@@ -73,7 +73,6 @@
 #include "sky/engine/core/page/ChromeClient.h"
 #include "sky/engine/core/page/EventHandler.h"
 #include "sky/engine/core/page/Page.h"
-#include "sky/engine/core/page/WindowFocusAllowedIndicator.h"
 #include "sky/engine/core/rendering/style/RenderStyle.h"
 #include "sky/engine/platform/EventDispatchForbiddenScope.h"
 #include "sky/engine/platform/PlatformScreen.h"
@@ -474,11 +473,7 @@ void LocalDOMWindow::focus(ExecutionContext* context)
     if (!host)
         return;
 
-    bool allowFocus = WindowFocusAllowedIndicator::windowFocusAllowed();
-
-    // If we're a top level window, bring the window to the front.
-    if (allowFocus)
-        host->chrome().focus();
+    host->chrome().focus();
 
     if (!m_frame)
         return;
