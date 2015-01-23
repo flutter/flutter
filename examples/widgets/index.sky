@@ -37,10 +37,10 @@
   </sky-box>
 
   <sky-box title='Checkboxes'>
-    <div><sky-checkbox id='checkbox' />Checkbox</div>
+    <div><sky-checkbox id='checkbox' checked='{{ checked }}'/>Checkbox</div>
     <div class="output">highlight: {{ myCheckbox.highlight }}</div>
     <div class="output">checked: {{ myCheckbox.checked }}</div>
-    <div><sky-checkbox id='checkbox' checked='{{ checked }}'/>Checkbox, default checked.</div>
+    <div><sky-checkbox id='checkbox' checked="true"/>Checkbox, default checked.</div>
     <div class="output">checked: {{ checked }}</div>
   </sky-box>
 
