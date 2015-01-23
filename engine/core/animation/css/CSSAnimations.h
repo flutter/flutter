@@ -47,7 +47,6 @@ namespace blink {
 class CSSTransitionData;
 class Element;
 class StylePropertyShorthand;
-class StyleResolver;
 class StyleRuleKeyframes;
 
 // This class stores the CSS Animations/Transitions information we use during a style recalc.
@@ -151,15 +150,10 @@ class CSSAnimations final {
 public:
     CSSAnimations();
 
-    // FIXME: This method is only used here and in the legacy animations
-    // implementation. It should be made private or file-scope when the legacy
-    // engine is removed.
-    static const StyleRuleKeyframes* matchScopedKeyframesRule(StyleResolver*, const Element*, String animationName);
-
     static const StylePropertyShorthand& animatableProperties();
     static bool isAllowedAnimation(CSSPropertyID);
     // FIXME: We should change the Element* to a const Element*
-    static PassOwnPtr<CSSAnimationUpdate> calculateUpdate(Element*, const Element& parentElement, const RenderStyle&, RenderStyle* parentStyle, StyleResolver*);
+    static PassOwnPtr<CSSAnimationUpdate> calculateUpdate(Element*, const Element& parentElement, const RenderStyle&, RenderStyle* parentStyle);
 
     void setPendingUpdate(PassOwnPtr<CSSAnimationUpdate> update) { m_pendingUpdate = update; }
     void maybeApplyPendingUpdate(Element*);
@@ -185,7 +179,6 @@ private:
 
     HashMap<CSSPropertyID, RefPtr<Interpolation> > m_previousActiveInterpolationsForAnimations;
 
-    static void calculateAnimationUpdate(CSSAnimationUpdate*, Element*, const Element& parentElement, const RenderStyle&, RenderStyle* parentStyle, StyleResolver*);
     static void calculateTransitionUpdate(CSSAnimationUpdate*, const Element*, const RenderStyle&);
     static void calculateTransitionUpdateForProperty(CSSPropertyID, CSSPropertyID eventId, const CSSTransitionData&, size_t transitionIndex, const RenderStyle& oldStyle, const RenderStyle&, const TransitionMap* activeTransitions, CSSAnimationUpdate*, const Element*);
 

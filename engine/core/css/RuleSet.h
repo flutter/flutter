@@ -83,7 +83,6 @@ public:
     const Vector<RuleData>* universalRules() const { ASSERT(!m_pendingRules); return &m_universalRules; }
     const Vector<RuleData>* hostRules() const { ASSERT(!m_pendingRules); return &m_hostRules; }
     const Vector<RawPtr<StyleRuleFontFace> >& fontFaceRules() const { return m_fontFaceRules; }
-    const Vector<RawPtr<StyleRuleKeyframes> >& keyframesRules() const { return m_keyframesRules; }
 
     void compactRulesIfNeeded()
     {
@@ -140,7 +139,6 @@ private:
     Vector<RuleData> m_universalRules;
     Vector<RuleData> m_hostRules;
     Vector<RawPtr<StyleRuleFontFace> > m_fontFaceRules;
-    Vector<RawPtr<StyleRuleKeyframes> > m_keyframesRules;
 
     RuleFeatureSet m_features;
 

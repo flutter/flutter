@@ -356,7 +356,7 @@ bool StyleResolver::applyAnimatedProperties(StyleResolverState& state, Element* 
         && !state.style()->transitions() && !state.style()->animations())
         return false;
 
-    state.setAnimationUpdate(CSSAnimations::calculateUpdate(animatingElement, *element, *state.style(), state.parentStyle(), this));
+    state.setAnimationUpdate(CSSAnimations::calculateUpdate(animatingElement, *element, *state.style(), state.parentStyle()));
     if (!state.animationUpdate())
         return false;
 

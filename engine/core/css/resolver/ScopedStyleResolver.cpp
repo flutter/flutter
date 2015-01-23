@@ -116,18 +116,6 @@ void ScopedStyleResolver::collectStyleSheets(Vector<RefPtr<CSSStyleSheet>>& shee
     }
 }
 
-const StyleRuleKeyframes* ScopedStyleResolver::keyframeStylesForAnimation(String animationName)
-{
-    for (auto& sheet : m_authorStyleSheets) {
-        // TODO(esprehn): Maybe just store the keyframes in a map?
-        for (auto& rule : sheet->contents()->ensureRuleSet().keyframesRules()) {
-            if (rule->name() == animationName)
-                return rule.get();
-        }
-    }
-    return nullptr;
-}
-
 void ScopedStyleResolver::collectMatchingAuthorRules(ElementRuleCollector& collector, CascadeOrder cascadeOrder)
 {
     for (size_t i = 0; i < m_authorStyleSheets.size(); ++i) {

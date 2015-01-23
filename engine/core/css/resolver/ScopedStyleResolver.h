@@ -56,8 +56,6 @@ public:
 
     const TreeScope& treeScope() const { return m_scope; }
 
-    const StyleRuleKeyframes* keyframeStylesForAnimation(String animationName);
-
     void collectMatchingAuthorRules(ElementRuleCollector&, CascadeOrder = ignoreCascadeOrder);
     void collectMatchingHostRules(ElementRuleCollector&, CascadeOrder = ignoreCascadeOrder);
 
