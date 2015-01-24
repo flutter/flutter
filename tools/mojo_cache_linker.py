@@ -8,10 +8,71 @@ import logging
 import os
 import sys
 import subprocess
+import json
+
+
+def library_paths(build_dir):
+    for name in os.listdir(build_dir):
+        path = os.path.realpath(os.path.join(build_dir, name))
+        if not os.path.isfile(path):
+            continue
+
+        # Only include suffixes we care about:
+        basename, ext = os.path.splitext(name)
+        if ext not in ('', '.mojo', '.so'):
+            continue
+
+        # Ignore ninja's dot-files.
+        if basename.startswith('.'):
+            continue
+        yield path
+
+
+def get_cached_app_id(path, cache, cache_mtime):
+    if not cache_mtime:
+        return None
+    try:
+        if os.path.getmtime(path) > cache_mtime:
+            return None
+    except:
+        return None
+    return cache.get(path)
+
+
+def compute_path_to_app_id_map(paths, cache, cache_mtime):
+    path_to_app_id_map = {}
+    for path in paths:
+        app_id = get_cached_app_id(path, cache, cache_mtime)
+        if not app_id:
+            logging.info('md5sum %s' % path)
+            # Example output:
+            # f82a3551478a9a0e010adccd675053b9 png_viewer.mojo
+            output = subprocess.check_output(['md5sum', path])
+            app_id = output.strip().split()[0]
+        path_to_app_id_map[path] = app_id
+    return path_to_app_id_map
+
+
+def read_app_id_cache(cache_path):
+    try:
+        with open(cache_path, 'r') as cache_file:
+            return json.load(cache_file), os.path.getmtime(cache_path)
+    except:
+        logging.warn('Failed to read file: %s' % cache_path)
+        return {}, None
+
+
+def write_app_id_cache(cache_path, cache):
+    try:
+        with open(cache_path, 'w') as cache_file:
+            json.dump(cache, cache_file, indent=2, sort_keys=True)
+    except:
+        logging.warn('Failed to write file: %s' % cache_path)
+
 
 # TODO(eseidel): Share logic with tools/android_stack_parser/stack
 def main():
-    logging.basicConfig(level=logging.INFO)
+    logging.basicConfig(level=logging.WARN)
     parser = argparse.ArgumentParser(
         description='Builds a directory of app_id symlinks to symbols'
         ' to match expected dlopen names from mojo_shell\'s NetworkLoader.')
@@ -23,42 +84,39 @@ def main():
         logging.fatal('links_dir: %s is not a directory' % args.links_dir)
         sys.exit(1)
 
-    for name in os.listdir(args.build_dir):
-        path = os.path.join(args.build_dir, name)
-        if not os.path.isfile(path):
-            continue
+    # Some of the .so files are 100s of megabytes.  Cache the md5s to save time.
+    cache_path = os.path.join(args.build_dir, '.app_id_cache')
+    cache, cache_mtime = read_app_id_cache(cache_path)
 
-        # md5sum is slow, so only bother for suffixes we care about:
-        basename, ext = os.path.splitext(name)
-        if ext not in ('', '.mojo', '.so'):
-            continue
+    paths = library_paths(args.build_dir)
+    path_to_app_id_map = compute_path_to_app_id_map(list(paths),
+        cache, cache_mtime)
 
-        # Ignore ninja's dot-files.
-        if basename.startswith('.'):
-            continue
+    # The cache contains unmodified app-ids.
+    write_app_id_cache(cache_path, path_to_app_id_map)
 
-        # Example output:
-        # f82a3551478a9a0e010adccd675053b9 png_viewer.mojo
-        md5 = subprocess.check_output(['md5sum', path]).strip().split()[0]
-        link_path = os.path.join(args.links_dir, '%s.mojo' % md5)
-
-        lib_path = os.path.realpath(os.path.join(args.build_dir, name))
+    for path, app_id in path_to_app_id_map.items():
+        basename = os.path.basename(path)
+        root_name, ext = os.path.splitext(basename)
 
         # On android foo.mojo is stripped, but libfoo_library.so is not.
         if ext == '.mojo':
-            symboled_name = 'lib%s_library.so' % basename
+            symboled_name = 'lib%s_library.so' % root_name
             symboled_path = os.path.realpath(
                 os.path.join(args.build_dir, symboled_name))
             if os.path.exists(symboled_path):
-                lib_path = symboled_path
+                path = symboled_path
 
-        print "%s -> %s" % (link_path, lib_path)
+        link_path = os.path.join(args.links_dir, '%s.mojo' % app_id)
+
+        logging.info("%s -> %s" % (link_path, path))
 
         if os.path.lexists(link_path):
-            logging.debug('link already exists %s, replacing' % lib_path)
+            logging.debug('link already exists %s, replacing' % path)
             os.unlink(link_path)
 
-        os.symlink(lib_path, link_path)
+        os.symlink(path, link_path)
+
 
 if __name__ == '__main__':
     main()
