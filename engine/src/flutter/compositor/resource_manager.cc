@@ -31,16 +31,9 @@ ResourceManager::~ResourceManager() {
 
 scoped_ptr<mojo::GLTexture> ResourceManager::CreateTexture(
     const gfx::Size& size) {
-  if (!available_textures_.empty()) {
-    scoped_ptr<mojo::GLTexture> texture(available_textures_.back());
-    available_textures_.back() = nullptr;
-    available_textures_.pop_back();
-    if (texture->size() == size)
-      return texture.Pass();
-    // Currently we only support caching textures of a constant size.
-    available_textures_.clear();
-  }
-
+  scoped_ptr<mojo::GLTexture> texture = texture_cache_.GetTexture(size);
+  if (texture)
+    return texture.Pass();
   gl_context_->MakeCurrent();
   return make_scoped_ptr(new mojo::GLTexture(
       gl_context_, mojo::TypeConverter<mojo::Size, gfx::Size>::Convert(size)));
@@ -89,11 +82,11 @@ void ResourceManager::ReturnResources(
     auto iter = resource_to_texture_map_.find(resource->id);
     if (iter == resource_to_texture_map_.end())
       continue;
-    mojo::GLTexture* texture = iter->second;
+    scoped_ptr<mojo::GLTexture> texture(iter->second);
     DCHECK_NE(0u, texture->texture_id());
     resource_to_texture_map_.erase(iter);
     glWaitSyncPointCHROMIUM(resource->sync_point);
-    available_textures_.push_back(texture);
+    texture_cache_.PutTexture(texture.Pass());
   }
 }
 
