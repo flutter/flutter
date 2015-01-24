@@ -104,17 +104,12 @@ void ShadowRoot::recalcStyle(StyleRecalcChange change)
     // There's no style to update so just calling recalcStyle means we're updated.
     clearNeedsStyleRecalc();
 
-    // FIXME: This doesn't handle :hover + div properly like Element::recalcStyle does.
-    Text* lastTextNode = 0;
     for (Node* child = lastChild(); child; child = child->previousSibling()) {
         if (child->isTextNode()) {
-            toText(child)->recalcTextStyle(change, lastTextNode);
-            lastTextNode = toText(child);
+            toText(child)->recalcTextStyle(change);
         } else if (child->isElementNode()) {
             if (child->shouldCallRecalcStyle(change))
-                toElement(child)->recalcStyle(change, lastTextNode);
-            if (child->renderer())
-                lastTextNode = 0;
+                toElement(child)->recalcStyle(change);
         }
     }
 

@@ -71,6 +71,8 @@ public:
 
     unsigned stackDepth() const { return m_stackDepth; }
 
+    bool preserveWhiteSpace() const { return m_preserveWhiteSpaceCount; }
+
     // Inlining this function is a (small) performance win on the parsing
     // benchmark.
     Element* top() const
@@ -107,6 +109,7 @@ private:
 
     ContainerNode* m_rootNode;
     unsigned m_stackDepth;
+    unsigned m_preserveWhiteSpaceCount;
 };
 
 } // namespace blink

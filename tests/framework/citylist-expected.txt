@@ -34,214 +34,214 @@ layer at (0,591) size 800x28 backgroundClip at (0,591) size 800x9 clip at (0,591
       RenderInline {span} at (0,0) size 92x15
         RenderText {#text} at (0,0) size 92x15
           text run at (0,0) width 92: "Center Point"
-      RenderText {#text} at (91,0) size 10x15
-        text run at (91,0) width 10: ", "
+      RenderInline {t} at (0,0) size 10x15
+        RenderText {#text} at (91,0) size 10x15
+          text run at (91,0) width 10: ", "
       RenderInline {span} at (0,0) size 115x15 [color=#AAAAAA]
         RenderText {#text} at (100,0) size 115x15
           text run at (100,0) width 115: "population 15408"
-      RenderText {#text} at (0,0) size 0x0
 layer at (0,561) size 800x28 clip at (0,561) size 800x27
   RenderFlexibleBox {city-item} at (0,561) size 800x28 [border: none (1px solid #EEEEEE) none]
     RenderParagraph {div} at (12,8) size 169.70x15
       RenderInline {span} at (0,0) size 47x15
         RenderText {#text} at (0,0) size 47x15
           text run at (0,0) width 47: "Calera"
-      RenderText {#text} at (46,0) size 10x15
-        text run at (46,0) width 10: ", "
+      RenderInline {t} at (0,0) size 10x15
+        RenderText {#text} at (46,0) size 10x15
+          text run at (46,0) width 10: ", "
       RenderInline {span} at (0,0) size 115x15 [color=#AAAAAA]
         RenderText {#text} at (55,0) size 115x15
           text run at (55,0) width 115: "population 10742"
-      RenderText {#text} at (0,0) size 0x0
 layer at (0,513) size 800x28 clip at (0,513) size 800x27
   RenderFlexibleBox {city-item} at (0,513) size 800x28 [border: none (1px solid #EEEEEE) none]
     RenderParagraph {div} at (12,8) size 176.22x15
       RenderInline {span} at (0,0) size 62x15
         RenderText {#text} at (0,0) size 62x15
           text run at (0,0) width 62: "Brewton"
-      RenderText {#text} at (61,0) size 9x15
-        text run at (61,0) width 9: ", "
+      RenderInline {t} at (0,0) size 9x15
+        RenderText {#text} at (61,0) size 9x15
+          text run at (61,0) width 9: ", "
       RenderInline {span} at (0,0) size 108x15 [color=#AAAAAA]
         RenderText {#text} at (69,0) size 108x15
           text run at (69,0) width 108: "population 5279"
-      RenderText {#text} at (0,0) size 0x0
 layer at (0,483) size 800x28 clip at (0,483) size 800x27
   RenderFlexibleBox {city-item} at (0,483) size 800x28 [border: none (1px solid #EEEEEE) none]
     RenderParagraph {div} at (12,8) size 149.84x15
       RenderInline {span} at (0,0) size 36x15
         RenderText {#text} at (0,0) size 36x15
           text run at (0,0) width 36: "Boaz"
-      RenderText {#text} at (35,0) size 9x15
-        text run at (35,0) width 9: ", "
+      RenderInline {t} at (0,0) size 9x15
+        RenderText {#text} at (35,0) size 9x15
+          text run at (35,0) width 9: ", "
       RenderInline {span} at (0,0) size 107x15 [color=#AAAAAA]
         RenderText {#text} at (43,0) size 107x15
           text run at (43,0) width 107: "population 8349"
-      RenderText {#text} at (0,0) size 0x0
 layer at (0,453) size 800x28 clip at (0,453) size 800x27
   RenderFlexibleBox {city-item} at (0,453) size 800x28 [border: none (1px solid #EEEEEE) none]
     RenderParagraph {div} at (12,8) size 220.13x15
       RenderInline {span} at (0,0) size 89x15
         RenderText {#text} at (0,0) size 89x15
           text run at (0,0) width 89: "Birmingham"
-      RenderText {#text} at (88,0) size 10x15
-        text run at (88,0) width 10: ", "
+      RenderInline {t} at (0,0) size 10x15
+        RenderText {#text} at (88,0) size 10x15
+          text run at (88,0) width 10: ", "
       RenderInline {span} at (0,0) size 124x15 [color=#AAAAAA]
         RenderText {#text} at (97,0) size 124x15
           text run at (97,0) width 124: "population 228798"
-      RenderText {#text} at (0,0) size 0x0
 layer at (0,423) size 800x28 clip at (0,423) size 800x27
   RenderFlexibleBox {city-item} at (0,423) size 800x28 [border: none (1px solid #EEEEEE) none]
     RenderParagraph {div} at (12,8) size 194.73x15
       RenderInline {span} at (0,0) size 72x15
         RenderText {#text} at (0,0) size 72x15
           text run at (0,0) width 72: "Bessemer"
-      RenderText {#text} at (71,0) size 10x15
-        text run at (71,0) width 10: ", "
+      RenderInline {t} at (0,0) size 10x15
+        RenderText {#text} at (71,0) size 10x15
+          text run at (71,0) width 10: ", "
       RenderInline {span} at (0,0) size 115x15 [color=#AAAAAA]
         RenderText {#text} at (80,0) size 115x15
           text run at (80,0) width 115: "population 28542"
-      RenderText {#text} at (0,0) size 0x0
 layer at (0,393) size 800x28 clip at (0,393) size 800x27
   RenderFlexibleBox {city-item} at (0,393) size 800x28 [border: none (1px solid #EEEEEE) none]
     RenderParagraph {div} at (12,8) size 203.06x15
       RenderInline {span} at (0,0) size 89x15
         RenderText {#text} at (0,0) size 89x15
           text run at (0,0) width 89: "Bay Minette"
-      RenderText {#text} at (88,0) size 9x15
-        text run at (88,0) width 9: ", "
+      RenderInline {t} at (0,0) size 9x15
+        RenderText {#text} at (88,0) size 9x15
+          text run at (88,0) width 9: ", "
       RenderInline {span} at (0,0) size 108x15 [color=#AAAAAA]
         RenderText {#text} at (96,0) size 108x15
           text run at (96,0) width 108: "population 8043"
-      RenderText {#text} at (0,0) size 0x0
 layer at (0,345) size 800x28 clip at (0,345) size 800x27
   RenderFlexibleBox {city-item} at (0,345) size 800x28 [border: none (1px solid #EEEEEE) none]
     RenderParagraph {div} at (12,8) size 176.48x15
       RenderInline {span} at (0,0) size 54x15
         RenderText {#text} at (0,0) size 54x15
           text run at (0,0) width 54: "Auburn"
-      RenderText {#text} at (53,0) size 9x15
-        text run at (53,0) width 9: ", "
+      RenderInline {t} at (0,0) size 9x15
+        RenderText {#text} at (53,0) size 9x15
+          text run at (53,0) width 9: ", "
       RenderInline {span} at (0,0) size 116x15 [color=#AAAAAA]
         RenderText {#text} at (61,0) size 116x15
           text run at (61,0) width 116: "population 56088"
-      RenderText {#text} at (0,0) size 0x0
 layer at (0,315) size 800x28 clip at (0,315) size 800x27
   RenderFlexibleBox {city-item} at (0,315) size 800x28 [border: none (1px solid #EEEEEE) none]
     RenderParagraph {div} at (12,8) size 163.61x15
       RenderInline {span} at (0,0) size 49x15
         RenderText {#text} at (0,0) size 49x15
           text run at (0,0) width 49: "Attalla"
-      RenderText {#text} at (48,0) size 10x15
-        text run at (48,0) width 10: ", "
+      RenderInline {t} at (0,0) size 10x15
+        RenderText {#text} at (48,0) size 10x15
+          text run at (48,0) width 10: ", "
       RenderInline {span} at (0,0) size 107x15 [color=#AAAAAA]
         RenderText {#text} at (57,0) size 107x15
           text run at (57,0) width 107: "population 6540"
-      RenderText {#text} at (0,0) size 0x0
 layer at (0,285) size 800x28 clip at (0,285) size 800x27
   RenderFlexibleBox {city-item} at (0,285) size 800x28 [border: none (1px solid #EEEEEE) none]
     RenderParagraph {div} at (12,8) size 168.64x15
       RenderInline {span} at (0,0) size 54x15
         RenderText {#text} at (0,0) size 54x15
           text run at (0,0) width 54: "Atmore"
-      RenderText {#text} at (53,0) size 10x15
-        text run at (53,0) width 10: ", "
+      RenderInline {t} at (0,0) size 10x15
+        RenderText {#text} at (53,0) size 10x15
+          text run at (53,0) width 10: ", "
       RenderInline {span} at (0,0) size 107x15 [color=#AAAAAA]
         RenderText {#text} at (62,0) size 107x15
           text run at (62,0) width 107: "population 7428"
-      RenderText {#text} at (0,0) size 0x0
 layer at (0,255) size 800x28 clip at (0,255) size 800x27
   RenderFlexibleBox {city-item} at (0,255) size 800x28 [border: none (1px solid #EEEEEE) none]
     RenderParagraph {div} at (12,8) size 174.28x15
       RenderInline {span} at (0,0) size 52x15
         RenderText {#text} at (0,0) size 52x15
           text run at (0,0) width 52: "Athens"
-      RenderText {#text} at (51,0) size 9x15
-        text run at (51,0) width 9: ", "
+      RenderInline {t} at (0,0) size 9x15
+        RenderText {#text} at (51,0) size 9x15
+          text run at (51,0) width 9: ", "
       RenderInline {span} at (0,0) size 116x15 [color=#AAAAAA]
         RenderText {#text} at (59,0) size 116x15
           text run at (59,0) width 116: "population 23715"
-      RenderText {#text} at (0,0) size 0x0
 layer at (0,225) size 800x28 clip at (0,225) size 800x27
   RenderFlexibleBox {city-item} at (0,225) size 800x28 [border: none (1px solid #EEEEEE) none]
     RenderParagraph {div} at (12,8) size 149.22x15
       RenderInline {span} at (0,0) size 35x15
         RenderText {#text} at (0,0) size 35x15
           text run at (0,0) width 35: "Arab"
-      RenderText {#text} at (34,0) size 9x15
-        text run at (34,0) width 9: ", "
+      RenderInline {t} at (0,0) size 9x15
+        RenderText {#text} at (34,0) size 9x15
+          text run at (34,0) width 9: ", "
       RenderInline {span} at (0,0) size 108x15 [color=#AAAAAA]
         RenderText {#text} at (42,0) size 108x15
           text run at (42,0) width 108: "population 7924"
-      RenderText {#text} at (0,0) size 0x0
 layer at (0,195) size 800x28 clip at (0,195) size 800x27
   RenderFlexibleBox {city-item} at (0,195) size 800x28 [border: none (1px solid #EEEEEE) none]
     RenderParagraph {div} at (12,8) size 188.09x15
       RenderInline {span} at (0,0) size 66x15
         RenderText {#text} at (0,0) size 66x15
           text run at (0,0) width 66: "Anniston"
-      RenderText {#text} at (65,0) size 9x15
-        text run at (65,0) width 9: ", "
+      RenderInline {t} at (0,0) size 9x15
+        RenderText {#text} at (65,0) size 9x15
+          text run at (65,0) width 9: ", "
       RenderInline {span} at (0,0) size 116x15 [color=#AAAAAA]
         RenderText {#text} at (73,0) size 116x15
           text run at (73,0) width 116: "population 23662"
-      RenderText {#text} at (0,0) size 0x0
 layer at (0,165) size 800x28 clip at (0,165) size 800x27
   RenderFlexibleBox {city-item} at (0,165) size 800x28 [border: none (1px solid #EEEEEE) none]
     RenderParagraph {div} at (12,8) size 186.73x15
       RenderInline {span} at (0,0) size 73x15
         RenderText {#text} at (0,0) size 73x15
           text run at (0,0) width 73: "Andalusia"
-      RenderText {#text} at (72,0) size 9x15
-        text run at (72,0) width 9: ", "
+      RenderInline {t} at (0,0) size 9x15
+        RenderText {#text} at (72,0) size 9x15
+          text run at (72,0) width 9: ", "
       RenderInline {span} at (0,0) size 107x15 [color=#AAAAAA]
         RenderText {#text} at (80,0) size 107x15
           text run at (80,0) width 107: "population 8978"
-      RenderText {#text} at (0,0) size 0x0
 layer at (0,135) size 800x28 clip at (0,135) size 800x27
   RenderFlexibleBox {city-item} at (0,135) size 800x28 [border: none (1px solid #EEEEEE) none]
     RenderParagraph {div} at (12,8) size 230.42x15
       RenderInline {span} at (0,0) size 108x15
         RenderText {#text} at (0,0) size 108x15
           text run at (0,0) width 108: "Alexander City"
-      RenderText {#text} at (107,0) size 9x15
-        text run at (107,0) width 9: ", "
+      RenderInline {t} at (0,0) size 9x15
+        RenderText {#text} at (107,0) size 9x15
+          text run at (107,0) width 9: ", "
       RenderInline {span} at (0,0) size 116x15 [color=#AAAAAA]
         RenderText {#text} at (115,0) size 116x15
           text run at (115,0) width 116: "population 15080"
-      RenderText {#text} at (0,0) size 0x0
 layer at (0,105) size 800x28 clip at (0,105) size 800x27
   RenderFlexibleBox {city-item} at (0,105) size 800x28 [border: none (1px solid #EEEEEE) none]
     RenderParagraph {div} at (12,8) size 198.86x15
       RenderInline {span} at (0,0) size 76x15
         RenderText {#text} at (0,0) size 76x15
           text run at (0,0) width 76: "Albertville"
-      RenderText {#text} at (75,0) size 10x15
-        text run at (75,0) width 10: ", "
+      RenderInline {t} at (0,0) size 10x15
+        RenderText {#text} at (75,0) size 10x15
+          text run at (75,0) width 10: ", "
       RenderInline {span} at (0,0) size 115x15 [color=#AAAAAA]
         RenderText {#text} at (84,0) size 115x15
           text run at (84,0) width 115: "population 19794"
-      RenderText {#text} at (0,0) size 0x0
 layer at (0,75) size 800x28 clip at (0,75) size 800x27
   RenderFlexibleBox {city-item} at (0,75) size 800x28 [border: none (1px solid #EEEEEE) none]
     RenderParagraph {div} at (12,8) size 193.48x15
       RenderInline {span} at (0,0) size 71x15
         RenderText {#text} at (0,0) size 71x15
           text run at (0,0) width 71: "Alabaster"
-      RenderText {#text} at (70,0) size 9x15
-        text run at (70,0) width 9: ", "
+      RenderInline {t} at (0,0) size 9x15
+        RenderText {#text} at (70,0) size 9x15
+          text run at (70,0) width 9: ", "
       RenderInline {span} at (0,0) size 116x15 [color=#AAAAAA]
         RenderText {#text} at (78,0) size 116x15
           text run at (78,0) width 116: "population 29352"
-      RenderText {#text} at (0,0) size 0x0
 layer at (0,45) size 800x28 clip at (0,45) size 800x27
   RenderFlexibleBox {city-item} at (0,45) size 800x28 [border: none (1px solid #EEEEEE) none]
     RenderParagraph {div} at (12,8) size 194.75x15
       RenderInline {span} at (0,0) size 81x15
         RenderText {#text} at (0,0) size 81x15
           text run at (0,0) width 81: "Adamsville"
-      RenderText {#text} at (80,0) size 9x15
-        text run at (80,0) width 9: ", "
+      RenderInline {t} at (0,0) size 9x15
+        RenderText {#text} at (80,0) size 9x15
+          text run at (80,0) width 9: ", "
       RenderInline {span} at (0,0) size 107x15 [color=#AAAAAA]
         RenderText {#text} at (88,0) size 107x15
           text run at (88,0) width 107: "population 4739"
-      RenderText {#text} at (0,0) size 0x0
 

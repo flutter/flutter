@@ -13,45 +13,36 @@ SOURCE: http://127.0.0.1:8000/sky/tests/parser/script.sky:38
 ERROR: Uncaught SyntaxError: Unexpected token } 
 SOURCE: http://127.0.0.1:8000/sky/tests/parser/script.sky:43
 <html>
-<import src="../resources/dump-as-markup.sky"></import>
-<body>
-
-<script>
+  <import src="../resources/dump-as-markup.sky"></import>
+  <body>
+    <script>
  TEST <a></a>
 </script>
-
-<SCRIPT>
+    <SCRIPT>
  TEST <a></a>
-</SCRIPT>
-
-<script>
+    </SCRIPT>
+    <script>
 <SCRIPT>
  TEST <a></a>
 </SCRIPT>
 </script>
-
-<SCRIPT>
-<script>
+    <SCRIPT>
+      <script>
  TEST <a></a>
 </SCRIPT>
 </script>
-</SCRIPT>
-
-<script> TEST </script>
+    </SCRIPT>
+    <script> TEST </script>
 
 &lt;
 script
-&gt; TEST 
-
-<script> TEST </
+&gt; TEST <script> TEST </
 script>
 </script>
-
-<script> TEST </scrip>
+    <script> TEST </scrip>
 </script>
-
-<script> TEST <//script>
+    <script> TEST <//script>
 </script>
-
-</body>
+  </body>
 </html>
+

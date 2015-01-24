@@ -46,6 +46,7 @@ HTMLElementStack::ElementRecord::~ElementRecord()
 HTMLElementStack::HTMLElementStack()
     : m_rootNode(nullptr)
     , m_stackDepth(0)
+    , m_preserveWhiteSpaceCount(0)
 {
 }
 
@@ -57,6 +58,7 @@ void HTMLElementStack::popAll()
 {
     m_rootNode = nullptr;
     m_stackDepth = 0;
+    m_preserveWhiteSpaceCount = 0;
     while (m_top)
         m_top = m_top->releaseNext();
 }
@@ -102,12 +104,18 @@ void HTMLElementStack::pushCommon(PassRefPtr<ContainerNode> node)
 {
     ASSERT(m_rootNode);
 
+    if (isHTMLTElement(node))
+        ++m_preserveWhiteSpaceCount;
     m_stackDepth++;
     m_top = adoptPtr(new ElementRecord(node, m_top.release()));
 }
 
 void HTMLElementStack::popCommon()
 {
+    if (isHTMLTElement(topNode())) {
+        ASSERT(m_preserveWhiteSpaceCount);
+        --m_preserveWhiteSpaceCount;
+    }
     m_top = m_top->releaseNext();
     m_stackDepth--;
 }

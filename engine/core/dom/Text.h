@@ -42,7 +42,7 @@ public:
 
     PassRefPtr<Text> splitText(unsigned offset, ExceptionState&);
 
-    void recalcTextStyle(StyleRecalcChange, Text* nextTextSibling);
+    void recalcTextStyle(StyleRecalcChange);
     bool textRendererIsNeeded(const RenderStyle&, const RenderObject& parent);
     RenderText* createTextRenderer(RenderStyle*);
     void updateTextRenderer(unsigned offsetOfReplacedData, unsigned lengthOfReplacedData, RecalcStyleBehavior = DoNotRecalcStyle);

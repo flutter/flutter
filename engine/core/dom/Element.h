@@ -201,7 +201,7 @@ public:
     void detach(const AttachContext& = AttachContext()) final;
 
     virtual RenderObject* createRenderer(RenderStyle*);
-    void recalcStyle(StyleRecalcChange, Text* nextTextSibling = 0);
+    void recalcStyle(StyleRecalcChange);
     void setAnimationStyleChange(bool);
     void setNeedsAnimationStyleRecalc();
 

@@ -905,7 +905,7 @@ PassRefPtr<RenderStyle> Element::styleForRenderer()
     return style.release();
 }
 
-void Element::recalcStyle(StyleRecalcChange change, Text* nextTextSibling)
+void Element::recalcStyle(StyleRecalcChange change)
 {
     ASSERT(document().inStyleRecalc());
     ASSERT(!parentOrShadowHostNode()->needsStyleRecalc());
@@ -933,9 +933,6 @@ void Element::recalcStyle(StyleRecalcChange change, Text* nextTextSibling)
         recalcChildStyle(change);
         clearChildNeedsStyleRecalc();
     }
-
-    if (change == Reattach)
-        reattachWhitespaceSiblings(nextTextSibling);
 }
 
 StyleRecalcChange Element::recalcOwnStyle(StyleRecalcChange change)
@@ -954,11 +951,8 @@ StyleRecalcChange Element::recalcOwnStyle(StyleRecalcChange change)
     if (localChange == Reattach) {
         AttachContext reattachContext;
         reattachContext.resolvedStyle = newStyle.get();
-        bool rendererWillChange = needsAttach() || renderer();
         reattach(reattachContext);
-        if (rendererWillChange || renderer())
-            return Reattach;
-        return ReattachNoRenderer;
+        return Reattach;
     }
 
     ASSERT(oldStyle);
@@ -994,19 +988,15 @@ void Element::recalcChildStyle(StyleRecalcChange change)
         // child and work our way back means in the common case, we'll find the insertion point in O(1) time.
         // See crbug.com/288225
         StyleResolver& styleResolver = document().styleResolver();
-        Text* lastTextNode = 0;
         for (Node* child = lastChild(); child; child = child->previousSibling()) {
             if (child->isTextNode()) {
-                toText(child)->recalcTextStyle(change, lastTextNode);
-                lastTextNode = toText(child);
+                toText(child)->recalcTextStyle(change);
             } else if (child->isElementNode()) {
                 Element* element = toElement(child);
                 if (element->shouldCallRecalcStyle(change))
-                    element->recalcStyle(change, lastTextNode);
+                    element->recalcStyle(change);
                 else if (element->supportsStyleSharing())
                     styleResolver.addToStyleSharingList(*element);
-                if (element->renderer())
-                    lastTextNode = 0;
             }
         }
     }

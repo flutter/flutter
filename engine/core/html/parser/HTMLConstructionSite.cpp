@@ -140,15 +140,6 @@ static unsigned findBreakIndexBetween(const StringBuilder& string, unsigned curr
     return 0;
 }
 
-static String atomizeIfAllWhitespace(const String& string, WhitespaceMode whitespaceMode)
-{
-    // Strings composed entirely of whitespace are likely to be repeated.
-    // Turn them into AtomicString so we share a single string for each.
-    if (whitespaceMode == AllWhitespace || (whitespaceMode == WhitespaceUnknown && isAllWhitespace(string)))
-        return AtomicString(string).string();
-    return string;
-}
-
 void HTMLConstructionSite::flushPendingText()
 {
     if (m_pendingText.isEmpty())
@@ -170,17 +161,28 @@ void HTMLConstructionSite::flushPendingText()
         unsigned breakIndex = findBreakIndexBetween(string, currentPosition, proposedBreakIndex);
         ASSERT(breakIndex <= string.length());
         String substring = string.substring(currentPosition, breakIndex - currentPosition);
-        substring = atomizeIfAllWhitespace(substring, pendingText.whitespaceMode);
+
+        ASSERT(breakIndex > currentPosition);
+        ASSERT(breakIndex - currentPosition == substring.length());
+        currentPosition = breakIndex;
+
+        if (isAllWhitespace(substring)) {
+            // Ignore whitespace nodes not inside inside a <t>. If we're splitting
+            // a text node this isn't really a whitespace node and we can't ignore
+            // it either.
+            if (!m_openElements.preserveWhiteSpace() && string.length() == substring.length())
+                continue;
+
+            // Strings composed entirely of whitespace are likely to be repeated.
+            // Turn them into AtomicString so we share a single string for each.
+            substring = AtomicString(substring).string();
+        }
 
         HTMLConstructionSiteTask task(HTMLConstructionSiteTask::InsertText);
         task.parent = pendingText.parent;
         task.child = Text::create(task.parent->document(), substring);
         queueTask(task);
-
-        ASSERT(breakIndex > currentPosition);
-        ASSERT(breakIndex - currentPosition == substring.length());
         ASSERT(toText(task.child.get())->length() == substring.length());
-        currentPosition = breakIndex;
     }
 }
 
@@ -297,7 +299,7 @@ void HTMLConstructionSite::insertScriptElement(AtomicHTMLToken* token)
     m_openElements.push(element.release());
 }
 
-void HTMLConstructionSite::insertTextNode(const String& string, WhitespaceMode whitespaceMode)
+void HTMLConstructionSite::insertTextNode(const String& string)
 {
     HTMLConstructionSiteTask dummyTask(HTMLConstructionSiteTask::Insert);
     dummyTask.parent = currentNode();
@@ -311,7 +313,7 @@ void HTMLConstructionSite::insertTextNode(const String& string, WhitespaceMode w
     // pending text into the task queue before making more.
     if (!m_pendingText.isEmpty() && (m_pendingText.parent != dummyTask.parent))
         flushPendingText();
-    m_pendingText.append(dummyTask.parent, string, whitespaceMode);
+    m_pendingText.append(dummyTask.parent, string);
 }
 
 PassRefPtr<Element> HTMLConstructionSite::createElement(AtomicHTMLToken* token, const AtomicString& namespaceURI)

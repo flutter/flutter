@@ -63,14 +63,6 @@ WTF_ALLOW_MOVE_INIT_AND_COMPARE_WITH_MEM_FUNCTIONS(blink::HTMLConstructionSiteTa
 
 namespace blink {
 
-// Note: These are intentionally ordered so that when we concatonate
-// strings and whitespaces the resulting whitespace is ws = min(ws1, ws2).
-enum WhitespaceMode {
-    WhitespaceUnknown,
-    NotAllWhitespace,
-    AllWhitespace,
-};
-
 class AtomicHTMLToken;
 class Document;
 class Element;
@@ -113,7 +105,7 @@ public:
     void insertHTMLElement(AtomicHTMLToken*);
     void insertSelfClosingHTMLElement(AtomicHTMLToken*);
     void insertScriptElement(AtomicHTMLToken*);
-    void insertTextNode(const String&, WhitespaceMode = WhitespaceUnknown);
+    void insertTextNode(const String&);
 
     bool isEmpty() const { return !m_openElements.stackDepth(); }
     Element* currentElement() const { return m_openElements.top(); }
@@ -148,21 +140,18 @@ private:
         DISALLOW_ALLOCATION();
     public:
         PendingText()
-            : whitespaceMode(WhitespaceUnknown)
         {
         }
 
-        void append(PassRefPtr<ContainerNode> newParent, const String& newString, WhitespaceMode newWhitespaceMode)
+        void append(PassRefPtr<ContainerNode> newParent, const String& newString)
         {
             ASSERT(!parent || parent == newParent);
             parent = newParent;
             stringBuilder.append(newString);
-            whitespaceMode = std::min(whitespaceMode, newWhitespaceMode);
         }
 
         void swap(PendingText& other)
         {
-            std::swap(whitespaceMode, other.whitespaceMode);
             parent.swap(other.parent);
             stringBuilder.swap(other.stringBuilder);
         }
@@ -175,17 +164,15 @@ private:
 
         bool isEmpty()
         {
-            // When the stringbuilder is empty, the parent and whitespace should also be "empty".
+            // When the stringbuilder is empty, the parent should also be "empty".
             ASSERT(stringBuilder.isEmpty() == !parent);
             ASSERT(!stringBuilder.isEmpty() || !nextChild);
-            ASSERT(!stringBuilder.isEmpty() || (whitespaceMode == WhitespaceUnknown));
             return stringBuilder.isEmpty();
         }
 
         RefPtr<ContainerNode> parent;
         RefPtr<Node> nextChild;
         StringBuilder stringBuilder;
-        WhitespaceMode whitespaceMode;
     };
 
     PendingText m_pendingText;

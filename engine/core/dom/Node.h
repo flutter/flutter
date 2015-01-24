@@ -566,8 +566,6 @@ protected:
 
     virtual void didMoveToNewDocument(Document& oldDocument);
 
-    static void reattachWhitespaceSiblings(Text* start);
-
 #if !ENABLE(OILPAN)
     void willBeDeletedFromDocument();
 #endif

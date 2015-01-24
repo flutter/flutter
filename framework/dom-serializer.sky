@@ -9,6 +9,7 @@ const kEntityMap = new Map([
 
 const kTextEscapePattern = /&|<|>|"|\u00a0/g;
 const kAttributeEscapePattern = /&|>|"|\u00a0/g;
+const kIndent = '  ';
 
 function escapeText(value, pattern) {
   return (value || '').replace(pattern, function(match) {
@@ -17,7 +18,7 @@ function escapeText(value, pattern) {
 }
 
 function serializeAttributes(element) {
-  var buffer = "";
+  var buffer = '';
   var attributes = element.getAttributes();
 
   for (var i = 0; i < attributes.length; ++i) {
@@ -32,40 +33,59 @@ function serializeAttributes(element) {
   return buffer;
 }
 
-function getFirstChild(element) {
-  if (element.tagName === 'template')
-    return element.content.firstChild;
-  return element.firstChild;
+function getFirstChild(node) {
+  if (node.localName === 'template')
+    return node.content.firstChild;
+  return node.firstChild;
 }
 
-function serializeElementChildren(element) {
-  if (element.tagName == "script" || element.tagName == "style")
-    return element.textContent;
-  return serializeChildren(getFirstChild(element));
+function getLastChild(node) {
+  if (node.localName === 'template')
+    return node.content.lastChild;
+  return node.lastChild;
 }
 
-function serializeChildren(firstChild) {
-  var buffer = "";
-  for (var child = firstChild; child; child = child.nextSibling)
-    buffer += serializeNode(child);
+function serializeChildren(node, depth) {
+  var buffer = '';
+  var firstChild = getFirstChild(node);
+  var lastChild = getLastChild(node);
+  if (firstChild instanceof Element && depth)
+    buffer += '\n' + kIndent.repeat(depth);
+  for (var child = firstChild; child; child = child.nextSibling) {
+    buffer += serializeNode(child, depth);
+    if (child instanceof Element && child.nextSibling instanceof Element)
+      buffer += '\n' + kIndent.repeat(depth);
+  }
+  if (lastChild instanceof Element) {
+    buffer += '\n';
+    if (depth)
+      buffer += kIndent.repeat(depth - 1);
+  }
   return buffer;
 }
 
-function serializeElement(element) {
+function serializeElement(element, depth) {
   var buffer = '<' + element.tagName + serializeAttributes(element) + '>';
-  buffer += serializeElementChildren(element);
+  buffer += serializeChildren(element, depth + 1);
   buffer += '</' + element.tagName + '>';
   return buffer;
 }
 
-function serializeNode(node) {
+function serializeText(node) {
+  var parent = node.parentNode;
+  if (parent && (parent.tagName == 'script' || parent.tagName == 'style'))
+    return node.data;
+  return escapeText(node.data, kTextEscapePattern);
+}
+
+function serializeNode(node, depth) {
   if (node instanceof Text)
-    return escapeText(node.data, kTextEscapePattern);
+    return serializeText(node);
   if (node instanceof Element)
-    return serializeElement(node);
+    return serializeElement(node, depth || 0);
   if (node instanceof Document || node instanceof ShadowRoot)
-    return serializeChildren(node.firstChild);
-  throw new Error("Cannot serialize node");
+    return serializeChildren(node, depth || 0);
+  throw new Error('Cannot serialize node');
 }
 
 module.exports = {

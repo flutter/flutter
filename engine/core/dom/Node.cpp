@@ -711,23 +711,6 @@ void Node::detach(const AttachContext& context)
     setChildNeedsStyleRecalc();
 }
 
-void Node::reattachWhitespaceSiblings(Text* start)
-{
-    for (Node* sibling = start; sibling; sibling = sibling->nextSibling()) {
-        if (sibling->isTextNode() && toText(sibling)->containsOnlyWhitespace()) {
-            bool hadRenderer = !!sibling->renderer();
-            sibling->reattach();
-            // If the reattach didn't toggle the visibility of the whitespace we don't
-            // need to continue reattaching siblings since they won't toggle visibility
-            // either.
-            if (hadRenderer == !!sibling->renderer())
-                return;
-        } else if (sibling->renderer()) {
-            return;
-        }
-    }
-}
-
 // FIXME: This code is used by editing.  Seems like it could move over there and not pollute Node.
 Node *Node::previousNodeConsideringAtomicNodes() const
 {
