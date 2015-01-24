@@ -10,6 +10,7 @@
 #include "base/memory/scoped_vector.h"
 #include "base/memory/weak_ptr.h"
 #include "mojo/services/surfaces/public/interfaces/surfaces.mojom.h"
+#include "sky/compositor/texture_cache.h"
 
 namespace gfx {
 class Size;
@@ -38,12 +39,11 @@ class ResourceManager {
   base::WeakPtr<mojo::GLContext> gl_context_;
   uint32_t next_resource_id_;
   base::hash_map<uint32_t, mojo::GLTexture*> resource_to_texture_map_;
-
-  ScopedVector<mojo::GLTexture> available_textures_;
+  TextureCache texture_cache_;
 
   DISALLOW_COPY_AND_ASSIGN(ResourceManager);
 };
 
-}  // namespace examples
+}  // namespace sky
 
 #endif  // SKY_COMPOSITOR_RESOURCE_MANAGER_H_

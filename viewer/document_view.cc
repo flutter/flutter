@@ -270,8 +270,9 @@ void DocumentView::OnViewBoundsChanged(mojo::View* view,
                                        const mojo::Rect& old_bounds,
                                        const mojo::Rect& new_bounds) {
   DCHECK_EQ(view, root_);
-  gfx::Size size = new_bounds.To<gfx::Rect>().size();
-  web_view_->resize(size);
+  float device_pixel_ratio = GetDevicePixelRatio();
+  web_view_->resize(blink::WebSize(new_bounds.width / device_pixel_ratio,
+                                   new_bounds.height / device_pixel_ratio));
 }
 
 void DocumentView::OnViewFocusChanged(mojo::View* gained_focus,

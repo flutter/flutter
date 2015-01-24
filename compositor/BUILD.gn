@@ -26,6 +26,8 @@ source_set("compositor") {
     "surface_allocator.h",
     "surface_holder.cc",
     "surface_holder.h",
+    "texture_cache.cc",
+    "texture_cache.h",
   ]
 
   deps = [
