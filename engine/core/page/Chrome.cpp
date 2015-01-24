@@ -101,11 +101,6 @@ void Chrome::show(NavigationPolicy policy) const
     m_client->show(policy);
 }
 
-void Chrome::mouseDidMoveOverElement(const HitTestResult& result, unsigned modifierFlags)
-{
-    m_client->mouseDidMoveOverElement(result, modifierFlags);
-}
-
 void Chrome::setCursor(const Cursor& cursor)
 {
     m_client->setCursor(cursor);

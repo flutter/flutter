@@ -242,7 +242,6 @@ public:
     // Whether the node can actually be focused.
     bool isFocusable() const;
     bool isKeyboardFocusable() const;
-    bool isMouseFocusable() const;
     void dispatchFocusEvent(Element* oldFocusedElement, FocusType);
     void dispatchBlurEvent(Element* newFocusedElement);
     void dispatchFocusInEvent(const AtomicString& eventType, Element* oldFocusedElement);

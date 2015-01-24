@@ -79,9 +79,6 @@ public:
     // the event has been processed, false otherwise.
     virtual bool handleInputEvent(const WebInputEvent&) = 0;
 
-    // Called to inform the WebWidget that mouse capture was lost.
-    virtual void mouseCaptureLost() = 0;
-
     // Called to inform the WebWidget that it has gained or lost keyboard focus.
     virtual void setFocus(bool) = 0;
 

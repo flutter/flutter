@@ -130,24 +130,11 @@ void Scrollbar::autoscrollTimerFired(Timer<Scrollbar>*)
     autoscrollPressedPart(autoscrollTimerDelay());
 }
 
-static bool thumbUnderMouse(Scrollbar* scrollbar)
-{
-    int thumbPos = scrollbar->trackPosition() + scrollbar->thumbPosition();
-    int thumbLength = scrollbar->thumbLength();
-    return scrollbar->pressedPos() >= thumbPos && scrollbar->pressedPos() < thumbPos + thumbLength;
-}
-
 void Scrollbar::autoscrollPressedPart(double delay)
 {
     // Don't do anything for the thumb or if nothing was pressed.
     if (m_pressedPart == ThumbPart || m_pressedPart == NoPart)
         return;
-
-    // Handle the track.
-    if ((m_pressedPart == BackTrackPart || m_pressedPart == ForwardTrackPart) && thumbUnderMouse(this)) {
-        setHoveredPart(ThumbPart);
-        return;
-    }
 
     // Handle the arrows and track.
     if (m_scrollableArea && m_scrollableArea->scroll(pressedPartScrollDirection(), pressedPartScrollGranularity()))
@@ -159,13 +146,6 @@ void Scrollbar::startTimerIfNeeded(double delay)
     // Don't do anything for the thumb.
     if (m_pressedPart == ThumbPart)
         return;
-
-    // Handle the track.  We halt track scrolling once the thumb is level
-    // with us.
-    if ((m_pressedPart == BackTrackPart || m_pressedPart == ForwardTrackPart) && thumbUnderMouse(this)) {
-        setHoveredPart(ThumbPart);
-        return;
-    }
 
     // We can't scroll if we've hit the beginning or end.
     ScrollDirection dir = pressedPartScrollDirection();
@@ -239,19 +219,6 @@ void Scrollbar::setHoveredPart(ScrollbarPart part)
 void Scrollbar::setPressedPart(ScrollbarPart part)
 {
     m_pressedPart = part;
-}
-
-void Scrollbar::mouseEntered()
-{
-    if (m_scrollableArea)
-        m_scrollableArea->mouseEnteredScrollbar(this);
-}
-
-void Scrollbar::mouseExited()
-{
-    if (m_scrollableArea)
-        m_scrollableArea->mouseExitedScrollbar(this);
-    setHoveredPart(NoPart);
 }
 
 bool Scrollbar::isOverlayScrollbar() const

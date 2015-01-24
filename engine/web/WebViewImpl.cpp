@@ -513,12 +513,6 @@ bool WebViewImpl::handleInputEvent(const WebInputEvent& inputEvent)
     }
 }
 
-void WebViewImpl::mouseCaptureLost()
-{
-    TRACE_EVENT_ASYNC_END0("input", "capturing mouse", this);
-    m_mouseCaptureNode = nullptr;
-}
-
 void WebViewImpl::setFocus(bool enable)
 {
     m_page->focusController().setFocused(enable);

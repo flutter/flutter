@@ -1587,15 +1587,6 @@ void Document::hoveredNodeDetached(Node* node)
     m_hoverNode = NodeRenderingTraversal::parent(node);
     while (m_hoverNode && !m_hoverNode->renderer())
         m_hoverNode = NodeRenderingTraversal::parent(m_hoverNode.get());
-
-    // If the mouse cursor is not visible, do not clear existing
-    // hover effects on the ancestors of |node| and do not invoke
-    // new hover effects on any other element.
-    if (!page()->isCursorVisible())
-        return;
-
-    if (frame())
-        frame()->eventHandler().scheduleHoverStateUpdate();
 }
 
 void Document::activeChainNodeDetached(Node* node)

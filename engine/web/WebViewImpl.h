@@ -71,7 +71,6 @@ public:
     virtual void layout() override;
     virtual void paint(WebCanvas*, const WebRect&) override;
     virtual bool handleInputEvent(const WebInputEvent&) override;
-    virtual void mouseCaptureLost() override;
     virtual void setFocus(bool enable) override;
     virtual bool setComposition(
         const WebString& text,
@@ -267,9 +266,6 @@ private:
 
     // Whether the webview is rendering transparently.
     bool m_isTransparent;
-
-    // If set, the (plugin) node which has mouse capture.
-    RefPtr<Node> m_mouseCaptureNode;
 
     IntRect m_rootLayerScrollDamage;
     WebLayer* m_rootLayer;

@@ -1480,16 +1480,6 @@ void Node::defaultEventHandler(Event* event)
     }
 }
 
-bool Node::willRespondToMouseMoveEvents()
-{
-    return hasEventListeners(EventTypeNames::mousemove) || hasEventListeners(EventTypeNames::mouseover) || hasEventListeners(EventTypeNames::mouseout);
-}
-
-bool Node::willRespondToMouseClickEvents()
-{
-    return isContentEditable(UserSelectAllIsAlwaysNonEditable) || hasEventListeners(EventTypeNames::mouseup) || hasEventListeners(EventTypeNames::mousedown) || hasEventListeners(EventTypeNames::click) || hasEventListeners(EventTypeNames::DOMActivate);
-}
-
 #if !ENABLE(OILPAN)
 // This is here for inlining
 inline void TreeScope::removedLastRefToScope()

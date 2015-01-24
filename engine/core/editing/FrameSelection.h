@@ -112,9 +112,6 @@ public:
     void clear();
     void prepareForDestruction();
 
-    // Call this after doing user-triggered selections to make it easy to delete the frame you entirely selected.
-    void selectFrameElementInParentIfFullySelected();
-
     bool contains(const LayoutPoint&);
 
     SelectionType selectionType() const { return m_selection.selectionType(); }

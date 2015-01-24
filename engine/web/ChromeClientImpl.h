@@ -78,8 +78,6 @@ public:
     virtual IntRect rootViewToScreen(const IntRect&) const override;
     virtual WebScreenInfo screenInfo() const override;
     virtual void layoutUpdated(LocalFrame*) const override;
-    virtual void mouseDidMoveOverElement(
-        const HitTestResult&, unsigned modifierFlags) override;
     virtual void setCursor(const Cursor&) override;
     virtual void setTouchAction(TouchAction) override;
 

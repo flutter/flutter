@@ -69,11 +69,6 @@ public:
     virtual void cancelAnimations() { }
     virtual void serviceScrollAnimations() { }
 
-    virtual void mouseEnteredContentArea() const { }
-    virtual void mouseExitedContentArea() const { }
-    virtual void mouseMovedInContentArea() const { }
-    virtual void mouseEnteredScrollbar(Scrollbar*) const { }
-    virtual void mouseExitedScrollbar(Scrollbar*) const { }
     virtual void contentsResized() const { }
 
     virtual void contentAreaDidShow() const { }

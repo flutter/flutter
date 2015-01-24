@@ -264,11 +264,6 @@ IntSize RenderLayerScrollableArea::overhangAmount() const
     return IntSize();
 }
 
-IntPoint RenderLayerScrollableArea::lastKnownMousePosition() const
-{
-    return box().frame() ? box().frame()->eventHandler().lastKnownMousePosition() : IntPoint();
-}
-
 IntRect RenderLayerScrollableArea::scrollableAreaBoundingBox() const
 {
     return box().absoluteBoundingBoxRect();

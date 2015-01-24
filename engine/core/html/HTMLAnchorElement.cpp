@@ -123,9 +123,4 @@ void HTMLAnchorElement::handleClick(Event* event)
     event->setDefaultHandled();
 }
 
-bool HTMLAnchorElement::willRespondToMouseClickEvents()
-{
-    return isLiveLink();
-}
-
 }

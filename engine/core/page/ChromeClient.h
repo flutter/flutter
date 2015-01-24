@@ -89,8 +89,6 @@ public:
 
     virtual void layoutUpdated(LocalFrame*) const { }
 
-    virtual void mouseDidMoveOverElement(const HitTestResult&, unsigned modifierFlags) = 0;
-
     virtual void setTouchAction(TouchAction) = 0;
 
     virtual String acceptLanguages() = 0;

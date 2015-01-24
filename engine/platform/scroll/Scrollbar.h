@@ -75,9 +75,6 @@ public:
     bool isOverlayScrollbar() const;
     bool shouldParticipateInHitTesting();
 
-    void mouseEntered();
-    void mouseExited();
-
     virtual IntRect convertToContainingView(const IntRect&) const override;
     virtual IntRect convertFromContainingView(const IntRect&) const override;
 

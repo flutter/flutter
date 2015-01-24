@@ -246,20 +246,6 @@ void ChromeClientImpl::layoutUpdated(LocalFrame* frame) const
     m_webView->layoutUpdated(WebLocalFrameImpl::fromFrame(frame));
 }
 
-void ChromeClientImpl::mouseDidMoveOverElement(
-    const HitTestResult& result, unsigned modifierFlags)
-{
-    if (!m_webView->client())
-        return;
-
-    WebURL url;
-    // Find out if the mouse is over a link, and if so, let our UI know...
-    if (result.isLiveLink() && !result.absoluteLinkURL().string().isEmpty())
-        url = result.absoluteLinkURL();
-
-    m_webView->client()->setMouseOverURL(url);
-}
-
 void ChromeClientImpl::setCursor(const Cursor& cursor)
 {
     setCursor(WebCursorInfo(cursor));

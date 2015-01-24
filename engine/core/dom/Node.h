@@ -439,10 +439,6 @@ public:
     void showTreeAndMark(const Node* markedNode1, const char* markedLabel1, const Node* markedNode2 = 0, const char* markedLabel2 = 0) const;
 #endif
 
-    bool willRespondToMouseMoveEvents();
-
-    virtual bool willRespondToMouseClickEvents();
-
     enum ShadowTreesTreatment {
         TreatShadowTreesAsDisconnected,
         TreatShadowTreesAsComposed

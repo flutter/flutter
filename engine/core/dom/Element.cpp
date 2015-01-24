@@ -1250,11 +1250,6 @@ bool Element::isKeyboardFocusable() const
     return isFocusable() && tabIndex() >= 0;
 }
 
-bool Element::isMouseFocusable() const
-{
-    return isFocusable();
-}
-
 void Element::dispatchFocusEvent(Element* oldFocusedElement, FocusType type)
 {
     RefPtr<FocusEvent> event = FocusEvent::create(EventTypeNames::focus, false, false, document().domWindow(), 0, oldFocusedElement);

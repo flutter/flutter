@@ -121,18 +121,11 @@ private:
 
 EventHandler::EventHandler(LocalFrame* frame)
     : m_frame(frame)
-    , m_mousePressed(false)
     , m_capturesDragging(false)
-    , m_mouseDownMayStartSelect(false)
-    , m_mouseDownMayStartDrag(false)
     , m_selectionInitiationState(HaveNotStartedSelection)
-    , m_hoverTimer(this, &EventHandler::hoverTimerFired)
     , m_cursorUpdateTimer(this, &EventHandler::cursorUpdateTimerFired)
-    , m_mouseDownMayStartAutoscroll(false)
     , m_clickCount(0)
     , m_shouldOnlyFireDragOverEvent(false)
-    , m_mousePositionIsUnknown(true)
-    , m_maxMouseMovedDuration(0)
     , m_didStartDrag(false)
     , m_activeIntervalTimer(this, &EventHandler::activeIntervalTimerFired)
     , m_lastShowPressTimestamp(0)
@@ -145,27 +138,14 @@ EventHandler::~EventHandler()
 
 void EventHandler::clear()
 {
-    m_hoverTimer.stop();
     m_cursorUpdateTimer.stop();
     m_activeIntervalTimer.stop();
-    m_nodeUnderMouse = nullptr;
-    m_lastNodeUnderMouse = nullptr;
-    m_lastScrollbarUnderMouse = nullptr;
     m_clickCount = 0;
     m_clickNode = nullptr;
     m_dragTarget = nullptr;
     m_shouldOnlyFireDragOverEvent = false;
-    m_mousePositionIsUnknown = true;
-    m_lastKnownMousePosition = IntPoint();
-    m_lastKnownMouseGlobalPosition = IntPoint();
-    m_mousePressNode = nullptr;
-    m_mousePressed = false;
     m_capturesDragging = false;
-    m_previousWheelScrolledNode = nullptr;
-    m_maxMouseMovedDuration = 0;
     m_didStartDrag = false;
-    m_mouseDownMayStartSelect = false;
-    m_mouseDownMayStartDrag = false;
     m_lastShowPressTimestamp = 0;
     m_lastDeferredTapElement = nullptr;
 }
@@ -183,47 +163,6 @@ void EventHandler::nodeWillBeRemoved(Node& nodeToBeRemoved)
     }
 }
 
-static inline bool dispatchSelectStart(Node* node)
-{
-    if (!node || !node->renderer())
-        return true;
-
-    return node->dispatchEvent(Event::createCancelableBubble(EventTypeNames::selectstart));
-}
-
-static VisibleSelection expandSelectionToRespectUserSelectAll(Node* targetNode, const VisibleSelection& selection)
-{
-    Node* rootUserSelectAll = Position::rootUserSelectAllForNode(targetNode);
-    if (!rootUserSelectAll)
-        return selection;
-
-    VisibleSelection newSelection(selection);
-    newSelection.setBase(positionBeforeNode(rootUserSelectAll).upstream(CanCrossEditingBoundary));
-    newSelection.setExtent(positionAfterNode(rootUserSelectAll).downstream(CanCrossEditingBoundary));
-
-    return newSelection;
-}
-
-bool EventHandler::updateSelectionForMouseDownDispatchingSelectStart(Node* targetNode, const VisibleSelection& selection, TextGranularity granularity)
-{
-    if (Position::nodeIsUserSelectNone(targetNode))
-        return false;
-
-    if (!dispatchSelectStart(targetNode))
-        return false;
-
-    if (selection.isRange())
-        m_selectionInitiationState = ExtendedSelection;
-    else {
-        granularity = CharacterGranularity;
-        m_selectionInitiationState = PlacedCaret;
-    }
-
-    m_frame->selection().setNonDirectionalSelectionIfNeeded(selection, granularity);
-
-    return true;
-}
-
 void EventHandler::selectClosestWordFromHitTestResult(const HitTestResult& result, AppendTrailingWhitespace appendTrailingWhitespace)
 {
     Node* innerNode = result.targetNode();
@@ -238,8 +177,6 @@ void EventHandler::selectClosestWordFromHitTestResult(const HitTestResult& resul
 
         if (appendTrailingWhitespace == ShouldAppendTrailingWhitespace && newSelection.isRange())
             newSelection.appendTrailingWhitespace();
-
-        updateSelectionForMouseDownDispatchingSelectStart(innerNode, expandSelectionToRespectUserSelectAll(innerNode, newSelection), WordGranularity);
     }
 }
 
@@ -263,80 +200,7 @@ void EventHandler::selectClosestMisspellingFromHitTestResult(const HitTestResult
 
         if (appendTrailingWhitespace == ShouldAppendTrailingWhitespace && newSelection.isRange())
             newSelection.appendTrailingWhitespace();
-
-        updateSelectionForMouseDownDispatchingSelectStart(innerNode, expandSelectionToRespectUserSelectAll(innerNode, newSelection), WordGranularity);
     }
-}
-
-void EventHandler::updateSelectionForMouseDrag()
-{
-    FrameView* view = m_frame->view();
-    if (!view)
-        return;
-    RenderView* renderer = m_frame->contentRenderer();
-    if (!renderer)
-        return;
-
-    HitTestRequest request(HitTestRequest::ReadOnly | HitTestRequest::Active | HitTestRequest::Move);
-    HitTestResult result(m_lastKnownMousePosition);
-    renderer->hitTest(request, result);
-    updateSelectionForMouseDrag(result);
-}
-
-void EventHandler::updateSelectionForMouseDrag(const HitTestResult& hitTestResult)
-{
-    if (!m_mouseDownMayStartSelect)
-        return;
-
-    Node* target = hitTestResult.targetNode();
-    if (!target)
-        return;
-
-    VisiblePosition targetPosition = m_frame->selection().selection().visiblePositionRespectingEditingBoundary(hitTestResult.localPoint(), target);
-    // Don't modify the selection if we're not on a node.
-    if (targetPosition.isNull())
-        return;
-
-    // Restart the selection if this is the first mouse move. This work is usually
-    // done in handleMousePressEvent, but not if the mouse press was on an existing selection.
-    VisibleSelection newSelection = m_frame->selection().selection();
-
-    if (m_selectionInitiationState == HaveNotStartedSelection && !dispatchSelectStart(target))
-        return;
-
-    if (m_selectionInitiationState != ExtendedSelection) {
-        // Always extend selection here because it's caused by a mouse drag
-        m_selectionInitiationState = ExtendedSelection;
-        newSelection = VisibleSelection(targetPosition);
-    }
-
-    if (RuntimeEnabledFeatures::userSelectAllEnabled()) {
-        Node* rootUserSelectAllForMousePressNode = Position::rootUserSelectAllForNode(m_mousePressNode.get());
-        if (rootUserSelectAllForMousePressNode && rootUserSelectAllForMousePressNode == Position::rootUserSelectAllForNode(target)) {
-            newSelection.setBase(positionBeforeNode(rootUserSelectAllForMousePressNode).upstream(CanCrossEditingBoundary));
-            newSelection.setExtent(positionAfterNode(rootUserSelectAllForMousePressNode).downstream(CanCrossEditingBoundary));
-        } else {
-            // Reset base for user select all when base is inside user-select-all area and extent < base.
-            if (rootUserSelectAllForMousePressNode && comparePositions(target->renderer()->positionForPoint(hitTestResult.localPoint()), m_mousePressNode->renderer()->positionForPoint(m_dragStartPos)) < 0)
-                newSelection.setBase(positionAfterNode(rootUserSelectAllForMousePressNode).downstream(CanCrossEditingBoundary));
-
-            Node* rootUserSelectAllForTarget = Position::rootUserSelectAllForNode(target);
-            if (rootUserSelectAllForTarget && m_mousePressNode->renderer() && comparePositions(target->renderer()->positionForPoint(hitTestResult.localPoint()), m_mousePressNode->renderer()->positionForPoint(m_dragStartPos)) < 0)
-                newSelection.setExtent(positionBeforeNode(rootUserSelectAllForTarget).upstream(CanCrossEditingBoundary));
-            else if (rootUserSelectAllForTarget && m_mousePressNode->renderer())
-                newSelection.setExtent(positionAfterNode(rootUserSelectAllForTarget).downstream(CanCrossEditingBoundary));
-            else
-                newSelection.setExtent(targetPosition);
-        }
-    } else {
-        newSelection.setExtent(targetPosition);
-    }
-
-    if (m_frame->selection().granularity() != CharacterGranularity)
-        newSelection.expandUsingGranularity(m_frame->selection().granularity());
-
-    m_frame->selection().setNonDirectionalSelectionIfNeeded(newSelection, m_frame->selection().granularity(),
-        FrameSelection::AdjustEndpointsAtBidiBoundary);
 }
 
 AutoscrollController* EventHandler::autoscrollController() const
@@ -374,11 +238,6 @@ void EventHandler::stopAutoscroll()
         controller->stopAutoscroll();
 }
 
-Node* EventHandler::mousePressNode() const
-{
-    return m_mousePressNode.get();
-}
-
 bool EventHandler::scroll(ScrollDirection direction, ScrollGranularity granularity, Node* startNode, Node** stopNode, float delta, IntPoint absolutePoint)
 {
     if (!delta)
@@ -388,9 +247,6 @@ bool EventHandler::scroll(ScrollDirection direction, ScrollGranularity granulari
 
     if (!node)
         node = m_frame->document()->focusedElement();
-
-    if (!node)
-        node = m_mousePressNode.get();
 
     if (!node || !node->renderer())
         return false;
@@ -424,11 +280,6 @@ bool EventHandler::bubblingScroll(ScrollDirection direction, ScrollGranularity g
     return false;
 }
 
-IntPoint EventHandler::lastKnownMousePosition() const
-{
-    return m_lastKnownMousePosition;
-}
-
 bool EventHandler::useHandCursor(Node* node, bool isOverLink)
 {
     if (!node)
@@ -447,28 +298,6 @@ void EventHandler::cursorUpdateTimerFired(Timer<EventHandler>*)
 
 void EventHandler::updateCursor()
 {
-    if (m_mousePositionIsUnknown)
-        return;
-
-    FrameView* view = m_frame->view();
-    if (!view || !view->shouldSetCursor())
-        return;
-
-    RenderView* renderView = view->renderView();
-    if (!renderView)
-        return;
-
-    m_frame->document()->updateLayout();
-
-    HitTestRequest request(HitTestRequest::ReadOnly);
-    HitTestResult result(m_lastKnownMousePosition);
-    renderView->hitTest(request, result);
-
-    OptionalCursor optionalCursor = selectCursor(result);
-    if (optionalCursor.isCursorChange()) {
-        m_currentMouseCursor = optionalCursor.cursor();
-        view->setCursor(m_currentMouseCursor);
-    }
 }
 
 OptionalCursor EventHandler::selectCursor(const HitTestResult& result)
@@ -612,14 +441,6 @@ OptionalCursor EventHandler::selectAutoCursor(const HitTestResult& result, Node*
     if (useHandCursor(node, result.isOverLink()))
         return handCursor();
 
-    // During selection, use an I-beam no matter what we're over.
-    // If a drag may be starting or we're capturing mouse events for a particular node, don't treat this as a selection.
-    if (m_mousePressed && m_mouseDownMayStartSelect
-        && !m_mouseDownMayStartDrag
-        && m_frame->selection().isCaretOrRange()) {
-        return iBeam;
-    }
-
     RenderObject* renderer = node ? node->renderer() : 0;
     if ((editable || (renderer && renderer->isText() && node->canStartSelection())) && !result.scrollbar())
         return iBeam;
@@ -654,12 +475,6 @@ bool EventHandler::isInsideScrollbar(const IntPoint& windowPoint) const
     return false;
 }
 
-void EventHandler::scheduleHoverStateUpdate()
-{
-    if (!m_hoverTimer.isActive())
-        m_hoverTimer.startOneShot(0, FROM_HERE);
-}
-
 void EventHandler::scheduleCursorUpdate()
 {
     if (!m_cursorUpdateTimer.isActive())
@@ -669,20 +484,6 @@ void EventHandler::scheduleCursorUpdate()
 bool EventHandler::isCursorVisible() const
 {
     return m_frame->page()->isCursorVisible();
-}
-
-void EventHandler::hoverTimerFired(Timer<EventHandler>*)
-{
-    m_hoverTimer.stop();
-
-    ASSERT(m_frame);
-    ASSERT(m_frame->document());
-
-    if (RenderView* renderer = m_frame->contentRenderer()) {
-        HitTestRequest request(HitTestRequest::Move);
-        HitTestResult result(m_lastKnownMousePosition);
-        renderer->hitTest(request, result);
-    }
 }
 
 void EventHandler::activeIntervalTimerFired(Timer<EventHandler>*)
@@ -784,15 +585,7 @@ bool EventHandler::dragHysteresisExceeded(const FloatPoint& floatDragViewportLoc
 
 bool EventHandler::dragHysteresisExceeded(const IntPoint& dragViewportLocation) const
 {
-    FrameView* view = m_frame->view();
-    if (!view)
-        return false;
-    IntPoint dragLocation = dragViewportLocation;
-    IntSize delta = dragLocation - m_mouseDownPos;
-
-    int threshold = 3;
-
-    return abs(delta.width()) >= threshold || abs(delta.height()) >= threshold;
+    return false;
 }
 
 bool EventHandler::handleTextInputEvent(const String& text, Event* underlyingEvent, TextEventInputType inputType)
@@ -831,23 +624,6 @@ void EventHandler::defaultTabEventHandler(KeyboardEvent* event)
 
 void EventHandler::capsLockStateMayHaveChanged()
 {
-}
-
-// If scrollbar (under mouse) is different from last, send a mouse exited. Set
-// last to scrollbar if setLast is true; else set last to 0.
-void EventHandler::updateLastScrollbarUnderMouse(Scrollbar* scrollbar, bool setLast)
-{
-    if (m_lastScrollbarUnderMouse != scrollbar) {
-        // Send mouse exited to the old scrollbar.
-        if (m_lastScrollbarUnderMouse)
-            m_lastScrollbarUnderMouse->mouseExited();
-
-        // Send mouse entered if we're setting a new scrollbar.
-        if (scrollbar && setLast)
-            scrollbar->mouseEntered();
-
-        m_lastScrollbarUnderMouse = setLast ? scrollbar : 0;
-    }
 }
 
 HitTestResult EventHandler::hitTestResultInFrame(LocalFrame* frame, const LayoutPoint& point, HitTestRequest::HitTestRequestType hitType)

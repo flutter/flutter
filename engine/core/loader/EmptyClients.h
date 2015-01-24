@@ -87,8 +87,6 @@ public:
     virtual IntRect rootViewToScreen(const IntRect& r) const override { return r; }
     virtual blink::WebScreenInfo screenInfo() const override { return blink::WebScreenInfo(); }
 
-    virtual void mouseDidMoveOverElement(const HitTestResult&, unsigned) override { }
-
     virtual void setCursor(const Cursor&) override { }
 
     virtual void setTouchAction(TouchAction touchAction) override { };

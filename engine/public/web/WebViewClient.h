@@ -82,9 +82,6 @@ public:
     // Called when script modifies window.status
     virtual void setStatusText(const WebString&) { }
 
-    // Called when hovering over an anchor with the given URL.
-    virtual void setMouseOverURL(const WebURL&) { }
-
     // Called when keyboard focus switches to an anchor with the given URL.
     virtual void setKeyboardFocusURL(const WebURL&) { }
 

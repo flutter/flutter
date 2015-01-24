@@ -38,15 +38,6 @@ public:
         KeyUp,
         RawKeyDown,
         Char,
-
-        // PlatformMouseEvent
-        MouseMoved,
-        MousePressed,
-        MouseReleased,
-        MouseScroll,
-
-        // PlatformWheelEvent
-        Wheel,
     };
 
     enum Modifiers {

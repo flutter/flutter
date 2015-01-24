@@ -659,8 +659,6 @@ sky_core_files = [
   "events/HashChangeEvent.h",
   "events/KeyboardEvent.cpp",
   "events/KeyboardEvent.h",
-  "events/MouseRelatedEvent.cpp",
-  "events/MouseRelatedEvent.h",
   "events/NodeEventContext.cpp",
   "events/NodeEventContext.h",
   "events/PageTransitionEvent.cpp",

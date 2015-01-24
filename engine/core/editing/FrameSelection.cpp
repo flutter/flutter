@@ -264,7 +264,6 @@ void FrameSelection::setSelection(const VisibleSelection& newSelection, SetSelec
     // Always clear the x position used for vertical arrow navigation.
     // It will be restored by the vertical arrow navigation code if necessary.
     m_xPosForVerticalArrowNavigation = NoXPosForVerticalArrowNavigation();
-    selectFrameElementInParentIfFullySelected();
     notifyRendererOfSelectionChange(userTriggered);
     m_frame->editor().respondToChangedSelection(oldSelection, options);
     if (userTriggered == UserTriggered) {
@@ -1239,16 +1238,6 @@ bool FrameSelection::contains(const LayoutPoint& point)
     return comparePositions(start, p) <= 0 && comparePositions(p, end) <= 0;
 }
 
-// Workaround for the fact that it's hard to delete a frame.
-// Call this after doing user-triggered selections to make it easy to delete the frame you entirely selected.
-// Can't do this implicitly as part of every setSelection call because in some contexts it might not be good
-// for the focus to move to another frame. So instead we call it from places where we are selecting with the
-// mouse or the keyboard after setting the selection.
-void FrameSelection::selectFrameElementInParentIfFullySelected()
-{
-
-}
-
 void FrameSelection::selectAll()
 {
     Document* document = m_frame->document();
@@ -1496,7 +1485,7 @@ void FrameSelection::setFocusedNodeIfNeeded()
             // We don't want to set focus on a subframe when selecting in a parent frame,
             // so add the !isFrameElement check here. There's probably a better way to make this
             // work in the long term, but this is the safest fix at this time.
-            if (target->isMouseFocusable() && !isFrameElement(target)) {
+            if (target->isFocusable() && !isFrameElement(target)) {
                 m_frame->page()->focusController().setFocusedElement(target, m_frame);
                 return;
             }

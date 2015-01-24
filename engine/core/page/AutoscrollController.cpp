@@ -162,20 +162,12 @@ void AutoscrollController::animate(double)
         return;
     }
 
-    EventHandler& eventHandler = m_autoscrollRenderer->frame()->eventHandler();
     switch (m_autoscrollType) {
     case AutoscrollForDragAndDrop:
         if (WTF::currentTime() - m_dragAndDropAutoscrollStartTime > autoscrollDelay)
             m_autoscrollRenderer->autoscroll(m_dragAndDropAutoscrollReferencePosition);
         break;
     case AutoscrollForSelection:
-        if (!eventHandler.mousePressed()) {
-            stopAutoscroll();
-            return;
-        }
-        eventHandler.updateSelectionForMouseDrag();
-        m_autoscrollRenderer->autoscroll(eventHandler.lastKnownMousePosition());
-        break;
     case NoAutoscroll:
         break;
     }

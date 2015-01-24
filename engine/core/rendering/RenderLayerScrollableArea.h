@@ -83,7 +83,6 @@ public:
     int visibleWidth() const;
     IntSize contentsSize() const override;
     IntSize overhangAmount() const;
-    IntPoint lastKnownMousePosition() const;
     IntRect scrollableAreaBoundingBox() const;
     bool userInputScrollable(ScrollbarOrientation) const override;
     bool shouldPlaceVerticalScrollbarOnLeft() const override;

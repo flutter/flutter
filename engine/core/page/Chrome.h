@@ -74,8 +74,6 @@ public:
 
     void show(NavigationPolicy = NavigationPolicyIgnore) const;
 
-    void mouseDidMoveOverElement(const HitTestResult&, unsigned modifierFlags);
-
     void willBeDestroyed();
 
 private:

@@ -76,11 +76,6 @@ public:
     void setHorizontalScrollElasticity(ScrollElasticity scrollElasticity) { m_horizontalScrollElasticity = scrollElasticity; }
     ScrollElasticity horizontalScrollElasticity() const { return static_cast<ScrollElasticity>(m_horizontalScrollElasticity); }
 
-    void mouseEnteredContentArea() const;
-    void mouseExitedContentArea() const;
-    void mouseMovedInContentArea() const;
-    void mouseEnteredScrollbar(Scrollbar*) const;
-    void mouseExitedScrollbar(Scrollbar*) const;
     void contentAreaDidShow() const;
     void contentAreaDidHide() const;
 

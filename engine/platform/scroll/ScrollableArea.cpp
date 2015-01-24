@@ -186,34 +186,6 @@ void ScrollableArea::setScrollOffsetFromAnimation(const IntPoint& offset)
     scrollPositionChanged(offset);
 }
 
-void ScrollableArea::mouseEnteredContentArea() const
-{
-    if (ScrollAnimator* scrollAnimator = existingScrollAnimator())
-        scrollAnimator->mouseEnteredContentArea();
-}
-
-void ScrollableArea::mouseExitedContentArea() const
-{
-    if (ScrollAnimator* scrollAnimator = existingScrollAnimator())
-        scrollAnimator->mouseEnteredContentArea();
-}
-
-void ScrollableArea::mouseMovedInContentArea() const
-{
-    if (ScrollAnimator* scrollAnimator = existingScrollAnimator())
-        scrollAnimator->mouseMovedInContentArea();
-}
-
-void ScrollableArea::mouseEnteredScrollbar(Scrollbar* scrollbar) const
-{
-    scrollAnimator()->mouseEnteredScrollbar(scrollbar);
-}
-
-void ScrollableArea::mouseExitedScrollbar(Scrollbar* scrollbar) const
-{
-    scrollAnimator()->mouseExitedScrollbar(scrollbar);
-}
-
 void ScrollableArea::contentAreaDidShow() const
 {
     if (ScrollAnimator* scrollAnimator = existingScrollAnimator())

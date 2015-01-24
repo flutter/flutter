@@ -156,38 +156,17 @@ void EventTarget::uncaughtExceptionInEventHandler()
 {
 }
 
-static const AtomicString& legacyType(const Event* event)
-{
-    if (event->type() == EventTypeNames::wheel)
-        return EventTypeNames::mousewheel;
-
-    return emptyAtom;
-}
-
 bool EventTarget::fireEventListeners(Event* event)
 {
     ASSERT(!EventDispatchForbiddenScope::isEventDispatchForbidden());
     ASSERT(event && !event->type().isEmpty());
 
-    EventTargetData* d = eventTargetData();
-    if (!d)
+    EventTargetData* data = eventTargetData();
+    if (!data)
         return true;
 
-    EventListenerVector* legacyListenersVector = 0;
-    AtomicString legacyTypeName = legacyType(event);
-    if (!legacyTypeName.isEmpty())
-        legacyListenersVector = d->eventListenerMap.find(legacyTypeName);
-
-    EventListenerVector* listenersVector = d->eventListenerMap.find(event->type());
-
-    if (listenersVector) {
-        fireEventListeners(event, d, *listenersVector);
-    } else if (legacyListenersVector) {
-        AtomicString unprefixedTypeName = event->type();
-        event->setType(legacyTypeName);
-        fireEventListeners(event, d, *legacyListenersVector);
-        event->setType(unprefixedTypeName);
-    }
+    if (EventListenerVector* listeners = data->eventListenerMap.find(event->type()))
+        fireEventListeners(event, data, *listeners);
 
     Editor::countEvent(executionContext(), event);
     return !event->defaultPrevented();

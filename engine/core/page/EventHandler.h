@@ -81,30 +81,17 @@ public:
     void clear();
     void nodeWillBeRemoved(Node&);
 
-    void updateSelectionForMouseDrag();
-
-    Node* mousePressNode() const;
-
     void stopAutoscroll();
 
     HitTestResult hitTestResultAtPoint(const LayoutPoint&,
         HitTestRequest::HitTestRequestType hitType = HitTestRequest::ReadOnly | HitTestRequest::Active,
         const LayoutSize& padding = LayoutSize());
 
-    bool mousePressed() const { return m_mousePressed; }
-    void setMousePressed(bool pressed) { m_mousePressed = pressed; }
-
-    void scheduleHoverStateUpdate();
     void scheduleCursorUpdate();
-
-    IntPoint lastKnownMousePosition() const;
-    Cursor currentMouseCursor() const { return m_currentMouseCursor; }
 
     // Attempts to scroll the DOM tree. If that fails, scrolls the view.
     // If the view can't be scrolled either, recursively bubble to the parent frame.
     bool bubblingScroll(ScrollDirection, ScrollGranularity, Node* startingNode = 0);
-
-    void setMouseDownMayStartAutoscroll() { m_mouseDownMayStartAutoscroll = true; }
 
     bool keyEvent(const PlatformKeyboardEvent&);
     void defaultKeyboardEventHandler(KeyboardEvent*);
@@ -121,7 +108,6 @@ public:
     void notifyElementActivated();
 
 private:
-    bool updateSelectionForMouseDownDispatchingSelectStart(Node*, const VisibleSelection&, TextGranularity);
     void selectClosestWordFromHitTestResult(const HitTestResult&, AppendTrailingWhitespace);
     void selectClosestMisspellingFromHitTestResult(const HitTestResult&, AppendTrailingWhitespace);
 
@@ -131,8 +117,6 @@ private:
     void hoverTimerFired(Timer<EventHandler>*);
     void cursorUpdateTimerFired(Timer<EventHandler>*);
     void activeIntervalTimerFired(Timer<EventHandler>*);
-
-    bool mouseDownMayStartSelect() const { return m_mouseDownMayStartSelect; }
 
     bool isCursorVisible() const;
     void updateCursor();
@@ -166,36 +150,20 @@ private:
 
     void defaultTabEventHandler(KeyboardEvent*);
 
-    void updateSelectionForMouseDrag(const HitTestResult&);
-
-    void updateLastScrollbarUnderMouse(Scrollbar*, bool);
-
     bool capturesDragging() const { return m_capturesDragging; }
 
     AutoscrollController* autoscrollController() const;
 
     LocalFrame* const m_frame;
 
-    bool m_mousePressed;
     bool m_capturesDragging;
-    RefPtr<Node> m_mousePressNode;
 
-    bool m_mouseDownMayStartSelect;
-    bool m_mouseDownMayStartDrag;
     enum SelectionInitiationState { HaveNotStartedSelection, PlacedCaret, ExtendedSelection };
     SelectionInitiationState m_selectionInitiationState;
 
     LayoutPoint m_dragStartPos;
 
-    Timer<EventHandler> m_hoverTimer;
     Timer<EventHandler> m_cursorUpdateTimer;
-
-    bool m_mouseDownMayStartAutoscroll;
-
-    RefPtr<Node> m_nodeUnderMouse;
-    RefPtr<Node> m_lastNodeUnderMouse;
-    RefPtr<Scrollbar> m_lastScrollbarUnderMouse;
-    Cursor m_currentMouseCursor;
 
     int m_clickCount;
     RefPtr<Node> m_clickNode;
@@ -203,14 +171,6 @@ private:
     RefPtr<Node> m_dragTarget;
     bool m_shouldOnlyFireDragOverEvent;
 
-    bool m_mousePositionIsUnknown;
-    IntPoint m_lastKnownMousePosition;
-    IntPoint m_lastKnownMouseGlobalPosition;
-    IntPoint m_mouseDownPos; // In our view's coords.
-
-    RefPtr<Node> m_previousWheelScrolledNode;
-
-    double m_maxMouseMovedDuration;
     bool m_didStartDrag;
 
     Timer<EventHandler> m_activeIntervalTimer;
