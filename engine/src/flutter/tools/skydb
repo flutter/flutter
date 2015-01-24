@@ -569,7 +569,7 @@ class SkyDebugger(object):
         self._add_basic_command(subparsers, 'reload', '/reload',
             'reload the current page')
         self._add_basic_command(subparsers, 'inspect', '/inspect',
-            'stop the running sky instance')
+            'start the inspector on the current page (Linux only)')
         self._add_basic_command(subparsers, 'start_profiling', '/start_profiling',
             'starts profiling the running sky instance (Linux only)')
 
