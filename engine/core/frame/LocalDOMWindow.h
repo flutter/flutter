@@ -59,7 +59,6 @@ class EventQueue;
 class ExceptionState;
 class FloatRect;
 class FrameConsole;
-class History;
 class IDBFactory;
 class LocalFrame;
 class Location;
@@ -111,7 +110,6 @@ public:
     // DOM Level 0
 
     Screen& screen() const;
-    History& history() const;
 
     Location& location() const;
     void setLocation(const String& location, LocalDOMWindow* callingWindow, LocalDOMWindow* enteredWindow,
@@ -196,10 +194,8 @@ public:
     void enqueueDocumentEvent(PassRefPtr<Event>);
     void enqueuePageshowEvent(PageshowEventPersistence);
     void enqueueHashchangeEvent(const String& oldURL, const String& newURL);
-    void enqueuePopstateEvent(PassRefPtr<SerializedScriptValue>);
     void dispatchWindowLoadEvent();
     void documentWasClosed();
-    void statePopped(PassRefPtr<SerializedScriptValue>);
 
     // FIXME: This shouldn't be public once LocalDOMWindow becomes ExecutionContext.
     void clearEventQueue();
@@ -243,7 +239,6 @@ private:
     HashSet<DOMWindowProperty*> m_properties;
 
     mutable RefPtr<Screen> m_screen;
-    mutable RefPtr<History> m_history;
     mutable RefPtr<Console> m_console;
     mutable RefPtr<Location> m_location;
     mutable RefPtr<StyleMedia> m_media;
@@ -251,7 +246,6 @@ private:
     mutable RefPtr<DOMWindowCSS> m_css;
 
     RefPtr<DOMWindowEventQueue> m_eventQueue;
-    RefPtr<SerializedScriptValue> m_pendingStateObject;
 };
 
 } // namespace blink

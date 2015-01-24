@@ -88,7 +88,6 @@
 #include "sky/engine/core/frame/FrameConsole.h"
 #include "sky/engine/core/frame/FrameHost.h"
 #include "sky/engine/core/frame/FrameView.h"
-#include "sky/engine/core/frame/History.h"
 #include "sky/engine/core/frame/LocalDOMWindow.h"
 #include "sky/engine/core/frame/LocalFrame.h"
 #include "sky/engine/core/frame/Settings.h"

@@ -435,8 +435,6 @@ public:
 
     bool allowExecutingScripts(Node*);
 
-    void statePopped(PassRefPtr<SerializedScriptValue>);
-
     enum LoadEventProgress {
         LoadEventNotRun,
         LoadEventTried,

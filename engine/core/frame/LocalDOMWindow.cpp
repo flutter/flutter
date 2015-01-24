@@ -53,13 +53,11 @@
 #include "sky/engine/core/events/EventListener.h"
 #include "sky/engine/core/events/HashChangeEvent.h"
 #include "sky/engine/core/events/PageTransitionEvent.h"
-#include "sky/engine/core/events/PopStateEvent.h"
 #include "sky/engine/core/frame/Console.h"
 #include "sky/engine/core/frame/DOMWindowLifecycleNotifier.h"
 #include "sky/engine/core/frame/FrameConsole.h"
 #include "sky/engine/core/frame/FrameHost.h"
 #include "sky/engine/core/frame/FrameView.h"
-#include "sky/engine/core/frame/History.h"
 #include "sky/engine/core/frame/LocalFrame.h"
 #include "sky/engine/core/frame/Location.h"
 #include "sky/engine/core/frame/Screen.h"
@@ -270,8 +268,6 @@ void LocalDOMWindow::documentWasClosed()
 {
     dispatchWindowLoadEvent();
     enqueuePageshowEvent(PageshowEventNotPersisted);
-    if (m_pendingStateObject)
-        enqueuePopstateEvent(m_pendingStateObject.release());
 }
 
 void LocalDOMWindow::enqueuePageshowEvent(PageshowEventPersistence persisted)
@@ -285,25 +281,6 @@ void LocalDOMWindow::enqueuePageshowEvent(PageshowEventPersistence persisted)
 void LocalDOMWindow::enqueueHashchangeEvent(const String& oldURL, const String& newURL)
 {
     enqueueWindowEvent(HashChangeEvent::create(oldURL, newURL));
-}
-
-void LocalDOMWindow::enqueuePopstateEvent(PassRefPtr<SerializedScriptValue> stateObject)
-{
-    // FIXME: https://bugs.webkit.org/show_bug.cgi?id=36202 Popstate event needs to fire asynchronously
-    dispatchEvent(PopStateEvent::create(stateObject, &history()));
-}
-
-void LocalDOMWindow::statePopped(PassRefPtr<SerializedScriptValue> stateObject)
-{
-    if (!frame())
-        return;
-
-    // Per step 11 of section 6.5.9 (history traversal) of the HTML5 spec, we
-    // defer firing of popstate until we're in the complete state.
-    if (document()->isLoadCompleted())
-        enqueuePopstateEvent(stateObject);
-    else
-        m_pendingStateObject = stateObject;
 }
 
 LocalDOMWindow::~LocalDOMWindow()
@@ -404,7 +381,6 @@ void LocalDOMWindow::resetDOMWindowProperties()
     m_properties.clear();
 
     m_screen = nullptr;
-    m_history = nullptr;
     m_console = nullptr;
     m_location = nullptr;
     m_media = nullptr;
@@ -431,13 +407,6 @@ Screen& LocalDOMWindow::screen() const
     if (!m_screen)
         m_screen = Screen::create(m_frame);
     return *m_screen;
-}
-
-History& LocalDOMWindow::history() const
-{
-    if (!m_history)
-        m_history = History::create(m_frame);
-    return *m_history;
 }
 
 Console& LocalDOMWindow::console() const

@@ -34,7 +34,6 @@
     PrimaryGlobal,
 ] interface Window : EventTarget {
     readonly attribute Screen screen;
-    readonly attribute History history;
     [DoNotCheckSecurity, Unforgeable, Replaceable, PutForwards=href] readonly attribute Location location;
     [Custom, MeasureAs=WindowEvent, NotEnumerable] attribute Event event;
 

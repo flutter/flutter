@@ -28,7 +28,6 @@
 
 #include "bindings/core/v8/V8DOMException.h"
 #include "bindings/core/v8/V8ErrorEvent.h"
-#include "bindings/core/v8/V8History.h"
 #include "bindings/core/v8/V8Location.h"
 #include "bindings/core/v8/V8Window.h"
 #include "sky/engine/bindings/core/v8/DOMWrapperWorld.h"
@@ -64,9 +63,6 @@ static LocalFrame* findFrame(v8::Local<v8::Object> host, v8::Local<v8::Value> da
             return 0;
         return V8Window::toNative(windowWrapper)->frame();
     }
-
-    if (V8History::wrapperTypeInfo.equals(type))
-        return V8History::toNative(host)->frame();
 
     if (V8Location::wrapperTypeInfo.equals(type))
         return V8Location::toNative(host)->frame();
