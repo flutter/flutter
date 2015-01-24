@@ -706,8 +706,6 @@ test("platform_unittests") {
     "image-decoders/ImageDecoderTest.cpp",
     "mac/ScrollElasticityControllerTest.mm",
     "network/HTTPParsersTest.cpp",
-    "testing/TreeTestHelpers.cpp",
-    "testing/TreeTestHelpers.h",
     "testing/RunAllTests.cpp",
     "transforms/TransformOperationsTest.cpp",
     "transforms/TransformationMatrixTest.cpp",
