@@ -14,6 +14,7 @@
 namespace blink {
 
 class LocalFrame;
+class WebGestureEvent;
 class WebPointerEvent;
 
 class NewEventHandler {
@@ -23,6 +24,7 @@ public:
     ~NewEventHandler();
 
     bool handlePointerEvent(const WebPointerEvent&);
+    bool handleGestureEvent(const WebGestureEvent&);
 
 private:
     bool handlePointerDownEvent(const WebPointerEvent&);
@@ -30,6 +32,7 @@ private:
     bool handlePointerMoveEvent(const WebPointerEvent&);
     bool handlePointerCancelEvent(const WebPointerEvent&);
 
+    bool dispatchGestureEvent(Node& target, const WebGestureEvent& event);
     bool dispatchPointerEvent(Node& target, const WebPointerEvent&);
     bool dispatchClickEvent(Node& capturingTarget, const WebPointerEvent&);
 

@@ -31,7 +31,6 @@
 #include "sky/engine/config.h"
 #include "sky/engine/web/WebInputEventConversion.h"
 
-#include "sky/engine/core/events/GestureEvent.h"
 #include "sky/engine/core/events/KeyboardEvent.h"
 #include "sky/engine/core/frame/FrameHost.h"
 #include "sky/engine/core/frame/FrameView.h"
@@ -43,129 +42,6 @@
 namespace blink {
 
 static const double millisPerSecond = 1000.0;
-
-static float widgetInputEventsScaleFactor(const Widget* widget)
-{
-    if (!widget)
-        return 1;
-
-    FrameView* rootView = toFrameView(widget->root());
-    if (!rootView)
-        return 1;
-
-    return rootView->inputEventsScaleFactor();
-}
-
-static IntSize widgetInputEventsOffset(const Widget* widget)
-{
-    if (!widget)
-        return IntSize();
-    FrameView* rootView = toFrameView(widget->root());
-    if (!rootView)
-        return IntSize();
-
-    return rootView->inputEventsOffsetForEmulation();
-}
-
-
-// PlatformGestureEventBuilder --------------------------------------------------
-
-PlatformGestureEventBuilder::PlatformGestureEventBuilder(Widget* widget, const WebGestureEvent& e)
-{
-    float scale = widgetInputEventsScaleFactor(widget);
-    IntSize offset = widgetInputEventsOffset(widget);
-
-    switch (e.type) {
-    case WebInputEvent::GestureScrollBegin:
-        m_type = PlatformEvent::GestureScrollBegin;
-        break;
-    case WebInputEvent::GestureScrollEnd:
-        m_type = PlatformEvent::GestureScrollEnd;
-        break;
-    case WebInputEvent::GestureFlingStart:
-        m_type = PlatformEvent::GestureFlingStart;
-        break;
-    case WebInputEvent::GestureScrollUpdate:
-        m_type = PlatformEvent::GestureScrollUpdate;
-        m_data.m_scrollUpdate.m_deltaX = e.data.scrollUpdate.deltaX / scale;
-        m_data.m_scrollUpdate.m_deltaY = e.data.scrollUpdate.deltaY / scale;
-        m_data.m_scrollUpdate.m_velocityX = e.data.scrollUpdate.velocityX;
-        m_data.m_scrollUpdate.m_velocityY = e.data.scrollUpdate.velocityY;
-        break;
-    case WebInputEvent::GestureScrollUpdateWithoutPropagation:
-        m_type = PlatformEvent::GestureScrollUpdateWithoutPropagation;
-        m_data.m_scrollUpdate.m_deltaX = e.data.scrollUpdate.deltaX / scale;
-        m_data.m_scrollUpdate.m_deltaY = e.data.scrollUpdate.deltaY / scale;
-        m_data.m_scrollUpdate.m_velocityX = e.data.scrollUpdate.velocityX;
-        m_data.m_scrollUpdate.m_velocityY = e.data.scrollUpdate.velocityY;
-        break;
-    case WebInputEvent::GestureTap:
-        m_type = PlatformEvent::GestureTap;
-        m_area = expandedIntSize(FloatSize(e.data.tap.width / scale, e.data.tap.height / scale));
-        m_data.m_tap.m_tapCount = e.data.tap.tapCount;
-        break;
-    case WebInputEvent::GestureTapUnconfirmed:
-        m_type = PlatformEvent::GestureTapUnconfirmed;
-        m_area = expandedIntSize(FloatSize(e.data.tap.width / scale, e.data.tap.height / scale));
-        break;
-    case WebInputEvent::GestureTapDown:
-        m_type = PlatformEvent::GestureTapDown;
-        m_area = expandedIntSize(FloatSize(e.data.tapDown.width / scale, e.data.tapDown.height / scale));
-        break;
-    case WebInputEvent::GestureShowPress:
-        m_type = PlatformEvent::GestureShowPress;
-        m_area = expandedIntSize(FloatSize(e.data.showPress.width / scale, e.data.showPress.height / scale));
-        break;
-    case WebInputEvent::GestureTapCancel:
-        m_type = PlatformEvent::GestureTapDownCancel;
-        break;
-    case WebInputEvent::GestureDoubleTap:
-        // DoubleTap gesture is now handled as PlatformEvent::GestureTap with tap_count = 2. So no
-        // need to convert to a Platfrom DoubleTap gesture. But in WebViewImpl::handleGestureEvent
-        // all WebGestureEvent are converted to PlatformGestureEvent, for completeness and not reach
-        // the ASSERT_NOT_REACHED() at the end, convert the DoubleTap to a NoType.
-        m_type = PlatformEvent::NoType;
-        break;
-    case WebInputEvent::GestureTwoFingerTap:
-        m_type = PlatformEvent::GestureTwoFingerTap;
-        m_area = expandedIntSize(FloatSize(e.data.twoFingerTap.firstFingerWidth / scale, e.data.twoFingerTap.firstFingerHeight / scale));
-        break;
-    case WebInputEvent::GestureLongPress:
-        m_type = PlatformEvent::GestureLongPress;
-        m_area = expandedIntSize(FloatSize(e.data.longPress.width / scale, e.data.longPress.height / scale));
-        break;
-    case WebInputEvent::GestureLongTap:
-        m_type = PlatformEvent::GestureLongTap;
-        m_area = expandedIntSize(FloatSize(e.data.longPress.width / scale, e.data.longPress.height / scale));
-        break;
-    case WebInputEvent::GesturePinchBegin:
-        m_type = PlatformEvent::GesturePinchBegin;
-        break;
-    case WebInputEvent::GesturePinchEnd:
-        m_type = PlatformEvent::GesturePinchEnd;
-        break;
-    case WebInputEvent::GesturePinchUpdate:
-        m_type = PlatformEvent::GesturePinchUpdate;
-        m_data.m_pinchUpdate.m_scale = e.data.pinchUpdate.scale;
-        break;
-    default:
-        ASSERT_NOT_REACHED();
-    }
-    m_position = widget->convertFromContainingView(
-        IntPoint((e.x - offset.width()) / scale, (e.y - offset.height()) / scale));
-    m_globalPosition = IntPoint(e.globalX, e.globalY);
-    m_timestamp = e.timeStampSeconds;
-
-    m_modifiers = 0;
-    if (e.modifiers & WebInputEvent::ShiftKey)
-        m_modifiers |= PlatformEvent::ShiftKey;
-    if (e.modifiers & WebInputEvent::ControlKey)
-        m_modifiers |= PlatformEvent::CtrlKey;
-    if (e.modifiers & WebInputEvent::AltKey)
-        m_modifiers |= PlatformEvent::AltKey;
-    if (e.modifiers & WebInputEvent::MetaKey)
-        m_modifiers |= PlatformEvent::MetaKey;
-}
 
 // MakePlatformKeyboardEvent --------------------------------------------------
 
@@ -275,16 +151,6 @@ static int getWebInputModifiers(const UIEventWithKeyState& event)
     return modifiers;
 }
 
-static FloatPoint convertAbsoluteLocationForRenderObjectFloat(const LayoutPoint& location, const RenderObject& renderObject)
-{
-    return renderObject.absoluteToLocal(location, UseTransforms);
-}
-
-static IntPoint convertAbsoluteLocationForRenderObject(const LayoutPoint& location, const RenderObject& renderObject)
-{
-    return roundedIntPoint(convertAbsoluteLocationForRenderObjectFloat(location, renderObject));
-}
-
 WebKeyboardEventBuilder::WebKeyboardEventBuilder(const KeyboardEvent& event)
 {
     if (event.type() == EventTypeNames::keydown)
@@ -367,35 +233,6 @@ WebKeyboardEventBuilder::WebKeyboardEventBuilder(const PlatformKeyboardEvent& ev
     event.text().copyTo(text, 0, textLengthCap);
     event.unmodifiedText().copyTo(unmodifiedText, 0, textLengthCap);
     memcpy(keyIdentifier, event.keyIdentifier().ascii().data(), std::min(static_cast<unsigned>(keyIdentifierLengthCap), event.keyIdentifier().length()));
-}
-
-WebGestureEventBuilder::WebGestureEventBuilder(const Widget* widget, const RenderObject* renderObject, const GestureEvent& event)
-{
-    if (event.type() == EventTypeNames::gestureshowpress)
-        type = GestureShowPress;
-    else if (event.type() == EventTypeNames::gesturetapdown)
-        type = GestureTapDown;
-    else if (event.type() == EventTypeNames::gesturescrollstart)
-        type = GestureScrollBegin;
-    else if (event.type() == EventTypeNames::gesturescrollend)
-        type = GestureScrollEnd;
-    else if (event.type() == EventTypeNames::gesturescrollupdate) {
-        type = GestureScrollUpdate;
-        data.scrollUpdate.deltaX = event.deltaX();
-        data.scrollUpdate.deltaY = event.deltaY();
-    } else if (event.type() == EventTypeNames::gesturetap) {
-        type = GestureTap;
-        data.tap.tapCount = 1;
-    }
-
-    timeStampSeconds = event.timeStamp() / millisPerSecond;
-    modifiers = getWebInputModifiers(event);
-
-    globalX = event.screenX();
-    globalY = event.screenY();
-    IntPoint localPoint = convertAbsoluteLocationForRenderObject(event.absoluteLocation(), *renderObject);
-    x = localPoint.x();
-    y = localPoint.y();
 }
 
 } // namespace blink

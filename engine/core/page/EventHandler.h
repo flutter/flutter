@@ -59,7 +59,6 @@ class KeyboardEvent;
 class LocalFrame;
 class Node;
 class OptionalCursor;
-class PlatformGestureEvent;
 class PlatformKeyboardEvent;
 class RenderLayer;
 class RenderLayerScrollableArea;
@@ -69,8 +68,6 @@ class Scrollbar;
 class TextEvent;
 class VisibleSelection;
 class Widget;
-
-typedef EventWithHitTestResults<PlatformGestureEvent> GestureEventWithHitTestResults;
 
 enum AppendTrailingWhitespace { ShouldAppendTrailingWhitespace, DontAppendTrailingWhitespace };
 enum CheckDragHysteresis { ShouldCheckDragHysteresis, DontCheckDragHysteresis };
@@ -107,24 +104,6 @@ public:
     // If the view can't be scrolled either, recursively bubble to the parent frame.
     bool bubblingScroll(ScrollDirection, ScrollGranularity, Node* startingNode = 0);
 
-    // Called on the local root frame exactly once per gesture event.
-    bool handleGestureEvent(const PlatformGestureEvent&);
-
-    // Hit-test the provided (non-scroll) gesture event, applying touch-adjustment and updating
-    // hover/active state across all frames if necessary. This should be called at most once
-    // per gesture event, and called on the local root frame.
-    // Note: This is similar to (the less clearly named) prepareMouseEvent.
-    // FIXME: Remove readOnly param when there is only ever a single call to this.
-    GestureEventWithHitTestResults targetGestureEvent(const PlatformGestureEvent&, bool readOnly = false);
-
-    // Handle the provided non-scroll gesture event. Should be called only on the inner frame.
-    bool handleGestureEventInFrame(const GestureEventWithHitTestResults&);
-
-    // Handle the provided scroll gesture event, propagating down to child frames as necessary.
-    bool handleGestureScrollEvent(const PlatformGestureEvent&);
-    bool handleGestureScrollEnd(const PlatformGestureEvent&);
-    bool isScrollbarHandlingGestures() const;
-
     void setMouseDownMayStartAutoscroll() { m_mouseDownMayStartAutoscroll = true; }
 
     bool keyEvent(const PlatformKeyboardEvent&);
@@ -145,15 +124,6 @@ private:
     bool updateSelectionForMouseDownDispatchingSelectStart(Node*, const VisibleSelection&, TextGranularity);
     void selectClosestWordFromHitTestResult(const HitTestResult&, AppendTrailingWhitespace);
     void selectClosestMisspellingFromHitTestResult(const HitTestResult&, AppendTrailingWhitespace);
-
-    HitTestRequest::HitTestRequestType getHitTypeForGestureType(PlatformEvent::Type);
-
-    bool handleGestureTap(const GestureEventWithHitTestResults&);
-    bool handleGestureLongPress(const GestureEventWithHitTestResults&);
-    bool handleGestureLongTap(const GestureEventWithHitTestResults&);
-    bool handleGestureScrollUpdate(const PlatformGestureEvent&);
-    bool handleGestureScrollBegin(const PlatformGestureEvent&);
-    void clearGestureScrollNodes();
 
     OptionalCursor selectCursor(const HitTestResult&);
     OptionalCursor selectAutoCursor(const HitTestResult&, Node*, const Cursor& iBeam);
@@ -202,11 +172,6 @@ private:
 
     bool capturesDragging() const { return m_capturesDragging; }
 
-    bool handleGestureShowPress();
-
-    bool passScrollGestureEventToWidget(const PlatformGestureEvent&, RenderObject*);
-    bool sendScrollEventToView(const PlatformGestureEvent&, const FloatSize&);
-
     AutoscrollController* autoscrollController() const;
 
     LocalFrame* const m_frame;
@@ -244,11 +209,6 @@ private:
     IntPoint m_mouseDownPos; // In our view's coords.
 
     RefPtr<Node> m_previousWheelScrolledNode;
-
-    RefPtr<Node> m_scrollGestureHandlingNode;
-    bool m_lastGestureScrollOverWidget;
-    RefPtr<Node> m_previousGestureScrolledNode;
-    RefPtr<Scrollbar> m_scrollbarHandlingScrollGesture;
 
     double m_maxMouseMovedDuration;
     bool m_didStartDrag;

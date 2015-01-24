@@ -128,11 +128,6 @@ bool Event::isKeyboardEvent() const
     return false;
 }
 
-bool Event::isGestureEvent() const
-{
-    return false;
-}
-
 bool Event::isDragEvent() const
 {
     return false;

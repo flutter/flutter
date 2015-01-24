@@ -64,7 +64,6 @@
 #include "sky/engine/platform/KeyboardCodes.h"
 #include "sky/engine/platform/Logging.h"
 #include "sky/engine/platform/NotImplemented.h"
-#include "sky/engine/platform/PlatformGestureEvent.h"
 #include "sky/engine/platform/PlatformKeyboardEvent.h"
 #include "sky/engine/platform/TraceEvent.h"
 #include "sky/engine/platform/fonts/FontCache.h"
@@ -167,59 +166,6 @@ WebViewImpl::~WebViewImpl()
 WebLocalFrameImpl* WebViewImpl::mainFrameImpl()
 {
     return m_page ? WebLocalFrameImpl::fromFrame(m_page->mainFrame()) : 0;
-}
-
-bool WebViewImpl::handleGestureEvent(const WebGestureEvent& event)
-{
-    bool eventSwallowed = false;
-    bool eventCancelled = false; // for disambiguation
-
-    PlatformGestureEventBuilder platformEvent(mainFrameImpl()->frameView(), event);
-
-    // FIXME: Remove redundant hit tests by pushing the call to EventHandler::targetGestureEvent
-    // up to this point and pass GestureEventWithHitTestResults around.
-
-    switch (event.type) {
-    case WebInputEvent::GestureTap: {
-        eventSwallowed = mainFrameImpl()->frame()->eventHandler().handleGestureEvent(platformEvent);
-        break;
-    }
-    case WebInputEvent::GestureTwoFingerTap:
-    case WebInputEvent::GestureLongPress:
-    case WebInputEvent::GestureLongTap: {
-        if (!mainFrameImpl() || !mainFrameImpl()->frameView())
-            break;
-        eventSwallowed = mainFrameImpl()->frame()->eventHandler().handleGestureEvent(platformEvent);
-        break;
-    }
-    case WebInputEvent::GestureShowPress: {
-        eventSwallowed = mainFrameImpl()->frame()->eventHandler().handleGestureEvent(platformEvent);
-        break;
-    }
-    case WebInputEvent::GestureDoubleTap:
-        // GestureDoubleTap is currently only used by Android for zooming. For WebCore,
-        // GestureTap with tap count = 2 is used instead. So we drop GestureDoubleTap here.
-        eventSwallowed = true;
-        break;
-    case WebInputEvent::GestureScrollBegin:
-    case WebInputEvent::GesturePinchBegin:
-    case WebInputEvent::GestureTapDown:
-    case WebInputEvent::GestureScrollEnd:
-    case WebInputEvent::GestureScrollUpdate:
-    case WebInputEvent::GestureScrollUpdateWithoutPropagation:
-    case WebInputEvent::GestureTapCancel:
-    case WebInputEvent::GestureTapUnconfirmed:
-    case WebInputEvent::GesturePinchEnd:
-    case WebInputEvent::GesturePinchUpdate:
-    case WebInputEvent::GestureFlingStart: {
-        eventSwallowed = mainFrameImpl()->frame()->eventHandler().handleGestureEvent(platformEvent);
-        break;
-    }
-    default:
-        ASSERT_NOT_REACHED();
-    }
-    m_client->didHandleGestureEvent(event, eventCancelled);
-    return eventSwallowed;
 }
 
 void WebViewImpl::setShowPaintRects(bool show)
@@ -513,8 +459,6 @@ void WebViewImpl::paint(WebCanvas* canvas, const WebRect& rect)
     gc.restore();
 }
 
-const WebInputEvent* WebViewImpl::m_currentInputEvent = 0;
-
 // FIXME: autogenerate this kind of code, and use it throughout Blink rather than
 // the one-offs for subsets of these values.
 static String inputTypeToName(WebInputEvent::Type type)
@@ -547,11 +491,14 @@ bool WebViewImpl::handleInputEvent(const WebInputEvent& inputEvent)
 {
     TRACE_EVENT1("input", "WebViewImpl::handleInputEvent", "type", inputTypeToName(inputEvent.type).ascii().data());
 
-    TemporaryChange<const WebInputEvent*> currentEventChange(m_currentInputEvent, &inputEvent);
-
     if (WebInputEvent::isPointerEventType(inputEvent.type)) {
         const WebPointerEvent& event = static_cast<const WebPointerEvent&>(inputEvent);
         return m_page->mainFrame()->newEventHandler().handlePointerEvent(event);
+    }
+
+    if (WebInputEvent::isGestureEventType(inputEvent.type)) {
+        const WebGestureEvent& event = static_cast<const WebGestureEvent&>(inputEvent);
+        return m_page->mainFrame()->newEventHandler().handleGestureEvent(event);
     }
 
     switch (inputEvent.type) {
@@ -559,34 +506,8 @@ bool WebViewImpl::handleInputEvent(const WebInputEvent& inputEvent)
     case WebInputEvent::KeyDown:
     case WebInputEvent::KeyUp:
         return handleKeyEvent(static_cast<const WebKeyboardEvent&>(inputEvent));
-
     case WebInputEvent::Char:
         return handleCharEvent(static_cast<const WebKeyboardEvent&>(inputEvent));
-    case WebInputEvent::GestureScrollBegin:
-    case WebInputEvent::GestureScrollEnd:
-    case WebInputEvent::GestureScrollUpdate:
-    case WebInputEvent::GestureScrollUpdateWithoutPropagation:
-    case WebInputEvent::GestureFlingStart:
-    case WebInputEvent::GestureFlingCancel:
-    case WebInputEvent::GestureTap:
-    case WebInputEvent::GestureTapUnconfirmed:
-    case WebInputEvent::GestureTapDown:
-    case WebInputEvent::GestureShowPress:
-    case WebInputEvent::GestureTapCancel:
-    case WebInputEvent::GestureDoubleTap:
-    case WebInputEvent::GestureTwoFingerTap:
-    case WebInputEvent::GestureLongPress:
-    case WebInputEvent::GestureLongTap:
-        return handleGestureEvent(static_cast<const WebGestureEvent&>(inputEvent));
-
-    case WebInputEvent::GesturePinchBegin:
-    case WebInputEvent::GesturePinchEnd:
-    case WebInputEvent::GesturePinchUpdate:
-        // FIXME: Once PlatformGestureEvent is updated to support pinch, this
-        // should call handleGestureEvent, just like it currently does for
-        // gesture scroll.
-        return false;
-
     default:
         return false;
     }

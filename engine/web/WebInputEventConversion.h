@@ -31,26 +31,18 @@
 #ifndef SKY_ENGINE_WEB_WEBINPUTEVENTCONVERSION_H_
 #define SKY_ENGINE_WEB_WEBINPUTEVENTCONVERSION_H_
 
-#include "sky/engine/platform/PlatformGestureEvent.h"
 #include "sky/engine/platform/PlatformKeyboardEvent.h"
 #include "sky/engine/public/platform/WebInputEvent.h"
 
 namespace blink {
 
-class GestureEvent;
 class KeyboardEvent;
 class RenderObject;
 class WebKeyboardEvent;
-class WebGestureEvent;
 class Widget;
 
 // These classes are used to convert from WebInputEvent subclasses to
 // corresponding WebCore events.
-
-class PlatformGestureEventBuilder : public PlatformGestureEvent {
-public:
-    PlatformGestureEventBuilder(Widget*, const WebGestureEvent&);
-};
 
 class PlatformKeyboardEventBuilder : public PlatformKeyboardEvent {
 public:
@@ -68,13 +60,6 @@ class WebKeyboardEventBuilder : public WebKeyboardEvent {
 public:
     WebKeyboardEventBuilder(const KeyboardEvent&);
     WebKeyboardEventBuilder(const PlatformKeyboardEvent&);
-};
-
-// Converts GestureEvent to a corresponding WebGestureEvent.
-// NOTE: If event mapping fails, the type will be set to Undefined.
-class WebGestureEventBuilder : public WebGestureEvent {
-public:
-    WebGestureEventBuilder(const Widget*, const RenderObject*, const GestureEvent&);
 };
 
 } // namespace blink

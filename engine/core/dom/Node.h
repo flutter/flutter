@@ -60,7 +60,6 @@ class NSResolver;
 class NodeEventContext;
 class NodeList;
 class NodeRareData;
-class PlatformGestureEvent;
 class PlatformKeyboardEvent;
 class QualifiedName;
 class RegisteredEventListener;
@@ -470,7 +469,6 @@ public:
     bool dispatchDOMActivateEvent(int detail, PassRefPtr<Event> underlyingEvent);
 
     bool dispatchKeyEvent(const PlatformKeyboardEvent&);
-    bool dispatchGestureEvent(const PlatformGestureEvent&);
 
     void dispatchInputEvent();
 

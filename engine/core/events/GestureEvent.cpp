@@ -1,27 +1,6 @@
-/*
- * Copyright (C) 2012 Google Inc. All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- *  * Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- *  * Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ``AS IS'' AND ANY
- * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
- * PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL APPLE COMPUTER, INC. OR
- * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
- * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
- * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
- * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
- * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
+// Copyright 2015 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
 
 #include "sky/engine/config.h"
 #include "sky/engine/core/dom/Element.h"
@@ -30,57 +9,50 @@
 
 namespace blink {
 
-PassRefPtr<GestureEvent> GestureEvent::create(PassRefPtr<AbstractView> view, const PlatformGestureEvent& event)
+static AtomicString stringForType(WebInputEvent::Type type)
 {
-    AtomicString eventType;
-    float deltaX = 0;
-    float deltaY = 0;
-    float velocityX = 0;
-    float velocityY = 0;
-    switch (event.type()) {
-    case PlatformEvent::GestureScrollBegin:
-        eventType = EventTypeNames::gesturescrollstart;
-        break;
-    case PlatformEvent::GestureScrollEnd:
-        eventType = EventTypeNames::gesturescrollend;
-        break;
-    case PlatformEvent::GestureScrollUpdate:
-    case PlatformEvent::GestureScrollUpdateWithoutPropagation:
-        // Only deltaX/Y are used when converting this
-        // back to a PlatformGestureEvent.
-        eventType = EventTypeNames::gesturescrollupdate;
-        deltaX = event.deltaX();
-        deltaY = event.deltaY();
-        velocityX = event.velocityX();
-        velocityY = event.velocityY();
-        break;
-    case PlatformEvent::GestureTap:
-        eventType = EventTypeNames::gesturetap;
-        break;
-    case PlatformEvent::GestureTapUnconfirmed:
-        eventType = EventTypeNames::gesturetapunconfirmed;
-        break;
-    case PlatformEvent::GestureTapDown:
-        eventType = EventTypeNames::gesturetapdown;
-        break;
-    case PlatformEvent::GestureShowPress:
-        eventType = EventTypeNames::gestureshowpress;
-        break;
-    case PlatformEvent::GestureTwoFingerTap:
-    case PlatformEvent::GestureLongPress:
-    case PlatformEvent::GesturePinchBegin:
-    case PlatformEvent::GesturePinchEnd:
-    case PlatformEvent::GesturePinchUpdate:
-    case PlatformEvent::GestureTapDownCancel:
-    default:
-        return nullptr;
-    }
-    return adoptRef(new GestureEvent(eventType, view, event.globalPosition().x(), event.globalPosition().y(), event.position().x(), event.position().y(), event.ctrlKey(), event.altKey(), event.shiftKey(), event.metaKey(), deltaX, deltaY, velocityX, velocityY));
+    if (type == WebInputEvent::GestureScrollBegin)
+        return EventTypeNames::gesturescrollstart;
+    if (type == WebInputEvent::GestureScrollEnd)
+        return EventTypeNames::gesturescrollend;
+    if (type == WebInputEvent::GestureScrollUpdate)
+        return EventTypeNames::gesturescrollupdate;
+    if (type == WebInputEvent::GestureScrollUpdateWithoutPropagation)
+        return EventTypeNames::gesturescrollupdate;
+    if (type == WebInputEvent::GestureFlingStart)
+        return EventTypeNames::gestureflingstart;
+    if (type == WebInputEvent::GestureFlingCancel)
+        return EventTypeNames::gestureflingcancel;
+    if (type == WebInputEvent::GestureShowPress)
+        return EventTypeNames::gestureshowpress;
+    if (type == WebInputEvent::GestureTap)
+        return EventTypeNames::gesturetap;
+    if (type == WebInputEvent::GestureTapUnconfirmed)
+        return EventTypeNames::gesturetapunconfirmed;
+    if (type == WebInputEvent::GestureTapDown)
+        return EventTypeNames::gesturetapdown;
+    if (type == WebInputEvent::GestureTapCancel)
+        return EventTypeNames::gesturetapcancel;
+    if (type == WebInputEvent::GestureDoubleTap)
+        return EventTypeNames::gesturedoubletap;
+    if (type == WebInputEvent::GestureTwoFingerTap)
+        return EventTypeNames::gesturetwofingertap;
+    if (type == WebInputEvent::GestureLongPress)
+        return EventTypeNames::gesturelongpress;
+    if (type == WebInputEvent::GestureLongTap)
+        return EventTypeNames::gesturelongtap;
+    if (type == WebInputEvent::GesturePinchBegin)
+        return EventTypeNames::gesturepinchstart;
+    if (type == WebInputEvent::GesturePinchEnd)
+        return EventTypeNames::gesturepinchend;
+    if (type == WebInputEvent::GesturePinchUpdate)
+        return EventTypeNames::gesturepinchupdate;
+    ASSERT_NOT_REACHED();
+    return AtomicString();
 }
 
-PassRefPtr<GestureEvent> GestureEvent::create(const AtomicString& type, const GestureEventInit& initializer)
+GestureEvent::~GestureEvent()
 {
-    return adoptRef(new GestureEvent(type, initializer));
 }
 
 const AtomicString& GestureEvent::interfaceName() const
@@ -88,55 +60,41 @@ const AtomicString& GestureEvent::interfaceName() const
     return EventNames::GestureEvent;
 }
 
-bool GestureEvent::isGestureEvent() const
+GestureEvent::GestureEvent()
+    : GestureEvent(AtomicString(), GestureEventInit())
 {
-    return true;
 }
 
-GestureEvent::GestureEvent()
-    : m_deltaX(0)
-    , m_deltaY(0)
+GestureEvent::GestureEvent(const WebGestureEvent& event)
+    : Event(stringForType(event.type), true, true)
+    , m_x(event.x)
+    , m_y(event.y)
+    , m_dx(0)
+    , m_dy(0)
     , m_velocityX(0)
     , m_velocityY(0)
 {
+    if (event.type == WebInputEvent::GestureFlingStart) {
+        m_velocityX = event.data.flingStart.velocityX;
+        m_velocityY = event.data.flingStart.velocityY;
+    } else if (event.type == WebInputEvent::GestureScrollUpdate
+            || event.type == WebInputEvent::GestureScrollUpdateWithoutPropagation) {
+        m_dx = event.data.scrollUpdate.deltaX;
+        m_dy = event.data.scrollUpdate.deltaY;
+        m_velocityX = event.data.scrollUpdate.velocityX;
+        m_velocityY = event.data.scrollUpdate.velocityY;
+    }
 }
 
 GestureEvent::GestureEvent(const AtomicString& type, const GestureEventInit& initializer)
-    : MouseRelatedEvent(type, initializer.bubbles, initializer.cancelable, initializer.view, initializer.detail, IntPoint(initializer.screenX, initializer.screenY),
-        IntPoint(0 /* pageX */, 0 /* pageY */),
-        IntPoint(0 /* movementX */, 0 /* movementY */),
-        initializer.ctrlKey, initializer.altKey, initializer.shiftKey, initializer.metaKey, false /* isSimulated */)
-    , m_deltaX(initializer.deltaX)
-    , m_deltaY(initializer.deltaY)
+    : Event(type, true, true)
+    , m_x(initializer.x)
+    , m_y(initializer.y)
+    , m_dx(initializer.dx)
+    , m_dy(initializer.dy)
     , m_velocityX(initializer.velocityX)
     , m_velocityY(initializer.velocityY)
 {
-}
-
-GestureEvent::GestureEvent(const AtomicString& type, PassRefPtr<AbstractView> view, int screenX, int screenY, int clientX, int clientY, bool ctrlKey, bool altKey, bool shiftKey, bool metaKey, float deltaX, float deltaY, float velocityX, float velocityY)
-    : MouseRelatedEvent(type, true, true, view, 0, IntPoint(screenX, screenY), IntPoint(clientX, clientY), IntPoint(0, 0), ctrlKey, altKey, shiftKey, metaKey)
-    , m_deltaX(deltaX)
-    , m_deltaY(deltaY)
-    , m_velocityX(velocityX)
-    , m_velocityY(velocityY)
-{
-}
-
-GestureEventDispatchMediator::GestureEventDispatchMediator(PassRefPtr<GestureEvent> gestureEvent)
-    : EventDispatchMediator(gestureEvent)
-{
-}
-
-GestureEvent* GestureEventDispatchMediator::event() const
-{
-    return toGestureEvent(EventDispatchMediator::event());
-}
-
-bool GestureEventDispatchMediator::dispatchEvent(EventDispatcher* dispatcher) const
-{
-    dispatcher->dispatch();
-    ASSERT(!event()->defaultPrevented());
-    return event()->defaultHandled() || event()->defaultPrevented();
 }
 
 } // namespace blink

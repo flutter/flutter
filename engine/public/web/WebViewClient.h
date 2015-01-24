@@ -45,7 +45,6 @@ namespace blink {
 class ServiceProvider;
 class WebCompositorOutputSurface;
 class WebElement;
-class WebGestureEvent;
 class WebHitTestResult;
 class WebImage;
 class WebKeyboardEvent;
@@ -107,9 +106,6 @@ public:
     // After calling WebWidget::layout(), expect to get this notification
     // unless the view did not need a layout.
     virtual void didUpdateLayout() { }
-
-    // Return true to swallow the input event if the embedder will start a disambiguation popup
-    virtual bool didTapMultipleTargets(const WebGestureEvent&, const WebVector<WebRect>& targetRects) { return false; }
 
     // Returns comma separated list of accept languages.
     virtual WebString acceptLanguages() { return WebString(); }

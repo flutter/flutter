@@ -479,7 +479,6 @@ source_set("platform") {
     "Partitions.h",
     "PlatformEvent.h",
     "PlatformExport.h",
-    "PlatformGestureEvent.h",
     "PlatformKeyboardEvent.cpp",
     "PlatformKeyboardEvent.h",
     "PlatformScreen.cpp",

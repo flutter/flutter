@@ -40,7 +40,6 @@
 
 namespace blink {
 
-class WebGestureEvent;
 class WebString;
 class WebWidget;
 struct WebCursorInfo;
@@ -120,9 +119,6 @@ public:
     // When this method gets called, WebWidgetClient implementation should
     // reset the input method by cancelling any ongoing composition.
     virtual void resetInputMethod() { }
-
-    // Called when a gesture event is handled.
-    virtual void didHandleGestureEvent(const WebGestureEvent& event, bool eventCancelled) { }
 
     // Called during WebWidget::HandleInputEvent for a TouchStart event to inform the embedder
     // of the touch actions that are permitted for this touch.

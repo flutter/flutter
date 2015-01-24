@@ -4,18 +4,11 @@
 
 [
     EventConstructor,
-] interface GestureEvent : UIEvent {
-    [InitializedByEventConstructor] readonly attribute long screenX;
-    [InitializedByEventConstructor] readonly attribute long screenY;
-    [InitializedByEventConstructor] readonly attribute long clientX;
-    [InitializedByEventConstructor] readonly attribute long clientY;
-    [InitializedByEventConstructor] readonly attribute boolean ctrlKey;
-    [InitializedByEventConstructor] readonly attribute boolean shiftKey;
-    [InitializedByEventConstructor] readonly attribute boolean altKey;
-    [InitializedByEventConstructor] readonly attribute boolean metaKey;
-
-    [InitializedByEventConstructor] readonly attribute double deltaX;
-    [InitializedByEventConstructor] readonly attribute double deltaY;
+] interface GestureEvent : Event {
+    [InitializedByEventConstructor] readonly attribute double x;
+    [InitializedByEventConstructor] readonly attribute double y;
+    [InitializedByEventConstructor] readonly attribute double dx;
+    [InitializedByEventConstructor] readonly attribute double dy;
     [InitializedByEventConstructor] readonly attribute double velocityX;
     [InitializedByEventConstructor] readonly attribute double velocityY;
 };

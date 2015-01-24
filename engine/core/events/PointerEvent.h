@@ -6,8 +6,6 @@
 #define SKY_ENGINE_CORE_EVENTS_POINTEREVENT_H_
 
 #include "sky/engine/core/events/Event.h"
-#include "sky/engine/core/events/EventDispatchMediator.h"
-#include "sky/engine/core/frame/LocalDOMWindow.h"
 #include "sky/engine/public/platform/WebInputEvent.h"
 
 namespace blink {
@@ -52,7 +50,9 @@ public:
     {
         return adoptRef(new PointerEvent(type, initializer));
     }
+
     ~PointerEvent() override;
+    const AtomicString& interfaceName() const override;
 
     int pointer() const { return m_pointer; }
     const String& kind() const { return m_kind; }

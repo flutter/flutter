@@ -37,7 +37,6 @@ namespace blink {
 
 class GraphicsContext;
 class IntRect;
-class PlatformGestureEvent;
 class ScrollableArea;
 
 class PLATFORM_EXPORT Scrollbar final : public Widget {
@@ -75,8 +74,6 @@ public:
 
     bool isOverlayScrollbar() const;
     bool shouldParticipateInHitTesting();
-
-    bool gestureEvent(const PlatformGestureEvent&);
 
     void mouseEntered();
     void mouseExited();

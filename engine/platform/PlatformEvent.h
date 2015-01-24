@@ -47,24 +47,6 @@ public:
 
         // PlatformWheelEvent
         Wheel,
-
-        // PlatformGestureEvent
-        GestureScrollBegin,
-        GestureScrollEnd,
-        GestureScrollUpdate,
-        GestureScrollUpdateWithoutPropagation,
-        GestureTap,
-        GestureTapUnconfirmed,
-        GestureTapDown,
-        GestureShowPress,
-        GestureTapDownCancel,
-        GestureTwoFingerTap,
-        GestureLongPress,
-        GestureLongTap,
-        GesturePinchBegin,
-        GesturePinchEnd,
-        GesturePinchUpdate,
-        GestureFlingStart,
     };
 
     enum Modifiers {

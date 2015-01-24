@@ -169,13 +169,6 @@ public:
 
     void updateMainFrameLayoutSize();
 
-    // Returns the input event we're currently processing. This is used in some
-    // cases where the WebCore DOM event doesn't have the information we need.
-    static const WebInputEvent* currentInputEvent()
-    {
-        return m_currentInputEvent;
-    }
-
     void scheduleAnimation();
 
     virtual void setVisibilityState(WebPageVisibilityState, bool) override;

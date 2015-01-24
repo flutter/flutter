@@ -59,7 +59,6 @@
 #include "sky/engine/core/events/EventDispatchMediator.h"
 #include "sky/engine/core/events/EventDispatcher.h"
 #include "sky/engine/core/events/EventListener.h"
-#include "sky/engine/core/events/GestureEvent.h"
 #include "sky/engine/core/events/KeyboardEvent.h"
 #include "sky/engine/core/events/TextEvent.h"
 #include "sky/engine/core/events/UIEvent.h"
@@ -1450,14 +1449,6 @@ bool Node::dispatchDOMActivateEvent(int detail, PassRefPtr<Event> underlyingEven
 bool Node::dispatchKeyEvent(const PlatformKeyboardEvent& event)
 {
     return EventDispatcher::dispatchEvent(this, KeyboardEventDispatchMediator::create(KeyboardEvent::create(event, document().domWindow())));
-}
-
-bool Node::dispatchGestureEvent(const PlatformGestureEvent& event)
-{
-    RefPtr<GestureEvent> gestureEvent = GestureEvent::create(document().domWindow(), event);
-    if (!gestureEvent)
-        return false;
-    return EventDispatcher::dispatchEvent(this, GestureEventDispatchMediator::create(gestureEvent));
 }
 
 void Node::dispatchInputEvent()

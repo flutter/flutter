@@ -18,7 +18,7 @@ static AtomicString stringForType(WebInputEvent::Type type)
     if (type == WebInputEvent::PointerCancel)
         return EventTypeNames::pointercancel;
     ASSERT_NOT_REACHED();
-    return EventTypeNames::pointercancel;
+    return AtomicString();
 }
 
 static String stringForKind(WebPointerEvent::Kind kind)
@@ -37,6 +37,11 @@ static String stringForKind(WebPointerEvent::Kind kind)
 
 PointerEvent::~PointerEvent()
 {
+}
+
+const AtomicString& PointerEvent::interfaceName() const
+{
+    return EventNames::PointerEvent;
 }
 
 PointerEvent::PointerEvent()

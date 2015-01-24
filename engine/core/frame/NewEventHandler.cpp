@@ -10,6 +10,7 @@
 #include "sky/engine/core/editing/Editor.h"
 #include "sky/engine/core/editing/FrameSelection.h"
 #include "sky/engine/core/editing/htmlediting.h"
+#include "sky/engine/core/events/GestureEvent.h"
 #include "sky/engine/core/events/PointerEvent.h"
 #include "sky/engine/core/frame/LocalFrame.h"
 #include "sky/engine/core/frame/FrameView.h"
@@ -30,7 +31,8 @@ static VisiblePosition visiblePositionForHitTestResult(const HitTestResult& hitT
     return VisiblePosition(firstPositionInOrBeforeNode(innerNode), DOWNSTREAM);
 }
 
-static LayoutPoint positionForEvent(const WebPointerEvent& event)
+template<typename EventType>
+static LayoutPoint positionForEvent(const EventType& event)
 {
     return roundedLayoutPoint(FloatPoint(event.x, event.y));
 }
@@ -71,6 +73,12 @@ bool NewEventHandler::dispatchPointerEvent(Node& target, const WebPointerEvent& 
     return target.dispatchEvent(pointerEvent.release());
 }
 
+bool NewEventHandler::dispatchGestureEvent(Node& target, const WebGestureEvent& event)
+{
+    RefPtr<GestureEvent> gestureEvent = GestureEvent::create(event);
+    return target.dispatchEvent(gestureEvent.release());
+}
+
 bool NewEventHandler::dispatchClickEvent(Node& capturingTarget, const WebPointerEvent& event)
 {
     ASSERT(event.type == WebInputEvent::PointerUp);
@@ -107,6 +115,13 @@ bool NewEventHandler::handlePointerEvent(const WebPointerEvent& event)
         return handlePointerMoveEvent(event);
     ASSERT(event.type == WebInputEvent::PointerCancel);
     return handlePointerCancelEvent(event);
+}
+
+bool NewEventHandler::handleGestureEvent(const WebGestureEvent& event)
+{
+    HitTestResult hitTestResult = performHitTest(positionForEvent(event));
+    RefPtr<Node> target = targetForHitTestResult(hitTestResult);
+    return !dispatchGestureEvent(*target, event);
 }
 
 bool NewEventHandler::handlePointerDownEvent(const WebPointerEvent& event)

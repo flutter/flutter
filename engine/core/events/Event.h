@@ -140,7 +140,6 @@ public:
     virtual bool isUIEvent() const;
     virtual bool isFocusEvent() const;
     virtual bool isKeyboardEvent() const;
-    virtual bool isGestureEvent() const;
 
     // Drag events are a subset of mouse events.
     virtual bool isDragEvent() const;

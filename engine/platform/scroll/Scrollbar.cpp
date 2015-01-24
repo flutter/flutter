@@ -26,7 +26,6 @@
 #include "sky/engine/config.h"
 #include "sky/engine/platform/scroll/Scrollbar.h"
 
-#include "sky/engine/platform/PlatformGestureEvent.h"
 #include "sky/engine/platform/graphics/GraphicsContext.h"
 #include "sky/engine/platform/scroll/ScrollAnimator.h"
 #include "sky/engine/platform/scroll/ScrollableArea.h"
@@ -240,50 +239,6 @@ void Scrollbar::setHoveredPart(ScrollbarPart part)
 void Scrollbar::setPressedPart(ScrollbarPart part)
 {
     m_pressedPart = part;
-}
-
-bool Scrollbar::gestureEvent(const PlatformGestureEvent& evt)
-{
-    switch (evt.type()) {
-    case PlatformEvent::GestureTapDown:
-        // FIXME(sky): Is setting the pressed part needed since we only have overlay scrollbars?
-        setPressedPart(NoPart);
-        m_pressedPos = orientation() == HorizontalScrollbar ? convertFromContainingView(evt.position()).x() : convertFromContainingView(evt.position()).y();
-        return true;
-    case PlatformEvent::GestureTapDownCancel:
-    case PlatformEvent::GestureScrollBegin:
-        if (m_pressedPart != ThumbPart)
-            return false;
-        m_scrollPos = m_pressedPos;
-        return true;
-    case PlatformEvent::GestureScrollUpdate:
-    case PlatformEvent::GestureScrollUpdateWithoutPropagation:
-        if (m_pressedPart != ThumbPart)
-            return false;
-        m_scrollPos += orientation() == HorizontalScrollbar ? evt.deltaX() : evt.deltaY();
-        moveThumb(m_scrollPos);
-        return true;
-    case PlatformEvent::GestureScrollEnd:
-    case PlatformEvent::GestureLongPress:
-    case PlatformEvent::GestureFlingStart:
-        m_scrollPos = 0;
-        m_pressedPos = 0;
-        setPressedPart(NoPart);
-        return false;
-    case PlatformEvent::GestureTap: {
-        if (m_pressedPart != ThumbPart && m_pressedPart != NoPart && m_scrollableArea
-            && m_scrollableArea->scroll(pressedPartScrollDirection(), pressedPartScrollGranularity())) {
-            return true;
-        }
-        m_scrollPos = 0;
-        m_pressedPos = 0;
-        setPressedPart(NoPart);
-        return false;
-    }
-    default:
-        // By default, we assume that gestures don't deselect the scrollbar.
-        return true;
-    }
 }
 
 void Scrollbar::mouseEntered()
