@@ -55,11 +55,18 @@ Each touch or pointer is tracked individually.
 
 New touches and pointers can appear and disappear over time.
 
-When a new one enters the system, a 'pointer-added' event is fired at
-the application's document.
+Each pointer has a list of current targets.
 
-When it is removed, a 'pointer-removed' event is fired at the
-application's document.
+When a new one enters the system, a non-bubbling 'pointer-added' event
+is fired at the application's document, and the pointer's current
+targets list is initialised to just that Document object.
+
+When it is removed, a non-bubbling 'pointer-removed' event is fired at
+the application's document and at any other objects in the pointer's
+current targets list. Currently, at the time of a pointer-removed, the
+list will always consist of only the document.
+
+A pointer can be "up" or "down". Initially all pointers are "up".
 
 A pointer switches from "up" to "down" when it is a touch or stylus
 that is in contact with the display surface, or when it is a mouse
@@ -69,59 +76,70 @@ down. A stylus can have a button pressed while "up".) In the case of a
 mouse with multiple buttons, the pointer switches back to "up" only
 when all the buttons have been released.
 
-When one switches from "up" to "down", the following algorithm is run:
+When a pointer switches from "up" to "down", the following algorithm
+is run:
 
  1. Hit test the position of the pointer, let 'node' be the result.
- 2. Fire a pointer-down event at the layoutManager for 'node'.
-    Let 'result' be the returned value.
- 3. If 'result' is undefined, then fire a pointer-down event at the
-    Element for 'node'.
-    Let 'result' be the returned value.
- 4. If 'result' is undefined or is not an EventTarget, let 'result' be
-    the application document.
- 5. Let 'result' capture this pointer.
+ 2. Fire a bubbling pointer-down event at the layoutManager for
+    'node', with an empty array as the default return value. Let
+    'result1' be the returned value.
+ 3. If result1 is not an array of EventTarget objects, set it to the
+    empty array and (if this is debug mode) report the issue.
+ 4. Fire a bubbling pointer-down event at the Element for 'node', with
+    an empty array as the default return value. Let 'result2' be the
+    returned value.
+ 5. If result2 is not an array of EventTarget objects, set it to the
+    empty array and (if this is debug mode) report the issue.
+ 6. Let result be the concatenation of result1's contents, result2's
+    contents, and the application document.
+ 7. Let 'result' be this pointer's current targets.
 
-A pointer that is "down" is captured -- all events for that pointer
-will be routed to the chosen target until the pointer goes up,
-regardless of whether it's in that target's visible area.
+When an object is one of the current targets of a pointer and no other
+pointers have that object as a current target so far, and either there
+are no buttons (touch, stylus) or only the primary button is active
+(mouse) and this is not an inverted stylus, then that pointer is
+considered the "primary" pointer for that object. The pointer remains
+the primary pointer for that object until the corresponding pointer-up
+event (even if the buttons change).
 
-When an object captures a pointer and it has no captured pointers so
-far, if either there are no buttons (touch, stylus) or only the
-primary button is active (mouse) and this is not an inverted stylus,
-then that pointer is marked as "primary" for that object. The pointer
-remains the primary pointer until the corresponding pointer-up event
-(even if the buttons change).
-
-When one moves, if it is "up" then a 'pointer-moved' event is fired at
-the application's document, otherwise if it is "down" then the event
-is fired at the object or document that was selected for the
-'pointer-down' event (the capturing object). If the return value of a
-'pointer-moved' event is 'cancel' then cancel the pointer.
+When a pointer moves, a non-bubbling 'pointer-move' event is fired at
+each of the pointer's current targets in turn (maintaining the order
+they had in the 'pointer-down' event, if there's more than one). If
+the return value of a 'pointer-moved' event is 'cancel', and the
+pointer is currently down, then the pointer is canceled (see below).
 
 When a pointer's button state changes but this doesn't impact whether
 it is "up" or "down", e.g. when a mouse with a button down gets a
 second button down, or when a stylus' buttons change state, but the
 pointer doesn't simultaneously move, then a 'pointer-moved' event is
-fired anyway, with dx=dy=0.
+fired anyway, as described above, but with dx=dy=0.
 
-When one switches from "down" to "up", a 'pointer-up' event is fired
-at the object or document that was selected for the 'pointer-down'
-event (the capturing target). The buttons exposed on that event are
-those that were down immediately prior to the buttons being released.
+When a pointer switches from "down" to "up", a non-bubbling
+'pointer-up' event is fired at each of the pointer's current targets
+in turn (maintaining the order they had in the 'pointer-down' event,
+if there's more than one), and then the pointer's current target list
+is emptied except for the application's document. The buttons exposed
+on the 'pointer-up' event are those that were down immediately prior
+to the buttons being released.
 
-At the time of a pointer-up event, if there is another pointer that is
-already down, captured by the same object, and is of the same kind,
-and that has either no buttons or only its primary button active, then
-that becomes the new primary pointer for that object before the
-pointer-up event is sent. Otherwise, the primary pointer stops being
-primary just after the pointer-up.
+At the time of a 'pointer-up' event, for each object that is a current
+target of the pointer, and for which the pointer is considered the
+"primary" pointer for that object, if there is another pointer that is
+already down, which is of the same kind, which also has that object as
+a current target, and that has either no buttons or only its primary
+button active, then that pointer becomes the new "primary" pointer for
+that object before the 'pointer-up' event is sent. Otherwise, the
+"primary" pointer stops being "primary" just _after_ the 'pointer-up'
+event. (This matters for whether the 'primary' field is set.)
 
 When a pointer is canceled, if it is "down", pretend that the pointer
-moved to "up", send 'pointer-up' as described below, and drop all
-events for this pointer until such time as it actually changes to be
-truly "up".
+moved to "up", sending 'pointer-up' as described above, and entirely
+empty its current targets list. AFter the pointer actually switches
+from "down" to "up", replace the current targets list with an object
+that only contains the application's document.
 
-Nothing special happens when a capturing target moves in the DOM.
+Nothing special happens when a pointer's current target moves in the
+DOM.
 
 The x and y position of an -up or -down event always match those of
 the previous -moved or -added event, so their dx and dy are always 0.
@@ -129,8 +147,7 @@ the previous -moved or -added event, so their dx and dy are always 0.
 Positions are floating point numbers; they can have subpixel values.
 
 
-These events all bubble and their data is an object with the following
-fields:
+These data of all these events is an object with the following fields:
 
         pointer: an integer assigned to this touch or pointer when it
                  enters the system, never reused, increasing
@@ -207,11 +224,11 @@ When down is true:
                  devices that do not detect pressure (e.g. mice),
                  returns 1.0
 
-    pressure-min: the minimum value that pressure can return for this
-                  pointer
+   pressure-min: the minimum value that pressure can return for this
+                 pointer
 
-    pressure-max: the maximum value that pressure can return for this
-                  pointer
+   pressure-max: the maximum value that pressure can return for this
+                 pointer
 
 
 When kind is 'touch', 'stylus', or 'stylus-inverted':
@@ -220,20 +237,20 @@ When kind is 'touch', 'stylus', or 'stylus-inverted':
                  distance of stylus or finger from screen), if
                  supported and down is not true, otherwise 0.0.
 
-    distance-min: the minimum value that distance can return for this
-                  pointer (always 0.0)
+   distance-min: the minimum value that distance can return for this
+                 pointer (always 0.0)
 
-    distance-max: the maximum value that distance can return for this
-                  pointer (0.0 if not supported)
+   distance-max: the maximum value that distance can return for this
+                 pointer (0.0 if not supported)
 
 
 When kind is 'touch', 'stylus', or 'stylus-inverted' and down is true:
 
-    radius-major: the radius of the contact ellipse along the major
-                  axis, in pixels
+   radius-major: the radius of the contact ellipse along the major
+                 axis, in pixels
 
-    radius-minor: the radius of the contact ellipse along the major
-                  axis, in pixels
+   radius-minor: the radius of the contact ellipse along the major
+                 axis, in pixels
 
      radius-min: the minimum value that could be reported for
                  radius-major or radius-minor for this pointer

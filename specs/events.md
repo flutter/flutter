@@ -27,7 +27,7 @@ Sky Event Model
   //
   // The advantage of this would be the ability to enforce (or at
   // least better catch) incorrect uses of the API, e.g. to make sure
-  // people don't stop on themselves in 'pointer-down' capture.
+  // people don't stomp on themselves with the return value.
 
   callback EventListener any (Event event);
     // if the return value is not undefined:
@@ -35,8 +35,8 @@ Sky Event Model
     //   set event.handled to true
 
   abstract class EventTarget {
-    any dispatchEvent(Event event); // O(N) in total number of listeners for this type in the chain
-      // sets event.handled to false and event.result to undefined
+    any dispatchEvent(Event event, any defaultResult = null); // O(N) in total number of listeners for this type in the chain
+      // sets event.handled to false and event.result to defaultResult
       // makes a record of the event target chain by calling getEventDispatchChain()
       // invokes all the handlers on the chain in turn
       // returns event.result
