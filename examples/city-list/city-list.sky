@@ -89,10 +89,10 @@ module.exports.LetterHeaderElement = class extends SkyElement {
     #population {
       color: #AAA;
     }
-
   </style>
   <div>
-    <span id="name">{{ name }}</span>,
+    <span id="name">{{ name }}</span>
+    <t>, </t>
     <span id="population">population {{ population }}</span>
   </div>
 </template>
