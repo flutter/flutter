@@ -41,5 +41,4 @@ layer at (686,582) size 114x18
     RenderInline {a} at (0,0) size 36x12
       RenderText {#text} at (75,3) size 36x12
         text run at (75,3) width 36: "J\x{E9}r\x{F4}me"
-    RenderText {#text} at (0,0) size 0x0
 

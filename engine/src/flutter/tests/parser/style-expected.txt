@@ -1,24 +1,20 @@
 <html>
-<import src="../resources/dump-as-markup.sky"></import>
-<body>
-
-<style>
+  <import src="../resources/dump-as-markup.sky"></import>
+  <body>
+    <style>
 & TEST <a></a>
 </style>
-
-<STYLE>
+    <STYLE>
 &amp; TEST <a></a>
-</STYLE>
-
-<style>
+    </STYLE>
+    <style>
 & TEST
 <STYLE>
 & TEST <a></a>
 </STYLE>
 & TEST
 </style>
-
-<STYLE>
+    <STYLE>
 &amp; TEST
 <style>
  TEST <a></a>
@@ -27,8 +23,7 @@
 </style>
 &amp; TEST
 </STYLE>
-
-<style> TEST </style>
+    <style> TEST </style>
 
 &lt;
 style
@@ -40,12 +35,10 @@ style
 style>
 & TEST
 </style>
-
-<style> & TEST </styl>
+    <style> & TEST </styl>
 & TEST
 </style>
-
-<style> & TEST <//style>
+    <style> & TEST <//style>
 & TEST
 </style>
 
@@ -53,3 +46,4 @@ style>
 
 </body>
 </html>
+

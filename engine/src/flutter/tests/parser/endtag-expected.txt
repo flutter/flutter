@@ -1,11 +1,11 @@
 <html>
-<import src="../resources/dump-as-markup.sky"></import>
-<body>
-
-<diva>1</diva>
-<divb>2</divb>
-<divc>3</divc>
-<divd>4</divd>;&gt;
+  <import src="../resources/dump-as-markup.sky"></import>
+  <body>
+    <diva>1</diva>
+    <divb>2</divb>
+    <divc>3</divc>
+    <divd>4</divd>;&gt;
 
 </body>
 </html>
+

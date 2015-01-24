@@ -1,6 +1,6 @@
 <html>
-<import src="../resources/dump-as-markup.sky"></import>
-<body>
+  <import src="../resources/dump-as-markup.sky"></import>
+  <body>
 THIS TEST SHOULD PASS
 (control test for success)
 </body>
