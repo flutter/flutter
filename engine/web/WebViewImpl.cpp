@@ -50,7 +50,6 @@
 #include "sky/engine/core/frame/NewEventHandler.h"
 #include "sky/engine/core/frame/Settings.h"
 #include "sky/engine/core/html/HTMLImportElement.h"
-#include "sky/engine/core/html/ime/InputMethodContext.h"
 #include "sky/engine/core/loader/FrameLoader.h"
 #include "sky/engine/core/loader/UniqueIdentifier.h"
 #include "sky/engine/core/page/AutoscrollController.h"
@@ -573,40 +572,6 @@ int WebViewImpl::textInputFlags()
 WebString WebViewImpl::inputModeOfFocusedElement()
 {
     return WebString();
-}
-
-InputMethodContext* WebViewImpl::inputMethodContext()
-{
-    if (!m_imeAcceptEvents)
-        return 0;
-
-    LocalFrame* focusedFrame = focusedCoreFrame();
-    if (!focusedFrame)
-        return 0;
-
-    Element* target = focusedFrame->document()->focusedElement();
-    if (target && target->hasInputMethodContext())
-        return &target->inputMethodContext();
-
-    return 0;
-}
-
-void WebViewImpl::didShowCandidateWindow()
-{
-    if (InputMethodContext* context = inputMethodContext())
-        context->dispatchCandidateWindowShowEvent();
-}
-
-void WebViewImpl::didUpdateCandidateWindow()
-{
-    if (InputMethodContext* context = inputMethodContext())
-        context->dispatchCandidateWindowUpdateEvent();
-}
-
-void WebViewImpl::didHideCandidateWindow()
-{
-    if (InputMethodContext* context = inputMethodContext())
-        context->dispatchCandidateWindowHideEvent();
 }
 
 WebVector<WebCompositionUnderline> WebViewImpl::compositionUnderlines() const

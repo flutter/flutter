@@ -119,13 +119,6 @@ public:
     // Returns information about the current text input of this WebWidget.
     virtual WebTextInputInfo textInputInfo() = 0;
 
-    // Called to notify that IME candidate window has changed its visibility or
-    // its appearance. These calls correspond to trigger
-    // candidatewindow{show,update,hide} events defined in W3C IME API.
-    virtual void didShowCandidateWindow() = 0;
-    virtual void didUpdateCandidateWindow() = 0;
-    virtual void didHideCandidateWindow() = 0;
-
     // The page background color. Can be used for filling in areas without
     // content.
     virtual WebColor backgroundColor() const = 0;

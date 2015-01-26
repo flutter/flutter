@@ -31,7 +31,6 @@
 #ifndef SKY_ENGINE_WEB_WEBVIEWIMPL_H_
 #define SKY_ENGINE_WEB_WEBVIEWIMPL_H_
 
-#include "sky/engine/core/html/ime/InputMethodContext.h"
 #include "sky/engine/platform/geometry/IntPoint.h"
 #include "sky/engine/platform/geometry/IntRect.h"
 #include "sky/engine/public/platform/WebInputEvent.h"
@@ -83,10 +82,6 @@ public:
     virtual bool compositionRange(size_t* location, size_t* length) override;
     virtual WebTextInputInfo textInputInfo() override;
     virtual WebColor backgroundColor() const override;
-
-    virtual void didShowCandidateWindow() override;
-    virtual void didUpdateCandidateWindow() override;
-    virtual void didHideCandidateWindow() override;
 
     // WebView methods:
     virtual void setMainFrame(WebFrame*) override;
@@ -216,8 +211,6 @@ private:
 
     void doComposite();
     void reallocateRenderer();
-
-    InputMethodContext* inputMethodContext();
 
     WebViewClient* m_client; // Can be 0 (e.g. unittests, shared workers, etc.)
     WebSpellCheckClient* m_spellCheckClient;

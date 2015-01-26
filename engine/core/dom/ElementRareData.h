@@ -27,7 +27,6 @@
 #include "sky/engine/core/dom/NodeRareData.h"
 #include "sky/engine/core/dom/custom/CustomElementDefinition.h"
 #include "sky/engine/core/dom/shadow/ElementShadow.h"
-#include "sky/engine/core/html/ime/InputMethodContext.h"
 #include "sky/engine/core/rendering/style/StyleInheritedData.h"
 #include "sky/engine/wtf/OwnPtr.h"
 
@@ -85,14 +84,6 @@ public:
         m_activeAnimations = activeAnimations;
     }
 
-    bool hasInputMethodContext() const { return m_inputMethodContext; }
-    InputMethodContext& ensureInputMethodContext(HTMLElement* element)
-    {
-        if (!m_inputMethodContext)
-            m_inputMethodContext = InputMethodContext::create(element);
-        return *m_inputMethodContext;
-    }
-
     void setCustomElementDefinition(PassRefPtr<CustomElementDefinition> definition) { m_customElementDefinition = definition; }
     CustomElementDefinition* customElementDefinition() const { return m_customElementDefinition.get(); }
 
@@ -103,7 +94,6 @@ private:
 
     OwnPtr<DOMTokenList> m_classList;
     OwnPtr<ElementShadow> m_shadow;
-    OwnPtr<InputMethodContext> m_inputMethodContext;
     OwnPtr<ActiveAnimations> m_activeAnimations;
     OwnPtr<InlineCSSStyleDeclaration> m_cssomWrapper;
 

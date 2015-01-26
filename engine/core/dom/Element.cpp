@@ -1559,16 +1559,6 @@ void Element::createUniqueElementData()
     }
 }
 
-InputMethodContext& Element::inputMethodContext()
-{
-    return ensureElementRareData().ensureInputMethodContext(toHTMLElement(this));
-}
-
-bool Element::hasInputMethodContext() const
-{
-    return hasRareData() && elementRareData()->hasInputMethodContext();
-}
-
 void Element::synchronizeStyleAttributeInternal() const
 {
     ASSERT(isStyledElement());

@@ -74,8 +74,6 @@
 
     [CustomElementCallbacks] attribute long tabIndex;
 
-    [RuntimeEnabled=IMEAPI] readonly attribute InputMethodContext inputMethodContext;
-
     [CustomElementCallbacks, RaisesException=Setter] attribute DOMString contentEditable;
     readonly attribute boolean isContentEditable;
 

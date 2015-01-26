@@ -50,7 +50,6 @@ class ElementRareData;
 class ElementShadow;
 class ExceptionState;
 class Image;
-class InputMethodContext;
 class IntSize;
 class MutableStylePropertySet;
 class PropertySetCSSStyleDeclaration;
@@ -271,9 +270,6 @@ public:
     ActiveAnimations* activeAnimations() const;
     ActiveAnimations& ensureActiveAnimations();
     bool hasActiveAnimations() const;
-
-    InputMethodContext& inputMethodContext();
-    bool hasInputMethodContext() const;
 
     void synchronizeAttribute(const AtomicString& localName) const;
 
