@@ -28,7 +28,7 @@ describe('MutationObserver', function() {
         observers[6].observe(div, {characterData: true, subtree: true});
         observers[8].observe(div, {attributes: true});
         div.setAttribute('foo', 'bar');
-        div.appendChild(document.createTextNode('hello'));
+        div.appendChild(new Text('hello'));
         div.firstChild.textContent = 'goodbye';
         setTimeout(function() {
             assert.deepEqual(order, [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);

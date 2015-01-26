@@ -5,7 +5,7 @@
 describe('Test MutationObserver.observe', function() {
   it('should respect character data options', function() {
     var observer = new MutationObserver(function() {});
-    var text = document.createTextNode('0');
+    var text = new Text('0');
 
     observer.observe(text, {characterDataOldValue: true});
     text.data = '1';

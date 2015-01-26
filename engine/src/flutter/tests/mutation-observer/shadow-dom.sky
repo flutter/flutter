@@ -7,7 +7,7 @@ describe('MutationObservers', function() {
   it('should handle shadow dom', function() {
     function mutate(element) {
       element.setAttribute('data-foo', 'bar');
-      element.insertBefore(document.createTextNode('hello'), element.firstChild);
+      element.insertBefore(new Text('hello'), element.firstChild);
       element.firstChild.textContent = 'goodbye';
       element.removeChild(element.firstChild);
     }
