@@ -40,8 +40,6 @@
 #include "sky/engine/bindings/core/v8/ScriptSourceCode.h"
 #include "sky/engine/bindings/core/v8/SerializedScriptValue.h"
 #include "sky/engine/bindings/core/v8/V8Binding.h"
-#include "sky/engine/bindings/core/v8/V8EventListener.h"
-#include "sky/engine/bindings/core/v8/V8EventListenerList.h"
 #include "sky/engine/bindings/core/v8/V8GCForContextDispose.h"
 #include "sky/engine/bindings/core/v8/V8HiddenValue.h"
 #include "sky/engine/core/dom/Element.h"
@@ -135,45 +133,6 @@ static void windowSetTimeoutImpl(const v8::FunctionCallbackInfo<v8::Value>& info
     }
 
     v8SetReturnValue(info, timerId);
-}
-
-void V8Window::eventAttributeGetterCustom(const v8::PropertyCallbackInfo<v8::Value>& info)
-{
-    LocalFrame* frame = V8Window::toNative(info.Holder())->frame();
-    ExceptionState exceptionState(ExceptionState::GetterContext, "event", "Window", info.Holder(), info.GetIsolate());
-    if (!BindingSecurity::shouldAllowAccessToFrame(info.GetIsolate(), frame, exceptionState)) {
-        exceptionState.throwIfNeeded();
-        return;
-    }
-
-    ASSERT(frame);
-    // This is a fast path to retrieve info.Holder()->CreationContext().
-    v8::Local<v8::Context> context = toV8Context(frame, DOMWrapperWorld::current(info.GetIsolate()));
-    if (context.IsEmpty())
-        return;
-
-    v8::Handle<v8::Value> jsEvent = V8HiddenValue::getHiddenValue(info.GetIsolate(), context->Global(), V8HiddenValue::event(info.GetIsolate()));
-    if (jsEvent.IsEmpty())
-        return;
-    v8SetReturnValue(info, jsEvent);
-}
-
-void V8Window::eventAttributeSetterCustom(v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info)
-{
-    LocalFrame* frame = V8Window::toNative(info.Holder())->frame();
-    ExceptionState exceptionState(ExceptionState::SetterContext, "event", "Window", info.Holder(), info.GetIsolate());
-    if (!BindingSecurity::shouldAllowAccessToFrame(info.GetIsolate(), frame, exceptionState)) {
-        exceptionState.throwIfNeeded();
-        return;
-    }
-
-    ASSERT(frame);
-    // This is a fast path to retrieve info.Holder()->CreationContext().
-    v8::Local<v8::Context> context = toV8Context(frame, DOMWrapperWorld::current(info.GetIsolate()));
-    if (context.IsEmpty())
-        return;
-
-    V8HiddenValue::setHiddenValue(info.GetIsolate(), context->Global(), V8HiddenValue::event(info.GetIsolate()), value);
 }
 
 // FIXME(fqian): returning string is cheating, and we should

@@ -110,7 +110,6 @@ public:
     virtual void removeAllEventListeners();
     virtual bool dispatchEvent(PassRefPtr<Event>);
     bool dispatchEvent(PassRefPtr<Event>, ExceptionState&); // DOM API
-    virtual void uncaughtExceptionInEventHandler();
 
     bool hasEventListeners() const;
     bool hasEventListeners(const AtomicString& eventType) const;

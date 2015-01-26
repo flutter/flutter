@@ -152,10 +152,6 @@ bool EventTarget::dispatchEvent(PassRefPtr<Event> event)
     return defaultPrevented;
 }
 
-void EventTarget::uncaughtExceptionInEventHandler()
-{
-}
-
 bool EventTarget::fireEventListeners(Event* event)
 {
     ASSERT(!EventDispatchForbiddenScope::isEventDispatchForbidden());

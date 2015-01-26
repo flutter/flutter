@@ -100,50 +100,16 @@ void V8AbstractEventListener::setListenerObject(v8::Handle<v8::Object> listener)
 
 void V8AbstractEventListener::invokeEventHandler(Event* event, v8::Local<v8::Value> jsEvent)
 {
-    // If jsEvent is empty, attempt to set it as a hidden value would crash v8.
     if (jsEvent.IsEmpty())
         return;
 
     ASSERT(!scriptState()->contextIsEmpty());
-    v8::Local<v8::Value> returnValue;
-    {
-        // Catch exceptions thrown in the event handler so they do not propagate to javascript code that caused the event to fire.
-        v8::TryCatch tryCatch;
-        tryCatch.SetVerbose(true);
 
-        // Save the old 'event' property so we can restore it later.
-        v8::Local<v8::Value> savedEvent = V8HiddenValue::getHiddenValue(isolate(), scriptState()->context()->Global(), V8HiddenValue::event(isolate()));
-        tryCatch.Reset();
+    // Catch exceptions thrown in the event handler so they do not propagate to javascript code that caused the event to fire.
+    v8::TryCatch tryCatch;
+    tryCatch.SetVerbose(true);
 
-        // Make the event available in the global object, so LocalDOMWindow can expose it.
-        V8HiddenValue::setHiddenValue(isolate(), scriptState()->context()->Global(), V8HiddenValue::event(isolate()), jsEvent);
-        tryCatch.Reset();
-
-        returnValue = callListenerFunction(jsEvent, event);
-        if (tryCatch.HasCaught())
-            event->target()->uncaughtExceptionInEventHandler();
-
-        if (!tryCatch.CanContinue()) // Result of TerminateExecution().
-            return;
-        tryCatch.Reset();
-
-        // Restore the old event. This must be done for all exit paths through this method.
-        if (savedEvent.IsEmpty())
-            V8HiddenValue::setHiddenValue(isolate(), scriptState()->context()->Global(), V8HiddenValue::event(isolate()), v8::Undefined(isolate()));
-        else
-            V8HiddenValue::setHiddenValue(isolate(), scriptState()->context()->Global(), V8HiddenValue::event(isolate()), savedEvent);
-        tryCatch.Reset();
-    }
-
-    if (returnValue.IsEmpty())
-        return;
-}
-
-bool V8AbstractEventListener::shouldPreventDefault(v8::Local<v8::Value> returnValue)
-{
-    // Prevent default action if the return value is false in accord with the spec
-    // http://www.w3.org/TR/html5/webappapis.html#event-handler-attributes
-    return returnValue->IsBoolean() && !returnValue->BooleanValue();
+    callListenerFunction(jsEvent, event);
 }
 
 v8::Local<v8::Object> V8AbstractEventListener::getReceiverObject(Event* event)

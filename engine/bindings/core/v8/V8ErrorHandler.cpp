@@ -85,9 +85,4 @@ void V8ErrorHandler::storeExceptionOnErrorEventWrapper(ErrorEvent* event, v8::Ha
     }
 }
 
-bool V8ErrorHandler::shouldPreventDefault(v8::Local<v8::Value> returnValue)
-{
-    return returnValue->IsBoolean() && returnValue->BooleanValue();
-}
-
 } // namespace blink

@@ -29,7 +29,6 @@ class ScriptWrappable;
     V(detail) \
     V(document) \
     V(error) \
-    V(event) \
     V(idbCursorRequest) \
     V(port1) \
     V(port2) \

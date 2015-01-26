@@ -35,7 +35,6 @@
 ] interface Window : EventTarget {
     readonly attribute Screen screen;
     [DoNotCheckSecurity, Unforgeable, Replaceable, PutForwards=href] readonly attribute Location location;
-    [Custom, MeasureAs=WindowEvent, NotEnumerable] attribute Event event;
 
     Selection getSelection();
 

@@ -129,8 +129,6 @@ protected:
 private:
     virtual v8::Local<v8::Value> callListenerFunction(v8::Handle<v8::Value> jsevent, Event*) = 0;
 
-    virtual bool shouldPreventDefault(v8::Local<v8::Value> returnValue);
-
     static void setWeakCallback(const v8::WeakCallbackData<v8::Object, V8AbstractEventListener>&);
 
     ScopedPersistent<v8::Object> m_listener;

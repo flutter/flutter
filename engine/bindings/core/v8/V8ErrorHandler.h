@@ -53,7 +53,6 @@ private:
     V8ErrorHandler(v8::Local<v8::Object> listener, ScriptState*);
 
     virtual v8::Local<v8::Value> callListenerFunction(v8::Handle<v8::Value> jsEvent, Event*) override;
-    virtual bool shouldPreventDefault(v8::Local<v8::Value> returnValue) override;
 };
 
 } // namespace blink
