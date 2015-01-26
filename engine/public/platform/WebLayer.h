@@ -29,7 +29,6 @@
 #include "sky/engine/public/platform/WebBlendMode.h"
 #include "sky/engine/public/platform/WebColor.h"
 #include "sky/engine/public/platform/WebCommon.h"
-#include "sky/engine/public/platform/WebCompositorAnimation.h"
 #include "sky/engine/public/platform/WebFloatPoint3D.h"
 #include "sky/engine/public/platform/WebPoint.h"
 #include "sky/engine/public/platform/WebRect.h"
@@ -41,8 +40,6 @@ class SkMatrix44;
 class SkImageFilter;
 
 namespace blink {
-class WebCompositorAnimationDelegate;
-class WebFilterOperations;
 class WebLayerScrollClient;
 struct WebFloatPoint;
 struct WebFloatRect;
@@ -113,26 +110,8 @@ public:
     virtual void setBackgroundColor(WebColor) = 0;
     virtual WebColor backgroundColor() const = 0;
 
-    // Clear the filters in use by passing in a newly instantiated
-    // WebFilterOperations object.
-    virtual void setFilters(const WebFilterOperations&) = 0;
-
-    // An animation delegate is notified when animations are started and
-    // stopped. The WebLayer does not take ownership of the delegate, and it is
-    // the responsibility of the client to reset the layer's delegate before
-    // deleting the delegate.
-    virtual void setAnimationDelegate(WebCompositorAnimationDelegate*) = 0;
-
-
-    // Returns false if the animation cannot be added.
-    // Takes ownership of the WebCompositorAnimation object.
-    virtual bool addAnimation(WebCompositorAnimation*) = 0;
-
     // Removes all animations with the given id.
     virtual void removeAnimation(int animationId) = 0;
-
-    // Removes all animations with the given id targeting the given property.
-    virtual void removeAnimation(int animationId, WebCompositorAnimation::TargetProperty) = 0;
 
     // Pauses all animations with the given id.
     virtual void pauseAnimation(int animationId, double timeOffset) = 0;

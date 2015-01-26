@@ -43,7 +43,6 @@
 namespace blink {
 
 class ServiceProvider;
-class WebCompositorOutputSurface;
 class WebElement;
 class WebHitTestResult;
 class WebImage;

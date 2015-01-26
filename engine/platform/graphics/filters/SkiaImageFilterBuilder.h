@@ -29,7 +29,6 @@
 #include "sky/engine/platform/PlatformExport.h"
 #include "sky/engine/platform/geometry/FloatSize.h"
 #include "sky/engine/platform/graphics/ColorSpace.h"
-#include "sky/engine/public/platform/WebFilterOperations.h"
 
 class SkImageFilter;
 
@@ -47,7 +46,6 @@ public:
     ~SkiaImageFilterBuilder();
 
     PassRefPtr<SkImageFilter> build(FilterEffect*, ColorSpace, bool requiresPMColorValidation = true);
-    void buildFilterOperations(const FilterOperations&, WebFilterOperations*);
     PassRefPtr<SkImageFilter> buildTransform(const AffineTransform&, SkImageFilter* input);
 
     PassRefPtr<SkImageFilter> transformColorSpace(

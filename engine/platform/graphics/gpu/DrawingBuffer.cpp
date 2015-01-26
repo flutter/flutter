@@ -38,7 +38,6 @@
 #include "sky/engine/platform/graphics/ImageBuffer.h"
 #include "sky/engine/platform/graphics/gpu/Extensions3DUtil.h"
 #include "sky/engine/public/platform/Platform.h"
-#include "sky/engine/public/platform/WebCompositorSupport.h"
 #include "sky/engine/public/platform/WebExternalBitmap.h"
 #include "sky/engine/public/platform/WebExternalTextureLayer.h"
 #include "sky/engine/public/platform/WebGraphicsContext3D.h"
@@ -505,7 +504,8 @@ Platform3DObject DrawingBuffer::framebuffer() const
 WebLayer* DrawingBuffer::platformLayer()
 {
     if (!m_layer) {
-        m_layer = adoptPtr(Platform::current()->compositorSupport()->createExternalTextureLayer(this));
+        m_layer = nullptr;
+        CRASH(); // No compositor.
 
         m_layer->setOpaque(!m_actualAttributes.alpha);
         m_layer->setBlendBackgroundColor(m_actualAttributes.alpha);

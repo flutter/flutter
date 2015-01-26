@@ -31,7 +31,6 @@
 #include "sky/engine/platform/graphics/Canvas2DLayerManager.h"
 #include "sky/engine/platform/graphics/ImageBuffer.h"
 #include "sky/engine/public/platform/Platform.h"
-#include "sky/engine/public/platform/WebCompositorSupport.h"
 #include "sky/engine/public/platform/WebGraphicsContext3D.h"
 #include "sky/engine/public/platform/WebGraphicsContext3DProvider.h"
 #include "sky/engine/wtf/RefCountedLeakCounter.h"
@@ -98,7 +97,8 @@ Canvas2DLayerBridge::Canvas2DLayerBridge(PassOwnPtr<WebGraphicsContext3DProvider
     ASSERT(m_contextProvider);
     // Used by browser tests to detect the use of a Canvas2DLayerBridge.
     TRACE_EVENT_INSTANT0("test_gpu", "Canvas2DLayerBridgeCreation", TRACE_EVENT_SCOPE_NAME_PROCESS);
-    m_layer = adoptPtr(Platform::current()->compositorSupport()->createExternalTextureLayer(this));
+    m_layer = nullptr;
+    CRASH(); // No compositor.
     m_layer->setOpaque(opacityMode == Opaque);
     m_layer->setBlendBackgroundColor(opacityMode != Opaque);
     m_layer->setRateLimitContext(m_rateLimitingEnabled);

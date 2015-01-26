@@ -42,7 +42,6 @@
 
 namespace blink {
 
-class WebCompositeAndReadbackAsyncCallback;
 class WebInputEvent;
 class WebLayerTreeView;
 class WebString;

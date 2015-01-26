@@ -54,11 +54,9 @@ namespace blink {
 
 class WebBlobRegistry;
 class WebClipboard;
-class WebCompositorSupport;
 class WebConvertableToTraceFormat;
 class WebDiscardableMemory;
 class WebFallbackThemeEngine;
-class WebFlingAnimator;
 class WebGraphicsContext3DProvider;
 class WebSandboxSupport;
 struct WebFloatPoint;
@@ -348,10 +346,6 @@ public:
     virtual bool canAccelerate2dCanvas() { return false; }
 
     virtual bool isThreadedCompositingEnabled() { return false; }
-
-    virtual WebCompositorSupport* compositorSupport() { return 0; }
-
-    virtual WebFlingAnimator* createFlingAnimator() { return 0; }
 
 protected:
     virtual ~Platform() { }

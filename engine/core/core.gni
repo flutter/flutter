@@ -59,8 +59,6 @@ sky_core_files = [
   "animation/AnimationStack.h",
   "animation/AnimationTimeline.cpp",
   "animation/AnimationTimeline.h",
-  "animation/AnimationTranslationUtil.cpp",
-  "animation/AnimationTranslationUtil.h",
   "animation/PendingAnimations.cpp",
   "animation/PendingAnimations.h",
   "animation/css/CSSAnimatableValueFactory.cpp",
