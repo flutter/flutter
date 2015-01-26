@@ -78,7 +78,6 @@ class DocumentParser;
 class Element;
 class ElementDataCache;
 class Event;
-class EventFactoryBase;
 class EventListener;
 class ExceptionState;
 class FloatQuad;
@@ -343,9 +342,6 @@ public:
     void clearDOMWindow() { m_domWindow = nullptr; }
     LocalDOMWindow* domWindow() const { return m_domWindow; }
 
-    static void registerEventFactory(PassOwnPtr<EventFactoryBase>);
-    static PassRefPtr<Event> createEvent(const String& eventType, ExceptionState&);
-
     // keep track of what types of event listeners are registered, so we don't
     // dispatch events unnecessarily
     enum ListenerType {
@@ -606,9 +602,6 @@ private:
 
     void setHoverNode(PassRefPtr<Node>);
     Node* hoverNode() const { return m_hoverNode.get(); }
-
-    typedef HashSet<OwnPtr<EventFactoryBase> > EventFactorySet;
-    static EventFactorySet& eventFactories();
 
     DocumentLifecycle m_lifecycle;
 

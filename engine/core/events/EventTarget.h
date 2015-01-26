@@ -32,10 +32,15 @@
 #ifndef SKY_ENGINE_CORE_EVENTS_EVENTTARGET_H_
 #define SKY_ENGINE_CORE_EVENTS_EVENTTARGET_H_
 
+#include "gen/sky/core/EventInterfaces.h"
+#include "gen/sky/core/EventNames.h"
+#include "gen/sky/core/EventTargetInterfaces.h"
+#include "gen/sky/core/EventTargetNames.h"
+#include "gen/sky/core/EventTypeNames.h"
 #include "sky/engine/bindings/core/v8/ScriptWrappable.h"
 #include "sky/engine/core/events/EventListenerMap.h"
-#include "sky/engine/core/events/ThreadLocalEventNames.h"
 #include "sky/engine/platform/heap/Handle.h"
+#include "sky/engine/wtf/text/AtomicString.h"
 
 namespace blink {
 

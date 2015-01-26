@@ -40,7 +40,6 @@
 #include "gen/sky/core/MediaTypeNames.h"
 #include "gen/sky/platform/FontFamilyNames.h"
 #include "sky/engine/core/dom/Document.h"
-#include "sky/engine/core/events/EventFactory.h"
 #include "sky/engine/core/html/parser/HTMLParserThread.h"
 #include "sky/engine/platform/EventTracer.h"
 #include "sky/engine/platform/Partitions.h"
@@ -48,16 +47,6 @@
 #include "sky/engine/wtf/text/StringStatics.h"
 
 namespace blink {
-
-void CoreInitializer::registerEventFactory()
-{
-    static bool isRegistered = false;
-    if (isRegistered)
-        return;
-    isRegistered = true;
-
-    Document::registerEventFactory(EventFactory::create());
-}
 
 void CoreInitializer::init()
 {
@@ -81,8 +70,6 @@ void CoreInitializer::init()
     QualifiedName::init();
     Partitions::init();
     EventTracer::initialize();
-
-    registerEventFactory();
 
     // Ensure that the main thread's thread-local data is initialized before
     // starting any worker threads.

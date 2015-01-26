@@ -79,7 +79,6 @@
 #include "sky/engine/core/editing/FrameSelection.h"
 #include "sky/engine/core/editing/SpellChecker.h"
 #include "sky/engine/core/events/Event.h"
-#include "sky/engine/core/events/EventFactory.h"
 #include "sky/engine/core/events/EventListener.h"
 #include "sky/engine/core/events/HashChangeEvent.h"
 #include "sky/engine/core/events/PageTransitionEvent.h"
@@ -1842,30 +1841,6 @@ void Document::enqueueResizeEvent()
 void Document::enqueueMediaQueryChangeListeners(Vector<RefPtr<MediaQueryListListener> >& listeners)
 {
     ensureScriptedAnimationController().enqueueMediaQueryChangeListeners(listeners);
-}
-
-Document::EventFactorySet& Document::eventFactories()
-{
-    DEFINE_STATIC_LOCAL(EventFactorySet, s_eventFactory, ());
-    return s_eventFactory;
-}
-
-void Document::registerEventFactory(PassOwnPtr<EventFactoryBase> eventFactory)
-{
-    ASSERT(!eventFactories().contains(eventFactory.get()));
-    eventFactories().add(eventFactory);
-}
-
-PassRefPtr<Event> Document::createEvent(const String& eventType, ExceptionState& exceptionState)
-{
-    RefPtr<Event> event = nullptr;
-    for (EventFactorySet::const_iterator it = eventFactories().begin(); it != eventFactories().end(); ++it) {
-        event = (*it)->create(eventType);
-        if (event)
-            return event.release();
-    }
-    exceptionState.throwDOMException(NotSupportedError, "The provided event type ('" + eventType + "') is invalid.");
-    return nullptr;
 }
 
 void Document::addListenerTypeIfNeeded(const AtomicString& eventType)

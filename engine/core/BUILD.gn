@@ -327,7 +327,6 @@ process_in_files("make_core_generated_event_factory") {
   ]
   other_inputs = make_event_factory_files
   outputs = [
-    "$sky_core_output_dir/Event.cpp",
     "$sky_core_output_dir/EventHeaders.h",
     "$sky_core_output_dir/EventInterfaces.h",
   ]
