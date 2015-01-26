@@ -104,10 +104,6 @@ public:
 
     virtual bool isChromeClientImpl() const { return false; }
 
-    // FIXME: Remove this method once we have input routing in the browser
-    // process. See http://crbug.com/339659.
-    virtual void forwardInputEvent(blink::Frame*, blink::Event*) { }
-
     // Input mehtod editor related functions.
     virtual void willSetInputMethodState() { }
     virtual void didUpdateTextOfFocusedElementByNonUserInput() { }

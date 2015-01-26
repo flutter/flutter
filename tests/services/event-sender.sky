@@ -10,10 +10,10 @@
 describe('Sky event sender', function() {
   it('should be able to send events', function(done) {
     var sky = document.querySelector('sky')
-    sky.focus();
     sky.addEventListener('keypress', function(event) {
       assert.equal(event.type, 'keypress');
-      assert.equal(event.keyCode, 0x41);
+      assert.equal(event.key, 0);
+      assert.equal(event.charCode, 0x41);
       done();
     });
 
@@ -22,7 +22,7 @@ describe('Sky event sender', function() {
     testHarness.dispatchInputEvent(new events.Event({
       action: constants.EventType.KEY_PRESSED,
       key_data: new events.KeyData({
-        native_key_code: 0x41,
+        windows_key_code: 0x41,
         text: 0x41,
         unmodified_text: 0x41,
         is_char: true,

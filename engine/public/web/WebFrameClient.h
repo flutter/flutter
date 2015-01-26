@@ -238,10 +238,6 @@ public:
     // Extensions3D.h in WebCore/platform/graphics).
     virtual void didLoseWebGLContext(WebLocalFrame*, int) { }
 
-    // FIXME: Remove this method once we have input routing in the browser
-    // process. See http://crbug.com/339659.
-    virtual void forwardInputEvent(const WebInputEvent*) { }
-
 protected:
     virtual ~WebFrameClient() { }
 };

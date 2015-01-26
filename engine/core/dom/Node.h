@@ -60,7 +60,6 @@ class NSResolver;
 class NodeEventContext;
 class NodeList;
 class NodeRareData;
-class PlatformKeyboardEvent;
 class QualifiedName;
 class RegisteredEventListener;
 class RenderBox;
@@ -463,9 +462,6 @@ public:
     virtual void handleLocalEvents(Event*);
 
     bool dispatchDOMActivateEvent(int detail, PassRefPtr<Event> underlyingEvent);
-
-    bool dispatchKeyEvent(const PlatformKeyboardEvent&);
-
     void dispatchInputEvent();
 
     // Perform the default action for an event.

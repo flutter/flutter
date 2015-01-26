@@ -32,12 +32,6 @@ class PlatformEvent {
 public:
     enum Type {
         NoType = 0,
-
-        // PlatformKeyboardEvent
-        KeyDown,
-        KeyUp,
-        RawKeyDown,
-        Char,
     };
 
     enum Modifiers {

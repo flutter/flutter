@@ -27,9 +27,9 @@
 #include "sky/engine/config.h"
 #include "sky/engine/core/editing/EditingBehavior.h"
 
+#include "gen/sky/core/EventTypeNames.h"
 #include "sky/engine/core/events/KeyboardEvent.h"
 #include "sky/engine/platform/KeyboardCodes.h"
-#include "sky/engine/platform/PlatformKeyboardEvent.h"
 
 namespace blink {
 
@@ -120,10 +120,6 @@ static const KeyPressEntry keyPressEntries[] = {
 
 const char* EditingBehavior::interpretKeyEvent(const KeyboardEvent& event) const
 {
-    const PlatformKeyboardEvent* keyEvent = event.keyEvent();
-    if (!keyEvent)
-        return "";
-
     static HashMap<int, const char*>* keyDownCommandsMap = 0;
     static HashMap<int, const char*>* keyPressCommandsMap = 0;
 
@@ -141,17 +137,17 @@ const char* EditingBehavior::interpretKeyEvent(const KeyboardEvent& event) const
     }
 
     unsigned modifiers = 0;
-    if (keyEvent->shiftKey())
+    if (event.shiftKey())
         modifiers |= ShiftKey;
-    if (keyEvent->altKey())
+    if (event.altKey())
         modifiers |= AltKey;
-    if (keyEvent->ctrlKey())
+    if (event.ctrlKey())
         modifiers |= CtrlKey;
-    if (keyEvent->metaKey())
+    if (event.metaKey())
         modifiers |= MetaKey;
 
-    if (keyEvent->type() == PlatformEvent::RawKeyDown) {
-        int mapKey = modifiers << 16 | event.keyCode();
+    if (event.type() == EventTypeNames::keydown) {
+        int mapKey = modifiers << 16 | event.key();
         return mapKey ? keyDownCommandsMap->get(mapKey) : 0;
     }
 
@@ -161,9 +157,6 @@ const char* EditingBehavior::interpretKeyEvent(const KeyboardEvent& event) const
 
 bool EditingBehavior::shouldInsertCharacter(const KeyboardEvent& event) const
 {
-    if (event.keyEvent()->text().length() != 1)
-        return true;
-
     // On Gtk/Linux, it emits key events with ASCII text and ctrl on for ctrl-<x>.
     // In Webkit, EditorClient::handleKeyboardEvent in
     // WebKit/gtk/WebCoreSupport/EditorClientGtk.cpp drop such events.
@@ -180,7 +173,7 @@ bool EditingBehavior::shouldInsertCharacter(const KeyboardEvent& event) const
     // which may be configured to do it so by user.
     // See also http://en.wikipedia.org/wiki/Keyboard_Layout
     // FIXME(ukai): investigate more detail for various keyboard layout.
-    UChar ch = event.keyEvent()->text()[0U];
+    UChar ch = event.charCode();
 
     // Don't insert null or control characters as they can result in
     // unexpected behaviour
@@ -190,10 +183,10 @@ bool EditingBehavior::shouldInsertCharacter(const KeyboardEvent& event) const
     // Don't insert ASCII character if ctrl w/o alt or meta is on.
     // On Mac, we should ignore events when meta is on (Command-<x>).
     if (ch < 0x80) {
-        if (event.keyEvent()->ctrlKey() && !event.keyEvent()->altKey())
+        if (event.ctrlKey() && !event.altKey())
             return false;
 #if OS(MACOSX)
-        if (event.keyEvent()->metaKey())
+        if (event.metaKey())
             return false;
 #endif
     }

@@ -59,7 +59,6 @@ class KeyboardEvent;
 class LocalFrame;
 class Node;
 class OptionalCursor;
-class PlatformKeyboardEvent;
 class RenderLayer;
 class RenderLayerScrollableArea;
 class RenderObject;
@@ -93,7 +92,6 @@ public:
     // If the view can't be scrolled either, recursively bubble to the parent frame.
     bool bubblingScroll(ScrollDirection, ScrollGranularity, Node* startingNode = 0);
 
-    bool keyEvent(const PlatformKeyboardEvent&);
     void defaultKeyboardEventHandler(KeyboardEvent*);
 
     bool handleTextInputEvent(const String& text, Event* underlyingEvent = 0, TextEventInputType = TextEventInputKeyboard);

@@ -57,7 +57,7 @@ module.exports = class extends SkyElement {
   }
   handleKeyDown(event) {
     // TODO(abarth): You can still get newlines if the user pastes them.
-    if (event.keyCode == 0xD)
+    if (event.key == 0xD)
       event.preventDefault();
   }
   handleFocus(event) {

@@ -61,7 +61,6 @@
 #include "sky/engine/public/web/WebTextDirection.h"
 #include "sky/engine/public/web/WebTouchAction.h"
 #include "sky/engine/public/web/WebViewClient.h"
-#include "sky/engine/web/WebInputEventConversion.h"
 #include "sky/engine/web/WebLocalFrameImpl.h"
 #include "sky/engine/web/WebSettingsImpl.h"
 #include "sky/engine/web/WebViewImpl.h"
@@ -286,22 +285,6 @@ void ChromeClientImpl::showImeIfNeeded()
 {
     if (m_webView->client())
         m_webView->client()->showImeIfNeeded();
-}
-
-// FIXME: Remove this code once we have input routing in the browser
-// process. See http://crbug.com/339659.
-void ChromeClientImpl::forwardInputEvent(
-    Frame* frame, Event* event)
-{
-    WebLocalFrameImpl* webFrame = WebLocalFrameImpl::fromFrame(toLocalFrame(frame));
-
-    // This is only called when we have out-of-process iframes, which
-    // need to forward input events across processes.
-    // FIXME: Add a check for out-of-process iframes enabled.
-    if (event->isKeyboardEvent()) {
-        WebKeyboardEventBuilder webEvent(*static_cast<KeyboardEvent*>(event));
-        webFrame->client()->forwardInputEvent(&webEvent);
-    }
 }
 
 } // namespace blink

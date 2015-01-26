@@ -59,8 +59,6 @@ component("web") {
     "WebFontImpl.h",
     "WebFrame.cpp",
     "WebHitTestResult.cpp",
-    "WebInputEventConversion.cpp",
-    "WebInputEventConversion.h",
     "Sky.cpp",
     "WebLeakDetector.cpp",
     "WebLocalFrameImpl.cpp",

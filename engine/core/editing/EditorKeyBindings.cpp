@@ -27,24 +27,19 @@
 #include "sky/engine/config.h"
 #include "sky/engine/core/editing/Editor.h"
 
+#include "gen/sky/core/EventTypeNames.h"
 #include "sky/engine/core/events/KeyboardEvent.h"
 #include "sky/engine/core/frame/LocalFrame.h"
 #include "sky/engine/core/page/EditorClient.h"
-#include "sky/engine/platform/PlatformKeyboardEvent.h"
 
 namespace blink {
 
-bool Editor::handleEditingKeyboardEvent(KeyboardEvent* evt)
+bool Editor::handleEditingKeyboardEvent(KeyboardEvent* event)
 {
-    const PlatformKeyboardEvent* keyEvent = evt->keyEvent();
-    // do not treat this as text input if it's a system key event
-    if (!keyEvent || keyEvent->isSystemKey())
-        return false;
-
-    String commandName = behavior().interpretKeyEvent(*evt);
+    String commandName = behavior().interpretKeyEvent(*event);
     Command command = this->command(commandName);
 
-    if (keyEvent->type() == PlatformEvent::RawKeyDown) {
+    if (event->type() == EventTypeNames::keydown) {
         // WebKit doesn't have enough information about mode to decide how
         // commands that just insert text if executed via Editor should be treated,
         // so we leave it upon WebCore to either handle them immediately
@@ -52,16 +47,17 @@ bool Editor::handleEditingKeyboardEvent(KeyboardEvent* evt)
         // (e.g. Tab that inserts a Tab character, or Enter).
         if (command.isTextInsertion() || commandName.isEmpty())
             return false;
-        return command.execute(evt);
+        return command.execute(event);
     }
 
-    if (command.execute(evt))
+    if (command.execute(event))
         return true;
 
-    if (!behavior().shouldInsertCharacter(*evt) || !canEdit())
+    if (!behavior().shouldInsertCharacter(*event) || !canEdit())
         return false;
 
-    return insertText(evt->keyEvent()->text(), evt);
+    UChar charCode = event->charCode();
+    return insertText(String(&charCode, 1), event);
 }
 
 void Editor::handleKeyboardEvent(KeyboardEvent* evt)

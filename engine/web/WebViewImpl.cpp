@@ -64,7 +64,6 @@
 #include "sky/engine/platform/KeyboardCodes.h"
 #include "sky/engine/platform/Logging.h"
 #include "sky/engine/platform/NotImplemented.h"
-#include "sky/engine/platform/PlatformKeyboardEvent.h"
 #include "sky/engine/platform/TraceEvent.h"
 #include "sky/engine/platform/fonts/FontCache.h"
 #include "sky/engine/platform/graphics/Color.h"
@@ -86,7 +85,6 @@
 #include "sky/engine/public/web/WebTextInputInfo.h"
 #include "sky/engine/public/web/WebViewClient.h"
 #include "sky/engine/web/CompositionUnderlineVectorBuilder.h"
-#include "sky/engine/web/WebInputEventConversion.h"
 #include "sky/engine/web/WebLocalFrameImpl.h"
 #include "sky/engine/web/WebSettingsImpl.h"
 #include "sky/engine/wtf/CurrentTime.h"
@@ -189,168 +187,6 @@ void WebViewImpl::acceptLanguagesChanged()
         return;
 
     page()->acceptLanguagesChanged();
-}
-
-bool WebViewImpl::handleKeyEvent(const WebKeyboardEvent& event)
-{
-    ASSERT((event.type == WebInputEvent::RawKeyDown)
-        || (event.type == WebInputEvent::KeyDown)
-        || (event.type == WebInputEvent::KeyUp));
-
-    // Please refer to the comments explaining the m_suppressNextKeypressEvent
-    // member.
-    // The m_suppressNextKeypressEvent is set if the KeyDown is handled by
-    // Webkit. A keyDown event is typically associated with a keyPress(char)
-    // event and a keyUp event. We reset this flag here as this is a new keyDown
-    // event.
-    m_suppressNextKeypressEvent = false;
-
-    RefPtr<LocalFrame> focusedFrame = focusedCoreFrame();
-    if (!focusedFrame)
-        return false;
-
-    RefPtr<LocalFrame> frame = focusedFrame.get();
-
-    PlatformKeyboardEventBuilder evt(event);
-
-    if (frame->eventHandler().keyEvent(evt)) {
-        if (WebInputEvent::RawKeyDown == event.type) {
-            // Suppress the next keypress event unless the focused node is a plug-in node.
-            // (Flash needs these keypress events to handle non-US keyboards.)
-            m_suppressNextKeypressEvent = true;
-        }
-        return true;
-    }
-
-    return keyEventDefault(event);
-}
-
-bool WebViewImpl::handleCharEvent(const WebKeyboardEvent& event)
-{
-    ASSERT(event.type == WebInputEvent::Char);
-
-    // Please refer to the comments explaining the m_suppressNextKeypressEvent
-    // member.  The m_suppressNextKeypressEvent is set if the KeyDown is
-    // handled by Webkit. A keyDown event is typically associated with a
-    // keyPress(char) event and a keyUp event. We reset this flag here as it
-    // only applies to the current keyPress event.
-    bool suppress = m_suppressNextKeypressEvent;
-    m_suppressNextKeypressEvent = false;
-
-    LocalFrame* frame = focusedCoreFrame();
-    if (!frame)
-        return suppress;
-
-    EventHandler& handler = frame->eventHandler();
-
-    PlatformKeyboardEventBuilder evt(event);
-    if (!evt.isCharacterKey())
-        return true;
-
-    // Safari 3.1 does not pass off windows system key messages (WM_SYSCHAR) to
-    // the eventHandler::keyEvent. We mimic this behavior on all platforms since
-    // for now we are converting other platform's key events to windows key
-    // events.
-    if (evt.isSystemKey())
-        return false;
-
-    if (!suppress && !handler.keyEvent(evt))
-        return keyEventDefault(event);
-
-    return true;
-}
-
-bool WebViewImpl::keyEventDefault(const WebKeyboardEvent& event)
-{
-    LocalFrame* frame = focusedCoreFrame();
-    if (!frame)
-        return false;
-
-    switch (event.type) {
-    case WebInputEvent::Char:
-        if (event.windowsKeyCode == VKEY_SPACE) {
-            int keyCode = ((event.modifiers & WebInputEvent::ShiftKey) ? VKEY_PRIOR : VKEY_NEXT);
-            return scrollViewWithKeyboard(keyCode, event.modifiers);
-        }
-        break;
-    case WebInputEvent::RawKeyDown:
-        if (event.modifiers == WebInputEvent::ControlKey) {
-            switch (event.windowsKeyCode) {
-            // Match FF behavior in the sense that Ctrl+home/end are the only Ctrl
-            // key combinations which affect scrolling. Safari is buggy in the
-            // sense that it scrolls the page for all Ctrl+scrolling key
-            // combinations. For e.g. Ctrl+pgup/pgdn/up/down, etc.
-            case VKEY_HOME:
-            case VKEY_END:
-                break;
-            default:
-                return false;
-            }
-        }
-        if (!event.isSystemKey && !(event.modifiers & WebInputEvent::ShiftKey))
-            return scrollViewWithKeyboard(event.windowsKeyCode, event.modifiers);
-        break;
-    default:
-        break;
-    }
-    return false;
-}
-
-bool WebViewImpl::scrollViewWithKeyboard(int keyCode, int modifiers)
-{
-    ScrollDirection scrollDirection;
-    ScrollGranularity scrollGranularity;
-    if (!mapKeyCodeForScroll(keyCode, &scrollDirection, &scrollGranularity))
-        return false;
-
-    if (LocalFrame* frame = focusedCoreFrame())
-        return frame->eventHandler().bubblingScroll(scrollDirection, scrollGranularity);
-    return false;
-}
-
-bool WebViewImpl::mapKeyCodeForScroll(
-    int keyCode,
-    ScrollDirection* scrollDirection,
-    ScrollGranularity* scrollGranularity)
-{
-    switch (keyCode) {
-    case VKEY_LEFT:
-        *scrollDirection = ScrollLeft;
-        *scrollGranularity = ScrollByLine;
-        break;
-    case VKEY_RIGHT:
-        *scrollDirection = ScrollRight;
-        *scrollGranularity = ScrollByLine;
-        break;
-    case VKEY_UP:
-        *scrollDirection = ScrollUp;
-        *scrollGranularity = ScrollByLine;
-        break;
-    case VKEY_DOWN:
-        *scrollDirection = ScrollDown;
-        *scrollGranularity = ScrollByLine;
-        break;
-    case VKEY_HOME:
-        *scrollDirection = ScrollUp;
-        *scrollGranularity = ScrollByDocument;
-        break;
-    case VKEY_END:
-        *scrollDirection = ScrollDown;
-        *scrollGranularity = ScrollByDocument;
-        break;
-    case VKEY_PRIOR:  // page up
-        *scrollDirection = ScrollUp;
-        *scrollGranularity = ScrollByPage;
-        break;
-    case VKEY_NEXT:  // page down
-        *scrollDirection = ScrollDown;
-        *scrollGranularity = ScrollByPage;
-        break;
-    default:
-        return false;
-    }
-
-    return true;
 }
 
 LocalFrame* WebViewImpl::focusedCoreFrame() const
@@ -501,16 +337,12 @@ bool WebViewImpl::handleInputEvent(const WebInputEvent& inputEvent)
         return m_page->mainFrame()->newEventHandler().handleGestureEvent(event);
     }
 
-    switch (inputEvent.type) {
-    case WebInputEvent::RawKeyDown:
-    case WebInputEvent::KeyDown:
-    case WebInputEvent::KeyUp:
-        return handleKeyEvent(static_cast<const WebKeyboardEvent&>(inputEvent));
-    case WebInputEvent::Char:
-        return handleCharEvent(static_cast<const WebKeyboardEvent&>(inputEvent));
-    default:
-        return false;
+    if (WebInputEvent::isKeyboardEventType(inputEvent.type)) {
+        const WebKeyboardEvent& event = static_cast<const WebKeyboardEvent&>(inputEvent);
+        return m_page->mainFrame()->newEventHandler().handleKeyboardEvent(event);
     }
+
+    return false;
 }
 
 void WebViewImpl::setFocus(bool enable)

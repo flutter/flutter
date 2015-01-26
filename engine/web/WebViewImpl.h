@@ -172,12 +172,6 @@ public:
 
     virtual void setVisibilityState(WebPageVisibilityState, bool) override;
 
-    // Returns true if the event leads to scrolling.
-    static bool mapKeyCodeForScroll(
-        int keyCode,
-        ScrollDirection*,
-        ScrollGranularity*);
-
     // Exposed for the purpose of overriding device metrics.
     void sendResizeEventAndRepaint();
 
@@ -214,13 +208,7 @@ private:
 
     WebString inputModeOfFocusedElement();
 
-    // Returns true if the event was actually processed.
-    bool keyEventDefault(const WebKeyboardEvent&);
-
     bool confirmComposition(const WebString& text, ConfirmCompositionBehavior);
-
-    // Returns true if the view was scrolled.
-    bool scrollViewWithKeyboard(int keyCode, int modifiers);
 
     // Converts |pos| from window coordinates to contents coordinates and gets
     // the HitTestResult for it.
@@ -228,10 +216,6 @@ private:
 
     void doComposite();
     void reallocateRenderer();
-
-    bool handleCharEvent(const WebKeyboardEvent&);
-    bool handleGestureEvent(const WebGestureEvent&);
-    bool handleKeyEvent(const WebKeyboardEvent&);
 
     InputMethodContext* inputMethodContext();
 

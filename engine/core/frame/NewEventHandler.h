@@ -15,6 +15,7 @@ namespace blink {
 
 class LocalFrame;
 class WebGestureEvent;
+class WebKeyboardEvent;
 class WebPointerEvent;
 
 class NewEventHandler {
@@ -25,6 +26,7 @@ public:
 
     bool handlePointerEvent(const WebPointerEvent&);
     bool handleGestureEvent(const WebGestureEvent&);
+    bool handleKeyboardEvent(const WebKeyboardEvent&);
 
 private:
     bool handlePointerDownEvent(const WebPointerEvent&);
@@ -35,7 +37,9 @@ private:
     bool dispatchGestureEvent(Node& target, const WebGestureEvent& event);
     bool dispatchPointerEvent(Node& target, const WebPointerEvent&);
     bool dispatchClickEvent(Node& capturingTarget, const WebPointerEvent&);
+    bool dispatchKeyboardEvent(Node& target, const WebKeyboardEvent& event);
 
+    Node* targetForKeyboardEvent() const;
     Node* targetForHitTestResult(const HitTestResult& hitTestResult);
     HitTestResult performHitTest(const LayoutPoint&);
     void updateSelectionForPointerDown(const HitTestResult&, const WebPointerEvent&);
@@ -44,6 +48,7 @@ private:
 
     LocalFrame& m_frame;
     PointerTargetMap m_targetForPointer;
+    bool m_suppressNextCharEvent;
 };
 
 }

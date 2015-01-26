@@ -11,12 +11,14 @@
 #include "sky/engine/core/editing/FrameSelection.h"
 #include "sky/engine/core/editing/htmlediting.h"
 #include "sky/engine/core/events/GestureEvent.h"
+#include "sky/engine/core/events/KeyboardEvent.h"
 #include "sky/engine/core/events/PointerEvent.h"
 #include "sky/engine/core/frame/LocalFrame.h"
 #include "sky/engine/core/frame/FrameView.h"
 #include "sky/engine/core/page/EventWithHitTestResults.h"
 #include "sky/engine/core/rendering/RenderObject.h"
 #include "sky/engine/core/rendering/RenderView.h"
+#include "sky/engine/platform/KeyboardCodes.h"
 #include "sky/engine/platform/geometry/FloatPoint.h"
 #include "sky/engine/public/platform/WebInputEvent.h"
 
@@ -39,6 +41,7 @@ static LayoutPoint positionForEvent(const EventType& event)
 
 NewEventHandler::NewEventHandler(LocalFrame& frame)
     : m_frame(frame)
+    , m_suppressNextCharEvent(false)
 {
 }
 
@@ -46,11 +49,19 @@ NewEventHandler::~NewEventHandler()
 {
 }
 
+Node* NewEventHandler::targetForKeyboardEvent() const
+{
+    Document* document = m_frame.document();
+    if (Node* focusedElement = document->focusedElement())
+        return focusedElement;
+    return document->documentElement();
+}
+
 Node* NewEventHandler::targetForHitTestResult(const HitTestResult& hitTestResult)
 {
     Node* node = hitTestResult.innerNode();
     if (!node)
-        return m_frame.document();
+        return m_frame.document()->documentElement();
     if (node->isTextNode())
         return NodeRenderingTraversal::parent(node);
     return node;
@@ -77,6 +88,12 @@ bool NewEventHandler::dispatchGestureEvent(Node& target, const WebGestureEvent& 
 {
     RefPtr<GestureEvent> gestureEvent = GestureEvent::create(event);
     return target.dispatchEvent(gestureEvent.release());
+}
+
+bool NewEventHandler::dispatchKeyboardEvent(Node& target, const WebKeyboardEvent& event)
+{
+    RefPtr<KeyboardEvent> keyboardEvent = KeyboardEvent::create(event);
+    return target.dispatchEvent(keyboardEvent.release());
 }
 
 bool NewEventHandler::dispatchClickEvent(Node& capturingTarget, const WebPointerEvent& event)
@@ -121,7 +138,34 @@ bool NewEventHandler::handleGestureEvent(const WebGestureEvent& event)
 {
     HitTestResult hitTestResult = performHitTest(positionForEvent(event));
     RefPtr<Node> target = targetForHitTestResult(hitTestResult);
-    return !dispatchGestureEvent(*target, event);
+    return target && !dispatchGestureEvent(*target, event);
+}
+
+bool NewEventHandler::handleKeyboardEvent(const WebKeyboardEvent& event)
+{
+    bool shouldSuppressCharEvent = m_suppressNextCharEvent;
+    m_suppressNextCharEvent = false;
+
+    if (event.type == WebInputEvent::Char) {
+        if (shouldSuppressCharEvent)
+            return true;
+        // Do we really need to suppress keypress events for these keys anymore?
+        if (event.key == VKEY_BACK
+            || event.key == VKEY_ESCAPE)
+            return true;
+    }
+
+    RefPtr<Node> target = targetForKeyboardEvent();
+    bool handled = target && !dispatchKeyboardEvent(*target, event);
+
+    // If the keydown event was handled, we don't want to "generate" a keypress
+    // event for that keystroke. However, we'll receive a Char event from the
+    // embedder regardless, so we set m_suppressNextCharEvent, will will prevent
+    // us from dispatching the keypress event when we receive that Char event.
+    if (handled && event.type == WebInputEvent::KeyDown)
+        m_suppressNextCharEvent = true;
+
+    return handled;
 }
 
 bool NewEventHandler::handlePointerDownEvent(const WebPointerEvent& event)
@@ -129,6 +173,8 @@ bool NewEventHandler::handlePointerDownEvent(const WebPointerEvent& event)
     ASSERT(m_targetForPointer.find(event.pointer) == m_targetForPointer.end());
     HitTestResult hitTestResult = performHitTest(positionForEvent(event));
     RefPtr<Node> target = targetForHitTestResult(hitTestResult);
+    if (!target)
+        return false;
     m_targetForPointer[event.pointer] = target;
     bool eventSwallowed = !dispatchPointerEvent(*target, event);
     // TODO(abarth): Set the target for the pointer to something determined when

@@ -87,7 +87,7 @@ GestureEvent::GestureEvent(const WebGestureEvent& event)
 }
 
 GestureEvent::GestureEvent(const AtomicString& type, const GestureEventInit& initializer)
-    : Event(type, true, true)
+    : Event(type, initializer)
     , m_x(initializer.x)
     , m_y(initializer.y)
     , m_dx(initializer.dx)

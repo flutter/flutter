@@ -87,10 +87,6 @@ public:
     // ChromeClientImpl:
     void setNewWindowNavigationPolicy(WebNavigationPolicy);
 
-    // FIXME: Remove this method once we have input routing in the browser
-    // process. See http://crbug.com/339659.
-    virtual void forwardInputEvent(Frame*, Event*) override;
-
     virtual void willSetInputMethodState() override;
     virtual void didUpdateTextOfFocusedElementByNonUserInput() override;
     virtual void showImeIfNeeded() override;

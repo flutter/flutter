@@ -60,9 +60,8 @@
 #include "sky/engine/core/rendering/RenderLayer.h"
 #include "sky/engine/core/rendering/RenderView.h"
 #include "sky/engine/core/rendering/style/RenderStyle.h"
-#include "sky/engine/platform/PlatformKeyboardEvent.h"
 #include "sky/engine/platform/TraceEvent.h"
-#include "sky/engine/platform/WindowsKeyboardCodes.h"
+#include "sky/engine/platform/KeyboardCodes.h"
 #include "sky/engine/platform/geometry/FloatPoint.h"
 #include "sky/engine/platform/graphics/Image.h"
 #include "sky/engine/platform/heap/Handle.h"
@@ -500,63 +499,6 @@ void EventHandler::notifyElementActivated()
     m_lastDeferredTapElement = nullptr;
 }
 
-bool EventHandler::keyEvent(const PlatformKeyboardEvent& initialKeyEvent)
-{
-    RefPtr<FrameView> protector(m_frame->view());
-
-    if (initialKeyEvent.windowsVirtualKeyCode() == VK_CAPITAL)
-        capsLockStateMayHaveChanged();
-
-    // Check for cases where we are too early for events -- possible unmatched key up
-    // from pressing return in the location bar.
-    RefPtr<Node> node = eventTargetNodeForDocument(m_frame->document());
-    if (!node)
-        return false;
-
-    // FIXME: it would be fair to let an input method handle KeyUp events before DOM dispatch.
-    if (initialKeyEvent.type() == PlatformEvent::KeyUp || initialKeyEvent.type() == PlatformEvent::Char)
-        return !node->dispatchKeyEvent(initialKeyEvent);
-
-    PlatformKeyboardEvent keyDownEvent = initialKeyEvent;
-    if (keyDownEvent.type() != PlatformEvent::RawKeyDown)
-        keyDownEvent.disambiguateKeyDownEvent(PlatformEvent::RawKeyDown);
-    RefPtr<KeyboardEvent> keydown = KeyboardEvent::create(keyDownEvent, m_frame->document()->domWindow());
-
-    keydown->setTarget(node);
-
-    if (initialKeyEvent.type() == PlatformEvent::RawKeyDown) {
-        node->dispatchEvent(keydown, IGNORE_EXCEPTION);
-        // If frame changed as a result of keydown dispatch, then return true to avoid sending a subsequent keypress message to the new frame.
-        bool changedFocusedFrame = m_frame->page() && m_frame != m_frame->page()->focusController().focusedOrMainFrame();
-        return keydown->defaultHandled() || keydown->defaultPrevented() || changedFocusedFrame;
-    }
-
-    node->dispatchEvent(keydown, IGNORE_EXCEPTION);
-    // If frame changed as a result of keydown dispatch, then return early to avoid sending a subsequent keypress message to the new frame.
-    bool changedFocusedFrame = m_frame->page() && m_frame != m_frame->page()->focusController().focusedOrMainFrame();
-    bool keydownResult = keydown->defaultHandled() || keydown->defaultPrevented() || changedFocusedFrame;
-    if (keydownResult)
-        return keydownResult;
-
-    // Focus may have changed during keydown handling, so refetch node.
-    // But if we are dispatching a fake backward compatibility keypress, then we pretend that the keypress happened on the original node.
-    node = eventTargetNodeForDocument(m_frame->document());
-    if (!node)
-        return false;
-
-    PlatformKeyboardEvent keyPressEvent = initialKeyEvent;
-    keyPressEvent.disambiguateKeyDownEvent(PlatformEvent::Char);
-    if (keyPressEvent.text().isEmpty())
-        return keydownResult;
-    RefPtr<KeyboardEvent> keypress = KeyboardEvent::create(keyPressEvent, m_frame->document()->domWindow());
-    keypress->setTarget(node);
-    if (keydownResult)
-        keypress->setDefaultPrevented(true);
-    node->dispatchEvent(keypress, IGNORE_EXCEPTION);
-
-    return keydownResult || keypress->defaultPrevented() || keypress->defaultHandled();
-}
-
 void EventHandler::defaultKeyboardEventHandler(KeyboardEvent* event)
 {
     if (event->type() == EventTypeNames::keydown) {
@@ -568,7 +510,7 @@ void EventHandler::defaultKeyboardEventHandler(KeyboardEvent* event)
         m_frame->editor().handleKeyboardEvent(event);
         if (event->defaultHandled())
             return;
-        if (event->keyIdentifier() == "U+0009")
+        if (event->key() == VKEY_TAB)
             defaultTabEventHandler(event);
     }
     if (event->type() == EventTypeNames::keypress) {

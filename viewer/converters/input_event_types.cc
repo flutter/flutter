@@ -182,7 +182,7 @@ scoped_ptr<blink::WebInputEvent> BuildWebKeyboardEvent(
   switch (event->action) {
     case mojo::EVENT_TYPE_KEY_PRESSED:
       web_event->type = event->key_data->is_char ? blink::WebInputEvent::Char :
-          blink::WebInputEvent::RawKeyDown;
+          blink::WebInputEvent::KeyDown;
       break;
     case mojo::EVENT_TYPE_KEY_RELEASED:
       web_event->type = blink::WebInputEvent::KeyUp;
@@ -191,15 +191,10 @@ scoped_ptr<blink::WebInputEvent> BuildWebKeyboardEvent(
       NOTREACHED();
   }
 
-  if (web_event->modifiers & blink::WebInputEvent::AltKey)
-    web_event->isSystemKey = true;
+  web_event->key = event->key_data->windows_key_code;
+  web_event->charCode = event->key_data->text;
+  web_event->unmodifiedCharCode = event->key_data->unmodified_text;
 
-  web_event->windowsKeyCode = event->key_data->windows_key_code;
-  web_event->nativeKeyCode = event->key_data->native_key_code;
-  web_event->text[0] = event->key_data->text;
-  web_event->unmodifiedText[0] = event->key_data->unmodified_text;
-
-  web_event->setKeyIdentifierFromWindowsKeyCode();
   return web_event.Pass();
 }
 
