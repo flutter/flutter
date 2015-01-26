@@ -3,7 +3,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 -->
-<import src="/sky/framework/sky-button/sky-button.sky" as="SkyButton" />
+<import src="/sky/framework/sky-button.sky" as="SkyButton" />
 
 <sky-element
     name="sky-checkbox"
