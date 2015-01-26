@@ -28,12 +28,19 @@ base::WeakPtr<SkyDebugger> SkyDebugger::GetWeakPtr() {
 void SkyDebugger::Initialize(mojo::ApplicationImpl* app) {
   window_manager_app_->Initialize(app);
   app->ConnectToApplication("mojo:sky_debugger_prompt");
+
+  // Format: --args-for="app_url default_url"
+  if (app->args().size() > 1)
+    default_url_ = app->args()[1];
 }
 
 bool SkyDebugger::ConfigureIncomingConnection(
     mojo::ApplicationConnection* connection) {
   window_manager_app_->ConfigureIncomingConnection(connection);
   connection->AddService(this);
+
+  if (!default_url_.empty())
+    NavigateToURL(default_url_); // Schedule a navigation in the new embedding.
   return true;
 }
 

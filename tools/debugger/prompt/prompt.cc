@@ -42,10 +42,11 @@ class Prompt : public mojo::ApplicationDelegate,
   // Overridden from mojo::ApplicationDelegate:
   virtual void Initialize(mojo::ApplicationImpl* app) override {
     app->ConnectToService("mojo:tracing", &tracing_);
-    // app_url, command_port, url_to_load
+    // Format: --args-for="app_url command_port"
     if (app->args().size() < 2) {
       LOG(ERROR) << "--args-for required to specify command_port";
-      exit(2);
+      mojo::ApplicationImpl::Terminate();
+      return;
     }
 
     base::StringToUint(app->args()[1], &command_port_);
@@ -54,10 +55,9 @@ class Prompt : public mojo::ApplicationDelegate,
         new net::TCPServerSocket(NULL, net::NetLog::Source()));
     int result = server_socket->ListenWithAddressAndPort("0.0.0.0", command_port_, 1);
     if (result != net::OK) {
-      // FIXME: Should we quit here?
       LOG(ERROR) << "Failed to bind to port " << command_port_
-                 << " skydb commands will not work, exiting.";
-      exit(2);
+                 << " skydb commands will not work.";
+      mojo::ApplicationImpl::Terminate();
       return;
     }
     web_server_.reset(new net::HttpServer(server_socket.Pass(), this));
