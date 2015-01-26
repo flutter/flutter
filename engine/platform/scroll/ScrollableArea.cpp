@@ -235,23 +235,6 @@ bool ScrollableArea::hasOverlayScrollbars() const
     return hScrollbar && hScrollbar->isOverlayScrollbar();
 }
 
-bool ScrollableArea::scheduleAnimation()
-{
-    WTF_LOG(ScriptedAnimationController, "ScrollableArea::scheduleAnimation: window = %d",
-        hostWindow() ? 1 : 0);
-    if (HostWindow* window = hostWindow()) {
-        window->scheduleAnimation();
-        return true;
-    }
-    return false;
-}
-
-void ScrollableArea::serviceScrollAnimations(double monotonicTime)
-{
-    if (ScrollAnimator* scrollAnimator = existingScrollAnimator())
-        scrollAnimator->serviceScrollAnimations();
-}
-
 IntPoint ScrollableArea::clampScrollPosition(const IntPoint& scrollPosition) const
 {
     return scrollPosition.shrunkTo(maximumScrollPosition()).expandedTo(minimumScrollPosition());

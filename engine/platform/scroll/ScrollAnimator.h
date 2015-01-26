@@ -67,7 +67,6 @@ public:
     FloatPoint currentPosition() const;
 
     virtual void cancelAnimations() { }
-    virtual void serviceScrollAnimations() { }
 
     virtual void contentsResized() const { }
 

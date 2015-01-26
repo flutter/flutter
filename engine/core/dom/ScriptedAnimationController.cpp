@@ -226,8 +226,8 @@ void ScriptedAnimationController::scheduleAnimationIfNeeded()
     if (!m_callbacks.size() && !m_eventQueue.size() && !m_mediaQueryListListeners.size())
         return;
 
-    if (FrameView* frameView = m_document->view())
-        frameView->scheduleAnimation();
+    // TODO(esprehn): This causes a full raster on every raf even if nothing changed.
+    m_document->scheduleVisualUpdate();
 }
 
 }

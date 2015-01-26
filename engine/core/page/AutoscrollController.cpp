@@ -172,12 +172,12 @@ void AutoscrollController::animate(double)
         break;
     }
     if (m_autoscrollType != NoAutoscroll)
-        m_page.chrome().scheduleAnimation();
+        startAutoscroll();
 }
 
 void AutoscrollController::startAutoscroll()
 {
-    m_page.chrome().scheduleAnimation();
+    m_page.animator().scheduleVisualUpdate();
 }
 
 } // namespace blink

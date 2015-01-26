@@ -46,8 +46,7 @@ void PendingAnimations::add(AnimationPlayer* player)
     m_pending.append(player);
 
     Document* document = player->timeline()->document();
-    if (document->view())
-        document->view()->scheduleAnimation();
+    document->scheduleVisualUpdate();
 
     bool visible = document->page() && document->page()->visibilityState() == PageVisibilityStateVisible;
     if (!visible && !m_timer.isActive()) {

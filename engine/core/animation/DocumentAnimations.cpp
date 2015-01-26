@@ -73,10 +73,8 @@ bool DocumentAnimations::needsOutdatedAnimationPlayerUpdate(const Document& docu
 void DocumentAnimations::startPendingAnimations(Document& document)
 {
     ASSERT(document.lifecycle().state() == DocumentLifecycle::StyleAndLayoutClean);
-    if (document.pendingAnimations().update()) {
-        ASSERT(document.view());
-        document.view()->scheduleAnimation();
-    }
+    if (document.pendingAnimations().update())
+        document.scheduleVisualUpdate();
 }
 
 } // namespace blink

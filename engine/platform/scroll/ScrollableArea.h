@@ -124,11 +124,6 @@ public:
 
     IntPoint clampScrollPosition(const IntPoint&) const;
 
-    // Let subclasses provide a way of asking for and servicing scroll
-    // animations.
-    bool scheduleAnimation();
-    void serviceScrollAnimations(double monotonicTime);
-
     // Returns true if the GraphicsLayer tree needs to be rebuilt.
     virtual bool updateAfterCompositingChange() = 0;
 

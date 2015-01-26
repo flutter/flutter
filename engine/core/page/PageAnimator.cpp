@@ -33,14 +33,6 @@ void PageAnimator::serviceScriptedAnimations(double monotonicAnimationStartTime)
 
     WTF_LOG(ScriptedAnimationController, "PageAnimator::serviceScriptedAnimations: #documents = %d",
         static_cast<int>(documents.size()));
-    for (size_t i = 0; i < documents.size(); ++i) {
-        if (documents[i]->frame()) {
-            if (const FrameView::ScrollableAreaSet* scrollableAreas = documents[i]->view()->scrollableAreas()) {
-                for (FrameView::ScrollableAreaSet::iterator it = scrollableAreas->begin(); it != scrollableAreas->end(); ++it)
-                    (*it)->serviceScrollAnimations(monotonicAnimationStartTime);
-            }
-        }
-    }
 
     for (size_t i = 0; i < documents.size(); ++i)
         DocumentAnimations::updateAnimationTimingForAnimationFrame(*documents[i], monotonicAnimationStartTime);

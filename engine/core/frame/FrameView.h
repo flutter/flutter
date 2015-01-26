@@ -176,7 +176,6 @@ public:
     IntRect windowToContents(const IntRect& windowRect) const { return windowRect; }
     IntRect contentsToWindow(const IntRect& contentsRect) const { return contentsRect; }
 
-    bool scheduleAnimation();
     IntRect visibleContentRect(IncludeScrollbarsInRect = ExcludeScrollbars) const { return IntRect(IntPoint(), expandedIntSize(frameRect().size())); }
     IntSize unscaledVisibleContentSize(IncludeScrollbarsInRect = ExcludeScrollbars) const { return frameRect().size(); }
     // FIXME(sky): Not clear what values these should return. This is just what they happen to be
