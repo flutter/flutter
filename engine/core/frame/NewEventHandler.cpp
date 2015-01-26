@@ -169,6 +169,17 @@ bool NewEventHandler::handleKeyboardEvent(const WebKeyboardEvent& event)
 
 bool NewEventHandler::handlePointerDownEvent(const WebPointerEvent& event)
 {
+    // In principle, we shouldn't get another pointer down for the same
+    // pointer ID, but for mice, we don't get a pointer cancel when you
+    // drag outside the window frame on Linux. For now, send the pointer
+    // cancel at this point.
+    if (event.kind == WebPointerEvent::Mouse
+        && m_targetForPointer.find(event.pointer) != m_targetForPointer.end()) {
+        WebPointerEvent fakeCancel = event;
+        fakeCancel.type = WebInputEvent::PointerCancel;
+        handlePointerCancelEvent(fakeCancel);
+    }
+
     ASSERT(m_targetForPointer.find(event.pointer) == m_targetForPointer.end());
     HitTestResult hitTestResult = performHitTest(positionForEvent(event));
     RefPtr<Node> target = targetForHitTestResult(hitTestResult);
@@ -184,10 +195,12 @@ bool NewEventHandler::handlePointerDownEvent(const WebPointerEvent& event)
 
 bool NewEventHandler::handlePointerUpEvent(const WebPointerEvent& event)
 {
-    RefPtr<Node> target = m_targetForPointer[event.pointer];
-    if (!target)
+    auto it = m_targetForPointer.find(event.pointer);
+    if (it == m_targetForPointer.end())
         return false;
-    m_targetForPointer.erase(event.pointer);
+    RefPtr<Node> target = it->second;
+    m_targetForPointer.erase(it);
+    ASSERT(target);
     bool eventSwallowed = !dispatchPointerEvent(*target, event);
     // When the user releases the primary pointer, we need to dispatch a tap
     // event to the common ancestor for where the pointer went down and where
@@ -199,14 +212,23 @@ bool NewEventHandler::handlePointerUpEvent(const WebPointerEvent& event)
 
 bool NewEventHandler::handlePointerMoveEvent(const WebPointerEvent& event)
 {
-    RefPtr<Node> target = m_targetForPointer[event.pointer];
-    return target && dispatchPointerEvent(*target.get(), event);
+    auto it = m_targetForPointer.find(event.pointer);
+    if (it == m_targetForPointer.end())
+        return false;
+    RefPtr<Node> target = it->second;
+    ASSERT(target);
+    return dispatchPointerEvent(*target.get(), event);
 }
 
 bool NewEventHandler::handlePointerCancelEvent(const WebPointerEvent& event)
 {
-    RefPtr<Node> target = m_targetForPointer[event.pointer];
-    return target && dispatchPointerEvent(*target, event);
+    auto it = m_targetForPointer.find(event.pointer);
+    if (it == m_targetForPointer.end())
+        return false;
+    RefPtr<Node> target = it->second;
+    m_targetForPointer.erase(it);
+    ASSERT(target);
+    return dispatchPointerEvent(*target, event);
 }
 
 }

@@ -46,7 +46,8 @@ scoped_ptr<blink::WebInputEvent> BuildWebPointerEvent(
       web_event->type = blink::WebInputEvent::PointerUp;
       break;
     case mojo::EVENT_TYPE_TOUCH_CANCELLED:
-    case mojo::EVENT_TYPE_MOUSE_EXITED:
+      // FIXME: What mouse event should we listen to in order to learn when the
+      // mouse moves out of the mojo::View?
       web_event->type = blink::WebInputEvent::PointerCancel;
       break;
     default:
@@ -207,7 +208,6 @@ scoped_ptr<blink::WebInputEvent> ConvertEvent(const mojo::EventPtr& event,
       event->action == mojo::EVENT_TYPE_TOUCH_MOVED ||
       event->action == mojo::EVENT_TYPE_TOUCH_CANCELLED ||
       event->action == mojo::EVENT_TYPE_MOUSE_DRAGGED ||
-      event->action == mojo::EVENT_TYPE_MOUSE_EXITED ||
       event->action == mojo::EVENT_TYPE_MOUSE_PRESSED ||
       event->action == mojo::EVENT_TYPE_MOUSE_RELEASED) {
     return BuildWebPointerEvent(event, device_pixel_ratio);
