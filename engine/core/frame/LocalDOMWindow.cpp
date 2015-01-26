@@ -41,7 +41,6 @@
 #include "sky/engine/core/css/DOMWindowCSS.h"
 #include "sky/engine/core/css/MediaQueryList.h"
 #include "sky/engine/core/css/MediaQueryMatcher.h"
-#include "sky/engine/core/css/StyleMedia.h"
 #include "sky/engine/core/css/resolver/StyleResolver.h"
 #include "sky/engine/core/dom/Document.h"
 #include "sky/engine/core/dom/Element.h"
@@ -382,7 +381,6 @@ void LocalDOMWindow::resetDOMWindowProperties()
     m_screen = nullptr;
     m_console = nullptr;
     m_location = nullptr;
-    m_media = nullptr;
 #if ENABLE(ASSERT)
     m_hasBeenReset = true;
 #endif
@@ -447,16 +445,6 @@ void LocalDOMWindow::focus(ExecutionContext* context)
         return;
 
     m_frame->eventHandler().focusDocumentView();
-}
-
-bool LocalDOMWindow::find(const String& string, bool caseSensitive, bool backwards, bool wrap, bool /*wholeWord*/, bool /*searchInFrames*/, bool /*showDialog*/) const
-{
-    // |m_frame| can be destructed during |Editor::findString()| via
-    // |Document::updateLayou()|, e.g. event handler removes a frame.
-    RefPtr<LocalFrame> protectFrame(m_frame);
-
-    // FIXME (13016): Support wholeWord, searchInFrames and showDialog
-    return m_frame->editor().findString(string, !backwards, caseSensitive, wrap, false);
 }
 
 int LocalDOMWindow::outerHeight() const
@@ -542,13 +530,6 @@ LocalDOMWindow* LocalDOMWindow::window() const
 Document* LocalDOMWindow::document() const
 {
     return m_document.get();
-}
-
-StyleMedia& LocalDOMWindow::styleMedia() const
-{
-    if (!m_media)
-        m_media = StyleMedia::create(m_frame);
-    return *m_media;
 }
 
 PassRefPtr<CSSStyleDeclaration> LocalDOMWindow::getComputedStyle(Element* elt) const

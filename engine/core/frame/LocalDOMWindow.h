@@ -119,8 +119,6 @@ public:
 
     void focus(ExecutionContext* = 0);
 
-    bool find(const String&, bool caseSensitive, bool backwards, bool wrap, bool wholeWord, bool searchInFrames, bool showDialog) const;
-
     int outerHeight() const;
     int outerWidth() const;
     int innerHeight() const;
@@ -132,7 +130,6 @@ public:
 
     // FIXME(sky): keeping self for now since js-test.html uses it.
     LocalDOMWindow* window() const;
-    LocalDOMWindow* self() const { return window(); }
 
     // DOM Level 2 AbstractView Interface
 
@@ -241,7 +238,6 @@ private:
     mutable RefPtr<Screen> m_screen;
     mutable RefPtr<Console> m_console;
     mutable RefPtr<Location> m_location;
-    mutable RefPtr<StyleMedia> m_media;
 
     mutable RefPtr<DOMWindowCSS> m_css;
 

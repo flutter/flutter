@@ -40,14 +40,6 @@
 
     [DoNotCheckSecurity, CallWith=ExecutionContext] void focus();
 
-    boolean find([Default=Undefined] optional DOMString string,
-                 [Default=Undefined] optional boolean caseSensitive,
-                 [Default=Undefined] optional boolean backwards,
-                 [Default=Undefined] optional boolean wrap,
-                 [Default=Undefined] optional boolean wholeWord,
-                 [Default=Undefined] optional boolean searchInFrames,
-                 [Default=Undefined] optional boolean showDialog);
-
     [Replaceable] readonly attribute long outerHeight;
     [Replaceable] readonly attribute long outerWidth;
     [Replaceable] readonly attribute long innerHeight;
@@ -63,7 +55,6 @@
     void resizeTo([Default=Undefined] optional float width, [Default=Undefined] optional float height); // FIXME: this should take longs not floats.
 
     // Self referential attributes
-    [Replaceable, DoNotCheckSecurity] readonly attribute Window self;
     [DoNotCheckSecurity, Unforgeable] readonly attribute Window window;
 
     // DOM Level 2 AbstractView Interface
@@ -71,9 +62,6 @@
 
     // CSSOM View Module
     MediaQueryList matchMedia(DOMString query);
-
-    // styleMedia has been removed from the CSSOM View specification.
-    readonly attribute StyleMedia styleMedia;
 
     // DOM Level 2 Style Interface
     CSSStyleDeclaration getComputedStyle([Default=Undefined] optional Element element);
