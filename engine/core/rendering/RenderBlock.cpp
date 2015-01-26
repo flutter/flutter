@@ -545,14 +545,13 @@ void RenderBlock::paint(PaintInfo& paintInfo, const LayoutPoint& paintOffset)
     // Our scrollbar widgets paint exactly when we tell them to, so that they work properly with
     // z-index.  We paint after we painted the background/border, so that the scrollbars will
     // sit above the background/border.
-    if (hasOverflowClip() && (phase == PaintPhaseBlockBackground || phase == PaintPhaseChildBlockBackground) && paintInfo.shouldPaintWithinRoot(this))
+    if (hasOverflowClip() && phase == PaintPhaseForeground && paintInfo.shouldPaintWithinRoot(this))
         layer()->scrollableArea()->paintOverflowControls(paintInfo.context, roundedIntPoint(adjustedPaintOffset), paintInfo.rect, false /* paintingOverlayControls */);
 }
 
 void RenderBlock::paintContents(PaintInfo& paintInfo, const LayoutPoint& paintOffset)
 {
     PaintPhase newPhase = (paintInfo.phase == PaintPhaseChildOutlines) ? PaintPhaseOutline : paintInfo.phase;
-    newPhase = (newPhase == PaintPhaseChildBlockBackgrounds) ? PaintPhaseChildBlockBackground : newPhase;
 
     // We don't paint our own background, but we do let the kids paint their backgrounds.
     PaintInfo paintInfoForChild(paintInfo);
@@ -588,13 +587,11 @@ void RenderBlock::paintAsInlineBlock(RenderObject* renderer, PaintInfo& paintInf
     // stacking context.  (See Appendix E.2, section 7.2.1.4 on
     // inline block/table/replaced elements in the CSS2.1 specification.)
     // This is also used by other elements (e.g. flex items).
-    bool preservePhase = paintInfo.phase == PaintPhaseSelection;
     PaintInfo info(paintInfo);
-    info.phase = preservePhase ? paintInfo.phase : PaintPhaseBlockBackground;
-    renderer->paint(info, childPoint);
-    if (!preservePhase) {
-        info.phase = PaintPhaseChildBlockBackgrounds;
+
+    if (paintInfo.phase == PaintPhaseSelection) {
         renderer->paint(info, childPoint);
+    } else {
         info.phase = PaintPhaseForeground;
         renderer->paint(info, childPoint);
         info.phase = PaintPhaseOutline;
@@ -639,7 +636,7 @@ void RenderBlock::paintObject(PaintInfo& paintInfo, const LayoutPoint& paintOffs
     if (hasOverflowClip())
         scrolledOffset.move(-scrolledContentOffset());
 
-    if (paintPhase == PaintPhaseBlockBackground || paintPhase == PaintPhaseChildBlockBackground) {
+    if (paintPhase == PaintPhaseForeground) {
         if (hasBoxDecorationBackground())
             paintBoxDecorationBackground(paintInfo, paintOffset);
     }
@@ -648,10 +645,6 @@ void RenderBlock::paintObject(PaintInfo& paintInfo, const LayoutPoint& paintOffs
         paintMask(paintInfo, paintOffset);
         return;
     }
-
-    // We're done.  We don't bother painting any children.
-    if (paintPhase == PaintPhaseBlockBackground)
-        return;
 
     if (paintPhase != PaintPhaseSelfOutline)
         paintContents(paintInfo, scrolledOffset);

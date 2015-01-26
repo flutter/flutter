@@ -38,9 +38,6 @@ namespace blink {
  */
 
 enum PaintPhase {
-    PaintPhaseBlockBackground,
-    PaintPhaseChildBlockBackground,
-    PaintPhaseChildBlockBackgrounds,
     PaintPhaseForeground,
     PaintPhaseOutline,
     PaintPhaseChildOutlines,

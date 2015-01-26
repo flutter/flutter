@@ -1043,11 +1043,6 @@ void RenderLayer::paintLayerContents(GraphicsContext* context, const LayerPainti
 
     LayoutPoint layerLocation = toPoint(layerBounds.location() - renderBoxLocation() + localPaintingInfo.subPixelAccumulation);
 
-    if (shouldPaintContent) {
-        paintBackground(context, transparencyLayerContext, paintingInfo.paintDirtyRect, haveTransparency,
-            localPaintingInfo, paintingRootForRenderer, layerLocation, backgroundRect);
-    }
-
     paintChildren(NegativeZOrderChildren, context, paintingInfo, paintFlags);
 
     if (shouldPaintContent) {
@@ -1120,29 +1115,6 @@ void RenderLayer::paintChildren(unsigned childrenToVisit, GraphicsContext* conte
     }
 }
 
-void RenderLayer::paintBackground(GraphicsContext* context, GraphicsContext* transparencyLayerContext,
-    const LayoutRect& transparencyPaintDirtyRect, bool haveTransparency, const LayerPaintingInfo& localPaintingInfo,
-    RenderObject* paintingRootForRenderer, LayoutPoint& layerLocation, ClipRect& layerBackgroundRect)
-{
-    // Begin transparency layers lazily now that we know we have to paint something.
-    if (haveTransparency)
-        beginTransparencyLayers(transparencyLayerContext, localPaintingInfo.rootLayer, transparencyPaintDirtyRect, localPaintingInfo.subPixelAccumulation);
-
-    if (localPaintingInfo.clipToDirtyRect) {
-        // Paint our background first, before painting any child layers.
-        // Establish the clip used to paint our background.
-        clipToRect(localPaintingInfo, context, layerBackgroundRect, DoNotIncludeSelfForBorderRadius); // Background painting will handle clipping to self.
-    }
-
-    // Paint the background.
-    // FIXME: Eventually we will collect the region from the fragment itself instead of just from the paint info.
-    PaintInfo paintInfo(context, pixelSnappedIntRect(layerBackgroundRect.rect()), PaintPhaseBlockBackground, paintingRootForRenderer, 0, localPaintingInfo.rootLayer->renderer());
-    renderer()->paint(paintInfo, layerLocation);
-
-    if (localPaintingInfo.clipToDirtyRect)
-        restoreClip(context, localPaintingInfo.paintDirtyRect, layerBackgroundRect);
-}
-
 void RenderLayer::paintForeground(GraphicsContext* context, GraphicsContext* transparencyLayerContext,
     const LayoutRect& transparencyPaintDirtyRect, bool haveTransparency, const LayerPaintingInfo& localPaintingInfo,
     RenderObject* paintingRootForRenderer, LayoutPoint& layerLocation, ClipRect& layerForegroundRect)
@@ -1162,9 +1134,6 @@ void RenderLayer::paintForeground(GraphicsContext* context, GraphicsContext* tra
         // We have to loop through every fragment multiple times, since we have to issue paint invalidations in each specific phase in order for
         // interleaving of the fragments to work properly.
         // FIXME(sky): Do we still need this for anything now that we don't have fragments?
-        paintForegroundWithPhase(PaintPhaseChildBlockBackgrounds,
-            context, localPaintingInfo, paintingRootForRenderer,
-            layerLocation, layerForegroundRect);
         paintForegroundWithPhase(PaintPhaseForeground,
             context, localPaintingInfo, paintingRootForRenderer,
             layerLocation, layerForegroundRect);

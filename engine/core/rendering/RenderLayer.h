@@ -410,9 +410,6 @@ private:
 
     void paintChildren(unsigned childrenToVisit, GraphicsContext*, const LayerPaintingInfo&, PaintLayerFlags);
 
-    void paintBackground(GraphicsContext*, GraphicsContext* transparencyLayerContext,
-        const LayoutRect& transparencyPaintDirtyRect, bool haveTransparency, const LayerPaintingInfo&, RenderObject* paintingRootForRenderer,
-        LayoutPoint& layerLocation, ClipRect& layerBackgroundRect);
     void paintForeground(GraphicsContext*, GraphicsContext* transparencyLayerContext,
         const LayoutRect& transparencyPaintDirtyRect, bool haveTransparency, const LayerPaintingInfo&, RenderObject* paintingRootForRenderer,
         LayoutPoint& layerLocation, ClipRect& layerForegroundRect);
