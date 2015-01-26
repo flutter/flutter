@@ -4,12 +4,12 @@
 // found in the LICENSE file.
 -->
 <sky>
-<import src="/sky/framework/sky-box/sky-box.sky"/>
-<import src="/sky/framework/sky-button/sky-button.sky"/>
-<import src="/sky/framework/sky-checkbox/sky-checkbox.sky"/>
+<import src="/sky/framework/sky-box.sky"/>
+<import src="/sky/framework/sky-button.sky"/>
+<import src="/sky/framework/sky-checkbox.sky"/>
 <import src="/sky/framework/sky-element/sky-element.sky" as="SkyElement"/>
 <import src="/sky/framework/sky-input.sky"/>
-<import src="/sky/framework/sky-radio/sky-radio.sky"/>
+<import src="/sky/framework/sky-radio.sky"/>
 <sky-element name="widget-root">
 <template>
   <style>
