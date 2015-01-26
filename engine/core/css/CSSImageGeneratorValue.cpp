@@ -26,7 +26,6 @@
 #include "sky/engine/config.h"
 #include "sky/engine/core/css/CSSImageGeneratorValue.h"
 
-#include "sky/engine/core/css/CSSCanvasValue.h"
 #include "sky/engine/core/css/CSSCrossfadeValue.h"
 #include "sky/engine/core/css/CSSGradientValue.h"
 #include "sky/engine/platform/graphics/Image.h"
@@ -118,8 +117,6 @@ void CSSImageGeneratorValue::putImage(const IntSize& size, PassRefPtr<Image> ima
 PassRefPtr<Image> CSSImageGeneratorValue::image(RenderObject* renderer, const IntSize& size)
 {
     switch (classType()) {
-    case CanvasClass:
-        return toCSSCanvasValue(this)->image(renderer, size);
     case CrossfadeClass:
         return toCSSCrossfadeValue(this)->image(renderer, size);
     case LinearGradientClass:
@@ -135,8 +132,6 @@ PassRefPtr<Image> CSSImageGeneratorValue::image(RenderObject* renderer, const In
 bool CSSImageGeneratorValue::isFixedSize() const
 {
     switch (classType()) {
-    case CanvasClass:
-        return toCSSCanvasValue(this)->isFixedSize();
     case CrossfadeClass:
         return toCSSCrossfadeValue(this)->isFixedSize();
     case LinearGradientClass:
@@ -152,8 +147,6 @@ bool CSSImageGeneratorValue::isFixedSize() const
 IntSize CSSImageGeneratorValue::fixedSize(const RenderObject* renderer)
 {
     switch (classType()) {
-    case CanvasClass:
-        return toCSSCanvasValue(this)->fixedSize(renderer);
     case CrossfadeClass:
         return toCSSCrossfadeValue(this)->fixedSize(renderer);
     case LinearGradientClass:
@@ -171,8 +164,6 @@ bool CSSImageGeneratorValue::isPending() const
     switch (classType()) {
     case CrossfadeClass:
         return toCSSCrossfadeValue(this)->isPending();
-    case CanvasClass:
-        return toCSSCanvasValue(this)->isPending();
     case LinearGradientClass:
         return toCSSLinearGradientValue(this)->isPending();
     case RadialGradientClass:
@@ -188,8 +179,6 @@ bool CSSImageGeneratorValue::knownToBeOpaque(const RenderObject* renderer) const
     switch (classType()) {
     case CrossfadeClass:
         return toCSSCrossfadeValue(this)->knownToBeOpaque(renderer);
-    case CanvasClass:
-        return false;
     case LinearGradientClass:
         return toCSSLinearGradientValue(this)->knownToBeOpaque(renderer);
     case RadialGradientClass:
@@ -205,9 +194,6 @@ void CSSImageGeneratorValue::loadSubimages(ResourceFetcher* fetcher)
     switch (classType()) {
     case CrossfadeClass:
         toCSSCrossfadeValue(this)->loadSubimages(fetcher);
-        break;
-    case CanvasClass:
-        toCSSCanvasValue(this)->loadSubimages(fetcher);
         break;
     case LinearGradientClass:
         toCSSLinearGradientValue(this)->loadSubimages(fetcher);

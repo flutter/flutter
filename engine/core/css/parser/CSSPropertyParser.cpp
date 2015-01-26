@@ -35,7 +35,6 @@
 #include "sky/engine/core/css/CSSAspectRatioValue.h"
 #include "sky/engine/core/css/CSSBasicShapes.h"
 #include "sky/engine/core/css/CSSBorderImage.h"
-#include "sky/engine/core/css/CSSCanvasValue.h"
 #include "sky/engine/core/css/CSSCrossfadeValue.h"
 #include "sky/engine/core/css/CSSCursorImageValue.h"
 #include "sky/engine/core/css/CSSFontFaceSrcValue.h"
@@ -5231,9 +5230,6 @@ bool CSSPropertyParser::parseGeneratedImage(CSSParserValueList* valueList, RefPt
     if (equalIgnoringCase(val->function->name, "repeating-radial-gradient("))
         return parseRadialGradient(valueList, value, Repeating);
 
-    if (equalIgnoringCase(val->function->name, "-webkit-canvas("))
-        return parseCanvas(valueList, value);
-
     if (equalIgnoringCase(val->function->name, "-webkit-cross-fade("))
         return parseCrossfade(valueList, value);
 
@@ -5283,22 +5279,6 @@ bool CSSPropertyParser::parseCrossfade(CSSParserValueList* valueList, RefPtr<CSS
 
     crossfade = result;
 
-    return true;
-}
-
-bool CSSPropertyParser::parseCanvas(CSSParserValueList* valueList, RefPtr<CSSValue>& canvas)
-{
-    // Walk the arguments.
-    CSSParserValueList* args = valueList->current()->function->args.get();
-    if (!args || args->size() != 1)
-        return false;
-
-    // The first argument is the canvas name.  It is an identifier.
-    CSSParserValue* value = args->current();
-    if (!value || value->unit != CSSPrimitiveValue::CSS_IDENT)
-        return false;
-
-    canvas = CSSCanvasValue::create(value->string);
     return true;
 }
 

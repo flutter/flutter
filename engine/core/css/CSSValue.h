@@ -77,14 +77,13 @@ public:
 
     bool isAspectRatioValue() const { return m_classType == AspectRatioClass; }
     bool isBorderImageSliceValue() const { return m_classType == BorderImageSliceClass; }
-    bool isCanvasValue() const { return m_classType == CanvasClass; }
     bool isCursorImageValue() const { return m_classType == CursorImageClass; }
     bool isCrossfadeValue() const { return m_classType == CrossfadeClass; }
     bool isFontFeatureValue() const { return m_classType == FontFeatureClass; }
     bool isFontValue() const { return m_classType == FontClass; }
     bool isFontFaceSrcValue() const { return m_classType == FontFaceSrcClass; }
     bool isFunctionValue() const { return m_classType == FunctionClass; }
-    bool isImageGeneratorValue() const { return m_classType >= CanvasClass && m_classType <= RadialGradientClass; }
+    bool isImageGeneratorValue() const { return m_classType >= CrossfadeClass && m_classType <= RadialGradientClass; }
     bool isGradientValue() const { return m_classType >= LinearGradientClass && m_classType <= RadialGradientClass; }
     bool isImageSetValue() const { return m_classType == ImageSetClass; }
     bool isImageValue() const { return m_classType == ImageClass; }
@@ -124,7 +123,6 @@ protected:
         CursorImageClass,
 
         // Image generator classes.
-        CanvasClass,
         CrossfadeClass,
         LinearGradientClass,
         RadialGradientClass,

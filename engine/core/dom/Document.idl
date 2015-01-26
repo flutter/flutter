@@ -63,8 +63,6 @@ typedef (CanvasRenderingContext2D or WebGLRenderingContext) RenderingContext;
     // Mozilla extensions
     Selection          getSelection();
 
-    [MeasureAs=DocumentGetCSSCanvasContext] RenderingContext getCSSCanvasContext(DOMString contextId, DOMString name, long width, long height);
-
     // HTML 5
     readonly attribute Element activeElement;
     boolean hasFocus();

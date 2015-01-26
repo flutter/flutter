@@ -406,10 +406,6 @@ public:
     void pushCurrentScript(PassRefPtr<HTMLScriptElement>);
     void popCurrentScript();
 
-    // Extension for manipulating canvas drawing contexts for use in CSS
-    void getCSSCanvasContext(const String& type, const String& name, int width, int height, RefPtr<CanvasRenderingContext2D>&, RefPtr<WebGLRenderingContext>&);
-    HTMLCanvasElement& getCSSCanvasElement(const String& name);
-
     void finishedParsing();
 
     const WTF::TextEncoding& encoding() const { return WTF::UTF8Encoding(); }
@@ -666,8 +662,6 @@ private:
     Vector<RefPtr<HTMLScriptElement> > m_currentScriptStack;
 
     AtomicString m_contentLanguage;
-
-    HashMap<String, RefPtr<HTMLCanvasElement> > m_cssCanvasElements;
 
     OwnPtr<SelectorQueryCache> m_selectorQueryCache;
 

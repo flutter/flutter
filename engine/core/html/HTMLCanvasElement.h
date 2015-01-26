@@ -191,7 +191,7 @@ private:
     mutable OwnPtr<GraphicsContextStateSaver> m_contextStateSaver;
 
     mutable RefPtr<Image> m_presentedImage;
-    mutable RefPtr<Image> m_copiedImage; // FIXME: This is temporary for platforms that have to copy the image buffer to render (and for CSSCanvasValue).
+    mutable RefPtr<Image> m_copiedImage; // FIXME: This is temporary for platforms that have to copy the image buffer to render.
 };
 
 } // namespace blink

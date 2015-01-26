@@ -70,7 +70,7 @@ PassOwnPtr<WebGLRenderingContext> WebGLRenderingContext::create(HTMLCanvasElemen
     }
     Settings* settings = frame->settings();
 
-    // The only situation that attrs is null is through Document::getCSSCanvasContext().
+    // TODO(esprehn): This should never be null.
     RefPtr<WebGLContextAttributes> defaultAttrs = nullptr;
     if (!attrs) {
         defaultAttrs = WebGLContextAttributes::create();

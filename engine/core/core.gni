@@ -127,8 +127,6 @@ sky_core_files = [
   "css/CSSBorderImageSliceValue.h",
   "css/CSSCalculationValue.cpp",
   "css/CSSCalculationValue.h",
-  "css/CSSCanvasValue.cpp",
-  "css/CSSCanvasValue.h",
   "css/CSSComputedStyleDeclaration.cpp",
   "css/CSSComputedStyleDeclaration.h",
   "css/CSSCrossfadeValue.cpp",

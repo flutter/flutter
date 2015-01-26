@@ -34,7 +34,6 @@
 #include "sky/engine/core/css/CSSAspectRatioValue.h"
 #include "sky/engine/core/css/CSSBasicShapes.h"
 #include "sky/engine/core/css/CSSBorderImage.h"
-#include "sky/engine/core/css/CSSCanvasValue.h"
 #include "sky/engine/core/css/CSSCrossfadeValue.h"
 #include "sky/engine/core/css/CSSCursorImageValue.h"
 #include "sky/engine/core/css/CSSFontFaceSrcValue.h"
