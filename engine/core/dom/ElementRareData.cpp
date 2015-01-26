@@ -38,7 +38,7 @@ namespace blink {
 struct SameSizeAsElementRareData : NodeRareData {
     short index;
     IntSize scrollOffset;
-    void* pointers[6];
+    void* pointers[5];
 };
 
 CSSStyleDeclaration& ElementRareData::ensureInlineCSSStyleDeclaration(Element* ownerElement)

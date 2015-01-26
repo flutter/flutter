@@ -1025,17 +1025,13 @@ void Element::setNeedsAnimationStyleRecalc()
 
 void Element::setCustomElementDefinition(PassRefPtr<CustomElementDefinition> definition)
 {
-    if (!hasRareData() && !definition)
-        return;
-    ASSERT(!customElementDefinition());
-    ensureElementRareData().setCustomElementDefinition(definition);
+    ASSERT(!m_customElementDefinition);
+    m_customElementDefinition = definition;
 }
 
 CustomElementDefinition* Element::customElementDefinition() const
 {
-    if (hasRareData())
-        return elementRareData()->customElementDefinition();
-    return 0;
+    return m_customElementDefinition.get();
 }
 
 // TODO(esprehn): Implement the sky spec where shadow roots are a custom

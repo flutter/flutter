@@ -25,7 +25,6 @@
 #include "sky/engine/core/animation/ActiveAnimations.h"
 #include "sky/engine/core/dom/DOMTokenList.h"
 #include "sky/engine/core/dom/NodeRareData.h"
-#include "sky/engine/core/dom/custom/CustomElementDefinition.h"
 #include "sky/engine/core/dom/shadow/ElementShadow.h"
 #include "sky/engine/core/rendering/style/StyleInheritedData.h"
 #include "sky/engine/wtf/OwnPtr.h"
@@ -84,9 +83,6 @@ public:
         m_activeAnimations = activeAnimations;
     }
 
-    void setCustomElementDefinition(PassRefPtr<CustomElementDefinition> definition) { m_customElementDefinition = definition; }
-    CustomElementDefinition* customElementDefinition() const { return m_customElementDefinition.get(); }
-
 private:
     short m_tabindex;
 
@@ -98,7 +94,6 @@ private:
     OwnPtr<InlineCSSStyleDeclaration> m_cssomWrapper;
 
     RefPtr<RenderStyle> m_computedStyle;
-    RefPtr<CustomElementDefinition> m_customElementDefinition;
 
     explicit ElementRareData(RenderObject*);
 };

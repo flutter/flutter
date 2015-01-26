@@ -374,6 +374,7 @@ private:
     ElementRareData& ensureElementRareData();
 
     RefPtr<ElementData> m_elementData;
+    RefPtr<CustomElementDefinition> m_customElementDefinition;
 };
 
 DEFINE_NODE_TYPE_CASTS(Element, isElementNode());
