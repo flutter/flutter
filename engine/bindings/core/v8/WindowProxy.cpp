@@ -35,7 +35,6 @@
 #include <utility>
 
 #include "bindings/core/v8/V8Document.h"
-#include "bindings/core/v8/V8HTMLDocument.h"
 #include "bindings/core/v8/V8Window.h"
 #include "gen/sky/platform/RuntimeEnabledFeatures.h"
 #include "sky/engine/bindings/core/v8/DOMWrapperWorld.h"

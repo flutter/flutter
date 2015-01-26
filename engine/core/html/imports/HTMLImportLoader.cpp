@@ -37,7 +37,6 @@
 #include "sky/engine/core/dom/DocumentParser.h"
 #include "sky/engine/core/dom/StyleEngine.h"
 #include "sky/engine/core/dom/custom/CustomElementSyncMicrotaskQueue.h"
-#include "sky/engine/core/html/HTMLDocument.h"
 #include "sky/engine/core/html/imports/HTMLImportChild.h"
 #include "sky/engine/core/html/imports/HTMLImportsController.h"
 
@@ -102,7 +101,7 @@ HTMLImportLoader::State HTMLImportLoader::startWritingAndParsing(mojo::URLRespon
     KURL url(ParsedURLString, String::fromUTF8(response->url));
     DocumentInit init = DocumentInit(url, 0, contextDocument, m_controller)
         .withRegistrationContext(m_controller->master()->registrationContext());
-    m_document = HTMLDocument::create(init);
+    m_document = Document::create(init);
     m_module = Module::create(contextDocument.get(), nullptr, m_document.get(), url.string());
     m_document->startParsing()->parse(response->body.Pass(), base::Bind(base::DoNothing));
     return StateLoading;

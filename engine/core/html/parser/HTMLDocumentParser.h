@@ -48,7 +48,6 @@ class BackgroundHTMLParser;
 class CompactHTMLToken;
 class Document;
 class Element;
-class HTMLDocument;
 class HTMLParserScheduler;
 class HTMLTreeBuilder;
 class ScriptController;
@@ -59,7 +58,7 @@ class PumpSession;
 class HTMLDocumentParser :  public DocumentParser {
     WTF_MAKE_FAST_ALLOCATED;
 public:
-    static PassRefPtr<HTMLDocumentParser> create(HTMLDocument& document, bool reportErrors)
+    static PassRefPtr<HTMLDocumentParser> create(Document& document, bool reportErrors)
     {
         return adoptRef(new HTMLDocumentParser(document, reportErrors));
     }
@@ -88,7 +87,7 @@ public:
     void resumeAfterWaitingForImports() override final;
 
 private:
-    HTMLDocumentParser(HTMLDocument&, bool reportErrors);
+    HTMLDocumentParser(Document&, bool reportErrors);
 
     HTMLTreeBuilder* treeBuilder() const { return m_treeBuilder.get(); }
 

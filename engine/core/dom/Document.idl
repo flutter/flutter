@@ -25,7 +25,6 @@ typedef (CanvasRenderingContext2D or WebGLRenderingContext) RenderingContext;
 [
     Constructor(),
     ConstructorCallWith=Document,
-    SpecialWrapFor=(HTMLDocument)
 ] interface Document : Node {
     readonly attribute Element documentElement;
 

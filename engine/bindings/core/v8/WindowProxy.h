@@ -47,7 +47,6 @@ namespace blink {
 
 class LocalDOMWindow;
 class LocalFrame;
-class HTMLDocument;
 
 // WindowProxy represents all the per-global object state for a LocalFrame that
 // persist between navigations.

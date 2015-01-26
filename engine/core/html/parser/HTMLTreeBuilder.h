@@ -46,14 +46,13 @@ class DocumentFragment;
 class Element;
 class LocalFrame;
 class HTMLToken;
-class HTMLDocument;
 class Node;
 class HTMLDocumentParser;
 
 class HTMLTreeBuilder final {
     WTF_MAKE_NONCOPYABLE(HTMLTreeBuilder); WTF_MAKE_FAST_ALLOCATED;
 public:
-    static PassOwnPtr<HTMLTreeBuilder> create(HTMLDocumentParser* parser, HTMLDocument* document, bool reportErrors)
+    static PassOwnPtr<HTMLTreeBuilder> create(HTMLDocumentParser* parser, Document* document, bool reportErrors)
     {
         return adoptPtr(new HTMLTreeBuilder(parser, document, reportErrors));
     }
@@ -86,7 +85,7 @@ private:
         TextMode,
     };
 
-    HTMLTreeBuilder(HTMLDocumentParser*, HTMLDocument*, bool reportErrors);
+    HTMLTreeBuilder(HTMLDocumentParser*, Document*, bool reportErrors);
 
     void processStartTag(AtomicHTMLToken*);
     void processEndTag(AtomicHTMLToken*);

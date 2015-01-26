@@ -31,7 +31,6 @@
 #include "sky/engine/core/css/MediaValuesCached.h"
 #include "sky/engine/core/dom/Element.h"
 #include "sky/engine/core/frame/LocalFrame.h"
-#include "sky/engine/core/html/HTMLDocument.h"
 #include "sky/engine/core/html/HTMLScriptElement.h"
 #include "sky/engine/core/html/parser/AtomicHTMLToken.h"
 #include "sky/engine/core/html/parser/BackgroundHTMLParser.h"
@@ -44,7 +43,7 @@
 
 namespace blink {
 
-HTMLDocumentParser::HTMLDocumentParser(HTMLDocument& document, bool reportErrors)
+HTMLDocumentParser::HTMLDocumentParser(Document& document, bool reportErrors)
     : DocumentParser(&document)
     , m_treeBuilder(HTMLTreeBuilder::create(this, &document, reportErrors))
     , m_parserScheduler(HTMLParserScheduler::create(this))

@@ -93,7 +93,6 @@
 #include "sky/engine/core/frame/Settings.h"
 #include "sky/engine/core/html/HTMLAnchorElement.h"
 #include "sky/engine/core/html/HTMLCanvasElement.h"
-#include "sky/engine/core/html/HTMLDocument.h"
 #include "sky/engine/core/html/HTMLScriptElement.h"
 #include "sky/engine/core/html/HTMLStyleElement.h"
 #include "sky/engine/core/html/HTMLTemplateElement.h"
@@ -234,7 +233,7 @@ static WeakDocumentSet& liveDocumentSet()
 }
 #endif
 
-Document::Document(const DocumentInit& initializer, DocumentClassFlags documentClasses)
+Document::Document(const DocumentInit& initializer)
     : ContainerNode(0, CreateDocument)
     , TreeScope(*this)
     , m_module(nullptr)
@@ -253,7 +252,6 @@ Document::Document(const DocumentInit& initializer, DocumentClassFlags documentC
     , m_markers(adoptPtr(new DocumentMarkerController))
     , m_loadEventProgress(LoadEventNotRun)
     , m_startTime(currentTime())
-    , m_documentClasses(documentClasses)
     , m_renderView(0)
 #if !ENABLE(OILPAN)
     , m_weakFactory(this)
@@ -353,7 +351,7 @@ PassRefPtr<Document> Document::create(Document& document)
 {
     DocumentInit init = DocumentInit::fromContext(document.contextDocument())
         .withRegistrationContext(document.registrationContext());
-    return HTMLDocument::create(init);
+    return adoptRef(new Document(init));
 }
 
 #if !ENABLE(OILPAN)
@@ -437,10 +435,8 @@ PassRefPtr<Element> Document::createElement(const AtomicString& name, ExceptionS
         exceptionState.throwDOMException(InvalidCharacterError, "The tag name provided ('" + name + "') is not a valid name.");
         return nullptr;
     }
-    if (isHTMLDocument())
-        return HTMLElementFactory::createHTMLElement(name, *this, false);
 
-    return Element::create(QualifiedName(name), this);
+    return HTMLElementFactory::createHTMLElement(name, *this, false);
 }
 
 ScriptValue Document::registerElement(ScriptState* scriptState, const AtomicString& name, ExceptionState& exceptionState)
@@ -801,8 +797,7 @@ void Document::setTitleElement(Element* titleElement)
 {
     // Only allow the first title element to change the title -- others have no effect.
     if (m_titleElement && m_titleElement != titleElement) {
-        if (isHTMLDocument())
-            m_titleElement = Traversal<HTMLTitleElement>::firstWithin(*this);
+        m_titleElement = Traversal<HTMLTitleElement>::firstWithin(*this);
     } else {
         m_titleElement = titleElement;
     }
@@ -819,10 +814,8 @@ void Document::removeTitle(Element* titleElement)
     m_titleElement = nullptr;
 
     // Update title based on first title element in the document, if one exists.
-    if (isHTMLDocument()) {
-        if (HTMLTitleElement* title = Traversal<HTMLTitleElement>::firstWithin(*this))
-            setTitleElement(title);
-    }
+    if (HTMLTitleElement* title = Traversal<HTMLTitleElement>::firstWithin(*this))
+        setTitleElement(title);
 
     if (!m_titleElement)
         updateTitle(String());
@@ -1281,7 +1274,7 @@ DocumentParser* Document::startParsing()
     ASSERT(!firstChild());
     ASSERT(!m_focusedElement);
 
-    m_parser = HTMLDocumentParser::create(toHTMLDocument(*this), false);
+    m_parser = HTMLDocumentParser::create(*this, false);
     setParsing(true);
     setReadyState(Loading);
     return m_parser.get();
@@ -2312,12 +2305,8 @@ Document& Document::ensureTemplateDocument()
     if (m_templateDocument)
         return *m_templateDocument;
 
-    if (isHTMLDocument()) {
-        DocumentInit init = DocumentInit::fromContext(contextDocument(), blankURL());
-        m_templateDocument = HTMLDocument::create(init);
-    } else {
-        m_templateDocument = Document::create(DocumentInit(blankURL()));
-    }
+    DocumentInit init = DocumentInit::fromContext(contextDocument(), blankURL());
+    m_templateDocument = Document::create(init);
 
     m_templateDocument->m_templateDocumentHost = this; // balanced in dtor.
 

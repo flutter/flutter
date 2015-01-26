@@ -628,8 +628,6 @@ simple_selector_list:
 
 element_name:
     IDENT {
-        if (parser->m_context.isHTMLDocument())
-            parser->tokenToLowerCase($1);
         $$ = $1;
     }
     | '*' {

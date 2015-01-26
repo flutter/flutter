@@ -82,11 +82,6 @@ WebLocalFrame* WebDocument::frame() const
     return WebLocalFrameImpl::fromFrame(constUnwrap<Document>()->frame());
 }
 
-bool WebDocument::isHTMLDocument() const
-{
-    return constUnwrap<Document>()->isHTMLDocument();
-}
-
 WebElement WebDocument::documentElement() const
 {
     return WebElement(constUnwrap<Document>()->documentElement());

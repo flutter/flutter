@@ -927,8 +927,6 @@ static void install{{v8_class}}Template(v8::Handle<v8::FunctionTemplate> functio
     // When a context is detached from a frame, turn on the access check.
     // Turning on checks also invalidates inline caches of the object.
     instanceTemplate->SetAccessCheckCallbacks(V8Window::namedSecurityCheckCustom, V8Window::indexedSecurityCheckCustom, v8::External::New(isolate, const_cast<WrapperTypeInfo*>(&V8Window::wrapperTypeInfo)), false);
-    {% elif interface_name in ['HTMLDocument'] %}
-    functionTemplate->SetHiddenPrototype(true);
     {% endif %}
 
     // Custom toString template

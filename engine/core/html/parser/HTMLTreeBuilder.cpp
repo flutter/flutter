@@ -30,7 +30,6 @@
 #include "gen/sky/core/HTMLNames.h"
 #include "sky/engine/bindings/core/v8/ExceptionStatePlaceholder.h"
 #include "sky/engine/core/dom/DocumentFragment.h"
-#include "sky/engine/core/html/HTMLDocument.h"
 #include "sky/engine/core/html/HTMLTemplateElement.h"
 #include "sky/engine/core/html/parser/AtomicHTMLToken.h"
 #include "sky/engine/core/html/parser/HTMLDocumentParser.h"
@@ -45,7 +44,7 @@ static TextPosition uninitializedPositionValue1()
     return TextPosition(OrdinalNumber::fromOneBasedInt(-1), OrdinalNumber::first());
 }
 
-HTMLTreeBuilder::HTMLTreeBuilder(HTMLDocumentParser* parser, HTMLDocument* document, bool)
+HTMLTreeBuilder::HTMLTreeBuilder(HTMLDocumentParser* parser, Document* document, bool)
     :
 #if ENABLE(ASSERT)
       m_isAttached(true),

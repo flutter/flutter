@@ -31,7 +31,6 @@
 #include "sky/engine/config.h"
 #include "sky/engine/bindings/core/v8/V8DOMWrapper.h"
 
-#include "bindings/core/v8/V8HTMLDocument.h"
 #include "bindings/core/v8/V8Window.h"
 #include "sky/engine/bindings/core/v8/V8Binding.h"
 #include "sky/engine/bindings/core/v8/V8ObjectConstructor.h"

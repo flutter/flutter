@@ -1809,9 +1809,6 @@ PassRefPtr<CSSValue> CSSPropertyParser::parseAttr(CSSParserValueList* args)
     if (attrName[0] == '-')
         return nullptr;
 
-    if (m_context.isHTMLDocument())
-        attrName = attrName.lower();
-
     return cssValuePool().createValue(attrName, CSSPrimitiveValue::CSS_ATTR);
 }
 

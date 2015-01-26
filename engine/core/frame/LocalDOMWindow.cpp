@@ -62,7 +62,6 @@
 #include "sky/engine/core/frame/Location.h"
 #include "sky/engine/core/frame/Screen.h"
 #include "sky/engine/core/frame/Settings.h"
-#include "sky/engine/core/html/HTMLDocument.h"
 #include "sky/engine/core/inspector/ConsoleMessage.h"
 #include "sky/engine/core/inspector/ConsoleMessageStorage.h"
 #include "sky/engine/core/inspector/InspectorTraceEvents.h"
@@ -228,7 +227,7 @@ PassRefPtr<Document> LocalDOMWindow::installNewDocument(const DocumentInit& init
 
     clearDocument();
 
-    m_document = HTMLDocument::create(init);
+    m_document = Document::create(init);
     m_application = Application::create(m_document.get(), m_document.get(), m_document->url().string());
     m_eventQueue = DOMWindowEventQueue::create(m_document.get());
     m_document->attach();

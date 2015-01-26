@@ -121,14 +121,6 @@ struct AnnotatedRegionValue;
 
 typedef int ExceptionCode;
 
-enum DocumentClass {
-    DefaultDocumentClass = 0,
-    HTMLDocumentClass = 1,
-    MediaDocumentClass = 1 << 4,
-};
-
-typedef unsigned char DocumentClassFlags;
-
 class Document;
 
 class Document : public ContainerNode, public TreeScope, public ExecutionContext, public ExecutionContextClient
@@ -210,8 +202,6 @@ public:
     void didChangeVisibilityState();
 
     PassRefPtr<Node> adoptNode(PassRefPtr<Node> source, ExceptionState&);
-
-    bool isHTMLDocument() const { return m_documentClasses & HTMLDocumentClass; }
 
     struct TransitionElementData {
         String scope;
@@ -538,7 +528,7 @@ public:
     virtual v8::Handle<v8::Object> wrap(v8::Handle<v8::Object> creationContext, v8::Isolate*) override;
 
 protected:
-    Document(const DocumentInit&, DocumentClassFlags = DefaultDocumentClass);
+    explicit Document(const DocumentInit&);
 
 #if !ENABLE(OILPAN)
     virtual void dispose() override;
@@ -688,8 +678,6 @@ private:
     HashMap<String, RefPtr<HTMLCanvasElement> > m_cssCanvasElements;
 
     OwnPtr<SelectorQueryCache> m_selectorQueryCache;
-
-    DocumentClassFlags m_documentClasses;
 
     RenderView* m_renderView;
 

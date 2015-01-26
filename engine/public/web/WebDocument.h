@@ -77,7 +77,6 @@ public:
 
     // Returns the frame the document belongs to or 0 if the document is frameless.
     BLINK_EXPORT WebLocalFrame* frame() const;
-    BLINK_EXPORT bool isHTMLDocument() const;
 
     BLINK_EXPORT WebElement documentElement() const;
     BLINK_EXPORT WebString title() const;

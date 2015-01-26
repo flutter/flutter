@@ -10,7 +10,6 @@
 #include "sky/engine/core/app/Module.h"
 #include "sky/engine/core/dom/Document.h"
 #include "sky/engine/core/dom/DocumentParser.h"
-#include "sky/engine/core/html/HTMLDocument.h"
 #include "sky/engine/wtf/text/WTFString.h"
 
 namespace blink {
@@ -50,7 +49,7 @@ void ModuleLoader::OnReceivedResponse(mojo::URLResponsePtr response) {
   DocumentInit init = DocumentInit(url, 0, context, 0)
       .withRegistrationContext(context->registrationContext());
 
-  RefPtr<Document> document = HTMLDocument::create(init);
+  RefPtr<Document> document = Document::create(init);
   document->startParsing()->parse(response->body.Pass(),
       base::Bind(&ModuleLoader::OnParsingComplete, weak_factory_.GetWeakPtr()));
 

@@ -81,9 +81,6 @@ public:
     const KURL& baseURL() const { return m_baseURL; }
     const Referrer& referrer() const { return m_referrer; }
 
-    // This causes CSS parsing to be case insensitive and should be removed.
-    bool isHTMLDocument() const { return true; }
-
     // FIXME: These setters shouldn't exist, however the current lifetime of CSSParserContext
     // is not well understood and thus we sometimes need to override these fields.
     void setBaseURL(const KURL& baseURL) { m_baseURL = baseURL; }
