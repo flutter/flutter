@@ -52,7 +52,6 @@
 #include "sky/engine/core/page/Chrome.h"
 #include "sky/engine/core/page/ChromeClient.h"
 #include "sky/engine/core/page/EditorClient.h"
-#include "sky/engine/core/page/EventWithHitTestResults.h"
 #include "sky/engine/core/page/FocusController.h"
 #include "sky/engine/core/page/Page.h"
 #include "sky/engine/core/rendering/HitTestRequest.h"

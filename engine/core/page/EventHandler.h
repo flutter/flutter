@@ -32,7 +32,6 @@
 #include "sky/engine/core/rendering/HitTestRequest.h"
 #include "sky/engine/core/rendering/style/RenderStyleConstants.h"
 #include "sky/engine/platform/Cursor.h"
-#include "sky/engine/platform/PlatformEvent.h"
 #include "sky/engine/platform/Timer.h"
 #include "sky/engine/platform/geometry/LayoutPoint.h"
 #include "sky/engine/platform/heap/Handle.h"
@@ -49,8 +48,6 @@ class Document;
 class Element;
 class Event;
 class EventTarget;
-template <typename EventType>
-class EventWithHitTestResults;
 class FloatPoint;
 class FloatQuad;
 class HitTestRequest;

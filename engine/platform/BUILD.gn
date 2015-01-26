@@ -472,7 +472,6 @@ source_set("platform") {
     "ParsingUtilities.h",
     "Partitions.cpp",
     "Partitions.h",
-    "PlatformEvent.h",
     "PlatformExport.h",
     "PlatformScreen.cpp",
     "PlatformScreen.h",

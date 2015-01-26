@@ -15,7 +15,6 @@
 #include "sky/engine/core/events/PointerEvent.h"
 #include "sky/engine/core/frame/LocalFrame.h"
 #include "sky/engine/core/frame/FrameView.h"
-#include "sky/engine/core/page/EventWithHitTestResults.h"
 #include "sky/engine/core/rendering/RenderObject.h"
 #include "sky/engine/core/rendering/RenderView.h"
 #include "sky/engine/platform/KeyboardCodes.h"

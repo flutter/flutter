@@ -48,7 +48,6 @@
 
 namespace blink {
 
-class PlatformEvent;
 class RenderBox;
 class RenderLayer;
 

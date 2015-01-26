@@ -80,8 +80,6 @@ class ElementDataCache;
 class Event;
 class EventFactoryBase;
 class EventListener;
-template <typename EventType>
-class EventWithHitTestResults;
 class ExceptionState;
 class FloatQuad;
 class FloatRect;
