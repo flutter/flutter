@@ -116,9 +116,7 @@ GraphicsContext::GraphicsContext(SkCanvas* canvas, DisabledMode disableContextOr
     , m_paintStateStack()
     , m_paintStateIndex(0)
     , m_pendingCanvasSave(false)
-    , m_annotationMode(0)
 #if ENABLE(ASSERT)
-    , m_annotationCount(0)
     , m_layerCount(0)
     , m_disableDestructionChecks(false)
 #endif
@@ -145,7 +143,6 @@ GraphicsContext::~GraphicsContext()
     if (!m_disableDestructionChecks) {
         ASSERT(!m_paintStateIndex);
         ASSERT(!m_paintState->saveCount());
-        ASSERT(!m_annotationCount);
         ASSERT(!m_layerCount);
         ASSERT(m_recordingStateStack.isEmpty());
         ASSERT(m_canvasStateStack.isEmpty());
@@ -223,35 +220,6 @@ void GraphicsContext::restoreLayer()
     m_canvas->restore();
     if (regionTrackingEnabled())
         m_trackedRegion.popCanvasLayer(this);
-}
-
-void GraphicsContext::beginAnnotation(const AnnotationList& annotations)
-{
-    if (contextDisabled())
-        return;
-
-    canvas()->beginCommentGroup("GraphicsContextAnnotation");
-
-    AnnotationList::const_iterator end = annotations.end();
-    for (AnnotationList::const_iterator it = annotations.begin(); it != end; ++it)
-        canvas()->addComment(it->first, it->second.ascii().data());
-
-#if ENABLE(ASSERT)
-    ++m_annotationCount;
-#endif
-}
-
-void GraphicsContext::endAnnotation()
-{
-    if (contextDisabled())
-        return;
-
-    ASSERT(m_annotationCount > 0);
-    canvas()->endCommentGroup();
-
-#if ENABLE(ASSERT)
-    --m_annotationCount;
-#endif
 }
 
 void GraphicsContext::setStrokePattern(PassRefPtr<Pattern> pattern)

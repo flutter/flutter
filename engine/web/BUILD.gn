@@ -13,7 +13,6 @@ platform_web_unittest_files = [
   "//sky/engine/platform/graphics/DeferredImageDecoderTest.cpp",
   "//sky/engine/platform/graphics/ImageDecodingStoreTest.cpp",
   "//sky/engine/platform/graphics/ImageFrameGeneratorTest.cpp",
-  "//sky/engine/platform/graphics/OpaqueRectTrackingContentLayerDelegateTest.cpp",
   "//sky/engine/platform/graphics/test/MockImageDecoder.h",
   "//sky/engine/platform/graphics/test/MockWebGraphicsContext3D.h",
   "//sky/engine/platform/image-decoders/gif/GIFImageDecoderTest.cpp",

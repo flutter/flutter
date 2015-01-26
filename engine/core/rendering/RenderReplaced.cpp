@@ -26,7 +26,6 @@
 
 #include "gen/sky/platform/RuntimeEnabledFeatures.h"
 #include "sky/engine/core/editing/PositionWithAffinity.h"
-#include "sky/engine/core/rendering/GraphicsContextAnnotator.h"
 #include "sky/engine/core/rendering/RenderBlock.h"
 #include "sky/engine/core/rendering/RenderImage.h"
 #include "sky/engine/core/rendering/RenderLayer.h"
@@ -89,8 +88,6 @@ void RenderReplaced::intrinsicSizeChanged()
 
 void RenderReplaced::paint(PaintInfo& paintInfo, const LayoutPoint& paintOffset)
 {
-    ANNOTATE_GRAPHICS_CONTEXT(paintInfo, this);
-
     if (!shouldPaint(paintInfo, paintOffset))
         return;
 

@@ -26,7 +26,6 @@
 #include "sky/engine/core/dom/Element.h"
 #include "sky/engine/core/frame/LocalFrame.h"
 #include "sky/engine/core/page/Page.h"
-#include "sky/engine/core/rendering/GraphicsContextAnnotator.h"
 #include "sky/engine/core/rendering/HitTestResult.h"
 #include "sky/engine/core/rendering/RenderGeometryMap.h"
 #include "sky/engine/core/rendering/RenderLayer.h"
@@ -198,8 +197,6 @@ void RenderView::paint(PaintInfo& paintInfo, const LayoutPoint& paintOffset)
     ASSERT(!needsLayout());
     // RenderViews should never be called to paint with an offset not on device pixels.
     ASSERT(LayoutPoint(IntPoint(paintOffset.x(), paintOffset.y())) == paintOffset);
-
-    ANNOTATE_GRAPHICS_CONTEXT(paintInfo, this);
 
     // This avoids painting garbage between columns if there is a column gap.
     if (m_frameView && style()->isOverflowPaged())

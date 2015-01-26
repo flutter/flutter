@@ -33,7 +33,6 @@
 #include "sky/engine/platform/geometry/FloatRect.h"
 #include "sky/engine/platform/graphics/DashArray.h"
 #include "sky/engine/platform/graphics/DrawLooperBuilder.h"
-#include "sky/engine/platform/graphics/GraphicsContextAnnotation.h"
 #include "sky/engine/platform/graphics/GraphicsContextState.h"
 #include "sky/engine/platform/graphics/ImageBufferSurface.h"
 #include "sky/engine/platform/graphics/ImageFilter.h"
@@ -217,9 +216,6 @@ public:
     void setTrackTextRegion(bool track) { m_trackTextRegion = track; }
     const SkRect& textRegion() const { return m_textRegion; }
 
-    AnnotationModeFlags annotationMode() const { return m_annotationMode; }
-    void setAnnotationMode(const AnnotationModeFlags mode) { m_annotationMode = mode; }
-
     SkColorFilter* colorFilter() const;
     void setColorFilter(ColorFilter);
     // ---------- End state management methods -----------------
@@ -388,9 +384,6 @@ public:
 
     static void adjustLineToPixelBoundaries(FloatPoint& p1, FloatPoint& p2, float strokeWidth, StrokeStyle);
 
-    void beginAnnotation(const AnnotationList&);
-    void endAnnotation();
-
     void preparePaintForDrawRectToRect(
         SkPaint*,
         const SkRect& srcRect,
@@ -494,13 +487,10 @@ private:
     Vector<CanvasSaveState> m_canvasStateStack;
     bool m_pendingCanvasSave;
 
-    AnnotationModeFlags m_annotationMode;
-
     struct RecordingState;
     Vector<RecordingState> m_recordingStateStack;
 
 #if ENABLE(ASSERT)
-    unsigned m_annotationCount;
     unsigned m_layerCount;
     bool m_disableDestructionChecks;
 #endif

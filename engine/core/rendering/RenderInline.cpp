@@ -26,7 +26,6 @@
 #include "sky/engine/core/dom/StyleEngine.h"
 #include "sky/engine/core/page/Chrome.h"
 #include "sky/engine/core/page/Page.h"
-#include "sky/engine/core/rendering/GraphicsContextAnnotator.h"
 #include "sky/engine/core/rendering/HitTestResult.h"
 #include "sky/engine/core/rendering/InlineTextBox.h"
 #include "sky/engine/core/rendering/RenderBlock.h"
@@ -174,7 +173,6 @@ void RenderInline::addChild(RenderObject* newChild, RenderObject* beforeChild)
 
 void RenderInline::paint(PaintInfo& paintInfo, const LayoutPoint& paintOffset)
 {
-    ANNOTATE_GRAPHICS_CONTEXT(paintInfo, this);
     m_lineBoxes.paint(this, paintInfo, paintOffset);
 }
 

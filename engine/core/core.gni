@@ -1037,8 +1037,6 @@ sky_core_files = [
   "rendering/FilterEffectRenderer.cpp",
   "rendering/FilterEffectRenderer.h",
   "rendering/GapRects.h",
-  "rendering/GraphicsContextAnnotator.cpp",
-  "rendering/GraphicsContextAnnotator.h",
   "rendering/HitTestingTransformState.cpp",
   "rendering/HitTestingTransformState.h",
   "rendering/HitTestLocation.cpp",

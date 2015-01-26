@@ -34,7 +34,6 @@
 #include "sky/engine/core/frame/LocalFrame.h"
 #include "sky/engine/core/frame/Settings.h"
 #include "sky/engine/core/page/Page.h"
-#include "sky/engine/core/rendering/GraphicsContextAnnotator.h"
 #include "sky/engine/core/rendering/HitTestLocation.h"
 #include "sky/engine/core/rendering/HitTestResult.h"
 #include "sky/engine/core/rendering/InlineIterator.h"
@@ -515,8 +514,6 @@ void RenderBlock::markPositionedObjectsForLayout()
 
 void RenderBlock::paint(PaintInfo& paintInfo, const LayoutPoint& paintOffset)
 {
-    ANNOTATE_GRAPHICS_CONTEXT(paintInfo, this);
-
     LayoutPoint adjustedPaintOffset = paintOffset + location();
 
     PaintPhase phase = paintInfo.phase;
