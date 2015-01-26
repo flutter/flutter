@@ -125,36 +125,6 @@ inline ElementRareData& Element::ensureElementRareData()
     return static_cast<ElementRareData&>(ensureRareData());
 }
 
-bool Element::hasElementFlagInternal(ElementFlags mask) const
-{
-    return elementRareData()->hasElementFlag(mask);
-}
-
-void Element::setElementFlag(ElementFlags mask, bool value)
-{
-    if (!hasRareData() && !value)
-        return;
-    ensureElementRareData().setElementFlag(mask, value);
-}
-
-void Element::clearElementFlag(ElementFlags mask)
-{
-    if (!hasRareData())
-        return;
-    elementRareData()->clearElementFlag(mask);
-}
-
-void Element::clearTabIndexExplicitlyIfNeeded()
-{
-    if (hasRareData())
-        elementRareData()->clearTabIndexExplicitly();
-}
-
-void Element::setTabIndexExplicitly(short tabIndex)
-{
-    ensureElementRareData().setTabIndexExplicitly(tabIndex);
-}
-
 void Element::setTabIndex(int value)
 {
     setIntegralAttribute(HTMLNames::tabindexAttr, value);
@@ -1092,7 +1062,8 @@ void Element::parseAttribute(const QualifiedName& name, const AtomicString& valu
     if (name == HTMLNames::tabindexAttr) {
         int tabindex = 0;
         if (value.isEmpty()) {
-            clearTabIndexExplicitlyIfNeeded();
+            if (hasRareData())
+                elementRareData()->clearTabIndex();
             if (treeScope().adjustedFocusedElement() == this) {
                 // We might want to call blur(), but it's dangerous to dispatch
                 // events here.
@@ -1100,7 +1071,8 @@ void Element::parseAttribute(const QualifiedName& name, const AtomicString& valu
             }
         } else if (parseHTMLInteger(value, tabindex)) {
             // Clamp tabindex to the range of 'short' to match Firefox's behavior.
-            setTabIndexExplicitly(max(static_cast<int>(std::numeric_limits<short>::min()), std::min(tabindex, static_cast<int>(std::numeric_limits<short>::max()))));
+            tabindex = max(static_cast<int>(std::numeric_limits<short>::min()), std::min(tabindex, static_cast<int>(std::numeric_limits<short>::max())));
+            ensureElementRareData().setTabIndex(tabindex);
         }
     }
 }
@@ -1227,7 +1199,9 @@ bool Element::supportsFocus() const
     // But supportsFocus must return true when the element is editable, or else
     // it won't be focusable. Furthermore, supportsFocus cannot just return true
     // always or else tabIndex() will change for all HTML elements.
-    return hasElementFlag(TabIndexWasSetExplicitly) || (hasEditableStyle() && parentNode() && !parentNode()->hasEditableStyle());
+    if (hasRareData() && elementRareData()->hasTabIndex())
+        return true;
+    return hasEditableStyle() && parentNode() && !parentNode()->hasEditableStyle();
 }
 
 bool Element::isFocusable() const

@@ -43,17 +43,18 @@ public:
     ~ElementRareData();
 
     short tabIndex() const { return m_tabindex; }
+    bool hasTabIndex() const { return m_hasTabIndex; }
 
-    void setTabIndexExplicitly(short index)
+    void setTabIndex(short index)
     {
         m_tabindex = index;
-        setElementFlag(TabIndexWasSetExplicitly, true);
+        m_hasTabIndex = true;
     }
 
-    void clearTabIndexExplicitly()
+    void clearTabIndex()
     {
         m_tabindex = 0;
-        clearElementFlag(TabIndexWasSetExplicitly);
+        m_hasTabIndex = false;
     }
 
     CSSStyleDeclaration& ensureInlineCSSStyleDeclaration(Element* ownerElement);
@@ -84,7 +85,8 @@ public:
     }
 
 private:
-    short m_tabindex;
+    unsigned m_tabindex : 16;
+    unsigned m_hasTabIndex : 1;
 
     IntSize m_savedLayerScrollOffset;
 
@@ -101,6 +103,7 @@ private:
 inline ElementRareData::ElementRareData(RenderObject* renderer)
     : NodeRareData(renderer)
     , m_tabindex(0)
+    , m_hasTabIndex(false)
 {
     m_isElementRareData = true;
 }

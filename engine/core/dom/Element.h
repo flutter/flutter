@@ -63,12 +63,6 @@ enum SpellcheckAttributeState {
     SpellcheckAttributeDefault
 };
 
-enum ElementFlags {
-    TabIndexWasSetExplicitly = 1 << 0,
-
-    NumberOfElementFlags = 2, // Required size of bitfield used to store the flags.
-};
-
 class Element : public ContainerNode {
     DEFINE_WRAPPERTYPEINFO();
 public:
@@ -298,8 +292,6 @@ protected:
     virtual void removedFrom(ContainerNode*) override;
     virtual void childrenChanged(const ChildrenChange&) override;
 
-    void clearTabIndexExplicitlyIfNeeded();
-    void setTabIndexExplicitly(short);
     // Subclasses may override this method to affect focusability. Unlike
     // supportsFocus, this method must be called on an up-to-date layout, so it
     // may use the renderer to reason about focusability. This method cannot be
@@ -316,11 +308,6 @@ private:
     void attributeChanged(const QualifiedName&, const AtomicString&, AttributeModificationReason = ModifiedDirectly);
 
     bool classChangeNeedsStyleRecalc(const SpaceSplitString& oldClasses, const SpaceSplitString& newClasses);
-
-    bool hasElementFlag(ElementFlags mask) const { return hasRareData() && hasElementFlagInternal(mask); }
-    void setElementFlag(ElementFlags, bool value = true);
-    void clearElementFlag(ElementFlags);
-    bool hasElementFlagInternal(ElementFlags) const;
 
     bool isElementNode() const = delete; // This will catch anyone doing an unnecessary check.
     bool isDocumentFragment() const = delete; // This will catch anyone doing an unnecessary check.

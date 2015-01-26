@@ -64,21 +64,15 @@ public:
         return *m_mutationObserverData;
     }
 
-    bool hasElementFlag(ElementFlags mask) const { return m_elementFlags & mask; }
-    void setElementFlag(ElementFlags mask, bool value) { m_elementFlags = (m_elementFlags & ~mask) | (-(int32_t)value & mask); }
-    void clearElementFlag(ElementFlags mask) { m_elementFlags &= ~mask; }
-
 protected:
     explicit NodeRareData(RenderObject* renderer)
         : NodeRareDataBase(renderer)
-        , m_elementFlags(0)
         , m_isElementRareData(false)
     { }
 
 private:
     OwnPtr<NodeMutationObserverData> m_mutationObserverData;
 
-    unsigned m_elementFlags : NumberOfElementFlags;
 protected:
     unsigned m_isElementRareData : 1;
 };
