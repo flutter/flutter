@@ -30,7 +30,6 @@ typedef (CanvasRenderingContext2D or WebGLRenderingContext) RenderingContext;
 
     [CustomElementCallbacks, PerWorldBindings, RaisesException] Element createElement(DOMString tagName);
     DocumentFragment createDocumentFragment();
-    Text createTextNode(DOMString data);
 
     [CustomElementCallbacks, RaisesException, TypeChecking=Interface] Node importNode(Node node, optional boolean deep = false);
 

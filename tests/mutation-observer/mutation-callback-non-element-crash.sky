@@ -9,7 +9,7 @@ function mutationCallback(mutations, observer) {
 var mutationObserver = new MutationObserver(mutationCallback);
 var body = document.getElementById("body");
 mutationObserver.observe(body, {childList: true});
-body.appendChild(document.createTextNode("PASS. We didn't crash"));
+body.appendChild(new Text("PASS. We didn't crash"));
 </script>
 </body>
 </html>

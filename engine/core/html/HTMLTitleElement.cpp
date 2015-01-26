@@ -86,7 +86,7 @@ void HTMLTitleElement::setText(const String &value)
     m_ignoreTitleUpdatesWhenChildrenChange = false;
 
     if (!value.isEmpty())
-        appendChild(document().createTextNode(value.impl()), IGNORE_EXCEPTION);
+        appendChild(Text::create(document(), value.impl()), IGNORE_EXCEPTION);
 }
 
 }

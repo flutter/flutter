@@ -44,7 +44,7 @@ function createElement(tagName) {
 
 function createText(text) {
   texts++;
-  return document.createTextNode(text);
+  return new Text(text);
 }
 
 function createElements(root, depth) {

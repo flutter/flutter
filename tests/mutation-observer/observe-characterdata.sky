@@ -41,7 +41,7 @@ describe('MutationObserver on character data', function() {
             // ...observer.disconnect() should prevent further delivery of mutations.
 
             assert.equal(mutations, null);
-            charDataNode = document.createTextNode('');
+            charDataNode = new Text('');
             observer.observe(charDataNode, { characterData: true });
             charDataNode.textContent = 'foo';
             charDataNode.textContent = 'bar';

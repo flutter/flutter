@@ -7,7 +7,7 @@ describe('Non-relevant properties on mutation records should be null, except for
   var observer = new MutationObserver(function() {});
 
   it('on characterData records', function() {
-    var text = document.createTextNode('something');
+    var text = new Text('something');
     observer.observe(text, {characterData: true});
     text.data = 'something else';
     var record = observer.takeRecords()[0];

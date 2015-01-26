@@ -70,7 +70,7 @@ void InsertLineBreakCommand::doApply()
     pos = positionOutsideTabSpan(pos);
 
     RefPtr<Node> nodeToInsert = nullptr;
-    nodeToInsert = document().createTextNode("\n");
+    nodeToInsert = Text::create(document(), "\n");
 
     // FIXME: Need to merge text nodes when inserting just after or before text.
 
@@ -111,7 +111,7 @@ void InsertLineBreakCommand::doApply()
             if (textNode->inDocument())
                 insertTextIntoNode(textNode, 0, nonBreakingSpaceString());
             else {
-                RefPtr<Text> nbspNode = document().createTextNode(nonBreakingSpaceString());
+                RefPtr<Text> nbspNode = Text::create(document(), nonBreakingSpaceString());
                 insertNodeAt(nbspNode.get(), positionBeforeTextNode);
                 endingPosition = firstPositionInNode(nbspNode.get());
             }

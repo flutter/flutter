@@ -517,11 +517,6 @@ PassRefPtr<DocumentFragment> Document::createDocumentFragment()
     return DocumentFragment::create(*this);
 }
 
-PassRefPtr<Text> Document::createTextNode(const String& data)
-{
-    return Text::create(*this, data);
-}
-
 PassRefPtr<Text> Document::createEditingTextNode(const String& text)
 {
     return Text::createEditingText(*this, text);
@@ -545,7 +540,7 @@ PassRefPtr<Node> Document::importNode(Node* importedNode, bool deep, ExceptionSt
 {
     switch (importedNode->nodeType()) {
     case TEXT_NODE:
-        return createTextNode(toText(importedNode)->data());
+        return Text::create(*this, toText(importedNode)->data());
     case ELEMENT_NODE: {
         Element* oldElement = toElement(importedNode);
         RefPtr<Element> newElement = createElement(oldElement->tagQName(), false);

@@ -174,7 +174,6 @@ public:
 
     PassRefPtr<Element> createElement(const AtomicString& name, ExceptionState&);
     PassRefPtr<DocumentFragment> createDocumentFragment();
-    PassRefPtr<Text> createTextNode(const String& data);
     PassRefPtr<Node> importNode(Node* importedNode, bool deep, ExceptionState&);
     PassRefPtr<Element> createElement(const QualifiedName&, bool createdByParser);
 
