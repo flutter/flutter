@@ -895,11 +895,6 @@ PassRefPtr<RenderStyle> Element::styleForRenderer()
         activeAnimations->cssAnimations().maybeApplyPendingUpdate(this);
     }
 
-    if (style->hasTransform()) {
-        if (const StylePropertySet* inlineStyle = this->inlineStyle())
-            style->setHasInlineTransform(inlineStyle->hasProperty(CSSPropertyTransform) || inlineStyle->hasProperty(CSSPropertyWebkitTransform));
-    }
-
     document().didRecalculateStyleForElement();
     return style.release();
 }

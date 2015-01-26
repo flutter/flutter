@@ -706,7 +706,6 @@ public:
     const AtomicString& highlight() const { return rareInheritedData->highlight; }
     const AtomicString& hyphenationString() const { return rareInheritedData->hyphenationString; }
     const AtomicString& locale() const { return rareInheritedData->locale; }
-    bool hasInlineTransform() const { return rareNonInheritedData->m_hasInlineTransform; }
     const TransformOperations& transform() const { return rareNonInheritedData->m_transform->m_operations; }
     const Length& transformOriginX() const { return rareNonInheritedData->m_transform->m_x; }
     const Length& transformOriginY() const { return rareNonInheritedData->m_transform->m_y; }
@@ -1065,7 +1064,6 @@ public:
     void setHyphens(Hyphens h) { SET_VAR(rareInheritedData, hyphens, h); }
     void setHyphenationString(const AtomicString& h) { SET_VAR(rareInheritedData, hyphenationString, h); }
     void setLocale(const AtomicString& locale) { SET_VAR(rareInheritedData, locale, locale); }
-    void setHasInlineTransform(bool b) { SET_VAR(rareNonInheritedData, m_hasInlineTransform, b); }
     void setTransform(const TransformOperations& ops) { SET_VAR(rareNonInheritedData.access()->m_transform, m_operations, ops); }
     void setTransformOriginX(const Length& l) { SET_VAR(rareNonInheritedData.access()->m_transform, m_x, l); }
     void setTransformOriginY(const Length& l) { SET_VAR(rareNonInheritedData.access()->m_transform, m_y, l); }

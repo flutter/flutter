@@ -158,9 +158,6 @@ public:
     // becomes composited.
     unsigned m_requiresAcceleratedCompositingForExternalReasons: 1;
 
-    // Whether the transform (if it exists) is stored in the element's inline style.
-    unsigned m_hasInlineTransform : 1;
-
 private:
     StyleRareNonInheritedData();
     StyleRareNonInheritedData(const StyleRareNonInheritedData&);
