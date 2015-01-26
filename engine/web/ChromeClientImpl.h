@@ -79,7 +79,6 @@ public:
     virtual WebScreenInfo screenInfo() const override;
     virtual void layoutUpdated(LocalFrame*) const override;
     virtual void setCursor(const Cursor&) override;
-    virtual void setTouchAction(TouchAction) override;
 
     // ChromeClient methods:
     virtual String acceptLanguages() override;
@@ -88,8 +87,6 @@ public:
     void setNewWindowNavigationPolicy(WebNavigationPolicy);
 
     virtual void willSetInputMethodState() override;
-    virtual void didUpdateTextOfFocusedElementByNonUserInput() override;
-    virtual void showImeIfNeeded() override;
 
 private:
     virtual bool isChromeClientImpl() const override { return true; }

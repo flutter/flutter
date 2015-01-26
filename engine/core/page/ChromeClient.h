@@ -89,8 +89,6 @@ public:
 
     virtual void layoutUpdated(LocalFrame*) const { }
 
-    virtual void setTouchAction(TouchAction) = 0;
-
     virtual String acceptLanguages() = 0;
 
     enum DialogType {
@@ -106,8 +104,6 @@ public:
 
     // Input mehtod editor related functions.
     virtual void willSetInputMethodState() { }
-    virtual void didUpdateTextOfFocusedElementByNonUserInput() { }
-    virtual void showImeIfNeeded() { }
 
 protected:
     virtual ~ChromeClient() { }

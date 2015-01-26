@@ -60,7 +60,6 @@
 #include "sky/engine/public/web/WebNode.h"
 #include "sky/engine/public/web/WebSettings.h"
 #include "sky/engine/public/web/WebTextDirection.h"
-#include "sky/engine/public/web/WebTouchAction.h"
 #include "sky/engine/public/web/WebViewClient.h"
 #include "sky/engine/web/WebLocalFrameImpl.h"
 #include "sky/engine/web/WebSettingsImpl.h"
@@ -122,8 +121,6 @@ FloatRect ChromeClientImpl::pageRect()
 
 void ChromeClientImpl::focus()
 {
-    if (m_webView->client())
-        m_webView->client()->didFocus();
 }
 
 bool ChromeClientImpl::canTakeFocus(FocusType)
@@ -167,13 +164,6 @@ WebNavigationPolicy ChromeClientImpl::getNavigationPolicy()
 
 void ChromeClientImpl::show(NavigationPolicy navigationPolicy)
 {
-    if (!m_webView->client())
-        return;
-
-    WebNavigationPolicy policy = static_cast<WebNavigationPolicy>(navigationPolicy);
-    if (policy == WebNavigationPolicyIgnore)
-        policy = getNavigationPolicy();
-    m_webView->client()->show(policy);
 }
 
 bool ChromeClientImpl::shouldReportDetailedMessageForSource(const String& url)
@@ -253,8 +243,6 @@ void ChromeClientImpl::setCursor(const Cursor& cursor)
 
 void ChromeClientImpl::setCursor(const WebCursorInfo& cursor)
 {
-    if (m_webView->client())
-        m_webView->client()->didChangeCursor(cursor);
 }
 
 String ChromeClientImpl::acceptLanguages()
@@ -262,30 +250,8 @@ String ChromeClientImpl::acceptLanguages()
     return m_webView->client()->acceptLanguages();
 }
 
-void ChromeClientImpl::setTouchAction(TouchAction touchAction)
-{
-    if (WebViewClient* client = m_webView->client()) {
-        WebTouchAction webTouchAction = static_cast<WebTouchAction>(touchAction);
-        client->setTouchAction(webTouchAction);
-    }
-}
-
 void ChromeClientImpl::willSetInputMethodState()
 {
-    if (m_webView->client())
-        m_webView->client()->resetInputMethod();
-}
-
-void ChromeClientImpl::didUpdateTextOfFocusedElementByNonUserInput()
-{
-    if (m_webView->client())
-        m_webView->client()->didUpdateTextOfFocusedElementByNonUserInput();
-}
-
-void ChromeClientImpl::showImeIfNeeded()
-{
-    if (m_webView->client())
-        m_webView->client()->showImeIfNeeded();
 }
 
 } // namespace blink

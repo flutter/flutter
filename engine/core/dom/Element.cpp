@@ -1155,8 +1155,6 @@ void Element::focus(bool restorePreviousSelection, FocusType type)
     if (!isFocusable())
         return;
     updateFocusAppearance(restorePreviousSelection);
-
-    document().page()->chrome().client().showImeIfNeeded();
 }
 
 void Element::updateFocusAppearance(bool /*restorePreviousSelection*/)

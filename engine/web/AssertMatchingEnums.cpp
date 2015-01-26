@@ -70,7 +70,6 @@
 #include "sky/engine/public/web/WebTextCheckingResult.h"
 #include "sky/engine/public/web/WebTextCheckingType.h"
 #include "sky/engine/public/web/WebTextDecorationType.h"
-#include "sky/engine/public/web/WebTouchAction.h"
 #include "sky/engine/public/web/WebView.h"
 #include "sky/engine/wtf/Assertions.h"
 #include "sky/engine/wtf/text/StringImpl.h"
@@ -207,12 +206,6 @@ COMPILE_ASSERT_MATCHING_ENUM(WebConsoleMessage::LevelLog, LogMessageLevel);
 COMPILE_ASSERT_MATCHING_ENUM(WebConsoleMessage::LevelWarning, WarningMessageLevel);
 COMPILE_ASSERT_MATCHING_ENUM(WebConsoleMessage::LevelError, ErrorMessageLevel);
 COMPILE_ASSERT_MATCHING_ENUM(WebConsoleMessage::LevelInfo, InfoMessageLevel);
-
-COMPILE_ASSERT_MATCHING_ENUM(WebTouchActionNone, TouchActionNone);
-COMPILE_ASSERT_MATCHING_ENUM(WebTouchActionAuto, TouchActionAuto);
-COMPILE_ASSERT_MATCHING_ENUM(WebTouchActionPanX, TouchActionPanX);
-COMPILE_ASSERT_MATCHING_ENUM(WebTouchActionPanY, TouchActionPanY);
-COMPILE_ASSERT_MATCHING_ENUM(WebTouchActionPinchZoom, TouchActionPinchZoom);
 
 COMPILE_ASSERT_MATCHING_ENUM(WebSettings::V8CacheOptionsOff, V8CacheOptionsOff);
 COMPILE_ASSERT_MATCHING_ENUM(WebSettings::V8CacheOptionsParse, V8CacheOptionsParse);

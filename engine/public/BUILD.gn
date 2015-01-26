@@ -117,12 +117,10 @@ source_set("web_headers") {
     "web/WebTextInputInfo.h",
     "web/WebTextInputType.h",
     "web/WebTextRun.h",
-    "web/WebTouchAction.h",
     "web/WebURLLoaderOptions.h",
     "web/WebView.h",
     "web/WebViewClient.h",
     "web/WebWidget.h",
-    "web/WebWidgetClient.h",
     "web/linux/WebFontRendering.h",
   ]
 }

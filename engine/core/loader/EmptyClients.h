@@ -89,8 +89,6 @@ public:
 
     virtual void setCursor(const Cursor&) override { }
 
-    virtual void setTouchAction(TouchAction touchAction) override { };
-
     virtual String acceptLanguages() override;
 };
 

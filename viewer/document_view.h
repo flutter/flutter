@@ -76,7 +76,7 @@ class DocumentView : public blink::ServiceProvider,
   void GetPixelsForTesting(std::vector<unsigned char>* pixels);
 
  private:
-  // WebWidgetClient methods:
+  // WebViewClient methods:
   void initializeLayerTreeView() override;
   void scheduleAnimation() override;
   blink::WebScreenInfo screenInfo() override;

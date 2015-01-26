@@ -33,12 +33,14 @@
 
 #include "../platform/WebGraphicsContext3D.h"
 #include "../platform/WebString.h"
+#include "sky/engine/public/platform/WebCommon.h"
+#include "sky/engine/public/platform/WebRect.h"
+#include "sky/engine/public/platform/WebScreenInfo.h"
 #include "sky/engine/public/web/WebFrame.h"
 #include "sky/engine/public/web/WebNavigatorContentUtilsClient.h"
 #include "sky/engine/public/web/WebPageVisibilityState.h"
 #include "sky/engine/public/web/WebTextAffinity.h"
 #include "sky/engine/public/web/WebTextDirection.h"
-#include "sky/engine/public/web/WebWidgetClient.h"
 
 namespace blink {
 
@@ -58,12 +60,32 @@ struct WebPoint;
 struct WebRect;
 struct WebSize;
 
-// Since a WebView is a WebWidget, a WebViewClient is a WebWidgetClient.
-// Virtual inheritance allows an implementation of WebWidgetClient to be
-// easily reused as part of an implementation of WebViewClient.
-class WebViewClient : virtual public WebWidgetClient {
+class WebViewClient {
 public:
     virtual ServiceProvider& services() = 0;
+
+    // Initialize compositing for this widget.
+    virtual void initializeLayerTreeView() { BLINK_ASSERT_NOT_REACHED(); };
+
+    // Called when the page should pump a frame.
+    virtual void scheduleAnimation() { }
+
+    // TODO(esprehn): Sky needs to implement these to control the mojo::View.
+
+    // Called to get/set the position of the widget in screen coordinates.
+    virtual WebRect windowRect() { return WebRect(); }
+    virtual void setWindowRect(const WebRect&) { }
+
+    // Called to get the position of the root window containing the widget
+    // in screen coordinates.
+    virtual WebRect rootWindowRect() { return WebRect(); }
+
+    // Called to query information about the screen where this widget is
+    // displayed.
+    virtual WebScreenInfo screenInfo() { return WebScreenInfo(); }
+
+    // Called to get the scale factor of the display.
+    virtual float deviceScaleFactor() { return 1; }
 
     // Editing -------------------------------------------------------------
 
