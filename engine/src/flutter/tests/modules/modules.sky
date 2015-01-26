@@ -13,6 +13,13 @@ describe('Module', function() {
     assert.equal(module.document, doc2);
     assert.equal(module.url, "http://www.example.com/module");
   });
+
+  it('should have an empty object by default for exports', function() {
+    var app = new Application(new Document(), "http://www.example.com/app");
+    var module = new Module(app, new Document(), "http://www.example.com/module");
+    assert.isObject(module.exports);
+    assert.lengthOf(Object.keys(module.exports), 0);
+  });
 });
 </script>
 </html>
