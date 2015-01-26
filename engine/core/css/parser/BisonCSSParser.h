@@ -59,10 +59,8 @@ class Element;
 class ImmutableStylePropertySet;
 class MutableStylePropertySet;
 class StyleColor;
-class StyleKeyframe;
 class StylePropertyShorthand;
 class StyleRuleBase;
-class StyleRuleKeyframes;
 class StyleSheetContents;
 
 // FIXME: This class is shared with CSSTokenizer so should we rename it to CSSSourceLocation?
@@ -84,7 +82,6 @@ public:
 
     void parseSheet(StyleSheetContents*, const String&);
     PassRefPtr<StyleRuleBase> parseRule(StyleSheetContents*, const String&);
-    PassRefPtr<StyleKeyframe> parseKeyframeRule(StyleSheetContents*, const String&);
     bool parseSupportsCondition(const String&);
     static bool parseValue(MutableStylePropertySet*, CSSPropertyID, const String&, CSSParserMode, StyleSheetContents*);
     static bool parseColor(RGBA32& color, const String&, bool strict = false);
@@ -94,7 +91,6 @@ public:
     static PassRefPtr<CSSValue> parseAnimationTimingFunctionValue(const String&);
     bool parseDeclaration(MutableStylePropertySet*, const String&, CSSParserObserver*, StyleSheetContents* contextStyleSheet);
     static PassRefPtr<ImmutableStylePropertySet> parseInlineStyleDeclaration(const String&, Element*);
-    PassOwnPtr<Vector<double> > parseKeyframeKeyList(const String&);
     bool parseAttributeMatchType(CSSSelector::AttributeMatchType&, const String&);
 
     static bool parseValue(MutableStylePropertySet*, CSSPropertyID, const String&, const Document&);
@@ -118,9 +114,6 @@ public:
 
     CSSParserValue& sinkFloatingValue(CSSParserValue&);
 
-    StyleKeyframe* createKeyframe(CSSParserValueList*);
-    StyleRuleKeyframes* createKeyframesRule(const String&, PassOwnPtr<Vector<RefPtr<StyleKeyframe> > >, bool isPrefixed);
-
     typedef Vector<RefPtr<StyleRuleBase> > RuleList;
     RuleList* createRuleList();
     RuleList* appendRule(RuleList*, StyleRuleBase*);
@@ -134,9 +127,6 @@ public:
 
     void startDeclarationsForMarginBox();
     void endDeclarationsForMarginBox();
-
-    Vector<RefPtr<StyleKeyframe> >* createFloatingKeyframeVector();
-    PassOwnPtr<Vector<RefPtr<StyleKeyframe> > > sinkFloatingKeyframeVector(Vector<RefPtr<StyleKeyframe> >*);
 
     CSSParserSelector* rewriteSpecifiersWithElementName(const AtomicString& namespacePrefix, const AtomicString& elementName, CSSParserSelector*, bool isNamespacePlaceholder = false);
     CSSParserSelector* rewriteSpecifiersWithNamespaceIfNeeded(CSSParserSelector*);
@@ -156,7 +146,6 @@ public:
     CSSPropertyID m_id;
     RawPtr<StyleSheetContents> m_styleSheet;
     RefPtr<StyleRuleBase> m_rule;
-    RefPtr<StyleKeyframe> m_keyframe;
     OwnPtr<CSSParserValueList> m_valueList;
     bool m_supportsCondition;
 
@@ -232,14 +221,11 @@ private:
     CSSParserLocation m_locationLabel;
 
     Vector<RefPtr<StyleRuleBase> > m_parsedRules;
-    Vector<RefPtr<StyleKeyframe> > m_parsedKeyframes;
     Vector<OwnPtr<RuleList> > m_parsedRuleLists;
     Vector<CSSParserSelector*> m_floatingSelectors;
     Vector<Vector<OwnPtr<CSSParserSelector> >*> m_floatingSelectorVectors;
     Vector<CSSParserValueList*> m_floatingValueLists;
     Vector<CSSParserFunction*> m_floatingFunctions;
-
-    OwnPtr<Vector<RefPtr<StyleKeyframe> > > m_floatingKeyframeVector;
 
     Vector<OwnPtr<CSSParserSelector> > m_reusableSelectorVector;
 

@@ -88,7 +88,6 @@ struct CSSRuleSourceData : public RefCounted<CSSRuleSourceData> {
         STYLE_RULE = 1,
         MEDIA_RULE = 3,
         FONT_FACE_RULE = 4,
-        KEYFRAMES_RULE = 6,
         SUPPORTS_RULE = 8,
         FILTER_RULE = 9
     };

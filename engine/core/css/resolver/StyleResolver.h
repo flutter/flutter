@@ -39,7 +39,6 @@ class Document;
 class Element;
 class ElementRuleCollector;
 class Interpolation;
-class StyleKeyframe;
 class StylePropertySet;
 class StyleResolverStats;
 class MatchResult;
@@ -67,7 +66,6 @@ public:
 
     PassRefPtr<RenderStyle> styleForElement(Element*, RenderStyle* parentStyle = 0);
 
-    PassRefPtr<RenderStyle> styleForKeyframe(Element*, const RenderStyle&, RenderStyle* parentStyle, const StyleKeyframe*, const AtomicString& animationName);
     static PassRefPtr<AnimatableValue> createAnimatableValueSnapshot(Element&, CSSPropertyID, CSSValue&);
     static PassRefPtr<AnimatableValue> createAnimatableValueSnapshot(StyleResolverState&, CSSPropertyID, CSSValue&);
 
@@ -75,8 +73,6 @@ public:
     PassRefPtr<RenderStyle> styleForText(Text*);
 
     static PassRefPtr<RenderStyle> styleForDocument(Document&);
-
-    void styleTreeResolveScopedKeyframesRules(const Element*, Vector<RawPtr<ScopedStyleResolver>, 8>&);
 
     // |properties| is an array with |count| elements.
     void applyPropertiesToStyle(const CSSPropertyValue* properties, size_t count, RenderStyle*);

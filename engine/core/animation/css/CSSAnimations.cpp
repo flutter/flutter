@@ -40,8 +40,6 @@
 #include "sky/engine/core/animation/css/CSSPropertyEquality.h"
 #include "sky/engine/core/css/CSSPropertyMetadata.h"
 #include "sky/engine/core/css/CSSValueList.h"
-#include "sky/engine/core/css/StyleKeyframe.h"
-#include "sky/engine/core/css/StyleRuleKeyframes.h"
 #include "sky/engine/core/dom/Element.h"
 #include "sky/engine/core/events/AnimationEvent.h"
 #include "sky/engine/core/events/TransitionEvent.h"

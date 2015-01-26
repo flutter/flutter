@@ -153,8 +153,6 @@ void RuleSet::addChildRules(const Vector<RefPtr<StyleRuleBase> >& rules)
                 addRule(styleRule, selectorIndex);
         } else if (rule->isFontFaceRule()) {
             addFontFaceRule(toStyleRuleFontFace(rule));
-        } else if (rule->isKeyframesRule()) {
-            // TODO(esprehn): remove this.
         } else if (rule->isSupportsRule() && toStyleRuleSupports(rule)->conditionIsSupported()) {
             addChildRules(toStyleRuleSupports(rule)->childRules());
         }

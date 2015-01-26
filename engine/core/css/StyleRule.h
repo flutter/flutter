@@ -36,15 +36,13 @@ public:
     enum Type {
         Unknown, // Not used.
         Style,
-        FontFace = 4,
-        Keyframes = 5,
-        Supports = 12,
+        FontFace,
+        Supports,
     };
 
     Type type() const { return static_cast<Type>(m_type); }
 
     bool isFontFaceRule() const { return type() == FontFace; }
-    bool isKeyframesRule() const { return type() == Keyframes; }
     bool isStyleRule() const { return type() == Style; }
     bool isSupportsRule() const { return type() == Supports; }
 

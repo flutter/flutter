@@ -49,7 +49,6 @@
 #include "sky/engine/core/css/FontFace.h"
 #include "sky/engine/core/css/MediaQueryEvaluator.h"
 #include "sky/engine/core/css/RuleSet.h"
-#include "sky/engine/core/css/StyleKeyframe.h"
 #include "sky/engine/core/css/StylePropertySet.h"
 #include "sky/engine/core/css/StyleSheetContents.h"
 #include "sky/engine/core/css/parser/BisonCSSParser.h"
@@ -69,7 +68,6 @@
 #include "sky/engine/core/frame/FrameView.h"
 #include "sky/engine/core/frame/LocalFrame.h"
 #include "sky/engine/core/rendering/RenderView.h"
-#include "sky/engine/core/rendering/style/KeyframeList.h"
 #include "sky/engine/wtf/LeakAnnotations.h"
 #include "sky/engine/wtf/StdLibExtras.h"
 
@@ -251,47 +249,6 @@ PassRefPtr<RenderStyle> StyleResolver::styleForElement(Element* element, RenderS
     return state.takeStyle();
 }
 
-PassRefPtr<RenderStyle> StyleResolver::styleForKeyframe(Element* element, const RenderStyle& elementStyle, RenderStyle* parentStyle, const StyleKeyframe* keyframe, const AtomicString& animationName)
-{
-    ASSERT(m_document.frame());
-    ASSERT(m_document.settings());
-
-    if (element == m_document.documentElement())
-        m_document.setDirectionSetOnDocumentElement(false);
-    StyleResolverState state(m_document, element, parentStyle);
-
-    MatchResult result;
-    result.addMatchedProperties(&keyframe->properties());
-
-    ASSERT(!state.style());
-
-    // Create the style
-    state.setStyle(RenderStyle::clone(&elementStyle));
-    state.setLineHeightValue(0);
-
-    state.fontBuilder().initForStyleResolve(state.document(), state.style());
-
-    // We also don't need to bother with animation properties since the only
-    // relevant one is animation-timing-function and we special-case that in
-    // CSSAnimations.cpp
-    bool inheritedOnly = false;
-    applyMatchedProperties<HighPriorityProperties>(state, result, inheritedOnly);
-
-    // If our font got dirtied, go ahead and update it now.
-    updateFont(state);
-
-    // Line-height is set when we are sure we decided on the font-size
-    if (state.lineHeightValue())
-        StyleBuilder::applyProperty(CSSPropertyLineHeight, state, state.lineHeightValue());
-
-    // Now do rest of the properties.
-    applyMatchedProperties<LowPriorityProperties>(state, result, inheritedOnly);
-
-    loadPendingResources(state);
-
-    return state.takeStyle();
-}
-
 // This function is used by the WebAnimations JavaScript API method animate().
 // FIXME: Remove this when animate() switches away from resolution-dependent parsing.
 PassRefPtr<AnimatableValue> StyleResolver::createAnimatableValueSnapshot(Element& element, CSSPropertyID property, CSSValue& value)
@@ -379,14 +336,6 @@ bool StyleResolver::applyAnimatedProperties(StyleResolverState& state, Element* 
     ASSERT(!state.fontBuilder().fontDirty());
 
     return true;
-}
-
-void StyleResolver::styleTreeResolveScopedKeyframesRules(const Element* element, Vector<RawPtr<ScopedStyleResolver>, 8>& resolvers)
-{
-    // Add resolvers for shadow roots hosted by the given element.
-    if (ShadowRoot* shadowRoot = element->shadowRoot())
-        resolvers.append(&shadowRoot->scopedStyleResolver());
-    resolvers.append(&element->treeScope().scopedStyleResolver());
 }
 
 template <StyleResolver::StyleApplicationPass pass>

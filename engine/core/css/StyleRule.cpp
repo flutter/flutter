@@ -23,7 +23,6 @@
 #include "sky/engine/core/css/StyleRule.h"
 
 #include "sky/engine/core/css/StylePropertySet.h"
-#include "sky/engine/core/css/StyleRuleKeyframes.h"
 
 namespace blink {
 
@@ -44,9 +43,6 @@ void StyleRuleBase::destroy()
         return;
     case Supports:
         delete toStyleRuleSupports(this);
-        return;
-    case Keyframes:
-        delete toStyleRuleKeyframes(this);
         return;
     case Unknown:
         ASSERT_NOT_REACHED();

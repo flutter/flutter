@@ -24,7 +24,6 @@
 
 #include "sky/engine/core/css/RuleFeature.h"
 #include "sky/engine/core/css/StyleRule.h"
-#include "sky/engine/core/css/StyleRuleKeyframes.h"
 #include "sky/engine/platform/heap/Handle.h"
 #include "sky/engine/wtf/Forward.h"
 #include "sky/engine/wtf/HashMap.h"
@@ -106,7 +105,6 @@ private:
 
     void addToRuleSet(const AtomicString& key, PendingRuleMap&, const RuleData&);
     void addFontFaceRule(StyleRuleFontFace*);
-    void addKeyframesRule(StyleRuleKeyframes*);
 
     void addChildRules(const Vector<RefPtr<StyleRuleBase> >&);
     bool findBestRuleSetAndAdd(const CSSSelector&, RuleData&);

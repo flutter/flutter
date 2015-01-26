@@ -47,7 +47,6 @@ namespace blink {
 class CSSTransitionData;
 class Element;
 class StylePropertyShorthand;
-class StyleRuleKeyframes;
 
 // This class stores the CSS Animations/Transitions information we use during a style recalc.
 // This includes updates to animations/transitions as well as the Interpolations to be applied.

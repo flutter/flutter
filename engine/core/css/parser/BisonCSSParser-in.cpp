@@ -61,8 +61,6 @@
 #include "sky/engine/core/css/Rect.h"
 #include "sky/engine/core/css/StylePropertySet.h"
 #include "sky/engine/core/css/StyleRule.h"
-#include "sky/engine/core/css/StyleKeyframe.h"
-#include "sky/engine/core/css/StyleRuleKeyframes.h"
 #include "sky/engine/core/css/StyleSheetContents.h"
 #include "sky/engine/core/css/parser/CSSParserIdioms.h"
 #include "sky/engine/core/dom/Document.h"
@@ -159,22 +157,6 @@ PassRefPtr<StyleRuleBase> BisonCSSParser::parseRule(StyleSheetContents* sheet, c
     setupParser("@-internal-rule ", string, "");
     cssyyparse(this);
     return m_rule.release();
-}
-
-PassRefPtr<StyleKeyframe> BisonCSSParser::parseKeyframeRule(StyleSheetContents* sheet, const String& string)
-{
-    setStyleSheet(sheet);
-    setupParser("@-internal-keyframe-rule ", string, "");
-    cssyyparse(this);
-    return m_keyframe.release();
-}
-
-PassOwnPtr<Vector<double> > BisonCSSParser::parseKeyframeKeyList(const String& string)
-{
-    setupParser("@-internal-keyframe-key-list ", string, "");
-    cssyyparse(this);
-    ASSERT(m_valueList);
-    return StyleKeyframe::createKeyList(m_valueList.get());
 }
 
 bool BisonCSSParser::parseSupportsCondition(const String& string)
@@ -1348,18 +1330,6 @@ CSSParserValue& BisonCSSParser::sinkFloatingValue(CSSParserValue& value)
     return value;
 }
 
-Vector<RefPtr<StyleKeyframe> >* BisonCSSParser::createFloatingKeyframeVector()
-{
-    m_floatingKeyframeVector = adoptPtr(new Vector<RefPtr<StyleKeyframe> >());
-    return m_floatingKeyframeVector.get();
-}
-
-PassOwnPtr<Vector<RefPtr<StyleKeyframe> > > BisonCSSParser::sinkFloatingKeyframeVector(Vector<RefPtr<StyleKeyframe> >* keyframeVector)
-{
-    ASSERT_UNUSED(keyframeVector, m_floatingKeyframeVector == keyframeVector);
-    return m_floatingKeyframeVector.release();
-}
-
 StyleRuleBase* BisonCSSParser::createSupportsRule(bool conditionIsSupported, RuleList* rules)
 {
     m_allowImportRules = m_allowNamespaceDeclarations = false;
@@ -1484,20 +1454,6 @@ void BisonCSSParser::endInvalidRuleHeader()
     endRuleHeader();
 }
 
-StyleRuleKeyframes* BisonCSSParser::createKeyframesRule(const String& name, PassOwnPtr<Vector<RefPtr<StyleKeyframe> > > popKeyframes, bool isPrefixed)
-{
-    OwnPtr<Vector<RefPtr<StyleKeyframe> > > keyframes = popKeyframes;
-    m_allowImportRules = m_allowNamespaceDeclarations = false;
-    RefPtr<StyleRuleKeyframes> rule = StyleRuleKeyframes::create();
-    for (size_t i = 0; i < keyframes->size(); ++i)
-        rule->parserAppendKeyframe(keyframes->at(i));
-    rule->setName(name);
-    rule->setVendorPrefixed(isPrefixed);
-    StyleRuleKeyframes* rulePtr = rule.get();
-    m_parsedRules.append(rule.release());
-    return rulePtr;
-}
-
 StyleRuleBase* BisonCSSParser::createStyleRule(Vector<OwnPtr<CSSParserSelector> >* selectors)
 {
     StyleRule* result = 0;
@@ -1571,23 +1527,6 @@ void BisonCSSParser::endDeclarationsForMarginBox()
 {
     rollbackLastProperties(m_parsedProperties.size() - m_numParsedPropertiesBeforeMarginBox);
     m_numParsedPropertiesBeforeMarginBox = INVALID_NUM_PARSED_PROPERTIES;
-}
-
-StyleKeyframe* BisonCSSParser::createKeyframe(CSSParserValueList* keys)
-{
-    OwnPtr<Vector<double> > keyVector = StyleKeyframe::createKeyList(keys);
-    if (keyVector->isEmpty())
-        return 0;
-
-    RefPtr<StyleKeyframe> keyframe = StyleKeyframe::create();
-    keyframe->setKeys(keyVector.release());
-    keyframe->setProperties(createStylePropertySet());
-
-    clearProperties();
-
-    StyleKeyframe* keyframePtr = keyframe.get();
-    m_parsedKeyframes.append(keyframe.release());
-    return keyframePtr;
 }
 
 void BisonCSSParser::startRule()
