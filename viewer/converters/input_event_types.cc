@@ -101,13 +101,17 @@ scoped_ptr<blink::WebInputEvent> BuildWebGestureEvent(
       break;
     case mojo::EVENT_TYPE_GESTURE_SCROLL_UPDATE:
       web_event->type = blink::WebInputEvent::GestureScrollUpdate;
-      web_event->data.scrollUpdate.deltaX = event->gesture_data->scroll_x;
-      web_event->data.scrollUpdate.deltaY = event->gesture_data->scroll_y;
+      web_event->data.scrollUpdate.deltaX =
+          event->gesture_data->scroll_x / device_pixel_ratio;
+      web_event->data.scrollUpdate.deltaY =
+          event->gesture_data->scroll_y / device_pixel_ratio;
       break;
     case mojo::EVENT_TYPE_SCROLL_FLING_START:
       web_event->type = blink::WebInputEvent::GestureFlingStart;
-      web_event->data.flingStart.velocityX = event->gesture_data->velocity_x;
-      web_event->data.flingStart.velocityY = event->gesture_data->velocity_y;
+      web_event->data.flingStart.velocityX =
+          event->gesture_data->velocity_x / device_pixel_ratio;
+      web_event->data.flingStart.velocityY =
+          event->gesture_data->velocity_y / device_pixel_ratio;
       break;
     case mojo::EVENT_TYPE_SCROLL_FLING_CANCEL:
       web_event->type = blink::WebInputEvent::GestureFlingCancel;
@@ -150,7 +154,8 @@ scoped_ptr<blink::WebInputEvent> BuildWebGestureEvent(
       break;
     case mojo::EVENT_TYPE_GESTURE_PINCH_UPDATE:
       web_event->type = blink::WebInputEvent::GesturePinchUpdate;
-      web_event->data.pinchUpdate.scale = event->gesture_data->scale;
+      web_event->data.pinchUpdate.scale =
+          event->gesture_data->scale / device_pixel_ratio;
       break;
     default:
       NOTIMPLEMENTED() << "Received unexpected event: " << event->action;
