@@ -7,5 +7,5 @@
     Constructor(Application application, Document document, DOMString url),
 ] interface Module : AbstractModule {
     readonly attribute Application application;
-    attribute any exports;
+    [CallWith=ScriptState] attribute any exports;
 };

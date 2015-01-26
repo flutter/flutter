@@ -3,7 +3,9 @@
 <import src="../resources/dump-as-text.sky" />
 <div id="result">FAIL - Script did not execute</div>
 <script>
-document.getElementById("result").textContent =
-    hello === undefined ? "PASS" : "FAIL";
+var result = "FAIL";
+if (typeof hello === "object" && Object.keys(hello).length === 0)
+  result = "PASS";
+document.getElementById("result").textContent = result;
 </script>
 </html>

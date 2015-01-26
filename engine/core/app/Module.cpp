@@ -29,4 +29,14 @@ Application* Module::GetApplication() {
   return application();
 }
 
+void Module::setExports(ScriptState*, const ScriptValue& exports) {
+  exports_ = exports;
+}
+
+const ScriptValue& Module::exports(ScriptState* scriptState) const {
+  if (exports_.isEmpty())
+    exports_ = ScriptValue::createEmptyObject(scriptState);
+  return exports_;
+}
+
 } // namespace blink

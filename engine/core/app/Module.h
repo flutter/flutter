@@ -24,8 +24,8 @@ public:
 
   Application* application() const { return application_.get(); }
 
-  void setExports(const ScriptValue& exports) { exports_ = exports; }
-  const ScriptValue& exports() const { return exports_; }
+  void setExports(ScriptState*, const ScriptValue& exports);
+  const ScriptValue& exports(ScriptState*) const;
 
 private:
   Module(ExecutionContext* context,
@@ -37,7 +37,7 @@ private:
   Application* GetApplication() override;
 
   RefPtr<Application> application_;
-  ScriptValue exports_;
+  mutable ScriptValue exports_;
 };
 
 } // namespace blink

@@ -7,11 +7,6 @@
 <import src="city-data-service.sky" as="CityDataService" />
 <import src="city-sequence.sky" as="CitySequence" />
 
-<script>
-// TODO(esprehn): exports should start as the empty object.
-module.exports = {};
-</script>
-
 <sky-element name="state-header">
 <template>
   <style>

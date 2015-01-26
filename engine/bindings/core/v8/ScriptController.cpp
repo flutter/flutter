@@ -295,7 +295,7 @@ void ScriptController::executeModuleScript(AbstractModule& module, const String&
                     scriptModule.formalDependencies.append(name);
                     v8::Handle<v8::Value> actual;
                     if (Module* childModule = child->module())
-                        actual = childModule->exports().v8Value();
+                        actual = childModule->exports(scriptState).v8Value();
                     if (actual.IsEmpty())
                         actual = v8::Undefined(m_isolate);
                     scriptModule.resolvedDependencies.append(actual);

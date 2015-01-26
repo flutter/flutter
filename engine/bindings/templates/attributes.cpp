@@ -249,6 +249,9 @@ v8::Local<v8::Value> v8Value, const v8::PropertyCallbackInfo<void>& info
           attribute.is_setter_call_with_execution_context %}
     ExecutionContext* executionContext = currentExecutionContext(info.GetIsolate());
     {% endif %}
+    {% if attribute.is_call_with_script_state %}
+    ScriptState* scriptState = ScriptState::current(info.GetIsolate());
+    {% endif %}
     {# Set #}
     {{attribute.cpp_setter}};
     {# Post-set #}

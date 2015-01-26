@@ -41,7 +41,7 @@ void AbstractModule::OnModuleLoadComplete(ModuleLoader* loader,
                                           Module* module) {
   RefPtr<ScriptPromiseResolver> resolver = loaders_.take(loader);
   ScriptState::Scope scope(resolver->scriptState());
-  resolver->resolve(module->exports().v8Value());
+  resolver->resolve(module->exports(resolver->scriptState()).v8Value());
 }
 
 } // namespace blink

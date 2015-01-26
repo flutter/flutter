@@ -60,6 +60,11 @@ public:
         ASSERT(isEmpty() || m_scriptState);
     }
 
+    static ScriptValue createEmptyObject(ScriptState* scriptState)
+    {
+        return ScriptValue(scriptState, v8::Object::New(scriptState->isolate()));
+    }
+
     ScriptState* scriptState() const
     {
         return m_scriptState.get();
