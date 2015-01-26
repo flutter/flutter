@@ -6,10 +6,8 @@ import("//build/config/ui.gni")
 
 if (is_android) {
   import("//build/config/android/config.gni")
-} else {
-  # TODO(brettw) remove this once && early-out is checked in.
-  is_android_webview_build = false
 }
+
 if (cpu_arch == "arm") {
   import("//build/config/arm.gni")
 } else {
@@ -18,17 +16,11 @@ if (cpu_arch == "arm") {
 }
 
 declare_args() {
-  # Enables the Oilpan garbage-collection infrastructure.
-  sky_enable_oilpan = false
-
-  # Set to true to enable the clang plugin that checks the usage of the Blink
-  # garbage-collection infrastructure during compilation.
-  sky_gc_plugin = false
-  sky_gc_plugin_dump_graph = false
-
+  # Enable asserts, even in release builds.
   sky_asserts_always_on = false
 
-  sky_enable_compostior = false
+  # Experimental support for the Dart VM.
+  sky_use_dart = false
 }
 
 # feature_defines_list ---------------------------------------------------------
@@ -46,14 +38,12 @@ if (!is_mac) {
   feature_defines_list += [ "ENABLE_OPENTYPE_VERTICAL=1" ]
 }
 
-if (sky_enable_oilpan) {
-  feature_defines_list += [ "ENABLE_OILPAN=1" ]
-}
 if (sky_asserts_always_on) {
   feature_defines_list += [ "ENABLE_ASSERT=1" ]
 }
-if (sky_enable_compostior) {
-  feature_defines_list += [ "ENABLE_COMPOSITOR=1" ]
+
+if (sky_use_dart) {
+  feature_defines_list += [ "WTF_USE_DART=1" ]
 }
 
 # feature_defines_string -------------------------------------------------------

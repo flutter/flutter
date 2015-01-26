@@ -55,13 +55,6 @@ config("config") {
   if (is_posix && gcc_version >= 49) {
     cflags += [ "-Wno-unused-but-set-variable" ]
   }
-
-  if (is_clang) {
-    if (sky_gc_plugin && clang_use_chrome_plugins) {
-      # TODO(GYP)
-      #'cflags': ['<!@(../../tools/clang/scripts/blink_gc_plugin_flags.sh enable-oilpan=<(sky_enable_oilpan) dump-graph=<(sky_gc_plugin_dump_graph))'],
-    }
-  }
 }
 
 # The follow configs apply to all targets except for unit tests, which rely on
