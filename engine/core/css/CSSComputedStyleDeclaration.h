@@ -49,9 +49,9 @@ enum EUpdateLayout { DoNotUpdateLayout = false, UpdateLayout = true };
 
 class CSSComputedStyleDeclaration final : public CSSStyleDeclaration {
 public:
-    static PassRefPtr<CSSComputedStyleDeclaration> create(PassRefPtr<Node> node, bool allowVisitedStyle = false, const String& pseudoElementName = String())
+    static PassRefPtr<CSSComputedStyleDeclaration> create(PassRefPtr<Node> node, bool allowVisitedStyle = false)
     {
-        return adoptRef(new CSSComputedStyleDeclaration(node, allowVisitedStyle, pseudoElementName));
+        return adoptRef(new CSSComputedStyleDeclaration(node, allowVisitedStyle));
     }
     virtual ~CSSComputedStyleDeclaration();
 
@@ -71,7 +71,7 @@ public:
     PassRefPtr<MutableStylePropertySet> copyPropertiesInSet(const Vector<CSSPropertyID>&) const;
 
 private:
-    CSSComputedStyleDeclaration(PassRefPtr<Node>, bool allowVisitedStyle, const String&);
+    CSSComputedStyleDeclaration(PassRefPtr<Node>, bool allowVisitedStyle);
 
     // CSSOM functions. Don't make these public.
     virtual unsigned length() const override;
@@ -102,7 +102,6 @@ private:
     PassRefPtr<CSSValueList> valuesForBackgroundShorthand() const;
 
     RefPtr<Node> m_node;
-    PseudoId m_pseudoElementSpecifier;
     bool m_allowVisitedStyle;
 #if !ENABLE(OILPAN)
     unsigned m_refCount;

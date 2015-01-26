@@ -1362,7 +1362,7 @@ void RenderObject::propagateStyleToAnonymousChildren(bool blockChildrenOnly)
 {
     // FIXME: We could save this call when the change only affected non-inherited properties.
     for (RenderObject* child = slowFirstChild(); child; child = child->nextSibling()) {
-        if (!child->isAnonymous() || child->style()->styleType() != NOPSEUDO)
+        if (!child->isAnonymous())
             continue;
 
         if (blockChildrenOnly && !child->isRenderBlock())

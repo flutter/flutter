@@ -551,12 +551,12 @@ StyleMedia& LocalDOMWindow::styleMedia() const
     return *m_media;
 }
 
-PassRefPtr<CSSStyleDeclaration> LocalDOMWindow::getComputedStyle(Element* elt, const String& pseudoElt) const
+PassRefPtr<CSSStyleDeclaration> LocalDOMWindow::getComputedStyle(Element* elt) const
 {
     if (!elt)
         return nullptr;
 
-    return CSSComputedStyleDeclaration::create(elt, false, pseudoElt);
+    return CSSComputedStyleDeclaration::create(elt, false);
 }
 
 double LocalDOMWindow::devicePixelRatio() const

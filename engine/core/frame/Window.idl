@@ -77,8 +77,7 @@
     readonly attribute StyleMedia styleMedia;
 
     // DOM Level 2 Style Interface
-    CSSStyleDeclaration getComputedStyle([Default=Undefined] optional Element element,
-                                         [TreatUndefinedAs=NullString, Default=Undefined] optional DOMString? pseudoElement);
+    CSSStyleDeclaration getComputedStyle([Default=Undefined] optional Element element);
 
     [Replaceable] readonly attribute double devicePixelRatio;
 

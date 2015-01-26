@@ -137,7 +137,6 @@ namespace blink {
         }
 
         static PseudoType parsePseudoType(const AtomicString&);
-        static PseudoId pseudoId(PseudoType);
 
         // Selectors are kept in an array by CSSSelectorList. The next component of the selector is
         // the next item in the array.

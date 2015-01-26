@@ -59,26 +59,6 @@ void CSSSelector::createRareData()
     m_hasRareData = true;
 }
 
-PseudoId CSSSelector::pseudoId(PseudoType type)
-{
-    switch (type) {
-    case PseudoUnknown:
-    case PseudoHover:
-    case PseudoFocus:
-    case PseudoActive:
-    case PseudoLang:
-    case PseudoUserAgentCustomElement:
-    case PseudoHost:
-        return NOPSEUDO;
-    case PseudoNotParsed:
-        ASSERT_NOT_REACHED();
-        return NOPSEUDO;
-    }
-
-    ASSERT_NOT_REACHED();
-    return NOPSEUDO;
-}
-
 // Could be made smaller and faster by replacing pointer with an
 // offset into a string buffer and making the bit fields smaller but
 // that could not be maintained by hand.

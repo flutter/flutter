@@ -763,9 +763,9 @@ Node *Node::nextLeafNode() const
     return 0;
 }
 
-RenderStyle* Node::virtualComputedStyle(PseudoId pseudoElementSpecifier)
+RenderStyle* Node::virtualComputedStyle()
 {
-    return parentOrShadowHostNode() ? parentOrShadowHostNode()->computedStyle(pseudoElementSpecifier) : 0;
+    return parentOrShadowHostNode() ? parentOrShadowHostNode()->computedStyle() : 0;
 }
 
 int Node::maxCharacterOffset() const

@@ -1240,8 +1240,7 @@ void Element::dispatchFocusOutEvent(const AtomicString& eventType, Element* newF
     dispatchScopedEventDispatchMediator(FocusOutEventDispatchMediator::create(FocusEvent::create(eventType, true, false, document().domWindow(), 0, newFocusedElement)));
 }
 
-// FIXME(sky): Remove pseudoElementSpecifier.
-RenderStyle* Element::computedStyle(PseudoId pseudoElementSpecifier)
+RenderStyle* Element::computedStyle()
 {
     // FIXME: Find and use the renderer from the pseudo element instead of the actual element so that the 'length'
     // properties, which are only known by the renderer because it did the layout, will be correct and so that the

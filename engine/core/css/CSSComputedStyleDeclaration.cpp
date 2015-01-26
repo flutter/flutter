@@ -890,16 +890,13 @@ static PassRefPtr<CSSValue> createLineBoxContainValue(unsigned lineBoxContain)
     return CSSLineBoxContainValue::create(lineBoxContain);
 }
 
-CSSComputedStyleDeclaration::CSSComputedStyleDeclaration(PassRefPtr<Node> n, bool allowVisitedStyle, const String& pseudoElementName)
+CSSComputedStyleDeclaration::CSSComputedStyleDeclaration(PassRefPtr<Node> n, bool allowVisitedStyle)
     : m_node(n)
     , m_allowVisitedStyle(allowVisitedStyle)
 #if !ENABLE(OILPAN)
     , m_refCount(1)
 #endif
 {
-    unsigned nameWithoutColonsStart = pseudoElementName[0] == ':' ? (pseudoElementName[1] == ':' ? 2 : 1) : 0;
-    m_pseudoElementSpecifier = CSSSelector::pseudoId(CSSSelector::parsePseudoType(
-        AtomicString(pseudoElementName.substring(nameWithoutColonsStart))));
 }
 
 CSSComputedStyleDeclaration::~CSSComputedStyleDeclaration()
@@ -956,7 +953,7 @@ PassRefPtr<CSSValue> CSSComputedStyleDeclaration::getFontSizeCSSValuePreferringK
 
     m_node->document().updateLayout();
 
-    RefPtr<RenderStyle> style = m_node->computedStyle(m_pseudoElementSpecifier);
+    RefPtr<RenderStyle> style = m_node->computedStyle();
     if (!style)
         return nullptr;
 
@@ -972,7 +969,7 @@ FixedPitchFontType CSSComputedStyleDeclaration::fixedPitchFontType() const
     if (!m_node)
         return NonFixedPitchFont;
 
-    RefPtr<RenderStyle> style = m_node->computedStyle(m_pseudoElementSpecifier);
+    RefPtr<RenderStyle> style = m_node->computedStyle();
     if (!style)
         return NonFixedPitchFont;
 
@@ -1231,7 +1228,7 @@ static bool isLayoutDependent(CSSPropertyID propertyID, PassRefPtr<RenderStyle> 
 
 PassRefPtr<RenderStyle> CSSComputedStyleDeclaration::computeRenderStyle(CSSPropertyID propertyID) const
 {
-    return m_node->computedStyle(m_pseudoElementSpecifier);
+    return m_node->computedStyle();
 }
 
 static ItemPosition resolveAlignmentAuto(ItemPosition position, Node* element)
@@ -2241,7 +2238,7 @@ unsigned CSSComputedStyleDeclaration::length() const
     if (!node)
         return 0;
 
-    RenderStyle* style = node->computedStyle(m_pseudoElementSpecifier);
+    RenderStyle* style = node->computedStyle();
     if (!style)
         return 0;
 
@@ -2260,7 +2257,7 @@ bool CSSComputedStyleDeclaration::cssPropertyMatches(CSSPropertyID propertyID, c
 {
     if (propertyID == CSSPropertyFontSize && propertyValue->isPrimitiveValue() && m_node) {
         m_node->document().updateLayout();
-        RenderStyle* style = m_node->computedStyle(m_pseudoElementSpecifier);
+        RenderStyle* style = m_node->computedStyle();
         if (style && style->fontDescription().keywordSize()) {
             CSSValueID sizeValue = cssIdentifierForFontSizeKeyword(style->fontDescription().keywordSize());
             const CSSPrimitiveValue* primitiveValue = toCSSPrimitiveValue(propertyValue);

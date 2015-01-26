@@ -137,7 +137,7 @@ void MatchedPropertiesCache::sweep(Timer<MatchedPropertiesCache>*)
 
 bool MatchedPropertiesCache::isCacheable(const Element* element, const RenderStyle* style, const RenderStyle* parentStyle)
 {
-    if (style->unique() || (style->styleType() != NOPSEUDO && parentStyle->unique()))
+    if (style->unique())
         return false;
     if (style->hasCurrentColor())
         return false;

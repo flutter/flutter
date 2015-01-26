@@ -422,7 +422,7 @@ public:
     RenderStyle* renderStyle() const;
     RenderStyle* parentRenderStyle() const;
 
-    RenderStyle* computedStyle(PseudoId pseudoElementSpecifier = NOPSEUDO) { return virtualComputedStyle(pseudoElementSpecifier); }
+    RenderStyle* computedStyle() { return virtualComputedStyle(); }
 
     virtual void insertedInto(ContainerNode* insertionPoint);
     virtual void removedFrom(ContainerNode* insertionPoint);
@@ -603,7 +603,7 @@ private:
     void traceStyleChangeIfNeeded(StyleChangeType);
     void setStyleChange(StyleChangeType);
 
-    virtual RenderStyle* virtualComputedStyle(PseudoId = NOPSEUDO);
+    virtual RenderStyle* virtualComputedStyle();
 
     void trackForDebugging();
 

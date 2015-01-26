@@ -144,7 +144,7 @@ public:
 
     // DOM Level 2 Style Interface
 
-    PassRefPtr<CSSStyleDeclaration> getComputedStyle(Element*, const String& pseudoElt) const;
+    PassRefPtr<CSSStyleDeclaration> getComputedStyle(Element*) const;
 
     // WebKit extensions
 

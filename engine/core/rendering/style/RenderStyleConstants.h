@@ -37,20 +37,6 @@ enum StyleRecalcChange {
     ReattachNoRenderer
 };
 
-// Static pseudo styles. Dynamic ones are produced on the fly.
-enum PseudoId {
-    // The order must be NOP ID, public IDs, and then internal IDs.
-    // If you add or remove a public ID, you must update _pseudoBits in RenderStyle.
-    NOPSEUDO, FIRST_LINE, SELECTION, FIRST_LINE_INHERITED, SCROLLBAR,
-    // Internal IDs follow:
-    SCROLLBAR_THUMB, SCROLLBAR_BUTTON, SCROLLBAR_TRACK, SCROLLBAR_TRACK_PIECE, SCROLLBAR_CORNER, RESIZER, INPUT_LIST_BUTTON,
-    // Special values follow:
-    AFTER_LAST_INTERNAL_PSEUDOID,
-    FIRST_PUBLIC_PSEUDOID = FIRST_LINE,
-    FIRST_INTERNAL_PSEUDOID = SCROLLBAR_THUMB,
-    PUBLIC_PSEUDOID_MASK = ((1 << FIRST_INTERNAL_PSEUDOID) - 1) & ~((1 << FIRST_PUBLIC_PSEUDOID) - 1),
-};
-
 enum ColumnFill { ColumnFillBalance, ColumnFillAuto };
 
 // These have been defined in the order of their precedence for border-collapsing. Do

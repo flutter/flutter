@@ -207,7 +207,7 @@ public:
 
     bool hasAuthorShadowRoot() const { return shadowRoot(); }
 
-    RenderStyle* computedStyle(PseudoId = NOPSEUDO);
+    RenderStyle* computedStyle();
 
     bool isUpgradedCustomElement() const { return customElementState() == Upgraded; }
     bool isUnresolvedCustomElement() const { return customElementState() == WaitingForUpgrade; }
@@ -342,7 +342,7 @@ private:
     virtual void formatForDebugger(char* buffer, unsigned length) const override;
 #endif
 
-    virtual RenderStyle* virtualComputedStyle(PseudoId pseudoElementSpecifier = NOPSEUDO) override { return computedStyle(pseudoElementSpecifier); }
+    virtual RenderStyle* virtualComputedStyle() override { return computedStyle(); }
 
     // cloneNode is private so that non-virtual cloneElementWithChildren and cloneElementWithoutChildren
     // are used instead.
