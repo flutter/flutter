@@ -69,8 +69,11 @@ class SkyDebugger : public mojo::ApplicationDelegate,
 
   scoped_ptr<window_manager::WindowManagerApp> window_manager_app_;
 
+  // TODO(eseidel): This is per-embedding state and should be separate
+  // from the ApplicationDelegate!
   mojo::View* root_;
   mojo::View* content_;
+  std::string default_url_;
   std::string pending_url_;
 
   mojo::ServiceProviderPtr viewer_services_;
