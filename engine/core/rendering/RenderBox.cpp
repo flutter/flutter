@@ -798,13 +798,11 @@ bool RenderBox::pushContentsClip(PaintInfo& paintInfo, const LayoutPoint& accumu
     if (paintInfo.phase == PaintPhaseSelfOutline || paintInfo.phase == PaintPhaseMask)
         return false;
 
-    bool isControlClip = hasControlClip();
     bool isOverflowClip = hasOverflowClip() && !layer()->isSelfPaintingLayer();
-
-    if (!isControlClip && !isOverflowClip)
+    if (!isOverflowClip)
         return false;
 
-    LayoutRect clipRect = isControlClip ? controlClipRect(accumulatedOffset) : overflowClipRect(accumulatedOffset);
+    LayoutRect clipRect = overflowClipRect(accumulatedOffset);
     RoundedRect clipRoundedRect(0, 0, 0, 0);
     bool hasBorderRadius = style()->hasBorderRadius();
     if (hasBorderRadius)
@@ -836,7 +834,7 @@ bool RenderBox::pushContentsClip(PaintInfo& paintInfo, const LayoutPoint& accumu
 
 void RenderBox::popContentsClip(PaintInfo& paintInfo, PaintPhase originalPhase, const LayoutPoint& accumulatedOffset)
 {
-    ASSERT(hasControlClip() || (hasOverflowClip() && !layer()->isSelfPaintingLayer()));
+    ASSERT(hasOverflowClip() && !layer()->isSelfPaintingLayer());
 
     paintInfo.context->restore();
     if (originalPhase == PaintPhaseOutline) {

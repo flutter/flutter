@@ -306,14 +306,8 @@ void RenderBlock::updateScrollInfoAfterLayout()
 
 void RenderBlock::layout()
 {
-    // Table cells call layoutBlock directly, so don't add any logic here.  Put code into
-    // layoutBlock().
+    // FIXME(sky): Inline layoutBlock here and get rid of it.
     layoutBlock(false);
-
-    // It's safe to check for control clip here, since controls can never be table cells.
-    // If we have a lightweight clip, there can never be any overflow from children.
-    if (hasControlClip() && m_overflow)
-        clearLayoutOverflow();
 }
 
 bool RenderBlock::widthAvailableToChildrenHasChanged()
@@ -532,7 +526,7 @@ void RenderBlock::paint(PaintInfo& paintInfo, const LayoutPoint& paintOffset)
     // There are some cases where not all clipped visual overflow is accounted for.
     // FIXME: reduce the number of such cases.
     ContentsClipBehavior contentsClipBehavior = ForceContentsClip;
-    if (hasOverflowClip() && !hasControlClip() && !(shouldPaintSelectionGaps() && phase == PaintPhaseForeground) && !hasCaret())
+    if (hasOverflowClip() && !(shouldPaintSelectionGaps() && phase == PaintPhaseForeground) && !hasCaret())
         contentsClipBehavior = SkipContentsClipIfPossible;
 
     bool pushedClip = pushContentsClip(paintInfo, adjustedPaintOffset, contentsClipBehavior);
@@ -1194,18 +1188,13 @@ bool RenderBlock::nodeAtPoint(const HitTestRequest& request, HitTestResult& resu
 
     // If we have clipping, then we can't have any spillout.
     bool useOverflowClip = hasOverflowClip() && !hasSelfPaintingLayer();
-    bool useClip = (hasControlClip() || useOverflowClip);
-    bool checkChildren = !useClip;
+    bool checkChildren = !useOverflowClip;
     if (!checkChildren) {
-        if (hasControlClip()) {
-            checkChildren = locationInContainer.intersects(controlClipRect(adjustedLocation));
-        } else {
-            LayoutRect clipRect = overflowClipRect(adjustedLocation);
-            if (style()->hasBorderRadius())
-                checkChildren = locationInContainer.intersects(style()->getRoundedBorderFor(clipRect));
-            else
-                checkChildren = locationInContainer.intersects(clipRect);
-        }
+        LayoutRect clipRect = overflowClipRect(adjustedLocation);
+        if (style()->hasBorderRadius())
+            checkChildren = locationInContainer.intersects(style()->getRoundedBorderFor(clipRect));
+        else
+            checkChildren = locationInContainer.intersects(clipRect);
     }
     if (checkChildren) {
         // Hit test descendants first.
@@ -1764,7 +1753,7 @@ void RenderBlock::addFocusRingRects(Vector<IntRect>& rects, const LayoutPoint& a
     if (width() && height())
         rects.append(pixelSnappedIntRect(additionalOffset, size()));
 
-    if (!hasOverflowClip() && !hasControlClip()) {
+    if (!hasOverflowClip()) {
         for (RootInlineBox* curr = firstRootBox(); curr; curr = curr->nextRootBox()) {
             LayoutUnit top = std::max<LayoutUnit>(curr->lineTop(), curr->top());
             LayoutUnit bottom = std::min<LayoutUnit>(curr->lineBottom(), curr->top() + curr->height());

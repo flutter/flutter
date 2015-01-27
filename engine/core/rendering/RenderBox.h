@@ -420,8 +420,6 @@ public:
 
     virtual LayoutRect overflowClipRect(const LayoutPoint& location);
     LayoutRect clipRect(const LayoutPoint& location);
-    virtual bool hasControlClip() const { return false; }
-    virtual LayoutRect controlClipRect(const LayoutPoint&) const { return LayoutRect(); }
     bool pushContentsClip(PaintInfo&, const LayoutPoint& accumulatedOffset, ContentsClipBehavior);
     void popContentsClip(PaintInfo&, PaintPhase originalPhase, const LayoutPoint& accumulatedOffset);
 
