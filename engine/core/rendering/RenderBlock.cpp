@@ -72,10 +72,6 @@ static TrackedDescendantsMap* gPercentHeightDescendantsMap = 0;
 static TrackedContainerMap* gPositionedContainerMap = 0;
 static TrackedContainerMap* gPercentHeightContainerMap = 0;
 
-typedef WTF::HashSet<RenderBlock*> DelayedUpdateScrollInfoSet;
-static int gDelayUpdateScrollInfo = 0;
-static DelayedUpdateScrollInfoSet* gDelayedUpdateScrollInfoSet = 0;
-
 RenderBlock::RenderBlock(ContainerNode* node)
     : RenderBox(node)
     , m_hasMarginBeforeQuirk(false)
@@ -158,9 +154,6 @@ void RenderBlock::willBeDestroyed()
     }
 
     m_lineBoxes.deleteLineBoxes();
-
-    if (UNLIKELY(gDelayedUpdateScrollInfoSet != 0))
-        gDelayedUpdateScrollInfoSet->remove(this);
 
     RenderBox::willBeDestroyed();
 }
@@ -263,45 +256,6 @@ void RenderBlock::removeChild(RenderObject* oldChild)
     // If this was our last child be sure to clear out our line boxes.
     if (!firstChild() && isRenderParagraph())
         deleteLineBoxTree();
-}
-
-void RenderBlock::startDelayUpdateScrollInfo()
-{
-    if (gDelayUpdateScrollInfo == 0) {
-        ASSERT(!gDelayedUpdateScrollInfoSet);
-        gDelayedUpdateScrollInfoSet = new DelayedUpdateScrollInfoSet;
-    }
-    ASSERT(gDelayedUpdateScrollInfoSet);
-    ++gDelayUpdateScrollInfo;
-}
-
-void RenderBlock::finishDelayUpdateScrollInfo()
-{
-    --gDelayUpdateScrollInfo;
-    ASSERT(gDelayUpdateScrollInfo >= 0);
-    if (gDelayUpdateScrollInfo == 0) {
-        ASSERT(gDelayedUpdateScrollInfoSet);
-
-        OwnPtr<DelayedUpdateScrollInfoSet> infoSet(adoptPtr(gDelayedUpdateScrollInfoSet));
-        gDelayedUpdateScrollInfoSet = 0;
-
-        for (DelayedUpdateScrollInfoSet::iterator it = infoSet->begin(); it != infoSet->end(); ++it) {
-            RenderBlock* block = *it;
-            if (block->hasOverflowClip()) {
-                block->layer()->scrollableArea()->updateAfterLayout();
-            }
-        }
-    }
-}
-
-void RenderBlock::updateScrollInfoAfterLayout()
-{
-    if (hasOverflowClip()) {
-        if (gDelayUpdateScrollInfo)
-            gDelayedUpdateScrollInfoSet->add(this);
-        else
-            layer()->scrollableArea()->updateAfterLayout();
-    }
 }
 
 bool RenderBlock::widthAvailableToChildrenHasChanged()
@@ -433,8 +387,6 @@ bool RenderBlock::simplifiedLayout()
 
     updateLayerTransformAfterLayout();
 
-    updateScrollInfoAfterLayout();
-
     clearNeedsLayout();
     return true;
 }
@@ -523,12 +475,6 @@ void RenderBlock::paint(PaintInfo& paintInfo, const LayoutPoint& paintOffset)
     }
     if (pushedClip)
         popContentsClip(paintInfo, phase, adjustedPaintOffset);
-
-    // Our scrollbar widgets paint exactly when we tell them to, so that they work properly with
-    // z-index.  We paint after we painted the background/border, so that the scrollbars will
-    // sit above the background/border.
-    if (hasOverflowClip() && phase == PaintPhaseForeground && paintInfo.shouldPaintWithinRoot(this))
-        layer()->scrollableArea()->paintOverflowControls(paintInfo.context, roundedIntPoint(adjustedPaintOffset), paintInfo.rect, false /* paintingOverlayControls */);
 }
 
 void RenderBlock::paintContents(PaintInfo& paintInfo, const LayoutPoint& paintOffset)
@@ -1541,11 +1487,7 @@ int RenderBlock::baselinePosition(FontBaseline baselineType, bool firstLine, Lin
         // (the content inside them moves).  This matches WinIE as well, which just bottom-aligns them.
         // We also give up on finding a baseline if we have a vertical scrollbar, or if we are scrolled
         // vertically (e.g., an overflow:hidden block that has had scrollTop moved).
-        bool ignoreBaseline = (layer() && layer()->scrollableArea() && ((direction == HorizontalLine ? (layer()->scrollableArea()->verticalScrollbar() || layer()->scrollableArea()->scrollYOffset())
-            : (layer()->scrollableArea()->horizontalScrollbar() || layer()->scrollableArea()->scrollXOffset()))));
-
-        int baselinePos = ignoreBaseline ? -1 : inlineBlockBaseline(direction);
-
+        int baselinePos = inlineBlockBaseline(direction);
         if (baselinePos != -1)
             return beforeMarginInLineDirection(direction) + baselinePos;
 
@@ -1879,9 +1821,6 @@ bool RenderBlock::recalcOverflowAfterStyleChange()
 
     LayoutUnit oldClientAfterEdge = hasRenderOverflow() ? m_overflow->layoutClientAfterEdge() : clientLogicalBottom();
     computeOverflow(oldClientAfterEdge, true);
-
-    if (hasOverflowClip())
-        layer()->scrollableArea()->updateAfterOverflowRecalc();
 
     return !hasOverflowClip();
 }

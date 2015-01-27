@@ -234,16 +234,6 @@ protected:
 
     virtual void updateHitTestResult(HitTestResult&, const LayoutPoint&) override;
 
-    // Delay update scrollbar until finishDelayUpdateScrollInfo() will be
-    // called. This function is used when a flexbox is laying out its
-    // descendant. If multiple calls are made to startDelayUpdateScrollInfo(),
-    // finishDelayUpdateScrollInfo() will do nothing until finishDelayUpdateScrollInfo()
-    // is called the same number of times.
-    static void startDelayUpdateScrollInfo();
-    static void finishDelayUpdateScrollInfo();
-
-    void updateScrollInfoAfterLayout();
-
     virtual void styleWillChange(StyleDifference, const RenderStyle& newStyle) override;
     virtual void styleDidChange(StyleDifference, const RenderStyle* oldStyle) override;
 

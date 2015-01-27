@@ -444,16 +444,6 @@ OptionalCursor EventHandler::selectAutoCursor(const HitTestResult& result, Node*
     return pointerCursor();
 }
 
-ScrollableArea* EventHandler::associatedScrollableArea(const RenderLayer* layer) const
-{
-    if (RenderLayerScrollableArea* scrollableArea = layer->scrollableArea()) {
-        if (scrollableArea->scrollsOverflow())
-            return scrollableArea;
-    }
-
-    return 0;
-}
-
 void EventHandler::invalidateClick()
 {
     m_clickCount = 0;

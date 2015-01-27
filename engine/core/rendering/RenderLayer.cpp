@@ -106,8 +106,6 @@ RenderLayer::RenderLayer(RenderLayerModelObject* renderer, LayerType type)
     updateStackingNode();
 
     m_isSelfPaintingLayer = shouldBeSelfPaintingLayer();
-
-    updateScrollableArea();
 }
 
 RenderLayer::~RenderLayer()
@@ -800,30 +798,12 @@ void RenderLayer::convertToLayerCoords(const RenderLayer* ancestorLayer, LayoutR
     rect.move(-delta.x(), -delta.y());
 }
 
-void RenderLayer::didUpdateNeedsCompositedScrolling()
-{
-    updateSelfPaintingLayer();
-}
-
 void RenderLayer::updateStackingNode()
 {
     if (requiresStackingNode())
         m_stackingNode = adoptPtr(new RenderLayerStackingNode(this));
     else
         m_stackingNode = nullptr;
-}
-
-void RenderLayer::updateScrollableArea()
-{
-    if (requiresScrollableArea())
-        m_scrollableArea = adoptPtr(new RenderLayerScrollableArea(*this));
-    else
-        m_scrollableArea = nullptr;
-}
-
-bool RenderLayer::hasOverflowControls() const
-{
-    return m_scrollableArea && m_scrollableArea->hasScrollbar();
 }
 
 void RenderLayer::paint(GraphicsContext* context, const LayoutRect& damageRect, RenderObject* paintingRoot)
@@ -873,13 +853,6 @@ void RenderLayer::clipToRect(const LayerPaintingInfo& localPaintingInfo, Graphic
     // any layers with overflow. The condition for being able to apply these clips is that the overflow object be in our
     // containing block chain so we check that also.
     for (RenderLayer* layer = rule == IncludeSelfForBorderRadius ? this : parent(); layer; layer = layer->parent()) {
-        // Composited scrolling layers handle border-radius clip in the compositor via a mask layer. We do not
-        // want to apply a border-radius clip to the layer contents itself, because that would require re-rastering
-        // every frame to update the clip. We only want to make sure that the mask layer is properly clipped so
-        // that it can in turn clip the scrolled contents in the compositor.
-        if (layer->needsCompositedScrolling())
-            break;
-
         if (layer->renderer()->hasOverflowClip() && layer->renderer()->style()->hasBorderRadius() && inContainingBlockChain(this, layer)) {
                 LayoutPoint delta;
                 layer->convertToLayerCoords(localPaintingInfo.rootLayer, delta);
@@ -970,7 +943,7 @@ void RenderLayer::paintLayerContents(GraphicsContext* context, const LayerPainti
     // Clip-path, like border radius, must not be applied to the contents of a composited-scrolling container.
     // It must, however, still be applied to the mask layer, so that the compositor can properly mask the
     // scrolling contents and scrollbars.
-    if (renderer()->hasClipPath() && style && !needsCompositedScrolling()) {
+    if (renderer()->hasClipPath() && style) {
         ASSERT(style->clipPath());
         if (style->clipPath()->type() == ClipPathOperation::SHAPE) {
             ShapeClipPathOperation* clipPath = toShapeClipPathOperation(style->clipPath());
@@ -1051,9 +1024,6 @@ void RenderLayer::paintLayerContents(GraphicsContext* context, const LayerPainti
 
     paintOutline(context, localPaintingInfo, paintingRootForRenderer, layerLocation, outlineRect);
     paintChildren(NormalFlowChildren | PositiveZOrderChildren, context, paintingInfo, paintFlags);
-
-    if (isPaintingOverlayScrollbars)
-        paintOverflowControls(context, localPaintingInfo, layerLocation, backgroundRect);
 
     if (filterPainter.hasStartedFilterEffect()) {
         context = filterPainter.applyFilterEffect();
@@ -1177,14 +1147,6 @@ void RenderLayer::paintMask(GraphicsContext* context, const LayerPaintingInfo& l
 
     if (localPaintingInfo.clipToDirtyRect)
         restoreClip(context, localPaintingInfo.paintDirtyRect, layerBackgroundRect);
-}
-
-void RenderLayer::paintOverflowControls(GraphicsContext* context, const LayerPaintingInfo& localPaintingInfo, LayoutPoint& layerLocation, ClipRect& layerBackgroundRect)
-{
-    clipToRect(localPaintingInfo, context, layerBackgroundRect);
-    if (RenderLayerScrollableArea* scrollableArea = this->scrollableArea())
-        scrollableArea->paintOverflowControls(context, roundedIntPoint(layerLocation), pixelSnappedIntRect(layerBackgroundRect.rect()), true);
-    restoreClip(context, localPaintingInfo.paintDirtyRect, layerBackgroundRect);
 }
 
 static inline LayoutRect frameVisibleRect(RenderObject* renderer)
@@ -1694,9 +1656,7 @@ bool RenderLayer::paintsWithTransform() const
 
 bool RenderLayer::shouldBeSelfPaintingLayer() const
 {
-    return m_layerType == NormalLayer
-        || (m_scrollableArea && m_scrollableArea->hasOverlayScrollbars())
-        || needsCompositedScrolling();
+    return m_layerType == NormalLayer;
 }
 
 void RenderLayer::updateSelfPaintingLayer()
@@ -1737,7 +1697,7 @@ bool RenderLayer::hasBoxDecorationsOrBackground() const
 
 bool RenderLayer::hasVisibleBoxDecorations() const
 {
-    return hasBoxDecorationsOrBackground() || hasOverflowControls();
+    return hasBoxDecorationsOrBackground();
 }
 
 bool RenderLayer::isVisuallyNonEmpty() const
@@ -1768,23 +1728,12 @@ void RenderLayer::styleChanged(StyleDifference diff, const RenderStyle* oldStyle
     m_stackingNode->updateIsNormalFlowOnly();
     m_stackingNode->updateStackingNodesAfterStyleChange(oldStyle);
 
-    if (m_scrollableArea)
-        m_scrollableArea->updateAfterStyleChange(oldStyle);
-
     // Overlay scrollbars can make this layer self-painting so we need
     // to recompute the bit once scrollbars have been updated.
     updateSelfPaintingLayer();
 
     updateTransform(oldStyle, renderer()->style());
     updateFilters(oldStyle, renderer()->style());
-}
-
-bool RenderLayer::scrollsOverflow() const
-{
-    if (RenderLayerScrollableArea* scrollableArea = this->scrollableArea())
-        return scrollableArea->scrollsOverflow();
-
-    return false;
 }
 
 FilterOperations RenderLayer::computeFilterOperations(const RenderStyle* style)

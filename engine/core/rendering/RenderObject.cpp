@@ -450,15 +450,7 @@ RenderBoxModelObject* RenderObject::enclosingBoxModelObject() const
 
 RenderBox* RenderObject::enclosingScrollableBox() const
 {
-    for (RenderObject* ancestor = parent(); ancestor; ancestor = ancestor->parent()) {
-        if (!ancestor->isBox())
-            continue;
-
-        RenderBox* ancestorBox = toRenderBox(ancestor);
-        if (ancestorBox->canBeScrolledAndHasScrollableArea())
-            return ancestorBox;
-    }
-
+    // FIXME(sky): Remove.
     return 0;
 }
 

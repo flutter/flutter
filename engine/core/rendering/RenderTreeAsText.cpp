@@ -368,17 +368,6 @@ static void write(TextStream& ts, RenderLayer& l,
     if (l.isTransparent())
         ts << " transparent";
 
-    if (l.renderer()->hasOverflowClip()) {
-        if (l.scrollableArea()->scrollXOffset())
-            ts << " scrollX " << l.scrollableArea()->scrollXOffset();
-        if (l.scrollableArea()->scrollYOffset())
-            ts << " scrollY " << l.scrollableArea()->scrollYOffset();
-        if (l.renderBox() && l.renderBox()->pixelSnappedClientWidth() != l.renderBox()->pixelSnappedScrollWidth())
-            ts << " scrollWidth " << l.renderBox()->pixelSnappedScrollWidth();
-        if (l.renderBox() && l.renderBox()->pixelSnappedClientHeight() != l.renderBox()->pixelSnappedScrollHeight())
-            ts << " scrollHeight " << l.renderBox()->pixelSnappedScrollHeight();
-    }
-
     if (paintPhase == LayerPaintPhaseBackground)
         ts << " layerType: background only";
     else if (paintPhase == LayerPaintPhaseForeground)

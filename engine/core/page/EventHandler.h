@@ -57,7 +57,6 @@ class LocalFrame;
 class Node;
 class OptionalCursor;
 class RenderLayer;
-class RenderLayerScrollableArea;
 class RenderObject;
 class ScrollableArea;
 class Scrollbar;
@@ -117,8 +116,6 @@ private:
     void updateCursor();
 
     bool isInsideScrollbar(const IntPoint&) const;
-
-    ScrollableArea* associatedScrollableArea(const RenderLayer*) const;
 
     // Scrolls the elements of the DOM tree. Returns true if a node was scrolled.
     // False if we reached the root and couldn't scroll anything.

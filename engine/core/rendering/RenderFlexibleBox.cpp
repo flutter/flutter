@@ -229,16 +229,12 @@ void RenderFlexibleBox::layout()
 
         m_numberOfInFlowChildrenOnFirstLine = -1;
 
-        RenderBlock::startDelayUpdateScrollInfo();
-
         prepareOrderIteratorAndMargins();
 
         ChildFrameRects oldChildRects;
         appendChildFrameRects(oldChildRects);
 
         layoutFlexItems(relayoutChildren);
-
-        RenderBlock::finishDelayUpdateScrollInfo();
 
         if (logicalHeight() != previousHeight)
             relayoutChildren = true;
@@ -250,10 +246,6 @@ void RenderFlexibleBox::layout()
     }
 
     updateLayerTransformAfterLayout();
-
-    // Update our scroll information if we're overflow:auto/scroll/hidden now that we know if
-    // we overflow or not.
-    updateScrollInfoAfterLayout();
 
     clearNeedsLayout();
 }

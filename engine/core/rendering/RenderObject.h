@@ -127,7 +127,6 @@ const int showTreeCharacterOffset = 39;
 class RenderObject : public ImageResourceClient {
     friend class RenderBlock;
     friend class RenderBlockFlow;
-    friend class RenderLayerScrollableArea; // For setParent.
     friend class RenderObjectChildList;
     WTF_MAKE_NONCOPYABLE(RenderObject);
 public:

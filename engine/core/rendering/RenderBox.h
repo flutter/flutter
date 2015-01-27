@@ -31,7 +31,6 @@ namespace blink {
 
 struct PaintInfo;
 class RenderBlockFlow;
-class RenderLayerScrollableArea;
 
 enum SizeType { MainOrPreferredSize, MinSize, MaxSize };
 enum AvailableLogicalHeightType { ExcludeMarginBorderPadding, IncludeMarginBorderPadding };
@@ -398,7 +397,6 @@ public:
     LayoutUnit availableHeight() const { return availableLogicalHeight(IncludeMarginBorderPadding); }
 
     virtual bool scroll(ScrollDirection, ScrollGranularity, float delta = 1);
-    bool canBeScrolledAndHasScrollableArea() const;
     virtual bool canBeProgramaticallyScrolled() const;
     virtual void autoscroll(const IntPoint&);
     bool autoscrollInProgress() const;

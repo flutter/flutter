@@ -188,8 +188,7 @@ int RenderBox::pixelSnappedOffsetHeight() const
 
 LayoutUnit RenderBox::scrollWidth() const
 {
-    if (hasOverflowClip())
-        return layer()->scrollableArea()->scrollWidth();
+    // FIXME(sky): Remove.
     // For objects with visible overflow, this matches IE.
     // FIXME: Need to work right with writing modes.
     if (style()->isLeftToRightDirection())
@@ -199,8 +198,7 @@ LayoutUnit RenderBox::scrollWidth() const
 
 LayoutUnit RenderBox::scrollHeight() const
 {
-    if (hasOverflowClip())
-        return layer()->scrollableArea()->scrollHeight();
+    // FIXME(sky): Remove.
     // For objects with visible overflow, this matches IE.
     // FIXME: Need to work right with writing modes.
     return std::max(clientHeight(), layoutOverflowRect().maxY() - borderTop());
@@ -208,23 +206,25 @@ LayoutUnit RenderBox::scrollHeight() const
 
 LayoutUnit RenderBox::scrollLeft() const
 {
-    return hasOverflowClip() ? layer()->scrollableArea()->scrollXOffset() : 0;
+    // FIXME(sky): Remove.
+    return 0;
 }
 
 LayoutUnit RenderBox::scrollTop() const
 {
-    return hasOverflowClip() ? layer()->scrollableArea()->scrollYOffset() : 0;
+    // FIXME(sky): Remove.
+    return 0;
 }
 
 int RenderBox::pixelSnappedScrollWidth() const
 {
+    // FIXME(sky): Remove.
     return snapSizeToPixel(scrollWidth(), x() + clientLeft());
 }
 
 int RenderBox::pixelSnappedScrollHeight() const
 {
-    if (hasOverflowClip())
-        return layer()->scrollableArea()->scrollHeight();
+    // FIXME(sky): Remove.
     // For objects with visible overflow, this matches IE.
     // FIXME: Need to work right with writing modes.
     return snapSizeToPixel(scrollHeight(), y() + clientTop());
@@ -232,42 +232,22 @@ int RenderBox::pixelSnappedScrollHeight() const
 
 void RenderBox::setScrollLeft(LayoutUnit newLeft)
 {
-    if (hasOverflowClip())
-        layer()->scrollableArea()->scrollToXOffset(newLeft, ScrollOffsetClamped);
+    // FIXME(sky): Remove.
 }
 
 void RenderBox::setScrollTop(LayoutUnit newTop)
 {
-    if (hasOverflowClip())
-        layer()->scrollableArea()->scrollToYOffset(newTop, ScrollOffsetClamped);
+    // FIXME(sky): Remove.
 }
 
 void RenderBox::scrollToOffset(const IntSize& offset)
 {
-    ASSERT(hasOverflowClip());
-    layer()->scrollableArea()->scrollToOffset(offset, ScrollOffsetClamped);
+    // FIXME(sky): Remove.
 }
 
 void RenderBox::scrollRectToVisible(const LayoutRect& rect, const ScrollAlignment& alignX, const ScrollAlignment& alignY)
 {
-    RenderBox* parentBox = 0;
-    LayoutRect newRect = rect;
-
-    if (parent()) {
-        parentBox = parent()->enclosingBox();
-    }
-
-    if (hasOverflowClip()) {
-        // Don't scroll to reveal an overflow layer that is restricted by the -webkit-line-clamp property.
-        // This will prevent us from revealing text hidden by the slider in Safari RSS.
-        newRect = layer()->scrollableArea()->exposeRect(rect, alignX, alignY);
-    }
-
-    if (frame()->page()->autoscrollController().autoscrollInProgress())
-        parentBox = enclosingScrollableBox();
-
-    if (parentBox)
-        parentBox->scrollRectToVisible(newRect, alignX, alignY);
+    // FIXME(sky): Remove.
 }
 
 void RenderBox::absoluteQuads(Vector<FloatQuad>& quads) const
@@ -335,14 +315,8 @@ void RenderBox::addFocusRingRects(Vector<IntRect>& rects, const LayoutPoint& add
 
 bool RenderBox::scroll(ScrollDirection direction, ScrollGranularity granularity, float delta)
 {
-    if (!layer() || !layer()->scrollableArea())
-        return false;
-    return layer()->scrollableArea()->scroll(direction, granularity, delta);
-}
-
-bool RenderBox::canBeScrolledAndHasScrollableArea() const
-{
-    return canBeProgramaticallyScrolled() && (pixelSnappedScrollHeight() != pixelSnappedClientHeight() || pixelSnappedScrollWidth() != pixelSnappedClientWidth());
+    // FIXME(sky): Remove.
+    return false;
 }
 
 bool RenderBox::canBeProgramaticallyScrolled() const
@@ -383,7 +357,8 @@ bool RenderBox::autoscrollInProgress() const
 // FIXME(sky): Replace with canBeScrolledAndHasScrollableArea.
 bool RenderBox::canAutoscroll() const
 {
-    return canBeScrolledAndHasScrollableArea();
+    // FIXME(sky): Remove.
+    return false;
 }
 
 // If specified point is in border belt, returned offset denotes direction of
@@ -426,24 +401,7 @@ RenderBox* RenderBox::findAutoscrollable(RenderObject* renderer)
 
 void RenderBox::scrollByRecursively(const IntSize& delta, ScrollOffsetClamping clamp)
 {
-    if (delta.isZero())
-        return;
-
-    if (hasOverflowClip()) {
-        IntSize newScrollOffset = layer()->scrollableArea()->adjustedScrollOffset() + delta;
-        layer()->scrollableArea()->scrollToOffset(newScrollOffset, clamp);
-
-        // If this layer can't do the scroll we ask the next layer up that can scroll to try
-        IntSize remainingScrollOffset = newScrollOffset - layer()->scrollableArea()->adjustedScrollOffset();
-        if (!remainingScrollOffset.isZero() && parent()) {
-            if (RenderBox* scrollableBox = enclosingScrollableBox())
-                scrollableBox->scrollByRecursively(remainingScrollOffset, clamp);
-
-            LocalFrame* frame = this->frame();
-            if (frame && frame->page())
-                frame->page()->autoscrollController().updateAutoscrollRenderer();
-        }
-    }
+    // FIXME(sky): Remove.
 }
 
 bool RenderBox::needsPreferredWidthsRecalculation() const
@@ -453,9 +411,8 @@ bool RenderBox::needsPreferredWidthsRecalculation() const
 
 IntSize RenderBox::scrolledContentOffset() const
 {
-    ASSERT(hasOverflowClip());
-    ASSERT(hasLayer());
-    return layer()->scrollableArea()->scrollOffset();
+    // FIXME(sky): Remove.
+    return IntSize();
 }
 
 void RenderBox::computeIntrinsicLogicalWidths(LayoutUnit& minLogicalWidth, LayoutUnit& maxLogicalWidth) const

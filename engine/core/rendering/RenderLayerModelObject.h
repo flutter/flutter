@@ -49,7 +49,6 @@ public:
 
     bool hasSelfPaintingLayer() const;
     RenderLayer* layer() const { return m_layer.get(); }
-    ScrollableArea* scrollableArea() const;
 
     virtual void styleWillChange(StyleDifference, const RenderStyle& newStyle) override;
     virtual void styleDidChange(StyleDifference, const RenderStyle* oldStyle) override;

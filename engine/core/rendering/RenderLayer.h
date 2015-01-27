@@ -49,7 +49,6 @@
 #include "sky/engine/core/rendering/RenderBox.h"
 #include "sky/engine/core/rendering/RenderLayerClipper.h"
 #include "sky/engine/core/rendering/RenderLayerFilterInfo.h"
-#include "sky/engine/core/rendering/RenderLayerScrollableArea.h"
 #include "sky/engine/core/rendering/RenderLayerStackingNode.h"
 #include "sky/engine/core/rendering/RenderLayerStackingNodeIterator.h"
 #include "sky/engine/public/platform/WebBlendMode.h"
@@ -215,8 +214,6 @@ public:
     // Only safe to call from RenderLayerModelObject::destroyLayer()
     void operator delete(void*);
 
-    bool needsCompositedScrolling() const { return m_scrollableArea && m_scrollableArea->needsCompositedScrolling(); }
-
     bool paintsWithTransform() const;
 
     bool containsDirtyOverlayScrollbars() const { return m_containsDirtyOverlayScrollbars; }
@@ -248,8 +245,6 @@ public:
 
     bool scrollsWithRespectTo(const RenderLayer*) const;
 
-    // FIXME: This should probably return a ScrollableArea but a lot of internal methods are mistakenly exposed.
-    RenderLayerScrollableArea* scrollableArea() const { return m_scrollableArea.get(); }
     RenderLayerClipper& clipper() { return m_clipper; }
     const RenderLayerClipper& clipper() const { return m_clipper; }
 
@@ -259,8 +254,6 @@ public:
         RenderLayerModelObject* layerRenderer = renderer();
         return isRootLayer() || layerRenderer->isPositioned() || hasTransform();
     }
-
-    bool scrollsOverflow() const;
 
     class AncestorDependentCompositingInputs {
     public:
@@ -363,8 +356,6 @@ public:
     RenderLayer* enclosingTransformedAncestor() const;
     LayoutPoint computeOffsetFromTransformedAncestor() const;
 
-    void didUpdateNeedsCompositedScrolling();
-
 private:
     // TODO(ojan): Get rid of this. These are basically layer-tree-only paint phases.
     enum PaintLayerFlags {
@@ -374,8 +365,6 @@ private:
 
     // Bounding box in the coordinates of this layer.
     LayoutRect logicalBoundingBox() const;
-
-    bool hasOverflowControls() const;
 
     void setAncestorChainHasSelfPaintingLayerDescendant();
     void dirtyAncestorChainHasSelfPaintingLayerDescendantStatus();
@@ -417,8 +406,6 @@ private:
         LayoutPoint& layerLocation, ClipRect& layerForegroundRect);
     void paintOutline(GraphicsContext*, const LayerPaintingInfo&, RenderObject* paintingRootForRenderer,
         LayoutPoint& layerLocation, ClipRect& layerOutlineRect);
-    void paintOverflowControls(GraphicsContext*, const LayerPaintingInfo&,
-        LayoutPoint& layerLocation, ClipRect& layerBackgroundRect);
     void paintMask(GraphicsContext*, const LayerPaintingInfo&, RenderObject* paintingRootForRenderer,
         LayoutPoint& layerLocation, ClipRect& layerBackgroundRect);
 
@@ -445,11 +432,6 @@ private:
     // FIXME: We should only create the stacking node if needed.
     bool requiresStackingNode() const { return true; }
     void updateStackingNode();
-
-    // FIXME: We could lazily allocate our ScrollableArea based on style properties ('overflow', ...)
-    // but for now, we are always allocating it for RenderBox as it's safer.
-    bool requiresScrollableArea() const { return renderBox(); }
-    void updateScrollableArea();
 
     void updateTransform(const RenderStyle* oldStyle, RenderStyle* newStyle);
 
@@ -514,8 +496,6 @@ private:
 
     DescendantDependentCompositingInputs m_descendantDependentCompositingInputs;
     AncestorDependentCompositingInputs m_ancestorDependentCompositingInputs;
-
-    OwnPtr<RenderLayerScrollableArea> m_scrollableArea;
 
     RenderLayerClipper m_clipper; // FIXME: Lazily allocate?
     OwnPtr<RenderLayerStackingNode> m_stackingNode;

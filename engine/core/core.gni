@@ -1083,8 +1083,6 @@ sky_core_files = [
   "rendering/RenderLayerFilterInfo.h",
   "rendering/RenderLayerModelObject.cpp",
   "rendering/RenderLayerModelObject.h",
-  "rendering/RenderLayerScrollableArea.cpp",
-  "rendering/RenderLayerScrollableArea.h",
   "rendering/RenderLayerStackingNode.cpp",
   "rendering/RenderLayerStackingNode.h",
   "rendering/RenderLayerStackingNodeIterator.cpp",
