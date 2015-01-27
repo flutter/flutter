@@ -49,8 +49,6 @@ containerCullingEnabled initial=false
 # Leaving enabled for now to not change existing behavior.
 downloadableBinaryFontsEnabled initial=true
 
-preferCompositingToLCDTextEnabled initial=false, invalidate=AcceleratedCompositing
-
 # 3D canvas (WebGL) support.
 webGLEnabled initial=false
 

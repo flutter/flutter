@@ -166,8 +166,6 @@ public:
 
     virtual void setSelectionState(SelectionState) override;
 
-    bool hasAcceleratedCompositing() const;
-
 protected:
     class BackgroundImageGeometry {
     public:

@@ -83,8 +83,6 @@ public:
     RenderLayer* firstChild() const { return m_first; }
     RenderLayer* lastChild() const { return m_last; }
 
-    const RenderLayer* compositingContainer() const;
-
     void addChild(RenderLayer* newChild, RenderLayer* beforeChild = 0);
     RenderLayer* removeChild(RenderLayer*);
 
@@ -143,6 +141,7 @@ public:
 
     RenderLayer* enclosingOverflowClipLayer(IncludeSelfOrNot = IncludeSelf) const;
 
+    const RenderLayer* compositingContainer() const;
     RenderLayer* enclosingFilterLayer(IncludeSelfOrNot = IncludeSelf) const;
     bool hasAncestorWithFilterOutsets() const;
 
@@ -165,18 +164,11 @@ public:
     LayoutRect physicalBoundingBox(const RenderLayer* ancestorLayer, const LayoutPoint* offsetFromRoot = 0) const;
     LayoutRect physicalBoundingBoxIncludingReflectionAndStackingChildren(const RenderLayer* ancestorLayer, const LayoutPoint& offsetFromRoot) const;
 
-    // FIXME: This function is inconsistent as to whether the returned rect has been flipped for writing mode.
-    LayoutRect boundingBoxForCompositingOverlapTest() const { return overlapBoundsIncludeChildren() ? boundingBoxForCompositing() : logicalBoundingBox(); }
-
     // If true, this layer's children are included in its bounds for overlap testing.
     // We can't rely on the children's positions if this layer has a filter that could have moved the children's pixels around.
     bool overlapBoundsIncludeChildren() const { return hasFilter() && renderer()->style()->filter().hasFilterThatMovesPixels(); }
 
-    enum CalculateBoundsOptions {
-        ApplyBoundsChickenEggHacks,
-        DoNotApplyBoundsChickenEggHacks,
-    };
-    LayoutRect boundingBoxForCompositing(const RenderLayer* ancestorLayer = 0, CalculateBoundsOptions = DoNotApplyBoundsChickenEggHacks) const;
+    LayoutRect boundingBoxForCompositing(const RenderLayer* ancestorLayer = 0) const;
 
     LayoutUnit staticInlinePosition() const { return m_staticInlinePosition; }
     LayoutUnit staticBlockPosition() const { return m_staticBlockPosition; }
@@ -251,106 +243,12 @@ public:
         return isRootLayer() || layerRenderer->isPositioned() || hasTransform();
     }
 
-    class AncestorDependentCompositingInputs {
-    public:
-        AncestorDependentCompositingInputs()
-            : opacityAncestor(0)
-            , transformAncestor(0)
-            , filterAncestor(0)
-            , clippingContainer(0)
-            , ancestorScrollingLayer(0)
-            , scrollParent(0)
-            , clipParent(0)
-            , isUnclippedDescendant(false)
-            , hasAncestorWithClipPath(false)
-        { }
-
-        IntRect clippedAbsoluteBoundingBox;
-        const RenderLayer* opacityAncestor;
-        const RenderLayer* transformAncestor;
-        const RenderLayer* filterAncestor;
-        const RenderObject* clippingContainer;
-        const RenderLayer* ancestorScrollingLayer;
-
-        // A scroll parent is a compositor concept. It's only needed in blink
-        // because we need to use it as a promotion trigger. A layer has a
-        // scroll parent if neither its compositor scrolling ancestor, nor any
-        // other layer scrolled by this ancestor, is a stacking ancestor of this
-        // layer. Layers with scroll parents must be scrolled with the main
-        // scrolling layer by the compositor.
-        const RenderLayer* scrollParent;
-
-        // A clip parent is another compositor concept that has leaked into
-        // blink so that it may be used as a promotion trigger. Layers with clip
-        // parents escape the clip of a stacking tree ancestor. The compositor
-        // needs to know about clip parents in order to circumvent its normal
-        // clipping logic.
-        const RenderLayer* clipParent;
-
-        // The "is unclipped descendant" concept is now only being used for one
-        // purpose: when traversing the RenderLayers in stacking order, we check
-        // if we scroll wrt to these unclipped descendants. We do this to
-        // proactively promote in the same way that we do for animated layers.
-        // Since we have no idea where scrolled content will scroll to, we just
-        // assume that it can overlap the unclipped thing at some point, so we
-        // promote. But this is unfortunate. We should be able to inflate the
-        // bounds of scrolling content for overlap the same way we're doing for
-        // animation and only promote what's necessary. Once we're doing that,
-        // we won't need to use the "unclipped" concept for promotion any
-        // longer.
-        unsigned isUnclippedDescendant : 1;
-        unsigned hasAncestorWithClipPath : 1;
-    };
-
-    class DescendantDependentCompositingInputs {
-    public:
-        DescendantDependentCompositingInputs()
-            : hasDescendantWithClipPath(false)
-
-        { }
-
-        unsigned hasDescendantWithClipPath : 1;
-    };
-
-    bool childNeedsCompositingInputsUpdate() const { return m_childNeedsCompositingInputsUpdate; }
-    bool needsCompositingInputsUpdate() const
-    {
-        // While we're updating the compositing inputs, these values may differ.
-        // We should never be asking for this value when that is the case.
-        ASSERT(m_needsDescendantDependentCompositingInputsUpdate == m_needsAncestorDependentCompositingInputsUpdate);
-        return m_needsDescendantDependentCompositingInputsUpdate;
-    }
-
-    void updateAncestorDependentCompositingInputs(const AncestorDependentCompositingInputs&);
-    void updateDescendantDependentCompositingInputs(const DescendantDependentCompositingInputs&);
-
-    const AncestorDependentCompositingInputs& ancestorDependentCompositingInputs() const { ASSERT(!m_needsAncestorDependentCompositingInputsUpdate); return m_ancestorDependentCompositingInputs; }
-    const DescendantDependentCompositingInputs& descendantDependentCompositingInputs() const { ASSERT(!m_needsDescendantDependentCompositingInputsUpdate); return m_descendantDependentCompositingInputs; }
-
-    IntRect clippedAbsoluteBoundingBox() const { return ancestorDependentCompositingInputs().clippedAbsoluteBoundingBox; }
-    const RenderLayer* opacityAncestor() const { return ancestorDependentCompositingInputs().opacityAncestor; }
-    const RenderLayer* transformAncestor() const { return ancestorDependentCompositingInputs().transformAncestor; }
-    const RenderLayer* filterAncestor() const { return ancestorDependentCompositingInputs().filterAncestor; }
-    const RenderObject* clippingContainer() const { return ancestorDependentCompositingInputs().clippingContainer; }
-    const RenderLayer* ancestorScrollingLayer() const { return ancestorDependentCompositingInputs().ancestorScrollingLayer; }
-    RenderLayer* scrollParent() const { return const_cast<RenderLayer*>(ancestorDependentCompositingInputs().scrollParent); }
-    RenderLayer* clipParent() const { return const_cast<RenderLayer*>(ancestorDependentCompositingInputs().clipParent); }
-    bool isUnclippedDescendant() const { return ancestorDependentCompositingInputs().isUnclippedDescendant; }
-    bool hasAncestorWithClipPath() const { return ancestorDependentCompositingInputs().hasAncestorWithClipPath; }
-    bool hasDescendantWithClipPath() const { return descendantDependentCompositingInputs().hasDescendantWithClipPath; }
-
     bool lostGroupedMapping() const { return m_lostGroupedMapping; }
     void setLostGroupedMapping(bool b) { m_lostGroupedMapping = b; }
-
-    bool hasCompositingDescendant() const { return m_hasCompositingDescendant; }
-    void setHasCompositingDescendant(bool);
 
     void updateOrRemoveFilterEffectRenderer();
 
     void updateSelfPaintingLayer();
-
-    RenderLayer* enclosingTransformedAncestor() const;
-    LayoutPoint computeOffsetFromTransformedAncestor() const;
 
 private:
     // TODO(ojan): Get rid of this. These are basically layer-tree-only paint phases.
@@ -462,12 +360,6 @@ private:
     unsigned m_has3DTransformedDescendant : 1;
 
     unsigned m_hasFilterInfo : 1;
-    unsigned m_needsAncestorDependentCompositingInputsUpdate : 1;
-    unsigned m_needsDescendantDependentCompositingInputsUpdate : 1;
-    unsigned m_childNeedsCompositingInputsUpdate : 1;
-
-    // Used only while determining what layers should be composited. Applies to the tree of z-order lists.
-    unsigned m_hasCompositingDescendant : 1;
 
     // True if this render layer just lost its grouped mapping due to the CompositedLayerMapping being destroyed,
     // and we don't yet know to what graphics layer this RenderLayer will be assigned.
@@ -486,9 +378,6 @@ private:
     LayoutUnit m_staticBlockPosition;
 
     OwnPtr<TransformationMatrix> m_transform;
-
-    DescendantDependentCompositingInputs m_descendantDependentCompositingInputs;
-    AncestorDependentCompositingInputs m_ancestorDependentCompositingInputs;
 
     RenderLayerClipper m_clipper; // FIXME: Lazily allocate?
     OwnPtr<RenderLayerStackingNode> m_stackingNode;

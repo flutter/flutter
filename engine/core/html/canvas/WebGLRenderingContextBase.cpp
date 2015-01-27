@@ -780,15 +780,9 @@ void WebGLRenderingContextBase::markContextChanged(ContentChangeType changeType)
     drawingBuffer()->markContentsChanged();
 
     m_layerCleared = false;
-    RenderBox* renderBox = canvas()->renderBox();
-    if (renderBox && renderBox->hasAcceleratedCompositing()) {
+    if (!m_markedCanvasDirty) {
         m_markedCanvasDirty = true;
-        canvas()->clearCopiedImage();
-    } else {
-        if (!m_markedCanvasDirty) {
-            m_markedCanvasDirty = true;
-            canvas()->didDraw(FloatRect(FloatPoint(0, 0), clampedCanvasSize()));
-        }
+        canvas()->didDraw(FloatRect(FloatPoint(0, 0), clampedCanvasSize()));
     }
 }
 

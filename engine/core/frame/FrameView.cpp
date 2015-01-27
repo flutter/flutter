@@ -184,11 +184,6 @@ void FrameView::recalcOverflowAfterStyleChange()
     renderView->recalcOverflowAfterStyleChange();
 }
 
-bool FrameView::isEnclosedInCompositingLayer() const
-{
-    return false;
-}
-
 RenderObject* FrameView::layoutRoot(bool onlyDuringLayout) const
 {
     return onlyDuringLayout && layoutPending() ? 0 : m_layoutSubtreeRoot;

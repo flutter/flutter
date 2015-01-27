@@ -492,25 +492,6 @@ void RenderStyle::clearCursorList()
         rareInheritedData.access()->cursorData = nullptr;
 }
 
-bool RenderStyle::hasWillChangeCompositingHint() const
-{
-    for (size_t i = 0; i < rareNonInheritedData->m_willChange->m_properties.size(); ++i) {
-        switch (rareNonInheritedData->m_willChange->m_properties[i]) {
-        case CSSPropertyOpacity:
-        case CSSPropertyTransform:
-        case CSSPropertyWebkitTransform:
-        case CSSPropertyTop:
-        case CSSPropertyLeft:
-        case CSSPropertyBottom:
-        case CSSPropertyRight:
-            return true;
-        default:
-            break;
-        }
-    }
-    return false;
-}
-
 inline bool requireTransformOrigin(const Vector<RefPtr<TransformOperation> >& transformOperations, RenderStyle::ApplyTransformOrigin applyOrigin)
 {
     // transform-origin brackets the transform with translate operations.

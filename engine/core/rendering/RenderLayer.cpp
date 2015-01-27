@@ -87,10 +87,6 @@ RenderLayer::RenderLayer(RenderLayerModelObject* renderer, LayerType type)
     , m_3DTransformedDescendantStatusDirty(true)
     , m_has3DTransformedDescendant(false)
     , m_hasFilterInfo(false)
-    , m_needsAncestorDependentCompositingInputsUpdate(true)
-    , m_needsDescendantDependentCompositingInputsUpdate(true)
-    , m_childNeedsCompositingInputsUpdate(true)
-    , m_hasCompositingDescendant(false)
     , m_lostGroupedMapping(false)
     , m_renderer(renderer)
     , m_parent(0)
@@ -179,7 +175,7 @@ void RenderLayer::dirtyAncestorChainHasSelfPaintingLayerDescendantStatus()
 
 bool RenderLayer::scrollsWithRespectTo(const RenderLayer* other) const
 {
-    return ancestorScrollingLayer() != other->ancestorScrollingLayer();
+    return false;
 }
 
 void RenderLayer::updateTransformationMatrix()
@@ -441,26 +437,6 @@ RenderLayer* RenderLayer::enclosingPositionedAncestor() const
     return curr;
 }
 
-RenderLayer* RenderLayer::enclosingTransformedAncestor() const
-{
-    RenderLayer* curr = parent();
-    while (curr && !curr->isRootLayer() && !curr->renderer()->hasTransform())
-        curr = curr->parent();
-
-    return curr;
-}
-
-LayoutPoint RenderLayer::computeOffsetFromTransformedAncestor() const
-{
-    const AncestorDependentCompositingInputs& properties = ancestorDependentCompositingInputs();
-
-    TransformState transformState(TransformState::ApplyTransformDirection, FloatPoint());
-    // FIXME: add a test that checks flipped writing mode and ApplyContainerFlip are correct.
-    renderer()->mapLocalToContainer(properties.transformAncestor ? properties.transformAncestor->renderer() : 0, transformState, ApplyContainerFlip);
-    transformState.flatten();
-    return LayoutPoint(transformState.lastPlanarPoint());
-}
-
 const RenderLayer* RenderLayer::compositingContainer() const
 {
     if (stackingNode()->isNormalFlowOnly())
@@ -480,25 +456,6 @@ RenderLayer* RenderLayer::enclosingFilterLayer(IncludeSelfOrNot includeSelf) con
 
     return 0;
 }
-
-void RenderLayer::updateAncestorDependentCompositingInputs(const AncestorDependentCompositingInputs& compositingInputs)
-{
-    m_ancestorDependentCompositingInputs = compositingInputs;
-    m_needsAncestorDependentCompositingInputsUpdate = false;
-}
-
-void RenderLayer::updateDescendantDependentCompositingInputs(const DescendantDependentCompositingInputs& compositingInputs)
-{
-    m_descendantDependentCompositingInputs = compositingInputs;
-    m_needsDescendantDependentCompositingInputsUpdate = false;
-}
-
-void RenderLayer::setHasCompositingDescendant(bool hasCompositingDescendant)
-{
-    // FIXME(sky): Remove
-    m_hasCompositingDescendant = hasCompositingDescendant;
-}
-
 
 bool RenderLayer::hasAncestorWithFilterOutsets() const
 {
@@ -1561,7 +1518,7 @@ LayoutRect RenderLayer::physicalBoundingBox(const RenderLayer* ancestorLayer, co
     return result;
 }
 
-static void expandRectForReflectionAndStackingChildren(const RenderLayer* ancestorLayer, RenderLayer::CalculateBoundsOptions options, LayoutRect& result)
+static void expandRectForReflectionAndStackingChildren(const RenderLayer* ancestorLayer, LayoutRect& result)
 {
     ASSERT(ancestorLayer->stackingNode()->isStackingContext() || !ancestorLayer->stackingNode()->hasPositiveZOrderList());
 
@@ -1571,7 +1528,7 @@ static void expandRectForReflectionAndStackingChildren(const RenderLayer* ancest
 
     RenderLayerStackingNodeIterator iterator(*ancestorLayer->stackingNode(), AllChildren);
     while (RenderLayerStackingNode* node = iterator.next()) {
-        result.unite(node->layer()->boundingBoxForCompositing(ancestorLayer, options));
+        result.unite(node->layer()->boundingBoxForCompositing(ancestorLayer));
     }
 }
 
@@ -1582,13 +1539,13 @@ LayoutRect RenderLayer::physicalBoundingBoxIncludingReflectionAndStackingChildre
 
     const_cast<RenderLayer*>(this)->stackingNode()->updateLayerListsIfNeeded();
 
-    expandRectForReflectionAndStackingChildren(this, DoNotApplyBoundsChickenEggHacks, result);
+    expandRectForReflectionAndStackingChildren(this, result);
 
     result.moveBy(offsetFromRoot);
     return result;
 }
 
-LayoutRect RenderLayer::boundingBoxForCompositing(const RenderLayer* ancestorLayer, CalculateBoundsOptions options) const
+LayoutRect RenderLayer::boundingBoxForCompositing(const RenderLayer* ancestorLayer) const
 {
     if (!isSelfPaintingLayer())
         return LayoutRect();
@@ -1600,7 +1557,7 @@ LayoutRect RenderLayer::boundingBoxForCompositing(const RenderLayer* ancestorLay
     if (isRootLayer())
         return m_renderer->view()->unscaledDocumentRect();
 
-    const bool shouldIncludeTransform = paintsWithTransform() || (options == ApplyBoundsChickenEggHacks && transform());
+    const bool shouldIncludeTransform = paintsWithTransform();
 
     LayoutRect localClipRect = clipper().localClipRect();
     if (localClipRect != PaintInfo::infiniteRect()) {
@@ -1618,7 +1575,7 @@ LayoutRect RenderLayer::boundingBoxForCompositing(const RenderLayer* ancestorLay
 
     const_cast<RenderLayer*>(this)->stackingNode()->updateLayerListsIfNeeded();
 
-    expandRectForReflectionAndStackingChildren(this, options, result);
+    expandRectForReflectionAndStackingChildren(this, result);
 
     // FIXME: We can optimize the size of the composited layers, by not enlarging
     // filtered areas with the outsets if we know that the filter is going to render in hardware.

@@ -110,10 +110,6 @@ base::SingleThreadTaskRunner* PlatformImpl::mainThreadTaskRunner() {
   return main_thread_task_runner_.get();
 }
 
-bool PlatformImpl::isThreadedCompositingEnabled() {
-  return true;
-}
-
 mojo::NetworkService* PlatformImpl::networkService() {
   return network_service_.get();
 }

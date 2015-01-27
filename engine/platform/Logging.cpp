@@ -58,8 +58,6 @@ WTFLogChannel LogProgress =           { WTFLogChannelOff };
 
 WTFLogChannel LogFileAPI =            { WTFLogChannelOff };
 
-WTFLogChannel LogCompositing =        { WTFLogChannelOff };
-
 WTFLogChannel LogScriptedAnimationController = { WTFLogChannelOff };
 WTFLogChannel LogTimers =                      { WTFLogChannelOff };
 
@@ -118,9 +116,6 @@ WTFLogChannel* getChannelFromName(const String& channelName)
 
     if (equalIgnoringCase(channelName, String("FileAPI")))
         return &LogFileAPI;
-
-    if (equalIgnoringCase(channelName, String("Compositing")))
-        return &LogCompositing;
 
     if (equalIgnoringCase(channelName, String("ScriptedAnimationController")))
         return &LogScriptedAnimationController;

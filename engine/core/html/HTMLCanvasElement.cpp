@@ -290,16 +290,8 @@ void HTMLCanvasElement::reset()
 bool HTMLCanvasElement::paintsIntoCanvasBuffer() const
 {
     ASSERT(m_context);
-
-    if (!m_context->isAccelerated())
-        return true;
-
-    if (renderBox() && renderBox()->hasAcceleratedCompositing())
-        return false;
-
     return true;
 }
-
 
 void HTMLCanvasElement::paint(GraphicsContext* context, const LayoutRect& r)
 {

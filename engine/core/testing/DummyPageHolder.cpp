@@ -76,11 +76,6 @@ DummyPageHolder::DummyPageHolder(
     // FIXME(sky): Delete the tests that use DummyPageHolder since
     // they no longer work and we're not running them.
 
-    // Settings& settings = m_page->settings();
-    // FIXME: http://crbug.com/363843. This needs to find a better way to
-    // not create graphics layers.
-    // settings.setAcceleratedCompositingEnabled(false);
-
     m_frameLoaderClient = frameLoaderClient;
     if (!m_frameLoaderClient)
         m_frameLoaderClient = adoptPtr(new EmptyFrameLoaderClient);

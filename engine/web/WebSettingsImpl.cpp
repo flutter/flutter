@@ -269,10 +269,6 @@ void WebSettingsImpl::setDeferredImageDecodingEnabled(bool enabled)
     m_deferredImageDecodingEnabled = enabled;
 }
 
-void WebSettingsImpl::setPreferCompositingToLCDTextEnabled(bool enabled)
-{
-}
-
 void WebSettingsImpl::setMinimumAccelerated2dCanvasSize(int numPixels)
 {
     m_settings->setMinimumAccelerated2dCanvasSize(numPixels);

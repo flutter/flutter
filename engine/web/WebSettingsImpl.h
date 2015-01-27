@@ -50,7 +50,6 @@ public:
     virtual HoverType primaryHoverType() const override;
     virtual void setAccelerated2dCanvasEnabled(bool) override;
     virtual void setAccelerated2dCanvasMSAASampleCount(int) override;
-    virtual void setPreferCompositingToLCDTextEnabled(bool) override;
     virtual void setAntialiased2dCanvasEnabled(bool) override;
     virtual void setAsynchronousSpellCheckingEnabled(bool) override;
     virtual void setContainerCullingEnabled(bool) override;

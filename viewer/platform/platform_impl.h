@@ -31,7 +31,6 @@ class PlatformImpl : public blink::Platform {
   virtual void setSharedTimerFireInterval(double interval_seconds);
   virtual void stopSharedTimer();
   virtual base::SingleThreadTaskRunner* mainThreadTaskRunner();
-  virtual bool isThreadedCompositingEnabled();
   virtual mojo::NetworkService* networkService();
   virtual blink::WebURLLoader* createURLLoader();
   virtual blink::WebURLError cancelledError(const blink::WebURL& url) const;

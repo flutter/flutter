@@ -100,8 +100,6 @@ public:
 
     void recalcOverflowAfterStyleChange();
 
-    bool isEnclosedInCompositingLayer() const;
-
     void prepareForDetach();
 
     void clear();

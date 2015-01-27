@@ -778,7 +778,6 @@ public:
     const Vector<CSSPropertyID>& willChangeProperties() const { return rareNonInheritedData->m_willChange->m_properties; }
     bool willChangeContents() const { return rareNonInheritedData->m_willChange->m_contents; }
     bool willChangeScrollPosition() const { return rareNonInheritedData->m_willChange->m_scrollPosition; }
-    bool hasWillChangeCompositingHint() const;
     bool subtreeWillChangeContents() const { return rareInheritedData->m_subtreeWillChangeContents; }
 
 // attribute setter methods
@@ -1119,9 +1118,6 @@ public:
     void setWillChangeContents(bool b) { SET_VAR(rareNonInheritedData.access()->m_willChange, m_contents, b); }
     void setWillChangeScrollPosition(bool b) { SET_VAR(rareNonInheritedData.access()->m_willChange, m_scrollPosition, b); }
     void setSubtreeWillChangeContents(bool b) { SET_VAR(rareInheritedData, m_subtreeWillChangeContents, b); }
-
-    bool requiresAcceleratedCompositingForExternalReasons(bool b) { return rareNonInheritedData->m_requiresAcceleratedCompositingForExternalReasons; }
-    void setRequiresAcceleratedCompositingForExternalReasons(bool b) { SET_VAR(rareNonInheritedData, m_requiresAcceleratedCompositingForExternalReasons, b); }
 
     void setClipPath(PassRefPtr<ClipPathOperation> operation)
     {

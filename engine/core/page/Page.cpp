@@ -230,9 +230,6 @@ void Page::settingsChanged(SettingsDelegate::ChangeType changeType)
             mainFrame()->document()->styleEngine()->updateGenericFontFamilySettings();
         setNeedsRecalcStyleInAllFrames();
         break;
-    case SettingsDelegate::AcceleratedCompositingChange:
-        // FIXME(sky): Remove
-        break;
     case SettingsDelegate::MediaQueryChange:
         if (mainFrame()->document())
             mainFrame()->document()->mediaQueryAffectingValueChanged();

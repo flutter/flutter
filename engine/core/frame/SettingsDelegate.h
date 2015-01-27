@@ -54,7 +54,6 @@ public:
         MultisamplingChange,
         ImageLoadingChange,
         FontFamilyChange,
-        AcceleratedCompositingChange,
         MediaQueryChange,
     };
 

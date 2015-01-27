@@ -62,12 +62,6 @@ void RenderBoxModelObject::setSelectionState(SelectionState state)
         containingBlock->setSelectionState(state);
 }
 
-bool RenderBoxModelObject::hasAcceleratedCompositing() const
-{
-    // FIXME(sky): Remove
-    return false;
-}
-
 RenderBoxModelObject::RenderBoxModelObject(ContainerNode* node)
     : RenderLayerModelObject(node)
 {

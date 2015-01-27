@@ -345,8 +345,6 @@ public:
     // This value must be checked again after a context loss event as the platform's capabilities may have changed.
     virtual bool canAccelerate2dCanvas() { return false; }
 
-    virtual bool isThreadedCompositingEnabled() { return false; }
-
 protected:
     virtual ~Platform() { }
 };
