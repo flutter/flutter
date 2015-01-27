@@ -5,14 +5,19 @@
 <import src="/mojo/public/sky/connection.sky" as="connection" />
 <import src="/mojo/services/network/public/interfaces/network_service.mojom.sky" as="net" />
 <import src="/mojo/services/network/public/interfaces/url_loader.mojom.sky" as="loader" />
-<import src="/mojo/services/public/sky/application.sky" as="application" />
+<import src="/mojo/services/public/sky/shell.sky" as="shell" />
+<import src="/mojo/public/interfaces/application/shell.mojom.sky" as="shellMojom" />
 <script>
+const Shell = shell.Shell;
+
 describe('Mojo network_service', function() {
   this.enableTimeouts(false);
 
   it('should be able to fetch text files', function(done) {
-    var app = new application.Application(internals.passShellProxyHandle());
-    var netService = app.shell.connectToService(
+    var shellHandle = internals.passShellProxyHandle();
+    var shellProxy = connection.bindHandleToProxy(shellHandle, shellMojom.Shell);
+    var shell = new Shell(shellProxy);
+    var netService = shell.connectToService(
       "mojo:network_service", net.NetworkService);
 
     var urlLoader;
@@ -24,11 +29,21 @@ describe('Mojo network_service', function() {
     urlRequest.url = "http://127.0.0.1:8000/sky/tests/services/resources/pass.txt";
     urlRequest.method = "GET";
     urlRequest.auto_follow_redirects = true;
+
     var urlRequestPromise = urlLoader.start(urlRequest);
     urlRequestPromise.then(function(result) {
+      if (result.response.error) {
+        assert.ok(false, "network request failed " + result.response.error.code + " "
+            + result.response.error.description);
+        done();
+      }
       console.log("url => " + result.response["url"]);
       console.log("status_line => " + result.response["status_line"]);
       console.log("mime_type => " + result.response["mime_type"]);
+
+      var start = Date.now();
+      while (Date.now() - start < 3) {}
+
       var drainDataPromise = core.drainData(result.response.body);
       drainDataPromise.then(function(result) {
         console.log("read " + result.buffer.byteLength + " bytes");

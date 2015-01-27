@@ -6,6 +6,7 @@
 
 #include "base/bind.h"
 #include "mojo/public/cpp/application/connect.h"
+#include "mojo/public/cpp/bindings/strong_binding.h"
 #include "mojo/public/cpp/utility/run_loop.h"
 #include "mojo/services/network/public/interfaces/network_service.mojom.h"
 #include "sky/viewer/document_view.h"
@@ -14,19 +15,20 @@ namespace sky {
 
 class SkyApplication : public mojo::Application {
  public:
-  SkyApplication(mojo::ShellPtr shell,
+  SkyApplication(mojo::InterfaceRequest<mojo::Application> application,
                  mojo::URLResponsePtr response)
       : url_(response->url),
-        shell_(shell.Pass()),
-        initial_response_(response.Pass()) {
-    shell_.set_client(this);
+        binding_(this, application.Pass()),
+        initial_response_(response.Pass()) {}
+
+  void Initialize(mojo::ShellPtr shell,
+                  mojo::Array<mojo::String> args) override {
+    shell_ = shell.Pass();
     mojo::ServiceProviderPtr service_provider;
     shell_->ConnectToApplication("mojo:network_service",
                                  mojo::GetProxy(&service_provider), nullptr);
     mojo::ConnectToService(service_provider.get(), &network_service_);
   }
-
-  void Initialize(mojo::Array<mojo::String> args) override {}
 
   void AcceptConnection(const mojo::String& requestor_url,
                         mojo::InterfaceRequest<mojo::ServiceProvider> services,
@@ -68,6 +70,7 @@ class SkyApplication : public mojo::Application {
   }
 
   mojo::String url_;
+  mojo::StrongBinding<mojo::Application> binding_;
   mojo::ShellPtr shell_;
   mojo::NetworkServicePtr network_service_;
   mojo::URLResponsePtr initial_response_;
@@ -79,9 +82,10 @@ ContentHandlerImpl::ContentHandlerImpl() {
 ContentHandlerImpl::~ContentHandlerImpl() {
 }
 
-void ContentHandlerImpl::StartApplication(mojo::ShellPtr shell,
-                                          mojo::URLResponsePtr response) {
-  new SkyApplication(shell.Pass(), response.Pass());
+void ContentHandlerImpl::StartApplication(
+    mojo::InterfaceRequest<mojo::Application> application,
+    mojo::URLResponsePtr response) {
+  new SkyApplication(application.Pass(), response.Pass());
 }
 
 }  // namespace sky

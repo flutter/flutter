@@ -99,10 +99,10 @@ mojo::Handle Internals::ConnectToEmbedderService(
 // owns the handle and is expected to use it to create the JS Application for
 // the DocumentView.
 mojo::Handle Internals::PassShellProxyHandle() {
-    mojo::MessagePipe pipe;
-    if (!shell_binding_.is_bound())
-      shell_binding_.Bind(pipe.handle0.Pass());
-    return pipe.handle1.release();
+  mojo::ShellPtr shell;
+  if (!shell_binding_.is_bound())
+    shell_binding_.Bind(GetProxy(&shell));
+  return shell.PassMessagePipe().release();
 }
 
 void Internals::ConnectToApplication(

@@ -1,7 +1,8 @@
 <import src="/mojo/public/sky/connection.sky" as="connection" />
 <import src="/mojo/public/sky/core.sky" as="core" />
 <import src="/mojo/public/sky/support.sky" as="support" />
-<import src="/mojo/services/public/sky/application.sky" as="application" />
+<import src="/mojo/public/interfaces/application/shell.mojom.sky" as="shellMojom" />
+<import src="/mojo/services/public/sky/shell.sky" as="shell" />
 <import src="/sky/services/inspector/inspector.mojom.sky" as="inspector" />
 <import src="console-agent.sky" as="ConsoleAgent" />
 <import src="dom-agent.sky" as="DOMAgent" />
@@ -117,8 +118,10 @@ class InspectorBackend extends inspector.InspectorBackend.stubClass {
 }
 
 (function() {
-  var app = new application.Application(internals.passShellProxyHandle());
-  var tracingApp = app.shell.connectToApplication("mojo:sky_inspector_server");
+  var shellHandle = internals.passShellProxyHandle();
+  var shellProxy = connection.bindHandleToProxy(shellHandle, shellMojom.Shell);
+  var myShell = new shell.Shell(shellProxy)
+  var tracingApp = myShell.connectToApplication("mojo:sky_inspector_server");
   tracingApp.provideService(inspector.InspectorBackend, InspectorBackend);
 
   window.frontend = tracingApp.requestService(inspector.InspectorFrontend);

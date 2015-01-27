@@ -19,7 +19,7 @@ class ContentHandlerImpl : public mojo::InterfaceImpl<mojo::ContentHandler> {
 
  private:
   // Overridden from ContentHandler:
-  void StartApplication(mojo::ShellPtr shell,
+  void StartApplication(mojo::InterfaceRequest<mojo::Application> application,
                         mojo::URLResponsePtr response) override;
 
   DISALLOW_COPY_AND_ASSIGN(ContentHandlerImpl);
