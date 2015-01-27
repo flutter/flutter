@@ -148,10 +148,6 @@ public:
     unsigned m_justifySelf : 4; // ItemPosition
     unsigned m_justifySelfOverflowAlignment : 2; // OverflowAlignment
 
-    // ScrollBehavior. 'scroll-behavior' has 2 accepted values, but ScrollBehavior has a third
-    // value (that can only be specified using CSSOM scroll APIs) so 2 bits are needed.
-    unsigned m_scrollBehavior: 2;
-
 private:
     StyleRareNonInheritedData();
     StyleRareNonInheritedData(const StyleRareNonInheritedData&);

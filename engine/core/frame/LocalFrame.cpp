@@ -283,9 +283,7 @@ PassRefPtr<Range> LocalFrame::rangeForPoint(const IntPoint& framePoint)
     return nullptr;
 }
 
-void LocalFrame::createView(const IntSize& viewportSize, const Color& backgroundColor, bool transparent,
-    ScrollbarMode horizontalScrollbarMode, bool horizontalLock,
-    ScrollbarMode verticalScrollbarMode, bool verticalLock)
+void LocalFrame::createView(const IntSize& viewportSize, const Color& backgroundColor, bool transparent)
 {
     ASSERT(this);
     ASSERT(page());

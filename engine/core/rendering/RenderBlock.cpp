@@ -560,10 +560,6 @@ void RenderBlock::paintObject(PaintInfo& paintInfo, const LayoutPoint& paintOffs
 {
     PaintPhase paintPhase = paintInfo.phase;
 
-    LayoutPoint scrolledOffset = paintOffset;
-    if (hasOverflowClip())
-        scrolledOffset.move(-scrolledContentOffset());
-
     if (paintPhase == PaintPhaseForeground) {
         if (hasBoxDecorationBackground())
             paintBoxDecorationBackground(paintInfo, paintOffset);
@@ -575,9 +571,9 @@ void RenderBlock::paintObject(PaintInfo& paintInfo, const LayoutPoint& paintOffs
     }
 
     if (paintPhase != PaintPhaseSelfOutline)
-        paintContents(paintInfo, scrolledOffset);
+        paintContents(paintInfo, paintOffset);
 
-    paintSelection(paintInfo, scrolledOffset); // Fill in gaps in selection on lines and between blocks.
+    paintSelection(paintInfo, paintOffset); // Fill in gaps in selection on lines and between blocks.
 
     if ((paintPhase == PaintPhaseOutline || paintPhase == PaintPhaseSelfOutline)
         && style()->hasOutline() && !style()->outlineStyleIsAuto()) {
@@ -1131,12 +1127,7 @@ bool RenderBlock::nodeAtPoint(const HitTestRequest& request, HitTestResult& resu
             checkChildren = locationInContainer.intersects(clipRect);
     }
     if (checkChildren) {
-        // Hit test descendants first.
-        LayoutSize scrolledOffset(localOffset);
-        if (hasOverflowClip())
-            scrolledOffset -= scrolledContentOffset();
-
-        if (hitTestContents(request, result, locationInContainer, toLayoutPoint(scrolledOffset), hitTestAction)) {
+        if (hitTestContents(request, result, locationInContainer, toLayoutPoint(localOffset), hitTestAction)) {
             updateHitTestResult(result, locationInContainer.point() - localOffset);
             return true;
         }
@@ -1331,7 +1322,6 @@ PositionWithAffinity RenderBlock::positionForPoint(const LayoutPoint& point)
     }
 
     LayoutPoint pointInContents = point;
-    offsetForContents(pointInContents);
     LayoutPoint pointInLogicalContents(pointInContents);
 
     if (isRenderParagraph())
@@ -1358,12 +1348,6 @@ PositionWithAffinity RenderBlock::positionForPoint(const LayoutPoint& point)
 
     // We only get here if there are no hit test candidate children below the click.
     return RenderBox::positionForPoint(point);
-}
-
-void RenderBlock::offsetForContents(LayoutPoint& offset) const
-{
-    if (hasOverflowClip())
-        offset += scrolledContentOffset();
 }
 
 LayoutUnit RenderBlock::availableLogicalWidth() const

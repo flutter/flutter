@@ -67,9 +67,6 @@ void CSSToStyleMap::mapFillAttachment(FillLayer* layer, CSSValue* value) const
     case CSSValueFixed:
         layer->setAttachment(FixedBackgroundAttachment);
         break;
-    case CSSValueScroll:
-        layer->setAttachment(ScrollBackgroundAttachment);
-        break;
     case CSSValueLocal:
         layer->setAttachment(LocalBackgroundAttachment);
         break;

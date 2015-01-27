@@ -111,7 +111,6 @@ public:
 
     virtual void setShowPaintRects(bool) override;
     void setShowDebugBorders(bool);
-    virtual void setShowScrollBottleneckRects(bool) override;
 
     virtual void acceptLanguagesChanged() override;
 
@@ -177,8 +176,6 @@ public:
 private:
     IntSize contentsSize() const;
 
-    void resetSavedScrollAndScaleState();
-
     void performResize();
 
     friend class WebView;  // So WebView::Create can call our constructor
@@ -239,7 +236,6 @@ private:
     // Whether the webview is rendering transparently.
     bool m_isTransparent;
 
-    IntRect m_rootLayerScrollDamage;
     WebLayer* m_rootLayer;
     bool m_matchesHeuristicsForGpuRasterization;
     // If true, the graphics context is being restored.
@@ -253,7 +249,6 @@ private:
 
     bool m_showPaintRects;
     bool m_showDebugBorders;
-    bool m_showScrollBottleneckRects;
     WebColor m_baseBackgroundColor;
     WebColor m_backgroundColorOverride;
 };

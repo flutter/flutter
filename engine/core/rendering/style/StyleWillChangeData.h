@@ -20,7 +20,7 @@ public:
 
     bool operator==(const StyleWillChangeData& o) const
     {
-        return m_properties == o.m_properties && m_contents == o.m_contents && m_scrollPosition == o.m_scrollPosition;
+        return m_properties == o.m_properties && m_contents == o.m_contents;
     }
 
     bool operator!=(const StyleWillChangeData& o) const
@@ -30,7 +30,6 @@ public:
 
     Vector<CSSPropertyID> m_properties;
     unsigned m_contents : 1;
-    unsigned m_scrollPosition : 1;
 
 private:
     StyleWillChangeData();

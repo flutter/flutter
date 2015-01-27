@@ -1814,14 +1814,6 @@ void Document::enqueueUniqueAnimationFrameEvent(PassRefPtr<Event> event)
     ensureScriptedAnimationController().enqueuePerFrameEvent(event);
 }
 
-void Document::enqueueScrollEventForNode(Node* target)
-{
-    // Per the W3C CSSOM View Module only scroll events fired at the document should bubble.
-    RefPtr<Event> scrollEvent = target->isDocumentNode() ? Event::createBubble(EventTypeNames::scroll) : Event::create(EventTypeNames::scroll);
-    scrollEvent->setTarget(target);
-    ensureScriptedAnimationController().enqueuePerFrameEvent(scrollEvent.release());
-}
-
 void Document::enqueueResizeEvent()
 {
     RefPtr<Event> event = Event::create(EventTypeNames::resize);
@@ -1844,8 +1836,6 @@ void Document::addListenerTypeIfNeeded(const AtomicString& eventType)
         addListenerType(ANIMATIONITERATION_LISTENER);
     } else if (eventType == EventTypeNames::transitionend) {
         addListenerType(TRANSITIONEND_LISTENER);
-    } else if (eventType == EventTypeNames::scroll) {
-        addListenerType(SCROLL_LISTENER);
     }
 }
 
@@ -2200,7 +2190,7 @@ IntSize Document::initialViewportSize() const
 {
     if (!view())
         return IntSize();
-    return view()->unscaledVisibleContentSize(IncludeScrollbars);
+    return view()->unscaledVisibleContentSize();
 }
 
 Node* eventTargetNodeForDocument(Document* doc)
@@ -2211,26 +2201,6 @@ Node* eventTargetNodeForDocument(Document* doc)
     if (!node)
         node = doc->documentElement();
     return node;
-}
-
-void Document::adjustFloatQuadsForScroll(Vector<FloatQuad>& quads)
-{
-    if (!view())
-        return;
-
-    LayoutRect visibleContentRect = view()->visibleContentRect();
-    for (size_t i = 0; i < quads.size(); ++i) {
-        quads[i].move(-FloatSize(visibleContentRect.x().toFloat(), visibleContentRect.y().toFloat()));
-    }
-}
-
-void Document::adjustFloatRectForScroll(FloatRect& rect)
-{
-    if (!view())
-        return;
-
-    LayoutRect visibleContentRect = view()->visibleContentRect();
-    rect.move(-FloatSize(visibleContentRect.x().toFloat(), visibleContentRect.y().toFloat()));
 }
 
 void Document::decrementActiveParserCount()

@@ -187,7 +187,6 @@ pointer-events inherited
 position
 quotes inherited, converter=convertQuotes
 right animatable, initial=initialOffset, converter=convertLengthOrAuto
-scroll-behavior runtime_flag=CSSOMSmoothScroll, type_name=ScrollBehavior
 size custom_all
 speak inherited
 table-layout

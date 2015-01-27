@@ -65,7 +65,6 @@ StyleRareNonInheritedData::StyleRareNonInheritedData()
     , m_justifyItemsPositionType(RenderStyle::initialJustifyItemsPositionType())
     , m_justifySelf(RenderStyle::initialJustifySelf())
     , m_justifySelfOverflowAlignment(RenderStyle::initialJustifySelfOverflowAlignment())
-    , m_scrollBehavior(RenderStyle::initialScrollBehavior())
 {
     m_maskBoxImage.setMaskDefaults();
 }
@@ -115,7 +114,6 @@ StyleRareNonInheritedData::StyleRareNonInheritedData(const StyleRareNonInherited
     , m_justifyItemsPositionType(o.m_justifyItemsPositionType)
     , m_justifySelf(o.m_justifySelf)
     , m_justifySelfOverflowAlignment(o.m_justifySelfOverflowAlignment)
-    , m_scrollBehavior(o.m_scrollBehavior)
 {
 }
 
@@ -167,8 +165,7 @@ bool StyleRareNonInheritedData::operator==(const StyleRareNonInheritedData& o) c
         && m_justifyItemsOverflowAlignment == o.m_justifyItemsOverflowAlignment
         && m_justifyItemsPositionType == o.m_justifyItemsPositionType
         && m_justifySelf == o.m_justifySelf
-        && m_justifySelfOverflowAlignment == o.m_justifySelfOverflowAlignment
-        && m_scrollBehavior == o.m_scrollBehavior;
+        && m_justifySelfOverflowAlignment == o.m_justifySelfOverflowAlignment;
 }
 
 bool StyleRareNonInheritedData::counterDataEquivalent(const StyleRareNonInheritedData& o) const

@@ -42,7 +42,6 @@
 #include "sky/engine/platform/fonts/TextRenderingMode.h"
 #include "sky/engine/platform/graphics/GraphicsTypes.h"
 #include "sky/engine/platform/graphics/Path.h"
-#include "sky/engine/platform/scroll/ScrollTypes.h"
 #include "sky/engine/platform/text/TextDirection.h"
 #include "sky/engine/platform/text/UnicodeBidi.h"
 #include "sky/engine/wtf/MathExtras.h"
@@ -304,9 +303,6 @@ template<> inline CSSPrimitiveValue::CSSPrimitiveValue(EFillAttachment e)
 {
     m_primitiveUnitType = CSS_VALUE_ID;
     switch (e) {
-    case ScrollBackgroundAttachment:
-        m_value.valueID = CSSValueScroll;
-        break;
     case LocalBackgroundAttachment:
         m_value.valueID = CSSValueLocal;
         break;
@@ -320,8 +316,6 @@ template<> inline CSSPrimitiveValue::operator EFillAttachment() const
 {
     ASSERT(isValueID());
     switch (m_value.valueID) {
-    case CSSValueScroll:
-        return ScrollBackgroundAttachment;
     case CSSValueLocal:
         return LocalBackgroundAttachment;
     case CSSValueFixed:
@@ -331,7 +325,7 @@ template<> inline CSSPrimitiveValue::operator EFillAttachment() const
     }
 
     ASSERT_NOT_REACHED();
-    return ScrollBackgroundAttachment;
+    return LocalBackgroundAttachment;
 }
 
 template<> inline CSSPrimitiveValue::CSSPrimitiveValue(EFillBox e)
@@ -1450,9 +1444,6 @@ template<> inline CSSPrimitiveValue::CSSPrimitiveValue(EOverflow e)
     case OHIDDEN:
         m_value.valueID = CSSValueHidden;
         break;
-    case OSCROLL:
-        m_value.valueID = CSSValueScroll;
-        break;
     case OAUTO:
         m_value.valueID = CSSValueAuto;
         break;
@@ -1476,8 +1467,6 @@ template<> inline CSSPrimitiveValue::operator EOverflow() const
         return OVISIBLE;
     case CSSValueHidden:
         return OHIDDEN;
-    case CSSValueScroll:
-        return OSCROLL;
     case CSSValueAuto:
         return OAUTO;
     case CSSValueOverlay:
@@ -3440,38 +3429,6 @@ template<> inline CSSPrimitiveValue::operator OverflowAlignment() const
     }
     ASSERT_NOT_REACHED();
     return OverflowAlignmentTrue;
-}
-
-template<> inline CSSPrimitiveValue::CSSPrimitiveValue(ScrollBehavior behavior)
-    : CSSValue(PrimitiveClass)
-{
-    m_primitiveUnitType = CSS_VALUE_ID;
-    switch (behavior) {
-    case ScrollBehaviorInstant:
-        m_value.valueID = CSSValueInstant;
-        break;
-    case ScrollBehaviorSmooth:
-        m_value.valueID = CSSValueSmooth;
-        break;
-    case ScrollBehaviorAuto:
-        // Behavior 'auto' is only allowed in ScrollOptions arguments passed to
-        // CSSOM scroll APIs.
-        ASSERT_NOT_REACHED();
-    }
-}
-
-template<> inline CSSPrimitiveValue::operator ScrollBehavior() const
-{
-    switch (getValueID()) {
-    case CSSValueInstant:
-        return ScrollBehaviorInstant;
-    case CSSValueSmooth:
-        return ScrollBehaviorSmooth;
-    default:
-        break;
-    }
-    ASSERT_NOT_REACHED();
-    return ScrollBehaviorInstant;
 }
 
 }

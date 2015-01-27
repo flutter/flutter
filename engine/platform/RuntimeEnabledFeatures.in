@@ -34,7 +34,6 @@ ClientHintsDpr status=experimental
 Crypto status=stable
 CSSAttributeCaseSensitivity status=experimental
 CSSMaskSourceType status=experimental
-CSSOMSmoothScroll status=experimental
 CSSTouchActionDelay status=test
 CSSViewport status=experimental
 CSS3Text status=experimental
@@ -49,7 +48,6 @@ EncryptedMediaAnyVersion status=stable
 ExecCommandInJavaScript status=test
 ExperimentalCanvasFeatures status=test
 ExperimentalWebSocket status=stable
-FastMobileScrolling
 FileAPIBlobClose status=experimental
 FileConstructor status=stable
 FileSystem status=stable
@@ -87,10 +85,6 @@ RegionBasedColumns status=experimental
 
 RequestAutocomplete status=test
 ScreenOrientation status=stable
-
-// Implements documentElement.scrollTop/Left and bodyElement.scrollTop/Left
-// as per the spec, matching other Web engines.
-ScrollTopLeftInterop status=experimental
 
 SessionStorage status=stable
 PictureSizes status=stable

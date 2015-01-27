@@ -206,13 +206,6 @@ PassRefPtr<TraceEvent::ConvertableToTraceFormat> InspectorMarkLoadEvent::data()
     return TracedValue::create();
 }
 
-PassRefPtr<TraceEvent::ConvertableToTraceFormat> InspectorScrollLayerEvent::data(RenderObject* renderer)
-{
-    RefPtr<TracedValue> value = TracedValue::create();
-    setGeneratingNodeId(value.get(), "nodeId", renderer);
-    return value;
-}
-
 PassRefPtr<TraceEvent::ConvertableToTraceFormat> InspectorEvaluateScriptEvent::data(const String& url, int lineNumber)
 {
     RefPtr<TracedValue> value = TracedValue::create();

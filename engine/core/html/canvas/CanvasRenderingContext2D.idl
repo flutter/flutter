@@ -87,7 +87,6 @@ enum CanvasFillRule { "nonzero", "evenodd" };
     void drawFocusIfNeeded(Element element);
     void drawFocusIfNeeded(Path2D path, Element element);
 
-    [RuntimeEnabled=ExperimentalCanvasFeatures] void scrollPathIntoView(optional Path2D path);
     void clip(optional CanvasFillRule winding);
     void clip(Path2D path, optional CanvasFillRule winding);
     boolean isPointInPath(unrestricted float x, unrestricted float y, optional CanvasFillRule winding);

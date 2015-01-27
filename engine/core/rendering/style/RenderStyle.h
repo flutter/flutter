@@ -59,7 +59,6 @@
 #include "sky/engine/platform/geometry/RoundedRect.h"
 #include "sky/engine/platform/graphics/Color.h"
 #include "sky/engine/platform/graphics/GraphicsTypes.h"
-#include "sky/engine/platform/scroll/ScrollTypes.h"
 #include "sky/engine/platform/text/TextDirection.h"
 #include "sky/engine/platform/text/UnicodeBidi.h"
 #include "sky/engine/platform/transforms/TransformOperations.h"
@@ -768,16 +767,11 @@ public:
     const FilterOperations& filter() const { return rareNonInheritedData->m_filter->m_operations; }
     bool hasFilter() const { return !rareNonInheritedData->m_filter->m_operations.operations().isEmpty(); }
 
-    bool shouldPlaceBlockDirectionScrollbarOnLogicalLeft() const { return !isLeftToRightDirection(); }
-
     TouchAction touchAction() const { return static_cast<TouchAction>(rareNonInheritedData->m_touchAction); }
     TouchActionDelay touchActionDelay() const { return static_cast<TouchActionDelay>(rareInheritedData->m_touchActionDelay); }
 
-    ScrollBehavior scrollBehavior() const { return static_cast<ScrollBehavior>(rareNonInheritedData->m_scrollBehavior); }
-
     const Vector<CSSPropertyID>& willChangeProperties() const { return rareNonInheritedData->m_willChange->m_properties; }
     bool willChangeContents() const { return rareNonInheritedData->m_willChange->m_contents; }
-    bool willChangeScrollPosition() const { return rareNonInheritedData->m_willChange->m_scrollPosition; }
     bool subtreeWillChangeContents() const { return rareInheritedData->m_subtreeWillChangeContents; }
 
 // attribute setter methods
@@ -1112,11 +1106,8 @@ public:
     void setTouchAction(TouchAction t) { SET_VAR(rareNonInheritedData, m_touchAction, t); }
     void setTouchActionDelay(TouchActionDelay t) { SET_VAR(rareInheritedData, m_touchActionDelay, t); }
 
-    void setScrollBehavior(ScrollBehavior b) { SET_VAR(rareNonInheritedData, m_scrollBehavior, b); }
-
     void setWillChangeProperties(const Vector<CSSPropertyID>& properties) { SET_VAR(rareNonInheritedData.access()->m_willChange, m_properties, properties); }
     void setWillChangeContents(bool b) { SET_VAR(rareNonInheritedData.access()->m_willChange, m_contents, b); }
-    void setWillChangeScrollPosition(bool b) { SET_VAR(rareNonInheritedData.access()->m_willChange, m_scrollPosition, b); }
     void setSubtreeWillChangeContents(bool b) { SET_VAR(rareInheritedData, m_subtreeWillChangeContents, b); }
 
     void setClipPath(PassRefPtr<ClipPathOperation> operation)
@@ -1295,7 +1286,6 @@ public:
     static TouchActionDelay initialTouchActionDelay() { return TouchActionDelayScript; }
     static ShadowList* initialBoxShadow() { return 0; }
     static ShadowList* initialTextShadow() { return 0; }
-    static ScrollBehavior initialScrollBehavior() { return ScrollBehaviorInstant; }
 
     static unsigned initialTabSize() { return 8; }
 

@@ -101,7 +101,7 @@ static unsigned verticalScrollDistance(LocalFrame& frame)
     RenderStyle* style = renderBox.style();
     if (!style)
         return 0;
-    if (!(style->overflowY() == OSCROLL || style->overflowY() == OAUTO || focusedElement->hasEditableStyle()))
+    if (!focusedElement->hasEditableStyle())
         return 0;
     int height = std::min<int>(renderBox.clientHeight(),
         frame.view()->height());
@@ -556,13 +556,6 @@ bool Editor::executeCommand(const String& commandName)
 
 bool Editor::executeCommand(const String& commandName, const String& value)
 {
-    // moveToBeginningOfDocument and moveToEndfDocument are only handled by WebKit for editable nodes.
-    if (!canEdit() && commandName == "moveToBeginningOfDocument")
-        return m_frame.eventHandler().bubblingScroll(ScrollUp, ScrollByDocument);
-
-    if (!canEdit() && commandName == "moveToEndOfDocument")
-        return m_frame.eventHandler().bubblingScroll(ScrollDown, ScrollByDocument);
-
     if (commandName == "showGuessPanel") {
         spellChecker().showSpellingGuessPanel();
         return true;

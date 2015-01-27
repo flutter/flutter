@@ -305,9 +305,6 @@ private:
 protected:
     bool createsBlockFormattingContext() const;
 
-    // Adjust from painting offsets to the local coords of this renderer
-    void offsetForContents(LayoutPoint&) const;
-
     virtual bool updateLogicalWidthAndColumnWidth();
 
 protected:

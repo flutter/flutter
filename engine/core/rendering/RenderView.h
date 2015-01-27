@@ -60,12 +60,9 @@ public:
     virtual LayoutUnit availableLogicalHeight(AvailableLogicalHeightType) const override;
 
     // The same as the FrameView's layoutHeight/layoutWidth but with null check guards.
-    int viewHeight(IncludeScrollbarsInRect = ExcludeScrollbars) const;
-    int viewWidth(IncludeScrollbarsInRect = ExcludeScrollbars) const;
-    int viewLogicalWidth() const
-    {
-        return viewWidth(ExcludeScrollbars);
-    }
+    int viewHeight() const;
+    int viewWidth() const;
+    int viewLogicalWidth() const { return viewWidth(); }
     int viewLogicalHeight() const;
     LayoutUnit viewLogicalHeightForPercentages() const;
 

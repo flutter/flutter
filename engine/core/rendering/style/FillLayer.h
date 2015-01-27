@@ -180,7 +180,7 @@ public:
     void fillUnsetProperties();
     void cullEmptyLayers();
 
-    static EFillAttachment initialFillAttachment(EFillLayerType) { return ScrollBackgroundAttachment; }
+    static EFillAttachment initialFillAttachment(EFillLayerType) { return LocalBackgroundAttachment; }
     static EFillBox initialFillClip(EFillLayerType) { return BorderFillBox; }
     static EFillBox initialFillOrigin(EFillLayerType type) { return type == BackgroundFillLayer ? PaddingFillBox : BorderFillBox; }
     static EFillRepeat initialFillRepeatX(EFillLayerType) { return NoRepeatFill; }

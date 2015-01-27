@@ -720,7 +720,6 @@ void StyleBuilderFunctions::applyValueCSSPropertyWebkitTextEmphasisStyle(StyleRe
 void StyleBuilderFunctions::applyInitialCSSPropertyWillChange(StyleResolverState& state)
 {
     state.style()->setWillChangeContents(false);
-    state.style()->setWillChangeScrollPosition(false);
     state.style()->setWillChangeProperties(Vector<CSSPropertyID>());
     state.style()->setSubtreeWillChangeContents(state.parentStyle()->subtreeWillChangeContents());
 }
@@ -728,7 +727,6 @@ void StyleBuilderFunctions::applyInitialCSSPropertyWillChange(StyleResolverState
 void StyleBuilderFunctions::applyInheritCSSPropertyWillChange(StyleResolverState& state)
 {
     state.style()->setWillChangeContents(state.parentStyle()->willChangeContents());
-    state.style()->setWillChangeScrollPosition(state.parentStyle()->willChangeScrollPosition());
     state.style()->setWillChangeProperties(state.parentStyle()->willChangeProperties());
     state.style()->setSubtreeWillChangeContents(state.parentStyle()->subtreeWillChangeContents());
 }
@@ -737,7 +735,6 @@ void StyleBuilderFunctions::applyValueCSSPropertyWillChange(StyleResolverState& 
 {
     ASSERT(value->isValueList());
     bool willChangeContents = false;
-    bool willChangeScrollPosition = false;
     Vector<CSSPropertyID> willChangeProperties;
 
     for (CSSValueListIterator i(value); i.hasMore(); i.advance()) {
@@ -746,13 +743,10 @@ void StyleBuilderFunctions::applyValueCSSPropertyWillChange(StyleResolverState& 
             willChangeProperties.append(propertyID);
         else if (primitiveValue->getValueID() == CSSValueContents)
             willChangeContents = true;
-        else if (primitiveValue->getValueID() == CSSValueScrollPosition)
-            willChangeScrollPosition = true;
         else
             ASSERT_NOT_REACHED();
     }
     state.style()->setWillChangeContents(willChangeContents);
-    state.style()->setWillChangeScrollPosition(willChangeScrollPosition);
     state.style()->setWillChangeProperties(willChangeProperties);
     state.style()->setSubtreeWillChangeContents(willChangeContents || state.parentStyle()->subtreeWillChangeContents());
 }

@@ -120,14 +120,6 @@ public:
     int clientTop();
     int clientWidth();
     int clientHeight();
-    int scrollLeft();
-    int scrollTop();
-    void setScrollLeft(int);
-    void setScrollLeft(const Dictionary& scrollOptionsHorizontal, ExceptionState&);
-    void setScrollTop(int);
-    void setScrollTop(const Dictionary& scrollOptionsVertical, ExceptionState&);
-    int scrollWidth();
-    int scrollHeight();
 
     PassRefPtr<ClientRectList> getClientRects();
     PassRefPtr<ClientRect> getBoundingClientRect();
@@ -257,9 +249,6 @@ public:
     bool hasID() const;
     bool hasClass() const;
     const SpaceSplitString& classNames() const;
-
-    IntSize savedLayerScrollOffset() const;
-    void setSavedLayerScrollOffset(const IntSize&);
 
     ActiveAnimations* activeAnimations() const;
     ActiveAnimations& ensureActiveAnimations();

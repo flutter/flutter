@@ -50,7 +50,6 @@
 #include "sky/engine/platform/graphics/filters/FilterOperation.h"
 #include "sky/engine/platform/network/ResourceLoadPriority.h"
 #include "sky/engine/platform/network/ResourceResponse.h"
-#include "sky/engine/platform/scroll/ScrollTypes.h"
 #include "sky/engine/platform/text/TextChecking.h"
 #include "sky/engine/platform/text/TextDecoration.h"
 #include "sky/engine/platform/weborigin/ReferrerPolicy.h"

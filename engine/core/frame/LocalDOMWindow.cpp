@@ -480,7 +480,7 @@ int LocalDOMWindow::innerHeight() const
     if (!view)
         return 0;
 
-    return view->visibleContentRect(IncludeScrollbars).height();
+    return view->visibleContentRect().height();
 }
 
 int LocalDOMWindow::innerWidth() const
@@ -492,7 +492,7 @@ int LocalDOMWindow::innerWidth() const
     if (!view)
         return 0;
 
-    return view->visibleContentRect(IncludeScrollbars).width();
+    return view->visibleContentRect().width();
 }
 
 int LocalDOMWindow::screenX() const

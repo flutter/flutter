@@ -436,10 +436,8 @@ void RenderBoxModelObject::paintFillLayerExtended(const PaintInfo& paintInfo, co
         context->clip(thisBox->overflowClipRect(rect.location()));
 
         // Adjust the paint rect to reflect a scrolled content box with borders at the ends.
-        IntSize offset = thisBox->scrolledContentOffset();
-        scrolledPaintRect.move(-offset);
-        scrolledPaintRect.setWidth(bLeft + thisBox->scrollWidth() + bRight);
-        scrolledPaintRect.setHeight(borderTop() + thisBox->scrollHeight() + borderBottom());
+        scrolledPaintRect.setWidth(bLeft + thisBox->clientWidth() + bRight);
+        scrolledPaintRect.setHeight(borderTop() + thisBox->clientHeight() + borderBottom());
     }
 
     GraphicsContextStateSaver backgroundClipStateSaver(*context, false);
@@ -726,15 +724,6 @@ void RenderBoxModelObject::calculateBackgroundImageGeometry(const RenderLayerMod
     // destRect will be adjusted later if the background is non-repeating.
     // FIXME: transforms spec says that fixed backgrounds behave like scroll inside transforms.
     bool fixedAttachment = fillLayer.attachment() == FixedBackgroundAttachment;
-
-    if (RuntimeEnabledFeatures::fastMobileScrollingEnabled()) {
-        // As a side effect of an optimization to blit on scroll, we do not honor the CSS
-        // property "background-attachment: fixed" because it may result in rendering
-        // artifacts. Note, these artifacts only appear if we are blitting on scroll of
-        // a page that has fixed background images.
-        fixedAttachment = false;
-    }
-
     if (!fixedAttachment) {
         geometry.setDestRect(snappedPaintRect);
 

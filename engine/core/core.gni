@@ -980,8 +980,6 @@ sky_core_files = [
   "loader/NavigationPolicy.h",
   "loader/UniqueIdentifier.cpp",
   "loader/UniqueIdentifier.h",
-  "page/AutoscrollController.cpp",
-  "page/AutoscrollController.h",
   "page/ChromeClient.h",
   "page/EditorClient.h",
   "page/EventHandler.cpp",

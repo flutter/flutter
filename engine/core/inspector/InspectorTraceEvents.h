@@ -91,11 +91,6 @@ public:
     static PassRefPtr<TraceEvent::ConvertableToTraceFormat> data();
 };
 
-class InspectorScrollLayerEvent {
-public:
-    static PassRefPtr<TraceEvent::ConvertableToTraceFormat> data(RenderObject*);
-};
-
 class InspectorEvaluateScriptEvent {
 public:
     static PassRefPtr<TraceEvent::ConvertableToTraceFormat> data(const String& url, int lineNumber);

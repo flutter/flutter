@@ -75,9 +75,6 @@ public:
     DOMTokenList* classList() const { return m_classList.get(); }
     void setClassList(PassOwnPtr<DOMTokenList> classList) { m_classList = classList; }
 
-    IntSize savedLayerScrollOffset() const { return m_savedLayerScrollOffset; }
-    void setSavedLayerScrollOffset(IntSize size) { m_savedLayerScrollOffset = size; }
-
     ActiveAnimations* activeAnimations() { return m_activeAnimations.get(); }
     void setActiveAnimations(PassOwnPtr<ActiveAnimations> activeAnimations)
     {
@@ -87,8 +84,6 @@ public:
 private:
     unsigned m_tabindex : 16;
     unsigned m_hasTabIndex : 1;
-
-    IntSize m_savedLayerScrollOffset;
 
     OwnPtr<DOMTokenList> m_classList;
     OwnPtr<ElementShadow> m_shadow;

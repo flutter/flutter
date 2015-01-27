@@ -32,7 +32,6 @@
 #include "sky/engine/platform/Widget.h"
 #include "sky/engine/platform/geometry/LayoutRect.h"
 #include "sky/engine/platform/graphics/Color.h"
-#include "sky/engine/platform/scroll/ScrollTypes.h"
 #include "sky/engine/wtf/Forward.h"
 #include "sky/engine/wtf/HashSet.h"
 #include "sky/engine/wtf/OwnPtr.h"
@@ -90,7 +89,7 @@ public:
 
     // Methods for getting/setting the size Blink should use to layout the contents.
     // FIXME(sky): Remove the scrollbars argument now that FrameView doesn't scroll.
-    IntSize layoutSize(IncludeScrollbarsInRect = ExcludeScrollbars) const;
+    IntSize layoutSize() const;
     void setLayoutSize(const IntSize&);
 
     // If this is set to false, the layout size will need to be explicitly set by the owner.
@@ -111,7 +110,7 @@ public:
     void setBaseBackgroundColor(const Color&);
     void updateBackgroundRecursively(const Color&, bool);
 
-    IntRect windowClipRect(IncludeScrollbarsInRect = ExcludeScrollbars) const;
+    IntRect windowClipRect() const;
 
     float visibleContentScaleFactor() const { return m_visibleContentScaleFactor; }
     void setVisibleContentScaleFactor(float);
@@ -170,8 +169,8 @@ public:
     IntRect windowToContents(const IntRect& windowRect) const { return windowRect; }
     IntRect contentsToWindow(const IntRect& contentsRect) const { return contentsRect; }
 
-    IntRect visibleContentRect(IncludeScrollbarsInRect = ExcludeScrollbars) const { return IntRect(IntPoint(), expandedIntSize(frameRect().size())); }
-    IntSize unscaledVisibleContentSize(IncludeScrollbarsInRect = ExcludeScrollbars) const { return frameRect().size(); }
+    IntRect visibleContentRect() const { return IntRect(IntPoint(), expandedIntSize(frameRect().size())); }
+    IntSize unscaledVisibleContentSize() const { return frameRect().size(); }
     // FIXME(sky): Not clear what values these should return. This is just what they happen to be
     // returning today.
     bool paintsEntireContents() const { return false; }

@@ -721,8 +721,7 @@ PassRefPtr<Range> Editor::findStringAndScrollToVisible(const String& target, Ran
     if (!nextMatch)
         return nullptr;
 
-    nextMatch->firstNode()->renderer()->scrollRectToVisible(nextMatch->boundingBox(),
-        ScrollAlignment::alignCenterIfNeeded, ScrollAlignment::alignCenterIfNeeded);
+    // FIXME(sky): Scroll to visible.
 
     return nextMatch.release();
 }

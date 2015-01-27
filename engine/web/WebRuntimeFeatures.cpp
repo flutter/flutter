@@ -63,11 +63,6 @@ void WebRuntimeFeatures::enableExperimentalCanvasFeatures(bool enable)
     RuntimeEnabledFeatures::setExperimentalCanvasFeaturesEnabled(enable);
 }
 
-void WebRuntimeFeatures::enableFastMobileScrolling(bool enable)
-{
-    RuntimeEnabledFeatures::setFastMobileScrollingEnabled(enable);
-}
-
 void WebRuntimeFeatures::enableFileSystem(bool enable)
 {
     RuntimeEnabledFeatures::setFileSystemEnabled(enable);

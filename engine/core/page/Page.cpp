@@ -35,7 +35,6 @@
 #include "sky/engine/core/frame/LocalDOMWindow.h"
 #include "sky/engine/core/frame/LocalFrame.h"
 #include "sky/engine/core/frame/Settings.h"
-#include "sky/engine/core/page/AutoscrollController.h"
 #include "sky/engine/core/page/ChromeClient.h"
 #include "sky/engine/core/page/FocusController.h"
 #include "sky/engine/core/page/PageLifecycleNotifier.h"
@@ -66,7 +65,6 @@ float deviceScaleFactor(LocalFrame* frame)
 Page::Page(PageClients& pageClients, ServiceProvider& services)
     : SettingsDelegate(Settings::create())
     , m_animator(this)
-    , m_autoscrollController(AutoscrollController::create(*this))
     , m_chromeClient(pageClients.chromeClient)
     , m_dragCaretController(DragCaretController::create())
     , m_focusController(FocusController::create(this))

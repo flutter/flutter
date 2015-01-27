@@ -35,7 +35,6 @@
 #include "sky/engine/core/rendering/HitTestRequest.h"
 #include "sky/engine/core/rendering/PaintPhase.h"
 #include "sky/engine/core/rendering/RenderObjectChildList.h"
-#include "sky/engine/core/rendering/ScrollAlignment.h"
 #include "sky/engine/core/rendering/SubtreeLayoutScope.h"
 #include "sky/engine/core/rendering/style/RenderStyle.h"
 #include "sky/engine/core/rendering/style/StyleInheritedData.h"
@@ -180,14 +179,9 @@ public:
     void moveLayers(RenderLayer* oldParent, RenderLayer* newParent);
     RenderLayer* findNextLayer(RenderLayer* parentLayer, RenderObject* startPoint, bool checkParent = true);
 
-    // Scrolling is a RenderBox concept, however some code just cares about recursively scrolling our enclosing ScrollableArea(s).
-    bool scrollRectToVisible(const LayoutRect&, const ScrollAlignment& alignX = ScrollAlignment::alignCenterIfNeeded, const ScrollAlignment& alignY = ScrollAlignment::alignCenterIfNeeded);
-
     // Convenience function for getting to the nearest enclosing box of a RenderObject.
     RenderBox* enclosingBox() const;
     RenderBoxModelObject* enclosingBoxModelObject() const;
-
-    RenderBox* enclosingScrollableBox() const;
 
 #if ENABLE(ASSERT)
     // Helper class forbidding calls to setNeedsLayout() during its lifetime.

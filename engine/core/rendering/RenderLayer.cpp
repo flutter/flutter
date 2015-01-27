@@ -173,11 +173,6 @@ void RenderLayer::dirtyAncestorChainHasSelfPaintingLayerDescendantStatus()
     }
 }
 
-bool RenderLayer::scrollsWithRespectTo(const RenderLayer* other) const
-{
-    return false;
-}
-
 void RenderLayer::updateTransformationMatrix()
 {
     if (m_transform) {
@@ -357,20 +352,9 @@ LayoutPoint RenderLayer::location() const
     if (renderer()->isOutOfFlowPositioned() && enclosingPositionedAncestor()) {
         RenderLayer* positionedParent = enclosingPositionedAncestor();
 
-        // For positioned layers, we subtract out the enclosing positioned layer's scroll offset.
-        if (positionedParent->renderer()->hasOverflowClip()) {
-            LayoutSize offset = positionedParent->renderBox()->scrolledContentOffset();
-            localPoint -= offset;
-        }
-
         if (positionedParent->renderer()->isRelPositioned() && positionedParent->renderer()->isRenderInline()) {
             LayoutSize offset = toRenderInline(positionedParent->renderer())->offsetForInFlowPositionedInline(*toRenderBox(renderer()));
             localPoint += offset;
-        }
-    } else if (parent()) {
-        if (parent()->renderer()->hasOverflowClip()) {
-            IntSize scrollOffset = parent()->renderBox()->scrolledContentOffset();
-            localPoint -= scrollOffset;
         }
     }
 

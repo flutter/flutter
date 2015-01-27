@@ -365,10 +365,10 @@ bool isValidKeywordPropertyAndValue(CSSPropertyID propertyId, CSSValueID valueID
     case CSSPropertyOverflowWrap: // normal | break-word
     case CSSPropertyWordWrap:
         return valueID == CSSValueNormal || valueID == CSSValueBreakWord;
-    case CSSPropertyOverflowX: // visible | hidden | scroll | auto | overlay
-        return valueID == CSSValueVisible || valueID == CSSValueHidden || valueID == CSSValueScroll || valueID == CSSValueAuto || valueID == CSSValueOverlay;
-    case CSSPropertyOverflowY: // visible | hidden | scroll | auto | overlay | -webkit-paged-x | -webkit-paged-y
-        return valueID == CSSValueVisible || valueID == CSSValueHidden || valueID == CSSValueScroll || valueID == CSSValueAuto || valueID == CSSValueOverlay || valueID == CSSValueWebkitPagedX || valueID == CSSValueWebkitPagedY;
+    case CSSPropertyOverflowX: // visible | hidden | auto | overlay
+        return valueID == CSSValueVisible || valueID == CSSValueHidden || valueID == CSSValueAuto || valueID == CSSValueOverlay;
+    case CSSPropertyOverflowY: // visible | hidden | auto | overlay | -webkit-paged-x | -webkit-paged-y
+        return valueID == CSSValueVisible || valueID == CSSValueHidden || valueID == CSSValueAuto || valueID == CSSValueOverlay || valueID == CSSValueWebkitPagedX || valueID == CSSValueWebkitPagedY;
     case CSSPropertyPageBreakAfter: // auto | always | avoid | left | right
     case CSSPropertyPageBreakBefore:
     case CSSPropertyPageBreakInside: // avoid | auto
@@ -378,9 +378,6 @@ bool isValidKeywordPropertyAndValue(CSSPropertyID propertyId, CSSValueID valueID
         return valueID == CSSValueVisible || valueID == CSSValueNone || valueID == CSSValueAll || valueID == CSSValueAuto || (valueID >= CSSValueVisiblepainted && valueID <= CSSValueBoundingBox);
     case CSSPropertyPosition: // static | relative | absolute | fixed
         return valueID == CSSValueStatic || valueID == CSSValueRelative || valueID == CSSValueAbsolute || valueID == CSSValueFixed;
-    case CSSPropertyScrollBehavior: // instant | smooth
-        ASSERT(RuntimeEnabledFeatures::cssomSmoothScrollEnabled());
-        return valueID == CSSValueInstant || valueID == CSSValueSmooth;
     case CSSPropertySpeak: // none | normal | spell-out | digits | literal-punctuation | no-punctuation
         return valueID == CSSValueNone || valueID == CSSValueNormal || valueID == CSSValueSpellOut || valueID == CSSValueDigits || valueID == CSSValueLiteralPunctuation || valueID == CSSValueNoPunctuation;
     case CSSPropertyTableLayout: // auto | fixed
@@ -491,7 +488,6 @@ bool isKeywordPropertyID(CSSPropertyID propertyId)
     case CSSPropertyPageBreakInside:
     case CSSPropertyPointerEvents:
     case CSSPropertyPosition:
-    case CSSPropertyScrollBehavior:
     case CSSPropertySpeak:
     case CSSPropertyTableLayout:
     case CSSPropertyTextAlignLast:

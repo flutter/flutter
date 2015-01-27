@@ -322,7 +322,7 @@ void FrameView::layout(bool allowSubtree)
             if (m_firstLayout) {
                 m_firstLayout = false;
                 m_firstLayoutCallbackPending = true;
-                m_lastViewportSize = layoutSize(IncludeScrollbars);
+                m_lastViewportSize = layoutSize();
             }
 
             m_size = LayoutSize(layoutSize().width(), layoutSize().height());
@@ -383,7 +383,7 @@ bool FrameView::shouldSetCursor() const
 }
 
 // FIXME(sky): remove
-IntSize FrameView::layoutSize(IncludeScrollbarsInRect) const
+IntSize FrameView::layoutSize() const
 {
     return m_layoutSize;
 }
@@ -572,7 +572,7 @@ void FrameView::performPostLayoutTasks()
 
 bool FrameView::wasViewportResized()
 {
-    return layoutSize(IncludeScrollbars) != m_lastViewportSize;
+    return layoutSize() != m_lastViewportSize;
 }
 
 void FrameView::sendResizeEventIfNeeded()
@@ -580,7 +580,7 @@ void FrameView::sendResizeEventIfNeeded()
     if (!wasViewportResized())
         return;
 
-    m_lastViewportSize = layoutSize(IncludeScrollbars);
+    m_lastViewportSize = layoutSize();
     m_frame->document()->enqueueResizeEvent();
 }
 
@@ -589,7 +589,7 @@ void FrameView::postLayoutTimerFired(Timer<FrameView>*)
     performPostLayoutTasks();
 }
 
-IntRect FrameView::windowClipRect(IncludeScrollbarsInRect scrollbarInclusion) const
+IntRect FrameView::windowClipRect() const
 {
     ASSERT(m_frame->view() == this);
 
@@ -597,7 +597,7 @@ IntRect FrameView::windowClipRect(IncludeScrollbarsInRect scrollbarInclusion) co
         return IntRect(IntPoint(), size());
 
     // Set our clip rect to be our contents.
-    IntRect clipRect = contentsToWindow(visibleContentRect(scrollbarInclusion));
+    IntRect clipRect = contentsToWindow(visibleContentRect());
     return clipRect;
 }
 

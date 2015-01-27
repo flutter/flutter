@@ -35,7 +35,6 @@
 #include "sky/engine/core/frame/LocalFrame.h"
 #include "sky/engine/core/frame/Settings.h"
 #include "sky/engine/core/html/HTMLElement.h"
-#include "sky/engine/core/page/AutoscrollController.h"
 #include "sky/engine/core/page/EventHandler.h"
 #include "sky/engine/core/page/Page.h"
 #include "sky/engine/core/rendering/HitTestResult.h"
@@ -51,10 +50,6 @@
 #include "sky/engine/platform/graphics/GraphicsContextStateSaver.h"
 
 namespace blink {
-
-// Size of border belt for autoscroll. When mouse pointer in border belt,
-// autoscroll is started.
-static const int autoscrollBeltSize = 20;
 
 RenderBox::RenderBox(ContainerNode* node)
     : RenderBoxModelObject(node)
@@ -186,70 +181,6 @@ int RenderBox::pixelSnappedOffsetHeight() const
     return snapSizeToPixel(offsetHeight(), y() + clientTop());
 }
 
-LayoutUnit RenderBox::scrollWidth() const
-{
-    // FIXME(sky): Remove.
-    // For objects with visible overflow, this matches IE.
-    // FIXME: Need to work right with writing modes.
-    if (style()->isLeftToRightDirection())
-        return std::max(clientWidth(), layoutOverflowRect().maxX() - borderLeft());
-    return clientWidth() - std::min<LayoutUnit>(0, layoutOverflowRect().x() - borderLeft());
-}
-
-LayoutUnit RenderBox::scrollHeight() const
-{
-    // FIXME(sky): Remove.
-    // For objects with visible overflow, this matches IE.
-    // FIXME: Need to work right with writing modes.
-    return std::max(clientHeight(), layoutOverflowRect().maxY() - borderTop());
-}
-
-LayoutUnit RenderBox::scrollLeft() const
-{
-    // FIXME(sky): Remove.
-    return 0;
-}
-
-LayoutUnit RenderBox::scrollTop() const
-{
-    // FIXME(sky): Remove.
-    return 0;
-}
-
-int RenderBox::pixelSnappedScrollWidth() const
-{
-    // FIXME(sky): Remove.
-    return snapSizeToPixel(scrollWidth(), x() + clientLeft());
-}
-
-int RenderBox::pixelSnappedScrollHeight() const
-{
-    // FIXME(sky): Remove.
-    // For objects with visible overflow, this matches IE.
-    // FIXME: Need to work right with writing modes.
-    return snapSizeToPixel(scrollHeight(), y() + clientTop());
-}
-
-void RenderBox::setScrollLeft(LayoutUnit newLeft)
-{
-    // FIXME(sky): Remove.
-}
-
-void RenderBox::setScrollTop(LayoutUnit newTop)
-{
-    // FIXME(sky): Remove.
-}
-
-void RenderBox::scrollToOffset(const IntSize& offset)
-{
-    // FIXME(sky): Remove.
-}
-
-void RenderBox::scrollRectToVisible(const LayoutRect& rect, const ScrollAlignment& alignX, const ScrollAlignment& alignY)
-{
-    // FIXME(sky): Remove.
-}
-
 void RenderBox::absoluteQuads(Vector<FloatQuad>& quads) const
 {
     quads.append(localToAbsoluteQuad(FloatRect(0, 0, width().toFloat(), height().toFloat()), 0 /* mode */));
@@ -313,106 +244,9 @@ void RenderBox::addFocusRingRects(Vector<IntRect>& rects, const LayoutPoint& add
         rects.append(pixelSnappedIntRect(additionalOffset, size()));
 }
 
-bool RenderBox::scroll(ScrollDirection direction, ScrollGranularity granularity, float delta)
-{
-    // FIXME(sky): Remove.
-    return false;
-}
-
-bool RenderBox::canBeProgramaticallyScrolled() const
-{
-    Node* node = this->node();
-    if (node && node->isDocumentNode())
-        return true;
-
-    if (!hasOverflowClip())
-        return false;
-
-    bool hasScrollableOverflow = hasScrollableOverflowX() || hasScrollableOverflowY();
-    if (scrollsOverflow() && hasScrollableOverflow)
-        return true;
-
-    return node && node->hasEditableStyle();
-}
-
-void RenderBox::autoscroll(const IntPoint& position)
-{
-    LocalFrame* frame = this->frame();
-    if (!frame)
-        return;
-
-    FrameView* frameView = frame->view();
-    if (!frameView)
-        return;
-
-    IntPoint currentDocumentPosition = frameView->windowToContents(position);
-    scrollRectToVisible(LayoutRect(currentDocumentPosition, LayoutSize(1, 1)), ScrollAlignment::alignToEdgeIfNeeded, ScrollAlignment::alignToEdgeIfNeeded);
-}
-
-bool RenderBox::autoscrollInProgress() const
-{
-    return frame() && frame()->page() && frame()->page()->autoscrollController().autoscrollInProgress(this);
-}
-
-// FIXME(sky): Replace with canBeScrolledAndHasScrollableArea.
-bool RenderBox::canAutoscroll() const
-{
-    // FIXME(sky): Remove.
-    return false;
-}
-
-// If specified point is in border belt, returned offset denotes direction of
-// scrolling.
-IntSize RenderBox::calculateAutoscrollDirection(const IntPoint& windowPoint) const
-{
-    if (!frame())
-        return IntSize();
-
-    FrameView* frameView = frame()->view();
-    if (!frameView)
-        return IntSize();
-
-    IntRect box(absoluteBoundingBoxRect());
-    IntRect windowBox = view()->frameView()->contentsToWindow(box);
-
-    IntPoint windowAutoscrollPoint = windowPoint;
-
-    if (windowAutoscrollPoint.x() < windowBox.x() + autoscrollBeltSize)
-        windowAutoscrollPoint.move(-autoscrollBeltSize, 0);
-    else if (windowAutoscrollPoint.x() > windowBox.maxX() - autoscrollBeltSize)
-        windowAutoscrollPoint.move(autoscrollBeltSize, 0);
-
-    if (windowAutoscrollPoint.y() < windowBox.y() + autoscrollBeltSize)
-        windowAutoscrollPoint.move(0, -autoscrollBeltSize);
-    else if (windowAutoscrollPoint.y() > windowBox.maxY() - autoscrollBeltSize)
-        windowAutoscrollPoint.move(0, autoscrollBeltSize);
-
-    return windowAutoscrollPoint - windowPoint;
-}
-
-RenderBox* RenderBox::findAutoscrollable(RenderObject* renderer)
-{
-    while (renderer && !(renderer->isBox() && toRenderBox(renderer)->canAutoscroll())) {
-        renderer = renderer->parent();
-    }
-
-    return renderer && renderer->isBox() ? toRenderBox(renderer) : 0;
-}
-
-void RenderBox::scrollByRecursively(const IntSize& delta, ScrollOffsetClamping clamp)
-{
-    // FIXME(sky): Remove.
-}
-
 bool RenderBox::needsPreferredWidthsRecalculation() const
 {
     return style()->paddingStart().isPercent() || style()->paddingEnd().isPercent();
-}
-
-IntSize RenderBox::scrolledContentOffset() const
-{
-    // FIXME(sky): Remove.
-    return IntSize();
 }
 
 void RenderBox::computeIntrinsicLogicalWidths(LayoutUnit& minLogicalWidth, LayoutUnit& maxLogicalWidth) const
@@ -658,10 +492,6 @@ bool RenderBox::backgroundHasOpaqueTopLayer() const
     if (fillLayer.clip() != BorderFillBox)
         return false;
 
-    // Clipped with local scrolling
-    if (hasOverflowClip() && fillLayer.attachment() == LocalBackgroundAttachment)
-        return false;
-
     if (fillLayer.hasOpaqueImage(this) && fillLayer.hasRepeatXY() && fillLayer.image()->canRender(*this))
         return true;
 
@@ -774,8 +604,6 @@ bool RenderBox::pushContentsClip(PaintInfo& paintInfo, const LayoutPoint& accumu
         if (hasBorderRadius)
             conservativeClipRect.intersect(clipRoundedRect.radiusCenterRect());
         conservativeClipRect.moveBy(-accumulatedOffset);
-        if (hasLayer())
-            conservativeClipRect.move(scrolledContentOffset());
         if (conservativeClipRect.contains(contentsVisualOverflow))
             return false;
     }
@@ -883,9 +711,6 @@ LayoutSize RenderBox::offsetFromContainer(const RenderObject* o, const LayoutPoi
 
     if (!isInline() || isReplaced())
         offset += locationOffset();
-
-    if (o->hasOverflowClip())
-        offset -= toRenderBox(o)->scrolledContentOffset();
 
     if (style()->position() == AbsolutePosition && o->isRelPositioned() && o->isRenderInline())
         offset += toRenderInline(o)->offsetForInFlowPositionedInline(*this);

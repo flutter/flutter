@@ -35,7 +35,6 @@
 #include "sky/engine/platform/Timer.h"
 #include "sky/engine/platform/geometry/LayoutPoint.h"
 #include "sky/engine/platform/heap/Handle.h"
-#include "sky/engine/platform/scroll/ScrollTypes.h"
 #include "sky/engine/wtf/Forward.h"
 #include "sky/engine/wtf/HashMap.h"
 #include "sky/engine/wtf/HashTraits.h"
@@ -43,7 +42,6 @@
 
 namespace blink {
 
-class AutoscrollController;
 class Document;
 class Element;
 class Event;
@@ -74,17 +72,11 @@ public:
     void clear();
     void nodeWillBeRemoved(Node&);
 
-    void stopAutoscroll();
-
     HitTestResult hitTestResultAtPoint(const LayoutPoint&,
         HitTestRequest::HitTestRequestType hitType = HitTestRequest::ReadOnly | HitTestRequest::Active,
         const LayoutSize& padding = LayoutSize());
 
     void scheduleCursorUpdate();
-
-    // Attempts to scroll the DOM tree. If that fails, scrolls the view.
-    // If the view can't be scrolled either, recursively bubble to the parent frame.
-    bool bubblingScroll(ScrollDirection, ScrollGranularity, Node* startingNode = 0);
 
     void defaultKeyboardEventHandler(KeyboardEvent*);
 
@@ -113,19 +105,6 @@ private:
     bool isCursorVisible() const;
     void updateCursor();
 
-    // Scrolls the elements of the DOM tree. Returns true if a node was scrolled.
-    // False if we reached the root and couldn't scroll anything.
-    // direction - The direction to scroll in. If this is a logicl direction, it will be
-    //             converted to the physical direction based on a node's writing mode.
-    // granularity - The units that the  scroll delta parameter is in.
-    // startNode - The node to start bubbling the scroll from. If a node can't scroll,
-    //             the scroll bubbles up to the containing block.
-    // stopNode - On input, if provided and non-null, the node at which we should stop bubbling on input.
-    //            On output, if provided and a node was scrolled stopNode will point to that node.
-    // delta - The delta to scroll by, in the units of the granularity parameter. (e.g. pixels, lines, pages, etc.)
-    // absolutePoint - For wheel scrolls - the location, in absolute coordinates, where the event occured.
-    bool scroll(ScrollDirection, ScrollGranularity, Node* startNode = 0, Node** stopNode = 0, float delta = 1.0f, IntPoint absolutePoint = IntPoint());
-
     TouchAction intersectTouchAction(const TouchAction, const TouchAction);
     TouchAction computeEffectiveTouchAction(const Node&);
 
@@ -139,8 +118,6 @@ private:
     void defaultTabEventHandler(KeyboardEvent*);
 
     bool capturesDragging() const { return m_capturesDragging; }
-
-    AutoscrollController* autoscrollController() const;
 
     LocalFrame* const m_frame;
 

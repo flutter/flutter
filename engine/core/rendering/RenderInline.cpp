@@ -592,9 +592,6 @@ LayoutSize RenderInline::offsetFromContainer(const RenderObject* container, cons
     if (isRelPositioned())
         offset += offsetForInFlowPosition();
 
-    if (container->hasOverflowClip())
-        offset -= toRenderBox(container)->scrolledContentOffset();
-
     // FIXME(sky): Remove now that it's always false?
     if (offsetDependsOnPoint)
         *offsetDependsOnPoint = false;

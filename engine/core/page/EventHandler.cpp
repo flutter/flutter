@@ -48,7 +48,6 @@
 #include "sky/engine/core/frame/LocalFrame.h"
 #include "sky/engine/core/frame/Settings.h"
 #include "sky/engine/core/loader/FrameLoaderClient.h"
-#include "sky/engine/core/page/AutoscrollController.h"
 #include "sky/engine/core/page/ChromeClient.h"
 #include "sky/engine/core/page/EditorClient.h"
 #include "sky/engine/core/page/FocusController.h"
@@ -198,13 +197,6 @@ void EventHandler::selectClosestMisspellingFromHitTestResult(const HitTestResult
     }
 }
 
-AutoscrollController* EventHandler::autoscrollController() const
-{
-    if (Page* page = m_frame->page())
-        return &page->autoscrollController();
-    return 0;
-}
-
 HitTestResult EventHandler::hitTestResultAtPoint(const LayoutPoint& point, HitTestRequest::HitTestRequestType hitType, const LayoutSize& padding)
 {
     TRACE_EVENT0("blink", "EventHandler::hitTestResultAtPoint");
@@ -225,54 +217,6 @@ HitTestResult EventHandler::hitTestResultAtPoint(const LayoutPoint& point, HitTe
     m_frame->contentRenderer()->hitTest(request, result);
 
     return result;
-}
-
-void EventHandler::stopAutoscroll()
-{
-    if (AutoscrollController* controller = autoscrollController())
-        controller->stopAutoscroll();
-}
-
-bool EventHandler::scroll(ScrollDirection direction, ScrollGranularity granularity, Node* startNode, Node** stopNode, float delta, IntPoint absolutePoint)
-{
-    if (!delta)
-        return false;
-
-    Node* node = startNode;
-
-    if (!node)
-        node = m_frame->document()->focusedElement();
-
-    if (!node || !node->renderer())
-        return false;
-
-    RenderBox* curBox = node->renderer()->enclosingBox();
-    while (curBox && !curBox->isRenderView()) {
-        // If we're at the stopNode, we should try to scroll it but we shouldn't bubble past it
-        bool shouldStopBubbling = stopNode && *stopNode && curBox->node() == *stopNode;
-        bool didScroll = curBox->scroll(direction, granularity, delta);
-
-        if (didScroll && stopNode)
-            *stopNode = curBox->node();
-
-        if (didScroll || shouldStopBubbling) {
-            return true;
-        }
-
-        curBox = curBox->containingBlock();
-    }
-
-    return false;
-}
-
-bool EventHandler::bubblingScroll(ScrollDirection direction, ScrollGranularity granularity, Node* startingNode)
-{
-    // The layout needs to be up to date to determine if we can scroll. We may be
-    // here because of an onLoad event, in which case the final layout hasn't been performed yet.
-    m_frame->document()->updateLayout();
-    if (scroll(direction, granularity, startingNode))
-        return true;
-    return false;
 }
 
 bool EventHandler::useHandCursor(Node* node, bool isOverLink)
@@ -584,10 +528,6 @@ TouchAction EventHandler::computeEffectiveTouchAction(const Node& node)
                 if (effectiveTouchAction == TouchActionNone)
                     break;
             }
-
-            // If we've reached an ancestor that supports a touch action, search no further.
-            if (renderer->isBox() && toRenderBox(renderer)->scrollsOverflow())
-                break;
         }
     }
     return effectiveTouchAction;

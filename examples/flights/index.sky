@@ -52,7 +52,7 @@
     app-scrollable {
       flex: 1;
       box-shadow: inset 0px 0px 22px 2px rgba(22, 22, 22, 0.63);
-      overflow: scroll;
+      overflow: hidden;
     }
 
     app-panel {

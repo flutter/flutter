@@ -2322,7 +2322,7 @@ bool CSSPropertyParser::parseFillProperty(CSSPropertyID propId, CSSPropertyID& p
                         m_valueList->next();
                     break;
                 case CSSPropertyBackgroundAttachment:
-                    if (val->id == CSSValueScroll || val->id == CSSValueFixed || val->id == CSSValueLocal) {
+                    if (val->id == CSSValueFixed || val->id == CSSValueLocal) {
                         currValue = cssValuePool().createIdentifierValue(val->id);
                         m_valueList->next();
                     }
@@ -5369,7 +5369,6 @@ PassRefPtr<CSSValue> CSSPropertyParser::parseWillChange()
             case CSSValueInherit:
                 return nullptr;
             case CSSValueContents:
-            case CSSValueScrollPosition:
                 values->append(cssValuePool().createIdentifierValue(currentValue->id));
                 break;
             default:

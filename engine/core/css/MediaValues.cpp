@@ -33,13 +33,13 @@ PassRefPtr<MediaValues> MediaValues::createDynamicIfFrameExists(LocalFrame* fram
 int MediaValues::calculateViewportWidth(LocalFrame* frame) const
 {
     ASSERT(frame && frame->view() && frame->document());
-    return frame->view()->layoutSize(IncludeScrollbars).width();
+    return frame->view()->layoutSize().width();
 }
 
 int MediaValues::calculateViewportHeight(LocalFrame* frame) const
 {
     ASSERT(frame && frame->view() && frame->document());
-    return frame->view()->layoutSize(IncludeScrollbars).height();
+    return frame->view()->layoutSize().height();
 }
 
 int MediaValues::calculateDeviceWidth(LocalFrame* frame) const

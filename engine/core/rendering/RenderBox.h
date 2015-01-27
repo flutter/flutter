@@ -25,7 +25,6 @@
 
 #include "sky/engine/core/rendering/RenderBoxModelObject.h"
 #include "sky/engine/core/rendering/RenderOverflow.h"
-#include "sky/engine/platform/scroll/ScrollTypes.h"
 
 namespace blink {
 
@@ -39,11 +38,6 @@ enum MarginDirection { BlockDirection, InlineDirection };
 enum ShouldComputePreferred { ComputeActual, ComputePreferred };
 
 enum ContentsClipBehavior { ForceContentsClip, SkipContentsClipIfPossible };
-
-enum ScrollOffsetClamping {
-    ScrollOffsetUnclamped,
-    ScrollOffsetClamped
-};
 
 struct RenderBoxRareData {
     WTF_MAKE_NONCOPYABLE(RenderBoxRareData); WTF_MAKE_FAST_ALLOCATED;
@@ -234,24 +228,6 @@ public:
     int pixelSnappedClientWidth() const;
     int pixelSnappedClientHeight() const;
 
-    // scrollWidth/scrollHeight will be the same as clientWidth/clientHeight unless the
-    // object has overflow:hidden/scroll/auto specified and also has overflow.
-    // scrollLeft/Top return the current scroll position.  These methods are virtual so that objects like
-    // textareas can scroll shadow content (but pretend that they are the objects that are
-    // scrolling).
-    virtual LayoutUnit scrollLeft() const;
-    virtual LayoutUnit scrollTop() const;
-    virtual LayoutUnit scrollWidth() const;
-    virtual LayoutUnit scrollHeight() const;
-    int pixelSnappedScrollWidth() const;
-    int pixelSnappedScrollHeight() const;
-    virtual void setScrollLeft(LayoutUnit);
-    virtual void setScrollTop(LayoutUnit);
-
-    void scrollToOffset(const IntSize&);
-    void scrollByRecursively(const IntSize& delta, ScrollOffsetClamping = ScrollOffsetUnclamped);
-    void scrollRectToVisible(const LayoutRect&, const ScrollAlignment& alignX, const ScrollAlignment& alignY);
-
     virtual LayoutUnit marginTop() const override { return m_marginBox.top(); }
     virtual LayoutUnit marginBottom() const override { return m_marginBox.bottom(); }
     virtual LayoutUnit marginLeft() const override { return m_marginBox.left(); }
@@ -396,24 +372,6 @@ public:
     LayoutUnit availableWidth() const { return availableLogicalWidth(); }
     LayoutUnit availableHeight() const { return availableLogicalHeight(IncludeMarginBorderPadding); }
 
-    virtual bool scroll(ScrollDirection, ScrollGranularity, float delta = 1);
-    virtual bool canBeProgramaticallyScrolled() const;
-    virtual void autoscroll(const IntPoint&);
-    bool autoscrollInProgress() const;
-    bool canAutoscroll() const;
-    IntSize calculateAutoscrollDirection(const IntPoint& windowPoint) const;
-    static RenderBox* findAutoscrollable(RenderObject*);
-    virtual void stopAutoscroll() { }
-
-    bool hasAutoVerticalScrollbar() const { return hasOverflowClip() && (style()->overflowY() == OAUTO || style()->overflowY() == OOVERLAY); }
-    bool hasAutoHorizontalScrollbar() const { return hasOverflowClip() && (style()->overflowX() == OAUTO || style()->overflowX() == OOVERLAY); }
-    bool scrollsOverflow() const { return scrollsOverflowX() || scrollsOverflowY(); }
-
-    bool hasScrollableOverflowX() const { return scrollsOverflowX() && pixelSnappedScrollWidth() != pixelSnappedClientWidth(); }
-    bool hasScrollableOverflowY() const { return scrollsOverflowY() && pixelSnappedScrollHeight() != pixelSnappedClientHeight(); }
-    virtual bool scrollsOverflowX() const { return hasOverflowClip() && (style()->overflowX() == OSCROLL || hasAutoHorizontalScrollbar()); }
-    virtual bool scrollsOverflowY() const { return hasOverflowClip() && (style()->overflowY() == OSCROLL || hasAutoVerticalScrollbar()); }
-
     virtual LayoutRect localCaretRect(InlineBox*, int caretOffset, LayoutUnit* extraWidthToEndOfLine = 0) override;
 
     virtual LayoutRect overflowClipRect(const LayoutPoint& location);
@@ -462,8 +420,6 @@ public:
 
     virtual bool needsPreferredWidthsRecalculation() const;
     virtual void computeIntrinsicRatioInformation(FloatSize& /* intrinsicSize */, double& /* intrinsicRatio */) const { }
-
-    IntSize scrolledContentOffset() const;
 
     virtual bool hasRelativeLogicalHeight() const;
 

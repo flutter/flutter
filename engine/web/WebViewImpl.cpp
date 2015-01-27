@@ -52,7 +52,6 @@
 #include "sky/engine/core/html/HTMLImportElement.h"
 #include "sky/engine/core/loader/FrameLoader.h"
 #include "sky/engine/core/loader/UniqueIdentifier.h"
-#include "sky/engine/core/page/AutoscrollController.h"
 #include "sky/engine/core/page/EventHandler.h"
 #include "sky/engine/core/page/FocusController.h"
 #include "sky/engine/core/page/Page.h"
@@ -135,7 +134,6 @@ WebViewImpl::WebViewImpl(WebViewClient* client)
     , m_flingSourceDevice(false)
     , m_showPaintRects(false)
     , m_showDebugBorders(false)
-    , m_showScrollBottleneckRects(false)
     , m_baseBackgroundColor(Color::white)
     , m_backgroundColorOverride(Color::transparent)
 {
@@ -170,11 +168,6 @@ void WebViewImpl::setShowPaintRects(bool show)
 void WebViewImpl::setShowDebugBorders(bool show)
 {
     m_showDebugBorders = show;
-}
-
-void WebViewImpl::setShowScrollBottleneckRects(bool show)
-{
-    m_showScrollBottleneckRects = show;
 }
 
 void WebViewImpl::acceptLanguagesChanged()
@@ -259,7 +252,6 @@ void WebViewImpl::beginFrame(const WebBeginFrameArgs& frameTime)
     RefPtr<FrameView> view = m_page->mainFrame()->view();
     if (!view)
         return;
-    m_page->autoscrollController().animate(validFrameTime.lastFrameTimeMonotonic);
     m_page->animator().serviceScriptedAnimations(validFrameTime.lastFrameTimeMonotonic);
 }
 

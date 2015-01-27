@@ -47,15 +47,6 @@
     readonly attribute long clientWidth;
     readonly attribute long clientHeight;
 
-    // FIXME: should be:
-    // attribute (Dictionary or double) scrollLeft;
-    // attribute (Dictionary or double) scrollTop;
-    // http://crbug.com/240176
-    [Custom=Setter] attribute long scrollLeft;
-    [Custom=Setter] attribute long scrollTop;
-    readonly attribute long scrollWidth;
-    readonly attribute long scrollHeight;
-
     void focus();
     void blur();
 

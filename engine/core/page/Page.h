@@ -42,7 +42,6 @@
 
 namespace blink {
 
-class AutoscrollController;
 class ChromeClient;
 class ClientRectList;
 class Document;
@@ -102,7 +101,6 @@ public:
     void documentDetached(Document*);
 
     PageAnimator& animator() { return m_animator; }
-    AutoscrollController& autoscrollController() const { return *m_autoscrollController; }
     DragCaretController& dragCaretController() const { return *m_dragCaretController; }
     FocusController& focusController() const { return *m_focusController; }
 
@@ -178,7 +176,6 @@ private:
     virtual void settingsChanged(SettingsDelegate::ChangeType) override;
 
     PageAnimator m_animator;
-    const OwnPtr<AutoscrollController> m_autoscrollController;
     ChromeClient* m_chromeClient;
     const OwnPtr<DragCaretController> m_dragCaretController;
     const OwnPtr<FocusController> m_focusController;

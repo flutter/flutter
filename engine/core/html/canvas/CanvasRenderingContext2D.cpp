@@ -1078,42 +1078,6 @@ bool CanvasRenderingContext2D::isPointInStrokeInternal(const Path& path, const f
     return path.strokeContains(transformedPoint, strokeData);
 }
 
-void CanvasRenderingContext2D::scrollPathIntoView()
-{
-    scrollPathIntoViewInternal(m_path);
-}
-
-void CanvasRenderingContext2D::scrollPathIntoView(Path2D* path2d)
-{
-    scrollPathIntoViewInternal(path2d->path());
-}
-
-void CanvasRenderingContext2D::scrollPathIntoViewInternal(const Path& path)
-{
-    RenderObject* renderer = canvas()->renderer();
-    RenderBox* renderBox = canvas()->renderBox();
-    if (!renderer || !renderBox || !state().m_invertibleCTM || path.isEmpty())
-        return;
-
-    canvas()->document().updateLayout();
-
-    // Apply transformation and get the bounding rect
-    Path transformedPath = path;
-    transformedPath.transform(state().m_transform);
-    FloatRect boundingRect = transformedPath.boundingRect();
-
-    // Offset by the canvas rect
-    LayoutRect pathRect(boundingRect);
-    IntRect canvasRect = renderBox->absoluteContentBox();
-    pathRect.move(canvasRect.x(), canvasRect.y());
-
-    renderer->scrollRectToVisible(
-        pathRect, ScrollAlignment::alignCenterAlways, ScrollAlignment::alignTopAlways);
-
-    // TODO: should implement "inform the user" that the caret and/or
-    // selection the specified rectangle of the canvas. See http://crbug.com/357987
-}
-
 void CanvasRenderingContext2D::clearRect(float x, float y, float width, float height)
 {
     if (!validateRectForCanvas(x, y, width, height))

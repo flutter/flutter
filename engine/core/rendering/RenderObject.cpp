@@ -42,7 +42,6 @@
 #include "sky/engine/core/frame/Settings.h"
 #include "sky/engine/core/html/HTMLAnchorElement.h"
 #include "sky/engine/core/html/HTMLElement.h"
-#include "sky/engine/core/page/AutoscrollController.h"
 #include "sky/engine/core/page/EventHandler.h"
 #include "sky/engine/core/page/Page.h"
 #include "sky/engine/core/rendering/HitTestResult.h"
@@ -412,16 +411,6 @@ RenderLayer* RenderObject::enclosingLayer() const
     return 0;
 }
 
-bool RenderObject::scrollRectToVisible(const LayoutRect& rect, const ScrollAlignment& alignX, const ScrollAlignment& alignY)
-{
-    RenderBox* enclosingBox = this->enclosingBox();
-    if (!enclosingBox)
-        return false;
-
-    enclosingBox->scrollRectToVisible(rect, alignX, alignY);
-    return true;
-}
-
 RenderBox* RenderObject::enclosingBox() const
 {
     RenderObject* curr = const_cast<RenderObject*>(this);
@@ -445,12 +434,6 @@ RenderBoxModelObject* RenderObject::enclosingBoxModelObject() const
     }
 
     ASSERT_NOT_REACHED();
-    return 0;
-}
-
-RenderBox* RenderObject::enclosingScrollableBox() const
-{
-    // FIXME(sky): Remove.
     return 0;
 }
 
@@ -1419,12 +1402,8 @@ void RenderObject::mapLocalToContainer(const RenderLayerModelObject* paintInvali
         return;
 
     // FIXME: this should call offsetFromContainer to share code, but I'm not sure it's ever called.
-    if (mode & ApplyContainerFlip && o->isBox()) {
+    if (mode & ApplyContainerFlip && o->isBox())
         mode &= ~ApplyContainerFlip;
-    }
-
-    if (o->hasOverflowClip())
-        transformState.move(-toRenderBox(o)->scrolledContentOffset());
 
     o->mapLocalToContainer(paintInvalidationContainer, transformState, mode);
 }
@@ -1436,25 +1415,16 @@ const RenderObject* RenderObject::pushMappingToContainer(const RenderLayerModelO
     RenderObject* container = parent();
     if (!container)
         return 0;
-
-    // FIXME: this should call offsetFromContainer to share code, but I'm not sure it's ever called.
-    LayoutSize offset;
-    if (container->hasOverflowClip())
-        offset = -toRenderBox(container)->scrolledContentOffset();
-
-    geometryMap.push(this, offset, false);
-
+    // FIXME(sky): Do we need to make this call?
+    geometryMap.push(this, LayoutSize(), false);
     return container;
 }
 
 void RenderObject::mapAbsoluteToLocalPoint(MapCoordinatesFlags mode, TransformState& transformState) const
 {
     RenderObject* o = parent();
-    if (o) {
+    if (o)
         o->mapAbsoluteToLocalPoint(mode, transformState);
-        if (o->hasOverflowClip())
-            transformState.move(toRenderBox(o)->scrolledContentOffset());
-    }
 }
 
 bool RenderObject::shouldUseTransformFromContainer(const RenderObject* containerObject) const
@@ -1509,15 +1479,9 @@ FloatPoint RenderObject::localToContainerPoint(const FloatPoint& localPoint, con
 LayoutSize RenderObject::offsetFromContainer(const RenderObject* o, const LayoutPoint& point, bool* offsetDependsOnPoint) const
 {
     ASSERT(o == container());
-
     LayoutSize offset;
-
-    if (o->hasOverflowClip())
-        offset -= toRenderBox(o)->scrolledContentOffset();
-
     if (offsetDependsOnPoint)
         *offsetDependsOnPoint = false;
-
     return offset;
 }
 
@@ -1641,16 +1605,8 @@ void RenderObject::willBeDestroyed()
     if (children)
         children->destroyLeftoverChildren();
 
-    // If this renderer is being autoscrolled, stop the autoscrolling.
-    if (LocalFrame* frame = this->frame()) {
-        if (frame->page())
-            frame->page()->autoscrollController().stopAutoscrollIfNeeded(this);
-    }
-
     remove();
-
     setAncestorLineBoxDirty(false);
-
     clearLayoutRootIfNeeded();
 }
 

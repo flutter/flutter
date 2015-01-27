@@ -94,12 +94,6 @@ void FrameLoaderClientImpl::willReleaseScriptContext(v8::Handle<v8::Context> con
         m_webFrame->client()->willReleaseScriptContext(m_webFrame, context);
 }
 
-void FrameLoaderClientImpl::didChangeScrollOffset()
-{
-    if (m_webFrame->client())
-        m_webFrame->client()->didChangeScrollOffset(m_webFrame);
-}
-
 void FrameLoaderClientImpl::detachedFromParent()
 {
     // Alert the client that the frame is being detached. This is the last

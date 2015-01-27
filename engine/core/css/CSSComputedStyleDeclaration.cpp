@@ -159,7 +159,6 @@ static const CSSPropertyID staticComputableProperties[] = {
     CSSPropertyPointerEvents,
     CSSPropertyPosition,
     CSSPropertyRight,
-    CSSPropertyScrollBehavior,
     CSSPropertySpeak,
     CSSPropertyTableLayout,
     CSSPropertyTabSize,
@@ -869,13 +868,11 @@ static PassRefPtr<CSSValue> valueForAnimationDirection(Timing::PlaybackDirection
     }
 }
 
-static PassRefPtr<CSSValue> valueForWillChange(const Vector<CSSPropertyID>& willChangeProperties, bool willChangeContents, bool willChangeScrollPosition)
+static PassRefPtr<CSSValue> valueForWillChange(const Vector<CSSPropertyID>& willChangeProperties, bool willChangeContents)
 {
     RefPtr<CSSValueList> list = CSSValueList::createCommaSeparated();
     if (willChangeContents)
         list->append(cssValuePool().createIdentifierValue(CSSValueContents));
-    if (willChangeScrollPosition)
-        list->append(cssValuePool().createIdentifierValue(CSSValueScrollPosition));
     for (size_t i = 0; i < willChangeProperties.size(); ++i)
         list->append(cssValuePool().createIdentifierValue(willChangeProperties[i]));
     if (!list->length())
@@ -1687,8 +1684,6 @@ PassRefPtr<CSSValue> CSSComputedStyleDeclaration::getPropertyCSSValue(CSSPropert
             return cssValuePool().createValue(style->position());
         case CSSPropertyRight:
             return valueForPositionOffset(*style, CSSPropertyRight, renderer);
-        case CSSPropertyScrollBehavior:
-            return cssValuePool().createValue(style->scrollBehavior());
         case CSSPropertyTableLayout:
             return cssValuePool().createValue(style->tableLayout());
         case CSSPropertyTextAlign:
@@ -1815,7 +1810,7 @@ PassRefPtr<CSSValue> CSSComputedStyleDeclaration::getPropertyCSSValue(CSSPropert
             }
             return pixelValueForLength(style->width(), *style);
         case CSSPropertyWillChange:
-            return valueForWillChange(style->willChangeProperties(), style->willChangeContents(), style->willChangeScrollPosition());
+            return valueForWillChange(style->willChangeProperties(), style->willChangeContents());
         case CSSPropertyWordBreak:
             return cssValuePool().createValue(style->wordBreak());
         case CSSPropertyWordSpacing:

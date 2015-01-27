@@ -398,50 +398,6 @@ int Element::clientHeight()
     return 0;
 }
 
-int Element::scrollLeft()
-{
-    // FIXME(sky): Remove(scrolling)
-    return 0;
-}
-
-int Element::scrollTop()
-{
-    // FIXME(sky): Remove(scrolling)
-    return 0;
-}
-
-void Element::setScrollLeft(int newLeft)
-{
-    // FIXME(sky): Remove(scrolling)
-}
-
-void Element::setScrollLeft(const Dictionary& scrollOptionsHorizontal, ExceptionState& exceptionState)
-{
-    // FIXME(sky): Remove(scrolling)
-}
-
-void Element::setScrollTop(int newTop)
-{
-    // FIXME(sky): Remove(scrolling)
-}
-
-void Element::setScrollTop(const Dictionary& scrollOptionsVertical, ExceptionState& exceptionState)
-{
-    // FIXME(sky): Remove(scrolling)
-}
-
-int Element::scrollWidth()
-{
-    // FIXME(sky): Remove(scrolling)
-    return 0;
-}
-
-int Element::scrollHeight()
-{
-    // FIXME(sky): Remove(scrolling)
-    return 0;
-}
-
 PassRefPtr<ClientRectList> Element::getClientRects()
 {
     document().updateLayout();
@@ -455,7 +411,6 @@ PassRefPtr<ClientRectList> Element::getClientRects()
 
     Vector<FloatQuad> quads;
     renderBoxModelObject->absoluteQuads(quads);
-    document().adjustFloatQuadsForScroll(quads);
     return ClientRectList::create(quads);
 }
 
@@ -475,7 +430,6 @@ PassRefPtr<ClientRect> Element::getBoundingClientRect()
     for (size_t i = 1; i < quads.size(); ++i)
         result.unite(quads[i].boundingBox());
 
-    document().adjustFloatRectForScroll(result);
     return ClientRect::create(result);
 }
 
@@ -716,8 +670,6 @@ void Element::insertedInto(ContainerNode* insertionPoint)
 void Element::removedFrom(ContainerNode* insertionPoint)
 {
     bool wasInDocument = insertionPoint->inDocument();
-
-    setSavedLayerScrollOffset(IntSize());
 
     if (insertionPoint->isInTreeScope() && treeScope() == document()) {
         const AtomicString& idValue = getIdAttribute();
@@ -1115,8 +1067,7 @@ void Element::updateFocusAppearance(bool /*restorePreviousSelection*/)
         // and we don't want to change the focus to a new Element.
         frame->selection().setSelection(newSelection,  FrameSelection::CloseTyping | FrameSelection::ClearTypingStyle | FrameSelection::DoNotSetFocus);
         frame->selection().revealSelection();
-    } else if (renderer())
-        renderer()->scrollRectToVisible(boundingBox());
+    }
 }
 
 void Element::blur()
@@ -1406,18 +1357,6 @@ void Element::didMoveToNewDocument(Document& oldDocument)
 
     if (needsURLResolutionForInlineStyle(*this, oldDocument, document()))
         reResolveURLsInInlineStyle(document(), ensureMutableInlineStyle());
-}
-
-IntSize Element::savedLayerScrollOffset() const
-{
-    return hasRareData() ? elementRareData()->savedLayerScrollOffset() : IntSize();
-}
-
-void Element::setSavedLayerScrollOffset(const IntSize& size)
-{
-    if (size.isZero() && !hasRareData())
-        return;
-    ensureElementRareData().setSavedLayerScrollOffset(size);
 }
 
 void Element::cloneAttributesFromElement(const Element& other)

@@ -76,7 +76,6 @@ public:
     virtual mojo::View* createChildFrame() override;
     virtual void selectorMatchChanged(const Vector<String>& addedSelectors, const Vector<String>& removedSelectors) override;
     virtual void transitionToCommittedForNewPage() override;
-    virtual void didChangeScrollOffset() override;
 
     virtual void didLoseWebGLContext(int arbRobustnessContextLostReason) override;
 

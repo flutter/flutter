@@ -883,8 +883,6 @@ static inline IntPoint absoluteLineDirectionPointToLocalPointInBlock(RootInlineB
     ASSERT(root);
     RenderBlockFlow& containingBlock = root->block();
     FloatPoint absoluteBlockPoint = containingBlock.localToAbsolute(FloatPoint());
-    if (containingBlock.hasOverflowClip())
-        absoluteBlockPoint -= containingBlock.scrolledContentOffset();
     return IntPoint(lineDirectionPoint - absoluteBlockPoint.x(), root->blockDirectionPointInLine());
 }
 

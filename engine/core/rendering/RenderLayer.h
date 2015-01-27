@@ -231,8 +231,6 @@ public:
 
     Node* enclosingElement() const;
 
-    bool scrollsWithRespectTo(const RenderLayer*) const;
-
     RenderLayerClipper& clipper() { return m_clipper; }
     const RenderLayerClipper& clipper() const { return m_clipper; }
 

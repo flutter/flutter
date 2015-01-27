@@ -396,23 +396,23 @@ IntRect RenderView::documentRect() const
     return IntRect(overflowRect);
 }
 
-int RenderView::viewHeight(IncludeScrollbarsInRect scrollbarInclusion) const
+int RenderView::viewHeight() const
 {
     if (m_frameView)
-        return m_frameView->layoutSize(scrollbarInclusion).height();
+        return m_frameView->layoutSize().height();
     return 0;
 }
 
-int RenderView::viewWidth(IncludeScrollbarsInRect scrollbarInclusion) const
+int RenderView::viewWidth() const
 {
     if (m_frameView)
-        return m_frameView->layoutSize(scrollbarInclusion).width();
+        return m_frameView->layoutSize().width();
     return 0;
 }
 
 int RenderView::viewLogicalHeight() const
 {
-    return viewHeight(ExcludeScrollbars);
+    return viewHeight();
 }
 
 LayoutUnit RenderView::viewLogicalHeightForPercentages() const
@@ -430,11 +430,7 @@ void RenderView::updateHitTestResult(HitTestResult& result, const LayoutPoint& p
         result.setInnerNode(node);
         if (!result.innerNonSharedNode())
             result.setInnerNonSharedNode(node);
-
-        LayoutPoint adjustedPoint = point;
-        offsetForContents(adjustedPoint);
-
-        result.setLocalPoint(adjustedPoint);
+        result.setLocalPoint(point);
     }
 }
 
@@ -452,13 +448,13 @@ void RenderView::popLayoutState()
 // FIXME(sky): remove
 double RenderView::layoutViewportWidth() const
 {
-    return viewWidth(IncludeScrollbars);
+    return viewWidth();
 }
 
 // FIXME(sky): remove
 double RenderView::layoutViewportHeight() const
 {
-    return viewHeight(IncludeScrollbars);
+    return viewHeight();
 }
 
 void RenderView::addIFrame(RenderIFrame* iframe)

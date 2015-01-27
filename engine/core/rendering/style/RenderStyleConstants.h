@@ -64,7 +64,7 @@ enum EBoxSizing { CONTENT_BOX, BORDER_BOX };
 // Random visual rendering model attributes. Not inherited.
 
 enum EOverflow {
-    OVISIBLE, OHIDDEN, OSCROLL, OAUTO, OOVERLAY, OPAGEDX, OPAGEDY
+    OVISIBLE, OHIDDEN, OAUTO, OOVERLAY, OPAGEDX, OPAGEDY
 };
 
 enum EVerticalAlign {
@@ -77,7 +77,7 @@ enum ETableLayout {
 };
 
 enum EFillAttachment {
-    ScrollBackgroundAttachment, LocalBackgroundAttachment, FixedBackgroundAttachment
+    LocalBackgroundAttachment, FixedBackgroundAttachment
 };
 
 enum EFillBox {

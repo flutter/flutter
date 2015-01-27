@@ -149,9 +149,6 @@ public:
     bool isPointInStroke(const float x, const float y);
     bool isPointInStroke(Path2D*, const float x, const float y);
 
-    void scrollPathIntoView();
-    void scrollPathIntoView(Path2D*);
-
     void clearRect(float x, float y, float width, float height);
     void fillRect(float x, float y, float width, float height);
     void strokeRect(float x, float y, float width, float height);
@@ -309,8 +306,6 @@ private:
 
     bool isPointInPathInternal(const Path&, const float x, const float y, const String& windingRuleString);
     bool isPointInStrokeInternal(const Path&, const float x, const float y);
-
-    void scrollPathIntoViewInternal(const Path&);
 
     void drawTextInternal(const String& text, float x, float y, bool fill, float maxWidth = 0, bool useMaxWidth = false);
 

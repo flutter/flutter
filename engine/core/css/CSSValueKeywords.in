@@ -366,7 +366,6 @@ pre
 pre-line
 pre-wrap
 relative
-scroll
 separate
 show
 static
@@ -783,14 +782,9 @@ true
 safe
 legacy
 
-// scroll-behavior
-instant
-smooth
-
 // will-change
 // auto
 contents
-scroll-position
 
 // all
 // initial

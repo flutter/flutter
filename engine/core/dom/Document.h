@@ -354,7 +354,6 @@ public:
         ANIMATIONSTART_LISTENER              = 1 << 7,
         ANIMATIONITERATION_LISTENER          = 1 << 8,
         TRANSITIONEND_LISTENER               = 1 << 9,
-        SCROLL_LISTENER                      = 1 << 10,
     };
 
     bool hasListenerType(ListenerType listenerType) const { return (m_listenerTypes & listenerType); }
@@ -434,7 +433,6 @@ public:
     void setContainsValidityStyleRules() { m_containsValidityStyleRules = true; }
 
     void enqueueResizeEvent();
-    void enqueueScrollEventForNode(Node*);
     void enqueueAnimationFrameEvent(PassRefPtr<Event>);
     // Only one event for a target/event type combination will be dispatched per frame.
     void enqueueUniqueAnimationFrameEvent(PassRefPtr<Event>);
@@ -468,9 +466,6 @@ public:
 
     bool haveImportsLoaded() const;
     void didLoadAllImports();
-
-    void adjustFloatQuadsForScroll(Vector<FloatQuad>&);
-    void adjustFloatRectForScroll(FloatRect&);
 
     unsigned activeParserCount() { return m_activeParserCount; }
     void incrementActiveParserCount() { ++m_activeParserCount; }

@@ -32,7 +32,6 @@
 #include "sky/engine/core/loader/FrameLoader.h"
 #include "sky/engine/platform/Supplementable.h"
 #include "sky/engine/platform/heap/Handle.h"
-#include "sky/engine/platform/scroll/ScrollTypes.h"
 #include "sky/engine/wtf/HashSet.h"
 
 namespace blink {
@@ -68,9 +67,7 @@ namespace blink {
         static PassRefPtr<LocalFrame> create(FrameLoaderClient*, FrameHost*);
 
         void setView(PassRefPtr<FrameView>);
-        void createView(const IntSize&, const Color&, bool,
-            ScrollbarMode = ScrollbarAuto, bool horizontalLock = false,
-            ScrollbarMode = ScrollbarAuto, bool verticalLock = false);
+        void createView(const IntSize&, const Color&, bool transparent);
 
         virtual ~LocalFrame();
 
