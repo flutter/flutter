@@ -11,6 +11,7 @@ Sky Event Model
     attribute any data; // O(1)
 
     readonly attribute EventTarget target; // O(1)
+    readonly attribute EventTarget currentTarget; // O(1)
     attribute Boolean handled; // O(1)
     attribute any result; // O(1)
 
@@ -38,7 +39,8 @@ Sky Event Model
     any dispatchEvent(Event event, any defaultResult = null); // O(N) in total number of listeners for this type in the chain
       // sets event.handled to false and event.result to defaultResult
       // makes a record of the event target chain by calling getEventDispatchChain()
-      // invokes all the handlers on the chain in turn
+      // sets event.target to this
+      // invokes all the handlers on the chain in turn, at each step setting currentTarget to the EventTarget for that step
       // returns event.result
     virtual Array<EventTarget> getEventDispatchChain(); // O(1) // returns []
     void addEventListener(String type, EventListener listener); // O(1)

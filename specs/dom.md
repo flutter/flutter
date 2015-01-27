@@ -3,7 +3,7 @@ Sky DOM APIs
 
 ```javascript
 
-// DOM
+// Element Tree
 
 typedef ChildNode (Element or Text);
 typedef ChildArgument (Element or Text or String);
@@ -123,9 +123,15 @@ class ShadowRoot : TreeScope {
 
 class Document : TreeScope {
   constructor (ChildArguments... nodes); // O(N) in number of arguments plus all their descendants
+}
+
+class ApplicationDocument : Document {
+  constructor (GestureManager gestureManager, ChildArguments... nodes); // O(N) in number of /nodes/ arguments plus all their descendants
 
   virtual LayoutManagerConstructor getLayoutManager(); // O(1)
     // returns sky.rootLayoutManager;
+
+  readonly attribute GestureManager gestureManager;
 }
 
 attribute LayoutManagerConstructor rootLayoutManager; // O(1)

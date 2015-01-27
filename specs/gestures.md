@@ -1,329 +1,285 @@
 Gestures
 ========
 
-TODO(ianh): make it possible for a Gesture to time out and cancel even
-without having seen a pointer event, to handle double-tap events
-
-TODO(ianh): even with that, we should keep track of finished-but-valid
-candidates so that when double-tap cancels itself, the tap, which was
-still valid even though it's done, can be accepted
-
 ```javascript
-
-callback GestureCallback void (Event event);
+typedef PointerID Integer;
 
 dictionary GestureState {
-  Boolean valid = false; // if true, the event was part of the current gesture
-    Boolean forceCommit = false; // if true, the gesture thinks that other gestures should give up
+  Boolean cancel = true; // if true, then cancel the gesture at this point
+  Boolean capture = false; // (for pointer-down) if true, then this pointer is relevant
+  Boolean choose = false; // if true, the gesture thinks that other gestures should give up
   Boolean finished = true; // if true, we're ready for the next gesture to start
+
+  // choose and cancel are mutually exclusive
 }
 
 dictionary SendEventOptions {
   Integer? coallesceGroup = null; // when queuing events, only the last event with each group is kept
-  Boolean precommit = false; // if true, event should just be sent right away, not queued
+  Boolean prechoose = false; // if true, event should just be sent right away, not queued
 }
 
-abstract class Gesture {
-  constructor ();
+abstract class Gesture : EventTarget {
+  constructor (EventTarget target);
+  readonly attribute EventTarget target;
 
-  attribute GestureCallback callback;
-  // set by GestureChooser to point to itself
+  virtual GestureState processEvent(Event event);
+  // return {}
+  virtual void choose(); // called by GestureManager // make sure to call superclass choose() before
+  // - assert: this.active == true
+  // - assert: this.chosen == false
+  // - set this.chosen = true
+  // - if there are any buffered events, dispatch them on this
+  virtual void cancel(); // called by GestureManager // make sure to call superclass cancel() after
+  // - set active and chosen to false, clear the event buffer
 
-  GestureState processEvent(EventTarget target, Event event);
-  //  - if this.ready=true:
-  //     - clear the sendEvent() buffer
-  //     - set this.accepted = false
-  //  - let returnValue = this.processEventInternal(...)
-  //  - if this.discarding:
-  //     - assert: returnValue.valid == false
-  //  - if returnValue.valid == false
-  //     - assert: returnValue.forceCommit == false
-  //  - if !returnValue.valid, then:
-  //     - clear the sendEvent() buffer
-  //     - set this.accepted = false
-  //  - set this.canceled = !returnValue.valid
-  //  - set this.ready = returnValue.finished
-  //  - set this.discarding = !returnValue.valid && !returnValue.finished
-  //  - set this.active = returnValue.valid && !returnValue.finished
-  //  - return returnValue
+  readonly attribute Boolean ready; // last event, we were finished
+  readonly attribute Boolean active; // we have not yet been canceled since we last captured a pointer
+  readonly attribute Boolean chosen; // we're the only possible gesture at this point
 
-  readonly attribute Boolean canceled; // defaults to false
-  // true if either the last time processEvent was invoked, valid was
-  // false, or, we have been cancel()ed
-
-  readonly attribute Boolean ready; // defaults to true
-  // true if the last time processEvent was invoked, the gesture was
-  // over
-
-  readonly attribute Boolean discarding; // defaults to false
-  // true if the last time processEvent was invoked, valid was false
-  // and finished was false, or, we have been cancel()ed
-  // (aka canceled && !ready)
-
-  readonly attribute Boolean active; // defaults to false
-  // true if the last time processEvent was invoked, valid was true
-  // and finished was false, and we haven't been cancel()ed
-  // (aka !canceled && !ready)
-
-  readonly attribute Boolean accepted; // defaults to false
-  // true accept() was called and we haven't been cancel()ed since
-
-  void accept();
-  // assert: this.canceled == false
-  // set accepted = true
-  // send the buffered gesture events to the callback
-  //  - call this immediately after getting a positive result from
-  //    processEvent()
-
-  virtual void cancel();
-  // called to indicate that this gesture isn't going to be chosen,
-  // or if it was chosen, that it is finished
-  //  - assert: this.canceled == false
-  //  - set this.canceled = true
-  //  - set this.discarding = !this.ready
-  //  - set this.active = false
-  //  - clear the sendEvent() buffer
-  //  - set this.accepted = false
-  //  - descendants may override this if they have more state to drop,
-  //    or if they want to send an event to report that it's canceled,
-  //    especially if this.accepted is true
-
-  virtual void reset();
-  // called immediately after the first pointer-down of a possible
-  // gesture is sent to processEvents() to indicate that the pointer
-  // wasn't captured so we are to forget anything ever happened (later
-  // pointer-downs are always captured)
-  //  - set this.canceled = true
-  //  - set this.ready = true
-  //  - set this.discarding = false
-  //  - set this.active = false
-  //  - clear the sendEvent() buffer
-  //  - set this.accepted = false
-  //  - descendants may override this if they have more state to drop
-
-  // internal API:
-
-  virtual GestureState processEventInternal(EventTarget target, Event event);
-  // descendants override this
-  // default implementation returns { } (defaults)
-  //  - if this.discarding == false, then:
-  //      - optionally, call sendEvent() to fire gesture-specific
-  //        events
-  //  - as the events are received, they get examined to see if they
-  //    fit the pattern for the gesture; if they do, then return an
-  //    object with valid=true; if more events for this gesture could
-  //    still come in, return finished=false.
-  //  - if you returned valid=false finished=false, then the next call
-  //    to this must not return valid=true
-  //  - doing anything with the event or target other than reading
-  //    state is a contract violation
-  //  - you are allowed to call sendEvent() at any time during a
-  //    processEventInternal() call, or after a call to
-  //    processEventInternal(), assuming that the last such call
-  //    returned either valid=true or finished=true, until the next
-  //    call to processEventInternal() or cancel().
-  //  - set forceCommit=true on the return value if you are confident
-  //    that this is the gesture the user meant, even if it's possible
-  //    that another gesture is still claiming it's valid (e.g. a long
-  //    press might forceCommit to override a scroll, if the user
-  //    hasn't moved for a while)
-  //  - if you send events, you can set precommit=true to send the
-  //    event even before the gesture has been accepted
-  //  - if you send precommit events, make sure to send corresponding
-  //    "cancel" events if reset() or cancel() are called
+  // !ready && !active => we're discarding events until the user gets to a state where a new gesture can begin
+  // active && !chosen => we're collecting events until no other gesture is valid, or until we take command
 
   void sendEvent(Event event, SendEventOptions options);
   // used internally to queue up or send events
-  //  - assert: this.discarding == false
-  //  - assert: options.precommit is false or options.coallesceGroup
+  //  - assert: this.active == true
+  //  - assert: options.prechoose is false or options.coallesceGroup
   //    is null
   //  - set event.gesture = this
-  //  - if this.accepted is true or if options.precommit is true, then
+  //  - if this.chosen is true or if options.prechoose is true, then
   //    send the event straight to the callback
   //  - otherwise:
-  //     - if the buffer has an entry with the same coallesceGroup
-  //       identifier, drop it
-  //     - add the event to the buffer
+  //     - if the event buffer has an entry with the same
+  //       coallesceGroup identifier, drop it
+  //     - add the event to the event buffer
+}
+```
+
+``Gesture`` objects have an Event buffer, initially empty. Each Event
+in this buffer can be associated with a coallesceGroup, which is
+identified by integer.
+
+When created, ``Gesture`` objects register themselves as pointer-down,
+pointer-move, and pointer-up event handlers on their target, with the
+same event handler. That event handler runs the following steps:
+ - let wasActive = this.active
+ - if this.ready == true, then:
+    - // reset the state to start a new gesture
+    - if this.active == true, then:
+       - call application.document.cancelGesture(this)
+    - set this.active = true
+    - set this.ready = false
+ - let returnValue be the result of calling ``processEvent()`` with
+   the Event object
+ - if returnValue.capture == true:
+    - assert: the event is a pointer-down event
+    - if the event is a pointer-down event:
+       - push this onto the event's return value
+ - if returnValue.cancel == true:
+    - assert: returnValue.choose == false
+    - if wasActive == true:
+       - call application.document.cancelGesture(this)
+       - // if wasActive == false, then no need to cancel, since we never added ourselves
+ - if returnValue.cancel == false and this.active == true:
+    - if wasActive == false or if event is a pointer-down event:
+       - call application.document.addGesture(event, this)
+    - if returnValue.choose == true:
+       - call application.document.chooseGesture(this)
+ - set this.ready = returnValue.finished
+ - set this.active = returnValue.valid
+
+Subclasses should override ``processEvent()``:
+ - as the events are received, they get examined to see if they
+   fit the pattern for the gesture; if they do, then return an
+   object with valid=true; if more events for this gesture could
+   still come in, return finished=false.
+ - if you returned valid=false finished=false, then the next call
+   to this must not return valid=true
+ - doing anything with the event or target other than reading
+   state is a contract violation
+ - you are allowed to call sendEvent() at any time during a
+   processEventInternal() call, or after a call to
+   processEventInternal(), assuming that the last such call returned
+   valid=true, until the next call to processEventInternal() or
+   cancel().
+ - set forceChoose=true on the return value if you are confident
+   that this is the gesture the user meant, even if it's possible
+   that another gesture is still claiming it's valid (e.g. a long
+   press might forceChoose to override a scroll, if the user
+   hasn't moved for a while)
+ - if you send events, you can set prechoose=true to send the
+   event even before the gesture has been chosen
+ - if you send prechoose events, make sure to send corresponding
+   "cancel" events if cancel() is called
+
+```javascript
+dictionary GestureList {
+  Array<Gesture> gestures;
+  Boolean chosen;
 }
 
-class GestureChooser : EventTarget {
-  constructor (EventTarget? target = null, Array<Gesture> candidates = []);
-  // throws if any of the candidates are active
+class GestureManager {
+  constructor (EventTarget target);
+  readonly attribute EventTarget target; // the ApplicationDocument, normally
 
-  readonly attribute EventTarget? target;
-  void setTarget(EventTarget? target);
+  void addGesture(Event event, Gesture gesture);
+  void cancelGesture(Gesture gesture);
+  void chooseGesture(Gesture gesture);
 
-  Array<Gesture> getGestures();
-  void addGesture(Gesture candidate);
-  // throw if candidates.active is true
-  void removeGesture(Gesture candidate);
-  // if active is true and candidate was the last Gesture in our list
-  // to be active, set active and accepted to false
-
-  // while target is not null and the list of candidates is not empty,
-  // ensures that it is registered as an event listener for
-  // pointer-down, pointer-move, and pointer-up events on the target;
-  // when the target changes, or when the list of candidates is
-  // emptied, unregisters itself
-
-  readonly attribute Boolean active; // at least one of the gestures is active (initially false)
-  readonly attribute Boolean accepted; // we accepted a gesture since the last time active was false (initially false)
-
-  // internal state:
-  // /candidates/ is a list of Gesture objects, initially empty
-  //
-  // any time one of the pointer events is received:
-  // - if it's pointer-down and it's already captured, ignore the
-  //   event and skip the remaining steps
-  // - let captured be a boolean
-  // - if /candidates/ is empty, then:
-  //    - set captured to false
-  //    - if accepted is true, call cancel() on whatever the last
-  //      accepted candidate was, if any
-  //    - add all the registered Gestures to /candidates/
-  // - otherwise:
-  //    - set captured to true
-  //    - if it's pointer-down, capture the event
-  // - call processEvent() with the event on all the Gestures in
-  //   /candidates/, collecting their return values (GestureState
-  //   objects)
-  // - set forcingAccept to false
-  // - set willAccept to null
-  // - for each Gesture in /candidates/, in registration order:
-  //    - if it returned valid==false, then 
-  //       - if it is our last accepted candidate, then:
-  //          - set this.accepted = false
-  //    - if it returned valid==true:
-  //       - if it's pointer-down, then:
-  //          - set captured to true
-  //          - capture the event
-  //       - if this.accepted == true:
-  //          - assert: this Gesture is the last accepted candidate
-  //       - if it returned forceCommit==true then:
-  //          - assert that its accepted attribute is false
-  //          - if forcingAccept is false, then: 
-  //             - set willAccept to this Gesture
-  //             - set forcingAccept to true
-  //       - otherwise:
-  //          - if forcingAccept is false:
-  //             - if willAccept is null:
-  //                - set willAccept to this Gesture
-  //             - otherwise:
-  //                - set willAccept to 'undecided'
-  //    - if it returned finished==true
-  //       - remove the Gesture from /candidates/
-  // - if willAccept is set to a Gesture:
-  //    - set this.accepted = true
-  //    - call the Gesture's accept() method; this is now the last
-  //      accepted candidate
-  //    - call cancel() on all the other Gesture objects that returned
-  //      valid==true
-  // - if captured is false:
-  //    - call reset() on all the gestures in /candidates/, and then
-  //      let /candidates/ be empty
-  // - if /candidates/ is now empty, then set active to false;
-  //   otherwise, set active to true
-
+  GestureList getActiveGestures(PointerID pointer);
 }
+```
 
+``GestureManager`` objects have a map of lists of Gesture objects,
+keyed on pointer IDs, and with each list associated with a "chosen"
+flag indicating if an entry in the list has already been chosen.
+Initially the map is empty. It is exposed by the
+``getActiveGestures()`` method, which returns the list and flag.
+
+When addGesture() is called with an event and a Gesture, it runs the
+following steps:
+ - let pointer be the value of the event's pointer field
+ - assert: pointer is an integer
+ - if we already have an entry for pointer:
+    - assert: this Gesture isn't already on the list for pointer
+    - if the list's "chosen" flag is set, then call
+      ``cancelGesture()`` with this Gesture
+    - otherwise, add this Gesture to the list for pointer
+ - otherwise, we don't have an entry for this pointer:
+    - create a list for pointer
+    - add this Gesture to the list for pointer
+
+A ``GestureManager``, when created, starts listening to
+``pointer-down`` events on its target. The listener acts as follows:
+ - assert: event is a ``pointer-down`` event
+ - let pointer be the value of the event's pointer field
+ - if we have an entry for this pointer, and the "chosen" flag isn't
+   set, and there is just one Gesture in the list, then set the flag
+   on the list and call the Gesture's ``choose()`` method.
+
+When ``cancelGesture()`` is called with a Gesture:
+ - for each pointer list:
+    - if the pointer list has this Gesture, remove it
+ - call cancel() on the Gesture
+ - for each pointer list:
+    - if the pointer list has no entries, forget it
+    - if the pointer list has one Gesture and the "chosen" flag isn't
+      set, set it and call that Gesture's ``choose()`` method.
+
+When ``chooseGesture()`` is called with a Gesture:
+ - if this Gesture is not active, then return silently
+   // this could happen e.g. if two gestures simultaneously add themselves
+   // and chose themselves for the same pointer-down
+ - let losers be an empty list of Gestures
+ - for each pointer list:
+    - if the pointer list has this Gesture, add all the other Gestures
+      in the list to losers, remove them from the list, and set the
+      "chosen" flag on that list
+ - remove duplicates from losers
+ - call ``cancel()`` on each entry in losers
+ - call ``choose()`` on the Gesture
+
+
+```javascript
 class TapGesture : Gesture {
 
   // internal state:
   //   Integer numButtons = 0;
   //   Boolean primaryDown = false;
 
-  virtual Boolean internalProcessEvent(EventTarget target, Event event);
+  virtual GestureState processEvent(Event event);
+  // - let returnValue = { finished = false }
   // - if the event is a pointer-down:
   //    - increment this.numButtons
+  //    - set returnValue.capture = true
   // - otherwise if it is a pointer-up:
   //    - assert: this.numButtons > 0
   //    - decrement this.numButtons
-  // - if this.discarding == true:
-  //      return { valid: false, finished: this.numButtons == 0 }
+  //    - if numButtons == 0:
+  //       - set returnValue.finished = true
+  // - if this.ready == false and this.active == false:
+  //    - return returnValue
   // - if EventTarget isn't an Element:
   //    - assert: event is a pointer-down
-  //    - assert: this.numButtons > 0
-  //    - return { valid: false, finished: false }
+  //    - return returnValue
   // - if the event is pointer-down:
   //    - assert: this.numButtons > 0
   //    - if it's primary:
   //       - assert: this.ready==true // this is the first press
   //       - this.primaryDown = true
-  //       - sendEvent() a tap-down event, with precommit=true
-  //       - return { valid: true, finished: false }
+  //       - sendEvent() a tap-down event, with prechoose=true
+  //       - set returnValue.cancel = false
+  //       - return returnValue
   //    - otherwise:
-  //       - if this.ready == false:
-  //          - // this is a right-click or similar
-  //          - return { valid: false, finished: false }
-  //       - otherwise, if this.canceled==false:
-  //          - assert: this.active==true
-  //          - // this is some bogus secondary press that we should ignore
-  //            // but it doesn't invalidate the existing primary press
-  //          - return { valid true, finished: false }
+  //       - if this.primaryDown == true and this.active == true:
+  //          - // this is some bogus secondary press that we should have prevent
+  //            // taps from starting until it's finished, but it doesn't invalidate
+  //            // the existing primary press
+  //          - set returnValue.cancel = false
+  //          - return returnValue
   //       - otherwise:
   //          - // this is some secondary press but we don't have a first press
-  //            // we have to wait til it's done before we can start a
-  //            // tap gesture again
-  //          - return { valid: false, finished: false }
-  // - otherwise:
-  //   - assert: this.active
-  //     // if we're ready, forcibly the first event we'll see is a pointer-down,
-  //     // so this.ready will never be true here
-  //     // if we're cancelled, then we won't get to here
-  //   - if the event is pointer-move:
-  //      - assert: this.numButtons > 0
-  //        // because otherwise we would have lost capture and thus not be getting the events
-  //      - if it's primary:
-  //         - if it hit tests within target's bounding box:
-  //            - sendEvent() a tap-move event, with precommit=true
-  //            - return { valid: true, finished: false }
-  //         - otherwise:
-  //            - sendEvent() a tap-cancel event, with precommit=true
-  //            - return { valid: false, finished: false }
-  //      - otherwise:
-  //         - // this is the move of some bogus secondary press
-  //           // ignore it, but continue listening
-  //         - return { valid: true, finished: false }
-  //   - if the event is pointer-up:
-  //      - if it's primary:
-  //         - sendEvent() a tap event
-  //         - this.primaryDown = false
-  //         - return { valid: true, forceCommit: this.numButtons == 0, finished: this.numButtons == 0 }
-  //      - otherwise:
-  //         - // this is the 'up' of some bogus secondary press
-  //           // ignore it, but continue listening for our primary up
-  //         - return { valid: this.primaryDown, finished: this.numButtons == 0 }
+  //            // (maybe this is all in the context of a right-click or something)
+  //            // we have to wait til it's done before we can start a tap gesture again
+  //          - return returnValue
+  // - if the event is pointer-move:
+  //    - assert: this.numButtons > 0
+  //    - if it's primary:
+  //       - if it hit tests within target's bounding box:
+  //          - sendEvent() a tap-move event, with prechoose=true
+  //          - set returnValue.cancel = false
+  //          - return returnValue
+  //       - otherwise:
+  //          - sendEvent() a tap-cancel event, with prechoose=true
+  //          - return returnValue
+  //    - otherwise:
+  //       - // this is the move of some bogus secondary press
+  //         // ignore it, but continue listening if we have a primary button down
+  //       - if this.primaryDown == true and this.active == true:
+  //          - set returnValue.cancel = false
+  //       - return returnValue
+  // - if the event is pointer-up:
+  //    - if it's primary:
+  //       - sendEvent() a tap event
+  //       - set this.primaryDown = false
+  //       - set returnValue.cancel = false
+  //       - return returnValue
+  //    - otherwise:
+  //       - // this is the 'up' of some bogus secondary press
+  //         // ignore it, but continue listening for our primary up if necessary
+  //       - if this.primaryDown == true and this.active == true:
+  //          - set returnValue.cancel = false
+  //       - return returnValue
 }
 
 class LongPressGesture : Gesture {
   GestureState processEvent(EventTarget target, Event event);  
   // long-tap-start: sent when the primary pointer goes down
-  // long-tap-cancel: sent when cancel(), reset(), or finger goes out of bounding box
+  // long-tap-cancel: sent when cancel()ed or finger goes out of bounding box
   // long-tap: sent when the primary pointer is released
 }
 
 class DoubleTapGesture : Gesture {
   GestureState processEvent(EventTarget target, Event event);  
   // double-tap-start: sent when the primary pointer goes down the first time
-  // double-tap-cancel: sent when cancel(), reset(), or finger goes out of bounding box, or it times out
-  // double-tap: sent when the primary pointer is released the second time
+  // double-tap-cancel: sent when cancel()ed or finger goes out of bounding box, or it times out
+  // double-tap: sent when the primary pointer is released the second time within the timeout
 }
 
 
 abstract class ScrollGesture : Gesture {
   GestureState processEvent(EventTarget target, Event event);  
   // this fires the following events (inertia is a boolean, delta is a float):
-  //   scroll-start, with field inertia=false, delta=0; precommit=true
-  //   scroll, with fields inertia (is this a simulated scroll from inertia or a real scroll?), delta (number of pixels to scroll); precommit=true
-  //   scroll-end, with field inertia (same), delta=0; precommit=true
+  //   scroll-start, with field inertia=false, delta=0; prechoose=true
+  //   scroll, with fields inertia (is this a simulated scroll from inertia or a real scroll?), delta (number of pixels to scroll); prechoose=true
+  //   scroll-end, with field inertia (same), delta=0; prechoose=true
   // scroll-start is fired right away
   // scroll is sent whenever the primary pointer moves while down
   // scroll is also sent after the pointer goes back up, based on inertia
   // scroll-end is sent after the pointer goes back up once the scroll reaches delta=0
   // scroll-end is also sent when the gesture is canceled or reset
   // processEvent() returns:
-  //  - valid=true pretty much always so long as there's a primary touch (e.g. not for a right-click)
-  //  - forceCommit=true when you travel a certain distance
+  //  - cancel=false pretty much always so long as there's a primary touch (e.g. not for a right-click)
+  //  - chose=true when you travel a certain distance
   //  - finished=true when the primary pointer goes up
 }
 
@@ -343,41 +299,41 @@ class PanGesture : Gesture {
 
 abstract class ZoomGesture : Gesture {
   GestureState processEvent(EventTarget target, Event event);  
-  // zoom-start: sent when we could start zooming (e.g. for pinch-zoom, when two fingers hit the glass) (precommit)
-  // zoom-end: sent when cancel()ed after zoom-start, or when the fingers are lifted (precommit)
+  // zoom-start: sent when we could start zooming (e.g. for pinch-zoom, when two fingers hit the glass) (prechoose)
+  // zoom-end: sent when cancel()ed after zoom-start, or when the fingers are lifted (prechoose)
   // zoom, with a 'scale' attribute, whose value is a multiple of the scale factor at zoom-start
   // e.g. if the user zooms to 2x, you'd get a bunch of 'zoom' events like scale=1.0, scale=1.17, ... scale=1.91, scale=2.0
 }
 
 class PinchZoomGesture : ZoomGesture {
   // a ZoomGesture for two-finger-pinch gesture
-  // zoom is precommit
+  // zoom is prechoose
 }
 
 class DoubleTapZoomGesture : ZoomGesture {
   // a ZoomGesture for the double-tap-slide gesture
-  // when the slide starts, forceCommit
+  // when the slide starts, forceChoose
 }
 
 
 class PanAndZoomGesture : Gesture {
   GestureState processEvent(EventTarget target, Event event);  
-  // manipulate-start (precommit)
-  // manipulate: (precommit)
+  // manipulate-start (prechoose)
+  // manipulate: (prechoose)
   //    panX, panY: pixels
   //    scaleX, scaleY: a multiplier of the scale at manipulate-start
   //    rotation: turns
-  // manipulate-end (precommit)
+  // manipulate-end (prechoose)
 }
 
 
 abstract class FlingGesture : Gesture {
   GestureState processEvent(EventTarget target, Event event);  
-  // fling-start: when the gesture begins (precommit)
-  // fling-move: while the user is directly dragging the element (has delta attribute with the distance from fling-start) (precommit)
+  // fling-start: when the gesture begins (prechoose)
+  // fling-move: while the user is directly dragging the element (has delta attribute with the distance from fling-start) (prechoose)
   // fling: the user has released the pointer and the decision is it was in fact flung
-  // fling-cancel: cancel(), or the user has released the pointer and the decision is it was not flung (precommit)
-  // fling-end: cancel(), reset(), or after fling or fling-cancel (precommit)
+  // fling-cancel: cancel(), or the user has released the pointer and the decision is it was not flung (prechoose)
+  // fling-end: cancel(), or after fling or fling-cancel (prechoose)
 }
 
 class FlingLeftGesture : FlingGesture { }
