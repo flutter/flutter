@@ -991,6 +991,7 @@ void RenderLayer::paintLayerContents(GraphicsContext* context, const LayerPainti
     FilterEffectRendererHelper filterPainter(filterRenderer() && paintsWithFilters());
 
     LayoutRect layerBounds;
+    // FIXME(sky): Remove foregroundRect. It's unused.
     ClipRect backgroundRect, foregroundRect, outlineRect;
     ClipRectsContext clipRectsContext(localPaintingInfo.rootLayer, PaintingClipRects, localPaintingInfo.subPixelAccumulation);
     clipper().calculateRects(clipRectsContext, localPaintingInfo.paintDirtyRect,
@@ -1045,7 +1046,7 @@ void RenderLayer::paintLayerContents(GraphicsContext* context, const LayerPainti
 
     if (shouldPaintContent) {
         paintForeground(context, transparencyLayerContext, paintingInfo.paintDirtyRect, haveTransparency,
-            localPaintingInfo, paintingRootForRenderer, layerLocation, foregroundRect);
+            localPaintingInfo, paintingRootForRenderer, layerLocation, backgroundRect);
     }
 
     paintOutline(context, localPaintingInfo, paintingRootForRenderer, layerLocation, outlineRect);

@@ -138,7 +138,7 @@ layer at (0,77) size 800x586
               RenderParagraph (anonymous) at (0,0) size 35.59x18
                 RenderText {#text} at (0,0) size 36x17
                   text run at (0,0) width 36: "$367"
-layer at (609,509) size 159x59
+layer at (609,509) size 159x59 clip at (610,510) size 157x57
   RenderFlexibleBox {app-toast} at (609.31,509) size 158.69x59 [border: (1px solid #AEA477)]
     RenderBlock {div} at (7,13.50) size 32x32
       RenderBlock {div} at (0,0) size 32x32 [border: (2px solid #000000)]
