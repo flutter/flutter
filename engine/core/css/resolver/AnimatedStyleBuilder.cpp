@@ -509,7 +509,7 @@ void AnimatedStyleBuilder::applyProperty(CSSPropertyID property, StyleResolverSt
         style->setVerticalAlignLength(animatableValueToLength(value, state));
         return;
     case CSSPropertyZIndex:
-        style->setZIndex(animatableValueRoundClampTo<int>(value));
+        style->setZIndex(animatableValueRoundClampTo<unsigned>(value));
         return;
     default:
         ASSERT_NOT_REACHED();

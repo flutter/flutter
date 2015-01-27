@@ -36,16 +36,15 @@
 namespace blink {
 
 enum ChildrenIteration {
-    NegativeZOrderChildren = 1,
-    NormalFlowChildren = 1 << 1,
-    PositiveZOrderChildren = 1 << 2,
-    AllChildren = NegativeZOrderChildren | NormalFlowChildren | PositiveZOrderChildren
+    NormalFlowChildren = 1,
+    PositiveZOrderChildren = 1 << 1,
+    AllChildren = NormalFlowChildren | PositiveZOrderChildren
 };
 
 class RenderLayerStackingNode;
 
 // This iterator walks the RenderLayerStackingNode lists in the following order:
-// NegativeZOrderChildren -> NormalFlowChildren -> PositiveZOrderChildren.
+// NormalFlowChildren -> PositiveZOrderChildren.
 class RenderLayerStackingNodeIterator {
     WTF_MAKE_NONCOPYABLE(RenderLayerStackingNodeIterator);
 public:

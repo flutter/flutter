@@ -414,24 +414,8 @@ void RenderTreeAsText::writeLayers(TextStream& ts, const RenderLayer* rootLayer,
 
     bool shouldPaint = (behavior & RenderAsTextShowAllLayers) ? true : layer->intersectsDamageRect(layerBounds, damageRect.rect(), rootLayer);
 
-    Vector<RenderLayerStackingNode*>* negList = layer->stackingNode()->negZOrderList();
-    bool paintsBackgroundSeparately = negList && negList->size() > 0;
-    if (shouldPaint && paintsBackgroundSeparately)
-        write(ts, *layer, layerBounds, damageRect.rect(), clipRectToApply.rect(), outlineRect.rect(), LayerPaintPhaseBackground, indent, behavior);
-
-    if (negList) {
-        int currIndent = indent;
-        if (behavior & RenderAsTextShowLayerNesting) {
-            writeIndent(ts, indent);
-            ts << " negative z-order list(" << negList->size() << ")\n";
-            ++currIndent;
-        }
-        for (unsigned i = 0; i != negList->size(); ++i)
-            writeLayers(ts, rootLayer, negList->at(i)->layer(), paintDirtyRect, currIndent, behavior);
-    }
-
     if (shouldPaint)
-        write(ts, *layer, layerBounds, damageRect.rect(), clipRectToApply.rect(), outlineRect.rect(), paintsBackgroundSeparately ? LayerPaintPhaseForeground : LayerPaintPhaseAll, indent, behavior);
+        write(ts, *layer, layerBounds, damageRect.rect(), clipRectToApply.rect(), outlineRect.rect(), LayerPaintPhaseAll, indent, behavior);
 
     if (Vector<RenderLayerStackingNode*>* normalFlowList = layer->stackingNode()->normalFlowList()) {
         int currIndent = indent;
@@ -444,7 +428,7 @@ void RenderTreeAsText::writeLayers(TextStream& ts, const RenderLayer* rootLayer,
             writeLayers(ts, rootLayer, normalFlowList->at(i)->layer(), paintDirtyRect, currIndent, behavior);
     }
 
-    if (Vector<RenderLayerStackingNode*>* posList = layer->stackingNode()->posZOrderList()) {
+    if (Vector<RenderLayerStackingNode*>* posList = layer->stackingNode()->zOrderList()) {
         int currIndent = indent;
         if (behavior & RenderAsTextShowLayerNesting) {
             writeIndent(ts, indent);

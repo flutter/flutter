@@ -305,7 +305,7 @@ bool RenderLayer::update3DTransformedDescendantStatus()
 
         // Transformed or preserve-3d descendants can only be in the z-order lists, not
         // in the normal flow list, so we only need to check those.
-        RenderLayerStackingNodeIterator iterator(*m_stackingNode.get(), PositiveZOrderChildren | NegativeZOrderChildren);
+        RenderLayerStackingNodeIterator iterator(*m_stackingNode.get(), PositiveZOrderChildren);
         while (RenderLayerStackingNode* node = iterator.next())
             m_has3DTransformedDescendant |= node->layer()->update3DTransformedDescendantStatus();
 
@@ -1043,8 +1043,6 @@ void RenderLayer::paintLayerContents(GraphicsContext* context, const LayerPainti
 
     LayoutPoint layerLocation = toPoint(layerBounds.location() - renderBoxLocation() + localPaintingInfo.subPixelAccumulation);
 
-    paintChildren(NegativeZOrderChildren, context, paintingInfo, paintFlags);
-
     if (shouldPaintContent) {
         paintForeground(context, transparencyLayerContext, paintingInfo.paintDirtyRect, haveTransparency,
             localPaintingInfo, paintingRootForRenderer, layerLocation, foregroundRect);
@@ -1439,15 +1437,6 @@ RenderLayer* RenderLayer::hitTestLayer(RenderLayer* rootLayer, RenderLayer* cont
         } else if (result.isRectBasedTest()) {
             result.append(tempResult);
         }
-    }
-
-    // Now check our negative z-index children.
-    hitLayer = hitTestChildren(NegativeZOrderChildren, rootLayer, request, result, hitTestRect, hitTestLocation,
-        localTransformState.get(), zOffsetForDescendantsPtr, zOffset, unflattenedTransformState.get(), depthSortDescendants);
-    if (hitLayer) {
-        if (!depthSortDescendants)
-            return hitLayer;
-        candidateLayer = hitLayer;
     }
 
     // If we found a layer, return. Child layers, and foreground always render in front of background.

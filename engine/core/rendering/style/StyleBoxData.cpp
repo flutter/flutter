@@ -28,7 +28,7 @@ namespace blink {
 
 struct SameSizeAsStyleBoxData : public RefCounted<SameSizeAsStyleBoxData> {
     Length length[7];
-    int m_zIndex;
+    unsigned m_zIndex;
     uint32_t bitfields;
 };
 

@@ -54,7 +54,7 @@ public:
 
     const Length& verticalAlign() const { return m_verticalAlign; }
 
-    int zIndex() const { return m_zIndex; }
+    unsigned zIndex() const { return m_zIndex; }
     bool hasAutoZIndex() const { return m_hasAutoZIndex; }
 
     EBoxSizing boxSizing() const { return static_cast<EBoxSizing>(m_boxSizing); }
@@ -77,7 +77,7 @@ private:
 
     Length m_verticalAlign;
 
-    int m_zIndex;
+    unsigned m_zIndex;
     unsigned m_hasAutoZIndex : 1;
     unsigned m_boxSizing : 1; // EBoxSizing
     unsigned m_boxDecorationBreak : 1; // EBoxDecorationBreak

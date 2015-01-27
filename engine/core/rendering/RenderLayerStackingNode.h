@@ -61,7 +61,7 @@ public:
     explicit RenderLayerStackingNode(RenderLayer*);
     ~RenderLayerStackingNode();
 
-    int zIndex() const { return renderer()->style()->zIndex(); }
+    unsigned zIndex() const { return renderer()->style()->zIndex(); }
 
     // A stacking context is a layer that has a non-auto z-index.
     bool isStackingContext() const { return !renderer()->style()->hasAutoZIndex(); }
@@ -75,8 +75,7 @@ public:
     void clearZOrderLists();
     void dirtyStackingContextZOrderLists();
 
-    bool hasPositiveZOrderList() const { return posZOrderList() && posZOrderList()->size(); }
-    bool hasNegativeZOrderList() const { return negZOrderList() && negZOrderList()->size(); }
+    bool hasPositiveZOrderList() const { return zOrderList() && zOrderList()->size(); }
 
     // FIXME: should check for dirtiness here?
     bool isNormalFlowOnly() const { return m_isNormalFlowOnly; }
@@ -104,11 +103,11 @@ private:
     friend class RenderLayerStackingNodeReverseIterator;
     friend class RenderTreeAsText;
 
-    Vector<RenderLayerStackingNode*>* posZOrderList() const
+    Vector<RenderLayerStackingNode*>* zOrderList() const
     {
         ASSERT(!m_zOrderListsDirty);
-        ASSERT(isStackingContext() || !m_posZOrderList);
-        return m_posZOrderList.get();
+        ASSERT(isStackingContext() || !m_zOrderList);
+        return m_zOrderList.get();
     }
 
     Vector<RenderLayerStackingNode*>* normalFlowList() const
@@ -117,15 +116,8 @@ private:
         return m_normalFlowList.get();
     }
 
-    Vector<RenderLayerStackingNode*>* negZOrderList() const
-    {
-        ASSERT(!m_zOrderListsDirty);
-        ASSERT(isStackingContext() || !m_negZOrderList);
-        return m_negZOrderList.get();
-    }
-
     void rebuildZOrderLists();
-    void collectLayers(OwnPtr<Vector<RenderLayerStackingNode*> >& posZOrderList, OwnPtr<Vector<RenderLayerStackingNode*> >& negZOrderList);
+    void collectLayers(OwnPtr<Vector<RenderLayerStackingNode*> >& zOrderList);
 
 #if ENABLE(ASSERT)
     bool isInStackingParentZOrderLists() const;
@@ -146,12 +138,9 @@ private:
 
     RenderLayer* m_layer;
 
-    // m_posZOrderList holds a sorted list of all the descendant nodes within
+    // m_zOrderList holds a sorted list of all the descendant nodes within
     // that have z-indices of 0 or greater (auto will count as 0).
-    // m_negZOrderList holds descendants within our stacking context with
-    // negative z-indices.
-    OwnPtr<Vector<RenderLayerStackingNode*> > m_posZOrderList;
-    OwnPtr<Vector<RenderLayerStackingNode*> > m_negZOrderList;
+    OwnPtr<Vector<RenderLayerStackingNode*> > m_zOrderList;
 
     // This list contains child nodes that cannot create stacking contexts.
     OwnPtr<Vector<RenderLayerStackingNode*> > m_normalFlowList;
@@ -174,8 +163,7 @@ inline void RenderLayerStackingNode::clearZOrderLists()
     updateStackingParentForZOrderLists(0);
 #endif
 
-    m_posZOrderList.clear();
-    m_negZOrderList.clear();
+    m_zOrderList.clear();
 }
 
 inline void RenderLayerStackingNode::updateZOrderLists()

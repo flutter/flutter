@@ -283,7 +283,7 @@ word-break inherited
 word-spacing animatable, inherited, initial=initialLetterWordSpacing, converter=convertSpacing
 // UAs must treat 'word-wrap' as an alternate name for the 'overflow-wrap' property. So using the same handlers.
 word-wrap inherited, name_for_methods=OverflowWrap
-z-index animatable, type_name=int, custom_all
+z-index animatable, type_name=unsigned, custom_all
 
 // Non-standard direction aware properties
 
