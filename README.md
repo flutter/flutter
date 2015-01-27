@@ -133,19 +133,17 @@ SKY MODULE
 <import src="/mojo/network/url_loader.mojom.sky" as="loader" />
 <script>
 module.exports = function fetch(url) {
-  return new Promise(function(resolve, reject) {
-    var networkService = shell.connectToService(
-        "mojo:network_service", net.NetworkService);
-    var request = new loader.URLRequest({
-        url: url, method: "GET", auto_follow_redirects: true});
-    var urlLoader = networkService.createURLLoader();
-    urlLoader.start(request).then(function(response) {
-      if (response.status_code == 200)
-        resolve(response.body);
-      else
-        reject(response);
-    });
-  };
+  var networkService = shell.connectToService(
+      "mojo:network_service", net.NetworkService);
+  var request = new loader.URLRequest({
+      url: url, method: "GET", auto_follow_redirects: true});
+  var urlLoader = networkService.createURLLoader();
+  return urlLoader.start(request).then(function(response) {
+    if (response.status_code == 200)
+      return response.body;
+    else
+      throw response;
+  });
 };
 </script>
 ```
