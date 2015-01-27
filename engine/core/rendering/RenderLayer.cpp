@@ -1147,7 +1147,7 @@ void RenderLayer::paintForeground(GraphicsContext* context, GraphicsContext* tra
 void RenderLayer::paintForegroundWithPhase(PaintPhase phase, GraphicsContext* context,
     const LayerPaintingInfo& localPaintingInfo, RenderObject* paintingRootForRenderer, LayoutPoint& layerLocation, ClipRect& layerForegroundRect)
 {
-    PaintInfo paintInfo(context, pixelSnappedIntRect(layerForegroundRect.rect()), phase, paintingRootForRenderer, 0, localPaintingInfo.rootLayer->renderer());
+    PaintInfo paintInfo(context, pixelSnappedIntRect(layerForegroundRect.rect()), phase, paintingRootForRenderer, localPaintingInfo.rootLayer->renderer());
     renderer()->paint(paintInfo, layerLocation);
 }
 
@@ -1157,7 +1157,7 @@ void RenderLayer::paintOutline(GraphicsContext* context, const LayerPaintingInfo
     if (layerOutlineRect.isEmpty())
         return;
 
-    PaintInfo paintInfo(context, pixelSnappedIntRect(layerOutlineRect.rect()), PaintPhaseSelfOutline, paintingRootForRenderer, 0, localPaintingInfo.rootLayer->renderer());
+    PaintInfo paintInfo(context, pixelSnappedIntRect(layerOutlineRect.rect()), PaintPhaseSelfOutline, paintingRootForRenderer, localPaintingInfo.rootLayer->renderer());
     clipToRect(localPaintingInfo, context, layerOutlineRect, DoNotIncludeSelfForBorderRadius);
     renderer()->paint(paintInfo, layerLocation);
     restoreClip(context, localPaintingInfo.paintDirtyRect, layerOutlineRect);
@@ -1171,7 +1171,7 @@ void RenderLayer::paintMask(GraphicsContext* context, const LayerPaintingInfo& l
 
     // Paint the mask.
     // FIXME: Eventually we will collect the region from the fragment itself instead of just from the paint info.
-    PaintInfo paintInfo(context, pixelSnappedIntRect(layerBackgroundRect.rect()), PaintPhaseMask, paintingRootForRenderer, 0, localPaintingInfo.rootLayer->renderer());
+    PaintInfo paintInfo(context, pixelSnappedIntRect(layerBackgroundRect.rect()), PaintPhaseMask, paintingRootForRenderer, localPaintingInfo.rootLayer->renderer());
     renderer()->paint(paintInfo, layerLocation);
 
     if (localPaintingInfo.clipToDirtyRect)

@@ -82,7 +82,6 @@ public:
     RenderObject* selectionEnd() const { return m_selectionEnd; }
     void selectionStartEnd(int& startPos, int& endPos) const;
 
-    virtual void absoluteRects(Vector<IntRect>&, const LayoutPoint& accumulatedOffset) const override;
     virtual void absoluteQuads(Vector<FloatQuad>&) const override;
 
     virtual LayoutRect viewRect() const override;

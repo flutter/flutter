@@ -504,11 +504,7 @@ public:
     // Return the offset from an object up the container() chain. Asserts that none of the intermediate objects have transforms.
     LayoutSize offsetFromAncestorContainer(const RenderObject*) const;
 
-    virtual void absoluteRects(Vector<IntRect>&, const LayoutPoint&) const { }
-
     IntRect absoluteBoundingBoxRect() const;
-    // FIXME: This function should go away eventually
-    IntRect absoluteBoundingBoxRectIgnoringTransforms() const;
 
     // Build an array of quads in absolute coords for line boxes
     virtual void absoluteQuads(Vector<FloatQuad>&) const { }

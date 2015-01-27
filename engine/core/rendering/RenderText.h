@@ -59,7 +59,6 @@ public:
     InlineTextBox* createInlineTextBox();
     void dirtyLineBoxes(bool fullLayout);
 
-    virtual void absoluteRects(Vector<IntRect>&, const LayoutPoint& accumulatedOffset) const override final;
     void absoluteRectsForRange(Vector<IntRect>&, unsigned startOffset = 0, unsigned endOffset = INT_MAX, bool useSelectionHeight = false);
 
     virtual void absoluteQuads(Vector<FloatQuad>&) const override final;

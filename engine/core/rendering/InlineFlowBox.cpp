@@ -997,11 +997,7 @@ void InlineFlowBox::paint(PaintInfo& paintInfo, const LayoutPoint& paintOffset, 
     if (!paintInfo.rect.intersects(pixelSnappedIntRect(overflowRect)))
         return;
 
-    if ((paintInfo.phase == PaintPhaseOutline || paintInfo.phase == PaintPhaseSelfOutline)
-        && renderer().style()->hasOutline() && !isRootInlineBox()) {
-        RenderInline& inlineFlow = toRenderInline(renderer());
-        paintInfo.outlineObjects()->add(&inlineFlow);
-    } else if (paintInfo.phase == PaintPhaseMask) {
+    if (paintInfo.phase == PaintPhaseMask) {
         paintMask(paintInfo, paintOffset);
         return;
     } else if (paintInfo.phase == PaintPhaseForeground) {

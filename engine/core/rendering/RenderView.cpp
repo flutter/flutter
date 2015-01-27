@@ -248,11 +248,6 @@ void RenderView::paintBoxDecorationBackground(PaintInfo& paintInfo, const Layout
     }
 }
 
-void RenderView::absoluteRects(Vector<IntRect>& rects, const LayoutPoint& accumulatedOffset) const
-{
-    rects.append(pixelSnappedIntRect(accumulatedOffset, layer()->size()));
-}
-
 void RenderView::absoluteQuads(Vector<FloatQuad>& quads) const
 {
     quads.append(FloatRect(FloatPoint(), layer()->size()));

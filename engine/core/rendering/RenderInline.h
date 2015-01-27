@@ -56,7 +56,6 @@ public:
     virtual LayoutUnit marginStart(const RenderStyle* otherStyle = 0) const override final;
     virtual LayoutUnit marginEnd(const RenderStyle* otherStyle = 0) const override final;
 
-    virtual void absoluteRects(Vector<IntRect>&, const LayoutPoint& accumulatedOffset) const override final;
     virtual void absoluteQuads(Vector<FloatQuad>&) const override;
 
     virtual LayoutSize offsetFromContainer(const RenderObject*, const LayoutPoint&, bool* offsetDependsOnPoint = 0) const override final;
@@ -80,7 +79,6 @@ public:
     LayoutSize offsetForInFlowPositionedInline(const RenderBox& child) const;
 
     virtual void addFocusRingRects(Vector<IntRect>&, const LayoutPoint& additionalOffset, const RenderLayerModelObject* paintContainer = 0) const override final;
-    void paintOutline(PaintInfo&, const LayoutPoint&);
 
     bool alwaysCreateLineBoxes() const { return alwaysCreateLineBoxesForRenderInline(); }
     void setAlwaysCreateLineBoxes(bool alwaysCreateLineBoxes = true) { setAlwaysCreateLineBoxesForRenderInline(alwaysCreateLineBoxes); }
@@ -147,9 +145,6 @@ private:
     virtual void updateHitTestResult(HitTestResult&, const LayoutPoint&) override final;
 
     virtual void updateFromStyle() override final;
-
-    void paintOutlineForLine(GraphicsContext*, const LayoutPoint&, const LayoutRect& prevLine, const LayoutRect& thisLine,
-                             const LayoutRect& nextLine, const Color);
 
     RenderObjectChildList m_children;
     RenderLineBoxList m_lineBoxes;   // All of the line boxes created for this inline flow.  For example, <i>Hello<br>world.</i> will have two <i> line boxes.

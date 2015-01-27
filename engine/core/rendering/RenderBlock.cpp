@@ -1727,11 +1727,6 @@ void RenderBlock::clearTruncation()
     }
 }
 
-void RenderBlock::absoluteRects(Vector<IntRect>& rects, const LayoutPoint& accumulatedOffset) const
-{
-    rects.append(pixelSnappedIntRect(accumulatedOffset, size()));
-}
-
 void RenderBlock::absoluteQuads(Vector<FloatQuad>& quads) const
 {
     quads.append(RenderBox::localToAbsoluteQuad(FloatRect(0, 0, width().toFloat(), height().toFloat()), 0 /* mode */));

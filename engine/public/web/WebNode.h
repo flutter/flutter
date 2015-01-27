@@ -104,11 +104,6 @@ public:
     BLINK_EXPORT bool focused() const;
     BLINK_EXPORT bool remove();
 
-    // Returns true if the node has a non-empty bounding box in layout.
-    // This does not 100% guarantee the user can see it, but is pretty close.
-    // Note: This method only works properly after layout has occurred.
-    BLINK_EXPORT bool hasNonEmptyBoundingBox() const;
-
     BLINK_EXPORT bool containsIncludingShadowDOM(const WebNode&) const;
     BLINK_EXPORT WebElement shadowHost() const;
 

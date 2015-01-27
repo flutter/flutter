@@ -270,11 +270,6 @@ void RenderBox::scrollRectToVisible(const LayoutRect& rect, const ScrollAlignmen
         parentBox->scrollRectToVisible(newRect, alignX, alignY);
 }
 
-void RenderBox::absoluteRects(Vector<IntRect>& rects, const LayoutPoint& accumulatedOffset) const
-{
-    rects.append(pixelSnappedIntRect(accumulatedOffset, size()));
-}
-
 void RenderBox::absoluteQuads(Vector<FloatQuad>& quads) const
 {
     quads.append(localToAbsoluteQuad(FloatRect(0, 0, width().toFloat(), height().toFloat()), 0 /* mode */));

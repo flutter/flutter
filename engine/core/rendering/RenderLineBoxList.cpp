@@ -187,9 +187,8 @@ bool RenderLineBoxList::lineIntersectsDirtyRect(RenderBoxModelObject* renderer, 
 
 void RenderLineBoxList::paint(RenderBoxModelObject* renderer, PaintInfo& paintInfo, const LayoutPoint& paintOffset) const
 {
-    // Only paint during the foreground/selection phases.
-    if (paintInfo.phase != PaintPhaseForeground && paintInfo.phase != PaintPhaseSelection && paintInfo.phase != PaintPhaseOutline
-        && paintInfo.phase != PaintPhaseSelfOutline && paintInfo.phase != PaintPhaseChildOutlines
+    if (paintInfo.phase != PaintPhaseForeground
+        && paintInfo.phase != PaintPhaseSelection
         && paintInfo.phase != PaintPhaseMask)
         return;
 
@@ -203,8 +202,6 @@ void RenderLineBoxList::paint(RenderBoxModelObject* renderer, PaintInfo& paintIn
         return;
 
     PaintInfo info(paintInfo);
-    ListHashSet<RenderInline*> outlineObjects;
-    info.setOutlineObjects(&outlineObjects);
 
     // See if our root lines intersect with the dirty rect.  If so, then we paint
     // them.  Note that boxes can easily overlap, so we can't make any assumptions
@@ -214,15 +211,6 @@ void RenderLineBoxList::paint(RenderBoxModelObject* renderer, PaintInfo& paintIn
             RootInlineBox& root = curr->root();
             curr->paint(info, paintOffset, root.lineTop(), root.lineBottom());
         }
-    }
-
-    if (info.phase == PaintPhaseOutline || info.phase == PaintPhaseSelfOutline || info.phase == PaintPhaseChildOutlines) {
-        ListHashSet<RenderInline*>::iterator end = info.outlineObjects()->end();
-        for (ListHashSet<RenderInline*>::iterator it = info.outlineObjects()->begin(); it != end; ++it) {
-            RenderInline* flow = *it;
-            flow->paintOutline(info, paintOffset);
-        }
-        info.outlineObjects()->clear();
     }
 }
 

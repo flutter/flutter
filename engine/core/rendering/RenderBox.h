@@ -290,7 +290,6 @@ public:
         m_marginBox.setEnd(styleToUse->direction(), value);
     }
 
-    virtual void absoluteRects(Vector<IntRect>&, const LayoutPoint& accumulatedOffset) const override;
     virtual void absoluteQuads(Vector<FloatQuad>&) const override;
 
     virtual void layout() override;

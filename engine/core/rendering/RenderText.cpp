@@ -224,12 +224,6 @@ String RenderText::plainText() const
     return plainTextBuilder.toString();
 }
 
-void RenderText::absoluteRects(Vector<IntRect>& rects, const LayoutPoint& accumulatedOffset) const
-{
-    for (InlineTextBox* box = firstTextBox(); box; box = box->nextTextBox())
-        rects.append(enclosingIntRect(FloatRect(accumulatedOffset + box->topLeft(), box->size())));
-}
-
 static FloatRect localQuadForTextBox(InlineTextBox* box, unsigned start, unsigned end, bool useSelectionHeight)
 {
     unsigned realEnd = std::min(box->end() + 1, end);

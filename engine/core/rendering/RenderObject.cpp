@@ -1015,22 +1015,6 @@ IntRect RenderObject::absoluteBoundingBoxRect() const
     return result;
 }
 
-IntRect RenderObject::absoluteBoundingBoxRectIgnoringTransforms() const
-{
-    FloatPoint absPos = localToAbsolute();
-    Vector<IntRect> rects;
-    absoluteRects(rects, flooredLayoutPoint(absPos));
-
-    size_t n = rects.size();
-    if (!n)
-        return IntRect();
-
-    LayoutRect result = rects[0];
-    for (size_t i = 1; i < n; ++i)
-        result.unite(rects[i]);
-    return pixelSnappedIntRect(result);
-}
-
 void RenderObject::absoluteFocusRingQuads(Vector<FloatQuad>& quads)
 {
     Vector<IntRect> rects;
