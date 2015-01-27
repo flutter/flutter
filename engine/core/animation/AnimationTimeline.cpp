@@ -156,7 +156,7 @@ void AnimationTimeline::AnimationTimelineTiming::cancelWake()
 void AnimationTimeline::AnimationTimelineTiming::serviceOnNextFrame()
 {
     if (m_timeline->m_document)
-        m_timeline->m_document->scheduleVisualUpdate();
+        m_timeline->m_document->page()->scheduleVisualUpdate();
 }
 
 double AnimationTimeline::currentTime(bool& isNull)

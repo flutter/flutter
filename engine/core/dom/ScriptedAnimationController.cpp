@@ -33,6 +33,7 @@
 #include "sky/engine/core/frame/FrameView.h"
 #include "sky/engine/core/frame/LocalDOMWindow.h"
 #include "sky/engine/core/inspector/InspectorTraceEvents.h"
+#include "sky/engine/core/page/Page.h"
 #include "sky/engine/platform/Logging.h"
 
 namespace blink {
@@ -220,7 +221,7 @@ void ScriptedAnimationController::scheduleAnimationIfNeeded()
         return;
 
     // TODO(esprehn): This causes a full raster on every raf even if nothing changed.
-    m_document->scheduleVisualUpdate();
+    m_document->page()->scheduleVisualUpdate();
 }
 
 }
