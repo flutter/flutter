@@ -17,11 +17,22 @@
   <style>
   :host {
     overflow: hidden;
+    position: relative;
   }
   #scrollable {
     transform: translateY(0);
   }
+  #vbar {
+    position: absolute;
+    right: 0;
+    width: 3px;
+    background-color: lightgray;
+    pointer-events: none;
+    top: 0;
+    height: 0;
+  }
   </style>
+  <div id="vbar" />
   <div id="scrollable">
     <content />
   </div>
@@ -30,6 +41,7 @@
 module.exports = class extends SkyElement {
   created() {
     this.scrollable_ = null;
+    this.vbar_ = null;
     this.scrollOffset_ = 0;
     this.flingCurve_ = null;
     this.flingAnimationId_ = null;
@@ -37,21 +49,35 @@ module.exports = class extends SkyElement {
 
   shadowRootReady() {
     this.scrollable_ = this.shadowRoot.getElementById('scrollable');
+    this.vbar_ = this.shadowRoot.getElementById('vbar');
+  }
+
+  get scrollOffset() {
+    return this.scrollOffset_;
+  }
+
+  set scrollOffset(value) {
+    // TODO(abarth): Can we get these values without forcing a synchronous layout?
+    var outerHeight = this.clientHeight;
+    var innerHeight = this.scrollable_.clientHeight;
+    var scrollRange = innerHeight - outerHeight;
+    var newScrollOffset = Math.max(0, Math.min(scrollRange, value));
+    if (newScrollOffset == this.scrollOffset_)
+      return;
+    this.scrollOffset_ = newScrollOffset;
+    var transform = 'translateY(' + -this.scrollOffset_.toFixed(2) + 'px)';
+    this.scrollable_.style.transform = transform;
+
+    var topPercent = newScrollOffset / innerHeight * 100;
+    var heightPercent = outerHeight / innerHeight * 100;
+    this.vbar_.style.top = topPercent + '%';
+    this.vbar_.style.height = heightPercent + '%';
   }
 
   scrollBy(scrollDelta) {
-    var scrollHeight = this.scrollable_.clientHeight - this.clientHeight;
-    var offset = Math.max(0, Math.min(scrollHeight, this.scrollOffset_ + scrollDelta));
-    if (offset == this.scrollOffset_)
-      return false;
-    this.scrollOffset_ = offset;
-    this.applyScrollOffset_();
-    return true;
-  }
-
-  applyScrollOffset_() {
-    var transform = 'translateY(' + -this.scrollOffset_.toFixed(2) + 'px)';
-    this.scrollable_.style.transform = transform;
+    var oldScrollOffset = this.scrollOffset_;
+    this.scrollOffset += scrollDelta;
+    return this.scrollOffset_ != oldScrollOffset;
   }
 
   scheduleFlingUpdate_() {
