@@ -31,12 +31,15 @@
     pointer-events: none;
     top: 0;
     height: 0;
+    will-change: opacity;
+    opacity: 0;
+    transition: opacity 0.2s ease-in-out;
   }
   </style>
-  <div id="vbar" />
   <div id="scrollable">
     <content />
   </div>
+  <div id="vbar" />
 </template>
 <script>
 module.exports = class extends SkyElement {
@@ -89,6 +92,7 @@ module.exports = class extends SkyElement {
     cancelAnimationFrame(this.flingAnimationId_);
     this.flingCurve_ = null;
     this.flingAnimationId_ = null;
+    this.vbar_.style.opacity = 0;
   }
 
   updateFling_(timeStamp) {
@@ -99,9 +103,11 @@ module.exports = class extends SkyElement {
   }
 
   handleScrollStart_(event) {
+    this.vbar_.style.opacity = 1;
   }
 
   handleScrollEnd_(event) {
+    this.vbar_.style.opacity = 0;
   }
 
   handleScrollUpdate_(event) {
