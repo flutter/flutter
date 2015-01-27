@@ -32,7 +32,7 @@
 <script>
 module.exports = class extends SkyElement {
   created() {
-    this.cities = cities;
+    this.cities = cities.slice(0, 300);
   }
 }.register();
 </script>
