@@ -55,7 +55,7 @@ public:
 
     virtual bool isRenderBlockFlow() const override final { return true; }
 
-    virtual void layoutBlock(bool relayoutChildren) override;
+    void layout() override;
 
     virtual void deleteLineBoxTree() override final;
 
@@ -122,7 +122,7 @@ protected:
     void determineLogicalLeftPositionForChild(RenderBox* child);
 
 private:
-    void layoutBlockFlow(bool relayoutChildren, SubtreeLayoutScope&);
+    void layoutBlockFlow(SubtreeLayoutScope&);
 
     void layoutBlockChild(RenderBox* child);
     void adjustPositionedBlock(RenderBox* child);

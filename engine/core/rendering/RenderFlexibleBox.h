@@ -46,7 +46,7 @@ public:
     virtual const char* renderName() const override;
 
     virtual bool isFlexibleBox() const override final { return true; }
-    virtual void layoutBlock(bool relayoutChildren) override final;
+    void layout() final;
 
     virtual int baselinePosition(FontBaseline, bool firstLine, LineDirectionMode, LinePositionMode = PositionOnContainingLine) const override;
     virtual int firstLineBoxBaseline() const override;

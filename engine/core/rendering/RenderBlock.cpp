@@ -304,12 +304,6 @@ void RenderBlock::updateScrollInfoAfterLayout()
     }
 }
 
-void RenderBlock::layout()
-{
-    // FIXME(sky): Inline layoutBlock here and get rid of it.
-    layoutBlock(false);
-}
-
 bool RenderBlock::widthAvailableToChildrenHasChanged()
 {
     bool widthAvailableToChildrenHasChanged = m_hasBorderOrPaddingLogicalWidthChanged;
@@ -327,12 +321,6 @@ bool RenderBlock::updateLogicalWidthAndColumnWidth()
     LayoutUnit oldWidth = logicalWidth();
     updateLogicalWidth();
     return oldWidth != logicalWidth() || widthAvailableToChildrenHasChanged();
-}
-
-void RenderBlock::layoutBlock(bool)
-{
-    ASSERT_NOT_REACHED();
-    clearNeedsLayout();
 }
 
 void RenderBlock::addOverflowFromChildren()

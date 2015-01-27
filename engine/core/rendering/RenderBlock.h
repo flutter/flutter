@@ -94,8 +94,6 @@ public:
     virtual void addChild(RenderObject* newChild, RenderObject* beforeChild = 0) override;
     virtual void removeChild(RenderObject*) override;
 
-    virtual void layoutBlock(bool relayoutChildren);
-
     void insertPositionedObject(RenderBox*);
     static void removePositionedObject(RenderBox*);
     void removePositionedObjects(RenderBlock*, ContainingBlockState = SameContainingBlock);
@@ -207,8 +205,6 @@ protected:
     virtual void willBeDestroyed() override;
 
     void dirtyForLayoutFromPercentageHeightDescendants(SubtreeLayoutScope&);
-
-    virtual void layout() override;
 
     enum PositionedLayoutBehavior {
         DefaultLayout,

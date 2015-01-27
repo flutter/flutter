@@ -65,17 +65,17 @@ bool RenderBlockFlow::updateLogicalWidthAndColumnWidth()
     return RenderBlock::updateLogicalWidthAndColumnWidth();
 }
 
-void RenderBlockFlow::layoutBlock(bool relayoutChildren)
+void RenderBlockFlow::layout()
 {
     ASSERT(needsLayout());
     ASSERT(isInlineBlock() || !isInline());
 
-    if (!relayoutChildren && simplifiedLayout())
+    if (simplifiedLayout())
         return;
 
     SubtreeLayoutScope layoutScope(*this);
 
-    layoutBlockFlow(relayoutChildren, layoutScope);
+    layoutBlockFlow(layoutScope);
 
     updateLayerTransformAfterLayout();
 
@@ -86,11 +86,11 @@ void RenderBlockFlow::layoutBlock(bool relayoutChildren)
     clearNeedsLayout();
 }
 
-inline void RenderBlockFlow::layoutBlockFlow(bool relayoutChildren, SubtreeLayoutScope& layoutScope)
+inline void RenderBlockFlow::layoutBlockFlow(SubtreeLayoutScope& layoutScope)
 {
     LayoutUnit oldLeft = logicalLeft();
     bool logicalWidthChanged = updateLogicalWidthAndColumnWidth();
-    relayoutChildren |= logicalWidthChanged;
+    bool relayoutChildren = logicalWidthChanged;
 
     LayoutState state(*this, locationOffset(), logicalWidthChanged);
 

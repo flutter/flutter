@@ -213,16 +213,14 @@ void RenderFlexibleBox::styleDidChange(StyleDifference diff, const RenderStyle* 
     }
 }
 
-void RenderFlexibleBox::layoutBlock(bool relayoutChildren)
+void RenderFlexibleBox::layout()
 {
     ASSERT(needsLayout());
 
-    if (!relayoutChildren && simplifiedLayout())
+    if (simplifiedLayout())
         return;
 
-    if (updateLogicalWidthAndColumnWidth())
-        relayoutChildren = true;
-
+    bool relayoutChildren = updateLogicalWidthAndColumnWidth();
     LayoutUnit previousHeight = logicalHeight();
     setLogicalHeight(borderAndPaddingLogicalHeight());
 
