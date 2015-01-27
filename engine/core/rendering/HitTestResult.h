@@ -43,7 +43,6 @@ class KURL;
 class Node;
 class RenderObject;
 class PositionWithAffinity;
-class Scrollbar;
 
 class HitTestResult {
     DISALLOW_ALLOCATION();
@@ -68,7 +67,6 @@ public:
     Element* innerElement() const;
     Node* innerNonSharedNode() const { return m_innerNonSharedNode.get(); }
     Element* URLElement() const { return m_innerURLElement.get(); }
-    Scrollbar* scrollbar() const { return m_scrollbar.get(); }
     bool isOverWidget() const { return m_isOverWidget; }
 
     // Forwarded from HitTestLocation
@@ -95,7 +93,6 @@ public:
     void setInnerNode(Node*);
     void setInnerNonSharedNode(Node*);
     void setURLElement(Element*);
-    void setScrollbar(Scrollbar*);
     void setIsOverWidget(bool b) { m_isOverWidget = b; }
 
     bool isSelected() const;
@@ -143,7 +140,6 @@ private:
     LayoutPoint m_localPoint; // A point in the local coordinate space of m_innerNonSharedNode's renderer. Allows us to efficiently
                               // determine where inside the renderer we hit on subsequent operations.
     RefPtr<Element> m_innerURLElement;
-    RefPtr<Scrollbar> m_scrollbar;
     bool m_isOverWidget; // Returns true if we are over a widget.
 
     mutable OwnPtr<NodeSet> m_rectBasedTestResult;

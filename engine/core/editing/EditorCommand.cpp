@@ -49,7 +49,6 @@
 #include "sky/engine/core/page/EditorClient.h"
 #include "sky/engine/core/page/EventHandler.h"
 #include "sky/engine/core/rendering/RenderBox.h"
-#include "sky/engine/platform/scroll/Scrollbar.h"
 #include "sky/engine/public/platform/Platform.h"
 #include "sky/engine/wtf/text/AtomicString.h"
 
@@ -74,6 +73,8 @@ static const bool isTextInsertion = true;
 
 static const bool allowExecutionWhenDisabled = true;
 static const bool doNotAllowExecutionWhenDisabled = false;
+
+static const float kMinFractionToStepWhenPaging = 0.875f;
 
 // Related to Editor::selectionForCommand.
 // Certain operations continue to use the target control's selection even if the event handler
@@ -104,7 +105,7 @@ static unsigned verticalScrollDistance(LocalFrame& frame)
         return 0;
     int height = std::min<int>(renderBox.clientHeight(),
         frame.view()->height());
-    return static_cast<unsigned>(max(max<int>(height * ScrollableArea::minFractionToStepWhenPaging(), height - ScrollableArea::maxOverlapBetweenPages()), 1));
+    return static_cast<unsigned>(max<int>(height * kMinFractionToStepWhenPaging, 1));
 }
 
 static bool executeCopy(LocalFrame& frame, Event*, EditorCommandSource, const String&)

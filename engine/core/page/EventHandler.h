@@ -58,8 +58,6 @@ class Node;
 class OptionalCursor;
 class RenderLayer;
 class RenderObject;
-class ScrollableArea;
-class Scrollbar;
 class TextEvent;
 class VisibleSelection;
 class Widget;
@@ -114,8 +112,6 @@ private:
 
     bool isCursorVisible() const;
     void updateCursor();
-
-    bool isInsideScrollbar(const IntPoint&) const;
 
     // Scrolls the elements of the DOM tree. Returns true if a node was scrolled.
     // False if we reached the root and couldn't scroll anything.

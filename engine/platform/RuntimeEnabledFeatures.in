@@ -83,7 +83,6 @@ PathOpsSVGClipping status=stable
 PreciseMemoryInfo
 PushMessaging status=experimental
 QuotaPromise status=experimental
-OverlayScrollbars status=stable
 RegionBasedColumns status=experimental
 
 RequestAutocomplete status=test

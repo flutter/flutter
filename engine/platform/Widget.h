@@ -65,7 +65,6 @@ public:
     virtual void paint(GraphicsContext*, const IntRect&) { }
 
     virtual bool isFrameView() const { return false; }
-    virtual bool isScrollbar() const { return false; }
 
     virtual HostWindow* hostWindow() const { ASSERT_NOT_REACHED(); return 0; }
     Widget* parent() const { return m_parent; }

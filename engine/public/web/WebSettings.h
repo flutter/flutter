@@ -137,7 +137,6 @@ public:
     virtual void setSupportDeprecatedTargetDensityDPI(bool) = 0;
     virtual void setTouchEditingEnabled(bool) = 0;
     virtual void setUnifiedTextCheckerEnabled(bool) = 0;
-    virtual void setUseSolidColorScrollbars(bool) = 0;
     virtual void setUseWideViewport(bool) = 0;
     virtual void setV8CacheOptions(V8CacheOptions) = 0;
     virtual void setWebGLErrorsToConsoleEnabled(bool) = 0;

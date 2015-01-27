@@ -27,7 +27,6 @@
 #include "sky/engine/core/frame/Settings.h"
 
 #include "gen/sky/platform/RuntimeEnabledFeatures.h"
-#include "sky/engine/platform/scroll/Scrollbar.h"
 
 namespace blink {
 

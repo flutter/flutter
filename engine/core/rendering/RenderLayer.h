@@ -157,7 +157,6 @@ public:
     void paint(GraphicsContext*, const LayoutRect& damageRect, RenderObject* paintingRoot = 0);
     bool hitTest(const HitTestRequest&, HitTestResult&);
     bool hitTest(const HitTestRequest&, const HitTestLocation&, HitTestResult&);
-    void paintOverlayScrollbars(GraphicsContext*, const LayoutRect& damageRect, RenderObject* paintingRoot = 0);
 
     // Pass offsetFromRoot if known.
     bool intersectsDamageRect(const LayoutRect& layerBounds, const LayoutRect& damageRect, const RenderLayer* rootLayer, const LayoutPoint* offsetFromRoot = 0) const;
@@ -215,9 +214,6 @@ public:
     void operator delete(void*);
 
     bool paintsWithTransform() const;
-
-    bool containsDirtyOverlayScrollbars() const { return m_containsDirtyOverlayScrollbars; }
-    void setContainsDirtyOverlayScrollbars(bool dirtyScrollbars) { m_containsDirtyOverlayScrollbars = dirtyScrollbars; }
 
     FilterOperations computeFilterOperations(const RenderStyle*);
     bool paintsWithFilters() const;
@@ -360,7 +356,6 @@ private:
     // TODO(ojan): Get rid of this. These are basically layer-tree-only paint phases.
     enum PaintLayerFlags {
         PaintContent,
-        PaintOverlayScrollbars,
     };
 
     // Bounding box in the coordinates of this layer.
@@ -465,8 +460,6 @@ private:
     // Set on a stacking context layer that has 3D descendants anywhere
     // in a preserves3D hierarchy. Hint to do 3D-aware hit testing.
     unsigned m_has3DTransformedDescendant : 1;
-
-    unsigned m_containsDirtyOverlayScrollbars : 1;
 
     unsigned m_hasFilterInfo : 1;
     unsigned m_needsAncestorDependentCompositingInputsUpdate : 1;

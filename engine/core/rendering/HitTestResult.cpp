@@ -33,7 +33,6 @@
 #include "sky/engine/core/html/HTMLImageElement.h"
 #include "sky/engine/core/html/parser/HTMLParserIdioms.h"
 #include "sky/engine/core/rendering/RenderImage.h"
-#include "sky/engine/platform/scroll/Scrollbar.h"
 
 namespace blink {
 
@@ -71,7 +70,6 @@ HitTestResult::HitTestResult(const HitTestResult& other)
     , m_pointInInnerNodeFrame(other.m_pointInInnerNodeFrame)
     , m_localPoint(other.localPoint())
     , m_innerURLElement(other.URLElement())
-    , m_scrollbar(other.scrollbar())
     , m_isOverWidget(other.isOverWidget())
 {
     // Only copy the NodeSet in case of rect hit test.
@@ -91,7 +89,6 @@ HitTestResult& HitTestResult::operator=(const HitTestResult& other)
     m_pointInInnerNodeFrame = other.m_pointInInnerNodeFrame;
     m_localPoint = other.localPoint();
     m_innerURLElement = other.URLElement();
-    m_scrollbar = other.scrollbar();
     m_isOverWidget = other.isOverWidget();
 
     // Only copy the NodeSet in case of rect hit test.
@@ -131,11 +128,6 @@ void HitTestResult::setInnerNonSharedNode(Node* n)
 void HitTestResult::setURLElement(Element* n)
 {
     m_innerURLElement = n;
-}
-
-void HitTestResult::setScrollbar(Scrollbar* s)
-{
-    m_scrollbar = s;
 }
 
 LocalFrame* HitTestResult::innerNodeFrame() const
@@ -292,10 +284,6 @@ bool HitTestResult::addNodeToRectBasedTestResult(Node* node, const HitTestReques
 void HitTestResult::append(const HitTestResult& other)
 {
     ASSERT(isRectBasedTest() && other.isRectBasedTest());
-
-    if (!m_scrollbar && other.scrollbar()) {
-        setScrollbar(other.scrollbar());
-    }
 
     if (!m_innerNode && other.innerNode()) {
         m_innerNode = other.innerNode();

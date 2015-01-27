@@ -67,6 +67,17 @@ enum ScrollbarOverlayStyle {
     ScrollbarOverlayStyleLight
 };
 
+enum IncludeScrollbarsInRect {
+    ExcludeScrollbars,
+    IncludeScrollbars,
+};
+
+enum ScrollBehavior {
+    ScrollBehaviorAuto,
+    ScrollBehaviorInstant,
+    ScrollBehaviorSmooth,
+};
+
 }
 
 #endif  // SKY_ENGINE_PLATFORM_SCROLL_SCROLLTYPES_H_

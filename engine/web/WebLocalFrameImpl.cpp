@@ -120,7 +120,6 @@
 #include "sky/engine/platform/heap/Handle.h"
 #include "sky/engine/platform/network/ResourceRequest.h"
 #include "sky/engine/platform/scroll/ScrollTypes.h"
-#include "sky/engine/platform/scroll/Scrollbar.h"
 #include "sky/engine/platform/weborigin/KURL.h"
 #include "sky/engine/platform/weborigin/SecurityPolicy.h"
 #include "sky/engine/public/platform/Platform.h"

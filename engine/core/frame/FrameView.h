@@ -28,10 +28,11 @@
 #include "gen/sky/platform/RuntimeEnabledFeatures.h"
 #include "sky/engine/core/rendering/PaintPhase.h"
 #include "sky/engine/platform/HostWindow.h"
+#include "sky/engine/platform/Timer.h"
 #include "sky/engine/platform/Widget.h"
 #include "sky/engine/platform/geometry/LayoutRect.h"
 #include "sky/engine/platform/graphics/Color.h"
-#include "sky/engine/platform/scroll/ScrollableArea.h"
+#include "sky/engine/platform/scroll/ScrollTypes.h"
 #include "sky/engine/wtf/Forward.h"
 #include "sky/engine/wtf/HashSet.h"
 #include "sky/engine/wtf/OwnPtr.h"
@@ -155,11 +156,6 @@ public:
     // FIXME: Remove this method once plugin loading is decoupled from layout.
     void flushAnyPendingPostLayoutTasks();
 
-    typedef HashSet<ScrollableArea*> ScrollableAreaSet;
-    void addScrollableArea(ScrollableArea*);
-    void removeScrollableArea(ScrollableArea*);
-    const ScrollableAreaSet* scrollableAreas() const { return m_scrollableAreas.get(); }
-
     void setHasSoftwareFilters(bool hasSoftwareFilters) { m_hasSoftwareFilters = hasSoftwareFilters; }
     bool hasSoftwareFilters() const { return m_hasSoftwareFilters; }
 
@@ -247,8 +243,6 @@ private:
 
     RefPtr<Node> m_nodeToDraw;
     bool m_isPainting;
-
-    OwnPtr<ScrollableAreaSet> m_scrollableAreas;
 
     bool m_hasSoftwareFilters;
 

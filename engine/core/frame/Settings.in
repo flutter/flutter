@@ -95,8 +95,6 @@ forceZeroLayoutHeight initial=false
 # crbug.com/304873 tracks removal once it's been enabled on all platforms.
 touchEditingEnabled initial=false
 
-useSolidColorScrollbars initial=true
-
 mainFrameClipsContent initial=true
 
 # Presumably used by tests?  Unclear.

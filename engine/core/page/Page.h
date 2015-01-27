@@ -59,7 +59,6 @@ class PageLifecycleNotifier;
 class Range;
 class RenderBox;
 class RenderObject;
-class ScrollableArea;
 class ServiceProvider;
 class Settings;
 class SpellCheckerClient;

@@ -26,7 +26,6 @@
 #include "sky/engine/core/rendering/LayoutState.h"
 #include "sky/engine/core/rendering/RenderBlockFlow.h"
 #include "sky/engine/core/rendering/RenderIFrame.h"
-#include "sky/engine/platform/scroll/ScrollableArea.h"
 #include "sky/engine/wtf/OwnPtr.h"
 
 namespace blink {

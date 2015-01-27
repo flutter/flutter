@@ -42,7 +42,7 @@
 #include "sky/engine/platform/fonts/TextRenderingMode.h"
 #include "sky/engine/platform/graphics/GraphicsTypes.h"
 #include "sky/engine/platform/graphics/Path.h"
-#include "sky/engine/platform/scroll/ScrollableArea.h"
+#include "sky/engine/platform/scroll/ScrollTypes.h"
 #include "sky/engine/platform/text/TextDirection.h"
 #include "sky/engine/platform/text/UnicodeBidi.h"
 #include "sky/engine/wtf/MathExtras.h"

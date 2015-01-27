@@ -43,16 +43,6 @@ class WebFallbackThemeEngine {
 public:
     // The UI part which is being accessed.
     enum Part {
-        // ScrollbarTheme parts
-        PartScrollbarDownArrow,
-        PartScrollbarLeftArrow,
-        PartScrollbarRightArrow,
-        PartScrollbarUpArrow,
-        PartScrollbarHorizontalThumb,
-        PartScrollbarVerticalThumb,
-        PartScrollbarHorizontalTrack,
-        PartScrollbarVerticalTrack,
-
         // RenderTheme parts
         PartCheckbox,
         PartRadio,
@@ -70,16 +60,6 @@ public:
         StateHover,
         StateNormal,
         StatePressed,
-    };
-
-    // Extra parameters for drawing the PartScrollbarHorizontalTrack and
-    // PartScrollbarVerticalTrack.
-    struct ScrollbarTrackExtraParams {
-        // The bounds of the entire track, as opposed to the part being painted.
-        int trackX;
-        int trackY;
-        int trackWidth;
-        int trackHeight;
     };
 
     // Extra parameters for PartCheckbox, PartPushButton and PartRadio.
@@ -122,7 +102,6 @@ public:
     };
 
     union ExtraParams {
-        ScrollbarTrackExtraParams scrollbarTrack;
         ButtonExtraParams button;
         MenuListExtraParams menuList;
         SliderExtraParams slider;

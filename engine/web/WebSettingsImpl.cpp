@@ -352,11 +352,6 @@ void WebSettingsImpl::setSmartInsertDeleteEnabled(bool enabled)
     m_settings->setSmartInsertDeleteEnabled(enabled);
 }
 
-void WebSettingsImpl::setUseSolidColorScrollbars(bool enabled)
-{
-    m_settings->setUseSolidColorScrollbars(enabled);
-}
-
 void WebSettingsImpl::setMainFrameResizesAreOrientationChanges(bool enabled)
 {
     m_mainFrameResizesAreOrientationChanges = enabled;

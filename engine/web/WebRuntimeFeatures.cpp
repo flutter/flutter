@@ -152,11 +152,6 @@ void WebRuntimeFeatures::enableWebGLImageChromium(bool enable)
     RuntimeEnabledFeatures::setWebGLImageChromiumEnabled(enable);
 }
 
-void WebRuntimeFeatures::enableOverlayScrollbars(bool enable)
-{
-    RuntimeEnabledFeatures::setOverlayScrollbarsEnabled(enable);
-}
-
 void WebRuntimeFeatures::enableOverlayFullscreenVideo(bool enable)
 {
     RuntimeEnabledFeatures::setOverlayFullscreenVideoEnabled(enable);

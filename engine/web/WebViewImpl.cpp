@@ -67,7 +67,6 @@
 #include "sky/engine/platform/graphics/GraphicsContext.h"
 #include "sky/engine/platform/graphics/Image.h"
 #include "sky/engine/platform/graphics/ImageBuffer.h"
-#include "sky/engine/platform/scroll/Scrollbar.h"
 #include "sky/engine/public/platform/Platform.h"
 #include "sky/engine/public/platform/WebFloatPoint.h"
 #include "sky/engine/public/platform/WebImage.h"

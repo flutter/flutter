@@ -125,7 +125,6 @@
 #include "sky/engine/platform/ScriptForbiddenScope.h"
 #include "sky/engine/platform/TraceEvent.h"
 #include "sky/engine/platform/network/HTTPParsers.h"
-#include "sky/engine/platform/scroll/Scrollbar.h"
 #include "sky/engine/platform/text/SegmentedString.h"
 #include "sky/engine/public/platform/Platform.h"
 #include "sky/engine/core/inspector/ScriptCallStack.h"

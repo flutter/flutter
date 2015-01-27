@@ -80,7 +80,6 @@
 #include "sky/engine/core/rendering/RenderLayer.h"
 #include "sky/engine/core/rendering/RenderView.h"
 #include "sky/engine/platform/EventDispatchForbiddenScope.h"
-#include "sky/engine/platform/scroll/ScrollableArea.h"
 #include "sky/engine/wtf/BitVector.h"
 #include "sky/engine/wtf/HashFunctions.h"
 #include "sky/engine/wtf/text/CString.h"
@@ -401,103 +400,45 @@ int Element::clientHeight()
 
 int Element::scrollLeft()
 {
-    document().updateLayout();
-
-    if (document().documentElement() != this) {
-        if (RenderBox* rend = renderBox())
-            return rend->scrollLeft();
-    }
-
+    // FIXME(sky): Remove(scrolling)
     return 0;
 }
 
 int Element::scrollTop()
 {
-    document().updateLayout();
-
-    if (document().documentElement() != this) {
-        if (RenderBox* rend = renderBox())
-            return rend->scrollTop();
-    }
-
+    // FIXME(sky): Remove(scrolling)
     return 0;
 }
 
 void Element::setScrollLeft(int newLeft)
 {
-    document().updateLayout();
-
-    if (document().documentElement() != this) {
-        if (RenderBox* rend = renderBox())
-            rend->setScrollLeft(newLeft);
-    }
+    // FIXME(sky): Remove(scrolling)
 }
 
 void Element::setScrollLeft(const Dictionary& scrollOptionsHorizontal, ExceptionState& exceptionState)
 {
-    String scrollBehaviorString;
-    ScrollBehavior scrollBehavior = ScrollBehaviorAuto;
-    if (DictionaryHelper::get(scrollOptionsHorizontal, "behavior", scrollBehaviorString)) {
-        if (!ScrollableArea::scrollBehaviorFromString(scrollBehaviorString, scrollBehavior)) {
-            exceptionState.throwTypeError("The ScrollBehavior provided is invalid.");
-            return;
-        }
-    }
-
-    int position;
-    if (!DictionaryHelper::get(scrollOptionsHorizontal, "x", position)) {
-        exceptionState.throwTypeError("ScrollOptionsHorizontal must include an 'x' member.");
-        return;
-    }
-
-    // FIXME: Use scrollBehavior to decide whether to scroll smoothly or instantly.
-    setScrollLeft(position);
+    // FIXME(sky): Remove(scrolling)
 }
 
 void Element::setScrollTop(int newTop)
 {
-    document().updateLayout();
-
-    if (document().documentElement() != this) {
-        if (RenderBox* rend = renderBox())
-            rend->setScrollTop(newTop);
-    }
+    // FIXME(sky): Remove(scrolling)
 }
 
 void Element::setScrollTop(const Dictionary& scrollOptionsVertical, ExceptionState& exceptionState)
 {
-    String scrollBehaviorString;
-    ScrollBehavior scrollBehavior = ScrollBehaviorAuto;
-    if (DictionaryHelper::get(scrollOptionsVertical, "behavior", scrollBehaviorString)) {
-        if (!ScrollableArea::scrollBehaviorFromString(scrollBehaviorString, scrollBehavior)) {
-            exceptionState.throwTypeError("The ScrollBehavior provided is invalid.");
-            return;
-        }
-    }
-
-    int position;
-    if (!DictionaryHelper::get(scrollOptionsVertical, "y", position)) {
-        exceptionState.throwTypeError("ScrollOptionsVertical must include a 'y' member.");
-        return;
-    }
-
-    // FIXME: Use scrollBehavior to decide whether to scroll smoothly or instantly.
-    setScrollTop(position);
+    // FIXME(sky): Remove(scrolling)
 }
 
 int Element::scrollWidth()
 {
-    document().updateLayout();
-    if (RenderBox* rend = renderBox())
-        return rend->scrollWidth().toDouble();
+    // FIXME(sky): Remove(scrolling)
     return 0;
 }
 
 int Element::scrollHeight()
 {
-    document().updateLayout();
-    if (RenderBox* rend = renderBox())
-        return rend->scrollHeight().toDouble();
+    // FIXME(sky): Remove(scrolling)
     return 0;
 }
 

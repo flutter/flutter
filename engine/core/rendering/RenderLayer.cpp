@@ -86,7 +86,6 @@ RenderLayer::RenderLayer(RenderLayerModelObject* renderer, LayerType type)
     , m_usedTransparency(false)
     , m_3DTransformedDescendantStatusDirty(true)
     , m_has3DTransformedDescendant(false)
-    , m_containsDirtyOverlayScrollbars(false)
     , m_hasFilterInfo(false)
     , m_needsAncestorDependentCompositingInputsUpdate(true)
     , m_needsDescendantDependentCompositingInputsUpdate(true)
@@ -813,17 +812,6 @@ void RenderLayer::paint(GraphicsContext* context, const LayoutRect& damageRect, 
     paintLayer(context, paintingInfo, PaintContent);
 }
 
-void RenderLayer::paintOverlayScrollbars(GraphicsContext* context, const LayoutRect& damageRect, RenderObject* paintingRoot)
-{
-    if (!m_containsDirtyOverlayScrollbars)
-        return;
-
-    LayerPaintingInfo paintingInfo(this, enclosingIntRect(damageRect), LayoutSize(), paintingRoot);
-    paintLayer(context, paintingInfo, PaintOverlayScrollbars);
-
-    m_containsDirtyOverlayScrollbars = false;
-}
-
 static bool inContainingBlockChain(RenderLayer* startLayer, RenderLayer* endLayer)
 {
     if (startLayer == endLayer)
@@ -971,9 +959,7 @@ void RenderLayer::paintLayerContents(GraphicsContext* context, const LayerPainti
         layerBounds, backgroundRect, foregroundRect, outlineRect,
         &offsetFromRoot);
 
-    bool isPaintingOverlayScrollbars = paintFlags == PaintOverlayScrollbars;
-    bool shouldPaintContent = isSelfPaintingLayer() && !isPaintingOverlayScrollbars
-        && intersectsDamageRect(layerBounds, backgroundRect.rect(), localPaintingInfo.rootLayer, &offsetFromRoot);
+    bool shouldPaintContent = isSelfPaintingLayer() && intersectsDamageRect(layerBounds, backgroundRect.rect(), localPaintingInfo.rootLayer, &offsetFromRoot);
 
     bool haveTransparency = isTransparent();
 

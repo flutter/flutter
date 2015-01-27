@@ -59,7 +59,7 @@
 #include "sky/engine/platform/geometry/RoundedRect.h"
 #include "sky/engine/platform/graphics/Color.h"
 #include "sky/engine/platform/graphics/GraphicsTypes.h"
-#include "sky/engine/platform/scroll/ScrollableArea.h"
+#include "sky/engine/platform/scroll/ScrollTypes.h"
 #include "sky/engine/platform/text/TextDirection.h"
 #include "sky/engine/platform/text/UnicodeBidi.h"
 #include "sky/engine/platform/transforms/TransformOperations.h"

@@ -63,8 +63,6 @@
 #include "sky/engine/platform/geometry/FloatPoint.h"
 #include "sky/engine/platform/graphics/Image.h"
 #include "sky/engine/platform/heap/Handle.h"
-#include "sky/engine/platform/scroll/ScrollAnimator.h"
-#include "sky/engine/platform/scroll/Scrollbar.h"
 #include "sky/engine/wtf/Assertions.h"
 #include "sky/engine/wtf/CurrentTime.h"
 #include "sky/engine/wtf/StdLibExtras.h"
@@ -439,7 +437,7 @@ OptionalCursor EventHandler::selectAutoCursor(const HitTestResult& result, Node*
         return handCursor();
 
     RenderObject* renderer = node ? node->renderer() : 0;
-    if ((editable || (renderer && renderer->isText() && node->canStartSelection())) && !result.scrollbar())
+    if (editable || (renderer && renderer->isText() && node->canStartSelection()))
         return iBeam;
     return pointerCursor();
 }
@@ -448,18 +446,6 @@ void EventHandler::invalidateClick()
 {
     m_clickCount = 0;
     m_clickNode = nullptr;
-}
-
-bool EventHandler::isInsideScrollbar(const IntPoint& windowPoint) const
-{
-    if (RenderView* renderView = m_frame->contentRenderer()) {
-        HitTestRequest request(HitTestRequest::ReadOnly);
-        HitTestResult result(windowPoint);
-        renderView->hitTest(request, result);
-        return result.scrollbar();
-    }
-
-    return false;
 }
 
 void EventHandler::scheduleCursorUpdate()

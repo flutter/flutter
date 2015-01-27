@@ -52,8 +52,6 @@
 #include "sky/engine/platform/fonts/FontCache.h"
 #include "sky/engine/platform/geometry/FloatRect.h"
 #include "sky/engine/platform/graphics/GraphicsContext.h"
-#include "sky/engine/platform/scroll/ScrollAnimator.h"
-#include "sky/engine/platform/scroll/Scrollbar.h"
 #include "sky/engine/platform/text/TextStream.h"
 #include "sky/engine/wtf/CurrentTime.h"
 #include "sky/engine/wtf/TemporaryChange.h"
@@ -714,9 +712,6 @@ void FrameView::paintContents(GraphicsContext* p, const IntRect& rect)
 
     rootLayer->paint(p, rect, renderer);
 
-    if (rootLayer->containsDirtyOverlayScrollbars())
-        rootLayer->paintOverlayScrollbars(p, rect, renderer);
-
     m_isPainting = false;
     m_lastPaintTime = currentTime();
 
@@ -808,21 +803,6 @@ IntPoint FrameView::convertFromRenderer(const RenderObject& renderer, const IntP
 IntPoint FrameView::convertToRenderer(const RenderObject& renderer, const IntPoint& viewPoint) const
 {
     return roundedIntPoint(renderer.absoluteToLocal(viewPoint, UseTransforms));
-}
-
-void FrameView::addScrollableArea(ScrollableArea* scrollableArea)
-{
-    ASSERT(scrollableArea);
-    if (!m_scrollableAreas)
-        m_scrollableAreas = adoptPtr(new ScrollableAreaSet);
-    m_scrollableAreas->add(scrollableArea);
-}
-
-void FrameView::removeScrollableArea(ScrollableArea* scrollableArea)
-{
-    if (!m_scrollableAreas)
-        return;
-    m_scrollableAreas->remove(scrollableArea);
 }
 
 bool FrameView::isVerticalDocument() const
