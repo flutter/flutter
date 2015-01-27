@@ -34,8 +34,11 @@ HTMLIFrameElement::~HTMLIFrameElement()
 void HTMLIFrameElement::insertedInto(ContainerNode* insertionPoint)
 {
     HTMLElement::insertedInto(insertionPoint);
-    if (insertionPoint->inDocument())
-        createView();
+    if (insertionPoint->inDocument()) {
+        if (LocalFrame* frame = document().frame())
+            m_contentView = frame->loaderClient()->createChildFrame();
+        navigateView();
+    }
 }
 
 void HTMLIFrameElement::removedFrom(ContainerNode* insertionPoint)
@@ -43,6 +46,15 @@ void HTMLIFrameElement::removedFrom(ContainerNode* insertionPoint)
     HTMLElement::removedFrom(insertionPoint);
     if (m_contentView)
         m_contentView->Destroy();
+}
+
+void HTMLIFrameElement::parseAttribute(const QualifiedName& name, const AtomicString& value)
+{
+    if (name == HTMLNames::srcAttr) {
+        navigateView();
+    } else {
+        HTMLElement::parseAttribute(name, value);
+    }
 }
 
 RenderObject* HTMLIFrameElement::createRenderer(RenderStyle* style)
@@ -56,29 +68,33 @@ void HTMLIFrameElement::OnViewDestroyed(mojo::View* view)
     m_contentView = nullptr;
 }
 
-ScriptValue HTMLIFrameElement::takeServiceProvider(ScriptState* scriptState)
+ScriptValue HTMLIFrameElement::takeServicesHandle(ScriptState* scriptState)
 {
     return ScriptValue(scriptState, gin::ConvertToV8(scriptState->isolate(), m_services.PassMessagePipe().release()));
 }
 
-void HTMLIFrameElement::createView()
+ScriptValue HTMLIFrameElement::takeExposedServicesHandle(ScriptState* scriptState)
 {
+    return ScriptValue(scriptState, gin::ConvertToV8(scriptState->isolate(), m_exposedServices.release()));
+}
+
+void HTMLIFrameElement::navigateView()
+{
+    if (!m_contentView)
+        return;
+
     String urlString = stripLeadingAndTrailingHTMLSpaces(getAttribute(HTMLNames::srcAttr));
     if (urlString.isEmpty())
         urlString = blankURL().string();
 
-    LocalFrame* parentFrame = document().frame();
-    if (!parentFrame)
-        return;
-
     KURL url = document().completeURL(urlString);
-    m_contentView = parentFrame->loaderClient()->createChildFrame();
-    if (!m_contentView)
-        return;
+
+    mojo::MessagePipe exposedServicesPipe;
+    m_exposedServices = exposedServicesPipe.handle0.Pass();
 
     m_contentView->Embed(mojo::String::From(url.string().utf8().data()),
-        GetProxy(&m_services),
-        nullptr);  // TODO(abarth) Expose the exposedService parameter.
+        mojo::GetProxy(&m_services),
+        mojo::MakeProxy<mojo::ServiceProvider>(exposedServicesPipe.handle1.Pass()));
     m_contentView->AddObserver(this);
 }
 

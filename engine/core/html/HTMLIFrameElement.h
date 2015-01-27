@@ -22,29 +22,32 @@ class HTMLIFrameElement : public HTMLElement,
 public:
     static PassRefPtr<HTMLIFrameElement> create(Document&);
 
-    virtual ~HTMLIFrameElement();
+    ~HTMLIFrameElement() override;
 
     mojo::View* contentView() const { return m_contentView; }
 
-    ScriptValue takeServiceProvider(ScriptState*);
+    ScriptValue takeServicesHandle(ScriptState*);
+    ScriptValue takeExposedServicesHandle(ScriptState*);
 
 private:
     explicit HTMLIFrameElement(Document&);
 
     // HTMLElement methods:
-    virtual RenderObject* createRenderer(RenderStyle* style) override;
+    RenderObject* createRenderer(RenderStyle* style) override;
 
-    virtual void insertedInto(ContainerNode*) override;
-    virtual void removedFrom(ContainerNode*) override;
+    void insertedInto(ContainerNode*) override;
+    void removedFrom(ContainerNode*) override;
+    void parseAttribute(const QualifiedName& name, const AtomicString& value) override;
 
     // ViewObserver methods:
     void OnViewDestroyed(mojo::View* view) override;
 
-private:
     void createView();
+    void navigateView();
 
     mojo::View* m_contentView;
     mojo::ServiceProviderPtr m_services;
+    mojo::ScopedMessagePipeHandle m_exposedServices;
 };
 
 } // namespace blink
