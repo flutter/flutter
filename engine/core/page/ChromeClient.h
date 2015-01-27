@@ -22,58 +22,34 @@
 #ifndef SKY_ENGINE_CORE_PAGE_CHROMECLIENT_H_
 #define SKY_ENGINE_CORE_PAGE_CHROMECLIENT_H_
 
-#include "sky/engine/core/dom/Document.h"
 #include "sky/engine/core/frame/ConsoleTypes.h"
 #include "sky/engine/core/inspector/ConsoleAPITypes.h"
-#include "sky/engine/core/loader/NavigationPolicy.h"
 #include "sky/engine/core/page/FocusType.h"
-#include "sky/engine/core/rendering/style/RenderStyleConstants.h"
 #include "sky/engine/platform/Cursor.h"
-#include "sky/engine/platform/HostWindow.h"
-#include "sky/engine/platform/scroll/ScrollTypes.h"
+#include "sky/engine/public/platform/WebScreenInfo.h"
 #include "sky/engine/wtf/Forward.h"
-#include "sky/engine/wtf/PassOwnPtr.h"
-#include "sky/engine/wtf/Vector.h"
 
 namespace blink {
 
-class ColorChooser;
-class ColorChooserClient;
-class DateTimeChooser;
-class DateTimeChooserClient;
 class Element;
 class FloatRect;
-class Frame;
-class GraphicsContext;
-class HitTestResult;
 class IntRect;
 class LocalFrame;
 class Node;
-class Page;
-class Widget;
 
 struct DateTimeChooserParameters;
 struct GraphicsDeviceAdapter;
 
 class ChromeClient {
 public:
-    virtual void chromeDestroyed() = 0;
-
     virtual void setWindowRect(const FloatRect&) = 0;
     virtual FloatRect windowRect() = 0;
 
-    virtual FloatRect pageRect() = 0;
-
     virtual void focus() = 0;
-
     virtual bool canTakeFocus(FocusType) = 0;
     virtual void takeFocus(FocusType) = 0;
-
     virtual void focusedNodeChanged(Node*) = 0;
-
     virtual void focusedFrameChanged(LocalFrame*) = 0;
-
-    virtual void show(NavigationPolicy) = 0;
 
     virtual bool shouldReportDetailedMessageForSource(const String& source) = 0;
     virtual void addMessageToConsole(LocalFrame*, MessageSource, MessageLevel, const String& message, unsigned lineNumber, const String& sourceID, const String& stackTrace) = 0;
@@ -83,27 +59,12 @@ public:
     // Methods used by HostWindow.
     virtual IntRect rootViewToScreen(const IntRect&) const = 0;
     virtual blink::WebScreenInfo screenInfo() const = 0;
-    virtual void setCursor(const Cursor&) = 0;
     virtual void scheduleVisualUpdate() = 0;
     // End methods used by HostWindow.
 
-    virtual void layoutUpdated(LocalFrame*) const { }
+    virtual void setCursor(const Cursor&) = 0;
 
     virtual String acceptLanguages() = 0;
-
-    enum DialogType {
-        AlertDialog = 0,
-        ConfirmDialog = 1,
-        PromptDialog = 2,
-        HTMLDialog = 3
-    };
-
-    virtual FloatSize minimumWindowSize() const { return FloatSize(100, 100); };
-
-    virtual bool isChromeClientImpl() const { return false; }
-
-    // Input mehtod editor related functions.
-    virtual void willSetInputMethodState() { }
 
 protected:
     virtual ~ChromeClient() { }

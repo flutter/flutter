@@ -35,7 +35,6 @@
 #include "sky/engine/core/editing/TypingCommand.h"
 #include "sky/engine/core/events/CompositionEvent.h"
 #include "sky/engine/core/frame/LocalFrame.h"
-#include "sky/engine/core/page/Chrome.h"
 #include "sky/engine/core/page/ChromeClient.h"
 #include "sky/engine/core/page/EventHandler.h"
 #include "sky/engine/core/rendering/RenderObject.h"
@@ -140,11 +139,7 @@ bool InputMethodController::confirmCompositionOrInsertText(const String& text, C
 
 void InputMethodController::confirmCompositionAndResetState()
 {
-    if (!hasComposition())
-        return;
-
-    // ChromeClient::willSetInputMethodState() resets input method and the composition string is committed.
-    m_frame.chromeClient().willSetInputMethodState();
+    // TODO(esprehn): Remove this.
 }
 
 void InputMethodController::cancelComposition()

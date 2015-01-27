@@ -74,7 +74,6 @@
 #include "sky/engine/core/html/HTMLTemplateElement.h"
 #include "sky/engine/core/html/parser/HTMLDocumentParser.h"
 #include "sky/engine/core/html/parser/HTMLParserIdioms.h"
-#include "sky/engine/core/page/Chrome.h"
 #include "sky/engine/core/page/ChromeClient.h"
 #include "sky/engine/core/page/FocusController.h"
 #include "sky/engine/core/page/Page.h"

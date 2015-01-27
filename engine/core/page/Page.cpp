@@ -21,6 +21,7 @@
 #include "sky/engine/core/page/Page.h"
 
 #include "sky/engine/core/dom/ClientRectList.h"
+#include "sky/engine/core/dom/Document.h"
 #include "sky/engine/core/dom/DocumentMarkerController.h"
 #include "sky/engine/core/dom/StyleEngine.h"
 #include "sky/engine/core/editing/Caret.h"
@@ -35,14 +36,17 @@
 #include "sky/engine/core/frame/LocalFrame.h"
 #include "sky/engine/core/frame/Settings.h"
 #include "sky/engine/core/page/AutoscrollController.h"
-#include "sky/engine/core/page/Chrome.h"
 #include "sky/engine/core/page/ChromeClient.h"
 #include "sky/engine/core/page/FocusController.h"
 #include "sky/engine/core/page/PageLifecycleNotifier.h"
 #include "sky/engine/core/rendering/RenderView.h"
+#include "sky/engine/platform/geometry/FloatRect.h"
+#include "sky/engine/public/platform/WebScreenInfo.h"
 #include "sky/engine/wtf/HashMap.h"
+#include "sky/engine/wtf/PassRefPtr.h"
 #include "sky/engine/wtf/RefCountedLeakCounter.h"
 #include "sky/engine/wtf/StdLibExtras.h"
+#include "sky/engine/wtf/Vector.h"
 #include "sky/engine/wtf/text/Base64.h"
 
 namespace blink {
@@ -63,7 +67,7 @@ Page::Page(PageClients& pageClients, ServiceProvider& services)
     : SettingsDelegate(Settings::create())
     , m_animator(this)
     , m_autoscrollController(AutoscrollController::create(*this))
-    , m_chrome(Chrome::create(pageClients.chromeClient))
+    , m_chromeClient(pageClients.chromeClient)
     , m_dragCaretController(DragCaretController::create())
     , m_focusController(FocusController::create(this))
     , m_undoStack(UndoStack::create())
@@ -270,8 +274,77 @@ void Page::willBeDestroyed()
     pageCounter.decrement();
 #endif
 
-    m_chrome->willBeDestroyed();
     m_mainFrame = 0;
+}
+
+IntRect Page::rootViewToScreen(const IntRect& rect) const
+{
+    return m_chromeClient->rootViewToScreen(rect);
+}
+
+blink::WebScreenInfo Page::screenInfo() const
+{
+    return m_chromeClient->screenInfo();
+}
+
+void Page::setWindowRect(const FloatRect& rect) const
+{
+    m_chromeClient->setWindowRect(rect);
+}
+
+FloatRect Page::windowRect() const
+{
+    return m_chromeClient->windowRect();
+}
+
+void Page::focus() const
+{
+    m_chromeClient->focus();
+}
+
+bool Page::canTakeFocus(FocusType type) const
+{
+    return m_chromeClient->canTakeFocus(type);
+}
+
+void Page::takeFocus(FocusType type) const
+{
+    m_chromeClient->takeFocus(type);
+}
+
+void Page::focusedNodeChanged(Node* node) const
+{
+    m_chromeClient->focusedNodeChanged(node);
+}
+
+void Page::focusedFrameChanged(LocalFrame* frame) const
+{
+    m_chromeClient->focusedFrameChanged(frame);
+}
+
+void Page::scheduleVisualUpdate()
+{
+    m_chromeClient->scheduleVisualUpdate();
+}
+
+void Page::setCursor(const Cursor& cursor)
+{
+    m_chromeClient->setCursor(cursor);
+}
+
+bool Page::shouldReportDetailedMessageForSource(const String& source)
+{
+    return m_chromeClient->shouldReportDetailedMessageForSource(source);
+}
+
+void Page::addMessageToConsole(LocalFrame* localFrame, MessageSource source, MessageLevel level, const String& message, unsigned lineNumber, const String& sourceID, const String& stackTrace)
+{
+    m_chromeClient->addMessageToConsole(localFrame, source, level, message, lineNumber, sourceID, stackTrace);
+}
+
+void* Page::webView() const
+{
+    return m_chromeClient->webView();
 }
 
 Page::PageClients::PageClients()

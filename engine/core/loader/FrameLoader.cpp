@@ -58,7 +58,6 @@
 #include "sky/engine/core/loader/FrameFetchContext.h"
 #include "sky/engine/core/loader/FrameLoaderClient.h"
 #include "sky/engine/core/loader/UniqueIdentifier.h"
-#include "sky/engine/core/page/Chrome.h"
 #include "sky/engine/core/page/ChromeClient.h"
 #include "sky/engine/core/page/EventHandler.h"
 #include "sky/engine/core/page/Page.h"

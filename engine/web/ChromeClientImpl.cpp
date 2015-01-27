@@ -86,11 +86,6 @@ void* ChromeClientImpl::webView() const
     return static_cast<void*>(m_webView);
 }
 
-void ChromeClientImpl::chromeDestroyed()
-{
-    // Our lifetime is bound to the WebViewImpl.
-}
-
 void ChromeClientImpl::setWindowRect(const FloatRect& r)
 {
     if (m_webView->client())
@@ -110,14 +105,6 @@ FloatRect ChromeClientImpl::windowRect()
         rect.height = m_webView->size().height;
     }
     return FloatRect(rect);
-}
-
-FloatRect ChromeClientImpl::pageRect()
-{
-    // We hide the details of the window's border thickness from the web page by
-    // simple re-using the window position here.  So, from the point-of-view of
-    // the web page, the window has no border.
-    return windowRect();
 }
 
 void ChromeClientImpl::focus()
@@ -161,10 +148,6 @@ void ChromeClientImpl::focusedFrameChanged(LocalFrame* frame)
 WebNavigationPolicy ChromeClientImpl::getNavigationPolicy()
 {
     return WebNavigationPolicyCurrentTab;
-}
-
-void ChromeClientImpl::show(NavigationPolicy navigationPolicy)
-{
 }
 
 bool ChromeClientImpl::shouldReportDetailedMessageForSource(const String& url)
@@ -238,11 +221,6 @@ WebScreenInfo ChromeClientImpl::screenInfo() const
     return m_webView->client() ? m_webView->client()->screenInfo() : WebScreenInfo();
 }
 
-void ChromeClientImpl::layoutUpdated(LocalFrame* frame) const
-{
-    m_webView->layoutUpdated(WebLocalFrameImpl::fromFrame(frame));
-}
-
 void ChromeClientImpl::setCursor(const Cursor& cursor)
 {
     setCursor(WebCursorInfo(cursor));
@@ -255,10 +233,6 @@ void ChromeClientImpl::setCursor(const WebCursorInfo& cursor)
 String ChromeClientImpl::acceptLanguages()
 {
     return m_webView->client()->acceptLanguages();
-}
-
-void ChromeClientImpl::willSetInputMethodState()
-{
 }
 
 } // namespace blink

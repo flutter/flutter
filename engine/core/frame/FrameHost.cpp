@@ -31,8 +31,6 @@
 #include "sky/engine/config.h"
 #include "sky/engine/core/frame/FrameHost.h"
 
-#include "sky/engine/core/page/Chrome.h"
-#include "sky/engine/core/page/ChromeClient.h"
 #include "sky/engine/core/page/Page.h"
 
 namespace blink {
@@ -56,11 +54,6 @@ FrameHost::~FrameHost()
 Settings& FrameHost::settings() const
 {
     return m_page->settings();
-}
-
-Chrome& FrameHost::chrome() const
-{
-    return m_page->chrome();
 }
 
 float FrameHost::deviceScaleFactor() const

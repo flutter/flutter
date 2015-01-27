@@ -58,40 +58,6 @@
 
 namespace blink {
 
-class EmptyChromeClient : public ChromeClient {
-    WTF_MAKE_FAST_ALLOCATED;
-public:
-    virtual ~EmptyChromeClient() { }
-    virtual void chromeDestroyed() override { }
-
-    virtual void* webView() const override { return 0; }
-    virtual void setWindowRect(const FloatRect&) override { }
-    virtual FloatRect windowRect() override { return FloatRect(); }
-
-    virtual FloatRect pageRect() override { return FloatRect(); }
-
-    virtual void focus() override { }
-
-    virtual bool canTakeFocus(FocusType) override { return false; }
-    virtual void takeFocus(FocusType) override { }
-
-    virtual void focusedNodeChanged(Node*) override { }
-    virtual void focusedFrameChanged(LocalFrame*) override { }
-    virtual void show(NavigationPolicy) override { }
-
-    virtual bool shouldReportDetailedMessageForSource(const String&) override { return false; }
-    virtual void addMessageToConsole(LocalFrame*, MessageSource, MessageLevel, const String&, unsigned, const String&, const String&) override { }
-
-    virtual void scheduleVisualUpdate() override { }
-
-    virtual IntRect rootViewToScreen(const IntRect& r) const override { return r; }
-    virtual blink::WebScreenInfo screenInfo() const override { return blink::WebScreenInfo(); }
-
-    virtual void setCursor(const Cursor&) override { }
-
-    virtual String acceptLanguages() override;
-};
-
 class EmptyFrameLoaderClient : public FrameLoaderClient {
     WTF_MAKE_NONCOPYABLE(EmptyFrameLoaderClient); WTF_MAKE_FAST_ALLOCATED;
 public:

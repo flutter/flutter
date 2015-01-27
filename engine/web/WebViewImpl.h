@@ -31,6 +31,7 @@
 #ifndef SKY_ENGINE_WEB_WEBVIEWIMPL_H_
 #define SKY_ENGINE_WEB_WEBVIEWIMPL_H_
 
+#include "sky/engine/core/rendering/HitTestResult.h"
 #include "sky/engine/platform/geometry/IntPoint.h"
 #include "sky/engine/platform/geometry/IntRect.h"
 #include "sky/engine/public/platform/WebInputEvent.h"
@@ -54,6 +55,7 @@ class Frame;
 class WebLocalFrameImpl;
 class WebImage;
 class WebSettingsImpl;
+class Page;
 
 class WebViewImpl final : public WebView, public RefCounted<WebViewImpl> {
 public:
@@ -153,13 +155,6 @@ public:
     // load. isNavigationWithinPage will be true if the navigation does
     // not take the user away from the current page.
     void didCommitLoad(bool isNewNavigation, bool isNavigationWithinPage);
-
-    // Indicates two things:
-    //   1) This view may have a new layout now.
-    //   2) Calling layout() is a no-op.
-    // After calling WebWidget::layout(), expect to get this notification
-    // unless the view did not need a layout.
-    void layoutUpdated(WebLocalFrameImpl*);
 
     void updateMainFrameLayoutSize();
 

@@ -65,7 +65,6 @@
 #include "sky/engine/core/inspector/ConsoleMessageStorage.h"
 #include "sky/engine/core/inspector/InspectorTraceEvents.h"
 #include "sky/engine/core/loader/FrameLoaderClient.h"
-#include "sky/engine/core/page/Chrome.h"
 #include "sky/engine/core/page/ChromeClient.h"
 #include "sky/engine/core/page/EventHandler.h"
 #include "sky/engine/core/page/Page.h"
@@ -151,7 +150,7 @@ FloatRect LocalDOMWindow::adjustWindowRect(LocalFrame& frame, const FloatRect& p
     ASSERT(host);
 
     FloatRect screen = screenAvailableRect(frame.view());
-    FloatRect window = host->chrome().windowRect();
+    FloatRect window = host->page().windowRect();
 
     // Make sure we're in a valid state before adjusting dimensions.
     ASSERT(std::isfinite(screen.x()));
@@ -173,7 +172,8 @@ FloatRect LocalDOMWindow::adjustWindowRect(LocalFrame& frame, const FloatRect& p
     if (!std::isnan(pendingChanges.height()))
         window.setHeight(pendingChanges.height());
 
-    FloatSize minimumSize = host->chrome().client().minimumWindowSize();
+    // TODO(esprehn): What?
+    FloatSize minimumSize = FloatSize(100, 100);
     // Let size 0 pass through, since that indicates default size, not minimum size.
     if (window.width())
         window.setWidth(min(max(minimumSize.width(), window.width()), screen.width()));
@@ -439,7 +439,7 @@ void LocalDOMWindow::focus(ExecutionContext* context)
     if (!host)
         return;
 
-    host->chrome().focus();
+    host->page().focus();
 
     if (!m_frame)
         return;
@@ -456,7 +456,7 @@ int LocalDOMWindow::outerHeight() const
     if (!host)
         return 0;
 
-    return static_cast<int>(host->chrome().windowRect().height());
+    return static_cast<int>(host->page().windowRect().height());
 }
 
 int LocalDOMWindow::outerWidth() const
@@ -468,7 +468,7 @@ int LocalDOMWindow::outerWidth() const
     if (!host)
         return 0;
 
-    return static_cast<int>(host->chrome().windowRect().width());
+    return static_cast<int>(host->page().windowRect().width());
 }
 
 int LocalDOMWindow::innerHeight() const
@@ -504,7 +504,7 @@ int LocalDOMWindow::screenX() const
     if (!host)
         return 0;
 
-    return static_cast<int>(host->chrome().windowRect().x());
+    return static_cast<int>(host->page().windowRect().x());
 }
 
 int LocalDOMWindow::screenY() const
@@ -516,7 +516,7 @@ int LocalDOMWindow::screenY() const
     if (!host)
         return 0;
 
-    return static_cast<int>(host->chrome().windowRect().y());
+    return static_cast<int>(host->page().windowRect().y());
 }
 
 LocalDOMWindow* LocalDOMWindow::window() const
@@ -557,10 +557,10 @@ void LocalDOMWindow::moveBy(float x, float y) const
     if (!host)
         return;
 
-    FloatRect windowRect = host->chrome().windowRect();
+    FloatRect windowRect = host->page().windowRect();
     windowRect.move(x, y);
     // Security check (the spec talks about UniversalBrowserWrite to disable this check...)
-    host->chrome().setWindowRect(adjustWindowRect(*m_frame, windowRect));
+    host->page().setWindowRect(adjustWindowRect(*m_frame, windowRect));
 }
 
 void LocalDOMWindow::moveTo(float x, float y) const
@@ -572,10 +572,10 @@ void LocalDOMWindow::moveTo(float x, float y) const
     if (!host)
         return;
 
-    FloatRect windowRect = host->chrome().windowRect();
+    FloatRect windowRect = host->page().windowRect();
     windowRect.setLocation(FloatPoint(x, y));
     // Security check (the spec talks about UniversalBrowserWrite to disable this check...)
-    host->chrome().setWindowRect(adjustWindowRect(*m_frame, windowRect));
+    host->page().setWindowRect(adjustWindowRect(*m_frame, windowRect));
 }
 
 void LocalDOMWindow::resizeBy(float x, float y) const
@@ -587,10 +587,10 @@ void LocalDOMWindow::resizeBy(float x, float y) const
     if (!host)
         return;
 
-    FloatRect fr = host->chrome().windowRect();
+    FloatRect fr = host->page().windowRect();
     FloatSize dest = fr.size() + FloatSize(x, y);
     FloatRect update(fr.location(), dest);
-    host->chrome().setWindowRect(adjustWindowRect(*m_frame, update));
+    host->page().setWindowRect(adjustWindowRect(*m_frame, update));
 }
 
 void LocalDOMWindow::resizeTo(float width, float height) const
@@ -602,10 +602,10 @@ void LocalDOMWindow::resizeTo(float width, float height) const
     if (!host)
         return;
 
-    FloatRect fr = host->chrome().windowRect();
+    FloatRect fr = host->page().windowRect();
     FloatSize dest = FloatSize(width, height);
     FloatRect update(fr.location(), dest);
-    host->chrome().setWindowRect(adjustWindowRect(*m_frame, update));
+    host->page().setWindowRect(adjustWindowRect(*m_frame, update));
 }
 
 int LocalDOMWindow::requestAnimationFrame(PassOwnPtr<RequestAnimationFrameCallback> callback)

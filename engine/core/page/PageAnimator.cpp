@@ -6,9 +6,9 @@
 #include "sky/engine/core/page/PageAnimator.h"
 
 #include "sky/engine/core/animation/DocumentAnimations.h"
+#include "sky/engine/core/dom/Document.h"
 #include "sky/engine/core/frame/FrameView.h"
 #include "sky/engine/core/frame/LocalFrame.h"
-#include "sky/engine/core/page/Chrome.h"
 #include "sky/engine/core/page/ChromeClient.h"
 #include "sky/engine/core/page/Page.h"
 #include "sky/engine/platform/Logging.h"
@@ -43,7 +43,7 @@ void PageAnimator::scheduleVisualUpdate()
 {
     if (m_servicingAnimations || m_updatingLayoutAndStyleForPainting)
         return;
-    m_page->chrome().scheduleVisualUpdate();
+    m_page->scheduleVisualUpdate();
 }
 
 void PageAnimator::updateLayoutAndStyleForPainting(LocalFrame* rootFrame)

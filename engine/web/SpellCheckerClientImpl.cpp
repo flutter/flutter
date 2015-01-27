@@ -27,6 +27,7 @@
 #include "sky/engine/config.h"
 #include "sky/engine/web/SpellCheckerClientImpl.h"
 
+#include "sky/engine/core/dom/Document.h"
 #include "sky/engine/core/dom/DocumentMarkerController.h"
 #include "sky/engine/core/dom/Element.h"
 #include "sky/engine/core/editing/Editor.h"

@@ -40,7 +40,6 @@
 #include "sky/engine/core/html/parser/TextResourceDecoder.h"
 #include "sky/engine/core/inspector/InspectorTraceEvents.h"
 #include "sky/engine/core/loader/FrameLoaderClient.h"
-#include "sky/engine/core/page/Chrome.h"
 #include "sky/engine/core/page/ChromeClient.h"
 #include "sky/engine/core/page/EventHandler.h"
 #include "sky/engine/core/page/FocusController.h"
@@ -361,15 +360,6 @@ void FrameView::layout(bool allowSubtree)
     // Post-layout assert that nobody was re-marked as needing layout during layout.
     document->renderView()->assertSubtreeIsLaidOut();
 #endif
-
-    // FIXME: It should be not possible to remove the FrameView from the frame/page during layout
-    // however m_inPerformLayout is not set for most of this function, so none of our RELEASE_ASSERTS
-    // in LocalFrame/Page will fire. One of the post-layout tasks is disconnecting the LocalFrame from
-    // the page in fast/frames/crash-remove-iframe-during-object-beforeload-2.html
-    // necessitating this check here.
-    // ASSERT(frame()->page());
-    if (frame().page())
-        frame().page()->chrome().client().layoutUpdated(m_frame.get());
 }
 
 DocumentLifecycle& FrameView::lifecycle() const
@@ -414,10 +404,7 @@ void FrameView::setLayoutSize(const IntSize& size)
 
 HostWindow* FrameView::hostWindow() const
 {
-    Page* page = frame().page();
-    if (!page)
-        return 0;
-    return &page->chrome();
+    return frame().page();
 }
 
 void FrameView::contentsResized()
@@ -855,7 +842,7 @@ void FrameView::setCursor(const Cursor& cursor)
     Page* page = frame().page();
     if (!page || !page->settings().deviceSupportsMouse())
         return;
-    page->chrome().setCursor(cursor);
+    page->setCursor(cursor);
 }
 
 void FrameView::setLayoutSizeInternal(const IntSize& size)

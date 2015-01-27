@@ -49,7 +49,6 @@
 #include "sky/engine/core/frame/Settings.h"
 #include "sky/engine/core/loader/FrameLoaderClient.h"
 #include "sky/engine/core/page/AutoscrollController.h"
-#include "sky/engine/core/page/Chrome.h"
 #include "sky/engine/core/page/ChromeClient.h"
 #include "sky/engine/core/page/EditorClient.h"
 #include "sky/engine/core/page/FocusController.h"

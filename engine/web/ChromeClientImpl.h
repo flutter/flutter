@@ -59,16 +59,14 @@ public:
     virtual void* webView() const override;
 
     // ChromeClient methods:
-    virtual void chromeDestroyed() override;
     virtual void setWindowRect(const FloatRect&) override;
     virtual FloatRect windowRect() override;
-    virtual FloatRect pageRect() override;
     virtual void focus() override;
     virtual bool canTakeFocus(FocusType) override;
     virtual void takeFocus(FocusType) override;
     virtual void focusedNodeChanged(Node*) override;
     virtual void focusedFrameChanged(LocalFrame*) override;
-    virtual void show(NavigationPolicy) override;
+
     virtual bool shouldReportDetailedMessageForSource(const WTF::String&) override;
     virtual void addMessageToConsole(
         LocalFrame*, MessageSource, MessageLevel,
@@ -77,27 +75,17 @@ public:
     virtual void scheduleVisualUpdate() override;
     virtual IntRect rootViewToScreen(const IntRect&) const override;
     virtual WebScreenInfo screenInfo() const override;
-    virtual void layoutUpdated(LocalFrame*) const override;
     virtual void setCursor(const Cursor&) override;
 
     // ChromeClient methods:
     virtual String acceptLanguages() override;
 
-    // ChromeClientImpl:
-    void setNewWindowNavigationPolicy(WebNavigationPolicy);
-
-    virtual void willSetInputMethodState() override;
-
 private:
-    virtual bool isChromeClientImpl() const override { return true; }
-
     WebNavigationPolicy getNavigationPolicy();
     void setCursor(const WebCursorInfo&);
 
     WebViewImpl* m_webView;  // weak pointer
 };
-
-DEFINE_TYPE_CASTS(ChromeClientImpl, ChromeClient, client, client->isChromeClientImpl(), client.isChromeClientImpl());
 
 } // namespace blink
 

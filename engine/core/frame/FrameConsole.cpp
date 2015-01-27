@@ -30,16 +30,16 @@
 #include "sky/engine/core/frame/FrameConsole.h"
 
 #include "sky/engine/bindings/core/v8/ScriptCallStackFactory.h"
+#include "sky/engine/core/dom/Document.h"
 #include "sky/engine/core/frame/FrameHost.h"
 #include "sky/engine/core/inspector/ConsoleAPITypes.h"
 #include "sky/engine/core/inspector/ConsoleMessage.h"
 #include "sky/engine/core/inspector/ConsoleMessageStorage.h"
 #include "sky/engine/core/inspector/ScriptArguments.h"
-#include "sky/engine/core/page/Chrome.h"
+#include "sky/engine/core/inspector/ScriptCallStack.h"
 #include "sky/engine/core/page/ChromeClient.h"
 #include "sky/engine/core/page/Page.h"
 #include "sky/engine/platform/network/ResourceResponse.h"
-#include "sky/engine/core/inspector/ScriptCallStack.h"
 #include "sky/engine/wtf/text/StringBuilder.h"
 
 namespace blink {
@@ -98,7 +98,7 @@ void FrameConsole::addMessage(PassRefPtr<ConsoleMessage> prpConsoleMessage)
 
     RefPtr<ScriptCallStack> reportedCallStack = nullptr;
     if (consoleMessage->source() != ConsoleAPIMessageSource) {
-        if (consoleMessage->callStack() && m_frame.chromeClient().shouldReportDetailedMessageForSource(messageURL))
+        if (consoleMessage->callStack() && m_frame.page()->shouldReportDetailedMessageForSource(messageURL))
             reportedCallStack = consoleMessage->callStack();
     } else {
         if (!m_frame.host() || (consoleMessage->scriptArguments() && consoleMessage->scriptArguments()->argumentCount() == 0))
@@ -107,14 +107,14 @@ void FrameConsole::addMessage(PassRefPtr<ConsoleMessage> prpConsoleMessage)
         if (!allClientReportingMessageTypes().contains(consoleMessage->type()))
             return;
 
-        if (m_frame.chromeClient().shouldReportDetailedMessageForSource(messageURL))
+        if (m_frame.page()->shouldReportDetailedMessageForSource(messageURL))
             reportedCallStack = createScriptCallStack(ScriptCallStack::maxCallStackSizeToCapture);
     }
 
     String stackTrace;
     if (reportedCallStack)
         stackTrace = FrameConsole::formatStackTraceString(consoleMessage->message(), reportedCallStack);
-    m_frame.chromeClient().addMessageToConsole(&m_frame, consoleMessage->source(), consoleMessage->level(), consoleMessage->message(), lineNumber, messageURL, stackTrace);
+    m_frame.page()->addMessageToConsole(&m_frame, consoleMessage->source(), consoleMessage->level(), consoleMessage->message(), lineNumber, messageURL, stackTrace);
 }
 
 void FrameConsole::reportResourceResponseReceived(Document* document, unsigned long requestIdentifier, const ResourceResponse& response)

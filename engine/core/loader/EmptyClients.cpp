@@ -35,19 +35,11 @@ namespace blink {
 
 void fillWithEmptyClients(Page::PageClients& pageClients)
 {
-    static ChromeClient* dummyChromeClient = adoptPtr(new EmptyChromeClient).leakPtr();
-    pageClients.chromeClient = dummyChromeClient;
-
     static EditorClient* dummyEditorClient = adoptPtr(new EmptyEditorClient).leakPtr();
     pageClients.editorClient = dummyEditorClient;
 
     static SpellCheckerClient* dummySpellCheckerClient = adoptPtr(new EmptySpellCheckerClient).leakPtr();
     pageClients.spellCheckerClient = dummySpellCheckerClient;
-}
-
-String EmptyChromeClient::acceptLanguages()
-{
-    return String();
 }
 
 NavigationPolicy EmptyFrameLoaderClient::decidePolicyForNavigation(const ResourceRequest&, Document*, NavigationPolicy, bool isTransitionNavigation)

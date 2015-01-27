@@ -39,7 +39,6 @@
 
 namespace blink {
 
-class Chrome;
 class Page;
 class ServiceProvider;
 class Settings;
@@ -62,7 +61,6 @@ public:
     // Careful: This function will eventually be removed.
     Page& page() const { return *m_page; }
     Settings& settings() const;
-    Chrome& chrome() const;
 
     ServiceProvider& services() const { return m_services; }
 

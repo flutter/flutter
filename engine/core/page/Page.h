@@ -21,10 +21,15 @@
 #ifndef SKY_ENGINE_CORE_PAGE_PAGE_H_
 #define SKY_ENGINE_CORE_PAGE_PAGE_H_
 
+#include "sky/engine/core/frame/ConsoleTypes.h"
 #include "sky/engine/core/frame/LocalFrame.h"
 #include "sky/engine/core/frame/SettingsDelegate.h"
+#include "sky/engine/core/inspector/ConsoleAPITypes.h"
+#include "sky/engine/core/page/FocusType.h"
 #include "sky/engine/core/page/PageAnimator.h"
 #include "sky/engine/core/page/PageVisibilityState.h"
+#include "sky/engine/platform/Cursor.h"
+#include "sky/engine/platform/HostWindow.h"
 #include "sky/engine/platform/LifecycleContext.h"
 #include "sky/engine/platform/Supplementable.h"
 #include "sky/engine/platform/geometry/LayoutRect.h"
@@ -38,15 +43,18 @@
 namespace blink {
 
 class AutoscrollController;
-class Chrome;
 class ChromeClient;
 class ClientRectList;
 class Document;
 class DragCaretController;
 class EditorClient;
+class FloatRect;
 class FocusController;
 class Frame;
 class FrameHost;
+class IntRect;
+class LocalFrame;
+class Node;
 class PageLifecycleNotifier;
 class Range;
 class RenderBox;
@@ -62,7 +70,7 @@ typedef uint64_t LinkHash;
 
 float deviceScaleFactor(LocalFrame*);
 
-class Page final : public Supplementable<Page>, public LifecycleContext<Page>, public SettingsDelegate {
+class Page final : public Supplementable<Page>, public LifecycleContext<Page>, public SettingsDelegate, public HostWindow {
     WTF_MAKE_NONCOPYABLE(Page);
     friend class Settings;
 public:
@@ -95,7 +103,6 @@ public:
     void documentDetached(Document*);
 
     PageAnimator& animator() { return m_animator; }
-    Chrome& chrome() const { return *m_chrome; }
     AutoscrollController& autoscrollController() const { return *m_autoscrollController; }
     DragCaretController& dragCaretController() const { return *m_dragCaretController; }
     FocusController& focusController() const { return *m_focusController; }
@@ -136,10 +143,32 @@ public:
 
     void willBeDestroyed();
 
-protected:
-    PageLifecycleNotifier& lifecycleNotifier();
+    // HostWindow methods.
+    virtual IntRect rootViewToScreen(const IntRect&) const override;
+    virtual blink::WebScreenInfo screenInfo() const override;
+    virtual void scheduleVisualUpdate() override;
+
+    void setWindowRect(const FloatRect&) const;
+    FloatRect windowRect() const;
+
+    void focus() const;
+
+    bool canTakeFocus(FocusType) const;
+    void takeFocus(FocusType) const;
+
+    void focusedNodeChanged(Node*) const;
+    void focusedFrameChanged(LocalFrame*) const;
+
+    bool shouldReportDetailedMessageForSource(const String& source);
+    void addMessageToConsole(LocalFrame*, MessageSource, MessageLevel, const String& message, unsigned lineNumber, const String& sourceID, const String& stackTrace);
+
+    void setCursor(const Cursor&);
+
+    void* webView() const;
 
 private:
+    PageLifecycleNotifier& lifecycleNotifier();
+
     void initGroup();
 
     void setTimerAlignmentInterval(double);
@@ -151,7 +180,7 @@ private:
 
     PageAnimator m_animator;
     const OwnPtr<AutoscrollController> m_autoscrollController;
-    const OwnPtr<Chrome> m_chrome;
+    ChromeClient* m_chromeClient;
     const OwnPtr<DragCaretController> m_dragCaretController;
     const OwnPtr<FocusController> m_focusController;
     const OwnPtr<UndoStack> m_undoStack;

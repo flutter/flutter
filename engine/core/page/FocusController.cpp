@@ -44,7 +44,6 @@
 #include "sky/engine/core/frame/LocalFrame.h"
 #include "sky/engine/core/frame/Settings.h"
 #include "sky/engine/core/html/HTMLImageElement.h"
-#include "sky/engine/core/page/Chrome.h"
 #include "sky/engine/core/page/ChromeClient.h"
 #include "sky/engine/core/page/EventHandler.h"
 #include "sky/engine/core/page/Page.h"
@@ -216,7 +215,7 @@ void FocusController::setFocusedFrame(PassRefPtr<LocalFrame> frame)
 
     m_isChangingFocusedFrame = false;
 
-    m_page->chrome().client().focusedFrameChanged(newFrame.get());
+    m_page->focusedFrameChanged(newFrame.get());
 }
 
 void FocusController::focusDocumentView(PassRefPtr<LocalFrame> frame)
@@ -326,10 +325,10 @@ bool FocusController::advanceFocusInDocumentOrder(FocusType type, bool initialFo
 
     if (!node) {
         // We didn't find a node to focus, so we should try to pass focus to Chrome.
-        if (!initialFocus && m_page->chrome().canTakeFocus(type)) {
+        if (!initialFocus && m_page->canTakeFocus(type)) {
             document->setFocusedElement(nullptr);
             setFocusedFrame(nullptr);
-            m_page->chrome().takeFocus(type);
+            m_page->takeFocus(type);
             return true;
         }
 
@@ -553,8 +552,6 @@ bool FocusController::setFocusedElement(Element* element, PassRefPtr<LocalFrame>
     // FIXME: Might want to disable this check for caretBrowsing
     if (oldFocusedElement && oldFocusedElement->isRootEditableElement() && !relinquishesEditingFocus(oldFocusedElement))
         return false;
-
-    m_page->chrome().client().willSetInputMethodState();
 
     RefPtr<Document> newDocument = nullptr;
     if (element)

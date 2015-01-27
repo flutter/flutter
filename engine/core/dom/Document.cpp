@@ -112,7 +112,6 @@
 #include "sky/engine/core/inspector/InspectorTraceEvents.h"
 #include "sky/engine/core/loader/FrameLoaderClient.h"
 #include "sky/engine/core/loader/ImageLoader.h"
-#include "sky/engine/core/page/Chrome.h"
 #include "sky/engine/core/page/ChromeClient.h"
 #include "sky/engine/core/page/EventHandler.h"
 #include "sky/engine/core/page/FocusController.h"
@@ -1683,7 +1682,7 @@ bool Document::setFocusedElement(PassRefPtr<Element> prpNewFocusedElement, Focus
     }
 
     if (!focusChangeBlocked && frameHost())
-        frameHost()->chrome().focusedNodeChanged(m_focusedElement.get());
+        page()->focusedNodeChanged(m_focusedElement.get());
 
 SetFocusedElementDone:
     updateRenderTreeIfNeeded();

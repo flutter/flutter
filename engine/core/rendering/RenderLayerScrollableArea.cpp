@@ -50,7 +50,6 @@
 #include "sky/engine/core/frame/FrameView.h"
 #include "sky/engine/core/frame/LocalFrame.h"
 #include "sky/engine/core/inspector/InspectorTraceEvents.h"
-#include "sky/engine/core/page/Chrome.h"
 #include "sky/engine/core/page/EventHandler.h"
 #include "sky/engine/core/page/FocusController.h"
 #include "sky/engine/core/page/Page.h"
@@ -99,9 +98,7 @@ RenderLayerScrollableArea::~RenderLayerScrollableArea()
 
 HostWindow* RenderLayerScrollableArea::hostWindow() const
 {
-    if (Page* page = box().frame()->page())
-        return &page->chrome();
-    return nullptr;
+    return box().frame()->page();
 }
 
 bool RenderLayerScrollableArea::isActive() const

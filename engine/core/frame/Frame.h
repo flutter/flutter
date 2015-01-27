@@ -66,8 +66,6 @@ public:
     virtual void setDOMWindow(PassRefPtr<LocalDOMWindow>);
     LocalDOMWindow* domWindow() const;
 
-    ChromeClient& chromeClient() const;
-
     Settings* settings() const; // can be null
 
 protected:

@@ -102,7 +102,6 @@
 #include "sky/engine/core/html/HTMLAnchorElement.h"
 #include "sky/engine/core/inspector/ConsoleMessage.h"
 #include "sky/engine/core/loader/MojoLoader.h"
-#include "sky/engine/core/page/Chrome.h"
 #include "sky/engine/core/page/EventHandler.h"
 #include "sky/engine/core/page/FocusController.h"
 #include "sky/engine/core/page/Page.h"

@@ -53,7 +53,6 @@
 #include "sky/engine/core/loader/FrameLoader.h"
 #include "sky/engine/core/loader/UniqueIdentifier.h"
 #include "sky/engine/core/page/AutoscrollController.h"
-#include "sky/engine/core/page/Chrome.h"
 #include "sky/engine/core/page/EventHandler.h"
 #include "sky/engine/core/page/FocusController.h"
 #include "sky/engine/core/page/Page.h"
@@ -196,7 +195,7 @@ WebViewImpl* WebViewImpl::fromPage(Page* page)
 {
     if (!page)
         return 0;
-    return static_cast<WebViewImpl*>(page->chrome().client().webView());
+    return static_cast<WebViewImpl*>(page->webView());
 }
 
 // WebWidget ------------------------------------------------------------------
@@ -821,13 +820,6 @@ bool WebViewImpl::isActive() const
 
 void WebViewImpl::didCommitLoad(bool isNewNavigation, bool isNavigationWithinPage)
 {
-}
-
-void WebViewImpl::layoutUpdated(WebLocalFrameImpl* webframe)
-{
-    if (!m_client)
-        return;
-    m_client->didUpdateLayout();
 }
 
 void WebViewImpl::setBackgroundColorOverride(WebColor color)

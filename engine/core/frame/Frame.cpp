@@ -36,7 +36,6 @@
 #include "sky/engine/core/frame/Settings.h"
 #include "sky/engine/core/loader/EmptyClients.h"
 #include "sky/engine/core/loader/FrameLoaderClient.h"
-#include "sky/engine/core/page/Chrome.h"
 #include "sky/engine/core/page/ChromeClient.h"
 #include "sky/engine/core/page/EventHandler.h"
 #include "sky/engine/core/page/FocusController.h"
@@ -101,19 +100,6 @@ void Frame::setDOMWindow(PassRefPtr<LocalDOMWindow> domWindow)
     if (m_domWindow)
         m_domWindow->reset();
     m_domWindow = domWindow;
-}
-
-static ChromeClient& emptyChromeClient()
-{
-    DEFINE_STATIC_LOCAL(EmptyChromeClient, client, ());
-    return client;
-}
-
-ChromeClient& Frame::chromeClient() const
-{
-    if (Page* page = this->page())
-        return page->chrome().client();
-    return emptyChromeClient();
 }
 
 } // namespace blink

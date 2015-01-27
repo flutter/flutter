@@ -35,7 +35,6 @@
 #include "sky/engine/core/html/parser/HTMLParserIdioms.h"
 #include "sky/engine/core/loader/FrameLoaderClient.h"
 #include "sky/engine/core/loader/FrameLoaderTypes.h"
-#include "sky/engine/core/page/Chrome.h"
 #include "sky/engine/core/page/ChromeClient.h"
 #include "sky/engine/core/rendering/RenderImage.h"
 #include "sky/engine/platform/network/ResourceRequest.h"

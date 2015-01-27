@@ -24,7 +24,6 @@
 #include "sky/engine/core/rendering/RenderInline.h"
 
 #include "sky/engine/core/dom/StyleEngine.h"
-#include "sky/engine/core/page/Chrome.h"
 #include "sky/engine/core/page/Page.h"
 #include "sky/engine/core/rendering/HitTestResult.h"
 #include "sky/engine/core/rendering/InlineTextBox.h"
