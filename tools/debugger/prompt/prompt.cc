@@ -81,9 +81,7 @@ class Prompt : public mojo::ApplicationDelegate,
 
     // FIXME: We should use use a fancier lookup system more like what
     // services/http_server/http_server.cc does with AddHandler.
-    if (info.path == "/trace")
-      ToggleTracing(connection_id);
-    else if (info.path == "/reload")
+    if (info.path == "/reload")
       Load(connection_id, url_);
     else if (info.path == "/inspect")
       Inspect(connection_id);
@@ -95,9 +93,12 @@ class Prompt : public mojo::ApplicationDelegate,
       StartProfiling(connection_id);
     else if (info.path == "/stop_profiling")
       StopProfiling(connection_id);
-    else {
+    else if (info.path == "/start_tracing")
+      StartTracing(connection_id);
+    else if (info.path == "/stop_tracing")
+      StopTracing(connection_id);
+    else
       Help(info.path, connection_id);
-    }
   }
 
   void OnWebSocketRequest(
@@ -125,9 +126,7 @@ class Prompt : public mojo::ApplicationDelegate,
   void Help(std::string path, int connection_id) {
     std::string help = base::StringPrintf("Sky Debugger running on port %d\n"
         "Supported URLs:\n"
-        "/toggle_tracing   -- Start/stop tracing\n"
         "/reload           -- Reload the current page\n"
-        "/inspect          -- Start inspector server for current page\n"
         "/quit             -- Quit\n"
         "/load             -- Load a new URL, url in POST body.\n",
         command_port_);
@@ -158,21 +157,29 @@ class Prompt : public mojo::ApplicationDelegate,
     debugger_->Shutdown();
   }
 
-  void ToggleTracing(int connection_id) {
-    bool was_tracing = is_tracing_;
-    is_tracing_ = !is_tracing_;
-
-    if (was_tracing) {
-      tracing_->StopAndFlush();
-      trace_collector_->GetTrace(base::Bind(
-          &Prompt::OnTraceAvailable, base::Unretained(this), connection_id));
+  void StartTracing(int connection_id) {
+    if (is_tracing_) {
+      Error(connection_id, "Already tracing. Use stop_tracing to stop.\n");
       return;
     }
 
+    is_tracing_ = true;
     mojo::DataPipe pipe;
     tracing_->Start(pipe.producer_handle.Pass(), mojo::String("*"));
     trace_collector_.reset(new TraceCollector(pipe.consumer_handle.Pass()));
-    Respond(connection_id, "Starting trace (type 'trace' to stop tracing)\n");
+    Respond(connection_id, "Starting trace (type 'stop_tracing' to stop)\n");
+  }
+
+  void StopTracing(int connection_id) {
+    if (!is_tracing_) {
+      Error(connection_id, "Not tracing yet. Use start_tracing to start.\n");
+      return;
+    }
+
+    is_tracing_ = false;
+    tracing_->StopAndFlush();
+    trace_collector_->GetTrace(base::Bind(
+        &Prompt::OnTraceAvailable, base::Unretained(this), connection_id));
   }
 
   void OnTraceAvailable(int connection_id, std::string trace) {
