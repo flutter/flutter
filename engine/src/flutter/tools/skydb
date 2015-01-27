@@ -288,7 +288,7 @@ class SkyDebugger(object):
 
     def stop_command(self, args):
         # TODO(eseidel): mojo_shell crashes when attempting graceful shutdown.
-        # self._send_command_to_sky('/quit')
+        # self._run_basic_command('/quit')
 
         self._kill_if_exists('sky_server_pid', 'sky_server')
 
@@ -326,7 +326,7 @@ class SkyDebugger(object):
                     self.pids['sky_server_root'], args.url_or_path)
         else:
             url = args.url_or_path
-        self._send_command_to_sky('/load', url)
+        self._run_basic_command('/load', url)
 
     def _read_mojo_map(self):
         # TODO(eseidel): Does not work for android.
@@ -335,8 +335,15 @@ class SkyDebugger(object):
             lines = maps_file.read().strip().split('\n')
             return dict(map(lambda line: line.split(' '), lines))
 
+    def stop_tracing_command(self, args):
+        file_name = args.file_name
+        trace = self._send_command_to_sky('/stop_tracing').content
+        with open(file_name, "wb") as trace_file:
+            trace_file.write(trace)
+        print "Trace saved in %s" % file_name
+
     def stop_profiling_command(self, args):
-        self._send_command_to_sky('/stop_profiling')
+        self._run_basic_command('/stop_profiling')
         mojo_map = self._read_mojo_map()
 
         # TODO(eseidel): We should have a helper for resolving urls, etc.
@@ -380,7 +387,10 @@ class SkyDebugger(object):
             response = requests.post(url, payload)
         else:
             response = requests.get(url)
-        print response.text
+        return response
+
+    def _run_basic_command(self, command_path, payload=None):
+        print self._send_command_to_sky(command_path, payload=payload).text
 
     # FIXME: These could be made into a context object with __enter__/__exit__.
     def _load_pid_file(self, path):
@@ -401,14 +411,14 @@ class SkyDebugger(object):
 
     def _add_basic_command(self, subparsers, name, url_path, help_text):
         parser = subparsers.add_parser(name, help=help_text)
-        command = lambda args: self._send_command_to_sky(url_path)
+        command = lambda args: self._run_basic_command(url_path)
         parser.set_defaults(func=command)
 
     def _wait_for_sky_command_port(self):
         tries = 0
         while True:
             try:
-                self._send_command_to_sky('/')
+                self._run_basic_command('/')
                 return True
             except:
                 tries += 1
@@ -564,14 +574,19 @@ class SkyDebugger(object):
             help='launch gdb and attach to gdbserver launched from start --gdb')
         gdb_attach_parser.set_defaults(func=self.gdb_attach_command)
 
-        self._add_basic_command(subparsers, 'trace', '/trace',
-            'toggle tracing')
+        self._add_basic_command(subparsers, 'start_tracing', '/start_tracing',
+            'starts tracing the running sky instance')
         self._add_basic_command(subparsers, 'reload', '/reload',
             'reload the current page')
         self._add_basic_command(subparsers, 'inspect', '/inspect',
             'start the inspector on the current page (Linux only)')
         self._add_basic_command(subparsers, 'start_profiling', '/start_profiling',
             'starts profiling the running sky instance (Linux only)')
+
+        stop_tracing_parser = subparsers.add_parser('stop_tracing',
+            help='stops tracing the running sky instance')
+        stop_tracing_parser.add_argument('file_name', type=str, default='sky_viewer.trace')
+        stop_tracing_parser.set_defaults(func=self.stop_tracing_command)
 
         stop_profiling_parser = subparsers.add_parser('stop_profiling',
             help='stops profiling the running sky instance (Linux only)')
