@@ -191,7 +191,7 @@ void DocumentView::PaintContents(SkCanvas* canvas, const gfx::Rect& clip) {
   web_view_->paint(canvas, rect);
 }
 
-void DocumentView::scheduleAnimation() {
+void DocumentView::scheduleVisualUpdate() {
   DCHECK(web_view_);
   layer_host_->SetNeedsAnimate();
 }

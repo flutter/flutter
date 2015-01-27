@@ -82,7 +82,7 @@ public:
     virtual bool shouldReportDetailedMessageForSource(const String&) override { return false; }
     virtual void addMessageToConsole(LocalFrame*, MessageSource, MessageLevel, const String&, unsigned, const String&, const String&) override { }
 
-    virtual void scheduleAnimation() override { }
+    virtual void scheduleVisualUpdate() override { }
 
     virtual IntRect rootViewToScreen(const IntRect& r) const override { return r; }
     virtual blink::WebScreenInfo screenInfo() const override { return blink::WebScreenInfo(); }

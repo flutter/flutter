@@ -45,7 +45,7 @@ public:
 
     virtual WebScreenInfo screenInfo() const = 0;
 
-    virtual void scheduleAnimation() = 0;
+    virtual void scheduleVisualUpdate() = 0;
 };
 
 } // namespace blink

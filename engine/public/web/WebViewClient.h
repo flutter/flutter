@@ -68,7 +68,7 @@ public:
     virtual void initializeLayerTreeView() { BLINK_ASSERT_NOT_REACHED(); };
 
     // Called when the page should pump a frame.
-    virtual void scheduleAnimation() { }
+    virtual void scheduleVisualUpdate() { }
 
     // TODO(esprehn): Sky needs to implement these to control the mojo::View.
 

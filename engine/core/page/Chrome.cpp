@@ -25,7 +25,6 @@
 #include "sky/engine/core/dom/Document.h"
 #include "sky/engine/core/frame/LocalFrame.h"
 #include "sky/engine/core/page/ChromeClient.h"
-#include "sky/engine/core/page/Page.h"
 #include "sky/engine/core/rendering/HitTestResult.h"
 #include "sky/engine/platform/Logging.h"
 #include "sky/engine/platform/geometry/FloatRect.h"
@@ -35,9 +34,8 @@
 
 namespace blink {
 
-Chrome::Chrome(Page* page, ChromeClient* client)
-    : m_page(page)
-    , m_client(client)
+Chrome::Chrome(ChromeClient* client)
+    : m_client(client)
 {
     ASSERT(m_client);
 }
@@ -46,9 +44,9 @@ Chrome::~Chrome()
 {
 }
 
-PassOwnPtr<Chrome> Chrome::create(Page* page, ChromeClient* client)
+PassOwnPtr<Chrome> Chrome::create(ChromeClient* client)
 {
-    return adoptPtr(new Chrome(page, client));
+    return adoptPtr(new Chrome(client));
 }
 
 IntRect Chrome::rootViewToScreen(const IntRect& rect) const
@@ -106,11 +104,9 @@ void Chrome::setCursor(const Cursor& cursor)
     m_client->setCursor(cursor);
 }
 
-void Chrome::scheduleAnimation()
+void Chrome::scheduleVisualUpdate()
 {
-    WTF_LOG(ScriptedAnimationController, "Chrome::scheduleAnimation");
-    m_page->animator().setAnimationFramePending();
-    m_client->scheduleAnimation();
+    m_client->scheduleVisualUpdate();
 }
 
 void Chrome::willBeDestroyed()

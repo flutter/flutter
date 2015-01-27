@@ -17,7 +17,6 @@ namespace blink {
 
 PageAnimator::PageAnimator(Page* page)
     : m_page(page)
-    , m_animationFramePending(false)
     , m_servicingAnimations(false)
     , m_updatingLayoutAndStyleForPainting(false)
 {
@@ -25,7 +24,6 @@ PageAnimator::PageAnimator(Page* page)
 
 void PageAnimator::serviceScriptedAnimations(double monotonicAnimationStartTime)
 {
-    m_animationFramePending = false;
     TemporaryChange<bool> servicing(m_servicingAnimations, true);
 
     Vector<RefPtr<Document> > documents;
@@ -43,10 +41,9 @@ void PageAnimator::serviceScriptedAnimations(double monotonicAnimationStartTime)
 
 void PageAnimator::scheduleVisualUpdate()
 {
-    // FIXME: also include m_animationFramePending here. It is currently not there due to crbug.com/353756.
     if (m_servicingAnimations || m_updatingLayoutAndStyleForPainting)
         return;
-    m_page->chrome().scheduleAnimation();
+    m_page->chrome().scheduleVisualUpdate();
 }
 
 void PageAnimator::updateLayoutAndStyleForPainting(LocalFrame* rootFrame)

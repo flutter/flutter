@@ -48,7 +48,7 @@ class Chrome final : public HostWindow {
 public:
     virtual ~Chrome();
 
-    static PassOwnPtr<Chrome> create(Page*, ChromeClient*);
+    static PassOwnPtr<Chrome> create(ChromeClient*);
 
     ChromeClient& client() { return *m_client; }
 
@@ -56,7 +56,7 @@ public:
     virtual IntRect rootViewToScreen(const IntRect&) const override;
     virtual blink::WebScreenInfo screenInfo() const override;
 
-    virtual void scheduleAnimation() override;
+    virtual void scheduleVisualUpdate() override;
 
     void setCursor(const Cursor&);
 
@@ -77,9 +77,8 @@ public:
     void willBeDestroyed();
 
 private:
-    Chrome(Page*, ChromeClient*);
+    Chrome(ChromeClient*);
 
-    Page* m_page;
     ChromeClient* m_client;
 };
 

@@ -17,13 +17,11 @@ public:
     void scheduleVisualUpdate();
     void serviceScriptedAnimations(double monotonicAnimationStartTime);
 
-    void setAnimationFramePending() { m_animationFramePending = true; }
     bool isServicingAnimations() const { return m_servicingAnimations; }
     void updateLayoutAndStyleForPainting(LocalFrame* rootFrame);
 
 private:
     Page* m_page;
-    bool m_animationFramePending;
     bool m_servicingAnimations;
     bool m_updatingLayoutAndStyleForPainting;
 };

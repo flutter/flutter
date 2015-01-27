@@ -209,9 +209,9 @@ void ChromeClientImpl::addMessageToConsole(LocalFrame* localFrame, MessageSource
     }
 }
 
-void ChromeClientImpl::scheduleAnimation()
+void ChromeClientImpl::scheduleVisualUpdate()
 {
-    m_webView->scheduleAnimation();
+    m_webView->scheduleVisualUpdate();
 }
 
 IntRect ChromeClientImpl::rootViewToScreen(const IntRect& rect) const

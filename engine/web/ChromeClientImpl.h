@@ -74,7 +74,7 @@ public:
         LocalFrame*, MessageSource, MessageLevel,
         const WTF::String& message, unsigned lineNumber,
         const WTF::String& sourceID, const WTF::String& stackTrace) override;
-    virtual void scheduleAnimation() override;
+    virtual void scheduleVisualUpdate() override;
     virtual IntRect rootViewToScreen(const IntRect&) const override;
     virtual WebScreenInfo screenInfo() const override;
     virtual void layoutUpdated(LocalFrame*) const override;

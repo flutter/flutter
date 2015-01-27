@@ -855,9 +855,9 @@ HitTestResult WebViewImpl::hitTestResultForWindowPos(const IntPoint& pos)
     return result;
 }
 
-void WebViewImpl::scheduleAnimation()
+void WebViewImpl::scheduleVisualUpdate()
 {
-    m_client->scheduleAnimation();
+    m_client->scheduleVisualUpdate();
 }
 
 void WebViewImpl::setVisibilityState(WebPageVisibilityState visibilityState,

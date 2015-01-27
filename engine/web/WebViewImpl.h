@@ -163,7 +163,7 @@ public:
 
     void updateMainFrameLayoutSize();
 
-    void scheduleAnimation();
+    void scheduleVisualUpdate();
 
     virtual void setVisibilityState(WebPageVisibilityState, bool) override;
 
