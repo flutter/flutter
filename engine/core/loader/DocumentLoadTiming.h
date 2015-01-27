@@ -37,7 +37,6 @@ class DocumentLoadTiming {
 public:
     DocumentLoadTiming();
 
-    double monotonicTimeToZeroBasedDocumentTime(double) const;
     double monotonicTimeToPseudoWallTime(double) const;
 
     void markNavigationStart();

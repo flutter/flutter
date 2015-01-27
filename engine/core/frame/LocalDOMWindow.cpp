@@ -610,7 +610,6 @@ void LocalDOMWindow::resizeTo(float width, float height) const
 
 int LocalDOMWindow::requestAnimationFrame(PassOwnPtr<RequestAnimationFrameCallback> callback)
 {
-    callback->m_useLegacyTimeBase = false;
     if (Document* d = document())
         return d->requestAnimationFrame(callback);
     return 0;

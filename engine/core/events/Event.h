@@ -25,7 +25,6 @@
 #define SKY_ENGINE_CORE_EVENTS_EVENT_H_
 
 #include "sky/engine/bindings/core/v8/ScriptWrappable.h"
-#include "sky/engine/core/dom/DOMTimeStamp.h"
 #include "sky/engine/core/events/EventPath.h"
 #include "sky/engine/platform/heap/Handle.h"
 #include "sky/engine/wtf/RefCounted.h"
@@ -103,7 +102,7 @@ public:
 
     bool bubbles() const { return m_canBubble; }
     bool cancelable() const { return m_cancelable; }
-    DOMTimeStamp timeStamp() const { return m_createTime; }
+    double timeStamp() const { return m_timeStamp; }
 
     void stopPropagation() { m_propagationStopped = true; }
     void stopImmediatePropagation() { m_immediatePropagationStopped = true; }
@@ -164,6 +163,8 @@ protected:
     virtual void receivedTarget();
     bool dispatched() const { return m_target; }
 
+    double m_timeStamp;
+
 private:
     AtomicString m_type;
     bool m_canBubble;
@@ -178,7 +179,6 @@ private:
     unsigned short m_eventPhase;
     RefPtr<EventTarget> m_currentTarget;
     RefPtr<EventTarget> m_target;
-    DOMTimeStamp m_createTime;
     RefPtr<Event> m_underlyingEvent;
     OwnPtr<EventPath> m_eventPath;
 };

@@ -160,7 +160,7 @@ public:
 
     static const int InputModifiers = ShiftKey | ControlKey | AltKey | MetaKey;
 
-    double timeStampSeconds; // Seconds since epoch.
+    double timeStampMS; // Milliseconds since epoch.
     unsigned size; // The size of this structure, for serialization.
     Type type;
     int modifiers;
@@ -186,7 +186,7 @@ protected:
     explicit WebInputEvent(unsigned sizeParam)
     {
         memset(this, 0, sizeParam);
-        timeStampSeconds = 0.0;
+        timeStampMS = 0.0;
         size = sizeParam;
         type = Undefined;
         modifiers = 0;

@@ -29,8 +29,8 @@ scoped_ptr<blink::WebInputEvent> BuildWebPointerEvent(
   scoped_ptr<blink::WebPointerEvent> web_event(new blink::WebPointerEvent);
 
   web_event->modifiers = EventFlagsToWebInputEventModifiers(event->flags);
-  web_event->timeStampSeconds =
-      base::TimeDelta::FromInternalValue(event->time_stamp).InSecondsF();
+  web_event->timeStampMS =
+      base::TimeDelta::FromInternalValue(event->time_stamp).InMillisecondsF();
 
   switch (event->action) {
     case mojo::EVENT_TYPE_TOUCH_PRESSED:
@@ -89,8 +89,8 @@ scoped_ptr<blink::WebInputEvent> BuildWebGestureEvent(
   scoped_ptr<blink::WebGestureEvent> web_event(new blink::WebGestureEvent);
 
   web_event->modifiers = EventFlagsToWebInputEventModifiers(event->flags);
-  web_event->timeStampSeconds =
-      base::TimeDelta::FromInternalValue(event->time_stamp).InSecondsF();
+  web_event->timeStampMS =
+      base::TimeDelta::FromInternalValue(event->time_stamp).InMillisecondsF();
 
   switch (event->action) {
     case mojo::EVENT_TYPE_GESTURE_SCROLL_BEGIN:
@@ -182,8 +182,8 @@ scoped_ptr<blink::WebInputEvent> BuildWebKeyboardEvent(
   scoped_ptr<blink::WebKeyboardEvent> web_event(new blink::WebKeyboardEvent);
 
   web_event->modifiers = EventFlagsToWebInputEventModifiers(event->flags);
-  web_event->timeStampSeconds =
-      base::TimeDelta::FromInternalValue(event->time_stamp).InSecondsF();
+  web_event->timeStampMS =
+      base::TimeDelta::FromInternalValue(event->time_stamp).InMillisecondsF();
 
   switch (event->action) {
     case mojo::EVENT_TYPE_KEY_PRESSED:

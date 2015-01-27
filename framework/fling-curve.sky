@@ -1,0 +1,47 @@
+<!--
+// Copyright 2015 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+-->
+<script>
+const kDefaultAlpha = -5707.62;
+const kDefaultBeta = 172;
+const kDefaultGamma = 3.7;
+
+function positionAtTime(t) {
+  return kDefaultAlpha * Math.exp(-kDefaultGamma * t) - kDefaultBeta * t - kDefaultAlpha;
+}
+
+function velocityAtTime(t) {
+  return -kDefaultAlpha * kDefaultGamma * Math.exp(-kDefaultGamma * t) - kDefaultBeta;
+}
+
+function timeAtVelocity(v) {
+  return -Math.log((v + kDefaultBeta) / (-kDefaultAlpha * kDefaultGamma)) / kDefaultGamma;
+}
+
+var kMaxVelocity = velocityAtTime(0);
+var kCurveDuration = timeAtVelocity(0);
+
+module.exports = class FlingCurve {
+  constructor(velocity, startTime) {
+    var startingVelocity = Math.min(kMaxVelocity, Math.abs(velocity));
+    this.timeOffset_ = timeAtVelocity(startingVelocity);
+    this.positionOffset_ = positionAtTime(this.timeOffset_);
+    this.startTime_ = startTime / 1000;
+    this.previousPosition_ = 0;
+    this.direction_ = Math.sign(velocity);
+    Object.preventExtensions(this);
+  }
+
+  update(timeStamp) {
+    var t = timeStamp / 1000 - this.startTime_ + this.timeOffset_;
+    if (t >= kCurveDuration)
+      return 0;
+    var position = positionAtTime(t) - this.positionOffset_;
+    var positionDelta = position - this.previousPosition_;
+    this.previousPosition_ = position;
+    return this.direction_ * Math.max(0, positionDelta);
+  }
+};
+</script>

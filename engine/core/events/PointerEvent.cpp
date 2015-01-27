@@ -74,6 +74,7 @@ PointerEvent::PointerEvent(const WebPointerEvent& event)
     , m_orientation(event.orientation)
     , m_tilt(event.tilt)
 {
+    m_timeStamp = event.timeStampMS;
 }
 
 PointerEvent::PointerEvent(const AtomicString& type, const PointerEventInit& initializer)

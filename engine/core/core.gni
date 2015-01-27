@@ -420,7 +420,6 @@ sky_core_files = [
   "dom/DOMError.h",
   "dom/DOMException.cpp",
   "dom/DOMException.h",
-  "dom/DOMTimeStamp.h",
   "dom/DOMTokenList.cpp",
   "dom/DOMTokenList.h",
   "dom/DOMURL.cpp",

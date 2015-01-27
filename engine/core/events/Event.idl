@@ -35,7 +35,7 @@
     readonly attribute unsigned short   eventPhase;
     [InitializedByEventConstructor] readonly attribute boolean bubbles;
     [InitializedByEventConstructor] readonly attribute boolean cancelable;
-    readonly attribute DOMTimeStamp     timeStamp;
+    readonly attribute double timeStamp;
 
     void               stopPropagation();
     void               preventDefault();

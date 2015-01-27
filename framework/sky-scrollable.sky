@@ -4,6 +4,7 @@
 // found in the LICENSE file.
 -->
 <import src="/sky/framework/sky-element/sky-element.sky" as="SkyElement" />
+<import src="/sky/framework/fling-curve.sky" as="FlingCurve" />
 
 <sky-element
   name="sky-scrollable"
@@ -26,15 +27,11 @@
   </div>
 </template>
 <script>
-// TODO(abarth): Move the fling curve to a separate module.
-var kFlingFriction = 0.9;
-var kFlingVelocityMin = 1;
-
 module.exports = class extends SkyElement {
   created() {
     this.scrollable_ = null;
     this.scrollOffset_ = 0;
-    this.flingVelocity_ = 0;
+    this.flingCurve_ = null;
     this.flingAnimationId_ = null;
   }
 
@@ -43,7 +40,8 @@ module.exports = class extends SkyElement {
   }
 
   scrollBy(scrollDelta) {
-    var offset = Math.max(0, Math.min(this.scrollable_.offsetHeight, this.scrollOffset_ + scrollDelta));
+    var scrollHeight = this.scrollable_.clientHeight - this.clientHeight;
+    var offset = Math.max(0, Math.min(scrollHeight, this.scrollOffset_ + scrollDelta));
     if (offset == this.scrollOffset_)
       return false;
     this.scrollOffset_ = offset;
@@ -56,22 +54,21 @@ module.exports = class extends SkyElement {
     this.scrollable_.style.transform = transform;
   }
 
-  scheduleFlingTick_() {
-    this.flingAnimationId_ = requestAnimationFrame(this.tickFling_.bind(this));
+  scheduleFlingUpdate_() {
+    this.flingAnimationId_ = requestAnimationFrame(this.updateFling_.bind(this));
   }
 
-  tickFling_() {
+  stopFling_() {
+    cancelAnimationFrame(this.flingAnimationId_);
+    this.flingCurve_ = null;
     this.flingAnimationId_ = null;
-    if (!this.scrollBy(this.flingVelocity_)) {
-      this.flingVelocity_ = 0;
-      return;
-    }
-    var velocity = this.flingVelocity_ * kFlingFriction;
-    if (velocity < kFlingVelocityMin)
-      velocity = 0;
-    this.flingVelocity_ = velocity;
-    if (velocity)
-      this.scheduleFlingTick_();
+  }
+
+  updateFling_(timeStamp) {
+    var scrollDelta = this.flingCurve_.update(timeStamp);
+    if (!scrollDelta || !this.scrollBy(scrollDelta))
+      return this.stopFling_();
+    this.scheduleFlingUpdate_();
   }
 
   handleScrollStart_(event) {
@@ -85,16 +82,12 @@ module.exports = class extends SkyElement {
   }
 
   handleFlingStart_(event) {
-    this.flingVelocity_ = -event.velocityY;
-    this.scheduleFlingTick_();
+    this.flingCurve_ = new FlingCurve(-event.velocityY, event.timeStamp);
+    this.scheduleFlingUpdate_();
   }
 
   handleFlingCancel_(event) {
-    if (!this.flingAnimationId_)
-      return;
-    cancelAnimationFrame(this.flingAnimationId_);
-    this.flingVelocity_ = 0;
-    this.flingAnimationId_ = null;
+    this.stopFling_();
   }
 }.register();
 </script>

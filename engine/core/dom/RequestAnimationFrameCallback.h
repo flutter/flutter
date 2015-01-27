@@ -42,7 +42,6 @@ public:
 
     int m_id;
     bool m_cancelled;
-    bool m_useLegacyTimeBase;
 };
 
 }

@@ -130,8 +130,7 @@ void ScriptedAnimationController::executeCallbacks(double monotonicTimeNow)
     if (!m_document)
         return;
 
-    double highResNowMs = 1000.0 * m_document->timing()->monotonicTimeToZeroBasedDocumentTime(monotonicTimeNow);
-    double legacyHighResNowMs = 1000.0 * m_document->timing()->monotonicTimeToPseudoWallTime(monotonicTimeNow);
+    double highResNowMs = 1000.0 * monotonicTimeNow;
 
     // First, generate a list of callbacks to consider.  Callbacks registered from this point
     // on are considered only for the "next" frame, not this one.
@@ -140,14 +139,8 @@ void ScriptedAnimationController::executeCallbacks(double monotonicTimeNow)
 
     for (size_t i = 0; i < m_callbacksToInvoke.size(); ++i) {
         RequestAnimationFrameCallback* callback = m_callbacksToInvoke[i].get();
-        if (!callback->m_cancelled) {
-            TRACE_EVENT1(TRACE_DISABLED_BY_DEFAULT("devtools.timeline"), "FireAnimationFrame", "data", InspectorAnimationFrameEvent::data(m_document, callback->m_id));
-            if (callback->m_useLegacyTimeBase)
-                callback->handleEvent(legacyHighResNowMs);
-            else
-                callback->handleEvent(highResNowMs);
-            TRACE_EVENT_INSTANT1(TRACE_DISABLED_BY_DEFAULT("devtools.timeline"), "UpdateCounters", TRACE_EVENT_SCOPE_PROCESS, "data", InspectorUpdateCountersEvent::data());
-        }
+        if (!callback->m_cancelled)
+            callback->handleEvent(highResNowMs);
     }
 
     m_callbacksToInvoke.clear();

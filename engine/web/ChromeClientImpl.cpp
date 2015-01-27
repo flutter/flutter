@@ -32,6 +32,7 @@
 #include "sky/engine/config.h"
 #include "sky/engine/web/ChromeClientImpl.h"
 
+#include "base/logging.h"
 #include "gen/sky/platform/RuntimeEnabledFeatures.h"
 #include "sky/engine/bindings/core/v8/ScriptController.h"
 #include "sky/engine/core/dom/Document.h"
@@ -193,10 +194,16 @@ inline static String messageLevelAsString(MessageLevel level)
 void ChromeClientImpl::addMessageToConsole(LocalFrame* localFrame, MessageSource source, MessageLevel level, const String& message, unsigned lineNumber, const String& sourceID, const String& stackTrace)
 {
 
-    if (level == ErrorMessageLevel)
+    if (level == ErrorMessageLevel) {
         printf("ERROR: %s \nSOURCE: %s:%u\n", message.utf8().data(), sourceID.utf8().data(), lineNumber);
-    else
+    } else {
+#if OS(ANDROID)
+        LOG(INFO) << "CONSOLE: " << messageLevelAsString(level).utf8().data()
+            << ": " << message.utf8().data();
+#else
         printf("CONSOLE: %s: %s\n", messageLevelAsString(level).utf8().data(), message.utf8().data());
+#endif
+    }
     fflush(stdout);
 
     WebLocalFrameImpl* frame = WebLocalFrameImpl::fromFrame(localFrame);

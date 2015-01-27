@@ -44,13 +44,6 @@ DocumentLoadTiming::DocumentLoadTiming()
 {
 }
 
-double DocumentLoadTiming::monotonicTimeToZeroBasedDocumentTime(double monotonicTime) const
-{
-    if (!monotonicTime)
-        return 0.0;
-    return monotonicTime - m_referenceMonotonicTime;
-}
-
 double DocumentLoadTiming::monotonicTimeToPseudoWallTime(double monotonicTime) const
 {
     if (!monotonicTime)

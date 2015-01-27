@@ -32,7 +32,8 @@
 namespace blink {
 
 Event::Event()
-    : m_canBubble(false)
+    : m_timeStamp(currentTimeMS())
+    , m_canBubble(false)
     , m_cancelable(false)
     , m_propagationStopped(false)
     , m_immediatePropagationStopped(false)
@@ -41,12 +42,12 @@ Event::Event()
     , m_cancelBubble(false)
     , m_eventPhase(0)
     , m_currentTarget(nullptr)
-    , m_createTime(convertSecondsToDOMTimeStamp(currentTime()))
 {
 }
 
 Event::Event(const AtomicString& eventType, bool canBubbleArg, bool cancelableArg)
-    : m_type(eventType)
+    : m_timeStamp(currentTimeMS())
+    , m_type(eventType)
     , m_canBubble(canBubbleArg)
     , m_cancelable(cancelableArg)
     , m_propagationStopped(false)
@@ -56,12 +57,12 @@ Event::Event(const AtomicString& eventType, bool canBubbleArg, bool cancelableAr
     , m_cancelBubble(false)
     , m_eventPhase(0)
     , m_currentTarget(nullptr)
-    , m_createTime(convertSecondsToDOMTimeStamp(currentTime()))
 {
 }
 
 Event::Event(const AtomicString& eventType, const EventInit& initializer)
-    : m_type(eventType)
+    : m_timeStamp(currentTimeMS())
+    , m_type(eventType)
     , m_canBubble(initializer.bubbles)
     , m_cancelable(initializer.cancelable)
     , m_propagationStopped(false)
@@ -71,7 +72,6 @@ Event::Event(const AtomicString& eventType, const EventInit& initializer)
     , m_cancelBubble(false)
     , m_eventPhase(0)
     , m_currentTarget(nullptr)
-    , m_createTime(convertSecondsToDOMTimeStamp(currentTime()))
 {
 }
 

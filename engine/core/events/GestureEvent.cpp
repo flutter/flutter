@@ -74,6 +74,8 @@ GestureEvent::GestureEvent(const WebGestureEvent& event)
     , m_velocityX(0)
     , m_velocityY(0)
 {
+    m_timeStamp = event.timeStampMS;
+
     if (event.type == WebInputEvent::GestureFlingStart) {
         m_velocityX = event.data.flingStart.velocityX;
         m_velocityY = event.data.flingStart.velocityY;

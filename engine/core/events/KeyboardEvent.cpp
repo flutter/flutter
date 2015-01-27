@@ -60,6 +60,8 @@ KeyboardEvent::KeyboardEvent(const WebKeyboardEvent& event)
     , m_metaKey(event.modifiers & WebInputEvent::MetaKey)
     , m_repeat(event.modifiers & WebInputEvent::IsAutoRepeat)
 {
+    m_timeStamp = event.timeStampMS;
+
     if (event.type == WebInputEvent::KeyDown || event.type == WebInputEvent::KeyUp) {
         m_charCode = 0;
     } else if (event.type == WebInputEvent::Char) {
