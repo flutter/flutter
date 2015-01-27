@@ -1,0 +1,202 @@
+// Copyright (c) 2012, the Dart project authors.  Please see the AUTHORS file
+// for details. All rights reserved. Use of this source code is governed by a
+// BSD-style license that can be found in the LICENSE file.
+
+// WARNING: Do not edit - generated code.
+
+#ifndef {{dart_class}}_h
+#define {{dart_class}}_h
+
+{% filter conditional(conditional_string) %}
+{% for filename in header_includes %}
+#include "{{filename}}"
+{% endfor %}
+
+#include <dart_api.h>
+
+namespace blink {
+
+struct {{dart_class}} {
+    static const int dartClassId = {{interface_name}}ClassId;
+    typedef {{cpp_class}} NativeType;
+    static const bool isNode = {{is_node|lower}};
+    static const bool isActive = {{is_active_dom_object|lower}};
+    static const bool isEventTarget = {{is_event_target|lower}};
+    static const bool isGarbageCollected = {{is_garbage_collected|lower}};
+
+    static ActiveDOMObject* toActiveDOMObject(void* value)
+    {
+      {% if is_active_dom_object %}
+        return toNative(value);
+      {% else %}
+        return 0;
+      {% endif %}
+    }
+    static EventTarget* toEventTarget(void* value)
+    {
+      {% if is_event_target %}
+        return toNative(value);
+      {% else %}
+        return 0;
+      {% endif %}
+    }
+    static Node* toNode(void* value)
+    {
+      {% if is_node %}
+        return toNative(value);
+      {% else %}
+        return 0;
+      {% endif %}
+    }
+    static {{cpp_class}}* toNative(void* value)
+    {
+        return static_cast<{{cpp_class}}*>(value);
+    }
+
+    // FIXME: This has redundant null checks, and much of this code should
+    // be moved to a common place to reduce code bloat.
+    // Convert to native, Dart_Null is an error
+    static NativeType* toNative(Dart_Handle handle, Dart_Handle& exception)
+    {
+        if (!Dart_IsNull(handle)) {
+            DartDOMData* domData = DartDOMData::current();
+            return DartDOMWrapper::unwrapDartWrapper<{{dart_class}}>(domData, handle, exception);
+        } else {
+            exception = Dart_NewStringFromCString("Null value is not a valid {{dart_class}}");
+            return 0;
+        }
+    }
+
+    // Convert nullable to native, Dart_Null maps to C++ null
+    static NativeType* toNativeWithNullCheck(Dart_Handle handle, Dart_Handle& exception)
+    {
+        DartDOMData* domData = DartDOMData::current();
+        return DartDOMWrapper::unwrapDartWrapper<{{dart_class}}>(domData, handle, exception);
+    }
+
+    // Convert to native, Dart_Null is an error
+    static NativeType* toNative(Dart_NativeArguments args, int index, Dart_Handle& exception)
+    {
+        NativeType* result = DartDOMWrapper::unwrapDartWrapper<{{dart_class}}>(args, index, exception);
+        if (result || exception) {
+            return result;
+        }
+        exception = Dart_NewStringFromCString("Null value is not a valid {{dart_class}}");
+        return 0;
+    }
+
+    // Convert nullable to native, Dart_Null maps to C++ null
+    static NativeType* toNativeWithNullCheck(Dart_NativeArguments args, int index, Dart_Handle& exception)
+    {
+        return DartDOMWrapper::unwrapDartWrapper<{{dart_class}}>(args, index, exception);
+    }
+
+    static bool hasInstance(Dart_Handle wrapper)
+    {
+        return DartDOMWrapper::subtypeOf(wrapper, dartClassId);
+    }
+
+    static Dart_Handle toDart(NativeType* value)
+    {
+        if (!value)
+            return Dart_Null();
+        DartDOMData* domData = DartDOMData::current();
+        Dart_WeakPersistentHandle result =
+            DartDOMWrapper::lookupWrapper<{{dart_class}}>(domData, value);
+        if (result)
+            return Dart_HandleFromWeakPersistent(result);
+        return createWrapper(domData, value);
+    }
+    static void returnToDart(Dart_NativeArguments args,
+                             NativeType* value,
+                             bool autoDartScope = true)
+    {
+        if (value) {
+            DartDOMData* domData = static_cast<DartDOMData*>(
+                Dart_GetNativeIsolateData(args));
+            Dart_WeakPersistentHandle result =
+                DartDOMWrapper::lookupWrapper<{{dart_class}}>(domData, value);
+            if (result)
+                Dart_SetWeakHandleReturnValue(args, result);
+            else {
+                if (autoDartScope) {
+                    Dart_SetReturnValue(args, createWrapper(domData, value));
+                } else {
+                    DartApiScope apiScope;
+                    Dart_SetReturnValue(args, createWrapper(domData, value));
+               }
+            }
+        }
+    }
+{% if has_custom_to_v8 or has_custom_wrap or special_wrap_for %}
+    static Dart_Handle createWrapper(DartDOMData* domData, NativeType* value);
+{% else %}
+    static Dart_Handle createWrapper(DartDOMData* domData, NativeType* value)
+    {
+        return DartDOMWrapper::createWrapper<{{dart_class}}>(domData, value, {{dart_class}}::dartClassId);
+    }
+{% endif %}
+    static Dart_Handle toDart({{pass_cpp_type}} value)
+    {
+        return toDart(value.get());
+    }
+    static Dart_Handle createWrapper({{pass_cpp_type}} value)
+    {
+        return createWrapper(value.get());
+    }
+    static void returnToDart(Dart_NativeArguments args,
+                             {{pass_cpp_type}} value,
+                             bool autoDartScope = true)
+    {
+        return returnToDart(args, value.get(), autoDartScope);
+    }
+
+    static Dart_NativeFunction resolver(Dart_Handle name,
+                                        int argumentCount,
+                                        bool* autoSetupScope);
+
+    static const uint8_t* symbolizer(Dart_NativeFunction nf);
+};
+
+namespace {{dart_class}}Internal {
+
+  {% from 'methods_cpp.template' import static_method_name %}
+  {% if has_custom_constructor %}
+  {# FIXME(vsm): Name this properly. #}
+  void constructorCallback(Dart_NativeArguments);
+  {% endif %}
+  {% if has_event_constructor %}
+  void initialize{{interface_name}}ForDart({{interface_name}}Init&, const String&, const HashMap<String, Dart_Handle>&, Dart_Handle&);
+  {% endif %}
+  {% for method in methods if method.is_custom_element_callbacks and not method.suppressed %}
+  void {{method.name}}_{{method.number_of_arguments}}(Dart_NativeArguments);
+  {% endfor %}
+
+  {% for method in methods if method.is_custom or method.custom_dart_new %}
+  void {{static_method_name(method.name)}}(Dart_NativeArguments args);
+    {% if method.overload_index == 1 %}
+  void {{static_method_name(method.name, 0)}}(Dart_NativeArguments args);
+    {% endif %}
+  {% endfor %}
+
+  {% for attribute in attributes %}
+    {% if attribute.has_custom_getter %}
+  void {{attribute.name}}Getter(Dart_NativeArguments);
+    {% endif %}
+    {% if attribute.has_custom_setter %}
+  void {{attribute.name}}Setter(Dart_NativeArguments); 
+    {% endif %}
+  {% endfor %}
+
+  {% if dart_class == 'DartCSSStyleDeclaration' %}
+  // TODO(efortuna): Pull in custom functions in a less hacky way!
+  void propertyQuery(Dart_NativeArguments args);
+  {% endif %}
+
+}
+
+}  // namespace blink
+
+{% endfilter %}
+
+#endif // {{dart_class}}_h

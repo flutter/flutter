@@ -1,0 +1,112 @@
+// Copyright (c) 2012, the Dart project authors.  Please see the AUTHORS file
+// for details. All rights reserved. Use of this source code is governed by a
+// BSD-style license that can be found in the LICENSE file.
+
+// WARNING: Do not edit - generated code.
+
+#include "config.h"
+#include "DartWebkitClassIds.h"
+
+#include "bindings/core/dart/DartLibraryIds.h"
+{% for interface in interfaces %}
+#include "bindings/{{interface.component_dir}}/dart/Dart{{interface.name}}.h"
+{% endfor %}
+
+namespace blink {
+
+ActiveDOMObject* toNullActiveDOMObject(void* value) { return 0; }
+EventTarget* toNullEventTarget(void* value) { return 0; }
+Node* toNullNode(void* value) { return 0; }
+_DartWebkitClassInfo DartWebkitClassInfo = {
+    {
+        "_InvalidClassId", -1,
+        toNullActiveDOMObject, toNullEventTarget, toNullNode
+    },
+    {
+        "_HistoryCrossFrame", -1,
+        toNullActiveDOMObject, toNullEventTarget, toNullNode
+    },
+    {
+        "_LocationCrossFrame", -1,
+        toNullActiveDOMObject, toNullEventTarget, toNullNode
+    },
+    {
+        "_DOMWindowCrossFrame", -1,
+        toNullActiveDOMObject, toNullEventTarget, toNullNode
+    },
+    {
+        "DateTime", -1,
+        toNullActiveDOMObject, toNullEventTarget, toNullNode
+    },
+    {
+        "JsObject", -1,
+        toNullActiveDOMObject, toNullEventTarget, toNullNode
+    },
+    {
+        "JsFunction", _JsObjectClassId,
+        toNullActiveDOMObject, toNullEventTarget, toNullNode
+    },
+    {
+        "JsArray", _JsObjectClassId,
+        toNullActiveDOMObject, toNullEventTarget, toNullNode
+    },
+
+    // New types that are not auto-generated should be added here.
+
+{% for interface in interfaces %}
+{% filter conditional(interface.conditional_string) %}
+    {
+        "{{interface.name}}",
+{% if interface.parent_interface %}
+        {{interface.parent_interface}}ClassId,
+{% else %}
+        -1,
+{% endif %}
+{% if interface.is_active_dom_object %}
+        Dart{{interface.name}}::toActiveDOMObject,
+{% else %}
+        toNullActiveDOMObject,
+{% endif %}
+{% if interface.is_event_target %}
+        Dart{{interface.name}}::toEventTarget,
+{% else %}
+        toNullEventTarget,
+{% endif %}
+{% if interface.is_node %}
+        Dart{{interface.name}}::toNode
+{% else %}
+        toNullNode
+{% endif %}
+    },
+{% endfilter %}
+{% endfor %}
+};
+
+
+Dart_NativeFunction blinkSnapshotResolver(Dart_Handle name, int argumentCount, bool* autoSetupScope)
+{
+{% for interface in interfaces %}
+    {% filter conditional(interface.conditional_string) %}
+        {% if interface.has_resolver %}
+            if (Dart_NativeFunction func = Dart{{interface.name}}::resolver(name, argumentCount, autoSetupScope))
+                return func;
+        {% endif %}
+    {% endfilter %}
+{% endfor %}
+    return 0;
+}
+
+const uint8_t* blinkSnapshotSymbolizer(Dart_NativeFunction nf)
+{
+{% for interface in interfaces %}
+    {% filter conditional(interface.conditional_string) %}
+        {% if interface.has_resolver %}
+            if (const uint8_t* r = Dart{{interface.name}}::symbolizer(nf))
+                return r;
+        {% endif %}
+    {% endfilter %}
+{% endfor %}
+    return 0;
+}
+
+} // namespace blink

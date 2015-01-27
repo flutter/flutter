@@ -1,0 +1,55 @@
+// Copyright (c) 2012, the Dart project authors.  Please see the AUTHORS file
+// for details. All rights reserved. Use of this source code is governed by a
+// BSD-style license that can be found in the LICENSE file.
+
+// WARNING: Do not edit - generated code.
+
+#ifndef DartWebkitClassIds_h
+#define DartWebkitClassIds_h
+
+namespace blink {
+
+enum {
+    _InvalidClassId = 0,
+    _HistoryCrossFrameClassId,
+    _LocationCrossFrameClassId,
+    _DOMWindowCrossFrameClassId,
+    _DateTimeClassId,
+    _JsObjectClassId,
+    _JsFunctionClassId,
+    _JsArrayClassId,
+    // New types that are not auto-generated should be added here.
+
+{% for interface in interfaces %}
+    {% filter conditional(interface.conditional_string) %}
+        {{interface.name}}ClassId,
+    {% endfilter %}
+{% endfor %}
+{% for callback in callbacks %}
+    {% filter conditional(interface.conditional_string) %}
+        {{callback.name}}ClassId,
+    {% endfilter %}
+{% endfor %}
+    NumWebkitClassIds,
+};
+
+class ActiveDOMObject;
+class EventTarget;
+class Node;
+typedef ActiveDOMObject* (*ToActiveDOMObject)(void* value);
+typedef EventTarget* (*ToEventTarget)(void* value);
+typedef Node* (*ToNode)(void* value);
+typedef struct {
+    const char* jsName;
+    int base_class_id;
+    ToActiveDOMObject toActiveDOMObject;
+    ToEventTarget toEventTarget;
+    ToNode toNode;
+} DartWrapperTypeInfo;
+typedef DartWrapperTypeInfo _DartWebkitClassInfo[NumWebkitClassIds];
+
+extern _DartWebkitClassInfo DartWebkitClassInfo;
+
+}  // Namspace WebCore
+
+#endif // DartWebkitClassIds_h

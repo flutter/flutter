@@ -1,0 +1,231 @@
+{##############################################################################}
+{% macro attribute_getter(cpp_class, attribute) %}
+static void {{static_attribute_name(attribute, 'Getter')}}(Dart_NativeArguments args)
+{
+{% if attribute.idl_type == "EventHandler" %}
+{# TODO(terry): Need to fix properly. #}
+    // FIXME: proper implementation.
+    DART_UNIMPLEMENTED();
+{% else %}
+  {% if attribute.is_getter_raises_exception or attribute.is_call_with_execution_context or attribute.is_call_with_script_state %}
+    Dart_Handle exception = 0;
+  {% endif %}
+    {
+  {% if attribute.is_call_with_execution_context %}
+        ExecutionContext* context = DartUtilities::scriptExecutionContext();
+        if (!context) {
+            exception = Dart_NewStringFromCString("Failed to retrieve a context");
+            goto fail;
+        }
+
+  {% endif %}
+{% if attribute.is_call_with_script_state %}
+  ScriptState* state = DartUtilities::currentScriptState();
+  if (!state) {
+      exception = Dart_NewStringFromCString("Failed to retrieve a script state");
+      goto fail;
+  }
+{% endif %}
+  {% if attribute.dart_set_return_value and not attribute.is_static %}
+        {{cpp_class}}* receiver = DartDOMWrapper::receiver< {{cpp_class}} >(args);
+  {% else %}
+        // FIXME: Need receiver setup too.
+  {% endif %}
+  {% if attribute.reflect_only %}
+        {{generate_reflects(attribute) | indent(8)}}
+  {% endif %}
+        {{callback_return(attribute)|indent(8)}}
+        return;
+    }
+  {% if attribute.is_getter_raises_exception or attribute.is_call_with_execution_context or attribute.is_call_with_script_state %}
+
+fail:
+    Dart_ThrowException(exception);
+    ASSERT_NOT_REACHED();
+  {% endif %}
+{% endif %}
+}
+{% endmacro %}
+
+
+{##############################################################################}
+{% macro callback_return(attribute) %}
+{% if attribute.dart_set_return_value %}
+  {% if attribute.is_nullable %}
+bool isNull = false;
+  {% endif %}
+  {% if attribute.is_getter_raises_exception or
+        attribute.is_nullable %}
+DartExceptionState es;
+  {% endif %}
+  {% if attribute.cached_attribute_validation_method or
+        attribute.is_getter_raises_exception or
+        attribute.is_nullable or
+        attribute.idl_type == 'EventHandler' %}
+    {% if attribute.cpp_type == 'DartStringAdapter' %}
+      {% set native_type = 'String' %}
+    {% else %}
+      {% set native_type = attribute.cpp_type %}
+    {% endif %}
+{# TODO(vsm): We still need to generate checks for cache attributes. #}
+{{native_type}} {{attribute.cpp_value}} = {{attribute.cpp_value_original}};    
+  {% endif %}
+  {% if attribute.is_nullable %}
+if (isNull)
+    return;
+  {% endif %}
+  {% if attribute.is_getter_raises_exception %}
+if (es.hadException()) {
+    exception = es.toDart(args, {{attribute.auto_scope}});
+    goto fail;
+}
+  {% endif %}
+{{attribute.dart_set_return_value}};
+{% else %}
+// FIXME: Need to convert this properly.
+DART_UNIMPLEMENTED();
+{% endif %}
+{% endmacro %}
+
+
+{##############################################################################}
+{% macro attribute_setter(cpp_class, attribute) %}
+static void {{static_attribute_name(attribute, 'Setter')}}(Dart_NativeArguments args)
+{
+{% if attribute.idl_type == "EventHandler" or not attribute.cpp_setter %}
+{# TODO(terry): Need to fix properly. #}
+    // FIXME: proper implementation.
+    DART_UNIMPLEMENTED();
+{% else %}
+    Dart_Handle exception = 0;
+    {
+        {{cpp_class}}* receiver = DartDOMWrapper::receiver< {{cpp_class}} >(args);
+{% if attribute.is_custom_element_callbacks %}
+        CustomElementCallbackDispatcher::CallbackDeliveryScope deliveryScope;
+{% endif %}
+{% set attribute_name = attribute.name if not attribute.put_forwards else 'value' %}
+
+        {{attribute.local_cpp_type}} {{attribute.setter_lvalue}} = {{attribute.dart_value_to_local_cpp_value}};
+        if (exception)
+            goto fail;
+{% if attribute.is_call_with_execution_context or
+      attribute.is_setter_call_with_execution_context %}
+
+        ExecutionContext* context = DartUtilities::scriptExecutionContext();
+        if (!context) {
+            exception = Dart_NewStringFromCString("Failed to retrieve a context");
+            goto fail;
+        }
+
+{% endif %}
+
+{% if attribute.is_call_with_script_state %}
+        ScriptState* state = DartUtilities::currentScriptState();
+        if (!state) {
+            exception = Dart_NewStringFromCString("Failed to retrieve a script state");
+            goto fail;
+        }
+{% endif %}
+{% if attribute.is_setter_raises_exception %}
+        DartExceptionState es;
+{% endif %}
+        {{attribute.cpp_setter}};
+{% if attribute.is_setter_raises_exception %}
+        if (es.hadException()) {
+            exception = es.toDart(args, {{attribute.auto_scope}});
+            goto fail;
+        }
+{% endif %}
+        return;
+    }
+
+fail:
+    Dart_ThrowException(exception);
+    ASSERT_NOT_REACHED();
+{% endif %}
+}
+{% endmacro %}
+
+
+{######################################}
+{% macro generate_reflects(attribute) %}
+{% set reflect_only_values = attribute.reflect_only %}
+{% set reflect_missing = attribute.reflect_missing %}
+{% set reflect_invalid = attribute.reflect_invalid %}
+{% set reflect_empty = attribute.reflect_empty %}
+{% if attribute.cpp_type == 'DartStringAdapter' %}
+  {% set native_type = 'String' %}
+{% else %}
+  {% set native_type = attribute.cpp_type %}
+{% endif %}
+{{native_type}} result = {{attribute.cpp_value_original}};    
+
+{# Attribute is limited to only known values: check that the attribute value is
+   one of those. If not, set it to the empty string.
+   http://www.whatwg.org/specs/web-apps/current-work/#limited-to-only-known-values #}
+{% if reflect_empty %}
+if (result.isNull()) {
+{% if reflect_missing %}
+    result = "{{reflect_missing}}";
+{% else %}
+    ;
+{% endif %}
+} else if (result.isEmpty()) {
+    result = "{{reflect_empty}}";
+{% else %}
+if (result.isEmpty()) {
+{# FIXME: should use [ReflectEmpty] instead; need to change IDL files #}
+{% if reflect_missing %}
+    result = "{{reflect_missing}}";
+{% else %}
+    ;
+{% endif %}
+{% endif %}
+{% for value in reflect_only_values %}
+} else if (equalIgnoringCase(result, "{{value}}")) {
+    result = "{{value}}";
+{% endfor %}
+} else {
+    result = "{{reflect_invalid}}";
+}
+
+{% endmacro %}
+
+
+{##############################################################################}
+{% macro static_attribute_name(attribute, setter_or_getter) -%}
+{{attribute.name}}{{setter_or_getter}}
+{%- endmacro -%}
+
+
+{##############################################################################}
+{% macro generate_attribute_resolver_body(dart_class, class_name, attribute) %}
+{% if not attribute.is_getter_suppressed %}
+if (argumentCount == 1 && name == "{{attribute.native_entry_getter.resolver_string}}") {
+    *autoSetupScope = {{attribute.auto_scope}};
+    return {{dart_class}}Internal::{{static_attribute_name(attribute, 'Getter')}};
+}
+{% endif %}
+{# FIXME Disabling PutForwards for now #}
+{#  {% if not attribute.is_read_only or attribute.put_forwards %} #}
+  {% if not attribute.is_read_only and not attribute.is_setter_suppressed %}
+if (argumentCount == 2 && name == "{{attribute.native_entry_setter.resolver_string}}") {
+    *autoSetupScope = {{attribute.auto_scope}};
+    return {{dart_class}}Internal::{{static_attribute_name(attribute, 'Setter')}};
+}
+  {% endif %}
+{% endmacro %}
+
+{##############################################################################}
+{% macro generate_attribute_symbolizer_body(dart_class, class_name, attribute) %}
+{% if not attribute.is_getter_suppressed %}
+if (nf == {{dart_class}}Internal::{{static_attribute_name(attribute, 'Getter')}}) {
+    return reinterpret_cast<const uint8_t*>("{{attribute.native_entry_getter.resolver_string}}");
+}
+{% endif %}
+  {% if not attribute.is_read_only and not attribute.is_setter_suppressed %}
+if (nf == {{dart_class}}Internal::{{static_attribute_name(attribute, 'Setter')}}) {
+    return reinterpret_cast<const uint8_t*>("{{attribute.native_entry_setter.resolver_string}}");
+}
+  {% endif %}
+{% endmacro %}
