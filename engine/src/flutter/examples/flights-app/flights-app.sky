@@ -46,6 +46,7 @@
 
     .route-result {
       margin: 16px 16px 0 16px;
+      outline: 1px solid black;
     }
 
     .route-title {
