@@ -23,12 +23,25 @@
       flex-shrink: 0;
       margin-right: 6px;
     }
+
+    .close-box {
+      position: absolute;
+      top: 3px;
+      right: 3px;
+      width: 1em;
+      overflow: hidden;
+      text-align: center;
+      outline: 1px solid #AEA477;
+    }
   </style>
   <div class="header">
     <content select=".toast-icon" />
   </div>
   <div class="content">
     <content select=".toast-content" />
+  </div>
+  <div class="close-box">
+   X
   </div>
 </template>
 <script>
