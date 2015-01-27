@@ -1,7 +1,7 @@
 <sky>
   <import src="../resources/run-after-display.sky" as="runAfterDisplay" />
 
-  <img src="http://storage.googleapis.com/mojo/sky-pngs/98fba68a625e150241fb2ce4696b3b4a5c0bb4b2" />
+  <img src="http://storage.googleapis.com/mojo/sky-pngs/fb6e2e548b500925439506ea4990bb5951ff0127" />
 
   <script>
     window.addEventListener('load', function() {
