@@ -17,6 +17,7 @@ class LocalFrame;
 class WebGestureEvent;
 class WebKeyboardEvent;
 class WebPointerEvent;
+class WebWheelEvent;
 
 class NewEventHandler {
     WTF_MAKE_NONCOPYABLE(NewEventHandler);
@@ -27,6 +28,7 @@ public:
     bool handlePointerEvent(const WebPointerEvent&);
     bool handleGestureEvent(const WebGestureEvent&);
     bool handleKeyboardEvent(const WebKeyboardEvent&);
+    bool handleWheelEvent(const WebWheelEvent&);
 
 private:
     bool handlePointerDownEvent(const WebPointerEvent&);
@@ -38,6 +40,7 @@ private:
     bool dispatchPointerEvent(Node& target, const WebPointerEvent&);
     bool dispatchClickEvent(Node& capturingTarget, const WebPointerEvent&);
     bool dispatchKeyboardEvent(Node& target, const WebKeyboardEvent& event);
+    bool dispatchWheelEvent(Node& target, const WebWheelEvent& event);
 
     Node* targetForKeyboardEvent() const;
     Node* targetForHitTestResult(const HitTestResult& hitTestResult);

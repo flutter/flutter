@@ -339,6 +339,11 @@ bool WebViewImpl::handleInputEvent(const WebInputEvent& inputEvent)
         return m_page->mainFrame()->newEventHandler().handleKeyboardEvent(event);
     }
 
+    if (WebInputEvent::isWheelEventType(inputEvent.type)) {
+        const WebWheelEvent& event = static_cast<const WebWheelEvent&>(inputEvent);
+        return m_page->mainFrame()->newEventHandler().handleWheelEvent(event);
+    }
+
     return false;
 }
 

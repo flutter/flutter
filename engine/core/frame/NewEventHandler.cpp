@@ -13,6 +13,7 @@
 #include "sky/engine/core/events/GestureEvent.h"
 #include "sky/engine/core/events/KeyboardEvent.h"
 #include "sky/engine/core/events/PointerEvent.h"
+#include "sky/engine/core/events/WheelEvent.h"
 #include "sky/engine/core/frame/LocalFrame.h"
 #include "sky/engine/core/frame/FrameView.h"
 #include "sky/engine/core/rendering/RenderObject.h"
@@ -95,6 +96,12 @@ bool NewEventHandler::dispatchKeyboardEvent(Node& target, const WebKeyboardEvent
     return target.dispatchEvent(keyboardEvent.release());
 }
 
+bool NewEventHandler::dispatchWheelEvent(Node& target, const WebWheelEvent& event)
+{
+    RefPtr<WheelEvent> wheelEvent = WheelEvent::create(event);
+    return target.dispatchEvent(wheelEvent.release());
+}
+
 bool NewEventHandler::dispatchClickEvent(Node& capturingTarget, const WebPointerEvent& event)
 {
     ASSERT(event.type == WebInputEvent::PointerUp);
@@ -165,6 +172,13 @@ bool NewEventHandler::handleKeyboardEvent(const WebKeyboardEvent& event)
         m_suppressNextCharEvent = true;
 
     return handled;
+}
+
+bool NewEventHandler::handleWheelEvent(const WebWheelEvent& event)
+{
+    HitTestResult hitTestResult = performHitTest(positionForEvent(event));
+    RefPtr<Node> target = targetForHitTestResult(hitTestResult);
+    return target && !dispatchWheelEvent(*target, event);
 }
 
 bool NewEventHandler::handlePointerDownEvent(const WebPointerEvent& event)

@@ -12,7 +12,8 @@
   on-gesturescrollend="handleScrollEnd_"
   on-gesturescrollupdate="handleScrollUpdate_"
   on-gestureflingstart="handleFlingStart_"
-  on-gestureflingcancel="handleFlingCancel_">
+  on-gestureflingcancel="handleFlingCancel_"
+  on-wheel="handleWheel_">
 <template>
   <style>
   :host {
@@ -114,6 +115,10 @@ module.exports = class extends SkyElement {
 
   handleFlingCancel_(event) {
     this.stopFling_();
+  }
+
+  handleWheel_(event) {
+    this.scrollBy(-event.offsetY);
   }
 }.register();
 </script>

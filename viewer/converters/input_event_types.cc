@@ -165,14 +165,6 @@ scoped_ptr<blink::WebInputEvent> BuildWebGestureEvent(
   web_event->x = event->location_data->in_view_location->x / device_pixel_ratio;
   web_event->y = event->location_data->in_view_location->y / device_pixel_ratio;
 
-  // TODO(erg): Remove this null check as parallel to above.
-  if (!event->location_data->screen_location.is_null()) {
-    web_event->globalX =
-        event->location_data->screen_location->x / device_pixel_ratio;
-    web_event->globalY =
-        event->location_data->screen_location->y / device_pixel_ratio;
-  }
-
   return web_event.Pass();
 }
 
@@ -200,6 +192,26 @@ scoped_ptr<blink::WebInputEvent> BuildWebKeyboardEvent(
   web_event->key = event->key_data->windows_key_code;
   web_event->charCode = event->key_data->text;
   web_event->unmodifiedCharCode = event->key_data->unmodified_text;
+
+  return web_event.Pass();
+}
+
+scoped_ptr<blink::WebInputEvent> BuildWebWheelEvent(
+    const mojo::EventPtr& event, float device_pixel_ratio) {
+  scoped_ptr<blink::WebWheelEvent> web_event(new blink::WebWheelEvent);
+
+  web_event->modifiers = EventFlagsToWebInputEventModifiers(event->flags);
+  web_event->timeStampMS =
+      base::TimeDelta::FromInternalValue(event->time_stamp).InMillisecondsF();
+
+  web_event->type = blink::WebInputEvent::WheelEvent;
+
+  const auto& location = event->location_data->in_view_location;
+  web_event->x = location->x / device_pixel_ratio;
+  web_event->y = location->y / device_pixel_ratio;
+
+  web_event->offsetX = event->wheel_data->x_offset / device_pixel_ratio;
+  web_event->offsetY = event->wheel_data->y_offset / device_pixel_ratio;
 
   return web_event.Pass();
 }
@@ -242,6 +254,9 @@ scoped_ptr<blink::WebInputEvent> ConvertEvent(const mojo::EventPtr& event,
               event->action == mojo::EVENT_TYPE_KEY_RELEASED) &&
              event->key_data) {
     return BuildWebKeyboardEvent(event, device_pixel_ratio);
+  } else if (event->action == mojo::EVENT_TYPE_MOUSEWHEEL &&
+             event->wheel_data) {
+    return BuildWebWheelEvent(event, device_pixel_ratio);
   }
 
   return scoped_ptr<blink::WebInputEvent>();

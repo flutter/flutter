@@ -667,6 +667,8 @@ sky_core_files = [
   "events/UIEvent.h",
   "events/UIEventWithKeyState.cpp",
   "events/UIEventWithKeyState.h",
+  "events/WheelEvent.cpp",
+  "events/WheelEvent.h",
   "events/WindowEventContext.cpp",
   "events/WindowEventContext.h",
   "fetch/CachePolicy.h",
@@ -1243,6 +1245,7 @@ core_idl_files = get_path_info([
                                  "events/TextEvent.idl",
                                  "events/TransitionEvent.idl",
                                  "events/UIEvent.idl",
+                                 "events/WheelEvent.idl",
                                  "frame/Console.idl",
                                  "frame/ConsoleBase.idl",
                                  "frame/ImageBitmap.idl",
@@ -1334,6 +1337,7 @@ core_dependency_idl_files =
 core_event_idl_files = get_path_info([
                                        "css/FontFaceSetLoadEvent.idl",
                                        "css/MediaQueryListEvent.idl",
+                                       "events/AnimationEvent.idl",
                                        "events/AnimationPlayerEvent.idl",
                                        "events/CompositionEvent.idl",
                                        "events/CustomEvent.idl",
@@ -1348,7 +1352,7 @@ core_event_idl_files = get_path_info([
                                        "events/TextEvent.idl",
                                        "events/TransitionEvent.idl",
                                        "events/UIEvent.idl",
-                                       "events/AnimationEvent.idl",
+                                       "events/WheelEvent.idl",
                                        "html/canvas/WebGLContextEvent.idl",
                                      ],
                                      "abspath")
