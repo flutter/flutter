@@ -19,13 +19,6 @@ import sys
 import time
 import urlparse
 
-SRC_ROOT = skypy.paths.Paths('ignored').src_root
-sys.path.insert(0, os.path.join(SRC_ROOT, 'build', 'android'))
-from pylib import android_commands
-from pylib import constants
-from pylib import forwarder
-
-
 SUPPORTED_MIME_TYPES = [
     'text/html',
     'text/sky',
@@ -35,14 +28,19 @@ SUPPORTED_MIME_TYPES = [
 DEFAULT_SKY_COMMAND_PORT = 7777
 GDB_PORT = 8888
 SKY_SERVER_PORT = 9999
-PID_FILE_PATH = "/tmp/skydb.pids"
 DEFAULT_URL = "https://raw.githubusercontent.com/domokit/mojo/master/sky/examples/home.sky"
 
 ANDROID_PACKAGE = "org.chromium.mojo.shell"
 ANDROID_ACTIVITY = "%s/.MojoShellActivity" % ANDROID_PACKAGE
 ANDROID_APK_NAME = 'MojoShell.apk'
+
+PID_FILE_PATH = "/tmp/skydb.pids"
 CACHE_LINKS_PATH = '/tmp/mojo_cache_links'
 SYSTEM_LIBS_ROOT_PATH = '/tmp/device_libs'
+
+SRC_ROOT = skypy.paths.Paths('ignored').src_root
+ADB_PATH = os.path.join(SRC_ROOT,
+    'third_party/android_tools/sdk/platform-tools/adb')
 
 
 # FIXME: Move this into mopy.config
@@ -85,7 +83,7 @@ class SkyDebugger(object):
         #  (to embed a comma into a string escape it using "\,")
         escaped_args = map(lambda arg: arg.replace(',', '\\,'), shell_args)
         return [
-            'adb', 'shell',
+            ADB_PATH, 'shell',
             'am', 'start',
             '-W',
             '-S',
@@ -111,6 +109,10 @@ class SkyDebugger(object):
             'mojo:window_manager',
         ]
 
+        if args.url_or_path:
+            shell_args.append(
+                '--args-for=mojo:window_manager %s' % self._url_from_args(args))
+
         # Map all mojo: urls to http: urls using the --origin command.
         build_dir_url = SkyServer.url_for_path(
             remote_server_port,
@@ -133,12 +135,6 @@ class SkyDebugger(object):
 
         return shell_command
 
-    def _connect_to_device(self):
-        device = android_commands.AndroidCommands(
-            android_commands.GetAttachedDevices()[0])
-        device.EnableAdbRoot()
-        return device
-
     def sky_server_for_args(self, args):
         # FIXME: This is a hack.  sky_server should just take a build_dir
         # not a magical "configuration" name.
@@ -155,7 +151,7 @@ class SkyDebugger(object):
         return skypy.paths.Paths(root_relative_build_dir)
 
     def _find_remote_pid_for_package(self, package):
-        ps_output = subprocess.check_output(['adb', 'shell', 'ps'])
+        ps_output = subprocess.check_output([ADB_PATH, 'shell', 'ps'])
         for line in ps_output.split('\n'):
             fields = line.split()
             if fields and fields[-1] == package:
@@ -163,7 +159,7 @@ class SkyDebugger(object):
         return None
 
     def _find_install_location_for_package(self, package):
-        pm_command = ['adb', 'shell', 'pm', 'path', package]
+        pm_command = [ADB_PATH, 'shell', 'pm', 'path', package]
         pm_output = subprocess.check_output(pm_command)
         # e.g. package:/data/app/org.chromium.mojo.shell-1/base.apk
         return pm_output.split(':')[-1]
@@ -193,25 +189,20 @@ class SkyDebugger(object):
         self.pids['sky_command_port'] = args.command_port
 
         if is_android:
-            # Pray to the build/android gods in their misspelled tongue.
-            constants.SetOutputDirectort(self.paths.build_dir)
-
             # We could make installing conditional on an argument.
             apk_path = os.path.join(self.paths.build_dir, 'apks',
                 ANDROID_APK_NAME)
-            subprocess.check_call(['adb', 'install', '-r', apk_path])
+            subprocess.check_call([ADB_PATH, 'install', '-r', apk_path])
 
-            device = self._connect_to_device()
-            self.pids['device_serial'] = device.GetDevice()
-
-            forwarder.Forwarder.Map([(0, sky_server.port)], device)
-            device_http_port = forwarder.Forwarder.DevicePortForHostPort(
-                sky_server.port)
-            self.pids['remote_sky_server_port'] = device_http_port
+            port_string = 'tcp:%s' % sky_server.port
+            subprocess.check_call([
+                ADB_PATH, 'reverse', port_string, port_string
+            ])
+            self.pids['remote_sky_server_port'] = sky_server.port
 
             port_string = 'tcp:%s' % args.command_port
             subprocess.check_call([
-                'adb', 'forward', port_string, port_string
+                ADB_PATH, 'forward', port_string, port_string
             ])
             self.pids['remote_sky_command_port'] = args.command_port
 
@@ -251,7 +242,7 @@ class SkyDebugger(object):
             gdb_server_path = os.path.join(
                 os.path.dirname(package_path), 'lib/arm/gdbserver')
             gdbserver_cmd = [
-                'adb', 'shell',
+                ADB_PATH, 'shell',
                 gdb_server_path, '--attach',
                 ':%d' % GDB_PORT,
                 str(self.pids['mojo_shell_pid'])
@@ -262,7 +253,7 @@ class SkyDebugger(object):
 
             port_string = 'tcp:%d' % GDB_PORT
             subprocess.check_call([
-                'adb', 'forward', port_string, port_string
+                ADB_PATH, 'forward', port_string, port_string
             ])
             self.pids['remote_gdbserver_port'] = GDB_PORT
 
@@ -270,10 +261,11 @@ class SkyDebugger(object):
             if not self._wait_for_sky_command_port():
                 logging.error('Failed to start sky')
                 self.stop_command(None)
-            else:
-                self.load_command(args)
         else:
-            print 'No load issued, connect with gdb first and then run load.'
+            # We could just run gdb_attach_command here, but when I do that
+            # it auto-suspends in my zsh.  Unclear why.
+            # self.gdb_attach_command(args)
+            print "Run skydb gdb_attach to attach."
 
     def _kill_if_exists(self, key, name):
         pid = self.pids.pop(key, None)
@@ -292,19 +284,17 @@ class SkyDebugger(object):
 
         self._kill_if_exists('sky_server_pid', 'sky_server')
 
-        # We could be much more surgical here:
         if 'remote_sky_server_port' in self.pids:
-            device = android_commands.AndroidCommands(
-                self.pids['device_serial'])
-            forwarder.Forwarder.UnmapAllDevicePorts(device)
+            port_string = 'tcp:%s' % self.pids['remote_sky_server_port']
+            subprocess.call([ADB_PATH, 'reverse', '--remove', port_string])
 
         if 'remote_sky_command_port' in self.pids:
             # adb forward --remove takes the *host* port, not the remote port.
             port_string = 'tcp:%s' % self.pids['sky_command_port']
-            subprocess.call(['adb', 'forward', '--remove', port_string])
+            subprocess.call([ADB_PATH, 'forward', '--remove', port_string])
 
             subprocess.call([
-                'adb', 'shell', 'am', 'force-stop', ANDROID_PACKAGE])
+                ADB_PATH, 'shell', 'am', 'force-stop', ANDROID_PACKAGE])
         else:
             # Only try to kill mojo_shell if it's running locally.
             self._kill_if_exists('mojo_shell_pid', 'mojo_shell')
@@ -314,19 +304,20 @@ class SkyDebugger(object):
                 'adb shell gdbserver')
 
             port_string = 'tcp:%s' % self.pids['remote_gdbserver_port']
-            subprocess.call(['adb', 'forward', '--remove', port_string])
+            subprocess.call([ADB_PATH, 'forward', '--remove', port_string])
         self.pids = {} # Clear out our pid file.
 
+    def _url_from_args(self, args):
+        if urlparse.urlparse(args.url_or_path).scheme:
+            return args.url_or_path
+        # The load happens on the remote device, use the remote port.
+        remote_sky_server_port = self.pids.get('remote_sky_server_port',
+            self.pids['sky_server_port'])
+        return SkyServer.url_for_path(remote_sky_server_port,
+            self.pids['sky_server_root'], args.url_or_path)
+
     def load_command(self, args):
-        if not urlparse.urlparse(args.url_or_path).scheme:
-            # The load happens on the remote device, use the remote port.
-            remote_sky_server_port = self.pids.get('remote_sky_server_port',
-                self.pids['sky_server_port'])
-            url = SkyServer.url_for_path(remote_sky_server_port,
-                    self.pids['sky_server_root'], args.url_or_path)
-        else:
-            url = args.url_or_path
-        self._run_basic_command('/load', url)
+        self._run_basic_command('/load', self._url_from_args(args))
 
     def _read_mojo_map(self):
         # TODO(eseidel): Does not work for android.
@@ -437,7 +428,7 @@ class SkyDebugger(object):
             'MojoShellApplication',
             'chromium',
         ]
-        subprocess.call(['adb', 'logcat', '-d', '-s'] + TAGS)
+        subprocess.call([ADB_PATH, 'logcat', '-d', '-s'] + TAGS)
 
     def _pull_system_libraries(self, system_libs_root):
         # Pull down the system libraries this pid has already mapped in.
@@ -506,7 +497,7 @@ class SkyDebugger(object):
         eval_commands.append(
             'set solib-search-path %s' % ':'.join(symbol_search_paths))
 
-        exec_command = ['/usr/bin/strace', '-o', 'trace.txt', gdb_path]
+        exec_command = [gdb_path]
         for command in eval_commands:
             exec_command += ['--eval-command', command]
 
@@ -519,7 +510,7 @@ class SkyDebugger(object):
         os.execv(exec_command[0], exec_command)
 
     def print_crash_command(self, args):
-        logcat_cmd = ['adb', 'logcat', '-d']
+        logcat_cmd = [ADB_PATH, 'logcat', '-d']
         logcat = subprocess.Popen(logcat_cmd, stdout=subprocess.PIPE)
 
         stack_path = os.path.join(SRC_ROOT,
