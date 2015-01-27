@@ -241,11 +241,7 @@ public:
         return isRootLayer() || layerRenderer->isPositioned() || hasTransform();
     }
 
-    bool lostGroupedMapping() const { return m_lostGroupedMapping; }
-    void setLostGroupedMapping(bool b) { m_lostGroupedMapping = b; }
-
     void updateOrRemoveFilterEffectRenderer();
-
     void updateSelfPaintingLayer();
 
 private:
@@ -358,10 +354,6 @@ private:
     unsigned m_has3DTransformedDescendant : 1;
 
     unsigned m_hasFilterInfo : 1;
-
-    // True if this render layer just lost its grouped mapping due to the CompositedLayerMapping being destroyed,
-    // and we don't yet know to what graphics layer this RenderLayer will be assigned.
-    unsigned m_lostGroupedMapping : 1;
 
     RenderLayerModelObject* m_renderer;
 
