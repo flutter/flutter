@@ -126,7 +126,7 @@ class SkyDebugger(object):
                 '--args-for=mojo:native_viewport_service --use-osmesa')
 
         if is_android and args.gdb:
-            shell_args.append('--wait_for_debugger')
+            shell_args.append('--wait-for-debugger')
 
         if 'remote_sky_server_port' in self.pids:
             shell_command = self._wrap_for_android(shell_args)
@@ -179,6 +179,11 @@ class SkyDebugger(object):
         # from the build directory?
         gn_args = gn_args_from_build_dir(self.paths.build_dir)
         is_android = 'android_sdk_version' in gn_args
+
+        if is_android and args.gdb and not 'is_debug' in gn_args:
+            # FIXME: We don't include gdbserver in the release APK...
+            print "Cannot debug Release builds on Android"
+            sys.exit(2)
 
         sky_server = self.sky_server_for_args(args)
         self.pids['sky_server_pid'] = sky_server.start()
@@ -265,7 +270,7 @@ class SkyDebugger(object):
             # We could just run gdb_attach_command here, but when I do that
             # it auto-suspends in my zsh.  Unclear why.
             # self.gdb_attach_command(args)
-            print "Run skydb gdb_attach to attach."
+            print "Run 'skydb gdb_attach' to attach."
 
     def _kill_if_exists(self, key, name):
         pid = self.pids.pop(key, None)
