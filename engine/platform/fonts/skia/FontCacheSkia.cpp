@@ -50,7 +50,15 @@
 #include "third_party/skia/include/ports/SkFontMgr.h"
 
 #if !OS(WIN) && !OS(ANDROID)
-static SkStream* streamForFontconfigInterfaceId(int fontconfigInterfaceId)
+// TODO(bungeman) remove this temporary code ASAP.
+// This namespace exists to ease transition of SkTypeface from using SkStream to SkStreamAsset.
+namespace tmp {
+// Like std::declval but only returns lvalue references, ok since it isn't used on rvalue references.
+template<typename T> T& declvall();
+// The return type of SkFontConfigInterface::openStream(const SkFontConfigInterface::FontIdentity&).
+using StreamType = decltype(tmp::declvall<SkFontConfigInterface>().openStream(tmp::declvall<const SkFontConfigInterface::FontIdentity&>()));
+}
+static tmp::StreamType streamForFontconfigInterfaceId(int fontconfigInterfaceId)
 {
     SkAutoTUnref<SkFontConfigInterface> fci(SkFontConfigInterface::RefGlobal());
     SkFontConfigInterface::FontIdentity fontIdentity;

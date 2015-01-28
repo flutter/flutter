@@ -55,7 +55,7 @@ static PassRefPtr<SkSurface> createSkSurface(GrContext* gr, const IntSize& size,
     gr->resetContext();
     SkImageInfo info = SkImageInfo::MakeN32Premul(size.width(), size.height());
     SkSurfaceProps disableLCDProps(0, kUnknown_SkPixelGeometry);
-    return adoptRef(SkSurface::NewRenderTarget(gr, info,  msaaSampleCount, &disableLCDProps));
+    return adoptRef(SkSurface::NewRenderTarget(gr, SkSurface::kNo_Budgeted, info,  msaaSampleCount, &disableLCDProps));
 }
 
 PassRefPtr<Canvas2DLayerBridge> Canvas2DLayerBridge::create(const IntSize& size, OpacityMode opacityMode, int msaaSampleCount)
