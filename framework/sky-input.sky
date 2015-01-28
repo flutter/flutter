@@ -3,9 +3,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 -->
-<import src="/sky/framework/shell.sky" as="shell" />
-<import src="/sky/framework/sky-element/sky-element.sky" as="SkyElement" />
-<import src="/mojo/services/keyboard/public/interfaces/keyboard.mojom.sky" as="keyboard" />
+<import src="/gen/mojo/services/keyboard/public/interfaces/keyboard.mojom.sky" as="keyboard" />
+<import src="shell.sky" as="shell" />
+<import src="sky-element/sky-element.sky" as="SkyElement" />
 
 <sky-element name="sky-input" attributes="value:string">
 <template>

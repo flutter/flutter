@@ -1,8 +1,8 @@
-<import src="/mojo/services/input_events/public/interfaces/input_event_constants.mojom.sky" as="constants" />
-<import src="/mojo/services/input_events/public/interfaces/input_events.mojom.sky" as="events" />
-<import src="/mojo/services/input_events/public/interfaces/input_key_codes.mojom.sky" as="codes" />
+<import src="/gen/mojo/services/input_events/public/interfaces/input_event_constants.mojom.sky" as="constants" />
+<import src="/gen/mojo/services/input_events/public/interfaces/input_events.mojom.sky" as="events" />
+<import src="/gen/mojo/services/input_events/public/interfaces/input_key_codes.mojom.sky" as="codes" />
+<import src="/gen/sky/services/testing/test_harness.mojom.sky" as="harness" />
 <import src="/sky/framework/shell.sky" as="shell" />
-<import src="/sky/services/testing/test_harness.mojom.sky" as="harness" />
 <script>
 var harness = shell.connectToService("mojo:sky_tester", harness.TestHarness);
 

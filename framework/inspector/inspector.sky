@@ -1,16 +1,16 @@
-<import src="/mojo/public/sky/connection.sky" as="connection" />
-<import src="/mojo/public/sky/core.sky" as="core" />
-<import src="/mojo/public/sky/support.sky" as="support" />
-<import src="/mojo/public/interfaces/application/shell.mojom.sky" as="shellMojom" />
-<import src="/mojo/services/public/sky/shell.sky" as="shell" />
-<import src="/sky/services/inspector/inspector.mojom.sky" as="inspector" />
+<import src="/gen/mojo/public/interfaces/application/shell.mojom.sky" as="shellMojom" />
+<import src="/gen/mojo/public/sky/connection.sky" as="connection" />
+<import src="/gen/mojo/public/sky/core.sky" as="core" />
+<import src="/gen/mojo/public/sky/support.sky" as="support" />
+<import src="/gen/mojo/services/public/sky/shell.sky" as="shell" />
+<import src="/gen/sky/services/inspector/inspector.mojom.sky" as="inspector" />
 <import src="console-agent.sky" as="ConsoleAgent" />
-<import src="dom-agent.sky" as="DOMAgent" />
-<import src="page-agent.sky" as="PageAgent" />
-<import src="worker-agent.sky" as="WorkerAgent" />
-<import src="runtime-agent.sky" as="RuntimeAgent" />
-<import src="indexeddb-agent.sky" as="IndexedDBAgent" />
 <import src="css-agent.sky" as="CSSAgent" />
+<import src="dom-agent.sky" as="DOMAgent" />
+<import src="indexeddb-agent.sky" as="IndexedDBAgent" />
+<import src="page-agent.sky" as="PageAgent" />
+<import src="runtime-agent.sky" as="RuntimeAgent" />
+<import src="worker-agent.sky" as="WorkerAgent" />
 <script>
 class InspectorBackend extends inspector.InspectorBackend.stubClass {
   constructor(frontend) {

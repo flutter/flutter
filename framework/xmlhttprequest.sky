@@ -1,8 +1,8 @@
-<import src="/mojo/public/sky/core.sky" as="core" />
-<import src="/mojo/public/sky/unicode.sky" as="unicode" />
-<import src="/mojo/services/network/public/interfaces/network_service.mojom.sky" as="net" />
-<import src="/mojo/services/network/public/interfaces/url_loader.mojom.sky" as="loader" />
-<import src="/sky/framework/shell.sky" as="shell" />
+<import src="/gen/mojo/public/sky/core.sky" as="core" />
+<import src="/gen/mojo/public/sky/unicode.sky" as="unicode" />
+<import src="/gen/mojo/services/network/public/interfaces/network_service.mojom.sky" as="net" />
+<import src="/gen/mojo/services/network/public/interfaces/url_loader.mojom.sky" as="loader" />
+<import src="shell.sky" as="shell" />
 <script>
 // XHR keeps itself alive.
 var outstandingRequests = new Set();

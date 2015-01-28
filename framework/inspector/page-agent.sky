@@ -1,4 +1,4 @@
-<import src="/sky/framework/xmlhttprequest.sky" as="XMLHttpRequest" />
+<import src="../xmlhttprequest.sky" as="XMLHttpRequest" />
 <script>
 class Page {
   constructor(delegate) {

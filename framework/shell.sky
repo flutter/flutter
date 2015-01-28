@@ -1,5 +1,5 @@
-<import src="/mojo/public/sky/core.sky" as="core" />
-<import src="/mojo/public/sky/connection.sky" as="connection" />
+<import src="/gen/mojo/public/sky/core.sky" as="core" />
+<import src="/gen/mojo/public/sky/connection.sky" as="connection" />
 <script>
 function wrapHandle(handle, service, client) {
   return connection.bindProxyHandle(handle, service.client, service);

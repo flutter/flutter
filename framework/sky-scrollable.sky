@@ -3,8 +3,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 -->
-<import src="/sky/framework/sky-element/sky-element.sky" as="SkyElement" />
-<import src="/sky/framework/fling-curve.sky" as="FlingCurve" />
+<import src="sky-element/sky-element.sky" as="SkyElement" />
+<import src="fling-curve.sky" as="FlingCurve" />
 
 <sky-element
   name="sky-scrollable"

@@ -1,4 +1,4 @@
-<import src="/sky/framework/shell.sky" as="shell" />
+<import src="shell.sky" as="shell" />
 <script>
 function connectToEmbedderService(service, client) {
     var handle = internals.connectToEmbedderService(service.name);

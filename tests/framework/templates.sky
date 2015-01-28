@@ -1,8 +1,8 @@
 <sky>
-<import src="/sky/tests//resources/chai.sky" />
-<import src="/sky/tests/resources/mocha.sky" />
+<import src="../resources/chai.sky" />
+<import src="../resources/mocha.sky" />
+<import src="../resources/test-element.sky" as="TestElement" />
 <import src="/sky/framework/sky-element/sky-element.sky" as="SkyElement" />
-<import src="/sky/tests/resources/test-element.sky" as="TestElement" />
 
 <div id="sandbox"></div>
 
