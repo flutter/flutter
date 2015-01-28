@@ -118,10 +118,7 @@ void DocumentView::OnEmbed(
 
   Load(response_.Pass());
 
-  auto& bounds = root_->bounds();
-  float device_pixel_ratio = GetDevicePixelRatio();
-  web_view_->resize(blink::WebSize(bounds.width / device_pixel_ratio,
-                                   bounds.height / device_pixel_ratio));
+  UpdateRootSizeAndViewportMetrics(root_->bounds());
 
   // TODO(abarth): We should ask the view whether it is focused instead of
   // assuming that we're focused.
@@ -270,6 +267,20 @@ void DocumentView::OnViewBoundsChanged(mojo::View* view,
                                        const mojo::Rect& old_bounds,
                                        const mojo::Rect& new_bounds) {
   DCHECK_EQ(view, root_);
+  UpdateRootSizeAndViewportMetrics(new_bounds);
+}
+
+void DocumentView::OnViewViewportMetricsChanged(
+    mojo::View* view,
+    const mojo::ViewportMetrics& old_metrics,
+    const mojo::ViewportMetrics& new_metrics) {
+  DCHECK_EQ(view, root_);
+  web_view_->setDeviceScaleFactor(GetDevicePixelRatio());
+  UpdateRootSizeAndViewportMetrics(root_->bounds());
+}
+
+void DocumentView::UpdateRootSizeAndViewportMetrics(
+    const mojo::Rect& new_bounds) {
   float device_pixel_ratio = GetDevicePixelRatio();
   web_view_->resize(blink::WebSize(new_bounds.width / device_pixel_ratio,
                                    new_bounds.height / device_pixel_ratio));

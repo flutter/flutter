@@ -112,6 +112,10 @@ class DocumentView : public blink::ServiceProvider,
   void OnViewBoundsChanged(mojo::View* view,
                            const mojo::Rect& old_bounds,
                            const mojo::Rect& new_bounds) override;
+  void OnViewViewportMetricsChanged(
+      mojo::View* view,
+      const mojo::ViewportMetrics& old_metrics,
+      const mojo::ViewportMetrics& new_metrics) override;
   void OnViewFocusChanged(mojo::View* gained_focus,
                           mojo::View* lost_focus) override;
   void OnViewDestroyed(mojo::View* view) override;
@@ -120,6 +124,8 @@ class DocumentView : public blink::ServiceProvider,
   void Load(mojo::URLResponsePtr response);
   float GetDevicePixelRatio() const;
   scoped_ptr<Rasterizer> CreateRasterizer();
+
+  void UpdateRootSizeAndViewportMetrics(const mojo::Rect& new_bounds);
 
   mojo::URLResponsePtr response_;
   mojo::ServiceProviderImpl exported_services_;
