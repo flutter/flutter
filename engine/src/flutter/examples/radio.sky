@@ -65,7 +65,7 @@ SKY MODULE - radio button and radio button group
              return child.name;
        return '';
      }
-     set value (name) { 
+     set value (name) {
        let children = this.getChildNodes();
        for (let child of children)
          if (child instanceof module.exports.RadioElement)
