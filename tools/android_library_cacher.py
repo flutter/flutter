@@ -4,11 +4,12 @@
 # found in the LICENSE file.
 
 import argparse
-import re
-import sys
-import os
 import logging
+import os
+import re
+import skypy.paths
 import subprocess
+import sys
 
 SRC_ROOT = skypy.paths.Paths('ignored').src_root
 ADB_PATH = os.path.join(SRC_ROOT,
