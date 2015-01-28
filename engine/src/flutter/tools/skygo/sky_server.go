@@ -78,12 +78,5 @@ func main() {
 
     addMapping("/gen/", genRoot)
 
-    // FIXME: Unclear if these are correct now that we have /gen.
-    // /gen is more explicit, but also is less like how a 3rd party might
-    // deploy a sky app.
-    addMapping("/mojo/public/", path.Join(genRoot, "mojo", "public"))
-    addMapping("/mojo/services/", path.Join(genRoot, "mojo", "services"))
-    addMapping("/sky/services/", path.Join(genRoot, "sky", "services"))
-
     http.ListenAndServe(":" + port, nil)
 }

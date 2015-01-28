@@ -1,12 +1,12 @@
 <html>
 <import src="../resources/chai.sky" />
 <import src="../resources/mocha.sky" />
-<import src="/mojo/public/sky/core.sky" as="core" />
-<import src="/mojo/public/sky/connection.sky" as="connection" />
-<import src="/mojo/services/network/public/interfaces/network_service.mojom.sky" as="net" />
-<import src="/mojo/services/network/public/interfaces/url_loader.mojom.sky" as="loader" />
-<import src="/mojo/services/public/sky/shell.sky" as="shell" />
-<import src="/mojo/public/interfaces/application/shell.mojom.sky" as="shellMojom" />
+<import src="/gen/mojo/public/interfaces/application/shell.mojom.sky" as="shellMojom" />
+<import src="/gen/mojo/public/sky/connection.sky" as="connection" />
+<import src="/gen/mojo/public/sky/core.sky" as="core" />
+<import src="/gen/mojo/services/network/public/interfaces/network_service.mojom.sky" as="net" />
+<import src="/gen/mojo/services/network/public/interfaces/url_loader.mojom.sky" as="loader" />
+<import src="/gen/mojo/services/public/sky/shell.sky" as="shell" />
 <script>
 const Shell = shell.Shell;
 
