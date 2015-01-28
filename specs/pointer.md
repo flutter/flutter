@@ -339,9 +339,3 @@ wheel), the following fields must be present also:
 
 Note: The only wheels that are supported are mouse wheels and physical
 dials. Track balls are not reported as mouse wheels.
-
-
-Text input events
------------------
-
-TODO(ianh): keyboard events
