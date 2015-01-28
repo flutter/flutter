@@ -102,7 +102,7 @@ void RenderReplaced::paint(PaintInfo& paintInfo, const LayoutPoint& paintOffset)
     }
 
     LayoutRect paintRect = LayoutRect(adjustedPaintOffset, size());
-    if ((paintInfo.phase == PaintPhaseOutline || paintInfo.phase == PaintPhaseSelfOutline) && style()->outlineWidth())
+    if (paintInfo.phase == PaintPhaseForeground && style()->outlineWidth())
         paintOutline(paintInfo, paintRect);
 
     if (paintInfo.phase != PaintPhaseForeground && paintInfo.phase != PaintPhaseSelection && !canHaveChildren())
@@ -150,10 +150,6 @@ void RenderReplaced::paint(PaintInfo& paintInfo, const LayoutPoint& paintOffset)
 
 bool RenderReplaced::shouldPaint(PaintInfo& paintInfo, const LayoutPoint& paintOffset)
 {
-    if (paintInfo.phase != PaintPhaseForeground && paintInfo.phase != PaintPhaseOutline && paintInfo.phase != PaintPhaseSelfOutline
-        && paintInfo.phase != PaintPhaseSelection && paintInfo.phase != PaintPhaseMask)
-        return false;
-
     if (!paintInfo.shouldPaintWithinRoot(this))
         return false;
 

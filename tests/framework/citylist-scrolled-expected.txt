@@ -6,6 +6,6 @@ layer at (0,0) size 800x600
   RenderBlock (positioned) {city-list} at (0,0) size 800x600 [bgcolor=#FFFFFF]
 layer at (0,0) size 800x600
   RenderBlock (positioned) {div} at (0,0) size 800x600
-layer at (0,0) size 800x2400 backgroundClip at (0,0) size 800x600 clip at (0,0) size 800x600 outlineClip at (0,0) size 800x600
+layer at (0,0) size 800x2400 backgroundClip at (0,0) size 800x600 clip at (0,0) size 800x600
   RenderBlock {div} at (0,0) size 800x2400
 

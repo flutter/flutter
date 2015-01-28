@@ -291,8 +291,6 @@ private:
         LayoutPoint& layerLocation, ClipRect& layerForegroundRect);
     void paintForegroundWithPhase(PaintPhase, GraphicsContext*, const LayerPaintingInfo&, RenderObject* paintingRootForRenderer,
         LayoutPoint& layerLocation, ClipRect& layerForegroundRect);
-    void paintOutline(GraphicsContext*, const LayerPaintingInfo&, RenderObject* paintingRootForRenderer,
-        LayoutPoint& layerLocation, ClipRect& layerOutlineRect);
     void paintMask(GraphicsContext*, const LayerPaintingInfo&, RenderObject* paintingRootForRenderer,
         LayoutPoint& layerLocation, ClipRect& layerBackgroundRect);
 

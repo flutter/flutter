@@ -481,10 +481,8 @@ void paintTextWithEmphasisMark(
 void InlineTextBox::paint(PaintInfo& paintInfo, const LayoutPoint& paintOffset, LayoutUnit /*lineTop*/, LayoutUnit /*lineBottom*/)
 {
     if (isLineBreak() || !paintInfo.shouldPaintWithinRoot(&renderer())
-        || m_truncation == cFullTruncation || paintInfo.phase == PaintPhaseOutline || !m_len)
+        || m_truncation == cFullTruncation || !m_len)
         return;
-
-    ASSERT(paintInfo.phase != PaintPhaseSelfOutline && paintInfo.phase != PaintPhaseChildOutlines);
 
     LayoutRect logicalVisualOverflow = logicalOverflowRect();
     LayoutUnit logicalStart = logicalVisualOverflow.x() + paintOffset.x();

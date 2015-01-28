@@ -58,7 +58,6 @@ private:
     virtual void imageChanged(WrappedImagePtr, const IntRect* = 0) final;
 
     void paintIntoRect(GraphicsContext*, const LayoutRect&);
-    virtual void paint(PaintInfo&, const LayoutPoint&) override final;
     virtual void layout() override;
 
     virtual const char* renderName() const override { return "RenderImage"; }
@@ -75,8 +74,6 @@ private:
     void updateIntrinsicSizeIfNeeded(const LayoutSize& newSize);
     // Update the size of the image to be rendered. Object-fit may cause this to be different from the CSS box's content rect.
     void updateInnerContentRect();
-
-    void paintAreaElementFocusRing(PaintInfo&);
 
     OwnPtr<RenderImageResource> m_imageResource;
     float m_imageDevicePixelRatio;

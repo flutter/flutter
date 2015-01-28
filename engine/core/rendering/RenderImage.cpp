@@ -184,18 +184,6 @@ void RenderImage::paintReplaced(PaintInfo& paintInfo, const LayoutPoint& paintOf
     }
 }
 
-void RenderImage::paint(PaintInfo& paintInfo, const LayoutPoint& paintOffset)
-{
-    RenderReplaced::paint(paintInfo, paintOffset);
-
-    if (paintInfo.phase == PaintPhaseOutline)
-        paintAreaElementFocusRing(paintInfo);
-}
-
-void RenderImage::paintAreaElementFocusRing(PaintInfo& paintInfo)
-{
-}
-
 void RenderImage::paintIntoRect(GraphicsContext* context, const LayoutRect& rect)
 {
     IntRect alignedRect = pixelSnappedIntRect(rect);

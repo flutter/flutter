@@ -164,10 +164,10 @@ LayoutRect RenderLayerClipper::childrenClipRect() const
     // FIXME: Regions not accounted for.
     RenderLayer* clippingRootLayer = clippingRootForPainting();
     LayoutRect layerBounds;
-    ClipRect backgroundRect, foregroundRect, outlineRect;
+    ClipRect backgroundRect, foregroundRect;
     // Need to use uncached clip rects, because the value of 'dontClipToOverflow' may be different from the painting path (<rdar://problem/11844909>).
     ClipRectsContext context(clippingRootLayer, UncachedClipRects);
-    calculateRects(context, m_renderer.view()->unscaledDocumentRect(), layerBounds, backgroundRect, foregroundRect, outlineRect);
+    calculateRects(context, m_renderer.view()->unscaledDocumentRect(), layerBounds, backgroundRect, foregroundRect);
     return clippingRootLayer->renderer()->localToAbsoluteQuad(FloatQuad(foregroundRect.rect())).enclosingBoundingBox();
 }
 
@@ -176,9 +176,9 @@ LayoutRect RenderLayerClipper::localClipRect() const
     // FIXME: border-radius not accounted for.
     RenderLayer* clippingRootLayer = clippingRootForPainting();
     LayoutRect layerBounds;
-    ClipRect backgroundRect, foregroundRect, outlineRect;
+    ClipRect backgroundRect, foregroundRect;
     ClipRectsContext context(clippingRootLayer, PaintingClipRects);
-    calculateRects(context, PaintInfo::infiniteRect(), layerBounds, backgroundRect, foregroundRect, outlineRect);
+    calculateRects(context, PaintInfo::infiniteRect(), layerBounds, backgroundRect, foregroundRect);
 
     LayoutRect clipRect = backgroundRect.rect();
     if (clipRect == PaintInfo::infiniteRect())
@@ -192,7 +192,7 @@ LayoutRect RenderLayerClipper::localClipRect() const
 }
 
 void RenderLayerClipper::calculateRects(const ClipRectsContext& context, const LayoutRect& paintDirtyRect, LayoutRect& layerBounds,
-    ClipRect& backgroundRect, ClipRect& foregroundRect, ClipRect& outlineRect, const LayoutPoint* offsetFromRoot) const
+    ClipRect& backgroundRect, ClipRect& foregroundRect, const LayoutPoint* offsetFromRoot) const
 {
     bool isClippingRoot = m_renderer.layer() == context.rootLayer;
 
@@ -205,7 +205,6 @@ void RenderLayerClipper::calculateRects(const ClipRectsContext& context, const L
     }
 
     foregroundRect = backgroundRect;
-    outlineRect = backgroundRect;
 
     LayoutPoint offset;
     if (offsetFromRoot)
@@ -244,7 +243,6 @@ void RenderLayerClipper::calculateRects(const ClipRectsContext& context, const L
         LayoutRect newPosClip = toRenderBox(m_renderer).clipRect(offset);
         backgroundRect.intersect(newPosClip);
         foregroundRect.intersect(newPosClip);
-        outlineRect.intersect(newPosClip);
     }
 }
 

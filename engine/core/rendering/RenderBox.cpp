@@ -582,7 +582,7 @@ void RenderBox::paintFillLayer(const PaintInfo& paintInfo, const Color& c, const
 
 bool RenderBox::pushContentsClip(PaintInfo& paintInfo, const LayoutPoint& accumulatedOffset, ContentsClipBehavior contentsClipBehavior)
 {
-    if (paintInfo.phase == PaintPhaseSelfOutline || paintInfo.phase == PaintPhaseMask)
+    if (paintInfo.phase == PaintPhaseMask)
         return false;
 
     bool isOverflowClip = hasOverflowClip() && !layer()->isSelfPaintingLayer();
@@ -608,8 +608,6 @@ bool RenderBox::pushContentsClip(PaintInfo& paintInfo, const LayoutPoint& accumu
             return false;
     }
 
-    if (paintInfo.phase == PaintPhaseOutline)
-        paintInfo.phase = PaintPhaseChildOutlines;
     paintInfo.context->save();
     if (hasBorderRadius)
         paintInfo.context->clipRoundedRect(clipRoundedRect);
@@ -620,13 +618,7 @@ bool RenderBox::pushContentsClip(PaintInfo& paintInfo, const LayoutPoint& accumu
 void RenderBox::popContentsClip(PaintInfo& paintInfo, PaintPhase originalPhase, const LayoutPoint& accumulatedOffset)
 {
     ASSERT(hasOverflowClip() && !layer()->isSelfPaintingLayer());
-
     paintInfo.context->restore();
-    if (originalPhase == PaintPhaseOutline) {
-        paintInfo.phase = PaintPhaseSelfOutline;
-        paintObject(paintInfo, accumulatedOffset);
-        paintInfo.phase = originalPhase;
-    }
 }
 
 LayoutRect RenderBox::overflowClipRect(const LayoutPoint& location)

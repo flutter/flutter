@@ -1000,25 +1000,21 @@ void InlineFlowBox::paint(PaintInfo& paintInfo, const LayoutPoint& paintOffset, 
     if (paintInfo.phase == PaintPhaseMask) {
         paintMask(paintInfo, paintOffset);
         return;
-    } else if (paintInfo.phase == PaintPhaseForeground) {
-        // Paint our background, border and box-shadow.
-        paintBoxDecorationBackground(paintInfo, paintOffset);
     }
 
-    // Paint our children.
-    if (paintInfo.phase != PaintPhaseSelfOutline) {
-        PaintInfo childInfo(paintInfo);
-        childInfo.phase = paintInfo.phase == PaintPhaseChildOutlines ? PaintPhaseOutline : paintInfo.phase;
+    if (paintInfo.phase == PaintPhaseForeground)
+        paintBoxDecorationBackground(paintInfo, paintOffset);
 
-        if (childInfo.paintingRoot && childInfo.paintingRoot->isDescendantOf(&renderer()))
-            childInfo.paintingRoot = 0;
-        else
-            childInfo.updatePaintingRootForChildren(&renderer());
+    PaintInfo childInfo(paintInfo);
 
-        for (InlineBox* curr = firstChild(); curr; curr = curr->nextOnLine()) {
-            if (curr->renderer().isText() || !curr->boxModelObject()->hasSelfPaintingLayer())
-                curr->paint(childInfo, paintOffset, lineTop, lineBottom);
-        }
+    if (childInfo.paintingRoot && childInfo.paintingRoot->isDescendantOf(&renderer()))
+        childInfo.paintingRoot = 0;
+    else
+        childInfo.updatePaintingRootForChildren(&renderer());
+
+    for (InlineBox* curr = firstChild(); curr; curr = curr->nextOnLine()) {
+        if (curr->renderer().isText() || !curr->boxModelObject()->hasSelfPaintingLayer())
+            curr->paint(childInfo, paintOffset, lineTop, lineBottom);
     }
 }
 

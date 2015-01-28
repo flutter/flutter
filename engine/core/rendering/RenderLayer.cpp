@@ -893,10 +893,10 @@ void RenderLayer::paintLayerContents(GraphicsContext* context, const LayerPainti
 
     LayoutRect layerBounds;
     // FIXME(sky): Remove foregroundRect. It's unused.
-    ClipRect backgroundRect, foregroundRect, outlineRect;
+    ClipRect backgroundRect, foregroundRect;
     ClipRectsContext clipRectsContext(localPaintingInfo.rootLayer, PaintingClipRects, localPaintingInfo.subPixelAccumulation);
     clipper().calculateRects(clipRectsContext, localPaintingInfo.paintDirtyRect,
-        layerBounds, backgroundRect, foregroundRect, outlineRect,
+        layerBounds, backgroundRect, foregroundRect,
         &offsetFromRoot);
 
     bool shouldPaintContent = isSelfPaintingLayer() && intersectsDamageRect(layerBounds, backgroundRect.rect(), localPaintingInfo.rootLayer, &offsetFromRoot);
@@ -948,7 +948,6 @@ void RenderLayer::paintLayerContents(GraphicsContext* context, const LayerPainti
             localPaintingInfo, paintingRootForRenderer, layerLocation, backgroundRect);
     }
 
-    paintOutline(context, localPaintingInfo, paintingRootForRenderer, layerLocation, outlineRect);
     paintChildren(NormalFlowChildren | PositiveZOrderChildren, context, paintingInfo, paintFlags);
 
     if (filterPainter.hasStartedFilterEffect()) {
@@ -1032,9 +1031,6 @@ void RenderLayer::paintForeground(GraphicsContext* context, GraphicsContext* tra
         paintForegroundWithPhase(PaintPhaseForeground,
             context, localPaintingInfo, paintingRootForRenderer,
             layerLocation, layerForegroundRect);
-        paintForegroundWithPhase(PaintPhaseChildOutlines,
-            context, localPaintingInfo, paintingRootForRenderer,
-            layerLocation, layerForegroundRect);
     }
 
     if (shouldClip)
@@ -1046,18 +1042,6 @@ void RenderLayer::paintForegroundWithPhase(PaintPhase phase, GraphicsContext* co
 {
     PaintInfo paintInfo(context, pixelSnappedIntRect(layerForegroundRect.rect()), phase, paintingRootForRenderer, localPaintingInfo.rootLayer->renderer());
     renderer()->paint(paintInfo, layerLocation);
-}
-
-void RenderLayer::paintOutline(GraphicsContext* context, const LayerPaintingInfo& localPaintingInfo,
-    RenderObject* paintingRootForRenderer, LayoutPoint& layerLocation, ClipRect& layerOutlineRect)
-{
-    if (layerOutlineRect.isEmpty())
-        return;
-
-    PaintInfo paintInfo(context, pixelSnappedIntRect(layerOutlineRect.rect()), PaintPhaseSelfOutline, paintingRootForRenderer, localPaintingInfo.rootLayer->renderer());
-    clipToRect(localPaintingInfo, context, layerOutlineRect, DoNotIncludeSelfForBorderRadius);
-    renderer()->paint(paintInfo, layerLocation);
-    restoreClip(context, localPaintingInfo.paintDirtyRect, layerOutlineRect);
 }
 
 void RenderLayer::paintMask(GraphicsContext* context, const LayerPaintingInfo& localPaintingInfo,
@@ -1305,9 +1289,9 @@ RenderLayer* RenderLayer::hitTestLayer(RenderLayer* rootLayer, RenderLayer* cont
     }
 
     LayoutRect layerBounds;
-    ClipRect backgroundRect, foregroundRect, outlineRect;
+    ClipRect backgroundRect, foregroundRect;
     ClipRectsContext clipRectsContext(rootLayer, RootRelativeClipRects);
-    clipper().calculateRects(clipRectsContext, hitTestRect, layerBounds, backgroundRect, foregroundRect, outlineRect);
+    clipper().calculateRects(clipRectsContext, hitTestRect, layerBounds, backgroundRect, foregroundRect);
 
     // Next we want to see if the mouse pos is inside the child RenderObjects of the layer.
     if (isSelfPaintingLayer() && foregroundRect.intersects(hitTestLocation)) {

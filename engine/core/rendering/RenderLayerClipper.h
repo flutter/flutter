@@ -95,7 +95,7 @@ public:
     // for painting/event handling.
     // Pass offsetFromRoot if known.
     void calculateRects(const ClipRectsContext&, const LayoutRect& paintDirtyRect, LayoutRect& layerBounds,
-        ClipRect& backgroundRect, ClipRect& foregroundRect, ClipRect& outlineRect, const LayoutPoint* offsetFromRoot = 0) const;
+        ClipRect& backgroundRect, ClipRect& foregroundRect, const LayoutPoint* offsetFromRoot = 0) const;
 
 private:
     void calculateClipRects(const ClipRectsContext&, ClipRects&) const;

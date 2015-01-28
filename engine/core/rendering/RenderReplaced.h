@@ -66,7 +66,7 @@ protected:
     void setIntrinsicSize(const LayoutSize& intrinsicSize) { m_intrinsicSize = intrinsicSize; }
     virtual void intrinsicSizeChanged();
 
-    virtual void paint(PaintInfo&, const LayoutPoint&) override;
+    virtual void paint(PaintInfo&, const LayoutPoint&) final;
     bool shouldPaint(PaintInfo&, const LayoutPoint&);
     LayoutRect localSelectionRect(bool checkWhetherSelected = true) const; // This is in local coordinates, but it's a physical rect (so the top left corner is physical top left).
 

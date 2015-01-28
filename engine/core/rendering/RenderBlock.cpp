@@ -479,11 +479,8 @@ void RenderBlock::paint(PaintInfo& paintInfo, const LayoutPoint& paintOffset)
 
 void RenderBlock::paintContents(PaintInfo& paintInfo, const LayoutPoint& paintOffset)
 {
-    PaintPhase newPhase = (paintInfo.phase == PaintPhaseChildOutlines) ? PaintPhaseOutline : paintInfo.phase;
-
     // We don't paint our own background, but we do let the kids paint their backgrounds.
     PaintInfo paintInfoForChild(paintInfo);
-    paintInfoForChild.phase = newPhase;
     paintInfoForChild.updatePaintingRootForChildren(this);
     paintChildren(paintInfoForChild, paintOffset);
 }
@@ -521,8 +518,6 @@ void RenderBlock::paintAsInlineBlock(RenderObject* renderer, PaintInfo& paintInf
         renderer->paint(info, childPoint);
     } else {
         info.phase = PaintPhaseForeground;
-        renderer->paint(info, childPoint);
-        info.phase = PaintPhaseOutline;
         renderer->paint(info, childPoint);
     }
 }
@@ -570,20 +565,17 @@ void RenderBlock::paintObject(PaintInfo& paintInfo, const LayoutPoint& paintOffs
         return;
     }
 
-    if (paintPhase != PaintPhaseSelfOutline)
-        paintContents(paintInfo, paintOffset);
-
+    paintContents(paintInfo, paintOffset);
     paintSelection(paintInfo, paintOffset); // Fill in gaps in selection on lines and between blocks.
 
-    if ((paintPhase == PaintPhaseOutline || paintPhase == PaintPhaseSelfOutline)
-        && style()->hasOutline() && !style()->outlineStyleIsAuto()) {
-        paintOutline(paintInfo, LayoutRect(paintOffset, size()));
-    }
+    if (paintPhase == PaintPhaseForeground) {
+        if (style()->hasOutline() && !style()->outlineStyleIsAuto())
+            paintOutline(paintInfo, LayoutRect(paintOffset, size()));
 
-    // If the caret's node's render object's containing block is this block, and the paint action is PaintPhaseForeground,
-    // then paint the caret.
-    if (paintPhase == PaintPhaseForeground)
+        // If the caret's node's render object's containing block is this block, and the paint action is PaintPhaseForeground,
+        // then paint the caret.
         paintCarets(paintInfo, paintOffset);
+    }
 }
 
 bool RenderBlock::shouldPaintSelectionGaps() const
