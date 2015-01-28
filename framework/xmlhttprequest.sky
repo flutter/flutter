@@ -101,10 +101,9 @@ class XMLHttpRequest {
     });
     priv.request.headers = requestHeaders;
 
-    // FIXME: Factor this into the JS bindings.
-    var pipe = new core.createMessagePipe();
-    priv.networkService.createURLLoader(pipe.handle1);
-    priv.loader = shell.wrapHandle(pipe.handle0, loader.URLLoader);
+    priv.networkService.createURLLoader(function(urlLoaderProxy) {
+        priv.loader = urlLoaderProxy;
+    });
 
     var self = this;
     outstandingRequests.add(this);

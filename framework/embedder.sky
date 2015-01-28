@@ -1,8 +1,8 @@
-<import src="shell.sky" as="shell" />
+<import src="/gen/mojo/public/sky/connection.sky" as="connection" />
 <script>
-function connectToEmbedderService(service, client) {
-    var handle = internals.connectToEmbedderService(service.name);
-    return shell.wrapHandle(handle, service, client);
+function connectToEmbedderService(service) {
+  var handle = internals.connectToEmbedderService(service.name);
+  return connection.bindHandleToProxy(handle, service);
 }
 
 module.exports = {
