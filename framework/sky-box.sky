@@ -28,7 +28,7 @@
     }
   </style>
   <div class="title">{{ title }}</div>
-  <div class="content"><content></content></div>
+  <div class="content"><content/></div>
 </template>
 <script>
 module.exports = class extends SkyElement {

@@ -1,0 +1,149 @@
+<!--
+// Copyright 2015 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+-->
+<import src="animation/controller.sky" as="AnimationController" />
+<import src="animation/curves.sky" as="Curves" />
+<import src="sky-element/sky-element.sky" as="SkyElement" />
+<import src="sky-scrollable.sky" />
+
+<sky-element
+  name="sky-drawer"
+  on-pointerdown="handlePointerDown"
+  on-pointermove="handlePointerMove"
+  on-pointerup="handlePointerUp"
+  on-pointercancel="handlePointerCancel">
+<template>
+  <style>
+    #mask {
+      background-color: black;
+      will-change: opacity;
+      position: absolute;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      right: 0;
+    }
+    #content {
+      background-color: yellow;
+      will-change: transform;
+      position: absolute;
+      width: 256px;
+      top: 0;
+      left: 0;
+      bottom: 0;
+    }
+  </style>
+  <div id="mask" on-click="handleMaskClick" />
+  <div id="content">
+    <content/>
+  </div>
+</template>
+<script>
+const kWidth = 256;
+const kMinAnimationDurationMS = 120;
+const kMaxAnimationDurationMS = 500;
+const kAnimationCurve = Curves.easeInOut;
+
+module.exports = class extends SkyElement {
+  created() {
+    this.previousX_ = 0;
+    this.position_ = 0;
+    this.mask_ = null;
+    this.content_ = null;
+    this.animation_ = new AnimationController(this);
+  }
+
+  shadowRootReady() {
+    this.mask_ = this.shadowRoot.getElementById('mask');
+    this.content_ = this.shadowRoot.getElementById('content');
+    this.position = -kWidth;
+  }
+
+  toggle() {
+    if (this.isMostlyClosed)
+      this.open();
+    else
+      this.close();
+  }
+
+  open() {
+    this.animateToPosition_(0);
+  }
+
+  close() {
+    this.animateToPosition_(-kWidth);
+  }
+
+  get isClosed() {
+    return this.position_ <= -kWidth;
+  }
+
+  get isMostlyClosed() {
+    return this.position_ <= -kWidth / 2;
+  }
+
+  get position() {
+    return this.position_;
+  }
+
+  set position(value) {
+    var newPosition = Math.min(0, Math.max(value, -kWidth));
+    this.position_ = newPosition;
+    this.content_.style.transform = 'translateX(' + newPosition + 'px)';
+    this.mask_.style.opacity = (newPosition / kWidth + 1) * 0.25;
+    this.style.display = this.isClosed ? 'none' : '';
+  }
+
+  settle_() {
+    if (this.isMostlyClosed)
+      this.close();
+    else
+      this.open();
+  }
+
+  animateToPosition_(targetPosition) {
+    var currentPosition = this.position_;
+    var animationDistance = Math.abs(targetPosition - currentPosition);
+    var duration = kMaxAnimationDurationMS * animationDistance / kWidth;
+    this.animation_.start({
+      begin: currentPosition,
+      end: targetPosition,
+      duration: Math.max(kMinAnimationDurationMS, duration),
+      curve: kAnimationCurve,
+    });
+  }
+
+  updateAnimation(position) {
+    this.position = position;
+  }
+
+  handleMaskClick() {
+    this.close();
+  }
+
+  handlePointerDown(event) {
+    this.animation_.stop();
+    this.previousX_ = event.x;
+  }
+
+  handlePointerMove(event) {
+    // TODO(abarth): Implement event.dx;
+    var deltaX = event.x - this.previousX_;
+    this.previousX_ = event.x;
+    this.position += deltaX;
+  }
+
+  handlePointerUp(event) {
+    if (!this.animation_.isAnimating)
+      this.settle_();
+  }
+
+  handlePointerCancel(event) {
+    if (!this.animation_.isAnimating)
+      this.settle_();
+  }
+}.register();
+</script>
+</sky-element>
