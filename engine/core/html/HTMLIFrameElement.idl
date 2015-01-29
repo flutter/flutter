@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 interface HTMLIFrameElement : HTMLElement {
+  [Reflect, URL] attribute DOMString src;
+
   [CallWith=ScriptState] any takeServicesHandle();
   [CallWith=ScriptState] any takeExposedServicesHandle();
 };

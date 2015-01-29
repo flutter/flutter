@@ -35,8 +35,10 @@ void HTMLIFrameElement::insertedInto(ContainerNode* insertionPoint)
 {
     HTMLElement::insertedInto(insertionPoint);
     if (insertionPoint->inDocument()) {
-        if (LocalFrame* frame = document().frame())
+        if (LocalFrame* frame = document().frame()) {
             m_contentView = frame->loaderClient()->createChildFrame();
+            m_contentView->AddObserver(this);
+        }
         navigateView();
     }
 }
@@ -95,7 +97,6 @@ void HTMLIFrameElement::navigateView()
     m_contentView->Embed(mojo::String::From(url.string().utf8().data()),
         mojo::GetProxy(&m_services),
         mojo::MakeProxy<mojo::ServiceProvider>(exposedServicesPipe.handle1.Pass()));
-    m_contentView->AddObserver(this);
 }
 
 }
