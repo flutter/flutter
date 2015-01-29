@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef SKY_TOOLS_DEBUGGER_PROMPT_TRACE_COLLECTOR_H_
-#define SKY_TOOLS_DEBUGGER_PROMPT_TRACE_COLLECTOR_H_
+#ifndef SKY_TOOLS_DEBUGGER_TRACE_COLLECTOR_H_
+#define SKY_TOOLS_DEBUGGER_TRACE_COLLECTOR_H_
 
 #include <vector>
 
@@ -37,4 +37,4 @@ class TraceCollector : public mojo::common::DataPipeDrainer::Client {
 }  // namespace debugger
 }  // namespace sky
 
-#endif  // SKY_TOOLS_DEBUGGER_PROMPT_TRACE_COLLECTOR_H_
+#endif  // SKY_TOOLS_DEBUGGER_TRACE_COLLECTOR_H_

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "sky/tools/debugger/prompt/trace_collector.h"
+#include "sky/tools/debugger/trace_collector.h"
 
 namespace sky {
 namespace debugger {

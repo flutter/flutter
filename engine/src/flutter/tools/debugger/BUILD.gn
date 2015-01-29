@@ -3,44 +3,36 @@
 # found in the LICENSE file.
 
 import("//mojo/public/mojo_application.gni")
-import("//mojo/public/tools/bindings/mojom.gni")
 
 group("debugger") {
   testonly = true
 
   deps = [
-    "//sky/tools/debugger/prompt",
     ":sky_debugger",
   ]
 }
 
 mojo_native_application("sky_debugger") {
+  output_name = "sky_debugger"
+
   sources = [
     "debugger.cc",
-    "debugger.h",
-    "main.cc",
-    "navigator_host_impl.cc",
-    "navigator_host_impl.h",
+    "trace_collector.cc",
+    "trace_collector.h",
   ]
 
   deps = [
     "//base",
+    "//base/allocator",
     "//mojo/application",
-    "//mojo/converters/geometry",
-    "//mojo/converters/input_events",
+    "//mojo/common",
     "//mojo/public/cpp/bindings",
+    "//mojo/public/cpp/system",
     "//mojo/public/cpp/utility",
-    "//mojo/services/input_events/public/interfaces",
-    "//mojo/services/navigation/public/interfaces",
-    "//mojo/services/view_manager/public/cpp",
-    "//services/window_manager:lib",
+    "//mojo/services/window_manager/public/interfaces",
+    "//net",
+    "//net:http_server",
+    "//services/tracing:bindings",
     "//sky/viewer:bindings",
-    ":bindings",
-  ]
-}
-
-mojom("bindings") {
-  sources = [
-    "debugger.mojom",
   ]
 }

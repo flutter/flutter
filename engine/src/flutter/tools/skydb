@@ -104,9 +104,9 @@ class SkyDebugger(object):
         shell_args = [
             '--v=1',
             '--content-handlers=%s' % ','.join(content_handlers),
-            '--url-mappings=mojo:window_manager=mojo:sky_debugger',
-            '--args-for=mojo:sky_debugger_prompt %d' % remote_command_port,
-            'mojo:window_manager',
+            '--url-mappings=mojo:window_manager=mojo:kiosk_wm',
+            '--args-for=mojo:sky_debugger %d' % remote_command_port,
+            'mojo:sky_debugger',
         ]
 
         if args.url_or_path:
@@ -574,8 +574,6 @@ class SkyDebugger(object):
             'starts tracing the running sky instance')
         self._add_basic_command(subparsers, 'reload', '/reload',
             'reload the current page')
-        self._add_basic_command(subparsers, 'inspect', '/inspect',
-            'start the inspector on the current page (Linux only)')
         self._add_basic_command(subparsers, 'start_profiling', '/start_profiling',
             'starts profiling the running sky instance (Linux only)')
 
