@@ -123,8 +123,6 @@ class DocumentView : public blink::ServiceProvider,
   void OnViewDestroyed(mojo::View* view) override;
   void OnViewInputEvent(mojo::View* view, const mojo::EventPtr& event) override;
 
-  bool DispatchInputEvent(const mojo::EventPtr& event);
-
   void Load(mojo::URLResponsePtr response);
   float GetDevicePixelRatio() const;
   scoped_ptr<Rasterizer> CreateRasterizer();

@@ -73,6 +73,32 @@ mojo::Target WebNavigationPolicyToNavigationTarget(
   }
 }
 
+ui::EventType ConvertEventTypeToUIEventType(blink::WebInputEvent::Type type) {
+  if (type == blink::WebInputEvent::PointerDown)
+    return ui::ET_TOUCH_PRESSED;
+  if (type == blink::WebInputEvent::PointerUp)
+    return ui::ET_TOUCH_RELEASED;
+  if (type == blink::WebInputEvent::PointerMove)
+    return ui::ET_TOUCH_MOVED;
+  DCHECK(type == blink::WebInputEvent::PointerCancel);
+  return ui::ET_TOUCH_CANCELLED;
+}
+
+scoped_ptr<ui::TouchEvent> ConvertToUITouchEvent(
+    const blink::WebInputEvent& event,
+    float device_pixel_ratio) {
+  if (!blink::WebInputEvent::isPointerEventType(event.type))
+    return nullptr;
+  const blink::WebPointerEvent& pointer_event =
+      static_cast<const blink::WebPointerEvent&>(event);
+  return make_scoped_ptr(new ui::TouchEvent(
+      ConvertEventTypeToUIEventType(event.type),
+      gfx::PointF(pointer_event.x * device_pixel_ratio,
+                  pointer_event.y * device_pixel_ratio),
+      pointer_event.pointer,
+      base::TimeDelta::FromMillisecondsD(pointer_event.timeStampMS)));
+}
+
 }  // namespace
 
 static int s_next_debugger_id = 1;
@@ -304,31 +330,32 @@ void DocumentView::OnViewDestroyed(mojo::View* view) {
   root_ = nullptr;
 }
 
-bool DocumentView::DispatchInputEvent(const mojo::EventPtr& event) {
-  scoped_ptr<blink::WebInputEvent> web_event =
-      ConvertEvent(event, GetDevicePixelRatio());
-  return web_event && web_view_->handleInputEvent(*web_event);
-}
-
 void DocumentView::OnViewInputEvent(
     mojo::View* view, const mojo::EventPtr& event) {
+  float device_pixel_ratio = GetDevicePixelRatio();
+  scoped_ptr<blink::WebInputEvent> web_event =
+      ConvertEvent(event, device_pixel_ratio);
+  if (!web_event)
+    return;
 
-  scoped_ptr<ui::Event> ui_event(event.To<scoped_ptr<ui::Event>>());
-  ui::TouchEvent* touch_event = nullptr;
-  if (ui_event->IsTouchEvent()) {
-    touch_event = static_cast<ui::TouchEvent*>(ui_event.get());
-    ui::GestureRecognizer::Get()->ProcessTouchEventPreDispatch(
-        *touch_event, this);
-  }
+  ui::GestureRecognizer* recognizer = ui::GestureRecognizer::Get();
+  scoped_ptr<ui::TouchEvent> touch_event =
+      ConvertToUITouchEvent(*web_event, device_pixel_ratio);
+  if (touch_event)
+    recognizer->ProcessTouchEventPreDispatch(*touch_event, this);
 
-  bool handled = DispatchInputEvent(event);
+  bool handled = web_view_->handleInputEvent(*web_event);
 
   if (touch_event) {
     ui::EventResult result = handled ? ui::ER_UNHANDLED : ui::ER_UNHANDLED;
-    if (auto gestures = ui::GestureRecognizer::Get()->ProcessTouchEventPostDispatch(
-        *touch_event, result, this)) {
-      for (auto& gesture : *gestures)
-        DispatchInputEvent(mojo::Event::From(*gesture));
+    if (auto gestures = recognizer->ProcessTouchEventPostDispatch(
+            *touch_event, result, this)) {
+      for (auto& gesture : *gestures) {
+        scoped_ptr<blink::WebInputEvent> gesture_event =
+            ConvertEvent(mojo::Event::From(*gesture), device_pixel_ratio);
+        if (gesture_event)
+          web_view_->handleInputEvent(*gesture_event);
+      }
     }
   }
 }
