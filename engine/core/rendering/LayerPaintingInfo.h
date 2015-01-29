@@ -54,15 +54,13 @@ class RenderLayer;
 
 struct LayerPaintingInfo {
     LayerPaintingInfo(RenderLayer* inRootLayer, const LayoutRect& inDirtyRect,
-        const LayoutSize& inSubPixelAccumulation, RenderObject* inPaintingRoot)
+        const LayoutSize& inSubPixelAccumulation)
         : rootLayer(inRootLayer)
-        , paintingRoot(inPaintingRoot)
         , paintDirtyRect(inDirtyRect)
         , subPixelAccumulation(inSubPixelAccumulation)
         , clipToDirtyRect(true)
     { }
     RenderLayer* rootLayer;
-    RenderObject* paintingRoot; // only paint descendants of this object
     LayoutRect paintDirtyRect; // relative to rootLayer;
     LayoutSize subPixelAccumulation;
     bool clipToDirtyRect;

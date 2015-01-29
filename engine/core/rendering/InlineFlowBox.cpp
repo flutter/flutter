@@ -1005,16 +1005,9 @@ void InlineFlowBox::paint(PaintInfo& paintInfo, const LayoutPoint& paintOffset, 
     if (paintInfo.phase == PaintPhaseForeground)
         paintBoxDecorationBackground(paintInfo, paintOffset);
 
-    PaintInfo childInfo(paintInfo);
-
-    if (childInfo.paintingRoot && childInfo.paintingRoot->isDescendantOf(&renderer()))
-        childInfo.paintingRoot = 0;
-    else
-        childInfo.updatePaintingRootForChildren(&renderer());
-
     for (InlineBox* curr = firstChild(); curr; curr = curr->nextOnLine()) {
         if (curr->renderer().isText() || !curr->boxModelObject()->hasSelfPaintingLayer())
-            curr->paint(childInfo, paintOffset, lineTop, lineBottom);
+            curr->paint(paintInfo, paintOffset, lineTop, lineBottom);
     }
 }
 
@@ -1107,8 +1100,6 @@ static LayoutRect clipRectForNinePieceImageStrip(InlineFlowBox* box, const NineP
 void InlineFlowBox::paintBoxDecorationBackground(PaintInfo& paintInfo, const LayoutPoint& paintOffset)
 {
     ASSERT(paintInfo.phase == PaintPhaseForeground);
-    if (!paintInfo.shouldPaintWithinRoot(&renderer()))
-        return;
 
     // You can use p::first-line to specify a background. If so, the root line boxes for
     // a line may actually have to paint a background.
@@ -1182,7 +1173,7 @@ void InlineFlowBox::paintBoxDecorationBackground(PaintInfo& paintInfo, const Lay
 
 void InlineFlowBox::paintMask(PaintInfo& paintInfo, const LayoutPoint& paintOffset)
 {
-    if (!paintInfo.shouldPaintWithinRoot(&renderer()) || paintInfo.phase != PaintPhaseMask)
+    if (paintInfo.phase != PaintPhaseMask)
         return;
 
     // Pixel snap mask painting.

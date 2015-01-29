@@ -129,7 +129,6 @@ public:
     void paintContents(GraphicsContext*, const IntRect& damageRect);
     bool isPainting() const;
     bool hasEverPainted() const { return m_lastPaintTime; }
-    void setNodeToDraw(Node*);
 
     Color documentBackgroundColor() const;
 
@@ -237,10 +236,7 @@ private:
     RenderObject* m_viewportRenderer;
 
     double m_lastPaintTime;
-
-    RefPtr<Node> m_nodeToDraw;
     bool m_isPainting;
-
     bool m_hasSoftwareFilters;
 
     float m_visibleContentScaleFactor;

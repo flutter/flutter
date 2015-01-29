@@ -506,9 +506,6 @@ public:
 
     static FloatRect absoluteBoundingBoxRectForRange(const Range*);
 
-    // the rect that will be painted if this object is passed as the paintingRoot
-    LayoutRect paintingRootRect(LayoutRect& topLevelRect);
-
     virtual LayoutUnit minPreferredLogicalWidth() const { return 0; }
     virtual LayoutUnit maxPreferredLogicalWidth() const { return 0; }
 

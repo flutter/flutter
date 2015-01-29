@@ -153,7 +153,7 @@ public:
     // front.  The hitTest method looks for mouse events by walking
     // layers that intersect the point from front to back.
     // paint() assumes that the caller will clip to the bounds of damageRect if necessary.
-    void paint(GraphicsContext*, const LayoutRect& damageRect, RenderObject* paintingRoot = 0);
+    void paint(GraphicsContext*, const LayoutRect& damageRect);
     bool hitTest(const HitTestRequest&, HitTestResult&);
     bool hitTest(const HitTestRequest&, const HitTestLocation&, HitTestResult&);
 
@@ -287,11 +287,11 @@ private:
     void paintChildren(unsigned childrenToVisit, GraphicsContext*, const LayerPaintingInfo&, PaintLayerFlags);
 
     void paintForeground(GraphicsContext*, GraphicsContext* transparencyLayerContext,
-        const LayoutRect& transparencyPaintDirtyRect, bool haveTransparency, const LayerPaintingInfo&, RenderObject* paintingRootForRenderer,
+        const LayoutRect& transparencyPaintDirtyRect, bool haveTransparency, const LayerPaintingInfo&,
         LayoutPoint& layerLocation, ClipRect& layerForegroundRect);
-    void paintForegroundWithPhase(PaintPhase, GraphicsContext*, const LayerPaintingInfo&, RenderObject* paintingRootForRenderer,
+    void paintForegroundWithPhase(PaintPhase, GraphicsContext*, const LayerPaintingInfo&,
         LayoutPoint& layerLocation, ClipRect& layerForegroundRect);
-    void paintMask(GraphicsContext*, const LayerPaintingInfo&, RenderObject* paintingRootForRenderer,
+    void paintMask(GraphicsContext*, const LayerPaintingInfo&,
         LayoutPoint& layerLocation, ClipRect& layerBackgroundRect);
 
     RenderLayer* hitTestLayer(RenderLayer* rootLayer, RenderLayer* containerLayer, const HitTestRequest& request, HitTestResult& result,

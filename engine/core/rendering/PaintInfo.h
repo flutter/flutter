@@ -47,30 +47,12 @@ class RenderObject;
  */
 struct PaintInfo {
     PaintInfo(GraphicsContext* newContext, const IntRect& newRect, PaintPhase newPhase,
-        RenderObject* newPaintingRoot, const RenderLayerModelObject* newPaintContainer)
+        const RenderLayerModelObject* newPaintContainer)
         : context(newContext)
         , rect(newRect)
         , phase(newPhase)
-        , paintingRoot(newPaintingRoot)
         , m_paintContainer(newPaintContainer)
     {
-    }
-
-    void updatePaintingRootForChildren(const RenderObject* renderer)
-    {
-        if (!paintingRoot)
-            return;
-
-        // If we're the painting root, kids draw normally, and see root of 0.
-        if (paintingRoot == renderer) {
-            paintingRoot = 0;
-            return;
-        }
-    }
-
-    bool shouldPaintWithinRoot(const RenderObject* renderer) const
-    {
-        return !paintingRoot || paintingRoot == renderer;
     }
 
     void applyTransform(const AffineTransform& localToAncestorTransform, bool identityStatusUnknown = true)
@@ -96,7 +78,6 @@ struct PaintInfo {
     GraphicsContext* context;
     IntRect rect;
     PaintPhase phase;
-    RenderObject* paintingRoot; // used to draw just one element and its visual kids
 
 private:
     const RenderLayerModelObject* m_paintContainer; // the layer object that originates the current painting

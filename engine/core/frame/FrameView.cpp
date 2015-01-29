@@ -667,8 +667,6 @@ void FrameView::paintContents(GraphicsContext* p, const IntRect& rect)
     bool fillWithRed;
     if (isTransparent())
         fillWithRed = false; // Transparent, don't fill with red.
-    else if (m_nodeToDraw)
-        fillWithRed = false; // Element images are transparent, don't fill with red.
     else
         fillWithRed = true;
 
@@ -696,8 +694,6 @@ void FrameView::paintContents(GraphicsContext* p, const IntRect& rect)
     ASSERT(!m_isPainting);
     m_isPainting = true;
 
-    // m_nodeToDraw is used to draw only one element (and its descendants)
-    RenderObject* renderer = m_nodeToDraw ? m_nodeToDraw->renderer() : 0;
     RenderLayer* rootLayer = renderView->layer();
 
 #if ENABLE(ASSERT)
@@ -705,7 +701,7 @@ void FrameView::paintContents(GraphicsContext* p, const IntRect& rect)
     RenderObject::SetLayoutNeededForbiddenScope forbidSetNeedsLayout(*rootLayer->renderer());
 #endif
 
-    rootLayer->paint(p, rect, renderer);
+    rootLayer->paint(p, rect);
 
     m_isPainting = false;
     m_lastPaintTime = currentTime();
@@ -721,11 +717,6 @@ void FrameView::paintContents(GraphicsContext* p, const IntRect& rect)
 bool FrameView::isPainting() const
 {
     return m_isPainting;
-}
-
-void FrameView::setNodeToDraw(Node* node)
-{
-    m_nodeToDraw = node;
 }
 
 void FrameView::updateLayoutAndStyleForPainting()

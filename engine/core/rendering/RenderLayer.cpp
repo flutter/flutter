@@ -745,10 +745,10 @@ void RenderLayer::updateStackingNode()
         m_stackingNode = nullptr;
 }
 
-void RenderLayer::paint(GraphicsContext* context, const LayoutRect& damageRect, RenderObject* paintingRoot)
+void RenderLayer::paint(GraphicsContext* context, const LayoutRect& damageRect)
 {
     TRACE_EVENT0("blink", "RenderLayer::paint");
-    LayerPaintingInfo paintingInfo(this, enclosingIntRect(damageRect), LayoutSize(), paintingRoot);
+    LayerPaintingInfo paintingInfo(this, enclosingIntRect(damageRect), LayoutSize());
     paintLayer(context, paintingInfo, PaintContent);
 }
 
@@ -933,19 +933,11 @@ void RenderLayer::paintLayerContents(GraphicsContext* context, const LayerPainti
         }
     }
 
-    // If this layer's renderer is a child of the paintingRoot, we render unconditionally, which
-    // is done by passing a nil paintingRoot down to our renderer (as if no paintingRoot was ever set).
-    // Else, our renderer tree may or may not contain the painting root, so we pass that root along
-    // so it will be tested against as we descend through the renderers.
-    RenderObject* paintingRootForRenderer = 0;
-    if (localPaintingInfo.paintingRoot && !renderer()->isDescendantOf(localPaintingInfo.paintingRoot))
-        paintingRootForRenderer = localPaintingInfo.paintingRoot;
-
     LayoutPoint layerLocation = toPoint(layerBounds.location() - renderBoxLocation() + localPaintingInfo.subPixelAccumulation);
 
     if (shouldPaintContent) {
         paintForeground(context, transparencyLayerContext, paintingInfo.paintDirtyRect, haveTransparency,
-            localPaintingInfo, paintingRootForRenderer, layerLocation, backgroundRect);
+            localPaintingInfo, layerLocation, backgroundRect);
     }
 
     paintChildren(NormalFlowChildren | PositiveZOrderChildren, context, paintingInfo, paintFlags);
@@ -959,7 +951,7 @@ void RenderLayer::paintLayerContents(GraphicsContext* context, const LayerPainti
     ASSERT(transparencyLayerContext == context);
 
     if (shouldPaintContent && renderer()->hasMask())
-        paintMask(context, localPaintingInfo, paintingRootForRenderer, layerLocation, backgroundRect);
+        paintMask(context, localPaintingInfo, layerLocation, backgroundRect);
 
     // End our transparency layer
     if (haveTransparency && m_usedTransparency) {
@@ -990,7 +982,7 @@ void RenderLayer::paintLayerByApplyingTransform(GraphicsContext* context, const 
 
     // Now do a paint with the root layer shifted to be us.
     LayerPaintingInfo transformedPaintingInfo(this, enclosingIntRect(transform.inverse().mapRect(paintingInfo.paintDirtyRect)),
-        adjustedSubPixelAccumulation, paintingInfo.paintingRoot);
+        adjustedSubPixelAccumulation);
     paintLayerContents(context, transformedPaintingInfo, paintFlags);
 }
 
@@ -1011,7 +1003,7 @@ void RenderLayer::paintChildren(unsigned childrenToVisit, GraphicsContext* conte
 
 void RenderLayer::paintForeground(GraphicsContext* context, GraphicsContext* transparencyLayerContext,
     const LayoutRect& transparencyPaintDirtyRect, bool haveTransparency, const LayerPaintingInfo& localPaintingInfo,
-    RenderObject* paintingRootForRenderer, LayoutPoint& layerLocation, ClipRect& layerForegroundRect)
+    LayoutPoint& layerLocation, ClipRect& layerForegroundRect)
 {
     bool foregroundRectIsEmpty = layerForegroundRect.isEmpty();
 
@@ -1029,7 +1021,7 @@ void RenderLayer::paintForeground(GraphicsContext* context, GraphicsContext* tra
         // interleaving of the fragments to work properly.
         // FIXME(sky): Do we still need this for anything now that we don't have fragments?
         paintForegroundWithPhase(PaintPhaseForeground,
-            context, localPaintingInfo, paintingRootForRenderer,
+            context, localPaintingInfo,
             layerLocation, layerForegroundRect);
     }
 
@@ -1038,21 +1030,21 @@ void RenderLayer::paintForeground(GraphicsContext* context, GraphicsContext* tra
 }
 
 void RenderLayer::paintForegroundWithPhase(PaintPhase phase, GraphicsContext* context,
-    const LayerPaintingInfo& localPaintingInfo, RenderObject* paintingRootForRenderer, LayoutPoint& layerLocation, ClipRect& layerForegroundRect)
+    const LayerPaintingInfo& localPaintingInfo, LayoutPoint& layerLocation, ClipRect& layerForegroundRect)
 {
-    PaintInfo paintInfo(context, pixelSnappedIntRect(layerForegroundRect.rect()), phase, paintingRootForRenderer, localPaintingInfo.rootLayer->renderer());
+    PaintInfo paintInfo(context, pixelSnappedIntRect(layerForegroundRect.rect()), phase, localPaintingInfo.rootLayer->renderer());
     renderer()->paint(paintInfo, layerLocation);
 }
 
 void RenderLayer::paintMask(GraphicsContext* context, const LayerPaintingInfo& localPaintingInfo,
-    RenderObject* paintingRootForRenderer, LayoutPoint& layerLocation, ClipRect& layerBackgroundRect)
+    LayoutPoint& layerLocation, ClipRect& layerBackgroundRect)
 {
     if (localPaintingInfo.clipToDirtyRect)
         clipToRect(localPaintingInfo, context, layerBackgroundRect, DoNotIncludeSelfForBorderRadius); // Mask painting will handle clipping to self.
 
     // Paint the mask.
     // FIXME: Eventually we will collect the region from the fragment itself instead of just from the paint info.
-    PaintInfo paintInfo(context, pixelSnappedIntRect(layerBackgroundRect.rect()), PaintPhaseMask, paintingRootForRenderer, localPaintingInfo.rootLayer->renderer());
+    PaintInfo paintInfo(context, pixelSnappedIntRect(layerBackgroundRect.rect()), PaintPhaseMask, localPaintingInfo.rootLayer->renderer());
     renderer()->paint(paintInfo, layerLocation);
 
     if (localPaintingInfo.clipToDirtyRect)

@@ -1025,15 +1025,6 @@ void RenderObject::addAbsoluteRectForLayer(LayoutRect& result)
         current->addAbsoluteRectForLayer(result);
 }
 
-LayoutRect RenderObject::paintingRootRect(LayoutRect& topLevelRect)
-{
-    LayoutRect result = absoluteBoundingBoxRect();
-    topLevelRect = result;
-    for (RenderObject* current = slowFirstChild(); current; current = current->nextSibling())
-        current->addAbsoluteRectForLayer(result);
-    return result;
-}
-
 void RenderObject::paint(PaintInfo&, const LayoutPoint&)
 {
 }

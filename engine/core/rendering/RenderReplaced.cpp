@@ -108,9 +108,6 @@ void RenderReplaced::paint(PaintInfo& paintInfo, const LayoutPoint& paintOffset)
     if (paintInfo.phase != PaintPhaseForeground && paintInfo.phase != PaintPhaseSelection && !canHaveChildren())
         return;
 
-    if (!paintInfo.shouldPaintWithinRoot(this))
-        return;
-
     bool drawSelectionTint = selectionState() != SelectionNone;
     if (paintInfo.phase == PaintPhaseSelection) {
         if (selectionState() == SelectionNone)
@@ -150,9 +147,6 @@ void RenderReplaced::paint(PaintInfo& paintInfo, const LayoutPoint& paintOffset)
 
 bool RenderReplaced::shouldPaint(PaintInfo& paintInfo, const LayoutPoint& paintOffset)
 {
-    if (!paintInfo.shouldPaintWithinRoot(this))
-        return false;
-
     LayoutPoint adjustedPaintOffset = paintOffset + location();
 
     // Early exit if the element touches the edges.

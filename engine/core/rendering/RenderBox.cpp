@@ -391,11 +391,8 @@ bool RenderBox::nodeAtPoint(const HitTestRequest& request, HitTestResult& result
 void RenderBox::paint(PaintInfo& paintInfo, const LayoutPoint& paintOffset)
 {
     LayoutPoint adjustedPaintOffset = paintOffset + location();
-    // default implementation. Just pass paint through to the children
-    PaintInfo childInfo(paintInfo);
-    childInfo.updatePaintingRootForChildren(this);
     for (RenderObject* child = slowFirstChild(); child; child = child->nextSibling())
-        child->paint(childInfo, adjustedPaintOffset);
+        child->paint(paintInfo, adjustedPaintOffset);
 }
 
 void RenderBox::paintRootBoxFillLayers(const PaintInfo& paintInfo)
@@ -440,9 +437,6 @@ BackgroundBleedAvoidance RenderBox::determineBackgroundBleedAvoidance(GraphicsCo
 
 void RenderBox::paintBoxDecorationBackground(PaintInfo& paintInfo, const LayoutPoint& paintOffset)
 {
-    if (!paintInfo.shouldPaintWithinRoot(this))
-        return;
-
     LayoutRect paintRect = borderBoxRect();
     paintRect.moveBy(paintOffset);
     paintBoxDecorationBackgroundWithRect(paintInfo, paintOffset, paintRect);
@@ -507,7 +501,7 @@ bool RenderBox::backgroundHasOpaqueTopLayer() const
 
 void RenderBox::paintMask(PaintInfo& paintInfo, const LayoutPoint& paintOffset)
 {
-    if (!paintInfo.shouldPaintWithinRoot(this) || paintInfo.phase != PaintPhaseMask)
+    if (paintInfo.phase != PaintPhaseMask)
         return;
 
     LayoutRect paintRect = LayoutRect(paintOffset, size());

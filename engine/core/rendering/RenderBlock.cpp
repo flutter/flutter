@@ -479,10 +479,8 @@ void RenderBlock::paint(PaintInfo& paintInfo, const LayoutPoint& paintOffset)
 
 void RenderBlock::paintContents(PaintInfo& paintInfo, const LayoutPoint& paintOffset)
 {
-    // We don't paint our own background, but we do let the kids paint their backgrounds.
-    PaintInfo paintInfoForChild(paintInfo);
-    paintInfoForChild.updatePaintingRootForChildren(this);
-    paintChildren(paintInfoForChild, paintOffset);
+    // FIXME(sky): Can we remove paintContents and just keep paintChildren?
+    paintChildren(paintInfo, paintOffset);
 }
 
 void RenderBlock::paintChildren(PaintInfo& paintInfo, const LayoutPoint& paintOffset)
