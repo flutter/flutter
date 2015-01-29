@@ -10,8 +10,7 @@ cityList.addEventListener('load', function() {
   } else {
     scrolled = true;
     setTimeout(function() {
-      cityList.scrollerElement.scrollTop = 200;
-      cityList.handleScroll({ target: cityList.scrollerElement });
+      cityList.scrollBy(200);
     }, 0);
   }
 });

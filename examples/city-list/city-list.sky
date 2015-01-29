@@ -120,34 +120,8 @@ module.exports.CityItemElement = class extends SkyElement {
       background-color: #fff;
   }
 
-  #scroller {
-    overflow-x: hidden;
-    overflow-y: auto;
-    perspective: 5px;
-    position: absolute;
-    left: 0;
-    right: 0;
-    top: 0;
-    bottom: 0;
-  }
-
-  #scroller::-webkit-scrollbar {
-    display:none;
-  }
-
-  #scrollarea {
-    will-change: transform;
-    transform-style: preserve-3d;
-  }
-
   #contentarea {
-    position: absolute;
-    will-change: contents;
-    width: 100%;
-  }
-
-  .void {
-    display: none;
+    will-change: transform;
   }
 
   .position {
@@ -157,12 +131,8 @@ module.exports.CityItemElement = class extends SkyElement {
   }
 
   </style>
-  <div id="scroller">
-    <div id="scrollarea">
-      <div id="contentarea">
-      </div>
+    <div id="contentarea">
     </div>
-  </div>
 </template>
 <script>
 
@@ -277,62 +247,23 @@ module.exports.CityItemElement = class extends SkyElement {
 
     function Scroller() {
       this.contentarea = null;
-      this.scroller = null;
-      this.contentTop = 0; // #contentarea's current top
-      this.scrollTop = 0; // #scrollarea's current top
-      this.scrollHeight = -1; // height of #scroller (the viewport)
-      this.lastScrollTop = 0; // last known scrollTop to compute deltas
-    }
-
-    Scroller.prototype.setup = function(scroller, scrollarea, contentarea) {
-      this.contentarea = contentarea;
-      this.scroller = scroller;
-
-      this.scrollHeight = scroller.offsetHeight;
-      scrollarea.style.height = (this.scrollHeight) * 4 + 'px';
-
-      this.reset();
-    }
-
-    Scroller.prototype.captureNewFrame = function(event) {
-        var scrollTop = event.target.scrollTop;
-
-        // Protect from re-entry.
-        if (this.lastScrollTop == scrollTop)
-          return false;
-
-        var scrollDown = scrollTop > this.lastScrollTop;
-        if (scrollDown) {
-          while (scrollTop > this.scrollHeight * 1.5) {
-            scrollTop -= this.scrollHeight;
-            this.contentTop -= this.scrollHeight;
-          }
-        } else {
-          while(scrollTop < this.scrollHeight * 1.5) {
-            scrollTop += this.scrollHeight;
-            this.contentTop += this.scrollHeight;
-          }
-        }
-
-        this.lastScrollTop = scrollTop;
-        event.target.scrollTop = scrollTop;
-        this.contentarea.style.top = this.contentTop + 'px';
-
-        this.scrollTop = scrollTop - this.contentTop;
-
-        return true;
-    }
-
-    Scroller.prototype.reset = function() {
-      if (!this.contentarea)
-        return;
-
-      this.scroller.scrollTop = this.scrollHeight;
-      this.lastScrollTop = this.scrollHeight;
-
-      this.contentarea.style.top = this.scrollHeight + 'px';
-      this.contentTop = this.scrollHeight;
       this.scrollTop = 0;
+      this.scrollHeight = -1;
+    }
+
+    Scroller.prototype.setup = function(scrollHeight, contentarea) {
+      this.scrollHeight = scrollHeight;
+      this.contentarea = contentarea;
+    }
+
+    Scroller.prototype.scrollBy = function(amount) {
+        this.scrollTop += amount;
+        this.scrollTo();
+    }
+
+    Scroller.prototype.scrollTo = function() {
+      var transform = 'translateY(' + -this.scrollTop.toFixed(2) + 'px)';
+      this.contentarea.style.transform = transform;
     }
 
     // Current position and height of the scroller, that could
@@ -536,19 +467,6 @@ module.exports.CityItemElement = class extends SkyElement {
       }
     }
 
-    Tiler.prototype.checkinAllTiles = function() {
-      var tiles = this.tiles;
-      while (tiles.length) {
-        this.checkinTile(tiles.pop());
-      }
-    }
-
-    Tiler.prototype.reset = function() {
-      this.checkinAllTiles();
-      this.drawTop = 0;
-      this.drawBottom = 0;
-    }
-
     module.exports.CityListElement = class extends SkyElement {
 
       created() {
@@ -558,7 +476,6 @@ module.exports.CityItemElement = class extends SkyElement {
         this.date = null;
         this.month = null;
         this.views = null;
-        this.scrollerElement = null;
       }
 
       attached() {
@@ -572,11 +489,11 @@ module.exports.CityItemElement = class extends SkyElement {
           cityItem: 30
         });
 
-        this.scrollerElement = this.shadowRoot.getElementById('scroller');
-        this.scrollerElement.addEventListener('scroll',
-            this.handleScroll.bind(this));
-
         var self = this;
+        this.addEventListener('wheel', function(event) {
+          self.scrollBy(-event.offsetY)
+        });
+
         setTimeout(function() {
           self.domReady();
           self.loader.maybeLoadMoreData(self.dataLoaded.bind(self));
@@ -584,8 +501,7 @@ module.exports.CityItemElement = class extends SkyElement {
       }
 
       domReady() {
-        this.scroller.setup(this.shadowRoot.getElementById('scroller'),
-            this.shadowRoot.getElementById('scrollarea'),
+        this.scroller.setup(this.clientHeight,
             this.shadowRoot.getElementById('contentarea'));
         var scrollFrame = this.scroller.getCurrentFrame();
         this.tiler.setupViews(scrollFrame);
@@ -605,16 +521,9 @@ module.exports.CityItemElement = class extends SkyElement {
         this.updateView(data.items, false);
       }
 
-      handleScroll(event) {
-        if (!this.scroller.captureNewFrame(event))
-          return;
-
-        this.updateView(this.loader.getItems(), true);
-      }
-
       scrollBy(amount) {
-        this.scrollerElement.scrollTop += amount;
-        this.handleScroll({ target: this.scrollerElement });
+        this.scroller.scrollBy(amount);
+        this.updateView(this.loader.getItems(), true);
       }
     }.register();
 
