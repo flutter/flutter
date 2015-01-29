@@ -364,8 +364,6 @@ sky_core_files = [
   "dom/custom/CustomElementCallbackQueue.h",
   "dom/custom/CustomElementDefinition.cpp",
   "dom/custom/CustomElementDefinition.h",
-  "dom/custom/CustomElementDescriptor.h",
-  "dom/custom/CustomElementDescriptorHash.h",
   "dom/custom/CustomElementException.cpp",
   "dom/custom/CustomElementException.h",
   "dom/custom/CustomElementLifecycleCallbacks.h",

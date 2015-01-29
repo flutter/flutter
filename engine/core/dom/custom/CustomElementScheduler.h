@@ -41,7 +41,6 @@
 
 namespace blink {
 
-class CustomElementDescriptor;
 class CustomElementMicrotaskImportStep;
 class CustomElementMicrotaskStep;
 class CustomElementRegistrationContext;
@@ -56,7 +55,7 @@ public:
     static void scheduleCallback(PassRefPtr<CustomElementLifecycleCallbacks>, PassRefPtr<Element>, CustomElementLifecycleCallbacks::CallbackType);
     static void scheduleAttributeChangedCallback(PassRefPtr<CustomElementLifecycleCallbacks>, PassRefPtr<Element>, const AtomicString& name, const AtomicString& oldValue, const AtomicString& newValue);
 
-    static void resolveOrScheduleResolution(PassRefPtr<CustomElementRegistrationContext>, PassRefPtr<Element>, const CustomElementDescriptor&);
+    static void resolveOrScheduleResolution(PassRefPtr<CustomElementRegistrationContext>, PassRefPtr<Element>);
     static CustomElementMicrotaskImportStep* scheduleImport(HTMLImportChild*);
 
     static void microtaskDispatcherDidFinish();

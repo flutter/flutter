@@ -33,8 +33,6 @@
 
 #include "sky/engine/core/dom/custom/CustomElement.h"
 #include "sky/engine/core/dom/custom/CustomElementDefinition.h"
-#include "sky/engine/core/dom/custom/CustomElementDescriptor.h"
-#include "sky/engine/core/dom/custom/CustomElementDescriptorHash.h"
 #include "sky/engine/wtf/HashMap.h"
 #include "sky/engine/wtf/HashSet.h"
 #include "sky/engine/wtf/RefPtr.h"
@@ -55,10 +53,10 @@ protected:
     CustomElementRegistry() { }
 
     CustomElementDefinition* registerElement(Document*, CustomElementConstructorBuilder*, const AtomicString& name, ExceptionState&);
-    CustomElementDefinition* find(const CustomElementDescriptor&) const;
+    CustomElementDefinition* find(const AtomicString& localName) const;
 
 private:
-    typedef HashMap<CustomElementDescriptor, RefPtr<CustomElementDefinition> > DefinitionMap;
+    typedef HashMap<AtomicString, RefPtr<CustomElementDefinition> > DefinitionMap;
     DefinitionMap m_definitions;
 };
 

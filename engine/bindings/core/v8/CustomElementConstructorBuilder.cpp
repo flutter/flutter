@@ -42,7 +42,6 @@
 #include "sky/engine/bindings/core/v8/V8PerContextData.h"
 #include "sky/engine/core/dom/Document.h"
 #include "sky/engine/core/dom/custom/CustomElementDefinition.h"
-#include "sky/engine/core/dom/custom/CustomElementDescriptor.h"
 #include "sky/engine/core/dom/custom/CustomElementException.h"
 #include "sky/engine/core/dom/custom/CustomElementProcessingStack.h"
 #include "sky/engine/wtf/Assertions.h"
@@ -166,20 +165,18 @@ bool CustomElementConstructorBuilder::createConstructor(Document* document, Cust
 
     v8::Isolate* isolate = m_scriptState->isolate();
 
-    if (!prototypeIsValid(definition->descriptor().localName(), exceptionState))
+    if (!prototypeIsValid(definition->localName(), exceptionState))
         return false;
 
     v8::Local<v8::FunctionTemplate> constructorTemplate = v8::FunctionTemplate::New(isolate);
     constructorTemplate->SetCallHandler(constructCustomElement);
     m_constructor = constructorTemplate->GetFunction();
     if (m_constructor.IsEmpty()) {
-        CustomElementException::throwException(CustomElementException::ContextDestroyedRegisteringDefinition, definition->descriptor().localName(), exceptionState);
+        CustomElementException::throwException(CustomElementException::ContextDestroyedRegisteringDefinition, definition->localName(), exceptionState);
         return false;
     }
 
-    const CustomElementDescriptor& descriptor = definition->descriptor();
-
-    v8::Handle<v8::String> v8TagName = v8String(isolate, descriptor.localName());
+    v8::Handle<v8::String> v8TagName = v8String(isolate, definition->localName());
 
     m_constructor->SetName(v8TagName);
 

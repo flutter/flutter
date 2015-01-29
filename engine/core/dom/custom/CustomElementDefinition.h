@@ -31,24 +31,24 @@
 #ifndef SKY_ENGINE_CORE_DOM_CUSTOM_CUSTOMELEMENTDEFINITION_H_
 #define SKY_ENGINE_CORE_DOM_CUSTOM_CUSTOMELEMENTDEFINITION_H_
 
-#include "sky/engine/core/dom/custom/CustomElementDescriptor.h"
 #include "sky/engine/core/dom/custom/CustomElementLifecycleCallbacks.h"
 #include "sky/engine/wtf/PassRefPtr.h"
 #include "sky/engine/wtf/RefCounted.h"
+#include "sky/engine/wtf/text/AtomicString.h"
 
 namespace blink {
 
 class CustomElementDefinition final : public RefCounted<CustomElementDefinition> {
 public:
-    static PassRefPtr<CustomElementDefinition> create(const CustomElementDescriptor&, PassRefPtr<CustomElementLifecycleCallbacks>);
+    static PassRefPtr<CustomElementDefinition> create(const AtomicString& localName, PassRefPtr<CustomElementLifecycleCallbacks>);
 
-    const CustomElementDescriptor& descriptor() const { return m_descriptor; }
+    const AtomicString& localName() const { return m_localName; }
     CustomElementLifecycleCallbacks* callbacks() const { return m_callbacks.get(); }
 
 private:
-    CustomElementDefinition(const CustomElementDescriptor&, PassRefPtr<CustomElementLifecycleCallbacks>);
+    CustomElementDefinition(const AtomicString& localName, PassRefPtr<CustomElementLifecycleCallbacks>);
 
-    CustomElementDescriptor m_descriptor;
+    AtomicString m_localName;
     RefPtr<CustomElementLifecycleCallbacks> m_callbacks;
 };
 

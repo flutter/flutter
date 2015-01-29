@@ -36,15 +36,14 @@
 
 namespace blink {
 
-PassOwnPtr<CustomElementMicrotaskResolutionStep> CustomElementMicrotaskResolutionStep::create(PassRefPtr<CustomElementRegistrationContext> context, PassRefPtr<Element> element, const CustomElementDescriptor& descriptor)
+PassOwnPtr<CustomElementMicrotaskResolutionStep> CustomElementMicrotaskResolutionStep::create(PassRefPtr<CustomElementRegistrationContext> context, PassRefPtr<Element> element)
 {
-    return adoptPtr(new CustomElementMicrotaskResolutionStep(context, element, descriptor));
+    return adoptPtr(new CustomElementMicrotaskResolutionStep(context, element));
 }
 
-CustomElementMicrotaskResolutionStep::CustomElementMicrotaskResolutionStep(PassRefPtr<CustomElementRegistrationContext> context, PassRefPtr<Element> element, const CustomElementDescriptor& descriptor)
+CustomElementMicrotaskResolutionStep::CustomElementMicrotaskResolutionStep(PassRefPtr<CustomElementRegistrationContext> context, PassRefPtr<Element> element)
     : m_context(context)
     , m_element(element)
-    , m_descriptor(descriptor)
 {
 }
 
@@ -54,7 +53,7 @@ CustomElementMicrotaskResolutionStep::~CustomElementMicrotaskResolutionStep()
 
 CustomElementMicrotaskStep::Result CustomElementMicrotaskResolutionStep::process()
 {
-    m_context->resolve(m_element.get(), m_descriptor);
+    m_context->resolve(m_element.get());
     return CustomElementMicrotaskStep::FinishedProcessing;
 }
 

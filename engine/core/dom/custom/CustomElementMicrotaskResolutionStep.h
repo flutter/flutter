@@ -31,7 +31,6 @@
 #ifndef SKY_ENGINE_CORE_DOM_CUSTOM_CUSTOMELEMENTMICROTASKRESOLUTIONSTEP_H_
 #define SKY_ENGINE_CORE_DOM_CUSTOM_CUSTOMELEMENTMICROTASKRESOLUTIONSTEP_H_
 
-#include "sky/engine/core/dom/custom/CustomElementDescriptor.h"
 #include "sky/engine/core/dom/custom/CustomElementMicrotaskStep.h"
 #include "sky/engine/platform/heap/Handle.h"
 #include "sky/engine/wtf/PassOwnPtr.h"
@@ -46,18 +45,17 @@ class Element;
 class CustomElementMicrotaskResolutionStep : public CustomElementMicrotaskStep {
     WTF_MAKE_NONCOPYABLE(CustomElementMicrotaskResolutionStep);
 public:
-    static PassOwnPtr<CustomElementMicrotaskResolutionStep> create(PassRefPtr<CustomElementRegistrationContext>, PassRefPtr<Element>, const CustomElementDescriptor&);
+    static PassOwnPtr<CustomElementMicrotaskResolutionStep> create(PassRefPtr<CustomElementRegistrationContext>, PassRefPtr<Element>);
 
     virtual ~CustomElementMicrotaskResolutionStep();
 
 private:
-    CustomElementMicrotaskResolutionStep(PassRefPtr<CustomElementRegistrationContext>, PassRefPtr<Element>, const CustomElementDescriptor&);
+    CustomElementMicrotaskResolutionStep(PassRefPtr<CustomElementRegistrationContext>, PassRefPtr<Element>);
 
     virtual Result process() override;
 
     RefPtr<CustomElementRegistrationContext> m_context;
     RefPtr<Element> m_element;
-    CustomElementDescriptor m_descriptor;
 };
 
 }

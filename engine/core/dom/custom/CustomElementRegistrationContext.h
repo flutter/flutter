@@ -32,7 +32,6 @@
 #define SKY_ENGINE_CORE_DOM_CUSTOM_CUSTOMELEMENTREGISTRATIONCONTEXT_H_
 
 #include "sky/engine/core/dom/QualifiedName.h"
-#include "sky/engine/core/dom/custom/CustomElementDescriptor.h"
 #include "sky/engine/core/dom/custom/CustomElementRegistry.h"
 #include "sky/engine/platform/heap/Handle.h"
 #include "sky/engine/wtf/HashMap.h"
@@ -61,7 +60,7 @@ public:
 
     PassRefPtr<Element> createCustomTagElement(Document&, const QualifiedName&);
 
-    void resolve(Element*, const CustomElementDescriptor&);
+    void resolve(Element*);
 
 protected:
     CustomElementRegistrationContext();

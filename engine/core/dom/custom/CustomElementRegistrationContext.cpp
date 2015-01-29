@@ -64,15 +64,13 @@ PassRefPtr<Element> CustomElementRegistrationContext::createCustomTagElement(Doc
 
 void CustomElementRegistrationContext::resolveOrScheduleResolution(Element* element)
 {
-    CustomElementDescriptor descriptor(element->localName());
     ASSERT(element->customElementState() == Element::WaitingForUpgrade);
-
-    CustomElementScheduler::resolveOrScheduleResolution(this, element, descriptor);
+    CustomElementScheduler::resolveOrScheduleResolution(this, element);
 }
 
-void CustomElementRegistrationContext::resolve(Element* element, const CustomElementDescriptor& descriptor)
+void CustomElementRegistrationContext::resolve(Element* element)
 {
-    if (CustomElementDefinition* definition = m_registry.find(descriptor))
+    if (CustomElementDefinition* definition = m_registry.find(element->localName()))
         CustomElement::define(element, definition);
 }
 

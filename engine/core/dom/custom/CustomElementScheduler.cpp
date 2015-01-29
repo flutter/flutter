@@ -69,15 +69,15 @@ void CustomElementScheduler::scheduleAttributeChangedCallback(PassRefPtr<CustomE
     queue.append(CustomElementCallbackInvocation::createAttributeChangedInvocation(callbacks, name, oldValue, newValue));
 }
 
-void CustomElementScheduler::resolveOrScheduleResolution(PassRefPtr<CustomElementRegistrationContext> context, PassRefPtr<Element> element, const CustomElementDescriptor& descriptor)
+void CustomElementScheduler::resolveOrScheduleResolution(PassRefPtr<CustomElementRegistrationContext> context, PassRefPtr<Element> element)
 {
     if (CustomElementProcessingStack::inCallbackDeliveryScope()) {
-        context->resolve(element.get(), descriptor);
+        context->resolve(element.get());
         return;
     }
 
     Document& document = element->document();
-    OwnPtr<CustomElementMicrotaskResolutionStep> step = CustomElementMicrotaskResolutionStep::create(context, element, descriptor);
+    OwnPtr<CustomElementMicrotaskResolutionStep> step = CustomElementMicrotaskResolutionStep::create(context, element);
     enqueueMicrotaskStep(document, step.release());
 }
 

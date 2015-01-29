@@ -33,13 +33,13 @@
 
 namespace blink {
 
-PassRefPtr<CustomElementDefinition> CustomElementDefinition::create(const CustomElementDescriptor& descriptor, PassRefPtr<CustomElementLifecycleCallbacks> callbacks)
+PassRefPtr<CustomElementDefinition> CustomElementDefinition::create(const AtomicString& localName, PassRefPtr<CustomElementLifecycleCallbacks> callbacks)
 {
-    return adoptRef(new CustomElementDefinition(descriptor, callbacks));
+    return adoptRef(new CustomElementDefinition(localName, callbacks));
 }
 
-CustomElementDefinition::CustomElementDefinition(const CustomElementDescriptor& descriptor, PassRefPtr<CustomElementLifecycleCallbacks> callbacks)
-    : m_descriptor(descriptor)
+CustomElementDefinition::CustomElementDefinition(const AtomicString& localName, PassRefPtr<CustomElementLifecycleCallbacks> callbacks)
+    : m_localName(localName)
     , m_callbacks(callbacks)
 {
 }
