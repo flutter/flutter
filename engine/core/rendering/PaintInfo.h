@@ -47,7 +47,7 @@ class RenderObject;
  */
 struct PaintInfo {
     PaintInfo(GraphicsContext* newContext, const IntRect& newRect, PaintPhase newPhase,
-        RenderObject* newPaintingRoot = 0, const RenderLayerModelObject* newPaintContainer = 0)
+        RenderObject* newPaintingRoot, const RenderLayerModelObject* newPaintContainer)
         : context(newContext)
         , rect(newRect)
         , phase(newPhase)

@@ -54,7 +54,7 @@ class RenderLayer;
 
 struct LayerPaintingInfo {
     LayerPaintingInfo(RenderLayer* inRootLayer, const LayoutRect& inDirtyRect,
-        const LayoutSize& inSubPixelAccumulation, RenderObject* inPaintingRoot = 0)
+        const LayoutSize& inSubPixelAccumulation, RenderObject* inPaintingRoot)
         : rootLayer(inRootLayer)
         , paintingRoot(inPaintingRoot)
         , paintDirtyRect(inDirtyRect)
