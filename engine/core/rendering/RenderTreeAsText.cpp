@@ -333,15 +333,9 @@ void write(TextStream& ts, const RenderObject& o, int indent, RenderAsTextBehavi
     }
 }
 
-enum LayerPaintPhase {
-    LayerPaintPhaseAll = 0,
-    LayerPaintPhaseBackground = -1,
-    LayerPaintPhaseForeground = 1
-};
-
 static void write(TextStream& ts, RenderLayer& l,
                   const LayoutRect& layerBounds, const LayoutRect& backgroundClipRect, const LayoutRect& clipRect,
-                  LayerPaintPhase paintPhase = LayerPaintPhaseAll, int indent = 0, RenderAsTextBehavior behavior = RenderAsTextBehaviorNormal)
+                  int indent = 0, RenderAsTextBehavior behavior = RenderAsTextBehaviorNormal)
 {
     IntRect adjustedLayoutBounds = pixelSnappedIntRect(layerBounds);
     IntRect adjustedBackgroundClipRect = pixelSnappedIntRect(backgroundClipRect);
@@ -365,15 +359,8 @@ static void write(TextStream& ts, RenderLayer& l,
     if (l.isTransparent())
         ts << " transparent";
 
-    if (paintPhase == LayerPaintPhaseBackground)
-        ts << " layerType: background only";
-    else if (paintPhase == LayerPaintPhaseForeground)
-        ts << " layerType: foreground only";
-
     ts << "\n";
-
-    if (paintPhase != LayerPaintPhaseBackground)
-        write(ts, *l.renderer(), indent + 1, behavior);
+    write(ts, *l.renderer(), indent + 1, behavior);
 }
 
 void RenderTreeAsText::writeLayers(TextStream& ts, const RenderLayer* rootLayer, RenderLayer* layer,
@@ -401,7 +388,7 @@ void RenderTreeAsText::writeLayers(TextStream& ts, const RenderLayer* rootLayer,
     bool shouldPaint = (behavior & RenderAsTextShowAllLayers) ? true : layer->intersectsDamageRect(layerBounds, damageRect.rect(), rootLayer);
 
     if (shouldPaint)
-        write(ts, *layer, layerBounds, damageRect.rect(), clipRectToApply.rect(), LayerPaintPhaseAll, indent, behavior);
+        write(ts, *layer, layerBounds, damageRect.rect(), clipRectToApply.rect(), indent, behavior);
 
     if (Vector<RenderLayerStackingNode*>* normalFlowList = layer->stackingNode()->normalFlowList()) {
         int currIndent = indent;
