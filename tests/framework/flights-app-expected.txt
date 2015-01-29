@@ -159,4 +159,11 @@ layer at (609,509) size 159x59 clip at (610,510) size 157x57
           RenderParagraph (anonymous) at (0,30) size 106.69x15
             RenderText {#text} at (0,0) size 107x15
               text run at (0,0) width 107: "cheaper tomorrow."
+layer at (751,513) size 13x15
+  RenderBlock (positioned) {div} at (141.89,4) size 12.80x15
+    RenderParagraph (anonymous) at (0,0) size 12.80x15
+      RenderText {#text} at (2,0) size 9x15
+        text run at (2,0) width 9: "X"
+selection start: position 0 of child 0 {#text} of child 0 {t} of child 2 {span} of {#document-fragment} of child 0 {app-search-input} of child 2 {app-toolbar} of {#document-fragment} of child 3 {flights-app} of child 0 {sky} of document
+selection end:   position 28 of child 0 {#text} of child 0 {t} of child 2 {span} of {#document-fragment} of child 0 {app-search-input} of child 2 {app-toolbar} of {#document-fragment} of child 3 {flights-app} of child 0 {sky} of document
 

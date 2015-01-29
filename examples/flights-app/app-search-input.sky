@@ -22,6 +22,11 @@
 </template>
 <script>
 module.exports = class extends SkyElement {
+  attached() {
+    var sel = window.getSelection();
+    var input = this.shadowRoot.querySelector('t');
+    sel.selectAllChildren(input);
+  }
 }.register();
 </script>
 </sky-element>
