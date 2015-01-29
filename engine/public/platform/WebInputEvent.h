@@ -212,8 +212,6 @@ public:
     Kind kind = Touch;
     float x = 0;
     float y = 0;
-    float dx = 0;
-    float dy = 0;
     int buttons = 0;
     float pressure = 0;
     float pressureMin = 0;

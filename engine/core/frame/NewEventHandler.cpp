@@ -76,12 +76,16 @@ HitTestResult NewEventHandler::performHitTest(const LayoutPoint& point)
     return result;
 }
 
-bool NewEventHandler::dispatchPointerEvent(Node& target, const WebPointerEvent& event)
+bool NewEventHandler::dispatchPointerEvent(PointerState& state, const WebPointerEvent& event)
 {
     RefPtr<PointerEvent> pointerEvent = PointerEvent::create(event);
+    pointerEvent->setDX(event.x - state.x);
+    pointerEvent->setDY(event.y - state.y);
+    state.x = event.x;
+    state.y = event.y;
     // TODO(abarth): Keep track of how many pointers are targeting the same node
     // and only mark the first one as primary.
-    return target.dispatchEvent(pointerEvent.release());
+    return state.target->dispatchEvent(pointerEvent.release());
 }
 
 bool NewEventHandler::dispatchGestureEvent(Node& target, const WebGestureEvent& event)
@@ -188,19 +192,20 @@ bool NewEventHandler::handlePointerDownEvent(const WebPointerEvent& event)
     // drag outside the window frame on Linux. For now, send the pointer
     // cancel at this point.
     if (event.kind == WebPointerEvent::Mouse
-        && m_targetForPointer.find(event.pointer) != m_targetForPointer.end()) {
+        && m_stateForPointer.find(event.pointer) != m_stateForPointer.end()) {
         WebPointerEvent fakeCancel = event;
         fakeCancel.type = WebInputEvent::PointerCancel;
         handlePointerCancelEvent(fakeCancel);
     }
 
-    ASSERT(m_targetForPointer.find(event.pointer) == m_targetForPointer.end());
+    ASSERT(m_stateForPointer.find(event.pointer) == m_stateForPointer.end());
     HitTestResult hitTestResult = performHitTest(positionForEvent(event));
     RefPtr<Node> target = targetForHitTestResult(hitTestResult);
     if (!target)
         return false;
-    m_targetForPointer[event.pointer] = target;
-    bool eventSwallowed = !dispatchPointerEvent(*target, event);
+    PointerState& state = m_stateForPointer[event.pointer];
+    state.target = target;
+    bool eventSwallowed = !dispatchPointerEvent(state, event);
     // TODO(abarth): Set the target for the pointer to something determined when
     // dispatching the event.
     updateSelectionForPointerDown(hitTestResult, event);
@@ -209,40 +214,40 @@ bool NewEventHandler::handlePointerDownEvent(const WebPointerEvent& event)
 
 bool NewEventHandler::handlePointerUpEvent(const WebPointerEvent& event)
 {
-    auto it = m_targetForPointer.find(event.pointer);
-    if (it == m_targetForPointer.end())
+    auto it = m_stateForPointer.find(event.pointer);
+    if (it == m_stateForPointer.end())
         return false;
-    RefPtr<Node> target = it->second;
-    m_targetForPointer.erase(it);
-    ASSERT(target);
-    bool eventSwallowed = !dispatchPointerEvent(*target, event);
+    PointerState stateCopy = it->second;
+    m_stateForPointer.erase(it);
+    ASSERT(stateCopy.target);
+    bool eventSwallowed = !dispatchPointerEvent(stateCopy, event);
     // When the user releases the primary pointer, we need to dispatch a tap
     // event to the common ancestor for where the pointer went down and where
     // it came up.
-    if (!dispatchClickEvent(*target, event))
+    if (!eventSwallowed && !dispatchClickEvent(*stateCopy.target, event))
         eventSwallowed = true;
     return eventSwallowed;
 }
 
 bool NewEventHandler::handlePointerMoveEvent(const WebPointerEvent& event)
 {
-    auto it = m_targetForPointer.find(event.pointer);
-    if (it == m_targetForPointer.end())
+    auto it = m_stateForPointer.find(event.pointer);
+    if (it == m_stateForPointer.end())
         return false;
-    RefPtr<Node> target = it->second;
-    ASSERT(target);
-    return dispatchPointerEvent(*target.get(), event);
+    PointerState& state = it->second;
+    ASSERT(state.target);
+    return dispatchPointerEvent(state, event);
 }
 
 bool NewEventHandler::handlePointerCancelEvent(const WebPointerEvent& event)
 {
-    auto it = m_targetForPointer.find(event.pointer);
-    if (it == m_targetForPointer.end())
+    auto it = m_stateForPointer.find(event.pointer);
+    if (it == m_stateForPointer.end())
         return false;
-    RefPtr<Node> target = it->second;
-    m_targetForPointer.erase(it);
-    ASSERT(target);
-    return dispatchPointerEvent(*target, event);
+    PointerState stateCopy = it->second;
+    m_stateForPointer.erase(it);
+    ASSERT(stateCopy.target);
+    return dispatchPointerEvent(stateCopy, event);
 }
 
 }

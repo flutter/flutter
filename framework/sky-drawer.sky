@@ -48,7 +48,6 @@ const kAnimationCurve = Curves.easeInOut;
 
 module.exports = class extends SkyElement {
   created() {
-    this.previousX_ = 0;
     this.position_ = 0;
     this.mask_ = null;
     this.content_ = null;
@@ -125,14 +124,10 @@ module.exports = class extends SkyElement {
 
   handlePointerDown(event) {
     this.animation_.stop();
-    this.previousX_ = event.x;
   }
 
   handlePointerMove(event) {
-    // TODO(abarth): Implement event.dx;
-    var deltaX = event.x - this.previousX_;
-    this.previousX_ = event.x;
-    this.position += deltaX;
+    this.position += event.dx;
   }
 
   handlePointerUp(event) {

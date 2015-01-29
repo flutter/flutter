@@ -31,13 +31,19 @@ public:
     bool handleWheelEvent(const WebWheelEvent&);
 
 private:
+    struct PointerState {
+        RefPtr<Node> target;
+        double x = 0;
+        double y = 0;
+    };
+
     bool handlePointerDownEvent(const WebPointerEvent&);
     bool handlePointerUpEvent(const WebPointerEvent&);
     bool handlePointerMoveEvent(const WebPointerEvent&);
     bool handlePointerCancelEvent(const WebPointerEvent&);
 
     bool dispatchGestureEvent(Node& target, const WebGestureEvent& event);
-    bool dispatchPointerEvent(Node& target, const WebPointerEvent&);
+    bool dispatchPointerEvent(PointerState& state, const WebPointerEvent&);
     bool dispatchClickEvent(Node& capturingTarget, const WebPointerEvent&);
     bool dispatchKeyboardEvent(Node& target, const WebKeyboardEvent& event);
     bool dispatchWheelEvent(Node& target, const WebWheelEvent& event);
@@ -47,10 +53,10 @@ private:
     HitTestResult performHitTest(const LayoutPoint&);
     void updateSelectionForPointerDown(const HitTestResult&, const WebPointerEvent&);
 
-    typedef std::map<int, RefPtr<Node>> PointerTargetMap;
+    typedef std::map<int, PointerState> PointerStateMap;
 
     LocalFrame& m_frame;
-    PointerTargetMap m_targetForPointer;
+    PointerStateMap m_stateForPointer;
     bool m_suppressNextCharEvent;
 };
 
