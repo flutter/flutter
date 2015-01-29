@@ -11,6 +11,7 @@
 #include "base/strings/string_util.h"
 #include "base/thread_task_runner_handle.h"
 #include "mojo/converters/geometry/geometry_type_converters.h"
+#include "mojo/converters/input_events/input_events_type_converters.h"
 #include "mojo/public/cpp/application/connect.h"
 #include "mojo/public/cpp/system/data_pipe.h"
 #include "mojo/public/interfaces/application/shell.mojom.h"
@@ -45,6 +46,7 @@
 #include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/core/SkColor.h"
 #include "third_party/skia/include/core/SkDevice.h"
+#include "ui/events/gestures/gesture_recognizer.h"
 #include "v8/include/v8.h"
 
 namespace sky {
@@ -99,6 +101,7 @@ DocumentView::~DocumentView() {
     web_view_->close();
   if (root_)
     root_->RemoveObserver(this);
+  ui::GestureRecognizer::Get()->CleanupStateForConsumer(this);
 }
 
 base::WeakPtr<DocumentView> DocumentView::GetWeakPtr() {
@@ -301,12 +304,33 @@ void DocumentView::OnViewDestroyed(mojo::View* view) {
   root_ = nullptr;
 }
 
-void DocumentView::OnViewInputEvent(
-    mojo::View* view, const mojo::EventPtr& event) {
+bool DocumentView::DispatchInputEvent(const mojo::EventPtr& event) {
   scoped_ptr<blink::WebInputEvent> web_event =
       ConvertEvent(event, GetDevicePixelRatio());
-  if (web_event)
-    web_view_->handleInputEvent(*web_event);
+  return web_event && web_view_->handleInputEvent(*web_event);
+}
+
+void DocumentView::OnViewInputEvent(
+    mojo::View* view, const mojo::EventPtr& event) {
+
+  scoped_ptr<ui::Event> ui_event(event.To<scoped_ptr<ui::Event>>());
+  ui::TouchEvent* touch_event = nullptr;
+  if (ui_event->IsTouchEvent()) {
+    touch_event = static_cast<ui::TouchEvent*>(ui_event.get());
+    ui::GestureRecognizer::Get()->ProcessTouchEventPreDispatch(
+        *touch_event, this);
+  }
+
+  bool handled = DispatchInputEvent(event);
+
+  if (touch_event) {
+    ui::EventResult result = handled ? ui::ER_UNHANDLED : ui::ER_UNHANDLED;
+    if (auto gestures = ui::GestureRecognizer::Get()->ProcessTouchEventPostDispatch(
+        *touch_event, result, this)) {
+      for (auto& gesture : *gestures)
+        DispatchInputEvent(mojo::Event::From(*gesture));
+    }
+  }
 }
 
 class InspectorHostImpl : public inspector::InspectorHost {

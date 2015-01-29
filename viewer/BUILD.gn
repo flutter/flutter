@@ -44,6 +44,7 @@ mojo_native_application("viewer") {
     "//mojo/common",
     "//mojo/common:tracing_impl",
     "//mojo/converters/geometry",
+    "//mojo/converters/input_events",
     "//mojo/converters/surfaces",
     "//mojo/edk/js",
     "//mojo/icu",
@@ -66,6 +67,7 @@ mojo_native_application("viewer") {
     "//sky/services/inspector:bindings",
     "//sky/services/testing:bindings",
     "//third_party/icu",
+    "//ui/events",
     "//url",
   ]
 }

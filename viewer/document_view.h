@@ -23,6 +23,7 @@
 #include "sky/engine/public/web/WebFrameClient.h"
 #include "sky/engine/public/web/WebViewClient.h"
 #include "sky/viewer/services/inspector_impl.h"
+#include "ui/events/gestures/gesture_types.h"
 
 namespace mojo {
 class ViewManager;
@@ -42,18 +43,19 @@ class Layer;
 class LayerHost;
 
 class DocumentView : public blink::ServiceProvider,
-                     public blink::WebViewClient,
                      public blink::WebFrameClient,
+                     public blink::WebViewClient,
+                     public mojo::ViewManagerDelegate,
+                     public mojo::ViewObserver,
                      public sky::LayerClient,
                      public sky::LayerHostClient,
-                     public mojo::ViewManagerDelegate,
-                     public mojo::ViewObserver {
+                     public ui::GestureConsumer {
  public:
   DocumentView(mojo::InterfaceRequest<mojo::ServiceProvider> services,
                mojo::ServiceProviderPtr exported_services,
                mojo::URLResponsePtr response,
                mojo::Shell* shell);
-  virtual ~DocumentView();
+  ~DocumentView() override;
 
   base::WeakPtr<DocumentView> GetWeakPtr();
 
@@ -120,6 +122,8 @@ class DocumentView : public blink::ServiceProvider,
                           mojo::View* lost_focus) override;
   void OnViewDestroyed(mojo::View* view) override;
   void OnViewInputEvent(mojo::View* view, const mojo::EventPtr& event) override;
+
+  bool DispatchInputEvent(const mojo::EventPtr& event);
 
   void Load(mojo::URLResponsePtr response);
   float GetDevicePixelRatio() const;
