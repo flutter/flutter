@@ -1,0 +1,79 @@
+<!--
+// Copyright 2015 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+-->
+<import src="/sky/framework/sky-drawer.sky" />
+<import src="/sky/framework/sky-element/sky-element.sky" as="SkyElement" />
+<import src="/sky/framework/sky-scrollable.sky" />
+
+<sky-element name="example-scaffold">
+<template>
+  <style>
+    :host {
+      display: flex;
+      flex-direction: column;
+      height: -webkit-fill-available;
+    }
+    sky-drawer {
+      position: absolute;
+      z-index: 1;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      right: 0;
+    }
+    sky-toolbar {
+      display: flex;
+      align-items: center;
+      background-color: #526E9C;
+      color: white;
+      height: 56px;
+    }
+    #menu {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 24px;
+      height: 24px;
+      padding: 7px;
+      margin: 0 8px;
+      background-color: papayawhip;
+      color: black;
+    }
+    #title {
+      flex: 1;
+      margin: 0 8px;
+    }
+    sky-scrollable {
+      flex: 1;
+      background-color: green;
+    }
+  </style>
+  <sky-drawer id="drawer">
+    <content select=".menu"/>
+  </sky-drawer>
+  <sky-toolbar>
+    <div id="menu" on-click="handleMenuClick"/>
+    <content id="title" select=".title"/>
+  </sky-toolbar>
+  <sky-scrollable>
+    <content />
+  </sky-scrollable>
+</template>
+<script>
+module.exports = class extends SkyElement {
+  created() {
+    this.toolbar_ = null;
+  }
+
+  shadowRootReady() {
+    this.toolbar_ = this.shadowRoot.getElementById('drawer');
+  }
+
+  handleMenuClick() {
+    this.toolbar_.toggle();
+  }
+}.register();
+</script>
+</sky-element>
