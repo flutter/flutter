@@ -194,6 +194,8 @@ class SkyDebugger(object):
         self.pids['sky_command_port'] = args.command_port
 
         if is_android:
+            subprocess.check_call([ADB_PATH, 'root'])
+
             # We could make installing conditional on an argument.
             apk_path = os.path.join(self.paths.build_dir, 'apks',
                 ANDROID_APK_NAME)

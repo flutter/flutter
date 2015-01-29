@@ -44,10 +44,10 @@ def compute_path_to_app_id_map(paths, cache, cache_mtime):
     for path in paths:
         app_id = get_cached_app_id(path, cache, cache_mtime)
         if not app_id:
-            logging.info('md5sum %s' % path)
+            logging.info('sha256sum %s' % path)
             # Example output:
             # f82a3551478a9a0e010adccd675053b9 png_viewer.mojo
-            output = subprocess.check_output(['md5sum', path])
+            output = subprocess.check_output(['sha256sum', path])
             app_id = output.strip().split()[0]
         path_to_app_id_map[path] = app_id
     return path_to_app_id_map
@@ -78,7 +78,12 @@ def main():
         ' to match expected dlopen names from mojo_shell\'s NetworkLoader.')
     parser.add_argument('links_dir', type=str)
     parser.add_argument('build_dir', type=str)
+    parser.add_argument('-f', '--force', action='store_true')
+    parser.add_argument('-v', '--verbose', action='store_true')
     args = parser.parse_args()
+
+    if args.verbose:
+        logging.getLogger().setLevel(logging.INFO)
 
     if not os.path.isdir(args.links_dir):
         logging.fatal('links_dir: %s is not a directory' % args.links_dir)
@@ -87,6 +92,8 @@ def main():
     # Some of the .so files are 100s of megabytes.  Cache the md5s to save time.
     cache_path = os.path.join(args.build_dir, '.app_id_cache')
     cache, cache_mtime = read_app_id_cache(cache_path)
+    if args.force:
+        cache_mtime = None
 
     paths = library_paths(args.build_dir)
     path_to_app_id_map = compute_path_to_app_id_map(list(paths),
