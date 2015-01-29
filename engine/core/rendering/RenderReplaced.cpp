@@ -93,19 +93,19 @@ void RenderReplaced::paint(PaintInfo& paintInfo, const LayoutPoint& paintOffset)
 
     LayoutPoint adjustedPaintOffset = paintOffset + location();
 
-    if (hasBoxDecorationBackground() && (paintInfo.phase == PaintPhaseForeground || paintInfo.phase == PaintPhaseSelection))
-        paintBoxDecorationBackground(paintInfo, adjustedPaintOffset);
-
     if (paintInfo.phase == PaintPhaseMask) {
         paintMask(paintInfo, adjustedPaintOffset);
         return;
     }
 
+    if (hasBoxDecorationBackground())
+        paintBoxDecorationBackground(paintInfo, adjustedPaintOffset);
+
     LayoutRect paintRect = LayoutRect(adjustedPaintOffset, size());
     if (paintInfo.phase == PaintPhaseForeground && style()->outlineWidth())
         paintOutline(paintInfo, paintRect);
 
-    if (paintInfo.phase != PaintPhaseForeground && paintInfo.phase != PaintPhaseSelection && !canHaveChildren())
+    if (paintInfo.phase == PaintPhaseMask && !canHaveChildren())
         return;
 
     bool drawSelectionTint = selectionState() != SelectionNone;

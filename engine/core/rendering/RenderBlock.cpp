@@ -503,21 +503,10 @@ void RenderBlock::paintChildAsInlineBlock(RenderBox* child, PaintInfo& paintInfo
 
 void RenderBlock::paintAsInlineBlock(RenderObject* renderer, PaintInfo& paintInfo, const LayoutPoint& childPoint)
 {
-    if (paintInfo.phase != PaintPhaseForeground && paintInfo.phase != PaintPhaseSelection)
+    // FIXME(sky): Why don't masks go down this path?
+    if (paintInfo.phase == PaintPhaseMask)
         return;
-
-    // Paint all phases atomically, as though the element established its own
-    // stacking context.  (See Appendix E.2, section 7.2.1.4 on
-    // inline block/table/replaced elements in the CSS2.1 specification.)
-    // This is also used by other elements (e.g. flex items).
-    PaintInfo info(paintInfo);
-
-    if (paintInfo.phase == PaintPhaseSelection) {
-        renderer->paint(info, childPoint);
-    } else {
-        info.phase = PaintPhaseForeground;
-        renderer->paint(info, childPoint);
-    }
+    renderer->paint(paintInfo, childPoint);
 }
 
 static inline bool hasCursorCaret(const FrameSelection& selection, const RenderBlock* block)

@@ -193,7 +193,7 @@ void InlineBox::adjustPosition(float dx, float dy)
 
 void InlineBox::paint(PaintInfo& paintInfo, const LayoutPoint& paintOffset, LayoutUnit /* lineTop */, LayoutUnit /*lineBottom*/)
 {
-    if (paintInfo.phase != PaintPhaseForeground && paintInfo.phase != PaintPhaseSelection)
+    if (paintInfo.phase == PaintPhaseMask)
         return;
 
     LayoutPoint childPoint = paintOffset;
