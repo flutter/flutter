@@ -32,7 +32,6 @@
 #include "sky/engine/core/events/Event.h"
 #include "sky/engine/core/frame/FrameView.h"
 #include "sky/engine/core/frame/LocalDOMWindow.h"
-#include "sky/engine/core/inspector/InspectorTraceEvents.h"
 #include "sky/engine/core/page/Page.h"
 #include "sky/engine/platform/Logging.h"
 
@@ -78,10 +77,6 @@ ScriptedAnimationController::CallbackId ScriptedAnimationController::registerCal
     callback->m_id = id;
     m_callbacks.append(callback);
     scheduleAnimationIfNeeded();
-
-    TRACE_EVENT_INSTANT1(TRACE_DISABLED_BY_DEFAULT("devtools.timeline"), "RequestAnimationFrame", TRACE_EVENT_SCOPE_PROCESS, "data", InspectorAnimationFrameEvent::data(m_document, id));
-    TRACE_EVENT_INSTANT1(TRACE_DISABLED_BY_DEFAULT("devtools.timeline.stack"), "CallStack", TRACE_EVENT_SCOPE_PROCESS, "stack", InspectorCallStackEvent::currentCallStack());
-
     return id;
 }
 
@@ -90,16 +85,12 @@ void ScriptedAnimationController::cancelCallback(CallbackId id)
     WTF_LOG(ScriptedAnimationController, "cancelCallback: id = %d", id);
     for (size_t i = 0; i < m_callbacks.size(); ++i) {
         if (m_callbacks[i]->m_id == id) {
-            TRACE_EVENT_INSTANT1(TRACE_DISABLED_BY_DEFAULT("devtools.timeline"), "CancelAnimationFrame", TRACE_EVENT_SCOPE_PROCESS, "data", InspectorAnimationFrameEvent::data(m_document, id));
-            TRACE_EVENT_INSTANT1(TRACE_DISABLED_BY_DEFAULT("devtools.timeline.stack"), "CallStack", TRACE_EVENT_SCOPE_PROCESS, "stack", InspectorCallStackEvent::currentCallStack());
             m_callbacks.remove(i);
             return;
         }
     }
     for (size_t i = 0; i < m_callbacksToInvoke.size(); ++i) {
         if (m_callbacksToInvoke[i]->m_id == id) {
-            TRACE_EVENT_INSTANT1(TRACE_DISABLED_BY_DEFAULT("devtools.timeline"), "CancelAnimationFrame", TRACE_EVENT_SCOPE_PROCESS, "data", InspectorAnimationFrameEvent::data(m_document, id));
-            TRACE_EVENT_INSTANT1(TRACE_DISABLED_BY_DEFAULT("devtools.timeline.stack"), "CallStack", TRACE_EVENT_SCOPE_PROCESS, "stack", InspectorCallStackEvent::currentCallStack());
             m_callbacksToInvoke[i]->m_cancelled = true;
             // will be removed at the end of executeCallbacks()
             return;

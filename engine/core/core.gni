@@ -948,8 +948,6 @@ sky_core_files = [
   "inspector/InspectorCounters.h",
   "inspector/InspectorNodeIds.cpp",
   "inspector/InspectorNodeIds.h",
-  "inspector/InspectorTraceEvents.cpp",
-  "inspector/InspectorTraceEvents.h",
   "inspector/JavaScriptCallFrame.cpp",
   "inspector/JavaScriptCallFrame.h",
   "inspector/ScriptArguments.cpp",

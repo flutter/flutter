@@ -27,8 +27,6 @@ class PlatformImpl : public blink::Platform {
   virtual void setSharedTimerFiredFunction(void (*func)());
   virtual void setSharedTimerFireInterval(double interval_seconds);
   virtual void stopSharedTimer();
-  virtual const unsigned char* getTraceCategoryEnabledFlag(
-      const char* category_name);
 
  private:
   void SuspendSharedTimer();

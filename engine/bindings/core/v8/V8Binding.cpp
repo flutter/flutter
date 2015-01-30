@@ -43,9 +43,7 @@
 #include "sky/engine/core/dom/QualifiedName.h"
 #include "sky/engine/core/frame/LocalFrame.h"
 #include "sky/engine/core/frame/Settings.h"
-#include "sky/engine/core/inspector/InspectorTraceEvents.h"
 #include "sky/engine/core/loader/FrameLoaderClient.h"
-#include "sky/engine/platform/EventTracer.h"
 #include "sky/engine/platform/JSONValues.h"
 #include "sky/engine/wtf/ArrayBufferContents.h"
 #include "sky/engine/wtf/MainThread.h"
@@ -834,30 +832,6 @@ ScriptState* V8TestingScope::scriptState() const
 v8::Isolate* V8TestingScope::isolate() const
 {
     return m_scriptState->isolate();
-}
-
-void GetDevToolsFunctionInfo(v8::Handle<v8::Function> function, v8::Isolate* isolate, int& scriptId, String& resourceName, int& lineNumber)
-{
-    v8::Handle<v8::Function> originalFunction = getBoundFunction(function);
-    scriptId = originalFunction->ScriptId();
-    v8::ScriptOrigin origin = originalFunction->GetScriptOrigin();
-    if (!origin.ResourceName().IsEmpty()) {
-        resourceName = NativeValueTraits<String>::nativeValue(origin.ResourceName(), isolate);
-        lineNumber = originalFunction->GetScriptLineNumber() + 1;
-    }
-    if (resourceName.isEmpty()) {
-        resourceName = "undefined";
-        lineNumber = 1;
-    }
-}
-
-PassRefPtr<TraceEvent::ConvertableToTraceFormat> devToolsTraceEventData(ExecutionContext* context, v8::Handle<v8::Function> function, v8::Isolate* isolate)
-{
-    int scriptId = 0;
-    String resourceName;
-    int lineNumber = 1;
-    GetDevToolsFunctionInfo(function, isolate, scriptId, resourceName, lineNumber);
-    return InspectorFunctionCallEvent::data(context, scriptId, resourceName, lineNumber);
 }
 
 } // namespace blink

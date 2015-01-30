@@ -48,7 +48,6 @@
 #include "sky/engine/core/html/HTMLImageElement.h"
 #include "sky/engine/core/html/HTMLTemplateElement.h"
 #include "sky/engine/core/html/imports/HTMLImportsController.h"
-#include "sky/engine/core/inspector/InspectorTraceEvents.h"
 #include "sky/engine/platform/Partitions.h"
 #include "sky/engine/platform/TraceEvent.h"
 #include "sky/engine/wtf/Vector.h"
@@ -303,18 +302,10 @@ private:
     bool m_constructRetainedObjectInfos;
 };
 
-static unsigned long long usedHeapSize(v8::Isolate* isolate)
-{
-    v8::HeapStatistics heapStatistics;
-    isolate->GetHeapStatistics(&heapStatistics);
-    return heapStatistics.used_heap_size();
-}
-
 void V8GCController::gcPrologue(v8::GCType type, v8::GCCallbackFlags flags)
 {
     // FIXME: It would be nice if the GC callbacks passed the Isolate directly....
     v8::Isolate* isolate = v8::Isolate::GetCurrent();
-    TRACE_EVENT_BEGIN1(TRACE_DISABLED_BY_DEFAULT("devtools.timeline"), "GCEvent", "usedHeapSizeBefore", usedHeapSize(isolate));
     if (type == v8::kGCTypeScavenge)
         minorGCPrologue(isolate);
     else if (type == v8::kGCTypeMarkSweepCompact)
@@ -368,9 +359,6 @@ void V8GCController::gcEpilogue(v8::GCType type, v8::GCCallbackFlags flags)
         minorGCEpilogue(isolate);
     else if (type == v8::kGCTypeMarkSweepCompact)
         majorGCEpilogue(isolate);
-
-    TRACE_EVENT_END1(TRACE_DISABLED_BY_DEFAULT("devtools.timeline"), "GCEvent", "usedHeapSizeAfter", usedHeapSize(isolate));
-    TRACE_EVENT_INSTANT1(TRACE_DISABLED_BY_DEFAULT("devtools.timeline"), "UpdateCounters", TRACE_EVENT_SCOPE_PROCESS, "data", InspectorUpdateCountersEvent::data());
 }
 
 void V8GCController::minorGCEpilogue(v8::Isolate* isolate)

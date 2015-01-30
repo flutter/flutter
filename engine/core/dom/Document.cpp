@@ -109,7 +109,6 @@
 #include "sky/engine/core/html/parser/TextResourceDecoder.h"
 #include "sky/engine/core/inspector/ConsoleMessage.h"
 #include "sky/engine/core/inspector/InspectorCounters.h"
-#include "sky/engine/core/inspector/InspectorTraceEvents.h"
 #include "sky/engine/core/loader/FrameLoaderClient.h"
 #include "sky/engine/core/loader/ImageLoader.h"
 #include "sky/engine/core/page/ChromeClient.h"
@@ -933,9 +932,6 @@ void Document::scheduleRenderTreeUpdate()
     // TODO(esprehn): We should either rename this state, or change the other
     // users of scheduleVisualUpdate() so they don't expect different states.
     m_lifecycle.ensureStateAtMost(DocumentLifecycle::VisualUpdatePending);
-
-    TRACE_EVENT_INSTANT1(TRACE_DISABLED_BY_DEFAULT("devtools.timeline"), "ScheduleStyleRecalculation", TRACE_EVENT_SCOPE_PROCESS, "frame", frame());
-    TRACE_EVENT_INSTANT1(TRACE_DISABLED_BY_DEFAULT("devtools.timeline.stack"), "CallStack", TRACE_EVENT_SCOPE_PROCESS, "stack", InspectorCallStackEvent::currentCallStack());
 }
 
 void Document::scheduleVisualUpdate()
@@ -1008,8 +1004,6 @@ void Document::updateRenderTree(StyleRecalcChange change)
     TRACE_EVENT_SCOPED_SAMPLING_STATE("blink", "UpdateRenderTree");
 
     m_styleRecalcElementCounter = 0;
-    TRACE_EVENT_BEGIN1(TRACE_DISABLED_BY_DEFAULT("devtools.timeline"), "RecalculateStyles", "frame", frame());
-    TRACE_EVENT_INSTANT1(TRACE_DISABLED_BY_DEFAULT("devtools.timeline.stack"), "CallStack", TRACE_EVENT_SCOPE_PROCESS, "stack", InspectorCallStackEvent::currentCallStack());
 
     DocumentAnimations::updateOutdatedAnimationPlayersIfNeeded(*this);
     evaluateMediaQueryListIfNeeded();
@@ -1028,9 +1022,6 @@ void Document::updateRenderTree(StyleRecalcChange change)
         clearFocusedElementSoon();
 
     ASSERT(!m_timeline->hasOutdatedAnimationPlayer());
-
-    TRACE_EVENT_END1(TRACE_DISABLED_BY_DEFAULT("devtools.timeline"), "RecalculateStyles", "elementCount", m_styleRecalcElementCounter);
-    TRACE_EVENT_END1("blink", "Document::updateRenderTree", "elementCount", m_styleRecalcElementCounter);
 }
 
 void Document::updateStyle(StyleRecalcChange change)
@@ -2053,10 +2044,8 @@ void Document::finishedParsing()
     // Keep it alive until we are done.
     RefPtr<Document> protect(this);
 
-    if (RefPtr<LocalFrame> f = frame()) {
+    if (RefPtr<LocalFrame> f = frame())
         checkCompleted();
-        TRACE_EVENT_INSTANT1(TRACE_DISABLED_BY_DEFAULT("devtools.timeline"), "MarkDOMContent", TRACE_EVENT_SCOPE_PROCESS, "data", InspectorMarkLoadEvent::data());
-    }
 
     // Schedule dropping of the ElementDataCache. We keep it alive for a while after parsing finishes
     // so that dynamically inserted content can also benefit from sharing optimizations.

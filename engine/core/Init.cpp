@@ -41,7 +41,6 @@
 #include "gen/sky/platform/FontFamilyNames.h"
 #include "sky/engine/core/dom/Document.h"
 #include "sky/engine/core/html/parser/HTMLParserThread.h"
-#include "sky/engine/platform/EventTracer.h"
 #include "sky/engine/platform/Partitions.h"
 #include "sky/engine/platform/PlatformThreadData.h"
 #include "sky/engine/wtf/text/StringStatics.h"

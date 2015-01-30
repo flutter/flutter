@@ -25,6 +25,7 @@
 #include "sky/engine/config.h"
 #include "sky/engine/core/dom/Node.h"
 
+#include "base/trace_event/trace_event_impl.h"
 #include "gen/sky/core/HTMLNames.h"
 #include "sky/engine/bindings/core/v8/DOMDataStore.h"
 #include "sky/engine/bindings/core/v8/ExceptionState.h"
@@ -70,9 +71,9 @@
 #include "sky/engine/core/page/Page.h"
 #include "sky/engine/core/rendering/RenderBox.h"
 #include "sky/engine/platform/EventDispatchForbiddenScope.h"
+#include "sky/engine/platform/JSONValues.h"
 #include "sky/engine/platform/Partitions.h"
 #include "sky/engine/platform/TraceEvent.h"
-#include "sky/engine/platform/TracedValue.h"
 #include "sky/engine/wtf/HashSet.h"
 #include "sky/engine/wtf/PassOwnPtr.h"
 #include "sky/engine/wtf/RefCountedLeakCounter.h"
@@ -467,7 +468,21 @@ void Node::markAncestorsWithChildNeedsDistributionRecalc()
 
 namespace {
 
-void addJsStack(TracedValue* stackFrames)
+class JSONTraceValue : public base::debug::ConvertableToTraceFormat {
+public:
+    explicit JSONTraceValue(RefPtr<JSONValue> value)
+        : m_value(value.release()) { }
+
+    void AppendAsTraceFormat(std::string* out) const override
+    {
+        out->append(m_value->toJSONString().utf8().data());
+    }
+
+private:
+    RefPtr<JSONValue> m_value;
+};
+
+void addJsStack(JSONArray* stackFrames)
 {
     RefPtr<ScriptCallStack> stack = createScriptCallStack(10);
     if (!stack)
@@ -476,18 +491,18 @@ void addJsStack(TracedValue* stackFrames)
         stackFrames->pushString(stack->at(i).functionName());
 }
 
-PassRefPtr<TraceEvent::ConvertableToTraceFormat> jsonObjectForStyleInvalidation(unsigned nodeCount, const Node* rootNode)
+scoped_refptr<base::debug::ConvertableToTraceFormat> jsonObjectForStyleInvalidation(unsigned nodeCount, const Node* rootNode)
 {
-    RefPtr<TracedValue> value = TracedValue::create();
-    value->setInteger("node_count", nodeCount);
+    RefPtr<JSONObject> value = JSONObject::create();
+    value->setNumber("node_count", nodeCount);
     value->setString("root_node", rootNode->debugName());
-    value->beginArray("js_stack");
-    addJsStack(value.get());
-    value->endArray();
-    return value;
+    RefPtr<JSONArray> stack;
+    addJsStack(stack.get());
+    value->setArray("js_stack", stack.release());
+    return make_scoped_refptr(new JSONTraceValue(value));
 }
 
-} // anonymous namespace'd functions supporting traceStyleChange
+} // namespace
 
 unsigned Node::styledSubtreeSize() const
 {

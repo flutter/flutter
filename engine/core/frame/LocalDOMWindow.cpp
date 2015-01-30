@@ -63,7 +63,6 @@
 #include "sky/engine/core/frame/Settings.h"
 #include "sky/engine/core/inspector/ConsoleMessage.h"
 #include "sky/engine/core/inspector/ConsoleMessageStorage.h"
-#include "sky/engine/core/inspector/InspectorTraceEvents.h"
 #include "sky/engine/core/loader/FrameLoaderClient.h"
 #include "sky/engine/core/page/ChromeClient.h"
 #include "sky/engine/core/page/EventHandler.h"
@@ -662,8 +661,6 @@ void LocalDOMWindow::dispatchLoadEvent()
 {
     RefPtr<Event> loadEvent(Event::create(EventTypeNames::load));
     dispatchEvent(loadEvent, document());
-
-    TRACE_EVENT_INSTANT1(TRACE_DISABLED_BY_DEFAULT("devtools.timeline"), "MarkLoad", TRACE_EVENT_SCOPE_PROCESS, "data", InspectorMarkLoadEvent::data());
 }
 
 bool LocalDOMWindow::dispatchEvent(PassRefPtr<Event> prpEvent, PassRefPtr<EventTarget> prpTarget)
@@ -676,8 +673,6 @@ bool LocalDOMWindow::dispatchEvent(PassRefPtr<Event> prpEvent, PassRefPtr<EventT
     event->setTarget(prpTarget ? prpTarget : this);
     event->setCurrentTarget(this);
     event->setEventPhase(Event::AT_TARGET);
-
-    TRACE_EVENT1(TRACE_DISABLED_BY_DEFAULT("devtools.timeline"), "EventDispatch", "data", InspectorEventDispatchEvent::data(*event));
 
     bool result = fireEventListeners(event.get());
 

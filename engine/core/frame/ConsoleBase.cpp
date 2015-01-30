@@ -31,7 +31,6 @@
 
 #include "sky/engine/bindings/core/v8/ScriptCallStackFactory.h"
 #include "sky/engine/core/inspector/ConsoleMessage.h"
-#include "sky/engine/core/inspector/InspectorTraceEvents.h"
 #include "sky/engine/core/inspector/ScriptArguments.h"
 #include "sky/engine/platform/TraceEvent.h"
 #include "sky/engine/wtf/text/CString.h"
@@ -171,7 +170,6 @@ void ConsoleBase::timeEnd(ScriptState* scriptState, const String& title)
 
 void ConsoleBase::timeStamp(const String& title)
 {
-    TRACE_EVENT_INSTANT1(TRACE_DISABLED_BY_DEFAULT("devtools.timeline"), "TimeStamp", TRACE_EVENT_SCOPE_PROCESS, "data", InspectorTimeStampEvent::data(context(), title));
 }
 
 void ConsoleBase::timeline(ScriptState* scriptState, const String& title)

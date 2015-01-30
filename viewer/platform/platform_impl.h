@@ -32,33 +32,6 @@ class PlatformImpl : public blink::Platform {
   virtual mojo::NetworkService* networkService();
   virtual blink::WebURLLoader* createURLLoader();
   virtual blink::WebURLError cancelledError(const blink::WebURL& url) const;
-  virtual const unsigned char* getTraceCategoryEnabledFlag(
-      const char* category_name);
-  virtual TraceEventHandle addTraceEvent(
-      char phase,
-      const unsigned char* category_group_enabled,
-      const char* name,
-      unsigned long long id,
-      int num_args,
-      const char** arg_names,
-      const unsigned char* arg_types,
-      const unsigned long long* arg_values,
-      unsigned char flags);
-  virtual TraceEventHandle addTraceEvent(
-      char phase,
-      const unsigned char* category_group_enabled,
-      const char* name,
-      unsigned long long id,
-      int num_args,
-      const char** arg_names,
-      const unsigned char* arg_types,
-      const unsigned long long* arg_values,
-      const blink::WebConvertableToTraceFormat* convertable_values,
-      unsigned char flags);
-  virtual void updateTraceEventDuration(
-      const unsigned char* category_group_enabled,
-      const char* name,
-      TraceEventHandle);
 
  private:
   void SuspendSharedTimer();

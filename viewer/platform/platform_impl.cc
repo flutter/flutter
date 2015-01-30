@@ -15,29 +15,9 @@
 #include "net/base/data_url.h"
 #include "net/base/mime_util.h"
 #include "net/base/net_errors.h"
-#include "sky/engine/public/platform/WebConvertableToTraceFormat.h"
 #include "sky/viewer/platform/weburlloader_impl.h"
 
 namespace sky {
-namespace {
-
-class ConvertableToTraceFormatWrapper
-    : public base::debug::ConvertableToTraceFormat {
- public:
-  explicit ConvertableToTraceFormatWrapper(
-      const blink::WebConvertableToTraceFormat& convertable)
-      : convertable_(convertable) {}
-  virtual void AppendAsTraceFormat(std::string* out) const override {
-    *out += convertable_.asTraceFormat().utf8();
-  }
-
- private:
-  virtual ~ConvertableToTraceFormatWrapper() {}
-
-  blink::WebConvertableToTraceFormat convertable_;
-};
-
-}  // namespace
 
 PlatformImpl::PlatformImpl(mojo::ApplicationImpl* app)
     : main_loop_(base::MessageLoop::current()),
@@ -121,82 +101,6 @@ blink::WebURLError PlatformImpl::cancelledError(const blink::WebURL& url)
   error.staleCopyInCache = false;
   error.isCancellation = true;
   return error;
-}
-
-const unsigned char* PlatformImpl::getTraceCategoryEnabledFlag(
-    const char* category_group) {
-  return TRACE_EVENT_API_GET_CATEGORY_GROUP_ENABLED(category_group);
-}
-
-COMPILE_ASSERT(
-    sizeof(blink::Platform::TraceEventHandle) ==
-        sizeof(base::debug::TraceEventHandle),
-    TraceEventHandle_types_must_be_same_size);
-
-blink::Platform::TraceEventHandle PlatformImpl::addTraceEvent(
-    char phase,
-    const unsigned char* category_group_enabled,
-    const char* name,
-    unsigned long long id,
-    int num_args,
-    const char** arg_names,
-    const unsigned char* arg_types,
-    const unsigned long long* arg_values,
-    unsigned char flags) {
-  base::debug::TraceEventHandle handle = TRACE_EVENT_API_ADD_TRACE_EVENT(
-      phase, category_group_enabled, name, id,
-      num_args, arg_names, arg_types, arg_values, NULL, flags);
-  blink::Platform::TraceEventHandle result;
-  memcpy(&result, &handle, sizeof(result));
-  return result;
-}
-
-blink::Platform::TraceEventHandle PlatformImpl::addTraceEvent(
-    char phase,
-    const unsigned char* category_group_enabled,
-    const char* name,
-    unsigned long long id,
-    int num_args,
-    const char** arg_names,
-    const unsigned char* arg_types,
-    const unsigned long long* arg_values,
-    const blink::WebConvertableToTraceFormat* convertable_values,
-    unsigned char flags) {
-  scoped_refptr<base::debug::ConvertableToTraceFormat> convertable_wrappers[2];
-  if (convertable_values) {
-    size_t size = std::min(static_cast<size_t>(num_args),
-                           arraysize(convertable_wrappers));
-    for (size_t i = 0; i < size; ++i) {
-      if (arg_types[i] == TRACE_VALUE_TYPE_CONVERTABLE) {
-        convertable_wrappers[i] =
-            new ConvertableToTraceFormatWrapper(convertable_values[i]);
-      }
-    }
-  }
-  base::debug::TraceEventHandle handle =
-      TRACE_EVENT_API_ADD_TRACE_EVENT(phase,
-                                      category_group_enabled,
-                                      name,
-                                      id,
-                                      num_args,
-                                      arg_names,
-                                      arg_types,
-                                      arg_values,
-                                      convertable_wrappers,
-                                      flags);
-  blink::Platform::TraceEventHandle result;
-  memcpy(&result, &handle, sizeof(result));
-  return result;
-}
-
-void PlatformImpl::updateTraceEventDuration(
-    const unsigned char* category_group_enabled,
-    const char* name,
-    TraceEventHandle handle) {
-  base::debug::TraceEventHandle traceEventHandle;
-  memcpy(&traceEventHandle, &handle, sizeof(handle));
-  TRACE_EVENT_API_UPDATE_TRACE_EVENT_DURATION(
-      category_group_enabled, name, traceEventHandle);
 }
 
 }  // namespace sky

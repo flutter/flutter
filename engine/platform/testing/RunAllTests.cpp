@@ -32,7 +32,6 @@
 
 #include <string.h>
 #include "base/test/test_suite.h"
-#include "sky/engine/platform/EventTracer.h"
 #include "sky/engine/platform/Partitions.h"
 #include "sky/engine/platform/TestingPlatformSupport.h"
 #include "sky/engine/wtf/CryptographicallyRandomNumber.h"

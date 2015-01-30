@@ -35,7 +35,6 @@
 #include "sky/engine/core/events/WindowEventContext.h"
 #include "sky/engine/core/frame/FrameView.h"
 #include "sky/engine/core/frame/LocalDOMWindow.h"
-#include "sky/engine/core/inspector/InspectorTraceEvents.h"
 #include "sky/engine/platform/EventDispatchForbiddenScope.h"
 #include "sky/engine/platform/TraceEvent.h"
 #include "sky/engine/wtf/RefPtr.h"
@@ -86,7 +85,6 @@ bool EventDispatcher::dispatch()
     ASSERT(!EventDispatchForbiddenScope::isEventDispatchForbidden());
     ASSERT(m_event->target());
     WindowEventContext windowEventContext(m_event.get(), m_node.get(), topNodeEventContext());
-    TRACE_EVENT1(TRACE_DISABLED_BY_DEFAULT("devtools.timeline"), "EventDispatch", "data", InspectorEventDispatchEvent::data(*m_event));
 
     if (dispatchEventPreProcess() == ContinueDispatching)
         if (dispatchEventAtCapturing(windowEventContext) == ContinueDispatching)
@@ -98,7 +96,6 @@ bool EventDispatcher::dispatch()
     // outermost shadow DOM boundary.
     m_event->setTarget(windowEventContext.target());
     m_event->setCurrentTarget(0);
-    TRACE_EVENT_INSTANT1(TRACE_DISABLED_BY_DEFAULT("devtools.timeline"), "UpdateCounters", TRACE_EVENT_SCOPE_PROCESS, "data", InspectorUpdateCountersEvent::data());
 
     return !m_event->defaultPrevented();
 }

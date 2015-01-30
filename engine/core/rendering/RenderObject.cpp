@@ -60,7 +60,6 @@
 #include "sky/engine/platform/JSONValues.h"
 #include "sky/engine/platform/Partitions.h"
 #include "sky/engine/platform/TraceEvent.h"
-#include "sky/engine/platform/TracedValue.h"
 #include "sky/engine/platform/geometry/TransformState.h"
 #include "sky/engine/platform/graphics/GraphicsContext.h"
 #include "sky/engine/wtf/RefCountedLeakCounter.h"

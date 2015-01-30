@@ -66,7 +66,6 @@ public:
 
     // Platform:
     virtual WebDiscardableMemory* allocateAndLockDiscardableMemory(size_t bytes) override;
-    virtual const unsigned char* getTraceCategoryEnabledFlag(const char* categoryName) override;
 
 private:
     const Config m_config;

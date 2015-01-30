@@ -136,7 +136,6 @@ SkBitmap NativeImageSkia::resizedBitmap(const SkISize& scaledImageSize, const Sk
         bool shouldCache = isDataComplete()
             && shouldCacheResampling(scaledImageSize, scaledImageSubset);
 
-        TRACE_EVENT1(TRACE_DISABLED_BY_DEFAULT("devtools.timeline"), "ResizeImage", "cached", shouldCache);
         SkBitmap resizedImage = skia::ImageOperations::Resize(bitmap(), skia::ImageOperations::RESIZE_LANCZOS3, scaledImageSize.width(), scaledImageSize.height(), scaledImageSubset);
         resizedImage.setImmutable();
 

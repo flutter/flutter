@@ -38,7 +38,6 @@
 #include "sky/engine/core/frame/LocalFrame.h"
 #include "sky/engine/core/frame/Settings.h"
 #include "sky/engine/core/html/parser/TextResourceDecoder.h"
-#include "sky/engine/core/inspector/InspectorTraceEvents.h"
 #include "sky/engine/core/loader/FrameLoaderClient.h"
 #include "sky/engine/core/page/ChromeClient.h"
 #include "sky/engine/core/page/EventHandler.h"
@@ -287,9 +286,6 @@ void FrameView::layout(bool allowSubtree)
 
     RELEASE_ASSERT(!isPainting());
 
-    TRACE_EVENT_BEGIN1(TRACE_DISABLED_BY_DEFAULT("devtools.timeline"), "Layout", "beginData", InspectorLayoutEvent::beginData(this));
-    TRACE_EVENT_INSTANT1(TRACE_DISABLED_BY_DEFAULT("devtools.timeline.stack"), "CallStack", TRACE_EVENT_SCOPE_PROCESS, "stack", InspectorCallStackEvent::currentCallStack());
-
     if (!allowSubtree && isSubtreeLayout()) {
         m_layoutSubtreeRoot->markContainingBlocksForLayout(false);
         m_layoutSubtreeRoot = 0;
@@ -342,8 +338,6 @@ void FrameView::layout(bool allowSubtree)
     ASSERT(!rootForThisLayout->needsLayout());
 
     scheduleOrPerformPostLayoutTasks();
-
-    TRACE_EVENT_END1(TRACE_DISABLED_BY_DEFAULT("devtools.timeline"), "Layout", "endData", InspectorLayoutEvent::endData(rootForThisLayout));
 
     m_nestedLayoutCount--;
     if (m_nestedLayoutCount)
@@ -419,8 +413,6 @@ void FrameView::scheduleRelayout()
         return;
     if (!m_frame->document()->isActive())
         return;
-    TRACE_EVENT_INSTANT1(TRACE_DISABLED_BY_DEFAULT("devtools.timeline"), "InvalidateLayout", TRACE_EVENT_SCOPE_PROCESS, "frame", m_frame.get());
-    TRACE_EVENT_INSTANT1(TRACE_DISABLED_BY_DEFAULT("devtools.timeline.stack"), "CallStack", TRACE_EVENT_SCOPE_PROCESS, "stack", InspectorCallStackEvent::currentCallStack());
 
     if (m_hasPendingLayout)
         return;
@@ -480,8 +472,6 @@ void FrameView::scheduleRelayoutOfSubtree(RenderObject* relayoutRoot)
         m_frame->document()->scheduleVisualUpdate();
         lifecycle().ensureStateAtMost(DocumentLifecycle::StyleClean);
     }
-    TRACE_EVENT_INSTANT1(TRACE_DISABLED_BY_DEFAULT("devtools.timeline"), "InvalidateLayout", TRACE_EVENT_SCOPE_PROCESS, "frame", m_frame.get());
-    TRACE_EVENT_INSTANT1(TRACE_DISABLED_BY_DEFAULT("devtools.timeline.stack"), "CallStack", TRACE_EVENT_SCOPE_PROCESS, "stack", InspectorCallStackEvent::currentCallStack());
 }
 
 bool FrameView::layoutPending() const
@@ -683,9 +673,6 @@ void FrameView::paintContents(GraphicsContext* p, const IntRect& rect)
     RELEASE_ASSERT(!needsLayout());
     ASSERT(m_frame->document()->lifecycle().state() >= DocumentLifecycle::StyleAndLayoutClean);
 
-    TRACE_EVENT1(TRACE_DISABLED_BY_DEFAULT("devtools.timeline"), "Paint", "data", InspectorPaintEvent::data(renderView, rect));
-    TRACE_EVENT_INSTANT1(TRACE_DISABLED_BY_DEFAULT("devtools.timeline.stack"), "CallStack", TRACE_EVENT_SCOPE_PROCESS, "stack", InspectorCallStackEvent::currentCallStack());
-
     bool isTopLevelPainter = !s_inPaintContents;
     s_inPaintContents = true;
 
@@ -726,10 +713,8 @@ void FrameView::updateLayoutAndStyleForPainting()
 
     updateLayoutAndStyleIfNeededRecursive();
 
-    if (RenderView* view = renderView()) {
-        TRACE_EVENT_INSTANT1(TRACE_DISABLED_BY_DEFAULT("devtools.timeline"), "updateIFramesAfterLayout", TRACE_EVENT_SCOPE_PROCESS, "frame", m_frame.get());
+    if (RenderView* view = renderView())
         view->updateIFramesAfterLayout();
-    }
 
     // TODO(ojan): Get rid of this and just have the LayoutClean state.
     lifecycle().advanceTo(DocumentLifecycle::StyleAndLayoutClean);

@@ -37,7 +37,6 @@
 #include "sky/engine/core/html/parser/HTMLParserScheduler.h"
 #include "sky/engine/core/html/parser/HTMLParserThread.h"
 #include "sky/engine/core/html/parser/HTMLTreeBuilder.h"
-#include "sky/engine/core/inspector/InspectorTraceEvents.h"
 #include "sky/engine/platform/SharedBuffer.h"
 #include "sky/engine/platform/TraceEvent.h"
 
@@ -240,10 +239,6 @@ void HTMLDocumentParser::pumpPendingSpeculations()
     ASSERT(!isWaitingForScripts());
     ASSERT(!isStopped());
 
-    // FIXME: Pass in current input length.
-    TRACE_EVENT_BEGIN1(TRACE_DISABLED_BY_DEFAULT("devtools.timeline"), "ParseHTML", "beginData", InspectorParseHtmlEvent::beginData(document(), lineNumber().zeroBasedInt()));
-    TRACE_EVENT_INSTANT1(TRACE_DISABLED_BY_DEFAULT("devtools.timeline.stack"), "CallStack", TRACE_EVENT_SCOPE_PROCESS, "stack", InspectorCallStackEvent::currentCallStack());
-
     double startTime = currentTime();
 
     while (!m_speculations.isEmpty()) {
@@ -258,9 +253,6 @@ void HTMLDocumentParser::pumpPendingSpeculations()
             break;
         }
     }
-
-    TRACE_EVENT_END1(TRACE_DISABLED_BY_DEFAULT("devtools.timeline"), "ParseHTML", "endLine", lineNumber().zeroBasedInt());
-    TRACE_EVENT_INSTANT1(TRACE_DISABLED_BY_DEFAULT("devtools.timeline"), "UpdateCounters", TRACE_EVENT_SCOPE_PROCESS, "data", InspectorUpdateCountersEvent::data());
 }
 
 Document* HTMLDocumentParser::contextForParsingSession()

@@ -80,10 +80,4 @@ blink::WebDiscardableMemory* TestingPlatformSupport::allocateAndLockDiscardableM
     return !m_config.hasDiscardableMemorySupport ? 0 : new TestingDiscardableMemory(bytes);
 }
 
-const unsigned char* TestingPlatformSupport::getTraceCategoryEnabledFlag(const char* categoryName)
-{
-    static const unsigned char tracingIsDisabled = 0;
-    return &tracingIsDisabled;
-}
-
 } // namespace blink

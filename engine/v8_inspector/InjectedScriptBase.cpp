@@ -34,7 +34,6 @@
 #include "sky/engine/v8_inspector/InjectedScriptBase.h"
 
 #include "sky/engine/bindings/core/v8/ScriptFunctionCall.h"
-#include "sky/engine/core/inspector/InspectorTraceEvents.h"
 #include "sky/engine/platform/JSONValues.h"
 #include "sky/engine/wtf/text/WTFString.h"
 
@@ -113,10 +112,6 @@ const ScriptValue& InjectedScriptBase::injectedScriptObject() const
 ScriptValue InjectedScriptBase::callFunctionWithEvalEnabled(ScriptFunctionCall& function, bool& hadException) const
 {
     ASSERT(!isEmpty());
-    ExecutionContext* executionContext = m_injectedScriptObject.scriptState()->executionContext();
-    TRACE_EVENT1(TRACE_DISABLED_BY_DEFAULT("devtools.timeline"), "FunctionCall", "data", InspectorFunctionCallEvent::data(executionContext, 0, name(), 1));
-    TRACE_EVENT_INSTANT1(TRACE_DISABLED_BY_DEFAULT("devtools.timeline.stack"), "CallStack", TRACE_EVENT_SCOPE_PROCESS, "stack", InspectorCallStackEvent::currentCallStack());
-
     ScriptState* scriptState = m_injectedScriptObject.scriptState();
     bool evalIsDisabled = false;
     if (scriptState) {
@@ -131,7 +126,6 @@ ScriptValue InjectedScriptBase::callFunctionWithEvalEnabled(ScriptFunctionCall& 
     if (evalIsDisabled)
         scriptState->setEvalEnabled(false);
 
-    TRACE_EVENT_INSTANT1(TRACE_DISABLED_BY_DEFAULT("devtools.timeline"), "UpdateCounters", TRACE_EVENT_SCOPE_PROCESS, "data", InspectorUpdateCountersEvent::data());
     return resultValue;
 }
 

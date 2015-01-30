@@ -746,9 +746,6 @@ private:
     RefPtr<ScriptState> m_scriptState;
 };
 
-void GetDevToolsFunctionInfo(v8::Handle<v8::Function>, v8::Isolate*, int& scriptId, String& resourceName, int& lineNumber);
-PassRefPtr<TraceEvent::ConvertableToTraceFormat> devToolsTraceEventData(ExecutionContext*, v8::Handle<v8::Function>, v8::Isolate*);
-
 class V8RethrowTryCatchScope final {
 public:
     explicit V8RethrowTryCatchScope(v8::TryCatch& block) : m_block(block) { }

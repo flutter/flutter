@@ -24,7 +24,6 @@ source_set("platform_headers") {
     "platform/WebCommon.h",
     "platform/WebContentLayer.h",
     "platform/WebContentLayerClient.h",
-    "platform/WebConvertableToTraceFormat.h",
     "platform/WebCursorInfo.h",
     "platform/WebData.h",
     "platform/WebDiscardableMemory.h",

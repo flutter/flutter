@@ -34,7 +34,6 @@
 #include "sky/engine/core/fetch/ResourceLoader.h"
 #include "sky/engine/core/frame/LocalFrame.h"
 #include "sky/engine/core/html/HTMLImageElement.h"
-#include "sky/engine/core/inspector/InspectorTraceEvents.h"
 #include "sky/engine/core/rendering/HitTestResult.h"
 #include "sky/engine/core/rendering/PaintInfo.h"
 #include "sky/engine/core/rendering/RenderLayer.h"
@@ -196,7 +195,6 @@ void RenderImage::paintIntoRect(GraphicsContext* context, const LayoutRect& rect
 
     Image* image = img.get();
 
-    TRACE_EVENT1(TRACE_DISABLED_BY_DEFAULT("devtools.timeline"), "PaintImage", "data", InspectorPaintImageEvent::data(*this));
     InterpolationQuality previousInterpolationQuality = context->imageInterpolationQuality();
     context->setImageInterpolationQuality(InterpolationLow);
     context->drawImage(image, alignedRect, CompositeSourceOver, shouldRespectImageOrientation());

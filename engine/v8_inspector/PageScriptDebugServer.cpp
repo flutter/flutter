@@ -41,7 +41,6 @@
 #include "sky/engine/core/dom/ExecutionContext.h"
 #include "sky/engine/core/frame/FrameConsole.h"
 #include "sky/engine/core/frame/LocalFrame.h"
-#include "sky/engine/core/inspector/InspectorTraceEvents.h"
 #include "sky/engine/v8_inspector/inspector_host.h"
 #include "sky/engine/v8_inspector/ScriptDebugListener.h"
 #include "sky/engine/wtf/OwnPtr.h"
@@ -155,13 +154,9 @@ void PageScriptDebugServer::runScript(ScriptState* scriptState, const String& sc
 
     ExecutionContext* executionContext = scriptState->executionContext();
     LocalFrame* frame = executionContext->executingWindow()->frame();
-    TRACE_EVENT1(TRACE_DISABLED_BY_DEFAULT("devtools.timeline"), "EvaluateScript", "data", InspectorEvaluateScriptEvent::data(sourceURL, TextPosition::minimumPosition().m_line.oneBasedInt()));
-    TRACE_EVENT_INSTANT1(TRACE_DISABLED_BY_DEFAULT("devtools.timeline.stack"), "CallStack", TRACE_EVENT_SCOPE_PROCESS, "stack", InspectorCallStackEvent::currentCallStack());
 
     RefPtr<LocalFrame> protect = frame;
     ScriptDebugServer::runScript(scriptState, scriptId, result, wasThrown, exceptionDetailsText, lineNumber, columnNumber, stackTrace);
-
-    TRACE_EVENT_INSTANT1(TRACE_DISABLED_BY_DEFAULT("devtools.timeline"), "UpdateCounters", TRACE_EVENT_SCOPE_PROCESS, "data", InspectorUpdateCountersEvent::data());
 }
 
 ScriptDebugListener* PageScriptDebugServer::getDebugListenerForContext(v8::Handle<v8::Context> context)
