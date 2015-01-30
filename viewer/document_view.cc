@@ -15,7 +15,6 @@
 #include "mojo/public/cpp/application/connect.h"
 #include "mojo/public/cpp/system/data_pipe.h"
 #include "mojo/public/interfaces/application/shell.mojom.h"
-#include "mojo/services/surfaces/public/interfaces/surfaces_service.mojom.h"
 #include "mojo/services/view_manager/public/cpp/view.h"
 #include "mojo/services/view_manager/public/cpp/view_manager.h"
 #include "skia/ext/refptr.h"
