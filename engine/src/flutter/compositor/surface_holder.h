@@ -10,7 +10,6 @@
 #include "base/memory/weak_ptr.h"
 #include "mojo/services/surfaces/public/interfaces/surface_id.mojom.h"
 #include "mojo/services/surfaces/public/interfaces/surfaces.mojom.h"
-#include "mojo/services/surfaces/public/interfaces/surfaces_service.mojom.h"
 #include "ui/gfx/geometry/rect.h"
 
 namespace mojo {
