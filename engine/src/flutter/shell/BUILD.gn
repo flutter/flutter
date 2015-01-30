@@ -1,0 +1,69 @@
+# Copyright 2015 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+assert(is_android)
+
+import("//build/config/android/config.gni")
+import("//build/config/android/rules.gni")
+
+group("shell") {
+  deps = [
+    ":sky_shell_apk",
+  ]
+}
+
+generate_jni("jni_headers") {
+  sources = [
+    "apk/src/org/domokit/sky/shell/SkyMain.java",
+  ]
+  jni_package = "sky/shell"
+}
+
+shared_library("sky_shell") {
+  sources = [
+    "library_loader.cc",
+    "sky_main.cc",
+    "sky_main.h",
+  ]
+
+  deps = [
+    "//base",
+    "//build/config/sanitizers:deps",
+    "//ui/gl",
+    ":jni_headers",
+  ]
+}
+
+android_library("java") {
+  java_files = [
+    "apk/src/org/domokit/sky/shell/SkyMain.java",
+    "apk/src/org/domokit/sky/shell/SkyShellActivity.java",
+    "apk/src/org/domokit/sky/shell/SkyShellApplication.java",
+  ]
+
+  deps = [
+    "//base:base_java",
+  ]
+}
+
+android_resources("resources") {
+  resource_dirs = [ "apk/res" ]
+  custom_package = "org.domokit.sky.shell"
+}
+
+android_apk("sky_shell_apk") {
+  apk_name = "SkyShell"
+
+  android_manifest = "apk/AndroidManifest.xml"
+  native_libs = [ "libsky_shell.so" ]
+
+  asset_location = "apk/res"
+
+  deps = [
+    ":sky_shell",
+    ":java",
+    ":resources",
+    "//base:base_java",
+  ]
+}
