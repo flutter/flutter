@@ -18,6 +18,11 @@ group("sky") {
     "//sky/tools/tester",
     "//sky/viewer",
   ]
+
+  if (is_android) {
+    deps += [ "//sky/shell" ]
+  }
+
   if (!is_android) {
     deps += [ "//third_party/mesa:osmesa" ]
   }
