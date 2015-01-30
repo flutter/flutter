@@ -50,12 +50,8 @@ public:
 
 }
 
-// FIXME: Make these global variables thread-safe. Make a value update atomic.
-PLATFORM_EXPORT extern long* traceSamplingState[3];
-
 class PLATFORM_EXPORT EventTracer {
 public:
-    static void initialize();
     static const unsigned char* getTraceCategoryEnabledFlag(const char*);
     static TraceEvent::TraceEventHandle addTraceEvent(char phase,
         const unsigned char* categoryEnabledFlag,

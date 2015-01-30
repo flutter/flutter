@@ -234,14 +234,6 @@ public:
     // addTraceEvent is expected to be called by the trace event macros.
     virtual const unsigned char* getTraceCategoryEnabledFlag(const char* categoryName) { return 0; }
 
-    typedef long int TraceEventAPIAtomicWord;
-
-    // Get a pointer to a global state of the given thread. An embedder is
-    // expected to update the global state as the state of the embedder changes.
-    // A sampling thread in the Chromium side reads the global state periodically
-    // and reflects the sampling profiled results into about:tracing.
-    virtual TraceEventAPIAtomicWord* getTraceSamplingState(const unsigned bucketName) { return 0; }
-
     typedef uint64_t TraceEventHandle;
 
     // Add a trace event to the platform tracing system. Depending on the actual

@@ -128,20 +128,6 @@ const unsigned char* PlatformImpl::getTraceCategoryEnabledFlag(
   return TRACE_EVENT_API_GET_CATEGORY_GROUP_ENABLED(category_group);
 }
 
-long* PlatformImpl::getTraceSamplingState(const unsigned thread_bucket) {
-  switch (thread_bucket) {
-    case 0:
-      return reinterpret_cast<long*>(&TRACE_EVENT_API_THREAD_BUCKET(0));
-    case 1:
-      return reinterpret_cast<long*>(&TRACE_EVENT_API_THREAD_BUCKET(1));
-    case 2:
-      return reinterpret_cast<long*>(&TRACE_EVENT_API_THREAD_BUCKET(2));
-    default:
-      NOTREACHED() << "Unknown thread bucket type.";
-  }
-  return NULL;
-}
-
 COMPILE_ASSERT(
     sizeof(blink::Platform::TraceEventHandle) ==
         sizeof(base::debug::TraceEventHandle),

@@ -40,29 +40,6 @@ namespace blink {
 
 COMPILE_ASSERT(sizeof(blink::Platform::TraceEventHandle) == sizeof(TraceEvent::TraceEventHandle), TraceEventHandle_types_must_be_compatible);
 
-// The dummy variable is needed to avoid a crash when someone updates the state variables
-// before EventTracer::initialize() is called.
-long dummyTraceSamplingState = 0;
-long* traceSamplingState[3] = {&dummyTraceSamplingState, &dummyTraceSamplingState, &dummyTraceSamplingState };
-
-void EventTracer::initialize()
-{
-    // current() might not exist in unit tests.
-    if (!blink::Platform::current())
-        return;
-
-    traceSamplingState[0] = blink::Platform::current()->getTraceSamplingState(0);
-    // FIXME: traceSamplingState[0] can be 0 in split-dll build. http://crbug.com/256965
-    if (!traceSamplingState[0])
-        traceSamplingState[0] = &dummyTraceSamplingState;
-    traceSamplingState[1] = blink::Platform::current()->getTraceSamplingState(1);
-    if (!traceSamplingState[1])
-        traceSamplingState[1] = &dummyTraceSamplingState;
-    traceSamplingState[2] = blink::Platform::current()->getTraceSamplingState(2);
-    if (!traceSamplingState[2])
-        traceSamplingState[2] = &dummyTraceSamplingState;
-}
-
 const unsigned char* EventTracer::getTraceCategoryEnabledFlag(const char* categoryName)
 {
     static const char* dummyCategoryEnabledFlag = "*";

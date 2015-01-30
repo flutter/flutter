@@ -54,7 +54,6 @@ int main(int argc, char** argv)
     blink::TestingPlatformSupport platform(platformConfig);
 
     blink::Partitions::init();
-    blink::EventTracer::initialize();
     int result = base::RunUnitTestsUsingBaseTestSuite(argc, argv);
     blink::Partitions::shutdown();
     return result;
