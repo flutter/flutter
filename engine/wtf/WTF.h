@@ -39,7 +39,7 @@
 namespace WTF {
 
 // This function must be called exactly once from the main thread before using anything else in WTF.
-WTF_EXPORT void initialize(TimeFunction currentTimeFunction, TimeFunction monotonicallyIncreasingTimeFunction);
+WTF_EXPORT void initialize();
 WTF_EXPORT void shutdown();
 WTF_EXPORT bool isShutdown();
 

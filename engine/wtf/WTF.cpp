@@ -43,7 +43,7 @@ bool s_shutdown;
 bool Partitions::s_initialized;
 PartitionAllocatorGeneric Partitions::m_bufferAllocator;
 
-void initialize(TimeFunction currentTimeFunction, TimeFunction monotonicallyIncreasingTimeFunction)
+void initialize()
 {
     // WTF, and Blink in general, cannot handle being re-initialized, even if shutdown first.
     // Make that explicit here.
@@ -51,8 +51,6 @@ void initialize(TimeFunction currentTimeFunction, TimeFunction monotonicallyIncr
     ASSERT(!s_shutdown);
     s_initialized = true;
     Partitions::initialize();
-    setCurrentTimeFunction(currentTimeFunction);
-    setMonotonicallyIncreasingTimeFunction(monotonicallyIncreasingTimeFunction);
     initializeThreading();
 }
 

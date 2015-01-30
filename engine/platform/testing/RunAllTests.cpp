@@ -39,11 +39,6 @@
 #include "sky/engine/wtf/MainThread.h"
 #include "sky/engine/wtf/WTF.h"
 
-static double CurrentTime()
-{
-    return 0.0;
-}
-
 static void AlwaysZeroNumberSource(unsigned char* buf, size_t len)
 {
     memset(buf, '\0', len);
@@ -52,7 +47,7 @@ static void AlwaysZeroNumberSource(unsigned char* buf, size_t len)
 int main(int argc, char** argv)
 {
     WTF::setRandomSource(AlwaysZeroNumberSource);
-    WTF::initialize(CurrentTime, 0);
+    WTF::initialize();
     WTF::initializeMainThread();
 
     blink::TestingPlatformSupport::Config platformConfig;

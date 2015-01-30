@@ -25,8 +25,6 @@ class PlatformImpl : public blink::Platform {
 
   // blink::Platform methods:
   virtual blink::WebString defaultLocale();
-  virtual double currentTime();
-  virtual double monotonicallyIncreasingTime();
   virtual void setSharedTimerFiredFunction(void (*func)());
   virtual void setSharedTimerFireInterval(double interval_seconds);
   virtual void stopSharedTimer();

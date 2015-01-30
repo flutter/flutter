@@ -28,32 +28,21 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "base/time/time.h"
 #include "sky/engine/config.h"
 #include "sky/engine/wtf/CurrentTime.h"
 
 namespace WTF {
 
-static TimeFunction currentTimeFunction;
-static TimeFunction monotonicallyIncreasingTimeFunction;
-
-void setCurrentTimeFunction(TimeFunction func)
-{
-    currentTimeFunction = func;
-}
-
-void setMonotonicallyIncreasingTimeFunction(TimeFunction func)
-{
-    monotonicallyIncreasingTimeFunction = func;
-}
-
 double currentTime()
 {
-    return (*currentTimeFunction)();
+    return base::Time::Now().ToDoubleT();
 }
 
 double monotonicallyIncreasingTime()
 {
-    return (*monotonicallyIncreasingTimeFunction)();
+  return base::TimeTicks::Now().ToInternalValue() /
+      static_cast<double>(base::Time::kMicrosecondsPerSecond);
 }
 
 } // namespace WTF

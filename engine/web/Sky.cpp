@@ -132,16 +132,6 @@ v8::Isolate* mainThreadIsolate()
     return V8PerIsolateData::mainThreadIsolate();
 }
 
-static double currentTimeFunction()
-{
-    return Platform::current()->currentTime();
-}
-
-static double monotonicallyIncreasingTimeFunction()
-{
-    return Platform::current()->monotonicallyIncreasingTime();
-}
-
 static void cryptographicallyRandomValues(unsigned char* buffer, size_t length)
 {
     base::RandBytes(buffer, length);
@@ -156,7 +146,7 @@ void initializeWithoutV8(Platform* platform)
     Platform::initialize(platform);
 
     WTF::setRandomSource(cryptographicallyRandomValues);
-    WTF::initialize(currentTimeFunction, monotonicallyIncreasingTimeFunction);
+    WTF::initialize();
     WTF::initializeMainThread();
 
     DEFINE_STATIC_LOCAL(CoreInitializer, initializer, ());

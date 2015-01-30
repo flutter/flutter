@@ -52,9 +52,6 @@ inline double currentTimeMS()
 WTF_EXPORT double monotonicallyIncreasingTime();
 
 typedef double(*TimeFunction)(void);
-void setCurrentTimeFunction(TimeFunction);
-void setMonotonicallyIncreasingTimeFunction(TimeFunction);
-
 
 } // namespace WTF
 

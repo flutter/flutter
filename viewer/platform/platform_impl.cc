@@ -59,22 +59,16 @@ blink::WebString PlatformImpl::defaultLocale() {
   return blink::WebString::fromUTF8("en-US");
 }
 
-double PlatformImpl::currentTime() {
-  return base::Time::Now().ToDoubleT();
-}
-
-double PlatformImpl::monotonicallyIncreasingTime() {
-  return base::TimeTicks::Now().ToInternalValue() /
-      static_cast<double>(base::Time::kMicrosecondsPerSecond);
-}
-
 void PlatformImpl::setSharedTimerFiredFunction(void (*func)()) {
   shared_timer_func_ = func;
 }
 
 void PlatformImpl::setSharedTimerFireInterval(
     double interval_seconds) {
-  shared_timer_fire_time_ = interval_seconds + monotonicallyIncreasingTime();
+  double now = base::TimeTicks::Now().ToInternalValue() /
+      static_cast<double>(base::Time::kMicrosecondsPerSecond);
+
+  shared_timer_fire_time_ = interval_seconds + now;
   if (shared_timer_suspended_) {
     shared_timer_fire_time_was_set_while_suspended_ = true;
     return;
