@@ -1,5 +1,5 @@
-UI Events
-=========
+Pointer Events
+==============
 
 Scope
 -----
@@ -9,7 +9,7 @@ The following input devices are supported by sky:
  - mice, including mouse wheels
  - styluses on screens
  - other devices that emulate mice (track pads, track balls)
- - keyboards
+ - [Keyboard](keyboard.md)
 
 The following input devices are not supported natively by sky, but can
 be used by connecting directly to the mojo application servicing the
@@ -47,9 +47,11 @@ whether a drag, once established as such, should be treated as a pan
 or a drag, and deciding whether a secondary touch should begin a
 zoom/rotation or not.
 
+This is done using the [gesture recogniser API](gestures.md)
 
-Pointer events
---------------
+
+Pointers
+--------
 
 Each touch or pointer is tracked individually.
 
@@ -145,6 +147,33 @@ The x and y position of an -up or -down event always match those of
 the previous -moved or -added event, so their dx and dy are always 0.
 
 Positions are floating point numbers; they can have subpixel values.
+
+For each pointer, only a single pointer-added or pointer-removed event
+is fired per frame. If a pointer would have been added and removed in
+the same frame, the pointer is ignored, and no events are fired for
+that pointer.
+
+For each pointer, only a single pointer-down or pointer-up event is
+fired per frame, representing the change in state from the last frame,
+if any. Exactly when the event is fired is up to the implementation
+and may depend on the hardware.
+
+For each pointer, at most two pointer-move events are fired per frame,
+one before the pointer-down or pointer-up event, if any, and one
+after. If the pointer didn't change "down" state, then only one
+pointer-move event is fired. All the actual moves that the pointer
+experienced are coallesced into the event.
+
+   Example:
+    If a mouse experiences the following events:
+       - move +1, down, move +2, up, move +4, down, move +8
+    ...the events might be:
+       - move +7, down, move +8
+    ...or:
+       - move +1, down, move +14
+
+TODO(ianh): expose the unfiltered uncoalesced stream of events for
+programs that want more precision (e.g. drawing apps)
 
 
 These data of all these events is an object with the following fields:
@@ -304,8 +333,6 @@ When kind is 'stylus' or 'stylus-inverted':
 TODO(ianh): add an API that exposes the currently existing pointers,
 so that you can determine e.g. if you have a mouse.
 
-TODO(ianh): determine what the update frequency of these events should
-be. One set of events per frame? Multiple updates per frame?
 
 
 Wheel events
