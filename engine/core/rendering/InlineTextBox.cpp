@@ -501,12 +501,6 @@ void InlineTextBox::paint(PaintInfo& paintInfo, const LayoutPoint& paintOffset, 
     if (logicalStart >= paintEnd || logicalStart + logicalExtent <= paintStart)
         return;
 
-    // Determine whether or not we're selected.
-    bool haveSelection = selectionState() != RenderObject::SelectionNone;
-    if (!haveSelection && paintInfo.phase == PaintPhaseSelection)
-        // When only painting the selection, don't bother to paint if there is none.
-        return;
-
     if (m_truncation != cNoTruncation) {
         if (renderer().containingBlock()->style()->isLeftToRightDirection() != isLeftToRightDirection()) {
             // Make the visible fragment of text hug the edge closest to the rest of the run by moving the origin
@@ -536,11 +530,12 @@ void InlineTextBox::paint(PaintInfo& paintInfo, const LayoutPoint& paintOffset, 
     bool containsComposition = renderer().node() && renderer().frame()->inputMethodController().compositionNode() == renderer().node();
     bool useCustomUnderlines = containsComposition && renderer().frame()->inputMethodController().compositionUsesCustomUnderlines();
 
+    bool haveSelection = selectionState() != RenderObject::SelectionNone;
+
     // Determine text colors.
     TextPaintingStyle textStyle = textPaintingStyle(renderer(), styleToUse);
     TextPaintingStyle selectionStyle = selectionPaintingStyle(renderer(), haveSelection, textStyle);
-    bool paintSelectedTextOnly = (paintInfo.phase == PaintPhaseSelection);
-    bool paintSelectedTextSeparately = !paintSelectedTextOnly && textStyle != selectionStyle;
+    bool paintSelectedTextSeparately = textStyle != selectionStyle;
 
     // Set our font.
     const Font& font = styleToUse->font();
@@ -549,16 +544,14 @@ void InlineTextBox::paint(PaintInfo& paintInfo, const LayoutPoint& paintOffset, 
 
     // 1. Paint backgrounds behind text if needed. Examples of such backgrounds include selection
     // and composition highlights.
-    if (paintInfo.phase != PaintPhaseSelection) {
-        if (containsComposition) {
-            paintCompositionBackgrounds(context, boxOrigin, styleToUse, font, useCustomUnderlines);
-        }
-
-        paintDocumentMarkers(context, boxOrigin, styleToUse, font, true);
-
-        if (haveSelection && !useCustomUnderlines)
-            paintSelection(context, boxOrigin, styleToUse, font, selectionStyle.fillColor);
+    if (containsComposition) {
+        paintCompositionBackgrounds(context, boxOrigin, styleToUse, font, useCustomUnderlines);
     }
+
+    paintDocumentMarkers(context, boxOrigin, styleToUse, font, true);
+
+    if (haveSelection && !useCustomUnderlines)
+        paintSelection(context, boxOrigin, styleToUse, font, selectionStyle.fillColor);
 
     // 2. Now paint the foreground, including text and decorations like underline/overline (in quirks mode only).
     int length = m_len;
@@ -575,7 +568,7 @@ void InlineTextBox::paint(PaintInfo& paintInfo, const LayoutPoint& paintOffset, 
 
     int sPos = 0;
     int ePos = 0;
-    if (paintSelectedTextOnly || paintSelectedTextSeparately)
+    if (paintSelectedTextSeparately)
         selectionStartEnd(sPos, ePos);
 
     bool respectHyphen = ePos == m_len && hasHyphen();
@@ -595,23 +588,21 @@ void InlineTextBox::paint(PaintInfo& paintInfo, const LayoutPoint& paintOffset, 
     if (!emphasisMark.isEmpty())
         emphasisMarkOffset = emphasisMarkPosition == TextEmphasisPositionOver ? -font.fontMetrics().ascent() - font.emphasisMarkDescent(emphasisMark) : font.fontMetrics().descent() + font.emphasisMarkAscent(emphasisMark);
 
-    if (!paintSelectedTextOnly) {
-        // FIXME: Truncate right-to-left text correctly.
-        int startOffset = 0;
-        int endOffset = length;
-        if (paintSelectedTextSeparately && ePos > sPos) {
-            startOffset = ePos;
-            endOffset = sPos;
-        }
-        // FIXME: This cache should probably ultimately be held somewhere else.
-        // A hashmap is convenient to avoid a memory hit when the
-        // RuntimeEnabledFeature is off.
-        bool textBlobIsCacheable = RuntimeEnabledFeatures::textBlobEnabled() && startOffset == 0 && endOffset == length;
-        TextBlobPtr* cachedTextBlob = textBlobIsCacheable ? &m_cachedTextBlob : nullptr;
-        paintTextWithEmphasisMark(context, font, textStyle, textRun, emphasisMark, emphasisMarkOffset, startOffset, endOffset, length, textOrigin, boxRect, cachedTextBlob);
+    // FIXME: Truncate right-to-left text correctly.
+    int startOffset = 0;
+    int endOffset = length;
+    if (paintSelectedTextSeparately && ePos > sPos) {
+        startOffset = ePos;
+        endOffset = sPos;
     }
+    // FIXME: This cache should probably ultimately be held somewhere else.
+    // A hashmap is convenient to avoid a memory hit when the
+    // RuntimeEnabledFeature is off.
+    bool textBlobIsCacheable = RuntimeEnabledFeatures::textBlobEnabled() && startOffset == 0 && endOffset == length;
+    TextBlobPtr* cachedTextBlob = textBlobIsCacheable ? &m_cachedTextBlob : nullptr;
+    paintTextWithEmphasisMark(context, font, textStyle, textRun, emphasisMark, emphasisMarkOffset, startOffset, endOffset, length, textOrigin, boxRect, cachedTextBlob);
 
-    if ((paintSelectedTextOnly || paintSelectedTextSeparately) && sPos < ePos) {
+    if (paintSelectedTextSeparately && sPos < ePos) {
         // paint only the text that is selected
         bool textBlobIsCacheable = RuntimeEnabledFeatures::textBlobEnabled() && sPos == 0 && ePos == length;
         TextBlobPtr* cachedTextBlob = textBlobIsCacheable ? &m_cachedTextBlob : nullptr;
@@ -620,7 +611,7 @@ void InlineTextBox::paint(PaintInfo& paintInfo, const LayoutPoint& paintOffset, 
 
     // Paint decorations
     TextDecoration textDecorations = styleToUse->textDecorationsInEffect();
-    if (textDecorations != TextDecorationNone && !paintSelectedTextOnly) {
+    if (textDecorations != TextDecorationNone) {
         GraphicsContextStateSaver stateSaver(*context, false);
         updateGraphicsContext(context, textStyle, stateSaver);
         paintDecoration(context, boxOrigin, textDecorations);
