@@ -1019,20 +1019,12 @@ void RenderLayer::paintForeground(GraphicsContext* context, GraphicsContext* tra
     // TODO(ojan): We probably should early return at the beginning of this function
     // if the rect is empty.
     if (!foregroundRectIsEmpty) {
-        paintForegroundWithPhase(PaintPhaseForeground,
-            context, localPaintingInfo,
-            layerLocation, layerForegroundRect);
+        PaintInfo paintInfo(context, pixelSnappedIntRect(layerForegroundRect.rect()), PaintPhaseForeground, localPaintingInfo.rootLayer->renderer());
+        renderer()->paint(paintInfo, layerLocation);
     }
 
     if (shouldClip)
         restoreClip(context, localPaintingInfo.paintDirtyRect, layerForegroundRect);
-}
-
-void RenderLayer::paintForegroundWithPhase(PaintPhase phase, GraphicsContext* context,
-    const LayerPaintingInfo& localPaintingInfo, LayoutPoint& layerLocation, ClipRect& layerForegroundRect)
-{
-    PaintInfo paintInfo(context, pixelSnappedIntRect(layerForegroundRect.rect()), phase, localPaintingInfo.rootLayer->renderer());
-    renderer()->paint(paintInfo, layerLocation);
 }
 
 void RenderLayer::paintMask(GraphicsContext* context, const LayerPaintingInfo& localPaintingInfo,

@@ -289,8 +289,6 @@ private:
     void paintForeground(GraphicsContext*, GraphicsContext* transparencyLayerContext,
         const LayoutRect& transparencyPaintDirtyRect, bool haveTransparency, const LayerPaintingInfo&,
         LayoutPoint& layerLocation, ClipRect& layerForegroundRect);
-    void paintForegroundWithPhase(PaintPhase, GraphicsContext*, const LayerPaintingInfo&,
-        LayoutPoint& layerLocation, ClipRect& layerForegroundRect);
     void paintMask(GraphicsContext*, const LayerPaintingInfo&,
         LayoutPoint& layerLocation, ClipRect& layerBackgroundRect);
 

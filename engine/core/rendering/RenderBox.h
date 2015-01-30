@@ -433,11 +433,8 @@ protected:
     virtual void updateFromStyle() override;
 
     void paintBackground(const PaintInfo&, const LayoutRect&, const Color& backgroundColor, BackgroundBleedAvoidance = BackgroundBleedNone);
-
     void paintFillLayer(const PaintInfo&, const Color&, const FillLayer&, const LayoutRect&, BackgroundBleedAvoidance, RenderObject* backgroundObject, bool skipBaseColor = false);
     void paintFillLayers(const PaintInfo&, const Color&, const FillLayer&, const LayoutRect&, BackgroundBleedAvoidance = BackgroundBleedNone, RenderObject* backgroundObject = 0);
-
-    void paintMaskImages(const PaintInfo&, const LayoutRect&);
     void paintBoxDecorationBackgroundWithRect(PaintInfo&, const LayoutPoint&, const LayoutRect&);
 
     // Information extracted from RenderStyle for box painting.

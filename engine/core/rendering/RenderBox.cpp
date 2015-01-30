@@ -502,11 +502,6 @@ bool RenderBox::backgroundHasOpaqueTopLayer() const
 void RenderBox::paintMask(PaintInfo& paintInfo, const LayoutPoint& paintOffset)
 {
     LayoutRect paintRect = LayoutRect(paintOffset, size());
-    paintMaskImages(paintInfo, paintRect);
-}
-
-void RenderBox::paintMaskImages(const PaintInfo& paintInfo, const LayoutRect& paintRect)
-{
     paintFillLayers(paintInfo, Color::transparent, style()->maskLayers(), paintRect, BackgroundBleedNone);
     paintNinePieceImage(paintInfo.context, paintRect, style(), style()->maskBoxImage());
 }
