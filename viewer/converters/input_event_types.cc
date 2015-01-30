@@ -158,7 +158,6 @@ scoped_ptr<blink::WebInputEvent> BuildWebGestureEvent(
           event->gesture_data->scale / device_pixel_ratio;
       break;
     default:
-      NOTIMPLEMENTED() << "Received unexpected event: " << event->action;
       break;
   }
 
