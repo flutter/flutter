@@ -594,12 +594,15 @@ void Layout::doLayout(const uint16_t* buf, size_t start, size_t count, size_t bu
 
 void Layout::doLayoutRunCached(const uint16_t* buf, size_t start, size_t count, size_t bufSize,
         bool isRtl, LayoutContext* ctx, size_t dstStart) {
+    HyphenEdit hyphen = ctx->paint.hyphenEdit;
     if (!isRtl) {
         // left to right
         size_t wordstart = start == bufSize ? start : getPrevWordBreak(buf, start + 1);
         size_t wordend;
         for (size_t iter = start; iter < start + count; iter = wordend) {
             wordend = getNextWordBreak(buf, iter, bufSize);
+            // Only apply hyphen to the last word in the string.
+            ctx->paint.hyphenEdit = wordend >= start + count ? hyphen : HyphenEdit();
             size_t wordcount = std::min(start + count, wordend) - iter;
             doLayoutWord(buf + wordstart, iter - wordstart, wordcount, wordend - wordstart,
                     isRtl, ctx, iter - dstStart);
@@ -612,6 +615,8 @@ void Layout::doLayoutRunCached(const uint16_t* buf, size_t start, size_t count, 
         size_t wordend = end == 0 ? 0 : getNextWordBreak(buf, end - 1, bufSize);
         for (size_t iter = end; iter > start; iter = wordstart) {
             wordstart = getPrevWordBreak(buf, iter);
+            // Only apply hyphen to the last (leftmost) word in the string.
+            ctx->paint.hyphenEdit = iter == end ? hyphen : HyphenEdit();
             size_t bufStart = std::max(start, wordstart);
             doLayoutWord(buf + wordstart, bufStart - wordstart, iter - bufStart,
                     wordend - wordstart, isRtl, ctx, bufStart - dstStart);
@@ -729,6 +734,12 @@ void Layout::doLayoutRun(const uint16_t* buf, size_t start, size_t count, size_t
                 hb_buffer_set_language(buffer, hb_language_from_string(lang.c_str(), -1));
             }
             hb_buffer_add_utf16(buffer, buf, bufSize, srunstart + start, srunend - srunstart);
+            if (ctx->paint.hyphenEdit.hasHyphen() && srunend > srunstart) {
+                // TODO: check whether this is really the desired semantics. It could have the
+                // effect of assigning the hyphen width to a nonspacing mark
+                unsigned int lastCluster = srunend - 1;
+                hb_buffer_add(buffer, 0x2010, lastCluster);
+            }
             hb_shape(hbFont, buffer, features.empty() ? NULL : &features[0], features.size());
             unsigned int numGlyphs;
             hb_glyph_info_t* info = hb_buffer_get_glyph_infos(buffer, &numGlyphs);
@@ -763,7 +774,12 @@ void Layout::doLayoutRun(const uint16_t* buf, size_t start, size_t count, size_t
                 ctx->paint.font->GetBounds(&glyphBounds, glyph_ix, ctx->paint);
                 glyphBounds.offset(x + xoff, y + yoff);
                 mBounds.join(glyphBounds);
-                mAdvances[info[i].cluster - start] += xAdvance;
+                if (info[i].cluster - start < count) {
+                    mAdvances[info[i].cluster - start] += xAdvance;
+                } else {
+                    ALOGE("cluster %d (start %d) out of bounds of count %d",
+                        info[i].cluster - start, start, count);
+                }
                 x += xAdvance;
             }
             if (numGlyphs)

@@ -27,6 +27,18 @@
 
 namespace android {
 
+// The hyphen edit represents an edit to the string when a word is
+// hyphenated. The most common hyphen edit is adding a "-" at the end
+// of a syllable, but nonstandard hyphenation allows for more choices.
+class HyphenEdit {
+public:
+    HyphenEdit() : hyphen(0) { }
+    HyphenEdit(uint32_t hyphenInt) : hyphen(hyphenInt) { }
+    bool hasHyphen() const { return hyphen != 0; }
+private:
+    uint32_t hyphen;
+};
+
 class MinikinFont;
 
 // Possibly move into own .h file?
@@ -36,7 +48,8 @@ struct MinikinPaint {
             fakery(), fontFeatureSettings() { }
 
     bool skipCache() const {
-      return !fontFeatureSettings.empty();
+        // TODO: add hyphen to cache
+        return !fontFeatureSettings.empty() || hyphenEdit.hasHyphen();
     }
 
     MinikinFont *font;
@@ -46,6 +59,7 @@ struct MinikinPaint {
     float letterSpacing;
     uint32_t paintFlags;
     FontFakery fakery;
+    HyphenEdit hyphenEdit;
     std::string fontFeatureSettings;
 };
 
