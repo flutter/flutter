@@ -36,14 +36,15 @@
     }
   </style>
   <div id="mask" on-click="handleMaskClick" />
-  <div id="content">
+  <div id="content" on-gestureflingstart="handleFlingStart">
     <content/>
   </div>
 </template>
 <script>
 const kWidth = 256;
-const kMinAnimationDurationMS = 120;
-const kMaxAnimationDurationMS = 500;
+const kMinFlingVelocity = 0.4;
+const kMinAnimationDurationMS = 246;
+const kMaxAnimationDurationMS = 600;
 const kAnimationCurve = Curves.easeInOut;
 
 module.exports = class extends SkyElement {
@@ -104,8 +105,8 @@ module.exports = class extends SkyElement {
 
   animateToPosition_(targetPosition) {
     var currentPosition = this.position_;
-    var animationDistance = Math.abs(targetPosition - currentPosition);
-    var duration = kMaxAnimationDurationMS * animationDistance / kWidth;
+    var distance = Math.abs(targetPosition - currentPosition);
+    var duration = kMaxAnimationDurationMS * distance / kWidth;
     this.animation_.start({
       begin: currentPosition,
       end: targetPosition,
@@ -138,6 +139,23 @@ module.exports = class extends SkyElement {
   handlePointerCancel(event) {
     if (!this.animation_.isAnimating)
       this.settle_();
+  }
+
+  handleFlingStart(event) {
+    var direction = Math.sign(event.velocityX);
+    var velocityX = Math.abs(event.velocityX) / 1000;
+    if (velocityX < kMinFlingVelocity)
+      return;
+    var targetPosition = direction < 0 ? -kWidth : 0;
+    var currentPosition = this.position_;
+    var distance = Math.abs(targetPosition - currentPosition);
+    var duration = distance / velocityX;
+    this.animation_.start({
+      begin: currentPosition,
+      end: targetPosition,
+      duration: duration,
+      curve: Curves.linear,
+    });
   }
 }.register();
 </script>
