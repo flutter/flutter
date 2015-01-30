@@ -501,9 +501,6 @@ bool RenderBox::backgroundHasOpaqueTopLayer() const
 
 void RenderBox::paintMask(PaintInfo& paintInfo, const LayoutPoint& paintOffset)
 {
-    if (paintInfo.phase != PaintPhaseMask)
-        return;
-
     LayoutRect paintRect = LayoutRect(paintOffset, size());
     paintMaskImages(paintInfo, paintRect);
 }

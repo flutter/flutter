@@ -151,7 +151,7 @@ float RootInlineBox::placeEllipsisBox(bool ltr, float blockLeftEdge, float block
 
 void RootInlineBox::paintEllipsisBox(PaintInfo& paintInfo, const LayoutPoint& paintOffset, LayoutUnit lineTop, LayoutUnit lineBottom) const
 {
-    if (hasEllipsisBox() && paintInfo.phase == PaintPhaseForeground)
+    if (hasEllipsisBox())
         ellipsisBox()->paint(paintInfo, paintOffset, lineTop, lineBottom);
 }
 

@@ -470,9 +470,7 @@ void RenderBlock::paint(PaintInfo& paintInfo, const LayoutPoint& paintOffset)
         contentsClipBehavior = SkipContentsClipIfPossible;
 
     bool pushedClip = pushContentsClip(paintInfo, adjustedPaintOffset, contentsClipBehavior);
-    {
-        paintObject(paintInfo, adjustedPaintOffset);
-    }
+    paintObject(paintInfo, adjustedPaintOffset);
     if (pushedClip)
         popContentsClip(paintInfo, phase, adjustedPaintOffset);
 }
@@ -540,29 +538,21 @@ void RenderBlock::paintCarets(PaintInfo& paintInfo, const LayoutPoint& paintOffs
 
 void RenderBlock::paintObject(PaintInfo& paintInfo, const LayoutPoint& paintOffset)
 {
-    PaintPhase paintPhase = paintInfo.phase;
-
-    if (paintPhase == PaintPhaseForeground) {
-        if (hasBoxDecorationBackground())
-            paintBoxDecorationBackground(paintInfo, paintOffset);
-    }
-
-    if (paintPhase == PaintPhaseMask) {
+    if (paintInfo.phase == PaintPhaseMask) {
         paintMask(paintInfo, paintOffset);
         return;
     }
 
+    if (hasBoxDecorationBackground())
+        paintBoxDecorationBackground(paintInfo, paintOffset);
+
     paintContents(paintInfo, paintOffset);
     paintSelection(paintInfo, paintOffset); // Fill in gaps in selection on lines and between blocks.
 
-    if (paintPhase == PaintPhaseForeground) {
-        if (style()->hasOutline() && !style()->outlineStyleIsAuto())
-            paintOutline(paintInfo, LayoutRect(paintOffset, size()));
+    if (style()->hasOutline() && !style()->outlineStyleIsAuto())
+        paintOutline(paintInfo, LayoutRect(paintOffset, size()));
 
-        // If the caret's node's render object's containing block is this block, and the paint action is PaintPhaseForeground,
-        // then paint the caret.
-        paintCarets(paintInfo, paintOffset);
-    }
+    paintCarets(paintInfo, paintOffset);
 }
 
 bool RenderBlock::shouldPaintSelectionGaps() const
@@ -592,7 +582,7 @@ bool RenderBlock::isSelectionRoot() const
 
 void RenderBlock::paintSelection(PaintInfo& paintInfo, const LayoutPoint& paintOffset)
 {
-    if (shouldPaintSelectionGaps() && paintInfo.phase == PaintPhaseForeground) {
+    if (shouldPaintSelectionGaps()) {
         LayoutUnit lastTop = 0;
         LayoutUnit lastLeft = logicalLeftSelectionOffset(this, lastTop);
         LayoutUnit lastRight = logicalRightSelectionOffset(this, lastTop);

@@ -617,18 +617,16 @@ void InlineTextBox::paint(PaintInfo& paintInfo, const LayoutPoint& paintOffset, 
         paintDecoration(context, boxOrigin, textDecorations);
     }
 
-    if (paintInfo.phase == PaintPhaseForeground) {
-        paintDocumentMarkers(context, boxOrigin, styleToUse, font, false);
+    paintDocumentMarkers(context, boxOrigin, styleToUse, font, false);
 
-        // Paint custom underlines for compositions.
-        if (useCustomUnderlines) {
-            const Vector<CompositionUnderline>& underlines = renderer().frame()->inputMethodController().customCompositionUnderlines();
-            CompositionUnderlineRangeFilter filter(underlines, start(), end());
-            for (CompositionUnderlineRangeFilter::ConstIterator it = filter.begin(); it != filter.end(); ++it) {
-                if (it->color == Color::transparent)
-                    continue;
-                paintCompositionUnderline(context, boxOrigin, *it);
-            }
+    // Paint custom underlines for compositions.
+    if (useCustomUnderlines) {
+        const Vector<CompositionUnderline>& underlines = renderer().frame()->inputMethodController().customCompositionUnderlines();
+        CompositionUnderlineRangeFilter filter(underlines, start(), end());
+        for (CompositionUnderlineRangeFilter::ConstIterator it = filter.begin(); it != filter.end(); ++it) {
+            if (it->color == Color::transparent)
+                continue;
+            paintCompositionUnderline(context, boxOrigin, *it);
         }
     }
 }

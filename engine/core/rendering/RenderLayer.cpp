@@ -1016,10 +1016,9 @@ void RenderLayer::paintForeground(GraphicsContext* context, GraphicsContext* tra
     if (shouldClip)
         clipToRect(localPaintingInfo, context, layerForegroundRect);
 
+    // TODO(ojan): We probably should early return at the beginning of this function
+    // if the rect is empty.
     if (!foregroundRectIsEmpty) {
-        // We have to loop through every fragment multiple times, since we have to issue paint invalidations in each specific phase in order for
-        // interleaving of the fragments to work properly.
-        // FIXME(sky): Do we still need this for anything now that we don't have fragments?
         paintForegroundWithPhase(PaintPhaseForeground,
             context, localPaintingInfo,
             layerLocation, layerForegroundRect);

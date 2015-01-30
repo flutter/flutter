@@ -102,11 +102,8 @@ void RenderReplaced::paint(PaintInfo& paintInfo, const LayoutPoint& paintOffset)
         paintBoxDecorationBackground(paintInfo, adjustedPaintOffset);
 
     LayoutRect paintRect = LayoutRect(adjustedPaintOffset, size());
-    if (paintInfo.phase == PaintPhaseForeground && style()->outlineWidth())
+    if (style()->outlineWidth())
         paintOutline(paintInfo, paintRect);
-
-    if (paintInfo.phase == PaintPhaseMask && !canHaveChildren())
-        return;
 
     bool completelyClippedOut = false;
     if (style()->hasBorderRadius()) {
