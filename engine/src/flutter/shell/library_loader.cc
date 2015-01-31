@@ -8,11 +8,13 @@
 #include "base/android/library_loader/library_loader_hooks.h"
 #include "base/logging.h"
 #include "sky/shell/sky_main.h"
+#include "sky/shell/sky_view.h"
 
 namespace {
 
 base::android::RegistrationMethod kSkyRegisteredMethods[] = {
     {"SkyMain", sky::shell::RegisterSkyMain},
+    {"SkyView", sky::shell::SkyView::Register},
 };
 
 bool RegisterMojoJni(JNIEnv* env) {

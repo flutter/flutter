@@ -16,16 +16,25 @@ group("shell") {
 generate_jni("jni_headers") {
   sources = [
     "apk/src/org/domokit/sky/shell/SkyMain.java",
+    "apk/src/org/domokit/sky/shell/SkyView.java",
   ]
   jni_package = "sky/shell"
 }
 
 shared_library("sky_shell") {
   sources = [
+    "gpu_driver.cc",
+    "gpu_driver.h",
     "library_loader.cc",
+    "shell.cc",
+    "shell.h",
     "sky_main.cc",
     "sky_main.h",
+    "sky_view.cc",
+    "sky_view.h",
   ]
+
+  configs += [ "//third_party/khronos:khronos_headers" ]
 
   deps = [
     "//base",
@@ -40,6 +49,7 @@ android_library("java") {
     "apk/src/org/domokit/sky/shell/SkyMain.java",
     "apk/src/org/domokit/sky/shell/SkyShellActivity.java",
     "apk/src/org/domokit/sky/shell/SkyShellApplication.java",
+    "apk/src/org/domokit/sky/shell/SkyView.java",
   ]
 
   deps = [

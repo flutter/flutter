@@ -17,6 +17,8 @@
 #include "base/run_loop.h"
 #include "base/threading/simple_thread.h"
 #include "jni/SkyMain_jni.h"
+#include "sky/shell/shell.h"
+#include "ui/gl/gl_surface_egl.h"
 
 using base::LazyInstance;
 
@@ -30,6 +32,8 @@ LazyInstance<scoped_ptr<base::MessageLoop>> g_java_message_loop =
 
 LazyInstance<base::android::ScopedJavaGlobalRef<jobject>> g_main_activiy =
     LAZY_INSTANCE_INITIALIZER;
+
+LazyInstance<scoped_ptr<Shell>> g_shell = LAZY_INSTANCE_INITIALIZER;
 
 void InitializeLogging() {
   logging::LoggingSettings settings;
@@ -58,6 +62,14 @@ static void Init(JNIEnv* env,
 
   g_java_message_loop.Get().reset(new base::MessageLoopForUI);
   base::MessageLoopForUI::current()->Start();
+
+  gfx::GLSurface::InitializeOneOff();
+
+  g_shell.Get().reset(new Shell(g_java_message_loop.Get()->task_runner()));
+
+  g_java_message_loop.Get()->PostTask(
+      FROM_HERE,
+      base::Bind(&Shell::Init, base::Unretained(g_shell.Get().get())));
 }
 
 static jboolean Start(JNIEnv* env, jclass clazz) {
