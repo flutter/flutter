@@ -19,7 +19,7 @@ class Shell;
 namespace sky {
 class SurfaceAllocator;
 
-class SurfaceHolder : public mojo::SurfaceClient {
+class SurfaceHolder : public mojo::ResourceReturner {
  public:
   class Client {
    public:
@@ -38,11 +38,11 @@ class SurfaceHolder : public mojo::SurfaceClient {
   void SubmitFrame(mojo::FramePtr frame, const base::Closure& callback);
 
  private:
-  // mojo::SurfaceClient
-  void SetIdNamespace(uint32_t id_namespace) override;
+  // mojo::ResourceReturner
   void ReturnResources(
       mojo::Array<mojo::ReturnedResourcePtr> resources) override;
 
+  void SetIdNamespace(uint32_t id_namespace);
   void SetQualifiedId();
 
   Client* client_;
@@ -50,6 +50,7 @@ class SurfaceHolder : public mojo::SurfaceClient {
   uint32_t id_namespace_;
   uint32_t local_id_;
   mojo::SurfacePtr surface_;
+  mojo::Binding<mojo::ResourceReturner> returner_binding_;
 
   base::WeakPtrFactory<SurfaceHolder> weak_factory_;
 
