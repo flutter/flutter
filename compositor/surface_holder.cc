@@ -17,12 +17,20 @@ SurfaceHolder::Client::~Client() {
 }
 
 SurfaceHolder::SurfaceHolder(Client* client, mojo::Shell* shell)
-    : client_(client), id_namespace_(0u), local_id_(0u), weak_factory_(this) {
+    : client_(client),
+      id_namespace_(0u),
+      local_id_(0u),
+      returner_binding_(this),
+      weak_factory_(this) {
   mojo::ServiceProviderPtr service_provider;
   shell->ConnectToApplication("mojo:surfaces_service",
                               mojo::GetProxy(&service_provider), nullptr);
   mojo::ConnectToService(service_provider.get(), &surface_);
-  surface_.set_client(this);
+  surface_->GetIdNamespace(
+      base::Bind(&SurfaceHolder::SetIdNamespace, base::Unretained(this)));
+  mojo::ResourceReturnerPtr returner_ptr;
+  returner_binding_.Bind(GetProxy(&returner_ptr));
+  surface_->SetResourceReturner(returner_ptr.Pass());
 }
 
 SurfaceHolder::~SurfaceHolder() {
@@ -65,9 +73,6 @@ void SurfaceHolder::SetIdNamespace(uint32_t id_namespace) {
 
 void SurfaceHolder::ReturnResources(
     mojo::Array<mojo::ReturnedResourcePtr> resources) {
-  // TODO(abarth): The surface service shouldn't spam us with empty calls.
-  if (!resources.size())
-    return;
   client_->ReturnResources(resources.Pass());
 }
 
