@@ -16,14 +16,6 @@ class NetworkService;
 }
 
 namespace sky {
-// The concrete type of WebURLRequest::ExtraData.
-class WebURLRequestExtraData : public blink::WebURLRequest::ExtraData {
- public:
-  WebURLRequestExtraData();
-  virtual ~WebURLRequestExtraData();
-
-  mojo::URLResponsePtr synthetic_response;
-};
 
 class WebURLLoaderImpl : public blink::WebURLLoader {
  public:
