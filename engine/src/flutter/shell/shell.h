@@ -8,7 +8,7 @@
 #include "base/macros.h"
 #include "base/memory/ref_counted.h"
 #include "base/memory/scoped_ptr.h"
-#include "sky/shell/gpu_driver.h"
+#include "sky/shell/gpu/rasterizer.h"
 #include "sky/shell/sky_view.h"
 
 namespace base {
@@ -35,7 +35,7 @@ class Shell : public SkyView::Delegate {
   scoped_ptr<base::Thread> gpu_thread_;
 
   scoped_ptr<SkyView> view_;
-  scoped_ptr<GPUDriver> gpu_driver_;
+  scoped_ptr<Rasterizer> rasterizer_;
 
   DISALLOW_COPY_AND_ASSIGN(Shell);
 };

@@ -22,7 +22,7 @@ Shell::~Shell() {
 void Shell::Init() {
   gpu_thread_.reset(new base::Thread("gpu_thread"));
   gpu_thread_->Start();
-  gpu_driver_.reset(new GPUDriver());
+  rasterizer_.reset(new Rasterizer());
 
   view_.reset(new SkyView(this));
   view_->Init();
@@ -31,7 +31,7 @@ void Shell::Init() {
 void Shell::OnAcceleratedWidgetAvailable(gfx::AcceleratedWidget widget) {
   gpu_thread_->message_loop()->PostTask(
       FROM_HERE,
-      base::Bind(&GPUDriver::Init, gpu_driver_->GetWeakPtr(), widget));
+      base::Bind(&Rasterizer::Init, rasterizer_->GetWeakPtr(), widget));
 }
 
 void Shell::OnDestroyed() {
