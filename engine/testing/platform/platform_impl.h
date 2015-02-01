@@ -22,27 +22,8 @@ class PlatformImpl : public blink::Platform {
   // blink::Platform methods:
   virtual blink::WebUnitTestSupport* unitTestSupport();
   virtual blink::WebString defaultLocale();
-  virtual double currentTime();
-  virtual double monotonicallyIncreasingTime();
-  virtual void setSharedTimerFiredFunction(void (*func)());
-  virtual void setSharedTimerFireInterval(double interval_seconds);
-  virtual void stopSharedTimer();
 
  private:
-  void SuspendSharedTimer();
-  void ResumeSharedTimer();
-
-  void DoTimeout() {
-    if (shared_timer_func_ && !shared_timer_suspended_)
-      shared_timer_func_();
-  }
-
-  base::MessageLoop* main_loop_;
-  base::OneShotTimer<PlatformImpl> shared_timer_;
-  void (*shared_timer_func_)();
-  double shared_timer_fire_time_;
-  bool shared_timer_fire_time_was_set_while_suspended_;
-  int shared_timer_suspended_;  // counter
   WebUnitTestSupportImpl unit_test_support_;
 
   DISALLOW_COPY_AND_ASSIGN(PlatformImpl);

@@ -25,31 +25,15 @@ class PlatformImpl : public blink::Platform {
 
   // blink::Platform methods:
   virtual blink::WebString defaultLocale();
-  virtual void setSharedTimerFiredFunction(void (*func)());
-  virtual void setSharedTimerFireInterval(double interval_seconds);
-  virtual void stopSharedTimer();
   virtual base::SingleThreadTaskRunner* mainThreadTaskRunner();
   virtual mojo::NetworkService* networkService();
   virtual blink::WebURLLoader* createURLLoader();
   virtual blink::WebURLError cancelledError(const blink::WebURL& url) const;
 
  private:
-  void SuspendSharedTimer();
-  void ResumeSharedTimer();
-
-  void DoTimeout() {
-    if (shared_timer_func_ && !shared_timer_suspended_)
-      shared_timer_func_();
-  }
-
   mojo::NetworkServicePtr network_service_;
   base::MessageLoop* main_loop_;
   scoped_refptr<base::SingleThreadTaskRunner> main_thread_task_runner_;
-  base::OneShotTimer<PlatformImpl> shared_timer_;
-  void (*shared_timer_func_)();
-  double shared_timer_fire_time_;
-  bool shared_timer_fire_time_was_set_while_suspended_;
-  int shared_timer_suspended_;  // counter
 
   DISALLOW_COPY_AND_ASSIGN(PlatformImpl);
 };

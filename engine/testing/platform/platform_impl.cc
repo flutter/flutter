@@ -16,12 +16,7 @@
 
 namespace sky {
 
-PlatformImpl::PlatformImpl()
-    : main_loop_(base::MessageLoop::current()),
-      shared_timer_func_(NULL),
-      shared_timer_fire_time_(0.0),
-      shared_timer_fire_time_was_set_while_suspended_(false),
-      shared_timer_suspended_(0) {
+PlatformImpl::PlatformImpl() {
 }
 
 PlatformImpl::~PlatformImpl() {
@@ -29,53 +24,6 @@ PlatformImpl::~PlatformImpl() {
 
 blink::WebString PlatformImpl::defaultLocale() {
   return blink::WebString::fromUTF8("en-US");
-}
-
-double PlatformImpl::currentTime() {
-  return base::Time::Now().ToDoubleT();
-}
-
-double PlatformImpl::monotonicallyIncreasingTime() {
-  return base::TimeTicks::Now().ToInternalValue() /
-      static_cast<double>(base::Time::kMicrosecondsPerSecond);
-}
-
-void PlatformImpl::setSharedTimerFiredFunction(void (*func)()) {
-  shared_timer_func_ = func;
-}
-
-void PlatformImpl::setSharedTimerFireInterval(
-    double interval_seconds) {
-  shared_timer_fire_time_ = interval_seconds + monotonicallyIncreasingTime();
-  if (shared_timer_suspended_) {
-    shared_timer_fire_time_was_set_while_suspended_ = true;
-    return;
-  }
-
-  // By converting between double and int64 representation, we run the risk
-  // of losing precision due to rounding errors. Performing computations in
-  // microseconds reduces this risk somewhat. But there still is the potential
-  // of us computing a fire time for the timer that is shorter than what we
-  // need.
-  // As the event loop will check event deadlines prior to actually firing
-  // them, there is a risk of needlessly rescheduling events and of
-  // needlessly looping if sleep times are too short even by small amounts.
-  // This results in measurable performance degradation unless we use ceil() to
-  // always round up the sleep times.
-  int64 interval = static_cast<int64>(
-      ceil(interval_seconds * base::Time::kMillisecondsPerSecond)
-      * base::Time::kMicrosecondsPerMillisecond);
-
-  if (interval < 0)
-    interval = 0;
-
-  shared_timer_.Stop();
-  shared_timer_.Start(FROM_HERE, base::TimeDelta::FromMicroseconds(interval),
-                      this, &PlatformImpl::DoTimeout);
-}
-
-void PlatformImpl::stopSharedTimer() {
-  shared_timer_.Stop();
 }
 
 blink::WebUnitTestSupport* PlatformImpl::unitTestSupport() {
