@@ -23,8 +23,12 @@ generate_jni("jni_headers") {
 
 shared_library("sky_shell") {
   sources = [
-    "gpu_driver.cc",
-    "gpu_driver.h",
+    "gpu/ganesh_context.cc",
+    "gpu/ganesh_context.h",
+    "gpu/ganesh_surface.cc",
+    "gpu/ganesh_surface.h",
+    "gpu/rasterizer.cc",
+    "gpu/rasterizer.h",
     "library_loader.cc",
     "shell.cc",
     "shell.h",
@@ -39,6 +43,8 @@ shared_library("sky_shell") {
   deps = [
     "//base",
     "//build/config/sanitizers:deps",
+    "//skia",
+    "//ui/gfx/geometry",
     "//ui/gl",
     ":jni_headers",
   ]
