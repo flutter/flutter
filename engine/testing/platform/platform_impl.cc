@@ -4,16 +4,6 @@
 
 #include "sky/engine/testing/platform/platform_impl.h"
 
-#include <cmath>
-
-#include "base/rand_util.h"
-#include "base/stl_util.h"
-#include "base/synchronization/waitable_event.h"
-#include "base/time/time.h"
-#include "net/base/data_url.h"
-#include "net/base/mime_util.h"
-#include "net/base/net_errors.h"
-
 namespace sky {
 
 PlatformImpl::PlatformImpl() {

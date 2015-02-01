@@ -4,24 +4,14 @@
 
 #include "sky/viewer/platform/platform_impl.h"
 
-#include <cmath>
-
-#include "base/debug/trace_event.h"
-#include "base/rand_util.h"
-#include "base/stl_util.h"
-#include "base/synchronization/waitable_event.h"
-#include "base/time/time.h"
 #include "mojo/public/cpp/application/application_impl.h"
-#include "net/base/data_url.h"
-#include "net/base/mime_util.h"
 #include "net/base/net_errors.h"
 #include "sky/viewer/platform/weburlloader_impl.h"
 
 namespace sky {
 
 PlatformImpl::PlatformImpl(mojo::ApplicationImpl* app)
-    : main_loop_(base::MessageLoop::current()),
-      main_thread_task_runner_(base::MessageLoop::current()->task_runner()) {
+    : main_thread_task_runner_(base::MessageLoop::current()->task_runner()) {
   app->ConnectToService("mojo:network_service", &network_service_);
 }
 

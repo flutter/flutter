@@ -189,20 +189,6 @@ public:
     // Returns a value such as "en-US".
     virtual WebString defaultLocale() { return WebString(); }
 
-    // Wall clock time in seconds since the epoch.
-    virtual double currentTime() { return 0; }
-
-    // Monotonically increasing time in seconds from an arbitrary fixed point in the past.
-    // This function is expected to return at least millisecond-precision values. For this reason,
-    // it is recommended that the fixed point be no further in the past than the epoch.
-    virtual double monotonicallyIncreasingTime() { return 0; }
-
-    // Delayed work is driven by a shared timer.
-    typedef void (*SharedTimerFunction)();
-    virtual void setSharedTimerFiredFunction(SharedTimerFunction timerFunction) { }
-    virtual void setSharedTimerFireInterval(double) { }
-    virtual void stopSharedTimer() { }
-
     virtual base::SingleThreadTaskRunner* mainThreadTaskRunner() { return 0; }
 
 

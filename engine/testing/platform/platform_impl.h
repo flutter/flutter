@@ -5,10 +5,6 @@
 #ifndef SKY_ENGINE_TESTING_PLATFORM_PLATFORM_IMPL_H_
 #define SKY_ENGINE_TESTING_PLATFORM_PLATFORM_IMPL_H_
 
-#include "base/memory/scoped_ptr.h"
-#include "base/message_loop/message_loop.h"
-#include "base/threading/thread_local_storage.h"
-#include "base/timer/timer.h"
 #include "sky/engine/public/platform/Platform.h"
 #include "sky/engine/testing/platform/webunittestsupport_impl.h"
 
@@ -16,12 +12,12 @@ namespace sky {
 
 class PlatformImpl : public blink::Platform {
  public:
-  explicit PlatformImpl();
-  virtual ~PlatformImpl();
+  PlatformImpl();
+  ~PlatformImpl() override;
 
   // blink::Platform methods:
-  virtual blink::WebUnitTestSupport* unitTestSupport();
-  virtual blink::WebString defaultLocale();
+  blink::WebString defaultLocale() override;
+  blink::WebUnitTestSupport* unitTestSupport() override;
 
  private:
   WebUnitTestSupportImpl unit_test_support_;
