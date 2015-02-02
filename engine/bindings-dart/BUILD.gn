@@ -1,0 +1,71 @@
+
+
+source_set("bindings-dart") {
+  sources = [
+    "dart_master.h",
+    "dart_master.cpp"
+  ]
+  deps = [
+    ":dart_controller",
+    "//dart/runtime/bin:libdart_withcore",
+    "//base:base"
+  ]
+}
+
+action("generate_snapshot_bin") {
+  deps = [
+    "//dart/runtime/bin:gen_snapshot($host_toolchain)",
+  ]
+  inputs = [
+    "snapshot.dart",
+    "//dart/runtime/tools/create_snapshot_bin.py",
+  ]
+  output = "$target_gen_dir/snapshot_gen.bin"
+  outputs = [
+    output,
+  ]
+
+  gen_snapshot_dir = get_label_info(
+      "//dart/runtime/bin:gen_snapshot($host_toolchain)", "root_out_dir")
+  script = "//dart/runtime/tools/create_snapshot_bin.py"
+  args = [
+    "--executable", rebase_path("$gen_snapshot_dir/gen_snapshot"),
+    "--package_root", rebase_path("$root_gen_dir"),
+    "--script", rebase_path("snapshot.dart"),
+    "--output_bin", rebase_path(output, root_build_dir),
+    "--target_os", os,
+  ]
+}
+
+action("generate_snapshot_file") {
+  deps = [
+    ":generate_snapshot_bin",
+  ]
+  inputs = [
+    "//dart/runtime/tools/create_snapshot_file.py",
+    "snapshot.cc.tmpl",
+    "$target_gen_dir/snapshot_gen.bin",
+  ]
+  output = "$target_gen_dir/snapshot.cc"
+  outputs = [
+    output,
+  ]
+
+  script = "//dart/runtime/tools/create_snapshot_file.py"
+  args = [
+    "--input_bin", rebase_path("$target_gen_dir/snapshot_gen.bin"),
+    "--input_cc", rebase_path("snapshot.cc.tmpl"),
+    "--output", rebase_path(output),
+  ]
+}
+
+source_set("dart_controller") {
+  sources = [
+    "$target_gen_dir/snapshot.cc",
+  ]
+
+  deps = [
+    ":generate_snapshot_file"
+  ]
+}
+

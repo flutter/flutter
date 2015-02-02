@@ -31,6 +31,7 @@
 #include "sky/engine/core/frame/LocalFrame.h"
 
 #include "gen/sky/platform/RuntimeEnabledFeatures.h"
+#include "sky/engine/bindings-dart/dart_master.h"
 #include "sky/engine/bindings/core/v8/ScriptController.h"
 #include "sky/engine/core/editing/Editor.h"
 #include "sky/engine/core/editing/FrameSelection.h"
@@ -77,6 +78,7 @@ inline LocalFrame::LocalFrame(FrameLoaderClient* client, FrameHost* host)
     , m_inputMethodController(InputMethodController::create(*this))
 {
     page()->setMainFrame(this);
+    DartMaster::InitVM();
 }
 
 PassRefPtr<LocalFrame> LocalFrame::create(FrameLoaderClient* client, FrameHost* host)
