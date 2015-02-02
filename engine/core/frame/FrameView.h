@@ -126,7 +126,6 @@ public:
 
     void paint(GraphicsContext* context, const IntRect& rect) override;
 
-    void paintContents(GraphicsContext*, const IntRect& damageRect);
     bool isPainting() const;
     bool hasEverPainted() const { return m_lastPaintTime; }
 

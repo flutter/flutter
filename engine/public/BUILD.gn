@@ -22,8 +22,6 @@ source_set("platform_headers") {
     "platform/WebClipboard.h",
     "platform/WebColor.h",
     "platform/WebCommon.h",
-    "platform/WebContentLayer.h",
-    "platform/WebContentLayerClient.h",
     "platform/WebCursorInfo.h",
     "platform/WebData.h",
     "platform/WebDiscardableMemory.h",

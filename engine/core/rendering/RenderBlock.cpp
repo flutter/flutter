@@ -475,34 +475,12 @@ void RenderBlock::paint(PaintInfo& paintInfo, const LayoutPoint& paintOffset)
         popContentsClip(paintInfo, phase, adjustedPaintOffset);
 }
 
-void RenderBlock::paintContents(PaintInfo& paintInfo, const LayoutPoint& paintOffset)
-{
-    // FIXME(sky): Can we remove paintContents and just keep paintChildren?
-    paintChildren(paintInfo, paintOffset);
-}
-
 void RenderBlock::paintChildren(PaintInfo& paintInfo, const LayoutPoint& paintOffset)
 {
-    for (RenderBox* child = firstChildBox(); child; child = child->nextSiblingBox())
-        paintChild(child, paintInfo, paintOffset);
-}
-
-void RenderBlock::paintChild(RenderBox* child, PaintInfo& paintInfo, const LayoutPoint& paintOffset)
-{
-    if (!child->hasSelfPaintingLayer())
-        child->paint(paintInfo, paintOffset);
-}
-
-void RenderBlock::paintChildAsInlineBlock(RenderBox* child, PaintInfo& paintInfo, const LayoutPoint& paintOffset)
-{
-    if (!child->hasSelfPaintingLayer())
-        paintAsInlineBlock(child, paintInfo, paintOffset);
-}
-
-void RenderBlock::paintAsInlineBlock(RenderObject* renderer, PaintInfo& paintInfo, const LayoutPoint& childPoint)
-{
-    // FIXME(sky): Remove this function.
-    renderer->paint(paintInfo, childPoint);
+    for (RenderBox* child = firstChildBox(); child; child = child->nextSiblingBox()) {
+        if (!child->hasSelfPaintingLayer())
+            child->paint(paintInfo, paintOffset);
+    }
 }
 
 static inline bool hasCursorCaret(const FrameSelection& selection, const RenderBlock* block)
@@ -539,7 +517,7 @@ void RenderBlock::paintObject(PaintInfo& paintInfo, const LayoutPoint& paintOffs
     if (hasBoxDecorationBackground())
         paintBoxDecorationBackground(paintInfo, paintOffset);
 
-    paintContents(paintInfo, paintOffset);
+    paintChildren(paintInfo, paintOffset);
     paintSelection(paintInfo, paintOffset); // Fill in gaps in selection on lines and between blocks.
 
     if (style()->hasOutline() && !style()->outlineStyleIsAuto())

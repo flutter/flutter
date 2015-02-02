@@ -260,8 +260,10 @@ void RenderFlexibleBox::appendChildFrameRects(ChildFrameRects& childFrameRects)
 
 void RenderFlexibleBox::paintChildren(PaintInfo& paintInfo, const LayoutPoint& paintOffset)
 {
-    for (RenderBox* child = m_orderIterator.first(); child; child = m_orderIterator.next())
-        paintChildAsInlineBlock(child, paintInfo, paintOffset);
+    for (RenderBox* child = m_orderIterator.first(); child; child = m_orderIterator.next()) {
+        if (!child->hasSelfPaintingLayer())
+            child->paint(paintInfo, paintOffset);
+    }
 }
 
 void RenderFlexibleBox::repositionLogicalHeightDependentFlexItems(Vector<LineContext>& lineContexts)

@@ -34,7 +34,7 @@ protected:
 
     void simplifiedNormalFlowLayout() final;
 
-    void paintContents(PaintInfo&, const LayoutPoint&) final;
+    void paintChildren(PaintInfo&, const LayoutPoint&) final;
 
     bool hitTestContents(const HitTestRequest&, HitTestResult&, const HitTestLocation& locationInContainer, const LayoutPoint& accumulatedOffset, HitTestAction) final;
 

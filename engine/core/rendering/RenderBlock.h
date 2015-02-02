@@ -191,11 +191,6 @@ public:
     void showLineTreeAndMark(const InlineBox* = 0, const char* = 0, const InlineBox* = 0, const char* = 0, const RenderObject* = 0) const;
 #endif
 
-    // inline-block elements paint all phases atomically. This function ensures that. Certain other elements
-    // (flex items) require this behavior as well, and this function exists as a helper for them.
-    // It is expected that the caller will call this function independent of the value of paintInfo.phase.
-    static void paintAsInlineBlock(RenderObject*, PaintInfo&, const LayoutPoint&);
-
     bool recalcChildOverflowAfterStyleChange();
     bool recalcOverflowAfterStyleChange();
 
@@ -218,8 +213,6 @@ protected:
     virtual void paint(PaintInfo&, const LayoutPoint&) override;
     virtual void paintObject(PaintInfo&, const LayoutPoint&) override;
     virtual void paintChildren(PaintInfo&, const LayoutPoint&);
-    void paintChild(RenderBox*, PaintInfo&, const LayoutPoint&);
-    void paintChildAsInlineBlock(RenderBox*, PaintInfo&, const LayoutPoint&);
 
     virtual void adjustInlineDirectionLineBounds(unsigned /* expansionOpportunityCount */, float& /* logicalLeft */, float& /* logicalWidth */) const { }
 
@@ -251,8 +244,6 @@ protected:
     void updateBlockChildDirtyBitsBeforeLayout(bool relayoutChildren, RenderBox*);
 
     virtual bool isInlineBlock() const override final { return isInline() && isReplaced(); }
-
-    virtual void paintContents(PaintInfo&, const LayoutPoint&);
 
     virtual bool hitTestContents(const HitTestRequest&, HitTestResult&, const HitTestLocation& locationInContainer, const LayoutPoint& accumulatedOffset, HitTestAction);
 

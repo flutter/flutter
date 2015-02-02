@@ -172,7 +172,7 @@ void RenderParagraph::simplifiedNormalFlowLayout()
       }
 }
 
-void RenderParagraph::paintContents(PaintInfo& paintInfo, const LayoutPoint& paintOffset)
+void RenderParagraph::paintChildren(PaintInfo& paintInfo, const LayoutPoint& paintOffset)
 {
     m_lineBoxes.paint(this, paintInfo, paintOffset);
 }

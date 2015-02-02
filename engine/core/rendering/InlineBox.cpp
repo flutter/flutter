@@ -193,8 +193,7 @@ void InlineBox::adjustPosition(float dx, float dy)
 
 void InlineBox::paint(PaintInfo& paintInfo, const LayoutPoint& paintOffset, LayoutUnit /* lineTop */, LayoutUnit /*lineBottom*/)
 {
-    LayoutPoint childPoint = paintOffset;
-    RenderBlock::paintAsInlineBlock(&renderer(), paintInfo, childPoint);
+    renderer().paint(paintInfo, paintOffset);
 }
 
 bool InlineBox::nodeAtPoint(const HitTestRequest& request, HitTestResult& result, const HitTestLocation& locationInContainer, const LayoutPoint& accumulatedOffset, LayoutUnit /* lineTop */, LayoutUnit /*lineBottom*/)

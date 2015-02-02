@@ -648,11 +648,6 @@ Color FrameView::documentBackgroundColor() const
 
 void FrameView::paint(GraphicsContext* context, const IntRect& rect)
 {
-    paintContents(context, rect);
-}
-
-void FrameView::paintContents(GraphicsContext* p, const IntRect& rect)
-{
 #ifndef NDEBUG
     bool fillWithRed;
     if (isTransparent())
@@ -661,7 +656,7 @@ void FrameView::paintContents(GraphicsContext* p, const IntRect& rect)
         fillWithRed = true;
 
     if (fillWithRed)
-        p->fillRect(rect, Color(0xFF, 0, 0));
+        context->fillRect(rect, Color(0xFF, 0, 0));
 #endif
 
     RenderView* renderView = this->renderView();
@@ -688,7 +683,7 @@ void FrameView::paintContents(GraphicsContext* p, const IntRect& rect)
     RenderObject::SetLayoutNeededForbiddenScope forbidSetNeedsLayout(*rootLayer->renderer());
 #endif
 
-    rootLayer->paint(p, rect);
+    rootLayer->paint(context, rect);
 
     m_isPainting = false;
     m_lastPaintTime = currentTime();
