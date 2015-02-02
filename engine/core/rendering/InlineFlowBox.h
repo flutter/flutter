@@ -291,7 +291,6 @@ public:
 
 private:
     void paintBoxDecorationBackground(PaintInfo&, const LayoutPoint&);
-    void paintMask(PaintInfo&, const LayoutPoint&);
     void paintFillLayers(const PaintInfo&, const Color&, const FillLayer&, const LayoutRect&);
     void paintFillLayer(const PaintInfo&, const Color&, const FillLayer&, const LayoutRect&);
     void paintBoxShadow(const PaintInfo&, RenderStyle*, ShadowStyle, const LayoutRect&);

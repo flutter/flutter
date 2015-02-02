@@ -950,9 +950,6 @@ void RenderLayer::paintLayerContents(GraphicsContext* context, const LayerPainti
     // Make sure that we now use the original transparency context.
     ASSERT(transparencyLayerContext == context);
 
-    if (shouldPaintContent && renderer()->hasMask())
-        paintMask(context, localPaintingInfo, layerLocation, backgroundRect);
-
     // End our transparency layer
     if (haveTransparency && m_usedTransparency) {
         context->endLayer();
@@ -1025,21 +1022,6 @@ void RenderLayer::paintForeground(GraphicsContext* context, GraphicsContext* tra
 
     if (shouldClip)
         restoreClip(context, localPaintingInfo.paintDirtyRect, layerForegroundRect);
-}
-
-void RenderLayer::paintMask(GraphicsContext* context, const LayerPaintingInfo& localPaintingInfo,
-    LayoutPoint& layerLocation, ClipRect& layerBackgroundRect)
-{
-    if (localPaintingInfo.clipToDirtyRect)
-        clipToRect(localPaintingInfo, context, layerBackgroundRect, DoNotIncludeSelfForBorderRadius); // Mask painting will handle clipping to self.
-
-    // Paint the mask.
-    // FIXME: Eventually we will collect the region from the fragment itself instead of just from the paint info.
-    PaintInfo paintInfo(context, pixelSnappedIntRect(layerBackgroundRect.rect()), PaintPhaseMask, localPaintingInfo.rootLayer->renderer());
-    renderer()->paint(paintInfo, layerLocation);
-
-    if (localPaintingInfo.clipToDirtyRect)
-        restoreClip(context, localPaintingInfo.paintDirtyRect, layerBackgroundRect);
 }
 
 static inline LayoutRect frameVisibleRect(RenderObject* renderer)

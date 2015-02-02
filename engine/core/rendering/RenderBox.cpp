@@ -499,13 +499,6 @@ bool RenderBox::backgroundHasOpaqueTopLayer() const
     return false;
 }
 
-void RenderBox::paintMask(PaintInfo& paintInfo, const LayoutPoint& paintOffset)
-{
-    LayoutRect paintRect = LayoutRect(paintOffset, size());
-    paintFillLayers(paintInfo, Color::transparent, style()->maskLayers(), paintRect, BackgroundBleedNone);
-    paintNinePieceImage(paintInfo.context, paintRect, style(), style()->maskBoxImage());
-}
-
 void RenderBox::paintFillLayers(const PaintInfo& paintInfo, const Color& c, const FillLayer& fillLayer, const LayoutRect& rect,
     BackgroundBleedAvoidance bleedAvoidance, RenderObject* backgroundObject)
 {
@@ -568,9 +561,6 @@ void RenderBox::paintFillLayer(const PaintInfo& paintInfo, const Color& c, const
 
 bool RenderBox::pushContentsClip(PaintInfo& paintInfo, const LayoutPoint& accumulatedOffset, ContentsClipBehavior contentsClipBehavior)
 {
-    if (paintInfo.phase == PaintPhaseMask)
-        return false;
-
     bool isOverflowClip = hasOverflowClip() && !layer()->isSelfPaintingLayer();
     if (!isOverflowClip)
         return false;

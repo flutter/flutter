@@ -93,11 +93,6 @@ void RenderReplaced::paint(PaintInfo& paintInfo, const LayoutPoint& paintOffset)
 
     LayoutPoint adjustedPaintOffset = paintOffset + location();
 
-    if (paintInfo.phase == PaintPhaseMask) {
-        paintMask(paintInfo, adjustedPaintOffset);
-        return;
-    }
-
     if (hasBoxDecorationBackground())
         paintBoxDecorationBackground(paintInfo, adjustedPaintOffset);
 

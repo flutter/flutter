@@ -997,11 +997,6 @@ void InlineFlowBox::paint(PaintInfo& paintInfo, const LayoutPoint& paintOffset, 
     if (!paintInfo.rect.intersects(pixelSnappedIntRect(overflowRect)))
         return;
 
-    if (paintInfo.phase == PaintPhaseMask) {
-        paintMask(paintInfo, paintOffset);
-        return;
-    }
-
     paintBoxDecorationBackground(paintInfo, paintOffset);
 
     for (InlineBox* curr = firstChild(); curr; curr = curr->nextOnLine()) {
@@ -1165,51 +1160,6 @@ void InlineFlowBox::paintBoxDecorationBackground(PaintInfo& paintInfo, const Lay
             paintInfo.context->clip(clipRect);
             boxModelObject()->paintBorder(paintInfo, LayoutRect(stripX, stripY, stripWidth, stripHeight), renderer().style(isFirstLineStyle()));
         }
-    }
-}
-
-void InlineFlowBox::paintMask(PaintInfo& paintInfo, const LayoutPoint& paintOffset)
-{
-    // Pixel snap mask painting.
-    LayoutRect frameRect = roundedFrameRect();
-
-    // Move x/y to our coordinates.
-    LayoutRect localRect(frameRect);
-    LayoutPoint adjustedPaintOffset = paintOffset + localRect.location();
-
-    const NinePieceImage& maskNinePieceImage = renderer().style()->maskBoxImage();
-    StyleImage* maskBoxImage = renderer().style()->maskBoxImage().image();
-
-    LayoutRect paintRect = LayoutRect(adjustedPaintOffset, frameRect.size());
-    paintFillLayers(paintInfo, Color::transparent, renderer().style()->maskLayers(), paintRect);
-
-    bool hasBoxImage = maskBoxImage && maskBoxImage->canRender(renderer());
-    if (!hasBoxImage || !maskBoxImage->isLoaded()) {
-        return; // Don't paint anything while we wait for the image to load.
-    }
-
-    // The simple case is where we are the only box for this object.  In those
-    // cases only a single call to draw is required.
-    if (!prevLineBox() && !nextLineBox()) {
-        boxModelObject()->paintNinePieceImage(paintInfo.context, LayoutRect(adjustedPaintOffset, frameRect.size()), renderer().style(), maskNinePieceImage);
-    } else {
-        // We have a mask image that spans multiple lines.
-        // We need to adjust _tx and _ty by the width of all previous lines.
-        LayoutUnit logicalOffsetOnLine = 0;
-        for (InlineFlowBox* curr = prevLineBox(); curr; curr = curr->prevLineBox())
-            logicalOffsetOnLine += curr->logicalWidth();
-        LayoutUnit totalLogicalWidth = logicalOffsetOnLine;
-        for (InlineFlowBox* curr = this; curr; curr = curr->nextLineBox())
-            totalLogicalWidth += curr->logicalWidth();
-        LayoutUnit stripX = adjustedPaintOffset.x() - logicalOffsetOnLine;
-        LayoutUnit stripY = adjustedPaintOffset.y();
-        LayoutUnit stripWidth = totalLogicalWidth;
-        LayoutUnit stripHeight = frameRect.height();
-
-        LayoutRect clipRect = clipRectForNinePieceImageStrip(this, maskNinePieceImage, paintRect);
-        GraphicsContextStateSaver stateSaver(*paintInfo.context);
-        paintInfo.context->clip(clipRect);
-        boxModelObject()->paintNinePieceImage(paintInfo.context, LayoutRect(stripX, stripY, stripWidth, stripHeight), renderer().style(), maskNinePieceImage);
     }
 }
 

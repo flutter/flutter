@@ -501,9 +501,7 @@ void RenderBlock::paintChildAsInlineBlock(RenderBox* child, PaintInfo& paintInfo
 
 void RenderBlock::paintAsInlineBlock(RenderObject* renderer, PaintInfo& paintInfo, const LayoutPoint& childPoint)
 {
-    // FIXME(sky): Why don't masks go down this path?
-    if (paintInfo.phase == PaintPhaseMask)
-        return;
+    // FIXME(sky): Remove this function.
     renderer->paint(paintInfo, childPoint);
 }
 
@@ -538,11 +536,6 @@ void RenderBlock::paintCarets(PaintInfo& paintInfo, const LayoutPoint& paintOffs
 
 void RenderBlock::paintObject(PaintInfo& paintInfo, const LayoutPoint& paintOffset)
 {
-    if (paintInfo.phase == PaintPhaseMask) {
-        paintMask(paintInfo, paintOffset);
-        return;
-    }
-
     if (hasBoxDecorationBackground())
         paintBoxDecorationBackground(paintInfo, paintOffset);
 
