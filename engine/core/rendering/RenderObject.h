@@ -33,7 +33,6 @@
 #include "sky/engine/core/fetch/ImageResourceClient.h"
 #include "sky/engine/core/html/HTMLElement.h"
 #include "sky/engine/core/rendering/HitTestRequest.h"
-#include "sky/engine/core/rendering/PaintPhase.h"
 #include "sky/engine/core/rendering/RenderObjectChildList.h"
 #include "sky/engine/core/rendering/SubtreeLayoutScope.h"
 #include "sky/engine/core/rendering/style/RenderStyle.h"

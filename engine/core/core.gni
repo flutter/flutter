@@ -1041,7 +1041,6 @@ sky_core_files = [
   "rendering/OrderIterator.cpp",
   "rendering/OrderIterator.h",
   "rendering/PaintInfo.h",
-  "rendering/PaintPhase.h",
   "rendering/PointerEventsHitRules.cpp",
   "rendering/PointerEventsHitRules.h",
   "rendering/RenderBlock.cpp",

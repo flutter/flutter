@@ -377,7 +377,7 @@ public:
     virtual LayoutRect overflowClipRect(const LayoutPoint& location);
     LayoutRect clipRect(const LayoutPoint& location);
     bool pushContentsClip(PaintInfo&, const LayoutPoint& accumulatedOffset, ContentsClipBehavior);
-    void popContentsClip(PaintInfo&, PaintPhase originalPhase, const LayoutPoint& accumulatedOffset);
+    void popContentsClip(PaintInfo&, const LayoutPoint& accumulatedOffset);
 
     virtual void paintObject(PaintInfo&, const LayoutPoint&) { ASSERT_NOT_REACHED(); }
     virtual void paintBoxDecorationBackground(PaintInfo&, const LayoutPoint&);

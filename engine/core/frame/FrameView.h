@@ -26,7 +26,6 @@
 #define SKY_ENGINE_CORE_FRAME_FRAMEVIEW_H_
 
 #include "gen/sky/platform/RuntimeEnabledFeatures.h"
-#include "sky/engine/core/rendering/PaintPhase.h"
 #include "sky/engine/platform/HostWindow.h"
 #include "sky/engine/platform/Timer.h"
 #include "sky/engine/platform/Widget.h"

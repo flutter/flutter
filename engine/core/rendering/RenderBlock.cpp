@@ -450,8 +450,6 @@ void RenderBlock::paint(PaintInfo& paintInfo, const LayoutPoint& paintOffset)
 {
     LayoutPoint adjustedPaintOffset = paintOffset + location();
 
-    PaintPhase phase = paintInfo.phase;
-
     LayoutRect overflowBox;
     // Check if we need to do anything at all.
     // FIXME: Could eliminate the isDocumentElement() check if we fix background painting so that the RenderView
@@ -466,13 +464,13 @@ void RenderBlock::paint(PaintInfo& paintInfo, const LayoutPoint& paintOffset)
     // There are some cases where not all clipped visual overflow is accounted for.
     // FIXME: reduce the number of such cases.
     ContentsClipBehavior contentsClipBehavior = ForceContentsClip;
-    if (hasOverflowClip() && !(shouldPaintSelectionGaps() && phase == PaintPhaseForeground) && !hasCaret())
+    if (hasOverflowClip() && !shouldPaintSelectionGaps() && !hasCaret())
         contentsClipBehavior = SkipContentsClipIfPossible;
 
     bool pushedClip = pushContentsClip(paintInfo, adjustedPaintOffset, contentsClipBehavior);
     paintObject(paintInfo, adjustedPaintOffset);
     if (pushedClip)
-        popContentsClip(paintInfo, phase, adjustedPaintOffset);
+        popContentsClip(paintInfo, adjustedPaintOffset);
 }
 
 void RenderBlock::paintChildren(PaintInfo& paintInfo, const LayoutPoint& paintOffset)

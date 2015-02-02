@@ -27,7 +27,6 @@
 #define SKY_ENGINE_CORE_RENDERING_PAINTINFO_H_
 
 #include <limits>
-#include "sky/engine/core/rendering/PaintPhase.h"
 #include "sky/engine/platform/geometry/IntRect.h"
 #include "sky/engine/platform/geometry/LayoutRect.h"
 #include "sky/engine/platform/graphics/GraphicsContext.h"
@@ -46,11 +45,10 @@ class RenderObject;
  * (tx|ty) is the calculated position of the parent
  */
 struct PaintInfo {
-    PaintInfo(GraphicsContext* newContext, const IntRect& newRect, PaintPhase newPhase,
+    PaintInfo(GraphicsContext* newContext, const IntRect& newRect,
         const RenderLayerModelObject* newPaintContainer)
         : context(newContext)
         , rect(newRect)
-        , phase(newPhase)
         , m_paintContainer(newPaintContainer)
     {
     }
@@ -77,7 +75,6 @@ struct PaintInfo {
     // FIXME: Introduce setters/getters at some point. Requires a lot of changes throughout rendering/.
     GraphicsContext* context;
     IntRect rect;
-    PaintPhase phase;
 
 private:
     const RenderLayerModelObject* m_paintContainer; // the layer object that originates the current painting

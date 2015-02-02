@@ -591,7 +591,7 @@ bool RenderBox::pushContentsClip(PaintInfo& paintInfo, const LayoutPoint& accumu
     return true;
 }
 
-void RenderBox::popContentsClip(PaintInfo& paintInfo, PaintPhase originalPhase, const LayoutPoint& accumulatedOffset)
+void RenderBox::popContentsClip(PaintInfo& paintInfo, const LayoutPoint& accumulatedOffset)
 {
     ASSERT(hasOverflowClip() && !layer()->isSelfPaintingLayer());
     paintInfo.context->restore();

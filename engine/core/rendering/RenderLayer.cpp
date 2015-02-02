@@ -1016,7 +1016,7 @@ void RenderLayer::paintForeground(GraphicsContext* context, GraphicsContext* tra
     // TODO(ojan): We probably should early return at the beginning of this function
     // if the rect is empty.
     if (!foregroundRectIsEmpty) {
-        PaintInfo paintInfo(context, pixelSnappedIntRect(layerForegroundRect.rect()), PaintPhaseForeground, localPaintingInfo.rootLayer->renderer());
+        PaintInfo paintInfo(context, pixelSnappedIntRect(layerForegroundRect.rect()), localPaintingInfo.rootLayer->renderer());
         renderer()->paint(paintInfo, layerLocation);
     }
 
