@@ -3,7 +3,7 @@
 source_set("bindings-dart") {
   sources = [
     "dart_master.h",
-    "dart_master.cpp"
+    "dart_master.cc"
   ]
   deps = [
     ":dart_controller",
