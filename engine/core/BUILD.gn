@@ -71,7 +71,7 @@ static_library("core") {
     ":libraries",
     ":prerequisites",
     "//sky/engine/platform",
-    "//sky/engine/bindings-dart"
+    "//sky/engine/bindings2"
   ]
 
   sources = sky_core_files
