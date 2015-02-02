@@ -1,0 +1,32 @@
+<!--
+// Copyright 2015 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+-->
+<sky>
+<import src="/sky/framework/sky-box.sky"/>
+<import src="/sky/framework/sky-element/sky-element.sky" as="SkyElement" />
+<import src="color-wheel.sky" />
+<sky-element name="color-picker">
+<template>
+  <style>
+  #color-sample {
+     height: 100px;
+     margin-top: 10px;
+     background-color: {{ inputColor }};
+  }
+  </style>
+  <sky-box title='Choose a Color'>
+    <color-wheel color="{{ inputColor }}"/>
+    <div id="color-sample"></div>
+  </sky-box>
+</template>
+<script>
+module.exports = class extends SkyElement {
+  created() {
+    this.inputColor = "#FFFFFF";
+  }
+}.register();
+</script>
+</sky-element>
+</sky>
