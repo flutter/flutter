@@ -37,6 +37,13 @@ source_set("libraries") {
     "//url",
     "//v8",
   ]
+
+  if (sky_use_dart) {
+    deps = [
+      "//dart/runtime:libdart",
+      "//dart/runtime/bin:libdart_embedder_noio",
+    ]
+  }
 }
 
 source_set("prerequisites") {
@@ -64,6 +71,7 @@ static_library("core") {
     ":libraries",
     ":prerequisites",
     "//sky/engine/platform",
+    "//sky/engine/bindings2"
   ]
 
   sources = sky_core_files
