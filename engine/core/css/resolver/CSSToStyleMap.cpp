@@ -139,8 +139,7 @@ void CSSToStyleMap::mapFillImage(FillLayer* layer, CSSValue* value)
         return;
     }
 
-    CSSPropertyID property = layer->type() == BackgroundFillLayer ? CSSPropertyBackgroundImage : CSSPropertyWebkitMaskImage;
-    layer->setImage(styleImage(property, value));
+    layer->setImage(styleImage(CSSPropertyBackgroundImage, value));
 }
 
 void CSSToStyleMap::mapFillRepeatX(FillLayer* layer, CSSValue* value) const
@@ -443,8 +442,6 @@ void CSSToStyleMap::mapNinePieceImage(RenderStyle* mutableStyle, CSSPropertyID p
     CSSPropertyID imageProperty;
     if (property == CSSPropertyWebkitBorderImage)
         imageProperty = CSSPropertyBorderImageSource;
-    else if (property == CSSPropertyWebkitMaskBoxImage)
-        imageProperty = CSSPropertyWebkitMaskBoxImageSource;
     else
         imageProperty = property;
 

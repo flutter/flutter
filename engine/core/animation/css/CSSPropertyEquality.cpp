@@ -22,18 +22,15 @@ bool fillLayersEqual(const FillLayer& aLayers, const FillLayer& bLayers)
     while (aLayer && bLayer) {
         switch (property) {
         case CSSPropertyBackgroundPositionX:
-        case CSSPropertyWebkitMaskPositionX:
             if (aLayer->xPosition() != bLayer->xPosition())
                 return false;
             break;
         case CSSPropertyBackgroundPositionY:
-        case CSSPropertyWebkitMaskPositionY:
             if (aLayer->yPosition() != bLayer->yPosition())
                 return false;
             break;
         case CSSPropertyBackgroundSize:
         case CSSPropertyWebkitBackgroundSize:
-        case CSSPropertyWebkitMaskSize:
             if (!(aLayer->sizeLength() == bLayer->sizeLength()))
                 return false;
             break;
@@ -196,22 +193,6 @@ bool CSSPropertyEquality::propertiesEqual(CSSPropertyID prop, const RenderStyle&
         return dataEquivalent(a.boxShadow(), b.boxShadow());
     case CSSPropertyWebkitClipPath:
         return dataEquivalent(a.clipPath(), b.clipPath());
-    case CSSPropertyWebkitMaskBoxImageOutset:
-        return a.maskBoxImageOutset() == b.maskBoxImageOutset();
-    case CSSPropertyWebkitMaskBoxImageSlice:
-        return a.maskBoxImageSlices() == b.maskBoxImageSlices();
-    case CSSPropertyWebkitMaskBoxImageSource:
-        return dataEquivalent(a.maskBoxImageSource(), b.maskBoxImageSource());
-    case CSSPropertyWebkitMaskBoxImageWidth:
-        return a.maskBoxImageWidth() == b.maskBoxImageWidth();
-    case CSSPropertyWebkitMaskImage:
-        return dataEquivalent(a.maskImage(), b.maskImage());
-    case CSSPropertyWebkitMaskPositionX:
-        return fillLayersEqual<CSSPropertyWebkitMaskPositionX>(a.maskLayers(), b.maskLayers());
-    case CSSPropertyWebkitMaskPositionY:
-        return fillLayersEqual<CSSPropertyWebkitMaskPositionY>(a.maskLayers(), b.maskLayers());
-    case CSSPropertyWebkitMaskSize:
-        return fillLayersEqual<CSSPropertyWebkitMaskSize>(a.maskLayers(), b.maskLayers());
     case CSSPropertyPerspective:
         return a.perspective() == b.perspective();
     case CSSPropertyPerspectiveOrigin:

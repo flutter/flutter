@@ -33,7 +33,6 @@ BleedingEdgeFastPaths
 ClientHintsDpr status=experimental
 Crypto status=stable
 CSSAttributeCaseSensitivity status=experimental
-CSSMaskSourceType status=experimental
 CSSTouchActionDelay status=test
 CSSViewport status=experimental
 CSS3Text status=experimental

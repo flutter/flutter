@@ -126,13 +126,6 @@ inline static PassRefPtr<AnimatableValue> createFromBorderImageLengthBox(const B
         createFromBorderImageLength(borderImageLengthBox.bottom(), style));
 }
 
-inline static PassRefPtr<AnimatableValue> createFromLengthBoxAndBool(const LengthBox lengthBox, const bool flag, const RenderStyle& style)
-{
-    return AnimatableLengthBoxAndBool::create(
-        createFromLengthBox(lengthBox, style),
-        flag);
-}
-
 inline static PassRefPtr<AnimatableValue> createFromLengthPoint(const LengthPoint& lengthPoint, const RenderStyle& style)
 {
     return AnimatableLengthPoint::create(
@@ -183,19 +176,19 @@ inline static PassRefPtr<AnimatableValue> createFromFillLayers(const FillLayer& 
 {
     Vector<RefPtr<AnimatableValue> > values;
     for (const FillLayer* fillLayer = &fillLayers; fillLayer; fillLayer = fillLayer->next()) {
-        if (property == CSSPropertyBackgroundImage || property == CSSPropertyWebkitMaskImage) {
+        if (property == CSSPropertyBackgroundImage) {
             if (!fillLayer->isImageSet())
                 break;
             values.append(createFromStyleImage(fillLayer->image()));
-        } else if (property == CSSPropertyBackgroundPositionX || property == CSSPropertyWebkitMaskPositionX) {
+        } else if (property == CSSPropertyBackgroundPositionX) {
             if (!fillLayer->isXPositionSet())
                 break;
             values.append(createFromBackgroundPosition(fillLayer->xPosition(), fillLayer->isBackgroundXOriginSet(), fillLayer->backgroundXOrigin(), style));
-        } else if (property == CSSPropertyBackgroundPositionY || property == CSSPropertyWebkitMaskPositionY) {
+        } else if (property == CSSPropertyBackgroundPositionY) {
             if (!fillLayer->isYPositionSet())
                 break;
             values.append(createFromBackgroundPosition(fillLayer->yPosition(), fillLayer->isBackgroundYOriginSet(), fillLayer->backgroundYOrigin(), style));
-        } else if (property == CSSPropertyBackgroundSize || property == CSSPropertyWebkitMaskSize) {
+        } else if (property == CSSPropertyBackgroundSize) {
             if (!fillLayer->isSizeSet())
                 break;
             values.append(createFromFillSize(fillLayer->size(), style));
@@ -395,22 +388,6 @@ PassRefPtr<AnimatableValue> CSSAnimatableValueFactory::create(CSSPropertyID prop
         if (ClipPathOperation* operation = style.clipPath())
             return AnimatableClipPathOperation::create(operation);
         return AnimatableUnknown::create(CSSValueNone);
-    case CSSPropertyWebkitMaskBoxImageOutset:
-        return createFromBorderImageLengthBox(style.maskBoxImageOutset(), style);
-    case CSSPropertyWebkitMaskBoxImageSlice:
-        return createFromLengthBoxAndBool(style.maskBoxImageSlices(), style.maskBoxImageSlicesFill(), style);
-    case CSSPropertyWebkitMaskBoxImageSource:
-        return createFromStyleImage(style.maskBoxImageSource());
-    case CSSPropertyWebkitMaskBoxImageWidth:
-        return createFromBorderImageLengthBox(style.maskBoxImageWidth(), style);
-    case CSSPropertyWebkitMaskImage:
-        return createFromFillLayers<CSSPropertyWebkitMaskImage>(style.maskLayers(), style);
-    case CSSPropertyWebkitMaskPositionX:
-        return createFromFillLayers<CSSPropertyWebkitMaskPositionX>(style.maskLayers(), style);
-    case CSSPropertyWebkitMaskPositionY:
-        return createFromFillLayers<CSSPropertyWebkitMaskPositionY>(style.maskLayers(), style);
-    case CSSPropertyWebkitMaskSize:
-        return createFromFillLayers<CSSPropertyWebkitMaskSize>(style.maskLayers(), style);
     case CSSPropertyPerspective:
         return createFromDouble(style.perspective());
     case CSSPropertyPerspectiveOrigin:

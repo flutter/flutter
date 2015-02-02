@@ -102,18 +102,6 @@ void StyleResourceLoader::loadPendingImages(RenderStyle* style, ElementStyleReso
                 style->setBorderImageSource(loadPendingImage(toStylePendingImage(style->borderImageSource()), elementStyleResources.deviceScaleFactor()));
             break;
         }
-        case CSSPropertyWebkitMaskBoxImageSource: {
-            if (style->maskBoxImageSource() && style->maskBoxImageSource()->isPendingImage())
-                style->setMaskBoxImageSource(loadPendingImage(toStylePendingImage(style->maskBoxImageSource()), elementStyleResources.deviceScaleFactor()));
-            break;
-        }
-        case CSSPropertyWebkitMaskImage: {
-            for (FillLayer* maskLayer = &style->accessMaskLayers(); maskLayer; maskLayer = maskLayer->next()) {
-                if (maskLayer->image() && maskLayer->image()->isPendingImage())
-                    maskLayer->setImage(loadPendingImage(toStylePendingImage(maskLayer->image()), elementStyleResources.deviceScaleFactor()));
-            }
-            break;
-        }
         default:
             ASSERT_NOT_REACHED();
         }

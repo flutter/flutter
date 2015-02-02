@@ -180,17 +180,6 @@ String StylePropertySerializer::asText() const
         case CSSPropertyFlexShrink:
             shorthandPropertyID = CSSPropertyFlex;
             break;
-        case CSSPropertyWebkitMaskPositionX:
-        case CSSPropertyWebkitMaskPositionY:
-        case CSSPropertyWebkitMaskRepeatX:
-        case CSSPropertyWebkitMaskRepeatY:
-        case CSSPropertyWebkitMaskImage:
-        case CSSPropertyWebkitMaskRepeat:
-        case CSSPropertyWebkitMaskPosition:
-        case CSSPropertyWebkitMaskClip:
-        case CSSPropertyWebkitMaskOrigin:
-            shorthandPropertyID = CSSPropertyWebkitMask;
-            break;
         case CSSPropertyWebkitTransformOriginX:
         case CSSPropertyWebkitTransformOriginY:
         case CSSPropertyWebkitTransformOriginZ:
@@ -278,12 +267,6 @@ String StylePropertySerializer::getPropertyValue(CSSPropertyID propertyID) const
         return getLayeredShorthandValue(transitionShorthand());
     case CSSPropertyListStyle:
         return getShorthandValue(listStyleShorthand());
-    case CSSPropertyWebkitMaskPosition:
-        return getLayeredShorthandValue(webkitMaskPositionShorthand());
-    case CSSPropertyWebkitMaskRepeat:
-        return getLayeredShorthandValue(webkitMaskRepeatShorthand());
-    case CSSPropertyWebkitMask:
-        return getLayeredShorthandValue(webkitMaskShorthand());
     case CSSPropertyWebkitTextEmphasis:
         return getShorthandValue(webkitTextEmphasisShorthand());
     case CSSPropertyWebkitTextStroke:
@@ -488,12 +471,10 @@ String StylePropertySerializer::getLayeredShorthandValue(const StylePropertyShor
             // We need to report background-repeat as it was written in the CSS. If the property is implicit,
             // then it was written with only one value. Here we figure out which value that was so we can
             // report back correctly.
-            if ((shorthand.properties()[j] == CSSPropertyBackgroundRepeatX && m_propertySet.isPropertyImplicit(shorthand.properties()[j]))
-                || (shorthand.properties()[j] == CSSPropertyWebkitMaskRepeatX && m_propertySet.isPropertyImplicit(shorthand.properties()[j]))) {
+            if (shorthand.properties()[j] == CSSPropertyBackgroundRepeatX && m_propertySet.isPropertyImplicit(shorthand.properties()[j])) {
 
                 // BUG 49055: make sure the value was not reset in the layer check just above.
-                if ((j < size - 1 && shorthand.properties()[j + 1] == CSSPropertyBackgroundRepeatY && value)
-                    || (j < size - 1 && shorthand.properties()[j + 1] == CSSPropertyWebkitMaskRepeatY && value)) {
+                if (j < size - 1 && shorthand.properties()[j + 1] == CSSPropertyBackgroundRepeatY && value) {
                     RefPtr<CSSValue> yValue = nullptr;
                     RefPtr<CSSValue> nextValue = values[j + 1];
                     if (nextValue->isValueList())
@@ -533,10 +514,10 @@ String StylePropertySerializer::getLayeredShorthandValue(const StylePropertyShor
                 if (!layerResult.isEmpty())
                     layerResult.append(' ');
                 if (foundPositionYCSSProperty
-                    && (shorthand.properties()[j] == CSSPropertyBackgroundSize || shorthand.properties()[j] == CSSPropertyWebkitMaskSize))
+                    && shorthand.properties()[j] == CSSPropertyBackgroundSize)
                     layerResult.appendLiteral("/ ");
                 if (!foundPositionYCSSProperty
-                    && (shorthand.properties()[j] == CSSPropertyBackgroundSize || shorthand.properties()[j] == CSSPropertyWebkitMaskSize))
+                    && shorthand.properties()[j] == CSSPropertyBackgroundSize)
                     continue;
 
                 if (useRepeatXShorthand) {
@@ -552,8 +533,7 @@ String StylePropertySerializer::getLayeredShorthandValue(const StylePropertyShor
                     layerResult.append(valueText);
                 }
 
-                if (shorthand.properties()[j] == CSSPropertyBackgroundPositionY
-                    || shorthand.properties()[j] == CSSPropertyWebkitMaskPositionY) {
+                if (shorthand.properties()[j] == CSSPropertyBackgroundPositionY) {
                     foundPositionYCSSProperty = true;
 
                     // background-position is a special case: if only the first offset is specified,

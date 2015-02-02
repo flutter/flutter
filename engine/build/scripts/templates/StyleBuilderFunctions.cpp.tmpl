@@ -255,10 +255,6 @@ static bool lengthTypeAndValueMatch(const BorderImageLengthBox& borderImageLengt
 {{apply_border_image_modifier('CSSPropertyBorderImageRepeat', 'Repeat')}}
 {{apply_border_image_modifier('CSSPropertyBorderImageSlice', 'Slice')}}
 {{apply_border_image_modifier('CSSPropertyBorderImageWidth', 'Width')}}
-{{apply_border_image_modifier('CSSPropertyWebkitMaskBoxImageOutset', 'Outset')}}
-{{apply_border_image_modifier('CSSPropertyWebkitMaskBoxImageRepeat', 'Repeat')}}
-{{apply_border_image_modifier('CSSPropertyWebkitMaskBoxImageSlice', 'Slice')}}
-{{apply_border_image_modifier('CSSPropertyWebkitMaskBoxImageWidth', 'Width')}}
 
 {% macro apply_value_border_image_source(property_id) %}
 {{declare_value_function(property_id)}}
@@ -268,7 +264,6 @@ static bool lengthTypeAndValueMatch(const BorderImageLengthBox& borderImageLengt
 }
 {% endmacro %}
 {{apply_value_border_image_source('CSSPropertyBorderImageSource')}}
-{{apply_value_border_image_source('CSSPropertyWebkitMaskBoxImageSource')}}
 
 {% macro apply_color(property_id, initial_color='StyleColor::currentColor') %}
 {% set property = properties[property_id] %}
@@ -424,17 +419,7 @@ static bool lengthTypeAndValueMatch(const BorderImageLengthBox& borderImageLengt
 {{apply_fill_layer('CSSPropertyBackgroundRepeatX', 'RepeatX')}}
 {{apply_fill_layer('CSSPropertyBackgroundRepeatY', 'RepeatY')}}
 {{apply_fill_layer('CSSPropertyBackgroundSize', 'Size')}}
-{{apply_fill_layer('CSSPropertyMaskSourceType', 'MaskSourceType')}}
 {{apply_fill_layer('CSSPropertyWebkitBackgroundComposite', 'Composite')}}
-{{apply_fill_layer('CSSPropertyWebkitMaskClip', 'Clip')}}
-{{apply_fill_layer('CSSPropertyWebkitMaskComposite', 'Composite')}}
-{{apply_fill_layer('CSSPropertyWebkitMaskImage', 'Image')}}
-{{apply_fill_layer('CSSPropertyWebkitMaskOrigin', 'Origin')}}
-{{apply_fill_layer('CSSPropertyWebkitMaskPositionX', 'XPosition')}}
-{{apply_fill_layer('CSSPropertyWebkitMaskPositionY', 'YPosition')}}
-{{apply_fill_layer('CSSPropertyWebkitMaskRepeatX', 'RepeatX')}}
-{{apply_fill_layer('CSSPropertyWebkitMaskRepeatY', 'RepeatY')}}
-{{apply_fill_layer('CSSPropertyWebkitMaskSize', 'Size')}}
 
 {% macro apply_value_number(property_id, id_for_minus_one) %}
 {{declare_value_function(property_id)}}

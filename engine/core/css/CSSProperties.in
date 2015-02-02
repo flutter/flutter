@@ -157,7 +157,6 @@ margin-bottom animatable, initial=initialMargin, converter=convertLengthOrAuto
 margin-left animatable, initial=initialMargin, converter=convertLengthOrAuto
 margin-right animatable, initial=initialMargin, converter=convertLengthOrAuto
 margin-top animatable, initial=initialMargin, converter=convertLengthOrAuto
-mask-source-type runtime_flag=CSSMaskSourceType, custom_all
 max-height animatable, initial=initialMaxSize, converter=convertLengthMaxSizing
 max-width animatable, initial=initialMaxSize, converter=convertLengthMaxSizing
 min-height animatable, initial=initialMinSize, converter=convertLengthSizing
@@ -236,20 +235,6 @@ filter animatable, custom_value
 -webkit-hyphenate-character inherited, name_for_methods=HyphenationString, converter=convertString<CSSValueAuto>
 -webkit-line-box-contain inherited, converter=convertLineBoxContain
 -webkit-line-break inherited, type_name=LineBreak
--webkit-mask-box-image-outset animatable, custom_all
--webkit-mask-box-image-repeat custom_all
--webkit-mask-box-image-slice animatable, custom_all
--webkit-mask-box-image-source animatable, custom_value
--webkit-mask-box-image-width animatable, custom_all
--webkit-mask-clip custom_all
--webkit-mask-composite custom_all
--webkit-mask-image animatable, custom_all
--webkit-mask-origin custom_all
--webkit-mask-position-x animatable, custom_all
--webkit-mask-position-y animatable, custom_all
--webkit-mask-repeat-x custom_all
--webkit-mask-repeat-y custom_all
--webkit-mask-size animatable, custom_all
 -webkit-perspective custom_all
 -webkit-perspective-origin custom_all
 -webkit-perspective-origin-x converter=convertLength
@@ -354,10 +339,6 @@ animation longhands=animation-name;animation-duration;animation-timing-function;
 // "-webkit-border-radius: 1px 2px" behaves as "border-radius: 1px / 2px"
 -webkit-border-radius longhands=border-top-left-radius;border-top-right-radius;border-bottom-right-radius;border-bottom-left-radius
 -webkit-border-start longhands=-webkit-border-start-width;-webkit-border-start-style;-webkit-border-start-color
--webkit-mask longhands=-webkit-mask-image;-webkit-mask-position-x;-webkit-mask-position-y;-webkit-mask-size;-webkit-mask-repeat-x;-webkit-mask-repeat-y;-webkit-mask-origin;-webkit-mask-clip
--webkit-mask-box-image longhands=-webkit-mask-box-image-source;-webkit-mask-box-image-slice;-webkit-mask-box-image-width;-webkit-mask-box-image-outset;-webkit-mask-box-image-repeat
--webkit-mask-position longhands=-webkit-mask-position-x;-webkit-mask-position-y
--webkit-mask-repeat longhands=-webkit-mask-repeat-x;-webkit-mask-repeat-y
 -webkit-text-emphasis longhands=-webkit-text-emphasis-style;-webkit-text-emphasis-color
 -webkit-text-stroke longhands=-webkit-text-stroke-width;-webkit-text-stroke-color
 -webkit-transform-origin longhands=-webkit-transform-origin-x;-webkit-transform-origin-y;-webkit-transform-origin-z

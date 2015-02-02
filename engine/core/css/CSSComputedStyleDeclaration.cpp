@@ -220,19 +220,6 @@ static const CSSPropertyID staticComputableProperties[] = {
     CSSPropertyWebkitLineBoxContain,
     CSSPropertyWebkitLineBreak,
     CSSPropertyWebkitLocale,
-    CSSPropertyWebkitMaskBoxImage,
-    CSSPropertyWebkitMaskBoxImageOutset,
-    CSSPropertyWebkitMaskBoxImageRepeat,
-    CSSPropertyWebkitMaskBoxImageSlice,
-    CSSPropertyWebkitMaskBoxImageSource,
-    CSSPropertyWebkitMaskBoxImageWidth,
-    CSSPropertyWebkitMaskClip,
-    CSSPropertyWebkitMaskComposite,
-    CSSPropertyWebkitMaskImage,
-    CSSPropertyWebkitMaskOrigin,
-    CSSPropertyWebkitMaskPosition,
-    CSSPropertyWebkitMaskRepeat,
-    CSSPropertyWebkitMaskSize,
     CSSPropertyOrder,
     CSSPropertyPerspective,
     CSSPropertyWebkitPerspective,
@@ -257,7 +244,6 @@ static const CSSPropertyID staticComputableProperties[] = {
     CSSPropertyWebkitUserDrag,
     CSSPropertyWebkitUserModify,
     CSSPropertyWebkitUserSelect,
-    CSSPropertyMaskSourceType,
 };
 
 static const Vector<CSSPropertyID>& computableProperties()
@@ -446,12 +432,12 @@ static PassRefPtr<CSSValueList> createPositionListForLayer(CSSPropertyID propert
 {
     RefPtr<CSSValueList> positionList = CSSValueList::createSpaceSeparated();
     if (layer.isBackgroundXOriginSet()) {
-        ASSERT_UNUSED(propertyID, propertyID == CSSPropertyBackgroundPosition || propertyID == CSSPropertyWebkitMaskPosition);
+        ASSERT_UNUSED(propertyID, propertyID == CSSPropertyBackgroundPosition);
         positionList->append(cssValuePool().createValue(layer.backgroundXOrigin()));
     }
     positionList->append(pixelValueForLength(layer.xPosition(), style));
     if (layer.isBackgroundYOriginSet()) {
-        ASSERT(propertyID == CSSPropertyBackgroundPosition || propertyID == CSSPropertyWebkitMaskPosition);
+        ASSERT(propertyID == CSSPropertyBackgroundPosition);
         positionList->append(cssValuePool().createValue(layer.backgroundYOrigin()));
     }
     positionList->append(pixelValueForLength(layer.yPosition(), style));
@@ -1072,20 +1058,6 @@ static PassRefPtr<CSSValue> valueForFillRepeat(EFillRepeat xRepeat, EFillRepeat 
     return list.release();
 }
 
-static PassRefPtr<CSSValue> valueForFillSourceType(EMaskSourceType type)
-{
-    switch (type) {
-    case MaskAlpha:
-        return cssValuePool().createValue(CSSValueAlpha);
-    case MaskLuminance:
-        return cssValuePool().createValue(CSSValueLuminance);
-    }
-
-    ASSERT_NOT_REACHED();
-
-    return nullptr;
-}
-
 static PassRefPtr<CSSValue> valueForFillSize(const FillSize& fillSize, const RenderStyle& style)
 {
     if (fillSize.type == Contain)
@@ -1288,11 +1260,9 @@ PassRefPtr<CSSValue> CSSComputedStyleDeclaration::getPropertyCSSValue(CSSPropert
 
         case CSSPropertyBackgroundColor:
             return m_allowVisitedStyle ? cssValuePool().createColorValue(style->colorIncludingFallback(CSSPropertyBackgroundColor).rgb()) : currentColorOrValidColor(*style, style->backgroundColor());
-        case CSSPropertyBackgroundImage:
-        case CSSPropertyWebkitMaskImage: {
+        case CSSPropertyBackgroundImage: {
             RefPtr<CSSValueList> list = CSSValueList::createCommaSeparated();
-            const FillLayer* currLayer = propertyID == CSSPropertyWebkitMaskImage ? &style->maskLayers() : &style->backgroundLayers();
-            for (; currLayer; currLayer = currLayer->next()) {
+            for (const FillLayer* currLayer = &style->backgroundLayers(); currLayer; currLayer = currLayer->next()) {
                 if (currLayer->image())
                     list->append(currLayer->image()->cssValue());
                 else
@@ -1301,33 +1271,21 @@ PassRefPtr<CSSValue> CSSComputedStyleDeclaration::getPropertyCSSValue(CSSPropert
             return list.release();
         }
         case CSSPropertyBackgroundSize:
-        case CSSPropertyWebkitBackgroundSize:
-        case CSSPropertyWebkitMaskSize: {
+        case CSSPropertyWebkitBackgroundSize: {
             RefPtr<CSSValueList> list = CSSValueList::createCommaSeparated();
-            const FillLayer* currLayer = propertyID == CSSPropertyWebkitMaskSize ? &style->maskLayers() : &style->backgroundLayers();
-            for (; currLayer; currLayer = currLayer->next())
+            for (const FillLayer* currLayer = &style->backgroundLayers(); currLayer; currLayer = currLayer->next())
                 list->append(valueForFillSize(currLayer->size(), *style));
             return list.release();
         }
-        case CSSPropertyBackgroundRepeat:
-        case CSSPropertyWebkitMaskRepeat: {
+        case CSSPropertyBackgroundRepeat: {
             RefPtr<CSSValueList> list = CSSValueList::createCommaSeparated();
-            const FillLayer* currLayer = propertyID == CSSPropertyWebkitMaskRepeat ? &style->maskLayers() : &style->backgroundLayers();
-            for (; currLayer; currLayer = currLayer->next())
+            for (const FillLayer* currLayer = &style->backgroundLayers(); currLayer; currLayer = currLayer->next())
                 list->append(valueForFillRepeat(currLayer->repeatX(), currLayer->repeatY()));
             return list.release();
         }
-        case CSSPropertyMaskSourceType: {
+        case CSSPropertyWebkitBackgroundComposite: {
             RefPtr<CSSValueList> list = CSSValueList::createCommaSeparated();
-            for (const FillLayer* currLayer = &style->maskLayers(); currLayer; currLayer = currLayer->next())
-                list->append(valueForFillSourceType(currLayer->maskSourceType()));
-            return list.release();
-        }
-        case CSSPropertyWebkitBackgroundComposite:
-        case CSSPropertyWebkitMaskComposite: {
-            RefPtr<CSSValueList> list = CSSValueList::createCommaSeparated();
-            const FillLayer* currLayer = propertyID == CSSPropertyWebkitMaskComposite ? &style->maskLayers() : &style->backgroundLayers();
-            for (; currLayer; currLayer = currLayer->next())
+            for (const FillLayer* currLayer = &style->backgroundLayers(); currLayer; currLayer = currLayer->next())
                 list->append(cssValuePool().createValue(currLayer->composite()));
             return list.release();
         }
@@ -1340,39 +1298,30 @@ PassRefPtr<CSSValue> CSSComputedStyleDeclaration::getPropertyCSSValue(CSSPropert
         case CSSPropertyBackgroundClip:
         case CSSPropertyBackgroundOrigin:
         case CSSPropertyWebkitBackgroundClip:
-        case CSSPropertyWebkitBackgroundOrigin:
-        case CSSPropertyWebkitMaskClip:
-        case CSSPropertyWebkitMaskOrigin: {
-            bool isClip = propertyID == CSSPropertyBackgroundClip || propertyID == CSSPropertyWebkitBackgroundClip || propertyID == CSSPropertyWebkitMaskClip;
+        case CSSPropertyWebkitBackgroundOrigin: {
+            bool isClip = propertyID == CSSPropertyBackgroundClip || propertyID == CSSPropertyWebkitBackgroundClip;
             RefPtr<CSSValueList> list = CSSValueList::createCommaSeparated();
-            const FillLayer* currLayer = (propertyID == CSSPropertyWebkitMaskClip || propertyID == CSSPropertyWebkitMaskOrigin) ? &style->maskLayers() : &style->backgroundLayers();
-            for (; currLayer; currLayer = currLayer->next()) {
+            for (const FillLayer* currLayer = &style->backgroundLayers(); currLayer; currLayer = currLayer->next()) {
                 EFillBox box = isClip ? currLayer->clip() : currLayer->origin();
                 list->append(cssValuePool().createValue(box));
             }
             return list.release();
         }
-        case CSSPropertyBackgroundPosition:
-        case CSSPropertyWebkitMaskPosition: {
+        case CSSPropertyBackgroundPosition: {
             RefPtr<CSSValueList> list = CSSValueList::createCommaSeparated();
-            const FillLayer* currLayer = propertyID == CSSPropertyWebkitMaskPosition ? &style->maskLayers() : &style->backgroundLayers();
-            for (; currLayer; currLayer = currLayer->next())
+            for (const FillLayer* currLayer = &style->backgroundLayers(); currLayer; currLayer = currLayer->next())
                 list->append(createPositionListForLayer(propertyID, *currLayer, *style));
             return list.release();
         }
-        case CSSPropertyBackgroundPositionX:
-        case CSSPropertyWebkitMaskPositionX: {
+        case CSSPropertyBackgroundPositionX: {
             RefPtr<CSSValueList> list = CSSValueList::createCommaSeparated();
-            const FillLayer* currLayer = propertyID == CSSPropertyWebkitMaskPositionX ? &style->maskLayers() : &style->backgroundLayers();
-            for (; currLayer; currLayer = currLayer->next())
+            for (const FillLayer* currLayer = &style->backgroundLayers(); currLayer; currLayer = currLayer->next())
                 list->append(pixelValueForLength(currLayer->xPosition(), *style));
             return list.release();
         }
-        case CSSPropertyBackgroundPositionY:
-        case CSSPropertyWebkitMaskPositionY: {
+        case CSSPropertyBackgroundPositionY: {
             RefPtr<CSSValueList> list = CSSValueList::createCommaSeparated();
-            const FillLayer* currLayer = propertyID == CSSPropertyWebkitMaskPositionY ? &style->maskLayers() : &style->backgroundLayers();
-            for (; currLayer; currLayer = currLayer->next())
+            for (const FillLayer* currLayer = &style->backgroundLayers(); currLayer; currLayer = currLayer->next())
                 list->append(pixelValueForLength(currLayer->yPosition(), *style));
             return list.release();
         }
@@ -1961,20 +1910,6 @@ PassRefPtr<CSSValue> CSSComputedStyleDeclaration::getPropertyCSSValue(CSSPropert
             return valueForNinePieceImageSlice(style->borderImage());
         case CSSPropertyBorderImageWidth:
             return valueForNinePieceImageQuad(style->borderImage().borderSlices(), *style);
-        case CSSPropertyWebkitMaskBoxImage:
-            return valueForNinePieceImage(style->maskBoxImage(), *style);
-        case CSSPropertyWebkitMaskBoxImageOutset:
-            return valueForNinePieceImageQuad(style->maskBoxImage().outset(), *style);
-        case CSSPropertyWebkitMaskBoxImageRepeat:
-            return valueForNinePieceImageRepeat(style->maskBoxImage());
-        case CSSPropertyWebkitMaskBoxImageSlice:
-            return valueForNinePieceImageSlice(style->maskBoxImage());
-        case CSSPropertyWebkitMaskBoxImageWidth:
-            return valueForNinePieceImageQuad(style->maskBoxImage().borderSlices(), *style);
-        case CSSPropertyWebkitMaskBoxImageSource:
-            if (style->maskBoxImageSource())
-                return style->maskBoxImageSource()->cssValue();
-            return cssValuePool().createIdentifierValue(CSSValueNone);
         case CSSPropertyWebkitFontSizeDelta:
             // Not a real style property -- used by the editing engine -- so has no computed value.
             break;
@@ -2195,9 +2130,6 @@ PassRefPtr<CSSValue> CSSComputedStyleDeclaration::getPropertyCSSValue(CSSPropert
 
         /* Unimplemented -webkit- properties */
         case CSSPropertyWebkitBorderRadius:
-        case CSSPropertyWebkitMask:
-        case CSSPropertyWebkitMaskRepeatX:
-        case CSSPropertyWebkitMaskRepeatY:
         case CSSPropertyWebkitPerspectiveOriginX:
         case CSSPropertyWebkitPerspectiveOriginY:
         case CSSPropertyWebkitTextStroke:
