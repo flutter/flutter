@@ -153,15 +153,10 @@ whitesmoke
 // yellow
 yellowgreen
 
-// mask-type / mask-mode
-alpha
-luminance
-
 // CSS_PROP_CLIP_PATH
 // CSS_PROP_CLIP_RULE
 // nonzero and evenodd part of core CSS values now.
 
-// CSS_PROP_MASK
 // CSS_PROP_OPACITY
 // CSS_PROP_ENABLE_BACKGROUND
 accumulate

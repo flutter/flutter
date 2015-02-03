@@ -536,7 +536,7 @@ bool RenderBlock::isSelectionRoot() const
     if (isDocumentElement() || hasOverflowClip()
         || isPositioned()
         || isInlineBlock()
-        || hasTransform() || hasMask()
+        || hasTransform()
         || isFlexItem())
         return true;
 

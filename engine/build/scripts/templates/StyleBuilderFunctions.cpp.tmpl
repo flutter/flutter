@@ -174,12 +174,9 @@ static bool lengthTypeAndValueMatch(const BorderImageLengthBox& borderImageLengt
 }
 
 {% macro apply_border_image_modifier(property_id, modifier_type) %}
-{% set is_mask_box = 'MaskBox' in property_id %}
-{% set getter = 'maskBoxImage' if is_mask_box else 'borderImage' %}
-{% set setter = 'setMaskBoxImage' if is_mask_box else 'setBorderImage' %}
 {{ declare_initial_function(property_id) }}
 {
-    const NinePieceImage& currentImage = state.style()->{{getter}}();
+    const NinePieceImage& currentImage = state.style()->borderImage();
     {# Check for equality in case we can bail out before creating a new NinePieceImage. #}
     {% if modifier_type == 'Outset' %}
     if (lengthTypeAndValueMatch(currentImage.outset(), Fixed, 0))
@@ -187,18 +184,10 @@ static bool lengthTypeAndValueMatch(const BorderImageLengthBox& borderImageLengt
     {% elif modifier_type == 'Repeat' %}
     if (currentImage.horizontalRule() == StretchImageRule && currentImage.verticalRule() == StretchImageRule)
         return;
-    {% elif modifier_type == 'Slice' and is_mask_box %}
-    // Masks have a different initial value for slices. Preserve the value of 0 for backwards compatibility.
-    if (currentImage.fill() == true && lengthTypeAndValueMatch(currentImage.imageSlices(), Fixed, 0))
-        return;
-    {% elif modifier_type == 'Slice' and not is_mask_box %}
+    {% elif modifier_type == 'Slice' %}
     if (currentImage.fill() == false && lengthTypeAndValueMatch(currentImage.imageSlices(), Percent, 100))
         return;
-    {% elif modifier_type == 'Width' and is_mask_box %}
-    // Masks have a different initial value for widths. Preserve the value of 'auto' for backwards compatibility.
-    if (lengthTypeAndValueMatch(currentImage.borderSlices(), Auto, 0))
-        return;
-    {% elif modifier_type == 'Width' and not is_mask_box %}
+    {% elif modifier_type == 'Width' %}
     if (lengthTypeAndValueMatch(currentImage.borderSlices(), Fixed, 1))
         return;
     {% endif %}
@@ -209,36 +198,33 @@ static bool lengthTypeAndValueMatch(const BorderImageLengthBox& borderImageLengt
     {% elif modifier_type == 'Repeat' %}
     image.setHorizontalRule(StretchImageRule);
     image.setVerticalRule(StretchImageRule);
-    {% elif modifier_type == 'Slice' and is_mask_box %}
-    image.setImageSlices(LengthBox({{ (['Length(0, Fixed)']*4) | join(', ') }}));
-    image.setFill(true);
-    {% elif modifier_type == 'Slice' and not is_mask_box %}
+    {% elif modifier_type == 'Slice' %}
     image.setImageSlices(LengthBox({{ (['Length(100, Percent)']*4) | join(', ') }}));
     image.setFill(false);
     {% elif modifier_type == 'Width' %}
-    image.setBorderSlices({{ 'Length(Auto)' if is_mask_box else '1.0' }});
+    image.setBorderSlices(1.0);
     {% endif %}
-    state.style()->{{setter}}(image);
+    state.style()->setBorderImage(image);
 }
 
 {{declare_inherit_function(property_id)}}
 {
-    NinePieceImage image(state.style()->{{getter}}());
+    NinePieceImage image(state.style()->borderImage());
     {% if modifier_type == 'Outset' %}
-    image.copyOutsetFrom(state.parentStyle()->{{getter}}());
+    image.copyOutsetFrom(state.parentStyle()->borderImage());
     {% elif modifier_type == 'Repeat' %}
-    image.copyRepeatFrom(state.parentStyle()->{{getter}}());
+    image.copyRepeatFrom(state.parentStyle()->borderImage());
     {% elif modifier_type == 'Slice' %}
-    image.copyImageSlicesFrom(state.parentStyle()->{{getter}}());
+    image.copyImageSlicesFrom(state.parentStyle()->borderImage());
     {% elif modifier_type == 'Width' %}
-    image.copyBorderSlicesFrom(state.parentStyle()->{{getter}}());
+    image.copyBorderSlicesFrom(state.parentStyle()->borderImage());
     {% endif %}
-    state.style()->{{setter}}(image);
+    state.style()->setBorderImage(image);
 }
 
 {{declare_value_function(property_id)}}
 {
-    NinePieceImage image(state.style()->{{getter}}());
+    NinePieceImage image(state.style()->borderImage());
     {% if modifier_type == 'Outset' %}
     image.setOutset(state.styleMap().mapNinePieceImageQuad(value));
     {% elif modifier_type == 'Repeat' %}
@@ -248,7 +234,7 @@ static bool lengthTypeAndValueMatch(const BorderImageLengthBox& borderImageLengt
     {% elif modifier_type == 'Width' %}
     image.setBorderSlices(state.styleMap().mapNinePieceImageQuad(value));
     {% endif %}
-    state.style()->{{setter}}(image);
+    state.style()->setBorderImage(image);
 }
 {% endmacro %}
 {{apply_border_image_modifier('CSSPropertyBorderImageOutset', 'Outset')}}
@@ -352,14 +338,12 @@ static bool lengthTypeAndValueMatch(const BorderImageLengthBox& borderImageLengt
 {% endmacro %}
 
 {% macro apply_fill_layer(property_id, fill_type) %}
-{% set layer_type = 'Background' if 'Background' in property_id else 'Mask' %}
-{% set fill_layer_type = layer_type + 'FillLayer' %}
-{% set access_layers = 'access' + layer_type + 'Layers' %}
+{% set access_layers = 'accessBackgroundLayers' %}
 {% set map_fill = 'mapFill' + fill_type %}
 {{declare_initial_function(property_id)}}
 {
     FillLayer* currChild = &state.style()->{{access_layers}}();
-    currChild->set{{fill_type}}(FillLayer::initialFill{{fill_type}}({{fill_layer_type}}));
+    currChild->set{{fill_type}}(FillLayer::initialFill{{fill_type}}(BackgroundFillLayer));
     for (currChild = currChild->next(); currChild; currChild = currChild->next())
         currChild->clear{{fill_type}}();
 }
@@ -368,7 +352,7 @@ static bool lengthTypeAndValueMatch(const BorderImageLengthBox& borderImageLengt
 {
     FillLayer* currChild = &state.style()->{{access_layers}}();
     FillLayer* prevChild = 0;
-    const FillLayer* currParent = &state.parentStyle()->{{layer_type|lower}}Layers();
+    const FillLayer* currParent = &state.parentStyle()->backgroundLayers();
     while (currParent && currParent->is{{fill_type}}Set()) {
         if (!currChild)
             currChild = prevChild->ensureNext();

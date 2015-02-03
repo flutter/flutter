@@ -102,9 +102,6 @@ public:
     OwnPtr<CSSAnimationData> m_animations;
     OwnPtr<CSSTransitionData> m_transitions;
 
-    FillLayer m_mask;
-    NinePieceImage m_maskBoxImage;
-
     LengthSize m_pageSize;
 
     RefPtr<ClipPathOperation> m_clipPath;

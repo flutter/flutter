@@ -1767,7 +1767,7 @@ PassRefPtr<CSSValue> CSSPropertyParser::parseAttr(CSSParserValueList* args)
         return nullptr;
 
     String attrName = a->string;
-    // CSS allows identifiers with "-" at the start, like "-webkit-mask-image".
+    // CSS allows identifiers with "-" at the start, like "-webkit-foo".
     // But HTML attribute names can't have those characters, and we should not
     // even parse them inside attr().
     if (attrName[0] == '-')
@@ -2227,9 +2227,9 @@ PassRefPtr<CSSValue> CSSPropertyParser::parseFillSize(CSSPropertyID propId, bool
                 parsedValue2 = createPrimitiveNumericValue(value);
         }
     } else if (!parsedValue2 && propId == CSSPropertyWebkitBackgroundSize) {
+        // FIXME(sky): Remove webkit-background-size.
         // For backwards compatibility we set the second value to the first if it is omitted.
-        // We only need to do this for -webkit-background-size. It should be safe to let masks match
-        // the real property.
+        // We only need to do this for -webkit-background-size.
         parsedValue2 = parsedValue1;
     }
 
@@ -4656,8 +4656,8 @@ bool CSSPropertyParser::parseBorderImageSlice(CSSPropertyID propId, RefPtr<CSSBo
     }
 
     if (context.allowFinalCommit()) {
-        // FIXME: For backwards compatibility, -webkit-border-image, -webkit-mask-box-image and -webkit-box-reflect have to do a fill by default.
-        // FIXME: What do we do with -webkit-box-reflect and -webkit-mask-box-image? Probably just have to leave them filling...
+        // FIXME(sky): Remove this.
+        // FIXME: For backwards compatibility, -webkit-border-image has to do a fill by default.
         if (propId == CSSPropertyWebkitBorderImage)
             context.commitFill();
 

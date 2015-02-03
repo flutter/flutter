@@ -474,14 +474,10 @@ static LayoutRect transparencyClipBox(const RenderLayer*, const RenderLayer* roo
 static void expandClipRectForDescendantsAndReflection(LayoutRect& clipRect, const RenderLayer* layer, const RenderLayer* rootLayer,
     TransparencyClipBoxBehavior transparencyBehavior, const LayoutSize& subPixelAccumulation)
 {
-    // If we have a mask, then the clip is limited to the border box area (and there is
-    // no need to examine child layers).
-    if (!layer->renderer()->hasMask()) {
-        // Note: we don't have to walk z-order lists since transparent elements always establish
-        // a stacking container. This means we can just walk the layer tree directly.
-        for (RenderLayer* curr = layer->firstChild(); curr; curr = curr->nextSibling())
-            clipRect.unite(transparencyClipBox(curr, rootLayer, transparencyBehavior, DescendantsOfTransparencyClipBox, subPixelAccumulation));
-    }
+    // Note: we don't have to walk z-order lists since transparent elements always establish
+    // a stacking container. This means we can just walk the layer tree directly.
+    for (RenderLayer* curr = layer->firstChild(); curr; curr = curr->nextSibling())
+        clipRect.unite(transparencyClipBox(curr, rootLayer, transparencyBehavior, DescendantsOfTransparencyClipBox, subPixelAccumulation));
 }
 
 static LayoutRect transparencyClipBox(const RenderLayer* layer, const RenderLayer* rootLayer, TransparencyClipBoxBehavior transparencyBehavior,
@@ -1580,7 +1576,7 @@ bool RenderLayer::isVisuallyNonEmpty() const
     if (hasNonEmptyChildRenderers())
         return true;
 
-    if (renderer()->isReplaced() || renderer()->hasMask())
+    if (renderer()->isReplaced())
         return true;
 
     if (hasVisibleBoxDecorations())

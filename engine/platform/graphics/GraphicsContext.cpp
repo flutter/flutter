@@ -1649,20 +1649,7 @@ void GraphicsContext::setRadii(SkVector* radii, IntSize topLeft, IntSize topRigh
 
 PassRefPtr<SkColorFilter> GraphicsContext::WebCoreColorFilterToSkiaColorFilter(ColorFilter colorFilter)
 {
-    switch (colorFilter) {
-    case ColorFilterLuminanceToAlpha:
-        return adoptRef(SkLumaColorFilter::Create());
-    case ColorFilterLinearRGBToSRGB:
-        return ImageBuffer::createColorSpaceFilter(ColorSpaceLinearRGB, ColorSpaceDeviceRGB);
-    case ColorFilterSRGBToLinearRGB:
-        return ImageBuffer::createColorSpaceFilter(ColorSpaceDeviceRGB, ColorSpaceLinearRGB);
-    case ColorFilterNone:
-        break;
-    default:
-        ASSERT_NOT_REACHED();
-        break;
-    }
-
+    // FIXME(sky): Remove
     return nullptr;
 }
 

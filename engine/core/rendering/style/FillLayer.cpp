@@ -56,7 +56,6 @@ FillLayer::FillLayer(EFillLayerType type, bool useInitialValues)
     , m_composite(FillLayer::initialFillComposite(type))
     , m_sizeType(useInitialValues ? FillLayer::initialFillSizeType(type) : SizeNone)
     , m_blendMode(FillLayer::initialFillBlendMode(type))
-    , m_maskSourceType(FillLayer::initialFillMaskSourceType(type))
     , m_backgroundXOrigin(LeftEdge)
     , m_backgroundYOrigin(TopEdge)
     , m_imageSet(useInitialValues)
@@ -69,9 +68,8 @@ FillLayer::FillLayer(EFillLayerType type, bool useInitialValues)
     , m_yPosSet(useInitialValues)
     , m_backgroundXOriginSet(false)
     , m_backgroundYOriginSet(false)
-    , m_compositeSet(useInitialValues || type == MaskFillLayer)
+    , m_compositeSet(useInitialValues)
     , m_blendModeSet(useInitialValues)
-    , m_maskSourceTypeSet(useInitialValues)
     , m_type(type)
 {
 }
@@ -90,7 +88,6 @@ FillLayer::FillLayer(const FillLayer& o)
     , m_composite(o.m_composite)
     , m_sizeType(o.m_sizeType)
     , m_blendMode(o.m_blendMode)
-    , m_maskSourceType(o.m_maskSourceType)
     , m_backgroundXOrigin(o.m_backgroundXOrigin)
     , m_backgroundYOrigin(o.m_backgroundYOrigin)
     , m_imageSet(o.m_imageSet)
@@ -105,7 +102,6 @@ FillLayer::FillLayer(const FillLayer& o)
     , m_backgroundYOriginSet(o.m_backgroundYOriginSet)
     , m_compositeSet(o.m_compositeSet)
     , m_blendModeSet(o.m_blendModeSet)
-    , m_maskSourceTypeSet(o.m_maskSourceTypeSet)
     , m_type(o.m_type)
 {
 }
@@ -138,7 +134,6 @@ FillLayer& FillLayer::operator=(const FillLayer& o)
     m_repeatX = o.m_repeatX;
     m_repeatY = o.m_repeatY;
     m_sizeType = o.m_sizeType;
-    m_maskSourceType = o.m_maskSourceType;
 
     m_imageSet = o.m_imageSet;
     m_attachmentSet = o.m_attachmentSet;
@@ -150,7 +145,6 @@ FillLayer& FillLayer::operator=(const FillLayer& o)
     m_repeatYSet = o.m_repeatYSet;
     m_xPosSet = o.m_xPosSet;
     m_yPosSet = o.m_yPosSet;
-    m_maskSourceTypeSet = o.m_maskSourceTypeSet;
 
     m_type = o.m_type;
 
@@ -165,7 +159,7 @@ bool FillLayer::operator==(const FillLayer& o) const
             && m_backgroundXOrigin == o.m_backgroundXOrigin && m_backgroundYOrigin == o.m_backgroundYOrigin
             && m_attachment == o.m_attachment && m_clip == o.m_clip && m_composite == o.m_composite
             && m_blendMode == o.m_blendMode && m_origin == o.m_origin && m_repeatX == o.m_repeatX
-            && m_repeatY == o.m_repeatY && m_sizeType == o.m_sizeType && m_maskSourceType == o.m_maskSourceType
+            && m_repeatY == o.m_repeatY && m_sizeType == o.m_sizeType
             && m_sizeLength == o.m_sizeLength && m_type == o.m_type
             && ((m_next && o.m_next) ? *m_next == *o.m_next : m_next == o.m_next);
 }

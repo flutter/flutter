@@ -256,33 +256,6 @@ void CSSToStyleMap::mapFillYPosition(FillLayer* layer, CSSValue* value) const
         layer->setBackgroundYOrigin(*(pair->first()));
 }
 
-void CSSToStyleMap::mapFillMaskSourceType(FillLayer* layer, CSSValue* value) const
-{
-    EMaskSourceType type = FillLayer::initialFillMaskSourceType(layer->type());
-    if (value->isInitialValue()) {
-        layer->setMaskSourceType(type);
-        return;
-    }
-
-    if (!value->isPrimitiveValue())
-        return;
-
-    switch (toCSSPrimitiveValue(value)->getValueID()) {
-    case CSSValueAlpha:
-        type = MaskAlpha;
-        break;
-    case CSSValueLuminance:
-        type = MaskLuminance;
-        break;
-    case CSSValueAuto:
-        break;
-    default:
-        ASSERT_NOT_REACHED();
-    }
-
-    layer->setMaskSourceType(type);
-}
-
 double CSSToStyleMap::mapAnimationDelay(CSSValue* value)
 {
     if (value->isInitialValue())

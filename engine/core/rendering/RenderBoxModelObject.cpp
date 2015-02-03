@@ -441,7 +441,6 @@ void RenderBoxModelObject::paintFillLayerExtended(const PaintInfo& paintInfo, co
     }
 
     GraphicsContextStateSaver backgroundClipStateSaver(*context, false);
-    IntRect maskRect;
 
     switch (bgLayer.clip()) {
     case PaddingFillBox:
@@ -500,8 +499,6 @@ void RenderBoxModelObject::paintFillLayerExtended(const PaintInfo& paintInfo, co
             CompositeOperator compositeOp = bgLayer.composite();
             RenderObject* clientForBackgroundImage = backgroundObject ? backgroundObject : this;
             RefPtr<Image> image = bgImage->image(clientForBackgroundImage, geometry.tileSize());
-            if (bgLayer.maskSourceType() == MaskLuminance)
-                context->setColorFilter(ColorFilterLuminanceToAlpha);
             InterpolationQuality previousInterpolationQuality = context->imageInterpolationQuality();
             context->setImageInterpolationQuality(InterpolationLow);
             context->drawTiledImage(image.get(), geometry.destRect(), geometry.relativePhase(), geometry.tileSize(),

@@ -1201,10 +1201,7 @@ void RenderObject::setStyle(PassRefPtr<RenderStyle> style)
     setStyleInternal(style);
 
     updateFillImages(oldStyle ? &oldStyle->backgroundLayers() : 0, m_style->backgroundLayers());
-    updateFillImages(oldStyle ? &oldStyle->maskLayers() : 0, m_style->maskLayers());
-
     updateImage(oldStyle ? oldStyle->borderImage().image() : 0, m_style->borderImage().image());
-    updateImage(oldStyle ? oldStyle->maskBoxImage().image() : 0, m_style->maskBoxImage().image());
 
     bool doesNotNeedLayout = !m_parent || isText();
 
@@ -1666,16 +1663,8 @@ void RenderObject::postDestroy()
                 backgroundImage->removeClient(this);
         }
 
-        for (const FillLayer* maskLayer = &m_style->maskLayers(); maskLayer; maskLayer = maskLayer->next()) {
-            if (StyleImage* maskImage = maskLayer->image())
-                maskImage->removeClient(this);
-        }
-
         if (StyleImage* borderImage = m_style->borderImage().image())
             borderImage->removeClient(this);
-
-        if (StyleImage* maskBoxImage = m_style->maskBoxImage().image())
-            maskBoxImage->removeClient(this);
     }
     delete this;
 }

@@ -88,8 +88,9 @@ enum EFillRepeat {
     RepeatFill, NoRepeatFill, RoundFill, SpaceFill
 };
 
+// FIXME(sky): Remove this enum.
 enum EFillLayerType {
-    BackgroundFillLayer, MaskFillLayer
+    BackgroundFillLayer
 };
 
 // CSS3 Background Values
@@ -97,9 +98,6 @@ enum EFillSizeType { Contain, Cover, SizeLength, SizeNone };
 
 // CSS3 Background Position
 enum BackgroundEdgeOrigin { TopEdge, RightEdge, BottomEdge, LeftEdge };
-
-// CSS Mask Source Types
-enum EMaskSourceType { MaskAlpha, MaskLuminance };
 
 // Deprecated Flexible Box Properties
 

@@ -61,7 +61,6 @@ public:
     void mapFillSize(FillLayer*, CSSValue*) const;
     void mapFillXPosition(FillLayer*, CSSValue*) const;
     void mapFillYPosition(FillLayer*, CSSValue*) const;
-    void mapFillMaskSourceType(FillLayer*, CSSValue*) const;
 
     static double mapAnimationDelay(CSSValue*);
     static Timing::PlaybackDirection mapAnimationDirection(CSSValue*);

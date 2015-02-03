@@ -109,7 +109,7 @@ void RenderImage::imageChanged(WrappedImagePtr newImage, const IntRect* rect)
         return;
     }
 
-    if (hasBoxDecorationBackground() || hasMask())
+    if (hasBoxDecorationBackground())
         RenderReplaced::imageChanged(newImage, rect);
 
     ASSERT(isRooted());

@@ -343,11 +343,6 @@ public:
         return imageOutsets(borderImage());
     }
 
-    LayoutBoxExtent maskBoxImageOutsets() const
-    {
-        return imageOutsets(maskBoxImage());
-    }
-
     bool hasFilterOutsets() const { return hasFilter() && filter().hasOutsets(); }
     FilterOutsets filterOutsets() const { return hasFilter() ? filter().outsets() : FilterOutsets(); }
 
@@ -567,26 +562,6 @@ public:
     FillLayer& accessBackgroundLayers() { return m_background.access()->m_background; }
     const FillLayer& backgroundLayers() const { return m_background->background(); }
 
-    StyleImage* maskImage() const { return rareNonInheritedData->m_mask.image(); }
-    EFillRepeat maskRepeatX() const { return static_cast<EFillRepeat>(rareNonInheritedData->m_mask.repeatX()); }
-    EFillRepeat maskRepeatY() const { return static_cast<EFillRepeat>(rareNonInheritedData->m_mask.repeatY()); }
-    CompositeOperator maskComposite() const { return static_cast<CompositeOperator>(rareNonInheritedData->m_mask.composite()); }
-    EFillBox maskClip() const { return static_cast<EFillBox>(rareNonInheritedData->m_mask.clip()); }
-    EFillBox maskOrigin() const { return static_cast<EFillBox>(rareNonInheritedData->m_mask.origin()); }
-    const Length& maskXPosition() const { return rareNonInheritedData->m_mask.xPosition(); }
-    const Length& maskYPosition() const { return rareNonInheritedData->m_mask.yPosition(); }
-    EFillSizeType maskSizeType() const { return rareNonInheritedData->m_mask.sizeType(); }
-    const LengthSize& maskSizeLength() const { return rareNonInheritedData->m_mask.sizeLength(); }
-    FillLayer& accessMaskLayers() { return rareNonInheritedData.access()->m_mask; }
-    const FillLayer& maskLayers() const { return rareNonInheritedData->m_mask; }
-
-    const NinePieceImage& maskBoxImage() const { return rareNonInheritedData->m_maskBoxImage; }
-    StyleImage* maskBoxImageSource() const { return rareNonInheritedData->m_maskBoxImage.image(); }
-    const LengthBox& maskBoxImageSlices() const { return rareNonInheritedData->m_maskBoxImage.imageSlices(); }
-    bool maskBoxImageSlicesFill() const { return rareNonInheritedData->m_maskBoxImage.fill(); }
-    const BorderImageLengthBox& maskBoxImageWidth() const { return rareNonInheritedData->m_maskBoxImage.borderSlices(); }
-    const BorderImageLengthBox& maskBoxImageOutset() const { return rareNonInheritedData->m_maskBoxImage.outset(); }
-
     short horizontalBorderSpacing() const;
     short verticalBorderSpacing() const;
     EEmptyCell emptyCells() const { return static_cast<EEmptyCell>(inherited_flags._empty_cells); }
@@ -727,8 +702,6 @@ public:
     enum ApplyTransformOrigin { IncludeTransformOrigin, ExcludeTransformOrigin };
     void applyTransform(TransformationMatrix&, const LayoutSize& borderBoxSize, ApplyTransformOrigin = IncludeTransformOrigin) const;
     void applyTransform(TransformationMatrix&, const FloatRect& boundingBox, ApplyTransformOrigin = IncludeTransformOrigin) const;
-
-    bool hasMask() const { return rareNonInheritedData->m_mask.hasImage() || rareNonInheritedData->m_maskBoxImage.hasImage(); }
 
     unsigned tabSize() const { return rareInheritedData->m_tabSize; }
 
@@ -930,38 +903,6 @@ public:
             accessBackgroundLayers().fillUnsetProperties();
         }
     }
-
-    void adjustMaskLayers()
-    {
-        if (maskLayers().next()) {
-            accessMaskLayers().cullEmptyLayers();
-            accessMaskLayers().fillUnsetProperties();
-        }
-    }
-
-    void setMaskImage(PassRefPtr<StyleImage> v) { rareNonInheritedData.access()->m_mask.setImage(v); }
-
-    void setMaskBoxImage(const NinePieceImage& b) { SET_VAR(rareNonInheritedData, m_maskBoxImage, b); }
-    void setMaskBoxImageSource(PassRefPtr<StyleImage> v) { rareNonInheritedData.access()->m_maskBoxImage.setImage(v); }
-    void setMaskBoxImageSlices(const LengthBox& slices)
-    {
-        rareNonInheritedData.access()->m_maskBoxImage.setImageSlices(slices);
-    }
-    void setMaskBoxImageSlicesFill(bool fill)
-    {
-        rareNonInheritedData.access()->m_maskBoxImage.setFill(fill);
-    }
-    void setMaskBoxImageWidth(const BorderImageLengthBox& slices)
-    {
-        rareNonInheritedData.access()->m_maskBoxImage.setBorderSlices(slices);
-    }
-    void setMaskBoxImageOutset(const BorderImageLengthBox& outset)
-    {
-        rareNonInheritedData.access()->m_maskBoxImage.setOutset(outset);
-    }
-    void setMaskXPosition(const Length& length) { SET_VAR(rareNonInheritedData, m_mask.m_xPosition, length); }
-    void setMaskYPosition(const Length& length) { SET_VAR(rareNonInheritedData, m_mask.m_yPosition, length); }
-    void setMaskSize(const LengthSize& s) { SET_VAR(rareNonInheritedData, m_mask.m_sizeLength, s); }
 
     void setHorizontalBorderSpacing(short);
     void setVerticalBorderSpacing(short);
@@ -1281,7 +1222,6 @@ public:
     static ImageResolutionSnap initialImageResolutionSnap() { return ImageResolutionNoSnap; }
     static float initialImageResolution() { return 1; }
     static StyleImage* initialBorderImageSource() { return 0; }
-    static StyleImage* initialMaskBoxImageSource() { return 0; }
     static TouchAction initialTouchAction() { return TouchActionAuto; }
     static TouchActionDelay initialTouchActionDelay() { return TouchActionDelayScript; }
     static ShadowList* initialBoxShadow() { return 0; }

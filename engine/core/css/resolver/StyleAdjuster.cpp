@@ -149,11 +149,10 @@ void StyleAdjuster::adjustRenderStyle(RenderStyle* style, RenderStyle* parentSty
 
     // Auto z-index becomes 0 for the root element and transparent objects. This prevents
     // cases where objects that should be blended as a single unit end up with a non-transparent
-    // object wedged in between them. Auto z-index also becomes 0 for objects that specify transforms/masks/reflections.
+    // object wedged in between them. Auto z-index also becomes 0 for objects that specify transforms.
     if (style->hasAutoZIndex() && ((element.document().documentElement() == element)
         || style->hasOpacity()
         || style->hasTransformRelatedProperty()
-        || style->hasMask()
         || style->clipPath()
         || style->hasFilter()
         || hasWillChangeThatCreatesStackingContext(style)))
@@ -176,7 +175,6 @@ void StyleAdjuster::adjustRenderStyle(RenderStyle* style, RenderStyle* parentSty
 
     // Cull out any useless layers and also repeat patterns into additional layers.
     style->adjustBackgroundLayers();
-    style->adjustMaskLayers();
 
     // If we have transitions, or animations, do not share this style.
     if (style->transitions() || style->animations())

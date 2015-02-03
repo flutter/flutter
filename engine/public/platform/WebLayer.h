@@ -62,10 +62,6 @@ public:
     virtual void setBounds(const WebSize&) = 0;
     virtual WebSize bounds() const = 0;
 
-    virtual void setMasksToBounds(bool) = 0;
-    virtual bool masksToBounds() const = 0;
-
-    virtual void setMaskLayer(WebLayer*) = 0;
     virtual void setReplicaLayer(WebLayer*) = 0;
 
     virtual void setOpacity(float) = 0;

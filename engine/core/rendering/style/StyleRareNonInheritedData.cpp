@@ -37,7 +37,6 @@ StyleRareNonInheritedData::StyleRareNonInheritedData()
     , m_perspective(RenderStyle::initialPerspective())
     , m_perspectiveOriginX(RenderStyle::initialPerspectiveOriginX())
     , m_perspectiveOriginY(RenderStyle::initialPerspectiveOriginY())
-    , m_mask(MaskFillLayer, true)
     , m_pageSize()
     , m_clipPath(RenderStyle::initialClipPath())
     , m_textDecorationColor(StyleColor::currentColor())
@@ -66,7 +65,6 @@ StyleRareNonInheritedData::StyleRareNonInheritedData()
     , m_justifySelf(RenderStyle::initialJustifySelf())
     , m_justifySelfOverflowAlignment(RenderStyle::initialJustifySelfOverflowAlignment())
 {
-    m_maskBoxImage.setMaskDefaults();
 }
 
 StyleRareNonInheritedData::StyleRareNonInheritedData(const StyleRareNonInheritedData& o)
@@ -85,8 +83,6 @@ StyleRareNonInheritedData::StyleRareNonInheritedData(const StyleRareNonInherited
     , m_boxShadow(o.m_boxShadow)
     , m_animations(o.m_animations ? CSSAnimationData::create(*o.m_animations) : nullptr)
     , m_transitions(o.m_transitions ? CSSTransitionData::create(*o.m_transitions) : nullptr)
-    , m_mask(o.m_mask)
-    , m_maskBoxImage(o.m_maskBoxImage)
     , m_pageSize(o.m_pageSize)
     , m_clipPath(o.m_clipPath)
     , m_textDecorationColor(o.m_textDecorationColor)
@@ -137,8 +133,6 @@ bool StyleRareNonInheritedData::operator==(const StyleRareNonInheritedData& o) c
         && shadowDataEquivalent(o)
         && animationDataEquivalent(o)
         && transitionDataEquivalent(o)
-        && m_mask == o.m_mask
-        && m_maskBoxImage == o.m_maskBoxImage
         && m_pageSize == o.m_pageSize
         && m_clipPath == o.m_clipPath
         && m_textDecorationColor == o.m_textDecorationColor

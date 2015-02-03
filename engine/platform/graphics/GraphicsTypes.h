@@ -102,11 +102,9 @@ enum TextDrawingMode {
 };
 typedef unsigned TextDrawingModeFlags;
 
+// FIXME(sky): Remove this enum.
 enum ColorFilter {
     ColorFilterNone,
-    ColorFilterLuminanceToAlpha,
-    ColorFilterSRGBToLinearRGB,
-    ColorFilterLinearRGBToSRGB
 };
 
 enum WindRule {
