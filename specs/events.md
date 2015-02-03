@@ -1,68 +1,73 @@
 Sky Event Model
 ===============
 
-```javascript
-  // EVENTS
+```dart
+SKY MODULE
+<!-- part of sky:core -->
 
-  class Event {
-    constructor (String type, Boolean bubbles = true, any data = null); // O(1)
-    readonly attribute String type; // O(1)
-    readonly attribute Boolean bubbles; // O(1)
-    attribute any data; // O(1)
+<script>
+abstract class Event {
+  Event({bool bubbles}) : this._bubbles = bubbles;
 
-    readonly attribute EventTarget target; // O(1)
-    readonly attribute EventTarget currentTarget; // O(1)
-    attribute Boolean handled; // O(1)
-    attribute any result; // O(1)
+  bool _bubbles;
+  bool get bubbles => _bubbles;
 
-    // TODO(ianh): do events get blocked at scope boundaries, e.g. focus events when both sides are in the scope?
-    // TODO(ianh): do events get retargetted, e.g. focus when leaving a custom element?
+  EventTarget _target;
+  EventTarget get target => _target;
+
+  EventTarget _currentTarget;
+  EventTarget get currentTarget => _currentTarget;
+
+  bool handled; // precise semantics depend on the event type, but in general, set this when you set result
+  dynamic result;
+
+  // TODO(ianh): abstract API for doing things at shadow tree boundaries 
+  // TODO(ianh): do events get blocked at scope boundaries, e.g. focus events when both sides are in the scope?
+  // TODO(ianh): do events get retargetted, e.g. focus when leaving a custom element?
+}
+
+class EventTarget {
+  EventTarget() : _eventsController = new DispatcherController<Event>();
+
+  Dispatcher get events => _eventsController.dispatcher;
+  EventTarget parentNode;
+
+  List<EventTarget> getEventDispatchChain() {
+    if (this.parentNode == null) {
+      return [this];
+    } else {
+      var result = this.parentNode.getEventDispatchChain();
+      result.add(this);
+      return result;
+    }
   }
 
-  // TODO(ianh): decide if we're using this generic Event class and
-  // allowing any arbitrary properties to be set on it, or if we're
-  // going to use subclasses (and drop "type"). If we use subclasses
-  // then how will declarative event handling work in frameworks?
-  // (consider that multiple modules can each have their own FooEvent
-  // class with the same name...)
-  //
-  // The advantage of this would be the ability to enforce (or at
-  // least better catch) incorrect uses of the API, e.g. to make sure
-  // people don't stomp on themselves with the return value.
+  final DispatcherController _eventsController;
 
-  callback EventListener any (Event event);
-    // if the return value is not undefined:
-    //   assign it to event.result
-    //   set event.handled to true
-
-  abstract class EventTarget {
-    any dispatchEvent(Event event, any defaultResult = null); // O(N) in total number of listeners for this type in the chain
-      // sets event.handled to false and event.result to defaultResult
-      // makes a record of the event target chain by calling getEventDispatchChain()
-      // sets event.target to this
-      // invokes all the handlers on the chain in turn, at each step setting currentTarget to the EventTarget for that step
-      // returns event.result
-    virtual Array<EventTarget> getEventDispatchChain(); // O(1) // returns []
-    void addEventListener(String type, EventListener listener); // O(1)
-    void removeEventListener(String type, EventListener listener); // O(N) in event listeners with that type
-    private Array<String> getRegisteredEventListenerTypes(); // O(N)
-    private Array<EventListener> getRegisteredEventListenersForType(String type); // O(N)
+  dynamic dispatchEvent(Event event, { defaultResult: null }) { // O(N*M) where N is the length of the chain and M is the average number of listeners per link in the chain
+    // note: this will throw if any of the listeners threw
+    assert(event != null); // event must be non-null
+    event.handled = false;
+    event.result = defaultResult;
+    event._target = this;
+    var chain = this.getEventDispatchChain();
+    var exceptions = new ExceptionListException<ExceptionListException<Exception>>();
+    for (var link in chain) {
+      try {
+        link._dispatchEventLocally(event);
+      } on ExceptionListException<Exception> catch (e) {
+        exceptions.add(e);
+      }
+    }
+    if (exceptions.length > 0)
+      throw exceptions;
+    return event.result;
   }
 
-  class CustomEventTarget : EventTarget { // implemented in JS
-    constructor (); // O(1)
-    attribute EventTarget parentNode; // getter O(1), setter O(N) in height of tree, throws if this would make a loop
-
-    virtual Array<EventTarget> getEventDispatchChain(); // O(N) in height of tree // implements EventTarget.getEventDispatchChain()
-      // let result = [];
-      // let node = this;
-      // while (node) {
-      //   result.push(node);
-      //   node = node.parentNode;
-      // }
-      // return result;
-
-    // you can inherit from this to make your object into an event target
-    // or you can inherit from EventTarget and implement your own getEventDispatchChain()
+  void _dispatchEventLocally(Event event) {
+    event._currentTarget = this;
+    _eventsController.add(event);
   }
+}
+</script>
 ```
