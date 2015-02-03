@@ -38,7 +38,7 @@ class Viewer : public mojo::ApplicationDelegate,
     blink::initialize(platform_impl_.get());
 
     mojo::icu::Initialize(app);
-    mojo::TracingImpl::Create(app);
+    tracing_.Initialize(app);
   }
 
   virtual bool ConfigureIncomingConnection(
@@ -54,11 +54,12 @@ class Viewer : public mojo::ApplicationDelegate,
   }
 
   scoped_ptr<PlatformImpl> platform_impl_;
+  mojo::TracingImpl tracing_;
 
   DISALLOW_COPY_AND_ASSIGN(Viewer);
 };
 
-}  // namespace mojo
+}  // namespace sky
 
 MojoResult MojoMain(MojoHandle shell_handle) {
   mojo::ApplicationRunnerChromium runner(new sky::Viewer);

@@ -15,7 +15,8 @@ TraceCollector::~TraceCollector() {
 }
 
 void TraceCollector::GetTrace(TraceCallback callback) {
-  DCHECK(!callback_.is_null());
+  DCHECK(callback_.is_null());
+  DCHECK(!callback.is_null());
   if (is_complete_) {
     callback.Run(GetTraceAsString());
     return;
