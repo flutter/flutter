@@ -165,6 +165,10 @@ registerElement('template', {
   'repeat': 'string',
 });
 
+registerElement('iframe', {
+  'src': 'string',
+});
+
 module.exports = {
   registerElement: registerElement,
   getRegistration: getRegistration,
