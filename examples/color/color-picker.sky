@@ -7,26 +7,40 @@
 <import src="/sky/framework/sky-box.sky"/>
 <import src="/sky/framework/sky-element/sky-element.sky" as="SkyElement" />
 <import src="color-wheel.sky" />
-<sky-element name="color-picker">
+<import src="color-samples.sky" />
+
+<sky-element name="color-picker" on-color-change="updateColorSamples">
 <template>
   <style>
-  #color-sample {
-     height: 100px;
-     margin-top: 10px;
-     background-color: {{ inputColor }};
+  color-samples {
+    height: 80px;
+    margin-top: 10px;
   }
   </style>
   <sky-box title='Choose a Color'>
-    <color-wheel color="{{ inputColor }}"/>
-    <div id="color-sample"></div>
+    <color-wheel id="color-wheel-element" color="{{ inputColor }}"/>
+    <color-samples id="color-samples-element"/>
   </sky-box>
 </template>
 <script>
 module.exports = class extends SkyElement {
   created() {
     this.inputColor = "#FFFFFF";
+    this.colorSamplesElt = null;
+    // Show the 6 most recently selected colors
+    var colorSample = {cssColor: this.inputColor};
+    this.colorSamples = new Array(6);
+    this.colorSamples.fill({cssColor: this.inputColor});
   }
-}.register();
+  shadowRootReady() {
+    this.colorSamplesElt = this.shadowRoot.getElementById('color-samples-element');
+  }
+  updateColorSamples(e) {
+    this.colorSamples.push({cssColor: e.detail});
+    this.colorSamples.shift();
+    this.colorSamplesElt.colors = this.colorSamples;
+  }
+}.register();    
 </script>
 </sky-element>
 </sky>
