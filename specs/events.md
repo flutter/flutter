@@ -6,11 +6,10 @@ SKY MODULE
 <!-- part of sky:core -->
 
 <script>
-abstract class Event {
-  Event({bool bubbles}) : this._bubbles = bubbles;
+abstract class Event<ReturnType> {
+  Event({bool this.bubbles});
 
-  bool _bubbles;
-  bool get bubbles => _bubbles;
+  final bool bubbles;
 
   EventTarget _target;
   EventTarget get target => _target;
@@ -19,7 +18,7 @@ abstract class Event {
   EventTarget get currentTarget => _currentTarget;
 
   bool handled; // precise semantics depend on the event type, but in general, set this when you set result
-  dynamic result;
+  ReturnType result;
 
   // TODO(ianh): abstract API for doing things at shadow tree boundaries 
   // TODO(ianh): do events get blocked at scope boundaries, e.g. focus events when both sides are in the scope?
@@ -45,17 +44,17 @@ class EventTarget {
   final DispatcherController _eventsController;
 
   dynamic dispatchEvent(Event event, { defaultResult: null }) { // O(N*M) where N is the length of the chain and M is the average number of listeners per link in the chain
-    // note: this will throw if any of the listeners threw
+    // note: this will throw an ExceptionListException<ExceptionListException> if any of the listeners threw
     assert(event != null); // event must be non-null
     event.handled = false;
     event.result = defaultResult;
     event._target = this;
     var chain = this.getEventDispatchChain();
-    var exceptions = new ExceptionListException<ExceptionListException<Exception>>();
+    var exceptions = new ExceptionListException<ExceptionListException>();
     for (var link in chain) {
       try {
         link._dispatchEventLocally(event);
-      } on ExceptionListException<Exception> catch (e) {
+      } on ExceptionListException catch (e) {
         exceptions.add(e);
       }
     }

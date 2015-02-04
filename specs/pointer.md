@@ -59,14 +59,14 @@ New touches and pointers can appear and disappear over time.
 
 Each pointer has a list of current targets.
 
-When a new one enters the system, a non-bubbling 'pointer-added' event
-is fired at the application's document, and the pointer's current
-targets list is initialised to just that Document object.
+When a new one enters the system, a non-bubbling ``PointerAddedEvent``
+event is fired at the application's document, and the pointer's
+current targets list is initialised to just that Document object.
 
-When it is removed, a non-bubbling 'pointer-removed' event is fired at
-the application's document and at any other objects in the pointer's
-current targets list. Currently, at the time of a pointer-removed, the
-list will always consist of only the document.
+When it is removed, a non-bubbling ``PointerRemovedEvent`` event is
+fired at the application's document and at any other objects in the
+pointer's current targets list. Currently, at the time of a
+``PointerRemoved``, the list will always consist of only the document.
 
 A pointer can be "up" or "down". Initially all pointers are "up".
 
@@ -82,14 +82,14 @@ When a pointer switches from "up" to "down", the following algorithm
 is run:
 
  1. Hit test the position of the pointer, let 'node' be the result.
- 2. Fire a bubbling pointer-down event at the layoutManager for
-    'node', with an empty array as the default return value. Let
+ 2. Fire a bubbling ``PointerDownEvent`` event at the layoutManager
+    for 'node', with an empty array as the default return value. Let
     'result1' be the returned value.
  3. If result1 is not an array of EventTarget objects, set it to the
     empty array and (if this is debug mode) report the issue.
- 4. Fire a bubbling pointer-down event at the Element for 'node', with
-    an empty array as the default return value. Let 'result2' be the
-    returned value.
+ 4. Fire a bubbling ``PointerDownEvent`` event at the Element for
+    'node', with an empty array as the default return value. Let
+    'result2' be the returned value.
  5. If result2 is not an array of EventTarget objects, set it to the
     empty array and (if this is debug mode) report the issue.
  6. Let result be the concatenation of result1's contents, result2's
@@ -101,44 +101,46 @@ pointers have that object as a current target so far, and either there
 are no buttons (touch, stylus) or only the primary button is active
 (mouse) and this is not an inverted stylus, then that pointer is
 considered the "primary" pointer for that object. The pointer remains
-the primary pointer for that object until the corresponding pointer-up
-event (even if the buttons change).
+the primary pointer for that object until the corresponding
+``PointerUpEvent`` event (even if the buttons change).
 
-When a pointer moves, a non-bubbling 'pointer-move' event is fired at
-each of the pointer's current targets in turn (maintaining the order
-they had in the 'pointer-down' event, if there's more than one). If
-the return value of a 'pointer-moved' event is 'cancel', and the
-pointer is currently down, then the pointer is canceled (see below).
+When a pointer moves, a non-bubbling ``PointerMoveEvent`` event is
+fired at each of the pointer's current targets in turn (maintaining
+the order they had in the ``PointerDownEvent`` event, if there's more
+than one). If the return value of a ``PointerMovedEvent`` event is
+'cancel', and the pointer is currently down, then the pointer is
+canceled (see below).
 
 When a pointer's button state changes but this doesn't impact whether
 it is "up" or "down", e.g. when a mouse with a button down gets a
 second button down, or when a stylus' buttons change state, but the
-pointer doesn't simultaneously move, then a 'pointer-moved' event is
-fired anyway, as described above, but with dx=dy=0.
+pointer doesn't simultaneously move, then a ``PointerMovedEvent``
+event is fired anyway, as described above, but with dx=dy=0.
 
 When a pointer switches from "down" to "up", a non-bubbling
-'pointer-up' event is fired at each of the pointer's current targets
-in turn (maintaining the order they had in the 'pointer-down' event,
-if there's more than one), and then the pointer's current target list
-is emptied except for the application's document. The buttons exposed
-on the 'pointer-up' event are those that were down immediately prior
-to the buttons being released.
+``PointerUpEvent`` event is fired at each of the pointer's current
+targets in turn (maintaining the order they had in the
+``PointerDownEvent`` event, if there's more than one), and then the
+pointer's current target list is emptied except for the application's
+document. The buttons exposed on the ``PointerUpEvent`` event are
+those that were down immediately prior to the buttons being released.
 
-At the time of a 'pointer-up' event, for each object that is a current
-target of the pointer, and for which the pointer is considered the
-"primary" pointer for that object, if there is another pointer that is
-already down, which is of the same kind, which also has that object as
-a current target, and that has either no buttons or only its primary
-button active, then that pointer becomes the new "primary" pointer for
-that object before the 'pointer-up' event is sent. Otherwise, the
-"primary" pointer stops being "primary" just _after_ the 'pointer-up'
-event. (This matters for whether the 'primary' field is set.)
+At the time of a ``PointerUpEvent`` event, for each object that is a
+current target of the pointer, and for which the pointer is considered
+the "primary" pointer for that object, if there is another pointer
+that is already down, which is of the same kind, which also has that
+object as a current target, and that has either no buttons or only its
+primary button active, then that pointer becomes the new "primary"
+pointer for that object before the ``PointerUpEvent`` event is sent.
+Otherwise, the "primary" pointer stops being "primary" just _after_
+the ``PointerUpEvent`` event. (This matters for whether the 'primary'
+field is set.)
 
 When a pointer is canceled, if it is "down", pretend that the pointer
-moved to "up", sending 'pointer-up' as described above, and entirely
-empty its current targets list. AFter the pointer actually switches
-from "down" to "up", replace the current targets list with an object
-that only contains the application's document.
+moved to "up", sending ``PointerUpEvent`` as described above, and
+entirely empty its current targets list. AFter the pointer actually
+switches from "down" to "up", replace the current targets list with an
+object that only contains the application's document.
 
 Nothing special happens when a pointer's current target moves in the
 DOM.
@@ -148,21 +150,22 @@ the previous -moved or -added event, so their dx and dy are always 0.
 
 Positions are floating point numbers; they can have subpixel values.
 
-For each pointer, only a single pointer-added or pointer-removed event
-is fired per frame. If a pointer would have been added and removed in
-the same frame, the pointer is ignored, and no events are fired for
-that pointer.
+For each pointer, only a single ``PointerAddedEvent`` or
+``PointerRemovedEvent`` event is fired per frame. If a pointer would
+have been added and removed in the same frame, the pointer is ignored,
+and no events are fired for that pointer.
 
-For each pointer, only a single pointer-down or pointer-up event is
-fired per frame, representing the change in state from the last frame,
-if any. Exactly when the event is fired is up to the implementation
-and may depend on the hardware.
+For each pointer, only a single ``PointerDownEvent`` or
+``PointerUpEvent`` event is fired per frame, representing the change
+in state from the last frame, if any. Exactly when the event is fired
+is up to the implementation and may depend on the hardware.
 
-For each pointer, at most two pointer-move events are fired per frame,
-one before the pointer-down or pointer-up event, if any, and one
-after. If the pointer didn't change "down" state, then only one
-pointer-move event is fired. All the actual moves that the pointer
-experienced are coallesced into the event.
+For each pointer, at most two ``PointerMoveEvent`` events are fired
+per frame, one before the ``PointerDownEvent`` or ``PointerUpEvent``
+event, if any, and one after. If the pointer didn't change "down"
+state, then only one ``PointerMoveEvent`` event is fired. All the
+actual moves that the pointer experienced are coallesced into the
+event.
 
    Example:
     If a mouse experiences the following events:
@@ -176,7 +179,8 @@ TODO(ianh): expose the unfiltered uncoalesced stream of events for
 programs that want more precision (e.g. drawing apps)
 
 
-These data of all these events is an object with the following fields:
+These events have the following fields (see below for the class
+definitions):
 
         pointer: an integer assigned to this touch or pointer when it
                  enters the system, never reused, increasing
@@ -193,11 +197,11 @@ These data of all these events is an object with the following fields:
               y: y-position relative to the top-left corner of the
                  surface of the node on which the event was fired
 
-             dx: difference in x-position since last pointer-moved
-                 event
+             dx: difference in x-position since last
+                 ``PointerMovedEvent`` event
 
-             dy: difference in y-position since last pointer-moved
-                 event
+             dy: difference in y-position since last
+                 ``PointerMovedEvent`` event
 
         buttons: a bitfield of the buttons pressed, from the following
                  list:
@@ -230,14 +234,16 @@ These data of all these events is an object with the following fields:
                  the back button are pressed at the same time, the
                  value will be 10 (bits 2 and 4)
 
-           down: true if the pointer is down (in pointer-down event or
-                 subsequent pointer-move events); false otherwise (in
-                 pointer-added, pointer-up, and pointer-removed
-                 events, and in pointer-move events that aren't
-                 between pointer-down and pointer-up events)
+           down: true if the pointer is down (in ``PointerDownEvent``
+                 event or subsequent ``PointerMoveEvent`` events);
+                 false otherwise (in ``PointerAdded``, ``PointerUp``,
+                 and ``PointerRemovedEvent`` events, and in
+                 ``PointerMoveEvent`` events that aren't between
+                 ``PointerDownEvent`` and ``PointerUpEvent`` events)
 
         primary: true if this is a primary pointer/touch (see above)
-                 can only be set for pointer-moved and pointer-up
+                 can only be set for ``PointerMovedEvent`` and
+                 ``PointerUpEvent``
 
        obscured: true if the system was rendering another view on top
                  of the sky application at the time of the event (this
@@ -333,13 +339,101 @@ When kind is 'stylus' or 'stylus-inverted':
 TODO(ianh): add an API that exposes the currently existing pointers,
 so that you can determine e.g. if you have a mouse.
 
+Here are the class definitions for pointer events:
 
+```dart
+enum PointerKind { touch, mouse, stylus, invertedStylus }
+
+abstract class PointerEvent extends Event {
+  PointerEvent({ bool bubbles,
+                 this.pointer,
+                 this.kind,
+                 this.x, this.y,
+                 this.dx: 0.0, this.dy: 0.0,
+                 this.buttons: 0,
+                 this.down: false,
+                 this.primary: false,
+                 this.obscured: false,
+                 this.pressure, this.minPressure, this.maxPressure,
+                 this.distance, this.minDistance, this.maxDistance,
+                 this.radiusMajor, this.radiusMinor, this.minRadius, this.maxRadius,
+                 this.orientation, this.tilt
+               }): super(bubbles: bubbles);
+
+  final int pointer;
+  final PointerKind kind;
+  final double x; // logical pixels
+  final double y; // logical pixels
+  final double dx; // logical pixels
+  final double dy; // logical pixels
+
+  final int buttons; // bit field
+  static const int primaryMouseButton = 0x01;
+  static const int secondaryMouseButton = 0x02;
+  static const int primaryStylusButton = 0x02;
+  static const int middleMouseButton = 0x04;
+  static const int secondaryStylusButton = 0x04;
+  static const int backButton = 0x08;
+  static const int forwardButton = 0x10;
+
+  final bool down;
+  final bool primary;
+  final bool obscured;
+
+  // if down != true, these are all null
+  final double pressure; // normalised, 0.0 means none, 1.0 means "normal"
+  final double minPressure; // 0 <= minPressure <= 1.0
+  final double maxPressure; // maxPressure >= 1.0
+
+  // if kind != touch, stylus, or invertedStylus, these are all null
+  final double distance; // logical pixels
+  final double minDistance; // logical pixels
+  final double maxDistance; // logical pixels
+
+  // if down != true or kind != touch, stylus, or invertedStylus, these are all null
+  final double radiusMajor; // logical pixels
+  final double radiusMinor; // logical pixels
+  final double minRadius; // logical pixels
+  final double maxRadius; // logical pixels
+
+  // if down != true or kind != touch, stylus, or invertedStylus, this is null
+  final double orientation; // radians // meaning is different for touch and stylus/invertedStylus
+
+  // if kind != stylus or invertedStylus, this is null
+  final double tilt; // radians
+}
+
+// the following uses proposed syntax from
+// https://code.google.com/p/dart/issues/detail?id=22274
+// to avoid duplicating that entire constructor up there
+
+class PointerAddedEvent extends Event {
+  PointerAddedEvent = PointerEvent;
+}
+
+class PointerRemovedEvent extends Event {
+  PointerRemovedEvent = PointerEvent;
+}
+
+class PointerDownEvent extends Event {
+  PointerDownEvent = PointerEvent;
+}
+
+class PointerUpEvent extends Event {
+  PointerUpEvent = PointerEvent;
+}
+
+class PointerMovedEvent extends Event {
+  PointerMovedEvent = PointerEvent;
+}
+```
 
 Wheel events
 ------------
 
-When a wheel input device is turned, a 'wheel' event that bubbles is
-fired at the application's document, with the following fields:
+When a wheel input device is turned, a ``WheelEvent`` event that
+bubbles is fired at the application's document, with the following
+fields:
 
           wheel: an integer assigned to this wheel by the system. The
                  same wheel on the same system must always be given
@@ -356,7 +450,7 @@ Additionally, if the wheel is associated with a pointer (e.g. a mouse
 wheel), the following fields must be present also:
 
         pointer: the integer assigned to the pointer in its
-                 'pointer-add' event (see above).
+                 ``PointerAddEvent`` event (see above).
 
               x: x-position relative to the top-left corner of the
                  display, in global layout coordinates
@@ -366,3 +460,20 @@ wheel), the following fields must be present also:
 
 Note: The only wheels that are supported are mouse wheels and physical
 dials. Track balls are not reported as mouse wheels.
+
+```dart
+abstract class WheelEvent extends Event {
+  PointerEvent({ bool bubbles,
+                 this.wheel,
+                 this.delta: 0.0,
+                 this.pointer,
+                 this.x, this.y,
+               }): super(bubbles: bubbles);
+
+  final int wheel;
+  final double delta; // revolutions (or fractions thereof)
+  final int pointer;
+  final double x; // logical pixels
+  final double y; // logical pixels
+}
+```
