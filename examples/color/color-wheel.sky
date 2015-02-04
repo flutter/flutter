@@ -7,8 +7,7 @@
 
 <sky-element name="color-wheel"
     attributes="color:string"
-    on-pointerdown="handlePointerDown"
-    on-pointermove="handlePointerMove">
+    on-pointerdown="handlePointerDown">
 <template>
   <style>
     img {
@@ -65,6 +64,12 @@ module.exports = class extends SkyElement {
   created() {
     super.created();
     this.color = "#xFF00FF";
+    this.colorChanged = function() {
+      this.dispatchEvent(new CustomEvent('color-change', {
+        bubbles: true,
+        detail: this.color,
+      }));
+    };
   }
   updateColor(event) {
     var bounds = event.target.getBoundingClientRect();
@@ -76,9 +81,6 @@ module.exports = class extends SkyElement {
       this.color = rgbToString(rgb);
   }
   handlePointerDown(event) {
-    this.updateColor(event);
-  }
-  handlePointerMove(event) {
     this.updateColor(event);
   }
 }.register();
