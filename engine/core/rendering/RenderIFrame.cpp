@@ -33,12 +33,17 @@ void RenderIFrame::updateWidgetBounds()
     if (!contentView)
         return;
 
+    // FIXME: Once viewport_metrics are initialized properly on child views,
+    // The GetRoot() call should be removed.
+    const float devicePixelRatio =
+        contentView->GetRoot()->viewport_metrics().device_pixel_ratio;
+
     IntRect bounds = absoluteContentBox();
     mojo::Rect mojoBounds;
-    mojoBounds.x = bounds.x();
-    mojoBounds.y = bounds.y();
-    mojoBounds.width = bounds.width();
-    mojoBounds.height = bounds.height();
+    mojoBounds.x = bounds.x() * devicePixelRatio;
+    mojoBounds.y = bounds.y() * devicePixelRatio;
+    mojoBounds.width = bounds.width() * devicePixelRatio;
+    mojoBounds.height = bounds.height() * devicePixelRatio;
     contentView->SetBounds(mojoBounds);
 }
 
