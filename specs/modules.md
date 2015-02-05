@@ -18,7 +18,7 @@ document's list of outstanding dependencies grows. When an imported
 module completes, it is removed from the document's list of
 outstanding dependencies.
 
-Before executing script or inserting an element that is not already
+Before compiling script or inserting an element that is not already
 registered, the parser waits until the list of outstanding
 dependencies is empty. After the parser has finished parsing, the
 document waits until its list of outstanding dependencies is empty
