@@ -126,12 +126,10 @@ class Document : TreeScope {
 }
 
 class ApplicationDocument : Document {
-  constructor (GestureManager gestureManager, ChildArguments... nodes); // O(N) in number of /nodes/ arguments plus all their descendants
+  constructor (ChildArguments... nodes); // O(N) in number of /nodes/ arguments plus all their descendants
 
   virtual LayoutManagerConstructor getLayoutManager(); // O(1)
     // returns sky.rootLayoutManager;
-
-  readonly attribute GestureManager gestureManager;
 }
 
 attribute LayoutManagerConstructor rootLayoutManager; // O(1)

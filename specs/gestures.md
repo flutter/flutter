@@ -1,92 +1,133 @@
 Gestures
 ========
 
-```javascript
-typedef PointerID Integer;
+```dart
+SKY MODULE
+<!-- part of sky:core -->
 
-dictionary GestureState {
-  Boolean cancel = true; // if true, then cancel the gesture at this point
-  Boolean capture = false; // (for pointer-down) if true, then this pointer is relevant
-  Boolean choose = false; // if true, the gesture thinks that other gestures should give up
-  Boolean finished = true; // if true, we're ready for the next gesture to start
+<script>
+abstract class GestureEvent extends Event {
+  Gesture _gesture;
+  Gesture get gesture => _gesture;
+}
 
+class GestureState {
+  bool cancel = true; // if true, then cancel the gesture at this point
+  bool capture = false; // (for PointerDownEvent) if true, then this pointer is relevant
+  bool choose = false; // if true, the gesture thinks that other gestures should give up
+  bool finished = true; // if true, we're ready for the next gesture to start
   // choose and cancel are mutually exclusive
 }
 
-dictionary SendEventOptions {
-  Integer? coallesceGroup = null; // when queuing events, only the last event with each group is kept
-  Boolean prechoose = false; // if true, event should just be sent right away, not queued
+class BufferedEvent {
+  const BufferedEvent(this.event, this.coallesceGroup);
+  final GestureEvent event;
+  final int coallesceGroup;
 }
 
-abstract class Gesture : EventTarget {
-  constructor (EventTarget target);
-  readonly attribute EventTarget target;
+abstract class Gesture extends EventTarget {
+  Gesture(this.target) : super() {
+    target.events.where((event) => event is PointerDownEvent ||
+                                   event is PointerMovedEvent ||
+                                   event is PointerUpEvent).listen(_handler);
+  }
+  final EventTarget target;
 
-  virtual GestureState processEvent(Event event);
-  // return {}
-  virtual void choose(); // called by GestureManager // make sure to call superclass choose() before
-  // - assert: this.active == true
-  // - assert: this.chosen == false
-  // - set this.chosen = true
-  // - if there are any buffered events, dispatch them on this
-  virtual void cancel(); // called by GestureManager // make sure to call superclass cancel() after
-  // - set active and chosen to false, clear the event buffer
+  bool _ready = true; // last event, we were finished
+  bool get ready => _ready;
+  bool _active = false; // we have not yet been canceled since we last started listening to a pointer
+  bool get active => _active;
+  bool _chosen = false; // we're the only possible gesture at this point
+  bool get chosen => _chosen;
 
-  readonly attribute Boolean ready; // last event, we were finished
-  readonly attribute Boolean active; // we have not yet been canceled since we last captured a pointer
-  readonly attribute Boolean chosen; // we're the only possible gesture at this point
+  // (!ready && !active) means we're discarding events until the user
+  // gets to a state where a new gesture can begin
 
-  // !ready && !active => we're discarding events until the user gets to a state where a new gesture can begin
-  // active && !chosen => we're collecting events until no other gesture is valid, or until we take command
+  // (active && !chosen) means we're collecting events until no other
+  // gesture is valid, or until we take command
 
-  void sendEvent(Event event, SendEventOptions options);
-  // used internally to queue up or send events
-  //  - assert: this.active == true
-  //  - assert: options.prechoose is false or options.coallesceGroup
-  //    is null
-  //  - set event.gesture = this
-  //  - if this.chosen is true or if options.prechoose is true, then
-  //    send the event straight to the callback
-  //  - otherwise:
-  //     - if the event buffer has an entry with the same
-  //       coallesceGroup identifier, drop it
-  //     - add the event to the event buffer
+  GestureState processEvent(PointerEvent event);
+
+  List<BufferedEvent> _eventBuffer;
+
+  void choose() {
+    // called by GestureManager
+    // if you override this, make sure to call superclass choose() first
+    assert(_active == true);
+    assert(_chosen == false);
+    _chosen = true;
+    // if there are any buffered events, dispatch them on this
+    if ((_eventBuffer != null) && (_eventBuffer.length > 0)) {
+      // we make a copy of the event buffer first so that the array isn't mutated out from under us
+      // while we are doing this
+      var events = _eventBuffer;
+      _eventBuffer = null;
+      for (var item in events) {
+        dispatchEvent(item.event);
+      }
+    }
+  }
+
+  void cancel() {
+    // called by GestureManager
+    // if you override this, make sure to call superclass cancel() last
+    _active = false;
+    _chosen = false;
+    _eventBuffer = null;
+  }
+
+  // for use by subclasses only
+  void sendEvent(GestureEvent event,
+                 { int coallesceGroup, // when queuing events, only the last event with each group is kept 
+                   bool prechoose: false // if true, event should just be sent right away, not queued
+                 }) {
+    assert(_active == true);
+    assert(coallesceGroup == null || prechoose == false);
+    event._gesture = this;
+    if (_chosen || prechoose) {
+      dispatchEvent(event);
+    } else {
+      if (_eventBuffer == null)
+        _eventBuffer = new List<BufferedEvent>();
+      if (coallesceGroup != null)
+        _eventBuffer.removeWhere((candidate) => candidate.coallesceGroup == coallesceGroup);
+      _eventBuffer.add(new BufferedEvent(event, coallesceGroup));
+    }
+  }
+
+  void _handler(event) {
+    bool wasActive = _active;
+    if (_ready) {
+      // reset the state to start a new gesture
+      if (_active)
+        module.application.gestureManager.cancelGesture(this);
+      _active = true;
+      _ready = false;
+    }
+    GestureState returnValue = processEvent(event);
+    if (returnValue.capture) {
+      assert(event is PointerDownEvent);
+      if (event is PointerDownEvent)
+        event.result.add(this);
+    }
+    if (returnValue.cancel) {
+      assert(returnValue.choose == false);
+      if (wasActive)
+        module.application.cancelGesture(this);
+      // if we never became active, then we never called addGesture() below
+      _active = false;
+    } else if (active == true) {
+      if (wasActive == false || event is PointerDownEvent)
+        module.application.addGesture(event, this);
+      if (returnValue.choose == true)
+        module.application.chooseGesture(this);
+    }
+    _ready = returnValue.finished;
+  }
 }
+
+/*
 ```
-
-``Gesture`` objects have an Event buffer, initially empty. Each Event
-in this buffer can be associated with a coallesceGroup, which is
-identified by integer.
-
-When created, ``Gesture`` objects register themselves as pointer-down,
-pointer-move, and pointer-up event handlers on their target, with the
-same event handler. That event handler runs the following steps:
- - let wasActive = this.active
- - if this.ready == true, then:
-    - // reset the state to start a new gesture
-    - if this.active == true, then:
-       - call application.document.cancelGesture(this)
-    - set this.active = true
-    - set this.ready = false
- - let returnValue be the result of calling ``processEvent()`` with
-   the Event object
- - if returnValue.capture == true:
-    - assert: the event is a pointer-down event
-    - if the event is a pointer-down event:
-       - push this onto the event's return value
- - if returnValue.cancel == true:
-    - assert: returnValue.choose == false
-    - if wasActive == true:
-       - call application.document.cancelGesture(this)
-       - // if wasActive == false, then no need to cancel, since we never added ourselves
- - if returnValue.cancel == false and this.active == true:
-    - if wasActive == false or if event is a pointer-down event:
-       - call application.document.addGesture(event, this)
-    - if returnValue.choose == true:
-       - call application.document.chooseGesture(this)
- - set this.ready = returnValue.finished
- - set this.active = returnValue.valid
-
 Subclasses should override ``processEvent()``:
  - as the events are received, they get examined to see if they
    fit the pattern for the gesture; if they do, then return an
@@ -111,76 +152,121 @@ Subclasses should override ``processEvent()``:
  - if you send prechoose events, make sure to send corresponding
    "cancel" events if cancel() is called
 
-```javascript
-dictionary GestureList {
-  Array<Gesture> gestures;
-  Boolean chosen;
+```dart
+*/
+
+class PointerState {
+  PointerState({this.gestures, this.chosen}) {
+    if (gestures == null)
+      gestures = new List<Gesture>();
+  }
+  factory PointerState.clone(PointerState source) {
+    return new PointerState(gestures: source.gestures, chosen: source.chosen);
+  }
+  List<Gesture> gestures;
+  bool chosen = false;
 }
 
 class GestureManager {
-  constructor (EventTarget target);
-  readonly attribute EventTarget target; // the ApplicationDocument, normally
+  GestureManager(this.target) {
+    target.events.where((event) => event is PointerDownEvent).listen(_handler);
+  }
+  final EventTarget target; // usually the ApplicationDocument object
 
-  void addGesture(Event event, Gesture gesture);
-  void cancelGesture(Gesture gesture);
-  void chooseGesture(Gesture gesture);
+  Map<int, PointerState> _pointers = new SplayTreeMap<int, PointerState>();
 
-  GestureList getActiveGestures(PointerID pointer);
+  void addGesture(PointerEvent event, Gesture gesture) {
+    assert(gesture.active);
+    var pointer = event.pointer;
+    if (_pointers.containsKey(pointer)) {
+      assert(!_pointers[pointer].gestures.contains(gesture));
+      if (_pointers[pointer].chosen)
+        cancelGesture(gesture);
+      else
+        _pointers[pointer].gestures.add(gesture);
+    } else {
+      PointerState pointerState = new PointerState();
+      pointerState.gestures.add(gesture);
+      _pointers[pointer] = pointerState;
+    }
+  }
+
+  void cancelGesture(Gesture gesture) {
+    _pointers.forEach((index, pointerState) => pointerState.gestures.remove(gesture));
+    gesture.cancel();
+    // get a static copy of the _pointers keys, so we can remove them safely
+    var activePointers = new List<int>.from(_pointers.keys);
+    // now walk our lists, removing pointers that are obsolete, and choosing
+    // gestures from pointers that have only one outstanding gesture
+    for (var index = 0; index < activePointers.length; index += 1) {
+      var pointerState = _pointers[activePointers[index]];
+      if (pointerState.gestures.length == 0) {
+        _pointers.remove(activePointers[index]);
+      } else {
+        if (pointerState.gestures.length == 1 && pointerState.chosen) {
+          pointerState.chosen = true;
+          pointerState.gestures[0].choose();
+        }
+      }
+    }
+  }
+
+  void chooseGesture(Gesture gesture) {
+    if (!gesture.active)
+      // this could happen e.g. if two gestures simultaneously add
+      // themselves and chose themselves for the same PointerDownEvent
+      return;
+    List<Gesture> losers = new List<Gesture>();
+    _pointers.values
+             .where((pointerState) => pointerState.gestures.contains(gesture))
+             .forEach((pointerState) {
+               losers.addAll(pointerState.gestures.where((candidateLoser) => candidateLoser != gesture));
+               pointerState.gestures.clear();
+               pointerState.gestures.add(gesture);
+               pointerState.chosen = true;
+             });
+    assert(losers.every((loser) => loser.active));
+    losers.forEach((loser) {
+      // we check loser.active because losers could contain duplicates
+      // and we should only cancel each gesture once
+      if (loser.active)
+        loser.cancel();
+      assert(!loser.active);
+    });
+    gesture.choose();
+  }
+
+  PointerState getActiveGestures(int pointer) {
+    if (_pointers.containsKey(pointer) && _pointers[pointer].gestures.length > 0)
+      return new PointerState.clone(_pointers[pointer]);
+    return new PointerState();
+  }
+
+  void _handler(PointerDownEvent event) {
+    var pointer = event.pointer;
+    if (_pointers.containsKey(pointer)) {
+      var pointerState = _pointers[pointer];
+      if ((!pointerState.chosen) && (pointerState.gestures.length == 1)) {
+        pointerState.chosen = true;
+        pointerState.gestures[0].choose();
+      }
+    }
+  }
+
 }
+</script>
 ```
 
-``GestureManager`` objects have a map of lists of Gesture objects,
-keyed on pointer IDs, and with each list associated with a "chosen"
-flag indicating if an entry in the list has already been chosen.
-Initially the map is empty. It is exposed by the
-``getActiveGestures()`` method, which returns the list and flag.
+Gestures defined in the framework
+---------------------------------
 
-When addGesture() is called with an event and a Gesture, it runs the
-following steps:
- - let pointer be the value of the event's pointer field
- - assert: pointer is an integer
- - if we already have an entry for pointer:
-    - assert: this Gesture isn't already on the list for pointer
-    - if the list's "chosen" flag is set, then call
-      ``cancelGesture()`` with this Gesture
-    - otherwise, add this Gesture to the list for pointer
- - otherwise, we don't have an entry for this pointer:
-    - create a list for pointer
-    - add this Gesture to the list for pointer
+```dart
+SKY MODULE
+<!-- not in sky:core -->
+<!-- note: this hasn't been dartified yet -->
 
-A ``GestureManager``, when created, starts listening to
-``pointer-down`` events on its target. The listener acts as follows:
- - assert: event is a ``pointer-down`` event
- - let pointer be the value of the event's pointer field
- - if we have an entry for this pointer, and the "chosen" flag isn't
-   set, and there is just one Gesture in the list, then set the flag
-   on the list and call the Gesture's ``choose()`` method.
-
-When ``cancelGesture()`` is called with a Gesture:
- - for each pointer list:
-    - if the pointer list has this Gesture, remove it
- - call cancel() on the Gesture
- - for each pointer list:
-    - if the pointer list has no entries, forget it
-    - if the pointer list has one Gesture and the "chosen" flag isn't
-      set, set it and call that Gesture's ``choose()`` method.
-
-When ``chooseGesture()`` is called with a Gesture:
- - if this Gesture is not active, then return silently
-   // this could happen e.g. if two gestures simultaneously add themselves
-   // and chose themselves for the same pointer-down
- - let losers be an empty list of Gestures
- - for each pointer list:
-    - if the pointer list has this Gesture, add all the other Gestures
-      in the list to losers, remove them from the list, and set the
-      "chosen" flag on that list
- - remove duplicates from losers
- - call ``cancel()`` on each entry in losers
- - call ``choose()`` on the Gesture
-
-
-```javascript
-class TapGesture : Gesture {
+<script>
+class TapGesture extends Gesture {
 
   // internal state:
   //   Integer numButtons = 0;
@@ -341,4 +427,5 @@ class FlingRightGesture : FlingGesture { }
 class FlingUpGesture : FlingGesture { }
 class FlingDownGesture : FlingGesture { }
 
+</script>
 ```

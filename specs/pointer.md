@@ -344,9 +344,8 @@ Here are the class definitions for pointer events:
 ```dart
 enum PointerKind { touch, mouse, stylus, invertedStylus }
 
-abstract class PointerEvent extends Event {
-  PointerEvent({ bool bubbles,
-                 this.pointer,
+abstract class PointerEvent<T> extends Event<T> {
+  PointerEvent({ this.pointer,
                  this.kind,
                  this.x, this.y,
                  this.dx: 0.0, this.dy: 0.0,
@@ -358,7 +357,7 @@ abstract class PointerEvent extends Event {
                  this.distance, this.minDistance, this.maxDistance,
                  this.radiusMajor, this.radiusMinor, this.minRadius, this.maxRadius,
                  this.orientation, this.tilt
-               }): super(bubbles: bubbles);
+               }): super();
 
   final int pointer;
   final PointerKind kind;
@@ -407,24 +406,30 @@ abstract class PointerEvent extends Event {
 // https://code.google.com/p/dart/issues/detail?id=22274
 // to avoid duplicating that entire constructor up there
 
-class PointerAddedEvent extends Event {
+class PointerAddedEvent extends PointerEvent<Null> {
   PointerAddedEvent = PointerEvent;
+  bool get bubbles => false;
 }
 
-class PointerRemovedEvent extends Event {
+class PointerRemovedEvent extends PointerEvent<Null> {
   PointerRemovedEvent = PointerEvent;
+  bool get bubbles => false;
 }
 
-class PointerDownEvent extends Event {
+class PointerDownEvent extends PointerEvent<List<EventTarget>> {
+  @override void init() { result = new List<EventTarget>(); }
   PointerDownEvent = PointerEvent;
+  bool get bubbles => true;
 }
 
-class PointerUpEvent extends Event {
+class PointerUpEvent extends PointerEvent<Null> {
   PointerUpEvent = PointerEvent;
+  bool get bubbles => false;
 }
 
-class PointerMovedEvent extends Event {
+class PointerMovedEvent extends PointerEvent<Null> {
   PointerMovedEvent = PointerEvent;
+  bool get bubbles => false;
 }
 ```
 
@@ -432,8 +437,8 @@ Wheel events
 ------------
 
 When a wheel input device is turned, a ``WheelEvent`` event that
-bubbles is fired at the application's document, with the following
-fields:
+doesn't bubble is fired at the application's document, with the
+following fields:
 
           wheel: an integer assigned to this wheel by the system. The
                  same wheel on the same system must always be given
@@ -462,7 +467,7 @@ Note: The only wheels that are supported are mouse wheels and physical
 dials. Track balls are not reported as mouse wheels.
 
 ```dart
-abstract class WheelEvent extends Event {
+class WheelEvent extends Event {
   PointerEvent({ bool bubbles,
                  this.wheel,
                  this.delta: 0.0,
@@ -475,5 +480,7 @@ abstract class WheelEvent extends Event {
   final int pointer;
   final double x; // logical pixels
   final double y; // logical pixels
+
+  bool get bubbles => false;
 }
 ```

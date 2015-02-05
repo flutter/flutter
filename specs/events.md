@@ -7,9 +7,10 @@ SKY MODULE
 
 <script>
 abstract class Event<ReturnType> {
-  Event({bool this.bubbles});
+  Event() { init(); }
+  void init() { }
 
-  final bool bubbles;
+  bool get bubbles;
 
   EventTarget _target;
   EventTarget get target => _target;
@@ -19,6 +20,8 @@ abstract class Event<ReturnType> {
 
   bool handled; // precise semantics depend on the event type, but in general, set this when you set result
   ReturnType result;
+
+  bool resultIsCompatible(dynamic candidate) => candidate is ReturnType;
 
   // TODO(ianh): abstract API for doing things at shadow tree boundaries 
   // TODO(ianh): do events get blocked at scope boundaries, e.g. focus events when both sides are in the scope?
@@ -36,7 +39,7 @@ class EventTarget {
       return [this];
     } else {
       var result = this.parentNode.getEventDispatchChain();
-      result.add(this);
+      result.insert(0, this);
       return result;
     }
   }
@@ -47,9 +50,14 @@ class EventTarget {
     // note: this will throw an ExceptionListException<ExceptionListException> if any of the listeners threw
     assert(event != null); // event must be non-null
     event.handled = false;
+    assert(event.resultIsCompatible(defaultResult));
     event.result = defaultResult;
     event._target = this;
-    var chain = this.getEventDispatchChain();
+    var chain;
+    if (event.bubbles)
+      chain = this.getEventDispatchChain();
+    else
+      chain = [this];
     var exceptions = new ExceptionListException<ExceptionListException>();
     for (var link in chain) {
       try {

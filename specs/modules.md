@@ -129,8 +129,9 @@ class Module : AbstractModule {
 }
 
 class Application : AbstractModule {
-  constructor (Document document, String url); // O(1)
+  constructor (Document document, GestureManager gestureManager, String url); // O(1)
   attribute String title; // O(1)
+  readonly attribute GestureManager gestureManager;
 }
 ```
 
