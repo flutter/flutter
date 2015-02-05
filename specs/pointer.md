@@ -9,7 +9,7 @@ The following input devices are supported by sky:
  - mice, including mouse wheels
  - styluses on screens
  - other devices that emulate mice (track pads, track balls)
- - [Keyboard](keyboard.md)
+ - [keyboards and IMEs](keyboard.md)
 
 The following input devices are not supported natively by sky, but can
 be used by connecting directly to the mojo application servicing the
