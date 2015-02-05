@@ -12,4 +12,4 @@ It has the following differences from Dart:
   ``libraryDefinition`` construct in the Sky Script Language).
 
 The way that Sky integrates the module system with its script language
-  is described in (modules.md)[modules.md].
+is described in [modules.md](modules.md).
