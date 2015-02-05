@@ -182,158 +182,158 @@ programs that want more precision (e.g. drawing apps)
 These events have the following fields (see below for the class
 definitions):
 
-        pointer: an integer assigned to this touch or pointer when it
-                 enters the system, never reused, increasing
-                 monotonically every time a new value is assigned,
-                 starting from 1 (if the system gets a new tap every
-                 microsecond, this will cause a problem after 285
-                 years)
+         pointer: an integer assigned to this touch or pointer when it
+                  enters the system, never reused, increasing
+                  monotonically every time a new value is assigned,
+                  starting from 1 (if the system gets a new tap every
+                  microsecond, this will cause a problem after 285
+                  years)
 
-           kind: one of 'touch', 'mouse', 'stylus', 'inverted-stylus'
+            kind: one of 'touch', 'mouse', 'stylus', 'inverted-stylus'
 
-              x: x-position relative to the top-left corner of the
-                 surface of the node on which the event was fired
+               x: x-position relative to the top-left corner of the
+                  surface of the node on which the event was fired
 
-              y: y-position relative to the top-left corner of the
-                 surface of the node on which the event was fired
+               y: y-position relative to the top-left corner of the
+                  surface of the node on which the event was fired
 
-             dx: difference in x-position since last
-                 ``PointerMovedEvent`` event
+              dx: difference in x-position since last
+                  ``PointerMovedEvent`` event
 
-             dy: difference in y-position since last
-                 ``PointerMovedEvent`` event
+              dy: difference in y-position since last
+                  ``PointerMovedEvent`` event
 
-        buttons: a bitfield of the buttons pressed, from the following
-                 list:
+         buttons: a bitfield of the buttons pressed, from the following
+                  list:
 
-                   1: primary mouse button (not available on stylus)
+                    1: primary mouse button (not available on stylus)
 
-                   2: secondary mouse button, primary stylus button
+                    2: secondary mouse button, primary stylus button
 
-                   3: middle mouse button, secondary stylus button
+                    3: middle mouse button, secondary stylus button
 
-                   4: back button
+                    4: back button
 
-                   5: forward button
+                    5: forward button
 
-                 additional buttons can be represented by numbers
-                 greater than six:
+                  additional buttons can be represented by numbers
+                  greater than six:
 
-                   n: (n-2)th mouse button, ignoring any buttons that
-                      are explicitly back or forward buttons
+                    n: (n-2)th mouse button, ignoring any buttons that
+                       are explicitly back or forward buttons
 
-                      (n-4)th stylus button, again ignoring any
-                      explictly back or forward buttons
+                       (n-4)th stylus button, again ignoring any
+                       explictly back or forward buttons
 
-                 note that stylus buttons can be pressed even when the
-                 pointer is not "down"
+                  note that stylus buttons can be pressed even when the
+                  pointer is not "down"
 
-                 e.g. if the left mouse button and the right mouse
-                 button are pressed at the same time, the value will
-                 be 3 (bits 1 and 2); if the right mouse button and
-                 the back button are pressed at the same time, the
-                 value will be 10 (bits 2 and 4)
+                  e.g. if the left mouse button and the right mouse
+                  button are pressed at the same time, the value will
+                  be 3 (bits 1 and 2); if the right mouse button and
+                  the back button are pressed at the same time, the
+                  value will be 10 (bits 2 and 4)
 
-           down: true if the pointer is down (in ``PointerDownEvent``
-                 event or subsequent ``PointerMoveEvent`` events);
-                 false otherwise (in ``PointerAdded``, ``PointerUp``,
-                 and ``PointerRemovedEvent`` events, and in
-                 ``PointerMoveEvent`` events that aren't between
-                 ``PointerDownEvent`` and ``PointerUpEvent`` events)
+            down: true if the pointer is down (in ``PointerDownEvent``
+                  event or subsequent ``PointerMoveEvent`` events);
+                  false otherwise (in ``PointerAdded``, ``PointerUp``,
+                  and ``PointerRemovedEvent`` events, and in
+                  ``PointerMoveEvent`` events that aren't between
+                  ``PointerDownEvent`` and ``PointerUpEvent`` events)
 
-        primary: true if this is a primary pointer/touch (see above)
-                 can only be set for ``PointerMovedEvent`` and
-                 ``PointerUpEvent``
+         primary: true if this is a primary pointer/touch (see above)
+                  can only be set for ``PointerMovedEvent`` and
+                  ``PointerUpEvent``
 
-       obscured: true if the system was rendering another view on top
-                 of the sky application at the time of the event (this
-                 is intended to enable click-jacking protections)
+        obscured: true if the system was rendering another view on top
+                  of the sky application at the time of the event (this
+                  is intended to enable click-jacking protections)
 
 
 When down is true:
 
-       pressure: the pressure of the touch as a number ranging from
-                 0.0, indicating a touch with no discernible pressure,
-                 to 1.0, indicating a touch with "normal" pressure,
-                 and possibly beyond, indicating a stronger touch; for
-                 devices that do not detect pressure (e.g. mice),
-                 returns 1.0
+        pressure: the pressure of the touch as a number ranging from
+                  0.0, indicating a touch with no discernible pressure,
+                  to 1.0, indicating a touch with "normal" pressure,
+                  and possibly beyond, indicating a stronger touch; for
+                  devices that do not detect pressure (e.g. mice),
+                  returns 1.0
 
-   pressure-min: the minimum value that pressure can return for this
-                 pointer
+    pressure-min: the minimum value that pressure can return for this
+                  pointer
 
-   pressure-max: the maximum value that pressure can return for this
-                 pointer
+    pressure-max: the maximum value that pressure can return for this
+                  pointer
 
 
 When kind is 'touch', 'stylus', or 'stylus-inverted':
 
-       distance: distance of detected object from surface (e.g.
-                 distance of stylus or finger from screen), if
-                 supported and down is not true, otherwise 0.0.
+        distance: distance of detected object from surface (e.g.
+                  distance of stylus or finger from screen), if
+                  supported and down is not true, otherwise 0.0.
 
-   distance-min: the minimum value that distance can return for this
-                 pointer (always 0.0)
+    distance-min: the minimum value that distance can return for this
+                  pointer (always 0.0)
 
-   distance-max: the maximum value that distance can return for this
-                 pointer (0.0 if not supported)
+    distance-max: the maximum value that distance can return for this
+                  pointer (0.0 if not supported)
 
 
 When kind is 'touch', 'stylus', or 'stylus-inverted' and down is true:
 
-   radius-major: the radius of the contact ellipse along the major
-                 axis, in pixels
+    radius-major: the radius of the contact ellipse along the major
+                  axis, in pixels
 
-   radius-minor: the radius of the contact ellipse along the major
-                 axis, in pixels
+    radius-minor: the radius of the contact ellipse along the major
+                  axis, in pixels
 
-     radius-min: the minimum value that could be reported for
-                 radius-major or radius-minor for this pointer
+      radius-min: the minimum value that could be reported for
+                  radius-major or radius-minor for this pointer
 
-     radius-max: the maximum value that could be reported for
-                 radius-major or radius-minor for this pointer
+      radius-max: the maximum value that could be reported for
+                  radius-major or radius-minor for this pointer
 
 
 When kind is 'touch' and down is true:
 
-    orientation: the angle of the contact ellipse, in radians in the
-                 range
+     orientation: the angle of the contact ellipse, in radians in the
+                  range
 
-                    -pi/2 < orientation <= pi/2
+                     -pi/2 < orientation <= pi/2
 
-                 ...giving the angle of the major axis of the ellipse
-                 with the y-axis (negative angles indicating an
-                 orientation along the top-left / bottom-right
-                 diagonal, positive angles indicating an orientation
-                 along the top-right / bottom-left diagonal, and zero
-                 indicating an orientation parallel with the y-axis)
+                  ...giving the angle of the major axis of the ellipse
+                  with the y-axis (negative angles indicating an
+                  orientation along the top-left / bottom-right
+                  diagonal, positive angles indicating an orientation
+                  along the top-right / bottom-left diagonal, and zero
+                  indicating an orientation parallel with the y-axis)
 
 
 When kind is 'stylus' or 'stylus-inverted':
 
-    orientation: the angle of the stylus, in radians in the range
+     orientation: the angle of the stylus, in radians in the range
 
-                    -pi < orientation <= pi
+                     -pi < orientation <= pi
 
-                 ...giving the angle of the axis of the stylus
-                 projected onto the screen, relative to the positive
-                 y-axis of the screen (thus 0 indicates the stylus, if
-                 projected onto the screen, would go from the contact
-                 point vertically up in the positive y-axis direction,
-                 pi would indicate that the stylus would go down in
-                 the negative y-axis direction; pi/4 would indicate
-                 that the stylus goes up and to the right, -pi/2 would
-                 indicate that the stylus goes to the left, etc)
+                  ...giving the angle of the axis of the stylus
+                  projected onto the screen, relative to the positive
+                  y-axis of the screen (thus 0 indicates the stylus, if
+                  projected onto the screen, would go from the contact
+                  point vertically up in the positive y-axis direction,
+                  pi would indicate that the stylus would go down in
+                  the negative y-axis direction; pi/4 would indicate
+                  that the stylus goes up and to the right, -pi/2 would
+                  indicate that the stylus goes to the left, etc)
 
-           tilt: the angle of the stylus, in radians in the range
+            tilt: the angle of the stylus, in radians in the range
 
-                    0 <= tilt <= pi/2
+                     0 <= tilt <= pi/2
 
-                 ...giving the angle of the axis of the stylus,
-                 relative to the axis perpendicular to the screen
-                 (thus 0 indicates the stylus is orthogonal to the
-                 plane of the screen, while pi/2 indicates that the
-                 stylus is flat on the screen)
+                  ...giving the angle of the axis of the stylus,
+                  relative to the axis perpendicular to the screen
+                  (thus 0 indicates the stylus is orthogonal to the
+                  plane of the screen, while pi/2 indicates that the
+                  stylus is flat on the screen)
 
 
 TODO(ianh): add an API that exposes the currently existing pointers,
@@ -440,28 +440,28 @@ When a wheel input device is turned, a ``WheelEvent`` event that
 doesn't bubble is fired at the application's document, with the
 following fields:
 
-          wheel: an integer assigned to this wheel by the system. The
-                 same wheel on the same system must always be given
-                 the same ID. The primary wheel (e.g. the vertical
-                 wheel on a mouse) must be given ID 1.
+           wheel: an integer assigned to this wheel by the system. The
+                  same wheel on the same system must always be given
+                  the same ID. The primary wheel (e.g. the vertical
+                  wheel on a mouse) must be given ID 1.
 
-          delta: an floating point number representing the fraction of
-                 the wheel that was turned, with positive numbers
-                 representing a downward movement on vertical wheels,
-                 rightward movement on horizontal wheels, and a
-                 clockwise movement on wheels with a user-facing side.
+           delta: an floating point number representing the fraction of
+                  the wheel that was turned, with positive numbers
+                  representing a downward movement on vertical wheels,
+                  rightward movement on horizontal wheels, and a
+                  clockwise movement on wheels with a user-facing side.
 
 Additionally, if the wheel is associated with a pointer (e.g. a mouse
 wheel), the following fields must be present also:
 
-        pointer: the integer assigned to the pointer in its
-                 ``PointerAddEvent`` event (see above).
+         pointer: the integer assigned to the pointer in its
+                  ``PointerAddEvent`` event (see above).
 
-              x: x-position relative to the top-left corner of the
-                 display, in global layout coordinates
+               x: x-position relative to the top-left corner of the
+                  display, in global layout coordinates
 
-              y: x-position relative to the top-left corner of the
-                 display, in global layout coordinates
+               y: x-position relative to the top-left corner of the
+                  display, in global layout coordinates
 
 Note: The only wheels that are supported are mouse wheels and physical
 dials. Track balls are not reported as mouse wheels.
