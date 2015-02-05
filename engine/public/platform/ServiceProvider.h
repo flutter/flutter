@@ -7,7 +7,6 @@
 
 namespace mojo {
 class NavigatorHost;
-class Shell;
 }
 
 namespace blink {
@@ -15,7 +14,6 @@ namespace blink {
 class ServiceProvider {
  public:
   virtual mojo::NavigatorHost* NavigatorHost() = 0;
-  virtual mojo::Shell* Shell() = 0;
 
  protected:
   virtual ~ServiceProvider();

@@ -279,16 +279,12 @@ void DocumentView::didCreateScriptContext(blink::WebLocalFrame* frame,
                          gin::ConvertToV8(isolate, internals));
 }
 
-blink::ServiceProvider& DocumentView::services() {
-  return *this;
+blink::ServiceProvider* DocumentView::services() {
+  return this;
 }
 
 mojo::NavigatorHost* DocumentView::NavigatorHost() {
   return navigator_host_.get();
-}
-
-mojo::Shell* DocumentView::Shell() {
-  return shell_;
 }
 
 void DocumentView::OnViewBoundsChanged(mojo::View* view,

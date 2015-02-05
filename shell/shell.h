@@ -10,6 +10,7 @@
 #include "base/memory/scoped_ptr.h"
 #include "sky/shell/gpu/rasterizer.h"
 #include "sky/shell/sky_view.h"
+#include "sky/shell/ui/engine.h"
 
 namespace base {
 class Thread;
@@ -33,9 +34,11 @@ class Shell : public SkyView::Delegate {
 
   scoped_refptr<base::SingleThreadTaskRunner> java_task_runner_;
   scoped_ptr<base::Thread> gpu_thread_;
+  scoped_ptr<base::Thread> ui_thread_;
 
   scoped_ptr<SkyView> view_;
   scoped_ptr<Rasterizer> rasterizer_;
+  scoped_ptr<Engine> engine_;
 
   DISALLOW_COPY_AND_ASSIGN(Shell);
 };

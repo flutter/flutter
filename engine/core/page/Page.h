@@ -84,7 +84,7 @@ public:
         SpellCheckerClient* spellCheckerClient;
     };
 
-    Page(PageClients&, ServiceProvider&);
+    Page(PageClients&, ServiceProvider*);
     virtual ~Page();
 
     FrameHost& frameHost() const { return *m_frameHost; }

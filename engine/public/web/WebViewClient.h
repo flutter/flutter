@@ -62,7 +62,7 @@ struct WebSize;
 
 class WebViewClient {
 public:
-    virtual ServiceProvider& services() = 0;
+    virtual ServiceProvider* services() { return nullptr; }
 
     // Initialize compositing for this widget.
     virtual void initializeLayerTreeView() { BLINK_ASSERT_NOT_REACHED(); };

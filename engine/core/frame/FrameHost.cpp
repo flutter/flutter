@@ -35,12 +35,12 @@
 
 namespace blink {
 
-PassOwnPtr<FrameHost> FrameHost::create(Page& page, ServiceProvider& services)
+PassOwnPtr<FrameHost> FrameHost::create(Page& page, ServiceProvider* services)
 {
     return adoptPtr(new FrameHost(page, services));
 }
 
-FrameHost::FrameHost(Page& page, ServiceProvider& services)
+FrameHost::FrameHost(Page& page, ServiceProvider* services)
     : m_page(&page)
     , m_services(services)
 {

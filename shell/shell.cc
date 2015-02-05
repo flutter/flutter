@@ -24,6 +24,13 @@ void Shell::Init() {
   gpu_thread_->Start();
   rasterizer_.reset(new Rasterizer());
 
+  ui_thread_.reset(new base::Thread("ui_thread"));
+  ui_thread_->Start();
+  engine_.reset(new Engine());
+
+  ui_thread_->message_loop()->PostTask(
+      FROM_HERE, base::Bind(&Engine::Init, engine_->GetWeakPtr()));
+
   view_.reset(new SkyView(this));
   view_->Init();
 }

@@ -55,14 +55,14 @@ class Settings;
 class FrameHost final {
     WTF_MAKE_NONCOPYABLE(FrameHost); WTF_MAKE_FAST_ALLOCATED;
 public:
-    static PassOwnPtr<FrameHost> create(Page&, ServiceProvider&);
+    static PassOwnPtr<FrameHost> create(Page&, ServiceProvider*);
     ~FrameHost();
 
     // Careful: This function will eventually be removed.
     Page& page() const { return *m_page; }
     Settings& settings() const;
 
-    ServiceProvider& services() const { return m_services; }
+    ServiceProvider* services() const { return m_services; }
 
     // Corresponds to pixel density of the device where this Page is
     // being displayed. In multi-monitor setups this can vary between pages.
@@ -70,10 +70,10 @@ public:
     float deviceScaleFactor() const;
 
 private:
-    FrameHost(Page&, ServiceProvider&);
+    FrameHost(Page&, ServiceProvider*);
 
     Page* m_page;
-    ServiceProvider& m_services;
+    ServiceProvider* m_services;
 };
 
 }

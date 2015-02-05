@@ -98,11 +98,10 @@ class DocumentView : public blink::ServiceProvider,
       v8::Handle<v8::Context>) override;
 
   // WebViewClient methods:
-  blink::ServiceProvider& services() override;
+  blink::ServiceProvider* services() override;
 
   // Services methods:
   mojo::NavigatorHost* NavigatorHost() override;
-  mojo::Shell* Shell() override;
 
   // ViewManagerDelegate methods:
   void OnEmbed(mojo::View* root,
