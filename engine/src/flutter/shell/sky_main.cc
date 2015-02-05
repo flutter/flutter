@@ -10,6 +10,7 @@
 #include "base/at_exit.h"
 #include "base/bind.h"
 #include "base/command_line.h"
+#include "base/i18n/icu_util.h"
 #include "base/lazy_instance.h"
 #include "base/logging.h"
 #include "base/macros.h"
@@ -63,6 +64,7 @@ static void Init(JNIEnv* env,
   g_java_message_loop.Get().reset(new base::MessageLoopForUI);
   base::MessageLoopForUI::current()->Start();
 
+  base::i18n::InitializeICU();
   gfx::GLSurface::InitializeOneOff();
 
   g_shell.Get().reset(new Shell(g_java_message_loop.Get()->task_runner()));

@@ -29,6 +29,10 @@ shared_library("sky_shell") {
     "gpu/ganesh_surface.h",
     "gpu/rasterizer.cc",
     "gpu/rasterizer.h",
+    "ui/engine.cc",
+    "ui/engine.h",
+    "ui/platform_impl.cc",
+    "ui/platform_impl.h",
     "library_loader.cc",
     "shell.cc",
     "shell.h",
@@ -38,12 +42,13 @@ shared_library("sky_shell") {
     "sky_view.h",
   ]
 
-  configs += [ "//third_party/khronos:khronos_headers" ]
-
   deps = [
     "//base",
+    "//base:i18n",
     "//build/config/sanitizers:deps",
+    "//mojo/edk/system",
     "//skia",
+    "//sky/engine",
     "//ui/gfx/geometry",
     "//ui/gl",
     ":jni_headers",
