@@ -22,6 +22,23 @@ Transforms
   </div>
 </div>
 
+<div style="position: absolute; top: 250px;">
+  Opacity
+  <div style="opacity: 0.8; background-color: pink;">
+    One
+    <div style="opacity: 0.7; position: absolute; left: 10px; background-color: salmon;">
+      Two
+      <div style="opacity: 0.6; position: absolute; left: 20px; background-color: papayawhip;">
+        Three
+        <div style="opacity: 0; transform: translate3d(0, 10px, 0); background-color: papayawhip;">
+          Clear
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
 <div style="position: absolute; right: 50px;">
   <div style="background-color: red;">
     1
