@@ -4,7 +4,7 @@
 
 #include "sky/compositor/layer.h"
 
-#include "base/debug/trace_event.h"
+#include "base/trace_event/trace_event.h"
 #include "sky/compositor/layer_host.h"
 #include "sky/compositor/picture_serializer.h"
 #include "sky/compositor/rasterizer.h"

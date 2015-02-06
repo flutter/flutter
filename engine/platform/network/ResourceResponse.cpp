@@ -27,6 +27,7 @@
 #include "sky/engine/config.h"
 #include "sky/engine/platform/network/ResourceResponse.h"
 
+#include <cmath>
 #include "sky/engine/wtf/CurrentTime.h"
 #include "sky/engine/wtf/StdLibExtras.h"
 

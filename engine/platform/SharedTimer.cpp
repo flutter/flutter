@@ -5,6 +5,7 @@
 #include "sky/engine/config.h"
 #include "sky/engine/platform/SharedTimer.h"
 
+#include <cmath>
 #include "base/time/time.h"
 #include "base/timer/timer.h"
 #include "sky/engine/wtf/CurrentTime.h"

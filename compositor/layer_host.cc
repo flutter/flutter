@@ -4,8 +4,8 @@
 
 #include "sky/compositor/layer_host.h"
 
-#include "base/debug/trace_event.h"
 #include "base/message_loop/message_loop.h"
+#include "base/trace_event/trace_event.h"
 #include "mojo/converters/geometry/geometry_type_converters.h"
 #include "mojo/gpu/gl_context.h"
 #include "mojo/services/surfaces/public/cpp/surfaces_utils.h"
