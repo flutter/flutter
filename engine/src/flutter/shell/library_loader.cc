@@ -17,7 +17,7 @@ base::android::RegistrationMethod kSkyRegisteredMethods[] = {
     {"SkyView", sky::shell::SkyView::Register},
 };
 
-bool RegisterMojoJni(JNIEnv* env) {
+bool RegisterSkyJni(JNIEnv* env) {
   return RegisterNativeMethods(env, kSkyRegisteredMethods,
                                arraysize(kSkyRegisteredMethods));
 }
@@ -35,7 +35,7 @@ JNI_EXPORT jint JNI_OnLoad(JavaVM* vm, void* reserved) {
   if (!base::android::RegisterJni(env))
     return -1;
 
-  if (!RegisterMojoJni(env))
+  if (!RegisterSkyJni(env))
     return -1;
 
   return JNI_VERSION_1_4;

@@ -8,7 +8,10 @@
 #include "base/android/jni_weak_ref.h"
 #include "base/android/scoped_java_ref.h"
 #include "base/macros.h"
-#include "ui/gfx/native_widget_types.h"
+#include "base/memory/weak_ptr.h"
+#include "base/single_thread_task_runner.h"
+#include "sky/shell/gpu_delegate.h"
+#include "sky/shell/ui_delegate.h"
 
 struct ANativeWindow;
 
@@ -17,22 +20,18 @@ namespace shell {
 
 class SkyView {
  public:
-  static bool Register(JNIEnv* env);
+  struct Config {
+    base::WeakPtr<GPUDelegate> gpu_delegate;
+    scoped_refptr<base::SingleThreadTaskRunner> gpu_task_runner;
 
-  class Delegate {
-   public:
-    virtual void OnAcceleratedWidgetAvailable(
-        gfx::AcceleratedWidget widget) = 0;
-    virtual void OnDestroyed() = 0;
-
-   protected:
-    virtual ~Delegate();
+    base::WeakPtr<UIDelegate> ui_delegate;
+    scoped_refptr<base::SingleThreadTaskRunner> ui_task_runner;
   };
 
-  explicit SkyView(Delegate* delegate);
-  ~SkyView();
+  static bool Register(JNIEnv* env);
 
-  void Init();
+  explicit SkyView(const Config& config);
+  ~SkyView();
 
   // Called from Java
   void Destroy(JNIEnv* env, jobject obj);
@@ -47,7 +46,7 @@ class SkyView {
  private:
   void ReleaseWindow();
 
-  Delegate* delegate_;
+  Config config_;
   ANativeWindow* window_;
 
   DISALLOW_COPY_AND_ASSIGN(SkyView);

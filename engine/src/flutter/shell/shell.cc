@@ -7,7 +7,9 @@
 #include "base/bind.h"
 #include "base/single_thread_task_runner.h"
 #include "base/threading/thread.h"
+#include "sky/shell/gpu/rasterizer.h"
 #include "sky/shell/sky_view.h"
+#include "sky/shell/ui/engine.h"
 
 namespace sky {
 namespace shell {
@@ -31,17 +33,13 @@ void Shell::Init() {
   ui_thread_->message_loop()->PostTask(
       FROM_HERE, base::Bind(&Engine::Init, engine_->GetWeakPtr()));
 
-  view_.reset(new SkyView(this));
-  view_->Init();
-}
+  SkyView::Config config;
+  config.gpu_task_runner = gpu_thread_->message_loop()->task_runner();
+  config.gpu_delegate = rasterizer_->GetWeakPtr();
+  config.ui_task_runner = ui_thread_->message_loop()->task_runner();
+  config.ui_delegate = engine_->GetWeakPtr();
 
-void Shell::OnAcceleratedWidgetAvailable(gfx::AcceleratedWidget widget) {
-  gpu_thread_->message_loop()->PostTask(
-      FROM_HERE,
-      base::Bind(&Rasterizer::Init, rasterizer_->GetWeakPtr(), widget));
-}
-
-void Shell::OnDestroyed() {
+  view_.reset(new SkyView(config));
 }
 
 }  // namespace shell

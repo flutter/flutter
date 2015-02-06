@@ -8,6 +8,8 @@
 #include <android/native_window_jni.h>
 
 #include "base/android/jni_android.h"
+#include "base/bind.h"
+#include "base/location.h"
 #include "jni/SkyView_jni.h"
 
 namespace sky {
@@ -18,10 +20,10 @@ bool SkyView::Register(JNIEnv* env) {
   return RegisterNativesImpl(env);
 }
 
-SkyView::Delegate::~Delegate() {
-}
-
-SkyView::SkyView(Delegate* delegate) : delegate_(delegate), window_(NULL) {
+SkyView::SkyView(const Config& config) : config_(config), window_(nullptr) {
+  JNIEnv* env = base::android::AttachCurrentThread();
+  Java_SkyView_createForActivity(env, base::android::GetApplicationContext(),
+                                 reinterpret_cast<jlong>(this));
 }
 
 SkyView::~SkyView() {
@@ -29,14 +31,7 @@ SkyView::~SkyView() {
     ReleaseWindow();
 }
 
-void SkyView::Init() {
-  JNIEnv* env = base::android::AttachCurrentThread();
-  Java_SkyView_createForActivity(env, base::android::GetApplicationContext(),
-                                 reinterpret_cast<jlong>(this));
-}
-
 void SkyView::Destroy(JNIEnv* env, jobject obj) {
-  delegate_->OnDestroyed();
 }
 
 void SkyView::SurfaceCreated(JNIEnv* env, jobject obj, jobject jsurface) {
@@ -48,11 +43,16 @@ void SkyView::SurfaceCreated(JNIEnv* env, jobject obj, jobject jsurface) {
     base::android::ScopedJavaLocalFrame scoped_local_reference_frame(env);
     window_ = ANativeWindow_fromSurface(env, jsurface);
   }
-  delegate_->OnAcceleratedWidgetAvailable(window_);
+  config_.gpu_task_runner->PostTask(
+      FROM_HERE, base::Bind(&GPUDelegate::OnAcceleratedWidgetAvailable,
+                            config_.gpu_delegate, window_));
 }
 
 void SkyView::SurfaceDestroyed(JNIEnv* env, jobject obj) {
   DCHECK(window_);
+  config_.gpu_task_runner->PostTask(
+      FROM_HERE,
+      base::Bind(&GPUDelegate::OnOutputSurfaceDestroyed, config_.gpu_delegate));
   ReleaseWindow();
 }
 
@@ -61,11 +61,15 @@ void SkyView::SurfaceSetSize(JNIEnv* env,
                              jint width,
                              jint height,
                              jfloat density) {
+  config_.ui_task_runner->PostTask(
+      FROM_HERE,
+      base::Bind(&UIDelegate::OnViewportMetricsChanged, config_.ui_delegate,
+                 gfx::Size(width, height), density));
 }
 
 void SkyView::ReleaseWindow() {
   ANativeWindow_release(window_);
-  window_ = NULL;
+  window_ = nullptr;
 }
 
 }  // namespace shell

@@ -8,9 +8,6 @@
 #include "base/macros.h"
 #include "base/memory/ref_counted.h"
 #include "base/memory/scoped_ptr.h"
-#include "sky/shell/gpu/rasterizer.h"
-#include "sky/shell/sky_view.h"
-#include "sky/shell/ui/engine.h"
 
 namespace base {
 class Thread;
@@ -19,9 +16,11 @@ class SingleThreadTaskRunner;
 
 namespace sky {
 namespace shell {
+class Engine;
+class Rasterizer;
 class SkyView;
 
-class Shell : public SkyView::Delegate {
+class Shell {
  public:
   explicit Shell(scoped_refptr<base::SingleThreadTaskRunner> java_task_runner);
   ~Shell();
@@ -29,9 +28,6 @@ class Shell : public SkyView::Delegate {
   void Init();
 
  private:
-  void OnAcceleratedWidgetAvailable(gfx::AcceleratedWidget widget) override;
-  void OnDestroyed() override;
-
   scoped_refptr<base::SingleThreadTaskRunner> java_task_runner_;
   scoped_ptr<base::Thread> gpu_thread_;
   scoped_ptr<base::Thread> ui_thread_;

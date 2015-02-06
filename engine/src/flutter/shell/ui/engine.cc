@@ -32,5 +32,13 @@ void Engine::Init() {
   web_view_->setMainFrame(blink::WebLocalFrame::create(this));
 }
 
+void Engine::OnViewportMetricsChanged(const gfx::Size& size,
+                                      float device_pixel_ratio) {
+  blink::WebSize web_size(size.width() / device_pixel_ratio,
+                          size.height() / device_pixel_ratio);
+  web_view_->setDeviceScaleFactor(device_pixel_ratio);
+  web_view_->resize(web_size);
+}
+
 }  // namespace shell
 }  // namespace sky
