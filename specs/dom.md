@@ -2,27 +2,21 @@ Sky DOM APIs
 ============
 
 ```dart
-abstract class ChildNode { }
+// ELEMENT TREE API
 
-abstract class Node extends EventTarget {
-  external TreeScope get ownerScope; // O(1) // never null
+abstract class ChildNode {
+  @nonnull external TreeScope get ownerScope; // O(1)
 
   external ParentNode get parentNode; // O(1)
   external Element get parentElement; // O(1) // if parentNode isn't an element, returns null
   external ChildNode get previousSibling; // O(1)
   external ChildNode get nextSibling; // O(1)
 
-  @override
-  external List</*@nonnull*/ EventTarget> getEventDispatchChain(); // O(N) in number of ancestors across shadow trees
-  // implements EventTarget.getEventDispatchChain()
-  // returns the event dispatch chain (including handling shadow trees)
-
   // the following all throw if parentNode is null
-  external void insertBefore(List</*@nonnull*/ ChildNode> nodes); // O(N) in number of arguments plus all their descendants
-  external void insertAfter(List</*@nonnull*/ ChildNode> nodes); // O(N) in number of arguments plus all their descendants
-  external void replaceWith(List</*@nonnull*/ ChildNode> nodes); // O(N) in number of descendants plus arguments plus all their descendants
+  external void insertBefore(@nonnull List</*@nonnull*/ ChildNode> nodes); // O(N) in number of arguments plus all their descendants
+  external void insertAfter(@nonnull List</*@nonnull*/ ChildNode> nodes); // O(N) in number of arguments plus all their descendants
+  external void replaceWith(@nonnull List</*@nonnull*/ ChildNode> nodes); // O(N) in number of descendants plus arguments plus all their descendants
   external void remove(); // O(N) in number of descendants
-  external Node cloneNode({bool deep: false}); // O(1) if deep=false, O(N) in the number of descendants if deep=true
 
   // called when parentNode changes
   external void parentChangeCallback(ParentNode oldParent, ParentNode newParent, ChildNode previousSibling, ChildNode nextSibling); // O(N) in descendants
@@ -32,6 +26,15 @@ abstract class Node extends EventTarget {
 
   external List<ContentElement> getDestinationInsertionPoints(); // O(N) in number of insertion points the node is in
   // returns the <content> elements to which this element was distributed
+}
+
+abstract class Node extends EventTarget {
+  @override
+  external List</*@nonnull*/ EventTarget> getEventDispatchChain(); // O(N) in number of ancestors across shadow trees
+  // implements EventTarget.getEventDispatchChain()
+  // returns the event dispatch chain (including handling shadow trees)
+
+  external Node cloneNode({bool deep: false}); // O(1) if deep=false, O(N) in the number of descendants if deep=true
 
   external ElementStyleDeclarationList get style; // O(1)
   // for nodes that aren't reachable from the Application Document, returns null
@@ -44,7 +47,7 @@ abstract class Node extends EventTarget {
   // this will be null until the first time it is rendered
   // it becomes null again when it is taken out of the rendering (see style.md)
 
-  LayoutManagerConstructor getLayoutManager(); // O(1)
+  Type getLayoutManager() => null; // O(1)
 
   void resetLayoutManager() { // O(1)
     if (renderNode != null) {
@@ -59,13 +62,13 @@ abstract class ParentNode extends Node {
   external ChildNode get lastChild; // O(1)
 
   // Returns a new List every time.
-  external List<ChildNode> getChildNodes(); // O(N) in number of child nodes
+  external List</*nonnull*/ ChildNode> getChildNodes(); // O(N) in number of child nodes
   external List<Element> getChildElements(); // O(N) in number of child nodes
   // TODO(ianh): might not be necessary if we have the parser drop unnecessary whitespace text nodes
 
-  external void append(List<ChildNode> nodes); // O(N) in number of arguments plus all their descendants
-  external void prepend(List<ChildNode> nodes); // O(N) in number of arguments plus all their descendants
-  external void replaceChildrenWith(List<ChildNode> nodes); // O(N) in number of descendants plus arguments plus all their descendants
+  external void append(@nonnull List</*nonnull*/ ChildNode> nodes); // O(N) in number of arguments plus all their descendants
+  external void prepend(@nonnull List</*nonnull*/ ChildNode> nodes); // O(N) in number of arguments plus all their descendants
+  external void replaceChildrenWith(@nonnull List</*nonnull*/ ChildNode> nodes); // O(N) in number of descendants plus arguments plus all their descendants
 }
 
 class Attr {
@@ -74,16 +77,32 @@ class Attr {
   final String value; // O(1)
 }
 
-abstract class Element extends ParentNode {
-  final String tagName; // O(1)
+// @tagname annotation for registering elements
+// only useful when placed on classes that inherit from Element
+class tagname {
+  const tagname(this.value);
+  @nonnull final String value;
+}
 
-  external bool hasAttribute(@nonnull String name); // O(N) in number of attributes
-  external String getAttribute(@nonnull String name); // O(N) in number of attributes
+abstract class FindRoot { }
+
+abstract class Element extends ParentNode with ChildNode implements FindRoot {
+  Element({Map</*@nonnull*/ String, /*@nonnull*/ String> attributes: null,
+           List</*nonnull*/ ChildNode> nodes: null}); // O(M+N), M = number of attributes, N = number of nodes plus all their descendants
+
+  @nonnull String get tagName { // O(N) in number of annotations on the class
+    // throws a StateError if the class doesn't have an @tagname annotation
+    var tagnameClass = reflectClass(tagname);
+    return (reflectClass(this.runtimeType).metadata.singleWhere((mirror) => mirror.type == tagnameClass).reflectee as tagname).value;
+  }
+
+  @nonnull external bool hasAttribute(@nonnull String name); // O(N) in number of attributes
+  @nonnull external String getAttribute(@nonnull String name); // O(N) in number of attributes
   external void setAttribute(@nonnull String name, [@nonnull String value = '']); // O(N) in number of attributes
   external void removeAttribute(@nonnull String name); // O(N) in number of attributes
 
   // Returns a new Array and new Attr instances every time.
-  List<Attr> getAttributes(); // O(N) in number of attributes
+  @nonnull external List<Attr> getAttributes(); // O(N) in number of attributes
 
   external ShadowRoot get shadowRoot; // O(1)
   // returns the shadow root
@@ -96,29 +115,27 @@ abstract class Element extends ParentNode {
   // TODO(ianh): does a node ever need to know when it's been redistributed?
 
   @override
-  LayoutManagerConstructor getLayoutManager() { // O(1)
+  Type getLayoutManager() { // O(1)
     if (renderNode)
       return renderNode.getProperty(phDisplay);
     return super.getLayoutManager();
   }
 }
 
-class Text extends Node {
-  external Text([String value = '']); // O(1)
-  // throws if value is null
+class Text extends Node with ChildNode {
+  external Text([@nonnull String value = '']); // O(1)
 
-  external String get value; // O(1)
+  @nonnull external String get value; // O(1)
+  external void set (@nonnull String value); // O(1)
 
-  void valueChangeCallback(String oldValue, String newValue) { }
+  void valueChangeCallback(@nonnull String oldValue, @nonnull String newValue) { }
 
   @override
-  LayoutManagerConstructor getLayoutManager() { // O(1)
-    return TextLayoutManager;
-  }
+  Type getLayoutManager() => TextLayoutManager; // O(1)
 }
 
-class DocumentFragment extends ParentNode {
-  DocumentFragment([List<ChildNode> nodes = null]); // O(N) in number of arguments plus all their descendants
+class DocumentFragment extends ParentNode implements FindRoot {
+  DocumentFragment([List</*nonnull*/ ChildNode> nodes = null]); // O(N) in number of arguments plus all their descendants
 }
 
 abstract class TreeScope extends ParentNode {
@@ -129,7 +146,7 @@ abstract class TreeScope extends ParentNode {
   // throws if id is null
 }
 
-class ShadowRoot extends TreeScope {
+class ShadowRoot extends TreeScope implements FindRoot {
   ShadowRoot([this._host]); // O(1)
   // note that there is no way in the API to use a newly created ShadowRoot currently
 
@@ -137,180 +154,126 @@ class ShadowRoot extends TreeScope {
   Element get host => _host; // O(1)
 }
 
-// DARTIFICATION INCOMPLETE PAST THIS POINT
-
-class Document extends TreeScope {
-  constructor (ChildArguments... nodes); // O(N) in number of arguments plus all their descendants
+class Document extends TreeScope implements FindRoot {
+  external Document ([List</*@nonnull*/ ChildNode> nodes = null]); // O(N) in number of arguments plus all their descendants
 }
 
 class ApplicationDocument extends Document {
-  constructor (ChildArguments... nodes); // O(N) in number of /nodes/ arguments plus all their descendants
+  external ApplicationDocument ([List</*@nonnull*/ ChildNode> nodes = null]); // O(N) in number of /nodes/ arguments plus all their descendants
 
-  virtual LayoutManagerConstructor getLayoutManager(); // O(1)
-    // returns sky.rootLayoutManager;
+  @override
+  Type getLayoutManager() => rootLayoutManager; // O(1)
 }
 
-attribute LayoutManagerConstructor rootLayoutManager; // O(1)
-  // initially configured to return BlockLayoutManager
+Type rootLayoutManager = BlockLayoutManager; // O(1)
 
 
 // BUILT-IN ELEMENTS
 
+@tagname('import')
 class ImportElement extends Element {
-  constructor (Dictionary<String> attributes, ChildArguments... nodes); // O(M+N), M = number of attributes, N = number of nodes plus all their descendants
-  constructor (ChildArguments... nodes); // shorthand
-  constructor (Dictionary<String> attributes); // shorthand
-  constructor (); // shorthand
-  constructor attribute String tagName; // O(1) // "import"
-  constructor attribute Boolean shadow; // O(1) // false
+  //XXX ImportElement = Element;
 
-  virtual LayoutManagerConstructor getLayoutManager(); // O(1)
-    // returns null
+  @override
+  Type getLayoutManager() => null; // O(1)
 }
+
+@tagname('template')
 class TemplateElement extends Element {
-  constructor (Dictionary<String> attributes, ChildArguments... nodes); // O(M+N), M = number of attributes, N = number of nodes plus all their descendants
-  constructor (ChildArguments... nodes); // shorthand
-  constructor (Dictionary<String> attributes); // shorthand
-  constructor (); // shorthand
-  constructor attribute String tagName; // O(1) // "template"
-  constructor attribute Boolean shadow; // O(1) // false
+  //XXX TemplateElement = Element;
 
-  readonly attribute DocumentFragment content; // O(1)
-  virtual LayoutManagerConstructor getLayoutManager(); // O(1)
-    // returns null
+  // TODO(ianh): convert <template> to using a token stream instead of a DocumentFragment
+
+  @nonnull external DocumentFragment get content; // O(1)
+
+  @override
+  Type getLayoutManager() => null; // O(1)
 }
+
+@tagname('script')
 class ScriptElement extends Element {
-  constructor (Dictionary<String> attributes, ChildArguments... nodes); // O(M+N), M = number of attributes, N = number of nodes plus all their descendants
-  constructor (ChildArguments... nodes); // shorthand
-  constructor (Dictionary<String> attributes); // shorthand
-  constructor (); // shorthand
-  constructor attribute String tagName; // O(1) // "script"
-  constructor attribute Boolean shadow; // O(1) // false
+  //XXX ScriptElement = Element;
 
-  virtual LayoutManagerConstructor getLayoutManager(); // O(1)
-    // returns null
+  @override
+  Type getLayoutManager() => null; // O(1)
 }
+
+@tagname('style')
 class StyleElement extends Element {
-  constructor (Dictionary<String> attributes, ChildArguments... nodes); // O(M+N), M = number of attributes, N = number of nodes plus all their descendants
-  constructor (ChildArguments... nodes); // shorthand
-  constructor (Dictionary<String> attributes); // shorthand
-  constructor (); // shorthand
-  constructor attribute String tagName; // O(1) // "style"
-  constructor attribute Boolean shadow; // O(1) // false
+  //XXX StyleElement = Element;
 
-  Array<Rule> getRules(); // O(N) in rules
-  virtual LayoutManagerConstructor getLayoutManager(); // O(1)
-    // returns null
+  @nonnull external List</*@nonnull*/ Rule> getRules(); // O(N) in rules
+
+  @override
+  Type getLayoutManager() => null; // O(1)
 }
+
+@tagname('content')
 class ContentElement extends Element {
-  constructor (Dictionary<String> attributes, ChildArguments... nodes); // O(M+N), M = number of attributes, N = number of nodes plus all their descendants
-  constructor (ChildArguments... nodes); // shorthand
-  constructor (Dictionary<String> attributes); // shorthand
-  constructor (); // shorthand
-  constructor attribute String tagName; // O(1) // "content"
-  constructor attribute Boolean shadow; // O(1) // false
+  //XXX ContentElement = Element;
 
-  Array<Node> getDistributedNodes(); // O(N) in distributed nodes
-  virtual LayoutManagerConstructor getLayoutManager(); // O(1)
-    // returns null
+  @nonnull external List</*@nonnull*/ Node> getDistributedNodes(); // O(N) in distributed nodes
+
+  @override
+  Type getLayoutManager() => null; // O(1)
 }
+
+@tagname('img')
 class ImgElement extends Element {
-  constructor (Dictionary<String> attributes, ChildArguments... nodes); // O(M+N), M = number of attributes, N = number of nodes plus all their descendants
-  constructor (ChildArguments... nodes); // shorthand
-  constructor (Dictionary<String> attributes); // shorthand
-  constructor (); // shorthand
-  constructor attribute String tagName; // O(1) // "img"
-  constructor attribute Boolean shadow; // O(1) // false
+  //XXX ImgElement = Element;
 
-  virtual LayoutManagerConstructor getLayoutManager(); // O(1)
-    // returns ImgElementLayoutManager
+  @override
+  Type getLayoutManager() => ImgElementLayoutManager; // O(1)
 }
+
+@tagname('div')
 class DivElement extends Element {
-  constructor (Dictionary<String> attributes, ChildArguments... nodes); // O(M+N), M = number of attributes, N = number of nodes plus all their descendants
-  constructor (ChildArguments... nodes); // shorthand
-  constructor (Dictionary<String> attributes); // shorthand
-  constructor (); // shorthand
-  constructor attribute String tagName; // O(1) // "div"
-  constructor attribute Boolean shadow; // O(1) // false
+  //XXX DivElement = Element;
 }
+
+@tagname('span')
 class SpanElement extends Element {
-  constructor (Dictionary<String> attributes, ChildArguments... nodes); // O(M+N), M = number of attributes, N = number of nodes plus all their descendants
-  constructor (ChildArguments... nodes); // shorthand
-  constructor (Dictionary<String> attributes); // shorthand
-  constructor (); // shorthand
-  constructor attribute String tagName; // O(1) // "span"
-  constructor attribute Boolean shadow; // O(1) // false
+  //XXX SpanElement = Element;
 }
+
+@tagname('iframe')
 class IframeElement extends Element {
-  constructor (Dictionary<String> attributes, ChildArguments... nodes); // O(M+N), M = number of attributes, N = number of nodes plus all their descendants
-  constructor (ChildArguments... nodes); // shorthand
-  constructor (Dictionary<String> attributes); // shorthand
-  constructor (); // shorthand
-  constructor attribute String tagName; // O(1) // "iframe"
-  constructor attribute Boolean shadow; // O(1) // false
+  //XXX IframeElement = Element;
 
-  virtual LayoutManagerConstructor getLayoutManager(); // O(1)
-    // returns IframeElementLayoutManager
+  @override
+  Type getLayoutManager() => IframeElementLayoutManager; // O(1)
 }
+
+@tagname('t')
 class TElement extends Element {
-  constructor (Dictionary<String> attributes, ChildArguments... nodes); // O(M+N), M = number of attributes, N = number of nodes plus all their descendants
-  constructor (ChildArguments... nodes); // shorthand
-  constructor (Dictionary<String> attributes); // shorthand
-  constructor (); // shorthand
-  constructor attribute String tagName; // O(1) // "t"
-  constructor attribute Boolean shadow; // O(1) // false
+  //XXX TElement = Element;
 }
+
+@tagname('a')
 class AElement extends Element {
-  constructor (Dictionary<String> attributes, ChildArguments... nodes); // O(M+N), M = number of attributes, N = number of nodes plus all their descendants
-  constructor (ChildArguments... nodes); // shorthand
-  constructor (Dictionary<String> attributes); // shorthand
-  constructor (); // shorthand
-  constructor attribute String tagName; // O(1) // "a"
-  constructor attribute Boolean shadow; // O(1) // false
+  //XXX AElement = Element;
 }
+
+@tagname('title')
 class TitleElement extends Element {
-  constructor (Dictionary<String> attributes, ChildArguments... nodes); // O(M+N), M = number of attributes, N = number of nodes plus all their descendants
-  constructor (ChildArguments... nodes); // shorthand
-  constructor (Dictionary<String> attributes); // shorthand
-  constructor (); // shorthand
-  constructor attribute String tagName; // O(1) // "title"
-  constructor attribute Boolean shadow; // O(1) // false
+  //XXX TitleElement = Element;
 
-  virtual LayoutManagerConstructor getLayoutManager(); // O(1)
-    // returns null
+  @override
+  Type getLayoutManager() => null; // O(1)
 }
+
 class ErrorElement extends Element {
-  constructor (Dictionary<String> attributes, ChildArguments... nodes); // O(M+N), M = number of attributes, N = number of nodes plus all their descendants
-  constructor (ChildArguments... nodes); // shorthand
-  constructor (Dictionary<String> attributes); // shorthand
-  constructor (); // shorthand
-  constructor attribute String tagName; // O(1) // "error"
-  constructor attribute Boolean shadow; // O(1) // false
+  ErrorElement._create();
 
-  virtual LayoutManagerConstructor getLayoutManager(); // O(1)
-    // returns ErrorElementLayoutManager
-}
-
-interface ElementConstructor {
-  constructor (Dictionary<String> attributes, ChildArguments... nodes); // O(M+N), M = number of attributes, N = number of nodes plus all their descendants
-  constructor (ChildArguments... nodes); // shorthand
-  constructor (Dictionary<String> attributes); // shorthand
-  constructor (); // shorthand
-
-  constructor attribute String tagName;
-  constructor attribute Boolean shadow;
+  @override
+  Type getLayoutManager() => ErrorElementLayoutManager; // O(1)
 }
 
 class SelectorQuery {
-  constructor (String selector); // O(F()) where F() is the complexity of the selector
+  external SelectorQuery(@nonnull String selector); // O(F()) where F() is the complexity of the selector
 
-  Boolean matches(Element element); // O(F())
-  Element? find(Element root); // O(N*F())+O(M) where N is the number of descendants and M the average depth of the tree
-  Element? find(DocumentFragment root); // O(N*F())+O(M) where N is the number of descendants and M the average depth of the tree
-  Element? find(TreeScope root); // O(N*F()) where N is the number of descendants
-  Array<Element> findAll(Element root); // O(N*F())+O(N*M) where N is the number of descendants and M the average depth of the tree
-  Array<Element> findAll(DocumentFragment root); // O(N*F())+O(N*M) where N is the number of descendants and M the average depth of the tree
-  Array<Element> findAll(TreeScope root); // O(N*F()) where N is the number of descendants
-
+  @nonnull external bool matches(@nonnull Element element); // O(F())
+  external Element find(@nonnull FindRoot root); // O(N*F())+O(M) where N is the number of descendants and M the average depth of the tree
+  @nonnull external List</*@nonnull*/ Element> findAll(FindRoot root); // O(N*F())+O(N*M) where N is the number of descendants and M the average depth of the tree
 }
 ```
