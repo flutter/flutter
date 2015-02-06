@@ -29,12 +29,12 @@ abstract class Event<ReturnType> {
 }
 
 class EventTarget {
-  EventTarget() : _eventsController = new DispatcherController<Event>();
+  EventTarget() : _eventsController = new DispatcherController<@nonnull Event>();
 
   Dispatcher get events => _eventsController.dispatcher;
   EventTarget parentNode;
 
-  List<EventTarget> getEventDispatchChain() {
+  List<@nonnull EventTarget> getEventDispatchChain() {
     if (this.parentNode == null) {
       return [this];
     } else {
@@ -46,7 +46,7 @@ class EventTarget {
 
   final DispatcherController _eventsController;
 
-  dynamic dispatchEvent(Event event, { defaultResult: null }) { // O(N*M) where N is the length of the chain and M is the average number of listeners per link in the chain
+  dynamic dispatchEvent(@nonnull Event event, { dynamic defaultResult: null }) { // O(N*M) where N is the length of the chain and M is the average number of listeners per link in the chain
     // note: this will throw an ExceptionListException<ExceptionListException> if any of the listeners threw
     assert(event != null); // event must be non-null
     event.handled = false;
@@ -71,7 +71,7 @@ class EventTarget {
     return event.result;
   }
 
-  void _dispatchEventLocally(Event event) {
+  void _dispatchEventLocally(@nonnull Event event) {
     event._currentTarget = this;
     _eventsController.add(event);
   }

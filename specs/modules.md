@@ -51,7 +51,8 @@ elements up to that point, interleaved so as to maintain the same
 relative order as those elements were first seen by the parser.
 
 When a library imports a module, it actually imports all the libraries
-that were declared by that module except the element tree library.
+that were declared by that module except the aforementioned element
+tree library.
 
 At the end of the ``<script>`` block's source, if it parsed correctly
 and completely, the following code is appended:
@@ -146,15 +147,11 @@ abstract class AbstractModule : EventTarget {
   //  - register the new tagName with this constructor
   //  - return the new Function (which is, not coincidentally, an
   //    InternalElementConstructorWithShadow)
-
-  readonly attribute ScriptElement? currentScript; // O(1) // returns the <script> element currently being executed if any, and if it's in this module; else null
 }
 
 class Module : AbstractModule {
   constructor (Application application, Document document, String url); // O(1)
   readonly attribute Application application; // O(1)
-
-  attribute any exports; // O(1) // defaults to {}
 }
 
 class Application : AbstractModule {

@@ -1,131 +1,149 @@
 Sky DOM APIs
 ============
 
-```javascript
+```dart
+abstract class ChildNode { }
 
-// Element Tree
+abstract class Node extends EventTarget {
+  external TreeScope get ownerScope; // O(1) // never null
 
-typedef ChildNode (Element or Text);
-typedef ChildArgument (Element or Text or String);
+  external ParentNode get parentNode; // O(1)
+  external Element get parentElement; // O(1) // if parentNode isn't an element, returns null
+  external ChildNode get previousSibling; // O(1)
+  external ChildNode get nextSibling; // O(1)
 
-abstract class Node : EventTarget { // implemented in C++
-  readonly attribute TreeScope? ownerScope; // O(1)
-
-  readonly attribute ParentNode? parentNode; // O(1)
-  readonly attribute Element? parentElement; // O(1) // if parentNode isn't an element, returns null
-  readonly attribute ChildNode? previousSibling; // O(1)
-  readonly attribute ChildNode? nextSibling; // O(1)
-
-  virtual Array<EventTarget> getEventDispatchChain(); // O(N) in number of ancestors across shadow trees // implements EventTarget.getEventDispatchChain()
-    // returns the event dispatch chain (including handling shadow trees)
+  @override
+  external List</*@nonnull*/ EventTarget> getEventDispatchChain(); // O(N) in number of ancestors across shadow trees
+  // implements EventTarget.getEventDispatchChain()
+  // returns the event dispatch chain (including handling shadow trees)
 
   // the following all throw if parentNode is null
-  void insertBefore(ChildArgument... nodes); // O(N) in number of arguments plus all their descendants
-  void insertAfter(ChildArgument... nodes); // O(N) in number of arguments plus all their descendants
-  void replaceWith(ChildArgument... nodes); // O(N) in number of descendants plus arguments plus all their descendants
-  void remove(); // O(N) in number of descendants
-  Node cloneNode(Boolean deep = false); // O(1) if deep=false, O(N) in the number of descendants if deep=true
+  external void insertBefore(List</*@nonnull*/ ChildNode> nodes); // O(N) in number of arguments plus all their descendants
+  external void insertAfter(List</*@nonnull*/ ChildNode> nodes); // O(N) in number of arguments plus all their descendants
+  external void replaceWith(List</*@nonnull*/ ChildNode> nodes); // O(N) in number of descendants plus arguments plus all their descendants
+  external void remove(); // O(N) in number of descendants
+  external Node cloneNode({bool deep: false}); // O(1) if deep=false, O(N) in the number of descendants if deep=true
 
   // called when parentNode changes
-  virtual void parentChangeCallback(ParentNode? oldParent, ParentNode? newParent, ChildNode? previousSibling, ChildNode? nextSibling); // O(N) in descendants (calls attached/detached)
-  virtual void attachedCallback(); // noop
-  virtual void detachedCallback(); // noop
+  external void parentChangeCallback(ParentNode oldParent, ParentNode newParent, ChildNode previousSibling, ChildNode nextSibling); // O(N) in descendants
+  // default implementation calls attached/detached
+  void attachedCallback() { }
+  void detachedCallback() { }
 
-  Array<ContentElement> getDestinationInsertionPoints(); // O(N) in number of insertion points the node is in
-    // returns the <content> elements to which this element was distributed
+  external List<ContentElement> getDestinationInsertionPoints(); // O(N) in number of insertion points the node is in
+  // returns the <content> elements to which this element was distributed
 
-  readonly attribute ElementStyleDeclarationList? style; // O(1)
-    // for nodes that aren't reachable from the Application Document, returns null
-    // (so in particular orphaned subtrees and nodes in module documents don't have one)
-    //  -- should be updated when the node's parent chain changes (same time as, e.g.,
-    //     the id hashtable is updated)
-    // also always returns null for ContentElement elements and ShadowRoot nodes
-  readonly attribute RenderNode? renderNode; // O(1)
-    // this will be null until the first time it is rendered
-    // it becomes null again when it is taken out of the rendering (see style.md)
-  abstract virtual LayoutManagerConstructor getLayoutManager(); // O(1)
-  void resetLayoutManager(); // O(1)
-    // if renderNode is non-null:
-    //   sets renderNode.layoutManager to null
-    //   sets renderNode.needsManager to true
+  external ElementStyleDeclarationList get style; // O(1)
+  // for nodes that aren't reachable from the Application Document, returns null
+  // (so in particular orphaned subtrees and nodes in module documents don't have one)
+  //  -- should be updated when the node's parent chain changes (same time as, e.g.,
+  //     the id hashtable is updated)
+  // also always returns null for ContentElement elements and ShadowRoot nodes
+
+  external RenderNode get renderNode; // O(1)
+  // this will be null until the first time it is rendered
+  // it becomes null again when it is taken out of the rendering (see style.md)
+
+  LayoutManagerConstructor getLayoutManager(); // O(1)
+
+  void resetLayoutManager() { // O(1)
+    if (renderNode != null) {
+      renderNode._layoutManager = null;
+      renderNode._needsManager = true;
+    }
+  }
 }
 
-abstract class ParentNode : Node {
-  readonly attribute ChildNode? firstChild; // O(1)
-  readonly attribute ChildNode? lastChild; // O(1)
+abstract class ParentNode extends Node {
+  external ChildNode get firstChild; // O(1)
+  external ChildNode get lastChild; // O(1)
 
-  // Returns a new Array every time.
-  Array<ChildNode> getChildNodes(); // O(N) in number of child nodes
-  Array<Element> getChildElements(); // O(N) in number of child nodes // TODO(ianh): might not be necessary if we have the parser drop unnecessary whitespace text nodes
+  // Returns a new List every time.
+  external List<ChildNode> getChildNodes(); // O(N) in number of child nodes
+  external List<Element> getChildElements(); // O(N) in number of child nodes
+  // TODO(ianh): might not be necessary if we have the parser drop unnecessary whitespace text nodes
 
-  void append(ChildArgument... nodes); // O(N) in number of arguments plus all their descendants
-  void prepend(ChildArgument... nodes); // O(N) in number of arguments plus all their descendants
-  void replaceChildrenWith(ChildArgument... nodes); // O(N) in number of descendants plus arguments plus all their descendants
+  external void append(List<ChildNode> nodes); // O(N) in number of arguments plus all their descendants
+  external void prepend(List<ChildNode> nodes); // O(N) in number of arguments plus all their descendants
+  external void replaceChildrenWith(List<ChildNode> nodes); // O(N) in number of descendants plus arguments plus all their descendants
 }
 
 class Attr {
-  constructor (String name, String value = ''); // O(1)
-  readonly attribute String name; // O(1)
-  readonly attribute String value; // O(1)
+  const Attr (this.name, [this.value = '']); // O(1)
+  final String name; // O(1)
+  final String value; // O(1)
 }
 
-abstract class Element : ParentNode {
-  readonly attribute String tagName; // O(1)
+abstract class Element extends ParentNode {
+  final String tagName; // O(1)
 
-  Boolean hasAttribute(String name); // O(N) in number of attributes
-  String getAttribute(String name); // O(N) in number of attributes
-  void setAttribute(String name, String value = ''); // O(N) in number of attributes
-  void removeAttribute(String name); // O(N) in number of attributes
+  external bool hasAttribute(@nonnull String name); // O(N) in number of attributes
+  external String getAttribute(@nonnull String name); // O(N) in number of attributes
+  external void setAttribute(@nonnull String name, [@nonnull String value = '']); // O(N) in number of attributes
+  external void removeAttribute(@nonnull String name); // O(N) in number of attributes
 
   // Returns a new Array and new Attr instances every time.
-  Array<Attr> getAttributes(); // O(N) in number of attributes
+  List<Attr> getAttributes(); // O(N) in number of attributes
 
-  readonly attribute ShadowRoot? shadowRoot; // O(1) // returns the shadow root // TODO(ianh): Should this be mutable? It would help explain how it gets set...
+  external ShadowRoot get shadowRoot; // O(1)
+  // returns the shadow root
+  // TODO(ianh): Should this be mutable? It would help explain how it gets set...
 
-  virtual void endTagParsedCallback(); // noop
-  virtual void attributeChangeCallback(String name, String? oldValue, String? newValue); // noop
+  void endTagParsedCallback() { }
+  void attributeChangeCallback(String name, String oldValue, String newValue) { }
+  // name will never be null when this is called by sky
+
   // TODO(ianh): does a node ever need to know when it's been redistributed?
 
-  virtual LayoutManagerConstructor getLayoutManager(); // O(1)
-    // default implementation looks up the 'display' property and returns the value:
-    //   if (renderNode)
-    //     return renderNode.getProperty(phDisplay);
-    //   return null;
+  @override
+  LayoutManagerConstructor getLayoutManager() { // O(1)
+    if (renderNode)
+      return renderNode.getProperty(phDisplay);
+    return super.getLayoutManager();
+  }
 }
 
-class Text : Node {
-  constructor (String value = ''); // O(1)
-  attribute String value; // O(1)
+class Text extends Node {
+  external Text([String value = '']); // O(1)
+  // throws if value is null
 
-  void replaceWith(String node); // O(1) // special case override of Node.replaceWith()
+  external String get value; // O(1)
 
-  virtual void valueChangeCallback(String? oldValue, String? newValue); // noop
+  void valueChangeCallback(String oldValue, String newValue) { }
 
-  virtual LayoutManagerConstructor getLayoutManager(); // O(1)
-    // default implementation returns TextLayoutManager's constructor
+  @override
+  LayoutManagerConstructor getLayoutManager() { // O(1)
+    return TextLayoutManager;
+  }
 }
 
-class DocumentFragment : ParentNode {
+class DocumentFragment extends ParentNode {
+  DocumentFragment([List<ChildNode> nodes = null]); // O(N) in number of arguments plus all their descendants
+}
+
+abstract class TreeScope extends ParentNode {
+  external Document get ownerDocument; // O(1)
+  external TreeScope get parentScope; // O(1)
+
+  external Element findId(String id); // O(1)
+  // throws if id is null
+}
+
+class ShadowRoot extends TreeScope {
+  ShadowRoot([this._host]); // O(1)
+  // note that there is no way in the API to use a newly created ShadowRoot currently
+
+  Element _host;
+  Element get host => _host; // O(1)
+}
+
+// DARTIFICATION INCOMPLETE PAST THIS POINT
+
+class Document extends TreeScope {
   constructor (ChildArguments... nodes); // O(N) in number of arguments plus all their descendants
 }
 
-abstract class TreeScope : ParentNode {
-  readonly attribute Document? ownerDocument; // O(1)
-  readonly attribute TreeScope? parentScope; // O(1)
-
-  Element? findId(String id); // O(1)
-}
-
-class ShadowRoot : TreeScope {
-  constructor (Element host); // O(1) // note that there is no way in the API to use a newly created ShadowRoot
-  readonly attribute Element host; // O(1)
-}
-
-class Document : TreeScope {
-  constructor (ChildArguments... nodes); // O(N) in number of arguments plus all their descendants
-}
-
-class ApplicationDocument : Document {
+class ApplicationDocument extends Document {
   constructor (ChildArguments... nodes); // O(N) in number of /nodes/ arguments plus all their descendants
 
   virtual LayoutManagerConstructor getLayoutManager(); // O(1)
@@ -138,7 +156,7 @@ attribute LayoutManagerConstructor rootLayoutManager; // O(1)
 
 // BUILT-IN ELEMENTS
 
-class ImportElement : Element {
+class ImportElement extends Element {
   constructor (Dictionary<String> attributes, ChildArguments... nodes); // O(M+N), M = number of attributes, N = number of nodes plus all their descendants
   constructor (ChildArguments... nodes); // shorthand
   constructor (Dictionary<String> attributes); // shorthand
@@ -149,7 +167,7 @@ class ImportElement : Element {
   virtual LayoutManagerConstructor getLayoutManager(); // O(1)
     // returns null
 }
-class TemplateElement : Element {
+class TemplateElement extends Element {
   constructor (Dictionary<String> attributes, ChildArguments... nodes); // O(M+N), M = number of attributes, N = number of nodes plus all their descendants
   constructor (ChildArguments... nodes); // shorthand
   constructor (Dictionary<String> attributes); // shorthand
@@ -161,7 +179,7 @@ class TemplateElement : Element {
   virtual LayoutManagerConstructor getLayoutManager(); // O(1)
     // returns null
 }
-class ScriptElement : Element {
+class ScriptElement extends Element {
   constructor (Dictionary<String> attributes, ChildArguments... nodes); // O(M+N), M = number of attributes, N = number of nodes plus all their descendants
   constructor (ChildArguments... nodes); // shorthand
   constructor (Dictionary<String> attributes); // shorthand
@@ -172,7 +190,7 @@ class ScriptElement : Element {
   virtual LayoutManagerConstructor getLayoutManager(); // O(1)
     // returns null
 }
-class StyleElement : Element {
+class StyleElement extends Element {
   constructor (Dictionary<String> attributes, ChildArguments... nodes); // O(M+N), M = number of attributes, N = number of nodes plus all their descendants
   constructor (ChildArguments... nodes); // shorthand
   constructor (Dictionary<String> attributes); // shorthand
@@ -184,7 +202,7 @@ class StyleElement : Element {
   virtual LayoutManagerConstructor getLayoutManager(); // O(1)
     // returns null
 }
-class ContentElement : Element {
+class ContentElement extends Element {
   constructor (Dictionary<String> attributes, ChildArguments... nodes); // O(M+N), M = number of attributes, N = number of nodes plus all their descendants
   constructor (ChildArguments... nodes); // shorthand
   constructor (Dictionary<String> attributes); // shorthand
@@ -196,7 +214,7 @@ class ContentElement : Element {
   virtual LayoutManagerConstructor getLayoutManager(); // O(1)
     // returns null
 }
-class ImgElement : Element {
+class ImgElement extends Element {
   constructor (Dictionary<String> attributes, ChildArguments... nodes); // O(M+N), M = number of attributes, N = number of nodes plus all their descendants
   constructor (ChildArguments... nodes); // shorthand
   constructor (Dictionary<String> attributes); // shorthand
@@ -207,7 +225,7 @@ class ImgElement : Element {
   virtual LayoutManagerConstructor getLayoutManager(); // O(1)
     // returns ImgElementLayoutManager
 }
-class DivElement : Element {
+class DivElement extends Element {
   constructor (Dictionary<String> attributes, ChildArguments... nodes); // O(M+N), M = number of attributes, N = number of nodes plus all their descendants
   constructor (ChildArguments... nodes); // shorthand
   constructor (Dictionary<String> attributes); // shorthand
@@ -215,7 +233,7 @@ class DivElement : Element {
   constructor attribute String tagName; // O(1) // "div"
   constructor attribute Boolean shadow; // O(1) // false
 }
-class SpanElement : Element {
+class SpanElement extends Element {
   constructor (Dictionary<String> attributes, ChildArguments... nodes); // O(M+N), M = number of attributes, N = number of nodes plus all their descendants
   constructor (ChildArguments... nodes); // shorthand
   constructor (Dictionary<String> attributes); // shorthand
@@ -223,7 +241,7 @@ class SpanElement : Element {
   constructor attribute String tagName; // O(1) // "span"
   constructor attribute Boolean shadow; // O(1) // false
 }
-class IframeElement : Element {
+class IframeElement extends Element {
   constructor (Dictionary<String> attributes, ChildArguments... nodes); // O(M+N), M = number of attributes, N = number of nodes plus all their descendants
   constructor (ChildArguments... nodes); // shorthand
   constructor (Dictionary<String> attributes); // shorthand
@@ -234,7 +252,7 @@ class IframeElement : Element {
   virtual LayoutManagerConstructor getLayoutManager(); // O(1)
     // returns IframeElementLayoutManager
 }
-class TElement : Element {
+class TElement extends Element {
   constructor (Dictionary<String> attributes, ChildArguments... nodes); // O(M+N), M = number of attributes, N = number of nodes plus all their descendants
   constructor (ChildArguments... nodes); // shorthand
   constructor (Dictionary<String> attributes); // shorthand
@@ -242,7 +260,7 @@ class TElement : Element {
   constructor attribute String tagName; // O(1) // "t"
   constructor attribute Boolean shadow; // O(1) // false
 }
-class AElement : Element {
+class AElement extends Element {
   constructor (Dictionary<String> attributes, ChildArguments... nodes); // O(M+N), M = number of attributes, N = number of nodes plus all their descendants
   constructor (ChildArguments... nodes); // shorthand
   constructor (Dictionary<String> attributes); // shorthand
@@ -250,7 +268,7 @@ class AElement : Element {
   constructor attribute String tagName; // O(1) // "a"
   constructor attribute Boolean shadow; // O(1) // false
 }
-class TitleElement : Element {
+class TitleElement extends Element {
   constructor (Dictionary<String> attributes, ChildArguments... nodes); // O(M+N), M = number of attributes, N = number of nodes plus all their descendants
   constructor (ChildArguments... nodes); // shorthand
   constructor (Dictionary<String> attributes); // shorthand
@@ -261,7 +279,7 @@ class TitleElement : Element {
   virtual LayoutManagerConstructor getLayoutManager(); // O(1)
     // returns null
 }
-class ErrorElement : Element {
+class ErrorElement extends Element {
   constructor (Dictionary<String> attributes, ChildArguments... nodes); // O(M+N), M = number of attributes, N = number of nodes plus all their descendants
   constructor (ChildArguments... nodes); // shorthand
   constructor (Dictionary<String> attributes); // shorthand
@@ -293,5 +311,6 @@ class SelectorQuery {
   Array<Element> findAll(Element root); // O(N*F())+O(N*M) where N is the number of descendants and M the average depth of the tree
   Array<Element> findAll(DocumentFragment root); // O(N*F())+O(N*M) where N is the number of descendants and M the average depth of the tree
   Array<Element> findAll(TreeScope root); // O(N*F()) where N is the number of descendants
+
 }
 ```

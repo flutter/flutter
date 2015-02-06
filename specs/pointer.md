@@ -363,10 +363,10 @@ abstract class PointerEvent<T> extends Event<T> {
   final PointerKind kind;
   final double x; // logical pixels
   final double y; // logical pixels
-  final double dx; // logical pixels
-  final double dy; // logical pixels
+  final @nonnull double dx; // logical pixels
+  final @nonnull double dy; // logical pixels
 
-  final int buttons; // bit field
+  final @nonnull int buttons; // bit field
   static const int primaryMouseButton = 0x01;
   static const int secondaryMouseButton = 0x02;
   static const int primaryStylusButton = 0x02;
@@ -375,9 +375,9 @@ abstract class PointerEvent<T> extends Event<T> {
   static const int backButton = 0x08;
   static const int forwardButton = 0x10;
 
-  final bool down;
-  final bool primary;
-  final bool obscured;
+  final @nonnull bool down;
+  final @nonnull bool primary;
+  final @nonnull bool obscured;
 
   // if down != true, these are all null
   final double pressure; // normalised, 0.0 means none, 1.0 means "normal"
@@ -476,7 +476,7 @@ class WheelEvent extends Event {
                }): super(bubbles: bubbles);
 
   final int wheel;
-  final double delta; // revolutions (or fractions thereof)
+  final @nonnull double delta; // revolutions (or fractions thereof)
   final int pointer;
   final double x; // logical pixels
   final double y; // logical pixels
