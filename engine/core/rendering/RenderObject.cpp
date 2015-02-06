@@ -1024,7 +1024,7 @@ void RenderObject::addAbsoluteRectForLayer(LayoutRect& result)
         current->addAbsoluteRectForLayer(result);
 }
 
-void RenderObject::paint(PaintInfo&, const LayoutPoint&)
+void RenderObject::paint(PaintInfo&, const LayoutPoint&, Vector<RenderBox*>& layers)
 {
 }
 

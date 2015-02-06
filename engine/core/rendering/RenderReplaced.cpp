@@ -86,7 +86,7 @@ void RenderReplaced::intrinsicSizeChanged()
     setNeedsLayoutAndPrefWidthsRecalc();
 }
 
-void RenderReplaced::paint(PaintInfo& paintInfo, const LayoutPoint& paintOffset)
+void RenderReplaced::paint(PaintInfo& paintInfo, const LayoutPoint& paintOffset, Vector<RenderBox*>& layers)
 {
     if (!shouldPaint(paintInfo, paintOffset))
         return;

@@ -185,7 +185,7 @@ bool RenderLineBoxList::lineIntersectsDirtyRect(RenderBoxModelObject* renderer, 
     return rangeIntersectsRect(renderer, logicalTop, logicalBottom, paintInfo.rect, offset);
 }
 
-void RenderLineBoxList::paint(RenderBoxModelObject* renderer, PaintInfo& paintInfo, const LayoutPoint& paintOffset) const
+void RenderLineBoxList::paint(RenderBoxModelObject* renderer, PaintInfo& paintInfo, const LayoutPoint& paintOffset, Vector<RenderBox*>& layers) const
 {
     ASSERT(renderer->isRenderBlock() || (renderer->isRenderInline() && renderer->hasLayer())); // The only way an inline could paint like this is if it has a layer.
 
@@ -204,7 +204,7 @@ void RenderLineBoxList::paint(RenderBoxModelObject* renderer, PaintInfo& paintIn
     for (InlineFlowBox* curr = firstLineBox(); curr; curr = curr->nextLineBox()) {
         if (lineIntersectsDirtyRect(renderer, curr, info, paintOffset)) {
             RootInlineBox& root = curr->root();
-            curr->paint(info, paintOffset, root.lineTop(), root.lineBottom());
+            curr->paint(info, paintOffset, root.lineTop(), root.lineBottom(), layers);
         }
     }
 }

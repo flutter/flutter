@@ -210,9 +210,9 @@ protected:
 
     int beforeMarginInLineDirection(LineDirectionMode) const;
 
-    virtual void paint(PaintInfo&, const LayoutPoint&) override;
-    virtual void paintObject(PaintInfo&, const LayoutPoint&) override;
-    virtual void paintChildren(PaintInfo&, const LayoutPoint&);
+    virtual void paint(PaintInfo&, const LayoutPoint&, Vector<RenderBox*>& layers) override;
+    void paintObject(PaintInfo&, const LayoutPoint&, Vector<RenderBox*>& layers);
+    virtual void paintChildren(PaintInfo&, const LayoutPoint&, Vector<RenderBox*>& layers);
 
     virtual void adjustInlineDirectionLineBounds(unsigned /* expansionOpportunityCount */, float& /* logicalLeft */, float& /* logicalWidth */) const { }
 

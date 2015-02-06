@@ -446,7 +446,7 @@ void RenderBlock::markPositionedObjectsForLayout()
     }
 }
 
-void RenderBlock::paint(PaintInfo& paintInfo, const LayoutPoint& paintOffset)
+void RenderBlock::paint(PaintInfo& paintInfo, const LayoutPoint& paintOffset, Vector<RenderBox*>& layers)
 {
     LayoutPoint adjustedPaintOffset = paintOffset + location();
 
@@ -468,16 +468,18 @@ void RenderBlock::paint(PaintInfo& paintInfo, const LayoutPoint& paintOffset)
         contentsClipBehavior = SkipContentsClipIfPossible;
 
     bool pushedClip = pushContentsClip(paintInfo, adjustedPaintOffset, contentsClipBehavior);
-    paintObject(paintInfo, adjustedPaintOffset);
+    paintObject(paintInfo, adjustedPaintOffset, layers);
     if (pushedClip)
         popContentsClip(paintInfo, adjustedPaintOffset);
 }
 
-void RenderBlock::paintChildren(PaintInfo& paintInfo, const LayoutPoint& paintOffset)
+void RenderBlock::paintChildren(PaintInfo& paintInfo, const LayoutPoint& paintOffset, Vector<RenderBox*>& layers)
 {
     for (RenderBox* child = firstChildBox(); child; child = child->nextSiblingBox()) {
-        if (!child->hasSelfPaintingLayer())
-            child->paint(paintInfo, paintOffset);
+        if (child->hasSelfPaintingLayer())
+            layers.append(child);
+        else
+            child->paint(paintInfo, paintOffset, layers);
     }
 }
 
@@ -510,12 +512,12 @@ void RenderBlock::paintCarets(PaintInfo& paintInfo, const LayoutPoint& paintOffs
     }
 }
 
-void RenderBlock::paintObject(PaintInfo& paintInfo, const LayoutPoint& paintOffset)
+void RenderBlock::paintObject(PaintInfo& paintInfo, const LayoutPoint& paintOffset, Vector<RenderBox*>& layers)
 {
     if (hasBoxDecorationBackground())
         paintBoxDecorationBackground(paintInfo, paintOffset);
 
-    paintChildren(paintInfo, paintOffset);
+    paintChildren(paintInfo, paintOffset, layers);
     paintSelection(paintInfo, paintOffset); // Fill in gaps in selection on lines and between blocks.
 
     if (style()->hasOutline() && !style()->outlineStyleIsAuto())

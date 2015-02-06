@@ -37,6 +37,7 @@
 #include "sky/engine/core/html/HTMLElement.h"
 #include "sky/engine/core/page/EventHandler.h"
 #include "sky/engine/core/page/Page.h"
+#include "sky/engine/core/rendering/FilterEffectRenderer.h"
 #include "sky/engine/core/rendering/HitTestResult.h"
 #include "sky/engine/core/rendering/PaintInfo.h"
 #include "sky/engine/core/rendering/RenderFlexibleBox.h"
@@ -388,11 +389,216 @@ bool RenderBox::nodeAtPoint(const HitTestRequest& request, HitTestResult& result
 
 // --------------------- painting stuff -------------------------------
 
-void RenderBox::paint(PaintInfo& paintInfo, const LayoutPoint& paintOffset)
+static inline bool compareZIndex(RenderBox* first, RenderBox* second)
+{
+    return first->style()->zIndex() < second->style()->zIndex();
+}
+
+void RenderBox::paintLayer(GraphicsContext* context, RenderLayer* rootLayer, const IntRect& rect)
+{
+    // If this layer is totally invisible then there is nothing to paint.
+    // TODO(ojan): Return false from isSelfPainting and then ASSERT(!opacity()) here.
+    if (!opacity())
+        return;
+
+    LayerPaintingInfo paintingInfo(rootLayer, rect, LayoutSize());
+
+    if (!layer()->paintsWithTransform()) {
+        paintLayerContents(context, paintingInfo, rect);
+        return;
+    }
+
+    TransformationMatrix layerTransform = layer()->renderableTransform();
+    // If the transform can't be inverted, then don't paint anything.
+    if (!layerTransform.isInvertible())
+        return;
+
+    // If we have a transparency layer enclosing us and we are the root of a transform, then we need to establish the transparency
+    // layer from the parent now, assuming there is a parent
+    if (layer()->isTransparent()) {
+        // TODO(ojan): This should ASSERT(layer()->parent()) instead of branching since the
+        // RenderView can't be transformed in sky.
+        if (layer()->parent())
+            layer()->parent()->beginTransparencyLayers(context, paintingInfo.rootLayer, paintingInfo.paintDirtyRect, paintingInfo.subPixelAccumulation);
+        else
+            layer()->beginTransparencyLayers(context, paintingInfo.rootLayer, paintingInfo.paintDirtyRect, paintingInfo.subPixelAccumulation);
+    }
+
+    // Make sure the parent's clip rects have been calculated.
+    ClipRect clipRect;
+    // TODO(ojan): This should ASSERT(layer()->parent()) instead of branching since the
+    // RenderView can't be transformed in sky.
+    if (layer()->parent()) {
+        ClipRectsContext clipRectsContext(paintingInfo.rootLayer, PaintingClipRects);
+        clipRect = layer()->clipper().backgroundClipRect(clipRectsContext);
+        clipRect.intersect(paintingInfo.paintDirtyRect);
+
+        // Push the parent coordinate space's clip.
+        layer()->parent()->clipToRect(paintingInfo, context, clipRect);
+    }
+
+    // This involves subtracting out the position of the layer in our current coordinate space, but preserving
+    // the accumulated error for sub-pixel layout.
+    LayoutPoint delta;
+    layer()->convertToLayerCoords(paintingInfo.rootLayer, delta);
+    TransformationMatrix transform(layer()->renderableTransform());
+    IntPoint roundedDelta = roundedIntPoint(delta);
+    transform.translateRight(roundedDelta.x(), roundedDelta.y());
+    LayoutSize adjustedSubPixelAccumulation = paintingInfo.subPixelAccumulation + (delta - roundedDelta);
+
+    // Apply the transform.
+    GraphicsContextStateSaver stateSaver(*context, false);
+    if (!transform.isIdentity()) {
+        stateSaver.save();
+        context->concatCTM(transform.toAffineTransform());
+    }
+
+    // Now do a paint with the root layer shifted to be us.
+    LayerPaintingInfo transformedPaintingInfo(layer(), enclosingIntRect(transform.inverse().mapRect(paintingInfo.paintDirtyRect)),
+        adjustedSubPixelAccumulation);
+    paintLayerContents(context, transformedPaintingInfo, rect);
+
+    // Restore the clip.
+    // TODO(ojan): This should ASSERT(layer()->parent()) instead of branching since the
+    // RenderView can't be transformed in sky.
+    if (layer()->parent())
+        layer()->parent()->restoreClip(context, paintingInfo.paintDirtyRect, clipRect);
+}
+
+void RenderBox::paintLayerContents(GraphicsContext* context, const LayerPaintingInfo& paintingInfo, const IntRect& rect)
+{
+    float deviceScaleFactor = blink::deviceScaleFactor(frame());
+    context->setDeviceScaleFactor(deviceScaleFactor);
+
+    GraphicsContext* transparencyLayerContext = context;
+
+    LayoutPoint offsetFromRoot;
+    layer()->convertToLayerCoords(paintingInfo.rootLayer, offsetFromRoot);
+
+    LayoutRect rootRelativeBounds;
+    bool rootRelativeBoundsComputed = false;
+
+    // Apply clip-path to context.
+    GraphicsContextStateSaver clipStateSaver(*context, false);
+
+    // Clip-path, like border radius, must not be applied to the contents of a composited-scrolling container.
+    // It must, however, still be applied to the mask layer, so that the compositor can properly mask the
+    // scrolling contents and scrollbars.
+    // TODO(ojan): This style null check doesn't make sense. We should always have a style.
+    if (hasClipPath() && style()) {
+        ASSERT(style()->clipPath());
+        if (style()->clipPath()->type() == ClipPathOperation::SHAPE) {
+            ShapeClipPathOperation* clipPath = toShapeClipPathOperation(style()->clipPath());
+            if (clipPath->isValid()) {
+                clipStateSaver.save();
+
+                if (!rootRelativeBoundsComputed) {
+                    rootRelativeBounds = layer()->physicalBoundingBoxIncludingReflectionAndStackingChildren(paintingInfo.rootLayer, offsetFromRoot);
+                    rootRelativeBoundsComputed = true;
+                }
+
+                context->clipPath(clipPath->path(rootRelativeBounds), clipPath->windRule());
+            }
+        }
+    }
+
+    LayerPaintingInfo localPaintingInfo(paintingInfo);
+    FilterEffectRendererHelper filterPainter(layer()->filterRenderer() && layer()->paintsWithFilters());
+
+    LayoutRect layerBounds;
+    // FIXME(sky): Remove foregroundRect. It's unused.
+    ClipRect contentRect, foregroundRect;
+    ClipRectsContext clipRectsContext(localPaintingInfo.rootLayer, PaintingClipRects, localPaintingInfo.subPixelAccumulation);
+    layer()->clipper().calculateRects(clipRectsContext, localPaintingInfo.paintDirtyRect,
+        layerBounds, contentRect, foregroundRect,
+        &offsetFromRoot);
+
+    bool shouldPaintContent = layer()->intersectsDamageRect(layerBounds, contentRect.rect(), localPaintingInfo.rootLayer, &offsetFromRoot);
+
+    bool haveTransparency = layer()->isTransparent();
+
+    if (filterPainter.haveFilterEffect()) {
+        ASSERT(layer()->filterInfo());
+
+        if (!rootRelativeBoundsComputed)
+            rootRelativeBounds = layer()->physicalBoundingBoxIncludingReflectionAndStackingChildren(paintingInfo.rootLayer, offsetFromRoot);
+
+        if (filterPainter.prepareFilterEffect(layer(), rootRelativeBounds, paintingInfo.paintDirtyRect)) {
+            // Rewire the old context to a memory buffer, so that we can capture the contents of the layer.
+            // NOTE: We saved the old context in the "transparencyLayerContext" local variable, to be able to start a transparency layer
+            // on the original context and avoid duplicating "beginFilterEffect" after each transparency layer call. Also, note that
+            // beginTransparencyLayers will only create a single lazy transparency layer, even though it is called twice in this method.
+            // With deferred filters, we don't need a separate context, but we do need to do transparency and clipping before starting
+            // filter processing.
+            // FIXME: when the legacy path is removed, remove the transparencyLayerContext as well.
+            if (haveTransparency) {
+                // If we have a filter and transparency, we have to eagerly start a transparency layer here, rather than risk a child layer lazily starts one after filter processing.
+                layer()->beginTransparencyLayers(context, localPaintingInfo.rootLayer, paintingInfo.paintDirtyRect, paintingInfo.subPixelAccumulation);
+            }
+            // We'll handle clipping to the dirty rect before filter rasterization.
+            // Filter processing will automatically expand the clip rect and the offscreen to accommodate any filter outsets.
+            // FIXME: It is incorrect to just clip to the damageRect here once multiple fragments are involved.
+            layer()->clipToRect(localPaintingInfo, context, contentRect);
+            // Subsequent code should not clip to the dirty rect, since we've already
+            // done it above, and doing it later will defeat the outsets.
+            localPaintingInfo.clipToDirtyRect = false;
+
+            context = filterPainter.beginFilterEffect(context);
+        }
+    }
+
+    LayoutPoint layerLocation = toPoint(layerBounds.location() - location() + localPaintingInfo.subPixelAccumulation);
+
+    if (shouldPaintContent) {
+        bool contentRectIsEmpty = contentRect.isEmpty();
+
+        // Begin transparency if we have something to paint.
+        if (haveTransparency && !contentRectIsEmpty)
+            layer()->beginTransparencyLayers(transparencyLayerContext, localPaintingInfo.rootLayer, paintingInfo.paintDirtyRect, localPaintingInfo.subPixelAccumulation);
+
+        // Optimize clipping for the single fragment case.
+        bool shouldClip = localPaintingInfo.clipToDirtyRect && !contentRectIsEmpty;
+        if (shouldClip)
+            layer()->clipToRect(localPaintingInfo, context, contentRect);
+
+        // TODO(ojan): We probably should have already set shouldPaintContent to false if the rect is empty.
+        if (!contentRectIsEmpty) {
+            Vector<RenderBox*> layers;
+
+            PaintInfo paintInfo(context, pixelSnappedIntRect(contentRect.rect()), localPaintingInfo.rootLayer->renderer());
+            paint(paintInfo, layerLocation, layers);
+
+            std::stable_sort(layers.begin(), layers.end(), compareZIndex);
+            for (auto& box : layers) {
+                box->paintLayer(context, paintingInfo.rootLayer, rect);
+            }
+        }
+
+        if (shouldClip)
+            layer()->restoreClip(context, localPaintingInfo.paintDirtyRect, contentRect);
+    }
+
+    if (filterPainter.hasStartedFilterEffect()) {
+        context = filterPainter.applyFilterEffect();
+        layer()->restoreClip(transparencyLayerContext, localPaintingInfo.paintDirtyRect, contentRect);
+    }
+
+    // Make sure that we now use the original transparency context.
+    ASSERT(transparencyLayerContext == context);
+
+    // End our transparency layer
+    if (haveTransparency && layer()->usedTransparency()) {
+        context->endLayer();
+        context->restore();
+        layer()->clearUsedTransparency();
+    }
+}
+
+void RenderBox::paint(PaintInfo& paintInfo, const LayoutPoint& paintOffset, Vector<RenderBox*>& layers)
 {
     LayoutPoint adjustedPaintOffset = paintOffset + location();
     for (RenderObject* child = slowFirstChild(); child; child = child->nextSibling())
-        child->paint(paintInfo, adjustedPaintOffset);
+        child->paint(paintInfo, adjustedPaintOffset, layers);
 }
 
 void RenderBox::paintRootBoxFillLayers(const PaintInfo& paintInfo)

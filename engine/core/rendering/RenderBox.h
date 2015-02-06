@@ -28,6 +28,7 @@
 
 namespace blink {
 
+struct LayerPaintingInfo;
 struct PaintInfo;
 class RenderBlockFlow;
 
@@ -267,8 +268,10 @@ public:
 
     virtual void absoluteQuads(Vector<FloatQuad>&) const override;
 
+    void paintLayer(GraphicsContext* context, RenderLayer* rootLayer, const IntRect& rect);
+
     virtual void layout() override;
-    virtual void paint(PaintInfo&, const LayoutPoint&) override;
+    virtual void paint(PaintInfo&, const LayoutPoint&, Vector<RenderBox*>& layers) override;
     virtual bool nodeAtPoint(const HitTestRequest&, HitTestResult&, const HitTestLocation& locationInContainer, const LayoutPoint& accumulatedOffset, HitTestAction) override;
 
     virtual LayoutUnit minPreferredLogicalWidth() const override;
@@ -379,7 +382,6 @@ public:
     bool pushContentsClip(PaintInfo&, const LayoutPoint& accumulatedOffset, ContentsClipBehavior);
     void popContentsClip(PaintInfo&, const LayoutPoint& accumulatedOffset);
 
-    virtual void paintObject(PaintInfo&, const LayoutPoint&) { ASSERT_NOT_REACHED(); }
     virtual void paintBoxDecorationBackground(PaintInfo&, const LayoutPoint&);
 
     // Called when a positioned object moves but doesn't necessarily change size.  A simplified layout is attempted
@@ -465,6 +467,8 @@ protected:
     void updateIntrinsicContentLogicalHeight(LayoutUnit intrinsicContentLogicalHeight) const { m_intrinsicContentLogicalHeight = intrinsicContentLogicalHeight; }
 
 private:
+    void paintLayerContents(GraphicsContext* context, const LayerPaintingInfo& paintingInfo, const IntRect& rect);
+
     void shrinkToFitWidth(const LayoutUnit availableSpace, const LayoutUnit logicalLeftValue, const LayoutUnit bordersPlusPadding, LogicalExtentComputedValues&) const;
 
     bool skipContainingBlockForPercentHeightCalculation(const RenderBox* containingBlock) const;

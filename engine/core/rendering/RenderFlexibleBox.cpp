@@ -258,11 +258,13 @@ void RenderFlexibleBox::appendChildFrameRects(ChildFrameRects& childFrameRects)
     }
 }
 
-void RenderFlexibleBox::paintChildren(PaintInfo& paintInfo, const LayoutPoint& paintOffset)
+void RenderFlexibleBox::paintChildren(PaintInfo& paintInfo, const LayoutPoint& paintOffset, Vector<RenderBox*>& layers)
 {
     for (RenderBox* child = m_orderIterator.first(); child; child = m_orderIterator.next()) {
-        if (!child->hasSelfPaintingLayer())
-            child->paint(paintInfo, paintOffset);
+        if (child->hasSelfPaintingLayer())
+            layers.append(child);
+        else
+            child->paint(paintInfo, paintOffset, layers);
     }
 }
 

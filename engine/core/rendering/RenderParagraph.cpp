@@ -172,9 +172,9 @@ void RenderParagraph::simplifiedNormalFlowLayout()
       }
 }
 
-void RenderParagraph::paintChildren(PaintInfo& paintInfo, const LayoutPoint& paintOffset)
+void RenderParagraph::paintChildren(PaintInfo& paintInfo, const LayoutPoint& paintOffset, Vector<RenderBox*>& layers)
 {
-    m_lineBoxes.paint(this, paintInfo, paintOffset);
+    m_lineBoxes.paint(this, paintInfo, paintOffset, layers);
 }
 
 bool RenderParagraph::hitTestContents(const HitTestRequest& request, HitTestResult& result, const HitTestLocation& locationInContainer, const LayoutPoint& accumulatedOffset, HitTestAction hitTestAction)

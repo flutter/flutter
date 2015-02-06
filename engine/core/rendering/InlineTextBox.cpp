@@ -478,7 +478,7 @@ void paintTextWithEmphasisMark(
 
 } // namespace
 
-void InlineTextBox::paint(PaintInfo& paintInfo, const LayoutPoint& paintOffset, LayoutUnit /*lineTop*/, LayoutUnit /*lineBottom*/)
+void InlineTextBox::paint(PaintInfo& paintInfo, const LayoutPoint& paintOffset, LayoutUnit /*lineTop*/, LayoutUnit /*lineBottom*/, Vector<RenderBox*>& layers)
 {
     if (isLineBreak() || m_truncation == cFullTruncation || !m_len)
         return;

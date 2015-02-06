@@ -68,7 +68,7 @@ public:
 
     FrameView* frameView() const { return m_frameView; }
 
-    virtual void paint(PaintInfo&, const LayoutPoint&) override;
+    virtual void paint(PaintInfo&, const LayoutPoint&, Vector<RenderBox*>& layers) override;
     virtual void paintBoxDecorationBackground(PaintInfo&, const LayoutPoint&) override;
 
     void setSelection(RenderObject* start, int startPos, RenderObject*, int endPos);

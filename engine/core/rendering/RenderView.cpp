@@ -191,7 +191,7 @@ void RenderView::mapAbsoluteToLocalPoint(MapCoordinatesFlags mode, TransformStat
     }
 }
 
-void RenderView::paint(PaintInfo& paintInfo, const LayoutPoint& paintOffset)
+void RenderView::paint(PaintInfo& paintInfo, const LayoutPoint& paintOffset, Vector<RenderBox*>& layers)
 {
     // If we ever require layout but receive a paint anyway, something has gone horribly wrong.
     ASSERT(!needsLayout());
@@ -202,7 +202,7 @@ void RenderView::paint(PaintInfo& paintInfo, const LayoutPoint& paintOffset)
     if (m_frameView && style()->isOverflowPaged())
         paintInfo.context->fillRect(paintInfo.rect, m_frameView->baseBackgroundColor());
 
-    paintObject(paintInfo, paintOffset);
+    paintObject(paintInfo, paintOffset, layers);
 }
 
 static inline bool rendererObscuresBackground(RenderBox* rootBox)

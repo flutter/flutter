@@ -170,9 +170,9 @@ void RenderInline::addChild(RenderObject* newChild, RenderObject* beforeChild)
     newChild->setNeedsLayoutAndPrefWidthsRecalc();
 }
 
-void RenderInline::paint(PaintInfo& paintInfo, const LayoutPoint& paintOffset)
+void RenderInline::paint(PaintInfo& paintInfo, const LayoutPoint& paintOffset, Vector<RenderBox*>& layers)
 {
-    m_lineBoxes.paint(this, paintInfo, paintOffset);
+    m_lineBoxes.paint(this, paintInfo, paintOffset, layers);
 }
 
 template<typename GeneratorContext>

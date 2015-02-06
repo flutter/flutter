@@ -149,16 +149,16 @@ float RootInlineBox::placeEllipsisBox(bool ltr, float blockLeftEdge, float block
     return result;
 }
 
-void RootInlineBox::paintEllipsisBox(PaintInfo& paintInfo, const LayoutPoint& paintOffset, LayoutUnit lineTop, LayoutUnit lineBottom) const
+void RootInlineBox::paintEllipsisBox(PaintInfo& paintInfo, const LayoutPoint& paintOffset, LayoutUnit lineTop, LayoutUnit lineBottom, Vector<RenderBox*>& layers) const
 {
     if (hasEllipsisBox())
-        ellipsisBox()->paint(paintInfo, paintOffset, lineTop, lineBottom);
+        ellipsisBox()->paint(paintInfo, paintOffset, lineTop, lineBottom, layers);
 }
 
-void RootInlineBox::paint(PaintInfo& paintInfo, const LayoutPoint& paintOffset, LayoutUnit lineTop, LayoutUnit lineBottom)
+void RootInlineBox::paint(PaintInfo& paintInfo, const LayoutPoint& paintOffset, LayoutUnit lineTop, LayoutUnit lineBottom, Vector<RenderBox*>& layers)
 {
-    InlineFlowBox::paint(paintInfo, paintOffset, lineTop, lineBottom);
-    paintEllipsisBox(paintInfo, paintOffset, lineTop, lineBottom);
+    InlineFlowBox::paint(paintInfo, paintOffset, lineTop, lineBottom, layers);
+    paintEllipsisBox(paintInfo, paintOffset, lineTop, lineBottom, layers);
 }
 
 bool RootInlineBox::nodeAtPoint(const HitTestRequest& request, HitTestResult& result, const HitTestLocation& locationInContainer, const LayoutPoint& accumulatedOffset, LayoutUnit lineTop, LayoutUnit lineBottom)

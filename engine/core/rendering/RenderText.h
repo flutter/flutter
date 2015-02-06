@@ -154,7 +154,7 @@ private:
     // callers with a RenderObject* can continue to use length().
     virtual unsigned length() const override final { return textLength(); }
 
-    virtual void paint(PaintInfo&, const LayoutPoint&) override final { ASSERT_NOT_REACHED(); }
+    virtual void paint(PaintInfo&, const LayoutPoint&, Vector<RenderBox*>& layers) override final { ASSERT_NOT_REACHED(); }
     virtual void layout() override final { ASSERT_NOT_REACHED(); }
     virtual bool nodeAtPoint(const HitTestRequest&, HitTestResult&, const HitTestLocation&, const LayoutPoint&, HitTestAction) override final { ASSERT_NOT_REACHED(); return false; }
 

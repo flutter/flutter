@@ -40,14 +40,14 @@ public:
         setHasVirtualLogicalHeight();
     }
 
-    virtual void paint(PaintInfo&, const LayoutPoint&, LayoutUnit lineTop, LayoutUnit lineBottom) override;
+    virtual void paint(PaintInfo&, const LayoutPoint&, LayoutUnit lineTop, LayoutUnit lineBottom, Vector<RenderBox*>& layers) override;
     virtual bool nodeAtPoint(const HitTestRequest&, HitTestResult&, const HitTestLocation& locationInContainer, const LayoutPoint& accumulatedOffset, LayoutUnit lineTop, LayoutUnit lineBottom) override;
     void setSelectionState(RenderObject::SelectionState s) { m_selectionState = s; }
     IntRect selectionRect();
 
     virtual float virtualLogicalHeight() const override { return m_height; }
 private:
-    void paintMarkupBox(PaintInfo&, const LayoutPoint& paintOffset, LayoutUnit lineTop, LayoutUnit lineBottom, RenderStyle*);
+    void paintMarkupBox(PaintInfo&, const LayoutPoint& paintOffset, LayoutUnit lineTop, LayoutUnit lineBottom, RenderStyle*, Vector<RenderBox*>& layers);
     int height() const { return m_height; }
     virtual RenderObject::SelectionState selectionState() override { return m_selectionState; }
     void paintSelection(GraphicsContext*, const FloatPoint&, RenderStyle*, const Font&);

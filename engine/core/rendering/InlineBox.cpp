@@ -191,9 +191,9 @@ void InlineBox::adjustPosition(float dx, float dy)
         toRenderBox(renderer()).move(dx, dy);
 }
 
-void InlineBox::paint(PaintInfo& paintInfo, const LayoutPoint& paintOffset, LayoutUnit /* lineTop */, LayoutUnit /*lineBottom*/)
+void InlineBox::paint(PaintInfo& paintInfo, const LayoutPoint& paintOffset, LayoutUnit /* lineTop */, LayoutUnit /*lineBottom*/, Vector<RenderBox*>& layers)
 {
-    renderer().paint(paintInfo, paintOffset);
+    renderer().paint(paintInfo, paintOffset, layers);
 }
 
 bool InlineBox::nodeAtPoint(const HitTestRequest& request, HitTestResult& result, const HitTestLocation& locationInContainer, const LayoutPoint& accumulatedOffset, LayoutUnit /* lineTop */, LayoutUnit /*lineBottom*/)

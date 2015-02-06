@@ -114,7 +114,7 @@ private:
 
     virtual void layout() override final { ASSERT_NOT_REACHED(); } // Do nothing for layout()
 
-    virtual void paint(PaintInfo&, const LayoutPoint&) override final;
+    virtual void paint(PaintInfo&, const LayoutPoint&, Vector<RenderBox*>& layers) override final;
 
     virtual bool nodeAtPoint(const HitTestRequest&, HitTestResult&, const HitTestLocation& locationInContainer, const LayoutPoint& accumulatedOffset, HitTestAction) override final;
 

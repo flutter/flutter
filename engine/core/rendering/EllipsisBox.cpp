@@ -33,7 +33,7 @@
 
 namespace blink {
 
-void EllipsisBox::paint(PaintInfo& paintInfo, const LayoutPoint& paintOffset, LayoutUnit lineTop, LayoutUnit lineBottom)
+void EllipsisBox::paint(PaintInfo& paintInfo, const LayoutPoint& paintOffset, LayoutUnit lineTop, LayoutUnit lineBottom, Vector<RenderBox*>& layers)
 {
     GraphicsContext* context = paintInfo.context;
     RenderStyle* style = renderer().style(isFirstLineStyle());
@@ -75,7 +75,7 @@ void EllipsisBox::paint(PaintInfo& paintInfo, const LayoutPoint& paintOffset, La
     if (hasShadow)
         context->clearDrawLooper();
 
-    paintMarkupBox(paintInfo, paintOffset, lineTop, lineBottom, style);
+    paintMarkupBox(paintInfo, paintOffset, lineTop, lineBottom, style, layers);
 }
 
 InlineBox* EllipsisBox::markupBox() const
@@ -97,7 +97,7 @@ InlineBox* EllipsisBox::markupBox() const
     return anchorBox;
 }
 
-void EllipsisBox::paintMarkupBox(PaintInfo& paintInfo, const LayoutPoint& paintOffset, LayoutUnit lineTop, LayoutUnit lineBottom, RenderStyle* style)
+void EllipsisBox::paintMarkupBox(PaintInfo& paintInfo, const LayoutPoint& paintOffset, LayoutUnit lineTop, LayoutUnit lineBottom, RenderStyle* style, Vector<RenderBox*>& layers)
 {
     InlineBox* markupBox = this->markupBox();
     if (!markupBox)
@@ -106,7 +106,7 @@ void EllipsisBox::paintMarkupBox(PaintInfo& paintInfo, const LayoutPoint& paintO
     LayoutPoint adjustedPaintOffset = paintOffset;
     adjustedPaintOffset.move(x() + m_logicalWidth - markupBox->x(),
         y() + style->fontMetrics().ascent() - (markupBox->y() + markupBox->renderer().style(isFirstLineStyle())->fontMetrics().ascent()));
-    markupBox->paint(paintInfo, adjustedPaintOffset, lineTop, lineBottom);
+    markupBox->paint(paintInfo, adjustedPaintOffset, lineTop, lineBottom, layers);
 }
 
 IntRect EllipsisBox::selectionRect()

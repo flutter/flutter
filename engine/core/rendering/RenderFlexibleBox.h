@@ -52,7 +52,7 @@ public:
     virtual int firstLineBoxBaseline() const override;
     virtual int inlineBlockBaseline(LineDirectionMode) const override;
 
-    virtual void paintChildren(PaintInfo&, const LayoutPoint&) override final;
+    virtual void paintChildren(PaintInfo&, const LayoutPoint&, Vector<RenderBox*>& layers) override final;
 
     bool isHorizontalFlow() const;
 

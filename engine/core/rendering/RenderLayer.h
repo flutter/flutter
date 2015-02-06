@@ -134,6 +134,7 @@ public:
     bool hasNonEmptyChildRenderers() const;
 
     bool usedTransparency() const { return m_usedTransparency; }
+    void clearUsedTransparency() { m_usedTransparency = false; }
 
     // Gets the nearest enclosing positioned ancestor layer (also includes
     // the <html> layer and the root layer).
@@ -152,8 +153,6 @@ public:
     // paints the layers that intersect the damage rect from back to
     // front.  The hitTest method looks for mouse events by walking
     // layers that intersect the point from front to back.
-    // paint() assumes that the caller will clip to the bounds of damageRect if necessary.
-    void paint(GraphicsContext*, const LayoutRect& damageRect);
     bool hitTest(const HitTestRequest&, HitTestResult&);
     bool hitTest(const HitTestRequest&, const HitTestLocation&, HitTestResult&);
 
@@ -244,6 +243,9 @@ public:
     void updateOrRemoveFilterEffectRenderer();
     void updateSelfPaintingLayer();
 
+    void clipToRect(const LayerPaintingInfo&, GraphicsContext*, const ClipRect&, BorderRadiusClippingRule = IncludeSelfForBorderRadius);
+    void restoreClip(GraphicsContext*, const LayoutRect& paintDirtyRect, const ClipRect&);
+
 private:
     // TODO(ojan): Get rid of this. These are basically layer-tree-only paint phases.
     enum PaintLayerFlags {
@@ -255,9 +257,6 @@ private:
 
     void setAncestorChainHasSelfPaintingLayerDescendant();
     void dirtyAncestorChainHasSelfPaintingLayerDescendantStatus();
-
-    void clipToRect(const LayerPaintingInfo&, GraphicsContext*, const ClipRect&, BorderRadiusClippingRule = IncludeSelfForBorderRadius);
-    void restoreClip(GraphicsContext*, const LayoutRect& paintDirtyRect, const ClipRect&);
 
     void setNextSibling(RenderLayer* next) { m_next = next; }
     void setPreviousSibling(RenderLayer* prev) { m_previous = prev; }
@@ -275,20 +274,6 @@ private:
     }
 
     LayoutPoint renderBoxLocation() const { return renderer()->isBox() ? toRenderBox(renderer())->location() : LayoutPoint(); }
-
-    // paintLayer() assumes that the caller will clip to the bounds of the painting dirty if necessary.
-    void paintLayer(GraphicsContext*, const LayerPaintingInfo&, PaintLayerFlags);
-
-    // paintLayerContents() assumes that the caller will clip to the bounds of the painting dirty rect if necessary.
-    void paintLayerContents(GraphicsContext*, const LayerPaintingInfo&, PaintLayerFlags);
-
-    void paintLayerByApplyingTransform(GraphicsContext*, const LayerPaintingInfo&, PaintLayerFlags, const LayoutPoint& translationOffset = LayoutPoint());
-
-    void paintChildren(unsigned childrenToVisit, GraphicsContext*, const LayerPaintingInfo&, PaintLayerFlags);
-
-    void paintForeground(GraphicsContext*, GraphicsContext* transparencyLayerContext,
-        const LayoutRect& transparencyPaintDirtyRect, bool haveTransparency, const LayerPaintingInfo&,
-        LayoutPoint& layerLocation, ClipRect& layerForegroundRect);
 
     RenderLayer* hitTestLayer(RenderLayer* rootLayer, RenderLayer* containerLayer, const HitTestRequest& request, HitTestResult& result,
                               const LayoutRect& hitTestRect, const HitTestLocation&, bool appliedTransform,

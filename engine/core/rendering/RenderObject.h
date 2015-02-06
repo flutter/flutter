@@ -440,7 +440,7 @@ public:
     void updateImage(StyleImage*, StyleImage*);
 
     // paintOffset is the offset from the origin of the GraphicsContext at which to paint the current object.
-    virtual void paint(PaintInfo&, const LayoutPoint& paintOffset);
+    virtual void paint(PaintInfo&, const LayoutPoint& paintOffset, Vector<RenderBox*>& layers);
 
     // Subclasses must reimplement this method to compute the size and position
     // of this object and all its descendants.

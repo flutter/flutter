@@ -989,7 +989,7 @@ bool InlineFlowBox::nodeAtPoint(const HitTestRequest& request, HitTestResult& re
     return false;
 }
 
-void InlineFlowBox::paint(PaintInfo& paintInfo, const LayoutPoint& paintOffset, LayoutUnit lineTop, LayoutUnit lineBottom)
+void InlineFlowBox::paint(PaintInfo& paintInfo, const LayoutPoint& paintOffset, LayoutUnit lineTop, LayoutUnit lineBottom, Vector<RenderBox*>& layers)
 {
     LayoutRect overflowRect(visualOverflowRect(lineTop, lineBottom));
     overflowRect.moveBy(paintOffset);
@@ -1001,7 +1001,7 @@ void InlineFlowBox::paint(PaintInfo& paintInfo, const LayoutPoint& paintOffset, 
 
     for (InlineBox* curr = firstChild(); curr; curr = curr->nextOnLine()) {
         if (curr->renderer().isText() || !curr->boxModelObject()->hasSelfPaintingLayer())
-            curr->paint(paintInfo, paintOffset, lineTop, lineBottom);
+            curr->paint(paintInfo, paintOffset, lineTop, lineBottom, layers);
     }
 }
 

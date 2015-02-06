@@ -683,7 +683,8 @@ void FrameView::paint(GraphicsContext* context, const IntRect& rect)
     RenderObject::SetLayoutNeededForbiddenScope forbidSetNeedsLayout(*rootLayer->renderer());
 #endif
 
-    rootLayer->paint(context, rect);
+    // TODO(ojan): Is this rect passed down correct or even needed?
+    renderView->paintLayer(context, rootLayer, pixelSnappedIntRect(renderView->viewRect()));
 
     m_isPainting = false;
     m_lastPaintTime = currentTime();
