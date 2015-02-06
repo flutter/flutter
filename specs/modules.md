@@ -28,17 +28,46 @@ before the module it represents is marked complete.
 Module API
 ----------
 
-Within a script in a module, the ``module`` identifier is bound to
-the ``Module`` object that represents the module.
+Each module consists of one or more libraries. The first library in a
+module is the *element tree library*, which imports the sky:core
+module and then consists of the following code for a Sky module:
 
-### Exporting values ###
+```dart
+final Module module = new Module();
+```
 
-A module can export a value by assigning the ``exports`` property of
-its ``Module`` object. By default, the ``exports`` property of a
-``Module`` is an empty Object. Properties can be added to the object,
-or, it can be set to an entirely different object; for example, it
-could be set to the module's ``Document`` itself, in case the point of
-the module is to expose some ``template`` elements.
+...and the following code for a Sky application:
+
+```dart
+final Module module = new Application();
+```
+
+The ``<script>`` elements found in the document create the subsequent
+libraries. Each one first imports the ``dart:mirror`` library, then
+the ``sky:core`` module, then the first library described above, then
+all the modules referenced by ``<import>`` element up to that
+``<script>`` element and all the libraries defined by ``<script>``
+elements up to that point, interleaved so as to maintain the same
+relative order as those elements were first seen by the parser.
+
+When a library imports a module, it actually imports all the libraries
+that were declared by that module except the element tree library.
+
+At the end of the ``<script>`` block's source, if it parsed correctly
+and completely, the following code is appended:
+
+```dart
+class _ { }
+module.registerElements(reflectClass(_).owner);
+```
+
+TODO(ianh): decide what URL and name we should give the libraries, as
+exposed in MirrorSystem.getName(libraryMirror.qualifiedName) etc
+
+The ``Module`` class is defined in ``sky:core`` as follows:
+
+
+TODO(ianh): dartification of the rest of this file
 
 ### Exporting element definitions ###
 
