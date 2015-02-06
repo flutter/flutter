@@ -4,7 +4,7 @@
 
 #include "sky/compositor/rasterizer_ganesh.h"
 
-#include "base/debug/trace_event.h"
+#include "base/trace_event/trace_event.h"
 #include "mojo/skia/ganesh_surface.h"
 #include "sky/compositor/layer_host.h"
 #include "third_party/skia/include/core/SkCanvas.h"
