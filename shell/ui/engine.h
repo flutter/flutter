@@ -10,12 +10,15 @@
 #include "base/memory/weak_ptr.h"
 #include "sky/engine/public/web/WebFrameClient.h"
 #include "sky/engine/public/web/WebViewClient.h"
+#include "sky/shell/ui_delegate.h"
+#include "ui/gfx/geometry/size.h"
 
 namespace sky {
 namespace shell {
 class PlatformImpl;
 
-class Engine : public blink::WebFrameClient,
+class Engine : public UIDelegate,
+               public blink::WebFrameClient,
                public blink::WebViewClient {
  public:
   Engine();
@@ -24,6 +27,9 @@ class Engine : public blink::WebFrameClient,
   base::WeakPtr<Engine> GetWeakPtr();
 
   void Init();
+
+  void OnViewportMetricsChanged(const gfx::Size& size,
+                                float device_pixel_ratio) override;
 
  private:
   scoped_ptr<PlatformImpl> platform_impl_;

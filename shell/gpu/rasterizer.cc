@@ -34,7 +34,7 @@ base::WeakPtr<Rasterizer> Rasterizer::GetWeakPtr() {
   return weak_factory_.GetWeakPtr();
 }
 
-void Rasterizer::Init(gfx::AcceleratedWidget widget) {
+void Rasterizer::OnAcceleratedWidgetAvailable(gfx::AcceleratedWidget widget) {
   share_group_ = make_scoped_refptr(new gfx::GLShareGroup());
   surface_ = gfx::GLSurface::CreateViewGLSurface(widget);
   CHECK(surface_) << "GLSurface required.";
@@ -51,6 +51,9 @@ void Rasterizer::Draw(skia::RefPtr<SkPicture> picture) {
   canvas->flush();
 
   surface_->SwapBuffers();
+}
+
+void Rasterizer::OnOutputSurfaceDestroyed() {
 }
 
 bool Rasterizer::CreateGLContext() {

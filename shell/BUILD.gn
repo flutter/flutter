@@ -29,10 +29,8 @@ shared_library("sky_shell") {
     "gpu/ganesh_surface.h",
     "gpu/rasterizer.cc",
     "gpu/rasterizer.h",
-    "ui/engine.cc",
-    "ui/engine.h",
-    "ui/platform_impl.cc",
-    "ui/platform_impl.h",
+    "gpu_delegate.cc",
+    "gpu_delegate.h",
     "library_loader.cc",
     "shell.cc",
     "shell.h",
@@ -40,6 +38,12 @@ shared_library("sky_shell") {
     "sky_main.h",
     "sky_view.cc",
     "sky_view.h",
+    "ui/engine.cc",
+    "ui/engine.h",
+    "ui/platform_impl.cc",
+    "ui/platform_impl.h",
+    "ui_delegate.cc",
+    "ui_delegate.h",
   ]
 
   deps = [

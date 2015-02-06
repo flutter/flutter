@@ -8,6 +8,7 @@
 #include "base/memory/ref_counted.h"
 #include "base/memory/weak_ptr.h"
 #include "skia/ext/refptr.h"
+#include "sky/shell/gpu_delegate.h"
 #include "ui/gfx/geometry/size.h"
 #include "ui/gfx/native_widget_types.h"
 
@@ -24,14 +25,16 @@ namespace shell {
 class GaneshContext;
 class GaneshSurface;
 
-class Rasterizer {
+class Rasterizer : public GPUDelegate {
  public:
   explicit Rasterizer();
   ~Rasterizer();
 
   base::WeakPtr<Rasterizer> GetWeakPtr();
 
-  void Init(gfx::AcceleratedWidget widget);
+  void OnAcceleratedWidgetAvailable(gfx::AcceleratedWidget widget) override;
+  void OnOutputSurfaceDestroyed() override;
+
   void Draw(skia::RefPtr<SkPicture> picture);
 
  private:
