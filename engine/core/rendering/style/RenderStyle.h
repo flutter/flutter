@@ -199,7 +199,7 @@ protected:
         unsigned overflowX : 3; // EOverflow
         unsigned overflowY : 3; // EOverflow
         unsigned verticalAlign : 4; // EVerticalAlign
-        unsigned position : 3; // EPosition
+        unsigned position : 1; // EPosition
         unsigned tableLayout : 1; // ETableLayout
         unsigned unicodeBidi : 3; // EUnicodeBidi
 
@@ -374,7 +374,8 @@ public:
 
     EPosition position() const { return static_cast<EPosition>(noninherited_flags.position); }
     bool hasOutOfFlowPosition() const { return position() == AbsolutePosition; }
-    bool hasInFlowPosition() const { return position() == RelativePosition; }
+    // FIXME(sky): Remove
+    bool hasInFlowPosition() const { return false; }
 
     const Length& width() const { return m_box->width(); }
     const Length& height() const { return m_box->height(); }

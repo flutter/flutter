@@ -1528,9 +1528,6 @@ template<> inline CSSPrimitiveValue::CSSPrimitiveValue(EPosition e)
     case StaticPosition:
         m_value.valueID = CSSValueStatic;
         break;
-    case RelativePosition:
-        m_value.valueID = CSSValueRelative;
-        break;
     case AbsolutePosition:
         m_value.valueID = CSSValueAbsolute;
         break;
@@ -1543,8 +1540,6 @@ template<> inline CSSPrimitiveValue::operator EPosition() const
     switch (m_value.valueID) {
     case CSSValueStatic:
         return StaticPosition;
-    case CSSValueRelative:
-        return RelativePosition;
     case CSSValueAbsolute:
         return AbsolutePosition;
     default:

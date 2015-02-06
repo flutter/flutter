@@ -51,10 +51,7 @@ namespace blink {
 
 static void adjustClipRectsForChildren(const RenderObject& renderer, ClipRects& clipRects)
 {
-    EPosition position = renderer.style()->position();
-    if (position == RelativePosition) {
-        clipRects.setPosClipRect(clipRects.overflowClipRect());
-    } else if (position == AbsolutePosition) {
+    if (renderer.style()->position() == AbsolutePosition) {
         clipRects.setOverflowClipRect(clipRects.posClipRect());
     }
 }

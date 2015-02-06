@@ -49,8 +49,7 @@ enum OutlineIsAuto { AUTO_OFF = 0, AUTO_ON };
 
 enum EPosition {
     StaticPosition = 0,
-    RelativePosition = 1,
-    AbsolutePosition = 2,
+    AbsolutePosition = 1,
 };
 
 // Box decoration attributes. Not inherited.

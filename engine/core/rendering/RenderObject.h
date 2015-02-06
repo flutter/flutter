@@ -726,8 +726,7 @@ private:
         // FIXME(sky): Remove this enum and just use EPosition directly.
         enum PositionedState {
             IsStaticallyPositioned = 0,
-            IsRelativelyPositioned = 1,
-            IsOutOfFlowPositioned = 2,
+            IsOutOfFlowPositioned = 1,
         };
 
     public:
@@ -791,12 +790,13 @@ private:
         ADD_BOOLEAN_BITFIELD(alwaysCreateLineBoxesForRenderInline, AlwaysCreateLineBoxesForRenderInline);
 
     private:
-        unsigned m_positionedState : 2; // PositionedState
+        unsigned m_positionedState : 1; // PositionedState
         unsigned m_selectionState : 3; // SelectionState
 
     public:
         bool isOutOfFlowPositioned() const { return m_positionedState == IsOutOfFlowPositioned; }
-        bool isRelPositioned() const { return m_positionedState == IsRelativelyPositioned; }
+        // FIXME(sky): Remove
+        bool isRelPositioned() const { return false; }
         bool isPositioned() const { return m_positionedState != IsStaticallyPositioned; }
 
         void setPositionedState(int positionState)

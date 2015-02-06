@@ -177,10 +177,6 @@ void RenderBlock::styleWillChange(StyleDifference diff, const RenderStyle& newSt
             // They will be inserted into our positioned objects list during layout.
             RenderObject* cb = parent();
             while (cb && (cb->style()->position() == StaticPosition || (cb->isInline() && !cb->isReplaced())) && !cb->isRenderView()) {
-                if (cb->style()->position() == RelativePosition && cb->isInline() && !cb->isReplaced()) {
-                    cb = cb->containingBlock();
-                    break;
-                }
                 cb = cb->parent();
             }
 
