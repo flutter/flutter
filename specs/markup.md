@@ -165,10 +165,9 @@ it's the runtime library). None of these elements have shadow trees.
    from the element's "content" attribute.
 
 ``<script>``
- - Blocks until all previous imports have been loaded, then runs the
-   script, with 'module' as the first argument, the exports of any
-   imports that have "as" attributes at this time passed in as
-   subsequent arguments, and with "this" set to null.
+ - Blocks until all previous imports have been loaded, then loads the
+   library given in the script block, as described in
+   [scripts.md](scripts.md).
 
 ``<style>``
  - Adds the contents to the document's styles.
@@ -207,9 +206,6 @@ it's the runtime library). None of these elements have shadow trees.
    the view manager). (Actually just ensures that any time the element
    is mutated, theTitleElement.ownerScope.ownerDocument.title is set
    to the element's contents.)
-
-``<error>``
- - Represents a parse error.
 
 
 Sky Markup: Global Attributes

@@ -2,6 +2,10 @@ Sky DOM APIs
 ============
 
 ```dart
+SKY MODULE
+<!-- part of sky:core -->
+
+<script>
 // ELEMENT TREE API
 
 abstract class ChildNode {
@@ -183,7 +187,7 @@ Type rootLayoutManager = BlockLayoutManager; // O(1)
 
 @tagname('import')
 class ImportElement extends Element {
-  //XXX ImportElement = Element;
+  ImportElement = Element;
 
   @override
   Type getLayoutManager() => null; // O(1)
@@ -191,7 +195,7 @@ class ImportElement extends Element {
 
 @tagname('template')
 class TemplateElement extends Element {
-  //XXX TemplateElement = Element;
+  TemplateElement = Element;
 
   // TODO(ianh): convert <template> to using a token stream instead of a DocumentFragment
 
@@ -203,7 +207,7 @@ class TemplateElement extends Element {
 
 @tagname('script')
 class ScriptElement extends Element {
-  //XXX ScriptElement = Element;
+  ScriptElement = Element;
 
   @override
   Type getLayoutManager() => null; // O(1)
@@ -211,7 +215,7 @@ class ScriptElement extends Element {
 
 @tagname('style')
 class StyleElement extends Element {
-  //XXX StyleElement = Element;
+  StyleElement = Element;
 
   @nonnull external List</*@nonnull*/ Rule> getRules(); // O(N) in rules
 
@@ -221,7 +225,7 @@ class StyleElement extends Element {
 
 @tagname('content')
 class ContentElement extends Element {
-  //XXX ContentElement = Element;
+  ContentElement = Element;
 
   @nonnull external List</*@nonnull*/ Node> getDistributedNodes(); // O(N) in distributed nodes
 
@@ -231,7 +235,7 @@ class ContentElement extends Element {
 
 @tagname('img')
 class ImgElement extends Element {
-  //XXX ImgElement = Element;
+  ImgElement = Element;
 
   @override
   Type getLayoutManager() => ImgElementLayoutManager; // O(1)
@@ -239,17 +243,17 @@ class ImgElement extends Element {
 
 @tagname('div')
 class DivElement extends Element {
-  //XXX DivElement = Element;
+  DivElement = Element;
 }
 
 @tagname('span')
 class SpanElement extends Element {
-  //XXX SpanElement = Element;
+  SpanElement = Element;
 }
 
 @tagname('iframe')
 class IframeElement extends Element {
-  //XXX IframeElement = Element;
+  IframeElement = Element;
 
   @override
   Type getLayoutManager() => IframeElementLayoutManager; // O(1)
@@ -257,27 +261,27 @@ class IframeElement extends Element {
 
 @tagname('t')
 class TElement extends Element {
-  //XXX TElement = Element;
+  TElement = Element;
 }
 
 @tagname('a')
 class AElement extends Element {
-  //XXX AElement = Element;
+  AElement = Element;
 }
 
 @tagname('title')
 class TitleElement extends Element {
-  //XXX TitleElement = Element;
+  TitleElement = Element;
 
   @override
   Type getLayoutManager() => null; // O(1)
 }
 
-class ErrorElement extends Element {
-  ErrorElement._create();
+class _ErrorElement extends Element {
+  _ErrorElement._create();
 
   @override
-  Type getLayoutManager() => ErrorElementLayoutManager; // O(1)
+  Type getLayoutManager() => _ErrorElementLayoutManager; // O(1)
 }
 
 class SelectorQuery {
@@ -287,4 +291,5 @@ class SelectorQuery {
   external Element find(@nonnull FindRoot root); // O(N*F())+O(M) where N is the number of descendants and M the average depth of the tree
   @nonnull external List</*@nonnull*/ Element> findAll(FindRoot root); // O(N*F())+O(N*M) where N is the number of descendants and M the average depth of the tree
 }
+</script>
 ```
