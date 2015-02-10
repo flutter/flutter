@@ -79,16 +79,26 @@ class Attr {
 
 // @tagname annotation for registering elements
 // only useful when placed on classes that inherit from Element
-class tagname {
-  const tagname(this.value);
-  @nonnull final String value;
+class tagname extends AutomaticMetadata {
+  const tagname(this.name);
+  @nonnull final String name;
+  void init(DeclarationMirror target, Module module) {
+    assert(target is ClassMirror);
+    if (!target.isSubclassOf(reflectClass(Element)))
+      throw Error('@tagname can only be used on descendants of Element');
+    module.registerElement(name, (target as ClassMirror).reflectedType);
+  }
 }
 
 abstract class FindRoot { }
 
 abstract class Element extends ParentNode with ChildNode implements FindRoot {
-  Element({Map</*@nonnull*/ String, /*@nonnull*/ String> attributes: null,
-           List</*nonnull*/ ChildNode> nodes: null}); // O(M+N), M = number of attributes, N = number of nodes plus all their descendants
+  external Element({Map</*@nonnull*/ String, /*@nonnull*/ String> attributes: null,
+                   List</*nonnull*/ ChildNode> nodes: null,
+                   Module hostModule: null}); // O(M+N), M = number of attributes, N = number of nodes plus all their descendants
+  // initialises the internal attributes table
+  // appends the given child nodes
+  // if this.needsShadow, creates a shadow tree
 
   @nonnull String get tagName { // O(N) in number of annotations on the class
     // throws a StateError if the class doesn't have an @tagname annotation
@@ -104,6 +114,7 @@ abstract class Element extends ParentNode with ChildNode implements FindRoot {
   // Returns a new Array and new Attr instances every time.
   @nonnull external List<Attr> getAttributes(); // O(N) in number of attributes
 
+  get bool needsShadow => false; // O(1)
   external ShadowRoot get shadowRoot; // O(1)
   // returns the shadow root
   // TODO(ianh): Should this be mutable? It would help explain how it gets set...
