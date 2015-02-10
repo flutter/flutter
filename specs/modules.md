@@ -66,7 +66,7 @@ void main() {
   LibraryMirror library = reflectClass(_).owner as LibraryMirror;
   if (library.declarations.containsKey(#init) && library.declarations[#init] is MethodMirror)
     init();
-  module.init(library);
+  AutomaticMetadata.runLibrary(library, module);
 }
 ```
 
