@@ -105,15 +105,6 @@ abstract class AbstractModule extends EventTarget {
   // if there is, then mark this tagname is broken, so that it acts as if it's not registered in the parser,
   // and, if this is the first time it was marked broken, log a console message regarding the issue
   // (mention the tag name but not the classes, so that it's not observable that this currently happens out of order)
-
-  void init(LibraryMirror library) {
-    library.declarations.forEach((Symbol s, DeclarationMirror d) {
-      d.metadata.forEach((InstanceMirror i) {
-        if (i.reflectee is AutomaticMetadata)
-          i.reflectee.init(d, this);
-      });
-    });
-  }
 }
 
 class Module : AbstractModule {

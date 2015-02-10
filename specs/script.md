@@ -36,13 +36,44 @@ The following definitions are exposed in ``sky:core``:
 ```dart
 abstract class AutomaticMetadata {
   const AutomaticMetadata();
-  void init(DeclarationMirror target) { }
+  void init(DeclarationMirror target, Module module);
+
+  static void runLibrary(LibraryMirror library, Module module) {
+    library.declarations.values.toList()..sort((DeclarationMirror a, DeclarationMirror b) {
+      bool aHasLocation;
+      try {
+        aHasLocation = a.location != null;
+      } catch(e) {
+        aHasLocation = false;
+      }
+      bool bHasLocation;
+      try {
+        bHasLocation = b.location != null;
+      } catch(e) {
+        bHasLocation = false;
+      }
+      if (!aHasLocation)
+        return bHasLocation ? 1 : 0;
+      if (!bHasLocation)
+        return -1;
+      if (a.location.sourceUri != b.location.sourceUri)
+        return a.location.sourceUri.toString().compareTo(b.location.sourceUri.toString());
+      if (a.location.line != b.location.line)
+        return a.location.line - b.location.line;
+      return a.location.column - b.location.column;
+    })
+    ..forEach((DeclarationMirror d) {
+      d.metadata.forEach((InstanceMirror i) {
+        if (i.reflectee is AutomaticMetadata)
+          i.reflectee.run(d, module);
+      });
+    });
+  }
 }
 
-/*
 class AutomaticFunction extends AutomaticMetadata {
   const AutomaticFunction();
-  void init(DeclarationMirror target) {
+  void init(DeclarationMirror target, Module module) {
     assert(target is MethodMirror);
     MethodMirror f = target as MethodMirror;
     assert(!f.isAbstract);
@@ -55,7 +86,6 @@ class AutomaticFunction extends AutomaticMetadata {
   }
 }
 const autorun = const AutomaticFunction();
-*/
 ```
 
 Extensions
