@@ -22,7 +22,8 @@ class SkyApplication : public mojo::Application {
         initial_response_(response.Pass()) {}
 
   void Initialize(mojo::ShellPtr shell,
-                  mojo::Array<mojo::String> args) override {
+                  mojo::Array<mojo::String> args,
+                  const mojo::String& url) override {
     shell_ = shell.Pass();
     mojo::ServiceProviderPtr service_provider;
     shell_->ConnectToApplication("mojo:network_service",
