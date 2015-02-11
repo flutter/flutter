@@ -80,6 +80,15 @@ ScriptValue HTMLIFrameElement::takeExposedServicesHandle(ScriptState* scriptStat
     return ScriptValue(scriptState, gin::ConvertToV8(scriptState->isolate(), m_exposedServices.release()));
 }
 
+void HTMLIFrameElement::embedViewManagerClient(const ScriptValue& client) {
+  if (!m_contentView)
+    return;
+
+  mojo::MessagePipeHandle handle;
+  if (gin::ConvertFromV8(client.isolate(), client.v8Value(), &handle))
+    m_contentView->Embed(mojo::MakeProxy<mojo::ViewManagerClient>(mojo::MakeScopedHandle(handle)));
+}
+
 void HTMLIFrameElement::navigateView()
 {
     if (!m_contentView)

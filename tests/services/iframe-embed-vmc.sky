@@ -1,0 +1,34 @@
+<html>
+<import src="/gen/mojo/public/interfaces/application/shell.mojom.sky" as="shellMojom" />
+<import src="/gen/mojo/public/sky/connection.sky" as="connection" />
+<import src="/gen/mojo/public/sky/core.sky" as="core" />
+<import src="/gen/mojo/services/public/sky/shell.sky" as="shellJS" />
+<import src="/gen/services/js/test/echo_service.mojom.sky" as="echoServiceMojom" />
+<import src="/gen/mojo/services/view_manager/public/interfaces/view_manager.mojom.sky" as="ViewManager">
+<import src="/gen/mojo/services/input_events/public/interfaces/input_events.mojom.sky" as="InputEvents"/>
+<import src="/sky/framework/sky-element/sky-element.sky" as="SkyElement" />
+
+<iframe></iframe>
+
+<script>
+var shellHandle = internals.passShellProxyHandle();
+var shellProxy = connection.bindHandleToProxy(shellHandle, shellMojom.Shell);
+var shell = new shellJS.Shell(shellProxy);
+
+// The vmcApp provides ViewManagerClient and EchoService.
+var vmcURL = "http://127.0.0.1:8000/sky/tests/services/resources/iframe-vmc.js"
+var vmcApp = shell.connectToApplication(vmcURL);
+
+// The Promise returned by the vmcApp's echoString() method will not 
+// resolve until the vmcApp's onEmbed() method runs.
+var echoService = vmcApp.requestService(echoServiceMojom.EchoService);
+echoService.echoString("success").then(function(response) {
+  internals.notifyTestComplete(response.value);
+});
+
+// Using internals.connectToService here, instead of just connecting
+// with vmcApp, because we just need a MessagePipe handle (not a proxy).
+var vmcService = internals.connectToService(vmcURL, ViewManager.ViewManagerClient.name);
+document.querySelector("iframe").embedViewManagerClient(vmcService);
+</script>
+</html>

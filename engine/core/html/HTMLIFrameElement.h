@@ -28,6 +28,7 @@ public:
 
     ScriptValue takeServicesHandle(ScriptState*);
     ScriptValue takeExposedServicesHandle(ScriptState*);
+    void embedViewManagerClient(const ScriptValue& client);
 
 private:
     explicit HTMLIFrameElement(Document&);
