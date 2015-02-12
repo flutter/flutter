@@ -1,47 +1,52 @@
 <sky>
-<import src="../resources/chai.sky" />
-<import src="../resources/mocha.sky" />
 <script>
-describe("ownerScope", function() {
-  it("should return null for elements not a child of a scope", function() {
+import "../resources/third_party/unittest/unittest.dart";
+import "../resources/unit.dart";
+
+import "dart:sky";
+
+void main() {
+  initUnit();
+
+  test("should return null for elements not a child of a scope", () {
     var doc = new Document();
     var element = doc.createElement("div");
-    assert.isNull(element.ownerScope);
+    expect(element.ownerScope, isNull);
   });
-  it("should return the document for elements in the document scope", function() {
+  test("should return the document for elements in the document scope", () {
     var doc = new Document();
     var element = doc.createElement("div");
     doc.appendChild(element);
-    assert.equal(element.ownerScope, element.ownerDocument);
-    assert.equal(element.ownerScope, doc);
+    expect(element.ownerScope, equals(element.ownerDocument));
+    expect(element.ownerScope, equals(doc));
   });
-  it("should return the shadow root for elements in the shadow root scope", function() {
+  test("should return the shadow root for elements in the shadow root scope", () {
     var doc = new Document();
     var host = doc.createElement("div");
     var child = doc.createElement("div");
     var shadowRoot = host.ensureShadowRoot();
     shadowRoot.appendChild(child);
-    assert.equal(child.ownerScope, shadowRoot);
+    expect(child.ownerScope, equals(shadowRoot));
   });
-  it("should return self for a shadow root or document", function() {
+  test("should return self for a shadow root or document", () {
     var doc = new Document();
     var host = doc.createElement("div");
     doc.appendChild(host);
     var shadowRoot = host.ensureShadowRoot();
-    assert.equal(shadowRoot.ownerScope, shadowRoot);
-    assert.equal(doc.ownerScope, doc);
+    expect(shadowRoot.ownerScope, equals(shadowRoot));
+    expect(doc.ownerScope, equals(doc));
   });
-  it("should dynamically update", function() {
+  test("should dynamically update", () {
     var doc = new Document();
     var host = doc.createElement("div");
     var child = doc.createElement("div");
     var shadowRoot = host.ensureShadowRoot();
-    assert.equal(child.ownerScope, null);
+    expect(child.ownerScope, isNull);
     shadowRoot.appendChild(child);
-    assert.equal(child.ownerScope, shadowRoot);
+    expect(child.ownerScope, equals(shadowRoot));
     child.remove();
-    assert.equal(child.ownerScope, null);
+    expect(child.ownerScope, isNull);
   });
-});
+}
 </script>
 </sky>

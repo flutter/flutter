@@ -1,13 +1,12 @@
-Running 9 tests
-ok 1 Class list should add multiple classes
-ok 2 Class list should add classes in order
-ok 3 Class list should remove classes
-ok 4 Class list should remove multiple classes
-ok 5 Class list should clear all classes
-ok 6 Class list should check for classes
-ok 7 Class list should get classes by index
-ok 8 Class list should toggle classes
-ok 9 Class list should dynamically update style
-9 tests
-9 pass
-0 fail
+CONSOLE: unittest-suite-wait-for-done
+CONSOLE: PASS: should add classes in order
+CONSOLE: PASS: should remove classes
+CONSOLE: PASS: should clear all classes
+CONSOLE: PASS: should check for classes
+CONSOLE: PASS: should get classes by index
+CONSOLE: PASS: should toggle classes
+CONSOLE: PASS: should dynamically update style
+CONSOLE: 
+CONSOLE: All 7 tests passed.
+CONSOLE: unittest-suite-success
+DONE

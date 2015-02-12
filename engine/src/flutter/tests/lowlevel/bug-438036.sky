@@ -1,6 +1,4 @@
 <sky>
-<import src="../resources/mocha.sky" />
-<import src="../resources/chai.sky" />
 <style>
   div { width: 100px; height: 100px; background-color: red; }
   div.wide { width: 200px; }
@@ -9,21 +7,29 @@
 <div></div>
 <div></div>
 <script>
+import "../resources/third_party/unittest/unittest.dart";
+import "../resources/unit.dart";
 
-describe("Div width", function() {
-  it("should grow width to 200px", function() {
+import "dart:sky";
+
+void main() {
+  initUnit();
+
+  test("should grow width to 200px", () {
     var target = document.querySelector('div');
 
     target.classList.add("wide");
-    assert.equal(getComputedStyle(target).width, "200px");
+    expect(window.getComputedStyle(target).getPropertyValue("width"),
+           equals("200px"));
   });
 
-  it("should grow height to 200px", function() {
-    var target = document.querySelectorAll('div')[1];
+  test("should grow height to 200px", () {
+    var target = document.querySelectorAll('div').item(1);
 
     target.id = 'high';
-    assert.equal(getComputedStyle(target).height, "200px");
+    expect(window.getComputedStyle(target).getPropertyValue("height"),
+           equals("200px"));
   });
-});
+}
 </script>
 </sky>

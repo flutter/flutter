@@ -1,14 +1,19 @@
 <html>
-<import src="../resources/mocha.sky" />
-<import src="../resources/chai.sky" />
 <foo />
 <script>
-describe('Border', function() {
-  it('should render', function() {
+import "../resources/third_party/unittest/unittest.dart";
+import "../resources/unit.dart";
+
+import "dart:sky";
+
+void main() {
+  initUnit();
+
+  test('should render', () {
     var foo = document.querySelector('foo');
     foo.setAttribute('style', 'border: 1px solid red');
-    assert.equal(foo.style.border, '1px solid rgb(255, 0, 0)');
+    expect(foo.style.getPropertyValue("border"), equals('1px solid rgb(255, 0, 0)'));
   });
-});
+}
 </script>
 </html>

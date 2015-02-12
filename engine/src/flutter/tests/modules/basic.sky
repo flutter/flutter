@@ -3,6 +3,10 @@
 <import src="resources/pass.sky" as="hello" />
 <div id="result">FAIL</div>
 <script>
-document.getElementById("result").textContent = hello;
+import "dart:sky";
+
+void main() {
+    document.getElementById("result").textContent = hello.kHello;
+}
 </script>
 </html>

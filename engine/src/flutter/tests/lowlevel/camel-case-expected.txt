@@ -1,5 +1,6 @@
-Running 1 tests
-ok 1 Element tag names should have various casing
-1 tests
-1 pass
-0 fail
+CONSOLE: unittest-suite-wait-for-done
+CONSOLE: PASS: should have various casing
+CONSOLE: 
+CONSOLE: All 1 tests passed.
+CONSOLE: unittest-suite-success
+DONE

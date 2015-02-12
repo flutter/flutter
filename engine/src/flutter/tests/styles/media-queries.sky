@@ -1,6 +1,4 @@
 <html>
-<import src="../resources/chai.sky" />
-<import src="../resources/mocha.sky" />
 
 <style media="(max-width: 0px)">
   #test { color: rgb(255, 0, 0); }
@@ -14,16 +12,25 @@
 <div id="matches">Should be red.</div>
 
 <script>
-describe('Media queries', function() {
-  it('should allow sheets to apply when they match', function() {
+import "../resources/third_party/unittest/unittest.dart";
+import "../resources/unit.dart";
+
+import "dart:sky";
+
+void main() {
+  initUnit();
+
+  test('should allow sheets to apply when they match', () {
     var element = document.getElementById('matches');
-    assert.equal(getComputedStyle(element).color, "rgb(255, 0, 0)");
+    expect(window.getComputedStyle(element).getPropertyValue("color"),
+           equals("rgb(255, 0, 0)"));
   });
 
-  it('should cause sheets to be skipped when they do not match', function() {
+  test('should cause sheets to be skipped when they do not match', () {
     var element = document.getElementById('does-not-match');
-    assert.equal(getComputedStyle(element).color, "rgb(0, 0, 0)");
+    expect(window.getComputedStyle(element).getPropertyValue("color"),
+           "rgb(0, 0, 0)");
   });
-});
+}
 </script>
 </html>

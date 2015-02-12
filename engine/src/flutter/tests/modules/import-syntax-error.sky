@@ -1,0 +1,12 @@
+<html>
+<import src="../resources/dump-as-text.sky" />
+<import src="resources/syntax-error.sky" as="hello" />
+<div id="result">PASS</div>
+<script>
+import "dart:sky";
+
+void main() {
+    document.getElementById("result").textContent = hello.kHello;
+}
+</script>
+</html>

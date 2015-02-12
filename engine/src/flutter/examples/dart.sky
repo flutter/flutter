@@ -1,0 +1,14 @@
+#!mojo mojo:sky_viewer
+<sky>
+<import src="dart-library.sky" as="library" />
+<script>
+import "dart:sky" as sky;
+
+main() {
+  var text = new sky.Text("Hello");
+  print(text.data);
+  // print(text.firstChild);
+}
+</script>
+</sky>
+w

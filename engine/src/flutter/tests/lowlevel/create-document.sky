@@ -1,15 +1,20 @@
 <html>
-<import src="../resources/chai.sky" />
-<import src="../resources/mocha.sky" />
 <script>
-describe('Document', function() {
-  it('should have a constructor', function() {
+import "../resources/third_party/unittest/unittest.dart";
+import "../resources/unit.dart";
+
+import "dart:sky";
+
+main() {
+  initUnit();
+
+  test('should have a constructor', () {
     var doc = new Document();
-    assert.isNotNull(doc);
-    assert.doesNotThrow(function() {
-      doc.registerElement('x-foo');
-    }, 'new document should have a registration context');
+    expect(doc, isNotNull);
+    // assert.doesNotThrow(function() {
+    //   doc.registerElement('x-foo');
+    // }, 'new document should have a registration context');
   });
-});
+}
 </script>
 </html>

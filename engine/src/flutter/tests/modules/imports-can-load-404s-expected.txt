@@ -1,1 +1,3 @@
+ERROR: Failed to load resource: the server responded with a status of 404 (HTTP/1.1 404 Not Found) 
+SOURCE: http://127.0.0.1:8000/sky/tests/modules/resources/does-not-exist.sky:0
 PASS

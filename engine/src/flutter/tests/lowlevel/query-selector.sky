@@ -1,6 +1,4 @@
 <html>
-<import src="../resources/mocha.sky" />
-<import src="../resources/chai.sky" />
 <div id="tests">
   <div id="id1">
     <div class="class2"></div>
@@ -16,58 +14,71 @@
   </tag-name-6>
 </div>
 <script>
-function query(selector) { return document.querySelector(selector); }
-function queryAll(selector) { return document.querySelectorAll(selector); }
+import "../resources/third_party/unittest/unittest.dart";
+import "../resources/unit.dart";
 
-describe("querySelector", function() {
-  it("should find elements by class name", function() {
-    assert.ok(query(".class2"));
-    assert.equal(query(".class2").classList.toString(), "class2");
-    assert.equal(queryAll(".class2").length, 2);
-    assert.equal(queryAll(".class2")[0].classList.toString(), "class2");
-    assert.equal(queryAll(".class2")[1].classList.toString(), "class2");
-    assert.notEqual(queryAll(".class2")[0], queryAll(".class2")[1]);
+import "dart:sky";
+
+query(selector) => document.querySelector(selector);
+queryAll(selector) => document.querySelectorAll(selector);
+
+main() {
+  initUnit();
+
+  test("should find elements by class name", () {
+    expect(query(".class2"), isNotNull);
+    expect(query(".class2").classList.toString(), equals("class2"));
+    expect(queryAll(".class2").length, 2);
+    expect(queryAll(".class2").item(0).classList.toString(), equals("class2"));
+    expect(queryAll(".class2").item(1).classList.toString(), equals("class2"));
+    expect(queryAll(".class2").item(0), isNot(equals(queryAll(".class2").item(1))));
   });
-  it("should find elements by id", function() {
-    assert.ok(query("#id5"));
-    assert.equal(query("#id5").id, "id5");
-    assert.equal(query("#id5").classList.toString(), "class5");
+
+  test("should find elements by id", () {
+    expect(query("#id5"), isNotNull);
+    expect(query("#id5").id, equals("id5"));
+    expect(query("#id5").classList.toString(), equals("class5"));
     // FIXME(sky): Do we still want to allow multiple id stuff like this?
-    assert.equal(queryAll("#id5").length, 2);
-    assert.equal(queryAll("#id5")[0], query("#id5"));
-    assert.notEqual(queryAll("#id5")[1], query("#id5"));
-    assert.equal(queryAll("#id5")[1].id, "id5");
+    expect(queryAll("#id5").length, equals(2));
+    expect(queryAll("#id5").item(0), equals(query("#id5")));
+    expect(queryAll("#id5").item(1), isNot(equals(query("#id5"))));
+    expect(queryAll("#id5").item(1).id, equals("id5"));
   });
-  it("should find elements by tag name", function() {
-    assert.ok(query("tag-name-6"));
-    assert.equal(query("tag-name-6").tagName, "tag-name-6");
-    assert.equal(query("tag-name-6").classList.toString(), "class6");
+
+  test("should find elements by tag name", () {
+    expect(query("tag-name-6"), isNotNull);
+    expect(query("tag-name-6").tagName, equals("tag-name-6"));
+    expect(query("tag-name-6").classList.toString(), equals("class6"));
     var context = query("#tests");
-    assert.equal(context.querySelectorAll("span").length, 2);
+    expect(context.querySelectorAll("span").length, equals(2));
   });
-  it("should find an element by compound selector", function() {
-    assert.ok(query("tag-name-6.class6#id6"));
-    assert.equal(query("tag-name-6.class6#id6").id, "id6");
-    assert.equal(query("tag-name-6.class6#id6").classList.toString(), "class6");
-    assert.equal(query("tag-name-6.class6#id6").tagName, "tag-name-6");
+
+  test("should find an element by compound selector", () {
+    expect(query("tag-name-6.class6#id6"), isNotNull);
+    expect(query("tag-name-6.class6#id6").id, equals("id6"));
+    expect(query("tag-name-6.class6#id6").classList.toString(), equals("class6"));
+    expect(query("tag-name-6.class6#id6").tagName, equals("tag-name-6"));
   });
-  it("should find all elements by compound selector", function() {
-    assert.ok(queryAll("tag-name-3.class7"));
-    assert.equal(queryAll("tag-name-3.class7").length, 3);
-    assert.equal(queryAll("tag-name-3.class7")[0].id, "tag1");
-    assert.equal(queryAll("tag-name-3.class7")[1].id, "tag2");
+
+  test("should find all elements by compound selector", () {
+    expect(queryAll("tag-name-3.class7"), isNotNull);
+    expect(queryAll("tag-name-3.class7").length, equals(3));
+    expect(queryAll("tag-name-3.class7").item(0).id, equals("tag1"));
+    expect(queryAll("tag-name-3.class7").item(1).id, equals("tag2"));
   });
-  it("should find all elements by attribute presence selector", function() {
-    assert.ok(queryAll("[testAttr]"));
-    assert.equal(queryAll("[testAttr]").length, 2);
-    assert.equal(queryAll("[testAttr]")[0].id, "id5");
-    assert.equal(queryAll("[testAttr]")[1].id, "id6");
+
+  test("should find all elements by attribute presence selector", () {
+    expect(queryAll("[testAttr]"), isNotNull);
+    expect(queryAll("[testAttr]").length, equals(2));
+    expect(queryAll("[testAttr]").item(0).id, equals("id5"));
+    expect(queryAll("[testAttr]").item(1).id, equals("id6"));
   });
-  it("should find all elements by attribute value selector", function() {
-    assert.ok(queryAll("[testAttr='the value']"));
-    assert.equal(queryAll("[testAttr='the value']").length, 1);
-    assert.equal(queryAll("[testAttr='the value']")[0].id, "id6");
+
+  test("should find all elements by attribute value selector", () {
+    expect(queryAll("[testAttr='the value']"), isNotNull);
+    expect(queryAll("[testAttr='the value']").length, equals(1));
+    expect(queryAll("[testAttr='the value']").item(0).id, equals("id6"));
   });
-});
+}
 </script>
 </html>

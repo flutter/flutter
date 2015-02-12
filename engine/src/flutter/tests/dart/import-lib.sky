@@ -1,0 +1,8 @@
+<script>
+import "resources/lib.dart" as lib;
+import "dart:sky.internals" as internals;
+
+void main() {
+  internals.notifyTestComplete(lib.kResult);
+}
+</script>>

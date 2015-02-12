@@ -1,0 +1,4 @@
+<script>
+// Note missing ;
+final String kHello = "FAIL: Somehow exported a string with a syntax error."
+</script>

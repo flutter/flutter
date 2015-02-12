@@ -1,20 +1,24 @@
 <html>
-<import src="../resources/chai.sky" />
-<import src="../resources/mocha.sky" />
 <foo />
 <script>
+import "../resources/third_party/unittest/unittest.dart";
+import "../resources/unit.dart";
 
-describe('Inline styles', function() {
-  it('should be settable using "style" attribute', function() {
+import "dart:sky";
+
+void main() {
+  initUnit();
+
+  test('should be settable using "style" attribute', () {
     var foo = document.querySelector('foo');
     foo.setAttribute('style', 'color: red');
 
 
-    assert.equal(foo.getAttribute('style'), 'color: red');
-    assert.equal(foo.style.color, 'rgb(255, 0, 0)');
-    assert.equal(window.getComputedStyle(foo).color, 'rgb(255, 0, 0)');
+    expect(foo.getAttribute('style'), equals('color: red'));
+    expect(foo.style.getPropertyValue("color"), equals('rgb(255, 0, 0)'));
+    expect(window.getComputedStyle(foo).getPropertyValue("color"),
+           equals('rgb(255, 0, 0)'));
   });
-});
-
+}
 </script>
 </html>

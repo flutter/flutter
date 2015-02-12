@@ -1,50 +1,55 @@
 <sky>
-<import src="../resources/chai.sky" />
-<import src="../resources/mocha.sky" />
 <import src="../resources/dom-utils.sky" as="DomUtils" />
 <script>
-describe("replaceChild", function() {
+import "../resources/third_party/unittest/unittest.dart";
+import "../resources/unit.dart";
+
+import "dart:sky";
+
+void main() {
+  initUnit();
+
   var childElementCount = DomUtils.childElementCount;
   var childNodeCount = DomUtils.childNodeCount;
 
-  it("should throw with invalid arguments", function() {
+  test("should throw with invalid arguments", () {
     var parent = document.createElement("div");
-    assert.throws(function() {
+    expect(() {
       parent.replaceChild();
-    });
-    assert.throws(function() {
-      parent.replaceChild(null, null);
-    });
-    assert.throws(function() {
+    }, throws);
+    // expect(() {
+    //   parent.replaceChild(null, null);
+    // }, throws);
+    expect(() {
       parent.replaceChild({tagName: "div"});
-    });
-    assert.throws(function() {
-      parent.replaceChild(null, document.createElement("div"));
-    });
-    assert.throws(function() {
+    }, throws);
+    // expect(() {
+    //   parent.replaceChild(null, document.createElement("div"));
+    // }, throws);
+    expect(() {
       parent.replaceChild(document.createElement("div"), {tagName: "div"});
-    });
+    }, throws);
   });
 
-  it("should replace elements", function() {
+  test("should replace elements", () {
     var parent = document.createElement("div");
     var oldChild = parent.appendChild(document.createElement("div"));
     var newChild = document.createElement("div");
     parent.replaceChild(newChild, oldChild);
-    assert.isNull(oldChild.parentNode);
-    assert.equal(newChild.parentNode, parent);
+    expect(oldChild.parentNode, isNull);
+    expect(newChild.parentNode, equals(parent));
   });
 
-  it("should replace text", function() {
+  test("should replace text", () {
     var parent = document.createElement("div");
     var oldChild = parent.appendChild(new Text(" it's a text "));
     var newChild = document.createElement("div");
     parent.replaceChild(newChild, oldChild);
-    assert.isNull(oldChild.parentNode);
-    assert.equal(newChild.parentNode, parent);
+    expect(oldChild.parentNode, isNull);
+    expect(newChild.parentNode, equals(parent));
   });
 
-  it("should replace children with a fragment", function() {
+  test("should replace children with a fragment", () {
     var fragment = document.createDocumentFragment();
     var child1 = fragment.appendChild(document.createElement("div"));
     var child2 = fragment.appendChild(new Text(" text "));
@@ -54,37 +59,37 @@ describe("replaceChild", function() {
     var oldChild = parent.appendChild(document.createElement("div"));
     var lastChild = parent.appendChild(document.createElement("div"));
     parent.replaceChild(fragment, oldChild);
-    assert.equal(child1.parentNode, parent);
-    assert.equal(child2.parentNode, parent);
-    assert.equal(child3.parentNode, parent);
-    assert.equal(child4.parentNode, parent);
-    assert.isNull(oldChild.parentNode);
-    assert.equal(childNodeCount(parent), 5);
-    assert.equal(childElementCount(parent), 3);
-    assert.equal(parent.lastChild, lastChild);
+    expect(child1.parentNode, equals(parent));
+    expect(child2.parentNode, equals(parent));
+    expect(child3.parentNode, equals(parent));
+    expect(child4.parentNode, equals(parent));
+    expect(oldChild.parentNode, isNull);
+    expect(childNodeCount(parent), equals(5));
+    expect(childElementCount(parent), equals(3));
+    expect(parent.lastChild, equals(lastChild));
   });
 
-  it("should throw when inserting a tree scope", function() {
-    var parent = document.createElement("div");
-    var doc = new Document();
-    var shadowRoot = document.createElement("span").ensureShadowRoot();
-    assert.throws(function() {
-      parent.replaceChild(doc);
-    });
-    assert.throws(function() {
-      parent.replaceChild(shadowRoot);
-    });
-    assert.throws(function() {
-      doc.replaceChild(fragment);
-    });
-  });
+  // test("should throw when inserting a tree scope", () {
+  //   var parent = document.createElement("div");
+  //   var doc = new Document();
+  //   var shadowRoot = document.createElement("span").ensureShadowRoot();
+  //   expect(() {
+  //     parent.replaceChild(doc);
+  //   }, throws);
+  //   expect(() {
+  //     parent.replaceChild(shadowRoot);
+  //   }, throws);
+  //   expect(() {
+  //     doc.replaceChild(fragment);
+  //   }, throws);
+  // });
 
-  it("should throw when appending to a text", function() {
-    var parent = new Text();
-    assert.throws(function() {
-      parent.replaceChild(document.createElement("div"), null);
-    });
-  });
-});
+  // test("should throw when appending to a text", () {
+  //   var parent = new Text();
+  //   expect(() {
+  //     parent.replaceChild(document.createElement("div"), null);
+  //   }, throws);
+  // });
+}
 </script>
 </sky>

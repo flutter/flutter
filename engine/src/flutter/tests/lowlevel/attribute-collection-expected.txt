@@ -1,8 +1,9 @@
-Running 4 tests
-ok 1 Attribute collection should get by index
-ok 2 Attribute collection should set by name
-ok 3 Attribute collection should be case sensitive
-ok 4 Attribute collection should not live update
-4 tests
-4 pass
-0 fail
+CONSOLE: unittest-suite-wait-for-done
+CONSOLE: PASS: should get by index
+CONSOLE: PASS: should set by name
+CONSOLE: PASS: should be case sensitive
+CONSOLE: PASS: should not live update
+CONSOLE: 
+CONSOLE: All 4 tests passed.
+CONSOLE: unittest-suite-success
+DONE

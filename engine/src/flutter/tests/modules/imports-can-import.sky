@@ -2,6 +2,10 @@
 <import src="resources/intermediate.sky" as="chocolate" />
 <div id="result">FAIL</div>
 <script>
-document.getElementById("result").textContent = JSON.stringify(chocolate);
+import "dart:sky";
+
+void main() {
+    document.getElementById("result").textContent = chocolate.message;
+}
 </script>
 </html>
