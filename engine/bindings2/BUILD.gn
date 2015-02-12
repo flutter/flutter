@@ -1,0 +1,399 @@
+# Copyright 2015 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//sky/engine/bindings2/bindings.gni")
+import("//sky/engine/core/core.gni")
+
+source_set("bindings2") {
+  sources = [
+    "builtin.cc",
+    "builtin.h",
+    "builtin_natives.cc",
+    "builtin_natives.h",
+    "builtin_sky.cc",
+    "builtin_sky.h",
+    "dart_callback.cc",
+    "dart_callback.h",
+    "dart_event_listener.cc",
+    "dart_event_listener.h",
+    "exception_messages.cc",
+    "exception_messages.h",
+    "exception_state.cc",
+    "exception_state.h",
+    "exception_state_placeholder.cc",
+    "exception_state_placeholder.h",
+    "mojo_natives.cc",
+    "mojo_natives.h",
+    "nullable.h",
+    "scheduled_action.cc",
+    "scheduled_action.h",
+  ]
+  deps = [
+    "//base",
+    "//dart/runtime/bin:libdart_withcore",
+    "//mojo/public/c/system",
+    "//mojo/public/cpp/system",
+    "//sky/engine/platform:platform",
+    "//sky/engine/tonic",
+    "//sky/engine/wtf",
+    ":generated_bindings",
+    ":snapshot_cc",
+  ]
+  include_dirs = [
+    "..",
+    "$root_build_dir",
+  ]
+}
+
+action("generate_snapshot_bin") {
+  deps = [
+    "//dart/runtime/bin:gen_snapshot($host_toolchain)",
+    ":generate_sky_core_dart",
+  ]
+  inputs = [
+    "//dart/runtime/tools/create_snapshot_bin.py",
+    "//sky/engine/bindings2/builtin.dart",
+    "//mojo/public/dart/bindings.dart",
+    "//mojo/public/dart/core.dart",
+    "//mojo/public/dart/src/application.dart",
+    "//mojo/public/dart/src/buffer.dart",
+    "//mojo/public/dart/src/codec.dart",
+    "//mojo/public/dart/src/data_pipe.dart",
+    "//mojo/public/dart/src/drain_data.dart",
+    "//mojo/public/dart/src/event_stream.dart",
+    "//mojo/public/dart/src/handle.dart",
+    "//mojo/public/dart/src/handle_watcher.dart",
+    "//mojo/public/dart/src/message.dart",
+    "//mojo/public/dart/src/message_pipe.dart",
+    "//mojo/public/dart/src/proxy.dart",
+    "//mojo/public/dart/src/service_provider.dart",
+    "//mojo/public/dart/src/struct.dart",
+    "//mojo/public/dart/src/stub.dart",
+    "//mojo/public/dart/src/timer_queue.dart",
+    "//mojo/public/dart/src/types.dart",
+    "snapshot.dart",
+  ]
+  output = "$target_gen_dir/snapshot_gen.bin"
+  outputs = [
+    output,
+  ]
+
+  builtin_path = rebase_path("//sky/engine/bindings2/builtin.dart")
+  sky_core_path = rebase_path("$bindings_output_dir/sky_core.dart")
+  mojo_bindings_path = rebase_path("//mojo/public/dart/bindings.dart")
+  mojo_core_path = rebase_path("//mojo/public/dart/core.dart")
+
+  gen_snapshot_dir =
+      get_label_info("//dart/runtime/bin:gen_snapshot($host_toolchain)",
+                     "root_out_dir")
+  script = "//dart/runtime/tools/create_snapshot_bin.py"
+
+  args = [
+    "--executable",
+    rebase_path("$gen_snapshot_dir/gen_snapshot"),
+    "--package_root",
+    rebase_path("$root_gen_dir"),
+    "--script",
+    rebase_path("snapshot.dart"),
+    "--output_bin",
+    rebase_path(output, root_build_dir),
+    "--target_os",
+    os,
+    "--url_mapping=dart:sky,$sky_core_path",
+    "--url_mapping=dart:mojo_bindings,$mojo_bindings_path",
+    "--url_mapping=dart:mojo_core,$mojo_core_path",
+    "--url_mapping=dart:sky_builtin,$builtin_path",
+  ]
+}
+
+action("generate_snapshot_file") {
+  deps = [
+    ":generate_snapshot_bin",
+  ]
+  inputs = [
+    "//dart/runtime/tools/create_snapshot_file.py",
+    "snapshot.cc.tmpl",
+    "$target_gen_dir/snapshot_gen.bin",
+  ]
+  output = "$target_gen_dir/snapshot.cc"
+  outputs = [
+    output,
+  ]
+
+  script = "//dart/runtime/tools/create_snapshot_file.py"
+  args = [
+    "--input_bin",
+    rebase_path("$target_gen_dir/snapshot_gen.bin"),
+    "--input_cc",
+    rebase_path("snapshot.cc.tmpl"),
+    "--output",
+    rebase_path(output),
+  ]
+}
+
+source_set("snapshot_cc") {
+  sources = [
+    "$target_gen_dir/snapshot.cc",
+  ]
+
+  deps = [
+    ":generate_snapshot_file",
+  ]
+}
+
+action("compute_interfaces_info_individual") {
+  sources = core_idl_files + core_dependency_idl_files
+  script = "$bindings_scripts_dir/compute_interfaces_info_individual.py"
+  output_file = "$bindings_output_dir/InterfacesInfoIndividual.pickle"
+
+  # TODO(eseidel): This is no longer needed, could pass these as args.
+  file_list = "$target_gen_dir/${target_name}_file_list.txt"
+  write_file(file_list, rebase_path(sources, root_build_dir))
+
+  # TODO(eseidel): Use depfile instead of this manual list.
+  inputs = [ "$bindings_scripts_dir/utilities.py" ] + sources
+
+  outputs = [
+    file_list,
+    output_file,
+  ]
+
+  args = [
+    # TODO(eseidel): Remove component-dir, it is meaningless in sky.
+    "--component-dir",
+    "ignored",
+    "--idl-files-list",
+    rebase_path(file_list, root_build_dir),
+    "--interfaces-info-file",
+    rebase_path(output_file, root_build_dir),
+
+    # TODO(eseidel): only-if-changed is always true, remove
+    "--write-file-only-if-changed=1",
+  ]
+}
+
+interfaces_info_individual_path =
+    "$bindings_output_dir/InterfacesInfoIndividual.pickle"
+
+interfaces_info_overall_path =
+    "$bindings_output_dir/InterfacesInfoOverall.pickle"
+
+action("compute_interfaces_info_overall") {
+  script = "$bindings_scripts_dir/compute_interfaces_info_overall.py"
+
+  inputs = [
+    interfaces_info_individual_path,
+  ]
+  outputs = [
+    interfaces_info_overall_path,
+  ]
+
+  args = [
+    # TODO(eseidel): only-if-changed is always true, remove
+    "--write-file-only-if-changed=1",
+    "--",
+  ]
+  args += rebase_path(inputs, root_build_dir)
+  args += rebase_path(outputs, root_build_dir)
+
+  deps = [
+    ":compute_interfaces_info_individual",
+  ]
+}
+
+# This separate pre-caching step is required to use lex/parse table
+# caching in PLY, since PLY itself does not check if the cache is
+# valid, and thus may end up using a stale cache if this step hasn"t
+# been run to update it.
+#
+# This action"s dependencies *is* the cache validation.
+#
+# GYP version: scripts.gyp:cached_lex_yacc_tables
+action("cached_lex_yacc_tables") {
+  script = "scripts/blink_idl_parser.py"
+
+  inputs = idl_lexer_parser_files
+  outputs = [
+    "$bindings_output_dir/lextab.py",
+    "$bindings_output_dir/parsetab.pickle",
+  ]
+
+  args = [ rebase_path(bindings_output_dir, root_build_dir) ]
+}
+
+# Runs the idl_compiler script over a list of sources.
+#
+# Parameters:
+#   sources = list of IDL files to compile
+#   output_dir = string containing the directory to put the output files.
+template("idl_compiler") {
+  output_dir = invoker.output_dir
+
+  action_foreach(target_name) {
+    # TODO(brettw) GYP adds a "-S before the script name to skip "import site" to
+    # speed up startup. Figure out if we need this and do something similar (not
+    # really expressible in GN now).
+    script = "$bindings_scripts_dir/compiler.py"
+
+    inputs = idl_lexer_parser_files + idl_compiler_files
+    inputs += [
+      "scripts/templates/attributes_cpp.template",
+      "scripts/templates/callback_interface_cpp.template",
+      "scripts/templates/callback_interface_dart.template",
+      "scripts/templates/callback_interface_h.template",
+      "scripts/templates/interface_base_cpp.template",
+      "scripts/templates/interface_cpp.template",
+      "scripts/templates/interface_dart.template",
+      "scripts/templates/interface_h.template",
+      "scripts/templates/methods_cpp.template",
+    ]
+    inputs += [
+      "$bindings_output_dir/lextab.py",
+      "$bindings_output_dir/parsetab.pickle",
+
+      # "$bindings_output_dir/cached_jinja_templates.stamp",
+      "//sky/engine/bindings2/IDLExtendedAttributes.txt",
+
+      # If the dependency structure or public interface info (e.g.,
+      # [ImplementedAs]) changes, we rebuild all files, since we"re not
+      # computing dependencies file-by-file in the build.
+      # This data is generally stable.
+      interfaces_info_overall_path,
+    ]
+
+    # Further, if any dependency (partial interface or implemented
+    # interface) changes, rebuild everything, since every IDL potentially
+    # depends on them, because we"re not computing dependencies
+    # file-by-file.
+    # FIXME: This is too conservative, and causes excess rebuilds:
+    # compute this file-by-file.  http://crbug.com/341748
+    # This should theoretically just be the IDL files passed in.
+    inputs += core_dependency_idl_files
+
+    sources = invoker.sources
+    outputs = [
+      "$output_dir/Dart{{source_name_part}}.cpp",
+      "$output_dir/Dart{{source_name_part}}.h",
+      "$output_dir/{{source_name_part}}.dart",
+    ]
+
+    args = [
+      "--output-dir",
+      rebase_path(output_dir, root_build_dir),
+      "--interfaces-info",
+      rebase_path(interfaces_info_overall_path, root_build_dir),
+      "--write-file-only-if-changed=1",  # Always true for Ninja.
+      "{{source}}",
+    ]
+
+    deps = [
+      ":compute_interfaces_info_overall",
+      ":cached_lex_yacc_tables",
+
+      # ":cached_jinja_templates",
+    ]
+  }
+}
+
+idl_compiler("compile_idls") {
+  sources = core_idl_files
+  output_dir = bindings_output_dir
+}
+
+action("generate_dart_globals") {
+  sources = core_idl_files
+  script = "$bindings_scripts_dir/compiler.py"
+
+  file_list = "$target_gen_dir/${target_name}_file_list.txt"
+  write_file(file_list, rebase_path(sources, root_build_dir))
+
+  inputs = sources + idl_compiler_files
+  inputs += [
+    "scripts/templates/global_cpp.template",
+    "scripts/templates/global_h.template",
+  ]
+
+  outputs = [
+    file_list,
+    "$bindings_output_dir/DartGlobal.h",
+    "$bindings_output_dir/DartGlobal.cpp",
+  ]
+
+  args = [
+    "--output-directory",
+    rebase_path(bindings_output_dir, root_build_dir),
+    "--generate-globals",
+    rebase_path(bindings_output_dir, root_build_dir),
+    rebase_path(file_list, root_build_dir),
+  ]
+
+  deps = [
+    ":compile_idls",
+  ]
+}
+
+action("generate_sky_core_dart") {
+  sources = core_idl_files
+  script = "$bindings_scripts_dir/compiler.py"
+
+  file_list = "$target_gen_dir/${target_name}_file_list.txt"
+  write_file(file_list, rebase_path(sources, root_build_dir))
+
+  inputs =
+      sources + idl_compiler_files + [ "scripts/templates/dart_blink.template" ]
+
+  outputs = [
+    file_list,
+    "$bindings_output_dir/sky_core.dart",
+  ]
+
+  args = [
+    "--output-directory",
+    rebase_path(bindings_output_dir, root_build_dir),
+    "--generate-dart-blink",
+    rebase_path(bindings_output_dir, root_build_dir),
+    rebase_path(file_list, root_build_dir),
+  ]
+
+  deps = [
+    ":compile_idls",
+  ]
+}
+
+source_set("generated_bindings") {
+  deps = [
+    "//base",
+    "//dart/runtime/bin:libdart_withcore",
+    "//gpu/command_buffer/client:gles2_c_lib",
+    "//mojo/application",
+    "//mojo/common",
+    "//mojo/edk/js",
+    "//mojo/public/c/system",
+    "//mojo/public/cpp/bindings",
+    "//mojo/public/cpp/system",
+    "//mojo/public/cpp/utility",
+    "//mojo/public/interfaces/application",
+    "//mojo/services/keyboard/public/interfaces",
+    "//mojo/services/navigation/public/interfaces",
+    "//mojo/services/view_manager/public/cpp",
+    "//skia",
+    "//sky/engine/wtf",
+    "//third_party/angle:translator",
+    "//third_party/iccjpeg",
+    "//third_party/libpng",
+    "//third_party/ots",
+    "//third_party/qcms",
+    "//third_party/zlib",
+    "//url",
+    ":generate_dart_globals",
+  ]
+
+  include_dirs = [
+    "..",
+    "$root_build_dir",
+  ]
+
+  sources = get_target_outputs(":compile_idls")
+  sources += get_target_outputs(":generate_dart_globals")
+}

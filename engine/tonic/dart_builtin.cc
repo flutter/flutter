@@ -9,6 +9,7 @@
 #include <string.h>
 
 #include "base/logging.h"
+#include "sky/engine/tonic/dart_converter.h"
 
 namespace blink {
 
@@ -45,6 +46,12 @@ const uint8_t* DartBuiltin::Symbolizer(Dart_NativeFunction native_function) cons
       return reinterpret_cast<const uint8_t*>(entry.name);
   }
   return nullptr;
+}
+
+Dart_Handle DartBuiltin::LookupLibrary(const char* name) {
+    Dart_Handle library = Dart_LookupLibrary(ToDart(name));
+    DCHECK(!Dart_IsError(library));
+    return library;
 }
 
 }  // namespace blink

@@ -8,7 +8,7 @@ static void {{static_attribute_name(attribute, 'Getter')}}(Dart_NativeArguments 
 {% if attribute.is_call_with_execution_context %}
     ExecutionContext* context = DOMDartState::CurrentDocument();
     if (!context) {
-      exception = Dart_NewStringFromCString("Failed to retrieve a context");
+      exception = ToDart("Failed to retrieve a context");
       goto fail;
     }
 {% endif %}
@@ -95,7 +95,7 @@ static void {{static_attribute_name(attribute, 'Setter')}}(Dart_NativeArguments 
 
         ExecutionContext* context = DOMDartState::CurrentDocument();
         if (!context) {
-            exception = Dart_NewStringFromCString("Failed to retrieve a context");
+            exception = ToDart("Failed to retrieve a context");
             goto fail;
         }
 
@@ -104,7 +104,7 @@ static void {{static_attribute_name(attribute, 'Setter')}}(Dart_NativeArguments 
 {% if attribute.is_call_with_script_state %}
         ScriptState* state = DartUtilities::currentScriptState();
         if (!state) {
-            exception = Dart_NewStringFromCString("Failed to retrieve a script state");
+            exception = ToDart("Failed to retrieve a script state");
             goto fail;
         }
 {% endif %}

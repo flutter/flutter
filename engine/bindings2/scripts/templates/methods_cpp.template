@@ -94,14 +94,14 @@ static void {{static_method_name(method.name, overload_index)}}(Dart_NativeArgum
         {% if method.is_call_with_script_state %}
         ScriptState* state = DartUtilities::currentScriptState();
         if (!state) {
-            exception = Dart_NewStringFromCString("Failed to retrieve a script state");
+            exception = ToDart("Failed to retrieve a script state");
             goto fail;
         }
         {% endif %}
         {% if method.is_call_with_execution_context %}
         ExecutionContext* context = DOMDartState::CurrentDocument();
         if (!context) {
-            exception = Dart_NewStringFromCString("Failed to retrieve a context");
+            exception = ToDart("Failed to retrieve a context");
             goto fail;
         }
         {% endif %}
@@ -318,14 +318,14 @@ static void {{static_method_name(constructor.name, overload_index)}}(Dart_Native
 {% if is_constructor_call_with_execution_context %}
         ExecutionContext* context = DOMDartState::CurrentDocument();
         if (!context) {
-            exception = Dart_NewStringFromCString("Failed to retrieve a context");
+            exception = ToDart("Failed to retrieve a context");
             goto fail;
         }
 {% endif %}
 {% if is_constructor_call_with_document or (constructor == named_constructor) %}
         LocalDOMWindow* domWindow = DOMDartState::CurrentWindow();
         if (!domWindow) {
-            exception = Dart_NewStringFromCString("Failed to fetch domWindow");
+            exception = ToDart("Failed to fetch domWindow");
             goto fail;
         }
         Document& document = *domWindow->document();

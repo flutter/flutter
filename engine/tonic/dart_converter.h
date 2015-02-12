@@ -320,6 +320,12 @@ inline std::string StdStringFromDart(Dart_Handle handle) {
   return std::string(utf8.data(), utf8.length());
 }
 
+
+// Alias Dart_NewStringFromCString for less typing.
+inline Dart_Handle ToDart(const char* val) {
+  return Dart_NewStringFromCString(val);
+}
+
 }  // namespace blink
 
 #endif  // SKY_ENGINE_TONIC_DART_CONVERTER_H_

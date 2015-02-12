@@ -27,6 +27,9 @@ class DartBuiltin {
 
   const uint8_t* Symbolizer(Dart_NativeFunction native_function) const;
 
+  // Helper around Dart_LookupLibrary.
+  static Dart_Handle LookupLibrary(const char* name);
+
  private:
   const Natives* natives_;
   size_t count_;
