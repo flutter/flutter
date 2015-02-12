@@ -27,7 +27,7 @@
 #ifndef SKY_ENGINE_CORE_DOM_CLIENTRECTLIST_H_
 #define SKY_ENGINE_CORE_DOM_CLIENTRECTLIST_H_
 
-#include "sky/engine/bindings/core/v8/ScriptWrappable.h"
+#include "sky/engine/tonic/dart_wrappable.h"
 #include "sky/engine/platform/geometry/FloatQuad.h"
 #include "sky/engine/platform/heap/Handle.h"
 #include "sky/engine/wtf/PassRefPtr.h"
@@ -38,7 +38,7 @@ namespace blink {
 
 class ClientRect;
 
-class ClientRectList final : public RefCounted<ClientRectList>, public ScriptWrappable {
+class ClientRectList final : public RefCounted<ClientRectList>, public DartWrappable {
     DECLARE_EMPTY_DESTRUCTOR_WILL_BE_REMOVED(ClientRectList);
     DEFINE_WRAPPERTYPEINFO();
 public:

@@ -34,9 +34,9 @@
 #include "sky/engine/core/html/canvas/CanvasRenderingContext2D.h"
 
 #include "gen/sky/core/CSSPropertyNames.h"
-#include "sky/engine/bindings/core/v8/ExceptionMessages.h"
-#include "sky/engine/bindings/core/v8/ExceptionState.h"
-#include "sky/engine/bindings/core/v8/ExceptionStatePlaceholder.h"
+#include "sky/engine/bindings2/exception_messages.h"
+#include "sky/engine/bindings2/exception_state.h"
+#include "sky/engine/bindings2/exception_state_placeholder.h"
 #include "sky/engine/core/css/CSSFontSelector.h"
 #include "sky/engine/core/css/StylePropertySet.h"
 #include "sky/engine/core/css/parser/BisonCSSParser.h"
@@ -786,6 +786,11 @@ void CanvasRenderingContext2D::setTransform(float m11, float m12, float m21, flo
     transform(m11, m12, m21, m22, dx, dy);
 }
 
+String CanvasRenderingContext2D::strokeColor()
+{
+    return strokeStyle()->color();
+}
+
 void CanvasRenderingContext2D::setStrokeColor(const String& color)
 {
     if (color == state().m_unparsedStrokeColor)
@@ -826,6 +831,11 @@ void CanvasRenderingContext2D::setStrokeColor(float c, float m, float y, float k
     if (state().m_strokeStyle && state().m_strokeStyle->isEquivalentCMYKA(c, m, y, k, a))
         return;
     setStrokeStyle(CanvasStyle::createFromCMYKAChannels(c, m, y, k, a));
+}
+
+String CanvasRenderingContext2D::fillColor()
+{
+    return fillStyle()->color();
 }
 
 void CanvasRenderingContext2D::setFillColor(const String& color)
@@ -1316,7 +1326,7 @@ void CanvasRenderingContext2D::drawImageInternal(CanvasImageSource* imageSource,
         SourceImageMode mode = canvas() == imageSource ? CopySourceImageIfVolatile : DontCopySourceImage; // Thunking for ==
         image = imageSource->getSourceImageForCanvas(mode, &sourceImageStatus);
         if (sourceImageStatus == UndecodableSourceImageStatus)
-            exceptionState.throwDOMException(InvalidStateError, "The HTMLImageElement provided is in the 'broken' state.");
+            exceptionState.ThrowDOMException(InvalidStateError, "The HTMLImageElement provided is in the 'broken' state.");
         if (!image || !image->width() || !image->height())
             return;
     }
@@ -1407,7 +1417,7 @@ PassRefPtr<CanvasGradient> CanvasRenderingContext2D::createLinearGradient(float 
 PassRefPtr<CanvasGradient> CanvasRenderingContext2D::createRadialGradient(float x0, float y0, float r0, float x1, float y1, float r1, ExceptionState& exceptionState)
 {
     if (r0 < 0 || r1 < 0) {
-        exceptionState.throwDOMException(IndexSizeError, String::format("The %s provided is less than 0.", r0 < 0 ? "r0" : "r1"));
+        exceptionState.ThrowDOMException(IndexSizeError, String::format("The %s provided is less than 0.", r0 < 0 ? "r0" : "r1"));
         return nullptr;
     }
 
@@ -1419,7 +1429,7 @@ PassRefPtr<CanvasPattern> CanvasRenderingContext2D::createPattern(CanvasImageSou
     const String& repetitionType, ExceptionState& exceptionState)
 {
     Pattern::RepeatMode repeatMode = CanvasPattern::parseRepetitionType(repetitionType, exceptionState);
-    if (exceptionState.hadException())
+    if (exceptionState.had_exception())
         return nullptr;
 
     SourceImageStatus status;
@@ -1429,10 +1439,10 @@ PassRefPtr<CanvasPattern> CanvasRenderingContext2D::createPattern(CanvasImageSou
     case NormalSourceImageStatus:
         break;
     case ZeroSizeCanvasSourceImageStatus:
-        exceptionState.throwDOMException(InvalidStateError, String::format("The canvas %s is 0.", imageSource->sourceSize().width() ? "height" : "width"));
+        exceptionState.ThrowDOMException(InvalidStateError, String::format("The canvas %s is 0.", imageSource->sourceSize().width() ? "height" : "width"));
         return nullptr;
     case UndecodableSourceImageStatus:
-        exceptionState.throwDOMException(InvalidStateError, "Source image is in the 'broken' state.");
+        exceptionState.ThrowDOMException(InvalidStateError, "Source image is in the 'broken' state.");
         return nullptr;
     case InvalidSourceImageStatus:
         imageForRendering = Image::nullImage();
@@ -1511,7 +1521,7 @@ PassRefPtr<ImageData> CanvasRenderingContext2D::createImageData(PassRefPtr<Image
 PassRefPtr<ImageData> CanvasRenderingContext2D::createImageData(float sw, float sh, ExceptionState& exceptionState) const
 {
     if (!sw || !sh) {
-        exceptionState.throwDOMException(IndexSizeError, String::format("The source %s is 0.", sw ? "height" : "width"));
+        exceptionState.ThrowDOMException(IndexSizeError, String::format("The source %s is 0.", sw ? "height" : "width"));
         return nullptr;
     }
 
@@ -1531,9 +1541,9 @@ PassRefPtr<ImageData> CanvasRenderingContext2D::createImageData(float sw, float 
 PassRefPtr<ImageData> CanvasRenderingContext2D::getImageData(float sx, float sy, float sw, float sh, ExceptionState& exceptionState) const
 {
     if (!sw || !sh)
-        exceptionState.throwDOMException(IndexSizeError, String::format("The source %s is 0.", sw ? "height" : "width"));
+        exceptionState.ThrowDOMException(IndexSizeError, String::format("The source %s is 0.", sw ? "height" : "width"));
 
-    if (exceptionState.hadException())
+    if (exceptionState.had_exception())
         return nullptr;
 
     if (sw < 0) {
@@ -2123,22 +2133,9 @@ void CanvasRenderingContext2D::drawFocusRing(const Path& path)
 
 void CanvasRenderingContext2D::addHitRegion(ExceptionState& exceptionState)
 {
-    addHitRegion(Dictionary(), exceptionState);
-}
-
-void CanvasRenderingContext2D::addHitRegion(const Dictionary& options, ExceptionState& exceptionState)
-{
     HitRegionOptions passOptions;
 
-    options.getWithUndefinedOrNullCheck("id", passOptions.id);
-    options.getWithUndefinedOrNullCheck("control", passOptions.control);
-    if (passOptions.id.isEmpty() && !passOptions.control) {
-        exceptionState.throwDOMException(NotSupportedError, "Both id and control are null.");
-        return;
-    }
-
     RefPtr<Path2D> path2d;
-    options.getWithUndefinedOrNullCheck("path", path2d);
     Path hitRegionPath = path2d ? path2d->path() : m_path;
 
     FloatRect clipBounds;
@@ -2146,7 +2143,7 @@ void CanvasRenderingContext2D::addHitRegion(const Dictionary& options, Exception
 
     if (hitRegionPath.isEmpty() || !context || !state().m_invertibleCTM
         || !context->getTransformedClipBounds(&clipBounds)) {
-        exceptionState.throwDOMException(NotSupportedError, "The specified path has no pixels.");
+        exceptionState.ThrowDOMException(NotSupportedError, "The specified path has no pixels.");
         return;
     }
 
@@ -2156,18 +2153,14 @@ void CanvasRenderingContext2D::addHitRegion(const Dictionary& options, Exception
         // FIXME: The hit regions should take clipping region into account.
         // However, we have no way to get the region from canvas state stack by now.
         // See http://crbug.com/387057
-        exceptionState.throwDOMException(NotSupportedError, "The specified path has no pixels.");
+        exceptionState.ThrowDOMException(NotSupportedError, "The specified path has no pixels.");
         return;
     }
 
     passOptions.path = hitRegionPath;
 
-    String fillRuleString;
-    options.getWithUndefinedOrNullCheck("fillRule", fillRuleString);
-    if (fillRuleString.isEmpty() || fillRuleString != "evenodd")
-        passOptions.fillRule = RULE_NONZERO;
-    else
-        passOptions.fillRule = RULE_EVENODD;
+    // FIXME(Dictionary): Way to specify fillRule
+    passOptions.fillRule = RULE_NONZERO;
 
     addHitRegionInternal(passOptions, exceptionState);
 }

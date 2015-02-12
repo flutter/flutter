@@ -27,7 +27,7 @@
 #include "sky/engine/config.h"
 #include "sky/engine/core/editing/VisiblePosition.h"
 
-#include "sky/engine/bindings/core/v8/ExceptionState.h"
+#include "sky/engine/bindings2/exception_state.h"
 #include "sky/engine/core/dom/Document.h"
 #include "sky/engine/core/dom/Range.h"
 #include "sky/engine/core/dom/Text.h"
@@ -722,7 +722,7 @@ bool setStart(Range *r, const VisiblePosition &visiblePosition)
     Position p = visiblePosition.deepEquivalent().parentAnchoredEquivalent();
     TrackExceptionState exceptionState;
     r->setStart(p.containerNode(), p.offsetInContainerNode(), exceptionState);
-    return !exceptionState.hadException();
+    return !exceptionState.had_exception();
 }
 
 bool setEnd(Range *r, const VisiblePosition &visiblePosition)
@@ -732,7 +732,7 @@ bool setEnd(Range *r, const VisiblePosition &visiblePosition)
     Position p = visiblePosition.deepEquivalent().parentAnchoredEquivalent();
     TrackExceptionState exceptionState;
     r->setEnd(p.containerNode(), p.offsetInContainerNode(), exceptionState);
-    return !exceptionState.hadException();
+    return !exceptionState.had_exception();
 }
 
 Element* enclosingBlockFlowElement(const VisiblePosition& visiblePosition)

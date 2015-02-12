@@ -29,9 +29,9 @@
 
     [InitializedByEventConstructor] readonly attribute DOMString data;
 
-    [RuntimeEnabled=IMEAPI] readonly attribute long activeSegmentStart;
-    [RuntimeEnabled=IMEAPI] readonly attribute long activeSegmentEnd;
-    [RuntimeEnabled=IMEAPI] sequence<unsigned long> getSegments();
+    readonly attribute long activeSegmentStart;
+    readonly attribute long activeSegmentEnd;
+    sequence<unsigned long> getSegments();
 
     void initCompositionEvent([Default=Undefined] optional DOMString typeArg,
                               [Default=Undefined] optional boolean canBubbleArg,

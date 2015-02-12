@@ -65,7 +65,7 @@ public:
     static AnimationPlayer* animate(Element& element, const Vector<Dictionary>& keyframeDictionaryVector, const Dictionary& timingInputDictionary, ExceptionState& exceptionState)
     {
         RefPtr<AnimationEffect> effect = EffectInput::convert(&element, keyframeDictionaryVector, exceptionState);
-        if (exceptionState.hadException())
+        if (exceptionState.had_exception())
             return 0;
         ASSERT(effect);
         return animateInternal(element, effect.release(), TimingInput::convert(timingInputDictionary));
@@ -74,7 +74,7 @@ public:
     static AnimationPlayer* animate(Element& element, const Vector<Dictionary>& keyframeDictionaryVector, double duration, ExceptionState& exceptionState)
     {
         RefPtr<AnimationEffect> effect = EffectInput::convert(&element, keyframeDictionaryVector, exceptionState);
-        if (exceptionState.hadException())
+        if (exceptionState.had_exception())
             return 0;
         ASSERT(effect);
         return animateInternal(element, effect.release(), TimingInput::convert(duration));
@@ -83,7 +83,7 @@ public:
     static AnimationPlayer* animate(Element& element, const Vector<Dictionary>& keyframeDictionaryVector, ExceptionState& exceptionState)
     {
         RefPtr<AnimationEffect> effect = EffectInput::convert(&element, keyframeDictionaryVector, exceptionState);
-        if (exceptionState.hadException())
+        if (exceptionState.had_exception())
             return 0;
         ASSERT(effect);
         return animateInternal(element, effect.release(), Timing());

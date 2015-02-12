@@ -28,7 +28,6 @@
 #define SKY_ENGINE_CORE_FRAME_SETTINGS_H_
 
 #include "gen/sky/core/SettingsMacros.h"
-#include "sky/engine/bindings/core/v8/V8CacheOptions.h"
 #include "sky/engine/core/css/PointerProperties.h"
 #include "sky/engine/core/frame/SettingsDelegate.h"
 #include "sky/engine/platform/Timer.h"

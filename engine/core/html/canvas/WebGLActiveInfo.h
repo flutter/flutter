@@ -26,7 +26,7 @@
 #ifndef SKY_ENGINE_CORE_HTML_CANVAS_WEBGLACTIVEINFO_H_
 #define SKY_ENGINE_CORE_HTML_CANVAS_WEBGLACTIVEINFO_H_
 
-#include "sky/engine/bindings/core/v8/ScriptWrappable.h"
+#include "sky/engine/tonic/dart_wrappable.h"
 #include "sky/engine/platform/graphics/GraphicsTypes3D.h"
 #include "sky/engine/wtf/PassRefPtr.h"
 #include "sky/engine/wtf/RefCounted.h"
@@ -34,7 +34,7 @@
 
 namespace blink {
 
-class WebGLActiveInfo final : public RefCounted<WebGLActiveInfo>, public ScriptWrappable {
+class WebGLActiveInfo final : public RefCounted<WebGLActiveInfo>, public DartWrappable {
     DEFINE_WRAPPERTYPEINFO();
 public:
     static PassRefPtr<WebGLActiveInfo> create(const String& name, GLenum type, GLint size)

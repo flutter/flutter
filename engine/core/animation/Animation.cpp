@@ -31,8 +31,7 @@
 #include "sky/engine/config.h"
 #include "sky/engine/core/animation/Animation.h"
 
-#include "sky/engine/bindings/core/v8/Dictionary.h"
-#include "sky/engine/bindings/core/v8/ExceptionState.h"
+#include "sky/engine/bindings2/exception_state.h"
 #include "sky/engine/core/animation/ActiveAnimations.h"
 #include "sky/engine/core/animation/AnimationHelpers.h"
 #include "sky/engine/core/animation/AnimationPlayer.h"
@@ -49,29 +48,13 @@ PassRefPtr<Animation> Animation::create(Element* target, PassRefPtr<AnimationEff
     return adoptRef(new Animation(target, effect, timing, priority, eventDelegate));
 }
 
-PassRefPtr<Animation> Animation::create(Element* element, PassRefPtr<AnimationEffect> effect, const Dictionary& timingInputDictionary)
+PassRefPtr<Animation> Animation::create(Element* element, double duration, ExceptionState&)
 {
-    return create(element, effect, TimingInput::convert(timingInputDictionary));
+    return create(element, PassRefPtr<AnimationEffect>(), TimingInput::convert(duration));
 }
-PassRefPtr<Animation> Animation::create(Element* element, PassRefPtr<AnimationEffect> effect, double duration)
+PassRefPtr<Animation> Animation::create(Element* element, ExceptionState& es)
 {
-    return create(element, effect, TimingInput::convert(duration));
-}
-PassRefPtr<Animation> Animation::create(Element* element, PassRefPtr<AnimationEffect> effect)
-{
-    return create(element, effect, Timing());
-}
-PassRefPtr<Animation> Animation::create(Element* element, const Vector<Dictionary>& keyframeDictionaryVector, const Dictionary& timingInputDictionary, ExceptionState& exceptionState)
-{
-    return create(element, EffectInput::convert(element, keyframeDictionaryVector, exceptionState), TimingInput::convert(timingInputDictionary));
-}
-PassRefPtr<Animation> Animation::create(Element* element, const Vector<Dictionary>& keyframeDictionaryVector, double duration, ExceptionState& exceptionState)
-{
-    return create(element, EffectInput::convert(element, keyframeDictionaryVector, exceptionState), TimingInput::convert(duration));
-}
-PassRefPtr<Animation> Animation::create(Element* element, const Vector<Dictionary>& keyframeDictionaryVector, ExceptionState& exceptionState)
-{
-    return create(element, EffectInput::convert(element, keyframeDictionaryVector, exceptionState), Timing());
+    return create(element, 0.0, es);
 }
 
 Animation::Animation(Element* target, PassRefPtr<AnimationEffect> effect, const Timing& timing, Priority priority, PassOwnPtr<EventDelegate> eventDelegate)

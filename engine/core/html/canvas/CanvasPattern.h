@@ -26,7 +26,7 @@
 #ifndef SKY_ENGINE_CORE_HTML_CANVAS_CANVASPATTERN_H_
 #define SKY_ENGINE_CORE_HTML_CANVAS_CANVASPATTERN_H_
 
-#include "sky/engine/bindings/core/v8/ScriptWrappable.h"
+#include "sky/engine/tonic/dart_wrappable.h"
 #include "sky/engine/platform/graphics/Pattern.h"
 #include "sky/engine/wtf/Forward.h"
 #include "sky/engine/wtf/PassRefPtr.h"
@@ -37,7 +37,7 @@ namespace blink {
 class ExceptionState;
 class Image;
 
-class CanvasPattern final : public RefCounted<CanvasPattern>, public ScriptWrappable {
+class CanvasPattern final : public RefCounted<CanvasPattern>, public DartWrappable {
     DEFINE_WRAPPERTYPEINFO();
 public:
     static Pattern::RepeatMode parseRepetitionType(const String&, ExceptionState&);

@@ -31,7 +31,7 @@
 #include "sky/engine/config.h"
 #include "sky/engine/public/web/WebElement.h"
 
-#include "sky/engine/bindings/core/v8/ExceptionState.h"
+#include "sky/engine/bindings2/exception_state.h"
 #include "sky/engine/core/dom/Element.h"
 #include "sky/engine/core/dom/custom/CustomElementProcessingStack.h"
 #include "sky/engine/core/dom/shadow/ShadowRoot.h"
@@ -73,7 +73,7 @@ bool WebElement::setAttribute(const WebString& attrName, const WebString& attrVa
     CustomElementProcessingStack::CallbackDeliveryScope deliverCustomElementCallbacks;
     TrackExceptionState exceptionState;
     unwrap<Element>()->setAttribute(attrName, attrValue, exceptionState);
-    return !exceptionState.hadException();
+    return !exceptionState.had_exception();
 }
 
 unsigned WebElement::attributeCount() const

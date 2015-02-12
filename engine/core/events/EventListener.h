@@ -23,8 +23,10 @@
 
 #include "sky/engine/wtf/RefCounted.h"
 
-namespace blink {
+typedef struct _Dart_WeakReferenceSet* Dart_WeakReferenceSet;
 
+namespace blink {
+class DartGCVisitor;
 class Event;
 class ExecutionContext;
 
@@ -33,6 +35,9 @@ public:
     virtual ~EventListener() { }
     virtual bool operator==(const EventListener&) = 0;
     virtual void handleEvent(ExecutionContext*, Event*) = 0;
+
+    virtual void AcceptDartGCVisitor(DartGCVisitor& visitor) const = 0;
+
 
 protected:
     explicit EventListener()

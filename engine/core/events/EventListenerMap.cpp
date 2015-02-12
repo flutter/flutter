@@ -176,13 +176,13 @@ EventListenerIterator::EventListenerIterator()
 {
 }
 
-EventListenerIterator::EventListenerIterator(EventTarget* target)
+EventListenerIterator::EventListenerIterator(const EventTarget* target)
     : m_map(0)
     , m_entryIndex(0)
     , m_index(0)
 {
     ASSERT(target);
-    EventTargetData* data = target->eventTargetData();
+    EventTargetData* data = const_cast<EventTarget*>(target)->eventTargetData();
 
     if (!data)
         return;

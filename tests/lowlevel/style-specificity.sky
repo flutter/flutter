@@ -1,6 +1,4 @@
 <html>
-<import src="../resources/chai.sky" />
-<import src="../resources/mocha.sky" />
 <style>
     #sandbox { color: red; }
     .blue { color: blue; }
@@ -8,12 +6,20 @@
 <body>
     <div id="sandbox" class="blue">This should be blue.</div>
     <script>
-    describe('Specificity', function() {
-      it('should not exist', function() {
+    import "../resources/third_party/unittest/unittest.dart";
+    import "../resources/unit.dart";
+
+    import "dart:sky";
+
+    main() {
+      initUnit();
+
+      test('should not exist', () {
         var sandbox = document.getElementById("sandbox");
-        assert.equal(getComputedStyle(sandbox).color, "rgb(0, 0, 255)");
+        expect(window.getComputedStyle(sandbox).getPropertyValue("color"),
+               equals("rgb(0, 0, 255)"));
       });
-    });
+    }
     </script>
 </body>
 </html>

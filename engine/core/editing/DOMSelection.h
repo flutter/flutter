@@ -31,7 +31,7 @@
 #ifndef SKY_ENGINE_CORE_EDITING_DOMSELECTION_H_
 #define SKY_ENGINE_CORE_EDITING_DOMSELECTION_H_
 
-#include "sky/engine/bindings/core/v8/ScriptWrappable.h"
+#include "sky/engine/tonic/dart_wrappable.h"
 #include "sky/engine/core/frame/DOMWindowProperty.h"
 #include "sky/engine/platform/heap/Handle.h"
 #include "sky/engine/wtf/Forward.h"
@@ -48,7 +48,7 @@ class Range;
 class TreeScope;
 class VisibleSelection;
 
-class DOMSelection final : public RefCounted<DOMSelection>, public ScriptWrappable, public DOMWindowProperty {
+class DOMSelection final : public RefCounted<DOMSelection>, public DartWrappable, public DOMWindowProperty {
     DEFINE_WRAPPERTYPEINFO();
 public:
     static PassRefPtr<DOMSelection> create(const TreeScope* treeScope)

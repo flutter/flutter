@@ -5,6 +5,7 @@
 #include "sky/engine/config.h"
 #include "sky/engine/bindings2/dart_callback.h"
 
+#include "sky/engine/tonic/dart_converter.h"
 #include "sky/engine/tonic/dart_error.h"
 #include "sky/engine/tonic/dart_state.h"
 

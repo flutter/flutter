@@ -26,8 +26,8 @@
 #include "sky/engine/config.h"
 #include "sky/engine/core/editing/DeleteFromTextNodeCommand.h"
 
-#include "sky/engine/bindings/core/v8/ExceptionState.h"
-#include "sky/engine/bindings/core/v8/ExceptionStatePlaceholder.h"
+#include "sky/engine/bindings2/exception_state.h"
+#include "sky/engine/bindings2/exception_state_placeholder.h"
 #include "sky/engine/core/dom/Text.h"
 
 namespace blink {
@@ -52,7 +52,7 @@ void DeleteFromTextNodeCommand::doApply()
 
     TrackExceptionState exceptionState;
     m_text = m_node->substringData(m_offset, m_count, exceptionState);
-    if (exceptionState.hadException())
+    if (exceptionState.had_exception())
         return;
 
     m_node->deleteData(m_offset, m_count, exceptionState, CharacterData::DeprecatedRecalcStyleImmediatlelyForEditing);

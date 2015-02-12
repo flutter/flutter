@@ -5,7 +5,7 @@
 interface HTMLIFrameElement : HTMLElement {
   [Reflect, URL] attribute DOMString src;
 
-  void embedViewManagerClient(any client);
-  [CallWith=ScriptState] any takeServicesHandle();
-  [CallWith=ScriptState] any takeExposedServicesHandle();
+  // void embedViewManagerClient(any client);
+  // [CallWith=ScriptState] any takeServicesHandle();
+  // [CallWith=ScriptState] any takeExposedServicesHandle();
 };

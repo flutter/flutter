@@ -22,7 +22,7 @@
 #define SKY_ENGINE_CORE_CSS_CSSSTYLEDECLARATION_H_
 
 #include "gen/sky/core/CSSPropertyNames.h"
-#include "sky/engine/bindings/core/v8/ScriptWrappable.h"
+#include "sky/engine/tonic/dart_wrappable.h"
 #include "sky/engine/wtf/Forward.h"
 #include "sky/engine/wtf/Noncopyable.h"
 
@@ -34,7 +34,7 @@ class CSSValue;
 class ExceptionState;
 class MutableStylePropertySet;
 
-class CSSStyleDeclaration : public ScriptWrappable {
+class CSSStyleDeclaration : public DartWrappable {
     DEFINE_WRAPPERTYPEINFO();
     WTF_MAKE_NONCOPYABLE(CSSStyleDeclaration); WTF_MAKE_FAST_ALLOCATED;
 public:
@@ -53,7 +53,7 @@ public:
     virtual String getPropertyValue(const String& propertyName) = 0;
     virtual String getPropertyShorthand(const String& propertyName) = 0;
     virtual bool isPropertyImplicit(const String& propertyName) = 0;
-    virtual void setProperty(const String& propertyName, const String& value, const String& priority, ExceptionState&) = 0;
+    virtual void setProperty(const String& propertyName, const String& value, ExceptionState&) = 0;
     virtual String removeProperty(const String& propertyName, ExceptionState&) = 0;
 
     // CSSPropertyID versions of the CSSOM functions to support bindings and editing.

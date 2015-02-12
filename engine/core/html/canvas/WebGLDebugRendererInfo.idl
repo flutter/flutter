@@ -25,7 +25,6 @@
 
 [
     NoInterfaceObject,
-    DoNotCheckConstants,
 ] interface WebGLDebugRendererInfo {
     const unsigned long UNMASKED_VENDOR_WEBGL = 0x9245;
     const unsigned long UNMASKED_RENDERER_WEBGL = 0x9246;

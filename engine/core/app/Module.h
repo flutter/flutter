@@ -11,7 +11,6 @@ namespace blink {
 class Application;
 
 class Module : public AbstractModule {
-  DEFINE_WRAPPERTYPEINFO();
 public:
   static PassRefPtr<Module> create(ExecutionContext* context,
                                    Application* application,
@@ -24,9 +23,6 @@ public:
 
   Application* application() const { return application_.get(); }
 
-  void setExports(ScriptState*, const ScriptValue& exports);
-  const ScriptValue& exports(ScriptState*) const;
-
 private:
   Module(ExecutionContext* context,
          Application* application,
@@ -37,7 +33,6 @@ private:
   Application* GetApplication() override;
 
   RefPtr<Application> application_;
-  mutable ScriptValue exports_;
 };
 
 } // namespace blink

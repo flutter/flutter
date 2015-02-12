@@ -24,7 +24,6 @@
  */
 
 [
-    Custom=Wrap,
     NoInterfaceObject,
 ] interface ArrayBufferView {
     readonly attribute ArrayBuffer buffer;

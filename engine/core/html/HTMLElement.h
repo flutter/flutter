@@ -32,8 +32,6 @@ class HTMLElement : public Element {
 public:
     DECLARE_ELEMENT_FACTORY_WITH_TAGNAME(HTMLElement);
 
-    virtual v8::Handle<v8::Object> wrap(v8::Handle<v8::Object> creationContext, v8::Isolate*) override;
-
 protected:
     HTMLElement(const QualifiedName& tagName, Document&, ConstructionType);
 

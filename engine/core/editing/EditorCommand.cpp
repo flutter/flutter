@@ -30,8 +30,8 @@
 
 #include "gen/sky/core/CSSPropertyNames.h"
 #include "gen/sky/core/CSSValueKeywords.h"
-#include "sky/engine/bindings/core/v8/ExceptionState.h"
-#include "sky/engine/bindings/core/v8/ExceptionStatePlaceholder.h"
+#include "sky/engine/bindings2/exception_state.h"
+#include "sky/engine/bindings2/exception_state_placeholder.h"
 #include "sky/engine/core/css/CSSValueList.h"
 #include "sky/engine/core/css/StylePropertySet.h"
 #include "sky/engine/core/dom/DocumentFragment.h"

@@ -26,7 +26,7 @@
 #include "sky/engine/config.h"
 #include "sky/engine/core/editing/AppendNodeCommand.h"
 
-#include "sky/engine/bindings/core/v8/ExceptionState.h"
+#include "sky/engine/bindings2/exception_state.h"
 
 namespace blink {
 

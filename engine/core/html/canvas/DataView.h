@@ -26,7 +26,7 @@
 #ifndef SKY_ENGINE_CORE_HTML_CANVAS_DATAVIEW_H_
 #define SKY_ENGINE_CORE_HTML_CANVAS_DATAVIEW_H_
 
-#include "sky/engine/bindings/core/v8/ScriptWrappable.h"
+#include "sky/engine/tonic/dart_wrappable.h"
 #include "sky/engine/wtf/ArrayBufferView.h"
 #include "sky/engine/wtf/PassRefPtr.h"
 
@@ -34,8 +34,7 @@ namespace blink {
 
 class ExceptionState;
 
-class DataView final : public ArrayBufferView, public ScriptWrappable {
-    DEFINE_WRAPPERTYPEINFO();
+class DataView final : public ArrayBufferView {
 public:
     static PassRefPtr<DataView> create(unsigned length);
     static PassRefPtr<DataView> create(PassRefPtr<ArrayBuffer>, unsigned byteOffset, unsigned byteLength);
@@ -76,8 +75,6 @@ public:
     {
         return TypeDataView;
     }
-
-    virtual v8::Handle<v8::Object> wrap(v8::Handle<v8::Object> creationContext, v8::Isolate*) override;
 
 protected:
     virtual void neuter() override;

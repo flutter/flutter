@@ -5,7 +5,6 @@
 #include "sky/engine/config.h"
 #include "sky/engine/core/animation/TimingInput.h"
 
-#include "sky/engine/bindings/core/v8/Dictionary.h"
 #include "sky/engine/core/css/parser/BisonCSSParser.h"
 #include "sky/engine/core/css/resolver/CSSToStyleMap.h"
 
@@ -93,55 +92,6 @@ void TimingInput::setTimingFunction(Timing& timing, const String& timingFunction
         timing.timingFunction = CSSToStyleMap::mapAnimationTimingFunction(timingFunctionValue.get(), true);
     else
         timing.timingFunction = Timing::defaults().timingFunction;
-}
-
-Timing TimingInput::convert(const Dictionary& timingInputDictionary)
-{
-    Timing result;
-
-    // FIXME: This method needs to be refactored to handle invalid
-    // null, NaN, Infinity values better.
-    // See: http://www.w3.org/TR/WebIDL/#es-double
-    double startDelay = Timing::defaults().startDelay;
-    DictionaryHelper::get(timingInputDictionary, "delay", startDelay);
-    setStartDelay(result, startDelay);
-
-    double endDelay = Timing::defaults().endDelay;
-    DictionaryHelper::get(timingInputDictionary, "endDelay", endDelay);
-    setEndDelay(result, endDelay);
-
-    String fillMode;
-    DictionaryHelper::get(timingInputDictionary, "fill", fillMode);
-    setFillMode(result, fillMode);
-
-    double iterationStart = Timing::defaults().iterationStart;
-    DictionaryHelper::get(timingInputDictionary, "iterationStart", iterationStart);
-    setIterationStart(result, iterationStart);
-
-    double iterationCount = Timing::defaults().iterationCount;
-    DictionaryHelper::get(timingInputDictionary, "iterations", iterationCount);
-    setIterationCount(result, iterationCount);
-
-    double iterationDuration = 0;
-    if (DictionaryHelper::get(timingInputDictionary, "duration", iterationDuration)) {
-        setIterationDuration(result, iterationDuration);
-    }
-
-    double playbackRate = Timing::defaults().playbackRate;
-    DictionaryHelper::get(timingInputDictionary, "playbackRate", playbackRate);
-    setPlaybackRate(result, playbackRate);
-
-    String direction;
-    DictionaryHelper::get(timingInputDictionary, "direction", direction);
-    setPlaybackDirection(result, direction);
-
-    String timingFunctionString;
-    DictionaryHelper::get(timingInputDictionary, "easing", timingFunctionString);
-    setTimingFunction(result, timingFunctionString);
-
-    result.assertValid();
-
-    return result;
 }
 
 Timing TimingInput::convert(double duration)

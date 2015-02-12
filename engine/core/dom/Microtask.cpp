@@ -32,10 +32,10 @@
 #include "sky/engine/core/dom/Microtask.h"
 
 #include "base/bind.h"
-#include "sky/engine/bindings/core/v8/V8PerIsolateData.h"
 #include "sky/engine/platform/TraceEvent.h"
 #include "sky/engine/public/platform/WebThread.h"
-#include "v8/include/v8.h"
+#include "sky/engine/wtf/OwnPtr.h"
+#include "sky/engine/wtf/Vector.h"
 
 namespace blink {
 
@@ -59,29 +59,34 @@ private:
 
 }
 
-void Microtask::performCheckpoint()
+// TODO(dart): Integrate this microtask queue with darts.
+typedef Vector<OwnPtr<WebThread::Task> > MicrotaskQueue;
+static MicrotaskQueue& microtaskQueue()
 {
-    v8::Isolate* isolate = v8::Isolate::GetCurrent();
-    V8PerIsolateData* isolateData = V8PerIsolateData::from(isolate);
-    ASSERT(isolateData);
-    if (isolateData->recursionLevel() || isolateData->performingMicrotaskCheckpoint())
-        return;
-    TRACE_EVENT0("v8", "v8.runMicrotasks");
-    isolateData->setPerformingMicrotaskCheckpoint(true);
-    isolate->RunMicrotasks();
-    isolateData->setPerformingMicrotaskCheckpoint(false);
+    DEFINE_STATIC_LOCAL(OwnPtr<MicrotaskQueue>, queue, (adoptPtr(new MicrotaskQueue())));
+    return *queue;
 }
 
-static void microtaskFunctionCallback(void* data)
+void Microtask::performCheckpoint()
 {
-    OwnPtr<WebThread::Task> task = adoptPtr(static_cast<WebThread::Task*>(data));
-    task->run();
+    MicrotaskQueue& queue = microtaskQueue();
+    while(!queue.isEmpty()) {
+        MicrotaskQueue local;
+        swap(queue, local);
+        for (const auto& task : local)
+            task->run();
+    }
 }
+
+// static void microtaskFunctionCallback(void* data)
+// {
+//     OwnPtr<WebThread::Task> task = adoptPtr(static_cast<WebThread::Task*>(data));
+//     task->run();
+// }
 
 void Microtask::enqueueMicrotask(PassOwnPtr<WebThread::Task> callback)
 {
-    v8::Isolate* isolate = v8::Isolate::GetCurrent();
-    isolate->EnqueueMicrotask(&microtaskFunctionCallback, callback.leakPtr());
+    microtaskQueue().append(callback);
 }
 
 void Microtask::enqueueMicrotask(const base::Closure& callback)

@@ -29,7 +29,7 @@
 #ifndef SKY_ENGINE_CORE_HTML_IMAGEDATA_H_
 #define SKY_ENGINE_CORE_HTML_IMAGEDATA_H_
 
-#include "sky/engine/bindings/core/v8/ScriptWrappable.h"
+#include "sky/engine/tonic/dart_wrappable.h"
 #include "sky/engine/platform/geometry/IntSize.h"
 #include "sky/engine/platform/heap/Handle.h"
 #include "sky/engine/wtf/RefCounted.h"
@@ -40,7 +40,7 @@ namespace blink {
 
 class ExceptionState;
 
-class ImageData final : public RefCounted<ImageData>, public ScriptWrappable {
+class ImageData final : public RefCounted<ImageData>, public DartWrappable {
     DEFINE_WRAPPERTYPEINFO();
 public:
     static PassRefPtr<ImageData> create(const IntSize&);
@@ -52,8 +52,6 @@ public:
     int width() const { return m_size.width(); }
     int height() const { return m_size.height(); }
     Uint8ClampedArray* data() const { return m_data.get(); }
-
-    virtual v8::Handle<v8::Object> wrap(v8::Handle<v8::Object> creationContext, v8::Isolate*) override;
 
 private:
     explicit ImageData(const IntSize&);

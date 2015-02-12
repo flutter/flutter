@@ -20,7 +20,6 @@
 
 // Introduced in DOM Level 2:
 [
-    Custom=Wrap,
     EventConstructor,
 ] interface Event {
     // DOM PhaseType
@@ -48,8 +47,8 @@
     void stopImmediatePropagation();
 
     // IE Extensions
-    [MeasureAs=EventSrcElement] readonly attribute EventTarget srcElement;
-    [CallWith=ExecutionContext, ImplementedAs=legacyReturnValue, MeasureAs=EventReturnValue] attribute boolean returnValue;
-    [MeasureAs=EventCancelBubble] attribute boolean cancelBubble;
-    [MeasureAs=EventPath] readonly attribute NodeList path;
+    readonly attribute EventTarget srcElement;
+    [CallWith=ExecutionContext, ImplementedAs=legacyReturnValue] attribute boolean returnValue;
+    attribute boolean cancelBubble;
+    readonly attribute NodeList path;
 };

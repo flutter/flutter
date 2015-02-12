@@ -26,19 +26,16 @@
 #ifndef SKY_ENGINE_CORE_EVENTS_CUSTOMEVENT_H_
 #define SKY_ENGINE_CORE_EVENTS_CUSTOMEVENT_H_
 
-#include "sky/engine/bindings/core/v8/SerializedScriptValue.h"
 #include "sky/engine/core/events/Event.h"
 
 namespace blink {
-
-class SerializedScriptValue;
 
 typedef EventInit CustomEventInit;
 
 class CustomEvent final : public Event {
     DEFINE_WRAPPERTYPEINFO();
 public:
-    virtual ~CustomEvent();
+    ~CustomEvent() override;
 
     static PassRefPtr<CustomEvent> create()
     {
@@ -50,23 +47,11 @@ public:
         return adoptRef(new CustomEvent(type, initializer));
     }
 
-    void initCustomEvent(const AtomicString& type, bool canBubble, bool cancelable, PassRefPtr<SerializedScriptValue>);
-
-    virtual const AtomicString& interfaceName() const override;
-
-    SerializedScriptValue* serializedDetail() { return m_serializedDetail.get(); }
-
-    void setSerializedDetail(PassRefPtr<SerializedScriptValue> detail)
-    {
-        ASSERT(!m_serializedDetail);
-        m_serializedDetail = detail;
-    }
+    const AtomicString& interfaceName() const override;
 
 private:
     CustomEvent();
     CustomEvent(const AtomicString& type, const CustomEventInit& initializer);
-
-    RefPtr<SerializedScriptValue> m_serializedDetail;
 };
 
 } // namespace blink

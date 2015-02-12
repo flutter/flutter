@@ -44,7 +44,6 @@ struct FontFaceSetLoadEventInit : public EventInit {
 };
 
 class FontFaceSetLoadEvent final : public Event {
-    DEFINE_WRAPPERTYPEINFO();
 public:
     static PassRefPtr<FontFaceSetLoadEvent> create()
     {

@@ -24,7 +24,7 @@
 #ifndef SKY_ENGINE_CORE_DOM_CONTAINERNODE_H_
 #define SKY_ENGINE_CORE_DOM_CONTAINERNODE_H_
 
-#include "sky/engine/bindings/core/v8/ExceptionStatePlaceholder.h"
+#include "sky/engine/bindings2/exception_state_placeholder.h"
 #include "sky/engine/core/dom/Node.h"
 #include "sky/engine/wtf/OwnPtr.h"
 #include "sky/engine/wtf/Vector.h"

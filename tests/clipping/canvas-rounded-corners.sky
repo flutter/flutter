@@ -16,9 +16,11 @@
   </ul>
   <canvas id="theCanvas" width="257" height="257"></canvas>
   <script>
+  void main() {
     var theCanvas = document.getElementById('theCanvas');
     var context = theCanvas.getContext('2d');
-    context.fillStyle = 'green';
+    context.fillColor = 'green';
     context.fillRect(0, 0, theCanvas.width, theCanvas.width);
+  }
   </script>
 </sky>

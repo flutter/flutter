@@ -101,7 +101,6 @@ public:
     virtual void setTouchEditingEnabled(bool) override;
     virtual void setUnifiedTextCheckerEnabled(bool) override;
     virtual void setUseWideViewport(bool) override;
-    virtual void setV8CacheOptions(V8CacheOptions) override;
     virtual void setWebGLErrorsToConsoleEnabled(bool) override;
 
     bool showPaintRects() const { return m_showPaintRects; }

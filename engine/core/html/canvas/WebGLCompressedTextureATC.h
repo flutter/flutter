@@ -26,7 +26,7 @@
 #ifndef SKY_ENGINE_CORE_HTML_CANVAS_WEBGLCOMPRESSEDTEXTUREATC_H_
 #define SKY_ENGINE_CORE_HTML_CANVAS_WEBGLCOMPRESSEDTEXTUREATC_H_
 
-#include "sky/engine/bindings/core/v8/ScriptWrappable.h"
+#include "sky/engine/tonic/dart_wrappable.h"
 #include "sky/engine/core/html/canvas/WebGLExtension.h"
 #include "sky/engine/wtf/PassRefPtr.h"
 
@@ -34,7 +34,7 @@ namespace blink {
 
 class WebGLTexture;
 
-class WebGLCompressedTextureATC final : public WebGLExtension, public ScriptWrappable {
+class WebGLCompressedTextureATC final : public WebGLExtension, public DartWrappable {
     DEFINE_WRAPPERTYPEINFO();
 public:
     static PassRefPtr<WebGLCompressedTextureATC> create(WebGLRenderingContextBase*);

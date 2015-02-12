@@ -29,7 +29,7 @@
 #ifndef SKY_ENGINE_CORE_FRAME_LOCATION_H_
 #define SKY_ENGINE_CORE_FRAME_LOCATION_H_
 
-#include "sky/engine/bindings/core/v8/ScriptWrappable.h"
+#include "sky/engine/tonic/dart_wrappable.h"
 #include "sky/engine/core/frame/DOMWindowProperty.h"
 #include "sky/engine/wtf/PassRefPtr.h"
 #include "sky/engine/wtf/RefCounted.h"
@@ -42,7 +42,7 @@ class ExceptionState;
 class LocalFrame;
 class KURL;
 
-class Location final : public RefCounted<Location>, public ScriptWrappable, public DOMWindowProperty {
+class Location final : public RefCounted<Location>, public DartWrappable, public DOMWindowProperty {
     DEFINE_WRAPPERTYPEINFO();
 public:
     static PassRefPtr<Location> create(LocalFrame* frame)
@@ -50,33 +50,33 @@ public:
         return adoptRef(new Location(frame));
     }
 
-    void setHref(LocalDOMWindow* callingWindow, LocalDOMWindow* enteredWindow, const String&);
+    void setHref(const String&);
     String href() const;
 
-    void assign(LocalDOMWindow* callingWindow, LocalDOMWindow* enteredWindow, const String&);
-    void replace(LocalDOMWindow* callingWindow, LocalDOMWindow* enteredWindow, const String&);
-    void reload(LocalDOMWindow* callingWindow);
+    void assign(const String&);
+    void replace(const String&);
+    void reload();
 
-    void setProtocol(LocalDOMWindow* callingWindow, LocalDOMWindow* enteredWindow, const String&, ExceptionState&);
+    void setProtocol(const String&, ExceptionState&);
     String protocol() const;
-    void setHost(LocalDOMWindow* callingWindow, LocalDOMWindow* enteredWindow, const String&);
+    void setHost(const String&);
     String host() const;
-    void setHostname(LocalDOMWindow* callingWindow, LocalDOMWindow* enteredWindow, const String&);
+    void setHostname(const String&);
     String hostname() const;
-    void setPort(LocalDOMWindow* callingWindow, LocalDOMWindow* enteredWindow, const String&);
+    void setPort(const String&);
     String port() const;
-    void setPathname(LocalDOMWindow* callingWindow, LocalDOMWindow* enteredWindow, const String&);
+    void setPathname(const String&);
     String pathname() const;
-    void setSearch(LocalDOMWindow* callingWindow, LocalDOMWindow* enteredWindow, const String&);
+    void setSearch(const String&);
     String search() const;
-    void setHash(LocalDOMWindow* callingWindow, LocalDOMWindow* enteredWindow, const String&);
+    void setHash(const String&);
     String hash() const;
     String origin() const;
 
 private:
     explicit Location(LocalFrame*);
 
-    void setLocation(const String&, LocalDOMWindow* callingWindow, LocalDOMWindow* enteredWindow);
+    void setLocation(const String&);
 
     const KURL& url() const;
 };

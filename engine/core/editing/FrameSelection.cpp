@@ -27,7 +27,7 @@
 #include "sky/engine/core/editing/FrameSelection.h"
 
 #include <stdio.h>
-#include "sky/engine/bindings/core/v8/ExceptionState.h"
+#include "sky/engine/bindings2/exception_state.h"
 #include "sky/engine/core/css/StylePropertySet.h"
 #include "sky/engine/core/dom/CharacterData.h"
 #include "sky/engine/core/dom/Document.h"
@@ -338,7 +338,7 @@ void FrameSelection::respondToNodeModification(Node& node, bool baseRemoved, boo
     } else if (RefPtr<Range> range = m_selection.firstRange()) {
         TrackExceptionState exceptionState;
         Range::CompareResults compareResult = range->compareNode(&node, exceptionState);
-        if (!exceptionState.hadException() && (compareResult == Range::NODE_BEFORE_AND_AFTER || compareResult == Range::NODE_INSIDE)) {
+        if (!exceptionState.had_exception() && (compareResult == Range::NODE_BEFORE_AND_AFTER || compareResult == Range::NODE_INSIDE)) {
             // If we did nothing here, when this node's renderer was destroyed, the rect that it
             // occupied would be invalidated, but, selection gaps that change as a result of
             // the removal wouldn't be invalidated.

@@ -29,7 +29,6 @@
  */
 
 [
-    DoNotCheckConstants,
     NoInterfaceObject,
     TypeChecking=Interface,
 ] interface ANGLEInstancedArrays {

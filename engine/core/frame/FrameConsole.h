@@ -29,7 +29,6 @@
 #ifndef SKY_ENGINE_CORE_FRAME_FRAMECONSOLE_H_
 #define SKY_ENGINE_CORE_FRAME_FRAMECONSOLE_H_
 
-#include "sky/engine/bindings/core/v8/ScriptState.h"
 #include "sky/engine/core/frame/ConsoleTypes.h"
 #include "sky/engine/platform/heap/Handle.h"
 #include "sky/engine/wtf/Forward.h"
@@ -42,7 +41,7 @@ class ConsoleMessageStorage;
 class Document;
 class FrameHost;
 class ResourceResponse;
-class ScriptCallStack;
+class LocalFrame;
 
 // FrameConsole takes per-frame console messages and routes them up through the FrameHost to the ChromeClient and Inspector.
 // It's meant as an abstraction around ChromeClient calls and the way that Blink core/ can add messages to the console.
@@ -58,20 +57,10 @@ public:
 
     void reportResourceResponseReceived(Document*, unsigned long requestIdentifier, const ResourceResponse&);
 
-    static String formatStackTraceString(const String& originalMessage, PassRefPtr<ScriptCallStack>);
-
-    static void mute();
-    static void unmute();
-
-    ConsoleMessageStorage* messageStorage();
-    void clearMessages();
-
 private:
     explicit FrameConsole(LocalFrame&);
 
     LocalFrame& m_frame;
-
-    OwnPtr<ConsoleMessageStorage> m_consoleMessageStorage;
 };
 
 } // namespace blink

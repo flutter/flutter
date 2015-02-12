@@ -5,9 +5,6 @@
 #include "sky/engine/config.h"
 #include "sky/engine/core/inspector/ConsoleMessage.h"
 
-#include "sky/engine/bindings/core/v8/ScriptCallStackFactory.h"
-#include "sky/engine/bindings/core/v8/ScriptValue.h"
-#include "sky/engine/core/inspector/ScriptArguments.h"
 #include "sky/engine/wtf/CurrentTime.h"
 #include "sky/engine/wtf/PassOwnPtr.h"
 
@@ -76,44 +73,6 @@ void ConsoleMessage::setLineNumber(unsigned lineNumber)
     m_lineNumber = lineNumber;
 }
 
-PassRefPtr<ScriptCallStack> ConsoleMessage::callStack() const
-{
-    return m_callStack;
-}
-
-void ConsoleMessage::setCallStack(PassRefPtr<ScriptCallStack> callStack)
-{
-    m_callStack = callStack;
-}
-
-ScriptState* ConsoleMessage::scriptState() const
-{
-    if (m_scriptState)
-        return m_scriptState->get();
-    return nullptr;
-}
-
-void ConsoleMessage::setScriptState(ScriptState* scriptState)
-{
-    if (m_scriptState)
-        m_scriptState->clear();
-
-    if (scriptState)
-        m_scriptState = adoptPtr(new ScriptStateProtectingContext(scriptState));
-    else
-        m_scriptState.clear();
-}
-
-PassRefPtr<ScriptArguments> ConsoleMessage::scriptArguments() const
-{
-    return m_scriptArguments;
-}
-
-void ConsoleMessage::setScriptArguments(PassRefPtr<ScriptArguments> scriptArguments)
-{
-    m_scriptArguments = scriptArguments;
-}
-
 unsigned long ConsoleMessage::requestIdentifier() const
 {
     return m_requestIdentifier;
@@ -152,46 +111,6 @@ const String& ConsoleMessage::message() const
 unsigned ConsoleMessage::columnNumber() const
 {
     return m_columnNumber;
-}
-
-void ConsoleMessage::frameWindowDiscarded(LocalDOMWindow* window)
-{
-    if (scriptState() && scriptState()->domWindow() == window)
-        setScriptState(nullptr);
-
-    if (!m_scriptArguments)
-        return;
-    if (m_scriptArguments->scriptState()->domWindow() != window)
-        return;
-    if (!m_message)
-        m_message = "<message collected>";
-    m_scriptArguments.clear();
-}
-
-unsigned ConsoleMessage::argumentCount()
-{
-    if (m_scriptArguments)
-        return m_scriptArguments->argumentCount();
-    return 0;
-}
-
-void ConsoleMessage::collectCallStack()
-{
-    if (m_type == EndGroupMessageType)
-        return;
-
-    if (!m_callStack || m_source == ConsoleAPIMessageSource)
-        m_callStack = createScriptCallStackForConsole(ScriptCallStack::maxCallStackSizeToCapture, true);
-
-    if (m_callStack && m_callStack->size() && !m_scriptId) {
-        const ScriptCallFrame& frame = m_callStack->at(0);
-        m_url = frame.sourceURL();
-        m_lineNumber = frame.lineNumber();
-        m_columnNumber = frame.columnNumber();
-        return;
-    }
-
-    m_callStack.clear();
 }
 
 } // namespace blink

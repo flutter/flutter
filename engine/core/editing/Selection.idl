@@ -65,29 +65,29 @@
     // Firefox extensions
     // https://developer.mozilla.org/En/DOM/Selection
     //
-    [MeasureAs=SelectionContainsNode] boolean containsNode([Default = Undefined] optional Node node, [Default = Undefined] optional boolean allowPartial);
+    boolean containsNode([Default = Undefined] optional Node node, [Default = Undefined] optional boolean allowPartial);
 
     // WebKit extensions
-    [MeasureAs=SelectionBaseNode] readonly attribute Node baseNode;
-    [MeasureAs=SelectionBaseOffset] readonly attribute long baseOffset;
-    [MeasureAs=SelectionExtentNode] readonly attribute Node extentNode;
-    [MeasureAs=SelectionExtentOffset] readonly attribute long extentOffset;
+    readonly attribute Node baseNode;
+    readonly attribute long baseOffset;
+    readonly attribute Node extentNode;
+    readonly attribute long extentOffset;
 
     // WebKit's "type" accessor returns "None", "Range" and "Caret"
     // IE's type accessor returns "none", "text" and "control"
-    [MeasureAs=SelectionType] readonly attribute DOMString type;
+    readonly attribute DOMString type;
 
-    [MeasureAs=SelectionModify] void modify([Default=Undefined] optional DOMString alter,
+    void modify([Default=Undefined] optional DOMString alter,
                                             [Default=Undefined] optional DOMString direction,
                                             [Default=Undefined] optional DOMString granularity);
-    [MeasureAs=SelectionSetBaseAndExtent, RaisesException] void setBaseAndExtent([Default=Undefined] optional Node baseNode,
+    [RaisesException] void setBaseAndExtent([Default=Undefined] optional Node baseNode,
                                                                                  [Default=Undefined] optional long baseOffset,
                                                                                  [Default=Undefined] optional Node extentNode,
                                                                                  [Default=Undefined] optional long extentOffset);
-    [ImplementedAs=collapse, MeasureAs=SelectionSetPosition, RaisesException, TypeChecking=Interface] void setPosition(Node node,
+    [ImplementedAs=collapse, RaisesException, TypeChecking=Interface] void setPosition(Node node,
                                                                                                                        optional long offset = 0);
 
     // IE extensions
     // http://msdn.microsoft.com/en-us/library/ms535869(VS.85).aspx
-    [MeasureAs=SelectionEmpty] void empty();
+    void empty();
 };

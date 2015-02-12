@@ -27,8 +27,8 @@
 #include "sky/engine/config.h"
 #include "sky/engine/core/editing/TextCheckingHelper.h"
 
-#include "sky/engine/bindings/core/v8/ExceptionState.h"
-#include "sky/engine/bindings/core/v8/ExceptionStatePlaceholder.h"
+#include "sky/engine/bindings2/exception_state.h"
+#include "sky/engine/bindings2/exception_state_placeholder.h"
 #include "sky/engine/core/dom/Document.h"
 #include "sky/engine/core/dom/DocumentMarkerController.h"
 #include "sky/engine/core/dom/Range.h"
@@ -166,7 +166,7 @@ int TextCheckingParagraph::offsetTo(const Position& position, ExceptionState& ex
     ASSERT(m_checkingRange);
     RefPtr<Range> range = offsetAsRange()->cloneRange();
     range->setEnd(position.containerNode(), position.computeOffsetInContainerNode(), exceptionState);
-    if (exceptionState.hadException())
+    if (exceptionState.had_exception())
         return 0;
     return TextIterator::rangeLength(range.get());
 }

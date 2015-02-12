@@ -22,7 +22,7 @@
 #include "sky/engine/config.h"
 #include "sky/engine/core/dom/CharacterData.h"
 
-#include "sky/engine/bindings/core/v8/ExceptionState.h"
+#include "sky/engine/bindings2/exception_state.h"
 #include "sky/engine/core/dom/Document.h"
 #include "sky/engine/core/dom/ExceptionCode.h"
 #include "sky/engine/core/dom/MutationObserverInterestGroup.h"
@@ -56,7 +56,7 @@ void CharacterData::setData(const String& data)
 String CharacterData::substringData(unsigned offset, unsigned count, ExceptionState& exceptionState)
 {
     if (offset > length()) {
-        exceptionState.throwDOMException(IndexSizeError, "The offset " + String::number(offset) + " is greater than the node's length (" + String::number(length()) + ").");
+        exceptionState.ThrowDOMException(IndexSizeError, "The offset " + String::number(offset) + " is greater than the node's length (" + String::number(length()) + ").");
         return String();
     }
 
@@ -90,7 +90,7 @@ void CharacterData::appendData(const String& data)
 void CharacterData::insertData(unsigned offset, const String& data, ExceptionState& exceptionState, RecalcStyleBehavior recalcStyleBehavior)
 {
     if (offset > length()) {
-        exceptionState.throwDOMException(IndexSizeError, "The offset " + String::number(offset) + " is greater than the node's length (" + String::number(length()) + ").");
+        exceptionState.ThrowDOMException(IndexSizeError, "The offset " + String::number(offset) + " is greater than the node's length (" + String::number(length()) + ").");
         return;
     }
 
@@ -105,7 +105,7 @@ void CharacterData::insertData(unsigned offset, const String& data, ExceptionSta
 static bool validateOffsetCount(unsigned offset, unsigned count, unsigned length, unsigned& realCount, ExceptionState& exceptionState)
 {
     if (offset > length) {
-        exceptionState.throwDOMException(IndexSizeError, "The offset " + String::number(offset) + " is greater than the node's length (" + String::number(length) + ").");
+        exceptionState.ThrowDOMException(IndexSizeError, "The offset " + String::number(offset) + " is greater than the node's length (" + String::number(length) + ").");
         return false;
     }
 

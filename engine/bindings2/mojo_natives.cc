@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include "sky/engine/config.h"
+#include "sky/engine/bindings2/mojo_natives.h"
+
 #include <stdio.h>
 #include <string.h>
 #include <vector>
@@ -9,10 +12,12 @@
 #include "base/logging.h"
 #include "base/macros.h"
 #include "base/memory/scoped_ptr.h"
-#include "builtin.h"
 #include "dart/runtime/include/dart_api.h"
 #include "mojo/public/c/system/core.h"
 #include "mojo/public/cpp/system/core.h"
+#include "sky/engine/bindings2/builtin.h"
+#include "sky/engine/tonic/dart_converter.h"
+#include "sky/engine/tonic/dart_builtin.h"
 
 namespace blink {
 
@@ -94,7 +99,7 @@ static void SetInvalidArgumentReturn(Dart_NativeArguments arguments) {
 }
 
 static Dart_Handle MojoLib() {
-  return DartBuiltins::LookupLibrary("dart:mojo_core");
+  return DartBuiltin::LookupLibrary("dart:mojo_core");
 }
 
 static Dart_Handle SignalsStateToDart(Dart_Handle klass,

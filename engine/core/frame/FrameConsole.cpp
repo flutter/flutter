@@ -29,41 +29,16 @@
 #include "sky/engine/config.h"
 #include "sky/engine/core/frame/FrameConsole.h"
 
-#include "sky/engine/bindings/core/v8/ScriptCallStackFactory.h"
 #include "sky/engine/core/dom/Document.h"
 #include "sky/engine/core/frame/FrameHost.h"
 #include "sky/engine/core/inspector/ConsoleAPITypes.h"
 #include "sky/engine/core/inspector/ConsoleMessage.h"
-#include "sky/engine/core/inspector/ConsoleMessageStorage.h"
-#include "sky/engine/core/inspector/ScriptArguments.h"
-#include "sky/engine/core/inspector/ScriptCallStack.h"
 #include "sky/engine/core/page/ChromeClient.h"
 #include "sky/engine/core/page/Page.h"
 #include "sky/engine/platform/network/ResourceResponse.h"
 #include "sky/engine/wtf/text/StringBuilder.h"
 
 namespace blink {
-
-static const HashSet<int>& allClientReportingMessageTypes()
-{
-    DEFINE_STATIC_LOCAL(HashSet<int>, types, ());
-    if (types.isEmpty()) {
-        types.add(LogMessageType);
-        types.add(DirMessageType);
-        types.add(DirXMLMessageType);
-        types.add(TableMessageType);
-        types.add(TraceMessageType);
-        types.add(ClearMessageType);
-        types.add(AssertMessageType);
-    }
-    return types;
-}
-
-namespace {
-
-int muteCount = 0;
-
-}
 
 FrameConsole::FrameConsole(LocalFrame& frame)
     : m_frame(frame)
@@ -75,8 +50,6 @@ DEFINE_EMPTY_DESTRUCTOR_WILL_BE_REMOVED(FrameConsole);
 void FrameConsole::addMessage(PassRefPtr<ConsoleMessage> prpConsoleMessage)
 {
     RefPtr<ConsoleMessage> consoleMessage = prpConsoleMessage;
-    if (muteCount && consoleMessage->source() != ConsoleAPIMessageSource)
-        return;
 
     // FIXME: This should not need to reach for the main-frame.
     // Inspector code should just take the current frame and know how to walk itself.
@@ -84,37 +57,9 @@ void FrameConsole::addMessage(PassRefPtr<ConsoleMessage> prpConsoleMessage)
     if (!context)
         return;
 
-    String messageURL;
-    unsigned lineNumber = 0;
-    if (consoleMessage->callStack() && consoleMessage->callStack()->size()) {
-        lineNumber = consoleMessage->callStack()->at(0).lineNumber();
-        messageURL = consoleMessage->callStack()->at(0).sourceURL();
-    } else {
-        lineNumber = consoleMessage->lineNumber();
-        messageURL = consoleMessage->url();
-    }
-
-    messageStorage()->reportMessage(consoleMessage);
-
-    RefPtr<ScriptCallStack> reportedCallStack = nullptr;
-    if (consoleMessage->source() != ConsoleAPIMessageSource) {
-        if (consoleMessage->callStack() && m_frame.page()->shouldReportDetailedMessageForSource(messageURL))
-            reportedCallStack = consoleMessage->callStack();
-    } else {
-        if (!m_frame.host() || (consoleMessage->scriptArguments() && consoleMessage->scriptArguments()->argumentCount() == 0))
-            return;
-
-        if (!allClientReportingMessageTypes().contains(consoleMessage->type()))
-            return;
-
-        if (m_frame.page()->shouldReportDetailedMessageForSource(messageURL))
-            reportedCallStack = createScriptCallStack(ScriptCallStack::maxCallStackSizeToCapture);
-    }
-
-    String stackTrace;
-    if (reportedCallStack)
-        stackTrace = FrameConsole::formatStackTraceString(consoleMessage->message(), reportedCallStack);
-    m_frame.page()->addMessageToConsole(&m_frame, consoleMessage->source(), consoleMessage->level(), consoleMessage->message(), lineNumber, messageURL, stackTrace);
+    String messageURL = consoleMessage->url();
+    unsigned lineNumber = consoleMessage->lineNumber();
+    m_frame.page()->addMessageToConsole(&m_frame, consoleMessage->source(), consoleMessage->level(), consoleMessage->message(), lineNumber, messageURL, String());
 }
 
 void FrameConsole::reportResourceResponseReceived(Document* document, unsigned long requestIdentifier, const ResourceResponse& response)
@@ -127,47 +72,6 @@ void FrameConsole::reportResourceResponseReceived(Document* document, unsigned l
     RefPtr<ConsoleMessage> consoleMessage = ConsoleMessage::create(NetworkMessageSource, ErrorMessageLevel, message, response.url().string());
     consoleMessage->setRequestIdentifier(requestIdentifier);
     addMessage(consoleMessage.release());
-}
-
-String FrameConsole::formatStackTraceString(const String& originalMessage, PassRefPtr<ScriptCallStack> callStack)
-{
-    StringBuilder stackTrace;
-    for (size_t i = 0; i < callStack->size(); ++i) {
-        const ScriptCallFrame& frame = callStack->at(i);
-        stackTrace.append("\n    at " + (frame.functionName().length() ? frame.functionName() : "(anonymous function)"));
-        stackTrace.appendLiteral(" (");
-        stackTrace.append(frame.sourceURL());
-        stackTrace.append(':');
-        stackTrace.append(String::number(frame.lineNumber()));
-        stackTrace.append(':');
-        stackTrace.append(String::number(frame.columnNumber()));
-        stackTrace.append(')');
-    }
-
-    return stackTrace.toString();
-}
-
-void FrameConsole::mute()
-{
-    muteCount++;
-}
-
-void FrameConsole::unmute()
-{
-    ASSERT(muteCount > 0);
-    muteCount--;
-}
-
-ConsoleMessageStorage* FrameConsole::messageStorage()
-{
-    if (!m_consoleMessageStorage)
-        m_consoleMessageStorage = ConsoleMessageStorage::createForFrame(&m_frame);
-    return m_consoleMessageStorage.get();
-}
-
-void FrameConsole::clearMessages()
-{
-    messageStorage()->clear();
 }
 
 } // namespace blink

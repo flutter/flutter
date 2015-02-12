@@ -27,7 +27,7 @@
 #ifndef SKY_ENGINE_CORE_HTML_CANVAS_CANVASGRADIENT_H_
 #define SKY_ENGINE_CORE_HTML_CANVAS_CANVASGRADIENT_H_
 
-#include "sky/engine/bindings/core/v8/ScriptWrappable.h"
+#include "sky/engine/tonic/dart_wrappable.h"
 #include "sky/engine/platform/graphics/Gradient.h"
 #include "sky/engine/platform/heap/Handle.h"
 #include "sky/engine/wtf/Forward.h"
@@ -38,7 +38,7 @@ namespace blink {
 
 class ExceptionState;
 
-class CanvasGradient final : public RefCounted<CanvasGradient>, public ScriptWrappable {
+class CanvasGradient final : public RefCounted<CanvasGradient>, public DartWrappable {
     DEFINE_WRAPPERTYPEINFO();
 public:
     static PassRefPtr<CanvasGradient> create(const FloatPoint& p0, const FloatPoint& p1)

@@ -27,7 +27,7 @@
 #ifndef SKY_ENGINE_CORE_DOM_DOMURL_H_
 #define SKY_ENGINE_CORE_DOM_DOMURL_H_
 
-#include "sky/engine/bindings/core/v8/ScriptWrappable.h"
+#include "sky/engine/tonic/dart_wrappable.h"
 #include "sky/engine/core/dom/DOMURLUtils.h"
 #include "sky/engine/platform/heap/Handle.h"
 #include "sky/engine/platform/weborigin/KURL.h"
@@ -40,7 +40,7 @@ class ExceptionState;
 class ExecutionContext;
 class URLRegistrable;
 
-class DOMURL final : public RefCounted<DOMURL>, public ScriptWrappable, public DOMURLUtils {
+class DOMURL final : public RefCounted<DOMURL>, public DartWrappable, public DOMURLUtils {
     DEFINE_WRAPPERTYPEINFO();
 public:
     static PassRefPtr<DOMURL> create(const String& url, ExceptionState& exceptionState)

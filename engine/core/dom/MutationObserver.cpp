@@ -33,8 +33,7 @@
 
 #include <algorithm>
 #include "base/bind.h"
-#include "sky/engine/bindings/core/v8/Dictionary.h"
-#include "sky/engine/bindings/core/v8/ExceptionState.h"
+#include "sky/engine/bindings2/exception_state.h"
 #include "sky/engine/core/dom/ExceptionCode.h"
 #include "sky/engine/core/dom/ExecutionContext.h"
 #include "sky/engine/core/dom/Microtask.h"
@@ -74,68 +73,16 @@ MutationObserver::~MutationObserver()
 #endif
 }
 
-void MutationObserver::observe(Node* node, const Dictionary& optionsDictionary, ExceptionState& exceptionState)
+void MutationObserver::observe(Node* node, ExceptionState& exceptionState)
 {
     if (!node) {
-        exceptionState.throwDOMException(NotFoundError, "The provided node was null.");
+        exceptionState.ThrowDOMException(NotFoundError, "The provided node was null.");
         return;
     }
 
+    // FIXME(Dictionary): Provide way to specify these.
     MutationObserverOptions options = 0;
-
-    bool attributeOldValue = false;
-    bool attributeOldValuePresent = DictionaryHelper::get(optionsDictionary, "attributeOldValue", attributeOldValue);
-    if (attributeOldValue)
-        options |= AttributeOldValue;
-
     HashSet<AtomicString> attributeFilter;
-    bool attributeFilterPresent = DictionaryHelper::get(optionsDictionary, "attributeFilter", attributeFilter);
-    if (attributeFilterPresent)
-        options |= AttributeFilter;
-
-    bool attributes = false;
-    bool attributesPresent = DictionaryHelper::get(optionsDictionary, "attributes", attributes);
-    if (attributes || (!attributesPresent && (attributeOldValuePresent || attributeFilterPresent)))
-        options |= Attributes;
-
-    bool characterDataOldValue = false;
-    bool characterDataOldValuePresent = DictionaryHelper::get(optionsDictionary, "characterDataOldValue", characterDataOldValue);
-    if (characterDataOldValue)
-        options |= CharacterDataOldValue;
-
-    bool characterData = false;
-    bool characterDataPresent = DictionaryHelper::get(optionsDictionary, "characterData", characterData);
-    if (characterData || (!characterDataPresent && characterDataOldValuePresent))
-        options |= CharacterData;
-
-    bool childListValue = false;
-    if (DictionaryHelper::get(optionsDictionary, "childList", childListValue) && childListValue)
-        options |= ChildList;
-
-    bool subtreeValue = false;
-    if (DictionaryHelper::get(optionsDictionary, "subtree", subtreeValue) && subtreeValue)
-        options |= Subtree;
-
-    if (!(options & Attributes)) {
-        if (options & AttributeOldValue) {
-            exceptionState.throwTypeError("The options object may only set 'attributeOldValue' to true when 'attributes' is true or not present.");
-            return;
-        }
-        if (options & AttributeFilter) {
-            exceptionState.throwTypeError("The options object may only set 'attributeFilter' when 'attributes' is true or not present.");
-            return;
-        }
-    }
-    if (!((options & CharacterData) || !(options & CharacterDataOldValue))) {
-        exceptionState.throwTypeError("The options object may only set 'characterDataOldValue' to true when 'characterData' is true or not present.");
-        return;
-    }
-
-    if (!(options & (Attributes | CharacterData | ChildList))) {
-        exceptionState.throwTypeError("The options object must set at least one of 'attributes', 'characterData', or 'childList' to true.");
-        return;
-    }
-
     node->registerMutationObserver(*this, options, attributeFilter);
 }
 

@@ -28,7 +28,7 @@
 
 #include "gen/sky/core/CSSPropertyNames.h"
 #include "gen/sky/core/CSSValueKeywords.h"
-#include "sky/engine/bindings/core/v8/ExceptionState.h"
+#include "sky/engine/bindings2/exception_state.h"
 #include "sky/engine/core/css/CSSToLengthConversionData.h"
 #include "sky/engine/core/css/StylePropertySet.h"
 #include "sky/engine/core/css/parser/BisonCSSParser.h"
@@ -69,21 +69,21 @@ void CSSMatrix::setMatrixValue(const String& string, ExceptionState& exceptionSt
         DEFINE_STATIC_REF(RenderStyle, defaultStyle, RenderStyle::createDefaultStyle());
         TransformOperations operations;
         if (!TransformBuilder::createTransformOperations(value.get(), CSSToLengthConversionData(defaultStyle, 0), operations)) {
-            exceptionState.throwDOMException(SyntaxError, "Failed to interpret '" + string + "' as a transformation operation.");
+            exceptionState.ThrowDOMException(SyntaxError, "Failed to interpret '" + string + "' as a transformation operation.");
             return;
         }
 
         // Convert transform operations to a TransformationMatrix. This can fail
         // if a param has a percentage ('%')
         if (operations.dependsOnBoxSize())
-            exceptionState.throwDOMException(SyntaxError, "The transformation depends on the box size, which is not supported.");
+            exceptionState.ThrowDOMException(SyntaxError, "The transformation depends on the box size, which is not supported.");
         TransformationMatrix t;
         operations.apply(FloatSize(0, 0), t);
 
         // set the matrix
         m_matrix = t;
     } else { // There is something there but parsing failed.
-        exceptionState.throwDOMException(SyntaxError, "Failed to parse '" + string + "'.");
+        exceptionState.ThrowDOMException(SyntaxError, "Failed to parse '" + string + "'.");
     }
 }
 
@@ -99,7 +99,7 @@ PassRefPtr<CSSMatrix> CSSMatrix::multiply(CSSMatrix* secondMatrix) const
 PassRefPtr<CSSMatrix> CSSMatrix::inverse(ExceptionState& exceptionState) const
 {
     if (!m_matrix.isInvertible()) {
-        exceptionState.throwDOMException(NotSupportedError, "The matrix is not invertable.");
+        exceptionState.ThrowDOMException(NotSupportedError, "The matrix is not invertable.");
         return nullptr;
     }
 

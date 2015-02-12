@@ -25,7 +25,6 @@
 
 [
     NoInterfaceObject,
-    DoNotCheckConstants,
 ] interface WebGLCompressedTexturePVRTC {
     /* Compressed Texture Formats */
     const unsigned long COMPRESSED_RGB_PVRTC_4BPPV1_IMG  = 0x8C00;

@@ -21,7 +21,7 @@
 #include "sky/engine/core/css/MediaList.h"
 
 #include "gen/sky/core/MediaFeatureNames.h"
-#include "sky/engine/bindings/core/v8/ExceptionState.h"
+#include "sky/engine/bindings2/exception_state.h"
 #include "sky/engine/core/css/CSSStyleSheet.h"
 #include "sky/engine/core/css/MediaQuery.h"
 #include "sky/engine/core/css/MediaQueryExp.h"

@@ -31,10 +31,7 @@
 #include "sky/engine/config.h"
 #include "sky/engine/public/web/WebDocument.h"
 
-#include "sky/engine/bindings/core/v8/Dictionary.h"
-#include "sky/engine/bindings/core/v8/ExceptionState.h"
-#include "sky/engine/bindings/core/v8/ScriptState.h"
-#include "sky/engine/bindings/core/v8/ScriptValue.h"
+#include "sky/engine/bindings2/exception_state.h"
 #include "sky/engine/core/animation/AnimationTimeline.h"
 #include "sky/engine/core/css/StyleSheetContents.h"
 #include "sky/engine/core/dom/Document.h"
@@ -48,7 +45,6 @@
 #include "sky/engine/public/web/WebElement.h"
 #include "sky/engine/web/WebLocalFrameImpl.h"
 #include "sky/engine/wtf/PassRefPtr.h"
-#include "v8/include/v8.h"
 
 namespace blink {
 
@@ -116,7 +112,7 @@ WebElement WebDocument::createElement(const WebString& tagName)
 {
     TrackExceptionState exceptionState;
     WebElement element(unwrap<Document>()->createElement(tagName, exceptionState));
-    if (exceptionState.hadException())
+    if (exceptionState.had_exception())
         return WebElement();
     return element;
 }

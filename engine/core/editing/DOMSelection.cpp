@@ -31,9 +31,9 @@
 #include "sky/engine/config.h"
 #include "sky/engine/core/editing/DOMSelection.h"
 
-#include "sky/engine/bindings/core/v8/ExceptionMessages.h"
-#include "sky/engine/bindings/core/v8/ExceptionState.h"
-#include "sky/engine/bindings/core/v8/ExceptionStatePlaceholder.h"
+#include "sky/engine/bindings2/exception_messages.h"
+#include "sky/engine/bindings2/exception_state.h"
+#include "sky/engine/bindings2/exception_state_placeholder.h"
 #include "sky/engine/core/dom/Document.h"
 #include "sky/engine/core/dom/ExceptionCode.h"
 #include "sky/engine/core/dom/Node.h"
@@ -201,7 +201,7 @@ void DOMSelection::collapse(Node* node, int offset, ExceptionState& exceptionSta
         return;
 
     if (offset < 0) {
-        exceptionState.throwDOMException(IndexSizeError, String::number(offset) + " is not a valid offset.");
+        exceptionState.ThrowDOMException(IndexSizeError, String::number(offset) + " is not a valid offset.");
         return;
     }
 
@@ -209,10 +209,10 @@ void DOMSelection::collapse(Node* node, int offset, ExceptionState& exceptionSta
         return;
     RefPtr<Range> range = Range::create(node->document());
     range->setStart(node, offset, exceptionState);
-    if (exceptionState.hadException())
+    if (exceptionState.had_exception())
         return;
     range->setEnd(node, offset, exceptionState);
-    if (exceptionState.hadException())
+    if (exceptionState.had_exception())
         return;
     m_frame->selection().setSelectedRange(range.get(), DOWNSTREAM, m_frame->selection().isDirectional() ? FrameSelection::Directional : FrameSelection::NonDirectional);
 }
@@ -225,7 +225,7 @@ void DOMSelection::collapseToEnd(ExceptionState& exceptionState)
     const VisibleSelection& selection = m_frame->selection().selection();
 
     if (selection.isNone()) {
-        exceptionState.throwDOMException(InvalidStateError, "there is no selection.");
+        exceptionState.ThrowDOMException(InvalidStateError, "there is no selection.");
         return;
     }
 
@@ -240,7 +240,7 @@ void DOMSelection::collapseToStart(ExceptionState& exceptionState)
     const VisibleSelection& selection = m_frame->selection().selection();
 
     if (selection.isNone()) {
-        exceptionState.throwDOMException(InvalidStateError, "there is no selection.");
+        exceptionState.ThrowDOMException(InvalidStateError, "there is no selection.");
         return;
     }
 
@@ -260,12 +260,12 @@ void DOMSelection::setBaseAndExtent(Node* baseNode, int baseOffset, Node* extent
         return;
 
     if (baseOffset < 0) {
-        exceptionState.throwDOMException(IndexSizeError, String::number(baseOffset) + " is not a valid base offset.");
+        exceptionState.ThrowDOMException(IndexSizeError, String::number(baseOffset) + " is not a valid base offset.");
         return;
     }
 
     if (extentOffset < 0) {
-        exceptionState.throwDOMException(IndexSizeError, String::number(extentOffset) + " is not a valid extent offset.");
+        exceptionState.ThrowDOMException(IndexSizeError, String::number(extentOffset) + " is not a valid extent offset.");
         return;
     }
 
@@ -337,11 +337,11 @@ void DOMSelection::extend(Node* node, int offset, ExceptionState& exceptionState
         return;
 
     if (offset < 0) {
-        exceptionState.throwDOMException(IndexSizeError, String::number(offset) + " is not a valid offset.");
+        exceptionState.ThrowDOMException(IndexSizeError, String::number(offset) + " is not a valid offset.");
         return;
     }
     if (offset > (node->offsetInCharacters() ? caretMaxOffset(node) : (int)node->countChildren())) {
-        exceptionState.throwDOMException(IndexSizeError, String::number(offset) + " is larger than the given node's length.");
+        exceptionState.ThrowDOMException(IndexSizeError, String::number(offset) + " is larger than the given node's length.");
         return;
     }
 
@@ -358,7 +358,7 @@ PassRefPtr<Range> DOMSelection::getRangeAt(int index, ExceptionState& exceptionS
         return nullptr;
 
     if (index < 0 || index >= rangeCount()) {
-        exceptionState.throwDOMException(IndexSizeError, String::number(index) + " is not a valid index.");
+        exceptionState.ThrowDOMException(IndexSizeError, String::number(index) + " is not a valid index.");
         return nullptr;
     }
 
@@ -471,16 +471,16 @@ bool DOMSelection::containsNode(const Node* n, bool allowPartial) const
         return false;
 
     TrackExceptionState exceptionState;
-    bool nodeFullySelected = Range::compareBoundaryPoints(parentNode, nodeIndex, selectedRange->startContainer(), selectedRange->startOffset(), exceptionState) >= 0 && !exceptionState.hadException()
-        && Range::compareBoundaryPoints(parentNode, nodeIndex + 1, selectedRange->endContainer(), selectedRange->endOffset(), exceptionState) <= 0 && !exceptionState.hadException();
-    if (exceptionState.hadException())
+    bool nodeFullySelected = Range::compareBoundaryPoints(parentNode, nodeIndex, selectedRange->startContainer(), selectedRange->startOffset(), exceptionState) >= 0 && !exceptionState.had_exception()
+        && Range::compareBoundaryPoints(parentNode, nodeIndex + 1, selectedRange->endContainer(), selectedRange->endOffset(), exceptionState) <= 0 && !exceptionState.had_exception();
+    if (exceptionState.had_exception())
         return false;
     if (nodeFullySelected)
         return true;
 
-    bool nodeFullyUnselected = (Range::compareBoundaryPoints(parentNode, nodeIndex, selectedRange->endContainer(), selectedRange->endOffset(), exceptionState) > 0 && !exceptionState.hadException())
-        || (Range::compareBoundaryPoints(parentNode, nodeIndex + 1, selectedRange->startContainer(), selectedRange->startOffset(), exceptionState) < 0 && !exceptionState.hadException());
-    ASSERT(!exceptionState.hadException());
+    bool nodeFullyUnselected = (Range::compareBoundaryPoints(parentNode, nodeIndex, selectedRange->endContainer(), selectedRange->endOffset(), exceptionState) > 0 && !exceptionState.had_exception())
+        || (Range::compareBoundaryPoints(parentNode, nodeIndex + 1, selectedRange->startContainer(), selectedRange->startOffset(), exceptionState) < 0 && !exceptionState.had_exception());
+    ASSERT(!exceptionState.had_exception());
     if (nodeFullyUnselected)
         return false;
 

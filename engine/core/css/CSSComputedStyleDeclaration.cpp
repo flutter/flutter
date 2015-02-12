@@ -28,7 +28,7 @@
 #include "gen/sky/core/StylePropertyShorthand.h"
 #include "gen/sky/platform/FontFamilyNames.h"
 #include "gen/sky/platform/RuntimeEnabledFeatures.h"
-#include "sky/engine/bindings/core/v8/ExceptionState.h"
+#include "sky/engine/bindings2/exception_state.h"
 #include "sky/engine/core/animation/DocumentAnimations.h"
 #include "sky/engine/core/css/BasicShapeFunctions.h"
 #include "sky/engine/core/css/CSSAspectRatioValue.h"
@@ -919,7 +919,7 @@ String CSSComputedStyleDeclaration::cssText() const
 
 void CSSComputedStyleDeclaration::setCSSText(const String&, ExceptionState& exceptionState)
 {
-    exceptionState.throwDOMException(NoModificationAllowedError, "These styles are computed, and therefore read-only.");
+    exceptionState.ThrowDOMException(NoModificationAllowedError, "These styles are computed, and therefore read-only.");
 }
 
 static CSSValueID cssIdentifierForFontSizeKeyword(int keywordSize)
@@ -2279,14 +2279,14 @@ bool CSSComputedStyleDeclaration::isPropertyImplicit(const String&)
     return false;
 }
 
-void CSSComputedStyleDeclaration::setProperty(const String& name, const String&, const String&, ExceptionState& exceptionState)
+void CSSComputedStyleDeclaration::setProperty(const String& name, const String&, ExceptionState& exceptionState)
 {
-    exceptionState.throwDOMException(NoModificationAllowedError, "These styles are computed, and therefore the '" + name + "' property is read-only.");
+    exceptionState.ThrowDOMException(NoModificationAllowedError, "These styles are computed, and therefore the '" + name + "' property is read-only.");
 }
 
 String CSSComputedStyleDeclaration::removeProperty(const String& name, ExceptionState& exceptionState)
 {
-    exceptionState.throwDOMException(NoModificationAllowedError, "These styles are computed, and therefore the '" + name + "' property is read-only.");
+    exceptionState.ThrowDOMException(NoModificationAllowedError, "These styles are computed, and therefore the '" + name + "' property is read-only.");
     return String();
 }
 
@@ -2302,7 +2302,7 @@ String CSSComputedStyleDeclaration::getPropertyValueInternal(CSSPropertyID prope
 
 void CSSComputedStyleDeclaration::setPropertyInternal(CSSPropertyID id, const String&, ExceptionState& exceptionState)
 {
-    exceptionState.throwDOMException(NoModificationAllowedError, "These styles are computed, and therefore the '" + getPropertyNameString(id) + "' property is read-only.");
+    exceptionState.ThrowDOMException(NoModificationAllowedError, "These styles are computed, and therefore the '" + getPropertyNameString(id) + "' property is read-only.");
 }
 
 PassRefPtr<CSSValueList> CSSComputedStyleDeclaration::valuesForBackgroundShorthand() const

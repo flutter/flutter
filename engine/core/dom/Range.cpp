@@ -25,7 +25,7 @@
 #include "sky/engine/config.h"
 #include "sky/engine/core/dom/Range.h"
 
-#include "sky/engine/bindings/core/v8/ExceptionState.h"
+#include "sky/engine/bindings2/exception_state.h"
 #include "sky/engine/core/dom/ClientRect.h"
 #include "sky/engine/core/dom/ClientRectList.h"
 #include "sky/engine/core/dom/DocumentFragment.h"
@@ -151,7 +151,7 @@ static inline bool checkForDifferentRootContainer(const RangeBoundaryPoint& star
 void Range::setStart(PassRefPtr<Node> refNode, int offset, ExceptionState& exceptionState)
 {
     if (!refNode) {
-        exceptionState.throwDOMException(NotFoundError, "The node provided was null.");
+        exceptionState.ThrowDOMException(NotFoundError, "The node provided was null.");
         return;
     }
 
@@ -162,7 +162,7 @@ void Range::setStart(PassRefPtr<Node> refNode, int offset, ExceptionState& excep
     }
 
     Node* childNode = checkNodeWOffset(refNode.get(), offset, exceptionState);
-    if (exceptionState.hadException())
+    if (exceptionState.had_exception())
         return;
 
     m_start.set(refNode, offset, childNode);
@@ -174,7 +174,7 @@ void Range::setStart(PassRefPtr<Node> refNode, int offset, ExceptionState& excep
 void Range::setEnd(PassRefPtr<Node> refNode, int offset, ExceptionState& exceptionState)
 {
     if (!refNode) {
-        exceptionState.throwDOMException(NotFoundError, "The node provided was null.");
+        exceptionState.ThrowDOMException(NotFoundError, "The node provided was null.");
         return;
     }
 
@@ -185,7 +185,7 @@ void Range::setEnd(PassRefPtr<Node> refNode, int offset, ExceptionState& excepti
     }
 
     Node* childNode = checkNodeWOffset(refNode.get(), offset, exceptionState);
-    if (exceptionState.hadException())
+    if (exceptionState.had_exception())
         return;
 
     m_end.set(refNode, offset, childNode);
@@ -217,7 +217,7 @@ void Range::collapse(bool toStart)
 bool Range::isPointInRange(Node* refNode, int offset, ExceptionState& exceptionState)
 {
     if (!refNode) {
-        exceptionState.throwDOMException(HierarchyRequestError, "The node provided was null.");
+        exceptionState.ThrowDOMException(HierarchyRequestError, "The node provided was null.");
         return false;
     }
 
@@ -226,11 +226,11 @@ bool Range::isPointInRange(Node* refNode, int offset, ExceptionState& exceptionS
     }
 
     checkNodeWOffset(refNode, offset, exceptionState);
-    if (exceptionState.hadException())
+    if (exceptionState.had_exception())
         return false;
 
-    return compareBoundaryPoints(refNode, offset, m_start.container(), m_start.offset(), exceptionState) >= 0 && !exceptionState.hadException()
-        && compareBoundaryPoints(refNode, offset, m_end.container(), m_end.offset(), exceptionState) <= 0 && !exceptionState.hadException();
+    return compareBoundaryPoints(refNode, offset, m_start.container(), m_start.offset(), exceptionState) >= 0 && !exceptionState.had_exception()
+        && compareBoundaryPoints(refNode, offset, m_end.container(), m_end.offset(), exceptionState) <= 0 && !exceptionState.had_exception();
 }
 
 short Range::comparePoint(Node* refNode, int offset, ExceptionState& exceptionState) const
@@ -240,28 +240,28 @@ short Range::comparePoint(Node* refNode, int offset, ExceptionState& exceptionSt
     // refNode node and an offset within the node is before, same as, or after the range respectively.
 
     if (!refNode->inActiveDocument()) {
-        exceptionState.throwDOMException(WrongDocumentError, "The node provided is not in an active document.");
+        exceptionState.ThrowDOMException(WrongDocumentError, "The node provided is not in an active document.");
         return 0;
     }
 
     if (refNode->document() != m_ownerDocument) {
-        exceptionState.throwDOMException(WrongDocumentError, "The node provided is not in this Range's Document.");
+        exceptionState.ThrowDOMException(WrongDocumentError, "The node provided is not in this Range's Document.");
         return 0;
     }
 
     checkNodeWOffset(refNode, offset, exceptionState);
-    if (exceptionState.hadException())
+    if (exceptionState.had_exception())
         return 0;
 
     // compare to start, and point comes before
     if (compareBoundaryPoints(refNode, offset, m_start.container(), m_start.offset(), exceptionState) < 0)
         return -1;
 
-    if (exceptionState.hadException())
+    if (exceptionState.had_exception())
         return 0;
 
     // compare to end, and point comes after
-    if (compareBoundaryPoints(refNode, offset, m_end.container(), m_end.offset(), exceptionState) > 0 && !exceptionState.hadException())
+    if (compareBoundaryPoints(refNode, offset, m_end.container(), m_end.offset(), exceptionState) > 0 && !exceptionState.had_exception())
         return 1;
 
     // point is in the middle of this range, or on the boundary points
@@ -275,7 +275,7 @@ Range::CompareResults Range::compareNode(Node* refNode, ExceptionState& exceptio
     // before and after(surrounds), or inside the range, respectively
 
     if (!refNode) {
-        exceptionState.throwDOMException(NotFoundError, "The node provided was null.");
+        exceptionState.ThrowDOMException(NotFoundError, "The node provided was null.");
         return NODE_BEFORE;
     }
 
@@ -295,7 +295,7 @@ Range::CompareResults Range::compareNode(Node* refNode, ExceptionState& exceptio
     if (!parentNode) {
         // if the node is the top document we should return NODE_BEFORE_AND_AFTER
         // but we throw to match firefox behavior
-        exceptionState.throwDOMException(NotFoundError, "The provided node has no parent.");
+        exceptionState.ThrowDOMException(NotFoundError, "The provided node has no parent.");
         return NODE_BEFORE;
     }
 
@@ -313,14 +313,14 @@ Range::CompareResults Range::compareNode(Node* refNode, ExceptionState& exceptio
 short Range::compareBoundaryPoints(CompareHow how, const Range* sourceRange, ExceptionState& exceptionState) const
 {
     if (!(how == START_TO_START || how == START_TO_END || how == END_TO_END || how == END_TO_START)) {
-        exceptionState.throwDOMException(NotSupportedError, "The comparison method provided must be one of 'START_TO_START', 'START_TO_END', 'END_TO_END', or 'END_TO_START'.");
+        exceptionState.ThrowDOMException(NotSupportedError, "The comparison method provided must be one of 'START_TO_START', 'START_TO_END', 'END_TO_END', or 'END_TO_START'.");
         return 0;
     }
 
     Node* thisCont = commonAncestorContainer();
     Node* sourceCont = sourceRange->commonAncestorContainer();
     if (thisCont->document() != sourceCont->document()) {
-        exceptionState.throwDOMException(WrongDocumentError, "The source range is in a different document than this range.");
+        exceptionState.ThrowDOMException(WrongDocumentError, "The source range is in a different document than this range.");
         return 0;
     }
 
@@ -331,7 +331,7 @@ short Range::compareBoundaryPoints(CompareHow how, const Range* sourceRange, Exc
     while (sourceTop->parentNode())
         sourceTop = sourceTop->parentNode();
     if (thisTop != sourceTop) { // in different DocumentFragments
-        exceptionState.throwDOMException(WrongDocumentError, "The source range is in a different document than this range.");
+        exceptionState.ThrowDOMException(WrongDocumentError, "The source range is in a different document than this range.");
         return 0;
     }
 
@@ -412,7 +412,7 @@ short Range::compareBoundaryPoints(Node* containerA, int offsetA, Node* containe
     // ### we need to do a traversal here instead
     Node* commonAncestor = commonAncestorContainer(containerA, containerB);
     if (!commonAncestor) {
-        exceptionState.throwDOMException(WrongDocumentError, "The two ranges are in separate documents.");
+        exceptionState.ThrowDOMException(WrongDocumentError, "The two ranges are in separate documents.");
         return 0;
     }
     Node* childA = containerA;
@@ -451,7 +451,7 @@ short Range::compareBoundaryPoints(const RangeBoundaryPoint& boundaryA, const Ra
 bool Range::boundaryPointsValid() const
 {
     TrackExceptionState exceptionState;
-    return compareBoundaryPoints(m_start, m_end, exceptionState) <= 0 && !exceptionState.hadException();
+    return compareBoundaryPoints(m_start, m_end, exceptionState) <= 0 && !exceptionState.had_exception();
 }
 
 void Range::deleteContents(ExceptionState& exceptionState)
@@ -469,7 +469,7 @@ bool Range::intersectsNode(Node* refNode, ExceptionState& exceptionState)
     // http://developer.mozilla.org/en/docs/DOM:range.intersectsNode
     // Returns a bool if the node intersects the range.
     if (!refNode) {
-        exceptionState.throwDOMException(NotFoundError, "The node provided is null.");
+        exceptionState.ThrowDOMException(NotFoundError, "The node provided is null.");
         return false;
     }
 
@@ -484,7 +484,7 @@ bool Range::intersectsNode(Node* refNode, ExceptionState& exceptionState)
     if (!parentNode) {
         // if the node is the top document we should return NODE_BEFORE_AND_AFTER
         // but we throw to match firefox behavior
-        exceptionState.throwDOMException(NotFoundError, "The node provided has no parent.");
+        exceptionState.ThrowDOMException(NotFoundError, "The node provided has no parent.");
         return false;
     }
 
@@ -603,14 +603,14 @@ PassRefPtr<DocumentFragment> Range::processContents(ActionType action, Exception
     if (action == EXTRACT_CONTENTS || action == DELETE_CONTENTS) {
         if (partialStart && commonRoot->contains(partialStart.get())) {
             // FIXME: We should not continue if we have an earlier error.
-            exceptionState.clearException();
+            exceptionState.ClearException();
             setStart(partialStart->parentNode(), partialStart->nodeIndex() + 1, exceptionState);
         } else if (partialEnd && commonRoot->contains(partialEnd.get())) {
             // FIXME: We should not continue if we have an earlier error.
-            exceptionState.clearException();
+            exceptionState.ClearException();
             setStart(partialEnd->parentNode(), partialEnd->nodeIndex(), exceptionState);
         }
-        if (exceptionState.hadException())
+        if (exceptionState.had_exception())
             return nullptr;
         m_end = m_start;
     }
@@ -771,7 +771,7 @@ PassRefPtr<Node> Range::processAncestorsAndTheirSiblings(ActionType action, Node
 PassRefPtr<DocumentFragment> Range::extractContents(ExceptionState& exceptionState)
 {
     checkExtractPrecondition(exceptionState);
-    if (exceptionState.hadException())
+    if (exceptionState.had_exception())
         return nullptr;
 
     return processContents(EXTRACT_CONTENTS, exceptionState);
@@ -787,7 +787,7 @@ void Range::insertNode(PassRefPtr<Node> prpNewNode, ExceptionState& exceptionSta
     RefPtr<Node> newNode = prpNewNode;
 
     if (!newNode) {
-        exceptionState.throwDOMException(NotFoundError, "The node provided is null.");
+        exceptionState.ThrowDOMException(NotFoundError, "The node provided is null.");
         return;
     }
 
@@ -797,7 +797,7 @@ void Range::insertNode(PassRefPtr<Node> prpNewNode, ExceptionState& exceptionSta
     // an extra one here - if a text node is going to split, it must have a parent to insert into
     bool startIsText = m_start.container()->isTextNode();
     if (startIsText && !m_start.container()->parentNode()) {
-        exceptionState.throwDOMException(HierarchyRequestError, "This operation would split a text node, but there's no parent into which to insert.");
+        exceptionState.ThrowDOMException(HierarchyRequestError, "This operation would split a text node, but there's no parent into which to insert.");
         return;
     }
 
@@ -823,7 +823,7 @@ void Range::insertNode(PassRefPtr<Node> prpNewNode, ExceptionState& exceptionSta
 
     for (Node* n = m_start.container(); n; n = n->parentNode()) {
         if (n == newNode) {
-            exceptionState.throwDOMException(HierarchyRequestError, "The node to be inserted contains the insertion point; it may not be inserted into itself.");
+            exceptionState.ThrowDOMException(HierarchyRequestError, "The node to be inserted contains the insertion point; it may not be inserted into itself.");
             return;
         }
     }
@@ -831,11 +831,11 @@ void Range::insertNode(PassRefPtr<Node> prpNewNode, ExceptionState& exceptionSta
     // InvalidNodeTypeError: Raised if newNode is an Attr, Entity, Notation, ShadowRoot or Document node.
     switch (newNodeType) {
     case Node::DOCUMENT_NODE:
-        exceptionState.throwDOMException(InvalidNodeTypeError, "The node to be inserted is a '" + newNode->nodeName() + "' node, which may not be inserted here.");
+        exceptionState.ThrowDOMException(InvalidNodeTypeError, "The node to be inserted is a '" + newNode->nodeName() + "' node, which may not be inserted here.");
         return;
     default:
         if (newNode->isShadowRoot()) {
-            exceptionState.throwDOMException(InvalidNodeTypeError, "The node to be inserted is a shadow root, which may not be inserted here.");
+            exceptionState.ThrowDOMException(InvalidNodeTypeError, "The node to be inserted is a shadow root, which may not be inserted here.");
             return;
         }
         break;
@@ -847,12 +847,12 @@ void Range::insertNode(PassRefPtr<Node> prpNewNode, ExceptionState& exceptionSta
     if (startIsText) {
         container = m_start.container();
         RefPtr<Text> newText = toText(container)->splitText(m_start.offset(), exceptionState);
-        if (exceptionState.hadException())
+        if (exceptionState.had_exception())
             return;
 
         container = m_start.container();
         container->parentNode()->insertBefore(newNode.release(), newText.get(), exceptionState);
-        if (exceptionState.hadException())
+        if (exceptionState.had_exception())
             return;
 
         if (collapsed) {
@@ -860,7 +860,7 @@ void Range::insertNode(PassRefPtr<Node> prpNewNode, ExceptionState& exceptionSta
             // e.g. by ContainerNode::updateTreeAfterInsertion
             // Given circumstance may mutate the tree so newText->parentNode() may become null
             if (!newText->parentNode()) {
-                exceptionState.throwDOMException(HierarchyRequestError, "This operation would set range's end to parent with new offset, but there's no parent into which to continue.");
+                exceptionState.ThrowDOMException(HierarchyRequestError, "This operation would set range's end to parent with new offset, but there's no parent into which to continue.");
                 return;
             }
             m_end.setToBeforeChild(*newText);
@@ -878,7 +878,7 @@ void Range::insertNode(PassRefPtr<Node> prpNewNode, ExceptionState& exceptionSta
 
         container = m_start.container();
         container->insertBefore(newNode.release(), NodeTraversal::childAt(*container, m_start.offset()), exceptionState);
-        if (exceptionState.hadException())
+        if (exceptionState.had_exception())
             return;
 
         // Note that m_start.offset() may have changed as a result of container->insertBefore,
@@ -922,7 +922,7 @@ Node* Range::checkNodeWOffset(Node* n, int offset, ExceptionState& exceptionStat
     switch (n->nodeType()) {
         case Node::TEXT_NODE:
             if (static_cast<unsigned>(offset) > toCharacterData(n)->length())
-                exceptionState.throwDOMException(IndexSizeError, "The offset " + String::number(offset) + " is larger than or equal to the node's length (" + String::number(toCharacterData(n)->length()) + ").");
+                exceptionState.ThrowDOMException(IndexSizeError, "The offset " + String::number(offset) + " is larger than or equal to the node's length (" + String::number(toCharacterData(n)->length()) + ").");
             return 0;
         case Node::DOCUMENT_FRAGMENT_NODE:
         case Node::DOCUMENT_NODE:
@@ -931,7 +931,7 @@ Node* Range::checkNodeWOffset(Node* n, int offset, ExceptionState& exceptionStat
                 return 0;
             Node* childBefore = NodeTraversal::childAt(*n, offset - 1);
             if (!childBefore)
-                exceptionState.throwDOMException(IndexSizeError, "There is no child at offset " + String::number(offset) + ".");
+                exceptionState.ThrowDOMException(IndexSizeError, "There is no child at offset " + String::number(offset) + ".");
             return childBefore;
         }
     }
@@ -942,7 +942,7 @@ Node* Range::checkNodeWOffset(Node* n, int offset, ExceptionState& exceptionStat
 void Range::checkNodeBA(Node* n, ExceptionState& exceptionState) const
 {
     if (!n) {
-        exceptionState.throwDOMException(NotFoundError, "The node provided is null.");
+        exceptionState.ThrowDOMException(NotFoundError, "The node provided is null.");
         return;
     }
 
@@ -951,14 +951,14 @@ void Range::checkNodeBA(Node* n, ExceptionState& exceptionState) const
     // or if refNode is a Document, DocumentFragment, ShadowRoot, Attr, Entity, or Notation node.
 
     if (!n->parentNode()) {
-        exceptionState.throwDOMException(InvalidNodeTypeError, "the given Node has no parent.");
+        exceptionState.ThrowDOMException(InvalidNodeTypeError, "the given Node has no parent.");
         return;
     }
 
     switch (n->nodeType()) {
         case Node::DOCUMENT_FRAGMENT_NODE:
         case Node::DOCUMENT_NODE:
-            exceptionState.throwDOMException(InvalidNodeTypeError, "The node provided is of type '" + n->nodeName() + "'.");
+            exceptionState.ThrowDOMException(InvalidNodeTypeError, "The node provided is of type '" + n->nodeName() + "'.");
             return;
         case Node::ELEMENT_NODE:
         case Node::TEXT_NODE:
@@ -975,7 +975,7 @@ void Range::checkNodeBA(Node* n, ExceptionState& exceptionState) const
         case Node::ELEMENT_NODE:
             break;
         case Node::TEXT_NODE:
-            exceptionState.throwDOMException(InvalidNodeTypeError, "The node provided is of type '" + n->nodeName() + "'.");
+            exceptionState.ThrowDOMException(InvalidNodeTypeError, "The node provided is of type '" + n->nodeName() + "'.");
             return;
     }
 }
@@ -988,7 +988,7 @@ PassRefPtr<Range> Range::cloneRange() const
 void Range::setStartAfter(Node* refNode, ExceptionState& exceptionState)
 {
     checkNodeBA(refNode, exceptionState);
-    if (exceptionState.hadException())
+    if (exceptionState.had_exception())
         return;
 
     setStart(refNode->parentNode(), refNode->nodeIndex() + 1, exceptionState);
@@ -997,7 +997,7 @@ void Range::setStartAfter(Node* refNode, ExceptionState& exceptionState)
 void Range::setEndBefore(Node* refNode, ExceptionState& exceptionState)
 {
     checkNodeBA(refNode, exceptionState);
-    if (exceptionState.hadException())
+    if (exceptionState.had_exception())
         return;
 
     setEnd(refNode->parentNode(), refNode->nodeIndex(), exceptionState);
@@ -1006,7 +1006,7 @@ void Range::setEndBefore(Node* refNode, ExceptionState& exceptionState)
 void Range::setEndAfter(Node* refNode, ExceptionState& exceptionState)
 {
     checkNodeBA(refNode, exceptionState);
-    if (exceptionState.hadException())
+    if (exceptionState.had_exception())
         return;
 
     setEnd(refNode->parentNode(), refNode->nodeIndex() + 1, exceptionState);
@@ -1015,12 +1015,12 @@ void Range::setEndAfter(Node* refNode, ExceptionState& exceptionState)
 void Range::selectNode(Node* refNode, ExceptionState& exceptionState)
 {
     if (!refNode) {
-        exceptionState.throwDOMException(NotFoundError, "The node provided is null.");
+        exceptionState.ThrowDOMException(NotFoundError, "The node provided is null.");
         return;
     }
 
     if (!refNode->parentNode()) {
-        exceptionState.throwDOMException(InvalidNodeTypeError, "the given Node has no parent.");
+        exceptionState.ThrowDOMException(InvalidNodeTypeError, "the given Node has no parent.");
         return;
     }
 
@@ -1033,7 +1033,7 @@ void Range::selectNode(Node* refNode, ExceptionState& exceptionState)
             break;
         case Node::DOCUMENT_FRAGMENT_NODE:
         case Node::DOCUMENT_NODE:
-            exceptionState.throwDOMException(InvalidNodeTypeError, "The node provided is of type '" + refNode->nodeName() + "'.");
+            exceptionState.ThrowDOMException(InvalidNodeTypeError, "The node provided is of type '" + refNode->nodeName() + "'.");
             return;
     }
 
@@ -1047,7 +1047,7 @@ void Range::selectNode(Node* refNode, ExceptionState& exceptionState)
 void Range::selectNodeContents(Node* refNode, ExceptionState& exceptionState)
 {
     if (!refNode) {
-        exceptionState.throwDOMException(NotFoundError, "The node provided is null.");
+        exceptionState.ThrowDOMException(NotFoundError, "The node provided is null.");
         return;
     }
 
@@ -1062,7 +1062,7 @@ void Range::surroundContents(PassRefPtr<Node> passNewParent, ExceptionState& exc
 {
     RefPtr<Node> newParent = passNewParent;
     if (!newParent) {
-        exceptionState.throwDOMException(NotFoundError, "The node provided is null.");
+        exceptionState.ThrowDOMException(NotFoundError, "The node provided is null.");
         return;
     }
 
@@ -1074,7 +1074,7 @@ void Range::surroundContents(PassRefPtr<Node> passNewParent, ExceptionState& exc
     if (endNonTextContainer->nodeType() == Node::TEXT_NODE)
         endNonTextContainer = endNonTextContainer->parentNode();
     if (startNonTextContainer != endNonTextContainer) {
-        exceptionState.throwDOMException(InvalidStateError, "The Range has partially selected a non-Text node.");
+        exceptionState.ThrowDOMException(InvalidStateError, "The Range has partially selected a non-Text node.");
         return;
     }
 
@@ -1083,7 +1083,7 @@ void Range::surroundContents(PassRefPtr<Node> passNewParent, ExceptionState& exc
     switch (newParent->nodeType()) {
         case Node::DOCUMENT_FRAGMENT_NODE:
         case Node::DOCUMENT_NODE:
-            exceptionState.throwDOMException(InvalidNodeTypeError, "The node provided is of type '" + newParent->nodeName() + "'.");
+            exceptionState.ThrowDOMException(InvalidNodeTypeError, "The node provided is of type '" + newParent->nodeName() + "'.");
             return;
         case Node::ELEMENT_NODE:
         case Node::TEXT_NODE:
@@ -1100,12 +1100,12 @@ void Range::surroundContents(PassRefPtr<Node> passNewParent, ExceptionState& exc
         parentOfNewParent = parentOfNewParent->parentNode();
 
     if (!parentOfNewParent) {
-        exceptionState.throwDOMException(HierarchyRequestError, "The container node is a detached character data node; no parent node is available for insertion.");
+        exceptionState.ThrowDOMException(HierarchyRequestError, "The container node is a detached character data node; no parent node is available for insertion.");
         return;
     }
 
     if (newParent->contains(m_start.container())) {
-        exceptionState.throwDOMException(HierarchyRequestError, "The node provided contains the insertion point; it may not be inserted into itself.");
+        exceptionState.ThrowDOMException(HierarchyRequestError, "The node provided contains the insertion point; it may not be inserted into itself.");
         return;
     }
 
@@ -1114,17 +1114,17 @@ void Range::surroundContents(PassRefPtr<Node> passNewParent, ExceptionState& exc
 
     while (Node* n = newParent->firstChild()) {
         toContainerNode(newParent)->removeChild(n, exceptionState);
-        if (exceptionState.hadException())
+        if (exceptionState.had_exception())
             return;
     }
     RefPtr<DocumentFragment> fragment = extractContents(exceptionState);
-    if (exceptionState.hadException())
+    if (exceptionState.had_exception())
         return;
     insertNode(newParent, exceptionState);
-    if (exceptionState.hadException())
+    if (exceptionState.had_exception())
         return;
     newParent->appendChild(fragment.release(), exceptionState);
-    if (exceptionState.hadException())
+    if (exceptionState.had_exception())
         return;
     selectNode(newParent.get(), exceptionState);
 }
@@ -1132,7 +1132,7 @@ void Range::surroundContents(PassRefPtr<Node> passNewParent, ExceptionState& exc
 void Range::setStartBefore(Node* refNode, ExceptionState& exceptionState)
 {
     checkNodeBA(refNode, exceptionState);
-    if (exceptionState.hadException())
+    if (exceptionState.had_exception())
         return;
 
     setStart(refNode->parentNode(), refNode->nodeIndex(), exceptionState);

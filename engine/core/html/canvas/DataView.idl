@@ -24,7 +24,6 @@
  */
 
 [
-    Custom=Wrap,
     CustomConstructor(ArrayBuffer buffer, optional unsigned long byteOffset, optional unsigned long byteLength),
     TypeChecking=Interface,
 ] interface DataView : ArrayBufferView {

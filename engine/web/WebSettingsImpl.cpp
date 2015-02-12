@@ -353,9 +353,4 @@ void WebSettingsImpl::setMainFrameResizesAreOrientationChanges(bool enabled)
     m_mainFrameResizesAreOrientationChanges = enabled;
 }
 
-void WebSettingsImpl::setV8CacheOptions(V8CacheOptions options)
-{
-    m_settings->setV8CacheOptions(static_cast<blink::V8CacheOptions>(options));
-}
-
 } // namespace blink

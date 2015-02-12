@@ -31,9 +31,6 @@
 #include "sky/engine/config.h"
 #include "sky/engine/core/events/ErrorEvent.h"
 
-#include "sky/engine/bindings/core/v8/V8Binding.h"
-#include "v8/include/v8.h"
-
 namespace blink {
 
 ErrorEventInit::ErrorEventInit()
@@ -49,7 +46,6 @@ ErrorEvent::ErrorEvent()
     , m_fileName()
     , m_lineNumber(0)
     , m_columnNumber(0)
-    , m_world(DOMWrapperWorld::current(v8::Isolate::GetCurrent()))
 {
 }
 
@@ -59,17 +55,15 @@ ErrorEvent::ErrorEvent(const AtomicString& type, const ErrorEventInit& initializ
     , m_fileName(initializer.filename)
     , m_lineNumber(initializer.lineno)
     , m_columnNumber(initializer.colno)
-    , m_world(DOMWrapperWorld::current(v8::Isolate::GetCurrent()))
 {
 }
 
-ErrorEvent::ErrorEvent(const String& message, const String& fileName, unsigned lineNumber, unsigned columnNumber, DOMWrapperWorld* world)
+ErrorEvent::ErrorEvent(const String& message, const String& fileName, unsigned lineNumber, unsigned columnNumber)
     : Event(EventTypeNames::error, false, true)
     , m_sanitizedMessage(message)
     , m_fileName(fileName)
     , m_lineNumber(lineNumber)
     , m_columnNumber(columnNumber)
-    , m_world(world)
 {
 }
 

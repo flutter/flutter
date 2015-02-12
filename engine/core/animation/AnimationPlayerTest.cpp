@@ -487,7 +487,7 @@ TEST_F(AnimationAnimationPlayerTest, Finish)
     EXPECT_EQ(0, player->currentTimeInternal());
     EXPECT_TRUE(player->finished());
 
-    EXPECT_FALSE(exceptionState.hadException());
+    EXPECT_FALSE(exceptionState.had_exception());
 }
 
 TEST_F(AnimationAnimationPlayerTest, FinishAfterSourceEnd)
@@ -523,7 +523,7 @@ TEST_F(AnimationAnimationPlayerTest, FinishRaisesException)
 
     player->finish(exceptionState);
     EXPECT_EQ(10, player->currentTimeInternal());
-    EXPECT_TRUE(exceptionState.hadException());
+    EXPECT_TRUE(exceptionState.had_exception());
     EXPECT_EQ(InvalidStateError, exceptionState.code());
 }
 

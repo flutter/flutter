@@ -26,7 +26,7 @@
 #include "sky/engine/config.h"
 #include "sky/engine/core/html/canvas/CanvasPattern.h"
 
-#include "sky/engine/bindings/core/v8/ExceptionState.h"
+#include "sky/engine/bindings2/exception_state.h"
 #include "sky/engine/core/dom/ExceptionCode.h"
 #include "sky/engine/wtf/text/WTFString.h"
 
@@ -47,7 +47,7 @@ Pattern::RepeatMode CanvasPattern::parseRepetitionType(const String& type,
     if (type == "repeat-y")
         return Pattern::RepeatModeY;
 
-    exceptionState.throwDOMException(SyntaxError, "The provided type ('" + type + "') is not one of 'repeat', 'no-repeat', 'repeat-x', or 'repeat-y'.");
+    exceptionState.ThrowDOMException(SyntaxError, "The provided type ('" + type + "') is not one of 'repeat', 'no-repeat', 'repeat-x', or 'repeat-y'.");
     return Pattern::RepeatModeNone;
 }
 

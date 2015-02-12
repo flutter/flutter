@@ -29,9 +29,8 @@
 #include "gen/sky/core/CSSValueKeywords.h"
 #include "gen/sky/core/HTMLNames.h"
 #include "gen/sky/platform/RuntimeEnabledFeatures.h"
-#include "sky/engine/bindings/core/v8/Dictionary.h"
-#include "sky/engine/bindings/core/v8/ExceptionMessages.h"
-#include "sky/engine/bindings/core/v8/ExceptionState.h"
+#include "sky/engine/bindings2/exception_messages.h"
+#include "sky/engine/bindings2/exception_state.h"
 #include "sky/engine/core/animation/AnimationTimeline.h"
 #include "sky/engine/core/animation/css/CSSAnimations.h"
 #include "sky/engine/core/css/CSSImageValue.h"
@@ -268,7 +267,7 @@ void Element::setContentEditable(const String& enabled, ExceptionState& exceptio
     else if (equalIgnoringCase(enabled, "inherit"))
         removeAttribute(HTMLNames::contenteditableAttr);
     else
-        exceptionState.throwDOMException(SyntaxError, "The value provided ('" + enabled + "') is not one of 'true', 'false', 'plaintext-only', or 'inherit'.");
+        exceptionState.ThrowDOMException(SyntaxError, "The value provided ('" + enabled + "') is not one of 'true', 'false', 'plaintext-only', or 'inherit'.");
 }
 
 bool Element::spellcheck() const
@@ -436,7 +435,7 @@ PassRefPtr<ClientRect> Element::getBoundingClientRect()
 void Element::setAttribute(const AtomicString& localName, const AtomicString& value, ExceptionState& exceptionState)
 {
     if (!Document::isValidName(localName)) {
-        exceptionState.throwDOMException(InvalidCharacterError, "'" + localName + "' is not a valid attribute name.");
+        exceptionState.ThrowDOMException(InvalidCharacterError, "'" + localName + "' is not a valid attribute name.");
         return;
     }
 

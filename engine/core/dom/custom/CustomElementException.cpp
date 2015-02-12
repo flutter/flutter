@@ -31,7 +31,7 @@
 #include "sky/engine/config.h"
 #include "sky/engine/core/dom/custom/CustomElementException.h"
 
-#include "sky/engine/bindings/core/v8/ExceptionState.h"
+#include "sky/engine/bindings2/exception_state.h"
 #include "sky/engine/core/dom/ExceptionCode.h"
 
 namespace blink {
@@ -45,43 +45,43 @@ void CustomElementException::throwException(Reason reason, const AtomicString& t
 {
     switch (reason) {
     case ConstructorPropertyNotConfigurable:
-        exceptionState.throwDOMException(NotSupportedError, preamble(type) + "Prototype constructor property is not configurable.");
+        exceptionState.ThrowDOMException(NotSupportedError, preamble(type) + "Prototype constructor property is not configurable.");
         return;
 
     case ContextDestroyedCheckingPrototype:
-        exceptionState.throwDOMException(InvalidStateError, preamble(type) + "The context is no longer valid.");
+        exceptionState.ThrowDOMException(InvalidStateError, preamble(type) + "The context is no longer valid.");
         return;
 
     case ContextDestroyedCreatingCallbacks:
-        exceptionState.throwDOMException(InvalidStateError, preamble(type) + "The context is no longer valid.");
+        exceptionState.ThrowDOMException(InvalidStateError, preamble(type) + "The context is no longer valid.");
         return;
 
     case ContextDestroyedRegisteringDefinition:
-        exceptionState.throwDOMException(InvalidStateError, preamble(type) + "The context is no longer valid.");
+        exceptionState.ThrowDOMException(InvalidStateError, preamble(type) + "The context is no longer valid.");
         return;
 
     case ExtendsIsInvalidName:
-        exceptionState.throwDOMException(NotSupportedError, preamble(type) + "The tag name specified in 'extends' is not a valid tag name.");
+        exceptionState.ThrowDOMException(NotSupportedError, preamble(type) + "The tag name specified in 'extends' is not a valid tag name.");
         return;
 
     case ExtendsIsCustomElementName:
-        exceptionState.throwDOMException(NotSupportedError, preamble(type) + "The tag name specified in 'extends' is a custom element name. Use inheritance instead.");
+        exceptionState.ThrowDOMException(NotSupportedError, preamble(type) + "The tag name specified in 'extends' is a custom element name. Use inheritance instead.");
         return;
 
     case InvalidName:
-        exceptionState.throwDOMException(SyntaxError, preamble(type) + "The type name is invalid.");
+        exceptionState.ThrowDOMException(SyntaxError, preamble(type) + "The type name is invalid.");
         return;
 
     case PrototypeInUse:
-        exceptionState.throwDOMException(NotSupportedError, preamble(type) + "The prototype is already in-use as an interface prototype object.");
+        exceptionState.ThrowDOMException(NotSupportedError, preamble(type) + "The prototype is already in-use as an interface prototype object.");
         return;
 
     case PrototypeNotAnObject:
-        exceptionState.throwDOMException(NotSupportedError, preamble(type) + "The prototype option is not an object.");
+        exceptionState.ThrowDOMException(NotSupportedError, preamble(type) + "The prototype option is not an object.");
         return;
 
     case TypeAlreadyRegistered:
-        exceptionState.throwDOMException(NotSupportedError, preamble(type) + "A type with that name is already registered.");
+        exceptionState.ThrowDOMException(NotSupportedError, preamble(type) + "A type with that name is already registered.");
         return;
     }
 

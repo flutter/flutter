@@ -1,5 +1,9 @@
 <script>
-window.addEventListener('load', function() {
-  internals.notifyTestComplete(internals.renderTreeAsText());
-});
+import "dart:sky" as sky;
+import "dart:sky.internals" as internals;
+
+void init() {
+  sky.window.addEventListener('load', (_) =>
+    internals.notifyTestComplete(internals.renderTreeAsText()));  
+}
 </script>

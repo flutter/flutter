@@ -25,7 +25,7 @@
 #ifndef SKY_ENGINE_CORE_DOM_NODE_H_
 #define SKY_ENGINE_CORE_DOM_NODE_H_
 
-#include "sky/engine/bindings/core/v8/ExceptionStatePlaceholder.h"
+#include "sky/engine/bindings2/exception_state_placeholder.h"
 #include "sky/engine/core/dom/MutationObserver.h"
 #include "sky/engine/core/dom/TreeScope.h"
 #include "sky/engine/core/dom/TreeShared.h"
@@ -441,6 +441,7 @@ public:
     unsigned short compareDocumentPosition(const Node*, ShadowTreesTreatment = TreatShadowTreesAsDisconnected) const;
 
     virtual Node* toNode() override final;
+    void AcceptDartGCVisitor(DartGCVisitor& visitor) const override;
 
     virtual const AtomicString& interfaceName() const override;
     virtual ExecutionContext* executionContext() const override final;
@@ -478,8 +479,6 @@ public:
     bool isAlreadySpellChecked() { return getFlag(AlreadySpellCheckedFlag); }
 
     unsigned lengthOfContents() const;
-
-    virtual v8::Handle<v8::Object> wrap(v8::Handle<v8::Object> creationContext, v8::Isolate*) override;
 
 private:
     enum NodeFlags {

@@ -1,9 +1,10 @@
-Running 5 tests
-ok 1 ownerScope should return null for elements not a child of a scope
-ok 2 ownerScope should return the document for elements in the document scope
-ok 3 ownerScope should return the shadow root for elements in the shadow root scope
-ok 4 ownerScope should return self for a shadow root or document
-ok 5 ownerScope should dynamically update
-5 tests
-5 pass
-0 fail
+CONSOLE: unittest-suite-wait-for-done
+CONSOLE: PASS: should return null for elements not a child of a scope
+CONSOLE: PASS: should return the document for elements in the document scope
+CONSOLE: PASS: should return the shadow root for elements in the shadow root scope
+CONSOLE: PASS: should return self for a shadow root or document
+CONSOLE: PASS: should dynamically update
+CONSOLE: 
+CONSOLE: All 5 tests passed.
+CONSOLE: unittest-suite-success
+DONE

@@ -41,7 +41,6 @@
 #include "sky/engine/platform/text/TextCheckerClient.h"
 #include "sky/engine/public/platform/WebScreenInfo.h"
 #include "sky/engine/wtf/Forward.h"
-#include "v8/include/v8.h"
 
 /*
  This file holds empty Client stubs for use by WebCore.
@@ -90,9 +89,6 @@ public:
     virtual void selectorMatchChanged(const Vector<String>&, const Vector<String>&) override { }
 
     virtual void documentElementAvailable() override { }
-
-    virtual void didCreateScriptContext(v8::Handle<v8::Context>) override { }
-    virtual void willReleaseScriptContext(v8::Handle<v8::Context>) override { }
 };
 
 class EmptyTextCheckerClient : public TextCheckerClient {

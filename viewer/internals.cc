@@ -2,39 +2,94 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include "sky/engine/config.h"
 #include "sky/viewer/internals.h"
 
-#include "mojo/edk/js/core.h"
-#include "mojo/edk/js/handle.h"
-#include "mojo/edk/js/support.h"
-#include "mojo/edk/js/threading.h"
 #include "mojo/public/cpp/application/connect.h"
 #include "mojo/public/cpp/bindings/array.h"
 #include "sky/engine/public/web/WebDocument.h"
 #include "sky/engine/public/web/WebFrame.h"
 #include "sky/engine/public/web/WebView.h"
+#include "sky/engine/tonic/dart_builtin.h"
+#include "sky/engine/tonic/dart_converter.h"
+#include "sky/engine/tonic/dart_error.h"
 #include "sky/viewer/document_view.h"
 #include "sky/viewer/runtime_flags.h"
-#include "v8/include/v8.h"
 #include <limits>
 
+using namespace blink;
+
 namespace sky {
+namespace {
 
-gin::WrapperInfo Internals::kWrapperInfo = {gin::kEmbedderNativeGin};
+int kInternalsKey = 0;
 
-// static
-gin::Handle<Internals> Internals::Create(
-    v8::Isolate* isolate, DocumentView* document_view) {
-  gin::Handle<Internals> internals =
-      gin::CreateHandle(isolate, new Internals(document_view));
-  v8::Handle<v8::Object> object = internals.ToV8().As<v8::Object>();
-  object->Set(gin::StringToV8(isolate, "core"),
-              mojo::js::Core::GetModule(isolate));
-  object->Set(gin::StringToV8(isolate, "support"),
-              mojo::js::Support::GetModule(isolate));
-  object->Set(gin::StringToV8(isolate, "threading"),
-              mojo::js::Threading::GetModule(isolate));
-  return internals;
+Internals* GetInternals() {
+  DartState* state = DartState::Current();
+  return static_cast<Internals*>(state->GetUserData(&kInternalsKey));
+}
+
+void RenderTreeAsText(Dart_NativeArguments args) {
+  Dart_Handle result = StdStringToDart(GetInternals()->RenderTreeAsText());
+  Dart_SetReturnValue(args, result);
+}
+
+void ContentAsText(Dart_NativeArguments args) {
+  Dart_Handle result = StdStringToDart(GetInternals()->ContentAsText());
+  Dart_SetReturnValue(args, result);
+}
+
+void NotifyTestComplete(Dart_NativeArguments args) {
+  Dart_Handle test_result = Dart_GetNativeArgument(args, 0);
+  GetInternals()->NotifyTestComplete(StdStringFromDart(test_result));
+}
+
+void PassShellProxyHandle(Dart_NativeArguments args) {
+  Dart_SetIntegerReturnValue(args, GetInternals()->PassShellProxyHandle().value());
+}
+
+const DartBuiltin::Natives kNativeFunctions[] = {
+  {"renderTreeAsText", RenderTreeAsText, 0},
+  {"contentAsText", ContentAsText, 0},
+  {"notifyTestComplete", NotifyTestComplete, 1},
+  {"passShellProxyHandle", PassShellProxyHandle, 0},
+};
+
+const DartBuiltin& GetBuiltin() {
+  static DartBuiltin& builtin = *new DartBuiltin(kNativeFunctions,
+                                                 arraysize(kNativeFunctions));
+  return builtin;
+}
+
+Dart_NativeFunction Resolver(Dart_Handle name,
+                             int argument_count,
+                             bool* auto_setup_scope) {
+  return GetBuiltin().Resolver(name, argument_count, auto_setup_scope);
+}
+
+const uint8_t* Symbolizer(Dart_NativeFunction native_function) {
+  return GetBuiltin().Symbolizer(native_function);
+}
+
+const char kLibraryName[] = "dart:sky.internals";
+const char kLibrarySource[] = R"DART(
+String renderTreeAsText() native "renderTreeAsText";
+String contentAsText() native "contentAsText";
+void notifyTestComplete(String test_result) native "notifyTestComplete";
+int passShellProxyHandle() native "passShellProxyHandle";
+)DART";
+
+}  // namespace
+
+void Internals::Create(Dart_Isolate isolate, DocumentView* document_view) {
+  DartState* state = DartState::From(isolate);
+  state->SetUserData(&kInternalsKey, new Internals(document_view));
+  Dart_Handle library =
+      Dart_LoadLibrary(Dart_NewStringFromCString(kLibraryName),
+                       Dart_NewStringFromCString(kLibrarySource), 0, 0);
+  CHECK(!LogIfError(library));
+  CHECK(!LogIfError(Dart_FinalizeLoading(true)));
+  CHECK(!LogIfError(Dart_SetNativeResolver(library, Resolver, Symbolizer)));
 }
 
 Internals::Internals(DocumentView* document_view)
@@ -45,19 +100,6 @@ Internals::Internals(DocumentView* document_view)
 }
 
 Internals::~Internals() {
-}
-
-gin::ObjectTemplateBuilder Internals::GetObjectTemplateBuilder(
-    v8::Isolate* isolate) {
-  return Wrappable<Internals>::GetObjectTemplateBuilder(isolate)
-      .SetMethod("renderTreeAsText", &Internals::RenderTreeAsText)
-      .SetMethod("contentAsText", &Internals::ContentAsText)
-      .SetMethod("notifyTestComplete", &Internals::NotifyTestComplete)
-      .SetMethod("connectToService", &Internals::ConnectToService)
-      .SetMethod("connectToEmbedderService",
-                 &Internals::ConnectToEmbedderService)
-      .SetMethod("pauseAnimations", &Internals::pauseAnimations)
-      .SetMethod("passShellProxyHandle", &Internals::PassShellProxyHandle);
 }
 
 std::string Internals::RenderTreeAsText() {

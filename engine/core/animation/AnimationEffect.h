@@ -32,7 +32,7 @@
 #define SKY_ENGINE_CORE_ANIMATION_ANIMATIONEFFECT_H_
 
 #include "gen/sky/core/CSSPropertyNames.h"
-#include "sky/engine/bindings/core/v8/ScriptWrappable.h"
+#include "sky/engine/tonic/dart_wrappable.h"
 #include "sky/engine/wtf/PassOwnPtr.h"
 #include "sky/engine/wtf/RefCounted.h"
 
@@ -40,7 +40,7 @@ namespace blink {
 
 class Interpolation;
 
-class AnimationEffect : public RefCounted<AnimationEffect>, public ScriptWrappable {
+class AnimationEffect : public RefCounted<AnimationEffect>, public DartWrappable {
     DEFINE_WRAPPERTYPEINFO();
 public:
     enum CompositeOperation {

@@ -27,8 +27,6 @@
 #ifndef SKY_ENGINE_CORE_FRAME_LOCALDOMWINDOW_H_
 #define SKY_ENGINE_CORE_FRAME_LOCALDOMWINDOW_H_
 
-#include "sky/engine/bindings/core/v8/Dictionary.h"
-#include "sky/engine/bindings/core/v8/SerializedScriptValue.h"
 #include "sky/engine/core/events/EventTarget.h"
 #include "sky/engine/core/frame/DOMWindowBase64.h"
 #include "sky/engine/core/frame/FrameDestructionObserver.h"
@@ -42,7 +40,6 @@ namespace blink {
 
 class Application;
 class CSSStyleDeclaration;
-class Console;
 class DOMSelection;
 class DOMURL;
 class DOMWindowCSS;
@@ -69,7 +66,6 @@ class RequestAnimationFrameCallback;
 class ScheduledAction;
 class Screen;
 class ScriptCallStack;
-class SerializedScriptValue;
 class StyleMedia;
 
 enum PageshowEventPersistence {
@@ -112,12 +108,11 @@ public:
     Screen& screen() const;
 
     Location& location() const;
-    void setLocation(const String& location, LocalDOMWindow* callingWindow, LocalDOMWindow* enteredWindow,
-        SetLocationLocking = LockHistoryBasedOnGestureState);
+    void setLocation(const String& location, SetLocationLocking = LockHistoryBasedOnGestureState);
 
     DOMSelection* getSelection();
 
-    void focus(ExecutionContext* = 0);
+    void focus();
 
     int outerHeight() const;
     int outerWidth() const;
@@ -147,7 +142,6 @@ public:
 
     double devicePixelRatio() const;
 
-    Console& console() const;
     FrameConsole* frameConsole() const;
 
     void printErrorMessage(const String&);
@@ -236,7 +230,6 @@ private:
     HashSet<DOMWindowProperty*> m_properties;
 
     mutable RefPtr<Screen> m_screen;
-    mutable RefPtr<Console> m_console;
     mutable RefPtr<Location> m_location;
 
     mutable RefPtr<DOMWindowCSS> m_css;

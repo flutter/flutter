@@ -1,6 +1,11 @@
-<import src="/sky/framework/dom-serializer.sky" as="DomSerializer" />
+<import src="/sky/framework/dom-serializer.sky" as="DomSerializer"/>
 <script>
-window.addEventListener('load', function() {
-  internals.notifyTestComplete(DomSerializer.serializeNode(document));
-});
+import "dart:sky";
+import "dart:sky.internals" as internals;
+
+void init() {
+  window.addEventListener('load', (_) {
+    internals.notifyTestComplete(DomSerializer.serializeNode(document));
+  });
+}
 </script>

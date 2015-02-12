@@ -31,7 +31,7 @@
 #ifndef SKY_ENGINE_CORE_ANIMATION_ANIMATIONNODE_H_
 #define SKY_ENGINE_CORE_ANIMATION_ANIMATIONNODE_H_
 
-#include "sky/engine/bindings/core/v8/ScriptWrappable.h"
+#include "sky/engine/tonic/dart_wrappable.h"
 #include "sky/engine/core/animation/Timing.h"
 #include "sky/engine/wtf/OwnPtr.h"
 #include "sky/engine/wtf/PassOwnPtr.h"
@@ -58,7 +58,7 @@ static inline double nullValue()
     return std::numeric_limits<double>::quiet_NaN();
 }
 
-class AnimationNode : public RefCounted<AnimationNode>, public ScriptWrappable {
+class AnimationNode : public RefCounted<AnimationNode>, public DartWrappable {
     DEFINE_WRAPPERTYPEINFO();
     friend class AnimationPlayer; // Calls attach/detach, updateInheritedTime.
 public:

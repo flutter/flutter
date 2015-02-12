@@ -74,14 +74,8 @@
 
 #include <algorithm>
 #include "mojo/public/cpp/system/data_pipe.h"
-#include "sky/engine/bindings/core/v8/DOMWrapperWorld.h"
-#include "sky/engine/bindings/core/v8/ExceptionState.h"
-#include "sky/engine/bindings/core/v8/ExceptionStatePlaceholder.h"
-#include "sky/engine/bindings/core/v8/ScriptController.h"
-#include "sky/engine/bindings/core/v8/ScriptSourceCode.h"
-#include "sky/engine/bindings/core/v8/ScriptValue.h"
-#include "sky/engine/bindings/core/v8/V8GCController.h"
-#include "sky/engine/bindings/core/v8/V8PerIsolateData.h"
+#include "sky/engine/bindings2/exception_state.h"
+#include "sky/engine/bindings2/exception_state_placeholder.h"
 #include "sky/engine/core/dom/Document.h"
 #include "sky/engine/core/dom/Node.h"
 #include "sky/engine/core/dom/NodeTraversal.h"
@@ -94,7 +88,6 @@
 #include "sky/engine/core/editing/TextAffinity.h"
 #include "sky/engine/core/editing/TextIterator.h"
 #include "sky/engine/core/editing/htmlediting.h"
-#include "sky/engine/core/frame/Console.h"
 #include "sky/engine/core/frame/FrameHost.h"
 #include "sky/engine/core/frame/FrameView.h"
 #include "sky/engine/core/frame/LocalDOMWindow.h"
@@ -137,7 +130,6 @@
 #include "sky/engine/public/web/WebNode.h"
 #include "sky/engine/public/web/WebRange.h"
 #include "sky/engine/public/web/WebScriptSource.h"
-#include "sky/engine/core/inspector/ScriptCallStack.h"
 #include "sky/engine/web/CompositionUnderlineVectorBuilder.h"
 #include "sky/engine/web/WebViewImpl.h"
 #include "sky/engine/wtf/CurrentTime.h"
@@ -164,7 +156,7 @@ static void frameContentAsPlainText(size_t maxChars, LocalFrame* frame, StringBu
     TrackExceptionState exceptionState;
     range->selectNodeContents(document->documentElement(), exceptionState);
 
-    if (!exceptionState.hadException()) {
+    if (!exceptionState.had_exception()) {
         // The text iterator will walk nodes giving us text. This is similar to
         // the plainText() function in core/editing/TextIterator.h, but we implement the maximum
         // size and also copy the results directly into a wstring, avoiding the
@@ -182,19 +174,6 @@ static void frameContentAsPlainText(size_t maxChars, LocalFrame* frame, StringBu
 int WebFrame::instanceCount()
 {
     return frameCount;
-}
-
-WebLocalFrame* WebLocalFrame::frameForCurrentContext()
-{
-    v8::Handle<v8::Context> context = v8::Isolate::GetCurrent()->GetCurrentContext();
-    if (context.IsEmpty())
-        return 0;
-    return frameForContext(context);
-}
-
-WebLocalFrame* WebLocalFrame::frameForContext(v8::Handle<v8::Context> context)
-{
-    return WebLocalFrameImpl::fromFrame(toFrameIfNotDetached(context));
 }
 
 bool WebLocalFrameImpl::isWebLocalFrame() const
@@ -244,9 +223,7 @@ WebDocument WebLocalFrameImpl::document() const
 void WebLocalFrameImpl::executeScript(const WebScriptSource& source)
 {
     ASSERT(frame());
-    TextPosition position(OrdinalNumber::fromOneBasedInt(source.startLine), OrdinalNumber::first());
-    v8::HandleScope handleScope(toIsolate(frame()));
-    frame()->script().executeScriptInMainWorld(ScriptSourceCode(source.code, source.url, position));
+    // TODO(dart)
 }
 
 void WebLocalFrameImpl::addMessageToConsole(const WebConsoleMessage& message)
@@ -277,27 +254,7 @@ void WebLocalFrameImpl::addMessageToConsole(const WebConsoleMessage& message)
 
 void WebLocalFrameImpl::collectGarbage()
 {
-    if (!frame())
-        return;
-    V8GCController::collectGarbage(v8::Isolate::GetCurrent());
-}
-
-v8::Handle<v8::Value> WebLocalFrameImpl::executeScriptAndReturnValue(const WebScriptSource& source)
-{
-    ASSERT(frame());
-    TextPosition position(OrdinalNumber::fromOneBasedInt(source.startLine), OrdinalNumber::first());
-    return frame()->script().executeScriptInMainWorldAndReturnValue(ScriptSourceCode(source.code, source.url, position));
-}
-
-v8::Handle<v8::Value> WebLocalFrameImpl::callFunctionEvenIfScriptDisabled(v8::Handle<v8::Function> function, v8::Handle<v8::Value> receiver, int argc, v8::Handle<v8::Value> argv[])
-{
-    ASSERT(frame());
-    return frame()->script().callFunction(function, receiver, argc, argv);
-}
-
-v8::Local<v8::Context> WebLocalFrameImpl::mainWorldScriptContext() const
-{
-    return toV8Context(frame(), DOMWrapperWorld::mainWorld());
+    // TODO(dart): Implement.
 }
 
 void WebLocalFrameImpl::load(const WebURL& url, mojo::ScopedDataPipeConsumerHandle responseStream)

@@ -29,7 +29,7 @@
 #ifndef SKY_ENGINE_CORE_DOM_DOMEXCEPTION_H_
 #define SKY_ENGINE_CORE_DOM_DOMEXCEPTION_H_
 
-#include "sky/engine/bindings/core/v8/ScriptWrappable.h"
+#include "sky/engine/tonic/dart_wrappable.h"
 #include "sky/engine/platform/heap/Handle.h"
 #include "sky/engine/wtf/PassRefPtr.h"
 #include "sky/engine/wtf/RefCounted.h"
@@ -39,7 +39,7 @@ namespace blink {
 
 typedef int ExceptionCode;
 
-class DOMException final : public RefCounted<DOMException>, public ScriptWrappable {
+class DOMException final : public RefCounted<DOMException>, public DartWrappable {
     DEFINE_WRAPPERTYPEINFO();
 public:
     static PassRefPtr<DOMException> create(ExceptionCode, const String& sanitizedMessage = String(), const String& unsanitizedMessage = String());

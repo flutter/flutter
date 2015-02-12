@@ -31,7 +31,7 @@
 #include "sky/engine/config.h"
 #include "sky/engine/public/web/WebNode.h"
 
-#include "sky/engine/bindings/core/v8/ExceptionState.h"
+#include "sky/engine/bindings2/exception_state.h"
 #include "sky/engine/core/dom/Document.h"
 #include "sky/engine/core/dom/Element.h"
 #include "sky/engine/core/dom/Node.h"
@@ -166,7 +166,7 @@ bool WebNode::remove()
 {
     TrackExceptionState exceptionState;
     m_private->remove(exceptionState);
-    return !exceptionState.hadException();
+    return !exceptionState.had_exception();
 }
 
 bool WebNode::containsIncludingShadowDOM(const WebNode& other) const

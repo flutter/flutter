@@ -26,32 +26,20 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-[
-    CheckSecurity=Frame,
-] interface Location {
-    // |assign|, |replace|, and *writing* |href| do not require a security
-    // check, as they *change* the page, and thus these do not change any
-    // property of an *existing* document at a different origin.
-    // However, *reading* |href|, or accessing any component, is a security
-    // problem, since that allows tracking navigation.
-    [SetterCallWith=(ActiveWindow,FirstWindow), DoNotCheckSecurity=Setter, Unforgeable] attribute DOMString href;
+interface Location {
+    attribute DOMString href;
 
-    [CallWith=(ActiveWindow,FirstWindow), DoNotCheckSecurity, Unforgeable] void assign(DOMString url);
-    [CallWith=(ActiveWindow,FirstWindow), DoNotCheckSecurity, Unforgeable] void replace(DOMString url);
-    [CallWith=ActiveWindow, Unforgeable] void reload();
+    void assign(DOMString url);
+    void replace(DOMString url);
+    void reload();
 
-    // URI decomposition attributes
-    [SetterCallWith=(ActiveWindow,FirstWindow), RaisesException=Setter] attribute DOMString protocol;
-    [SetterCallWith=(ActiveWindow,FirstWindow)] attribute DOMString host;
-    [SetterCallWith=(ActiveWindow,FirstWindow)] attribute DOMString hostname;
-    [SetterCallWith=(ActiveWindow,FirstWindow)] attribute DOMString port;
-    [SetterCallWith=(ActiveWindow,FirstWindow)] attribute DOMString pathname;
-    [SetterCallWith=(ActiveWindow,FirstWindow)] attribute DOMString search;
-    [SetterCallWith=(ActiveWindow,FirstWindow)] attribute DOMString hash;
+    [RaisesException=Setter] attribute DOMString protocol;
+    attribute DOMString host;
+    attribute DOMString hostname;
+    attribute DOMString port;
+    attribute DOMString pathname;
+    attribute DOMString search;
+    attribute DOMString hash;
 
     readonly attribute DOMString origin;
-
-    [NotEnumerable, Unforgeable, ImplementedAs=href] DOMString toString();
-    [NotEnumerable, Custom, Unforgeable] any valueOf();
 };
-

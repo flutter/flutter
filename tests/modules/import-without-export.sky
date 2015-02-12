@@ -3,9 +3,10 @@
 <import src="../resources/dump-as-text.sky" />
 <div id="result">FAIL - Script did not execute</div>
 <script>
-var result = "FAIL";
-if (typeof hello === "object" && Object.keys(hello).length === 0)
-  result = "PASS";
-document.getElementById("result").textContent = result;
+import "dart:sky";
+
+void main() {
+    document.getElementById("result").textContent = "PASS";
+}
 </script>
 </html>

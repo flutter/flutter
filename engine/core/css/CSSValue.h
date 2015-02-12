@@ -21,7 +21,7 @@
 #ifndef SKY_ENGINE_CORE_CSS_CSSVALUE_H_
 #define SKY_ENGINE_CORE_CSS_CSSVALUE_H_
 
-#include "sky/engine/bindings/core/v8/ScriptWrappable.h"
+#include "sky/engine/tonic/dart_wrappable.h"
 #include "sky/engine/core/dom/ExceptionCode.h"
 #include "sky/engine/platform/heap/Handle.h"
 #include "sky/engine/platform/weborigin/KURL.h"
@@ -42,7 +42,7 @@ enum CSSTextFormattingFlags { QuoteCSSStringIfNeeded, AlwaysQuoteCSSString };
 // They should be handled by separate wrapper classes.
 
 // Please don't expose more CSSValue types to the web.
-class CSSValue : public RefCounted<CSSValue>, public ScriptWrappableBase {
+class CSSValue : public RefCounted<CSSValue> {
 public:
     enum Type {
         CSS_INHERIT = 0,

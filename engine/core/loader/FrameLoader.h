@@ -54,7 +54,6 @@ class NavigationAction;
 class Page;
 class ResourceError;
 class ResourceResponse;
-class SerializedScriptValue;
 
 class FrameLoader {
     WTF_MAKE_NONCOPYABLE(FrameLoader);

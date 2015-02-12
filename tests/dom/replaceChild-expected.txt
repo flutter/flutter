@@ -1,10 +1,9 @@
-Running 6 tests
-ok 1 replaceChild should throw with invalid arguments
-ok 2 replaceChild should replace elements
-ok 3 replaceChild should replace text
-ok 4 replaceChild should replace children with a fragment
-ok 5 replaceChild should throw when inserting a tree scope
-ok 6 replaceChild should throw when appending to a text
-6 tests
-6 pass
-0 fail
+CONSOLE: unittest-suite-wait-for-done
+CONSOLE: PASS: should throw with invalid arguments
+CONSOLE: PASS: should replace elements
+CONSOLE: PASS: should replace text
+CONSOLE: PASS: should replace children with a fragment
+CONSOLE: 
+CONSOLE: All 4 tests passed.
+CONSOLE: unittest-suite-success
+DONE

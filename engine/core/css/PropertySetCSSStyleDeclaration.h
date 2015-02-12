@@ -51,7 +51,7 @@ private:
     virtual String getPropertyValue(const String& propertyName) override final;
     virtual String getPropertyShorthand(const String& propertyName) override final;
     virtual bool isPropertyImplicit(const String& propertyName) override final;
-    virtual void setProperty(const String& propertyName, const String& value, const String& priority, ExceptionState&) override final;
+    virtual void setProperty(const String& propertyName, const String& value, ExceptionState&) override final;
     virtual String removeProperty(const String& propertyName, ExceptionState&) override final;
     virtual String cssText() const override final;
     virtual void setCSSText(const String&, ExceptionState&) override final;

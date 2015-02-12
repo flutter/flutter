@@ -1,1 +1,1 @@
-{"message":"PASS: pass.sky succesfully exported this string."}
+PASS: pass.sky succesfully exported this string.

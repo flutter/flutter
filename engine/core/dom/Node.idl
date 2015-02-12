@@ -19,24 +19,23 @@
  */
 
 [
-    Custom=Wrap,
     DependentLifetime,
 ] interface Node : EventTarget {
-    [PerWorldBindings] readonly attribute Node             parentNode;
-    [PerWorldBindings] readonly attribute Node             firstChild;
-    [PerWorldBindings] readonly attribute Node             lastChild;
-    [PerWorldBindings] readonly attribute Node             previousSibling;
-    [PerWorldBindings] readonly attribute Node             nextSibling;
-    [PerWorldBindings] readonly attribute Document         ownerDocument;
+    readonly attribute Node             parentNode;
+    readonly attribute Node             firstChild;
+    readonly attribute Node             lastChild;
+    readonly attribute Node             previousSibling;
+    readonly attribute Node             nextSibling;
+    readonly attribute Document         ownerDocument;
 
     // TODO(esprehn): This should return TreeScope in Sky, but we don't have
     // a TreeScope type yet.
     readonly attribute Node ownerScope;
 
-    [CustomElementCallbacks, PerWorldBindings, RaisesException, TypeChecking=Interface] Node insertBefore(Node newChild, Node? refChild);
-    [CustomElementCallbacks, PerWorldBindings, RaisesException, TypeChecking=Interface] Node replaceChild(Node newChild, Node oldChild);
+    [CustomElementCallbacks, RaisesException, TypeChecking=Interface] Node insertBefore(Node newChild, Node? refChild);
+    [CustomElementCallbacks, RaisesException, TypeChecking=Interface] Node replaceChild(Node newChild, Node oldChild);
     [CustomElementCallbacks, RaisesException, TypeChecking=Interface] Node removeChild(Node oldChild);
-    [CustomElementCallbacks, PerWorldBindings, RaisesException, TypeChecking=Interface] Node appendChild(Node newChild);
+    [CustomElementCallbacks, RaisesException, TypeChecking=Interface] Node appendChild(Node newChild);
 
     [ImplementedAs=hasChildren] boolean hasChildNodes();
     [CustomElementCallbacks] Node cloneNode(optional boolean deep);
@@ -55,5 +54,5 @@
 
     unsigned short compareDocumentPosition(Node other);
 
-    [PerWorldBindings] readonly attribute Element parentElement;
+    readonly attribute Element parentElement;
 };

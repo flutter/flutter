@@ -18,17 +18,12 @@
  * Boston, MA 02110-1301, USA.
  */
 
-[
-    CheckSecurity=Window,
-    Custom=ToV8,
-] interface EventTarget {
-    // FIXME: first 2 args should be required, but throwing TypeError breaks
-    // legacy content.  http://crbug.com/353484
-    void addEventListener(optional DOMString? type,
-                          optional EventListener listener,
+interface EventTarget {
+    void addEventListener(DOMString? type,
+                          EventListener listener,
                           optional boolean useCapture);
-    void removeEventListener(optional DOMString? type,
-                             optional EventListener listener,
+    void removeEventListener(DOMString? type,
+                             EventListener listener,
                              optional boolean useCapture);
     [RaisesException] boolean dispatchEvent(Event event);
 };

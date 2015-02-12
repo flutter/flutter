@@ -27,7 +27,7 @@
 #include "sky/engine/config.h"
 #include "sky/engine/core/dom/SelectorQuery.h"
 
-#include "sky/engine/bindings/core/v8/ExceptionState.h"
+#include "sky/engine/bindings2/exception_state.h"
 #include "sky/engine/core/css/SelectorChecker.h"
 #include "sky/engine/core/css/parser/BisonCSSParser.h"
 #include "sky/engine/core/dom/Document.h"
@@ -93,7 +93,7 @@ SelectorQuery* SelectorQueryCache::add(const AtomicString& selectors, const Docu
     parser.parseSelector(selectors, selectorList);
 
     if (!selectorList.first()) {
-        exceptionState.throwDOMException(SyntaxError, "'" + selectors + "' is not a valid selector.");
+        exceptionState.ThrowDOMException(SyntaxError, "'" + selectors + "' is not a valid selector.");
         return 0;
     }
 

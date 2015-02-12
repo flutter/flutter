@@ -50,7 +50,6 @@ class Document;
 class Element;
 class HTMLParserScheduler;
 class HTMLTreeBuilder;
-class ScriptController;
 class ScriptSourceCode;
 
 class PumpSession;

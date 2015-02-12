@@ -32,9 +32,7 @@
 #define SKY_ENGINE_CORE_CSS_FONTFACE_H_
 
 #include "gen/sky/core/CSSPropertyNames.h"
-#include "sky/engine/bindings/core/v8/ScriptPromise.h"
-#include "sky/engine/bindings/core/v8/ScriptPromiseProperty.h"
-#include "sky/engine/bindings/core/v8/ScriptWrappable.h"
+#include "sky/engine/tonic/dart_wrappable.h"
 #include "sky/engine/core/css/CSSValue.h"
 #include "sky/engine/core/dom/DOMException.h"
 #include "sky/engine/platform/fonts/FontTraits.h"
@@ -46,21 +44,21 @@ namespace blink {
 
 class CSSFontFace;
 class CSSValueList;
-class Dictionary;
 class Document;
 class ExceptionState;
+class ExecutionContext;
 class FontFaceReadyPromiseResolver;
 class StylePropertySet;
 class StyleRuleFontFace;
 
-class FontFace : public RefCounted<FontFace>, public ScriptWrappable {
+class FontFace : public RefCounted<FontFace>, public DartWrappable {
     DEFINE_WRAPPERTYPEINFO();
 public:
     enum LoadStatus { Unloaded, Loading, Loaded, Error };
 
-    static PassRefPtr<FontFace> create(ExecutionContext*, const AtomicString& family, PassRefPtr<ArrayBuffer> source, const Dictionary&);
-    static PassRefPtr<FontFace> create(ExecutionContext*, const AtomicString& family, PassRefPtr<ArrayBufferView>, const Dictionary&);
-    static PassRefPtr<FontFace> create(ExecutionContext*, const AtomicString& family, const String& source, const Dictionary&);
+    static PassRefPtr<FontFace> create(ExecutionContext*, const AtomicString& family, PassRefPtr<ArrayBuffer> source);
+    static PassRefPtr<FontFace> create(ExecutionContext*, const AtomicString& family, PassRefPtr<ArrayBufferView>);
+    static PassRefPtr<FontFace> create(ExecutionContext*, const AtomicString& family, const String& source);
     static PassRefPtr<FontFace> create(Document*, const StyleRuleFontFace*);
 
     ~FontFace();
@@ -83,9 +81,6 @@ public:
     void setFeatureSettings(ExecutionContext*, const String&, ExceptionState&);
 
     String status() const;
-    ScriptPromise loaded(ScriptState* scriptState) { return fontStatusPromise(scriptState); }
-
-    ScriptPromise load(ScriptState*);
 
     LoadStatus loadStatus() const { return m_status; }
     void setLoadStatus(LoadStatus);
@@ -106,7 +101,7 @@ public:
 
 private:
     FontFace();
-    FontFace(ExecutionContext*, const AtomicString& family, const Dictionary& descriptors);
+    FontFace(ExecutionContext*, const AtomicString& family);
 
     void initCSSFontFace(Document*, PassRefPtr<CSSValue> src);
     void initCSSFontFace(const unsigned char* data, unsigned size);
@@ -115,9 +110,6 @@ private:
     bool setPropertyValue(PassRefPtr<CSSValue>, CSSPropertyID);
     bool setFamilyValue(CSSValueList*);
     void loadInternal(ExecutionContext*);
-    ScriptPromise fontStatusPromise(ScriptState*);
-
-    typedef ScriptPromiseProperty<RawPtr<FontFace>, RawPtr<FontFace>, RefPtr<DOMException> > LoadedProperty;
 
     AtomicString m_family;
     RefPtr<CSSValue> m_src;
@@ -130,7 +122,6 @@ private:
     LoadStatus m_status;
     RefPtr<DOMException> m_error;
 
-    OwnPtr<LoadedProperty> m_loadedProperty;
     OwnPtr<CSSFontFace> m_cssFontFace;
     Vector<RefPtr<LoadFontCallback> > m_callbacks;
 };

@@ -39,7 +39,6 @@
 
 namespace blink {
 
-class Dictionary;
 class Element;
 class ExceptionState;
 class SampledEffect;
@@ -49,14 +48,10 @@ class Animation final : public AnimationNode {
 public:
     enum Priority { DefaultPriority, TransitionPriority };
 
-    static PassRefPtr<Animation> create(Element*, PassRefPtr<AnimationEffect>, const Timing&, Priority = DefaultPriority, PassOwnPtr<EventDelegate> = nullptr);
+    static PassRefPtr<Animation> create(Element*, PassRefPtr<AnimationEffect> effect, const Timing&, Priority = DefaultPriority, PassOwnPtr<EventDelegate> = nullptr);
     // Web Animations API Bindings constructors.
-    static PassRefPtr<Animation> create(Element*, PassRefPtr<AnimationEffect>, const Dictionary& timingInputDictionary);
-    static PassRefPtr<Animation> create(Element*, PassRefPtr<AnimationEffect>, double duration);
-    static PassRefPtr<Animation> create(Element*, PassRefPtr<AnimationEffect>);
-    static PassRefPtr<Animation> create(Element*, const Vector<Dictionary>& keyframeDictionaryVector, const Dictionary& timingInputDictionary, ExceptionState&);
-    static PassRefPtr<Animation> create(Element*, const Vector<Dictionary>& keyframeDictionaryVector, double duration, ExceptionState&);
-    static PassRefPtr<Animation> create(Element*, const Vector<Dictionary>& keyframeDictionaryVector, ExceptionState&);
+    static PassRefPtr<Animation> create(Element*, ExceptionState&);
+    static PassRefPtr<Animation> create(Element*, double duration, ExceptionState&);
 
     virtual ~Animation();
 
@@ -81,7 +76,7 @@ protected:
     virtual double calculateTimeToEffectChange(bool forwards, double inheritedTime, double timeToNextIteration) const override;
 
 private:
-    Animation(Element*, PassRefPtr<AnimationEffect>, const Timing&, Priority, PassOwnPtr<EventDelegate>);
+    Animation(Element*, PassRefPtr<AnimationEffect> effect, const Timing&, Priority, PassOwnPtr<EventDelegate>);
 
     RawPtr<Element> m_target;
     RefPtr<AnimationEffect> m_effect;

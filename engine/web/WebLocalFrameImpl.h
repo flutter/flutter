@@ -70,14 +70,6 @@ public:
     virtual void executeScript(const WebScriptSource&) override;
     virtual void addMessageToConsole(const WebConsoleMessage&) override;
     virtual void collectGarbage() override;
-    virtual v8::Handle<v8::Value> executeScriptAndReturnValue(
-        const WebScriptSource&) override;
-    virtual v8::Handle<v8::Value> callFunctionEvenIfScriptDisabled(
-        v8::Handle<v8::Function>,
-        v8::Handle<v8::Value>,
-        int argc,
-        v8::Handle<v8::Value> argv[]) override;
-    virtual v8::Local<v8::Context> mainWorldScriptContext() const override;
     virtual void load(const WebURL&, mojo::ScopedDataPipeConsumerHandle);
     virtual void replaceSelection(const WebString&) override;
     virtual void insertText(const WebString&) override;

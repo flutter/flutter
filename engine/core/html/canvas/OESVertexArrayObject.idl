@@ -24,7 +24,6 @@
  */
 
 [
-    DoNotCheckConstants,
     NoInterfaceObject,
     TypeChecking=Interface,
 ] interface OESVertexArrayObject {

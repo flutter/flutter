@@ -107,9 +107,6 @@ mediaTypeOverride type=String, initial="screen", invalidate=MediaType
 loadsImagesAutomatically initial=false, invalidate=ImageLoading
 imagesEnabled initial=true, invalidate=ImageLoading
 
-# V8 supports different types of caching. Used by V8 bindings.
-v8CacheOptions type=V8CacheOptions, initial=V8CacheOptionsOff
-
 # These values are bit fields for the properties of available pointing devices
 # and may take on multiple values (e.g. laptop with touchpad and touchscreen
 # has pointerType coarse *and* fine).

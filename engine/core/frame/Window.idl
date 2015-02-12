@@ -26,19 +26,15 @@
 
 // HTML 5 draft spec:
 // http://www.w3.org/html/wg/drafts/html/master/browsers.html#window
-// FIXME: explain all uses of [DoNotCheckSecurity]
 [
-    CheckSecurity=Frame,
-    Custom=ToV8,
     ImplementedAs=LocalDOMWindow,
-    PrimaryGlobal,
 ] interface Window : EventTarget {
     readonly attribute Screen screen;
-    [DoNotCheckSecurity, Unforgeable, Replaceable, PutForwards=href] readonly attribute Location location;
+    [Replaceable, PutForwards=href] readonly attribute Location location;
 
     Selection getSelection();
 
-    [DoNotCheckSecurity, CallWith=ExecutionContext] void focus();
+    void focus();
 
     [Replaceable] readonly attribute long outerHeight;
     [Replaceable] readonly attribute long outerWidth;
@@ -55,7 +51,7 @@
     void resizeTo([Default=Undefined] optional float width, [Default=Undefined] optional float height); // FIXME: this should take longs not floats.
 
     // Self referential attributes
-    [DoNotCheckSecurity, Unforgeable] readonly attribute Window window;
+    readonly attribute Window window;
 
     // DOM Level 2 AbstractView Interface
     readonly attribute Document document;
@@ -71,17 +67,12 @@
     // This is the interface orientation in degrees. Some examples are:
     //  0 is straight up; -90 is when the device is rotated 90 clockwise;
     //  90 is when rotated counter clockwise.
-    [RuntimeEnabled=OrientationEvent, MeasureAs=WindowOrientation] readonly attribute long orientation;
+    readonly attribute long orientation;
 
-    [Replaceable] readonly attribute Console console;
-
-    [MeasureAs=UnprefixedRequestAnimationFrame] long requestAnimationFrame(RequestAnimationFrameCallback callback);
+    long requestAnimationFrame(RequestAnimationFrameCallback callback);
     void cancelAnimationFrame(long id);
 
     [Replaceable] readonly attribute CSS CSS;
-
-    // window.toString() requires special handling in V8
-    [DoNotCheckSignature, DoNotCheckSecurity, Custom, NotEnumerable] stringifier;
 
     // FIXME(sky): can't remove w/o also removing hacks in bindings generator.
     [Custom, NotEnumerable] getter Window (DOMString name);

@@ -6,9 +6,13 @@
 <div class="h1">about:blank</div>
 <div class="p">Welcome to Sky!</div>
 <script>
+import "dart:sky" as sky;
+import "dart:sky.internals" as internals;
+
 // Don't use dump-as-render-tree.sky, we want a test with no imports.
-window.addEventListener('load', function() {
-  internals.notifyTestComplete(internals.renderTreeAsText());
-});
+void main() {
+  sky.window.addEventListener('load', (_) =>
+    internals.notifyTestComplete(internals.renderTreeAsText()));  
+}
 </script>
 </div>

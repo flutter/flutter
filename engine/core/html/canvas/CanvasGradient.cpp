@@ -27,7 +27,7 @@
 #include "sky/engine/config.h"
 #include "sky/engine/core/html/canvas/CanvasGradient.h"
 
-#include "sky/engine/bindings/core/v8/ExceptionState.h"
+#include "sky/engine/bindings2/exception_state.h"
 #include "sky/engine/core/dom/ExceptionCode.h"
 #include "sky/engine/core/html/canvas/CanvasPattern.h"
 #include "sky/engine/core/html/canvas/CanvasStyle.h"
@@ -47,13 +47,13 @@ CanvasGradient::CanvasGradient(const FloatPoint& p0, float r0, const FloatPoint&
 void CanvasGradient::addColorStop(float value, const String& color, ExceptionState& exceptionState)
 {
     if (!(value >= 0 && value <= 1.0f)) {
-        exceptionState.throwDOMException(IndexSizeError, "The provided value (" + String::number(value) + ") is outside the range (0.0, 1.0).");
+        exceptionState.ThrowDOMException(IndexSizeError, "The provided value (" + String::number(value) + ") is outside the range (0.0, 1.0).");
         return;
     }
 
     RGBA32 rgba = 0;
     if (!parseColorOrCurrentColor(rgba, color, 0 /*canvas*/)) {
-        exceptionState.throwDOMException(SyntaxError, "The value provided ('" + color + "') could not be parsed as a color.");
+        exceptionState.ThrowDOMException(SyntaxError, "The value provided ('" + color + "') could not be parsed as a color.");
         return;
     }
 

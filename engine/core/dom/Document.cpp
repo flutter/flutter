@@ -30,15 +30,9 @@
 
 #include "gen/sky/core/HTMLElementFactory.h"
 #include "gen/sky/platform/RuntimeEnabledFeatures.h"
-#include "sky/engine/bindings/core/v8/CustomElementConstructorBuilder.h"
-#include "sky/engine/bindings/core/v8/DOMDataStore.h"
-#include "sky/engine/bindings/core/v8/Dictionary.h"
-#include "sky/engine/bindings/core/v8/ExceptionMessages.h"
-#include "sky/engine/bindings/core/v8/ExceptionState.h"
-#include "sky/engine/bindings/core/v8/ExceptionStatePlaceholder.h"
-#include "sky/engine/bindings/core/v8/ScriptController.h"
-#include "sky/engine/bindings/core/v8/V8DOMWrapper.h"
-#include "sky/engine/bindings/core/v8/WindowProxy.h"
+#include "sky/engine/bindings2/exception_messages.h"
+#include "sky/engine/bindings2/exception_state.h"
+#include "sky/engine/bindings2/exception_state_placeholder.h"
 #include "sky/engine/core/animation/AnimationTimeline.h"
 #include "sky/engine/core/animation/DocumentAnimations.h"
 #include "sky/engine/core/css/CSSFontSelector.h"
@@ -126,7 +120,6 @@
 #include "sky/engine/platform/network/HTTPParsers.h"
 #include "sky/engine/platform/text/SegmentedString.h"
 #include "sky/engine/public/platform/Platform.h"
-#include "sky/engine/core/inspector/ScriptCallStack.h"
 #include "sky/engine/wtf/CurrentTime.h"
 #include "sky/engine/wtf/DateMath.h"
 #include "sky/engine/wtf/HashFunctions.h"
@@ -426,23 +419,17 @@ void Document::childrenChanged(const ChildrenChange& change)
 PassRefPtr<Element> Document::createElement(const AtomicString& name, ExceptionState& exceptionState)
 {
     if (!isValidName(name)) {
-        exceptionState.throwDOMException(InvalidCharacterError, "The tag name provided ('" + name + "') is not a valid name.");
+        exceptionState.ThrowDOMException(InvalidCharacterError, "The tag name provided ('" + name + "') is not a valid name.");
         return nullptr;
     }
 
     return HTMLElementFactory::createHTMLElement(name, *this, false);
 }
 
-ScriptValue Document::registerElement(ScriptState* scriptState, const AtomicString& name, ExceptionState& exceptionState)
+PassRefPtr<DartValue> Document::registerElement(DartState*, const AtomicString& name, ExceptionState& exceptionState)
 {
-    return registerElement(scriptState, name, Dictionary(), exceptionState);
-}
-
-ScriptValue Document::registerElement(ScriptState* scriptState, const AtomicString& name, const Dictionary& options, ExceptionState& exceptionState)
-{
-    CustomElementConstructorBuilder constructorBuilder(scriptState, &options);
-    registrationContext().registerElement(this, &constructorBuilder, name, exceptionState);
-    return constructorBuilder.bindingsReturnValue();
+    // TODO(abarth): Add back custom elment registration.
+    return DartValue::Create();
 }
 
 CustomElementMicrotaskRunQueue* Document::customElementMicrotaskRunQueue()
@@ -521,10 +508,10 @@ bool Document::importContainerNodeChildren(ContainerNode* oldContainerNode, Pass
 {
     for (Node* oldChild = oldContainerNode->firstChild(); oldChild; oldChild = oldChild->nextSibling()) {
         RefPtr<Node> newChild = importNode(oldChild, true, exceptionState);
-        if (exceptionState.hadException())
+        if (exceptionState.had_exception())
             return false;
         newContainerNode->appendChild(newChild.release(), exceptionState);
-        if (exceptionState.hadException())
+        if (exceptionState.had_exception())
             return false;
     }
 
@@ -556,7 +543,7 @@ PassRefPtr<Node> Document::importNode(Node* importedNode, bool deep, ExceptionSt
         if (importedNode->isShadowRoot()) {
             // ShadowRoot nodes should not be explicitly importable.
             // Either they are imported along with their host node, or created implicitly.
-            exceptionState.throwDOMException(NotSupportedError, "The node provided is a shadow root, which may not be imported.");
+            exceptionState.ThrowDOMException(NotSupportedError, "The node provided is a shadow root, which may not be imported.");
             return nullptr;
         }
         DocumentFragment* oldFragment = toDocumentFragment(importedNode);
@@ -567,7 +554,7 @@ PassRefPtr<Node> Document::importNode(Node* importedNode, bool deep, ExceptionSt
         return newFragment.release();
     }
     case DOCUMENT_NODE:
-        exceptionState.throwDOMException(NotSupportedError, "The node provided is a document, which may not be imported.");
+        exceptionState.ThrowDOMException(NotSupportedError, "The node provided is a document, which may not be imported.");
         return nullptr;
     }
 
@@ -581,18 +568,18 @@ PassRefPtr<Node> Document::adoptNode(PassRefPtr<Node> source, ExceptionState& ex
 
     switch (source->nodeType()) {
     case DOCUMENT_NODE:
-        exceptionState.throwDOMException(NotSupportedError, "The node provided is of type '" + source->nodeName() + "', which may not be adopted.");
+        exceptionState.ThrowDOMException(NotSupportedError, "The node provided is of type '" + source->nodeName() + "', which may not be adopted.");
         return nullptr;
     default:
         if (source->isShadowRoot()) {
             // ShadowRoot cannot disconnect itself from the host node.
-            exceptionState.throwDOMException(HierarchyRequestError, "The node provided is a shadow root, which may not be adopted.");
+            exceptionState.ThrowDOMException(HierarchyRequestError, "The node provided is a shadow root, which may not be adopted.");
             return nullptr;
         }
 
         if (source->parentNode()) {
             source->parentNode()->removeChild(source.get(), exceptionState);
-            if (exceptionState.hadException())
+            if (exceptionState.had_exception())
                 return nullptr;
         }
     }
@@ -1410,7 +1397,6 @@ void Document::logExceptionToConsole(const String& errorMessage, int scriptId, c
 {
     RefPtr<ConsoleMessage> consoleMessage = ConsoleMessage::create(JSMessageSource, ErrorMessageLevel, errorMessage, sourceURL, lineNumber);
     consoleMessage->setScriptId(scriptId);
-    consoleMessage->setCallStack(callStack);
     addMessage(consoleMessage.release());
 }
 
@@ -1917,7 +1903,7 @@ static bool parseQualifiedNameInternal(const AtomicString& qualifiedName, const 
         U16_NEXT(characters, i, length, c)
         if (c == ':') {
             if (sawColon) {
-                exceptionState.throwDOMException(NamespaceError, "The qualified name provided ('" + qualifiedName + "') contains multiple colons.");
+                exceptionState.ThrowDOMException(NamespaceError, "The qualified name provided ('" + qualifiedName + "') contains multiple colons.");
                 return false; // multiple colons: not allowed
             }
             nameStart = true;
@@ -1931,7 +1917,7 @@ static bool parseQualifiedNameInternal(const AtomicString& qualifiedName, const 
                 message.appendLiteral("') contains the invalid name-start character '");
                 message.append(c);
                 message.appendLiteral("'.");
-                exceptionState.throwDOMException(InvalidCharacterError, message.toString());
+                exceptionState.ThrowDOMException(InvalidCharacterError, message.toString());
                 return false;
             }
             nameStart = false;
@@ -1943,7 +1929,7 @@ static bool parseQualifiedNameInternal(const AtomicString& qualifiedName, const 
                 message.appendLiteral("') contains the invalid character '");
                 message.append(c);
                 message.appendLiteral("'.");
-                exceptionState.throwDOMException(InvalidCharacterError, message.toString());
+                exceptionState.ThrowDOMException(InvalidCharacterError, message.toString());
                 return false;
             }
         }
@@ -1955,7 +1941,7 @@ static bool parseQualifiedNameInternal(const AtomicString& qualifiedName, const 
     } else {
         prefix = AtomicString(characters, colonPos);
         if (prefix.isEmpty()) {
-            exceptionState.throwDOMException(NamespaceError, "The qualified name provided ('" + qualifiedName + "') has an empty namespace prefix.");
+            exceptionState.ThrowDOMException(NamespaceError, "The qualified name provided ('" + qualifiedName + "') has an empty namespace prefix.");
             return false;
         }
         int prefixStart = colonPos + 1;
@@ -1963,7 +1949,7 @@ static bool parseQualifiedNameInternal(const AtomicString& qualifiedName, const 
     }
 
     if (localName.isEmpty()) {
-        exceptionState.throwDOMException(NamespaceError, "The qualified name provided ('" + qualifiedName + "') has an empty local name.");
+        exceptionState.ThrowDOMException(NamespaceError, "The qualified name provided ('" + qualifiedName + "') has an empty local name.");
         return false;
     }
 
@@ -1975,7 +1961,7 @@ bool Document::parseQualifiedName(const AtomicString& qualifiedName, AtomicStrin
     unsigned length = qualifiedName.length();
 
     if (!length) {
-        exceptionState.throwDOMException(InvalidCharacterError, "The qualified name provided is empty.");
+        exceptionState.ThrowDOMException(InvalidCharacterError, "The qualified name provided is empty.");
         return false;
     }
 
@@ -2102,7 +2088,7 @@ void Document::addMessage(PassRefPtr<ConsoleMessage> consoleMessage)
     if (!m_frame)
         return;
 
-    if (!consoleMessage->scriptState() && consoleMessage->url().isNull() && !consoleMessage->lineNumber()) {
+    if (consoleMessage->url().isNull() && !consoleMessage->lineNumber()) {
         consoleMessage->setURL(url().string());
         if (parsing() && m_parser) {
             if (!m_parser->isWaitingForScripts() && !m_parser->isExecutingScript())
@@ -2248,33 +2234,6 @@ bool Document::hasFocus() const
         return false;
     Frame* focusedFrame = page->focusController().focusedFrame();
     return focusedFrame && focusedFrame == frame();
-}
-
-v8::Handle<v8::Object> Document::wrap(v8::Handle<v8::Object> creationContext, v8::Isolate* isolate)
-{
-    ASSERT(!DOMDataStore::containsWrapperNonTemplate(this, isolate));
-
-    const WrapperTypeInfo* wrapperType = wrapperTypeInfo();
-
-    if (frame() && frame()->script().initializeMainWorld()) {
-        // initializeMainWorld may have created a wrapper for the object, retry from the start.
-        v8::Handle<v8::Object> wrapper = DOMDataStore::getWrapperNonTemplate(this, isolate);
-        if (!wrapper.IsEmpty())
-            return wrapper;
-    }
-
-    v8::Handle<v8::Object> wrapper = V8DOMWrapper::createWrapper(creationContext, wrapperType, toScriptWrappableBase(), isolate);
-    if (UNLIKELY(wrapper.IsEmpty()))
-        return wrapper;
-
-    wrapperType->installConditionallyEnabledProperties(wrapper, isolate);
-    V8DOMWrapper::associateObjectWithWrapperNonTemplate(this, wrapperType, wrapper, isolate);
-
-    DOMWrapperWorld& world = DOMWrapperWorld::current(isolate);
-    if (world.isMainWorld() && frame())
-        frame()->script().windowProxy(world)->updateDocumentWrapper(wrapper);
-
-    return wrapper;
 }
 
 } // namespace blink

@@ -65,7 +65,6 @@ public:
     KURL contextURL() const { return virtualURL(); }
     KURL contextCompleteURL(const String& url) const { return virtualCompleteURL(url); }
 
-    bool shouldSanitizeScriptError(const String& sourceURL);
     void reportException(PassRefPtr<ErrorEvent>, int scriptId, PassRefPtr<ScriptCallStack>);
 
     void addConsoleMessage(PassRefPtr<ConsoleMessage>);

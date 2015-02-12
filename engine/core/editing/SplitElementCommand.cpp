@@ -27,8 +27,8 @@
 #include "sky/engine/core/editing/SplitElementCommand.h"
 
 #include "gen/sky/core/HTMLNames.h"
-#include "sky/engine/bindings/core/v8/ExceptionState.h"
-#include "sky/engine/bindings/core/v8/ExceptionStatePlaceholder.h"
+#include "sky/engine/bindings2/exception_state.h"
+#include "sky/engine/bindings2/exception_state_placeholder.h"
 #include "sky/engine/core/dom/Element.h"
 #include "sky/engine/wtf/Assertions.h"
 
@@ -59,7 +59,7 @@ void SplitElementCommand::executeApply()
     if (!parent || !parent->hasEditableStyle())
         return;
     parent->insertBefore(m_element1.get(), m_element2.get(), exceptionState);
-    if (exceptionState.hadException())
+    if (exceptionState.had_exception())
         return;
 
     // Delete id attribute from the second element because the same id cannot be used for more than one element

@@ -26,9 +26,7 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-[
-    DoNotCheckConstants,
-] exception DOMException {
+exception DOMException {
 
     readonly attribute unsigned short   code;
     readonly attribute DOMString        name;

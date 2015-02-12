@@ -33,7 +33,7 @@
 #include "sky/engine/core/events/EventTarget.h"
 
 #include "gen/sky/platform/RuntimeEnabledFeatures.h"
-#include "sky/engine/bindings/core/v8/ExceptionState.h"
+#include "sky/engine/bindings2/exception_state.h"
 #include "sky/engine/core/dom/Document.h"
 #include "sky/engine/core/dom/ExceptionCode.h"
 #include "sky/engine/core/dom/ExecutionContext.h"
@@ -41,6 +41,7 @@
 #include "sky/engine/core/events/Event.h"
 #include "sky/engine/core/frame/LocalDOMWindow.h"
 #include "sky/engine/platform/EventDispatchForbiddenScope.h"
+#include "sky/engine/tonic/dart_gc_visitor.h"
 #include "sky/engine/wtf/StdLibExtras.h"
 #include "sky/engine/wtf/Vector.h"
 
@@ -62,6 +63,16 @@ EventTarget::EventTarget()
 
 EventTarget::~EventTarget()
 {
+}
+
+void EventTarget::AcceptDartGCVisitor(DartGCVisitor& visitor) const
+{
+    if (!visitor.have_found_set())
+        visitor.AddToSetForRoot(this, dart_wrapper());
+    EventListenerIterator iterator(this);
+    while (EventListener* listener = iterator.nextListener())
+        listener->AcceptDartGCVisitor(visitor);
+    DartWrappable::AcceptDartGCVisitor(visitor);
 }
 
 Node* EventTarget::toNode()
@@ -124,15 +135,15 @@ bool EventTarget::removeEventListener(const AtomicString& eventType, PassRefPtr<
 bool EventTarget::dispatchEvent(PassRefPtr<Event> event, ExceptionState& exceptionState)
 {
     if (!event) {
-        exceptionState.throwDOMException(InvalidStateError, "The event provided is null.");
+        exceptionState.ThrowDOMException(InvalidStateError, "The event provided is null.");
         return false;
     }
     if (event->type().isEmpty()) {
-        exceptionState.throwDOMException(InvalidStateError, "The event provided is uninitialized.");
+        exceptionState.ThrowDOMException(InvalidStateError, "The event provided is uninitialized.");
         return false;
     }
     if (event->isBeingDispatched()) {
-        exceptionState.throwDOMException(InvalidStateError, "The event is already being dispatched.");
+        exceptionState.ThrowDOMException(InvalidStateError, "The event is already being dispatched.");
         return false;
     }
 

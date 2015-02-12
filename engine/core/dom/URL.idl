@@ -27,9 +27,8 @@
 // http://url.spec.whatwg.org/#url
 
 [
-    Constructor(ScalarValueString url),
-    Constructor(ScalarValueString url, ScalarValueString base),
-    Constructor(ScalarValueString url, URL base),
+    Constructor(DOMString url),
+    Constructor(DOMString url, DOMString base),
     ImplementedAs=DOMURL,
     RaisesException=Constructor,
 ] interface URL {

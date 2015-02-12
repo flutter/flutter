@@ -3,5 +3,5 @@
 // found in the LICENSE file.
 
 interface HTMLAnchorElement : HTMLElement {
-    attribute ScalarValueString href;
+    attribute DOMString href;
 };

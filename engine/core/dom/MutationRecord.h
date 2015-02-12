@@ -31,7 +31,7 @@
 #ifndef SKY_ENGINE_CORE_DOM_MUTATIONRECORD_H_
 #define SKY_ENGINE_CORE_DOM_MUTATIONRECORD_H_
 
-#include "sky/engine/bindings/core/v8/ScriptWrappable.h"
+#include "sky/engine/tonic/dart_wrappable.h"
 #include "sky/engine/platform/heap/Handle.h"
 #include "sky/engine/wtf/PassRefPtr.h"
 #include "sky/engine/wtf/RefCounted.h"
@@ -44,7 +44,7 @@ class QualifiedName;
 template <typename NodeType> class StaticNodeTypeList;
 typedef StaticNodeTypeList<Node> StaticNodeList;
 
-class MutationRecord : public RefCounted<MutationRecord>, public ScriptWrappable {
+class MutationRecord : public RefCounted<MutationRecord>, public DartWrappable {
     DEFINE_WRAPPERTYPEINFO();
 public:
     static PassRefPtr<MutationRecord> createChildList(PassRefPtr<Node> target, PassRefPtr<StaticNodeList> added, PassRefPtr<StaticNodeList> removed, PassRefPtr<Node> previousSibling, PassRefPtr<Node> nextSibling);

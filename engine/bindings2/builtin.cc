@@ -11,6 +11,7 @@
 #include "sky/engine/bindings2/builtin_natives.h"
 #include "sky/engine/bindings2/builtin_sky.h"
 #include "sky/engine/bindings2/mojo_natives.h"
+#include "sky/engine/tonic/dart_builtin.h"
 
 namespace blink {
 namespace {

@@ -25,10 +25,6 @@ component("web") {
   deps = [
     "//sky/engine/core",
     "//sky/engine/platform",
-
-    # FIXME: v8_inspector should not depend on core types and be separate
-    # from both web and core.
-    "//sky/engine/v8_inspector",
   ]
 
   configs += [
@@ -60,7 +56,6 @@ component("web") {
     "WebFrame.cpp",
     "WebHitTestResult.cpp",
     "Sky.cpp",
-    "WebLeakDetector.cpp",
     "WebLocalFrameImpl.cpp",
     "WebLocalFrameImpl.h",
     "WebNode.cpp",
@@ -90,7 +85,6 @@ test("sky_unittests") {
     "//testing/gtest",
     "//third_party/zlib",
     "//url",
-    "//v8",
     ":web",
   ]
 

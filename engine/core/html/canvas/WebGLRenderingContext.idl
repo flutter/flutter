@@ -26,7 +26,6 @@
 // http://www.khronos.org/registry/webgl/specs/latest/1.0/#WebGLRenderingContext
 
 [
-    DoNotCheckConstants,
     TypeChecking=Interface,
 ] interface WebGLRenderingContext { };
 WebGLRenderingContext implements WebGLRenderingContextBase;

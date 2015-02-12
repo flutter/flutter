@@ -22,8 +22,8 @@
 #include "sky/engine/config.h"
 #include "sky/engine/core/dom/Text.h"
 
-#include "sky/engine/bindings/core/v8/ExceptionState.h"
-#include "sky/engine/bindings/core/v8/ExceptionStatePlaceholder.h"
+#include "sky/engine/bindings2/exception_state.h"
+#include "sky/engine/bindings2/exception_state_placeholder.h"
 #include "sky/engine/core/css/resolver/StyleResolver.h"
 #include "sky/engine/core/dom/ExceptionCode.h"
 #include "sky/engine/core/dom/NodeRenderStyle.h"
@@ -53,7 +53,7 @@ PassRefPtr<Text> Text::splitText(unsigned offset, ExceptionState& exceptionState
     // IndexSizeError: Raised if the specified offset is negative or greater than
     // the number of 16-bit units in data.
     if (offset > length()) {
-        exceptionState.throwDOMException(IndexSizeError, "The offset " + String::number(offset) + " is larger than the Text node's length.");
+        exceptionState.ThrowDOMException(IndexSizeError, "The offset " + String::number(offset) + " is larger than the Text node's length.");
         return nullptr;
     }
 
@@ -66,7 +66,7 @@ PassRefPtr<Text> Text::splitText(unsigned offset, ExceptionState& exceptionState
 
     if (parentNode())
         parentNode()->insertBefore(newText.get(), nextSibling(), exceptionState);
-    if (exceptionState.hadException())
+    if (exceptionState.had_exception())
         return nullptr;
 
     if (renderer())

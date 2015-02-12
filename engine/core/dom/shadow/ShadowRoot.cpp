@@ -27,7 +27,7 @@
 #include "sky/engine/config.h"
 #include "sky/engine/core/dom/shadow/ShadowRoot.h"
 
-#include "sky/engine/bindings/core/v8/ExceptionState.h"
+#include "sky/engine/bindings2/exception_state.h"
 #include "sky/engine/core/css/resolver/StyleResolver.h"
 #include "sky/engine/core/dom/Document.h"
 #include "sky/engine/core/dom/ElementTraversal.h"
@@ -82,7 +82,7 @@ void ShadowRoot::dispose()
 
 PassRefPtr<Node> ShadowRoot::cloneNode(bool, ExceptionState& exceptionState)
 {
-    exceptionState.throwDOMException(DataCloneError, "ShadowRoot nodes are not clonable.");
+    exceptionState.ThrowDOMException(DataCloneError, "ShadowRoot nodes are not clonable.");
     return nullptr;
 }
 

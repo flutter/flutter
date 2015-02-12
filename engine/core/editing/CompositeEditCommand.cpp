@@ -26,7 +26,7 @@
 #include "sky/engine/config.h"
 #include "sky/engine/core/editing/CompositeEditCommand.h"
 
-#include "sky/engine/bindings/core/v8/ExceptionStatePlaceholder.h"
+#include "sky/engine/bindings2/exception_state_placeholder.h"
 #include "sky/engine/core/dom/Document.h"
 #include "sky/engine/core/dom/DocumentFragment.h"
 #include "sky/engine/core/dom/DocumentMarkerController.h"

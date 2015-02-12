@@ -26,7 +26,7 @@
 #include "sky/engine/config.h"
 #include "sky/engine/core/editing/InsertIntoTextNodeCommand.h"
 
-#include "sky/engine/bindings/core/v8/ExceptionStatePlaceholder.h"
+#include "sky/engine/bindings2/exception_state_placeholder.h"
 #include "sky/engine/core/dom/Document.h"
 #include "sky/engine/core/dom/Text.h"
 #include "sky/engine/core/frame/Settings.h"

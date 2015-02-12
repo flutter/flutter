@@ -22,7 +22,6 @@
 #include "sky/engine/public/platform/ServiceProvider.h"
 #include "sky/engine/public/web/WebFrameClient.h"
 #include "sky/engine/public/web/WebViewClient.h"
-#include "sky/viewer/services/inspector_impl.h"
 #include "ui/events/gestures/gesture_types.h"
 
 namespace mojo {
@@ -30,15 +29,9 @@ class ViewManager;
 class View;
 }
 
-namespace inspector {
-class InspectorBackendMojo;
-}
-
 namespace sky {
-class InspectorHostImpl;
 class Rasterizer;
 class RasterizerBitmap;
-class ScriptRunner;
 class Layer;
 class LayerHost;
 
@@ -93,9 +86,8 @@ class DocumentView : public blink::ServiceProvider,
       const blink::WebString& source_name,
       unsigned source_line,
       const blink::WebString& stack_trace) override;
-  void didCreateScriptContext(
-      blink::WebLocalFrame*,
-      v8::Handle<v8::Context>) override;
+  void didCreateIsolate(blink::WebLocalFrame* frame,
+                        Dart_Isolate isolate) override;
 
   // WebViewClient methods:
   blink::ServiceProvider* services() override;
@@ -136,15 +128,9 @@ class DocumentView : public blink::ServiceProvider,
   blink::WebView* web_view_;
   mojo::View* root_;
   mojo::ViewManagerClientFactory view_manager_client_factory_;
-  InspectorServiceFactory inspector_service_factory_;
-  mojo::ServiceProviderImpl inspector_service_provider_impl_;
   scoped_ptr<LayerHost> layer_host_;
   scoped_refptr<Layer> root_layer_;
   RasterizerBitmap* bitmap_rasterizer_;  // Used for pixel tests.
-  scoped_ptr<ScriptRunner> script_runner_;
-  scoped_ptr<InspectorHostImpl> inspector_host_;
-  scoped_ptr<inspector::InspectorBackendMojo> inspector_backend_;
-  int debugger_id_;
 
   base::WeakPtrFactory<DocumentView> weak_factory_;
 

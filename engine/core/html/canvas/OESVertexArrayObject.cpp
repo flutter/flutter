@@ -27,7 +27,7 @@
 
 #include "sky/engine/core/html/canvas/OESVertexArrayObject.h"
 
-#include "sky/engine/bindings/core/v8/ExceptionState.h"
+#include "sky/engine/bindings2/exception_state.h"
 #include "sky/engine/core/html/canvas/WebGLRenderingContextBase.h"
 #include "sky/engine/core/html/canvas/WebGLVertexArrayObjectOES.h"
 

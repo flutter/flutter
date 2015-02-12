@@ -6,28 +6,20 @@
 #define SKY_VIEWER_INTERNALS_H_
 
 #include "base/memory/weak_ptr.h"
-#include "gin/handle.h"
-#include "gin/object_template_builder.h"
-#include "gin/wrappable.h"
+#include "base/supports_user_data.h"
+#include "dart/runtime/include/dart_api.h"
 #include "mojo/public/interfaces/application/shell.mojom.h"
 #include "sky/services/testing/test_harness.mojom.h"
 
 namespace sky {
 class DocumentView;
 
-class Internals : public gin::Wrappable<Internals>,
+class Internals : public base::SupportsUserData::Data,
                   public mojo::Shell {
  public:
-  static gin::WrapperInfo kWrapperInfo;
-  static gin::Handle<Internals> Create(v8::Isolate*, DocumentView*);
-
   virtual ~Internals();
 
-  virtual gin::ObjectTemplateBuilder GetObjectTemplateBuilder(
-      v8::Isolate* isolate) override;
-
- private:
-  explicit Internals(DocumentView* document_view);
+  static void Create(Dart_Isolate isolate, DocumentView* document_view);
 
   // mojo::Shell method:
   void ConnectToApplication(
@@ -46,6 +38,9 @@ class Internals : public gin::Wrappable<Internals>,
       const std::string& application_url, const std::string& interface_name);
 
   void pauseAnimations(double pauseTime);
+
+ private:
+  explicit Internals(DocumentView* document_view);
 
   base::WeakPtr<DocumentView> document_view_;
   mojo::Binding<mojo::Shell> shell_binding_;

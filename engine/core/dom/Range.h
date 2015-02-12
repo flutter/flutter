@@ -25,8 +25,8 @@
 #ifndef SKY_ENGINE_CORE_DOM_RANGE_H_
 #define SKY_ENGINE_CORE_DOM_RANGE_H_
 
-#include "sky/engine/bindings/core/v8/ExceptionStatePlaceholder.h"
-#include "sky/engine/bindings/core/v8/ScriptWrappable.h"
+#include "sky/engine/bindings2/exception_state_placeholder.h"
+#include "sky/engine/tonic/dart_wrappable.h"
 #include "sky/engine/core/dom/RangeBoundaryPoint.h"
 #include "sky/engine/platform/geometry/FloatRect.h"
 #include "sky/engine/platform/geometry/IntRect.h"
@@ -47,7 +47,7 @@ class Node;
 class NodeWithIndex;
 class Text;
 
-class Range final : public RefCounted<Range>, public ScriptWrappable {
+class Range final : public RefCounted<Range>, public DartWrappable {
     DEFINE_WRAPPERTYPEINFO();
 public:
     static PassRefPtr<Range> create(Document&);

@@ -26,7 +26,7 @@
 #ifndef SKY_ENGINE_CORE_HTML_CANVAS_WEBGLVERTEXARRAYOBJECTOES_H_
 #define SKY_ENGINE_CORE_HTML_CANVAS_WEBGLVERTEXARRAYOBJECTOES_H_
 
-#include "sky/engine/bindings/core/v8/ScriptWrappable.h"
+#include "sky/engine/tonic/dart_wrappable.h"
 #include "sky/engine/core/html/canvas/WebGLBuffer.h"
 #include "sky/engine/core/html/canvas/WebGLContextObject.h"
 #include "sky/engine/wtf/PassRefPtr.h"
@@ -35,7 +35,7 @@
 
 namespace blink {
 
-class WebGLVertexArrayObjectOES final : public WebGLContextObject, public ScriptWrappable {
+class WebGLVertexArrayObjectOES final : public WebGLContextObject, public DartWrappable {
     DEFINE_WRAPPERTYPEINFO();
 public:
     enum VaoType {

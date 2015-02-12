@@ -24,7 +24,7 @@
 
 #include "gen/sky/core/HTMLNames.h"
 #include "gen/sky/platform/RuntimeEnabledFeatures.h"
-#include "sky/engine/bindings/core/v8/ExceptionState.h"
+#include "sky/engine/bindings2/exception_state.h"
 #include "sky/engine/core/css/CSSStyleSheet.h"
 #include "sky/engine/core/css/StylePropertySet.h"
 #include "sky/engine/core/css/parser/BisonCSSParser.h"
@@ -185,7 +185,7 @@ bool AbstractPropertySetCSSStyleDeclaration::isPropertyImplicit(const String& pr
     return propertySet().isPropertyImplicit(propertyID);
 }
 
-void AbstractPropertySetCSSStyleDeclaration::setProperty(const String& propertyName, const String& value, const String& priority, ExceptionState& exceptionState)
+void AbstractPropertySetCSSStyleDeclaration::setProperty(const String& propertyName, const String& value, ExceptionState& exceptionState)
 {
     CSSPropertyID propertyID = cssPropertyID(propertyName);
     if (!propertyID)

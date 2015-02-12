@@ -26,7 +26,7 @@
 #include "sky/engine/config.h"
 #include "sky/engine/core/editing/VisibleSelection.h"
 
-#include "sky/engine/bindings/core/v8/ExceptionState.h"
+#include "sky/engine/bindings2/exception_state.h"
 #include "sky/engine/core/dom/Document.h"
 #include "sky/engine/core/dom/Element.h"
 #include "sky/engine/core/dom/Range.h"
@@ -283,8 +283,8 @@ static PassRefPtr<Range> makeSearchRange(const Position& pos)
     searchRange->selectNodeContents(boundary, exceptionState);
     searchRange->setStart(start.containerNode(), start.offsetInContainerNode(), exceptionState);
 
-    ASSERT(!exceptionState.hadException());
-    if (exceptionState.hadException())
+    ASSERT(!exceptionState.had_exception());
+    if (exceptionState.had_exception())
         return nullptr;
 
     return searchRange.release();

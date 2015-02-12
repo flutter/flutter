@@ -389,7 +389,7 @@ void AnimationPlayer::finish(ExceptionState& exceptionState)
         return;
     }
     if (m_playbackRate > 0 && sourceEnd() == std::numeric_limits<double>::infinity()) {
-        exceptionState.throwDOMException(InvalidStateError, "AnimationPlayer has source content whose end time is infinity.");
+        exceptionState.ThrowDOMException(InvalidStateError, "AnimationPlayer has source content whose end time is infinity.");
         return;
     }
     if (playing()) {

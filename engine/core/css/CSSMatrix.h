@@ -26,7 +26,7 @@
 #ifndef SKY_ENGINE_CORE_CSS_CSSMATRIX_H_
 #define SKY_ENGINE_CORE_CSS_CSSMATRIX_H_
 
-#include "sky/engine/bindings/core/v8/ScriptWrappable.h"
+#include "sky/engine/tonic/dart_wrappable.h"
 #include "sky/engine/platform/transforms/TransformationMatrix.h"
 #include "sky/engine/wtf/RefCounted.h"
 #include "sky/engine/wtf/text/WTFString.h"
@@ -35,7 +35,7 @@ namespace blink {
 
 class ExceptionState;
 
-class CSSMatrix final : public RefCounted<CSSMatrix>, public ScriptWrappable {
+class CSSMatrix final : public RefCounted<CSSMatrix>, public DartWrappable {
     DEFINE_WRAPPERTYPEINFO();
 public:
     static PassRefPtr<CSSMatrix> create(const TransformationMatrix& m)

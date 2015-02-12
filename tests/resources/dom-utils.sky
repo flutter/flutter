@@ -1,20 +1,17 @@
 <script>
-  function childNodeCount(parent) {
-    var count = 0;
-    for (var node = parent.firstChild; node; node = node.nextSibling)
-      ++count;
-    return count;
-  }
+import "dart:sky";
 
-  function childElementCount(parent) {
-    var count = 0;
-    for (var element = parent.firstElementChild; element; element = element.nextElementSibling)
-      ++count;
-    return count;
-  }
+int childNodeCount(parent) {
+  int count = 0;
+  for (Node node = parent.firstChild; node != null; node = node.nextSibling)
+    ++count;
+  return count;
+}
 
-  module.exports = {
-    childNodeCount: childNodeCount,
-    childElementCount: childElementCount,
-  };
+int childElementCount(parent) {
+  int count = 0;
+  for (Element element = parent.firstElementChild; element != null; element = element.nextElementSibling)
+    ++count;
+  return count;
+}
 </script>

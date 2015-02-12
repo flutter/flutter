@@ -34,27 +34,22 @@
 #include "base/message_loop/message_loop.h"
 #include "base/rand_util.h"
 #include "gen/sky/platform/RuntimeEnabledFeatures.h"
-#include "gin/public/v8_platform.h"
 #include "mojo/common/message_pump_mojo.h"
-#include "sky/engine/bindings/core/v8/V8Binding.h"
-#include "sky/engine/bindings/core/v8/V8GCController.h"
-#include "sky/engine/bindings/core/v8/V8Initializer.h"
-#include "sky/engine/core/Init.h"
 #include "sky/engine/core/animation/AnimationClock.h"
 #include "sky/engine/core/dom/Microtask.h"
 #include "sky/engine/core/frame/Settings.h"
+#include "sky/engine/core/Init.h"
 #include "sky/engine/core/page/Page.h"
+#include "sky/engine/core/script/dart_controller.h"
 #include "sky/engine/platform/LayoutTestSupport.h"
 #include "sky/engine/platform/Logging.h"
-#include "sky/engine/platform/graphics/ImageDecodingStore.h"
 #include "sky/engine/public/platform/Platform.h"
 #include "sky/engine/wtf/Assertions.h"
 #include "sky/engine/wtf/CryptographicallyRandomNumber.h"
 #include "sky/engine/wtf/MainThread.h"
-#include "sky/engine/wtf/WTF.h"
 #include "sky/engine/wtf/text/AtomicString.h"
 #include "sky/engine/wtf/text/TextEncoding.h"
-#include "v8/include/v8.h"
+#include "sky/engine/wtf/WTF.h"
 
 namespace blink {
 
@@ -68,7 +63,7 @@ void willProcessTask()
 void didProcessTask()
 {
     Microtask::performCheckpoint();
-    V8GCController::reportDOMMemoryUsageToV8(mainThreadIsolate());
+    // FIXME: Report memory usage to dart?
 }
 
 class TaskObserver : public base::MessageLoop::TaskObserver {
@@ -118,26 +113,12 @@ void removeMessageLoopObservers()
 // Doing so may cause hard to reproduce crashes.
 static bool s_webKitInitialized = false;
 
-void initialize(Platform* platform)
-{
-    initializeWithoutV8(platform);
-
-    V8Initializer::initializeMainThreadIfNeeded();
-
-    addMessageLoopObservers();
-}
-
-v8::Isolate* mainThreadIsolate()
-{
-    return V8PerIsolateData::mainThreadIsolate();
-}
-
 static void cryptographicallyRandomValues(unsigned char* buffer, size_t length)
 {
     base::RandBytes(buffer, length);
 }
 
-void initializeWithoutV8(Platform* platform)
+void initialize(Platform* platform)
 {
     ASSERT(!s_webKitInitialized);
     s_webKitInitialized = true;
@@ -160,20 +141,18 @@ void initializeWithoutV8(Platform* platform)
     // the initialization thread-safe, but given that so many code paths use
     // this, initializing this lazily probably doesn't buy us much.
     WTF::UTF8Encoding();
+
+    DartController::InitVM();
+
+    addMessageLoopObservers();
 }
 
 void shutdown()
 {
     removeMessageLoopObservers();
 
-    v8::Isolate* isolate = V8PerIsolateData::mainThreadIsolate();
-    V8PerIsolateData::dispose(isolate);
+    // FIXME: Shutdown dart?
 
-    shutdownWithoutV8();
-}
-
-void shutdownWithoutV8()
-{
     CoreInitializer::shutdown();
     WTF::shutdown();
     Platform::shutdown();

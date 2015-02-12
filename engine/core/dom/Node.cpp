@@ -27,10 +27,7 @@
 
 #include "base/trace_event/trace_event_impl.h"
 #include "gen/sky/core/HTMLNames.h"
-#include "sky/engine/bindings/core/v8/DOMDataStore.h"
-#include "sky/engine/bindings/core/v8/ExceptionState.h"
-#include "sky/engine/bindings/core/v8/ScriptCallStackFactory.h"
-#include "sky/engine/bindings/core/v8/V8DOMWrapper.h"
+#include "sky/engine/bindings2/exception_state.h"
 #include "sky/engine/core/css/resolver/StyleResolver.h"
 #include "sky/engine/core/dom/Attr.h"
 #include "sky/engine/core/dom/Attribute.h"
@@ -74,6 +71,7 @@
 #include "sky/engine/platform/JSONValues.h"
 #include "sky/engine/platform/Partitions.h"
 #include "sky/engine/platform/TraceEvent.h"
+#include "sky/engine/tonic/dart_gc_visitor.h"
 #include "sky/engine/wtf/HashSet.h"
 #include "sky/engine/wtf/PassOwnPtr.h"
 #include "sky/engine/wtf/RefCountedLeakCounter.h"
@@ -320,6 +318,21 @@ void Node::clearRareData()
     clearFlag(HasRareDataFlag);
 }
 
+static const Node* rootForGC(const Node* node)
+{
+    if (node->inDocument())
+        return &node->document();
+    while (Node* parent = node->parentOrShadowHostOrTemplateHostNode())
+        node = parent;
+    return node;
+}
+
+void Node::AcceptDartGCVisitor(DartGCVisitor& visitor) const
+{
+    visitor.AddToSetForRoot(rootForGC(this), dart_wrapper());
+    EventTarget::AcceptDartGCVisitor(visitor);
+}
+
 Node* Node::toNode()
 {
     return this;
@@ -335,7 +348,7 @@ PassRefPtr<Node> Node::insertBefore(PassRefPtr<Node> newChild, Node* refChild, E
     if (isContainerNode())
         return toContainerNode(this)->insertBefore(newChild, refChild, exceptionState);
 
-    exceptionState.throwDOMException(HierarchyRequestError, "This node type does not support this method.");
+    exceptionState.ThrowDOMException(HierarchyRequestError, "This node type does not support this method.");
     return nullptr;
 }
 
@@ -344,7 +357,7 @@ PassRefPtr<Node> Node::replaceChild(PassRefPtr<Node> newChild, PassRefPtr<Node> 
     if (isContainerNode())
         return toContainerNode(this)->replaceChild(newChild, oldChild, exceptionState);
 
-    exceptionState.throwDOMException(HierarchyRequestError,  "This node type does not support this method.");
+    exceptionState.ThrowDOMException(HierarchyRequestError,  "This node type does not support this method.");
     return nullptr;
 }
 
@@ -353,7 +366,7 @@ PassRefPtr<Node> Node::removeChild(PassRefPtr<Node> oldChild, ExceptionState& ex
     if (isContainerNode())
         return toContainerNode(this)->removeChild(oldChild, exceptionState);
 
-    exceptionState.throwDOMException(NotFoundError, "This node type does not support this method.");
+    exceptionState.ThrowDOMException(NotFoundError, "This node type does not support this method.");
     return nullptr;
 }
 
@@ -362,7 +375,7 @@ PassRefPtr<Node> Node::appendChild(PassRefPtr<Node> newChild, ExceptionState& ex
     if (isContainerNode())
         return toContainerNode(this)->appendChild(newChild, exceptionState);
 
-    exceptionState.throwDOMException(HierarchyRequestError, "This node type does not support this method.");
+    exceptionState.ThrowDOMException(HierarchyRequestError, "This node type does not support this method.");
     return nullptr;
 }
 
@@ -482,26 +495,6 @@ private:
     RefPtr<JSONValue> m_value;
 };
 
-void addJsStack(JSONArray* stackFrames)
-{
-    RefPtr<ScriptCallStack> stack = createScriptCallStack(10);
-    if (!stack)
-        return;
-    for (size_t i = 0; i < stack->size(); i++)
-        stackFrames->pushString(stack->at(i).functionName());
-}
-
-scoped_refptr<base::debug::ConvertableToTraceFormat> jsonObjectForStyleInvalidation(unsigned nodeCount, const Node* rootNode)
-{
-    RefPtr<JSONObject> value = JSONObject::create();
-    value->setNumber("node_count", nodeCount);
-    value->setString("root_node", rootNode->debugName());
-    RefPtr<JSONArray> stack;
-    addJsStack(stack.get());
-    value->setArray("js_stack", stack.release());
-    return make_scoped_refptr(new JSONTraceValue(value));
-}
-
 } // namespace
 
 unsigned Node::styledSubtreeSize() const
@@ -525,9 +518,8 @@ void Node::traceStyleChange(StyleChangeType changeType)
     if (nodeCount < kMinLoggedSize)
         return;
 
-    TRACE_EVENT_INSTANT1(TRACE_DISABLED_BY_DEFAULT("style.debug"),
-        "Node::setNeedsStyleRecalc", TRACE_EVENT_SCOPE_PROCESS,
-        "data", jsonObjectForStyleInvalidation(nodeCount, this)
+    TRACE_EVENT_INSTANT0(TRACE_DISABLED_BY_DEFAULT("style.debug"),
+        "Node::setNeedsStyleRecalc", TRACE_EVENT_SCOPE_PROCESS
     );
 }
 
@@ -1600,21 +1592,6 @@ unsigned Node::lengthOfContents() const
     }
     ASSERT_NOT_REACHED();
     return 0;
-}
-
-v8::Handle<v8::Object> Node::wrap(v8::Handle<v8::Object> creationContext, v8::Isolate* isolate)
-{
-    ASSERT(!DOMDataStore::containsWrapperNonTemplate(this, isolate));
-
-    const WrapperTypeInfo* wrapperType = wrapperTypeInfo();
-
-    v8::Handle<v8::Object> wrapper = V8DOMWrapper::createWrapper(creationContext, wrapperType, toScriptWrappableBase(), isolate);
-    if (UNLIKELY(wrapper.IsEmpty()))
-        return wrapper;
-
-    wrapperType->installConditionallyEnabledProperties(wrapper, isolate);
-    V8DOMWrapper::associateObjectWithWrapperNonTemplate(this, wrapperType, wrapper, isolate);
-    return wrapper;
 }
 
 } // namespace blink

@@ -30,7 +30,7 @@
 #ifndef SKY_ENGINE_CORE_CSS_DOMWINDOWCSS_H_
 #define SKY_ENGINE_CORE_CSS_DOMWINDOWCSS_H_
 
-#include "sky/engine/bindings/core/v8/ScriptWrappable.h"
+#include "sky/engine/tonic/dart_wrappable.h"
 #include "sky/engine/platform/heap/Handle.h"
 #include "sky/engine/wtf/Forward.h"
 #include "sky/engine/wtf/PassRefPtr.h"
@@ -38,7 +38,7 @@
 
 namespace blink {
 
-class DOMWindowCSS : public RefCounted<DOMWindowCSS>, public ScriptWrappable {
+class DOMWindowCSS : public RefCounted<DOMWindowCSS>, public DartWrappable {
     DEFINE_WRAPPERTYPEINFO();
 public:
     static PassRefPtr<DOMWindowCSS> create();

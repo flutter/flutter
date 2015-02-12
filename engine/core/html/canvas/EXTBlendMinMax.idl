@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 [
-    DoNotCheckConstants,
     NoInterfaceObject,
     TypeChecking=Interface,
 ] interface EXTBlendMinMax {

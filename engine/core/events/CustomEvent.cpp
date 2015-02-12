@@ -26,8 +26,6 @@
 #include "sky/engine/config.h"
 #include "sky/engine/core/events/CustomEvent.h"
 
-#include "sky/engine/bindings/core/v8/SerializedScriptValue.h"
-
 namespace blink {
 
 CustomEvent::CustomEvent()
@@ -41,16 +39,6 @@ CustomEvent::CustomEvent(const AtomicString& type, const CustomEventInit& initia
 
 CustomEvent::~CustomEvent()
 {
-}
-
-void CustomEvent::initCustomEvent(const AtomicString& type, bool canBubble, bool cancelable, PassRefPtr<SerializedScriptValue> serializedDetail)
-{
-    if (dispatched())
-        return;
-
-    initEvent(type, canBubble, cancelable);
-
-    m_serializedDetail = serializedDetail;
 }
 
 const AtomicString& CustomEvent::interfaceName() const

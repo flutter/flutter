@@ -1,9 +1,13 @@
 <foo>
-<import src="../resources/run-after-display.sky" as="runAfterDisplay" />
+<import src="../resources/run-after-display.sky" />
 This is a reftest.
 <script>
-runAfterDisplay(function() {
-    internals.notifyTestComplete("");
-});
+import "dart:sky.internals" as internals;
+
+void main() {
+    runAfterDisplay(() {
+        internals.notifyTestComplete("");
+    });
+}
 </script>
 </foo>

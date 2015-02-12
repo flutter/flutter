@@ -28,7 +28,7 @@
 #ifndef SKY_ENGINE_CORE_HTML_CANVAS_PATH2D_H_
 #define SKY_ENGINE_CORE_HTML_CANVAS_PATH2D_H_
 
-#include "sky/engine/bindings/core/v8/ScriptWrappable.h"
+#include "sky/engine/tonic/dart_wrappable.h"
 #include "sky/engine/core/html/canvas/CanvasPathMethods.h"
 #include "sky/engine/platform/heap/Handle.h"
 #include "sky/engine/platform/transforms/AffineTransform.h"
@@ -37,7 +37,7 @@
 
 namespace blink {
 
-class Path2D final : public RefCounted<Path2D>, public CanvasPathMethods, public ScriptWrappable {
+class Path2D final : public RefCounted<Path2D>, public CanvasPathMethods, public DartWrappable {
     DEFINE_WRAPPERTYPEINFO();
     WTF_MAKE_FAST_ALLOCATED;
     WTF_MAKE_NONCOPYABLE(Path2D);

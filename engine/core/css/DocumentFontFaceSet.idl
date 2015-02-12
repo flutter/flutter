@@ -29,5 +29,5 @@
  */
 
 partial interface Document {
-    [MeasureAs=DocumentFonts] readonly attribute FontFaceSet fonts;
+    readonly attribute FontFaceSet fonts;
 };

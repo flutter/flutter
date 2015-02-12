@@ -30,8 +30,7 @@
 #include "sky/engine/core/html/ImageData.h"
 
 #include "gen/sky/platform/RuntimeEnabledFeatures.h"
-#include "sky/engine/bindings/core/v8/ExceptionState.h"
-#include "sky/engine/bindings/core/v8/custom/V8Uint8ClampedArrayCustom.h"
+#include "sky/engine/bindings2/exception_state.h"
 #include "sky/engine/core/dom/ExceptionCode.h"
 
 namespace blink {
@@ -65,11 +64,11 @@ PassRefPtr<ImageData> ImageData::create(const IntSize& size, PassRefPtr<Uint8Cla
 PassRefPtr<ImageData> ImageData::create(unsigned width, unsigned height, ExceptionState& exceptionState)
 {
     if (!RuntimeEnabledFeatures::imageDataConstructorEnabled()) {
-        exceptionState.throwTypeError("Illegal constructor");
+        exceptionState.ThrowTypeError("Illegal constructor");
         return nullptr;
     }
     if (!width || !height) {
-        exceptionState.throwDOMException(IndexSizeError, String::format("The source %s is zero or not a number.", width ? "height" : "width"));
+        exceptionState.ThrowDOMException(IndexSizeError, String::format("The source %s is zero or not a number.", width ? "height" : "width"));
         return nullptr;
     }
 
@@ -77,7 +76,7 @@ PassRefPtr<ImageData> ImageData::create(unsigned width, unsigned height, Excepti
     dataSize *= width;
     dataSize *= height;
     if (dataSize.hasOverflowed()) {
-        exceptionState.throwDOMException(IndexSizeError, "The requested image size exceeds the supported range.");
+        exceptionState.ThrowDOMException(IndexSizeError, "The requested image size exceeds the supported range.");
         return nullptr;
     }
 
@@ -89,55 +88,40 @@ PassRefPtr<ImageData> ImageData::create(unsigned width, unsigned height, Excepti
 PassRefPtr<ImageData> ImageData::create(Uint8ClampedArray* data, unsigned width, unsigned height, ExceptionState& exceptionState)
 {
     if (!RuntimeEnabledFeatures::imageDataConstructorEnabled()) {
-        exceptionState.throwTypeError("Illegal constructor");
+        exceptionState.ThrowTypeError("Illegal constructor");
         return nullptr;
     }
     if (!data) {
-        exceptionState.throwTypeError("Expected a Uint8ClampedArray as first argument.");
+        exceptionState.ThrowTypeError("Expected a Uint8ClampedArray as first argument.");
         return nullptr;
     }
     if (!width) {
-        exceptionState.throwDOMException(IndexSizeError, "The source width is zero or not a number.");
+        exceptionState.ThrowDOMException(IndexSizeError, "The source width is zero or not a number.");
         return nullptr;
     }
 
     unsigned length = data->length();
     if (!length) {
-        exceptionState.throwDOMException(IndexSizeError, "The input data has a zero byte length.");
+        exceptionState.ThrowDOMException(IndexSizeError, "The input data has a zero byte length.");
         return nullptr;
     }
     if (length % 4) {
-        exceptionState.throwDOMException(IndexSizeError, "The input data byte length is not a multiple of 4.");
+        exceptionState.ThrowDOMException(IndexSizeError, "The input data byte length is not a multiple of 4.");
         return nullptr;
     }
     length /= 4;
     if (length % width) {
-        exceptionState.throwDOMException(IndexSizeError, "The input data byte length is not a multiple of (4 * width).");
+        exceptionState.ThrowDOMException(IndexSizeError, "The input data byte length is not a multiple of (4 * width).");
         return nullptr;
     }
     if (!height) {
         height = length / width;
     } else if (height != length / width) {
-        exceptionState.throwDOMException(IndexSizeError, "The input data byte length is not equal to (4 * width * height).");
+        exceptionState.ThrowDOMException(IndexSizeError, "The input data byte length is not equal to (4 * width * height).");
         return nullptr;
     }
 
     return adoptRef(new ImageData(IntSize(width, height), data));
-}
-
-v8::Handle<v8::Object> ImageData::wrap(v8::Handle<v8::Object> creationContext, v8::Isolate* isolate)
-{
-    v8::Handle<v8::Object> wrapper = ScriptWrappable::wrap(creationContext, isolate);
-    if (!wrapper.IsEmpty()) {
-        // Create a V8 Uint8ClampedArray object.
-        v8::Handle<v8::Value> pixelArray = toV8(data(), creationContext, isolate);
-        // Set the "data" property of the ImageData object to
-        // the created v8 object, eliminating the C++ callback
-        // when accessing the "data" property.
-        if (!pixelArray.IsEmpty())
-            wrapper->ForceSet(v8AtomicString(isolate, "data"), pixelArray, v8::ReadOnly);
-    }
-    return wrapper;
 }
 
 ImageData::ImageData(const IntSize& size)

@@ -33,7 +33,6 @@
 #include "sky/engine/web/FrameLoaderClientImpl.h"
 
 #include "gen/sky/platform/RuntimeEnabledFeatures.h"
-#include "sky/engine/bindings/core/v8/ScriptController.h"
 #include "sky/engine/core/dom/Document.h"
 #include "sky/engine/core/frame/FrameView.h"
 #include "sky/engine/core/frame/Settings.h"
@@ -59,7 +58,6 @@
 #include "sky/engine/wtf/StringExtras.h"
 #include "sky/engine/wtf/text/CString.h"
 #include "sky/engine/wtf/text/WTFString.h"
-#include "v8/include/v8.h"
 
 namespace blink {
 
@@ -76,22 +74,6 @@ void FrameLoaderClientImpl::documentElementAvailable()
 {
     if (m_webFrame->client())
         m_webFrame->client()->didCreateDocumentElement(m_webFrame);
-}
-
-void FrameLoaderClientImpl::didCreateScriptContext(v8::Handle<v8::Context> context)
-{
-    // FIXME: We shouldn't need separate debugger ids in sky since
-    // we should have at most one DocumentView per process, no?
-    m_webFrame->frame()->script().setWorldDebugId(1);
-
-    if (m_webFrame->client())
-        m_webFrame->client()->didCreateScriptContext(m_webFrame, context);
-}
-
-void FrameLoaderClientImpl::willReleaseScriptContext(v8::Handle<v8::Context> context)
-{
-    if (m_webFrame->client())
-        m_webFrame->client()->willReleaseScriptContext(m_webFrame, context);
 }
 
 void FrameLoaderClientImpl::detachedFromParent()
@@ -268,6 +250,11 @@ void FrameLoaderClientImpl::dispatchDidChangeManifest()
 {
     if (m_webFrame->client())
         m_webFrame->client()->didChangeManifest(m_webFrame);
+}
+
+void FrameLoaderClientImpl::didCreateIsolate(Dart_Isolate isolate) {
+  if (m_webFrame->client())
+    m_webFrame->client()->didCreateIsolate(m_webFrame, isolate);
 }
 
 } // namespace blink

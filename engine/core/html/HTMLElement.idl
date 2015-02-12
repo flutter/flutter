@@ -19,7 +19,6 @@
  */
 
 [
-    Custom=Wrap,
 ] interface HTMLElement : Element {
 
 };

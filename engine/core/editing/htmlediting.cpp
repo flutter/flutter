@@ -27,8 +27,8 @@
 #include "sky/engine/core/editing/htmlediting.h"
 
 #include "gen/sky/core/HTMLElementFactory.h"
-#include "sky/engine/bindings/core/v8/ExceptionState.h"
-#include "sky/engine/bindings/core/v8/ExceptionStatePlaceholder.h"
+#include "sky/engine/bindings2/exception_state.h"
+#include "sky/engine/bindings2/exception_state_placeholder.h"
 #include "sky/engine/core/dom/Document.h"
 #include "sky/engine/core/dom/ElementTraversal.h"
 #include "sky/engine/core/dom/NodeTraversal.h"
@@ -504,7 +504,7 @@ PassRefPtr<Range> createRange(Document& document, const VisiblePosition& start, 
 {
     RefPtr<Range> selectedRange = Range::create(document);
     selectedRange->setStart(start.deepEquivalent().containerNode(), start.deepEquivalent().computeOffsetInContainerNode(), exceptionState);
-    if (!exceptionState.hadException())
+    if (!exceptionState.had_exception())
         selectedRange->setEnd(end.deepEquivalent().containerNode(), end.deepEquivalent().computeOffsetInContainerNode(), exceptionState);
     return selectedRange.release();
 }

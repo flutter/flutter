@@ -28,8 +28,8 @@
 #ifndef SKY_ENGINE_CORE_DOM_DOCUMENT_H_
 #define SKY_ENGINE_CORE_DOM_DOCUMENT_H_
 
-#include "sky/engine/bindings/core/v8/ExceptionStatePlaceholder.h"
-#include "sky/engine/bindings/core/v8/ScriptValue.h"
+#include "sky/engine/tonic/dart_value.h"
+#include "sky/engine/bindings2/exception_state_placeholder.h"
 #include "sky/engine/core/animation/AnimationClock.h"
 #include "sky/engine/core/animation/PendingAnimations.h"
 #include "sky/engine/core/dom/ContainerNode.h"
@@ -57,6 +57,7 @@
 #include "sky/engine/wtf/PassRefPtr.h"
 #include "sky/engine/wtf/WeakPtr.h"
 #include "sky/engine/wtf/text/TextEncoding.h"
+#include "sky/engine/wtf/text/TextPosition.h"
 
 namespace blink {
 
@@ -109,7 +110,6 @@ class ScriptRunner;
 class ScriptedAnimationController;
 class SegmentedString;
 class SelectorQueryCache;
-class SerializedScriptValue;
 class Settings;
 class StyleEngine;
 class StyleResolver;
@@ -453,8 +453,7 @@ public:
 
     IntSize initialViewportSize() const;
 
-    ScriptValue registerElement(ScriptState*, const AtomicString& name, ExceptionState&);
-    ScriptValue registerElement(ScriptState*, const AtomicString& name, const Dictionary& options, ExceptionState&);
+    PassRefPtr<DartValue> registerElement(DartState*, const AtomicString& name, ExceptionState&);
     CustomElementRegistrationContext& registrationContext() { return *m_registrationContext; }
     CustomElementMicrotaskRunQueue* customElementMicrotaskRunQueue();
 
@@ -510,8 +509,6 @@ public:
     void notifyResizeForViewportUnits();
 
     void didRecalculateStyleForElement() { ++m_styleRecalcElementCounter; }
-
-    virtual v8::Handle<v8::Object> wrap(v8::Handle<v8::Object> creationContext, v8::Isolate*) override;
 
 protected:
     explicit Document(const DocumentInit&);

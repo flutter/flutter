@@ -25,7 +25,7 @@
 #ifndef SKY_ENGINE_CORE_DOM_DOMTOKENLIST_H_
 #define SKY_ENGINE_CORE_DOM_DOMTOKENLIST_H_
 
-#include "sky/engine/bindings/core/v8/ScriptWrappable.h"
+#include "sky/engine/tonic/dart_wrappable.h"
 #include "sky/engine/platform/heap/Handle.h"
 #include "sky/engine/wtf/PassOwnPtr.h"
 #include "sky/engine/wtf/Vector.h"
@@ -37,7 +37,7 @@ class Element;
 class ExceptionState;
 class SpaceSplitString;
 
-class DOMTokenList final : public ScriptWrappable {
+class DOMTokenList final : public DartWrappable {
     DEFINE_WRAPPERTYPEINFO();
     WTF_MAKE_FAST_ALLOCATED;
     WTF_MAKE_NONCOPYABLE(DOMTokenList);

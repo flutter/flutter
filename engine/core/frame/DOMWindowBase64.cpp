@@ -33,7 +33,7 @@
 #include "sky/engine/config.h"
 #include "sky/engine/core/frame/DOMWindowBase64.h"
 
-#include "sky/engine/bindings/core/v8/ExceptionState.h"
+#include "sky/engine/bindings2/exception_state.h"
 #include "sky/engine/core/dom/ExceptionCode.h"
 #include "sky/engine/core/html/parser/HTMLParserIdioms.h"
 #include "sky/engine/wtf/text/Base64.h"
@@ -46,7 +46,7 @@ String DOMWindowBase64::btoa(const String& stringToEncode, ExceptionState& excep
         return String();
 
     if (!stringToEncode.containsOnlyLatin1()) {
-        exceptionState.throwDOMException(InvalidCharacterError, "The string to be encoded contains characters outside of the Latin1 range.");
+        exceptionState.ThrowDOMException(InvalidCharacterError, "The string to be encoded contains characters outside of the Latin1 range.");
         return String();
     }
 
@@ -59,12 +59,12 @@ String DOMWindowBase64::atob(const String& encodedString, ExceptionState& except
         return String();
 
     if (!encodedString.containsOnlyLatin1()) {
-        exceptionState.throwDOMException(InvalidCharacterError, "The string to be decoded contains characters outside of the Latin1 range.");
+        exceptionState.ThrowDOMException(InvalidCharacterError, "The string to be decoded contains characters outside of the Latin1 range.");
         return String();
     }
     Vector<char> out;
     if (!base64Decode(encodedString, out, isHTMLSpace<UChar>, Base64ValidatePadding)) {
-        exceptionState.throwDOMException(InvalidCharacterError, "The string to be decoded is not correctly encoded.");
+        exceptionState.ThrowDOMException(InvalidCharacterError, "The string to be decoded is not correctly encoded.");
         return String();
     }
 

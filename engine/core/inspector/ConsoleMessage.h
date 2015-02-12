@@ -5,7 +5,6 @@
 #ifndef SKY_ENGINE_CORE_INSPECTOR_CONSOLEMESSAGE_H_
 #define SKY_ENGINE_CORE_INSPECTOR_CONSOLEMESSAGE_H_
 
-#include "sky/engine/bindings/core/v8/ScriptState.h"
 #include "sky/engine/core/frame/ConsoleTypes.h"
 #include "sky/engine/core/inspector/ConsoleAPITypes.h"
 #include "sky/engine/core/inspector/ScriptCallStack.h"
@@ -16,10 +15,6 @@
 #include "sky/engine/wtf/text/WTFString.h"
 
 namespace blink {
-
-class ScriptArguments;
-class ScriptCallStack;
-class ScriptState;
 
 class ConsoleMessage final: public RefCounted<ConsoleMessage> {
 public:
@@ -37,12 +32,6 @@ public:
     void setURL(const String&);
     unsigned lineNumber() const;
     void setLineNumber(unsigned);
-    PassRefPtr<ScriptCallStack> callStack() const;
-    void setCallStack(PassRefPtr<ScriptCallStack>);
-    ScriptState* scriptState() const;
-    void setScriptState(ScriptState*);
-    PassRefPtr<ScriptArguments> scriptArguments() const;
-    void setScriptArguments(PassRefPtr<ScriptArguments>);
     unsigned long requestIdentifier() const;
     void setRequestIdentifier(unsigned long);
     double timestamp() const;
@@ -52,11 +41,6 @@ public:
     MessageLevel level() const;
     const String& message() const;
     unsigned columnNumber() const;
-
-    void frameWindowDiscarded(LocalDOMWindow*);
-    unsigned argumentCount();
-
-    void collectCallStack();
 
 private:
     ConsoleMessage(MessageSource, MessageLevel, const String& message, const String& url = String(), unsigned lineNumber = 0, unsigned columnNumber = 0);
@@ -69,9 +53,6 @@ private:
     String m_url;
     unsigned m_lineNumber;
     unsigned m_columnNumber;
-    RefPtr<ScriptCallStack> m_callStack;
-    OwnPtr<ScriptStateProtectingContext> m_scriptState;
-    RefPtr<ScriptArguments> m_scriptArguments;
     unsigned long m_requestIdentifier;
     double m_timestamp;
 };

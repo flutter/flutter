@@ -93,11 +93,6 @@ void ExecutionContext::suspendActiveDOMObjectIfNeeded(ActiveDOMObject* object)
         object->suspend();
 }
 
-bool ExecutionContext::shouldSanitizeScriptError(const String& sourceURL)
-{
-    return false;
-}
-
 void ExecutionContext::reportException(PassRefPtr<ErrorEvent> event, int scriptId, PassRefPtr<ScriptCallStack> callStack)
 {
     RefPtr<ErrorEvent> errorEvent = event;
@@ -139,9 +134,6 @@ bool ExecutionContext::dispatchErrorEvent(PassRefPtr<ErrorEvent> event)
         return false;
 
     RefPtr<ErrorEvent> errorEvent = event;
-    if (shouldSanitizeScriptError(errorEvent->filename()))
-        errorEvent = ErrorEvent::createSanitizedError(errorEvent->world());
-
     ASSERT(!m_inDispatchErrorEvent);
     m_inDispatchErrorEvent = true;
     target->dispatchEvent(errorEvent);

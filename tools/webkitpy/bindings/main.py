@@ -43,7 +43,7 @@ import bindings.scripts.compute_interfaces_info_individual
 from bindings.scripts.compute_interfaces_info_individual import compute_info_individual, info_individual
 import bindings.scripts.compute_interfaces_info_overall
 from bindings.scripts.compute_interfaces_info_overall import compute_interfaces_info_overall, interfaces_info
-from bindings.scripts.idl_compiler import IdlCompilerDictionaryImpl, IdlCompilerV8
+from bindings.scripts.idl_compiler import IdlCompilerV8
 
 
 PASS_MESSAGE = 'All tests PASS!'
@@ -192,9 +192,6 @@ def bindings_tests(output_directory, verbose):
         idl_compiler = IdlCompilerV8(output_directory,
                                      interfaces_info=interfaces_info,
                                      only_if_changed=True)
-        dictionary_impl_compiler = IdlCompilerDictionaryImpl(
-            output_directory, interfaces_info=interfaces_info,
-            only_if_changed=True)
 
         idl_basenames = [filename
                          for filename in os.listdir(test_input_directory)
@@ -207,9 +204,6 @@ def bindings_tests(output_directory, verbose):
                 os.path.join(test_input_directory, idl_basename))
             idl_compiler.compile_file(idl_path)
             definition_name, _ = os.path.splitext(idl_basename)
-            if (definition_name in interfaces_info and
-                interfaces_info[definition_name]['is_dictionary']):
-                dictionary_impl_compiler.compile_file(idl_path)
             if verbose:
                 print 'Compiled: %s' % filename
     finally:

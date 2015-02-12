@@ -20,7 +20,7 @@
 #ifndef SKY_ENGINE_CORE_CSS_MEDIAQUERYLIST_H_
 #define SKY_ENGINE_CORE_CSS_MEDIAQUERYLIST_H_
 
-#include "sky/engine/bindings/core/v8/ScriptWrappable.h"
+#include "sky/engine/tonic/dart_wrappable.h"
 #include "sky/engine/core/dom/ActiveDOMObject.h"
 #include "sky/engine/core/events/EventTarget.h"
 #include "sky/engine/platform/heap/Handle.h"

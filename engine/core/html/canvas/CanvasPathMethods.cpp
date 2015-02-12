@@ -35,7 +35,7 @@
 #include "sky/engine/config.h"
 #include "sky/engine/core/html/canvas/CanvasPathMethods.h"
 
-#include "sky/engine/bindings/core/v8/ExceptionState.h"
+#include "sky/engine/bindings2/exception_state.h"
 #include "sky/engine/core/dom/ExceptionCode.h"
 #include "sky/engine/platform/geometry/FloatRect.h"
 #include "sky/engine/platform/transforms/AffineTransform.h"
@@ -113,7 +113,7 @@ void CanvasPathMethods::arcTo(float x1, float y1, float x2, float y2, float r, E
         return;
 
     if (r < 0) {
-        exceptionState.throwDOMException(IndexSizeError, "The radius provided (" + String::number(r) + ") is negative.");
+        exceptionState.ThrowDOMException(IndexSizeError, "The radius provided (" + String::number(r) + ") is negative.");
         return;
     }
 
@@ -257,7 +257,7 @@ void CanvasPathMethods::arc(float x, float y, float radius, float startAngle, fl
         return;
 
     if (radius < 0) {
-        exceptionState.throwDOMException(IndexSizeError, "The radius provided (" + String::number(radius) + ") is negative.");
+        exceptionState.ThrowDOMException(IndexSizeError, "The radius provided (" + String::number(radius) + ") is negative.");
         return;
     }
 
@@ -281,11 +281,11 @@ void CanvasPathMethods::ellipse(float x, float y, float radiusX, float radiusY, 
         return;
 
     if (radiusX < 0) {
-        exceptionState.throwDOMException(IndexSizeError, "The major-axis radius provided (" + String::number(radiusX) + ") is negative.");
+        exceptionState.ThrowDOMException(IndexSizeError, "The major-axis radius provided (" + String::number(radiusX) + ") is negative.");
         return;
     }
     if (radiusY < 0) {
-        exceptionState.throwDOMException(IndexSizeError, "The minor-axis radius provided (" + String::number(radiusY) + ") is negative.");
+        exceptionState.ThrowDOMException(IndexSizeError, "The minor-axis radius provided (" + String::number(radiusY) + ") is negative.");
         return;
     }
 

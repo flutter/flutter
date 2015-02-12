@@ -24,14 +24,14 @@
 #ifndef SKY_ENGINE_CORE_DOM_NODELIST_H_
 #define SKY_ENGINE_CORE_DOM_NODELIST_H_
 
-#include "sky/engine/bindings/core/v8/ScriptWrappable.h"
+#include "sky/engine/tonic/dart_wrappable.h"
 #include "sky/engine/wtf/RefCounted.h"
 
 namespace blink {
 
 class Node;
 
-class NodeList : public RefCounted<NodeList>, public ScriptWrappable {
+class NodeList : public RefCounted<NodeList>, public DartWrappable {
     DEFINE_WRAPPERTYPEINFO();
 public:
     virtual ~NodeList() { }

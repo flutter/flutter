@@ -135,7 +135,6 @@ public:
     virtual void setTouchEditingEnabled(bool) = 0;
     virtual void setUnifiedTextCheckerEnabled(bool) = 0;
     virtual void setUseWideViewport(bool) = 0;
-    virtual void setV8CacheOptions(V8CacheOptions) = 0;
     virtual void setWebGLErrorsToConsoleEnabled(bool) = 0;
 
 protected:

@@ -27,8 +27,8 @@
 #include "sky/engine/core/html/canvas/WebGLRenderingContextBase.h"
 
 #include "gen/sky/platform/RuntimeEnabledFeatures.h"
-#include "sky/engine/bindings/core/v8/ExceptionMessages.h"
-#include "sky/engine/bindings/core/v8/ExceptionState.h"
+#include "sky/engine/bindings2/exception_messages.h"
+#include "sky/engine/bindings2/exception_state.h"
 #include "sky/engine/core/dom/ExceptionCode.h"
 #include "sky/engine/core/fetch/ImageResource.h"
 #include "sky/engine/core/frame/LocalFrame.h"

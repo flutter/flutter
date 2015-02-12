@@ -26,18 +26,9 @@
 
     DOMString?          getPropertyValue([Default=Undefined] optional DOMString propertyName);
     [RaisesException] DOMString?          removeProperty([Default=Undefined] optional DOMString propertyName);
-    [RaisesException] void setProperty([Default=Undefined] optional DOMString propertyName,
-                                       [Default=Undefined] optional DOMString? value,
-                                       optional DOMString? priority = null);
+    [RaisesException] void setProperty(DOMString propertyName, DOMString? value);
 
     readonly attribute unsigned long    length;
     getter DOMString          item([Default=Undefined] optional unsigned long index);
-    [Custom=(PropertyGetter,PropertyEnumerator,PropertyQuery)] getter (DOMString or float) (DOMString name);
     [Custom] setter void (DOMString propertyName, DOMString? propertyValue);
-
-    // Deprecated as of 2003: http://lists.w3.org/Archives/Public/www-style/2003Oct/0347.html
-    // FIXME: This should be DeprecateAs=, but currently too many tests use
-    // this function and would need CONSOLE: message rebaselines!
-    [MeasureAs=CSSStyleDeclarationGetPropertyCSSValue] CSSValue           getPropertyCSSValue([Default=Undefined] optional DOMString propertyName);
 };
-

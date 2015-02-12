@@ -30,10 +30,10 @@
     readonly attribute long naturalHeight;
     readonly attribute long naturalWidth;
     [Reflect, URL] attribute DOMString src;
-    [RuntimeEnabled=PictureSizes] readonly attribute DOMString currentSrc;
+    readonly attribute DOMString currentSrc;
     attribute long width;
 
     // Extensions
-    [MeasureAs=HTMLImageElementX] readonly attribute long x;
-    [MeasureAs=HTMLImageElementY] readonly attribute long y;
+    readonly attribute long x;
+    readonly attribute long y;
 };

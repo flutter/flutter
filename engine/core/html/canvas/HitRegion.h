@@ -5,7 +5,6 @@
 #ifndef SKY_ENGINE_CORE_HTML_CANVAS_HITREGION_H_
 #define SKY_ENGINE_CORE_HTML_CANVAS_HITREGION_H_
 
-#include "sky/engine/bindings/core/v8/Dictionary.h"
 #include "sky/engine/core/dom/Element.h"
 #include "sky/engine/platform/graphics/Path.h"
 #include "sky/engine/platform/heap/Handle.h"

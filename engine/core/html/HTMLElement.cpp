@@ -25,15 +25,8 @@
 #include "sky/engine/config.h"
 #include "sky/engine/core/html/HTMLElement.h"
 
-#include "core/V8HTMLElementWrapperFactory.h" // FIXME: should be bindings/core/v8
-
 namespace blink {
 
 DEFINE_ELEMENT_FACTORY_WITH_TAGNAME(HTMLElement);
-
-v8::Handle<v8::Object> HTMLElement::wrap(v8::Handle<v8::Object> creationContext, v8::Isolate* isolate)
-{
-    return createV8HTMLWrapper(this, creationContext, isolate);
-}
 
 } // namespace blink

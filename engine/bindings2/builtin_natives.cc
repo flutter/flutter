@@ -17,6 +17,7 @@
 #include "sky/engine/core/dom/Microtask.h"
 #include "sky/engine/core/script/dom_dart_state.h"
 #include "sky/engine/tonic/dart_api_scope.h"
+#include "sky/engine/tonic/dart_builtin.h"
 #include "sky/engine/tonic/dart_error.h"
 #include "sky/engine/tonic/dart_isolate_scope.h"
 #include "sky/engine/tonic/dart_state.h"
@@ -88,7 +89,7 @@ static void InitDartInternal(Dart_Handle builtin_library) {
   Dart_Handle print = GetClosure(builtin_library, "_getPrintClosure");
   Dart_Handle timer = GetClosure(builtin_library, "_getCreateTimerClosure");
 
-  Dart_Handle internal_library = DartBuiltin::LookupLibrary("dart:_internal")
+  Dart_Handle internal_library = DartBuiltin::LookupLibrary("dart:_internal");
 
   DART_CHECK_VALID(Dart_SetField(
       internal_library, ToDart("_printClosure"), print));
@@ -103,7 +104,7 @@ static void InitDartInternal(Dart_Handle builtin_library) {
 static void InitAsync(Dart_Handle builtin_library) {
   Dart_Handle schedule_microtask =
       GetClosure(builtin_library, "_getScheduleMicrotaskClosure");
-  Dart_Handle internal_library = DartBuiltin::LookupLibrary("dart:async")
+  Dart_Handle async_library = DartBuiltin::LookupLibrary("dart:async");
   Dart_Handle set_schedule_microtask = ToDart("_setScheduleImmediateClosure");
   DART_CHECK_VALID(Dart_Invoke(async_library, set_schedule_microtask, 1,
                                &schedule_microtask));

@@ -30,7 +30,7 @@
     boolean hasAttributes();
     sequence<Attr> getAttributes();
 
-    [PerWorldBindings] readonly attribute CSSStyleDeclaration style;
+    readonly attribute CSSStyleDeclaration style;
 
     [Reflect] attribute DOMString id;
     readonly attribute DOMString? localName;
@@ -50,10 +50,10 @@
     void focus();
     void blur();
 
-    [PerWorldBindings] readonly attribute DOMTokenList classList;
+    readonly attribute DOMTokenList classList;
 
     [RaisesException] ShadowRoot ensureShadowRoot();
-    [PerWorldBindings] readonly attribute ShadowRoot shadowRoot;
+    readonly attribute ShadowRoot shadowRoot;
     NodeList getDestinationInsertionPoints();
 
     // CSSOM View Module API

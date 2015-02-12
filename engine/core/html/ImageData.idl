@@ -30,8 +30,6 @@
 
 [
     Constructor(unsigned long width, unsigned long height),
-    Constructor(Uint8ClampedArray data, unsigned long width, [Default=Undefined] optional unsigned long height),
-    Custom=Wrap,
     RaisesException=Constructor,
 ] interface ImageData {
     readonly attribute long width;

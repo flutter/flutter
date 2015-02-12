@@ -27,7 +27,7 @@
 #ifndef SKY_ENGINE_CORE_HTML_CANVAS_WEBGLSHADERPRECISIONFORMAT_H_
 #define SKY_ENGINE_CORE_HTML_CANVAS_WEBGLSHADERPRECISIONFORMAT_H_
 
-#include "sky/engine/bindings/core/v8/ScriptWrappable.h"
+#include "sky/engine/tonic/dart_wrappable.h"
 #include "sky/engine/platform/graphics/GraphicsTypes3D.h"
 #include "sky/engine/platform/heap/Handle.h"
 #include "sky/engine/wtf/PassRefPtr.h"
@@ -35,7 +35,7 @@
 
 namespace blink {
 
-class WebGLShaderPrecisionFormat final : public RefCounted<WebGLShaderPrecisionFormat>, public ScriptWrappable {
+class WebGLShaderPrecisionFormat final : public RefCounted<WebGLShaderPrecisionFormat>, public DartWrappable {
     DEFINE_WRAPPERTYPEINFO();
 public:
     static PassRefPtr<WebGLShaderPrecisionFormat> create(GLint rangeMin, GLint rangeMax, GLint precision);

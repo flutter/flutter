@@ -29,8 +29,7 @@ interface HTMLCanvasElement : HTMLElement {
     attribute long width;
     attribute long height;
 
-    [Custom, RaisesException] DOMString toDataURL([TreatUndefinedAs=NullString, Default=Undefined] optional DOMString? type);
+    [RaisesException] DOMString toDataURL([TreatUndefinedAs=NullString, Default=Undefined] optional DOMString? type);
 
-    // The custom binding is needed to handle context creation attributes.
-    [Custom] any getContext([Default=Undefined] optional DOMString contextId);
+    CanvasRenderingContext2D getContext(DOMString contextId);
 };

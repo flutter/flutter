@@ -1,7 +1,5 @@
 <import src="../../resources/dump-as-text.sky" />
 <import src="pass.sky" as="banana" />
 <script>
-module.exports = {
-  message: banana,
-};
+final String message = banana.kHello;
 </script>

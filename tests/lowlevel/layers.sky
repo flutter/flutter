@@ -1,6 +1,6 @@
 <sky>
 
-<import src="../resources/run-after-display.sky" as="runAfterDisplay" />
+<import src="../resources/run-after-display.sky" />
 <style>
   sky {
     padding: 10px;
@@ -68,9 +68,13 @@ Transforms
 </div>
 
 <script>
-runAfterDisplay(function() {
-  internals.notifyTestComplete("");
-});
+import "dart:sky.internals" as internals;
+
+void main() {
+  runAfterDisplay(() {
+    internals.notifyTestComplete("");
+  });
+}
 </script>
 
 </sky>

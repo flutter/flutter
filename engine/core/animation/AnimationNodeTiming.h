@@ -5,15 +5,15 @@
 #ifndef SKY_ENGINE_CORE_ANIMATION_ANIMATIONNODETIMING_H_
 #define SKY_ENGINE_CORE_ANIMATION_ANIMATIONNODETIMING_H_
 
-#include "sky/engine/bindings/core/v8/Nullable.h"
-#include "sky/engine/bindings/core/v8/ScriptWrappable.h"
+#include "sky/engine/tonic/dart_wrappable.h"
+#include "sky/engine/bindings2/nullable.h"
 #include "sky/engine/core/animation/AnimationNode.h"
 #include "sky/engine/wtf/RefCounted.h"
 #include "sky/engine/wtf/text/WTFString.h"
 
 namespace blink {
 
-class AnimationNodeTiming : public RefCounted<AnimationNodeTiming>, public ScriptWrappable {
+class AnimationNodeTiming : public RefCounted<AnimationNodeTiming>, public DartWrappable {
     DEFINE_WRAPPERTYPEINFO();
 public:
     static PassRefPtr<AnimationNodeTiming> create(AnimationNode* parent);

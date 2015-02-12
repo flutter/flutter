@@ -27,7 +27,7 @@
 #ifndef SKY_ENGINE_CORE_HTML_CANVAS_WEBGLCONTEXTATTRIBUTES_H_
 #define SKY_ENGINE_CORE_HTML_CANVAS_WEBGLCONTEXTATTRIBUTES_H_
 
-#include "sky/engine/bindings/core/v8/ScriptWrappable.h"
+#include "sky/engine/tonic/dart_wrappable.h"
 #include "sky/engine/core/html/canvas/CanvasContextAttributes.h"
 #include "sky/engine/public/platform/WebGraphicsContext3D.h"
 #include "sky/engine/wtf/PassRefPtr.h"
@@ -36,7 +36,7 @@ namespace blink {
 
 class Settings;
 
-class WebGLContextAttributes final : public CanvasContextAttributes, public ScriptWrappable {
+class WebGLContextAttributes final : public CanvasContextAttributes, public DartWrappable {
     DECLARE_EMPTY_VIRTUAL_DESTRUCTOR_WILL_BE_REMOVED(WebGLContextAttributes);
     DEFINE_WRAPPERTYPEINFO();
 public:

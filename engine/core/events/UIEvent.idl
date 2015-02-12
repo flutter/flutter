@@ -30,10 +30,10 @@
                                     [Default=Undefined] optional long detail);
 
     // Non-standard
-    [MeasureAs=UIEventLayerX] readonly attribute long layerX;
-    [MeasureAs=UIEventLayerY] readonly attribute long layerY;
-    [MeasureAs=UIEventPageX] readonly attribute long pageX;
-    [MeasureAs=UIEventPageY] readonly attribute long pageY;
+    readonly attribute long layerX;
+    readonly attribute long layerY;
+    readonly attribute long pageX;
+    readonly attribute long pageY;
 
     // FIXME: these belong on the KeyboardEvent interface
     readonly attribute long keyCode;

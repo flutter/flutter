@@ -10,7 +10,6 @@
 namespace blink {
 
 class Application : public AbstractModule {
-  DEFINE_WRAPPERTYPEINFO();
 public:
   static PassRefPtr<Application> create(ExecutionContext* context,
                                         PassRefPtr<Document> document,
@@ -22,6 +21,8 @@ public:
 
   void setTitle(const String& title) { title_ = title; }
   const String& title() { return title_; }
+
+  bool isApplication() const override { return true; }
 
 private:
   Application(ExecutionContext* context,

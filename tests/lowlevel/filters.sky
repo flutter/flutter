@@ -1,11 +1,15 @@
 <foo>
-<import src="../resources/run-after-display.sky" as="runAfterDisplay" />
+<import src="../resources/run-after-display.sky" />
 
 <div style="filter: grayscale(1) blur(2px); color: green;">This should be gray and blurred</div>
 
 <script>
-runAfterDisplay(function() {
+import "dart:sky.internals" as internals;
+
+void main() {
+  runAfterDisplay(() {
     internals.notifyTestComplete("");
-});
+  });
+}
 </script>
 </foo>

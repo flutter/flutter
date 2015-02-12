@@ -33,7 +33,6 @@
 #include "sky/engine/wtf/PassRefPtr.h"
 #include "sky/engine/wtf/RefPtr.h"
 #include "sky/engine/wtf/Vector.h"
-#include "v8/include/v8.h"
 
 namespace blink {
 
@@ -72,14 +71,12 @@ PassRefPtr<StaticNodeTypeList<NodeType> > StaticNodeTypeList<NodeType>::adopt(Ve
 {
     RefPtr<StaticNodeTypeList<NodeType> > nodeList = adoptRef(new StaticNodeTypeList<NodeType>);
     nodeList->m_nodes.swap(nodes);
-    v8::Isolate::GetCurrent()->AdjustAmountOfExternalAllocatedMemory(nodeList->AllocationSize());
     return nodeList.release();
 }
 
 template <typename NodeType>
 StaticNodeTypeList<NodeType>::~StaticNodeTypeList()
 {
-    v8::Isolate::GetCurrent()->AdjustAmountOfExternalAllocatedMemory(-AllocationSize());
 }
 
 template <typename NodeType>

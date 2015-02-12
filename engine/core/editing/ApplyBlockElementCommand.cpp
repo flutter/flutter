@@ -28,7 +28,7 @@
 #include "sky/engine/core/editing/ApplyBlockElementCommand.h"
 
 #include "gen/sky/core/HTMLNames.h"
-#include "sky/engine/bindings/core/v8/ExceptionState.h"
+#include "sky/engine/bindings2/exception_state.h"
 #include "sky/engine/core/dom/NodeRenderStyle.h"
 #include "sky/engine/core/dom/Text.h"
 #include "sky/engine/core/editing/VisiblePosition.h"
@@ -116,7 +116,7 @@ static bool isNewLineAtPosition(const Position& position)
 
     TrackExceptionState exceptionState;
     String textAtPosition = toText(textNode)->substringData(offset, 1, exceptionState);
-    if (exceptionState.hadException())
+    if (exceptionState.had_exception())
         return false;
 
     return textAtPosition[0] == '\n';

@@ -131,25 +131,6 @@ public:
     // Calls window.gc() if it is defined.
     virtual void collectGarbage() = 0;
 
-    // Executes script in the context of the current page and returns the value
-    // that the script evaluated to.
-    virtual v8::Handle<v8::Value> executeScriptAndReturnValue(
-        const WebScriptSource&) = 0;
-
-    // Call the function with the given receiver and arguments, bypassing
-    // canExecute().
-    virtual v8::Handle<v8::Value> callFunctionEvenIfScriptDisabled(
-        v8::Handle<v8::Function>,
-        v8::Handle<v8::Value>,
-        int argc,
-        v8::Handle<v8::Value> argv[]) = 0;
-
-    // Returns the V8 context for associated with the main world and this
-    // frame. There can be many V8 contexts associated with this frame, one for
-    // each isolated world and one for the main world. If you don't know what
-    // the "main world" or an "isolated world" is, then you probably shouldn't
-    // be calling this API.
-    virtual v8::Local<v8::Context> mainWorldScriptContext() const = 0;
 
     // Navigation ----------------------------------------------------------
 

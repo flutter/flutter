@@ -1,5 +1,6 @@
-Running 1 tests
-ok 1 Document should have a constructor
-1 tests
-1 pass
-0 fail
+CONSOLE: unittest-suite-wait-for-done
+CONSOLE: PASS: should have a constructor
+CONSOLE: 
+CONSOLE: All 1 tests passed.
+CONSOLE: unittest-suite-success
+DONE

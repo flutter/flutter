@@ -55,12 +55,16 @@ enum CanvasFillRule { "nonzero", "evenodd" };
     void resetTransform();
 
     // image smoothing
-    [MeasureAs=UnprefixedImageSmoothingEnabled] attribute boolean imageSmoothingEnabled;
+    attribute boolean imageSmoothingEnabled;
 
     // colors and styles (see also the CanvasDrawingStyles interface)
     // FIXME: Use union types when supported: http://crbug.com/372891
-    [Custom] attribute object strokeStyle; // (default black)
-    [Custom] attribute object fillStyle; // (default black)
+    // [Custom] attribute object strokeStyle; // (default black)
+    // [Custom] attribute object fillStyle; // (default black)
+
+    attribute DOMString strokeColor; // (default black)
+    attribute DOMString fillColor; // (default black)
+
     CanvasGradient createLinearGradient(float x0, float y0, float x1, float y1);
     [RaisesException] CanvasGradient createRadialGradient(float x0, float y0, float r0, float x1, float y1, float r1);
     [RaisesException] CanvasPattern createPattern(HTMLCanvasElement canvas, DOMString? repetitionType);
@@ -106,16 +110,9 @@ enum CanvasFillRule { "nonzero", "evenodd" };
     [RaisesException] void drawImage(HTMLCanvasElement canvas, unrestricted float x, unrestricted float y);
     [RaisesException] void drawImage(HTMLCanvasElement canvas, unrestricted float x, unrestricted float y, unrestricted float width, unrestricted float height);
     [RaisesException] void drawImage(HTMLCanvasElement canvas, unrestricted float sx, unrestricted float sy, unrestricted float sw, unrestricted float sh, unrestricted float dx, unrestricted float dy, unrestricted float dw, unrestricted float dh);
-    [RuntimeEnabled=ExperimentalCanvasFeatures, RaisesException] void drawImage(ImageBitmap imageBitmap, unrestricted float x, unrestricted float y);
-    [RuntimeEnabled=ExperimentalCanvasFeatures, RaisesException] void drawImage(ImageBitmap imageBitmap, unrestricted float x, unrestricted float y, unrestricted float width, unrestricted float height);
-    [RuntimeEnabled=ExperimentalCanvasFeatures, RaisesException] void drawImage(ImageBitmap imageBitmap, unrestricted float sx, unrestricted float sy, unrestricted float sw, unrestricted float sh, unrestricted float dx, unrestricted float dy, unrestricted float dw, unrestricted float dh);
-
-    // hit regions
-    // FIXME: Blink does not currently support WebIDL dictionary definitions.
-    // See http://crbug.com/321462
-    [RuntimeEnabled=ExperimentalCanvasFeatures, RaisesException] void addHitRegion(optional Dictionary options);
-    [RuntimeEnabled=ExperimentalCanvasFeatures] void removeHitRegion(DOMString id);
-    [RuntimeEnabled=ExperimentalCanvasFeatures] void clearHitRegions();
+    [RaisesException] void drawImage(ImageBitmap imageBitmap, unrestricted float x, unrestricted float y);
+    [RaisesException] void drawImage(ImageBitmap imageBitmap, unrestricted float x, unrestricted float y, unrestricted float width, unrestricted float height);
+    [RaisesException] void drawImage(ImageBitmap imageBitmap, unrestricted float sx, unrestricted float sy, unrestricted float sw, unrestricted float sh, unrestricted float dx, unrestricted float dy, unrestricted float dw, unrestricted float dh);
 
     // pixel manipulation
     ImageData createImageData(ImageData imagedata);
@@ -126,7 +123,7 @@ enum CanvasFillRule { "nonzero", "evenodd" };
 
     // Context state
     // Should be merged with WebGL counterpart in CanvasRenderingContext, once no-longer experimental
-    [RuntimeEnabled=ExperimentalCanvasFeatures] boolean isContextLost();
+    boolean isContextLost();
 
     Canvas2DContextAttributes getContextAttributes();
 
@@ -146,30 +143,30 @@ enum CanvasFillRule { "nonzero", "evenodd" };
     attribute DOMString font; // (default 10px sans-serif)
     attribute DOMString textAlign; // "start", "end", "left", "right", "center" (default: "start")
     attribute DOMString textBaseline; // "top", "hanging", "middle", "alphabetic", "ideographic", "bottom" (default: "alphabetic")
-    [RuntimeEnabled=ExperimentalCanvasFeatures] attribute DOMString direction; // "inherit", "rtl", "ltr" (default: "inherit")
+    attribute DOMString direction; // "inherit", "rtl", "ltr" (default: "inherit")
 
     // Non-standard APIs. Candidates for deprecation
     // https://developer.mozilla.org/en/docs/Web/API/CanvasRenderingContext2D
-    [MeasureAs=CanvasRenderingContext2DSetLineWidth] void setLineWidth(unrestricted float width);
-    [MeasureAs=CanvasRenderingContext2DSetLineCap] void setLineCap(DOMString cap);
-    [MeasureAs=CanvasRenderingContext2DSetLineJoin] void setLineJoin(DOMString join);
-    [MeasureAs=CanvasRenderingContext2DSetMiterLimit] void setMiterLimit(unrestricted float limit);
-    [MeasureAs=CanvasRenderingContext2DClearShadow] void clearShadow();
-    [MeasureAs=CanvasRenderingContext2DSetStrokeColor] void setStrokeColor(DOMString color, optional unrestricted float alpha);
-    [MeasureAs=CanvasRenderingContext2DSetStrokeColor] void setStrokeColor(unrestricted float grayLevel, optional unrestricted float alpha);
-    [MeasureAs=CanvasRenderingContext2DSetStrokeColor] void setStrokeColor(unrestricted float r, unrestricted float g, unrestricted float b, unrestricted float a);
-    [MeasureAs=CanvasRenderingContext2DSetStrokeColor] void setStrokeColor(unrestricted float c, unrestricted float m, unrestricted float y, unrestricted float k, unrestricted float a);
-    [MeasureAs=CanvasRenderingContext2DSetFillColor] void setFillColor(DOMString color, optional unrestricted float alpha);
-    [MeasureAs=CanvasRenderingContext2DSetFillColor] void setFillColor(unrestricted float grayLevel, optional unrestricted float alpha);
-    [MeasureAs=CanvasRenderingContext2DSetFillColor] void setFillColor(unrestricted float r, unrestricted float g, unrestricted float b, unrestricted float a);
-    [MeasureAs=CanvasRenderingContext2DSetFillColor] void setFillColor(unrestricted float c, unrestricted float m, unrestricted float y, unrestricted float k, unrestricted float a);
-    [MeasureAs=CanvasRenderingContext2DDrawImageFromRect] void drawImageFromRect(
+    void setLineWidth(unrestricted float width);
+    void setLineCap(DOMString cap);
+    void setLineJoin(DOMString join);
+    void setMiterLimit(unrestricted float limit);
+    void clearShadow();
+    void setStrokeColor(DOMString color, optional unrestricted float alpha);
+    void setStrokeColor(unrestricted float grayLevel, optional unrestricted float alpha);
+    void setStrokeColor(unrestricted float r, unrestricted float g, unrestricted float b, unrestricted float a);
+    void setStrokeColor(unrestricted float c, unrestricted float m, unrestricted float y, unrestricted float k, unrestricted float a);
+    void setFillColor(DOMString color, optional unrestricted float alpha);
+    void setFillColor(unrestricted float grayLevel, optional unrestricted float alpha);
+    void setFillColor(unrestricted float r, unrestricted float g, unrestricted float b, unrestricted float a);
+    void setFillColor(unrestricted float c, unrestricted float m, unrestricted float y, unrestricted float k, unrestricted float a);
+    void drawImageFromRect(
         HTMLImageElement? image, optional unrestricted float sx, optional unrestricted float sy, optional unrestricted float sw, optional unrestricted float sh,
         optional unrestricted float dx, optional unrestricted float dy, optional unrestricted float dw, optional unrestricted float dh, optional DOMString compositeOperation);
-    [MeasureAs=CanvasRenderingContext2DSetShadow] void setShadow(unrestricted float width, unrestricted float height, unrestricted float blur, optional DOMString color, optional unrestricted float alpha);
-    [MeasureAs=CanvasRenderingContext2DSetShadow] void setShadow(unrestricted float width, unrestricted float height, unrestricted float blur, unrestricted float grayLevel, optional unrestricted float alpha);
-    [MeasureAs=CanvasRenderingContext2DSetShadow] void setShadow(unrestricted float width, unrestricted float height, unrestricted float blur, unrestricted float r, unrestricted float g, unrestricted float b, unrestricted float a);
-    [MeasureAs=CanvasRenderingContext2DSetShadow] void setShadow(unrestricted float width, unrestricted float height, unrestricted float blur, unrestricted float c, unrestricted float m, unrestricted float y, unrestricted float k, unrestricted float a);
+    void setShadow(unrestricted float width, unrestricted float height, unrestricted float blur, optional DOMString color, optional unrestricted float alpha);
+    void setShadow(unrestricted float width, unrestricted float height, unrestricted float blur, unrestricted float grayLevel, optional unrestricted float alpha);
+    void setShadow(unrestricted float width, unrestricted float height, unrestricted float blur, unrestricted float r, unrestricted float g, unrestricted float b, unrestricted float a);
+    void setShadow(unrestricted float width, unrestricted float height, unrestricted float blur, unrestricted float c, unrestricted float m, unrestricted float y, unrestricted float k, unrestricted float a);
 };
 
 CanvasRenderingContext2D implements CanvasPathMethods;

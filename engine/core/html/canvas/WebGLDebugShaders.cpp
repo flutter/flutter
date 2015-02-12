@@ -26,7 +26,7 @@
 #include "sky/engine/config.h"
 #include "sky/engine/core/html/canvas/WebGLDebugShaders.h"
 
-#include "sky/engine/bindings/core/v8/ExceptionState.h"
+#include "sky/engine/bindings2/exception_state.h"
 #include "sky/engine/core/html/canvas/WebGLRenderingContextBase.h"
 #include "sky/engine/core/html/canvas/WebGLShader.h"
 

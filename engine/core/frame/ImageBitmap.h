@@ -5,7 +5,7 @@
 #ifndef SKY_ENGINE_CORE_FRAME_IMAGEBITMAP_H_
 #define SKY_ENGINE_CORE_FRAME_IMAGEBITMAP_H_
 
-#include "sky/engine/bindings/core/v8/ScriptWrappable.h"
+#include "sky/engine/tonic/dart_wrappable.h"
 #include "sky/engine/core/html/HTMLImageElement.h"
 #include "sky/engine/core/html/canvas/CanvasImageSource.h"
 #include "sky/engine/platform/geometry/IntRect.h"
@@ -19,7 +19,7 @@ namespace blink {
 class HTMLCanvasElement;
 class ImageData;
 
-class ImageBitmap final : public RefCounted<ImageBitmap>, public ScriptWrappable, public ImageLoaderClient, public CanvasImageSource {
+class ImageBitmap final : public RefCounted<ImageBitmap>, public DartWrappable, public ImageLoaderClient, public CanvasImageSource {
     DEFINE_WRAPPERTYPEINFO();
 public:
     static PassRefPtr<ImageBitmap> create(HTMLImageElement*, const IntRect&);

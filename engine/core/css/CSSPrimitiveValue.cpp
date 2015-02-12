@@ -21,7 +21,7 @@
 #include "sky/engine/config.h"
 #include "sky/engine/core/css/CSSPrimitiveValue.h"
 
-#include "sky/engine/bindings/core/v8/ExceptionState.h"
+#include "sky/engine/bindings2/exception_state.h"
 #include "sky/engine/core/css/CSSBasicShapes.h"
 #include "sky/engine/core/css/CSSCalculationValue.h"
 #include "sky/engine/core/css/CSSHelper.h"
@@ -660,7 +660,7 @@ void CSSPrimitiveValue::setFloatValue(unsigned short, double, ExceptionState& ex
     // Keeping values immutable makes optimizations easier and allows sharing of the primitive value objects.
     // No other engine supports mutating style through this API. Computed style is always read-only anyway.
     // Supporting setter would require making primitive value copy-on-write and taking care of style invalidation.
-    exceptionState.throwDOMException(NoModificationAllowedError, "CSSPrimitiveValue objects are read-only.");
+    exceptionState.ThrowDOMException(NoModificationAllowedError, "CSSPrimitiveValue objects are read-only.");
 }
 
 double CSSPrimitiveValue::conversionToCanonicalUnitsScaleFactor(UnitType unitType)
@@ -720,7 +720,7 @@ double CSSPrimitiveValue::getDoubleValue(UnitType unitType, ExceptionState& exce
     double result = 0;
     bool success = getDoubleValueInternal(unitType, &result);
     if (!success) {
-        exceptionState.throwDOMException(InvalidAccessError, "Failed to obtain a double value.");
+        exceptionState.ThrowDOMException(InvalidAccessError, "Failed to obtain a double value.");
         return 0.0;
     }
 
@@ -886,7 +886,7 @@ void CSSPrimitiveValue::setStringValue(unsigned short, const String&, ExceptionS
     // Keeping values immutable makes optimizations easier and allows sharing of the primitive value objects.
     // No other engine supports mutating style through this API. Computed style is always read-only anyway.
     // Supporting setter would require making primitive value copy-on-write and taking care of style invalidation.
-    exceptionState.throwDOMException(NoModificationAllowedError, "CSSPrimitiveValue objects are read-only.");
+    exceptionState.ThrowDOMException(NoModificationAllowedError, "CSSPrimitiveValue objects are read-only.");
 }
 
 String CSSPrimitiveValue::getStringValue(ExceptionState& exceptionState) const
@@ -901,7 +901,7 @@ String CSSPrimitiveValue::getStringValue(ExceptionState& exceptionState) const
         case CSS_PROPERTY_ID:
             return propertyName(m_value.propertyID);
         default:
-            exceptionState.throwDOMException(InvalidAccessError, "This object's value cannot be represented as a string.");
+            exceptionState.ThrowDOMException(InvalidAccessError, "This object's value cannot be represented as a string.");
             break;
     }
 
@@ -929,7 +929,7 @@ String CSSPrimitiveValue::getStringValue() const
 Rect* CSSPrimitiveValue::getRectValue(ExceptionState& exceptionState) const
 {
     if (m_primitiveUnitType != CSS_RECT) {
-        exceptionState.throwDOMException(InvalidAccessError, "This object is not a rect value.");
+        exceptionState.ThrowDOMException(InvalidAccessError, "This object is not a rect value.");
         return 0;
     }
 
@@ -939,7 +939,7 @@ Rect* CSSPrimitiveValue::getRectValue(ExceptionState& exceptionState) const
 Quad* CSSPrimitiveValue::getQuadValue(ExceptionState& exceptionState) const
 {
     if (m_primitiveUnitType != CSS_QUAD) {
-        exceptionState.throwDOMException(InvalidAccessError, "This object is not a quad value.");
+        exceptionState.ThrowDOMException(InvalidAccessError, "This object is not a quad value.");
         return 0;
     }
 
@@ -949,7 +949,7 @@ Quad* CSSPrimitiveValue::getQuadValue(ExceptionState& exceptionState) const
 PassRefPtr<RGBColor> CSSPrimitiveValue::getRGBColorValue(ExceptionState& exceptionState) const
 {
     if (m_primitiveUnitType != CSS_RGBCOLOR) {
-        exceptionState.throwDOMException(InvalidAccessError, "This object is not an RGB color value.");
+        exceptionState.ThrowDOMException(InvalidAccessError, "This object is not an RGB color value.");
         return nullptr;
     }
 
@@ -960,7 +960,7 @@ PassRefPtr<RGBColor> CSSPrimitiveValue::getRGBColorValue(ExceptionState& excepti
 Pair* CSSPrimitiveValue::getPairValue(ExceptionState& exceptionState) const
 {
     if (m_primitiveUnitType != CSS_PAIR) {
-        exceptionState.throwDOMException(InvalidAccessError, "This object is not a pair value.");
+        exceptionState.ThrowDOMException(InvalidAccessError, "This object is not a pair value.");
         return 0;
     }
 

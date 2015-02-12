@@ -33,9 +33,8 @@
 #include "base/bind.h"
 #include "gen/sky/core/HTMLNames.h"
 #include "gen/sky/platform/RuntimeEnabledFeatures.h"
-#include "sky/engine/bindings/core/v8/ExceptionMessages.h"
-#include "sky/engine/bindings/core/v8/ExceptionState.h"
-#include "sky/engine/bindings/core/v8/ScriptController.h"
+#include "sky/engine/bindings2/exception_messages.h"
+#include "sky/engine/bindings2/exception_state.h"
 #include "sky/engine/core/dom/Document.h"
 #include "sky/engine/core/dom/ExceptionCode.h"
 #include "sky/engine/core/dom/Microtask.h"
@@ -57,7 +56,6 @@
 #include "sky/engine/platform/graphics/gpu/WebGLImageBufferSurface.h"
 #include "sky/engine/platform/transforms/AffineTransform.h"
 #include "sky/engine/public/platform/Platform.h"
-#include "v8/include/v8.h"
 
 namespace blink {
 
@@ -91,7 +89,6 @@ DEFINE_NODE_FACTORY(HTMLCanvasElement)
 HTMLCanvasElement::~HTMLCanvasElement()
 {
     resetDirtyRect();
-    v8::Isolate::GetCurrent()->AdjustAmountOfExternalAllocatedMemory(-m_externallyAllocatedMemory);
 #if !ENABLE(OILPAN)
     HashSet<RawPtr<CanvasObserver> >::iterator end = m_observers.end();
     for (HashSet<RawPtr<CanvasObserver> >::iterator it = m_observers.begin(); it != end; ++it)
@@ -134,7 +131,7 @@ void HTMLCanvasElement::setWidth(int value)
     setIntegralAttribute(HTMLNames::widthAttr, value);
 }
 
-CanvasRenderingContext* HTMLCanvasElement::getContext(const String& type, CanvasContextAttributes* attrs)
+CanvasRenderingContext2D* HTMLCanvasElement::getContext(const String& type, CanvasContextAttributes* attrs)
 {
     // A Canvas can either be "2D" or "webgl" but never both. If you request a 2D canvas and the existing
     // context is already 2D, just return that. If the existing context is WebGL, then destroy it
@@ -158,24 +155,24 @@ CanvasRenderingContext* HTMLCanvasElement::getContext(const String& type, Canvas
             blink::Platform::current()->histogramEnumeration("Canvas.ContextType", Context2d, ContextTypeCount);
             m_context = CanvasRenderingContext2D::create(this, static_cast<Canvas2DContextAttributes*>(attrs));
         }
-        return m_context.get();
+        return static_cast<CanvasRenderingContext2D*>(m_context.get());
     }
 
     // Accept the the provisional "experimental-webgl" or official "webgl" context ID.
-    if (type == "webgl" || type == "experimental-webgl") {
-        ContextType contextType = (type == "webgl") ? ContextWebgl : ContextExperimentalWebgl;
-        if (!m_context) {
-            blink::Platform::current()->histogramEnumeration("Canvas.ContextType", contextType, ContextTypeCount);
-            m_context = WebGLRenderingContext::create(this, static_cast<WebGLContextAttributes*>(attrs));
-            updateExternallyAllocatedMemory();
-        } else if (!m_context->is3d()) {
-            dispatchEvent(WebGLContextEvent::create(EventTypeNames::webglcontextcreationerror, false, true, "Canvas has an existing, non-WebGL context"));
-            return 0;
-        }
-        return m_context.get();
-    }
+    // if (type == "webgl" || type == "experimental-webgl") {
+    //     ContextType contextType = (type == "webgl") ? ContextWebgl : ContextExperimentalWebgl;
+    //     if (!m_context) {
+    //         blink::Platform::current()->histogramEnumeration("Canvas.ContextType", contextType, ContextTypeCount);
+    //         m_context = WebGLRenderingContext::create(this, static_cast<WebGLContextAttributes*>(attrs));
+    //         updateExternallyAllocatedMemory();
+    //     } else if (!m_context->is3d()) {
+    //         dispatchEvent(WebGLContextEvent::create(EventTypeNames::webglcontextcreationerror, false, true, "Canvas has an existing, non-WebGL context"));
+    //         return 0;
+    //     }
+    //     return m_context.get();
+    // }
 
-    return 0;
+    return nullptr;
 }
 
 void HTMLCanvasElement::didDraw(const FloatRect& rect)
@@ -534,7 +531,6 @@ void HTMLCanvasElement::updateExternallyAllocatedMemory() const
         externallyAllocatedMemory = std::numeric_limits<intptr_t>::max();
 
     // Subtracting two intptr_t that are known to be positive will never underflow.
-    v8::Isolate::GetCurrent()->AdjustAmountOfExternalAllocatedMemory(externallyAllocatedMemory - m_externallyAllocatedMemory);
     m_externallyAllocatedMemory = externallyAllocatedMemory;
 }
 

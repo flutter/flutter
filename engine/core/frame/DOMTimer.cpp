@@ -114,7 +114,7 @@ void DOMTimer::fired()
         WTF_LOG(Timers, "DOMTimer::fired: m_timeoutID = %d, repeatInterval = %f, m_action = %p", m_timeoutID, repeatInterval(), m_action.get());
 
         // No access to member variables after this point, it can delete the timer.
-        m_action->execute(context);
+        m_action->Execute(context);
         return;
     }
 
@@ -126,7 +126,7 @@ void DOMTimer::fired()
     // This timer is being deleted; no access to member variables allowed after this point.
     context->removeTimeoutByID(m_timeoutID);
 
-    action->execute(context);
+    action->Execute(context);
 
     timerNestingLevel = 0;
 }

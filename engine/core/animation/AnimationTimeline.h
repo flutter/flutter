@@ -31,7 +31,7 @@
 #ifndef SKY_ENGINE_CORE_ANIMATION_ANIMATIONTIMELINE_H_
 #define SKY_ENGINE_CORE_ANIMATION_ANIMATIONTIMELINE_H_
 
-#include "sky/engine/bindings/core/v8/ScriptWrappable.h"
+#include "sky/engine/tonic/dart_wrappable.h"
 #include "sky/engine/core/animation/AnimationEffect.h"
 #include "sky/engine/core/animation/AnimationPlayer.h"
 #include "sky/engine/core/dom/Element.h"
@@ -47,7 +47,7 @@ class Document;
 class AnimationNode;
 
 // AnimationTimeline is constructed and owned by Document, and tied to its lifecycle.
-class AnimationTimeline : public RefCounted<AnimationTimeline>, public ScriptWrappable {
+class AnimationTimeline : public RefCounted<AnimationTimeline>, public DartWrappable {
     DEFINE_WRAPPERTYPEINFO();
 public:
     class PlatformTiming {

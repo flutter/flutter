@@ -31,7 +31,6 @@
 #ifndef SKY_ENGINE_CORE_EVENTS_ERROREVENT_H_
 #define SKY_ENGINE_CORE_EVENTS_ERROREVENT_H_
 
-#include "sky/engine/bindings/core/v8/DOMWrapperWorld.h"
 #include "sky/engine/core/events/Event.h"
 #include "sky/engine/wtf/RefPtr.h"
 #include "sky/engine/wtf/text/WTFString.h"
@@ -54,17 +53,13 @@ public:
     {
         return adoptRef(new ErrorEvent);
     }
-    static PassRefPtr<ErrorEvent> create(const String& message, const String& fileName, unsigned lineNumber, unsigned columnNumber, DOMWrapperWorld* world)
+    static PassRefPtr<ErrorEvent> create(const String& message, const String& fileName, unsigned lineNumber, unsigned columnNumber)
     {
-        return adoptRef(new ErrorEvent(message, fileName, lineNumber, columnNumber, world));
+        return adoptRef(new ErrorEvent(message, fileName, lineNumber, columnNumber));
     }
     static PassRefPtr<ErrorEvent> create(const AtomicString& type, const ErrorEventInit& initializer)
     {
         return adoptRef(new ErrorEvent(type, initializer));
-    }
-    static PassRefPtr<ErrorEvent> createSanitizedError(DOMWrapperWorld* world)
-    {
-        return adoptRef(new ErrorEvent("Script error.", String(), 0, 0, world));
     }
     virtual ~ErrorEvent();
 
@@ -79,13 +74,11 @@ public:
 
     virtual const AtomicString& interfaceName() const override;
 
-    DOMWrapperWorld* world() const { return m_world.get(); }
-
     void setUnsanitizedMessage(const String&);
 
 private:
     ErrorEvent();
-    ErrorEvent(const String& message, const String& fileName, unsigned lineNumber, unsigned columnNumber, DOMWrapperWorld*);
+    ErrorEvent(const String& message, const String& fileName, unsigned lineNumber, unsigned columnNumber);
     ErrorEvent(const AtomicString&, const ErrorEventInit&);
 
     String m_unsanitizedMessage;
@@ -93,8 +86,6 @@ private:
     String m_fileName;
     unsigned m_lineNumber;
     unsigned m_columnNumber;
-
-    RefPtr<DOMWrapperWorld> m_world;
 };
 
 } // namespace blink

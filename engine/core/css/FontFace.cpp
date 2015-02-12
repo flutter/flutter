@@ -33,9 +33,7 @@
 
 #include "gen/sky/core/CSSValueKeywords.h"
 #include "gen/sky/platform/FontFamilyNames.h"
-#include "sky/engine/bindings/core/v8/Dictionary.h"
-#include "sky/engine/bindings/core/v8/ExceptionState.h"
-#include "sky/engine/bindings/core/v8/ScriptState.h"
+#include "sky/engine/bindings2/exception_state.h"
 #include "sky/engine/core/css/BinaryDataFontFaceSource.h"
 #include "sky/engine/core/css/CSSFontFace.h"
 #include "sky/engine/core/css/CSSFontFaceSrcValue.h"
@@ -68,9 +66,9 @@ static PassRefPtr<CSSValue> parseCSSValue(const Document* document, const String
     return parsedStyle->getPropertyCSSValue(propertyID);
 }
 
-PassRefPtr<FontFace> FontFace::create(ExecutionContext* context, const AtomicString& family, const String& source, const Dictionary& descriptors)
+PassRefPtr<FontFace> FontFace::create(ExecutionContext* context, const AtomicString& family, const String& source)
 {
-    RefPtr<FontFace> fontFace = adoptRef(new FontFace(context, family, descriptors));
+    RefPtr<FontFace> fontFace = adoptRef(new FontFace(context, family));
 
     RefPtr<CSSValue> src = parseCSSValue(toDocument(context), source, CSSPropertySrc);
     if (!src || !src->isValueList())
@@ -80,16 +78,16 @@ PassRefPtr<FontFace> FontFace::create(ExecutionContext* context, const AtomicStr
     return fontFace.release();
 }
 
-PassRefPtr<FontFace> FontFace::create(ExecutionContext* context, const AtomicString& family, PassRefPtr<ArrayBuffer> source, const Dictionary& descriptors)
+PassRefPtr<FontFace> FontFace::create(ExecutionContext* context, const AtomicString& family, PassRefPtr<ArrayBuffer> source)
 {
-    RefPtr<FontFace> fontFace = adoptRef(new FontFace(context, family, descriptors));
+    RefPtr<FontFace> fontFace = adoptRef(new FontFace(context, family));
     fontFace->initCSSFontFace(static_cast<const unsigned char*>(source->data()), source->byteLength());
     return fontFace.release();
 }
 
-PassRefPtr<FontFace> FontFace::create(ExecutionContext* context, const AtomicString& family, PassRefPtr<ArrayBufferView> source, const Dictionary& descriptors)
+PassRefPtr<FontFace> FontFace::create(ExecutionContext* context, const AtomicString& family, PassRefPtr<ArrayBufferView> source)
 {
-    RefPtr<FontFace> fontFace = adoptRef(new FontFace(context, family, descriptors));
+    RefPtr<FontFace> fontFace = adoptRef(new FontFace(context, family));
     fontFace->initCSSFontFace(static_cast<const unsigned char*>(source->baseAddress()), source->byteLength());
     return fontFace.release();
 }
@@ -128,24 +126,10 @@ FontFace::FontFace()
 {
 }
 
-FontFace::FontFace(ExecutionContext* context, const AtomicString& family, const Dictionary& descriptors)
+FontFace::FontFace(ExecutionContext* context, const AtomicString& family)
     : m_family(family)
     , m_status(Unloaded)
 {
-    Document* document = toDocument(context);
-    String value;
-    if (DictionaryHelper::get(descriptors, "style", value))
-        setPropertyFromString(document, value, CSSPropertyFontStyle);
-    if (DictionaryHelper::get(descriptors, "weight", value))
-        setPropertyFromString(document, value, CSSPropertyFontWeight);
-    if (DictionaryHelper::get(descriptors, "stretch", value))
-        setPropertyFromString(document, value, CSSPropertyFontStretch);
-    if (DictionaryHelper::get(descriptors, "unicodeRange", value))
-        setPropertyFromString(document, value, CSSPropertyUnicodeRange);
-    if (DictionaryHelper::get(descriptors, "variant", value))
-        setPropertyFromString(document, value, CSSPropertyFontVariant);
-    if (DictionaryHelper::get(descriptors, "featureSettings", value))
-        setPropertyFromString(document, value, CSSPropertyWebkitFontFeatureSettings);
 }
 
 FontFace::~FontFace()
@@ -220,7 +204,7 @@ void FontFace::setPropertyFromString(const Document* document, const String& s, 
 
     String message = "Failed to set '" + s + "' as a property value.";
     if (exceptionState)
-        exceptionState->throwDOMException(SyntaxError, message);
+        exceptionState->ThrowDOMException(SyntaxError, message);
     else
         setError(DOMException::create(SyntaxError, message));
 }
@@ -323,13 +307,6 @@ void FontFace::setLoadStatus(LoadStatus status)
     ASSERT(m_status != Error || m_error);
 
     if (m_status == Loaded || m_status == Error) {
-        if (m_loadedProperty) {
-            if (m_status == Loaded)
-                m_loadedProperty->resolve(this);
-            else
-                m_loadedProperty->reject(m_error.get());
-        }
-
         Vector<RefPtr<LoadFontCallback> > callbacks;
         m_callbacks.swap(callbacks);
         for (size_t i = 0; i < callbacks.size(); ++i) {
@@ -346,24 +323,6 @@ void FontFace::setError(PassRefPtr<DOMException> error)
     if (!m_error)
         m_error = error ? error : DOMException::create(NetworkError);
     setLoadStatus(Error);
-}
-
-ScriptPromise FontFace::fontStatusPromise(ScriptState* scriptState)
-{
-    if (!m_loadedProperty) {
-        m_loadedProperty = adoptPtr(new LoadedProperty(scriptState->executionContext(), this, LoadedProperty::Loaded));
-        if (m_status == Loaded)
-            m_loadedProperty->resolve(this);
-        else if (m_status == Error)
-            m_loadedProperty->reject(m_error.get());
-    }
-    return m_loadedProperty->promise(scriptState->world());
-}
-
-ScriptPromise FontFace::load(ScriptState* scriptState)
-{
-    loadInternal(scriptState->executionContext());
-    return fontStatusPromise(scriptState);
 }
 
 void FontFace::loadWithCallback(PassRefPtr<LoadFontCallback> callback, ExecutionContext* context)

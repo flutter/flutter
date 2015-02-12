@@ -615,7 +615,6 @@ source_set("platform") {
     "//third_party/qcms",
     "//third_party:jpeg",
     "//url",
-    "//v8",
   ]
 
   forward_dependent_configs_from = [
@@ -627,7 +626,6 @@ source_set("platform") {
     "//third_party/ots",
     "//third_party/qcms",
     "//url",
-    "//v8",
   ]
 
   if (is_android) {

@@ -58,7 +58,7 @@
 
     stringifier;
 
-    [DeprecateAs=RangeDetach] void detach();
+    void detach();
 
     [RaisesException] boolean isPointInRange(Node refNode, long offset);
     [RaisesException, TypeChecking=Interface] short comparePoint(Node refNode, long offset);
@@ -76,7 +76,7 @@
     const unsigned short NODE_BEFORE_AND_AFTER = 2;
     const unsigned short NODE_INSIDE           = 3;
 
-    [RaisesException, MeasureAs=RangeCompareNode] short compareNode([Default=Undefined] optional Node refNode);
+    [RaisesException] short compareNode([Default=Undefined] optional Node refNode);
 
-    [RaisesException, MeasureAs=RangeExpand] void expand([Default=Undefined] optional DOMString unit);
+    [RaisesException] void expand([Default=Undefined] optional DOMString unit);
 };

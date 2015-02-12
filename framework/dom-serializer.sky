@@ -1,24 +1,28 @@
 <script>
-const kEntityMap = new Map([
+import "dart:sky";
+
+final kEntityMap = new Map.fromIterable([
   ['\u00a0', '&nbsp;'],
   ['&', '&amp;'],
   ['<', '&lt;'],
   ['>', '&gt;'],
   ['"', '&quot;'],
-]);
+], key: (item) => item[0], value: (item) => item[1]);
 
-const kTextEscapePattern = /&|<|>|"|\u00a0/g;
-const kAttributeEscapePattern = /&|>|"|\u00a0/g;
+final RegExp kTextEscapePattern = new RegExp(r'&|<|>|"|\u00a0');
+final RegExp kAttributeEscapePattern = new RegExp(r'&|>|"|\u00a0');
 const kIndent = '  ';
 
-function escapeText(value, pattern) {
-  return (value || '').replace(pattern, function(match) {
-    return kEntityMap.get(match);
+String escapeText(String value, RegExp pattern) {
+  if (value == null)
+    value = '';
+  return value.replaceAllMapped(pattern, (Match match) {
+    return kEntityMap[match[0]];
   });
 }
 
-function serializeAttributes(element) {
-  var buffer = '';
+String serializeAttributes(Element element) {
+  String buffer = '';
   var attributes = element.getAttributes();
 
   for (var i = 0; i < attributes.length; ++i) {
@@ -33,62 +37,58 @@ function serializeAttributes(element) {
   return buffer;
 }
 
-function getFirstChild(node) {
-  if (node.localName === 'template')
+Node getFirstChild(Node node) {
+  if (node is HTMLTemplateElement)
     return node.content.firstChild;
   return node.firstChild;
 }
 
-function getLastChild(node) {
-  if (node.localName === 'template')
+Node getLastChild(Node node) {
+  if (node is HTMLTemplateElement)
     return node.content.lastChild;
   return node.lastChild;
 }
 
-function serializeChildren(node, depth) {
-  var buffer = '';
-  var firstChild = getFirstChild(node);
-  var lastChild = getLastChild(node);
-  if (firstChild instanceof Element && depth)
-    buffer += '\n' + kIndent.repeat(depth);
-  for (var child = firstChild; child; child = child.nextSibling) {
+String serializeChildren(Node node, int depth) {
+  String buffer = '';
+  Node firstChild = getFirstChild(node);
+  Node lastChild = getLastChild(node);
+  if (firstChild is Element && depth != 0)
+    buffer += '\n' + (kIndent * depth);
+  for (Node child = firstChild; child != null; child = child.nextSibling) {
     buffer += serializeNode(child, depth);
-    if (child instanceof Element && child.nextSibling instanceof Element)
-      buffer += '\n' + kIndent.repeat(depth);
+    if (child is Element && child.nextSibling is Element)
+      buffer += '\n' + (kIndent * depth);
   }
-  if (lastChild instanceof Element) {
+  if (lastChild is Element) {
     buffer += '\n';
-    if (depth)
-      buffer += kIndent.repeat(depth - 1);
+    if (depth != 0)
+      buffer += kIndent * (depth - 1);
   }
   return buffer;
 }
 
-function serializeElement(element, depth) {
-  var buffer = '<' + element.tagName + serializeAttributes(element) + '>';
+String serializeElement(Element element, int depth) {
+  String buffer = '<' + element.tagName + serializeAttributes(element) + '>';
   buffer += serializeChildren(element, depth + 1);
   buffer += '</' + element.tagName + '>';
   return buffer;
 }
 
-function serializeText(node) {
-  var parent = node.parentNode;
-  if (parent && (parent.tagName == 'script' || parent.tagName == 'style'))
+String serializeText(Node node) {
+  Node parent = node.parentNode;
+  if (parent != null && (parent is HTMLScriptElement || parent is HTMLStyleElement))
     return node.data;
   return escapeText(node.data, kTextEscapePattern);
 }
 
-function serializeNode(node, depth) {
-  if (node instanceof Text)
+String serializeNode(Node node, [int depth = 0]) {
+  if (node is Text)
     return serializeText(node);
-  if (node instanceof Element)
-    return serializeElement(node, depth || 0);
-  if (node instanceof Document || node instanceof ShadowRoot)
-    return serializeChildren(node, depth || 0);
+  if (node is Element)
+    return serializeElement(node, depth);
+  if (node is Document || node is ShadowRoot)
+    return serializeChildren(node, depth);
   throw new Error('Cannot serialize node');
 }
-
-module.exports = {
-  serializeNode: serializeNode,
-};
 </script>

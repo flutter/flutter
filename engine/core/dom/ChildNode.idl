@@ -26,7 +26,7 @@
     LegacyTreatAsPartialInterface,
     NoInterfaceObject, // Always used on target of 'implements'
 ] interface ChildNode {
-    [PerWorldBindings] readonly attribute Element previousElementSibling;
-    [PerWorldBindings] readonly attribute Element nextElementSibling;
+    readonly attribute Element previousElementSibling;
+    readonly attribute Element nextElementSibling;
     [RaisesException, CustomElementCallbacks] void remove();
 };

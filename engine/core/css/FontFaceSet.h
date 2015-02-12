@@ -26,9 +26,7 @@
 #ifndef SKY_ENGINE_CORE_CSS_FONTFACESET_H_
 #define SKY_ENGINE_CORE_CSS_FONTFACESET_H_
 
-#include "sky/engine/bindings/core/v8/ScriptPromise.h"
 #include "sky/engine/core/css/FontFace.h"
-#include "sky/engine/core/css/FontFaceSetForEachCallback.h"
 #include "sky/engine/core/dom/ActiveDOMObject.h"
 #include "sky/engine/core/events/EventListener.h"
 #include "sky/engine/core/events/EventTarget.h"
@@ -54,7 +52,6 @@ class ExceptionState;
 class Font;
 class FontFaceCache;
 class FontResource;
-class FontsReadyPromiseResolver;
 class ExecutionContext;
 
 class FontFaceSet final : public RefCountedSupplement<Document, FontFaceSet>, public ActiveDOMObject, public EventTargetWithInlineData {
@@ -65,14 +62,10 @@ public:
     virtual ~FontFaceSet();
 
     bool check(const String& font, const String& text, ExceptionState&);
-    ScriptPromise load(ScriptState*, const String& font, const String& text);
-    ScriptPromise ready(ScriptState*);
 
     void add(FontFace*, ExceptionState&);
     void clear();
     bool remove(FontFace*, ExceptionState&);
-    void forEach(PassOwnPtr<FontFaceSetForEachCallback>, const ScriptValue& thisArg) const;
-    void forEach(PassOwnPtr<FontFaceSetForEachCallback>) const;
     bool has(FontFace*, ExceptionState&) const;
 
     unsigned long size() const;
@@ -123,7 +116,6 @@ private:
     bool hasLoadedFonts() const { return !m_loadedFonts.isEmpty() || !m_failedFonts.isEmpty(); }
 
     bool inActiveDocumentContext() const;
-    void forEachInternal(PassOwnPtr<FontFaceSetForEachCallback>, const ScriptValue* thisArg) const;
     void addToLoadingFonts(PassRefPtr<FontFace>);
     void removeFromLoadingFonts(PassRefPtr<FontFace>);
     void fireLoadingEvent();
@@ -136,7 +128,6 @@ private:
 
     HashSet<RefPtr<FontFace> > m_loadingFonts;
     bool m_shouldFireLoadingEvent;
-    Vector<OwnPtr<FontsReadyPromiseResolver> > m_readyResolvers;
     FontFaceArray m_loadedFonts;
     FontFaceArray m_failedFonts;
     ListHashSet<RefPtr<FontFace> > m_nonCSSConnectedFaces;

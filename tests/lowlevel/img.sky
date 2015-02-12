@@ -1,5 +1,5 @@
 <foo>
-<import src="../resources/dump-as-render-tree.sky" />
+<import src="../resources/dump-as-render-tree.sky" as="harness" />
 
 <img src="resources/palatted-color-png-gamma-one-color-profile.png" />
 <img src="resources/palatted-color-png-gamma-one-color-profile.png" style="width: 100px;" />

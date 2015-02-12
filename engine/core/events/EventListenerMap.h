@@ -73,7 +73,7 @@ class EventListenerIterator {
     WTF_MAKE_NONCOPYABLE(EventListenerIterator);
 public:
     EventListenerIterator();
-    EventListenerIterator(EventTarget*);
+    EventListenerIterator(const EventTarget*);
 #if ENABLE(ASSERT)
     ~EventListenerIterator();
 #endif

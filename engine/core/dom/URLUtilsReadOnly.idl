@@ -29,16 +29,16 @@
     NoInterfaceObject, // Always used on target of 'implements'
 ] interface URLUtilsReadOnly {
     // FIXME: should be stringifier: http://crbug.com/306606
-    // stringifier readonly attribute ScalarValueString href;
-    readonly attribute ScalarValueString href;
-    [NotEnumerable, ImplementedAs=href] ScalarValueString toString();
-    readonly attribute ScalarValueString origin;
+    // stringifier readonly attribute DOMString href;
+    readonly attribute DOMString href;
+    [NotEnumerable, ImplementedAs=href] DOMString toString();
+    readonly attribute DOMString origin;
 
-    readonly attribute ScalarValueString protocol;
-    readonly attribute ScalarValueString host;
-    readonly attribute ScalarValueString hostname;
-    readonly attribute ScalarValueString port;
-    readonly attribute ScalarValueString pathname;
-    readonly attribute ScalarValueString search;
-    readonly attribute ScalarValueString hash;
+    readonly attribute DOMString protocol;
+    readonly attribute DOMString host;
+    readonly attribute DOMString hostname;
+    readonly attribute DOMString port;
+    readonly attribute DOMString pathname;
+    readonly attribute DOMString search;
+    readonly attribute DOMString hash;
 };

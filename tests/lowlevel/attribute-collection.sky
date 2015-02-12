@@ -1,62 +1,67 @@
 <html>
-<import src="../resources/mocha.sky" />
-<import src="../resources/chai.sky" />
 <script>
-describe("Attribute collection", function() {
+import "../resources/third_party/unittest/unittest.dart";
+import "../resources/unit.dart";
+
+import "dart:sky";
+
+void main() {
+  initUnit();
+
   var div;
-  beforeEach(function() {
+  setUp(() {
     div = document.createElement("div");
   });
 
-  it("should get by index", function() {
+  test("should get by index", () {
     div.setAttribute("attr0", "value0");
     div.setAttribute("attr1", "value1");
     var attrs = div.getAttributes();
-    assert.equal(attrs.length, 2);
-    assert.equal(attrs[0].name, "attr0");
-    assert.equal(attrs[0].value, "value0");
-    assert.equal(attrs[1].name, "attr1");
-    assert.equal(attrs[1].value, "value1");
+    expect(attrs.length, equals(2));
+    expect(attrs[0].name, equals("attr0"));
+    expect(attrs[0].value, equals("value0"));
+    expect(attrs[1].name, equals("attr1"));
+    expect(attrs[1].value, equals("value1"));
   });
-  it("should set by name", function() {
+  test("should set by name", () {
     div.setAttribute("attrName", "value0");
-    assert.equal(div.getAttribute("attrName"), "value0");
-    assert.equal(div.getAttributes()[0].name, "attrName");
-    assert.equal(div.getAttributes()[0].value, "value0");
+    expect(div.getAttribute("attrName"), equals("value0"));
+    expect(div.getAttributes()[0].name, equals("attrName"));
+    expect(div.getAttributes()[0].value, equals("value0"));
     div.setAttribute("attrName", "new value");
-    assert.equal(div.getAttribute("attrName"), "new value");
-    assert.equal(div.getAttributes()[0].name, "attrName");
-    assert.equal(div.getAttributes()[0].value, "new value");
+    expect(div.getAttribute("attrName"), equals("new value"));
+    expect(div.getAttributes()[0].name, equals("attrName"));
+    expect(div.getAttributes()[0].value, equals("new value"));
   });
-  it("should be case sensitive", function() {
+  test("should be case sensitive", () {
     div.setAttribute("attrName", "value0");
-    assert.isNull(div.getAttribute("attrname"));
-    assert.equal(div.getAttribute("attrName"), "value0");
+    expect(div.getAttribute("attrname"), isNull);
+    expect(div.getAttribute("attrName"), equals("value0"));
   });
-  it("should not live update", function() {
+  test("should not live update", () {
     div.setAttribute("attr0", "0");
     div.setAttribute("attr1", "1");
     div.setAttribute("attr2", "2");
     var oldAttributes = div.getAttributes();
-    assert.equal(oldAttributes.length, 3);
+    expect(oldAttributes.length, equals(3));
     div.removeAttribute("attr1");
-    assert.equal(oldAttributes.length, 3);
+    expect(oldAttributes.length, equals(3));
     div.setAttribute("attr0", "value0");
     div.setAttribute("attr2", "value2");
     var newAttributes = div.getAttributes();
-    assert.equal(newAttributes.length, 2);
-    assert.equal(newAttributes[0].name, "attr0");
-    assert.equal(newAttributes[0].value, "value0");
-    assert.equal(newAttributes[1].name, "attr2");
-    assert.equal(newAttributes[1].value, "value2");
-    assert.notEqual(newAttributes, oldAttributes);
-    assert.equal(oldAttributes[0].name, "attr0");
-    assert.equal(oldAttributes[0].value, "0");
-    assert.equal(oldAttributes[1].name, "attr1");
-    assert.equal(oldAttributes[1].value, "1");
-    assert.equal(oldAttributes[2].name, "attr2");
-    assert.equal(oldAttributes[2].value, "2");
+    expect(newAttributes.length, equals(2));
+    expect(newAttributes[0].name, equals("attr0"));
+    expect(newAttributes[0].value, equals("value0"));
+    expect(newAttributes[1].name, equals("attr2"));
+    expect(newAttributes[1].value, equals("value2"));
+    expect(newAttributes, isNot(equals(oldAttributes)));
+    expect(oldAttributes[0].name, equals("attr0"));
+    expect(oldAttributes[0].value, equals("0"));
+    expect(oldAttributes[1].name, equals("attr1"));
+    expect(oldAttributes[1].value, equals("1"));
+    expect(oldAttributes[2].name, equals("attr2"));
+    expect(oldAttributes[2].value, equals("2"));
   });
-});
+}
 </script>
 </html>

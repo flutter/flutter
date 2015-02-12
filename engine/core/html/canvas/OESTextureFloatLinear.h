@@ -26,13 +26,13 @@
 #ifndef SKY_ENGINE_CORE_HTML_CANVAS_OESTEXTUREFLOATLINEAR_H_
 #define SKY_ENGINE_CORE_HTML_CANVAS_OESTEXTUREFLOATLINEAR_H_
 
-#include "sky/engine/bindings/core/v8/ScriptWrappable.h"
+#include "sky/engine/tonic/dart_wrappable.h"
 #include "sky/engine/core/html/canvas/WebGLExtension.h"
 #include "sky/engine/wtf/PassRefPtr.h"
 
 namespace blink {
 
-class OESTextureFloatLinear final : public WebGLExtension, public ScriptWrappable {
+class OESTextureFloatLinear final : public WebGLExtension, public DartWrappable {
     DEFINE_WRAPPERTYPEINFO();
 public:
     static PassRefPtr<OESTextureFloatLinear> create(WebGLRenderingContextBase*);

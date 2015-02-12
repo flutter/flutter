@@ -23,7 +23,7 @@
 #include "sky/engine/config.h"
 #include "sky/engine/core/dom/ContainerNode.h"
 
-#include "sky/engine/bindings/core/v8/ExceptionState.h"
+#include "sky/engine/bindings2/exception_state.h"
 #include "sky/engine/core/dom/ChildListMutationScope.h"
 #include "sky/engine/core/dom/ElementTraversal.h"
 #include "sky/engine/core/dom/ExceptionCode.h"
@@ -83,12 +83,12 @@ bool ContainerNode::containsConsideringHostElements(const Node& newChild) const
 void ContainerNode::checkAcceptChildType(const Node* newChild, ExceptionState& exceptionState) const
 {
     if (!newChild) {
-        exceptionState.throwDOMException(NotFoundError, "The new child element is null.");
+        exceptionState.ThrowDOMException(NotFoundError, "The new child element is null.");
         return;
     }
 
     if (newChild->isTreeScope()) {
-        exceptionState.throwDOMException(HierarchyRequestError, "Nodes of type '" + newChild->nodeName() + "' may not be inserted inside nodes of type '" + nodeName() + "'.");
+        exceptionState.ThrowDOMException(HierarchyRequestError, "Nodes of type '" + newChild->nodeName() + "' may not be inserted inside nodes of type '" + nodeName() + "'.");
         return;
     }
 }
@@ -96,7 +96,7 @@ void ContainerNode::checkAcceptChildType(const Node* newChild, ExceptionState& e
 void ContainerNode::checkAcceptChildHierarchy(const Node& newChild, const Node* oldChild, ExceptionState& exceptionState) const
 {
     if (containsConsideringHostElements(newChild)) {
-        exceptionState.throwDOMException(HierarchyRequestError, "The new child element contains the parent.");
+        exceptionState.ThrowDOMException(HierarchyRequestError, "The new child element contains the parent.");
         return;
     }
 
@@ -110,7 +110,7 @@ void ContainerNode::checkAcceptChildHierarchy(const Node& newChild, const Node* 
                 ++elementCount;
         }
         if (elementCount > 1 || ((!oldChild || !oldChild->isElementNode()) && elementCount && document().documentElement())) {
-            exceptionState.throwDOMException(HierarchyRequestError, "Document can only contain one Element.");
+            exceptionState.ThrowDOMException(HierarchyRequestError, "Document can only contain one Element.");
             return;
         }
     }
@@ -130,18 +130,18 @@ PassRefPtr<Node> ContainerNode::insertBefore(PassRefPtr<Node> newChild, Node* re
     }
 
     checkAcceptChildType(newChild.get(), exceptionState);
-    if (exceptionState.hadException())
+    if (exceptionState.had_exception())
         return nullptr;
 
     checkAcceptChildHierarchy(*newChild, 0, exceptionState);
-    if (exceptionState.hadException())
+    if (exceptionState.had_exception())
         return nullptr;
 
     ASSERT(newChild);
 
     // NotFoundError: Raised if refChild is not a child of this node
     if (refChild->parentNode() != this) {
-        exceptionState.throwDOMException(NotFoundError, "The node before which the new node is to be inserted is not a child of this node.");
+        exceptionState.ThrowDOMException(NotFoundError, "The node before which the new node is to be inserted is not a child of this node.");
         return nullptr;
     }
 
@@ -153,7 +153,7 @@ PassRefPtr<Node> ContainerNode::insertBefore(PassRefPtr<Node> newChild, Node* re
 
     NodeVector targets;
     collectChildrenAndRemoveFromOldParent(*newChild, targets, exceptionState);
-    if (exceptionState.hadException())
+    if (exceptionState.had_exception())
         return nullptr;
     if (targets.isEmpty())
         return newChild;
@@ -161,7 +161,7 @@ PassRefPtr<Node> ContainerNode::insertBefore(PassRefPtr<Node> newChild, Node* re
     // Must check this again beacuse focus events might run synchronously when
     // removing children.
     checkAcceptChildHierarchy(*newChild, 0, exceptionState);
-    if (exceptionState.hadException())
+    if (exceptionState.had_exception())
         return nullptr;
 
     ChildListMutationScope mutation(*this);
@@ -240,23 +240,23 @@ PassRefPtr<Node> ContainerNode::replaceChild(PassRefPtr<Node> newChild, PassRefP
         return oldChild;
 
     if (!oldChild) {
-        exceptionState.throwDOMException(NotFoundError, "The node to be replaced is null.");
+        exceptionState.ThrowDOMException(NotFoundError, "The node to be replaced is null.");
         return nullptr;
     }
 
     RefPtr<Node> child = oldChild;
 
     checkAcceptChildType(newChild.get(), exceptionState);
-    if (exceptionState.hadException())
+    if (exceptionState.had_exception())
         return nullptr;
 
     checkAcceptChildHierarchy(*newChild, child.get(), exceptionState);
-    if (exceptionState.hadException())
+    if (exceptionState.had_exception())
         return nullptr;
 
     // NotFoundError: Raised if oldChild is not a child of this node.
     if (child->parentNode() != this) {
-        exceptionState.throwDOMException(NotFoundError, "The node to be replaced is not a child of this node.");
+        exceptionState.ThrowDOMException(NotFoundError, "The node to be replaced is not a child of this node.");
         return nullptr;
     }
 
@@ -266,7 +266,7 @@ PassRefPtr<Node> ContainerNode::replaceChild(PassRefPtr<Node> newChild, PassRefP
 
     // Remove the node we're replacing
     removeChild(child, exceptionState);
-    if (exceptionState.hadException())
+    if (exceptionState.had_exception())
         return nullptr;
 
     if (next && (next->previousSibling() == newChild || next == newChild)) // nothing to do
@@ -274,13 +274,13 @@ PassRefPtr<Node> ContainerNode::replaceChild(PassRefPtr<Node> newChild, PassRefP
 
     NodeVector targets;
     collectChildrenAndRemoveFromOldParent(*newChild, targets, exceptionState);
-    if (exceptionState.hadException())
+    if (exceptionState.had_exception())
         return nullptr;
 
     // Must check this again beacuse focus events might run synchronously when
     // removing children.
     checkAcceptChildHierarchy(*newChild, child.get(),exceptionState);
-    if (exceptionState.hadException())
+    if (exceptionState.had_exception())
         return nullptr;
 
     // Add the new child(ren)
@@ -414,7 +414,7 @@ PassRefPtr<Node> ContainerNode::removeChild(PassRefPtr<Node> oldChild, Exception
     // Events fired when blurring currently focused node might have moved this
     // child into a different parent.
     if (child->parentNode() != this) {
-        exceptionState.throwDOMException(NotFoundError, "The node to be removed is no longer a child of this node. Perhaps it was moved in a 'blur' event handler?");
+        exceptionState.ThrowDOMException(NotFoundError, "The node to be removed is no longer a child of this node. Perhaps it was moved in a 'blur' event handler?");
         return nullptr;
     }
 
@@ -422,7 +422,7 @@ PassRefPtr<Node> ContainerNode::removeChild(PassRefPtr<Node> oldChild, Exception
 
     // Mutation events might have moved this child into a different parent.
     if (child->parentNode() != this) {
-        exceptionState.throwDOMException(NotFoundError, "The node to be removed is no longer a child of this node. Perhaps it was moved in response to a mutation?");
+        exceptionState.ThrowDOMException(NotFoundError, "The node to be removed is no longer a child of this node. Perhaps it was moved in response to a mutation?");
         return nullptr;
     }
 
@@ -517,11 +517,11 @@ PassRefPtr<Node> ContainerNode::appendChild(PassRefPtr<Node> newChild, Exception
     ASSERT(refCount() || parentOrShadowHostNode());
 
     checkAcceptChildType(newChild.get(), exceptionState);
-    if (exceptionState.hadException())
+    if (exceptionState.had_exception())
         return nullptr;
 
     checkAcceptChildHierarchy(*newChild, 0, exceptionState);
-    if (exceptionState.hadException())
+    if (exceptionState.had_exception())
         return nullptr;
 
     ASSERT(newChild);
@@ -531,7 +531,7 @@ PassRefPtr<Node> ContainerNode::appendChild(PassRefPtr<Node> newChild, Exception
 
     NodeVector targets;
     collectChildrenAndRemoveFromOldParent(*newChild, targets, exceptionState);
-    if (exceptionState.hadException())
+    if (exceptionState.had_exception())
         return nullptr;
 
     if (targets.isEmpty())
@@ -540,7 +540,7 @@ PassRefPtr<Node> ContainerNode::appendChild(PassRefPtr<Node> newChild, Exception
     // Must check this again beacuse focus events might run synchronously when
     // removing children.
     checkAcceptChildHierarchy(*newChild, 0, exceptionState);
-    if (exceptionState.hadException())
+    if (exceptionState.had_exception())
         return nullptr;
 
     // Now actually add the child(ren)
@@ -666,7 +666,7 @@ void ContainerNode::childrenChanged(const ChildrenChange& change)
 void ContainerNode::cloneChildNodes(ContainerNode *clone)
 {
     TrackExceptionState exceptionState;
-    for (Node* n = firstChild(); n && !exceptionState.hadException(); n = n->nextSibling())
+    for (Node* n = firstChild(); n && !exceptionState.had_exception(); n = n->nextSibling())
         clone->appendChild(n->cloneNode(true), exceptionState);
 }
 
@@ -881,7 +881,7 @@ unsigned ContainerNode::countChildren() const
 PassRefPtr<Element> ContainerNode::querySelector(const AtomicString& selectors, ExceptionState& exceptionState)
 {
     if (selectors.isEmpty()) {
-        exceptionState.throwDOMException(SyntaxError, "The provided selector is empty.");
+        exceptionState.ThrowDOMException(SyntaxError, "The provided selector is empty.");
         return nullptr;
     }
 
@@ -894,7 +894,7 @@ PassRefPtr<Element> ContainerNode::querySelector(const AtomicString& selectors, 
 PassRefPtr<StaticElementList> ContainerNode::querySelectorAll(const AtomicString& selectors, ExceptionState& exceptionState)
 {
     if (selectors.isEmpty()) {
-        exceptionState.throwDOMException(SyntaxError, "The provided selector is empty.");
+        exceptionState.ThrowDOMException(SyntaxError, "The provided selector is empty.");
         return nullptr;
     }
 

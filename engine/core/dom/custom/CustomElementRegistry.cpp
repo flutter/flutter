@@ -31,7 +31,6 @@
 #include "sky/engine/config.h"
 #include "sky/engine/core/dom/custom/CustomElementRegistry.h"
 
-#include "sky/engine/bindings/core/v8/CustomElementConstructorBuilder.h"
 #include "sky/engine/core/dom/DocumentLifecycleObserver.h"
 #include "sky/engine/core/dom/custom/CustomElementException.h"
 #include "sky/engine/core/dom/custom/CustomElementRegistrationContext.h"
@@ -61,52 +60,8 @@ private:
 
 CustomElementDefinition* CustomElementRegistry::registerElement(Document* document, CustomElementConstructorBuilder* constructorBuilder, const AtomicString& userSuppliedName, ExceptionState& exceptionState)
 {
-    // FIXME: In every instance except one it is the
-    // CustomElementConstructorBuilder that observes document
-    // destruction during registration. This responsibility should be
-    // consolidated in one place.
-    RegistrationContextObserver observer(document);
-
-    AtomicString type = userSuppliedName.lower();
-
-    if (!CustomElement::isValidName(type)) {
-        CustomElementException::throwException(CustomElementException::InvalidName, type, exceptionState);
-        return 0;
-    }
-
-    if (m_definitions.contains(type)) {
-        CustomElementException::throwException(CustomElementException::TypeAlreadyRegistered, type, exceptionState);
-        return 0;
-    }
-
-    QualifiedName tagName = nullName;
-    if (!constructorBuilder->validateOptions(type, tagName, exceptionState))
-        return 0;
-
-    ASSERT(!observer.registrationContextWentAway());
-
-    RefPtr<CustomElementLifecycleCallbacks> lifecycleCallbacks = constructorBuilder->createCallbacks();
-
-    // Consulting the constructor builder could execute script and
-    // kill the document.
-    if (observer.registrationContextWentAway()) {
-        CustomElementException::throwException(CustomElementException::ContextDestroyedCreatingCallbacks, type, exceptionState);
-        return 0;
-    }
-
-    RefPtr<CustomElementDefinition> definition = CustomElementDefinition::create(tagName.localName(), lifecycleCallbacks);
-
-    if (!constructorBuilder->createConstructor(document, definition.get(), exceptionState))
-        return 0;
-
-    m_definitions.add(tagName.localName(), definition);
-
-    if (!constructorBuilder->didRegisterDefinition(definition.get())) {
-        CustomElementException::throwException(CustomElementException::ContextDestroyedRegisteringDefinition, type, exceptionState);
-        return 0;
-    }
-
-    return definition.get();
+    // TODO(dart): Figure out how to register a custom element.
+    return 0;
 }
 
 CustomElementDefinition* CustomElementRegistry::find(const AtomicString& localName) const

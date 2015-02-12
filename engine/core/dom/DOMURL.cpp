@@ -27,8 +27,8 @@
 #include "sky/engine/config.h"
 #include "sky/engine/core/dom/DOMURL.h"
 
-#include "sky/engine/bindings/core/v8/ExceptionMessages.h"
-#include "sky/engine/bindings/core/v8/ExceptionState.h"
+#include "sky/engine/bindings2/exception_messages.h"
+#include "sky/engine/bindings2/exception_state.h"
 #include "sky/engine/core/dom/ExceptionCode.h"
 #include "sky/engine/core/dom/ExecutionContext.h"
 #include "sky/engine/core/fetch/MemoryCache.h"
@@ -39,11 +39,11 @@ namespace blink {
 DOMURL::DOMURL(const String& url, const KURL& base, ExceptionState& exceptionState)
 {
     if (!base.isValid())
-        exceptionState.throwDOMException(SyntaxError, "Invalid base URL");
+        exceptionState.ThrowDOMException(SyntaxError, "Invalid base URL");
 
     m_url = KURL(base, url);
     if (!m_url.isValid())
-        exceptionState.throwDOMException(SyntaxError, "Invalid URL");
+        exceptionState.ThrowDOMException(SyntaxError, "Invalid URL");
 }
 
 void DOMURL::setInput(const String& value)

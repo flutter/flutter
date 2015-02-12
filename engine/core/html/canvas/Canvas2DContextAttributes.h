@@ -27,7 +27,7 @@
 #ifndef SKY_ENGINE_CORE_HTML_CANVAS_CANVAS2DCONTEXTATTRIBUTES_H_
 #define SKY_ENGINE_CORE_HTML_CANVAS_CANVAS2DCONTEXTATTRIBUTES_H_
 
-#include "sky/engine/bindings/core/v8/ScriptWrappable.h"
+#include "sky/engine/tonic/dart_wrappable.h"
 #include "sky/engine/core/html/canvas/CanvasContextAttributes.h"
 #include "sky/engine/wtf/PassRefPtr.h"
 #include "sky/engine/wtf/text/WTFString.h"
@@ -39,7 +39,7 @@ enum Canvas2DContextStorage {
     DiscardableStorage
 };
 
-class Canvas2DContextAttributes : public CanvasContextAttributes, public ScriptWrappable {
+class Canvas2DContextAttributes : public CanvasContextAttributes, public DartWrappable {
     DECLARE_EMPTY_VIRTUAL_DESTRUCTOR_WILL_BE_REMOVED(Canvas2DContextAttributes);
     DEFINE_WRAPPERTYPEINFO();
 public:

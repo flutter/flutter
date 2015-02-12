@@ -27,8 +27,8 @@
 #include "sky/engine/core/editing/VisibleUnits.h"
 
 #include "gen/sky/platform/RuntimeEnabledFeatures.h"
-#include "sky/engine/bindings/core/v8/ExceptionState.h"
-#include "sky/engine/bindings/core/v8/ExceptionStatePlaceholder.h"
+#include "sky/engine/bindings2/exception_state.h"
+#include "sky/engine/bindings2/exception_state_placeholder.h"
 #include "sky/engine/core/dom/Document.h"
 #include "sky/engine/core/dom/Element.h"
 #include "sky/engine/core/dom/NodeTraversal.h"
@@ -479,8 +479,8 @@ static VisiblePosition previousBoundary(const VisiblePosition& c, BoundarySearch
     searchRange->setStart(start.deprecatedNode(), start.deprecatedEditingOffset(), exceptionState);
     searchRange->setEnd(end.deprecatedNode(), end.deprecatedEditingOffset(), exceptionState);
 
-    ASSERT(!exceptionState.hadException());
-    if (exceptionState.hadException())
+    ASSERT(!exceptionState.had_exception());
+    if (exceptionState.had_exception())
         return VisiblePosition();
 
     SimplifiedBackwardsTextIterator it(searchRange.get());

@@ -26,7 +26,7 @@
 #ifndef SKY_ENGINE_CORE_HTML_CANVAS_WEBGLFRAMEBUFFER_H_
 #define SKY_ENGINE_CORE_HTML_CANVAS_WEBGLFRAMEBUFFER_H_
 
-#include "sky/engine/bindings/core/v8/ScriptWrappable.h"
+#include "sky/engine/tonic/dart_wrappable.h"
 #include "sky/engine/core/html/canvas/WebGLContextObject.h"
 #include "sky/engine/core/html/canvas/WebGLSharedObject.h"
 #include "sky/engine/wtf/HashMap.h"
@@ -39,7 +39,7 @@ namespace blink {
 class WebGLRenderbuffer;
 class WebGLTexture;
 
-class WebGLFramebuffer final : public WebGLContextObject, public ScriptWrappable {
+class WebGLFramebuffer final : public WebGLContextObject, public DartWrappable {
     DEFINE_WRAPPERTYPEINFO();
 public:
     class WebGLAttachment : public RefCounted<WebGLAttachment> {

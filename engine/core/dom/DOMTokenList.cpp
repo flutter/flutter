@@ -25,7 +25,7 @@
 #include "sky/engine/config.h"
 #include "sky/engine/core/dom/DOMTokenList.h"
 
-#include "sky/engine/bindings/core/v8/ExceptionState.h"
+#include "sky/engine/bindings2/exception_state.h"
 #include "sky/engine/core/dom/Document.h"
 #include "sky/engine/core/dom/Element.h"
 #include "sky/engine/core/dom/ExceptionCode.h"
@@ -91,12 +91,12 @@ void DOMTokenList::clear()
 bool DOMTokenList::validateToken(const String& token, ExceptionState& exceptionState)
 {
     if (token.isEmpty()) {
-        exceptionState.throwDOMException(SyntaxError, "The token provided must not be empty.");
+        exceptionState.ThrowDOMException(SyntaxError, "The token provided must not be empty.");
         return false;
     }
 
     if (token.find(isHTMLSpace) != kNotFound) {
-        exceptionState.throwDOMException(InvalidCharacterError, "The token provided ('" + token + "') contains HTML space characters, which are not valid in tokens.");
+        exceptionState.ThrowDOMException(InvalidCharacterError, "The token provided ('" + token + "') contains HTML space characters, which are not valid in tokens.");
         return false;
     }
 

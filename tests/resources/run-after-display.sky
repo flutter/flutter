@@ -1,11 +1,14 @@
 <script>
-module.exports = function(callback) {
-    window.requestAnimationFrame(function() {
-        // At this point, only the animate has happened, but no compositing
-        // or layout.  Use a timeout for the callback so that notifyDone
-        // can be called inside of it.
-        // FIXME: we need a better way of waiting for chromium events to happen
-        window.setTimeout(callback);
-    });
-};
+import "dart:async";
+import "dart:sky";
+
+void runAfterDisplay(void callback()) {
+  window.requestAnimationFrame((_) {
+    // At this point, only the animate has happened, but no compositing
+    // or layout.  Use a timeout for the callback so that notifyDone
+    // can be called inside of it.
+    // FIXME: we need a better way of waiting for chromium events to happen
+    new Timer(Duration.ZERO, callback);
+  });
+}
 </script>

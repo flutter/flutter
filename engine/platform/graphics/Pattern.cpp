@@ -30,7 +30,6 @@
 
 #include "sky/engine/platform/graphics/skia/SkiaUtils.h"
 #include "third_party/skia/include/core/SkCanvas.h"
-#include "v8/include/v8.h"
 
 namespace blink {
 
@@ -50,8 +49,6 @@ Pattern::Pattern(PassRefPtr<Image> image, RepeatMode repeatMode)
 
 Pattern::~Pattern()
 {
-    if (m_externalMemoryAllocated)
-        v8::Isolate::GetCurrent()->AdjustAmountOfExternalAllocatedMemory(-m_externalMemoryAllocated);
 }
 
 SkShader* Pattern::shader()
@@ -101,7 +98,6 @@ SkShader* Pattern::shader()
 
         // Clamp to int, since that's what the adjust function takes.
         m_externalMemoryAllocated = static_cast<int>(std::min(static_cast<size_t>(INT_MAX), bm2.getSafeSize()));
-        v8::Isolate::GetCurrent()->AdjustAmountOfExternalAllocatedMemory(m_externalMemoryAllocated);
     }
     return m_pattern.get();
 }

@@ -26,7 +26,7 @@
 #ifndef SKY_ENGINE_CORE_HTML_CANVAS_WEBGLRENDERINGCONTEXTBASE_H_
 #define SKY_ENGINE_CORE_HTML_CANVAS_WEBGLRENDERINGCONTEXTBASE_H_
 
-#include "sky/engine/bindings/core/v8/Nullable.h"
+#include "sky/engine/bindings2/nullable.h"
 #include "sky/engine/core/dom/ActiveDOMObject.h"
 #include "sky/engine/core/html/canvas/CanvasRenderingContext.h"
 #include "sky/engine/core/html/canvas/WebGLExtensionName.h"

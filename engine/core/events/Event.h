@@ -24,7 +24,7 @@
 #ifndef SKY_ENGINE_CORE_EVENTS_EVENT_H_
 #define SKY_ENGINE_CORE_EVENTS_EVENT_H_
 
-#include "sky/engine/bindings/core/v8/ScriptWrappable.h"
+#include "sky/engine/tonic/dart_wrappable.h"
 #include "sky/engine/core/events/EventPath.h"
 #include "sky/engine/platform/heap/Handle.h"
 #include "sky/engine/wtf/RefCounted.h"
@@ -44,7 +44,7 @@ private:
     STACK_ALLOCATED();
 };
 
-class Event : public RefCounted<Event>,  public ScriptWrappable {
+class Event : public RefCounted<Event>,  public DartWrappable {
     DEFINE_WRAPPERTYPEINFO();
 public:
     enum PhaseType {

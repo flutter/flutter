@@ -32,9 +32,8 @@
 
 [
     // FIXME: should be optional union type http://crbug.com/240176
-    Constructor(Element? target, sequence<Dictionary> keyframes),
-    Constructor(Element? target, sequence<Dictionary> keyframes, double timingInput),
-    Constructor(Element? target, sequence<Dictionary> keyframes, Dictionary timingInput),
+    Constructor(Element? target),
+    Constructor(Element? target, double timingInput),
     RaisesException=Constructor,
 ] interface Animation : AnimationNode {
 };

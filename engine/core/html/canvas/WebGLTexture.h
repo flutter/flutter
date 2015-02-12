@@ -26,14 +26,14 @@
 #ifndef SKY_ENGINE_CORE_HTML_CANVAS_WEBGLTEXTURE_H_
 #define SKY_ENGINE_CORE_HTML_CANVAS_WEBGLTEXTURE_H_
 
-#include "sky/engine/bindings/core/v8/ScriptWrappable.h"
+#include "sky/engine/tonic/dart_wrappable.h"
 #include "sky/engine/core/html/canvas/WebGLSharedObject.h"
 #include "sky/engine/wtf/PassRefPtr.h"
 #include "sky/engine/wtf/Vector.h"
 
 namespace blink {
 
-class WebGLTexture final : public WebGLSharedObject, public ScriptWrappable {
+class WebGLTexture final : public WebGLSharedObject, public DartWrappable {
     DEFINE_WRAPPERTYPEINFO();
 public:
     enum TextureExtensionFlag {

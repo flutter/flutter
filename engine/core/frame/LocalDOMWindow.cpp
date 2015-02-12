@@ -29,13 +29,9 @@
 
 #include <algorithm>
 #include "gen/sky/platform/RuntimeEnabledFeatures.h"
-#include "sky/engine/bindings/core/v8/Dictionary.h"
-#include "sky/engine/bindings/core/v8/ExceptionMessages.h"
-#include "sky/engine/bindings/core/v8/ExceptionState.h"
-#include "sky/engine/bindings/core/v8/ExceptionStatePlaceholder.h"
-#include "sky/engine/bindings/core/v8/ScriptCallStackFactory.h"
-#include "sky/engine/bindings/core/v8/ScriptController.h"
-#include "sky/engine/bindings/core/v8/SerializedScriptValue.h"
+#include "sky/engine/bindings2/exception_messages.h"
+#include "sky/engine/bindings2/exception_state.h"
+#include "sky/engine/bindings2/exception_state_placeholder.h"
 #include "sky/engine/core/app/Application.h"
 #include "sky/engine/core/css/CSSComputedStyleDeclaration.h"
 #include "sky/engine/core/css/DOMWindowCSS.h"
@@ -52,7 +48,6 @@
 #include "sky/engine/core/events/EventListener.h"
 #include "sky/engine/core/events/HashChangeEvent.h"
 #include "sky/engine/core/events/PageTransitionEvent.h"
-#include "sky/engine/core/frame/Console.h"
 #include "sky/engine/core/frame/DOMWindowLifecycleNotifier.h"
 #include "sky/engine/core/frame/FrameConsole.h"
 #include "sky/engine/core/frame/FrameHost.h"
@@ -62,19 +57,18 @@
 #include "sky/engine/core/frame/Screen.h"
 #include "sky/engine/core/frame/Settings.h"
 #include "sky/engine/core/inspector/ConsoleMessage.h"
-#include "sky/engine/core/inspector/ConsoleMessageStorage.h"
 #include "sky/engine/core/loader/FrameLoaderClient.h"
 #include "sky/engine/core/page/ChromeClient.h"
 #include "sky/engine/core/page/EventHandler.h"
 #include "sky/engine/core/page/Page.h"
 #include "sky/engine/core/rendering/style/RenderStyle.h"
+#include "sky/engine/core/script/dart_controller.h"
 #include "sky/engine/platform/EventDispatchForbiddenScope.h"
 #include "sky/engine/platform/PlatformScreen.h"
 #include "sky/engine/platform/geometry/FloatRect.h"
 #include "sky/engine/platform/weborigin/KURL.h"
 #include "sky/engine/platform/weborigin/SecurityPolicy.h"
 #include "sky/engine/public/platform/Platform.h"
-#include "sky/engine/core/inspector/ScriptCallStack.h"
 #include "sky/engine/wtf/MainThread.h"
 #include "sky/engine/wtf/MathExtras.h"
 #include "sky/engine/wtf/text/WTFString.h"
@@ -228,9 +222,9 @@ PassRefPtr<Document> LocalDOMWindow::installNewDocument(const DocumentInit& init
     m_document = Document::create(init);
     m_application = Application::create(m_document.get(), m_document.get(), m_document->url().string());
     m_eventQueue = DOMWindowEventQueue::create(m_document.get());
+    m_frame->dart().CreateIsolateFor(m_document.get());
     m_document->attach();
 
-    m_frame->script().updateDocument();
     return m_document;
 }
 
@@ -334,7 +328,7 @@ void LocalDOMWindow::frameDestroyed()
 
 void LocalDOMWindow::willDetachFrameHost()
 {
-    m_frame->console().messageStorage()->frameWindowDiscarded(this);
+    // FIXME(sky): remove
 }
 
 void LocalDOMWindow::willDestroyDocumentInFrame()
@@ -378,7 +372,6 @@ void LocalDOMWindow::resetDOMWindowProperties()
     m_properties.clear();
 
     m_screen = nullptr;
-    m_console = nullptr;
     m_location = nullptr;
 #if ENABLE(ASSERT)
     m_hasBeenReset = true;
@@ -405,13 +398,6 @@ Screen& LocalDOMWindow::screen() const
     return *m_screen;
 }
 
-Console& LocalDOMWindow::console() const
-{
-    if (!m_console)
-        m_console = Console::create(m_frame);
-    return *m_console;
-}
-
 FrameConsole* LocalDOMWindow::frameConsole() const
 {
     return &m_frame->console();
@@ -429,7 +415,7 @@ DOMSelection* LocalDOMWindow::getSelection()
     return m_frame->document()->getSelection();
 }
 
-void LocalDOMWindow::focus(ExecutionContext* context)
+void LocalDOMWindow::focus()
 {
     if (!m_frame)
         return;
@@ -693,7 +679,7 @@ void LocalDOMWindow::removeAllEventListeners()
     removeAllEventListenersInternal(DoBroadcastListenerRemoval);
 }
 
-void LocalDOMWindow::setLocation(const String& urlString, LocalDOMWindow* callingWindow, LocalDOMWindow* enteredWindow, SetLocationLocking locking)
+void LocalDOMWindow::setLocation(const String& urlString, SetLocationLocking locking)
 {
     // FIXME(sky): remove.
 }

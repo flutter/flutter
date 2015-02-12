@@ -26,14 +26,14 @@
 #ifndef SKY_ENGINE_CORE_HTML_TEXTMETRICS_H_
 #define SKY_ENGINE_CORE_HTML_TEXTMETRICS_H_
 
-#include "sky/engine/bindings/core/v8/ScriptWrappable.h"
+#include "sky/engine/tonic/dart_wrappable.h"
 #include "sky/engine/platform/heap/Handle.h"
 #include "sky/engine/wtf/PassRefPtr.h"
 #include "sky/engine/wtf/RefCounted.h"
 
 namespace blink {
 
-class TextMetrics final : public RefCounted<TextMetrics>, public ScriptWrappable {
+class TextMetrics final : public RefCounted<TextMetrics>, public DartWrappable {
     DEFINE_WRAPPERTYPEINFO();
 public:
     static PassRefPtr<TextMetrics> create() { return adoptRef(new TextMetrics); }

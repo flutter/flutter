@@ -21,14 +21,14 @@
 #ifndef SKY_ENGINE_CORE_CSS_RECT_H_
 #define SKY_ENGINE_CORE_CSS_RECT_H_
 
-#include "sky/engine/bindings/core/v8/ScriptWrappable.h"
+#include "sky/engine/tonic/dart_wrappable.h"
 #include "sky/engine/core/css/CSSPrimitiveValue.h"
 #include "sky/engine/wtf/RefPtr.h"
 #include "sky/engine/wtf/text/StringBuilder.h"
 
 namespace blink {
 
-class RectBase : public RefCounted<RectBase>, public ScriptWrappableBase {
+class RectBase : public RefCounted<RectBase> {
     DECLARE_EMPTY_DESTRUCTOR_WILL_BE_REMOVED(RectBase);
 public:
     CSSPrimitiveValue* top() const { return m_top.get(); }

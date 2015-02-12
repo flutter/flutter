@@ -40,21 +40,14 @@
 #include "sky/engine/public/platform/Platform.h"
 #include "sky/engine/public/web/Sky.h"
 #include "sky/engine/testing/platform/platform_impl.h"
-#include "v8/include/v8.h"
 
-int runHelper(TestSuite* testSuite)
-{
+int runHelper(TestSuite* testSuite) {
   base::MessageLoopForUI message_loop;
   blink::initialize(new sky::PlatformImpl());
-
-  std::string flags("--expose-gc");
-  v8::V8::SetFlagsFromString(flags.c_str(), static_cast<int>(flags.size()));
-
   return testSuite->Run();
 }
 
-int main(int argc, char** argv)
-{
+int main(int argc, char** argv) {
   TestSuite test_suite(argc, argv);
   return base::LaunchUnitTests(
       argc, argv, Bind(&runHelper, Unretained(&test_suite)));

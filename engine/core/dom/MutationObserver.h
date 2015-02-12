@@ -31,7 +31,7 @@
 #ifndef SKY_ENGINE_CORE_DOM_MUTATIONOBSERVER_H_
 #define SKY_ENGINE_CORE_DOM_MUTATIONOBSERVER_H_
 
-#include "sky/engine/bindings/core/v8/ScriptWrappable.h"
+#include "sky/engine/tonic/dart_wrappable.h"
 #include "sky/engine/platform/heap/Handle.h"
 #include "sky/engine/wtf/HashSet.h"
 #include "sky/engine/wtf/PassOwnPtr.h"
@@ -42,7 +42,6 @@
 
 namespace blink {
 
-class Dictionary;
 class ExceptionState;
 class MutationCallback;
 class MutationObserver;
@@ -58,7 +57,7 @@ typedef HashSet<RawPtr<MutationObserverRegistration> > MutationObserverRegistrat
 typedef Vector<RefPtr<MutationObserver> > MutationObserverVector;
 typedef Vector<RefPtr<MutationRecord> > MutationRecordVector;
 
-class MutationObserver final : public RefCounted<MutationObserver>, public ScriptWrappable {
+class MutationObserver final : public RefCounted<MutationObserver>, public DartWrappable {
     DEFINE_WRAPPERTYPEINFO();
 public:
     enum MutationType {
@@ -85,7 +84,7 @@ public:
 
     ~MutationObserver();
 
-    void observe(Node*, const Dictionary&, ExceptionState&);
+    void observe(Node*, ExceptionState&);
     Vector<RefPtr<MutationRecord> > takeRecords();
     void disconnect();
     void observationStarted(MutationObserverRegistration*);

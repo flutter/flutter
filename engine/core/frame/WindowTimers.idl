@@ -38,8 +38,8 @@
     // FIXME: would be clearer as a union type, like:
     // typedef (Function or DOMString) Handler
     // Needs spec update and better union support: http://crbug.com/240176
-    [Custom] long setTimeout(any handler, [Default=Undefined] optional long timeout);
+    // [Custom] long setTimeout(any handler, [Default=Undefined] optional long timeout);
     void clearTimeout([Default=Undefined] optional long handle);
-    [Custom] long setInterval(any handler, [Default=Undefined] optional long timeout);
+    // [Custom] long setInterval(any handler, [Default=Undefined] optional long timeout);
     void clearInterval([Default=Undefined] optional long handle);
 };

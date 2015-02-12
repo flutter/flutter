@@ -26,13 +26,13 @@
 #ifndef SKY_ENGINE_CORE_HTML_CANVAS_EXTTEXTUREFILTERANISOTROPIC_H_
 #define SKY_ENGINE_CORE_HTML_CANVAS_EXTTEXTUREFILTERANISOTROPIC_H_
 
-#include "sky/engine/bindings/core/v8/ScriptWrappable.h"
+#include "sky/engine/tonic/dart_wrappable.h"
 #include "sky/engine/core/html/canvas/WebGLExtension.h"
 #include "sky/engine/wtf/PassRefPtr.h"
 
 namespace blink {
 
-class EXTTextureFilterAnisotropic final : public WebGLExtension, public ScriptWrappable {
+class EXTTextureFilterAnisotropic final : public WebGLExtension, public DartWrappable {
     DEFINE_WRAPPERTYPEINFO();
 public:
     static PassRefPtr<EXTTextureFilterAnisotropic> create(WebGLRenderingContextBase*);
