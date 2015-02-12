@@ -1,0 +1,43 @@
+// Copyright 2015 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+// WARNING: Do not edit - generated code.
+part of sky.core;
+
+abstract class {{interface_name}} extends {{ parent_interface if parent_interface else 'NativeFieldWrapperClass2' }} {
+
+{% macro args_macro(args) -%}
+    {%- for arg in args -%}
+        {%- if arg.is_optional and (loop.first or not args[arg.index-1].is_optional) -%}
+        [
+        {%- endif -%}
+        {{ arg.dart_type }} {{ arg.name }}
+        {%- if arg.is_optional %} = {{ arg.dart_default_value }}
+        {%- if loop.last -%}]{%- endif -%}
+        {%- endif -%}
+        {%- if not loop.last %}, {% endif %}
+    {%- endfor -%}
+{%- endmacro %}
+
+{# TODO(eseidel): We only ever have one constructor. #}
+{% for constructor in constructors %}
+    static {{interface_name}} _constructor({{ args_macro(constructor.arguments) }}) native "{{interface_name}}_constructorCallback";
+    factory {{interface_name}}({{ args_macro(constructor.arguments) }}) => _constructor(
+    {%- for arg in constructor.arguments -%}
+        {{ arg.name }}{% if not loop.last %}, {% endif %}
+    {%- endfor -%}
+    );
+{% endfor %}
+
+{% for attribute in attributes %}
+    {{ attribute.dart_type }} get {{ attribute.name }} native "{{interface_name}}_{{ attribute.name }}_Getter";
+{% if not attribute.is_read_only %}
+    void set {{ attribute.name }}({{ attribute.dart_type }} value) native "{{interface_name}}_{{ attribute.name }}_Setter";
+{% endif %}
+{% endfor %}
+
+{% for method in methods %}
+    {{method.dart_type}} {{method.name}}({{ args_macro(method.arguments)}} ) native "{{interface_name}}_{{ method.name }}_Callback";
+{% endfor %}
+}
