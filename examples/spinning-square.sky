@@ -1,6 +1,5 @@
 #!mojo mojo:sky_viewer
 <sky>
-<import src="fps-counter.sky" />
 <style>
 square {
   margin: 50px;
@@ -10,20 +9,23 @@ square {
 }
 </style>
 <square />
-<fps-counter showHistory="true" />
 <script>
-var square = document.querySelector('square');
-var timeBase = 0;
+import "dart:sky";
 
-function animate(time) {
-  if (!timeBase)
-    timeBase = time;
-  var delta = time - timeBase;
-  var rotation = Math.floor(delta / 10);
-  square.style.transform = 'rotate(' + rotation + 'deg)';
-  requestAnimationFrame(animate);
+void main() {
+  Element square = document.querySelector('square');
+  double timeBase = null;
+
+  void animate(double time) {
+    if (timeBase == null)
+      timeBase = time;
+    double delta = time - timeBase;
+    int rotation = (delta / 10).floor();
+    square.style.setProperty("transform", 'rotate(${rotation}deg)');
+    window.requestAnimationFrame(animate);
+  }
+
+  window.requestAnimationFrame(animate);
 }
-
-requestAnimationFrame(animate);
 </script>
 </sky>
