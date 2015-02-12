@@ -105,33 +105,3 @@ assumed to exist:
      ClassName = SuperclassName;
      ClassName.namedConstructor = SuperclassName.otherNamedConstructor;
 ```
-
-* It is assumed that the standard library includes something that
-  matches this pattern:
-
-```dart
-class DispatcherController<T> {
-  Dispatcher<T> _dispatcher;
-  Dispatcher<T> get dispatcher => _dispatcher;
-
-  void add(T data) {
-    // ...
-  }
-}
-typedef bool Filter<T>(T t);
-typedef void Handler<T>(T t);
-class Dispatcher<T> {
-  Dispatcher<T> where(Filter<T> filter) { /*...*/ return this; }
-  void listen(Handler<T> handler) { /* ... */ }
-}
-class ExceptionListException<T> extends Exception with IterableMixin<T> {
-  List<T> _exceptions;
-  void add(T exception) {
-    if (_exceptions == null)
-      _exceptions = new List<T>();
-    _exceptions.add(exception);
-  }
-  int get length => _exceptions == null ? 0 : _exceptions.length;
-  Iterator<T> iterator() => _exceptions.iterator();
-}
-```
