@@ -29,7 +29,7 @@
 
 #include "gen/sky/core/CSSPropertyNames.h"
 #include "gen/sky/core/EventNames.h"
-#include "sky/engine/bindings2/exception_state_placeholder.h"
+#include "sky/engine/bindings/exception_state_placeholder.h"
 #include "sky/engine/core/css/CSSComputedStyleDeclaration.h"
 #include "sky/engine/core/css/StylePropertySet.h"
 #include "sky/engine/core/dom/DocumentFragment.h"

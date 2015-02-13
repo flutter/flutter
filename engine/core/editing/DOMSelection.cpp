@@ -31,9 +31,9 @@
 #include "sky/engine/config.h"
 #include "sky/engine/core/editing/DOMSelection.h"
 
-#include "sky/engine/bindings2/exception_messages.h"
-#include "sky/engine/bindings2/exception_state.h"
-#include "sky/engine/bindings2/exception_state_placeholder.h"
+#include "sky/engine/bindings/exception_messages.h"
+#include "sky/engine/bindings/exception_state.h"
+#include "sky/engine/bindings/exception_state_placeholder.h"
 #include "sky/engine/core/dom/Document.h"
 #include "sky/engine/core/dom/ExceptionCode.h"
 #include "sky/engine/core/dom/Node.h"

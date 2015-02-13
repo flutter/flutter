@@ -3,9 +3,9 @@
 // found in the LICENSE file.
 
 #include "sky/engine/config.h"
-#include "sky/engine/bindings2/builtin_sky.h"
+#include "sky/engine/bindings/builtin_sky.h"
 
-#include "sky/engine/bindings2/builtin.h"
+#include "sky/engine/bindings/builtin.h"
 #include "sky/engine/core/frame/LocalDOMWindow.h"
 #include "sky/engine/core/script/dom_dart_state.h"
 #include "sky/engine/tonic/dart_error.h"

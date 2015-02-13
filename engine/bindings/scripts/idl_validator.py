@@ -37,7 +37,7 @@ import re
 
 module_path = os.path.dirname(__file__)
 source_path = os.path.join(module_path, os.pardir, os.pardir)
-EXTENDED_ATTRIBUTES_RELATIVE_PATH = os.path.join('bindings2',
+EXTENDED_ATTRIBUTES_RELATIVE_PATH = os.path.join('bindings',
                                                  'IDLExtendedAttributes.txt')
 EXTENDED_ATTRIBUTES_FILENAME = os.path.join(source_path,
                                             EXTENDED_ATTRIBUTES_RELATIVE_PATH)

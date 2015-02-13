@@ -31,7 +31,7 @@
 #include "sky/engine/config.h"
 #include "sky/engine/public/web/WebDocument.h"
 
-#include "sky/engine/bindings2/exception_state.h"
+#include "sky/engine/bindings/exception_state.h"
 #include "sky/engine/core/animation/AnimationTimeline.h"
 #include "sky/engine/core/css/StyleSheetContents.h"
 #include "sky/engine/core/dom/Document.h"

@@ -56,7 +56,7 @@ INTERFACE_H_INCLUDES = frozenset([
 ])
 
 INTERFACE_CPP_INCLUDES = frozenset([
-    'sky/engine/bindings2/exception_state.h',
+    'sky/engine/bindings/exception_state.h',
     'core/dom/Document.h',
     'base/trace_event/trace_event.h',
     'wtf/GetPtr.h',

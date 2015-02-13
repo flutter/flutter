@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 #include "sky/engine/config.h"
-#include "sky/engine/bindings2/builtin_natives.h"
+#include "sky/engine/bindings/builtin_natives.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -13,7 +13,7 @@
 #include "base/logging.h"
 #include "base/macros.h"
 #include "dart/runtime/include/dart_api.h"
-#include "sky/engine/bindings2/builtin.h"
+#include "sky/engine/bindings/builtin.h"
 #include "sky/engine/core/dom/Microtask.h"
 #include "sky/engine/core/script/dom_dart_state.h"
 #include "sky/engine/tonic/dart_api_scope.h"

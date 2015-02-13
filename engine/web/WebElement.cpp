@@ -31,7 +31,7 @@
 #include "sky/engine/config.h"
 #include "sky/engine/public/web/WebElement.h"
 
-#include "sky/engine/bindings2/exception_state.h"
+#include "sky/engine/bindings/exception_state.h"
 #include "sky/engine/core/dom/Element.h"
 #include "sky/engine/core/dom/custom/CustomElementProcessingStack.h"
 #include "sky/engine/core/dom/shadow/ShadowRoot.h"

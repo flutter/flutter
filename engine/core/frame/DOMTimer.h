@@ -27,7 +27,7 @@
 #ifndef SKY_ENGINE_CORE_FRAME_DOMTIMER_H_
 #define SKY_ENGINE_CORE_FRAME_DOMTIMER_H_
 
-#include "sky/engine/bindings2/scheduled_action.h"
+#include "sky/engine/bindings/scheduled_action.h"
 #include "sky/engine/core/frame/SuspendableTimer.h"
 #include "sky/engine/wtf/Compiler.h"
 #include "sky/engine/wtf/OwnPtr.h"

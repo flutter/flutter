@@ -25,7 +25,7 @@
 #include "sky/engine/config.h"
 #include "sky/engine/core/dom/DOMTokenList.h"
 
-#include "sky/engine/bindings2/exception_state.h"
+#include "sky/engine/bindings/exception_state.h"
 #include "sky/engine/core/dom/Document.h"
 #include "sky/engine/core/dom/Element.h"
 #include "sky/engine/core/dom/ExceptionCode.h"

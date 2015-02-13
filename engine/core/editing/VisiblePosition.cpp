@@ -27,7 +27,7 @@
 #include "sky/engine/config.h"
 #include "sky/engine/core/editing/VisiblePosition.h"
 
-#include "sky/engine/bindings2/exception_state.h"
+#include "sky/engine/bindings/exception_state.h"
 #include "sky/engine/core/dom/Document.h"
 #include "sky/engine/core/dom/Range.h"
 #include "sky/engine/core/dom/Text.h"

@@ -26,7 +26,7 @@
 #include "sky/engine/config.h"
 #include "sky/engine/core/editing/RemoveNodeCommand.h"
 
-#include "sky/engine/bindings2/exception_state_placeholder.h"
+#include "sky/engine/bindings/exception_state_placeholder.h"
 #include "sky/engine/core/dom/Node.h"
 #include "sky/engine/wtf/Assertions.h"
 

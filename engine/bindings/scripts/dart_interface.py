@@ -53,7 +53,7 @@ INTERFACE_H_INCLUDES = frozenset([
 
 
 INTERFACE_CPP_INCLUDES = frozenset([
-    'sky/engine/bindings2/exception_state.h',
+    'sky/engine/bindings/exception_state.h',
     'sky/engine/core/script/dom_dart_state.h',
     'sky/engine/tonic/dart_converter.h',
     'sky/engine/tonic/dart_wrappable.h',
@@ -76,7 +76,7 @@ def interface_context(interface):
     extended_attributes = interface.extended_attributes
 
     if inherits_interface(interface.name, 'EventTarget'):
-        includes.update(['bindings2/dart_event_listener.h'])
+        includes.update(['bindings/dart_event_listener.h'])
 
     # [SetWrapperReferenceTo]
     set_wrapper_reference_to_list = [{

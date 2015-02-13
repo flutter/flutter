@@ -29,9 +29,9 @@
 
 #include <algorithm>
 #include "gen/sky/platform/RuntimeEnabledFeatures.h"
-#include "sky/engine/bindings2/exception_messages.h"
-#include "sky/engine/bindings2/exception_state.h"
-#include "sky/engine/bindings2/exception_state_placeholder.h"
+#include "sky/engine/bindings/exception_messages.h"
+#include "sky/engine/bindings/exception_state.h"
+#include "sky/engine/bindings/exception_state_placeholder.h"
 #include "sky/engine/core/app/Application.h"
 #include "sky/engine/core/css/CSSComputedStyleDeclaration.h"
 #include "sky/engine/core/css/DOMWindowCSS.h"

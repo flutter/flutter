@@ -25,7 +25,7 @@
 #ifndef SKY_ENGINE_CORE_DOM_NODE_H_
 #define SKY_ENGINE_CORE_DOM_NODE_H_
 
-#include "sky/engine/bindings2/exception_state_placeholder.h"
+#include "sky/engine/bindings/exception_state_placeholder.h"
 #include "sky/engine/core/dom/MutationObserver.h"
 #include "sky/engine/core/dom/TreeScope.h"
 #include "sky/engine/core/dom/TreeShared.h"

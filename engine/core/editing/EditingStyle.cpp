@@ -28,7 +28,7 @@
 #include "sky/engine/core/editing/EditingStyle.h"
 
 #include "gen/sky/core/HTMLNames.h"
-#include "sky/engine/bindings2/exception_state_placeholder.h"
+#include "sky/engine/bindings/exception_state_placeholder.h"
 #include "sky/engine/core/css/CSSComputedStyleDeclaration.h"
 #include "sky/engine/core/css/CSSPropertyMetadata.h"
 #include "sky/engine/core/css/CSSValueList.h"

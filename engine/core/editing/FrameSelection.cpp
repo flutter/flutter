@@ -27,7 +27,7 @@
 #include "sky/engine/core/editing/FrameSelection.h"
 
 #include <stdio.h>
-#include "sky/engine/bindings2/exception_state.h"
+#include "sky/engine/bindings/exception_state.h"
 #include "sky/engine/core/css/StylePropertySet.h"
 #include "sky/engine/core/dom/CharacterData.h"
 #include "sky/engine/core/dom/Document.h"

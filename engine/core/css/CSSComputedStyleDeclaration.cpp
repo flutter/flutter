@@ -28,7 +28,7 @@
 #include "gen/sky/core/StylePropertyShorthand.h"
 #include "gen/sky/platform/FontFamilyNames.h"
 #include "gen/sky/platform/RuntimeEnabledFeatures.h"
-#include "sky/engine/bindings2/exception_state.h"
+#include "sky/engine/bindings/exception_state.h"
 #include "sky/engine/core/animation/DocumentAnimations.h"
 #include "sky/engine/core/css/BasicShapeFunctions.h"
 #include "sky/engine/core/css/CSSAspectRatioValue.h"

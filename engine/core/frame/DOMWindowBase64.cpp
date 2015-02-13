@@ -33,7 +33,7 @@
 #include "sky/engine/config.h"
 #include "sky/engine/core/frame/DOMWindowBase64.h"
 
-#include "sky/engine/bindings2/exception_state.h"
+#include "sky/engine/bindings/exception_state.h"
 #include "sky/engine/core/dom/ExceptionCode.h"
 #include "sky/engine/core/html/parser/HTMLParserIdioms.h"
 #include "sky/engine/wtf/text/Base64.h"

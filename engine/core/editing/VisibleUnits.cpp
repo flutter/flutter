@@ -27,8 +27,8 @@
 #include "sky/engine/core/editing/VisibleUnits.h"
 
 #include "gen/sky/platform/RuntimeEnabledFeatures.h"
-#include "sky/engine/bindings2/exception_state.h"
-#include "sky/engine/bindings2/exception_state_placeholder.h"
+#include "sky/engine/bindings/exception_state.h"
+#include "sky/engine/bindings/exception_state_placeholder.h"
 #include "sky/engine/core/dom/Document.h"
 #include "sky/engine/core/dom/Element.h"
 #include "sky/engine/core/dom/NodeTraversal.h"

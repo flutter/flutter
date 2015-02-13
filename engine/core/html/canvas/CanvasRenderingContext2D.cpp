@@ -34,9 +34,9 @@
 #include "sky/engine/core/html/canvas/CanvasRenderingContext2D.h"
 
 #include "gen/sky/core/CSSPropertyNames.h"
-#include "sky/engine/bindings2/exception_messages.h"
-#include "sky/engine/bindings2/exception_state.h"
-#include "sky/engine/bindings2/exception_state_placeholder.h"
+#include "sky/engine/bindings/exception_messages.h"
+#include "sky/engine/bindings/exception_state.h"
+#include "sky/engine/bindings/exception_state_placeholder.h"
 #include "sky/engine/core/css/CSSFontSelector.h"
 #include "sky/engine/core/css/StylePropertySet.h"
 #include "sky/engine/core/css/parser/BisonCSSParser.h"

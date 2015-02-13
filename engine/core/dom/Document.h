@@ -29,7 +29,7 @@
 #define SKY_ENGINE_CORE_DOM_DOCUMENT_H_
 
 #include "sky/engine/tonic/dart_value.h"
-#include "sky/engine/bindings2/exception_state_placeholder.h"
+#include "sky/engine/bindings/exception_state_placeholder.h"
 #include "sky/engine/core/animation/AnimationClock.h"
 #include "sky/engine/core/animation/PendingAnimations.h"
 #include "sky/engine/core/dom/ContainerNode.h"

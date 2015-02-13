@@ -28,7 +28,7 @@
 #include "sky/engine/core/html/parser/HTMLTreeBuilder.h"
 
 #include "gen/sky/core/HTMLNames.h"
-#include "sky/engine/bindings2/exception_state_placeholder.h"
+#include "sky/engine/bindings/exception_state_placeholder.h"
 #include "sky/engine/core/dom/DocumentFragment.h"
 #include "sky/engine/core/html/HTMLTemplateElement.h"
 #include "sky/engine/core/html/parser/AtomicHTMLToken.h"

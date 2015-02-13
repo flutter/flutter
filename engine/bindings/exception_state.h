@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef SKY_ENGINE_BINDINGS2_EXCEPTION_STATE_H_
-#define SKY_ENGINE_BINDINGS2_EXCEPTION_STATE_H_
+#ifndef SKY_ENGINE_BINDINGS_EXCEPTION_STATE_H_
+#define SKY_ENGINE_BINDINGS_EXCEPTION_STATE_H_
 
 #include "sky/engine/tonic/dart_persistent_value.h"
 #include "sky/engine/wtf/Noncopyable.h"
@@ -65,4 +65,4 @@ class TrackExceptionState final : public ExceptionState {};
 
 }  // namespace blink
 
-#endif  // SKY_ENGINE_BINDINGS2_EXCEPTION_STATE_H_
+#endif  // SKY_ENGINE_BINDINGS_EXCEPTION_STATE_H_

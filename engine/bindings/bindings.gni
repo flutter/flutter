@@ -2,7 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-bindings_scripts_dir = "//sky/engine/bindings2/scripts"
+bindings_scripts_dir = "//sky/engine/bindings/scripts"
 bindings_output_dir = "$root_gen_dir/sky/bindings"
 
 idl_lexer_parser_files = [

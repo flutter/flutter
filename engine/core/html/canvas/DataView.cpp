@@ -26,7 +26,7 @@
 #include "sky/engine/config.h"
 #include "sky/engine/core/html/canvas/DataView.h"
 
-#include "sky/engine/bindings2/exception_state.h"
+#include "sky/engine/bindings/exception_state.h"
 #include "sky/engine/core/dom/ExceptionCode.h"
 #include "sky/engine/platform/CheckedInt.h"
 #include "sky/engine/wtf/CPU.h"

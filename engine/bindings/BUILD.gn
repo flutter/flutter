@@ -2,10 +2,10 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-import("//sky/engine/bindings2/bindings.gni")
+import("//sky/engine/bindings/bindings.gni")
 import("//sky/engine/core/core.gni")
 
-source_set("bindings2") {
+source_set("bindings") {
   sources = [
     "builtin.cc",
     "builtin.h",
@@ -53,7 +53,7 @@ action("generate_snapshot_bin") {
   ]
   inputs = [
     "//dart/runtime/tools/create_snapshot_bin.py",
-    "//sky/engine/bindings2/builtin.dart",
+    "//sky/engine/bindings/builtin.dart",
     "//mojo/public/dart/bindings.dart",
     "//mojo/public/dart/core.dart",
     "//mojo/public/dart/src/application.dart",
@@ -79,7 +79,7 @@ action("generate_snapshot_bin") {
     output,
   ]
 
-  builtin_path = rebase_path("//sky/engine/bindings2/builtin.dart")
+  builtin_path = rebase_path("//sky/engine/bindings/builtin.dart")
   sky_core_path = rebase_path("$bindings_output_dir/sky_core.dart")
   mojo_bindings_path = rebase_path("//mojo/public/dart/bindings.dart")
   mojo_core_path = rebase_path("//mojo/public/dart/core.dart")
@@ -253,7 +253,7 @@ template("idl_compiler") {
       "$bindings_output_dir/parsetab.pickle",
 
       # "$bindings_output_dir/cached_jinja_templates.stamp",
-      "//sky/engine/bindings2/IDLExtendedAttributes.txt",
+      "//sky/engine/bindings/IDLExtendedAttributes.txt",
 
       # If the dependency structure or public interface info (e.g.,
       # [ImplementedAs]) changes, we rebuild all files, since we"re not

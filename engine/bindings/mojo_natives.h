@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef SKY_ENGINE_BINDINGS2_MOJO_NATIVES_H_
-#define SKY_ENGINE_BINDINGS2_MOJO_NATIVES_H_
+#ifndef SKY_ENGINE_BINDINGS_MOJO_NATIVES_H_
+#define SKY_ENGINE_BINDINGS_MOJO_NATIVES_H_
 
 #include "dart/runtime/include/dart_api.h"
 
@@ -17,4 +17,4 @@ const uint8_t* MojoNativeSymbol(Dart_NativeFunction nf);
 
 }  // namespace blink
 
-#endif  // SKY_ENGINE_BINDINGS2_MOJO_NATIVES_H_
+#endif  // SKY_ENGINE_BINDINGS_MOJO_NATIVES_H_

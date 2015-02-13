@@ -33,7 +33,7 @@
 #include "sky/engine/core/events/EventTarget.h"
 
 #include "gen/sky/platform/RuntimeEnabledFeatures.h"
-#include "sky/engine/bindings2/exception_state.h"
+#include "sky/engine/bindings/exception_state.h"
 #include "sky/engine/core/dom/Document.h"
 #include "sky/engine/core/dom/ExceptionCode.h"
 #include "sky/engine/core/dom/ExecutionContext.h"

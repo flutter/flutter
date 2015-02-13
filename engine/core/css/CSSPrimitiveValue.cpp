@@ -21,7 +21,7 @@
 #include "sky/engine/config.h"
 #include "sky/engine/core/css/CSSPrimitiveValue.h"
 
-#include "sky/engine/bindings2/exception_state.h"
+#include "sky/engine/bindings/exception_state.h"
 #include "sky/engine/core/css/CSSBasicShapes.h"
 #include "sky/engine/core/css/CSSCalculationValue.h"
 #include "sky/engine/core/css/CSSHelper.h"

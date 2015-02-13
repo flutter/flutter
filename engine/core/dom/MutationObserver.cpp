@@ -33,7 +33,7 @@
 
 #include <algorithm>
 #include "base/bind.h"
-#include "sky/engine/bindings2/exception_state.h"
+#include "sky/engine/bindings/exception_state.h"
 #include "sky/engine/core/dom/ExceptionCode.h"
 #include "sky/engine/core/dom/ExecutionContext.h"
 #include "sky/engine/core/dom/Microtask.h"

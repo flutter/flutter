@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 #include "sky/engine/config.h"
-#include "sky/engine/bindings2/dart_event_listener.h"
+#include "sky/engine/bindings/dart_event_listener.h"
 
 #include "sky/engine/core/events/Event.h"
 #include "sky/engine/tonic/dart_api_scope.h"

@@ -3,14 +3,14 @@
 // found in the LICENSE file.
 
 #include "sky/engine/config.h"
-#include "sky/engine/bindings2/builtin.h"
+#include "sky/engine/bindings/builtin.h"
 
 #include "base/logging.h"
 #include "dart/runtime/include/dart_api.h"
 #include "gen/sky/bindings/DartGlobal.h"
-#include "sky/engine/bindings2/builtin_natives.h"
-#include "sky/engine/bindings2/builtin_sky.h"
-#include "sky/engine/bindings2/mojo_natives.h"
+#include "sky/engine/bindings/builtin_natives.h"
+#include "sky/engine/bindings/builtin_sky.h"
+#include "sky/engine/bindings/mojo_natives.h"
 #include "sky/engine/tonic/dart_builtin.h"
 
 namespace blink {

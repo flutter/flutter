@@ -24,7 +24,7 @@
 #include "sky/engine/core/html/HTMLTitleElement.h"
 
 #include "gen/sky/core/HTMLNames.h"
-#include "sky/engine/bindings2/exception_state_placeholder.h"
+#include "sky/engine/bindings/exception_state_placeholder.h"
 #include "sky/engine/core/dom/ChildListMutationScope.h"
 #include "sky/engine/core/dom/Document.h"
 #include "sky/engine/core/dom/Text.h"

@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef SKY_ENGINE_BINDINGS2_DART_CALLBACK_H_
-#define SKY_ENGINE_BINDINGS2_DART_CALLBACK_H_
+#ifndef SKY_ENGINE_BINDINGS_DART_CALLBACK_H_
+#define SKY_ENGINE_BINDINGS_DART_CALLBACK_H_
 
 #include "dart/runtime/include/dart_api.h"
 #include "sky/engine/tonic/dart_persistent_value.h"
@@ -27,4 +27,4 @@ class DartCallback {
 };
 }
 
-#endif  // SKY_ENGINE_BINDINGS2_DART_CALLBACK_H_
+#endif  // SKY_ENGINE_BINDINGS_DART_CALLBACK_H_

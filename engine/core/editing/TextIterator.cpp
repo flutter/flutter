@@ -29,7 +29,7 @@
 
 #include <unicode/usearch.h>
 #include <unicode/utf16.h>
-#include "sky/engine/bindings2/exception_state_placeholder.h"
+#include "sky/engine/bindings/exception_state_placeholder.h"
 #include "sky/engine/core/dom/Document.h"
 #include "sky/engine/core/dom/NodeTraversal.h"
 #include "sky/engine/core/dom/shadow/ShadowRoot.h"

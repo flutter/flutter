@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef SKY_ENGINE_BINDINGS2_EXCEPTIONMESSAGES_H_
-#define SKY_ENGINE_BINDINGS2_EXCEPTIONMESSAGES_H_
+#ifndef SKY_ENGINE_BINDINGS_EXCEPTIONMESSAGES_H_
+#define SKY_ENGINE_BINDINGS_EXCEPTIONMESSAGES_H_
 
 #include "sky/engine/wtf/MathExtras.h"
 #include "sky/engine/wtf/text/StringBuilder.h"
@@ -152,4 +152,4 @@ String ExceptionMessages::formatNumber<double>(double number);
 
 }  // namespace blink
 
-#endif  // SKY_ENGINE_BINDINGS2_EXCEPTIONMESSAGES_H_
+#endif  // SKY_ENGINE_BINDINGS_EXCEPTIONMESSAGES_H_

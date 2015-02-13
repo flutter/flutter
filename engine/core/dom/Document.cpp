@@ -30,9 +30,9 @@
 
 #include "gen/sky/core/HTMLElementFactory.h"
 #include "gen/sky/platform/RuntimeEnabledFeatures.h"
-#include "sky/engine/bindings2/exception_messages.h"
-#include "sky/engine/bindings2/exception_state.h"
-#include "sky/engine/bindings2/exception_state_placeholder.h"
+#include "sky/engine/bindings/exception_messages.h"
+#include "sky/engine/bindings/exception_state.h"
+#include "sky/engine/bindings/exception_state_placeholder.h"
 #include "sky/engine/core/animation/AnimationTimeline.h"
 #include "sky/engine/core/animation/DocumentAnimations.h"
 #include "sky/engine/core/css/CSSFontSelector.h"

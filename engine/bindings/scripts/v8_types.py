@@ -273,7 +273,7 @@ IdlTypeBase.impl_should_use_nullable_container = property(
 def impl_includes_for_type(idl_type, interfaces_info):
     includes_for_type = set()
     if idl_type.impl_should_use_nullable_container:
-        includes_for_type.add('bindings2/nullable.h')
+        includes_for_type.add('bindings/nullable.h')
 
     idl_type = idl_type.preprocessed_type
     native_array_element_type = idl_type.native_array_element_type
