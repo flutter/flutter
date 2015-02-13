@@ -41,7 +41,6 @@ namespace blink {
 
 class WebFrame;
 class WebFrameClient;
-class WebHitTestResult;
 class WebSettings;
 class WebSpellCheckClient;
 class WebViewClient;
@@ -124,9 +123,6 @@ public:
 
 
     // Data exchange -------------------------------------------------------
-
-    // Do a hit test at given point and return the HitTestResult.
-    virtual WebHitTestResult hitTestResultAt(const WebPoint&) = 0;
 
     // Retrieves a list of spelling markers.
     virtual void spellingMarkers(WebVector<uint32_t>* markers) = 0;

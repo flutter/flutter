@@ -54,7 +54,6 @@ component("web") {
     "WebFontImpl.cpp",
     "WebFontImpl.h",
     "WebFrame.cpp",
-    "WebHitTestResult.cpp",
     "Sky.cpp",
     "WebLocalFrameImpl.cpp",
     "WebLocalFrameImpl.h",

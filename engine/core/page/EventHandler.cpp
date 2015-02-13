@@ -219,14 +219,6 @@ HitTestResult EventHandler::hitTestResultAtPoint(const LayoutPoint& point, HitTe
     return result;
 }
 
-bool EventHandler::useHandCursor(Node* node, bool isOverLink)
-{
-    if (!node)
-        return false;
-
-    return isOverLink && !node->hasEditableStyle();
-}
-
 void EventHandler::cursorUpdateTimerFired(Timer<EventHandler>*)
 {
     ASSERT(m_frame);
@@ -247,7 +239,7 @@ OptionalCursor EventHandler::selectCursor(const HitTestResult& result)
 
     Node* node = result.innerPossiblyPseudoNode();
     if (!node)
-        return selectAutoCursor(result, node, iBeamCursor());
+        return selectAutoCursor(result, node);
 
     RenderObject* renderer = node->renderer();
     RenderStyle* style = renderer ? renderer->style() : 0;
@@ -296,8 +288,7 @@ OptionalCursor EventHandler::selectCursor(const HitTestResult& result)
 
     switch (style ? style->cursor() : CURSOR_AUTO) {
     case CURSOR_AUTO: {
-        const Cursor& iBeam = iBeamCursor();
-        return selectAutoCursor(result, node, iBeam);
+        return selectAutoCursor(result, node);
     }
     case CURSOR_CROSS:
         return crossCursor();
@@ -373,16 +364,13 @@ OptionalCursor EventHandler::selectCursor(const HitTestResult& result)
     return pointerCursor();
 }
 
-OptionalCursor EventHandler::selectAutoCursor(const HitTestResult& result, Node* node, const Cursor& iBeam)
+OptionalCursor EventHandler::selectAutoCursor(const HitTestResult& result, Node* node)
 {
-    bool editable = (node && node->hasEditableStyle());
-
-    if (useHandCursor(node, result.isOverLink()))
-        return handCursor();
-
     RenderObject* renderer = node ? node->renderer() : 0;
-    if (editable || (renderer && renderer->isText() && node->canStartSelection()))
-        return iBeam;
+    if (!node || !renderer)
+        return pointerCursor();
+    if (node->hasEditableStyle() || (renderer->isText() && node->canStartSelection()))
+        return iBeamCursor();
     return pointerCursor();
 }
 

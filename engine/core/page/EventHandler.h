@@ -87,8 +87,6 @@ public:
 
     void capsLockStateMayHaveChanged(); // Only called by FrameSelection
 
-    bool useHandCursor(Node*, bool isOverLink);
-
     void notifyElementActivated();
 
 private:
@@ -96,7 +94,7 @@ private:
     void selectClosestMisspellingFromHitTestResult(const HitTestResult&, AppendTrailingWhitespace);
 
     OptionalCursor selectCursor(const HitTestResult&);
-    OptionalCursor selectAutoCursor(const HitTestResult&, Node*, const Cursor& iBeam);
+    OptionalCursor selectAutoCursor(const HitTestResult&, Node*);
 
     void hoverTimerFired(Timer<EventHandler>*);
     void cursorUpdateTimerFired(Timer<EventHandler>*);

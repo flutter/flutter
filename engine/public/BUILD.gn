@@ -91,7 +91,6 @@ source_set("web_headers") {
     "web/WebFontDescription.h",
     "web/WebFrame.h",
     "web/WebFrameClient.h",
-    "web/WebHitTestResult.h",
     "web/WebLocalFrame.h",
     "web/WebNavigationPolicy.h",
     "web/WebNavigationType.h",

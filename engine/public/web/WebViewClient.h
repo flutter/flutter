@@ -46,7 +46,6 @@ namespace blink {
 
 class ServiceProvider;
 class WebElement;
-class WebHitTestResult;
 class WebImage;
 class WebKeyboardEvent;
 class WebNode;
@@ -102,9 +101,6 @@ public:
 
     // Called when script modifies window.status
     virtual void setStatusText(const WebString&) { }
-
-    // Called when keyboard focus switches to an anchor with the given URL.
-    virtual void setKeyboardFocusURL(const WebURL&) { }
 
     // Called to determine if drag-n-drop operations may initiate a page
     // navigation.

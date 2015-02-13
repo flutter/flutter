@@ -74,7 +74,6 @@
 #include "sky/engine/public/platform/WebVector.h"
 #include "sky/engine/public/web/WebBeginFrameArgs.h"
 #include "sky/engine/public/web/WebFrameClient.h"
-#include "sky/engine/public/web/WebHitTestResult.h"
 #include "sky/engine/public/web/WebNode.h"
 #include "sky/engine/public/web/WebRange.h"
 #include "sky/engine/public/web/WebTextInputInfo.h"
@@ -732,17 +731,6 @@ IntSize WebViewImpl::contentsSize() const
     if (!root)
         return IntSize();
     return root->documentRect().size();
-}
-
-WebHitTestResult WebViewImpl::hitTestResultAt(const WebPoint& point)
-{
-    return coreHitTestResultAt(point);
-}
-
-HitTestResult WebViewImpl::coreHitTestResultAt(const WebPoint& point)
-{
-    IntPoint scaledPoint = point;
-    return hitTestResultForWindowPos(scaledPoint);
 }
 
 void WebViewImpl::spellingMarkers(WebVector<uint32_t>* markers)

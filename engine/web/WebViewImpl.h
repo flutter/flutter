@@ -105,7 +105,6 @@ public:
     virtual float deviceScaleFactor() const override;
     virtual void setDeviceScaleFactor(float) override;
 
-    virtual WebHitTestResult hitTestResultAt(const WebPoint&) override;
     virtual void spellingMarkers(WebVector<uint32_t>* markers) override;
     virtual void removeSpellingMarkersUnderWords(const WebVector<WebString>& words) override;
 
@@ -115,8 +114,6 @@ public:
     virtual void acceptLanguagesChanged() override;
 
     // WebViewImpl
-    HitTestResult coreHitTestResultAt(const WebPoint&);
-
     void setBackgroundColorOverride(WebColor);
 
     Color baseBackgroundColor() const { return m_baseBackgroundColor; }

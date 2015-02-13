@@ -37,28 +37,24 @@
 namespace blink {
 
 HitTestResult::HitTestResult()
-    : m_isOverWidget(false)
 {
 }
 
 HitTestResult::HitTestResult(const LayoutPoint& point)
     : m_hitTestLocation(point)
     , m_pointInInnerNodeFrame(point)
-    , m_isOverWidget(false)
 {
 }
 
 HitTestResult::HitTestResult(const LayoutPoint& centerPoint, unsigned topPadding, unsigned rightPadding, unsigned bottomPadding, unsigned leftPadding)
     : m_hitTestLocation(centerPoint, topPadding, rightPadding, bottomPadding, leftPadding)
     , m_pointInInnerNodeFrame(centerPoint)
-    , m_isOverWidget(false)
 {
 }
 
 HitTestResult::HitTestResult(const HitTestLocation& other)
     : m_hitTestLocation(other)
     , m_pointInInnerNodeFrame(m_hitTestLocation.point())
-    , m_isOverWidget(false)
 {
 }
 
@@ -69,8 +65,6 @@ HitTestResult::HitTestResult(const HitTestResult& other)
     , m_innerNonSharedNode(other.innerNonSharedNode())
     , m_pointInInnerNodeFrame(other.m_pointInInnerNodeFrame)
     , m_localPoint(other.localPoint())
-    , m_innerURLElement(other.URLElement())
-    , m_isOverWidget(other.isOverWidget())
 {
     // Only copy the NodeSet in case of rect hit test.
     m_rectBasedTestResult = adoptPtr(other.m_rectBasedTestResult ? new NodeSet(*other.m_rectBasedTestResult) : 0);
@@ -88,8 +82,6 @@ HitTestResult& HitTestResult::operator=(const HitTestResult& other)
     m_innerNonSharedNode = other.innerNonSharedNode();
     m_pointInInnerNodeFrame = other.m_pointInInnerNodeFrame;
     m_localPoint = other.localPoint();
-    m_innerURLElement = other.URLElement();
-    m_isOverWidget = other.isOverWidget();
 
     // Only copy the NodeSet in case of rect hit test.
     m_rectBasedTestResult = adoptPtr(other.m_rectBasedTestResult ? new NodeSet(*other.m_rectBasedTestResult) : 0);
@@ -123,11 +115,6 @@ void HitTestResult::setInnerNode(Node* n)
 void HitTestResult::setInnerNonSharedNode(Node* n)
 {
     m_innerNonSharedNode = n;
-}
-
-void HitTestResult::setURLElement(Element* n)
-{
-    m_innerURLElement = n;
 }
 
 LocalFrame* HitTestResult::innerNodeFrame() const
@@ -171,48 +158,6 @@ IntRect HitTestResult::imageRect() const
     return m_innerNonSharedNode->renderBox()->absoluteContentQuad().enclosingBoundingBox();
 }
 
-KURL HitTestResult::absoluteImageURL() const
-{
-    return absoluteImageURLInternal(false);
-}
-
-KURL HitTestResult::absoluteImageURLIncludingCanvasDataURL() const
-{
-    return absoluteImageURLInternal(true);
-}
-
-KURL HitTestResult::absoluteImageURLInternal(bool allowCanvas) const
-{
-    if (!m_innerNonSharedNode)
-        return KURL();
-
-    RenderObject* renderer = m_innerNonSharedNode->renderer();
-    if (!(renderer && (renderer->isImage() || renderer->isCanvas())))
-        return KURL();
-
-    AtomicString urlString;
-    if ((allowCanvas && isHTMLCanvasElement(*m_innerNonSharedNode))
-        || isHTMLImageElement(*m_innerNonSharedNode)
-       ) {
-        urlString = toElement(*m_innerNonSharedNode).imageSourceURL();
-    } else
-        return KURL();
-
-    return m_innerNonSharedNode->document().completeURL(stripLeadingAndTrailingHTMLSpaces(urlString));
-}
-
-KURL HitTestResult::absoluteLinkURL() const
-{
-    if (!m_innerURLElement)
-        return KURL();
-    return m_innerURLElement->hrefURL();
-}
-
-bool HitTestResult::isLiveLink() const
-{
-    return m_innerURLElement && m_innerURLElement->isLiveLink();
-}
-
 bool HitTestResult::isMisspelled() const
 {
     if (!targetNode() || !targetNode()->renderer())
@@ -222,18 +167,6 @@ bool HitTestResult::isMisspelled() const
         return false;
     return m_innerNonSharedNode->document().markers().markersInRange(
         makeRange(pos, pos).get(), DocumentMarker::MisspellingMarkers()).size() > 0;
-}
-
-bool HitTestResult::isOverLink() const
-{
-    return m_innerURLElement && m_innerURLElement->isLink();
-}
-
-String HitTestResult::textContent() const
-{
-    if (!m_innerURLElement)
-        return String();
-    return m_innerURLElement->textContent();
 }
 
 // FIXME: This function needs a better name and may belong in a different class. It's not
@@ -291,8 +224,6 @@ void HitTestResult::append(const HitTestResult& other)
         m_innerNonSharedNode = other.innerNonSharedNode();
         m_localPoint = other.localPoint();
         m_pointInInnerNodeFrame = other.m_pointInInnerNodeFrame;
-        m_innerURLElement = other.URLElement();
-        m_isOverWidget = other.isOverWidget();
     }
 
     if (other.m_rectBasedTestResult) {
