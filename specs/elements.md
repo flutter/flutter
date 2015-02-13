@@ -139,11 +139,10 @@ abstract class ParentNode extends Node {
 
   external void _appendChild(Node node); // O(N) in number of descendants
   // node must be Text or Element
-  Node appendChild(Node node) {
+  void appendChild(Node node) {
     if (node is String)
       node = new Text(node);
     _appendChild(node);
-    return node;
   }
   void append(List nodes) {
     nodes.forEach(appendChild);
@@ -151,11 +150,10 @@ abstract class ParentNode extends Node {
 
   external void _prependChild(Node node); // O(N) in number of descendants
   // node must be Text or Element
-  Node prependChild(Node node) {
+  void prependChild(Node node) {
     if (node is String)
       node = new Text(node);
     _prependChild(node);
-    return node;
   }
   void prepend(List nodes) {
     // note: not implemented in terms of _prependChild()
@@ -166,10 +164,9 @@ abstract class ParentNode extends Node {
   }
 
   external void removeChildren(); // O(N) in number of descendants
-  Node setChild(Node node) {
+  void setChild(Node node) {
     removeChildren();
     appendChild(node);
-    return node;
   }
   void setChildren(List nodes) {
     removeChildren();
