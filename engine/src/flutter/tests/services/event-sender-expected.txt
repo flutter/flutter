@@ -1,6 +1,7 @@
+CONSOLE: unittest-suite-wait-for-done
 #BEGIN
-Running 1 tests
-ok 1 Sky event sender should be able to send events
-1 tests
-1 pass
-0 fail
+CONSOLE: PASS: should be able to send events
+CONSOLE: 
+CONSOLE: All 1 tests passed.
+CONSOLE: unittest-suite-success
+DONE
