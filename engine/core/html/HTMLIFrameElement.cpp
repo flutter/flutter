@@ -6,7 +6,6 @@
 #include "sky/engine/core/html/HTMLIFrameElement.h"
 
 #include "gen/sky/core/HTMLNames.h"
-#include "mojo/edk/js/handle.h"
 #include "sky/engine/core/frame/LocalFrame.h"
 #include "sky/engine/core/html/parser/HTMLParserIdioms.h"
 #include "sky/engine/core/loader/FrameLoaderClient.h"

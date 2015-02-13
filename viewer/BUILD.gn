@@ -42,7 +42,6 @@ mojo_native_application("viewer") {
     "//mojo/converters/geometry",
     "//mojo/converters/input_events",
     "//mojo/converters/surfaces",
-    "//mojo/edk/js",
     "//mojo/icu",
     "//mojo/public/cpp/bindings",
     "//mojo/public/cpp/system",
