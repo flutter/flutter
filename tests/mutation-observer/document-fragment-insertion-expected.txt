@@ -1,7 +1,0 @@
-Running 3 tests
-ok 1 DocumentFragments should remove all children of the fragment before moving children, using appendChild
-ok 2 DocumentFragments should remove all children of the fragment before moving children, using insertBefore
-ok 3 DocumentFragments should remove all children of the fragment before moving children, using replaceChild
-3 tests
-3 pass
-0 fail

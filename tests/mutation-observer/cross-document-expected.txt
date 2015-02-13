@@ -1,6 +1,0 @@
-Running 2 tests
-ok 1 MutationObserver cross document moves should handle basic observation
-ok 2 MutationObserver cross document moves should handle subtree observation
-2 tests
-2 pass
-0 fail

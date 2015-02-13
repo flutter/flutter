@@ -1,9 +1,0 @@
-Running 5 tests
-ok 1 MutationObserver.observe on a subtree should handle basic aspects of subtree observation
-ok 2 MutationObserver.observe on a subtree should handle two observers at different depths
-ok 3 MutationObserver.observe on a subtree should handle one observer at two different depths
-ok 4 MutationObserver.observe on a subtree should handle transiently detached nodes are still observed via subtree
-ok 5 MutationObserver.observe on a subtree should have correct behavior of transient observation with complex movement
-5 tests
-5 pass
-0 fail

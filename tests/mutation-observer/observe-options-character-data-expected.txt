@@ -1,5 +1,0 @@
-Running 1 tests
-ok 1 Test MutationObserver.observe should respect character data options
-1 tests
-1 pass
-0 fail
