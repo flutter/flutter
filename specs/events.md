@@ -55,7 +55,7 @@ class Dispatcher<T> {
     var target = _listeners.lastWhere((v) => v.a == handler, orElse: () => null);
     if (target == null)
       return false;
-    _listeners.remove(target);
+    _listeners.removeAt(_listeners.lastIndexOf(target));
     return true;
   }
   void _add(T data) {
