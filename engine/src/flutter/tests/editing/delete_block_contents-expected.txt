@@ -1,5 +1,6 @@
-Running 1 tests
-ok 1 height of an editable block remains the same after adding block elements and removing them
-1 tests
-1 pass
-0 fail
+CONSOLE: unittest-suite-wait-for-done
+CONSOLE: PASS: remains the same after adding block elements and removing them
+CONSOLE: 
+CONSOLE: All 1 tests passed.
+CONSOLE: unittest-suite-success
+DONE
