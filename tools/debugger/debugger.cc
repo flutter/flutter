@@ -6,7 +6,6 @@
 
 #include "base/bind.h"
 #include "base/debug/profiler.h"
-#include "base/memory/weak_ptr.h"
 #include "base/strings/string_number_conversions.h"
 #include "base/strings/stringprintf.h"
 #include "mojo/application/application_runner_chromium.h"
@@ -31,7 +30,7 @@ const size_t kMinSendBufferSize = 1024 * 1024;
 class SkyDebugger : public mojo::ApplicationDelegate,
                     public net::HttpServer::Delegate {
  public:
-  SkyDebugger() : is_tracing_(false), weak_ptr_factory_(this) {}
+  SkyDebugger() : is_tracing_(false) {}
   virtual ~SkyDebugger() {}
 
  private:
@@ -199,7 +198,6 @@ class SkyDebugger : public mojo::ApplicationDelegate,
   mojo::WindowManagerPtr window_manager_;
   tracing::TraceCoordinatorPtr tracing_;
   std::string url_;
-  base::WeakPtrFactory<SkyDebugger> weak_ptr_factory_;
   scoped_ptr<net::HttpServer> web_server_;
   uint32_t command_port_;
 
