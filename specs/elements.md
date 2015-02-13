@@ -24,6 +24,8 @@ abstract class Node extends EventTarget {
   // the following all throw if parentNode is null
   external void insertBefore(List nodes); // O(N) in number of arguments plus all their descendants
   external void insertAfter(List nodes); // O(N) in number of arguments plus all their descendants
+  // TODO(ianh): rename insertBefore() and insertAfter() since the Web has an insertBefore() that means
+  // something else. What's a good name, though?
   external void replaceWith(List nodes); // O(N) in number of descendants plus arguments plus all their descendants
   // nodes must be String, Text, or Element
 
@@ -76,7 +78,7 @@ abstract class ParentNode extends Node {
   // TODO(ianh): might not be necessary if we have the parser drop unnecessary whitespace text nodes
 
   external void append(List nodes); // O(N) in number of arguments plus all their descendants
-  external void appendSingle(Node nodes); // O(N) in number of descandants
+  external void appendChild(Node child); // O(N) in number of descandants
   external void prepend(List nodes); // O(N) in number of arguments plus all their descendants
   external void replaceChildrenWith(List nodes); // O(N) in number of descendants plus arguments plus all their descendants
   // nodes must be String, Text, or Element
