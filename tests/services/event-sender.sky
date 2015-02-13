@@ -1,35 +1,38 @@
+#!mojo mojo:sky_viewer
 <sky>
-<import src="../resources/chai.sky" />
-<import src="../resources/mocha.sky" />
-<import src="/gen/mojo/services/input_events/public/interfaces/input_event_constants.mojom.sky" as="constants" />
-<import src="/gen/mojo/services/input_events/public/interfaces/input_events.mojom.sky" as="events" />
-<import src="/gen/sky/services/testing/test_harness.mojom.sky" as="harness" />
-<import src="/sky/framework/shell.sky" as="shell" />
-
 <script>
-describe('Sky event sender', function() {
-  it('should be able to send events', function(done) {
-    var sky = document.querySelector('sky')
-    sky.addEventListener('keypress', function(event) {
-      assert.equal(event.type, 'keypress');
-      assert.equal(event.key, 0);
-      assert.equal(event.charCode, 0x41);
-      done();
-    });
+import "../resources/third_party/unittest/unittest.dart";
+import "../resources/unit.dart";
+import "/sky/framework/shell.dart" as shell;
+import "dart:sky";
+import "package:mojo/services/input_events/public/interfaces/input_event_constants.mojom.dart" as constants;
+import "package:mojo/services/input_events/public/interfaces/input_events.mojom.dart" as events;
+import "package:sky/services/testing/test_harness.mojom.dart" as harness;
 
-    var testHarness = shell.connectToService(
-        "mojo:sky_tester", harness.TestHarness);
-    testHarness.dispatchInputEvent(new events.Event({
-      action: constants.EventType.KEY_PRESSED,
-      key_data: new events.KeyData({
-        windows_key_code: 0x41,
-        text: 0x41,
-        unmodified_text: 0x41,
-        is_char: true,
-        character: 0x41,
-      }),
+void main() {
+  initUnit();
+
+  test('should be able to send events', () {
+    var sky = document.querySelector('sky');
+    sky.addEventListener('keypress', expectAsync((event) {
+      expect(event.type, equals('keypress'));
+      expect(event.key, equals(0));
+      expect(event.charCode, equals(0x41));
     }));
+
+    var testHarness = new harness.TestHarnessProxy.unbound();
+    shell.connectToService("mojo:sky_tester", testHarness);
+    var keyData = new events.KeyData();
+    keyData.windowsKeyCode = 0x41;
+    keyData.text = 0x41;
+    keyData.unmodifiedText = 0x41;
+    keyData.isChar = true;
+    keyData.character = 0x41;
+    var event = new events.Event();
+    event.action = constants.EventType_KEY_PRESSED;
+    event.keyData = keyData;
+    testHarness.dispatchInputEvent(event);
   });
-});
+}
 </script>
 </sky>

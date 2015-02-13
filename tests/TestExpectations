@@ -10,9 +10,6 @@ https://github.com/domokit/mojo/issues/14 parser/normaliser-null.sky [ Skip ]
 https://github.com/domokit/mojo/issues/14 parser/utf16.sky [ Skip ]
 https://github.com/domokit/mojo/issues/16 parser/normaliser-crlf.sky [ Skip ]
 
-# We don't implement embed ViewManagerClient yet.
-crbug.com/2 services/iframe-embed-vmc.sky [ Skip ]
-
 # These tests broke during the Dart migration
 crbug.com/2 animation/basic-imperative.sky [ Skip ]
 crbug.com/2 animation/basic-transition.sky [ Skip ]
@@ -45,9 +42,6 @@ crbug.com/2 modules/load-event.sky [ Skip ]
 crbug.com/2 modules/modules.sky [ Skip ]
 crbug.com/2 modules/script-import.sky [ Skip ]
 crbug.com/2 parser/script.sky [ Skip ]
-crbug.com/2 services/buffer.sky [ Skip ]
-crbug.com/2 services/codec.sky [ Skip ]
-crbug.com/2 services/core.sky [ Skip ]
-crbug.com/2 services/event-sender.sky [ Skip ]
+crbug.com/2 services/iframe-embed-vmc.sky [ Skip ]
 crbug.com/2 services/iframe-service-provider.sky [ Skip ]
 crbug.com/2 services/network.sky [ Skip ]
