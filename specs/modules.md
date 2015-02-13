@@ -24,6 +24,13 @@ dependencies is empty. After the parser has finished parsing, the
 document waits until its list of outstanding dependencies is empty
 before the module it represents is marked complete.
 
+The ``as`` attribute on the ``import`` element binds a name to the
+imported module:
+
+```html
+<import src="path/to/chocolate.sky" as="chocolate" />
+```
+
 
 Module API
 ----------
@@ -52,7 +59,8 @@ relative order as those elements were first seen by the parser.
 
 When a library imports a module, it actually imports all the libraries
 that were declared by that module except the aforementioned element
-tree library.
+tree library. If the ``as`` attribute is present on the ``import``
+element, all the libraries are bound to the same name.
 
 At the end of the ``<script>`` block's source, if it parsed correctly
 and completely, the conceptual equivalent of the following code is
@@ -78,24 +86,23 @@ exposed in MirrorSystem.getName(libraryMirror.qualifiedName) etc
 The ``Module`` class is defined in ``sky:core`` as follows:
 
 ```dart
-
 abstract class AbstractModule extends EventTarget {
-  AbstractModule({this.document, this.url});
-
-  final Document document; // O(1)
-  // the Document of the module or application
+  AbstractModule({this.url, this.elements});
 
   final String url;
 
-  @nonnull external Future<@nonnull Module> import(String url); // O(Yikes)
+  final Root elements; // O(1)
+  // the Root node of the module or application's element tree
+
+  external Future<Module> import(String url); // O(Yikes)
   // load and return the URL at the given Module
   // if it's already loaded, the future will resolve immediately
   // if loading fails, the future will have an error
 
-  @nonnull List</*@nonnull*/ Module> getImports(); // O(N)
+  List<Module> getImports(); // O(N)
   // returns the Module objects of all the imported modules
 
-  external registerElement(@nonnull String tagname, @nonnull Type elementClass); // O(1)
+  external registerElement(String tagname, Type elementClass); // O(1)
   // registers a tag name with the parser
   // only useful during parse time
   // verify that tagname isn't null or empty
@@ -107,44 +114,17 @@ abstract class AbstractModule extends EventTarget {
   // (mention the tag name but not the classes, so that it's not observable that this currently happens out of order)
 }
 
-class Module : AbstractModule {
-  constructor (Application application, Document document, String url); // O(1)
-  readonly attribute Application application; // O(1)
+class Module extends AbstractModule {
+  Module({String url, Root elements, this.application}) :
+    super(url: url, elements: elements); // O(1)
+  final Application application; // O(1)
 }
 
-class Application : AbstractModule {
-  constructor (Document document, GestureManager gestureManager, String url); // O(1)
-  attribute String title; // O(1)
-  readonly attribute GestureManager gestureManager;
+class Application extends AbstractModule {
+  Application({String url, Root elements, this.gestureManager}) :
+    super(url: url, elements: elements); // O(1)
+  external String get title; // O(1)
+  external void set title(String newValue); // O(1)
+  final GestureManager gestureManager;
 }
 ```
-
- 
-Naming modules
---------------
-
-The ``as`` attribute on the ``import`` element binds a name to the
-imported module:
-
-```html
-<import src="path/to/chocolate.sky" as="chocolate" />
-```
-
-The parser executes the contents of script elements inside a module as
-if they were executed as follow:
-
-```javascript
-(new Function(name_1, ..., name_n, module, source_code)).call(
-  value_1, ..., value_n, source_module);
-```
-
-Where ``name_1`` through ``name_n`` are the names bound to the
-various named imports in the script element's document,
-``source_code`` is the text content of the script element,
-``source_module`` is the ``Module`` object of the script element's
-module, and ``value_1`` through ``value_n`` are the values
-exported by the various named imports in the script element's
-document.
-
-When an import fails to load, the ``as`` name for the import gets
-bound to ``undefined``.

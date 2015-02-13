@@ -17,19 +17,64 @@ abstract class Node extends EventTarget {
   external Root get owner; // O(1)
 
   external ParentNode get parentNode; // O(1)
-  external Element get parentElement; // O(1) // if parentNode isn't an element, returns null
-  external Node get previousSibling; // O(1)
-  external Node get nextSibling; // O(1)
+  Element get parentElement => {
+    if (parentNode is Element)
+      return parentNode as Element;
+    return null;
+  }
 
-  // the following all throw if parentNode is null
-  external void insertBefore(List nodes); // O(N) in number of arguments plus all their descendants
-  external void insertAfter(List nodes); // O(N) in number of arguments plus all their descendants
-  // TODO(ianh): rename insertBefore() and insertAfter() since the Web has an insertBefore() that means
-  // something else. What's a good name, though?
-  external void replaceWith(List nodes); // O(N) in number of descendants plus arguments plus all their descendants
-  // nodes must be String, Text, or Element
+  external Node get previousSibling; // O(1)
+  Element get previousElementSibling => {
+    var result = previousSibling;
+    while (result != null && result is! Element)
+      result = result.previousSibling;
+    return result as Element;
+  }
+
+  external Node get nextSibling; // O(1)
+  Element get nextElementSibling => {
+    var result = nextSibling;
+    while (result != null && result is! Element)
+      result = result.nextSibling;
+    return result as Element;
+  }
+
+  external void _insertBefore(Node node); // O(N) in number of descendants
+  // node must be Text or Element, parentNode must be non-null
+  void insertBefore(List nodes) {
+    List.forEach((node) {
+      if (node is String)
+        node = new Text(node);
+      _insertBefore(node);
+    });    
+  }
+
+  void _insertAfter(Node node); // O(N) in number of arguments plus all their descendants
+  // node must be Text or Element, parentNode must be non-null
+  void insertAfter(List nodes) {
+    var lastNode = this;
+    List.forEach((node) {
+      if (node is String)
+        node = new Text(node);
+      lastNode._insertAfter(node);
+      lastNode = node;
+    });
+  }
+
+  void replaceWith(List nodes) {
+    if (nextSibling != null) {
+      var anchor = nextSibling;
+      remove(); // parentNode can't be null here, so this won't throw
+      anchor.insertBefore(nodes);
+    } else {
+      var anchor = parentNode;
+      remove(); // throws if parentNode is null
+      anchor.append(nodes);
+    }
+  }
 
   external void remove(); // O(N) in number of descendants
+  // parentNode must be non-null
 
   // called when parentNode changes
   // this is why insertBefore(), append(), et al, are O(N) -- the whole affected subtree is walked
@@ -70,18 +115,63 @@ abstract class Node extends EventTarget {
 
 abstract class ParentNode extends Node {
   external Node get firstChild; // O(1)
+  Element get firstElementChild => {
+    var result = firstChild;
+    while (result != null && result is! Element)
+      result = result.nextSibling;
+    return result as Element;
+  }
+
   external Node get lastChild; // O(1)
+  Element get lastElementChild => {
+    var result = lastChild;
+    while (result != null && result is! Element)
+      result = result.previousSibling;
+    return result as Element;
+  }
 
   // Returns a new List every time.
   external List<Node> getChildren(); // O(N) in number of child nodes
-  external List<Element> getChildElements(); // O(N) in number of child nodes
-  // TODO(ianh): might not be necessary if we have the parser drop unnecessary whitespace text nodes
+  List<Element> getChildElements() {
+    // that the following works without a cast is absurd
+    return getChildren().where((node) => node is Element).toList();
+  }
 
-  external void append(List nodes); // O(N) in number of arguments plus all their descendants
-  external void appendChild(Node child); // O(N) in number of descandants
-  external void prepend(List nodes); // O(N) in number of arguments plus all their descendants
-  external void replaceChildrenWith(List nodes); // O(N) in number of descendants plus arguments plus all their descendants
-  // nodes must be String, Text, or Element
+  external void _appendChild(Node node); // O(N) in number of descendants
+  // node must be Text or Element
+  void appendChild(Node node) {
+    if (node is String)
+      node = new Text(node);
+    _appendChild(node);    
+  }
+  void append(List nodes) {
+    nodes.forEach(appendChild);
+  }
+
+  external void _prependChild(Node node); // O(N) in number of descendants
+  // node must be Text or Element
+  void prependChild(Node node) {
+    if (node is String)
+      node = new Text(node);
+    _prependChild(node);    
+  }
+  void prepend(List nodes) {
+    // note: not implemented in terms of _prependChild()
+    if (firstChild != null)
+      firstChild.insertBefore(nodes);
+    else
+      append(nodes);
+  }
+
+  external void removeChildren(); // O(N) in number of descendants
+  void setChild(Node node) {
+    removeChildren();
+    appendChild(node);
+  }
+  void setChildren(List nodes) {
+    removeChildren();
+    append(nodes);
+  }
 }
 
 class Attr {
@@ -107,7 +197,7 @@ abstract class Element extends ParentNode with Node {
   external Element({Map<String, String> attributes: null,
                    List children: null,
                    Module hostModule: null}); // O(M+N), M = number of attributes, N = number of children nodes plus all their descendants
-  // initialises the internal attributes table
+  // initialises the internal attributes table, which is a ordered list
   // appends the given children nodes
   // children must be String, Text, or Element
   // if this.needsShadow, creates a shadow tree
@@ -129,9 +219,8 @@ abstract class Element extends ParentNode with Node {
   external List<Attr> getAttributes(); // O(N) in number of attributes
 
   get bool needsShadow => false; // O(1)
-  external Root get shadowRoot; // O(1)
+  external final Root shadowRoot; // O(1)
   // returns the shadow root
-  // TODO(ianh): Should this be mutable? It would help explain how it gets set...
 
   void endTagParsedCallback() { }
   void attributeChangeCallback(String name, String oldValue, String newValue) { }
