@@ -797,11 +797,6 @@ static inline LayoutRect frameVisibleRect(RenderObject* renderer)
     return frameView->visibleContentRect();
 }
 
-bool RenderLayer::hitTest(const HitTestRequest& request, HitTestResult& result)
-{
-    return hitTest(request, result.hitTestLocation(), result);
-}
-
 bool RenderLayer::hitTest(const HitTestRequest& request, const HitTestLocation& hitTestLocation, HitTestResult& result)
 {
     ASSERT(isSelfPaintingLayer() || hasSelfPaintingLayerDescendant());

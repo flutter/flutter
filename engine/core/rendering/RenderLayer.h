@@ -149,11 +149,8 @@ public:
     void convertToLayerCoords(const RenderLayer* ancestorLayer, LayoutPoint&) const;
     void convertToLayerCoords(const RenderLayer* ancestorLayer, LayoutRect&) const;
 
-    // The two main functions that use the layer system.  The paint method
-    // paints the layers that intersect the damage rect from back to
-    // front.  The hitTest method looks for mouse events by walking
+    // The hitTest method looks for mouse events by walking
     // layers that intersect the point from front to back.
-    bool hitTest(const HitTestRequest&, HitTestResult&);
     bool hitTest(const HitTestRequest&, const HitTestLocation&, HitTestResult&);
 
     // Pass offsetFromRoot if known.
