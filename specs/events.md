@@ -131,6 +131,9 @@ abstract class Event<ReturnType> {
   // TODO(ianh): abstract API for doing things at shadow tree boundaries 
   // TODO(ianh): do events get blocked at scope boundaries, e.g. focus events when both sides are in the scope?
   // TODO(ianh): do events get retargetted, e.g. focus when leaving a custom element?
+  // e.g. sent from inside a shadow tree, when exiting the shadow tree, focus event should:
+  //  - disappear if we're moving from one to another element
+  //  - be targetted if it's going to another node in a different scope
 }
 
 class EventTarget {
