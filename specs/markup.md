@@ -149,7 +149,7 @@ that everything of note would be provided by frameworks.
 
 The following elements are implicitly registered by default, even if
 you haven't imported anything. You can get to their constructors if
-you import sky:core (basically, sky:core is always imported by defaul;
+you import dart:sky (basically, dart:sky is always imported by defaul;
 it's the runtime library). None of these elements have shadow trees.
 
 ``<import src="foo.sky">``

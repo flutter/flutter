@@ -31,9 +31,7 @@ Notes
 
 ```
 magical imports:
-  the core mojo fabric JS API   sky:mojo:fabric:core
-  the asyncWait/cancelWait mojo fabric JS API (interface to IPC thread)  sky:mojo:fabric:ipc
-  the mojom for the shell, proxying through C++ so that the shell pipe isn't exposed  sky:mojo:shell
-  the sky API  sky:core
-  the sky debug symbols for private APIs  sky:debug
+  the mojo fabric API   dart:mojo
+  the mojom for the shell, proxying through C++ so that the shell pipe isn't exposed  dart:mojo-shell
+  the Sky API  dart:sky
 ```

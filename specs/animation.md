@@ -32,7 +32,7 @@ Easing Functions
 ----------------
 
 ```dart
-// part of the framework, not sky:core
+// part of the framework, not dart:sky
 
 typedef void AnimationCallback();
 

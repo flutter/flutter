@@ -31,7 +31,7 @@ The ``@nonnull`` annotation does nothing in code not marked
 purposes. It indicates places where providing a null is a contract
 violation and that results are therefore likely to be poor.
 
-The following definitions are exposed in ``sky:core``:
+The following definitions are exposed in ``dart:sky``:
 
 ```dart
 abstract class AutomaticMetadata {

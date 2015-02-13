@@ -3,7 +3,7 @@ Sky DOM APIs
 
 ```dart
 SKY MODULE
-<!-- part of sky:core -->
+<!-- part of dart:sky -->
 
 <script>
 // ELEMENT TREE API

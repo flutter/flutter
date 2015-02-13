@@ -3,7 +3,7 @@ Sky Event Model
 
 ```dart
 SKY MODULE
-<!-- part of sky:core -->
+<!-- part of dart:sky -->
 
 <script>
 import 'dart:collection';

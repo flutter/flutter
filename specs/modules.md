@@ -36,7 +36,7 @@ Module API
 ----------
 
 Each module consists of one or more libraries. The first library in a
-module is the *element tree library*, which imports the sky:core
+module is the *element tree library*, which imports the dart:sky
 module and then consists of the following code for a Sky module:
 
 ```dart
@@ -51,7 +51,7 @@ final Module module = new Application();
 
 The ``<script>`` elements found in the document create the subsequent
 libraries. Each one first imports the ``dart:mirror`` library, then
-the ``sky:core`` module, then the first library described above, then
+the ``dart:sky`` module, then the first library described above, then
 all the modules referenced by ``<import>`` element up to that
 ``<script>`` element and all the libraries defined by ``<script>``
 elements up to that point, interleaved so as to maintain the same
@@ -83,7 +83,7 @@ Then, that ``main()`` function is called.
 TODO(ianh): decide what URL and name we should give the libraries, as
 exposed in MirrorSystem.getName(libraryMirror.qualifiedName) etc
 
-The ``Module`` class is defined in ``sky:core`` as follows:
+The ``Module`` class is defined in ``dart:sky`` as follows:
 
 ```dart
 abstract class AbstractModule extends EventTarget {

@@ -3,7 +3,7 @@ Gestures
 
 ```dart
 SKY MODULE
-<!-- part of sky:core -->
+<!-- part of dart:sky -->
 
 <script>
 abstract class GestureEvent extends Event {
@@ -261,7 +261,7 @@ Gestures defined in the framework
 
 ```dart
 SKY MODULE
-<!-- not in sky:core -->
+<!-- not in dart:sky -->
 <!-- note: this hasn't been dartified yet -->
 
 <script>

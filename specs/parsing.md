@@ -803,7 +803,7 @@ _document_ (this is implemented in JS):
         _imported modules_ contains no entries with unresolved
         promises.
      2. If the tag name is not registered, then let the ErrorElement
-        constructor from sky:core be the element constructor.
+        constructor from dart:sky be the element constructor.
         Otherwise, let the element constructor be the registered
         element's constructor for that tag name in this module.
      3. Create an element _node_ with the attributes given by the

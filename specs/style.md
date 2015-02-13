@@ -269,7 +269,7 @@ StyleNode
 */
 ```
 
-The types marked with * in the list above are not part of sky:core,
+The types marked with * in the list above are not part of dart:sky,
 and are only shown here to illustrate what kinds of extensions are
 possible and where they would fit.
 
@@ -454,7 +454,7 @@ PropertyHandle registerProperty(PropertySettings propertySettings);
   // registers a property with the given settings, and returns an integer >= 0
   // that can be used to refer to this property
 
-// sky:core exports a bunch of style grammars so that people can extend them
+// dart:sky exports a bunch of style grammars so that people can extend them
 attribute StyleGrammar PositiveLengthOrInfinityStyleGrammar; // resolves to LengthStyleValue
 attribute StyleGrammar PositiveLengthOrAutoStyleGrammar; // resolves to LengthStyleValue or IdentifierStyleValue (with value 'auto')
 attribute StyleGrammar PositiveLengthStyleGrammar; // resolves to LengthStyleValue
@@ -564,7 +564,7 @@ class Rule {
 
 Each frame, at some defined point relative to requestAnimationFrame(),
 if a Rule has started applying, or a Rule stopped applying, to an
-element, sky:core calls thatElement.style.clearFrameStyles() and then,
+element, dart:sky calls thatElement.style.clearFrameStyles() and then,
 for each Rule that now applies, calls
 thatElement.style.addFrameStyles() with the relevant StyleDeclaration
 and pseudoElement from each such Rule.
@@ -760,7 +760,7 @@ the Node inherited everything inheritable from its parent.
 Layout
 ------
 
-sky:core registers 'display' as follows:
+dart:sky registers 'display' as follows:
 
 ```javascript
   {
@@ -778,7 +778,7 @@ The following API is then used to add new layout manager types to 'display':
 void registerLayoutManager(String displayValue, LayoutManagerConstructor? layoutManager);
 ```
 
-sky:core by default registers:
+dart:sky by default registers:
 
 - 'block': sky.BlockLayoutManager
 - 'paragraph': sky.ParagraphLayoutManager
