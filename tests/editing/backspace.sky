@@ -1,5 +1,4 @@
 <body>
-<import src="../resources/event-sender.sky" as="eventSender" />
 <style>
 .blue {
   border: 2px solid blue;
@@ -7,11 +6,17 @@
 </style>
 <div class="blue" contenteditable></div>
 <script>
-var control = document.querySelector('.blue');
-control.focus();
-eventSender.keyDown('a');
-eventSender.keyDown('b');
-eventSender.keyDown('BACK');
-eventSender.done();
+import "../resources/event-sender.dart" as eventSender;
+import "dart:sky";
+import "package:mojo/services/input_events/public/interfaces/input_key_codes.mojom.dart";
+
+void main() {
+  var control = document.querySelector('.blue');
+  control.focus();
+  eventSender.keyDown(KeyboardCode_A);
+  eventSender.keyDown(KeyboardCode_B);
+  eventSender.keyDown(KeyboardCode_BACK);
+  eventSender.done();
+}
 </script>
 </body>

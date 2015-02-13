@@ -1,11 +1,17 @@
 <sky>
-<import src="../resources/chai.sky" />
-<import src="../resources/mocha.sky" />
 This test verifies that the height of an editable block remains the same after adding block elements and removing them.
 <div contenteditable="true" style="border: solid blue" id="test"></div>
 <script>
-describe("height of an editable block", function() {
-  it("remains the same after adding block elements and removing them", function(done) {
+import "../resources/third_party/unittest/unittest.dart";
+import "../resources/unit.dart";
+
+import "dart:async";
+import "dart:sky";
+
+void main() {
+  initUnit();
+
+  test("remains the same after adding block elements and removing them", () {
     var elem = document.getElementById("test");
     var originalHeight = elem.offsetHeight;
     var d = elem.appendChild(document.createElement('div'));
@@ -14,15 +20,14 @@ describe("height of an editable block", function() {
     d.appendChild(new Text('bbb'));
     var newHeight = elem.offsetHeight;
 
-    while (elem.firstChild) {
+    while (elem.firstChild != null) {
        elem.removeChild(elem.firstChild);
     }
 
-    setTimeout(function() {
-      assert.equal(elem.offsetHeight, originalHeight);
-      done();
-    });
+    new Timer(Duration.ZERO, expectAsync(() {
+      expect(elem.offsetHeight, equals(originalHeight));
+    }));
   });
-})
+}
 </script>
 </sky>
