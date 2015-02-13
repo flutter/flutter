@@ -48,6 +48,10 @@ Timer _createTimer(int milliseconds,
   return new _Timer(milliseconds, callback, repeating);
 }
 
+String _getBaseURLString() native "GetBaseURLString";
+Uri _getBaseURL() => Uri.parse(_getBaseURLString());
+
 _getPrintClosure() => _print;
 _getScheduleMicrotaskClosure() => _scheduleMicrotask;
+_getGetBaseURLClosure() =>_getBaseURL;
 _getCreateTimerClosure() => _createTimer;

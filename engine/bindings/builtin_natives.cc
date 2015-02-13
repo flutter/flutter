@@ -36,6 +36,7 @@ namespace blink {
 #define BUILTIN_NATIVE_LIST(V) \
   V(Logger_PrintString, 1)     \
   V(ScheduleMicrotask, 1)      \
+  V(GetBaseURLString, 0)       \
   V(Timer_create, 3)           \
   V(Timer_cancel, 1)
 
@@ -101,7 +102,14 @@ static void InitDartInternal(Dart_Handle builtin_library) {
   DART_CHECK_VALID(Dart_SetField(vm_hooks, timer_name, timer));
 }
 
-static void InitAsync(Dart_Handle builtin_library) {
+static void InitDartCore(Dart_Handle builtin) {
+  Dart_Handle get_base_url = GetClosure(builtin, "_getGetBaseURLClosure");
+  Dart_Handle core_library = DartBuiltin::LookupLibrary("dart:core");
+  DART_CHECK_VALID(Dart_SetField(core_library,
+      ToDart("_uriBaseClosure"), get_base_url));
+}
+
+static void InitDartAsync(Dart_Handle builtin_library) {
   Dart_Handle schedule_microtask =
       GetClosure(builtin_library, "_getScheduleMicrotaskClosure");
   Dart_Handle async_library = DartBuiltin::LookupLibrary("dart:async");
@@ -114,7 +122,8 @@ void BuiltinNatives::Init() {
   Dart_Handle builtin = Builtin::LoadAndCheckLibrary(Builtin::kBuiltinLibrary);
   DART_CHECK_VALID(builtin);
   InitDartInternal(builtin);
-  InitAsync(builtin);
+  InitDartCore(builtin);
+  InitDartAsync(builtin);
 }
 
 // Implementation of native functions which are used for some
@@ -155,6 +164,11 @@ void ScheduleMicrotask(Dart_NativeArguments args) {
   DartState* dart_state = DartState::Current();
   Microtask::enqueueMicrotask(base::Bind(&ExecuteMicrotask,
     dart_state->GetWeakPtr(), DartValue::Create(dart_state, closure)));
+}
+
+void GetBaseURLString(Dart_NativeArguments args) {
+  String url = DOMDartState::CurrentDocument()->url().string();
+  Dart_SetReturnValue(args, StringToDart(DartState::Current(), url));
 }
 
 void Timer_create(Dart_NativeArguments args) {
