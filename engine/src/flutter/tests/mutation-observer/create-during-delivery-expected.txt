@@ -1,5 +1,0 @@
-Running 1 tests
-ok 1 MutationObservers must wait for the next loop when created during delivery
-1 tests
-1 pass
-0 fail

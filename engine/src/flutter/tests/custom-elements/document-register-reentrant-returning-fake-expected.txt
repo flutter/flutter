@@ -1,1 +1,0 @@
-Fuzzing document.registerElement() through getters. PASS uless crash.

@@ -1,2 +1,0 @@
-CONSOLE: LOG: Constructor object isn't created.
-Fuzzing document.registerElement() through getters. PASS unless crash.

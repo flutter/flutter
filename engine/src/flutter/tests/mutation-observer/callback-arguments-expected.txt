@@ -1,5 +1,0 @@
-Running 1 tests
-ok 1 MutationObserver should pass the callback and observer arguments
-1 tests
-1 pass
-0 fail

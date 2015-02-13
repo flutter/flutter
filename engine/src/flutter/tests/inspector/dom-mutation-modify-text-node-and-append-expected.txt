@@ -1,6 +1,0 @@
-CONSOLE: LOG: DOM.childNodeInserted
-CONSOLE: LOG: 2
-CONSOLE: LOG: 3
-CONSOLE: LOG: DOM.childNodeInserted
-CONSOLE: LOG: 3
-adding
