@@ -68,11 +68,6 @@ enum CursorDirective {
     DoNotSetCursor
 };
 
-enum HitTestAction {
-    HitTestBlockBackground,
-    HitTestForeground
-};
-
 // Sides used when drawing borders and outlines. The values should run clockwise from top.
 enum BoxSide {
     BSTop,
@@ -298,7 +293,7 @@ public:
     // SVG uses FloatPoint precise hit testing, and passes the point in parent
     // coordinates instead of in paint invalidaiton container coordinates. Eventually the
     // rest of the rendering tree will move to a similar model.
-    virtual bool nodeAtFloatPoint(const HitTestRequest&, HitTestResult&, const FloatPoint& pointInParent, HitTestAction);
+    virtual bool nodeAtFloatPoint(const HitTestRequest&, HitTestResult&, const FloatPoint& pointInParent);
 
     bool canHaveWhitespaceChildren() const
     {
@@ -446,7 +441,7 @@ public:
 
     bool hitTest(const HitTestRequest&, HitTestResult&, const HitTestLocation& locationInContainer, const LayoutPoint& accumulatedOffset);
     virtual void updateHitTestResult(HitTestResult&, const LayoutPoint&);
-    virtual bool nodeAtPoint(const HitTestRequest&, HitTestResult&, const HitTestLocation& locationInContainer, const LayoutPoint& accumulatedOffset, HitTestAction);
+    virtual bool nodeAtPoint(const HitTestRequest&, HitTestResult&, const HitTestLocation& locationInContainer, const LayoutPoint& accumulatedOffset);
 
     virtual PositionWithAffinity positionForPoint(const LayoutPoint&);
     PositionWithAffinity createPositionWithAffinity(int offset, EAffinity);

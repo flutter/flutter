@@ -359,9 +359,9 @@ const char* RenderInline::renderName() const
 }
 
 bool RenderInline::nodeAtPoint(const HitTestRequest& request, HitTestResult& result,
-                                const HitTestLocation& locationInContainer, const LayoutPoint& accumulatedOffset, HitTestAction hitTestAction)
+                                const HitTestLocation& locationInContainer, const LayoutPoint& accumulatedOffset)
 {
-    return m_lineBoxes.hitTest(this, request, result, locationInContainer, accumulatedOffset, hitTestAction);
+    return m_lineBoxes.hitTest(this, request, result, locationInContainer, accumulatedOffset);
 }
 
 namespace {

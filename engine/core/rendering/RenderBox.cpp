@@ -362,23 +362,22 @@ LayoutUnit RenderBox::adjustContentBoxLogicalHeightForBoxSizing(LayoutUnit heigh
     return std::max<LayoutUnit>(0, height);
 }
 
-bool RenderBox::nodeAtPoint(const HitTestRequest& request, HitTestResult& result, const HitTestLocation& locationInContainer, const LayoutPoint& accumulatedOffset, HitTestAction action)
+bool RenderBox::nodeAtPoint(const HitTestRequest& request, HitTestResult& result, const HitTestLocation& locationInContainer, const LayoutPoint& accumulatedOffset)
 {
     LayoutPoint adjustedLocation = accumulatedOffset + location();
 
     // Check kids first.
     for (RenderObject* child = slowLastChild(); child; child = child->previousSibling()) {
-        if ((!child->hasLayer() || !toRenderLayerModelObject(child)->layer()->isSelfPaintingLayer()) && child->nodeAtPoint(request, result, locationInContainer, adjustedLocation, action)) {
+        if ((!child->hasLayer() || !toRenderLayerModelObject(child)->layer()->isSelfPaintingLayer()) && child->nodeAtPoint(request, result, locationInContainer, adjustedLocation)) {
             updateHitTestResult(result, locationInContainer.point() - toLayoutSize(adjustedLocation));
             return true;
         }
     }
 
-    // Check our bounds next. For this purpose always assume that we can only be hit in the
-    // foreground phase (which is true for replaced elements like images).
+    // Check our bounds next.
     LayoutRect boundsRect = borderBoxRect();
     boundsRect.moveBy(adjustedLocation);
-    if (visibleToHitTestRequest(request) && action == HitTestForeground && locationInContainer.intersects(boundsRect)) {
+    if (visibleToHitTestRequest(request) && locationInContainer.intersects(boundsRect)) {
         updateHitTestResult(result, locationInContainer.point() - toLayoutSize(adjustedLocation));
         if (!result.addNodeToRectBasedTestResult(node(), request, locationInContainer, boundsRect))
             return true;

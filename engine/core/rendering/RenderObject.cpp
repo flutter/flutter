@@ -1674,14 +1674,11 @@ PositionWithAffinity RenderObject::positionForPoint(const LayoutPoint&)
     return createPositionWithAffinity(caretMinOffset(), DOWNSTREAM);
 }
 
+// FIXME(sky): Change the callers to use nodeAtPoint direclty and remove this function.
+// Or, rename nodeAtPoint to hitTest?
 bool RenderObject::hitTest(const HitTestRequest& request, HitTestResult& result, const HitTestLocation& locationInContainer, const LayoutPoint& accumulatedOffset)
 {
-    // First test the foreground layer (lines and inlines).
-    bool inside = nodeAtPoint(request, result, locationInContainer, accumulatedOffset, HitTestForeground);
-    // See if the mouse is inside us but not any of our descendants
-    if (!inside)
-        inside = nodeAtPoint(request, result, locationInContainer, accumulatedOffset, HitTestBlockBackground);
-    return inside;
+    return nodeAtPoint(request, result, locationInContainer, accumulatedOffset);
 }
 
 void RenderObject::updateHitTestResult(HitTestResult& result, const LayoutPoint& point)
@@ -1699,7 +1696,7 @@ void RenderObject::updateHitTestResult(HitTestResult& result, const LayoutPoint&
     }
 }
 
-bool RenderObject::nodeAtPoint(const HitTestRequest&, HitTestResult&, const HitTestLocation& /*locationInContainer*/, const LayoutPoint& /*accumulatedOffset*/, HitTestAction)
+bool RenderObject::nodeAtPoint(const HitTestRequest&, HitTestResult&, const HitTestLocation& /*locationInContainer*/, const LayoutPoint& /*accumulatedOffset*/)
 {
     return false;
 }
@@ -1937,7 +1934,7 @@ bool RenderObject::canUpdateSelectionOnRootLineBoxes()
     return containingBlock ? !containingBlock->needsLayout() : false;
 }
 
-bool RenderObject::nodeAtFloatPoint(const HitTestRequest&, HitTestResult&, const FloatPoint&, HitTestAction)
+bool RenderObject::nodeAtFloatPoint(const HitTestRequest&, HitTestResult&, const FloatPoint&)
 {
     ASSERT_NOT_REACHED();
     return false;

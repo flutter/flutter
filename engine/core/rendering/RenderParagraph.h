@@ -36,7 +36,7 @@ protected:
 
     void paintChildren(PaintInfo&, const LayoutPoint&, Vector<RenderBox*>& layers) final;
 
-    bool hitTestContents(const HitTestRequest&, HitTestResult&, const HitTestLocation& locationInContainer, const LayoutPoint& accumulatedOffset, HitTestAction) final;
+    bool hitTestContents(const HitTestRequest&, HitTestResult&, const HitTestLocation& locationInContainer, const LayoutPoint& accumulatedOffset) final;
 
     virtual ETextAlign textAlignmentForLine(bool endsWithSoftBreak) const;
 

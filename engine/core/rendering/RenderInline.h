@@ -116,7 +116,7 @@ private:
 
     virtual void paint(PaintInfo&, const LayoutPoint&, Vector<RenderBox*>& layers) override final;
 
-    virtual bool nodeAtPoint(const HitTestRequest&, HitTestResult&, const HitTestLocation& locationInContainer, const LayoutPoint& accumulatedOffset, HitTestAction) override final;
+    virtual bool nodeAtPoint(const HitTestRequest&, HitTestResult&, const HitTestLocation& locationInContainer, const LayoutPoint& accumulatedOffset) override final;
 
     virtual LayerType layerTypeRequired() const override { return isRelPositioned() || createsGroup() || hasClipPath() ? NormalLayer : NoLayer; }
 

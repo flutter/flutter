@@ -177,9 +177,9 @@ void RenderParagraph::paintChildren(PaintInfo& paintInfo, const LayoutPoint& pai
     m_lineBoxes.paint(this, paintInfo, paintOffset, layers);
 }
 
-bool RenderParagraph::hitTestContents(const HitTestRequest& request, HitTestResult& result, const HitTestLocation& locationInContainer, const LayoutPoint& accumulatedOffset, HitTestAction hitTestAction)
+bool RenderParagraph::hitTestContents(const HitTestRequest& request, HitTestResult& result, const HitTestLocation& locationInContainer, const LayoutPoint& accumulatedOffset)
 {
-    return m_lineBoxes.hitTest(this, request, result, locationInContainer, accumulatedOffset, hitTestAction);
+    return m_lineBoxes.hitTest(this, request, result, locationInContainer, accumulatedOffset);
 }
 
 void RenderParagraph::markLinesDirtyInBlockRange(LayoutUnit logicalTop, LayoutUnit logicalBottom, RootInlineBox* highest)

@@ -206,10 +206,10 @@ LayoutUnit RenderImage::minimumReplacedHeight() const
     return m_imageResource->errorOccurred() ? intrinsicSize().height() : LayoutUnit();
 }
 
-bool RenderImage::nodeAtPoint(const HitTestRequest& request, HitTestResult& result, const HitTestLocation& locationInContainer, const LayoutPoint& accumulatedOffset, HitTestAction hitTestAction)
+bool RenderImage::nodeAtPoint(const HitTestRequest& request, HitTestResult& result, const HitTestLocation& locationInContainer, const LayoutPoint& accumulatedOffset)
 {
     HitTestResult tempResult(result.hitTestLocation());
-    bool inside = RenderReplaced::nodeAtPoint(request, tempResult, locationInContainer, accumulatedOffset, hitTestAction);
+    bool inside = RenderReplaced::nodeAtPoint(request, tempResult, locationInContainer, accumulatedOffset);
 
     if (!inside && result.isRectBasedTest())
         result.append(tempResult);

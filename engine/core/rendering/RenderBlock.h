@@ -176,7 +176,7 @@ public:
     LayoutUnit marginBeforeForChild(const RenderBox* child) const;
     LayoutUnit marginAfterForChild(const RenderBox* child) const;
 
-    virtual bool nodeAtPoint(const HitTestRequest&, HitTestResult&, const HitTestLocation& locationInContainer, const LayoutPoint& accumulatedOffset, HitTestAction) override;
+    virtual bool nodeAtPoint(const HitTestRequest&, HitTestResult&, const HitTestLocation& locationInContainer, const LayoutPoint& accumulatedOffset) override;
 
     LayoutUnit availableLogicalWidthForContent() const { return max<LayoutUnit>(0, logicalRightOffsetForContent() - logicalLeftOffsetForContent()); }
     LayoutUnit logicalLeftOffsetForContent() const { return borderLeft() + paddingLeft(); }
@@ -245,7 +245,7 @@ protected:
 
     virtual bool isInlineBlock() const override final { return isInline() && isReplaced(); }
 
-    virtual bool hitTestContents(const HitTestRequest&, HitTestResult&, const HitTestLocation& locationInContainer, const LayoutPoint& accumulatedOffset, HitTestAction);
+    virtual bool hitTestContents(const HitTestRequest&, HitTestResult&, const HitTestLocation& locationInContainer, const LayoutPoint& accumulatedOffset);
 
 private:
     virtual RenderObjectChildList* virtualChildren() override final { return children(); }

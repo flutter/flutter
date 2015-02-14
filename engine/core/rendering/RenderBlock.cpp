@@ -1024,7 +1024,7 @@ LayoutUnit RenderBlock::textIndentOffset() const
     return minimumValueForLength(style()->textIndent(), cw);
 }
 
-bool RenderBlock::nodeAtPoint(const HitTestRequest& request, HitTestResult& result, const HitTestLocation& locationInContainer, const LayoutPoint& accumulatedOffset, HitTestAction hitTestAction)
+bool RenderBlock::nodeAtPoint(const HitTestRequest& request, HitTestResult& result, const HitTestLocation& locationInContainer, const LayoutPoint& accumulatedOffset)
 {
     LayoutPoint adjustedLocation(accumulatedOffset + location());
     LayoutSize localOffset = toLayoutSize(adjustedLocation);
@@ -1063,7 +1063,7 @@ bool RenderBlock::nodeAtPoint(const HitTestRequest& request, HitTestResult& resu
             checkChildren = locationInContainer.intersects(clipRect);
     }
     if (checkChildren) {
-        if (hitTestContents(request, result, locationInContainer, toLayoutPoint(localOffset), hitTestAction)) {
+        if (hitTestContents(request, result, locationInContainer, toLayoutPoint(localOffset))) {
             updateHitTestResult(result, locationInContainer.point() - localOffset);
             return true;
         }
@@ -1079,22 +1079,20 @@ bool RenderBlock::nodeAtPoint(const HitTestRequest& request, HitTestResult& resu
     }
 
     // Now hit test our background
-    if (hitTestAction == HitTestBlockBackground) {
-        LayoutRect boundsRect(adjustedLocation, size());
-        if (visibleToHitTestRequest(request) && locationInContainer.intersects(boundsRect)) {
-            updateHitTestResult(result, locationInContainer.point() - localOffset);
-            if (!result.addNodeToRectBasedTestResult(node(), request, locationInContainer, boundsRect))
-                return true;
-        }
+    LayoutRect boundsRect(adjustedLocation, size());
+    if (visibleToHitTestRequest(request) && locationInContainer.intersects(boundsRect)) {
+        updateHitTestResult(result, locationInContainer.point() - localOffset);
+        if (!result.addNodeToRectBasedTestResult(node(), request, locationInContainer, boundsRect))
+            return true;
     }
 
     return false;
 }
 
-bool RenderBlock::hitTestContents(const HitTestRequest& request, HitTestResult& result, const HitTestLocation& locationInContainer, const LayoutPoint& accumulatedOffset, HitTestAction hitTestAction)
+bool RenderBlock::hitTestContents(const HitTestRequest& request, HitTestResult& result, const HitTestLocation& locationInContainer, const LayoutPoint& accumulatedOffset)
 {
     for (RenderBox* child = lastChildBox(); child; child = child->previousSiblingBox()) {
-        if (!child->hasSelfPaintingLayer() && child->nodeAtPoint(request, result, locationInContainer, accumulatedOffset, hitTestAction))
+        if (!child->hasSelfPaintingLayer() && child->nodeAtPoint(request, result, locationInContainer, accumulatedOffset))
             return true;
     }
 

@@ -69,7 +69,7 @@ private:
 
     virtual LayoutUnit minimumReplacedHeight() const override;
 
-    virtual bool nodeAtPoint(const HitTestRequest&, HitTestResult&, const HitTestLocation& locationInContainer, const LayoutPoint& accumulatedOffset, HitTestAction) override final;
+    virtual bool nodeAtPoint(const HitTestRequest&, HitTestResult&, const HitTestLocation& locationInContainer, const LayoutPoint& accumulatedOffset) override final;
 
     void updateIntrinsicSizeIfNeeded(const LayoutSize& newSize);
     // Update the size of the image to be rendered. Object-fit may cause this to be different from the CSS box's content rect.

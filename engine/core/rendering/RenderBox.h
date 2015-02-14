@@ -272,7 +272,7 @@ public:
 
     virtual void layout() override;
     virtual void paint(PaintInfo&, const LayoutPoint&, Vector<RenderBox*>& layers) override;
-    virtual bool nodeAtPoint(const HitTestRequest&, HitTestResult&, const HitTestLocation& locationInContainer, const LayoutPoint& accumulatedOffset, HitTestAction) override;
+    virtual bool nodeAtPoint(const HitTestRequest&, HitTestResult&, const HitTestLocation& locationInContainer, const LayoutPoint& accumulatedOffset) override;
 
     virtual LayoutUnit minPreferredLogicalWidth() const override;
     virtual LayoutUnit maxPreferredLogicalWidth() const override;
