@@ -1,9 +1,8 @@
 CONSOLE: unittest-suite-wait-for-done
-CONSOLE: PASS: should throw with invalid arguments
 CONSOLE: PASS: should replace elements
 CONSOLE: PASS: should replace text
 CONSOLE: PASS: should replace children with a fragment
 CONSOLE: 
-CONSOLE: All 4 tests passed.
+CONSOLE: All 3 tests passed.
 CONSOLE: unittest-suite-success
 DONE
