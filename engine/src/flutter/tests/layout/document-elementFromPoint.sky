@@ -1,9 +1,14 @@
 <sky>
 <style>
-foo { width: 100px; height: 100px; background: blue; }
+foo, parent { width: 100px; height: 100px; background: blue; }
 bar { width: 100px; height: 100px; background: purple; }
+parent { display: paragraph; }
+child { background: salmon; }
 </style>
 <foo /><bar />
+<parent>
+  <child>Foo bar</child>
+</parent>
 <script>
 import "../resources/third_party/unittest/unittest.dart";
 import "../resources/unit.dart";
@@ -24,7 +29,24 @@ void main() {
     // z-order (missing, zero, positive and negative)
     expect(document.elementFromPoint(50, 50).tagName, equals('foo'));
     expect(document.elementFromPoint(50, 150).tagName, equals('bar'));
-    expect(document.elementFromPoint(50, 250).tagName, equals('sky'));
+    expect(document.elementFromPoint(150, 50).tagName, equals('sky'));
+  });
+
+  void hitTestWithChildren() {
+    expect(document.elementFromPoint(50, 210).tagName, equals('child'));
+    // Right of the <child> inline.
+    expect(document.elementFromPoint(95, 210).tagName, equals('parent'));
+    // Below the <child> inline.
+    expect(document.elementFromPoint(50, 275).tagName, equals('parent'));
+  }
+
+  test("should hit test child and parent", () {
+    hitTestWithChildren();
+  });
+
+  test("should hit test child with layered parent", () {
+    document.querySelector('parent').style.setProperty("transform", "translate3d(0, 0, 0)");
+    hitTestWithChildren();
   });
 }
 </script>
