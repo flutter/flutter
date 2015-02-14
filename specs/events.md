@@ -75,14 +75,7 @@ class Dispatcher<T> {
       throw exceptions;
   }
 
-  Dispatcher<T> where(Filter<T> filter) {
-    var subdispatcher = new Dispatcher<T>();
-    listen((T data) {
-      if (filter(data))
-        subdispatcher._add(data);
-    });
-    return subdispatcher;
-  }
+  Dispatcher<T> where(Filter<T> filter) => new WhereDispatcher<T>(this, filter);
 
   Dispatcher<T> until(Filter<T> filter) {
     var subdispatcher = new Dispatcher<T>();
@@ -108,6 +101,28 @@ class Dispatcher<T> {
     };
     listen(handler);
     return completer.future;
+  }
+}
+
+class WhereDispatcher<T> extends Dispatcher {
+  WhereDispatcher(this.parent, this.filter) : super();
+  Dispatcher parent;
+  Filter filter;
+
+  void listen(Handler<T> handler) {
+    if (_listeners == null || _listeners.length == 0)
+      parent.listen(_handler);
+    super.listen(handler);
+  }
+  bool unlisten(Handler<T> handler) {
+    var result = super.unlisten(handler);
+    if (result && _listeners.length == 0)
+      parent.unlisten(_handler);
+    return result;
+  }
+  void _handler(T data) {
+    if (filter(data))
+      _add(data);
   }
 }
 
