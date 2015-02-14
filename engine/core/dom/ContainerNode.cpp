@@ -51,7 +51,7 @@ static void collectChildrenAndRemoveFromOldParent(Node& node, NodeVector& nodes,
 {
     if (node.isDocumentFragment()) {
         DocumentFragment& fragment = toDocumentFragment(node);
-        getChildNodes(fragment, nodes);
+        appendChildNodes(fragment, nodes);
         fragment.removeChildren();
         return;
     }
@@ -325,7 +325,7 @@ void ContainerNode::willRemoveChild(Node& child)
 void ContainerNode::willRemoveChildren()
 {
     NodeVector children;
-    getChildNodes(*this, children);
+    appendChildNodes(*this, children);
 
     ChildListMutationScope mutation(*this);
     for (NodeVector::const_iterator it = children.begin(); it != children.end(); ++it) {
@@ -867,6 +867,72 @@ void ContainerNode::setHovered(bool over)
         if (renderStyle()->affectedByHover())
             setNeedsStyleRecalc(LocalStyleChange);
     }
+}
+
+Element* ContainerNode::firstElementChild() const
+{
+    return ElementTraversal::firstChild(*this);
+}
+
+Element* ContainerNode::lastElementChild() const
+{
+    return ElementTraversal::lastChild(*this);
+}
+
+Vector<RefPtr<Node>> ContainerNode::getChildNodes() const
+{
+    Vector<RefPtr<Node>> result;
+    for (Node* node = firstChild(); node; node = node->nextSibling())
+        result.append(node);
+    return result;
+}
+
+Vector<RefPtr<Element>> ContainerNode::getChildElements() const
+{
+    Vector<RefPtr<Element>> result;
+    for (Element* element = ElementTraversal::firstWithin(*this); element; element = ElementTraversal::next(*element, this))
+        result.append(element);
+    return result;
+}
+
+void ContainerNode::append(Vector<RefPtr<Node>>& nodes, ExceptionState& es)
+{
+    RefPtr<ContainerNode> protect(this);
+    for (auto& node : nodes) {
+        appendChild(node.release(), es);
+        if (es.had_exception())
+            return;
+    }
+}
+
+void ContainerNode::prepend(Vector<RefPtr<Node>>& nodes, ExceptionState& es)
+{
+    RefPtr<ContainerNode> protect(this);
+    RefPtr<Node> refChild = m_firstChild;
+    for (auto& node : nodes) {
+        insertBefore(node.release(), refChild.get(), es);
+        if (es.had_exception())
+            return;
+    }
+}
+
+PassRefPtr<Node> ContainerNode::prependChild(PassRefPtr<Node> node, ExceptionState& es)
+{
+    return insertBefore(node, m_firstChild, es);
+}
+
+PassRefPtr<Node> ContainerNode::setChild(PassRefPtr<Node> node, ExceptionState& es)
+{
+    RefPtr<ContainerNode> protect(this);
+    removeChildren();
+    return appendChild(node, es);
+}
+
+void ContainerNode::setChildren(Vector<RefPtr<Node>>& nodes, ExceptionState& es)
+{
+    RefPtr<ContainerNode> protect(this);
+    removeChildren();
+    append(nodes, es);
 }
 
 unsigned ContainerNode::countChildren() const

@@ -22,7 +22,7 @@ void main() {
     var oldChild = doc.appendChild(doc.createElement("div"));
     expect(childElementCount(doc), equals(1));
     var newChild = doc.createElement("div");
-    doc.replaceChild(newChild, oldChild);
+    oldChild.replaceWith([newChild]);
     expect(childElementCount(doc), equals(1));
     expect(newChild.parentNode, equals(doc));
     expect(oldChild.parentNode, isNull);
@@ -33,7 +33,7 @@ void main() {
     expect(childElementCount(doc), equals(0));
     expect(childNodeCount(doc), equals(1));
     var newChild = doc.createElement("div");
-    doc.replaceChild(newChild, oldChild);
+    oldChild.replaceWith([newChild]);
     expect(childElementCount(doc), equals(1));
     expect(childNodeCount(doc), equals(1));
     expect(newChild.parentNode, equals(doc));
@@ -44,7 +44,7 @@ void main() {
     var oldChild = doc.appendChild(doc.createElement("div"));
     expect(childElementCount(doc), equals(1));
     var newChild = new Text(" text ");
-    doc.replaceChild(newChild, oldChild);
+    oldChild.replaceWith([newChild]);
     expect(childElementCount(doc), equals(0));
     expect(childNodeCount(doc), equals(1));
     expect(newChild.parentNode, equals(doc));
@@ -68,7 +68,7 @@ void main() {
     fragment.appendChild(new Text(" text "));
     var newChild = fragment.appendChild(doc.createElement("div"));
     fragment.appendChild(new Text(" "));
-    doc.replaceChild(fragment, oldChild);
+    oldChild.replaceWith([fragment]);
     expect(childElementCount(doc), equals(1));
     expect(childNodeCount(doc), equals(3));
     expect(newChild.parentNode, equals(doc));

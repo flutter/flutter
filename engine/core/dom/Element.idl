@@ -1,75 +1,36 @@
-/*
- * Copyright (C) 2006, 2007, 2009 Apple Inc. All rights reserved.
- * Copyright (C) 2006 Samuel Weinig <sam.weinig@gmail.com>
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
- *
- * You should have received a copy of the GNU Library General Public License
- * along with this library; see the file COPYING.LIB.  If not, write to
- * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
- * Boston, MA 02110-1301, USA.
- */
+// Copyright 2015 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
 
-[
-    SpecialWrapFor=HTMLElement,
-] interface Element : Node {
-    readonly attribute DOMString? tagName;
+interface Element : ParentNode {
+  readonly attribute DOMString tagName;
 
-    DOMString? getAttribute(DOMString name);
-    [RaisesException, CustomElementCallbacks] void setAttribute(DOMString name, DOMString value);
-    [CustomElementCallbacks] void removeAttribute(DOMString name);
-    boolean hasAttribute(DOMString name);
-    boolean hasAttributes();
-    sequence<Attr> getAttributes();
+  boolean hasAttribute(DOMString name);
+  [TreatReturnedNullStringAs=Null] DOMString getAttribute(DOMString name);
+  [RaisesException] void setAttribute(DOMString name, optional DOMString value);
+  void removeAttribute(DOMString name);
 
-    readonly attribute CSSStyleDeclaration style;
+  sequence<Attr> getAttributes();
 
-    [Reflect] attribute DOMString id;
-    readonly attribute DOMString? localName;
+  readonly attribute ShadowRoot shadowRoot;
 
-    [RaisesException] boolean matches(DOMString selectors);
+  // TODO(abarth): Move to Node.
+  readonly attribute CSSStyleDeclaration style;
 
-    readonly attribute long offsetLeft;
-    readonly attribute long offsetTop;
-    readonly attribute long offsetWidth;
-    readonly attribute long offsetHeight;
-    readonly attribute Element offsetParent;
-    readonly attribute long clientLeft;
-    readonly attribute long clientTop;
-    readonly attribute long clientWidth;
-    readonly attribute long clientHeight;
-
-    void focus();
-    void blur();
-
-    readonly attribute DOMTokenList classList;
-
-    [RaisesException] ShadowRoot ensureShadowRoot();
-    readonly attribute ShadowRoot shadowRoot;
-    NodeList getDestinationInsertionPoints();
-
-    // CSSOM View Module API
-    ClientRectList getClientRects();
-    ClientRect getBoundingClientRect();
-
-    [Reflect] attribute DOMString lang;
-    attribute DOMString dir;
-
-    [CustomElementCallbacks] attribute long tabIndex;
-
-    [CustomElementCallbacks, RaisesException=Setter] attribute DOMString contentEditable;
-    readonly attribute boolean isContentEditable;
-
-    attribute boolean spellcheck;
+  // TODO(abarth): Remove these when we implement more of the system.
+  [RaisesException] boolean matches(DOMString selectors);
+  void focus();
+  void blur();
+  attribute long tabIndex;
+  readonly attribute DOMTokenList classList;
+  [RaisesException] ShadowRoot ensureShadowRoot();
+  readonly attribute long offsetLeft;
+  readonly attribute long offsetTop;
+  readonly attribute long offsetWidth;
+  readonly attribute long offsetHeight;
+  readonly attribute Element offsetParent;
+  readonly attribute long clientLeft;
+  readonly attribute long clientTop;
+  readonly attribute long clientWidth;
+  readonly attribute long clientHeight;
 };
-
-Element implements ParentNode;
-Element implements ChildNode;

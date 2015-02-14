@@ -126,6 +126,10 @@ struct DartConverter<RefPtr<T>> {
   static Dart_Handle ToDart(RefPtr<T> val) {
     return DartConverter<T*>::ToDart(val.get());
   }
+
+  static RefPtr<T> FromDart(Dart_Handle handle) {
+    return DartConverter<T*>::FromDart(handle);
+  }
 };
 
 template<typename T>

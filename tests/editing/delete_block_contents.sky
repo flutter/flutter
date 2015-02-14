@@ -20,9 +20,7 @@ void main() {
     d.appendChild(new Text('bbb'));
     var newHeight = elem.offsetHeight;
 
-    while (elem.firstChild != null) {
-       elem.removeChild(elem.firstChild);
-    }
+    elem.removeChildren();
 
     new Timer(Duration.ZERO, expectAsync(() {
       expect(elem.offsetHeight, equals(originalHeight));

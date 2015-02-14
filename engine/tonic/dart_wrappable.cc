@@ -50,9 +50,9 @@ void DartWrappable::FinalizeDartWrapper(void* isolate_callback_data,
 }
 
 DartWrappable* DartConverterWrappable::FromDart(Dart_Handle handle) {
-  intptr_t* peer = 0;
+  intptr_t peer = 0;
   Dart_Handle result =
-      Dart_GetNativeInstanceField(handle, DartWrappable::kPeerIndex, peer);
+      Dart_GetNativeInstanceField(handle, DartWrappable::kPeerIndex, &peer);
   if (Dart_IsError(result))
     return nullptr;
   return reinterpret_cast<DartWrappable*>(peer);

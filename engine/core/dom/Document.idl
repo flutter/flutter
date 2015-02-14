@@ -25,7 +25,7 @@ typedef (CanvasRenderingContext2D or WebGLRenderingContext) RenderingContext;
 [
     Constructor(),
     ConstructorCallWith=Document,
-] interface Document : Node {
+] interface Document : ParentNode {
     readonly attribute Element documentElement;
 
     [CustomElementCallbacks, RaisesException] Element createElement(DOMString tagName);
@@ -75,5 +75,3 @@ typedef (CanvasRenderingContext2D or WebGLRenderingContext) RenderingContext;
 
     readonly attribute HTMLScriptElement currentScript;
 };
-
-Document implements ParentNode;

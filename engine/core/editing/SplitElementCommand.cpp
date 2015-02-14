@@ -83,7 +83,7 @@ void SplitElementCommand::doUnapply()
         return;
 
     NodeVector children;
-    getChildNodes(*m_element1, children);
+    appendChildNodes(*m_element1, children);
 
     RefPtr<Node> refChild = m_element2->firstChild();
 

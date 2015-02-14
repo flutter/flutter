@@ -76,6 +76,9 @@ public:
     bool hasAttribute(const AtomicString& name) const;
     const AtomicString& getAttribute(const AtomicString& name) const;
     void setAttribute(const AtomicString& name, const AtomicString& value, ExceptionState&);
+    void setAttribute(const AtomicString& name, ExceptionState& es) {
+        setAttribute(name, String(), es);
+    }
     void removeAttribute(const AtomicString& name);
     void removeAttribute(const QualifiedName&);
 

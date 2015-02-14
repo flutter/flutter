@@ -26,7 +26,7 @@
         var tests = document.getElementById("tests");
         var log = document.getElementById("log");
         var i = 1;
-        for (var element = tests.firstElementChild; element != null; element = element.nextElementSibling) {
+        for (Element element = tests.firstElementChild; element != null; element = element.nextElementSibling) {
             var order = int.parse(window.getComputedStyle(element).getPropertyValue("order"));
             var div = document.createElement("div");
             var text = (order == i) ? "PASS" : "FAIL";
@@ -34,7 +34,7 @@
                 + element.tagName
                 + " class="
                 + element.classList.toString()
-                + " id=" + element.id
+                + " id=" + element.getAttribute("id").toString()
                 + "> order was "
                 + order.toString();
             if (order != i)

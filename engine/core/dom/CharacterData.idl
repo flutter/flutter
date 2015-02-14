@@ -30,6 +30,3 @@ interface CharacterData : Node {
     [RaisesException] void deleteData(unsigned long offset, unsigned long length);
     [RaisesException] void replaceData(unsigned long offset, unsigned long length, DOMString data);
 };
-
-CharacterData implements ChildNode;
-

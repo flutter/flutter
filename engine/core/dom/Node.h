@@ -144,6 +144,14 @@ public:
     Node* firstChild() const;
     Node* lastChild() const;
 
+    Element* previousElementSibling();
+    Element* nextElementSibling();
+
+    // These functions release the nodes from |nodes|.
+    void newInsertBefore(Vector<RefPtr<Node>>& nodes, ExceptionState&);
+    void newInsertAfter(Vector<RefPtr<Node>>& nodes, ExceptionState&);
+    void replaceWith(Vector<RefPtr<Node>>& nodes, ExceptionState&);
+
     void remove(ExceptionState&);
 
     // These should all actually return a node, but this is only important for language bindings,
@@ -340,7 +348,7 @@ public:
         return *m_treeScope;
     }
 
-    ContainerNode* ownerScope() const;
+    ContainerNode* owner() const;
 
     bool inActiveDocument() const;
 

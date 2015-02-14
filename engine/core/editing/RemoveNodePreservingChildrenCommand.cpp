@@ -43,7 +43,7 @@ void RemoveNodePreservingChildrenCommand::doApply()
 {
     if (m_node->isContainerNode()) {
         NodeVector children;
-        getChildNodes(toContainerNode(*m_node), children);
+        appendChildNodes(toContainerNode(*m_node), children);
 
         size_t size = children.size();
         for (size_t i = 0; i < size; ++i) {

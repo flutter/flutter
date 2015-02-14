@@ -43,12 +43,28 @@ const int initialNodeVectorSize = 11;
 typedef Vector<RefPtr<Node>, initialNodeVectorSize> NodeVector;
 
 class ContainerNode : public Node {
+    DEFINE_WRAPPERTYPEINFO();
 public:
     virtual ~ContainerNode();
 
     Node* firstChild() const { return m_firstChild; }
     Node* lastChild() const { return m_lastChild; }
     bool hasChildren() const { return m_firstChild; }
+
+    Element* firstElementChild() const;
+    Element* lastElementChild() const;
+
+    Vector<RefPtr<Node>> getChildNodes() const;
+    Vector<RefPtr<Element>> getChildElements() const;
+
+    // These functions release the nodes from |nodes|.
+    void append(Vector<RefPtr<Node>>& nodes, ExceptionState&);
+    void prepend(Vector<RefPtr<Node>>& nodes, ExceptionState&);
+    PassRefPtr<Node> prependChild(PassRefPtr<Node> node, ExceptionState&);
+
+    void removeChildren();
+    PassRefPtr<Node> setChild(PassRefPtr<Node> node, ExceptionState&);
+    void setChildren(Vector<RefPtr<Node>>& nodes, ExceptionState&);
 
     bool hasOneChild() const { return m_firstChild && !m_firstChild->nextSibling(); }
     bool hasOneTextChild() const { return hasOneChild() && m_firstChild->isTextNode(); }
@@ -69,7 +85,6 @@ public:
     // They don't send DOM mutation events or handle reparenting.
     void parserAppendChild(PassRefPtr<Node>);
 
-    void removeChildren();
 
     void cloneChildNodes(ContainerNode* clone);
 
@@ -216,7 +231,7 @@ inline bool Node::isTreeScope() const
     return &treeScope().rootNode() == this;
 }
 
-inline void getChildNodes(ContainerNode& node, NodeVector& nodes)
+inline void appendChildNodes(ContainerNode& node, NodeVector& nodes)
 {
     ASSERT(!nodes.size());
     for (Node* child = node.firstChild(); child; child = child->nextSibling())

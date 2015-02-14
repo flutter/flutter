@@ -379,6 +379,58 @@ PassRefPtr<Node> Node::appendChild(PassRefPtr<Node> newChild, ExceptionState& ex
     return nullptr;
 }
 
+Element* Node::previousElementSibling()
+{
+    return ElementTraversal::previousSibling(*this);
+}
+
+Element* Node::nextElementSibling()
+{
+    return ElementTraversal::nextSibling(*this);
+}
+
+void Node::newInsertBefore(Vector<RefPtr<Node>>& nodes, ExceptionState& es)
+{
+    RefPtr<ContainerNode> parent = parentNode();
+    if (!parent)
+        return;
+    RefPtr<Node> protect(this);
+    for (auto& node : nodes) {
+        parent->insertBefore(node.release(), this, es);
+        if (es.had_exception())
+            return;
+    }
+}
+
+void Node::newInsertAfter(Vector<RefPtr<Node>>& nodes, ExceptionState& es)
+{
+    RefPtr<ContainerNode> parent = this->parentNode();
+    if (!parent)
+        return;
+    RefPtr<Node> reference = m_next;
+    for (auto& node : nodes) {
+      parent->insertBefore(node.release(), reference.get(), es);
+      if (es.had_exception())
+        return;
+    }
+}
+
+void Node::replaceWith(Vector<RefPtr<Node>>& nodes, ExceptionState& es)
+{
+    RefPtr<ContainerNode> parent = this->parentNode();
+    if (!parent)
+        return;
+    RefPtr<Node> reference = m_next;
+    remove(es);
+    if (es.had_exception())
+        return;
+    for (auto& node : nodes) {
+        parent->insertBefore(node, reference.get(), es);
+        if (es.had_exception())
+            return;
+    }
+}
+
 void Node::remove(ExceptionState& exceptionState)
 {
     if (ContainerNode* parent = parentNode())
@@ -862,7 +914,7 @@ Document* Node::ownerDocument() const
     return doc == this ? 0 : doc;
 }
 
-ContainerNode* Node::ownerScope() const
+ContainerNode* Node::owner() const
 {
     if (inDocument())
         return &treeScope().rootNode();

@@ -248,9 +248,10 @@ struct DartConverter<Vector<T>> {
     Dart_ListLength(handle, &length);
     result.reserveCapacity(length);
     for (intptr_t i = 0; i < length; ++i) {
-      Dart_Handle element = Dart_ListGetAt(handle, i);
-      DCHECK(!Dart_IsError(element));
-      result.append(DartConverter<T>::FromDart(element));
+      Dart_Handle item = Dart_ListGetAt(handle, i);
+      DCHECK(!Dart_IsError(item));
+      DCHECK(item);
+      result.append(DartConverter<T>::FromDart(item));
     }
     return result;
   }

@@ -20,9 +20,7 @@
 [
     Constructor,
     ConstructorCallWith=Document,
-] interface DocumentFragment : Node {
+] interface DocumentFragment : ParentNode {
     // NonElementParentNode API.
     Element getElementById(DOMString elementId);
 };
-
-DocumentFragment implements ParentNode;

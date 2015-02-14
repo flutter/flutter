@@ -11,14 +11,13 @@ void main() {
   test("should return null for elements not a child of a scope", () {
     var doc = new Document();
     var element = doc.createElement("div");
-    expect(element.ownerScope, isNull);
+    expect(element.owner, isNull);
   });
   test("should return the document for elements in the document scope", () {
     var doc = new Document();
     var element = doc.createElement("div");
     doc.appendChild(element);
-    expect(element.ownerScope, equals(element.ownerDocument));
-    expect(element.ownerScope, equals(doc));
+    expect(element.owner, equals(doc));
   });
   test("should return the shadow root for elements in the shadow root scope", () {
     var doc = new Document();
@@ -26,26 +25,26 @@ void main() {
     var child = doc.createElement("div");
     var shadowRoot = host.ensureShadowRoot();
     shadowRoot.appendChild(child);
-    expect(child.ownerScope, equals(shadowRoot));
+    expect(child.owner, equals(shadowRoot));
   });
   test("should return self for a shadow root or document", () {
     var doc = new Document();
     var host = doc.createElement("div");
     doc.appendChild(host);
     var shadowRoot = host.ensureShadowRoot();
-    expect(shadowRoot.ownerScope, equals(shadowRoot));
-    expect(doc.ownerScope, equals(doc));
+    expect(shadowRoot.owner, equals(shadowRoot));
+    expect(doc.owner, equals(doc));
   });
   test("should dynamically update", () {
     var doc = new Document();
     var host = doc.createElement("div");
     var child = doc.createElement("div");
     var shadowRoot = host.ensureShadowRoot();
-    expect(child.ownerScope, isNull);
+    expect(child.owner, isNull);
     shadowRoot.appendChild(child);
-    expect(child.ownerScope, equals(shadowRoot));
+    expect(child.owner, equals(shadowRoot));
     child.remove();
-    expect(child.ownerScope, isNull);
+    expect(child.owner, isNull);
   });
 }
 </script>

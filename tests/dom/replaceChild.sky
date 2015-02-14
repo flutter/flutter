@@ -12,30 +12,11 @@ void main() {
   var childElementCount = DomUtils.childElementCount;
   var childNodeCount = DomUtils.childNodeCount;
 
-  test("should throw with invalid arguments", () {
-    var parent = document.createElement("div");
-    expect(() {
-      parent.replaceChild();
-    }, throws);
-    // expect(() {
-    //   parent.replaceChild(null, null);
-    // }, throws);
-    expect(() {
-      parent.replaceChild({tagName: "div"});
-    }, throws);
-    // expect(() {
-    //   parent.replaceChild(null, document.createElement("div"));
-    // }, throws);
-    expect(() {
-      parent.replaceChild(document.createElement("div"), {tagName: "div"});
-    }, throws);
-  });
-
   test("should replace elements", () {
     var parent = document.createElement("div");
     var oldChild = parent.appendChild(document.createElement("div"));
     var newChild = document.createElement("div");
-    parent.replaceChild(newChild, oldChild);
+    oldChild.replaceWith([newChild]);
     expect(oldChild.parentNode, isNull);
     expect(newChild.parentNode, equals(parent));
   });
@@ -44,7 +25,7 @@ void main() {
     var parent = document.createElement("div");
     var oldChild = parent.appendChild(new Text(" it's a text "));
     var newChild = document.createElement("div");
-    parent.replaceChild(newChild, oldChild);
+    oldChild.replaceWith([newChild]);
     expect(oldChild.parentNode, isNull);
     expect(newChild.parentNode, equals(parent));
   });
@@ -58,7 +39,7 @@ void main() {
     var parent = document.createElement("div");
     var oldChild = parent.appendChild(document.createElement("div"));
     var lastChild = parent.appendChild(document.createElement("div"));
-    parent.replaceChild(fragment, oldChild);
+    oldChild.replaceWith([fragment]);
     expect(child1.parentNode, equals(parent));
     expect(child2.parentNode, equals(parent));
     expect(child3.parentNode, equals(parent));

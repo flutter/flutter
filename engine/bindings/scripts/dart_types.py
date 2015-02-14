@@ -413,21 +413,10 @@ def dart_value_to_cpp_value_array_or_sequence(native_array_element_type, variabl
     # and is used to provide a human-readable exception message
     if index is None:
         index = 0  # special case, meaning "setter"
-#    else:
-#        index += 1  # human-readable index
-    if (native_array_element_type.is_interface_type):
-        this_cpp_type = None
-        ref_ptr_type = 'RefPtr'
-        # FIXME(vsm): We're not using ref_ptr_type....
-        expression_format = '{variable_name} = DartConverter<Vector<{native_array_element_type}>>::FromArguments(args, {index}, exception)'
-        add_includes_for_type(native_array_element_type)
-    else:
-        ref_ptr_type = None
-        this_cpp_type = native_array_element_type.cpp_type
-        expression_format = '{variable_name} = DartConverter<Vector<{cpp_type}>>::FromArguments(args, {index}, exception)'
-
+    this_cpp_type = native_array_element_type.cpp_type
+    expression_format = '{variable_name} = DartConverter<Vector<{cpp_type}>>::FromArguments(args, {index}, exception)'
     expression = expression_format.format(native_array_element_type=native_array_element_type.name,
-                                          cpp_type=this_cpp_type, index=index, ref_ptr_type=ref_ptr_type,
+                                          cpp_type=this_cpp_type, index=index,
                                           variable_name=variable_name)
     return expression
 
