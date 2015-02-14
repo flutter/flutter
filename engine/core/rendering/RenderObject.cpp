@@ -1674,18 +1674,13 @@ PositionWithAffinity RenderObject::positionForPoint(const LayoutPoint&)
     return createPositionWithAffinity(caretMinOffset(), DOWNSTREAM);
 }
 
-bool RenderObject::hitTest(const HitTestRequest& request, HitTestResult& result, const HitTestLocation& locationInContainer, const LayoutPoint& accumulatedOffset, HitTestFilter hitTestFilter)
+bool RenderObject::hitTest(const HitTestRequest& request, HitTestResult& result, const HitTestLocation& locationInContainer, const LayoutPoint& accumulatedOffset)
 {
-    bool inside = false;
-    if (hitTestFilter != HitTestSelf) {
-        // First test the foreground layer (lines and inlines).
-        inside = nodeAtPoint(request, result, locationInContainer, accumulatedOffset, HitTestForeground);
-    }
-
+    // First test the foreground layer (lines and inlines).
+    bool inside = nodeAtPoint(request, result, locationInContainer, accumulatedOffset, HitTestForeground);
     // See if the mouse is inside us but not any of our descendants
-    if (hitTestFilter != HitTestDescendants && !inside)
+    if (!inside)
         inside = nodeAtPoint(request, result, locationInContainer, accumulatedOffset, HitTestBlockBackground);
-
     return inside;
 }
 

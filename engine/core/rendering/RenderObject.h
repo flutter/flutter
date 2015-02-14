@@ -68,12 +68,6 @@ enum CursorDirective {
     DoNotSetCursor
 };
 
-enum HitTestFilter {
-    HitTestAll,
-    HitTestSelf,
-    HitTestDescendants
-};
-
 enum HitTestAction {
     HitTestBlockBackground,
     HitTestForeground
@@ -450,7 +444,7 @@ public:
     void forceLayout();
     void forceChildLayout();
 
-    bool hitTest(const HitTestRequest&, HitTestResult&, const HitTestLocation& locationInContainer, const LayoutPoint& accumulatedOffset, HitTestFilter = HitTestAll);
+    bool hitTest(const HitTestRequest&, HitTestResult&, const HitTestLocation& locationInContainer, const LayoutPoint& accumulatedOffset);
     virtual void updateHitTestResult(HitTestResult&, const LayoutPoint&);
     virtual bool nodeAtPoint(const HitTestRequest&, HitTestResult&, const HitTestLocation& locationInContainer, const LayoutPoint& accumulatedOffset, HitTestAction);
 

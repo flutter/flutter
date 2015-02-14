@@ -1006,15 +1006,16 @@ RenderLayer* RenderLayer::hitTestLayer(RenderLayer* rootLayer, RenderLayer* cont
     }
 
     LayoutRect layerBounds;
-    ClipRect backgroundRect, foregroundRect;
+    // FIXME(sky): Remove foregroundRect. It's unused.
+    ClipRect contentRect, foregroundRect;
     ClipRectsContext clipRectsContext(rootLayer, RootRelativeClipRects);
-    clipper().calculateRects(clipRectsContext, hitTestRect, layerBounds, backgroundRect, foregroundRect);
+    clipper().calculateRects(clipRectsContext, hitTestRect, layerBounds, contentRect, foregroundRect);
 
     // Next we want to see if the mouse pos is inside the child RenderObjects of the layer.
-    if (isSelfPaintingLayer() && foregroundRect.intersects(hitTestLocation)) {
+    if (isSelfPaintingLayer() && contentRect.intersects(hitTestLocation)) {
         // Hit test with a temporary HitTestResult, because we only want to commit to 'result' if we know we're frontmost.
         HitTestResult tempResult(result.hitTestLocation());
-        if (hitTestContents(request, tempResult, layerBounds, hitTestLocation, HitTestDescendants)
+        if (hitTestContents(request, tempResult, layerBounds, hitTestLocation)
             && isHitCandidate(this, false, zOffsetForContentsPtr, unflattenedTransformState.get())) {
             if (result.isRectBasedTest())
                 result.append(tempResult);
@@ -1029,25 +1030,7 @@ RenderLayer* RenderLayer::hitTestLayer(RenderLayer* rootLayer, RenderLayer* cont
         }
     }
 
-    // If we found a layer, return. Child layers, and foreground always render in front of background.
-    if (candidateLayer)
-        return candidateLayer;
-
-    if (isSelfPaintingLayer() && backgroundRect.intersects(hitTestLocation)) {
-        HitTestResult tempResult(result.hitTestLocation());
-        if (hitTestContents(request, tempResult, layerBounds, hitTestLocation, HitTestSelf)
-            && isHitCandidate(this, false, zOffsetForContentsPtr, unflattenedTransformState.get())) {
-            if (result.isRectBasedTest())
-                result.append(tempResult);
-            else
-                result = tempResult;
-            return this;
-        }
-        if (result.isRectBasedTest())
-            result.append(tempResult);
-    }
-
-    return 0;
+    return candidateLayer;
 }
 
 RenderLayer* RenderLayer::hitTestLayerByApplyingTransform(RenderLayer* rootLayer, RenderLayer* containerLayer, const HitTestRequest& request, HitTestResult& result,
@@ -1080,11 +1063,11 @@ RenderLayer* RenderLayer::hitTestLayerByApplyingTransform(RenderLayer* rootLayer
     return hitTestLayer(this, containerLayer, request, result, localHitTestRect, newHitTestLocation, true, newTransformState.get(), zOffset);
 }
 
-bool RenderLayer::hitTestContents(const HitTestRequest& request, HitTestResult& result, const LayoutRect& layerBounds, const HitTestLocation& hitTestLocation, HitTestFilter hitTestFilter) const
+bool RenderLayer::hitTestContents(const HitTestRequest& request, HitTestResult& result, const LayoutRect& layerBounds, const HitTestLocation& hitTestLocation) const
 {
     ASSERT(isSelfPaintingLayer() || hasSelfPaintingLayerDescendant());
 
-    if (!renderer()->hitTest(request, result, hitTestLocation, toLayoutPoint(layerBounds.location() - renderBoxLocation()), hitTestFilter)) {
+    if (!renderer()->hitTest(request, result, hitTestLocation, toLayoutPoint(layerBounds.location() - renderBoxLocation()))) {
         // It's wrong to set innerNode, but then claim that you didn't hit anything, unless it is
         // a rect-based test.
         ASSERT(!result.innerNode() || (result.isRectBasedTest() && result.rectBasedTestResult().size()));

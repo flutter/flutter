@@ -288,7 +288,7 @@ private:
                             const HitTestingTransformState* containerTransformState,
                             const LayoutPoint& translationOffset = LayoutPoint()) const;
 
-    bool hitTestContents(const HitTestRequest&, HitTestResult&, const LayoutRect& layerBounds, const HitTestLocation&, HitTestFilter) const;
+    bool hitTestContents(const HitTestRequest&, HitTestResult&, const LayoutRect& layerBounds, const HitTestLocation&) const;
 
     bool shouldBeSelfPaintingLayer() const;
 
