@@ -1079,7 +1079,7 @@ bool RenderBlock::nodeAtPoint(const HitTestRequest& request, HitTestResult& resu
     }
 
     // Now hit test our background
-    if (hitTestAction == HitTestBlockBackground || hitTestAction == HitTestChildBlockBackground) {
+    if (hitTestAction == HitTestBlockBackground) {
         LayoutRect boundsRect(adjustedLocation, size());
         if (visibleToHitTestRequest(request) && locationInContainer.intersects(boundsRect)) {
             updateHitTestResult(result, locationInContainer.point() - localOffset);
@@ -1093,12 +1093,8 @@ bool RenderBlock::nodeAtPoint(const HitTestRequest& request, HitTestResult& resu
 
 bool RenderBlock::hitTestContents(const HitTestRequest& request, HitTestResult& result, const HitTestLocation& locationInContainer, const LayoutPoint& accumulatedOffset, HitTestAction hitTestAction)
 {
-    // Hit test our children.
-    HitTestAction childHitTest = hitTestAction;
-    if (hitTestAction == HitTestChildBlockBackgrounds)
-        childHitTest = HitTestChildBlockBackground;
     for (RenderBox* child = lastChildBox(); child; child = child->previousSiblingBox()) {
-        if (!child->hasSelfPaintingLayer() && child->nodeAtPoint(request, result, locationInContainer, accumulatedOffset, childHitTest))
+        if (!child->hasSelfPaintingLayer() && child->nodeAtPoint(request, result, locationInContainer, accumulatedOffset, hitTestAction))
             return true;
     }
 

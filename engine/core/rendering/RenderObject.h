@@ -76,8 +76,6 @@ enum HitTestFilter {
 
 enum HitTestAction {
     HitTestBlockBackground,
-    HitTestChildBlockBackground,
-    HitTestChildBlockBackgrounds,
     HitTestForeground
 };
 
