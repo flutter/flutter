@@ -59,7 +59,10 @@ class DartLoader::Job : public DartDependency,
  private:
   // MojoFetcher::Client
   void OnReceivedResponse(mojo::URLResponsePtr response) override {
-    // TODO(abarth): Handle network errors.
+    if (response->status_code != 200) {
+      loader_->DidFailJob(this);
+      return;
+    }
     drainer_ = adoptPtr(new DataPipeDrainer(this, response->body.Pass()));
   }
 
@@ -175,7 +178,8 @@ class DartLoader::WatcherSignaler {
 };
 
 DartLoader::DartLoader(DartState* dart_state)
-    : dart_state_(dart_state->GetWeakPtr()), dependency_catcher_(nullptr) {
+    : dart_state_(dart_state->GetWeakPtr()),
+      dependency_catcher_(nullptr) {
 }
 
 DartLoader::~DartLoader() {
@@ -258,6 +262,19 @@ void DartLoader::DidCompleteSourceJob(SourceJob* job,
       Dart_HandleFromPersistent(job->library()),
       StringToDart(dart_state_.get(), job->url().string()),
       Dart_NewStringFromUTF8(buffer.data(), buffer.size()), 0, 0));
+
+  jobs_.remove(job);
+}
+
+void DartLoader::DidFailJob(Job* job) {
+  DCHECK(dart_state_);
+  DartIsolateScope scope(dart_state_->isolate());
+  DartApiScope api_scope;
+
+  WatcherSignaler watcher_signaler(*this, job);
+
+  LOG(ERROR) << "Library Load failed: " << job->url().string().utf8().data();
+  // TODO(eseidel): Call Dart_LibraryHandleError in the SourceJob case?
 
   jobs_.remove(job);
 }

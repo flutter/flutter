@@ -55,6 +55,7 @@ class DartLoader {
   Dart_Handle Source(Dart_Handle library, Dart_Handle url);
   void DidCompleteImportJob(ImportJob* job, const Vector<uint8_t>& buffer);
   void DidCompleteSourceJob(SourceJob* job, const Vector<uint8_t>& buffer);
+  void DidFailJob(Job* job);
 
   base::WeakPtr<DartState> dart_state_;
   HashMap<String, Job*> pending_libraries_;
