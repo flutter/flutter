@@ -55,6 +55,7 @@ ImplementedAs=*
 InitializedByEventConstructor
 Iterable
 LegacyTreatAsPartialInterface
+Named
 NamedConstructor=*
 NoImplHeader
 NoInterfaceObject
@@ -70,9 +71,9 @@ ReflectInvalid=*
 ReflectMissing=*
 ReflectOnly=*
 Replaceable
+SetterCallWith=ExecutionContext|ScriptArguments|ActiveWindow|FirstWindow
 SetWrapperReferenceFrom=*
 SetWrapperReferenceTo=*
-SetterCallWith=ExecutionContext|ScriptArguments|ActiveWindow|FirstWindow
 SpecialWrapFor=*
 TreatNullAs=NullString|EmptyString
 TreatReturnedNullStringAs=Null|Undefined

@@ -125,6 +125,7 @@ def argument_context(interface, method, argument, index):
         'local_cpp_type': local_cpp_type,
         # FIXME: check that the default value's type is compatible with the argument's
         'default_value': default_value,
+        'is_named': 'Named' in extended_attributes,
         'dart_default_value': dart_default_value,
         'enum_validation_expression': idl_type.enum_validation_expression,
         'preprocessed_type': preprocessed_type,

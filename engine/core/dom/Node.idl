@@ -3,8 +3,7 @@
 // found in the LICENSE file.
 
 interface Node : EventTarget {
-  // TODO(abarth): This should actually be a named argument.
-  Node cloneNode(optional boolean deep);
+  Node cloneNode([Named] optional boolean deep = true);
 
   readonly attribute ParentNode owner;
   readonly attribute ParentNode parentNode;
