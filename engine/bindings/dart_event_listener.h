@@ -51,12 +51,7 @@ struct DartConverter<EventListener*> {
   static PassRefPtr<EventListener> FromArgumentsWithNullCheck(
       Dart_NativeArguments args,
       int index,
-      Dart_Handle& exception) {
-    Dart_Handle handle = Dart_GetNativeArgument(args, index);
-    if (Dart_IsNull(handle))
-      return nullptr;
-    return FromDart(handle);
-  }
+      Dart_Handle& exception);
 };
 
 }  // namespace blink

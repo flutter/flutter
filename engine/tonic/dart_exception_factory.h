@@ -17,6 +17,7 @@ class DartExceptionFactory {
   explicit DartExceptionFactory(DartState* dart_state);
   ~DartExceptionFactory();
 
+  Dart_Handle CreateNullArgumentException(int index);
   Dart_Handle CreateException(const String& class_name, const String& message);
 
  private:

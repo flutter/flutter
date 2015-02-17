@@ -7,6 +7,7 @@
 
 #include "sky/engine/tonic/dart_converter.h"
 #include "sky/engine/tonic/dart_builtin.h"
+#include "sky/engine/wtf/text/StringBuilder.h"
 
 namespace blink {
 
@@ -15,6 +16,14 @@ DartExceptionFactory::DartExceptionFactory(DartState* dart_state)
 }
 
 DartExceptionFactory::~DartExceptionFactory() {
+}
+
+Dart_Handle DartExceptionFactory::CreateNullArgumentException(int index) {
+  StringBuilder message;
+  message.appendLiteral("Argument ");
+  message.appendNumber(index);
+  message.appendLiteral(" cannot be null.");
+  return CreateException("ArgumentError", message.toString());
 }
 
 Dart_Handle DartExceptionFactory::CreateException(const String& class_name,

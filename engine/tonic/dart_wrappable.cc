@@ -10,7 +10,6 @@
 #include "sky/engine/tonic/dart_exception_factory.h"
 #include "sky/engine/tonic/dart_state.h"
 #include "sky/engine/tonic/dart_wrapper_info.h"
-#include "sky/engine/wtf/text/StringBuilder.h"
 
 namespace blink {
 
@@ -79,12 +78,7 @@ DartWrappable* DartConverterWrappable::FromArgumentsWithNullCheck(
   Dart_Handle handle = Dart_GetNativeArgument(args, index);
   if (Dart_IsNull(handle)) {
     DartState* state = DartState::Current();
-    StringBuilder message;
-    message.appendLiteral("Argument ");
-    message.appendNumber(index);
-    message.appendLiteral(" cannot be null.");
-    exception = state->exception_factory().CreateException("ArgumentError",
-                                                           message.toString());
+    exception = state->exception_factory().CreateNullArgumentException(index);
     return nullptr;
   }
   intptr_t native_fields[DartWrappable::kNumberOfNativeFields];

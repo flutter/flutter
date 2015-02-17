@@ -8,6 +8,7 @@
 #include "sky/engine/core/events/Event.h"
 #include "sky/engine/tonic/dart_api_scope.h"
 #include "sky/engine/tonic/dart_error.h"
+#include "sky/engine/tonic/dart_exception_factory.h"
 #include "sky/engine/tonic/dart_gc_visitor.h"
 #include "sky/engine/tonic/dart_isolate_scope.h"
 
@@ -64,6 +65,20 @@ void DartEventListener::Finalize(void* isolate_callback_data,
   DartEventListener* listener = static_cast<DartEventListener*>(peer);
   listener->closure_ = nullptr;
   listener->deref();  // Balances ref in DartEventListener::DartEventListener
+}
+
+PassRefPtr<EventListener>
+DartConverter<EventListener*>::FromArgumentsWithNullCheck(
+    Dart_NativeArguments args,
+    int index,
+    Dart_Handle& exception) {
+  Dart_Handle handle = Dart_GetNativeArgument(args, index);
+  if (Dart_IsNull(handle)) {
+    DartState* state = DartState::Current();
+    exception = state->exception_factory().CreateNullArgumentException(index);
+    return nullptr;
+  }
+  return FromDart(handle);
 }
 
 }  // namespace blink
