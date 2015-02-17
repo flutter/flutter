@@ -100,7 +100,9 @@ void DartController::ExecuteModule(RefPtr<AbstractModule> module) {
   DCHECK(Dart_CurrentIsolate() == dart_state()->isolate());
   DartApiScope dart_api_scope;
 
-  LogIfError(Dart_FinalizeLoading(true));
+  // Don't continue if we failed to load the module.
+  if (LogIfError(Dart_FinalizeLoading(true)))
+    return;
   Dart_Handle library = module->library()->dart_value();
   const char* name = module->isApplication() ? "main" : "init";
   Dart_Handle closure_name = Dart_NewStringFromCString(name);

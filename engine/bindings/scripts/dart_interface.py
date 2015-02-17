@@ -169,6 +169,9 @@ def interface_context(interface):
             # For overloaded methods, only generate one accessor
             ('overload_index' not in method or method['overload_index'] == 1))
 
+    for method in methods:
+        assert 'overloads' not in method, 'Dart does not support overloads, %s in %s' % (method['name'], interface.name)
+
     generate_method_native_entries(interface, methods, 'Method')
 
     context.update({
