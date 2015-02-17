@@ -11,7 +11,7 @@ part of sky.core;
         {{ '{' if arg.is_named else '[' }}
         {%- endif -%}
         {{ arg.dart_type }} {{ arg.name }}
-        {%- if arg.is_optional %} = {{ arg.dart_default_value }}
+        {%- if arg.is_optional %} {{ ':' if arg.is_named else '='}}  {{ arg.dart_default_value }}
         {#- TODO(eseidel): This does not support having both optional and named arguments! -#}
         {%- if loop.last -%}{{ '}' if arg.is_named else ']' }}{%- endif -%}
         {%- endif -%}
