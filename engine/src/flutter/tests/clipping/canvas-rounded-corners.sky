@@ -16,11 +16,13 @@
   </ul>
   <canvas id="theCanvas" width="257" height="257"></canvas>
   <script>
+  import 'dart:sky';
+
   void main() {
     var theCanvas = document.getElementById('theCanvas');
     var context = theCanvas.getContext('2d');
     context.fillColor = 'green';
-    context.fillRect(0, 0, theCanvas.width, theCanvas.width);
+    context.fillRect(0.0, 0.0, 1.0 * theCanvas.width, 1.0 * theCanvas.width);
   }
   </script>
 </sky>
