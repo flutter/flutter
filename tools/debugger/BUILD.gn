@@ -30,8 +30,8 @@ mojo_native_application("sky_debugger") {
     "//mojo/public/cpp/system",
     "//mojo/public/cpp/utility",
     "//mojo/services/window_manager/public/interfaces",
-    "//net",
-    "//net:http_server",
+    "//services/http_server/public",
+    "//services/http_server/public:util",
     "//services/tracing:bindings",
     "//sky/viewer:bindings",
   ]
