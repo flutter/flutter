@@ -17,10 +17,9 @@ void main() {
     expect(() {
       parent.appendChild();
     }, throws);
-    // TODO(dart): This is a real bug.
-    // expect(() {
-    //   parent.appendChild(null);
-    // }, throws);
+    expect(() {
+      parent.appendChild(null);
+    }, throws);
     expect(() {
       parent.appendChild({tagName: "div"});
     }, throws);
