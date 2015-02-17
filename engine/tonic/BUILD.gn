@@ -15,6 +15,8 @@ source_set("tonic") {
     "dart_converter.h",
     "dart_error.cc",
     "dart_error.h",
+    "dart_exception_factory.cc",
+    "dart_exception_factory.h",
     "dart_gc_context.cc",
     "dart_gc_context.h",
     "dart_gc_controller.cc",

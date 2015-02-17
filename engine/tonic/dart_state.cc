@@ -7,6 +7,7 @@
 
 #include "sky/engine/tonic/dart_class_library.h"
 #include "sky/engine/tonic/dart_string_cache.h"
+#include "sky/engine/tonic/dart_exception_factory.h"
 #include "sky/engine/wtf/PassOwnPtr.h"
 
 namespace blink {
@@ -21,6 +22,7 @@ DartState::DartState()
     : isolate_(NULL),
       class_library_(adoptPtr(new DartClassLibrary)),
       string_cache_(adoptPtr(new DartStringCache)),
+      exception_factory_(adoptPtr(new DartExceptionFactory(this))),
       weak_factory_(this) {
 }
 

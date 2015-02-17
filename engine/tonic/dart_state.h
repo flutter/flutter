@@ -16,6 +16,7 @@
 namespace blink {
 class DartStringCache;
 class DartClassLibrary;
+class DartExceptionFactory;
 
 // DartState represents the state associated with a given Dart isolate. The
 // lifetime of this object is controlled by the DartVM. If you want to hold a
@@ -46,11 +47,13 @@ class DartState : public base::SupportsUserData {
 
   DartClassLibrary& class_library() { return *class_library_; }
   DartStringCache& string_cache() { return *string_cache_; }
+  DartExceptionFactory& exception_factory() { return *exception_factory_; }
 
  private:
   Dart_Isolate isolate_;
   OwnPtr<DartClassLibrary> class_library_;
   OwnPtr<DartStringCache> string_cache_;
+  OwnPtr<DartExceptionFactory> exception_factory_;
 
   base::WeakPtrFactory<DartState> weak_factory_;
 
