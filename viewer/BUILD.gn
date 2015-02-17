@@ -27,8 +27,6 @@ mojo_native_application("viewer") {
     "platform/weburlloader_impl.h",
     "runtime_flags.cc",
     "runtime_flags.h",
-    "services/inspector_impl.cc",
-    "services/inspector_impl.h",
     "viewer.cc",
   ]
 
