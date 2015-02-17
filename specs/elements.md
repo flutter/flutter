@@ -379,7 +379,7 @@ class SelectorQuery {
   external SelectorQuery(String selector); // O(F()) where F() is the complexity of the selector
 
   external bool matches(Element element); // O(F())
-  external Element find(node root); // O(N*F())+O(M) where N is the number of descendants and M the average depth of the tree
+  external Element find(Node root); // O(N*F())+O(M) where N is the number of descendants and M the average depth of the tree
   external List<Element> findAll(Node root); // O(N*F())+O(N*M) where N is the number of descendants and M the average depth of the tree
   // find() and findAll() throw if the root is not one of the following:
   //  - Element

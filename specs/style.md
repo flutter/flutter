@@ -570,8 +570,8 @@ thatElement.style.addFrameStyles() with the relevant StyleDeclaration
 and pseudoElement from each such Rule.
 
 
-Cascade
--------
+Update the render tree
+----------------------
 
 Simultaneously walk the tree rooted at the application Document,
 taking into account shadow trees and child distribution, and the tree

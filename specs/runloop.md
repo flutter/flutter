@@ -1,44 +1,104 @@
 Sky's Run Loop
 ==============
 
+Sky has three task queues, named idle, paint, and nextPaint.
+
+When a task is run, it has a time budget, and if the time budget is
+exceeded, then a catchable DeadlineExceededException exception is
+fired.
+
+```dart
+class DeadlineExceededException implements Exception { }
+```
+
+When Sky is to *process a task queue until a particular time*, with a
+queue *relevant task queue*, bits *filter bits*, a time
+*particular time*, and an *idle rule* which is either "sleep" or
+"abort", it must run the following steps:
+
+1. Let *remaining time* be the time until the given *particular time*.
+2. If *remaining time* is less than or equal to zero, exit this
+   algorithm.
+3. Let *task list* be the list of tasks in the *relevant task queue*
+   that have bits that, when 'or'ed with *filter bits*, are non-zero;
+   whose required budget is less than or equal to *remaining time*;
+   and whose due time, if any, has been reached.
+4. If *task list* is empty, then if *idle rule* is "sleep" then return
+   to step 1, otherwise, exit this algorithm.
+5. Sort *task list* by the priority of each task, highest first.
+6. Remove the top task from *task list* from the *relevant task
+   queue*, and let that be *selected task*.
+7. Run *selected task*, with a budget of *remaining time* or 1ms,
+   whichever is shorter.
+8. Return to step 1.
+
+When Sky is to *drain a task queue for a specified time*, with a queue
+*relevant task queue*, bits *filter bits*, and a duration *budget*, it
+must run the following steps:
+
+2. Let *task list* be the list of tasks in the *relevant task queue*
+   that have bits that, when 'or'ed with *filter bits*, are non-zero;
+   and whose required budget is less than or equal to *budget*.
+4. If *task list* is empty, then exit.
+5. Sort *task list* by the priority of each task, highest first.
+6. Remove the top task from *task list* from the *relevant task
+   queue*, and let that be *selected task*.
+7. Run *selected task*, with a budget of *budget*.
+8. Decrease *budget* with the amount of time that *selected task* took
+   to run.
+9. If *selected task* threw an uncaught DeadlineExceededException
+   exception, then cancel all the tasks in *relevant task queue*.
+   Otherwise, return to step 2.
+
 Sky's run loop consists of running the following, at 120Hz (each loop
 takes 8.333ms):
 
-1. Send scroll and resize events if necessary, limiting each handler
-   to 1ms, and limiting the total time spent on these handlers to 1ms.
+1. *Drain* the *paint task queue*, with bits
+   `application.paintTaskBits`, for 1ms.
 
-2. Fire animation frame callbacks for up to 1ms. Each callback can run
-   for up to 1ms. Once 1ms has expired, throw a (catchable)
-   EDeadlineExceeded exception. If it's not caught, drop subsequent
-   callbacks.
+2. Create a task that does the following, then run it with a budget of
+   1ms:
 
-4. Spend up to 1ms to update the render tree, including calling
-   childAdded(), childRemoved(), and getLayoutManager() as needed.
-   Once 1ms has expired, throw a (catchable) EDeadlineExceeded
-   exception, leaving the render tree in whatever state it has
-   reached.
+   1. Update the render tree, including calling childAdded(),
+      childRemoved(), and getLayoutManager() as needed, catching any
+      exceptions other than DeadlineExceededException exceptions.
 
-3. Update the ElementStyleDeclarationList objects for all elements on
-   the RenderTree.
+   If an exception is thrown by this, then the RenderNode tree will
+   continue to not quite match the element tree, which is fine.
 
-5. Update as much of layout as possible; after 1ms, throw a
-   (catchable) EDeadlineExceeded exception, leaving the remaining
-   nodes unprepared.
+3. If there are no tasks on the *idle task queue* with bits
+   `LayoutKind`, create a task that tells the root node to layout if
+   it has needsLayout or descendantNeedsLayout, mark that with
+   priority 0 and bits `LayoutKind`, and add it to the *idle task
+   queue*.
 
-6. Update as much of paint as possible; after 1ms, throw a (catchable)
-   EDeadlineExceeded exception, leaving any remaining nodes
-   unprepared.
+4. *Process* the *idle task queue*, with bits `LayoutKind`, with a
+   target time of t-1ms, where t is the time at which we have to send
+   the frame to the GPU, and with an *idle rule* of "abort".
 
-7. Send frame to GPU.
+5. Create a task that does the following, then run it with a budget of
+   1ms:
 
-8. Run pending tasks until the 8.333ms expires. Each task may only run
-   for at most 1ms, after 1ms they get a (catchable) EDeadlineExceeded
-   exception. While there are no pending tasks, sleep.
-   Tasks are things like:
-    - timers
-    - updating the DOM in response to parsing
-    - input events
-    - mojo callbacks
+   1. If there are no RenderNodes that need paint, abort.
+
+   2. Call the `paint()` callback of the RenderNode that was least
+      recently marked as needing paint, catching any exceptions other
+      than DeadlineExceededException exceptions.
+
+   3. Jump to step 1.
+
+   If an exception is thrown by this, then some RenderNode objects
+      will be out-of-date during the paint.
+
+6. Send frame to GPU.
+
+7. Replace the paint queue with the nextPaint queue, and let the
+   nextPaint queue be an empty queue.
+
+8. *Process* the *idle task queue*, with bits
+   `application.idleTaskBits`, with a target time of t, where t is the
+   time at which we have to start the next frame's layout and paint
+   computations, and with an *idle rule* of "sleep".
 
 TODO(ianh): Update the timings above to have some relationship to
 reality.
@@ -46,5 +106,17 @@ reality.
 TODO(ianh): Define an API so that the application can adjust the
 budgets.
 
-TODO(ianh): Define how scroll notifications get sent, or decide to
-drop them entirely from this model.
+Task kinds and priorities
+-------------------------
+
+```dart
+const IdlePriority = 0;
+const FuturePriority = 10000; // the tasks scheduled by futures resolving have this priority
+
+const IdleKind = 0x01; // tasks that should run during the idle loop
+const LayoutKind = 0x02; // tasks that should run during layout
+const PaintQueueKind = 0x04; // tasks that run on the paint queue
+
+int idleTaskBits = IdleKind;
+int paintTaskBits = PaintQueueKind;
+```

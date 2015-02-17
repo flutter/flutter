@@ -4,26 +4,28 @@ Animation API
 ```dart
 typedef void TimerCallback();
 
+external void _addTask({ TimerCallback callback, Duration budget, int bits, int priority, Queue queue });
+// see (runloop.md)[runloop.md] for the semantics of tasks and queues
+// _addTask() does the zone magic on callback
+
+external final Queue get _idleQueue;
+external final Queue get _paintQueue;
+external final Queue get _nextPaintQueue;
+
 class AnimationTimer extends Timer {
-  external factory whenIdle(TimerCallback callback, { double budget: 1.0 });
-  // calls callback next time the system is idle
-  // - if budget is in the range 0.0 < budget <= 1.0, then callback is
-  //   guaranteed to have that many milliseconds before being killed
-  // - if budget <= 0.0, then the callback could be killed [at any time](script.md).
-  // - if budget > 1.0, then it is treated as 1.0.
+  factory whenIdle(TimerCallback callback, { Duration budget: 1.0 }) {
+    if (budget.inMilliseconds > 1.0)
+      budget = new Duration(milliseconds: 1.0);
+    _addTask(callback: callback, budget: budget, bits: IdleTask, priority: IdlePriority, queue: _idleQueue);
+  }
 
-  external factory beforePaint(TimerCallback callback, { int priority: 0 });
-  // runs this timeout before this frame's layout/paint phases begin
-  external factory nextFrame(TimerCallback callback, { int priority: 0 });
-  // runs this timeout right away
+  factory beforePaint(TimerCallback callback, { int priority: 0 }) {
+    _addTask(callback: callback, budget: new Duration(milliseconds: 1.0), bits: PaintTask, priority: priority, queue: _paintQueue);
+  }
 
-  // for beforePaint and nextFrame, the callbacks are first sorted by
-  // priority, and then run in decreasing order of priority,
-  // tie-breaking by registration time, earliest first.
-
-  // once there is no more time for callbacks this frame, the Timers
-  // are all canceled, so isActive will become false
-
+  factory nextFrame(TimerCallback callback, { int priority: 0 }) {
+    _addTask(callback: callback, budget: new Duration(milliseconds: 1.0), bits: PaintTask, priority: priority, queue: _nextPaintQueue);
+  }
 }
 ```
 
