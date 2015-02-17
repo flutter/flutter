@@ -10,12 +10,12 @@
 #include "base/thread_task_runner_handle.h"
 #include "mojo/common/common_type_converters.h"
 #include "mojo/services/network/public/interfaces/network_service.mojom.h"
-#include "net/base/net_errors.h"
 #include "sky/engine/public/platform/WebURLError.h"
 #include "sky/engine/public/platform/WebURLLoadTiming.h"
 #include "sky/engine/public/platform/WebURLLoaderClient.h"
 #include "sky/engine/public/platform/WebURLResponse.h"
 #include "sky/viewer/converters/url_request_types.h"
+#include "sky/viewer/platform/net_constants.h"
 
 namespace sky {
 namespace {
@@ -97,7 +97,7 @@ void WebURLLoaderImpl::cancel() {
   mojo::URLResponsePtr failed_response(mojo::URLResponse::New());
   failed_response->url = mojo::String::From(url_);
   failed_response->error = mojo::NetworkError::New();
-  failed_response->error->code = net::ERR_ABORTED;
+  failed_response->error->code = kNetErrorAborted;
 
   base::ThreadTaskRunnerHandle::Get()->PostTask(
       FROM_HERE,
@@ -129,12 +129,12 @@ void WebURLLoaderImpl::OnReceivedResponse(mojo::URLResponsePtr url_response) {
 
 void WebURLLoaderImpl::OnReceivedError(mojo::URLResponsePtr url_response) {
   blink::WebURLError web_error;
-  web_error.domain = blink::WebString::fromUTF8(net::kErrorDomain);
+  web_error.domain = blink::WebString::fromUTF8(kNetErrorDomain);
   web_error.reason = url_response->error->code;
   web_error.unreachableURL = GURL(url_response->url);
   web_error.staleCopyInCache = false;
   web_error.isCancellation =
-      url_response->error->code == net::ERR_ABORTED ? true : false;
+      url_response->error->code == kNetErrorAborted ? true : false;
 
   client_->didFail(this, web_error);
 }

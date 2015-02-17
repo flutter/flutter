@@ -5,7 +5,7 @@
 #include "sky/viewer/platform/platform_impl.h"
 
 #include "mojo/public/cpp/application/application_impl.h"
-#include "net/base/net_errors.h"
+#include "sky/viewer/platform/net_constants.h"
 #include "sky/viewer/platform/weburlloader_impl.h"
 
 namespace sky {
@@ -37,8 +37,8 @@ blink::WebURLLoader* PlatformImpl::createURLLoader() {
 blink::WebURLError PlatformImpl::cancelledError(const blink::WebURL& url)
     const {
   blink::WebURLError error;
-  error.domain = blink::WebString::fromUTF8(net::kErrorDomain);
-  error.reason = net::ERR_ABORTED;
+  error.domain = blink::WebString::fromUTF8(kNetErrorDomain);
+  error.reason = kNetErrorAborted;
   error.unreachableURL = url;
   error.staleCopyInCache = false;
   error.isCancellation = true;
