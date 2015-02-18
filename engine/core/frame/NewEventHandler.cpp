@@ -54,14 +54,14 @@ Node* NewEventHandler::targetForKeyboardEvent() const
     Document* document = m_frame.document();
     if (Node* focusedElement = document->focusedElement())
         return focusedElement;
-    return document->documentElement();
+    return document;
 }
 
 Node* NewEventHandler::targetForHitTestResult(const HitTestResult& hitTestResult)
 {
     Node* node = hitTestResult.innerNode();
     if (!node)
-        return m_frame.document()->documentElement();
+        return m_frame.document();
     if (node->isTextNode())
         return NodeRenderingTraversal::parent(node);
     return node;

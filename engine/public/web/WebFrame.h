@@ -148,17 +148,6 @@ public:
     virtual void unmarkText() = 0;
     virtual bool hasMarkedText() const = 0;
 
-    virtual WebRange markedRange() const = 0;
-
-    // Returns the frame rectangle in window coordinate space of the given text
-    // range.
-    virtual bool firstRectForCharacterRange(unsigned location, unsigned length, WebRect&) const = 0;
-
-    // Returns the index of a character in the Frame's text stream at the given
-    // point. The point is in the window coordinate space. Will return
-    // WTF::notFound if the point is invalid.
-    virtual size_t characterIndexForPoint(const WebPoint&) const = 0;
-
     // Supports commands like Undo, Redo, Cut, Copy, Paste, SelectAll,
     // Unselect, etc. See EditorCommand.cpp for the full list of supported
     // commands.

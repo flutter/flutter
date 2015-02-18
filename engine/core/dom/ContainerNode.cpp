@@ -99,21 +99,6 @@ void ContainerNode::checkAcceptChildHierarchy(const Node& newChild, const Node* 
         exceptionState.ThrowDOMException(HierarchyRequestError, "The new child element contains the parent.");
         return;
     }
-
-    // TODO(esprehn): Remove this, sky should allow multiple top level elements.
-    if (isDocumentNode()) {
-        unsigned elementCount = 0;
-        if (newChild.isElementNode()) {
-            elementCount = 1;
-        } else if (newChild.isDocumentFragment()) {
-            for (Element* element = ElementTraversal::firstChild(newChild); element; element = ElementTraversal::nextSibling(*element))
-                ++elementCount;
-        }
-        if (elementCount > 1 || ((!oldChild || !oldChild->isElementNode()) && elementCount && document().documentElement())) {
-            exceptionState.ThrowDOMException(HierarchyRequestError, "Document can only contain one Element.");
-            return;
-        }
-    }
 }
 
 PassRefPtr<Node> ContainerNode::insertBefore(PassRefPtr<Node> newChild, Node* refChild, ExceptionState& exceptionState)

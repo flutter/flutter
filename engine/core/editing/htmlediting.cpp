@@ -837,7 +837,7 @@ int indexForVisiblePosition(const VisiblePosition& visiblePosition, RefPtr<Conta
     if (shadowRoot)
         scope = shadowRoot;
     else
-        scope = document.documentElement();
+        scope = &document;
 
     RefPtr<Range> range = Range::create(document, firstPositionInNode(scope.get()), p.parentAnchoredEquivalent());
 

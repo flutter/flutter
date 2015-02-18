@@ -101,12 +101,6 @@ FrameSelection::~FrameSelection()
 #endif
 }
 
-Element* FrameSelection::rootEditableElementOrDocumentElement() const
-{
-    Element* selectionRoot = m_selection.rootEditableElement();
-    return selectionRoot ? selectionRoot : m_frame->document()->documentElement();
-}
-
 ContainerNode* FrameSelection::rootEditableElementOrTreeScopeRootNode() const
 {
     Element* selectionRoot = m_selection.rootEditableElement();
@@ -1252,11 +1246,11 @@ void FrameSelection::selectAll()
             selectStartTarget = root.get();
     } else {
         root = m_selection.nonBoundaryShadowTreeRootNode();
-        if (root)
+        if (root) {
             selectStartTarget = root->shadowHost();
-        else {
-            root = document->documentElement();
-            selectStartTarget = document->documentElement();
+        } else {
+            root = document;
+            selectStartTarget = document;
         }
     }
     if (!root)

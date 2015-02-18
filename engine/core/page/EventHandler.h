@@ -90,9 +90,6 @@ public:
     void notifyElementActivated();
 
 private:
-    void selectClosestWordFromHitTestResult(const HitTestResult&, AppendTrailingWhitespace);
-    void selectClosestMisspellingFromHitTestResult(const HitTestResult&, AppendTrailingWhitespace);
-
     OptionalCursor selectCursor(const HitTestResult&);
     OptionalCursor selectAutoCursor(const HitTestResult&, Node*);
 

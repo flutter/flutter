@@ -69,6 +69,7 @@
 #include "sky/engine/platform/weborigin/KURL.h"
 #include "sky/engine/platform/weborigin/SecurityPolicy.h"
 #include "sky/engine/public/platform/Platform.h"
+#include "sky/engine/tonic/dart_gc_visitor.h"
 #include "sky/engine/wtf/MainThread.h"
 #include "sky/engine/wtf/MathExtras.h"
 #include "sky/engine/wtf/text/WTFString.h"
@@ -308,6 +309,11 @@ ExecutionContext* LocalDOMWindow::executionContext() const
 LocalDOMWindow* LocalDOMWindow::toDOMWindow()
 {
     return this;
+}
+
+void LocalDOMWindow::AcceptDartGCVisitor(DartGCVisitor& visitor) const {
+    visitor.AddToSetForRoot(document(), dart_wrapper());
+    EventTarget::AcceptDartGCVisitor(visitor);
 }
 
 PassRefPtr<MediaQueryList> LocalDOMWindow::matchMedia(const String& media)

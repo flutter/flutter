@@ -133,11 +133,7 @@ void StyleAdjuster::adjustRenderStyle(RenderStyle* style, RenderStyle* parentSty
     ASSERT(parentStyle);
 
     if (style->display() != NONE) {
-        // Absolute/fixed positioned elements, floating elements and the document element need block-like outside display.
-        if (style->hasOutOfFlowPosition() || element.document().documentElement() == element)
-            style->setDisplay(equivalentBlockDisplay(style->display()));
-
-        if (parentStyle->requiresOnlyBlockChildren())
+        if (style->hasOutOfFlowPosition() || parentStyle->requiresOnlyBlockChildren())
             style->setDisplay(equivalentBlockDisplay(style->display()));
         else
             style->setDisplay(equivalentInlineDisplay(style->display()));
@@ -147,15 +143,12 @@ void StyleAdjuster::adjustRenderStyle(RenderStyle* style, RenderStyle* parentSty
     if (style->position() == StaticPosition && !parentStyleForcesZIndexToCreateStackingContext(parentStyle))
         style->setHasAutoZIndex();
 
-    // Auto z-index becomes 0 for the root element and transparent objects. This prevents
-    // cases where objects that should be blended as a single unit end up with a non-transparent
-    // object wedged in between them. Auto z-index also becomes 0 for objects that specify transforms.
-    if (style->hasAutoZIndex() && ((element.document().documentElement() == element)
-        || style->hasOpacity()
-        || style->hasTransformRelatedProperty()
-        || style->clipPath()
-        || style->hasFilter()
-        || hasWillChangeThatCreatesStackingContext(style)))
+    if (style->hasAutoZIndex()
+        && (style->hasOpacity()
+            || style->hasTransformRelatedProperty()
+            || style->clipPath()
+            || style->hasFilter()
+            || hasWillChangeThatCreatesStackingContext(style)))
         style->setZIndex(0);
 
     // will-change:transform should result in the same rendering behavior as having a transform,

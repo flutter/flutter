@@ -91,6 +91,7 @@ public:
     virtual ExecutionContext* executionContext() const override;
 
     virtual LocalDOMWindow* toDOMWindow() override;
+    void AcceptDartGCVisitor(DartGCVisitor& visitor) const override;
 
     void registerProperty(DOMWindowProperty*);
     void unregisterProperty(DOMWindowProperty*);

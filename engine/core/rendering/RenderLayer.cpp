@@ -1128,9 +1128,7 @@ RenderLayer* RenderLayer::hitTestChildren(ChildrenIteration childrentoVisit, Ren
 bool RenderLayer::intersectsDamageRect(const LayoutRect& layerBounds, const LayoutRect& damageRect, const RenderLayer* rootLayer, const LayoutPoint* offsetFromRoot) const
 {
     // Always examine the canvas and the root.
-    // FIXME: Could eliminate the isDocumentElement() check if we fix background painting so that the RenderView
-    // paints the root's background.
-    if (isRootLayer() || renderer()->isDocumentElement())
+    if (isRootLayer())
         return true;
 
     // If we aren't an inline flow, and our layer bounds do intersect the damage rect, then we

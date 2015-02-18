@@ -453,26 +453,6 @@ bool WebViewImpl::confirmComposition(const WebString& text, ConfirmCompositionBe
     return focused->inputMethodController().confirmCompositionOrInsertText(text, selectionBehavior == KeepSelection ? InputMethodController::KeepSelection : InputMethodController::DoNotKeepSelection);
 }
 
-bool WebViewImpl::compositionRange(size_t* location, size_t* length)
-{
-    LocalFrame* focused = focusedCoreFrame();
-    if (!focused || !m_imeAcceptEvents)
-        return false;
-
-    RefPtr<Range> range = focused->inputMethodController().compositionRange();
-    if (!range)
-        return false;
-
-    Element* editable = focused->selection().rootEditableElementOrDocumentElement();
-    ASSERT(editable);
-    PlainTextRange plainTextRange(PlainTextRange::create(*editable, *range.get()));
-    if (plainTextRange.isNull())
-        return false;
-    *location = plainTextRange.start();
-    *length = plainTextRange.length();
-    return true;
-}
-
 WebTextInputInfo WebViewImpl::textInputInfo()
 {
     WebTextInputInfo info;
@@ -582,18 +562,6 @@ WebVector<WebCompositionUnderline> WebViewImpl::compositionUnderlines() const
     return results;
 }
 
-WebColor WebViewImpl::backgroundColor() const
-{
-    if (isTransparent())
-        return Color::transparent;
-    if (!m_page)
-        return m_baseBackgroundColor;
-    if (!m_page->mainFrame())
-        return m_baseBackgroundColor;
-    FrameView* view = m_page->mainFrame()->view();
-    return view->documentBackgroundColor().rgb();
-}
-
 // WebView --------------------------------------------------------------------
 
 WebSettingsImpl* WebViewImpl::settingsImpl()
@@ -624,9 +592,7 @@ void WebViewImpl::injectModule(const WebString& path)
     RefPtr<Document> document = m_page->mainFrame()->document();
     RefPtr<HTMLImportElement> import = HTMLImportElement::create(*document);
     import->setAttribute(HTMLNames::srcAttr, path);
-    if (!document->documentElement())
-        return;
-    document->documentElement()->appendChild(import.release());
+    document->appendChild(import.release());
 }
 
 void WebViewImpl::setFocusedFrame(WebFrame* frame)

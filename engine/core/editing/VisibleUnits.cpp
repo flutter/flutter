@@ -935,10 +935,12 @@ VisiblePosition previousLinePosition(const VisiblePosition &visiblePosition, int
     // Could not find a previous line. This means we must already be on the first line.
     // Move to the start of the content in this block, which effectively moves us
     // to the start of the line we're on.
-    Element* rootElement = node->hasEditableStyle(editableType) ? node->rootEditableElement(editableType) : node->document().documentElement();
-    if (!rootElement)
+    ContainerNode* rootContainer = &node->document();
+    if (node->hasEditableStyle(editableType))
+        rootContainer = node->rootEditableElement(editableType);
+    if (!rootContainer)
         return VisiblePosition();
-    return VisiblePosition(firstPositionInNode(rootElement), DOWNSTREAM);
+    return VisiblePosition(firstPositionInNode(rootContainer), DOWNSTREAM);
 }
 
 VisiblePosition nextLinePosition(const VisiblePosition &visiblePosition, int lineDirectionPoint, EditableType editableType)
@@ -993,10 +995,12 @@ VisiblePosition nextLinePosition(const VisiblePosition &visiblePosition, int lin
     // Could not find a next line. This means we must already be on the last line.
     // Move to the end of the content in this block, which effectively moves us
     // to the end of the line we're on.
-    Element* rootElement = node->hasEditableStyle(editableType) ? node->rootEditableElement(editableType) : node->document().documentElement();
-    if (!rootElement)
+    ContainerNode* rootContainer = &node->document();
+    if (node->hasEditableStyle(editableType))
+        rootContainer = node->rootEditableElement(editableType);
+    if (!rootContainer)
         return VisiblePosition();
-    return VisiblePosition(lastPositionInNode(rootElement), DOWNSTREAM);
+    return VisiblePosition(lastPositionInNode(rootContainer), DOWNSTREAM);
 }
 
 // ---------
@@ -1284,10 +1288,10 @@ bool isEndOfBlock(const VisiblePosition &pos)
 
 VisiblePosition startOfDocument(const Node* node)
 {
-    if (!node || !node->document().documentElement())
+    if (!node)
         return VisiblePosition();
 
-    return VisiblePosition(firstPositionInNode(node->document().documentElement()), DOWNSTREAM);
+    return VisiblePosition(firstPositionInNode(&node->document()), DOWNSTREAM);
 }
 
 VisiblePosition startOfDocument(const VisiblePosition &c)
@@ -1297,11 +1301,10 @@ VisiblePosition startOfDocument(const VisiblePosition &c)
 
 VisiblePosition endOfDocument(const Node* node)
 {
-    if (!node || !node->document().documentElement())
+    if (!node)
         return VisiblePosition();
 
-    Element* doc = node->document().documentElement();
-    return VisiblePosition(lastPositionInNode(doc), DOWNSTREAM);
+    return VisiblePosition(lastPositionInNode(&node->document()), DOWNSTREAM);
 }
 
 VisiblePosition endOfDocument(const VisiblePosition &c)

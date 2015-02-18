@@ -9,7 +9,7 @@ element.setAttribute("as", "hello");
 element.addEventListener("load", function() {
   document.getElementById("result1").textContent = "PASS: Load event fired.";
 });
-document.documentElement.appendChild(element);
+document.firstElementChild.appendChild(element);
 </script>
 <script>
 document.getElementById("result2").textContent = hello;

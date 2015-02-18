@@ -264,52 +264,6 @@ bool VisibleSelection::expandUsingGranularity(TextGranularity granularity)
     return true;
 }
 
-static PassRefPtr<Range> makeSearchRange(const Position& pos)
-{
-    Node* node = pos.deprecatedNode();
-    if (!node)
-        return nullptr;
-    Document& document = node->document();
-    if (!document.documentElement())
-        return nullptr;
-    Element* boundary = enclosingBlockFlowElement(*node);
-    if (!boundary)
-        return nullptr;
-
-    RefPtr<Range> searchRange(Range::create(document));
-    TrackExceptionState exceptionState;
-
-    Position start(pos.parentAnchoredEquivalent());
-    searchRange->selectNodeContents(boundary, exceptionState);
-    searchRange->setStart(start.containerNode(), start.offsetInContainerNode(), exceptionState);
-
-    ASSERT(!exceptionState.had_exception());
-    if (exceptionState.had_exception())
-        return nullptr;
-
-    return searchRange.release();
-}
-
-void VisibleSelection::appendTrailingWhitespace()
-{
-    RefPtr<Range> searchRange = makeSearchRange(m_end);
-    if (!searchRange)
-        return;
-
-    CharacterIterator charIt(searchRange.get(), TextIteratorEmitsCharactersBetweenAllVisiblePositions);
-    bool changed = false;
-
-    for (; charIt.length(); charIt.advance(1)) {
-        UChar c = charIt.characterAt(0);
-        if ((!isSpaceOrNewline(c) && c != noBreakSpace) || c == '\n')
-            break;
-        m_end = charIt.range()->endPosition();
-        changed = true;
-    }
-    if (changed)
-        didChange();
-}
-
 void VisibleSelection::setBaseAndExtentToDeepEquivalents()
 {
     // Move the selection to rendered positions, if possible.

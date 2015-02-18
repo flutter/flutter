@@ -141,7 +141,7 @@ bool SharedStyleFinder::canShareStyleWithElement(Element& candidate) const
 
 bool SharedStyleFinder::documentContainsValidCandidate() const
 {
-    for (Element* element = document().documentElement(); element; element = ElementTraversal::next(*element)) {
+    for (Element* element = ElementTraversal::firstChild(document()); element; element = ElementTraversal::next(*element)) {
         if (element->supportsStyleSharing() && canShareStyleWithElement(*element))
             return true;
     }

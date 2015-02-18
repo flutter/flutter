@@ -111,17 +111,8 @@ public:
     // Returns true if there is an ongoing composition or the text is inserted.
     virtual bool confirmComposition(const WebString& text) = 0;
 
-    // Fetches the character range of the current composition, also called the
-    // "marked range." Returns true and fills the out-paramters on success;
-    // returns false on failure.
-    virtual bool compositionRange(size_t* location, size_t* length) = 0;
-
     // Returns information about the current text input of this WebWidget.
     virtual WebTextInputInfo textInputInfo() = 0;
-
-    // The page background color. Can be used for filling in areas without
-    // content.
-    virtual WebColor backgroundColor() const = 0;
 
 protected:
     ~WebWidget() { }

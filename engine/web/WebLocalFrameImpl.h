@@ -76,9 +76,6 @@ public:
     virtual void setMarkedText(const WebString&, unsigned location, unsigned length) override;
     virtual void unmarkText() override;
     virtual bool hasMarkedText() const override;
-    virtual WebRange markedRange() const override;
-    virtual bool firstRectForCharacterRange(unsigned location, unsigned length, WebRect&) const override;
-    virtual size_t characterIndexForPoint(const WebPoint&) const override;
     virtual bool executeCommand(const WebString&, const WebNode& = WebNode()) override;
     virtual bool executeCommand(const WebString&, const WebString& value, const WebNode& = WebNode()) override;
     virtual bool isCommandEnabled(const WebString&) const override;

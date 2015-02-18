@@ -9,7 +9,7 @@ void main () {
   initUnit();
 
   test('should have various casing', () {
-    expect(document.documentElement.tagName, equals('CamelCase'));
+    expect(document.firstElementChild.tagName, equals('CamelCase'));
 
     var element = document.createElement('CamelCase');
     expect(element.tagName, equals('CamelCase'));

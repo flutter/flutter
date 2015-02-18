@@ -578,8 +578,6 @@ sky_core_files = [
   "editing/SplitElementCommand.h",
   "editing/SplitTextNodeCommand.cpp",
   "editing/SplitTextNodeCommand.h",
-  "editing/SurroundingText.cpp",
-  "editing/SurroundingText.h",
   "editing/TextAffinity.h",
   "editing/TextCheckingHelper.cpp",
   "editing/TextCheckingHelper.h",

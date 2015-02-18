@@ -195,8 +195,6 @@ PassRefPtr<RenderStyle> StyleResolver::styleForElement(Element* element, RenderS
     ASSERT(m_document.frame());
     ASSERT(m_document.settings());
 
-    if (element == m_document.documentElement())
-        m_document.setDirectionSetOnDocumentElement(false);
     StyleResolverState state(m_document, element, defaultParent);
 
     if (state.parentStyle()) {
@@ -272,7 +270,7 @@ PassRefPtr<AnimatableValue> StyleResolver::createAnimatableValueSnapshot(StyleRe
 
 PassRefPtr<RenderStyle> StyleResolver::defaultStyleForElement()
 {
-    StyleResolverState state(m_document, 0);
+    StyleResolverState state(m_document, nullptr);
     state.setStyle(RenderStyle::create());
     state.fontBuilder().initForStyleResolve(m_document, state.style());
     state.style()->setLineHeight(RenderStyle::initialLineHeight());
@@ -578,7 +576,7 @@ void StyleResolver::printStats()
 
 void StyleResolver::applyPropertiesToStyle(const CSSPropertyValue* properties, size_t count, RenderStyle* style)
 {
-    StyleResolverState state(m_document, m_document.documentElement(), style);
+    StyleResolverState state(m_document, nullptr, style);
     state.setStyle(style);
 
     state.fontBuilder().initForStyleResolve(m_document, style);

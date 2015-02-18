@@ -81,9 +81,7 @@ public:
     virtual bool confirmComposition() override;
     virtual bool confirmComposition(ConfirmCompositionBehavior selectionBehavior) override;
     virtual bool confirmComposition(const WebString& text) override;
-    virtual bool compositionRange(size_t* location, size_t* length) override;
     virtual WebTextInputInfo textInputInfo() override;
-    virtual WebColor backgroundColor() const override;
 
     // WebView methods:
     virtual void setMainFrame(WebFrame*) override;

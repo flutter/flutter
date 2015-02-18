@@ -101,8 +101,8 @@ WebRange WebRange::expandedToParagraph() const
 WebRange WebRange::fromDocumentRange(WebLocalFrame* frame, int start, int length)
 {
     LocalFrame* webFrame = toWebLocalFrameImpl(frame)->frame();
-    Element* selectionRoot = webFrame->selection().rootEditableElement();
-    ContainerNode* scope = selectionRoot ? selectionRoot : webFrame->document()->documentElement();
+    ContainerNode* selectionRoot = webFrame->selection().rootEditableElement();
+    ContainerNode* scope = selectionRoot ? selectionRoot : webFrame->document();
     return PlainTextRange(start, start + length).createRange(*scope);
 }
 

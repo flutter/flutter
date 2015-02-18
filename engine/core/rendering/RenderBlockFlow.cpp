@@ -104,7 +104,7 @@ inline void RenderBlockFlow::layoutBlockFlow(SubtreeLayoutScope& layoutScope)
     if (previousHeight != logicalHeight())
         relayoutChildren = true;
 
-    layoutPositionedObjects(relayoutChildren || isDocumentElement(), oldLeft != logicalLeft() ? ForcedLayoutAfterContainingBlockMoved : DefaultLayout);
+    layoutPositionedObjects(relayoutChildren, oldLeft != logicalLeft() ? ForcedLayoutAfterContainingBlockMoved : DefaultLayout);
 
     // Add overflow from children (unless we're multi-column, since in that case all our child overflow is clipped anyway).
     computeOverflow(oldClientAfterEdge);

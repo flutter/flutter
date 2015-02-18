@@ -165,11 +165,6 @@ public:
 
     String outgoingReferrer();
 
-    Element* documentElement() const
-    {
-        return m_documentElement.get();
-    }
-
     Location* location() const;
 
     PassRefPtr<Element> createElement(const AtomicString& name, ExceptionState&);
@@ -391,9 +386,6 @@ public:
 
     DocumentMarkerController& markers() const { return *m_markers; }
 
-    bool directionSetOnDocumentElement() const { return m_directionSetOnDocumentElement; }
-    void setDirectionSetOnDocumentElement(bool b) { m_directionSetOnDocumentElement = b; }
-
     KURL openSearchDescriptionURL();
 
     Document& topDocument() const;
@@ -548,8 +540,6 @@ private:
 
     virtual bool isDocument() const override final { return true; }
 
-    virtual void childrenChanged(const ChildrenChange&) override;
-
     virtual String nodeName() const override final;
     virtual NodeType nodeType() const override final;
     virtual PassRefPtr<Node> cloneNode(bool deep = true) override final;
@@ -620,7 +610,6 @@ private:
     RefPtr<Element> m_focusedElement;
     RefPtr<Node> m_hoverNode;
     RefPtr<Element> m_activeHoverElement;
-    RefPtr<Element> m_documentElement;
     UserActionElementSet m_userActionElements;
 
     typedef HashSet<RawPtr<Range> > AttachedRangeSet;
@@ -669,8 +658,6 @@ private:
 
     bool m_didSetReferrerPolicy;
     ReferrerPolicy m_referrerPolicy;
-
-    bool m_directionSetOnDocumentElement;
 
     RefPtr<MediaQueryMatcher> m_mediaQueryMatcher;
 
@@ -725,8 +712,6 @@ inline bool Node::isDocumentNode() const
 {
     return this == document();
 }
-
-Node* eventTargetNodeForDocument(Document*);
 
 } // namespace blink
 

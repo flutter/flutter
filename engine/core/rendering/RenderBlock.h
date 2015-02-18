@@ -294,8 +294,6 @@ private:
     bool widthAvailableToChildrenHasChanged();
 
 protected:
-    bool createsBlockFormattingContext() const;
-
     virtual bool updateLogicalWidthAndColumnWidth();
 
 protected:

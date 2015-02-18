@@ -13,8 +13,7 @@ void main() {
   initUnit();
 
   test('should be able to send events', () {
-    var sky = document.querySelector('sky');
-    sky.addEventListener('keypress', expectAsync((event) {
+    document.addEventListener('keypress', expectAsync((event) {
       expect(event.type, equals('keypress'));
       expect(event.key, equals(0));
       expect(event.charCode, equals(0x41));

@@ -621,31 +621,6 @@ float FrameView::inputEventsScaleFactor() const
     return pageScale * m_inputEventsScaleFactorForEmulation;
 }
 
-Color FrameView::documentBackgroundColor() const
-{
-    // <https://bugs.webkit.org/show_bug.cgi?id=59540> We blend the background color of
-    // the document and the body against the base background color of the frame view.
-    // Background images are unfortunately impractical to include.
-
-    Color result = baseBackgroundColor();
-    if (!frame().document())
-        return result;
-
-    Element* htmlElement = frame().document()->documentElement();
-
-    // We take the aggregate of the base background color
-    // the <html> background color, and the <body>
-    // background color to find the document color. The
-    // addition of the base background color is not
-    // technically part of the document background, but it
-    // otherwise poses problems when the aggregate is not
-    // fully opaque.
-    if (htmlElement && htmlElement->renderer())
-        result = result.blend(htmlElement->renderer()->style()->colorIncludingFallback(CSSPropertyBackgroundColor));
-
-    return result;
-}
-
 void FrameView::paint(GraphicsContext* context, const IntRect& rect)
 {
 #ifndef NDEBUG

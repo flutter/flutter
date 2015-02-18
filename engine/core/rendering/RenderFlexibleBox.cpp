@@ -239,7 +239,7 @@ void RenderFlexibleBox::layout()
         if (logicalHeight() != previousHeight)
             relayoutChildren = true;
 
-        layoutPositionedObjects(relayoutChildren || isDocumentElement());
+        layoutPositionedObjects(relayoutChildren);
 
         // FIXME: css3/flexbox/repaint-rtl-column.html seems to issue paint invalidations for more overflow than it needs to.
         computeOverflow(clientLogicalBottomAfterRepositioning());

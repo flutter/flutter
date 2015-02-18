@@ -250,7 +250,6 @@ Document::Document(const DocumentInit& initializer)
     , m_loadEventDelayTimer(this, &Document::loadEventDelayTimerFired)
     , m_didSetReferrerPolicy(false)
     , m_referrerPolicy(ReferrerPolicyDefault)
-    , m_directionSetOnDocumentElement(false)
     , m_registrationContext(initializer.registrationContext())
     , m_elementDataCacheClearTimer(this, &Document::elementDataCacheClearTimerFired)
     , m_timeline(AnimationTimeline::create(this))
@@ -354,7 +353,6 @@ void Document::dispose()
     m_hoverNode = nullptr;
     m_activeHoverElement = nullptr;
     m_titleElement = nullptr;
-    m_documentElement = nullptr;
     m_userActionElements.documentDidRemoveLastRef();
 
     detachParser();
@@ -408,12 +406,6 @@ Location* Document::location() const
         return 0;
 
     return &domWindow()->location();
-}
-
-void Document::childrenChanged(const ChildrenChange& change)
-{
-    ContainerNode::childrenChanged(change);
-    m_documentElement = ElementTraversal::firstWithin(*this);
 }
 
 PassRefPtr<Element> Document::createElement(const AtomicString& name, ExceptionState& exceptionState)
@@ -1043,9 +1035,9 @@ void Document::updateStyle(StyleRecalcChange change)
     if (StyleResolverStats* stats = styleResolver().stats())
         stats->reset();
 
-    if (Element* documentElement = this->documentElement()) {
-        if (documentElement->shouldCallRecalcStyle(change))
-            documentElement->recalcStyle(change);
+    for (Element* element = ElementTraversal::firstChild(*this); element; element = ElementTraversal::nextSibling(*element)) {
+        if (element->shouldCallRecalcStyle(change))
+            element->recalcStyle(change);
     }
 
     styleResolver().printStats();
@@ -2168,16 +2160,6 @@ IntSize Document::initialViewportSize() const
     return view()->unscaledVisibleContentSize();
 }
 
-Node* eventTargetNodeForDocument(Document* doc)
-{
-    if (!doc)
-        return 0;
-    Node* node = doc->focusedElement();
-    if (!node)
-        node = doc->documentElement();
-    return node;
-}
-
 void Document::decrementActiveParserCount()
 {
     --m_activeParserCount;
@@ -2218,7 +2200,7 @@ Element* Document::activeElement() const
 {
     if (Element* element = treeScope().adjustedFocusedElement())
         return element;
-    return documentElement();
+    return nullptr;
 }
 
 void Document::getTransitionElementData(Vector<TransitionElementData>& elementData)

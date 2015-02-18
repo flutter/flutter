@@ -205,30 +205,9 @@ void RenderView::paint(PaintInfo& paintInfo, const LayoutPoint& paintOffset, Vec
     paintObject(paintInfo, paintOffset, layers);
 }
 
-static inline bool rendererObscuresBackground(RenderBox* rootBox)
-{
-    ASSERT(rootBox);
-    RenderStyle* style = rootBox->style();
-    if (style->opacity() != 1
-        || style->hasFilter()
-        || style->hasTransform())
-        return false;
-
-    return true;
-}
-
 void RenderView::paintBoxDecorationBackground(PaintInfo& paintInfo, const LayoutPoint&)
 {
     if (!view())
-        return;
-
-    bool shouldPaintBackground = true;
-    Node* documentElement = document().documentElement();
-    if (RenderBox* rootBox = documentElement ? toRenderBox(documentElement->renderer()) : 0)
-        shouldPaintBackground = !rendererObscuresBackground(rootBox);
-
-    // If painting will entirely fill the view, no need to fill the background.
-    if (!shouldPaintBackground)
         return;
 
     // This code typically only executes if the root element's visibility has been set to hidden,
@@ -369,20 +348,6 @@ IntRect RenderView::unscaledDocumentRect() const
     return pixelSnappedIntRect(layoutOverflowRect());
 }
 
-bool RenderView::rootBackgroundIsEntirelyFixed() const
-{
-    if (RenderObject* backgroundRenderer = this->backgroundRenderer())
-        return backgroundRenderer->hasEntirelyFixedBackground();
-    return false;
-}
-
-RenderObject* RenderView::backgroundRenderer() const
-{
-    if (Element* documentElement = document().documentElement())
-        return documentElement->renderer();
-    return 0;
-}
-
 LayoutRect RenderView::backgroundRect(RenderBox* backgroundRenderer) const
 {
     return unscaledDocumentRect();
@@ -418,20 +383,6 @@ int RenderView::viewLogicalHeight() const
 LayoutUnit RenderView::viewLogicalHeightForPercentages() const
 {
     return viewLogicalHeight();
-}
-
-void RenderView::updateHitTestResult(HitTestResult& result, const LayoutPoint& point)
-{
-    if (result.innerNode())
-        return;
-
-    Node* node = document().documentElement();
-    if (node) {
-        result.setInnerNode(node);
-        if (!result.innerNonSharedNode())
-            result.setInnerNonSharedNode(node);
-        result.setLocalPoint(point);
-    }
 }
 
 void RenderView::pushLayoutState(LayoutState& layoutState)

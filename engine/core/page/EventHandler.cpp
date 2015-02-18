@@ -157,46 +157,6 @@ void EventHandler::nodeWillBeRemoved(Node& nodeToBeRemoved)
     }
 }
 
-void EventHandler::selectClosestWordFromHitTestResult(const HitTestResult& result, AppendTrailingWhitespace appendTrailingWhitespace)
-{
-    Node* innerNode = result.targetNode();
-    VisibleSelection newSelection;
-
-    if (innerNode && innerNode->renderer()) {
-        VisiblePosition pos(innerNode->renderer()->positionForPoint(result.localPoint()));
-        if (pos.isNotNull()) {
-            newSelection = VisibleSelection(pos);
-            newSelection.expandUsingGranularity(WordGranularity);
-        }
-
-        if (appendTrailingWhitespace == ShouldAppendTrailingWhitespace && newSelection.isRange())
-            newSelection.appendTrailingWhitespace();
-    }
-}
-
-void EventHandler::selectClosestMisspellingFromHitTestResult(const HitTestResult& result, AppendTrailingWhitespace appendTrailingWhitespace)
-{
-    Node* innerNode = result.targetNode();
-    VisibleSelection newSelection;
-
-    if (innerNode && innerNode->renderer()) {
-        VisiblePosition pos(innerNode->renderer()->positionForPoint(result.localPoint()));
-        Position start = pos.deepEquivalent();
-        Position end = pos.deepEquivalent();
-        if (pos.isNotNull()) {
-            DocumentMarkerVector markers = innerNode->document().markers().markersInRange(makeRange(pos, pos).get(), DocumentMarker::MisspellingMarkers());
-            if (markers.size() == 1) {
-                start.moveToOffset(markers[0]->startOffset());
-                end.moveToOffset(markers[0]->endOffset());
-                newSelection = VisibleSelection(start, end);
-            }
-        }
-
-        if (appendTrailingWhitespace == ShouldAppendTrailingWhitespace && newSelection.isRange())
-            newSelection.appendTrailingWhitespace();
-    }
-}
-
 HitTestResult EventHandler::hitTestResultAtPoint(const LayoutPoint& point, HitTestRequest::HitTestRequestType hitType, const LayoutSize& padding)
 {
     TRACE_EVENT0("blink", "EventHandler::hitTestResultAtPoint");
@@ -434,6 +394,14 @@ bool EventHandler::dragHysteresisExceeded(const FloatPoint& floatDragViewportLoc
 bool EventHandler::dragHysteresisExceeded(const IntPoint& dragViewportLocation) const
 {
     return false;
+}
+
+// TODO(abarth): This should just be targetForKeyboardEvent
+static Node* eventTargetNodeForDocument(Document* document)
+{
+    if (Node* node = document->focusedElement())
+        return node;
+    return document;
 }
 
 bool EventHandler::handleTextInputEvent(const String& text, Event* underlyingEvent, TextEventInputType inputType)

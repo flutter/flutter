@@ -26,8 +26,6 @@ typedef (CanvasRenderingContext2D or WebGLRenderingContext) RenderingContext;
     Constructor(),
     ConstructorCallWith=Document,
 ] interface Document : ParentNode {
-    readonly attribute Element documentElement;
-
     [CustomElementCallbacks, RaisesException] Element createElement(DOMString tagName);
     DocumentFragment createDocumentFragment();
 

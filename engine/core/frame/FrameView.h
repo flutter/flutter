@@ -128,8 +128,6 @@ public:
     bool isPainting() const;
     bool hasEverPainted() const { return m_lastPaintTime; }
 
-    Color documentBackgroundColor() const;
-
     static double currentFrameTimeStamp() { return s_currentFrameTimeStamp; }
 
     void updateLayoutAndStyleForPainting();

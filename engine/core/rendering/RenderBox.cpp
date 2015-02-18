@@ -117,16 +117,13 @@ void RenderBox::updateFromStyle()
     RenderBoxModelObject::updateFromStyle();
 
     RenderStyle* styleToUse = style();
-    bool isRootObject = isDocumentElement();
-    bool isViewObject = isRenderView();
 
-    // The root and the RenderView always paint their backgrounds/borders.
-    if (isRootObject || isViewObject)
+    if (isRenderView()) {
         setHasBoxDecorationBackground(true);
-
-    // TODO(esprehn): Why do we not want to set this on the RenderView?
-    if (isRenderBlock() && !isViewObject)
+    } else if (isRenderBlock()) {
+        // TODO(esprehn): Why do we not want to set this on the RenderView?
         setHasOverflowClip(!styleToUse->isOverflowVisible());
+    }
 
     setHasTransform(styleToUse->hasTransformRelatedProperty());
 }
@@ -678,10 +675,6 @@ void RenderBox::paintBoxDecorationBackgroundWithRect(PaintInfo& paintInfo, const
 
 void RenderBox::paintBackground(const PaintInfo& paintInfo, const LayoutRect& paintRect, const Color& backgroundColor, BackgroundBleedAvoidance bleedAvoidance)
 {
-    if (isDocumentElement()) {
-        paintRootBoxFillLayers(paintInfo);
-        return;
-    }
     paintFillLayers(paintInfo, backgroundColor, style()->backgroundLayers(), paintRect, bleedAvoidance);
 }
 
@@ -737,18 +730,10 @@ void RenderBox::paintFillLayers(const PaintInfo& paintInfo, const Color& c, cons
     if (!context)
         shouldDrawBackgroundInSeparateBuffer = false;
 
+    // FIXME(sky): Propagate this constant.
     bool skipBaseColor = false;
-    if (shouldDrawBackgroundInSeparateBuffer) {
-        bool isBaseColorVisible = !isBottomLayerOccluded && c.hasAlpha();
-
-        // Paint the document's base background color outside the transparency layer,
-        // so that the background images don't blend with this color: http://crbug.com/389039.
-        if (isBaseColorVisible && isDocumentElementWithOpaqueBackground()) {
-            paintRootBackgroundColor(paintInfo, rect, Color());
-            skipBaseColor = true;
-        }
+    if (shouldDrawBackgroundInSeparateBuffer)
         context->beginTransparencyLayer(1);
-    }
 
     Vector<const FillLayer*>::const_reverse_iterator topLayer = layers.rend();
     for (Vector<const FillLayer*>::const_reverse_iterator it = layers.rbegin(); it != topLayer; ++it)
@@ -1320,8 +1305,6 @@ LayoutUnit RenderBox::computePercentageLogicalHeight(const Length& height) const
     const RenderBox* containingBlockChild = this;
     LayoutUnit rootMarginBorderPaddingHeight = 0;
     while (!cb->isRenderView() && skipContainingBlockForPercentHeightCalculation(cb)) {
-        if (cb->isDocumentElement())
-            rootMarginBorderPaddingHeight += cb->marginBefore() + cb->marginAfter() + cb->borderAndPaddingLogicalHeight();
         skippedAutoHeightContainingBlock = true;
         containingBlockChild = cb;
         cb = cb->containingBlock();
@@ -2812,12 +2795,6 @@ bool RenderBox::percentageLogicalHeightIsResolvableFromBlock(const RenderBlock* 
         return percentageLogicalHeightIsResolvableFromBlock(cb->containingBlock(), cb->isOutOfFlowPositioned());
     if (cb->isRenderView() || isOutOfFlowPositionedWithSpecifiedHeight)
         return true;
-    if (cb->isDocumentElement() && isOutOfFlowPositioned) {
-        // Match the positioned objects behavior, which is that positioned objects will fill their viewport
-        // always.  Note we could only hit this case by recurring into computePercentageLogicalHeight on a positioned containing block.
-        return true;
-    }
-
     return false;
 }
 

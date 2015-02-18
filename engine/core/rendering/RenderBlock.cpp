@@ -320,11 +320,6 @@ void RenderBlock::addOverflowFromPositionedObjects()
     }
 }
 
-bool RenderBlock::createsBlockFormattingContext() const
-{
-    return isInlineBlock() || isFloatingOrOutOfFlowPositioned() || hasOverflowClip() || isFlexItem() || isDocumentElement();
-}
-
 void RenderBlock::updateBlockChildDirtyBitsBeforeLayout(bool relayoutChildren, RenderBox* child)
 {
     // FIXME: Technically percentage height objects only need a relayout if their percentage isn't going to be turned into
@@ -446,16 +441,10 @@ void RenderBlock::paint(PaintInfo& paintInfo, const LayoutPoint& paintOffset, Ve
 {
     LayoutPoint adjustedPaintOffset = paintOffset + location();
 
-    LayoutRect overflowBox;
-    // Check if we need to do anything at all.
-    // FIXME: Could eliminate the isDocumentElement() check if we fix background painting so that the RenderView
-    // paints the root's background.
-    if (!isDocumentElement()) {
-        overflowBox = visualOverflowRect();
-        overflowBox.moveBy(adjustedPaintOffset);
-        if (!overflowBox.intersects(paintInfo.rect))
-            return;
-    }
+    LayoutRect overflowBox = visualOverflowRect();
+    overflowBox.moveBy(adjustedPaintOffset);
+    if (!overflowBox.intersects(paintInfo.rect))
+        return;
 
     // There are some cases where not all clipped visual overflow is accounted for.
     // FIXME: reduce the number of such cases.
@@ -531,7 +520,10 @@ bool RenderBlock::isSelectionRoot() const
 {
     ASSERT(node() || isAnonymous());
 
-    if (isDocumentElement() || hasOverflowClip()
+    if (node() && node()->parentNode() == document())
+        return true;
+
+    if (hasOverflowClip()
         || isPositioned()
         || isInlineBlock()
         || hasTransform()
@@ -603,9 +595,6 @@ GapRects RenderBlock::selectionGaps(RenderBlock* rootBlock, const LayoutPoint& r
         LayoutRect blockRect(offsetFromRootBlock.width(), offsetFromRootBlock.height(), width(), height());
         blockRect.moveBy(rootBlockPhysicalPosition);
         clipOutPositionedObjects(paintInfo, blockRect.location(), positionedObjects());
-        if (isDocumentElement()) // The <body> must make sure to examine its containingBlock's positioned objects.
-            for (RenderBlock* cb = containingBlock(); cb && !cb->isRenderView(); cb = cb->containingBlock())
-                clipOutPositionedObjects(paintInfo, LayoutPoint(cb->x(), cb->y()), cb->positionedObjects());
     }
 
     // FIXME: overflow: auto/scroll regions need more math here, since painting in the border box is different from painting in the padding box (one is scrolled, the other is

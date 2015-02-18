@@ -154,7 +154,7 @@ static void frameContentAsPlainText(size_t maxChars, LocalFrame* frame, StringBu
     // Select the document body.
     RefPtr<Range> range(document->createRange());
     TrackExceptionState exceptionState;
-    range->selectNodeContents(document->documentElement(), exceptionState);
+    range->selectNodeContents(document, exceptionState);
 
     if (!exceptionState.had_exception()) {
         // The text iterator will walk nodes giving us text. This is similar to
@@ -291,42 +291,6 @@ void WebLocalFrameImpl::unmarkText()
 bool WebLocalFrameImpl::hasMarkedText() const
 {
     return frame()->inputMethodController().hasComposition();
-}
-
-WebRange WebLocalFrameImpl::markedRange() const
-{
-    return frame()->inputMethodController().compositionRange();
-}
-
-bool WebLocalFrameImpl::firstRectForCharacterRange(unsigned location, unsigned length, WebRect& rect) const
-{
-    if ((location + length < location) && (location + length))
-        length = 0;
-
-    Element* editable = frame()->selection().rootEditableElementOrDocumentElement();
-    ASSERT(editable);
-    RefPtr<Range> range = PlainTextRange(location, location + length).createRange(*editable);
-    if (!range)
-        return false;
-    IntRect intRect = frame()->editor().firstRectForRange(range.get());
-    rect = WebRect(intRect);
-    rect = frame()->view()->contentsToWindow(rect);
-    return true;
-}
-
-size_t WebLocalFrameImpl::characterIndexForPoint(const WebPoint& webPoint) const
-{
-    if (!frame())
-        return kNotFound;
-
-    IntPoint point = frame()->view()->windowToContents(webPoint);
-    HitTestResult result = frame()->eventHandler().hitTestResultAtPoint(point, HitTestRequest::ReadOnly | HitTestRequest::Active);
-    RefPtr<Range> range = frame()->rangeForPoint(result.roundedPointInInnerNodeFrame());
-    if (!range)
-        return kNotFound;
-    Element* editable = frame()->selection().rootEditableElementOrDocumentElement();
-    ASSERT(editable);
-    return PlainTextRange::create(*editable, *range.get()).start();
 }
 
 bool WebLocalFrameImpl::executeCommand(const WebString& name, const WebNode& node)

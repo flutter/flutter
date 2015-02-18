@@ -267,8 +267,6 @@ public:
     virtual bool isRenderInline() const { return false; }
     virtual bool isRenderView() const { return false; }
 
-    bool isDocumentElement() const { return document().documentElement() == m_node; }
-
     bool everHadLayout() const { return m_bitfields.everHadLayout(); }
 
     bool alwaysCreateLineBoxesForRenderInline() const

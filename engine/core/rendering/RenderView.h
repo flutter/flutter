@@ -84,15 +84,10 @@ public:
 
     LayoutState* layoutState() const { return m_layoutState; }
 
-    virtual void updateHitTestResult(HitTestResult&, const LayoutPoint&) override;
-
     IntRect unscaledDocumentRect() const;
     LayoutRect backgroundRect(RenderBox* backgroundRenderer) const;
 
     IntRect documentRect() const;
-
-    // Renderer that paints the root background has background-images which all have background-attachment: fixed.
-    bool rootBackgroundIsEntirelyFixed() const;
 
     double layoutViewportWidth() const;
     double layoutViewportHeight() const;
@@ -116,8 +111,6 @@ private:
 
     void positionDialog(RenderBox*);
     void positionDialogs();
-
-    RenderObject* backgroundRenderer() const;
 
     FrameView* m_frameView;
 

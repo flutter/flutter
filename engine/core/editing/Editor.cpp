@@ -273,7 +273,7 @@ void Editor::deleteSelectionWithSmartDelete(bool smartDelete)
 
 void Editor::pasteAsPlainText(const String& pastingText, bool smartReplace)
 {
-    Element* target = findEventTargetFromSelection();
+    ContainerNode* target = findEventTargetFromSelection();
     if (!target)
         return;
     target->dispatchEvent(TextEvent::createForPlainTextPaste(m_frame.domWindow(), pastingText, smartReplace), IGNORE_EXCEPTION);
@@ -281,7 +281,7 @@ void Editor::pasteAsPlainText(const String& pastingText, bool smartReplace)
 
 void Editor::pasteAsFragment(PassRefPtr<DocumentFragment> pastingFragment, bool smartReplace, bool matchStyle)
 {
-    Element* target = findEventTargetFromSelection();
+    ContainerNode* target = findEventTargetFromSelection();
     if (!target)
         return;
     target->dispatchEvent(TextEvent::createForFragmentPaste(m_frame.domWindow(), pastingFragment, smartReplace, matchStyle), IGNORE_EXCEPTION);
@@ -352,16 +352,14 @@ void Editor::clearLastEditCommand()
     m_lastEditCommand.clear();
 }
 
-Element* Editor::findEventTargetFrom(const VisibleSelection& selection) const
+ContainerNode* Editor::findEventTargetFrom(const VisibleSelection& selection) const
 {
-    Element* target = selection.start().element();
-    if (!target)
-        target = m_frame.document()->documentElement();
-
-    return target;
+    if (Element* target = selection.start().element())
+        return target;
+    return m_frame.document();
 }
 
-Element* Editor::findEventTargetFromSelection() const
+ContainerNode* Editor::findEventTargetFromSelection() const
 {
     return findEventTargetFrom(m_frame.selection().selection());
 }

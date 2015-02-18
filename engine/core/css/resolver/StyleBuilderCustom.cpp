@@ -154,9 +154,6 @@ void StyleBuilderFunctions::applyValueCSSPropertyCursor(StyleResolverState& stat
 void StyleBuilderFunctions::applyValueCSSPropertyDirection(StyleResolverState& state, CSSValue* value)
 {
     state.style()->setDirection(*toCSSPrimitiveValue(value));
-    Element* element = state.element();
-    if (element && element == element->document().documentElement())
-        element->document().setDirectionSetOnDocumentElement(true);
 }
 
 void StyleBuilderFunctions::applyInitialCSSPropertyFontFamily(StyleResolverState& state)

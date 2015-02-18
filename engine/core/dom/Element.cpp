@@ -371,12 +371,6 @@ int Element::clientWidth()
 {
     document().updateLayout();
 
-    // FIXME(sky): Can we just use getBoundingClientRect() instead?
-    if (document().documentElement() == this) {
-        if (FrameView* view = document().view())
-            return view->layoutSize().width();
-    }
-
     if (RenderBox* renderer = renderBox())
         return renderer->pixelSnappedClientWidth();
     return 0;
@@ -385,12 +379,6 @@ int Element::clientWidth()
 int Element::clientHeight()
 {
     document().updateLayout();
-
-    // FIXME(sky): Can we just use getBoundingClientRect() instead?
-    if (document().documentElement() == this) {
-        if (FrameView* view = document().view())
-            return view->layoutSize().height();
-    }
 
     if (RenderBox* renderer = renderBox())
         return renderer->pixelSnappedClientHeight();

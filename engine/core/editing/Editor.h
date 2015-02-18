@@ -176,7 +176,7 @@ public:
     void pasteAsFragment(PassRefPtr<DocumentFragment>, bool smartReplace, bool matchStyle);
     void pasteAsPlainText(const String&, bool smartReplace);
 
-    Element* findEventTargetFrom(const VisibleSelection&) const;
+    ContainerNode* findEventTargetFrom(const VisibleSelection&) const;
 
     bool findString(const String&, FindOptions);
     // FIXME: Switch callers over to the FindOptions version and retire this one.
@@ -235,7 +235,7 @@ private:
     void changeSelectionAfterCommand(const VisibleSelection& newSelection, FrameSelection::SetSelectionOptions);
     void notifyComponentsOnChangedSelection(const VisibleSelection& oldSelection, FrameSelection::SetSelectionOptions);
 
-    Element* findEventTargetFromSelection() const;
+    ContainerNode* findEventTargetFromSelection() const;
 
     PassRefPtr<Range> rangeOfString(const String&, Range*, FindOptions);
 

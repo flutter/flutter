@@ -89,8 +89,6 @@ public:
     bool isDirectional() const { return m_isDirectional; }
     void setIsDirectional(bool isDirectional) { m_isDirectional = isDirectional; }
 
-    void appendTrailingWhitespace();
-
     bool expandUsingGranularity(TextGranularity granularity);
 
     // We don't yet support multi-range selections, so we only ever have one range to return.

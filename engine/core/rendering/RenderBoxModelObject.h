@@ -246,8 +246,6 @@ protected:
 
     bool hasAutoHeightOrContainingBlockWithAutoHeight() const;
 
-    bool isDocumentElementWithOpaqueBackground() const;
-
     void paintRootBackgroundColor(const PaintInfo&, const LayoutRect&, const Color&);
 
 public:

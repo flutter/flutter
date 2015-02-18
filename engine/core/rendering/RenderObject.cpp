@@ -1842,9 +1842,6 @@ void RenderObject::imageChanged(WrappedImagePtr, const IntRect*)
 
 Element* RenderObject::offsetParent() const
 {
-    if (isDocumentElement())
-        return 0;
-
     Node* node = 0;
     for (RenderObject* ancestor = parent(); ancestor; ancestor = ancestor->parent()) {
         // Spec: http://www.w3.org/TR/cssom-view/#offset-attributes

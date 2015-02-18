@@ -78,11 +78,6 @@ WebLocalFrame* WebDocument::frame() const
     return WebLocalFrameImpl::fromFrame(constUnwrap<Document>()->frame());
 }
 
-WebElement WebDocument::documentElement() const
-{
-    return WebElement(constUnwrap<Document>()->documentElement());
-}
-
 WebString WebDocument::title() const
 {
     return WebString(constUnwrap<Document>()->title());
