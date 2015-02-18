@@ -27,7 +27,7 @@ abstract class AutomaticMetadata {
   void init(DeclarationMirror target, Module module);
 
   static void runLibrary(LibraryMirror library, Module module) {
-    library.declarations.values.toList()..sort((DeclarationMirror a, DeclarationMirror b) {
+    library.declarations.values.toList() /* ..sort((DeclarationMirror a, DeclarationMirror b) {
       bool aHasLocation;
       try {
         aHasLocation = a.location != null;
@@ -49,7 +49,7 @@ abstract class AutomaticMetadata {
       if (a.location.line != b.location.line)
         return a.location.line - b.location.line;
       return a.location.column - b.location.column;
-    })
+    }) */
     ..forEach((DeclarationMirror d) {
       d.metadata.forEach((InstanceMirror i) {
         if (i.reflectee is AutomaticMetadata)
@@ -93,3 +93,6 @@ assumed to exist:
      ClassName = SuperclassName;
      ClassName.namedConstructor = SuperclassName.otherNamedConstructor;
 ```
+
+* The reflection APIs (`dart:mirrors`) are assumed to reflect a
+  library's declarations in source order.
