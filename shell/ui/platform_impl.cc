@@ -4,11 +4,15 @@
 
 #include "sky/shell/ui/platform_impl.h"
 
+#include "mojo/public/cpp/application/connect.h"
+
 namespace sky {
 namespace shell {
 
-PlatformImpl::PlatformImpl()
-    : main_thread_task_runner_(base::MessageLoop::current()->task_runner()) {
+PlatformImpl::PlatformImpl(mojo::ServiceProviderPtr service_provider)
+    : main_thread_task_runner_(base::MessageLoop::current()->task_runner()),
+      service_provider_(service_provider.Pass()) {
+  mojo::ConnectToService(service_provider_.get(), &network_service_);
 }
 
 PlatformImpl::~PlatformImpl() {
@@ -20,6 +24,10 @@ blink::WebString PlatformImpl::defaultLocale() {
 
 base::SingleThreadTaskRunner* PlatformImpl::mainThreadTaskRunner() {
   return main_thread_task_runner_.get();
+}
+
+mojo::NetworkService* PlatformImpl::networkService() {
+  return network_service_.get();
 }
 
 }  // namespace shell

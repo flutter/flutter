@@ -24,7 +24,8 @@ gfx::Size GetSize(SkPicture* picture) {
 
 }  // namespace
 
-Rasterizer::Rasterizer() : weak_factory_(this) {
+Rasterizer::Rasterizer()
+    : share_group_(new gfx::GLShareGroup()), weak_factory_(this) {
 }
 
 Rasterizer::~Rasterizer() {
@@ -35,14 +36,15 @@ base::WeakPtr<Rasterizer> Rasterizer::GetWeakPtr() {
 }
 
 void Rasterizer::OnAcceleratedWidgetAvailable(gfx::AcceleratedWidget widget) {
-  share_group_ = make_scoped_refptr(new gfx::GLShareGroup());
   surface_ = gfx::GLSurface::CreateViewGLSurface(widget);
   CHECK(surface_) << "GLSurface required.";
-  CHECK(CreateGLContext()) << "GLContext required.";
 }
 
 void Rasterizer::Draw(skia::RefPtr<SkPicture> picture) {
-  // TODO(abarth): We should handle losing the GL context.
+  if (!surface_)
+    return;
+
+  EnsureGLContext();
   CHECK(context_->MakeCurrent(surface_.get()));
   EnsureGaneshSurface(GetSize(picture.get()));
 
@@ -54,15 +56,20 @@ void Rasterizer::Draw(skia::RefPtr<SkPicture> picture) {
 }
 
 void Rasterizer::OnOutputSurfaceDestroyed() {
+  ganesh_surface_.reset();
+  ganesh_context_.reset();
+  context_ = nullptr;
+  surface_ = nullptr;
 }
 
-bool Rasterizer::CreateGLContext() {
+void Rasterizer::EnsureGLContext() {
+  if (context_)
+    return;
   context_ = gfx::GLContext::CreateGLContext(share_group_.get(), surface_.get(),
                                              gfx::PreferIntegratedGpu);
-  if (!context_)
-    return false;
+  CHECK(context_) << "GLContext required.";
+  CHECK(context_->MakeCurrent(surface_.get()));
   ganesh_context_.reset(new GaneshContext(context_.get()));
-  return true;
 }
 
 void Rasterizer::EnsureGaneshSurface(const gfx::Size& size) {

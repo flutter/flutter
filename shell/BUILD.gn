@@ -15,8 +15,9 @@ group("shell") {
 
 generate_jni("jni_headers") {
   sources = [
+    "apk/src/org/domokit/sky/shell/JavaServiceProvider.java",
     "apk/src/org/domokit/sky/shell/SkyMain.java",
-    "apk/src/org/domokit/sky/shell/SkyView.java",
+    "apk/src/org/domokit/sky/shell/PlatformView.java",
   ]
   jni_package = "sky/shell"
 }
@@ -31,13 +32,17 @@ shared_library("sky_shell") {
     "gpu/rasterizer.h",
     "gpu_delegate.cc",
     "gpu_delegate.h",
+    "java_service_provider.cc",
+    "java_service_provider.h",
     "library_loader.cc",
+    "platform_view.cc",
+    "platform_view.h",
     "shell.cc",
     "shell.h",
     "sky_main.cc",
     "sky_main.h",
-    "sky_view.cc",
-    "sky_view.h",
+    "ui/animator.cc",
+    "ui/animator.h",
     "ui/engine.cc",
     "ui/engine.h",
     "ui/platform_impl.cc",
@@ -50,7 +55,12 @@ shared_library("sky_shell") {
     "//base",
     "//base:i18n",
     "//build/config/sanitizers:deps",
+    "//mojo/android:libsystem_java",
+    "//mojo/common",
     "//mojo/edk/system",
+    "//mojo/public/cpp/application",
+    "//mojo/public/interfaces/application",
+    "//mojo/services/network/public/interfaces",
     "//skia",
     "//sky/engine",
     "//ui/gfx/geometry",
@@ -61,20 +71,39 @@ shared_library("sky_shell") {
 
 android_library("java") {
   java_files = [
+    "apk/src/org/domokit/sky/shell/JavaServiceProvider.java",
+    "apk/src/org/domokit/sky/shell/PlatformView.java",
     "apk/src/org/domokit/sky/shell/SkyMain.java",
     "apk/src/org/domokit/sky/shell/SkyShellActivity.java",
     "apk/src/org/domokit/sky/shell/SkyShellApplication.java",
-    "apk/src/org/domokit/sky/shell/SkyView.java",
   ]
 
   deps = [
     "//base:base_java",
+    "//mojo/android:system_java",
+    "//mojo/public/interfaces/application:application_java",
+    "//mojo/public/java:bindings",
+    "//mojo/public/java:system",
+    "//mojo/services/network/public/interfaces:interfaces_java",
   ]
 }
+
+sky_shell_assets_dir = "$root_build_dir/sky_shell/assets"
 
 android_resources("resources") {
   resource_dirs = [ "apk/res" ]
   custom_package = "org.domokit.sky.shell"
+}
+
+copy_ex("assets") {
+  clear_dir = true
+  dest = sky_shell_assets_dir
+  sources = [
+    "$root_build_dir/icudtl.dat",
+  ]
+  deps = [
+    "//third_party/icu",
+  ]
 }
 
 android_apk("sky_shell_apk") {
@@ -83,12 +112,13 @@ android_apk("sky_shell_apk") {
   android_manifest = "apk/AndroidManifest.xml"
   native_libs = [ "libsky_shell.so" ]
 
-  asset_location = "apk/res"
+  asset_location = sky_shell_assets_dir
 
   deps = [
-    ":sky_shell",
+    "//base:base_java",
+    ":assets",
     ":java",
     ":resources",
-    "//base:base_java",
+    ":sky_shell",
   ]
 }

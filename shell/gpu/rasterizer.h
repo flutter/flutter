@@ -34,11 +34,10 @@ class Rasterizer : public GPUDelegate {
 
   void OnAcceleratedWidgetAvailable(gfx::AcceleratedWidget widget) override;
   void OnOutputSurfaceDestroyed() override;
-
-  void Draw(skia::RefPtr<SkPicture> picture);
+  void Draw(skia::RefPtr<SkPicture> picture) override;
 
  private:
-  bool CreateGLContext();
+  void EnsureGLContext();
   void EnsureGaneshSurface(const gfx::Size& size);
 
   scoped_refptr<gfx::GLShareGroup> share_group_;

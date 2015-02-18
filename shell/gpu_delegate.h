@@ -5,7 +5,10 @@
 #ifndef SKY_SHELL_GPU_DELEGATE_H_
 #define SKY_SHELL_GPU_DELEGATE_H_
 
+#include "skia/ext/refptr.h"
 #include "ui/gfx/native_widget_types.h"
+
+class SkPicture;
 
 namespace sky {
 namespace shell {
@@ -14,6 +17,7 @@ class GPUDelegate {
  public:
   virtual void OnAcceleratedWidgetAvailable(gfx::AcceleratedWidget widget) = 0;
   virtual void OnOutputSurfaceDestroyed() = 0;
+  virtual void Draw(skia::RefPtr<SkPicture> picture) = 0;
 
  protected:
   virtual ~GPUDelegate();

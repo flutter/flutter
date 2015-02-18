@@ -7,14 +7,18 @@
 #include "base/android/jni_registrar.h"
 #include "base/android/library_loader/library_loader_hooks.h"
 #include "base/logging.h"
+#include "mojo/android/system/core_impl.h"
+#include "sky/shell/java_service_provider.h"
+#include "sky/shell/platform_view.h"
 #include "sky/shell/sky_main.h"
-#include "sky/shell/sky_view.h"
 
 namespace {
 
 base::android::RegistrationMethod kSkyRegisteredMethods[] = {
+    {"CoreImpl", mojo::android::RegisterCoreImpl},
+    {"JavaServiceProvider", sky::shell::RegisterJavaServiceProvider},
     {"SkyMain", sky::shell::RegisterSkyMain},
-    {"SkyView", sky::shell::SkyView::Register},
+    {"PlatformView", sky::shell::PlatformView::Register},
 };
 
 bool RegisterSkyJni(JNIEnv* env) {
