@@ -12,16 +12,16 @@ abstract class GestureEvent extends Event {
 }
 
 class GestureState {
-  @nonnull bool cancel = true; // if true, then cancel the gesture at this point
-  @nonnull bool capture = false; // (for PointerDownEvent) if true, then this pointer is relevant
-  @nonnull bool choose = false; // if true, the gesture thinks that other gestures should give up
-  @nonnull bool finished = true; // if true, we're ready for the next gesture to start
+  bool cancel = true; // if true, then cancel the gesture at this point
+  bool capture = false; // (for PointerDownEvent) if true, then this pointer is relevant
+  bool choose = false; // if true, the gesture thinks that other gestures should give up
+  bool finished = true; // if true, we're ready for the next gesture to start
   // choose and cancel are mutually exclusive
 }
 
 class BufferedEvent {
   const BufferedEvent(this.event, this.coallesceGroup);
-  final @nonnull GestureEvent event;
+  final GestureEvent event;
   final int coallesceGroup;
 }
 
@@ -31,7 +31,7 @@ abstract class Gesture extends EventTarget {
                                    event is PointerMovedEvent ||
                                    event is PointerUpEvent).listen(_handler);
   }
-  final @nonnull EventTarget target;
+  final EventTarget target;
 
   bool _ready = true; // last event, we were finished
   bool get ready => _ready;
@@ -46,9 +46,9 @@ abstract class Gesture extends EventTarget {
   // (active && !chosen) means we're collecting events until no other
   // gesture is valid, or until we take command
 
-  @nonnull GestureState processEvent(@nonnull PointerEvent event);
+  GestureState processEvent(PointerEvent event);
 
-  List<@nonnull BufferedEvent> _eventBuffer;
+  List<BufferedEvent> _eventBuffer;
 
   void choose() {
     // called by GestureManager
@@ -76,9 +76,9 @@ abstract class Gesture extends EventTarget {
   }
 
   // for use by subclasses only
-  void sendEvent(@nonnull GestureEvent event,
+  void sendEvent(GestureEvent event,
                  { int coallesceGroup, // when queuing events, only the last event with each group is kept 
-                   @nonnull bool prechoose: false // if true, event should just be sent right away, not queued
+                   bool prechoose: false // if true, event should just be sent right away, not queued
                  }) {
     assert(_active == true);
     assert(coallesceGroup == null || prechoose == false);
@@ -94,7 +94,7 @@ abstract class Gesture extends EventTarget {
     }
   }
 
-  void _handler(@nonnull Event event) {
+  void _handler(Event event) {
     bool wasActive = _active;
     if (_ready) {
       // reset the state to start a new gesture
@@ -125,7 +125,6 @@ abstract class Gesture extends EventTarget {
   }
 }
 
-/*
 ```
 Subclasses should override ``processEvent()``:
  - as the events are received, they get examined to see if they
@@ -152,7 +151,6 @@ Subclasses should override ``processEvent()``:
    "cancel" events if cancel() is called
 
 ```dart
-*/
 
 class PointerState {
   PointerState({this.gestures, this.chosen}) {
@@ -162,19 +160,19 @@ class PointerState {
   factory PointerState.clone(PointerState source) {
     return new PointerState(gestures: source.gestures, chosen: source.chosen);
   }
-  @nonnull List<@nonnull Gesture> gestures;
-  @nonnull bool chosen = false;
+  List<Gesture> gestures;
+  bool chosen = false;
 }
 
 class GestureManager {
   GestureManager(this.target) {
     target.events.where((event) => event is PointerDownEvent).listen(_handler);
   }
-  final @nonnull EventTarget target; // usually the ApplicationRoot object
+  final EventTarget target; // usually the ApplicationRoot object
 
-  Map<@nonnull int, @nonnull PointerState> _pointers = new SplayTreeMap<int, PointerState>();
+  Map<int, PointerState> _pointers = new SplayTreeMap<int, PointerState>();
 
-  void addGesture(@nonnull PointerEvent event, @nonnull Gesture gesture) {
+  void addGesture(PointerEvent event, Gesture gesture) {
     assert(gesture.active);
     var pointer = event.pointer;
     if (_pointers.containsKey(pointer)) {
@@ -190,7 +188,7 @@ class GestureManager {
     }
   }
 
-  void cancelGesture(@nonnull Gesture gesture) {
+  void cancelGesture(Gesture gesture) {
     _pointers.forEach((index, pointerState) => pointerState.gestures.remove(gesture));
     gesture.cancel();
     // get a static copy of the _pointers keys, so we can remove them safely
@@ -210,12 +208,12 @@ class GestureManager {
     }
   }
 
-  void chooseGesture(@nonnull Gesture gesture) {
+  void chooseGesture(Gesture gesture) {
     if (!gesture.active)
       // this could happen e.g. if two gestures simultaneously add
       // themselves and chose themselves for the same PointerDownEvent
       return;
-    @nonnull List<@nonnull Gesture> losers = new List<@nonnull Gesture>();
+    List<Gesture> losers = new List<Gesture>();
     _pointers.values
              .where((pointerState) => pointerState.gestures.contains(gesture))
              .forEach((pointerState) {
@@ -235,13 +233,13 @@ class GestureManager {
     gesture.choose();
   }
 
-  @nonnull PointerState getActiveGestures(@nonnull int pointer) {
+  PointerState getActiveGestures(int pointer) {
     if (_pointers.containsKey(pointer) && _pointers[pointer].gestures.length > 0)
       return new PointerState.clone(_pointers[pointer]);
     return new PointerState();
   }
 
-  void _handler(@nonnull PointerDownEvent event) {
+  void _handler(PointerDownEvent event) {
     var pointer = event.pointer;
     if (_pointers.containsKey(pointer)) {
       var pointerState = _pointers[pointer];
