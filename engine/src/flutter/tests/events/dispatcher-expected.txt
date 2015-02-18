@@ -1,0 +1,12 @@
+CONSOLE: unittest-suite-wait-for-done
+CONSOLE: PASS: Dispatcher simple listen
+CONSOLE: PASS: Dispatcher firstWhere
+CONSOLE: PASS: Dispatcher where
+CONSOLE: PASS: Dispatcher where without listener
+CONSOLE: PASS: Dispatcher where with listeners removed
+CONSOLE: PASS: Dispatcher double listeners
+CONSOLE: PASS: Dispatcher zones
+CONSOLE: 
+CONSOLE: All 7 tests passed.
+CONSOLE: unittest-suite-success
+DONE
