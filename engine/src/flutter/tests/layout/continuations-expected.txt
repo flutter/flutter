@@ -1,13 +1,12 @@
 layer at (0,0) size 800x600
   RenderView {#document} at (0,0) size 800x600
-layer at (0,0) size 800x19
-  RenderBlock {sky} at (0,0) size 800x19
-    RenderBlock {div} at (0,0) size 800x19
-      RenderParagraph {span} at (0,0) size 800x19
-        RenderBlock (inline-block) {div} at (0,0) size 25.22x19
-          RenderParagraph (anonymous) at (0,0) size 25.22x19
-            RenderText {#text} at (0,0) size 26x19
-              text run at (0,0) width 26: "foo"
-        RenderText {#text} at (25,0) size 27x19
-          text run at (25,0) width 27: "bar"
+    RenderBlock {sky} at (0,0) size 800x19
+      RenderBlock {div} at (0,0) size 800x19
+        RenderParagraph {span} at (0,0) size 800x19
+          RenderBlock (inline-block) {div} at (0,0) size 25.22x19
+            RenderParagraph (anonymous) at (0,0) size 25.22x19
+              RenderText {#text} at (0,0) size 26x19
+                text run at (0,0) width 26: "foo"
+          RenderText {#text} at (25,0) size 27x19
+            text run at (25,0) width 27: "bar"
 

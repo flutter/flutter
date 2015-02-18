@@ -1,24 +1,23 @@
 layer at (0,0) size 800x600
   RenderView {#document} at (0,0) size 800x600
-layer at (0,0) size 800x353
-  RenderBlock {sky} at (0,0) size 800x353
-    RenderBlock {h3} at (0,0) size 800x19
-      RenderParagraph (anonymous) at (0,0) size 800x19
-        RenderText {#text} at (0,0) size 92x19
-          text run at (0,0) width 92: "It passes if:"
-    RenderBlock {ul} at (0,19) size 800x57
-      RenderBlock {li} at (0,0) size 800x19
+    RenderBlock {sky} at (0,0) size 800x353
+      RenderBlock {h3} at (0,0) size 800x19
         RenderParagraph (anonymous) at (0,0) size 800x19
-          RenderText {#text} at (0,0) size 511x19
-            text run at (0,0) width 511: "the canvas content has rounded corners (top-left and top-right)"
-      RenderBlock {li} at (0,19) size 800x19
-        RenderParagraph (anonymous) at (0,0) size 800x19
-          RenderText {#text} at (0,0) size 457x19
-            text run at (0,0) width 457: "the 10px red border is visible around the canvas content"
-      RenderBlock {li} at (0,38) size 800x19
-        RenderParagraph (anonymous) at (0,0) size 800x19
-          RenderText {#text} at (0,0) size 200x19
-            text run at (0,0) width 200: "gray border is not visible"
+          RenderText {#text} at (0,0) size 92x19
+            text run at (0,0) width 92: "It passes if:"
+      RenderBlock {ul} at (0,19) size 800x57
+        RenderBlock {li} at (0,0) size 800x19
+          RenderParagraph (anonymous) at (0,0) size 800x19
+            RenderText {#text} at (0,0) size 511x19
+              text run at (0,0) width 511: "the canvas content has rounded corners (top-left and top-right)"
+        RenderBlock {li} at (0,19) size 800x19
+          RenderParagraph (anonymous) at (0,0) size 800x19
+            RenderText {#text} at (0,0) size 457x19
+              text run at (0,0) width 457: "the 10px red border is visible around the canvas content"
+        RenderBlock {li} at (0,38) size 800x19
+          RenderParagraph (anonymous) at (0,0) size 800x19
+            RenderText {#text} at (0,0) size 200x19
+              text run at (0,0) width 200: "gray border is not visible"
 layer at (0,76) size 277x277
   RenderHTMLCanvas {canvas} at (0,76) size 277x277 [bgcolor=#808080] [border: (10px solid #FF0000)]
 

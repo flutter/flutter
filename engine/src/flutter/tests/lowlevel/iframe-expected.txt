@@ -1,25 +1,24 @@
 layer at (0,0) size 800x600
   RenderView {#document} at (0,0) size 800x600
-layer at (0,0) size 800x506
-  RenderBlock {sky} at (0,0) size 800x506
-    RenderBlock {div} at (0,0) size 800x228
-      RenderParagraph (anonymous) at (0,0) size 800x19
-        RenderText {#text} at (0,0) size 76x19
-          text run at (0,0) width 76: "This is an"
-      RenderParagraph (anonymous) at (0,209) size 800x19
-        RenderText {#text} at (0,0) size 72x19
-          text run at (0,0) width 72: "element."
-    RenderBlock {div} at (0,228) size 800x200
-      RenderParagraph (anonymous) at (0,0) size 800x19
-        RenderText {#text} at (0,0) size 99x19
-          text run at (0,0) width 99: "Placeholder."
-    RenderBlock {div} at (0,428) size 800x78
-      RenderParagraph (anonymous) at (0,0) size 800x19
-        RenderText {#text} at (0,0) size 218x19
-          text run at (0,0) width 218: "Small iframe should render"
-      RenderParagraph (anonymous) at (0,59) size 800x19
-        RenderText {#text} at (0,0) size 76x19
-          text run at (0,0) width 76: "correctly."
+    RenderBlock {sky} at (0,0) size 800x506
+      RenderBlock {div} at (0,0) size 800x228
+        RenderParagraph (anonymous) at (0,0) size 800x19
+          RenderText {#text} at (0,0) size 76x19
+            text run at (0,0) width 76: "This is an"
+        RenderParagraph (anonymous) at (0,209) size 800x19
+          RenderText {#text} at (0,0) size 72x19
+            text run at (0,0) width 72: "element."
+      RenderBlock {div} at (0,228) size 800x200
+        RenderParagraph (anonymous) at (0,0) size 800x19
+          RenderText {#text} at (0,0) size 99x19
+            text run at (0,0) width 99: "Placeholder."
+      RenderBlock {div} at (0,428) size 800x78
+        RenderParagraph (anonymous) at (0,0) size 800x19
+          RenderText {#text} at (0,0) size 218x19
+            text run at (0,0) width 218: "Small iframe should render"
+        RenderParagraph (anonymous) at (0,59) size 800x19
+          RenderText {#text} at (0,0) size 76x19
+            text run at (0,0) width 76: "correctly."
 layer at (0,19) size 340x190
   RenderReplaced {iframe} at (0,19) size 340x190 [border: (20px solid #000000)]
 layer at (0,447) size 300x40

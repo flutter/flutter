@@ -1,13 +1,12 @@
 layer at (0,0) size 800x600
   RenderView {#document} at (0,0) size 800x600
-layer at (0,0) size 800x137
-  RenderBlock {div} at (0,0) size 800x137
-    RenderBlock {div} at (32,32) size 736x38
-      RenderParagraph (anonymous) at (0,0) size 736x38
-        RenderText {#text} at (0,0) size 191x38
-          text run at (0,0) width 191: "about:blank"
-    RenderBlock {div} at (16,110) size 768x19 [color=#BCD8F5]
-      RenderParagraph (anonymous) at (0,0) size 768x19
-        RenderText {#text} at (0,0) size 152x19
-          text run at (0,0) width 152: "Welcome to Sky!"
+    RenderBlock {div} at (0,0) size 800x137
+      RenderBlock {div} at (32,32) size 736x38
+        RenderParagraph (anonymous) at (0,0) size 736x38
+          RenderText {#text} at (0,0) size 191x38
+            text run at (0,0) width 191: "about:blank"
+      RenderBlock {div} at (16,110) size 768x19 [color=#BCD8F5]
+        RenderParagraph (anonymous) at (0,0) size 768x19
+          RenderText {#text} at (0,0) size 152x19
+            text run at (0,0) width 152: "Welcome to Sky!"
 
