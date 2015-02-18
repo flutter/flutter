@@ -36,8 +36,7 @@ Dart_Handle DartExceptionFactory::CreateException(const String& class_name,
   Dart_Handle exception_class = Dart_GetType(
       core_library_.value(), StringToDart(dart_state_, class_name), 0, 0);
   Dart_Handle message_handle = StringToDart(dart_state_, message);
-  Dart_Handle empty_string = Dart_NewStringFromCString("");
-  return Dart_New(exception_class, empty_string, 1, &message_handle);
+  return Dart_New(exception_class, Dart_EmptyString(), 1, &message_handle);
 }
 
 }  // namespace blink
