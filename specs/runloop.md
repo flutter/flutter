@@ -1,7 +1,7 @@
 Sky's Run Loop
 ==============
 
-Sky has three task queues, named idle, paint, and nextPaint.
+Sky has three task queues, named idle, frame, and nextFrame.
 
 When a task is run, it has a time budget, and if the time budget is
 exceeded, then a catchable DeadlineExceededException exception is
@@ -20,9 +20,9 @@ queue *relevant task queue*, bits *filter bits*, a time
 2. If *remaining time* is less than or equal to zero, exit this
    algorithm.
 3. Let *task list* be the list of tasks in the *relevant task queue*
-   that have bits that, when 'or'ed with *filter bits*, are non-zero;
-   whose required budget is less than or equal to *remaining time*;
-   and whose due time, if any, has been reached.
+   that have bits that, when 'and'ed with *filter bits*, are equal to
+   *filter bits*, whose required budget is less than or equal to
+   *remaining time*; and whose due time, if any, has been reached.
 4. If *task list* is empty, then if *idle rule* is "sleep" then return
    to step 1, otherwise, exit this algorithm.
 5. Sort *task list* by the priority of each task, highest first.
@@ -53,8 +53,8 @@ must run the following steps:
 Sky's run loop consists of running the following, at 120Hz (each loop
 takes 8.333ms):
 
-1. *Drain* the *paint task queue*, with bits
-   `application.paintTaskBits`, for 1ms.
+1. *Drain* the *frame task queue*, with bits
+   `application.frameTaskBits`, for 1ms.
 
 2. Create a task that does the following, then run it with a budget of
    1ms:
@@ -92,8 +92,8 @@ takes 8.333ms):
 
 6. Send frame to GPU.
 
-7. Replace the paint queue with the nextPaint queue, and let the
-   nextPaint queue be an empty queue.
+7. Replace the frame queue with the nextFrame queue, and let the
+   nextFrame queue be an empty queue.
 
 8. *Process* the *idle task queue*, with bits
    `application.idleTaskBits`, with a target time of t, where t is the
@@ -109,14 +109,24 @@ budgets.
 Task kinds and priorities
 -------------------------
 
+Tasks scheduled by futures get the priority and task kind bits from
+the task they are scheduled from.
+
 ```dart
-const IdlePriority = 0;
-const FuturePriority = 10000; // the tasks scheduled by futures resolving have this priority
+int IdlePriority = 0; // tasks that can be delayed arbitrarily
+int FutureLayoutPriority = 1000; // async-layout tasks
+int AnimationPriority = 3000; // animation-related tasks
+int InputPriority = 4000; // input events
+int ScrollPriority = 5000; // framework-fired events for scrolling
 
-const IdleKind = 0x01; // tasks that should run during the idle loop
-const LayoutKind = 0x02; // tasks that should run during layout
-const PaintQueueKind = 0x04; // tasks that run on the paint queue
+// possible idle queue task bits
+int IdleKind = 0x01; // tasks that should run during the idle loop
+int LayoutKind = 0x02; // tasks that should run during layout
+int TouchSafeKind = 0x04; // tasks that should keep running while there is a pointer down
+int idleTaskBits = IdleKind; // tasks must have all these bits to run during idle loop
+int layoutTaskBits = LayoutKind; // tasks must have all these bits to run during layout
 
-int idleTaskBits = IdleKind;
-int paintTaskBits = PaintQueueKind;
+// possible frame queue task bits
+// (there are none at this time)
+int frameTaskBits = 0x00; // tasks must have all these bits to run during the frame loop
 ```
