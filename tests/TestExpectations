@@ -10,6 +10,9 @@ https://github.com/domokit/mojo/issues/14 parser/normaliser-null.sky [ Skip ]
 https://github.com/domokit/mojo/issues/14 parser/utf16.sky [ Skip ]
 https://github.com/domokit/mojo/issues/16 parser/normaliser-crlf.sky [ Skip ]
 
+# This test depends on events.md being implemented
+crbug.com/1 events/dispatcher.sky [ Skip ]
+
 # These tests broke during the Dart migration
 crbug.com/2 animation/basic-imperative.sky [ Skip ]
 crbug.com/2 animation/basic-transition.sky [ Skip ]
