@@ -6,40 +6,80 @@
 
 #include "base/bind.h"
 #include "base/single_thread_task_runner.h"
-#include "base/threading/thread.h"
+#include "mojo/common/message_pump_mojo.h"
+#include "mojo/edk/embedder/embedder.h"
+#include "mojo/edk/embedder/simple_platform_support.h"
 #include "sky/shell/gpu/rasterizer.h"
-#include "sky/shell/sky_view.h"
+#include "sky/shell/java_service_provider.h"
+#include "sky/shell/platform_view.h"
 #include "sky/shell/ui/engine.h"
 
 namespace sky {
 namespace shell {
+namespace {
+
+static Shell* g_shell = nullptr;
+
+scoped_ptr<base::MessagePump> CreateMessagePumpMojo() {
+  return make_scoped_ptr(new mojo::common::MessagePumpMojo);
+}
+
+}  // namespace
 
 Shell::Shell(scoped_refptr<base::SingleThreadTaskRunner> java_task_runner)
     : java_task_runner_(java_task_runner) {
+  DCHECK(!g_shell);
+  mojo::embedder::Init(scoped_ptr<mojo::embedder::PlatformSupport>(
+      new mojo::embedder::SimplePlatformSupport()));
+
+  base::Thread::Options options;
+  options.message_pump_factory = base::Bind(&CreateMessagePumpMojo);
+
+  InitGPU(options);
+  InitUI(options);
+  InitView();
 }
 
 Shell::~Shell() {
 }
 
-void Shell::Init() {
-  gpu_thread_.reset(new base::Thread("gpu_thread"));
-  gpu_thread_->Start();
-  rasterizer_.reset(new Rasterizer());
+void Shell::Init(scoped_refptr<base::SingleThreadTaskRunner> java_task_runner) {
+  g_shell = new Shell(java_task_runner);
+}
 
+Shell& Shell::Shared() {
+  DCHECK(g_shell);
+  return *g_shell;
+}
+
+void Shell::InitGPU(const base::Thread::Options& options) {
+  gpu_thread_.reset(new base::Thread("gpu_thread"));
+  gpu_thread_->StartWithOptions(options);
+
+  rasterizer_.reset(new Rasterizer());
+}
+
+void Shell::InitUI(const base::Thread::Options& options) {
   ui_thread_.reset(new base::Thread("ui_thread"));
-  ui_thread_->Start();
-  engine_.reset(new Engine());
+  ui_thread_->StartWithOptions(options);
+
+  Engine::Config config;
+  config.gpu_task_runner = gpu_thread_->message_loop()->task_runner();
+  config.gpu_delegate = rasterizer_->GetWeakPtr();
+  engine_.reset(new Engine(config));
 
   ui_thread_->message_loop()->PostTask(
-      FROM_HERE, base::Bind(&Engine::Init, engine_->GetWeakPtr()));
+      FROM_HERE, base::Bind(&Engine::Init, engine_->GetWeakPtr(),
+                            base::Passed(CreateJavaServiceProvider())));
+}
 
-  SkyView::Config config;
+void Shell::InitView() {
+  PlatformView::Config config;
   config.gpu_task_runner = gpu_thread_->message_loop()->task_runner();
   config.gpu_delegate = rasterizer_->GetWeakPtr();
   config.ui_task_runner = ui_thread_->message_loop()->task_runner();
   config.ui_delegate = engine_->GetWeakPtr();
-
-  view_.reset(new SkyView(config));
+  view_.reset(new PlatformView(config));
 }
 
 }  // namespace shell

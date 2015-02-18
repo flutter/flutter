@@ -18,7 +18,7 @@ public class SkyShellActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        SkyMain.ensureInitialized(this);
-        SkyMain.start();
+        SkyMain.ensureInitialized(getApplicationContext());
+        setContentView(new PlatformView(this));
     }
 }

@@ -8,9 +8,9 @@
 #include "base/macros.h"
 #include "base/memory/ref_counted.h"
 #include "base/memory/scoped_ptr.h"
+#include "base/threading/thread.h"
 
 namespace base {
-class Thread;
 class SingleThreadTaskRunner;
 }
 
@@ -18,21 +18,30 @@ namespace sky {
 namespace shell {
 class Engine;
 class Rasterizer;
-class SkyView;
+class PlatformView;
 
 class Shell {
  public:
-  explicit Shell(scoped_refptr<base::SingleThreadTaskRunner> java_task_runner);
   ~Shell();
 
-  void Init();
+  static void Init(
+      scoped_refptr<base::SingleThreadTaskRunner> java_task_runner);
+  static Shell& Shared();
+
+  PlatformView* view() const { return view_.get(); }
 
  private:
+  explicit Shell(scoped_refptr<base::SingleThreadTaskRunner> java_task_runner);
+
+  void InitGPU(const base::Thread::Options& options);
+  void InitUI(const base::Thread::Options& options);
+  void InitView();
+
   scoped_refptr<base::SingleThreadTaskRunner> java_task_runner_;
   scoped_ptr<base::Thread> gpu_thread_;
   scoped_ptr<base::Thread> ui_thread_;
 
-  scoped_ptr<SkyView> view_;
+  scoped_ptr<PlatformView> view_;
   scoped_ptr<Rasterizer> rasterizer_;
   scoped_ptr<Engine> engine_;
 

@@ -30,7 +30,7 @@ GaneshContext::GaneshContext(scoped_refptr<gfx::GLContext> gl_context)
 
   gr_context_ = skia::AdoptRef(GrContext::Create(
       kOpenGL_GrBackend, reinterpret_cast<GrBackendContext>(interface.get())));
-  DCHECK(gr_context_);
+  DCHECK(gr_context_) << "Failed to create GrContext.";
   gr_context_->setResourceCacheLimits(kMaxGaneshResourceCacheCount,
                                       kMaxGaneshResourceCacheBytes);
 }

@@ -31,11 +31,6 @@ namespace {
 LazyInstance<scoped_ptr<base::MessageLoop>> g_java_message_loop =
     LAZY_INSTANCE_INITIALIZER;
 
-LazyInstance<base::android::ScopedJavaGlobalRef<jobject>> g_main_activiy =
-    LAZY_INSTANCE_INITIALIZER;
-
-LazyInstance<scoped_ptr<Shell>> g_shell = LAZY_INSTANCE_INITIALIZER;
-
 void InitializeLogging() {
   logging::LoggingSettings settings;
   settings.logging_dest = logging::LOG_TO_SYSTEM_DEBUG_LOG;
@@ -49,16 +44,11 @@ void InitializeLogging() {
 
 }  // namespace
 
-static void Init(JNIEnv* env,
-                 jclass clazz,
-                 jobject activity) {
-  g_main_activiy.Get().Reset(env, activity);
-
-  base::android::ScopedJavaLocalRef<jobject> scoped_activity(env, activity);
-  base::android::InitApplicationContext(env, scoped_activity);
+static void Init(JNIEnv* env, jclass clazz, jobject context) {
+  base::android::ScopedJavaLocalRef<jobject> scoped_context(env, context);
+  base::android::InitApplicationContext(env, scoped_context);
 
   base::CommandLine::Init(0, nullptr);
-
   InitializeLogging();
 
   g_java_message_loop.Get().reset(new base::MessageLoopForUI);
@@ -67,16 +57,7 @@ static void Init(JNIEnv* env,
   base::i18n::InitializeICU();
   gfx::GLSurface::InitializeOneOff();
 
-  g_shell.Get().reset(new Shell(g_java_message_loop.Get()->task_runner()));
-
-  g_java_message_loop.Get()->PostTask(
-      FROM_HERE,
-      base::Bind(&Shell::Init, base::Unretained(g_shell.Get().get())));
-}
-
-static jboolean Start(JNIEnv* env, jclass clazz) {
-  LOG(INFO) << "Native code started!";
-  return true;
+  Shell::Init(g_java_message_loop.Get()->task_runner());
 }
 
 bool RegisterSkyMain(JNIEnv* env) {

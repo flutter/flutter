@@ -18,7 +18,7 @@ struct ANativeWindow;
 namespace sky {
 namespace shell {
 
-class SkyView {
+class PlatformView {
  public:
   struct Config {
     base::WeakPtr<GPUDelegate> gpu_delegate;
@@ -30,11 +30,11 @@ class SkyView {
 
   static bool Register(JNIEnv* env);
 
-  explicit SkyView(const Config& config);
-  ~SkyView();
+  explicit PlatformView(const Config& config);
+  ~PlatformView();
 
   // Called from Java
-  void Destroy(JNIEnv* env, jobject obj);
+  void Detach(JNIEnv* env, jobject obj);
   void SurfaceCreated(JNIEnv* env, jobject obj, jobject jsurface);
   void SurfaceDestroyed(JNIEnv* env, jobject obj);
   void SurfaceSetSize(JNIEnv* env,
@@ -49,7 +49,7 @@ class SkyView {
   Config config_;
   ANativeWindow* window_;
 
-  DISALLOW_COPY_AND_ASSIGN(SkyView);
+  DISALLOW_COPY_AND_ASSIGN(PlatformView);
 };
 
 }  // namespace shell

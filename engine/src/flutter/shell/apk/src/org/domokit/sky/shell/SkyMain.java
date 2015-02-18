@@ -8,6 +8,7 @@ import android.content.Context;
 import android.util.Log;
 
 import org.chromium.base.JNINamespace;
+import org.chromium.base.ResourceExtractor;
 
 /**
  * A class to intialize the native code.
@@ -28,6 +29,9 @@ public class SkyMain {
         if (sInitialized)
             return;
         try {
+            ResourceExtractor resourceExtractor = ResourceExtractor.get(applicationContext);
+            resourceExtractor.startExtractingResources();
+            resourceExtractor.waitForCompletion();
             nativeInit(applicationContext);
             sInitialized = true;
         } catch (Exception e) {
@@ -36,15 +40,5 @@ public class SkyMain {
         }
     }
 
-    /**
-     * Starts the specified application in the specified context.
-     *
-     * @return <code>true</code> if an application has been launched.
-     **/
-    static boolean start() {
-        return nativeStart();
-    }
-
     private static native void nativeInit(Context context);
-    private static native boolean nativeStart();
 }

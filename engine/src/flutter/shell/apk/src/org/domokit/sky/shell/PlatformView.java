@@ -4,67 +4,60 @@
 
 package org.domokit.sky.shell;
 
-import android.app.Activity;
 import android.content.Context;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 
-import org.chromium.base.CalledByNative;
 import org.chromium.base.JNINamespace;
 
 /**
  * A view containing Sky
  */
 @JNINamespace("sky::shell")
-public class SkyView extends SurfaceView {
-    private long mNativeSkyView;
+public class PlatformView extends SurfaceView {
+    private long mNativePlatformView;
     private final SurfaceHolder.Callback mSurfaceCallback;
 
-    @SuppressWarnings("unused")
-    @CalledByNative
-    public static void createForActivity(Activity activity, long nativeSkyView) {
-        activity.setContentView(new SkyView(activity, nativeSkyView));
-    }
-
-    public SkyView(Context context, long nativeSkyView) {
+    public PlatformView(Context context) {
         super(context);
 
         setFocusable(true);
         setFocusableInTouchMode(true);
 
-        mNativeSkyView = nativeSkyView;
-        assert mNativeSkyView != 0;
+        mNativePlatformView = nativeAttach();
+        assert mNativePlatformView != 0;
 
         final float density = context.getResources().getDisplayMetrics().density;
 
         mSurfaceCallback = new SurfaceHolder.Callback() {
             @Override
             public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-                assert mNativeSkyView != 0;
-                nativeSurfaceSetSize(mNativeSkyView, width, height, density);
+                assert mNativePlatformView != 0;
+                nativeSurfaceSetSize(mNativePlatformView, width, height, density);
             }
 
             @Override
             public void surfaceCreated(SurfaceHolder holder) {
-                assert mNativeSkyView != 0;
-                nativeSurfaceCreated(mNativeSkyView, holder.getSurface());
+                assert mNativePlatformView != 0;
+                nativeSurfaceCreated(mNativePlatformView, holder.getSurface());
             }
 
             @Override
             public void surfaceDestroyed(SurfaceHolder holder) {
-                assert mNativeSkyView != 0;
-                nativeSurfaceDestroyed(mNativeSkyView);
+                assert mNativePlatformView != 0;
+                nativeSurfaceDestroyed(mNativePlatformView);
             }
         };
         getHolder().addCallback(mSurfaceCallback);
     }
 
-    public void destroy() {
+    @Override
+    protected void onDetachedFromWindow() {
         getHolder().removeCallback(mSurfaceCallback);
-        nativeDestroy(mNativeSkyView);
-        mNativeSkyView = 0;
+        nativeDetach(mNativePlatformView);
+        mNativePlatformView = 0;
     }
 
     @Override
@@ -76,9 +69,10 @@ public class SkyView extends SurfaceView {
         }
     }
 
-    private static native void nativeDestroy(long nativeSkyView);
-    private static native void nativeSurfaceCreated(long nativeSkyView, Surface surface);
-    private static native void nativeSurfaceDestroyed(long nativeSkyView);
+    private static native long nativeAttach();
+    private static native void nativeDetach(long nativePlatformView);
+    private static native void nativeSurfaceCreated(long nativePlatformView, Surface surface);
+    private static native void nativeSurfaceDestroyed(long nativePlatformView);
     private static native void nativeSurfaceSetSize(
-            long nativeSkyView, int width, int height, float density);
+            long nativePlatformView, int width, int height, float density);
 }
