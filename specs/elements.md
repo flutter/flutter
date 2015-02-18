@@ -39,6 +39,10 @@ abstract class Node extends EventTarget {
     return result as Element;
   }
 
+  // TODO(ianh): rename insertBefore() and insertAfter() since the Web
+  // has an insertBefore() that means something else. What's a good
+  // name, though?
+
   external void _insertBefore(Node node); // O(N) in number of descendants
   // node must be Text or Element, parentNode must be non-null
   void insertBefore(List nodes) {
