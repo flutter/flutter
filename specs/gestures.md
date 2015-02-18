@@ -170,7 +170,7 @@ class GestureManager {
   GestureManager(this.target) {
     target.events.where((event) => event is PointerDownEvent).listen(_handler);
   }
-  final @nonnull EventTarget target; // usually the ApplicationDocument object
+  final @nonnull EventTarget target; // usually the ApplicationRoot object
 
   Map<@nonnull int, @nonnull PointerState> _pointers = new SplayTreeMap<int, PointerState>();
 

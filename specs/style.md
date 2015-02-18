@@ -159,11 +159,11 @@ same classname), or specifying other redundant or conflicting
 selectors (e.g. [foo][foo=bar], or [foo=bar][foo=baz]) will be
 flagged.
 
-Alternatively, a selector can be the special value "@document",
+Alternatively, a selector can be the special value "@root",
 optionally followed by a pseudo-element, as in:
 
 ```css
-@document::bar
+@root::bar
 ```
 
 
@@ -573,9 +573,9 @@ and pseudoElement from each such Rule.
 Update the render tree
 ----------------------
 
-Simultaneously walk the tree rooted at the application Document,
-taking into account shadow trees and child distribution, and the tree
-rooted at the document's RenderNode.
+Simultaneously walk the tree rooted at the application's element
+tree's root node, taking into account shadow trees and child
+distribution, and the tree rooted at that Root node's RenderNode.
 
 If you come across a node that doesn't have an assigned RenderNode,
 then create one, placing it in the appropriate place in the RenderTree

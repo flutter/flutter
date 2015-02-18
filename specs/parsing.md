@@ -783,10 +783,10 @@ Then, pass the tokens to the tree construction stage.
 Tree construction stage
 -----------------------
 
-To construct a node tree from a _sequence of tokens_ and a document
-_document_ (this is implemented in JS):
+To construct a node tree from a _sequence of tokens_ and an element
+tree rooted at a `Root` node _root_ (this is implemented in JS):
 
-1. Initialize the _stack of open nodes_ to be _document_.
+1. Initialize the _stack of open nodes_ to be _root_.
 2. Initialize _imported modules_ to an empty list.
 3. Consider each token _token_ in the _sequence of tokens_ in turn, as
    follows. If a token is to be skipped, then jump straight to the
@@ -814,8 +814,9 @@ _document_ (this is implemented in JS):
      5. Append _node_ to the top node in the _stack of open nodes_.
      6. Push _node_ onto the top of the _stack of open nodes_.
      7. If _node_ is a ``template`` element, then:
-        1. Let _fragment_ be the ``DocumentFragment`` object that the
-           ``template`` element uses as its template contents container.
+        1. Let _fragment_ be the ``Fragment`` object that the
+           ``template`` element uses as its template contents
+           container.
         2. Push _fragment_ onto the top of the _stack of open nodes_.
         If _node_ is an ``import`` element, then:
         1. Let ``url`` be the value of _node_'s ``src`` attribute.
@@ -840,6 +841,6 @@ _document_ (this is implemented in JS):
         associated names as appropriate.
    - If _token_ is an automatic end tag token:
      1. Pop the top node from the _stack of open nodes_, unless it is
-        the document.
+        the _root_ node.
 4. Yield until _imported modules_ has no promises.
 5. Fire a ``load`` event at the _parsing context_ object.

@@ -13,16 +13,16 @@ most basic form, you import a module as follows:
 <import src="path/to/module.sky" />
 ```
 
-As these ``import`` elements are inserted into a document, the
-document's list of outstanding dependencies grows. When an imported
-module completes, it is removed from the document's list of
-outstanding dependencies.
+As these ``import`` elements are inserted into a module's element
+tree, the module's list of outstanding dependencies grows. When an
+imported module completes, it is removed from the importing module's
+list of outstanding dependencies.
 
 Before compiling script or inserting an element that is not already
 registered, the parser waits until the list of outstanding
 dependencies is empty. After the parser has finished parsing, the
-document waits until its list of outstanding dependencies is empty
-before the module it represents is marked complete.
+module waits until its list of outstanding dependencies is empty
+before marking itself complete.
 
 The ``as`` attribute on the ``import`` element binds a name to the
 imported module:
@@ -49,13 +49,14 @@ final Module module = new Module();
 final Module module = new Application();
 ```
 
-The ``<script>`` elements found in the document create the subsequent
-libraries. Each one first imports the ``dart:mirror`` library, then
-the ``dart:sky`` module, then the first library described above, then
-all the modules referenced by ``<import>`` element up to that
-``<script>`` element and all the libraries defined by ``<script>``
-elements up to that point, interleaved so as to maintain the same
-relative order as those elements were first seen by the parser.
+The ``<script>`` elements found in the module's element tree create
+the subsequent libraries. Each one first imports the ``dart:mirror``
+library, then the ``dart:sky`` module, then the first library
+described above, then all the modules referenced by ``<import>``
+element up to that ``<script>`` element and all the libraries defined
+by ``<script>`` elements up to that point, interleaved so as to
+maintain the same relative order as those elements were first seen by
+the parser.
 
 When a library imports a module, it actually imports all the libraries
 that were declared by that module except the aforementioned element

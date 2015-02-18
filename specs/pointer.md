@@ -60,13 +60,15 @@ New touches and pointers can appear and disappear over time.
 Each pointer has a list of current targets.
 
 When a new one enters the system, a non-bubbling ``PointerAddedEvent``
-event is fired at the application's document, and the pointer's
-current targets list is initialised to just that Document object.
+event is fired at the application's element tree's root node, and the
+pointer's current targets list is initialised to just that Root
+object.
 
 When it is removed, a non-bubbling ``PointerRemovedEvent`` event is
-fired at the application's document and at any other objects in the
-pointer's current targets list. Currently, at the time of a
-``PointerRemoved``, the list will always consist of only the document.
+fired at the application's element tree's root node and at any other
+objects in the pointer's current targets list. Currently, at the time
+of a ``PointerRemoved``, the list will always consist of only the
+application's element tree's root node.
 
 A pointer can be "up" or "down". Initially all pointers are "up".
 
@@ -93,7 +95,7 @@ is run:
  5. If result2 is not an array of EventTarget objects, set it to the
     empty array and (if this is debug mode) report the issue.
  6. Let result be the concatenation of result1's contents, result2's
-    contents, and the application document.
+    contents, and the application's element tree's root node.
  7. Let 'result' be this pointer's current targets.
 
 When an object is one of the current targets of a pointer and no other
@@ -122,8 +124,9 @@ When a pointer switches from "down" to "up", a non-bubbling
 targets in turn (maintaining the order they had in the
 ``PointerDownEvent`` event, if there's more than one), and then the
 pointer's current target list is emptied except for the application's
-document. The buttons exposed on the ``PointerUpEvent`` event are
-those that were down immediately prior to the buttons being released.
+element tree's root node. The buttons exposed on the
+``PointerUpEvent`` event are those that were down immediately prior to
+the buttons being released.
 
 At the time of a ``PointerUpEvent`` event, for each object that is a
 current target of the pointer, and for which the pointer is considered
@@ -140,7 +143,7 @@ When a pointer is canceled, if it is "down", pretend that the pointer
 moved to "up", sending ``PointerUpEvent`` as described above, and
 entirely empty its current targets list. AFter the pointer actually
 switches from "down" to "up", replace the current targets list with an
-object that only contains the application's document.
+object that only contains the application's element tree's root node.
 
 Nothing special happens when a pointer's current target moves in the
 DOM.
@@ -437,8 +440,8 @@ Wheel events
 ------------
 
 When a wheel input device is turned, a ``WheelEvent`` event that
-doesn't bubble is fired at the application's document, with the
-following fields:
+doesn't bubble is fired at the application's element tree's root node,
+with the following fields:
 
            wheel: an integer assigned to this wheel by the system. The
                   same wheel on the same system must always be given

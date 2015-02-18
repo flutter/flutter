@@ -161,8 +161,8 @@ it's the runtime library). None of these elements have shadow trees.
 
 ``<template>``
  - The contents of the element aren't placed in the Element itself.
-   They are instead placed into a DocumentFragment that you can obtain
-   from the element's "content" attribute.
+   They are instead placed into a Fragment that you can obtain from
+   the element's "content" attribute.
 
 ``<script>``
  - Blocks until all previous imports have been loaded, then loads the
@@ -170,7 +170,7 @@ it's the runtime library). None of these elements have shadow trees.
    [scripts.md](scripts.md).
 
 ``<style>``
- - Adds the contents to the document's styles.
+ - Adds the contents to the module's styles.
 
 ``<content>``
 ``<content select="...">``
@@ -202,10 +202,10 @@ it's the runtime library). None of these elements have shadow trees.
    for "foo.bin".
 
 ``<title>``
- - Sets the contents as the document's title (as provided by Sky to
+ - Sets the contents as the application's title (as provided by Sky to
    the view manager). (Actually just ensures that any time the element
-   is mutated, theTitleElement.ownerScope.ownerDocument.title is set
-   to the element's contents.)
+   is mutated, module.application.title is set to the element's
+   contents.)
 
 
 Sky Markup: Global Attributes
