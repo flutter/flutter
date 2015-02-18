@@ -94,7 +94,7 @@ private:
 
     void stopBackgroundParser();
     void processParsedChunkFromBackgroundParser(PassOwnPtr<ParsedChunk>);
-    void pumpPendingSpeculations();
+    void pumpPendingChunks();
 
     Document* contextForParsingSession();
 
@@ -119,7 +119,7 @@ private:
     HTMLScriptRunner m_scriptRunner;
 
     OwnPtr<ParsedChunk> m_lastChunkBeforeScript;
-    Deque<OwnPtr<ParsedChunk> > m_speculations;
+    Deque<OwnPtr<ParsedChunk> > m_pendingChunks;
     base::WeakPtrFactory<HTMLDocumentParser> m_weakFactory;
     base::WeakPtr<BackgroundHTMLParser> m_backgroundParser;
 

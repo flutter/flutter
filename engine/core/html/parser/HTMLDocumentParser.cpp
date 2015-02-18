@@ -59,7 +59,7 @@ HTMLDocumentParser::~HTMLDocumentParser()
     ASSERT(!m_parserScheduler);
     ASSERT(!m_pumpSessionNestingLevel);
     ASSERT(!m_haveBackgroundParser);
-    // FIXME: We should be able to ASSERT(m_speculations.isEmpty()),
+    // FIXME: We should be able to ASSERT(m_pendingChunks.isEmpty()),
     // but there are cases where that's not true currently. For example,
     // we we're told to stop parsing before we've consumed all the input.
 }
@@ -150,7 +150,7 @@ void HTMLDocumentParser::resumeParsingAfterYield()
     RefPtr<HTMLDocumentParser> protect(this);
 
     ASSERT(m_haveBackgroundParser);
-    pumpPendingSpeculations();
+    pumpPendingChunks();
 }
 
 void HTMLDocumentParser::runScriptsForPausedTreeBuilder()
@@ -165,12 +165,11 @@ void HTMLDocumentParser::runScriptsForPausedTreeBuilder()
 void HTMLDocumentParser::didReceiveParsedChunkFromBackgroundParser(PassOwnPtr<ParsedChunk> chunk)
 {
     TRACE_EVENT0("blink", "HTMLDocumentParser::didReceiveParsedChunkFromBackgroundParser");
+    // Sky should not need nested parsers.
+    ASSERT(document()->activeParserCount() == 0);
 
-    // alert(), runModalDialog, and the JavaScript Debugger all run nested event loops
-    // which can cause this method to be re-entered. We detect re-entry using
-    // hasActiveParser(), save the chunk as a speculation, and return.
-    if (isWaitingForScripts() || !m_speculations.isEmpty() || document()->activeParserCount() > 0) {
-        m_speculations.append(chunk);
+    if (isWaitingForScripts() || !m_pendingChunks.isEmpty() || document()->activeParserCount() > 0 || !document()->haveImportsLoaded()) {
+        m_pendingChunks.append(chunk);
         return;
     }
 
@@ -178,13 +177,14 @@ void HTMLDocumentParser::didReceiveParsedChunkFromBackgroundParser(PassOwnPtr<Pa
     // but we need to ensure it isn't deleted yet.
     RefPtr<HTMLDocumentParser> protect(this);
 
-    ASSERT(m_speculations.isEmpty());
-    m_speculations.append(chunk);
-    pumpPendingSpeculations();
+    ASSERT(m_pendingChunks.isEmpty());
+    m_pendingChunks.append(chunk);
+    pumpPendingChunks();
 }
 
 void HTMLDocumentParser::processParsedChunkFromBackgroundParser(PassOwnPtr<ParsedChunk> popChunk)
 {
+    // TODO(eseidel): Include the token count in the trace event.
     TRACE_EVENT0("blink", "HTMLDocumentParser::processParsedChunkFromBackgroundParser");
 
     ASSERT_WITH_SECURITY_IMPLICATION(!document()->activeParserCount());
@@ -218,7 +218,7 @@ void HTMLDocumentParser::processParsedChunkFromBackgroundParser(PassOwnPtr<Parse
 
         if (it->type() == HTMLToken::EndOfFile) {
             ASSERT(it + 1 == tokens->end()); // The EOF is assumed to be the last token of this bunch.
-            ASSERT(m_speculations.isEmpty()); // There should never be any chunks after the EOF.
+            ASSERT(m_pendingChunks.isEmpty()); // There should never be any chunks after the EOF.
             prepareToStopParsing();
             break;
         }
@@ -229,7 +229,7 @@ void HTMLDocumentParser::processParsedChunkFromBackgroundParser(PassOwnPtr<Parse
         m_treeBuilder->flush();
 }
 
-void HTMLDocumentParser::pumpPendingSpeculations()
+void HTMLDocumentParser::pumpPendingChunks()
 {
     // FIXME: Share this constant with the parser scheduler.
     const double parserTimeLimit = 0.500;
@@ -238,17 +238,18 @@ void HTMLDocumentParser::pumpPendingSpeculations()
     ASSERT(refCount() >= 2);
     ASSERT(!isWaitingForScripts());
     ASSERT(!isStopped());
+    ASSERT(document()->haveImportsLoaded());
 
     double startTime = currentTime();
 
-    while (!m_speculations.isEmpty()) {
-        processParsedChunkFromBackgroundParser(m_speculations.takeFirst());
+    while (!m_pendingChunks.isEmpty()) {
+        processParsedChunkFromBackgroundParser(m_pendingChunks.takeFirst());
 
         // Always check isStopped first as m_document may be null.
         if (isStopped() || isWaitingForScripts() || !document()->haveImportsLoaded())
             break;
 
-        if (currentTime() - startTime > parserTimeLimit && !m_speculations.isEmpty()) {
+        if (currentTime() - startTime > parserTimeLimit && !m_pendingChunks.isEmpty()) {
             m_parserScheduler->scheduleForResume();
             break;
         }
@@ -369,20 +370,18 @@ TextPosition HTMLDocumentParser::textPosition() const
 
 bool HTMLDocumentParser::isWaitingForScripts() const
 {
-    return m_treeBuilder->hasParserBlockingScript() || m_scriptRunner.hasPendingScripts();
+    return m_treeBuilder->hasParserBlockingScript();
 }
 
 void HTMLDocumentParser::resumeAfterWaitingForImports()
 {
     RefPtr<HTMLDocumentParser> protect(this);
-    if (m_scriptRunner.hasPendingScripts())
-        m_scriptRunner.executePendingScripts();
     ASSERT(!isExecutingScript());
     ASSERT(!isWaitingForScripts());
-    if (m_speculations.isEmpty())
+    if (m_pendingChunks.isEmpty())
         return;
     ASSERT(m_haveBackgroundParser);
-    pumpPendingSpeculations();
+    pumpPendingChunks();
 }
 
 }

@@ -113,27 +113,36 @@ void BackgroundHTMLParser::markEndOfFile()
     m_input.close();
 }
 
-bool BackgroundHTMLParser::updateTokenizerState(const CompactHTMLToken& token)
+BackgroundHTMLParser::ContinueBehavior BackgroundHTMLParser::updateTokenizerState(const CompactHTMLToken& lastToken)
 {
-    if (token.type() == HTMLToken::StartTag) {
-        const String& tagName = token.data();
+    if (lastToken.type() == HTMLToken::StartTag) {
+        const String& tagName = lastToken.data();
 
         if (threadSafeMatch(tagName, HTMLNames::scriptTag) || threadSafeMatch(tagName, HTMLNames::styleTag))
             m_tokenizer->setState(HTMLTokenizer::RawDataState);
 
         if (threadSafeMatch(tagName, HTMLNames::importTag)) {
             m_state = DidSeeImportState;
-            return true;
+            return ContinueParsing;
         }
 
         if (m_state == InitialState)
-            return true;
+            return ContinueParsing;
 
+        // If we hit a start tag which is not an <import> tag while in the
+        // have-seen-import state, we need to send all but the last token.
+        // This lets the main thread see all import tags in one chunk.
+        // TODO(eseidel): We could replace this with a preloader and then
+        // simply yield after every </import> regardless.
         m_state = InitialState;
-        return false;
+        return SendTokensExceptingLast;
     }
 
-    return token.type() != HTMLToken::EndTag || !threadSafeMatch(token.data(), HTMLNames::scriptTag);
+    // We send all tokens at the end of every </script>
+    if (lastToken.type() == HTMLToken::EndTag && threadSafeMatch(lastToken.data(), HTMLNames::scriptTag))
+        return SendTokensIncludingLast;
+
+    return ContinueParsing;
 }
 
 void BackgroundHTMLParser::pumpTokenizer()
@@ -145,14 +154,19 @@ void BackgroundHTMLParser::pumpTokenizer()
             break;
         }
 
+        ContinueBehavior result;
         {
             CompactHTMLToken token(m_token.get(), TextPosition(m_input.currentLine(), m_input.currentColumn()));
+            result = updateTokenizerState(token);
+            if (result ==  SendTokensExceptingLast)
+                sendTokensToMainThread();
+
             m_pendingTokens->append(token);
         }
 
         m_token->clear();
 
-        if (!updateTokenizerState(m_pendingTokens->last()) || m_pendingTokens->size() >= pendingTokenLimit)
+        if (result == SendTokensIncludingLast || m_pendingTokens->size() >= pendingTokenLimit)
             sendTokensToMainThread();
     }
 }

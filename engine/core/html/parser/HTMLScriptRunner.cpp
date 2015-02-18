@@ -25,24 +25,7 @@ HTMLScriptRunner::~HTMLScriptRunner()
 
 void HTMLScriptRunner::runScript(PassRefPtr<HTMLScriptElement> element, TextPosition textPosition)
 {
-    ASSERT(!hasPendingScripts());
-
-    if (!element->document().isScriptExecutionReady()) {
-        m_pendingScript = element;
-        m_textPosition = textPosition;
-        return;
-    }
-
-    executeScript(element, textPosition);
-}
-
-void HTMLScriptRunner::executePendingScripts()
-{
-    executeScript(m_pendingScript.release(), m_textPosition);
-}
-
-void HTMLScriptRunner::executeScript(PassRefPtr<HTMLScriptElement> element, TextPosition textPosition)
-{
+    ASSERT(element->document().haveImportsLoaded());
     Microtask::performCheckpoint();
 
     Document& sourceDocument = element->document();

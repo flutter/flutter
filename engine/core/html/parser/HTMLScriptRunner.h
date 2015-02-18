@@ -20,14 +20,10 @@ public:
 
     void runScript(PassRefPtr<HTMLScriptElement>, TextPosition);
 
-    bool hasPendingScripts() const { return m_pendingScript; }
-    void executePendingScripts();
-
 private:
     void executeScript(PassRefPtr<HTMLScriptElement>, TextPosition);
 
     bool m_isExecutingScript;
-    RefPtr<HTMLScriptElement> m_pendingScript;
     TextPosition m_textPosition;
 };
 

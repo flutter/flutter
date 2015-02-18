@@ -210,8 +210,6 @@ public:
 
     StyleResolver& styleResolver() const;
 
-    bool isScriptExecutionReady() const { return haveImportsLoaded(); }
-
     StyleEngine* styleEngine() { return m_styleEngine.get(); }
 
     // Called when one or more stylesheets in the document may have been added, removed, or changed.

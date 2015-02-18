@@ -66,7 +66,14 @@ private:
     void markEndOfFile();
     void pumpTokenizer();
     void sendTokensToMainThread();
-    bool updateTokenizerState(const CompactHTMLToken& token);
+
+    enum ContinueBehavior {
+        ContinueParsing,
+        SendTokensIncludingLast,
+        SendTokensExceptingLast,
+    };
+
+    ContinueBehavior updateTokenizerState(const CompactHTMLToken& token);
 
     enum State {
         InitialState,
