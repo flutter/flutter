@@ -151,7 +151,8 @@ void DocumentView::Load(mojo::URLResponsePtr response) {
   web_view_ = blink::WebView::create(this);
   ConfigureSettings(web_view_->settings());
   web_view_->setMainFrame(blink::WebLocalFrame::create(this));
-  web_view_->mainFrame()->load(GURL(response->url), response->body.Pass());
+  web_view_->mainFrame()->loadFromDataPipeWithURL(
+      response->body.Pass(), GURL(response->url));
 }
 
 void DocumentView::initializeLayerTreeView() {

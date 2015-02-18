@@ -134,7 +134,9 @@ public:
 
     // Navigation ----------------------------------------------------------
 
-    virtual void load(const WebURL&, mojo::ScopedDataPipeConsumerHandle) = 0;
+    virtual void load(const WebURL&) = 0;
+
+    virtual void loadFromDataPipeWithURL(mojo::ScopedDataPipeConsumerHandle, const WebURL&) = 0;
 
 
     // Editing -------------------------------------------------------------

@@ -32,6 +32,7 @@
 #define SKY_ENGINE_WEB_WEBLOCALFRAMEIMPL_H_
 
 #include "sky/engine/core/frame/LocalFrame.h"
+#include "sky/engine/platform/fetcher/MojoFetcher.h"
 #include "sky/engine/platform/geometry/FloatRect.h"
 #include "sky/engine/public/web/WebLocalFrame.h"
 #include "sky/engine/web/FrameLoaderClientImpl.h"
@@ -56,6 +57,7 @@ template <typename T> class WebVector;
 // Implementation of WebFrame, note that this is a reference counted object.
 class WebLocalFrameImpl final
     : public WebLocalFrame
+    , public MojoFetcher::Client
     , public RefCounted<WebLocalFrameImpl> {
 public:
     // WebFrame methods:
@@ -70,7 +72,8 @@ public:
     virtual void executeScript(const WebScriptSource&) override;
     virtual void addMessageToConsole(const WebConsoleMessage&) override;
     virtual void collectGarbage() override;
-    virtual void load(const WebURL&, mojo::ScopedDataPipeConsumerHandle);
+    virtual void load(const WebURL&);
+    virtual void loadFromDataPipeWithURL(mojo::ScopedDataPipeConsumerHandle, const WebURL&);
     virtual void replaceSelection(const WebString&) override;
     virtual void insertText(const WebString&) override;
     virtual void setMarkedText(const WebString&, unsigned location, unsigned length) override;
@@ -137,6 +140,9 @@ private:
     // Sets the local core frame and registers destruction observers.
     void setCoreFrame(PassRefPtr<LocalFrame>);
 
+    // MojoFetcher::Client
+    void OnReceivedResponse(mojo::URLResponsePtr) override;
+
     FrameLoaderClientImpl m_frameLoaderClientImpl;
 
     // The embedder retains a reference to the WebCore LocalFrame while it is active in the DOM. This
@@ -145,6 +151,7 @@ private:
     RefPtr<LocalFrame> m_frame;
 
     WebFrameClient* m_client;
+    OwnPtr<MojoFetcher> m_fetcher;
 
     // Stores the additional input events offset and scale when device metrics emulation is enabled.
     IntSize m_inputEventsOffsetForEmulation;

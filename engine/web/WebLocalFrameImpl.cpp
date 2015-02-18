@@ -257,9 +257,24 @@ void WebLocalFrameImpl::collectGarbage()
     // TODO(dart): Implement.
 }
 
-void WebLocalFrameImpl::load(const WebURL& url, mojo::ScopedDataPipeConsumerHandle responseStream)
+void WebLocalFrameImpl::loadFromDataPipeWithURL(mojo::ScopedDataPipeConsumerHandle responseStream, const WebURL& url)
 {
-    frame()->mojoLoader().load(url, responseStream.Pass());
+    frame()->mojoLoader().init(url);
+    frame()->mojoLoader().parse(responseStream.Pass());
+}
+
+void WebLocalFrameImpl::load(const WebURL& url)
+{
+    frame()->mojoLoader().init(url);
+    m_fetcher = adoptPtr(new MojoFetcher(this, url));
+}
+
+void WebLocalFrameImpl::OnReceivedResponse(mojo::URLResponsePtr response)
+{
+    m_fetcher.clear();
+    if (!response->body.is_valid())
+        LOG(FATAL) << "Response has no body.";
+    frame()->mojoLoader().parse(response->body.Pass());
 }
 
 void WebLocalFrameImpl::replaceSelection(const WebString& text)

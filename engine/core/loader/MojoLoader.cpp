@@ -17,15 +17,12 @@
 
 namespace blink {
 
-using namespace mojo;
-
 MojoLoader::MojoLoader(LocalFrame& frame)
     : m_frame(frame)
 {
 }
 
-void MojoLoader::load(const KURL& url, ScopedDataPipeConsumerHandle responseStream)
-{
+void MojoLoader::init(const KURL& url) {
     DocumentInit init(url, &m_frame);
 
     // FIXME(sky): Poorly named method for creating the FrameView:
@@ -40,8 +37,11 @@ void MojoLoader::load(const KURL& url, ScopedDataPipeConsumerHandle responseStre
     document->setReadyState(Document::Loading);
     // FIXME: This should read the Content-Language out of the
     // response headers and set them on Document::contentLanguage.
+}
 
-    document->startParsing()->parse(responseStream.Pass(), base::Bind(base::DoNothing));
+void MojoLoader::parse(mojo::ScopedDataPipeConsumerHandle responseStream) {
+  m_frame.document()->startParsing()->parse(responseStream.Pass(),
+                                            base::Bind(base::DoNothing));
 }
 
 }

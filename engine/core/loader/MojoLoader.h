@@ -16,7 +16,8 @@ class MojoLoader {
 public:
     explicit MojoLoader(LocalFrame&);
 
-    void load(const KURL&, mojo::ScopedDataPipeConsumerHandle);
+    void init(const KURL&);
+    void parse(mojo::ScopedDataPipeConsumerHandle);
 
 private:
     LocalFrame& m_frame;
