@@ -15,9 +15,9 @@ final ShellProxy _shell = new ShellProxy.fromHandle(
 ApplicationConnection connectToApplication(String url) {
   var serviceProviderProxy = new ServiceProviderProxy.unbound();
   _shell.connectToApplication(url, serviceProviderProxy, null);
-  return new ApplicationConnection(serviceProviderProxy);
+  return new ApplicationConnection(null, serviceProviderProxy);
 }
 
 void connectToService(String url, bindings.Proxy proxy) {
-  connectToApplication(url).connectToService(proxy);
+  connectToApplication(url).requestService(proxy);
 }
