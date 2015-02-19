@@ -5,10 +5,12 @@
 #include "sky/shell/ui/engine.h"
 
 #include "base/bind.h"
+#include "sky/engine/public/platform/WebInputEvent.h"
 #include "sky/engine/public/web/Sky.h"
 #include "sky/engine/public/web/WebLocalFrame.h"
 #include "sky/engine/public/web/WebView.h"
 #include "sky/shell/ui/animator.h"
+#include "sky/shell/ui/input_event_converter.h"
 #include "sky/shell/ui/platform_impl.h"
 #include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/core/SkPictureRecorder.h"
@@ -19,6 +21,8 @@ namespace shell {
 Engine::Engine(const Config& config)
     : animator_(new Animator(config, this)),
       web_view_(nullptr),
+      device_pixel_ratio_(1.0f),
+      viewport_observer_binding_(this),
       weak_factory_(this) {
 }
 
@@ -39,7 +43,7 @@ void Engine::Init(mojo::ScopedMessagePipeHandle service_provider) {
   web_view_ = blink::WebView::create(this);
   web_view_->setMainFrame(blink::WebLocalFrame::create(this));
   web_view_->mainFrame()->load(
-      GURL("http://127.0.0.1:8000/sky/examples/spinning-square.sky"));
+      GURL("http://domokit.github.io/sky/examples/spinning-square.sky"));
 }
 
 void Engine::BeginFrame(base::TimeTicks frame_time) {
@@ -63,14 +67,28 @@ skia::RefPtr<SkPicture> Engine::Paint() {
   return skia::AdoptRef(recorder.endRecordingAsPicture());
 }
 
-void Engine::OnViewportMetricsChanged(const gfx::Size& physical_size,
+void Engine::ConnectToViewportObserver(
+    mojo::InterfaceRequest<ViewportObserver> request) {
+  viewport_observer_binding_.Bind(request.Pass());
+}
+
+void Engine::OnViewportMetricsChanged(int width, int height,
                                       float device_pixel_ratio) {
-  physical_size_ = physical_size;
+  physical_size_.SetSize(width, height);
+  device_pixel_ratio_ = device_pixel_ratio;
   web_view_->setDeviceScaleFactor(device_pixel_ratio);
-  gfx::SizeF size = gfx::ScaleSize(physical_size, 1 / device_pixel_ratio);
+  gfx::SizeF size = gfx::ScaleSize(physical_size_, 1 / device_pixel_ratio);
   // FIXME: We should be able to set the size of the WebView in floating point
   // because its in logical pixels.
   web_view_->resize(blink::WebSize(size.width(), size.height()));
+}
+
+void Engine::OnInputEvent(InputEventPtr event) {
+  scoped_ptr<blink::WebInputEvent> web_event =
+      ConvertEvent(event, device_pixel_ratio_);
+  if (!web_event)
+    return;
+  web_view_->handleInputEvent(*web_event);
 }
 
 void Engine::initializeLayerTreeView() {

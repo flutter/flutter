@@ -9,6 +9,7 @@
 #include "base/memory/scoped_ptr.h"
 #include "base/memory/weak_ptr.h"
 #include "base/single_thread_task_runner.h"
+#include "mojo/public/cpp/bindings/binding.h"
 #include "mojo/public/cpp/system/core.h"
 #include "skia/ext/refptr.h"
 #include "sky/engine/public/web/WebFrameClient.h"
@@ -24,6 +25,7 @@ class Animator;
 class PlatformImpl;
 
 class Engine : public UIDelegate,
+               public ViewportObserver,
                public blink::WebFrameClient,
                public blink::WebViewClient {
  public:
@@ -44,8 +46,13 @@ class Engine : public UIDelegate,
 
  private:
   // UIDelegate methods:
-  void OnViewportMetricsChanged(const gfx::Size& physical_size,
+  void ConnectToViewportObserver(
+      mojo::InterfaceRequest<ViewportObserver> request) override;
+
+  // ViewportObserver:
+  void OnViewportMetricsChanged(int width, int height,
                                 float device_pixel_ratio) override;
+  void OnInputEvent(InputEventPtr event) override;
 
   // WebViewClient methods:
   void initializeLayerTreeView() override;
@@ -54,7 +61,9 @@ class Engine : public UIDelegate,
   scoped_ptr<PlatformImpl> platform_impl_;
   scoped_ptr<Animator> animator_;
   blink::WebView* web_view_;
+  float device_pixel_ratio_;
   gfx::Size physical_size_;
+  mojo::Binding<ViewportObserver> viewport_observer_binding_;
 
   base::WeakPtrFactory<Engine> weak_factory_;
 
