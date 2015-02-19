@@ -809,7 +809,7 @@ bool RenderLayer::hitTest(const HitTestRequest& request, const HitTestLocation& 
     if (!request.ignoreClipping())
         hitTestArea.intersect(frameVisibleRect(renderer()));
 
-    RenderLayer* insideLayer = hitTestLayer(this, 0, request, result, hitTestArea, hitTestLocation, false);
+    RenderLayer* insideLayer = hitTestLayer(this, 0, request, result, hitTestArea, hitTestLocation);
     if (!insideLayer) {
         // We didn't hit any layer. If we are the root layer and the mouse is -- or just was -- down,
         // return ourselves. We do this so mouse events continue getting delivered after a drag has
@@ -914,40 +914,57 @@ static bool isHitCandidate(const RenderLayer* hitLayer, bool canDepthSort, doubl
 // If zOffset is non-null (which indicates that the caller wants z offset information),
 //  *zOffset on return is the z offset of the hit point relative to the containing flattening layer.
 RenderLayer* RenderLayer::hitTestLayer(RenderLayer* rootLayer, RenderLayer* containerLayer, const HitTestRequest& request, HitTestResult& result,
-                                       const LayoutRect& hitTestRect, const HitTestLocation& hitTestLocation, bool appliedTransform,
+                                       const LayoutRect& hitTestRect, const HitTestLocation& hitTestLocation,
                                        const HitTestingTransformState* transformState, double* zOffset)
 {
     if (!isSelfPaintingLayer() && !hasSelfPaintingLayerDescendant())
         return 0;
 
     // The natural thing would be to keep HitTestingTransformState on the stack, but it's big, so we heap-allocate.
+    RefPtr<HitTestingTransformState> localTransformState;
+
+    LayoutRect localHitTestRect = hitTestRect;
+    HitTestLocation localHitTestLocation = hitTestLocation;
+
+    // We need transform state for the first time, or to offset the container state, or to accumulate the new transform.
+    if (transform() || transformState || m_has3DTransformedDescendant || preserves3D())
+        localTransformState = createLocalTransformState(rootLayer, containerLayer, localHitTestRect, localHitTestLocation, transformState);
 
     // Apply a transform if we have one.
-    if (transform() && !appliedTransform) {
+    if (transform()) {
         // Make sure the parent's clip rects have been calculated.
         if (parent()) {
             ClipRect clipRect = clipper().backgroundClipRect(ClipRectsContext(rootLayer, RootRelativeClipRects));
             // Go ahead and test the enclosing clip now.
-            if (!clipRect.intersects(hitTestLocation))
+            if (!clipRect.intersects(localHitTestLocation))
                 return 0;
         }
 
-        return hitTestLayerByApplyingTransform(rootLayer, containerLayer, request, result, hitTestRect, hitTestLocation, transformState, zOffset);
+        // If the transform can't be inverted, then don't hit test this layer at all.
+        if (!localTransformState->m_accumulatedTransform.isInvertible())
+            return 0;
+
+        // Compute the point and the hit test rect in the coords of this layer by using the values
+        // from the transformState, which store the point and quad in the coords of the last flattened
+        // layer, and the accumulated transform which lets up map through preserve-3d layers.
+        //
+        // We can't just map hitTestLocation and hitTestRect because they may have been flattened (losing z)
+        // by our container.
+        FloatPoint localPoint = localTransformState->mappedPoint();
+        FloatQuad localPointQuad = localTransformState->mappedQuad();
+        localHitTestRect = localTransformState->boundsOfMappedArea();
+        if (localHitTestLocation.isRectBasedTest())
+            localHitTestLocation = HitTestLocation(localPoint, localPointQuad);
+        else
+            localHitTestLocation = HitTestLocation(localPoint);
+
+        // Now do a hit test with the root layer shifted to be us.
+        rootLayer = this;
     }
 
     // Ensure our lists and 3d status are up-to-date.
     m_stackingNode->updateLayerListsIfNeeded();
     update3DTransformedDescendantStatus();
-
-    RefPtr<HitTestingTransformState> localTransformState;
-    if (appliedTransform) {
-        // We computed the correct state in the caller (above code), so just reference it.
-        ASSERT(transformState);
-        localTransformState = const_cast<HitTestingTransformState*>(transformState);
-    } else if (transformState || m_has3DTransformedDescendant || preserves3D()) {
-        // We need transform state for the first time, or to offset the container state, so create it here.
-        localTransformState = createLocalTransformState(rootLayer, containerLayer, hitTestRect, hitTestLocation, transformState);
-    }
 
     // Check for hit test on backface if backface-visibility is 'hidden'
     if (localTransformState && renderer()->style()->backfaceVisibility() == BackfaceVisibilityHidden) {
@@ -987,7 +1004,7 @@ RenderLayer* RenderLayer::hitTestLayer(RenderLayer* rootLayer, RenderLayer* cont
     RenderLayer* candidateLayer = 0;
 
     // Begin by walking our list of positive layers from highest z-index down to the lowest z-index.
-    RenderLayer* hitLayer = hitTestChildren(PositiveZOrderChildren, rootLayer, request, result, hitTestRect, hitTestLocation,
+    RenderLayer* hitLayer = hitTestChildren(PositiveZOrderChildren, rootLayer, request, result, localHitTestRect, localHitTestLocation,
                                         localTransformState.get(), zOffsetForDescendantsPtr, zOffset, unflattenedTransformState.get(), depthSortDescendants);
     if (hitLayer) {
         if (!depthSortDescendants)
@@ -996,7 +1013,7 @@ RenderLayer* RenderLayer::hitTestLayer(RenderLayer* rootLayer, RenderLayer* cont
     }
 
     // Now check our overflow objects.
-    hitLayer = hitTestChildren(NormalFlowChildren, rootLayer, request, result, hitTestRect, hitTestLocation,
+    hitLayer = hitTestChildren(NormalFlowChildren, rootLayer, request, result, localHitTestRect, localHitTestLocation,
                            localTransformState.get(), zOffsetForDescendantsPtr, zOffset, unflattenedTransformState.get(), depthSortDescendants);
     if (hitLayer) {
         if (!depthSortDescendants)
@@ -1008,13 +1025,13 @@ RenderLayer* RenderLayer::hitTestLayer(RenderLayer* rootLayer, RenderLayer* cont
     // FIXME(sky): Remove foregroundRect. It's unused.
     ClipRect contentRect, foregroundRect;
     ClipRectsContext clipRectsContext(rootLayer, RootRelativeClipRects);
-    clipper().calculateRects(clipRectsContext, hitTestRect, layerBounds, contentRect, foregroundRect);
+    clipper().calculateRects(clipRectsContext, localHitTestRect, layerBounds, contentRect, foregroundRect);
 
     // Next we want to see if the mouse pos is inside the child RenderObjects of the layer.
-    if (isSelfPaintingLayer() && contentRect.intersects(hitTestLocation)) {
+    if (isSelfPaintingLayer() && contentRect.intersects(localHitTestLocation)) {
         // Hit test with a temporary HitTestResult, because we only want to commit to 'result' if we know we're frontmost.
         HitTestResult tempResult(result.hitTestLocation());
-        if (hitTestContents(request, tempResult, layerBounds, hitTestLocation)
+        if (hitTestContents(request, tempResult, layerBounds, localHitTestLocation)
             && isHitCandidate(this, false, zOffsetForContentsPtr, unflattenedTransformState.get())) {
             if (result.isRectBasedTest())
                 result.append(tempResult);
@@ -1030,36 +1047,6 @@ RenderLayer* RenderLayer::hitTestLayer(RenderLayer* rootLayer, RenderLayer* cont
     }
 
     return candidateLayer;
-}
-
-RenderLayer* RenderLayer::hitTestLayerByApplyingTransform(RenderLayer* rootLayer, RenderLayer* containerLayer, const HitTestRequest& request, HitTestResult& result,
-    const LayoutRect& hitTestRect, const HitTestLocation& hitTestLocation, const HitTestingTransformState* transformState, double* zOffset,
-    const LayoutPoint& translationOffset)
-{
-    // Create a transform state to accumulate this transform.
-    RefPtr<HitTestingTransformState> newTransformState = createLocalTransformState(rootLayer, containerLayer, hitTestRect, hitTestLocation, transformState, translationOffset);
-
-    // If the transform can't be inverted, then don't hit test this layer at all.
-    if (!newTransformState->m_accumulatedTransform.isInvertible())
-        return 0;
-
-    // Compute the point and the hit test rect in the coords of this layer by using the values
-    // from the transformState, which store the point and quad in the coords of the last flattened
-    // layer, and the accumulated transform which lets up map through preserve-3d layers.
-    //
-    // We can't just map hitTestLocation and hitTestRect because they may have been flattened (losing z)
-    // by our container.
-    FloatPoint localPoint = newTransformState->mappedPoint();
-    FloatQuad localPointQuad = newTransformState->mappedQuad();
-    LayoutRect localHitTestRect = newTransformState->boundsOfMappedArea();
-    HitTestLocation newHitTestLocation;
-    if (hitTestLocation.isRectBasedTest())
-        newHitTestLocation = HitTestLocation(localPoint, localPointQuad);
-    else
-        newHitTestLocation = HitTestLocation(localPoint);
-
-    // Now do a hit test with the root layer shifted to be us.
-    return hitTestLayer(this, containerLayer, request, result, localHitTestRect, newHitTestLocation, true, newTransformState.get(), zOffset);
 }
 
 bool RenderLayer::hitTestContents(const HitTestRequest& request, HitTestResult& result, const LayoutRect& layerBounds, const HitTestLocation& hitTestLocation) const
@@ -1105,7 +1092,7 @@ RenderLayer* RenderLayer::hitTestChildren(ChildrenIteration childrentoVisit, Ren
         RenderLayer* childLayer = child->layer();
         RenderLayer* hitLayer = 0;
         HitTestResult tempResult(result.hitTestLocation());
-        hitLayer = childLayer->hitTestLayer(rootLayer, this, request, tempResult, hitTestRect, hitTestLocation, false, transformState, zOffsetForDescendants);
+        hitLayer = childLayer->hitTestLayer(rootLayer, this, request, tempResult, hitTestRect, hitTestLocation, transformState, zOffsetForDescendants);
 
         // If it a rect-based test, we can safely append the temporary result since it might had hit
         // nodes but not necesserily had hitLayer set.
