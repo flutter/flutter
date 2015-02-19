@@ -77,7 +77,9 @@ class SkyApplication : public mojo::Application {
   mojo::URLResponsePtr initial_response_;
 };
 
-ContentHandlerImpl::ContentHandlerImpl() {
+ContentHandlerImpl::ContentHandlerImpl(
+    mojo::InterfaceRequest<mojo::ContentHandler> request)
+    : binding_(this, request.Pass()) {
 }
 
 ContentHandlerImpl::~ContentHandlerImpl() {

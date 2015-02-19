@@ -15,16 +15,17 @@ namespace tester {
 TestRunnerClient::~TestRunnerClient() {
 }
 
-TestRunner::TestRunner(TestRunnerClient* client, mojo::View* container,
-    const std::string& url, bool enable_pixel_dumping)
-    : test_harness_factory_(this),
-      client_(client),
+TestRunner::TestRunner(TestRunnerClient* client,
+                       mojo::View* container,
+                       const std::string& url,
+                       bool enable_pixel_dumping)
+    : client_(client),
       weak_ptr_factory_(this),
       enable_pixel_dumping_(enable_pixel_dumping) {
   CHECK(client);
 
   mojo::ServiceProviderPtr test_harness_provider;
-  test_harness_provider_impl_.AddService(&test_harness_factory_);
+  test_harness_provider_impl_.AddService(this);
   test_harness_provider_impl_.Bind(GetProxy(&test_harness_provider));
 
   container->Embed(url, nullptr, test_harness_provider.Pass());
@@ -65,6 +66,11 @@ void TestRunner::OnTestComplete(const std::string& test_result,
   std::cerr.flush();
 
   client_->OnTestComplete();
+}
+
+void TestRunner::Create(mojo::ApplicationConnection* app,
+                        mojo::InterfaceRequest<TestHarness> request) {
+  new TestHarnessImpl(this, request.Pass());
 }
 
 }  // namespace tester

@@ -7,6 +7,7 @@
 
 #include "base/memory/weak_ptr.h"
 #include "mojo/public/cpp/application/interface_factory_impl.h"
+#include "mojo/public/cpp/bindings/strong_binding.h"
 #include "mojo/public/cpp/system/core.h"
 #include "sky/services/testing/test_harness.mojom.h"
 
@@ -14,9 +15,10 @@ namespace sky {
 namespace tester {
 class TestRunner;
 
-class TestHarnessImpl : public mojo::InterfaceImpl<TestHarness> {
+class TestHarnessImpl : public TestHarness {
  public:
-  explicit TestHarnessImpl(TestRunner*);
+  TestHarnessImpl(TestRunner* runner,
+                  mojo::InterfaceRequest<TestHarness> request);
   virtual ~TestHarnessImpl();
 
  private:
@@ -25,13 +27,11 @@ class TestHarnessImpl : public mojo::InterfaceImpl<TestHarness> {
     const mojo::Array<uint8_t> pixels) override;
   void DispatchInputEvent(mojo::EventPtr event) override;
 
+  mojo::StrongBinding<TestHarness> binding_;
   base::WeakPtr<TestRunner> test_runner_;
 
   MOJO_DISALLOW_COPY_AND_ASSIGN(TestHarnessImpl);
 };
-
-typedef mojo::InterfaceFactoryImplWithContext<
-    TestHarnessImpl, TestRunner> TestHarnessFactory;
 
 }  // namespace tester
 }  // namespace sky

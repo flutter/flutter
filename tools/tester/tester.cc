@@ -78,7 +78,7 @@ class SkyTester : public mojo::ApplicationDelegate,
       mojo::ApplicationConnection* connection) override {
     window_manager_app_->ConfigureIncomingConnection(connection);
     if (test_runner_)
-      connection->AddService(test_runner_->test_harness_factory());
+      connection->AddService(test_runner_.get());
     return true;
   }
 

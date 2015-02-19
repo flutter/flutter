@@ -9,8 +9,9 @@
 namespace sky {
 namespace tester {
 
-TestHarnessImpl::TestHarnessImpl(TestRunner* test_runner)
-    : test_runner_(test_runner->GetWeakPtr()) {
+TestHarnessImpl::TestHarnessImpl(TestRunner* test_runner,
+                                 mojo::InterfaceRequest<TestHarness> request)
+    : binding_(this, request.Pass()), test_runner_(test_runner->GetWeakPtr()) {
   // FIXME: This is technically when the V8 context gets created and
   // not when the test is started. An error before we instantiated
   // the V8 context would show up before the #BEGIN line for this test.

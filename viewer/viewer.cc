@@ -50,7 +50,7 @@ class Viewer : public mojo::ApplicationDelegate,
   // Overridden from InterfaceFactory<ContentHandler>
   virtual void Create(mojo::ApplicationConnection* connection,
                       mojo::InterfaceRequest<mojo::ContentHandler> request) override {
-    mojo::BindToRequest(new ContentHandlerImpl(), &request);
+    new ContentHandlerImpl(request.Pass());
   }
 
   scoped_ptr<PlatformImpl> platform_impl_;

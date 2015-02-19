@@ -25,14 +25,13 @@ class TestRunnerClient {
   virtual ~TestRunnerClient();
 };
 
-class TestRunner {
+class TestRunner : public mojo::InterfaceFactory<TestHarness> {
  public:
   TestRunner(TestRunnerClient* client, mojo::View* container,
       const std::string& url, bool enable_pixel_dumping);
-  virtual ~TestRunner();
+  ~TestRunner() override;
 
   TestRunnerClient* client() const { return client_; }
-  TestHarnessFactory* test_harness_factory() { return &test_harness_factory_; }
 
   base::WeakPtr<TestRunner> GetWeakPtr();
   void OnTestStart();
@@ -40,7 +39,10 @@ class TestRunner {
     const mojo::Array<uint8_t>& pixels);
 
  private:
-  TestHarnessFactory test_harness_factory_;
+  // mojo::InterfaceFactory<TestHarness> implementation:
+  void Create(mojo::ApplicationConnection* app,
+              mojo::InterfaceRequest<TestHarness> request) override;
+
   mojo::ServiceProviderImpl test_harness_provider_impl_;
   TestRunnerClient* client_;
   base::WeakPtrFactory<TestRunner> weak_ptr_factory_;
