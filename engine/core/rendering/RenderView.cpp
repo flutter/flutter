@@ -81,7 +81,29 @@ bool RenderView::hitTest(const HitTestRequest& request, const HitTestLocation& l
     // Note that Document::updateLayout calls its parent's updateLayout.
     // FIXME: It should be the caller's responsibility to ensure an up-to-date layout.
     frameView()->updateLayoutAndStyleIfNeededRecursive();
-    return layer()->hitTest(request, location, result);
+
+    // RenderView should make sure to update layout before entering hit testing
+    ASSERT(!frame()->view()->layoutPending());
+    ASSERT(!document().renderView()->needsLayout());
+
+    // TODO(ojan): Does any of this intersection stuff make sense for Sky?
+    LayoutRect hitTestArea = view()->documentRect();
+    if (!request.ignoreClipping())
+        hitTestArea.intersect(frame()->view()->visibleContentRect());
+
+    RenderLayer* insideLayer = layer()->hitTestLayer(layer(), 0, request, result, hitTestArea, location);
+    if (!insideLayer) {
+        // TODO(ojan): Is this code needed for Sky?
+
+        // We didn't hit any layer. If we are the root layer and the mouse is -- or just was -- down,
+        // return ourselves. We do this so mouse events continue getting delivered after a drag has
+        // exited the WebView, and so hit testing over a scrollbar hits the content document.
+        if (request.active() || request.release()) {
+            updateHitTestResult(result, location.point());
+            insideLayer = layer();
+        }
+    }
+    return insideLayer;
 }
 
 void RenderView::computeLogicalHeight(LayoutUnit logicalHeight, LayoutUnit, LogicalExtentComputedValues& computedValues) const

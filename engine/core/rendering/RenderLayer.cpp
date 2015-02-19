@@ -788,40 +788,6 @@ void RenderLayer::restoreClip(GraphicsContext* context, const LayoutRect& paintD
     context->restore();
 }
 
-static inline LayoutRect frameVisibleRect(RenderObject* renderer)
-{
-    FrameView* frameView = renderer->document().view();
-    if (!frameView)
-        return LayoutRect();
-
-    return frameView->visibleContentRect();
-}
-
-bool RenderLayer::hitTest(const HitTestRequest& request, const HitTestLocation& hitTestLocation, HitTestResult& result)
-{
-    ASSERT(isSelfPaintingLayer() || hasSelfPaintingLayerDescendant());
-
-    // RenderView should make sure to update layout before entering hit testing
-    ASSERT(!renderer()->frame()->view()->layoutPending());
-    ASSERT(!renderer()->document().renderView()->needsLayout());
-
-    LayoutRect hitTestArea = renderer()->view()->documentRect();
-    if (!request.ignoreClipping())
-        hitTestArea.intersect(frameVisibleRect(renderer()));
-
-    RenderLayer* insideLayer = hitTestLayer(this, 0, request, result, hitTestArea, hitTestLocation);
-    if (!insideLayer) {
-        // We didn't hit any layer. If we are the root layer and the mouse is -- or just was -- down,
-        // return ourselves. We do this so mouse events continue getting delivered after a drag has
-        // exited the WebView, and so hit testing over a scrollbar hits the content document.
-        if ((request.active() || request.release()) && isRootLayer()) {
-            renderer()->updateHitTestResult(result, hitTestLocation.point());
-            insideLayer = this;
-        }
-    }
-    return insideLayer;
-}
-
 Node* RenderLayer::enclosingElement() const
 {
     for (RenderObject* r = renderer(); r; r = r->parent()) {

@@ -475,7 +475,7 @@ VisiblePosition WebLocalFrameImpl::visiblePositionForWindowPoint(const WebPoint&
 {
     HitTestRequest request = HitTestRequest::Move | HitTestRequest::ReadOnly | HitTestRequest::Active | HitTestRequest::IgnoreClipping;
     HitTestResult result(frame()->view()->windowToContents(roundedIntPoint(FloatPoint(point))));
-    frame()->document()->renderView()->layer()->hitTest(request, result.hitTestLocation(), result);
+    frame()->document()->renderView()->hitTest(request, result.hitTestLocation(), result);
 
     if (Node* node = result.targetNode())
         return frame()->selection().selection().visiblePositionRespectingEditingBoundary(result.localPoint(), node);
