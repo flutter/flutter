@@ -11,7 +11,9 @@ import org.chromium.mojo.system.MessagePipeHandle;
 import org.chromium.mojo.system.MojoException;
 import org.chromium.mojo.system.Pair;
 import org.chromium.mojo.system.impl.CoreImpl;
+import org.chromium.mojom.mojo.NetworkService;
 import org.chromium.mojom.mojo.ServiceProvider;
+import org.domokit.oknet.NetworkServiceImpl;
 
 /**
  * A class to intialize the network.
@@ -42,6 +44,10 @@ public class JavaServiceProvider implements ServiceProvider {
 
     @Override
     public void connectToService(String interfaceName, MessagePipeHandle pipe) {
+        if (interfaceName.equals(NetworkService.MANAGER.getName())) {
+            NetworkService.MANAGER.bind(new NetworkServiceImpl(mCore), pipe);
+            return;
+        }
         pipe.close();
     }
 }
