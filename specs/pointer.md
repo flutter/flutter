@@ -471,12 +471,11 @@ dials. Track balls are not reported as mouse wheels.
 
 ```dart
 class WheelEvent extends Event {
-  PointerEvent({ bool bubbles,
-                 this.wheel,
-                 this.delta: 0.0,
-                 this.pointer,
-                 this.x, this.y,
-               }): super(bubbles: bubbles);
+  Event({ this.wheel,
+          this.delta: 0.0,
+          this.pointer,
+          this.x, this.y,
+        }): super();
 
   final int wheel;
   final double delta; // revolutions (or fractions thereof)
