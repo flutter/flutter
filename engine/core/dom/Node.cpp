@@ -533,7 +533,7 @@ void Node::markAncestorsWithChildNeedsDistributionRecalc()
 
 namespace {
 
-class JSONTraceValue : public base::debug::ConvertableToTraceFormat {
+class JSONTraceValue : public base::trace_event::ConvertableToTraceFormat {
 public:
     explicit JSONTraceValue(RefPtr<JSONValue> value)
         : m_value(value.release()) { }
