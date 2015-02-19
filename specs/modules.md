@@ -103,7 +103,7 @@ abstract class AbstractModule extends EventTarget {
   List<Module> getImports(); // O(N)
   // returns the Module objects of all the imported modules
 
-  external registerElement(String tagname, Type elementClass); // O(1)
+  external void registerElement(String tagname, Type elementClass); // O(1)
   // registers a tag name with the parser
   // only useful during parse time
   // verify that tagname isn't null or empty
