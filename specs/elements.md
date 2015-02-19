@@ -197,7 +197,7 @@ class tagname extends AutomaticMetadata {
   }
 }
 
-abstract class Element extends ParentNode with Node {
+abstract class Element extends ParentNode {
   external Element({Map<String, String> attributes: null,
                    List children: null,
                    Module hostModule: null}); // O(M+N), M = number of attributes, N = number of children nodes plus all their descendants
@@ -240,7 +240,7 @@ abstract class Element extends ParentNode with Node {
   }
 }
 
-class Text extends Node with Node {
+class Text extends Node {
   external Text([String value = '']); // O(1)
 
   external String get value; // O(1)
