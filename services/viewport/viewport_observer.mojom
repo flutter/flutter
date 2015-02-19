@@ -1,0 +1,12 @@
+// Copyright 2015 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+module sky;
+
+import "sky/services/viewport/input_event.mojom";
+
+interface ViewportObserver {
+  OnViewportMetricsChanged(int32 width, int32 height, float device_pixel_ratio);
+  OnInputEvent(InputEvent event);
+};

@@ -45,6 +45,8 @@ shared_library("sky_shell") {
     "ui/animator.h",
     "ui/engine.cc",
     "ui/engine.h",
+    "ui/input_event_converter.cc",
+    "ui/input_event_converter.h",
     "ui/platform_impl.cc",
     "ui/platform_impl.h",
     "ui_delegate.cc",
@@ -63,6 +65,7 @@ shared_library("sky_shell") {
     "//mojo/services/network/public/interfaces",
     "//skia",
     "//sky/engine",
+    "//sky/services/viewport",
     "//ui/gfx/geometry",
     "//ui/gl",
     ":jni_headers",
@@ -86,6 +89,7 @@ android_library("java") {
     "//mojo/public/java:system",
     "//mojo/services/network/public/interfaces:interfaces_java",
     "//sky/services/oknet",
+    "//sky/services/viewport:viewport_java",
   ]
 }
 

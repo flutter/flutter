@@ -1,0 +1,43 @@
+// Copyright 2015 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+module sky;
+
+enum EventType {
+  UNKNOWN,
+  POINTER_DOWN,
+  POINTER_UP,
+  POINTER_MOVE,
+  POINTER_CANCEL,
+};
+
+enum PointerKind {
+  TOUCH,
+};
+
+struct PointerData {
+  int32 pointer;
+  PointerKind kind;
+  float x;
+  float y;
+  int32 buttons;
+  float pressure;
+  float pressure_min;
+  float pressure_max;
+  float distance;
+  float distance_min;
+  float distance_max;
+  float radius_major;
+  float radius_minor;
+  float radius_min;
+  float radius_max;
+  float orientation;
+  float tilt;
+};
+
+struct InputEvent {
+  EventType type;
+  int64 time_stamp;
+  PointerData? pointer_data;
+};

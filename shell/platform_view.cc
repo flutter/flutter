@@ -16,8 +16,12 @@
 namespace sky {
 namespace shell {
 
-static jlong Attach(JNIEnv* env, jclass clazz) {
-  return reinterpret_cast<jlong>(Shell::Shared().view());
+static jlong Attach(JNIEnv* env, jclass clazz, jint viewportObserverHandle) {
+  PlatformView* view = Shell::Shared().view();
+  view->ConnectToViewportObserver(
+      mojo::MakeRequest<ViewportObserver>(mojo::ScopedMessagePipeHandle(
+          mojo::MessagePipeHandle(viewportObserverHandle))));
+  return reinterpret_cast<jlong>(view);
 }
 
 // static
@@ -32,6 +36,14 @@ PlatformView::PlatformView(const Config& config)
 PlatformView::~PlatformView() {
   if (window_)
     ReleaseWindow();
+}
+
+void PlatformView::ConnectToViewportObserver(
+    mojo::InterfaceRequest<ViewportObserver> request) {
+  config_.ui_task_runner->PostTask(
+      FROM_HERE,
+      base::Bind(&UIDelegate::ConnectToViewportObserver, config_.ui_delegate,
+                 base::Passed(&request)));
 }
 
 void PlatformView::Detach(JNIEnv* env, jobject obj) {
@@ -58,17 +70,6 @@ void PlatformView::SurfaceDestroyed(JNIEnv* env, jobject obj) {
       FROM_HERE,
       base::Bind(&GPUDelegate::OnOutputSurfaceDestroyed, config_.gpu_delegate));
   ReleaseWindow();
-}
-
-void PlatformView::SurfaceSetSize(JNIEnv* env,
-                                  jobject obj,
-                                  jint width,
-                                  jint height,
-                                  jfloat density) {
-  config_.ui_task_runner->PostTask(
-      FROM_HERE,
-      base::Bind(&UIDelegate::OnViewportMetricsChanged, config_.ui_delegate,
-                 gfx::Size(width, height), density));
 }
 
 void PlatformView::ReleaseWindow() {

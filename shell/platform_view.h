@@ -33,6 +33,9 @@ class PlatformView {
   explicit PlatformView(const Config& config);
   ~PlatformView();
 
+  void ConnectToViewportObserver(
+      mojo::InterfaceRequest<ViewportObserver> request);
+
   // Called from Java
   void Detach(JNIEnv* env, jobject obj);
   void SurfaceCreated(JNIEnv* env, jobject obj, jobject jsurface);

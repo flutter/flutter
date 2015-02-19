@@ -5,6 +5,8 @@
 #ifndef SKY_SHELL_UI_DELEGATE_H_
 #define SKY_SHELL_UI_DELEGATE_H_
 
+#include "mojo/public/cpp/bindings/interface_request.h"
+#include "sky/services/viewport/viewport_observer.mojom.h"
 #include "ui/gfx/geometry/size.h"
 
 namespace sky {
@@ -12,8 +14,8 @@ namespace shell {
 
 class UIDelegate {
  public:
-  virtual void OnViewportMetricsChanged(const gfx::Size& size,
-                                        float device_pixel_ratio) = 0;
+  virtual void ConnectToViewportObserver(
+      mojo::InterfaceRequest<ViewportObserver> request) = 0;
 
  protected:
   virtual ~UIDelegate();
