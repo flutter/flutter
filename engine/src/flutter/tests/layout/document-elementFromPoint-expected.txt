@@ -2,7 +2,9 @@ CONSOLE: unittest-suite-wait-for-done
 CONSOLE: PASS: should hit test
 CONSOLE: PASS: should hit test child and parent
 CONSOLE: PASS: should hit test child with layered parent
+CONSOLE: PASS: should hit test transformed child
+CONSOLE: PASS: should hit test canvas
 CONSOLE: 
-CONSOLE: All 3 tests passed.
+CONSOLE: All 5 tests passed.
 CONSOLE: unittest-suite-success
 DONE
