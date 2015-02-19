@@ -22,14 +22,12 @@ void main() {
 
   test('should allow sheets to apply when they match', () {
     var element = document.getElementById('matches');
-    expect(window.getComputedStyle(element).getPropertyValue("color"),
-           equals("rgb(255, 0, 0)"));
+    expect(window.getComputedStyle(element)["color"], equals("rgb(255, 0, 0)"));
   });
 
   test('should cause sheets to be skipped when they do not match', () {
     var element = document.getElementById('does-not-match');
-    expect(window.getComputedStyle(element).getPropertyValue("color"),
-           "rgb(0, 0, 0)");
+    expect(window.getComputedStyle(element)["color"], equals("rgb(0, 0, 0)"));
   });
 }
 </script>

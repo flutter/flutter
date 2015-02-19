@@ -19,7 +19,7 @@ void main() {
     var target = document.querySelector('div');
 
     target.classList.add("wide");
-    expect(window.getComputedStyle(target).getPropertyValue("width"),
+    expect(window.getComputedStyle(target)["width"],
            equals("200px"));
   });
 
@@ -27,7 +27,7 @@ void main() {
     var target = document.querySelectorAll('div')[1];
 
     target.setAttribute("id", "high");
-    expect(window.getComputedStyle(target).getPropertyValue("height"),
+    expect(window.getComputedStyle(target)["height"],
            equals("200px"));
   });
 }

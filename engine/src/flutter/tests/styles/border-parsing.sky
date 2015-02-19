@@ -12,7 +12,7 @@ void main() {
   test('should render', () {
     var foo = document.querySelector('foo');
     foo.setAttribute('style', 'border: 1px solid red');
-    expect(foo.style.getPropertyValue("border"), equals('1px solid rgb(255, 0, 0)'));
+    expect(foo.style["border"], equals('1px solid rgb(255, 0, 0)'));
   });
 }
 </script>

@@ -16,7 +16,7 @@
 
       test('should not exist', () {
         var sandbox = document.getElementById("sandbox");
-        expect(window.getComputedStyle(sandbox).getPropertyValue("color"),
+        expect(window.getComputedStyle(sandbox)["color"],
                equals("rgb(0, 0, 255)"));
       });
     }

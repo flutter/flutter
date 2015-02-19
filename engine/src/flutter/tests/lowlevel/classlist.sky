@@ -102,23 +102,23 @@ main() {
   });
 
   test("should dynamically update style", () {
-    expect(window.getComputedStyle(target).getPropertyValue("font-size"),
+    expect(window.getComputedStyle(target)["font-size"],
            equals("5px"));
     target.classList.add("font-10");
     target.classList.add("font-12");
-    expect(window.getComputedStyle(target).getPropertyValue("font-size"),
+    expect(window.getComputedStyle(target)["font-size"],
            equals("12px"));
     target.classList.add("font-24");
-    expect(window.getComputedStyle(target).getPropertyValue("font-size"),
+    expect(window.getComputedStyle(target)["font-size"],
            equals("24px"));
     target.classList.remove("font-12");
-    expect(window.getComputedStyle(target).getPropertyValue("font-size"),
+    expect(window.getComputedStyle(target)["font-size"],
            equals("24px"));
     target.classList.remove("font-24");
-    expect(window.getComputedStyle(target).getPropertyValue("font-size"),
+    expect(window.getComputedStyle(target)["font-size"],
            equals("10px"));
     target.classList.remove("font-10");
-    expect(window.getComputedStyle(target).getPropertyValue("font-size"),
+    expect(window.getComputedStyle(target)["font-size"],
            equals("5px"));
   });
 }
