@@ -10,6 +10,7 @@ import org.chromium.base.BaseChromiumApplication;
 import org.chromium.base.PathUtils;
 import org.chromium.base.ResourceExtractor;
 import org.chromium.base.library_loader.LibraryLoader;
+import org.chromium.base.library_loader.LibraryProcessType;
 import org.chromium.base.library_loader.ProcessInitException;
 
 /**
@@ -43,7 +44,7 @@ public class SkyShellApplication extends BaseChromiumApplication {
      */
     private void initializeNative() {
         try {
-            LibraryLoader.ensureInitialized();
+            LibraryLoader.get(LibraryProcessType.PROCESS_BROWSER).ensureInitialized();
         } catch (ProcessInitException e) {
             Log.e(TAG, "sky_shell initialization failed.", e);
             throw new RuntimeException(e);
