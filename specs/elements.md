@@ -84,7 +84,7 @@ abstract class Node extends EventTarget {
   // this is why insertBefore(), append(), et al, are O(N) -- the whole affected subtree is walked
   // mutating the element tree from within this is strongly discouraged, since it will result in the
   // callbacks being invoked while the element tree is in a different state than implied by the callbacks
-  external void parentChangeCallback(ParentNode oldParent, ParentNode newParent, Node previousSibling, Node nextSibling); // O(N) in descendants
+  external void parentChangeCallback(ParentNode oldParent, ParentNode newParent); // O(N) in descendants
   // default implementation calls attached/detached
   void attachedCallback() { }
   void detachedCallback() { }
