@@ -1,6 +1,17 @@
 Sky Style Language
 ==================
 
+THIS IS NOT UP TO DATE
+
+DO NOT IMPLEMENT THIS YET
+
+It has not been Dartified.
+
+It has not been converted to have a sane element.style API.
+
+It has not been converted to have layout be interruptible using Futures.
+
+
 Planed changes
 --------------
 
