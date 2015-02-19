@@ -197,14 +197,27 @@ class tagname extends AutomaticMetadata {
   }
 }
 
+// @hasShadow annotation for registering elements
+class _HasShadow {
+  const HasShadow();
+}
+const hasShadow = const _HasShadow();
+
 abstract class Element extends ParentNode {
-  external Element({Map<String, String> attributes: null,
-                   List children: null,
-                   Module hostModule: null}); // O(M+N), M = number of attributes, N = number of children nodes plus all their descendants
+  Element({Map<String, String> attributes: null,
+           List children: null,
+           Module hostModule: null}) { // O(M+N), M = number of attributes, N = number of children nodes plus all their descendants
+    var shadowClass = reflectClass(hasShadow);
+    bool needsShadow = reflect(this).type.metadata.singleWhere((mirror) => mirror.type == hasShadowClass);
+    if (children != null)
+      children = children.map((node) => node is String ? new Text(node) : node).toList();
+    this._initElement(attributes, children, hostModule, needsShadow);
+  }
+  external void _initElement(Map<String, String> attributes, List children, Module hostModule, bool needsShadow);
   // initialises the internal attributes table, which is a ordered list
   // appends the given children nodes
-  // children must be String, Text, or Element
-  // if this.needsShadow, creates a shadow tree
+  // children must be Text or Element
+  // if needsShadow is true, creates a shadow tree
 
   String get tagName { // O(N) in number of annotations on the class
     // throws a StateError if the class doesn't have an @tagname annotation
@@ -222,7 +235,6 @@ abstract class Element extends ParentNode {
   // Returns a new Array and new Attr instances every time.
   external List<Attr> getAttributes(); // O(N) in number of attributes
 
-  get bool needsShadow => false; // O(1)
   external final Root shadowRoot; // O(1)
   // returns the shadow root
 
