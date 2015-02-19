@@ -4,11 +4,13 @@ foo, parent { width: 100px; height: 100px; background: blue; }
 bar { width: 100px; height: 100px; background: purple; }
 parent { display: paragraph; }
 child { background: salmon; }
+canvas { height: 50px; background-color: pink; }
 </style>
 <foo /><bar />
 <parent>
   <child>Foo bar</child>
 </parent>
+<canvas />
 <script>
 import "../resources/third_party/unittest/unittest.dart";
 import "../resources/unit.dart";
@@ -47,6 +49,16 @@ void main() {
   test("should hit test child with layered parent", () {
     document.querySelector('parent').style.setProperty("transform", "translate3d(0, 0, 0)");
     hitTestWithChildren();
+  });
+
+  test("should hit test transformed child", () {
+    document.querySelector('child').style.setProperty("transform", "translate3d(100px, 0, 0)");
+    expect(document.elementFromPoint(50, 210).tagName, equals('parent'));
+    expect(document.elementFromPoint(150, 210).tagName, equals('child'));
+  });
+
+  test("should hit test canvas", () {
+    expect(document.elementFromPoint(50, 310).tagName, equals('canvas'));
   });
 }
 </script>
