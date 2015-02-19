@@ -312,7 +312,7 @@
   bool imagesLoaded() {
     var images = window.document.querySelectorAll('img');
     for (var i = 0; i < images.length; i++) {
-      if (!images.item(i).complete)
+      if (!images[i].complete)
         return false;
     }
     return true;

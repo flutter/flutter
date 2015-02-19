@@ -41,7 +41,6 @@ class Document;
 class Element;
 class ExceptionState;
 template <typename NodeType> class StaticNodeTypeList;
-typedef StaticNodeTypeList<Element> StaticElementList;
 
 class SelectorQuery {
     WTF_MAKE_NONCOPYABLE(SelectorQuery);
@@ -50,7 +49,7 @@ public:
     static PassOwnPtr<SelectorQuery> adopt(CSSSelectorList&);
 
     bool matches(Element&) const;
-    PassRefPtr<StaticElementList> queryAll(ContainerNode& rootNode) const;
+    Vector<RefPtr<Element>> queryAll(ContainerNode& rootNode) const;
     PassRefPtr<Element> queryFirst(ContainerNode& rootNode) const;
 private:
     explicit SelectorQuery(CSSSelectorList&);

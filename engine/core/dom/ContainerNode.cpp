@@ -942,18 +942,20 @@ PassRefPtr<Element> ContainerNode::querySelector(const AtomicString& selectors, 
     return selectorQuery->queryFirst(*this);
 }
 
-PassRefPtr<StaticElementList> ContainerNode::querySelectorAll(const AtomicString& selectors, ExceptionState& exceptionState)
+Vector<RefPtr<Element>> ContainerNode::querySelectorAll(const AtomicString& selectors, ExceptionState& exceptionState)
 {
+    Vector<RefPtr<Element>> result;
     if (selectors.isEmpty()) {
         exceptionState.ThrowDOMException(SyntaxError, "The provided selector is empty.");
-        return nullptr;
+        return result;
     }
 
     SelectorQuery* selectorQuery = document().selectorQueryCache().add(selectors, document(), exceptionState);
     if (!selectorQuery)
-        return nullptr;
+        return result;
 
-    return selectorQuery->queryAll(*this);
+    result = selectorQuery->queryAll(*this);
+    return result;
 }
 
 void ContainerNode::updateTreeAfterInsertion(Node& child)

@@ -24,5 +24,5 @@
 
   // TODO(abarth): Remove when we have the selector object.
   [RaisesException] Element querySelector(DOMString selectors);
-  [RaisesException] NodeList querySelectorAll(DOMString selectors);
+  [RaisesException] sequence<Element> querySelectorAll(DOMString selectors);
 };

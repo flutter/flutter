@@ -64,7 +64,6 @@ private:
 };
 
 typedef StaticNodeTypeList<Node> StaticNodeList;
-typedef StaticNodeTypeList<Element> StaticElementList;
 
 template <typename NodeType>
 PassRefPtr<StaticNodeTypeList<NodeType> > StaticNodeTypeList<NodeType>::adopt(Vector<RefPtr<NodeType> >& nodes)

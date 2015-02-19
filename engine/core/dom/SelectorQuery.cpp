@@ -52,14 +52,14 @@ bool SelectorQuery::matches(Element& element) const
     return selectorMatches(element, element);
 }
 
-PassRefPtr<StaticElementList> SelectorQuery::queryAll(ContainerNode& rootNode) const
+Vector<RefPtr<Element>> SelectorQuery::queryAll(ContainerNode& rootNode) const
 {
-    Vector<RefPtr<Element> > result;
+    Vector<RefPtr<Element>> result;
     for (Element* element = ElementTraversal::firstWithin(rootNode); element; element = ElementTraversal::next(*element, &rootNode)) {
         if (selectorMatches(rootNode, *element))
             result.append(element);
     }
-    return StaticElementList::adopt(result);
+    return result;
 }
 
 PassRefPtr<Element> SelectorQuery::queryFirst(ContainerNode& rootNode) const

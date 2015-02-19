@@ -34,7 +34,6 @@ namespace blink {
 class ExceptionState;
 class FloatPoint;
 template <typename NodeType> class StaticNodeTypeList;
-typedef StaticNodeTypeList<Element> StaticElementList;
 
 // This constant controls how much buffer is initially allocated
 // for a Node Vector that is used to store child Nodes of a given Node.
@@ -72,7 +71,7 @@ public:
     unsigned countChildren() const;
 
     PassRefPtr<Element> querySelector(const AtomicString& selectors, ExceptionState&);
-    PassRefPtr<StaticElementList> querySelectorAll(const AtomicString& selectors, ExceptionState&);
+    Vector<RefPtr<Element>> querySelectorAll(const AtomicString& selectors, ExceptionState&);
 
     PassRefPtr<Node> insertBefore(PassRefPtr<Node> newChild, Node* refChild, ExceptionState& = ASSERT_NO_EXCEPTION);
     PassRefPtr<Node> replaceChild(PassRefPtr<Node> newChild, PassRefPtr<Node> oldChild, ExceptionState& = ASSERT_NO_EXCEPTION);
