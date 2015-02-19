@@ -72,7 +72,8 @@ namespace {{dart_class}}Internal {
   {% endif %}
 {% endfor %}
 
-{# Special operations (methods) #}
+  {% block named_property_getter %}{% endblock %}
+  {% block named_property_setter %}{% endblock %}
   {% block indexed_property_getter %}{% endblock %}
 }
 
@@ -108,10 +109,9 @@ Dart_NativeFunction {{dart_class}}::Resolver(Dart_Handle nameHandle, int argumen
     {% endfor %}
     {# Special operations (methods) #}
     {# TODO(terry): Only emit indexed getter for DataTransferItemList; emit for interfaces. #}
-    {% block indexed_property_getter_resolver %}{% endblock %}
-    {% if dart_class == 'DartCSSStyleDeclaration' %}
-      {% block named_property_getter_resolver %}{% endblock %}
-    {% endif %}
+{% block indexed_property_getter_resolver %}{% endblock %}
+{% block named_property_getter_resolver %}{% endblock %}
+{% block named_property_setter_resolver %}{% endblock %}
     return 0;
 }
 
@@ -135,9 +135,8 @@ const uint8_t* {{dart_class}}::Symbolizer(Dart_NativeFunction native_function)
     {% for method in methods if not method.suppressed %}
 {{generate_symbolizer_body(dart_class, interface_name, method) | indent(4)}}
     {% endfor %}
-    {% if dart_class == 'DartCSSStyleDeclaration' %}
 {% block generate_symbolizer_named_property_getter %}{% endblock %}
-    {% endif %}
+{% block generate_symbolizer_named_property_setter %}{% endblock %}
 {% block generate_symbolizer_indexed_property_getter %}{% endblock %}
     return 0;
 }

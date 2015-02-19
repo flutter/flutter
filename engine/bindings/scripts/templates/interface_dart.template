@@ -43,4 +43,12 @@ abstract class {{interface_name}} extends {{ parent_interface if parent_interfac
 {% for method in methods %}
     {{method.dart_type}} {{method.name}}({{ args_macro(method.arguments)}}) native "{{interface_name}}_{{ method.name }}_Callback";
 {% endfor %}
+
+    // Operators
+{% if named_property_getter %}
+    String operator[](String name) native "{{interface_name}}___getter___Callback";
+{% endif %}
+{% if named_property_setter %}
+    void operator[]=(String name, String value) native "{{interface_name}}___setter___Callback";
+{% endif %}
 }

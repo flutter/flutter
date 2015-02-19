@@ -60,21 +60,15 @@ double AnimationNodeTiming::iterations()
     return m_parent->specifiedTiming().iterationCount;
 }
 
-// This logic was copied from the example in bindings/tests/idls/TestInterface.idl
-// and bindings/tests/results/V8TestInterface.cpp.
-// FIXME: It might be possible to have 'duration' defined as an attribute in the idl.
-// If possible, fix will be in a follow-up patch.
-void AnimationNodeTiming::getDuration(String propertyName, Nullable<double>& element0, String& element1)
+String AnimationNodeTiming::getDuration(String propertyName)
 {
     if (propertyName != "duration")
-        return;
+        return String();
 
-    if (std::isnan(m_parent->specifiedTiming().iterationDuration)) {
-        element1 = "auto";
-        return;
-    }
-    element0.set(m_parent->specifiedTiming().iterationDuration * 1000);
-    return;
+    if (std::isnan(m_parent->specifiedTiming().iterationDuration))
+        return "auto";
+
+    return String::number(m_parent->specifiedTiming().iterationDuration * 1000);
 }
 
 double AnimationNodeTiming::playbackRate()

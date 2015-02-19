@@ -22,7 +22,7 @@ public:
     String fill();
     double iterationStart();
     double iterations();
-    void getDuration(String propertyName, Nullable<double>& element0, String& element1);
+    String getDuration(String propertyName);
     double playbackRate();
     String direction();
     String easing();

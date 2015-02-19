@@ -73,9 +73,6 @@
     void cancelAnimationFrame(long id);
 
     [Replaceable] readonly attribute CSS CSS;
-
-    // FIXME(sky): can't remove w/o also removing hacks in bindings generator.
-    [Custom, NotEnumerable] getter Window (DOMString name);
 };
 
 Window implements WindowBase64;

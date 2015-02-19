@@ -626,18 +626,24 @@ def property_getter(getter, cpp_arguments):
     return context
 
 
-def property_setter(setter):
+def property_setter(setter, cpp_arguments):
     context = v8_interface.property_setter(setter)
 
-    idl_type = setter.arguments[1].idl_type
+    idl_type = setter.idl_type
     extended_attributes = setter.extended_attributes
+    is_raises_exception = 'RaisesException' in extended_attributes
 
+    cpp_method_name = 'receiver->%s' % DartUtilities.cpp_name(setter)
+
+    if is_raises_exception:
+        cpp_arguments.append('es')
+
+    cpp_value = '%s(%s)' % (cpp_method_name, ', '.join(cpp_arguments))
     context.update({
-        'dart_value_to_local_cpp_value': idl_type.dart_value_to_local_cpp_value(
-            extended_attributes, 'propertyValue', False,
-            context['has_type_checking_interface']),
-    })
-
+        'cpp_type': idl_type.cpp_type,
+        'cpp_value': cpp_value,
+        'is_raises_exception': is_raises_exception,
+        'name': DartUtilities.cpp_name(setter)})
     return context
 
 
@@ -700,7 +706,7 @@ def named_property_getter(interface):
 
     getter.name = getter.name or 'anonymousNamedGetter'
 
-    return property_getter(getter, ['propertyName'])
+    return property_getter(getter, [getter.arguments[0].name])
 
 
 def named_property_setter(interface):
@@ -716,7 +722,8 @@ def named_property_setter(interface):
     except StopIteration:
         return None
 
-    return property_setter(setter)
+    return property_setter(setter, [setter.arguments[0].name,
+                                    setter.arguments[1].name])
 
 
 def generate_native_entries_for_specials(interface, context):

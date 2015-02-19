@@ -5,6 +5,66 @@
 
 
 {##############################################################################}
+{% block named_property_getter %}
+{% if named_property_getter and not named_property_getter.is_custom %}
+static void namedPropertyGetter(Dart_NativeArguments args)
+{
+    {{cpp_class}}* /* FIXME(vsm): Remove this. */ ALLOW_UNUSED receiver = GetReceiver<{{cpp_class}}>(args);
+    Dart_Handle exception = nullptr;
+    {
+  {% if named_property_getter.is_raises_exception %}
+        ExceptionState es;
+  {% endif %}
+
+        String name = DartConverter<String>::FromArguments(args, 1, exception);
+        if (exception)
+            goto fail;
+        {{named_property_getter.cpp_type}} result = {{named_property_getter.cpp_value}};
+        if (!result)
+            return;
+        {{named_property_getter.dart_set_return_value}};
+        return;
+    }
+
+fail:
+    Dart_ThrowException(exception);
+    ASSERT_NOT_REACHED();
+}
+
+{% endif %}
+{% endblock %}
+
+{##############################################################################}
+{% block named_property_setter %}
+{% if named_property_setter and not named_property_setter.is_custom %}
+static void namedPropertySetter(Dart_NativeArguments args)
+{
+    {{cpp_class}}* /* FIXME(vsm): Remove this. */ ALLOW_UNUSED receiver = GetReceiver<{{cpp_class}}>(args);
+    Dart_Handle exception = nullptr;
+    {
+  {% if named_property_setter.is_raises_exception %}
+        ExceptionState es;
+  {% endif %}
+
+        String name = DartConverter<String>::FromArguments(args, 1, exception);
+        if (exception)
+            goto fail;
+        String value = DartConverter<String>::FromArguments(args, 2, exception);
+        if (exception)
+            goto fail;
+        {{named_property_setter.cpp_value}};
+        return;
+    }
+
+fail:
+    Dart_ThrowException(exception);
+    ASSERT_NOT_REACHED();
+}
+
+{% endif %}
+{% endblock %}
+
+{##############################################################################}
 {% block indexed_property_getter %}
 {% if indexed_property_getter and not indexed_property_getter.is_custom %}
   {% set getter = indexed_property_getter %}
@@ -38,7 +98,6 @@ fail:
 {# TODO(terry): Should handle custom index getter - none today. #}
 {% endblock %}
 
-
 {##############################################################################}
 {% block indexed_property_getter_resolver %}
     {# TODO(terry): Support all indexed and named properties today only indexed getter is supported. #}
@@ -57,12 +116,26 @@ if (argumentCount == 2 && name == "{{resolver_string}}") {
 {##############################################################################}
 {% block named_property_getter_resolver %}
     {# Resolver named properties #}
-    {% if named_property_getter %}
+    {% if named_property_getter and not named_property_getter.is_custom %}
       {% for native_entry in named_property_getter.native_entries %}
         {% set resolver_string = native_entry.resolver_string %}
 if (argumentCount == 2 && (name == "{{resolver_string}}")) {
     *autoSetupScope = true;
-    return {{dart_class}}Internal::propertyQuery;
+    return {{dart_class}}Internal::namedPropertyGetter;
+}
+      {% endfor %}
+    {% endif %}
+{% endblock %}
+
+{##############################################################################}
+{% block named_property_setter_resolver %}
+    {# Resolver named properties #}
+    {% if named_property_setter and not named_property_setter.is_custom %}
+      {% for native_entry in named_property_setter.native_entries %}
+        {% set resolver_string = native_entry.resolver_string %}
+if (argumentCount == 3 && (name == "{{resolver_string}}")) {
+    *autoSetupScope = true;
+    return {{dart_class}}Internal::namedPropertySetter;
 }
       {% endfor %}
     {% endif %}
@@ -82,11 +155,22 @@ if (native_function == {{dart_class}}Internal::indexedPropertyGetter) {
 
 {##############################################################################}
 {% block generate_symbolizer_named_property_getter %}
-    {# Resolver named properties #}
     {% if named_property_getter %}
       {% for native_entry in named_property_getter.native_entries %}
         {% set resolver_string = native_entry.resolver_string %}
-if (native_function == {{dart_class}}Internal::propertyQuery) {
+if (native_function == {{dart_class}}Internal::namedPropertyGetter) {
+    return reinterpret_cast<const uint8_t*>("{{resolver_string}}");
+}
+      {% endfor %}
+    {% endif %}
+{% endblock %}
+
+{##############################################################################}
+{% block generate_symbolizer_named_property_setter %}
+    {% if named_property_setter %}
+      {% for native_entry in named_property_setter.native_entries %}
+        {% set resolver_string = native_entry.resolver_string %}
+if (native_function == {{dart_class}}Internal::namedPropertySetter) {
     return reinterpret_cast<const uint8_t*>("{{resolver_string}}");
 }
       {% endfor %}

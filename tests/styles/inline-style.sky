@@ -15,9 +15,8 @@ void main() {
 
 
     expect(foo.getAttribute('style'), equals('color: red'));
-    expect(foo.style.getPropertyValue("color"), equals('rgb(255, 0, 0)'));
-    expect(window.getComputedStyle(foo).getPropertyValue("color"),
-           equals('rgb(255, 0, 0)'));
+    expect(foo.style["color"], equals('rgb(255, 0, 0)'));
+    expect(window.getComputedStyle(foo)["color"], equals('rgb(255, 0, 0)'));
   });
 }
 </script>

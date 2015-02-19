@@ -27,7 +27,7 @@
         var log = document.getElementById("log");
         var i = 1;
         for (Element element = tests.firstElementChild; element != null; element = element.nextElementSibling) {
-            var order = int.parse(window.getComputedStyle(element).getPropertyValue("order"));
+            var order = int.parse(window.getComputedStyle(element)["order"]);
             var div = document.createElement("div");
             var text = (order == i) ? "PASS" : "FAIL";
             text += ": <"
