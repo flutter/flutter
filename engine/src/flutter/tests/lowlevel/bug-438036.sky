@@ -24,7 +24,7 @@ void main() {
   });
 
   test("should grow height to 200px", () {
-    var target = document.querySelectorAll('div').item(1);
+    var target = document.querySelectorAll('div')[1];
 
     target.setAttribute("id", "high");
     expect(window.getComputedStyle(target).getPropertyValue("height"),
