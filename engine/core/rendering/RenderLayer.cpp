@@ -847,11 +847,8 @@ PassRefPtr<HitTestingTransformState> RenderLayer::createLocalTransformState(Rend
 }
 
 
-static bool isHitCandidate(const RenderLayer* hitLayer, bool canDepthSort, double* zOffset, const HitTestingTransformState* transformState)
+static bool isHitCandidate(bool canDepthSort, double* zOffset, const HitTestingTransformState* transformState)
 {
-    if (!hitLayer)
-        return false;
-
     // The hit layer is depth-sorting with other layers, so just say that it was hit.
     if (canDepthSort)
         return true;
@@ -879,7 +876,7 @@ static bool isHitCandidate(const RenderLayer* hitLayer, bool canDepthSort, doubl
 //
 // If zOffset is non-null (which indicates that the caller wants z offset information),
 //  *zOffset on return is the z offset of the hit point relative to the containing flattening layer.
-RenderLayer* RenderLayer::hitTestLayer(RenderLayer* rootLayer, RenderLayer* containerLayer, const HitTestRequest& request, HitTestResult& result,
+bool RenderLayer::hitTestLayer(RenderLayer* rootLayer, RenderLayer* containerLayer, const HitTestRequest& request, HitTestResult& result,
                                        const LayoutRect& hitTestRect, const HitTestLocation& hitTestLocation,
                                        const HitTestingTransformState* transformState, double* zOffset)
 {
@@ -966,26 +963,17 @@ RenderLayer* RenderLayer::hitTestLayer(RenderLayer* rootLayer, RenderLayer* cont
         zOffsetForContentsPtr = zOffset;
     }
 
-    // This variable tracks which layer the mouse ends up being inside.
-    RenderLayer* candidateLayer = 0;
-
     // Begin by walking our list of positive layers from highest z-index down to the lowest z-index.
-    RenderLayer* hitLayer = hitTestChildren(PositiveZOrderChildren, rootLayer, request, result, localHitTestRect, localHitTestLocation,
-                                        localTransformState.get(), zOffsetForDescendantsPtr, zOffset, unflattenedTransformState.get(), depthSortDescendants);
-    if (hitLayer) {
-        if (!depthSortDescendants)
-            return hitLayer;
-        candidateLayer = hitLayer;
-    }
+    bool hitLayer = hitTestChildren(PositiveZOrderChildren, rootLayer, request, result, localHitTestRect, localHitTestLocation,
+                                    localTransformState.get(), zOffsetForDescendantsPtr, zOffset, unflattenedTransformState.get(), depthSortDescendants);
+    if (hitLayer && !depthSortDescendants)
+        return true;
 
     // Now check our overflow objects.
     hitLayer = hitTestChildren(NormalFlowChildren, rootLayer, request, result, localHitTestRect, localHitTestLocation,
-                           localTransformState.get(), zOffsetForDescendantsPtr, zOffset, unflattenedTransformState.get(), depthSortDescendants);
-    if (hitLayer) {
-        if (!depthSortDescendants)
-            return hitLayer;
-        candidateLayer = hitLayer;
-    }
+                               localTransformState.get(), zOffsetForDescendantsPtr, zOffset, unflattenedTransformState.get(), depthSortDescendants);
+    if (hitLayer && !depthSortDescendants)
+        return true;
 
     LayoutRect layerBounds;
     // FIXME(sky): Remove foregroundRect. It's unused.
@@ -998,21 +986,21 @@ RenderLayer* RenderLayer::hitTestLayer(RenderLayer* rootLayer, RenderLayer* cont
         // Hit test with a temporary HitTestResult, because we only want to commit to 'result' if we know we're frontmost.
         HitTestResult tempResult(result.hitTestLocation());
         if (hitTestContents(request, tempResult, layerBounds, localHitTestLocation)
-            && isHitCandidate(this, false, zOffsetForContentsPtr, unflattenedTransformState.get())) {
+            && isHitCandidate(false, zOffsetForContentsPtr, unflattenedTransformState.get())) {
             if (result.isRectBasedTest())
                 result.append(tempResult);
             else
                 result = tempResult;
             if (!depthSortDescendants)
-                return this;
+                return true;
             // Foreground can depth-sort with descendant layers, so keep this as a candidate.
-            candidateLayer = this;
+            hitLayer = true;
         } else if (result.isRectBasedTest()) {
             result.append(tempResult);
         }
     }
 
-    return candidateLayer;
+    return hitLayer;
 }
 
 bool RenderLayer::hitTestContents(const HitTestRequest& request, HitTestResult& result, const LayoutRect& layerBounds, const HitTestLocation& hitTestLocation) const
@@ -1041,7 +1029,7 @@ bool RenderLayer::hitTestContents(const HitTestRequest& request, HitTestResult& 
     return true;
 }
 
-RenderLayer* RenderLayer::hitTestChildren(ChildrenIteration childrentoVisit, RenderLayer* rootLayer,
+bool RenderLayer::hitTestChildren(ChildrenIteration childrentoVisit, RenderLayer* rootLayer,
     const HitTestRequest& request, HitTestResult& result,
     const LayoutRect& hitTestRect, const HitTestLocation& hitTestLocation,
     const HitTestingTransformState* transformState,
@@ -1052,21 +1040,19 @@ RenderLayer* RenderLayer::hitTestChildren(ChildrenIteration childrentoVisit, Ren
     if (!hasSelfPaintingLayerDescendant())
         return 0;
 
-    RenderLayer* resultLayer = 0;
+    bool hitLayer = false;
     RenderLayerStackingNodeReverseIterator iterator(*m_stackingNode, childrentoVisit);
     while (RenderLayerStackingNode* child = iterator.next()) {
         RenderLayer* childLayer = child->layer();
-        RenderLayer* hitLayer = 0;
         HitTestResult tempResult(result.hitTestLocation());
-        hitLayer = childLayer->hitTestLayer(rootLayer, this, request, tempResult, hitTestRect, hitTestLocation, transformState, zOffsetForDescendants);
+        hitLayer |= childLayer->hitTestLayer(rootLayer, this, request, tempResult, hitTestRect, hitTestLocation, transformState, zOffsetForDescendants);
 
         // If it a rect-based test, we can safely append the temporary result since it might had hit
         // nodes but not necesserily had hitLayer set.
         if (result.isRectBasedTest())
             result.append(tempResult);
 
-        if (isHitCandidate(hitLayer, depthSortDescendants, zOffset, unflattenedTransformState)) {
-            resultLayer = hitLayer;
+        if (hitLayer && isHitCandidate(depthSortDescendants, zOffset, unflattenedTransformState)) {
             if (!result.isRectBasedTest())
                 result = tempResult;
             if (!depthSortDescendants)
@@ -1074,7 +1060,7 @@ RenderLayer* RenderLayer::hitTestChildren(ChildrenIteration childrentoVisit, Ren
         }
     }
 
-    return resultLayer;
+    return hitLayer;
 }
 
 bool RenderLayer::intersectsDamageRect(const LayoutRect& layerBounds, const LayoutRect& damageRect, const RenderLayer* rootLayer, const LayoutPoint* offsetFromRoot) const

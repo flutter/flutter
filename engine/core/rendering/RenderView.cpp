@@ -91,7 +91,7 @@ bool RenderView::hitTest(const HitTestRequest& request, const HitTestLocation& l
     if (!request.ignoreClipping())
         hitTestArea.intersect(frame()->view()->visibleContentRect());
 
-    RenderLayer* insideLayer = layer()->hitTestLayer(layer(), 0, request, result, hitTestArea, location);
+    bool insideLayer = layer()->hitTestLayer(layer(), 0, request, result, hitTestArea, location);
     if (!insideLayer) {
         // TODO(ojan): Is this code needed for Sky?
 
@@ -100,7 +100,7 @@ bool RenderView::hitTest(const HitTestRequest& request, const HitTestLocation& l
         // exited the WebView, and so hit testing over a scrollbar hits the content document.
         if (request.active() || request.release()) {
             updateHitTestResult(result, location.point());
-            insideLayer = layer();
+            insideLayer = true;
         }
     }
     return insideLayer;

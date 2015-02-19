@@ -239,9 +239,9 @@ public:
     void clipToRect(const LayerPaintingInfo&, GraphicsContext*, const ClipRect&, BorderRadiusClippingRule = IncludeSelfForBorderRadius);
     void restoreClip(GraphicsContext*, const LayoutRect& paintDirtyRect, const ClipRect&);
 
-    RenderLayer* hitTestLayer(RenderLayer* rootLayer, RenderLayer* containerLayer, const HitTestRequest& request, HitTestResult& result,
-                              const LayoutRect& hitTestRect, const HitTestLocation&,
-                              const HitTestingTransformState* transformState = 0, double* zOffset = 0);
+    bool hitTestLayer(RenderLayer* rootLayer, RenderLayer* containerLayer, const HitTestRequest& request, HitTestResult& result,
+                      const LayoutRect& hitTestRect, const HitTestLocation&,
+                      const HitTestingTransformState* transformState = 0, double* zOffset = 0);
 
 private:
     // TODO(ojan): Get rid of this. These are basically layer-tree-only paint phases.
@@ -272,10 +272,10 @@ private:
 
     LayoutPoint renderBoxLocation() const { return renderer()->isBox() ? toRenderBox(renderer())->location() : LayoutPoint(); }
 
-    RenderLayer* hitTestChildren(ChildrenIteration, RenderLayer* rootLayer, const HitTestRequest&, HitTestResult&,
-                             const LayoutRect& hitTestRect, const HitTestLocation&,
-                             const HitTestingTransformState* transformState, double* zOffsetForDescendants, double* zOffset,
-                             const HitTestingTransformState* unflattenedTransformState, bool depthSortDescendants);
+    bool hitTestChildren(ChildrenIteration, RenderLayer* rootLayer, const HitTestRequest&, HitTestResult&,
+                         const LayoutRect& hitTestRect, const HitTestLocation&,
+                         const HitTestingTransformState* transformState, double* zOffsetForDescendants, double* zOffset,
+                         const HitTestingTransformState* unflattenedTransformState, bool depthSortDescendants);
 
     PassRefPtr<HitTestingTransformState> createLocalTransformState(RenderLayer* rootLayer, RenderLayer* containerLayer,
                             const LayoutRect& hitTestRect, const HitTestLocation&,
