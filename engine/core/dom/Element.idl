@@ -24,6 +24,8 @@ interface Element : ParentNode {
   attribute long tabIndex;
   readonly attribute DOMTokenList classList;
   [RaisesException] ShadowRoot ensureShadowRoot();
+
+  ClientRect getBoundingClientRect();
   readonly attribute long offsetLeft;
   readonly attribute long offsetTop;
   readonly attribute long offsetWidth;
