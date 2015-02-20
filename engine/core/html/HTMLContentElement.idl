@@ -27,5 +27,5 @@
 [
 ] interface HTMLContentElement : HTMLElement {
     [Reflect, TreatNullAs=NullString] attribute DOMString select;
-    NodeList getDistributedNodes();
+    sequence<Node> getDistributedNodes();
 };

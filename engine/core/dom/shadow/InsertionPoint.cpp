@@ -141,16 +141,15 @@ bool InsertionPoint::isContentInsertionPoint() const
     return isHTMLContentElement(*this) && isActive();
 }
 
-PassRefPtr<StaticNodeList> InsertionPoint::getDistributedNodes()
+Vector<RefPtr<Node>> InsertionPoint::getDistributedNodes()
 {
     document().updateDistributionForNodeIfNeeded(this);
 
-    Vector<RefPtr<Node> > nodes;
-    nodes.reserveInitialCapacity(m_distribution.size());
+    Vector<RefPtr<Node> > result;
+    result.reserveInitialCapacity(m_distribution.size());
     for (size_t i = 0; i < m_distribution.size(); ++i)
-        nodes.uncheckedAppend(m_distribution.at(i));
-
-    return StaticNodeList::adopt(nodes);
+        result.uncheckedAppend(m_distribution.at(i));
+    return result;
 }
 
 void InsertionPoint::childrenChanged(const ChildrenChange& change)

@@ -1560,15 +1560,15 @@ void Node::removedLastRef()
 }
 #endif
 
-PassRefPtr<StaticNodeList> Node::getDestinationInsertionPoints()
+Vector<RefPtr<Node>> Node::getDestinationInsertionPoints()
 {
     document().updateDistributionForNodeIfNeeded(this);
     Vector<RawPtr<InsertionPoint>, 8> insertionPoints;
     collectDestinationInsertionPoints(*this, insertionPoints);
     // FIXME(sky): Is there an easier way to get this into a Vector<Node>?
-    Vector<RefPtr<Node> > nodes(insertionPoints.size());
-    copyToVector(insertionPoints, nodes);
-    return StaticNodeList::adopt(nodes);
+    Vector<RefPtr<Node>> result(insertionPoints.size());
+    copyToVector(insertionPoints, result);
+    return result;
 }
 
 void Node::setFocus(bool flag)

@@ -50,7 +50,7 @@ public:
 
     bool isContentInsertionPoint() const;
 
-    PassRefPtr<StaticNodeList> getDistributedNodes();
+    Vector<RefPtr<Node>> getDistributedNodes();
 
     virtual bool canAffectSelector() const { return false; }
 

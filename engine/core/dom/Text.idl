@@ -20,10 +20,6 @@
     Constructor(optional DOMString data = ""),
     ConstructorCallWith=Document,
 ] interface Text : CharacterData {
-
-    // DOM Level 1
     [RaisesException] Text splitText(unsigned long offset);
-
-    // Shadow DOM API
-    NodeList getDestinationInsertionPoints();
+    sequence<Node> getDestinationInsertionPoints();
 };

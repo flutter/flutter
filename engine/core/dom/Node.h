@@ -481,7 +481,7 @@ public:
     void unregisterTransientMutationObserver(MutationObserverRegistration*);
     void notifyMutationObserversNodeWillDetach();
 
-    PassRefPtr<StaticNodeList> getDestinationInsertionPoints();
+    Vector<RefPtr<Node>> getDestinationInsertionPoints();
 
     void setAlreadySpellChecked(bool flag) { setFlag(flag, AlreadySpellCheckedFlag); }
     bool isAlreadySpellChecked() { return getFlag(AlreadySpellCheckedFlag); }
