@@ -10,11 +10,11 @@
 namespace blink {
 
 class Document;
-class {{namespace}}Element;
+class Element;
 
 class {{namespace}}ElementFactory {
 public:
-    static PassRefPtr<{{namespace}}Element> create{{namespace}}Element(
+    static PassRefPtr<Element> createElement(
         const AtomicString& localName,
         Document&,
         bool createdByParser = true);

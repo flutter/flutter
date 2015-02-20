@@ -489,12 +489,12 @@ static bool isInlineHTMLElementWithStyle(const Node* node)
     if (isBlock(node))
         return false;
 
-    if (!node->isHTMLElement())
+    if (!node->isElementNode())
         return false;
 
     // We can skip over elements whose class attribute is
     // one of our internal classes.
-    const HTMLElement* element = toHTMLElement(node);
+    const Element* element = toElement(node);
     const AtomicString& classAttributeValue = element->getAttribute(HTMLNames::classAttr);
     if (classAttributeValue == AppleTabSpanClass)
         return true;

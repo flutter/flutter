@@ -135,7 +135,6 @@ public:
     String tagName() const { return nodeName(); }
 
     bool hasTagName(const QualifiedName& tagName) const { return m_tagName == tagName; }
-    bool hasTagName(const HTMLQualifiedName& name) const { return hasLocalName(name.localName()); }
 
     // A fast function for checking the local name against another atomic string.
     bool hasLocalName(const AtomicString& other) const { return m_tagName.localName() == other; }
@@ -519,11 +518,6 @@ inline ShadowRoot* Node::shadowRoot() const
     if (!isElementNode())
         return 0;
     return toElement(this)->shadowRoot();
-}
-
-inline bool Node::hasTagName(const HTMLQualifiedName& name) const
-{
-    return isHTMLElement() && toElement(*this).hasTagName(name);
 }
 
 inline void Element::invalidateStyleAttribute()

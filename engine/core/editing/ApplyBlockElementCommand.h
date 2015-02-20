@@ -42,7 +42,6 @@ protected:
     ApplyBlockElementCommand(Document&, const QualifiedName& tagName);
 
     virtual void formatSelection(const VisiblePosition& startOfSelection, const VisiblePosition& endOfSelection);
-    PassRefPtr<HTMLElement> createBlockElement() const;
     const QualifiedName tagName() const { return m_tagName; }
 
 private:

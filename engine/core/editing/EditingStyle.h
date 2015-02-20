@@ -104,7 +104,7 @@ public:
 
     void removeBlockProperties();
 
-    static bool elementIsStyledSpanOrHTMLEquivalent(const HTMLElement*);
+    static bool elementIsStyledSpanOrHTMLEquivalent(const Element*);
 
     void mergeTypingStyle(Document*);
 

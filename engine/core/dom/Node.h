@@ -53,7 +53,6 @@ class EventListener;
 class ExceptionState;
 class FloatPoint;
 class LocalFrame;
-class HTMLQualifiedName;
 class IntRect;
 class KeyboardEvent;
 class NSResolver;
@@ -134,7 +133,6 @@ public:
 
     // DOM methods & attributes for Node
 
-    bool hasTagName(const HTMLQualifiedName&) const;
     virtual String nodeName() const = 0;
     virtual NodeType nodeType() const = 0;
     ContainerNode* parentNode() const;
@@ -197,7 +195,7 @@ public:
     // PseudoElements and VTTElements. It's possible we can just eliminate all the checks
     // since those elements will never have class names, inline style, or other things that
     // this apparently guards against.
-    bool isStyledElement() const { return isHTMLElement(); }
+    bool isStyledElement() const { return isElementNode(); }
 
     bool isDocumentNode() const;
     bool isTreeScope() const;

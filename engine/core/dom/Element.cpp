@@ -173,10 +173,6 @@ PassRefPtr<Element> Element::cloneElementWithChildren()
 PassRefPtr<Element> Element::cloneElementWithoutChildren()
 {
     RefPtr<Element> clone = cloneElementWithoutAttributesAndChildren();
-    // This will catch HTML elements in the wrong namespace that are not correctly copied.
-    // This is a sanity check as HTML overloads some of the DOM methods.
-    ASSERT(isHTMLElement() == clone->isHTMLElement());
-
     clone->cloneDataFromElement(*this);
     return clone.release();
 }

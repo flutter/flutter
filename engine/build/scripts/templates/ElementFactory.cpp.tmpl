@@ -71,7 +71,7 @@ static void create{{namespace}}FunctionMap()
         g_constructors->set(data[i].tag.localName(), data[i].func);
 }
 
-PassRefPtr<{{namespace}}Element> {{namespace}}ElementFactory::create{{namespace}}Element(
+PassRefPtr<Element> {{namespace}}ElementFactory::createElement(
     const AtomicString& localName,
     Document& document,
     bool createdByParser)
@@ -81,11 +81,8 @@ PassRefPtr<{{namespace}}Element> {{namespace}}ElementFactory::create{{namespace}
     if (ConstructorFunction function = g_constructors->get(localName))
         return function(document, createdByParser);
 
-    if (CustomElement::isValidName(localName)) {
-        RefPtr<Element> element = document.registrationContext().createCustomTagElement(document, QualifiedName(localName));
-        ASSERT_WITH_SECURITY_IMPLICATION(element->is{{namespace}}Element());
-        return static_pointer_cast<{{namespace}}Element>(element.release());
-    }
+    if (CustomElement::isValidName(localName))
+        return document.registrationContext().createCustomTagElement(document, QualifiedName(localName));
 
     return {{fallback_interface}}::create(QualifiedName(localName), document);
 }

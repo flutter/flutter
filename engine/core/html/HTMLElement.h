@@ -56,8 +56,7 @@ inline HTMLElement::HTMLElement(const QualifiedName& tagName, Document& document
 #define DEFINE_HTMLELEMENT_TYPE_CASTS_WITH_FUNCTION(thisType) \
     inline bool is##thisType(const thisType* element); \
     inline bool is##thisType(const thisType& element); \
-    inline bool is##thisType(const HTMLElement* element) { return element && is##thisType(*element); } \
-    inline bool is##thisType(const Node& node) { return node.isHTMLElement() ? is##thisType(toHTMLElement(node)) : false; } \
+    inline bool is##thisType(const Node& node) { return node.isElementNode() ? is##thisType(toElement(node)) : false; } \
     inline bool is##thisType(const Node* node) { return node && is##thisType(*node); } \
     inline bool is##thisType(const Element* element) { return element && is##thisType(*element); } \
     template<typename T> inline bool is##thisType(const PassRefPtr<T>& node) { return is##thisType(node.get()); } \

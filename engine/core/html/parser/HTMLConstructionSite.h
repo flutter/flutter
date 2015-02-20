@@ -120,8 +120,7 @@ private:
 
     void attachLater(ContainerNode* parent, PassRefPtr<Node> child, bool selfClosing = false);
 
-    PassRefPtr<HTMLElement> createHTMLElement(AtomicHTMLToken*);
-    PassRefPtr<Element> createElement(AtomicHTMLToken*, const AtomicString& namespaceURI);
+    PassRefPtr<Element> createElement(AtomicHTMLToken*);
 
     void queueTask(const HTMLConstructionSiteTask&);
 

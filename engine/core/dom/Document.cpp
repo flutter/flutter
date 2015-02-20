@@ -415,7 +415,7 @@ PassRefPtr<Element> Document::createElement(const AtomicString& name, ExceptionS
         return nullptr;
     }
 
-    return HTMLElementFactory::createHTMLElement(name, *this, false);
+    return HTMLElementFactory::createElement(name, *this, false);
 }
 
 PassRefPtr<DartValue> Document::registerElement(DartState*, const AtomicString& name, ExceptionState& exceptionState)
@@ -585,7 +585,7 @@ PassRefPtr<Node> Document::adoptNode(PassRefPtr<Node> source, ExceptionState& ex
 PassRefPtr<Element> Document::createElement(const QualifiedName& qName, bool createdByParser)
 {
     // FIXME(sky): This should only take a local name.
-    return HTMLElementFactory::createHTMLElement(qName.localName(), *this, createdByParser);
+    return HTMLElementFactory::createElement(qName.localName(), *this, createdByParser);
 }
 
 String Document::readyState() const

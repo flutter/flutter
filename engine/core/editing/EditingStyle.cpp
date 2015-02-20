@@ -459,7 +459,7 @@ static const Vector<OwnPtr<HTMLAttributeEquivalent> >& htmlAttributeEquivalents(
     return HTMLAttributeEquivalents;
 }
 
-bool EditingStyle::elementIsStyledSpanOrHTMLEquivalent(const HTMLElement* element)
+bool EditingStyle::elementIsStyledSpanOrHTMLEquivalent(const Element* element)
 {
     ASSERT(element);
     bool elementIsSpanOrElementEquivalent = false;

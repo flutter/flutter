@@ -390,7 +390,7 @@ bool isSpecialHTMLElement(const Node* n)
     if (!n)
         return false;
 
-    if (!n->isHTMLElement())
+    if (!n->isElementNode())
         return false;
 
     if (n->isLink())
@@ -608,7 +608,7 @@ Element* enclosingAnchorElement(const Position& p)
 
 bool canMergeLists(Element* firstList, Element* secondList)
 {
-    if (!firstList || !secondList || !firstList->isHTMLElement() || !secondList->isHTMLElement())
+    if (!firstList || !secondList)
         return false;
 
     return firstList->hasTagName(secondList->tagQName()) // make sure the list types match (ol vs. ul)
@@ -631,16 +631,6 @@ bool isEmptyTableCell(const Node* node)
 PassRefPtr<HTMLElement> createDefaultParagraphElement(Document& document)
 {
     return nullptr;
-}
-
-PassRefPtr<HTMLElement> createHTMLElement(Document& document, const QualifiedName& name)
-{
-    return createHTMLElement(document, name.localName());
-}
-
-PassRefPtr<HTMLElement> createHTMLElement(Document& document, const AtomicString& tagName)
-{
-    return HTMLElementFactory::createHTMLElement(tagName, document, false);
 }
 
 bool isNodeRendered(const Node *node)

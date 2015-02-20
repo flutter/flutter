@@ -461,7 +461,7 @@ bool Node::hasEditableStyle(EditableLevel editableLevel, UserSelectAllTreatment 
     // would fire in the middle of Document::setFocusedNode().
 
     for (const Node* node = this; node; node = node->parentNode()) {
-        if (node->isHTMLElement() && node->renderer()) {
+        if (node->isElementNode() && node->renderer()) {
             // Elements with user-select: all style are considered atomic
             // therefore non editable.
             if (Position::nodeIsUserSelectAll(node) && treatment == UserSelectAllIsAlwaysNonEditable)
@@ -1626,7 +1626,7 @@ void Node::setCustomElementState(CustomElementState newState)
         break;
     }
 
-    ASSERT(isHTMLElement());
+    ASSERT(isElementNode());
     setFlag(CustomElementFlag);
     setFlag(newState == Upgraded, CustomElementUpgradedFlag);
 }

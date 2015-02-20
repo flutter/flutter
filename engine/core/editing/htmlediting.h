@@ -198,8 +198,6 @@ PassRefPtr<Range> createRange(Document&, const VisiblePosition& start, const Vis
 // Functions returning HTMLElement
 
 PassRefPtr<HTMLElement> createDefaultParagraphElement(Document&);
-PassRefPtr<HTMLElement> createHTMLElement(Document&, const QualifiedName&);
-PassRefPtr<HTMLElement> createHTMLElement(Document&, const AtomicString&);
 
 // -------------------------------------------------------------------------
 // Element

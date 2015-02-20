@@ -230,12 +230,4 @@ VisiblePosition ApplyBlockElementCommand::endOfNextParagrahSplittingTextNodesIfN
     return VisiblePosition(Position(text.get(), position.offsetInContainerNode() - 1));
 }
 
-PassRefPtr<HTMLElement> ApplyBlockElementCommand::createBlockElement() const
-{
-    RefPtr<HTMLElement> element = createHTMLElement(document(), m_tagName);
-    if (m_inlineStyle.length())
-        element->setAttribute(HTMLNames::styleAttr, m_inlineStyle);
-    return element.release();
-}
-
 }

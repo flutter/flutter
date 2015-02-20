@@ -275,7 +275,7 @@ void HTMLConstructionSite::finishedParsing()
 
 void HTMLConstructionSite::insertHTMLElement(AtomicHTMLToken* token)
 {
-    RefPtr<HTMLElement> element = createHTMLElement(token);
+    RefPtr<Element> element = createElement(token);
     attachLater(currentNode(), element);
     m_openElements.push(element.release());
 }
@@ -286,7 +286,7 @@ void HTMLConstructionSite::insertSelfClosingHTMLElement(AtomicHTMLToken* token)
     // Normally HTMLElementStack is responsible for calling finishParsingChildren,
     // but self-closing elements are never in the element stack so the stack
     // doesn't get a chance to tell them that we're done parsing their children.
-    attachLater(currentNode(), createHTMLElement(token), true);
+    attachLater(currentNode(), createElement(token), true);
     // FIXME: Do we want to acknowledge the token's self-closing flag?
     // http://www.whatwg.org/specs/web-apps/current-work/multipage/tokenization.html#acknowledge-self-closing-flag
 }
@@ -316,14 +316,6 @@ void HTMLConstructionSite::insertTextNode(const String& string)
     m_pendingText.append(dummyTask.parent, string);
 }
 
-PassRefPtr<Element> HTMLConstructionSite::createElement(AtomicHTMLToken* token, const AtomicString& namespaceURI)
-{
-    QualifiedName tagName(token->name());
-    RefPtr<Element> element = ownerDocumentForCurrentNode().createElement(tagName, true);
-    setAttributes(element.get(), token);
-    return element.release();
-}
-
 inline Document& HTMLConstructionSite::ownerDocumentForCurrentNode()
 {
     if (isHTMLTemplateElement(*currentNode()))
@@ -331,10 +323,10 @@ inline Document& HTMLConstructionSite::ownerDocumentForCurrentNode()
     return currentNode()->document();
 }
 
-PassRefPtr<HTMLElement> HTMLConstructionSite::createHTMLElement(AtomicHTMLToken* token)
+PassRefPtr<Element> HTMLConstructionSite::createElement(AtomicHTMLToken* token)
 {
     Document& document = ownerDocumentForCurrentNode();
-    RefPtr<HTMLElement> element = HTMLElementFactory::createHTMLElement(token->name(), document, true);
+    RefPtr<Element> element = HTMLElementFactory::createElement(token->name(), document, true);
     setAttributes(element.get(), token);
     return element.release();
 }
