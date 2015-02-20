@@ -23,7 +23,6 @@
 #define SKY_ENGINE_CORE_RENDERING_RENDERVIEW_H_
 
 #include "sky/engine/core/frame/FrameView.h"
-#include "sky/engine/core/rendering/LayoutState.h"
 #include "sky/engine/core/rendering/RenderBlockFlow.h"
 #include "sky/engine/core/rendering/RenderIFrame.h"
 #include "sky/engine/wtf/OwnPtr.h"
@@ -82,8 +81,6 @@ public:
 
     virtual LayoutRect viewRect() const override;
 
-    LayoutState* layoutState() const { return m_layoutState; }
-
     IntRect unscaledDocumentRect() const;
     LayoutRect backgroundRect(RenderBox* backgroundRenderer) const;
 
@@ -91,9 +88,6 @@ public:
 
     double layoutViewportWidth() const;
     double layoutViewportHeight() const;
-
-    void pushLayoutState(LayoutState&);
-    void popLayoutState();
 
     void addIFrame(RenderIFrame* iframe);
     void removeIFrame(RenderIFrame* iframe);
@@ -103,11 +97,6 @@ private:
     virtual void mapLocalToContainer(const RenderLayerModelObject* paintInvalidationContainer, TransformState&, MapCoordinatesFlags = ApplyContainerFlip) const override;
     virtual const RenderObject* pushMappingToContainer(const RenderLayerModelObject* ancestorToStopAt, RenderGeometryMap&) const override;
     virtual void mapAbsoluteToLocalPoint(MapCoordinatesFlags, TransformState&) const override;
-
-    void layoutContent();
-#if ENABLE(ASSERT)
-    void checkLayoutState();
-#endif
 
     void positionDialog(RenderBox*);
     void positionDialogs();
@@ -119,8 +108,6 @@ private:
 
     int m_selectionStartPos;
     int m_selectionEndPos;
-
-    LayoutState* m_layoutState;
 
     unsigned m_renderCounterCount;
 

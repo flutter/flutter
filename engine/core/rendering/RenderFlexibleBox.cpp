@@ -224,26 +224,22 @@ void RenderFlexibleBox::layout()
     LayoutUnit previousHeight = logicalHeight();
     setLogicalHeight(borderAndPaddingLogicalHeight());
 
-    {
-        LayoutState state(*this, locationOffset());
+    m_numberOfInFlowChildrenOnFirstLine = -1;
 
-        m_numberOfInFlowChildrenOnFirstLine = -1;
+    prepareOrderIteratorAndMargins();
 
-        prepareOrderIteratorAndMargins();
+    ChildFrameRects oldChildRects;
+    appendChildFrameRects(oldChildRects);
 
-        ChildFrameRects oldChildRects;
-        appendChildFrameRects(oldChildRects);
+    layoutFlexItems(relayoutChildren);
 
-        layoutFlexItems(relayoutChildren);
+    if (logicalHeight() != previousHeight)
+        relayoutChildren = true;
 
-        if (logicalHeight() != previousHeight)
-            relayoutChildren = true;
+    layoutPositionedObjects(relayoutChildren);
 
-        layoutPositionedObjects(relayoutChildren);
-
-        // FIXME: css3/flexbox/repaint-rtl-column.html seems to issue paint invalidations for more overflow than it needs to.
-        computeOverflow(clientLogicalBottomAfterRepositioning());
-    }
+    // FIXME: css3/flexbox/repaint-rtl-column.html seems to issue paint invalidations for more overflow than it needs to.
+    computeOverflow(clientLogicalBottomAfterRepositioning());
 
     updateLayerTransformAfterLayout();
 

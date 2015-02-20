@@ -261,7 +261,7 @@ bool RenderBlock::widthAvailableToChildrenHasChanged()
 
     // If we use border-box sizing, have percentage padding, and our parent has changed width then the width available to our children has changed even
     // though our own width has remained the same.
-    widthAvailableToChildrenHasChanged |= style()->boxSizing() == BORDER_BOX && needsPreferredWidthsRecalculation() && view()->layoutState()->containingBlockLogicalWidthChanged();
+    widthAvailableToChildrenHasChanged |= style()->boxSizing() == BORDER_BOX && needsPreferredWidthsRecalculation();
 
     return widthAvailableToChildrenHasChanged;
 }
@@ -350,31 +350,25 @@ bool RenderBlock::simplifiedLayout()
     if (!posChildNeedsLayout() && !(needsSimplifiedNormalFlowLayout() || needsPositionedMovementLayout()))
         return false;
 
+    if (needsPositionedMovementLayout() && !tryLayoutDoingPositionedMovementOnly())
+        return false;
 
-    {
-        // LayoutState needs this deliberate scope to pop before paint invalidation.
-        LayoutState state(*this, locationOffset());
+    // Lay out positioned descendants or objects that just need to recompute overflow.
+    if (needsSimplifiedNormalFlowLayout())
+        simplifiedNormalFlowLayout();
 
-        if (needsPositionedMovementLayout() && !tryLayoutDoingPositionedMovementOnly())
-            return false;
+    if (posChildNeedsLayout() || needsPositionedMovementLayout())
+        layoutPositionedObjects(false, needsPositionedMovementLayout() ? ForcedLayoutAfterContainingBlockMoved : DefaultLayout);
 
-        // Lay out positioned descendants or objects that just need to recompute overflow.
-        if (needsSimplifiedNormalFlowLayout())
-            simplifiedNormalFlowLayout();
-
-        if (posChildNeedsLayout() || needsPositionedMovementLayout())
-            layoutPositionedObjects(false, needsPositionedMovementLayout() ? ForcedLayoutAfterContainingBlockMoved : DefaultLayout);
-
-        // Recompute our overflow information.
-        // FIXME: We could do better here by computing a temporary overflow object from layoutPositionedObjects and only
-        // updating our overflow if we either used to have overflow or if the new temporary object has overflow.
-        // For now just always recompute overflow. This is no worse performance-wise than the old code that called rightmostPosition and
-        // lowestPosition on every relayout so it's not a regression.
-        // computeOverflow expects the bottom edge before we clamp our height. Since this information isn't available during
-        // simplifiedLayout, we cache the value in m_overflow.
-        LayoutUnit oldClientAfterEdge = hasRenderOverflow() ? m_overflow->layoutClientAfterEdge() : clientLogicalBottom();
-        computeOverflow(oldClientAfterEdge, true);
-    }
+    // Recompute our overflow information.
+    // FIXME: We could do better here by computing a temporary overflow object from layoutPositionedObjects and only
+    // updating our overflow if we either used to have overflow or if the new temporary object has overflow.
+    // For now just always recompute overflow. This is no worse performance-wise than the old code that called rightmostPosition and
+    // lowestPosition on every relayout so it's not a regression.
+    // computeOverflow expects the bottom edge before we clamp our height. Since this information isn't available during
+    // simplifiedLayout, we cache the value in m_overflow.
+    LayoutUnit oldClientAfterEdge = hasRenderOverflow() ? m_overflow->layoutClientAfterEdge() : clientLogicalBottom();
+    computeOverflow(oldClientAfterEdge, true);
 
     updateLayerTransformAfterLayout();
 

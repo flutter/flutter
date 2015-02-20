@@ -117,8 +117,6 @@ public:
 protected:
     virtual void layoutChildren(bool relayoutChildren, SubtreeLayoutScope&, LayoutUnit beforeEdge, LayoutUnit afterEdge);
 
-    virtual bool updateLogicalWidthAndColumnWidth() override;
-
     void determineLogicalLeftPositionForChild(RenderBox* child);
 
 private:

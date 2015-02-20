@@ -1001,8 +1001,6 @@ sky_core_files = [
   "rendering/InlineTextBox.cpp",
   "rendering/InlineTextBox.h",
   "rendering/LayerPaintingInfo.h",
-  "rendering/LayoutState.cpp",
-  "rendering/LayoutState.h",
   "rendering/line/BreakingContext.cpp",
   "rendering/line/BreakingContextInlineHeaders.h",
   "rendering/line/LineBreaker.cpp",

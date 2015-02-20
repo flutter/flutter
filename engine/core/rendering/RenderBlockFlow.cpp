@@ -60,11 +60,6 @@ RenderBlockFlow* RenderBlockFlow::createAnonymous(Document* document)
     return renderer;
 }
 
-bool RenderBlockFlow::updateLogicalWidthAndColumnWidth()
-{
-    return RenderBlock::updateLogicalWidthAndColumnWidth();
-}
-
 void RenderBlockFlow::layout()
 {
     ASSERT(needsLayout());
@@ -87,8 +82,6 @@ inline void RenderBlockFlow::layoutBlockFlow(SubtreeLayoutScope& layoutScope)
     LayoutUnit oldLeft = logicalLeft();
     bool logicalWidthChanged = updateLogicalWidthAndColumnWidth();
     bool relayoutChildren = logicalWidthChanged;
-
-    LayoutState state(*this, locationOffset(), logicalWidthChanged);
 
     LayoutUnit beforeEdge = borderBefore() + paddingBefore();
     LayoutUnit afterEdge = borderAfter() + paddingAfter();

@@ -231,10 +231,6 @@ void FrameView::performLayout(RenderObject* rootForThisLayout, bool inSubtreeLay
     // performLayout is the actual guts of layout().
     // FIXME: The 300 other lines in layout() probably belong in other helper functions
     // so that a single human could understand what layout() is actually doing.
-
-    LayoutState layoutState(*rootForThisLayout);
-
-    // FIXME (crbug.com/256657): Do not do two layouts for text autosizing.
     rootForThisLayout->layout();
 
     lifecycle().advanceTo(DocumentLifecycle::AfterPerformLayout);

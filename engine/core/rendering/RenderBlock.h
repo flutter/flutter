@@ -288,15 +288,12 @@ private:
     Position positionForBox(InlineBox*, bool start = true) const;
     PositionWithAffinity positionForPointWithInlineChildren(const LayoutPoint&);
 
-    // End helper functions and structs used by layoutChildren.
-
     void removeFromGlobalMaps();
     bool widthAvailableToChildrenHasChanged();
 
 protected:
-    virtual bool updateLogicalWidthAndColumnWidth();
+    bool updateLogicalWidthAndColumnWidth();
 
-protected:
     RenderObjectChildList m_children;
     RenderLineBoxList m_lineBoxes;   // All of the root line boxes created for this block flow.  For example, <div>Hello<br>world.</div> will have two total lines for the <div>.
 

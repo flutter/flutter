@@ -43,7 +43,6 @@ RenderView::RenderView(Document* document)
     , m_selectionEnd(nullptr)
     , m_selectionStartPos(-1)
     , m_selectionEndPos(-1)
-    , m_layoutState(0)
     , m_renderCounterCount(0)
     , m_hitTestCount(0)
 {
@@ -127,24 +126,6 @@ bool RenderView::isChildAllowed(RenderObject* child, RenderStyle*) const
     return child->isBox();
 }
 
-void RenderView::layoutContent()
-{
-    ASSERT(needsLayout());
-
-    RenderBlockFlow::layout();
-
-#if ENABLE(ASSERT)
-    checkLayoutState();
-#endif
-}
-
-#if ENABLE(ASSERT)
-void RenderView::checkLayoutState()
-{
-    ASSERT(!m_layoutState->next());
-}
-#endif
-
 void RenderView::layout()
 {
     SubtreeLayoutScope layoutScope(*this);
@@ -161,17 +142,10 @@ void RenderView::layout()
         }
     }
 
-    ASSERT(!m_layoutState);
     if (!needsLayout())
         return;
 
-    LayoutState rootLayoutState(*this);
-
-    layoutContent();
-
-#if ENABLE(ASSERT)
-    checkLayoutState();
-#endif
+    RenderBlockFlow::layout();
     clearNeedsLayout();
 }
 
@@ -405,17 +379,6 @@ int RenderView::viewLogicalHeight() const
 LayoutUnit RenderView::viewLogicalHeightForPercentages() const
 {
     return viewLogicalHeight();
-}
-
-void RenderView::pushLayoutState(LayoutState& layoutState)
-{
-    m_layoutState = &layoutState;
-}
-
-void RenderView::popLayoutState()
-{
-    ASSERT(m_layoutState);
-    m_layoutState = m_layoutState->next();
 }
 
 // FIXME(sky): remove

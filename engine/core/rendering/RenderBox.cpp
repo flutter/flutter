@@ -139,7 +139,6 @@ void RenderBox::layout()
         return;
     }
 
-    LayoutState state(*this, locationOffset());
     while (child) {
         child->layoutIfNeeded();
         ASSERT(!child->needsLayout());
