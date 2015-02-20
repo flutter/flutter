@@ -44,15 +44,28 @@ void NotifyTestComplete(Dart_NativeArguments args) {
   GetInternals()->NotifyTestComplete(StdStringFromDart(test_result));
 }
 
-void PassShellProxyHandle(Dart_NativeArguments args) {
-  Dart_SetIntegerReturnValue(args, GetInternals()->PassShellProxyHandle().value());
+void TakeShellProxyHandle(Dart_NativeArguments args) {
+  Dart_SetIntegerReturnValue(args,
+      GetInternals()->TakeShellProxyHandle().value());
+}
+
+void TakeServicesProvidedToEmbedder(Dart_NativeArguments args) {
+  Dart_SetIntegerReturnValue(args,
+      GetInternals()->TakeServicesProvidedToEmbedder().value());
+}
+
+void TakeServicesProvidedByEmbedder(Dart_NativeArguments args) {
+  Dart_SetIntegerReturnValue(args,
+      GetInternals()->TakeServicesProvidedByEmbedder().value());
 }
 
 const DartBuiltin::Natives kNativeFunctions[] = {
   {"renderTreeAsText", RenderTreeAsText, 0},
   {"contentAsText", ContentAsText, 0},
   {"notifyTestComplete", NotifyTestComplete, 1},
-  {"passShellProxyHandle", PassShellProxyHandle, 0},
+  {"takeShellProxyHandle", TakeShellProxyHandle, 0},
+  {"takeServicesProvidedToEmbedder", TakeServicesProvidedToEmbedder, 0},
+  {"takeServicesProvidedByEmbedder", TakeServicesProvidedByEmbedder, 0},
 };
 
 const DartBuiltin& GetBuiltin() {
@@ -76,7 +89,9 @@ const char kLibrarySource[] = R"DART(
 String renderTreeAsText() native "renderTreeAsText";
 String contentAsText() native "contentAsText";
 void notifyTestComplete(String test_result) native "notifyTestComplete";
-int passShellProxyHandle() native "passShellProxyHandle";
+int takeShellProxyHandle() native "takeShellProxyHandle";
+int takeServicesProvidedToEmbedder() native "takeServicesProvidedToEmbedder";
+int takeServicesProvidedByEmbedder() native "takeServicesProvidedByEmbedder";
 )DART";
 
 }  // namespace
@@ -95,8 +110,7 @@ void Internals::Create(Dart_Isolate isolate, DocumentView* document_view) {
 Internals::Internals(DocumentView* document_view)
   : document_view_(document_view->GetWeakPtr()),
     shell_binding_(this) {
-  if (document_view_->imported_services())
-    mojo::ConnectToService(document_view_->imported_services(), &test_harness_);
+  test_harness_ = document_view_->TakeTestHarness();
 }
 
 Internals::~Internals() {
@@ -126,21 +140,22 @@ void Internals::NotifyTestComplete(const std::string& test_result) {
   }
 }
 
-mojo::Handle Internals::ConnectToEmbedderService(
-    const std::string& interface_name) {
-  if (!document_view_ || !document_view_->imported_services())
+mojo::Handle Internals::TakeServicesProvidedToEmbedder() {
+  if (!document_view_)
     return mojo::Handle();
+  return document_view_->TakeServicesProvidedToEmbedder().release();
+}
 
-  mojo::MessagePipe pipe;
-  document_view_->imported_services()->ConnectToService(interface_name,
-                                                        pipe.handle1.Pass());
-  return pipe.handle0.release();
+mojo::Handle Internals::TakeServicesProvidedByEmbedder() {
+  if (!document_view_)
+    return mojo::Handle();
+  return document_view_->TakeServicesProvidedByEmbedder().release();
 }
 
 // Returns a MessagePipe handle that's connected to this Shell. The caller
 // owns the handle and is expected to use it to create the JS Application for
 // the DocumentView.
-mojo::Handle Internals::PassShellProxyHandle() {
+mojo::Handle Internals::TakeShellProxyHandle() {
   mojo::ShellPtr shell;
   if (!shell_binding_.is_bound())
     shell_binding_.Bind(GetProxy(&shell));

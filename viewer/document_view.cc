@@ -127,11 +127,16 @@ base::WeakPtr<DocumentView> DocumentView::GetWeakPtr() {
 
 void DocumentView::OnEmbed(
     mojo::View* root,
-    mojo::InterfaceRequest<mojo::ServiceProvider> services,
-    mojo::ServiceProviderPtr exposed_services) {
+    mojo::InterfaceRequest<mojo::ServiceProvider> services_provided_to_embedder,
+    mojo::ServiceProviderPtr services_provided_by_embedder) {
   root_ = root;
-  imported_services_ = exposed_services.Pass();
-  navigator_host_.set_service_provider(imported_services_.get());
+
+  mojo::ConnectToService(services_provided_by_embedder.get(), &navigator_host_);
+  if (RuntimeFlags::Get().testing())
+    mojo::ConnectToService(services_provided_by_embedder.get(), &test_harness_);
+
+  services_provided_to_embedder_ = services_provided_to_embedder.Pass();
+  services_provided_by_embedder_ = services_provided_by_embedder.Pass();
 
   Load(response_.Pass());
 
@@ -176,6 +181,18 @@ void DocumentView::GetPixelsForTesting(std::vector<unsigned char>* pixels) {
   DCHECK(RuntimeFlags::Get().testing()) << "Requires testing runtime flag";
   DCHECK(root_layer_) << "The root layer owns the rasterizer";
   return bitmap_rasterizer_->GetPixelsForTesting(pixels);
+}
+
+TestHarnessPtr DocumentView::TakeTestHarness() {
+  return test_harness_.Pass();
+}
+
+mojo::ScopedMessagePipeHandle DocumentView::TakeServicesProvidedToEmbedder() {
+  return services_provided_to_embedder_.PassMessagePipe();
+}
+
+mojo::ScopedMessagePipeHandle DocumentView::TakeServicesProvidedByEmbedder() {
+  return services_provided_by_embedder_.PassMessagePipe();
 }
 
 mojo::Shell* DocumentView::GetShell() {

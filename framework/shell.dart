@@ -10,7 +10,7 @@ import "package:mojo/public/interfaces/application/service_provider.mojom.dart";
 import "package:mojo/public/interfaces/application/shell.mojom.dart";
 
 final ShellProxy _shell = new ShellProxy.fromHandle(
-    new core.MojoHandle(internals.passShellProxyHandle()));
+    new core.MojoHandle(internals.takeShellProxyHandle()));
 
 ApplicationConnection connectToApplication(String url) {
   var serviceProviderProxy = new ServiceProviderProxy.unbound();

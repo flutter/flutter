@@ -118,7 +118,7 @@ class InspectorBackend extends inspector.InspectorBackend.stubClass {
 }
 
 (function() {
-  var shellHandle = internals.passShellProxyHandle();
+  var shellHandle = internals.takeShellProxyHandle();
   var shellProxy = connection.bindHandleToProxy(shellHandle, shellMojom.Shell);
   var myShell = new shell.Shell(shellProxy)
   var tracingApp = myShell.connectToApplication("mojo:sky_inspector_server");

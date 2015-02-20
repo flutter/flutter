@@ -27,12 +27,13 @@ class Internals : public base::SupportsUserData::Data,
       mojo::InterfaceRequest<mojo::ServiceProvider> services,
       mojo::ServiceProviderPtr exposed_services) override;
 
-  mojo::Handle PassShellProxyHandle();
   std::string RenderTreeAsText();
   std::string ContentAsText();
   void NotifyTestComplete(const std::string& test_result);
 
-  mojo::Handle ConnectToEmbedderService(const std::string& interface_name);
+  mojo::Handle TakeShellProxyHandle();
+  mojo::Handle TakeServicesProvidedToEmbedder();
+  mojo::Handle TakeServicesProvidedByEmbedder();
 
   mojo::Handle ConnectToService(
       const std::string& application_url, const std::string& interface_name);

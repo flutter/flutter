@@ -14,7 +14,7 @@ describe('Mojo network_service', function() {
   this.enableTimeouts(false);
 
   it('should be able to fetch text files', function(done) {
-    var shellHandle = internals.passShellProxyHandle();
+    var shellHandle = internals.takeShellProxyHandle();
     var shellProxy = connection.bindHandleToProxy(shellHandle, shellMojom.Shell);
     var shell = new Shell(shellProxy);
     var netService = shell.connectToService(

@@ -22,6 +22,7 @@
 #include "sky/engine/public/platform/ServiceProvider.h"
 #include "sky/engine/public/web/WebFrameClient.h"
 #include "sky/engine/public/web/WebViewClient.h"
+#include "sky/services/testing/test_harness.mojom.h"
 #include "ui/events/gestures/gesture_types.h"
 
 namespace mojo {
@@ -53,9 +54,6 @@ class DocumentView : public blink::ServiceProvider,
   base::WeakPtr<DocumentView> GetWeakPtr();
 
   blink::WebView* web_view() const { return web_view_; }
-  mojo::ServiceProvider* imported_services() const {
-    return imported_services_.get();
-  }
 
   mojo::Shell* shell() const { return shell_; }
 
@@ -69,6 +67,10 @@ class DocumentView : public blink::ServiceProvider,
   void StartDebuggerInspectorBackend();
 
   void GetPixelsForTesting(std::vector<unsigned char>* pixels);
+
+  TestHarnessPtr TakeTestHarness();
+  mojo::ScopedMessagePipeHandle TakeServicesProvidedToEmbedder();
+  mojo::ScopedMessagePipeHandle TakeServicesProvidedByEmbedder();
 
  private:
   // WebViewClient methods:
@@ -122,9 +124,11 @@ class DocumentView : public blink::ServiceProvider,
 
   mojo::URLResponsePtr response_;
   mojo::ServiceProviderImpl exported_services_;
-  mojo::ServiceProviderPtr imported_services_;
+  mojo::InterfaceRequest<mojo::ServiceProvider> services_provided_to_embedder_;
+  mojo::ServiceProviderPtr services_provided_by_embedder_;
   mojo::Shell* shell_;
-  mojo::LazyInterfacePtr<mojo::NavigatorHost> navigator_host_;
+  TestHarnessPtr test_harness_;
+  mojo::NavigatorHostPtr navigator_host_;
   blink::WebView* web_view_;
   mojo::View* root_;
   mojo::ViewManagerClientFactory view_manager_client_factory_;
