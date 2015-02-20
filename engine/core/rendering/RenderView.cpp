@@ -91,7 +91,7 @@ bool RenderView::hitTest(const HitTestRequest& request, const HitTestLocation& l
     if (!request.ignoreClipping())
         hitTestArea.intersect(frame()->view()->visibleContentRect());
 
-    bool insideLayer = layer()->hitTestLayer(layer(), 0, request, result, hitTestArea, location);
+    bool insideLayer = hitTestLayer(layer(), 0, request, result, hitTestArea, location);
     if (!insideLayer) {
         // TODO(ojan): Is this code needed for Sky?
 

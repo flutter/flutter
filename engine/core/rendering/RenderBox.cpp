@@ -39,6 +39,7 @@
 #include "sky/engine/core/page/Page.h"
 #include "sky/engine/core/rendering/FilterEffectRenderer.h"
 #include "sky/engine/core/rendering/HitTestResult.h"
+#include "sky/engine/core/rendering/HitTestingTransformState.h"
 #include "sky/engine/core/rendering/PaintInfo.h"
 #include "sky/engine/core/rendering/RenderFlexibleBox.h"
 #include "sky/engine/core/rendering/RenderGeometryMap.h"
@@ -383,9 +384,261 @@ bool RenderBox::nodeAtPoint(const HitTestRequest& request, HitTestResult& result
     return false;
 }
 
+PassRefPtr<HitTestingTransformState> RenderBox::createLocalTransformState(
+    RenderLayer* rootLayer, RenderLayer* containerLayer,
+    const LayoutRect& hitTestRect, const HitTestLocation& hitTestLocation,
+    const HitTestingTransformState* containerTransformState) const
+{
+    RefPtr<HitTestingTransformState> transformState;
+    LayoutPoint offset;
+    if (containerTransformState) {
+        // If we're already computing transform state, then it's relative to the container (which we know is non-null).
+        transformState = HitTestingTransformState::create(*containerTransformState);
+        layer()->convertToLayerCoords(containerLayer, offset);
+    } else {
+        // If this is the first time we need to make transform state, then base it off of hitTestLocation,
+        // which is relative to rootLayer.
+        transformState = HitTestingTransformState::create(hitTestLocation.transformedPoint(), hitTestLocation.transformedRect(), FloatQuad(hitTestRect));
+        layer()->convertToLayerCoords(rootLayer, offset);
+    }
+
+    RenderObject* containerRenderer = containerLayer ? containerLayer->renderer() : 0;
+    if (shouldUseTransformFromContainer(containerRenderer)) {
+        TransformationMatrix containerTransform;
+        getTransformFromContainer(containerRenderer, toLayoutSize(offset), containerTransform);
+        transformState->applyTransform(containerTransform, HitTestingTransformState::AccumulateTransform);
+    } else {
+        transformState->translate(offset.x(), offset.y(), HitTestingTransformState::AccumulateTransform);
+    }
+
+    return transformState;
+}
+
+// Compute the z-offset of the point in the transformState.
+// This is effectively projecting a ray normal to the plane of ancestor, finding where that
+// ray intersects target, and computing the z delta between those two points.
+static double computeZOffset(const HitTestingTransformState& transformState)
+{
+    // We got an affine transform, so no z-offset
+    if (transformState.m_accumulatedTransform.isAffine())
+        return 0;
+
+    // Flatten the point into the target plane
+    FloatPoint targetPoint = transformState.mappedPoint();
+
+    // Now map the point back through the transform, which computes Z.
+    FloatPoint3D backmappedPoint = transformState.m_accumulatedTransform.mapPoint(FloatPoint3D(targetPoint));
+    return backmappedPoint.z();
+}
+
+static bool isHitCandidate(bool canDepthSort, double* zOffset, const HitTestingTransformState* transformState)
+{
+    // The hit layer is depth-sorting with other layers, so just say that it was hit.
+    if (canDepthSort)
+        return true;
+
+    // We need to look at z-depth to decide if this layer was hit.
+    if (zOffset) {
+        ASSERT(transformState);
+        // This is actually computing our z, but that's OK because the hitLayer is coplanar with us.
+        double childZOffset = computeZOffset(*transformState);
+        if (childZOffset > *zOffset) {
+            *zOffset = childZOffset;
+            return true;
+        }
+        return false;
+    }
+
+    return true;
+}
+
+static inline bool reverseCompareZIndex(RenderLayerModelObject* first, RenderLayerModelObject* second)
+{
+    return first->style()->zIndex() > second->style()->zIndex();
+}
+
+// hitTestLocation and hitTestRect are relative to rootLayer.
+// A 'flattening' layer is one preserves3D() == false.
+// transformState.m_accumulatedTransform holds the transform from the containing flattening layer.
+// transformState.m_lastPlanarPoint is the hitTestLocation in the plane of the containing flattening layer.
+// transformState.m_lastPlanarQuad is the hitTestRect as a quad in the plane of the containing flattening layer.
+//
+// If zOffset is non-null (which indicates that the caller wants z offset information),
+//  *zOffset on return is the z offset of the hit point relative to the containing flattening layer.
+bool RenderBox::hitTestLayer(RenderLayer* rootLayer, RenderLayer* containerLayer, const HitTestRequest& request, HitTestResult& result,
+    const LayoutRect& hitTestRect, const HitTestLocation& hitTestLocation,
+    const HitTestingTransformState* transformState, double* zOffset)
+{
+    ASSERT(layer()->isSelfPaintingLayer());
+
+    // The natural thing would be to keep HitTestingTransformState on the stack, but it's big, so we heap-allocate.
+    RefPtr<HitTestingTransformState> localTransformState;
+
+    LayoutRect localHitTestRect = hitTestRect;
+    HitTestLocation localHitTestLocation = hitTestLocation;
+
+    // We need transform state for the first time, or to offset the container state, or to accumulate the new transform.
+    if (layer()->transform() || transformState || layer()->has3DTransformedDescendant() || layer()->preserves3D())
+        localTransformState = createLocalTransformState(rootLayer, containerLayer, localHitTestRect, localHitTestLocation, transformState);
+
+    // Apply a transform if we have one.
+    if (layer()->transform()) {
+        // Make sure the parent's clip rects have been calculated.
+        if (parent()) {
+            ClipRect clipRect = layer()->clipper().backgroundClipRect(ClipRectsContext(rootLayer, RootRelativeClipRects));
+            // Go ahead and test the enclosing clip now.
+            if (!clipRect.intersects(localHitTestLocation))
+                return 0;
+        }
+
+        // If the transform can't be inverted, then don't hit test this layer at all.
+        if (!localTransformState->m_accumulatedTransform.isInvertible())
+            return 0;
+
+        // Compute the point and the hit test rect in the coords of this layer by using the values
+        // from the transformState, which store the point and quad in the coords of the last flattened
+        // layer, and the accumulated transform which lets up map through preserve-3d layers.
+        //
+        // We can't just map hitTestLocation and hitTestRect because they may have been flattened (losing z)
+        // by our container.
+        FloatPoint localPoint = localTransformState->mappedPoint();
+        FloatQuad localPointQuad = localTransformState->mappedQuad();
+        localHitTestRect = localTransformState->boundsOfMappedArea();
+        if (localHitTestLocation.isRectBasedTest())
+            localHitTestLocation = HitTestLocation(localPoint, localPointQuad);
+        else
+            localHitTestLocation = HitTestLocation(localPoint);
+
+        // Now do a hit test with the root layer shifted to be us.
+        rootLayer = layer();
+    }
+
+    // Ensure our lists and 3d status are up-to-date.
+    layer()->stackingNode()->updateLayerListsIfNeeded();
+    layer()->update3DTransformedDescendantStatus();
+
+    // Check for hit test on backface if backface-visibility is 'hidden'
+    if (localTransformState && style()->backfaceVisibility() == BackfaceVisibilityHidden) {
+        TransformationMatrix invertedMatrix = localTransformState->m_accumulatedTransform.inverse();
+        // If the z-vector of the matrix is negative, the back is facing towards the viewer.
+        if (invertedMatrix.m33() < 0)
+            return 0;
+    }
+
+    RefPtr<HitTestingTransformState> unflattenedTransformState = localTransformState;
+    if (localTransformState && !layer()->preserves3D()) {
+        // Keep a copy of the pre-flattening state, for computing z-offsets for the container
+        unflattenedTransformState = HitTestingTransformState::create(*localTransformState);
+        // This layer is flattening, so flatten the state passed to descendants.
+        localTransformState->flatten();
+    }
+
+    // The following are used for keeping track of the z-depth of the hit point of 3d-transformed
+    // descendants.
+    double localZOffset = -std::numeric_limits<double>::infinity();
+    double* zOffsetForDescendantsPtr = 0;
+    double* zOffsetForContentsPtr = 0;
+
+    bool depthSortDescendants = false;
+    if (layer()->preserves3D()) {
+        depthSortDescendants = true;
+        // Our layers can depth-test with our container, so share the z depth pointer with the container, if it passed one down.
+        zOffsetForDescendantsPtr = zOffset ? zOffset : &localZOffset;
+        zOffsetForContentsPtr = zOffset ? zOffset : &localZOffset;
+    } else if (zOffset) {
+        zOffsetForDescendantsPtr = 0;
+        // Container needs us to give back a z offset for the hit layer.
+        zOffsetForContentsPtr = zOffset;
+    }
+
+    Vector<RenderBox*> layers;
+    collectSelfPaintingLayers(layers);
+    std::stable_sort(layers.begin(), layers.end(), reverseCompareZIndex);
+
+    bool hitLayer = false;
+    for (auto& currentLayer : layers) {
+        HitTestResult tempResult(result.hitTestLocation());
+        bool localHitLayer = currentLayer->hitTestLayer(rootLayer, layer(), request, tempResult,
+            hitTestRect, hitTestLocation, localTransformState.get(), zOffsetForDescendantsPtr);
+
+        // If it a rect-based test, we can safely append the temporary result since it might had hit
+        // nodes but not necesserily had hitLayer set.
+        if (result.isRectBasedTest())
+            result.append(tempResult);
+
+        if (localHitLayer && isHitCandidate(depthSortDescendants, zOffset, unflattenedTransformState.get())) {
+            hitLayer = localHitLayer;
+            if (!result.isRectBasedTest())
+                result = tempResult;
+            if (!depthSortDescendants)
+                return true;
+        }
+    }
+
+    LayoutRect layerBounds;
+    // FIXME(sky): Remove foregroundRect. It's unused.
+    ClipRect contentRect, foregroundRect;
+    ClipRectsContext clipRectsContext(rootLayer, RootRelativeClipRects);
+    layer()->clipper().calculateRects(clipRectsContext, localHitTestRect, layerBounds, contentRect, foregroundRect);
+
+    // Next we want to see if the mouse pos is inside the child RenderObjects of the layer.
+    if (contentRect.intersects(localHitTestLocation)) {
+        // Hit test with a temporary HitTestResult, because we only want to commit to 'result' if we know we're frontmost.
+        HitTestResult tempResult(result.hitTestLocation());
+        if (hitTestNonLayerDescendants(request, tempResult, layerBounds, localHitTestLocation)
+            && isHitCandidate(false, zOffsetForContentsPtr, unflattenedTransformState.get())) {
+            if (result.isRectBasedTest())
+                result.append(tempResult);
+            else
+                result = tempResult;
+            if (!depthSortDescendants)
+                return true;
+            // Foreground can depth-sort with descendant layers, so keep this as a candidate.
+            hitLayer = true;
+        } else if (result.isRectBasedTest()) {
+            result.append(tempResult);
+        }
+    }
+
+    return hitLayer;
+}
+
+bool RenderBox::hitTestNonLayerDescendants(const HitTestRequest& request, HitTestResult& result,
+    const LayoutRect& layerBounds, const HitTestLocation& hitTestLocation)
+{
+    if (!hitTest(request, result, hitTestLocation, toLayoutPoint(layerBounds.location() - location()))) {
+        // It's wrong to set innerNode, but then claim that you didn't hit anything, unless it is
+        // a rect-based test.
+        ASSERT(!result.innerNode() || (result.isRectBasedTest() && result.rectBasedTestResult().size()));
+        return false;
+    }
+
+    // For positioned generated content, we might still not have a
+    // node by the time we get to the layer level, since none of
+    // the content in the layer has an element. So just walk up
+    // the tree.
+    if (!result.innerNode() || !result.innerNonSharedNode()) {
+        Node* enclosingElement = 0;
+        for (RenderObject* r = this; r; r = r->parent()) {
+            if (Node* element = r->node()) {
+                enclosingElement = element;
+                break;
+            }
+        }
+        ASSERT(enclosingElement);
+
+        if (!result.innerNode())
+            result.setInnerNode(enclosingElement);
+        if (!result.innerNonSharedNode())
+            result.setInnerNonSharedNode(enclosingElement);
+    }
+
+    return true;
+}
+
 // --------------------- painting stuff -------------------------------
 
-static inline bool compareZIndex(RenderBox* first, RenderBox* second)
+static inline bool forwardCompareZIndex(RenderBox* first, RenderBox* second)
 {
     return first->style()->zIndex() < second->style()->zIndex();
 }
@@ -564,7 +817,7 @@ void RenderBox::paintLayerContents(GraphicsContext* context, const LayerPainting
             PaintInfo paintInfo(context, pixelSnappedIntRect(contentRect.rect()), localPaintingInfo.rootLayer->renderer());
             paint(paintInfo, layerLocation, layers);
 
-            std::stable_sort(layers.begin(), layers.end(), compareZIndex);
+            std::stable_sort(layers.begin(), layers.end(), forwardCompareZIndex);
             for (auto& box : layers) {
                 box->paintLayer(context, paintingInfo.rootLayer, rect);
             }

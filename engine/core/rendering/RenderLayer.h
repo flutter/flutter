@@ -188,6 +188,10 @@ public:
     bool preserves3D() const { return renderer()->style()->transformStyle3D() == TransformStyle3DPreserve3D; }
     bool has3DTransform() const { return m_transform && !m_transform->isAffine(); }
 
+    bool has3DTransformedDescendant() const { return m_has3DTransformedDescendant; }
+    // Both updates the status, and returns true if descendants of this have 3d.
+    bool update3DTransformedDescendantStatus();
+
     // FIXME: reflections should force transform-style to be flat in the style: https://bugs.webkit.org/show_bug.cgi?id=106959
     bool shouldPreserve3D() const { return renderer()->style()->transformStyle3D() == TransformStyle3DPreserve3D; }
 
@@ -221,8 +225,6 @@ public:
 
     void updateFilters(const RenderStyle* oldStyle, const RenderStyle* newStyle);
 
-    Node* enclosingElement() const;
-
     RenderLayerClipper& clipper() { return m_clipper; }
     const RenderLayerClipper& clipper() const { return m_clipper; }
 
@@ -238,10 +240,6 @@ public:
 
     void clipToRect(const LayerPaintingInfo&, GraphicsContext*, const ClipRect&, BorderRadiusClippingRule = IncludeSelfForBorderRadius);
     void restoreClip(GraphicsContext*, const LayoutRect& paintDirtyRect, const ClipRect&);
-
-    bool hitTestLayer(RenderLayer* rootLayer, RenderLayer* containerLayer, const HitTestRequest& request, HitTestResult& result,
-                      const LayoutRect& hitTestRect, const HitTestLocation&,
-                      const HitTestingTransformState* transformState = 0, double* zOffset = 0);
 
 private:
     // TODO(ojan): Get rid of this. These are basically layer-tree-only paint phases.
@@ -272,18 +270,6 @@ private:
 
     LayoutPoint renderBoxLocation() const { return renderer()->isBox() ? toRenderBox(renderer())->location() : LayoutPoint(); }
 
-    bool hitTestChildren(ChildrenIteration, RenderLayer* rootLayer, const HitTestRequest&, HitTestResult&,
-                         const LayoutRect& hitTestRect, const HitTestLocation&,
-                         const HitTestingTransformState* transformState, double* zOffsetForDescendants, double* zOffset,
-                         const HitTestingTransformState* unflattenedTransformState, bool depthSortDescendants);
-
-    PassRefPtr<HitTestingTransformState> createLocalTransformState(RenderLayer* rootLayer, RenderLayer* containerLayer,
-                            const LayoutRect& hitTestRect, const HitTestLocation&,
-                            const HitTestingTransformState* containerTransformState,
-                            const LayoutPoint& translationOffset = LayoutPoint()) const;
-
-    bool hitTestContents(const HitTestRequest&, HitTestResult&, const LayoutRect& layerBounds, const HitTestLocation&) const;
-
     bool shouldBeSelfPaintingLayer() const;
 
     // FIXME: We should only create the stacking node if needed.
@@ -293,8 +279,6 @@ private:
     void updateTransform(const RenderStyle* oldStyle, RenderStyle* newStyle);
 
     void dirty3DTransformedDescendantStatus();
-    // Both updates the status, and returns true if descendants of this have 3d.
-    bool update3DTransformedDescendantStatus();
 
     void updateOrRemoveFilterClients();
 

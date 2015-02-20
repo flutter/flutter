@@ -62,6 +62,21 @@ bool RenderLayerModelObject::hasSelfPaintingLayer() const
     return m_layer && m_layer->isSelfPaintingLayer();
 }
 
+void RenderLayerModelObject::collectSelfPaintingLayers(Vector<RenderBox*>& layers)
+{
+    for (RenderObject* child = slowFirstChild(); child; child = child->nextSibling()) {
+        if (child->isBox()) {
+            RenderBox* childBox = toRenderBox(child);
+            if (childBox->hasSelfPaintingLayer())
+                layers.append(childBox);
+            else
+                childBox->collectSelfPaintingLayers(layers);
+        } else if (child->isLayerModelObject()) {
+            toRenderLayerModelObject(child)->collectSelfPaintingLayers(layers);
+        }
+    }
+}
+
 void RenderLayerModelObject::willBeDestroyed()
 {
     RenderObject::willBeDestroyed();

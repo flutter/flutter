@@ -45,6 +45,7 @@ public:
     // This is the only way layers should ever be destroyed.
     void destroyLayer();
 
+    void collectSelfPaintingLayers(Vector<RenderBox*>& layers);
     bool hasSelfPaintingLayer() const;
     RenderLayer* layer() const { return m_layer.get(); }
 

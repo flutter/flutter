@@ -30,6 +30,7 @@ namespace blink {
 
 struct LayerPaintingInfo;
 struct PaintInfo;
+class HitTestingTransformState;
 class RenderBlockFlow;
 
 enum SizeType { MainOrPreferredSize, MinSize, MaxSize };
@@ -268,6 +269,11 @@ public:
 
     virtual void absoluteQuads(Vector<FloatQuad>&) const override;
 
+    bool hitTestLayer(RenderLayer* rootLayer, RenderLayer* containerLayer,
+        const HitTestRequest& request, HitTestResult& result,
+        const LayoutRect& hitTestRect, const HitTestLocation& hitTestLocation,
+        const HitTestingTransformState* transformState = 0, double* zOffset = 0);
+
     void paintLayer(GraphicsContext* context, RenderLayer* rootLayer, const IntRect& rect);
 
     virtual void layout() override;
@@ -467,6 +473,13 @@ protected:
     void updateIntrinsicContentLogicalHeight(LayoutUnit intrinsicContentLogicalHeight) const { m_intrinsicContentLogicalHeight = intrinsicContentLogicalHeight; }
 
 private:
+    PassRefPtr<HitTestingTransformState> createLocalTransformState(
+        RenderLayer* rootLayer, RenderLayer* containerLayer,
+        const LayoutRect& hitTestRect, const HitTestLocation& hitTestLocation,
+        const HitTestingTransformState* containerTransformState) const;
+    bool hitTestNonLayerDescendants(const HitTestRequest& request, HitTestResult& result,
+        const LayoutRect& layerBounds, const HitTestLocation& hitTestLocation);
+
     void paintLayerContents(GraphicsContext* context, const LayerPaintingInfo& paintingInfo, const IntRect& rect);
 
     void shrinkToFitWidth(const LayoutUnit availableSpace, const LayoutUnit logicalLeftValue, const LayoutUnit bordersPlusPadding, LogicalExtentComputedValues&) const;
