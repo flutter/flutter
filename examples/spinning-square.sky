@@ -21,7 +21,7 @@ void main() {
       timeBase = time;
     double delta = time - timeBase;
     int rotation = (delta / 10).floor();
-    square.style.setProperty("transform", 'rotate(${rotation}deg)');
+    square.style["transform"] = "rotate(${rotation}deg)";
     window.requestAnimationFrame(animate);
   }
 
