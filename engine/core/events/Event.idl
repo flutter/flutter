@@ -18,9 +18,8 @@
  * Boston, MA 02110-1301, USA.
  */
 
-// Introduced in DOM Level 2:
 [
-    EventConstructor,
+    Constructor(DOMString type, [Named] optional boolean bubbles, [Named] optional boolean cancelable),
 ] interface Event {
     // DOM PhaseType
     const unsigned short NONE                = 0;
@@ -38,9 +37,6 @@
 
     void               stopPropagation();
     void               preventDefault();
-    void initEvent([Default=Undefined] optional DOMString eventTypeArg,
-                   [Default=Undefined] optional boolean canBubbleArg,
-                   [Default=Undefined] optional boolean cancelableArg);
 
     // DOM Level 3 Additions.
     readonly attribute boolean defaultPrevented;

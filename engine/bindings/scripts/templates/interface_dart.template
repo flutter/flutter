@@ -11,7 +11,7 @@ part of sky.core;
         {{ '{' if arg.is_named else '[' }}
         {%- endif -%}
         {{ arg.dart_type }} {{ arg.name }}
-        {%- if arg.is_optional %} {{ ':' if arg.is_named else '='}}  {{ arg.dart_default_value }}
+        {%- if arg.is_optional %} {{ ':' if arg.is_named else '='}} {{ arg.dart_default_value }}
         {#- TODO(eseidel): This does not support having both optional and named arguments! -#}
         {%- if loop.last -%}{{ '}' if arg.is_named else ']' }}{%- endif -%}
         {%- endif -%}
@@ -24,7 +24,11 @@ class {{interface_name}} extends {{ parent_interface if parent_interface else 'N
     // Constructors
 {# TODO(eseidel): We only ever have one constructor. #}
 {%- for constructor in constructors %}
-    void _constructor({{ args_macro(constructor.arguments) }}) native "{{interface_name}}_constructorCallback";
+    void _constructor(
+    {%- for arg in constructor.arguments -%}
+        {{ arg.dart_type }} {{ arg.name }}{% if not loop.last %}, {% endif %}
+    {%- endfor -%}
+    ) native "{{interface_name}}_constructorCallback";
     {{interface_name}}({{ args_macro(constructor.arguments) }}) { _constructor(
     {%- for arg in constructor.arguments -%}
         {{ arg.name }}{% if not loop.last %}, {% endif %}

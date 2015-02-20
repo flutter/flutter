@@ -62,9 +62,9 @@ public:
     // A factory for a simple event. The event doesn't bubble, and isn't
     // cancelable.
     // http://www.whatwg.org/specs/web-apps/current-work/multipage/webappapis.html#fire-a-simple-event
-    static PassRefPtr<Event> create(const AtomicString& type)
+    static PassRefPtr<Event> create(const AtomicString& type, bool bubbles = false, bool cancelable = false)
     {
-        return adoptRef(new Event(type, false, false));
+        return adoptRef(new Event(type, bubbles, cancelable));
     }
     static PassRefPtr<Event> createCancelable(const AtomicString& type)
     {
