@@ -41,6 +41,29 @@ Dart_Handle DartWrappable::CreateDartWrapper(DartState* dart_state) {
   return wrapper;
 }
 
+void DartWrappable::AssociateWithDartWrapper(Dart_NativeArguments args) {
+  DCHECK(!dart_wrapper_);
+
+  Dart_Handle wrapper = Dart_GetNativeArgument(args, 0);
+  CHECK(!LogIfError(wrapper));
+
+  intptr_t native_fields[kNumberOfNativeFields];
+  CHECK(!LogIfError(Dart_GetNativeFieldsOfArgument(
+      args, 0, kNumberOfNativeFields, native_fields)));
+  CHECK(!native_fields[kPeerIndex]);
+  CHECK(!native_fields[kWrapperInfoIndex]);
+
+  const DartWrapperInfo& info = GetDartWrapperInfo();
+  CHECK(!LogIfError(Dart_SetNativeInstanceField(
+      wrapper, kPeerIndex, reinterpret_cast<intptr_t>(this))));
+  CHECK(!LogIfError(Dart_SetNativeInstanceField(
+      wrapper, kWrapperInfoIndex, reinterpret_cast<intptr_t>(&info))));
+
+  info.ref_object(this);  // Balanced in FinalizeDartWrapper.
+  dart_wrapper_ = Dart_NewPrologueWeakPersistentHandle(
+      wrapper, this, info.size_in_bytes, &FinalizeDartWrapper);
+}
+
 void DartWrappable::FinalizeDartWrapper(void* isolate_callback_data,
                                         Dart_WeakPersistentHandle wrapper,
                                         void* peer) {

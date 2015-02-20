@@ -106,7 +106,7 @@ def argument_context(interface, method, argument, index):
     idl_type = argument.idl_type
     this_cpp_value = cpp_value(interface, method, index)
     auto_scope = not 'DartNoAutoScope' in extended_attributes
-    arg_index = index + 1 if not (method.is_static or method.is_constructor) else index
+    arg_index = index + 1 if not method.is_static else index
     preprocessed_type = str(idl_type.preprocessed_type)
     local_cpp_type = idl_type.cpp_type_args(argument.extended_attributes, raw_type=True)
     default_value = argument.default_cpp_value

@@ -40,6 +40,7 @@ class DartWrappable {
   virtual void AcceptDartGCVisitor(DartGCVisitor& visitor) const;
 
   Dart_Handle CreateDartWrapper(DartState* dart_state);
+  void AssociateWithDartWrapper(Dart_NativeArguments args);
   Dart_WeakPersistentHandle dart_wrapper() const { return dart_wrapper_; }
 
  protected:
@@ -133,7 +134,7 @@ struct DartConverter<RefPtr<T>> {
 };
 
 template<typename T>
-static T* GetReceiver(Dart_NativeArguments args) {
+inline T* GetReceiver(Dart_NativeArguments args) {
   intptr_t receiver;
   Dart_Handle result = Dart_GetNativeReceiver(args, &receiver);
   DCHECK(!Dart_IsError(result));

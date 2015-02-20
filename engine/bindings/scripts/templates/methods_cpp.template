@@ -335,7 +335,7 @@ static void {{static_method_name(constructor.name, overload_index)}}(Dart_Native
         ExceptionState es;
 {% endif %}
         {{generate_arguments(constructor) | indent(8)}}
-        {{callback_return(constructor, constructor.dart_set_return_value, constructor.cpp_value) | indent(8)}}
+        {{constructor.cpp_value}}->AssociateWithDartWrapper(args);
 {% if constructor.has_exception_state %}
         if (es.had_exception()) {
             exception = es.GetDartException(args, {{constructor.auto_scope}});
@@ -368,6 +368,8 @@ static void eventConstructorCallback(Dart_NativeArguments args)
 {% macro generate_resolver_constructor(dart_class, class_name, constructor) %}
 {% for native_entry in constructor.native_entries %}
 {% set resolver_string = native_entry.resolver_string %}
+{% set args_one_based = constructor.number_of_arguments + 1 %}
+{% set args_required_one_based = constructor.number_of_required_arguments + 1 %}
 {% if constructor.overload_index %}
   {% set constructor_name = static_method_name(constructor.name) + "Dispatcher" %}
 {% else %}
@@ -376,9 +378,9 @@ static void eventConstructorCallback(Dart_NativeArguments args)
 {% if has_custom_constructor %}
 if (name == "{{resolver_string}}") {
 {% elif constructor.number_of_arguments == constructor.number_of_required_arguments %}
-if (argumentCount == {{constructor.number_of_arguments}} && name == "{{resolver_string}}") {
+if (argumentCount == {{args_one_based}} && name == "{{resolver_string}}") {
 {% else %}
-if (argumentCount >= {{constructor.number_of_required_arguments}} && argumentCount <= {{constructor.number_of_arguments}} && name == "{{resolver_string}}") {
+if (argumentCount >= {{args_required_one_based}} && argumentCount <= {{args_one_based}} && name == "{{resolver_string}}") {
 {% endif %}
     *autoSetupScope = {{constructor.auto_scope}};
     return {{dart_class}}Internal::{{constructor_name}};

@@ -1,0 +1,31 @@
+<sky>
+<script>
+import "../resources/third_party/unittest/unittest.dart";
+import "../resources/unit.dart";
+
+import "dart:sky";
+
+class CustomText extends Text {
+  CustomText() : super("awesome");
+
+  bool get isCustom => true;
+}
+
+void main() {
+  initUnit();
+
+  test("should be able to insert in DOM", () {
+    var child = new CustomText();
+    expect(child.isCustom, isTrue);
+    expect(child.parentNode, isNull);
+    expect(child.data, equals("awesome"));
+
+    var parent = document.createElement("div");
+    parent.appendChild(child);
+    expect(child.parentNode, equals(parent));
+    expect(parent.firstChild, equals(child));
+    expect(parent.firstChild.isCustom, isTrue);
+  });
+}
+</script>
+</sky>

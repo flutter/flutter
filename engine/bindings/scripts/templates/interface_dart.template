@@ -19,16 +19,17 @@ part of sky.core;
     {%- endfor -%}
 {%- endmacro -%}
 
-abstract class {{interface_name}} extends {{ parent_interface if parent_interface else 'NativeFieldWrapperClass2' }} {
+{% if not constructors %}abstract {% endif -%}
+class {{interface_name}} extends {{ parent_interface if parent_interface else 'NativeFieldWrapperClass2' }} {
     // Constructors
 {# TODO(eseidel): We only ever have one constructor. #}
-{%- for constructor in constructors -%}
-    static {{interface_name}} _constructor({{ args_macro(constructor.arguments) }}) native "{{interface_name}}_constructorCallback";
-    factory {{interface_name}}({{ args_macro(constructor.arguments) }}) => _constructor(
+{%- for constructor in constructors %}
+    void _constructor({{ args_macro(constructor.arguments) }}) native "{{interface_name}}_constructorCallback";
+    {{interface_name}}({{ args_macro(constructor.arguments) }}) { _constructor(
     {%- for arg in constructor.arguments -%}
         {{ arg.name }}{% if not loop.last %}, {% endif %}
     {%- endfor -%}
-    );
+    ); }
 {% endfor %}
 
     // Attributes
