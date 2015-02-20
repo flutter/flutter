@@ -1,0 +1,12 @@
+<import src='resources/with-dart-import.sky' as='test'></import>
+<script>
+import "dart:sky.internals" as internals;
+
+void main() {
+    // The HTMLImportsLoader used to think with-dart-import load completed
+    // and did not know about with-dart-import having dart import statements
+    // which had made the load/execution of the script asynchronous.
+    String result = test.didInit ? "PASS" : "FAIL";
+    internals.notifyTestComplete(result);
+}
+</script>

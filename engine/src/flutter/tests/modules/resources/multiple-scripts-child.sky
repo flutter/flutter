@@ -1,0 +1,18 @@
+<sky>
+<script>
+final String one = 'one';
+bool oneInit = false;
+void init() {
+    oneInit = true;
+}
+final conflict = 'one';
+</script>
+<script>
+final String two = 'two';
+bool twoInit = false;
+void init() {
+    twoInit = true;
+}
+final conflict = 'two';
+</script>
+</sky>

@@ -1,0 +1,8 @@
+CONSOLE: unittest-suite-wait-for-done
+CONSOLE: PASS: multiple libraries should combine using "as"
+CONSOLE: PASS: multiple libraries should each init
+CONSOLE: PASS: conflicting names should be ignored
+CONSOLE: 
+CONSOLE: All 3 tests passed.
+CONSOLE: unittest-suite-success
+DONE
