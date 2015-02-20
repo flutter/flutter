@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import "/sky/framework/shell.dart" as shell;
+import "/sky/framework/embedder.dart";
 import "dart:async";
 import "dart:sky";
 import "dart:sky.internals" as internals;
@@ -62,7 +62,7 @@ harness.TestHarnessProxy _init() {
   document.addEventListener('keypress', handleKeyPress_);
 
   var harnessProxy = new harness.TestHarnessProxy.unbound();
-  shell.connectToService("mojo:sky_tester", harnessProxy);
+  embedder.connectToService("mojo:sky_tester", harnessProxy);
   return harnessProxy;
 }
 
