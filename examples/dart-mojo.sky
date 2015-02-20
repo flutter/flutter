@@ -74,7 +74,7 @@ main() {
   var messagePipe = new MojoMessagePipe();
   var wget = new WGet(messagePipe.endpoints[1]);
   wget.listen();
-  var shellProxy = new shell_mojom.ShellProxy.fromHandle(new MojoHandle(internals.passShellProxyHandle()));
+  var shellProxy = new shell_mojom.ShellProxy.fromHandle(new MojoHandle(internals.takeShellProxyHandle()));
   wget.initializeFromShellProxy(shellProxy, ["mojo:wget", "http://www.google.com"], "mojo:wget");
 }
 
