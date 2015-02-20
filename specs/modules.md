@@ -71,15 +71,17 @@ the library itself):
 
 ```dart
 class _ { }
-void main() {
+void main(ScriptElement script) {
   LibraryMirror library = reflectClass(_).owner as LibraryMirror;
-  if (library.declarations.containsKey(#init) && library.declarations[#init] is MethodMirror)
-    init();
-  AutomaticMetadata.runLibrary(library, module);
+  if (library.declarations.containsKey(#_init) && library.declarations[#_init] is MethodMirror)
+    _init(script);
+  AutomaticMetadata.runLibrary(library, module, script);
 }
 ```
 
-Then, that ``main()`` function is called.
+Then, that ``main(script)`` function is called, with ``script`` set to
+the ``ScriptElement`` object representing the relevant ``<script>``
+element.
 
 TODO(ianh): decide what URL and name we should give the libraries, as
 exposed in MirrorSystem.getName(libraryMirror.qualifiedName) etc

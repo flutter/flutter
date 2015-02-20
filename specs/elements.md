@@ -184,19 +184,6 @@ class Attr {
   final String value; // O(1)
 }
 
-// @tagname annotation for registering elements
-// only useful when placed on classes that inherit from Element
-class tagname extends AutomaticMetadata {
-  const tagname(this.name);
-  final String name;
-  void init(DeclarationMirror target, Module module) {
-    assert(target is ClassMirror);
-    if (!(target as ClassMirror).isSubclassOf(reflectClass(Element)))
-      throw new UnsupportedError('@tagname can only be used on descendants of Element');
-    module.registerElement(name, (target as ClassMirror).reflectedType);
-  }
-}
-
 // @hasShadow annotation for registering elements
 class _HasShadow {
   const _HasShadow();
@@ -221,12 +208,6 @@ abstract class Element extends ParentNode {
   // appends the given children nodes
   // children must be Text or Element
   // if needsShadow is true, creates a shadow tree
-
-  String get tagName { // O(N) in number of annotations on the class
-    // throws a StateError if the class doesn't have an @tagname annotation
-    var tagnameClass = reflectClass(tagname);
-    return (reflectClass(this.runtimeType).metadata.singleWhere((mirror) => mirror.type == tagnameClass).reflectee as tagname).name;
-  }
 
   external bool hasAttribute(String name); // O(N) in number of attributes
   external String getAttribute(String name); // O(N) in number of attributes

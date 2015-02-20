@@ -26,9 +26,9 @@ import 'dart:mirrors';
 
 abstract class AutomaticMetadata {
   const AutomaticMetadata();
-  void init(DeclarationMirror target, Module module);
+  void init(DeclarationMirror target, Module module, ScriptElement script);
 
-  static void runLibrary(LibraryMirror library, Module module) {
+  static void runLibrary(LibraryMirror library, Module module, ScriptElement script) {
     library.declarations.values.toList() /* ..sort((DeclarationMirror a, DeclarationMirror b) {
       bool aHasLocation;
       try {
@@ -55,7 +55,7 @@ abstract class AutomaticMetadata {
     ..forEach((DeclarationMirror d) {
       d.metadata.forEach((InstanceMirror i) {
         if (i.reflectee is AutomaticMetadata)
-          i.reflectee.run(d, module);
+          i.reflectee.run(d, module, script);
       });
     });
   }
@@ -63,16 +63,17 @@ abstract class AutomaticMetadata {
 
 class AutomaticFunction extends AutomaticMetadata {
   const AutomaticFunction();
-  void init(DeclarationMirror target, Module module) {
+  void init(DeclarationMirror target, Module module, ScriptElement script) {
     assert(target is MethodMirror);
     MethodMirror f = target as MethodMirror;
     assert(!f.isAbstract);
     assert(f.isRegularMethod);
     assert(f.isTopLevel);
     assert(f.isStatic);
-    assert(f.parameters.length == 0);
+    assert(f.parameters.length == 1);
+    assert(f.parameters[0].type == ScriptElement);
     assert(f.returnType == currentMirrorSystem().voidType);
-    (f.owner as LibraryMirror).invoke(f.simpleName, []);
+    (f.owner as LibraryMirror).invoke(f.simpleName, [script]);
   }
 }
 const autorun = const AutomaticFunction();
