@@ -1,0 +1,6 @@
+CONSOLE: unittest-suite-wait-for-done
+CONSOLE: PASS: paragraph width should shrink
+CONSOLE: 
+CONSOLE: All 1 tests passed.
+CONSOLE: unittest-suite-success
+DONE
