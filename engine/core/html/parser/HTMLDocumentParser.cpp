@@ -159,7 +159,13 @@ void HTMLDocumentParser::runScriptsForPausedTreeBuilder()
         return;
     TextPosition scriptStartPosition = TextPosition::belowRangePosition();
     RefPtr<Element> scriptToProcess = m_treeBuilder->takeScriptToProcess(scriptStartPosition);
-    m_scriptRunner.runScript(toHTMLScriptElement(scriptToProcess.get()), scriptStartPosition);
+
+    // Sending the script to dart may find additional 'import' declarations
+    // which need to load before the script can execute.  HTMLScriptRunner
+    // always calls scriptExecutionCompleted regardless of success/failure.
+    m_scriptRunner = HTMLScriptRunner::createForScript(
+        toHTMLScriptElement(scriptToProcess.get()), scriptStartPosition, this);
+    m_scriptRunner->start();
 }
 
 void HTMLDocumentParser::didReceiveParsedChunkFromBackgroundParser(PassOwnPtr<ParsedChunk> chunk)
@@ -168,7 +174,8 @@ void HTMLDocumentParser::didReceiveParsedChunkFromBackgroundParser(PassOwnPtr<Pa
     // Sky should not need nested parsers.
     ASSERT(document()->activeParserCount() == 0);
 
-    if (isWaitingForScripts() || !m_pendingChunks.isEmpty() || document()->activeParserCount() > 0 || !document()->haveImportsLoaded()) {
+    if (isWaitingForScripts() || !m_pendingChunks.isEmpty() ||
+        document()->activeParserCount() > 0) {
         m_pendingChunks.append(chunk);
         return;
     }
@@ -200,8 +207,12 @@ void HTMLDocumentParser::processParsedChunkFromBackgroundParser(PassOwnPtr<Parse
     OwnPtr<ParsedChunk> chunk(popChunk);
     OwnPtr<CompactHTMLTokenStream> tokens = chunk->tokens.release();
 
-    for (Vector<CompactHTMLToken>::const_iterator it = tokens->begin(); it != tokens->end(); ++it) {
-        ASSERT(!isWaitingForScripts());
+    Vector<CompactHTMLToken>::const_iterator it;
+    for (it = tokens->begin(); it != tokens->end(); ++it) {
+      // A chunk can issue import loads causing us to be isWaitingForScripts
+      // but we don't stop processing in that case.
+      ASSERT(!m_treeBuilder->hasParserBlockingScript());
+      ASSERT(!m_scriptRunner);
 
         m_textPosition = it->textPosition();
 
@@ -210,19 +221,26 @@ void HTMLDocumentParser::processParsedChunkFromBackgroundParser(PassOwnPtr<Parse
         if (isStopped())
             break;
 
-        if (isWaitingForScripts()) {
-            ASSERT(it + 1 == tokens->end()); // The </script> is assumed to be the last token of this bunch.
+        if (m_treeBuilder->hasParserBlockingScript()) {
+            ++it; // Make it == end() during non-stopped termination.
+            ASSERT(it == tokens->end());  // The </script> is assumed to be the
+                                          // last token of this bunch.
             runScriptsForPausedTreeBuilder();
             break;
         }
 
         if (it->type() == HTMLToken::EndOfFile) {
-            ASSERT(it + 1 == tokens->end()); // The EOF is assumed to be the last token of this bunch.
+            ++it; // Make it == end() during non-stopped termination.
+            ASSERT(it == tokens->end());  // The EOF is assumed to be the
+                                          // last token of this bunch.
             ASSERT(m_pendingChunks.isEmpty()); // There should never be any chunks after the EOF.
             prepareToStopParsing();
             break;
         }
     }
+
+    // Either we aborted due to stopping or we processed all tokens.
+    ASSERT(isStopped() || it == tokens->end());
 
     // Make sure any pending text nodes are emitted before returning.
     if (!isStopped())
@@ -238,7 +256,6 @@ void HTMLDocumentParser::pumpPendingChunks()
     ASSERT(refCount() >= 2);
     ASSERT(!isWaitingForScripts());
     ASSERT(!isStopped());
-    ASSERT(document()->haveImportsLoaded());
 
     double startTime = currentTime();
 
@@ -246,7 +263,7 @@ void HTMLDocumentParser::pumpPendingChunks()
         processParsedChunkFromBackgroundParser(m_pendingChunks.takeFirst());
 
         // Always check isStopped first as m_document may be null.
-        if (isStopped() || isWaitingForScripts() || !document()->haveImportsLoaded())
+        if (isStopped() || isWaitingForScripts())
             break;
 
         if (currentTime() - startTime > parserTimeLimit && !m_pendingChunks.isEmpty()) {
@@ -353,7 +370,8 @@ void HTMLDocumentParser::endIfDelayed()
 
 bool HTMLDocumentParser::isExecutingScript() const
 {
-    return m_scriptRunner.isExecutingScript();
+    // TODO(eseidel): Callers may need updates now that scripts can be async.
+    return m_scriptRunner && m_scriptRunner->isExecutingScript();
 }
 
 OrdinalNumber HTMLDocumentParser::lineNumber() const
@@ -370,13 +388,13 @@ TextPosition HTMLDocumentParser::textPosition() const
 
 bool HTMLDocumentParser::isWaitingForScripts() const
 {
-    return m_treeBuilder->hasParserBlockingScript();
+  return m_treeBuilder->hasParserBlockingScript() || m_scriptRunner ||
+         !document()->haveImportsLoaded();
 }
 
 void HTMLDocumentParser::resumeAfterWaitingForImports()
 {
     RefPtr<HTMLDocumentParser> protect(this);
-    ASSERT(!isExecutingScript());
     ASSERT(!isWaitingForScripts());
     if (m_pendingChunks.isEmpty())
         return;
@@ -384,4 +402,14 @@ void HTMLDocumentParser::resumeAfterWaitingForImports()
     pumpPendingChunks();
 }
 
+// HTMLScriptRunner has finished executing a script.
+// Just call resumeAfterWaitingForImports since it happens to do what we need.
+void HTMLDocumentParser::scriptExecutionCompleted() {
+  ASSERT(m_scriptRunner);
+  m_scriptRunner.clear();
+  // To avoid re-entering the parser for synchronous scripts, we use a postTask.
+  base::MessageLoop::current()->PostTask(
+      FROM_HERE, base::Bind(&HTMLDocumentParser::resumeAfterWaitingForImports,
+                            m_weakFactory.GetWeakPtr()));
+}
 }

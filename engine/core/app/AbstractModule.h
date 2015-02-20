@@ -13,6 +13,19 @@
 namespace blink {
 class Application;
 
+class LibraryEntry {
+ public:
+  LibraryEntry(PassRefPtr<DartValue> library, TextPosition position)
+      : dart_library_(library), text_position_(position) {}
+
+  DartValue* library() const { return dart_library_.get(); }
+  const TextPosition& position() const { return text_position_; }
+
+ private:
+  RefPtr<DartValue> dart_library_;
+  TextPosition text_position_;
+};
+
 class AbstractModule : public RefCounted<AbstractModule>,
                        public EventTargetWithInlineData,
                        public ContextLifecycleObserver {
@@ -25,9 +38,10 @@ class AbstractModule : public RefCounted<AbstractModule>,
 
   virtual bool isApplication() const { return false; }
 
-  void set_library(RefPtr<DartValue> library) { library_ = library; }
+  String UrlForLibraryAt(TextPosition);
 
-  DartValue* library() const { return library_.get(); }
+  void AddLibrary(RefPtr<DartValue> library, TextPosition position);
+  const Vector<LibraryEntry>& libraries() const { return libraries_; }
 
  protected:
   AbstractModule(ExecutionContext*, PassRefPtr<Document>, const String& url);
@@ -39,7 +53,7 @@ class AbstractModule : public RefCounted<AbstractModule>,
 
   RefPtr<Document> document_;
   String url_;
-  RefPtr<DartValue> library_;
+  Vector<LibraryEntry> libraries_;
 };
 
 } // namespace blink

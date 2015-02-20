@@ -1,0 +1,12 @@
+<script>
+import 'dart-import.dart' as base;
+// Use the dart import so it doesn't ignore it.
+class TestClass extends base.BaseClass {
+}
+
+bool didInit = false;
+
+void init() {
+    didInit = (new TestClass() != null);
+}
+</script>

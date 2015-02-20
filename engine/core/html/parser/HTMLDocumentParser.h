@@ -54,7 +54,7 @@ class ScriptSourceCode;
 
 class PumpSession;
 
-class HTMLDocumentParser :  public DocumentParser {
+class HTMLDocumentParser : public DocumentParser, public HTMLScriptRunnerHost {
     WTF_MAKE_FAST_ALLOCATED;
 public:
     static PassRefPtr<HTMLDocumentParser> create(Document& document, bool reportErrors)
@@ -84,6 +84,9 @@ public:
     bool isWaitingForScripts() const override final;
     bool isExecutingScript() const override final;
     void resumeAfterWaitingForImports() override final;
+
+    // From HTMLScriptRunnerHost:
+    void scriptExecutionCompleted();
 
 private:
     HTMLDocumentParser(Document&, bool reportErrors);
@@ -116,7 +119,7 @@ private:
     OwnPtr<HTMLParserScheduler> m_parserScheduler;
     TextPosition m_textPosition;
 
-    HTMLScriptRunner m_scriptRunner;
+    OwnPtr<HTMLScriptRunner> m_scriptRunner;
 
     OwnPtr<ParsedChunk> m_lastChunkBeforeScript;
     Deque<OwnPtr<ParsedChunk> > m_pendingChunks;

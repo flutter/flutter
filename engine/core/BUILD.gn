@@ -66,6 +66,11 @@ static_library("core") {
 
   sources = sky_core_files
 
+  include_dirs = [
+    # Needed for dart_mirrors_api.h in dart_controller.cc
+    rebase_path("//dart/runtime"),
+  ]
+
   forward_dependent_configs_from = [ ":libraries" ]
 
   # core and core_generated are really the same thing.

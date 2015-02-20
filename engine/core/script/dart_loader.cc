@@ -207,6 +207,8 @@ Dart_Handle DartLoader::HandleLibraryTag(Dart_LibraryTag tag,
 void DartLoader::WaitForDependencies(
     const HashSet<DartDependency*>& dependencies,
     const base::Closure& callback) {
+  if (dependencies.isEmpty())
+    return callback.Run();
   dependency_watchers_.add(
       adoptPtr(new DependencyWatcher(dependencies, callback)));
 }

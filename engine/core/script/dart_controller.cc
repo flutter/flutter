@@ -8,6 +8,7 @@
 #include "base/bind.h"
 #include "base/logging.h"
 #include "base/single_thread_task_runner.h"
+#include "dart/runtime/include/dart_mirrors_api.h"
 #include "sky/engine/bindings/builtin.h"
 #include "sky/engine/bindings/builtin_natives.h"
 #include "sky/engine/bindings/builtin_sky.h"
@@ -43,77 +44,102 @@ static const char* kCheckedModeArgs[] = {
 
 extern const uint8_t* kDartSnapshotBuffer;
 
-DartController::DartController() : weak_factory_(this) {
+DartController::DartController() {
 }
 
 DartController::~DartController() {
 }
 
-void DartController::LoadModule(RefPtr<AbstractModule> module,
-                                const String& source,
-                                const TextPosition& textPosition) {
-  DartIsolateScope isolate_scope(dart_state()->isolate());
-  DartApiScope dart_api_scope;
+bool DartController::ImportChildLibraries(AbstractModule* module,
+                                          Dart_Handle library) {
+  // If the document has never seen an <import> tag, it won't have an import
+  // controller, and thus will return null for its root HTMLImport.  We could
+  // remove this null-check by always creating an ImportController.
+  HTMLImport* root = module->document()->import();
+  if (!root)
+    return true;
 
-  DartDependencyCatcher dependency_catcher(dart_state()->loader());
+  // TODO(abarth): Why doesn't HTMLImport do these casts for us?
+  for (HTMLImportChild* child =
+           static_cast<HTMLImportChild*>(root->firstChild());
+       child; child = static_cast<HTMLImportChild*>(child->next())) {
+    if (Element* link = child->link()) {
+      String name = link->getAttribute(HTMLNames::asAttr);
 
+      Module* child_module = child->module();
+      if (!child_module)
+        continue;
+      for (const auto& entry : child_module->libraries()) {
+        if (entry.library()->is_empty())
+          continue;
+        if (LogIfError(Dart_LibraryImportLibrary(
+                library, entry.library()->dart_value(),
+                StringToDart(dart_state(), name))))
+          return false;
+      }
+    }
+  }
+  return true;
+}
+
+Dart_Handle DartController::CreateLibrary(AbstractModule* module,
+                                          const String& source,
+                                          const TextPosition& textPosition) {
   Dart_Handle library = Dart_LoadLibrary(
-      StringToDart(dart_state(), module->url()),
+      StringToDart(dart_state(), module->UrlForLibraryAt(textPosition)),
       StringToDart(dart_state(), source), textPosition.m_line.zeroBasedInt(),
       textPosition.m_column.zeroBasedInt());
 
   if (LogIfError(library))
-    return;
+    return nullptr;
 
-  if (HTMLImport* parent = module->document()->import()) {
-    for (HTMLImportChild* child = static_cast<HTMLImportChild*>(parent->firstChild());
-         child; child = static_cast<HTMLImportChild*>(child->next())) {
-      if (Element* link = child->link()) {
-        String name = link->getAttribute(HTMLNames::asAttr);
+  if (!ImportChildLibraries(module, library))
+    return nullptr;
 
-        Module* childModule = child->module();
-        if (childModule
-            && childModule->library()
-            && !childModule->library()->is_empty()) {
-          if (LogIfError(Dart_LibraryImportLibrary(
-                  library, childModule->library()->dart_value(),
-                  StringToDart(dart_state(), name))))
-            return;
-        }
-      }
-    }
-  }
-
-  module->set_library(DartValue::Create(dart_state(), library));
-  const auto& dependencies = dependency_catcher.dependencies();
-
-  if (dependencies.isEmpty()) {
-    ExecuteModule(module);
-  } else {
-    dart_state()->loader().WaitForDependencies(
-        dependencies, base::Bind(&DartController::ExecuteModule,
-                                 weak_factory_.GetWeakPtr(), module));
-  }
+  return library;
 }
 
-void DartController::ExecuteModule(RefPtr<AbstractModule> module) {
+void DartController::LoadScriptInModule(
+    AbstractModule* module,
+    const String& source,
+    const TextPosition& position,
+    const LoadFinishedCallback& finished_callback) {
+  DartIsolateScope isolate_scope(dart_state()->isolate());
+  DartApiScope dart_api_scope;
+
+  DartDependencyCatcher dependency_catcher(dart_state()->loader());
+  Dart_Handle library_handle = CreateLibrary(module, source, position);
+  if (!library_handle)
+    return finished_callback.Run(nullptr, nullptr);
+  RefPtr<DartValue> library = DartValue::Create(dart_state(), library_handle);
+  module->AddLibrary(library, position);
+
+  // TODO(eseidel): Better if the library/module retained its dependencies and
+  // dependency waiting could be separate from library creation.
+  dart_state()->loader().WaitForDependencies(
+      dependency_catcher.dependencies(),
+      base::Bind(finished_callback, module, library));
+}
+
+void DartController::ExecuteLibraryInModule(AbstractModule* module,
+                                            Dart_Handle library) {
+  ASSERT(library);
   DCHECK(Dart_CurrentIsolate() == dart_state()->isolate());
   DartApiScope dart_api_scope;
 
   // Don't continue if we failed to load the module.
   if (LogIfError(Dart_FinalizeLoading(true)))
     return;
-  Dart_Handle library = module->library()->dart_value();
   const char* name = module->isApplication() ? "main" : "init";
-  Dart_Handle closure_name = Dart_NewStringFromCString(name);
-  Dart_Handle result = Dart_Invoke(library, closure_name, 0, nullptr);
 
-  if (module->isApplication()) {
-    // TODO(dart): This will throw an API error if main() is absent. It would be
-    // better to test whether main() is present first, then attempt to invoke it
-    // so as to capture & report other errors.
-    LogIfError(result);
-  }
+  // main() is required, but init() is not:
+  // TODO(rmacnak): Dart_LookupFunction won't find re-exports, etc.
+  Dart_Handle entry = Dart_LookupFunction(library, ToDart(name));
+  if (!Dart_IsFunction(entry) && !module->isApplication())
+    return;
+
+  Dart_Handle result = Dart_Invoke(library, ToDart(name), 0, nullptr);
+  LogIfError(result);
 }
 
 static void UnhandledExceptionCallback(Dart_Handle error) {

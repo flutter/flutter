@@ -5,8 +5,8 @@
 #ifndef SKY_ENGINE_CORE_SCRIPT_DART_CONTROLLER_H_
 #define SKY_ENGINE_CORE_SCRIPT_DART_CONTROLLER_H_
 
+#include "base/callback_forward.h"
 #include "base/macros.h"
-#include "base/memory/weak_ptr.h"
 #include "dart/runtime/include/dart_api.h"
 #include "sky/engine/wtf/OwnPtr.h"
 #include "sky/engine/wtf/text/AtomicString.h"
@@ -17,6 +17,7 @@ class AbstractModule;
 class BuiltinSky;
 class DOMDartState;
 class Document;
+class DartValue;
 
 class DartController {
  public:
@@ -25,21 +26,28 @@ class DartController {
 
   static void InitVM();
 
-  void LoadModule(RefPtr<AbstractModule> module,
-                  const String& source,
-                  const TextPosition& textPosition);
+  typedef base::Callback<void(RefPtr<AbstractModule>, RefPtr<DartValue>)>
+      LoadFinishedCallback;
+
+  void LoadScriptInModule(AbstractModule* module,
+                          const String& source,
+                          const TextPosition& textPosition,
+                          const LoadFinishedCallback& load_finished_callback);
+  void ExecuteLibraryInModule(AbstractModule* module, Dart_Handle library);
+
   void ClearForClose();
-  void CreateIsolateFor(Document*);
+  void CreateIsolateFor(Document* document);
 
   DOMDartState* dart_state() const { return dom_dart_state_.get(); }
 
  private:
-  void ExecuteModule(RefPtr<AbstractModule> module);
+  bool ImportChildLibraries(AbstractModule* module, Dart_Handle library);
+  Dart_Handle CreateLibrary(AbstractModule* module,
+                            const String& source,
+                            const TextPosition& position);
 
   OwnPtr<DOMDartState> dom_dart_state_;
   OwnPtr<BuiltinSky> builtin_sky_;
-
-  base::WeakPtrFactory<DartController> weak_factory_;
 
   DISALLOW_COPY_AND_ASSIGN(DartController);
 };
