@@ -41,8 +41,7 @@ def case_insensitive_matching(name):
     return (name == ('HTMLEvents')
             or name == 'Event'
             or name == 'Events'
-            or name.startswith('UIEvent')
-            or name.startswith('CustomEvent'))
+            or name.startswith('UIEvent'))
 
 class EventFactoryWriter(name_macros.Writer):
     defaults = {
