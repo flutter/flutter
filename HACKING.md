@@ -6,9 +6,6 @@ Building
 
 * Follow the setup & build instructions for [Mojo](https://github.com/domokit/mojo)
 
-If building for Android, be aware a patch to V8's GN build is required:
-https://code.google.com/p/v8/issues/detail?id=3841
-
 Running applications
 --------------------
 
@@ -32,26 +29,17 @@ determine whether its using android, etc.
 Running tests manually
 ----------------------
 
-* ``sky/tools/run_sky_httpd``
-* ``out/Debug/mojo_shell --args-for="mojo:native_viewport_service --use-headless-config" --content-handlers=text/html,mojo:sky_viewer --url-mappings=mojo:window_manager=mojo:sky_tester mojo:window_manager``
+* ``out/downloads/sky_server -t Debug . 8000``
+* ``out/Debug/mojo_shell --args-for="mojo:native_viewport_service --use-headless-config --use-osmesa" --args-for"=mojo:sky_viewer --testing" --content-handlers=text/sky,mojo:sky_viewer --url-mappings=mojo:window_manager=mojo:sky_tester,mojo:surfaces_service=mojo:fake_surfaces_service mojo:window_manager``
 * The ``sky_tester`` should print ``#READY`` when ready
-* Type the URL you wish to run, for example ``http://127.0.0.1:8000/lowlevel/text.html``, and press the enter key
+* Type the URL you wish to run, for example ``http://127.0.0.1:8000/sky/tests/lowlevel/text.html``, and press the enter key
 * The harness should print the results of the test.  You can then type another URL.
 
 Writing tests
 -------------
 
-* Import ``resources/mocha.html`` and ``resources/chai.html``
-* Write tests in [mocha format](http://mochajs.org/#getting-started) and use [chai asserts](http://chaijs.com/api/assert/):
-```html
-describe('My pretty test of my subject', function() {
-  var subject = new MySubject();
-
-  it('should be pretty', function() {
-    assert.ok(subject.isPretty);
-  });
-});
-```
+* We recommend using the ``unittest.dart`` testing framework.
+* See ``sky/tests/lowlevel/attribute-collection.sky`` for an example.
 
 Adding pixel tests
 ------------------
