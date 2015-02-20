@@ -3,7 +3,7 @@
 <script>
 import "../resources/third_party/unittest/unittest.dart";
 import "../resources/unit.dart";
-import "/sky/framework/shell.dart" as shell;
+import "/sky/framework/embedder.dart";
 import "dart:sky";
 import "package:mojo/services/input_events/public/interfaces/input_event_constants.mojom.dart" as constants;
 import "package:mojo/services/input_events/public/interfaces/input_events.mojom.dart" as events;
@@ -20,7 +20,7 @@ void main() {
     }));
 
     var testHarness = new harness.TestHarnessProxy.unbound();
-    shell.connectToService("mojo:sky_tester", testHarness);
+    embedder.connectToService("mojo:sky_tester", testHarness);
     var keyData = new events.KeyData();
     keyData.windowsKeyCode = 0x41;
     keyData.text = 0x41;

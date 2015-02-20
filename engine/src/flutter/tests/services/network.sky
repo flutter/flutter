@@ -1,62 +1,46 @@
-<html>
-<import src="../resources/chai.sky" />
-<import src="../resources/mocha.sky" />
-<import src="/gen/mojo/public/interfaces/application/shell.mojom.sky" as="shellMojom" />
-<import src="/gen/mojo/public/sky/connection.sky" as="connection" />
-<import src="/gen/mojo/public/sky/core.sky" as="core" />
-<import src="/gen/mojo/services/network/public/interfaces/network_service.mojom.sky" as="net" />
-<import src="/gen/mojo/services/network/public/interfaces/url_loader.mojom.sky" as="loader" />
-<import src="/gen/mojo/services/public/sky/shell.sky" as="shell" />
+#!mojo mojo:sky_viewer
+<sky>
 <script>
-const Shell = shell.Shell;
+import '/sky/framework/embedder.dart';
+import 'dart:async';
+import 'dart:mojo_bindings';
+import 'dart:mojo_core';
+import 'dart:typed_data';
+import "dart:sky.internals" as internals;
 
-describe('Mojo network_service', function() {
-  this.enableTimeouts(false);
+import 'package:mojo/services/network/public/interfaces/network_service.mojom.dart';
+import 'package:mojo/services/network/public/interfaces/url_loader.mojom.dart';
 
-  it('should be able to fetch text files', function(done) {
-    var shellHandle = internals.takeShellProxyHandle();
-    var shellProxy = connection.bindHandleToProxy(shellHandle, shellMojom.Shell);
-    var shell = new Shell(shellProxy);
-    var netService = shell.connectToService(
-      "mojo:network_service", net.NetworkService);
+Future<String> run(url) async {
+  var networkService = new NetworkServiceProxy.unbound();
+  embedder.connectToService("mojo:network_service", networkService);
 
-    var urlLoader;
-    netService.createURLLoader(function(urlLoaderProxy) {
-      urlLoader = urlLoaderProxy;
-    });
+  var urlLoaderProxy = new UrlLoaderProxy.unbound();
+  networkService.createUrlLoader(urlLoaderProxy);
 
-    var urlRequest = new loader.URLRequest();
-    urlRequest.url = "http://127.0.0.1:8000/sky/tests/services/resources/pass.txt";
-    urlRequest.method = "GET";
-    urlRequest.auto_follow_redirects = true;
+  var urlRequest = new UrlRequest()
+      ..url = url
+      ..autoFollowRedirects = true;
+  var urlResponse = await urlLoaderProxy.start(urlRequest);
 
-    var urlRequestPromise = urlLoader.start(urlRequest);
-    urlRequestPromise.then(function(result) {
-      if (result.response.error) {
-        assert.ok(false, "network request failed " + result.response.error.code + " "
-            + result.response.error.description);
-        done();
-      }
-      console.log("url => " + result.response["url"]);
-      console.log("status_line => " + result.response["status_line"]);
-      console.log("mime_type => " + result.response["mime_type"]);
+  urlLoaderProxy.close();
+  networkService.close();
 
-      var start = Date.now();
-      while (Date.now() - start < 3) {}
+  print("url => ${urlResponse.response.url}");
+  print("status_line => ${urlResponse.response.statusLine}");
+  print("mime_type => ${urlResponse.response.mimeType}");
 
-      var drainDataPromise = core.drainData(result.response.body);
-      drainDataPromise.then(function(result) {
-        console.log("read " + result.buffer.byteLength + " bytes");
-        done();
-      }).catch(function() {
-        assert.ok(false, "core.drainData failed");
-        done();
-      });
-    }).catch(function() {
-      assert.ok(false, "start failed");
-      done();
-    });
-  });
-});
+  ByteData bodyData =
+      await DataPipeDrainer.drainHandle(urlResponse.response.body);
+  print("read ${bodyData.lengthInBytes} bytes");
+
+  return new String.fromCharCodes(new Uint8List.view(bodyData.buffer));
+}
+
+main() async {
+  var url = "http://127.0.0.1:8000/sky/tests/services/resources/pass.txt";
+  var result = await run(url);
+  internals.notifyTestComplete(result);
+}
 </script>
-</html>
+</sky>
