@@ -5,10 +5,15 @@ bar { width: 100px; height: 100px; background: purple; }
 parent { display: paragraph; }
 child { background: salmon; }
 canvas { height: 50px; background-color: pink; }
+inline-block { display: inline-block; width: 50px; height: 50px; background: green; }
+grand-child { width: 50px; height: 50px; transform: translate3d(100px, 0, 0); background: papayawhip; }
 </style>
 <foo /><bar />
 <parent>
   <child>Foo bar</child>
+  <inline-block>
+    <grand-child />
+  </inline-block>
 </parent>
 <canvas />
 <script>
@@ -52,9 +57,14 @@ void main() {
   });
 
   test("should hit test transformed child", () {
+    document.querySelector('parent').style["display"] = "block";
     document.querySelector('child').style["transform"] = "translate3d(100px, 0, 0)";
     expect(document.elementFromPoint(50, 210).tagName, equals('parent'));
     expect(document.elementFromPoint(150, 210).tagName, equals('child'));
+    expect(document.elementFromPoint(25, 240).tagName, equals('inline-block'));
+    // TODO(ojan): This is incorrect. It should hit grand-child.
+    // This broke sometime before 4153b8a515d54275934d4244aaf2d5a7a8fe3333.
+    expect(document.elementFromPoint(150, 240).tagName, equals('sky'));
   });
 
   test("should hit test canvas", () {
