@@ -49,14 +49,6 @@ LayoutState::LayoutState(RenderBox& renderer, const LayoutSize& offset, bool con
 {
     renderer.view()->pushLayoutState(*this);
     m_layoutOffset = m_next->m_layoutOffset + offset;
-
-    if (renderer.isOutOfFlowPositioned()) {
-        if (RenderObject* container = renderer.container()) {
-            if (container->style()->hasInFlowPosition() && container->isRenderInline())
-                m_layoutOffset += toRenderInline(container)->offsetForInFlowPositionedInline(renderer);
-        }
-    }
-
     // FIXME: <http://bugs.webkit.org/show_bug.cgi?id=13443> Apply control clip if present.
 }
 

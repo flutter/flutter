@@ -175,9 +175,6 @@ LayoutPoint RenderBoxModelObject::adjustedPositionRelativeToOffsetParent(const L
         if (offsetParent->isBox())
             referencePoint.move(-toRenderBox(offsetParent)->borderLeft(), -toRenderBox(offsetParent)->borderTop());
         if (!isOutOfFlowPositioned()) {
-            if (isRelPositioned())
-                referencePoint.move(relativePositionOffset());
-
             RenderObject* current;
             for (current = parent(); current != offsetParent && current->parent(); current = current->parent()) {
                 // FIXME: What are we supposed to do inside SVG content?
@@ -190,11 +187,6 @@ LayoutPoint RenderBoxModelObject::adjustedPositionRelativeToOffsetParent(const L
     }
 
     return referencePoint;
-}
-
-LayoutSize RenderBoxModelObject::offsetForInFlowPosition() const
-{
-    return isRelPositioned() ? relativePositionOffset() : LayoutSize();
 }
 
 LayoutUnit RenderBoxModelObject::offsetLeft() const

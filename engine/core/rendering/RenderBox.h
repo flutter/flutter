@@ -327,7 +327,6 @@ public:
     void computeAndSetBlockDirectionMargins(const RenderBlock* containingBlock);
 
     void positionLineBox(InlineBox*);
-    void moveWithEdgeOfInlineContainerIfNecessary();
 
     virtual InlineBox* createInlineBox();
     void dirtyLineBoxes(bool fullLayout);

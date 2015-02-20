@@ -308,7 +308,6 @@ public:
     }
 
     bool isOutOfFlowPositioned() const { return m_bitfields.isOutOfFlowPositioned(); } // absolute or fixed positioning
-    bool isRelPositioned() const { return m_bitfields.isRelPositioned(); } // relative positioning
     bool isPositioned() const { return m_bitfields.isPositioned(); }
 
     bool isText() const  { return m_bitfields.isText(); }
@@ -780,8 +779,6 @@ private:
 
     public:
         bool isOutOfFlowPositioned() const { return m_positionedState == IsOutOfFlowPositioned; }
-        // FIXME(sky): Remove
-        bool isRelPositioned() const { return false; }
         bool isPositioned() const { return m_positionedState != IsStaticallyPositioned; }
 
         void setPositionedState(int positionState)

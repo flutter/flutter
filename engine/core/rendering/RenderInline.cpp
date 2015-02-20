@@ -351,10 +351,6 @@ LayoutUnit RenderInline::marginAfter(const RenderStyle* otherStyle) const
 
 const char* RenderInline::renderName() const
 {
-    if (isRelPositioned())
-        return "RenderInline (relative positioned)";
-    if (isAnonymous())
-        return "RenderInline (generated)";
     return "RenderInline";
 }
 
@@ -584,21 +580,6 @@ LayoutRect RenderInline::linesVisualOverflowBoundingBox() const
     return rect;
 }
 
-LayoutSize RenderInline::offsetFromContainer(const RenderObject* container, const LayoutPoint& point, bool* offsetDependsOnPoint) const
-{
-    ASSERT(container == this->container());
-
-    LayoutSize offset;
-    if (isRelPositioned())
-        offset += offsetForInFlowPosition();
-
-    // FIXME(sky): Remove now that it's always false?
-    if (offsetDependsOnPoint)
-        *offsetDependsOnPoint = false;
-
-    return offset;
-}
-
 void RenderInline::mapLocalToContainer(const RenderLayerModelObject* paintInvalidationContainer, TransformState& transformState, MapCoordinatesFlags mode) const
 {
     if (paintInvalidationContainer == this)
@@ -709,44 +690,6 @@ int RenderInline::baselinePosition(FontBaseline baselineType, bool firstLine, Li
     ASSERT(linePositionMode == PositionOnContainingLine);
     const FontMetrics& fontMetrics = style(firstLine)->fontMetrics();
     return fontMetrics.ascent(baselineType) + (lineHeight(firstLine, direction, linePositionMode) - fontMetrics.height()) / 2;
-}
-
-LayoutSize RenderInline::offsetForInFlowPositionedInline(const RenderBox& child) const
-{
-    // FIXME: This function isn't right with mixed writing modes.
-
-    ASSERT(isRelPositioned());
-    if (!isRelPositioned())
-        return LayoutSize();
-
-    // When we have an enclosing relpositioned inline, we need to add in the offset of the first line
-    // box from the rest of the content, but only in the cases where we know we're positioned
-    // relative to the inline itself.
-
-    LayoutSize logicalOffset;
-    LayoutUnit inlinePosition;
-    LayoutUnit blockPosition;
-    if (firstLineBox()) {
-        inlinePosition = LayoutUnit::fromFloatRound(firstLineBox()->logicalLeft());
-        blockPosition = firstLineBox()->logicalTop();
-    } else {
-        inlinePosition = layer()->staticInlinePosition();
-        blockPosition = layer()->staticBlockPosition();
-    }
-
-    // Per http://www.w3.org/TR/CSS2/visudet.html#abs-non-replaced-width an absolute positioned box
-    // with a static position should locate itself as though it is a normal flow box in relation to
-    // its containing block. If this relative-positioned inline has a negative offset we need to
-    // compensate for it so that we align the positioned object with the edge of its containing block.
-    if (child.style()->hasStaticInlinePosition())
-        logicalOffset.setWidth(std::max(LayoutUnit(), -offsetForInFlowPosition().width()));
-    else
-        logicalOffset.setWidth(inlinePosition);
-
-    if (!child.style()->hasStaticBlockPosition())
-        logicalOffset.setHeight(blockPosition);
-
-    return logicalOffset;
 }
 
 namespace {

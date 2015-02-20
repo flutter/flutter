@@ -198,10 +198,6 @@ inline void setStaticPositions(RenderBlockFlow* block, RenderBox* child)
         // inline so that we can obtain the value later.
         toRenderInline(containerBlock)->layer()->setStaticInlinePosition(block->startAlignedOffsetForLine(false));
         toRenderInline(containerBlock)->layer()->setStaticBlockPosition(blockHeight);
-
-        // If |child| is a leading or trailing positioned object this is its only opportunity to ensure it moves with an inline
-        // container changing width.
-        child->moveWithEdgeOfInlineContainerIfNecessary();
     }
     block->updateStaticInlinePositionForChild(child);
     child->layer()->setStaticBlockPosition(blockHeight);

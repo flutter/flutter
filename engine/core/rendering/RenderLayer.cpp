@@ -347,27 +347,10 @@ LayoutPoint RenderLayer::location() const
         }
     }
 
-    // Subtract our parent's scroll offset.
-    if (renderer()->isOutOfFlowPositioned() && enclosingPositionedAncestor()) {
-        RenderLayer* positionedParent = enclosingPositionedAncestor();
-
-        if (positionedParent->renderer()->isRelPositioned() && positionedParent->renderer()->isRenderInline()) {
-            LayoutSize offset = toRenderInline(positionedParent->renderer())->offsetForInFlowPositionedInline(*toRenderBox(renderer()));
-            localPoint += offset;
-        }
-    }
-
-    localPoint.move(offsetForInFlowPosition());
-
     // FIXME: We'd really like to just get rid of the concept of a layer rectangle and rely on the renderers.
     localPoint -= inlineBoundingBoxOffset;
 
     return localPoint;
-}
-
-const LayoutSize RenderLayer::offsetForInFlowPosition() const
-{
-    return renderer()->isRelPositioned() ? toRenderBoxModelObject(renderer())->offsetForInFlowPosition() : LayoutSize();
 }
 
 TransformationMatrix RenderLayer::perspectiveTransform() const

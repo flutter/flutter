@@ -58,8 +58,6 @@ public:
 
     virtual void absoluteQuads(Vector<FloatQuad>&) const override;
 
-    virtual LayoutSize offsetFromContainer(const RenderObject*, const LayoutPoint&, bool* offsetDependsOnPoint = 0) const override final;
-
     IntRect linesBoundingBox() const;
     LayoutRect linesVisualOverflowBoundingBox() const;
 
@@ -75,8 +73,6 @@ public:
     InlineFlowBox* lastLineBox() const { return m_lineBoxes.lastLineBox(); }
     InlineBox* firstLineBoxIncludingCulling() const { return alwaysCreateLineBoxes() ? firstLineBox() : culledInlineFirstLineBox(); }
     InlineBox* lastLineBoxIncludingCulling() const { return alwaysCreateLineBoxes() ? lastLineBox() : culledInlineLastLineBox(); }
-
-    LayoutSize offsetForInFlowPositionedInline(const RenderBox& child) const;
 
     virtual void addFocusRingRects(Vector<IntRect>&, const LayoutPoint& additionalOffset, const RenderLayerModelObject* paintContainer = 0) const override final;
 
@@ -118,7 +114,7 @@ private:
 
     virtual bool nodeAtPoint(const HitTestRequest&, HitTestResult&, const HitTestLocation& locationInContainer, const LayoutPoint& accumulatedOffset) override final;
 
-    virtual LayerType layerTypeRequired() const override { return isRelPositioned() || createsGroup() || hasClipPath() ? NormalLayer : NoLayer; }
+    virtual LayerType layerTypeRequired() const override { return createsGroup() || hasClipPath() ? NormalLayer : NoLayer; }
 
     virtual LayoutUnit offsetLeft() const override final;
     virtual LayoutUnit offsetTop() const override final;

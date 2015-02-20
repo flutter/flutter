@@ -1115,18 +1115,9 @@ void RenderBox::mapLocalToContainer(const RenderLayerModelObject* paintInvalidat
 LayoutSize RenderBox::offsetFromContainer(const RenderObject* o, const LayoutPoint& point, bool* offsetDependsOnPoint) const
 {
     ASSERT(o == container());
-
-    LayoutSize offset;
-    if (isRelPositioned())
-        offset += offsetForInFlowPosition();
-
     if (!isInline() || isReplaced())
-        offset += locationOffset();
-
-    if (style()->position() == AbsolutePosition && o->isRelPositioned() && o->isRenderInline())
-        offset += toRenderInline(o)->offsetForInFlowPositionedInline(*this);
-
-    return offset;
+        return locationOffset();
+    return LayoutSize();
 }
 
 InlineBox* RenderBox::createInlineBox()
@@ -1170,9 +1161,6 @@ void RenderBox::positionLineBox(InlineBox* box)
                 setChildNeedsLayout(MarkOnlyThis); // Just go ahead and mark the positioned object as needing layout, so it will update its position properly.
         }
 
-        if (container()->isRenderInline())
-            moveWithEdgeOfInlineContainerIfNecessary();
-
         // Nuke the box.
         box->remove(DontMarkLineBoxes);
         box->destroy();
@@ -1180,17 +1168,6 @@ void RenderBox::positionLineBox(InlineBox* box)
         setLocation(roundedLayoutPoint(box->topLeft()));
         setInlineBoxWrapper(box);
     }
-}
-
-void RenderBox::moveWithEdgeOfInlineContainerIfNecessary()
-{
-    ASSERT(isOutOfFlowPositioned() && container()->isRenderInline() && container()->isRelPositioned());
-    // If this object is inside a relative positioned inline and its inline position is an explicit offset from the edge of its container
-    // then it will need to move if its inline container has changed width. We do not track if the width has changed
-    // but if we are here then we are laying out lines inside it, so it probably has - mark our object for layout so that it can
-    // move to the new offset created by the new width.
-    if (!normalChildNeedsLayout() && !style()->hasStaticInlinePosition())
-        setChildNeedsLayout(MarkOnlyThis);
 }
 
 void RenderBox::deleteLineBoxWrapper()
@@ -1807,54 +1784,16 @@ void RenderBox::computeAndSetBlockDirectionMargins(const RenderBlock* containing
 
 LayoutUnit RenderBox::containingBlockLogicalWidthForPositioned(const RenderBoxModelObject* containingBlock) const
 {
-    if (containingBlock->isBox())
-        return toRenderBox(containingBlock)->clientLogicalWidth();
-
-    ASSERT(containingBlock->isRenderInline() && containingBlock->isRelPositioned());
-
-    const RenderInline* flow = toRenderInline(containingBlock);
-    InlineFlowBox* first = flow->firstLineBox();
-    InlineFlowBox* last = flow->lastLineBox();
-
-    // If the containing block is empty, return a width of 0.
-    if (!first || !last)
-        return 0;
-
-    LayoutUnit fromLeft;
-    LayoutUnit fromRight;
-    if (containingBlock->style()->isLeftToRightDirection()) {
-        fromLeft = first->logicalLeft() + first->borderLogicalLeft();
-        fromRight = last->logicalLeft() + last->logicalWidth() - last->borderLogicalRight();
-    } else {
-        fromRight = first->logicalLeft() + first->logicalWidth() - first->borderLogicalRight();
-        fromLeft = last->logicalLeft() + last->borderLogicalLeft();
-    }
-
-    return std::max<LayoutUnit>(0, fromRight - fromLeft);
+    ASSERT(containingBlock->isBox());
+    return toRenderBox(containingBlock)->clientLogicalWidth();
 }
 
 LayoutUnit RenderBox::containingBlockLogicalHeightForPositioned(const RenderBoxModelObject* containingBlock) const
 {
-    if (containingBlock->isBox()) {
-        const RenderBlock* cb = containingBlock->isRenderBlock() ?
-            toRenderBlock(containingBlock) : containingBlock->containingBlock();
-        return cb->clientLogicalHeight();
-    }
-
-    ASSERT(containingBlock->isRenderInline() && containingBlock->isRelPositioned());
-
-    const RenderInline* flow = toRenderInline(containingBlock);
-    InlineFlowBox* first = flow->firstLineBox();
-    InlineFlowBox* last = flow->lastLineBox();
-
-    // If the containing block is empty, return a height of 0.
-    if (!first || !last)
-        return 0;
-
-    LayoutRect boundingBox = flow->linesBoundingBox();
-    LayoutUnit heightResult = boundingBox.height();
-    heightResult -= (containingBlock->borderBefore() + containingBlock->borderAfter());
-    return heightResult;
+    ASSERT(containingBlock->isBox());
+    const RenderBlock* cb = containingBlock->isRenderBlock() ?
+        toRenderBlock(containingBlock) : containingBlock->containingBlock();
+    return cb->clientLogicalHeight();
 }
 
 static void computeInlineStaticDistance(Length& logicalLeft, Length& logicalRight, const RenderBox* child, const RenderBoxModelObject* containerBlock, LayoutUnit containerLogicalWidth)
@@ -1866,18 +1805,8 @@ static void computeInlineStaticDistance(Length& logicalLeft, Length& logicalRigh
     if (child->parent()->style()->direction() == LTR) {
         LayoutUnit staticPosition = child->layer()->staticInlinePosition() - containerBlock->borderLogicalLeft();
         for (RenderObject* curr = child->parent(); curr && curr != containerBlock; curr = curr->container()) {
-            if (curr->isBox()) {
+            if (curr->isBox())
                 staticPosition += toRenderBox(curr)->logicalLeft();
-                if (toRenderBox(curr)->isRelPositioned())
-                    staticPosition += toRenderBox(curr)->relativePositionOffset().width();
-            } else if (curr->isInline()) {
-                if (curr->isRelPositioned()) {
-                    if (!curr->style()->logicalLeft().isAuto())
-                        staticPosition += curr->style()->logicalLeft().value();
-                    else
-                        staticPosition -= curr->style()->logicalRight().value();
-                }
-            }
         }
         logicalLeft.setValue(Fixed, staticPosition);
     } else {
@@ -1885,20 +1814,10 @@ static void computeInlineStaticDistance(Length& logicalLeft, Length& logicalRigh
         LayoutUnit staticPosition = child->layer()->staticInlinePosition() + containerLogicalWidth + containerBlock->borderLogicalLeft();
         for (RenderObject* curr = child->parent(); curr; curr = curr->container()) {
             if (curr->isBox()) {
-                if (curr != containerBlock) {
+                if (curr != containerBlock)
                     staticPosition -= toRenderBox(curr)->logicalLeft();
-                    if (toRenderBox(curr)->isRelPositioned())
-                        staticPosition -= toRenderBox(curr)->relativePositionOffset().width();
-                }
                 if (curr == enclosingBox)
                     staticPosition -= enclosingBox->logicalWidth();
-            } else if (curr->isInline()) {
-                if (curr->isRelPositioned()) {
-                    if (!curr->style()->logicalLeft().isAuto())
-                        staticPosition -= curr->style()->logicalLeft().value();
-                    else
-                        staticPosition += curr->style()->logicalRight().value();
-                }
             }
             if (curr == containerBlock)
                 break;
@@ -3092,14 +3011,8 @@ LayoutRect RenderBox::layoutOverflowRectForPropagation() const
     if (!hasOverflowClip())
         rect.unite(layoutOverflowRect());
 
-    bool hasTransform = hasLayer() && layer()->transform();
-    if (isRelPositioned() || hasTransform) {
-        if (hasTransform)
-            rect = layer()->currentTransform().mapRect(rect);
-
-        if (isRelPositioned())
-            rect.move(offsetForInFlowPosition());
-    }
+    if (hasLayer() && layer()->transform())
+        rect = layer()->currentTransform().mapRect(rect);
 
     return rect;
 }

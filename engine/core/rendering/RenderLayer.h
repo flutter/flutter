@@ -120,9 +120,6 @@ public:
     void updateTransformationMatrix();
     RenderLayer* renderingContextRoot();
 
-    // Our current relative position offset.
-    const LayoutSize offsetForInFlowPosition() const;
-
     RenderLayerStackingNode* stackingNode() { return m_stackingNode.get(); }
     const RenderLayerStackingNode* stackingNode() const { return m_stackingNode.get(); }
 
