@@ -11,7 +11,7 @@
 <iframe></iframe>
 
 <script>
-var shellHandle = internals.passShellProxyHandle();
+var shellHandle = internals.takeShellProxyHandle();
 var shellProxy = connection.bindHandleToProxy(shellHandle, shellMojom.Shell);
 var shell = new shellJS.Shell(shellProxy);
 
