@@ -84,7 +84,7 @@ abstract class Node extends EventTarget {
   // this is why insertBefore(), append(), et al, are O(N) -- the whole affected subtree is walked
   // mutating the element tree from within this is strongly discouraged, since it will result in the
   // callbacks being invoked while the element tree is in a different state than implied by the callbacks
-  external void parentChangeCallback(ParentNode oldParent, ParentNode newParent); // O(N) in descendants
+  external void parentChangedCallback(ParentNode oldParent, ParentNode newParent); // O(N) in descendants
   // default implementation calls attached/detached
   void attachedCallback() { }
   void detachedCallback() { }
@@ -242,7 +242,7 @@ abstract class Element extends ParentNode {
   // returns the shadow root
 
   void endTagParsedCallback() { }
-  void attributeChangeCallback(String name, String oldValue, String newValue) { }
+  void attributeChangedCallback(String name, String oldValue, String newValue) { }
   // name will never be null when this is called by sky
 
   // TODO(ianh): does a node ever need to know when it's been redistributed?
@@ -261,7 +261,7 @@ class Text extends Node {
   external String get value; // O(1)
   external void set (String value); // O(1)
 
-  void valueChangeCallback(String oldValue, String newValue) { }
+  void valueChangedCallback(String oldValue, String newValue) { }
 
   @override
   Type getLayoutManager() => TextLayoutManager; // O(1)
