@@ -100,7 +100,7 @@ abstract class AbstractModule extends EventTarget {
   // if it's already loaded, the future will resolve immediately
   // if loading fails, the future will have an error
 
-  List<Module> getImports(); // O(N)
+  external List<Module> getImports(); // O(N)
   // returns the Module objects of all the imported modules
 
   external void registerElement(String tagname, Type elementClass); // O(1)

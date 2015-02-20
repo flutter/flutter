@@ -112,19 +112,20 @@ abstract class Gesture extends EventTarget {
     if (returnValue.cancel) {
       assert(returnValue.choose == false);
       if (wasActive)
-        module.application.cancelGesture(this);
+        module.application.gestureManager.cancelGesture(this);
       // if we never became active, then we never called addGesture() below
       _active = false;
     } else if (active == true) {
       if (wasActive == false || event is PointerDownEvent)
-        module.application.addGesture(event, this);
+        module.application.gestureManager.addGesture(event, this);
       if (returnValue.choose == true)
-        module.application.chooseGesture(this);
+        module.application.gestureManager.chooseGesture(this);
     }
     _ready = returnValue.finished;
   }
 }
 
+/*
 ```
 Subclasses should override ``processEvent()``:
  - as the events are received, they get examined to see if they
@@ -136,10 +137,9 @@ Subclasses should override ``processEvent()``:
  - doing anything with the event or target other than reading
    state is a contract violation
  - you are allowed to call sendEvent() at any time during a
-   processEventInternal() call, or after a call to
-   processEventInternal(), assuming that the last such call returned
-   valid=true, until the next call to processEventInternal() or
-   cancel().
+   processEvent() call, or after a call to processEvent(), assuming
+   that the last such call returned valid=true, until the next call to
+   processEvent() or cancel().
  - set forceChoose=true on the return value if you are confident
    that this is the gesture the user meant, even if it's possible
    that another gesture is still claiming it's valid (e.g. a long
@@ -151,6 +151,7 @@ Subclasses should override ``processEvent()``:
    "cancel" events if cancel() is called
 
 ```dart
+*/
 
 class PointerState {
   PointerState({this.gestures, this.chosen}) {
@@ -251,6 +252,7 @@ class GestureManager {
   }
 
 }
+/*
 </script>
 ```
 
@@ -263,13 +265,15 @@ SKY MODULE
 <!-- note: this hasn't been dartified yet -->
 
 <script>
+*/
 class TapGesture extends Gesture {
+  TapGesture = Gesture;
 
   // internal state:
   //   Integer numButtons = 0;
   //   Boolean primaryDown = false;
 
-  virtual GestureState processEvent(Event event);
+  GestureState processEvent(Event event);
   // - let returnValue = { finished = false }
   // - if the event is a pointer-down:
   //    - increment this.numButtons
@@ -334,23 +338,29 @@ class TapGesture extends Gesture {
   //       - return returnValue
 }
 
-class LongPressGesture : Gesture {
-  GestureState processEvent(EventTarget target, Event event);  
+class LongPressGesture extends Gesture {
+  LongPressGesture = Gesture;
+
+  GestureState processEvent(PointerEvent event);
   // long-tap-start: sent when the primary pointer goes down
   // long-tap-cancel: sent when cancel()ed or finger goes out of bounding box
   // long-tap: sent when the primary pointer is released
 }
 
-class DoubleTapGesture : Gesture {
-  GestureState processEvent(EventTarget target, Event event);  
+class DoubleTapGesture extends Gesture {
+  DoubleTapGesture = Gesture;
+
+  GestureState processEvent(PointerEvent event);
   // double-tap-start: sent when the primary pointer goes down the first time
   // double-tap-cancel: sent when cancel()ed or finger goes out of bounding box, or it times out
   // double-tap: sent when the primary pointer is released the second time within the timeout
 }
 
 
-abstract class ScrollGesture : Gesture {
-  GestureState processEvent(EventTarget target, Event event);  
+abstract class ScrollGesture extends Gesture {
+  ScrollGesture = Gesture;
+
+  GestureState processEvent(PointerEvent event);
   // this fires the following events (inertia is a boolean, delta is a float):
   //   scroll-start, with field inertia=false, delta=0; prechoose=true
   //   scroll, with fields inertia (is this a simulated scroll from inertia or a real scroll?), delta (number of pixels to scroll); prechoose=true
@@ -366,41 +376,52 @@ abstract class ScrollGesture : Gesture {
   //  - finished=true when the primary pointer goes up
 }
 
-class HorizontalScrollGesture : ScrollGesture { }
+class HorizontalScrollGesture extends ScrollGesture {
   // a ScrollGesture giving x-axis scrolling
+  HorizontalScrollGesture = ScrollGesture;
+}
 
-class VerticalScrollGesture : ScrollGesture { }
+class VerticalScrollGesture extends ScrollGesture {
   // a ScrollGesture giving y-axis scrolling
+  VerticalScrollGesture = ScrollGesture;
+}
 
 
-class PanGesture : Gesture {
+class PanGesture extends Gesture {
+  PanGesture = Gesture;
   // similar to ScrollGesture, but with two axes
   // pan-start, pan, pan-end
   // events have inertia (boolean), dx (float), dy (float)
 }
 
 
-abstract class ZoomGesture : Gesture {
-  GestureState processEvent(EventTarget target, Event event);  
+abstract class ZoomGesture extends Gesture {
+  ZoomGesture = Gesture;
+
+  GestureState processEvent(PointerEvent event);
   // zoom-start: sent when we could start zooming (e.g. for pinch-zoom, when two fingers hit the glass) (prechoose)
   // zoom-end: sent when cancel()ed after zoom-start, or when the fingers are lifted (prechoose)
   // zoom, with a 'scale' attribute, whose value is a multiple of the scale factor at zoom-start
   // e.g. if the user zooms to 2x, you'd get a bunch of 'zoom' events like scale=1.0, scale=1.17, ... scale=1.91, scale=2.0
 }
 
-class PinchZoomGesture : ZoomGesture {
+class PinchZoomGesture extends ZoomGesture {
+  PinchZoomGesture = ZoomGesture;
   // a ZoomGesture for two-finger-pinch gesture
   // zoom is prechoose
 }
 
-class DoubleTapZoomGesture : ZoomGesture {
+class DoubleTapZoomGesture extends ZoomGesture {
+  DoubleTapZoomGesture = ZoomGesture;
   // a ZoomGesture for the double-tap-slide gesture
   // when the slide starts, forceChoose
 }
 
 
-class PanAndZoomGesture : Gesture {
-  GestureState processEvent(EventTarget target, Event event);  
+class PanAndZoomGesture extends Gesture {
+  PanAndZoomGesture = Gesture;
+
+  GestureState processEvent(PointerEvent event);
   // manipulate-start (prechoose)
   // manipulate: (prechoose)
   //    panX, panY: pixels
@@ -410,8 +431,10 @@ class PanAndZoomGesture : Gesture {
 }
 
 
-abstract class FlingGesture : Gesture {
-  GestureState processEvent(EventTarget target, Event event);  
+abstract class FlingGesture extends Gesture {
+  FlingGesture = Gesture;
+
+  GestureState processEvent(PointerEvent event);
   // fling-start: when the gesture begins (prechoose)
   // fling-move: while the user is directly dragging the element (has delta attribute with the distance from fling-start) (prechoose)
   // fling: the user has released the pointer and the decision is it was in fact flung
@@ -419,10 +442,17 @@ abstract class FlingGesture : Gesture {
   // fling-end: cancel(), or after fling or fling-cancel (prechoose)
 }
 
-class FlingLeftGesture : FlingGesture { }
-class FlingRightGesture : FlingGesture { }
-class FlingUpGesture : FlingGesture { }
-class FlingDownGesture : FlingGesture { }
-
+class FlingLeftGesture extends FlingGesture {
+  FlingLeftGesture = FlingGesture;
+}
+class FlingRightGesture extends FlingGesture {
+  FlingRightGesture = FlingGesture;
+}
+class FlingUpGesture extends FlingGesture {
+  FlingUpGesture = FlingGesture;
+}
+class FlingDownGesture extends FlingGesture {
+  FlingDownGesture = FlingGesture;
+}
 </script>
 ```

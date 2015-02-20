@@ -22,6 +22,8 @@ argument's default value.
 The following definitions are exposed in ``dart:sky``:
 
 ```dart
+import 'dart:mirrors';
+
 abstract class AutomaticMetadata {
   const AutomaticMetadata();
   void init(DeclarationMirror target, Module module);

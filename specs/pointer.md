@@ -434,6 +434,7 @@ class PointerMovedEvent extends PointerEvent<Null> {
   PointerMovedEvent = PointerEvent;
   bool get bubbles => false;
 }
+/*
 ```
 
 Wheel events
@@ -470,12 +471,13 @@ Note: The only wheels that are supported are mouse wheels and physical
 dials. Track balls are not reported as mouse wheels.
 
 ```dart
+*/
 class WheelEvent extends Event {
-  Event({ this.wheel,
-          this.delta: 0.0,
-          this.pointer,
-          this.x, this.y,
-        }): super();
+  WheelEvent({ this.wheel,
+               this.delta: 0.0,
+               this.pointer,
+               this.x, this.y
+             }): super();
 
   final int wheel;
   final double delta; // revolutions (or fractions thereof)

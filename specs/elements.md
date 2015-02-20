@@ -17,14 +17,14 @@ abstract class Node extends EventTarget {
   external Root get owner; // O(1)
 
   external ParentNode get parentNode; // O(1)
-  Element get parentElement => {
+  Element get parentElement {
     if (parentNode is Element)
       return parentNode as Element;
     return null;
   }
 
   external Node get previousSibling; // O(1)
-  Element get previousElementSibling => {
+  Element get previousElementSibling {
     var result = previousSibling;
     while (result != null && result is! Element)
       result = result.previousSibling;
@@ -32,7 +32,7 @@ abstract class Node extends EventTarget {
   }
 
   external Node get nextSibling; // O(1)
-  Element get nextElementSibling => {
+  Element get nextElementSibling {
     var result = nextSibling;
     while (result != null && result is! Element)
       result = result.nextSibling;
@@ -53,7 +53,7 @@ abstract class Node extends EventTarget {
     });    
   }
 
-  void _insertAfter(Node node); // O(N) in number of arguments plus all their descendants
+  external void _insertAfter(Node node); // O(N) in number of arguments plus all their descendants
   // node must be Text or Element, parentNode must be non-null
   void insertAfter(List nodes) {
     var lastNode = this;
@@ -119,7 +119,7 @@ abstract class Node extends EventTarget {
 
 abstract class ParentNode extends Node {
   external Node get firstChild; // O(1)
-  Element get firstElementChild => {
+  Element get firstElementChild {
     var result = firstChild;
     while (result != null && result is! Element)
       result = result.nextSibling;
@@ -127,7 +127,7 @@ abstract class ParentNode extends Node {
   }
 
   external Node get lastChild; // O(1)
-  Element get lastElementChild => {
+  Element get lastElementChild {
     var result = lastChild;
     while (result != null && result is! Element)
       result = result.previousSibling;
@@ -143,7 +143,7 @@ abstract class ParentNode extends Node {
 
   external void _appendChild(Node node); // O(N) in number of descendants
   // node must be Text or Element
-  void appendChild(Node node) {
+  void appendChild(node) {
     if (node is String)
       node = new Text(node);
     _appendChild(node);
@@ -154,7 +154,7 @@ abstract class ParentNode extends Node {
 
   external void _prependChild(Node node); // O(N) in number of descendants
   // node must be Text or Element
-  void prependChild(Node node) {
+  void prependChild(node) {
     if (node is String)
       node = new Text(node);
     _prependChild(node);
@@ -168,7 +168,7 @@ abstract class ParentNode extends Node {
   }
 
   external void removeChildren(); // O(N) in number of descendants
-  void setChild(Node node) {
+  void setChild(node) {
     removeChildren();
     appendChild(node);
   }
@@ -191,15 +191,15 @@ class tagname extends AutomaticMetadata {
   final String name;
   void init(DeclarationMirror target, Module module) {
     assert(target is ClassMirror);
-    if (!target.isSubclassOf(reflectClass(Element)))
-      throw Error('@tagname can only be used on descendants of Element');
+    if (!(target as ClassMirror).isSubclassOf(reflectClass(Element)))
+      throw new UnsupportedError('@tagname can only be used on descendants of Element');
     module.registerElement(name, (target as ClassMirror).reflectedType);
   }
 }
 
 // @hasShadow annotation for registering elements
 class _HasShadow {
-  const HasShadow();
+  const _HasShadow();
 }
 const hasShadow = const _HasShadow();
 
@@ -207,8 +207,11 @@ abstract class Element extends ParentNode {
   Element({Map<String, String> attributes: null,
            List children: null,
            Module hostModule: null}) { // O(M+N), M = number of attributes, N = number of children nodes plus all their descendants
-    var shadowClass = reflectClass(hasShadow);
-    bool needsShadow = reflect(this).type.metadata.singleWhere((mirror) => mirror.type == hasShadowClass);
+    var shadowClass = reflectClass(hasShadow.runtimeType);
+    var shadowAnnotations = reflect(this).type.metadata.where((mirror) => mirror.type == shadowClass);
+    if (shadowAnnotations.length > 2)
+      throw new StateError('@hasShadow specified multiple times on ' + currentMirrorSystem().getName(reflectClass(this.runtimeType).simpleName));
+    bool needsShadow = shadowAnnotations.length == 1;
     if (children != null)
       children = children.map((node) => node is String ? new Text(node) : node).toList();
     this._initElement(attributes, children, hostModule, needsShadow);
@@ -222,7 +225,7 @@ abstract class Element extends ParentNode {
   String get tagName { // O(N) in number of annotations on the class
     // throws a StateError if the class doesn't have an @tagname annotation
     var tagnameClass = reflectClass(tagname);
-    return (reflectClass(this.runtimeType).metadata.singleWhere((mirror) => mirror.type == tagnameClass).reflectee as tagname).value;
+    return (reflectClass(this.runtimeType).metadata.singleWhere((mirror) => mirror.type == tagnameClass).reflectee as tagname).name;
   }
 
   external bool hasAttribute(String name); // O(N) in number of attributes
@@ -235,7 +238,7 @@ abstract class Element extends ParentNode {
   // Returns a new Array and new Attr instances every time.
   external List<Attr> getAttributes(); // O(N) in number of attributes
 
-  external final Root shadowRoot; // O(1)
+  external Root get shadowRoot; // O(1)
   // returns the shadow root
 
   void endTagParsedCallback() { }
@@ -270,8 +273,14 @@ class Fragment extends ParentNode {
 }
 
 class Root extends ParentNode {
-  external Root ({List children, Element host}); // O(N) in number of children nodes arguments plus all their descendants
-  // children must be String, Text, or Element
+  Root({List children: null, this.host}) { // O(N) in number of children nodes plus all their descendants
+    if (children != null)
+      children = children.map((node) => node is String ? new Text(node) : node).toList();
+    this._initRoot(children);
+  }
+  external void _initRoot(List children);
+  // appends the given children nodes
+  // children must be Text or Element
 
   final Element host;
 
@@ -280,8 +289,7 @@ class Root extends ParentNode {
 }
 
 class ApplicationRoot extends Root {
-  external ApplicationRoot ({List children}) : Root(children: children); // O(N) in number of children nodes arguments plus all their descendants
-  // children must be String, Text, or Element
+  ApplicationRoot ({List children}) : super(children: children); // O(N) in number of children nodes arguments plus all their descendants
 
   @override
   Type getLayoutManager() => rootLayoutManager; // O(1)
