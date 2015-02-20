@@ -12,7 +12,7 @@
 
 namespace blink {
 
-DartState::Scope::Scope(DartState* dart_state) {
+DartState::Scope::Scope(DartState* dart_state) : scope_(dart_state->isolate()) {
 }
 
 DartState::Scope::~Scope() {

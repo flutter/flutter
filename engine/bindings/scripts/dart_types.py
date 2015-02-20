@@ -51,11 +51,11 @@ from v8_globals import includes
 
 NON_WRAPPER_TYPES = frozenset([
     'CompareHow',
+    'DartValue',
     'EventHandler',
     'EventListener',
     'MediaQueryListListener',
     'NodeFilter',
-    'SerializedScriptValue',
 ])
 TYPED_ARRAYS = {
     # (cpp_type, dart_type), used by constructor templates
@@ -109,7 +109,6 @@ CPP_SPECIAL_CONVERSION_RULES = {
     'EventHandler': 'EventListener*',
     'MediaQueryListListener': 'RefPtrWillBeRawPtr<MediaQueryListListener>',
     'Promise': 'ScriptPromise',
-    'ScriptValue': 'ScriptValue',
     # FIXME: Eliminate custom bindings for XPathNSResolver  http://crbug.com/345529
     'XPathNSResolver': 'RefPtrWillBeRawPtr<XPathNSResolver>',
     'boolean': 'bool',
@@ -249,7 +248,7 @@ INCLUDES_FOR_TYPE = {
     'MediaQueryListListener': set(['sky/engine/core/css/MediaQueryListListener.h']),
     'NodeList': set(['sky/engine/core/dom/NodeList.h',
                      'sky/engine/core/dom/StaticNodeList.h']),
-    'ScriptValue': set(['sky/engine/tonic/dart_value.h']),
+    'DartValue': set(['sky/engine/tonic/dart_value.h']),
 }
 
 
@@ -345,8 +344,7 @@ DART_TO_CPP_VALUE = {
     'MediaQueryListListener': 'nullptr /* FIXME, DART_TO_CPP_VALUE[MediaQueryListener] */',
     'NodeFilter': 'nullptr /* FIXME, DART_TO_CPP_VALUE[NodeFilter] */',
     'Promise': 'DartUtilities::dartToScriptPromise{null_check}(args, {index})',
-    'SerializedScriptValue': 'nullptr /* FIXME, DART_TO_CPP_VALUE[SerializedScriptValue] */',
-    'ScriptValue': 'DartUtilities::dartToScriptValue{null_check}(args, {index})',
+    'DartValue': 'DartConverter<DartValue*>::FromArguments(args, {index}, exception)',
     # FIXME(vsm): Why don't we have an entry for Window? V8 does.
     # I think I removed this as the Window object is more special in V8 - it's the
     # global context as well.  Do we need to special case it?
@@ -452,7 +450,7 @@ def preprocess_idl_type(idl_type):
         # Enumerations are internally DOMStrings
         return IdlType('DOMString')
     if (idl_type.name == 'Any' or idl_type.is_callback_function):
-        return IdlType('ScriptValue')
+        return IdlType('DartValue')
     return idl_type
 
 IdlTypeBase.preprocessed_type = property(preprocess_idl_type)
@@ -482,8 +480,9 @@ def preprocess_idl_type_and_value(idl_type, cpp_value, extended_attributes):
 
 IDL_TO_DART_TYPE = {
     'DOMString': 'String',
-    'void': 'void',
+    'DartValue': 'dynamic',
     'boolean': 'bool',
+    'void': 'void',
 }
 
 def idl_type_to_dart_type(idl_type):
@@ -505,9 +504,10 @@ def idl_type_to_dart_type(idl_type):
 
 DART_DEFAULT_VALUES_BY_TYPE = {
     'String': '""',
-    'int': '0',
-    'double': '0',
     'bool': 'false',
+    'double': '0',
+    'dynamic': 'null',
+    'int': '0',
 }
 
 def dart_default_value(dart_type, argument=None):
@@ -559,7 +559,7 @@ def dart_conversion_type(idl_type, extended_attributes):
         if treat_returned_null_string_as == 'Undefined':
             return 'StringOrUndefined'
         raise 'Unrecognized TreatReturnNullStringAs value: "%s"' % treat_returned_null_string_as
-    if idl_type.is_basic_type or base_idl_type == 'ScriptValue':
+    if idl_type.is_basic_type or base_idl_type == 'DartValue':
         return base_idl_type
 
     # Data type with potential additional includes
@@ -605,8 +605,7 @@ DART_SET_RETURN_VALUE = {
     'Date': 'Dart_SetReturnValue(args, {cpp_value})',
     'EventHandler': DART_FIX_ME,
     'ScriptPromise': 'Dart_SetReturnValue(args, {cpp_value})',
-    'ScriptValue': 'Dart_SetReturnValue(args, {cpp_value})',
-    'SerializedScriptValue': DART_FIX_ME,
+    'DartValue': 'DartConverter<DartValue*>::SetReturnValue(args, {cpp_value})',
     # DOMWrapper
     # TODO(terry): Remove ForMainWorld stuff.
     'DOMWrapperForMainWorld': DART_FIX_ME,
@@ -636,7 +635,7 @@ def dart_set_return_value(idl_type, cpp_value,
     idl_type, cpp_value = preprocess_idl_type_and_value(idl_type, cpp_value, extended_attributes)
     this_dart_conversion_type = idl_type.dart_conversion_type(extended_attributes)
     # SetReturn-specific overrides
-    if this_dart_conversion_type in ['Date', 'EventHandler', 'ScriptPromise', 'ScriptValue', 'SerializedScriptValue', 'array']:
+    if this_dart_conversion_type in ['Date', 'EventHandler', 'ScriptPromise', 'SerializedScriptValue', 'array']:
         # Convert value to Dart and then use general Dart_SetReturnValue
         # FIXME(vsm): Why do we differ from V8 here? It doesn't have a
         # creation_context.
@@ -715,8 +714,7 @@ CPP_VALUE_TO_DART_VALUE = {
     'EventHandler': '-----OOPS TO DART-EVENT---',
     # We need to generate the NullCheck version in some cases.
     'ScriptPromise': 'DartUtilities::scriptPromiseToDart({cpp_value})',
-    'ScriptValue': 'DartUtilities::scriptValueToDart({cpp_value})',
-    'SerializedScriptValue': 'DartUtilities::serializedScriptValueToDart({cpp_value})',
+    'DartValue': 'DartConverter<DartValue*>::ToDart({cpp_value})',
     # General
     'array': 'VectorToDart({cpp_value})',
     'DOMWrapper': 'Dart{idl_type}::toDart({cpp_value})',

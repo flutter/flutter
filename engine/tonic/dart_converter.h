@@ -269,13 +269,25 @@ struct DartConverter<Vector<T>> {
 // DartValue
 
 template <>
-struct DartConverter<DartValue> {
+struct DartConverter<DartValue*> {
   static Dart_Handle ToDart(DartState* state, DartValue* val) {
     return val->dart_value();
   }
 
   static void SetReturnValue(Dart_NativeArguments args, DartValue* val) {
     Dart_SetReturnValue(args, val->dart_value());
+  }
+
+  static PassRefPtr<DartValue> FromDart(Dart_Handle handle) {
+    return DartValue::Create(DartState::Current(), handle);
+  }
+
+  static PassRefPtr<DartValue> FromArguments(Dart_NativeArguments args,
+                                             int index,
+                                             Dart_Handle& exception,
+                                             bool auto_scope = true) {
+    // TODO(abarth): What should we do with auto_scope?
+    return FromDart(Dart_GetNativeArgument(args, index));
   }
 };
 

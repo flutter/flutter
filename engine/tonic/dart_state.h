@@ -9,6 +9,8 @@
 #include "base/memory/weak_ptr.h"
 #include "base/supports_user_data.h"
 #include "dart/runtime/include/dart_api.h"
+#include "sky/engine/tonic/dart_api_scope.h"
+#include "sky/engine/tonic/dart_isolate_scope.h"
 #include "sky/engine/wtf/OwnPtr.h"
 #include "sky/engine/wtf/PassRefPtr.h"
 #include "sky/engine/wtf/RefCounted.h"
@@ -29,6 +31,10 @@ class DartState : public base::SupportsUserData {
    public:
     Scope(DartState* dart_state);
     ~Scope();
+
+   private:
+    DartIsolateScope scope_;
+    DartApiScope api_scope_;
   };
 
   DartState();

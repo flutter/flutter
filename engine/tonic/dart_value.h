@@ -30,6 +30,10 @@ class DartValue : public RefCounted<DartValue> {
   ~DartValue();
 
   Dart_Handle dart_value() const { return dart_value_.value(); }
+  const base::WeakPtr<DartState>& dart_state() const {
+      return dart_value_.dart_state();
+  }
+
   bool is_empty() const { return !dart_value(); }
 
   bool is_null() const {
