@@ -19,7 +19,7 @@ void moveDot(event) {
   double x = event.x;
   double y = event.y;
 
-  dot.style.setProperty("transform", "translate(${x-50}px,${y-50}px)");
+  dot.style["transform"] = "translate(${x-50}px,${y-50}px)";
 }
 
 void main() {
