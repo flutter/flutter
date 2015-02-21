@@ -16,8 +16,9 @@ namespace blink {
 class AbstractModule;
 class BuiltinSky;
 class DOMDartState;
-class Document;
 class DartValue;
+class Document;
+class HTMLScriptElement;
 
 class DartController {
  public:
@@ -33,7 +34,9 @@ class DartController {
                           const String& source,
                           const TextPosition& textPosition,
                           const LoadFinishedCallback& load_finished_callback);
-  void ExecuteLibraryInModule(AbstractModule* module, Dart_Handle library);
+  void ExecuteLibraryInModule(AbstractModule* module,
+                              Dart_Handle library,
+                              HTMLScriptElement* script);
 
   void ClearForClose();
   void CreateIsolateFor(Document* document);

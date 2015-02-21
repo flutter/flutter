@@ -6,7 +6,7 @@ class TestClass extends base.BaseClass {
 
 bool didInit = false;
 
-void init() {
+void _init(_) {
     didInit = (new TestClass() != null);
 }
 </script>

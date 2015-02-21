@@ -1,0 +1,25 @@
+<!--
+// Copyright 2015 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+-->
+<import src="/sky/framework/sky-element.sky" />
+<sky-element>
+<template>
+  <style>
+    div {
+      height: 50px;
+      width: 50px;
+      background-color: green;
+    }
+  </style>
+  <div>Hi</div>
+</template>
+<script>
+@Tagname('example')
+class ExampleElement extends SkyElement {
+}
+
+_init(script) => register(script, ExampleElement);
+</script>
+</sky-element>

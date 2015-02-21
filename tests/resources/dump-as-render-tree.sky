@@ -2,7 +2,7 @@
 import "dart:sky" as sky;
 import "dart:sky.internals" as internals;
 
-void init() {
+void _init(_) {
   sky.window.addEventListener('load', (_) =>
     internals.notifyTestComplete(internals.renderTreeAsText()));  
 }

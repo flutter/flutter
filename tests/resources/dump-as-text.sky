@@ -6,7 +6,7 @@ void handleLoadEvent(event) {
   internals.notifyTestComplete(internals.contentAsText());
 }
 
-void init() {
+void _init(_) {
   sky.window.addEventListener('load', handleLoadEvent);
 }
 </script>

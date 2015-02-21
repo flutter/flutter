@@ -16,6 +16,7 @@
 #include "sky/engine/core/app/Module.h"
 #include "sky/engine/core/dom/Element.h"
 #include "sky/engine/core/frame/LocalFrame.h"
+#include "sky/engine/core/html/HTMLScriptElement.h"
 #include "sky/engine/core/html/imports/HTMLImport.h"
 #include "sky/engine/core/html/imports/HTMLImportChild.h"
 #include "sky/engine/core/loader/FrameLoaderClient.h"
@@ -29,6 +30,7 @@
 #include "sky/engine/tonic/dart_gc_controller.h"
 #include "sky/engine/tonic/dart_isolate_scope.h"
 #include "sky/engine/tonic/dart_state.h"
+#include "sky/engine/tonic/dart_wrappable.h"
 #include "sky/engine/wtf/text/TextPosition.h"
 
 namespace blink {
@@ -122,7 +124,8 @@ void DartController::LoadScriptInModule(
 }
 
 void DartController::ExecuteLibraryInModule(AbstractModule* module,
-                                            Dart_Handle library) {
+                                            Dart_Handle library,
+                                            HTMLScriptElement* script) {
   ASSERT(library);
   DCHECK(Dart_CurrentIsolate() == dart_state()->isolate());
   DartApiScope dart_api_scope;
@@ -130,16 +133,23 @@ void DartController::ExecuteLibraryInModule(AbstractModule* module,
   // Don't continue if we failed to load the module.
   if (LogIfError(Dart_FinalizeLoading(true)))
     return;
-  const char* name = module->isApplication() ? "main" : "init";
+  const char* name = module->isApplication() ? "main" : "_init";
 
   // main() is required, but init() is not:
   // TODO(rmacnak): Dart_LookupFunction won't find re-exports, etc.
   Dart_Handle entry = Dart_LookupFunction(library, ToDart(name));
-  if (!Dart_IsFunction(entry) && !module->isApplication())
+  if (module->isApplication()) {
+    LogIfError(Dart_Invoke(library, ToDart(name), 0, nullptr));
+    return;
+  }
+
+  if (!Dart_IsFunction(entry))
     return;
 
-  Dart_Handle result = Dart_Invoke(library, ToDart(name), 0, nullptr);
-  LogIfError(result);
+  Dart_Handle args[] = {
+    ToDart(script),
+  };
+  LogIfError(Dart_Invoke(library, ToDart(name), arraysize(args), args));
 }
 
 static void UnhandledExceptionCallback(Dart_Handle error) {

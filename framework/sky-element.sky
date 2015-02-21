@@ -1,0 +1,85 @@
+<!--
+// Copyright 2015 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+-->
+<script>
+import "dart:mirrors";
+import "dart:sky";
+
+class _Registration {
+  Element template;
+  _Registration(this.template);
+}
+
+final Map<String, _Registration> _registery = new Map<String, _Registration>();
+
+class Tagname {
+  final String name;
+  const Tagname(this.name);
+}
+
+String _getTagName(Type type) {
+  return reflectClass(type).metadata.firstWhere(
+      (i) => i.reflectee is Tagname).reflectee.name;
+}
+
+abstract class SkyElement extends Element {
+  // Override these functions to receive lifecycle notifications.
+  void created() {}
+  void attached() {}
+  void detached() {}
+  void attributeChanged(String attrName, String oldValue, String newValue) {}
+  void shadowRootReady() {}
+
+  String get tagName => _getTagName(runtimeType);
+
+  // TODO(abarth): Rather than hard-coding "example" here, we should make the
+  // bindings read the |tagName| property of this object during construction.
+  SkyElement() : super("example") {
+    created();
+
+    // Invoke attributeChanged callback when element is first created too.
+    for (Attr attribute in getAttributes())
+      attributeChangedCallback(attribute.name, null, attribute.value);
+  }
+
+  attachedCallback() {
+    if (shadowRoot == null) {
+      var registration = _registery[tagName];
+      if (registration.template != null) {
+        ShadowRoot shadow = ensureShadowRoot();
+        var tree = registration.template.content.cloneNode(deep:true);
+        shadow.appendChild(tree);
+        shadowRootReady();
+      }
+    }
+    attached();
+  }
+
+  detachedCallback() {
+    detached();
+  }
+
+  attributeChangedCallback(name, oldValue, newValue) {
+    attributeChanged(name, oldValue, newValue);
+  }
+}
+
+void register(Element script, Type type) {
+  Element definition = script.parentNode;
+
+  if (definition.tagName != 'sky-element')
+    throw new UnsupportedError('register() calls must be inside a <sky-element>.');
+
+  ClassMirror mirror = reflectClass(type);
+  if (!mirror.isSubclassOf(reflectClass(SkyElement)))
+    throw new UnsupportedError('@Tagname can only be used on descendants of SkyElement');
+
+  String tagName = _getTagName(type);
+  Element template = definition.querySelector('template');
+
+  document.registerElement(tagName, type);
+  _registery[tagName] = new _Registration(template);
+}
+</script>

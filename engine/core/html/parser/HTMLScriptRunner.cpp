@@ -115,8 +115,11 @@ void HTMLScriptRunner::executeLibrary(RefPtr<AbstractModule> module,
   // or script failures, etc.
   Microtask::performCheckpoint();
 
-  if (LocalFrame* frame = contextFrame(m_element.get()))
-    frame->dart().ExecuteLibraryInModule(module.get(), library->dart_value());
+  if (LocalFrame* frame = contextFrame(m_element.get())) {
+    frame->dart().ExecuteLibraryInModule(module.get(),
+                                         library->dart_value(),
+                                         m_element.get());
+  }
 
   advanceTo(StateCompleted);
   // We may be deleted at this point.
