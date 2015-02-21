@@ -1,0 +1,38 @@
+<!--
+// Copyright 2015 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+-->
+<import src="/sky/framework/sky-element.sky" />
+<import src="/sky/framework/sky-scrollable.sky" />
+<import src="../data/cities.sky" as="cities" />
+
+<sky-element name="example-scrollable">
+<template>
+  <style>
+  sky-scrollable {
+    margin: 20px;
+    height: 400px;
+    border: 2px solid blue;
+  }
+  </style>
+  <sky-scrollable />
+</template>
+<script>
+import "dart:sky";
+
+@Tagname('example-scrollable')
+class ExampleScrollable extends SkyElement {
+  void shadowRootReady() {
+    Element parent = shadowRoot.querySelector('sky-scrollable');
+    for (Map city in cities.kData.getRange(0, 300)) {
+      Element div = document.createElement('div');
+      div.setChild(new Text(city['name']));
+      parent.appendChild(div);
+    }
+  }
+}
+
+_init(script) => register(script, ExampleScrollable);
+</script>
+</sky-element>
