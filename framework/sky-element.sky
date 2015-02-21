@@ -47,8 +47,8 @@ abstract class SkyElement extends Element {
       var registration = _registery[tagName];
       if (registration.template != null) {
         ShadowRoot shadow = ensureShadowRoot();
-        var tree = registration.template.content.cloneNode(deep:true);
-        shadow.appendChild(tree);
+        Node content = registration.template.content;
+        shadow.appendChild(document.importNode(content, deep: true));
         shadowRootReady();
       }
     }

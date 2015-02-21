@@ -394,11 +394,12 @@ bool HTMLDocumentParser::isWaitingForScripts() const
 
 void HTMLDocumentParser::resumeAfterWaitingForImports()
 {
-    RefPtr<HTMLDocumentParser> protect(this);
-    ASSERT(!isWaitingForScripts());
+    if (isWaitingForScripts())
+        return;
     if (m_pendingChunks.isEmpty())
         return;
     ASSERT(m_haveBackgroundParser);
+    RefPtr<HTMLDocumentParser> protect(this);
     pumpPendingChunks();
 }
 

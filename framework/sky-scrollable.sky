@@ -3,17 +3,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 -->
-<import src="sky-element/sky-element.sky" as="SkyElement" />
-<import src="fling-curve.sky" as="FlingCurve" />
+<import src="sky-element.sky" />
 
-<sky-element
-  name="sky-scrollable"
-  on-gesturescrollstart="handleScrollStart_"
-  on-gesturescrollend="handleScrollEnd_"
-  on-gesturescrollupdate="handleScrollUpdate_"
-  on-gestureflingstart="handleFlingStart_"
-  on-gestureflingcancel="handleFlingCancel_"
-  on-wheel="handleWheel_">
+<sky-element>
 <template>
   <style>
   :host {
@@ -42,90 +34,103 @@
   <div id="vbar" />
 </template>
 <script>
-module.exports = class extends SkyElement {
-  created() {
-    this.scrollable_ = null;
-    this.vbar_ = null;
-    this.scrollOffset_ = 0;
-    this.flingCurve_ = null;
-    this.flingAnimationId_ = null;
+import "dart:math" as math;
+import "dart:sky";
+import "fling-curve.dart";
+
+@Tagname('sky-scrollable')
+class SkyScrollable extends SkyElement {
+  Element _scrollable;
+  Element _vbar;
+  double _scrollOffset = 0.0;
+  FlingCurve _flingCurve;
+  int _flingAnimationId;
+
+  SkyScrollable() {
+    addEventListener('gesturescrollstart', _handleScrollStart);
+    addEventListener('gesturescrollend', _handleScrollEnd);
+    addEventListener('gesturescrollupdate', _handleScrollUpdate);
+    addEventListener('gestureflingstart', _handleFlingStart);
+    addEventListener('gestureflingcancel', _handleFlingCancel);
+    addEventListener('wheel', _handleWheel);
   }
 
-  shadowRootReady() {
-    this.scrollable_ = this.shadowRoot.getElementById('scrollable');
-    this.vbar_ = this.shadowRoot.getElementById('vbar');
+  void shadowRootReady() {
+    _scrollable = shadowRoot.getElementById('scrollable');
+    _vbar = shadowRoot.getElementById('vbar');
   }
 
-  get scrollOffset() {
-    return this.scrollOffset_;
-  }
+  double get scrollOffset => _scrollOffset;
 
-  set scrollOffset(value) {
+  set scrollOffset(double value) {
     // TODO(abarth): Can we get these values without forcing a synchronous layout?
-    var outerHeight = this.clientHeight;
-    var innerHeight = this.scrollable_.clientHeight;
-    var scrollRange = innerHeight - outerHeight;
-    var newScrollOffset = Math.max(0, Math.min(scrollRange, value));
-    if (newScrollOffset == this.scrollOffset_)
+    double outerHeight = clientHeight.toDouble();
+    double innerHeight = _scrollable.clientHeight.toDouble();
+    double scrollRange = innerHeight - outerHeight;
+    double newScrollOffset = math.max(0.0, math.min(scrollRange, value));
+    if (newScrollOffset == _scrollOffset)
       return;
-    this.scrollOffset_ = newScrollOffset;
-    var transform = 'translateY(' + -this.scrollOffset_.toFixed(2) + 'px)';
-    this.scrollable_.style.transform = transform;
+    _scrollOffset = newScrollOffset;
+    String transform = 'translateY(${(-_scrollOffset).toStringAsFixed(2)}px)';
+    _scrollable.style['transform'] = transform;
 
-    var topPercent = newScrollOffset / innerHeight * 100;
-    var heightPercent = outerHeight / innerHeight * 100;
-    this.vbar_.style.top = topPercent + '%';
-    this.vbar_.style.height = heightPercent + '%';
+    double topPercent = newScrollOffset / innerHeight * 100.0;
+    double heightPercent = outerHeight / innerHeight * 100.0;
+    _vbar.style['top'] = '${topPercent}%';
+    _vbar.style['height'] = '${heightPercent}%';
   }
 
-  scrollBy(scrollDelta) {
-    var oldScrollOffset = this.scrollOffset_;
-    this.scrollOffset += scrollDelta;
-    return this.scrollOffset_ != oldScrollOffset;
+  bool scrollBy(double scrollDelta) {
+    double oldScrollOffset = _scrollOffset;
+    scrollOffset += scrollDelta;
+    return _scrollOffset != oldScrollOffset;
   }
 
-  scheduleFlingUpdate_() {
-    this.flingAnimationId_ = requestAnimationFrame(this.updateFling_.bind(this));
+  void _scheduleFlingUpdate() {
+    _flingAnimationId = window.requestAnimationFrame(_updateFling);
   }
 
-  stopFling_() {
-    cancelAnimationFrame(this.flingAnimationId_);
-    this.flingCurve_ = null;
-    this.flingAnimationId_ = null;
-    this.vbar_.style.opacity = 0;
+  void _stopFling() {
+    window.cancelAnimationFrame(_flingAnimationId);
+    _flingCurve = null;
+    _flingAnimationId = null;
+    _vbar.style['opacity'] = '0';
   }
 
-  updateFling_(timeStamp) {
-    var scrollDelta = this.flingCurve_.update(timeStamp);
-    if (!scrollDelta || !this.scrollBy(scrollDelta))
-      return this.stopFling_();
-    this.scheduleFlingUpdate_();
+  void _updateFling(double timeStamp) {
+    double scrollDelta = _flingCurve.update(timeStamp);
+    if (scrollDelta == 0.0 || !scrollBy(scrollDelta))
+      _stopFling();
+    else
+      _scheduleFlingUpdate();
   }
 
-  handleScrollStart_(event) {
-    this.vbar_.style.opacity = 1;
+  void _handleScrollStart(_) {
+    _vbar.style['opacity'] = '1';
   }
 
-  handleScrollEnd_(event) {
-    this.vbar_.style.opacity = 0;
+  void _handleScrollEnd(_) {
+    _vbar.style['opacity'] = '0';
   }
 
-  handleScrollUpdate_(event) {
-    this.scrollBy(-event.dy);
+  void _handleScrollUpdate(GestureEvent event) {
+    scrollBy(-event.dy);
   }
 
-  handleFlingStart_(event) {
-    this.flingCurve_ = new FlingCurve(-event.velocityY, event.timeStamp);
-    this.scheduleFlingUpdate_();
+  void _handleFlingStart(GestureEvent event) {
+    _flingCurve = new FlingCurve(-event.velocityY, event.timeStamp);
+    _scheduleFlingUpdate();
   }
 
-  handleFlingCancel_(event) {
-    this.stopFling_();
+  void _handleFlingCancel(_) {
+    _stopFling();
   }
 
-  handleWheel_(event) {
-    this.scrollBy(-event.offsetY);
+  void _handleWheel(WheelEvent event) {
+    scrollBy(-event.offsetY);
   }
-}.register();
+}
+
+_init(script) => register(script, SkyScrollable);
 </script>
 </sky-element>

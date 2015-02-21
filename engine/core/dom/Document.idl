@@ -29,7 +29,7 @@ typedef (CanvasRenderingContext2D or WebGLRenderingContext) RenderingContext;
     [CustomElementCallbacks, RaisesException] Element createElement(DOMString tagName);
     DocumentFragment createDocumentFragment();
 
-    [CustomElementCallbacks, RaisesException, TypeChecking=Interface] Node importNode(Node node, optional boolean deep = false);
+    [CustomElementCallbacks, RaisesException, TypeChecking=Interface] Node importNode(Node node, [Named] optional boolean deep = false);
 
     Element getElementById(DOMString elementId);
 

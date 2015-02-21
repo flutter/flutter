@@ -3,7 +3,7 @@
 import "dart:sky";
 
 class FooElement extends Element {
-  FooElement() : super("foo");
+  final String tagName = "foo";
 
   attachedCallback() {
     print("PASS: FooElement attached.");
