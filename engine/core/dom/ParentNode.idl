@@ -13,14 +13,14 @@
   sequence<Node> getChildNodes();
   sequence<Element> getChildElements();
 
-  [RaisesException] void append(sequence<Node> nodes);
-  [RaisesException] Node appendChild(Node nodes);
-  [RaisesException] void prepend(sequence<Node> nodes);
-  [RaisesException] Node prependChild(Node nodes);
+  [CustomElementCallbacks, RaisesException] void append(sequence<Node> nodes);
+  [CustomElementCallbacks, RaisesException] Node appendChild(Node nodes);
+  [CustomElementCallbacks, RaisesException] void prepend(sequence<Node> nodes);
+  [CustomElementCallbacks, RaisesException] Node prependChild(Node nodes);
 
-  void removeChildren();
-  [RaisesException] Node setChild(Node node);
-  [RaisesException] void setChildren(sequence<Node> nodes);
+  [CustomElementCallbacks] void removeChildren();
+  [CustomElementCallbacks, RaisesException] Node setChild(Node node);
+  [CustomElementCallbacks, RaisesException] void setChildren(sequence<Node> nodes);
 
   // TODO(abarth): Remove when we have the selector object.
   [RaisesException] Element querySelector(DOMString selectors);

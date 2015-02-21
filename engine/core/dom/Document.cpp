@@ -67,7 +67,7 @@
 #include "sky/engine/core/dom/StyleEngine.h"
 #include "sky/engine/core/dom/Text.h"
 #include "sky/engine/core/dom/custom/CustomElementMicrotaskRunQueue.h"
-#include "sky/engine/core/dom/custom/CustomElementRegistrationContext.h"
+#include "sky/engine/core/dom/custom2/new_custom_element_registry.h"
 #include "sky/engine/core/dom/shadow/ElementShadow.h"
 #include "sky/engine/core/dom/shadow/ShadowRoot.h"
 #include "sky/engine/core/editing/FrameSelection.h"
@@ -250,7 +250,7 @@ Document::Document(const DocumentInit& initializer)
     , m_loadEventDelayTimer(this, &Document::loadEventDelayTimerFired)
     , m_didSetReferrerPolicy(false)
     , m_referrerPolicy(ReferrerPolicyDefault)
-    , m_registrationContext(initializer.registrationContext())
+    , m_elementRegistry(initializer.elementRegistry())
     , m_elementDataCacheClearTimer(this, &Document::elementDataCacheClearTimerFired)
     , m_timeline(AnimationTimeline::create(this))
     , m_templateDocumentHost(nullptr)
@@ -259,8 +259,8 @@ Document::Document(const DocumentInit& initializer)
 {
     setClient(this);
 
-    if (!m_registrationContext)
-        m_registrationContext = CustomElementRegistrationContext::create();
+    if (!m_elementRegistry)
+        m_elementRegistry = NewCustomElementRegistry::Create();
 
     m_fetcher = ResourceFetcher::create(this);
 
@@ -338,7 +338,7 @@ Document::~Document()
 PassRefPtr<Document> Document::create(Document& document)
 {
     DocumentInit init = DocumentInit::fromContext(document.contextDocument())
-        .withRegistrationContext(document.registrationContext());
+        .withElementRegistry(document.elementRegistry());
     return adoptRef(new Document(init));
 }
 
@@ -357,7 +357,7 @@ void Document::dispose()
 
     detachParser();
 
-    m_registrationContext.clear();
+    m_elementRegistry.clear();
 
     if (m_importsController)
         HTMLImportsController::removeFrom(*this);
@@ -418,10 +418,9 @@ PassRefPtr<Element> Document::createElement(const AtomicString& name, ExceptionS
     return HTMLElementFactory::createElement(name, *this, false);
 }
 
-PassRefPtr<DartValue> Document::registerElement(DartState*, const AtomicString& name, ExceptionState& exceptionState)
+void Document::registerElement(const AtomicString& name, PassRefPtr<DartValue> type, ExceptionState& es)
 {
-    // TODO(abarth): Add back custom elment registration.
-    return DartValue::Create();
+    m_elementRegistry->RegisterElement(name, type);
 }
 
 CustomElementMicrotaskRunQueue* Document::customElementMicrotaskRunQueue()
@@ -1463,7 +1462,7 @@ PassRefPtr<Node> Document::cloneNode(bool deep)
 
 PassRefPtr<Document> Document::cloneDocumentWithoutChildren()
 {
-    return create(DocumentInit(url()).withRegistrationContext(registrationContext()));
+    return create(DocumentInit(url()).withElementRegistry(elementRegistry()));
 }
 
 void Document::evaluateMediaQueryListIfNeeded()

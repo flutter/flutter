@@ -30,7 +30,7 @@
 
 #include "gen/sky/platform/RuntimeEnabledFeatures.h"
 #include "sky/engine/core/dom/Document.h"
-#include "sky/engine/core/dom/custom/CustomElementRegistrationContext.h"
+#include "sky/engine/core/dom/custom2/new_custom_element_registry.h"
 #include "sky/engine/core/frame/LocalFrame.h"
 #include "sky/engine/core/html/imports/HTMLImportsController.h"
 
@@ -49,7 +49,7 @@ DocumentInit::DocumentInit(const DocumentInit& other)
     , m_frame(other.m_frame)
     , m_contextDocument(other.m_contextDocument)
     , m_importsController(other.m_importsController)
-    , m_registrationContext(other.m_registrationContext)
+    , m_elementRegistry(other.m_elementRegistry)
 {
 }
 
@@ -77,16 +77,11 @@ Settings* DocumentInit::settings() const
     return frameForSecurityContext()->settings();
 }
 
-DocumentInit& DocumentInit::withRegistrationContext(CustomElementRegistrationContext& registrationContext)
+DocumentInit& DocumentInit::withElementRegistry(NewCustomElementRegistry& elementregistry)
 {
-    ASSERT(!m_registrationContext);
-    m_registrationContext = &registrationContext;
+    ASSERT(!m_elementRegistry);
+    m_elementRegistry = &elementregistry;
     return *this;
-}
-
-PassRefPtr<CustomElementRegistrationContext> DocumentInit::registrationContext() const
-{
-    return m_registrationContext.get();
 }
 
 WeakPtr<Document> DocumentInit::contextDocument() const

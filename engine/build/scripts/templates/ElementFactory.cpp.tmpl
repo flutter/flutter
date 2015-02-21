@@ -11,8 +11,7 @@
 {% if fallback_interface %}
 #include "core/{{namespace|lower}}/{{fallback_interface}}.h"
 {% endif %}
-#include "core/dom/custom/CustomElement.h"
-#include "core/dom/custom/CustomElementRegistrationContext.h"
+#include "core/dom/custom2/new_custom_element_registry.h"
 #include "core/dom/Document.h"
 #include "core/frame/Settings.h"
 #include "gen/sky/platform/RuntimeEnabledFeatures.h"
@@ -80,11 +79,7 @@ PassRefPtr<Element> {{namespace}}ElementFactory::createElement(
         create{{namespace}}FunctionMap();
     if (ConstructorFunction function = g_constructors->get(localName))
         return function(document, createdByParser);
-
-    if (CustomElement::isValidName(localName))
-        return document.registrationContext().createCustomTagElement(document, QualifiedName(localName));
-
-    return {{fallback_interface}}::create(QualifiedName(localName), document);
+    return document.elementRegistry().CreateElement(document, localName);
 }
 
 } // namespace blink

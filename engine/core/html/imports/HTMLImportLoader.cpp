@@ -100,7 +100,7 @@ HTMLImportLoader::State HTMLImportLoader::startWritingAndParsing(mojo::URLRespon
     ASSERT(contextDocument.get());
     KURL url(ParsedURLString, String::fromUTF8(response->url));
     DocumentInit init = DocumentInit(url, 0, contextDocument, m_controller)
-        .withRegistrationContext(m_controller->master()->registrationContext());
+        .withElementRegistry(m_controller->master()->elementRegistry());
     m_document = Document::create(init);
     m_module = Module::create(contextDocument.get(), nullptr, m_document.get(), url.string());
     m_document->startParsing()->parse(response->body.Pass(), base::Bind(base::DoNothing));

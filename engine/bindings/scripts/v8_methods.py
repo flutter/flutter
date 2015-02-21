@@ -101,7 +101,7 @@ def method_context(interface, method):
         includes.add('bindings/core/v8/ScriptState.h')
     is_custom_element_callbacks = 'CustomElementCallbacks' in extended_attributes
     if is_custom_element_callbacks:
-        includes.add('core/dom/custom/CustomElementProcessingStack.h')
+        includes.add('sky/engine/core/dom/custom2/new_custom_element_callback_scope.h')
 
     is_raises_exception = 'RaisesException' in extended_attributes
 

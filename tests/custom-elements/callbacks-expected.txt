@@ -1,0 +1,6 @@
+CONSOLE: unittest-suite-wait-for-done
+CONSOLE: PASS: callbacks should be called
+CONSOLE: 
+CONSOLE: All 1 tests passed.
+CONSOLE: unittest-suite-success
+DONE

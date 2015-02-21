@@ -1,0 +1,55 @@
+<sky>
+<script>
+import "../resources/third_party/unittest/unittest.dart";
+import "../resources/unit.dart";
+
+import "dart:sky";
+
+class FooElement extends Element {
+  FooElement() : super("foo");
+
+  attachedCallback() {
+    ++attachedCallbackCount;
+  }
+
+  detachedCallback() {
+    ++detachedCallbackCount;
+  }
+
+  attributeChangedCallback(String name, String oldValue, String newValue) {
+    ++attributeChangedCallbackCount;
+  }
+
+  int attachedCallbackCount = 0;
+  int detachedCallbackCount = 0;
+  int attributeChangedCallbackCount = 0;
+}
+
+
+void main() {
+  initUnit();
+
+  document.registerElement("foo", FooElement);
+
+  test("callbacks should be called", () {
+    Element sky = document.querySelector("sky");
+    FooElement foo = document.createElement("foo");
+    expect(foo.attachedCallbackCount, equals(0));
+    expect(foo.detachedCallbackCount, equals(0));
+    expect(foo.attributeChangedCallbackCount, equals(0));
+    sky.appendChild(foo);
+    expect(foo.attachedCallbackCount, equals(1));
+    expect(foo.detachedCallbackCount, equals(0));
+    expect(foo.attributeChangedCallbackCount, equals(0));
+    foo.setAttribute("bar", "baz");
+    expect(foo.attachedCallbackCount, equals(1));
+    expect(foo.detachedCallbackCount, equals(0));
+    expect(foo.attributeChangedCallbackCount, equals(1));
+    foo.remove();
+    expect(foo.attachedCallbackCount, equals(1));
+    expect(foo.detachedCallbackCount, equals(1));
+    expect(foo.attributeChangedCallbackCount, equals(1));
+  });
+}
+</script>
+</sky>

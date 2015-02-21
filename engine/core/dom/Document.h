@@ -70,7 +70,6 @@ class CanvasRenderingContext2D;
 class Comment;
 class ConsoleMessage;
 class CustomElementMicrotaskRunQueue;
-class CustomElementRegistrationContext;
 class DocumentFragment;
 class DocumentLifecycleNotifier;
 class DocumentLoadTiming;
@@ -100,6 +99,7 @@ class LocalFrame;
 class Location;
 class MediaQueryListListener;
 class MediaQueryMatcher;
+class NewCustomElementRegistry;
 class Page;
 class QualifiedName;
 class Range;
@@ -443,8 +443,8 @@ public:
 
     IntSize initialViewportSize() const;
 
-    PassRefPtr<DartValue> registerElement(DartState*, const AtomicString& name, ExceptionState&);
-    CustomElementRegistrationContext& registrationContext() { return *m_registrationContext; }
+    void registerElement(const AtomicString& name, PassRefPtr<DartValue> type, ExceptionState&);
+    NewCustomElementRegistry& elementRegistry() const { return *m_elementRegistry; }
     CustomElementMicrotaskRunQueue* customElementMicrotaskRunQueue();
 
     void setImportsController(HTMLImportsController*);
@@ -663,7 +663,7 @@ private:
 
     RefPtr<ScriptedAnimationController> m_scriptedAnimationController;
 
-    RefPtr<CustomElementRegistrationContext> m_registrationContext;
+    RefPtr<NewCustomElementRegistry> m_elementRegistry;
     RefPtr<CustomElementMicrotaskRunQueue> m_customElementMicrotaskRunQueue;
 
     void elementDataCacheClearTimerFired(Timer<Document>*);

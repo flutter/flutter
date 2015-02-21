@@ -56,8 +56,7 @@
 #include "sky/engine/core/dom/SelectorQuery.h"
 #include "sky/engine/core/dom/StyleEngine.h"
 #include "sky/engine/core/dom/Text.h"
-#include "sky/engine/core/dom/custom/CustomElement.h"
-#include "sky/engine/core/dom/custom/CustomElementRegistrationContext.h"
+#include "sky/engine/core/dom/custom2/new_custom_element.h"
 #include "sky/engine/core/dom/shadow/InsertionPoint.h"
 #include "sky/engine/core/dom/shadow/ShadowRoot.h"
 #include "sky/engine/core/editing/FrameSelection.h"
@@ -79,6 +78,7 @@
 #include "sky/engine/core/rendering/RenderLayer.h"
 #include "sky/engine/core/rendering/RenderView.h"
 #include "sky/engine/platform/EventDispatchForbiddenScope.h"
+#include "sky/engine/tonic/dart_state.h"
 #include "sky/engine/wtf/BitVector.h"
 #include "sky/engine/wtf/HashFunctions.h"
 #include "sky/engine/wtf/text/CString.h"
@@ -86,6 +86,17 @@
 #include "sky/engine/wtf/text/TextPosition.h"
 
 namespace blink {
+
+PassRefPtr<Element> Element::create(Document& document, const AtomicString& tagName)
+{
+    DCHECK(DartState::Current()) << "This function should be used only by the bindings";
+    RefPtr<Element> element = create(QualifiedName(tagName), &document);
+    // TODO(abarth): We should remove these states because elements are never
+    // waiting for upgrades.
+    element->setCustomElementState(Element::WaitingForUpgrade);
+    element->setCustomElementState(Element::Upgraded);
+    return element.release();
+}
 
 PassRefPtr<Element> Element::create(const QualifiedName& tagName, Document* document)
 {
@@ -105,9 +116,6 @@ Element::~Element()
 #if !ENABLE(OILPAN)
     if (hasRareData())
         elementRareData()->clearShadow();
-
-    if (isCustomElement())
-        CustomElement::wasDestroyed(this);
 #endif
 }
 
@@ -639,7 +647,7 @@ void Element::insertedInto(ContainerNode* insertionPoint)
         return;
 
     if (isUpgradedCustomElement() && inDocument())
-        CustomElement::didAttach(this, document());
+        NewCustomElement::DidAttach(this, document());
 
     TreeScope& scope = insertionPoint->treeScope();
     if (scope != treeScope())
@@ -663,7 +671,7 @@ void Element::removedFrom(ContainerNode* insertionPoint)
     ContainerNode::removedFrom(insertionPoint);
     if (wasInDocument) {
         if (isUpgradedCustomElement())
-            CustomElement::didDetach(this, insertionPoint->document());
+            NewCustomElement::DidDetach(this, insertionPoint->document());
     }
 }
 
@@ -1301,7 +1309,7 @@ void Element::willModifyAttribute(const QualifiedName& name, const AtomicString&
         setNeedsStyleRecalc(LocalStyleChange);
 
     if (isUpgradedCustomElement())
-        CustomElement::attributeDidChange(this, name.localName(), oldValue, newValue);
+        NewCustomElement::AttributeDidChange(this, name.localName(), oldValue, newValue);
 
     if (OwnPtr<MutationObserverInterestGroup> recipients = MutationObserverInterestGroup::createForAttributesMutation(*this, name))
         recipients->enqueueMutationRecord(MutationRecord::createAttributes(this, name, oldValue));

@@ -81,7 +81,7 @@ static void {{static_method_name(method.name, overload_index)}}(Dart_NativeArgum
     {{cpp_class}}* /* FIXME(vsm): Remove this. */ ALLOW_UNUSED receiver = GetReceiver<{{cpp_class}}>(args);
 {% endif %}
 {% if method.is_custom_element_callbacks %}
-    CustomElementProcessingStack::CallbackDeliveryScope deliveryScope;
+    NewCustomElementCallbackScope deliveryScope;
 {% endif %}
 {% if arguments_count > 0 or
       method.has_exception_state or

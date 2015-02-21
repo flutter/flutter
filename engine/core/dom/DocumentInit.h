@@ -36,10 +36,10 @@
 
 namespace blink {
 
-class CustomElementRegistrationContext;
 class Document;
-class LocalFrame;
 class HTMLImportsController;
+class LocalFrame;
+class NewCustomElementRegistry;
 class Settings;
 
 class DocumentInit final {
@@ -61,9 +61,12 @@ public:
     LocalFrame* ownerFrame() const;
     Settings* settings() const;
 
-    DocumentInit& withRegistrationContext(CustomElementRegistrationContext&);
-    PassRefPtr<CustomElementRegistrationContext> registrationContext() const;
+    DocumentInit& withElementRegistry(NewCustomElementRegistry&);
     WeakPtr<Document> contextDocument() const;
+
+    NewCustomElementRegistry* elementRegistry() const {
+        return m_elementRegistry.get();
+    }
 
     static DocumentInit fromContext(WeakPtr<Document> contextDocument, const KURL& = KURL());
 
@@ -76,7 +79,7 @@ private:
     RefPtr<Document> m_owner;
     WeakPtr<Document> m_contextDocument;
     RawPtr<HTMLImportsController> m_importsController;
-    RefPtr<CustomElementRegistrationContext> m_registrationContext;
+    RefPtr<NewCustomElementRegistry> m_elementRegistry;
 };
 
 } // namespace blink
