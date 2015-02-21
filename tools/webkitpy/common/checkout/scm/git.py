@@ -32,6 +32,10 @@ import logging
 import os
 import re
 
+# This import isn't used, but it's needed for the
+# path_to_module('webkitpy.common.config') call in create_patch.
+import webkitpy.common.config
+
 from webkitpy.common.checkout.scm.scm import SCM
 from webkitpy.common.memoized import memoized
 from webkitpy.common.system.executive import Executive, ScriptError
