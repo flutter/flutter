@@ -83,7 +83,7 @@ static void {{static_attribute_name(attribute, 'Setter')}}(Dart_NativeArguments 
     {
         {{cpp_class}}* receiver = GetReceiver<{{cpp_class}}>(args);
 {% if attribute.is_custom_element_callbacks %}
-        NewCustomElementCallbackScope deliveryScope;
+        CustomElementCallbackScope deliveryScope;
 {% endif %}
 {% set attribute_name = attribute.name if not attribute.put_forwards else 'value' %}
 

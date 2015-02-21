@@ -97,7 +97,7 @@ class LocalFrame;
 class Location;
 class MediaQueryListListener;
 class MediaQueryMatcher;
-class NewCustomElementRegistry;
+class CustomElementRegistry;
 class Page;
 class QualifiedName;
 class Range;
@@ -442,7 +442,7 @@ public:
     IntSize initialViewportSize() const;
 
     void registerElement(const AtomicString& name, PassRefPtr<DartValue> type, ExceptionState&);
-    NewCustomElementRegistry& elementRegistry() const { return *m_elementRegistry; }
+    CustomElementRegistry& elementRegistry() const { return *m_elementRegistry; }
 
     void setImportsController(HTMLImportsController*);
     HTMLImportsController* importsController() const { return m_importsController; }
@@ -660,7 +660,7 @@ private:
 
     RefPtr<ScriptedAnimationController> m_scriptedAnimationController;
 
-    RefPtr<NewCustomElementRegistry> m_elementRegistry;
+    RefPtr<CustomElementRegistry> m_elementRegistry;
 
     void elementDataCacheClearTimerFired(Timer<Document>*);
     Timer<Document> m_elementDataCacheClearTimer;

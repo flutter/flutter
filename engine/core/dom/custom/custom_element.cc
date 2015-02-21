@@ -3,15 +3,15 @@
 // found in the LICENSE file.
 
 #include "sky/engine/config.h"
-#include "sky/engine/core/dom/custom2/new_custom_element.h"
+#include "sky/engine/core/dom/custom/custom_element.h"
 
 #include "base/bind.h"
 #include "dart/runtime/include/dart_api.h"
 #include "sky/engine/core/dom/Document.h"
 #include "sky/engine/core/dom/Element.h"
 #include "sky/engine/core/dom/Microtask.h"
-#include "sky/engine/core/dom/custom2/new_custom_element_callback_scope.h"
-#include "sky/engine/core/dom/custom2/new_custom_element_registry.h"
+#include "sky/engine/core/dom/custom/custom_element_callback_scope.h"
+#include "sky/engine/core/dom/custom/custom_element_registry.h"
 #include "sky/engine/tonic/dart_converter.h"
 #include "sky/engine/tonic/dart_state.h"
 #include "sky/engine/wtf/text/AtomicString.h"
@@ -20,7 +20,7 @@ namespace blink {
 namespace {
 
 void ScheduleCallback(const base::Closure& callback) {
-  if (auto* scope = NewCustomElementCallbackScope::Current()) {
+  if (auto* scope = CustomElementCallbackScope::Current()) {
     scope->Enqueue(callback);
   } else {
     Microtask::enqueueMicrotask(callback);
@@ -67,7 +67,7 @@ void CallDidDetachedCallback(RefPtr<Element> element, RefPtr<Document> document)
 
 }  // namespace
 
-void NewCustomElement::AttributeDidChange(Element* element,
+void CustomElement::AttributeDidChange(Element* element,
                                           const AtomicString& name,
                                           const AtomicString& oldValue,
                                           const AtomicString& newValue) {
@@ -75,11 +75,11 @@ void NewCustomElement::AttributeDidChange(Element* element,
       element, name, oldValue, newValue));
 }
 
-void NewCustomElement::DidAttach(Element* element, Document& document) {
+void CustomElement::DidAttach(Element* element, Document& document) {
   ScheduleCallback(base::Bind(CallDidAttachedCallback, element, &document));
 }
 
-void NewCustomElement::DidDetach(Element* element, Document& document) {
+void CustomElement::DidDetach(Element* element, Document& document) {
   ScheduleCallback(base::Bind(CallDidDetachedCallback, element, &document));
 }
 

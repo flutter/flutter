@@ -33,7 +33,7 @@
 
 #include "sky/engine/bindings/exception_state.h"
 #include "sky/engine/core/dom/Element.h"
-#include "sky/engine/core/dom/custom2/new_custom_element_callback_scope.h"
+#include "sky/engine/core/dom/custom/custom_element_callback_scope.h"
 #include "sky/engine/core/dom/shadow/ShadowRoot.h"
 #include "sky/engine/core/rendering/RenderBoxModelObject.h"
 #include "sky/engine/core/rendering/RenderObject.h"
@@ -57,7 +57,7 @@ void WebElement::removeAttribute(const WebString& attrName)
 {
     // TODO: Custom element callbacks need to be called on WebKit API methods that
     // mutate the DOM in any way.
-    NewCustomElementCallbackScope deliveryScope;
+    CustomElementCallbackScope deliveryScope;
     unwrap<Element>()->removeAttribute(attrName);
 }
 
@@ -70,7 +70,7 @@ bool WebElement::setAttribute(const WebString& attrName, const WebString& attrVa
 {
     // TODO: Custom element callbacks need to be called on WebKit API methods that
     // mutate the DOM in any way.
-    NewCustomElementCallbackScope deliveryScope;
+    CustomElementCallbackScope deliveryScope;
     TrackExceptionState exceptionState;
     unwrap<Element>()->setAttribute(attrName, attrValue, exceptionState);
     return !exceptionState.had_exception();

@@ -66,7 +66,7 @@
 #include "sky/engine/core/dom/StaticNodeList.h"
 #include "sky/engine/core/dom/StyleEngine.h"
 #include "sky/engine/core/dom/Text.h"
-#include "sky/engine/core/dom/custom2/new_custom_element_registry.h"
+#include "sky/engine/core/dom/custom/custom_element_registry.h"
 #include "sky/engine/core/dom/shadow/ElementShadow.h"
 #include "sky/engine/core/dom/shadow/ShadowRoot.h"
 #include "sky/engine/core/editing/FrameSelection.h"
@@ -259,7 +259,7 @@ Document::Document(const DocumentInit& initializer)
     setClient(this);
 
     if (!m_elementRegistry)
-        m_elementRegistry = NewCustomElementRegistry::Create();
+        m_elementRegistry = CustomElementRegistry::Create();
 
     m_fetcher = ResourceFetcher::create(this);
 

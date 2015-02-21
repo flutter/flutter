@@ -3,20 +3,20 @@
 // found in the LICENSE file.
 
 #include "sky/engine/config.h"
-#include "sky/engine/core/dom/custom2/new_custom_element_registry.h"
+#include "sky/engine/core/dom/custom/custom_element_registry.h"
 
 #include "sky/engine/core/dom/Element.h"
 #include "sky/engine/core/html/HTMLElement.h"
 
 namespace blink {
 
-NewCustomElementRegistry::NewCustomElementRegistry() {
+CustomElementRegistry::CustomElementRegistry() {
 }
 
-NewCustomElementRegistry::~NewCustomElementRegistry() {
+CustomElementRegistry::~CustomElementRegistry() {
 }
 
-void NewCustomElementRegistry::RegisterElement(const AtomicString& name,
+void CustomElementRegistry::RegisterElement(const AtomicString& name,
                                                PassRefPtr<DartValue> type) {
   if (!dart_state_)
     dart_state_ = type->dart_state();
@@ -28,7 +28,7 @@ void NewCustomElementRegistry::RegisterElement(const AtomicString& name,
   }
 }
 
-PassRefPtr<Element> NewCustomElementRegistry::CreateElement(
+PassRefPtr<Element> CustomElementRegistry::CreateElement(
     Document& document, const AtomicString& name) {
   const auto& it = registrations_.find(name);
   if (it != registrations_.end()) {

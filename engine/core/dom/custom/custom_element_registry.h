@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef SKY_ENGINE_CORE_DOM_CUSTOM2_NEW_CUSTOM_ELEMENT_REGISTRY_H_
-#define SKY_ENGINE_CORE_DOM_CUSTOM2_NEW_CUSTOM_ELEMENT_REGISTRY_H_
+#ifndef SKY_ENGINE_CORE_DOM_CUSTOM_NEW_CUSTOM_ELEMENT_REGISTRY_H_
+#define SKY_ENGINE_CORE_DOM_CUSTOM_NEW_CUSTOM_ELEMENT_REGISTRY_H_
 
 #include "base/macros.h"
 #include "base/memory/weak_ptr.h"
@@ -19,13 +19,13 @@
 namespace blink {
 class Document;
 
-class NewCustomElementRegistry : public RefCounted<NewCustomElementRegistry> {
+class CustomElementRegistry : public RefCounted<CustomElementRegistry> {
  public:
-  static PassRefPtr<NewCustomElementRegistry> Create() {
-    return adoptRef(new NewCustomElementRegistry());
+  static PassRefPtr<CustomElementRegistry> Create() {
+    return adoptRef(new CustomElementRegistry());
   }
 
-  ~NewCustomElementRegistry();
+  ~CustomElementRegistry();
 
   void RegisterElement(const AtomicString& name, PassRefPtr<DartValue> type);
   PassRefPtr<Element> CreateElement(Document& document, const AtomicString& name);
@@ -33,14 +33,14 @@ class NewCustomElementRegistry : public RefCounted<NewCustomElementRegistry> {
   const base::WeakPtr<DartState>& dart_state() const { return dart_state_; }
 
  private:
-  NewCustomElementRegistry();
+  CustomElementRegistry();
 
   base::WeakPtr<DartState> dart_state_;
   HashMap<AtomicString, RefPtr<DartValue>> registrations_;
 
-  DISALLOW_COPY_AND_ASSIGN(NewCustomElementRegistry);
+  DISALLOW_COPY_AND_ASSIGN(CustomElementRegistry);
 };
 
 } // namespace blink
 
-#endif  // SKY_ENGINE_CORE_DOM_CUSTOM2_NEW_CUSTOM_ELEMENT_REGISTRY_H_
+#endif  // SKY_ENGINE_CORE_DOM_CUSTOM_NEW_CUSTOM_ELEMENT_REGISTRY_H_

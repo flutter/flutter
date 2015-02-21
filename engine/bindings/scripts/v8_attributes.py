@@ -54,7 +54,7 @@ def attribute_context(interface, attribute):
     is_custom_element_callbacks = 'CustomElementCallbacks' in extended_attributes
     is_reflect = 'Reflect' in extended_attributes
     if is_custom_element_callbacks or is_reflect:
-        includes.add('sky/engine/core/dom/custom2/new_custom_element_callback_scope.h')
+        includes.add('sky/engine/core/dom/custom/custom_element_callback_scope.h')
     # [TypeChecking]
     has_type_checking_unrestricted = (
         (has_extended_attribute_value(interface, 'TypeChecking', 'Unrestricted') or

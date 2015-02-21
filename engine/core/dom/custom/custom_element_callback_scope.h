@@ -10,17 +10,17 @@
 
 namespace blink {
 
-class NewCustomElementCallbackScope {
+class CustomElementCallbackScope {
  public:
-  NewCustomElementCallbackScope();
-  ~NewCustomElementCallbackScope();
+  CustomElementCallbackScope();
+  ~CustomElementCallbackScope();
 
   void Enqueue(const base::Closure&);
 
-  static NewCustomElementCallbackScope* Current();
+  static CustomElementCallbackScope* Current();
 
  private:
-  NewCustomElementCallbackScope* previous_scope_;
+  CustomElementCallbackScope* previous_scope_;
   Vector<base::Closure> callbacks_;
 };
 

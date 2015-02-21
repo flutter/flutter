@@ -3,21 +3,21 @@
 // found in the LICENSE file.
 
 #include "sky/engine/config.h"
-#include "sky/engine/core/dom/custom2/new_custom_element_callback_scope.h"
+#include "sky/engine/core/dom/custom/custom_element_callback_scope.h"
 
 #include "base/callback.h"
 
 namespace blink {
 namespace {
-static NewCustomElementCallbackScope* g_current = nullptr;
+static CustomElementCallbackScope* g_current = nullptr;
 }
 
-NewCustomElementCallbackScope::NewCustomElementCallbackScope()
+CustomElementCallbackScope::CustomElementCallbackScope()
     : previous_scope_(g_current) {
   g_current = this;
 }
 
-NewCustomElementCallbackScope::~NewCustomElementCallbackScope() {
+CustomElementCallbackScope::~CustomElementCallbackScope() {
   while(!callbacks_.isEmpty()) {
     Vector<base::Closure> local;
     callbacks_.swap(local);
@@ -28,11 +28,11 @@ NewCustomElementCallbackScope::~NewCustomElementCallbackScope() {
   g_current = previous_scope_;
 }
 
-NewCustomElementCallbackScope* NewCustomElementCallbackScope::Current() {
+CustomElementCallbackScope* CustomElementCallbackScope::Current() {
   return g_current;
 }
 
-void NewCustomElementCallbackScope::Enqueue(const base::Closure& callback) {
+void CustomElementCallbackScope::Enqueue(const base::Closure& callback) {
   callbacks_.append(callback);
 }
 

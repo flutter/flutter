@@ -11,14 +11,14 @@ namespace blink {
 class Document;
 class Element;
 
-class NewCustomElement {
+class CustomElement {
  public:
   static void AttributeDidChange(Element*, const AtomicString& name, const AtomicString& oldValue, const AtomicString& newValue);
   static void DidAttach(Element*, Document&);
   static void DidDetach(Element*, Document&);
 
  private:
-  NewCustomElement();
+  CustomElement();
 };
 
 }  // namespace blink

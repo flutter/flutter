@@ -56,7 +56,7 @@
 #include "sky/engine/core/dom/SelectorQuery.h"
 #include "sky/engine/core/dom/StyleEngine.h"
 #include "sky/engine/core/dom/Text.h"
-#include "sky/engine/core/dom/custom2/new_custom_element.h"
+#include "sky/engine/core/dom/custom/custom_element.h"
 #include "sky/engine/core/dom/shadow/InsertionPoint.h"
 #include "sky/engine/core/dom/shadow/ShadowRoot.h"
 #include "sky/engine/core/editing/FrameSelection.h"
@@ -647,7 +647,7 @@ void Element::insertedInto(ContainerNode* insertionPoint)
         return;
 
     if (isUpgradedCustomElement() && inDocument())
-        NewCustomElement::DidAttach(this, document());
+        CustomElement::DidAttach(this, document());
 
     TreeScope& scope = insertionPoint->treeScope();
     if (scope != treeScope())
@@ -671,7 +671,7 @@ void Element::removedFrom(ContainerNode* insertionPoint)
     ContainerNode::removedFrom(insertionPoint);
     if (wasInDocument) {
         if (isUpgradedCustomElement())
-            NewCustomElement::DidDetach(this, insertionPoint->document());
+            CustomElement::DidDetach(this, insertionPoint->document());
     }
 }
 
@@ -1298,7 +1298,7 @@ void Element::willModifyAttribute(const QualifiedName& name, const AtomicString&
         setNeedsStyleRecalc(LocalStyleChange);
 
     if (isUpgradedCustomElement())
-        NewCustomElement::AttributeDidChange(this, name.localName(), oldValue, newValue);
+        CustomElement::AttributeDidChange(this, name.localName(), oldValue, newValue);
 
     if (OwnPtr<MutationObserverInterestGroup> recipients = MutationObserverInterestGroup::createForAttributesMutation(*this, name))
         recipients->enqueueMutationRecord(MutationRecord::createAttributes(this, name, oldValue));

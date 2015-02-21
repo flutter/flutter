@@ -30,7 +30,7 @@
 
 #include "gen/sky/platform/RuntimeEnabledFeatures.h"
 #include "sky/engine/core/dom/Document.h"
-#include "sky/engine/core/dom/custom2/new_custom_element_registry.h"
+#include "sky/engine/core/dom/custom/custom_element_registry.h"
 #include "sky/engine/core/frame/LocalFrame.h"
 #include "sky/engine/core/html/imports/HTMLImportsController.h"
 
@@ -77,7 +77,7 @@ Settings* DocumentInit::settings() const
     return frameForSecurityContext()->settings();
 }
 
-DocumentInit& DocumentInit::withElementRegistry(NewCustomElementRegistry& elementregistry)
+DocumentInit& DocumentInit::withElementRegistry(CustomElementRegistry& elementregistry)
 {
     ASSERT(!m_elementRegistry);
     m_elementRegistry = &elementregistry;
