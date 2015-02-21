@@ -65,9 +65,6 @@ enum SpellcheckAttributeState {
 class Element : public ContainerNode {
     DEFINE_WRAPPERTYPEINFO();
 public:
-    // Used for custom elements.
-    static PassRefPtr<Element> create(Document& document, const AtomicString& tagName);
-
     static PassRefPtr<Element> create(const QualifiedName&, Document*);
     virtual ~Element();
 

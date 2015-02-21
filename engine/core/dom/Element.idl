@@ -3,8 +3,7 @@
 // found in the LICENSE file.
 
 [
-  Constructor(DOMString tagName),
-  ConstructorCallWith=Document,
+  CustomConstructor,
 ] interface Element : ParentNode {
   readonly attribute DOMString tagName;
 

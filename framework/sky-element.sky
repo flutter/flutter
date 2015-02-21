@@ -34,9 +34,7 @@ abstract class SkyElement extends Element {
 
   String get tagName => _getTagName(runtimeType);
 
-  // TODO(abarth): Rather than hard-coding "example" here, we should make the
-  // bindings read the |tagName| property of this object during construction.
-  SkyElement() : super("example") {
+  SkyElement() {
     created();
 
     // Invoke attributeChanged callback when element is first created too.

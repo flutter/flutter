@@ -19,11 +19,11 @@ part of sky.core;
     {%- endfor -%}
 {%- endmacro -%}
 
-{% if not constructors %}abstract {% endif -%}
+{% if not constructors and not custom_constructors %}abstract {% endif -%}
 class {{interface_name}} extends {{ parent_interface if parent_interface else 'NativeFieldWrapperClass2' }} {
     // Constructors
 {# TODO(eseidel): We only ever have one constructor. #}
-{%- for constructor in constructors %}
+{%- for constructor in constructors + custom_constructors %}
     void _constructor(
     {%- for arg in constructor.arguments -%}
         {{ arg.dart_type }} {{ arg.name }}{% if not loop.last %}, {% endif %}

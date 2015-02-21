@@ -87,17 +87,6 @@
 
 namespace blink {
 
-PassRefPtr<Element> Element::create(Document& document, const AtomicString& tagName)
-{
-    DCHECK(DartState::Current()) << "This function should be used only by the bindings";
-    RefPtr<Element> element = create(QualifiedName(tagName), &document);
-    // TODO(abarth): We should remove these states because elements are never
-    // waiting for upgrades.
-    element->setCustomElementState(Element::WaitingForUpgrade);
-    element->setCustomElementState(Element::Upgraded);
-    return element.release();
-}
-
 PassRefPtr<Element> Element::create(const QualifiedName& tagName, Document* document)
 {
     return adoptRef(new Element(tagName, document, CreateElement));

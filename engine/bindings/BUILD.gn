@@ -13,6 +13,7 @@ source_set("bindings") {
     "builtin_natives.h",
     "builtin_sky.cc",
     "builtin_sky.h",
+    "custom/dart_element_custom.cc",
     "dart_callback.cc",
     "dart_callback.h",
     "dart_event_listener.cc",
