@@ -2,7 +2,7 @@
 <script>
 final String one = 'one';
 bool oneInit = false;
-void init() {
+void _init(_) {
     oneInit = true;
 }
 final conflict = 'one';
@@ -10,7 +10,7 @@ final conflict = 'one';
 <script>
 final String two = 'two';
 bool twoInit = false;
-void init() {
+void _init(_) {
     twoInit = true;
 }
 final conflict = 'two';
