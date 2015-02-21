@@ -876,17 +876,6 @@ void Element::setNeedsAnimationStyleRecalc()
     setAnimationStyleChange(true);
 }
 
-void Element::setCustomElementDefinition(PassRefPtr<CustomElementDefinition> definition)
-{
-    ASSERT(!m_customElementDefinition);
-    m_customElementDefinition = definition;
-}
-
-CustomElementDefinition* Element::customElementDefinition() const
-{
-    return m_customElementDefinition.get();
-}
-
 // TODO(esprehn): Implement the sky spec where shadow roots are a custom
 // element registration feature.
 PassRefPtr<ShadowRoot> Element::ensureShadowRoot(ExceptionState& exceptionState)

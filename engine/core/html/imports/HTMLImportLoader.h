@@ -39,7 +39,6 @@
 
 namespace blink {
 
-class CustomElementSyncMicrotaskQueue;
 class Document;
 class HTMLImportChild;
 class HTMLImportsController;
@@ -86,8 +85,6 @@ public:
     // Called by Document::finishedParsing, after DOMContentLoaded was dispatched.
     void didFinishParsing();
 
-    PassRefPtr<CustomElementSyncMicrotaskQueue> microtaskQueue() const;
-
 private:
     HTMLImportLoader(HTMLImportsController*);
 
@@ -110,7 +107,6 @@ private:
     State m_state;
     RefPtr<Module> m_module;
     RefPtr<Document> m_document;
-    RefPtr<CustomElementSyncMicrotaskQueue> m_microtaskQueue;
 
     OwnPtr<MojoFetcher> m_fetcher;
 };

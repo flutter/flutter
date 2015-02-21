@@ -66,7 +66,6 @@
 #include "sky/engine/core/dom/StaticNodeList.h"
 #include "sky/engine/core/dom/StyleEngine.h"
 #include "sky/engine/core/dom/Text.h"
-#include "sky/engine/core/dom/custom/CustomElementMicrotaskRunQueue.h"
 #include "sky/engine/core/dom/custom2/new_custom_element_registry.h"
 #include "sky/engine/core/dom/shadow/ElementShadow.h"
 #include "sky/engine/core/dom/shadow/ShadowRoot.h"
@@ -421,13 +420,6 @@ PassRefPtr<Element> Document::createElement(const AtomicString& name, ExceptionS
 void Document::registerElement(const AtomicString& name, PassRefPtr<DartValue> type, ExceptionState& es)
 {
     m_elementRegistry->RegisterElement(name, type);
-}
-
-CustomElementMicrotaskRunQueue* Document::customElementMicrotaskRunQueue()
-{
-    if (!m_customElementMicrotaskRunQueue)
-        m_customElementMicrotaskRunQueue = CustomElementMicrotaskRunQueue::create();
-    return m_customElementMicrotaskRunQueue.get();
 }
 
 void Document::setImportsController(HTMLImportsController* controller)

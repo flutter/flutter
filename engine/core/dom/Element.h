@@ -43,7 +43,6 @@ class Attribute;
 class CSSStyleDeclaration;
 class ClientRect;
 class ClientRectList;
-class CustomElementDefinition;
 class DOMTokenList;
 class Document;
 class ElementRareData;
@@ -243,9 +242,6 @@ public:
 
     virtual bool canContainRangeEndPoint() const override { return true; }
 
-    void setCustomElementDefinition(PassRefPtr<CustomElementDefinition>);
-    CustomElementDefinition* customElementDefinition() const;
-
     bool isSpellCheckingEnabled() const;
 
     // FIXME: public for RenderTreeBuilder, we shouldn't expose this though.
@@ -355,7 +351,6 @@ private:
     ElementRareData& ensureElementRareData();
 
     RefPtr<ElementData> m_elementData;
-    RefPtr<CustomElementDefinition> m_customElementDefinition;
 };
 
 DEFINE_NODE_TYPE_CASTS(Element, isElementNode());

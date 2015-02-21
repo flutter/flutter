@@ -38,7 +38,6 @@
 
 namespace blink {
 
-class CustomElementMicrotaskImportStep;
 class HTMLImportLoader;
 class HTMLImportChildClient;
 class Element;
@@ -85,17 +84,13 @@ public:
 #endif
 
     void didFinishLoading();
-    void didFinishUpgradingCustomElements();
     void normalize();
 
 private:
     void didFinish();
     void shareLoader();
-    void createCustomElementMicrotaskStepIfNeeded();
-    void invalidateCustomElementMicrotaskStep();
 
     KURL m_url;
-    WeakPtr<CustomElementMicrotaskImportStep> m_customElementMicrotaskStep;
 #if !ENABLE(OILPAN)
     WeakPtrFactory<HTMLImportChild> m_weakFactory;
 #endif

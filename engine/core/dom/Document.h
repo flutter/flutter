@@ -41,7 +41,6 @@
 #include "sky/engine/core/dom/TextLinkColors.h"
 #include "sky/engine/core/dom/TreeScope.h"
 #include "sky/engine/core/dom/UserActionElementSet.h"
-#include "sky/engine/core/dom/custom/CustomElement.h"
 #include "sky/engine/core/fetch/ResourceClient.h"
 #include "sky/engine/core/loader/DocumentLoadTiming.h"
 #include "sky/engine/core/page/FocusType.h"
@@ -69,7 +68,6 @@ class CSSStyleSheet;
 class CanvasRenderingContext2D;
 class Comment;
 class ConsoleMessage;
-class CustomElementMicrotaskRunQueue;
 class DocumentFragment;
 class DocumentLifecycleNotifier;
 class DocumentLoadTiming;
@@ -445,7 +443,6 @@ public:
 
     void registerElement(const AtomicString& name, PassRefPtr<DartValue> type, ExceptionState&);
     NewCustomElementRegistry& elementRegistry() const { return *m_elementRegistry; }
-    CustomElementMicrotaskRunQueue* customElementMicrotaskRunQueue();
 
     void setImportsController(HTMLImportsController*);
     HTMLImportsController* importsController() const { return m_importsController; }
@@ -664,7 +661,6 @@ private:
     RefPtr<ScriptedAnimationController> m_scriptedAnimationController;
 
     RefPtr<NewCustomElementRegistry> m_elementRegistry;
-    RefPtr<CustomElementMicrotaskRunQueue> m_customElementMicrotaskRunQueue;
 
     void elementDataCacheClearTimerFired(Timer<Document>*);
     Timer<Document> m_elementDataCacheClearTimer;

@@ -32,9 +32,6 @@
 #include "sky/engine/core/html/imports/HTMLImportChild.h"
 
 #include "sky/engine/core/dom/Document.h"
-#include "sky/engine/core/dom/custom/CustomElement.h"
-#include "sky/engine/core/dom/custom/CustomElementMicrotaskImportStep.h"
-#include "sky/engine/core/dom/custom/CustomElementSyncMicrotaskQueue.h"
 #include "sky/engine/core/html/imports/HTMLImportChildClient.h"
 #include "sky/engine/core/html/imports/HTMLImportLoader.h"
 #include "sky/engine/core/html/imports/HTMLImportTreeRoot.h"
@@ -73,13 +70,11 @@ void HTMLImportChild::ownerInserted()
 
 void HTMLImportChild::didShareLoader()
 {
-    createCustomElementMicrotaskStepIfNeeded();
     stateWillChange();
 }
 
 void HTMLImportChild::didStartLoading()
 {
-    createCustomElementMicrotaskStepIfNeeded();
 }
 
 void HTMLImportChild::didFinish()
@@ -91,13 +86,6 @@ void HTMLImportChild::didFinish()
 void HTMLImportChild::didFinishLoading()
 {
     stateWillChange();
-    CustomElement::didFinishLoadingImport(*(root()->document()));
-}
-
-void HTMLImportChild::didFinishUpgradingCustomElements()
-{
-    stateWillChange();
-    m_customElementMicrotaskStep.clear();
 }
 
 #if !ENABLE(OILPAN)
@@ -137,32 +125,10 @@ void HTMLImportChild::stateDidChange()
         didFinish();
 }
 
-void HTMLImportChild::invalidateCustomElementMicrotaskStep()
-{
-    if (!m_customElementMicrotaskStep)
-        return;
-    m_customElementMicrotaskStep->invalidate();
-    m_customElementMicrotaskStep.clear();
-}
-
-void HTMLImportChild::createCustomElementMicrotaskStepIfNeeded()
-{
-    ASSERT(!m_customElementMicrotaskStep);
-
-    if (!isDone() && !formsCycle()) {
-#if ENABLE(OILPAN)
-        m_customElementMicrotaskStep = CustomElement::didCreateImport(this);
-#else
-        m_customElementMicrotaskStep = CustomElement::didCreateImport(this)->weakPtr();
-#endif
-    }
-}
-
 bool HTMLImportChild::isDone() const
 {
     ASSERT(m_loader);
-
-    return m_loader->isDone() && m_loader->microtaskQueue()->isEmpty() && !m_customElementMicrotaskStep;
+    return m_loader->isDone();
 }
 
 HTMLImportLoader* HTMLImportChild::loader() const
@@ -206,11 +172,8 @@ void HTMLImportChild::normalize()
         takeChildrenFrom(oldFirst);
     }
 
-    for (HTMLImportChild* child = toHTMLImportChild(firstChild()); child; child = toHTMLImportChild(child->next())) {
-        if (child->formsCycle())
-            child->invalidateCustomElementMicrotaskStep();
+    for (HTMLImportChild* child = toHTMLImportChild(firstChild()); child; child = toHTMLImportChild(child->next()))
         child->normalize();
-    }
 }
 
 #if !defined(NDEBUG)
@@ -218,10 +181,9 @@ void HTMLImportChild::showThis()
 {
     bool isFirst = loader() ? loader()->isFirstImport(this) : false;
     HTMLImport::showThis();
-    fprintf(stderr, " loader=%p first=%d, step=%p sync=%s url=%s",
+    fprintf(stderr, " loader=%p first=%d, sync=%s url=%s",
         m_loader.get(),
         isFirst,
-        m_customElementMicrotaskStep.get(),
         isSync() ? "Y" : "N",
         url().string().utf8().data());
 }

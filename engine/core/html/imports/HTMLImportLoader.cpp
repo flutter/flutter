@@ -36,7 +36,6 @@
 #include "sky/engine/core/dom/Document.h"
 #include "sky/engine/core/dom/DocumentParser.h"
 #include "sky/engine/core/dom/StyleEngine.h"
-#include "sky/engine/core/dom/custom/CustomElementSyncMicrotaskQueue.h"
 #include "sky/engine/core/html/imports/HTMLImportChild.h"
 #include "sky/engine/core/html/imports/HTMLImportsController.h"
 
@@ -45,7 +44,6 @@ namespace blink {
 HTMLImportLoader::HTMLImportLoader(HTMLImportsController* controller)
     : m_controller(controller)
     , m_state(StateLoading)
-    , m_microtaskQueue(CustomElementSyncMicrotaskQueue::create())
 {
 }
 
@@ -182,11 +180,6 @@ void HTMLImportLoader::removeImport(HTMLImportChild* client)
 bool HTMLImportLoader::shouldBlockScriptExecution() const
 {
     return firstImport()->state().shouldBlockScriptExecution();
-}
-
-PassRefPtr<CustomElementSyncMicrotaskQueue> HTMLImportLoader::microtaskQueue() const
-{
-    return m_microtaskQueue;
 }
 
 } // namespace blink
