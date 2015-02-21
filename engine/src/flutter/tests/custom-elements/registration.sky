@@ -1,0 +1,27 @@
+<import src="../resources/dump-as-text.sky" />
+<script>
+import "dart:sky";
+
+class FooElement extends Element {
+  FooElement() : super("foo");
+
+  attachedCallback() {
+    print("PASS: FooElement attached.");
+  }
+
+  detachedCallback() {
+  }
+
+  attributeChangedCallbackCount(String name, String oldValue, String newValue) {
+  }
+}
+
+void main() {
+  document.registerElement("foo", FooElement);
+}
+</script>
+<foo />
+<script>
+// This script element creates a microtask checkpoint and ensures that
+// the <foo /> attached callback runs before the test ends.
+</script>
