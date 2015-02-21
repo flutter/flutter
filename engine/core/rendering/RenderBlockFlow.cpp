@@ -144,7 +144,6 @@ void RenderBlockFlow::layoutChildren(bool relayoutChildren, SubtreeLayoutScope& 
 
         if (child->isOutOfFlowPositioned()) {
             child->containingBlock()->insertPositionedObject(child);
-            adjustPositionedBlock(child);
             continue;
         }
 
@@ -158,21 +157,6 @@ void RenderBlockFlow::layoutChildren(bool relayoutChildren, SubtreeLayoutScope& 
     setLogicalHeight(std::max(logicalHeight() + afterEdge, beforeEdge + afterEdge));
 }
 
-void RenderBlockFlow::adjustPositionedBlock(RenderBox* child)
-{
-    bool hasStaticBlockPosition = child->style()->hasStaticBlockPosition();
-
-    LayoutUnit logicalTop = logicalHeight();
-    updateStaticInlinePositionForChild(child);
-
-    RenderLayer* childLayer = child->layer();
-    if (childLayer->staticBlockPosition() != logicalTop) {
-        childLayer->setStaticBlockPosition(logicalTop);
-        if (hasStaticBlockPosition)
-            child->setChildNeedsLayout(MarkOnlyThis);
-    }
-}
-
 RootInlineBox* RenderBlockFlow::createAndAppendRootInlineBox()
 {
     RootInlineBox* rootBox = createRootInlineBox();
@@ -184,19 +168,6 @@ RootInlineBox* RenderBlockFlow::createAndAppendRootInlineBox()
 void RenderBlockFlow::deleteLineBoxTree()
 {
     m_lineBoxes.deleteLineBoxTree();
-}
-
-void RenderBlockFlow::updateStaticInlinePositionForChild(RenderBox* child)
-{
-    if (child->style()->isOriginalDisplayInlineType())
-        setStaticInlinePositionForChild(child, startAlignedOffsetForLine(false));
-    else
-        setStaticInlinePositionForChild(child, startOffsetForContent());
-}
-
-void RenderBlockFlow::setStaticInlinePositionForChild(RenderBox* child, LayoutUnit inlinePosition)
-{
-    child->layer()->setStaticInlinePosition(inlinePosition);
 }
 
 void RenderBlockFlow::addChild(RenderObject* newChild, RenderObject* beforeChild)

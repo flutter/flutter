@@ -106,9 +106,6 @@ public:
     LayoutUnit startAlignedOffsetForLine(bool shouldIndentText);
     void updateLogicalWidthForAlignment(const ETextAlign&, const RootInlineBox*, BidiRun* trailingSpaceRun, float& logicalLeft, float& totalLogicalWidth, float& availableLogicalWidth, unsigned expansionOpportunityCount);
 
-    void setStaticInlinePositionForChild(RenderBox*, LayoutUnit inlinePosition);
-    void updateStaticInlinePositionForChild(RenderBox*);
-
     static bool shouldSkipCreatingRunsForObject(RenderObject* obj)
     {
         return obj->isOutOfFlowPositioned() && !obj->style()->isOriginalDisplayInlineType() && !obj->container()->isRenderInline();
@@ -121,9 +118,7 @@ protected:
 
 private:
     void layoutBlockFlow(SubtreeLayoutScope&);
-
     void layoutBlockChild(RenderBox* child);
-    void adjustPositionedBlock(RenderBox* child);
 
     RootInlineBox* createRootInlineBox();
 

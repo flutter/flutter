@@ -824,9 +824,6 @@ void RenderParagraph::layoutRunsAndFloatsInRange(LineLayoutState& layoutState,
                 lineBox->setLineBreakInfo(endOfLine.object(), endOfLine.offset(), resolver.status());
         }
 
-        for (size_t i = 0; i < lineBreaker.positionedObjects().size(); ++i)
-            setStaticPositions(this, lineBreaker.positionedObjects()[i]);
-
         if (!layoutState.lineInfo().isEmpty())
             layoutState.lineInfo().setFirstLine(false);
 

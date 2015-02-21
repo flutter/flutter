@@ -882,24 +882,6 @@ void RenderFlexibleBox::setLogicalOverrideSize(RenderBox* child, LayoutUnit chil
         child->setOverrideLogicalContentWidth(childPreferredSize - child->borderAndPaddingLogicalWidth());
 }
 
-void RenderFlexibleBox::prepareChildForPositionedLayout(RenderBox* child, LayoutUnit mainAxisOffset, LayoutUnit crossAxisOffset, PositionedLayoutMode layoutMode)
-{
-    ASSERT(child->isOutOfFlowPositioned());
-    child->containingBlock()->insertPositionedObject(child);
-    RenderLayer* childLayer = child->layer();
-    LayoutUnit inlinePosition = isColumnFlow() ? crossAxisOffset : mainAxisOffset;
-    if (layoutMode == FlipForRowReverse && style()->flexDirection() == FlowRowReverse)
-        inlinePosition = mainAxisExtent() - mainAxisOffset;
-    childLayer->setStaticInlinePosition(inlinePosition);
-
-    LayoutUnit staticBlockPosition = isColumnFlow() ? mainAxisOffset : crossAxisOffset;
-    if (childLayer->staticBlockPosition() != staticBlockPosition) {
-        childLayer->setStaticBlockPosition(staticBlockPosition);
-        if (child->style()->hasStaticBlockPosition())
-            child->setChildNeedsLayout(MarkOnlyThis);
-    }
-}
-
 ItemPosition RenderFlexibleBox::alignmentForChild(RenderBox* child) const
 {
     ItemPosition align = resolveAlignment(style(), child->style());
@@ -972,7 +954,7 @@ void RenderFlexibleBox::layoutAndPlaceChildren(LayoutUnit& crossAxisOffset, cons
         RenderBox* child = children[i];
 
         if (child->isOutOfFlowPositioned()) {
-            prepareChildForPositionedLayout(child, mainAxisOffset, crossAxisOffset, FlipForRowReverse);
+            child->containingBlock()->insertPositionedObject(child);
             continue;
         }
 
@@ -1053,10 +1035,9 @@ void RenderFlexibleBox::layoutColumnReverse(const OrderedFlexItemList& children,
     for (size_t i = 0; i < children.size(); ++i) {
         RenderBox* child = children[i];
 
-        if (child->isOutOfFlowPositioned()) {
-            child->layer()->setStaticBlockPosition(mainAxisOffset);
+        if (child->isOutOfFlowPositioned())
             continue;
-        }
+
         mainAxisOffset -= mainAxisExtentForChild(child) + flowAwareMarginEndForChild(child);
 
         setFlowAwareLocationForChild(child, LayoutPoint(mainAxisOffset, crossAxisOffset + flowAwareMarginBeforeForChild(child)));
@@ -1131,12 +1112,6 @@ void RenderFlexibleBox::alignFlexLines(Vector<LineContext>& lineContexts)
 void RenderFlexibleBox::adjustAlignmentForChild(RenderBox* child, LayoutUnit delta)
 {
     if (child->isOutOfFlowPositioned()) {
-        LayoutUnit staticInlinePosition = child->layer()->staticInlinePosition();
-        LayoutUnit staticBlockPosition = child->layer()->staticBlockPosition();
-        LayoutUnit mainAxis = isColumnFlow() ? staticBlockPosition : staticInlinePosition;
-        LayoutUnit crossAxis = isColumnFlow() ? staticInlinePosition : staticBlockPosition;
-        crossAxis += delta;
-        prepareChildForPositionedLayout(child, mainAxis, crossAxis, NoFlipForRowReverse);
         return;
     }
 

@@ -93,8 +93,6 @@ RenderLayer::RenderLayer(RenderLayerModelObject* renderer, LayerType type)
     , m_next(0)
     , m_first(0)
     , m_last(0)
-    , m_staticInlinePosition(0)
-    , m_staticBlockPosition(0)
     , m_clipper(*renderer)
 {
     updateStackingNode();

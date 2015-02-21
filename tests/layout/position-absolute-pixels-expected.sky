@@ -1,7 +1,7 @@
 <sky>
   <import src="../resources/run-after-display.sky"/>
 
-  <img src="http://storage.googleapis.com/mojo/sky-pngs/df9f2bee2247645ae83ed672858ee47fb239f70a" />
+  <img src="http://storage.googleapis.com/mojo/sky-pngs/0e49314437b063e76c28511c34a6c6da72c17956" />
 
   <script>
   import "dart:sky";

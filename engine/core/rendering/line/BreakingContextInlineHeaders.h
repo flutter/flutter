@@ -99,8 +99,6 @@ public:
     }
 
 private:
-    void skipTrailingWhitespace(InlineIterator&, const LineInfo&);
-
     InlineBidiResolver& m_resolver;
 
     InlineIterator m_current;
@@ -183,40 +181,6 @@ inline bool requiresLineBox(const InlineIterator& it, const LineInfo& lineInfo =
     UChar current = it.current();
     bool notJustWhitespace = current != ' ' && current != '\t' && current != softHyphen && (current != '\n' || it.object()->preservesNewline());
     return notJustWhitespace || isEmptyInline(it.object());
-}
-
-inline void setStaticPositions(RenderBlockFlow* block, RenderBox* child)
-{
-    ASSERT(child->isOutOfFlowPositioned());
-    // FIXME: The math here is actually not really right. It's a best-guess approximation that
-    // will work for the common cases
-    RenderObject* containerBlock = child->container();
-    LayoutUnit blockHeight = block->logicalHeight();
-    if (containerBlock->isRenderInline()) {
-        // A relative positioned inline encloses us. In this case, we also have to determine our
-        // position as though we were an inline. Set |staticInlinePosition| and |staticBlockPosition| on the relative positioned
-        // inline so that we can obtain the value later.
-        toRenderInline(containerBlock)->layer()->setStaticInlinePosition(block->startAlignedOffsetForLine(false));
-        toRenderInline(containerBlock)->layer()->setStaticBlockPosition(blockHeight);
-    }
-    block->updateStaticInlinePositionForChild(child);
-    child->layer()->setStaticBlockPosition(blockHeight);
-}
-
-// FIXME: The entire concept of the skipTrailingWhitespace function is flawed, since we really need to be building
-// line boxes even for containers that may ultimately collapse away. Otherwise we'll never get positioned
-// elements quite right. In other words, we need to build this function's work into the normal line
-// object iteration process.
-// NB. this function will insert any floating elements that would otherwise
-// be skipped but it will not position them.
-inline void BreakingContext::skipTrailingWhitespace(InlineIterator& iterator, const LineInfo& lineInfo)
-{
-    while (!iterator.atEnd() && !requiresLineBox(iterator, lineInfo, TrailingWhitespace)) {
-        RenderObject* object = iterator.object();
-        if (object->isOutOfFlowPositioned())
-            setStaticPositions(m_block, toRenderBox(object));
-        iterator.increment();
-    }
 }
 
 inline void BreakingContext::initializeForCurrentObject()
@@ -311,18 +275,10 @@ inline void BreakingContext::handleOutOfFlowPositioned(Vector<RenderBox*>& posit
     // If our original display wasn't an inline type, then we can
     // go ahead and determine our static inline position now.
     RenderBox* box = toRenderBox(m_current.object());
-    bool isInlineType = box->style()->isOriginalDisplayInlineType();
-    if (!isInlineType) {
-        m_block->setStaticInlinePositionForChild(box, m_block->startOffsetForContent());
-    } else {
-        // If our original display was an INLINE type, then we can go ahead
-        // and determine our static y position now.
-        box->layer()->setStaticBlockPosition(m_block->logicalHeight());
-    }
 
     // If we're ignoring spaces, we have to stop and include this object and
     // then start ignoring spaces again.
-    if (isInlineType || box->container()->isRenderInline()) {
+    if (box->style()->isOriginalDisplayInlineType() || box->container()->isRenderInline()) {
         if (m_ignoringSpaces)
             m_lineMidpointState.ensureLineBoxInsideIgnoredSpaces(box);
         m_trailingObjects.appendObjectIfNeeded(box);
@@ -591,12 +547,10 @@ inline bool BreakingContext::handleText(WordMeasurements& wordMeasurements, bool
                     // Check if line is too big even without the extra space
                     // at the end of the line. If it is not, do nothing.
                     // If the line needs the extra whitespace to be too long,
-                    // then move the line break to the space and skip all
-                    // additional whitespace.
+                    // then move the line break to the space.
                     if (!m_width.fitsOnLine(charWidth)) {
                         lineWasTooWide = true;
                         m_lineBreak.moveTo(m_current.object(), m_current.offset(), m_current.nextBreakablePosition());
-                        skipTrailingWhitespace(m_lineBreak, m_lineInfo);
                     }
                 }
                 if (lineWasTooWide || !m_width.fitsOnLine()) {

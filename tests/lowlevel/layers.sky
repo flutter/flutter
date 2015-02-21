@@ -24,11 +24,11 @@ Transforms
 
 <div style="position: absolute; top: 250px;">
   Opacity
-  <div style="opacity: 0.8; background-color: pink;">
+  <div style="opacity: 0.8; background-color: pink; transform: translate3d(0, 0, 0)">
     One
-    <div style="opacity: 0.7; position: absolute; left: 10px; background-color: salmon;">
+    <div style="opacity: 0.7; position: absolute; left: 15px; top: 10px; background-color: salmon;">
       Two
-      <div style="opacity: 0.6; position: absolute; left: 20px; background-color: papayawhip;">
+      <div style="opacity: 0.6; position: absolute; left: 15px; top: 10px; background-color: papayawhip;">
         Three
         <div style="opacity: 0; transform: translate3d(0, 10px, 0); background-color: papayawhip;">
           Clear

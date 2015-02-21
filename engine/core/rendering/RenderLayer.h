@@ -159,12 +159,6 @@ public:
 
     LayoutRect boundingBoxForCompositing(const RenderLayer* ancestorLayer = 0) const;
 
-    LayoutUnit staticInlinePosition() const { return m_staticInlinePosition; }
-    LayoutUnit staticBlockPosition() const { return m_staticBlockPosition; }
-
-    void setStaticInlinePosition(LayoutUnit position) { m_staticInlinePosition = position; }
-    void setStaticBlockPosition(LayoutUnit position) { m_staticBlockPosition = position; }
-
     LayoutSize subpixelAccumulation() const;
     void setSubpixelAccumulation(const LayoutSize&);
 
@@ -313,10 +307,6 @@ private:
     RenderLayer* m_next;
     RenderLayer* m_first;
     RenderLayer* m_last;
-
-    // Cached normal flow values for absolute positioned elements with static left/top values.
-    LayoutUnit m_staticInlinePosition;
-    LayoutUnit m_staticBlockPosition;
 
     OwnPtr<TransformationMatrix> m_transform;
 

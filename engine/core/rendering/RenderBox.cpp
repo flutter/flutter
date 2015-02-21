@@ -100,17 +100,8 @@ void RenderBox::styleDidChange(StyleDifference diff, const RenderStyle* oldStyle
 {
     RenderBoxModelObject::styleDidChange(diff, oldStyle);
 
-    RenderStyle* newStyle = style();
-    if (needsLayout() && oldStyle) {
+    if (needsLayout() && oldStyle)
         RenderBlock::removePercentHeightDescendantIfNeeded(this);
-
-        // Normally we can do optimized positioning layout for absolute/fixed positioned objects. There is one special case, however, which is
-        // when the positioned object's margin-before is changed. In this case the parent has to get a layout in order to run margin collapsing
-        // to determine the new static position.
-        if (isOutOfFlowPositioned() && newStyle->hasStaticBlockPosition() && oldStyle->marginBefore() != newStyle->marginBefore()
-            && parent() && !parent()->normalChildNeedsLayout())
-            parent()->setChildNeedsLayout();
-    }
 }
 
 void RenderBox::updateFromStyle()
@@ -1126,27 +1117,6 @@ void RenderBox::dirtyLineBoxes(bool fullLayout)
 void RenderBox::positionLineBox(InlineBox* box)
 {
     if (isOutOfFlowPositioned()) {
-        // Cache the x position only if we were an INLINE type originally.
-        bool wasInline = style()->isOriginalDisplayInlineType();
-        if (wasInline) {
-            // The value is cached in the xPos of the box.  We only need this value if
-            // our object was inline originally, since otherwise it would have ended up underneath
-            // the inlines.
-            RootInlineBox& root = box->root();
-            root.block().setStaticInlinePositionForChild(this, LayoutUnit::fromFloatRound(box->logicalLeft()));
-            if (style()->hasStaticInlinePosition())
-                setChildNeedsLayout(MarkOnlyThis); // Just go ahead and mark the positioned object as needing layout, so it will update its position properly.
-        } else {
-            // Our object was a block originally, so we make our normal flow position be
-            // just below the line box (as though all the inlines that came before us got
-            // wrapped in an anonymous block, which is what would have happened had we been
-            // in flow).  This value was cached in the y() of the box.
-            layer()->setStaticBlockPosition(box->logicalTop());
-            if (style()->hasStaticBlockPosition())
-                setChildNeedsLayout(MarkOnlyThis); // Just go ahead and mark the positioned object as needing layout, so it will update its position properly.
-        }
-
-        // Nuke the box.
         box->remove(DontMarkLineBoxes);
         box->destroy();
     } else if (isReplaced()) {
@@ -1781,34 +1751,11 @@ LayoutUnit RenderBox::containingBlockLogicalHeightForPositioned(const RenderBoxM
     return cb->clientLogicalHeight();
 }
 
-static void computeInlineStaticDistance(Length& logicalLeft, Length& logicalRight, const RenderBox* child, const RenderBoxModelObject* containerBlock, LayoutUnit containerLogicalWidth)
+static void computePositionedStaticDistance(Length& leftOrTop, Length& rightOrBottom)
 {
-    if (!logicalLeft.isAuto() || !logicalRight.isAuto())
+    if (!leftOrTop.isAuto() || !rightOrBottom.isAuto())
         return;
-
-    // FIXME: The static distance computation has not been patched for mixed writing modes yet.
-    if (child->parent()->style()->direction() == LTR) {
-        LayoutUnit staticPosition = child->layer()->staticInlinePosition() - containerBlock->borderLogicalLeft();
-        for (RenderObject* curr = child->parent(); curr && curr != containerBlock; curr = curr->container()) {
-            if (curr->isBox())
-                staticPosition += toRenderBox(curr)->logicalLeft();
-        }
-        logicalLeft.setValue(Fixed, staticPosition);
-    } else {
-        RenderBox* enclosingBox = child->parent()->enclosingBox();
-        LayoutUnit staticPosition = child->layer()->staticInlinePosition() + containerLogicalWidth + containerBlock->borderLogicalLeft();
-        for (RenderObject* curr = child->parent(); curr; curr = curr->container()) {
-            if (curr->isBox()) {
-                if (curr != containerBlock)
-                    staticPosition -= toRenderBox(curr)->logicalLeft();
-                if (curr == enclosingBox)
-                    staticPosition -= enclosingBox->logicalWidth();
-            }
-            if (curr == containerBlock)
-                break;
-        }
-        logicalRight.setValue(Fixed, staticPosition);
-    }
+    leftOrTop.setValue(Fixed, 0);
 }
 
 void RenderBox::computePositionedLogicalWidth(LogicalExtentComputedValues& computedValues) const
@@ -1878,7 +1825,7 @@ void RenderBox::computePositionedLogicalWidth(LogicalExtentComputedValues& compu
 
     // see FIXME 1
     // Calculate the static distance if needed.
-    computeInlineStaticDistance(logicalLeftLength, logicalRightLength, this, containerBlock, containerLogicalWidth);
+    computePositionedStaticDistance(logicalLeftLength, logicalRightLength);
 
     // Calculate constraint equation values for 'width' case.
     computePositionedLogicalWidthUsing(style()->logicalWidth(), containerBlock, containerDirection,
@@ -2115,20 +2062,6 @@ void RenderBox::computePositionedLogicalWidthUsing(Length logicalWidth, const Re
     computeLogicalLeftPositionedOffset(computedValues.m_position, this, computedValues.m_extent, containerBlock, containerLogicalWidth);
 }
 
-static void computeBlockStaticDistance(Length& logicalTop, Length& logicalBottom, const RenderBox* child, const RenderBoxModelObject* containerBlock)
-{
-    if (!logicalTop.isAuto() || !logicalBottom.isAuto())
-        return;
-
-    // FIXME: The static distance computation has not been patched for mixed writing modes.
-    LayoutUnit staticLogicalTop = child->layer()->staticBlockPosition() - containerBlock->borderBefore();
-    for (RenderObject* curr = child->parent(); curr && curr != containerBlock; curr = curr->container()) {
-        if (curr->isBox())
-            staticLogicalTop += toRenderBox(curr)->logicalTop();
-    }
-    logicalTop.setValue(Fixed, staticLogicalTop);
-}
-
 void RenderBox::computePositionedLogicalHeight(LogicalExtentComputedValues& computedValues) const
 {
     if (isReplaced()) {
@@ -2174,7 +2107,7 @@ void RenderBox::computePositionedLogicalHeight(LogicalExtentComputedValues& comp
 
     // see FIXME 1
     // Calculate the static distance if needed.
-    computeBlockStaticDistance(logicalTopLength, logicalBottomLength, this, containerBlock);
+    computePositionedStaticDistance(logicalTopLength, logicalBottomLength);
 
     // Calculate constraint equation values for 'height' case.
     LayoutUnit logicalHeight = computedValues.m_extent;
@@ -2395,7 +2328,7 @@ void RenderBox::computePositionedLogicalWidthReplaced(LogicalExtentComputedValue
      *    else if 'direction' is 'rtl', set 'right' to the static position.
     \*-----------------------------------------------------------------------*/
     // see FIXME 1
-    computeInlineStaticDistance(logicalLeft, logicalRight, this, containerBlock, containerLogicalWidth);
+    computePositionedStaticDistance(logicalLeft, logicalRight);
 
     /*-----------------------------------------------------------------------*\
      * 3. If 'left' or 'right' are 'auto', replace any 'auto' on 'margin-left'
@@ -2557,7 +2490,7 @@ void RenderBox::computePositionedLogicalHeightReplaced(LogicalExtentComputedValu
      *    with the element's static position.
     \*-----------------------------------------------------------------------*/
     // see FIXME 1
-    computeBlockStaticDistance(logicalTop, logicalBottom, this, containerBlock);
+    computePositionedStaticDistance(logicalTop, logicalBottom);
 
     /*-----------------------------------------------------------------------*\
      * 3. If 'bottom' is 'auto', replace any 'auto' on 'margin-top' or

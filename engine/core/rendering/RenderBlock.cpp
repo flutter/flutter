@@ -402,15 +402,6 @@ void RenderBlock::layoutPositionedObjects(bool relayoutChildren, PositionedLayou
     for (TrackedRendererListHashSet::iterator it = positionedDescendants->begin(); it != end; ++it) {
         r = *it;
 
-        SubtreeLayoutScope layoutScope(*r);
-
-        // When a non-positioned block element moves, it may have positioned children that are implicitly positioned relative to the
-        // non-positioned block.  Rather than trying to detect all of these movement cases, we just always lay out positioned
-        // objects that are positioned implicitly like this.  Such objects are rare, and so in typical DHTML menu usage (where everything is
-        // positioned explicitly) this should not incur a performance penalty.
-        if (relayoutChildren || (r->style()->hasStaticBlockPosition() && r->parent() != this))
-            layoutScope.setChildNeedsLayout(r);
-
         // If relayoutChildren is set and the child has percentage padding or an embedded content box, we also need to invalidate the childs pref widths.
         if (relayoutChildren && r->needsPreferredWidthsRecalculation())
             r->setPreferredLogicalWidthsDirty(MarkOnlyThis);

@@ -369,8 +369,6 @@ public:
     // to determine its position.
     bool hasAutoLeftAndRight() const { return left().isAuto() && right().isAuto(); }
     bool hasAutoTopAndBottom() const { return top().isAuto() && bottom().isAuto(); }
-    bool hasStaticInlinePosition() const { return hasAutoLeftAndRight(); }
-    bool hasStaticBlockPosition() const { return hasAutoTopAndBottom(); }
 
     EPosition position() const { return static_cast<EPosition>(noninherited_flags.position); }
     bool hasOutOfFlowPosition() const { return position() == AbsolutePosition; }
