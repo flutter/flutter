@@ -4,18 +4,18 @@ layer at (0,0) size 100x100
   RenderBlock {block} at (0,0) size 100x100 [bgcolor=#FFC0CB]
     RenderBlock {spacer} at (0,0) size 40x40 [bgcolor=#FFEFD5] [border: (5px solid #800080)]
     RenderBlock {spacer} at (0,40) size 40x40 [bgcolor=#FFEFD5] [border: (5px solid #800080)]
-layer at (0,40) size 20x20
-  RenderBlock (positioned) {absolute} at (0,40) size 20x20 [bgcolor=#008000]
+layer at (0,0) size 20x20
+  RenderBlock (positioned) {absolute} at (0,0) size 20x20 [bgcolor=#008000]
 layer at (0,150) size 100x100
   RenderParagraph {paragraph} at (0,150) size 100x100 [bgcolor=#FFA500]
     RenderBlock (inline-block) {spacer} at (0,0) size 40x40 [bgcolor=#FFEFD5] [border: (5px solid #800080)]
     RenderBlock (inline-block) {spacer} at (40,0) size 40x40 [bgcolor=#FFEFD5] [border: (5px solid #800080)]
-layer at (0,194) size 20x20
-  RenderBlock (positioned) {absolute} at (0,44) size 20x20 [bgcolor=#008000]
+layer at (0,150) size 20x20
+  RenderBlock (positioned) {absolute} at (0,0) size 20x20 [bgcolor=#008000]
 layer at (0,300) size 100x100
   RenderFlexibleBox {flex} at (0,300) size 100x100 [bgcolor=#FA8072]
     RenderBlock {spacer} at (0,0) size 40x40 [bgcolor=#FFEFD5] [border: (5px solid #800080)]
     RenderBlock {spacer} at (40,0) size 40x40 [bgcolor=#FFEFD5] [border: (5px solid #800080)]
-layer at (40,300) size 20x20
-  RenderBlock (positioned) {absolute} at (40,0) size 20x20 [bgcolor=#008000]
+layer at (0,300) size 20x20
+  RenderBlock (positioned) {absolute} at (0,0) size 20x20 [bgcolor=#008000]
 
