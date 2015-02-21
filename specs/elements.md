@@ -2,10 +2,6 @@ Sky DOM APIs
 ============
 
 ```dart
-SKY MODULE
-<!-- part of dart:sky -->
-
-<script>
 // ELEMENT TREE API
 
 abstract class Node extends EventTarget {
@@ -278,108 +274,6 @@ class ApplicationRoot extends Root {
 
 Type rootLayoutManager = BlockLayoutManager; // O(1)
 
-
-// BUILT-IN ELEMENTS
-
-@tagname('import')
-class ImportElement extends Element {
-  ImportElement = Element;
-
-  @override
-  Type getLayoutManager() => null; // O(1)
-}
-
-@tagname('template')
-class TemplateElement extends Element {
-  TemplateElement = Element;
-
-  // TODO(ianh): convert <template> to using a token stream instead of a Fragment
-
-  external Fragment get content; // O(1)
-
-  @override
-  Type getLayoutManager() => null; // O(1)
-}
-
-@tagname('script')
-class ScriptElement extends Element {
-  ScriptElement = Element;
-
-  @override
-  Type getLayoutManager() => null; // O(1)
-}
-
-@tagname('style')
-class StyleElement extends Element {
-  StyleElement = Element;
-
-  external List<Rule> getRules(); // O(N) in rules
-
-  @override
-  Type getLayoutManager() => null; // O(1)
-}
-
-@tagname('content')
-class ContentElement extends Element {
-  ContentElement = Element;
-
-  external List<Node> getDistributedNodes(); // O(N) in distributed nodes
-
-  @override
-  Type getLayoutManager() => null; // O(1)
-}
-
-@tagname('img')
-class ImgElement extends Element {
-  ImgElement = Element;
-
-  @override
-  Type getLayoutManager() => ImgElementLayoutManager; // O(1)
-}
-
-@tagname('div')
-class DivElement extends Element {
-  DivElement = Element;
-}
-
-@tagname('span')
-class SpanElement extends Element {
-  SpanElement = Element;
-}
-
-@tagname('iframe')
-class IframeElement extends Element {
-  IframeElement = Element;
-
-  @override
-  Type getLayoutManager() => IframeElementLayoutManager; // O(1)
-}
-
-@tagname('t')
-class TElement extends Element {
-  TElement = Element;
-}
-
-@tagname('a')
-class AElement extends Element {
-  AElement = Element;
-}
-
-@tagname('title')
-class TitleElement extends Element {
-  TitleElement = Element;
-
-  @override
-  Type getLayoutManager() => null; // O(1)
-}
-
-class _ErrorElement extends Element {
-  _ErrorElement._create();
-
-  @override
-  Type getLayoutManager() => _ErrorElementLayoutManager; // O(1)
-}
-
 class SelectorQuery {
   external SelectorQuery(String selector); // O(F()) where F() is the complexity of the selector
 
@@ -391,5 +285,4 @@ class SelectorQuery {
   //  - Fragment
   //  - Root
 }
-</script>
 ```

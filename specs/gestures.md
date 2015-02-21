@@ -2,10 +2,6 @@ Gestures
 ========
 
 ```dart
-SKY MODULE
-<!-- part of dart:sky -->
-
-<script>
 abstract class GestureEvent extends Event {
   Gesture _gesture;
   Gesture get gesture => _gesture;
@@ -253,7 +249,6 @@ class GestureManager {
 
 }
 /*
-</script>
 ```
 
 Gestures defined in the framework

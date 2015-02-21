@@ -31,21 +31,36 @@ imported module:
 <import src="path/to/chocolate.sky" as="chocolate" />
 ```
 
+Each module implicitly imports the [Built-In Elements
+Module](builtins.md).
+
+When a module imports another, and the ``import`` element has no
+``as`` attribute, then any elements registered in that module whose
+tag names do not begin with an underscore must be registered on the
+importing module. (If multiple elements are registered with the same
+name, that name gets marked as dead for that module and all the
+registrations for that name are discarded.)
+
+TODO(ianh): decide if elements imported with "as" should be imported
+but with the "as" name prefixed, as in ``<foo.button>``
+
 
 Module API
 ----------
 
 Each module consists of one or more libraries. The first library in a
-module is the *element tree library*, which imports the dart:sky
-module and then consists of the following code for a Sky module:
+module is the *element tree library*, which consists of the following
+code for a Sky module:
 
 ```dart
+import 'dart:sky';
 final Module module = new Module();
 ```
 
 ...and the following code for a Sky application:
 
 ```dart
+import 'dart:sky';
 final Module module = new Application();
 ```
 

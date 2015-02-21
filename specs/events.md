@@ -2,10 +2,6 @@ Sky Event Model
 ===============
 
 ```dart
-SKY MODULE
-<!-- part of dart:sky -->
-
-<script>
 import 'dart:collection';
 import 'dart:async';
 
@@ -199,5 +195,4 @@ class EventTarget {
     _eventsController.add(event);
   }
 }
-</script>
 ```
