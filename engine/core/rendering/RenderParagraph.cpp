@@ -175,6 +175,17 @@ void RenderParagraph::simplifiedNormalFlowLayout()
 void RenderParagraph::paintChildren(PaintInfo& paintInfo, const LayoutPoint& paintOffset, Vector<RenderBox*>& layers)
 {
     m_lineBoxes.paint(this, paintInfo, paintOffset, layers);
+
+    for (RenderObject* child = firstChild(); child; child = child->nextSibling()) {
+        // TODO(ojan): This is wrong at the moment. Inlines can have self painting
+        // layers as well. Either make inlines with self-painting layers work or
+        // don't allow inlines to be self painting.
+        if (child->isBox()) {
+            RenderBox* box = toRenderBox(child);
+            if (box->hasSelfPaintingLayer())
+                layers.append(box);
+        }
+    }
 }
 
 bool RenderParagraph::hitTestContents(const HitTestRequest& request, HitTestResult& result, const HitTestLocation& locationInContainer, const LayoutPoint& accumulatedOffset)
