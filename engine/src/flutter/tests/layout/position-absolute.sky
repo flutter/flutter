@@ -1,0 +1,49 @@
+<import src="../resources/dump-as-render-tree.sky" />
+
+<style>
+  block, paragraph, flex {
+    width: 100px;
+    height: 100px;
+    margin-bottom: 50px;
+    /* Make it a positioning root. */
+    transform: translate3d(0, 0, 0);
+  }
+  block { background: pink; }
+  paragraph {
+    background: orange;
+    display: paragraph;
+  }
+  flex {
+    background: salmon;
+    display: flex;
+  }
+  spacer {
+    height: 30px;
+    width: 30px;
+    border: 5px solid purple;
+    background: papayawhip;
+  }
+  absolute {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    background: green;
+  }
+</style>
+<block>
+  <spacer />
+  <absolute />
+  <spacer />
+</block>
+
+<paragraph>
+  <spacer />
+  <absolute />
+  <spacer />
+</paragraph>
+
+<flex>
+  <spacer />
+  <absolute />
+  <spacer />
+</flex>
