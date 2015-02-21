@@ -138,6 +138,9 @@ class Git(SCM):
 
     def _upstream_branch(self):
         current_branch = self.current_branch()
+        # If the remote is pointing to something other than "." than the upstream branch isn't a local branch.
+        if self.read_git_config('branch.%s.remote' % current_branch, cwd=self.checkout_root, executive=self._executive) != ".":
+            return None
         return self._branch_from_ref(self.read_git_config('branch.%s.merge' % current_branch, cwd=self.checkout_root, executive=self._executive).strip())
 
     def _merge_base(self, git_commit=None):
@@ -156,6 +159,10 @@ class Git(SCM):
             if '..' not in git_commit:
                 git_commit = git_commit + "^.." + git_commit
             return git_commit
+
+        upstream = self._upstream_branch()
+        if upstream:
+            return upstream
 
         return self._remote_merge_base()
 
