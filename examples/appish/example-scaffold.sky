@@ -4,10 +4,10 @@
 // found in the LICENSE file.
 -->
 <import src="/sky/framework/sky-drawer.sky" />
-<import src="/sky/framework/sky-element/sky-element.sky" as="SkyElement" />
+<import src="/sky/framework/sky-element.sky" />
 <import src="/sky/framework/sky-scrollable.sky" />
 
-<sky-element name="example-scaffold">
+<sky-element>
 <template>
   <style>
     :host {
@@ -54,7 +54,7 @@
     <content select=".menu"/>
   </sky-drawer>
   <sky-toolbar>
-    <div id="menu" on-click="handleMenuClick"/>
+    <div id="menu" />
     <content id="title" select=".title"/>
   </sky-toolbar>
   <sky-scrollable>
@@ -62,18 +62,23 @@
   </sky-scrollable>
 </template>
 <script>
-module.exports = class extends SkyElement {
-  created() {
-    this.toolbar_ = null;
+import "dart:sky";
+
+@Tagname('example-scaffold')
+class ExampleScaffold extends SkyElement {
+  Element _drawer;
+
+  void shadowRootReady() {
+    _drawer = shadowRoot.getElementById('drawer');
+    Element menu = shadowRoot.getElementById('menu');
+    menu.addEventListener('click', _handleMenuClick);
   }
 
-  shadowRootReady() {
-    this.toolbar_ = this.shadowRoot.getElementById('drawer');
+  void _handleMenuClick(_) {
+    _drawer.toggle();
   }
+}
 
-  handleMenuClick() {
-    this.toolbar_.toggle();
-  }
-}.register();
+_init(script) => register(script, ExampleScaffold);
 </script>
 </sky-element>
