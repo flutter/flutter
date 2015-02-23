@@ -1,16 +1,11 @@
 <!--
-// Copyright 2014 The Chromium Authors. All rights reserved.
+// Copyright 2015 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 -->
-<import src="sky-element/sky-element.sky" as="SkyElement" />
+<import src="sky-element.sky" />
 
-<sky-element
-    name="sky-button"
-    attributes="highlight:boolean"
-    on-pointerdown="handlePointerDown"
-    on-pointerup="handlePointerUp"
-    on-pointercancel="handlePointerCancel">
+<sky-element attributes="highlight:boolean">
 <template>
   <style>
     :host {
@@ -29,21 +24,31 @@
   <content />
 </template>
 <script>
-module.exports = class extends SkyElement {
-  created() {
-    super.created();
+import "dart:sky";
 
-    this.tabIndex = 0; // Make focusable.
+@Tagname('sky-button')
+class SkyButton extends SkyElement {
+  SkyButton() {
+    addEventListener('pointerdown', _handlePointerDown);
+    addEventListener('pointerup', _handlePointerUp);
+    addEventListener('pointercancel', _handlePointerCancel);
+
+    tabIndex = 0; // Make focusable.
   }
-  handlePointerDown() {
-    this.highlight = true;
+
+  void _handlePointerDown(_) {
+    highlight = true;
   }
-  handlePointerUp() {
-    this.highlight = false;
+
+  void _handlePointerUp(_) {
+    highlight = false;
   }
-  handlePointerCancel() {
-    this.highlight = false;
+
+  void _handlePointerCancel(_) {
+    highlight = false;
   }
-}.register();
+}
+
+_init(script) => register(script, SkyButton);
 </script>
 </sky-element>

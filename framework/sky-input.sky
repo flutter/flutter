@@ -3,9 +3,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 -->
-<import src="/gen/mojo/services/keyboard/public/interfaces/keyboard.mojom.sky" as="keyboard" />
-<import src="shell.sky" as="shell" />
-<import src="sky-element/sky-element.sky" as="SkyElement" />
+<import src="sky-element.sky" />
 
 <sky-element name="sky-input" attributes="value:string">
 <template>
@@ -24,48 +22,49 @@
     overflow: hidden;
   }
   </style>
-  <div id="control" contenteditable
-       on-focus="handleFocus"
-       on-blur="handleBlur"
-       on-keydown="handleKeyDown">{{ value }}</div>
+  <div id="control" contenteditable />
 </template>
 <script>
-var keyboard = shell.connectToService("mojo:keyboard", keyboard.Keyboard);
-module.exports = class extends SkyElement {
+import "dart:sky";
+
+// TODO(abarth): Connect to the mojo:keyboard service.
+
+@Tagname('sky-input')
+class SkyInput extends SkyElement {
+  Element _control;
+
+  static String _textForValue(String value) => value == null ? '' : value;
+
   shadowRootReady() {
-    var control = this.shadowRoot.getElementById('control');
-    var text = control.firstChild;
-
-    var observer = new MutationObserver(function() {
-      // contenteditable might remove the text node, but we need to keep it
-      // since that's where the data binding is connected to.
-      if (!text.parentNode)
-        control.appendChild(text);
-      if (this.value == control.textContent)
-        return;
-      this.value = control.textContent;
-      this.dispatchEvent(new CustomEvent('change', {
-        bubbles: true,
-      }));
-    }.bind(this));
-
-    observer.observe(control, {
-      subtree: true,
-      characterData: true,
-      childList: true,
-    });
+    _control = shadowRoot.getElementById('control');
+    _control.setChild(new Text(_textForValue(getAttribute('text'))));
+    _control.addEventListener('focus', _handleFocus);
+    _control.addEventListener('blur', _handleBlur);
+    _control.addEventListener('keydown', _handleKeyDown);
   }
-  handleKeyDown(event) {
+
+  String get text => _control == null ? null : _control.textContent;
+
+  void textChanged(String oldValue, String newValue) {
+    if (_control != null)
+      _control.setChild(new Text(_textForValue(newValue)));
+  }
+
+  void _handleKeyDown(KeyboardEvent event) {
     // TODO(abarth): You can still get newlines if the user pastes them.
     if (event.key == 0xD)
       event.preventDefault();
   }
-  handleFocus(event) {
-    keyboard.show();
+
+  void _handleFocus(_) {
+    // TODO(abarth): Show the keyboard.
   }
-  handleBlur(event) {
-    keyboard.hide();
+
+  void _handleBlur(_) {
+    // TODO(abarth): Hide the keyboard.
   }
-}.register();
+}
+
+_init(script) => register(script, SkyInput);
 </script>
 </sky-element>

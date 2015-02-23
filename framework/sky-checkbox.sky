@@ -1,14 +1,12 @@
 <!--
-// Copyright 2014 The Chromium Authors. All rights reserved.
+// Copyright 2015 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 -->
-<import src="sky-button.sky" as="SkyButton" />
+<import src="sky-button.sky" />
+<import src="sky-element.sky" />
 
-<sky-element
-    name="sky-checkbox"
-    attributes="checked:boolean"
-    on-click="handleClick">
+<sky-element attributes="checked:boolean, highlight:boolean">
 <template>
   <style>
     :host {
@@ -47,27 +45,47 @@
       border-color: #0f9d58;
     }
   </style>
-  <div id="container" class="{{ containerStyle }}">
-    <div id="check" class="{{ checkStyle }}" />
+  <div id="container">
+    <div id="check" />
   </div>
 </template>
 <script>
-module.exports = class extends SkyButton {
-  created() {
-    super.created();
+import "dart:sky";
 
-    this.containerStyle = '';
-    this.checkStyle = '';
+@Tagname('sky-checkbox')
+class SkyCheckbox extends SkyButton {
+  Element _container;
+  Element _check;
+
+  SkyCheckbox() {
+    addEventListener('click', _handleClick);
   }
-  checkedChanged(oldValue, newValue) {
-    this.checkStyle = newValue ? 'checked' : '';
+
+  static String _checkClassForValue(bool value) => value ? 'checked' : '';
+  static String _containerClassForValue(bool value) => value ? 'highlight' : '';
+
+  void shadowRootReady() {
+    _container = shadowRoot.getElementById('container');
+    _container.setAttribute('class', _containerClassForValue(highlight));
+    _check = shadowRoot.getElementById('check');
+    _check.setAttribute('class', _checkClassForValue(checked));
   }
-  highlightChanged(oldValue, newValue) {
-    this.containerStyle = newValue ? 'highlight' : '';
+
+  void checkedChanged(bool oldValue, bool newValue) {
+    if (_check != null)
+      _check.setAttribute('class', _checkClassForValue(newValue));
   }
-  handleClick() {
-    this.checked = !this.checked;
+
+  void highlightChanged(bool oldValue, bool newValue) {
+    if (_container != null)
+      _container.setAttribute('class', _containerClassForValue(newValue));
   }
-}.register();
+
+  void _handleClick(_) {
+    checked = !checked;
+  }
+}
+
+_init(script) => register(script, SkyCheckbox);
 </script>
 </sky-element>

@@ -1,14 +1,12 @@
 <!--
-// Copyright 2014 The Chromium Authors. All rights reserved.
+// Copyright 2015 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 -->
-<import src="sky-button.sky" as="SkyButton" />
+<import src="sky-button.sky" />
+<import src="sky-element.sky" />
 
-<sky-element
-    name="sky-radio"
-    attributes="selected:boolean, group:string"
-    on-click="handleClick">
+<sky-element attributes="selected:boolean, group:string, highlight:boolean">
 <template>
   <style>
     :host {
@@ -20,9 +18,6 @@
       border: 1px solid blue;
       margin: 0 5px;
     }
-    :host([highlight=true]) box {
-      background-color: orange;
-    }
     dot {
       -webkit-user-select: none;
       width: 10px;
@@ -32,74 +27,95 @@
       margin: 2px;
     }
   </style>
-  <template if="{{ selected }}">
-    <dot />
-  </template>
+  <dot />
 </template>
 <script>
-const kControllerMap = new WeakMap();
+import "dart:sky";
 
-class RadioGroupController {
-  static forRadio(radio) {
-    var scope = radio.ownerScope;
-    var controller = kControllerMap.get(scope);
-    if (!controller)
-      kControllerMap.set(scope, new RadioGroupController());
-    return kControllerMap.get(scope);
+final Map<Node, _RadioGroupController> _controllerMap = new Map();
+
+class _RadioGroupController {
+  static _RadioGroupController forRadio(radio) {
+    Node owner = radio.owner;
+    return _controllerMap.putIfAbsent(owner, () =>
+        new _RadioGroupController(owner));
   }
-  constructor() {
-    this.radios = new Set();
-  }
-  addRadio(radio) {
-    this.radios.add(radio);
+
+  final Node _scope;
+  final Set<SkyRadio> _radios = new Set<SkyRadio>();
+
+  _RadioGroupController(this._scope);
+
+  void addRadio(SkyRadio radio) {
+    _radios.add(radio);
     // If this new radio is default-selected, take selection from the group.
     if (radio.selected)
-      this.takeSelectionFromGroup(radio);
+      takeSelectionFromGroup(radio);
   }
-  removeRadio(radio) {
-    this.radios.remove(radio);
+
+  void removeRadio(SkyRadio radio) {
+    _radios.remove(radio);
+    if (_radios.isEmpty)
+      _controllerMap.remove(_scope);
   }
-  takeSelectionFromGroup(selectedRadio) {
-    // Emtpy/null/undefined group means an isolated radio.
-    if (!selectedRadio.group)
+
+  void takeSelectionFromGroup(SkyRadio selectedRadio) {
+    String group = selectedRadio.group;
+    if (group == null)
       return;
-    this.radios.forEach(function(radio) {
-      if (selectedRadio === radio)
+    _radios.forEach((SkyRadio radio) {
+      if (selectedRadio == radio)
         return;
-      if (radio.group != selectedRadio.group)
+      if (radio.group != group)
         return;
       radio.selected = false;
     });
   }
-};
+}
 
-module.exports = class extends SkyButton {
-  created() {
-    super.created();
+@Tagname('sky-radio')
+class SkyRadio extends SkyButton {
+  _RadioGroupController _controller;
+  Element _dot;
 
-    this.controller = null;
+  SkyRadio() {
+    addEventListener('click', _handleClick);
   }
-  attached() {
+
+  void shadowRootReady() {
+    _dot = shadowRoot.querySelector('dot');
+    _dot.style['display'] = selected ? 'block' : 'none';
+  }
+
+  void attached() {
     super.attached();
-    this.controller = RadioGroupController.forRadio(this);
-    this.controller.addRadio(this);
+    _controller = _RadioGroupController.forRadio(this);
+    _controller.addRadio(this);
   }
-  detached() {
+
+  void detached() {
     super.detached();
-    this.controller.removeRadio(this);
-    this.controller = null;
+    _controller.removeRadio(this);
+    _controller = null;
   }
-  selectedChanged(oldValue, newValue) {
-    if (newValue && this.controller)
-      this.controller.takeSelectionFromGroup(this);
+
+  void selectedChanged(bool oldValue, bool newValue) {
+    if (_dot != null)
+      _dot.style['display'] = newValue ? 'block' : 'none';
+    if (newValue && _controller != null)
+      _controller.takeSelectionFromGroup(this);
   }
-  groupChanged(oldValue, newValue) {
-    if (this.selected && this.controller)
-      this.controller.takeSelectionFromGroup(this);
+
+  void groupChanged(String oldValue, String newValue) {
+    if (selected && _controller != null)
+      _controller.takeSelectionFromGroup(this);
   }
-  handleClick() {
+
+  _handleClick(_) {
     this.selected = true;
   }
-}.register();
+}
+
+_init(script) => register(script, SkyRadio);
 </script>
 </sky-element>

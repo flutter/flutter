@@ -9,7 +9,7 @@
 
   boolean hasAttribute(DOMString name);
   [TreatReturnedNullStringAs=Null] DOMString getAttribute(DOMString name);
-  [CustomElementCallbacks, RaisesException] void setAttribute(DOMString name, optional DOMString value);
+  [CustomElementCallbacks, RaisesException] void setAttribute(DOMString name, optional DOMString? value);
   [CustomElementCallbacks] void removeAttribute(DOMString name);
 
   sequence<Attr> getAttributes();

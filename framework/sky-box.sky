@@ -1,11 +1,11 @@
 <!--
-// Copyright 2014 The Chromium Authors. All rights reserved.
+// Copyright 2015 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 -->
-<import src="sky-element/sky-element.sky" as="SkyElement" />
+<import src="sky-element.sky" />
 
-<sky-element name="sky-box" attributes="title:string">
+<sky-element attributes="title:string">
 <template>
   <style>
     :host {
@@ -15,23 +15,39 @@
       border: 1px solid gray;
       margin: 10px;
     }
-    .title {
+    #title {
       text-align: center;
       font-size: 10px;
       padding: 8px 8px 4px 8px;
     }
-    .content {
+    #content {
       padding: 4px 8px 8px 8px;
     }
     div {
       flex: 1;
     }
   </style>
-  <div class="title">{{ title }}</div>
-  <div class="content"><content/></div>
+  <div id="title"></div>
+  <div id="content"><content/></div>
 </template>
 <script>
-module.exports = class extends SkyElement {
-}.register();
+import "dart:sky";
+
+@Tagname('sky-box')
+class SkyBox extends SkyElement {
+  Element _title;
+
+  void shadowRootReady() {
+    _title = shadowRoot.getElementById('title');
+    _title.setChild(new Text(title));
+  }
+
+  void titleChanged(String oldValue, String newValue) {
+    if (_title != null)
+      _title.setChild(new Text(newValue));
+  }
+}
+
+_init(script) => register(script, SkyBox);
 </script>
 </sky-element>
