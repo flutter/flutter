@@ -23,6 +23,9 @@ MojoFetcher::MojoFetcher(Client* client, const KURL& url)
   mojo::URLRequestPtr url_request = mojo::URLRequest::New();
   url_request->url = url.string().toUTF8();
   url_request->auto_follow_redirects = true;
+  // TODO(rafaelw): Bypass the cache until we can figure out why modified
+  // resources aren't updating within sky.
+  url_request->bypass_cache = true;
   url_loader_->Start(url_request.Pass(),
                      base::Bind(&MojoFetcher::OnReceivedResponse,
                                 weak_factory_.GetWeakPtr()));
