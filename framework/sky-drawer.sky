@@ -3,17 +3,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 -->
-<import src="animation/controller.sky" as="AnimationController" />
-<import src="animation/curves.sky" as="Curves" />
-<import src="sky-element/sky-element.sky" as="SkyElement" />
+<import src="sky-element.sky" />
 <import src="sky-scrollable.sky" />
 
-<sky-element
-  name="sky-drawer"
-  on-pointerdown="handlePointerDown"
-  on-pointermove="handlePointerMove"
-  on-pointerup="handlePointerUp"
-  on-pointercancel="handlePointerCancel">
+<sky-element>
 <template>
   <style>
     #mask {
@@ -35,128 +28,136 @@
       bottom: 0;
     }
   </style>
-  <div id="mask" on-click="handleMaskClick" />
-  <div id="content" on-gestureflingstart="handleFlingStart">
+  <div id="mask" />
+  <div id="content">
     <content/>
   </div>
 </template>
 <script>
-const kWidth = 256;
-const kMinFlingVelocity = 0.4;
-const kMinAnimationDurationMS = 246;
-const kMaxAnimationDurationMS = 600;
-const kAnimationCurve = Curves.easeInOut;
+import "animation/controller.dart";
+import "animation/curves.dart";
+import "animation/timer.dart";
+import "dart:math" as math;
+import "dart:sky";
 
-module.exports = class extends SkyElement {
-  created() {
-    this.position_ = 0;
-    this.mask_ = null;
-    this.content_ = null;
-    this.animation_ = new AnimationController(this);
+const double _kWidth = 256.0;
+const double _kMinFlingVelocity = 0.4;
+const double _kMinAnimationDurationMS = 246.0;
+const double _kMaxAnimationDurationMS = 600.0;
+const Cubic _kAnimationCurve = easeOut;
+
+@Tagname('sky-drawer')
+class SkyDrawer extends SkyElement implements AnimationDelegate {
+  Element _mask;
+  Element _content;
+  double _position = 0.0;
+  AnimationController _animation;
+
+  SkyDrawer() {
+    _animation = new AnimationController(this);
+
+    addEventListener('pointerdown', _handlePointerDown);
+    addEventListener('pointermove', _handlePointerMove);
+    addEventListener('pointerup', _handlePointerUp);
+    addEventListener('pointercancel', _handlePointerCancel);
   }
 
-  shadowRootReady() {
-    this.mask_ = this.shadowRoot.getElementById('mask');
-    this.content_ = this.shadowRoot.getElementById('content');
-    this.position = -kWidth;
+  void shadowRootReady() {
+    _mask = shadowRoot.getElementById('mask');
+    _mask.addEventListener('click', _handleMaskClick);
+    _content = shadowRoot.getElementById('content');
+    _content.addEventListener('gestureflingstart', _handleFlingStart);
+    position = -_kWidth;
   }
 
-  toggle() {
-    if (this.isMostlyClosed)
-      this.open();
+  void toggle() {
+    if (isMostlyClosed)
+      open();
     else
-      this.close();
+      close();
   }
 
-  open() {
-    this.animateToPosition_(0);
+  void open() {
+    _animateToPosition(0.0);
   }
 
-  close() {
-    this.animateToPosition_(-kWidth);
+  void close() {
+    _animateToPosition(-_kWidth);
   }
 
-  get isClosed() {
-    return this.position_ <= -kWidth;
+  bool get isClosed => _position <= -_kWidth;
+  bool get isMostlyClosed => _position <= -_kWidth / 2;
+  double get position => _position;
+
+  set position(double value) {
+    double newPosition = math.min(0.0, math.max(value, -_kWidth));
+    _position = newPosition;
+    _content.style['transform'] = 'translateX(${newPosition}px)';
+    _mask.style['opacity'] = '${(newPosition / _kWidth + 1) * 0.25}';
+    style['display'] = isClosed ? 'none' : '';
   }
 
-  get isMostlyClosed() {
-    return this.position_ <= -kWidth / 2;
-  }
-
-  get position() {
-    return this.position_;
-  }
-
-  set position(value) {
-    var newPosition = Math.min(0, Math.max(value, -kWidth));
-    this.position_ = newPosition;
-    this.content_.style.transform = 'translateX(' + newPosition + 'px)';
-    this.mask_.style.opacity = (newPosition / kWidth + 1) * 0.25;
-    this.style.display = this.isClosed ? 'none' : '';
-  }
-
-  settle_() {
-    if (this.isMostlyClosed)
-      this.close();
+  void _settle() {
+    if (isMostlyClosed)
+      close();
     else
-      this.open();
+      open();
   }
 
-  animateToPosition_(targetPosition) {
-    var currentPosition = this.position_;
-    var distance = Math.abs(targetPosition - currentPosition);
-    var duration = kMaxAnimationDurationMS * distance / kWidth;
-    this.animation_.start({
+  void _animateToPosition(double targetPosition) {
+    double currentPosition = _position;
+    double distance = (targetPosition - currentPosition).abs();
+    double duration = _kMaxAnimationDurationMS * distance / _kWidth;
+    _animation.start(
       begin: currentPosition,
       end: targetPosition,
-      duration: Math.max(kMinAnimationDurationMS, duration),
-      curve: kAnimationCurve,
-    });
+      duration: math.max(_kMinAnimationDurationMS, duration),
+      curve: _kAnimationCurve);
   }
 
-  updateAnimation(position) {
-    this.position = position;
+  void updateAnimation(double p) {
+    position = p;
   }
 
-  handleMaskClick() {
-    this.close();
+  void _handleMaskClick(_) {
+    close();
   }
 
-  handlePointerDown(event) {
-    this.animation_.stop();
+  void _handlePointerDown(_) {
+    _animation.stop();
   }
 
-  handlePointerMove(event) {
-    this.position += event.dx;
+  void _handlePointerMove(PointerEvent event) {
+    position += event.dx;
   }
 
-  handlePointerUp(event) {
-    if (!this.animation_.isAnimating)
-      this.settle_();
+  void _handlePointerUp(_) {
+    if (!_animation.isAnimating)
+      _settle();
   }
 
-  handlePointerCancel(event) {
-    if (!this.animation_.isAnimating)
-      this.settle_();
+  void _handlePointerCancel(_) {
+    if (!_animation.isAnimating)
+      _settle();
   }
 
-  handleFlingStart(event) {
-    var direction = Math.sign(event.velocityX);
-    var velocityX = Math.abs(event.velocityX) / 1000;
-    if (velocityX < kMinFlingVelocity)
+  void _handleFlingStart(event) {
+    double direction = event.velocityX.sign();
+    double velocityX = event.velocityX.abs() / 1000;
+    if (velocityX < _kMinFlingVelocity)
       return;
-    var targetPosition = direction < 0 ? -kWidth : 0;
-    var currentPosition = this.position_;
-    var distance = Math.abs(targetPosition - currentPosition);
-    var duration = distance / velocityX;
-    this.animation_.start({
+    double targetPosition = direction < 0.0 ? -kWidth : 0.0;
+    double currentPosition = _position;
+    double distance = (targetPosition - currentPosition).abs();
+    double duration = distance / velocityX;
+    _animation.start(
       begin: currentPosition,
       end: targetPosition,
       duration: duration,
-      curve: Curves.linear,
-    });
+      curve: linear);
   }
-}.register();
+}
+
+_init(script) => register(script, SkyDrawer);
 </script>
 </sky-element>
