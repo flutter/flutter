@@ -28,7 +28,7 @@ public:
 
     PassRefPtr<DartValue> takeServicesHandle(DartState*);
     PassRefPtr<DartValue> takeExposedServicesHandle(DartState*);
-    void embedViewManagerClient(DartValue* client);
+    void embedViewManagerClient(RefPtr<DartValue> client);
 
 private:
     explicit HTMLIFrameElement(Document&);

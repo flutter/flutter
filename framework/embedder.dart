@@ -13,7 +13,7 @@ final _EmbedderImpl embedder = new _EmbedderImpl();
 
 class _EmbedderImpl {
   static final ShellProxy shell = new ShellProxy.fromHandle(
-      new core.MojoHandle(internals.takeShellProxyHandle())); 
+      new core.MojoHandle(internals.takeShellProxyHandle()));
 
   static final ApplicationConnection connection = new ApplicationConnection(
       new ServiceProviderStub.fromHandle(

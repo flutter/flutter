@@ -29,11 +29,6 @@ Internals* GetInternals() {
   return static_cast<Internals*>(state->GetUserData(&kInternalsKey));
 }
 
-void RenderTreeAsText(Dart_NativeArguments args) {
-  Dart_Handle result = StdStringToDart(GetInternals()->RenderTreeAsText());
-  Dart_SetReturnValue(args, result);
-}
-
 void ContentAsText(Dart_NativeArguments args) {
   Dart_Handle result = StdStringToDart(GetInternals()->ContentAsText());
   Dart_SetReturnValue(args, result);
@@ -44,28 +39,33 @@ void NotifyTestComplete(Dart_NativeArguments args) {
   GetInternals()->NotifyTestComplete(StdStringFromDart(test_result));
 }
 
+void RenderTreeAsText(Dart_NativeArguments args) {
+  Dart_Handle result = StdStringToDart(GetInternals()->RenderTreeAsText());
+  Dart_SetReturnValue(args, result);
+}
+
 void TakeShellProxyHandle(Dart_NativeArguments args) {
   Dart_SetIntegerReturnValue(args,
       GetInternals()->TakeShellProxyHandle().value());
 }
 
-void TakeServicesProvidedToEmbedder(Dart_NativeArguments args) {
-  Dart_SetIntegerReturnValue(args,
-      GetInternals()->TakeServicesProvidedToEmbedder().value());
+void TakeServicesProvidedByEmbedder(Dart_NativeArguments args) {
+  Dart_SetIntegerReturnValue(
+      args, GetInternals()->TakeServicesProvidedByEmbedder().value());
 }
 
-void TakeServicesProvidedByEmbedder(Dart_NativeArguments args) {
-  Dart_SetIntegerReturnValue(args,
-      GetInternals()->TakeServicesProvidedByEmbedder().value());
+void TakeServicesProvidedToEmbedder(Dart_NativeArguments args) {
+  Dart_SetIntegerReturnValue(
+      args, GetInternals()->TakeServicesProvidedToEmbedder().value());
 }
 
 const DartBuiltin::Natives kNativeFunctions[] = {
-  {"renderTreeAsText", RenderTreeAsText, 0},
-  {"contentAsText", ContentAsText, 0},
-  {"notifyTestComplete", NotifyTestComplete, 1},
-  {"takeShellProxyHandle", TakeShellProxyHandle, 0},
-  {"takeServicesProvidedToEmbedder", TakeServicesProvidedToEmbedder, 0},
-  {"takeServicesProvidedByEmbedder", TakeServicesProvidedByEmbedder, 0},
+    {"contentAsText", ContentAsText, 0},
+    {"notifyTestComplete", NotifyTestComplete, 1},
+    {"renderTreeAsText", RenderTreeAsText, 0},
+    {"takeShellProxyHandle", TakeShellProxyHandle, 0},
+    {"takeServicesProvidedByEmbedder", TakeServicesProvidedByEmbedder, 0},
+    {"takeServicesProvidedToEmbedder", TakeServicesProvidedToEmbedder, 0},
 };
 
 const DartBuiltin& GetBuiltin() {
@@ -86,12 +86,12 @@ const uint8_t* Symbolizer(Dart_NativeFunction native_function) {
 
 const char kLibraryName[] = "dart:sky.internals";
 const char kLibrarySource[] = R"DART(
-String renderTreeAsText() native "renderTreeAsText";
 String contentAsText() native "contentAsText";
 void notifyTestComplete(String test_result) native "notifyTestComplete";
+String renderTreeAsText() native "renderTreeAsText";
 int takeShellProxyHandle() native "takeShellProxyHandle";
-int takeServicesProvidedToEmbedder() native "takeServicesProvidedToEmbedder";
 int takeServicesProvidedByEmbedder() native "takeServicesProvidedByEmbedder";
+int takeServicesProvidedToEmbedder() native "takeServicesProvidedToEmbedder";
 )DART";
 
 }  // namespace
@@ -170,20 +170,6 @@ void Internals::ConnectToApplication(
     document_view_->shell()->ConnectToApplication(
         application_url, services.Pass(), exposed_services.Pass());
   }
-}
-
-mojo::Handle Internals::ConnectToService(
-    const std::string& application_url, const std::string& interface_name) {
-  if (!document_view_)
-    return mojo::Handle();
-
-  mojo::ServiceProviderPtr service_provider;
-  ConnectToApplication(application_url, mojo::GetProxy(&service_provider),
-                       nullptr);
-
-  mojo::MessagePipe pipe;
-  service_provider->ConnectToService(interface_name, pipe.handle1.Pass());
-  return pipe.handle0.release();
 }
 
 void Internals::pauseAnimations(double pauseTime) {

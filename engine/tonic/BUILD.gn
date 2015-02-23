@@ -38,10 +38,12 @@ source_set("tonic") {
     "dart_wrappable.cc",
     "dart_wrappable.h",
     "dart_wrapper_info.h",
+    "mojo_converter.h",
   ]
 
   deps = [
     "//base",
+    "//mojo/public/cpp/system",
     "//sky/engine/wtf",
   ]
 

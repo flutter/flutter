@@ -35,9 +35,6 @@ class Internals : public base::SupportsUserData::Data,
   mojo::Handle TakeServicesProvidedToEmbedder();
   mojo::Handle TakeServicesProvidedByEmbedder();
 
-  mojo::Handle ConnectToService(
-      const std::string& application_url, const std::string& interface_name);
-
   void pauseAnimations(double pauseTime);
 
  private:

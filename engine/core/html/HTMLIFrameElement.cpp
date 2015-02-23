@@ -10,6 +10,7 @@
 #include "sky/engine/core/html/parser/HTMLParserIdioms.h"
 #include "sky/engine/core/loader/FrameLoaderClient.h"
 #include "sky/engine/core/rendering/RenderIFrame.h"
+#include "sky/engine/tonic/mojo_converter.h"
 
 namespace blink {
 
@@ -79,14 +80,13 @@ PassRefPtr<DartValue> HTMLIFrameElement::takeExposedServicesHandle(DartState*)
     return DartValue::Create();
 }
 
-void HTMLIFrameElement::embedViewManagerClient(DartValue* client) {
+void HTMLIFrameElement::embedViewManagerClient(RefPtr<DartValue> client)
+{
   if (!m_contentView)
     return;
 
-  // TODO(dart)
-  // mojo::MessagePipeHandle handle;
-  // if (gin::ConvertFromV8(client.isolate(), client.v8Value(), &handle))
-  //   m_contentView->Embed(mojo::MakeProxy<mojo::ViewManagerClient>(mojo::MakeScopedHandle(handle)));
+  m_contentView->Embed(mojo::MakeProxy<mojo::ViewManagerClient>(
+      DartConverter<mojo::ScopedMessagePipeHandle>::FromDart(client->dart_value())));
 }
 
 void HTMLIFrameElement::navigateView()
