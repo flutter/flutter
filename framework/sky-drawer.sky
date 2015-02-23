@@ -64,7 +64,7 @@ class SkyDrawer extends SkyElement implements AnimationDelegate {
 
   void shadowRootReady() {
     _mask = shadowRoot.getElementById('mask');
-    _mask.addEventListener('click', _handleMaskClick);
+    _mask.addEventListener('gesturetap', _handleMaskTap);
     _content = shadowRoot.getElementById('content');
     _content.addEventListener('gestureflingstart', _handleFlingStart);
     position = -_kWidth;
@@ -119,7 +119,7 @@ class SkyDrawer extends SkyElement implements AnimationDelegate {
     position = p;
   }
 
-  void _handleMaskClick(_) {
+  void _handleMaskTap(_) {
     close();
   }
 

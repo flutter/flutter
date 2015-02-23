@@ -13,7 +13,7 @@
     position: relative;
   }
   #scrollable {
-    transform: translateY(0);
+    will-change: transform;
   }
   #vbar {
     position: absolute;
