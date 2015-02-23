@@ -36,7 +36,7 @@ class FlingCurve {
 
   FlingCurve(double velocity, double startTime) {
     double startingVelocity = math.min(_kMaxVelocity, velocity.abs());
-    _timeOffset = _velocityAtTime(startingVelocity);
+    _timeOffset = _timeAtVelocity(startingVelocity);
     _positionOffset = _positionAtTime(_timeOffset);
     _startTime = startTime / 1000.0;
     _previousPosition = 0.0;

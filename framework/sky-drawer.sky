@@ -19,7 +19,7 @@
       right: 0;
     }
     #content {
-      background-color: yellow;
+      background-color: white;
       will-change: transform;
       position: absolute;
       width: 256px;

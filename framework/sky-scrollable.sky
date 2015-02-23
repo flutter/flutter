@@ -11,6 +11,7 @@
   :host {
     overflow: hidden;
     position: relative;
+    will-change: transform;
   }
   #scrollable {
     will-change: transform;
