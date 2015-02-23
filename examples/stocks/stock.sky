@@ -8,19 +8,46 @@
 <sky-element attributes="ticker:string">
 <template>
   <style>
+  :host {
+    height: 50px;
+    display: flex;
+    width: 100%;
+    border: 1px solid black;
+  }
+  #ticker {
+    padding: 10px;
+    flex-grow: 1;
+  }
+  #change {
+    padding: 10px;
+    border-radius: 5px;
+    min-width: 60px;
+    text-align: right;
+  }
+  .positive {
+    background-color: green;
+  }
+  .negative {
+    background-color: red;
+  }
   </style>
   <div id="ticker" />
+  <div id="change" />
 </template>
 <script>
 import "dart:sky";
 
 @Tagname('stock')
 class Stock extends SkyElement {
-  Element _ticker;
+  var model; // model.Stock
 
   void shadowRootReady() {
-    _ticker = shadowRoot.getElementById('ticker');
-    _ticker.textContent = ticker;
+    Element ticker = shadowRoot.getElementById('ticker');
+    ticker.textContent = model.symbol;
+
+    Element change = shadowRoot.getElementById('change');
+    change.textContent = "${model.percentChange.toStringAsFixed(2)}%";
+    change.classList.add((model.percentChange < 0) ? 'negative' : 'positive');
   }
 }
 
