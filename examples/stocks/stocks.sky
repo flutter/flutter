@@ -6,7 +6,8 @@
 <import src="/sky/framework/sky-drawer.sky" />
 <import src="/sky/framework/sky-element.sky" />
 <import src="/sky/framework/sky-scrollable.sky" />
-<import src="stock.sky" />
+<import src="stock.sky" as='view'/>
+<import src='companylist.sky' as='model'/>
 
 <sky-element>
 <template>
@@ -58,28 +59,7 @@
     <div id="menu" />
     I am a stocks app
   </sky-toolbar>
-  <sky-scrollable>
-    <stock ticker="GOOG" />
-    <stock ticker="GOOGL" />
-    <stock ticker="GOOG" />
-    <stock ticker="GOOG" />
-    <stock ticker="GOOG" />
-    <stock ticker="GOOG" />
-    <stock ticker="GOOG" />
-    <stock ticker="GOOG" />
-    <stock ticker="GOOG" />
-    <stock ticker="GOOG" />
-    <stock ticker="GOOG" />
-    <stock ticker="GOOG" />
-    <stock ticker="GOOG" />
-    <stock ticker="GOOG" />
-    <stock ticker="GOOG" />
-    <stock ticker="GOOG" />
-    <stock ticker="GOOG" />
-    <stock ticker="GOOG" />
-    <stock ticker="GOOG" />
-    <stock ticker="GOOG" />
-    <stock ticker="GOOG" />
+  <sky-scrollable id='stock_list'>
   </sky-scrollable>
 </template>
 <script>
@@ -93,6 +73,16 @@ class Stocks extends SkyElement {
     _drawer = shadowRoot.getElementById('drawer');
     Element menu = shadowRoot.getElementById('menu');
     menu.addEventListener('click', _handleMenuClick);
+    populateStockList();
+  }
+
+  void populateStockList() {
+    Element stockList = shadowRoot.getElementById('stock_list');
+    // Limit to first 100 to avoid taking seconds to load.
+    for (var i = 0; i < 100; i++) {
+      model.Stock stock = model.oracle.stocks[i];
+      stockList.appendChild(new view.Stock()..ticker = stock.symbol);
+    }
   }
 
   void _handleMenuClick(_) {
