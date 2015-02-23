@@ -65,7 +65,7 @@ bool DecodingImageGenerator::onGetInfo(SkImageInfo* info)
     return true;
 }
 
-bool DecodingImageGenerator::onGetPixels(const SkImageInfo& info, void* pixels, size_t rowBytes, SkPMColor ctable[], int* ctableCount)
+SkImageGenerator::Result DecodingImageGenerator::onGetPixels(const SkImageInfo& info, void* pixels, size_t rowBytes, SkPMColor ctable[], int* ctableCount)
 {
     TRACE_EVENT1("blink", "DecodingImageGenerator::getPixels", "index", static_cast<int>(m_frameIndex));
 
@@ -73,11 +73,11 @@ bool DecodingImageGenerator::onGetPixels(const SkImageInfo& info, void* pixels, 
     if (info.width() != m_imageInfo.width() || info.height() != m_imageInfo.height() || info.colorType() != m_imageInfo.colorType()) {
         // ImageFrame may have changed the owning SkBitmap to kOpaque_SkAlphaType after sniffing the encoded data, so if we see a request
         // for opaque, that is ok even if our initial alphatype was not opaque.
-        return false;
+        return Result::kInvalidScale;
     }
 
     bool decoded = m_frameGenerator->decodeAndScale(m_imageInfo, m_frameIndex, pixels, rowBytes);
-    return decoded;
+    return decoded ? Result::kSuccess : Result::kInvalidInput;
 }
 
 bool DecodingImageGenerator::onGetYUV8Planes(SkISize sizes[3], void* planes[3], size_t rowBytes[3])
