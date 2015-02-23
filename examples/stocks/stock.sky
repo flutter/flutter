@@ -5,7 +5,7 @@
 -->
 <import src="/sky/framework/sky-element.sky" />
 
-<sky-element attributes="ticker:string">
+<sky-element>
 <template>
   <style>
   :host {
@@ -18,10 +18,13 @@
     padding: 10px;
     flex-grow: 1;
   }
+  #last-sale {
+    padding: 10px;
+  }
   #change {
     padding: 10px;
     border-radius: 5px;
-    min-width: 60px;
+    min-width: 70px;
     text-align: right;
   }
   .positive {
@@ -32,6 +35,7 @@
   }
   </style>
   <div id="ticker" />
+  <div id="last-sale" />
   <div id="change" />
 </template>
 <script>
@@ -42,11 +46,16 @@ class Stock extends SkyElement {
   var model; // model.Stock
 
   void shadowRootReady() {
-    Element ticker = shadowRoot.getElementById('ticker');
-    ticker.textContent = model.symbol;
+    shadowRoot.getElementById('ticker').textContent = model.symbol;
+
+    Element lastSale = shadowRoot.getElementById('last-sale');
+    lastSale.textContent = "\$${model.lastSale.toStringAsFixed(2)}";
 
     Element change = shadowRoot.getElementById('change');
-    change.textContent = "${model.percentChange.toStringAsFixed(2)}%";
+    String changeString = "${model.percentChange.toStringAsFixed(2)}%";
+    if (model.percentChange > 0)
+      changeString = "+" + changeString;
+    change.textContent = changeString;
     change.classList.add((model.percentChange < 0) ? 'negative' : 'positive');
   }
 }
