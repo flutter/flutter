@@ -15,12 +15,13 @@ Running applications
     * `skybd start` BUILD_DIR [url]
     * `skydb load` [url]
     * `skydb stop`
+    * `skydb start_tracing` # Starts recoding a performance trace (use stop_tracing to stop)
     * `skydb print_crash` # Symbolicate the most recent crash from android.
 
 Once `skydb start` is issued, all subsequent commands will be sent to
 the running mojo_shell instance (even on an attached android device).
 `skydb start` reads gn args from the passed build directory to
-determine whether its using android, etc.
+determine whether its using android, for example.
 
 * ``./sky/tools/test_sky --debug``
   * This runs the tests against ``//out/Debug``. If you want to run against
