@@ -6,6 +6,7 @@
 <import src="/sky/framework/sky-drawer.sky" />
 <import src="/sky/framework/sky-element.sky" />
 <import src="/sky/framework/sky-scrollable.sky" />
+<import src="stock.sky" />
 
 <sky-element>
 <template>
@@ -51,21 +52,41 @@
     }
   </style>
   <sky-drawer id="drawer">
-    <content select=".menu"/>
+    I am drawer
   </sky-drawer>
   <sky-toolbar>
     <div id="menu" />
-    <content id="title" select=".title"/>
+    I am a stocks app
   </sky-toolbar>
   <sky-scrollable>
-    <content />
+    <stock ticker="GOOG" />
+    <stock ticker="GOOGL" />
+    <stock ticker="GOOG" />
+    <stock ticker="GOOG" />
+    <stock ticker="GOOG" />
+    <stock ticker="GOOG" />
+    <stock ticker="GOOG" />
+    <stock ticker="GOOG" />
+    <stock ticker="GOOG" />
+    <stock ticker="GOOG" />
+    <stock ticker="GOOG" />
+    <stock ticker="GOOG" />
+    <stock ticker="GOOG" />
+    <stock ticker="GOOG" />
+    <stock ticker="GOOG" />
+    <stock ticker="GOOG" />
+    <stock ticker="GOOG" />
+    <stock ticker="GOOG" />
+    <stock ticker="GOOG" />
+    <stock ticker="GOOG" />
+    <stock ticker="GOOG" />
   </sky-scrollable>
 </template>
 <script>
 import "dart:sky";
 
-@Tagname('example-scaffold')
-class ExampleScaffold extends SkyElement {
+@Tagname('stocks')
+class Stocks extends SkyElement {
   Element _drawer;
 
   void shadowRootReady() {
@@ -79,6 +100,6 @@ class ExampleScaffold extends SkyElement {
   }
 }
 
-_init(script) => register(script, ExampleScaffold);
+_init(script) => register(script, Stocks);
 </script>
 </sky-element>

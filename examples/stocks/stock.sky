@@ -1,0 +1,29 @@
+<!--
+// Copyright 2015 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+-->
+<import src="/sky/framework/sky-element.sky" />
+
+<sky-element attributes="ticker:string">
+<template>
+  <style>
+  </style>
+  <div id="ticker" />
+</template>
+<script>
+import "dart:sky";
+
+@Tagname('stock')
+class Stock extends SkyElement {
+  Element _ticker;
+
+  void shadowRootReady() {
+    _ticker = shadowRoot.getElementById('ticker');
+    _ticker.textContent = ticker;
+  }
+}
+
+_init(script) => register(script, Stock);
+</script>
+</sky-element>
