@@ -1,9 +1,0 @@
-<div>
-<script>
-
-getPlace() {
-  return "world";
-}
-
-</script>
-</div>
