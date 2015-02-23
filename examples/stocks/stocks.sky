@@ -16,6 +16,7 @@
       display: flex;
       flex-direction: column;
       height: -webkit-fill-available;
+      font: 'Helvetica';
     }
     sky-drawer {
       position: absolute;
@@ -49,7 +50,6 @@
     }
     sky-scrollable {
       flex: 1;
-      background-color: green;
     }
   </style>
   <sky-drawer id="drawer">
@@ -64,6 +64,7 @@
 </template>
 <script>
 import "dart:sky";
+import "dart:math";
 
 @Tagname('stocks')
 class Stocks extends SkyElement {
@@ -78,10 +79,12 @@ class Stocks extends SkyElement {
 
   void populateStockList() {
     Element stockList = shadowRoot.getElementById('stock_list');
-    // Limit to first 100 to avoid taking seconds to load.
+    // Limit to 100 to avoid taking seconds to load.
+    var rng = new Random();
     for (var i = 0; i < 100; i++) {
-      model.Stock stock = model.oracle.stocks[i];
-      stockList.appendChild(new view.Stock()..ticker = stock.symbol);
+      List<model.Stock> list = model.oracle.stocks;
+      model.Stock stock = list[rng.nextInt(list.length)];
+      stockList.appendChild(new view.Stock()..model = stock);
     }
   }
 

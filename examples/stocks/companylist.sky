@@ -1,4 +1,6 @@
 <script>
+import "dart:math";
+
 // Snapshot from http://www.nasdaq.com/screening/company-list.aspx
 // Fetched 2/23/2014.
 // "Symbol","Name","LastSale","MarketCap","IPOyear","Sector","industry","Summary Quote",
@@ -2973,6 +2975,7 @@ class Stock {
   String name;
   double lastSale;
   String marketCap;
+  double percentChange;
 
   Stock(this.symbol, this.name, this.lastSale, this.marketCap);
 
@@ -2986,6 +2989,8 @@ class Stock {
     symbol = fields[0];
     name = fields[1];
     marketCap = fields[4];
+    var rng = new Random();
+    percentChange = (rng.nextDouble() * 20) - 10;
   }
 }
 
