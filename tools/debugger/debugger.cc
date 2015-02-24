@@ -51,10 +51,10 @@ class SkyDebugger : public mojo::ApplicationDelegate,
     local_address->family = mojo::NET_ADDRESS_FAMILY_IPV4;
     local_address->ipv4 = mojo::NetAddressIPv4::New();
     local_address->ipv4->addr.resize(4);
-    local_address->ipv4->addr[0] = 0;
+    local_address->ipv4->addr[0] = 127;
     local_address->ipv4->addr[1] = 0;
     local_address->ipv4->addr[2] = 0;
-    local_address->ipv4->addr[3] = 0;
+    local_address->ipv4->addr[3] = 1;
     local_address->ipv4->port = command_port_;
     http_server_factory->CreateHttpServer(GetProxy(&http_server_).Pass(),
                                           local_address.Pass());
