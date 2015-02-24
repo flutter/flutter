@@ -70,13 +70,14 @@ enum IncludeSelfOrNot { IncludeSelf, ExcludeSelf };
 class RenderLayer {
     WTF_MAKE_NONCOPYABLE(RenderLayer);
 public:
-    RenderLayer(RenderLayerModelObject*, LayerType);
+    RenderLayer(RenderBox*, LayerType);
     ~RenderLayer();
 
     String debugName() const;
 
-    RenderLayerModelObject* renderer() const { return m_renderer; }
-    RenderBox* renderBox() const { return m_renderer && m_renderer->isBox() ? toRenderBox(m_renderer) : 0; }
+    RenderBox* renderer() const { return m_renderer; }
+    // FIXME(sky): Remove
+    RenderBox* renderBox() const { return m_renderer; }
     RenderLayer* parent() const { return m_parent; }
     RenderLayer* previousSibling() const { return m_previous; }
     RenderLayer* nextSibling() const { return m_next; }
@@ -189,7 +190,7 @@ public:
     bool hasFilter() const { return renderer()->hasFilter(); }
 
     void* operator new(size_t);
-    // Only safe to call from RenderLayerModelObject::destroyLayer()
+    // Only safe to call from RenderBox::destroyLayer()
     void operator delete(void*);
 
     bool paintsWithTransform() const;
@@ -222,7 +223,7 @@ public:
     inline bool isPositionedContainer() const
     {
         // FIXME: This is not in sync with containingBlock.
-        RenderLayerModelObject* layerRenderer = renderer();
+        RenderBox* layerRenderer = renderer();
         return isRootLayer() || layerRenderer->isPositioned() || hasTransform();
     }
 
@@ -259,7 +260,7 @@ private:
         return m_hasSelfPaintingLayerDescendant;
     }
 
-    LayoutPoint renderBoxLocation() const { return renderer()->isBox() ? toRenderBox(renderer())->location() : LayoutPoint(); }
+    LayoutPoint renderBoxLocation() const { return renderer()->location(); }
 
     bool shouldBeSelfPaintingLayer() const;
 
@@ -300,7 +301,7 @@ private:
 
     unsigned m_hasFilterInfo : 1;
 
-    RenderLayerModelObject* m_renderer;
+    RenderBox* m_renderer;
 
     RenderLayer* m_parent;
     RenderLayer* m_previous;

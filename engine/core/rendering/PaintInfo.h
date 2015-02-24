@@ -36,8 +36,8 @@
 
 namespace blink {
 
+class RenderBox;
 class RenderInline;
-class RenderLayerModelObject;
 class RenderObject;
 
 /*
@@ -46,7 +46,7 @@ class RenderObject;
  */
 struct PaintInfo {
     PaintInfo(GraphicsContext* newContext, const IntRect& newRect,
-        const RenderLayerModelObject* newPaintContainer)
+        const RenderBox* newPaintContainer)
         : context(newContext)
         , rect(newRect)
         , m_paintContainer(newPaintContainer)
@@ -70,14 +70,14 @@ struct PaintInfo {
     }
 
     static IntRect infiniteRect() { return IntRect(LayoutRect::infiniteRect()); }
-    const RenderLayerModelObject* paintContainer() const { return m_paintContainer; }
+    const RenderBox* paintContainer() const { return m_paintContainer; }
 
     // FIXME: Introduce setters/getters at some point. Requires a lot of changes throughout rendering/.
     GraphicsContext* context;
     IntRect rect;
 
 private:
-    const RenderLayerModelObject* m_paintContainer; // the layer object that originates the current painting
+    const RenderBox* m_paintContainer; // the layer object that originates the current painting
 };
 
 } // namespace blink

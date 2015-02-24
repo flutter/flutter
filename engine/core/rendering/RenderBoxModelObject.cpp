@@ -63,29 +63,12 @@ void RenderBoxModelObject::setSelectionState(SelectionState state)
 }
 
 RenderBoxModelObject::RenderBoxModelObject(ContainerNode* node)
-    : RenderLayerModelObject(node)
+    : RenderObject(node)
 {
 }
 
 RenderBoxModelObject::~RenderBoxModelObject()
 {
-}
-
-bool RenderBoxModelObject::calculateHasBoxDecorations() const
-{
-    RenderStyle* styleToUse = style();
-    ASSERT(styleToUse);
-    return hasBackground() || styleToUse->hasBorder() || styleToUse->boxShadow();
-}
-
-void RenderBoxModelObject::updateFromStyle()
-{
-    RenderLayerModelObject::updateFromStyle();
-
-    RenderStyle* styleToUse = style();
-    setHasBoxDecorationBackground(calculateHasBoxDecorations());
-    setInline(styleToUse->isDisplayInlineType());
-    setPositionState(styleToUse->position());
 }
 
 bool RenderBoxModelObject::hasAutoHeightOrContainingBlockWithAutoHeight() const
@@ -655,7 +638,7 @@ static inline int getSpace(int areaSize, int tileSize)
     return space;
 }
 
-void RenderBoxModelObject::calculateBackgroundImageGeometry(const RenderLayerModelObject* paintContainer, const FillLayer& fillLayer, const LayoutRect& paintRect,
+void RenderBoxModelObject::calculateBackgroundImageGeometry(const RenderBox* paintContainer, const FillLayer& fillLayer, const LayoutRect& paintRect,
     BackgroundImageGeometry& geometry, RenderObject* backgroundObject) const
 {
     LayoutUnit left = 0;
@@ -2331,7 +2314,7 @@ void RenderBoxModelObject::mapAbsoluteToLocalPoint(MapCoordinatesFlags mode, Tra
         transformState.move(containerOffset.width(), containerOffset.height(), preserve3D ? TransformState::AccumulateTransform : TransformState::FlattenTransform);
 }
 
-const RenderObject* RenderBoxModelObject::pushMappingToContainer(const RenderLayerModelObject* ancestorToStopAt, RenderGeometryMap& geometryMap) const
+const RenderObject* RenderBoxModelObject::pushMappingToContainer(const RenderBox* ancestorToStopAt, RenderGeometryMap& geometryMap) const
 {
     ASSERT(ancestorToStopAt != this);
 
@@ -2341,7 +2324,7 @@ const RenderObject* RenderBoxModelObject::pushMappingToContainer(const RenderLay
         return 0;
 
     bool isInline = isRenderInline();
-    bool hasTransform = !isInline && hasLayer() && layer()->transform();
+    bool hasTransform = !isInline && hasLayer() && toRenderBox(this)->layer()->transform();
 
     LayoutSize adjustmentForSkippedAncestor;
     if (ancestorSkipped) {
@@ -2365,6 +2348,21 @@ const RenderObject* RenderBoxModelObject::pushMappingToContainer(const RenderLay
     }
 
     return ancestorSkipped ? ancestorToStopAt : container;
+}
+
+void RenderBoxModelObject::collectSelfPaintingLayers(Vector<RenderBox*>& layers)
+{
+    for (RenderObject* child = slowFirstChild(); child; child = child->nextSibling()) {
+        if (child->isBox()) {
+            RenderBox* childBox = toRenderBox(child);
+            if (childBox->hasSelfPaintingLayer())
+                layers.append(childBox);
+            else
+                childBox->collectSelfPaintingLayers(layers);
+        } else if (child->isBoxModelObject()) {
+            toRenderBoxModelObject(child)->collectSelfPaintingLayers(layers);
+        }
+    }
 }
 
 void RenderBoxModelObject::moveChildTo(RenderBoxModelObject* toBoxModelObject, RenderObject* child, RenderObject* beforeChild, bool fullRemoveInsert)

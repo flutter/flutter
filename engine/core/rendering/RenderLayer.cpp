@@ -78,7 +78,7 @@
 
 namespace blink {
 
-RenderLayer::RenderLayer(RenderLayerModelObject* renderer, LayerType type)
+RenderLayer::RenderLayer(RenderBox* renderer, LayerType type)
     : m_layerType(type)
     , m_hasSelfPaintingLayerDescendant(false)
     , m_hasSelfPaintingLayerDescendantDirty(false)
@@ -361,7 +361,7 @@ TransformationMatrix RenderLayer::perspectiveTransform() const
         return TransformationMatrix();
 
     // Maybe fetch the perspective from the backing?
-    const IntRect borderBox = toRenderBox(renderer())->pixelSnappedBorderBoxRect();
+    const IntRect borderBox = renderer()->pixelSnappedBorderBoxRect();
     const float boxWidth = borderBox.width();
     const float boxHeight = borderBox.height();
 
@@ -386,7 +386,7 @@ FloatPoint RenderLayer::perspectiveOrigin() const
     if (!renderer()->hasTransform())
         return FloatPoint();
 
-    const LayoutRect borderBox = toRenderBox(renderer())->borderBoxRect();
+    const LayoutRect borderBox = renderer()->borderBoxRect();
     RenderStyle* style = renderer()->style();
 
     return FloatPoint(floatValueForLength(style->perspectiveOriginX(), borderBox.width().toFloat()), floatValueForLength(style->perspectiveOriginY(), borderBox.height().toFloat()));
@@ -424,7 +424,7 @@ RenderLayer* RenderLayer::enclosingFilterLayer(IncludeSelfOrNot includeSelf) con
 bool RenderLayer::hasAncestorWithFilterOutsets() const
 {
     for (const RenderLayer* curr = this; curr; curr = curr->parent()) {
-        RenderLayerModelObject* renderer = curr->renderer();
+        RenderBox* renderer = curr->renderer();
         if (renderer->style()->hasFilterOutsets())
             return true;
     }
@@ -650,7 +650,7 @@ static inline const RenderLayer* accumulateOffsetTowardsAncestor(const RenderLay
 {
     ASSERT(ancestorLayer != layer);
 
-    const RenderLayerModelObject* renderer = layer->renderer();
+    const RenderBox* renderer = layer->renderer();
     EPosition position = renderer->style()->position();
 
     RenderLayer* parentLayer;

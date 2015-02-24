@@ -263,7 +263,7 @@ RenderLayerStackingNode* RenderLayerStackingNode::ancestorStackingContextNode() 
     return 0;
 }
 
-RenderLayerModelObject* RenderLayerStackingNode::renderer() const
+RenderBox* RenderLayerStackingNode::renderer() const
 {
     return m_layer->renderer();
 }

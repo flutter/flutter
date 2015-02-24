@@ -75,7 +75,7 @@ static void applyClipRects(const ClipRectsContext& context, RenderObject& render
     }
 }
 
-RenderLayerClipper::RenderLayerClipper(RenderLayerModelObject& renderer)
+RenderLayerClipper::RenderLayerClipper(RenderBox& renderer)
     : m_renderer(renderer)
 {
 }
@@ -212,23 +212,23 @@ void RenderLayerClipper::calculateRects(const ClipRectsContext& context, const L
 
     // Update the clip rects that will be passed to child layers.
     if (m_renderer.hasOverflowClip()) {
-        foregroundRect.intersect(toRenderBox(m_renderer).overflowClipRect(offset));
+        foregroundRect.intersect(m_renderer.overflowClipRect(offset));
         if (m_renderer.style()->hasBorderRadius())
             foregroundRect.setHasRadius(true);
 
         // If we establish an overflow clip at all, then go ahead and make sure our background
         // rect is intersected with our layer's bounds including our visual overflow,
         // since any visual overflow like box-shadow or border-outset is not clipped by overflow:auto/hidden.
-        if (toRenderBox(m_renderer).hasVisualOverflow()) {
+        if (m_renderer.hasVisualOverflow()) {
             // FIXME: Perhaps we should be propagating the borderbox as the clip rect for children, even though
             //        we may need to inflate our clip specifically for shadows or outsets.
             // FIXME: Does not do the right thing with CSS regions yet, since we don't yet factor in the
             // individual region boxes as overflow.
-            LayoutRect layerBoundsWithVisualOverflow = toRenderBox(m_renderer).visualOverflowRect();
+            LayoutRect layerBoundsWithVisualOverflow = m_renderer.visualOverflowRect();
             layerBoundsWithVisualOverflow.moveBy(offset);
             backgroundRect.intersect(layerBoundsWithVisualOverflow);
         } else {
-            LayoutRect bounds = toRenderBox(m_renderer).borderBoxRect();
+            LayoutRect bounds = m_renderer.borderBoxRect();
             bounds.moveBy(offset);
             backgroundRect.intersect(bounds);
         }
@@ -237,7 +237,7 @@ void RenderLayerClipper::calculateRects(const ClipRectsContext& context, const L
     // CSS clip (different than clipping due to overflow) can clip to any box, even if it falls outside of the border box.
     if (m_renderer.hasClip()) {
         // Clip applies to *us* as well, so go ahead and update the damageRect.
-        LayoutRect newPosClip = toRenderBox(m_renderer).clipRect(offset);
+        LayoutRect newPosClip = m_renderer.clipRect(offset);
         backgroundRect.intersect(newPosClip);
         foregroundRect.intersect(newPosClip);
     }

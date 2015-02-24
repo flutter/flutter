@@ -37,7 +37,7 @@
 namespace blink {
 
 class RenderLayer;
-class RenderLayerModelObject;
+class RenderBox;
 class TransformationMatrix;
 class TransformState;
 
@@ -58,14 +58,14 @@ public:
     // Map to a container. Will assert that the container has been pushed onto this map.
     // A null container maps through the RenderView (including its scale transform, if any).
     // If the container is the RenderView, the scroll offset is applied, but not the scale.
-    FloatPoint mapToContainer(const FloatPoint&, const RenderLayerModelObject*) const;
-    FloatQuad mapToContainer(const FloatRect&, const RenderLayerModelObject*) const;
+    FloatPoint mapToContainer(const FloatPoint&, const RenderBox*) const;
+    FloatQuad mapToContainer(const FloatRect&, const RenderBox*) const;
 
     // Called by code walking the renderer or layer trees.
     void pushMappingsToAncestor(const RenderLayer*, const RenderLayer* ancestorLayer);
     void popMappingsToAncestor(const RenderLayer*);
-    void pushMappingsToAncestor(const RenderObject*, const RenderLayerModelObject* ancestorRenderer);
-    void popMappingsToAncestor(const RenderLayerModelObject*);
+    void pushMappingsToAncestor(const RenderObject*, const RenderBox* ancestorRenderer);
+    void popMappingsToAncestor(const RenderBox*);
 
     // The following methods should only be called by renderers inside a call to pushMappingsToAncestor().
 
@@ -75,7 +75,7 @@ public:
     void push(const RenderObject*, const TransformationMatrix&, bool accumulatingTransform = false, bool isNonUniform = false, bool hasTransform = false);
 
 private:
-    void mapToContainer(TransformState&, const RenderLayerModelObject* container = 0) const;
+    void mapToContainer(TransformState&, const RenderBox* container = 0) const;
 
     void stepInserted(const RenderGeometryMapStep&);
     void stepRemoved(const RenderGeometryMapStep&);

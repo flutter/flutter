@@ -52,11 +52,11 @@ class InlineBox;
 class InlineFlowBox;
 class Position;
 class PositionWithAffinity;
-class RenderBoxModelObject;
 class RenderBlock;
+class RenderBox;
+class RenderBoxModelObject;
 class RenderGeometryMap;
 class RenderLayer;
-class RenderLayerModelObject;
 class RenderView;
 class TransformState;
 
@@ -259,7 +259,6 @@ public:
     virtual bool isCanvas() const { return false; }
     virtual bool isImage() const { return false; }
     virtual bool isInlineBlock() const { return false; }
-    virtual bool isLayerModelObject() const { return false; }
     virtual bool isRenderBlock() const { return false; }
     virtual bool isRenderBlockFlow() const { return false; }
     virtual bool isRenderParagraph() const { return false; }
@@ -379,7 +378,7 @@ public:
     // Returns the object containing this one. Can be different from parent for positioned elements.
     // If paintInvalidationContainer and paintInvalidationContainerSkipped are not null, on return *paintInvalidationContainerSkipped
     // is true if the renderer returned is an ancestor of paintInvalidationContainer.
-    RenderObject* container(const RenderLayerModelObject* paintInvalidationContainer = 0, bool* paintInvalidationContainerSkipped = 0) const;
+    RenderObject* container(const RenderBox* paintInvalidationContainer = 0, bool* paintInvalidationContainerSkipped = 0) const;
 
     // TODO(esprehn): Remove this.
     RenderObject* hoverAncestor() const { return parent(); }
@@ -470,8 +469,8 @@ public:
     FloatQuad absoluteToLocalQuad(const FloatQuad&, MapCoordinatesFlags mode = 0) const;
 
     // Convert a local quad into the coordinate system of container, taking transforms into account.
-    FloatQuad localToContainerQuad(const FloatQuad&, const RenderLayerModelObject* paintInvalidatinoContainer, MapCoordinatesFlags = 0) const;
-    FloatPoint localToContainerPoint(const FloatPoint&, const RenderLayerModelObject* paintInvalidationContainer, MapCoordinatesFlags = 0) const;
+    FloatQuad localToContainerQuad(const FloatQuad&, const RenderBox* paintInvalidatinoContainer, MapCoordinatesFlags = 0) const;
+    FloatPoint localToContainerPoint(const FloatPoint&, const RenderBox* paintInvalidationContainer, MapCoordinatesFlags = 0) const;
 
     // Return the offset from the container() renderer (excluding transforms). In multi-column layout,
     // different offsets apply at different points, so return the offset that applies to the given point.
@@ -517,11 +516,11 @@ public:
 
     void getTextDecorations(unsigned decorations, AppliedTextDecoration& underline, AppliedTextDecoration& overline, AppliedTextDecoration& linethrough, bool quirksMode = false, bool firstlineStyle = false);
 
-    // Return the RenderLayerModelObject in the container chain which is responsible for painting this object, or 0
+    // Return the RenderBox in the container chain which is responsible for painting this object, or 0
     // if painting is root-relative. This is the container that should be passed to the 'forPaintInvalidation'
     // methods.
-    const RenderLayerModelObject* containerForPaintInvalidation() const;
-    const RenderLayerModelObject* adjustCompositedContainerForSpecialAncestors(const RenderLayerModelObject* paintInvalidationContainer) const;
+    const RenderView* containerForPaintInvalidation() const;
+    const RenderBox* adjustCompositedContainerForSpecialAncestors(const RenderBox* paintInvalidationContainer) const;
 
     virtual unsigned length() const { return 1; }
 
@@ -599,19 +598,19 @@ public:
 
     // Map points and quads through elements, potentially via 3d transforms. You should never need to call these directly; use
     // localToAbsolute/absoluteToLocal methods instead.
-    virtual void mapLocalToContainer(const RenderLayerModelObject* paintInvalidationContainer, TransformState&, MapCoordinatesFlags = ApplyContainerFlip) const;
+    virtual void mapLocalToContainer(const RenderBox* paintInvalidationContainer, TransformState&, MapCoordinatesFlags = ApplyContainerFlip) const;
     virtual void mapAbsoluteToLocalPoint(MapCoordinatesFlags, TransformState&) const;
 
     // Pushes state onto RenderGeometryMap about how to map coordinates from this renderer to its container, or ancestorToStopAt (whichever is encountered first).
     // Returns the renderer which was mapped to (container or ancestorToStopAt).
-    virtual const RenderObject* pushMappingToContainer(const RenderLayerModelObject* ancestorToStopAt, RenderGeometryMap&) const;
+    virtual const RenderObject* pushMappingToContainer(const RenderBox* ancestorToStopAt, RenderGeometryMap&) const;
 
     bool shouldUseTransformFromContainer(const RenderObject* container) const;
     void getTransformFromContainer(const RenderObject* container, const LayoutSize& offsetInContainer, TransformationMatrix&) const;
 
     bool createsGroup() const { return isTransparent() || hasFilter(); }
 
-    virtual void addFocusRingRects(Vector<IntRect>&, const LayoutPoint& /* additionalOffset */, const RenderLayerModelObject* /* paintContainer */ = 0) const { };
+    virtual void addFocusRingRects(Vector<IntRect>&, const LayoutPoint& /* additionalOffset */, const RenderBox* /* paintContainer */ = 0) const { };
 
     RespectImageOrientationEnum shouldRespectImageOrientation() const;
 
@@ -649,7 +648,7 @@ protected:
 
     void paintFocusRing(PaintInfo&, const LayoutPoint&, RenderStyle*);
     void paintOutline(PaintInfo&, const LayoutRect&);
-    void addChildFocusRingRects(Vector<IntRect>&, const LayoutPoint& additionalOffset, const RenderLayerModelObject* paintContainer) const;
+    void addChildFocusRingRects(Vector<IntRect>&, const LayoutPoint& additionalOffset, const RenderBox* paintContainer) const;
 
     virtual LayoutRect viewRect() const;
 

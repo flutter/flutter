@@ -85,6 +85,14 @@ static void setHasTextDescendantsOnAncestors(InlineFlowBox* box)
     }
 }
 
+static bool hasSelfPaintingLayer(InlineBox* box)
+{
+    RenderObject& renderer = box->renderer();
+    if (renderer.isBox())
+        return toRenderBox(renderer).hasSelfPaintingLayer();
+    return false;
+}
+
 void InlineFlowBox::addToLine(InlineBox* child)
 {
     ASSERT(!child->parent());
@@ -151,7 +159,7 @@ void InlineFlowBox::addToLine(InlineBox* child)
             RenderBox& box = toRenderBox(child->renderer());
             if (box.hasRenderOverflow() || box.hasSelfPaintingLayer())
                 child->clearKnownToHaveNoOverflow();
-        } else if (child->renderer().style(isFirstLineStyle())->boxShadow() || child->boxModelObject()->hasSelfPaintingLayer()
+        } else if (child->renderer().style(isFirstLineStyle())->boxShadow() || hasSelfPaintingLayer(child)
             || child->renderer().style(isFirstLineStyle())->hasBorderImageOutsets()
             || child->renderer().style(isFirstLineStyle())->hasOutline()) {
             child->clearKnownToHaveNoOverflow();
@@ -889,7 +897,7 @@ void InlineFlowBox::computeOverflow(LayoutUnit lineTop, LayoutUnit lineBottom, G
         } else if (curr->renderer().isRenderInline()) {
             InlineFlowBox* flow = toInlineFlowBox(curr);
             flow->computeOverflow(lineTop, lineBottom, textBoxDataMap);
-            if (!flow->boxModelObject()->hasSelfPaintingLayer())
+            if (!hasSelfPaintingLayer(flow))
                 logicalVisualOverflow.unite(flow->logicalVisualOverflowRect(lineTop, lineBottom));
             LayoutRect childLayoutOverflow = flow->logicalLayoutOverflowRect(lineTop, lineBottom);
             childLayoutOverflow.move(flow->boxModelObject()->relativePositionLogicalOffset());
@@ -942,7 +950,7 @@ bool InlineFlowBox::nodeAtPoint(const HitTestRequest& request, HitTestResult& re
     // We need to account for culled inline parents of the hit-tested nodes, so that they may also get included in area-based hit-tests.
     RenderObject* culledParent = 0;
     for (InlineBox* curr = lastChild(); curr; curr = curr->prevOnLine()) {
-        if (curr->renderer().isText() || !curr->boxModelObject()->hasSelfPaintingLayer()) {
+        if (curr->renderer().isText() || !hasSelfPaintingLayer(curr)) {
             RenderObject* newParent = 0;
             // Culled parents are only relevant for area-based hit-tests, so ignore it in point-based ones.
             if (locationInContainer.isRectBasedTest()) {
@@ -1000,7 +1008,7 @@ void InlineFlowBox::paint(PaintInfo& paintInfo, const LayoutPoint& paintOffset, 
     paintBoxDecorationBackground(paintInfo, paintOffset);
 
     for (InlineBox* curr = firstChild(); curr; curr = curr->nextOnLine()) {
-        if (curr->renderer().isText() || !curr->boxModelObject()->hasSelfPaintingLayer())
+        if (curr->renderer().isText() || !hasSelfPaintingLayer(curr))
             curr->paint(paintInfo, paintOffset, lineTop, lineBottom, layers);
     }
 }

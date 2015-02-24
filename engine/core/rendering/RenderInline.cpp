@@ -91,24 +91,13 @@ void RenderInline::willBeDestroyed()
     RenderBoxModelObject::willBeDestroyed();
 }
 
-void RenderInline::updateFromStyle()
-{
-    RenderBoxModelObject::updateFromStyle();
-
-    // FIXME: Is this still needed. Was needed for run-ins, since run-in is considered a block display type.
-    setInline(true);
-
-    // FIXME: Support transforms and reflections on inline flows someday.
-    setHasTransform(false);
-}
-
 void RenderInline::styleDidChange(StyleDifference diff, const RenderStyle* oldStyle)
 {
     RenderBoxModelObject::styleDidChange(diff, oldStyle);
 
     if (!alwaysCreateLineBoxes()) {
         RenderStyle* newStyle = style();
-        bool alwaysCreateLineBoxesNew = hasSelfPaintingLayer() || hasBoxDecorationBackground() || newStyle->hasPadding() || newStyle->hasMargin() || newStyle->hasOutline();
+        bool alwaysCreateLineBoxesNew = hasBoxDecorationBackground() || newStyle->hasPadding() || newStyle->hasMargin() || newStyle->hasOutline();
         if (oldStyle && alwaysCreateLineBoxesNew) {
             dirtyLineBoxes(false);
             setNeedsLayout();
@@ -541,7 +530,7 @@ LayoutRect RenderInline::culledInlineVisualOverflowBoundingBox() const
             RenderInline* currInline = toRenderInline(curr);
             if (!currInline->alwaysCreateLineBoxes())
                 result.uniteIfNonZero(currInline->culledInlineVisualOverflowBoundingBox());
-            else if (!currInline->hasSelfPaintingLayer())
+            else
                 result.uniteIfNonZero(currInline->linesVisualOverflowBoundingBox());
         } else if (curr->isText()) {
             // FIXME; Overflow from text boxes is lost. We will need to cache this information in
@@ -580,11 +569,8 @@ LayoutRect RenderInline::linesVisualOverflowBoundingBox() const
     return rect;
 }
 
-void RenderInline::mapLocalToContainer(const RenderLayerModelObject* paintInvalidationContainer, TransformState& transformState, MapCoordinatesFlags mode) const
+void RenderInline::mapLocalToContainer(const RenderBox* paintInvalidationContainer, TransformState& transformState, MapCoordinatesFlags mode) const
 {
-    if (paintInvalidationContainer == this)
-        return;
-
     bool containerSkipped;
     RenderObject* o = container(paintInvalidationContainer, &containerSkipped);
     if (!o)
@@ -708,7 +694,7 @@ public:
 
 } // unnamed namespace
 
-void RenderInline::addFocusRingRects(Vector<IntRect>& rects, const LayoutPoint& additionalOffset, const RenderLayerModelObject* paintContainer) const
+void RenderInline::addFocusRingRects(Vector<IntRect>& rects, const LayoutPoint& additionalOffset, const RenderBox* paintContainer) const
 {
     AbsoluteRectsIgnoringEmptyRectsGeneratorContext context(rects, additionalOffset);
     generateLineBoxRects(context);

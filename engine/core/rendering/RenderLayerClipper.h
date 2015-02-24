@@ -78,7 +78,7 @@ private:
 class RenderLayerClipper {
     WTF_MAKE_NONCOPYABLE(RenderLayerClipper);
 public:
-    explicit RenderLayerClipper(RenderLayerModelObject&);
+    explicit RenderLayerClipper(RenderBox&);
 
     void clearClipRectsIncludingDescendants();
     void clearClipRectsIncludingDescendants(ClipRectsCacheSlot);
@@ -122,7 +122,7 @@ private:
     }
 
     // FIXME: Could this be a RenderBox?
-    RenderLayerModelObject& m_renderer;
+    RenderBox& m_renderer;
     mutable OwnPtr<ClipRectsCache> m_cache;
 };
 

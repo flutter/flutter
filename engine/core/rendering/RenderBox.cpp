@@ -67,6 +67,26 @@ void RenderBox::willBeDestroyed()
     clearOverrideSize();
     RenderBlock::removePercentHeightDescendantIfNeeded(this);
     RenderBoxModelObject::willBeDestroyed();
+    destroyLayer();
+}
+
+void RenderBox::destroyLayer()
+{
+    setHasLayer(false);
+    m_layer = nullptr;
+}
+
+void RenderBox::createLayer(LayerType type)
+{
+    ASSERT(!m_layer);
+    m_layer = adoptPtr(new RenderLayer(this, type));
+    setHasLayer(true);
+    m_layer->insertOnlyThisLayer();
+}
+
+bool RenderBox::hasSelfPaintingLayer() const
+{
+    return m_layer && m_layer->isSelfPaintingLayer();
 }
 
 void RenderBox::removeFloatingOrPositionedChildFromBlockLists()
@@ -83,14 +103,18 @@ void RenderBox::removeFloatingOrPositionedChildFromBlockLists()
 void RenderBox::styleWillChange(StyleDifference diff, const RenderStyle& newStyle)
 {
     RenderStyle* oldStyle = style();
-    if (oldStyle) {
+    if (oldStyle && parent()) {
         // When a layout hint happens and an object's position style changes, we have to do a layout
         // to dirty the render tree using the old position value now.
-        if (diff.needsFullLayout() && parent() && oldStyle->position() != newStyle.position()) {
+        if (diff.needsFullLayout() && oldStyle->position() != newStyle.position()) {
             markContainingBlocksForLayout();
             if (newStyle.hasOutOfFlowPosition())
                 parent()->setChildNeedsLayout();
         }
+
+        if (oldStyle->hasAutoClip() != newStyle.hasAutoClip()
+            || oldStyle->clip() != newStyle.clip())
+            layer()->clipper().clearClipRectsIncludingDescendants();
     }
 
     RenderBoxModelObject::styleWillChange(diff, newStyle);
@@ -98,19 +122,49 @@ void RenderBox::styleWillChange(StyleDifference diff, const RenderStyle& newStyl
 
 void RenderBox::styleDidChange(StyleDifference diff, const RenderStyle* oldStyle)
 {
-    RenderBoxModelObject::styleDidChange(diff, oldStyle);
+    bool hadTransform = hasTransform();
+
+    RenderObject::styleDidChange(diff, oldStyle);
+    updateFromStyle();
+
+    LayerType type = layerTypeRequired();
+    if (type != NoLayer) {
+        if (!layer()) {
+            createLayer(type);
+            if (parent() && !needsLayout()) {
+                // FIXME: We should call a specialized version of this function.
+                layer()->updateLayerPositionsAfterLayout();
+            }
+        }
+    } else if (layer() && layer()->parent()) {
+        setHasTransform(false); // Either a transform wasn't specified or the object doesn't support transforms, so just null out the bit.
+        layer()->removeOnlyThisLayer(); // calls destroyLayer() which clears m_layer
+        if (hadTransform)
+            setNeedsLayoutAndPrefWidthsRecalc();
+    }
+
+    if (layer()) {
+        // FIXME: Ideally we shouldn't need this setter but we can't easily infer an overflow-only layer
+        // from the style.
+        layer()->setLayerType(type);
+        layer()->styleChanged(diff, oldStyle);
+    }
 
     if (needsLayout() && oldStyle)
         RenderBlock::removePercentHeightDescendantIfNeeded(this);
 }
 
+// TODO(ojan): Inline this into styleDidChange,
 void RenderBox::updateFromStyle()
 {
-    RenderBoxModelObject::updateFromStyle();
-
     RenderStyle* styleToUse = style();
 
+    setHasBoxDecorationBackground(hasBackground() || styleToUse->hasBorder() || styleToUse->boxShadow());
+    setInline(styleToUse->isDisplayInlineType());
+    setPositionState(styleToUse->position());
+
     if (isRenderView()) {
+        // TODO(ojan): Merge this into the same call above.
         setHasBoxDecorationBackground(true);
     } else if (isRenderBlock()) {
         // TODO(esprehn): Why do we not want to set this on the RenderView?
@@ -227,7 +281,7 @@ FloatQuad RenderBox::absoluteContentQuad() const
     return localToAbsoluteQuad(FloatRect(rect));
 }
 
-void RenderBox::addFocusRingRects(Vector<IntRect>& rects, const LayoutPoint& additionalOffset, const RenderLayerModelObject*) const
+void RenderBox::addFocusRingRects(Vector<IntRect>& rects, const LayoutPoint& additionalOffset, const RenderBox*) const
 {
     if (!size().isEmpty())
         rects.append(pixelSnappedIntRect(additionalOffset, size()));
@@ -356,7 +410,7 @@ bool RenderBox::nodeAtPoint(const HitTestRequest& request, HitTestResult& result
 
     // Check kids first.
     for (RenderObject* child = slowLastChild(); child; child = child->previousSibling()) {
-        if ((!child->hasLayer() || !toRenderLayerModelObject(child)->layer()->isSelfPaintingLayer()) && child->nodeAtPoint(request, result, locationInContainer, adjustedLocation)) {
+        if ((!child->hasLayer() || !toRenderBox(child)->layer()->isSelfPaintingLayer()) && child->nodeAtPoint(request, result, locationInContainer, adjustedLocation)) {
             updateHitTestResult(result, locationInContainer.point() - toLayoutSize(adjustedLocation));
             return true;
         }
@@ -442,7 +496,7 @@ static bool isHitCandidate(bool canDepthSort, double* zOffset, const HitTestingT
     return true;
 }
 
-static inline bool reverseCompareZIndex(RenderLayerModelObject* first, RenderLayerModelObject* second)
+static inline bool reverseCompareZIndex(RenderBox* first, RenderBox* second)
 {
     return first->style()->zIndex() > second->style()->zIndex();
 }
@@ -1055,7 +1109,7 @@ LayoutUnit RenderBox::containingBlockLogicalHeightForContent(AvailableLogicalHei
     return containingBlock()->availableLogicalHeight(heightType);
 }
 
-void RenderBox::mapLocalToContainer(const RenderLayerModelObject* paintInvalidationContainer, TransformState& transformState, MapCoordinatesFlags mode) const
+void RenderBox::mapLocalToContainer(const RenderBox* paintInvalidationContainer, TransformState& transformState, MapCoordinatesFlags mode) const
 {
     if (paintInvalidationContainer == this)
         return;

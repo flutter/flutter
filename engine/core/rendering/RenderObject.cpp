@@ -312,7 +312,7 @@ static void addLayers(RenderObject* obj, RenderLayer* parentLayer, RenderObject*
             beforeChild = newObject->parent()->findNextLayer(parentLayer, newObject);
             newObject = 0;
         }
-        parentLayer->addChild(toRenderLayerModelObject(obj)->layer(), beforeChild);
+        parentLayer->addChild(toRenderBox(obj)->layer(), beforeChild);
         return;
     }
 
@@ -336,7 +336,7 @@ void RenderObject::removeLayers(RenderLayer* parentLayer)
         return;
 
     if (hasLayer()) {
-        parentLayer->removeChild(toRenderLayerModelObject(this)->layer());
+        parentLayer->removeChild(toRenderBox(this)->layer());
         return;
     }
 
@@ -350,7 +350,7 @@ void RenderObject::moveLayers(RenderLayer* oldParent, RenderLayer* newParent)
         return;
 
     if (hasLayer()) {
-        RenderLayer* layer = toRenderLayerModelObject(this)->layer();
+        RenderLayer* layer = toRenderBox(this)->layer();
         ASSERT(oldParent == layer->parent());
         if (oldParent)
             oldParent->removeChild(layer);
@@ -370,7 +370,7 @@ RenderLayer* RenderObject::findNextLayer(RenderLayer* parentLayer, RenderObject*
         return 0;
 
     // Step 1: If our layer is a child of the desired parent, then return our layer.
-    RenderLayer* ourLayer = hasLayer() ? toRenderLayerModelObject(this)->layer() : 0;
+    RenderLayer* ourLayer = hasLayer() ? toRenderBox(this)->layer() : 0;
     if (ourLayer && ourLayer->parent() == parentLayer)
         return ourLayer;
 
@@ -402,7 +402,7 @@ RenderLayer* RenderObject::enclosingLayer() const
 {
     for (const RenderObject* current = this; current; current = current->parent()) {
         if (current->hasLayer())
-            return toRenderLayerModelObject(current)->layer();
+            return toRenderBox(current)->layer();
     }
     // FIXME: We should remove the one caller that triggers this case and make
     // this function return a reference.
@@ -943,7 +943,7 @@ void RenderObject::paintOutline(PaintInfo& paintInfo, const LayoutRect& paintRec
         graphicsContext->endLayer();
 }
 
-void RenderObject::addChildFocusRingRects(Vector<IntRect>& rects, const LayoutPoint& additionalOffset, const RenderLayerModelObject* paintContainer) const
+void RenderObject::addChildFocusRingRects(Vector<IntRect>& rects, const LayoutPoint& additionalOffset, const RenderBox* paintContainer) const
 {
     for (RenderObject* current = slowFirstChild(); current; current = current->nextSibling()) {
         if (current->isText())
@@ -992,7 +992,7 @@ IntRect RenderObject::absoluteBoundingBoxRect() const
 void RenderObject::absoluteFocusRingQuads(Vector<FloatQuad>& quads)
 {
     Vector<IntRect> rects;
-    const RenderLayerModelObject* container = containerForPaintInvalidation();
+    const RenderBox* container = containerForPaintInvalidation();
     addFocusRingRects(rects, LayoutPoint(localToContainerPoint(FloatPoint(), container)), container);
     size_t count = rects.size();
     for (size_t i = 0; i < count; ++i)
@@ -1028,12 +1028,12 @@ void RenderObject::paint(PaintInfo&, const LayoutPoint&, Vector<RenderBox*>& lay
 {
 }
 
-const RenderLayerModelObject* RenderObject::containerForPaintInvalidation() const
+const RenderView* RenderObject::containerForPaintInvalidation() const
 {
     return isRooted() ? view() : 0;
 }
 
-const RenderLayerModelObject* RenderObject::adjustCompositedContainerForSpecialAncestors(const RenderLayerModelObject* paintInvalidationContainer) const
+const RenderBox* RenderObject::adjustCompositedContainerForSpecialAncestors(const RenderBox* paintInvalidationContainer) const
 {
     // FIXME(sky): We shouldn't have any special ancestors and we don't have composited containers
     if (paintInvalidationContainer)
@@ -1150,8 +1150,8 @@ StyleDifference RenderObject::adjustStyleDifference(StyleDifference diff) const
     // The answer to layerTypeRequired() for plugins, iframes, and canvas can change without the actual
     // style changing, since it depends on whether we decide to composite these elements. When the
     // layer status of one of these elements changes, we need to force a layout.
-    if (!diff.needsFullLayout() && style() && isLayerModelObject()) {
-        bool requiresLayer = toRenderLayerModelObject(this)->layerTypeRequired() != NoLayer;
+    if (!diff.needsFullLayout() && style() && isBox()) {
+        bool requiresLayer = toRenderBox(this)->layerTypeRequired() != NoLayer;
         if (hasLayer() != requiresLayer)
             diff.setNeedsFullLayout();
     }
@@ -1379,7 +1379,7 @@ FloatQuad RenderObject::absoluteToLocalQuad(const FloatQuad& quad, MapCoordinate
     return transformState.lastPlanarQuad();
 }
 
-void RenderObject::mapLocalToContainer(const RenderLayerModelObject* paintInvalidationContainer, TransformState& transformState, MapCoordinatesFlags mode) const
+void RenderObject::mapLocalToContainer(const RenderBox* paintInvalidationContainer, TransformState& transformState, MapCoordinatesFlags mode) const
 {
     if (paintInvalidationContainer == this)
         return;
@@ -1395,7 +1395,7 @@ void RenderObject::mapLocalToContainer(const RenderLayerModelObject* paintInvali
     o->mapLocalToContainer(paintInvalidationContainer, transformState, mode);
 }
 
-const RenderObject* RenderObject::pushMappingToContainer(const RenderLayerModelObject* ancestorToStopAt, RenderGeometryMap& geometryMap) const
+const RenderObject* RenderObject::pushMappingToContainer(const RenderBox* ancestorToStopAt, RenderGeometryMap& geometryMap) const
 {
     ASSERT_UNUSED(ancestorToStopAt, ancestorToStopAt != this);
 
@@ -1418,21 +1418,21 @@ bool RenderObject::shouldUseTransformFromContainer(const RenderObject* container
 {
     // hasTransform() indicates whether the object has transform, transform-style or perspective. We just care about transform,
     // so check the layer's transform directly.
-    return (hasLayer() && toRenderLayerModelObject(this)->layer()->transform()) || (containerObject && containerObject->style()->hasPerspective());
+    return (hasLayer() && toRenderBox(this)->layer()->transform()) || (containerObject && containerObject->style()->hasPerspective());
 }
 
 void RenderObject::getTransformFromContainer(const RenderObject* containerObject, const LayoutSize& offsetInContainer, TransformationMatrix& transform) const
 {
     transform.makeIdentity();
     transform.translate(offsetInContainer.width().toFloat(), offsetInContainer.height().toFloat());
-    RenderLayer* layer = hasLayer() ? toRenderLayerModelObject(this)->layer() : 0;
+    RenderLayer* layer = hasLayer() ? toRenderBox(this)->layer() : 0;
     if (layer && layer->transform())
         transform.multiply(layer->currentTransform());
 
     if (containerObject && containerObject->hasLayer() && containerObject->style()->hasPerspective()) {
         // Perpsective on the container affects us, so we have to factor it in here.
         ASSERT(containerObject->hasLayer());
-        FloatPoint perspectiveOrigin = toRenderLayerModelObject(containerObject)->layer()->perspectiveOrigin();
+        FloatPoint perspectiveOrigin = toRenderBox(containerObject)->layer()->perspectiveOrigin();
 
         TransformationMatrix perspectiveMatrix;
         perspectiveMatrix.applyPerspective(containerObject->style()->perspective());
@@ -1443,7 +1443,7 @@ void RenderObject::getTransformFromContainer(const RenderObject* containerObject
     }
 }
 
-FloatQuad RenderObject::localToContainerQuad(const FloatQuad& localQuad, const RenderLayerModelObject* paintInvalidationContainer, MapCoordinatesFlags mode) const
+FloatQuad RenderObject::localToContainerQuad(const FloatQuad& localQuad, const RenderBox* paintInvalidationContainer, MapCoordinatesFlags mode) const
 {
     // Track the point at the center of the quad's bounding box. As mapLocalToContainer() calls offsetFromContainer(),
     // it will use that point as the reference point to decide which column's transform to apply in multiple-column blocks.
@@ -1454,7 +1454,7 @@ FloatQuad RenderObject::localToContainerQuad(const FloatQuad& localQuad, const R
     return transformState.lastPlanarQuad();
 }
 
-FloatPoint RenderObject::localToContainerPoint(const FloatPoint& localPoint, const RenderLayerModelObject* paintInvalidationContainer, MapCoordinatesFlags mode) const
+FloatPoint RenderObject::localToContainerPoint(const FloatPoint& localPoint, const RenderBox* paintInvalidationContainer, MapCoordinatesFlags mode) const
 {
     TransformState transformState(TransformState::ApplyTransformDirection, localPoint);
     mapLocalToContainer(paintInvalidationContainer, transformState, mode | ApplyContainerFlip | UseTransforms);
@@ -1506,7 +1506,7 @@ bool RenderObject::isRooted() const
     while (object->parent() && !object->hasLayer())
         object = object->parent();
     if (object->hasLayer())
-        return toRenderLayerModelObject(object)->layer()->root()->isRootLayer();
+        return toRenderBox(object)->layer()->root()->isRootLayer();
     return false;
 }
 
@@ -1522,7 +1522,7 @@ bool RenderObject::hasEntirelyFixedBackground() const
     return m_style->hasEntirelyFixedBackground();
 }
 
-RenderObject* RenderObject::container(const RenderLayerModelObject* paintInvalidationContainer, bool* paintInvalidationContainerSkipped) const
+RenderObject* RenderObject::container(const RenderBox* paintInvalidationContainer, bool* paintInvalidationContainerSkipped) const
 {
     if (paintInvalidationContainerSkipped)
         *paintInvalidationContainerSkipped = false;

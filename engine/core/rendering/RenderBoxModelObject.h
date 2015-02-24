@@ -24,7 +24,7 @@
 #ifndef SKY_ENGINE_CORE_RENDERING_RENDERBOXMODELOBJECT_H_
 #define SKY_ENGINE_CORE_RENDERING_RENDERBOXMODELOBJECT_H_
 
-#include "sky/engine/core/rendering/RenderLayerModelObject.h"
+#include "sky/engine/core/rendering/RenderObject.h"
 #include "sky/engine/core/rendering/style/ShadowData.h"
 #include "sky/engine/platform/geometry/LayoutRect.h"
 
@@ -51,7 +51,7 @@ enum ContentChangeType {
 // This class is the base for all objects that adhere to the CSS box model as described
 // at http://www.w3.org/TR/CSS21/box.html
 
-class RenderBoxModelObject : public RenderLayerModelObject {
+class RenderBoxModelObject : public RenderObject {
 public:
     RenderBoxModelObject(ContainerNode*);
     virtual ~RenderBoxModelObject();
@@ -70,8 +70,6 @@ public:
     int pixelSnappedOffsetTop() const { return roundToInt(offsetTop()); }
     virtual int pixelSnappedOffsetWidth() const;
     virtual int pixelSnappedOffsetHeight() const;
-
-    virtual void updateFromStyle() override;
 
     // This will work on inlines to return the bounding box of all of the lines' border boxes.
     virtual IntRect borderBoundingBox() const = 0;
@@ -160,7 +158,9 @@ public:
     virtual int baselinePosition(FontBaseline, bool firstLine, LineDirectionMode, LinePositionMode = PositionOnContainingLine) const = 0;
 
     virtual void mapAbsoluteToLocalPoint(MapCoordinatesFlags, TransformState&) const override;
-    virtual const RenderObject* pushMappingToContainer(const RenderLayerModelObject* ancestorToStopAt, RenderGeometryMap&) const override;
+    virtual const RenderObject* pushMappingToContainer(const RenderBox* ancestorToStopAt, RenderGeometryMap&) const override;
+
+    void collectSelfPaintingLayers(Vector<RenderBox*>& layers);
 
     virtual void setSelectionState(SelectionState) override;
 
@@ -230,8 +230,7 @@ protected:
 
     LayoutPoint adjustedPositionRelativeToOffsetParent(const LayoutPoint&) const;
 
-    bool calculateHasBoxDecorations() const;
-    void calculateBackgroundImageGeometry(const RenderLayerModelObject* paintContainer, const FillLayer&, const LayoutRect& paintRect, BackgroundImageGeometry&, RenderObject* = 0) const;
+    void calculateBackgroundImageGeometry(const RenderBox* paintContainer, const FillLayer&, const LayoutRect& paintRect, BackgroundImageGeometry&, RenderObject* = 0) const;
     void getBorderEdgeInfo(class BorderEdge[], const RenderStyle*, bool includeLogicalLeftEdge = true, bool includeLogicalRightEdge = true) const;
     bool borderObscuresBackgroundEdge(const FloatSize& contextScale) const;
     bool borderObscuresBackground() const;

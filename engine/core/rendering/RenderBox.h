@@ -57,6 +57,13 @@ public:
     LayoutUnit m_overrideLogicalContentWidth;
 };
 
+enum LayerType {
+    NoLayer,
+    NormalLayer,
+    // An overflow clip layer is required for bookkeeping purposes,
+    // but does not force a layer to be self painting.
+    OverflowClipLayer,
+};
 
 class RenderBox : public RenderBoxModelObject {
 public:
@@ -64,15 +71,19 @@ public:
 
     // hasAutoZIndex only returns true if the element is positioned or a flex-item since
     // position:static elements that are not flex-items get their z-index coerced to auto.
-    virtual LayerType layerTypeRequired() const override
+    virtual LayerType layerTypeRequired() const
     {
         if (isPositioned() || createsGroup() || hasClipPath() || hasTransform() || hasHiddenBackface() || !style()->hasAutoZIndex())
             return NormalLayer;
         if (hasOverflowClip())
             return OverflowClipLayer;
-
         return NoLayer;
     }
+
+    void destroyLayer();
+    void createLayer(LayerType);
+    bool hasSelfPaintingLayer() const;
+    RenderLayer* layer() const { return m_layer.get(); }
 
     // Use this with caution! No type checking is done!
     RenderBox* firstChildBox() const;
@@ -165,7 +176,7 @@ public:
     // does include the intrinsic padding in the content box as this is what some callers expect (like getComputedStyle).
     LayoutRect computedCSSContentBoxRect() const { return LayoutRect(borderLeft() + computedCSSPaddingLeft(), borderTop() + computedCSSPaddingTop(), clientWidth() - computedCSSPaddingLeft() - computedCSSPaddingRight(), clientHeight() - computedCSSPaddingTop() - computedCSSPaddingBottom()); }
 
-    virtual void addFocusRingRects(Vector<IntRect>&, const LayoutPoint& additionalOffset, const RenderLayerModelObject* paintContainer = 0) const override;
+    virtual void addFocusRingRects(Vector<IntRect>&, const LayoutPoint& additionalOffset, const RenderBox* paintContainer = 0) const override;
 
     // Use this with caution! No type checking is done!
     RenderBox* previousSiblingBox() const;
@@ -436,7 +447,6 @@ protected:
 
     virtual void styleWillChange(StyleDifference, const RenderStyle& newStyle) override;
     virtual void styleDidChange(StyleDifference, const RenderStyle* oldStyle) override;
-    virtual void updateFromStyle() override;
 
     void paintBackground(const PaintInfo&, const LayoutRect&, const Color& backgroundColor, BackgroundBleedAvoidance = BackgroundBleedNone);
     void paintFillLayer(const PaintInfo&, const Color&, const FillLayer&, const LayoutRect&, BackgroundBleedAvoidance, RenderObject* backgroundObject, bool skipBaseColor = false);
@@ -463,7 +473,7 @@ protected:
 
     virtual bool shouldComputeSizeAsReplaced() const { return isReplaced() && !isInlineBlock(); }
 
-    virtual void mapLocalToContainer(const RenderLayerModelObject* paintInvalidationContainer, TransformState&, MapCoordinatesFlags = ApplyContainerFlip) const override;
+    virtual void mapLocalToContainer(const RenderBox* paintInvalidationContainer, TransformState&, MapCoordinatesFlags = ApplyContainerFlip) const override;
 
     void paintRootBoxFillLayers(const PaintInfo&);
 
@@ -472,6 +482,8 @@ protected:
     void updateIntrinsicContentLogicalHeight(LayoutUnit intrinsicContentLogicalHeight) const { m_intrinsicContentLogicalHeight = intrinsicContentLogicalHeight; }
 
 private:
+    void updateFromStyle();
+
     PassRefPtr<HitTestingTransformState> createLocalTransformState(
         RenderLayer* rootLayer, RenderLayer* containerLayer,
         const LayoutRect& hitTestRect, const HitTestLocation& hitTestLocation,
@@ -542,6 +554,7 @@ protected:
     OwnPtr<RenderOverflow> m_overflow;
 
 private:
+    OwnPtr<RenderLayer> m_layer;
     OwnPtr<RenderBoxRareData> m_rareData;
 };
 

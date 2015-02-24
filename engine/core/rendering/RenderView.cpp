@@ -149,7 +149,7 @@ void RenderView::layout()
     clearNeedsLayout();
 }
 
-void RenderView::mapLocalToContainer(const RenderLayerModelObject* paintInvalidationContainer, TransformState& transformState, MapCoordinatesFlags mode) const
+void RenderView::mapLocalToContainer(const RenderBox* paintInvalidationContainer, TransformState& transformState, MapCoordinatesFlags mode) const
 {
     if (!paintInvalidationContainer && mode & UseTransforms && shouldUseTransformFromContainer(0)) {
         TransformationMatrix t;
@@ -158,7 +158,7 @@ void RenderView::mapLocalToContainer(const RenderLayerModelObject* paintInvalida
     }
 }
 
-const RenderObject* RenderView::pushMappingToContainer(const RenderLayerModelObject* ancestorToStopAt, RenderGeometryMap& geometryMap) const
+const RenderObject* RenderView::pushMappingToContainer(const RenderBox* ancestorToStopAt, RenderGeometryMap& geometryMap) const
 {
     LayoutSize offset;
     RenderObject* container = 0;
