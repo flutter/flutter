@@ -28,6 +28,7 @@
   #change {
     border-radius: 5px;
     min-width: 72px;
+    padding: 2px;
     padding-right: 10px;
     text-align: right;
   }
