@@ -970,8 +970,7 @@ void Document::updateRenderTree(StyleRecalcChange change)
     // UpdateSuspendScope::performDeferredWidgetTreeOperations() ?
     RefPtr<LocalFrame> protect(m_frame);
 
-    TRACE_EVENT_BEGIN0("blink", "Document::updateRenderTree");
-    TRACE_EVENT_SCOPED_SAMPLING_STATE("blink", "UpdateRenderTree");
+    TRACE_EVENT0("blink", "Document::updateRenderTree");
 
     m_styleRecalcElementCounter = 0;
 
