@@ -49,7 +49,7 @@
       flex: 1;
     }
   </style>
-  <sky-drawer id="drawer">
+  <sky-drawer id="drawer" level="3">
     <sky-drawer-header>
       Stocks
     </sky-drawer-header>
