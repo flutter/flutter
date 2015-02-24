@@ -19,14 +19,14 @@
   #vbar {
     position: absolute;
     right: 0;
-    width: 3px;
     background-color: lightgray;
     pointer-events: none;
     top: 0;
     height: 0;
     will-change: opacity;
     opacity: 0;
-    transition: opacity 0.2s ease-in-out;
+    transition-property: opacity;
+    transition-function: ease-in-out;
   }
   </style>
   <div id="scrollable">
@@ -38,6 +38,7 @@
 import "dart:math" as math;
 import "dart:sky";
 import "fling-curve.dart";
+import "view-configuration.dart" as config;
 
 @Tagname('sky-scrollable')
 class SkyScrollable extends SkyElement {
@@ -59,6 +60,28 @@ class SkyScrollable extends SkyElement {
   void shadowRootReady() {
     _scrollable = shadowRoot.getElementById('scrollable');
     _vbar = shadowRoot.getElementById('vbar');
+    // This is not documented anywhere, but the scrollbar appears to only paint
+    // 3px even though it's official width is 10px?
+    // Chrome appears 3px wide with a 3px outer spacing.
+    // Contacts appears 3px wide with a 5px runner and 5px outer spacing.
+    // Settings appears 4px wide with no outer spacing.
+    const double paintPercent = 0.3;
+    const double outerGapPercent = 0.3;
+    const double innerGapPercent = 0.4;
+    const double paintWidth = paintPercent * config.kScrollbarSize;
+    _vbar.style['width'] = "${paintWidth}px";
+    _vbar.style['margin-right'] = "${outerGapPercent * config.kScrollbarSize}px";
+    _vbar.style['margin-left'] ="${innerGapPercent * config.kScrollbarSize}px";
+    // The scroll thumb never quite makes it to the top or bottom in gmail
+    // or chrome (in chrome more from the bottom than the top).
+    _vbar.style['margin-top'] = "${config.kScrollbarSize}px";
+    _vbar.style['margin-bottom'] = "${config.kScrollbarSize}px";
+
+    // Some android apps round their scrollbars, some don't, not rounding for now.
+
+    const double msToSeconds = 1.0 / 1000.0;
+    _vbar.style['transition-duration'] = "${msToSeconds * config.kScrollbarFadeDuration}s";
+    _vbar.style['transition-delay'] = "${msToSeconds * config.kScrollbarFadeDelay}s";
   }
 
   double get scrollOffset => _scrollOffset;
