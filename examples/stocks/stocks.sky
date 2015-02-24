@@ -36,17 +36,17 @@
       height: 56px;
       box-shadow: 0px 4px 4px grey;
     }
-    #menu {
+    sky-icon {
       display: flex;
       justify-content: center;
       align-items: center;
       padding: 7px;
-      margin: 0 8px;
+      margin: 0 4px;
       color: black;
     }
     #title {
       flex: 1;
-      margin: 0 8px;
+      margin: 0 4px;
     }
     sky-scrollable {
       flex: 1;
@@ -57,7 +57,9 @@
   </sky-drawer>
   <sky-toolbar>
     <sky-icon id="menu" type="navigation/menu_white" size="24" />
-    I am a stocks app
+    <div id="title">I am a stocks app</div>
+    <sky-icon type="action/search_white" size="24" />
+    <sky-icon type="navigation/more_vert_white" size="24" />
   </sky-toolbar>
   <sky-scrollable id='stock_list'>
   </sky-scrollable>
