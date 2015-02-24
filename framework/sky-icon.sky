@@ -1,0 +1,33 @@
+<!--
+// Copyright 2015 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+-->
+<import src="sky-element.sky" />
+
+<sky-element attributes="type:string, size:number">
+<template>
+  <img />
+</template>
+<script>
+import "dart:sky";
+
+const String kAssetBase = '/sky/assets/material-design-icons';
+
+@Tagname('sky-icon')
+class SkyIcon extends SkyElement {
+  void shadowRootReady() {
+    Element img = shadowRoot.firstElementChild;
+    int intSize = size.floor();
+    img.style['height'] = '${intSize}px';
+    img.style['width'] = '${intSize}px';
+    List<String> parts = type.split('/');
+    String category = parts[0];
+    String subtype = parts[1];
+    img.src = '${kAssetBase}/${category}/2x_web/ic_${subtype}_${intSize}dp.png';
+  }
+}
+
+_init(script) => register(script, SkyIcon);
+</script>
+</sky-element>

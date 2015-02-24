@@ -5,6 +5,7 @@
 -->
 <import src="/sky/framework/sky-drawer.sky" />
 <import src="/sky/framework/sky-element.sky" />
+<import src="/sky/framework/sky-icon.sky" />
 <import src="/sky/framework/sky-scrollable.sky" />
 <import src="stock.sky" as='view'/>
 <import src='companylist.sky' as='model'/>
@@ -39,11 +40,8 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      width: 24px;
-      height: 24px;
       padding: 7px;
       margin: 0 8px;
-      background-color: papayawhip;
       color: black;
     }
     #title {
@@ -58,7 +56,7 @@
     I am drawer
   </sky-drawer>
   <sky-toolbar>
-    <div id="menu" />
+    <sky-icon id="menu" type="navigation/menu_white" size="24" />
     I am a stocks app
   </sky-toolbar>
   <sky-scrollable id='stock_list'>
