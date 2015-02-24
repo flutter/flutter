@@ -16,7 +16,8 @@
       display: flex;
       flex-direction: column;
       height: -webkit-fill-available;
-      font: 'Helvetica';
+      font-family: 'Roboto Regular', 'Helvetica';
+      font-size: 16px;
     }
     sky-drawer {
       position: absolute;
@@ -66,6 +67,15 @@
 import "dart:sky";
 import "dart:math";
 
+List pick(List list, int count) {
+  var rng = new Random();
+  List picked = new List();
+  for (int i = 0; i < count; i++) {
+    picked.add(list[rng.nextInt(list.length)]);
+  }
+  return picked;
+}
+
 @Tagname('stocks')
 class Stocks extends SkyElement {
   Element _drawer;
@@ -80,10 +90,9 @@ class Stocks extends SkyElement {
   void populateStockList() {
     Element stockList = shadowRoot.getElementById('stock_list');
     // Limit to 100 to avoid taking seconds to load.
-    var rng = new Random();
-    for (var i = 0; i < 100; i++) {
-      List<model.Stock> list = model.oracle.stocks;
-      model.Stock stock = list[rng.nextInt(list.length)];
+    List<model.Stock> picked = pick(model.oracle.stocks, 100);
+    picked.sort((a, b) => a.symbol.compareTo(b.symbol));
+    for (model.Stock stock in picked) {
       stockList.appendChild(new view.Stock()..model = stock);
     }
   }

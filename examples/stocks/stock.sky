@@ -9,29 +9,27 @@
 <template>
   <style>
   :host {
-    height: 50px;
+    // TODO(eseidel): Why does setting height here make this too big?
+    // height: 48px;
+    max-height: 48px;
     display: flex;
-    width: 100%;
-    border: 1px solid black;
+    border-bottom: 1px solid black;
+    padding-top: 16px;
+    padding-left: 16px;
+    padding-right: 16px;
+    padding-bottom: 20px;
   }
   #ticker {
-    padding: 10px;
     flex-grow: 1;
   }
   #last-sale {
-    padding: 10px;
+    padding-right: 20px;
   }
   #change {
-    padding: 10px;
     border-radius: 5px;
-    min-width: 70px;
+    min-width: 72px;
+    padding-right: 10px;
     text-align: right;
-  }
-  .positive {
-    background-color: green;
-  }
-  .negative {
-    background-color: red;
   }
   </style>
   <div id="ticker" />
@@ -40,6 +38,45 @@
 </template>
 <script>
 import "dart:sky";
+import "dart:math";
+
+List<String> redColors = [
+  '#FFEBEE',
+  '#FFCDD2',
+  '#EF9A9A',
+  '#E57373',
+  '#EF5350',
+  '#F44336',
+  '#E53935',
+  '#D32F2F',
+  '#C62828',
+  '#B71C1C',
+];
+
+List<String> greenColors = [
+  '#E8F5E9',
+  '#C8E6C9',
+  '#A5D6A7',
+  '#81C784',
+  '#66BB6A',
+  '#4CAF50',
+  '#43A047',
+  '#388E3C',
+  '#2E7D32',
+  '#1B5E20',
+];
+
+int colorIndexForPercentChange(double percentChange) {
+  // Currently the max is 10%.
+  double maxPercent = 10.0;
+  return max(0, ((percentChange.abs() / maxPercent) * greenColors.length).floor());
+}
+
+String colorForPercentChange(double percentChange) {
+  if (percentChange > 0)
+    return greenColors[colorIndexForPercentChange(percentChange)];
+  return redColors[colorIndexForPercentChange(percentChange)];
+}
 
 @Tagname('stock')
 class Stock extends SkyElement {
@@ -56,7 +93,7 @@ class Stock extends SkyElement {
     if (model.percentChange > 0)
       changeString = "+" + changeString;
     change.textContent = changeString;
-    change.classList.add((model.percentChange < 0) ? 'negative' : 'positive');
+    change.style['background-color'] = colorForPercentChange(model.percentChange);
   }
 }
 
