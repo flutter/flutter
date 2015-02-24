@@ -58,10 +58,14 @@ import 'dart:mirrors';
 import 'dart:math';
 
 class WeakMap<Key, Value> {
-  Expando<Value> _map = new Expando<Value>();
+  // This is not actually a weak map right now, because Dart doesn't let us have weak references.
+  // We should fix that, or else we're going to keep alive every object you ever tear off through
+  // the StyleDeclaration API, even if you never use it again, until the StyleDeclaration object
+  // itself is GC'ed, which is likely when the element is GC'ed, which is likely never.
+  Map<Key, Value> _map = new Map<Key, Value>();
   operator[](Key key) => _map[key];
   operator[]=(Key key, Value value) => _map[key] = value;
-  bool containsKey(Key key) => _map[key] != null;
+  bool containsKey(Key key) => _map.containsKey(key);
 }
 
 typedef void StringSetter(Symbol propertySymbol, StyleDeclaration declaration, String value);
