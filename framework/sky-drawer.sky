@@ -3,10 +3,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 -->
+<import src="shadow.sky" as="shadow" />
 <import src="sky-element.sky" />
 <import src="sky-scrollable.sky" />
 
-<sky-element>
+<sky-element attributes="level:number">
 <template>
   <style>
     #mask {
@@ -63,6 +64,7 @@ class SkyDrawer extends SkyElement implements AnimationDelegate {
   }
 
   void shadowRootReady() {
+    shadow.applyTo(shadowRoot);
     _mask = shadowRoot.getElementById('mask');
     _mask.addEventListener('gesturetap', _handleMaskTap);
     _content = shadowRoot.getElementById('content');
