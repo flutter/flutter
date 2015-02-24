@@ -1,0 +1,8 @@
+CONSOLE: unittest-suite-wait-for-done
+CONSOLE: PASS: pixel translate should roundtrip
+CONSOLE: PASS: percent translate should roundtrip
+CONSOLE: PASS: scale should roundtrip
+CONSOLE: 
+CONSOLE: All 3 tests passed.
+CONSOLE: unittest-suite-success
+DONE
