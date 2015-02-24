@@ -30,9 +30,10 @@
     sky-toolbar {
       display: flex;
       align-items: center;
-      background-color: #526E9C;
+      background-color: #3F51B5;
       color: white;
       height: 56px;
+      box-shadow: 0px 4px 4px grey;
     }
     #menu {
       display: flex;
