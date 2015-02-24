@@ -114,7 +114,7 @@ private:
 
     virtual bool nodeAtPoint(const HitTestRequest&, HitTestResult&, const HitTestLocation& locationInContainer, const LayoutPoint& accumulatedOffset) override final;
 
-    virtual LayerType layerTypeRequired() const override { return createsGroup() || hasClipPath() ? NormalLayer : NoLayer; }
+    virtual LayerType layerTypeRequired() const override { return NoLayer; }
 
     virtual LayoutUnit offsetLeft() const override final;
     virtual LayoutUnit offsetTop() const override final;
