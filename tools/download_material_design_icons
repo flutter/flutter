@@ -1,0 +1,35 @@
+#!/usr/bin/env python
+# Copyright (c) 2015 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import os
+import subprocess
+
+from webkitpy.common.system import filesystem
+from webkitpy.common.webkit_finder import WebKitFinder
+
+finder = WebKitFinder(filesystem.FileSystem())
+
+assets_dir = finder.path_from_chromium_base('sky', 'assets')
+sha1_path = os.path.join(assets_dir, 'material-design-icons.sha1')
+
+with open(sha1_path) as f:
+    sha1 = f.read()
+
+tgz_path = os.path.join(assets_dir, 'material-design-icons.tgz')
+subprocess.call([
+    'download_from_google_storage',
+    '--no_resume',
+    '--no_auth',
+    '--bucket', 'mojo',
+    '--output', tgz_path,
+    'material-design-icons/%s' % sha1,
+])
+
+output_path = os.path.join(assets_dir, tgz_path)
+subprocess.call([
+    'tar', '-xzf', output_path, '-C', assets_dir
+])
+
+os.unlink(tgz_path)
