@@ -19,7 +19,7 @@
       right: 0;
     }
     #content {
-      background-color: white;
+      background-color: #FAFAFA;
       will-change: transform;
       position: absolute;
       width: 256px;

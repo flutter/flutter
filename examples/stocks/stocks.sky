@@ -3,9 +3,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 -->
+<import src="/sky/framework/sky-drawer-header.sky" />
 <import src="/sky/framework/sky-drawer.sky" />
 <import src="/sky/framework/sky-element.sky" />
 <import src="/sky/framework/sky-icon.sky" />
+<import src="/sky/framework/sky-menu-divider.sky" />
+<import src="/sky/framework/sky-menu-item.sky" />
 <import src="/sky/framework/sky-scrollable.sky" />
 <import src="/sky/framework/sky-toolbar.sky" />
 <import src="stock.sky" as='view'/>
@@ -35,12 +38,8 @@
       color: white;
     }
     sky-icon {
-      display: flex;
-      justify-content: center;
-      align-items: center;
       padding: 8px;
       margin: 0 4px;
-      color: black;
     }
     #title {
       flex: 1;
@@ -51,7 +50,14 @@
     }
   </style>
   <sky-drawer id="drawer">
-    I am drawer
+    <sky-drawer-header>
+      Stocks
+    </sky-drawer-header>
+    <sky-menu-item icon="content/inbox">Inbox</sky-menu-item>
+    <sky-menu-item icon="content/drafts">Drafts</sky-menu-item>
+    <sky-menu-divider />
+    <sky-menu-item icon="action/settings">Settings</sky-menu-item>
+    <sky-menu-item icon="action/help">Help &amp; feedback</sky-menu-item>
   </sky-drawer>
   <sky-toolbar level="2">
     <sky-icon id="menu" type="navigation/menu_white" size="24" />

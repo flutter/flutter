@@ -1,0 +1,54 @@
+<!--
+// Copyright 2015 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+-->
+<import src="sky-element.sky" />
+<import src="sky-icon.sky" />
+
+<sky-element attributes="icon:string">
+<template>
+  <style>
+    :host {
+      display: flex;
+      align-items: center;
+      height: 48px;
+      -webkit-user-select: none;
+    }
+    sky-icon {
+      padding: 0px 16px;
+    }
+    #label {
+      font-family: 'Roboto Medium', 'Helvetica';
+      color: #212121;
+      padding: 0px 16px;
+      flex: 1;
+    }
+  </style>
+  <sky-icon size="24" />
+  <div id="label">
+    <content />
+  </div>
+</template>
+<script>
+import "dart:sky";
+
+@Tagname('sky-menu-item')
+class SkyMenuItem extends SkyElement {
+  SkyIcon _icon;
+  Element _label;
+
+  void shadowRootReady() {
+    _icon = shadowRoot.querySelector('sky-icon');
+    _icon.type = "${icon}_grey600";
+  }
+
+  void iconChanged(String oldValue, String newValue) {
+    if (_icon != null)
+      _icon.type = "${newValue}_grey600";
+  }
+}
+
+_init(script) => register(script, SkyMenuItem);
+</script>
+</sky-element>
