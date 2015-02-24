@@ -67,7 +67,7 @@ class SkyDebugger : public mojo::ApplicationDelegate,
     if (request->relative_url == "/reload") {
       Load(callback, url_);
     } else if (request->relative_url == "/quit") {
-      Quit();
+      Exit();
     } else if (request->relative_url == "/load") {
       std::string url;
       mojo::common::BlockingCopyToString(request->body.Pass(), &url);
@@ -118,7 +118,7 @@ class SkyDebugger : public mojo::ApplicationDelegate,
     window_manager_->Embed(url_, nullptr, nullptr);
   }
 
-  void Quit() {
+  void Exit() {
     // TODO(eseidel): We should orderly shutdown once mojo can.
     exit(0);
   }
