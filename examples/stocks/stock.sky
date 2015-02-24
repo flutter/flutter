@@ -13,7 +13,7 @@
     // height: 48px;
     max-height: 48px;
     display: flex;
-    border-bottom: 1px solid black;
+    border-bottom: 1px solid #F4F4F4;
     padding-top: 16px;
     padding-left: 16px;
     padding-right: 16px;

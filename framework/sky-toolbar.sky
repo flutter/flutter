@@ -1,0 +1,32 @@
+<!--
+// Copyright 2015 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+-->
+<import src="shadow.sky" as="shadow" />
+<import src="sky-element.sky" />
+
+<sky-element attributes="level:number">
+<template>
+  <style>
+    :host {
+      display: flex;
+      align-items: center;
+      height: 56px;
+    }
+  </style>
+  <content />
+</template>
+<script>
+import "dart:sky";
+
+@Tagname('sky-toolbar')
+class SkyToolbar extends SkyElement {
+  void shadowRootReady() {
+    shadow.applyTo(shadowRoot);
+  }
+}
+
+_init(script) => register(script, SkyToolbar);
+</script>
+</sky-element>

@@ -7,6 +7,7 @@
 <import src="/sky/framework/sky-element.sky" />
 <import src="/sky/framework/sky-icon.sky" />
 <import src="/sky/framework/sky-scrollable.sky" />
+<import src="/sky/framework/sky-toolbar.sky" />
 <import src="stock.sky" as='view'/>
 <import src='companylist.sky' as='model'/>
 
@@ -22,25 +23,22 @@
     }
     sky-drawer {
       position: absolute;
-      z-index: 1;
+      z-index: 2;
       top: 0;
       left: 0;
       bottom: 0;
       right: 0;
     }
     sky-toolbar {
-      display: flex;
-      align-items: center;
+      z-index: 1;
       background-color: #3F51B5;
       color: white;
-      height: 56px;
-      box-shadow: 0px 4px 4px grey;
     }
     sky-icon {
       display: flex;
       justify-content: center;
       align-items: center;
-      padding: 7px;
+      padding: 8px;
       margin: 0 4px;
       color: black;
     }
@@ -55,7 +53,7 @@
   <sky-drawer id="drawer">
     I am drawer
   </sky-drawer>
-  <sky-toolbar>
+  <sky-toolbar level="2">
     <sky-icon id="menu" type="navigation/menu_white" size="24" />
     <div id="title">I am a stocks app</div>
     <sky-icon type="action/search_white" size="24" />
