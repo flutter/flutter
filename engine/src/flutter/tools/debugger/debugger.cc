@@ -14,6 +14,7 @@
 #include "mojo/public/cpp/application/application_delegate.h"
 #include "mojo/public/cpp/application/application_impl.h"
 #include "mojo/public/cpp/bindings/binding.h"
+#include "mojo/services/network/public/interfaces/net_address.mojom.h"
 #include "mojo/services/window_manager/public/interfaces/window_manager.mojom.h"
 #include "services/http_server/public/http_server.mojom.h"
 #include "services/http_server/public/http_server_factory.mojom.h"
@@ -45,8 +46,18 @@ class SkyDebugger : public mojo::ApplicationDelegate,
     base::StringToUint(app->args()[1], &command_port_);
     http_server::HttpServerFactoryPtr http_server_factory;
     app->ConnectToService("mojo:http_server", &http_server_factory);
+
+    mojo::NetAddressPtr local_address(mojo::NetAddress::New());
+    local_address->family = mojo::NET_ADDRESS_FAMILY_IPV4;
+    local_address->ipv4 = mojo::NetAddressIPv4::New();
+    local_address->ipv4->addr.resize(4);
+    local_address->ipv4->addr[0] = 0;
+    local_address->ipv4->addr[1] = 0;
+    local_address->ipv4->addr[2] = 0;
+    local_address->ipv4->addr[3] = 0;
+    local_address->ipv4->port = command_port_;
     http_server_factory->CreateHttpServer(GetProxy(&http_server_).Pass(),
-                                          command_port_);
+                                          local_address.Pass());
 
     http_server::HttpHandlerPtr handler_ptr;
     handler_binding_.Bind(GetProxy(&handler_ptr).Pass());
