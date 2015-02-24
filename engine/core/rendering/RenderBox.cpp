@@ -696,7 +696,9 @@ void RenderBox::paintLayer(GraphicsContext* context, RenderLayer* rootLayer, con
 
     LayerPaintingInfo paintingInfo(rootLayer, rect, LayoutSize());
 
-    if (!layer()->paintsWithTransform()) {
+    TransformationMatrix* layerTransform = layer()->transform();
+
+    if (!layerTransform) {
         paintLayerContents(context, paintingInfo, rect);
         return;
     }
@@ -704,20 +706,14 @@ void RenderBox::paintLayer(GraphicsContext* context, RenderLayer* rootLayer, con
     // The RenderView can't be transformed in Sky.
     ASSERT(layer()->parent());
 
-    TransformationMatrix layerTransform = layer()->renderableTransform();
     // If the transform can't be inverted, then don't paint anything.
-    if (!layerTransform.isInvertible())
+    if (!layerTransform->isInvertible())
         return;
 
     // If we have a transparency layer enclosing us and we are the root of a transform, then we need to establish the transparency
     // layer from the parent now, assuming there is a parent
     if (layer()->isTransparent()) {
-        // TODO(ojan): This should ASSERT(layer()->parent()) instead of branching since the
-        // RenderView can't be transformed in sky.
-        if (layer()->parent())
-            layer()->parent()->beginTransparencyLayers(context, paintingInfo.rootLayer, paintingInfo.paintDirtyRect, paintingInfo.subPixelAccumulation);
-        else
-            layer()->beginTransparencyLayers(context, paintingInfo.rootLayer, paintingInfo.paintDirtyRect, paintingInfo.subPixelAccumulation);
+        layer()->parent()->beginTransparencyLayers(context, paintingInfo.rootLayer, paintingInfo.paintDirtyRect, paintingInfo.subPixelAccumulation);
     }
 
     // Make sure the parent's clip rects have been calculated.
@@ -732,7 +728,7 @@ void RenderBox::paintLayer(GraphicsContext* context, RenderLayer* rootLayer, con
     // the accumulated error for sub-pixel layout.
     LayoutPoint delta;
     layer()->convertToLayerCoords(paintingInfo.rootLayer, delta);
-    TransformationMatrix transform(layer()->renderableTransform());
+    TransformationMatrix transform(*layerTransform);
     IntPoint roundedDelta = roundedIntPoint(delta);
     transform.translateRight(roundedDelta.x(), roundedDelta.y());
     LayoutSize adjustedSubPixelAccumulation = paintingInfo.subPixelAccumulation + (delta - roundedDelta);
@@ -2984,7 +2980,7 @@ LayoutRect RenderBox::layoutOverflowRectForPropagation() const
         rect.unite(layoutOverflowRect());
 
     if (hasLayer() && layer()->transform())
-        rect = layer()->currentTransform().mapRect(rect);
+        rect = layer()->transform()->mapRect(rect);
 
     return rect;
 }

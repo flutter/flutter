@@ -880,13 +880,6 @@ inline void RenderObject::setSelectionStateIfNeeded(SelectionState state)
     setSelectionState(state);
 }
 
-inline void makeMatrixRenderable(TransformationMatrix& matrix)
-{
-    // FIXME(sky): We shouldn't need to do this once Skia has 4x4 matrix support.
-    // Until then, 3d transforms don't work right.
-    matrix.makeAffine();
-}
-
 #define DEFINE_RENDER_OBJECT_TYPE_CASTS(thisType, predicate) \
     DEFINE_TYPE_CASTS(thisType, RenderObject, object, object->predicate, object.predicate)
 

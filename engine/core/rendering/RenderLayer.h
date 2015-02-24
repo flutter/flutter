@@ -164,13 +164,8 @@ public:
     void setSubpixelAccumulation(const LayoutSize&);
 
     bool hasTransform() const { return renderer()->hasTransform(); }
-    // Note that this transform has the transform-origin baked in.
+    // This transform has the transform-origin baked in.
     TransformationMatrix* transform() const { return m_transform.get(); }
-    // currentTransform computes a transform which takes accelerated animations into account. The
-    // resulting transform has transform-origin baked in. If the layer does not have a transform,
-    // returns the identity matrix.
-    TransformationMatrix currentTransform(RenderStyle::ApplyTransformOrigin = RenderStyle::IncludeTransformOrigin) const;
-    TransformationMatrix renderableTransform() const;
 
     // Get the perspective transform, which is applied to transformed sublayers.
     // Returns true if the layer has a -webkit-perspective.
@@ -192,8 +187,6 @@ public:
     void* operator new(size_t);
     // Only safe to call from RenderBox::destroyLayer()
     void operator delete(void*);
-
-    bool paintsWithTransform() const;
 
     FilterOperations computeFilterOperations(const RenderStyle*);
     bool paintsWithFilters() const;

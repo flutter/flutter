@@ -177,7 +177,9 @@ void RenderLayer::updateTransformationMatrix()
         ASSERT(box);
         m_transform->makeIdentity();
         box->style()->applyTransform(*m_transform, box->pixelSnappedBorderBoxRect().size(), RenderStyle::IncludeTransformOrigin);
-        makeMatrixRenderable(*m_transform);
+        // FIXME(sky): We shouldn't need to do this once Skia has 4x4 matrix support.
+        // Until then, 3d transforms don't work right.
+        m_transform->makeAffine();
     }
 }
 
@@ -228,28 +230,6 @@ RenderLayer* RenderLayer::renderingContextRoot()
         renderingContext = current;
 
     return renderingContext;
-}
-
-TransformationMatrix RenderLayer::currentTransform(RenderStyle::ApplyTransformOrigin applyOrigin) const
-{
-    if (!m_transform)
-        return TransformationMatrix();
-
-    // m_transform includes transform-origin, so we need to recompute the transform here.
-    if (applyOrigin == RenderStyle::ExcludeTransformOrigin) {
-        RenderBox* box = renderBox();
-        TransformationMatrix currTransform;
-        box->style()->applyTransform(currTransform, box->pixelSnappedBorderBoxRect().size(), RenderStyle::ExcludeTransformOrigin);
-        makeMatrixRenderable(currTransform);
-        return currTransform;
-    }
-
-    return *m_transform;
-}
-
-TransformationMatrix RenderLayer::renderableTransform() const
-{
-    return m_transform ? *m_transform : TransformationMatrix();
 }
 
 RenderLayer* RenderLayer::enclosingOverflowClipLayer(IncludeSelfOrNot includeSelf) const
@@ -468,7 +448,7 @@ static LayoutRect transparencyClipBox(const RenderLayer* layer, const RenderLaye
     // paintDirtyRect, and that should cut down on the amount we have to paint.  Still it
     // would be better to respect clips.
 
-    if (rootLayer != layer && ((transparencyBehavior == PaintingTransparencyClipBox && layer->paintsWithTransform())
+    if (rootLayer != layer && ((transparencyBehavior == PaintingTransparencyClipBox && layer->transform())
         || (transparencyBehavior == HitTestingTransparencyClipBox && layer->hasTransform()))) {
         // The best we can do here is to use enclosed bounding boxes to establish a "fuzzy" enough clip to encompass
         // the transformed layer and all of its children.
@@ -866,11 +846,9 @@ LayoutRect RenderLayer::boundingBoxForCompositing(const RenderLayer* ancestorLay
     if (isRootLayer())
         return m_renderer->view()->unscaledDocumentRect();
 
-    const bool shouldIncludeTransform = paintsWithTransform();
-
     LayoutRect localClipRect = clipper().localClipRect();
     if (localClipRect != PaintInfo::infiniteRect()) {
-        if (shouldIncludeTransform)
+        if (transform())
             localClipRect = transform()->mapRect(localClipRect);
 
         LayoutPoint delta;
@@ -891,19 +869,13 @@ LayoutRect RenderLayer::boundingBoxForCompositing(const RenderLayer* ancestorLay
     // https://bugs.webkit.org/show_bug.cgi?id=81239
     m_renderer->style()->filterOutsets().expandRect(result);
 
-    if (shouldIncludeTransform)
+    if (transform())
         result = transform()->mapRect(result);
 
     LayoutPoint delta;
     convertToLayerCoords(ancestorLayer, delta);
     result.moveBy(delta);
     return result;
-}
-
-bool RenderLayer::paintsWithTransform() const
-{
-    // FIXME(sky): Remove
-    return transform();
 }
 
 bool RenderLayer::shouldBeSelfPaintingLayer() const

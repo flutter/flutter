@@ -1,0 +1,52 @@
+<style>
+  .container {
+    height: 100px;
+    width: 200px;
+    margin: 30px;
+    outline: 1px solid black;
+  }
+  .box {
+    height: 100%;
+    width: 100%;
+    padding: 5px;
+    margin: 5px;
+    border: 5px solid gray;
+    background-color: green;
+    transform-origin: 20% 50%;
+  }
+</style>
+
+<div class="container">
+  <div id="test-box" class="box"></div>
+</div>
+
+<script type="text/javascript" charset="utf-8">
+  import "../resources/third_party/unittest/unittest.dart";
+  import "../resources/unit.dart";
+
+  import "dart:sky";
+
+  void main() {
+    initUnit();
+
+    var testBox = document.getElementById('test-box');
+
+    void testTransformRoundTrip(transform, resultMatrix) {
+      testBox.style['transform'] = transform;
+      var computedTransform = window.getComputedStyle(testBox)['transform'];
+      expect(computedTransform, equals(resultMatrix));
+    }
+
+    test('pixel translate should roundtrip', () {
+      testTransformRoundTrip('translate(80px, 90px)', 'matrix(1, 0, 0, 1, 80, 90)');
+    });
+
+    test('percent translate should roundtrip', () {
+      testTransformRoundTrip('translate(10px, 50%)', 'matrix(1, 0, 0, 1, 10, 60)');
+    });
+
+    test('scale should roundtrip', () {
+      testTransformRoundTrip('scale(1.2, 0.8)', 'matrix(1.2, 0, 0, 0.8, 0, 0)');
+    });
+  }
+</script>

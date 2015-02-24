@@ -1427,7 +1427,7 @@ void RenderObject::getTransformFromContainer(const RenderObject* containerObject
     transform.translate(offsetInContainer.width().toFloat(), offsetInContainer.height().toFloat());
     RenderLayer* layer = hasLayer() ? toRenderBox(this)->layer() : 0;
     if (layer && layer->transform())
-        transform.multiply(layer->currentTransform());
+        transform.multiply(*layer->transform());
 
     if (containerObject && containerObject->hasLayer() && containerObject->style()->hasPerspective()) {
         // Perpsective on the container affects us, so we have to factor it in here.
