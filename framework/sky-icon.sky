@@ -16,15 +16,37 @@ const String kAssetBase = '/sky/assets/material-design-icons';
 
 @Tagname('sky-icon')
 class SkyIcon extends SkyElement {
-  void shadowRootReady() {
-    Element img = shadowRoot.firstElementChild;
-    int intSize = size.floor();
-    img.style['height'] = '${intSize}px';
-    img.style['width'] = '${intSize}px';
+  Element _img;
+
+  void _setSize(int size) {
+    _img.style['height'] = '${size}px';
+    _img.style['width'] = '${size}px';
+  }
+
+  void _setSrc(String type, int size) {
     List<String> parts = type.split('/');
+    if (parts.length < 2)
+      return;
     String category = parts[0];
     String subtype = parts[1];
-    img.src = '${kAssetBase}/${category}/2x_web/ic_${subtype}_${intSize}dp.png';
+    _img.src = '${kAssetBase}/${category}/2x_web/ic_${subtype}_${size}dp.png';
+  }
+
+  void shadowRootReady() {
+    _img = shadowRoot.firstElementChild;
+    int size = this.size.floor();
+    _setSize(size);
+    _setSrc(type, size);
+  }
+
+  void typeChanged(String oldValue, String newValue) {
+    if (_img != null)
+      _setSrc(newValue, size.floor());
+  }
+
+  void sizeChanged(double oldValue, double newValue) {
+    if (_img != null)
+      _setSize(newValue.floor());
   }
 }
 

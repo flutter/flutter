@@ -3,31 +3,19 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 -->
-<import src="sky-button.sky" />
 <import src="sky-element.sky" />
+<import src="sky-icon.sky" />
 
-<sky-element attributes="selected:boolean, group:string, highlight:boolean">
+<sky-element attributes="selected:boolean, group:string">
 <template>
   <style>
     :host {
       display: inline-block;
       -webkit-user-select: none;
-      width: 14px;
-      height: 14px;
-      border-radius: 7px;
-      border: 1px solid blue;
-      margin: 0 5px;
-    }
-    dot {
-      -webkit-user-select: none;
-      width: 10px;
-      height: 10px;
-      border-radius: 5px;
-      background-color: black;
-      margin: 2px;
+      margin: 8px 16px;
     }
   </style>
-  <dot />
+  <sky-icon size="18" />
 </template>
 <script>
 import "dart:sky";
@@ -73,18 +61,21 @@ class _RadioGroupController {
   }
 }
 
+const String _kOnIcon = 'toggle/radio_button_on_black';
+const String _kOffIcon = 'toggle/radio_button_off_black';
+
 @Tagname('sky-radio')
-class SkyRadio extends SkyButton {
+class SkyRadio extends SkyElement {
   _RadioGroupController _controller;
-  Element _dot;
+  SkyIcon _icon;
 
   SkyRadio() {
     addEventListener('click', _handleClick);
   }
 
   void shadowRootReady() {
-    _dot = shadowRoot.querySelector('dot');
-    _dot.style['display'] = selected ? 'block' : 'none';
+    _icon = shadowRoot.querySelector('sky-icon');
+    _icon.type = selected ? _kOnIcon : _kOffIcon;
   }
 
   void attached() {
@@ -100,8 +91,8 @@ class SkyRadio extends SkyButton {
   }
 
   void selectedChanged(bool oldValue, bool newValue) {
-    if (_dot != null)
-      _dot.style['display'] = newValue ? 'block' : 'none';
+    if (_icon != null)
+      _icon.type = newValue ? _kOnIcon : _kOffIcon;
     if (newValue && _controller != null)
       _controller.takeSelectionFromGroup(this);
   }

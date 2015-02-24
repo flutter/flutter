@@ -13,6 +13,9 @@
 <sky-element>
 <template>
   <style>
+  :host {
+    font-family: 'Roboto Regular', 'Helvetica';
+  }
   div {
     display: flex;
     align-items: center;
@@ -34,9 +37,11 @@
     </sky-box>
   
     <sky-box title='Buttons'>
-      <sky-button id='button'>Button</sky-button>
-      <div>highlight: {{ myButton.highlight }}</div>
-      <div>clickCount: {{ clickCount }}</div>
+      <div style="display: flex; flex-direction: horizontal">
+        <div style="flex:1" />
+        <sky-button level="1" id="button">CANCEL</sky-button>
+        <sky-button level="1" primary>CONFIRM</sky-button>
+      </div>
     </sky-box>
   
     <sky-box title='Checkboxes'>

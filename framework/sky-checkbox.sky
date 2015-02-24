@@ -3,82 +3,42 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 -->
-<import src="sky-button.sky" />
 <import src="sky-element.sky" />
+<import src="sky-icon.sky" />
 
-<sky-element attributes="checked:boolean, highlight:boolean">
+<sky-element attributes="checked:boolean">
 <template>
   <style>
     :host {
-      display: flex;
-      justify-content: center;
-      align-items: center;
+      display: inline-block;
       -webkit-user-select: none;
-      cursor: pointer;
-      width: 30px;
-      height: 30px;
-    }
-    #container {
-      border: solid 2px;
-      border-color: rgba(90, 90, 90, 0.25);
-      width: 10px;
-      height: 10px;
-    }
-    #container.highlight {
-      border-radius: 10px;
-      background-color: orange;
-      border-color: orange;
-    }
-    #check {
-      top: 0px;
-      left: 0px;
-    }
-    #check.checked {
-      transform: translate(2px, -15px) rotate(45deg);
-      width: 10px;
-      height: 20px;
-      border-style: solid;
-      border-top: none;
-      border-left: none;
-      border-right-width: 2px;
-      border-bottom-width: 2px;
-      border-color: #0f9d58;
+      margin: 8px 16px;
     }
   </style>
-  <div id="container">
-    <div id="check" />
-  </div>
+  <sky-icon size="18" />
 </template>
 <script>
 import "dart:sky";
 
+const String _kOnIcon = 'toggle/check_box_black';
+const String _kOffIcon = 'toggle/check_box_outline_blank_black';
+
 @Tagname('sky-checkbox')
-class SkyCheckbox extends SkyButton {
-  Element _container;
-  Element _check;
+class SkyCheckbox extends SkyElement {
+  SkyIcon _icon;
 
   SkyCheckbox() {
     addEventListener('click', _handleClick);
   }
 
-  static String _checkClassForValue(bool value) => value ? 'checked' : '';
-  static String _containerClassForValue(bool value) => value ? 'highlight' : '';
-
   void shadowRootReady() {
-    _container = shadowRoot.getElementById('container');
-    _container.setAttribute('class', _containerClassForValue(highlight));
-    _check = shadowRoot.getElementById('check');
-    _check.setAttribute('class', _checkClassForValue(checked));
+    _icon = shadowRoot.querySelector('sky-icon');
+    _icon.type = checked ? _kOnIcon : _kOffIcon;
   }
 
   void checkedChanged(bool oldValue, bool newValue) {
-    if (_check != null)
-      _check.setAttribute('class', _checkClassForValue(newValue));
-  }
-
-  void highlightChanged(bool oldValue, bool newValue) {
-    if (_container != null)
-      _container.setAttribute('class', _containerClassForValue(newValue));
+    if (_icon != null)
+      _icon.type = newValue ? _kOnIcon : _kOffIcon;
   }
 
   void _handleClick(_) {

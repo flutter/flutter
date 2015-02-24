@@ -10,16 +10,20 @@
   <style>
   :host {
     display: flex;
-    border: 1px solid blue;
-    margin: 5px;
-    padding: 4px;
   }
   #control {
+    margin: 8px;
+    padding: 8px;
+    border-bottom: 1px solid #E7E7E7;
     flex: 1;
     align-self: center;
     height: 1.2em;
     white-space: nowrap;
     overflow: hidden;
+  }
+  #control.focused {
+    padding-bottom: 7px;
+    border-bottom: 2px solid #009cf3;
   }
   </style>
   <div id="control" contenteditable />
@@ -57,10 +61,14 @@ class SkyInput extends SkyElement {
   }
 
   void _handleFocus(_) {
+    if (_control)
+      _control.setAttribute('class', 'focused');
     // TODO(abarth): Show the keyboard.
   }
 
   void _handleBlur(_) {
+    if (_control)
+      _control.removeAttribute('class');
     // TODO(abarth): Hide the keyboard.
   }
 }

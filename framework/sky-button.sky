@@ -4,21 +4,25 @@
 // found in the LICENSE file.
 -->
 <import src="sky-element.sky" />
+<import src="shadow.sky" as="shadow" />
 
-<sky-element attributes="highlight:boolean">
+<sky-element attributes="primary:boolean, level:number">
 <template>
   <style>
     :host {
       display: inline-flex;
-      border-radius: 4px;
+      -webkit-user-select: none;
       justify-content: center;
       align-items: center;
-      border: 1px solid blue;
-      -webkit-user-select: none;
-      margin: 5px;
+      height: 36px;
+      min-width: 64px;
+      padding: 0 8px;
+      margin: 4px;
+      border-radius: 2px;
     }
-    :host([highlight=true]) {
-      background-color: orange;
+    :host([primary]) {
+      color: white;
+      background-color: #0098f4;
     }
   </style>
   <content />
@@ -29,23 +33,11 @@ import "dart:sky";
 @Tagname('sky-button')
 class SkyButton extends SkyElement {
   SkyButton() {
-    addEventListener('pointerdown', _handlePointerDown);
-    addEventListener('pointerup', _handlePointerUp);
-    addEventListener('pointercancel', _handlePointerCancel);
-
     tabIndex = 0; // Make focusable.
   }
 
-  void _handlePointerDown(_) {
-    highlight = true;
-  }
-
-  void _handlePointerUp(_) {
-    highlight = false;
-  }
-
-  void _handlePointerCancel(_) {
-    highlight = false;
+  void shadowRootReady() {
+    shadow.applyTo(shadowRoot);
   }
 }
 
