@@ -1,0 +1,30 @@
+<!--
+// Copyright 2015 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+-->
+<import src="sky-element.sky" />
+<import src="sky-ink-splash.sky" />
+<script>
+import "dart:sky";
+
+HTMLStyleElement _kStyleElement;
+
+class MaterialElement extends SkyElement {
+  MaterialElement() {
+    addEventListener('pointerdown', _handlePointerDown);
+  }
+
+  void _handlePointerDown(PointerEvent event) {
+    // We set the transform here to become a container for absolutely positioned
+    // elements. We should either have a better way of becoming such a container
+    // or we should make every RenderBlock be such a container.
+    style['transform'] = 'translateX(0)';
+
+    ClientRect rect = getBoundingClientRect();
+    SkyInkSplash splash = new SkyInkSplash();
+    shadowRoot.prependChild(splash);
+    splash.start(event.x, event.y, rect);
+  }
+}
+</script>

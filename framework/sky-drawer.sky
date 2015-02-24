@@ -144,7 +144,7 @@ class SkyDrawer extends SkyElement implements AnimationDelegate {
   }
 
   void _handleFlingStart(event) {
-    double direction = event.velocityX.sign();
+    double direction = event.velocityX.sign;
     double velocityX = event.velocityX.abs() / 1000;
     if (velocityX < _kMinFlingVelocity)
       return;

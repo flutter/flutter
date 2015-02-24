@@ -3,6 +3,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 -->
+<import src="/sky/framework/material-element.sky" />
 <import src="/sky/framework/sky-element.sky" />
 <import src="stock-arrow.sky" />
 
@@ -46,7 +47,7 @@
 import "dart:sky";
 
 @Tagname('stock')
-class Stock extends SkyElement {
+class Stock extends MaterialElement {
   var model; // model.Stock
 
   void shadowRootReady() {
