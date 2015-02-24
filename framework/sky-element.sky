@@ -14,7 +14,11 @@ final Map<String, _Converter> _kAttributeConverters = {
     return value == 'true';
   },
   'number': (String value) {
-    return double.parse(value);
+    try {
+      return double.parse(value);
+    } catch(_) {
+      return 0.0;
+    }
   },
   'string': (String value) {
     return value == null ? '' : value;

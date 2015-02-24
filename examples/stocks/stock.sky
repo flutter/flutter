@@ -4,6 +4,7 @@
 // found in the LICENSE file.
 -->
 <import src="/sky/framework/sky-element.sky" />
+<import src="stock-arrow.sky" />
 
 <sky-element>
 <template>
@@ -13,71 +14,36 @@
     // height: 48px;
     max-height: 48px;
     display: flex;
+    align-items: center;
     border-bottom: 1px solid #F4F4F4;
     padding-top: 16px;
     padding-left: 16px;
     padding-right: 16px;
     padding-bottom: 20px;
   }
+  stock-arrow {
+    margin-right: 16px;
+  }
   #ticker {
-    flex-grow: 1;
+    flex: 1;
+    font-family: 'Roboto Medium', 'Helvetica';
   }
   #last-sale {
-    padding-right: 20px;
+    text-align: right;
+    padding-right: 16px;
   }
   #change {
-    border-radius: 5px;
-    min-width: 72px;
-    padding: 2px;
-    padding-right: 10px;
+    color: #8A8A8A;
     text-align: right;
   }
   </style>
+  <stock-arrow id="arrow" />
   <div id="ticker" />
   <div id="last-sale" />
   <div id="change" />
 </template>
 <script>
 import "dart:sky";
-import "dart:math";
-
-List<String> redColors = [
-  '#FFEBEE',
-  '#FFCDD2',
-  '#EF9A9A',
-  '#E57373',
-  '#EF5350',
-  '#F44336',
-  '#E53935',
-  '#D32F2F',
-  '#C62828',
-  '#B71C1C',
-];
-
-List<String> greenColors = [
-  '#E8F5E9',
-  '#C8E6C9',
-  '#A5D6A7',
-  '#81C784',
-  '#66BB6A',
-  '#4CAF50',
-  '#43A047',
-  '#388E3C',
-  '#2E7D32',
-  '#1B5E20',
-];
-
-int colorIndexForPercentChange(double percentChange) {
-  // Currently the max is 10%.
-  double maxPercent = 10.0;
-  return max(0, ((percentChange.abs() / maxPercent) * greenColors.length).floor());
-}
-
-String colorForPercentChange(double percentChange) {
-  if (percentChange > 0)
-    return greenColors[colorIndexForPercentChange(percentChange)];
-  return redColors[colorIndexForPercentChange(percentChange)];
-}
 
 @Tagname('stock')
 class Stock extends SkyElement {
@@ -94,7 +60,9 @@ class Stock extends SkyElement {
     if (model.percentChange > 0)
       changeString = "+" + changeString;
     change.textContent = changeString;
-    change.style['background-color'] = colorForPercentChange(model.percentChange);
+
+    StockArrow arrow = shadowRoot.getElementById('arrow');
+    arrow.change = model.percentChange;
   }
 }
 
