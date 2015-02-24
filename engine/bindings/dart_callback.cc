@@ -7,6 +7,7 @@
 
 #include "sky/engine/tonic/dart_converter.h"
 #include "sky/engine/tonic/dart_error.h"
+#include "sky/engine/tonic/dart_invoke.h"
 #include "sky/engine/tonic/dart_state.h"
 
 namespace blink {
@@ -33,7 +34,7 @@ Dart_Isolate DartCallback::GetIsolate() const {
 }
 
 bool DartCallback::handleEvent(int argc, Dart_Handle* argv) {
-  LogIfError(Dart_InvokeClosure(callback_.value(), argc, argv));
+  DartInvokeAppClosure(callback_.value(), argc, argv);
   return true;
 }
 

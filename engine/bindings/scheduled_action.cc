@@ -7,6 +7,7 @@
 
 #include "sky/engine/tonic/dart_api_scope.h"
 #include "sky/engine/tonic/dart_error.h"
+#include "sky/engine/tonic/dart_invoke.h"
 #include "sky/engine/tonic/dart_isolate_scope.h"
 
 namespace blink {
@@ -24,7 +25,7 @@ void ScheduledAction::Execute(ExecutionContext*) {
     return;
   DartIsolateScope scope(closure_.dart_state()->isolate());
   DartApiScope api_scope;
-  LogIfError(Dart_InvokeClosure(closure_.value(), 0, nullptr));
+  DartInvokeAppClosure(closure_.value(), 0, nullptr);
 }
 
 }  // namespace blink

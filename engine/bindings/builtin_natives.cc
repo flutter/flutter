@@ -19,6 +19,7 @@
 #include "sky/engine/tonic/dart_api_scope.h"
 #include "sky/engine/tonic/dart_builtin.h"
 #include "sky/engine/tonic/dart_error.h"
+#include "sky/engine/tonic/dart_invoke.h"
 #include "sky/engine/tonic/dart_isolate_scope.h"
 #include "sky/engine/tonic/dart_state.h"
 #include "sky/engine/tonic/dart_value.h"
@@ -154,7 +155,7 @@ static void ExecuteMicrotask(base::WeakPtr<DartState> dart_state,
     return;
   DartIsolateScope scope(dart_state->isolate());
   DartApiScope api_scope;
-  LogIfError(Dart_InvokeClosure(callback->dart_value(), 0, nullptr));
+  DartInvokeAppClosure(callback->dart_value(), 0, nullptr);
 }
 
 void ScheduleMicrotask(Dart_NativeArguments args) {

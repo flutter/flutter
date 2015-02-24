@@ -13,6 +13,7 @@
 #include "sky/engine/core/dom/custom/custom_element_callback_scope.h"
 #include "sky/engine/core/dom/custom/custom_element_registry.h"
 #include "sky/engine/tonic/dart_converter.h"
+#include "sky/engine/tonic/dart_invoke.h"
 #include "sky/engine/tonic/dart_state.h"
 #include "sky/engine/wtf/text/AtomicString.h"
 
@@ -42,7 +43,7 @@ void CallAttributeDidChangedCallback(RefPtr<Element> element,
     StringToDart(dart_state, oldValue),
     StringToDart(dart_state, newValue),
   };
-  LogIfError(Dart_Invoke(wrapper, callback, arraysize(args), args));
+  DartInvokeAppField(wrapper, callback, arraysize(args), args);
 }
 
 void CallDidAttachedCallback(RefPtr<Element> element, RefPtr<Document> document) {

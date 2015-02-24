@@ -10,6 +10,7 @@
 #include "sky/engine/tonic/dart_error.h"
 #include "sky/engine/tonic/dart_exception_factory.h"
 #include "sky/engine/tonic/dart_gc_visitor.h"
+#include "sky/engine/tonic/dart_invoke.h"
 #include "sky/engine/tonic/dart_isolate_scope.h"
 
 namespace blink {
@@ -51,7 +52,7 @@ void DartEventListener::handleEvent(ExecutionContext* context, Event* event) {
   DCHECK(event_handle);
 
   Dart_Handle params[] = {event_handle};
-  LogIfError(Dart_InvokeClosure(closure_handle, arraysize(params), params));
+  DartInvokeAppClosure(closure_handle, arraysize(params), params);
 }
 
 void DartEventListener::AcceptDartGCVisitor(DartGCVisitor& visitor) const {

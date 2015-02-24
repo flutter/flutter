@@ -28,6 +28,7 @@
 #include "sky/engine/tonic/dart_class_library.h"
 #include "sky/engine/tonic/dart_error.h"
 #include "sky/engine/tonic/dart_gc_controller.h"
+#include "sky/engine/tonic/dart_invoke.h"
 #include "sky/engine/tonic/dart_isolate_scope.h"
 #include "sky/engine/tonic/dart_state.h"
 #include "sky/engine/tonic/dart_wrappable.h"
@@ -139,7 +140,7 @@ void DartController::ExecuteLibraryInModule(AbstractModule* module,
   // TODO(rmacnak): Dart_LookupFunction won't find re-exports, etc.
   Dart_Handle entry = Dart_LookupFunction(library, ToDart(name));
   if (module->isApplication()) {
-    LogIfError(Dart_Invoke(library, ToDart(name), 0, nullptr));
+    DartInvokeAppField(library, ToDart(name), 0, nullptr);
     return;
   }
 
@@ -149,7 +150,7 @@ void DartController::ExecuteLibraryInModule(AbstractModule* module,
   Dart_Handle args[] = {
     ToDart(script),
   };
-  LogIfError(Dart_Invoke(library, ToDart(name), arraysize(args), args));
+  DartInvokeAppField(library, ToDart(name), arraysize(args), args);
 }
 
 static void UnhandledExceptionCallback(Dart_Handle error) {

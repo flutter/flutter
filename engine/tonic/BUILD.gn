@@ -23,6 +23,8 @@ source_set("tonic") {
     "dart_gc_controller.h",
     "dart_gc_visitor.cc",
     "dart_gc_visitor.h",
+    "dart_invoke.cc",
+    "dart_invoke.h",
     "dart_isolate_scope.cc",
     "dart_isolate_scope.h",
     "dart_persistent_value.cc",
