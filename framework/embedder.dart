@@ -12,14 +12,26 @@ import "package:mojo/public/interfaces/application/shell.mojom.dart";
 final _EmbedderImpl embedder = new _EmbedderImpl();
 
 class _EmbedderImpl {
-  static final ShellProxy shell = new ShellProxy.fromHandle(
+  ApplicationConnection _connection;
+
+  final ShellProxy shell = new ShellProxy.fromHandle(
       new core.MojoHandle(internals.takeShellProxyHandle()));
 
-  static final ApplicationConnection connection = new ApplicationConnection(
-      new ServiceProviderStub.fromHandle(
-          new core.MojoHandle(internals.takeServicesProvidedToEmbedder())),
-      new ServiceProviderProxy.fromHandle(
-          new core.MojoHandle(internals.takeServicesProvidedByEmbedder())));
+  ApplicationConnection get connection {
+    if (_connection == null) {
+      var stubHandle = new core.MojoHandle(
+          internals.takeServicesProvidedToEmbedder());
+      var proxyHandle = new core.MojoHandle(
+          internals.takeServicesProvidedByEmbedder());
+      _connection = new ApplicationConection(
+         stubHandle.isValid ? ServiceProviderStub.fromHandle(stubHandle)
+             : null;
+         proxyHandle.isValid ? ServiceProviderProxy.fromHandle(proxyHandle)
+             : null;
+      );
+    }
+    return _connection;
+  }
 
   ApplicationConnection connectToApplication(String url) {
     var proxy = new ServiceProviderProxy.unbound();
