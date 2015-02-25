@@ -5,14 +5,15 @@
 #include "sky/shell/ui/engine.h"
 
 #include "base/bind.h"
+#include "mojo/public/cpp/application/connect.h"
 #include "sky/engine/public/platform/WebInputEvent.h"
 #include "sky/engine/public/web/Sky.h"
 #include "sky/engine/public/web/WebLocalFrame.h"
 #include "sky/engine/public/web/WebSettings.h"
 #include "sky/engine/public/web/WebView.h"
+#include "sky/services/platform/platform_impl.h"
 #include "sky/shell/ui/animator.h"
 #include "sky/shell/ui/input_event_converter.h"
-#include "sky/shell/ui/platform_impl.h"
 #include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/core/SkPictureRecorder.h"
 
@@ -46,9 +47,13 @@ base::WeakPtr<Engine> Engine::GetWeakPtr() {
   return weak_factory_.GetWeakPtr();
 }
 
-void Engine::Init(mojo::ScopedMessagePipeHandle service_provider) {
-  platform_impl_.reset(new PlatformImpl(
-      mojo::MakeProxy<mojo::ServiceProvider>(service_provider.Pass())));
+void Engine::Init(mojo::ScopedMessagePipeHandle service_provider_handle) {
+  mojo::ServiceProviderPtr service_provider =
+      mojo::MakeProxy<mojo::ServiceProvider>(service_provider_handle.Pass());
+  mojo::NetworkServicePtr network_service;
+  mojo::ConnectToService(service_provider.get(), &network_service);
+  platform_impl_.reset(new PlatformImpl(network_service.Pass()));
+
   blink::initialize(platform_impl_.get());
 }
 

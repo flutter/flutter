@@ -20,9 +20,9 @@
 #include "ui/gfx/geometry/size.h"
 
 namespace sky {
+class PlatformImpl;
 namespace shell {
 class Animator;
-class PlatformImpl;
 
 class Engine : public UIDelegate,
                public ViewportObserver,

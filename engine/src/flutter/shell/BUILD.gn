@@ -47,8 +47,6 @@ shared_library("sky_shell") {
     "ui/engine.h",
     "ui/input_event_converter.cc",
     "ui/input_event_converter.h",
-    "ui/platform_impl.cc",
-    "ui/platform_impl.h",
     "ui_delegate.cc",
     "ui_delegate.h",
   ]
@@ -65,6 +63,7 @@ shared_library("sky_shell") {
     "//mojo/services/network/public/interfaces",
     "//skia",
     "//sky/engine",
+    "//sky/services/platform",
     "//sky/services/viewport",
     "//ui/gfx/geometry",
     "//ui/gl",
