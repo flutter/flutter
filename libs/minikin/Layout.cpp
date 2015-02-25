@@ -173,13 +173,24 @@ private:
     static const size_t kMaxEntries = 100;
 };
 
+static unsigned int disabledDecomposeCompatibility(hb_unicode_funcs_t*, hb_codepoint_t,
+                                                   hb_codepoint_t*, void*) {
+    return 0;
+}
+
 class LayoutEngine : public Singleton<LayoutEngine> {
 public:
     LayoutEngine() {
+        unicodeFunctions = hb_unicode_funcs_create(hb_icu_get_unicode_funcs());
+        /* Disable the function used for compatibility decomposition */
+        hb_unicode_funcs_set_decompose_compatibility_func(
+                unicodeFunctions, disabledDecomposeCompatibility, NULL, NULL);
         hbBuffer = hb_buffer_create();
+        hb_buffer_set_unicode_funcs(hbBuffer, unicodeFunctions);
     }
 
     hb_buffer_t* hbBuffer;
+    hb_unicode_funcs_t* unicodeFunctions;
     LayoutCache layoutCache;
     HbFaceCache hbFaceCache;
 };
@@ -402,7 +413,7 @@ int Layout::findFace(FakedFont face, LayoutContext* ctx) {
 static hb_script_t codePointToScript(hb_codepoint_t codepoint) {
     static hb_unicode_funcs_t* u = 0;
     if (!u) {
-        u = hb_icu_get_unicode_funcs();
+        u = LayoutEngine::getInstance().unicodeFunctions;
     }
     return hb_unicode_script(u, codepoint);
 }
@@ -709,7 +720,7 @@ void Layout::doLayoutRun(const uint16_t* buf, size_t start, size_t count, size_t
             srunend = srunstart;
             hb_script_t script = getScriptRun(buf + start, run.end, &srunend);
 
-            hb_buffer_reset(buffer);
+            hb_buffer_clear_contents(buffer);
             hb_buffer_set_script(buffer, script);
             hb_buffer_set_direction(buffer, isRtl? HB_DIRECTION_RTL : HB_DIRECTION_LTR);
             FontLanguage language = ctx->style.getLanguage();
