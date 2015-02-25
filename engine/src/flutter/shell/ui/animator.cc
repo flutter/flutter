@@ -34,9 +34,17 @@ void Animator::RequestFrame() {
   }
 }
 
+void Animator::CancelFrameRequest() {
+  engine_requested_frame_ = false;
+}
+
 void Animator::BeginFrame() {
   DCHECK(frame_in_progress_);
-  DCHECK(engine_requested_frame_);
+  // There could be a request in the message loop at time of cancel.
+  if (!engine_requested_frame_) {
+    frame_in_progress_ = false;
+    return;
+  }
   engine_requested_frame_ = false;
 
   engine_->BeginFrame(base::TimeTicks::Now());

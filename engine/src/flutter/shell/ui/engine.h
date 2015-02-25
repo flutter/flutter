@@ -11,7 +11,9 @@
 #include "base/single_thread_task_runner.h"
 #include "mojo/public/cpp/bindings/binding.h"
 #include "mojo/public/cpp/system/core.h"
+#include "mojo/services/navigation/public/interfaces/navigation.mojom.h"
 #include "skia/ext/refptr.h"
+#include "sky/engine/public/platform/ServiceProvider.h"
 #include "sky/engine/public/web/WebFrameClient.h"
 #include "sky/engine/public/web/WebViewClient.h"
 #include "sky/shell/gpu_delegate.h"
@@ -26,6 +28,8 @@ class Animator;
 
 class Engine : public UIDelegate,
                public ViewportObserver,
+               public blink::ServiceProvider,
+               public mojo::NavigatorHost,
                public blink::WebFrameClient,
                public blink::WebViewClient {
  public:
@@ -56,9 +60,19 @@ class Engine : public UIDelegate,
   void LoadURL(const mojo::String& url) override;
 
   // WebViewClient methods:
+  void frameDetached(blink::WebFrame*) override;
   void initializeLayerTreeView() override;
   void scheduleVisualUpdate() override;
   blink::WebScreenInfo screenInfo() override;
+  blink::ServiceProvider* services() override;
+
+  // Services methods:
+  mojo::NavigatorHost* NavigatorHost() override;
+
+  // NavigatorHost methods:
+  void RequestNavigate(mojo::Target target,
+                       mojo::URLRequestPtr request) override;
+  void DidNavigateLocally(const mojo::String& url) override;
 
   void UpdateWebViewSize();
 
