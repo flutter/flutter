@@ -389,27 +389,6 @@ const RenderLayer* RenderLayer::compositingContainer() const
     return 0;
 }
 
-RenderLayer* RenderLayer::enclosingFilterLayer(IncludeSelfOrNot includeSelf) const
-{
-    const RenderLayer* curr = (includeSelf == IncludeSelf) ? this : parent();
-    for (; curr; curr = curr->parent()) {
-        if (curr->requiresFullLayerImageForFilters())
-            return const_cast<RenderLayer*>(curr);
-    }
-
-    return 0;
-}
-
-bool RenderLayer::hasAncestorWithFilterOutsets() const
-{
-    for (const RenderLayer* curr = this; curr; curr = curr->parent()) {
-        RenderBox* renderer = curr->renderer();
-        if (renderer->style()->hasFilterOutsets())
-            return true;
-    }
-    return false;
-}
-
 enum TransparencyClipBoxBehavior {
     PaintingTransparencyClipBox,
     HitTestingTransparencyClipBox

@@ -64,7 +64,6 @@ public:
 
     bool canInterpolateWith(const FilterOperations&) const;
 
-    bool hasOutsets() const;
     FilterOutsets outsets() const;
 
     bool hasFilterThatMovesPixels() const;

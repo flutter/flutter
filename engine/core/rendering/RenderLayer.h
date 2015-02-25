@@ -138,8 +138,6 @@ public:
     RenderLayer* enclosingOverflowClipLayer(IncludeSelfOrNot = IncludeSelf) const;
 
     const RenderLayer* compositingContainer() const;
-    RenderLayer* enclosingFilterLayer(IncludeSelfOrNot = IncludeSelf) const;
-    bool hasAncestorWithFilterOutsets() const;
 
     void convertToLayerCoords(const RenderLayer* ancestorLayer, LayoutPoint&) const;
     void convertToLayerCoords(const RenderLayer* ancestorLayer, LayoutRect&) const;

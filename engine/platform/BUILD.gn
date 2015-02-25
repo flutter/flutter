@@ -675,7 +675,6 @@ test("platform_unittests") {
     "geometry/RoundedRectTest.cpp",
     "graphics/GraphicsContextTest.cpp",
     "graphics/ThreadSafeDataTransportTest.cpp",
-    "graphics/filters/FilterOperationsTest.cpp",
     "graphics/filters/ImageFilterBuilderTest.cpp",
     "graphics/gpu/DrawingBufferTest.cpp",
     "image-decoders/ImageDecoderTest.cpp",

@@ -97,16 +97,6 @@ bool FilterOperations::hasReferenceFilter() const
     return false;
 }
 
-bool FilterOperations::hasOutsets() const
-{
-    for (size_t i = 0; i < m_operations.size(); ++i) {
-        FilterOperation::OperationType operationType = m_operations.at(i)->type();
-        if (operationType == FilterOperation::BLUR || operationType == FilterOperation::DROP_SHADOW || operationType == FilterOperation::REFERENCE)
-            return true;
-    }
-    return false;
-}
-
 FilterOutsets FilterOperations::outsets() const
 {
     FilterOutsets totalOutsets;
