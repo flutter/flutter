@@ -1,0 +1,6 @@
+CONSOLE: unittest-suite-wait-for-done
+CONSOLE: PASS: should not crash when setting style to null
+CONSOLE: 
+CONSOLE: All 1 tests passed.
+CONSOLE: unittest-suite-success
+DONE
