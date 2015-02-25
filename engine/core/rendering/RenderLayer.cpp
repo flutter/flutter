@@ -389,68 +389,6 @@ const RenderLayer* RenderLayer::compositingContainer() const
     return 0;
 }
 
-enum TransparencyClipBoxBehavior {
-    PaintingTransparencyClipBox,
-    HitTestingTransparencyClipBox
-};
-
-static LayoutRect transparencyClipBox(const RenderLayer*, const RenderLayer* rootLayer, const LayoutSize& subPixelAccumulation);
-
-static void expandClipRectForDescendantsAndReflection(LayoutRect& clipRect, const RenderLayer* layer, const RenderLayer* rootLayer,
-    const LayoutSize& subPixelAccumulation)
-{
-    // Note: we don't have to walk z-order lists since transparent elements always establish
-    // a stacking container. This means we can just walk the layer tree directly.
-    for (RenderLayer* curr = layer->firstChild(); curr; curr = curr->nextSibling())
-        clipRect.unite(transparencyClipBox(curr, rootLayer, subPixelAccumulation));
-}
-
-static LayoutRect transparencyClipBox(const RenderLayer* layer, const RenderLayer* rootLayer,
-    const LayoutSize& subPixelAccumulation)
-{
-    // FIXME: Although this function completely ignores CSS-imposed clipping, we did already intersect with the
-    // paintDirtyRect, and that should cut down on the amount we have to paint.  Still it
-    // would be better to respect clips.
-
-    if (rootLayer != layer && layer->transform()) {
-        // The best we can do here is to use enclosed bounding boxes to establish a "fuzzy" enough clip to encompass
-        // the transformed layer and all of its children.
-        const RenderLayer* rootLayerForTransform = rootLayer;
-        LayoutPoint delta;
-        layer->convertToLayerCoords(rootLayerForTransform, delta);
-
-        delta.move(subPixelAccumulation);
-        IntPoint pixelSnappedDelta = roundedIntPoint(delta);
-        TransformationMatrix transform;
-        transform.translate(pixelSnappedDelta.x(), pixelSnappedDelta.y());
-        transform = transform * *layer->transform();
-
-        // We don't use fragment boxes when collecting a transformed layer's bounding box, since it always
-        // paints unfragmented.y
-        LayoutRect clipRect = layer->physicalBoundingBox(layer);
-        expandClipRectForDescendantsAndReflection(clipRect, layer, layer, subPixelAccumulation);
-        layer->renderer()->style()->filterOutsets().expandRect(clipRect);
-        LayoutRect result = transform.mapRect(clipRect);
-        return result;
-    }
-
-    LayoutRect clipRect = layer->physicalBoundingBox(rootLayer);
-    expandClipRectForDescendantsAndReflection(clipRect, layer, rootLayer, subPixelAccumulation);
-    layer->renderer()->style()->filterOutsets().expandRect(clipRect);
-    clipRect.move(subPixelAccumulation);
-    return clipRect;
-}
-
-void RenderLayer::beginTransparencyLayers(GraphicsContext* context, const RenderLayer* rootLayer, const LayoutRect& paintDirtyRect, const LayoutSize& subPixelAccumulation)
-{
-    ASSERT(isTransparent());
-    context->save();
-    LayoutRect clipRect = intersection(paintDirtyRect,
-        transparencyClipBox(this, rootLayer, subPixelAccumulation));
-    context->clip(clipRect);
-    context->beginTransparencyLayer(renderer()->opacity());
-}
-
 void* RenderLayer::operator new(size_t sz)
 {
     return partitionAlloc(Partitions::getRenderingPartition(), sz);
