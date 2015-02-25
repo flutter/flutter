@@ -39,11 +39,6 @@ void Engine::Init(mojo::ScopedMessagePipeHandle service_provider) {
   platform_impl_.reset(new PlatformImpl(
       mojo::MakeProxy<mojo::ServiceProvider>(service_provider.Pass())));
   blink::initialize(platform_impl_.get());
-
-  web_view_ = blink::WebView::create(this);
-  web_view_->setMainFrame(blink::WebLocalFrame::create(this));
-  web_view_->mainFrame()->load(
-      GURL("http://domokit.github.io/sky/examples/spinning-square.sky"));
 }
 
 void Engine::BeginFrame(base::TimeTicks frame_time) {
@@ -76,8 +71,15 @@ void Engine::OnViewportMetricsChanged(int width, int height,
                                       float device_pixel_ratio) {
   physical_size_.SetSize(width, height);
   device_pixel_ratio_ = device_pixel_ratio;
-  web_view_->setDeviceScaleFactor(device_pixel_ratio);
-  gfx::SizeF size = gfx::ScaleSize(physical_size_, 1 / device_pixel_ratio);
+  if (web_view_)
+    UpdateWebViewSize();
+}
+
+void Engine::UpdateWebViewSize()
+{
+  CHECK(web_view_);
+  web_view_->setDeviceScaleFactor(device_pixel_ratio_);
+  gfx::SizeF size = gfx::ScaleSize(physical_size_, 1 / device_pixel_ratio_);
   // FIXME: We should be able to set the size of the WebView in floating point
   // because its in logical pixels.
   web_view_->resize(blink::WebSize(size.width(), size.height()));
@@ -89,6 +91,13 @@ void Engine::OnInputEvent(InputEventPtr event) {
   if (!web_event)
     return;
   web_view_->handleInputEvent(*web_event);
+}
+
+void Engine::LoadURL(const mojo::String& url) {
+  web_view_ = blink::WebView::create(this);
+  web_view_->setMainFrame(blink::WebLocalFrame::create(this));
+  UpdateWebViewSize();
+  web_view_->mainFrame()->load(GURL(url));
 }
 
 void Engine::initializeLayerTreeView() {

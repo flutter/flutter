@@ -53,10 +53,13 @@ class Engine : public UIDelegate,
   void OnViewportMetricsChanged(int width, int height,
                                 float device_pixel_ratio) override;
   void OnInputEvent(InputEventPtr event) override;
+  void LoadURL(const mojo::String& url) override;
 
   // WebViewClient methods:
   void initializeLayerTreeView() override;
   void scheduleVisualUpdate() override;
+
+  void UpdateWebViewSize();
 
   scoped_ptr<PlatformImpl> platform_impl_;
   scoped_ptr<Animator> animator_;

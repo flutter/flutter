@@ -109,6 +109,10 @@ public class PlatformView extends SurfaceView {
         return true;
     }
 
+    public void loadUrl(String url) {
+        mViewportObserver.loadUrl(url);
+    }
+
     private void attach() {
         Core core = CoreImpl.getInstance();
         Pair<ViewportObserver.Proxy, InterfaceRequest<ViewportObserver>> result =
