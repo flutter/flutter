@@ -8,6 +8,7 @@
 #include "sky/engine/public/platform/WebInputEvent.h"
 #include "sky/engine/public/web/Sky.h"
 #include "sky/engine/public/web/WebLocalFrame.h"
+#include "sky/engine/public/web/WebSettings.h"
 #include "sky/engine/public/web/WebView.h"
 #include "sky/shell/ui/animator.h"
 #include "sky/shell/ui/input_event_converter.h"
@@ -17,6 +18,16 @@
 
 namespace sky {
 namespace shell {
+
+namespace {
+
+void ConfigureSettings(blink::WebSettings* settings) {
+  settings->setDefaultFixedFontSize(13);
+  settings->setDefaultFontSize(16);
+  settings->setLoadsImagesAutomatically(true);
+}
+
+}
 
 Engine::Engine(const Config& config)
     : animator_(new Animator(config, this)),
@@ -85,6 +96,15 @@ void Engine::UpdateWebViewSize()
   web_view_->resize(blink::WebSize(size.width(), size.height()));
 }
 
+// TODO(eseidel): This is likely not needed anymore.
+blink::WebScreenInfo Engine::screenInfo() {
+  blink::WebScreenInfo screen;
+  screen.rect = blink::WebRect(gfx::Rect(physical_size_));
+  screen.availableRect = screen.rect;
+  screen.deviceScaleFactor = device_pixel_ratio_;
+  return screen;
+}
+
 void Engine::OnInputEvent(InputEventPtr event) {
   scoped_ptr<blink::WebInputEvent> web_event =
       ConvertEvent(event, device_pixel_ratio_);
@@ -95,6 +115,7 @@ void Engine::OnInputEvent(InputEventPtr event) {
 
 void Engine::LoadURL(const mojo::String& url) {
   web_view_ = blink::WebView::create(this);
+  ConfigureSettings(web_view_->settings());
   web_view_->setMainFrame(blink::WebLocalFrame::create(this));
   UpdateWebViewSize();
   web_view_->mainFrame()->load(GURL(url));

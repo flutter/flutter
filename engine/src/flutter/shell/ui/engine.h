@@ -58,6 +58,7 @@ class Engine : public UIDelegate,
   // WebViewClient methods:
   void initializeLayerTreeView() override;
   void scheduleVisualUpdate() override;
+  blink::WebScreenInfo screenInfo() override;
 
   void UpdateWebViewSize();
 
