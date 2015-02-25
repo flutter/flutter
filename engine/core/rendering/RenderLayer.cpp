@@ -80,8 +80,6 @@ namespace blink {
 
 RenderLayer::RenderLayer(RenderBox* renderer, LayerType type)
     : m_layerType(type)
-    , m_hasSelfPaintingLayerDescendant(false)
-    , m_hasSelfPaintingLayerDescendantDirty(false)
     , m_isRootLayer(renderer->isRenderView())
     , m_3DTransformedDescendantStatusDirty(true)
     , m_has3DTransformedDescendant(false)
@@ -138,35 +136,6 @@ void RenderLayer::updateLayerPositionsAfterLayout()
     TRACE_EVENT0("blink", "RenderLayer::updateLayerPositionsAfterLayout");
 
     m_clipper.clearClipRectsIncludingDescendants();
-}
-
-void RenderLayer::updateHasSelfPaintingLayerDescendant() const
-{
-    ASSERT(m_hasSelfPaintingLayerDescendantDirty);
-
-    m_hasSelfPaintingLayerDescendant = false;
-
-    for (RenderLayer* child = firstChild(); child; child = child->nextSibling()) {
-        if (child->isSelfPaintingLayer() || child->hasSelfPaintingLayerDescendant()) {
-            m_hasSelfPaintingLayerDescendant = true;
-            break;
-        }
-    }
-
-    m_hasSelfPaintingLayerDescendantDirty = false;
-}
-
-void RenderLayer::dirtyAncestorChainHasSelfPaintingLayerDescendantStatus()
-{
-    for (RenderLayer* layer = this; layer; layer = layer->parent()) {
-        layer->m_hasSelfPaintingLayerDescendantDirty = true;
-        // If we have reached a self-painting layer, we know our parent should have a self-painting descendant
-        // in this case, there is no need to dirty our ancestors further.
-        if (layer->isSelfPaintingLayer()) {
-            ASSERT(!parent() || parent()->m_hasSelfPaintingLayerDescendantDirty || parent()->m_hasSelfPaintingLayerDescendant);
-            break;
-        }
-    }
 }
 
 void RenderLayer::updateTransformationMatrix()
@@ -427,8 +396,6 @@ void RenderLayer::addChild(RenderLayer* child, RenderLayer* beforeChild)
         // off dirty in that case anyway.
         child->stackingNode()->dirtyStackingContextZOrderLists();
     }
-
-    dirtyAncestorChainHasSelfPaintingLayerDescendantStatus();
 }
 
 RenderLayer* RenderLayer::removeChild(RenderLayer* oldChild)
@@ -456,8 +423,6 @@ RenderLayer* RenderLayer::removeChild(RenderLayer* oldChild)
     oldChild->setPreviousSibling(0);
     oldChild->setNextSibling(0);
     oldChild->m_parent = 0;
-
-    dirtyAncestorChainHasSelfPaintingLayerDescendantStatus();
 
     return oldChild;
 }
@@ -765,18 +730,6 @@ bool RenderLayer::shouldBeSelfPaintingLayer() const
     return m_layerType == NormalLayer;
 }
 
-void RenderLayer::updateSelfPaintingLayer()
-{
-    bool isSelfPaintingLayer = shouldBeSelfPaintingLayer();
-    if (this->isSelfPaintingLayer() == isSelfPaintingLayer)
-        return;
-
-    m_isSelfPaintingLayer = isSelfPaintingLayer;
-
-    if (parent())
-        parent()->dirtyAncestorChainHasSelfPaintingLayerDescendantStatus();
-}
-
 bool RenderLayer::hasNonEmptyChildRenderers() const
 {
     // Some HTML can cause whitespace text nodes to have renderers, like:
@@ -836,7 +789,7 @@ void RenderLayer::styleChanged(StyleDifference diff, const RenderStyle* oldStyle
 
     // Overlay scrollbars can make this layer self-painting so we need
     // to recompute the bit once scrollbars have been updated.
-    updateSelfPaintingLayer();
+    m_isSelfPaintingLayer = shouldBeSelfPaintingLayer();
 
     updateTransform(oldStyle, renderer()->style());
     updateFilters(oldStyle, renderer()->style());
@@ -890,23 +843,3 @@ void RenderLayer::updateOrRemoveFilterEffectRenderer()
 }
 
 } // namespace blink
-
-#ifndef NDEBUG
-void showLayerTree(const blink::RenderLayer* layer)
-{
-    if (!layer)
-        return;
-
-    if (blink::LocalFrame* frame = layer->renderer()->frame()) {
-        WTF::String output = externalRepresentation(frame, blink::RenderAsTextShowAllLayers | blink::RenderAsTextShowLayerNesting | blink::RenderAsTextShowCompositedLayers | blink::RenderAsTextShowAddresses | blink::RenderAsTextShowIDAndClass | blink::RenderAsTextDontUpdateLayout | blink::RenderAsTextShowLayoutState);
-        fprintf(stderr, "%s\n", output.utf8().data());
-    }
-}
-
-void showLayerTree(const blink::RenderObject* renderer)
-{
-    if (!renderer)
-        return;
-    showLayerTree(renderer->enclosingLayer());
-}
-#endif

@@ -214,37 +214,18 @@ public:
     }
 
     void updateOrRemoveFilterEffectRenderer();
-    void updateSelfPaintingLayer();
 
     void clipToRect(const LayerPaintingInfo&, GraphicsContext*, const ClipRect&, BorderRadiusClippingRule = IncludeSelfForBorderRadius);
     void restoreClip(GraphicsContext*, const LayoutRect& paintDirtyRect, const ClipRect&);
 
 private:
-    // TODO(ojan): Get rid of this. These are basically layer-tree-only paint phases.
-    enum PaintLayerFlags {
-        PaintContent,
-    };
-
     // Bounding box in the coordinates of this layer.
     LayoutRect logicalBoundingBox() const;
-
-    void setAncestorChainHasSelfPaintingLayerDescendant();
-    void dirtyAncestorChainHasSelfPaintingLayerDescendantStatus();
 
     void setNextSibling(RenderLayer* next) { m_next = next; }
     void setPreviousSibling(RenderLayer* prev) { m_previous = prev; }
     void setFirstChild(RenderLayer* first) { m_first = first; }
     void setLastChild(RenderLayer* last) { m_last = last; }
-
-    void updateHasSelfPaintingLayerDescendant() const;
-
-    bool hasSelfPaintingLayerDescendant() const
-    {
-        if (m_hasSelfPaintingLayerDescendantDirty)
-            updateHasSelfPaintingLayerDescendant();
-        ASSERT(!m_hasSelfPaintingLayerDescendantDirty);
-        return m_hasSelfPaintingLayerDescendant;
-    }
 
     LayoutPoint renderBoxLocation() const { return renderer()->location(); }
 
@@ -266,11 +247,6 @@ private:
     // machinery for a RenderLayer allocated only to handle the overflow clip case.
     // FIXME(crbug.com/332791): Self-painting layer should be merged into the overflow-only concept.
     unsigned m_isSelfPaintingLayer : 1;
-
-    // If have no self-painting descendants, we don't have to walk our children during painting. This can lead to
-    // significant savings, especially if the tree has lots of non-self-painting layers grouped together (e.g. table cells).
-    mutable unsigned m_hasSelfPaintingLayerDescendant : 1;
-    mutable unsigned m_hasSelfPaintingLayerDescendantDirty : 1;
 
     const unsigned m_isRootLayer : 1;
 
@@ -298,11 +274,5 @@ private:
 };
 
 } // namespace blink
-
-#ifndef NDEBUG
-// Outside the WebCore namespace for ease of invocation from gdb.
-void showLayerTree(const blink::RenderLayer*);
-void showLayerTree(const blink::RenderObject*);
-#endif
 
 #endif  // SKY_ENGINE_CORE_RENDERING_RENDERLAYER_H_
