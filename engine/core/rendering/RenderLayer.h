@@ -131,9 +131,6 @@ public:
     // True if this layer container renderers that paint.
     bool hasNonEmptyChildRenderers() const;
 
-    bool usedTransparency() const { return m_usedTransparency; }
-    void clearUsedTransparency() { m_usedTransparency = false; }
-
     // Gets the nearest enclosing positioned ancestor layer (also includes
     // the <html> layer and the root layer).
     RenderLayer* enclosingPositionedAncestor() const;
@@ -267,8 +264,6 @@ private:
 
     void updateOrRemoveFilterClients();
 
-    LayoutRect paintingExtent(const RenderLayer* rootLayer, const LayoutRect& paintDirtyRect, const LayoutSize& subPixelAccumulation);
-
     LayerType m_layerType;
 
     // Self-painting layer is an optimization where we avoid the heavy RenderLayer painting
@@ -282,10 +277,6 @@ private:
     mutable unsigned m_hasSelfPaintingLayerDescendantDirty : 1;
 
     const unsigned m_isRootLayer : 1;
-
-    unsigned m_usedTransparency : 1; // Tracks whether we need to close a transparent layer, i.e., whether
-                                 // we ended up painting this layer or any descendants (and therefore need to
-                                 // blend).
 
     unsigned m_3DTransformedDescendantStatusDirty : 1;
     // Set on a stacking context layer that has 3D descendants anywhere

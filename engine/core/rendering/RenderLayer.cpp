@@ -83,7 +83,6 @@ RenderLayer::RenderLayer(RenderBox* renderer, LayerType type)
     , m_hasSelfPaintingLayerDescendant(false)
     , m_hasSelfPaintingLayerDescendantDirty(false)
     , m_isRootLayer(renderer->isRenderView())
-    , m_usedTransparency(false)
     , m_3DTransformedDescendantStatusDirty(true)
     , m_has3DTransformedDescendant(false)
     , m_hasFilterInfo(false)
@@ -411,45 +410,30 @@ bool RenderLayer::hasAncestorWithFilterOutsets() const
     return false;
 }
 
-RenderLayer* RenderLayer::transparentPaintingAncestor()
-{
-    for (RenderLayer* curr = parent(); curr; curr = curr->parent()) {
-        if (curr->isTransparent())
-            return curr;
-    }
-    return 0;
-}
-
 enum TransparencyClipBoxBehavior {
     PaintingTransparencyClipBox,
     HitTestingTransparencyClipBox
 };
 
-enum TransparencyClipBoxMode {
-    DescendantsOfTransparencyClipBox,
-    RootOfTransparencyClipBox
-};
-
-static LayoutRect transparencyClipBox(const RenderLayer*, const RenderLayer* rootLayer, TransparencyClipBoxBehavior, TransparencyClipBoxMode, const LayoutSize& subPixelAccumulation);
+static LayoutRect transparencyClipBox(const RenderLayer*, const RenderLayer* rootLayer, const LayoutSize& subPixelAccumulation);
 
 static void expandClipRectForDescendantsAndReflection(LayoutRect& clipRect, const RenderLayer* layer, const RenderLayer* rootLayer,
-    TransparencyClipBoxBehavior transparencyBehavior, const LayoutSize& subPixelAccumulation)
+    const LayoutSize& subPixelAccumulation)
 {
     // Note: we don't have to walk z-order lists since transparent elements always establish
     // a stacking container. This means we can just walk the layer tree directly.
     for (RenderLayer* curr = layer->firstChild(); curr; curr = curr->nextSibling())
-        clipRect.unite(transparencyClipBox(curr, rootLayer, transparencyBehavior, DescendantsOfTransparencyClipBox, subPixelAccumulation));
+        clipRect.unite(transparencyClipBox(curr, rootLayer, subPixelAccumulation));
 }
 
-static LayoutRect transparencyClipBox(const RenderLayer* layer, const RenderLayer* rootLayer, TransparencyClipBoxBehavior transparencyBehavior,
-    TransparencyClipBoxMode transparencyMode, const LayoutSize& subPixelAccumulation)
+static LayoutRect transparencyClipBox(const RenderLayer* layer, const RenderLayer* rootLayer,
+    const LayoutSize& subPixelAccumulation)
 {
     // FIXME: Although this function completely ignores CSS-imposed clipping, we did already intersect with the
     // paintDirtyRect, and that should cut down on the amount we have to paint.  Still it
     // would be better to respect clips.
 
-    if (rootLayer != layer && ((transparencyBehavior == PaintingTransparencyClipBox && layer->transform())
-        || (transparencyBehavior == HitTestingTransparencyClipBox && layer->hasTransform()))) {
+    if (rootLayer != layer && layer->transform()) {
         // The best we can do here is to use enclosed bounding boxes to establish a "fuzzy" enough clip to encompass
         // the transformed layer and all of its children.
         const RenderLayer* rootLayerForTransform = rootLayer;
@@ -463,48 +447,29 @@ static LayoutRect transparencyClipBox(const RenderLayer* layer, const RenderLaye
         transform = transform * *layer->transform();
 
         // We don't use fragment boxes when collecting a transformed layer's bounding box, since it always
-        // paints unfragmented.
+        // paints unfragmented.y
         LayoutRect clipRect = layer->physicalBoundingBox(layer);
-        expandClipRectForDescendantsAndReflection(clipRect, layer, layer, transparencyBehavior, subPixelAccumulation);
+        expandClipRectForDescendantsAndReflection(clipRect, layer, layer, subPixelAccumulation);
         layer->renderer()->style()->filterOutsets().expandRect(clipRect);
         LayoutRect result = transform.mapRect(clipRect);
         return result;
     }
 
     LayoutRect clipRect = layer->physicalBoundingBox(rootLayer);
-    expandClipRectForDescendantsAndReflection(clipRect, layer, rootLayer, transparencyBehavior, subPixelAccumulation);
+    expandClipRectForDescendantsAndReflection(clipRect, layer, rootLayer, subPixelAccumulation);
     layer->renderer()->style()->filterOutsets().expandRect(clipRect);
     clipRect.move(subPixelAccumulation);
     return clipRect;
 }
 
-LayoutRect RenderLayer::paintingExtent(const RenderLayer* rootLayer, const LayoutRect& paintDirtyRect, const LayoutSize& subPixelAccumulation)
-{
-    return intersection(transparencyClipBox(this, rootLayer, PaintingTransparencyClipBox, RootOfTransparencyClipBox, subPixelAccumulation), paintDirtyRect);
-}
-
 void RenderLayer::beginTransparencyLayers(GraphicsContext* context, const RenderLayer* rootLayer, const LayoutRect& paintDirtyRect, const LayoutSize& subPixelAccumulation)
 {
-    if (isTransparent() && m_usedTransparency)
-        return;
-
-    RenderLayer* ancestor = transparentPaintingAncestor();
-    if (ancestor)
-        ancestor->beginTransparencyLayers(context, rootLayer, paintDirtyRect, subPixelAccumulation);
-
-    if (isTransparent()) {
-        m_usedTransparency = true;
-        context->save();
-        LayoutRect clipRect = paintingExtent(rootLayer, paintDirtyRect, subPixelAccumulation);
-        context->clip(clipRect);
-
-        context->beginTransparencyLayer(renderer()->opacity());
-
-#ifdef REVEAL_TRANSPARENCY_LAYERS
-        context->setFillColor(Color(0.0f, 0.0f, 0.5f, 0.2f));
-        context->fillRect(clipRect);
-#endif
-    }
+    ASSERT(isTransparent());
+    context->save();
+    LayoutRect clipRect = intersection(paintDirtyRect,
+        transparencyClipBox(this, rootLayer, subPixelAccumulation));
+    context->clip(clipRect);
+    context->beginTransparencyLayer(renderer()->opacity());
 }
 
 void* RenderLayer::operator new(size_t sz)

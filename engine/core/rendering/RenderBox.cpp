@@ -710,12 +710,6 @@ void RenderBox::paintLayer(GraphicsContext* context, RenderLayer* rootLayer, con
     if (!layerTransform->isInvertible())
         return;
 
-    // If we have a transparency layer enclosing us and we are the root of a transform, then we need to establish the transparency
-    // layer from the parent now, assuming there is a parent
-    if (layer()->isTransparent()) {
-        layer()->parent()->beginTransparencyLayers(context, paintingInfo.rootLayer, paintingInfo.paintDirtyRect, paintingInfo.subPixelAccumulation);
-    }
-
     // Make sure the parent's clip rects have been calculated.
     ClipRectsContext clipRectsContext(paintingInfo.rootLayer, PaintingClipRects);
     ClipRect clipRect = layer()->clipper().backgroundClipRect(clipRectsContext);
@@ -753,8 +747,6 @@ void RenderBox::paintLayerContents(GraphicsContext* context, const LayerPainting
 {
     float deviceScaleFactor = blink::deviceScaleFactor(frame());
     context->setDeviceScaleFactor(deviceScaleFactor);
-
-    GraphicsContext* transparencyLayerContext = context;
 
     LayoutPoint offsetFromRoot;
     layer()->convertToLayerCoords(paintingInfo.rootLayer, offsetFromRoot);
@@ -798,7 +790,10 @@ void RenderBox::paintLayerContents(GraphicsContext* context, const LayerPainting
         }
     }
 
-    bool haveTransparency = layer()->isTransparent();
+    if (layer()->isTransparent())
+        layer()->beginTransparencyLayers(context, localPaintingInfo.rootLayer, paintingInfo.paintDirtyRect, localPaintingInfo.subPixelAccumulation);
+
+    layer()->clipToRect(localPaintingInfo, context, contentRect);
 
     FilterEffectRendererHelper filterPainter(layer()->filterRenderer() && layer()->paintsWithFilters());
 
@@ -808,38 +803,11 @@ void RenderBox::paintLayerContents(GraphicsContext* context, const LayerPainting
         if (!rootRelativeBoundsComputed)
             rootRelativeBounds = layer()->physicalBoundingBoxIncludingReflectionAndStackingChildren(paintingInfo.rootLayer, offsetFromRoot);
 
-        if (filterPainter.prepareFilterEffect(layer(), rootRelativeBounds, paintingInfo.paintDirtyRect)) {
-            // Rewire the old context to a memory buffer, so that we can capture the contents of the layer.
-            // NOTE: We saved the old context in the "transparencyLayerContext" local variable, to be able to start a transparency layer
-            // on the original context and avoid duplicating "beginFilterEffect" after each transparency layer call. Also, note that
-            // beginTransparencyLayers will only create a single lazy transparency layer, even though it is called twice in this method.
-            // With deferred filters, we don't need a separate context, but we do need to do transparency and clipping before starting
-            // filter processing.
-            // FIXME: when the legacy path is removed, remove the transparencyLayerContext as well.
-            if (haveTransparency) {
-                // If we have a filter and transparency, we have to eagerly start a transparency layer here, rather than risk a child layer lazily starts one after filter processing.
-                layer()->beginTransparencyLayers(context, localPaintingInfo.rootLayer, paintingInfo.paintDirtyRect, paintingInfo.subPixelAccumulation);
-            }
-            // We'll handle clipping to the dirty rect before filter rasterization.
-            // Filter processing will automatically expand the clip rect and the offscreen to accommodate any filter outsets.
-            // FIXME: It is incorrect to just clip to the damageRect here once multiple fragments are involved.
-            layer()->clipToRect(localPaintingInfo, context, contentRect);
-            // Subsequent code should not clip to the dirty rect, since we've already
-            // done it above, and doing it later will defeat the outsets.
-            localPaintingInfo.clipToDirtyRect = false;
-
+        if (filterPainter.prepareFilterEffect(layer(), rootRelativeBounds, paintingInfo.paintDirtyRect))
             context = filterPainter.beginFilterEffect(context);
-        }
     }
 
     LayoutPoint layerLocation = toPoint(layerBounds.location() - location() + localPaintingInfo.subPixelAccumulation);
-
-    // Begin transparency if we have something to paint.
-    if (haveTransparency)
-        layer()->beginTransparencyLayers(transparencyLayerContext, localPaintingInfo.rootLayer, paintingInfo.paintDirtyRect, localPaintingInfo.subPixelAccumulation);
-
-    if (localPaintingInfo.clipToDirtyRect)
-        layer()->clipToRect(localPaintingInfo, context, contentRect);
 
     Vector<RenderBox*> layers;
     PaintInfo paintInfo(context, pixelSnappedIntRect(contentRect.rect()), localPaintingInfo.rootLayer->renderer());
@@ -850,22 +818,14 @@ void RenderBox::paintLayerContents(GraphicsContext* context, const LayerPainting
         box->paintLayer(context, paintingInfo.rootLayer, rect);
     }
 
-    if (localPaintingInfo.clipToDirtyRect)
-        layer()->restoreClip(context, localPaintingInfo.paintDirtyRect, contentRect);
-
-    if (filterPainter.hasStartedFilterEffect()) {
+    if (filterPainter.hasStartedFilterEffect())
         context = filterPainter.applyFilterEffect();
-        layer()->restoreClip(transparencyLayerContext, localPaintingInfo.paintDirtyRect, contentRect);
-    }
 
-    // Make sure that we now use the original transparency context.
-    ASSERT(transparencyLayerContext == context);
+    layer()->restoreClip(context, localPaintingInfo.paintDirtyRect, contentRect);
 
-    // End our transparency layer
-    if (haveTransparency && layer()->usedTransparency()) {
+    if (layer()->isTransparent()) {
         context->endLayer();
         context->restore();
-        layer()->clearUsedTransparency();
     }
 }
 

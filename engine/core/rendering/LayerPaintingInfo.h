@@ -58,12 +58,10 @@ struct LayerPaintingInfo {
         : rootLayer(inRootLayer)
         , paintDirtyRect(inDirtyRect)
         , subPixelAccumulation(inSubPixelAccumulation)
-        , clipToDirtyRect(true)
     { }
     RenderLayer* rootLayer;
     LayoutRect paintDirtyRect; // relative to rootLayer;
     LayoutSize subPixelAccumulation;
-    bool clipToDirtyRect;
 };
 
 } // namespace blink
