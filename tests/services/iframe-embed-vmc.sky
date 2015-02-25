@@ -4,12 +4,12 @@
 
 <script>
 import 'dart:async';
-import 'dart:mojo_bindings';
-import 'dart:mojo_core';
 import 'dart:sky';
 import 'dart:sky.internals' as internals;
 import 'dart:typed_data';
 import '/mojo/public/dart/application.dart';
+import 'mojo:bindings';
+import 'mojo:core';
 
 import 'package:mojo/public/interfaces/application/shell.mojom.dart' as shell_mojom;
 import 'package:mojo/services/input_events/public/interfaces/input_events.mojom.dart' as input_events;
@@ -26,7 +26,7 @@ class IFrameEmbed extends Application {
         "http://127.0.0.1:8000/sky/tests/services/resources/iframe-vmc.js";
     final vmcAppConnection = connectToApplication(vmcURL);
 
-    // The Promise returned by the vmcApp's echoString() method will not 
+    // The Promise returned by the vmcApp's echoString() method will not
     // resolve until the vmcApp's onEmbed() method runs.
     final echoService = new echo_service_mojom.EchoServiceProxy.unbound();
     vmcAppConnection.requestService(echoService);

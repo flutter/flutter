@@ -102,8 +102,8 @@ action("generate_snapshot_bin") {
     "--target_os",
     os,
     "--url_mapping=dart:sky,$sky_core_path",
-    "--url_mapping=dart:mojo_bindings,$mojo_bindings_path",
-    "--url_mapping=dart:mojo_core,$mojo_core_path",
+    "--url_mapping=mojo:bindings,$mojo_bindings_path",
+    "--url_mapping=mojo:core,$mojo_core_path",
     "--url_mapping=dart:sky_builtin,$builtin_path",
   ]
 }

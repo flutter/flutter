@@ -3,9 +3,9 @@
 // found in the LICENSE file.
 
 import "/mojo/public/dart/application.dart";
-import "dart:mojo_bindings" as bindings;
-import "dart:mojo_core" as core;
 import "dart:sky.internals" as internals;
+import "mojo:bindings" as bindings;
+import "mojo:core" as core;
 import "package:mojo/public/interfaces/application/service_provider.mojom.dart";
 import "package:mojo/public/interfaces/application/shell.mojom.dart";
 
