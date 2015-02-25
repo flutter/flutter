@@ -284,7 +284,8 @@ void DartController::CreateIsolateFor(Document* document) {
 }
 
 void DartController::ClearForClose() {
-  DartIsolateScope scope(dom_dart_state_->isolate());
+  // Don't use a DartIsolateScope here since we never exit the isolate.
+  Dart_EnterIsolate(dom_dart_state_->isolate());
   Dart_ShutdownIsolate();
   dom_dart_state_.clear();
 }

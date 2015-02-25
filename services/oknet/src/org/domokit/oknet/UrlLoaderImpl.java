@@ -118,7 +118,7 @@ public class UrlLoaderImpl implements UrlLoader {
             for (String header : request.headers) {
                 String[] parts = header.split(":");
                 String name = parts[0].trim();
-                String value = parts.length > 1 ? parts[2].trim() : "";
+                String value = parts.length > 1 ? parts[1].trim() : "";
                 builder.addHeader(name, value);
             }
         }

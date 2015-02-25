@@ -1141,6 +1141,8 @@ void FrameSelection::prepareForDestruction()
     if (view)
         view->clearSelection();
 
+    m_frame = 0;
+
     setSelection(VisibleSelection(), CloseTyping | ClearTypingStyle | DoNotUpdateAppearance);
 }
 

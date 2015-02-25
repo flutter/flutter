@@ -17,6 +17,7 @@ class Animator {
   ~Animator();
 
   void RequestFrame();
+  void CancelFrameRequest();
 
  private:
   void BeginFrame();

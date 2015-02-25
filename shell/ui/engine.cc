@@ -119,11 +119,19 @@ void Engine::OnInputEvent(InputEventPtr event) {
 }
 
 void Engine::LoadURL(const mojo::String& url) {
-  web_view_ = blink::WebView::create(this);
+  // Something bad happens if you try to call WebView::close and replace
+  // the webview.  So for now we just load into the existing one. :/
+  if (!web_view_)
+    web_view_ = blink::WebView::create(this);
   ConfigureSettings(web_view_->settings());
   web_view_->setMainFrame(blink::WebLocalFrame::create(this));
   UpdateWebViewSize();
   web_view_->mainFrame()->load(GURL(url));
+}
+
+void Engine::frameDetached(blink::WebFrame* frame) {
+  // |frame| is invalid after here.
+  frame->close();
 }
 
 void Engine::initializeLayerTreeView() {
@@ -131,6 +139,24 @@ void Engine::initializeLayerTreeView() {
 
 void Engine::scheduleVisualUpdate() {
   animator_->RequestFrame();
+}
+
+blink::ServiceProvider* Engine::services() {
+  return this;
+}
+
+mojo::NavigatorHost* Engine::NavigatorHost() {
+  return this;
+}
+
+void Engine::RequestNavigate(mojo::Target target,
+                             mojo::URLRequestPtr request) {
+  // Ignoring target for now.
+  base::MessageLoop::current()->PostTask(FROM_HERE,
+      base::Bind(&Engine::LoadURL, GetWeakPtr(), request->url));
+}
+
+void Engine::DidNavigateLocally(const mojo::String& url) {
 }
 
 }  // namespace shell
