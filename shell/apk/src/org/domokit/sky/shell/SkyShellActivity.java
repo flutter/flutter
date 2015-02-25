@@ -5,6 +5,8 @@
 package org.domokit.sky.shell;
 
 import android.app.Activity;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 
 /**
@@ -18,7 +20,17 @@ public class SkyShellActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        String url = "https://domokit.github.io/home";
+        Intent intent = getIntent();
+        if (Intent.ACTION_VIEW.equals(intent.getAction())) {
+            Uri skyUri = intent.getData();
+            Uri httpsUri = skyUri.buildUpon().scheme("https").build();
+            url = httpsUri.toString();
+        }
+
         SkyMain.ensureInitialized(getApplicationContext());
-        setContentView(new PlatformView(this));
+        PlatformView view = new PlatformView(this);
+        setContentView(view);
+        view.loadUrl(url);
     }
 }
