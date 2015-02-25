@@ -36,6 +36,7 @@ import "animation/curves.dart";
 import "animation/timer.dart";
 import "dart:math" as math;
 import "dart:sky";
+import "dart:async";
 
 const double _kSplashSize = 400.0;
 const double _kSplashDuration = 500.0;
@@ -46,6 +47,7 @@ class SkyInkSplash extends SkyElement implements AnimationDelegate {
   Element _splash;
   double _offsetX;
   double _offsetY;
+  Completer<SkyInkSplash> _completer = new Completer();
 
   SkyInkSplash() {
     _animation = new AnimationController(this);
@@ -55,7 +57,7 @@ class SkyInkSplash extends SkyElement implements AnimationDelegate {
     _splash = shadowRoot.getElementById('splash');
   }
 
-  void start(double x, double y, ClientRect rect) {
+  Future start(double x, double y, ClientRect rect) {
     _offsetX = x - rect.left;
     _offsetY = y - rect.top;
     _animation.start(
@@ -63,11 +65,23 @@ class SkyInkSplash extends SkyElement implements AnimationDelegate {
       end: _kSplashSize,
       duration: _kSplashDuration,
       curve: easeOut);
+    return _completer.future;
+  }
+
+  void _done() {
+    remove();
+    _completer.complete(this);
+  }
+
+  void cancel() {
+    // TODO(eseidel): Should fade away instead of stopping immediately.
+    _animation.stop();
+    _done();
   }
 
   void updateAnimation(double p) {
     if (p == _kSplashSize) {
-      remove();
+      _done();
       return;
     }
     _splash.style['top'] = '${_offsetY - p/2}px';

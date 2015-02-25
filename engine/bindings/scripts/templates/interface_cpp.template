@@ -49,7 +49,7 @@ static void namedPropertySetter(Dart_NativeArguments args)
         String name = DartConverter<String>::FromArguments(args, 1, exception);
         if (exception)
             goto fail;
-        String value = DartConverter<String>::FromArguments(args, 2, exception);
+        String value = DartConverter<String>::FromArgumentsWithNullCheck(args, 2, exception);
         if (exception)
             goto fail;
         {{named_property_setter.cpp_value}};

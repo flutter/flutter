@@ -11,20 +11,52 @@ import "dart:sky";
 HTMLStyleElement _kStyleElement;
 
 class MaterialElement extends SkyElement {
+  Set<SkyInkSplash> _activeSplashes = new Set();
+  bool _didAddTransformHack = false;
+
   MaterialElement() {
     addEventListener('pointerdown', _handlePointerDown);
+    addEventListener('gesturescrollstart', _handleScrollStart);
   }
 
-  void _handlePointerDown(PointerEvent event) {
+  void addTransformHack() {
+    if (_didAddTransformHack)
+      return;
+    if (style['transform'] != null)
+      return;
+    _didAddTransformHack = true;
     // We set the transform here to become a container for absolutely positioned
     // elements. We should either have a better way of becoming such a container
     // or we should make every RenderBlock be such a container.
     style['transform'] = 'translateX(0)';
+  }
 
+  void removeTransformHack() {
+    if (!_didAddTransformHack)
+      return;
+    style.removeProperty('transform');
+    _didAddTransformHack = false;
+  }
+
+  void _handlePointerDown(PointerEvent event) {
+    addTransformHack();
     ClientRect rect = getBoundingClientRect();
     SkyInkSplash splash = new SkyInkSplash();
     shadowRoot.prependChild(splash);
-    splash.start(event.x, event.y, rect);
+    splash.start(event.x, event.y, rect).then(_handleSplashComplete);
+    _activeSplashes.add(splash);
+  }
+
+  void _handleSplashComplete(SkyInkSplash splash) {
+    _activeSplashes.remove(splash);
+    if (_activeSplashes.isEmpty)
+      removeTransformHack();
+  }
+
+  void _handleScrollStart(GestureEvent event) {
+    for (SkyInkSplash splash in _activeSplashes) {
+      splash.cancel();
+    }
   }
 }
 </script>
