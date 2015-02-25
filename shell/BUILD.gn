@@ -60,6 +60,7 @@ shared_library("sky_shell") {
     "//mojo/edk/system",
     "//mojo/public/cpp/application",
     "//mojo/public/interfaces/application",
+    "//mojo/services/navigation/public/interfaces",
     "//mojo/services/network/public/interfaces",
     "//skia",
     "//sky/engine",
