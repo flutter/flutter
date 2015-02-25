@@ -285,7 +285,7 @@ public:
         const LayoutRect& hitTestRect, const HitTestLocation& hitTestLocation,
         const HitTestingTransformState* transformState = 0, double* zOffset = 0);
 
-    void paintLayer(GraphicsContext* context, RenderLayer* rootLayer, const IntRect& rect);
+    void paintLayer(GraphicsContext*, const LayerPaintingInfo&);
 
     virtual void layout() override;
     virtual void paint(PaintInfo&, const LayoutPoint&, Vector<RenderBox*>& layers) override;
@@ -491,7 +491,7 @@ private:
     bool hitTestNonLayerDescendants(const HitTestRequest& request, HitTestResult& result,
         const LayoutRect& layerBounds, const HitTestLocation& hitTestLocation);
 
-    void paintLayerContents(GraphicsContext* context, const LayerPaintingInfo& paintingInfo, const IntRect& rect);
+    void paintLayerContents(GraphicsContext*, const LayerPaintingInfo&);
 
     void shrinkToFitWidth(const LayoutUnit availableSpace, const LayoutUnit logicalLeftValue, const LayoutUnit bordersPlusPadding, LogicalExtentComputedValues&) const;
 

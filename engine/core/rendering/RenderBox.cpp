@@ -687,19 +687,17 @@ static inline bool forwardCompareZIndex(RenderBox* first, RenderBox* second)
     return first->style()->zIndex() < second->style()->zIndex();
 }
 
-void RenderBox::paintLayer(GraphicsContext* context, RenderLayer* rootLayer, const IntRect& rect)
+void RenderBox::paintLayer(GraphicsContext* context, const LayerPaintingInfo& paintingInfo)
 {
     // If this layer is totally invisible then there is nothing to paint.
     // TODO(ojan): Return false from isSelfPainting and then ASSERT(!opacity()) here.
     if (!opacity())
         return;
 
-    LayerPaintingInfo paintingInfo(rootLayer, rect, LayoutSize());
-
     TransformationMatrix* layerTransform = layer()->transform();
 
     if (!layerTransform) {
-        paintLayerContents(context, paintingInfo, rect);
+        paintLayerContents(context, paintingInfo);
         return;
     }
 
@@ -737,13 +735,13 @@ void RenderBox::paintLayer(GraphicsContext* context, RenderLayer* rootLayer, con
     // Now do a paint with the root layer shifted to be us.
     LayerPaintingInfo transformedPaintingInfo(layer(), enclosingIntRect(transform.inverse().mapRect(paintingInfo.paintDirtyRect)),
         adjustedSubPixelAccumulation);
-    paintLayerContents(context, transformedPaintingInfo, rect);
+    paintLayerContents(context, transformedPaintingInfo);
 
     // Restore the clip.
     layer()->parent()->restoreClip(context, paintingInfo.paintDirtyRect, clipRect);
 }
 
-void RenderBox::paintLayerContents(GraphicsContext* context, const LayerPaintingInfo& paintingInfo, const IntRect& rect)
+void RenderBox::paintLayerContents(GraphicsContext* context, const LayerPaintingInfo& paintingInfo)
 {
     float deviceScaleFactor = blink::deviceScaleFactor(frame());
     context->setDeviceScaleFactor(deviceScaleFactor);
@@ -815,7 +813,7 @@ void RenderBox::paintLayerContents(GraphicsContext* context, const LayerPainting
 
     std::stable_sort(layers.begin(), layers.end(), forwardCompareZIndex);
     for (auto& box : layers) {
-        box->paintLayer(context, paintingInfo.rootLayer, rect);
+        box->paintLayer(context, paintingInfo);
     }
 
     if (filterPainter.hasStartedFilterEffect())
