@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "sky/viewer/converters/url_request_types.h"
+#include "sky/services/platform/url_request_types.h"
 
 #include "base/strings/string_util.h"
 #include "mojo/public/cpp/system/data_pipe.h"

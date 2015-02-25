@@ -17,7 +17,7 @@ namespace sky {
 
 class PlatformImpl : public blink::Platform {
  public:
-  explicit PlatformImpl(mojo::ApplicationImpl* app);
+  explicit PlatformImpl(mojo::NetworkServicePtr network_service);
   ~PlatformImpl() override;
 
   // blink::Platform methods:

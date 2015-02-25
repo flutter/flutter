@@ -1,0 +1,26 @@
+# Copyright 2015 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+source_set("platform") {
+  sources = [
+    "net_constants.h",
+    "platform_impl.cc",
+    "platform_impl.h",
+    "url_request_types.cc",
+    "url_request_types.h",
+    "weburlloader_impl.cc",
+    "weburlloader_impl.h",
+  ]
+
+  deps = [
+    "//base",
+    "//mojo/common",
+    "//mojo/public/cpp/bindings",
+    "//mojo/public/cpp/system",
+    "//mojo/public/cpp/utility",
+    "//mojo/services/network/public/interfaces",
+    "//sky/engine",
+    "//url",
+  ]
+}

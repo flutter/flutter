@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "sky/viewer/platform/weburlloader_impl.h"
+#include "sky/services/platform/weburlloader_impl.h"
 
 #include "base/bind.h"
 #include "base/logging.h"
@@ -14,8 +14,8 @@
 #include "sky/engine/public/platform/WebURLLoadTiming.h"
 #include "sky/engine/public/platform/WebURLLoaderClient.h"
 #include "sky/engine/public/platform/WebURLResponse.h"
-#include "sky/viewer/converters/url_request_types.h"
-#include "sky/viewer/platform/net_constants.h"
+#include "sky/services/platform/net_constants.h"
+#include "sky/services/platform/url_request_types.h"
 
 namespace sky {
 namespace {

@@ -2,17 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "sky/viewer/platform/platform_impl.h"
+#include "sky/services/platform/platform_impl.h"
 
-#include "mojo/public/cpp/application/application_impl.h"
-#include "sky/viewer/platform/net_constants.h"
-#include "sky/viewer/platform/weburlloader_impl.h"
+#include "sky/services/platform/net_constants.h"
+#include "sky/services/platform/weburlloader_impl.h"
 
 namespace sky {
 
-PlatformImpl::PlatformImpl(mojo::ApplicationImpl* app)
+PlatformImpl::PlatformImpl(mojo::NetworkServicePtr network_service)
     : main_thread_task_runner_(base::MessageLoop::current()->task_runner()) {
-  app->ConnectToService("mojo:network_service", &network_service_);
+  network_service_ = network_service.Pass();
 }
 
 PlatformImpl::~PlatformImpl() {
