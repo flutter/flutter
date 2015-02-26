@@ -40,9 +40,6 @@ String CSSFilterValue::customCSSText() const
 {
     StringBuilder result;
     switch (m_type) {
-    case ReferenceFilterOperation:
-        result.appendLiteral("url(");
-        break;
     case GrayscaleFilterOperation:
         result.appendLiteral("grayscale(");
         break;

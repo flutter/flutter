@@ -631,10 +631,6 @@ PassRefPtr<CSSValue> CSSComputedStyleDeclaration::valueForFilter(const RenderObj
     for (Vector<RefPtr<FilterOperation> >::const_iterator it = style.filter().operations().begin(); it != end; ++it) {
         FilterOperation* filterOperation = it->get();
         switch (filterOperation->type()) {
-        case FilterOperation::REFERENCE:
-            filterValue = CSSFilterValue::create(CSSFilterValue::ReferenceFilterOperation);
-            filterValue->append(cssValuePool().createValue(toReferenceFilterOperation(filterOperation)->url(), CSSPrimitiveValue::CSS_STRING));
-            break;
         case FilterOperation::GRAYSCALE:
             filterValue = CSSFilterValue::create(CSSFilterValue::GrayscaleFilterOperation);
             filterValue->append(cssValuePool().createValue(toBasicColorMatrixFilterOperation(filterOperation)->amount(), CSSPrimitiveValue::CSS_NUMBER));

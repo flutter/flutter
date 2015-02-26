@@ -29,7 +29,7 @@
 
 namespace blink {
 
-class PLATFORM_EXPORT Filter : public RefCounted<Filter> {
+class PLATFORM_EXPORT Filter {
 public:
     Filter(const AffineTransform& absoluteTransform)
     : m_absoluteTransform(absoluteTransform)

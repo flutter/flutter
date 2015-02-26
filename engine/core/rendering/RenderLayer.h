@@ -48,7 +48,6 @@
 #include "sky/engine/core/rendering/LayerPaintingInfo.h"
 #include "sky/engine/core/rendering/RenderBox.h"
 #include "sky/engine/core/rendering/RenderLayerClipper.h"
-#include "sky/engine/core/rendering/RenderLayerFilterInfo.h"
 #include "sky/engine/core/rendering/RenderLayerStackingNode.h"
 #include "sky/engine/core/rendering/RenderLayerStackingNodeIterator.h"
 #include "sky/engine/public/platform/WebBlendMode.h"
@@ -146,20 +145,8 @@ public:
 
     FilterEffectRenderer* filterRenderer() const
     {
-        RenderLayerFilterInfo* filterInfo = this->filterInfo();
-        return filterInfo ? filterInfo->renderer() : 0;
+        return m_filterRenderer.get();
     }
-
-    RenderLayerFilterInfo* filterInfo() const { return hasFilterInfo() ? RenderLayerFilterInfo::filterInfoForRenderLayer(this) : 0; }
-    RenderLayerFilterInfo* ensureFilterInfo() { return RenderLayerFilterInfo::createFilterInfoForRenderLayerIfNeeded(this); }
-    void removeFilterInfoIfNeeded()
-    {
-        if (hasFilterInfo())
-            RenderLayerFilterInfo::removeFilterInfoForRenderLayer(this);
-    }
-
-    bool hasFilterInfo() const { return m_hasFilterInfo; }
-    void setHasFilterInfo(bool hasFilterInfo) { m_hasFilterInfo = hasFilterInfo; }
 
     RenderLayerClipper& clipper() { return m_clipper; }
     const RenderLayerClipper& clipper() const { return m_clipper; }
@@ -203,8 +190,6 @@ private:
     // in a preserves3D hierarchy. Hint to do 3D-aware hit testing.
     unsigned m_has3DTransformedDescendant : 1;
 
-    unsigned m_hasFilterInfo : 1;
-
     RenderBox* m_renderer;
 
     RenderLayer* m_parent;
@@ -214,6 +199,7 @@ private:
     RenderLayer* m_last;
 
     OwnPtr<TransformationMatrix> m_transform;
+    OwnPtr<FilterEffectRenderer> m_filterRenderer;
 
     RenderLayerClipper m_clipper; // FIXME: Lazily allocate?
     OwnPtr<RenderLayerStackingNode> m_stackingNode;

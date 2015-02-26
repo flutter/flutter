@@ -40,8 +40,6 @@ namespace blink {
 static FilterOperation::OperationType filterOperationForType(CSSFilterValue::FilterOperationType type)
 {
     switch (type) {
-    case CSSFilterValue::ReferenceFilterOperation:
-        return FilterOperation::REFERENCE;
     case CSSFilterValue::GrayscaleFilterOperation:
         return FilterOperation::GRAYSCALE;
     case CSSFilterValue::SepiaFilterOperation:
@@ -92,9 +90,6 @@ bool FilterOperationResolver::createFilterOperations(CSSValue* inValue, const CS
 
         CSSFilterValue* filterValue = toCSSFilterValue(i.value());
         FilterOperation::OperationType operationType = filterOperationForType(filterValue->operationType());
-
-        if (operationType == FilterOperation::REFERENCE)
-            continue;
 
         // Check that all parameters are primitive values, with the
         // exception of drop shadow which has a CSSShadowValue parameter.

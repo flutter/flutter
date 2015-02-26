@@ -859,8 +859,6 @@ void RenderBox::paintLayerContents(GraphicsContext* context, const LayerPainting
     FilterEffectRendererHelper filterPainter(layer()->filterRenderer() && hasFilter());
 
     if (filterPainter.haveFilterEffect()) {
-        ASSERT(layer()->filterInfo());
-
         if (!rootRelativeBoundsComputed)
             rootRelativeBounds = layer()->physicalBoundingBoxIncludingReflectionAndStackingChildren(paintingInfo.rootLayer, offsetFromRoot);
 

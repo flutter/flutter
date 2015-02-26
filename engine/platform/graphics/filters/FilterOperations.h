@@ -67,8 +67,6 @@ public:
     FilterOutsets outsets() const;
 
     bool hasFilterThatMovesPixels() const;
-
-    bool hasReferenceFilter() const;
 private:
     Vector<RefPtr<FilterOperation> > m_operations;
 };

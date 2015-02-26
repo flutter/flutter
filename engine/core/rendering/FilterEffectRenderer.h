@@ -71,9 +71,11 @@ class FilterEffectRenderer final : public Filter
 {
     WTF_MAKE_FAST_ALLOCATED;
 public:
-    static PassRefPtr<FilterEffectRenderer> create()
+    virtual ~FilterEffectRenderer();
+
+    static PassOwnPtr<FilterEffectRenderer> create()
     {
-        return adoptRef(new FilterEffectRenderer());
+        return adoptPtr(new FilterEffectRenderer());
     }
 
     void setSourceImageRect(const IntRect& sourceImageRect)
@@ -104,7 +106,6 @@ public:
 private:
 
     FilterEffectRenderer();
-    virtual ~FilterEffectRenderer();
 
     IntRect m_sourceDrawingRegion;
 

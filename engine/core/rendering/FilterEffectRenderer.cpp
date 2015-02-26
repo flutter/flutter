@@ -87,9 +87,6 @@ bool FilterEffectRenderer::build(RenderObject* renderer, const FilterOperations&
         RefPtr<FilterEffect> effect;
         FilterOperation* filterOperation = operations.operations().at(i).get();
         switch (filterOperation->type()) {
-        case FilterOperation::REFERENCE: {
-            break;
-        }
         case FilterOperation::GRAYSCALE: {
             Vector<float> inputParameters;
             double oneMinusAmount = clampTo(1 - toBasicColorMatrixFilterOperation(filterOperation)->amount(), 0.0, 1.0);
@@ -220,12 +217,10 @@ bool FilterEffectRenderer::build(RenderObject* renderer, const FilterOperations&
         }
 
         if (effect) {
-            if (filterOperation->type() != FilterOperation::REFERENCE) {
-                // Unlike SVG, filters applied here should not clip to their primitive subregions.
-                effect->setClipsToBounds(false);
-                effect->setOperatingColorSpace(ColorSpaceDeviceRGB);
-                effect->inputEffects().append(previousEffect);
-            }
+            // Unlike SVG, filters applied here should not clip to their primitive subregions.
+            effect->setClipsToBounds(false);
+            effect->setOperatingColorSpace(ColorSpaceDeviceRGB);
+            effect->inputEffects().append(previousEffect);
             previousEffect = effect.release();
         }
     }

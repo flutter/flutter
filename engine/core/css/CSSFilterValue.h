@@ -36,7 +36,6 @@ public:
     // NOTE: these have to match the values in the IDL
     enum FilterOperationType {
         UnknownFilterOperation,
-        ReferenceFilterOperation,
         GrayscaleFilterOperation,
         SepiaFilterOperation,
         SaturateFilterOperation,

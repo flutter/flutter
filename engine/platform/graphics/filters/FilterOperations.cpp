@@ -88,15 +88,6 @@ bool FilterOperations::canInterpolateWith(const FilterOperations& other) const
     return true;
 }
 
-bool FilterOperations::hasReferenceFilter() const
-{
-    for (size_t i = 0; i < m_operations.size(); ++i) {
-        if (m_operations.at(i)->type() == FilterOperation::REFERENCE)
-            return true;
-    }
-    return false;
-}
-
 FilterOutsets FilterOperations::outsets() const
 {
     FilterOutsets totalOutsets;
@@ -121,21 +112,6 @@ FilterOutsets FilterOperations::outsets() const
                 std::max(0, outsetSize.width() - dropShadowOperation->x())
             );
             totalOutsets += outsets;
-            break;
-        }
-        case FilterOperation::REFERENCE: {
-            ReferenceFilterOperation* referenceOperation = toReferenceFilterOperation(filterOperation);
-            if (referenceOperation->filter() && referenceOperation->filter()->lastEffect()) {
-                FloatRect outsetRect(0, 0, 1, 1);
-                outsetRect = referenceOperation->filter()->lastEffect()->mapRectRecursive(outsetRect);
-                FilterOutsets outsets(
-                    std::max(0.0f, -outsetRect.y()),
-                    std::max(0.0f, outsetRect.x() + outsetRect.width() - 1),
-                    std::max(0.0f, outsetRect.y() + outsetRect.height() - 1),
-                    std::max(0.0f, -outsetRect.x())
-                );
-                totalOutsets += outsets;
-            }
             break;
         }
         default:

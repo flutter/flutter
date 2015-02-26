@@ -67,7 +67,6 @@
 #include "sky/engine/platform/geometry/FloatRect.h"
 #include "sky/engine/platform/geometry/TransformState.h"
 #include "sky/engine/platform/graphics/GraphicsContextStateSaver.h"
-#include "sky/engine/platform/graphics/filters/ReferenceFilter.h"
 #include "sky/engine/platform/graphics/filters/SourceGraphic.h"
 #include "sky/engine/platform/transforms/ScaleTransformOperation.h"
 #include "sky/engine/platform/transforms/TransformationMatrix.h"
@@ -83,7 +82,6 @@ RenderLayer::RenderLayer(RenderBox* renderer, LayerType type)
     , m_isRootLayer(renderer->isRenderView())
     , m_3DTransformedDescendantStatusDirty(true)
     , m_has3DTransformedDescendant(false)
-    , m_hasFilterInfo(false)
     , m_renderer(renderer)
     , m_parent(0)
     , m_previous(0)
@@ -98,7 +96,6 @@ RenderLayer::RenderLayer(RenderBox* renderer, LayerType type)
 
 RenderLayer::~RenderLayer()
 {
-    removeFilterInfoIfNeeded();
 }
 
 void RenderLayer::updateLayerPositionsAfterLayout()
@@ -616,40 +613,16 @@ void RenderLayer::updateFilters(const RenderStyle* oldStyle, const RenderStyle* 
         return;
 
     if (!renderer()->hasFilter()) {
-        removeFilterInfoIfNeeded();
+        m_filterRenderer = nullptr;
         return;
     }
 
-    if (renderer()->style()->filter().hasReferenceFilter())
-        ensureFilterInfo()->updateReferenceFilterClients(renderer()->style()->filter());
-    else if (hasFilterInfo())
-        filterInfo()->removeReferenceFilterClients();
-
-    // FilterEffectRenderer is only used to render the filters in software mode,
-    // so we always need to run updateOrRemoveFilterEffectRenderer after the composited
-    // mode might have changed for this layer.
-    if (!renderer()->hasFilter()) {
-        // Don't delete the whole filter info here, because we might use it
-        // for loading CSS shader files.
-        if (RenderLayerFilterInfo* filterInfo = this->filterInfo())
-            filterInfo->setRenderer(nullptr);
-
-        return;
-    }
-
-    RenderLayerFilterInfo* filterInfo = ensureFilterInfo();
-    if (!filterInfo->renderer()) {
-        RefPtr<FilterEffectRenderer> filterRenderer = FilterEffectRenderer::create();
-        filterInfo->setRenderer(filterRenderer.release());
-
-        // We can optimize away code paths in other places if we know that there are no software filters.
-        renderer()->document().view()->setHasSoftwareFilters(true);
-    }
+    m_filterRenderer = FilterEffectRenderer::create();
 
     // If the filter fails to build, remove it from the layer. It will still attempt to
     // go through regular processing (e.g. compositing), but never apply anything.
-    if (!filterInfo->renderer()->build(renderer(), renderer()->style()->filter()))
-        filterInfo->setRenderer(nullptr);
+    if (!m_filterRenderer->build(renderer(), renderer()->style()->filter()))
+        m_filterRenderer = nullptr;
 }
 
 void RenderLayer::styleChanged(StyleDifference diff, const RenderStyle* oldStyle)

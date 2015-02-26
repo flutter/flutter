@@ -30,7 +30,6 @@
 #include "sky/engine/platform/PlatformExport.h"
 #include "sky/engine/platform/graphics/Color.h"
 #include "sky/engine/platform/graphics/filters/Filter.h"
-#include "sky/engine/platform/graphics/filters/ReferenceFilter.h"
 #include "sky/engine/wtf/OwnPtr.h"
 #include "sky/engine/wtf/PassOwnPtr.h"
 #include "sky/engine/wtf/RefCounted.h"
@@ -43,7 +42,6 @@ namespace blink {
 class PLATFORM_EXPORT FilterOperation : public RefCounted<FilterOperation> {
 public:
     enum OperationType {
-        REFERENCE, // url(#somefilter)
         GRAYSCALE,
         SEPIA,
         SATURATE,
@@ -57,6 +55,7 @@ public:
         NONE
     };
 
+    // FIXME(sky): Remove
     static bool canInterpolate(FilterOperation::OperationType type)
     {
         switch (type) {
@@ -71,8 +70,6 @@ public:
         case BLUR:
         case DROP_SHADOW:
             return true;
-        case REFERENCE:
-            return false;
         case NONE:
             break;
         }
@@ -106,50 +103,6 @@ private:
 
 #define DEFINE_FILTER_OPERATION_TYPE_CASTS(thisType, operationType) \
     DEFINE_TYPE_CASTS(thisType, FilterOperation, op, op->type() == FilterOperation::operationType, op.type() == FilterOperation::operationType);
-
-class PLATFORM_EXPORT ReferenceFilterOperation : public FilterOperation {
-public:
-    static PassRefPtr<ReferenceFilterOperation> create(const String& url, const AtomicString& fragment)
-    {
-        return adoptRef(new ReferenceFilterOperation(url, fragment));
-    }
-
-    virtual bool movesPixels() const override { return true; }
-
-    const String& url() const { return m_url; }
-    const AtomicString& fragment() const { return m_fragment; }
-
-    ReferenceFilter* filter() const { return m_filter.get(); }
-    void setFilter(PassRefPtr<ReferenceFilter> filter) { m_filter = filter; }
-
-private:
-    virtual PassRefPtr<FilterOperation> blend(const FilterOperation* from, double progress) const override
-    {
-        ASSERT_NOT_REACHED();
-        return nullptr;
-    }
-
-    virtual bool operator==(const FilterOperation& o) const override
-    {
-        if (!isSameType(o))
-            return false;
-        const ReferenceFilterOperation* other = static_cast<const ReferenceFilterOperation*>(&o);
-        return m_url == other->m_url;
-    }
-
-    ReferenceFilterOperation(const String& url, const AtomicString& fragment)
-        : FilterOperation(REFERENCE)
-        , m_url(url)
-        , m_fragment(fragment)
-    {
-    }
-
-    String m_url;
-    AtomicString m_fragment;
-    RefPtr<ReferenceFilter> m_filter;
-};
-
-DEFINE_FILTER_OPERATION_TYPE_CASTS(ReferenceFilterOperation, REFERENCE);
 
 // GRAYSCALE, SEPIA, SATURATE and HUE_ROTATE are variations on a basic color matrix effect.
 // For HUE_ROTATE, the angle of rotation is stored in m_amount.
