@@ -26,6 +26,12 @@ public class SkyDemoActivity extends SkyActivity {
         if (Intent.ACTION_VIEW.equals(intent.getAction())) {
             Uri skyUri = intent.getData();
             Uri httpsUri = skyUri.buildUpon().scheme("https").build();
+            // This is a hack to disable https for local testing.
+            // getHost may be null if we're passed a non-normalized url.
+            if (skyUri.getHost() != null
+                    && skyUri.getHost().equals("localhost")) {
+                httpsUri = skyUri.buildUpon().scheme("http").build();
+            }
             url = httpsUri.toString();
         }
 

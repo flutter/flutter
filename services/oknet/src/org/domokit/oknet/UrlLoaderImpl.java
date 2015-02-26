@@ -133,6 +133,7 @@ public class UrlLoaderImpl implements UrlLoader {
                 // TODO(abarth): Which mError.code should we set?
                 mError.description = e.toString();
                 UrlResponse urlResponse = new UrlResponse();
+                urlResponse.url = request.urlString();
                 urlResponse.error = mError;
                 responseCallback.call(urlResponse);
 

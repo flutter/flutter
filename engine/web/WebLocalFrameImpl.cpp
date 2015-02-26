@@ -73,6 +73,8 @@
 #include "sky/engine/web/WebLocalFrameImpl.h"
 
 #include <algorithm>
+#include "base/strings/stringprintf.h"
+#include "mojo/common/data_pipe_utils.h"
 #include "mojo/public/cpp/system/data_pipe.h"
 #include "sky/engine/bindings/exception_state.h"
 #include "sky/engine/bindings/exception_state_placeholder.h"
@@ -82,12 +84,12 @@
 #include "sky/engine/core/dom/shadow/ShadowRoot.h"
 #include "sky/engine/core/editing/Editor.h"
 #include "sky/engine/core/editing/FrameSelection.h"
+#include "sky/engine/core/editing/htmlediting.h"
 #include "sky/engine/core/editing/InputMethodController.h"
 #include "sky/engine/core/editing/PlainTextRange.h"
 #include "sky/engine/core/editing/SpellChecker.h"
 #include "sky/engine/core/editing/TextAffinity.h"
 #include "sky/engine/core/editing/TextIterator.h"
-#include "sky/engine/core/editing/htmlediting.h"
 #include "sky/engine/core/frame/FrameHost.h"
 #include "sky/engine/core/frame/FrameView.h"
 #include "sky/engine/core/frame/LocalDOMWindow.h"
@@ -105,13 +107,13 @@
 #include "sky/engine/core/rendering/RenderTreeAsText.h"
 #include "sky/engine/core/rendering/RenderView.h"
 #include "sky/engine/core/rendering/style/StyleInheritedData.h"
-#include "sky/engine/platform/TraceEvent.h"
 #include "sky/engine/platform/clipboard/ClipboardUtilities.h"
 #include "sky/engine/platform/fonts/FontCache.h"
 #include "sky/engine/platform/graphics/GraphicsContext.h"
 #include "sky/engine/platform/graphics/skia/SkiaUtils.h"
 #include "sky/engine/platform/heap/Handle.h"
 #include "sky/engine/platform/network/ResourceRequest.h"
+#include "sky/engine/platform/TraceEvent.h"
 #include "sky/engine/platform/weborigin/KURL.h"
 #include "sky/engine/platform/weborigin/SecurityPolicy.h"
 #include "sky/engine/public/platform/Platform.h"
@@ -272,9 +274,26 @@ void WebLocalFrameImpl::load(const WebURL& url)
 void WebLocalFrameImpl::OnReceivedResponse(mojo::URLResponsePtr response)
 {
     m_fetcher.clear();
-    if (!response->body.is_valid())
-        LOG(FATAL) << "Response has no body.";
-    frame()->mojoLoader().parse(response->body.Pass());
+    if (response->body.is_valid()) {
+        frame()->mojoLoader().parse(response->body.Pass());
+        return;
+    }
+    LOG(ERROR) << "Response for " << response->url
+        << " (status " << response->status_code  << ") has no body.";
+
+    // TODO(eseidel): This is a hack, but makes debugging way easier.
+    mojo::DataPipe pipe;
+    frame()->mojoLoader().parse(pipe.consumer_handle.Pass());
+    std::string error_response = base::StringPrintf(
+        "<error><h>Empty Body</h><l>%d %s</l><m>%s</m></t></error>",
+        response->status_code, response->status_line.get().c_str(),
+        response->error->description.get().c_str());
+
+    uint32_t length = error_response.length();
+    MojoWriteData(pipe.producer_handle.get().value(),
+                  error_response.data(),
+                  &length,
+                  MOJO_WRITE_DATA_FLAG_ALL_OR_NONE);
 }
 
 void WebLocalFrameImpl::replaceSelection(const WebString& text)
