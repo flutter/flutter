@@ -73,6 +73,7 @@ class Engine : public UIDelegate,
   void RequestNavigate(mojo::Target target,
                        mojo::URLRequestPtr request) override;
   void DidNavigateLocally(const mojo::String& url) override;
+  void RequestNavigateHistory(int32_t delta) override;
 
   void UpdateWebViewSize();
 
