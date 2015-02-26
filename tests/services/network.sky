@@ -12,18 +12,18 @@ import 'package:mojo/services/network/public/interfaces/network_service.mojom.da
 import 'package:mojo/services/network/public/interfaces/url_loader.mojom.dart';
 
 Future<String> run(url) async {
-  var networkService = new NetworkServiceProxy.unbound();
+  var networkService= new NetworkServiceProxy.unbound();
   embedder.connectToService("mojo:network_service", networkService);
 
-  var urlLoaderProxy = new UrlLoaderProxy.unbound();
-  networkService.createUrlLoader(urlLoaderProxy);
+  var urlLoader = new UrlLoaderProxy.unbound();
+  networkService.ptr.createUrlLoader(urlLoader);
 
   var urlRequest = new UrlRequest()
       ..url = url
       ..autoFollowRedirects = true;
-  var urlResponse = await urlLoaderProxy.start(urlRequest);
+  var urlResponse = await urlLoader.ptr.start(urlRequest);
 
-  urlLoaderProxy.close();
+  urlLoader.close();
   networkService.close();
 
   print("url => ${urlResponse.response.url}");

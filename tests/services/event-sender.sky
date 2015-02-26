@@ -30,7 +30,7 @@ void main() {
     var event = new events.Event();
     event.action = constants.EventType_KEY_PRESSED;
     event.keyData = keyData;
-    testHarness.dispatchInputEvent(event);
+    testHarness.ptr.dispatchInputEvent(event);
   });
 }
 </script>

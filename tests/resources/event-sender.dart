@@ -71,7 +71,7 @@ final harness.TestHarnessProxy _harness = _init();
 // |0| should be EventFlags_NONE once its a compile-time constant.
 void keyDown(int keyCode, [int eventFlags = 0]) {
   if (!_chars.contains(keyCode)) {
-    _harness.dispatchInputEvent(
+    _harness.ptr.dispatchInputEvent(
         new events.Event()
         ..action = constants.EventType_KEY_PRESSED
         ..flags = eventFlags
@@ -79,7 +79,7 @@ void keyDown(int keyCode, [int eventFlags = 0]) {
                      ..keyCode = keyCode
                      ..windowsKeyCode = keyCode));
 
-    _harness.dispatchInputEvent(
+    _harness.ptr.dispatchInputEvent(
         new events.Event()
         ..action = constants.EventType_KEY_PRESSED
         ..flags = eventFlags
@@ -88,8 +88,8 @@ void keyDown(int keyCode, [int eventFlags = 0]) {
                      ..windowsKeyCode = keyCode));
   } else {
     ++_keyPressesRemaining;
-    _harness.dispatchInputEvent(
-        new events.Event()
+    _harness.ptr.dispatchInputEvent(
+       new events.Event()
         ..action = constants.EventType_KEY_PRESSED
         ..flags = eventFlags
         ..keyData = (new events.KeyData()

@@ -36,16 +36,16 @@ class _EmbedderImpl {
   ApplicationConnection connectToApplication(String url) {
     var proxy = new ServiceProviderProxy.unbound();
     var stub = new ServiceProviderStub.unbound();
-    shell.connectToApplication(url, proxy, stub);
+    shell.ptr.connectToApplication(url, proxy, stub);
     return new ApplicationConnection(stub, proxy);
   }
 
-  void connectToService(String url, bindings.Proxy proxy) {
+  void connectToService(String url, bindings.ProxyBase proxy) {
     var appSp = new ServiceProviderProxy.unbound();
-    shell.connectToApplication(url, appSp, null);
+    shell.ptr.connectToApplication(url, appSp, null);
     var pipe = new core.MojoMessagePipe();
-    proxy.bind(pipe.endpoints[0]);
-    appSp.connectToService(proxy.name, pipe.endpoints[1]);
+    proxy.impl.bind(pipe.endpoints[0]);
+    appSp.ptr.connectToService(proxy.name, pipe.endpoints[1]);
     appSp.close();
   }
 }
