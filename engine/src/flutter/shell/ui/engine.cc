@@ -159,5 +159,9 @@ void Engine::RequestNavigate(mojo::Target target,
 void Engine::DidNavigateLocally(const mojo::String& url) {
 }
 
+void Engine::RequestNavigateHistory(int32_t delta) {
+  NOTIMPLEMENTED();
+}
+
 }  // namespace shell
 }  // namespace sky
