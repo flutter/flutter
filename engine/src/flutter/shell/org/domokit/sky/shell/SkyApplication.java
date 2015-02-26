@@ -17,7 +17,7 @@ import org.chromium.base.library_loader.ProcessInitException;
  * MojoShell implementation of {@link android.app.Application}, managing application-level global
  * state and initializations.
  */
-public class SkyShellApplication extends BaseChromiumApplication {
+public class SkyApplication extends BaseChromiumApplication {
     private static final String TAG = "SkyShellApplication";
     private static final String PRIVATE_DATA_DIRECTORY_SUFFIX = "sky_shell";
     private static final String[] SKY_MANDATORY_PAKS = {

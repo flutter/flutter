@@ -7,17 +7,11 @@ assert(is_android)
 import("//build/config/android/config.gni")
 import("//build/config/android/rules.gni")
 
-group("shell") {
-  deps = [
-    ":sky_shell_apk",
-  ]
-}
-
 generate_jni("jni_headers") {
   sources = [
-    "apk/src/org/domokit/sky/shell/JavaServiceProvider.java",
-    "apk/src/org/domokit/sky/shell/SkyMain.java",
-    "apk/src/org/domokit/sky/shell/PlatformView.java",
+    "org/domokit/sky/shell/JavaServiceProvider.java",
+    "org/domokit/sky/shell/SkyMain.java",
+    "org/domokit/sky/shell/PlatformView.java",
   ]
   jni_package = "sky/shell"
 }
@@ -74,11 +68,11 @@ shared_library("sky_shell") {
 
 android_library("java") {
   java_files = [
-    "apk/src/org/domokit/sky/shell/JavaServiceProvider.java",
-    "apk/src/org/domokit/sky/shell/PlatformView.java",
-    "apk/src/org/domokit/sky/shell/SkyMain.java",
-    "apk/src/org/domokit/sky/shell/SkyShellActivity.java",
-    "apk/src/org/domokit/sky/shell/SkyShellApplication.java",
+    "org/domokit/sky/shell/JavaServiceProvider.java",
+    "org/domokit/sky/shell/PlatformView.java",
+    "org/domokit/sky/shell/SkyMain.java",
+    "org/domokit/sky/shell/SkyActivity.java",
+    "org/domokit/sky/shell/SkyApplication.java",
   ]
 
   deps = [
@@ -93,37 +87,13 @@ android_library("java") {
   ]
 }
 
-sky_shell_assets_dir = "$root_build_dir/sky_shell/assets"
-
-android_resources("resources") {
-  resource_dirs = [ "apk/res" ]
-  custom_package = "org.domokit.sky.shell"
-}
-
 copy_ex("assets") {
   clear_dir = true
-  dest = sky_shell_assets_dir
+  dest = "$root_build_dir/sky_shell/assets"
   sources = [
     "$root_build_dir/icudtl.dat",
   ]
   deps = [
     "//third_party/icu",
-  ]
-}
-
-android_apk("sky_shell_apk") {
-  apk_name = "SkyShell"
-
-  android_manifest = "apk/AndroidManifest.xml"
-  native_libs = [ "libsky_shell.so" ]
-
-  asset_location = sky_shell_assets_dir
-
-  deps = [
-    "//base:base_java",
-    ":assets",
-    ":java",
-    ":resources",
-    ":sky_shell",
   ]
 }
