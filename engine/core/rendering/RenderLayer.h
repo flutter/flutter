@@ -124,8 +124,6 @@ public:
 
     bool hasBoxDecorationsOrBackground() const;
     bool hasVisibleBoxDecorations() const;
-    // Returns true if this layer has visible content (ignoring any child layers).
-    bool isVisuallyNonEmpty() const;
     // True if this layer container renderers that paint.
     bool hasNonEmptyChildRenderers() const;
 
@@ -181,9 +179,6 @@ public:
     // Only safe to call from RenderBox::destroyLayer()
     void operator delete(void*);
 
-    FilterOperations computeFilterOperations(const RenderStyle*);
-    bool paintsWithFilters() const;
-    bool requiresFullLayerImageForFilters() const;
     FilterEffectRenderer* filterRenderer() const
     {
         RenderLayerFilterInfo* filterInfo = this->filterInfo();
@@ -213,8 +208,6 @@ public:
         return isRootLayer() || layerRenderer->isPositioned() || hasTransform();
     }
 
-    void updateOrRemoveFilterEffectRenderer();
-
     void clipToRect(const LayerPaintingInfo&, GraphicsContext*, const ClipRect&, BorderRadiusClippingRule = IncludeSelfForBorderRadius);
     void restoreClip(GraphicsContext*, const LayoutRect& paintDirtyRect, const ClipRect&);
 
@@ -238,8 +231,6 @@ private:
     void updateTransform(const RenderStyle* oldStyle, RenderStyle* newStyle);
 
     void dirty3DTransformedDescendantStatus();
-
-    void updateOrRemoveFilterClients();
 
     LayerType m_layerType;
 

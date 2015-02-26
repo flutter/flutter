@@ -845,7 +845,7 @@ void RenderBox::paintLayerContents(GraphicsContext* context, const LayerPainting
 
     layer()->clipToRect(localPaintingInfo, context, contentRect);
 
-    FilterEffectRendererHelper filterPainter(layer()->filterRenderer() && layer()->paintsWithFilters());
+    FilterEffectRendererHelper filterPainter(layer()->filterRenderer() && hasFilter());
 
     if (filterPainter.haveFilterEffect()) {
         ASSERT(layer()->filterInfo());

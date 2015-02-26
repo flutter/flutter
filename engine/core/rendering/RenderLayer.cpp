@@ -107,20 +107,6 @@ String RenderLayer::debugName() const
     return renderer()->debugName();
 }
 
-bool RenderLayer::paintsWithFilters() const
-{
-    // FIXME(sky): Remove
-    return renderer()->hasFilter();
-}
-
-bool RenderLayer::requiresFullLayerImageForFilters() const
-{
-    if (!paintsWithFilters())
-        return false;
-    FilterEffectRenderer* filter = filterRenderer();
-    return filter ? filter->hasFilterThatMovesPixels() : false;
-}
-
 LayoutSize RenderLayer::subpixelAccumulation() const
 {
     return m_subpixelAccumulation;
@@ -730,25 +716,6 @@ bool RenderLayer::shouldBeSelfPaintingLayer() const
     return m_layerType == NormalLayer;
 }
 
-bool RenderLayer::hasNonEmptyChildRenderers() const
-{
-    // Some HTML can cause whitespace text nodes to have renderers, like:
-    // <div>
-    // <img src=...>
-    // </div>
-    // so test for 0x0 RenderTexts here
-    for (RenderObject* child = renderer()->slowFirstChild(); child; child = child->nextSibling()) {
-        if (!child->hasLayer()) {
-            if (child->isRenderInline() || !child->isBox())
-                return true;
-
-            if (toRenderBox(child)->width() > 0 || toRenderBox(child)->height() > 0)
-                return true;
-        }
-    }
-    return false;
-}
-
 bool RenderLayer::hasBoxDecorationsOrBackground() const
 {
     return renderer()->style()->hasBoxDecorations() || renderer()->style()->hasBackground();
@@ -759,49 +726,11 @@ bool RenderLayer::hasVisibleBoxDecorations() const
     return hasBoxDecorationsOrBackground();
 }
 
-bool RenderLayer::isVisuallyNonEmpty() const
-{
-    if (hasNonEmptyChildRenderers())
-        return true;
-
-    if (renderer()->isReplaced())
-        return true;
-
-    if (hasVisibleBoxDecorations())
-        return true;
-
-    return false;
-}
-
 void RenderLayer::updateFilters(const RenderStyle* oldStyle, const RenderStyle* newStyle)
 {
     if (!newStyle->hasFilter() && (!oldStyle || !oldStyle->hasFilter()))
         return;
 
-    updateOrRemoveFilterClients();
-    updateOrRemoveFilterEffectRenderer();
-}
-
-void RenderLayer::styleChanged(StyleDifference diff, const RenderStyle* oldStyle)
-{
-    m_stackingNode->updateIsNormalFlowOnly();
-    m_stackingNode->updateStackingNodesAfterStyleChange(oldStyle);
-
-    // Overlay scrollbars can make this layer self-painting so we need
-    // to recompute the bit once scrollbars have been updated.
-    m_isSelfPaintingLayer = shouldBeSelfPaintingLayer();
-
-    updateTransform(oldStyle, renderer()->style());
-    updateFilters(oldStyle, renderer()->style());
-}
-
-FilterOperations RenderLayer::computeFilterOperations(const RenderStyle* style)
-{
-    return style->filter();
-}
-
-void RenderLayer::updateOrRemoveFilterClients()
-{
     if (!hasFilter()) {
         removeFilterInfoIfNeeded();
         return;
@@ -811,14 +740,11 @@ void RenderLayer::updateOrRemoveFilterClients()
         ensureFilterInfo()->updateReferenceFilterClients(renderer()->style()->filter());
     else if (hasFilterInfo())
         filterInfo()->removeReferenceFilterClients();
-}
 
-void RenderLayer::updateOrRemoveFilterEffectRenderer()
-{
     // FilterEffectRenderer is only used to render the filters in software mode,
     // so we always need to run updateOrRemoveFilterEffectRenderer after the composited
     // mode might have changed for this layer.
-    if (!paintsWithFilters()) {
+    if (!renderer()->hasFilter()) {
         // Don't delete the whole filter info here, because we might use it
         // for loading CSS shader files.
         if (RenderLayerFilterInfo* filterInfo = this->filterInfo())
@@ -838,8 +764,21 @@ void RenderLayer::updateOrRemoveFilterEffectRenderer()
 
     // If the filter fails to build, remove it from the layer. It will still attempt to
     // go through regular processing (e.g. compositing), but never apply anything.
-    if (!filterInfo->renderer()->build(renderer(), computeFilterOperations(renderer()->style())))
+    if (!filterInfo->renderer()->build(renderer(), renderer()->style()->filter()))
         filterInfo->setRenderer(nullptr);
+}
+
+void RenderLayer::styleChanged(StyleDifference diff, const RenderStyle* oldStyle)
+{
+    m_stackingNode->updateIsNormalFlowOnly();
+    m_stackingNode->updateStackingNodesAfterStyleChange(oldStyle);
+
+    // Overlay scrollbars can make this layer self-painting so we need
+    // to recompute the bit once scrollbars have been updated.
+    m_isSelfPaintingLayer = shouldBeSelfPaintingLayer();
+
+    updateTransform(oldStyle, renderer()->style());
+    updateFilters(oldStyle, renderer()->style());
 }
 
 } // namespace blink
