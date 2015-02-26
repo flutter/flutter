@@ -73,11 +73,7 @@ public:
     RenderLayer(RenderBox*, LayerType);
     ~RenderLayer();
 
-    String debugName() const;
-
     RenderBox* renderer() const { return m_renderer; }
-    // FIXME(sky): Remove
-    RenderBox* renderBox() const { return m_renderer; }
     RenderLayer* parent() const { return m_parent; }
     RenderLayer* previousSibling() const { return m_previous; }
     RenderLayer* nextSibling() const { return m_next; }
@@ -91,13 +87,8 @@ public:
     void insertOnlyThisLayer();
 
     void styleChanged(StyleDifference, const RenderStyle* oldStyle);
-
-    // FIXME: Many people call this function while it has out-of-date information.
     bool isSelfPaintingLayer() const { return m_isSelfPaintingLayer; }
-
     void setLayerType(LayerType layerType) { m_layerType = layerType; }
-
-    bool isTransparent() const { return renderer()->isTransparent(); }
 
     const RenderLayer* root() const
     {
@@ -109,29 +100,19 @@ public:
 
     LayoutPoint location() const;
     IntSize size() const;
-
     LayoutRect rect() const { return LayoutRect(location(), size()); }
 
     bool isRootLayer() const { return m_isRootLayer; }
 
     void updateLayerPositionsAfterLayout();
-
     void updateTransformationMatrix();
-    RenderLayer* renderingContextRoot();
 
     RenderLayerStackingNode* stackingNode() { return m_stackingNode.get(); }
     const RenderLayerStackingNode* stackingNode() const { return m_stackingNode.get(); }
 
-    bool hasBoxDecorationsOrBackground() const;
-    bool hasVisibleBoxDecorations() const;
-    // True if this layer container renderers that paint.
-    bool hasNonEmptyChildRenderers() const;
-
     // Gets the nearest enclosing positioned ancestor layer (also includes
     // the <html> layer and the root layer).
     RenderLayer* enclosingPositionedAncestor() const;
-
-    RenderLayer* enclosingOverflowClipLayer(IncludeSelfOrNot = IncludeSelf) const;
 
     const RenderLayer* compositingContainer() const;
 
@@ -144,25 +125,11 @@ public:
     // Bounding box relative to some ancestor layer. Pass offsetFromRoot if known.
     LayoutRect physicalBoundingBox(const RenderLayer* ancestorLayer, const LayoutPoint* offsetFromRoot = 0) const;
     LayoutRect physicalBoundingBoxIncludingReflectionAndStackingChildren(const RenderLayer* ancestorLayer, const LayoutPoint& offsetFromRoot) const;
-
-    // If true, this layer's children are included in its bounds for overlap testing.
-    // We can't rely on the children's positions if this layer has a filter that could have moved the children's pixels around.
-    bool overlapBoundsIncludeChildren() const { return hasFilter() && renderer()->style()->filter().hasFilterThatMovesPixels(); }
-
     LayoutRect boundingBoxForCompositing(const RenderLayer* ancestorLayer = 0) const;
 
-    LayoutSize subpixelAccumulation() const;
-    void setSubpixelAccumulation(const LayoutSize&);
-
-    bool hasTransform() const { return renderer()->hasTransform(); }
     // This transform has the transform-origin baked in.
     TransformationMatrix* transform() const { return m_transform.get(); }
 
-    // Get the perspective transform, which is applied to transformed sublayers.
-    // Returns true if the layer has a -webkit-perspective.
-    // Note that this transform has the perspective-origin baked in.
-    TransformationMatrix perspectiveTransform() const;
-    FloatPoint perspectiveOrigin() const;
     bool preserves3D() const { return renderer()->style()->transformStyle3D() == TransformStyle3DPreserve3D; }
     bool has3DTransform() const { return m_transform && !m_transform->isAffine(); }
 
@@ -172,8 +139,6 @@ public:
 
     // FIXME: reflections should force transform-style to be flat in the style: https://bugs.webkit.org/show_bug.cgi?id=106959
     bool shouldPreserve3D() const { return renderer()->style()->transformStyle3D() == TransformStyle3DPreserve3D; }
-
-    bool hasFilter() const { return renderer()->hasFilter(); }
 
     void* operator new(size_t);
     // Only safe to call from RenderBox::destroyLayer()
@@ -196,16 +161,13 @@ public:
     bool hasFilterInfo() const { return m_hasFilterInfo; }
     void setHasFilterInfo(bool hasFilterInfo) { m_hasFilterInfo = hasFilterInfo; }
 
-    void updateFilters(const RenderStyle* oldStyle, const RenderStyle* newStyle);
-
     RenderLayerClipper& clipper() { return m_clipper; }
     const RenderLayerClipper& clipper() const { return m_clipper; }
 
     inline bool isPositionedContainer() const
     {
         // FIXME: This is not in sync with containingBlock.
-        RenderBox* layerRenderer = renderer();
-        return isRootLayer() || layerRenderer->isPositioned() || hasTransform();
+        return isRootLayer() || renderer()->isPositioned() || renderer()->hasTransform();
     }
 
     void clipToRect(const LayerPaintingInfo&, GraphicsContext*, const ClipRect&, BorderRadiusClippingRule = IncludeSelfForBorderRadius);
@@ -220,14 +182,9 @@ private:
     void setFirstChild(RenderLayer* first) { m_first = first; }
     void setLastChild(RenderLayer* last) { m_last = last; }
 
-    LayoutPoint renderBoxLocation() const { return renderer()->location(); }
-
     bool shouldBeSelfPaintingLayer() const;
 
-    // FIXME: We should only create the stacking node if needed.
-    bool requiresStackingNode() const { return true; }
-    void updateStackingNode();
-
+    void updateFilters(const RenderStyle* oldStyle, const RenderStyle* newStyle);
     void updateTransform(const RenderStyle* oldStyle, RenderStyle* newStyle);
 
     void dirty3DTransformedDescendantStatus();
@@ -260,8 +217,6 @@ private:
 
     RenderLayerClipper m_clipper; // FIXME: Lazily allocate?
     OwnPtr<RenderLayerStackingNode> m_stackingNode;
-
-    LayoutSize m_subpixelAccumulation; // The accumulated subpixel offset of a composited layer's composited bounds compared to absolute coordinates.
 };
 
 } // namespace blink

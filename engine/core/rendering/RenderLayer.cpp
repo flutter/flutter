@@ -92,8 +92,7 @@ RenderLayer::RenderLayer(RenderBox* renderer, LayerType type)
     , m_last(0)
     , m_clipper(*renderer)
 {
-    updateStackingNode();
-
+    m_stackingNode = adoptPtr(new RenderLayerStackingNode(this));
     m_isSelfPaintingLayer = shouldBeSelfPaintingLayer();
 }
 
@@ -102,33 +101,15 @@ RenderLayer::~RenderLayer()
     removeFilterInfoIfNeeded();
 }
 
-String RenderLayer::debugName() const
-{
-    return renderer()->debugName();
-}
-
-LayoutSize RenderLayer::subpixelAccumulation() const
-{
-    return m_subpixelAccumulation;
-}
-
-void RenderLayer::setSubpixelAccumulation(const LayoutSize& size)
-{
-    m_subpixelAccumulation = size;
-}
-
 void RenderLayer::updateLayerPositionsAfterLayout()
 {
-    TRACE_EVENT0("blink", "RenderLayer::updateLayerPositionsAfterLayout");
-
     m_clipper.clearClipRectsIncludingDescendants();
 }
 
 void RenderLayer::updateTransformationMatrix()
 {
     if (m_transform) {
-        RenderBox* box = renderBox();
-        ASSERT(box);
+        RenderBox* box = renderer();
         m_transform->makeIdentity();
         box->style()->applyTransform(*m_transform, box->pixelSnappedBorderBoxRect().size(), RenderStyle::IncludeTransformOrigin);
         // FIXME(sky): We shouldn't need to do this once Skia has 4x4 matrix support.
@@ -164,38 +145,6 @@ void RenderLayer::updateTransform(const RenderStyle* oldStyle, RenderStyle* newS
 
     if (had3DTransform != has3DTransform())
         dirty3DTransformedDescendantStatus();
-}
-
-static RenderLayer* enclosingLayerForContainingBlock(RenderLayer* layer)
-{
-    if (RenderObject* containingBlock = layer->renderer()->containingBlock())
-        return containingBlock->enclosingLayer();
-    return 0;
-}
-
-RenderLayer* RenderLayer::renderingContextRoot()
-{
-    RenderLayer* renderingContext = 0;
-
-    if (shouldPreserve3D())
-        renderingContext = this;
-
-    for (RenderLayer* current = enclosingLayerForContainingBlock(this); current && current->shouldPreserve3D(); current = enclosingLayerForContainingBlock(current))
-        renderingContext = current;
-
-    return renderingContext;
-}
-
-RenderLayer* RenderLayer::enclosingOverflowClipLayer(IncludeSelfOrNot includeSelf) const
-{
-    const RenderLayer* layer = (includeSelf == IncludeSelf) ? this : parent();
-    while (layer) {
-        if (layer->renderer()->hasOverflowClip())
-            return const_cast<RenderLayer*>(layer);
-
-        layer = layer->parent();
-    }
-    return 0;
 }
 
 void RenderLayer::dirty3DTransformedDescendantStatus()
@@ -241,14 +190,9 @@ bool RenderLayer::update3DTransformedDescendantStatus()
 
 IntSize RenderLayer::size() const
 {
-    if (renderer()->isInline() && renderer()->isRenderInline())
-        return toRenderInline(renderer())->linesBoundingBox().size();
-
     // FIXME: Is snapping the size really needed here?
-    if (RenderBox* box = renderBox())
-        return pixelSnappedIntSize(box->size(), box->location());
-
-    return IntSize();
+    RenderBox* box = renderer();
+    return pixelSnappedIntSize(box->size(), box->location());
 }
 
 LayoutPoint RenderLayer::location() const
@@ -261,8 +205,8 @@ LayoutPoint RenderLayer::location() const
         IntRect lineBox = inlineFlow->linesBoundingBox();
         inlineBoundingBoxOffset = toSize(lineBox.location());
         localPoint += inlineBoundingBoxOffset;
-    } else if (RenderBox* box = renderBox()) {
-        localPoint += box->locationOffset();
+    } else {
+        localPoint += renderer()->locationOffset();
     }
 
     if (!renderer()->isOutOfFlowPositioned() && renderer()->parent()) {
@@ -283,47 +227,6 @@ LayoutPoint RenderLayer::location() const
     localPoint -= inlineBoundingBoxOffset;
 
     return localPoint;
-}
-
-TransformationMatrix RenderLayer::perspectiveTransform() const
-{
-    if (!renderer()->hasTransform())
-        return TransformationMatrix();
-
-    RenderStyle* style = renderer()->style();
-    if (!style->hasPerspective())
-        return TransformationMatrix();
-
-    // Maybe fetch the perspective from the backing?
-    const IntRect borderBox = renderer()->pixelSnappedBorderBoxRect();
-    const float boxWidth = borderBox.width();
-    const float boxHeight = borderBox.height();
-
-    float perspectiveOriginX = floatValueForLength(style->perspectiveOriginX(), boxWidth);
-    float perspectiveOriginY = floatValueForLength(style->perspectiveOriginY(), boxHeight);
-
-    // A perspective origin of 0,0 makes the vanishing point in the center of the element.
-    // We want it to be in the top-left, so subtract half the height and width.
-    perspectiveOriginX -= boxWidth / 2.0f;
-    perspectiveOriginY -= boxHeight / 2.0f;
-
-    TransformationMatrix t;
-    t.translate(perspectiveOriginX, perspectiveOriginY);
-    t.applyPerspective(style->perspective());
-    t.translate(-perspectiveOriginX, -perspectiveOriginY);
-
-    return t;
-}
-
-FloatPoint RenderLayer::perspectiveOrigin() const
-{
-    if (!renderer()->hasTransform())
-        return FloatPoint();
-
-    const LayoutRect borderBox = renderer()->borderBoxRect();
-    RenderStyle* style = renderer()->style();
-
-    return FloatPoint(floatValueForLength(style->perspectiveOriginX(), borderBox.width().toFloat()), floatValueForLength(style->perspectiveOriginY(), borderBox.height().toFloat()));
 }
 
 RenderLayer* RenderLayer::enclosingPositionedAncestor() const
@@ -527,14 +430,6 @@ void RenderLayer::convertToLayerCoords(const RenderLayer* ancestorLayer, LayoutR
     rect.move(-delta.x(), -delta.y());
 }
 
-void RenderLayer::updateStackingNode()
-{
-    if (requiresStackingNode())
-        m_stackingNode = adoptPtr(new RenderLayerStackingNode(this));
-    else
-        m_stackingNode = nullptr;
-}
-
 static bool inContainingBlockChain(RenderLayer* startLayer, RenderLayer* endLayer)
 {
     if (startLayer == endLayer)
@@ -617,8 +512,7 @@ LayoutRect RenderLayer::logicalBoundingBox() const
     if (renderer()->isInline() && renderer()->isRenderInline()) {
         result = toRenderInline(renderer())->linesVisualOverflowBoundingBox();
     } else {
-        RenderBox* box = renderBox();
-        ASSERT(box);
+        RenderBox* box = renderer();
         result = box->borderBoxRect();
         result.unite(box->visualOverflowRect());
     }
@@ -716,22 +610,12 @@ bool RenderLayer::shouldBeSelfPaintingLayer() const
     return m_layerType == NormalLayer;
 }
 
-bool RenderLayer::hasBoxDecorationsOrBackground() const
-{
-    return renderer()->style()->hasBoxDecorations() || renderer()->style()->hasBackground();
-}
-
-bool RenderLayer::hasVisibleBoxDecorations() const
-{
-    return hasBoxDecorationsOrBackground();
-}
-
 void RenderLayer::updateFilters(const RenderStyle* oldStyle, const RenderStyle* newStyle)
 {
     if (!newStyle->hasFilter() && (!oldStyle || !oldStyle->hasFilter()))
         return;
 
-    if (!hasFilter()) {
+    if (!renderer()->hasFilter()) {
         removeFilterInfoIfNeeded();
         return;
     }

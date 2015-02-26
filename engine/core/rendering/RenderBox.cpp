@@ -281,6 +281,17 @@ FloatQuad RenderBox::absoluteContentQuad() const
     return localToAbsoluteQuad(FloatRect(rect));
 }
 
+FloatPoint RenderBox::perspectiveOrigin() const
+{
+    if (!hasTransform())
+        return FloatPoint();
+
+    const LayoutRect borderBox = borderBoxRect();
+    return FloatPoint(
+        floatValueForLength(style()->perspectiveOriginX(), borderBox.width().toFloat()),
+        floatValueForLength(style()->perspectiveOriginY(), borderBox.height().toFloat()));
+}
+
 void RenderBox::addFocusRingRects(Vector<IntRect>& rects, const LayoutPoint& additionalOffset, const RenderBox*) const
 {
     if (!size().isEmpty())
@@ -835,7 +846,7 @@ void RenderBox::paintLayerContents(GraphicsContext* context, const LayerPainting
         }
     }
 
-    if (layer()->isTransparent()) {
+    if (isTransparent()) {
         context->save();
         LayoutRect clipRect = intersection(paintingInfo.paintDirtyRect,
             transparencyClipBox(layer(), localPaintingInfo.rootLayer, localPaintingInfo.subPixelAccumulation));
@@ -873,7 +884,7 @@ void RenderBox::paintLayerContents(GraphicsContext* context, const LayerPainting
 
     layer()->restoreClip(context, localPaintingInfo.paintDirtyRect, contentRect);
 
-    if (layer()->isTransparent()) {
+    if (isTransparent()) {
         context->endLayer();
         context->restore();
     }

@@ -1432,7 +1432,7 @@ void RenderObject::getTransformFromContainer(const RenderObject* containerObject
     if (containerObject && containerObject->hasLayer() && containerObject->style()->hasPerspective()) {
         // Perpsective on the container affects us, so we have to factor it in here.
         ASSERT(containerObject->hasLayer());
-        FloatPoint perspectiveOrigin = toRenderBox(containerObject)->layer()->perspectiveOrigin();
+        FloatPoint perspectiveOrigin = toRenderBox(containerObject)->perspectiveOrigin();
 
         TransformationMatrix perspectiveMatrix;
         perspectiveMatrix.applyPerspective(containerObject->style()->perspective());

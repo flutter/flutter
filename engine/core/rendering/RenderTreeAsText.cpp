@@ -356,8 +356,6 @@ static void write(TextStream& ts, RenderLayer& l,
         if (!adjustedClipRect.contains(adjustedLayoutBounds))
             ts << " clip " << adjustedClipRect;
     }
-    if (l.isTransparent())
-        ts << " transparent";
 
     ts << "\n";
     write(ts, *l.renderer(), indent + 1, behavior);
@@ -369,8 +367,8 @@ void RenderTreeAsText::writeLayers(TextStream& ts, const RenderLayer* rootLayer,
     // FIXME: Apply overflow to the root layer to not break every test. Complete hack. Sigh.
     LayoutRect paintDirtyRect(paintRect);
     if (rootLayer == layer) {
-        paintDirtyRect.setWidth(max<LayoutUnit>(paintDirtyRect.width(), rootLayer->renderBox()->layoutOverflowRect().maxX()));
-        paintDirtyRect.setHeight(max<LayoutUnit>(paintDirtyRect.height(), rootLayer->renderBox()->layoutOverflowRect().maxY()));
+        paintDirtyRect.setWidth(max<LayoutUnit>(paintDirtyRect.width(), rootLayer->renderer()->layoutOverflowRect().maxX()));
+        paintDirtyRect.setHeight(max<LayoutUnit>(paintDirtyRect.height(), rootLayer->renderer()->layoutOverflowRect().maxY()));
     }
 
     // Calculate the clip rects we should use.
@@ -380,7 +378,7 @@ void RenderTreeAsText::writeLayers(TextStream& ts, const RenderLayer* rootLayer,
 
     // FIXME: Apply overflow to the root layer to not break every test. Complete hack. Sigh.
     if (rootLayer == layer)
-        layerBounds.setSize(layer->size().expandedTo(pixelSnappedIntSize(layer->renderBox()->maxLayoutOverflow(), LayoutPoint(0, 0))));
+        layerBounds.setSize(layer->size().expandedTo(pixelSnappedIntSize(layer->renderer()->maxLayoutOverflow(), LayoutPoint(0, 0))));
 
     // Ensure our lists are up-to-date.
     layer->stackingNode()->updateLayerListsIfNeeded();
