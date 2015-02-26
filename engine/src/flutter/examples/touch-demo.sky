@@ -6,27 +6,54 @@ dot {
     height: 100px;
     width: 100px;
     background-color: #00FF00;
+    border-radius: 50px;
 }
 </style>
-<dot />
 <log>Ready</log>
 <script>
 import "dart:sky";
 
-final Element dot = document.querySelector("dot");
+// Material design colors. :p
+List<String> colors = [
+  "#009688",
+  "#FFC107",
+  "#9C27B0",
+  "#03A9F4",
+  "#673AB7",
+  "#CDDC39",
+];
 
-void moveDot(event) {
-  double x = event.x;
-  double y = event.y;
+Element whichDot(event) {
+  return document.querySelector('dot[id="${event.pointer}"]');
+}
 
-  dot.style["transform"] = "translate(${x-50}px,${y-50}px)";
+void moreDots(event) {
+  Element dot = document.createElement('dot');
+  dot.setAttribute('id', "${event.pointer}");
+  dot.style['background-color'] = colors[event.pointer.remainder(colors.length)];
+  document.querySelector('sky').appendChild(dot);
+  runToTheCenter(event);
+}
+
+void goAway(event) {
+  whichDot(event).remove();
+}
+
+void stopDots(event) {
+  for (Element e in document.querySelectorAll('dot'))
+    e.remove();
+}
+
+void runToTheCenter(event) {
+  whichDot(event).style["transform"] =
+      "translate(${event.x-50}px,${event.y-50}px)";
 }
 
 void main() {
-  document.addEventListener("pointerdown", moveDot);
-  document.addEventListener("pointermove", moveDot);
-  document.addEventListener("pointerup", moveDot);
-  document.addEventListener("pointercancel", moveDot);
+  document.addEventListener("pointerdown", moreDots);
+  document.addEventListener("pointermove", runToTheCenter);
+  document.addEventListener("pointerup", goAway);
+  document.addEventListener("pointercancel", stopDots);
 }
 </script>
 </sky>
