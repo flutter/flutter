@@ -4,13 +4,13 @@
      found in the LICENSE file.
  -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="org.domokit.sky.shell">
+    package="org.domokit.stocks">
 
     <uses-sdk android:minSdkVersion="14" android:targetSdkVersion="21" />
     <uses-permission android:name="android.permission.INTERNET"/>
 
-    <application android:name="SkyShellApplication" android:label="Sky">
-        <activity android:name="SkyShellActivity"
+    <application android:name="org.domokit.sky.shell.SkyApplication" android:label="Stocks">
+        <activity android:name="StocksActivity"
                   android:launchMode="singleTask"
                   android:theme="@android:style/Theme.Holo.Light.NoActionBar"
                   android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
@@ -18,11 +18,6 @@
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
-            </intent-filter>
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW"/>
-                <category android:name="android.intent.category.DEFAULT" />
-                <data android:scheme="sky" />
             </intent-filter>
         </activity>
     </application>

@@ -20,7 +20,10 @@ group("sky") {
   ]
 
   if (is_android) {
-    deps += [ "//sky/shell" ]
+    deps += [
+      "//sky/apk/demo",
+      "//sky/apk/stocks",
+    ]
   }
 
   if (!is_android) {

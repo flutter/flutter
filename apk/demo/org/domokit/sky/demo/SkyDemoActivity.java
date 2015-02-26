@@ -2,17 +2,18 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-package org.domokit.sky.shell;
+package org.domokit.sky.demo;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 
+import org.domokit.sky.shell.SkyActivity;
+
 /**
- * Main activity for SkyShell.
+ * Main activity for SkyDemo.
  */
-public class SkyShellActivity extends Activity {
+public class SkyDemoActivity extends SkyActivity {
     /**
      * @see android.app.Activity#onCreate(android.os.Bundle)
      */
@@ -28,9 +29,6 @@ public class SkyShellActivity extends Activity {
             url = httpsUri.toString();
         }
 
-        SkyMain.ensureInitialized(getApplicationContext());
-        PlatformView view = new PlatformView(this);
-        setContentView(view);
-        view.loadUrl(url);
+        loadUrl(url);
     }
 }
