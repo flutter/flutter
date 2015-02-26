@@ -81,10 +81,17 @@ public class PlatformView extends SurfaceView {
     }
 
     private int getTypeForAction(int maskedAction) {
+        // Primary pointer:
         if (maskedAction == MotionEvent.ACTION_DOWN)
             return EventType.POINTER_DOWN;
         if (maskedAction == MotionEvent.ACTION_UP)
             return EventType.POINTER_UP;
+        // Secondary pointer:
+        if (maskedAction == MotionEvent.ACTION_POINTER_DOWN)
+            return EventType.POINTER_DOWN;
+        if (maskedAction == MotionEvent.ACTION_POINTER_UP)
+            return EventType.POINTER_UP;
+        // All pointers:
         if (maskedAction == MotionEvent.ACTION_MOVE)
             return EventType.POINTER_MOVE;
         if (maskedAction == MotionEvent.ACTION_CANCEL)
@@ -92,13 +99,12 @@ public class PlatformView extends SurfaceView {
         return EventType.UNKNOWN;
     }
 
-    @Override
-    public boolean onTouchEvent(MotionEvent event) {
+    private void sendInputEventForIndex(MotionEvent event, int pointerIndex) {
         PointerData pointerData = new PointerData();
-        pointerData.pointer = event.getPointerId(0);
+        pointerData.pointer = event.getPointerId(pointerIndex);
         pointerData.kind = PointerKind.TOUCH;
-        pointerData.x = event.getX();
-        pointerData.y = event.getY();
+        pointerData.x = event.getX(pointerIndex);
+        pointerData.y = event.getY(pointerIndex);
 
         InputEvent inputEvent = new InputEvent();
         inputEvent.type = getTypeForAction(event.getActionMasked());
@@ -106,6 +112,26 @@ public class PlatformView extends SurfaceView {
         inputEvent.pointerData = pointerData;
 
         mViewportObserver.onInputEvent(inputEvent);
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        int maskedAction = event.getActionMasked();
+        // ACTION_UP, ACTION_POINTER_UP, ACTION_DOWN, and ACTION_POINTER_DOWN
+        // only apply to a single pointer, other events apply to all pointers.
+        if (maskedAction == MotionEvent.ACTION_UP
+                || maskedAction == MotionEvent.ACTION_POINTER_UP
+                || maskedAction == MotionEvent.ACTION_DOWN
+                || maskedAction == MotionEvent.ACTION_POINTER_DOWN) {
+            sendInputEventForIndex(event, event.getActionIndex());
+        } else {
+            // ACTION_MOVE may not actually mean all pointers have moved
+            // but it's the responsibility of a later part of the system to
+            // ignore 0-deltas if desired.
+            for (int p = 0; p < event.getPointerCount(); p++) {
+                sendInputEventForIndex(event, p);
+            }
+        }
         return true;
     }
 

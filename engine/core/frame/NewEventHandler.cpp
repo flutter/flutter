@@ -121,7 +121,7 @@ bool NewEventHandler::dispatchClickEvent(Node& capturingTarget, const WebPointer
 void NewEventHandler::updateSelectionForPointerDown(const HitTestResult& hitTestResult, const WebPointerEvent& event)
 {
     Node* innerNode = hitTestResult.innerNode();
-    if (!innerNode->renderer())
+    if (!innerNode || !innerNode->renderer())
         return;
     if (Position::nodeIsUserSelectNone(innerNode))
         return;
@@ -191,14 +191,14 @@ bool NewEventHandler::handlePointerDownEvent(const WebPointerEvent& event)
     // pointer ID, but for mice, we don't get a pointer cancel when you
     // drag outside the window frame on Linux. For now, send the pointer
     // cancel at this point.
-    if (event.kind == WebPointerEvent::Mouse
-        && m_stateForPointer.find(event.pointer) != m_stateForPointer.end()) {
+    bool alreadyDown = m_stateForPointer.find(event.pointer) != m_stateForPointer.end();
+    if (event.kind == WebPointerEvent::Mouse && alreadyDown) {
         WebPointerEvent fakeCancel = event;
         fakeCancel.type = WebInputEvent::PointerCancel;
         handlePointerCancelEvent(fakeCancel);
     }
 
-    ASSERT(m_stateForPointer.find(event.pointer) == m_stateForPointer.end());
+    DCHECK(!alreadyDown) << "Pointer id " << event.pointer << "already down!";
     HitTestResult hitTestResult = performHitTest(positionForEvent(event));
     RefPtr<Node> target = targetForHitTestResult(hitTestResult);
     if (!target)

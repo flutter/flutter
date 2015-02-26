@@ -14,9 +14,9 @@
   sequence<Element> getChildElements();
 
   [CustomElementCallbacks, RaisesException] void append(sequence<Node> nodes);
-  [CustomElementCallbacks, RaisesException] Node appendChild(Node nodes);
+  [CustomElementCallbacks, RaisesException] Node appendChild(Node node);
   [CustomElementCallbacks, RaisesException] void prepend(sequence<Node> nodes);
-  [CustomElementCallbacks, RaisesException] Node prependChild(Node nodes);
+  [CustomElementCallbacks, RaisesException] Node prependChild(Node node);
 
   [CustomElementCallbacks] void removeChildren();
   [CustomElementCallbacks, RaisesException] Node setChild(Node node);
