@@ -103,6 +103,7 @@ DocumentView::DocumentView(
     mojo::Shell* shell)
     : response_(response.Pass()),
       exported_services_(services.Pass()),
+      imported_services_(exported_services.Pass()),
       shell_(shell),
       web_view_(nullptr),
       root_(nullptr),
@@ -110,6 +111,7 @@ DocumentView::DocumentView(
       bitmap_rasterizer_(nullptr),
       weak_factory_(this) {
   exported_services_.AddService(&view_manager_client_factory_);
+  InitServiceRegistry();
 }
 
 DocumentView::~DocumentView() {
@@ -192,6 +194,10 @@ mojo::ScopedMessagePipeHandle DocumentView::TakeServicesProvidedToEmbedder() {
 
 mojo::ScopedMessagePipeHandle DocumentView::TakeServicesProvidedByEmbedder() {
   return services_provided_by_embedder_.PassMessagePipe();
+}
+
+mojo::ScopedMessagePipeHandle DocumentView::TakeServiceRegistry() {
+  return service_registry_.PassMessagePipe();
 }
 
 mojo::Shell* DocumentView::GetShell() {
@@ -358,6 +364,18 @@ void DocumentView::OnViewInputEvent(
 
 void DocumentView::StartDebuggerInspectorBackend() {
   // FIXME: Do we need this for dart?
+}
+
+void DocumentView::InitServiceRegistry() {
+  mojo::ConnectToService(imported_services_.get(), &service_registry_);
+  mojo::Array<mojo::String> interface_names(1);
+  interface_names[0] = "ViewManagerClient";
+  mojo::ServiceProviderImpl* sp_impl(new mojo::ServiceProviderImpl());
+  sp_impl->AddService(&view_manager_client_factory_);
+  mojo::ServiceProviderPtr sp;
+  service_registry_service_provider_binding_.reset(
+      new mojo::StrongBinding<mojo::ServiceProvider>(sp_impl, &sp));
+  service_registry_->AddServices(interface_names.Pass(), sp.Pass());
 }
 
 }  // namespace sky

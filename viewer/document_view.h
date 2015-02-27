@@ -10,6 +10,7 @@
 #include "mojo/public/cpp/application/lazy_interface_ptr.h"
 #include "mojo/public/cpp/application/service_provider_impl.h"
 #include "mojo/public/cpp/bindings/interface_impl.h"
+#include "mojo/public/cpp/bindings/strong_binding.h"
 #include "mojo/public/interfaces/application/application.mojom.h"
 #include "mojo/services/content_handler/public/interfaces/content_handler.mojom.h"
 #include "mojo/services/navigation/public/interfaces/navigation.mojom.h"
@@ -17,6 +18,7 @@
 #include "mojo/services/view_manager/public/cpp/view_manager_client_factory.h"
 #include "mojo/services/view_manager/public/cpp/view_manager_delegate.h"
 #include "mojo/services/view_manager/public/cpp/view_observer.h"
+#include "services/service_registry/service_registry.mojom.h"
 #include "sky/compositor/layer_client.h"
 #include "sky/compositor/layer_host_client.h"
 #include "sky/engine/public/platform/ServiceProvider.h"
@@ -71,6 +73,7 @@ class DocumentView : public blink::ServiceProvider,
   TestHarnessPtr TakeTestHarness();
   mojo::ScopedMessagePipeHandle TakeServicesProvidedToEmbedder();
   mojo::ScopedMessagePipeHandle TakeServicesProvidedByEmbedder();
+  mojo::ScopedMessagePipeHandle TakeServiceRegistry();
 
  private:
   // WebViewClient methods:
@@ -122,8 +125,11 @@ class DocumentView : public blink::ServiceProvider,
 
   void UpdateRootSizeAndViewportMetrics(const mojo::Rect& new_bounds);
 
+  void InitServiceRegistry();
+
   mojo::URLResponsePtr response_;
   mojo::ServiceProviderImpl exported_services_;
+  mojo::ServiceProviderPtr imported_services_;
   mojo::InterfaceRequest<mojo::ServiceProvider> services_provided_to_embedder_;
   mojo::ServiceProviderPtr services_provided_by_embedder_;
   mojo::Shell* shell_;
@@ -135,7 +141,9 @@ class DocumentView : public blink::ServiceProvider,
   scoped_ptr<LayerHost> layer_host_;
   scoped_refptr<Layer> root_layer_;
   RasterizerBitmap* bitmap_rasterizer_;  // Used for pixel tests.
-
+  service_registry::ServiceRegistryPtr service_registry_;
+  scoped_ptr<mojo::StrongBinding<mojo::ServiceProvider>>
+      service_registry_service_provider_binding_;
   base::WeakPtrFactory<DocumentView> weak_factory_;
 
   DISALLOW_COPY_AND_ASSIGN(DocumentView);

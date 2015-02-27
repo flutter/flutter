@@ -34,6 +34,7 @@ class Internals : public base::SupportsUserData::Data,
   mojo::Handle TakeShellProxyHandle();
   mojo::Handle TakeServicesProvidedToEmbedder();
   mojo::Handle TakeServicesProvidedByEmbedder();
+  mojo::Handle TakeServiceRegistry();
 
   void pauseAnimations(double pauseTime);
 

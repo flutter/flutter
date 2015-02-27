@@ -59,6 +59,11 @@ void TakeServicesProvidedToEmbedder(Dart_NativeArguments args) {
       args, GetInternals()->TakeServicesProvidedToEmbedder().value());
 }
 
+void TakeServiceRegistry(Dart_NativeArguments args) {
+  Dart_SetIntegerReturnValue(
+      args, GetInternals()->TakeServiceRegistry().value());
+}
+
 const DartBuiltin::Natives kNativeFunctions[] = {
     {"contentAsText", ContentAsText, 0},
     {"notifyTestComplete", NotifyTestComplete, 1},
@@ -66,6 +71,7 @@ const DartBuiltin::Natives kNativeFunctions[] = {
     {"takeShellProxyHandle", TakeShellProxyHandle, 0},
     {"takeServicesProvidedByEmbedder", TakeServicesProvidedByEmbedder, 0},
     {"takeServicesProvidedToEmbedder", TakeServicesProvidedToEmbedder, 0},
+    {"takeServiceRegistry", TakeServiceRegistry, 0},
 };
 
 const DartBuiltin& GetBuiltin() {
@@ -92,6 +98,7 @@ String renderTreeAsText() native "renderTreeAsText";
 int takeShellProxyHandle() native "takeShellProxyHandle";
 int takeServicesProvidedByEmbedder() native "takeServicesProvidedByEmbedder";
 int takeServicesProvidedToEmbedder() native "takeServicesProvidedToEmbedder";
+int takeServiceRegistry() native "takeServiceRegistry";
 )DART";
 
 }  // namespace
@@ -150,6 +157,12 @@ mojo::Handle Internals::TakeServicesProvidedByEmbedder() {
   if (!document_view_)
     return mojo::Handle();
   return document_view_->TakeServicesProvidedByEmbedder().release();
+}
+
+mojo::Handle Internals::TakeServiceRegistry() {
+  if (!document_view_)
+    return mojo::Handle();
+  return document_view_->TakeServiceRegistry().release();
 }
 
 // Returns a MessagePipe handle that's connected to this Shell. The caller
