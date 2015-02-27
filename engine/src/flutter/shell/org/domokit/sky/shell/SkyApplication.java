@@ -18,7 +18,7 @@ import org.chromium.base.library_loader.ProcessInitException;
  * state and initializations.
  */
 public class SkyApplication extends BaseChromiumApplication {
-    private static final String TAG = "SkyShellApplication";
+    private static final String TAG = "SkyApplication";
     private static final String PRIVATE_DATA_DIRECTORY_SUFFIX = "sky_shell";
     private static final String[] SKY_MANDATORY_PAKS = {
             "icudtl.dat",
