@@ -23,6 +23,7 @@
 #ifndef SKY_ENGINE_CORE_RENDERING_RENDERBOX_H_
 #define SKY_ENGINE_CORE_RENDERING_RENDERBOX_H_
 
+#include "sky/engine/core/rendering/FilterEffectRenderer.h"
 #include "sky/engine/core/rendering/RenderBoxModelObject.h"
 #include "sky/engine/core/rendering/RenderOverflow.h"
 
@@ -485,6 +486,7 @@ protected:
 
 private:
     void updateFromStyle();
+    void updateFilters();
 
     PassRefPtr<HitTestingTransformState> createLocalTransformState(
         RenderLayer* rootLayer, RenderLayer* containerLayer,
@@ -554,6 +556,8 @@ protected:
 
     // Our overflow information.
     OwnPtr<RenderOverflow> m_overflow;
+
+    OwnPtr<FilterEffectRenderer> m_filterRenderer;
 
 private:
     OwnPtr<RenderLayer> m_layer;

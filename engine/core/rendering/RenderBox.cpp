@@ -37,7 +37,6 @@
 #include "sky/engine/core/html/HTMLElement.h"
 #include "sky/engine/core/page/EventHandler.h"
 #include "sky/engine/core/page/Page.h"
-#include "sky/engine/core/rendering/FilterEffectRenderer.h"
 #include "sky/engine/core/rendering/HitTestResult.h"
 #include "sky/engine/core/rendering/HitTestingTransformState.h"
 #include "sky/engine/core/rendering/PaintInfo.h"
@@ -172,6 +171,22 @@ void RenderBox::updateFromStyle()
     }
 
     setHasTransform(styleToUse->hasTransformRelatedProperty());
+    updateFilters();
+}
+
+void RenderBox::updateFilters()
+{
+    if (!style()->hasFilter()) {
+        m_filterRenderer = nullptr;
+        return;
+    }
+
+    m_filterRenderer = FilterEffectRenderer::create();
+
+    // If the filter fails to build, remove it from the layer. It will still attempt to
+    // go through regular processing (e.g. compositing), but never apply anything.
+    if (!m_filterRenderer->build(this, style()->filter()))
+        m_filterRenderer = nullptr;
 }
 
 void RenderBox::layout()
@@ -856,13 +871,13 @@ void RenderBox::paintLayerContents(GraphicsContext* context, const LayerPainting
 
     layer()->clipToRect(localPaintingInfo, context, contentRect);
 
-    FilterEffectRendererHelper filterPainter(layer()->filterRenderer() && hasFilter());
+    FilterEffectRendererHelper filterPainter(m_filterRenderer && style()->hasFilter());
 
     if (filterPainter.haveFilterEffect()) {
         if (!rootRelativeBoundsComputed)
             rootRelativeBounds = layer()->physicalBoundingBoxIncludingReflectionAndStackingChildren(paintingInfo.rootLayer, offsetFromRoot);
 
-        if (filterPainter.prepareFilterEffect(layer(), rootRelativeBounds, paintingInfo.paintDirtyRect))
+        if (filterPainter.prepareFilterEffect(m_filterRenderer.get(), rootRelativeBounds, paintingInfo.paintDirtyRect))
             context = filterPainter.beginFilterEffect(context);
     }
 

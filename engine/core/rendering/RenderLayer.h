@@ -55,7 +55,6 @@
 
 namespace blink {
 
-class FilterEffectRenderer;
 class FilterOperations;
 class HitTestRequest;
 class HitTestResult;
@@ -143,11 +142,6 @@ public:
     // Only safe to call from RenderBox::destroyLayer()
     void operator delete(void*);
 
-    FilterEffectRenderer* filterRenderer() const
-    {
-        return m_filterRenderer.get();
-    }
-
     RenderLayerClipper& clipper() { return m_clipper; }
     const RenderLayerClipper& clipper() const { return m_clipper; }
 
@@ -171,7 +165,6 @@ private:
 
     bool shouldBeSelfPaintingLayer() const;
 
-    void updateFilters(const RenderStyle* oldStyle, const RenderStyle* newStyle);
     void updateTransform(const RenderStyle* oldStyle, RenderStyle* newStyle);
 
     void dirty3DTransformedDescendantStatus();
@@ -199,7 +192,6 @@ private:
     RenderLayer* m_last;
 
     OwnPtr<TransformationMatrix> m_transform;
-    OwnPtr<FilterEffectRenderer> m_filterRenderer;
 
     RenderLayerClipper m_clipper; // FIXME: Lazily allocate?
     OwnPtr<RenderLayerStackingNode> m_stackingNode;

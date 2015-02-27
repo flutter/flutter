@@ -52,7 +52,6 @@
 #include "sky/engine/core/frame/LocalFrame.h"
 #include "sky/engine/core/frame/Settings.h"
 #include "sky/engine/core/page/Page.h"
-#include "sky/engine/core/rendering/FilterEffectRenderer.h"
 #include "sky/engine/core/rendering/HitTestRequest.h"
 #include "sky/engine/core/rendering/HitTestResult.h"
 #include "sky/engine/core/rendering/HitTestingTransformState.h"
@@ -607,24 +606,6 @@ bool RenderLayer::shouldBeSelfPaintingLayer() const
     return m_layerType == NormalLayer;
 }
 
-void RenderLayer::updateFilters(const RenderStyle* oldStyle, const RenderStyle* newStyle)
-{
-    if (!newStyle->hasFilter() && (!oldStyle || !oldStyle->hasFilter()))
-        return;
-
-    if (!renderer()->hasFilter()) {
-        m_filterRenderer = nullptr;
-        return;
-    }
-
-    m_filterRenderer = FilterEffectRenderer::create();
-
-    // If the filter fails to build, remove it from the layer. It will still attempt to
-    // go through regular processing (e.g. compositing), but never apply anything.
-    if (!m_filterRenderer->build(renderer(), renderer()->style()->filter()))
-        m_filterRenderer = nullptr;
-}
-
 void RenderLayer::styleChanged(StyleDifference diff, const RenderStyle* oldStyle)
 {
     m_stackingNode->updateIsNormalFlowOnly();
@@ -635,7 +616,6 @@ void RenderLayer::styleChanged(StyleDifference diff, const RenderStyle* oldStyle
     m_isSelfPaintingLayer = shouldBeSelfPaintingLayer();
 
     updateTransform(oldStyle, renderer()->style());
-    updateFilters(oldStyle, renderer()->style());
 }
 
 } // namespace blink

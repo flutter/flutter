@@ -358,8 +358,6 @@ public:
     bool hasClipPath() const { return style() && style()->clipPath(); }
     bool hasHiddenBackface() const { return style() && style()->backfaceVisibility() == BackfaceVisibilityHidden; }
 
-    bool hasFilter() const { return style() && style()->hasFilter(); }
-
     inline bool preservesNewline() const;
 
     RenderView* view() const { return document().renderView(); };
@@ -608,7 +606,7 @@ public:
     bool shouldUseTransformFromContainer(const RenderObject* container) const;
     void getTransformFromContainer(const RenderObject* container, const LayoutSize& offsetInContainer, TransformationMatrix&) const;
 
-    bool createsGroup() const { return isTransparent() || hasFilter(); }
+    bool createsGroup() const { return isTransparent() || style()->hasFilter(); }
 
     virtual void addFocusRingRects(Vector<IntRect>&, const LayoutPoint& /* additionalOffset */, const RenderBox* /* paintContainer */ = 0) const { };
 

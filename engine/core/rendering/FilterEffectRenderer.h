@@ -40,15 +40,15 @@
 
 namespace blink {
 
+class FilterEffectRenderer;
 class GraphicsContext;
-class RenderLayer;
 class RenderObject;
 
 class FilterEffectRendererHelper {
 public:
     FilterEffectRendererHelper(bool haveFilterEffect)
         : m_savedGraphicsContext(0)
-        , m_renderLayer(0)
+        , m_filter(0)
         , m_haveFilterEffect(haveFilterEffect)
     {
     }
@@ -56,12 +56,12 @@ public:
     bool haveFilterEffect() const { return m_haveFilterEffect; }
     bool hasStartedFilterEffect() const { return m_savedGraphicsContext; }
 
-    bool prepareFilterEffect(RenderLayer*, const LayoutRect& filterBoxRect, const LayoutRect& dirtyRect);
+    bool prepareFilterEffect(FilterEffectRenderer*, const LayoutRect& filterBoxRect, const LayoutRect& dirtyRect);
     GraphicsContext* beginFilterEffect(GraphicsContext* oldContext);
     GraphicsContext* applyFilterEffect();
 private:
     GraphicsContext* m_savedGraphicsContext;
-    RenderLayer* m_renderLayer;
+    FilterEffectRenderer* m_filter;
 
     FloatRect m_filterBoxRect;
     bool m_haveFilterEffect;

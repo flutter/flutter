@@ -287,18 +287,16 @@ LayoutRect FilterEffectRenderer::computeSourceImageRectForDirtyRect(const Layout
     return LayoutRect(rectForPaintInvalidation);
 }
 
-bool FilterEffectRendererHelper::prepareFilterEffect(RenderLayer* renderLayer, const LayoutRect& filterBoxRect, const LayoutRect& dirtyRect)
+bool FilterEffectRendererHelper::prepareFilterEffect(FilterEffectRenderer* filter, const LayoutRect& filterBoxRect, const LayoutRect& dirtyRect)
 {
-    ASSERT(m_haveFilterEffect && renderLayer->filterRenderer());
-    m_renderLayer = renderLayer;
+    ASSERT(m_haveFilterEffect && filter);
+    m_filter = filter;
 
     // Prepare a transformation that brings the coordinates into the space
     // filter coordinates are defined in.
     AffineTransform absoluteTransform;
     // FIXME: Should these really be upconverted to doubles and not rounded? crbug.com/350474
     absoluteTransform.translate(filterBoxRect.x().toDouble(), filterBoxRect.y().toDouble());
-
-    FilterEffectRenderer* filter = renderLayer->filterRenderer();
     filter->setAbsoluteTransform(absoluteTransform);
 
     IntRect filterSourceRect = pixelSnappedIntRect(filter->computeSourceImageRectForDirtyRect(filterBoxRect, dirtyRect));
@@ -319,11 +317,9 @@ bool FilterEffectRendererHelper::prepareFilterEffect(RenderLayer* renderLayer, c
 
 GraphicsContext* FilterEffectRendererHelper::beginFilterEffect(GraphicsContext* context)
 {
-    ASSERT(m_renderLayer);
-
-    FilterEffectRenderer* filter = m_renderLayer->filterRenderer();
+    ASSERT(m_filter);
     SkiaImageFilterBuilder builder(context);
-    RefPtr<ImageFilter> imageFilter = builder.build(filter->lastEffect().get(), ColorSpaceDeviceRGB);
+    RefPtr<ImageFilter> imageFilter = builder.build(m_filter->lastEffect().get(), ColorSpaceDeviceRGB);
     if (!imageFilter) {
         m_haveFilterEffect = false;
         return context;
@@ -340,7 +336,7 @@ GraphicsContext* FilterEffectRendererHelper::beginFilterEffect(GraphicsContext* 
 
 GraphicsContext* FilterEffectRendererHelper::applyFilterEffect()
 {
-    ASSERT(m_haveFilterEffect && m_renderLayer->filterRenderer());
+    ASSERT(m_haveFilterEffect && m_filter);
     GraphicsContext* context = m_savedGraphicsContext;
     context->endLayer();
     context->restore();
