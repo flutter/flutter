@@ -154,7 +154,6 @@ void DartController::ExecuteLibraryInModule(AbstractModule* module,
 }
 
 static void UnhandledExceptionCallback(Dart_Handle error) {
-  DCHECK(!Dart_IsError(error));
   LOG(ERROR) << Dart_GetError(error);
 }
 

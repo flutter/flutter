@@ -4,11 +4,14 @@
 
 package org.domokit.oknet;
 
+import android.content.Context;
+
 import com.squareup.okhttp.OkHttpClient;
 
 import org.chromium.mojo.bindings.InterfaceRequest;
 import org.chromium.mojo.system.Core;
 import org.chromium.mojo.system.DataPipe;
+import org.chromium.mojo.system.MessagePipeHandle;
 import org.chromium.mojo.system.MojoException;
 import org.chromium.mojom.mojo.CookieStore;
 import org.chromium.mojom.mojo.NetAddress;
@@ -26,10 +29,12 @@ public class NetworkServiceImpl implements NetworkService {
     private OkHttpClient mClient;
     private Core mCore;
 
-    public NetworkServiceImpl(Core core) {
+    public NetworkServiceImpl(Context context, Core core, MessagePipeHandle pipe) {
         assert core != null;
         mCore = core;
         mClient = new OkHttpClient();
+
+        NetworkService.MANAGER.bind(this, pipe);
     }
 
     @Override

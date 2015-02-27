@@ -14,6 +14,7 @@
 #include "sky/services/platform/platform_impl.h"
 #include "sky/shell/ui/animator.h"
 #include "sky/shell/ui/input_event_converter.h"
+#include "sky/shell/ui/internals.h"
 #include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/core/SkPictureRecorder.h"
 
@@ -48,10 +49,10 @@ base::WeakPtr<Engine> Engine::GetWeakPtr() {
 }
 
 void Engine::Init(mojo::ScopedMessagePipeHandle service_provider_handle) {
-  mojo::ServiceProviderPtr service_provider =
+  service_provider_ =
       mojo::MakeProxy<mojo::ServiceProvider>(service_provider_handle.Pass());
   mojo::NetworkServicePtr network_service;
-  mojo::ConnectToService(service_provider.get(), &network_service);
+  mojo::ConnectToService(service_provider_.get(), &network_service);
   platform_impl_.reset(new PlatformImpl(network_service.Pass()));
 
   blink::initialize(platform_impl_.get());
@@ -139,6 +140,11 @@ void Engine::initializeLayerTreeView() {
 
 void Engine::scheduleVisualUpdate() {
   animator_->RequestFrame();
+}
+
+void Engine::didCreateIsolate(blink::WebLocalFrame* frame,
+                              Dart_Isolate isolate) {
+  Internals::Create(isolate, service_provider_.Pass());
 }
 
 blink::ServiceProvider* Engine::services() {

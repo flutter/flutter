@@ -11,6 +11,7 @@
 #include "base/single_thread_task_runner.h"
 #include "mojo/public/cpp/bindings/binding.h"
 #include "mojo/public/cpp/system/core.h"
+#include "mojo/public/interfaces/application/service_provider.mojom.h"
 #include "mojo/services/navigation/public/interfaces/navigation.mojom.h"
 #include "skia/ext/refptr.h"
 #include "sky/engine/public/platform/ServiceProvider.h"
@@ -65,6 +66,8 @@ class Engine : public UIDelegate,
   void scheduleVisualUpdate() override;
   blink::WebScreenInfo screenInfo() override;
   blink::ServiceProvider* services() override;
+  void didCreateIsolate(blink::WebLocalFrame* frame,
+                        Dart_Isolate isolate) override;
 
   // Services methods:
   mojo::NavigatorHost* NavigatorHost() override;
@@ -77,6 +80,7 @@ class Engine : public UIDelegate,
 
   void UpdateWebViewSize();
 
+  mojo::ServiceProviderPtr service_provider_;
   scoped_ptr<PlatformImpl> platform_impl_;
   scoped_ptr<Animator> animator_;
   blink::WebView* web_view_;
