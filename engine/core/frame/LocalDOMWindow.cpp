@@ -29,6 +29,7 @@
 
 #include <algorithm>
 #include "gen/sky/platform/RuntimeEnabledFeatures.h"
+#include "mojo/services/navigation/public/interfaces/navigation.mojom.h"
 #include "sky/engine/bindings/exception_messages.h"
 #include "sky/engine/bindings/exception_state.h"
 #include "sky/engine/bindings/exception_state_placeholder.h"
@@ -69,6 +70,7 @@
 #include "sky/engine/platform/weborigin/KURL.h"
 #include "sky/engine/platform/weborigin/SecurityPolicy.h"
 #include "sky/engine/public/platform/Platform.h"
+#include "sky/engine/public/platform/ServiceProvider.h"
 #include "sky/engine/tonic/dart_gc_visitor.h"
 #include "sky/engine/wtf/MainThread.h"
 #include "sky/engine/wtf/MathExtras.h"
@@ -687,7 +689,15 @@ void LocalDOMWindow::removeAllEventListeners()
 
 void LocalDOMWindow::setLocation(const String& urlString, SetLocationLocking locking)
 {
-    // FIXME(sky): remove.
+    if (!m_frame)
+        return;
+    FrameHost* host = m_frame->host();
+    if (!host)
+        return;
+    mojo::URLRequestPtr request = mojo::URLRequest::New();
+    request->url = urlString.toUTF8();
+    host->services()->NavigatorHost()->RequestNavigate(
+        mojo::TARGET_SOURCE_NODE, request.Pass());
 }
 
 void LocalDOMWindow::printErrorMessage(const String& message)

@@ -1,0 +1,43 @@
+<script>
+import '/sky/framework/shell.dart' as shell;
+import 'dart:sky';
+import 'package:sky/services/sensors/sensors.mojom.dart';
+
+// TODO(abarth): We should factor this out into a kinemetics library.
+class _ShakeDetector extends SensorListener {
+  _ShakeDetector() {
+    SensorServiceProxy sensorService = new SensorServiceProxy.unbound();
+    shell.requestService(sensorService);
+
+    _stub = new SensorListenerStub.unbound()
+            ..delegate = this;
+    sensorService.ptr.addListener(SensorType_ACCELEROMETER, _stub);
+    _stub.listen();
+  }
+
+  void onAccuracyChanged(int accuracy) {
+  }
+
+  void onSensorChanged(SensorData data) {
+    double value = data.values[0] + data.values[1] + data.values[2];
+    if (isShaking && value < 15.0)
+      didCompleteShake();
+    else if (value > 40.0)
+      isShaking = true;
+  }
+
+  void didCompleteShake() {
+    window.location.assign(document.URL);
+    _stub.close();
+  }
+
+  bool isShaking = false;
+  SensorListenerStub _stub;
+}
+
+_ShakeDetector _detector;
+
+void _init(_) {
+  _detector = new _ShakeDetector();
+}
+</script>
