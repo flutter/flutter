@@ -12,6 +12,7 @@
 #include "sky/engine/public/web/WebSettings.h"
 #include "sky/engine/public/web/WebView.h"
 #include "sky/services/platform/platform_impl.h"
+#include "sky/shell/java_service_provider.h"
 #include "sky/shell/ui/animator.h"
 #include "sky/shell/ui/input_event_converter.h"
 #include "sky/shell/ui/internals.h"
@@ -32,7 +33,8 @@ void ConfigureSettings(blink::WebSettings* settings) {
 }
 
 Engine::Engine(const Config& config)
-    : animator_(new Animator(config, this)),
+    : java_task_runner_(config.java_task_runner),
+      animator_(new Animator(config, this)),
       web_view_(nullptr),
       device_pixel_ratio_(1.0f),
       viewport_observer_binding_(this),
@@ -48,9 +50,17 @@ base::WeakPtr<Engine> Engine::GetWeakPtr() {
   return weak_factory_.GetWeakPtr();
 }
 
-void Engine::Init(mojo::ScopedMessagePipeHandle service_provider_handle) {
-  service_provider_ =
-      mojo::MakeProxy<mojo::ServiceProvider>(service_provider_handle.Pass());
+mojo::ServiceProviderPtr Engine::CreateServiceProvider() {
+  mojo::MessagePipe pipe;
+  java_task_runner_->PostTask(FROM_HERE, base::Bind(
+    CreateJavaServiceProvider,
+    base::Passed(mojo::MakeRequest<mojo::ServiceProvider>(
+        pipe.handle1.Pass()))));
+  return mojo::MakeProxy<mojo::ServiceProvider>(pipe.handle0.Pass());
+}
+
+void Engine::Init() {
+  service_provider_ = CreateServiceProvider();
   mojo::NetworkServicePtr network_service;
   mojo::ConnectToService(service_provider_.get(), &network_service);
   platform_impl_.reset(new PlatformImpl(network_service.Pass()));
@@ -144,7 +154,7 @@ void Engine::scheduleVisualUpdate() {
 
 void Engine::didCreateIsolate(blink::WebLocalFrame* frame,
                               Dart_Isolate isolate) {
-  Internals::Create(isolate, service_provider_.Pass());
+  Internals::Create(isolate, CreateServiceProvider());
 }
 
 blink::ServiceProvider* Engine::services() {

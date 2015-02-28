@@ -64,13 +64,13 @@ void Shell::InitUI(const base::Thread::Options& options) {
   ui_thread_->StartWithOptions(options);
 
   Engine::Config config;
+  config.java_task_runner = java_task_runner_;
   config.gpu_task_runner = gpu_thread_->message_loop()->task_runner();
   config.gpu_delegate = rasterizer_->GetWeakPtr();
   engine_.reset(new Engine(config));
 
   ui_thread_->message_loop()->PostTask(
-      FROM_HERE, base::Bind(&Engine::Init, engine_->GetWeakPtr(),
-                            base::Passed(CreateJavaServiceProvider())));
+      FROM_HERE, base::Bind(&Engine::Init, engine_->GetWeakPtr()));
 }
 
 void Shell::InitView() {
