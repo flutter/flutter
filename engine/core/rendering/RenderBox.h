@@ -33,6 +33,7 @@ struct LayerPaintingInfo;
 struct PaintInfo;
 class HitTestingTransformState;
 class RenderBlockFlow;
+class TransformationMatrix;
 
 enum SizeType { MainOrPreferredSize, MinSize, MaxSize };
 enum AvailableLogicalHeightType { ExcludeMarginBorderPadding, IncludeMarginBorderPadding };
@@ -216,6 +217,10 @@ public:
     void clearAllOverflows() { m_overflow.clear(); }
 
     void updateLayerTransformAfterLayout();
+
+    // This transform has the transform-origin baked in.
+    TransformationMatrix* transform() const { return m_transform.get(); }
+    bool has3DTransform() const { return m_transform && !m_transform->isAffine(); }
 
     LayoutUnit contentWidth() const { return clientWidth() - paddingLeft() - paddingRight(); }
     LayoutUnit contentHeight() const { return clientHeight() - paddingTop() - paddingBottom(); }
@@ -485,6 +490,8 @@ protected:
     void updateIntrinsicContentLogicalHeight(LayoutUnit intrinsicContentLogicalHeight) const { m_intrinsicContentLogicalHeight = intrinsicContentLogicalHeight; }
 
 private:
+    void updateTransformationMatrix();
+    void updateTransform(const RenderStyle* oldStyle);
     void updateFromStyle();
     void updateFilters();
 
@@ -557,7 +564,9 @@ protected:
     // Our overflow information.
     OwnPtr<RenderOverflow> m_overflow;
 
+    // TODO(ojan): Move these two into RenderBoxRareData.
     OwnPtr<FilterEffectRenderer> m_filterRenderer;
+    OwnPtr<TransformationMatrix> m_transform;
 
 private:
     OwnPtr<RenderLayer> m_layer;

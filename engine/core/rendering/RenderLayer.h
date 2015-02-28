@@ -55,12 +55,7 @@
 
 namespace blink {
 
-class FilterOperations;
-class HitTestRequest;
-class HitTestResult;
-class HitTestingTransformState;
 class RenderStyle;
-class TransformationMatrix;
 
 enum BorderRadiusClippingRule { IncludeSelfForBorderRadius, DoNotIncludeSelfForBorderRadius };
 enum IncludeSelfOrNot { IncludeSelf, ExcludeSelf };
@@ -103,7 +98,6 @@ public:
     bool isRootLayer() const { return m_isRootLayer; }
 
     void updateLayerPositionsAfterLayout();
-    void updateTransformationMatrix();
 
     RenderLayerStackingNode* stackingNode() { return m_stackingNode.get(); }
     const RenderLayerStackingNode* stackingNode() const { return m_stackingNode.get(); }
@@ -125,18 +119,9 @@ public:
     LayoutRect physicalBoundingBoxIncludingReflectionAndStackingChildren(const RenderLayer* ancestorLayer, const LayoutPoint& offsetFromRoot) const;
     LayoutRect boundingBoxForCompositing(const RenderLayer* ancestorLayer = 0) const;
 
-    // This transform has the transform-origin baked in.
-    TransformationMatrix* transform() const { return m_transform.get(); }
-
-    bool preserves3D() const { return renderer()->style()->transformStyle3D() == TransformStyle3DPreserve3D; }
-    bool has3DTransform() const { return m_transform && !m_transform->isAffine(); }
-
     bool has3DTransformedDescendant() const { return m_has3DTransformedDescendant; }
     // Both updates the status, and returns true if descendants of this have 3d.
     bool update3DTransformedDescendantStatus();
-
-    // FIXME: reflections should force transform-style to be flat in the style: https://bugs.webkit.org/show_bug.cgi?id=106959
-    bool shouldPreserve3D() const { return renderer()->style()->transformStyle3D() == TransformStyle3DPreserve3D; }
 
     void* operator new(size_t);
     // Only safe to call from RenderBox::destroyLayer()
@@ -154,7 +139,6 @@ public:
     void clipToRect(const LayerPaintingInfo&, GraphicsContext*, const ClipRect&, BorderRadiusClippingRule = IncludeSelfForBorderRadius);
     void restoreClip(GraphicsContext*, const LayoutRect& paintDirtyRect, const ClipRect&);
 
-private:
     // Bounding box in the coordinates of this layer.
     LayoutRect logicalBoundingBox() const;
 
@@ -165,10 +149,9 @@ private:
 
     bool shouldBeSelfPaintingLayer() const;
 
-    void updateTransform(const RenderStyle* oldStyle, RenderStyle* newStyle);
-
     void dirty3DTransformedDescendantStatus();
 
+private:
     LayerType m_layerType;
 
     // Self-painting layer is an optimization where we avoid the heavy RenderLayer painting
@@ -190,8 +173,6 @@ private:
     RenderLayer* m_next;
     RenderLayer* m_first;
     RenderLayer* m_last;
-
-    OwnPtr<TransformationMatrix> m_transform;
 
     RenderLayerClipper m_clipper; // FIXME: Lazily allocate?
     OwnPtr<RenderLayerStackingNode> m_stackingNode;

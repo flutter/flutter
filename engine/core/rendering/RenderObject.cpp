@@ -1418,16 +1418,16 @@ bool RenderObject::shouldUseTransformFromContainer(const RenderObject* container
 {
     // hasTransform() indicates whether the object has transform, transform-style or perspective. We just care about transform,
     // so check the layer's transform directly.
-    return (hasLayer() && toRenderBox(this)->layer()->transform()) || (containerObject && containerObject->style()->hasPerspective());
+    return (isBox() && toRenderBox(this)->transform()) || (containerObject && containerObject->style()->hasPerspective());
 }
 
 void RenderObject::getTransformFromContainer(const RenderObject* containerObject, const LayoutSize& offsetInContainer, TransformationMatrix& transform) const
 {
     transform.makeIdentity();
     transform.translate(offsetInContainer.width().toFloat(), offsetInContainer.height().toFloat());
-    RenderLayer* layer = hasLayer() ? toRenderBox(this)->layer() : 0;
-    if (layer && layer->transform())
-        transform.multiply(*layer->transform());
+    TransformationMatrix* localTransform = isBox() ? toRenderBox(this)->transform() : 0;
+    if (localTransform)
+        transform.multiply(*localTransform);
 
     if (containerObject && containerObject->hasLayer() && containerObject->style()->hasPerspective()) {
         // Perpsective on the container affects us, so we have to factor it in here.

@@ -317,7 +317,7 @@ RenderLayer* RenderLayerClipper::clippingRootForPainting() const
 
         current = current->compositingContainer();
         ASSERT(current);
-        if (current->transform())
+        if (current->renderer()->transform())
             return const_cast<RenderLayer*>(current);
     }
 

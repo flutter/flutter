@@ -353,7 +353,7 @@ IntRect RenderView::documentRect() const
 {
     FloatRect overflowRect(unscaledDocumentRect());
     if (hasTransform())
-        overflowRect = layer()->transform()->mapRect(overflowRect);
+        overflowRect = transform()->mapRect(overflowRect);
     return IntRect(overflowRect);
 }
 

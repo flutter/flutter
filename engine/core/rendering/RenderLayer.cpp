@@ -102,46 +102,6 @@ void RenderLayer::updateLayerPositionsAfterLayout()
     m_clipper.clearClipRectsIncludingDescendants();
 }
 
-void RenderLayer::updateTransformationMatrix()
-{
-    if (m_transform) {
-        RenderBox* box = renderer();
-        m_transform->makeIdentity();
-        box->style()->applyTransform(*m_transform, box->pixelSnappedBorderBoxRect().size(), RenderStyle::IncludeTransformOrigin);
-        // FIXME(sky): We shouldn't need to do this once Skia has 4x4 matrix support.
-        // Until then, 3d transforms don't work right.
-        m_transform->makeAffine();
-    }
-}
-
-void RenderLayer::updateTransform(const RenderStyle* oldStyle, RenderStyle* newStyle)
-{
-    if (oldStyle && newStyle->transformDataEquivalent(*oldStyle))
-        return;
-
-    // hasTransform() on the renderer is also true when there is transform-style: preserve-3d or perspective set,
-    // so check style too.
-    bool hasTransform = renderer()->hasTransform() && newStyle->hasTransform();
-    bool had3DTransform = has3DTransform();
-
-    bool hadTransform = m_transform;
-    if (hasTransform != hadTransform) {
-        if (hasTransform)
-            m_transform = adoptPtr(new TransformationMatrix);
-        else
-            m_transform.clear();
-
-        // Layers with transforms act as clip rects roots, so clear the cached clip rects here.
-        m_clipper.clearClipRectsIncludingDescendants();
-    } else if (hasTransform) {
-        m_clipper.clearClipRectsIncludingDescendants(AbsoluteClipRects);
-    }
-
-    updateTransformationMatrix();
-
-    if (had3DTransform != has3DTransform())
-        dirty3DTransformedDescendantStatus();
-}
 
 void RenderLayer::dirty3DTransformedDescendantStatus()
 {
@@ -153,7 +113,7 @@ void RenderLayer::dirty3DTransformedDescendantStatus()
 
     // This propagates up through preserve-3d hierarchies to the enclosing flattening layer.
     // Note that preserves3D() creates stacking context, so we can just run up the stacking containers.
-    while (stackingNode && stackingNode->layer()->preserves3D()) {
+    while (stackingNode && stackingNode->layer()->renderer()->style()->preserves3D()) {
         stackingNode->layer()->m_3DTransformedDescendantStatusDirty = true;
         stackingNode = stackingNode->ancestorStackingContextNode();
     }
@@ -178,10 +138,10 @@ bool RenderLayer::update3DTransformedDescendantStatus()
 
     // If we live in a 3d hierarchy, then the layer at the root of that hierarchy needs
     // the m_has3DTransformedDescendant set.
-    if (preserves3D())
-        return has3DTransform() || m_has3DTransformedDescendant;
+    if (renderer()->style()->preserves3D())
+        return renderer()->has3DTransform() || m_has3DTransformedDescendant;
 
-    return has3DTransform();
+    return renderer()->has3DTransform();
 }
 
 IntSize RenderLayer::size() const
@@ -571,8 +531,8 @@ LayoutRect RenderLayer::boundingBoxForCompositing(const RenderLayer* ancestorLay
 
     LayoutRect localClipRect = clipper().localClipRect();
     if (localClipRect != PaintInfo::infiniteRect()) {
-        if (transform())
-            localClipRect = transform()->mapRect(localClipRect);
+        if (renderer()->transform())
+            localClipRect = renderer()->transform()->mapRect(localClipRect);
 
         LayoutPoint delta;
         convertToLayerCoords(ancestorLayer, delta);
@@ -592,8 +552,8 @@ LayoutRect RenderLayer::boundingBoxForCompositing(const RenderLayer* ancestorLay
     // https://bugs.webkit.org/show_bug.cgi?id=81239
     m_renderer->style()->filterOutsets().expandRect(result);
 
-    if (transform())
-        result = transform()->mapRect(result);
+    if (renderer()->transform())
+        result = renderer()->transform()->mapRect(result);
 
     LayoutPoint delta;
     convertToLayerCoords(ancestorLayer, delta);
@@ -614,8 +574,6 @@ void RenderLayer::styleChanged(StyleDifference diff, const RenderStyle* oldStyle
     // Overlay scrollbars can make this layer self-painting so we need
     // to recompute the bit once scrollbars have been updated.
     m_isSelfPaintingLayer = shouldBeSelfPaintingLayer();
-
-    updateTransform(oldStyle, renderer()->style());
 }
 
 } // namespace blink

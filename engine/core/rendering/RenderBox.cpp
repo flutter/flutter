@@ -149,8 +149,50 @@ void RenderBox::styleDidChange(StyleDifference diff, const RenderStyle* oldStyle
         layer()->styleChanged(diff, oldStyle);
     }
 
+    updateTransform(oldStyle);
+
     if (needsLayout() && oldStyle)
         RenderBlock::removePercentHeightDescendantIfNeeded(this);
+}
+
+void RenderBox::updateTransformationMatrix()
+{
+    if (m_transform) {
+        m_transform->makeIdentity();
+        style()->applyTransform(*m_transform, pixelSnappedBorderBoxRect().size(), RenderStyle::IncludeTransformOrigin);
+        // FIXME(sky): We shouldn't need to do this once Skia has 4x4 matrix support.
+        // Until then, 3d transforms don't work right.
+        m_transform->makeAffine();
+    }
+}
+
+void RenderBox::updateTransform(const RenderStyle* oldStyle)
+{
+    if (oldStyle && style()->transformDataEquivalent(*oldStyle))
+        return;
+
+    // hasTransform() on the renderer is also true when there is transform-style: preserve-3d or perspective set,
+    // so check style too.
+    bool localHasTransform = hasTransform() && style()->hasTransform();
+    bool had3DTransform = has3DTransform();
+
+    bool hadTransform = m_transform;
+    if (localHasTransform != hadTransform) {
+        if (localHasTransform)
+            m_transform = adoptPtr(new TransformationMatrix);
+        else
+            m_transform.clear();
+
+        // Layers with transforms act as clip rects roots, so clear the cached clip rects here.
+        layer()->clipper().clearClipRectsIncludingDescendants();
+    } else if (localHasTransform) {
+        layer()->clipper().clearClipRectsIncludingDescendants(AbsoluteClipRects);
+    }
+
+    updateTransformationMatrix();
+
+    if (had3DTransform != has3DTransform())
+        layer()->dirty3DTransformedDescendantStatus();
 }
 
 // TODO(ojan): Inline this into styleDidChange,
@@ -246,9 +288,8 @@ void RenderBox::absoluteQuads(Vector<FloatQuad>& quads) const
 
 void RenderBox::updateLayerTransformAfterLayout()
 {
-    // Transform-origin depends on box size, so we need to update the layer transform after layout.
-    if (hasLayer())
-        layer()->updateTransformationMatrix();
+    // Transform-origin depends on box size, so we need to update the transform after layout.
+    updateTransformationMatrix();
 }
 
 LayoutUnit RenderBox::constrainLogicalWidthByMinMax(LayoutUnit logicalWidth, LayoutUnit availableWidth, RenderBlock* cb) const
@@ -548,11 +589,11 @@ bool RenderBox::hitTestLayer(RenderLayer* rootLayer, RenderLayer* containerLayer
     HitTestLocation localHitTestLocation = hitTestLocation;
 
     // We need transform state for the first time, or to offset the container state, or to accumulate the new transform.
-    if (layer()->transform() || transformState || layer()->has3DTransformedDescendant() || layer()->preserves3D())
+    if (transform() || transformState || layer()->has3DTransformedDescendant() || style()->preserves3D())
         localTransformState = createLocalTransformState(rootLayer, containerLayer, localHitTestRect, localHitTestLocation, transformState);
 
     // Apply a transform if we have one.
-    if (layer()->transform()) {
+    if (transform()) {
         // The RenderView cannot have transforms.
         ASSERT(parent());
         // Make sure the parent's clip rects have been calculated.
@@ -596,7 +637,7 @@ bool RenderBox::hitTestLayer(RenderLayer* rootLayer, RenderLayer* containerLayer
     }
 
     RefPtr<HitTestingTransformState> unflattenedTransformState = localTransformState;
-    if (localTransformState && !layer()->preserves3D()) {
+    if (localTransformState && !style()->preserves3D()) {
         // Keep a copy of the pre-flattening state, for computing z-offsets for the container
         unflattenedTransformState = HitTestingTransformState::create(*localTransformState);
         // This layer is flattening, so flatten the state passed to descendants.
@@ -610,7 +651,7 @@ bool RenderBox::hitTestLayer(RenderLayer* rootLayer, RenderLayer* containerLayer
     double* zOffsetForContentsPtr = 0;
 
     bool depthSortDescendants = false;
-    if (layer()->preserves3D()) {
+    if (style()->preserves3D()) {
         depthSortDescendants = true;
         // Our layers can depth-test with our container, so share the z depth pointer with the container, if it passed one down.
         zOffsetForDescendantsPtr = zOffset ? zOffset : &localZOffset;
@@ -720,9 +761,7 @@ void RenderBox::paintLayer(GraphicsContext* context, const LayerPaintingInfo& pa
     if (!opacity())
         return;
 
-    TransformationMatrix* layerTransform = layer()->transform();
-
-    if (!layerTransform) {
+    if (!transform()) {
         paintLayerContents(context, paintingInfo);
         return;
     }
@@ -731,7 +770,7 @@ void RenderBox::paintLayer(GraphicsContext* context, const LayerPaintingInfo& pa
     ASSERT(layer()->parent());
 
     // If the transform can't be inverted, then don't paint anything.
-    if (!layerTransform->isInvertible())
+    if (!transform()->isInvertible())
         return;
 
     // Make sure the parent's clip rects have been calculated.
@@ -746,20 +785,20 @@ void RenderBox::paintLayer(GraphicsContext* context, const LayerPaintingInfo& pa
     // the accumulated error for sub-pixel layout.
     LayoutPoint delta;
     layer()->convertToLayerCoords(paintingInfo.rootLayer, delta);
-    TransformationMatrix transform(*layerTransform);
+    TransformationMatrix localTransform(*transform());
     IntPoint roundedDelta = roundedIntPoint(delta);
-    transform.translateRight(roundedDelta.x(), roundedDelta.y());
+    localTransform.translateRight(roundedDelta.x(), roundedDelta.y());
     LayoutSize adjustedSubPixelAccumulation = paintingInfo.subPixelAccumulation + (delta - roundedDelta);
 
     // Apply the transform.
     GraphicsContextStateSaver stateSaver(*context, false);
-    if (!transform.isIdentity()) {
+    if (!localTransform.isIdentity()) {
         stateSaver.save();
-        context->concatCTM(transform.toAffineTransform());
+        context->concatCTM(localTransform.toAffineTransform());
     }
 
     // Now do a paint with the root layer shifted to be us.
-    LayerPaintingInfo transformedPaintingInfo(layer(), enclosingIntRect(transform.inverse().mapRect(paintingInfo.paintDirtyRect)),
+    LayerPaintingInfo transformedPaintingInfo(layer(), enclosingIntRect(localTransform.inverse().mapRect(paintingInfo.paintDirtyRect)),
         adjustedSubPixelAccumulation);
     paintLayerContents(context, transformedPaintingInfo);
 
@@ -785,7 +824,7 @@ static LayoutRect transparencyClipBox(const RenderLayer* layer, const RenderLaye
     // paintDirtyRect, and that should cut down on the amount we have to paint.  Still it
     // would be better to respect clips.
 
-    if (rootLayer != layer && layer->transform()) {
+    if (rootLayer != layer && layer->renderer()->transform()) {
         // The best we can do here is to use enclosed bounding boxes to establish a "fuzzy" enough clip to encompass
         // the transformed layer and all of its children.
         const RenderLayer* rootLayerForTransform = rootLayer;
@@ -796,7 +835,7 @@ static LayoutRect transparencyClipBox(const RenderLayer* layer, const RenderLaye
         IntPoint pixelSnappedDelta = roundedIntPoint(delta);
         TransformationMatrix transform;
         transform.translate(pixelSnappedDelta.x(), pixelSnappedDelta.y());
-        transform = transform * *layer->transform();
+        transform = transform * *layer->renderer()->transform();
 
         // We don't use fragment boxes when collecting a transformed layer's bounding box, since it always
         // paints unfragmented.y
@@ -3013,8 +3052,8 @@ LayoutRect RenderBox::layoutOverflowRectForPropagation() const
     if (!hasOverflowClip())
         rect.unite(layoutOverflowRect());
 
-    if (hasLayer() && layer()->transform())
-        rect = layer()->transform()->mapRect(rect);
+    if (transform())
+        rect = transform()->mapRect(rect);
 
     return rect;
 }

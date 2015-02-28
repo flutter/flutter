@@ -2324,7 +2324,7 @@ const RenderObject* RenderBoxModelObject::pushMappingToContainer(const RenderBox
         return 0;
 
     bool isInline = isRenderInline();
-    bool hasTransform = !isInline && hasLayer() && toRenderBox(this)->layer()->transform();
+    bool hasTransform = !isInline && isBox() && toRenderBox(this)->transform();
 
     LayoutSize adjustmentForSkippedAncestor;
     if (ancestorSkipped) {
