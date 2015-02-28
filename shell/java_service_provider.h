@@ -7,12 +7,13 @@
 
 #include <jni.h>
 #include "mojo/public/cpp/system/core.h"
+#include "mojo/public/interfaces/application/service_provider.mojom.h"
 
 namespace sky {
 namespace shell {
 
 bool RegisterJavaServiceProvider(JNIEnv* env);
-mojo::ScopedMessagePipeHandle CreateJavaServiceProvider();
+void CreateJavaServiceProvider(mojo::InterfaceRequest<mojo::ServiceProvider>);
 
 }  // namespace shell
 }  // namespace sky

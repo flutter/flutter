@@ -11,7 +11,6 @@ import org.chromium.base.JNINamespace;
 import org.chromium.mojo.system.Core;
 import org.chromium.mojo.system.MessagePipeHandle;
 import org.chromium.mojo.system.MojoException;
-import org.chromium.mojo.system.Pair;
 import org.chromium.mojo.system.impl.CoreImpl;
 import org.chromium.mojom.mojo.NetworkService;
 import org.chromium.mojom.mojo.ServiceProvider;
@@ -29,11 +28,10 @@ public class JavaServiceProvider implements ServiceProvider {
 
     @SuppressWarnings("unused")
     @CalledByNative
-    public static int create(Context context) {
+    public static void create(Context context, int nativeHandle) {
         Core core = CoreImpl.getInstance();
-        Pair<MessagePipeHandle, MessagePipeHandle> messagePipe = core.createMessagePipe(null);
-        ServiceProvider.MANAGER.bind(new JavaServiceProvider(core, context), messagePipe.first);
-        return messagePipe.second.releaseNativeHandle();
+        MessagePipeHandle pipe = core.acquireNativeHandle(nativeHandle).toMessagePipeHandle();
+        ServiceProvider.MANAGER.bind(new JavaServiceProvider(core, context), pipe);
     }
 
     public JavaServiceProvider(Core core, Context context) {

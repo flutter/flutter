@@ -6,6 +6,7 @@
 
 #include "base/android/jni_android.h"
 #include "jni/JavaServiceProvider_jni.h"
+#include "mojo/public/cpp/bindings/interface_request.h"
 
 namespace sky {
 namespace shell {
@@ -14,11 +15,12 @@ bool RegisterJavaServiceProvider(JNIEnv* env) {
   return RegisterNativesImpl(env);
 }
 
-mojo::ScopedMessagePipeHandle CreateJavaServiceProvider() {
-  JNIEnv* env = base::android::AttachCurrentThread();
-  return mojo::ScopedMessagePipeHandle(
-      mojo::MessagePipeHandle(Java_JavaServiceProvider_create(
-            env, base::android::GetApplicationContext())));
+void CreateJavaServiceProvider(
+    mojo::InterfaceRequest<mojo::ServiceProvider> request) {
+  Java_JavaServiceProvider_create(
+      base::android::AttachCurrentThread(),
+      base::android::GetApplicationContext(),
+      request.PassMessagePipe().release().value());
 }
 
 }  // namespace shell

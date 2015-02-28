@@ -35,6 +35,8 @@ class Engine : public UIDelegate,
                public blink::WebViewClient {
  public:
   struct Config {
+    scoped_refptr<base::SingleThreadTaskRunner> java_task_runner;
+
     base::WeakPtr<GPUDelegate> gpu_delegate;
     scoped_refptr<base::SingleThreadTaskRunner> gpu_task_runner;
   };
@@ -44,7 +46,7 @@ class Engine : public UIDelegate,
 
   base::WeakPtr<Engine> GetWeakPtr();
 
-  void Init(mojo::ScopedMessagePipeHandle service_provider);
+  void Init();
 
   void BeginFrame(base::TimeTicks frame_time);
   skia::RefPtr<SkPicture> Paint();
@@ -78,8 +80,10 @@ class Engine : public UIDelegate,
   void DidNavigateLocally(const mojo::String& url) override;
   void RequestNavigateHistory(int32_t delta) override;
 
+  mojo::ServiceProviderPtr CreateServiceProvider();
   void UpdateWebViewSize();
 
+  scoped_refptr<base::SingleThreadTaskRunner> java_task_runner_;
   mojo::ServiceProviderPtr service_provider_;
   scoped_ptr<PlatformImpl> platform_impl_;
   scoped_ptr<Animator> animator_;
