@@ -10,7 +10,7 @@ dot {
     border-radius: 50px;
 }
 </style>
-<log>Ready</log>
+<log>Ready!</log>
 <script>
 import "dart:sky";
 
