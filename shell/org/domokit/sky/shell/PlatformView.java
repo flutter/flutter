@@ -26,10 +26,14 @@ import org.chromium.mojom.sky.ViewportObserver;
  * A view containing Sky
  */
 @JNINamespace("sky::shell")
-public class PlatformView extends SurfaceView {
+public class PlatformView extends SurfaceView
+        implements GestureProvider.OnGestureListener {
+    private static final String TAG = "PlatformView";
+
     private long mNativePlatformView;
     private ViewportObserver.Proxy mViewportObserver;
     private final SurfaceHolder.Callback mSurfaceCallback;
+    private GestureProvider mGestureProvider;
 
     public PlatformView(Context context) {
         super(context);
@@ -62,6 +66,8 @@ public class PlatformView extends SurfaceView {
             }
         };
         getHolder().addCallback(mSurfaceCallback);
+
+        mGestureProvider = new GestureProvider(context, this);
     }
 
     @Override
@@ -116,6 +122,8 @@ public class PlatformView extends SurfaceView {
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
+        mGestureProvider.onTouchEvent(event);
+
         int maskedAction = event.getActionMasked();
         // ACTION_UP, ACTION_POINTER_UP, ACTION_DOWN, and ACTION_POINTER_DOWN
         // only apply to a single pointer, other events apply to all pointers.
@@ -133,6 +141,11 @@ public class PlatformView extends SurfaceView {
             }
         }
         return true;
+    }
+
+    @Override
+    public void onGestureEvent(InputEvent event) {
+        mViewportObserver.onInputEvent(event);
     }
 
     public void loadUrl(String url) {

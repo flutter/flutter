@@ -72,11 +72,12 @@ shared_library("sky_shell") {
 
 android_library("java") {
   java_files = [
+    "org/domokit/sky/shell/GestureProvider.java",
     "org/domokit/sky/shell/JavaServiceProvider.java",
     "org/domokit/sky/shell/PlatformView.java",
-    "org/domokit/sky/shell/SkyMain.java",
     "org/domokit/sky/shell/SkyActivity.java",
     "org/domokit/sky/shell/SkyApplication.java",
+    "org/domokit/sky/shell/SkyMain.java",
   ]
 
   deps = [

@@ -94,8 +94,10 @@ class SkyScrollable extends SkyElement {
     double newScrollOffset = math.max(0.0, math.min(scrollRange, value));
     if (newScrollOffset == _scrollOffset)
       return;
+    // TODO(eseidel): We should scroll in device pixels instead of logical
+    // pixels, but to do that correctly we need to use a device pixel unit.
     _scrollOffset = newScrollOffset;
-    String transform = 'translateY(${(-_scrollOffset).toStringAsFixed(2)}px)';
+    String transform = 'translateY(${(-_scrollOffset).toInt()}px)';
     _scrollable.style['transform'] = transform;
 
     double topPercent = newScrollOffset / innerHeight * 100.0;

@@ -10,6 +10,11 @@ enum EventType {
   POINTER_UP,
   POINTER_MOVE,
   POINTER_CANCEL,
+  GESTURE_SCROLL_BEGIN,
+  GESTURE_SCROLL_UPDATE,
+  GESTURE_SCROLL_END,
+  GESTURE_FLING_START,
+  GESTURE_FLING_CANCEL,
 };
 
 enum PointerKind {
@@ -36,8 +41,18 @@ struct PointerData {
   float tilt;
 };
 
+struct GestureData {
+    float x;
+    float y;
+    float dx;
+    float dy;
+    float velocityX;
+    float velocityY;
+};
+
 struct InputEvent {
   EventType type;
   int64 time_stamp;
   PointerData? pointer_data;
+  GestureData? gesture_data;
 };
