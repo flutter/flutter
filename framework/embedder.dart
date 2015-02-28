@@ -8,7 +8,7 @@ import "mojo:bindings" as bindings;
 import "mojo:core" as core;
 import "package:mojo/public/interfaces/application/service_provider.mojom.dart";
 import "package:mojo/public/interfaces/application/shell.mojom.dart";
-import "package:services/service_registry/service_registry.mojom.dart";
+import "package:mojo/services/service_registry/public/interfaces/service_registry.mojom.dart";
 
 final _EmbedderImpl embedder = new _EmbedderImpl();
 
@@ -56,5 +56,3 @@ class _EmbedderImpl {
     return _serviceRegistry;
   }
 }
-
-
