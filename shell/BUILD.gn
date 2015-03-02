@@ -75,6 +75,8 @@ android_library("java") {
     "org/domokit/sky/shell/GestureProvider.java",
     "org/domokit/sky/shell/JavaServiceProvider.java",
     "org/domokit/sky/shell/PlatformView.java",
+    "org/domokit/sky/shell/ServiceFactory.java",
+    "org/domokit/sky/shell/ServiceRegistry.java",
     "org/domokit/sky/shell/SkyActivity.java",
     "org/domokit/sky/shell/SkyApplication.java",
     "org/domokit/sky/shell/SkyMain.java",
@@ -88,8 +90,6 @@ android_library("java") {
     "//mojo/public/java:system",
     "//mojo/services/network/public/interfaces:interfaces_java",
     "//sky/services/oknet",
-    "//sky/services/sensors",
-    "//sky/services/sensors:interfaces_java",
     "//sky/services/viewport:viewport_java",
   ]
 }

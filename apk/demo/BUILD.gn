@@ -9,9 +9,17 @@ import("//build/config/android/rules.gni")
 import("//sky/apk/rules.gni")
 
 android_library("java") {
-  java_files = [ "org/domokit/sky/demo/SkyDemoActivity.java" ]
+  java_files = [
+    "org/domokit/sky/demo/SkyDemoActivity.java",
+    "org/domokit/sky/demo/SkyDemoApplication.java",
+  ]
 
   deps = [
+    "//base:base_java",
+    "//mojo/public/java:bindings",
+    "//mojo/public/java:system",
+    "//sky/services/sensors",
+    "//sky/services/sensors:interfaces_java",
     "//sky/shell:java",
   ]
 }

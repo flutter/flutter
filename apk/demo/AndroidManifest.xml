@@ -10,7 +10,7 @@
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-feature android:name="android.hardware.sensor.accelerometer" android:required="true" />
 
-    <application android:name="org.domokit.sky.shell.SkyApplication" android:label="Sky">
+    <application android:name="SkyDemoApplication" android:label="Sky">
         <activity android:name="SkyDemoActivity"
                   android:launchMode="singleTask"
                   android:theme="@android:style/Theme.Holo.Light.NoActionBar"
