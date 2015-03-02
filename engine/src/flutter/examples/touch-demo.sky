@@ -4,10 +4,11 @@
 <style>
 dot {
     position: absolute;
-    height: 100px;
-    width: 100px;
+    height: 10px;
+    width: 10px;
     background-color: #00FF00;
-    border-radius: 50px;
+    border-radius: 5px;
+    opacity: .75;
 }
 </style>
 <log>Ready!</log>
@@ -46,8 +47,12 @@ void stopDots(event) {
 }
 
 void runToTheCenter(event) {
-  whichDot(event).style["transform"] =
-      "translate(${event.x-50}px,${event.y-50}px)";
+  float radius = (5 + (95 * event.pressure));
+  Element dot = whichDot(event);
+  dot.style["transform"] = "translate(${event.x-radius}px,${event.y-radius}px)";
+  dot.style["width"] = "${2 * radius}px";
+  dot.style["height"] = "${2 * radius}px";
+  dot.style["border-radius"] = "${radius}px";
 }
 
 void main() {

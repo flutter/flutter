@@ -112,10 +112,18 @@ public class PlatformView extends SurfaceView
         pointerData.x = event.getX(pointerIndex);
         pointerData.y = event.getY(pointerIndex);
 
+        pointerData.pressure = event.getPressure(pointerIndex);
+        // TODO(eseidel): Could get the calibrated range if necessary:
+        // event.getDevice().getMotionRange(MotionEvent.AXIS_PRESSURE)
+        pointerData.pressureMin = 0.0f;
+        pointerData.pressureMax = 1.0f;
+
         InputEvent inputEvent = new InputEvent();
         inputEvent.type = getTypeForAction(event.getActionMasked());
         inputEvent.timeStamp = event.getEventTime();
         inputEvent.pointerData = pointerData;
+
+
 
         mViewportObserver.onInputEvent(inputEvent);
     }
