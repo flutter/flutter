@@ -17,8 +17,7 @@ class SkyApplication : public mojo::Application {
  public:
   SkyApplication(mojo::InterfaceRequest<mojo::Application> application,
                  mojo::URLResponsePtr response)
-      : url_(response->url),
-        binding_(this, application.Pass()),
+      : binding_(this, application.Pass()),
         initial_response_(response.Pass()) {}
 
   void Initialize(mojo::ShellPtr shell,
@@ -33,7 +32,8 @@ class SkyApplication : public mojo::Application {
 
   void AcceptConnection(const mojo::String& requestor_url,
                         mojo::InterfaceRequest<mojo::ServiceProvider> services,
-                        mojo::ServiceProviderPtr exposed_services) override {
+                        mojo::ServiceProviderPtr exposed_services,
+                        const mojo::String& url) override {
     if (initial_response_) {
       OnResponseReceived(mojo::URLLoaderPtr(), services.Pass(),
                          exposed_services.Pass(), initial_response_.Pass());
@@ -41,7 +41,7 @@ class SkyApplication : public mojo::Application {
       mojo::URLLoaderPtr loader;
       network_service_->CreateURLLoader(mojo::GetProxy(&loader));
       mojo::URLRequestPtr request(mojo::URLRequest::New());
-      request->url = url_;
+      request->url = url;
       request->auto_follow_redirects = true;
 
       // |loader| will be pass to the OnResponseReceived method through a
@@ -70,7 +70,6 @@ class SkyApplication : public mojo::Application {
                      shell_.get());
   }
 
-  mojo::String url_;
   mojo::StrongBinding<mojo::Application> binding_;
   mojo::ShellPtr shell_;
   mojo::NetworkServicePtr network_service_;
