@@ -41,6 +41,9 @@ scoped_ptr<blink::WebInputEvent> BuildWebPointerEvent(
     web_event->pointer = event->pointer_data->pointer;
     web_event->x = event->pointer_data->x / device_pixel_ratio;
     web_event->y = event->pointer_data->y / device_pixel_ratio;
+    web_event->pressure = event->pointer_data->pressure;
+    web_event->pressureMin = event->pointer_data->pressure_min;
+    web_event->pressureMax = event->pointer_data->pressure_max;
   }
 
   return web_event.Pass();
