@@ -47,7 +47,7 @@ void stopDots(event) {
 }
 
 void runToTheCenter(event) {
-  float radius = (5 + (95 * event.pressure));
+  double radius = (5 + (95 * event.pressure));
   Element dot = whichDot(event);
   dot.style["transform"] = "translate(${event.x-radius}px,${event.y-radius}px)";
   dot.style["width"] = "${2 * radius}px";
