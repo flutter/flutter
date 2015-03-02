@@ -687,10 +687,9 @@ bool RenderBox::hitTestLayer(RenderLayer* rootLayer, RenderLayer* containerLayer
     }
 
     LayoutRect layerBounds;
-    // FIXME(sky): Remove foregroundRect. It's unused.
-    ClipRect contentRect, foregroundRect;
+    ClipRect contentRect;
     ClipRectsContext clipRectsContext(rootLayer, RootRelativeClipRects);
-    layer()->clipper().calculateRects(clipRectsContext, localHitTestRect, layerBounds, contentRect, foregroundRect);
+    layer()->clipper().calculateRects(clipRectsContext, localHitTestRect, layerBounds, contentRect);
 
     // Next we want to see if the mouse pos is inside the child RenderObjects of the layer.
     if (contentRect.intersects(localHitTestLocation)) {
@@ -864,12 +863,10 @@ void RenderBox::paintLayerContents(GraphicsContext* context, const LayerPainting
     LayerPaintingInfo localPaintingInfo(paintingInfo);
 
     LayoutRect layerBounds;
-    // FIXME(sky): Remove foregroundRect. It's unused.
-    ClipRect contentRect, foregroundRect;
+    ClipRect contentRect;
     ClipRectsContext clipRectsContext(localPaintingInfo.rootLayer, PaintingClipRects, localPaintingInfo.subPixelAccumulation);
     layer()->clipper().calculateRects(clipRectsContext, localPaintingInfo.paintDirtyRect,
-        layerBounds, contentRect, foregroundRect,
-        &offsetFromRoot);
+        layerBounds, contentRect, &offsetFromRoot);
 
     if (!layer()->intersectsDamageRect(layerBounds, contentRect.rect(), localPaintingInfo.rootLayer, &offsetFromRoot))
         return;

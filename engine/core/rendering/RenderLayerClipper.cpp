@@ -155,27 +155,14 @@ void RenderLayerClipper::clearClipRectsIncludingDescendants(ClipRectsCacheSlot c
         layer->clipper().clearClipRectsIncludingDescendants(cacheSlot);
 }
 
-LayoutRect RenderLayerClipper::childrenClipRect() const
-{
-    // FIXME: border-radius not accounted for.
-    // FIXME: Regions not accounted for.
-    RenderLayer* clippingRootLayer = clippingRootForPainting();
-    LayoutRect layerBounds;
-    ClipRect backgroundRect, foregroundRect;
-    // Need to use uncached clip rects, because the value of 'dontClipToOverflow' may be different from the painting path (<rdar://problem/11844909>).
-    ClipRectsContext context(clippingRootLayer, UncachedClipRects);
-    calculateRects(context, m_renderer.view()->unscaledDocumentRect(), layerBounds, backgroundRect, foregroundRect);
-    return clippingRootLayer->renderer()->localToAbsoluteQuad(FloatQuad(foregroundRect.rect())).enclosingBoundingBox();
-}
-
 LayoutRect RenderLayerClipper::localClipRect() const
 {
     // FIXME: border-radius not accounted for.
     RenderLayer* clippingRootLayer = clippingRootForPainting();
     LayoutRect layerBounds;
-    ClipRect backgroundRect, foregroundRect;
+    ClipRect backgroundRect;
     ClipRectsContext context(clippingRootLayer, PaintingClipRects);
-    calculateRects(context, PaintInfo::infiniteRect(), layerBounds, backgroundRect, foregroundRect);
+    calculateRects(context, PaintInfo::infiniteRect(), layerBounds, backgroundRect);
 
     LayoutRect clipRect = backgroundRect.rect();
     if (clipRect == PaintInfo::infiniteRect())
@@ -189,7 +176,7 @@ LayoutRect RenderLayerClipper::localClipRect() const
 }
 
 void RenderLayerClipper::calculateRects(const ClipRectsContext& context, const LayoutRect& paintDirtyRect, LayoutRect& layerBounds,
-    ClipRect& backgroundRect, ClipRect& foregroundRect, const LayoutPoint* offsetFromRoot) const
+    ClipRect& backgroundRect, const LayoutPoint* offsetFromRoot) const
 {
     bool isClippingRoot = m_renderer.layer() == context.rootLayer;
 
@@ -201,8 +188,6 @@ void RenderLayerClipper::calculateRects(const ClipRectsContext& context, const L
         backgroundRect = paintDirtyRect;
     }
 
-    foregroundRect = backgroundRect;
-
     LayoutPoint offset;
     if (offsetFromRoot)
         offset = *offsetFromRoot;
@@ -212,10 +197,6 @@ void RenderLayerClipper::calculateRects(const ClipRectsContext& context, const L
 
     // Update the clip rects that will be passed to child layers.
     if (m_renderer.hasOverflowClip()) {
-        foregroundRect.intersect(m_renderer.overflowClipRect(offset));
-        if (m_renderer.style()->hasBorderRadius())
-            foregroundRect.setHasRadius(true);
-
         // If we establish an overflow clip at all, then go ahead and make sure our background
         // rect is intersected with our layer's bounds including our visual overflow,
         // since any visual overflow like box-shadow or border-outset is not clipped by overflow:auto/hidden.
@@ -239,7 +220,6 @@ void RenderLayerClipper::calculateRects(const ClipRectsContext& context, const L
         // Clip applies to *us* as well, so go ahead and update the damageRect.
         LayoutRect newPosClip = m_renderer.clipRect(offset);
         backgroundRect.intersect(newPosClip);
-        foregroundRect.intersect(newPosClip);
     }
 }
 

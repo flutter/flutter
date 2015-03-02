@@ -334,12 +334,11 @@ void write(TextStream& ts, const RenderObject& o, int indent, RenderAsTextBehavi
 }
 
 static void write(TextStream& ts, RenderLayer& l,
-                  const LayoutRect& layerBounds, const LayoutRect& backgroundClipRect, const LayoutRect& clipRect,
+                  const LayoutRect& layerBounds, const LayoutRect& backgroundClipRect,
                   int indent = 0, RenderAsTextBehavior behavior = RenderAsTextBehaviorNormal)
 {
     IntRect adjustedLayoutBounds = pixelSnappedIntRect(layerBounds);
     IntRect adjustedBackgroundClipRect = pixelSnappedIntRect(backgroundClipRect);
-    IntRect adjustedClipRect = pixelSnappedIntRect(clipRect);
 
     writeIndent(ts, indent);
 
@@ -353,8 +352,6 @@ static void write(TextStream& ts, RenderLayer& l,
     if (!adjustedLayoutBounds.isEmpty()) {
         if (!adjustedBackgroundClipRect.contains(adjustedLayoutBounds))
             ts << " backgroundClip " << adjustedBackgroundClipRect;
-        if (!adjustedClipRect.contains(adjustedLayoutBounds))
-            ts << " clip " << adjustedClipRect;
     }
 
     ts << "\n";
@@ -373,8 +370,8 @@ void RenderTreeAsText::writeLayers(TextStream& ts, const RenderLayer* rootLayer,
 
     // Calculate the clip rects we should use.
     LayoutRect layerBounds;
-    ClipRect damageRect, clipRectToApply;
-    layer->clipper().calculateRects(ClipRectsContext(rootLayer, UncachedClipRects), paintDirtyRect, layerBounds, damageRect, clipRectToApply);
+    ClipRect damageRect;
+    layer->clipper().calculateRects(ClipRectsContext(rootLayer, UncachedClipRects), paintDirtyRect, layerBounds, damageRect);
 
     // FIXME: Apply overflow to the root layer to not break every test. Complete hack. Sigh.
     if (rootLayer == layer)
@@ -386,7 +383,7 @@ void RenderTreeAsText::writeLayers(TextStream& ts, const RenderLayer* rootLayer,
     bool shouldPaint = (behavior & RenderAsTextShowAllLayers) ? true : layer->intersectsDamageRect(layerBounds, damageRect.rect(), rootLayer);
 
     if (shouldPaint)
-        write(ts, *layer, layerBounds, damageRect.rect(), clipRectToApply.rect(), indent, behavior);
+        write(ts, *layer, layerBounds, damageRect.rect(), indent, behavior);
 
     if (Vector<RenderLayerStackingNode*>* normalFlowList = layer->stackingNode()->normalFlowList()) {
         int currIndent = indent;
