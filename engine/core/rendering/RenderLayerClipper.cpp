@@ -49,32 +49,6 @@
 
 namespace blink {
 
-static void adjustClipRectsForChildren(const RenderObject& renderer, ClipRects& clipRects)
-{
-    if (renderer.style()->position() == AbsolutePosition) {
-        clipRects.setOverflowClipRect(clipRects.posClipRect());
-    }
-}
-
-static void applyClipRects(const ClipRectsContext& context, RenderObject& renderer, LayoutPoint offset, ClipRects& clipRects)
-{
-    ASSERT(renderer.hasOverflowClip() || renderer.hasClip());
-
-    if (renderer.hasOverflowClip()) {
-        ClipRect newOverflowClip = toRenderBox(renderer).overflowClipRect(offset);
-        newOverflowClip.setHasRadius(renderer.style()->hasBorderRadius());
-        clipRects.setOverflowClipRect(intersection(newOverflowClip, clipRects.overflowClipRect()));
-        if (renderer.isPositioned())
-            clipRects.setPosClipRect(intersection(newOverflowClip, clipRects.posClipRect()));
-    }
-
-    if (renderer.hasClip()) {
-        LayoutRect newClip = toRenderBox(renderer).clipRect(offset);
-        clipRects.setPosClipRect(intersection(newClip, clipRects.posClipRect()));
-        clipRects.setOverflowClipRect(intersection(newClip, clipRects.overflowClipRect()));
-    }
-}
-
 RenderLayerClipper::RenderLayerClipper(RenderBox& renderer)
     : m_renderer(renderer)
 {
@@ -249,21 +223,27 @@ void RenderLayerClipper::calculateClipRects(const ClipRectsContext& context, Cli
         clipRects.reset(PaintInfo::infiniteRect());
     }
 
-    adjustClipRectsForChildren(m_renderer, clipRects);
-
-    if (m_renderer.hasOverflowClip()) {
-        // This offset cannot use convertToLayerCoords, because sometimes our rootLayer may be across
-        // some transformed layer boundary, for example, in the RenderLayerCompositor overlapMap, where
-        // clipRects are needed in view space.
-        applyClipRects(context, m_renderer, roundedLayoutPoint(m_renderer.localToContainerPoint(FloatPoint(), context.rootLayer->renderer())), clipRects);
+    if (m_renderer.style()->position() == AbsolutePosition) {
+        clipRects.setOverflowClipRect(clipRects.posClipRect());
     }
-}
 
-static ClipRect backgroundClipRectForPosition(const ClipRects& parentRects, EPosition position)
-{
-    if (position == AbsolutePosition)
-        return parentRects.posClipRect();
-    return parentRects.overflowClipRect();
+    // This offset cannot use convertToLayerCoords, because sometimes our rootLayer may be across
+    // some transformed layer boundary, for example, in the RenderLayerCompositor overlapMap, where
+    // clipRects are needed in view space.
+    LayoutPoint offset = roundedLayoutPoint(m_renderer.localToContainerPoint(FloatPoint(), context.rootLayer->renderer()));
+    if (m_renderer.hasOverflowClip()) {
+        ClipRect newOverflowClip = m_renderer.overflowClipRect(offset);
+        newOverflowClip.setHasRadius(m_renderer.style()->hasBorderRadius());
+        clipRects.setOverflowClipRect(intersection(newOverflowClip, clipRects.overflowClipRect()));
+        if (m_renderer.isPositioned())
+            clipRects.setPosClipRect(intersection(newOverflowClip, clipRects.posClipRect()));
+    }
+
+    if (m_renderer.hasClip()) {
+        LayoutRect newClip = m_renderer.clipRect(offset);
+        clipRects.setPosClipRect(intersection(newClip, clipRects.posClipRect()));
+        clipRects.setOverflowClipRect(intersection(newClip, clipRects.overflowClipRect()));
+    }
 }
 
 ClipRect RenderLayerClipper::backgroundClipRect(const ClipRectsContext& context) const
@@ -277,7 +257,9 @@ ClipRect RenderLayerClipper::backgroundClipRect(const ClipRectsContext& context)
     else
         m_renderer.layer()->parent()->clipper().getOrCalculateClipRects(context, parentClipRects);
 
-    return backgroundClipRectForPosition(parentClipRects, m_renderer.style()->position());
+    if (m_renderer.style()->position() == AbsolutePosition)
+        return parentClipRects.posClipRect();
+    return parentClipRects.overflowClipRect();
 }
 
 void RenderLayerClipper::getOrCalculateClipRects(const ClipRectsContext& context, ClipRects& clipRects) const

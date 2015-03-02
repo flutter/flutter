@@ -186,8 +186,6 @@ void RenderBox::updateTransform(const RenderStyle* oldStyle)
         // Layers with transforms act as clip rects roots, so clear the cached clip rects here.
         if (layer())
             layer()->clipper().clearClipRectsIncludingDescendants();
-    } else if (localHasTransform && layer()) {
-        layer()->clipper().clearClipRectsIncludingDescendants(AbsoluteClipRects);
     }
 
     updateTransformationMatrix();
