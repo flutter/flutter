@@ -48,5 +48,12 @@
     test('scale should roundtrip', () {
       testTransformRoundTrip('scale(1.2, 0.8)', 'matrix(1.2, 0, 0, 0.8, 0, 0)');
     });
+
+    test('removing a transform should not crash', () {
+      testBox.style['transform'] = 'translate(0, 0, 0)';
+      testBox.getBoundingClientRect();
+      testBox.style.removeProperty('transform');
+      testBox.getBoundingClientRect();
+    });
   }
 </script>
