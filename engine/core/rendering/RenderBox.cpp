@@ -184,14 +184,15 @@ void RenderBox::updateTransform(const RenderStyle* oldStyle)
             m_transform.clear();
 
         // Layers with transforms act as clip rects roots, so clear the cached clip rects here.
-        layer()->clipper().clearClipRectsIncludingDescendants();
-    } else if (localHasTransform) {
+        if (layer())
+            layer()->clipper().clearClipRectsIncludingDescendants();
+    } else if (localHasTransform && layer()) {
         layer()->clipper().clearClipRectsIncludingDescendants(AbsoluteClipRects);
     }
 
     updateTransformationMatrix();
 
-    if (had3DTransform != has3DTransform())
+    if (layer() && had3DTransform != has3DTransform())
         layer()->dirty3DTransformedDescendantStatus();
 }
 
