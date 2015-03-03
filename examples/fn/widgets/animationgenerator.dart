@@ -45,8 +45,6 @@ class FrameGenerator {
   }
 }
 
-const double _kFrameTime = 1000 / 60;
-
 class AnimationGenerator extends FrameGenerator {
 
   Stream<double> get onTick => _stream;
@@ -55,6 +53,7 @@ class AnimationGenerator extends FrameGenerator {
   final double end;
   final Curve curve;
   Stream<double> _stream;
+  bool _done = false;
 
   AnimationGenerator(this.duration, {
     this.begin: 0.0,
@@ -64,23 +63,22 @@ class AnimationGenerator extends FrameGenerator {
   }):super(onDone: onDone) {
     double startTime = 0.0;
     double targetTime = 0.0;
-    bool done = false;
     _stream = super.onTick.map((timeStamp) {
       if (startTime == 0.0) {
         startTime = timeStamp;
         targetTime = startTime + duration;
       }
-
-      // Clamp the final frame to target time so we terminate the series with
-      // 1.0 exactly.
-      if ((timeStamp - targetTime).abs() <= _kFrameTime) {
-        return 1.0;
-      }
-
-      return (timeStamp - startTime) / duration;
+      return math.min((timeStamp - startTime) / duration, 1.0);
     })
-    .takeWhile((t) => t <= 1.0)
+    .takeWhile(_checkForCompletion)
     .map((t) =>  begin + (end - begin) * curve.transform(t));
+  }
+
+  bool _checkForCompletion(double t) {
+    if (_done)
+      return false;
+    _done = t >= 1;
+    return true;
   }
 }
 
