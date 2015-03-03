@@ -92,10 +92,20 @@ class StocksApp extends App {
       ]
     );
 
+    var fab = new FloatingActionButton(content: new Icon(
+      type: 'content/add_white', size: 24));
+
     return new Container(
       key: 'StocksApp',
-      style: _style,
-      children: [drawer, toolbar, new Stocklist(stocks: oracle.stocks)]
+      children: [
+        new Container(
+          key: 'Content',
+          style: _style,
+          children: [toolbar, new Stocklist(stocks: oracle.stocks)]
+        ),
+        fab,
+        drawer,
+      ]
     );
   }
 }
