@@ -1,0 +1,9 @@
+#!mojo mojo:sky_viewer
+<sky>
+<script>
+import 'stocksapp.dart';
+main() {
+  new StocksApp();
+}
+</script>
+</sky>
