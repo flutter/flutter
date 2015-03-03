@@ -10,7 +10,6 @@
 #include "base/macros.h"
 #include "base/memory/weak_ptr.h"
 #include "base/single_thread_task_runner.h"
-#include "sky/shell/gpu_delegate.h"
 #include "sky/shell/ui_delegate.h"
 
 struct ANativeWindow;
@@ -21,9 +20,6 @@ namespace shell {
 class PlatformView {
  public:
   struct Config {
-    base::WeakPtr<GPUDelegate> gpu_delegate;
-    scoped_refptr<base::SingleThreadTaskRunner> gpu_task_runner;
-
     base::WeakPtr<UIDelegate> ui_delegate;
     scoped_refptr<base::SingleThreadTaskRunner> ui_task_runner;
   };

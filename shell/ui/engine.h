@@ -55,6 +55,8 @@ class Engine : public UIDelegate,
   // UIDelegate methods:
   void ConnectToViewportObserver(
       mojo::InterfaceRequest<ViewportObserver> request) override;
+  void OnAcceleratedWidgetAvailable(gfx::AcceleratedWidget widget) override;
+  void OnOutputSurfaceDestroyed() override;
 
   // ViewportObserver:
   void OnViewportMetricsChanged(int width, int height,
@@ -83,7 +85,7 @@ class Engine : public UIDelegate,
   mojo::ServiceProviderPtr CreateServiceProvider();
   void UpdateWebViewSize();
 
-  scoped_refptr<base::SingleThreadTaskRunner> java_task_runner_;
+  Config config_;
   mojo::ServiceProviderPtr service_provider_;
   scoped_ptr<PlatformImpl> platform_impl_;
   scoped_ptr<Animator> animator_;
