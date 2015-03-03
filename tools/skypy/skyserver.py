@@ -7,9 +7,13 @@ import subprocess
 import logging
 import os.path
 
+SKYPY_PATH = os.path.dirname(__file__)
+SKY_TOOLS_PATH = os.path.dirname(SKYPY_PATH)
+SKY_ROOT = os.path.dirname(SKY_TOOLS_PATH)
+SRC_ROOT = os.path.dirname(SKY_ROOT)
+
 class SkyServer(object):
-    def __init__(self, paths, port, configuration, root):
-        self.paths = paths
+    def __init__(self, port, configuration, root):
         self.port = port
         self.configuration = configuration
         self.root = root
@@ -21,10 +25,9 @@ class SkyServer(object):
         return sock.connect_ex(('localhost', port)) == 0
 
     @staticmethod
-    def _download_server_if_necessary(paths):
-        subprocess.call(os.path.join(paths.sky_tools_directory,
-            'download_sky_server'))
-        return os.path.join(paths.src_root, 'out', 'downloads', 'sky_server')
+    def _download_server_if_necessary():
+        subprocess.call(os.path.join(SKY_TOOLS_PATH, 'download_sky_server'))
+        return os.path.join(SRC_ROOT, 'out', 'downloads', 'sky_server')
 
     def start(self):
         if self._port_in_use(self.port):
@@ -33,7 +36,7 @@ class SkyServer(object):
                 self.port)
             return
 
-        server_path = self._download_server_if_necessary(self.paths)
+        server_path = self._download_server_if_necessary()
         server_command = [
             server_path,
             '-t', self.configuration,
