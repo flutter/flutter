@@ -1,6 +1,10 @@
 part of widgets;
 
 class FloatingActionButton extends StyleComponent {
+
+  // TODO(rafaelw): Ganesh has problems with box shadows
+  // box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
+
   static final Style _style = new Style('''
     position: absolute;
     display: flex;
@@ -12,8 +16,7 @@ class FloatingActionButton extends StyleComponent {
     height: 56px;
     background-color: #F44336;
     color: white;
-    border-radius: 28px;
-    box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);'''
+    border-radius: 28px;'''
   );
 
   Style get style => _style;
