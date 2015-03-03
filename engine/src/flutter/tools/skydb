@@ -144,8 +144,7 @@ class SkyDebugger(object):
         # not a magical "configuration" name.
         configuration = os.path.basename(os.path.normpath(self.paths.build_dir))
         server_root = self._server_root_for_url(args.url_or_path)
-        sky_server = SkyServer(self.paths, SKY_SERVER_PORT,
-            configuration, server_root)
+        sky_server = SkyServer(SKY_SERVER_PORT, configuration, server_root)
         return sky_server
 
     def _create_paths_for_build_dir(self, build_dir):
