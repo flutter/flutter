@@ -7,6 +7,7 @@ class Radio extends ButtonBase {
   ValueChanged onChanged;
 
   static Style _style = new Style('''
+    transform: translateX(0);
     display: inline-block;
     -webkit-user-select: none;
     width: 14px;
@@ -17,6 +18,7 @@ class Radio extends ButtonBase {
   );
 
   static Style _highlightStyle = new Style('''
+    transform: translateX(0);
     display: inline-block;
     -webkit-user-select: none;
     width: 14px;
@@ -51,7 +53,7 @@ class Radio extends ButtonBase {
       onPointerUp: _handlePointerUp,
       onPointerCancel: _handlePointerCancel,
       children: value == groupValue ?
-          [new Container( style : _dotStyle )] : null
+          [super.render(), new Container( style : _dotStyle )] : [super.render()]
     );
   }
 

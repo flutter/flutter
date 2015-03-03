@@ -1,6 +1,7 @@
 library widgets;
 
 import '../lib/fn.dart';
+import 'dart:collection';
 import 'dart:async';
 import 'dart:math' as math;
 import 'dart:sky' as sky;
@@ -16,6 +17,7 @@ part 'fixedheightscrollable.dart';
 part 'flingcurve.dart';
 part 'icon.dart';
 part 'inksplash.dart';
+part 'material.dart';
 part 'menudivider.dart';
 part 'menuitem.dart';
 part 'radio.dart';

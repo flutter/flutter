@@ -120,6 +120,7 @@ class Drawer extends Component {
     background-color: #FAFAFA;
     will-change: transform;
     position: absolute;
+    z-index: 3;
     width: 256px;
     top: 0;
     left: 0;
