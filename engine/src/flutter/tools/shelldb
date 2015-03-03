@@ -10,10 +10,9 @@ import logging
 import os
 import subprocess
 import sys
-import urllib
 import urlparse
 
-SKY_TOOLS_DIR = os.path.dirname(__file__)
+SKY_TOOLS_DIR = os.path.dirname(os.path.abspath(__file__))
 SKY_ROOT = os.path.dirname(SKY_TOOLS_DIR)
 SRC_ROOT = os.path.dirname(SKY_ROOT)
 
@@ -42,6 +41,10 @@ class Pids(object):
     def __len__(self):
         return len(self._dict)
 
+    def get(self, key, default=None):
+        assert key in self._known_keys, '%s not in known_keys' % key
+        return self._dict.get(key, default)
+
     def __getitem__(self, key):
         assert key in self._known_keys, '%s not in known_keys' % key
         return self._dict[key]
@@ -61,7 +64,7 @@ class Pids(object):
         assert key in self._known_keys, '%s not in allowed_keys' % key
         return key in self._dict
 
-    def clear():
+    def clear(self):
         self._dict = {}
 
     @classmethod
@@ -84,20 +87,20 @@ class Pids(object):
 
 
 def _convert_to_sky_url(url):
-    result = urllib.parse.urlsplit(url)
-    result.scheme = 'sky'
-    return urllib.parse.urlunsplit(result)
+    parts = urlparse.urlsplit(url)
+    parts = parts._replace(scheme='sky')
+    return parts.geturl()
 
 
 # A free function for possible future sharing with a 'load' command.
-def _url_from_args(args):
+def _url_from_args(args, pids):
     if urlparse.urlparse(args.url_or_path).scheme:
         return args.url_or_path
     # The load happens on the remote device, use the remote port.
-    remote_sky_server_port = self.pids.get('remote_sky_server_port',
-        self.pids['sky_server_port'])
+    remote_sky_server_port = pids.get('remote_sky_server_port',
+        pids['sky_server_port'])
     url = SkyServer.url_for_path(remote_sky_server_port,
-        self.pids['sky_server_root'], args.url_or_path)
+        pids['sky_server_root'], args.url_or_path)
     return _convert_to_sky_url(url)
 
 
@@ -153,7 +156,7 @@ class StartSky(object):
         subprocess.check_call([ADB_PATH, 'shell',
             'am', 'start',
             '-a', 'android.intent.action.VIEW',
-            '-d', _url_from_args(args)])
+            '-d', _url_from_args(args, pids)])
 
 
 class StopSky(object):

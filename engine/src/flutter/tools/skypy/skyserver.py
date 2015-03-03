@@ -7,7 +7,7 @@ import subprocess
 import logging
 import os.path
 
-SKYPY_PATH = os.path.dirname(__file__)
+SKYPY_PATH = os.path.dirname(os.path.abspath(__file__))
 SKY_TOOLS_PATH = os.path.dirname(SKYPY_PATH)
 SKY_ROOT = os.path.dirname(SKY_TOOLS_PATH)
 SRC_ROOT = os.path.dirname(SKY_ROOT)
