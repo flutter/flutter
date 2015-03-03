@@ -20,5 +20,7 @@ part 'menudivider.dart';
 part 'menuitem.dart';
 part 'radio.dart';
 part 'toolbar.dart';
+part 'floating_action_button.dart';
+part 'style_component.dart';
 
 typedef void ValueChanged(value);

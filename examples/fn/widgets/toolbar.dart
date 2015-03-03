@@ -4,7 +4,7 @@ class Toolbar extends Component {
 
   List<Node> children;
 
-  static Style _style = new Style('''
+  static final Style _style = new Style('''
     display: flex;
     align-items: center;
     height: 84px;
