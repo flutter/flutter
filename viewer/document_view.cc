@@ -17,6 +17,7 @@
 #include "mojo/public/interfaces/application/shell.mojom.h"
 #include "mojo/services/view_manager/public/cpp/view.h"
 #include "mojo/services/view_manager/public/cpp/view_manager.h"
+#include "mojo/services/view_manager/public/interfaces/view_manager.mojom.h"
 #include "skia/ext/refptr.h"
 #include "sky/compositor/layer.h"
 #include "sky/compositor/layer_host.h"
@@ -369,7 +370,7 @@ void DocumentView::StartDebuggerInspectorBackend() {
 void DocumentView::InitServiceRegistry() {
   mojo::ConnectToService(imported_services_.get(), &service_registry_);
   mojo::Array<mojo::String> interface_names(1);
-  interface_names[0] = "ViewManagerClient";
+  interface_names[0] = mojo::ViewManagerClient::Name_;
   mojo::ServiceProviderImpl* sp_impl(new mojo::ServiceProviderImpl());
   sp_impl->AddService(&view_manager_client_factory_);
   mojo::ServiceProviderPtr sp;

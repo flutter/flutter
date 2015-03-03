@@ -47,6 +47,7 @@ mojo_native_application("viewer") {
     "//mojo/services/service_registry/public/interfaces",
     "//mojo/services/surfaces/public/interfaces",
     "//mojo/services/view_manager/public/cpp",
+    "//mojo/services/view_manager/public/interfaces",
     "//skia",
     "//sky/compositor",
     "//sky/engine",
