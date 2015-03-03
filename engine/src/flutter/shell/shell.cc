@@ -75,8 +75,6 @@ void Shell::InitUI(const base::Thread::Options& options) {
 
 void Shell::InitView() {
   PlatformView::Config config;
-  config.gpu_task_runner = gpu_thread_->message_loop()->task_runner();
-  config.gpu_delegate = rasterizer_->GetWeakPtr();
   config.ui_task_runner = ui_thread_->message_loop()->task_runner();
   config.ui_delegate = engine_->GetWeakPtr();
   view_.reset(new PlatformView(config));

@@ -59,16 +59,16 @@ void PlatformView::SurfaceCreated(JNIEnv* env, jobject obj, jobject jsurface) {
     base::android::ScopedJavaLocalFrame scoped_local_reference_frame(env);
     window_ = ANativeWindow_fromSurface(env, jsurface);
   }
-  config_.gpu_task_runner->PostTask(
-      FROM_HERE, base::Bind(&GPUDelegate::OnAcceleratedWidgetAvailable,
-                            config_.gpu_delegate, window_));
+  config_.ui_task_runner->PostTask(
+      FROM_HERE, base::Bind(&UIDelegate::OnAcceleratedWidgetAvailable,
+                            config_.ui_delegate, window_));
 }
 
 void PlatformView::SurfaceDestroyed(JNIEnv* env, jobject obj) {
   DCHECK(window_);
-  config_.gpu_task_runner->PostTask(
+  config_.ui_task_runner->PostTask(
       FROM_HERE,
-      base::Bind(&GPUDelegate::OnOutputSurfaceDestroyed, config_.gpu_delegate));
+      base::Bind(&UIDelegate::OnOutputSurfaceDestroyed, config_.ui_delegate));
   ReleaseWindow();
 }
 

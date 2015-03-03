@@ -33,7 +33,7 @@ void ConfigureSettings(blink::WebSettings* settings) {
 }
 
 Engine::Engine(const Config& config)
-    : java_task_runner_(config.java_task_runner),
+    : config_(config),
       animator_(new Animator(config, this)),
       web_view_(nullptr),
       device_pixel_ratio_(1.0f),
@@ -52,10 +52,11 @@ base::WeakPtr<Engine> Engine::GetWeakPtr() {
 
 mojo::ServiceProviderPtr Engine::CreateServiceProvider() {
   mojo::MessagePipe pipe;
-  java_task_runner_->PostTask(FROM_HERE, base::Bind(
-    CreateJavaServiceProvider,
-    base::Passed(mojo::MakeRequest<mojo::ServiceProvider>(
-        pipe.handle1.Pass()))));
+  config_.java_task_runner->PostTask(
+      FROM_HERE,
+      base::Bind(CreateJavaServiceProvider,
+                 base::Passed(mojo::MakeRequest<mojo::ServiceProvider>(
+                     pipe.handle1.Pass()))));
   return mojo::MakeProxy<mojo::ServiceProvider>(pipe.handle0.Pass());
 }
 
@@ -92,6 +93,20 @@ skia::RefPtr<SkPicture> Engine::Paint() {
 void Engine::ConnectToViewportObserver(
     mojo::InterfaceRequest<ViewportObserver> request) {
   viewport_observer_binding_.Bind(request.Pass());
+}
+
+void Engine::OnAcceleratedWidgetAvailable(gfx::AcceleratedWidget widget) {
+  config_.gpu_task_runner->PostTask(
+      FROM_HERE, base::Bind(&GPUDelegate::OnAcceleratedWidgetAvailable,
+                            config_.gpu_delegate, widget));
+  if (web_view_)
+    scheduleVisualUpdate();
+}
+
+void Engine::OnOutputSurfaceDestroyed() {
+  config_.gpu_task_runner->PostTask(
+      FROM_HERE,
+      base::Bind(&GPUDelegate::OnOutputSurfaceDestroyed, config_.gpu_delegate));
 }
 
 void Engine::OnViewportMetricsChanged(int width, int height,
