@@ -6,6 +6,7 @@ class Checkbox extends ButtonBase {
   ValueChanged onChanged;
 
   static Style _style = new Style('''
+    transform: translateX(0);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -61,6 +62,7 @@ class Checkbox extends ButtonBase {
       onPointerUp: _handlePointerUp,
       onPointerCancel: _handlePointerCancel,
       children: [
+        super.render(),
         new Container(
           style: _highlight ? _containerHighlightStyle : _containerStyle,
           children: [

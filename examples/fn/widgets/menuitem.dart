@@ -1,11 +1,21 @@
 part of widgets;
 
-class MenuItem extends Component {
+class MenuItem extends ButtonBase {
 
   static Style _style = new Style('''
+    transform: translateX(0);
     display: flex;
     align-items: center;
     height: 48px;
+    -webkit-user-select: none;'''
+  );
+
+  static Style _highlightStyle = new Style('''
+    transform: translateX(0);
+    display: flex;
+    align-items: center;
+    height: 48px;
+    background: rgba(153, 153, 153, 0.4);
     -webkit-user-select: none;'''
   );
 
@@ -23,13 +33,20 @@ class MenuItem extends Component {
   List<Node> children;
   String icon;
 
-  MenuItem({ Object key, this.icon, this.children }) : super(key: key) {
+  sky.EventListener onClick;
+
+  MenuItem({ Object key, this.icon, this.children, this.onClick }) : super(key: key) {
   }
 
   Node render() {
     return new Container(
-      style: _style,
+      style: _highlight ? _highlightStyle : _style,
+      onClick: onClick,
+      onPointerDown: _handlePointerDown,
+      onPointerUp: _handlePointerUp,
+      onPointerCancel: _handlePointerCancel,
       children: [
+        super.render(),
         new Icon(
           style: _iconStyle,
           size: 24,

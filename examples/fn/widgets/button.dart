@@ -3,6 +3,7 @@ part of widgets;
 class Button extends ButtonBase {
 
   static Style _style = new Style('''
+    transform: translateX(0);
     display: inline-flex;
     border-radius: 4px;
     justify-content: center;
@@ -13,6 +14,7 @@ class Button extends ButtonBase {
   );
 
   static Style _highlightStyle = new Style('''
+    transform: translateX(0);
     display: inline-flex;
     border-radius: 4px;
     justify-content: center;
@@ -36,7 +38,7 @@ class Button extends ButtonBase {
       onPointerDown: _handlePointerDown,
       onPointerUp: _handlePointerUp,
       onPointerCancel: _handlePointerCancel,
-      children: [content]
+      children: [super.render(), content]
     );
   }
 }

@@ -1,6 +1,6 @@
 part of widgets;
 
-abstract class ButtonBase extends Component {
+abstract class ButtonBase extends MaterialComponent {
 
   bool _highlight = false;
 
