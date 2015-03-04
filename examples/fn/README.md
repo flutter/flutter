@@ -5,6 +5,8 @@ Effen is a prototype of a functional-reactive framework for sky which takes insp
 
 Effen is comprised of three main parts: a virtual-dom and diffing engine, a component mechanism and a very early set of widgets for use in creating applications.
 
+The central idea is that you build your UI out of components. Components describe what their view should look like given their current configuration & state. The diffing engine ensures that the DOM looks how the component describes.
+
 If you just want to dive into code, see the `sky/examples/stocks-fn`.
 
 Is this the official framework for Sky?
