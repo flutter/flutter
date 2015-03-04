@@ -1,3 +1,7 @@
+// Copyright 2015 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 part of fn;
 
 List<Component> _dirtyComponents = new List<Component>();
@@ -30,7 +34,7 @@ abstract class Component extends Node {
   bool _dirty = true; // components begin dirty because they haven't rendered.
   Node _rendered = null;
   bool _removed = false;
-  int _order;
+  final int _order;
   static int _currentOrder = 0;
   bool _stateful;
   static Component _currentlyRendering;

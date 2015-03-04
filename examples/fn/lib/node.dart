@@ -1,8 +1,12 @@
+// Copyright 2015 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 part of fn;
 
-void parentInsertBefore(sky.ParentNode parent,
-                        sky.Node node,
-                        sky.Node ref) {
+void _parentInsertBefore(sky.ParentNode parent,
+                         sky.Node node,
+                         sky.Node ref) {
   if (ref != null) {
     ref.insertBefore([node]);
   } else {
@@ -41,7 +45,7 @@ class Text extends Node {
   bool _sync(Node old, sky.ParentNode host, sky.Node insertBefore) {
     if (old == null) {
       _root = new sky.Text(data);
-      parentInsertBefore(host, _root, insertBefore);
+      _parentInsertBefore(host, _root, insertBefore);
       return false;
     }
 
@@ -51,7 +55,7 @@ class Text extends Node {
   }
 }
 
-var _emptyList = new List<Node>();
+final List<Node> _emptyList = new List<Node>();
 
 abstract class Element extends Node {
 
@@ -102,7 +106,7 @@ abstract class Element extends Node {
     _className = style == null ? '': style._className;
     _children = children == null ? _emptyList : children;
 
-    if (debugWarnings()) {
+    if (_debugWarnings()) {
       _debugReportDuplicateIds();
     }
   }
@@ -194,7 +198,7 @@ abstract class Element extends Node {
         assert(child._root is sky.Node);
       }
 
-      parentInsertBefore(host, _root, insertBefore);
+      _parentInsertBefore(host, _root, insertBefore);
       return false;
     }
 
@@ -283,7 +287,7 @@ abstract class Element extends Node {
 
       oldNodeIdMap[currentNode._key] = null; // mark it reordered.
       // print("Reparenting ${currentNode._key}");
-      parentInsertBefore(root, oldNode._root, nextSibling);
+      _parentInsertBefore(root, oldNode._root, nextSibling);
       return true;
     }
 
@@ -344,7 +348,7 @@ class Container extends Element {
 
   String get _tagName => 'div';
 
-  static Container _emptyContainer = new Container();
+  static final Container _emptyContainer = new Container();
 
   Element get _emptyElement => _emptyContainer;
 
@@ -389,7 +393,7 @@ class Image extends Element {
 
   String get _tagName => 'img';
 
-  static Image _emptyImage = new Image();
+  static final Image _emptyImage = new Image();
   Element get _emptyElement => _emptyImage;
 
   String src;
@@ -457,7 +461,7 @@ class Anchor extends Element {
 
   String get _tagName => 'a';
 
-  static Anchor _emptyAnchor = new Anchor();
+  static final Anchor _emptyAnchor = new Anchor();
 
   String href;
 

@@ -1,15 +1,17 @@
+// Copyright 2015 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 library reflect;
 
 import 'dart:mirrors';
 import 'dart:collection';
 
-HashMap<ClassMirror, List> _fieldCache = new HashMap<ClassMirror, List>();
+final HashMap<ClassMirror, List> _fieldCache = new HashMap<ClassMirror, List>();
 
 List<Symbol> _getPublicFields(ClassMirror mirror) {
-  var fields = _fieldCache[mirror];
-  if (fields == null) {
-    fields = new List<Symbol>();
-    _fieldCache[mirror] = fields;
+  return _fieldCache.putIfAbsent(mirror, () {
+    List<Symbol> fields = new List<Symbol>();
 
     while (mirror != null) {
       var decls = mirror.declarations;
@@ -25,9 +27,9 @@ List<Symbol> _getPublicFields(ClassMirror mirror) {
 
       mirror = mirror.superclass;
     }
-  }
 
-  return fields;
+    return fields;
+  });
 }
 
 void copyPublicFields(Object source, Object target) {
