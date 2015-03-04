@@ -45,8 +45,10 @@ class SkyIcon extends SkyElement {
   }
 
   void sizeChanged(double oldValue, double newValue) {
-    if (_img != null)
+    if (_img != null) {
       _setSize(newValue.floor());
+      _setSrc(type, newValue.floor());
+    }
   }
 }
 

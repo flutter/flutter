@@ -4,6 +4,7 @@
 // found in the LICENSE file.
 -->
 <import src="sky-element.sky" />
+<import src="material-element.sky" />
 <import src="sky-icon.sky" />
 
 <sky-element attributes="icon:string">
@@ -15,6 +16,15 @@
       height: 48px;
       -webkit-user-select: none;
     }
+    #background {
+      display: flex;
+      align-items: center;
+      height: 100%;
+      flex: 1;
+    }
+    #background[highlight] {
+      background: rgba(153, 153, 153, 0.4);
+    }
     sky-icon {
       padding: 0px 16px;
     }
@@ -25,18 +35,26 @@
       flex: 1;
     }
   </style>
-  <sky-icon size="24" />
-  <div id="label">
-    <content />
+  <div id="background">
+    <sky-icon size="24" />
+    <div id="label">
+      <content />
+    </div>
   </div>
 </template>
 <script>
 import "dart:sky";
 
 @Tagname('sky-menu-item')
-class SkyMenuItem extends SkyElement {
+class SkyMenuItem extends MaterialElement {
   SkyIcon _icon;
   Element _label;
+
+  SkyMenuItem() {
+    addEventListener('pointerdown', _handlePointerDown);
+    addEventListener('pointerup', _handlePointerUp);
+    addEventListener('pointercancel', _handlePointerUp);
+  }
 
   void shadowRootReady() {
     _icon = shadowRoot.querySelector('sky-icon');
@@ -46,6 +64,14 @@ class SkyMenuItem extends SkyElement {
   void iconChanged(String oldValue, String newValue) {
     if (_icon != null)
       _icon.type = "${newValue}_grey600";
+  }
+
+  void _handlePointerDown(Event event) {
+    shadowRoot.getElementById('background').setAttribute('highlight', '');
+  }
+
+  void _handlePointerUp(Event event) {
+    shadowRoot.getElementById('background').removeAttribute('highlight');
   }
 }
 
