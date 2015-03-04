@@ -1,8 +1,9 @@
 Sky Style Language
 ==================
 
-Note: This is a work in progress that will eventually replace
-(style.md)[style.md].
+This is a trimmed down version of the API in (style.md)[style.md]
+that is intended to be a stepping stone to the long-term world where
+there are no hard-coded properties in the engine.
 
 The Sky style API looks like the following:
 
@@ -57,17 +58,6 @@ The dart:sky library contains the following to define this API:
 import 'dart:mirrors';
 import 'dart:math';
 
-class WeakMap<Key, Value> {
-  // This is not actually a weak map right now, because Dart doesn't let us have weak references.
-  // We should fix that, or else we're going to keep alive every object you ever tear off through
-  // the StyleDeclaration API, even if you never use it again, until the StyleDeclaration object
-  // itself is GC'ed, which is likely when the element is GC'ed, which is likely never.
-  Map<Key, Value> _map = new Map<Key, Value>();
-  operator[](Key key) => _map[key];
-  operator[]=(Key key, Value value) => _map[key] = value;
-  bool containsKey(Key key) => _map.containsKey(key);
-}
-
 typedef void StringSetter(Symbol propertySymbol, StyleDeclaration declaration, String value);
 typedef String StringGetter(Symbol propertySymbol, StyleDeclaration declaration);
 typedef Property ObjectConstructor(Symbol propertySymbol, StyleDeclaration declaration);
@@ -119,7 +109,7 @@ class StyleDeclaration {
   }
 
   // some properties expose dedicated APIs so you don't have to use string manipulation
-  WeakMap<Symbol, Property> _properties = new WeakMap<Symbol, Property>();
+  MapOfWeakReferences<Symbol, Property> _properties = new MapOfWeakReferences<Symbol, Property>();
   noSuchMethod(Invocation invocation) {
     Symbol propertySymbol;
     if (invocation.isSetter) {
@@ -178,14 +168,17 @@ abstract class Property {
     throw new ArgumentError(value);
   }
 
-  void setter(dynamic value) {
-    if (value == initial)
-      return _setInitial();
-    if (value == inherit)
-      return _setInitial();
-    if (value == null)
-      return _unset();
-    throw new ArgumentError(value);
+  void setter(dynamic newValue) {
+    switch (newValue) {
+      case initial:
+        _setInitial();
+      case inherit:
+        _setInherit();
+      case null:
+        _unset();
+      default:
+        throw new ArgumentError(value);
+    }
   }
 
   external bool _isInitial();

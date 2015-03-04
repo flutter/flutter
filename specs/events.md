@@ -31,12 +31,6 @@ class DispatcherController<T> {
   void add(T data) => dispatcher._add(data);
 }
 
-class Pair<A, B> {
-  const Pair(this.a, this.b);
-  final A a;
-  final B b;
-}
-
 class Dispatcher<T> {
   List<Pair<Handler, ZoneUnaryCallback>> _listeners;
   void listen(Handler<T> handler) {

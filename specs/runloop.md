@@ -11,6 +11,18 @@ fired.
 class DeadlineExceededException implements Exception { }
 ```
 
+There is a method you can use that guards your code against these
+exceptions:
+
+```dart
+typedef void Callback();
+external guardAgainstDeadlineExceptions(Callback callback);
+// runs callback.
+// if the time budget for the _task_ expires while the callback is
+// running, the callback isn't interrupted, but the method will throw
+// an exception once the callback returns.
+```
+
 When Sky is to *process a task queue until a particular time*, with a
 queue *relevant task queue*, bits *filter bits*, a time
 *particular time*, and an *idle rule* which is either "sleep" or
