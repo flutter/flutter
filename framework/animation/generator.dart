@@ -1,7 +1,13 @@
-part of widgets;
+// Copyright 2015 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+import 'curves.dart';
+import 'dart:async';
+import 'dart:math' as math;
+import 'dart:sky' as sky;
 
 class FrameGenerator {
-
   Function onDone;
   StreamController _controller;
 
@@ -46,7 +52,6 @@ class FrameGenerator {
 }
 
 class AnimationGenerator extends FrameGenerator {
-
   Stream<double> get onTick => _stream;
   final double duration;
   final double begin;
@@ -62,12 +67,9 @@ class AnimationGenerator extends FrameGenerator {
     Function onDone
   }):super(onDone: onDone) {
     double startTime = 0.0;
-    double targetTime = 0.0;
     _stream = super.onTick.map((timeStamp) {
-      if (startTime == 0.0) {
+      if (startTime == 0.0)
         startTime = timeStamp;
-        targetTime = startTime + duration;
-      }
       return math.min((timeStamp - startTime) / duration, 1.0);
     })
     .takeWhile(_checkForCompletion)
