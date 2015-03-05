@@ -28,8 +28,7 @@ Set up your computer
   - Linux: ``sudo apt-get install android-tools-adb``
 
 2. Download the Sky framework:
-  a. ``curl -O https://domokit.github.io/sky-sdk.tgz``
-  b. ``tar -xvzf sky-sdk.tgz``
+  - ``git clone https://github.com/domokit/sky-sdk.git``
 
 3. Using a USB cable, plug your phone into your computer. If prompted on your
    device, authorize your computer to access your device.
@@ -37,4 +36,4 @@ Set up your computer
 Running a Sky application
 -------------------------
 
-1. ``/path/to/sky-sdk/run myapp.sky && adb logcat``
+1. ``/path/to/sky-sdk/shelldb myapp.sky && adb logcat``
