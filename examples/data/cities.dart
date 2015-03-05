@@ -1,9 +1,7 @@
-<!--
 // Copyright 2014 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
--->
-<script>
+
 final List<Map> kData = [
   {"name":"New York","state":"New York","population":8363710},
   {"name":"Los Angeles","state":"California","population":3833995},
@@ -5005,4 +5003,3 @@ final List<Map> kData = [
   {"name":"Hartwell","state":"Georgia","population":4298},
   {"name":"Newport","state":"North Carolina","population":4298}
 ];
-</script>
