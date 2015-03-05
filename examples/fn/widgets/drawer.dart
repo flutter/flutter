@@ -2,8 +2,8 @@ part of widgets;
 
 const double _kWidth = 256.0;
 const double _kMinFlingVelocity = 0.4;
-const double _kMinAnimationDurationMS = 246.0;
-const double _kMaxAnimationDurationMS = 600.0;
+const double _kBaseSettleDurationMS = 246.0;
+const double _kMaxSettleDurationMS = 600.0;
 const Cubic _kAnimationCurve = easeOut;
 
 class DrawerAnimation {
@@ -73,10 +73,8 @@ class DrawerAnimation {
 
   void _animateToPosition(double targetPosition) {
     double distance = (targetPosition - _position).abs();
-    double duration = math.max(
-        _kMinAnimationDurationMS,
-        _kMaxAnimationDurationMS * distance / _kWidth);
-
+    double targetDuration = distance / _kWidth * _kBaseSettleDurationMS;
+    double duration = math.min(targetDuration, _kMaxSettleDurationMS);
     _animate(duration, _position, targetPosition, _kAnimationCurve);
   }
 
