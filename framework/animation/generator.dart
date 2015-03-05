@@ -66,6 +66,7 @@ class AnimationGenerator extends FrameGenerator {
     this.curve: linear,
     Function onDone
   }):super(onDone: onDone) {
+    assert(duration > 0);
     double startTime = 0.0;
     _stream = super.onTick.map((timeStamp) {
       if (startTime == 0.0)
