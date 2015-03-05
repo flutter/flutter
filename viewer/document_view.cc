@@ -133,9 +133,13 @@ void DocumentView::OnEmbed(
     mojo::ServiceProviderPtr services_provided_by_embedder) {
   root_ = root;
 
-  mojo::ConnectToService(services_provided_by_embedder.get(), &navigator_host_);
-  if (RuntimeFlags::Get().testing())
-    mojo::ConnectToService(services_provided_by_embedder.get(), &test_harness_);
+  if (services_provided_by_embedder.get()) {
+    mojo::ConnectToService(services_provided_by_embedder.get(),
+                           &navigator_host_);
+    if (RuntimeFlags::Get().testing())
+      mojo::ConnectToService(services_provided_by_embedder.get(),
+                             &test_harness_);
+  }
 
   services_provided_to_embedder_ = services_provided_to_embedder.Pass();
   services_provided_by_embedder_ = services_provided_by_embedder.Pass();
@@ -268,9 +272,11 @@ float DocumentView::GetDevicePixelRatio() const {
 blink::WebNavigationPolicy DocumentView::decidePolicyForNavigation(
     const blink::WebFrameClient::NavigationPolicyInfo& info) {
 
-  navigator_host_->RequestNavigate(
-      WebNavigationPolicyToNavigationTarget(info.defaultPolicy),
-      mojo::URLRequest::From(info.urlRequest).Pass());
+  if (navigator_host_.get()) {
+    navigator_host_->RequestNavigate(
+        WebNavigationPolicyToNavigationTarget(info.defaultPolicy),
+        mojo::URLRequest::From(info.urlRequest).Pass());
+  }
 
   return blink::WebNavigationPolicyIgnore;
 }
