@@ -2,6 +2,7 @@ library widgets;
 
 import '../../../framework/animation/curves.dart';
 import '../../../framework/animation/fling-curve.dart';
+import '../../../framework/animation/generator.dart';
 import '../../../framework/fn.dart';
 import '../../../framework/theme/colors.dart';
 import '../../../framework/theme/shadows.dart';
@@ -10,7 +11,6 @@ import 'dart:async';
 import 'dart:math' as math;
 import 'dart:sky' as sky;
 
-part 'animationgenerator.dart';
 part 'box.dart';
 part 'button.dart';
 part 'buttonbase.dart';
