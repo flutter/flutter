@@ -2,6 +2,8 @@ library widgets;
 
 import '../lib/fn.dart';
 import '../../../framework/fling-curve.dart';
+import '../../../framework/theme/colors.dart';
+import '../../../framework/theme/shadows.dart';
 import 'dart:collection';
 import 'dart:async';
 import 'dart:math' as math;
