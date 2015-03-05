@@ -7,7 +7,7 @@
 <import src="/sky/framework/sky-scrollable.sky" />
 <import src="../data/cities.sky" as="cities" />
 
-<sky-element name="example-scrollable">
+<sky-element>
 <template>
   <style>
   sky-scrollable {
@@ -21,8 +21,8 @@
 <script>
 import "dart:sky";
 
-@Tagname('example-scrollable')
-class ExampleScrollable extends SkyElement {
+@Tagname('scrolling')
+class Scrolling extends SkyElement {
   void shadowRootReady() {
     Element parent = shadowRoot.querySelector('sky-scrollable');
     for (Map city in cities.kData.getRange(0, 300)) {
@@ -33,6 +33,6 @@ class ExampleScrollable extends SkyElement {
   }
 }
 
-_init(script) => register(script, ExampleScrollable);
+_init(script) => register(script, Scrolling);
 </script>
 </sky-element>
