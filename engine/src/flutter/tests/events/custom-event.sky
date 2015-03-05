@@ -5,7 +5,7 @@ import "../resources/unit.dart";
 import "dart:sky";
 
 class MyEvent extends Event {
-  MyEvent() : super("awesome", bubbles: true);
+  MyEvent() : super(type: "awesome", bubbles: true);
 
   bool get isCustom => true;
 }
