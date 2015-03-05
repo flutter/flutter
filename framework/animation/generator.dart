@@ -74,7 +74,13 @@ class AnimationGenerator extends FrameGenerator {
       return math.min((timeStamp - startTime) / duration, 1.0);
     })
     .takeWhile(_checkForCompletion)
-    .map((t) =>  begin + (end - begin) * curve.transform(t));
+    .map(_transform);
+  }
+
+  double _transform(double t) {
+    if (_done)
+      return end;
+    return begin + (end - begin) * curve.transform(t);
   }
 
   bool _checkForCompletion(double t) {
