@@ -5,7 +5,6 @@
 -->
 <import src="/sky/framework/sky-element.sky" />
 <import src="/sky/framework/sky-scrollable.sky" />
-<import src="../data/cities.sky" as="cities" />
 
 <sky-element>
 <template>
@@ -20,6 +19,7 @@
 </template>
 <script>
 import "dart:sky";
+import "../data/cities.dart" as cities;
 
 @Tagname('scrolling')
 class Scrolling extends SkyElement {

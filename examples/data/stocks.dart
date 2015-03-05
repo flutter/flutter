@@ -1,4 +1,8 @@
-part of stocksapp;
+// Copyright 2014 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+import "dart:math";
 
 // Snapshot from http://www.nasdaq.com/screening/company-list.aspx
 // Fetched 2/23/2014.
@@ -3000,7 +3004,6 @@ class StockOracle {
 
   StockOracle.fromCompanyList(List<List<String>> list) {
     stocks = list.map((fields) => new Stock.fromFields(fields)).toList();
-    stocks.sort((a, b) => a.symbol.compareTo(b.symbol));
   }
 
   Stock lookupBySymbol(String symbol) {

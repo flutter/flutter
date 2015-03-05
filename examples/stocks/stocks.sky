@@ -12,7 +12,6 @@
 <import src="/sky/framework/sky-scrollable.sky" />
 <import src="/sky/framework/sky-toolbar.sky" />
 <import src="stock.sky" as='view'/>
-<import src='companylist.sky' as='model'/>
 
 <sky-element>
 <template>
@@ -71,6 +70,7 @@
 <script>
 import "dart:sky";
 import "dart:math";
+import "../data/stocks.dart" as model;
 
 List pick(List list, int count) {
   var rng = new Random();

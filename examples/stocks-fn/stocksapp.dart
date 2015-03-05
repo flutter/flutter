@@ -1,12 +1,12 @@
 library stocksapp;
 
+import '../data/stocks.dart';
 import '../fn/lib/fn.dart';
 import '../fn/widgets/widgets.dart';
 import 'dart:collection';
 import 'dart:math';
 import 'dart:sky' as sky;
 
-part 'companylist.dart';
 part 'stockarrow.dart';
 part 'stocklist.dart';
 part 'stockrow.dart';
