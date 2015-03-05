@@ -72,7 +72,7 @@
     long requestAnimationFrame(RequestAnimationFrameCallback callback);
     void cancelAnimationFrame(long id);
 
-    [Replaceable] readonly attribute CSS CSS;
+    // [Replaceable] readonly attribute CSS CSS;
 };
 
 Window implements WindowBase64;

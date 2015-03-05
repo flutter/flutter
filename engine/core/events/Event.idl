@@ -19,7 +19,9 @@
  */
 
 [
-    Constructor(DOMString type, [Named] optional boolean bubbles, [Named] optional boolean cancelable),
+    // TODO(eseidel): Type is optional to appease dart analyzer:
+    // The class 'Event' does not have a default constructor
+    Constructor([Named] optional DOMString type, [Named] optional boolean bubbles, [Named] optional boolean cancelable),
 ] interface Event {
     // DOM PhaseType
     const unsigned short NONE                = 0;

@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 // WARNING: Do not edit - generated code.
-library sky.core;
+library dart.sky;
 
 import "dart:nativewrappers";
 

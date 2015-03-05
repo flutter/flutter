@@ -483,6 +483,7 @@ IDL_TO_DART_TYPE = {
     'DartValue': 'dynamic',
     'boolean': 'bool',
     'void': 'void',
+    'unsigned long': 'int',
 }
 
 def idl_type_to_dart_type(idl_type):
@@ -496,7 +497,7 @@ def idl_type_to_dart_type(idl_type):
         return 'double'
     native_array_element_type = idl_type.native_array_element_type
     if native_array_element_type:
-        return 'List<%s>' % native_array_element_type
+        return 'List<%s>' % idl_type_to_dart_type(native_array_element_type)
     assert preprocessed_type
     assert idl_type.is_interface_type, "Missing dart type mapping for '%s'" % preprocessed_type
     return preprocessed_type
@@ -505,7 +506,7 @@ def idl_type_to_dart_type(idl_type):
 DART_DEFAULT_VALUES_BY_TYPE = {
     'String': '""',
     'bool': 'false',
-    'double': '0',
+    'double': '0.0',
     'dynamic': 'null',
     'int': '0',
 }

@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 // WARNING: Do not edit - generated code.
-part of sky.core;
+part of dart.sky;
 
 {% macro args_macro(args) -%}
     {%- for arg in args -%}

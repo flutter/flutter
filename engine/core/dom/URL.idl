@@ -27,7 +27,6 @@
 // http://url.spec.whatwg.org/#url
 
 [
-    Constructor(DOMString url),
     Constructor(DOMString url, DOMString base),
     ImplementedAs=DOMURL,
     RaisesException=Constructor,

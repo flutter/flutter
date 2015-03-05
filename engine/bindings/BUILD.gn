@@ -50,7 +50,7 @@ source_set("bindings") {
 action("generate_snapshot_bin") {
   deps = [
     "//dart/runtime/bin:gen_snapshot($host_toolchain)",
-    ":generate_sky_core_dart",
+    ":generate_dart_sky",
   ]
   inputs = [
     "//dart/runtime/tools/create_snapshot_bin.py",
@@ -81,7 +81,7 @@ action("generate_snapshot_bin") {
   ]
 
   builtin_path = rebase_path("//sky/engine/bindings/builtin.dart")
-  sky_core_path = rebase_path("$bindings_output_dir/sky_core.dart")
+  dart_sky_path = rebase_path("$bindings_output_dir/dart_sky.dart")
   mojo_bindings_path = rebase_path("//mojo/public/dart/bindings.dart")
   mojo_core_path = rebase_path("//mojo/public/dart/core.dart")
 
@@ -101,7 +101,7 @@ action("generate_snapshot_bin") {
     rebase_path(output, root_build_dir),
     "--target_os",
     os,
-    "--url_mapping=dart:sky,$sky_core_path",
+    "--url_mapping=dart:sky,$dart_sky_path",
     "--url_mapping=mojo:bindings,$mojo_bindings_path",
     "--url_mapping=mojo:core,$mojo_core_path",
     "--url_mapping=dart:sky_builtin,$builtin_path",
@@ -334,7 +334,7 @@ action("generate_dart_globals") {
   ]
 }
 
-action("generate_sky_core_dart") {
+action("generate_dart_sky") {
   sources = core_idl_files
   script = "$bindings_scripts_dir/compiler.py"
 
@@ -346,7 +346,7 @@ action("generate_sky_core_dart") {
 
   outputs = [
     file_list,
-    "$bindings_output_dir/sky_core.dart",
+    "$bindings_output_dir/dart_sky.dart",
   ]
 
   args = [

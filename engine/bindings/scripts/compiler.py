@@ -114,7 +114,7 @@ class IdlCompilerDart(IdlCompiler):
 
     def generate_dart_blink(self, global_entries):
         global_dart_blink_filename = os.path.join(self.output_directory,
-                                                  'sky_core.dart')
+                                                  'dart_sky.dart')
         expanded_global_entries = []
         for (directory, file_list_file) in global_entries:
             with open(file_list_file) as input_file:
