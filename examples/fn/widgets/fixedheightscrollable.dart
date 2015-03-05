@@ -50,10 +50,6 @@ abstract class FixedHeightScrollable extends Component {
 
     return new Container(
       style: _style,
-      onFlingStart: _handleFlingStart,
-      onFlingCancel: _handleFlingCancel,
-      onScrollUpdate: _handleScrollUpdate,
-      onWheel: _handleWheel,
       children: [
         new Container(
           style: _scrollAreaStyle,
@@ -61,7 +57,11 @@ abstract class FixedHeightScrollable extends Component {
           children: items
         )
       ]
-    );
+    )
+    ..events.listen('gestureflingstart', _handleFlingStart)
+    ..events.listen('gestureflingcancel', _handleFlingCancel)
+    ..events.listen('gesturescrollupdate', _handleScrollUpdate)
+    ..events.listen('wheel', _handleWheel);
   }
 
   void willUnmount() {

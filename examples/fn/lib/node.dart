@@ -18,6 +18,10 @@ abstract class Node {
   String _key = null;
   sky.Node _root = null;
 
+  // TODO(abarth): Both Elements and Components have |events| but |Text|
+  // doesn't. Should we add a common base class to contain |events|?
+  final EventMap events = new EventMap();
+
   Node({ Object key }) {
     _key = key == null ? "$runtimeType" : "$runtimeType-$key";
   }
@@ -65,19 +69,6 @@ abstract class Element extends Node {
 
   String inlineStyle;
 
-  sky.EventListener onClick;
-  sky.EventListener onFlingCancel;
-  sky.EventListener onFlingStart;
-  sky.EventListener onGestureTap;
-  sky.EventListener onPointerCancel;
-  sky.EventListener onPointerDown;
-  sky.EventListener onPointerMove;
-  sky.EventListener onPointerUp;
-  sky.EventListener onScrollEnd;
-  sky.EventListener onScrollStart;
-  sky.EventListener onScrollUpdate;
-  sky.EventListener onWheel;
-
   List<Node> _children = null;
   String _className = '';
 
@@ -86,21 +77,7 @@ abstract class Element extends Node {
     List<Node> children,
     Style style,
 
-    this.inlineStyle,
-
-    // Events
-    this.onClick,
-    this.onFlingCancel,
-    this.onFlingStart,
-    this.onGestureTap,
-    this.onPointerCancel,
-    this.onPointerDown,
-    this.onPointerMove,
-    this.onPointerUp,
-    this.onScrollEnd,
-    this.onScrollStart,
-    this.onScrollUpdate,
-    this.onWheel
+    this.inlineStyle
   }) : super(key:key) {
 
     _className = style == null ? '': style._className;
@@ -135,34 +112,48 @@ abstract class Element extends Node {
     }
   }
 
-  void _syncEvent(String eventName, sky.EventListener listener,
-                  sky.EventListener oldListener) {
-    sky.Element root = _root as sky.Element;
-    if (listener == oldListener)
-      return;
-
-    if (oldListener != null) {
-      root.removeEventListener(eventName, oldListener);
-    }
-
-    if (listener != null) {
-      root.addEventListener(eventName, listener);
-    }
-  }
-
   void _syncEvents([Element old]) {
-    _syncEvent('click', onClick, old.onClick);
-    _syncEvent('gestureflingcancel', onFlingCancel, old.onFlingCancel);
-    _syncEvent('gestureflingstart', onFlingStart, old.onFlingStart);
-    _syncEvent('gesturescrollend', onScrollEnd, old.onScrollEnd);
-    _syncEvent('gesturescrollstart', onScrollStart, old.onScrollStart);
-    _syncEvent('gesturescrollupdate', onScrollUpdate, old.onScrollUpdate);
-    _syncEvent('gesturetap', onGestureTap, old.onGestureTap);
-    _syncEvent('pointercancel', onPointerCancel, old.onPointerCancel);
-    _syncEvent('pointerdown', onPointerDown, old.onPointerDown);
-    _syncEvent('pointermove', onPointerMove, old.onPointerMove);
-    _syncEvent('pointerup', onPointerUp, old.onPointerUp);
-    _syncEvent('wheel', onWheel, old.onWheel);
+    List<EventHandler> newHandlers = events._handlers;
+    int newStartIndex = 0;
+    int newEndIndex = newHandlers.length;
+
+    List<EventHandler> oldHandlers = old.events._handlers;
+    int oldStartIndex = 0;
+    int oldEndIndex = oldHandlers.length;
+
+    // Skip over leading handlers that match.
+    while (newStartIndex < newEndIndex && oldStartIndex < oldEndIndex) {
+      EventHandler newHander = newHandlers[newStartIndex];
+      EventHandler oldHandler = oldHandlers[oldStartIndex];
+      if (newHander.type != oldHandler.type
+          || newHander.listener != oldHandler.listener)
+        break;
+      ++newStartIndex;
+      ++oldStartIndex;
+    }
+
+    // Skip over trailing handlers that match.
+    while (newStartIndex < newEndIndex && oldStartIndex < oldEndIndex) {
+      EventHandler newHander = newHandlers[newEndIndex - 1];
+      EventHandler oldHandler = oldHandlers[oldEndIndex - 1];
+      if (newHander.type != oldHandler.type
+          || newHander.listener != oldHandler.listener)
+        break;
+      --newEndIndex;
+      --oldEndIndex;
+    }
+
+    sky.Element root = _root as sky.Element;
+
+    for (int i = oldStartIndex; i < oldEndIndex; ++i) {
+      EventHandler oldHandler = oldHandlers[i];
+      root.removeEventListener(oldHandler.type, oldHandler.listener);
+    }
+
+    for (int i = newStartIndex; i < newEndIndex; ++i) {
+      EventHandler newHander = newHandlers[i];
+      root.addEventListener(newHander.type, newHander.listener);
+    }
   }
 
   void _syncNode([Element old]) {
@@ -356,36 +347,12 @@ class Container extends Element {
     Object key,
     List<Node> children,
     Style style,
-    String inlineStyle,
-    sky.EventListener onClick,
-    sky.EventListener onFlingCancel,
-    sky.EventListener onFlingStart,
-    sky.EventListener onGestureTap,
-    sky.EventListener onPointerCancel,
-    sky.EventListener onPointerDown,
-    sky.EventListener onPointerMove,
-    sky.EventListener onPointerUp,
-    sky.EventListener onScrollEnd,
-    sky.EventListener onScrollStart,
-    sky.EventListener onScrollUpdate,
-    sky.EventListener onWheel
+    String inlineStyle
   }) : super(
     key: key,
     children: children,
     style: style,
-    inlineStyle: inlineStyle,
-    onClick: onClick,
-    onFlingCancel: onFlingCancel,
-    onFlingStart: onFlingStart,
-    onGestureTap: onGestureTap,
-    onPointerCancel: onPointerCancel,
-    onPointerDown: onPointerDown,
-    onPointerMove: onPointerMove,
-    onPointerUp: onPointerUp,
-    onScrollEnd: onScrollEnd,
-    onScrollStart: onScrollStart,
-    onScrollUpdate: onScrollUpdate,
-    onWheel: onWheel
+    inlineStyle: inlineStyle
   );
 }
 
@@ -405,18 +372,6 @@ class Image extends Element {
     List<Node> children,
     Style style,
     String inlineStyle,
-    sky.EventListener onClick,
-    sky.EventListener onFlingCancel,
-    sky.EventListener onFlingStart,
-    sky.EventListener onGestureTap,
-    sky.EventListener onPointerCancel,
-    sky.EventListener onPointerDown,
-    sky.EventListener onPointerMove,
-    sky.EventListener onPointerUp,
-    sky.EventListener onScrollEnd,
-    sky.EventListener onScrollStart,
-    sky.EventListener onScrollUpdate,
-    sky.EventListener onWheel,
     this.width,
     this.height,
     this.src
@@ -424,19 +379,7 @@ class Image extends Element {
     key: key,
     children: children,
     style: style,
-    inlineStyle: inlineStyle,
-    onClick: onClick,
-    onFlingCancel: onFlingCancel,
-    onFlingStart: onFlingStart,
-    onGestureTap: onGestureTap,
-    onPointerCancel: onPointerCancel,
-    onPointerDown: onPointerDown,
-    onPointerMove: onPointerMove,
-    onPointerUp: onPointerUp,
-    onScrollEnd: onScrollEnd,
-    onScrollStart: onScrollStart,
-    onScrollUpdate: onScrollUpdate,
-    onWheel: onWheel
+    inlineStyle: inlineStyle
   );
 
   void _syncNode([Element old]) {
@@ -470,18 +413,6 @@ class Anchor extends Element {
     List<Node> children,
     Style style,
     String inlineStyle,
-    sky.EventListener onClick,
-    sky.EventListener onFlingCancel,
-    sky.EventListener onFlingStart,
-    sky.EventListener onGestureTap,
-    sky.EventListener onPointerCancel,
-    sky.EventListener onPointerDown,
-    sky.EventListener onPointerMove,
-    sky.EventListener onPointerUp,
-    sky.EventListener onScrollEnd,
-    sky.EventListener onScrollStart,
-    sky.EventListener onScrollUpdate,
-    sky.EventListener onWheel,
     this.width,
     this.height,
     this.href
@@ -489,19 +420,7 @@ class Anchor extends Element {
     key: key,
     children: children,
     style: style,
-    inlineStyle: inlineStyle,
-    onClick: onClick,
-    onFlingCancel: onFlingCancel,
-    onFlingStart: onFlingStart,
-    onGestureTap: onGestureTap,
-    onPointerCancel: onPointerCancel,
-    onPointerDown: onPointerDown,
-    onPointerMove: onPointerMove,
-    onPointerUp: onPointerUp,
-    onScrollEnd: onScrollEnd,
-    onScrollStart: onScrollStart,
-    onScrollUpdate: onScrollUpdate,
-    onWheel: onWheel
+    inlineStyle: inlineStyle
   );
 
   void _syncNode([Element old]) {

@@ -103,6 +103,8 @@ abstract class Component extends Node {
     _currentlyRendering = null;
     _currentOrder = lastOrder;
 
+    _rendered.events.addAll(events);
+
     _dirty = false;
 
     // TODO(rafaelw): This prevents components from returning different node

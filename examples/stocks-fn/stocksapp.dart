@@ -37,13 +37,7 @@ class StocksApp extends App {
 
   Node render() {
     var drawer = new Drawer(
-      onPositionChanged: _drawerAnimation.onPositionChanged,
-      handleMaskFling: _drawerAnimation.handleFlingStart,
-      handleMaskTap: _drawerAnimation.handleMaskTap,
-      handlePointerCancel: _drawerAnimation.handlePointerCancel,
-      handlePointerDown: _drawerAnimation.handlePointerDown,
-      handlePointerMove: _drawerAnimation.handlePointerMove,
-      handlePointerUp: _drawerAnimation.handlePointerUp,
+      animation: _drawerAnimation,
       children: [
         new DrawerHeader(
           children: [new Text('Stocks')]
@@ -76,9 +70,9 @@ class StocksApp extends App {
     var toolbar = new Toolbar(
       children: [
         new Icon(key: 'menu', style: _iconStyle,
-            onClick: _drawerAnimation.toggle,
             size: 24,
-            type: 'navigation/menu_white'),
+            type: 'navigation/menu_white')
+          ..events.listen('click', _drawerAnimation.toggle),
         new Container(
           style: _titleStyle,
           children: [new Text('I am a stocks app')]

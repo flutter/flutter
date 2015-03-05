@@ -26,12 +26,11 @@ abstract class MaterialComponent extends Component {
 
     return new Container(
       style: _style,
-      onScrollStart: _cancelSplashes,
-      onWheel: _cancelSplashes,
-      onPointerDown: _startSplash,
       children: children,
       key: _splashesKey
-    );
+    )..events.listen('gesturescrollstart', _cancelSplashes)
+     ..events.listen('wheel', _cancelSplashes)
+     ..events.listen('pointerdown', _startSplash);
   }
 
   sky.ClientRect _getBoundingRect() => getRoot().getBoundingClientRect();

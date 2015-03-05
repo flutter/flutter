@@ -33,18 +33,11 @@ class MenuItem extends ButtonBase {
   List<Node> children;
   String icon;
 
-  sky.EventListener onClick;
-
-  MenuItem({ Object key, this.icon, this.children, this.onClick }) : super(key: key) {
-  }
+  MenuItem({ Object key, this.icon, this.children }) : super(key: key);
 
   Node render() {
     return new Container(
       style: _highlight ? _highlightStyle : _style,
-      onClick: onClick,
-      onPointerDown: _handlePointerDown,
-      onPointerUp: _handlePointerUp,
-      onPointerCancel: _handlePointerCancel,
       children: [
         super.render(),
         new Icon(

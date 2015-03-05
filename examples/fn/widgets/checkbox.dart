@@ -57,10 +57,6 @@ class Checkbox extends ButtonBase {
   Node render() {
     return new Container(
       style: _style,
-      onClick: _handleClick,
-      onPointerDown: _handlePointerDown,
-      onPointerUp: _handlePointerUp,
-      onPointerCancel: _handlePointerCancel,
       children: [
         super.render(),
         new Container(
@@ -72,7 +68,7 @@ class Checkbox extends ButtonBase {
           ]
         )
       ]
-    );
+    )..events.listen('click', _handleClick);
   }
 
   void _handleClick(sky.Event e) {

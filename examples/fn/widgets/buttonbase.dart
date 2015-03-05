@@ -4,7 +4,11 @@ abstract class ButtonBase extends MaterialComponent {
 
   bool _highlight = false;
 
-  ButtonBase({ Object key }) : super(key: key);
+  ButtonBase({ Object key }) : super(key: key) {
+    events.listen('pointerdown', _handlePointerDown);
+    events.listen('pointerup', _handlePointerUp);
+    events.listen('pointercancel', _handlePointerCancel);
+  }
 
   void _handlePointerDown(_) {
     setState(() {
