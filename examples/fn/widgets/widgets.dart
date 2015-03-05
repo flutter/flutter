@@ -2,6 +2,7 @@ library widgets;
 
 import '../lib/fn.dart';
 import '../../../framework/fling-curve.dart';
+import '../../../framework/animation/curves.dart';
 import '../../../framework/theme/colors.dart';
 import '../../../framework/theme/shadows.dart';
 import 'dart:collection';
