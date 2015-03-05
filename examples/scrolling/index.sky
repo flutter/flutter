@@ -5,6 +5,6 @@
 // found in the LICENSE file.
 -->
 <sky>
-  <import src="example-scrollable.sky" />
-  <example-scrollable />
+  <import src="scrolling.sky" />
+  <scrolling />
 </sky>
