@@ -9,22 +9,18 @@ import 'dart:collection';
 import 'dart:sky' as sky;
 import 'reflect.dart' as reflect;
 
-bool _checkedMode;
-
-bool _debugWarnings() {
+bool _initIsInCheckedMode() {
   void testFn(double i) {}
-
-  if (_checkedMode == null) {
-    _checkedMode = false;
-    try {
-      testFn('not a double');
-    } catch (ex) {
-      _checkedMode = true;
-    }
+  try {
+    testFn('not a double');
+  } catch (ex) {
+    return true;
   }
-
-  return _checkedMode;
+  return false;
 }
+
+final bool _isInCheckedMode = _initIsInCheckedMode();
+final bool _shouldLogRenderDuration = false;
 
 class EventHandler {
   final String type;
@@ -152,7 +148,7 @@ abstract class Element extends Node {
     _className = style == null ? '': style._className;
     _children = children == null ? _emptyList : children;
 
-    if (_debugWarnings()) {
+    if (_isInCheckedMode) {
       _debugReportDuplicateIds();
     }
   }
@@ -516,8 +512,10 @@ void _renderDirtyComponents() {
 
   _dirtyComponents.clear();
   _renderScheduled = false;
+
   sw.stop();
-  print("Render took ${sw.elapsedMicroseconds} microseconds");
+  if (_shouldLogRenderDuration)
+    print("Render took ${sw.elapsedMicroseconds} microseconds");
 }
 
 void _scheduleComponentForRender(Component c) {
@@ -646,18 +644,19 @@ abstract class Component extends Node {
 
 abstract class App extends Component {
   sky.Node _host = null;
-  App()
-    : super(stateful: true) {
-
+  App() : super(stateful: true) {
     _host = sky.document.createElement('div');
     sky.document.appendChild(_host);
 
     new Future.microtask(() {
       Stopwatch sw = new Stopwatch()..start();
+
       _sync(null, _host, null);
       assert(_root is sky.Node);
+
       sw.stop();
-      print("Initial render: ${sw.elapsedMicroseconds} microseconds");
+      if (_shouldLogRenderDuration)
+        print("Initial render: ${sw.elapsedMicroseconds} microseconds");
     });
   }
 }
