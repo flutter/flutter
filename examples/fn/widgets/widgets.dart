@@ -1,6 +1,7 @@
 library widgets;
 
 import '../lib/fn.dart';
+import '../../../framework/fling-curve.dart';
 import 'dart:collection';
 import 'dart:async';
 import 'dart:math' as math;
@@ -14,7 +15,6 @@ part 'checkbox.dart';
 part 'drawer.dart';
 part 'drawerheader.dart';
 part 'fixedheightscrollable.dart';
-part 'flingcurve.dart';
 part 'icon.dart';
 part 'inksplash.dart';
 part 'material.dart';
