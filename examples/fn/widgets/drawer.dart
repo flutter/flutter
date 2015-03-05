@@ -103,7 +103,7 @@ class Drawer extends Component {
     left: 0;
     bottom: 0;
     right: 0;
-    box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);'''
+    box-shadpw: ${Shadow[3]};'''
   );
 
   static Style _maskStyle = new Style('''
@@ -117,7 +117,7 @@ class Drawer extends Component {
   );
 
   static Style _contentStyle = new Style('''
-    background-color: #FAFAFA;
+    background-color: ${Grey[50]};
     will-change: transform;
     position: absolute;
     z-index: 3;

@@ -7,7 +7,7 @@ class DrawerHeader extends Component {
     flex-direction: column;
     height: 140px;
     -webkit-user-select: none;
-    background-color: #E3ECF5;
+    background-color: ${BlueGrey[50]};
     border-bottom: 1px solid #D1D9E1;
     padding-bottom: 7px;
     margin-bottom: 8px;'''

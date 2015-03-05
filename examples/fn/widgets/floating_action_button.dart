@@ -12,7 +12,7 @@ class FloatingActionButton extends MaterialComponent {
     transform: translateX(0);
     width: 56px;
     height: 56px;
-    background-color: #F44336;
+    background-color: ${Red[500]};
     color: white;
     border-radius: 28px;'''
   );
