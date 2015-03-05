@@ -143,7 +143,7 @@ class StartSky(object):
         pids['sky_server_port'] = sky_server.port
         pids['sky_server_root'] = sky_server.root
 
-        pids['build_dir'] = args.build_dir
+        pids['build_dir'] = os.path.abspath(args.build_dir)
 
         subprocess.check_call([ADB_PATH, 'install', '-r', apk_path])
 
@@ -189,6 +189,35 @@ class StopSky(object):
         pids.clear()
 
 
+class Analyze(object):
+    def add_subparser(self, subparsers):
+        analyze_parser = subparsers.add_parser('analyze',
+            help=('run the dart analyzer with sky url mappings'))
+        analyze_parser.add_argument('app_path', type=str)
+        analyze_parser.set_defaults(func=self.run)
+
+    def run(self, args, pids):
+        ANALYZER_PATH = 'third_party/dart-sdk/dart-sdk/bin/dartanalyzer'
+
+        build_dir = os.path.abspath(pids['build_dir'])
+        bindings_path = os.path.join(build_dir, 'gen/sky/bindings')
+        sky_builtin_path = \
+            os.path.join(SRC_ROOT, 'sky/engine/bindings/builtin.dart')
+        sky_core_path = os.path.join(bindings_path, 'sky_core.dart')
+        mojo_bindings_path = \
+            os.path.join(SRC_ROOT, 'mojo/public/dart/bindings.dart')
+        mojo_core_path = os.path.join(SRC_ROOT, 'mojo/public/dart/core.dart')
+        analyzer_args = [ANALYZER_PATH,
+            # sky_core.dart does not compile cleanly yet. :(
+            # "--url-mapping=dart:sky,%s" % sky_core_path,
+            "--url-mapping=dart:sky_builtin,%s" % sky_builtin_path,
+            "--url-mapping=mojo:bindings,%s" % mojo_bindings_path,
+            "--url-mapping=mojo:core,%s" % mojo_core_path,
+            args.app_path
+        ]
+        subprocess.call(analyzer_args)
+
+
 class SkyShellRunner(object):
     def main(self):
         logging.basicConfig(level=logging.WARNING)
@@ -196,7 +225,7 @@ class SkyShellRunner(object):
         parser = argparse.ArgumentParser(description='Sky Shell Runner')
         subparsers = parser.add_subparsers(help='sub-command help')
 
-        for command in [StartSky(), StopSky()]:
+        for command in [StartSky(), StopSky(), Analyze()]:
             command.add_subparser(subparsers)
 
         args = parser.parse_args()
