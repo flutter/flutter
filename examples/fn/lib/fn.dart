@@ -10,6 +10,7 @@ import 'dart:sky' as sky;
 import 'reflect.dart' as reflect;
 
 part 'component.dart';
+part 'event.dart';
 part 'node.dart';
 part 'style.dart';
 

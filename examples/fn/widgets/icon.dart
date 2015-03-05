@@ -7,14 +7,12 @@ class Icon extends Component {
   Style style;
   int size;
   String type;
-  sky.EventListener onClick;
 
   Icon({
     String key,
     this.style,
     this.size,
-    this.type: '',
-    this.onClick
+    this.type: ''
   }) : super(key: key);
 
   Node render() {
@@ -28,7 +26,6 @@ class Icon extends Component {
 
     return new Image(
       style: style,
-      onClick: onClick,
       width: size,
       height: size,
       src: '${kAssetBase}/${category}/2x_web/ic_${subtype}_${size}dp.png'

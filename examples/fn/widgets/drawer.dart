@@ -127,24 +127,12 @@ class Drawer extends Component {
     bottom: 0;'''
   );
 
-  Stream<double> onPositionChanged;
-  sky.EventListener handleMaskFling;
-  sky.EventListener handleMaskTap;
-  sky.EventListener handlePointerCancel;
-  sky.EventListener handlePointerDown;
-  sky.EventListener handlePointerMove;
-  sky.EventListener handlePointerUp;
+  DrawerAnimation animation;
   List<Node> children;
 
   Drawer({
     Object key,
-    this.onPositionChanged,
-    this.handleMaskFling,
-    this.handleMaskTap,
-    this.handlePointerCancel,
-    this.handlePointerDown,
-    this.handlePointerMove,
-    this.handlePointerUp,
+    this.animation,
     this.children
   }) : super(key: key);
 
@@ -157,7 +145,7 @@ class Drawer extends Component {
       return;
 
     _listening = true;
-    onPositionChanged.listen((position) {
+    animation.onPositionChanged.listen((position) {
       setState(() {
         _position = position;
       });
@@ -172,29 +160,28 @@ class Drawer extends Component {
     String maskInlineStyle = 'opacity: ${(_position / _kWidth + 1) * 0.25}';
     String contentInlineStyle = 'transform: translateX(${_position}px)';
 
+    Container mask = new Container(
+      key: 'Mask',
+      style: _maskStyle,
+      inlineStyle: maskInlineStyle
+    )..events.listen('gesturetap', animation.handleMaskTap)
+     ..events.listen('gestureflingstart', animation.handleFlingStart);
+
+    Container content = new Container(
+      key: 'Content',
+      style: _contentStyle,
+      inlineStyle: contentInlineStyle,
+      children: children
+    );
+
     return new Container(
       style: _style,
       inlineStyle: inlineStyle,
-      onPointerDown: handlePointerDown,
-      onPointerMove: handlePointerMove,
-      onPointerUp: handlePointerUp,
-      onPointerCancel: handlePointerCancel,
+      children: [ mask, content ]
+    )..events.listen('pointerdown', animation.handlePointerDown)
+     ..events.listen('pointermove', animation.handlePointerMove)
+     ..events.listen('pointerup', animation.handlePointerUp)
+     ..events.listen('pointercancel', animation.handlePointerCancel);
 
-      children: [
-        new Container(
-          key: 'Mask',
-          style: _maskStyle,
-          inlineStyle: maskInlineStyle,
-          onGestureTap: handleMaskTap,
-          onFlingStart: handleMaskFling
-        ),
-        new Container(
-          key: 'Content',
-          style: _contentStyle,
-          inlineStyle: contentInlineStyle,
-          children: children
-        )
-      ]
-    );
   }
 }

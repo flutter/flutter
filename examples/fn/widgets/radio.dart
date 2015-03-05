@@ -48,16 +48,12 @@ class Radio extends ButtonBase {
   Node render() {
     return new Container(
       style: _highlight ? _highlightStyle : _style,
-      onClick: _handleClick,
-      onPointerDown: _handlePointerDown,
-      onPointerUp: _handlePointerUp,
-      onPointerCancel: _handlePointerCancel,
       children: value == groupValue ?
           [super.render(), new Container( style : _dotStyle )] : [super.render()]
-    );
+    )..events.listen('click', _handleClick);
   }
 
-  void _handleClick(sky.Event e) {
+  void _handleClick(_) {
     onChanged(value);
   }
 }
