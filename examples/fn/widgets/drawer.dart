@@ -73,9 +73,11 @@ class DrawerAnimation {
 
   void _animateToPosition(double targetPosition) {
     double distance = (targetPosition - _position).abs();
-    double targetDuration = distance / _kWidth * _kBaseSettleDurationMS;
-    double duration = math.min(targetDuration, _kMaxSettleDurationMS);
-    _animate(duration, _position, targetPosition, _kAnimationCurve);
+    if (distance != 0) {
+      double targetDuration = distance / _kWidth * _kBaseSettleDurationMS;
+      double duration = math.min(targetDuration, _kMaxSettleDurationMS);
+      _animate(duration, _position, targetPosition, _kAnimationCurve);
+    }
   }
 
   void handleFlingStart(event) {
