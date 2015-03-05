@@ -1,7 +1,7 @@
 library stocksapp;
 
+import '../../framework/fn.dart';
 import '../data/stocks.dart';
-import '../fn/lib/fn.dart';
 import '../fn/widgets/widgets.dart';
 import 'dart:collection';
 import 'dart:math';

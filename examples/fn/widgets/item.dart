@@ -1,7 +1,7 @@
 library item;
 
+import '../../../framework/fn.dart';
 import 'dart:sky' as sky;
-import 'fn.dart';
 import 'widgets.dart';
 
 enum Color { RED, GREEN }
