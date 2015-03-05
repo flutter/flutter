@@ -203,13 +203,13 @@ class Analyze(object):
         bindings_path = os.path.join(build_dir, 'gen/sky/bindings')
         sky_builtin_path = \
             os.path.join(SRC_ROOT, 'sky/engine/bindings/builtin.dart')
-        sky_core_path = os.path.join(bindings_path, 'sky_core.dart')
+        dart_sky_path = os.path.join(bindings_path, 'dart_sky.dart')
         mojo_bindings_path = \
             os.path.join(SRC_ROOT, 'mojo/public/dart/bindings.dart')
         mojo_core_path = os.path.join(SRC_ROOT, 'mojo/public/dart/core.dart')
         analyzer_args = [ANALYZER_PATH,
             # sky_core.dart does not compile cleanly yet. :(
-            # "--url-mapping=dart:sky,%s" % sky_core_path,
+            # "--url-mapping=dart:sky,%s" % dart_sky_path,
             "--url-mapping=dart:sky_builtin,%s" % sky_builtin_path,
             "--url-mapping=mojo:bindings,%s" % mojo_bindings_path,
             "--url-mapping=mojo:core,%s" % mojo_core_path,
