@@ -503,24 +503,34 @@ class Anchor extends Element {
 
 List<Component> _dirtyComponents = new List<Component>();
 bool _renderScheduled = false;
+bool _inRenderDirtyComponents = false;
 
 void _renderDirtyComponents() {
-  Stopwatch sw = new Stopwatch()..start();
+  try {
+    _inRenderDirtyComponents = true;
+    Stopwatch sw = new Stopwatch()..start();
 
-  _dirtyComponents.sort((a, b) => a._order - b._order);
-  for (var comp in _dirtyComponents) {
-    comp._renderIfDirty();
+    _dirtyComponents.sort((a, b) => a._order - b._order);
+    for (var comp in _dirtyComponents) {
+      comp._renderIfDirty();
+    }
+
+    _dirtyComponents.clear();
+    _renderScheduled = false;
+
+    sw.stop();
+    if (_shouldLogRenderDuration)
+      print("Render took ${sw.elapsedMicroseconds} microseconds");
+  } finally {
+    _inRenderDirtyComponents = false;
   }
-
-  _dirtyComponents.clear();
-  _renderScheduled = false;
-
-  sw.stop();
-  if (_shouldLogRenderDuration)
-    print("Render took ${sw.elapsedMicroseconds} microseconds");
 }
 
 void _scheduleComponentForRender(Component c) {
+  assert(!_inRenderDirtyComponents);
+  if (_inRenderDirtyComponents)
+    return;
+
   _dirtyComponents.add(c);
 
   if (!_renderScheduled) {
