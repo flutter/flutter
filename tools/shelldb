@@ -208,8 +208,7 @@ class Analyze(object):
             os.path.join(SRC_ROOT, 'mojo/public/dart/bindings.dart')
         mojo_core_path = os.path.join(SRC_ROOT, 'mojo/public/dart/core.dart')
         analyzer_args = [ANALYZER_PATH,
-            # sky_core.dart does not compile cleanly yet. :(
-            # "--url-mapping=dart:sky,%s" % dart_sky_path,
+            "--url-mapping=dart:sky,%s" % dart_sky_path,
             "--url-mapping=dart:sky_builtin,%s" % sky_builtin_path,
             "--url-mapping=mojo:bindings,%s" % mojo_bindings_path,
             "--url-mapping=mojo:core,%s" % mojo_core_path,
