@@ -636,13 +636,17 @@ abstract class Component extends Node {
   }
 
   void _renderIfDirty() {
+    if (_removed)
+      return;
+
     assert(_rendered != null);
-    assert(!_removed);
 
     var rendered = _rendered;
     while (rendered is Component) {
       rendered = rendered._rendered;
     }
+
+    assert(rendered._root != null);
     sky.Node root = rendered._root;
 
     _renderInternal(root.parentNode, root.nextSibling);
