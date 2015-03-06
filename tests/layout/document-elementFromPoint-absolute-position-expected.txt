@@ -1,0 +1,12 @@
+CONSOLE: unittest-suite-wait-for-done
+CONSOLE: PASS: should hit test top item
+CONSOLE: PASS: should hit test second
+CONSOLE: PASS: should hit test third
+CONSOLE: PASS: should hit test fourth
+CONSOLE: PASS: should hit test fifth
+CONSOLE: PASS: should hit test sixth
+CONSOLE: PASS: should hit test seventh
+CONSOLE: 
+CONSOLE: All 7 tests passed.
+CONSOLE: unittest-suite-success
+DONE

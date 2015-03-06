@@ -562,9 +562,9 @@ static bool isHitCandidate(bool canDepthSort, double* zOffset, const HitTestingT
     return true;
 }
 
-static inline bool reverseCompareZIndex(RenderBox* first, RenderBox* second)
+static inline bool forwardCompareZIndex(RenderBox* first, RenderBox* second)
 {
-    return first->style()->zIndex() > second->style()->zIndex();
+    return first->style()->zIndex() < second->style()->zIndex();
 }
 
 // hitTestLocation and hitTestRect are relative to rootLayer.
@@ -663,7 +663,11 @@ bool RenderBox::hitTestLayer(RenderLayer* rootLayer, RenderLayer* containerLayer
 
     Vector<RenderBox*> layers;
     collectSelfPaintingLayers(layers);
-    std::stable_sort(layers.begin(), layers.end(), reverseCompareZIndex);
+    // Hit testing needs to walk in the backwards direction from paint.
+    // Forward compare and then reverse instead of just reverse comparing
+    // so that elements with the same z-index are walked in reverse tree order.
+    std::stable_sort(layers.begin(), layers.end(), forwardCompareZIndex);
+    layers.reverse();
 
     bool hitLayer = false;
     for (auto& currentLayer : layers) {
@@ -746,11 +750,6 @@ bool RenderBox::hitTestNonLayerDescendants(const HitTestRequest& request, HitTes
 }
 
 // --------------------- painting stuff -------------------------------
-
-static inline bool forwardCompareZIndex(RenderBox* first, RenderBox* second)
-{
-    return first->style()->zIndex() < second->style()->zIndex();
-}
 
 void RenderBox::paintLayer(GraphicsContext* context, const LayerPaintingInfo& paintingInfo)
 {
