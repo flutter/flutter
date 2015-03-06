@@ -122,9 +122,11 @@ class HTMLImageElement extends Element {
   Object style = {};
 }
 
-class Event {
-  Event();
-}
+class Event {}
+
+class PointerEvent extends Event {}
+class GestureEvent extends Event {}
+class WheelEvent extends Event {}
 
 typedef EventListener(Event event);
 
@@ -146,3 +148,12 @@ class Window {
 Document document = new Document();
 
 Window window = new Window();
+
+class ClientRect {
+    double top
+    double right;
+    double bottomr;
+    double left;
+    double width;
+    double height;
+}
