@@ -61,7 +61,7 @@ abstract class MaterialComponent extends Component {
     });
   }
 
-  void willUnmount() {
+  void didUnmount() {
     _cancelSplashes(null);
   }
 

@@ -64,7 +64,7 @@ abstract class FixedHeightScrollable extends Component {
     ..events.listen('wheel', _handleWheel);
   }
 
-  void willUnmount() {
+  void didUnmount() {
     _stopFling();
   }
 

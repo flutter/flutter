@@ -528,9 +528,6 @@ void _renderDirtyComponents() {
 
 void _scheduleComponentForRender(Component c) {
   assert(!_inRenderDirtyComponents);
-  if (_inRenderDirtyComponents)
-    return;
-
   _dirtyComponents.add(c);
 
   if (!_renderScheduled) {
@@ -553,16 +550,16 @@ abstract class Component extends Node {
         _order = _currentOrder + 1,
         super(key:key);
 
-  void willUnmount() {}
+  void didUnmount() {}
 
   void _remove() {
     assert(_rendered != null);
     assert(_root != null);
-    willUnmount();
     _rendered._remove();
     _rendered = null;
     _root = null;
     _removed = true;
+    didUnmount();
   }
 
   // TODO(rafaelw): It seems wrong to expose DOM at all. This is presently
@@ -640,10 +637,10 @@ abstract class Component extends Node {
   }
 
   void setState(Function fn()) {
-    assert(_rendered != null); // cannot setState before mounting.
+    assert(_rendered != null || _removed); // cannot setState before mounting.
     _stateful = true;
     fn();
-    if (_currentlyRendering != this) {
+    if (!_removed && _currentlyRendering != this) {
       _dirty = true;
       _scheduleComponentForRender(this);
     }
