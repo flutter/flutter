@@ -10,7 +10,7 @@ import 'dart:sky' as sky;
 import 'reflect.dart' as reflect;
 
 bool _initIsInCheckedMode() {
-  void testFn(double i) {}
+  String testFn(i) { double d = i; return d.toString(); }
   try {
     testFn('not a double');
   } catch (ex) {
@@ -405,7 +405,6 @@ class Container extends Element {
   String get _tagName => 'div';
 
   static final Container _emptyContainer = new Container();
-
   Element get _emptyElement => _emptyContainer;
 
   Container({
@@ -470,8 +469,11 @@ class Anchor extends Element {
   String get _tagName => 'a';
 
   static final Anchor _emptyAnchor = new Anchor();
+  Element get _emptyElement => _emptyAnchor;
 
   String href;
+  int width;
+  int height;
 
   Anchor({
     Object key,
