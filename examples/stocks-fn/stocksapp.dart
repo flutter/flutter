@@ -3,9 +3,7 @@ library stocksapp;
 import '../../framework/fn.dart';
 import '../data/stocks.dart';
 import '../fn/widgets/widgets.dart';
-import 'dart:collection';
 import 'dart:math';
-import 'dart:sky' as sky;
 
 part 'stockarrow.dart';
 part 'stocklist.dart';

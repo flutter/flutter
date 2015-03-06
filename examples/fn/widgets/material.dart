@@ -33,9 +33,9 @@ abstract class MaterialComponent extends Component {
      ..events.listen('pointerdown', _startSplash);
   }
 
-  sky.ClientRect _getBoundingRect() => getRoot().getBoundingClientRect();
+  sky.ClientRect _getBoundingRect() => (getRoot() as sky.Element).getBoundingClientRect();
 
-  void _startSplash(sky.Event event) {
+  void _startSplash(sky.PointerEvent event) {
     setState(() {
       if (_splashes == null) {
         _splashes = new LinkedHashSet<SplashAnimation>();

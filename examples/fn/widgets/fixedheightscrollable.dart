@@ -106,22 +106,22 @@ abstract class FixedHeightScrollable extends Component {
     _scheduleFlingUpdate();
   }
 
-  void _handleScrollUpdate(sky.Event event) {
+  void _handleScrollUpdate(sky.GestureEvent event) {
     _scrollBy(-event.dy);
   }
 
-  void _handleFlingStart(sky.Event event) {
+  void _handleFlingStart(sky.GestureEvent event) {
     setState(() {
       _flingCurve = new FlingCurve(-event.velocityY, event.timeStamp);
       _scheduleFlingUpdate();
     });
   }
 
-  void _handleFlingCancel(sky.Event event) {
+  void _handleFlingCancel(sky.GestureEvent event) {
     _stopFling();
   }
 
-  void _handleWheel(sky.Event event) {
+  void _handleWheel(sky.WheelEvent event) {
     _scrollBy(-event.offsetY);
   }
 }
