@@ -615,8 +615,14 @@ abstract class Component extends Node {
 
     _dirty = false;
 
-    if (oldRendered != null && _rendered.runtimeType != oldRendered.runtimeType)
+    // TODO(rafaelw): This eagerly removes the old DOM. It may be that a
+    // new component was rendered that could re-use some of it. Consider
+    // syncing the new VDOM against the old one.
+    if (oldRendered != null &&
+        _rendered.runtimeType != oldRendered.runtimeType) {
+      oldRendered._remove();
       oldRendered = null;
+    }
 
     if (_rendered._sync(oldRendered, host, insertBefore)) {
       _rendered = oldRendered; // retain stateful component
