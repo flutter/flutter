@@ -141,7 +141,7 @@ class DocumentView : public blink::ServiceProvider,
   scoped_ptr<LayerHost> layer_host_;
   scoped_refptr<Layer> root_layer_;
   RasterizerBitmap* bitmap_rasterizer_;  // Used for pixel tests.
-  service_registry::ServiceRegistryPtr service_registry_;
+  mojo::ServiceRegistryPtr service_registry_;
   scoped_ptr<mojo::StrongBinding<mojo::ServiceProvider>>
       service_registry_service_provider_binding_;
   base::WeakPtrFactory<DocumentView> weak_factory_;
