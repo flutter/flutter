@@ -1,9 +1,6 @@
 part of widgets;
 
 class FloatingActionButton extends MaterialComponent {
-  // TODO(rafaelw): Ganesh has problems with box shadows
-  // box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
-
   static final Style _style = new Style('''
     position: absolute;
     bottom: 16px;
@@ -14,6 +11,7 @@ class FloatingActionButton extends MaterialComponent {
     height: 56px;
     background-color: ${Red[500]};
     color: white;
+    box-shadow: ${Shadow[3]};
     border-radius: 28px;'''
   );
   static final Style _clipStyle = new Style('''
