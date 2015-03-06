@@ -188,10 +188,10 @@ abstract class Element extends Node {
 
     // Skip over leading handlers that match.
     while (newStartIndex < newEndIndex && oldStartIndex < oldEndIndex) {
-      EventHandler newHander = newHandlers[newStartIndex];
+      EventHandler newHandler = newHandlers[newStartIndex];
       EventHandler oldHandler = oldHandlers[oldStartIndex];
-      if (newHander.type != oldHandler.type
-          || newHander.listener != oldHandler.listener)
+      if (newHandler.type != oldHandler.type
+          || newHandler.listener != oldHandler.listener)
         break;
       ++newStartIndex;
       ++oldStartIndex;
@@ -199,10 +199,10 @@ abstract class Element extends Node {
 
     // Skip over trailing handlers that match.
     while (newStartIndex < newEndIndex && oldStartIndex < oldEndIndex) {
-      EventHandler newHander = newHandlers[newEndIndex - 1];
+      EventHandler newHandler = newHandlers[newEndIndex - 1];
       EventHandler oldHandler = oldHandlers[oldEndIndex - 1];
-      if (newHander.type != oldHandler.type
-          || newHander.listener != oldHandler.listener)
+      if (newHandler.type != oldHandler.type
+          || newHandler.listener != oldHandler.listener)
         break;
       --newEndIndex;
       --oldEndIndex;
@@ -216,8 +216,8 @@ abstract class Element extends Node {
     }
 
     for (int i = newStartIndex; i < newEndIndex; ++i) {
-      EventHandler newHander = newHandlers[i];
-      root.addEventListener(newHander.type, newHander.listener);
+      EventHandler newHandler = newHandlers[i];
+      root.addEventListener(newHandler.type, newHandler.listener);
     }
   }
 
@@ -604,10 +604,8 @@ abstract class Component extends Node {
 
     _dirty = false;
 
-    // TODO(rafaelw): This prevents components from returning different node
-    // types as their root node at different times. Consider relaxing.
-    assert(oldRendered == null ||
-           _rendered.runtimeType == oldRendered.runtimeType);
+    if (oldRendered != null && _rendered.runtimeType != oldRendered.runtimeType)
+      oldRendered = null;
 
     if (_rendered._sync(oldRendered, host, insertBefore)) {
       _rendered = oldRendered; // retain stateful component
