@@ -44,9 +44,13 @@ void Rasterizer::Draw(skia::RefPtr<SkPicture> picture) {
   if (!surface_)
     return;
 
+  gfx::Size size = GetSize(picture.get());
+  if (size.IsEmpty())
+    return;
+
   EnsureGLContext();
   CHECK(context_->MakeCurrent(surface_.get()));
-  EnsureGaneshSurface(GetSize(picture.get()));
+  EnsureGaneshSurface(size);
 
   SkCanvas* canvas = ganesh_surface_->canvas();
   canvas->drawPicture(picture.get());
