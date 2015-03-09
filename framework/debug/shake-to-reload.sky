@@ -9,10 +9,8 @@ class _ShakeDetector extends SensorListener {
     SensorServiceProxy sensorService = new SensorServiceProxy.unbound();
     shell.requestService(sensorService);
 
-    _stub = new SensorListenerStub.unbound()
-            ..delegate = this;
+    _stub = new SensorListenerStub.unbound()..impl = this;
     sensorService.ptr.addListener(SensorType_ACCELEROMETER, _stub);
-    _stub.listen();
   }
 
   void onAccuracyChanged(int accuracy) {
