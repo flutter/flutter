@@ -34,7 +34,7 @@ class StockRow extends MaterialComponent {
     this.stock = stock;
   }
 
-  Node render() {
+  Node build() {
     String lastSale = "\$${stock.lastSale.toStringAsFixed(2)}";
 
     String changeInPrice = "${stock.percentChange.toStringAsFixed(2)}%";
@@ -62,7 +62,7 @@ class StockRow extends MaterialComponent {
       )
     ];
 
-    children.add(super.render());
+    children.add(super.build());
 
     return new Container(
       style: _style,

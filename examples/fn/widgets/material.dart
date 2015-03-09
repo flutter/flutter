@@ -17,7 +17,7 @@ abstract class MaterialComponent extends Component {
 
   MaterialComponent({ Object key }) : super(key: key);
 
-  Node render() {
+  Node build() {
     List<Node> children = [];
 
     if (_splashes != null) {

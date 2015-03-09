@@ -15,7 +15,7 @@ class Icon extends Component {
     this.type: ''
   }) : super(key: key);
 
-  Node render() {
+  Node build() {
     String category = '';
     String subtype = '';
     List<String> parts = type.split('/');

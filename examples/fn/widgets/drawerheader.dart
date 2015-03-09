@@ -27,7 +27,7 @@ class DrawerHeader extends Component {
 
   DrawerHeader({ Object key, this.children }) : super(key: key);
 
-  Node render() {
+  Node build() {
     return new Container(
       style: _style,
       children: [

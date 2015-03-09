@@ -30,8 +30,8 @@ class FloatingActionButton extends MaterialComponent {
 
   FloatingActionButton({ Object key, this.content }) : super(key: key);
 
-  Node render() {
-    List<Node> children = [super.render()];
+  Node build() {
+    List<Node> children = [super.build()];
 
     if (content != null)
       children.add(content);

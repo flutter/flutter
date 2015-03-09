@@ -27,7 +27,7 @@ class Box extends Component {
 
   Box({String key, this.title, this.children }) : super(key: key);
 
-  Node render() {
+  Node build() {
     return new Container(
       style: _style,
       children: [

@@ -35,11 +35,11 @@ class MenuItem extends ButtonBase {
 
   MenuItem({ Object key, this.icon, this.children }) : super(key: key);
 
-  Node render() {
+  Node build() {
     return new Container(
       style: _highlight ? _highlightStyle : _style,
       children: [
-        super.render(),
+        super.build(),
         new Icon(
           style: _iconStyle,
           size: 24,

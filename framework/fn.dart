@@ -244,7 +244,7 @@ abstract class Element extends Node {
     Element oldElement = old as Element;
 
     if (oldElement == null) {
-      // print("...no oldElement, initial render");
+      // print("...no oldElement, initial build");
 
       _root = sky.document.createElement(_tagName);
       _parentInsertBefore(host, _root, insertBefore);
@@ -502,21 +502,21 @@ class Anchor extends Element {
 }
 
 List<Component> _dirtyComponents = new List<Component>();
-bool _renderScheduled = false;
+bool _buildScheduled = false;
 bool _inRenderDirtyComponents = false;
 
-void _renderDirtyComponents() {
+void _buildDirtyComponents() {
   try {
     _inRenderDirtyComponents = true;
     Stopwatch sw = new Stopwatch()..start();
 
     _dirtyComponents.sort((a, b) => a._order - b._order);
     for (var comp in _dirtyComponents) {
-      comp._renderIfDirty();
+      comp._buildIfDirty();
     }
 
     _dirtyComponents.clear();
-    _renderScheduled = false;
+    _buildScheduled = false;
 
     sw.stop();
     if (_shouldLogRenderDuration)
@@ -530,15 +530,15 @@ void _scheduleComponentForRender(Component c) {
   assert(!_inRenderDirtyComponents);
   _dirtyComponents.add(c);
 
-  if (!_renderScheduled) {
-    _renderScheduled = true;
-    new Future.microtask(_renderDirtyComponents);
+  if (!_buildScheduled) {
+    _buildScheduled = true;
+    new Future.microtask(_buildDirtyComponents);
   }
 }
 
 abstract class Component extends Node {
-  bool _dirty = true; // components begin dirty because they haven't rendered.
-  Node _rendered = null;
+  bool _dirty = true; // components begin dirty because they haven't built.
+  Node _vdom = null;
   bool _removed = false;
   final int _order;
   static int _currentOrder = 0;
@@ -554,10 +554,10 @@ abstract class Component extends Node {
   void didUnmount() {}
 
   void _remove() {
-    assert(_rendered != null);
+    assert(_vdom != null);
     assert(_root != null);
-    _rendered._remove();
-    _rendered = null;
+    _vdom._remove();
+    _vdom = null;
     _root = null;
     _removed = true;
     didUnmount();
@@ -571,89 +571,89 @@ abstract class Component extends Node {
     Component oldComponent = old as Component;
 
     if (oldComponent == null || oldComponent == this) {
-      _renderInternal(host, insertBefore);
+      _buildInternal(host, insertBefore);
       return false;
     }
 
     assert(oldComponent != null);
     assert(_dirty);
-    assert(_rendered == null);
+    assert(_vdom == null);
 
     if (oldComponent._stateful) {
-      _stateful = false; // prevent iloop from _renderInternal below.
+      _stateful = false; // prevent iloop from _buildInternal below.
 
       reflect.copyPublicFields(this, oldComponent);
 
       oldComponent._dirty = true;
       _dirty = false;
 
-      oldComponent._renderInternal(host, insertBefore);
+      oldComponent._buildInternal(host, insertBefore);
       return true;  // Must retain old component
     }
 
-    _rendered = oldComponent._rendered;
-    _renderInternal(host, insertBefore);
+    _vdom = oldComponent._vdom;
+    _buildInternal(host, insertBefore);
     return false;
   }
 
-  void _renderInternal(sky.Node host, sky.Node insertBefore) {
+  void _buildInternal(sky.Node host, sky.Node insertBefore) {
     if (!_dirty) {
-      assert(_rendered != null);
+      assert(_vdom != null);
       return;
     }
 
-    var oldRendered = _rendered;
+    var oldRendered = _vdom;
     bool mounting = oldRendered == null;
     int lastOrder = _currentOrder;
     _currentOrder = _order;
     _currentlyRendering = this;
-    _rendered = render();
+    _vdom = build();
     _currentlyRendering = null;
     _currentOrder = lastOrder;
 
-    _rendered.events.addAll(events);
+    _vdom.events.addAll(events);
 
     _dirty = false;
 
     // TODO(rafaelw): This eagerly removes the old DOM. It may be that a
-    // new component was rendered that could re-use some of it. Consider
+    // new component was built that could re-use some of it. Consider
     // syncing the new VDOM against the old one.
     if (oldRendered != null &&
-        _rendered.runtimeType != oldRendered.runtimeType) {
+        _vdom.runtimeType != oldRendered.runtimeType) {
       oldRendered._remove();
       oldRendered = null;
     }
 
-    if (_rendered._sync(oldRendered, host, insertBefore)) {
-      _rendered = oldRendered; // retain stateful component
+    if (_vdom._sync(oldRendered, host, insertBefore)) {
+      _vdom = oldRendered; // retain stateful component
     }
-    _root = _rendered._root;
-    assert(_rendered._root is sky.Node);
+    _root = _vdom._root;
+    assert(_vdom._root is sky.Node);
 
     if (mounting) {
       didMount();
     }
   }
 
-  void _renderIfDirty() {
+  void _buildIfDirty() {
     if (_removed)
       return;
 
-    assert(_rendered != null);
+    assert(_vdom != null);
 
-    var rendered = _rendered;
-    while (rendered is Component) {
-      rendered = rendered._rendered;
+    var vdom = _vdom;
+    while (vdom is Component) {
+      vdom = vdom._vdom;
     }
 
-    assert(rendered._root != null);
-    sky.Node root = rendered._root;
+    assert(vdom._root != null);
+    sky.Node root = vdom._root;
 
-    _renderInternal(root.parentNode, root.nextSibling);
+    _buildInternal(root.parentNode, root.nextSibling);
   }
 
   void setState(Function fn()) {
-    assert(_rendered != null || _removed); // cannot setState before mounting.
+    assert(_vdom != null || _removed); // cannot setState before mounting.
     _stateful = true;
     fn();
     if (!_removed && _currentlyRendering != this) {
@@ -662,7 +662,7 @@ abstract class Component extends Node {
     }
   }
 
-  Node render();
+  Node build();
 }
 
 abstract class App extends Component {
@@ -679,7 +679,7 @@ abstract class App extends Component {
 
       sw.stop();
       if (_shouldLogRenderDuration)
-        print("Initial render: ${sw.elapsedMicroseconds} microseconds");
+        print("Initial build: ${sw.elapsedMicroseconds} microseconds");
     });
   }
 }
