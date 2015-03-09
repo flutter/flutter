@@ -6,7 +6,6 @@ class StockRow extends MaterialComponent {
 
   static Style _style = new Style('''
     transform: translateX(0);
-    max-height: 48px;
     display: flex;
     align-items: center;
     border-bottom: 1px solid #F4F4F4;

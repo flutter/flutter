@@ -247,6 +247,7 @@ abstract class Element extends Node {
       // print("...no oldElement, initial render");
 
       _root = sky.document.createElement(_tagName);
+      _parentInsertBefore(host, _root, insertBefore);
       _syncNode();
 
       for (var child in _children) {
@@ -254,7 +255,6 @@ abstract class Element extends Node {
         assert(child._root is sky.Node);
       }
 
-      _parentInsertBefore(host, _root, insertBefore);
       return false;
     }
 
