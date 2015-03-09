@@ -45,11 +45,11 @@ class Radio extends ButtonBase {
     this.groupValue
   }) : super(key: key);
 
-  Node render() {
+  Node build() {
     return new Container(
       style: _highlight ? _highlightStyle : _style,
       children: value == groupValue ?
-          [super.render(), new Container( style : _dotStyle )] : [super.render()]
+          [super.build(), new Container( style : _dotStyle )] : [super.build()]
     )..events.listen('click', _handleClick);
   }
 

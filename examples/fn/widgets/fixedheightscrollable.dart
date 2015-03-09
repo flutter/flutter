@@ -32,7 +32,7 @@ abstract class FixedHeightScrollable extends Component {
     this.maxOffset
   }) : super(key: key) {}
 
-  List<Node> renderItems(int start, int count);
+  List<Node> buildItems(int start, int count);
 
   void didMount() {
     var root = getRoot();
@@ -48,7 +48,7 @@ abstract class FixedHeightScrollable extends Component {
     });
   }
 
-  Node render() {
+  Node build() {
     var itemNumber = 0;
     var drawCount = 1;
     var transformStyle = '';
@@ -73,7 +73,7 @@ abstract class FixedHeightScrollable extends Component {
         new Container(
           style: _scrollAreaStyle,
           inlineStyle: transformStyle,
-          children: renderItems(itemNumber, drawCount)
+          children: buildItems(itemNumber, drawCount)
         )
       ]
     )

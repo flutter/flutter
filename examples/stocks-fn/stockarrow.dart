@@ -67,7 +67,7 @@ class StockArrow extends Component {
     return _kRedColors[_colorIndexForPercentChange(percentChange)];
   }
 
-  Node render() {
+  Node build() {
     String border = _colorForPercentChange(percentChange).toString();
     bool up = percentChange > 0;
     String type = up ? 'bottom' : 'top';

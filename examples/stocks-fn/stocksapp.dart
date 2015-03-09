@@ -33,7 +33,7 @@ class StocksApp extends App {
 
   StocksApp() : super();
 
-  Node render() {
+  Node build() {
     var drawer = new Drawer(
       animation: _drawerAnimation,
       children: [

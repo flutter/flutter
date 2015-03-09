@@ -34,20 +34,20 @@ main() {
 import '../fn/lib/fn.dart';
 
 class HelloWorldApp extends App {
-  Node render() {
+  Node build() {
     return new Text('Hello, World!');
   }
 }
 ```
-An app is comprised of (and is, itself, a) components. A component's main job is to implement `Node render()`. The idea here is that the `render` method describes the DOM of a component at any given point during its lifetime. In this case, our `HelloWorldApp`'s `render` method just returns a `Text` node which displays the obligatory line of text.
+An app is comprised of (and is, itself, a) components. A component's main job is to implement `Node build()`. The idea here is that the `build` method describes the DOM of a component at any given point during its lifetime. In this case, our `HelloWorldApp`'s `build` method just returns a `Text` node which displays the obligatory line of text.
 
 Nodes
 -----
-A component's `render` method must return a single `Node` which *may* have children (and so on, forming a *subtree*). Effen comes with a few built-in nodes which mirror the built-in nodes/elements of sky: `Text`, `Anchor` (`<a />`, `Image` (`<img />`) and `Container` (`<div />`). `render` can return a tree of Nodes comprised of any of these nodes and plus any other imported object which extends `Component`.
+A component's `build` method must return a single `Node` which *may* have children (and so on, forming a *subtree*). Effen comes with a few built-in nodes which mirror the built-in nodes/elements of sky: `Text`, `Anchor` (`<a />`, `Image` (`<img />`) and `Container` (`<div />`). `build` can return a tree of Nodes comprised of any of these nodes and plus any other imported object which extends `Component`.
 
 How to structure you app
 ------------------------
-If you're familiar with React, the basic idea is the same: Application data flows *down* from components which have data to components & nodes which they construct via construction parameters. Generally speaking, View-Model data (data which is derived from *model* data, but exists only because the view needs it), is computed during the course of `render` and is short-lived, being handed into nodes & components as configuration data.
+If you're familiar with React, the basic idea is the same: Application data flows *down* from components which have data to components & nodes which they construct via construction parameters. Generally speaking, View-Model data (data which is derived from *model* data, but exists only because the view needs it), is computed during the course of `build` and is short-lived, being handed into nodes & components as configuration data.
 
 What does "data flowing down the tree" mean?
 --------------------------------------------
@@ -68,13 +68,13 @@ All components have access to two kinds of state: (1) data which is handing in f
 
 All nodes and most components should be stateless, never needing to mutate themselves and only reacting to data which is handed into them. Some components will be stateful. This state will likely encapsulate transient states of the UI, such as scroll position, animation state, uncommitted form values, etc...
 
-A component can become stateful in two ways: (1) by passing `super(stateful: true)` to its call to the superclasses constructor, or by calling `setState(Function fn)`. The former is a way to have a component start its life stateful, and the later results in the component becoming statefull *as well as* scheduling the component to re-render at the end of the current animation frame.
+A component can become stateful in two ways: (1) by passing `super(stateful: true)` to its call to the superclasses constructor, or by calling `setState(Function fn)`. The former is a way to have a component start its life stateful, and the later results in the component becoming statefull *as well as* scheduling the component to re-build at the end of the current animation frame.
 
-What does it mean to be stateful? It means that the diffing mechanism retains the specific *instance* of the component as long as the component which renders it continues to require its presence. The component which constructed it may have provided new configuration in form of different values for the constructor parameters, but these values (public fields) will be copied (using reflection) onto the retained instance whose privates fields are left unmodified.
+What does it mean to be stateful? It means that the diffing mechanism retains the specific *instance* of the component as long as the component which builds it continues to require its presence. The component which constructed it may have provided new configuration in form of different values for the constructor parameters, but these values (public fields) will be copied (using reflection) onto the retained instance whose privates fields are left unmodified.
 
 Rendering
 ---------
-At the end of each animation frame, all components (including the root `App`) which have `setState` on themselves will be re-rendered and the resulting changes will be minimally applied to the DOM. Note that components of lower "order" (those near the root of the tree) will render first because their rendering may require re-rendering of higher order (those near the leaves), thus avoiding the possibility that a component which is dirty render more than once during a single cycle.
+At the end of each animation frame, all components (including the root `App`) which have `setState` on themselves will be rebuilt and the resulting changes will be minimally applied to the DOM. Note that components of lower "order" (those near the root of the tree) will build first because their building may require rebuilding of higher order (those near the leaves), thus avoiding the possibility that a component which is dirty build more than once during a single cycle.
 
 Keys
 ----
@@ -90,8 +90,8 @@ class MyComp extends Component {
     Object key,
     sky.EventListener onClick // delegated handler
   }) : super(key: key);
-  
-  Node render() {
+
+  Node build() {
     return new Container(
       onClick: onClick,
       onScrollStart: _handleScroll // direct handler
@@ -116,20 +116,20 @@ Styling is the part of Effen which is least designed and is likely to change. At
 
 Animation
 ---------
-Animation is still an area of exploration. The pattern which is presently used in the `stocks-fn` example is the following: Components which are animatable should contain within their implementation file an Animation object whose job it is to react to events and control an animation by exposing one or more Dart `stream`s of data. The `Animation` object is owned by the owner (or someone even higher) and the stream is passed into the animating component via its constructor. The first time the component renders, it listens on the stream and calls `setState` on itself for each value which emerges from the stream [See the `drawer.dart` widget for an example].
+Animation is still an area of exploration. The pattern which is presently used in the `stocks-fn` example is the following: Components which are animatable should contain within their implementation file an Animation object whose job it is to react to events and control an animation by exposing one or more Dart `stream`s of data. The `Animation` object is owned by the owner (or someone even higher) and the stream is passed into the animating component via its constructor. The first time the component builds, it listens on the stream and calls `setState` on itself for each value which emerges from the stream [See the `drawer.dart` widget for an example].
 
 Performance
 -----------
 Isn't diffing the DOM expensive? This is kind of a subject question with a few answers, but the biggest issue is what do you mean by "fast"?
 
-The stock answer is that diffing the DOM is fast because you compute the diff of the current VDOM from the previous VDOM and only apply the diffs to the actual DOM. The truth that this is fast, but not really fast enough to re-render everything on the screen for 60 or 120fps animations on a mobile device.
+The stock answer is that diffing the DOM is fast because you compute the diff of the current VDOM from the previous VDOM and only apply the diffs to the actual DOM. The truth that this is fast, but not really fast enough to rebuild everything on the screen for 60 or 120fps animations on a mobile device.
 
-The answer that many people don't get is that there are really two logical types of renders: (1) When underlying model data changes: This generally requires handing in new data to the root component (in Effen, this means the `App` calling `setState` on itself). (2) When user interaction updates a control or an animation takes place. (1) is generally more expensive because it requires a full rendering & diff, but tends to happen infrequently. (2) tends to happen frequently, but at nodes which are near the leafs of the tree, so the number of nodes which must be reconsiled is generally small.
+The answer that many people don't get is that there are really two logical types of builds: (1) When underlying model data changes: This generally requires handing in new data to the root component (in Effen, this means the `App` calling `setState` on itself). (2) When user interaction updates a control or an animation takes place. (1) is generally more expensive because it requires a full building & diff, but tends to happen infrequently. (2) tends to happen frequently, but at nodes which are near the leafs of the tree, so the number of nodes which must be reconsiled is generally small.
 
-React provides a way to manually insist that a componet not re-render based on its old and new state (and they encourage the use of immutable data structures because discovering the data is the same can be accomplished with a reference comparison). A similar mechanism is in the works for Effen.
+React provides a way to manually insist that a componet not rebuild based on its old and new state (and they encourage the use of immutable data structures because discovering the data is the same can be accomplished with a reference comparison). A similar mechanism is in the works for Effen.
 
-Lastly, Effen does something unique: Because its diffing is component-wise, it can be smart about not forcing the re-render of components which are handed in as *arguments* when only the component itself is dirty. For example, the `drawer.dart` component knows how to animate out & back and expose a content pane -- but it takes its content pane as an argument. When the animation mutates the inlineStyle of the `Drawer`'s `Container`, it must schedule itself for re-render -- but -- because the content was handed in to its constructor, its configuration can't have changed and Effen doesn't require it to re-render.
+Lastly, Effen does something unique: Because its diffing is component-wise, it can be smart about not forcing the rebuild of components which are handed in as *arguments* when only the component itself is dirty. For example, the `drawer.dart` component knows how to animate out & back and expose a content pane -- but it takes its content pane as an argument. When the animation mutates the inlineStyle of the `Drawer`'s `Container`, it must schedule itself for rebuild -- but -- because the content was handed in to its constructor, its configuration can't have changed and Effen doesn't require it to rebuild.
 
-It is a design goal that it should be *possible* to arrange that all "render" cycles which happen during animations can complete in less than one milliesecond on a Nexus 5.
+It is a design goal that it should be *possible* to arrange that all "build" cycles which happen during animations can complete in less than one milliesecond on a Nexus 5.
 
 

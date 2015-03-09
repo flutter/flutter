@@ -80,7 +80,7 @@ class InkSplash extends Component {
     });
   }
 
-  Node render() {
+  Node build() {
     _ensureListening();
 
     return new Container(

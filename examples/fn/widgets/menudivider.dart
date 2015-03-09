@@ -9,7 +9,7 @@ class MenuDivider extends Component {
 
   MenuDivider({ Object key }) : super(key: key);
 
-  Node render() {
+  Node build() {
     return new Container(
       style: _style
     );

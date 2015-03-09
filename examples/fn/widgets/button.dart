@@ -29,11 +29,11 @@ class Button extends ButtonBase {
 
   Button({ Object key, this.content }) : super(key: key);
 
-  Node render() {
+  Node build() {
     return new Container(
       key: 'Button',
       style: _highlight ? _highlightStyle : _style,
-      children: [super.render(), content]
+      children: [super.build(), content]
     );
   }
 }

@@ -54,11 +54,11 @@ class Checkbox extends ButtonBase {
 
   Checkbox({ Object key, this.onChanged, this.checked }) : super(key: key);
 
-  Node render() {
+  Node build() {
     return new Container(
       style: _style,
       children: [
-        super.render(),
+        super.build(),
         new Container(
           style: _highlight ? _containerHighlightStyle : _containerStyle,
           children: [

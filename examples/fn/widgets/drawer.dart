@@ -152,7 +152,7 @@ class Drawer extends Component {
     });
   }
 
-  Node render() {
+  Node build() {
     _ensureListening();
 
     bool isClosed = _position <= -_kWidth;

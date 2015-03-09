@@ -16,7 +16,7 @@ class Toolbar extends Component {
 
   Toolbar({String key, this.children}) : super(key: key);
 
-  Node render() {
+  Node build() {
     return new Container(
       style: _style,
       children: children
