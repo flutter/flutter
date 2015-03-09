@@ -8,7 +8,9 @@ import android.content.Context;
 
 import org.chromium.mojo.system.Core;
 import org.chromium.mojo.system.MessagePipeHandle;
+import org.chromium.mojom.keyboard.KeyboardService;
 import org.chromium.mojom.sensors.SensorService;
+import org.domokit.keyboard.KeyboardServiceImpl;
 import org.domokit.sensors.SensorServiceImpl;
 import org.domokit.sky.shell.ServiceFactory;
 import org.domokit.sky.shell.ServiceRegistry;
@@ -26,6 +28,13 @@ public class SkyDemoApplication extends SkyApplication {
             @Override
             public void connectToService(Context context, Core core, MessagePipeHandle pipe) {
                 new SensorServiceImpl(context, core, pipe);
+            }
+        });
+
+        ServiceRegistry.SHARED.register(KeyboardService.MANAGER.getName(), new ServiceFactory() {
+            @Override
+            public void connectToService(Context context, Core core, MessagePipeHandle pipe) {
+                new KeyboardServiceImpl(context, core, pipe);
             }
         });
     }

@@ -1,0 +1,16 @@
+// Copyright 2015 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+module keyboard;
+
+interface KeyboardClient {
+  commitText(string text, int32 newCursorPosition);
+  setComposingText(string text, int32 newCursorPosition);
+  setComposingRegion(int32 start, int32 end);
+};
+
+interface KeyboardService {
+  Show(KeyboardClient client);
+  Hide();
+};
