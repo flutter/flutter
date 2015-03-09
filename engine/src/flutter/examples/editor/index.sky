@@ -1,0 +1,10 @@
+#!mojo mojo:sky_viewer
+<sky>
+<import src="/sky/framework/debug/shake-to-reload.sky" />
+<script>
+import 'editor_app.dart';
+main() {
+  new EditorApp();
+}
+</script>
+</sky>

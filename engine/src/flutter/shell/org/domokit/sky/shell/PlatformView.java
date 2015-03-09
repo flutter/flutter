@@ -10,6 +10,8 @@ import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputConnection;
 
 import org.chromium.base.JNINamespace;
 import org.chromium.mojo.bindings.InterfaceRequest;
@@ -21,6 +23,7 @@ import org.chromium.mojom.sky.InputEvent;
 import org.chromium.mojom.sky.PointerData;
 import org.chromium.mojom.sky.PointerKind;
 import org.chromium.mojom.sky.ViewportObserver;
+import org.domokit.keyboard.KeyboardServiceImpl;
 
 /**
  * A view containing Sky
@@ -68,6 +71,7 @@ public class PlatformView extends SurfaceView
         getHolder().addCallback(mSurfaceCallback);
 
         mGestureProvider = new GestureProvider(context, this);
+        KeyboardServiceImpl.setActiveView(this);
     }
 
     @Override
@@ -84,6 +88,16 @@ public class PlatformView extends SurfaceView
             requestFocusFromTouch();
             requestFocus();
         }
+    }
+
+    @Override
+    public boolean onCheckIsTextEditor() {
+        return true;
+    }
+
+    @Override
+    public InputConnection onCreateInputConnection(EditorInfo outAttrs) {
+        return KeyboardServiceImpl.createInputConnection(outAttrs);
     }
 
     private int getTypeForAction(int maskedAction) {
