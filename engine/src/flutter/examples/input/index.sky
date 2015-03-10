@@ -2,9 +2,9 @@
 <sky>
 <import src="/sky/framework/debug/shake-to-reload.sky" />
 <script>
-import 'editor_app.dart';
+import 'input_app.dart';
 main() {
-  new EditorApp();
+  new InputApp();
 }
 </script>
 </sky>
