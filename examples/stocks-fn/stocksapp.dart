@@ -1,8 +1,16 @@
 library stocksapp;
 
 import '../../framework/fn.dart';
+import '../../framework/components/drawer.dart';
+import '../../framework/components/drawer_header.dart';
+import '../../framework/components/fixed_height_scrollable.dart';
+import '../../framework/components/floating_action_button.dart';
+import '../../framework/components/icon.dart';
+import '../../framework/components/material.dart';
+import '../../framework/components/menu_divider.dart';
+import '../../framework/components/menu_item.dart';
+import '../../framework/components/toolbar.dart';
 import '../data/stocks.dart';
-import '../fn/widgets/widgets.dart';
 import 'dart:math';
 
 part 'stockarrow.dart';

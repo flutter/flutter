@@ -1,6 +1,6 @@
 part of stocksapp;
 
-class StockRow extends MaterialComponent {
+class StockRow extends Material {
 
   Stock stock;
 
