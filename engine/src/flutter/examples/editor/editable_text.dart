@@ -3,73 +3,35 @@
 // found in the LICENSE file.
 
 import '../../framework/fn.dart';
-import '../../framework/shell.dart' as shell;
+import '../../framework/theme/colors.dart';
 import 'dart:async';
-import 'dart:math';
 import 'editable_string.dart';
-import 'package:sky/services/keyboard/keyboard.mojom.dart';
 
 class EditableText extends Component {
-  static Style _style = new Style('''
-    display: paragraph;
-    white-space: pre-wrap;
-    padding: 10px;
-    height: 200px;
-    background-color: lightblue;'''
+  static final Style _style = new Style('''
+    display: inline;'''
   );
 
-  static Style _cusorStyle = new Style('''
+  static final Style _cusorStyle = new Style('''
     display: inline-block;
     width: 2px;
     height: 1.2em;
     vertical-align: top;
-    background-color: blue;'''
+    background-color: ${Blue[500]};'''
   );
 
-  static Style _composingStyle = new Style('''
+  static final Style _composingStyle = new Style('''
     display: inline;
     text-decoration: underline;'''
   );
 
-  KeyboardServiceProxy _service;
-
-  EditableString _string;
+  EditableString value;
+  bool focused;
   Timer _cursorTimer;
   bool _showCursor = false;
 
-  EditableText({Object key}) : super(key: key, stateful: true) {
-    _string = new EditableString(text: '', onChanged: _handleTextChanged);
-    events.listen('click', _handleClick);
-    events.listen('focus', _handleFocus);
-    events.listen('blur', _handleBlur);
-  }
-
-  void _handleTextChanged(EditableString string) {
-    setState(() {
-      _string = string;
-      _showCursor = true;
-      _restartCursorTimer();
-    });
-  }
-
-  void _handleClick(_) {
-    if (_service != null)
-      return;
-    _service = new KeyboardServiceProxy.unbound();
-    shell.requestService(_service);
-    _service.ptr.show(_string.stub);
-    _restartCursorTimer();
-    setState(() {
-      _showCursor = true;
-    });
-  }
-
-  void _handleFocus(_) {
-    print("_handleFocus");
-  }
-
-  void _handleBlur(_) {
-    print("_handleBlur");
+  EditableText({Object key, this.value, this.focused})
+      : super(key: key, stateful: true) {
   }
 
   void _cursorTick(Timer timer) {
@@ -78,28 +40,39 @@ class EditableText extends Component {
     });
   }
 
-  void _restartCursorTimer() {
-    if (_cursorTimer != null)
-      _cursorTimer.cancel();
+  void _startCursorTimer() {
+    _showCursor = true;
     _cursorTimer = new Timer.periodic(
         new Duration(milliseconds: 500), _cursorTick);
   }
 
-  void didUnmount() {
+  void _stopCursorTimer() {
     _cursorTimer.cancel();
+    _cursorTimer = null;
+    _showCursor = false;
+  }
+
+  void didUnmount() {
+    if (_cursorTimer != null)
+      _stopCursorTimer();
   }
 
   Node build() {
+    if (focused && _cursorTimer == null)
+      _startCursorTimer();
+    else if (!focused && _cursorTimer != null)
+      _stopCursorTimer();
+
     List<Node> children = new List<Node>();
 
-    if (!_string.composing.isValid) {
-      children.add(new Text(_string.text));
+    if (!value.composing.isValid) {
+      children.add(new Text(value.text));
     } else {
-      String beforeComposing = _string.textBefore(_string.composing);
+      String beforeComposing = value.textBefore(value.composing);
       if (!beforeComposing.isEmpty)
         children.add(new Text(beforeComposing));
 
-      String composing = _string.textInside(_string.composing);
+      String composing = value.textInside(value.composing);
       if (!composing.isEmpty) {
         children.add(new Container(
           key: 'composing', 
@@ -108,7 +81,7 @@ class EditableText extends Component {
         ));
       }
 
-      String afterComposing = _string.textAfter(_string.composing);
+      String afterComposing = value.textAfter(value.composing);
       if (!afterComposing.isEmpty)
         children.add(new Text(afterComposing));
     }

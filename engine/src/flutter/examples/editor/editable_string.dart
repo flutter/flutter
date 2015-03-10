@@ -4,7 +4,7 @@
 
 import 'package:sky/services/keyboard/keyboard.mojom.dart';
 
-typedef void StringChangedCallback(EditableString updated);
+typedef void StringUpdated();
 
 class TextRange {
   final int start;
@@ -23,11 +23,11 @@ class EditableString implements KeyboardClient {
   TextRange composing = const TextRange.empty();
   TextRange selection = const TextRange.empty();
 
-  final StringChangedCallback onChanged;
+  final StringUpdated onUpdated;
 
   KeyboardClientStub stub;
 
-  EditableString({this.text: '', this.onChanged}) {
+  EditableString({this.text: '', this.onUpdated}) {
     stub = new KeyboardClientStub.unbound()..impl = this;
   }
 
@@ -85,7 +85,7 @@ class EditableString implements KeyboardClient {
     TextRange committedRange = _replaceOrAppend(composing, text);
     selection = new TextRange.collapsed(committedRange.end);
     composing = const TextRange.empty();
-    onChanged(this);
+    onUpdated();
   }
 
   void deleteSurroundingText(int beforeLength, int afterLength) {
@@ -97,23 +97,23 @@ class EditableString implements KeyboardClient {
     _delete(beforeRange);
     selection = new TextRange(start: selection.start - beforeLength,
                               end: selection.end - beforeLength);
-    onChanged(this);
+    onUpdated();
   }
 
   void setComposingRegion(int start, int end) {
     composing = new TextRange(start: start, end: end);
-    onChanged(this);
+    onUpdated();
   }
 
   void setComposingText(String text, int newCursorPosition) {
     // TODO(abarth): Why is |newCursorPosition| always 1?
     composing = _replaceOrAppend(composing, text);
     selection = new TextRange.collapsed(composing.end);
-    onChanged(this);
+    onUpdated();
   }
 
   void setSelection(int start, int end) {
     selection = new TextRange(start: start, end: end);
-    onChanged(this);
+    onUpdated();
   }
 }
