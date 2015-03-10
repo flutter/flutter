@@ -8,7 +8,7 @@ if (is_android) {
   import("//build/config/android/config.gni")
 }
 
-if (cpu_arch == "arm") {
+if (target_cpu == "arm") {
   import("//build/config/arm.gni")
 } else {
   # TODO(brettw) remove this once && early-out is checked in.

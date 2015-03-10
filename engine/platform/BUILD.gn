@@ -640,7 +640,7 @@ source_set("platform") {
     direct_dependent_configs = [ "//build/config/linux:fontconfig" ]
   }
 
-  if (cpu_arch == "arm") {
+  if (target_cpu == "arm") {
     deps += [ ":sky_arm_neon" ]
   }
 }
@@ -713,7 +713,7 @@ test("platform_unittests") {
   include_dirs = [ "$root_build_dir" ]
 }
 
-if (cpu_arch == "arm") {
+if (target_cpu == "arm") {
   source_set("sky_arm_neon") {
     sources = [
       "graphics/cpu/arm/WebGLImageConversionNEON.h",

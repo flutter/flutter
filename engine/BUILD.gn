@@ -46,7 +46,7 @@ config("config") {
   # nullptr) conflict with upcoming c++0x types.
   cflags_cc = [ "-Wno-c++0x-compat" ]
 
-  if (is_linux && cpu_arch == "arm") {
+  if (is_linux && target_cpu == "arm") {
     # Due to a bug in gcc arm, we get warnings about uninitialized
     # timesNewRoman.unstatic.3258 and colorTransparent.unstatic.4879.
     cflags += [ "-Wno-uninitialized" ]

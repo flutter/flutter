@@ -22,7 +22,7 @@ class LayerHostClient;
 class LayerHost : public SurfaceHolder::Client {
  public:
   explicit LayerHost(LayerHostClient* client);
-  ~LayerHost();
+  ~LayerHost() override;
 
   LayerHostClient* client() const { return client_; }
 

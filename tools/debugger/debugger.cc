@@ -29,7 +29,7 @@ class SkyDebugger : public mojo::ApplicationDelegate,
                     public http_server::HttpHandler {
  public:
   SkyDebugger() : is_tracing_(false), handler_binding_(this) {}
-  virtual ~SkyDebugger() {}
+  ~SkyDebugger() override {}
 
  private:
   // mojo::ApplicationDelegate:

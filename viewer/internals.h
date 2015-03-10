@@ -17,7 +17,7 @@ class DocumentView;
 class Internals : public base::SupportsUserData::Data,
                   public mojo::Shell {
  public:
-  virtual ~Internals();
+  ~Internals() override;
 
   static void Create(Dart_Isolate isolate, DocumentView* document_view);
 

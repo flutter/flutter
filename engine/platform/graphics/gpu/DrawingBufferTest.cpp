@@ -205,7 +205,7 @@ public:
 
 class DrawingBufferTest : public Test {
 protected:
-    virtual void SetUp()
+    void SetUp() override
     {
         RefPtr<FakeContextEvictionManager> contextEvictionManager = adoptRef(new FakeContextEvictionManager());
         OwnPtr<WebGraphicsContext3DForTests> context = adoptPtr(new WebGraphicsContext3DForTests);
@@ -443,7 +443,7 @@ TEST_F(DrawingBufferTest, verifyInsertAndWaitSyncPointCorrectly)
 
 class DrawingBufferImageChromiumTest : public DrawingBufferTest {
 protected:
-    virtual void SetUp()
+    void SetUp() override
     {
         RefPtr<FakeContextEvictionManager> contextEvictionManager = adoptRef(new FakeContextEvictionManager());
         OwnPtr<WebGraphicsContext3DForTests> context = adoptPtr(new WebGraphicsContext3DForTests);
@@ -456,7 +456,7 @@ protected:
         testing::Mock::VerifyAndClearExpectations(webContext());
     }
 
-    virtual void TearDown()
+    void TearDown() override
     {
         RuntimeEnabledFeatures::setWebGLImageChromiumEnabled(false);
     }

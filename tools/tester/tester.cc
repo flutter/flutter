@@ -64,17 +64,17 @@ class SkyTester : public mojo::ApplicationDelegate,
         root_(NULL),
         content_(NULL),
         weak_ptr_factory_(this) {}
-  virtual ~SkyTester() {}
+  ~SkyTester() override {}
 
  private:
   // Overridden from mojo::ApplicationDelegate:
-  virtual void Initialize(mojo::ApplicationImpl* impl) override {
+  void Initialize(mojo::ApplicationImpl* impl) override {
     window_manager_app_->Initialize(impl);
 
     if (impl->args().size() >= 2)
       url_from_args_ = impl->args()[1];
   }
-  virtual bool ConfigureIncomingConnection(
+  bool ConfigureIncomingConnection(
       mojo::ApplicationConnection* connection) override {
     window_manager_app_->ConfigureIncomingConnection(connection);
     if (test_runner_)
@@ -83,9 +83,9 @@ class SkyTester : public mojo::ApplicationDelegate,
   }
 
   // Overridden from mojo::ViewManagerDelegate:
-  virtual void OnEmbed(mojo::View* root,
-                       mojo::InterfaceRequest<mojo::ServiceProvider> services,
-                       mojo::ServiceProviderPtr exposed_services) override {
+  void OnEmbed(mojo::View* root,
+               mojo::InterfaceRequest<mojo::ServiceProvider> services,
+               mojo::ServiceProviderPtr exposed_services) override {
     root_ = root;
     root_->AddObserver(this);
 
@@ -100,22 +100,21 @@ class SkyTester : public mojo::ApplicationDelegate,
   }
 
   // Overridden from window_manager::WindowManagerDelegate:
-  virtual void Embed(const mojo::String& url,
-                     mojo::InterfaceRequest<mojo::ServiceProvider> services,
-                     mojo::ServiceProviderPtr exposed_services) override {}
+  void Embed(const mojo::String& url,
+             mojo::InterfaceRequest<mojo::ServiceProvider> services,
+             mojo::ServiceProviderPtr exposed_services) override {}
 
-  virtual void OnViewManagerDisconnected(
-      mojo::ViewManager* view_manager) override {
+  void OnViewManagerDisconnected(mojo::ViewManager* view_manager) override {
     root_ = NULL;
   }
 
-  virtual void OnViewDestroyed(mojo::View* view) override {
+  void OnViewDestroyed(mojo::View* view) override {
     view->RemoveObserver(this);
   }
 
-  virtual void OnViewBoundsChanged(mojo::View* view,
-                                   const mojo::Rect& old_bounds,
-                                   const mojo::Rect& new_bounds) override {
+  void OnViewBoundsChanged(mojo::View* view,
+                           const mojo::Rect& old_bounds,
+                           const mojo::Rect& new_bounds) override {
     content_->SetBounds(new_bounds);
   }
 

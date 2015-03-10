@@ -38,7 +38,7 @@ namespace {
 
 class ImageDecodingStoreTest : public ::testing::Test, public MockImageDecoderClient {
 public:
-    virtual void SetUp()
+    void SetUp() override
     {
         ImageDecodingStore::instance()->setCacheLimitInBytes(1024 * 1024);
         m_data = SharedBuffer::create();
@@ -46,17 +46,17 @@ public:
         m_decodersDestroyed = 0;
     }
 
-    virtual void TearDown()
+    void TearDown() override
     {
         ImageDecodingStore::instance()->clear();
     }
 
-    virtual void decoderBeingDestroyed()
+    void decoderBeingDestroyed() override
     {
         ++m_decodersDestroyed;
     }
 
-    virtual void frameBufferRequested()
+    void frameBufferRequested() override
     {
         // Decoder is never used by ImageDecodingStore.
         ASSERT_TRUE(false);

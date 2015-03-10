@@ -27,11 +27,11 @@ class Viewer : public mojo::ApplicationDelegate,
  public:
   Viewer() {}
 
-  virtual ~Viewer() { blink::shutdown(); }
+  ~Viewer() override { blink::shutdown(); }
 
  private:
   // Overridden from ApplicationDelegate:
-  virtual void Initialize(mojo::ApplicationImpl* app) override {
+  void Initialize(mojo::ApplicationImpl* app) override {
     RuntimeFlags::Initialize(app);
 
     mojo::NetworkServicePtr network_service;
@@ -43,15 +43,15 @@ class Viewer : public mojo::ApplicationDelegate,
     tracing_.Initialize(app);
   }
 
-  virtual bool ConfigureIncomingConnection(
+  bool ConfigureIncomingConnection(
       mojo::ApplicationConnection* connection) override {
     connection->AddService<mojo::ContentHandler>(this);
     return true;
   }
 
   // Overridden from InterfaceFactory<ContentHandler>
-  virtual void Create(mojo::ApplicationConnection* connection,
-                      mojo::InterfaceRequest<mojo::ContentHandler> request) override {
+  void Create(mojo::ApplicationConnection* connection,
+              mojo::InterfaceRequest<mojo::ContentHandler> request) override {
     new ContentHandlerImpl(request.Pass());
   }
 
