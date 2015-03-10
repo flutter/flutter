@@ -3,10 +3,10 @@
 // found in the LICENSE file.
 
 import '../../framework/fn.dart';
-import 'editable_text.dart';
+import 'input.dart';
 
 class EditorApp extends App {
   Node build() {
-    return new EditableText();
+    return new Input();
   }
 }
