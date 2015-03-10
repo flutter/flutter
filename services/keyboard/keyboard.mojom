@@ -4,10 +4,27 @@
 
 module keyboard;
 
+struct CompletionData {
+  int64 id;
+  int32 position;
+  string text;
+  string label;
+};
+
+struct CorrectionData {
+  int32 offset;
+  string old_text;
+  string new_text;
+};
+
 interface KeyboardClient {
-  commitText(string text, int32 newCursorPosition);
-  setComposingText(string text, int32 newCursorPosition);
-  setComposingRegion(int32 start, int32 end);
+  CommitCompletion(CompletionData completion);
+  CommitCorrection(CorrectionData correction);
+  CommitText(string text, int32 newCursorPosition);
+  DeleteSurroundingText(int32 beforeLength, int32 afterLength);
+  SetComposingRegion(int32 start, int32 end);
+  SetComposingText(string text, int32 newCursorPosition);
+  SetSelection(int32 start, int32 end);
 };
 
 interface KeyboardService {

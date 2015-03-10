@@ -7,8 +7,12 @@ package org.domokit.keyboard;
 import android.text.InputType;
 import android.view.View;
 import android.view.inputmethod.BaseInputConnection;
+import android.view.inputmethod.CompletionInfo;
+import android.view.inputmethod.CorrectionInfo;
 import android.view.inputmethod.EditorInfo;
 
+import org.chromium.mojom.keyboard.CompletionData;
+import org.chromium.mojom.keyboard.CorrectionData;
 import org.chromium.mojom.keyboard.KeyboardClient;
 
 /**
@@ -27,9 +31,35 @@ public class InputConnectionAdaptor extends BaseInputConnection {
     }
 
     @Override
+    public boolean commitCompletion(CompletionInfo completion) {
+        // TODO(abarth): Copy the data from |completion| to CompletionData.
+        mClient.commitCompletion(new CompletionData());
+        return super.commitCompletion(completion);
+    }
+
+    @Override
+    public boolean commitCorrection(CorrectionInfo correction) {
+        // TODO(abarth): Copy the data from |correction| to CompletionData.
+        mClient.commitCorrection(new CorrectionData());
+        return super.commitCorrection(correction);
+    }
+
+    @Override
     public boolean commitText(CharSequence text, int newCursorPosition) {
         mClient.commitText(text.toString(), newCursorPosition);
         return super.commitText(text, newCursorPosition);
+    }
+
+    @Override
+    public boolean deleteSurroundingText(int beforeLength, int afterLength) {
+        mClient.deleteSurroundingText(beforeLength, afterLength);
+        return super.deleteSurroundingText(beforeLength, afterLength);
+    }
+
+    @Override
+    public boolean setComposingRegion(int start, int end) {
+        mClient.setComposingRegion(start, end);
+        return super.setComposingRegion(start, end);
     }
 
     @Override
@@ -39,8 +69,8 @@ public class InputConnectionAdaptor extends BaseInputConnection {
     }
 
     @Override
-    public boolean setComposingRegion(int start, int end) {
-        mClient.setComposingRegion(start, end);
-        return super.setComposingRegion(start, end);
+    public boolean setSelection(int start, int end) {
+        mClient.setSelection(start, end);
+        return super.setSelection(start, end);
     }
 }
