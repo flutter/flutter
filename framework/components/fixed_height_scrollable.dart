@@ -1,18 +1,23 @@
-part of widgets;
+// Copyright 2015 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+import '../animation/fling-curve.dart';
+import '../fn.dart';
+import 'dart:sky' as sky;
 
 abstract class FixedHeightScrollable extends Component {
-
   // TODO(rafaelw): This component really shouldn't have an opinion
   // about how it is sized. The owning component should decide whether
   // it's explicitly sized or flexible or whatever...
-  static Style _style = new Style('''
+  static final Style _style = new Style('''
     overflow: hidden;
     position: relative;
     flex: 1;
     will-change: transform;'''
   );
 
-  static Style _scrollAreaStyle = new Style('''
+  static final Style _scrollAreaStyle = new Style('''
     position:relative;
     will-change: transform;'''
   );
@@ -30,7 +35,12 @@ abstract class FixedHeightScrollable extends Component {
     Object key,
     this.minOffset,
     this.maxOffset
-  }) : super(key: key) {}
+  }) : super(key: key) {
+    events.listen('gestureflingstart', _handleFlingStart);
+    events.listen('gestureflingcancel', _handleFlingCancel);
+    events.listen('gesturescrollupdate', _handleScrollUpdate);
+    events.listen('wheel', _handleWheel);
+  }
 
   List<Node> buildItems(int start, int count);
 
@@ -76,11 +86,7 @@ abstract class FixedHeightScrollable extends Component {
           children: buildItems(itemNumber, drawCount)
         )
       ]
-    )
-    ..events.listen('gestureflingstart', _handleFlingStart)
-    ..events.listen('gestureflingcancel', _handleFlingCancel)
-    ..events.listen('gesturescrollupdate', _handleScrollUpdate)
-    ..events.listen('wheel', _handleWheel);
+    );
   }
 
   void didUnmount() {

@@ -1,12 +1,18 @@
-part of widgets;
+// Copyright 2015 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+import '../fn.dart';
+import 'button_base.dart';
+
+typedef void ValueChanged(value);
 
 class Radio extends ButtonBase {
-
   Object value;
   Object groupValue;
   ValueChanged onChanged;
 
-  static Style _style = new Style('''
+  static final Style _style = new Style('''
     transform: translateX(0);
     display: inline-block;
     -webkit-user-select: none;
@@ -17,7 +23,7 @@ class Radio extends ButtonBase {
     margin: 0 5px;'''
   );
 
-  static Style _highlightStyle = new Style('''
+  static final Style _highlightStyle = new Style('''
     transform: translateX(0);
     display: inline-block;
     -webkit-user-select: none;
@@ -29,7 +35,7 @@ class Radio extends ButtonBase {
     background-color: orange;'''
   );
 
-  static Style _dotStyle = new Style('''
+  static final Style _dotStyle = new Style('''
     -webkit-user-select: none;
     width: 10px;
     height: 10px;
@@ -43,14 +49,16 @@ class Radio extends ButtonBase {
     this.onChanged,
     this.value,
     this.groupValue
-  }) : super(key: key);
+  }) : super(key: key) {
+    events.listen('click', _handleClick);
+  }
 
   Node build() {
     return new Container(
-      style: _highlight ? _highlightStyle : _style,
+      style: highlight ? _highlightStyle : _style,
       children: value == groupValue ?
           [super.build(), new Container( style : _dotStyle )] : [super.build()]
-    )..events.listen('click', _handleClick);
+    )
   }
 
   void _handleClick(_) {

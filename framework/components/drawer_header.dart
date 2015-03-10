@@ -1,8 +1,12 @@
-part of widgets;
+// Copyright 2015 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+import '../fn.dart';
+import '../theme/colors.dart';
 
 class DrawerHeader extends Component {
-
-  static Style _style = new Style('''
+  static final Style _style = new Style('''
     display: flex;
     flex-direction: column;
     height: 140px;
@@ -13,11 +17,11 @@ class DrawerHeader extends Component {
     margin-bottom: 8px;'''
   );
 
-  static Style _spacerStyle = new Style('''
+  static final Style _spacerStyle = new Style('''
     flex: 1'''
   );
 
-  static Style _labelStyle = new Style('''
+  static final Style _labelStyle = new Style('''
     padding: 0 16px;
     font-family: 'Roboto Medium', 'Helvetica';
     color: #212121;'''

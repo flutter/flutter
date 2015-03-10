@@ -1,11 +1,14 @@
-part of widgets;
+// Copyright 2015 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+import '../fn.dart';
+import 'button_base.dart';
+
+typedef void ValueChanged(value);
 
 class Checkbox extends ButtonBase {
-
-  bool checked;
-  ValueChanged onChanged;
-
-  static Style _style = new Style('''
+  static final Style _style = new Style('''
     transform: translateX(0);
     display: flex;
     justify-content: center;
@@ -16,14 +19,14 @@ class Checkbox extends ButtonBase {
     height: 30px;'''
   );
 
-  static Style _containerStyle = new Style('''
+  static final Style _containerStyle = new Style('''
     border: solid 2px;
     border-color: rgba(90, 90, 90, 0.25);
     width: 10px;
     height: 10px;'''
   );
 
-  static Style _containerHighlightStyle = new Style('''
+  static final Style _containerHighlightStyle = new Style('''
     border: solid 2px;
     border-color: rgba(90, 90, 90, 0.25);
     width: 10px;
@@ -33,12 +36,12 @@ class Checkbox extends ButtonBase {
     border-color: orange;'''
   );
 
-  static Style _uncheckedStyle = new Style('''
+  static final Style _uncheckedStyle = new Style('''
     top: 0px;
     left: 0px;'''
   );
 
-  static Style _checkedStyle = new Style('''
+  static final Style _checkedStyle = new Style('''
     top: 0px;
     left: 0px;
     transform: translate(2px, -15px) rotate(45deg);
@@ -52,7 +55,16 @@ class Checkbox extends ButtonBase {
     border-color: #0f9d58;'''
   );
 
-  Checkbox({ Object key, this.onChanged, this.checked }) : super(key: key);
+  bool checked;
+  ValueChanged onChanged;
+
+  Checkbox({ Object key, this.onChanged, this.checked }) : super(key: key) {
+    events.listen('click', _handleClick);
+  }
+
+  void _handleClick(sky.Event e) {
+    onChanged(!checked);
+  }
 
   Node build() {
     return new Container(
@@ -60,7 +72,7 @@ class Checkbox extends ButtonBase {
       children: [
         super.build(),
         new Container(
-          style: _highlight ? _containerHighlightStyle : _containerStyle,
+          style: highlight ? _containerHighlightStyle : _containerStyle,
           children: [
             new Container(
               style: checked ? _checkedStyle : _uncheckedStyle
@@ -68,10 +80,6 @@ class Checkbox extends ButtonBase {
           ]
         )
       ]
-    )..events.listen('click', _handleClick);
-  }
-
-  void _handleClick(sky.Event e) {
-    onChanged(!checked);
+    )
   }
 }

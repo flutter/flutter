@@ -1,10 +1,16 @@
-part of widgets;
+// Copyright 2015 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
 
-abstract class MaterialComponent extends Component {
+import '../fn.dart';
+import 'dart:sky' as sky;
+import 'dart:collection';
+import 'ink_splash.dart';
 
+abstract class Material extends Component {
   static const _splashesKey = const Object();
 
-  static Style _style = new Style('''
+  static final Style _style = new Style('''
     transform: translateX(0);
     position: absolute;
     top: 0;
@@ -15,7 +21,11 @@ abstract class MaterialComponent extends Component {
 
   LinkedHashSet<SplashAnimation> _splashes;
 
-  MaterialComponent({ Object key }) : super(key: key);
+  Material({ Object key }) : super(key: key) {
+    events.listen('gesturescrollstart', _cancelSplashes);
+    events.listen('wheel', _cancelSplashes);
+    events.listen('pointerdown', _startSplash);
+  }
 
   Node build() {
     List<Node> children = [];
@@ -28,9 +38,7 @@ abstract class MaterialComponent extends Component {
       style: _style,
       children: children,
       key: _splashesKey
-    )..events.listen('gesturescrollstart', _cancelSplashes)
-     ..events.listen('wheel', _cancelSplashes)
-     ..events.listen('pointerdown', _startSplash);
+    );
   }
 
   sky.ClientRect _getBoundingRect() => (getRoot() as sky.Element).getBoundingClientRect();

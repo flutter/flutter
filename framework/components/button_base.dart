@@ -1,8 +1,12 @@
-part of widgets;
+// Copyright 2015 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
 
-abstract class ButtonBase extends MaterialComponent {
+import '../fn.dart';
+import 'material.dart';
 
-  bool _highlight = false;
+abstract class ButtonBase extends Material {
+  bool highlight = false;
 
   ButtonBase({ Object key }) : super(key: key) {
     events.listen('pointerdown', _handlePointerDown);
@@ -12,17 +16,17 @@ abstract class ButtonBase extends MaterialComponent {
 
   void _handlePointerDown(_) {
     setState(() {
-      _highlight = true;
+      highlight = true;
     });
   }
   void _handlePointerUp(_) {
     setState(() {
-      _highlight = false;
+      highlight = false;
     });
   }
   void _handlePointerCancel(_) {
     setState(() {
-      _highlight = false;
+      highlight = false;
     });
   }
 }

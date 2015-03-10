@@ -1,8 +1,13 @@
-part of widgets;
+// Copyright 2015 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+import '../fn.dart';
+import 'button_base.dart';
+import 'icon.dart';
 
 class MenuItem extends ButtonBase {
-
-  static Style _style = new Style('''
+  static final Style _style = new Style('''
     transform: translateX(0);
     display: flex;
     align-items: center;
@@ -10,7 +15,7 @@ class MenuItem extends ButtonBase {
     -webkit-user-select: none;'''
   );
 
-  static Style _highlightStyle = new Style('''
+  static final Style _highlightStyle = new Style('''
     transform: translateX(0);
     display: flex;
     align-items: center;
@@ -19,11 +24,11 @@ class MenuItem extends ButtonBase {
     -webkit-user-select: none;'''
   );
 
-  static Style _iconStyle = new Style('''
+  static final Style _iconStyle = new Style('''
     padding: 0px 16px;'''
   );
 
-  static Style _labelStyle = new Style('''
+  static final Style _labelStyle = new Style('''
       font-family: 'Roboto Medium', 'Helvetica';
       color: #212121;
       padding: 0px 16px;
@@ -37,7 +42,7 @@ class MenuItem extends ButtonBase {
 
   Node build() {
     return new Container(
-      style: _highlight ? _highlightStyle : _style,
+      style: highlight ? _highlightStyle : _style,
       children: [
         super.build(),
         new Icon(

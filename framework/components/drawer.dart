@@ -1,4 +1,15 @@
-part of widgets;
+// Copyright 2015 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+import '../animation/curves.dart';
+import '../animation/generator.dart';
+import '../fn.dart';
+import '../theme/colors.dart';
+import '../theme/shadows.dart';
+import 'dart:async';
+import 'dart:math' as math;
+import 'dart:sky' as sky;
 
 const double _kWidth = 256.0;
 const double _kMinFlingVelocity = 0.4;
@@ -7,7 +18,6 @@ const double _kMaxSettleDurationMS = 600.0;
 const Cubic _kAnimationCurve = easeOut;
 
 class DrawerAnimation extends Animation {
-
   Stream<double> get onPositionChanged => onValueChanged;
 
   bool get _isMostlyClosed => value <= -_kWidth / 2;
@@ -67,8 +77,7 @@ class DrawerAnimation extends Animation {
 }
 
 class Drawer extends Component {
-
-  static Style _style = new Style('''
+  static final Style _style = new Style('''
     position: absolute;
     z-index: 2;
     top: 0;
@@ -78,7 +87,7 @@ class Drawer extends Component {
     box-shadpw: ${Shadow[3]};'''
   );
 
-  static Style _maskStyle = new Style('''
+  static final Style _maskStyle = new Style('''
     background-color: black;
     will-change: opacity;
     position: absolute;
@@ -88,7 +97,7 @@ class Drawer extends Component {
     right: 0;'''
   );
 
-  static Style _contentStyle = new Style('''
+  static final Style _contentStyle = new Style('''
     background-color: ${Grey[50]};
     will-change: transform;
     position: absolute;
@@ -106,7 +115,12 @@ class Drawer extends Component {
     Object key,
     this.animation,
     this.children
-  }) : super(key: key);
+  }) : super(key: key) {
+    events.listen('pointerdown', animation.handlePointerDown);
+    events.listen('pointermove', animation.handlePointerMove);
+    events.listen('pointerup', animation.handlePointerUp);
+    events.listen('pointercancel', animation.handlePointerCancel);
+  }
 
   double _position = -_kWidth;
 
@@ -150,10 +164,6 @@ class Drawer extends Component {
       style: _style,
       inlineStyle: inlineStyle,
       children: [ mask, content ]
-    )..events.listen('pointerdown', animation.handlePointerDown)
-     ..events.listen('pointermove', animation.handlePointerMove)
-     ..events.listen('pointerup', animation.handlePointerUp)
-     ..events.listen('pointercancel', animation.handlePointerCancel);
-
+    );
   }
 }

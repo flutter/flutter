@@ -1,6 +1,13 @@
-part of widgets;
+// Copyright 2015 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
 
-class FloatingActionButton extends MaterialComponent {
+import '../fn.dart';
+import 'material.dart';
+import '../theme/colors.dart';
+import '../theme/shadows.dart';
+
+class FloatingActionButton extends Material {
   static final Style _style = new Style('''
     position: absolute;
     bottom: 16px;

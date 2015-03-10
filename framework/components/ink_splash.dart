@@ -1,4 +1,12 @@
-part of widgets;
+// Copyright 2015 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+import '../animation/curves.dart';
+import '../animation/generator.dart';
+import '../fn.dart';
+import 'dart:async';
+import 'dart:sky' as sky;
 
 const double _kSplashSize = 400.0;
 const double _kSplashDuration = 500.0;
@@ -34,10 +42,7 @@ class SplashAnimation {
 }
 
 class InkSplash extends Component {
-
-  Stream<String> onStyleChanged;
-
-  static Style _style = new Style('''
+  static final Style _style = new Style('''
     position: absolute;
     pointer-events: none;
     overflow: hidden;
@@ -47,7 +52,7 @@ class InkSplash extends Component {
     right: 0;
   ''');
 
-  static Style _splashStyle = new Style('''
+  static final Style _splashStyle = new Style('''
     position: absolute;
     background-color: rgba(0, 0, 0, 0.4);
     border-radius: 0;
@@ -56,6 +61,8 @@ class InkSplash extends Component {
     height: 0;
     width: 0;
   ''');
+
+  Stream<String> onStyleChanged;
 
   double _offsetX;
   double _offsetY;
