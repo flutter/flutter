@@ -31,7 +31,12 @@ class StocksApp extends App {
     margin: 0 4px;'''
   );
 
-  StocksApp() : super();
+  List<Stock> _sortedStocks;
+
+  StocksApp() : super() {
+    _sortedStocks = oracle.stocks;
+    _sortedStocks.sort((a, b) => a.symbol.compareTo(b.symbol));
+  }
 
   Node build() {
     var drawer = new Drawer(
@@ -93,7 +98,7 @@ class StocksApp extends App {
         new Container(
           key: 'Content',
           style: _style,
-          children: [toolbar, new Stocklist(stocks: oracle.stocks)]
+          children: [toolbar, new Stocklist(stocks: _sortedStocks)]
         ),
         fab,
         drawer,
