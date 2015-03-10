@@ -3,9 +3,9 @@
 // found in the LICENSE file.
 
 import '../../framework/fn.dart';
-import 'input.dart';
+import '../../framework/components/input.dart';
 
-class EditorApp extends App {
+class InputApp extends App {
   Node build() {
     return new Input();
   }

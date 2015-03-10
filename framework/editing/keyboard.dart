@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../../framework/shell.dart' as shell;
+import '../shell.dart' as shell;
 import 'package:sky/services/keyboard/keyboard.mojom.dart';
 
 class _KeyboardConnection {

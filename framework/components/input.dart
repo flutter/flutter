@@ -2,11 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../../framework/fn.dart';
-import '../../framework/theme/colors.dart';
-import 'editable_string.dart';
-import 'editable_text.dart';
-import 'keyboard.dart';
+import '../editing/editable_string.dart';
+import '../editing/editable_text.dart';
+import '../editing/keyboard.dart';
+import '../fn.dart';
+import '../theme/colors.dart';
 
 typedef void ValueChanged(value);
 
