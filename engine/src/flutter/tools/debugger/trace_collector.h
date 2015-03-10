@@ -18,7 +18,7 @@ class TraceCollector : public mojo::common::DataPipeDrainer::Client {
   typedef base::Callback<void(std::string)> TraceCallback;
 
   explicit TraceCollector(mojo::ScopedDataPipeConsumerHandle source);
-  ~TraceCollector();
+  ~TraceCollector() override;
 
   void GetTrace(TraceCallback callback);
 

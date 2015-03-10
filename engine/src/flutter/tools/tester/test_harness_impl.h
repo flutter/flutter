@@ -19,7 +19,7 @@ class TestHarnessImpl : public TestHarness {
  public:
   TestHarnessImpl(TestRunner* runner,
                   mojo::InterfaceRequest<TestHarness> request);
-  virtual ~TestHarnessImpl();
+  ~TestHarnessImpl() override;
 
  private:
   // TestHarness implementation.

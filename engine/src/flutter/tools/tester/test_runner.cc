@@ -20,8 +20,8 @@ TestRunner::TestRunner(TestRunnerClient* client,
                        const std::string& url,
                        bool enable_pixel_dumping)
     : client_(client),
-      weak_ptr_factory_(this),
-      enable_pixel_dumping_(enable_pixel_dumping) {
+      enable_pixel_dumping_(enable_pixel_dumping),
+      weak_ptr_factory_(this) {
   CHECK(client);
 
   mojo::ServiceProviderPtr test_harness_provider;

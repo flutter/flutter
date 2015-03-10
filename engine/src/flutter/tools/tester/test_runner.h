@@ -45,8 +45,8 @@ class TestRunner : public mojo::InterfaceFactory<TestHarness> {
 
   mojo::ServiceProviderImpl test_harness_provider_impl_;
   TestRunnerClient* client_;
-  base::WeakPtrFactory<TestRunner> weak_ptr_factory_;
   bool enable_pixel_dumping_;
+  base::WeakPtrFactory<TestRunner> weak_ptr_factory_;
 
   MOJO_DISALLOW_COPY_AND_ASSIGN(TestRunner);
 };
