@@ -145,7 +145,7 @@ class EventTarget {
   EventTarget() : _eventsController = new DispatcherController<Event>();
 
   Dispatcher get events => _eventsController.dispatcher;
-  EventTarget parentNode;
+  EventTarget get parentNode;
 
   List<EventTarget> getEventDispatchChain() {
     if (this.parentNode == null) {
