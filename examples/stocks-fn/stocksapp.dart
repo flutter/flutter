@@ -42,6 +42,7 @@ class StocksApp extends App {
 
   List<Stock> _sortedStocks;
   bool _isSearching = false;
+  String _searchQuery;
 
   StocksApp() : super() {
     _sortedStocks = oracle.stocks;
@@ -51,6 +52,12 @@ class StocksApp extends App {
   void _handleSearchClick(_) {
     setState(() {
       _isSearching = !_isSearching;
+    });
+  }
+
+  void _handleSearchQueryChanged(query) {
+    setState(() {
+      _searchQuery = query;
     });
   }
 
@@ -86,9 +93,13 @@ class StocksApp extends App {
       ]
     );
 
-    Node title = _isSearching
-        ? new Input(focused: true, placeholder: 'Search stocks')
-        : new Text('I am a stocks app');
+    Node title;
+    if (_isSearching) {
+      title = new Input(focused: true, placeholder: 'Search stocks',
+          onChanged: _handleSearchQueryChanged);
+    } else {
+      title = new Text('I am a stocks app');
+    }
 
     var toolbar = new Toolbar(
       children: [
@@ -110,6 +121,8 @@ class StocksApp extends App {
       ]
     );
 
+    var list = new Stocklist(stocks: _sortedStocks, query: _searchQuery);
+
     var fab = new FloatingActionButton(content: new Icon(
       type: 'content/add_white', size: 24));
 
@@ -119,7 +132,7 @@ class StocksApp extends App {
         new Container(
           key: 'Content',
           style: _style,
-          children: [toolbar, new Stocklist(stocks: _sortedStocks)]
+          children: [toolbar, list]
         ),
         fab,
         drawer,
