@@ -28,21 +28,15 @@ class Input extends Component {
 
   ValueChanged onChanged;
   String value;
+  bool focused = false;
 
-  bool _focused = false;
+  bool _isAttachedToKeyboard = false;
   EditableString _editableValue;
 
-  Input({Object key, this.value: ''}) : super(key: key, stateful: true) {
+  Input({Object key, this.value: '', this.focused})
+      : super(key: key, stateful: true) {
     _editableValue = new EditableString(text: value,
                                         onUpdated: _handleTextUpdated);
-    events.listen('click', _handleClick);
-  }
-
-  void _handleClick(_) {
-    keyboard.show(_editableValue.stub);
-    setState(() {
-      _focused = true;
-    });
   }
 
   void _handleTextUpdated() {
@@ -54,12 +48,22 @@ class Input extends Component {
     }
   }
 
+  void didUnmount() {
+    if (_isAttachedToKeyboard)
+      keyboard.hide();
+  }
+
   Node build() {
+    if (focused && !_isAttachedToKeyboard) {
+      keyboard.show(_editableValue.stub);
+      _isAttachedToKeyboard = true;
+    }
+
     return new Container(
       style: _style,
-      inlineStyle: _focused ? _focusedInlineStyle : null,
+      inlineStyle: focused ? _focusedInlineStyle : null,
       children: [
-        new EditableText(value: _editableValue, focused: _focused),
+        new EditableText(value: _editableValue, focused: focused),
       ]
     );
   }

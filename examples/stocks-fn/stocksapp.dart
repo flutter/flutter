@@ -6,6 +6,7 @@ import '../../framework/components/drawer_header.dart';
 import '../../framework/components/fixed_height_scrollable.dart';
 import '../../framework/components/floating_action_button.dart';
 import '../../framework/components/icon.dart';
+import '../../framework/components/input.dart';
 import '../../framework/components/material.dart';
 import '../../framework/components/menu_divider.dart';
 import '../../framework/components/menu_item.dart';
@@ -40,10 +41,17 @@ class StocksApp extends App {
   );
 
   List<Stock> _sortedStocks;
+  bool _isSearching = false;
 
   StocksApp() : super() {
     _sortedStocks = oracle.stocks;
     _sortedStocks.sort((a, b) => a.symbol.compareTo(b.symbol));
+  }
+
+  void _handleSearchClick(_) {
+    setState(() {
+      _isSearching = !_isSearching;
+    });
   }
 
   Node build() {
@@ -78,6 +86,9 @@ class StocksApp extends App {
       ]
     );
 
+    Node title = _isSearching ?
+        new Input(focused: true) : new Text('I am a stocks app');
+
     var toolbar = new Toolbar(
       children: [
         new Icon(key: 'menu', style: _iconStyle,
@@ -86,11 +97,12 @@ class StocksApp extends App {
           ..events.listen('click', _drawerAnimation.toggle),
         new Container(
           style: _titleStyle,
-          children: [new Text('I am a stocks app')]
+          children: [title]
         ),
         new Icon(key: 'search', style: _iconStyle,
             size: 24,
-            type: 'action/search_white'),
+            type: 'action/search_white')
+          ..events.listen('click', _handleSearchClick),
         new Icon(key: 'more_white', style: _iconStyle,
             size: 24,
             type: 'navigation/more_vert_white')
