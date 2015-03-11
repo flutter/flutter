@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 
 <import src="/sky/framework/dom-serializer.sky" as="DomSerializer" />
-<import src="/sky/framework/sky-element/sky-binder.sky" as="binder" />
+<import src="/sky/framework/elements/sky-element/sky-binder.sky" as="binder" />
 
 <div id="host"></div>
 

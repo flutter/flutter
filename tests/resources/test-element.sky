@@ -3,8 +3,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 -->
-<import src="/sky/framework/sky-checkbox.sky" />
-<import src="/sky/framework/sky-element/sky-element.sky" as="SkyElement" />
+<import src="/sky/framework/elements/sky-checkbox.sky" />
+<import src="/sky/framework/elements/sky-element/sky-element.sky" as="SkyElement" />
 
 <sky-element
     name="test-element"
