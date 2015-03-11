@@ -14,8 +14,8 @@
       color: rgb(255, 191, 0);
       font-family: 'Courier', 'monospace';
     }
-    span {
-      white-space: nowrap;
+    .line {
+      white-space: pre;
     }
   </style>
   <sky-scrollable id="control" contenteditable />
@@ -54,6 +54,7 @@ class TerminalDisplayImpl extends SkyElement implements TerminalDisplay {
 
   void shadowRootReady() {
     _control = shadowRoot.getElementById('control');
+    _control.addEventListener('keydown', _handleKeyDown);
     _control.addEventListener('keypress', _handleKeyPress);
 
     // Initialize with the first line.
@@ -62,20 +63,52 @@ class TerminalDisplayImpl extends SkyElement implements TerminalDisplay {
     _connect(getAttribute('url'));
   }
 
-  void _handleKeyPress(KeyboardEvent event) {
-    // TODO(vtl): Add "echo" mode; do |putChar(event.charCode);| if echo is on.
-
-    if (_readerQueue.isEmpty) {
-      _inputQueue.add(event.charCode);
-    } else {
-      _readerQueue.removeAt(0).complete(event.charCode);
+  void _handleKeyDown(KeyboardEvent event) {
+    // TODO(vtl): In general, our key handling is a total hack (due in part to
+    // sky's keyboard support being incomplete) -- e.g., we shouldn't have to
+    // make our div contenteditable. We have to intercept backspace (^H) here,
+    // since we won't actually get a keypress event for it. (Possibly, we should
+    // only handle keydown instead of keypress, but then we'd have to handle
+    // shift, etc. ourselves.)
+    if (event.key == 8) {
+      _enqueueChar(8);
+      event.preventDefault();
     }
+  }
 
+  void _handleKeyPress(KeyboardEvent event) {
+    _enqueueChar(event.charCode);
     event.preventDefault();
   }
 
+  void _enqueueChar(int charCode) {
+    // TODO(vtl): Add "echo" mode; do |putChar(event.charCode);| if echo is on.
+
+    if (_readerQueue.isEmpty) {
+      _inputQueue.add(charCode);
+    } else {
+      _readerQueue.removeAt(0).complete(charCode);
+    }
+  }
+
+  void _backspace() {
+    var oldText = _control.lastChild.textContent;
+    if (oldText.length > 0) {
+      _control.lastChild.textContent = oldText.substring(0, oldText.length - 1);
+    }
+  }
+
   void _newLine() {
-    _control.appendChild(document.createElement('span'));
+    var line = document.createElement('div');
+    line.setAttribute('class', 'line');
+    _control.appendChild(line);
+  }
+
+  void _clear() {
+    while (_control.firstChild != null) {
+      _control.firstChild.remove();
+    }
+    _newLine();
   }
 
   // TODO(vtl): Should we always auto-connect? Should there be facilities for
@@ -91,11 +124,29 @@ class TerminalDisplayImpl extends SkyElement implements TerminalDisplay {
 
   @override
   void putChar(int byte) {
-    if (byte == 10 || byte == 13) {
-      _newLine();
+    // Fast-path for printable chars.
+    if (byte >= 32) {
+      _control.lastChild.textContent += new String.fromCharCode(byte);
       return;
     }
-    _control.lastChild.textContent += new String.fromCharCode(byte);
+
+    switch (byte) {
+      case 8:  // BS (^H).
+        _backspace();
+        break;
+      case 10:  // LF ('\n').
+        _newLine();  // TODO(vtl): LF and CR should be separated.
+        break;
+      case 12:  // FF (^L).
+        _clear();
+        break;
+      case 13:  // CR ('\r').
+        _newLine();  // TODO(vtl): LF and CR should be separated.
+        break;
+      default:
+        // Should beep or something.
+        break;
+    }
   }
 
   @override
