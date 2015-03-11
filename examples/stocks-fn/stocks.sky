@@ -1,5 +1,6 @@
 #!mojo mojo:sky_viewer
 <sky>
+<import src="/sky/framework/debug/shake-to-reload.sky" />
 <script>
 import 'stocksapp.dart';
 main() {
