@@ -3,14 +3,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 -->
-<import src="/sky/framework/sky-drawer-header.sky" />
-<import src="/sky/framework/sky-drawer.sky" />
-<import src="/sky/framework/sky-element.sky" />
-<import src="/sky/framework/sky-icon.sky" />
-<import src="/sky/framework/sky-menu-divider.sky" />
-<import src="/sky/framework/sky-menu-item.sky" />
-<import src="/sky/framework/sky-scrollable.sky" />
-<import src="/sky/framework/sky-toolbar.sky" />
+<import src="/sky/framework/elements/sky-drawer-header.sky" />
+<import src="/sky/framework/elements/sky-drawer.sky" />
+<import src="/sky/framework/elements/sky-element.sky" />
+<import src="/sky/framework/elements/sky-icon.sky" />
+<import src="/sky/framework/elements/sky-menu-divider.sky" />
+<import src="/sky/framework/elements/sky-menu-item.sky" />
+<import src="/sky/framework/elements/sky-scrollable.sky" />
+<import src="/sky/framework/elements/sky-toolbar.sky" />
 <import src="stock.sky" as='view'/>
 
 <sky-element>
