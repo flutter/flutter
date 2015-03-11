@@ -8,8 +8,8 @@ import 'dart:sky';
 import 'dart:sky.internals' as internals;
 import 'dart:typed_data';
 import '/mojo/public/dart/application.dart';
-import 'mojo:bindings';
-import 'mojo:core';
+import 'dart:mojo.bindings';
+import 'dart:mojo.core';
 
 import 'package:mojo/public/interfaces/application/shell.mojom.dart' as shell_mojom;
 import 'package:mojo/services/input_events/public/interfaces/input_events.mojom.dart' as input_events;
