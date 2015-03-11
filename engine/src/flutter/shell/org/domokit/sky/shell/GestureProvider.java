@@ -69,13 +69,15 @@ public class GestureProvider implements GestureDetector.OnGestureListener {
 
     @Override
     public boolean onDown(MotionEvent event) {
+        InputEvent inputEvent = createGestureEvent(event);
+        inputEvent.type = EventType.GESTURE_TAP_DOWN;
+        mListener.onGestureEvent(inputEvent);
         return true;
     }
 
     @Override
     public boolean onFling(MotionEvent e1, MotionEvent e2,
             float velocityX, float velocityY) {
-
         mFlinging = true;
 
         // Use the first event as a scroll start (for the target hit-test)
@@ -85,12 +87,14 @@ public class GestureProvider implements GestureDetector.OnGestureListener {
         inputEvent.type = EventType.GESTURE_FLING_START;
 
         mListener.onGestureEvent(inputEvent);
-
         return true;
     }
 
     @Override
     public void onLongPress(MotionEvent event) {
+        InputEvent inputEvent = createGestureEvent(event);
+        inputEvent.type = EventType.GESTURE_LONG_PRESS;
+        mListener.onGestureEvent(inputEvent);
     }
 
     @Override
@@ -115,12 +119,16 @@ public class GestureProvider implements GestureDetector.OnGestureListener {
 
     @Override
     public void onShowPress(MotionEvent event) {
+        InputEvent inputEvent = createGestureEvent(event);
+        inputEvent.type = EventType.GESTURE_SHOW_PRESS;
+        mListener.onGestureEvent(inputEvent);
     }
 
     @Override
     public boolean onSingleTapUp(MotionEvent event) {
+        InputEvent inputEvent = createGestureEvent(event);
+        inputEvent.type = EventType.GESTURE_TAP;
+        mListener.onGestureEvent(inputEvent);
         return true;
     }
-
-
 }
