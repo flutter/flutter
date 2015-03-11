@@ -86,8 +86,9 @@ class StocksApp extends App {
       ]
     );
 
-    Node title = _isSearching ?
-        new Input(focused: true) : new Text('I am a stocks app');
+    Node title = _isSearching
+        ? new Input(focused: true, placeholder: 'Search stocks')
+        : new Text('I am a stocks app');
 
     var toolbar = new Toolbar(
       children: [

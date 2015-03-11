@@ -13,6 +13,7 @@ typedef void ValueChanged(value);
 class Input extends Component {
   static final Style _style = new Style('''
     display: paragraph;
+    transform: translateX(0);
     margin: 8px;
     padding: 8px;
     border-bottom: 1px solid ${Grey[200]};
@@ -22,18 +23,26 @@ class Input extends Component {
     overflow: hidden;'''
   );
 
+  static final Style _placeholderStyle = new Style('''
+    top: 8px;
+    left: 8px;
+    color: ${Grey[200]};
+    position: absolute;'''
+  );
+
   static final String _focusedInlineStyle = '''
     padding: 7px;
     border-bottom: 2px solid ${Blue[500]};''';
 
   ValueChanged onChanged;
   String value;
+  String placeholder;
   bool focused = false;
 
   bool _isAttachedToKeyboard = false;
   EditableString _editableValue;
 
-  Input({Object key, this.value: '', this.focused})
+  Input({Object key, this.value: '', this.placeholder, this.focused})
       : super(key: key, stateful: true) {
     _editableValue = new EditableString(text: value,
                                         onUpdated: _handleTextUpdated);
@@ -59,12 +68,21 @@ class Input extends Component {
       _isAttachedToKeyboard = true;
     }
 
+    List<Node> children = [];
+
+    if (placeholder != null && value.isEmpty) {
+      children.add(new Container(
+          style: _placeholderStyle,
+          children: [new Text(placeholder)]
+      ));
+    }
+
+    children.add(new EditableText(value: _editableValue, focused: focused));
+
     return new Container(
       style: _style,
       inlineStyle: focused ? _focusedInlineStyle : null,
-      children: [
-        new EditableText(value: _editableValue, focused: focused),
-      ]
+      children: children
     );
   }
 }
