@@ -12,7 +12,6 @@ group("sky") {
     "//sky/engine/platform:platform_unittests",
     "//sky/engine/web:sky_unittests",
     "//sky/engine/wtf:unittests",
-    "//sky/services/inspector",
     "//sky/tools/debugger",
     "//sky/tools/imagediff",
     "//sky/tools/tester",

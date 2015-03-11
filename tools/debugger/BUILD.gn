@@ -34,6 +34,5 @@ mojo_native_application("sky_debugger") {
     "//services/http_server/public",
     "//services/http_server/public:util",
     "//services/tracing:bindings",
-    "//sky/viewer:bindings",
   ]
 }

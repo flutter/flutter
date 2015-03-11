@@ -27,6 +27,5 @@ mojo_native_application("tester") {
     "//mojo/services/view_manager/public/cpp",
     "//services/window_manager:lib",
     "//sky/services/testing:bindings",
-    "//sky/viewer:bindings",
   ]
 }

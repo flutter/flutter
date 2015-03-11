@@ -27,7 +27,6 @@ mojo_native_application("viewer") {
   include_dirs = [ ".." ]
 
   deps = [
-    ":bindings",
     "//mojo/application",
     "//mojo/common",
     "//mojo/common:tracing_impl",
@@ -52,17 +51,10 @@ mojo_native_application("viewer") {
     "//sky/compositor",
     "//sky/engine",
     "//sky/engine/tonic",
-    "//sky/services/inspector:bindings",
     "//sky/services/platform",
     "//sky/services/testing:bindings",
     "//third_party/icu",
     "//ui/events",
     "//url",
-  ]
-}
-
-mojom("bindings") {
-  sources = [
-    "services/inspector.mojom",
   ]
 }
