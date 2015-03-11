@@ -6,15 +6,19 @@ module sky;
 
 enum EventType {
   UNKNOWN,
-  POINTER_DOWN,
-  POINTER_UP,
-  POINTER_MOVE,
   POINTER_CANCEL,
-  GESTURE_SCROLL_BEGIN,
-  GESTURE_SCROLL_UPDATE,
-  GESTURE_SCROLL_END,
-  GESTURE_FLING_START,
+  POINTER_DOWN,
+  POINTER_MOVE,
+  POINTER_UP,
   GESTURE_FLING_CANCEL,
+  GESTURE_FLING_START,
+  GESTURE_LONG_PRESS,
+  GESTURE_SCROLL_BEGIN,
+  GESTURE_SCROLL_END,
+  GESTURE_SCROLL_UPDATE,
+  GESTURE_SHOW_PRESS,
+  GESTURE_TAP,
+  GESTURE_TAP_DOWN,
 };
 
 enum PointerKind {
@@ -42,12 +46,12 @@ struct PointerData {
 };
 
 struct GestureData {
-    float x;
-    float y;
-    float dx;
-    float dy;
-    float velocityX;
-    float velocityY;
+  float x;
+  float y;
+  float dx;
+  float dy;
+  float velocityX;
+  float velocityY;
 };
 
 struct InputEvent {

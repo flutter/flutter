@@ -79,6 +79,18 @@ scoped_ptr<blink::WebInputEvent> BuildWebGestureEvent(
     case EVENT_TYPE_GESTURE_FLING_CANCEL:
       web_event->type = blink::WebInputEvent::GestureFlingCancel;
       break;
+    case EVENT_TYPE_GESTURE_LONG_PRESS:
+      web_event->type = blink::WebInputEvent::GestureLongPress;
+      break;
+    case EVENT_TYPE_GESTURE_SHOW_PRESS:
+      web_event->type = blink::WebInputEvent::GestureShowPress;
+      break;
+    case EVENT_TYPE_GESTURE_TAP:
+      web_event->type = blink::WebInputEvent::GestureTap;
+      break;
+    case EVENT_TYPE_GESTURE_TAP_DOWN:
+      web_event->type = blink::WebInputEvent::GestureTapDown;
+      break;
     default:
       break;
   }
@@ -101,11 +113,15 @@ scoped_ptr<blink::WebInputEvent> ConvertEvent(const InputEventPtr& event,
     case EVENT_TYPE_POINTER_MOVE:
     case EVENT_TYPE_POINTER_CANCEL:
       return BuildWebPointerEvent(event, device_pixel_ratio);
-    case EVENT_TYPE_GESTURE_SCROLL_BEGIN:
-    case EVENT_TYPE_GESTURE_SCROLL_UPDATE:
-    case EVENT_TYPE_GESTURE_SCROLL_END:
-    case EVENT_TYPE_GESTURE_FLING_START:
     case EVENT_TYPE_GESTURE_FLING_CANCEL:
+    case EVENT_TYPE_GESTURE_FLING_START:
+    case EVENT_TYPE_GESTURE_LONG_PRESS:
+    case EVENT_TYPE_GESTURE_SCROLL_BEGIN:
+    case EVENT_TYPE_GESTURE_SCROLL_END:
+    case EVENT_TYPE_GESTURE_SCROLL_UPDATE:
+    case EVENT_TYPE_GESTURE_SHOW_PRESS:
+    case EVENT_TYPE_GESTURE_TAP:
+    case EVENT_TYPE_GESTURE_TAP_DOWN:
       return BuildWebGestureEvent(event, device_pixel_ratio);
     case EVENT_TYPE_UNKNOWN:
       NOTIMPLEMENTED() << "ConvertEvent received unexpected EVENT_TYPE_UNKNOWN";
