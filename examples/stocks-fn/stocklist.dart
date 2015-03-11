@@ -1,20 +1,22 @@
 part of stocksapp;
 
 class Stocklist extends FixedHeightScrollable {
-
+  String query;
   List<Stock> stocks;
 
   Stocklist({
     Object key,
-    this.stocks
+    this.stocks,
+    this.query
   }) : super(key: key, minOffset: 0.0);
 
   List<Node> buildItems(int start, int count) {
-    var items = [];
-    for (var i = 0; i < count; i++) {
-      items.add(new StockRow(stock: stocks[start + i]));
-    }
-
-    return items;
+    return stocks
+      .skip(start)
+      .where((stock) => query == null || stock.symbol.contains(
+          new RegExp(query, caseSensitive: false)))
+      .take(count)
+      .map((stock) => new StockRow(stock: stock))
+      .toList(growable: false);
   }
 }
