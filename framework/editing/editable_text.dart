@@ -76,7 +76,7 @@ class EditableText extends Component {
       if (!composing.isEmpty) {
         children.add(new Container(
           key: 'composing', 
-          style: _composingStyle,
+          styles: [_composingStyle],
           children: [new Text(composing)]
         ));
       }
@@ -87,10 +87,10 @@ class EditableText extends Component {
     }
 
     if (_showCursor)
-      children.add(new Container(key: 'cursor', style: _cusorStyle));
+      children.add(new Container(key: 'cursor', styles: [_cusorStyle]));
 
     return new Container(
-      style: _style,
+      styles: [_style],
       children: children
     );
   }

@@ -10,6 +10,7 @@ import '../theme/shadows.dart';
 import 'dart:async';
 import 'dart:math' as math;
 import 'dart:sky' as sky;
+import 'material.dart';
 
 const double _kWidth = 256.0;
 const double _kMinFlingVelocity = 0.4;
@@ -83,8 +84,7 @@ class Drawer extends Component {
     top: 0;
     left: 0;
     bottom: 0;
-    right: 0;
-    box-shadpw: ${Shadow[3]};'''
+    right: 0;'''
   );
 
   static final Style _maskStyle = new Style('''
@@ -110,11 +110,13 @@ class Drawer extends Component {
 
   DrawerAnimation animation;
   List<Node> children;
+  int level;
 
   Drawer({
     Object key,
     this.animation,
-    this.children
+    this.children,
+    this.level: 0
   }) : super(key: key) {
     events.listen('pointerdown', animation.handlePointerDown);
     events.listen('pointermove', animation.handlePointerMove);
@@ -148,20 +150,21 @@ class Drawer extends Component {
 
     Container mask = new Container(
       key: 'Mask',
-      style: _maskStyle,
+      styles: [_maskStyle],
       inlineStyle: maskInlineStyle
     )..events.listen('gesturetap', animation.handleMaskTap)
      ..events.listen('gestureflingstart', animation.handleFlingStart);
 
-    Container content = new Container(
+    Material content = new Material(
       key: 'Content',
-      style: _contentStyle,
+      styles: [_contentStyle],
       inlineStyle: contentInlineStyle,
-      children: children
+      children: children,
+      level: level
     );
 
     return new Container(
-      style: _style,
+      styles: [_style],
       inlineStyle: inlineStyle,
       children: [ mask, content ]
     );

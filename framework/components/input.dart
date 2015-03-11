@@ -75,7 +75,7 @@ class Input extends Component {
 
     if (placeholder != null && _value.isEmpty) {
       children.add(new Container(
-          style: _placeholderStyle,
+          styles: [_placeholderStyle],
           children: [new Text(placeholder)]
       ));
     }
@@ -83,7 +83,7 @@ class Input extends Component {
     children.add(new EditableText(value: _editableValue, focused: focused));
 
     return new Container(
-      style: _style,
+      styles: [_style],
       inlineStyle: focused ? _focusedInlineStyle : null,
       children: children
     );

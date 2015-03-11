@@ -78,10 +78,10 @@ abstract class FixedHeightScrollable extends Component {
     }
 
     return new Container(
-      style: _style,
+      styles: [_style],
       children: [
         new Container(
-          style: _scrollAreaStyle,
+          styles: [_scrollAreaStyle],
           inlineStyle: transformStyle,
           children: buildItems(itemNumber, drawCount)
         )

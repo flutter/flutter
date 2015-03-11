@@ -3,8 +3,10 @@
 // found in the LICENSE file.
 
 import '../fn.dart';
-import 'dart:sky' as sky;
+import '../theme/shadows.dart';
 import 'dart:collection';
+import 'dart:math';
+import 'dart:sky' as sky;
 import 'ink_splash.dart';
 
 class Material extends Component {
@@ -19,12 +21,28 @@ class Material extends Component {
     bottom: 0'''
   );
 
+  static final List<Style> shadowStyle = [
+    null,
+    new Style('box-shadow: ${Shadow[1]}'),
+    new Style('box-shadow: ${Shadow[2]}'),
+    new Style('box-shadow: ${Shadow[3]}'),
+    new Style('box-shadow: ${Shadow[4]}'),
+    new Style('box-shadow: ${Shadow[5]}'),
+  ];
+
   LinkedHashSet<SplashAnimation> _splashes;
 
-  Style style;
+  List<Style> styles;
+  String inlineStyle;
   List<Node> children;
+  int level;
 
-  Material({ Object key, this.style, this.children }) : super(key: key) {
+  Material({
+      Object key,
+      this.styles,
+      this.inlineStyle,
+      this.children,
+      this.level: 0 }) : super(key: key) {
     events.listen('gesturescrollstart', _cancelSplashes);
     events.listen('wheel', _cancelSplashes);
     events.listen('pointerdown', _startSplash);
@@ -35,7 +53,7 @@ class Material extends Component {
 
     if (_splashes != null) {
       childrenIncludingSplashes.add(new Container(
-        style: _splashesStyle,
+        styles: [_splashesStyle],
         children: new List.from(_splashes.map(
             (s) => new InkSplash(s.onStyleChanged))),
         key: 'Splashes'
@@ -45,8 +63,14 @@ class Material extends Component {
     if (children != null)
       childrenIncludingSplashes.addAll(children);
 
-    return new Container(key: 'Material', style: style,
-        children: childrenIncludingSplashes);
+    List<Style> stylesIncludingShadow = styles;
+    if (level > 0) {
+      stylesIncludingShadow = new List.from(styles);
+      stylesIncludingShadow.add(shadowStyle[level]);
+    }
+
+    return new Container(key: 'Material', styles: stylesIncludingShadow,
+        inlineStyle: inlineStyle, children: childrenIncludingSplashes);
   }
 
   sky.ClientRect _getBoundingRect() => (getRoot() as sky.Element).getBoundingClientRect();

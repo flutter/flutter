@@ -18,7 +18,6 @@ class FloatingActionButton extends Component {
     height: 56px;
     background-color: ${Red[500]};
     color: white;
-    box-shadow: ${Shadow[3]};
     border-radius: 28px;'''
   );
   static final Style _clipStyle = new Style('''
@@ -34,8 +33,10 @@ class FloatingActionButton extends Component {
     -webkit-clip-path: circle(28px at center);''');
 
   Node content;
+  int level;
 
-  FloatingActionButton({ Object key, this.content }) : super(key: key);
+  FloatingActionButton({ Object key, this.content, this.level: 0 })
+      : super(key: key);
 
   Node build() {
     List<Node> children = [];
@@ -43,13 +44,17 @@ class FloatingActionButton extends Component {
     if (content != null)
       children.add(content);
 
+    List<Style> containerStyle = [_style];
+    if (level > 0)
+      containerStyle.add(Material.shadowStyle[level]);
+
     return new Container(
       key: "Container",
-      style: _style,
+      styles: containerStyle,
       children: [
         new Material(
           key: "Clip",
-          style: _clipStyle,
+          styles: [_clipStyle],
           children: children
         )
       ]

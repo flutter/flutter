@@ -68,13 +68,13 @@ class Checkbox extends ButtonBase {
 
   Node build() {
     return new Container(
-      style: _style,
+      styles: [_style],
       children: [
         new Container(
-          style: highlight ? _containerHighlightStyle : _containerStyle,
+          styles: [highlight ? _containerHighlightStyle : _containerStyle],
           children: [
             new Container(
-              style: checked ? _checkedStyle : _uncheckedStyle
+              styles: [checked ? _checkedStyle : _uncheckedStyle]
             )
           ]
         )

@@ -3,41 +3,33 @@
 // found in the LICENSE file.
 
 import '../fn.dart';
-import 'button_base.dart';
+import '../theme/shadows.dart';
 import 'material.dart';
 
-class Button extends ButtonBase {
+class Button extends Component {
   static final Style _style = new Style('''
-    transform: translateX(0);
     display: inline-flex;
-    border-radius: 4px;
+    transform: translateX(0);
+    -webkit-user-select: none;
     justify-content: center;
     align-items: center;
-    border: 1px solid blue;
-    -webkit-user-select: none;
-    margin: 5px;'''
-  );
-
-  static final Style _highlightStyle = new Style('''
-    transform: translateX(0);
-    display: inline-flex;
-    border-radius: 4px;
-    justify-content: center;
-    align-items: center;
-    border: 1px solid blue;
-    -webkit-user-select: none;
-    margin: 5px;
-    background-color: orange;'''
+    height: 36px;
+    min-width: 64px;
+    padding: 0 8px;
+    margin: 4px;
+    border-radius: 2px;'''
   );
 
   Node content;
+  int level;
 
-  Button({ Object key, this.content }) : super(key: key);
+  Button({ Object key, this.content, this.level }) : super(key: key);
 
   Node build() {
     return new Material(
-      style: highlight ? _highlightStyle : _style,
-      children: [content]
+      styles: [_style],
+      children: [content],
+      level: level
     );
   }
 }

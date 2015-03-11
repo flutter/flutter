@@ -135,17 +135,16 @@ abstract class Element extends Node {
   String inlineStyle;
 
   List<Node> _children = null;
-  String _className = '';
+  String _class = '';
 
   Element({
     Object key,
     List<Node> children,
-    Style style,
+    List<Style> styles,
 
     this.inlineStyle
   }) : super(key:key) {
-
-    _className = style == null ? '': style._className;
+    _class = styles == null ? '' : styles.map((s) => s._className).join(' ');
     _children = children == null ? _emptyList : children;
 
     if (_isInCheckedMode) {
@@ -229,8 +228,8 @@ abstract class Element extends Node {
     _syncEvents(old);
 
     sky.Element root = _root as sky.Element;
-    if (_className != old._className) {
-      root.setAttribute('class', _className);
+    if (_class != old._class) {
+      root.setAttribute('class', _class);
     }
 
     if (inlineStyle != old.inlineStyle) {
@@ -413,12 +412,12 @@ class Container extends Element {
   Container({
     Object key,
     List<Node> children,
-    Style style,
+    List<Style> styles,
     String inlineStyle
   }) : super(
     key: key,
     children: children,
-    style: style,
+    styles: styles,
     inlineStyle: inlineStyle
   );
 }
@@ -437,7 +436,7 @@ class Image extends Element {
   Image({
     Object key,
     List<Node> children,
-    Style style,
+    List<Style> styles,
     String inlineStyle,
     this.width,
     this.height,
@@ -445,7 +444,7 @@ class Image extends Element {
   }) : super(
     key: key,
     children: children,
-    style: style,
+    styles: styles,
     inlineStyle: inlineStyle
   );
 
@@ -481,7 +480,7 @@ class Anchor extends Element {
   Anchor({
     Object key,
     List<Node> children,
-    Style style,
+    List<Style> styles,
     String inlineStyle,
     this.width,
     this.height,
@@ -489,7 +488,7 @@ class Anchor extends Element {
   }) : super(
     key: key,
     children: children,
-    style: style,
+    styles: styles,
     inlineStyle: inlineStyle
   );
 

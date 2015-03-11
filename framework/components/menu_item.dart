@@ -43,15 +43,15 @@ class MenuItem extends ButtonBase {
 
   Node build() {
     return new Material (
-      style: highlight ? _highlightStyle : _style,
+      styles: [highlight ? _highlightStyle : _style],
       children: [
         new Icon(
-          style: _iconStyle,
+          styles: [_iconStyle],
           size: 24,
           type: "${icon}_grey600"
         ),
         new Container(
-          style: _labelStyle,
+          styles: [_labelStyle],
           children: children
         )
       ]

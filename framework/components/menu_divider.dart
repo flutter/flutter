@@ -14,7 +14,7 @@ class MenuDivider extends Component {
 
   Node build() {
     return new Container(
-      style: _style
+      styles: [_style]
     );
   }
 }

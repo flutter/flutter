@@ -23,7 +23,7 @@ class Toolbar extends Component {
 
   Node build() {
     return new Container(
-      style: _style,
+      styles: [_style],
       children: children
     );
   }

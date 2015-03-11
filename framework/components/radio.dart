@@ -56,7 +56,7 @@ class Radio extends ButtonBase {
 
   Node build() {
     return new Material(
-      style: highlight ? _highlightStyle : _style,
+      styles: [highlight ? _highlightStyle : _style],
       children: value == groupValue ? [new Container( style : _dotStyle )] : []
     )
   }
