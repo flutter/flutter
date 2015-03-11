@@ -64,6 +64,7 @@ class StocksApp extends App {
   Node build() {
     var drawer = new Drawer(
       animation: _drawerAnimation,
+      level: 3,
       children: [
         new DrawerHeader(
           children: [new Text('Stocks')]
@@ -103,19 +104,19 @@ class StocksApp extends App {
 
     var toolbar = new Toolbar(
       children: [
-        new Icon(key: 'menu', style: _iconStyle,
+        new Icon(key: 'menu', styles: [_iconStyle],
             size: 24,
             type: 'navigation/menu_white')
           ..events.listen('click', _drawerAnimation.toggle),
         new Container(
-          style: _titleStyle,
+          styles: [_titleStyle],
           children: [title]
         ),
-        new Icon(key: 'search', style: _iconStyle,
+        new Icon(key: 'search', styles: [_iconStyle],
             size: 24,
             type: 'action/search_white')
           ..events.listen('click', _handleSearchClick),
-        new Icon(key: 'more_white', style: _iconStyle,
+        new Icon(key: 'more_white', styles: [_iconStyle],
             size: 24,
             type: 'navigation/more_vert_white')
       ]
@@ -124,14 +125,14 @@ class StocksApp extends App {
     var list = new Stocklist(stocks: _sortedStocks, query: _searchQuery);
 
     var fab = new FloatingActionButton(content: new Icon(
-      type: 'content/add_white', size: 24));
+      type: 'content/add_white', size: 24), level: 3);
 
     return new Container(
       key: 'StocksApp',
       children: [
         new Container(
           key: 'Content',
-          style: _style,
+          styles: [_style],
           children: [toolbar, list]
         ),
         fab,

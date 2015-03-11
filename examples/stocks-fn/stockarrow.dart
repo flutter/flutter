@@ -74,11 +74,11 @@ class StockArrow extends Component {
 
     return new Container(
       inlineStyle: 'border-color: $border',
-      style: _style,
+      styles: [_style],
       children: [
         new Container(
           inlineStyle: 'border-$type-color: $border',
-          style: up ? _upStyle : _downStyle
+          styles: [up ? _upStyle : _downStyle]
         )
       ]
     );

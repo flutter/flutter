@@ -47,23 +47,23 @@ class StockRow extends Component {
       ),
       new Container(
         key: 'Ticker',
-        style: _tickerStyle,
+        styles: [_tickerStyle],
         children: [new Text(stock.symbol)]
       ),
       new Container(
         key: 'LastSale',
-        style: _lastSaleStyle,
+        styles: [_lastSaleStyle],
         children: [new Text(lastSale)]
       ),
       new Container(
         key: 'Change',
-        style: _changeStyle,
+        styles: [_changeStyle],
         children: [new Text(changeInPrice)]
       )
     ];
 
     return new Material(
-      style: _style,
+      styles: [_style],
       children: children
     );
   }
