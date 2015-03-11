@@ -27,8 +27,8 @@ const LibraryDescriptor kBuiltinLibraries[] = {
     /* { url_, has_natives_, native_symbol_, native_resolver_ } */
     {"dart:sky_builtin", true, BuiltinNatives::NativeSymbol, BuiltinNatives::NativeLookup},
     {"dart:sky", true, skySnapshotSymbolizer, skySnapshotResolver},
-    {"mojo:bindings", false, nullptr, nullptr},
-    {"mojo:core", true, MojoNativeSymbol, MojoNativeLookup},
+    {"dart:mojo.bindings", false, nullptr, nullptr},
+    {"dart:mojo.core", true, MojoNativeSymbol, MojoNativeLookup},
 };
 
 }  // namespace

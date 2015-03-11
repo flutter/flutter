@@ -12,5 +12,5 @@ import 'dart:mirrors';
 import 'dart:sky';
 import 'dart:sky_builtin';
 import 'dart:typed_data';
-import 'mojo:bindings';
-import 'mojo:core';
+import 'dart:mojo.bindings';
+import 'dart:mojo.core';

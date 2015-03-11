@@ -210,8 +210,8 @@ class Analyze(object):
         analyzer_args = [ANALYZER_PATH,
             "--url-mapping=dart:sky,%s" % dart_sky_path,
             "--url-mapping=dart:sky_builtin,%s" % sky_builtin_path,
-            "--url-mapping=mojo:bindings,%s" % mojo_bindings_path,
-            "--url-mapping=mojo:core,%s" % mojo_core_path,
+            "--url-mapping=dart:mojo.bindings,%s" % mojo_bindings_path,
+            "--url-mapping=dart:mojo.core,%s" % mojo_core_path,
             args.app_path
         ]
         subprocess.call(analyzer_args)

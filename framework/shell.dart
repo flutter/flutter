@@ -4,7 +4,7 @@
 
 import "/mojo/public/dart/application.dart";
 import "dart:sky.internals" as internals;
-import "mojo:core" as core;
+import "dart:mojo.core" as core;
 import "package:mojo/public/interfaces/application/service_provider.mojom.dart";
 
 ApplicationConnection _initConnection() {

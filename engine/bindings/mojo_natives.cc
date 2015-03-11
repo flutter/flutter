@@ -99,7 +99,7 @@ static void SetInvalidArgumentReturn(Dart_NativeArguments arguments) {
 }
 
 static Dart_Handle MojoLib() {
-  return DartBuiltin::LookupLibrary("mojo:core");
+  return DartBuiltin::LookupLibrary("dart:mojo.core");
 }
 
 static Dart_Handle SignalsStateToDart(Dart_Handle klass,
