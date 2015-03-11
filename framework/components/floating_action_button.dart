@@ -7,7 +7,7 @@ import 'material.dart';
 import '../theme/colors.dart';
 import '../theme/shadows.dart';
 
-class FloatingActionButton extends Material {
+class FloatingActionButton extends Component {
   static final Style _style = new Style('''
     position: absolute;
     bottom: 16px;
@@ -38,7 +38,7 @@ class FloatingActionButton extends Material {
   FloatingActionButton({ Object key, this.content }) : super(key: key);
 
   Node build() {
-    List<Node> children = [super.build()];
+    List<Node> children = [];
 
     if (content != null)
       children.add(content);
@@ -47,7 +47,7 @@ class FloatingActionButton extends Material {
       key: "Container",
       style: _style,
       children: [
-        new Container(
+        new Material(
           key: "Clip",
           style: _clipStyle,
           children: children

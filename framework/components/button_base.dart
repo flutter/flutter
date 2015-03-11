@@ -3,9 +3,8 @@
 // found in the LICENSE file.
 
 import '../fn.dart';
-import 'material.dart';
 
-abstract class ButtonBase extends Material {
+abstract class ButtonBase extends Component {
   bool highlight = false;
 
   ButtonBase({ Object key }) : super(key: key) {

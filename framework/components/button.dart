@@ -4,6 +4,7 @@
 
 import '../fn.dart';
 import 'button_base.dart';
+import 'material.dart';
 
 class Button extends ButtonBase {
   static final Style _style = new Style('''
@@ -34,9 +35,9 @@ class Button extends ButtonBase {
   Button({ Object key, this.content }) : super(key: key);
 
   Node build() {
-    return new Container(
+    return new Material(
       style: highlight ? _highlightStyle : _style,
-      children: [super.build(), content]
+      children: [content]
     );
   }
 }

@@ -70,7 +70,6 @@ class Checkbox extends ButtonBase {
     return new Container(
       style: _style,
       children: [
-        super.build(),
         new Container(
           style: highlight ? _containerHighlightStyle : _containerStyle,
           children: [

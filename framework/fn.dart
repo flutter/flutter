@@ -258,6 +258,9 @@ abstract class Element extends Node {
       return false;
     }
 
+    if (this == oldElement)
+      return false;
+
     _root = oldElement._root;
     oldElement._root = null;
     sky.Element root = (_root as sky.Element);

@@ -7,10 +7,10 @@ import 'dart:sky' as sky;
 import 'dart:collection';
 import 'ink_splash.dart';
 
-abstract class Material extends Component {
+class Material extends Component {
   static const _splashesKey = const Object();
 
-  static final Style _style = new Style('''
+  static final Style _splashesStyle = new Style('''
     transform: translateX(0);
     position: absolute;
     top: 0;
@@ -21,24 +21,32 @@ abstract class Material extends Component {
 
   LinkedHashSet<SplashAnimation> _splashes;
 
-  Material({ Object key }) : super(key: key) {
+  Style style;
+  List<Node> children;
+
+  Material({ Object key, this.style, this.children }) : super(key: key) {
     events.listen('gesturescrollstart', _cancelSplashes);
     events.listen('wheel', _cancelSplashes);
     events.listen('pointerdown', _startSplash);
   }
 
   Node build() {
-    List<Node> children = [];
+    List<Node> childrenIncludingSplashes = [];
 
     if (_splashes != null) {
-      children.addAll(_splashes.map((s) => new InkSplash(s.onStyleChanged)));
+      childrenIncludingSplashes.add(new Container(
+        style: _splashesStyle,
+        children: new List.from(_splashes.map(
+            (s) => new InkSplash(s.onStyleChanged))),
+        key: 'Splashes'
+      ));
     }
 
-    return new Container(
-      style: _style,
-      children: children,
-      key: _splashesKey
-    );
+    if (children != null)
+      childrenIncludingSplashes.addAll(children);
+
+    return new Container(key: 'Material', style: style,
+        children: childrenIncludingSplashes);
   }
 
   sky.ClientRect _getBoundingRect() => (getRoot() as sky.Element).getBoundingClientRect();
