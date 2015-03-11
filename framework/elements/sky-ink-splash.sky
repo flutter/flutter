@@ -31,9 +31,9 @@
   <div id="splash" />
 </template>
 <script>
-import "animation/controller.dart";
-import "animation/curves.dart";
-import "animation/timer.dart";
+import "../animation/controller.dart";
+import "../animation/curves.dart";
+import "../animation/timer.dart";
 import "dart:math" as math;
 import "dart:sky";
 import "dart:async";

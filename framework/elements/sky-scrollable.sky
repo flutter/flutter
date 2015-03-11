@@ -37,8 +37,8 @@
 <script>
 import "dart:math" as math;
 import "dart:sky";
-import "animation/fling-curve.dart";
-import "theme/view-configuration.dart" as config;
+import "../animation/fling-curve.dart";
+import "../theme/view-configuration.dart" as config;
 
 @Tagname('sky-scrollable')
 class SkyScrollable extends SkyElement {
