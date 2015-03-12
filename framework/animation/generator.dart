@@ -61,14 +61,15 @@ class AnimationGenerator extends FrameGenerator {
   Stream<double> _stream;
   bool _done = false;
 
-  AnimationGenerator(this.duration, {
+  AnimationGenerator({
     this.initialDelay: 0.0,
+    this.duration,
     this.begin: 0.0,
     this.end: 1.0,
     this.curve: linear,
     Function onDone
   }):super(onDone: onDone) {
-    assert(duration > 0);
+    assert(duration != null && duration > 0.0);
     double startTime = 0.0;
     _stream = super.onTick.map((timeStamp) {
       if (startTime == 0.0)
@@ -132,8 +133,12 @@ class Animation {
       { Curve curve: linear, double initialDelay: 0.0 }) {
     stop();
 
-    _animation = new AnimationGenerator(duration, begin: _value, end: newValue,
-        curve: curve, initialDelay: initialDelay);
+    _animation = new AnimationGenerator(
+        duration: duration,
+        begin: _value,
+        end: newValue,
+        curve: curve,
+        initialDelay: initialDelay);
 
     _animation.onTick.listen(_setValue, onDone: () {
       _animation = null;

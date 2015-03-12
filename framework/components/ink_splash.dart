@@ -27,8 +27,11 @@ class SplashAnimation {
       : _offsetX = x - rect.left,
         _offsetY = y - rect.top {
 
-    _animation = new AnimationGenerator(_kSplashDuration,
-        end: _kSplashSize, curve: easeOut, onDone: onDone);
+    _animation = new AnimationGenerator(
+        duration:_kSplashDuration,
+        end: _kSplashSize,
+        curve: easeOut,
+        onDone: onDone);
 
     _styleChanged = _animation.onTick.map((p) => '''
       top: ${_offsetY - p/2}px;
