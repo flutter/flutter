@@ -1,6 +1,7 @@
 library stocksapp;
 
 import '../../framework/fn.dart';
+import '../../framework/animation/scroll_curve.dart';
 import '../../framework/components/drawer.dart';
 import '../../framework/components/drawer_header.dart';
 import '../../framework/components/fixed_height_scrollable.dart';
