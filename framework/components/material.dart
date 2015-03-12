@@ -5,13 +5,10 @@
 import '../fn.dart';
 import '../theme/shadows.dart';
 import 'dart:collection';
-import 'dart:math';
 import 'dart:sky' as sky;
 import 'ink_splash.dart';
 
 class Material extends Component {
-  static const _splashesKey = const Object();
-
   static final Style _splashesStyle = new Style('''
     transform: translateX(0);
     position: absolute;

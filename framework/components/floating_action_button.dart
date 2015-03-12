@@ -5,7 +5,6 @@
 import '../fn.dart';
 import 'material.dart';
 import '../theme/colors.dart';
-import '../theme/shadows.dart';
 
 class FloatingActionButton extends Component {
   static final Style _style = new Style('''

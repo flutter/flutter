@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import "dart:math" as math;
-import "dart:sky";
+import "dart:sky" as sky;
 
 abstract class AnimationDelegate {
   void updateAnimation(double t);
@@ -25,7 +25,7 @@ class AnimationTimer {
   }
 
   void stop() {
-    window.cancelAnimationFrame(_animationId);
+    sky.window.cancelAnimationFrame(_animationId);
     _startTime = 0.0;
     _duration = 0.0;
     _animationId = 0;
@@ -33,7 +33,7 @@ class AnimationTimer {
 
   void _scheduleTick() {
     assert(_animationId == 0);
-    _animationId = window.requestAnimationFrame(_tick);
+    _animationId = sky.window.requestAnimationFrame(_tick);
   }
 
   void _tick(double timeStamp) {

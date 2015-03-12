@@ -117,7 +117,7 @@ class Document extends ParentNode {
 }
 
 class HTMLImageElement extends Element {
-  Image();
+  HTMLImageElement();
   String src;
   Object style = {};
 }
@@ -139,6 +139,7 @@ class Window {
     new Timer(const Duration(milliseconds: 16), () {
       _callRAF(fn);
     });
+    return 1;
   }
 
   void cancelAnimationFrame(int id) {
@@ -150,7 +151,7 @@ Document document = new Document();
 Window window = new Window();
 
 class ClientRect {
-    double top
+    double top;
     double right;
     double bottomr;
     double left;

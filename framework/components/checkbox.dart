@@ -79,6 +79,6 @@ class Checkbox extends ButtonBase {
           ]
         )
       ]
-    )
+    );
   }
 }
