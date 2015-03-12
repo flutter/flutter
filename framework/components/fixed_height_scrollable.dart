@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../animation/fling-curve.dart';
+import '../animation/fling_curve.dart';
 import '../fn.dart';
 import 'dart:sky' as sky;
 
