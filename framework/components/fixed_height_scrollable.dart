@@ -4,6 +4,7 @@
 
 import '../animation/scroll_curve.dart';
 import '../fn.dart';
+import 'dart:math' as math;
 import 'dart:sky' as sky;
 import 'scrollable.dart';
 
@@ -52,17 +53,24 @@ abstract class FixedHeightScrollable extends Scrollable {
     var transformStyle = '';
 
     if (_height > 0.0) {
-      drawCount = (_height / _itemHeight).round() + 1;
-      double alignmentDelta = -scrollOffset % _itemHeight;
-      if (alignmentDelta != 0.0) {
-        alignmentDelta -= _itemHeight;
+      if (scrollOffset < 0.0) {
+        double visibleHeight = _height + scrollOffset;
+        drawCount = (visibleHeight / _itemHeight).round() + 1;
+        transformStyle =
+          'transform: translateY(${(-scrollOffset).toStringAsFixed(2)}px)';
+      } else {
+        drawCount = (_height / _itemHeight).round() + 1;
+        double alignmentOffset = math.max(0.0, scrollOffset);
+        double alignmentDelta = -scrollOffset % _itemHeight;
+        if (alignmentDelta != 0.0)
+          alignmentDelta -= _itemHeight;
+
+        double drawStart = scrollOffset + alignmentDelta;
+        itemNumber = (drawStart / _itemHeight).floor();
+
+        transformStyle =
+            'transform: translateY(${(alignmentDelta).toStringAsFixed(2)}px)';
       }
-
-      double drawStart = scrollOffset + alignmentDelta;
-      itemNumber = (drawStart / _itemHeight).floor();
-
-      transformStyle =
-          'transform: translateY(${(alignmentDelta).toStringAsFixed(2)}px)';
     }
 
     return new Container(
