@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import '../animation/scroll_curve.dart';
 import '../fn.dart';
 import 'dart:sky' as sky;
 import 'scrollable.dart';
@@ -27,10 +28,8 @@ abstract class FixedHeightScrollable extends Scrollable {
 
   FixedHeightScrollable({
     Object key,
-    double minOffset,
-    double maxOffset
-  }) : super(key: key, minOffset: minOffset, maxOffset: maxOffset) {
-  }
+    ScrollCurve scrollCurve
+  }) : super(key: key, scrollCurve: scrollCurve);
 
   void didMount() {
     super.didMount();

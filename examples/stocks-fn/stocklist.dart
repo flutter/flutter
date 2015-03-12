@@ -8,7 +8,7 @@ class Stocklist extends FixedHeightScrollable {
     Object key,
     this.stocks,
     this.query
-  }) : super(key: key, minOffset: 0.0);
+  }) : super(key: key, scrollCurve: new BoundedScrollCurve(minOffset: 0.0));
 
   List<Node> buildItems(int start, int count) {
     return stocks

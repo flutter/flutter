@@ -3,24 +3,19 @@
 // found in the LICENSE file.
 
 import '../animation/fling_curve.dart';
+import '../animation/scroll_curve.dart';
 import '../fn.dart';
 import 'dart:sky' as sky;
 
 abstract class Scrollable extends Component {
-  double minOffset;
-  double maxOffset;
-
+  ScrollCurve scrollCurve;
   double get scrollOffset => _scrollOffset;
 
   double _scrollOffset = 0.0;
   FlingCurve _flingCurve;
   int _flingAnimationId;
 
-  Scrollable({
-    Object key,
-    this.minOffset,
-    this.maxOffset
-  }) : super(key: key) {
+  Scrollable({Object key, this.scrollCurve}) : super(key: key) {
     events.listen('gestureflingstart', _handleFlingStart);
     events.listen('gestureflingcancel', _handleFlingCancel);
     events.listen('gesturescrollupdate', _handleScrollUpdate);
@@ -33,15 +28,9 @@ abstract class Scrollable extends Component {
   }
 
   bool scrollBy(double scrollDelta) {
-    var newScrollOffset = _scrollOffset + scrollDelta;
-    if (minOffset != null && newScrollOffset < minOffset)
-      newScrollOffset = minOffset;
-    else if (maxOffset != null && newScrollOffset > maxOffset)
-      newScrollOffset = maxOffset;
-
+    var newScrollOffset = scrollCurve.apply(_scrollOffset, scrollDelta);
     if (newScrollOffset == _scrollOffset)
       return false;
-
     setState(() {
       _scrollOffset = newScrollOffset;
     });
