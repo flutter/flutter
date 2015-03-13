@@ -6,6 +6,7 @@ import 'curves.dart';
 import 'dart:async';
 import 'dart:math' as math;
 import 'dart:sky' as sky;
+import 'mechanics.dart';
 
 abstract class Generator {
   Stream<double> get onTick;
