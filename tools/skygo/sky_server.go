@@ -55,13 +55,16 @@ func main() {
     // and they *must* be before any unnamed arguments.  There are better ones:
     // https://godoc.org/github.com/jessevdk/go-flags
     // but for now we're using raw-go.
-    if flag.NArg() != 2 {
+    if flag.NArg() != 3 {
         usage()
     }
 
     root, _ := filepath.Abs(flag.Arg(0))
     port := flag.Arg(1)
+    packageRoot := flag.Arg(2)
 
+    // genRoot should not be needed once we figure out how mojom generation
+    // for sdk users should work.
     genRoot := path.Join(root, "out", *configuration, "gen")
 
     fmt.Fprintf(os.Stderr, "Mappings for localhost:%s:\n", port)
@@ -77,6 +80,7 @@ func main() {
     })
 
     addMapping("/gen/", genRoot)
+    addMapping("/packages/", packageRoot)
 
     http.ListenAndServe(":" + port, nil)
 }

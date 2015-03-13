@@ -4,7 +4,8 @@
 
 import '../fn.dart';
 
-const String kAssetBase = '/sky/assets/material-design-icons';
+// TODO(eseidel): This should use package:.
+const String kAssetBase = '/packages/sky/assets/material-design-icons';
 
 class Icon extends Component {
   Style style;
