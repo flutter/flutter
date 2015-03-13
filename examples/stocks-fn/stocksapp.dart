@@ -105,19 +105,19 @@ class StocksApp extends App {
 
     var toolbar = new Toolbar(
       children: [
-        new Icon(key: 'menu', styles: [_iconStyle],
+        new Icon(key: 'menu', style: _iconStyle,
             size: 24,
             type: 'navigation/menu_white')
           ..events.listen('click', _drawerAnimation.toggle),
         new Container(
-          styles: [_titleStyle],
+          style: _titleStyle,
           children: [title]
         ),
-        new Icon(key: 'search', styles: [_iconStyle],
+        new Icon(key: 'search', style: _iconStyle,
             size: 24,
             type: 'action/search_white')
           ..events.listen('click', _handleSearchClick),
-        new Icon(key: 'more_white', styles: [_iconStyle],
+        new Icon(key: 'more_white', style: _iconStyle,
             size: 24,
             type: 'navigation/more_vert_white')
       ]
@@ -133,7 +133,7 @@ class StocksApp extends App {
       children: [
         new Container(
           key: 'Content',
-          styles: [_style],
+          style: _style,
           children: [toolbar, list]
         ),
         fab,
