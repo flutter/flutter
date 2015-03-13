@@ -66,7 +66,7 @@ Stateful vs. Stateless components
 ---------------------------------
 All components have access to two kinds of state: (1) configuration data (constructor arguments) and (2) private data (data they mutate themselves). While react components have explicit property bags for these two kinds of state (`this.prop` and `this.state`), Effen maps these ideas to the public and private fields of the component. Constructor arguments should (by convention) be reflected as public fields of the component and state should only be set on private (with a leading underbar `_`) fields.
 
-All nodes and most components should be stateless, never needing to mutate themselves and only reacting to data which is handed into them. Some components will be stateful. This state will likely encapsulate transient states of the UI, such as scroll position, animation state, uncommitted form values, etc...
+All (non-component) Effen nodes are stateless. Some components will be stateful. This state will likely encapsulate transient states of the UI, such as scroll position, animation state, uncommitted form values, etc...
 
 A component can become stateful in two ways: (1) by passing `super(stateful: true)` to its call to the superclasses constructor, or by calling `setState(Function fn)`. The former is a way to have a component start its life stateful, and the later results in the component becoming statefull *as well as* scheduling the component to re-build at the end of the current animation frame.
 
