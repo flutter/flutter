@@ -68,7 +68,7 @@ All components have access to two kinds of state: (1) configuration data (constr
 
 All (non-component) Effen nodes are stateless. Some components will be stateful. This state will likely encapsulate transient states of the UI, such as scroll position, animation state, uncommitted form values, etc...
 
-A component can become stateful in two ways: (1) by passing `super(stateful: true)` to its call to the superclasses constructor, or by calling `setState(Function fn)`. The former is a way to have a component start its life stateful, and the later results in the component becoming statefull *as well as* scheduling the component to re-build at the end of the current animation frame.
+A component can become stateful in two ways: (1) by passing `super(stateful: true)` to its call to the superclass's constructor, or by calling `setState(Function fn)`. The former is a way to have a component start its life stateful, and the latter results in the component becoming statefull *as well as* scheduling the component to re-build at the end of the current animation frame.
 
 What does it mean to be stateful? It means that the diffing mechanism retains the specific *instance* of the component as long as the component which builds it continues to require its presence. The component which constructed it may have provided new configuration in form of different values for the constructor parameters, but these values (public fields) will be copied (using reflection) onto the retained instance whose privates fields are left unmodified.
 
