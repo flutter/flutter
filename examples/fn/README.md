@@ -64,7 +64,7 @@ What this means is that the `Checkbox` component is *never* "owns" the state of 
 
 Stateful vs. Stateless components
 ---------------------------------
-All components have access to two kinds of state: (1) data which is handing in from their owner (the component which constructed them) and (2) data which they mutate themselves. While react components have explicit property bags for these two kinds of state (`this.prop` and `this.state`), Effen maps these ideas to the public and private fields of the component. Constructor arguments should (by convention) be reflected as public fields of the component and state should only be set on private (with a leading underbar `_`) fields.
+All components have access to two kinds of state: (1) configuration data (constructor arguments) and (2) private data (data they mutate themselves). While react components have explicit property bags for these two kinds of state (`this.prop` and `this.state`), Effen maps these ideas to the public and private fields of the component. Constructor arguments should (by convention) be reflected as public fields of the component and state should only be set on private (with a leading underbar `_`) fields.
 
 All nodes and most components should be stateless, never needing to mutate themselves and only reacting to data which is handed into them. Some components will be stateful. This state will likely encapsulate transient states of the UI, such as scroll position, animation state, uncommitted form values, etc...
 
