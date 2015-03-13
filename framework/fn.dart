@@ -82,8 +82,10 @@ void _parentInsertBefore(sky.ParentNode parent,
 }
 
 abstract class Node {
-  String _key = null;
-  sky.Node _root = null;
+  String _key;
+  Node _parent;
+  sky.Node _root;
+  bool _defunct = false;
 
   // TODO(abarth): Both Elements and Components have |events| but |Text|
   // doesn't. Should we add a common base class to contain |events|?
@@ -93,19 +95,53 @@ abstract class Node {
     _key = key == null ? "$runtimeType" : "$runtimeType-$key";
   }
 
+  Node get _emptyNode;
+
+  sky.Node _createNode();
+
+  void _mount(Node parent, sky.ParentNode host, sky.Node insertBefore) {
+    var node = _emptyNode;
+    node._parent = parent;
+
+    node._root = _createNode();
+    assert(node._root != null);
+
+    _parentInsertBefore(host, node._root, insertBefore);
+
+    _syncNode(node);
+  }
+
+  bool _sync(Node old, Node parent, sky.ParentNode host,
+      sky.Node insertBefore) {
+
+    if (old == null) {
+      _mount(parent, host, insertBefore);
+      return false;
+    }
+
+    return _syncNode(old);
+  }
+
   // Return true IFF the old node has *become* the new node (should be
   // retained because it is stateful)
-  bool _sync(Node old, sky.ParentNode host, sky.Node insertBefore);
+  bool _syncNode(Node old) {
+    assert(!old._defunct);
+    _root = old._root;
+    _parent = old._parent;
+    return false;
+  }
 
-  void _remove() {
+  void _unmount() {
     assert(_root != null);
+    _parent = null;
     _root.remove();
+    _defunct = true;
     _root = null;
   }
 }
 
 class Text extends Node {
-  String data;
+  final String data;
 
   // Text nodes are special cases of having non-unique keys (which don't need
   // to be assigned as part of the API). Since they are unique in not having
@@ -113,14 +149,19 @@ class Text extends Node {
   // the data.
   Text(this.data) : super(key:'*text*');
 
-  bool _sync(Node old, sky.ParentNode host, sky.Node insertBefore) {
-    if (old == null) {
-      _root = new sky.Text(data);
-      _parentInsertBefore(host, _root, insertBefore);
-      return false;
-    }
+  static Text _emptyText = new Text(null);
 
-    _root = old._root;
+  Node get _emptyNode => _emptyText;
+
+  sky.Node _createNode() {
+    return new sky.Text(data);
+  }
+
+  bool _syncNode(Node old) {
+    super._syncNode(old);
+    if (old == _emptyText)
+      return false; // we set inside _createNode();
+
     (_root as sky.Text).data = data;
     return false;
   }
@@ -132,36 +173,34 @@ abstract class Element extends Node {
 
   String get _tagName;
 
-  Element get _emptyElement;
+  sky.Node _createNode() => sky.document.createElement(_tagName);
 
-  String inlineStyle;
+  final String inlineStyle;
 
-  List<Node> _children = null;
-  String _class = '';
+  final List<Node> _children;
+  final String _class;
 
   Element({
     Object key,
     List<Node> children,
     Style style,
-
     this.inlineStyle
-  }) : super(key:key) {
-    _class = style == null ? '' : style._className;
-    _children = children == null ? _emptyList : children;
+  }) : _class = style == null ? '' : style._className,
+       _children = children == null ? _emptyList : children,
+       super(key:key) {
 
     if (_isInCheckedMode) {
       _debugReportDuplicateIds();
     }
   }
 
-  void _remove() {
-    super._remove();
+  void _unmount() {
+    super._unmount();
     if (_children != null) {
       for (var child in _children) {
-        child._remove();
+        child._unmount();
       }
     }
-    _children = null;
   }
 
   void _debugReportDuplicateIds() {
@@ -222,51 +261,29 @@ abstract class Element extends Node {
     }
   }
 
-  void _syncNode([Element old]) {
-    if (old == null) {
-      old = _emptyElement;
-    }
-
-    _syncEvents(old);
-
-    sky.Element root = _root as sky.Element;
-    if (_class != old._class) {
-      root.setAttribute('class', _class);
-    }
-
-    if (inlineStyle != old.inlineStyle) {
-      root.setAttribute('style', inlineStyle);
-    }
-  }
-
-  bool _sync(Node old, sky.ParentNode host, sky.Node insertBefore) {
-    // print("---Syncing children of $_key");
+  bool _syncNode(Node old) {
+    super._syncNode(old);
 
     Element oldElement = old as Element;
+    sky.Element root = _root as sky.Element;
 
-    if (oldElement == null) {
-      // print("...no oldElement, initial build");
+    _syncEvents(oldElement);
 
-      _root = sky.document.createElement(_tagName);
-      _parentInsertBefore(host, _root, insertBefore);
-      _syncNode();
+    if (_class != oldElement._class)
+      root.setAttribute('class', _class);
 
-      for (var child in _children) {
-        child._sync(null, _root, null);
-        assert(child._root is sky.Node);
-      }
+    if (inlineStyle != oldElement.inlineStyle)
+      root.setAttribute('style', inlineStyle);
 
-      return false;
-    }
+    _syncChildren(oldElement);
 
-    if (this == oldElement)
-      return false;
+    return false;
+  }
 
-    _root = oldElement._root;
-    oldElement._root = null;
-    sky.Element root = (_root as sky.Element);
-
-    _syncNode(oldElement);
+  void _syncChildren(Element oldElement) {
+    // print("---Syncing children of $_key");
+    sky.Element root = _root as sky.Element;
+    assert(root != null);
 
     var startIndex = 0;
     var endIndex = _children.length;
@@ -280,12 +297,12 @@ abstract class Element extends Node {
     Node oldNode = null;
 
     void sync(int atIndex) {
-      if (currentNode._sync(oldNode, root, nextSibling)) {
+      if (currentNode._sync(oldNode, this, _root, nextSibling)) {
         // oldNode was stateful and must be retained.
-        assert(oldNode != null);
         currentNode = oldNode;
         _children[atIndex] = currentNode;
       }
+
       assert(currentNode._root is sky.Node);
     }
 
@@ -395,12 +412,9 @@ abstract class Element extends Node {
     while (oldStartIndex < oldEndIndex) {
       oldNode = oldChildren[oldStartIndex];
       // print('> ${oldNode._key} removing from $oldEndIndex');
-      oldNode._remove();
+      oldNode._unmount();
       advanceOldStartIndex();
     }
-
-    oldElement._children = null;
-    return false;
   }
 }
 
@@ -409,7 +423,8 @@ class Container extends Element {
   String get _tagName => 'div';
 
   static final Container _emptyContainer = new Container();
-  Element get _emptyElement => _emptyContainer;
+
+  Node get _emptyNode => _emptyContainer;
 
   Container({
     Object key,
@@ -429,7 +444,8 @@ class Image extends Element {
   String get _tagName => 'img';
 
   static final Image _emptyImage = new Image();
-  Element get _emptyElement => _emptyImage;
+
+  Node get _emptyNode => _emptyImage;
 
   String src;
   int width;
@@ -450,21 +466,22 @@ class Image extends Element {
     inlineStyle: inlineStyle
   );
 
-  void _syncNode([Element old]) {
+  bool _syncNode(Node old) {
     super._syncNode(old);
 
-    Image oldImage = old != null ? old : _emptyImage;
+    Image oldImage = old as Image;
     sky.HTMLImageElement skyImage = _root as sky.HTMLImageElement;
-    if (src != oldImage.src) {
-      skyImage.src = src;
-    }
 
-    if (width != oldImage.width) {
+    if (src != oldImage.src)
+      skyImage.src = src;
+
+    if (width != oldImage.width)
       skyImage.style['width'] = '${width}px';
-    }
-    if (height != oldImage.height) {
+
+    if (height != oldImage.height)
       skyImage.style['height'] = '${height}px';
-    }
+
+    return false;
   }
 }
 
@@ -473,7 +490,8 @@ class Anchor extends Element {
   String get _tagName => 'a';
 
   static final Anchor _emptyAnchor = new Anchor();
-  Element get _emptyElement => _emptyAnchor;
+
+  Node get _emptyNode => _emptyAnchor;
 
   String href;
   int width;
@@ -494,14 +512,16 @@ class Anchor extends Element {
     inlineStyle: inlineStyle
   );
 
-  void _syncNode([Element old]) {
-    Anchor oldAnchor = old != null ? old as Anchor : _emptyAnchor;
-    super._syncNode(oldAnchor);
+  bool _syncNode(Node old) {
+    super._syncNode(old);
 
+    Anchor oldAnchor = old as Anchor;
     sky.HTMLAnchorElement skyAnchor = _root as sky.HTMLAnchorElement;
-    if (href != oldAnchor.href) {
+
+    if (href != oldAnchor.href)
       skyAnchor.href = href;
-    }
+
+    return false;
   }
 }
 
@@ -543,7 +563,6 @@ void _scheduleComponentForRender(Component c) {
 abstract class Component extends Node {
   bool _dirty = true; // components begin dirty because they haven't built.
   Node _vdom = null;
-  bool _removed = false;
   final int _order;
   static int _currentOrder = 0;
   bool _stateful;
@@ -557,50 +576,51 @@ abstract class Component extends Node {
   void didMount() {}
   void didUnmount() {}
 
-  void _remove() {
-    assert(_vdom != null);
-    assert(_root != null);
-    _vdom._remove();
-    _vdom = null;
-    _root = null;
-    _removed = true;
-    didUnmount();
-  }
-
   // TODO(rafaelw): It seems wrong to expose DOM at all. This is presently
   // needed to get sizing info.
   sky.Node getRoot() => _root;
 
-  bool _sync(Node old, sky.Node host, sky.Node insertBefore) {
+  void _mount(Node parent, sky.ParentNode host, sky.Node insertBefore) {
+    _parent = parent;
+
+    _syncInternal(host, insertBefore);
+
+    didMount();
+  }
+
+  void _unmount() {
+    assert(_vdom != null);
+    assert(_root != null);
+    _vdom._unmount();
+    _vdom = null;
+    _root = null;
+    _parent = null;
+    _defunct = true;
+    didUnmount();
+  }
+
+  bool _syncNode(Node old) {
     Component oldComponent = old as Component;
 
-    if (oldComponent == null || oldComponent == this) {
-      _buildInternal(host, insertBefore);
+    if (!oldComponent._stateful) {
+      _vdom = oldComponent._vdom;
+      _syncInternal();
+
       return false;
     }
 
-    assert(oldComponent != null);
-    assert(_dirty);
-    assert(_vdom == null);
+    _stateful = false; // prevent iloop from _syncInternal below.
 
-    if (oldComponent._stateful) {
-      _stateful = false; // prevent iloop from _buildInternal below.
+    reflect.copyPublicFields(this, oldComponent);
 
-      reflect.copyPublicFields(this, oldComponent);
+    oldComponent._dirty = true;
+    _dirty = false;
 
-      oldComponent._dirty = true;
-      _dirty = false;
-
-      oldComponent._buildInternal(host, insertBefore);
-      return true;  // Must retain old component
-    }
-
-    _vdom = oldComponent._vdom;
-    _buildInternal(host, insertBefore);
-    return false;
+    oldComponent._syncInternal();
+    return true;  // Retain old component
   }
 
-  void _buildInternal(sky.Node host, sky.Node insertBefore) {
+  void _syncInternal([sky.Node host, sky.Node insertBefore]) {
     if (!_dirty) {
       assert(_vdom != null);
       return;
@@ -608,6 +628,7 @@ abstract class Component extends Node {
 
     var oldRendered = _vdom;
     bool mounting = oldRendered == null;
+
     int lastOrder = _currentOrder;
     _currentOrder = _order;
     _currentlyRendering = this;
@@ -624,13 +645,17 @@ abstract class Component extends Node {
     // syncing the new VDOM against the old one.
     if (oldRendered != null &&
         _vdom.runtimeType != oldRendered.runtimeType) {
-      oldRendered._remove();
+      var oldRoot = oldRendered._root;
+      host = oldRoot.parentNode;
+      insertBefore = oldRoot.nextSibling;
+      oldRendered._unmount();
       oldRendered = null;
     }
 
-    if (_vdom._sync(oldRendered, host, insertBefore)) {
+    if (_vdom._sync(oldRendered, this, host, insertBefore)) {
       _vdom = oldRendered; // retain stateful component
     }
+
     _root = _vdom._root;
     assert(_vdom._root is sky.Node);
 
@@ -640,7 +665,7 @@ abstract class Component extends Node {
   }
 
   void _buildIfDirty() {
-    if (_removed)
+    if (_defunct)
       return;
 
     assert(_vdom != null);
@@ -651,16 +676,14 @@ abstract class Component extends Node {
     }
 
     assert(vdom._root != null);
-    sky.Node root = vdom._root;
-
-    _buildInternal(root.parentNode, root.nextSibling);
+    _syncInternal();
   }
 
   void setState(Function fn()) {
-    assert(_vdom != null || _removed); // cannot setState before mounting.
+    assert(_vdom != null || _defunct); // cannot setState before mounting.
     _stateful = true;
     fn();
-    if (!_removed && _currentlyRendering != this) {
+    if (!_defunct && _currentlyRendering != this) {
       _dirty = true;
       _scheduleComponentForRender(this);
     }
@@ -678,7 +701,7 @@ abstract class App extends Component {
     new Future.microtask(() {
       Stopwatch sw = new Stopwatch()..start();
 
-      _sync(null, _host, null);
+      _mount(null, _host, null);
       assert(_root is sky.Node);
 
       sw.stop();
