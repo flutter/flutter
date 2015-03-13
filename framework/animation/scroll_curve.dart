@@ -3,8 +3,14 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
+import 'mechanics.dart';
+import 'simulation.dart';
+
+const double _kSlope = 0.01;
 
 abstract class ScrollCurve {
+  Simulation release(Particle particle) => null;
+
   // Returns the new scroll offset.
   double apply(double scrollOffset, double scrollDelta);
 }
@@ -26,6 +32,18 @@ class BoundedScrollCurve extends ScrollCurve {
 }
 
 class OverscrollCurve extends ScrollCurve {
+  Simulation release(Particle particle) {
+    if (particle.position >= 0.0)
+      return null;
+    System system = new ParticleClimbingRamp(
+        particle: particle,
+        box: new Box(max: 0.0),
+        slope: _kSlope,
+        targetPosition: 0.0);
+    return new Simulation(system,
+        terminationCondition: () => particle.position == 0.0);
+  }
+
   double apply(double scrollOffset, double scrollDelta) {
     double newScrollOffset = scrollOffset + scrollDelta;
     if (newScrollOffset < 0.0) {

@@ -51,13 +51,15 @@ class FrameGenerator {
   }
 }
 
-class AnimationGenerator extends FrameGenerator {
+class AnimationGenerator {
   Stream<double> get onTick => _stream;
   final double initialDelay;
   final double duration;
   final double begin;
   final double end;
   final Curve curve;
+
+  FrameGenerator _generator;
   Stream<double> _stream;
   bool _done = false;
 
@@ -68,19 +70,25 @@ class AnimationGenerator extends FrameGenerator {
     this.end: 1.0,
     this.curve: linear,
     Function onDone
-  }):super(onDone: onDone) {
+  }) {
     assert(duration != null && duration > 0.0);
+    _generator = new FrameGenerator(onDone: onDone);
+
     double startTime = 0.0;
-    _stream = super.onTick.map((timeStamp) {
+    _stream = _generator.onTick.map((timeStamp) {
       if (startTime == 0.0)
         startTime = timeStamp;
 
       double t = (timeStamp - (startTime + initialDelay)) / duration;
       return math.max(0.0, math.min(t, 1.0));
     })
-    .takeWhile(_checkForCompletion) //
+    .takeWhile(_checkForCompletion)
     .where((t) => t >= 0.0)
     .map(_transform);
+  }
+
+  void cancel() {
+    _generator.cancel();
   }
 
   double _transform(double t) {
