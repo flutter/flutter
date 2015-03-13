@@ -6,7 +6,8 @@ import 'dart:math' as math;
 import 'mechanics.dart';
 import 'generators.dart';
 
-const double _kSlope = 0.01;
+const double _kSlope = 0.02;
+const double _kFriction = 0.004;
 
 abstract class ScrollBehavior {
   Simulation release(Particle particle) => null;
@@ -33,8 +34,16 @@ class BoundedScrollBehavior extends ScrollBehavior {
 
 class OverscrollBehavior extends ScrollBehavior {
   Simulation release(Particle particle) {
-    if (particle.position >= 0.0)
-      return null;
+    if (particle.position >= 0.0) {
+      if (particle.velocity == 0.0)
+        return null;
+      System system = new ParticleInBoxWithFriction(
+        particle: particle,
+        box: new Box(min: 0.0),
+        friction: _kFriction);
+      return new Simulation(system,
+        terminationCondition: () => particle.velocity == 0.0);
+    }
     System system = new ParticleClimbingRamp(
         particle: particle,
         box: new Box(max: 0.0),

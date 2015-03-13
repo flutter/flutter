@@ -5,7 +5,7 @@
 import 'dart:math' as math;
 
 const double kGravity = -0.980;
-const double _kMinVelocity = 0.1;
+const double _kMinVelocity = 0.01;
 
 abstract class System {
   void update(double deltaT);
@@ -66,6 +66,23 @@ class ParticleInBox extends System {
   void update(double deltaT) {
     particle.update(deltaT);
     box.confine(particle);
+  }
+}
+
+class ParticleInBoxWithFriction extends ParticleInBox {
+  final double friction;
+  final double _sign;
+
+  ParticleInBoxWithFriction({Particle particle, Box box, this.friction})
+      : super(particle: particle, box: box),
+        _sign = particle.velocity.sign;
+
+  void update(double deltaT) {
+    double force = -_sign * friction;
+    particle.applyImpluse(force * deltaT);
+    if (particle.velocity.sign != _sign)
+      particle.velocity = 0.0;
+    super.update(deltaT);
   }
 }
 

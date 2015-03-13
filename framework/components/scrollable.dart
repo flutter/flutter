@@ -2,21 +2,26 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../animation/curves.dart';
-import '../animation/fling_curve.dart';
 import '../animation/generators.dart';
-import '../animation/scroll_behavior.dart';
 import '../animation/mechanics.dart';
+import '../animation/scroll_behavior.dart';
 import '../fn.dart';
+import '../theme/view-configuration.dart' as config;
+import 'dart:math' as math;
 import 'dart:sky' as sky;
+
+const double _kMillisecondsPerSecond = 1000.0;
+
+double _velocityForFlingGesture(sky.GestureEvent event) {
+  return math.max(-config.kMaxFlingVelocity, math.min(config.kMaxFlingVelocity,
+      -event.velocityY)) / _kMillisecondsPerSecond;
+}
 
 abstract class Scrollable extends Component {
   ScrollBehavior scrollBehavior;
   double get scrollOffset => _scrollOffset;
 
   double _scrollOffset = 0.0;
-  FlingCurve _flingCurve;
-  int _flingAnimationId;
   Simulation _simulation;
 
   Scrollable({Object key, this.scrollBehavior}) : super(key: key) {
@@ -31,7 +36,6 @@ abstract class Scrollable extends Component {
 
   void didUnmount() {
     super.didUnmount();
-    _stopFling();
     _stopSimulation();
   }
 
@@ -45,18 +49,6 @@ abstract class Scrollable extends Component {
     return true;
   }
 
-  void _scheduleFlingUpdate() {
-    _flingAnimationId = sky.window.requestAnimationFrame(_updateFling);
-  }
-
-  void _stopFling() {
-    if (_flingAnimationId == null)
-      return;
-    sky.window.cancelAnimationFrame(_flingAnimationId);
-    _flingCurve = null;
-    _flingAnimationId = null;
-  }
-
   void _stopSimulation() {
     if (_simulation == null)
       return;
@@ -64,16 +56,8 @@ abstract class Scrollable extends Component {
     _simulation = null;
   }
 
-  void _updateFling(double timeStamp) {
-    double scrollDelta = _flingCurve.update(timeStamp);
-    if (!scrollBy(scrollDelta))
-      return _settle();
-    _scheduleFlingUpdate();
-  }
-
-  void _settle() {
-    _stopFling();
-    Particle particle = new Particle(position: scrollOffset);
+  void _startSimulation(Particle particle) {
+    _stopSimulation();
     _simulation = scrollBehavior.release(particle);
     if (_simulation == null)
       return;
@@ -84,14 +68,17 @@ abstract class Scrollable extends Component {
     });
   }
 
+  Particle _createParticle([double velocity = 0.0]) {
+    return new Particle(position: _scrollOffset, velocity: velocity);
+  }
+
   void _handlePointerDown(_) {
-    _stopFling();
     _stopSimulation();
   }
 
   void _handlePointerUpOrCancel(_) {
-    if (_flingCurve == null)
-      _settle();
+    if (_simulation == null)
+      _startSimulation(_createParticle());
   }
 
   void _handleScrollUpdate(sky.GestureEvent event) {
@@ -99,13 +86,11 @@ abstract class Scrollable extends Component {
   }
 
   void _handleFlingStart(sky.GestureEvent event) {
-    _stopSimulation();
-    _flingCurve = new FlingCurve(-event.velocityY, event.timeStamp);
-    _scheduleFlingUpdate();
+    _startSimulation(_createParticle(_velocityForFlingGesture(event)));
   }
 
   void _handleFlingCancel(sky.GestureEvent event) {
-    _settle();
+    _startSimulation(_createParticle());
   }
 
   void _handleWheel(sky.WheelEvent event) {
