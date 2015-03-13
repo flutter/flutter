@@ -7,13 +7,13 @@ import '../fn.dart';
 const String kAssetBase = '/sky/assets/material-design-icons';
 
 class Icon extends Component {
-  List<Style> styles;
+  Style style;
   int size;
   String type;
 
   Icon({
     String key,
-    this.styles,
+    this.style,
     this.size,
     this.type: ''
   }) : super(key: key);
@@ -28,7 +28,7 @@ class Icon extends Component {
     }
 
     return new Image(
-      styles: styles,
+      style: style,
       width: size,
       height: size,
       src: '${kAssetBase}/${category}/2x_web/ic_${subtype}_${size}dp.png'

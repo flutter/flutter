@@ -75,8 +75,8 @@ class EditableText extends Component {
       String composing = value.textInside(value.composing);
       if (!composing.isEmpty) {
         children.add(new Container(
-          key: 'composing', 
-          styles: [_composingStyle],
+          key: 'composing',
+          style: _composingStyle,
           children: [new Text(composing)]
         ));
       }
@@ -87,10 +87,10 @@ class EditableText extends Component {
     }
 
     if (_showCursor)
-      children.add(new Container(key: 'cursor', styles: [_cusorStyle]));
+      children.add(new Container(key: 'cursor', style: _cusorStyle));
 
     return new Container(
-      styles: [_style],
+      style: _style,
       children: children
     );
   }

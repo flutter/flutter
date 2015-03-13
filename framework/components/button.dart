@@ -26,7 +26,7 @@ class Button extends Component {
 
   Node build() {
     return new Material(
-      styles: [_style],
+      style: _style,
       children: [content],
       level: level
     );

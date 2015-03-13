@@ -33,15 +33,15 @@ class DrawerHeader extends Component {
 
   Node build() {
     return new Container(
-      styles: [_style],
+      style: _style,
       children: [
         new Container(
           key: 'Spacer',
-          styles: [_spacerStyle]
+          style: _spacerStyle
         ),
         new Container(
           key: 'Label',
-          styles: [_labelStyle],
+          style: _labelStyle,
           children: children
         )
       ]

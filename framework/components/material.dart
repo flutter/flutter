@@ -29,14 +29,14 @@ class Material extends Component {
 
   LinkedHashSet<SplashAnimation> _splashes;
 
-  List<Style> styles;
+  Style style;
   String inlineStyle;
   List<Node> children;
   int level;
 
   Material({
       Object key,
-      this.styles,
+      this.style,
       this.inlineStyle,
       this.children,
       this.level: 0 }) : super(key: key) {
@@ -50,7 +50,7 @@ class Material extends Component {
 
     if (_splashes != null) {
       childrenIncludingSplashes.add(new Container(
-        styles: [_splashesStyle],
+        style: _splashesStyle,
         children: new List.from(_splashes.map(
             (s) => new InkSplash(s.onStyleChanged))),
         key: 'Splashes'
@@ -60,14 +60,12 @@ class Material extends Component {
     if (children != null)
       childrenIncludingSplashes.addAll(children);
 
-    List<Style> stylesIncludingShadow = styles;
-    if (level > 0) {
-      stylesIncludingShadow = new List.from(styles);
-      stylesIncludingShadow.add(shadowStyle[level]);
-    }
-
-    return new Container(key: 'Material', styles: stylesIncludingShadow,
-        inlineStyle: inlineStyle, children: childrenIncludingSplashes);
+    return new Container(
+        key: 'Material',
+        style: level > 0 ? style.extend(shadowStyle[level]) : style,
+        inlineStyle: inlineStyle,
+        children: childrenIncludingSplashes
+    );
   }
 
   sky.ClientRect _getBoundingRect() => (getRoot() as sky.Element).getBoundingClientRect();

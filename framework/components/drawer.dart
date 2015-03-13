@@ -150,21 +150,21 @@ class Drawer extends Component {
 
     Container mask = new Container(
       key: 'Mask',
-      styles: [_maskStyle],
+      style: _maskStyle,
       inlineStyle: maskInlineStyle
     )..events.listen('gesturetap', animation.handleMaskTap)
      ..events.listen('gestureflingstart', animation.handleFlingStart);
 
     Material content = new Material(
       key: 'Content',
-      styles: [_contentStyle],
+      style: _contentStyle,
       inlineStyle: contentInlineStyle,
       children: children,
       level: level
     );
 
     return new Container(
-      styles: [_style],
+      style: _style,
       inlineStyle: inlineStyle,
       children: [ mask, content ]
     );

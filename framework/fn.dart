@@ -46,23 +46,25 @@ class Style {
   final String _className;
   static final Map<String, Style> _cache = new HashMap<String, Style>();
 
-  static int nextStyleId = 1;
+  static int _nextStyleId = 1;
 
-  static String nextClassName(String styles) {
-    assert(sky.document != null);
-    String className = "style$nextStyleId";
-    nextStyleId++;
+  static String _getNextClassName() { return "style${_nextStyleId++}"; }
 
-    sky.Element styleNode = sky.document.createElement('style');
-    styleNode.setChild(new sky.Text(".$className { $styles }"));
-    sky.document.appendChild(styleNode);
+  Style extend(Style other) {
+    var className = "$_className ${other._className}";
 
-    return className;
+    return _cache.putIfAbsent(className, () {
+      return new Style._internal(className);
+    });
   }
 
   factory Style(String styles) {
     return _cache.putIfAbsent(styles, () {
-      return new Style._internal(nextClassName(styles));
+      var className = _getNextClassName();
+      sky.Element styleNode = sky.document.createElement('style');
+      styleNode.setChild(new sky.Text(".$className { $styles }"));
+      sky.document.appendChild(styleNode);
+      return new Style._internal(className);
     });
   }
 
@@ -140,11 +142,11 @@ abstract class Element extends Node {
   Element({
     Object key,
     List<Node> children,
-    List<Style> styles,
+    Style style,
 
     this.inlineStyle
   }) : super(key:key) {
-    _class = styles == null ? '' : styles.map((s) => s._className).join(' ');
+    _class = style == null ? '' : style._className;
     _children = children == null ? _emptyList : children;
 
     if (_isInCheckedMode) {
@@ -412,12 +414,12 @@ class Container extends Element {
   Container({
     Object key,
     List<Node> children,
-    List<Style> styles,
+    Style style,
     String inlineStyle
   }) : super(
     key: key,
     children: children,
-    styles: styles,
+    style: style,
     inlineStyle: inlineStyle
   );
 }
@@ -436,7 +438,7 @@ class Image extends Element {
   Image({
     Object key,
     List<Node> children,
-    List<Style> styles,
+    Style style,
     String inlineStyle,
     this.width,
     this.height,
@@ -444,7 +446,7 @@ class Image extends Element {
   }) : super(
     key: key,
     children: children,
-    styles: styles,
+    style: style,
     inlineStyle: inlineStyle
   );
 
@@ -480,7 +482,7 @@ class Anchor extends Element {
   Anchor({
     Object key,
     List<Node> children,
-    List<Style> styles,
+    Style style,
     String inlineStyle,
     this.width,
     this.height,
@@ -488,7 +490,7 @@ class Anchor extends Element {
   }) : super(
     key: key,
     children: children,
-    styles: styles,
+    style: style,
     inlineStyle: inlineStyle
   );
 
