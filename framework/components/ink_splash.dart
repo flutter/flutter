@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import '../animation/curves.dart';
-import '../animation/generator.dart';
+import '../animation/generators.dart';
 import '../fn.dart';
 import 'dart:async';
 import 'dart:sky' as sky;

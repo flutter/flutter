@@ -4,24 +4,24 @@
 
 import 'dart:math' as math;
 import 'mechanics.dart';
-import 'simulation.dart';
+import 'generators.dart';
 
 const double _kSlope = 0.01;
 
-abstract class ScrollCurve {
+abstract class ScrollBehavior {
   Simulation release(Particle particle) => null;
 
   // Returns the new scroll offset.
-  double apply(double scrollOffset, double scrollDelta);
+  double applyCurve(double scrollOffset, double scrollDelta);
 }
 
-class BoundedScrollCurve extends ScrollCurve {
+class BoundedScrollBehavior extends ScrollBehavior {
   double minOffset;
   double maxOffset;
 
-  BoundedScrollCurve({this.minOffset: 0.0, this.maxOffset});
+  BoundedScrollBehavior({this.minOffset: 0.0, this.maxOffset});
 
-  double apply(double scrollOffset, double scrollDelta) {
+  double applyCurve(double scrollOffset, double scrollDelta) {
     double newScrollOffset = scrollOffset + scrollDelta;
     if (minOffset != null)
       newScrollOffset = math.max(minOffset, newScrollOffset);
@@ -31,7 +31,7 @@ class BoundedScrollCurve extends ScrollCurve {
   }
 }
 
-class OverscrollCurve extends ScrollCurve {
+class OverscrollBehavior extends ScrollBehavior {
   Simulation release(Particle particle) {
     if (particle.position >= 0.0)
       return null;
@@ -44,7 +44,7 @@ class OverscrollCurve extends ScrollCurve {
         terminationCondition: () => particle.position == 0.0);
   }
 
-  double apply(double scrollOffset, double scrollDelta) {
+  double applyCurve(double scrollOffset, double scrollDelta) {
     double newScrollOffset = scrollOffset + scrollDelta;
     if (newScrollOffset < 0.0) {
       // If we're overscrolling, we want move the scroll offset 2x slower than

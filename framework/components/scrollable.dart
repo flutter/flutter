@@ -4,15 +4,14 @@
 
 import '../animation/curves.dart';
 import '../animation/fling_curve.dart';
-import '../animation/generator.dart';
-import '../animation/scroll_curve.dart';
+import '../animation/generators.dart';
+import '../animation/scroll_behavior.dart';
 import '../animation/mechanics.dart';
-import '../animation/simulation.dart';
 import '../fn.dart';
 import 'dart:sky' as sky;
 
 abstract class Scrollable extends Component {
-  ScrollCurve scrollCurve;
+  ScrollBehavior scrollBehavior;
   double get scrollOffset => _scrollOffset;
 
   double _scrollOffset = 0.0;
@@ -20,7 +19,7 @@ abstract class Scrollable extends Component {
   int _flingAnimationId;
   Simulation _simulation;
 
-  Scrollable({Object key, this.scrollCurve}) : super(key: key) {
+  Scrollable({Object key, this.scrollBehavior}) : super(key: key) {
     events.listen('pointerdown', _handlePointerDown);
     events.listen('pointerup', _handlePointerUpOrCancel);
     events.listen('pointercancel', _handlePointerUpOrCancel);
@@ -37,7 +36,7 @@ abstract class Scrollable extends Component {
   }
 
   bool scrollBy(double scrollDelta) {
-    var newScrollOffset = scrollCurve.apply(_scrollOffset, scrollDelta);
+    var newScrollOffset = scrollBehavior.applyCurve(_scrollOffset, scrollDelta);
     if (newScrollOffset == _scrollOffset)
       return false;
     setState(() {
@@ -75,7 +74,7 @@ abstract class Scrollable extends Component {
   void _settle() {
     _stopFling();
     Particle particle = new Particle(position: scrollOffset);
-    _simulation = scrollCurve.release(particle);
+    _simulation = scrollBehavior.release(particle);
     if (_simulation == null)
       return;
     _simulation.onTick.listen((_) {
