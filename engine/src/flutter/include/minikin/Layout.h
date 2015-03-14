@@ -57,6 +57,17 @@ struct LayoutGlyph {
 // Internal state used during layout operation
 class LayoutContext;
 
+enum {
+    kBidi_LTR = 0,
+    kBidi_RTL = 1,
+    kBidi_Default_LTR = 2,
+    kBidi_Default_RTL = 3,
+    kBidi_Force_LTR = 4,
+    kBidi_Force_RTL = 5,
+
+    kBidi_Mask = 0x7
+};
+
 // Lifecycle and threading assumptions for Layout:
 // The object is assumed to be owned by a single thread; multiple threads
 // may not mutate it at the same time.
