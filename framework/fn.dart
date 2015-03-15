@@ -20,27 +20,7 @@ bool _initIsInCheckedMode() {
 }
 
 final bool _isInCheckedMode = _initIsInCheckedMode();
-final bool _shouldLogRenderDuration = false;
-
-class EventHandler {
-  final String type;
-  final sky.EventListener listener;
-
-  EventHandler(this.type, this.listener);
-}
-
-class EventMap {
-  final List<EventHandler> _handlers = new List<EventHandler>();
-
-  void listen(String type, sky.EventListener listener) {
-    assert(listener != null);
-    _handlers.add(new EventHandler(type, listener));
-  }
-
-  void addAll(EventMap events) {
-    _handlers.addAll(events._handlers);
-  }
-}
+final bool _shouldLogRenderDuration = true;
 
 class Style {
   final String _className;
@@ -91,10 +71,6 @@ abstract class Node {
   sky.Node _root;
   bool _defunct = false;
 
-  // TODO(abarth): Both Elements and Components have |events| but |Text|
-  // doesn't. Should we add a common base class to contain |events|?
-  final EventMap events = new EventMap();
-
   Node({ Object key }) {
     _key = key == null ? "$runtimeType" : "$runtimeType-$key";
   }
@@ -138,51 +114,6 @@ abstract class Node {
     assert(node._root is sky.Node);
     return node;
   }
-
-  void _syncEvents(EventMap oldEventMap) {
-    List<EventHandler> newHandlers = events._handlers;
-    int newStartIndex = 0;
-    int newEndIndex = newHandlers.length;
-
-    List<EventHandler> oldHandlers = oldEventMap._handlers;
-    int oldStartIndex = 0;
-    int oldEndIndex = oldHandlers.length;
-
-    // Skip over leading handlers that match.
-    while (newStartIndex < newEndIndex && oldStartIndex < oldEndIndex) {
-      EventHandler newHandler = newHandlers[newStartIndex];
-      EventHandler oldHandler = oldHandlers[oldStartIndex];
-      if (newHandler.type != oldHandler.type
-          || newHandler.listener != oldHandler.listener)
-        break;
-      ++newStartIndex;
-      ++oldStartIndex;
-    }
-
-    // Skip over trailing handlers that match.
-    while (newStartIndex < newEndIndex && oldStartIndex < oldEndIndex) {
-      EventHandler newHandler = newHandlers[newEndIndex - 1];
-      EventHandler oldHandler = oldHandlers[oldEndIndex - 1];
-      if (newHandler.type != oldHandler.type
-          || newHandler.listener != oldHandler.listener)
-        break;
-      --newEndIndex;
-      --oldEndIndex;
-    }
-
-    sky.Element root = _root as sky.Element;
-
-    for (int i = oldStartIndex; i < oldEndIndex; ++i) {
-      EventHandler oldHandler = oldHandlers[i];
-      root.removeEventListener(oldHandler.type, oldHandler.listener);
-    }
-
-    for (int i = newStartIndex; i < newEndIndex; ++i) {
-      EventHandler newHandler = newHandlers[i];
-      root.addEventListener(newHandler.type, newHandler.listener);
-    }
-  }
-
 }
 
 /*
@@ -192,6 +123,11 @@ abstract class Node {
  * has become stateful.
  */
 abstract class RenderNode extends Node {
+
+  static final Map<sky.Node, RenderNode> _nodeMap =
+      new HashMap<sky.Node, RenderNode>();
+
+  static RenderNode _getMounted(sky.Node node) => _nodeMap[node];
 
   RenderNode({ Object key }) : super(key: key);
 
@@ -208,6 +144,7 @@ abstract class RenderNode extends Node {
       _root = old._root;
     }
 
+    _nodeMap[_root] = this;
     _syncNode(old);
   }
 
@@ -216,6 +153,128 @@ abstract class RenderNode extends Node {
   void _remove() {
     assert(_root != null);
     _root.remove();
+    _nodeMap.remove(_root);
+    super._remove();
+  }
+}
+
+typedef GestureEventListener(sky.GestureEvent e);
+typedef PointerEventListener(sky.PointerEvent e);
+typedef EventListener(sky.Event e);
+
+class EventTarget extends Node  {
+  Node content;
+  final Map<String, sky.EventListener> listeners;
+
+  static final Set<String> _registeredEvents = new HashSet<String>();
+
+  static Map<String, sky.EventListener> _createListeners({
+    EventListener onWheel,
+    GestureEventListener onGestureFlingCancel,
+    GestureEventListener onGestureFlingStart,
+    GestureEventListener onGestureScrollStart,
+    GestureEventListener onGestureScrollUpdate,
+    GestureEventListener onGestureTap,
+    PointerEventListener onPointerCancel,
+    PointerEventListener onPointerDown,
+    PointerEventListener onPointerMove,
+    PointerEventListener onPointerUp,
+    Map<String, sky.EventListener> custom
+  }) {
+    var listeners = custom != null ?
+        new HashMap<String, sky.EventListener>.from(custom) :
+        new HashMap<String, sky.EventListener>();
+
+    if (onWheel != null)
+      listeners['wheel'] = onWheel;
+    if (onGestureFlingCancel != null)
+      listeners['gestureflingcancel'] = onGestureFlingCancel;
+    if (onGestureFlingStart != null)
+      listeners['gestureflingstart'] = onGestureFlingStart;
+    if (onGestureScrollStart != null)
+      listeners['gesturescrollstart'] = onGestureScrollStart;
+    if (onGestureScrollUpdate != null)
+      listeners['gesturescrollupdate'] = onGestureScrollUpdate;
+    if (onGestureTap != null)
+      listeners['gesturetap'] = onGestureTap;
+    if (onPointerCancel != null)
+      listeners['pointercancel'] = onPointerCancel;
+    if (onPointerDown != null)
+      listeners['pointerdown'] = onPointerDown;
+    if (onPointerMove != null)
+      listeners['pointermove'] = onPointerMove;
+    if (onPointerUp != null)
+      listeners['pointerup'] = onPointerUp;
+
+    return listeners;
+  }
+
+  EventTarget(Node content, {
+    EventListener onWheel,
+    GestureEventListener onGestureFlingCancel,
+    GestureEventListener onGestureFlingStart,
+    GestureEventListener onGestureScrollStart,
+    GestureEventListener onGestureScrollUpdate,
+    GestureEventListener onGestureTap,
+    PointerEventListener onPointerCancel,
+    PointerEventListener onPointerDown,
+    PointerEventListener onPointerMove,
+    PointerEventListener onPointerUp,
+    Map<String, sky.EventListener> custom
+  }) : this.content = content,
+       listeners = _createListeners(
+         onWheel: onWheel,
+         onGestureFlingCancel: onGestureFlingCancel,
+         onGestureFlingStart: onGestureFlingStart,
+         onGestureScrollUpdate: onGestureScrollUpdate,
+         onGestureScrollStart: onGestureScrollStart,
+         onGestureTap: onGestureTap,
+         onPointerCancel: onPointerCancel,
+         onPointerDown: onPointerDown,
+         onPointerMove: onPointerMove,
+         onPointerUp: onPointerUp,
+         custom: custom
+       ),
+       super(key: content._key);
+
+  void _handleEvent(sky.Event e) {
+    sky.EventListener listener = listeners[e.type];
+    if (listener != null) {
+      listener(e);
+    }
+  }
+
+  static void _dispatchEvent(sky.Event e) {
+    Node target = RenderNode._getMounted(e.target);
+
+    // TODO(rafaelw): StopPropagation?
+    while (target != null) {
+      if (target is EventTarget) {
+        (target as EventTarget)._handleEvent(e);
+      }
+
+      target = target._parent;
+    }
+  }
+
+  static void _ensureDocumentListener(String eventType) {
+    if (_registeredEvents.add(eventType)) {
+      sky.document.addEventListener(eventType, _dispatchEvent);
+    }
+  }
+
+  void _sync(Node old, sky.ParentNode host, sky.Node insertBefore) {
+    for (var type in listeners.keys) {
+      _ensureDocumentListener(type);
+    }
+
+    Node oldContent = old == null ? null : (old as EventTarget).content;
+    content = _syncChild(content, oldContent , host, insertBefore);
+    _root = content._root;
+  }
+
+  void _remove() {
+    content._remove();
     super._remove();
   }
 }
@@ -298,8 +357,6 @@ abstract class Element extends RenderNode {
   void _syncNode(RenderNode old) {
     Element oldElement = old as Element;
     sky.Element root = _root as sky.Element;
-
-    _syncEvents(oldElement.events);
 
     if (_class != oldElement._class)
       root.setAttribute('class', _class);
@@ -581,8 +638,6 @@ void _scheduleComponentForRender(Component c) {
   }
 }
 
-EventMap _emptyEventMap = new EventMap();
-
 abstract class Component extends Node {
   bool get _isBuilding => _currentlyBuilding == this;
   bool _dirty = true;
@@ -666,9 +721,6 @@ abstract class Component extends Node {
     _built = _syncChild(_built, oldBuilt, host, insertBefore);
     _dirty = false;
     _root = _built._root;
-
-    _built.events.addAll(events);
-    _syncEvents(oldComponent != null ? oldComponent.events : _emptyEventMap);
   }
 
   void _buildIfDirty() {

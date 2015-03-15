@@ -30,11 +30,7 @@ class Material extends Component {
       this.style,
       this.inlineStyle,
       this.children,
-      this.level: 0 }) : super(key: key) {
-    events.listen('gesturescrollstart', _cancelSplashes);
-    events.listen('wheel', _cancelSplashes);
-    events.listen('pointerdown', _startSplash);
-  }
+      this.level: 0 }) : super(key: key);
 
   Node build() {
     List<Node> childrenIncludingSplashes = [];
@@ -47,10 +43,15 @@ class Material extends Component {
     if (children != null)
       childrenIncludingSplashes.addAll(children);
 
-    return new Container(
-        style: level > 0 ? style.extend(shadowStyle[level]) : style,
-        inlineStyle: inlineStyle,
-        children: childrenIncludingSplashes);
+    return new EventTarget(
+      new Container(
+          style: level > 0 ? style.extend(shadowStyle[level]) : style,
+          inlineStyle: inlineStyle,
+          children: childrenIncludingSplashes),
+      onGestureScrollStart: _cancelSplashes,
+      onWheel: _cancelSplashes,
+      onPointerDown: _startSplash
+    );
   }
 
   sky.ClientRect _getBoundingRect() => (getRoot() as sky.Element).getBoundingClientRect();

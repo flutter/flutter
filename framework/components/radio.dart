@@ -50,14 +50,15 @@ class Radio extends ButtonBase {
     this.onChanged,
     this.value,
     this.groupValue
-  }) : super(key: key) {
-    events.listen('gesturetap', _handleClick);
-  }
+  }) : super(key: key);
 
-  Node build() {
-    return new Material(
-      style: highlight ? _highlightStyle : _style,
-      children: value == groupValue ? [new Container(style: _dotStyle )] : []
+  Node buildContent() {
+    return new EventTarget(
+      new Material(
+        style: highlight ? _highlightStyle : _style,
+        children: value == groupValue ? [new Container(style: _dotStyle )] : []
+      ),
+      onGestureTap: _handleClick
     );
   }
 

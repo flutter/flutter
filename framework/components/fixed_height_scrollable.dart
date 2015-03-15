@@ -47,7 +47,7 @@ abstract class FixedHeightScrollable extends Scrollable {
     });
   }
 
-  Node build() {
+  Node buildContent() {
     var itemNumber = 0;
     var drawCount = 1;
     var transformStyle = '';

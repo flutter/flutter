@@ -39,7 +39,7 @@ class MenuItem extends ButtonBase {
 
   MenuItem({ Object key, this.icon, this.children }) : super(key: key);
 
-  Node build() {
+  Node buildContent() {
     return new Material (
       style: highlight ? _highlightStyle : _style,
       children: [

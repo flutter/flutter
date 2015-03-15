@@ -115,10 +115,6 @@ class Drawer extends Component {
     this.children,
     this.level: 0
   }) : super(key: key) {
-    events.listen('pointerdown', controller.handlePointerDown);
-    events.listen('pointermove', controller.handlePointerMove);
-    events.listen('pointerup', controller.handlePointerUp);
-    events.listen('pointercancel', controller.handlePointerCancel);
     _position = new AnimatedValueListener(this, controller.position);
   }
 
@@ -134,12 +130,15 @@ class Drawer extends Component {
     String maskInlineStyle = 'opacity: ${(_position.value / _kWidth + 1) * 0.5}';
     String contentInlineStyle = 'transform: translateX(${_position.value}px)';
 
-    Container mask = new Container(
-      key: 'Mask',
-      style: _maskStyle,
-      inlineStyle: maskInlineStyle
-    )..events.listen('gesturetap', controller.handleMaskTap)
-     ..events.listen('gestureflingstart', controller.handleFlingStart);
+    var mask = new EventTarget(
+      new Container(
+        key: 'Mask',
+        style: _maskStyle,
+        inlineStyle: maskInlineStyle
+      ),
+      onGestureTap: controller.handleMaskTap,
+      onGestureFlingStart: controller.handleFlingStart
+    );
 
     Material content = new Material(
       key: 'Content',
@@ -149,10 +148,16 @@ class Drawer extends Component {
       level: level
     );
 
-    return new Container(
-      style: _style,
-      inlineStyle: inlineStyle,
-      children: [ mask, content ]
+    return new EventTarget(
+      new Container(
+        style: _style,
+        inlineStyle: inlineStyle,
+        children: [ mask, content ]
+      ),
+      onPointerDown: controller.handlePointerDown,
+      onPointerMove: controller.handlePointerMove,
+      onPointerUp: controller.handlePointerUp,
+      onPointerCancel: controller.handlePointerCancel
     );
   }
 }

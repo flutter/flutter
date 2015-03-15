@@ -58,27 +58,28 @@ class Checkbox extends ButtonBase {
   bool checked;
   ValueChanged onChanged;
 
-  Checkbox({ Object key, this.onChanged, this.checked }) : super(key: key) {
-    events.listen('gesturetap', _handleClick);
-  }
+  Checkbox({ Object key, this.onChanged, this.checked }) : super(key: key);
 
   void _handleClick(sky.Event e) {
     onChanged(!checked);
   }
 
-  Node build() {
-    return new Container(
-      style: _style,
-      children: [
-        new Container(
-          style: highlight ? _containerHighlightStyle : _containerStyle,
-          children: [
-            new Container(
-              style: checked ? _checkedStyle : _uncheckedStyle
-            )
-          ]
-        )
-      ]
+  Node buildContent() {
+    return new EventTarget(
+      new Container(
+        style: _style,
+        children: [
+          new Container(
+            style: highlight ? _containerHighlightStyle : _containerStyle,
+            children: [
+              new Container(
+                style: checked ? _checkedStyle : _uncheckedStyle
+              )
+            ]
+          )
+        ]
+      ),
+      onGestureTap: _handleClick
     );
   }
 }
