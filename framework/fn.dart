@@ -20,7 +20,7 @@ bool _initIsInCheckedMode() {
 }
 
 final bool _isInCheckedMode = _initIsInCheckedMode();
-final bool _shouldLogRenderDuration = true;
+final bool _shouldLogRenderDuration = false;
 
 class Style {
   final String _className;
