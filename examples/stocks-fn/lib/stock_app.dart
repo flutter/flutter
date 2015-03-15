@@ -20,7 +20,7 @@ import 'stock_menu.dart';
 class StocksApp extends App {
 
   DrawerController _drawerController = new DrawerController();
-  PopupMenuController _menuController = new PopupMenuController();
+  PopupMenuController _menuController;
 
   static Style _style = new Style('''
     display: flex;
@@ -58,6 +58,7 @@ class StocksApp extends App {
 
   void _handleMenuClick(_) {
     setState(() {
+      _menuController = new PopupMenuController();
       _menuController.open();
     });
   }
@@ -111,22 +112,28 @@ class StocksApp extends App {
 
     var toolbar = new ActionBar(
       children: [
-        new Icon(key: 'menu', style: _iconStyle,
-            size: 24,
-            type: 'navigation/menu_white')
-          ..events.listen('gesturetap', _drawerController.toggle),
+        new EventTarget(
+          new Icon(key: 'menu', style: _iconStyle,
+              size: 24,
+              type: 'navigation/menu_white'),
+          onGestureTap: _drawerController.toggle
+        ),
         new Container(
           style: _titleStyle,
           children: [title]
         ),
-        new Icon(key: 'search', style: _iconStyle,
-            size: 24,
-            type: 'action/search_white')
-          ..events.listen('gesturetap', _handleSearchClick),
-        new Icon(key: 'more_white', style: _iconStyle,
-            size: 24,
-            type: 'navigation/more_vert_white')
-          ..events.listen('gesturetap', _handleMenuClick),
+        new EventTarget(
+          new Icon(key: 'search', style: _iconStyle,
+              size: 24,
+              type: 'action/search_white'),
+          onGestureTap: _handleSearchClick
+        ),
+        new EventTarget(
+          new Icon(key: 'more_white', style: _iconStyle,
+              size: 24,
+              type: 'navigation/more_vert_white'),
+          onGestureTap: _handleMenuClick
+        )
       ]
     );
 
@@ -145,15 +152,19 @@ class StocksApp extends App {
       drawer
     ];
 
-    if (_menuController.isOpen) {
-      children.add(new StockMenu(controller: _menuController)
-                   ..events.listen('gesturetap', (_) {
-        // TODO(abarth): We should close the menu when you tap away from the
-        // menu rather than when you tap on the menu.
-        setState(() {
-          _menuController.close();
-        });
-      }));
+    if (_menuController != null) {
+      var menu = new EventTarget(
+        new StockMenu(controller: _menuController),
+        onGestureTap: (_) {
+          // TODO(abarth): We should close the menu when you tap away from the
+          // menu rather than when you tap on the menu.
+          setState(() {
+            _menuController.close();
+            _menuController = null;
+          });
+        }
+      );
+      children.add(menu);
     }
 
     return new Container(key: 'StocksApp', children: children);
