@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'animated_component.dart';
 import '../animation/animated_value.dart';
 import '../fn.dart';
 import '../theme/colors.dart';
@@ -32,7 +33,7 @@ class PopupMenuController {
   }
 }
 
-class PopupMenu extends Component {
+class PopupMenu extends AnimatedComponent {
   static final Style _style = new Style('''
     border-radius: 2px;
     padding: 8px 0;
@@ -43,14 +44,16 @@ class PopupMenu extends Component {
   int level;
   PopupMenuController controller;
 
-  AnimatedValueListener _position;
+  double _position;
   List<AnimatedValue> _opacities;
   int _width;
   int _height;
 
   PopupMenu({ Object key, this.controller, this.items, this.level })
       : super(key: key) {
-    _position = new AnimatedValueListener(this, controller.position);
+    animateField(controller.position, #_position);
+
+    onDidMount(_measureSize);
   }
 
   void _ensureItemAnimations() {
@@ -65,16 +68,15 @@ class PopupMenu extends Component {
   }
 
   String _inlineStyle() {
-    double value = _position.value;
-    if (value == null || value == 1.0 || _height == null || _width == null)
+    if (_position == null || _position == 1.0 || _height == null || _width == null)
       return null;
     return '''
-      opacity: ${math.min(1.0, value * 1.5)};
-      width: ${math.min(_width, _width * value * 3.0)}px;
-      height: ${_height * value}px;''';
+      opacity: ${math.min(1.0, _position * 1.5)};
+      width: ${math.min(_width, _width * _position * 3.0)}px;
+      height: ${_height * _position}px;''';
   }
 
-  void didMount() {
+  void _measureSize() {
     setState(() {
       var root = getRoot();
       _width = root.clientWidth;
@@ -82,12 +84,7 @@ class PopupMenu extends Component {
     });
   }
 
-  void didUnmount() {
-    _position.stopListening();
-  }
-
   Node build() {
-    _position.ensureListening();
     _ensureItemAnimations();
 
     List<Node> children = [];

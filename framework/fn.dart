@@ -645,8 +645,8 @@ bool _buildScheduled = false;
 bool _inRenderDirtyComponents = false;
 
 void _notifyMountStatusChanged() {
-  _unmountedComponents.forEach((c) => c.didUnmount());
-  _mountedComponents.forEach((c) => c.didMount());
+  _unmountedComponents.forEach((c) => c._didUnmount());
+  _mountedComponents.forEach((c) => c._didMount());
   _mountedComponents.clear();
   _unmountedComponents.clear();
 }
@@ -700,6 +700,23 @@ abstract class Component extends Node {
   static int _currentOrder = 0;
   bool _stateful;
   static Component _currentlyBuilding;
+  List<Function> _mountCallbacks;
+  List<Function> _unmountCallbacks;
+
+  void onDidMount(Function fn) {
+    if (_mountCallbacks == null)
+      _mountCallbacks = new List<Function>();
+
+    _mountCallbacks.add(fn);
+  }
+
+  void onDidUnmount(Function fn) {
+    if (_unmountCallbacks == null)
+      _unmountCallbacks = new List<Function>();
+
+    _unmountCallbacks.add(fn);
+  }
+
 
   Component({ Object key, bool stateful })
       : _stateful = stateful != null ? stateful : false,
@@ -709,8 +726,15 @@ abstract class Component extends Node {
   Component.fromArgs(Object key, bool stateful)
       : this(key: key, stateful: stateful);
 
-  void didMount() {}
-  void didUnmount() {}
+  void _didMount() {
+    if (_mountCallbacks != null)
+      _mountCallbacks.forEach((fn) => fn());
+  }
+
+  void _didUnmount() {
+    if (_unmountCallbacks != null)
+      _unmountCallbacks.forEach((fn) => fn());
+  }
 
   // TODO(rafaelw): It seems wrong to expose DOM at all. This is presently
   // needed to get sizing info.

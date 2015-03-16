@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'animated_component.dart';
 import '../animation/animated_value.dart';
 import '../animation/curves.dart';
 import '../fn.dart';
@@ -74,7 +75,7 @@ class DrawerController {
   }
 }
 
-class Drawer extends Component {
+class Drawer extends AnimatedComponent {
   static final Style _style = new Style('''
     position: absolute;
     top: 0;
@@ -107,7 +108,7 @@ class Drawer extends Component {
   int level;
   DrawerController controller;
 
-  AnimatedValueListener _position;
+  double _position;
 
   Drawer({
     Object key,
@@ -115,20 +116,14 @@ class Drawer extends Component {
     this.children,
     this.level: 0
   }) : super(key: key) {
-    _position = new AnimatedValueListener(this, controller.position);
-  }
-
-  void didUnmount() {
-    _position.stopListening();
+    animateField(controller.position, #_position);
   }
 
   Node build() {
-    _position.ensureListening();
-
-    bool isClosed = _position.value <= -_kWidth;
+    bool isClosed = _position <= -_kWidth;
     String inlineStyle = 'display: ${isClosed ? 'none' : ''}';
-    String maskInlineStyle = 'opacity: ${(_position.value / _kWidth + 1) * 0.5}';
-    String contentInlineStyle = 'transform: translateX(${_position.value}px)';
+    String maskInlineStyle = 'opacity: ${(_position / _kWidth + 1) * 0.5}';
+    String contentInlineStyle = 'transform: translateX(${_position}px)';
 
     var mask = new EventTarget(
       new Container(

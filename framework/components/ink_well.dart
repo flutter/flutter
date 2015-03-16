@@ -15,7 +15,11 @@ class InkWell extends Component {
   List<Node> children;
 
   InkWell({ Object key, this.style, this.inlineStyle, this.children })
-      : super(key: key);
+      : super(key: key) {
+    onDidUnmount(() {
+      _cancelSplashes(null);
+    });
+  }
 
   Node build() {
     List<Node> childrenIncludingSplashes = [];
@@ -67,10 +71,6 @@ class InkWell extends Component {
       _splashes = null;
       splashes.forEach((s) { s.cancel(); });
     });
-  }
-
-  void didUnmount() {
-    _cancelSplashes(null);
   }
 
   void _splashDone(SplashController splash) {

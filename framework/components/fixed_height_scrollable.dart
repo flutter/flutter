@@ -30,10 +30,11 @@ abstract class FixedHeightScrollable extends Scrollable {
   FixedHeightScrollable({
     Object key,
     ScrollBehavior scrollBehavior
-  }) : super(key: key, scrollBehavior: scrollBehavior);
+  }) : super(key: key, scrollBehavior: scrollBehavior) {
+    onDidMount(_measureHeights);
+  }
 
-  void didMount() {
-    super.didMount();
+  void _measureHeights() {
     var root = getRoot();
     var item = root.firstChild.firstChild;
     sky.ClientRect scrollRect = root.getBoundingClientRect();

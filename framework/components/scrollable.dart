@@ -24,7 +24,9 @@ abstract class Scrollable extends Component {
   double _scrollOffset = 0.0;
   Simulation _simulation;
 
-  Scrollable({Object key, this.scrollBehavior}) : super(key: key);
+  Scrollable({Object key, this.scrollBehavior}) : super(key: key) {
+    onDidUnmount(_stopSimulation);
+  }
 
   Node buildContent();
 
@@ -39,11 +41,6 @@ abstract class Scrollable extends Component {
       onGestureScrollUpdate: _handleScrollUpdate,
       onWheel: _handleWheel
     );
-  }
-
-  void didUnmount() {
-    super.didUnmount();
-    _stopSimulation();
   }
 
   bool scrollBy(double scrollDelta) {

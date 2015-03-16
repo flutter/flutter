@@ -49,6 +49,10 @@ class Input extends Component {
       : super(key: key, stateful: true) {
     _editableValue = new EditableString(text: _value,
                                         onUpdated: _handleTextUpdated);
+    onDidUnmount(() {
+      if (_isAttachedToKeyboard)
+        keyboard.hide();
+    });
   }
 
   void _handleTextUpdated() {
@@ -58,11 +62,6 @@ class Input extends Component {
       if (onChanged != null)
         onChanged(_value);
     }
-  }
-
-  void didUnmount() {
-    if (_isAttachedToKeyboard)
-      keyboard.hide();
   }
 
   Node build() {

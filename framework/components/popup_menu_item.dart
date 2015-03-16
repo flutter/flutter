@@ -2,32 +2,27 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'animated_component.dart';
 import '../animation/animated_value.dart';
 import '../fn.dart';
 import 'ink_well.dart';
 
-class PopupMenuItem extends Component {
+class PopupMenuItem extends AnimatedComponent {
   static final Style _style = new Style('''
     min-width: 112px;
     padding: 16px;''');
 
   List<Node> children;
-  AnimatedValueListener _opacity;
+  double _opacity;
 
   PopupMenuItem({ Object key, this.children, AnimatedValue opacity}) : super(key: key) {
-    _opacity = new AnimatedValueListener(this, opacity);
-  }
-
-  void didUnmount() {
-    _opacity.stopListening();
+    animateField(opacity, #_opacity);
   }
 
   Node build() {
-    _opacity.ensureListening();
-
     return new InkWell(
       style: _style,
-      inlineStyle: _opacity.value == null ? null : 'opacity: ${_opacity.value}',
+      inlineStyle: _opacity == null ? null : 'opacity: ${_opacity}',
       children: children
     );
   }
