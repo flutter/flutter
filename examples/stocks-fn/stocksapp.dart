@@ -11,7 +11,7 @@ import '../../framework/components/input.dart';
 import '../../framework/components/material.dart';
 import '../../framework/components/menu_divider.dart';
 import '../../framework/components/menu_item.dart';
-import '../../framework/components/toolbar.dart';
+import '../../framework/components/action_bar.dart';
 import '../data/stocks.dart';
 import 'dart:math';
 
@@ -103,7 +103,7 @@ class StocksApp extends App {
       title = new Text('I am a stocks app');
     }
 
-    var toolbar = new Toolbar(
+    var toolbar = new ActionBar(
       children: [
         new Icon(key: 'menu', style: _iconStyle,
             size: 24,
