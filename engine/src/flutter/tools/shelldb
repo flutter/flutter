@@ -124,12 +124,12 @@ class StartSky(object):
                 (path, server_root))
         return server_root
 
-    def _sky_server_for_args(self, args):
+    def _sky_server_for_args(self, args, packages_root):
         # FIXME: This is a hack.  sky_server should just take a build_dir
         # not a magical "configuration" name.
         configuration = os.path.basename(os.path.normpath(args.build_dir))
         server_root = self._server_root_for_url(args.url_or_path)
-        sky_server = SkyServer(SKY_SERVER_PORT, configuration, server_root)
+        sky_server = SkyServer(SKY_SERVER_PORT, configuration, server_root, packages_root)
         return sky_server
 
     def run(self, args, pids):
@@ -138,7 +138,19 @@ class StartSky(object):
             print "'%s' does not exist?" % apk_path
             return 2
 
-        sky_server = self._sky_server_for_args(args)
+        sdk_root = os.path.join(args.build_dir, 'gen', 'sky_sdk')
+        packages_root = os.path.join(sdk_root, 'packages_root')
+        sky_tools_directory = os.path.join(SRC_ROOT, 'sky/tools')
+        subprocess.check_call([
+            os.path.join(sky_tools_directory, 'deploy_sdk.py'),
+            '--build-dir', args.build_dir,
+            '--non-interactive',
+            '--dev-environment',
+            '--fake-pub-get-into', packages_root,
+            sdk_root,
+        ])
+
+        sky_server = self._sky_server_for_args(args, packages_root)
         pids['sky_server_pid'] = sky_server.start()
         pids['sky_server_port'] = sky_server.port
         pids['sky_server_root'] = sky_server.root
