@@ -5,7 +5,6 @@
 import 'dart:math' as math;
 
 const double kGravity = -0.980;
-const double _kMinVelocity = 0.01;
 
 abstract class System {
   void update(double deltaT);
@@ -132,12 +131,12 @@ class ParticleClimbingRamp extends System {
   }
 
   void update(double deltaT) {
-    particle.applyImpluse(kGravity * slope * deltaT);
-    // If we don't apply a min velocity, error terms in the simulation can
-    // prevent us from reaching the targetPosition before gravity overtakes our
-    // initial velocity and we start rolling down the hill.
-    particle.velocity = math.max(_kMinVelocity, particle.velocity);
     particle.update(deltaT);
+    // Note that we apply the impluse from gravity after updating the particle's
+    // position so that we overestimate the distance traveled by the particle.
+    // That ensures that we actually hit the edge of the box and don't wind up
+    // reversing course.
+    particle.applyImpluse(kGravity * slope * deltaT);
     box.confine(particle);
   }
 }
