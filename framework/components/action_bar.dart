@@ -7,7 +7,7 @@ import '../theme/colors.dart';
 import '../theme/shadows.dart';
 import '../theme/view-configuration.dart';
 
-class Toolbar extends Component {
+class ActionBar extends Component {
   List<Node> children;
 
   static final Style _style = new Style('''
@@ -20,7 +20,7 @@ class Toolbar extends Component {
     box-shadow: ${Shadow[2]};'''
   );
 
-  Toolbar({String key, this.children}) : super(key: key);
+  ActionBar({String key, this.children}) : super(key: key);
 
   Node build() {
     return new Container(
