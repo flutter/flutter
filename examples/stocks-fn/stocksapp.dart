@@ -32,13 +32,12 @@ class StocksApp extends App {
   );
 
   static Style _iconStyle = new Style('''
-    padding: 8px;
-    margin: 0 4px;'''
+    padding: 8px;'''
   );
 
   static Style _titleStyle = new Style('''
-    flex: 1;
-    margin: 0 4px;'''
+    padding-left: 24px;
+    flex: 1;'''
   );
 
   List<Stock> _sortedStocks;

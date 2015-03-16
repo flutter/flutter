@@ -14,6 +14,7 @@ class ActionBar extends Component {
     display: flex;
     align-items: center;
     height: 56px;
+    padding: 0 8px;
     background-color: ${Purple[500]};
     color: white;
     padding-top: ${kStatusBarHeight}px;
