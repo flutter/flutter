@@ -647,6 +647,9 @@ abstract class Component extends Node {
   bool get _isBuilding => _currentlyBuilding == this;
   bool _dirty = true;
 
+  sky.Node get _host => _root.parentNode;
+  sky.Node get _insertionPoint => _root == null ? _root : _root.nextSibling;
+
   Node _built;
   final int _order;
   static int _currentOrder = 0;
@@ -735,8 +738,8 @@ abstract class Component extends Node {
     if (!_dirty || _defunct)
       return;
 
-    assert(_root != null);
-    _sync(null, _root.parentNode, _root.nextSibling);
+    assert(_host != null);
+    _sync(null, _host, _insertionPoint);
   }
 
   void scheduleBuild() {
@@ -757,21 +760,11 @@ abstract class Component extends Node {
 }
 
 abstract class App extends Component {
-  sky.Node _host = null;
+  sky.Node _host;
+
   App() : super(stateful: true) {
     _host = sky.document.createElement('div');
     sky.document.appendChild(_host);
-
-    new Future.microtask(() {
-      Stopwatch sw = new Stopwatch()..start();
-
-      _sync(null, _host, null);
-      assert(_root is sky.Node);
-      _notifyMountStatusChanged();
-
-      sw.stop();
-      if (_shouldLogRenderDuration)
-        print("Initial build: ${sw.elapsedMicroseconds} microseconds");
-    });
+    _scheduleComponentForRender(this);
   }
 }
