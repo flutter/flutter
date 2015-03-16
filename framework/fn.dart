@@ -21,6 +21,7 @@ bool _initIsInCheckedMode() {
 
 final bool _isInCheckedMode = _initIsInCheckedMode();
 final bool _shouldLogRenderDuration = false;
+final bool _shouldTrace = false;
 
 class Style {
   final String _className;
@@ -70,6 +71,7 @@ abstract class Node {
   Node _parent;
   sky.Node _root;
   bool _defunct = false;
+  int _nodeDepth;
 
   Node({ Object key }) {
     _key = key == null ? "$runtimeType" : "$runtimeType-$key";
@@ -86,20 +88,55 @@ abstract class Node {
     _root = null;
   }
 
+  void _ensureDepth() {
+    if (_nodeDepth == null) {
+      _nodeDepth = 0;
+      Node parent = _parent;
+      while (parent != null) {
+        _nodeDepth++;
+        parent = parent._parent;
+      }
+    }
+  }
+
+  void _trace(String message) {
+    if (!_shouldTrace)
+      return;
+
+    _ensureDepth();
+    StringBuffer buffer = new StringBuffer();
+    int depth = _nodeDepth;
+    while (depth-- > 0) {
+      buffer.write(' ');
+    }
+    buffer.write(message);
+    print(buffer);
+  }
+
+  void _removeChild(Node node) {
+    _trace('_sync(remove) ${node._key}');
+    node._remove();
+  }
+
   // Returns the child which should be retained as the child of this node.
   Node _syncChild(Node node, Node oldNode, sky.ParentNode host,
       sky.Node insertBefore) {
-    if (node == oldNode)
+
+    if (node == oldNode) {
+      _trace('_sync(identical) ${node._key}');
       return node; // Nothing to do. Subtrees must be identical.
+    }
 
     // TODO(rafaelw): This eagerly removes the old DOM. It may be that a
     // new component was built that could re-use some of it. Consider
     // syncing the new VDOM against the old one.
     if (oldNode != null && node._key != oldNode._key) {
+      _trace('_sync(remove) ${node._key}');
       oldNode._remove();
     }
 
     if (node._willSync(oldNode)) {
+      _trace('_sync(statefull) ${node._key} -> ${oldNode._key}');
       oldNode._sync(node, host, insertBefore);
       node._defunct = true;
       assert(oldNode._root is sky.Node);
@@ -107,6 +144,12 @@ abstract class Node {
     }
 
     node._parent = this;
+
+    if (oldNode == null) {
+      _trace('_sync(insert) ${node._key}');
+    } else {
+      _trace('_sync(stateless) ${node._key} <- ${oldNode._key}');
+    }
     node._sync(oldNode, host, insertBefore);
     if (oldNode != null)
       oldNode._defunct = true;
@@ -279,7 +322,7 @@ class EventTarget extends Node  {
   }
 
   void _remove() {
-    content._remove();
+    _removeChild(content);
     super._remove();
   }
 }
@@ -340,7 +383,7 @@ abstract class Element extends RenderNode {
     super._remove();
     if (_children != null) {
       for (var child in _children) {
-        child._remove();
+        _removeChild(child);
       }
     }
   }
@@ -483,7 +526,7 @@ abstract class Element extends RenderNode {
     currentNode = null;
     while (oldStartIndex < oldEndIndex) {
       oldNode = oldChildren[oldStartIndex];
-      oldNode._remove();
+      _removeChild(oldNode);
       advanceOldStartIndex();
     }
   }
@@ -674,7 +717,7 @@ abstract class Component extends Node {
   void _remove() {
     assert(_built != null);
     assert(_root != null);
-    _built._remove();
+    _removeChild(_built);
     _built = null;
     _unmountedComponents.add(this);
     super._remove();
@@ -739,6 +782,7 @@ abstract class Component extends Node {
       return;
 
     assert(_host != null);
+    _trace('$_key rebuilding...');
     _sync(null, _host, _insertionPoint);
   }
 
