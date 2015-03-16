@@ -10,3 +10,4 @@ const int kMinFlingVelocity = 50;
 const int kScrollbarFadeDelay = 300;
 const int kScrollbarFadeDuration = 250;
 const int kScrollbarSize = 10;
+const int kStatusBarHeight = 25;

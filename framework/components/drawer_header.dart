@@ -4,12 +4,13 @@
 
 import '../fn.dart';
 import '../theme/colors.dart';
+import '../theme/view-configuration.dart';
 
 class DrawerHeader extends Component {
   static final Style _style = new Style('''
     display: flex;
     flex-direction: column;
-    height: 140px;
+    height: ${140 + kStatusBarHeight}px;
     -webkit-user-select: none;
     background-color: ${BlueGrey[50]};
     border-bottom: 1px solid #D1D9E1;

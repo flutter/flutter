@@ -5,6 +5,7 @@
 import '../fn.dart';
 import '../theme/colors.dart';
 import '../theme/shadows.dart';
+import '../theme/view-configuration.dart';
 
 class Toolbar extends Component {
   List<Node> children;
@@ -15,6 +16,7 @@ class Toolbar extends Component {
     height: 56px;
     background-color: ${Purple[500]};
     color: white;
+    padding-top: ${kStatusBarHeight}px;
     box-shadow: ${Shadow[2]};'''
   );
 
