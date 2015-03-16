@@ -77,6 +77,7 @@ class AnimationGenerator extends Generator {
     this.curve: linear,
     Function onDone
   }) {
+    assert(curve != null);
     assert(duration != null && duration > 0.0);
     _generator = new FrameGenerator(onDone: onDone);
 

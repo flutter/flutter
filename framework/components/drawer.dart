@@ -16,7 +16,7 @@ const double _kWidth = 304.0;
 const double _kMinFlingVelocity = 0.4;
 const double _kBaseSettleDurationMS = 246.0;
 const double _kMaxSettleDurationMS = 600.0;
-const Cubic _kAnimationCurve = parabolicRise;
+const Curve _kAnimationCurve = parabolicRise;
 
 class DrawerAnimation extends Animation {
   Stream<double> get onPositionChanged => onValueChanged;
