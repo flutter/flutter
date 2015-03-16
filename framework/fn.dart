@@ -122,6 +122,8 @@ abstract class Node {
   Node _syncChild(Node node, Node oldNode, sky.ParentNode host,
       sky.Node insertBefore) {
 
+    assert(oldNode == null || node._key == oldNode._key);
+
     if (node == oldNode) {
       _trace('_sync(identical) ${node._key}');
       return node; // Nothing to do. Subtrees must be identical.
@@ -136,7 +138,7 @@ abstract class Node {
     }
 
     if (node._willSync(oldNode)) {
-      _trace('_sync(statefull) ${node._key} -> ${oldNode._key}');
+      _trace('_sync(statefull) ${node._key}');
       oldNode._sync(node, host, insertBefore);
       node._defunct = true;
       assert(oldNode._root is sky.Node);
@@ -148,7 +150,7 @@ abstract class Node {
     if (oldNode == null) {
       _trace('_sync(insert) ${node._key}');
     } else {
-      _trace('_sync(stateless) ${node._key} <- ${oldNode._key}');
+      _trace('_sync(stateless) ${node._key}');
     }
     node._sync(oldNode, host, insertBefore);
     if (oldNode != null)
