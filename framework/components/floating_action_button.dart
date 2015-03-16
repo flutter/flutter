@@ -11,7 +11,6 @@ class FloatingActionButton extends Component {
     position: absolute;
     bottom: 16px;
     right: 16px;
-    z-index: 5;
     transform: translateX(0);
     width: 56px;
     height: 56px;

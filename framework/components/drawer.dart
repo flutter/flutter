@@ -12,11 +12,11 @@ import 'dart:math' as math;
 import 'dart:sky' as sky;
 import 'material.dart';
 
-const double _kWidth = 256.0;
+const double _kWidth = 304.0;
 const double _kMinFlingVelocity = 0.4;
 const double _kBaseSettleDurationMS = 246.0;
 const double _kMaxSettleDurationMS = 600.0;
-const Cubic _kAnimationCurve = easeOut;
+const Cubic _kAnimationCurve = parabolicRise;
 
 class DrawerAnimation extends Animation {
   Stream<double> get onPositionChanged => onValueChanged;
@@ -80,7 +80,6 @@ class DrawerAnimation extends Animation {
 class Drawer extends Component {
   static final Style _style = new Style('''
     position: absolute;
-    z-index: 2;
     top: 0;
     left: 0;
     bottom: 0;
@@ -101,8 +100,7 @@ class Drawer extends Component {
     background-color: ${Grey[50]};
     will-change: transform;
     position: absolute;
-    z-index: 3;
-    width: 256px;
+    width: 304px;
     top: 0;
     left: 0;
     bottom: 0;'''
@@ -145,7 +143,7 @@ class Drawer extends Component {
 
     bool isClosed = _position <= -_kWidth;
     String inlineStyle = 'display: ${isClosed ? 'none' : ''}';
-    String maskInlineStyle = 'opacity: ${(_position / _kWidth + 1) * 0.25}';
+    String maskInlineStyle = 'opacity: ${(_position / _kWidth + 1) * 0.5}';
     String contentInlineStyle = 'transform: translateX(${_position}px)';
 
     Container mask = new Container(

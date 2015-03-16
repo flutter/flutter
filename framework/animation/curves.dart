@@ -21,6 +21,22 @@ class Linear implements Curve {
   }
 }
 
+class ParabolicFall implements Curve {
+  const ParabolicFall();
+
+  double transform(double t) {
+    return -t*t + 1;
+  }
+}
+
+class ParabolicRise implements Curve {
+  const ParabolicRise();
+
+  double transform(double t) {
+    return -(t-1)*(t-1) + 1;
+  }
+}
+
 class Cubic implements Curve {
   final double a;
   final double b;
@@ -52,3 +68,5 @@ const Cubic ease = const Cubic(0.25, 0.1, 0.25, 1.0);
 const Cubic easeIn = const Cubic(0.42, 0.0, 1.0, 1.0);
 const Cubic easeOut = const Cubic(0.0, 0.0, 0.58, 1.0);
 const Cubic easeInOut = const Cubic(0.42, 0.0, 0.58, 1.0);
+const ParabolicRise parabolicRise = const ParabolicRise();
+const ParabolicFall parabolicFall = const ParabolicFall();

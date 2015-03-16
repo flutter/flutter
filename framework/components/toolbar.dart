@@ -13,7 +13,6 @@ class Toolbar extends Component {
     display: flex;
     align-items: center;
     height: 56px;
-    z-index: 1;
     background-color: ${Purple[500]};
     color: white;
     box-shadow: ${Shadow[2]};'''
