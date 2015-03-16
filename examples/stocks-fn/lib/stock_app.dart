@@ -40,6 +40,10 @@ class StocksApp extends App {
     ${typography.white.title};'''
   );
 
+  static Style _stocklistHeight = new Style('''
+    flex: 1;'''
+  );
+
   List<Stock> _sortedStocks;
   bool _isSearching = false;
   bool _isShowingMenu = false;
@@ -137,7 +141,9 @@ class StocksApp extends App {
       ]
     );
 
-    var list = new Stocklist(stocks: _sortedStocks, query: _searchQuery);
+    var list = new StyleNode(
+      new Stocklist(stocks: _sortedStocks, query: _searchQuery),
+      _stocklistHeight);
 
     var fab = new FloatingActionButton(content: new Icon(
       type: 'content/add_white', size: 24), level: 3);

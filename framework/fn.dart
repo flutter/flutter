@@ -52,6 +52,29 @@ class Style {
   Style._internal(this._className);
 }
 
+abstract class ContentNode extends Node {
+  Node content;
+
+  ContentNode(Node content) : this.content = content, super(key: content._key);
+
+  void _sync(Node old, sky.ParentNode host, sky.Node insertBefore) {
+    Node oldContent = old == null ? null : (old as ContentNode).content;
+    content = _syncChild(content, oldContent, host, insertBefore);
+    _root = content._root;
+  }
+
+  void _remove() {
+    _removeChild(content);
+    super._remove();
+  }
+}
+
+class StyleNode extends ContentNode {
+  final Style style;
+
+  StyleNode(Node content, this.style): super(content);
+}
+
 void _parentInsertBefore(sky.ParentNode parent,
                          sky.Node node,
                          sky.Node ref) {
@@ -133,8 +156,7 @@ abstract class Node {
     // new component was built that could re-use some of it. Consider
     // syncing the new VDOM against the old one.
     if (oldNode != null && node._key != oldNode._key) {
-      _trace('_sync(remove) ${node._key}');
-      oldNode._remove();
+      _removeChild(oldNode);
     }
 
     if (node._willSync(oldNode)) {
@@ -207,8 +229,7 @@ typedef GestureEventListener(sky.GestureEvent e);
 typedef PointerEventListener(sky.PointerEvent e);
 typedef EventListener(sky.Event e);
 
-class EventTarget extends Node  {
-  Node content;
+class EventTarget extends ContentNode  {
   final Map<String, sky.EventListener> listeners;
 
   static final Set<String> _registeredEvents = new HashSet<String>();
@@ -270,8 +291,7 @@ class EventTarget extends Node  {
     PointerEventListener onPointerMove,
     PointerEventListener onPointerUp,
     Map<String, sky.EventListener> custom
-  }) : this.content = content,
-       listeners = _createListeners(
+  }) : listeners = _createListeners(
          onWheel: onWheel,
          onGestureFlingCancel: onGestureFlingCancel,
          onGestureFlingStart: onGestureFlingStart,
@@ -285,7 +305,7 @@ class EventTarget extends Node  {
          onPointerUp: onPointerUp,
          custom: custom
        ),
-       super(key: content._key);
+       super(content);
 
   void _handleEvent(sky.Event e) {
     sky.EventListener listener = listeners[e.type];
@@ -318,14 +338,7 @@ class EventTarget extends Node  {
       _ensureDocumentListener(type);
     }
 
-    Node oldContent = old == null ? null : (old as EventTarget).content;
-    content = _syncChild(content, oldContent , host, insertBefore);
-    _root = content._root;
-  }
-
-  void _remove() {
-    _removeChild(content);
-    super._remove();
+    super._sync(old, host, insertBefore);
   }
 }
 
@@ -362,18 +375,18 @@ abstract class Element extends RenderNode {
 
   sky.Node _createNode() => sky.document.createElement(_tagName);
 
+  final List<Node> children;
+  final Style style;
   final String inlineStyle;
 
-  final List<Node> _children;
-  final String _class;
+  String _class;
 
   Element({
     Object key,
     List<Node> children,
-    Style style,
+    this.style,
     this.inlineStyle
-  }) : _class = style == null ? '' : style._className,
-       _children = children == null ? _emptyList : children,
+  }) : this.children = children == null ? _emptyList : children,
        super(key:key) {
 
     if (_isInCheckedMode) {
@@ -383,8 +396,8 @@ abstract class Element extends RenderNode {
 
   void _remove() {
     super._remove();
-    if (_children != null) {
-      for (var child in _children) {
+    if (children != null) {
+      for (var child in children) {
         _removeChild(child);
       }
     }
@@ -392,7 +405,7 @@ abstract class Element extends RenderNode {
 
   void _debugReportDuplicateIds() {
     var idSet = new HashSet<String>();
-    for (var child in _children) {
+    for (var child in children) {
       if (child is Text) {
         continue; // Text nodes all have the same key and are never reordered.
       }
@@ -404,10 +417,30 @@ abstract class Element extends RenderNode {
     }
   }
 
+  void _ensureClass() {
+    if (_class == null) {
+      List<Style> styles = new List<Style>();
+      if (style != null) {
+        styles.add(style);
+      }
+
+      Node parent = _parent;
+      while (parent != null && parent is! RenderNode) {
+        if (parent is StyleNode)
+          styles.add((parent as StyleNode).style);
+
+        parent = parent._parent;
+      }
+
+      _class = styles.map((s) => s._className).join(' ');
+    }
+  }
+
   void _syncNode(RenderNode old) {
     Element oldElement = old as Element;
     sky.Element root = _root as sky.Element;
 
+    _ensureClass();
     if (_class != oldElement._class)
       root.setAttribute('class', _class);
 
@@ -422,9 +455,9 @@ abstract class Element extends RenderNode {
     assert(root != null);
 
     var startIndex = 0;
-    var endIndex = _children.length;
+    var endIndex = children.length;
 
-    var oldChildren = oldElement._children;
+    var oldChildren = oldElement.children;
     var oldStartIndex = 0;
     var oldEndIndex = oldChildren.length;
 
@@ -433,13 +466,13 @@ abstract class Element extends RenderNode {
     Node oldNode = null;
 
     void sync(int atIndex) {
-      _children[atIndex] = _syncChild(currentNode, oldNode, _root, nextSibling);
+      children[atIndex] = _syncChild(currentNode, oldNode, _root, nextSibling);
     }
 
     // Scan backwards from end of list while nodes can be directly synced
     // without reordering.
     while (endIndex > startIndex && oldEndIndex > oldStartIndex) {
-      currentNode = _children[endIndex - 1];
+      currentNode = children[endIndex - 1];
       oldNode = oldChildren[oldEndIndex - 1];
 
       if (currentNode._key != oldNode._key) {
@@ -498,7 +531,7 @@ abstract class Element extends RenderNode {
     // Scan forwards, this time we may re-order;
     nextSibling = root.firstChild;
     while (startIndex < endIndex && oldStartIndex < oldEndIndex) {
-      currentNode = _children[startIndex];
+      currentNode = children[startIndex];
       oldNode = oldChildren[oldStartIndex];
 
       if (currentNode._key == oldNode._key) {
@@ -519,7 +552,7 @@ abstract class Element extends RenderNode {
     // New insertions
     oldNode = null;
     while (startIndex < endIndex) {
-      currentNode = _children[startIndex];
+      currentNode = children[startIndex];
       sync(startIndex);
       startIndex++;
     }

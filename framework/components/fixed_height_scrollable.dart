@@ -9,13 +9,9 @@ import 'dart:sky' as sky;
 import 'scrollable.dart';
 
 abstract class FixedHeightScrollable extends Scrollable {
-  // TODO(rafaelw): This component really shouldn't have an opinion
-  // about how it is sized. The owning component should decide whether
-  // it's explicitly sized or flexible or whatever...
   static final Style _style = new Style('''
     overflow: hidden;
     position: relative;
-    flex: 1;
     will-change: transform;'''
   );
 
