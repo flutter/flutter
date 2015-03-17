@@ -44,10 +44,10 @@ enum StrokeStyle {
 };
 
 enum InterpolationQuality {
-    InterpolationNone = SkPaint::kNone_FilterLevel,
-    InterpolationLow = SkPaint::kLow_FilterLevel,
-    InterpolationMedium = SkPaint::kMedium_FilterLevel,
-    InterpolationHigh = SkPaint::kHigh_FilterLevel,
+    InterpolationNone = kNone_SkFilterQuality,
+    InterpolationLow = kLow_SkFilterQuality,
+    InterpolationMedium = kMedium_SkFilterQuality,
+    InterpolationHigh = kHigh_SkFilterQuality,
 #if USE(LOW_QUALITY_IMAGE_INTERPOLATION)
     InterpolationDefault = InterpolationLow,
 #else

@@ -980,7 +980,7 @@ void GraphicsContext::drawPicture(PassRefPtr<SkPicture> picture, const FloatRect
     RefPtr<SkPictureImageFilter> pictureFilter = adoptRef(SkPictureImageFilter::Create(picture.get(), sourceBounds));
     SkMatrix layerScale;
     layerScale.setScale(deviceDest.width() / src.width(), deviceDest.height() / src.height());
-    RefPtr<SkMatrixImageFilter> matrixFilter = adoptRef(SkMatrixImageFilter::Create(layerScale, SkPaint::kLow_FilterLevel, pictureFilter.get()));
+    RefPtr<SkMatrixImageFilter> matrixFilter = adoptRef(SkMatrixImageFilter::Create(layerScale, kLow_SkFilterQuality, pictureFilter.get()));
     SkPaint picturePaint;
     picturePaint.setXfermodeMode(WebCoreCompositeToSkiaComposite(op, blendMode));
     picturePaint.setImageFilter(matrixFilter.get());
@@ -1791,7 +1791,7 @@ void GraphicsContext::preparePaintForDrawRectToRect(
         resampling = InterpolationLow;
     }
     resampling = limitInterpolationQuality(this, resampling);
-    paint->setFilterLevel(static_cast<SkPaint::FilterLevel>(resampling));
+    paint->setFilterQuality(static_cast<SkFilterQuality>(resampling));
 }
 
 } // namespace blink

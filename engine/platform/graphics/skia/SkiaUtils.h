@@ -53,11 +53,11 @@ SkXfermode::Mode PLATFORM_EXPORT WebCoreCompositeToSkiaComposite(CompositeOperat
 // move this guy into SkColor.h
 SkColor SkPMColorToColor(SkPMColor);
 
-inline SkPaint::FilterLevel WebCoreInterpolationQualityToSkFilterLevel(InterpolationQuality quality)
+inline SkFilterQuality WebCoreInterpolationQualityToSkFilterQuality(InterpolationQuality quality)
 {
     // FIXME: this reflects existing client mappings, but should probably
     // be expanded to map higher level interpolations more accurately.
-    return quality != InterpolationNone ? SkPaint::kLow_FilterLevel : SkPaint::kNone_FilterLevel;
+    return quality != InterpolationNone ? kLow_SkFilterQuality : kNone_SkFilterQuality;
 }
 
 // Skia has problems when passed infinite, etc floats, filter them to 0.

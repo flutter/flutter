@@ -27,10 +27,10 @@ GraphicsContextState::GraphicsContextState()
     m_strokePaint.setStrokeCap(SkPaint::kDefault_Cap);
     m_strokePaint.setStrokeJoin(SkPaint::kDefault_Join);
     m_strokePaint.setStrokeMiter(SkFloatToScalar(m_strokeData.miterLimit()));
-    m_strokePaint.setFilterLevel(WebCoreInterpolationQualityToSkFilterLevel(m_interpolationQuality));
+    m_strokePaint.setFilterQuality(WebCoreInterpolationQualityToSkFilterQuality(m_interpolationQuality));
     m_strokePaint.setAntiAlias(m_shouldAntialias);
     m_fillPaint.setColor(applyAlpha(m_fillColor.rgb()));
-    m_fillPaint.setFilterLevel(WebCoreInterpolationQualityToSkFilterLevel(m_interpolationQuality));
+    m_fillPaint.setFilterQuality(WebCoreInterpolationQualityToSkFilterQuality(m_interpolationQuality));
     m_fillPaint.setAntiAlias(m_shouldAntialias);
 }
 
@@ -237,8 +237,8 @@ void GraphicsContextState::setCompositeOperation(CompositeOperator compositeOper
 void GraphicsContextState::setInterpolationQuality(InterpolationQuality quality)
 {
     m_interpolationQuality = quality;
-    m_strokePaint.setFilterLevel(WebCoreInterpolationQualityToSkFilterLevel(quality));
-    m_fillPaint.setFilterLevel(WebCoreInterpolationQualityToSkFilterLevel(quality));
+    m_strokePaint.setFilterQuality(WebCoreInterpolationQualityToSkFilterQuality(quality));
+    m_fillPaint.setFilterQuality(WebCoreInterpolationQualityToSkFilterQuality(quality));
 }
 
 void GraphicsContextState::setShouldAntialias(bool shouldAntialias)
