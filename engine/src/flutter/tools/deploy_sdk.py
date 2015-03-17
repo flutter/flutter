@@ -160,6 +160,13 @@ def main():
     copy(os.path.join(build_dir, 'gen/sky'),
         sdk_path('packages/sky/lib'), gen_filter)
 
+    # Sky SDK additions:
+    copy_or_link(src_path('sky/engine/bindings/builtin.dart'),
+        sdk_path('packages/sky/sdk_additions/dart_sky_builtins.dart'))
+    bindings_path = os.path.join(build_dir, 'gen/sky/bindings')
+    copy_or_link(os.path.join(bindings_path, 'dart_sky.dart'),
+        sdk_path('packages/sky/sdk_additions/dart_sky.dart'))
+
     # Not used in the dev environment.
     copy_or_link(src_path('sky/sdk/tools/sky'),
         sdk_path('packages/sky/bin/sky'))
@@ -170,15 +177,26 @@ def main():
     copy(os.path.join(build_dir, 'gen/mojo'), sdk_path('packages/mojo/lib'),
         gen_filter)
 
+    # Mojo SDK additions:
+    copy_or_link(src_path('mojo/public/dart/bindings.dart'),
+        sdk_path('packages/mojo/sdk_additions/dart_mojo_bindings.dart'))
+    copy_or_link(src_path('mojo/public/dart/dart_mojo_core.dart'),
+        sdk_path('packages/mojo/sdk_additions/dart_mojo_core.dart'))
+
     if not skip_apks:
         ensure_dir_exists(sdk_path('apks'))
-        shutil.copy(os.path.join(build_dir, 'apks', 'SkyShell.apk'),
+        shutil.copy(os.path.join(build_dir, 'apks', 'SkyDemo.apk'),
             sdk_path('apks'))
 
     if generate_licenses:
         with open(sdk_path('LICENSES.sky'), 'w') as license_file:
             subprocess.check_call([src_path('tools/licenses.py'), 'credits'],
                 stdout=license_file)
+
+        copy_or_link(src_path('AUTHORS'), sdk_path('packages/mojo/AUTHORS'))
+        copy_or_link(src_path('LICENSE'), sdk_path('packages/mojo/LICENSE'))
+        copy_or_link(src_path('AUTHORS'), sdk_path('packages/sky/AUTHORS'))
+        copy_or_link(src_path('LICENSE'), sdk_path('packages/sky/LICENSE'))
 
     if args.fake_pub_get_into:
         packages_dir = os.path.abspath(args.fake_pub_get_into)
