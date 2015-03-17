@@ -1,10 +1,12 @@
-part of stocksapp;
+// Copyright 2015 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+import 'dart:math';
+import 'package:sky/framework/fn.dart';
 
 class StockArrow extends Component {
-
-  double percentChange;
-
-  static Style _style = new Style('''
+  static final Style _style = new Style('''
     width: 40px;
     height: 40px;
     display: flex;
@@ -15,7 +17,7 @@ class StockArrow extends Component {
     border: 1px solid transparent;'''
   );
 
-  static Style _upStyle = new Style('''
+  static final Style _upStyle = new Style('''
     width: 0;
     height: 0;
     border-left: 9px solid transparent;
@@ -24,7 +26,7 @@ class StockArrow extends Component {
     border-bottom: 9px solid white;'''
   );
 
-  static Style _downStyle = new Style('''
+  static final Style _downStyle = new Style('''
     width: 0;
     height: 0;
     border-left: 9px solid transparent;
@@ -33,8 +35,11 @@ class StockArrow extends Component {
     border-top: 9px solid white'''
   );
 
+  double percentChange;
+
   StockArrow({ Object key, this.percentChange }) : super(key: key);
 
+  // TODO(abarth): These should use sky/framework/theme/colors.dart.
   final List<String> _kRedColors = [
     '#E57373',
     '#EF5350',
@@ -45,6 +50,7 @@ class StockArrow extends Component {
     '#B71C1C',
   ];
 
+  // TODO(abarth): These should use sky/framework/theme/colors.dart.
   final List<String> _kGreenColors = [
     '#81C784',
     '#66BB6A',

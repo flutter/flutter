@@ -70,7 +70,7 @@
 <script>
 import "dart:sky";
 import "dart:math";
-import "../data/stocks.dart" as model;
+import "../stocks-fn/lib/stock_data.dart" as model;
 
 List pick(List list, int count) {
   var rng = new Random();

@@ -1,10 +1,15 @@
-part of stocksapp;
+// Copyright 2015 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+import 'package:sky/framework/components/material.dart';
+import 'package:sky/framework/fn.dart';
+import 'package:sky/framework/theme/typography.dart' as typography;
+import 'stock_arrow.dart';
+import 'stock_data.dart';
 
 class StockRow extends Component {
-
-  Stock stock;
-
-  static Style _style = new Style('''
+  static final Style _style = new Style('''
     transform: translateX(0);
     display: flex;
     align-items: center;
@@ -15,19 +20,21 @@ class StockRow extends Component {
     padding-bottom: 20px;'''
   );
 
-  static Style _tickerStyle = new Style('''
+  static final Style _tickerStyle = new Style('''
     flex: 1;'''
   );
 
-  static Style _lastSaleStyle = new Style('''
+  static final Style _lastSaleStyle = new Style('''
     text-align: right;
     padding-right: 16px;'''
   );
 
-  static Style _changeStyle = new Style('''
+  static final Style _changeStyle = new Style('''
     ${typography.black.caption};
     text-align: right;'''
   );
+
+  Stock stock;
 
   StockRow({Stock stock}) : super(key: stock.symbol) {
     this.stock = stock;
