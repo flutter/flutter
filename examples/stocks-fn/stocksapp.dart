@@ -109,7 +109,7 @@ class StocksApp extends App {
         new Icon(key: 'menu', style: _iconStyle,
             size: 24,
             type: 'navigation/menu_white')
-          ..events.listen('click', _drawerAnimation.toggle),
+          ..events.listen('gesturetap', _drawerAnimation.toggle),
         new Container(
           style: _titleStyle,
           children: [title]
@@ -117,7 +117,7 @@ class StocksApp extends App {
         new Icon(key: 'search', style: _iconStyle,
             size: 24,
             type: 'action/search_white')
-          ..events.listen('click', _handleSearchClick),
+          ..events.listen('gesturetap', _handleSearchClick),
         new Icon(key: 'more_white', style: _iconStyle,
             size: 24,
             type: 'navigation/more_vert_white')
