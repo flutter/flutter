@@ -34,7 +34,8 @@ class DrawerAnimation extends Animation {
   void handlePointerDown(_) => stop();
 
   void handlePointerMove(sky.PointerEvent event) {
-    assert(!isAnimating);
+    if (isAnimating)
+      return;
     value = math.min(0.0, math.max(value + event.dx, -_kWidth));
   }
 

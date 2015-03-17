@@ -51,7 +51,7 @@ class Radio extends ButtonBase {
     this.value,
     this.groupValue
   }) : super(key: key) {
-    events.listen('click', _handleClick);
+    events.listen('gesturetap', _handleClick);
   }
 
   Node build() {

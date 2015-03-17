@@ -45,25 +45,18 @@ class SplashAnimation {
 }
 
 class InkSplash extends Component {
-  static final Style _style = new Style('''
+  static final Style _clipperStyle = new Style('''
     position: absolute;
     pointer-events: none;
     overflow: hidden;
     top: 0;
     left: 0;
     bottom: 0;
-    right: 0;
-  ''');
+    right: 0;''');
 
   static final Style _splashStyle = new Style('''
     position: absolute;
-    background-color: rgba(0, 0, 0, 0.4);
-    border-radius: 0;
-    top: 0;
-    left: 0;
-    height: 0;
-    width: 0;
-  ''');
+    background-color: rgba(0, 0, 0, 0.4);''');
 
   Stream<String> onStyleChanged;
 
@@ -94,7 +87,7 @@ class InkSplash extends Component {
     _ensureListening();
 
     return new Container(
-      style: _style,
+      style: _clipperStyle,
       children: [
         new Container(
           inlineStyle: _inlineStyle,

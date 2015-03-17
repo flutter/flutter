@@ -9,15 +9,6 @@ import 'dart:sky' as sky;
 import 'ink_splash.dart';
 
 class Material extends Component {
-  static final Style _splashesStyle = new Style('''
-    transform: translateX(0);
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0'''
-  );
-
   static final List<Style> shadowStyle = [
     null,
     new Style('box-shadow: ${Shadow[1]}'),
@@ -49,23 +40,17 @@ class Material extends Component {
     List<Node> childrenIncludingSplashes = [];
 
     if (_splashes != null) {
-      childrenIncludingSplashes.add(new Container(
-        style: _splashesStyle,
-        children: new List.from(_splashes.map(
-            (s) => new InkSplash(s.onStyleChanged))),
-        key: 'Splashes'
-      ));
+      childrenIncludingSplashes.addAll(
+          _splashes.map((s) => new InkSplash(s.onStyleChanged)));
     }
 
     if (children != null)
       childrenIncludingSplashes.addAll(children);
 
     return new Container(
-        key: 'Material',
         style: level > 0 ? style.extend(shadowStyle[level]) : style,
         inlineStyle: inlineStyle,
-        children: childrenIncludingSplashes
-    );
+        children: childrenIncludingSplashes);
   }
 
   sky.ClientRect _getBoundingRect() => (getRoot() as sky.Element).getBoundingClientRect();
