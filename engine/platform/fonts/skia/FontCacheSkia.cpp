@@ -69,6 +69,58 @@ static tmp::StreamType streamForFontconfigInterfaceId(int fontconfigInterfaceId)
 
 namespace blink {
 
+static int toSkiaWeight(FontWeight weight)
+{
+    switch (weight) {
+    case FontWeight100:
+        return SkFontStyle::kThin_Weight;
+    case FontWeight200:
+        return SkFontStyle::kExtraLight_Weight;
+    case FontWeight300:
+        return SkFontStyle::kLight_Weight;
+    case FontWeight400:
+        return SkFontStyle::kNormal_Weight;
+    case FontWeight500:
+        return SkFontStyle::kMedium_Weight;
+    case FontWeight600:
+        return SkFontStyle::kSemiBold_Weight;
+    case FontWeight700:
+        return SkFontStyle::kBold_Weight;
+    case FontWeight800:
+        return SkFontStyle::kExtraBold_Weight;
+    case FontWeight900:
+        return SkFontStyle::kBlack_Weight;
+    }
+    ASSERT_NOT_REACHED();
+    return SkFontStyle::kNormal_Weight;
+}
+
+static SkFontStyle::Slant toSkiaSlant(FontStyle style)
+{
+    switch (style) {
+    case FontStyleNormal:
+        return SkFontStyle::kUpright_Slant;
+    case FontStyleItalic:
+        return SkFontStyle::kItalic_Slant;
+    }
+    ASSERT_NOT_REACHED();
+    return SkFontStyle::kUpright_Slant;
+}
+
+static int toSkiaWidth(FontStretch stretch)
+{
+    // Numeric values matching OS/2 & Windows Metrics usWidthClass table.
+    // https://www.microsoft.com/typography/otspec/os2.htm
+    return static_cast<int>(stretch);
+}
+
+static SkFontStyle toSkiaFontStyle(const FontDescription& fontDescription)
+{
+    return SkFontStyle(toSkiaWeight(fontDescription.weight()),
+                       toSkiaWidth(fontDescription.stretch()),
+                       toSkiaSlant(fontDescription.style()));
+}
+
 void FontCache::platformInit()
 {
 }
@@ -190,15 +242,22 @@ PassRefPtr<SkTypeface> FontCache::createTypeface(const FontDescription& fontDesc
         name = family.utf8();
     }
 
-    int style = SkTypeface::kNormal;
-    if (fontDescription.weight() >= FontWeight600)
-        style |= SkTypeface::kBold;
-    if (fontDescription.style())
-        style |= SkTypeface::kItalic;
+    SkFontStyle style = toSkiaFontStyle(fontDescription);
+    RefPtr<SkFontMgr> fm = adoptRef(SkFontMgr::RefDefault());
+    RefPtr<SkTypeface> typeface = adoptRef(fm->matchFamilyStyle(name.data(), style));
+    if (typeface)
+        return typeface.release();
 
-    // FIXME: Use m_fontManager, SkFontStyle and matchFamilyStyle instead of
-    // CreateFromName on all platforms.
-    return adoptRef(SkTypeface::CreateFromName(name.data(), static_cast<SkTypeface::Style>(style)));
+    int legacyStyle = SkTypeface::kNormal;
+    if (fontDescription.weight() >= FontWeight600)
+        legacyStyle |= SkTypeface::kBold;
+    if (fontDescription.style())
+        legacyStyle |= SkTypeface::kItalic;
+
+    // FIXME: Use fm, SkFontStyle and matchFamilyStyle instead of this legacy
+    // API. To make this work, we need to understand the extra fallback behavior
+    // in CreateFromName.
+    return adoptRef(SkTypeface::CreateFromName(name.data(), static_cast<SkTypeface::Style>(legacyStyle)));
 }
 
 #if !OS(WIN)
