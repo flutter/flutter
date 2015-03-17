@@ -24,8 +24,8 @@
 import 'dart:async';
 import 'dart:core';
 import 'dart:sky';
-import 'package:examples/echo_terminal/terminal_client.mojom.dart' as terminal;
-import '/sky/framework/embedder.dart';
+import 'package:mojo/services/terminal/public/interfaces/terminal_client.mojom.dart' as terminal;
+import 'package:sky/framework/embedder.dart';
 import 'terminal_display.dart';
 import 'terminal_file_impl.dart';
 
