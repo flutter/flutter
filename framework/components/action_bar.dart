@@ -16,7 +16,6 @@ class ActionBar extends Component {
     height: 56px;
     padding: 0 8px;
     background-color: ${Purple[500]};
-    color: white;
     padding-top: ${kStatusBarHeight}px;
     box-shadow: ${Shadow[2]};'''
   );

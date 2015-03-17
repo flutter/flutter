@@ -15,7 +15,6 @@ class FloatingActionButton extends Component {
     width: 56px;
     height: 56px;
     background-color: ${Red[500]};
-    color: white;
     border-radius: 28px;'''
   );
   static final Style _clipStyle = new Style('''

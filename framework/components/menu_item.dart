@@ -30,10 +30,8 @@ class MenuItem extends ButtonBase {
   );
 
   static final Style _labelStyle = new Style('''
-      font-family: 'Roboto Medium', 'Helvetica';
-      color: #212121;
-      padding: 0px 16px;
-      flex: 1;'''
+    padding: 0px 16px;
+    flex: 1;'''
   );
 
   List<Node> children;

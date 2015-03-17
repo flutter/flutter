@@ -23,9 +23,7 @@ class DrawerHeader extends Component {
   );
 
   static final Style _labelStyle = new Style('''
-    padding: 0 16px;
-    font-family: 'Roboto Medium', 'Helvetica';
-    color: #212121;'''
+    padding: 0 16px;'''
   );
 
   List<Node> children;
