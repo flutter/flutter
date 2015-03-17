@@ -5,8 +5,8 @@
 import 'dart:async';
 import 'dart:core';
 import 'dart:mojo.core';
-import 'package:services/files/file.mojom.dart' as files;
-import 'package:services/files/types.mojom.dart' as files;
+import 'package:mojo/services/files/public/interfaces/file.mojom.dart' as files;
+import 'package:mojo/services/files/public/interfaces/types.mojom.dart' as files;
 
 import 'terminal_display.dart';
 
