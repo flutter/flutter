@@ -16,8 +16,7 @@ class StockRow extends Component {
   );
 
   static Style _tickerStyle = new Style('''
-    flex: 1;
-    font-family: 'Roboto Medium', 'Helvetica';'''
+    flex: 1;'''
   );
 
   static Style _lastSaleStyle = new Style('''
@@ -26,7 +25,7 @@ class StockRow extends Component {
   );
 
   static Style _changeStyle = new Style('''
-    color: #8A8A8A;
+    ${typography.black.caption};
     text-align: right;'''
   );
 
