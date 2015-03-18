@@ -14,6 +14,7 @@ import 'package:sky/framework/fn.dart';
 import 'package:sky/framework/theme/typography.dart' as typography;
 import 'stock_data.dart';
 import 'stock_list.dart';
+import 'stock_menu.dart';
 
 class StocksApp extends App {
 
@@ -39,6 +40,7 @@ class StocksApp extends App {
 
   List<Stock> _sortedStocks;
   bool _isSearching = false;
+  bool _isShowingMenu = false;
   String _searchQuery;
 
   StocksApp() : super() {
@@ -49,6 +51,12 @@ class StocksApp extends App {
   void _handleSearchClick(_) {
     setState(() {
       _isSearching = !_isSearching;
+    });
+  }
+
+  void _handleMenuClick(_) {
+    setState(() {
+      _isShowingMenu = !_isShowingMenu;
     });
   }
 
@@ -116,6 +124,7 @@ class StocksApp extends App {
         new Icon(key: 'more_white', style: _iconStyle,
             size: 24,
             type: 'navigation/more_vert_white')
+          ..events.listen('gesturetap', _handleMenuClick),
       ]
     );
 
@@ -124,17 +133,19 @@ class StocksApp extends App {
     var fab = new FloatingActionButton(content: new Icon(
       type: 'content/add_white', size: 24), level: 3);
 
-    return new Container(
-      key: 'StocksApp',
-      children: [
-        new Container(
-          key: 'Content',
-          style: _style,
-          children: [toolbar, list]
-        ),
-        fab,
-        drawer,
-      ]
-    );
+    var children = [
+      new Container(
+        key: 'Content',
+        style: _style,
+        children: [toolbar, list]
+      ),
+      fab,
+      drawer
+    ];
+
+    if (_isShowingMenu)
+      children.add(new StockMenu());
+
+    return new Container(key: 'StocksApp', children: children);
   }
 }
