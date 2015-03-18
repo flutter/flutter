@@ -10,6 +10,7 @@ import 'package:sky/framework/components/icon.dart';
 import 'package:sky/framework/components/input.dart';
 import 'package:sky/framework/components/menu_divider.dart';
 import 'package:sky/framework/components/menu_item.dart';
+import 'package:sky/framework/components/popup_menu.dart';
 import 'package:sky/framework/fn.dart';
 import 'package:sky/framework/theme/typography.dart' as typography;
 import 'stock_data.dart';
@@ -18,7 +19,8 @@ import 'stock_menu.dart';
 
 class StocksApp extends App {
 
-  DrawerController _DrawerController = new DrawerController();
+  DrawerController _drawerController = new DrawerController();
+  PopupMenuController _menuController = new PopupMenuController();
 
   static Style _style = new Style('''
     display: flex;
@@ -56,7 +58,7 @@ class StocksApp extends App {
 
   void _handleMenuClick(_) {
     setState(() {
-      _isShowingMenu = !_isShowingMenu;
+      _menuController.open();
     });
   }
 
@@ -68,7 +70,7 @@ class StocksApp extends App {
 
   Node build() {
     var drawer = new Drawer(
-      controller: _DrawerController,
+      controller: _drawerController,
       level: 3,
       children: [
         new DrawerHeader(
@@ -112,7 +114,7 @@ class StocksApp extends App {
         new Icon(key: 'menu', style: _iconStyle,
             size: 24,
             type: 'navigation/menu_white')
-          ..events.listen('gesturetap', _DrawerController.toggle),
+          ..events.listen('gesturetap', _drawerController.toggle),
         new Container(
           style: _titleStyle,
           children: [title]
@@ -143,10 +145,13 @@ class StocksApp extends App {
       drawer
     ];
 
-    if (_isShowingMenu) {
-      children.add(new StockMenu()..events.listen('gesturetap', (_) {
+    if (_menuController.isOpen) {
+      children.add(new StockMenu(controller: _menuController)
+                   ..events.listen('gesturetap', (_) {
+        // TODO(abarth): We should close the menu when you tap away from the
+        // menu rather than when you tap on the menu.
         setState(() {
-          _isShowingMenu = false;
+          _menuController.close();
         });
       }));
     }
