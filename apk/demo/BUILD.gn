@@ -31,5 +31,11 @@ sky_apk("demo") {
   android_manifest = "AndroidManifest.xml"
   deps = [
     ":java",
+    ":demo_resources",
   ]
+}
+
+android_resources("demo_resources") {
+  resource_dirs = [ "res" ]
+  android_manifest = "AndroidManifest.xml"
 }
