@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../animation/animation.dart';
+import '../animation/animated_value.dart';
 import '../animation/curves.dart';
 import '../fn.dart';
 import '../theme/colors.dart';
@@ -18,34 +18,30 @@ const double _kBaseSettleDurationMS = 246.0;
 const double _kMaxSettleDurationMS = 600.0;
 const Curve _kAnimationCurve = parabolicRise;
 
-class DrawerAnimation extends Animation {
-  Stream<double> get onPositionChanged => onValueChanged;
+class DrawerController {
+  final AnimatedValue position = new AnimatedValue(-_kWidth);
 
-  bool get _isMostlyClosed => value <= -_kWidth / 2;
-
-  DrawerAnimation() {
-    value = -_kWidth;
-  }
+  bool get _isMostlyClosed => position.value <= -_kWidth / 2;
 
   void toggle(_) => _isMostlyClosed ? _open() : _close();
 
   void handleMaskTap(_) => _close();
 
-  void handlePointerDown(_) => stop();
+  void handlePointerDown(_) => position.stop();
 
   void handlePointerMove(sky.PointerEvent event) {
-    if (isAnimating)
+    if (position.isAnimating)
       return;
-    value = math.min(0.0, math.max(value + event.dx, -_kWidth));
+    position.value = math.min(0.0, math.max(position.value + event.dx, -_kWidth));
   }
 
   void handlePointerUp(_) {
-    if (!isAnimating)
+    if (!position.isAnimating)
       _settle();
   }
 
   void handlePointerCancel(_) {
-    if (!isAnimating)
+    if (!position.isAnimating)
       _settle();
   }
 
@@ -56,11 +52,11 @@ class DrawerAnimation extends Animation {
   void _settle() => _isMostlyClosed ? _close() : _open();
 
   void _animateToPosition(double targetPosition) {
-    double distance = (targetPosition - value).abs();
+    double distance = (targetPosition - position.value).abs();
     if (distance != 0) {
       double targetDuration = distance / _kWidth * _kBaseSettleDurationMS;
       double duration = math.min(targetDuration, _kMaxSettleDurationMS);
-      animateTo(targetPosition, duration, curve: _kAnimationCurve);
+      position.animateTo(targetPosition, duration, curve: _kAnimationCurve);
     }
   }
 
@@ -71,10 +67,10 @@ class DrawerAnimation extends Animation {
       return;
 
     double targetPosition = direction < 0.0 ? -_kWidth : 0.0;
-    double distance = (targetPosition - value).abs();
+    double distance = (targetPosition - position.value).abs();
     double duration = distance / velocityX;
 
-    animateTo(targetPosition, duration, curve: linear);
+    position.animateTo(targetPosition, duration, curve: linear);
   }
 }
 
@@ -101,58 +97,49 @@ class Drawer extends Component {
     background-color: ${Grey[50]};
     will-change: transform;
     position: absolute;
-    width: 304px;
+    width: ${_kWidth}px;
     top: 0;
     left: 0;
     bottom: 0;'''
   );
 
-  DrawerAnimation animation;
   List<Node> children;
   int level;
+  DrawerController controller;
+
+  AnimatedValueListener _position;
 
   Drawer({
     Object key,
-    this.animation,
+    this.controller,
     this.children,
     this.level: 0
   }) : super(key: key) {
-    events.listen('pointerdown', animation.handlePointerDown);
-    events.listen('pointermove', animation.handlePointerMove);
-    events.listen('pointerup', animation.handlePointerUp);
-    events.listen('pointercancel', animation.handlePointerCancel);
+    events.listen('pointerdown', controller.handlePointerDown);
+    events.listen('pointermove', controller.handlePointerMove);
+    events.listen('pointerup', controller.handlePointerUp);
+    events.listen('pointercancel', controller.handlePointerCancel);
+    _position = new AnimatedValueListener(this, controller.position);
   }
 
-  double _position = -_kWidth;
-
-  bool _listening = false;
-
-  void _ensureListening() {
-    if (_listening)
-      return;
-
-    _listening = true;
-    animation.onPositionChanged.listen((position) {
-      setState(() {
-        _position = position;
-      });
-    });
+  void didUnmount() {
+    _position.stopListening();
   }
 
   Node build() {
-    _ensureListening();
+    _position.ensureListening();
 
-    bool isClosed = _position <= -_kWidth;
+    bool isClosed = _position.value <= -_kWidth;
     String inlineStyle = 'display: ${isClosed ? 'none' : ''}';
-    String maskInlineStyle = 'opacity: ${(_position / _kWidth + 1) * 0.5}';
-    String contentInlineStyle = 'transform: translateX(${_position}px)';
+    String maskInlineStyle = 'opacity: ${(_position.value / _kWidth + 1) * 0.5}';
+    String contentInlineStyle = 'transform: translateX(${_position.value}px)';
 
     Container mask = new Container(
       key: 'Mask',
       style: _maskStyle,
       inlineStyle: maskInlineStyle
-    )..events.listen('gesturetap', animation.handleMaskTap)
-     ..events.listen('gestureflingstart', animation.handleFlingStart);
+    )..events.listen('gesturetap', controller.handleMaskTap)
+     ..events.listen('gestureflingstart', controller.handleFlingStart);
 
     Material content = new Material(
       key: 'Content',

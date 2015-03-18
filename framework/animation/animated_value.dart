@@ -2,11 +2,20 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import '../fn.dart';
 import 'curves.dart';
 import 'dart:async';
 import 'generators.dart';
 
-class Animation {
+class AnimatedValue {
+  StreamController _controller = new StreamController(sync: true);
+  AnimationGenerator _animation;
+  double _value;
+
+  AnimatedValue(double initial) {
+    value = initial;
+  }
+
   Stream<double> get onValueChanged => _controller.stream;
 
   double get value => _value;
@@ -17,12 +26,6 @@ class Animation {
   }
 
   bool get isAnimating => _animation != null;
-
-  StreamController _controller = new StreamController(sync: true);
-
-  AnimationGenerator _animation;
-
-  double _value;
 
   void _setValue(double value) {
     _value = value;
@@ -50,5 +53,30 @@ class Animation {
     _animation.onTick.listen(_setValue, onDone: () {
       _animation = null;
     });
+  }
+}
+
+class AnimatedValueListener {
+  final Component _component;
+  final AnimatedValue _value;
+  StreamSubscription<double> _subscription;
+
+  AnimatedValueListener(this._component, this._value);
+
+  double get value => _value == null ? null : _value.value;
+
+  void ensureListening() {
+    if (_subscription != null || _value == null)
+      return;
+    _subscription = _value.onValueChanged.listen((_) {
+      _component.scheduleBuild();
+    });
+  }
+
+  void stopListening() {
+    if (_subscription == null)
+      return;
+    _subscription.cancel();
+    _subscription = null;
   }
 }

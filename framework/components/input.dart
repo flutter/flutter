@@ -52,7 +52,7 @@ class Input extends Component {
   }
 
   void _handleTextUpdated() {
-    setState(() {});
+    scheduleBuild();
     if (_value != _editableValue.text) {
       _value = _editableValue.text;
       if (onChanged != null)

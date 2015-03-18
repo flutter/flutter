@@ -679,6 +679,10 @@ abstract class Component extends Node {
     _syncInternal();
   }
 
+  void scheduleBuild() {
+    setState(() {});
+  }
+
   void setState(Function fn()) {
     assert(_vdom != null || _defunct); // cannot setState before mounting.
     _stateful = true;

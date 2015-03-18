@@ -18,7 +18,7 @@ import 'stock_menu.dart';
 
 class StocksApp extends App {
 
-  DrawerAnimation _drawerAnimation = new DrawerAnimation();
+  DrawerController _DrawerController = new DrawerController();
 
   static Style _style = new Style('''
     display: flex;
@@ -68,7 +68,7 @@ class StocksApp extends App {
 
   Node build() {
     var drawer = new Drawer(
-      animation: _drawerAnimation,
+      controller: _DrawerController,
       level: 3,
       children: [
         new DrawerHeader(
@@ -112,7 +112,7 @@ class StocksApp extends App {
         new Icon(key: 'menu', style: _iconStyle,
             size: 24,
             type: 'navigation/menu_white')
-          ..events.listen('gesturetap', _drawerAnimation.toggle),
+          ..events.listen('gesturetap', _DrawerController.toggle),
         new Container(
           style: _titleStyle,
           children: [title]
@@ -143,8 +143,13 @@ class StocksApp extends App {
       drawer
     ];
 
-    if (_isShowingMenu)
-      children.add(new StockMenu());
+    if (_isShowingMenu) {
+      children.add(new StockMenu()..events.listen('gesturetap', (_) {
+        setState(() {
+          _isShowingMenu = false;
+        });
+      }));
+    }
 
     return new Container(key: 'StocksApp', children: children);
   }
