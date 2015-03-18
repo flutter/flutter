@@ -85,6 +85,11 @@ def link(from_root, to_root, filter_func=None):
     os.symlink(from_root, to_root)
 
 
+def make_relative_symlink(source, link_name):
+    rel_source = os.path.relpath(source, os.path.dirname(link_name))
+    os.symlink(rel_source, link_name)
+
+
 def confirm(prompt):
     response = raw_input('%s [N]|y: ' % prompt)
     return response and response.lower() == 'y'
@@ -117,6 +122,7 @@ def main():
         default=os.path.join(SRC_ROOT, DEFAULT_REL_BUILD_DIR))
     parser.add_argument('--non-interactive', action='store_true')
     parser.add_argument('--dev-environment', action='store_true')
+    parser.add_argument('--commit', action='store_true')
     parser.add_argument('--fake-pub-get-into', action='store', type=str)
     args = parser.parse_args()
 
@@ -129,7 +135,7 @@ def main():
     # These are separate ideas but don't need a separate flag yet.
     use_links = args.dev_environment
     skip_apks = args.dev_environment
-    should_commit = not args.dev_environment
+    should_commit = args.commit
     generate_licenses = not args.dev_environment
 
     # We save a bunch of time in --dev-environment mode by symlinking whole
@@ -201,9 +207,9 @@ def main():
     if args.fake_pub_get_into:
         packages_dir = os.path.abspath(args.fake_pub_get_into)
         ensure_dir_exists(packages_dir)
-        os.symlink(sdk_path('packages/mojo/lib'),
+        make_relative_symlink(sdk_path('packages/mojo/lib'),
             os.path.join(packages_dir, 'mojo'))
-        os.symlink(sdk_path('packages/sky/lib'),
+        make_relative_symlink(sdk_path('packages/sky/lib'),
             os.path.join(packages_dir, 'sky'))
 
     if should_commit:

@@ -21,7 +21,7 @@ public class SkyDemoActivity extends SkyActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        String url = "https://domokit.github.io/home";
+        String url = "https://domokit.github.io/sky_home";
         Intent intent = getIntent();
         if (Intent.ACTION_VIEW.equals(intent.getAction())) {
             Uri skyUri = intent.getData();

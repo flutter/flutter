@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../../framework/fn.dart';
-import '../../framework/components/input.dart';
+import 'package:sky/framework/fn.dart';
+import 'package:sky/framework/components/input.dart';
 
 class InputApp extends App {
   Node build() {
