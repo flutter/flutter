@@ -1,0 +1,39 @@
+<!--
+// Copyright 2015 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+-->
+<template>
+  <style>
+  :host([level="1"]) {
+    box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+  }
+  :host([level="2"]) {
+    box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
+  }
+  :host([level="3"]) {
+    box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
+  }
+  :host([level="4"]) {
+    box-shadow: 0 14px 28px rgba(0,0,0,0.25), 0 10px 10px rgba(0,0,0,0.22);
+  }
+  :host([level="5"]) {
+    box-shadow: 0 19px 38px rgba(0,0,0,0.30), 0 15px 12px rgba(0,0,0,0.22);
+  }
+  </style>
+</template>
+<script>
+import "dart:sky";
+
+HTMLStyleElement _kStyleElement;
+
+void applyTo(ShadowRoot shadowRoot) {
+  shadowRoot.appendChild(_kStyleElement.cloneNode(deep: true));
+}
+
+_init(script) {
+  HTMLTemplateElement template = script.owner.querySelector('template');
+  _kStyleElement = template.content.querySelector('style');
+}
+</script>
+</sky-element>

@@ -1,0 +1,166 @@
+<!--
+// Copyright 2015 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+-->
+<import src="/sky/framework/elements/sky-element.sky" />
+<import src="/sky/framework/elements/sky-scrollable.sky" />
+<sky-element>
+<template>
+  <style>
+    #control {
+      height: -webkit-fill-available;
+      background-color: black;
+      color: rgb(255, 191, 0);
+      font-family: 'Courier', 'monospace';
+    }
+    .line {
+      white-space: pre;
+    }
+  </style>
+  <sky-scrollable id="control" contenteditable />
+</template>
+<script>
+import 'dart:async';
+import 'dart:core';
+import 'dart:sky';
+import 'package:mojo/services/terminal/public/interfaces/terminal_client.mojom.dart' as terminal;
+import 'package:sky/framework/embedder.dart';
+import 'terminal_display.dart';
+import 'terminal_file_impl.dart';
+
+// Implements the <terminal> element, which implements a "terminal display". Has
+// an |url| attribute, whose value should be a Mojo app that provides the
+// |terminal.TerminalClient| service.
+@Tagname('terminal')
+class TerminalDisplayImpl extends SkyElement implements TerminalDisplay {
+  Element _control;
+
+  // Queue of unconsumed input (keystrokes), with the head at index 0.
+  // Keystrokes end up here if there's no reader (i.e., |getChar()|) pending,
+  // i.e., if |_readerQueue| is empty. Invariant: At most one of |_inputQueue|
+  // and |_readerQueue| may be nonempty at any given time.
+  List<int> _inputQueue;
+
+  // Queue of things waiting for input, with the head at index 0. If a keystroke
+  // is received and this is nonempty, the head is given that keystroke (and
+  // dequeued).
+  List<Completer<int>> _readerQueue;
+
+  TerminalDisplayImpl()
+      : _inputQueue = new List<int>(),
+        _readerQueue = new List<Completer<int>>() {
+  }
+
+  void shadowRootReady() {
+    _control = shadowRoot.getElementById('control');
+    _control.addEventListener('keydown', _handleKeyDown);
+    _control.addEventListener('keypress', _handleKeyPress);
+
+    // Initialize with the first line.
+    _newLine();
+
+    _connect(getAttribute('url'));
+  }
+
+  void _handleKeyDown(KeyboardEvent event) {
+    // TODO(vtl): In general, our key handling is a total hack (due in part to
+    // sky's keyboard support being incomplete) -- e.g., we shouldn't have to
+    // make our div contenteditable. We have to intercept backspace (^H) here,
+    // since we won't actually get a keypress event for it. (Possibly, we should
+    // only handle keydown instead of keypress, but then we'd have to handle
+    // shift, etc. ourselves.)
+    if (event.key == 8) {
+      _enqueueChar(8);
+      event.preventDefault();
+    }
+  }
+
+  void _handleKeyPress(KeyboardEvent event) {
+    _enqueueChar(event.charCode);
+    event.preventDefault();
+  }
+
+  void _enqueueChar(int charCode) {
+    // TODO(vtl): Add "echo" mode; do |putChar(event.charCode);| if echo is on.
+
+    if (_readerQueue.isEmpty) {
+      _inputQueue.add(charCode);
+    } else {
+      _readerQueue.removeAt(0).complete(charCode);
+    }
+  }
+
+  void _backspace() {
+    var oldText = _control.lastChild.textContent;
+    if (oldText.length > 0) {
+      _control.lastChild.textContent = oldText.substring(0, oldText.length - 1);
+    }
+  }
+
+  void _newLine() {
+    var line = document.createElement('div');
+    line.setAttribute('class', 'line');
+    _control.appendChild(line);
+  }
+
+  void _clear() {
+    while (_control.firstChild != null) {
+      _control.firstChild.remove();
+    }
+    _newLine();
+  }
+
+  // TODO(vtl): Should we always auto-connect? Should there be facilities for
+  // programmatically connecting? (What if the |url| attribute isn't set?)
+  void _connect(String url) {
+    var terminalClient = new terminal.TerminalClientProxy.unbound();
+    embedder.connectToService(url, terminalClient);
+    terminalClient.ptr.connectToTerminal(new TerminalFileImpl(this).stub);
+    terminalClient.close();
+  }
+
+  // |TerminalDisplay| implementation:
+
+  @override
+  void putChar(int byte) {
+    // Fast-path for printable chars.
+    if (byte >= 32) {
+      _control.lastChild.textContent += new String.fromCharCode(byte);
+      return;
+    }
+
+    switch (byte) {
+      case 8:  // BS (^H).
+        _backspace();
+        break;
+      case 10:  // LF ('\n').
+        _newLine();  // TODO(vtl): LF and CR should be separated.
+        break;
+      case 12:  // FF (^L).
+        _clear();
+        break;
+      case 13:  // CR ('\r').
+        _newLine();  // TODO(vtl): LF and CR should be separated.
+        break;
+      default:
+        // Should beep or something.
+        break;
+    }
+  }
+
+  @override
+  Future<int> getChar() async {
+    if (_inputQueue.isNotEmpty) {
+      return new Future.value(_inputQueue.removeAt(0));
+    }
+
+    var completer = new Completer<int>();
+    _readerQueue.add(completer);
+    return completer.future;
+  }
+}
+
+_init(script) => register(script, TerminalDisplayImpl);
+</script>
+</sky-element>
