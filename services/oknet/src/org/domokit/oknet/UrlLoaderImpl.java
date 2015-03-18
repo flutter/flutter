@@ -4,6 +4,8 @@
 
 package org.domokit.oknet;
 
+import android.util.Log;
+
 import com.squareup.okhttp.Call;
 import com.squareup.okhttp.Callback;
 import com.squareup.okhttp.Headers;
@@ -31,10 +33,12 @@ import java.nio.charset.Charset;
 
 import okio.BufferedSource;
 
+
 /**
  * OkHttp implementation of UrlLoader.
  */
 public class UrlLoaderImpl implements UrlLoader {
+    private static final String TAG = "UrlLoaderImpl";
     private Core mCore;
     private OkHttpClient mClient;
     private boolean mIsLoading;
@@ -129,6 +133,7 @@ public class UrlLoaderImpl implements UrlLoader {
         call.enqueue(new Callback() {
             @Override
             public void onFailure(Request request, IOException e) {
+                Log.w(TAG, "Network failure loading " + request.urlString());
                 mError = new NetworkError();
                 // TODO(abarth): Which mError.code should we set?
                 mError.description = e.toString();
@@ -146,6 +151,11 @@ public class UrlLoaderImpl implements UrlLoader {
                 urlResponse.url = response.request().urlString();
                 urlResponse.statusCode = response.code();
                 urlResponse.statusLine = response.message();
+
+                if (urlResponse.statusCode >= 400) {
+                    Log.w(TAG, "Failed to load: " + urlResponse.url + " ("
+                            + urlResponse.statusCode + ")");
+                }
 
                 Headers headers = response.headers();
                 urlResponse.headers = new String[headers.size()];
