@@ -173,10 +173,6 @@ def main():
     copy_or_link(os.path.join(bindings_path, 'dart_sky.dart'),
         sdk_path('packages/sky/sdk_additions/dart_sky.dart'))
 
-    # Not used in the dev environment.
-    copy_or_link(src_path('sky/sdk/tools/sky'),
-        sdk_path('packages/sky/bin/sky'))
-
     # Mojo package, lots of overlap with gen, must be copied:
     copy(src_path('mojo/public'), sdk_path('packages/mojo/lib/public'),
         dart_filter)
