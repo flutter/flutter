@@ -653,6 +653,9 @@ abstract class Component extends Node {
         _order = _currentOrder + 1,
         super(key:key);
 
+  Component.fromArgs(Object key, bool stateful)
+      : this(key: key, stateful: stateful);
+
   void didMount() {}
   void didUnmount() {}
 
