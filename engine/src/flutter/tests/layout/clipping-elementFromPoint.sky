@@ -1,0 +1,39 @@
+<style>
+toolbar {
+  background: yellow;
+  width: 50px;
+  height: 50px;
+}
+scrollable {
+  overflow: hidden;
+  height: 400px;
+  background: red;
+}
+content {
+  height: 400px;
+  background-color: pink;
+  transform: translateY(-100px);
+}
+</style>
+<toolbar>toolbar</toolbar>
+<scrollable><content>content</content></scrollable>
+<script>
+import "../resources/third_party/unittest/unittest.dart";
+import "../resources/unit.dart";
+
+import "dart:async";
+import "dart:sky";
+
+void main() {
+  initUnit();
+
+  test("should hit test toolbar", () {
+    expect(document.elementFromPoint(10, 10).textContent, equals("toolbar"));
+  });
+
+  test("should hit test toolbar when transformed, but clipped element overlaps", () {
+    document.querySelector("scrollable").style["transform"] = "translate(0, 0)";
+    expect(document.elementFromPoint(10, 10).textContent, equals("toolbar"));
+  });
+}
+</script>
