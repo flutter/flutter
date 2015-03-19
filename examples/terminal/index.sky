@@ -5,4 +5,22 @@
 // found in the LICENSE file.
 -->
 <import src="terminal.sky" />
-<terminal url="mojo:echo_terminal" />
+<!--
+<terminal id="terminal" url="mojo:echo_terminal" />
+-->
+<terminal id="terminal" />
+<script>
+import 'dart:core';
+import 'dart:sky';
+
+main () {
+  var terminal = document.getElementById('terminal');
+  var params = Uri.parse(document.URL).queryParameters;
+  if (params.containsKey('url')) {
+    terminal.connect(params['url']);
+  } else {
+    terminal.putString('HALP: Add a "?url=<URL>" query.\n'
+                       'E.g., "?url=mojo:echo_terminal".\n');
+  }
+}
+</script>
