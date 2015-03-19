@@ -1162,7 +1162,7 @@ public:
     static float initialBoxFlex() { return 0.0f; }
     static unsigned initialBoxFlexGroup() { return 1; }
     static unsigned initialBoxOrdinalGroup() { return 1; }
-    static EBoxSizing initialBoxSizing() { return CONTENT_BOX; }
+    static EBoxSizing initialBoxSizing() { return BORDER_BOX; }
     static float initialFlexGrow() { return 0; }
     static float initialFlexShrink() { return 1; }
     static Length initialFlexBasis() { return Length(Auto); }

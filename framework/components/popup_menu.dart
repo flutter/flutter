@@ -36,7 +36,6 @@ class PopupMenu extends Component {
   static final Style _style = new Style('''
     border-radius: 2px;
     padding: 8px 0;
-    box-sizing: border-box;
     background-color: ${Grey[50]};'''
   );
 
