@@ -38,18 +38,12 @@
 
 namespace blink {
 
-DisplayList::DisplayList(const FloatRect& bounds)
-    : m_bounds(bounds)
+DisplayList::DisplayList()
 {
 }
 
 DisplayList::~DisplayList()
 {
-}
-
-const FloatRect& DisplayList::bounds() const
-{
-    return m_bounds;
 }
 
 SkPicture* DisplayList::picture() const

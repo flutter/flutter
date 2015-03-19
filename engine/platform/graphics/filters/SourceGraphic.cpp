@@ -63,17 +63,9 @@ void SourceGraphic::applySoftware()
     }
 }
 
-void SourceGraphic::setDisplayList(PassRefPtr<DisplayList> displayList)
-{
-    m_displayList = displayList;
-}
-
 PassRefPtr<SkImageFilter> SourceGraphic::createImageFilter(SkiaImageFilterBuilder*)
 {
-    if (!m_displayList)
-        return nullptr;
-
-    return adoptRef(SkPictureImageFilter::Create(m_displayList->picture(), m_displayList->bounds()));
+    return nullptr;
 }
 
 TextStream& SourceGraphic::externalRepresentation(TextStream& ts, int indent) const

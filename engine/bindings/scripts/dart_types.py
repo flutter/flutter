@@ -718,7 +718,7 @@ CPP_VALUE_TO_DART_VALUE = {
     'DartValue': 'DartConverter<DartValue*>::ToDart({cpp_value})',
     # General
     'array': 'VectorToDart({cpp_value})',
-    'DOMWrapper': 'Dart{idl_type}::toDart({cpp_value})',
+    'DOMWrapper': 'DartConverter<{idl_type}*>::ToDart({cpp_value})',
 }
 
 

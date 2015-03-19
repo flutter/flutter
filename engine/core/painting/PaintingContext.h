@@ -5,6 +5,7 @@
 #ifndef SKY_ENGINE_CORE_PAINTING_PAINTINGCONTEXT_H_
 #define SKY_ENGINE_CORE_PAINTING_PAINTINGCONTEXT_H_
 
+#include "base/callback.h"
 #include "sky/engine/core/painting/Paint.h"
 #include "sky/engine/platform/graphics/DisplayList.h"
 #include "sky/engine/tonic/dart_wrappable.h"
@@ -16,18 +17,31 @@ namespace blink {
 class PaintingContext : public RefCounted<PaintingContext>, public DartWrappable {
     DEFINE_WRAPPERTYPEINFO();
 public:
-    ~PaintingContext() override;
-    PassRefPtr<PaintingContext> create(const FloatRect& bounds) { return adoptRef(new PaintingContext(bounds)); }
+    typedef base::Callback<void (RefPtr<PaintingContext>)> CommitCallback;
 
-    double height() const { return m_displayList->bounds().height(); }
-    double width() const { return m_displayList->bounds().width(); }
+    ~PaintingContext() override;
+    static PassRefPtr<PaintingContext> create(const FloatSize& size, const CommitCallback& commitCallback)
+    {
+        return adoptRef(new PaintingContext(size, commitCallback));
+    }
+
+    double height() const { return m_size.height(); }
+    double width() const { return m_size.width(); }
 
     void drawCircle(double x, double y, double radius, Paint* paint);
     void commit();
 
-private:
-    PaintingContext(const FloatRect& bounds);
+    PassRefPtr<DisplayList> takeDisplayList()
+    {
+        ASSERT(!m_canvas);
+        return m_displayList.release();
+    }
 
+private:
+    PaintingContext(const FloatSize& size, const CommitCallback& commitCallback);
+
+    FloatSize m_size;
+    CommitCallback m_commitCallback;
     RefPtr<DisplayList> m_displayList;
     SkCanvas* m_canvas;
 };

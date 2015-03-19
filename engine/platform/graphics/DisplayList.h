@@ -49,10 +49,8 @@ class PLATFORM_EXPORT DisplayList final : public WTF::RefCounted<DisplayList> {
     WTF_MAKE_FAST_ALLOCATED;
     WTF_MAKE_NONCOPYABLE(DisplayList);
 public:
-    DisplayList(const FloatRect&);
+    DisplayList();
     ~DisplayList();
-
-    const FloatRect& bounds() const;
 
     // This entry point will return 0 when the DisplayList is in the
     // midst of recording (i.e., between a beginRecording/endRecording pair)
@@ -65,7 +63,6 @@ public:
     void endRecording();
 
 private:
-    FloatRect m_bounds;
     RefPtr<SkPicture> m_picture;
     OwnPtr<SkPictureRecorder> m_recorder;
 };

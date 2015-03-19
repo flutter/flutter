@@ -450,6 +450,8 @@ public:
 
     bool hasSameDirectionAs(const RenderBox* object) const { return style()->direction() == object->style()->direction(); }
 
+    void setCustomPainting(PassRefPtr<DisplayList> customPainting) { m_customPainting = customPainting; }
+
 protected:
     virtual void willBeDestroyed() override;
 
@@ -569,6 +571,7 @@ protected:
     OwnPtr<TransformationMatrix> m_transform;
 
 private:
+    RefPtr<DisplayList> m_customPainting;
     OwnPtr<RenderLayer> m_layer;
     OwnPtr<RenderBoxRareData> m_rareData;
 };

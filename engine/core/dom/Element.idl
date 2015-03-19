@@ -16,6 +16,8 @@
 
   readonly attribute ShadowRoot shadowRoot;
 
+  void requestPaint(PaintingCallback callback);
+
   // TODO(abarth): Move to Node.
   readonly attribute CSSStyleDeclaration style;
 

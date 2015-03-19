@@ -989,6 +989,12 @@ void RenderBox::paintBoxDecorationBackground(PaintInfo& paintInfo, const LayoutP
     LayoutRect paintRect = borderBoxRect();
     paintRect.moveBy(paintOffset);
     paintBoxDecorationBackgroundWithRect(paintInfo, paintOffset, paintRect);
+    // TODO(abarth): Currently we only draw m_customPainting if we happen to
+    // have a box decoration or a background. Instead, we should probably have
+    // another function like paintBoxDecorationBackground that subclasses can
+    // call to draw m_customPainting.
+    if (m_customPainting)
+        paintInfo.context->drawDisplayList(m_customPainting.get(), paintRect.location());
 }
 
 void RenderBox::paintBoxDecorationBackgroundWithRect(PaintInfo& paintInfo, const LayoutPoint& paintOffset, const LayoutRect& paintRect)

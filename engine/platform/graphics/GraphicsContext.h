@@ -155,7 +155,7 @@ public:
     // rotations of thin ("hairline") images.
     // Note: This will only be reliable when the device pixel scale/ratio is
     // fixed (e.g. when drawing to context backed by an ImageBuffer).
-    void disableAntialiasingOptimizationForHairlineImages() { ASSERT(!isRecording()); m_antialiasHairlineImages = true; }
+    void disableAntialiasingOptimizationForHairlineImages() { m_antialiasHairlineImages = true; }
     bool shouldAntialiasHairlineImages() const { return m_antialiasHairlineImages; }
 
     void setShouldClampToSourceRect(bool clampToSourceRect) { mutableState()->setShouldClampToSourceRect(clampToSourceRect); }
@@ -258,7 +258,7 @@ public:
         const IntRect&, const IntSize& innerTopLeft, const IntSize& innerTopRight, const IntSize& innerBottomLeft, const IntSize& innerBottomRight, const Color&);
     void fillBetweenRoundedRects(const RoundedRect&, const RoundedRect&, const Color&);
 
-    void drawDisplayList(DisplayList*);
+    void drawDisplayList(DisplayList*, const FloatPoint&);
 
     void drawImage(Image*, const IntPoint&, CompositeOperator = CompositeSourceOver, RespectImageOrientationEnum = DoNotRespectImageOrientation);
     void drawImage(Image*, const IntRect&, CompositeOperator = CompositeSourceOver, RespectImageOrientationEnum = DoNotRespectImageOrientation);
@@ -318,11 +318,6 @@ public:
     void beginTransparencyLayer(float opacity, const FloatRect* = 0);
     void beginLayer(float opacity, CompositeOperator, const FloatRect* = 0, ColorFilter = ColorFilterNone, ImageFilter* = 0);
     void endLayer();
-
-    // Instead of being dispatched to the active canvas, draw commands following beginRecording()
-    // are stored in a display list that can be replayed at a later time.
-    void beginRecording(const FloatRect& bounds);
-    PassRefPtr<DisplayList> endRecording();
 
     bool hasShadow() const;
     void setShadow(const FloatSize& offset, float blur, const Color&,
@@ -466,8 +461,6 @@ private:
 
     void fillRectWithRoundedHole(const IntRect&, const RoundedRect& roundedHoleRect, const Color&);
 
-    bool isRecording() const;
-
     // null indicates painting is contextDisabled. Never delete this object.
     SkCanvas* m_canvas;
 
@@ -486,9 +479,6 @@ private:
     struct CanvasSaveState;
     Vector<CanvasSaveState> m_canvasStateStack;
     bool m_pendingCanvasSave;
-
-    struct RecordingState;
-    Vector<RecordingState> m_recordingStateStack;
 
 #if ENABLE(ASSERT)
     unsigned m_layerCount;

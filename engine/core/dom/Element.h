@@ -51,6 +51,7 @@ class ExceptionState;
 class Image;
 class IntSize;
 class MutableStylePropertySet;
+class PaintingCallback;
 class PropertySetCSSStyleDeclaration;
 class PseudoElement;
 class ShadowRoot;
@@ -125,6 +126,8 @@ public:
 
     PassRefPtr<ClientRectList> getClientRects();
     PassRefPtr<ClientRect> getBoundingClientRect();
+
+    void requestPaint(PassOwnPtr<PaintingCallback>);
 
     virtual void didMoveToNewDocument(Document&) override;
 

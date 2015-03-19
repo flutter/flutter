@@ -29,7 +29,7 @@ public:
 
     void setARGB(unsigned a, unsigned r, unsigned g, unsigned b)
     {
-        m_paint.setARGB(r, g, b, a);
+        m_paint.setARGB(a, r, g, b);
     }
 
     const SkPaint& paint() const { return m_paint; }

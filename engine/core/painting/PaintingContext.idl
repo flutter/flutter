@@ -7,6 +7,5 @@ interface PaintingContext {
   readonly attribute double width;
 
   void drawCircle(double x, double y, double radius, Paint paint);
-
   void commit();
 };

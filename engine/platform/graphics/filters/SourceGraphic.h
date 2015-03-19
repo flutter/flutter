@@ -41,9 +41,6 @@ public:
     virtual TextStream& externalRepresentation(TextStream&, int indention) const override;
     PassRefPtr<SkImageFilter> createImageFilter(SkiaImageFilterBuilder*) override;
 
-    void setDisplayList(PassRefPtr<DisplayList>);
-
-
 private:
     SourceGraphic(Filter* filter)
         : FilterEffect(filter)
@@ -52,7 +49,7 @@ private:
     }
 
     virtual void applySoftware() override;
-    RefPtr<DisplayList> m_displayList;
+    // TODO(sky): This class appears to be broken...
 };
 
 } //namespace blink

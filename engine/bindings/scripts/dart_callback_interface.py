@@ -124,7 +124,12 @@ def generate_arguments_contents(arguments, call_with_this_handle):
             for argument in arguments]
     if call_with_this_handle:
         argument_declarations.insert(0, 'ScriptValue thisValue')
+
+    dart_argument_declarations = [
+            '%s %s' % (dart_types.idl_type_to_dart_type(argument.idl_type), argument.name)
+            for argument in arguments]
     return  {
         'argument_declarations': argument_declarations,
+        'dart_argument_declarations': dart_argument_declarations,
         'arguments': [generate_argument(argument) for argument in arguments],
     }
