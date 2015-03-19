@@ -5,7 +5,7 @@
 import '../fn.dart';
 import 'button_base.dart';
 import 'icon.dart';
-import 'material.dart';
+import 'ink_well.dart';
 
 class MenuItem extends ButtonBase {
   static final Style _style = new Style('''
@@ -40,7 +40,7 @@ class MenuItem extends ButtonBase {
   MenuItem({ Object key, this.icon, this.children }) : super(key: key);
 
   Node buildContent() {
-    return new Material (
+    return new InkWell (
       style: highlight ? _highlightStyle : _style,
       children: [
         new Icon(

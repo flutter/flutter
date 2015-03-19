@@ -175,6 +175,7 @@ class EventTarget extends Node  {
     GestureEventListener onGestureScrollStart,
     GestureEventListener onGestureScrollUpdate,
     GestureEventListener onGestureTap,
+    GestureEventListener onGestureTapDown,
     PointerEventListener onPointerCancel,
     PointerEventListener onPointerDown,
     PointerEventListener onPointerMove,
@@ -197,6 +198,8 @@ class EventTarget extends Node  {
       listeners['gesturescrollupdate'] = onGestureScrollUpdate;
     if (onGestureTap != null)
       listeners['gesturetap'] = onGestureTap;
+    if (onGestureTapDown != null)
+      listeners['gesturetapdown'] = onGestureTapDown;
     if (onPointerCancel != null)
       listeners['pointercancel'] = onPointerCancel;
     if (onPointerDown != null)
@@ -216,6 +219,7 @@ class EventTarget extends Node  {
     GestureEventListener onGestureScrollStart,
     GestureEventListener onGestureScrollUpdate,
     GestureEventListener onGestureTap,
+    GestureEventListener onGestureTapDown,
     PointerEventListener onPointerCancel,
     PointerEventListener onPointerDown,
     PointerEventListener onPointerMove,
@@ -229,6 +233,7 @@ class EventTarget extends Node  {
          onGestureScrollUpdate: onGestureScrollUpdate,
          onGestureScrollStart: onGestureScrollStart,
          onGestureTap: onGestureTap,
+         onGestureTapDown: onGestureTapDown,
          onPointerCancel: onPointerCancel,
          onPointerDown: onPointerDown,
          onPointerMove: onPointerMove,

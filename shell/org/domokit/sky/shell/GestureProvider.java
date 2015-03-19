@@ -38,9 +38,11 @@ public class GestureProvider implements GestureDetector.OnGestureListener {
     }
 
     private InputEvent createGestureEvent(MotionEvent event) {
+        int pointerIndex = event.getActionIndex();
         GestureData gestureData = new GestureData();
-        gestureData.x = event.getX();
-        gestureData.y = event.getY();
+        gestureData.primaryPointer = event.getPointerId(pointerIndex);
+        gestureData.x = event.getX(pointerIndex);
+        gestureData.y = event.getY(pointerIndex);
         InputEvent inputEvent = new InputEvent();
         inputEvent.timeStamp = event.getEventTime();
         inputEvent.gestureData = gestureData;

@@ -4,7 +4,7 @@
 
 import '../animation/animated_value.dart';
 import '../fn.dart';
-import 'material.dart';
+import 'ink_well.dart';
 
 class PopupMenuItem extends Component {
   static final Style _style = new Style('''
@@ -25,7 +25,7 @@ class PopupMenuItem extends Component {
   Node build() {
     _opacity.ensureListening();
 
-    return new Material(
+    return new InkWell(
       style: _style,
       inlineStyle: _opacity.value == null ? null : 'opacity: ${_opacity.value}',
       children: children

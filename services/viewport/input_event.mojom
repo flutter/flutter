@@ -46,6 +46,7 @@ struct PointerData {
 };
 
 struct GestureData {
+  int32 primary_pointer;
   float x;
   float y;
   float dx;

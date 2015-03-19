@@ -4,9 +4,7 @@
 
 import '../fn.dart';
 import '../theme/shadows.dart';
-import 'dart:collection';
-import 'dart:sky' as sky;
-import 'ink_splash.dart';
+import 'ink_well.dart';
 
 class Material extends Component {
   static final List<Style> shadowStyle = [
@@ -17,8 +15,6 @@ class Material extends Component {
     new Style('box-shadow: ${Shadow[4]}'),
     new Style('box-shadow: ${Shadow[5]}'),
   ];
-
-  LinkedHashSet<SplashAnimation> _splashes;
 
   Style style;
   String inlineStyle;
@@ -33,69 +29,10 @@ class Material extends Component {
       this.level: 0 }) : super(key: key);
 
   Node build() {
-    List<Node> childrenIncludingSplashes = [];
-
-    if (_splashes != null) {
-      childrenIncludingSplashes.addAll(
-          _splashes.map((s) => new InkSplash(s.onStyleChanged)));
-    }
-
-    if (children != null)
-      childrenIncludingSplashes.addAll(children);
-
-    return new EventTarget(
-      new Container(
-          style: level > 0 ? style.extend(shadowStyle[level]) : style,
-          inlineStyle: inlineStyle,
-          children: childrenIncludingSplashes),
-      onGestureScrollStart: _cancelSplashes,
-      onWheel: _cancelSplashes,
-      onPointerDown: _startSplash
+    return new InkWell(
+      style: level > 0 ? style.extend(shadowStyle[level]) : style,
+      inlineStyle: inlineStyle,
+      children: children
     );
-  }
-
-  sky.ClientRect _getBoundingRect() => (getRoot() as sky.Element).getBoundingClientRect();
-
-  void _startSplash(sky.PointerEvent event) {
-    setState(() {
-      if (_splashes == null) {
-        _splashes = new LinkedHashSet<SplashAnimation>();
-      }
-
-      var splash;
-      splash = new SplashAnimation(_getBoundingRect(), event.x, event.y,
-                                   onDone: () { _splashDone(splash); });
-
-      _splashes.add(splash);
-    });
-  }
-
-  void _cancelSplashes(sky.Event event) {
-    if (_splashes == null) {
-      return;
-    }
-
-    setState(() {
-      var splashes = _splashes;
-      _splashes = null;
-      splashes.forEach((s) { s.cancel(); });
-    });
-  }
-
-  void didUnmount() {
-    _cancelSplashes(null);
-  }
-
-  void _splashDone(SplashAnimation splash) {
-    if (_splashes == null) {
-      return;
-    }
-
-    setState(() {
-      _splashes.remove(splash);
-      if (_splashes.length == 0) {
-        _splashes = null;
-      }
-    });
   }
 }

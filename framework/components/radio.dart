@@ -4,6 +4,7 @@
 
 import '../fn.dart';
 import 'button_base.dart';
+import 'ink_well.dart';
 import 'material.dart';
 
 typedef void ValueChanged(value);
@@ -54,7 +55,7 @@ class Radio extends ButtonBase {
 
   Node buildContent() {
     return new EventTarget(
-      new Material(
+      new InkWell(
         style: highlight ? _highlightStyle : _style,
         children: value == groupValue ? [new Container(style: _dotStyle )] : []
       ),

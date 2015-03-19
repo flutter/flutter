@@ -11,6 +11,7 @@
 namespace blink {
 
 struct GestureEventInit : public EventInit {
+    int primaryPointer = 0;
     double x = 0;
     double y = 0;
     double dx = 0;
@@ -38,6 +39,7 @@ public:
     ~GestureEvent() override;
     const AtomicString& interfaceName() const override;
 
+    int primaryPointer() const { return m_primaryPointer; }
     float x() const { return m_x; }
     float y() const { return m_y; }
     float dx() const { return m_dx; }
@@ -50,6 +52,7 @@ private:
     explicit GestureEvent(const WebGestureEvent&);
     GestureEvent(const AtomicString& type, const GestureEventInit&);
 
+    int m_primaryPointer;
     float m_x;
     float m_y;
     float m_dx;

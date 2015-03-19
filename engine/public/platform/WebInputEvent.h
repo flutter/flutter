@@ -268,6 +268,7 @@ public:
 
 class WebGestureEvent : public WebInputEvent {
 public:
+    int primaryPointer = 0;
     float x = 0;
     float y = 0;
 
