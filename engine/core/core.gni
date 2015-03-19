@@ -940,6 +940,10 @@ sky_core_files = [
   "page/PageVisibilityState.cpp",
   "page/PageVisibilityState.h",
   "page/SpellCheckerClient.h",
+  "painting/Paint.cpp",
+  "painting/Paint.h",
+  "painting/PaintingContext.cpp",
+  "painting/PaintingContext.h",
   "rendering/BidiRun.h",
   "rendering/BidiRunForLine.cpp",
   "rendering/BidiRunForLine.h",
@@ -1234,6 +1238,8 @@ core_idl_files = get_path_info([
                                  "html/ImageData.idl",
                                  "html/TextMetrics.idl",
                                  "html/VoidCallback.idl",
+                                 "painting/Paint.idl",
+                                 "painting/PaintingContext.idl",
                                ],
                                "abspath")
 
