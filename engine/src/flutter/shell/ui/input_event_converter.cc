@@ -96,6 +96,7 @@ scoped_ptr<blink::WebInputEvent> BuildWebGestureEvent(
   }
 
   if (event->gesture_data) {
+    web_event->primaryPointer = event->gesture_data->primary_pointer;
     web_event->x = event->gesture_data->x / device_pixel_ratio;
     web_event->y = event->gesture_data->y / device_pixel_ratio;
   }
