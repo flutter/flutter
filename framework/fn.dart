@@ -767,6 +767,7 @@ abstract class App extends Component {
 
       _sync(null, _host, null);
       assert(_root is sky.Node);
+      _notifyMountStatusChanged();
 
       sw.stop();
       if (_shouldLogRenderDuration)
