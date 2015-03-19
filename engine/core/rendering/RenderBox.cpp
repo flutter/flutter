@@ -673,7 +673,7 @@ bool RenderBox::hitTestLayer(RenderLayer* rootLayer, RenderLayer* containerLayer
     for (auto& currentLayer : layers) {
         HitTestResult tempResult(result.hitTestLocation());
         bool localHitLayer = currentLayer->hitTestLayer(rootLayer, layer(), request, tempResult,
-            hitTestRect, hitTestLocation, localTransformState.get(), zOffsetForDescendantsPtr);
+            localHitTestRect, localHitTestLocation, localTransformState.get(), zOffsetForDescendantsPtr);
 
         // If it a rect-based test, we can safely append the temporary result since it might had hit
         // nodes but not necesserily had hitLayer set.
