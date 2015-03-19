@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:sky/framework/components/material.dart';
+import 'package:sky/framework/components/ink_well.dart';
 import 'package:sky/framework/fn.dart';
 import 'package:sky/framework/theme/typography.dart' as typography;
 import 'stock_arrow.dart';
@@ -68,7 +68,7 @@ class StockRow extends Component {
       )
     ];
 
-    return new Material(
+    return new InkWell(
       style: _style,
       children: children
     );
