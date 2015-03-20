@@ -171,9 +171,9 @@ def main():
     copy_or_link(src_path('sky/engine/bindings/builtin.dart'),
         sdk_path('packages/sky/sdk_additions/dart_sky_builtins.dart'))
     bindings_path = os.path.join(build_dir, 'gen/sky/bindings')
-    copy_or_link(os.path.join(bindings_path, 'dart_sky.dart'),
-        sdk_path('packages/sky/sdk_additions/dart_sky.dart'))
-
+    # dart_sky.dart has many supporting files:
+    copy_or_link(bindings_path, sdk_path('packages/sky/sdk_additions'),
+        dart_filter)
 
     # Mojo package, lots of overlap with gen, must be copied:
     copy(src_path('mojo/public'), sdk_path('packages/mojo/lib/public'),
