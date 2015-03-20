@@ -76,13 +76,10 @@ class DrawerController {
 }
 
 class Drawer extends AnimatedComponent {
+  // TODO(abarth): We need a better way to become a container for absolutely
+  // positioned elements.
   static final Style _style = new Style('''
-    position: absolute;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    right: 0;'''
-  );
+    transform: translateX(0);''');
 
   static final Style _maskStyle = new Style('''
     background-color: black;

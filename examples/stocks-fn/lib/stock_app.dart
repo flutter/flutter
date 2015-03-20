@@ -11,6 +11,7 @@ import 'package:sky/framework/components/input.dart';
 import 'package:sky/framework/components/menu_divider.dart';
 import 'package:sky/framework/components/menu_item.dart';
 import 'package:sky/framework/components/popup_menu.dart';
+import 'package:sky/framework/components/scaffold.dart';
 import 'package:sky/framework/fn.dart';
 import 'package:sky/framework/theme/typography.dart' as typography;
 import 'stock_data.dart';
@@ -22,14 +23,6 @@ class StocksApp extends App {
   DrawerController _drawerController = new DrawerController();
   PopupMenuController _menuController;
 
-  static Style _style = new Style('''
-    display: flex;
-    flex-direction: column;
-    height: -webkit-fill-available;
-    ${typography.typeface};
-    ${typography.black.body1};'''
-  );
-
   static Style _iconStyle = new Style('''
     padding: 8px;'''
   );
@@ -38,10 +31,6 @@ class StocksApp extends App {
     padding-left: 24px;
     flex: 1;
     ${typography.white.title};'''
-  );
-
-  static Style _stocklistHeight = new Style('''
-    flex: 1;'''
   );
 
   List<Stock> _sortedStocks;
@@ -114,7 +103,7 @@ class StocksApp extends App {
       title = new Text('Stocks');
     }
 
-    var toolbar = new ActionBar(
+    var actionBar = new ActionBar(
       children: [
         new EventTarget(
           new Icon(key: 'menu', style: _iconStyle,
@@ -141,25 +130,10 @@ class StocksApp extends App {
       ]
     );
 
-    var list = new StyleNode(
-      new Stocklist(stocks: _sortedStocks, query: _searchQuery),
-      _stocklistHeight);
-
-    var fab = new FloatingActionButton(content: new Icon(
-      type: 'content/add_white', size: 24), level: 3);
-
-    var children = [
-      new Container(
-        key: 'Content',
-        style: _style,
-        children: [toolbar, list]
-      ),
-      fab,
-      drawer
-    ];
+    List<Node> overlays = [];
 
     if (_menuController != null) {
-      var menu = new EventTarget(
+      overlays.add(new EventTarget(
         new StockMenu(controller: _menuController),
         onGestureTap: (_) {
           // TODO(abarth): We should close the menu when you tap away from the
@@ -169,10 +143,16 @@ class StocksApp extends App {
             _menuController = null;
           });
         }
-      );
-      children.add(menu);
+      ));
     }
 
-    return new Container(key: 'StocksApp', children: children);
+    return new Scaffold(
+      actionBar: actionBar,
+      content: new Stocklist(stocks: _sortedStocks, query: _searchQuery),
+      fab: new FloatingActionButton(
+        content: new Icon(type: 'content/add_white', size: 24), level: 3),
+      drawer: drawer,
+      overlays: overlays
+    );
   }
 }
