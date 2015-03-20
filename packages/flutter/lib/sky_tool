@@ -13,17 +13,17 @@ import subprocess
 import sys
 import urlparse
 
-SDK_TOOLS_DIR = os.path.dirname(os.path.abspath(__file__))
-SDK_ROOT = os.path.dirname(SDK_TOOLS_DIR)
+# TODO(eseidel): This should be BIN_DIR.
+LIB_DIR = os.path.realpath(os.path.dirname(os.path.abspath(__file__)))
+SKY_PACKAGE_ROOT = os.path.realpath(os.path.dirname(LIB_DIR))
 
 SKY_SERVER_PORT = 9888
-DEFAULT_URL = os.path.join(SDK_ROOT, "examples/index.sky")
 APK_NAME = 'SkyDemo.apk'
 ANDROID_PACKAGE = "org.domokit.sky.demo"
 # FIXME: This assumes adb is in $PATH, we could look for ANDROID_HOME, etc?
 ADB_PATH = 'adb'
 
-PID_FILE_PATH = "/tmp/skydemo.pids"
+PID_FILE_PATH = "/tmp/sky_tool.pids"
 PID_FILE_KEYS = frozenset([
     'remote_sky_server_port',
     'sky_server_pid',
@@ -112,16 +112,25 @@ def _url_for_path(port, root, path):
 class StartSky(object):
     def add_subparser(self, subparsers):
         start_parser = subparsers.add_parser('start',
-            help='launch SKyShell.apk on the device')
+            help='launch %s on the device' % APK_NAME)
         start_parser.add_argument('--install', action='store_true')
         start_parser.add_argument('project_or_path', nargs='?', type=str,
             default='main.sky')
         start_parser.set_defaults(func=self.run)
 
+    def _is_package_installed(self, package_name):
+        pm_path_cmd = [ADB_PATH, 'shell', 'pm', 'path', package_name]
+        return subprocess.check_output(pm_path_cmd).strip() != ''
+
     def run(self, args, pids):
         StopSky().run(args, pids)
+
+        if not self._is_package_installed(ANDROID_PACKAGE):
+            print '%s is not installed, installing.' % APK_NAME
+            args.install = True
+
         if args.install:
-            apk_path = os.path.join(SDK_ROOT, 'apks', APK_NAME)
+            apk_path = os.path.join(SKY_PACKAGE_ROOT, 'apks', APK_NAME)
             if not os.path.exists(apk_path):
                 print "'%s' does not exist?" % apk_path
                 return 2
