@@ -5,19 +5,25 @@
 #include "sky/engine/config.h"
 #include "sky/engine/core/painting/PaintingContext.h"
 
-#include "base/bind.h"
-#include "sky/engine/core/dom/Microtask.h"
+#include "sky/engine/core/dom/Document.h"
+#include "sky/engine/core/dom/Element.h"
+#include "sky/engine/core/painting/PaintingTasks.h"
 #include "sky/engine/platform/geometry/IntRect.h"
 #include "third_party/skia/include/core/SkCanvas.h"
 
 namespace blink {
 
-PaintingContext::PaintingContext(const FloatSize& size, const CommitCallback& commitCallback)
-    : m_size(size)
-    , m_commitCallback(commitCallback)
+PassRefPtr<PaintingContext> PaintingContext::create(PassRefPtr<Element> element, const FloatSize& size)
+{
+    return adoptRef(new PaintingContext(element, size));
+}
+
+PaintingContext::PaintingContext(PassRefPtr<Element> element, const FloatSize& size)
+    : m_element(element)
+    , m_size(size)
 {
     m_displayList = adoptRef(new DisplayList);
-    m_canvas = m_displayList->beginRecording(expandedIntSize(size));
+    m_canvas = m_displayList->beginRecording(expandedIntSize(m_size));
 }
 
 PaintingContext::~PaintingContext()
@@ -39,7 +45,8 @@ void PaintingContext::commit()
         return;
     m_displayList->endRecording();
     m_canvas = nullptr;
-    Microtask::enqueueMicrotask(base::Bind(m_commitCallback, this));
+    PaintingTasks::enqueueCommit(m_element, m_displayList.release());
+    m_element->document().scheduleVisualUpdate();
 }
 
 } // namespace blink

@@ -11,6 +11,7 @@
 #include "sky/engine/core/frame/LocalFrame.h"
 #include "sky/engine/core/page/ChromeClient.h"
 #include "sky/engine/core/page/Page.h"
+#include "sky/engine/core/painting/PaintingTasks.h"
 #include "sky/engine/platform/Logging.h"
 
 namespace blink {
@@ -45,17 +46,17 @@ void PageAnimator::updateLayoutAndStyleForPainting(LocalFrame* rootFrame)
 
     TemporaryChange<bool> servicing(m_updatingLayoutAndStyleForPainting, true);
 
-    // In order for our child HWNDs (NativeWindowWidgets) to update properly,
-    // they need to be told that we are updating the screen. The problem is that
-    // the native widgets need to recalculate their clip region and not overlap
-    // any of our non-native widgets. To force the resizing, call
-    // setFrameRect(). This will be a quick operation for most frames, but the
-    // NativeWindowWidgets will update a proper clipping region.
     view->setFrameRect(view->frameRect());
-
-    // setFrameRect may have the side-effect of causing existing page layout to
-    // be invalidated, so layout needs to be called last.
     view->updateLayoutAndStyleForPainting();
+
+    // TODO(abarth): Remove these calls to updateLayoutAndStyleForPainting
+    // once requestPaint callbacks can't dirty layout.
+    while (PaintingTasks::serviceRequests())
+        view->updateLayoutAndStyleForPainting();
+
+    PaintingTasks::drainCommits();
+
+    ASSERT(m_page->mainFrame()->document()->lifecycle().state() == DocumentLifecycle::StyleAndLayoutClean);
 }
 
 }

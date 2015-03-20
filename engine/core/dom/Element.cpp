@@ -26,7 +26,6 @@
 #include "sky/engine/config.h"
 #include "sky/engine/core/dom/Element.h"
 
-#include "base/bind.h"
 #include "gen/sky/core/CSSValueKeywords.h"
 #include "gen/sky/core/HTMLNames.h"
 #include "gen/sky/platform/RuntimeEnabledFeatures.h"
@@ -77,8 +76,8 @@
 #include "sky/engine/core/page/ChromeClient.h"
 #include "sky/engine/core/page/FocusController.h"
 #include "sky/engine/core/page/Page.h"
-#include "sky/engine/core/painting/PaintingContext.h"
 #include "sky/engine/core/painting/PaintingCallback.h"
+#include "sky/engine/core/painting/PaintingTasks.h"
 #include "sky/engine/core/rendering/RenderLayer.h"
 #include "sky/engine/core/rendering/RenderView.h"
 #include "sky/engine/platform/EventDispatchForbiddenScope.h"
@@ -417,36 +416,10 @@ PassRefPtr<ClientRect> Element::getBoundingClientRect()
     return ClientRect::create(result);
 }
 
-// TODO(abarth): We should schedule this work at a more reasonable time.
-static void handlePaintingCommit(RefPtr<Element> element, RefPtr<PaintingContext> context)
-{
-    if (!element->document().isActive())
-        return;
-    element->document().updateLayout();
-    RenderObject* renderer = element->renderer();
-    if (!renderer || !renderer->isBox())
-        return;
-    toRenderBox(renderer)->setCustomPainting(context->takeDisplayList());
-    element->document().scheduleVisualUpdate();
-}
-
-// TODO(abarth): We should schedule this work at a more reasonable time.
-static void runPaintingCallback(RefPtr<Element> element, PassOwnPtr<PaintingCallback> callback)
-{
-    if (!element->document().isActive())
-        return;
-    element->document().updateLayout();
-    RenderObject* renderer = element->renderer();
-    if (!renderer || !renderer->isBox())
-        return;
-    RefPtr<PaintingContext> context = PaintingContext::create(
-        toRenderBox(renderer)->size(), base::Bind(&handlePaintingCommit, element));
-    callback->handleEvent(context.get());
-}
-
 void Element::requestPaint(PassOwnPtr<PaintingCallback> callback)
 {
-    Microtask::enqueueMicrotask(base::Bind(&runPaintingCallback, this, callback));
+    PaintingTasks::enqueueRequest(this, callback);
+    document().scheduleVisualUpdate();
 }
 
 void Element::setAttribute(const AtomicString& localName, const AtomicString& value, ExceptionState& exceptionState)

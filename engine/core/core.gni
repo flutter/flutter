@@ -946,6 +946,8 @@ sky_core_files = [
   "painting/PaintingCallback.h",
   "painting/PaintingContext.cpp",
   "painting/PaintingContext.h",
+  "painting/PaintingTasks.cpp",
+  "painting/PaintingTasks.h",
   "rendering/BidiRun.h",
   "rendering/BidiRunForLine.cpp",
   "rendering/BidiRunForLine.h",
