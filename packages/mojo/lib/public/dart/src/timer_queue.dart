@@ -5,12 +5,12 @@
 part of core;
 
 class Timeout implements Comparable<Timeout> {
-  int deadline;  // milliseconds since the Unix epoch.
+  int deadline; // milliseconds since the Unix epoch.
   SendPort port;
 
   Timeout(this.port, this.deadline);
 
-  int compareTo(Timeout other)  => other.deadline - deadline;
+  int compareTo(Timeout other) => deadline - other.deadline;
 }
 
 class TimerQueue {

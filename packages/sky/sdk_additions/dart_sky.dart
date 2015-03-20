@@ -75,6 +75,8 @@ part 'OESTextureHalfFloat.dart';
 part 'OESTextureHalfFloatLinear.dart';
 part 'OESVertexArrayObject.dart';
 part 'PageTransitionEvent.dart';
+part 'Paint.dart';
+part 'PaintingContext.dart';
 part 'ParentNode.dart';
 part 'Path2D.dart';
 part 'PointerEvent.dart';
@@ -113,6 +115,7 @@ part 'WebGLVertexArrayObjectOES.dart';
 part 'WheelEvent.dart';
 part 'Window.dart';
 
+part 'PaintingCallback.dart';
 part 'RequestAnimationFrameCallback.dart';
 part 'VoidCallback.dart';
 

@@ -4,6 +4,7 @@
 
 import '../fn.dart';
 import 'button_base.dart';
+import 'ink_well.dart';
 import 'material.dart';
 
 typedef void ValueChanged(value);
@@ -50,14 +51,15 @@ class Radio extends ButtonBase {
     this.onChanged,
     this.value,
     this.groupValue
-  }) : super(key: key) {
-    events.listen('gesturetap', _handleClick);
-  }
+  }) : super(key: key);
 
-  Node build() {
-    return new Material(
-      style: highlight ? _highlightStyle : _style,
-      children: value == groupValue ? [new Container(style: _dotStyle )] : []
+  Node buildContent() {
+    return new EventTarget(
+      new InkWell(
+        style: highlight ? _highlightStyle : _style,
+        children: value == groupValue ? [new Container(style: _dotStyle )] : []
+      ),
+      onGestureTap: _handleClick
     );
   }
 

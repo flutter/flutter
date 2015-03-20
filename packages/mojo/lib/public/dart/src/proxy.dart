@@ -4,6 +4,12 @@
 
 part of bindings;
 
+class ProxyCloseException {
+  final String message;
+  ProxyCloseException(this.message);
+  String toString() => message;
+}
+
 abstract class Proxy extends core.MojoEventStreamListener {
   Map<int, Completer> _completerMap;
   int _nextId = 0;
@@ -38,6 +44,15 @@ abstract class Proxy extends core.MojoEventStreamListener {
 
   void handleWrite() {
     throw 'Unexpected write signal in proxy.';
+  }
+
+  @override
+  Future close({bool nodefer: false}) {
+    for (var completer in _completerMap.values) {
+      completer.completeError(new ProxyCloseException('Proxy closed'));
+    }
+    _completerMap.clear();
+    return super.close(nodefer: nodefer);
   }
 
   void sendMessage(Struct message, int name) {

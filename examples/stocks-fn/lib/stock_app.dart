@@ -10,6 +10,8 @@ import 'package:sky/framework/components/icon.dart';
 import 'package:sky/framework/components/input.dart';
 import 'package:sky/framework/components/menu_divider.dart';
 import 'package:sky/framework/components/menu_item.dart';
+import 'package:sky/framework/components/popup_menu.dart';
+import 'package:sky/framework/components/scaffold.dart';
 import 'package:sky/framework/fn.dart';
 import 'package:sky/framework/theme/typography.dart' as typography;
 import 'stock_data.dart';
@@ -18,15 +20,8 @@ import 'stock_menu.dart';
 
 class StocksApp extends App {
 
-  DrawerController _DrawerController = new DrawerController();
-
-  static Style _style = new Style('''
-    display: flex;
-    flex-direction: column;
-    height: -webkit-fill-available;
-    ${typography.typeface};
-    ${typography.black.body1};'''
-  );
+  DrawerController _drawerController = new DrawerController();
+  PopupMenuController _menuController;
 
   static Style _iconStyle = new Style('''
     padding: 8px;'''
@@ -56,7 +51,8 @@ class StocksApp extends App {
 
   void _handleMenuClick(_) {
     setState(() {
-      _isShowingMenu = !_isShowingMenu;
+      _menuController = new PopupMenuController();
+      _menuController.open();
     });
   }
 
@@ -68,7 +64,7 @@ class StocksApp extends App {
 
   Node build() {
     var drawer = new Drawer(
-      controller: _DrawerController,
+      controller: _drawerController,
       level: 3,
       children: [
         new DrawerHeader(
@@ -107,50 +103,56 @@ class StocksApp extends App {
       title = new Text('Stocks');
     }
 
-    var toolbar = new ActionBar(
+    var actionBar = new ActionBar(
       children: [
-        new Icon(key: 'menu', style: _iconStyle,
-            size: 24,
-            type: 'navigation/menu_white')
-          ..events.listen('gesturetap', _DrawerController.toggle),
+        new EventTarget(
+          new Icon(key: 'menu', style: _iconStyle,
+              size: 24,
+              type: 'navigation/menu_white'),
+          onGestureTap: _drawerController.toggle
+        ),
         new Container(
           style: _titleStyle,
           children: [title]
         ),
-        new Icon(key: 'search', style: _iconStyle,
-            size: 24,
-            type: 'action/search_white')
-          ..events.listen('gesturetap', _handleSearchClick),
-        new Icon(key: 'more_white', style: _iconStyle,
-            size: 24,
-            type: 'navigation/more_vert_white')
-          ..events.listen('gesturetap', _handleMenuClick),
+        new EventTarget(
+          new Icon(key: 'search', style: _iconStyle,
+              size: 24,
+              type: 'action/search_white'),
+          onGestureTap: _handleSearchClick
+        ),
+        new EventTarget(
+          new Icon(key: 'more_white', style: _iconStyle,
+              size: 24,
+              type: 'navigation/more_vert_white'),
+          onGestureTap: _handleMenuClick
+        )
       ]
     );
 
-    var list = new Stocklist(stocks: _sortedStocks, query: _searchQuery);
+    List<Node> overlays = [];
 
-    var fab = new FloatingActionButton(content: new Icon(
-      type: 'content/add_white', size: 24), level: 3);
-
-    var children = [
-      new Container(
-        key: 'Content',
-        style: _style,
-        children: [toolbar, list]
-      ),
-      fab,
-      drawer
-    ];
-
-    if (_isShowingMenu) {
-      children.add(new StockMenu()..events.listen('gesturetap', (_) {
-        setState(() {
-          _isShowingMenu = false;
-        });
-      }));
+    if (_menuController != null) {
+      overlays.add(new EventTarget(
+        new StockMenu(controller: _menuController),
+        onGestureTap: (_) {
+          // TODO(abarth): We should close the menu when you tap away from the
+          // menu rather than when you tap on the menu.
+          setState(() {
+            _menuController.close();
+            _menuController = null;
+          });
+        }
+      ));
     }
 
-    return new Container(key: 'StocksApp', children: children);
+    return new Scaffold(
+      actionBar: actionBar,
+      content: new Stocklist(stocks: _sortedStocks, query: _searchQuery),
+      fab: new FloatingActionButton(
+        content: new Icon(type: 'content/add_white', size: 24), level: 3),
+      drawer: drawer,
+      overlays: overlays
+    );
   }
 }

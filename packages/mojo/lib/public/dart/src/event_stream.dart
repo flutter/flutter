@@ -200,21 +200,24 @@ class MojoEventStreamListener {
         assert(_eventStream.readyWrite);
         handleWrite();
       }
-      if (_isOpen) {
+      if (!signalsReceived.isPeerClosed) {
         _eventStream.enableSignals(signalsWatched);
       }
       _isInHandler = false;
       if (signalsReceived.isPeerClosed) {
-        if (onError != null) {
-          onError();
-        }
-        close();
+        // nodefer is true here because there is no need to wait to close until
+        // outstanding messages are sent. The other side is gone.
+        close(nodefer: true).then((_) {
+          if (onError != null) {
+            onError();
+          }
+        });
       }
     }, onDone: close);
     return subscription;
   }
 
-  Future close() {
+  Future close({bool nodefer: false}) {
     var result;
     _isOpen = false;
     _endpoint = null;

@@ -7,10 +7,9 @@ import 'material.dart';
 import '../theme/colors.dart';
 
 class FloatingActionButton extends Component {
+  // TODO(abarth): We need a better way to become a container for absolutely
+  // positioned elements.
   static final Style _style = new Style('''
-    position: absolute;
-    bottom: 16px;
-    right: 16px;
     transform: translateX(0);
     width: 56px;
     height: 56px;

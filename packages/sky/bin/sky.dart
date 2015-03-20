@@ -1,8 +1,10 @@
 import 'dart:io' show Platform;
 
 void main() {
-  var uri = Platform.script;
-  print(uri);
-  var path = uri.toFilePath();
-  print(path);
+  print('Main, woohoo');
+  String toolPath = '/src/mojo/src/sky/sdk/packages/sky/bin/sky';
+
+  Process.run(toolPath, []).then((ProcessResult results) {
+    print(results.stdout);
+  });
 }

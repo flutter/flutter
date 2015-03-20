@@ -13,9 +13,10 @@
       background-color: black;
       color: rgb(255, 191, 0);
       font-family: 'Courier', 'monospace';
+      font-size: small;
     }
     .line {
-      white-space: pre;
+      white-space: nowrap;
     }
   </style>
   <sky-scrollable id="control" contenteditable />
@@ -60,7 +61,10 @@ class TerminalDisplayImpl extends SkyElement implements TerminalDisplay {
     // Initialize with the first line.
     _newLine();
 
-    _connect(getAttribute('url'));
+    var url = getAttribute('url');
+    if (url != null) {
+      connect(url);
+    }
   }
 
   void _handleKeyDown(KeyboardEvent event) {
@@ -111,13 +115,17 @@ class TerminalDisplayImpl extends SkyElement implements TerminalDisplay {
     _newLine();
   }
 
-  // TODO(vtl): Should we always auto-connect? Should there be facilities for
-  // programmatically connecting? (What if the |url| attribute isn't set?)
-  void _connect(String url) {
+  void connect(String url) {
     var terminalClient = new terminal.TerminalClientProxy.unbound();
     embedder.connectToService(url, terminalClient);
     terminalClient.ptr.connectToTerminal(new TerminalFileImpl(this).stub);
     terminalClient.close();
+  }
+
+  void putString(String s) {
+    for (var i = 0; i < s.length; i++) {
+      putChar(s.codeUnitAt(i));
+    }
   }
 
   // |TerminalDisplay| implementation:

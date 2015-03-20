@@ -2,45 +2,69 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import '../animation/animated_value.dart';
 import '../animation/curves.dart';
 import '../animation/generators.dart';
 import '../fn.dart';
+import '../theme/view-configuration.dart' as config;
 import 'dart:async';
+import 'dart:math' as math;
 import 'dart:sky' as sky;
 
-const double _kSplashSize = 400.0;
-const double _kSplashDuration = 500.0;
+const double _kSplashConfirmedDuration = 350.0;
+const double _kSplashUnconfirmedDuration = config.kDefaultLongPressTimeout;
 
-class SplashAnimation {
-  AnimationGenerator _animation;
+double _getSplashTargetSize(sky.ClientRect rect, double x, double y) {
+  return 2.0 * math.max(math.max(x - rect.left, rect.right - x),
+                        math.max(y - rect.top, rect.bottom - y));
+}
+
+class SplashController {
+  final int pointer;
+  Stream<String> get onStyleChanged => _styleStream;
+
+  final AnimatedValue _size = new AnimatedValue(0.0);
   double _offsetX;
   double _offsetY;
+  double _targetSize;
+  Stream<String> _styleStream;
 
-  Stream<String> _styleChanged;
+  void start() {
+    _size.animateTo(_targetSize, _kSplashUnconfirmedDuration, curve: easeOut);
+  }
 
-  Stream<String> get onStyleChanged => _styleChanged;
+  void confirm() {
+    double fractionRemaining = (_targetSize - _size.value) / _targetSize;
+    double duration = fractionRemaining * _kSplashConfirmedDuration;
+    if (duration <= 0.0)
+      return;
+    _size.animateTo(_targetSize, duration, curve: easeOut);
+  }
 
-  void cancel() => _animation.cancel();
+  void cancel() {
+    _size.stop();
+  }
 
-  SplashAnimation(sky.ClientRect rect, double x, double y,
-                  { Function onDone })
+  SplashController(sky.ClientRect rect, double x, double y,
+                   { this.pointer, Function onDone })
       : _offsetX = x - rect.left,
-        _offsetY = y - rect.top {
+        _offsetY = y - rect.top,
+        _targetSize = _getSplashTargetSize(rect, x, y) {
 
-    _animation = new AnimationGenerator(
-        duration:_kSplashDuration,
-        end: _kSplashSize,
-        curve: easeOut,
-        onDone: onDone);
+    _styleStream = _size.onValueChanged.map((p) {
+      if (p == _targetSize) {
+        onDone();
+      }
+      return '''
+        top: ${_offsetY - p/2}px;
+        left: ${_offsetX - p/2}px;
+        width: ${p}px;
+        height: ${p}px;
+        border-radius: ${p}px;
+        opacity: ${1.0 - (p / _targetSize)};''';
+    });
 
-    _styleChanged = _animation.onTick.map((p) => '''
-      top: ${_offsetY - p/2}px;
-      left: ${_offsetX - p/2}px;
-      width: ${p}px;
-      height: ${p}px;
-      border-radius: ${p}px;
-      opacity: ${1.0 - (p / _kSplashSize)};
-    ''');
+    start();
   }
 }
 

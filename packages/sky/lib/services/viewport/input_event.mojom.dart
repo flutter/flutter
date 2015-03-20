@@ -197,9 +197,10 @@ class PointerData extends bindings.Struct {
 }
 
 class GestureData extends bindings.Struct {
-  static const int kStructSize = 32;
+  static const int kStructSize = 40;
   static const bindings.StructDataHeader kDefaultStructInfo =
       const bindings.StructDataHeader(kStructSize, 0);
+  int primaryPointer = 0;
   double x = 0.0;
   double y = 0.0;
   double dx = 0.0;
@@ -226,27 +227,31 @@ class GestureData extends bindings.Struct {
     }
     {
       
-      result.x = decoder0.decodeFloat(8);
+      result.primaryPointer = decoder0.decodeInt32(8);
     }
     {
       
-      result.y = decoder0.decodeFloat(12);
+      result.x = decoder0.decodeFloat(12);
     }
     {
       
-      result.dx = decoder0.decodeFloat(16);
+      result.y = decoder0.decodeFloat(16);
     }
     {
       
-      result.dy = decoder0.decodeFloat(20);
+      result.dx = decoder0.decodeFloat(20);
     }
     {
       
-      result.velocityX = decoder0.decodeFloat(24);
+      result.dy = decoder0.decodeFloat(24);
     }
     {
       
-      result.velocityY = decoder0.decodeFloat(28);
+      result.velocityX = decoder0.decodeFloat(28);
+    }
+    {
+      
+      result.velocityY = decoder0.decodeFloat(32);
     }
     return result;
   }
@@ -254,21 +259,24 @@ class GestureData extends bindings.Struct {
   void encode(bindings.Encoder encoder) {
     var encoder0 = encoder.getStructEncoderAtOffset(kDefaultStructInfo);
     
-    encoder0.encodeFloat(x, 8);
+    encoder0.encodeInt32(primaryPointer, 8);
     
-    encoder0.encodeFloat(y, 12);
+    encoder0.encodeFloat(x, 12);
     
-    encoder0.encodeFloat(dx, 16);
+    encoder0.encodeFloat(y, 16);
     
-    encoder0.encodeFloat(dy, 20);
+    encoder0.encodeFloat(dx, 20);
     
-    encoder0.encodeFloat(velocityX, 24);
+    encoder0.encodeFloat(dy, 24);
     
-    encoder0.encodeFloat(velocityY, 28);
+    encoder0.encodeFloat(velocityX, 28);
+    
+    encoder0.encodeFloat(velocityY, 32);
   }
 
   String toString() {
     return "GestureData("
+           "primaryPointer: $primaryPointer" ", "
            "x: $x" ", "
            "y: $y" ", "
            "dx: $dx" ", "

@@ -9,13 +9,9 @@ import 'dart:sky' as sky;
 import 'scrollable.dart';
 
 abstract class FixedHeightScrollable extends Scrollable {
-  // TODO(rafaelw): This component really shouldn't have an opinion
-  // about how it is sized. The owning component should decide whether
-  // it's explicitly sized or flexible or whatever...
   static final Style _style = new Style('''
     overflow: hidden;
     position: relative;
-    flex: 1;
     will-change: transform;'''
   );
 
@@ -30,10 +26,11 @@ abstract class FixedHeightScrollable extends Scrollable {
   FixedHeightScrollable({
     Object key,
     ScrollBehavior scrollBehavior
-  }) : super(key: key, scrollBehavior: scrollBehavior);
+  }) : super(key: key, scrollBehavior: scrollBehavior) {
+    onDidMount(_measureHeights);
+  }
 
-  void didMount() {
-    super.didMount();
+  void _measureHeights() {
     var root = getRoot();
     var item = root.firstChild.firstChild;
     sky.ClientRect scrollRect = root.getBoundingClientRect();
@@ -47,7 +44,7 @@ abstract class FixedHeightScrollable extends Scrollable {
     });
   }
 
-  Node build() {
+  Node buildContent() {
     var itemNumber = 0;
     var drawCount = 1;
     var transformStyle = '';

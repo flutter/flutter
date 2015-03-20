@@ -32,6 +32,10 @@ class EditableText extends Component {
 
   EditableText({Object key, this.value, this.focused})
       : super(key: key, stateful: true) {
+    onDidUnmount(() {
+      if (_cursorTimer != null)
+        _stopCursorTimer();
+    });
   }
 
   void _cursorTick(Timer timer) {
@@ -50,11 +54,6 @@ class EditableText extends Component {
     _cursorTimer.cancel();
     _cursorTimer = null;
     _showCursor = false;
-  }
-
-  void didUnmount() {
-    if (_cursorTimer != null)
-      _stopCursorTimer();
   }
 
   Node build() {

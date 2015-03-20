@@ -21,26 +21,7 @@ bool _initIsInCheckedMode() {
 
 final bool _isInCheckedMode = _initIsInCheckedMode();
 final bool _shouldLogRenderDuration = false;
-
-class EventHandler {
-  final String type;
-  final sky.EventListener listener;
-
-  EventHandler(this.type, this.listener);
-}
-
-class EventMap {
-  final List<EventHandler> _handlers = new List<EventHandler>();
-
-  void listen(String type, sky.EventListener listener) {
-    assert(listener != null);
-    _handlers.add(new EventHandler(type, listener));
-  }
-
-  void addAll(EventMap events) {
-    _handlers.addAll(events._handlers);
-  }
-}
+final bool _shouldTrace = false;
 
 class Style {
   final String _className;
@@ -71,6 +52,29 @@ class Style {
   Style._internal(this._className);
 }
 
+abstract class ContentNode extends Node {
+  Node content;
+
+  ContentNode(Node content) : this.content = content, super(key: content._key);
+
+  void _sync(Node old, sky.ParentNode host, sky.Node insertBefore) {
+    Node oldContent = old == null ? null : (old as ContentNode).content;
+    content = _syncChild(content, oldContent, host, insertBefore);
+    _root = content._root;
+  }
+
+  void _remove() {
+    _removeChild(content);
+    super._remove();
+  }
+}
+
+class StyleNode extends ContentNode {
+  final Style style;
+
+  StyleNode(Node content, this.style): super(content);
+}
+
 void _parentInsertBefore(sky.ParentNode parent,
                          sky.Node node,
                          sky.Node ref) {
@@ -81,6 +85,8 @@ void _parentInsertBefore(sky.ParentNode parent,
   }
 }
 
+enum _SyncOperation { IDENTICAL, INSERTION, STATEFUL, STATELESS, REMOVAL }
+
 /*
  * All Effen nodes derive from Node. All nodes have a _parent, a _key and
  * can be sync'd.
@@ -90,10 +96,7 @@ abstract class Node {
   Node _parent;
   sky.Node _root;
   bool _defunct = false;
-
-  // TODO(abarth): Both Elements and Components have |events| but |Text|
-  // doesn't. Should we add a common base class to contain |events|?
-  final EventMap events = new EventMap();
+  int _nodeDepth;
 
   Node({ Object key }) {
     _key = key == null ? "$runtimeType" : "$runtimeType-$key";
@@ -110,20 +113,65 @@ abstract class Node {
     _root = null;
   }
 
+  void _ensureDepth() {
+    if (_nodeDepth == null) {
+      _nodeDepth = 0;
+      Node parent = _parent;
+      while (parent != null) {
+        _nodeDepth++;
+        parent = parent._parent;
+      }
+    }
+  }
+
+  void _trace(String message) {
+    if (!_shouldTrace)
+      return;
+
+    _ensureDepth();
+    StringBuffer buffer = new StringBuffer();
+    int depth = _nodeDepth;
+    while (depth-- > 0) {
+      buffer.write(' ');
+    }
+    buffer.write(message);
+    print(buffer);
+  }
+
+  void _traceSync(_SyncOperation op, String key) {
+    if (!_shouldTrace)
+      return;
+
+    String opString = op.toString().toLowerCase();
+    String outString = opString.substring(opString.indexOf('.') + 1);
+    _trace('_sync($outString) $key');
+  }
+
+  void _removeChild(Node node) {
+    _traceSync(_SyncOperation.REMOVAL, node._key);
+    node._remove();
+  }
+
   // Returns the child which should be retained as the child of this node.
   Node _syncChild(Node node, Node oldNode, sky.ParentNode host,
       sky.Node insertBefore) {
-    if (node == oldNode)
+
+    assert(oldNode == null || node._key == oldNode._key);
+
+    if (node == oldNode) {
+      _traceSync(_SyncOperation.IDENTICAL, node._key);
       return node; // Nothing to do. Subtrees must be identical.
+    }
 
     // TODO(rafaelw): This eagerly removes the old DOM. It may be that a
     // new component was built that could re-use some of it. Consider
     // syncing the new VDOM against the old one.
     if (oldNode != null && node._key != oldNode._key) {
-      oldNode._remove();
+      _removeChild(oldNode);
     }
 
     if (node._willSync(oldNode)) {
+      _traceSync(_SyncOperation.STATEFUL, node._key);
       oldNode._sync(node, host, insertBefore);
       node._defunct = true;
       assert(oldNode._root is sky.Node);
@@ -131,6 +179,12 @@ abstract class Node {
     }
 
     node._parent = this;
+
+    if (oldNode == null) {
+      _traceSync(_SyncOperation.INSERTION, node._key);
+    } else {
+      _traceSync(_SyncOperation.STATELESS, node._key);
+    }
     node._sync(oldNode, host, insertBefore);
     if (oldNode != null)
       oldNode._defunct = true;
@@ -138,51 +192,6 @@ abstract class Node {
     assert(node._root is sky.Node);
     return node;
   }
-
-  void _syncEvents(EventMap oldEventMap) {
-    List<EventHandler> newHandlers = events._handlers;
-    int newStartIndex = 0;
-    int newEndIndex = newHandlers.length;
-
-    List<EventHandler> oldHandlers = oldEventMap._handlers;
-    int oldStartIndex = 0;
-    int oldEndIndex = oldHandlers.length;
-
-    // Skip over leading handlers that match.
-    while (newStartIndex < newEndIndex && oldStartIndex < oldEndIndex) {
-      EventHandler newHandler = newHandlers[newStartIndex];
-      EventHandler oldHandler = oldHandlers[oldStartIndex];
-      if (newHandler.type != oldHandler.type
-          || newHandler.listener != oldHandler.listener)
-        break;
-      ++newStartIndex;
-      ++oldStartIndex;
-    }
-
-    // Skip over trailing handlers that match.
-    while (newStartIndex < newEndIndex && oldStartIndex < oldEndIndex) {
-      EventHandler newHandler = newHandlers[newEndIndex - 1];
-      EventHandler oldHandler = oldHandlers[oldEndIndex - 1];
-      if (newHandler.type != oldHandler.type
-          || newHandler.listener != oldHandler.listener)
-        break;
-      --newEndIndex;
-      --oldEndIndex;
-    }
-
-    sky.Element root = _root as sky.Element;
-
-    for (int i = oldStartIndex; i < oldEndIndex; ++i) {
-      EventHandler oldHandler = oldHandlers[i];
-      root.removeEventListener(oldHandler.type, oldHandler.listener);
-    }
-
-    for (int i = newStartIndex; i < newEndIndex; ++i) {
-      EventHandler newHandler = newHandlers[i];
-      root.addEventListener(newHandler.type, newHandler.listener);
-    }
-  }
-
 }
 
 /*
@@ -192,6 +201,11 @@ abstract class Node {
  * has become stateful.
  */
 abstract class RenderNode extends Node {
+
+  static final Map<sky.Node, RenderNode> _nodeMap =
+      new HashMap<sky.Node, RenderNode>();
+
+  static RenderNode _getMounted(sky.Node node) => _nodeMap[node];
 
   RenderNode({ Object key }) : super(key: key);
 
@@ -208,6 +222,7 @@ abstract class RenderNode extends Node {
       _root = old._root;
     }
 
+    _nodeMap[_root] = this;
     _syncNode(old);
   }
 
@@ -216,7 +231,125 @@ abstract class RenderNode extends Node {
   void _remove() {
     assert(_root != null);
     _root.remove();
+    _nodeMap.remove(_root);
     super._remove();
+  }
+}
+
+typedef GestureEventListener(sky.GestureEvent e);
+typedef PointerEventListener(sky.PointerEvent e);
+typedef EventListener(sky.Event e);
+
+class EventTarget extends ContentNode  {
+  final Map<String, sky.EventListener> listeners;
+
+  static final Set<String> _registeredEvents = new HashSet<String>();
+
+  static Map<String, sky.EventListener> _createListeners({
+    EventListener onWheel,
+    GestureEventListener onGestureFlingCancel,
+    GestureEventListener onGestureFlingStart,
+    GestureEventListener onGestureScrollStart,
+    GestureEventListener onGestureScrollUpdate,
+    GestureEventListener onGestureTap,
+    GestureEventListener onGestureTapDown,
+    PointerEventListener onPointerCancel,
+    PointerEventListener onPointerDown,
+    PointerEventListener onPointerMove,
+    PointerEventListener onPointerUp,
+    Map<String, sky.EventListener> custom
+  }) {
+    var listeners = custom != null ?
+        new HashMap<String, sky.EventListener>.from(custom) :
+        new HashMap<String, sky.EventListener>();
+
+    if (onWheel != null)
+      listeners['wheel'] = onWheel;
+    if (onGestureFlingCancel != null)
+      listeners['gestureflingcancel'] = onGestureFlingCancel;
+    if (onGestureFlingStart != null)
+      listeners['gestureflingstart'] = onGestureFlingStart;
+    if (onGestureScrollStart != null)
+      listeners['gesturescrollstart'] = onGestureScrollStart;
+    if (onGestureScrollUpdate != null)
+      listeners['gesturescrollupdate'] = onGestureScrollUpdate;
+    if (onGestureTap != null)
+      listeners['gesturetap'] = onGestureTap;
+    if (onGestureTapDown != null)
+      listeners['gesturetapdown'] = onGestureTapDown;
+    if (onPointerCancel != null)
+      listeners['pointercancel'] = onPointerCancel;
+    if (onPointerDown != null)
+      listeners['pointerdown'] = onPointerDown;
+    if (onPointerMove != null)
+      listeners['pointermove'] = onPointerMove;
+    if (onPointerUp != null)
+      listeners['pointerup'] = onPointerUp;
+
+    return listeners;
+  }
+
+  EventTarget(Node content, {
+    EventListener onWheel,
+    GestureEventListener onGestureFlingCancel,
+    GestureEventListener onGestureFlingStart,
+    GestureEventListener onGestureScrollStart,
+    GestureEventListener onGestureScrollUpdate,
+    GestureEventListener onGestureTap,
+    GestureEventListener onGestureTapDown,
+    PointerEventListener onPointerCancel,
+    PointerEventListener onPointerDown,
+    PointerEventListener onPointerMove,
+    PointerEventListener onPointerUp,
+    Map<String, sky.EventListener> custom
+  }) : listeners = _createListeners(
+         onWheel: onWheel,
+         onGestureFlingCancel: onGestureFlingCancel,
+         onGestureFlingStart: onGestureFlingStart,
+         onGestureScrollUpdate: onGestureScrollUpdate,
+         onGestureScrollStart: onGestureScrollStart,
+         onGestureTap: onGestureTap,
+         onGestureTapDown: onGestureTapDown,
+         onPointerCancel: onPointerCancel,
+         onPointerDown: onPointerDown,
+         onPointerMove: onPointerMove,
+         onPointerUp: onPointerUp,
+         custom: custom
+       ),
+       super(content);
+
+  void _handleEvent(sky.Event e) {
+    sky.EventListener listener = listeners[e.type];
+    if (listener != null) {
+      listener(e);
+    }
+  }
+
+  static void _dispatchEvent(sky.Event e) {
+    Node target = RenderNode._getMounted(e.target);
+
+    // TODO(rafaelw): StopPropagation?
+    while (target != null) {
+      if (target is EventTarget) {
+        (target as EventTarget)._handleEvent(e);
+      }
+
+      target = target._parent;
+    }
+  }
+
+  static void _ensureDocumentListener(String eventType) {
+    if (_registeredEvents.add(eventType)) {
+      sky.document.addEventListener(eventType, _dispatchEvent);
+    }
+  }
+
+  void _sync(Node old, sky.ParentNode host, sky.Node insertBefore) {
+    for (var type in listeners.keys) {
+      _ensureDocumentListener(type);
+    }
+
+    super._sync(old, host, insertBefore);
   }
 }
 
@@ -253,18 +386,18 @@ abstract class Element extends RenderNode {
 
   sky.Node _createNode() => sky.document.createElement(_tagName);
 
+  final List<Node> children;
+  final Style style;
   final String inlineStyle;
 
-  final List<Node> _children;
-  final String _class;
+  String _class;
 
   Element({
     Object key,
     List<Node> children,
-    Style style,
+    this.style,
     this.inlineStyle
-  }) : _class = style == null ? '' : style._className,
-       _children = children == null ? _emptyList : children,
+  }) : this.children = children == null ? _emptyList : children,
        super(key:key) {
 
     if (_isInCheckedMode) {
@@ -274,16 +407,16 @@ abstract class Element extends RenderNode {
 
   void _remove() {
     super._remove();
-    if (_children != null) {
-      for (var child in _children) {
-        child._remove();
+    if (children != null) {
+      for (var child in children) {
+        _removeChild(child);
       }
     }
   }
 
   void _debugReportDuplicateIds() {
     var idSet = new HashSet<String>();
-    for (var child in _children) {
+    for (var child in children) {
       if (child is Text) {
         continue; // Text nodes all have the same key and are never reordered.
       }
@@ -295,12 +428,30 @@ abstract class Element extends RenderNode {
     }
   }
 
+  void _ensureClass() {
+    if (_class == null) {
+      List<Style> styles = new List<Style>();
+      if (style != null) {
+        styles.add(style);
+      }
+
+      Node parent = _parent;
+      while (parent != null && parent is! RenderNode) {
+        if (parent is StyleNode)
+          styles.add((parent as StyleNode).style);
+
+        parent = parent._parent;
+      }
+
+      _class = styles.map((s) => s._className).join(' ');
+    }
+  }
+
   void _syncNode(RenderNode old) {
     Element oldElement = old as Element;
     sky.Element root = _root as sky.Element;
 
-    _syncEvents(oldElement.events);
-
+    _ensureClass();
     if (_class != oldElement._class)
       root.setAttribute('class', _class);
 
@@ -315,9 +466,9 @@ abstract class Element extends RenderNode {
     assert(root != null);
 
     var startIndex = 0;
-    var endIndex = _children.length;
+    var endIndex = children.length;
 
-    var oldChildren = oldElement._children;
+    var oldChildren = oldElement.children;
     var oldStartIndex = 0;
     var oldEndIndex = oldChildren.length;
 
@@ -326,13 +477,13 @@ abstract class Element extends RenderNode {
     Node oldNode = null;
 
     void sync(int atIndex) {
-      _children[atIndex] = _syncChild(currentNode, oldNode, _root, nextSibling);
+      children[atIndex] = _syncChild(currentNode, oldNode, _root, nextSibling);
     }
 
     // Scan backwards from end of list while nodes can be directly synced
     // without reordering.
     while (endIndex > startIndex && oldEndIndex > oldStartIndex) {
-      currentNode = _children[endIndex - 1];
+      currentNode = children[endIndex - 1];
       oldNode = oldChildren[oldEndIndex - 1];
 
       if (currentNode._key != oldNode._key) {
@@ -391,7 +542,7 @@ abstract class Element extends RenderNode {
     // Scan forwards, this time we may re-order;
     nextSibling = root.firstChild;
     while (startIndex < endIndex && oldStartIndex < oldEndIndex) {
-      currentNode = _children[startIndex];
+      currentNode = children[startIndex];
       oldNode = oldChildren[oldStartIndex];
 
       if (currentNode._key == oldNode._key) {
@@ -412,7 +563,7 @@ abstract class Element extends RenderNode {
     // New insertions
     oldNode = null;
     while (startIndex < endIndex) {
-      currentNode = _children[startIndex];
+      currentNode = children[startIndex];
       sync(startIndex);
       startIndex++;
     }
@@ -421,7 +572,7 @@ abstract class Element extends RenderNode {
     currentNode = null;
     while (oldStartIndex < oldEndIndex) {
       oldNode = oldChildren[oldStartIndex];
-      oldNode._remove();
+      _removeChild(oldNode);
       advanceOldStartIndex();
     }
   }
@@ -530,19 +681,38 @@ class Anchor extends Element {
   }
 }
 
-List<Component> _dirtyComponents = new List<Component>();
+
 Set<Component> _mountedComponents = new HashSet<Component>();
 Set<Component> _unmountedComponents = new HashSet<Component>();
 
+void _enqueueDidMount(Component c) {
+  assert(!_notifingMountStatus);
+  _mountedComponents.add(c);
+}
+
+void _enqueueDidUnmount(Component c) {
+  assert(!_notifingMountStatus);
+  _unmountedComponents.add(c);
+}
+
+bool _notifingMountStatus = false;
+
+void _notifyMountStatusChanged() {
+  try {
+    _notifingMountStatus = true;
+    _unmountedComponents.forEach((c) => c._didUnmount());
+    _mountedComponents.forEach((c) => c._didMount());
+    _mountedComponents.clear();
+    _unmountedComponents.clear();
+  } finally {
+    _notifingMountStatus = false;
+  }
+}
+
+List<Component> _dirtyComponents = new List<Component>();
 bool _buildScheduled = false;
 bool _inRenderDirtyComponents = false;
 
-void _notifyMountStatusChanged() {
-  _unmountedComponents.forEach((c) => c.didUnmount());
-  _mountedComponents.forEach((c) => c.didMount());
-  _mountedComponents.clear();
-  _unmountedComponents.clear();
-}
 
 void _buildDirtyComponents() {
   Stopwatch sw;
@@ -581,25 +751,53 @@ void _scheduleComponentForRender(Component c) {
   }
 }
 
-EventMap _emptyEventMap = new EventMap();
-
 abstract class Component extends Node {
   bool get _isBuilding => _currentlyBuilding == this;
   bool _dirty = true;
+
+  sky.Node get _host => _root.parentNode;
+  sky.Node get _insertionPoint => _root == null ? _root : _root.nextSibling;
 
   Node _built;
   final int _order;
   static int _currentOrder = 0;
   bool _stateful;
   static Component _currentlyBuilding;
+  List<Function> _mountCallbacks;
+  List<Function> _unmountCallbacks;
+
+  void onDidMount(Function fn) {
+    if (_mountCallbacks == null)
+      _mountCallbacks = new List<Function>();
+
+    _mountCallbacks.add(fn);
+  }
+
+  void onDidUnmount(Function fn) {
+    if (_unmountCallbacks == null)
+      _unmountCallbacks = new List<Function>();
+
+    _unmountCallbacks.add(fn);
+  }
+
 
   Component({ Object key, bool stateful })
       : _stateful = stateful != null ? stateful : false,
         _order = _currentOrder + 1,
         super(key:key);
 
-  void didMount() {}
-  void didUnmount() {}
+  Component.fromArgs(Object key, bool stateful)
+      : this(key: key, stateful: stateful);
+
+  void _didMount() {
+    if (_mountCallbacks != null)
+      _mountCallbacks.forEach((fn) => fn());
+  }
+
+  void _didUnmount() {
+    if (_unmountCallbacks != null)
+      _unmountCallbacks.forEach((fn) => fn());
+  }
 
   // TODO(rafaelw): It seems wrong to expose DOM at all. This is presently
   // needed to get sizing info.
@@ -608,9 +806,9 @@ abstract class Component extends Node {
   void _remove() {
     assert(_built != null);
     assert(_root != null);
-    _built._remove();
+    _removeChild(_built);
     _built = null;
-    _unmountedComponents.add(this);
+    _enqueueDidUnmount(this);
     super._remove();
   }
 
@@ -654,7 +852,7 @@ abstract class Component extends Node {
     }
 
     if (oldBuilt == null)
-      _mountedComponents.add(this);
+      _enqueueDidMount(this);
 
     int lastOrder = _currentOrder;
     _currentOrder = _order;
@@ -666,17 +864,15 @@ abstract class Component extends Node {
     _built = _syncChild(_built, oldBuilt, host, insertBefore);
     _dirty = false;
     _root = _built._root;
-
-    _built.events.addAll(events);
-    _syncEvents(oldComponent != null ? oldComponent.events : _emptyEventMap);
   }
 
   void _buildIfDirty() {
     if (!_dirty || _defunct)
       return;
 
-    assert(_root != null);
-    _sync(null, _root.parentNode, _root.nextSibling);
+    assert(_host != null);
+    _trace('$_key rebuilding...');
+    _sync(null, _host, _insertionPoint);
   }
 
   void scheduleBuild() {
@@ -697,20 +893,11 @@ abstract class Component extends Node {
 }
 
 abstract class App extends Component {
-  sky.Node _host = null;
+  sky.Node _host;
+
   App() : super(stateful: true) {
     _host = sky.document.createElement('div');
     sky.document.appendChild(_host);
-
-    new Future.microtask(() {
-      Stopwatch sw = new Stopwatch()..start();
-
-      _sync(null, _host, null);
-      assert(_root is sky.Node);
-
-      sw.stop();
-      if (_shouldLogRenderDuration)
-        print("Initial build: ${sw.elapsedMicroseconds} microseconds");
-    });
+    _scheduleComponentForRender(this);
   }
 }
