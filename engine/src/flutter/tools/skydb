@@ -131,6 +131,7 @@ class SkyDebugger(object):
 
         if is_android and args.gdb:
             shell_args.append('--wait-for-debugger')
+            shell_args.append('--predictable-app-filenames')
 
         if 'remote_sky_server_port' in self.pids:
             shell_command = self._wrap_for_android(shell_args)
