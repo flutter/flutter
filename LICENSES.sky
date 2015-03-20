@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <title>Credits</title>
-<import src="/sky/framework/sky-scrollable.sky" />
+<import src="/packages/sky/framework/sky-scrollable.sky" />
 <style>
 body {
   background-color: white;
