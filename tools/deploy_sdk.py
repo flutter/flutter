@@ -167,10 +167,6 @@ def main():
     copy(os.path.join(build_dir, 'gen/sky'),
         sdk_path('packages/sky/lib'), gen_filter)
 
-    # Work around the fact that pub run doesn't work well right now.
-    copy(src_path('sky/sdk/packages/sky/bin/sky'),
-        sdk_path('packages/sky/lib/sky_tool'))
-
     # Sky SDK additions:
     copy_or_link(src_path('sky/engine/bindings/builtin.dart'),
         sdk_path('packages/sky/sdk_additions/dart_sky_builtins.dart'))
@@ -192,9 +188,9 @@ def main():
         sdk_path('packages/mojo/sdk_additions/dart_mojo_core.dart'))
 
     if not skip_apks:
-        ensure_dir_exists(sdk_path('apks'))
+        ensure_dir_exists(sdk_path('packages/sky/apks'))
         shutil.copy(os.path.join(build_dir, 'apks', 'SkyDemo.apk'),
-            sdk_path('apks'))
+            sdk_path('packages/sky/apks'))
 
     if generate_licenses:
         with open(sdk_path('LICENSES.sky'), 'w') as license_file:
