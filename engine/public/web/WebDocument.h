@@ -85,9 +85,6 @@ public:
     BLINK_EXPORT WebReferrerPolicy referrerPolicy() const;
     BLINK_EXPORT WebElement createElement(const WebString& tagName);
 
-    BLINK_EXPORT void pauseAnimationsForTesting(double pauseTime) const;
-
-
 #if BLINK_IMPLEMENTATION
     WebDocument(const PassRefPtr<Document>&);
     WebDocument& operator=(const PassRefPtr<Document>&);

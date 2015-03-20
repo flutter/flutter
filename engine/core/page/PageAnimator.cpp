@@ -26,17 +26,10 @@ void PageAnimator::serviceScriptedAnimations(double monotonicAnimationStartTime)
 {
     TemporaryChange<bool> servicing(m_servicingAnimations, true);
 
-    Vector<RefPtr<Document> > documents;
-    documents.append(m_page->mainFrame()->document());
+    RefPtr<Document> document = m_page->mainFrame()->document();
 
-    WTF_LOG(ScriptedAnimationController, "PageAnimator::serviceScriptedAnimations: #documents = %d",
-        static_cast<int>(documents.size()));
-
-    for (size_t i = 0; i < documents.size(); ++i)
-        DocumentAnimations::updateAnimationTimingForAnimationFrame(*documents[i], monotonicAnimationStartTime);
-
-    for (size_t i = 0; i < documents.size(); ++i)
-        documents[i]->serviceScriptedAnimations(monotonicAnimationStartTime);
+    DocumentAnimations::updateAnimationTimingForAnimationFrame(*document, monotonicAnimationStartTime);
+    document->serviceScriptedAnimations(monotonicAnimationStartTime);
 }
 
 void PageAnimator::scheduleVisualUpdate()

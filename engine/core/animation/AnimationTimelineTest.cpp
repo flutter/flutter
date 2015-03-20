@@ -178,20 +178,6 @@ TEST_F(AnimationAnimationTimelineTest, ZeroTime)
     EXPECT_FALSE(isNull);
 }
 
-TEST_F(AnimationAnimationTimelineTest, PauseForTesting)
-{
-    float seekTime = 1;
-    timing.fillMode = Timing::FillModeForwards;
-    RefPtr<Animation> anim1 = Animation::create(element.get(), AnimatableValueKeyframeEffectModel::create(AnimatableValueKeyframeVector()), timing);
-    RefPtr<Animation> anim2  = Animation::create(element.get(), AnimatableValueKeyframeEffectModel::create(AnimatableValueKeyframeVector()), timing);
-    AnimationPlayer* player1 = timeline->play(anim1.get());
-    AnimationPlayer* player2 = timeline->play(anim2.get());
-    timeline->pauseAnimationsForTesting(seekTime);
-
-    EXPECT_FLOAT_EQ(seekTime, player1->currentTimeInternal());
-    EXPECT_FLOAT_EQ(seekTime, player2->currentTimeInternal());
-}
-
 TEST_F(AnimationAnimationTimelineTest, DelayBeforeAnimationStart)
 {
     timing.iterationDuration = 2;

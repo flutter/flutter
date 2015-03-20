@@ -85,7 +85,6 @@ public:
     double currentTimeInternal(bool& isNull);
     double currentTimeInternal();
     double effectiveTime();
-    void pauseAnimationsForTesting(double);
 
     void setOutdatedAnimationPlayer(AnimationPlayer*);
     bool hasOutdatedAnimationPlayer() const;

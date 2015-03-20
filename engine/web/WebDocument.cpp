@@ -112,11 +112,6 @@ WebElement WebDocument::createElement(const WebString& tagName)
     return element;
 }
 
-void WebDocument::pauseAnimationsForTesting(double pauseTime) const {
-    constUnwrap<Document>()->frame()->view()->updateLayoutAndStyleForPainting();
-    constUnwrap<Document>()->timeline().pauseAnimationsForTesting(pauseTime);
-}
-
 WebDocument::WebDocument(const PassRefPtr<Document>& elem)
     : WebNode(elem)
 {

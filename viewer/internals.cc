@@ -185,11 +185,4 @@ void Internals::ConnectToApplication(
   }
 }
 
-void Internals::pauseAnimations(double pauseTime) {
-  if (pauseTime < 0)
-    return;
-
-    document_view_->web_view()->mainFrame()->document().pauseAnimationsForTesting(pauseTime);
-}
-
 }  // namespace sky

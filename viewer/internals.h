@@ -36,8 +36,6 @@ class Internals : public base::SupportsUserData::Data,
   mojo::Handle TakeServicesProvidedByEmbedder();
   mojo::Handle TakeServiceRegistry();
 
-  void pauseAnimations(double pauseTime);
-
  private:
   explicit Internals(DocumentView* document_view);
 

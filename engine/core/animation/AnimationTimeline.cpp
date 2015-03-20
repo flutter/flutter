@@ -192,13 +192,6 @@ double AnimationTimeline::effectiveTime()
     return std::isnan(time) ? 0 : time;
 }
 
-void AnimationTimeline::pauseAnimationsForTesting(double pauseTime)
-{
-    for (HashSet<RefPtr<AnimationPlayer> >::iterator it = m_playersNeedingUpdate.begin(); it != m_playersNeedingUpdate.end(); ++it)
-        (*it)->pauseForTesting(pauseTime);
-    serviceAnimations(TimingUpdateOnDemand);
-}
-
 bool AnimationTimeline::hasOutdatedAnimationPlayer() const
 {
     for (HashSet<RefPtr<AnimationPlayer> >::iterator it = m_playersNeedingUpdate.begin(); it != m_playersNeedingUpdate.end(); ++it) {
