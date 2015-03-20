@@ -6,6 +6,7 @@
 
 #include "base/bind.h"
 #include "base/message_loop/message_loop.h"
+#include "base/trace_event/trace_event.h"
 
 namespace sky {
 namespace shell {
@@ -24,6 +25,8 @@ Animator::~Animator() {
 void Animator::RequestFrame() {
   if (engine_requested_frame_)
     return;
+
+  TRACE_EVENT_ASYNC_BEGIN0("sky", "Frame request pending", this);
   engine_requested_frame_ = true;
 
   if (!frame_in_progress_) {
@@ -45,7 +48,9 @@ void Animator::BeginFrame() {
     frame_in_progress_ = false;
     return;
   }
+
   engine_requested_frame_ = false;
+  TRACE_EVENT_ASYNC_END0("sky", "Frame request pending", this);
 
   engine_->BeginFrame(base::TimeTicks::Now());
   config_.gpu_task_runner->PostTaskAndReply(
