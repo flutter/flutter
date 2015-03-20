@@ -17,18 +17,16 @@ class StockMenu extends Component {
   StockMenu({Object key, this.controller}) : super(key: key);
 
   Node build() {
-    return new Container(
-      style: _style,
-      children: [
-        new PopupMenu(
-          controller: controller,
-          items: [
-            [new Text('Add stock')],
-            [new Text('Remove stock')],
-            [new Text('Help & feeback')],
-          ],
-          level: 4)
-      ]
+    return new StyleNode(
+      new PopupMenu(
+        controller: controller,
+        items: [
+          [new Text('Add stock')],
+          [new Text('Remove stock')],
+          [new Text('Help & feeback')],
+        ],
+        level: 4),
+        _style
     );
   }
 }
