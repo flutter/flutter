@@ -6,6 +6,7 @@
 #include "sky/engine/core/script/dart_loader.h"
 
 #include "base/callback.h"
+#include "base/trace_event/trace_event.h"
 #include "mojo/common/data_pipe_drainer.h"
 #include "sky/engine/core/script/dart_dependency_catcher.h"
 #include "sky/engine/core/script/dom_dart_state.h"
@@ -79,11 +80,16 @@ class DartLoader::Job : public DartDependency,
 
 class DartLoader::ImportJob : public Job {
  public:
-  using Job::Job;
+  ImportJob(DartLoader* loader, const KURL& url)
+    : Job(loader, url) {
+    TRACE_EVENT_ASYNC_BEGIN1("sky", "DartLoader::ImportJob", this,
+                             "url", url.string().ascii().toStdString());
+  }
 
  private:
   // DataPipeDrainer::Client
   void OnDataComplete() override {
+    TRACE_EVENT_ASYNC_END0("sky", "DartLoader::ImportJob", this);
     loader_->DidCompleteImportJob(this, buffer_);
   }
 };
@@ -91,13 +97,17 @@ class DartLoader::ImportJob : public Job {
 class DartLoader::SourceJob : public Job {
  public:
   SourceJob(DartLoader* loader, const KURL& url, Dart_Handle library)
-      : Job(loader, url), library_(loader->dart_state(), library) {}
+      : Job(loader, url), library_(loader->dart_state(), library) {
+    TRACE_EVENT_ASYNC_BEGIN1("sky", "DartLoader::SourceJob", this,
+                             "url", url.string().ascii().toStdString());
+  }
 
   Dart_PersistentHandle library() const { return library_.value(); }
 
  private:
   // DataPipeDrainer::Client
   void OnDataComplete() override {
+    TRACE_EVENT_ASYNC_END0("sky", "DartLoader::SourceJob", this);
     loader_->DidCompleteSourceJob(this, buffer_);
   }
 

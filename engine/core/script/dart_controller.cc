@@ -8,6 +8,7 @@
 #include "base/bind.h"
 #include "base/logging.h"
 #include "base/single_thread_task_runner.h"
+#include "base/trace_event/trace_event.h"
 #include "dart/runtime/include/dart_mirrors_api.h"
 #include "sky/engine/bindings/builtin.h"
 #include "sky/engine/bindings/builtin_natives.h"
@@ -127,6 +128,8 @@ void DartController::LoadScriptInModule(
 void DartController::ExecuteLibraryInModule(AbstractModule* module,
                                             Dart_Handle library,
                                             HTMLScriptElement* script) {
+  TRACE_EVENT1("sky", "DartController::ExecuteLibraryInModule",
+               "url", module->url().ascii().toStdString());
   ASSERT(library);
   DCHECK(Dart_CurrentIsolate() == dart_state()->isolate());
   DartApiScope dart_api_scope;
