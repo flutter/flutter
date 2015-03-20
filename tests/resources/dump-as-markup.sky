@@ -1,7 +1,7 @@
-<import src="dom-serializer.sky" as="DomSerializer"/>
 <script>
 import "dart:sky";
 import "dart:sky.internals" as internals;
+import "dom_serializer.dart" as DomSerializer;
 
 void _init(_) {
   window.addEventListener('load', (_) {

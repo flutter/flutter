@@ -1,9 +1,6 @@
-<!--
 // Copyright 2015 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
--->
-<script>
 import "dart:sky";
 
 final kEntityMap = new Map.fromIterable([
@@ -42,19 +39,19 @@ String serializeAttributes(Element element) {
   return buffer;
 }
 
-Node getFirstChild(Node node) {
+Node getFirstChild(ParentNode node) {
   if (node is HTMLTemplateElement)
     return node.content.firstChild;
   return node.firstChild;
 }
 
-Node getLastChild(Node node) {
+Node getLastChild(ParentNode node) {
   if (node is HTMLTemplateElement)
     return node.content.lastChild;
   return node.lastChild;
 }
 
-String serializeChildren(Node node, int depth) {
+String serializeChildren(ParentNode node, int depth) {
   String buffer = '';
   Node firstChild = getFirstChild(node);
   Node lastChild = getLastChild(node);
@@ -80,7 +77,7 @@ String serializeElement(Element element, int depth) {
   return buffer;
 }
 
-String serializeText(Node node) {
+String serializeText(Text node) {
   Node parent = node.parentNode;
   if (parent != null && (parent is HTMLScriptElement || parent is HTMLStyleElement))
     return node.data;
@@ -94,6 +91,5 @@ String serializeNode(Node node, [int depth = 0]) {
     return serializeElement(node, depth);
   if (node is Document || node is ShadowRoot)
     return serializeChildren(node, depth);
-  throw new Error('Cannot serialize node');
+  throw new Exception('Cannot serialize node');
 }
-</script>
