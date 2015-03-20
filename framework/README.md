@@ -1,17 +1,14 @@
 Effen (fn)
 ===
 
-Effen is a prototype of a functional-reactive framework for sky which takes inspiration from [React](http://facebook.github.io/react/). The code as you see it here is a first-draft, is unreviewed, untested and will probably catch your house on fire. It is a proof of concept.
+Effen is a prototype of a functional-reactive framework for sky which takes inspiration from [React](http://facebook.github.io/react/).
 
 Effen is comprised of three main parts: a virtual-dom and diffing engine, a component mechanism and a very early set of widgets for use in creating applications.
 
-The central idea is that you build your UI out of components. Components describe what their view should look like given their current configuration & state. The diffing engine ensures that the DOM looks how the component describes.
+The central idea is that you build your UI out of components. Components describe what their view should look like given their current configuration & state. The diffing engine ensures that the DOM looks how the component describes by applying minimal diffs to transition it from one state to the next.
 
 If you just want to dive into code, see the `sky/examples/stocks-fn`.
 
-Is this the official framework for Sky?
----------------------------------------
-Nope, it's just an experiment. We're testing how well it works and how we like it.
 
 Hello World
 -----------
@@ -82,19 +79,31 @@ In order to efficiently apply changes to the DOM and to ensure that stateful com
 
 Event Handling
 --------------
-To handle an event is to receive a callback. All elements, (e.g. `Container`, `Anchor`, and `Image`) have optional named constructor arguments named `on*` whose type is function that takes a single `sky.Event` as a parameter. To handle an event, implement a callback on your component and pass it to the appropriate node. If you need to expose the event callback to an owner component, just pipe it through your constructor arguments:
+Events logically fire through the Effen node tree. If want to handle an event as it bubbles from the target to the root, create an `EventTarget`. `EventTarget` has named (typed) parameters for a small set of events that we've hit so far, as well as a 'custom' argument which is a `Map<String, sky.EventListener>`. If you'd like to add a type argument for an event, just post a patch.
 
 ```JavaScript
 class MyComp extends Component {
   MyComp({
-    Object key,
-    sky.EventListener onClick // delegated handler
+    Object key
   }) : super(key: key);
 
+  void _handleClick(sky.GestureEvent e) {
+    // do stuff
+  }
+
+  void _customEventCallback(sky.Event e) {
+    // do other stuff
+  }
+
   Node build() {
-    return new Container(
-      onClick: onClick,
-      onScrollStart: _handleScroll // direct handler
+    new EventTarget(
+      new Container(
+        children: // ...
+      ),
+      onGestureTap: _handleClick,
+      custom: {
+        'myCustomEvent': _customEventCallback
+      }
     );
   }
 
@@ -106,30 +115,22 @@ class MyComp extends Component {
 }
 ```
 
-*Note: Only a subset of the events defined in sky are currently exposed on Element. If you need one which isn't present, feel free to post a patch which adds it.*
 
 Styling
 -------
-Styling is the part of Effen which is least designed and is likely to change. At the moment, there are two ways to apply style to an element: (1) by handing a `Style` object to the `style` constructor parameter, or by passing a `String` to the `inlineStyle` constructor parameter. Both take a string of CSS, but the construction of a `Style` object presently causes a new `<style />` element to be created at the document level which can quickly be applied to components by Effen setting their class -- while inlineStyle does what you would expect.
+Styling is the part of Effen which is least designed and is likely to change. There are two ways to specify styles:
 
-`Style` objects are for most styling which is static and `inlineStyle`s are for styling which is dynamic (e.g. `display: ` or `transform: translate*()` which may change as a result of animating of transient UI state).
+  * `Style` objects which are interned and can be applied to Elements via the `style` constructor parameter. Use `Style` objects for styles which are *not* animated.
+  * An `inlineStyle` string which can be applied to Elements via the `inlineStyle` constructor parameter.  Use `inlineStyle` for styles which *are* animated.
+  
+If you need to apply a Style to a Component or Node which you didn't construct (i.e. one that was handed into your constructor), you can wrap it in a `StyleNode` which also takes a `Style` constructor in it's `style` constructor parameter.
 
 Animation
 ---------
-Animation is still an area of exploration. The pattern which is presently used in the `stocks-fn` example is the following: Components which are animatable should contain within their implementation file an Animation object whose job it is to react to events and control an animation by exposing one or more Dart `stream`s of data. The `Animation` object is owned by the owner (or someone even higher) and the stream is passed into the animating component via its constructor. The first time the component builds, it listens on the stream and calls `setState` on itself for each value which emerges from the stream [See the `drawer.dart` widget for an example].
+Animation is still an area of exploration. Have a look at [AnimatedComponent](components/animated_component.dart) and [Drawer](components/drawer.dart) for an example of this this currently works.
 
 Performance
 -----------
-Isn't diffing the DOM expensive? This is kind of a subject question with a few answers, but the biggest issue is what do you mean by "fast"?
-
-The stock answer is that diffing the DOM is fast because you compute the diff of the current VDOM from the previous VDOM and only apply the diffs to the actual DOM. The truth that this is fast, but not really fast enough to rebuild everything on the screen for 60 or 120fps animations on a mobile device.
-
-The answer that many people don't get is that there are really two logical types of builds: (1) When underlying model data changes: This generally requires handing in new data to the root component (in Effen, this means the `App` calling `setState` on itself). (2) When user interaction updates a control or an animation takes place. (1) is generally more expensive because it requires a full building & diff, but tends to happen infrequently. (2) tends to happen frequently, but at nodes which are near the leafs of the tree, so the number of nodes which must be reconsiled is generally small.
-
-React provides a way to manually insist that a componet not rebuild based on its old and new state (and they encourage the use of immutable data structures because discovering the data is the same can be accomplished with a reference comparison). A similar mechanism is in the works for Effen.
-
-Lastly, Effen does something unique: Because its diffing is component-wise, it can be smart about not forcing the rebuild of components which are handed in as *arguments* when only the component itself is dirty. For example, the `drawer.dart` component knows how to animate out & back and expose a content pane -- but it takes its content pane as an argument. When the animation mutates the inlineStyle of the `Drawer`'s `Container`, it must schedule itself for rebuild -- but -- because the content was handed in to its constructor, its configuration can't have changed and Effen doesn't require it to rebuild.
-
 It is a design goal that it should be *possible* to arrange that all "build" cycles which happen during animations can complete in less than one milliesecond on a Nexus 5.
 
 
