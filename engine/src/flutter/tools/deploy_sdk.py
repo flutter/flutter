@@ -55,6 +55,7 @@ def ensure_dir_exists(path):
 
 
 def copy(from_root, to_root, filter_func=None):
+    assert os.path.exists(from_root), "%s does not exist!" % from_root
     if os.path.isfile(from_root):
         ensure_dir_exists(os.path.dirname(to_root))
         shutil.copy(from_root, to_root)
@@ -166,12 +167,17 @@ def main():
     copy(os.path.join(build_dir, 'gen/sky'),
         sdk_path('packages/sky/lib'), gen_filter)
 
+    # Work around the fact that pub run doesn't work well right now.
+    copy(src_path('sky/sdk/packages/sky/bin/sky'),
+        sdk_path('packages/sky/lib/sky_tool'))
+
     # Sky SDK additions:
     copy_or_link(src_path('sky/engine/bindings/builtin.dart'),
         sdk_path('packages/sky/sdk_additions/dart_sky_builtins.dart'))
     bindings_path = os.path.join(build_dir, 'gen/sky/bindings')
     copy_or_link(os.path.join(bindings_path, 'dart_sky.dart'),
         sdk_path('packages/sky/sdk_additions/dart_sky.dart'))
+
 
     # Mojo package, lots of overlap with gen, must be copied:
     copy(src_path('mojo/public'), sdk_path('packages/mojo/lib/public'),
@@ -182,7 +188,7 @@ def main():
     # Mojo SDK additions:
     copy_or_link(src_path('mojo/public/dart/bindings.dart'),
         sdk_path('packages/mojo/sdk_additions/dart_mojo_bindings.dart'))
-    copy_or_link(src_path('mojo/public/dart/dart_mojo_core.dart'),
+    copy_or_link(src_path('mojo/public/dart/core.dart'),
         sdk_path('packages/mojo/sdk_additions/dart_mojo_core.dart'))
 
     if not skip_apks:
