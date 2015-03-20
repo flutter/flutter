@@ -7,7 +7,7 @@ Effen is comprised of three main parts: a virtual-dom and diffing engine, a comp
 
 The central idea is that you build your UI out of components. Components describe what their view should look like given their current configuration & state. The diffing engine ensures that the DOM looks how the component describes by applying minimal diffs to transition it from one state to the next.
 
-If you just want to dive into code, see the `sky/examples/stocks-fn`.
+If you just want to dive into code, see the [stocks-fn example](../examples/stocks-fn).
 
 
 Hello World
