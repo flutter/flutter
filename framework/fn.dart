@@ -85,6 +85,8 @@ void _parentInsertBefore(sky.ParentNode parent,
   }
 }
 
+enum _SyncOperation { IDENTICAL, INSERTION, STATEFUL, STATELESS, REMOVAL }
+
 /*
  * All Effen nodes derive from Node. All nodes have a _parent, a _key and
  * can be sync'd.
@@ -136,8 +138,17 @@ abstract class Node {
     print(buffer);
   }
 
+  void _traceSync(_SyncOperation op, String key) {
+    if (!_shouldTrace)
+      return;
+
+    String opString = op.toString().toLowerCase();
+    String outString = opString.substring(opString.indexOf('.') + 1);
+    _trace('_sync($outString) $key');
+  }
+
   void _removeChild(Node node) {
-    _trace('_sync(remove) ${node._key}');
+    _traceSync(_SyncOperation.REMOVAL, node._key);
     node._remove();
   }
 
@@ -148,7 +159,7 @@ abstract class Node {
     assert(oldNode == null || node._key == oldNode._key);
 
     if (node == oldNode) {
-      _trace('_sync(identical) ${node._key}');
+      _traceSync(_SyncOperation.IDENTICAL, node._key);
       return node; // Nothing to do. Subtrees must be identical.
     }
 
@@ -160,7 +171,7 @@ abstract class Node {
     }
 
     if (node._willSync(oldNode)) {
-      _trace('_sync(statefull) ${node._key}');
+      _traceSync(_SyncOperation.STATEFUL, node._key);
       oldNode._sync(node, host, insertBefore);
       node._defunct = true;
       assert(oldNode._root is sky.Node);
@@ -170,9 +181,9 @@ abstract class Node {
     node._parent = this;
 
     if (oldNode == null) {
-      _trace('_sync(insert) ${node._key}');
+      _traceSync(_SyncOperation.INSERTION, node._key);
     } else {
-      _trace('_sync(stateless) ${node._key}');
+      _traceSync(_SyncOperation.STATELESS, node._key);
     }
     node._sync(oldNode, host, insertBefore);
     if (oldNode != null)
@@ -670,19 +681,38 @@ class Anchor extends Element {
   }
 }
 
-List<Component> _dirtyComponents = new List<Component>();
+
 Set<Component> _mountedComponents = new HashSet<Component>();
 Set<Component> _unmountedComponents = new HashSet<Component>();
 
+void _enqueueDidMount(Component c) {
+  assert(!_notifingMountStatus);
+  _mountedComponents.add(c);
+}
+
+void _enqueueDidUnmount(Component c) {
+  assert(!_notifingMountStatus);
+  _unmountedComponents.add(c);
+}
+
+bool _notifingMountStatus = false;
+
+void _notifyMountStatusChanged() {
+  try {
+    _notifingMountStatus = true;
+    _unmountedComponents.forEach((c) => c._didUnmount());
+    _mountedComponents.forEach((c) => c._didMount());
+    _mountedComponents.clear();
+    _unmountedComponents.clear();
+  } finally {
+    _notifingMountStatus = false;
+  }
+}
+
+List<Component> _dirtyComponents = new List<Component>();
 bool _buildScheduled = false;
 bool _inRenderDirtyComponents = false;
 
-void _notifyMountStatusChanged() {
-  _unmountedComponents.forEach((c) => c._didUnmount());
-  _mountedComponents.forEach((c) => c._didMount());
-  _mountedComponents.clear();
-  _unmountedComponents.clear();
-}
 
 void _buildDirtyComponents() {
   Stopwatch sw;
@@ -778,7 +808,7 @@ abstract class Component extends Node {
     assert(_root != null);
     _removeChild(_built);
     _built = null;
-    _unmountedComponents.add(this);
+    _enqueueDidUnmount(this);
     super._remove();
   }
 
@@ -822,7 +852,7 @@ abstract class Component extends Node {
     }
 
     if (oldBuilt == null)
-      _mountedComponents.add(this);
+      _enqueueDidMount(this);
 
     int lastOrder = _currentOrder;
     _currentOrder = _order;
