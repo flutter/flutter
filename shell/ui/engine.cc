@@ -5,6 +5,7 @@
 #include "sky/shell/ui/engine.h"
 
 #include "base/bind.h"
+#include "base/trace_event/trace_event.h"
 #include "mojo/public/cpp/application/connect.h"
 #include "sky/engine/public/platform/WebInputEvent.h"
 #include "sky/engine/public/web/Sky.h"
@@ -61,6 +62,8 @@ mojo::ServiceProviderPtr Engine::CreateServiceProvider() {
 }
 
 void Engine::Init() {
+  TRACE_EVENT0("sky", "Engine::Init");
+
   service_provider_ = CreateServiceProvider();
   mojo::NetworkServicePtr network_service;
   mojo::ConnectToService(service_provider_.get(), &network_service);
@@ -70,6 +73,8 @@ void Engine::Init() {
 }
 
 void Engine::BeginFrame(base::TimeTicks frame_time) {
+  TRACE_EVENT0("sky", "Engine::BeginFrame");
+
   double frame_time_sec = (frame_time - base::TimeTicks()).InSecondsF();
   double deadline_sec = frame_time_sec;
   double interval_sec = 1.0 / 60;
@@ -80,6 +85,8 @@ void Engine::BeginFrame(base::TimeTicks frame_time) {
 }
 
 skia::RefPtr<SkPicture> Engine::Paint() {
+  TRACE_EVENT0("sky", "Engine::Paint");
+
   SkRTreeFactory factory;
   SkPictureRecorder recorder;
   auto canvas = skia::SharePtr(recorder.beginRecording(
@@ -137,6 +144,7 @@ blink::WebScreenInfo Engine::screenInfo() {
 }
 
 void Engine::OnInputEvent(InputEventPtr event) {
+  TRACE_EVENT0("sky", "Engine::OnInputEvent");
   scoped_ptr<blink::WebInputEvent> web_event =
       ConvertEvent(event, device_pixel_ratio_);
   if (!web_event)

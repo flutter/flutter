@@ -32,7 +32,7 @@
 #include "sky/engine/core/dom/Microtask.h"
 
 #include "base/bind.h"
-#include "sky/engine/platform/TraceEvent.h"
+#include "base/trace_event/trace_event.h"
 #include "sky/engine/public/platform/WebThread.h"
 #include "sky/engine/wtf/OwnPtr.h"
 #include "sky/engine/wtf/Vector.h"
@@ -71,18 +71,14 @@ void Microtask::performCheckpoint()
 {
     MicrotaskQueue& queue = microtaskQueue();
     while(!queue.isEmpty()) {
+        TRACE_EVENT0("sky", "Microtask::performCheckpoint");
+
         MicrotaskQueue local;
         swap(queue, local);
         for (const auto& task : local)
             task->run();
     }
 }
-
-// static void microtaskFunctionCallback(void* data)
-// {
-//     OwnPtr<WebThread::Task> task = adoptPtr(static_cast<WebThread::Task*>(data));
-//     task->run();
-// }
 
 void Microtask::enqueueMicrotask(PassOwnPtr<WebThread::Task> callback)
 {

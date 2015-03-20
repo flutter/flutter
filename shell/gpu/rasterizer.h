@@ -39,6 +39,7 @@ class Rasterizer : public GPUDelegate {
  private:
   void EnsureGLContext();
   void EnsureGaneshSurface(const gfx::Size& size);
+  void DrawPicture(SkPicture* picture);
 
   scoped_refptr<gfx::GLShareGroup> share_group_;
   scoped_refptr<gfx::GLSurface> surface_;

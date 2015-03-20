@@ -4,6 +4,7 @@
 
 #include "sky/shell/gpu/rasterizer.h"
 
+#include "base/trace_event/trace_event.h"
 #include "sky/shell/gpu/ganesh_context.h"
 #include "sky/shell/gpu/ganesh_surface.h"
 #include "third_party/skia/include/core/SkCanvas.h"
@@ -41,6 +42,8 @@ void Rasterizer::OnAcceleratedWidgetAvailable(gfx::AcceleratedWidget widget) {
 }
 
 void Rasterizer::Draw(skia::RefPtr<SkPicture> picture) {
+  TRACE_EVENT0("sky", "Rasterizer::Draw");
+
   if (!surface_)
     return;
 
@@ -52,11 +55,15 @@ void Rasterizer::Draw(skia::RefPtr<SkPicture> picture) {
   CHECK(context_->MakeCurrent(surface_.get()));
   EnsureGaneshSurface(size);
 
-  SkCanvas* canvas = ganesh_surface_->canvas();
-  canvas->drawPicture(picture.get());
-  canvas->flush();
-
+  DrawPicture(picture.get());
   surface_->SwapBuffers();
+}
+
+void Rasterizer::DrawPicture(SkPicture* picture) {
+  TRACE_EVENT0("sky", "Rasterizer::DrawPicture");
+  SkCanvas* canvas = ganesh_surface_->canvas();
+  canvas->drawPicture(picture);
+  canvas->flush();
 }
 
 void Rasterizer::OnOutputSurfaceDestroyed() {
