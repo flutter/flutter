@@ -10,8 +10,9 @@ import("//build/config/android/rules.gni")
 generate_jni("jni_headers") {
   sources = [
     "org/domokit/sky/shell/JavaServiceProvider.java",
-    "org/domokit/sky/shell/SkyMain.java",
     "org/domokit/sky/shell/PlatformView.java",
+    "org/domokit/sky/shell/SkyMain.java",
+    "org/domokit/sky/shell/TracingController.java",
   ]
   jni_package = "sky/shell"
 }
@@ -35,6 +36,8 @@ shared_library("sky_shell") {
     "shell.h",
     "sky_main.cc",
     "sky_main.h",
+    "tracing_controller.cc",
+    "tracing_controller.h",
     "ui/animator.cc",
     "ui/animator.h",
     "ui/engine.cc",
@@ -80,6 +83,7 @@ android_library("java") {
     "org/domokit/sky/shell/SkyActivity.java",
     "org/domokit/sky/shell/SkyApplication.java",
     "org/domokit/sky/shell/SkyMain.java",
+    "org/domokit/sky/shell/TracingController.java",
   ]
 
   deps = [

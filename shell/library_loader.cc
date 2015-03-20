@@ -13,14 +13,16 @@
 #include "sky/shell/java_service_provider.h"
 #include "sky/shell/platform_view.h"
 #include "sky/shell/sky_main.h"
+#include "sky/shell/tracing_controller.h"
 
 namespace {
 
 base::android::RegistrationMethod kSkyRegisteredMethods[] = {
     {"CoreImpl", mojo::android::RegisterCoreImpl},
     {"JavaServiceProvider", sky::shell::RegisterJavaServiceProvider},
-    {"SkyMain", sky::shell::RegisterSkyMain},
     {"PlatformView", sky::shell::PlatformView::Register},
+    {"SkyMain", sky::shell::RegisterSkyMain},
+    {"TracingController", sky::shell::RegisterTracingController},
 };
 
 bool RegisterJNI(JNIEnv* env) {

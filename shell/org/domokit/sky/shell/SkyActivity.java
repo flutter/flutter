@@ -14,6 +14,7 @@ import android.view.WindowManager;
  * Base class for activities that use Sky.
  */
 public class SkyActivity extends Activity {
+    private TracingController mTracingController;
     private PlatformView mView;
 
     /**
@@ -35,6 +36,7 @@ public class SkyActivity extends Activity {
         SkyMain.ensureInitialized(getApplicationContext());
         mView = new PlatformView(this);
         setContentView(mView);
+        mTracingController = new TracingController(this);
     }
 
     public void loadUrl(String url) {
