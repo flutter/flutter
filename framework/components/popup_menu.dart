@@ -37,8 +37,8 @@ class PopupMenu extends AnimatedComponent {
   static final Style _style = new Style('''
     border-radius: 2px;
     padding: 8px 0;
-    background-color: ${Grey[50]};'''
-  );
+    box-sizing: border-box;
+    background-color: ${Grey[50]};''');
 
   List<List<Node>> items;
   int level;
