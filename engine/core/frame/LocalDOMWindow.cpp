@@ -57,6 +57,7 @@
 #include "sky/engine/core/frame/Location.h"
 #include "sky/engine/core/frame/Screen.h"
 #include "sky/engine/core/frame/Settings.h"
+#include "sky/engine/core/frame/Tracing.h"
 #include "sky/engine/core/inspector/ConsoleMessage.h"
 #include "sky/engine/core/loader/FrameLoaderClient.h"
 #include "sky/engine/core/page/ChromeClient.h"
@@ -416,6 +417,13 @@ Location& LocalDOMWindow::location() const
     if (!m_location)
         m_location = Location::create(m_frame);
     return *m_location;
+}
+
+Tracing& LocalDOMWindow::tracing() const
+{
+    if (!m_tracing)
+        m_tracing = Tracing::create();
+    return *m_tracing;
 }
 
 DOMSelection* LocalDOMWindow::getSelection()

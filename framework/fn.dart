@@ -9,6 +9,8 @@ import 'dart:collection';
 import 'dart:sky' as sky;
 import 'reflect.dart' as reflect;
 
+final sky.Tracing _tracing = sky.window.tracing;
+
 bool _initIsInCheckedMode() {
   String testFn(i) { double d = i; return d.toString(); }
   try {
@@ -713,8 +715,9 @@ List<Component> _dirtyComponents = new List<Component>();
 bool _buildScheduled = false;
 bool _inRenderDirtyComponents = false;
 
-
 void _buildDirtyComponents() {
+  _tracing.begin('fn::_buildDirtyComponents');
+
   Stopwatch sw;
   if (_shouldLogRenderDuration)
     sw = new Stopwatch()..start();
@@ -737,8 +740,10 @@ void _buildDirtyComponents() {
 
   if (_shouldLogRenderDuration) {
     sw.stop();
-    print("Render took ${sw.elapsedMicroseconds} microseconds");
+    print('Render took ${sw.elapsedMicroseconds} microseconds');
   }
+
+  _tracing.end('fn::_buildDirtyComponents');
 }
 
 void _scheduleComponentForRender(Component c) {

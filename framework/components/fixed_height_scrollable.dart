@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import '../animation/scroll_behavior.dart';
+import '../debug/tracing.dart';
 import '../fn.dart';
 import 'dart:math' as math;
 import 'dart:sky' as sky;
@@ -30,22 +31,24 @@ abstract class FixedHeightScrollable extends Scrollable {
   }) : super(key: key, scrollBehavior: scrollBehavior);
 
   void _measureHeights() {
-    if (_itemHeight != null)
-      return;
-    var root = getRoot();
-    if (root == null)
-      return;
-    var item = root.firstChild.firstChild;
-    if (item == null)
-      return;
-    sky.ClientRect scrollRect = root.getBoundingClientRect();
-    sky.ClientRect itemRect = item.getBoundingClientRect();
-    assert(scrollRect.height > 0);
-    assert(itemRect.height > 0);
+    trace('FixedHeightScrollable::_measureHeights', () {
+      if (_itemHeight != null)
+        return;
+      var root = getRoot();
+      if (root == null)
+        return;
+      var item = root.firstChild.firstChild;
+      if (item == null)
+        return;
+      sky.ClientRect scrollRect = root.getBoundingClientRect();
+      sky.ClientRect itemRect = item.getBoundingClientRect();
+      assert(scrollRect.height > 0);
+      assert(itemRect.height > 0);
 
-    setState(() {
-      _height = scrollRect.height;
-      _itemHeight = itemRect.height;
+      setState(() {
+        _height = scrollRect.height;
+        _itemHeight = itemRect.height;
+      });
     });
   }
 

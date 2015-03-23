@@ -12,6 +12,7 @@ import 'package:sky/framework/components/menu_divider.dart';
 import 'package:sky/framework/components/menu_item.dart';
 import 'package:sky/framework/components/popup_menu.dart';
 import 'package:sky/framework/components/scaffold.dart';
+import 'package:sky/framework/debug/tracing.dart';
 import 'package:sky/framework/fn.dart';
 import 'package:sky/framework/theme/typography.dart' as typography;
 import 'stock_data.dart';
@@ -42,7 +43,9 @@ class StocksApp extends App {
     fetchStockOracle().then((oracle) {
       setState(() {
         _sortedStocks = oracle.stocks;
-        _sortedStocks.sort((a, b) => a.symbol.compareTo(b.symbol));
+        trace('StocksApp::sortStocks', () {
+          _sortedStocks.sort((a, b) => a.symbol.compareTo(b.symbol));
+        });
       });
     });
   }

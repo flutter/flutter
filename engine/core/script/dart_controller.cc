@@ -212,6 +212,8 @@ static Dart_Isolate IsolateCreateCallback(const char* script_uri,
 }
 
 static void CallHandleMessage(base::WeakPtr<DartState> dart_state) {
+  TRACE_EVENT0("sky", "CallHandleMessage");
+
   if (!dart_state)
     return;
 

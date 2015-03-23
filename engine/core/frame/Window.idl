@@ -72,6 +72,8 @@
     long requestAnimationFrame(RequestAnimationFrameCallback callback);
     void cancelAnimationFrame(long id);
 
+    readonly attribute Tracing tracing;
+
     // [Replaceable] readonly attribute CSS CSS;
 };
 

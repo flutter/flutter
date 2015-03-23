@@ -67,6 +67,7 @@ class ScheduledAction;
 class Screen;
 class ScriptCallStack;
 class StyleMedia;
+class Tracing;
 
 enum PageshowEventPersistence {
     PageshowEventNotPersisted = 0,
@@ -123,6 +124,8 @@ public:
     int screenY() const;
     int screenLeft() const { return screenX(); }
     int screenTop() const { return screenY(); }
+
+    Tracing& tracing() const;
 
     // FIXME(sky): keeping self for now since js-test.html uses it.
     LocalDOMWindow* window() const;
@@ -232,7 +235,7 @@ private:
 
     mutable RefPtr<Screen> m_screen;
     mutable RefPtr<Location> m_location;
-
+    mutable RefPtr<Tracing> m_tracing;
     mutable RefPtr<DOMWindowCSS> m_css;
 
     RefPtr<DOMWindowEventQueue> m_eventQueue;
