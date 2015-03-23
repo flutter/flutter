@@ -4,17 +4,13 @@
 
 import 'dart:convert';
 import 'dart:math';
+import 'package:sky/framework/debug/tracing.dart';
 import 'package:sky/framework/net/fetch.dart';
 
 // Snapshot from http://www.nasdaq.com/screening/company-list.aspx
 // Fetched 2/23/2014.
 // "Symbol","Name","LastSale","MarketCap","IPOyear","Sector","industry","Summary Quote",
-// final List<List<String>> _kCompanyList = [
-//   ["TFSC","1347 Capital Corp.","9.43","\$56.09M","2014","Finance","Business Services","http://www.nasdaq.com/symbol/tfsc"],
-//   ["TFSCR","1347 Capital Corp.","0.37","n/a","2014","Finance","Business Services","http://www.nasdaq.com/symbol/tfscr"],
-//   ["TFSCU","1347 Capital Corp.","9.97","\$41.67M","2014","n/a","n/a","http://www.nasdaq.com/symbol/tfscu"],
-//   ["TFSCW","1347 Capital Corp.","0.2","n/a","2014","Finance","Business Services","http://www.nasdaq.com/symbol/tfscw"],
-// ];
+// Data in stock_data.json
 
 class Stock {
   String symbol;
@@ -60,8 +56,11 @@ class StockOracle {
 
 Future<StockOracle> fetchStockOracle() async {
   Response response = await fetch('lib/stock_data.json');
-  String json = response.bodyAsString();
-  JsonDecoder decoder = new JsonDecoder();
-  var companyList = decoder.convert(json);
-  return new StockOracle.fromCompanyList(companyList);
+
+  return trace('stocks::fetchStockOracle', () {
+    String json = response.bodyAsString();
+    JsonDecoder decoder = new JsonDecoder();
+    var companyList = decoder.convert(json);
+    return new StockOracle.fromCompanyList(companyList);
+  });
 }
