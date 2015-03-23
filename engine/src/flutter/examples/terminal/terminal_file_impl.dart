@@ -4,7 +4,7 @@
 
 import 'dart:async';
 import 'dart:core';
-import 'dart:mojo.core';
+import 'package:mojo/public/dart/core.dart' as core;
 import 'package:mojo/services/files/public/interfaces/file.mojom.dart' as files;
 import 'package:mojo/services/files/public/interfaces/types.mojom.dart' as files;
 
