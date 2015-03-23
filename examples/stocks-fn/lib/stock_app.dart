@@ -33,14 +33,18 @@ class StocksApp extends App {
     ${typography.white.title};'''
   );
 
-  List<Stock> _sortedStocks;
+  List<Stock> _sortedStocks = [];
   bool _isSearching = false;
   bool _isShowingMenu = false;
   String _searchQuery;
 
   StocksApp() : super() {
-    _sortedStocks = oracle.stocks;
-    _sortedStocks.sort((a, b) => a.symbol.compareTo(b.symbol));
+    fetchStockOracle().then((oracle) {
+      setState(() {
+        _sortedStocks = oracle.stocks;
+        _sortedStocks.sort((a, b) => a.symbol.compareTo(b.symbol));
+      });
+    });
   }
 
   void _handleSearchClick(_) {

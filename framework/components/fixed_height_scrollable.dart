@@ -6,6 +6,7 @@ import '../animation/scroll_behavior.dart';
 import '../fn.dart';
 import 'dart:math' as math;
 import 'dart:sky' as sky;
+import 'dart:async';
 import 'scrollable.dart';
 
 abstract class FixedHeightScrollable extends Scrollable {
@@ -26,13 +27,17 @@ abstract class FixedHeightScrollable extends Scrollable {
   FixedHeightScrollable({
     Object key,
     ScrollBehavior scrollBehavior
-  }) : super(key: key, scrollBehavior: scrollBehavior) {
-    onDidMount(_measureHeights);
-  }
+  }) : super(key: key, scrollBehavior: scrollBehavior);
 
   void _measureHeights() {
+    if (_itemHeight != null)
+      return;
     var root = getRoot();
+    if (root == null)
+      return;
     var item = root.firstChild.firstChild;
+    if (item == null)
+      return;
     sky.ClientRect scrollRect = root.getBoundingClientRect();
     sky.ClientRect itemRect = item.getBoundingClientRect();
     assert(scrollRect.height > 0);
@@ -49,7 +54,10 @@ abstract class FixedHeightScrollable extends Scrollable {
     var drawCount = 1;
     var transformStyle = '';
 
-    if (_height > 0.0) {
+    if (_itemHeight == null)
+      new Future.microtask(_measureHeights);
+
+    if (_height > 0.0 && _itemHeight != null) {
       if (scrollOffset < 0.0) {
         double visibleHeight = _height + scrollOffset;
         drawCount = (visibleHeight / _itemHeight).round() + 1;
