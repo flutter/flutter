@@ -52,29 +52,6 @@ class Style {
   Style._internal(this._className);
 }
 
-abstract class ContentNode extends Node {
-  Node content;
-
-  ContentNode(Node content) : this.content = content, super(key: content._key);
-
-  void _sync(Node old, sky.ParentNode host, sky.Node insertBefore) {
-    Node oldContent = old == null ? null : (old as ContentNode).content;
-    content = _syncChild(content, oldContent, host, insertBefore);
-    _root = content._root;
-  }
-
-  void _remove() {
-    _removeChild(content);
-    super._remove();
-  }
-}
-
-class StyleNode extends ContentNode {
-  final Style style;
-
-  StyleNode(Node content, this.style): super(content);
-}
-
 void _parentInsertBefore(sky.ParentNode parent,
                          sky.Node node,
                          sky.Node ref) {
@@ -192,6 +169,29 @@ abstract class Node {
     assert(node._root is sky.Node);
     return node;
   }
+}
+
+abstract class ContentNode extends Node {
+  Node content;
+
+  ContentNode(Node content) : this.content = content, super(key: content._key);
+
+  void _sync(Node old, sky.ParentNode host, sky.Node insertBefore) {
+    Node oldContent = old == null ? null : (old as ContentNode).content;
+    content = _syncChild(content, oldContent, host, insertBefore);
+    _root = content._root;
+  }
+
+  void _remove() {
+    _removeChild(content);
+    super._remove();
+  }
+}
+
+class StyleNode extends ContentNode {
+  final Style style;
+
+  StyleNode(Node content, this.style): super(content);
 }
 
 /*
