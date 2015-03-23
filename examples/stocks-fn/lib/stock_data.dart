@@ -23,7 +23,7 @@ class Stock {
   String marketCap;
   double percentChange;
 
-  Stock(this.symbol, this.name, this.lastSale, this.marketCap);
+  Stock(this.symbol, this.name, this.lastSale, this.marketCap, this.percentChange);
 
   Stock.fromFields(List<String> fields) {
     // FIXME: This class should only have static data, not lastSale, etc.
