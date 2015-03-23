@@ -202,7 +202,7 @@ static Dart_Isolate IsolateCreateCallback(const char* script_uri,
   {
     DartApiScope apiScope;
     Builtin::SetNativeResolver(Builtin::kBuiltinLibrary);
-    Builtin::SetNativeResolver(Builtin::kMojoCoreLibrary);
+    Builtin::SetNativeResolver(Builtin::kMojoInternalLibrary);
   }
 
   Dart_ExitIsolate();
@@ -234,7 +234,7 @@ static void EnsureHandleWatcherStarted() {
   // TODO(dart): Call Dart_Cleanup (ensure the handle watcher isolate is closed)
   // during shutdown.
   Dart_Handle mojo_core_lib =
-      Builtin::LoadAndCheckLibrary(Builtin::kMojoCoreLibrary);
+      Builtin::LoadAndCheckLibrary(Builtin::kMojoInternalLibrary);
   CHECK(!LogIfError((mojo_core_lib)));
   Dart_Handle handle_watcher_type = Dart_GetType(
       mojo_core_lib,
@@ -271,7 +271,7 @@ void DartController::CreateIsolateFor(Document* document) {
     DartApiScope apiScope;
 
     Builtin::SetNativeResolver(Builtin::kBuiltinLibrary);
-    Builtin::SetNativeResolver(Builtin::kMojoCoreLibrary);
+    Builtin::SetNativeResolver(Builtin::kMojoInternalLibrary);
     BuiltinNatives::Init();
 
     builtin_sky_ = adoptPtr(new BuiltinSky(dart_state()));

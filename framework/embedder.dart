@@ -4,8 +4,8 @@
 
 import "package:mojo/public/dart/application.dart";
 import "dart:sky.internals" as internals;
-import "dart:mojo.bindings" as bindings;
-import "dart:mojo.core" as core;
+import "package:mojo/public/dart/bindings.dart" as bindings;
+import "package:mojo/public/dart/core.dart" as core;
 import "package:mojo/public/interfaces/application/service_provider.mojom.dart";
 import "package:mojo/public/interfaces/application/shell.mojom.dart";
 import "package:mojo/services/service_registry/public/interfaces/service_registry.mojom.dart";
@@ -25,9 +25,11 @@ class _EmbedderImpl {
           new core.MojoHandle(internals.takeServicesProvidedToEmbedder());
       var proxyHandle =
           new core.MojoHandle(internals.takeServicesProvidedByEmbedder());
-      _connection = new ApplicationConection(
-          stubHandle.isValid ? new ServiceProviderStub.fromHandle(stubHandle) : null,
-          proxyHandle.isValid ? new ServiceProviderProxy.fromHandle(proxyHandle) : null);
+      _connection = new ApplicationConection(stubHandle.isValid
+          ? new ServiceProviderStub.fromHandle(stubHandle)
+          : null, proxyHandle.isValid
+          ? new ServiceProviderProxy.fromHandle(proxyHandle)
+          : null);
     }
     return _connection;
   }

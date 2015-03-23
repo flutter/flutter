@@ -43,7 +43,7 @@ namespace blink {
   V(MojoMessagePipe_Read, 5)               \
   V(MojoHandle_Close, 1)                   \
   V(MojoHandle_Wait, 3)                    \
-  V(MojoHandle_Register, 1)                \
+  V(MojoHandle_Register, 2)                \
   V(MojoHandle_WaitMany, 3)                \
   V(MojoHandleWatcher_SendControlData, 4)  \
   V(MojoHandleWatcher_RecvControlData, 1)  \
@@ -98,16 +98,13 @@ static void SetInvalidArgumentReturn(Dart_NativeArguments arguments) {
       arguments, static_cast<int64_t>(MOJO_RESULT_INVALID_ARGUMENT));
 }
 
-static Dart_Handle MojoLib() {
-  return DartBuiltin::LookupLibrary("dart:mojo.core");
-}
-
-static Dart_Handle SignalsStateToDart(Dart_Handle klass,
-                                      const MojoHandleSignalsState& state) {
-  Dart_Handle arg1 = Dart_NewInteger(state.satisfied_signals);
-  Dart_Handle arg2 = Dart_NewInteger(state.satisfiable_signals);
-  Dart_Handle args[] = {arg1, arg2};
-  return Dart_New(klass, Dart_Null(), 2, args);
+static Dart_Handle SignalsStateToDart(const MojoHandleSignalsState& state) {
+  Dart_Handle list = Dart_NewList(2);
+  Dart_Handle arg0 = Dart_NewInteger(state.satisfied_signals);
+  Dart_Handle arg1 = Dart_NewInteger(state.satisfiable_signals);
+  Dart_ListSetAt(list, 0, arg0);
+  Dart_ListSetAt(list, 1, arg1);
+  return list;
 }
 
 #define CHECK_INTEGER_ARGUMENT(args, num, result, failure)                     \
@@ -135,46 +132,23 @@ static void MojoHandleCloserCallback(void* isolate_data,
   delete callback_peer;
 }
 
-// Setup a weak persistent handle for a Dart MojoHandle that calls MojoClose
-// on the handle when the MojoHandle is GC'd or the VM is going down.
+// Setup a weak persistent handle for a MojoHandle that calls MojoClose on the
+// handle when the MojoHandle is GC'd or the VM is going down.
 void MojoHandle_Register(Dart_NativeArguments arguments) {
-  // An instance of Dart class MojoHandle.
   Dart_Handle mojo_handle_instance = Dart_GetNativeArgument(arguments, 0);
   if (!Dart_IsInstance(mojo_handle_instance)) {
     SetInvalidArgumentReturn(arguments);
     return;
   }
-  // TODO(zra): Here, we could check that mojo_handle_instance is really a
-  // MojoHandle instance, but with the Dart API it's not too easy to get a Type
-  // object from the class name outside of the root library. For now, we'll rely
-  // on the existence of the right fields to be sufficient.
-
-  Dart_Handle raw_mojo_handle_instance = Dart_GetField(
-      mojo_handle_instance, ToDart("_handle"));
-  if (Dart_IsError(raw_mojo_handle_instance)) {
-    SetInvalidArgumentReturn(arguments);
-    return;
-  }
-
-  Dart_Handle mojo_handle = Dart_GetField(
-      raw_mojo_handle_instance, ToDart("h"));
-  if (Dart_IsError(mojo_handle)) {
-    SetInvalidArgumentReturn(arguments);
-    return;
-  }
 
   int64_t raw_handle = static_cast<int64_t>(MOJO_HANDLE_INVALID);
-  Dart_Handle result = Dart_IntegerToInt64(mojo_handle, &raw_handle);
-  if (Dart_IsError(result)) {
-    SetInvalidArgumentReturn(arguments);
-    return;
-  }
-
+  CHECK_INTEGER_ARGUMENT(arguments, 1, &raw_handle, InvalidArgument);
   if (raw_handle == static_cast<int64_t>(MOJO_HANDLE_INVALID)) {
     SetInvalidArgumentReturn(arguments);
     return;
   }
 
+  // Set up a finalizer.
   CloserCallbackPeer* callback_peer = new CloserCallbackPeer();
   callback_peer->handle = static_cast<MojoHandle>(raw_handle);
   Dart_NewWeakPersistentHandle(mojo_handle_instance,
@@ -206,17 +180,13 @@ void MojoHandle_Wait(Dart_NativeArguments arguments) {
                             static_cast<MojoHandleSignals>(signals),
                             static_cast<MojoDeadline>(deadline), &state);
 
-  Dart_Handle klass = Dart_GetClass(
-      MojoLib(), ToDart("MojoHandleSignalsState"));
-  DART_CHECK_VALID(klass);
-
   // The return value is structured as a list of length 2:
   // [0] MojoResult
   // [1] MojoHandleSignalsState. (may be null)
   Dart_Handle list = Dart_NewList(2);
   Dart_ListSetAt(list, 0, Dart_NewInteger(r));
   if (mojo::WaitManyResult(r).AreSignalsStatesValid()) {
-    Dart_ListSetAt(list, 1, SignalsStateToDart(klass, state));
+    Dart_ListSetAt(list, 1, SignalsStateToDart(state));
   } else {
     Dart_ListSetAt(list, 1, Dart_Null());
   }
@@ -265,10 +235,6 @@ void MojoHandle_WaitMany(Dart_NativeArguments arguments) {
   mojo::WaitManyResult wmr = mojo::WaitMany(
       mojo_handles, mojo_signals, static_cast<MojoDeadline>(deadline), &states);
 
-  Dart_Handle klass = Dart_GetClass(
-      MojoLib(), ToDart("MojoHandleSignalsState"));
-  DART_CHECK_VALID(klass);
-
   // The return value is structured as a list of length 3:
   // [0] MojoResult
   // [1] index of handle that caused a return (may be null)
@@ -282,7 +248,7 @@ void MojoHandle_WaitMany(Dart_NativeArguments arguments) {
   if (wmr.AreSignalsStatesValid()) {
     Dart_Handle stateList = Dart_NewList(handles_len);
     for (int i = 0; i < handles_len; i++) {
-      Dart_ListSetAt(stateList, i, SignalsStateToDart(klass, states[i]));
+      Dart_ListSetAt(stateList, i, SignalsStateToDart(states[i]));
     }
     Dart_ListSetAt(list, 2, stateList);
   } else {

@@ -5,9 +5,9 @@ import '/sky/framework/embedder.dart';
 import 'dart:async';
 import 'dart:typed_data';
 import "dart:sky.internals" as internals;
-import 'dart:mojo.bindings';
-import 'dart:mojo.core';
 
+import 'package:mojo/public/dart/bindings.dart';
+import 'package:mojo/public/dart/core.dart';
 import 'package:mojo/services/network/public/interfaces/network_service.mojom.dart';
 import 'package:mojo/services/network/public/interfaces/url_loader.mojom.dart';
 
