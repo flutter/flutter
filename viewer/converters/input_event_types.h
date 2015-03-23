@@ -12,9 +12,16 @@ namespace blink {
 class WebInputEvent;
 }
 
+namespace ui {
+class GestureEvent;
+}
+
 namespace sky {
 
 scoped_ptr<blink::WebInputEvent> ConvertEvent(const mojo::EventPtr& event,
+                                              float device_pixel_ratio);
+
+scoped_ptr<blink::WebInputEvent> ConvertEvent(const ui::GestureEvent& event,
                                               float device_pixel_ratio);
 }
 

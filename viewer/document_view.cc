@@ -361,7 +361,7 @@ void DocumentView::OnViewInputEvent(
             *touch_event, result, this)) {
       for (auto& gesture : *gestures) {
         scoped_ptr<blink::WebInputEvent> gesture_event =
-            ConvertEvent(mojo::Event::From(*gesture), device_pixel_ratio);
+            ConvertEvent(*gesture, device_pixel_ratio);
         if (gesture_event)
           web_view_->handleInputEvent(*gesture_event);
       }
