@@ -15,6 +15,7 @@ import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
 import com.squareup.okhttp.ResponseBody;
 
+import org.chromium.base.TraceEvent;
 import org.chromium.mojo.system.AsyncWaiter;
 import org.chromium.mojo.system.Core;
 import org.chromium.mojo.system.DataPipe;
@@ -43,6 +44,8 @@ public class UrlLoaderImpl implements UrlLoader {
     private OkHttpClient mClient;
     private boolean mIsLoading;
     private NetworkError mError;
+    private static long sNextTracingId = 1;
+    private final long mTracingId;
 
     class CopyToPipeJob {
         private BufferedSource mSource;
@@ -54,6 +57,7 @@ public class UrlLoaderImpl implements UrlLoader {
         }
 
         public void copy() throws IOException {
+            TraceEvent.begin("UrlLoaderImpl::CopyToPipeJob::copy");
             int result = 0;
             do {
                 try {
@@ -66,12 +70,15 @@ public class UrlLoaderImpl implements UrlLoader {
                 } catch (MojoException e) {
                     if (e.getMojoResult() != MojoResult.SHOULD_WAIT) throw e;
                     copyMoreAsync();
+                    TraceEvent.end("UrlLoaderImpl::CopyToPipeJob::copy");
                     return;
                 }
             } while (result != -1);
 
             mIsLoading = false;
             mProducer.close();
+            TraceEvent.finishAsync("UrlLoaderImpl", mTracingId);
+            TraceEvent.end("UrlLoaderImpl::CopyToPipeJob::copy");
         }
 
         private void copyMoreAsync() {
@@ -85,12 +92,14 @@ public class UrlLoaderImpl implements UrlLoader {
                     } catch (IOException e) {
                         mIsLoading = false;
                         mProducer.close();
+                        TraceEvent.finishAsync("UrlLoaderImpl", mTracingId);
                     }
                 }
                 @Override
                 public void onError(MojoException exception) {
                     mIsLoading = false;
                     mProducer.close();
+                    TraceEvent.finishAsync("UrlLoaderImpl", mTracingId);
                 }
             });
         }
@@ -102,6 +111,7 @@ public class UrlLoaderImpl implements UrlLoader {
         mClient = client;
         mIsLoading = false;
         mError = null;
+        mTracingId = sNextTracingId++;
     }
 
     @Override
@@ -112,6 +122,7 @@ public class UrlLoaderImpl implements UrlLoader {
 
     @Override
     public void start(UrlRequest request, StartResponse callback) {
+        TraceEvent.startAsync("UrlLoaderImpl", mTracingId);
         mIsLoading = true;
         mError = null;
 
@@ -143,6 +154,7 @@ public class UrlLoaderImpl implements UrlLoader {
                 responseCallback.call(urlResponse);
 
                 mIsLoading = false;
+                TraceEvent.finishAsync("UrlLoaderImpl", mTracingId);
             }
 
             @Override
@@ -186,6 +198,7 @@ public class UrlLoaderImpl implements UrlLoader {
                 } catch (IOException e) {
                     mIsLoading = false;
                     producerHandle.close();
+                    TraceEvent.finishAsync("UrlLoaderImpl", mTracingId);
                 }
             }
         });
