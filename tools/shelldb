@@ -218,14 +218,9 @@ class Analyze(object):
         sky_builtin_path = \
             os.path.join(SRC_ROOT, 'sky/engine/bindings/builtin.dart')
         dart_sky_path = os.path.join(bindings_path, 'dart_sky.dart')
-        mojo_bindings_path = \
-            os.path.join(SRC_ROOT, 'mojo/public/dart/bindings.dart')
-        mojo_core_path = os.path.join(SRC_ROOT, 'mojo/public/dart/core.dart')
         analyzer_args = [ANALYZER_PATH,
             "--url-mapping=dart:sky,%s" % dart_sky_path,
             "--url-mapping=dart:sky_builtin,%s" % sky_builtin_path,
-            "--url-mapping=dart:mojo.bindings,%s" % mojo_bindings_path,
-            "--url-mapping=dart:mojo.core,%s" % mojo_core_path,
             args.app_path
         ]
         subprocess.call(analyzer_args)
