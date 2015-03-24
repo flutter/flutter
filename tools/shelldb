@@ -113,6 +113,9 @@ class StartSky(object):
         start_parser.add_argument('build_dir', type=str)
         start_parser.add_argument('url_or_path', nargs='?', type=str,
             default=DEFAULT_URL)
+        start_parser.add_argument('--no_install', action="store_false",
+            default=True, dest="install",
+            help="Don't install SkyDemo.apk before starting")
         start_parser.set_defaults(func=self.run)
 
     def _server_root_for_url(self, url_or_path):
@@ -159,7 +162,8 @@ class StartSky(object):
 
         pids['build_dir'] = os.path.abspath(args.build_dir)
 
-        subprocess.check_call([ADB_PATH, 'install', '-r', apk_path])
+        if args.install:
+            subprocess.check_call([ADB_PATH, 'install', '-r', apk_path])
 
         port_string = 'tcp:%s' % sky_server.port
         subprocess.check_call([
