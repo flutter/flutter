@@ -12,6 +12,8 @@ import 'package:sky/framework/net/fetch.dart';
 // "Symbol","Name","LastSale","MarketCap","IPOyear","Sector","industry","Summary Quote",
 // Data in stock_data.json
 
+final Random _rng = new Random();
+
 class Stock {
   String symbol;
   String name;
@@ -31,36 +33,41 @@ class Stock {
     symbol = fields[0];
     name = fields[1];
     marketCap = fields[4];
-    var rng = new Random();
-    percentChange = (rng.nextDouble() * 20) - 10;
+    percentChange = (_rng.nextDouble() * 20) - 10;
   }
 }
 
-class StockOracle {
-  List<Stock> stocks;
+class StockData {
+  List<List<String>> _data;
 
-  StockOracle(this.stocks);
+  StockData(this._data);
 
-  StockOracle.fromCompanyList(List<List<String>> list) {
-    stocks = list.map((fields) => new Stock.fromFields(fields)).toList();
+  void appendTo(List<Stock> stocks) {
+    for (List<String> fields in _data)
+      stocks.add(new Stock.fromFields(fields));
+  }
+}
+
+typedef void StockDataCallback(StockData data);
+const _kChunkCount = 30;
+
+class StockDataFetcher {
+  int _currentChunk = 0;
+  final StockDataCallback callback;
+
+  StockDataFetcher(this.callback) {
+    _fetchNextChunk();
   }
 
-  Stock lookupBySymbol(String symbol) {
-    this.stocks.forEach((stock) {
-      if (stock.symbol == symbol)
-        return stock;
+  void _fetchNextChunk() {
+    fetch('data/stock_data_${_currentChunk++}.json').then((Response response) {
+      String json = response.bodyAsString();
+      JsonDecoder decoder = new JsonDecoder();
+
+      callback(new StockData(decoder.convert(json)));
+
+      if (_currentChunk < _kChunkCount)
+        _fetchNextChunk();
     });
-    return null;
   }
-}
-
-Future<StockOracle> fetchStockOracle() async {
-  Response response = await fetch('lib/stock_data.json');
-
-  return trace('stocks::fetchStockOracle', () {
-    String json = response.bodyAsString();
-    JsonDecoder decoder = new JsonDecoder();
-    var companyList = decoder.convert(json);
-    return new StockOracle.fromCompanyList(companyList);
-  });
 }

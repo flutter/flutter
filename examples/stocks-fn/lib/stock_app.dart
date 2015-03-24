@@ -34,18 +34,16 @@ class StocksApp extends App {
     ${typography.white.title};'''
   );
 
-  List<Stock> _sortedStocks = [];
+  StockDataFetcher _stockDataFetcher;
+  List<Stock> _stocks = [];
   bool _isSearching = false;
   bool _isShowingMenu = false;
   String _searchQuery;
 
   StocksApp() : super() {
-    fetchStockOracle().then((oracle) {
+    _stockDataFetcher = new StockDataFetcher((StockData data) {
       setState(() {
-        _sortedStocks = oracle.stocks;
-        trace('StocksApp::sortStocks', () {
-          _sortedStocks.sort((a, b) => a.symbol.compareTo(b.symbol));
-        });
+        data.appendTo(_stocks);
       });
     });
   }
@@ -155,7 +153,7 @@ class StocksApp extends App {
 
     return new Scaffold(
       actionBar: actionBar,
-      content: new Stocklist(stocks: _sortedStocks, query: _searchQuery),
+      content: new Stocklist(stocks: _stocks, query: _searchQuery),
       fab: new FloatingActionButton(
         content: new Icon(type: 'content/add_white', size: 24), level: 3),
       drawer: drawer,

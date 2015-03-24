@@ -1,0 +1,1002 @@
+[
+  [
+    "GABC", 
+    "German American Bancorp, Inc.", 
+    "29.18", 
+    "$385.48M", 
+    "n/a", 
+    "Finance", 
+    "Major Banks", 
+    "http://www.nasdaq.com/symbol/gabc"
+  ], 
+  [
+    "GAI", 
+    "Global-Tech Advanced Innovations Inc.", 
+    "3.9", 
+    "$11.87M", 
+    "n/a", 
+    "Consumer Durables", 
+    "Home Furnishings", 
+    "http://www.nasdaq.com/symbol/gai"
+  ], 
+  [
+    "GAIA", 
+    "Gaiam, Inc.", 
+    "6.64", 
+    "$162.45M", 
+    "1999", 
+    "Consumer Services", 
+    "Movies/Entertainment", 
+    "http://www.nasdaq.com/symbol/gaia"
+  ], 
+  [
+    "GAIN", 
+    "Gladstone Investment Corporation", 
+    "7.8", 
+    "$206.51M", 
+    "2005", 
+    "n/a", 
+    "n/a", 
+    "http://www.nasdaq.com/symbol/gain"
+  ], 
+  [
+    "GAINO", 
+    "Gladstone Investment Corporation", 
+    "25.3799", 
+    "n/a", 
+    "n/a", 
+    "n/a", 
+    "n/a", 
+    "http://www.nasdaq.com/symbol/gaino"
+  ], 
+  [
+    "GAINP", 
+    "Gladstone Investment Corporation", 
+    "25.8", 
+    "n/a", 
+    "n/a", 
+    "n/a", 
+    "n/a", 
+    "http://www.nasdaq.com/symbol/gainp"
+  ], 
+  [
+    "GALE", 
+    "Galena Biopharma, Inc.", 
+    "1.84", 
+    "$223.48M", 
+    "n/a", 
+    "Health Care", 
+    "Major Pharmaceuticals", 
+    "http://www.nasdaq.com/symbol/gale"
+  ], 
+  [
+    "GALT", 
+    "Galectin Therapeutics Inc.", 
+    "4.04", 
+    "$89.38M", 
+    "n/a", 
+    "Health Care", 
+    "Major Pharmaceuticals", 
+    "http://www.nasdaq.com/symbol/galt"
+  ], 
+  [
+    "GALTU", 
+    "Galectin Therapeutics Inc.", 
+    "7.7", 
+    "n/a", 
+    "n/a", 
+    "Health Care", 
+    "Major Pharmaceuticals", 
+    "http://www.nasdaq.com/symbol/galtu"
+  ], 
+  [
+    "GALTW", 
+    "Galectin Therapeutics Inc.", 
+    "1.9732", 
+    "n/a", 
+    "n/a", 
+    "Health Care", 
+    "Major Pharmaceuticals", 
+    "http://www.nasdaq.com/symbol/galtw"
+  ], 
+  [
+    "GAME", 
+    "Shanda Games Limited", 
+    "5.58", 
+    "$1.5B", 
+    "n/a", 
+    "Miscellaneous", 
+    "Business Services", 
+    "http://www.nasdaq.com/symbol/game"
+  ], 
+  [
+    "GARS", 
+    "Garrison Capital Inc.", 
+    "14.83", 
+    "$248.53M", 
+    "2013", 
+    "n/a", 
+    "n/a", 
+    "http://www.nasdaq.com/symbol/gars"
+  ], 
+  [
+    "GASS", 
+    "StealthGas, Inc.", 
+    "6.14", 
+    "$245.61M", 
+    "2005", 
+    "Transportation", 
+    "Marine Transportation", 
+    "http://www.nasdaq.com/symbol/gass"
+  ], 
+  [
+    "GBCI", 
+    "Glacier Bancorp, Inc.", 
+    "24.79", 
+    "$1.86B", 
+    "n/a", 
+    "Finance", 
+    "Major Banks", 
+    "http://www.nasdaq.com/symbol/gbci"
+  ], 
+  [
+    "GBDC", 
+    "Golub Capital BDC, Inc.", 
+    "17.58", 
+    "$829.28M", 
+    "2010", 
+    "n/a", 
+    "n/a", 
+    "http://www.nasdaq.com/symbol/gbdc"
+  ], 
+  [
+    "GBIM", 
+    "GlobeImmune, Inc.", 
+    "7.61", 
+    "$43.75M", 
+    "2014", 
+    "Health Care", 
+    "Major Pharmaceuticals", 
+    "http://www.nasdaq.com/symbol/gbim"
+  ], 
+  [
+    "GBLI", 
+    "Global Indemnity plc", 
+    "26.71", 
+    "$676.28M", 
+    "n/a", 
+    "Finance", 
+    "Property-Casualty Insurers", 
+    "http://www.nasdaq.com/symbol/gbli"
+  ], 
+  [
+    "GBNK", 
+    "Guaranty Bancorp", 
+    "15.1", 
+    "$328.38M", 
+    "n/a", 
+    "Finance", 
+    "Major Banks", 
+    "http://www.nasdaq.com/symbol/gbnk"
+  ], 
+  [
+    "GBSN", 
+    "Great Basin Scientific, Inc.", 
+    "1.8", 
+    "$9.16M", 
+    "2014", 
+    "Health Care", 
+    "Medical/Dental Instruments", 
+    "http://www.nasdaq.com/symbol/gbsn"
+  ], 
+  [
+    "GCBC", 
+    "Greene County Bancorp, Inc.", 
+    "27.9748", 
+    "$118.12M", 
+    "n/a", 
+    "Finance", 
+    "Banks", 
+    "http://www.nasdaq.com/symbol/gcbc"
+  ], 
+  [
+    "GCVRZ", 
+    "Sanofi", 
+    "0.62", 
+    "n/a", 
+    "n/a", 
+    "Health Care", 
+    "Major Pharmaceuticals", 
+    "http://www.nasdaq.com/symbol/gcvrz"
+  ], 
+  [
+    "GDEF", 
+    "Global Defense & National Security Systems, Inc.", 
+    "10.3", 
+    "$99.13M", 
+    "2013", 
+    "Finance", 
+    "Business Services", 
+    "http://www.nasdaq.com/symbol/gdef"
+  ], 
+  [
+    "GENC", 
+    "Gencor Industries Inc.", 
+    "9.66", 
+    "$91.96M", 
+    "n/a", 
+    "Capital Goods", 
+    "Construction/Ag Equipment/Trucks", 
+    "http://www.nasdaq.com/symbol/genc"
+  ], 
+  [
+    "GENE", 
+    "Genetic Technologies Ltd", 
+    "6.46", 
+    "$26.44M", 
+    "n/a", 
+    "Health Care", 
+    "Biotechnology: Biological Products (No Diagnostic Substances)", 
+    "http://www.nasdaq.com/symbol/gene"
+  ], 
+  [
+    "GEOS", 
+    "Geospace Technologies Corporation", 
+    "18.31", 
+    "$240.71M", 
+    "n/a", 
+    "Capital Goods", 
+    "Industrial Machinery/Components", 
+    "http://www.nasdaq.com/symbol/geos"
+  ], 
+  [
+    "GERN", 
+    "Geron Corporation", 
+    "3.16", 
+    "$496.79M", 
+    "1996", 
+    "Health Care", 
+    "Major Pharmaceuticals", 
+    "http://www.nasdaq.com/symbol/gern"
+  ], 
+  [
+    "GEVA", 
+    "Synageva BioPharma Corp.", 
+    "102.45", 
+    "$3.77B", 
+    "n/a", 
+    "Health Care", 
+    "Biotechnology: Biological Products (No Diagnostic Substances)", 
+    "http://www.nasdaq.com/symbol/geva"
+  ], 
+  [
+    "GEVO", 
+    "Gevo, Inc.", 
+    "0.27", 
+    "$26.9M", 
+    "2011", 
+    "Basic Industries", 
+    "Major Chemicals", 
+    "http://www.nasdaq.com/symbol/gevo"
+  ], 
+  [
+    "GFED", 
+    "Guaranty Federal Bancshares, Inc.", 
+    "14.53", 
+    "$62.48M", 
+    "n/a", 
+    "Finance", 
+    "Major Banks", 
+    "http://www.nasdaq.com/symbol/gfed"
+  ], 
+  [
+    "GFN", 
+    "General Finance Corporation", 
+    "8.9", 
+    "$230.06M", 
+    "n/a", 
+    "Consumer Services", 
+    "Other Specialty Stores", 
+    "http://www.nasdaq.com/symbol/gfn"
+  ], 
+  [
+    "GFNCP", 
+    "General Finance Corporation", 
+    "110", 
+    "n/a", 
+    "n/a", 
+    "Consumer Services", 
+    "Other Specialty Stores", 
+    "http://www.nasdaq.com/symbol/gfncp"
+  ], 
+  [
+    "GFNSL", 
+    "General Finance Corporation", 
+    "25.85", 
+    "n/a", 
+    "n/a", 
+    "Consumer Services", 
+    "Other Specialty Stores", 
+    "http://www.nasdaq.com/symbol/gfnsl"
+  ], 
+  [
+    "GGAC", 
+    "Garnero Group Acquisition Company", 
+    "9.52", 
+    "$177.1M", 
+    "2014", 
+    "Finance", 
+    "Business Services", 
+    "http://www.nasdaq.com/symbol/ggac"
+  ], 
+  [
+    "GGACR", 
+    "Garnero Group Acquisition Company", 
+    "0.16", 
+    "n/a", 
+    "2014", 
+    "Finance", 
+    "Business Services", 
+    "http://www.nasdaq.com/symbol/ggacr"
+  ], 
+  [
+    "GGACU", 
+    "Garnero Group Acquisition Company", 
+    "9.9", 
+    "$129.33M", 
+    "2014", 
+    "Finance", 
+    "Business Services", 
+    "http://www.nasdaq.com/symbol/ggacu"
+  ], 
+  [
+    "GGACW", 
+    "Garnero Group Acquisition Company", 
+    "0.11", 
+    "n/a", 
+    "2014", 
+    "Finance", 
+    "Business Services", 
+    "http://www.nasdaq.com/symbol/ggacw"
+  ], 
+  [
+    "GGAL", 
+    "Grupo Financiero Galicia S.A.", 
+    "20.505", 
+    "$2.67B", 
+    "n/a", 
+    "Finance", 
+    "Commercial Banks", 
+    "http://www.nasdaq.com/symbol/ggal"
+  ], 
+  [
+    "GHDX", 
+    "Genomic Health, Inc.", 
+    "31", 
+    "$983.37M", 
+    "2005", 
+    "Health Care", 
+    "Medical Specialities", 
+    "http://www.nasdaq.com/symbol/ghdx"
+  ], 
+  [
+    "GIFI", 
+    "Gulf Island Fabrication, Inc.", 
+    "16.86", 
+    "$244.67M", 
+    "1997", 
+    "Capital Goods", 
+    "Metal Fabrications", 
+    "http://www.nasdaq.com/symbol/gifi"
+  ], 
+  [
+    "GIGA", 
+    "Giga-tronics Incorporated", 
+    "1.76", 
+    "$9.58M", 
+    "1983", 
+    "Capital Goods", 
+    "Electrical Products", 
+    "http://www.nasdaq.com/symbol/giga"
+  ], 
+  [
+    "GIGM", 
+    "GigaMedia Limited", 
+    "0.772", 
+    "$39.25M", 
+    "n/a", 
+    "Technology", 
+    "Computer Software: Programming, Data Processing", 
+    "http://www.nasdaq.com/symbol/gigm"
+  ], 
+  [
+    "GIII", 
+    "G-III Apparel Group, LTD.", 
+    "105.53", 
+    "$2.37B", 
+    "1989", 
+    "Consumer Non-Durables", 
+    "Apparel", 
+    "http://www.nasdaq.com/symbol/giii"
+  ], 
+  [
+    "GILD", 
+    "Gilead Sciences, Inc.", 
+    "102.61", 
+    "$154.8B", 
+    "1992", 
+    "Health Care", 
+    "Biotechnology: Biological Products (No Diagnostic Substances)", 
+    "http://www.nasdaq.com/symbol/gild"
+  ], 
+  [
+    "GILT", 
+    "Gilat Satellite Networks Ltd.", 
+    "4.83", 
+    "$205.84M", 
+    "n/a", 
+    "Technology", 
+    "Radio And Television Broadcasting And Communications Equipment", 
+    "http://www.nasdaq.com/symbol/gilt"
+  ], 
+  [
+    "GK", 
+    "G&K Services, Inc.", 
+    "72.46", 
+    "$1.44B", 
+    "n/a", 
+    "Consumer Services", 
+    "Other Consumer Services", 
+    "http://www.nasdaq.com/symbol/gk"
+  ], 
+  [
+    "GKNT", 
+    "Geeknet, Inc.", 
+    "7.87", 
+    "$52.88M", 
+    "n/a", 
+    "Consumer Services", 
+    "Other Specialty Stores", 
+    "http://www.nasdaq.com/symbol/gknt"
+  ], 
+  [
+    "GLAD", 
+    "Gladstone Capital Corporation", 
+    "8.41", 
+    "$176.61M", 
+    "2001", 
+    "n/a", 
+    "n/a", 
+    "http://www.nasdaq.com/symbol/glad"
+  ], 
+  [
+    "GLADO", 
+    "Gladstone Capital Corporation", 
+    "25.3352", 
+    "$55.74M", 
+    "n/a", 
+    "n/a", 
+    "n/a", 
+    "http://www.nasdaq.com/symbol/glado"
+  ], 
+  [
+    "GLBS", 
+    "Globus Maritime Limited", 
+    "1.647", 
+    "$16.86M", 
+    "n/a", 
+    "Transportation", 
+    "Marine Transportation", 
+    "http://www.nasdaq.com/symbol/glbs"
+  ], 
+  [
+    "GLBZ", 
+    "Glen Burnie Bancorp", 
+    "12.23", 
+    "$33.77M", 
+    "n/a", 
+    "Finance", 
+    "Major Banks", 
+    "http://www.nasdaq.com/symbol/glbz"
+  ], 
+  [
+    "GLDC", 
+    "Golden Enterprises, Inc.", 
+    "3.97", 
+    "$46.58M", 
+    "n/a", 
+    "Consumer Non-Durables", 
+    "Packaged Foods", 
+    "http://www.nasdaq.com/symbol/gldc"
+  ], 
+  [
+    "GLDD", 
+    "Great Lakes Dredge & Dock Corporation", 
+    "7.42", 
+    "$446.21M", 
+    "n/a", 
+    "Basic Industries", 
+    "Military/Government/Technical", 
+    "http://www.nasdaq.com/symbol/gldd"
+  ], 
+  [
+    "GLDI", 
+    "Credit Suisse AG", 
+    "12", 
+    "$162.3M", 
+    "n/a", 
+    "Finance", 
+    "Investment Bankers/Brokers/Service", 
+    "http://www.nasdaq.com/symbol/gldi"
+  ], 
+  [
+    "GLMD", 
+    "Galmed Pharmaceuticals Ltd.", 
+    "8.04", 
+    "$89.25M", 
+    "2014", 
+    "Health Care", 
+    "Major Pharmaceuticals", 
+    "http://www.nasdaq.com/symbol/glmd"
+  ], 
+  [
+    "GLNG", 
+    "Golar LNG Limited", 
+    "31.32", 
+    "$2.92B", 
+    "n/a", 
+    "Consumer Services", 
+    "Marine Transportation", 
+    "http://www.nasdaq.com/symbol/glng"
+  ], 
+  [
+    "GLPI", 
+    "Gaming and Leisure Properties, Inc.", 
+    "33.79", 
+    "$3.8B", 
+    "n/a", 
+    "Consumer Services", 
+    "Real Estate Investment Trusts", 
+    "http://www.nasdaq.com/symbol/glpi"
+  ], 
+  [
+    "GLRE", 
+    "Greenlight Reinsurance, Ltd.", 
+    "31.95", 
+    "$1.2B", 
+    "2007", 
+    "Finance", 
+    "Property-Casualty Insurers", 
+    "http://www.nasdaq.com/symbol/glre"
+  ], 
+  [
+    "GLRI", 
+    "Glori Energy Inc", 
+    "3.175", 
+    "$100.01M", 
+    "n/a", 
+    "Energy", 
+    "Oil & Gas Production", 
+    "http://www.nasdaq.com/symbol/glri"
+  ], 
+  [
+    "GLUU", 
+    "Glu Mobile Inc.", 
+    "5.11", 
+    "$546.51M", 
+    "2007", 
+    "Technology", 
+    "EDP Services", 
+    "http://www.nasdaq.com/symbol/gluu"
+  ], 
+  [
+    "GLYC", 
+    "GlycoMimetics, Inc.", 
+    "8.12", 
+    "$153.43M", 
+    "2014", 
+    "Health Care", 
+    "Major Pharmaceuticals", 
+    "http://www.nasdaq.com/symbol/glyc"
+  ], 
+  [
+    "GMAN", 
+    "Gordmans Stores, Inc.", 
+    "3.95", 
+    "$77.33M", 
+    "2010", 
+    "Consumer Services", 
+    "Clothing/Shoe/Accessory Stores", 
+    "http://www.nasdaq.com/symbol/gman"
+  ], 
+  [
+    "GMCR", 
+    "Keurig Green Mountain, Inc.", 
+    "122.87", 
+    "$19.87B", 
+    "1993", 
+    "Consumer Non-Durables", 
+    "Packaged Foods", 
+    "http://www.nasdaq.com/symbol/gmcr"
+  ], 
+  [
+    "GMLP", 
+    "Golar LNG Partners LP", 
+    "27.76", 
+    "$1.71B", 
+    "2011", 
+    "Consumer Services", 
+    "Marine Transportation", 
+    "http://www.nasdaq.com/symbol/gmlp"
+  ], 
+  [
+    "GNBC", 
+    "Green Bancorp, Inc.", 
+    "11.35", 
+    "$297.04M", 
+    "2014", 
+    "Finance", 
+    "Major Banks", 
+    "http://www.nasdaq.com/symbol/gnbc"
+  ], 
+  [
+    "GNCA", 
+    "Genocea Biosciences, Inc.", 
+    "9", 
+    "$158.49M", 
+    "2014", 
+    "Health Care", 
+    "Biotechnology: Biological Products (No Diagnostic Substances)", 
+    "http://www.nasdaq.com/symbol/gnca"
+  ], 
+  [
+    "GNCMA", 
+    "General Communication, Inc.", 
+    "14.43", 
+    "$594.69M", 
+    "n/a", 
+    "Public Utilities", 
+    "Telecommunications Equipment", 
+    "http://www.nasdaq.com/symbol/gncma"
+  ], 
+  [
+    "GNMA", 
+    "iShares GNMA Bond ETF", 
+    "50.2932", 
+    "$40.23M", 
+    "n/a", 
+    "n/a", 
+    "n/a", 
+    "http://www.nasdaq.com/symbol/gnma"
+  ], 
+  [
+    "GNMK", 
+    "GenMark Diagnostics, Inc.", 
+    "13.22", 
+    "$551.73M", 
+    "2010", 
+    "Health Care", 
+    "Medical/Dental Instruments", 
+    "http://www.nasdaq.com/symbol/gnmk"
+  ], 
+  [
+    "GNTX", 
+    "Gentex Corporation", 
+    "17.875", 
+    "$5.23B", 
+    "n/a", 
+    "Capital Goods", 
+    "Auto Parts:O.E.M.", 
+    "http://www.nasdaq.com/symbol/gntx"
+  ], 
+  [
+    "GNVC", 
+    "GenVec, Inc.", 
+    "3.37", 
+    "$58.2M", 
+    "2000", 
+    "Health Care", 
+    "Major Pharmaceuticals", 
+    "http://www.nasdaq.com/symbol/gnvc"
+  ], 
+  [
+    "GOGO", 
+    "Gogo Inc.", 
+    "16.22", 
+    "$1.38B", 
+    "2013", 
+    "Consumer Services", 
+    "Telecommunications Equipment", 
+    "http://www.nasdaq.com/symbol/gogo"
+  ], 
+  [
+    "GOLD", 
+    "Randgold Resources Limited", 
+    "76.11", 
+    "$7.06B", 
+    "n/a", 
+    "Basic Industries", 
+    "Precious Metals", 
+    "http://www.nasdaq.com/symbol/gold"
+  ], 
+  [
+    "GOMO", 
+    "Sungy Mobile Limited", 
+    "4.99", 
+    "$167.08M", 
+    "2013", 
+    "Technology", 
+    "Computer Software: Prepackaged Software", 
+    "http://www.nasdaq.com/symbol/gomo"
+  ], 
+  [
+    "GOOD", 
+    "Gladstone Commercial Corporation", 
+    "17.6", 
+    "$372.57M", 
+    "2003", 
+    "Consumer Services", 
+    "Real Estate", 
+    "http://www.nasdaq.com/symbol/good"
+  ], 
+  [
+    "GOODN", 
+    "Gladstone Commercial Corporation", 
+    "25.6101", 
+    "n/a", 
+    "n/a", 
+    "Consumer Services", 
+    "Real Estate", 
+    "http://www.nasdaq.com/symbol/goodn"
+  ], 
+  [
+    "GOODO", 
+    "Gladstone Commercial Corporation", 
+    "25.4301", 
+    "$29.24M", 
+    "n/a", 
+    "Consumer Services", 
+    "Real Estate", 
+    "http://www.nasdaq.com/symbol/goodo"
+  ], 
+  [
+    "GOODP", 
+    "Gladstone Commercial Corporation", 
+    "25.6", 
+    "$25.6M", 
+    "n/a", 
+    "Consumer Services", 
+    "Real Estate", 
+    "http://www.nasdaq.com/symbol/goodp"
+  ], 
+  [
+    "GOOG", 
+    "Google Inc.", 
+    "538.95", 
+    "$366.82B", 
+    "2004", 
+    "Technology", 
+    "Computer Software: Programming, Data Processing", 
+    "http://www.nasdaq.com/symbol/goog"
+  ], 
+  [
+    "GOOGL", 
+    "Google Inc.", 
+    "541.8", 
+    "$368.76B", 
+    "n/a", 
+    "Technology", 
+    "Computer Software: Programming, Data Processing", 
+    "http://www.nasdaq.com/symbol/googl"
+  ], 
+  [
+    "GPIC", 
+    "Gaming Partners International Corporation", 
+    "8.265", 
+    "$65.43M", 
+    "n/a", 
+    "Consumer Non-Durables", 
+    "Recreational Products/Toys", 
+    "http://www.nasdaq.com/symbol/gpic"
+  ], 
+  [
+    "GPOR", 
+    "Gulfport Energy Corporation", 
+    "43.01", 
+    "$3.68B", 
+    "n/a", 
+    "Energy", 
+    "Oil & Gas Production", 
+    "http://www.nasdaq.com/symbol/gpor"
+  ], 
+  [
+    "GPRE", 
+    "Green Plains, Inc.", 
+    "25.01", 
+    "$940.6M", 
+    "n/a", 
+    "Basic Industries", 
+    "Major Chemicals", 
+    "http://www.nasdaq.com/symbol/gpre"
+  ], 
+  [
+    "GPRO", 
+    "GoPro, Inc.", 
+    "45.07", 
+    "$5.67B", 
+    "2014", 
+    "Miscellaneous", 
+    "Industrial Machinery/Components", 
+    "http://www.nasdaq.com/symbol/gpro"
+  ], 
+  [
+    "GRBK", 
+    "Green Brick Partners, Inc.", 
+    "8.2", 
+    "$51.15M", 
+    "n/a", 
+    "Capital Goods", 
+    "Homebuilding", 
+    "http://www.nasdaq.com/symbol/grbk"
+  ], 
+  [
+    "GRFS", 
+    "Grifols, S.A.", 
+    "35.2", 
+    "$12.1B", 
+    "n/a", 
+    "Health Care", 
+    "Major Pharmaceuticals", 
+    "http://www.nasdaq.com/symbol/grfs"
+  ], 
+  [
+    "GRID", 
+    "First Trust NASDAQ Clean Edge Smart Grid Infrastructure Index ", 
+    "35.9316", 
+    "$12.58M", 
+    "n/a", 
+    "n/a", 
+    "n/a", 
+    "http://www.nasdaq.com/symbol/grid"
+  ], 
+  [
+    "GRIF", 
+    "Griffin Land & Nurseries, Inc.", 
+    "31.38", 
+    "$161.59M", 
+    "n/a", 
+    "Finance", 
+    "Real Estate", 
+    "http://www.nasdaq.com/symbol/grif"
+  ], 
+  [
+    "GRMN", 
+    "Garmin Ltd.", 
+    "49.42", 
+    "$9.48B", 
+    "2000", 
+    "Capital Goods", 
+    "Industrial Machinery/Components", 
+    "http://www.nasdaq.com/symbol/grmn"
+  ], 
+  [
+    "GROW", 
+    "U.S. Global Investors, Inc.", 
+    "3.345", 
+    "$51.46M", 
+    "n/a", 
+    "Finance", 
+    "Investment Managers", 
+    "http://www.nasdaq.com/symbol/grow"
+  ], 
+  [
+    "GRPN", 
+    "Groupon, Inc.", 
+    "8.15", 
+    "$5.5B", 
+    "2011", 
+    "Technology", 
+    "Advertising", 
+    "http://www.nasdaq.com/symbol/grpn"
+  ], 
+  [
+    "GRVY", 
+    "GRAVITY Co., Ltd.", 
+    "0.519", 
+    "$14.43M", 
+    "2005", 
+    "Miscellaneous", 
+    "Business Services", 
+    "http://www.nasdaq.com/symbol/grvy"
+  ], 
+  [
+    "GSBC", 
+    "Great Southern Bancorp, Inc.", 
+    "36.93", 
+    "$506.96M", 
+    "1989", 
+    "Finance", 
+    "Major Banks", 
+    "http://www.nasdaq.com/symbol/gsbc"
+  ], 
+  [
+    "GSIG", 
+    "GSI Group, Inc.", 
+    "13.62", 
+    "$465.96M", 
+    "n/a", 
+    "Miscellaneous", 
+    "Industrial Machinery/Components", 
+    "http://www.nasdaq.com/symbol/gsig"
+  ], 
+  [
+    "GSIT", 
+    "GSI Technology, Inc.", 
+    "5.7275", 
+    "$133.95M", 
+    "2007", 
+    "Technology", 
+    "Semiconductors", 
+    "http://www.nasdaq.com/symbol/gsit"
+  ], 
+  [
+    "GSM", 
+    "Globe Specialty Metals Inc.", 
+    "15.37", 
+    "$1.13B", 
+    "2009", 
+    "Capital Goods", 
+    "Metal Fabrications", 
+    "http://www.nasdaq.com/symbol/gsm"
+  ], 
+  [
+    "GSOL", 
+    "Global Sources Ltd.", 
+    "5.56", 
+    "$165.79M", 
+    "n/a", 
+    "Consumer Services", 
+    "Advertising", 
+    "http://www.nasdaq.com/symbol/gsol"
+  ], 
+  [
+    "GSVC", 
+    "GSV Capital Corp", 
+    "9.97", 
+    "$192.62M", 
+    "2011", 
+    "n/a", 
+    "n/a", 
+    "http://www.nasdaq.com/symbol/gsvc"
+  ], 
+  [
+    "GT", 
+    "The Goodyear Tire & Rubber Company", 
+    "27.69", 
+    "$7.46B", 
+    "n/a", 
+    "Consumer Durables", 
+    "Automotive Aftermarket", 
+    "http://www.nasdaq.com/symbol/gt"
+  ], 
+  [
+    "GTIM", 
+    "Good Times Restaurants Inc.", 
+    "8.29", 
+    "$78.33M", 
+    "n/a", 
+    "Consumer Services", 
+    "Restaurants", 
+    "http://www.nasdaq.com/symbol/gtim"
+  ], 
+  [
+    "GTLS", 
+    "Chart Industries, Inc.", 
+    "31.07", 
+    "$947.05M", 
+    "2006", 
+    "Capital Goods", 
+    "Metal Fabrications", 
+    "http://www.nasdaq.com/symbol/gtls"
+  ]
+]
