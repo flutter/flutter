@@ -5,7 +5,9 @@
 package org.domokit.oknet;
 
 import android.content.Context;
+import android.util.Log;
 
+import com.squareup.okhttp.Cache;
 import com.squareup.okhttp.OkHttpClient;
 
 import org.chromium.mojo.bindings.InterfaceRequest;
@@ -22,17 +24,33 @@ import org.chromium.mojom.mojo.UdpSocket;
 import org.chromium.mojom.mojo.UrlLoader;
 import org.chromium.mojom.mojo.WebSocket;
 
+import java.io.File;
+import java.io.IOException;
+
 /**
  * OkHttp implementation of NetworkService.
  */
 public class NetworkServiceImpl implements NetworkService {
-    private OkHttpClient mClient;
+    private static final String TAG = "NetworkServiceImpl";
+    private static OkHttpClient sClient;
     private Core mCore;
 
     public NetworkServiceImpl(Context context, Core core, MessagePipeHandle pipe) {
         assert core != null;
         mCore = core;
-        mClient = new OkHttpClient();
+
+        if (sClient == null) {
+            sClient = new OkHttpClient();
+
+            try {
+                int cacheSize = 10 * 1024 * 1024; // 10 MiB
+                File cacheDirectory = new File(context.getCacheDir(), "ok_http_cache");
+                Cache cache = new Cache(cacheDirectory, cacheSize);
+                sClient.setCache(cache);
+            } catch (IOException e) {
+                Log.e(TAG, "Unable to create HTTP cache", e);
+            }
+        }
 
         NetworkService.MANAGER.bind(this, pipe);
     }
@@ -45,7 +63,7 @@ public class NetworkServiceImpl implements NetworkService {
 
     @Override
     public void createUrlLoader(InterfaceRequest<UrlLoader> loader) {
-        UrlLoader.MANAGER.bind(new UrlLoaderImpl(mCore, mClient), loader);
+        UrlLoader.MANAGER.bind(new UrlLoaderImpl(mCore, sClient), loader);
     }
 
     @Override
