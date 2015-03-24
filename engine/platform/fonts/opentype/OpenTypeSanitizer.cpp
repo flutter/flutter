@@ -48,9 +48,6 @@ PassRefPtr<SharedBuffer> OpenTypeSanitizer::sanitize()
     if (m_buffer->size() > maxWebFontSize)
         return nullptr;
 
-    if (RuntimeEnabledFeatures::woff2Enabled())
-        ots::EnableWOFF2();
-
     // A transcoded font is usually smaller than an original font.
     // However, it can be slightly bigger than the original one due to
     // name table replacement and/or padding for glyf table.

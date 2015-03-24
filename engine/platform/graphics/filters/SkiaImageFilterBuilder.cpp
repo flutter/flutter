@@ -32,11 +32,11 @@
 #include "sky/engine/platform/graphics/filters/SourceGraphic.h"
 #include "sky/engine/platform/graphics/skia/SkiaUtils.h"
 #include "sky/engine/public/platform/WebPoint.h"
+#include "third_party/skia/include/core/SkMatrixImageFilter.h"
 #include "third_party/skia/include/effects/SkBlurImageFilter.h"
 #include "third_party/skia/include/effects/SkColorFilterImageFilter.h"
 #include "third_party/skia/include/effects/SkColorMatrixFilter.h"
 #include "third_party/skia/include/effects/SkDropShadowImageFilter.h"
-#include "third_party/skia/include/effects/SkMatrixImageFilter.h"
 #include "third_party/skia/include/effects/SkTableColorFilter.h"
 
 namespace blink {
