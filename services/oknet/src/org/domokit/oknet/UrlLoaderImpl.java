@@ -16,7 +16,6 @@ import com.squareup.okhttp.Response;
 import com.squareup.okhttp.ResponseBody;
 
 import org.chromium.base.TraceEvent;
-import org.chromium.mojo.system.AsyncWaiter;
 import org.chromium.mojo.system.Core;
 import org.chromium.mojo.system.DataPipe;
 import org.chromium.mojo.system.MojoException;
@@ -40,14 +39,14 @@ import okio.BufferedSource;
  */
 public class UrlLoaderImpl implements UrlLoader {
     private static final String TAG = "UrlLoaderImpl";
-    private Core mCore;
+    private final Core mCore;
     private OkHttpClient mClient;
     private boolean mIsLoading;
     private NetworkError mError;
     private static long sNextTracingId = 1;
     private final long mTracingId;
 
-    class CopyToPipeJob {
+    class CopyToPipeJob implements Runnable {
         private BufferedSource mSource;
         private DataPipe.ProducerHandle mProducer;
 
@@ -56,7 +55,8 @@ public class UrlLoaderImpl implements UrlLoader {
             mProducer = producerHandle;
         }
 
-        public void copy() throws IOException {
+        @Override
+        public void run() {
             TraceEvent.begin("UrlLoaderImpl::CopyToPipeJob::copy");
             int result = 0;
             do {
@@ -68,10 +68,12 @@ public class UrlLoaderImpl implements UrlLoader {
                     buffer.put(tmp);
                     mProducer.endWriteData(result == -1 ? 0 : result);
                 } catch (MojoException e) {
-                    if (e.getMojoResult() != MojoResult.SHOULD_WAIT) throw e;
-                    copyMoreAsync();
-                    TraceEvent.end("UrlLoaderImpl::CopyToPipeJob::copy");
-                    return;
+                    if (e.getMojoResult() != MojoResult.SHOULD_WAIT)
+                        throw e;
+                    mCore.wait(mProducer, Core.HandleSignals.WRITABLE, -1);
+                } catch (IOException e) {
+                    Log.e(TAG, "mSource.read failed", e);
+                    break;
                 }
             } while (result != -1);
 
@@ -79,29 +81,6 @@ public class UrlLoaderImpl implements UrlLoader {
             mProducer.close();
             TraceEvent.finishAsync("UrlLoaderImpl", mTracingId);
             TraceEvent.end("UrlLoaderImpl::CopyToPipeJob::copy");
-        }
-
-        private void copyMoreAsync() {
-            AsyncWaiter w = mCore.getDefaultAsyncWaiter();
-            w.asyncWait(mProducer, Core.HandleSignals.WRITABLE, -1, new AsyncWaiter.Callback() {
-                @Override
-                public void onResult(int result) {
-                    assert result == MojoResult.OK;
-                    try {
-                        copy();
-                    } catch (IOException e) {
-                        mIsLoading = false;
-                        mProducer.close();
-                        TraceEvent.finishAsync("UrlLoaderImpl", mTracingId);
-                    }
-                }
-                @Override
-                public void onError(MojoException exception) {
-                    mIsLoading = false;
-                    mProducer.close();
-                    TraceEvent.finishAsync("UrlLoaderImpl", mTracingId);
-                }
-            });
         }
     }
 
@@ -193,13 +172,7 @@ public class UrlLoaderImpl implements UrlLoader {
                 urlResponse.body = consumerHandle;
                 responseCallback.call(urlResponse);
                 CopyToPipeJob job = new CopyToPipeJob(body.source(), producerHandle);
-                try {
-                    job.copy();
-                } catch (IOException e) {
-                    mIsLoading = false;
-                    producerHandle.close();
-                    TraceEvent.finishAsync("UrlLoaderImpl", mTracingId);
-                }
+                (new Thread(job)).start();
             }
         });
     }
