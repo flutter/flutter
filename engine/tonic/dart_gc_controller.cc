@@ -5,6 +5,7 @@
 #include "sky/engine/config.h"
 #include "sky/engine/tonic/dart_gc_controller.h"
 
+#include "base/trace_event/trace_event.h"
 #include "dart/runtime/include/dart_api.h"
 #include "sky/engine/tonic/dart_gc_context.h"
 #include "sky/engine/tonic/dart_gc_visitor.h"
@@ -33,6 +34,8 @@ void Visit(void* isolate_callback_data,
 }  // namespace
 
 void DartGCPrologue() {
+  TRACE_EVENT_ASYNC_BEGIN0("sky", "DartGC", 0);
+
   Dart_EnterScope();
   DCHECK(!g_gc_context);
   g_gc_context = new DartGCContext();
@@ -43,6 +46,8 @@ void DartGCEpilogue() {
   delete g_gc_context;
   g_gc_context = nullptr;
   Dart_ExitScope();
+
+  TRACE_EVENT_ASYNC_END0("sky", "DartGC", 0);
 }
 
 }  // namespace blink
