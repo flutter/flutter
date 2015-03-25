@@ -134,13 +134,13 @@ class Drawer extends AnimatedComponent {
       onGestureFlingStart: controller.handleFlingStart
     );
 
-    Material content = new Material(
-      key: 'Content',
-      style: _contentStyle,
-      inlineStyle: contentInlineStyle,
-      children: children,
-      level: level
-    );
+    Node content = new StyleNode(
+      new Material(
+        key: 'Content',
+        inlineStyle: contentInlineStyle,
+        children: children,
+        level: level),
+      _contentStyle);
 
     return new EventTarget(
       new Container(

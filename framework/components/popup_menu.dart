@@ -87,10 +87,11 @@ class PopupMenu extends AnimatedComponent {
       return new PopupMenuItem(key: i++, children: item, opacity: opacity);
     }));
 
-    return new Material(
-      style: _style,
-      inlineStyle: _inlineStyle(),
-      children: children,
-      level: level);
+    return new StyleNode(
+      new Material(
+        inlineStyle: _inlineStyle(),
+        children: children,
+        level: level),
+      _style);
   }
 }

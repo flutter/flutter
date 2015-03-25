@@ -16,21 +16,20 @@ class Material extends Component {
     new Style('box-shadow: ${Shadow[5]}'),
   ];
 
-  Style style;
   String inlineStyle;
   List<Node> children;
   int level;
 
   Material({
-      Object key,
-      this.style,
-      this.inlineStyle,
-      this.children,
-      this.level: 0 }) : super(key: key);
+    Object key,
+    this.inlineStyle,
+    this.children,
+    this.level: 0
+  }) : super(key: key);
 
   Node build() {
     return new StyleNode(
       new InkWell(inlineStyle: inlineStyle, children: children),
-      level > 0 ? style.extend(shadowStyle[level]) : style);
+      shadowStyle[level]);
   }
 }
