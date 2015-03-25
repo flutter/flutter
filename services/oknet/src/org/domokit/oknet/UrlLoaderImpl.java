@@ -30,6 +30,7 @@ import org.chromium.mojom.mojo.UrlResponse;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
+import java.util.concurrent.Executor;
 
 import okio.BufferedSource;
 
@@ -40,18 +41,22 @@ import okio.BufferedSource;
 public class UrlLoaderImpl implements UrlLoader {
     private static final String TAG = "UrlLoaderImpl";
     private final Core mCore;
-    private OkHttpClient mClient;
+    private final OkHttpClient mClient;
+    private final Executor mExecutor;
     private boolean mIsLoading;
     private NetworkError mError;
+
     private static long sNextTracingId = 1;
     private final long mTracingId;
 
     class CopyToPipeJob implements Runnable {
+        private ResponseBody mBody;
         private BufferedSource mSource;
         private DataPipe.ProducerHandle mProducer;
 
-        public CopyToPipeJob(BufferedSource source, DataPipe.ProducerHandle producerHandle) {
-            mSource = source;
+        public CopyToPipeJob(ResponseBody body, DataPipe.ProducerHandle producerHandle) {
+            mBody = body;
+            mSource = body.source();
             mProducer = producerHandle;
         }
 
@@ -79,15 +84,21 @@ public class UrlLoaderImpl implements UrlLoader {
 
             mIsLoading = false;
             mProducer.close();
+            try {
+                mBody.close();
+            } catch (IOException e) {
+                Log.e(TAG, "mBody.close failed", e);
+            }
             TraceEvent.finishAsync("UrlLoaderImpl", mTracingId);
             TraceEvent.end("UrlLoaderImpl::CopyToPipeJob::copy");
         }
     }
 
-    public UrlLoaderImpl(Core core, OkHttpClient client) {
+    public UrlLoaderImpl(Core core, OkHttpClient client, Executor executor) {
         assert core != null;
         mCore = core;
         mClient = client;
+        mExecutor = executor;
         mIsLoading = false;
         mError = null;
         mTracingId = sNextTracingId++;
@@ -171,8 +182,7 @@ public class UrlLoaderImpl implements UrlLoader {
                 DataPipe.ConsumerHandle consumerHandle = handles.second;
                 urlResponse.body = consumerHandle;
                 responseCallback.call(urlResponse);
-                CopyToPipeJob job = new CopyToPipeJob(body.source(), producerHandle);
-                (new Thread(job)).start();
+                mExecutor.execute(new CopyToPipeJob(body, producerHandle));
             }
         });
     }

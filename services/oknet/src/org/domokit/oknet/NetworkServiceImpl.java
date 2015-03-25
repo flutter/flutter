@@ -26,18 +26,24 @@ import org.chromium.mojom.mojo.WebSocket;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * OkHttp implementation of NetworkService.
  */
 public class NetworkServiceImpl implements NetworkService {
     private static final String TAG = "NetworkServiceImpl";
+    private static ExecutorService sThreadPool;
     private static OkHttpClient sClient;
     private Core mCore;
 
     public NetworkServiceImpl(Context context, Core core, MessagePipeHandle pipe) {
         assert core != null;
         mCore = core;
+
+        if (sThreadPool == null)
+            sThreadPool = Executors.newCachedThreadPool();
 
         if (sClient == null) {
             sClient = new OkHttpClient();
@@ -63,7 +69,7 @@ public class NetworkServiceImpl implements NetworkService {
 
     @Override
     public void createUrlLoader(InterfaceRequest<UrlLoader> loader) {
-        UrlLoader.MANAGER.bind(new UrlLoaderImpl(mCore, sClient), loader);
+        UrlLoader.MANAGER.bind(new UrlLoaderImpl(mCore, sClient, sThreadPool), loader);
     }
 
     @Override
