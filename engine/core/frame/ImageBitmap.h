@@ -7,7 +7,6 @@
 
 #include "sky/engine/tonic/dart_wrappable.h"
 #include "sky/engine/core/html/HTMLImageElement.h"
-#include "sky/engine/core/html/canvas/CanvasImageSource.h"
 #include "sky/engine/platform/geometry/IntRect.h"
 #include "sky/engine/platform/graphics/Image.h"
 #include "sky/engine/platform/heap/Handle.h"
@@ -16,14 +15,12 @@
 
 namespace blink {
 
-class HTMLCanvasElement;
 class ImageData;
 
-class ImageBitmap final : public RefCounted<ImageBitmap>, public DartWrappable, public ImageLoaderClient, public CanvasImageSource {
+class ImageBitmap final : public RefCounted<ImageBitmap>, public DartWrappable, public ImageLoaderClient {
     DEFINE_WRAPPERTYPEINFO();
 public:
     static PassRefPtr<ImageBitmap> create(HTMLImageElement*, const IntRect&);
-    static PassRefPtr<ImageBitmap> create(HTMLCanvasElement*, const IntRect&);
     static PassRefPtr<ImageBitmap> create(ImageData*, const IntRect&);
     static PassRefPtr<ImageBitmap> create(ImageBitmap*, const IntRect&);
     static PassRefPtr<ImageBitmap> create(Image*, const IntRect&);
@@ -39,14 +36,8 @@ public:
 
     virtual ~ImageBitmap();
 
-    // CanvasImageSource implementation
-    virtual PassRefPtr<Image> getSourceImageForCanvas(SourceImageMode, SourceImageStatus*) const override;
-    virtual void adjustDrawRects(FloatRect* srcRect, FloatRect* dstRect) const override;
-    virtual FloatSize sourceSize() const override;
-
 private:
     ImageBitmap(HTMLImageElement*, const IntRect&);
-    ImageBitmap(HTMLCanvasElement*, const IntRect&);
     ImageBitmap(ImageData*, const IntRect&);
     ImageBitmap(ImageBitmap*, const IntRect&);
     ImageBitmap(Image*, const IntRect&);

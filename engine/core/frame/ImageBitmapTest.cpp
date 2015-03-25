@@ -36,9 +36,7 @@
 #include "sky/engine/core/fetch/MemoryCache.h"
 #include "sky/engine/core/fetch/MockImageResourceClient.h"
 #include "sky/engine/core/fetch/ResourcePtr.h"
-#include "sky/engine/core/html/HTMLCanvasElement.h"
 #include "sky/engine/core/html/HTMLImageElement.h"
-#include "sky/engine/core/html/canvas/CanvasRenderingContext2D.h"
 #include "sky/engine/platform/graphics/BitmapImage.h"
 #include "sky/engine/platform/graphics/skia/NativeImageSkia.h"
 #include "sky/engine/platform/heap/Handle.h"
@@ -184,22 +182,6 @@ TEST_F(ImageBitmapTest, ImageBitmapSourceChanged)
     ASSERT_NE(imageBitmap->bitmapImage().get(), newImageResource->image());
     ASSERT_NE(imageBitmap->bitmapImage()->nativeImageForCurrentFrame()->bitmap().pixelRef()->pixels(),
         newImageResource->image()->nativeImageForCurrentFrame()->bitmap().pixelRef()->pixels());
-}
-
-// Verifies that ImageBitmaps constructed from ImageBitmaps hold onto their own Image.
-TEST_F(ImageBitmapTest, ImageResourceLifetime)
-{
-    RefPtr<HTMLCanvasElement> canvasElement = HTMLCanvasElement::create(*Document::create().get());
-    canvasElement->setHeight(40);
-    canvasElement->setWidth(40);
-    RefPtr<ImageBitmap> imageBitmapDerived = nullptr;
-    {
-        RefPtr<ImageBitmap> imageBitmapFromCanvas = ImageBitmap::create(canvasElement.get(), IntRect(0, 0, canvasElement->width(), canvasElement->height()));
-        imageBitmapDerived = ImageBitmap::create(imageBitmapFromCanvas.get(), IntRect(0, 0, 20, 20));
-    }
-    CanvasRenderingContext* context = canvasElement->getContext("2d");
-    TrackExceptionState exceptionState;
-    toCanvasRenderingContext2D(context)->drawImage(imageBitmapDerived.get(), 0, 0, exceptionState);
 }
 
 } // namespace

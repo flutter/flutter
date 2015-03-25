@@ -68,7 +68,6 @@
 #include "sky/engine/core/frame/FrameView.h"
 #include "sky/engine/core/frame/LocalFrame.h"
 #include "sky/engine/core/frame/Settings.h"
-#include "sky/engine/core/html/HTMLCanvasElement.h"
 #include "sky/engine/core/html/HTMLElement.h"
 #include "sky/engine/core/html/HTMLTemplateElement.h"
 #include "sky/engine/core/html/parser/HTMLDocumentParser.h"
@@ -140,10 +139,6 @@ bool Element::rendererIsFocusable() const
     // callsites like Document::setFocusedElement that would currently fail on
     // them. See crbug.com/251163
     if (!renderer()) {
-        // Elements in canvas fallback content are not rendered, but they are allowed to be
-        // focusable as long as their canvas is displayed and visible.
-        if (const HTMLCanvasElement* canvas = Traversal<HTMLCanvasElement>::firstAncestorOrSelf(*this))
-            return canvas->renderer();
         // We can't just use needsStyleRecalc() because if the node is in a
         // display:none tree it might say it needs style recalc but the whole
         // document is actually up to date.
@@ -1526,11 +1521,6 @@ bool Element::supportsStyleSharing() const
     if (isUserActionElement())
         return false;
     if (hasActiveAnimations())
-        return false;
-    // Turn off style sharing for elements that can gain layers for reasons outside of the style system.
-    // See comments in RenderObject::setStyle().
-    // FIXME: Why does gaining a layer from outside the style system require disabling sharing?
-    if (isHTMLCanvasElement(*this))
         return false;
     return true;
 }

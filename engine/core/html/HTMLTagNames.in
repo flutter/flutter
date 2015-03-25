@@ -2,7 +2,6 @@ namespace="HTML"
 fallbackInterfaceName="HTMLElement"
 
 a interfaceName=HTMLAnchorElement
-canvas
 content interfaceName=HTMLContentElement
 iframe interfaceName=HTMLIFrameElement
 img interfaceName=HTMLImageElement, constructorNeedsCreatedByParser

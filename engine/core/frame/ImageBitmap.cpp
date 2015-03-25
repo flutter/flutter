@@ -5,9 +5,7 @@
 #include "sky/engine/config.h"
 #include "sky/engine/core/frame/ImageBitmap.h"
 
-#include "sky/engine/core/html/HTMLCanvasElement.h"
 #include "sky/engine/core/html/ImageData.h"
-#include "sky/engine/core/html/canvas/CanvasRenderingContext.h"
 #include "sky/engine/platform/graphics/BitmapImage.h"
 #include "sky/engine/platform/graphics/GraphicsContext.h"
 #include "sky/engine/platform/graphics/ImageBuffer.h"
@@ -48,20 +46,6 @@ ImageBitmap::ImageBitmap(HTMLImageElement* image, const IntRect& cropRect)
     else
         m_imageElement->addClient(this);
 
-}
-
-ImageBitmap::ImageBitmap(HTMLCanvasElement* canvas, const IntRect& cropRect)
-    : m_imageElement(nullptr)
-    , m_cropRect(cropRect)
-    , m_bitmapOffset(IntPoint())
-{
-    CanvasRenderingContext* sourceContext = canvas->renderingContext();
-    if (sourceContext && sourceContext->is3d())
-        sourceContext->paintRenderingResultsToCanvas();
-
-    IntRect srcRect = intersection(cropRect, IntRect(IntPoint(), canvas->size()));
-    m_bitmapRect = IntRect(IntPoint(std::max(0, -cropRect.x()), std::max(0, -cropRect.y())), srcRect.size());
-    m_bitmap = cropImage(canvas->buffer()->copyImage(CopyBackingStore).get(), cropRect);
 }
 
 ImageBitmap::ImageBitmap(ImageData* data, const IntRect& cropRect)
@@ -123,12 +107,6 @@ PassRefPtr<ImageBitmap> ImageBitmap::create(HTMLImageElement* image, const IntRe
     return adoptRef(new ImageBitmap(image, normalizedCropRect));
 }
 
-PassRefPtr<ImageBitmap> ImageBitmap::create(HTMLCanvasElement* canvas, const IntRect& cropRect)
-{
-    IntRect normalizedCropRect = normalizeRect(cropRect);
-    return adoptRef(new ImageBitmap(canvas, normalizedCropRect));
-}
-
 PassRefPtr<ImageBitmap> ImageBitmap::create(ImageData* data, const IntRect& cropRect)
 {
     IntRect normalizedCropRect = normalizeRect(cropRect);
@@ -160,30 +138,6 @@ PassRefPtr<Image> ImageBitmap::bitmapImage() const
     if (m_imageElement)
         return m_imageElement->cachedImage()->image();
     return m_bitmap;
-}
-
-PassRefPtr<Image> ImageBitmap::getSourceImageForCanvas(SourceImageMode, SourceImageStatus* status) const
-{
-    *status = NormalSourceImageStatus;
-    return bitmapImage();
-}
-
-void ImageBitmap::adjustDrawRects(FloatRect* srcRect, FloatRect* dstRect) const
-{
-    FloatRect intersectRect = intersection(m_bitmapRect, *srcRect);
-    FloatRect newSrcRect = intersectRect;
-    newSrcRect.move(m_bitmapOffset - m_bitmapRect.location());
-    FloatRect newDstRect(FloatPoint(intersectRect.location() - srcRect->location()), m_bitmapRect.size());
-    newDstRect.scale(dstRect->width() / srcRect->width() * intersectRect.width() / m_bitmapRect.width(),
-        dstRect->height() / srcRect->height() * intersectRect.height() / m_bitmapRect.height());
-    newDstRect.moveBy(dstRect->location());
-    *srcRect = newSrcRect;
-    *dstRect = newDstRect;
-}
-
-FloatSize ImageBitmap::sourceSize() const
-{
-    return FloatSize(width(), height());
 }
 
 }

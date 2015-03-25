@@ -65,7 +65,6 @@ class AnimationTimeline;
 class Attr;
 class CSSStyleDeclaration;
 class CSSStyleSheet;
-class CanvasRenderingContext2D;
 class Comment;
 class ConsoleMessage;
 class DocumentFragment;
@@ -83,7 +82,6 @@ class FloatRect;
 class Frame;
 class FrameHost;
 class FrameView;
-class HTMLCanvasElement;
 class HTMLDocumentParser;
 class HTMLElement;
 class HTMLImport;
@@ -112,7 +110,6 @@ class Settings;
 class StyleEngine;
 class StyleResolver;
 class Text;
-class WebGLRenderingContext;
 
 struct AnnotatedRegionValue;
 

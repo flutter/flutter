@@ -20,8 +20,6 @@
 
 callback CustomElementConstructor = Element ();
 
-typedef (CanvasRenderingContext2D or WebGLRenderingContext) RenderingContext;
-
 [
     Constructor(),
     ConstructorCallWith=Document,

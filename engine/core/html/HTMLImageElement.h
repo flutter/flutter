@@ -26,7 +26,6 @@
 
 #include "sky/engine/core/html/HTMLElement.h"
 #include "sky/engine/core/html/HTMLImageLoader.h"
-#include "sky/engine/core/html/canvas/CanvasImageSource.h"
 #include "sky/engine/platform/graphics/GraphicsTypes.h"
 #include "sky/engine/wtf/WeakPtr.h"
 
@@ -35,7 +34,7 @@ namespace blink {
 class ImageCandidate;
 class MediaQueryList;
 
-class HTMLImageElement final : public HTMLElement, public CanvasImageSource {
+class HTMLImageElement final : public HTMLElement {
     DEFINE_WRAPPERTYPEINFO();
 public:
     class ViewportChangeListener;
@@ -76,12 +75,6 @@ public:
     void removeClient(ImageLoaderClient* client) { imageLoader().removeClient(client); }
 
     virtual const AtomicString imageSourceURL() const override;
-
-    // CanvasImageSourceImplementations
-    virtual PassRefPtr<Image> getSourceImageForCanvas(SourceImageMode, SourceImageStatus*) const;
-    virtual FloatSize sourceSize() const override;
-    virtual FloatSize defaultDestinationSize() const override;
-    virtual const KURL& sourceURL() const override;
 
 protected:
     explicit HTMLImageElement(Document&, bool createdByParser = false);

@@ -34,8 +34,6 @@
 #include "sky/engine/core/dom/NodeTraversal.h"
 #include "sky/engine/core/fetch/ImageResource.h"
 #include "sky/engine/core/html/HTMLAnchorElement.h"
-#include "sky/engine/core/html/HTMLCanvasElement.h"
-#include "sky/engine/core/html/canvas/CanvasRenderingContext.h"
 #include "sky/engine/core/html/parser/HTMLParserIdioms.h"
 #include "sky/engine/core/html/parser/HTMLSrcsetParser.h"
 #include "sky/engine/core/inspector/ConsoleMessage.h"
@@ -309,48 +307,6 @@ void HTMLImageElement::didMoveToNewDocument(Document& oldDocument)
     HTMLElement::didMoveToNewDocument(oldDocument);
 }
 
-PassRefPtr<Image> HTMLImageElement::getSourceImageForCanvas(SourceImageMode, SourceImageStatus* status) const
-{
-    if (!complete() || !cachedImage()) {
-        *status = IncompleteSourceImageStatus;
-        return nullptr;
-    }
-
-    if (cachedImage()->errorOccurred()) {
-        *status = UndecodableSourceImageStatus;
-        return nullptr;
-    }
-
-    RefPtr<Image> sourceImage = cachedImage()->imageForRenderer(renderer());
-
-    // We need to synthesize a container size if a renderer is not available to provide one.
-    if (!renderer() && sourceImage->usesContainerSize())
-        sourceImage->setContainerSize(sourceImage->size());
-
-    *status = NormalSourceImageStatus;
-    return sourceImage->imageForDefaultFrame();
-}
-
-FloatSize HTMLImageElement::sourceSize() const
-{
-    ImageResource* image = cachedImage();
-    if (!image)
-        return FloatSize();
-    return image->imageSizeForRenderer(renderer()); // FIXME: Not sure about this.
-}
-
-FloatSize HTMLImageElement::defaultDestinationSize() const
-{
-    ImageResource* image = cachedImage();
-    if (!image)
-        return FloatSize();
-    LayoutSize size;
-    size = image->imageSizeForRenderer(renderer()); // FIXME: Not sure about this.
-    if (renderer() && renderer()->isRenderImage() && image->image() && !image->image()->hasRelativeWidth())
-        size.scale(toRenderImage(renderer())->imageDevicePixelRatio());
-    return size;
-}
-
 void HTMLImageElement::selectSourceURL(ImageLoader::UpdateFromElementBehavior behavior)
 {
     unsigned effectiveSize = 0;
@@ -363,11 +319,6 @@ void HTMLImageElement::selectSourceURL(ImageLoader::UpdateFromElementBehavior be
         document().mediaQueryMatcher().addViewportListener(m_listener.get());
     }
     imageLoader().updateFromElement(behavior);
-}
-
-const KURL& HTMLImageElement::sourceURL() const
-{
-    return cachedImage()->response().url();
 }
 
 }
