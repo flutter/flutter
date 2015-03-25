@@ -10,7 +10,6 @@ import 'stock_data.dart';
 
 class StockRow extends Component {
   static final Style _style = new Style('''
-    transform: translateX(0);
     display: flex;
     align-items: center;
     border-bottom: 1px solid #F4F4F4;
@@ -68,9 +67,6 @@ class StockRow extends Component {
       )
     ];
 
-    return new InkWell(
-      style: _style,
-      children: children
-    );
+    return new StyleNode(new InkWell(children: children), _style);
   }
 }
