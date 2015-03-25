@@ -145,8 +145,11 @@ class StocksApp extends App {
           // TODO(abarth): We should close the menu when you tap away from the
           // menu rather than when you tap on the menu.
           setState(() {
-            _menuController.close();
-            _menuController = null;
+            _menuController.close().then((_) {
+              setState(() {
+                _menuController = null;
+              });
+            });
           });
         }
       ));
