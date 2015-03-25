@@ -25,7 +25,7 @@ class _EmbedderImpl {
           new core.MojoHandle(internals.takeServicesProvidedToEmbedder());
       var proxyHandle =
           new core.MojoHandle(internals.takeServicesProvidedByEmbedder());
-      _connection = new ApplicationConection(stubHandle.isValid
+      _connection = new ApplicationConnection(stubHandle.isValid
           ? new ServiceProviderStub.fromHandle(stubHandle)
           : null, proxyHandle.isValid
           ? new ServiceProviderProxy.fromHandle(proxyHandle)
