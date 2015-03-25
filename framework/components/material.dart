@@ -29,10 +29,8 @@ class Material extends Component {
       this.level: 0 }) : super(key: key);
 
   Node build() {
-    return new InkWell(
-      style: level > 0 ? style.extend(shadowStyle[level]) : style,
-      inlineStyle: inlineStyle,
-      children: children
-    );
+    return new StyleNode(
+      new InkWell(inlineStyle: inlineStyle, children: children),
+      level > 0 ? style.extend(shadowStyle[level]) : style);
   }
 }

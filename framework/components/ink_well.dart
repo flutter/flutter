@@ -8,13 +8,15 @@ import 'dart:sky' as sky;
 import 'ink_splash.dart';
 
 class InkWell extends Component {
+  static final Style _containmentStyleHack = new Style('''
+    transform: translateX(0);''');
+
   LinkedHashSet<SplashController> _splashes;
 
-  Style style;
   String inlineStyle;
   List<Node> children;
 
-  InkWell({ Object key, this.style, this.inlineStyle, this.children })
+  InkWell({ Object key, this.inlineStyle, this.children })
       : super(key: key) {
     onDidUnmount(() {
       _cancelSplashes(null);
@@ -34,9 +36,9 @@ class InkWell extends Component {
 
     return new EventTarget(
       new Container(
-          style: style,
-          inlineStyle: inlineStyle,
-          children: childrenIncludingSplashes),
+        style: _containmentStyleHack,
+        inlineStyle: inlineStyle,
+        children: childrenIncludingSplashes),
       onGestureTapDown: _startSplash,
       onGestureTap: _confirmSplash
     );

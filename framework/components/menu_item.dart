@@ -40,21 +40,23 @@ class MenuItem extends ButtonBase {
   MenuItem({ Object key, this.icon, this.children }) : super(key: key);
 
   Node buildContent() {
-    return new InkWell (
-      style: highlight ? _highlightStyle : _style,
-      children: [
-        new StyleNode(
-          new Icon(
-            size: 24,
-            type: "${icon}_grey600"
+    return new StyleNode(
+      new InkWell(
+        children: [
+          new StyleNode(
+            new Icon(
+              size: 24,
+              type: "${icon}_grey600"
+            ),
+            _iconStyle
           ),
-          _iconStyle
-        ),
-        new Container(
-          style: _labelStyle,
-          children: children
-        )
-      ]
+          new Container(
+            style: _labelStyle,
+            children: children
+          )
+        ]
+      ),
+      highlight ? _highlightStyle : _style
     );
   }
 }
