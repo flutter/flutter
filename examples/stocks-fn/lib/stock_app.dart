@@ -11,6 +11,7 @@ import 'package:sky/framework/components/icon_button.dart';
 import 'package:sky/framework/components/input.dart';
 import 'package:sky/framework/components/menu_divider.dart';
 import 'package:sky/framework/components/menu_item.dart';
+import 'package:sky/framework/components/modal_overlay.dart';
 import 'package:sky/framework/components/popup_menu.dart';
 import 'package:sky/framework/components/scaffold.dart';
 import 'package:sky/framework/debug/tracing.dart';
@@ -61,16 +62,26 @@ class StocksApp extends App {
     });
   }
 
-  void _handleSearchQueryChanged(query) {
+  void _handleSearchQueryChanged(String query) {
     setState(() {
       _searchQuery = query;
     });
   }
 
-  void _handleMenuClick(_) {
+  void _handleMenuShow(_) {
     setState(() {
       _menuController = new PopupMenuController();
       _menuController.open();
+    });
+  }
+
+  void _handleMenuHide(_) {
+    setState(() {
+      _menuController.close().then((_) {
+        setState(() {
+          _menuController = null;
+        });
+      });
     });
   }
 
@@ -116,7 +127,7 @@ class StocksApp extends App {
             onGestureTap: _handleSearchBegin),
           new IconButton(
             icon: 'navigation/more_vert_white',
-            onGestureTap: _handleMenuClick)
+            onGestureTap: _handleMenuShow)
         ]),
       _actionBarStyle);
   }
@@ -135,25 +146,17 @@ class StocksApp extends App {
       _searchBarStyle);
   }
 
+  void addMenuToOverlays(List<Node> overlays) {
+    if (_menuController == null)
+      return;
+    overlays.add(new ModalOverlay(
+      children: [new StockMenu(controller: _menuController)],
+      onDismiss: _handleMenuHide));
+  }
+
   Node build() {
     List<Node> overlays = [];
-
-    if (_menuController != null) {
-      overlays.add(new EventTarget(
-        new StockMenu(controller: _menuController),
-        onGestureTap: (_) {
-          // TODO(abarth): We should close the menu when you tap away from the
-          // menu rather than when you tap on the menu.
-          setState(() {
-            _menuController.close().then((_) {
-              setState(() {
-                _menuController = null;
-              });
-            });
-          });
-        }
-      ));
-    }
+    addMenuToOverlays(overlays);
 
     return new Scaffold(
       header: _isSearching ? buildSearchBar() : buildActionBar(),
