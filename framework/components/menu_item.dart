@@ -43,10 +43,12 @@ class MenuItem extends ButtonBase {
     return new InkWell (
       style: highlight ? _highlightStyle : _style,
       children: [
-        new Icon(
-          style: _iconStyle,
-          size: 24,
-          type: "${icon}_grey600"
+        new StyleNode(
+          new Icon(
+            size: 24,
+            type: "${icon}_grey600"
+          ),
+          _iconStyle
         ),
         new Container(
           style: _labelStyle,

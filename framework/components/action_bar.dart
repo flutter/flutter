@@ -3,29 +3,39 @@
 // found in the LICENSE file.
 
 import '../fn.dart';
-import '../theme/colors.dart';
 import '../theme/shadows.dart';
 import '../theme/view-configuration.dart';
 
 class ActionBar extends Component {
-  List<Node> children;
-
   static final Style _style = new Style('''
     display: flex;
     align-items: center;
     height: 56px;
     padding: 0 8px;
-    background-color: ${Purple[500]};
     padding-top: ${kStatusBarHeight}px;
-    box-shadow: ${Shadow[2]};'''
-  );
+    box-shadow: ${Shadow[2]};''');
 
-  ActionBar({String key, this.children}) : super(key: key);
+  static Style _centerStyle = new Style('''
+    padding-left: 24px;
+    flex: 1;''');
+
+  Node left;
+  Node center;
+  List<Node> right;
+
+  ActionBar({
+    String key,
+    this.left,
+    this.center,
+    this.right
+  }) : super(key: key);
 
   Node build() {
-    return new Container(
-      style: _style,
-      children: children
-    );
+    List<Node> children = [left, new StyleNode(center, _centerStyle)];
+
+    if (right != null)
+      children.addAll(right);
+
+    return new Container(style: _style, children: children);
   }
 }

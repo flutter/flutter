@@ -33,7 +33,7 @@ class Scaffold extends Component {
     bottom: 0;
     right: 0;''');
 
-  ActionBar actionBar;
+  Node header;
   Node content;
   FloatingActionButton fab;
   Drawer drawer;
@@ -41,7 +41,7 @@ class Scaffold extends Component {
 
   Scaffold({
     Object key,
-    this.actionBar,
+    this.header,
     this.content,
     this.fab,
     this.drawer,
@@ -49,15 +49,11 @@ class Scaffold extends Component {
   }) : super(key: key);
 
   Node build() {
-    var children = [
+    List<Node> children = [
       new Container(
         key: 'Main',
         style: _mainStyle,
-        children: [
-          actionBar,
-          new StyleNode(content, _contentStyle)
-        ]
-      ),
+        children: [header, new StyleNode(content, _contentStyle)])
     ];
 
     if (fab != null)
