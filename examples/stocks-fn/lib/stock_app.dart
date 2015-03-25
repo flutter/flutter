@@ -7,6 +7,7 @@ import 'package:sky/framework/components/drawer.dart';
 import 'package:sky/framework/components/drawer_header.dart';
 import 'package:sky/framework/components/floating_action_button.dart';
 import 'package:sky/framework/components/icon.dart';
+import 'package:sky/framework/components/icon_button.dart';
 import 'package:sky/framework/components/input.dart';
 import 'package:sky/framework/components/menu_divider.dart';
 import 'package:sky/framework/components/menu_item.dart';
@@ -15,24 +16,23 @@ import 'package:sky/framework/components/scaffold.dart';
 import 'package:sky/framework/debug/tracing.dart';
 import 'package:sky/framework/fn.dart';
 import 'package:sky/framework/theme/typography.dart' as typography;
+import 'package:sky/framework/theme/colors.dart';
 import 'stock_data.dart';
 import 'stock_list.dart';
 import 'stock_menu.dart';
 
 class StocksApp extends App {
-
   DrawerController _drawerController = new DrawerController();
   PopupMenuController _menuController;
 
-  static Style _iconStyle = new Style('''
-    padding: 8px;'''
-  );
+  static final Style _actionBarStyle = new Style('''
+    background-color: ${Purple[500]};''');
 
-  static Style _titleStyle = new Style('''
-    padding-left: 24px;
-    flex: 1;
-    ${typography.white.title};'''
-  );
+  static final Style _searchBarStyle = new Style('''
+    background-color: ${Grey[50]};''');
+
+  static final Style _titleStyle = new Style('''
+    ${typography.white.title};''');
 
   StockDataFetcher _stockDataFetcher;
   List<Stock> _stocks = [];
@@ -48,9 +48,22 @@ class StocksApp extends App {
     });
   }
 
-  void _handleSearchClick(_) {
+  void _handleSearchBegin(_) {
     setState(() {
-      _isSearching = !_isSearching;
+      _isSearching = true;
+    });
+  }
+
+  void _handleSearchEnd(_) {
+    setState(() {
+      _isSearching = false;
+      _searchQuery = null;
+    });
+  }
+
+  void _handleSearchQueryChanged(query) {
+    setState(() {
+      _searchQuery = query;
     });
   }
 
@@ -61,80 +74,68 @@ class StocksApp extends App {
     });
   }
 
-  void _handleSearchQueryChanged(query) {
-    setState(() {
-      _searchQuery = query;
-    });
-  }
-
-  Node build() {
-    var drawer = new Drawer(
+  Drawer buildDrawer() {
+    return new Drawer(
       controller: _drawerController,
       level: 3,
       children: [
-        new DrawerHeader(
-          children: [new Text('Stocks')]
-        ),
+        new DrawerHeader(children: [new Text('Stocks')]),
         new MenuItem(
           key: 'Inbox',
           icon: 'content/inbox',
-          children: [new Text('Inbox')]
-        ),
-        new MenuDivider(
-        ),
+          children: [new Text('Inbox')]),
+        new MenuDivider(),
         new MenuItem(
           key: 'Drafts',
           icon: 'content/drafts',
-          children: [new Text('Drafts')]
-        ),
+          children: [new Text('Drafts')]),
         new MenuItem(
           key: 'Settings',
           icon: 'action/settings',
-          children: [new Text('Settings')]
-        ),
+          children: [new Text('Settings')]),
         new MenuItem(
           key: 'Help & Feedback',
           icon: 'action/help',
-          children: [new Text('Help & Feedback')]
-        )
+          children: [new Text('Help & Feedback')])
       ]
     );
+  }
 
-    Node title;
-    if (_isSearching) {
-      title = new Input(focused: true, placeholder: 'Search stocks',
-          onChanged: _handleSearchQueryChanged);
-    } else {
-      title = new Text('Stocks');
-    }
-
-    var actionBar = new ActionBar(
-      children: [
-        new EventTarget(
-          new Icon(key: 'menu', style: _iconStyle,
-              size: 24,
-              type: 'navigation/menu_white'),
-          onGestureTap: _drawerController.toggle
-        ),
-        new Container(
+  Node buildActionBar() {
+    return new StyleNode(
+      new ActionBar(
+        left: new IconButton(
+          icon: 'navigation/menu_white',
+          onGestureTap: _drawerController.toggle),
+        center: new Container(
           style: _titleStyle,
-          children: [title]
-        ),
-        new EventTarget(
-          new Icon(key: 'search', style: _iconStyle,
-              size: 24,
-              type: 'action/search_white'),
-          onGestureTap: _handleSearchClick
-        ),
-        new EventTarget(
-          new Icon(key: 'more_white', style: _iconStyle,
-              size: 24,
-              type: 'navigation/more_vert_white'),
-          onGestureTap: _handleMenuClick
-        )
-      ]
-    );
+          children: [new Text('Stocks')]),
+        right: [
+          new IconButton(
+            icon: 'action/search_white',
+            onGestureTap: _handleSearchBegin),
+          new IconButton(
+            icon: 'navigation/more_vert_white',
+            onGestureTap: _handleMenuClick)
+        ]),
+      _actionBarStyle);
+  }
 
+  // TODO(abarth): Should we factor this into a SearchBar in the framework?
+  Node buildSearchBar() {
+    return new StyleNode(
+      new ActionBar(
+        left: new IconButton(
+          icon: 'navigation/arrow_back_grey600',
+          onGestureTap: _handleSearchEnd),
+        center: new Input(
+          focused: true,
+          placeholder: 'Search stocks',
+          onChanged: _handleSearchQueryChanged)),
+      _searchBarStyle);
+  }
+
+  Node build() {
     List<Node> overlays = [];
 
     if (_menuController != null) {
@@ -152,11 +153,11 @@ class StocksApp extends App {
     }
 
     return new Scaffold(
-      actionBar: actionBar,
+      header: _isSearching ? buildSearchBar() : buildActionBar(),
       content: new Stocklist(stocks: _stocks, query: _searchQuery),
       fab: new FloatingActionButton(
         content: new Icon(type: 'content/add_white', size: 24), level: 3),
-      drawer: drawer,
+      drawer: buildDrawer(),
       overlays: overlays
     );
   }
