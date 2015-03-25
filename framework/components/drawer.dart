@@ -126,7 +126,6 @@ class Drawer extends AnimatedComponent {
 
     var mask = new EventTarget(
       new Container(
-        key: 'Mask',
         style: _maskStyle,
         inlineStyle: maskInlineStyle
       ),
@@ -134,13 +133,13 @@ class Drawer extends AnimatedComponent {
       onGestureFlingStart: controller.handleFlingStart
     );
 
-    Node content = new StyleNode(
-      new Material(
-        key: 'Content',
+    Material content = new Material(
+      content: new Container(
+        style: _contentStyle,
         inlineStyle: contentInlineStyle,
-        children: children,
-        level: level),
-      _contentStyle);
+        children: children
+      ),
+      level: level);
 
     return new EventTarget(
       new Container(

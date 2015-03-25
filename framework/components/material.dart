@@ -7,7 +7,7 @@ import '../theme/shadows.dart';
 import 'ink_well.dart';
 
 class Material extends Component {
-  static final List<Style> shadowStyle = [
+  static final List<Style> _shadowStyle = [
     null,
     new Style('box-shadow: ${Shadow[1]}'),
     new Style('box-shadow: ${Shadow[2]}'),
@@ -16,20 +16,12 @@ class Material extends Component {
     new Style('box-shadow: ${Shadow[5]}'),
   ];
 
-  String inlineStyle;
-  List<Node> children;
+  Node content;
   int level;
 
-  Material({
-    Object key,
-    this.inlineStyle,
-    this.children,
-    this.level: 0
-  }) : super(key: key);
+  Material({ Object key, this.content, this.level: 0 }) : super(key: key);
 
   Node build() {
-    return new StyleNode(
-      new InkWell(inlineStyle: inlineStyle, children: children),
-      shadowStyle[level]);
+    return new StyleNode(content, _shadowStyle[level]);
   }
 }

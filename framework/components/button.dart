@@ -26,7 +26,9 @@ class Button extends Component {
 
   Node build() {
     return new StyleNode(
-      new Material(children: [content], level: level),
+      new Material(
+        content: new InkWell(children: [content]),
+        level: level),
       _style);
   }
 }

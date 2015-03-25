@@ -14,7 +14,8 @@ import 'material.dart';
 import 'popup_menu_item.dart';
 
 const double _kMenuOpenDuration = 300.0;
-const double _kMenuCloneDuration = 200.0;
+const double _kMenuCloseDuration = 200.0;
+const double _kMenuCloseDelay = 100.0;
 
 class PopupMenuController {
   bool isOpen = false;
@@ -26,7 +27,8 @@ class PopupMenuController {
   }
 
   Future close() {
-    return position.animateTo(0.0, _kMenuCloneDuration).then((_) {
+    return position.animateTo(0.0, _kMenuCloseDuration,
+        initialDelay: _kMenuCloseDelay).then((_) {
       isOpen = false;
     });
   }
@@ -87,11 +89,12 @@ class PopupMenu extends AnimatedComponent {
       return new PopupMenuItem(key: i++, children: item, opacity: opacity);
     }));
 
-    return new StyleNode(
-      new Material(
+    return new Material(
+      content: new Container(
+        style: _style,
         inlineStyle: _inlineStyle(),
-        children: children,
-        level: level),
-      _style);
+        children: children
+      ),
+      level: level);
   }
 }

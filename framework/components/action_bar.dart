@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 
 import '../fn.dart';
-import '../theme/shadows.dart';
 import '../theme/view-configuration.dart';
+import 'material.dart';
 
 class ActionBar extends Component {
   static final Style _style = new Style('''
@@ -13,8 +13,7 @@ class ActionBar extends Component {
     height: 56px;
     padding: 0 8px;
     transition: background-color 0.3s;
-    padding-top: ${kStatusBarHeight}px;
-    box-shadow: ${Shadow[2]};''');
+    padding-top: ${kStatusBarHeight}px;''');
 
   static Style _centerStyle = new Style('''
     padding-left: 24px;
@@ -37,6 +36,8 @@ class ActionBar extends Component {
     if (right != null)
       children.addAll(right);
 
-    return new Container(style: _style, children: children);
+    return new Material(
+      content: new Container(style: _style, children: children),
+      level: 2);
   }
 }

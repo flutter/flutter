@@ -41,9 +41,10 @@ class FloatingActionButton extends Component {
     if (content != null)
       children.add(content);
 
-    return new Container(
-      style: level > 0 ? _style.extend(Material.shadowStyle[level]) : _style,
-      children: [new StyleNode(new InkWell(children: children), _clipStyle)]
-    );
+    return new Material(
+      content: new Container(
+        style: _style,
+        children: [new StyleNode(new InkWell(children: children), _clipStyle)]),
+      level: level);
   }
 }
