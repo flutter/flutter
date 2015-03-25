@@ -12,6 +12,7 @@ class ActionBar extends Component {
     align-items: center;
     height: 56px;
     padding: 0 8px;
+    transition: background-color 0.3s;
     padding-top: ${kStatusBarHeight}px;
     box-shadow: ${Shadow[2]};''');
 
