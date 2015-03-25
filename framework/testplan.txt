@@ -1,0 +1,22 @@
+-Basic Sync output (build a thing)
+  -Div, Image, Anchor, Text
+
+-Sync
+  -Text Node
+  -Container
+    -Childlist mutations
+  -Image
+  -Anchor
+
+-Styling
+  -StyleObjects
+  -inlineStyle
+  -StyleNode
+
+-Event Dispatch
+
+-Components
+  -Stateless vs stateful
+  -Mount/Unmount signals
+  -setState/scheduleBuild build
+  -getRoot

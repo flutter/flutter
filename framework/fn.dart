@@ -454,7 +454,7 @@ abstract class Element extends RenderNode {
     sky.Element root = _root as sky.Element;
 
     _ensureClass();
-    if (_class != oldElement._class)
+    if (_class != oldElement._class && _class != '')
       root.setAttribute('class', _class);
 
     if (inlineStyle != oldElement.inlineStyle)
