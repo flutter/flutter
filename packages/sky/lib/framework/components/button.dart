@@ -25,10 +25,10 @@ class Button extends Component {
   Button({ Object key, this.content, this.level }) : super(key: key);
 
   Node build() {
-    return new Material(
-      style: _style,
-      children: [content],
-      level: level
-    );
+    return new StyleNode(
+      new Material(
+        content: new InkWell(children: [content]),
+        level: level),
+      _style);
   }
 }

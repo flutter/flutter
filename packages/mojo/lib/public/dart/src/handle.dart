@@ -4,15 +4,6 @@
 
 part of core;
 
-class _MojoHandleNatives {
-  static int register(MojoEventStream eventStream) native "MojoHandle_Register";
-  static int close(int handle) native "MojoHandle_Close";
-  static List wait(
-      int handle, int signals, int deadline) native "MojoHandle_Wait";
-  static List waitMany(List<int> handles, List<int> signals,
-      int deadline) native "MojoHandle_WaitMany";
-}
-
 class _HandleCreationRecord {
   final MojoHandle handle;
   final StackTrace stack;
@@ -36,7 +27,7 @@ class MojoHandle {
 
   MojoResult close() {
     assert(_removeUnclosedHandle(this));
-    int result = _MojoHandleNatives.close(_h);
+    int result = MojoHandleNatives.close(_h);
     _h = INVALID;
     return new MojoResult(result);
   }
@@ -47,8 +38,11 @@ class MojoHandle {
   }
 
   MojoWaitResult wait(int signals, int deadline) {
-    List result = _MojoHandleNatives.wait(h, signals, deadline);
-    return new MojoWaitResult(new MojoResult(result[0]), result[1]);
+    List result = MojoHandleNatives.wait(h, signals, deadline);
+    var state = result[1] != null
+        ? new MojoHandleSignalsState(result[1][0], result[1][1])
+        : null;
+    return new MojoWaitResult(new MojoResult(result[0]), state);
   }
 
   bool _ready(MojoHandleSignals signal) {
@@ -89,13 +83,16 @@ class MojoHandle {
 
   static MojoWaitManyResult waitMany(
       List<int> handles, List<int> signals, int deadline) {
-    List result = _MojoHandleNatives.waitMany(handles, signals, deadline);
-    return new MojoWaitManyResult(
-        new MojoResult(result[0]), result[1], result[2]);
+    List result = MojoHandleNatives.waitMany(handles, signals, deadline);
+    List states = result[2] != null
+        ? result[2].map((l) => new MojoHandleSignalsState(l[0], l[1])).toList()
+        : null;
+    return new MojoWaitManyResult(new MojoResult(result[0]), result[1], states);
   }
 
   static MojoResult register(MojoEventStream eventStream) {
-    return new MojoResult(_MojoHandleNatives.register(eventStream));
+    return new MojoResult(
+        MojoHandleNatives.register(eventStream, eventStream._handle.h));
   }
 
   static HashMap<int, _HandleCreationRecord> _unclosedHandles = new HashMap();

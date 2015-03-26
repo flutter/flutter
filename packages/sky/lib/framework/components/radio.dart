@@ -55,9 +55,11 @@ class Radio extends ButtonBase {
 
   Node buildContent() {
     return new EventTarget(
-      new InkWell(
-        style: highlight ? _highlightStyle : _style,
-        children: value == groupValue ? [new Container(style: _dotStyle )] : []
+      new StyleNode(
+        new InkWell(
+          children: value == groupValue ? [new Container(style: _dotStyle)] : []
+        ),
+        highlight ? _highlightStyle : _style
       ),
       onGestureTap: _handleClick
     );

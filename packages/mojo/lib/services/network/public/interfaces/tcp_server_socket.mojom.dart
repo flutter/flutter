@@ -5,8 +5,9 @@
 library tcp_server_socket.mojom;
 
 import 'dart:async';
-import 'dart:mojo.bindings' as bindings;
-import 'dart:mojo.core' as core;
+
+import 'package:mojo/public/dart/bindings.dart' as bindings;
+import 'package:mojo/public/dart/core.dart' as core;
 import 'package:mojo/services/network/public/interfaces/net_address.mojom.dart' as net_address_mojom;
 import 'package:mojo/services/network/public/interfaces/network_error.mojom.dart' as network_error_mojom;
 import 'package:mojo/services/network/public/interfaces/tcp_connected_socket.mojom.dart' as tcp_connected_socket_mojom;

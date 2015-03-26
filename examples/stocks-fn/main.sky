@@ -5,7 +5,6 @@
 // found in the LICENSE file.
 -->
 <sky>
-<import src="/sky/framework/debug/shake-to-reload.sky" />
 <script>
 // TODO(abarth): Should this be package:stocks/stocks_app.dart?
 import 'lib/stock_app.dart';

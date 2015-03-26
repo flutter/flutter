@@ -7,6 +7,7 @@ import '../editing/editable_text.dart';
 import '../editing/keyboard.dart';
 import '../fn.dart';
 import '../theme/colors.dart';
+import '../theme/typography.dart' as typography;
 
 typedef void ValueChanged(value);
 
@@ -26,8 +27,8 @@ class Input extends Component {
   static final Style _placeholderStyle = new Style('''
     top: 8px;
     left: 8px;
-    color: ${Grey[200]};
-    position: absolute;'''
+    position: absolute;
+    ${typography.black.caption};'''
   );
 
   static final String _focusedInlineStyle = '''

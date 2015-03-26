@@ -3,8 +3,9 @@
 // found in the LICENSE file.
 
 import '../fn.dart';
-import 'material.dart';
 import '../theme/colors.dart';
+import 'ink_well.dart';
+import 'material.dart';
 
 class FloatingActionButton extends Component {
   // TODO(abarth): We need a better way to become a container for absolutely
@@ -40,16 +41,10 @@ class FloatingActionButton extends Component {
     if (content != null)
       children.add(content);
 
-    return new Container(
-      key: "Container",
-      style: level > 0 ? _style.extend(Material.shadowStyle[level]) : _style,
-      children: [
-        new Material(
-          key: "Clip",
-          style: _clipStyle,
-          children: children
-        )
-      ]
-    );
+    return new Material(
+      content: new Container(
+        style: _style,
+        children: [new StyleNode(new InkWell(children: children), _clipStyle)]),
+      level: level);
   }
 }

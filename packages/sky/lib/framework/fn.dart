@@ -9,6 +9,8 @@ import 'dart:collection';
 import 'dart:sky' as sky;
 import 'reflect.dart' as reflect;
 
+final sky.Tracing _tracing = sky.window.tracing;
+
 bool _initIsInCheckedMode() {
   String testFn(i) { double d = i; return d.toString(); }
   try {
@@ -50,29 +52,6 @@ class Style {
   }
 
   Style._internal(this._className);
-}
-
-abstract class ContentNode extends Node {
-  Node content;
-
-  ContentNode(Node content) : this.content = content, super(key: content._key);
-
-  void _sync(Node old, sky.ParentNode host, sky.Node insertBefore) {
-    Node oldContent = old == null ? null : (old as ContentNode).content;
-    content = _syncChild(content, oldContent, host, insertBefore);
-    _root = content._root;
-  }
-
-  void _remove() {
-    _removeChild(content);
-    super._remove();
-  }
-}
-
-class StyleNode extends ContentNode {
-  final Style style;
-
-  StyleNode(Node content, this.style): super(content);
 }
 
 void _parentInsertBefore(sky.ParentNode parent,
@@ -192,6 +171,29 @@ abstract class Node {
     assert(node._root is sky.Node);
     return node;
   }
+}
+
+abstract class ContentNode extends Node {
+  Node content;
+
+  ContentNode(Node content) : this.content = content, super(key: content._key);
+
+  void _sync(Node old, sky.ParentNode host, sky.Node insertBefore) {
+    Node oldContent = old == null ? null : (old as ContentNode).content;
+    content = _syncChild(content, oldContent, host, insertBefore);
+    _root = content._root;
+  }
+
+  void _remove() {
+    _removeChild(content);
+    super._remove();
+  }
+}
+
+class StyleNode extends ContentNode {
+  final Style style;
+
+  StyleNode(Node content, this.style): super(content);
 }
 
 /*
@@ -452,7 +454,7 @@ abstract class Element extends RenderNode {
     sky.Element root = _root as sky.Element;
 
     _ensureClass();
-    if (_class != oldElement._class)
+    if (_class != oldElement._class && _class != '')
       root.setAttribute('class', _class);
 
     if (inlineStyle != oldElement.inlineStyle)
@@ -713,8 +715,9 @@ List<Component> _dirtyComponents = new List<Component>();
 bool _buildScheduled = false;
 bool _inRenderDirtyComponents = false;
 
-
 void _buildDirtyComponents() {
+  _tracing.begin('fn::_buildDirtyComponents');
+
   Stopwatch sw;
   if (_shouldLogRenderDuration)
     sw = new Stopwatch()..start();
@@ -737,8 +740,10 @@ void _buildDirtyComponents() {
 
   if (_shouldLogRenderDuration) {
     sw.stop();
-    print("Render took ${sw.elapsedMicroseconds} microseconds");
+    print('Render took ${sw.elapsedMicroseconds} microseconds');
   }
+
+  _tracing.end('fn::_buildDirtyComponents');
 }
 
 void _scheduleComponentForRender(Component c) {

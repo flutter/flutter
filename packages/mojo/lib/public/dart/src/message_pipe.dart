@@ -4,16 +4,6 @@
 
 part of core;
 
-class _MojoMessagePipeNatives {
-  static List MojoCreateMessagePipe(int flags) native "MojoMessagePipe_Create";
-
-  static int MojoWriteMessage(int handle, ByteData data, int numBytes,
-      List<int> handles, int flags) native "MojoMessagePipe_Write";
-
-  static List MojoReadMessage(int handle, ByteData data, int numBytes,
-      List<int> handles, int flags) native "MojoMessagePipe_Read";
-}
-
 class MojoMessagePipeReadResult {
   final MojoResult status;
   final int bytesRead;
@@ -60,7 +50,7 @@ class MojoMessagePipeEndpoint {
         (handles != null) ? handles.map((h) => h.h).toList() : null;
 
     // Do the call.
-    int result = _MojoMessagePipeNatives.MojoWriteMessage(
+    int result = MojoMessagePipeNatives.MojoWriteMessage(
         handle.h, data, dataNumBytes, mojoHandles, flags);
 
     status = new MojoResult(result);
@@ -95,7 +85,7 @@ class MojoMessagePipeEndpoint {
     }
 
     // Do the call.
-    List result = _MojoMessagePipeNatives.MojoReadMessage(
+    List result = MojoMessagePipeNatives.MojoReadMessage(
         handle.h, data, dataNumBytes, mojoHandles, flags);
 
     if (result == null) {
@@ -140,7 +130,7 @@ class MojoMessagePipe {
   }
 
   factory MojoMessagePipe([int flags = FLAG_NONE]) {
-    List result = _MojoMessagePipeNatives.MojoCreateMessagePipe(flags);
+    List result = MojoMessagePipeNatives.MojoCreateMessagePipe(flags);
     if (result == null) {
       return null;
     }

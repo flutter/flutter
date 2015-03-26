@@ -4,25 +4,6 @@
 
 part of core;
 
-class _MojoSharedBufferNatives {
-  static List Create(int numBytes, int flags)
-      native "MojoSharedBuffer_Create";
-
-  static List Duplicate(int bufferHandle, int flags)
-      native "MojoSharedBuffer_Duplicate";
-
-  static List Map(MojoSharedBuffer buffer,
-                  int bufferHandle,
-                  int offset,
-                  int numBytes,
-                  int flags)
-      native "MojoSharedBuffer_Map";
-
-  static int Unmap(ByteData buffer)
-      native "MojoSharedBuffer_Unmap";
-}
-
-
 class MojoSharedBuffer {
   static const int CREATE_FLAG_NONE = 0;
   static const int DUPLICATE_FLAG_NONE = 0;
@@ -32,11 +13,11 @@ class MojoSharedBuffer {
   MojoResult status;
   ByteData mapping;
 
-  MojoSharedBuffer(
-      this.handle, [this.status = MojoResult.OK, this.mapping = null]);
+  MojoSharedBuffer(this.handle,
+      [this.status = MojoResult.OK, this.mapping = null]);
 
   factory MojoSharedBuffer.create(int numBytes, [int flags = 0]) {
-    List result = _MojoSharedBufferNatives.Create(numBytes, flags);
+    List result = MojoSharedBufferNatives.Create(numBytes, flags);
     if (result == null) {
       return null;
     }
@@ -52,13 +33,13 @@ class MojoSharedBuffer {
   }
 
   factory MojoSharedBuffer.duplicate(MojoSharedBuffer msb, [int flags = 0]) {
-    List result = _MojoSharedBufferNatives.Duplicate(msb.handle.h, flags);
+    List result = MojoSharedBufferNatives.Duplicate(msb.handle.h, flags);
     if (result == null) {
       return null;
     }
     assert((result is List) && (result.length == 2));
     var r = new MojoResult(result[0]);
-    if(!r.isOk) {
+    if (!r.isOk) {
       return null;
     }
 
@@ -83,8 +64,8 @@ class MojoSharedBuffer {
       status = MojoResult.INVALID_ARGUMENT;
       return status;
     }
-    List result = _MojoSharedBufferNatives.Map(
-        this, handle.h, offset, numBytes, flags);
+    List result =
+        MojoSharedBufferNatives.Map(this, handle.h, offset, numBytes, flags);
     if (result == null) {
       status = MojoResult.INVALID_ARGUMENT;
       return status;
@@ -96,7 +77,7 @@ class MojoSharedBuffer {
   }
 
   MojoResult unmap() {
-    int r = _MojoSharedBufferNatives.Unmap(mapping);
+    int r = MojoSharedBufferNatives.Unmap(mapping);
     status = new MojoResult(r);
     mapping = null;
     return status;

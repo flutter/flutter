@@ -5,8 +5,9 @@
 library types.mojom;
 
 import 'dart:async';
-import 'dart:mojo.bindings' as bindings;
-import 'dart:mojo.core' as core;
+
+import 'package:mojo/public/dart/bindings.dart' as bindings;
+import 'package:mojo/public/dart/core.dart' as core;
 final kOpenFlagRead = 0x1;
 final kOpenFlagWrite = 0x2;
 final kOpenFlagCreate = 0x4;

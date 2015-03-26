@@ -64,7 +64,8 @@ class MojoEventStream extends Stream<List<int>> {
     _controller.addStream(_receivePort).whenComplete(_controller.close);
 
     if (_signals != MojoHandleSignals.NONE) {
-      var res = MojoHandleWatcher.add(_handle, _sendPort, _signals.value);
+      var res = new MojoResult(
+          MojoHandleWatcher.add(_handle.h, _sendPort, _signals.value));
       if (!res.isOk) {
         throw "MojoHandleWatcher add failed: $res";
       }
@@ -78,7 +79,8 @@ class MojoEventStream extends Stream<List<int>> {
   void enableSignals(MojoHandleSignals signals) {
     _signals = signals;
     if (_isListening) {
-      var res = MojoHandleWatcher.add(_handle, _sendPort, signals.value);
+      var res = new MojoResult(
+          MojoHandleWatcher.add(_handle.h, _sendPort, signals.value));
       if (!res.isOk) {
         throw "MojoHandleWatcher add failed: $res";
       }
@@ -92,11 +94,13 @@ class MojoEventStream extends Stream<List<int>> {
 
   Future _handleWatcherClose() {
     assert(_handle != null);
-    return MojoHandleWatcher.close(_handle, wait: true).then((_) {
+    assert(MojoHandle._removeUnclosedHandle(_handle));
+    return MojoHandleWatcher.close(_handle.h, wait: true).then((r) {
       if (_receivePort != null) {
         _receivePort.close();
         _receivePort = null;
       }
+      return new MojoResult(r);
     });
   }
 
@@ -118,12 +122,13 @@ class MojoEventStream extends Stream<List<int>> {
 
   void _onPauseStateChange() {
     if (_controller.isPaused) {
-      var res = MojoHandleWatcher.remove(_handle);
+      var res = new MojoResult(MojoHandleWatcher.remove(_handle.h));
       if (!res.isOk) {
         throw "MojoHandleWatcher add failed: $res";
       }
     } else {
-      var res = MojoHandleWatcher.add(_handle, _sendPort, _signals.value);
+      var res = new MojoResult(
+          MojoHandleWatcher.add(_handle.h, _sendPort, _signals.value));
       if (!res.isOk) {
         throw "MojoHandleWatcher add failed: $res";
       }

@@ -23,6 +23,7 @@ abstract class Window extends EventTarget {
     Document get document native "Window_document_Getter";
     double get devicePixelRatio native "Window_devicePixelRatio_Getter";
     int get orientation native "Window_orientation_Getter";
+    Tracing get tracing native "Window_tracing_Getter";
 
     // Methods
     Selection getSelection() native "Window_getSelection_Callback";

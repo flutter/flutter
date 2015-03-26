@@ -22,6 +22,8 @@ const Curve _kAnimationCurve = parabolicRise;
 class DrawerController {
   final AnimatedValue position = new AnimatedValue(-_kWidth);
 
+  bool get isClosed => position.value == -_kWidth;
+
   bool get _isMostlyClosed => position.value <= -_kWidth / 2;
 
   void toggle(_) => _isMostlyClosed ? _open() : _close();
@@ -124,7 +126,6 @@ class Drawer extends AnimatedComponent {
 
     var mask = new EventTarget(
       new Container(
-        key: 'Mask',
         style: _maskStyle,
         inlineStyle: maskInlineStyle
       ),
@@ -133,12 +134,12 @@ class Drawer extends AnimatedComponent {
     );
 
     Material content = new Material(
-      key: 'Content',
-      style: _contentStyle,
-      inlineStyle: contentInlineStyle,
-      children: children,
-      level: level
-    );
+      content: new Container(
+        style: _contentStyle,
+        inlineStyle: contentInlineStyle,
+        children: children
+      ),
+      level: level);
 
     return new EventTarget(
       new Container(

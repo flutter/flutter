@@ -5,8 +5,9 @@
 library sensors.mojom;
 
 import 'dart:async';
-import 'dart:mojo.bindings' as bindings;
-import 'dart:mojo.core' as core;
+
+import 'package:mojo/public/dart/bindings.dart' as bindings;
+import 'package:mojo/public/dart/core.dart' as core;
 
 final int SensorType_ACCELEROMETER = 0;
 final int SensorType_AMBIENT_TEMPERATURE = SensorType_ACCELEROMETER + 1;

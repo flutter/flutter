@@ -10,6 +10,7 @@ import 'generators.dart';
 class AnimatedValue {
   StreamController _controller = new StreamController(sync: true);
   AnimationGenerator _animation;
+  Completer _completer;
   double _value;
 
   AnimatedValue(double initial) {
@@ -35,14 +36,23 @@ class AnimatedValue {
     _controller.add(_value);
   }
 
+  void _done() {
+    _animation = null;
+    if (_completer == null)
+      return;
+    Completer completer = _completer;
+    _completer = null;
+    completer.complete(_value);
+  }
+
   void stop() {
     if (_animation != null) {
       _animation.cancel();
-      _animation = null;
+      _done();
     }
   }
 
-  void animateTo(double newValue, double duration,
+  Future<double> animateTo(double newValue, double duration,
       { Curve curve: linear, double initialDelay: 0.0 }) {
     stop();
 
@@ -51,10 +61,10 @@ class AnimatedValue {
         begin: _value,
         end: newValue,
         curve: curve,
-        initialDelay: initialDelay);
+        initialDelay: initialDelay)
+      ..onTick.listen(_setValue, onDone: _done);
 
-    _animation.onTick.listen(_setValue, onDone: () {
-      _animation = null;
-    });
+    _completer = new Completer();
+    return _completer.future;
   }
 }
