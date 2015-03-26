@@ -10,8 +10,12 @@ dot {
     border-radius: 5px;
     opacity: .75;
 }
+
+log {
+    margin-top: 50px;
+}
 </style>
-<log>Ready!</log>
+<log>Touch the screen!</log>
 <script>
 import "dart:sky";
 
