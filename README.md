@@ -1,156 +1,81 @@
 Sky
 ===
 
-Sky is an experiment in building a UI framework for Mojo.  The approach we're
-exploring is to create a layered framework based around a retained hierarchy of
-semantic elements.  We're experimenting with different ideas and exploring
-various approaches, many of which won't work and will need to be discarded, but,
-if we're lucky, some of which might turn out to be useful.
+Sky is an experimental, high-performance UI framework for mobile apps. Sky helps
+you create apps with beautiful user interfaces and high-quality interactive
+design that run smoothly at 120 Hz.
 
-Sky has three layers, each of which also adds progressively more opinion.  At
-the lowest layer, Sky contains a rendering engine that parses markup, executes
-script, and applies styling information.  Layered above the engine is a
-collection of components that define the interactive behavior of a suite of
-widgets, such as input fields, buttons, and menus.  Above the widget layer is a
-theme layer that gives each widget a concrete visual and interactive design.
+Sky consists of two components:
 
-Elements
+1. *The Sky engine.* The [engine](engine) is the core of the system system.
+   Written in C++, the engine provides the muscle of the Sky system. The engine
+   provides several primitives, including a soft real-time scheduler and a
+   hierarchial, retained-mode graphics system, that let you build high-quality
+   apps.
+
+2. *The Sky framework.* The [framework](framework) makes it easy to build apps
+   using Sky by providing familiar user interface widgets, such as buttons,
+   infinite lists, and animations, on top of the engine using Dart. These
+   extensible components follow a functional programming style inspired by
+   React.
+
+Sky is still experimental. We're experimenting with different ideas and
+exploring various approaches, many of which won't work and will need to be
+discarded, but, if we're lucky, some of which might turn out to be useful.
+
+Examples
 --------
 
-The Sky engine contains [a handful of primitive elements](specs/markup.md) and the tools with which
-to create custom elements.  The following elements are built into the engine:
+The simplest Sky app is, appropriately, HelloWorldApp:
 
- - ``script``: Executes script
- - ``style``: Defines style rules
- - ``import``: Loads a module
- - ``iframe``: Embeds another Mojo application
- - ``template``: Captures descendants for use as a template
- - ``content``: Visually projects descendents of the shadow host
- - ``shadow``: Visually projects older shadow roots of the shadow host
- - ``img``: Displays an image
- - ``div``: Neutral element for hooking styles in shadow trees
- - ``span``: Neutral element for hooking styles in shadow trees
- - ``a``: Links to another Mojo application
- - ``title``: Briefly describes the current application state to the user
- - ``t``: Preserve whitespace (by default, whitespace nodes are dropped)
- - ``error``: Represents a parse error
+```dart
+import 'package:sky/framework/fn.dart';
 
-### Additional Elements ###
-
-In addition to the built-in elements, frameworks and applications can define
-custom elements.  The Sky framework contains a number of general-purpose
-elements, including ``input``, ``button``, ``menu``, ``toolbar``, ``video``, and
-``dialog``.  However, developers are free to implement their own input fields,
-buttons, menus, toolbars, videos, or dialogs with access to all the same engine
-features as the frame because the framework does not occupy a privileged
-position in Sky.
-
-### Custom Layout ###
-
-TODO: Describe the approach for customizing layout.
-
-### Custom Painting ###
-
-TODO: Describe the approach for customizing painting.
-
-Modules
--------
-
-Sky applications consist of a collection of modules.  Each module can describe
-its dependencies, register custom elements, and export objects for use in other
-modules.
-
-Below is a sketch of a typical module.  The first ``import`` element imports the
-Sky framework, which defines the ``sky-element`` element.  This module then uses
-``sky-element`` to define another element, ``my-element``. The second ``import``
-element imports another module and gives it the name ``foo`` within this module.
-For example, the ``AnnualReport`` constructor uses the ``BalanceSheet`` class
-exported by that module.
-
-```html
-SKY MODULE
-<import src=”/sky/framework” />
-<import src=”/another/module.sky” as=”foo” />
-<sky-element name=”my-element”>
-class extends SkyElement {
-  constructor () {
-    this.addEventListener('click', (event) => this.updateTime());
-    this.shadowRoot.appendChild('Click to show the time');
-  }
-  updateTime() {
-    this.shadowRoot.firstChild.replaceWith(new Date());
-  }
-}
-</sky-element>
-<script>
-class AnnualReport {
-  constructor(bar) {
-    this.sheet = new foo.BalanceSheet(bar);
-  }
-  frobinate() {
-    this.sheet.balance();
+class HelloWorldApp extends App {
+  Node build() {
+    return new Text('Hello, world!');
   }
 }
 
-function mult(x, y) {
-  return x * y;
+void main() {
+  new HelloWorldApp();
 }
-
-function multiplyByTwo(x) {
-  return mult(x, 2);
-}
-
-module.exports = {
-  AnnualReport: AnnualReport,
-  multiplyByTwo: multiplyByTwo,
-};
-</script>
 ```
 
-The script definitions are local to each module and cannot be referenced by
-other modules unless exported.  For example, the ``mult`` function is private to
-this module whereas the ``multiplyByTwo`` function can be used by other modules
-because it is exported.  Similarly, this module exports the ``AnnualReport``
-class.
+Execution starts in `main`, which creates the `HelloWorldApp`. The framework
+then marks `HelloWorldApp` as dirty, which schedules it to build during the next
+animation frame. Each animation frame, the framework calls `build` on all the
+dirty components and diffs the virtual `Node` hierarchy returned this frame with
+the hierarchy returned last frame. Any differences are then applied as mutations
+to the physical heiarchy retained by the engine.
+
+For a more featureful example, please see the
+[example stocks app](examples/stocks-fn/lib/stocks_app.dart).
 
 Services
 --------
 
-Sky applications can access Mojo services and can provide services to other Mojo
-applications.  For example, Sky applications can access the network using Mojo's
-``network_service``.  Typically, however, Sky applications access services via
-frameworks that provide idiomatic interfaces to the underlying Mojo services.
-These idiomatic interfaces are layered on top of the underlying Mojo service,
-and developers are free to use the underlying service directly.
+Sky apps can access services from the host operating system using Mojo. For
+example, you can access the network using the `network_service.mojom` interface.
+Although you can use these low-level interfaces directly, you might prefer to
+access these services via libraries in the framework. For example, the
+`fetch.dart` library wraps the underlying `network_service.mojom` in an
+ergonomic interface:
 
-As an example, the following is a sketch of a module that wraps Mojo's
-``network_service`` in a simpler functional interface:
+```dart
+import 'package:sky/framework/net/fetch.dart';
 
-```html
-SKY MODULE
-<import src=”mojo:shell” as=”shell” />
-<import src="/mojo/network/network_service.mojom.sky" as="net" />
-<import src="/mojo/network/url_loader.mojom.sky" as="loader" />
-<script>
-module.exports = function fetch(url) {
-  var networkService = shell.connectToService(
-      "mojo:network_service", net.NetworkService);
-  var request = new loader.URLRequest({
-      url: url, method: "GET", auto_follow_redirects: true});
-  var urlLoader = networkService.createURLLoader();
-  return urlLoader.start(request).then(function(response) {
-    if (response.status_code == 200)
-      return response.body;
-    else
-      throw response;
+void foo() {
+  fetch('example.txt').then((Response response) {
+    print(response.bodyAsString());
   });
-};
-</script>
+}
 ```
 
-Notice that the ``shell`` module is built-in and provides access to the
-underlying Mojo fabric but the ``net`` and ``loader`` modules run inside Sky and
-encode and decode messages sent over Mojo pipes.
+Supported platforms
+-------------------
+
+Currently, Sky supports the Android and Mojo operating systems.
 
 Specifications
 --------------
@@ -162,11 +87,4 @@ and the specification are in flux, but hopefully they'll converge over time.
 Contributing
 ------------
 
-Instructions for building and testing Sky are contained in [HACKING.md](HACKING.md). For
-coordination, we use the ``#mojo`` IRC channel on
-[Freenode](https://freenode.net/).
-
-History
--------
-Sky started from the Blink codebase r181355:
-http://blink.lc/blink/tree/?id=086acdd04cbe6fcb89b2fc6bd438fb8819a26776
+Instructions for building and testing Sky are contained in [HACKING.md](HACKING.md).
