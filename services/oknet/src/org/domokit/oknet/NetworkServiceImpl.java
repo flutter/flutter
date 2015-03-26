@@ -45,18 +45,8 @@ public class NetworkServiceImpl implements NetworkService {
         if (sThreadPool == null)
             sThreadPool = Executors.newCachedThreadPool();
 
-        if (sClient == null) {
+        if (sClient == null)
             sClient = new OkHttpClient();
-
-            try {
-                int cacheSize = 10 * 1024 * 1024; // 10 MiB
-                File cacheDirectory = new File(context.getCacheDir(), "ok_http_cache");
-                Cache cache = new Cache(cacheDirectory, cacheSize);
-                sClient.setCache(cache);
-            } catch (IOException e) {
-                Log.e(TAG, "Unable to create HTTP cache", e);
-            }
-        }
 
         NetworkService.MANAGER.bind(this, pipe);
     }
