@@ -4,6 +4,7 @@
 
 import 'package:sky/framework/fn.dart';
 import 'package:sky/framework/components/button.dart';
+import 'package:sky/framework/components/input.dart';
 import 'package:sky/framework/components/popup_menu.dart';
 
 class WidgetsApp extends App {
@@ -17,6 +18,7 @@ class WidgetsApp extends App {
       children: [
         new Button(key: 'Go', content: new Text('Go'), level: 1),
         new Button(key: 'Back', content: new Text('Back'), level: 3),
+        new Input(),
         new Container(
           style: _menuStyle,
           children: [
