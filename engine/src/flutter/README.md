@@ -50,7 +50,7 @@ the hierarchy returned last frame. Any differences are then applied as mutations
 to the physical heiarchy retained by the engine.
 
 For a more featureful example, please see the
-[example stocks app](examples/stocks-fn/lib/stocks_app.dart).
+[example stocks app](examples/stocks/lib/stocks_app.dart).
 
 Services
 --------
