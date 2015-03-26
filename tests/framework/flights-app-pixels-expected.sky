@@ -1,0 +1,18 @@
+<sky>
+  <import src="../resources/run-after-display.sky"/>
+
+  <img src="http://storage.googleapis.com/mojo/sky-pngs/a4dc155c6a26016292a09dfc7271d871c1780e30" />
+
+  <script>
+  import "dart:sky";
+  import "dart:sky.internals" as internals;
+
+  void main() {
+    window.addEventListener("load", (_) {
+      runAfterDisplay(() {
+        internals.notifyTestComplete("");
+      });
+    });
+  }
+  </script>
+</sky>
