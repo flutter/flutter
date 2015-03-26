@@ -2,6 +2,9 @@
 // information for our code generation. The various supported arguments
 // are described below with example usage
 
+// We should remove all those marked OBSOLETE now
+// We should remove all those marked LAYOUT once we have custom layout
+// We should remove all those marked ANIMATIONS once we have an animation system
 
 // - alias_for=other-property
 // Properties specifying alias_for do not get their own enum and instead map
@@ -79,6 +82,7 @@
 // Other properties can depend upon high priority properties (e.g. font-size / ems)
 color animatable, inherited, custom_all
 direction inherited, custom_value
+
 // FIXME: This is a mess due to crbug.com/353932. Shorthands shouldn't have
 // any StyleBuilder handling!
 font custom_all, longhands=font-family;font-size;font-style;font-variant;font-weight;font-stretch;line-height
@@ -97,9 +101,16 @@ font-weight animatable, inherited, font, type_name=FontWeight, name_for_methods=
 text-rendering inherited, font, type_name=TextRenderingMode
 line-height animatable, inherited, getter=specifiedLineHeight, custom_value
 
+
+// LAYOUT
 align-content
+
+// LAYOUT
 align-items custom_all
+
+// LAYOUT
 align-self custom_all
+
 backface-visibility
 background-attachment custom_all
 background-clip custom_all
@@ -132,63 +143,159 @@ border-top-left-radius animatable, initial=initialBorderRadius, converter=conver
 border-top-right-radius animatable, initial=initialBorderRadius, converter=convertRadius
 border-top-style type_name=EBorderStyle, initial=initialBorderStyle
 border-top-width animatable, initial=initialBorderWidth, converter=convertLineWidth<unsigned>
+
+// LAYOUT
 bottom animatable, initial=initialOffset, converter=convertLengthOrAuto
+
 box-shadow animatable, converter=convertShadow
+
+// LAYOUT
 box-sizing
+
+// LAYOUT
 caption-side inherited
+
 clip animatable, converter=convertClip, custom_all
+
+// OBSOLETE
 cursor inherited, custom_all
+
+// LAYOUT
 display
+
+// LAYOUT
 empty-cells inherited, type_name=EEmptyCell
+
+// LAYOUT
 flex-basis animatable, converter=convertLengthOrAuto
+
+// LAYOUT
 flex-direction
+
+// LAYOUT
 flex-grow animatable, type_name=float
+
+// LAYOUT
 flex-shrink animatable, type_name=float
+
+// LAYOUT
 flex-wrap
+
+// LAYOUT
 height animatable, initial=initialSize, converter=convertLengthSizing
+
 image-rendering inherited
+
+// LAYOUT
 justify-content
+
+// LAYOUT
 left animatable, initial=initialOffset, converter=convertLengthOrAuto
+
 letter-spacing animatable, inherited, initial=initialLetterWordSpacing, converter=convertSpacing
+
+// OBSOLETE
 list-style-image animatable, inherited, custom_value
+
+// OBSOLETE
 list-style-position inherited
+
+// OBSOLETE
 list-style-type inherited
+
+// LAYOUT
 margin-bottom animatable, initial=initialMargin, converter=convertLengthOrAuto
+
+// LAYOUT
 margin-left animatable, initial=initialMargin, converter=convertLengthOrAuto
+
+// LAYOUT
 margin-right animatable, initial=initialMargin, converter=convertLengthOrAuto
+
+// LAYOUT
 margin-top animatable, initial=initialMargin, converter=convertLengthOrAuto
+
+// LAYOUT
 max-height animatable, initial=initialMaxSize, converter=convertLengthMaxSizing
+
+// LAYOUT
 max-width animatable, initial=initialMaxSize, converter=convertLengthMaxSizing
+
+// LAYOUT
 min-height animatable, initial=initialMinSize, converter=convertLengthSizing
+
+// LAYOUT
 min-width animatable, initial=initialMinSize, converter=convertLengthSizing
+
 object-fit runtime_flag=ObjectFitPosition, type_name=ObjectFit
 object-position runtime_flag=ObjectFitPosition, animatable, converter=convertLengthPoint
 opacity animatable, type_name=float
+
+// LAYOUT
 order type_name=int
+
+// OBSOLETE
 orphans animatable, inherited, type_name=short, custom_all
+
 outline-color animatable, custom_all
 outline-offset animatable, converter=convertComputedLength<int>
 outline-style custom_all
 outline-width animatable, converter=convertLineWidth<unsigned short>
+
+// OBSOLETE
 overflow-wrap inherited
+
+// OBSOLETE
 overflow-x type_name=EOverflow
+
+// OBSOLETE
 overflow-y type_name=EOverflow
+
+// LAYOUT
 padding-bottom animatable, initial=initialPadding, converter=convertLength
+
+// LAYOUT
 padding-left animatable, initial=initialPadding, converter=convertLength
+
+// LAYOUT
 padding-right animatable, initial=initialPadding, converter=convertLength
+
+// LAYOUT
 padding-top animatable, initial=initialPadding, converter=convertLength
+
+// OBSOLETE
 page-break-after type_name=EPageBreak, initial=initialPageBreak
+
+// OBSOLETE
 page-break-before type_name=EPageBreak, initial=initialPageBreak
+
+// OBSOLETE
 page-break-inside type_name=EPageBreak, initial=initialPageBreak
+
 perspective animatable, custom_value
 perspective-origin animatable, custom_all
+
+// OBSOLETE
 pointer-events inherited
+
+// LAYOUT
 position
+
+// OBSOLETE
 quotes inherited, converter=convertQuotes
+
+// LAYOUT
 right animatable, initial=initialOffset, converter=convertLengthOrAuto
+
+// OBSOLETE
 size custom_all
+
+// OBSOLETE
 speak inherited
+
+// OBSOLETE
 table-layout
+
 tab-size inherited, type_name=unsigned
 text-align inherited, custom_value
 text-align-last runtime_flag=CSS3Text, inherited, type_name=TextAlignLast
@@ -202,22 +309,48 @@ text-justify runtime_flag=CSS3Text, inherited, type_name=TextJustify
 text-overflow type_name=TextOverflow
 text-shadow animatable, inherited, converter=convertShadow
 text-underline-position runtime_flag=CSS3TextDecorations, inherited, type_name=TextUnderlinePosition
+
+// LAYOUT
 top animatable, initial=initialOffset, converter=convertLengthOrAuto
+
+// OBSOLETE
 touch-action converter=convertFlags<TouchAction>
+
+// OBSOLETE
 touch-action-delay runtime_flag=CSSTouchActionDelay, inherited, type_name=TouchActionDelay
+
 transform animatable, custom_value
 transform-origin animatable, custom_all
 transform-style name_for_methods=TransformStyle3D
 unicode-bidi
+
+// LAYOUT
 vertical-align animatable, custom_inherit, custom_value
+
+// ANIMATION
 animation-delay custom_all
+
+// ANIMATION
 animation-direction custom_all
+
+// ANIMATION
 animation-duration custom_all
+
+// ANIMATION
 animation-fill-mode custom_all
+
+// ANIMATION
 animation-iteration-count custom_all
+
+// ANIMATION
 animation-name custom_all
+
+// ANIMATION
 animation-play-state custom_all
+
+// ANIMATION
 animation-timing-function custom_all
+
 filter animatable, custom_value
 -webkit-aspect-ratio inherited, custom_all
 -webkit-backface-visibility use_handlers_for=CSSPropertyBackfaceVisibility
@@ -225,13 +358,22 @@ filter animatable, custom_value
 -webkit-background-composite custom_all
 -webkit-background-origin use_handlers_for=CSSPropertyBackgroundOrigin
 -webkit-background-size animatable, use_handlers_for=CSSPropertyBackgroundSize
+
+// LAYOUT
 -webkit-border-horizontal-spacing animatable, inherited, name_for_methods=HorizontalBorderSpacing, converter=convertComputedLength<short>
+
 -webkit-border-image initial=initialNinePieceImage, custom_value
+
+// LAYOUT
 -webkit-border-vertical-spacing animatable, inherited, name_for_methods=VerticalBorderSpacing, converter=convertComputedLength<short>
+
 -webkit-box-decoration-break
 -webkit-box-shadow animatable, use_handlers_for=CSSPropertyBoxShadow
 -webkit-clip-path animatable, custom_value
+
+// OBSOLETE
 -webkit-highlight inherited, converter=convertString<CSSValueNone>
+
 -webkit-hyphenate-character inherited, name_for_methods=HyphenationString, converter=convertString<CSSValueAuto>
 -webkit-line-box-contain inherited, converter=convertLineBoxContain
 -webkit-line-break inherited, type_name=LineBreak
@@ -240,7 +382,10 @@ filter animatable, custom_value
 -webkit-perspective-origin-x converter=convertLength
 -webkit-perspective-origin-y converter=convertLength
 -webkit-rtl-ordering inherited, type_name=Order, setter=setRTLOrdering, initial=initialRTLOrdering
+
+// OBSOLETE
 -webkit-tap-highlight-color inherited, converter=convertColor
+
 -webkit-text-emphasis-color inherited, custom_all
 -webkit-text-emphasis-position inherited, type_name=TextEmphasisPosition
 -webkit-text-emphasis-style inherited, custom_all
@@ -252,25 +397,49 @@ filter animatable, custom_value
 -webkit-transform-origin-y converter=convertLength
 -webkit-transform-origin-z converter=convertComputedLength<float>
 -webkit-transform-style name_for_methods=TransformStyle3D
+
+// ANIMATION
 transition-delay custom_all
+
+// ANIMATION
 transition-duration custom_all
+
+// ANIMATION
 transition-property custom_all
+
+// ANIMATION
 transition-timing-function custom_all
+
+// OBSOLETE
 -webkit-user-drag
+
+// OBSOLETE
 -webkit-user-modify inherited
+
+// OBSOLETE
 -webkit-user-select inherited
+
 white-space inherited
+
+// OBSOLETE
 widows animatable, inherited, type_name=short, custom_all
+
+// LAYOUT
 width animatable, initial=initialSize, converter=convertLengthSizing
+
+// ANIMATION
 will-change custom_all
+
 word-break inherited
 word-spacing animatable, inherited, initial=initialLetterWordSpacing, converter=convertSpacing
 // UAs must treat 'word-wrap' as an alternate name for the 'overflow-wrap' property. So using the same handlers.
 word-wrap inherited, name_for_methods=OverflowWrap
+
+// consider changing this to just be the way you decide what order to paint siblings by default
 z-index animatable, type_name=unsigned, custom_all
 
-// Non-standard direction aware properties
 
+// Non-standard direction aware properties
 -webkit-border-end-color direction_aware
 -webkit-border-end-style direction_aware
 -webkit-border-end-width direction_aware
@@ -283,34 +452,72 @@ z-index animatable, type_name=unsigned, custom_all
 -webkit-border-after-color direction_aware
 -webkit-border-after-style direction_aware
 -webkit-border-after-width direction_aware
+
+// LAYOUT
 -webkit-margin-end direction_aware
+
+// LAYOUT
 -webkit-margin-start direction_aware
+
+// LAYOUT
 -webkit-margin-before direction_aware
+
+// LAYOUT
 -webkit-margin-after direction_aware
+
+// LAYOUT
 -webkit-padding-end direction_aware
+
+// LAYOUT
 -webkit-padding-start direction_aware
+
+// LAYOUT
 -webkit-padding-before direction_aware
+
+// LAYOUT
 -webkit-padding-after direction_aware
+
+// LAYOUT
 -webkit-logical-width direction_aware
+
+// LAYOUT
 -webkit-logical-height direction_aware
+
+// LAYOUT
 -webkit-min-logical-width direction_aware
+
+// LAYOUT
 -webkit-min-logical-height direction_aware
+
+// LAYOUT
 -webkit-max-logical-width direction_aware
+
+// LAYOUT
 -webkit-max-logical-height direction_aware
+
 
 // Properties that we ignore in the StyleBuilder.
 // FIXME: We should see if any of these should actually be unreachable
 
+// OBSOLETE
 all builder_skip
+
+// OBSOLETE
 orientation builder_skip
+
+// OBSOLETE
 page builder_skip
+
+// OBSOLETE
 src builder_skip
+
+// OBSOLETE
 unicode-range builder_skip
+
 -webkit-font-size-delta builder_skip
 -webkit-text-decorations-in-effect inherited, builder_skip
 
 // Shorthands
-
 background longhands=background-image;background-position-x;background-position-y;background-size;background-repeat-x;background-repeat-y;background-attachment;background-origin;background-clip;background-color
 background-position longhands=background-position-x;background-position-y
 background-repeat longhands=background-repeat-x;background-repeat-y
@@ -325,8 +532,13 @@ border-spacing longhands=-webkit-border-horizontal-spacing;-webkit-border-vertic
 border-style longhands=border-top-style;border-right-style;border-bottom-style;border-left-style
 border-top longhands=border-top-width;border-top-style;border-top-color
 border-width longhands=border-top-width;border-right-width;border-bottom-width;border-left-width
+
+// LAYOUT
 flex longhands=flex-grow;flex-shrink;flex-basis
+
+// LAYOUT
 flex-flow longhands=flex-direction;flex-wrap
+
 list-style longhands=list-style-type;list-style-position;list-style-image
 margin longhands=margin-top;margin-right;margin-bottom;margin-left
 outline longhands=outline-color;outline-style;outline-width
@@ -345,7 +557,7 @@ animation longhands=animation-name;animation-duration;animation-timing-function;
 transition longhands=transition-property;transition-duration;transition-timing-function;transition-delay
 
 // Aliases; these map to the same CSSPropertyID
-
+// ALL OBSOLETE
 -epub-caption-side alias_for=caption-side
 -epub-text-emphasis alias_for=-webkit-text-emphasis
 -epub-text-emphasis-color alias_for=-webkit-text-emphasis-color
