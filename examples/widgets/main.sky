@@ -8,7 +8,7 @@
 <import src="/sky/framework/debug/shake-to-reload.sky" />
 <script>
 import 'widgets_app.dart';
-main() {
+void main() {
   new WidgetsApp();
 }
 </script>

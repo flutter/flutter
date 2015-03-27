@@ -8,7 +8,7 @@
 <script>
 // TODO(abarth): Should this be package:stocks/stocks_app.dart?
 import 'lib/stock_app.dart';
-main() {
+void main() {
   new StocksApp();
 }
 </script>
