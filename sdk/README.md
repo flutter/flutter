@@ -7,8 +7,8 @@ design that run smoothly at 120 Hz.
 
 Sky consists of two components:
 
-1. *The Sky engine.* The engine is the core of the system system. Written in
-   C++, the engine provides the muscle of the Sky system. The engine provides
+1. *The Sky engine.* The engine is the core of the system. Written in C++, the
+   engine provides the muscle of the Sky system. The engine provides
    several primitives, including a soft real-time scheduler and a hierarchial,
    retained-mode graphics system, that let you build high-quality apps.
 
