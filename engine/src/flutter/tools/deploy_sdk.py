@@ -26,6 +26,7 @@ DEFAULT_REL_BUILD_DIR = os.path.join('out', 'android_Release')
 def git_revision():
     return subprocess.check_output(['git', 'rev-parse', 'HEAD']).strip()
 
+
 def gen_filter(path):
     if os.path.isdir(path):
         return True
@@ -33,20 +34,13 @@ def gen_filter(path):
     # Don't include all .dart, just .mojom.dart.
     return path.endswith('.mojom.dart')
 
+
 def dart_filter(path):
     if os.path.isdir(path):
         return True
     _, ext = os.path.splitext(path)
     # .dart includes '.mojom.dart'
     return ext == '.dart'
-
-
-def sky_or_dart_filter(path):
-    if os.path.isdir(path):
-        return True
-    _, ext = os.path.splitext(path)
-    # .dart includes '.mojom.dart'
-    return ext == '.sky' or ext == '.dart'
 
 
 def ensure_dir_exists(path):
@@ -156,12 +150,10 @@ def main():
     # Manually clear sdk_root above to avoid deleting dot-files.
     copy(src_path('sky/sdk'), sdk_root)
 
-    copy_or_link(src_path('sky/examples'), sdk_path('examples'),
-        sky_or_dart_filter)
+    copy_or_link(src_path('sky/examples'), sdk_path('examples'))
 
     # Sky package
-    copy_or_link(src_path('sky/framework'),
-        sdk_path('packages/sky/lib/framework'), sky_or_dart_filter)
+    copy_or_link(src_path('sky/framework'), sdk_path('packages/sky/lib/framework'))
     copy_or_link(src_path('sky/assets'), sdk_path('packages/sky/lib/assets'))
     # Copy gen files every time for now:
     copy(os.path.join(build_dir, 'gen/sky'),
