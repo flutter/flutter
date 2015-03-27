@@ -1,9 +1,7 @@
 #!mojo mojo:sky_viewer
-<div><!-- remove this element once Document can have multiple element children -->
 <style>
  .h1 { font-size: 2em; margin: 1em; }
  .p { margin: 0.5em 1em; color: #bcd8f5; font-weight: 900; }
 </style>
 <div class="h1">about:blank</div>
 <div class="p">Welcome to Sky!</div>
-</div>

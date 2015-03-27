@@ -1,0 +1,7 @@
+<script>
+import 'hello_world.dart';
+
+void main() {
+  new HelloWorldApp();
+}
+</script>
