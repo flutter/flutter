@@ -26,7 +26,6 @@
 #include "unicode/locid.h"
 #include <cmath>
 #include <vector>
-#include "minikin/Hyphenator.h"
 
 namespace android {
 
@@ -43,10 +42,6 @@ class LineWidths {
             mFirstWidth = firstWidth;
             mFirstWidthLineCount = firstWidthLineCount;
             mRestWidth = restWidth;
-        }
-        bool isConstant() const {
-            // technically mFirstWidthLineCount == 0 would count too, but doesn't actually happen
-            return mRestWidth == mFirstWidth;
         }
         float getLineWidth(int line) const {
             return (line < mFirstWidthLineCount) ? mFirstWidth : mRestWidth;
@@ -82,8 +77,6 @@ class TabStops {
 
 class LineBreaker {
     public:
-        const static int kTab_Shift = 29;  // keep synchronized with TAB_MASK in StaticLayout.java
-
         ~LineBreaker() {
             utext_close(&mUText);
             delete mBreakIterator;
@@ -95,8 +88,13 @@ class LineBreaker {
         // locale has actually changed.
         // That logic could be here but it's better for performance that it's upstream because of
         // the cost of constructing and comparing the ICU Locale object.
-        // Note: caller is responsible for managing lifetime of hyphenator
-        void setLocale(const icu::Locale& locale, Hyphenator* hyphenator);
+        void setLocale(const icu::Locale& locale) {
+            delete mBreakIterator;
+            UErrorCode status = U_ZERO_ERROR;
+            mBreakIterator = icu::BreakIterator::createLineInstance(locale, status);
+            // TODO: check status
+            // TODO: load hyphenator from locale
+        }
 
         void resize(size_t size) {
             mTextBuf.resize(size);
@@ -132,8 +130,8 @@ class LineBreaker {
         // Minikin to do the shaping of the strings. The main thing that would need to be changed
         // is having some kind of callback (or virtual class, or maybe even template), which could
         // easily be instantiated with Minikin's Layout. Future work for when needed.
-        float addStyleRun(MinikinPaint* paint, const FontCollection* typeface, FontStyle style,
-                size_t start, size_t end, bool isRtl);
+        float addStyleRun(const MinikinPaint* paint, const FontCollection* typeface,
+                FontStyle style, size_t start, size_t end, bool isRtl);
 
         void addReplacement(size_t start, size_t end, float width);
 
@@ -147,7 +145,7 @@ class LineBreaker {
             return mWidths.data();
         }
 
-        const int* getFlags() const {
+        const uint8_t* getFlags() const {
             return mFlags.data();
         }
 
@@ -168,39 +166,22 @@ class LineBreaker {
             ParaWidth postBreak;
             float penalty;  // penalty of this break (for example, hyphen penalty)
             float score;  // best score found for this break
-            size_t lineNumber;  // only updated for non-constant line widths
-            uint8_t hyphenEdit;
         };
 
         float currentLineWidth() const;
 
-        // compute shrink/stretch penalty for line
-        float computeScore(float delta, bool atEnd);
-
-        void addWordBreak(size_t offset, ParaWidth preBreak, ParaWidth postBreak, float penalty,
-                uint8_t hyph);
+        void addWordBreak(size_t offset, ParaWidth preBreak, ParaWidth postBreak, float penalty);
 
         void addCandidate(Candidate cand);
 
-        // push an actual break to the output. Takes care of setting flags for tab
-        void pushBreak(int offset, float width, uint8_t hyph);
-
         void computeBreaksGreedy();
 
-        void computeBreaksOptimal();
-
-        // special case when LineWidth is constant (layout is rectangle)
-        void computeBreaksOptimalRect();
-
-        void finishBreaksOptimal();
+        void computeBreaksOpt();
 
         icu::BreakIterator* mBreakIterator = nullptr;
         UText mUText = UTEXT_INITIALIZER;
         std::vector<uint16_t>mTextBuf;
         std::vector<float>mCharWidths;
-
-        Hyphenator* mHyphenator;
-        std::vector<uint8_t> mHyphBuf;
 
         // layout parameters
         BreakStrategy mStrategy = kBreakStrategy_Greedy;
@@ -210,7 +191,7 @@ class LineBreaker {
         // result of line breaking
         std::vector<int> mBreaks;
         std::vector<float> mWidths;
-        std::vector<int> mFlags;
+        std::vector<uint8_t> mFlags;
 
         ParaWidth mWidth = 0;
         std::vector<Candidate> mCandidates;

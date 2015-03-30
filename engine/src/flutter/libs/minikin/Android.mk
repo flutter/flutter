@@ -22,7 +22,6 @@ LOCAL_SRC_FILES := \
     FontCollection.cpp \
     FontFamily.cpp \
     GraphemeBreak.cpp \
-    Hyphenator.cpp \
     Layout.cpp \
     LineBreaker.cpp \
     MinikinInternal.cpp \
