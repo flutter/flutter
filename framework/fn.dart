@@ -439,7 +439,7 @@ abstract class Element extends RenderNode {
 
       Node parent = _parent;
       while (parent != null && parent is! RenderNode) {
-        if (parent is StyleNode)
+        if (parent is StyleNode && (parent as StyleNode).style != null)
           styles.add((parent as StyleNode).style);
 
         parent = parent._parent;
