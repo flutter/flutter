@@ -47,7 +47,7 @@ then marks `HelloWorldApp` as dirty, which schedules it to build during the next
 animation frame. Each animation frame, the framework calls `build` on all the
 dirty components and diffs the virtual `Node` hierarchy returned this frame with
 the hierarchy returned last frame. Any differences are then applied as mutations
-to the physical heiarchy retained by the engine.
+to the physical hierarchy retained by the engine.
 
 For more examples, please see the [examples directory](examples/).
 
