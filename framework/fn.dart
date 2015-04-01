@@ -75,7 +75,6 @@ abstract class UINode {
   UINode _parent;
   sky.Node _root;
   bool _defunct = false;
-  int _nodeDepth;
 
   UINode({ Object key }) {
     _key = key == null ? "$runtimeType" : "$runtimeType-$key";
@@ -92,14 +91,11 @@ abstract class UINode {
     _root = null;
   }
 
+  int _nodeDepth;
   void _ensureDepth() {
     if (_nodeDepth == null) {
-      _nodeDepth = 0;
-      UINode parent = _parent;
-      while (parent != null) {
-        _nodeDepth++;
-        parent = parent._parent;
-      }
+      _parent.ensureDepth();
+      _nodeDepth = _parent._nodeDepth + 1;
     }
   }
 
@@ -108,13 +104,7 @@ abstract class UINode {
       return;
 
     _ensureDepth();
-    StringBuffer buffer = new StringBuffer();
-    int depth = _nodeDepth;
-    while (depth-- > 0) {
-      buffer.write(' ');
-    }
-    buffer.write(message);
-    print(buffer);
+    print((' ' * _nodeDepth) + message);
   }
 
   void _traceSync(_SyncOperation op, String key) {
