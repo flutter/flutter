@@ -33,14 +33,14 @@ main() {
 import 'package:sky/framework/fn.dart';
 
 class HelloWorldApp extends App {
-  Node build() {
+  UINode build() {
     return new Text('Hello, world!');
   }
 }
 ```
 
 An app is comprised of (and is, itself, a) components. A component's main job is
-to implement `Node build()`. The idea here is that the `build` method describes
+to implement `UINode build()`. The idea here is that the `build` method describes
 the DOM of a component at any given point during its lifetime. In this case, our
 `HelloWorldApp`'s `build` method just returns a `Text` node which displays the
 obligatory line of text.
@@ -48,7 +48,7 @@ obligatory line of text.
 Nodes
 -----
 
-A component's `build` method must return a single `Node` which *may* have
+A component's `build` method must return a single `UINode` which *may* have
 children (and so on, forming a *subtree*). Effen comes with a few built-in nodes
 which mirror the built-in nodes/elements of sky: `Text`, `Anchor` (`<a />`,
 `Image` (`<img />`) and `Container` (`<div />`). `build` can return a tree of
@@ -146,7 +146,7 @@ Event Handling
 --------------
 
 Events logically fire through the Effen node tree. If want to handle an event as
-it bubbles from the target to the root, create an `EventTarget`. `EventTarget`
+it bubbles from the target to the root, create an `EventListenerNode`. `EventListenerNode`
 has named (typed) parameters for a small set of events that we've hit so far, as
 well as a 'custom' argument which is a `Map<String, sky.EventListener>`. If
 you'd like to add a type argument for an event, just post a patch.
@@ -165,8 +165,8 @@ class MyComp extends Component {
     // do other stuff
   }
 
-  Node build() {
-    new EventTarget(
+  UINode build() {
+    new EventListenerNode(
       new Container(
         children: // ...
       ),
@@ -189,9 +189,9 @@ Styling
 -------
 
 Styling is the part of Effen which is least designed and is likely to change.
-There are two ways to specify styles:
+There are three ways to specify styles:
 
-  * `Style` objects which are interned and can be applied to Elements via the
+  * `Style` objects which are interned and can be applied to WrapperNodes via the
     ``style` constructor parameter. Use `Style` objects for styles which are
     `*not* animated.
 
@@ -199,7 +199,7 @@ There are two ways to specify styles:
     `inlineStyle` constructor parameter.  Use `inlineStyle` for styles which
     *are* animated.
   
-If you need to apply a Style to a Component or Node which you didn't construct
+If you need to apply a Style to a Component or UINode which you didn't construct
 (i.e. one that was handed into your constructor), you can wrap it in a
 `StyleNode` which also takes a `Style` constructor in it's `style` constructor
 parameter.

@@ -28,10 +28,10 @@ abstract class Scrollable extends Component {
     onDidUnmount(_stopSimulation);
   }
 
-  Node buildContent();
+  UINode buildContent();
 
-  Node build() {
-    return new EventTarget(
+  UINode build() {
+    return new EventListenerNode(
       buildContent(),
       onPointerDown: _handlePointerDown,
       onPointerUp: _handlePointerUpOrCancel,

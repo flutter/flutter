@@ -33,11 +33,11 @@ class Scaffold extends Component {
     bottom: 0;
     right: 0;''');
 
-  Node header;
-  Node content;
+  UINode header;
+  UINode content;
   FloatingActionButton fab;
   Drawer drawer;
-  List<Node> overlays;
+  List<UINode> overlays;
 
   Scaffold({
     Object key,
@@ -48,8 +48,8 @@ class Scaffold extends Component {
     this.overlays
   }) : super(key: key);
 
-  Node build() {
-    List<Node> children = [
+  UINode build() {
+    List<UINode> children = [
       new Container(
         key: 'Main',
         style: _mainStyle,

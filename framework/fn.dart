@@ -67,25 +67,25 @@ void _parentInsertBefore(sky.ParentNode parent,
 enum _SyncOperation { IDENTICAL, INSERTION, STATEFUL, STATELESS, REMOVAL }
 
 /*
- * All Effen nodes derive from Node. All nodes have a _parent, a _key and
+ * All Effen nodes derive from UINode. All nodes have a _parent, a _key and
  * can be sync'd.
  */
-abstract class Node {
+abstract class UINode {
   String _key;
-  Node _parent;
+  UINode _parent;
   sky.Node _root;
   bool _defunct = false;
   int _nodeDepth;
 
-  Node({ Object key }) {
+  UINode({ Object key }) {
     _key = key == null ? "$runtimeType" : "$runtimeType-$key";
   }
 
   // Subclasses which implements Nodes that become stateful may return true
   // if the |old| node has become stateful and should be retained.
-  bool _willSync(Node old) => false;
+  bool _willSync(UINode old) => false;
 
-  void _sync(Node old, sky.ParentNode host, sky.Node insertBefore);
+  void _sync(UINode old, sky.ParentNode host, sky.Node insertBefore);
 
   void _remove() {
     _defunct = true;
@@ -95,7 +95,7 @@ abstract class Node {
   void _ensureDepth() {
     if (_nodeDepth == null) {
       _nodeDepth = 0;
-      Node parent = _parent;
+      UINode parent = _parent;
       while (parent != null) {
         _nodeDepth++;
         parent = parent._parent;
@@ -126,13 +126,13 @@ abstract class Node {
     _trace('_sync($outString) $key');
   }
 
-  void _removeChild(Node node) {
+  void _removeChild(UINode node) {
     _traceSync(_SyncOperation.REMOVAL, node._key);
     node._remove();
   }
 
   // Returns the child which should be retained as the child of this node.
-  Node _syncChild(Node node, Node oldNode, sky.ParentNode host,
+  UINode _syncChild(UINode node, UINode oldNode, sky.ParentNode host,
       sky.Node insertBefore) {
 
     assert(oldNode == null || node._key == oldNode._key);
@@ -173,13 +173,13 @@ abstract class Node {
   }
 }
 
-abstract class ContentNode extends Node {
-  Node content;
+abstract class ContentNode extends UINode {
+  UINode content;
 
-  ContentNode(Node content) : this.content = content, super(key: content._key);
+  ContentNode(UINode content) : this.content = content, super(key: content._key);
 
-  void _sync(Node old, sky.ParentNode host, sky.Node insertBefore) {
-    Node oldContent = old == null ? null : (old as ContentNode).content;
+  void _sync(UINode old, sky.ParentNode host, sky.Node insertBefore) {
+    UINode oldContent = old == null ? null : (old as ContentNode).content;
     content = _syncChild(content, oldContent, host, insertBefore);
     _root = content._root;
   }
@@ -193,16 +193,16 @@ abstract class ContentNode extends Node {
 class StyleNode extends ContentNode {
   final Style style;
 
-  StyleNode(Node content, this.style): super(content);
+  StyleNode(UINode content, this.style): super(content);
 }
 
 /*
  * RenderNodes correspond to a desired state of a sky.Node. They are fully
- * immutable, with one exception: A Node which is a Component which lives within
- * an Element's children list, may be replaced with the "old" instance if it
+ * immutable, with one exception: A UINode which is a Component which lives within
+ * an WrapperNode's children list, may be replaced with the "old" instance if it
  * has become stateful.
  */
-abstract class RenderNode extends Node {
+abstract class RenderNode extends UINode {
 
   static final Map<sky.Node, RenderNode> _nodeMap =
       new HashMap<sky.Node, RenderNode>();
@@ -215,7 +215,7 @@ abstract class RenderNode extends Node {
 
   sky.Node _createNode();
 
-  void _sync(Node old, sky.ParentNode host, sky.Node insertBefore) {
+  void _sync(UINode old, sky.ParentNode host, sky.Node insertBefore) {
     if (old == null) {
       _root = _createNode();
       _parentInsertBefore(host, _root, insertBefore);
@@ -242,7 +242,7 @@ typedef GestureEventListener(sky.GestureEvent e);
 typedef PointerEventListener(sky.PointerEvent e);
 typedef EventListener(sky.Event e);
 
-class EventTarget extends ContentNode  {
+class EventListenerNode extends ContentNode  {
   final Map<String, sky.EventListener> listeners;
 
   static final Set<String> _registeredEvents = new HashSet<String>();
@@ -291,7 +291,7 @@ class EventTarget extends ContentNode  {
     return listeners;
   }
 
-  EventTarget(Node content, {
+  EventListenerNode(UINode content, {
     EventListener onWheel,
     GestureEventListener onGestureFlingCancel,
     GestureEventListener onGestureFlingStart,
@@ -328,12 +328,12 @@ class EventTarget extends ContentNode  {
   }
 
   static void _dispatchEvent(sky.Event e) {
-    Node target = RenderNode._getMounted(e.target);
+    UINode target = RenderNode._getMounted(e.target);
 
     // TODO(rafaelw): StopPropagation?
     while (target != null) {
-      if (target is EventTarget) {
-        (target as EventTarget)._handleEvent(e);
+      if (target is EventListenerNode) {
+        (target as EventListenerNode)._handleEvent(e);
       }
 
       target = target._parent;
@@ -346,7 +346,7 @@ class EventTarget extends ContentNode  {
     }
   }
 
-  void _sync(Node old, sky.ParentNode host, sky.Node insertBefore) {
+  void _sync(UINode old, sky.ParentNode host, sky.Node insertBefore) {
     for (var type in listeners.keys) {
       _ensureDocumentListener(type);
     }
@@ -380,23 +380,23 @@ class Text extends RenderNode {
   }
 }
 
-final List<Node> _emptyList = new List<Node>();
+final List<UINode> _emptyList = new List<UINode>();
 
-abstract class Element extends RenderNode {
+abstract class WrapperNode extends RenderNode {
 
   String get _tagName;
 
   sky.Node _createNode() => sky.document.createElement(_tagName);
 
-  final List<Node> children;
+  final List<UINode> children;
   final Style style;
   final String inlineStyle;
 
   String _class;
 
-  Element({
+  WrapperNode({
     Object key,
-    List<Node> children,
+    List<UINode> children,
     this.style,
     this.inlineStyle
   }) : this.children = children == null ? _emptyList : children,
@@ -437,7 +437,7 @@ abstract class Element extends RenderNode {
         styles.add(style);
       }
 
-      Node parent = _parent;
+      UINode parent = _parent;
       while (parent != null && parent is! RenderNode) {
         if (parent is StyleNode && (parent as StyleNode).style != null)
           styles.add((parent as StyleNode).style);
@@ -450,33 +450,33 @@ abstract class Element extends RenderNode {
   }
 
   void _syncNode(RenderNode old) {
-    Element oldElement = old as Element;
+    WrapperNode oldWrapperNode = old as WrapperNode;
     sky.Element root = _root as sky.Element;
 
     _ensureClass();
-    if (_class != oldElement._class && _class != '')
+    if (_class != oldWrapperNode._class && _class != '')
       root.setAttribute('class', _class);
 
-    if (inlineStyle != oldElement.inlineStyle)
+    if (inlineStyle != oldWrapperNode.inlineStyle)
       root.setAttribute('style', inlineStyle);
 
-    _syncChildren(oldElement);
+    _syncChildren(oldWrapperNode);
   }
 
-  void _syncChildren(Element oldElement) {
+  void _syncChildren(WrapperNode oldWrapperNode) {
     sky.Element root = _root as sky.Element;
     assert(root != null);
 
     var startIndex = 0;
     var endIndex = children.length;
 
-    var oldChildren = oldElement.children;
+    var oldChildren = oldWrapperNode.children;
     var oldStartIndex = 0;
     var oldEndIndex = oldChildren.length;
 
     sky.Node nextSibling = null;
-    Node currentNode = null;
-    Node oldNode = null;
+    UINode currentNode = null;
+    UINode oldNode = null;
 
     void sync(int atIndex) {
       children[atIndex] = _syncChild(currentNode, oldNode, _root, nextSibling);
@@ -498,7 +498,7 @@ abstract class Element extends RenderNode {
       nextSibling = currentNode._root;
     }
 
-    HashMap<String, Node> oldNodeIdMap = null;
+    HashMap<String, UINode> oldNodeIdMap = null;
 
     bool oldNodeReordered(String key) {
       return oldNodeIdMap != null &&
@@ -518,7 +518,7 @@ abstract class Element extends RenderNode {
       if (oldNodeIdMap != null)
         return;
 
-      oldNodeIdMap = new HashMap<String, Node>();
+      oldNodeIdMap = new HashMap<String, UINode>();
       for (int i = oldStartIndex; i < oldEndIndex; i++) {
         var node = oldChildren[i];
         if (node is! Text) {
@@ -580,7 +580,7 @@ abstract class Element extends RenderNode {
   }
 }
 
-class Container extends Element {
+class Container extends WrapperNode {
 
   String get _tagName => 'div';
 
@@ -590,7 +590,7 @@ class Container extends Element {
 
   Container({
     Object key,
-    List<Node> children,
+    List<UINode> children,
     Style style,
     String inlineStyle
   }) : super(
@@ -601,7 +601,7 @@ class Container extends Element {
   );
 }
 
-class Image extends Element {
+class Image extends WrapperNode {
 
   String get _tagName => 'img';
 
@@ -615,7 +615,7 @@ class Image extends Element {
 
   Image({
     Object key,
-    List<Node> children,
+    List<UINode> children,
     Style style,
     String inlineStyle,
     this.width,
@@ -628,7 +628,7 @@ class Image extends Element {
     inlineStyle: inlineStyle
   );
 
-  void _syncNode(Node old) {
+  void _syncNode(UINode old) {
     super._syncNode(old);
 
     Image oldImage = old as Image;
@@ -645,13 +645,13 @@ class Image extends Element {
   }
 }
 
-class Anchor extends Element {
+class Anchor extends WrapperNode {
 
   String get _tagName => 'a';
 
   static final Anchor _emptyAnchor = new Anchor();
 
-  Node get _emptyNode => _emptyAnchor;
+  UINode get _emptyNode => _emptyAnchor;
 
   final String href;
   final int width;
@@ -659,7 +659,7 @@ class Anchor extends Element {
 
   Anchor({
     Object key,
-    List<Node> children,
+    List<UINode> children,
     Style style,
     String inlineStyle,
     this.width,
@@ -672,7 +672,7 @@ class Anchor extends Element {
     inlineStyle: inlineStyle
   );
 
-  void _syncNode(Node old) {
+  void _syncNode(UINode old) {
     super._syncNode(old);
 
     Anchor oldAnchor = old as Anchor;
@@ -756,14 +756,14 @@ void _scheduleComponentForRender(Component c) {
   }
 }
 
-abstract class Component extends Node {
+abstract class Component extends UINode {
   bool get _isBuilding => _currentlyBuilding == this;
   bool _dirty = true;
 
   sky.Node get _host => _root.parentNode;
   sky.Node get _insertionPoint => _root == null ? _root : _root.nextSibling;
 
-  Node _built;
+  UINode _built;
   final int _order;
   static int _currentOrder = 0;
   bool _stateful;
@@ -817,7 +817,7 @@ abstract class Component extends Node {
     super._remove();
   }
 
-  bool _willSync(Node old) {
+  bool _willSync(UINode old) {
     Component oldComponent = old as Component;
     if (oldComponent == null || !oldComponent._stateful)
       return false;
@@ -842,7 +842,7 @@ abstract class Component extends Node {
    * 3) Syncing against an old version
    *      assert(_built == null && old != null)
    */
-  void _sync(Node old, sky.ParentNode host, sky.Node insertBefore) {
+  void _sync(UINode old, sky.ParentNode host, sky.Node insertBefore) {
     assert(!_defunct);
     assert(_built == null || old == null);
 
@@ -894,7 +894,7 @@ abstract class Component extends Node {
     _scheduleComponentForRender(this);
   }
 
-  Node build();
+  UINode build();
 }
 
 abstract class App extends Component {

@@ -13,7 +13,7 @@ class WidgetsApp extends App {
     top: 200px;
     left: 200px;''');
 
-  Node build() {
+  UINode build() {
     return new Container(
       children: [
         new Button(key: 'Go', content: new Text('Go'), level: 1),

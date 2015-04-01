@@ -56,13 +56,13 @@ class EditableText extends Component {
     _showCursor = false;
   }
 
-  Node build() {
+  UINode build() {
     if (focused && _cursorTimer == null)
       _startCursorTimer();
     else if (!focused && _cursorTimer != null)
       _stopCursorTimer();
 
-    List<Node> children = new List<Node>();
+    List<UINode> children = new List<UINode>();
 
     if (!value.composing.isValid) {
       children.add(new Text(value.text));

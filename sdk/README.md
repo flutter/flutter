@@ -32,7 +32,7 @@ The simplest Sky app is, appropriately, HelloWorldApp:
 import 'package:sky/framework/fn.dart';
 
 class HelloWorldApp extends App {
-  Node build() {
+  UINode build() {
     return new Text('Hello, world!');
   }
 }
@@ -45,7 +45,7 @@ void main() {
 Execution starts in `main`, which creates the `HelloWorldApp`. The framework
 then marks `HelloWorldApp` as dirty, which schedules it to build during the next
 animation frame. Each animation frame, the framework calls `build` on all the
-dirty components and diffs the virtual `Node` hierarchy returned this frame with
+dirty components and diffs the virtual `UINode` hierarchy returned this frame with
 the hierarchy returned last frame. Any differences are then applied as mutations
 to the physical hierarchy retained by the engine.
 

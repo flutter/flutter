@@ -12,12 +12,12 @@ class PopupMenuItem extends Component {
     min-width: 112px;
     padding: 16px;''');
 
-  List<Node> children;
+  List<UINode> children;
   double opacity;
 
   PopupMenuItem({ Object key, this.children, this.opacity}) : super(key: key);
 
-  Node build() {
+  UINode build() {
     return new StyleNode(
       new InkWell(
         inlineStyle: opacity == null ? null : 'opacity: ${opacity}',

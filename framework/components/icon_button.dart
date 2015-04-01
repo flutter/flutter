@@ -15,8 +15,8 @@ class IconButton extends Component {
   IconButton({ String icon: '', this.onGestureTap })
     : super(key: icon), icon = icon;
 
-  Node build() {
-    return new EventTarget(
+  UINode build() {
+    return new EventListenerNode(
       new StyleNode(new Icon(type: icon, size: 24), _style),
       onGestureTap: onGestureTap);
   }

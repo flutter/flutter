@@ -53,8 +53,8 @@ class Radio extends ButtonBase {
     this.groupValue
   }) : super(key: key);
 
-  Node buildContent() {
-    return new EventTarget(
+  UINode buildContent() {
+    return new EventListenerNode(
       new StyleNode(
         new InkWell(
           children: value == groupValue ? [new Container(style: _dotStyle)] : []

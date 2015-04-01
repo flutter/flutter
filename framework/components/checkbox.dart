@@ -64,8 +64,8 @@ class Checkbox extends ButtonBase {
     onChanged(!checked);
   }
 
-  Node buildContent() {
-    return new EventTarget(
+  UINode buildContent() {
+    return new EventListenerNode(
       new Container(
         style: _style,
         children: [

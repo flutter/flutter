@@ -52,7 +52,7 @@ abstract class FixedHeightScrollable extends Scrollable {
     });
   }
 
-  Node buildContent() {
+  UINode buildContent() {
     var itemNumber = 0;
     var drawCount = 1;
     var transformStyle = '';

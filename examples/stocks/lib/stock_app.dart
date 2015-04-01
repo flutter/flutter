@@ -112,7 +112,7 @@ class StocksApp extends App {
     );
   }
 
-  Node buildActionBar() {
+  UINode buildActionBar() {
     return new StyleNode(
       new ActionBar(
         left: new IconButton(
@@ -133,7 +133,7 @@ class StocksApp extends App {
   }
 
   // TODO(abarth): Should we factor this into a SearchBar in the framework?
-  Node buildSearchBar() {
+  UINode buildSearchBar() {
     return new StyleNode(
       new ActionBar(
         left: new IconButton(
@@ -146,7 +146,7 @@ class StocksApp extends App {
       _searchBarStyle);
   }
 
-  void addMenuToOverlays(List<Node> overlays) {
+  void addMenuToOverlays(List<UINode> overlays) {
     if (_menuController == null)
       return;
     overlays.add(new ModalOverlay(
@@ -154,8 +154,8 @@ class StocksApp extends App {
       onDismiss: _handleMenuHide));
   }
 
-  Node build() {
-    List<Node> overlays = [];
+  UINode build() {
+    List<UINode> overlays = [];
     addMenuToOverlays(overlays);
 
     return new Scaffold(

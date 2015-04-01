@@ -34,12 +34,12 @@ class MenuItem extends ButtonBase {
     flex: 1;'''
   );
 
-  List<Node> children;
+  List<UINode> children;
   String icon;
 
   MenuItem({ Object key, this.icon, this.children }) : super(key: key);
 
-  Node buildContent() {
+  UINode buildContent() {
     return new StyleNode(
       new InkWell(
         children: [

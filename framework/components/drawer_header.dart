@@ -26,11 +26,11 @@ class DrawerHeader extends Component {
     padding: 0 16px;'''
   );
 
-  List<Node> children;
+  List<UINode> children;
 
   DrawerHeader({ Object key, this.children }) : super(key: key);
 
-  Node build() {
+  UINode build() {
     return new Container(
       style: _style,
       children: [
