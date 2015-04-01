@@ -39,14 +39,14 @@ class StockRow extends Component {
     this.stock = stock;
   }
 
-  Node build() {
+  UINode build() {
     String lastSale = "\$${stock.lastSale.toStringAsFixed(2)}";
 
     String changeInPrice = "${stock.percentChange.toStringAsFixed(2)}%";
     if (stock.percentChange > 0)
       changeInPrice = "+" + changeInPrice;
 
-    List<Node> children = [
+    List<UINode> children = [
       new StockArrow(
         percentChange: stock.percentChange
       ),

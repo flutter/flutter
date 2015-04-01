@@ -18,7 +18,7 @@ class Stocklist extends FixedHeightScrollable {
     this.query
   }) : super(key: key, scrollBehavior: new OverscrollBehavior());
 
-  List<Node> buildItems(int start, int count) {
+  List<UINode> buildItems(int start, int count) {
     return stocks
       .skip(start)
       .where((stock) => query == null || stock.symbol.contains(
