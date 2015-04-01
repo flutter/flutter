@@ -3,7 +3,7 @@ import 'dart:sky';
 import 'package:sky/framework/fn.dart';
 
 class TestApp extends App {
-  Node build() {
+  UINode build() {
     return new Container(
       inlineStyle: 'background-color: green',
       children: [
