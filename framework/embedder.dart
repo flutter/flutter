@@ -14,7 +14,7 @@ final _EmbedderImpl embedder = new _EmbedderImpl();
 
 class _EmbedderImpl {
   ApplicationConnection _connection;
-  ServiceRegistry _serviceRegistry;
+  ServiceRegistryProxy _serviceRegistry;
 
   final ShellProxy shell = new ShellProxy.fromHandle(
       new core.MojoHandle(internals.takeShellProxyHandle()));
@@ -50,11 +50,11 @@ class _EmbedderImpl {
     appSp.close();
   }
 
-  ServiceRegistryProxy get serviceRegistry {
+  ServiceRegistry get serviceRegistry {
     if (_serviceRegistry == null) {
       _serviceRegistry = new ServiceRegistryProxy.fromHandle(
           new core.MojoHandle(internals.takeServiceRegistry()));
     }
-    return _serviceRegistry;
+    return _serviceRegistry.ptr;
   }
 }
