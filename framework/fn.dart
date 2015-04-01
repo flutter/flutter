@@ -11,17 +11,6 @@ import 'reflect.dart' as reflect;
 
 final sky.Tracing _tracing = sky.window.tracing;
 
-bool _initIsInCheckedMode() {
-  String testFn(i) { double d = i; return d.toString(); }
-  try {
-    testFn('not a double');
-  } catch (ex) {
-    return true;
-  }
-  return false;
-}
-
-final bool _isInCheckedMode = _initIsInCheckedMode();
 final bool _shouldLogRenderDuration = false;
 final bool _shouldTrace = false;
 
@@ -396,9 +385,7 @@ abstract class WrapperNode extends RenderNode {
   }) : this.children = children == null ? _emptyList : children,
        super(key:key) {
 
-    if (_isInCheckedMode) {
-      _debugReportDuplicateIds();
-    }
+    assert(!_debugHasDuplicateIds());
   }
 
   void _remove() {
@@ -410,7 +397,7 @@ abstract class WrapperNode extends RenderNode {
     }
   }
 
-  void _debugReportDuplicateIds() {
+  bool _debugHasDuplicateIds() {
     var idSet = new HashSet<String>();
     for (var child in children) {
       if (child is Text) {
@@ -422,6 +409,7 @@ abstract class WrapperNode extends RenderNode {
                  of another node, they must have unique keys.''';
       }
     }
+    return false;
   }
 
   void _ensureClass() {
