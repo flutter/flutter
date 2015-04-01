@@ -95,7 +95,7 @@ abstract class UINode {
   void _ensureDepth() {
     if (_nodeDepth == null) {
       if (_parent != null) {
-        _parent.ensureDepth();
+        _parent._ensureDepth();
         _nodeDepth = _parent._nodeDepth + 1;
       } else {
         _nodeDepth = 0;
