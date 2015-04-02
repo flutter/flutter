@@ -50,11 +50,11 @@ class _EmbedderImpl {
     appSp.close();
   }
 
-  ServiceRegistry get serviceRegistry {
+  ServiceRegistryProxy get serviceRegistry {
     if (_serviceRegistry == null) {
       _serviceRegistry = new ServiceRegistryProxy.fromHandle(
           new core.MojoHandle(internals.takeServiceRegistry()));
     }
-    return _serviceRegistry.ptr;
+    return _serviceRegistry;
   }
 }
