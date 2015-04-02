@@ -50,6 +50,7 @@ class ElementShadow;
 class ExceptionState;
 class Image;
 class IntSize;
+class LayoutCallback;
 class MutableStylePropertySet;
 class PaintingCallback;
 class PropertySetCSSStyleDeclaration;
@@ -201,7 +202,22 @@ public:
     PassRefPtr<ShadowRoot> ensureShadowRoot(ExceptionState&);
     ShadowRoot* shadowRoot() const;
 
+    double x() const;
+    void setX(double);
+
+    double y() const;
+    void setY(double);
+
+    double width() const;
+    void setWidth(double);
+
+    double height() const;
+    void setHeight(double);
+
     bool hasAuthorShadowRoot() const { return shadowRoot(); }
+
+    LayoutCallback* layoutManager() const;
+    void setLayoutManager(PassOwnPtr<LayoutCallback>);
 
     RenderStyle* computedStyle();
 
@@ -351,6 +367,7 @@ private:
     ElementRareData& ensureElementRareData();
 
     RefPtr<ElementData> m_elementData;
+    OwnPtr<LayoutCallback> m_layoutManager;
 };
 
 DEFINE_NODE_TYPE_CASTS(Element, isElementNode());

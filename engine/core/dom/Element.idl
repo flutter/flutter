@@ -18,6 +18,8 @@
 
   void requestPaint(PaintingCallback callback);
 
+  void setLayoutManager(LayoutCallback callback);
+
   // TODO(abarth): Move to Node.
   readonly attribute CSSStyleDeclaration style;
 
@@ -39,4 +41,9 @@
   readonly attribute long clientTop;
   readonly attribute long clientWidth;
   readonly attribute long clientHeight;
+
+  attribute double x;
+  attribute double y;
+  attribute double width;
+  attribute double height;
 };
