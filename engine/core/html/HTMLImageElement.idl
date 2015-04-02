@@ -26,14 +26,8 @@
 ] interface HTMLImageElement : HTMLElement {
     readonly attribute boolean complete;
     [Reflect, ReflectOnly=("anonymous","use-credentials"), ReflectEmpty="anonymous", ReflectInvalid="anonymous"] attribute DOMString crossOrigin;
-    attribute long height;
     readonly attribute long naturalHeight;
     readonly attribute long naturalWidth;
     [Reflect, URL] attribute DOMString src;
     readonly attribute DOMString currentSrc;
-    attribute long width;
-
-    // Extensions
-    readonly attribute long x;
-    readonly attribute long y;
 };
