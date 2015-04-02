@@ -46,7 +46,8 @@ static const char* kCheckedModeArgs[] = {
 };
 #endif
 
-extern const uint8_t* kDartSnapshotBuffer;
+extern const uint8_t* kDartVmIsolateSnapshotBuffer;
+extern const uint8_t* kDartIsolateSnapshotBuffer;
 
 DartController::DartController() {
 }
@@ -185,15 +186,15 @@ static Dart_Isolate IsolateCreateCallback(const char* script_uri,
                                           char** error) {
 
   if (IsServiceIsolateURL(script_uri)) {
-    return Dart_CreateIsolate(script_uri, "main", kDartSnapshotBuffer, nullptr,
-          error);
+    return Dart_CreateIsolate(script_uri, "main", kDartIsolateSnapshotBuffer,
+          nullptr, error);
   }
 
   // Create & start the handle watcher isolate
-  CHECK(kDartSnapshotBuffer);
+  CHECK(kDartIsolateSnapshotBuffer);
   DartState* dart_state = new DartState();
   Dart_Isolate isolate = Dart_CreateIsolate("sky:handle_watcher", "",
-      kDartSnapshotBuffer, dart_state, error);
+      kDartIsolateSnapshotBuffer, dart_state, error);
   CHECK(isolate) << error;
   dart_state->set_isolate(isolate);
 
@@ -257,11 +258,11 @@ static void EnsureHandleWatcherStarted() {
 
 void DartController::CreateIsolateFor(Document* document) {
   DCHECK(document);
-  CHECK(kDartSnapshotBuffer);
+  CHECK(kDartIsolateSnapshotBuffer);
   char* error = nullptr;
   dom_dart_state_ = adoptPtr(new DOMDartState(document));
   Dart_Isolate isolate = Dart_CreateIsolate(
-      document->url().string().utf8().data(), "main", kDartSnapshotBuffer,
+      document->url().string().utf8().data(), "main", kDartIsolateSnapshotBuffer,
       static_cast<DartState*>(dom_dart_state_.get()), &error);
   Dart_SetMessageNotifyCallback(MessageNotifyCallback);
   CHECK(isolate) << error;
@@ -304,7 +305,8 @@ void DartController::InitVM() {
 #endif
 
   CHECK(Dart_SetVMFlags(argc, argv));
-  CHECK(Dart_Initialize(IsolateCreateCallback,
+  CHECK(Dart_Initialize(kDartVmIsolateSnapshotBuffer,
+                        IsolateCreateCallback,
                         nullptr,  // Isolate interrupt callback.
                         UnhandledExceptionCallback, IsolateShutdownCallback,
                         // File IO callbacks.
