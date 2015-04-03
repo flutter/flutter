@@ -201,8 +201,8 @@ class SkyDebugger : public mojo::ApplicationDelegate,
 }  // namespace debugger
 }  // namespace sky
 
-MojoResult MojoMain(MojoHandle shell_handle) {
+MojoResult MojoMain(MojoHandle application_request) {
   mojo::ApplicationRunnerChromium runner(new sky::debugger::SkyDebugger);
   runner.set_message_loop_type(base::MessageLoop::TYPE_IO);
-  return runner.Run(shell_handle);
+  return runner.Run(application_request);
 }
