@@ -165,7 +165,7 @@ class SkyTester : public mojo::ApplicationDelegate,
 }  // namespace tester
 }  // namespace examples
 
-MojoResult MojoMain(MojoHandle shell_handle) {
+MojoResult MojoMain(MojoHandle application_request) {
   mojo::ApplicationRunnerChromium runner(new sky::tester::SkyTester);
-  return runner.Run(shell_handle);
+  return runner.Run(application_request);
 }
