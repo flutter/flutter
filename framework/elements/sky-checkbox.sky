@@ -10,7 +10,7 @@
 <template>
   <style>
     :host {
-      display: inline-block;
+      display: inline-flex;
       -webkit-user-select: none;
       margin: 8px 16px;
     }

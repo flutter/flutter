@@ -1,8 +1,8 @@
 layer at (0,0) size 800x600
   RenderView {#document} at (0,0) size 800x600
-    RenderBlock {sky} at (0,0) size 800x94
+    RenderFlexibleBox {sky} at (0,0) size 800x94
 layer at (0,0) size 56x69
-  RenderBlock {div} at (0,0) size 56x69 [border: (3px solid #0000FF)]
+  RenderFlexibleBox {div} at (0,0) size 56x69 [border: (3px solid #0000FF)]
     RenderParagraph (anonymous) at (3,3) size 50x19
       RenderText {#text} at (0,0) size 91x19
         text run at (0,0) width 91: "These lines"

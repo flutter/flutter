@@ -4257,6 +4257,7 @@ static bool isFlexBasisMiddleArg(double flexGrow, double flexShrink, double unse
     return flexGrow != unsetValue && flexShrink == unsetValue &&  argSize == 3;
 }
 
+// TODO(ojan): Make this have reasonable defaults.
 bool CSSPropertyParser::parseFlex(CSSParserValueList* args)
 {
     if (!args || !args->size() || args->size() > 3)

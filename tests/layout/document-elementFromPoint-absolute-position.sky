@@ -7,7 +7,7 @@ no-z-above,
 no-z-below,
 postive-z-after {
   position: absolute;
-  display: block;
+  display: flex;
   left: 0;
   right: 0;
   top: 0;

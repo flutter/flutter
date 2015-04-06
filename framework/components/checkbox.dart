@@ -11,6 +11,7 @@ class Checkbox extends ButtonBase {
   static final Style _style = new Style('''
     transform: translateX(0);
     display: flex;
+    flex-direction: row;
     justify-content: center;
     align-items: center;
     -webkit-user-select: none;

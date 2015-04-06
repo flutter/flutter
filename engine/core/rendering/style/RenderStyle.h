@@ -1111,7 +1111,7 @@ public:
     static TextOrientation initialTextOrientation() { return TextOrientationVerticalRight; }
     static ObjectFit initialObjectFit() { return ObjectFitFill; }
     static LengthPoint initialObjectPosition() { return LengthPoint(Length(50.0, Percent), Length(50.0, Percent)); }
-    static EDisplay initialDisplay() { return BLOCK; }
+    static EDisplay initialDisplay() { return FLEX; }
     static EEmptyCell initialEmptyCells() { return SHOW; }
     static EListStylePosition initialListStylePosition() { return OUTSIDE; }
     static EListStyleType initialListStyleType() { return Disc; }
@@ -1164,7 +1164,7 @@ public:
     static unsigned initialBoxOrdinalGroup() { return 1; }
     static EBoxSizing initialBoxSizing() { return CONTENT_BOX; }
     static float initialFlexGrow() { return 0; }
-    static float initialFlexShrink() { return 1; }
+    static float initialFlexShrink() { return 0; }
     static Length initialFlexBasis() { return Length(Auto); }
     static int initialOrder() { return 0; }
     static EAlignContent initialAlignContent() { return AlignContentStretch; }
@@ -1172,7 +1172,7 @@ public:
     static OverflowAlignment initialAlignItemsOverflowAlignment() { return OverflowAlignmentDefault; }
     static ItemPosition initialAlignSelf() { return ItemPositionAuto; }
     static OverflowAlignment initialAlignSelfOverflowAlignment() { return OverflowAlignmentDefault; }
-    static EFlexDirection initialFlexDirection() { return FlowRow; }
+    static EFlexDirection initialFlexDirection() { return FlowColumn; }
     static EFlexWrap initialFlexWrap() { return FlexNoWrap; }
     static EJustifyContent initialJustifyContent() { return JustifyFlexStart; }
     static ItemPosition initialJustifyItems() { return ItemPositionAuto; }

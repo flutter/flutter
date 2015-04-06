@@ -1,23 +1,23 @@
 layer at (0,0) size 800x600
   RenderView {#document} at (0,0) size 800x600
 layer at (0,0) size 800x600
-  RenderBlock {html} at (0,0) size 800x600
-    RenderBlock {head} at (0,0) size 800x0
-    RenderBlock {body} at (0,0) size 800x600 [bgcolor=#FFFFFF]
-      RenderBlock {div} at (0,0) size 800x265
-        RenderBlock {div} at (0,0) size 800x115
+  RenderFlexibleBox {html} at (0,0) size 800x600
+    RenderFlexibleBox {head} at (0,0) size 800x0
+    RenderFlexibleBox {body} at (0,0) size 800x600 [bgcolor=#FFFFFF]
+      RenderFlexibleBox {div} at (0,0) size 800x265
+        RenderFlexibleBox {div} at (0,0) size 800x115
           RenderParagraph {div} at (15,15) size 770x49
             RenderInline {a} at (0,0) size 242x48 [color=#333333]
               RenderText {#text} at (528,0) size 242x48
                 text run at (528,0) width 242: "Adam Barth"
-          RenderBlock {div} at (15,64) size 770x36
+          RenderFlexibleBox {div} at (15,64) size 770x36
             RenderParagraph {div} at (0,0) size 770x18
               RenderText {#text} at (574,0) size 196x17
                 text run at (574,0) width 196: "Ph.D., M.S., Stanford, 2008"
             RenderParagraph {div} at (0,18) size 770x18
               RenderText {#text} at (635,0) size 135x17
                 text run at (635,0) width 135: "B.A., Cornell, 2003"
-        RenderBlock {div} at (0,115) size 800x150
+        RenderFlexibleBox {div} at (0,115) size 800x150
           RenderParagraph {div} at (0,19) size 800x28
             RenderInline {a} at (0,0) size 93x17 [color=#333333]
               RenderText {#text} at (692,5) size 93x17

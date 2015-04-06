@@ -418,14 +418,12 @@ LayoutUnit RenderFlexibleBox::flowAwareBorderEnd() const
 
 LayoutUnit RenderFlexibleBox::flowAwareBorderBefore() const
 {
-    // FIXME(sky): Remove
-    return borderTop();
+    return isHorizontalFlow() ? borderTop() : borderLeft();
 }
 
 LayoutUnit RenderFlexibleBox::flowAwareBorderAfter() const
 {
-    // FIXME(sky): Remove
-    return borderBottom();
+    return isHorizontalFlow() ? borderBottom() : borderRight();
 }
 
 LayoutUnit RenderFlexibleBox::flowAwarePaddingStart() const
@@ -444,14 +442,12 @@ LayoutUnit RenderFlexibleBox::flowAwarePaddingEnd() const
 
 LayoutUnit RenderFlexibleBox::flowAwarePaddingBefore() const
 {
-    // FIXME(sky): Remove
-    return paddingTop();
+    return isHorizontalFlow() ? paddingTop() : paddingLeft();
 }
 
 LayoutUnit RenderFlexibleBox::flowAwarePaddingAfter() const
 {
-    // FIXME(sky): Remove
-    return paddingBottom();
+    return isHorizontalFlow() ? paddingBottom() : paddingRight();
 }
 
 LayoutUnit RenderFlexibleBox::flowAwareMarginStartForChild(RenderBox* child) const
@@ -470,8 +466,7 @@ LayoutUnit RenderFlexibleBox::flowAwareMarginEndForChild(RenderBox* child) const
 
 LayoutUnit RenderFlexibleBox::flowAwareMarginBeforeForChild(RenderBox* child) const
 {
-    // FIXME(sky): Remove
-    return child->marginTop();
+    return isHorizontalFlow() ? child->marginTop() : child->marginLeft();
 }
 
 LayoutUnit RenderFlexibleBox::crossAxisMarginExtentForChild(RenderBox* child) const

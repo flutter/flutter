@@ -13,7 +13,7 @@ class EditableText extends Component {
   );
 
   static final Style _cusorStyle = new Style('''
-    display: inline-block;
+    display: inline-flex;
     width: 2px;
     height: 1.2em;
     vertical-align: top;

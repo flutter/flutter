@@ -21,6 +21,7 @@ class FloatingActionButton extends Component {
     transform: translateX(0);
     position: absolute;
     display: flex;
+    flex-direction: row;
     justify-content: center;
     align-items: center;
     top: 0;

@@ -2,6 +2,7 @@
 <style>
 .blue {
   border: 2px solid blue;
+  display: paragraph;
 }
 </style>
 <div class="blue" contenteditable></div>

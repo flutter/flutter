@@ -9,6 +9,7 @@ import 'material.dart';
 class ActionBar extends Component {
   static final Style _style = new Style('''
     display: flex;
+    flex-direction: row;
     align-items: center;
     height: 56px;
     padding: 0 8px;

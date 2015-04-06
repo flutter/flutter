@@ -16,6 +16,7 @@
   flex {
     background: salmon;
     display: flex;
+    flex-direction: row;
   }
   spacer {
     height: 30px;
