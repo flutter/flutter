@@ -113,6 +113,9 @@ class SkyDebugger(object):
             shell_args.append(
                 '--args-for=mojo:window_manager %s' % self._url_from_args(args))
 
+        if args.trace_startup:
+            shell_args.append('--trace-startup')
+
         # Map all mojo: urls to http: urls using the --origin command.
         build_dir_url = SkyServer.url_for_path(
             remote_server_port,
@@ -566,6 +569,7 @@ class SkyDebugger(object):
             default=DEFAULT_URL)
         start_parser.add_argument('--show-command', action='store_true',
             help='Display the shell command and exit')
+        start_parser.add_argument('--trace-startup', action='store_true')
         start_parser.set_defaults(func=self.start_command)
 
         stop_parser = subparsers.add_parser('stop',
