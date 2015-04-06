@@ -25,6 +25,7 @@ LOCAL_SRC_FILES := \
     Hyphenator.cpp \
     Layout.cpp \
     LineBreaker.cpp \
+    Measurement.cpp \
     MinikinInternal.cpp \
     MinikinRefCounted.cpp \
     MinikinFontFreeType.cpp \

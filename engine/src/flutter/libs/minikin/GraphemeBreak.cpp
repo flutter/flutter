@@ -41,7 +41,7 @@ bool GraphemeBreak::isGraphemeBreak(const uint16_t* buf, size_t start, size_t co
     uint32_t c2 = 0;
     size_t offset_back = offset;
     U16_PREV(buf, start, offset_back, c1);
-    U16_NEXT(buf, offset, count, c2);
+    U16_NEXT(buf, offset, start + count, c2);
     int32_t p1 = u_getIntPropertyValue(c1, UCHAR_GRAPHEME_CLUSTER_BREAK);
     int32_t p2 = u_getIntPropertyValue(c2, UCHAR_GRAPHEME_CLUSTER_BREAK);
     // Rule GB3, CR x LF
@@ -54,7 +54,7 @@ bool GraphemeBreak::isGraphemeBreak(const uint16_t* buf, size_t start, size_t co
     }
     // Rule GB5, / (Control | CR | LF)
     if (p2 == U_GCB_CONTROL || p2 == U_GCB_CR || p2 == U_GCB_LF) {
-        // exclude zero-width control characters from breaking (tailoring of TR29)
+        // exclude zero-width control characters from breaking (tailoring of UAX #29)
         if (c2 == 0x00ad
                 || (c2 >= 0x200b && c2 <= 0x200f)
                 || (c2 >= 0x2028 && c2 <= 0x202e)
@@ -83,12 +83,12 @@ bool GraphemeBreak::isGraphemeBreak(const uint16_t* buf, size_t start, size_t co
     if (p2 == U_GCB_EXTEND || p2 == U_GCB_SPACING_MARK) {
         if (c2 == 0xe33) {
             // most other implementations break THAI CHARACTER SARA AM
-            // (tailoring of TR29)
+            // (tailoring of UAX #29)
             return true;
         }
         return false;
     }
-    // Cluster indic syllables togeter (tailoring of TR29)
+    // Cluster indic syllables together (tailoring of UAX #29)
     if (u_getIntPropertyValue(c1, UCHAR_CANONICAL_COMBINING_CLASS) == 9  // virama
             && u_getIntPropertyValue(c2, UCHAR_GENERAL_CATEGORY) == U_OTHER_LETTER) {
         return false;
