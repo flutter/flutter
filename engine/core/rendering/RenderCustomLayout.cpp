@@ -21,13 +21,6 @@ RenderCustomLayout::~RenderCustomLayout()
 
 void RenderCustomLayout::layout()
 {
-    // TODO(ojan): This should really be done by the author code, but
-    // if the author code doesn't call layout, then we won't clear the
-    // needsLayout bit and we'll assert.
-    for (RenderBox* child = firstChildBox(); child; child = child->nextSiblingBox()) {
-        child->layoutIfNeeded();
-    }
-
     ASSERT(node()->isElementNode());
     toElement(node())->layoutManager()->handleEvent();
     clearNeedsLayout();

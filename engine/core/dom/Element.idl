@@ -18,6 +18,8 @@
 
   void requestPaint(PaintingCallback callback);
 
+  void setNeedsLayout();
+  void layout();
   void setLayoutManager(LayoutCallback callback);
 
   // TODO(abarth): Move to Node.

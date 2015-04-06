@@ -925,8 +925,11 @@ double Element::width() const
 
 void Element::setWidth(double width)
 {
-    if (RenderBox* box = renderBox())
-        return box->setWidth(width);
+    if (RenderBox* box = renderBox()) {
+        box->setWidth(width);
+        // TODO(ojan): Remove override widths once we remove box layout from the C++ code.
+        box->setOverrideLogicalContentWidth(width);
+    }
 }
 
 double Element::height() const
@@ -942,6 +945,18 @@ void Element::setHeight(double height)
         return box->setHeight(height);
 }
 
+void Element::setNeedsLayout()
+{
+    if (RenderBox* box = renderBox())
+        box->setNeedsLayout();
+}
+
+void Element::layout()
+{
+    if (RenderBox* box = renderBox())
+        box->layoutIfNeeded();
+}
+
 LayoutCallback* Element::layoutManager() const
 {
     return m_layoutManager.get();
@@ -949,6 +964,12 @@ LayoutCallback* Element::layoutManager() const
 
 void Element::setLayoutManager(PassOwnPtr<LayoutCallback> callback)
 {
+    if (renderer() && !renderer()->isRenderCustomLayout()) {
+        // We don't go through the normal reattach codepaths because
+        // those are all tied to changes to the RenderStyle.
+        markAncestorsWithChildNeedsStyleRecalc();
+        detach();
+    }
     m_layoutManager = callback;
 }
 

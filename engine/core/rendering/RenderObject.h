@@ -261,6 +261,7 @@ public:
     virtual bool isInlineBlock() const { return false; }
     virtual bool isRenderBlock() const { return false; }
     virtual bool isRenderBlockFlow() const { return false; }
+    virtual bool isRenderCustomLayout() const { return false; }
     virtual bool isRenderParagraph() const { return false; }
     virtual bool isRenderImage() const { return false; }
     virtual bool isRenderInline() const { return false; }

@@ -1289,11 +1289,7 @@ void RenderBox::computeLogicalWidth(LogicalExtentComputedValues& computedValues)
     if (node() && view()->frameView() && view()->frameView()->layoutRoot(true) == this)
         return;
 
-    // The parent box is flexing us, so it has increased or decreased our
-    // width.  Use the width from the style context.
-    // FIXME: Account for block-flow in flexible boxes.
-    // https://bugs.webkit.org/show_bug.cgi?id=46418
-    if (hasOverrideWidth() && parent()->isFlexibleBox()) {
+    if (hasOverrideWidth()) {
         computedValues.m_extent = overrideLogicalContentWidth() + borderAndPaddingLogicalWidth();
         return;
     }

@@ -201,6 +201,7 @@ public:
     ElementShadow& ensureShadow();
     PassRefPtr<ShadowRoot> ensureShadowRoot(ExceptionState&);
     ShadowRoot* shadowRoot() const;
+    bool hasAuthorShadowRoot() const { return shadowRoot(); }
 
     double x() const;
     void setX(double);
@@ -214,7 +215,8 @@ public:
     double height() const;
     void setHeight(double);
 
-    bool hasAuthorShadowRoot() const { return shadowRoot(); }
+    void setNeedsLayout();
+    void layout();
 
     LayoutCallback* layoutManager() const;
     void setLayoutManager(PassOwnPtr<LayoutCallback>);

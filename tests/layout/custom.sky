@@ -1,0 +1,85 @@
+<parent style='background-color: lightblue;'>
+  <child style='background-color: pink;'>
+    <grandchild style='background-color: red; width: 25px; height: 25px;'></grandchild>
+  </child>
+  <child2 style='background-color: salmon; height: 25px;' />
+</parent>
+
+<script>
+import "../resources/third_party/unittest/unittest.dart";
+import "../resources/unit.dart";
+
+import 'dart:async';
+import 'dart:sky';
+
+void main() {
+  initUnit();
+
+  var first = true;
+
+  var parent = document.querySelector('parent');
+  var firstChild = parent.firstElementChild;
+  var secondChild = parent.lastElementChild;
+
+  parent.setLayoutManager(() {
+    if (first) {
+      first = false;
+      parent.width = 200.0;
+    } else {
+      parent.width = 150.0;
+    }
+
+    firstChild.width = 100.0;
+    firstChild.layout();
+    firstChild.x = 100.0;
+    firstChild.y = 50.0;
+    firstChild.height = 50.0;
+
+    // The second element correctly gets it's width from it's container.
+    // TODO(ojan): Change the layout method to take in availableWidth
+    // so code doesn't need to mess with setNeedsLayout dirty bits
+    // in the middle of layout and so the parent and child don't need
+    // to coordinate as much about expectations.
+    secondChild.setNeedsLayout();
+    secondChild.layout();
+
+    parent.height = 100.0;
+  });
+
+  void assertNonChangingValues() {
+    expect(parent.offsetHeight, equals(100));
+    expect(parent.offsetTop, equals(0));
+    expect(parent.offsetLeft, equals(0));
+
+    expect(firstChild.offsetWidth, equals(100));
+    expect(firstChild.offsetHeight, equals(50));
+    expect(firstChild.offsetTop, equals(50));
+    expect(firstChild.offsetLeft, equals(100));
+
+    expect(secondChild.offsetHeight, equals(25));
+    expect(secondChild.offsetTop, equals(0));
+    expect(secondChild.offsetLeft, equals(0));
+  };
+
+  test("should have the right sizes after layout", () {
+    Completer completer = new Completer();
+
+    window.requestAnimationFrame((_) {
+      expect(parent.offsetWidth, equals(200));
+      expect(secondChild.offsetWidth, equals(200));
+      assertNonChangingValues();
+
+      parent.setNeedsLayout();
+
+      window.requestAnimationFrame((_) {
+        expect(parent.offsetWidth, equals(150));
+        expect(secondChild.offsetWidth, equals(150));
+        assertNonChangingValues();
+        completer.complete();
+      });
+    });
+
+    return completer.future;
+  });
+}
+</script>

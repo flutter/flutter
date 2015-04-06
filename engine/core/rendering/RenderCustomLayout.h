@@ -14,6 +14,7 @@ public:
     explicit RenderCustomLayout(ContainerNode* node);
     virtual void layout() override;
     const char* renderName() const;
+    bool isRenderCustomLayout() const final { return true; }
 
 protected:
     virtual ~RenderCustomLayout();
