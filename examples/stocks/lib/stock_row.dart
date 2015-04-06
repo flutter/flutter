@@ -11,6 +11,7 @@ import 'stock_data.dart';
 class StockRow extends Component {
   static final Style _style = new Style('''
     display: flex;
+    flex-direction: row;
     align-items: center;
     border-bottom: 1px solid #F4F4F4;
     padding-top: 16px;
