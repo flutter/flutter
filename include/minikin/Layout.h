@@ -106,8 +106,12 @@ public:
     float getAdvance() const;
 
     // Get advances, copying into caller-provided buffer. The size of this
-    // buffer must match the length of the string (nchars arg to doLayout).
+    // buffer must match the length of the string (count arg to doLayout).
     void getAdvances(float* advances);
+
+    // The i parameter is an offset within the buf relative to start, it is < count, where
+    // start and count are the parameters to doLayout
+    float getCharAdvance(size_t i) const { return mAdvances[i]; }
 
     void getBounds(MinikinRect* rect);
 
