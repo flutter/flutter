@@ -45,9 +45,6 @@ public:
 
     virtual ~HTMLImageElement();
 
-    int width();
-    int height();
-
     int naturalWidth() const;
     int naturalHeight() const;
     const String& currentSrc() const;
@@ -55,15 +52,8 @@ public:
     ImageResource* cachedImage() const { return imageLoader().image(); }
     void setImageResource(ImageResource* i) { imageLoader().setImage(i); };
 
-    void setHeight(int);
-
     KURL src() const;
     void setSrc(const String&);
-
-    void setWidth(int);
-
-    int x() const;
-    int y() const;
 
     bool complete() const;
 

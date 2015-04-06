@@ -178,46 +178,6 @@ void HTMLImageElement::removedFrom(ContainerNode* insertionPoint)
     HTMLElement::removedFrom(insertionPoint);
 }
 
-int HTMLImageElement::width()
-{
-    if (!renderer()) {
-        // check the attribute first for an explicit pixel value
-        bool ok;
-        int width = getAttribute(HTMLNames::widthAttr).toInt(&ok);
-        if (ok)
-            return width;
-
-        // if the image is available, use its width
-        if (imageLoader().image())
-            return imageLoader().image()->imageSizeForRenderer(renderer()).width();
-    }
-
-    document().updateLayout();
-
-    RenderBox* box = renderBox();
-    return box ? box->contentBoxRect().pixelSnappedWidth() : 0;
-}
-
-int HTMLImageElement::height()
-{
-    if (!renderer()) {
-        // check the attribute first for an explicit pixel value
-        bool ok;
-        int height = getAttribute(HTMLNames::heightAttr).toInt(&ok);
-        if (ok)
-            return height;
-
-        // if the image is available, use its height
-        if (imageLoader().image())
-            return imageLoader().image()->imageSizeForRenderer(renderer()).height();
-    }
-
-    document().updateLayout();
-
-    RenderBox* box = renderBox();
-    return box ? box->contentBoxRect().pixelSnappedHeight() : 0;
-}
-
 int HTMLImageElement::naturalWidth() const
 {
     if (!imageLoader().image())
@@ -252,11 +212,6 @@ bool HTMLImageElement::isURLAttribute(const Attribute& attribute) const
         || HTMLElement::isURLAttribute(attribute);
 }
 
-void HTMLImageElement::setHeight(int value)
-{
-    setIntegralAttribute(HTMLNames::heightAttr, value);
-}
-
 KURL HTMLImageElement::src() const
 {
     return document().completeURL(getAttribute(HTMLNames::srcAttr));
@@ -265,35 +220,6 @@ KURL HTMLImageElement::src() const
 void HTMLImageElement::setSrc(const String& value)
 {
     setAttribute(HTMLNames::srcAttr, AtomicString(value));
-}
-
-void HTMLImageElement::setWidth(int value)
-{
-    setIntegralAttribute(HTMLNames::widthAttr, value);
-}
-
-int HTMLImageElement::x() const
-{
-    document().updateLayout();
-    RenderObject* r = renderer();
-    if (!r)
-        return 0;
-
-    // FIXME: This doesn't work correctly with transforms.
-    FloatPoint absPos = r->localToAbsolute();
-    return absPos.x();
-}
-
-int HTMLImageElement::y() const
-{
-    document().updateLayout();
-    RenderObject* r = renderer();
-    if (!r)
-        return 0;
-
-    // FIXME: This doesn't work correctly with transforms.
-    FloatPoint absPos = r->localToAbsolute();
-    return absPos.y();
 }
 
 bool HTMLImageElement::complete() const
