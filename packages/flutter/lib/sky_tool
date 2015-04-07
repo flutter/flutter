@@ -209,8 +209,19 @@ class StopSky(object):
 
 
 class SkyShellRunner(object):
+    def _check_for_adb(self):
+        try:
+            subprocess.call([ADB_PATH, '--help'])
+        except OSError:
+            print "'adb' (from the Android SDK) not in $PATH, can't continue."
+            return False
+        return True
+
+
     def main(self):
         logging.basicConfig(level=logging.WARNING)
+        if not self._check_for_adb()
+            sys.exit(2)
 
         parser = argparse.ArgumentParser(description='Sky Demo Runner')
         subparsers = parser.add_subparsers(help='sub-command help')
