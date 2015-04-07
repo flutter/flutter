@@ -180,21 +180,21 @@ class StyleNode extends ContentNode {
 }
 
 /*
- * RenderNodes correspond to a desired state of a sky.Node. They are fully
+ * SkyNodeWrappers correspond to a desired state of a sky.Node. They are fully
  * immutable, with one exception: A UINode which is a Component which lives within
- * an WrapperNode's children list, may be replaced with the "old" instance if it
+ * an SkyElementWrapper's children list, may be replaced with the "old" instance if it
  * has become stateful.
  */
-abstract class RenderNode extends UINode {
+abstract class SkyNodeWrapper extends UINode {
 
-  static final Map<sky.Node, RenderNode> _nodeMap =
-      new HashMap<sky.Node, RenderNode>();
+  static final Map<sky.Node, SkyNodeWrapper> _nodeMap =
+      new HashMap<sky.Node, SkyNodeWrapper>();
 
-  static RenderNode _getMounted(sky.Node node) => _nodeMap[node];
+  static SkyNodeWrapper _getMounted(sky.Node node) => _nodeMap[node];
 
-  RenderNode({ Object key }) : super(key: key);
+  SkyNodeWrapper({ Object key }) : super(key: key);
 
-  RenderNode get _emptyNode;
+  SkyNodeWrapper get _emptyNode;
 
   sky.Node _createNode();
 
@@ -211,7 +211,7 @@ abstract class RenderNode extends UINode {
     _syncNode(old);
   }
 
-  void _syncNode(RenderNode old);
+  void _syncNode(SkyNodeWrapper old);
 
   void _remove() {
     assert(_root != null);
@@ -311,7 +311,7 @@ class EventListenerNode extends ContentNode  {
   }
 
   static void _dispatchEvent(sky.Event e) {
-    UINode target = RenderNode._getMounted(e.target);
+    UINode target = SkyNodeWrapper._getMounted(e.target);
 
     // TODO(rafaelw): StopPropagation?
     while (target != null) {
@@ -338,7 +338,7 @@ class EventListenerNode extends ContentNode  {
   }
 }
 
-class Text extends RenderNode {
+class Text extends SkyNodeWrapper {
   final String data;
 
   // Text nodes are special cases of having non-unique keys (which don't need
@@ -349,13 +349,13 @@ class Text extends RenderNode {
 
   static final Text _emptyText = new Text(null);
 
-  RenderNode get _emptyNode => _emptyText;
+  SkyNodeWrapper get _emptyNode => _emptyText;
 
   sky.Node _createNode() {
     return new sky.Text(data);
   }
 
-  void _syncNode(RenderNode old) {
+  void _syncNode(SkyNodeWrapper old) {
     if (old == _emptyText)
       return; // we set inside _createNode();
 
@@ -365,7 +365,7 @@ class Text extends RenderNode {
 
 final List<UINode> _emptyList = new List<UINode>();
 
-abstract class WrapperNode extends RenderNode {
+abstract class SkyElementWrapper extends SkyNodeWrapper {
 
   String get _tagName;
 
@@ -377,7 +377,7 @@ abstract class WrapperNode extends RenderNode {
 
   String _class;
 
-  WrapperNode({
+  SkyElementWrapper({
     Object key,
     List<UINode> children,
     this.style,
@@ -420,7 +420,7 @@ abstract class WrapperNode extends RenderNode {
       }
 
       UINode parent = _parent;
-      while (parent != null && parent is! RenderNode) {
+      while (parent != null && parent is! SkyNodeWrapper) {
         if (parent is StyleNode && (parent as StyleNode).style != null)
           styles.add((parent as StyleNode).style);
 
@@ -431,28 +431,28 @@ abstract class WrapperNode extends RenderNode {
     }
   }
 
-  void _syncNode(RenderNode old) {
-    WrapperNode oldWrapperNode = old as WrapperNode;
+  void _syncNode(SkyNodeWrapper old) {
+    SkyElementWrapper oldSkyElementWrapper = old as SkyElementWrapper;
     sky.Element root = _root as sky.Element;
 
     _ensureClass();
-    if (_class != oldWrapperNode._class && _class != '')
+    if (_class != oldSkyElementWrapper._class && _class != '')
       root.setAttribute('class', _class);
 
-    if (inlineStyle != oldWrapperNode.inlineStyle)
+    if (inlineStyle != oldSkyElementWrapper.inlineStyle)
       root.setAttribute('style', inlineStyle);
 
-    _syncChildren(oldWrapperNode);
+    _syncChildren(oldSkyElementWrapper);
   }
 
-  void _syncChildren(WrapperNode oldWrapperNode) {
+  void _syncChildren(SkyElementWrapper oldSkyElementWrapper) {
     sky.Element root = _root as sky.Element;
     assert(root != null);
 
     var startIndex = 0;
     var endIndex = children.length;
 
-    var oldChildren = oldWrapperNode.children;
+    var oldChildren = oldSkyElementWrapper.children;
     var oldStartIndex = 0;
     var oldEndIndex = oldChildren.length;
 
@@ -562,13 +562,13 @@ abstract class WrapperNode extends RenderNode {
   }
 }
 
-class Container extends WrapperNode {
+class Container extends SkyElementWrapper {
 
   String get _tagName => 'div';
 
   static final Container _emptyContainer = new Container();
 
-  RenderNode get _emptyNode => _emptyContainer;
+  SkyNodeWrapper get _emptyNode => _emptyContainer;
 
   Container({
     Object key,
@@ -583,13 +583,13 @@ class Container extends WrapperNode {
   );
 }
 
-class Image extends WrapperNode {
+class Image extends SkyElementWrapper {
 
   String get _tagName => 'img';
 
   static final Image _emptyImage = new Image();
 
-  RenderNode get _emptyNode => _emptyImage;
+  SkyNodeWrapper get _emptyNode => _emptyImage;
 
   final String src;
   final int width;
@@ -627,7 +627,7 @@ class Image extends WrapperNode {
   }
 }
 
-class Anchor extends WrapperNode {
+class Anchor extends SkyElementWrapper {
 
   String get _tagName => 'a';
 
