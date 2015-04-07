@@ -8,7 +8,7 @@ class TestApp extends App {
       inlineStyle: 'background-color: green',
       children: [
         new Text('I am Text'),
-        new Image(src: 'foo.jpg'),
+        new Image(src: 'resources/united.jpg'),
         new Anchor(href: 'http://www.google.com')
       ]
     );
