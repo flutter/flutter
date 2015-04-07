@@ -716,7 +716,7 @@ void MojoHandleWatcher_SendControlData(Dart_NativeArguments arguments) {
   CHECK_INTEGER_ARGUMENT(arguments, 1, &client_handle, InvalidArgument);
 
   Dart_Handle send_port_handle = Dart_GetNativeArgument(arguments, 2);
-  Dart_Port send_port_id = 0;
+  Dart_Port send_port_id = ILLEGAL_PORT;
   if (!Dart_IsNull(send_port_handle)) {
     Dart_Handle result = Dart_SendPortGetId(send_port_handle, &send_port_id);
     if (Dart_IsError(result)) {
@@ -755,7 +755,9 @@ void MojoHandleWatcher_RecvControlData(Dart_NativeArguments arguments) {
 
   Dart_Handle list = Dart_NewList(3);
   Dart_ListSetAt(list, 0, Dart_NewInteger(cd.handle));
-  Dart_ListSetAt(list, 1, Dart_NewSendPort(cd.port));
+  if (cd.port != ILLEGAL_PORT) {
+    Dart_ListSetAt(list, 1, Dart_NewSendPort(cd.port));
+  }
   Dart_ListSetAt(list, 2, Dart_NewInteger(cd.data));
   Dart_SetReturnValue(arguments, list);
 }
