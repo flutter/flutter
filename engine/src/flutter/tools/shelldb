@@ -9,6 +9,7 @@ import json
 import logging
 import os
 import re
+import signal
 import subprocess
 import sys
 import time
@@ -23,7 +24,7 @@ DEFAULT_URL = "sky://domokit.github.io/home"
 APK_NAME = 'SkyDemo.apk'
 ADB_PATH = os.path.join(SRC_ROOT,
     'third_party/android_tools/sdk/platform-tools/adb')
-
+ANDROID_PACKAGE = "org.domokit.sky.demo"
 
 PID_FILE_PATH = "/tmp/skydemo.pids"
 PID_FILE_KEYS = frozenset([
@@ -69,6 +70,10 @@ class Pids(object):
     def clear(self):
         self._dict = {}
 
+    def pop(self, key, default=None):
+        assert key in self._known_keys, '%s not in allowed_keys' % key
+        return self._dict.pop(key, default)
+
     @classmethod
     def read_from(cls, path, known_keys):
         contents = {}
@@ -104,6 +109,13 @@ def _url_from_args(args, pids):
     url = SkyServer.url_for_path(remote_sky_server_port,
         pids['sky_server_root'], args.url_or_path)
     return _convert_to_sky_url(url)
+
+
+def dev_sdk_root(build_dir):
+    return os.path.join(build_dir, 'gen', 'sky_sdk')
+
+def dev_packages_root(build_dir):
+    return os.path.join(dev_sdk_root(build_dir), 'packages_root')
 
 
 class StartSky(object):
@@ -143,8 +155,8 @@ class StartSky(object):
             print "'%s' does not exist?" % apk_path
             return 2
 
-        sdk_root = os.path.join(args.build_dir, 'gen', 'sky_sdk')
-        packages_root = os.path.join(sdk_root, 'packages_root')
+        sdk_root = dev_sdk_root(args.build_dir)
+        packages_root = dev_packages_root(args.build_dir)
         sky_tools_directory = os.path.join(SRC_ROOT, 'sky/tools')
         subprocess.check_call([
             os.path.join(sky_tools_directory, 'deploy_sdk.py'),
@@ -197,8 +209,8 @@ class StopSky(object):
     def run(self, args, pids):
         self._kill_if_exists(pids, 'sky_server_pid', 'sky_server')
 
-        if 'remote_sky_server_port' in self.pids:
-            port_string = 'tcp:%s' % self.pids['remote_sky_server_port']
+        if 'remote_sky_server_port' in pids:
+            port_string = 'tcp:%s' % pids['remote_sky_server_port']
             subprocess.call([ADB_PATH, 'reverse', '--remove', port_string])
 
         subprocess.call([
@@ -215,9 +227,12 @@ class Analyze(object):
         analyze_parser.set_defaults(func=self.run)
 
     def run(self, args, pids):
+        build_dir = pids.get('build_dir')
+        if not build_dir:
+            logging.fatal("pids file missing build_dir. Try 'start' first.")
+            return 2
         ANALYZER_PATH = 'third_party/dart-sdk/dart-sdk/bin/dartanalyzer'
 
-        build_dir = os.path.abspath(pids['build_dir'])
         bindings_path = os.path.join(build_dir, 'gen/sky/bindings')
         sky_builtin_path = \
             os.path.join(SRC_ROOT, 'sky/engine/bindings/builtin.dart')
@@ -225,9 +240,10 @@ class Analyze(object):
         analyzer_args = [ANALYZER_PATH,
             "--url-mapping=dart:sky,%s" % dart_sky_path,
             "--url-mapping=dart:sky_builtin,%s" % sky_builtin_path,
+            "--package-root", dev_packages_root(build_dir),
             args.app_path
         ]
-        subprocess.call(analyzer_args)
+        return subprocess.call(analyzer_args)
 
 class StartTracing(object):
     def add_subparser(self, subparsers):
