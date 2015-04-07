@@ -867,12 +867,6 @@ template<> inline CSSPrimitiveValue::CSSPrimitiveValue(EDisplay e)
     case PARAGRAPH:
         m_value.valueID = CSSValueParagraph;
         break;
-    case BLOCK:
-        m_value.valueID = CSSValueBlock;
-        break;
-    case INLINE_BLOCK:
-        m_value.valueID = CSSValueInlineBlock;
-        break;
     case FLEX:
         m_value.valueID = CSSValueFlex;
         break;

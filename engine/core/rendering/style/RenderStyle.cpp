@@ -234,10 +234,8 @@ bool RenderStyle::requiresOnlyBlockChildren()
     case INLINE:
         return false;
 
-    case BLOCK:
     case FLEX:
     case INLINE_FLEX:
-    case INLINE_BLOCK:
         return true;
 
     case NONE:

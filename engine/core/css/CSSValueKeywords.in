@@ -262,8 +262,6 @@ inline
 // Contains only inline content.
 paragraph
 // Contains only block content.
-block
-inline-block
 flex
 inline-flex
 //none
@@ -667,6 +665,7 @@ upright
 vertical-right
 
 // -webkit-line-box-contain
+block
 font
 glyphs
 inline-box

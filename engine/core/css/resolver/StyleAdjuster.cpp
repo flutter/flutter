@@ -48,15 +48,11 @@ static EDisplay equivalentInlineDisplay(EDisplay display)
     case PARAGRAPH:
         return INLINE;
 
-    case BLOCK:
-        return INLINE_BLOCK;
-
     case FLEX:
         return INLINE_FLEX;
 
     case INLINE:
     case INLINE_FLEX:
-    case INLINE_BLOCK:
         return display;
 
     case NONE:
@@ -72,16 +68,12 @@ static EDisplay equivalentBlockDisplay(EDisplay display)
 {
     switch (display) {
     case PARAGRAPH:
-    case BLOCK:
     case FLEX:
         return display;
 
+    case INLINE:
     case INLINE_FLEX:
         return FLEX;
-
-    case INLINE:
-    case INLINE_BLOCK:
-        return BLOCK;
 
     case NONE:
         ASSERT_NOT_REACHED();
@@ -97,7 +89,7 @@ static EDisplay equivalentBlockDisplay(EDisplay display)
 // and absolute or relatively positioned elements.
 static bool doesNotInheritTextDecoration(const RenderStyle* style, const Element& e)
 {
-    return style->display() == INLINE_BLOCK || isAtShadowBoundary(&e) || style->hasOutOfFlowPosition();
+    return isAtShadowBoundary(&e) || style->hasOutOfFlowPosition();
 }
 
 static bool parentStyleForcesZIndexToCreateStackingContext(const RenderStyle* parentStyle)

@@ -1261,7 +1261,7 @@ private:
 
     bool isDisplayReplacedType(EDisplay display) const
     {
-        return display == INLINE_BLOCK || display == INLINE_FLEX;
+        return display == INLINE_FLEX;
     }
 
     bool isDisplayInlineType(EDisplay display) const

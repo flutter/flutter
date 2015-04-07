@@ -125,9 +125,6 @@ RenderObject* RenderObject::createObject(Element* element, RenderStyle* style)
         return 0;
     case INLINE:
         return new RenderInline(element);
-    case BLOCK:
-    case INLINE_BLOCK:
-        return new RenderBlockFlow(element);
     case PARAGRAPH:
         return new RenderParagraph(element);
     case FLEX:
