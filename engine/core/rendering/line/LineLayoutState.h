@@ -24,7 +24,7 @@
 #ifndef SKY_ENGINE_CORE_RENDERING_LINE_LINELAYOUTSTATE_H_
 #define SKY_ENGINE_CORE_RENDERING_LINE_LINELAYOUTSTATE_H_
 
-#include "sky/engine/core/rendering/RenderBlockFlow.h"
+#include "sky/engine/core/rendering/RenderParagraph.h"
 #include "sky/engine/platform/geometry/LayoutRect.h"
 
 namespace blink {
@@ -34,12 +34,9 @@ namespace blink {
 class LineLayoutState {
 public:
     LineLayoutState(bool fullLayout)
-        : m_lastFloat(0)
-        , m_endLine(0)
-        , m_floatIndex(0)
+        : m_endLine(0)
         , m_endLineLogicalTop(0)
         , m_endLineMatched(false)
-        , m_checkForFloatsFromLastLine(false)
         , m_hasInlineChild(false)
         , m_isFullLayout(fullLayout)
         , m_adjustedLogicalLineTop(0)
@@ -50,9 +47,6 @@ public:
 
     bool endLineMatched() const { return m_endLineMatched; }
     void setEndLineMatched(bool endLineMatched) { m_endLineMatched = endLineMatched; }
-
-    bool checkForFloatsFromLastLine() const { return m_checkForFloatsFromLastLine; }
-    void setCheckForFloatsFromLastLine(bool check) { m_checkForFloatsFromLastLine = check; }
 
     bool hasInlineChild() const { return m_hasInlineChild; }
     void setHasInlineChild(bool hasInlineChild) { m_hasInlineChild = hasInlineChild; }
@@ -66,26 +60,15 @@ public:
     RootInlineBox* endLine() const { return m_endLine; }
     void setEndLine(RootInlineBox* line) { m_endLine = line; }
 
-    FloatingObject* lastFloat() const { return m_lastFloat; }
-    void setLastFloat(FloatingObject* lastFloat) { m_lastFloat = lastFloat; }
-
-    Vector<RenderBlockFlow::FloatWithRect>& floats() { return m_floats; }
-
-    unsigned floatIndex() const { return m_floatIndex; }
-    void setFloatIndex(unsigned floatIndex) { m_floatIndex = floatIndex; }
-
     LayoutUnit adjustedLogicalLineTop() const { return m_adjustedLogicalLineTop; }
     void setAdjustedLogicalLineTop(LayoutUnit value) { m_adjustedLogicalLineTop = value; }
 
 private:
-    Vector<RenderBlockFlow::FloatWithRect> m_floats;
-    FloatingObject* m_lastFloat;
     RootInlineBox* m_endLine;
     LineInfo m_lineInfo;
-    unsigned m_floatIndex;
     LayoutUnit m_endLineLogicalTop;
     bool m_endLineMatched;
-    bool m_checkForFloatsFromLastLine;
+    // FIXME(sky): Do we still need this?
     // Used as a performance optimization to avoid doing a full paint invalidation when our floats
     // change but we don't have any inline children.
     bool m_hasInlineChild;

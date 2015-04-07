@@ -32,7 +32,6 @@ namespace blink {
 struct LayerPaintingInfo;
 struct PaintInfo;
 class HitTestingTransformState;
-class RenderBlockFlow;
 class TransformationMatrix;
 
 enum SizeType { MainOrPreferredSize, MinSize, MaxSize };

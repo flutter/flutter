@@ -26,7 +26,7 @@
 #include "sky/engine/core/rendering/HitTestResult.h"
 #include "sky/engine/core/rendering/InlineTextBox.h"
 #include "sky/engine/core/rendering/PaintInfo.h"
-#include "sky/engine/core/rendering/RenderBlockFlow.h"
+#include "sky/engine/core/rendering/RenderParagraph.h"
 #include "sky/engine/core/rendering/RenderInline.h"
 #include "sky/engine/core/rendering/RenderView.h"
 #include "sky/engine/core/rendering/VerticalPositionCache.h"
@@ -37,7 +37,7 @@ namespace blink {
 
 struct SameSizeAsRootInlineBox : public InlineFlowBox {
     unsigned unsignedVariable;
-    void* pointers[4];
+    void* pointers[3];
     LayoutUnit layoutVariables[5];
 };
 
@@ -46,7 +46,7 @@ COMPILE_ASSERT(sizeof(RootInlineBox) == sizeof(SameSizeAsRootInlineBox), RootInl
 typedef WTF::HashMap<const RootInlineBox*, EllipsisBox*> EllipsisBoxMap;
 static EllipsisBoxMap* gEllipsisBoxMap = 0;
 
-RootInlineBox::RootInlineBox(RenderBlockFlow& block)
+RootInlineBox::RootInlineBox(RenderParagraph& block)
     : InlineFlowBox(block)
     , m_lineBreakPos(0)
     , m_lineBreakObj(0)
@@ -392,8 +392,8 @@ LayoutUnit RootInlineBox::selectionTopAdjustedForPrecedingBlock() const
 
     LayoutSize offsetToBlockBefore;
     if (RenderBlock* block = root().block().blockBeforeWithinSelectionRoot(offsetToBlockBefore)) {
-        if (block->isRenderBlockFlow()) {
-            if (RootInlineBox* lastLine = toRenderBlockFlow(block)->lastRootBox()) {
+        if (block->isRenderParagraph()) {
+            if (RootInlineBox* lastLine = toRenderParagraph(block)->lastRootBox()) {
                 RenderObject::SelectionState lastLineSelectionState = lastLine->selectionState();
                 if (lastLineSelectionState != RenderObject::SelectionInside && lastLineSelectionState != RenderObject::SelectionStart)
                     return top;
@@ -420,9 +420,9 @@ int RootInlineBox::blockDirectionPointInLine() const
     return std::max(lineTop(), selectionTop());
 }
 
-RenderBlockFlow& RootInlineBox::block() const
+RenderParagraph& RootInlineBox::block() const
 {
-    return toRenderBlockFlow(renderer());
+    return toRenderParagraph(renderer());
 }
 
 static bool isEditableLeaf(InlineBox* leaf)

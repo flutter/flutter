@@ -40,6 +40,7 @@
 #include "sky/engine/core/rendering/InlineTextBox.h"
 #include "sky/engine/core/rendering/RenderBlock.h"
 #include "sky/engine/core/rendering/RenderInline.h"
+#include "sky/engine/core/rendering/RenderParagraph.h"
 #include "sky/engine/core/rendering/RenderText.h"
 #include "sky/engine/platform/Logging.h"
 #include "sky/engine/wtf/text/CString.h"
@@ -802,8 +803,8 @@ bool Position::isCandidate() const
     if (editingIgnoresContent(deprecatedNode()))
         return (atFirstEditingPositionForNode() || atLastEditingPositionForNode()) && !nodeIsUserSelectNone(deprecatedNode()->parentNode());
 
-    if (renderer->isRenderBlockFlow()) {
-        if (toRenderBlock(renderer)->logicalHeight()) {
+    if (renderer->isRenderParagraph()) {
+        if (toRenderParagraph(renderer)->logicalHeight()) {
             if (!Position::hasRenderedNonAnonymousDescendantsWithHeight(renderer))
                 return atFirstEditingPositionForNode() && !Position::nodeIsUserSelectNone(deprecatedNode());
             return m_anchorNode->hasEditableStyle() && !Position::nodeIsUserSelectNone(deprecatedNode()) && atEditingBoundary();
@@ -1003,7 +1004,7 @@ void Position::getInlineBoxAndOffset(EAffinity affinity, TextDirection primaryDi
 
     if (!renderer->isText()) {
         inlineBox = 0;
-        if (canHaveChildrenForEditing(deprecatedNode()) && renderer->isRenderBlockFlow() && hasRenderedNonAnonymousDescendantsWithHeight(renderer)) {
+        if (canHaveChildrenForEditing(deprecatedNode()) && renderer->isRenderParagraph() && hasRenderedNonAnonymousDescendantsWithHeight(renderer)) {
             // Try a visually equivalent position with possibly opposite editability. This helps in case |this| is in
             // an editable block but surrounded by non-editable positions. It acts to negate the logic at the beginning
             // of RenderObject::createVisiblePosition().
@@ -1151,7 +1152,7 @@ TextDirection Position::primaryDirection() const
 {
     TextDirection primaryDirection = LTR;
     for (const RenderObject* r = m_anchorNode->renderer(); r; r = r->parent()) {
-        if (r->isRenderBlockFlow()) {
+        if (r->isRenderParagraph()) {
             primaryDirection = r->style()->direction();
             break;
         }

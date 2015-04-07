@@ -24,9 +24,10 @@
 #define SKY_ENGINE_CORE_RENDERING_INLINEITERATOR_H_
 
 #include "sky/engine/core/rendering/BidiRun.h"
-#include "sky/engine/core/rendering/RenderBlockFlow.h"
 #include "sky/engine/core/rendering/RenderInline.h"
+#include "sky/engine/core/rendering/RenderParagraph.h"
 #include "sky/engine/core/rendering/RenderText.h"
+#include "sky/engine/core/rendering/line/TrailingObjects.h"
 #include "sky/engine/wtf/StdLibExtras.h"
 
 namespace blink {
@@ -283,7 +284,7 @@ static inline RenderObject* bidiNextIncludingEmptyInlines(RenderObject* root, Re
     return bidiNextShared(root, current, observer, IncludeEmptyInlines, endOfInlinePtr);
 }
 
-static inline RenderObject* bidiFirstSkippingEmptyInlines(RenderBlockFlow* root, BidiRunList<BidiRun>& runs, InlineBidiResolver* resolver = 0)
+static inline RenderObject* bidiFirstSkippingEmptyInlines(RenderParagraph* root, BidiRunList<BidiRun>& runs, InlineBidiResolver* resolver = 0)
 {
     RenderObject* o = root->firstChild();
     if (!o)
@@ -331,7 +332,7 @@ inline void InlineIterator::fastIncrementInTextNode()
         m_pos++;
 }
 
-// FIXME: This is used by RenderBlockFlow for simplified layout, and has nothing to do with bidi
+// FIXME: This is used by RenderParagraph for simplified layout, and has nothing to do with bidi
 // it shouldn't use functions called bidiFirst and bidiNext.
 class InlineWalker {
 public:
@@ -600,7 +601,7 @@ public:
         // We only need to add a fake run for a given isolated span once during each call to createBidiRunsForLine.
         // We'll be called for every span inside the isolated span so we just ignore subsequent calls.
         // We also avoid creating a fake run until we hit a child that warrants one, e.g. we skip floats.
-        if (RenderBlockFlow::shouldSkipCreatingRunsForObject(obj))
+        if (RenderParagraph::shouldSkipCreatingRunsForObject(obj))
             return;
         if (!m_haveAddedFakeRunForRootIsolate) {
             BidiRun* run = addPlaceholderRunForIsolatedInline(resolver, obj, pos);
@@ -629,7 +630,7 @@ static void inline appendRunObjectIfNecessary(RenderObject* obj, unsigned start,
 
 static void adjustMidpointsAndAppendRunsForObjectIfNeeded(RenderObject* obj, unsigned start, unsigned end, InlineBidiResolver& resolver, AppendRunBehavior behavior, IsolateTracker& tracker)
 {
-    if (start > end || RenderBlockFlow::shouldSkipCreatingRunsForObject(obj))
+    if (start > end || RenderParagraph::shouldSkipCreatingRunsForObject(obj))
         return;
 
     LineMidpointState& lineMidpointState = resolver.midpointState();

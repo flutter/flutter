@@ -172,7 +172,6 @@ void StyleResolver::matchRules(Element& element, ElementRuleCollector& collector
 PassRefPtr<RenderStyle> StyleResolver::styleForDocument(Document& document)
 {
     RefPtr<RenderStyle> documentStyle = RenderStyle::create();
-    documentStyle->setDisplay(FLEX);
     documentStyle->setRTLOrdering(LogicalOrder);
     documentStyle->setLocale(document.contentLanguage());
     documentStyle->setZIndex(0);

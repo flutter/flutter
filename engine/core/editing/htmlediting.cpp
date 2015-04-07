@@ -893,7 +893,7 @@ bool areIdenticalElements(const Node* first, const Node* second)
 bool isBlockFlowElement(const Node& node)
 {
     RenderObject* renderer = node.renderer();
-    return node.isElementNode() && renderer && renderer->isRenderBlockFlow();
+    return node.isElementNode() && renderer && renderer->isRenderParagraph();
 }
 
 Position adjustedSelectionStartForStyleComputation(const VisibleSelection& selection)

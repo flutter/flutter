@@ -28,6 +28,7 @@
 #include "sky/engine/core/rendering/RenderInline.h"
 #include "sky/engine/core/rendering/RenderLayer.h"
 #include "sky/engine/core/rendering/RenderObjectInlines.h"
+#include "sky/engine/core/rendering/RenderParagraph.h"
 #include "sky/engine/core/rendering/RenderView.h"
 #include "sky/engine/core/rendering/RootInlineBox.h"
 #include "sky/engine/platform/fonts/Font.h"

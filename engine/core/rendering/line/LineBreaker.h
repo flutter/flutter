@@ -36,7 +36,7 @@ struct RenderTextInfo;
 class LineBreaker {
 public:
     friend class BreakingContext;
-    LineBreaker(RenderBlockFlow* block)
+    LineBreaker(RenderParagraph* block)
         : m_block(block)
     {
         reset();
@@ -52,7 +52,7 @@ private:
 
     void skipLeadingWhitespace(InlineBidiResolver&, LineInfo&, FloatingObject* lastFloatFromPreviousLine, LineWidth&);
 
-    RenderBlockFlow* m_block;
+    RenderParagraph* m_block;
     bool m_hyphenated;
     Vector<RenderBox*> m_positionedObjects;
 };

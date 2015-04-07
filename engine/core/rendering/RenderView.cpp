@@ -37,7 +37,7 @@
 namespace blink {
 
 RenderView::RenderView(Document* document)
-    : RenderBlockFlow(document)
+    : RenderFlexibleBox(document)
     , m_frameView(document->view())
     , m_selectionStart(nullptr)
     , m_selectionEnd(nullptr)
@@ -116,11 +116,6 @@ void RenderView::updateLogicalWidth()
         setLogicalWidth(viewLogicalWidth());
 }
 
-LayoutUnit RenderView::availableLogicalHeight(AvailableLogicalHeightType heightType) const
-{
-    return RenderBlockFlow::availableLogicalHeight(heightType);
-}
-
 bool RenderView::isChildAllowed(RenderObject* child, RenderStyle*) const
 {
     return child->isBox();
@@ -145,7 +140,7 @@ void RenderView::layout()
     if (!needsLayout())
         return;
 
-    RenderBlockFlow::layout();
+    RenderFlexibleBox::layout();
     clearNeedsLayout();
 }
 

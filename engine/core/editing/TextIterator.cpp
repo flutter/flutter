@@ -789,7 +789,7 @@ bool TextIterator::shouldRepresentNodeOffsetZero()
     // If this node is unrendered or invisible the VisiblePosition checks below won't have much meaning.
     // Additionally, if the range we are iterating over contains huge sections of unrendered content,
     // we would create VisiblePositions on every call to this function without this check.
-    if (!m_node->renderer() || (m_node->renderer()->isRenderBlockFlow() && !toRenderBlock(m_node->renderer())->height()))
+    if (!m_node->renderer() || (m_node->renderer()->isRenderParagraph() && !toRenderBlock(m_node->renderer())->height()))
         return false;
 
     // The startPos.isNotNull() check is needed because the start could be before the body,

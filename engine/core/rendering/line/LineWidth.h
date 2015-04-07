@@ -36,14 +36,14 @@ namespace blink {
 
 class FloatingObject;
 class RenderObject;
-class RenderBlockFlow;
+class RenderParagraph;
 
 enum IndentTextOrNot { DoNotIndentText, IndentText };
 enum WhitespaceTreatment { ExcludeWhitespace, IncludeWhitespace };
 
 class LineWidth {
 public:
-    LineWidth(RenderBlockFlow&, bool isFirstLine, IndentTextOrNot shouldIndentText);
+    LineWidth(RenderParagraph&, bool isFirstLine, IndentTextOrNot shouldIndentText);
 
     bool fitsOnLine() const { return currentWidth() <= (m_availableWidth + LayoutUnit::epsilon()); }
     bool fitsOnLine(float extra) const { return currentWidth() + extra <= (m_availableWidth + LayoutUnit::epsilon()); }
@@ -71,7 +71,7 @@ private:
     void computeAvailableWidthFromLeftAndRight();
     void updateLineDimension(LayoutUnit newLineTop, LayoutUnit newLineWidth, const float& newLineLeft, const float& newLineRight);
 
-    RenderBlockFlow& m_block;
+    RenderParagraph& m_block;
     float m_uncommittedWidth;
     float m_committedWidth;
     float m_trailingWhitespaceWidth;

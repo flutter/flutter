@@ -22,7 +22,7 @@
 
 #include "sky/engine/core/rendering/InlineFlowBox.h"
 #include "sky/engine/core/rendering/PaintInfo.h"
-#include "sky/engine/core/rendering/RenderBlockFlow.h"
+#include "sky/engine/core/rendering/RenderParagraph.h"
 #include "sky/engine/core/rendering/RenderObjectInlines.h"
 #include "sky/engine/core/rendering/RootInlineBox.h"
 #include "sky/engine/platform/Partitions.h"

@@ -45,7 +45,7 @@ const unsigned cMaxLineDepth = 200;
 
 class BreakingContext {
 public:
-    BreakingContext(InlineBidiResolver& resolver, LineInfo& inLineInfo, LineWidth& lineWidth, RenderTextInfo& inRenderTextInfo, FloatingObject* inLastFloatFromPreviousLine, bool appliedStartWidth, RenderBlockFlow* block)
+    BreakingContext(InlineBidiResolver& resolver, LineInfo& inLineInfo, LineWidth& lineWidth, RenderTextInfo& inRenderTextInfo, FloatingObject* inLastFloatFromPreviousLine, bool appliedStartWidth, RenderParagraph* block)
         : m_resolver(resolver)
         , m_current(resolver.position())
         , m_lineBreak(resolver.position())
@@ -105,7 +105,7 @@ private:
     InlineIterator m_lineBreak;
     InlineIterator m_startOfIgnoredSpaces;
 
-    RenderBlockFlow* m_block;
+    RenderParagraph* m_block;
     RenderObject* m_lastObject;
     RenderObject* m_nextObject;
 
@@ -292,7 +292,7 @@ inline void BreakingContext::handleOutOfFlowPositioned(Vector<RenderBox*>& posit
 
 // This is currently just used for list markers and inline flows that have line boxes. Neither should
 // have an effect on whitespace at the start of the line.
-inline bool shouldSkipWhitespaceAfterStartObject(RenderBlockFlow* block, RenderObject* o, LineMidpointState& lineMidpointState)
+inline bool shouldSkipWhitespaceAfterStartObject(RenderParagraph* block, RenderObject* o, LineMidpointState& lineMidpointState)
 {
     RenderObject* next = bidiNextSkippingEmptyInlines(block, o);
     while (next && next->isFloatingOrOutOfFlowPositioned())

@@ -111,7 +111,6 @@ const int showTreeCharacterOffset = 39;
 // Base class for all rendering tree objects.
 class RenderObject : public ImageResourceClient {
     friend class RenderBlock;
-    friend class RenderBlockFlow;
     friend class RenderObjectChildList;
     WTF_MAKE_NONCOPYABLE(RenderObject);
 public:
@@ -260,7 +259,6 @@ public:
     virtual bool isImage() const { return false; }
     virtual bool isInlineBlock() const { return false; }
     virtual bool isRenderBlock() const { return false; }
-    virtual bool isRenderBlockFlow() const { return false; }
     virtual bool isRenderCustomLayout() const { return false; }
     virtual bool isRenderParagraph() const { return false; }
     virtual bool isRenderImage() const { return false; }

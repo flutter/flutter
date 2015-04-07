@@ -11,7 +11,6 @@
 #include "sky/engine/core/rendering/RenderObjectInlines.h"
 #include "sky/engine/core/rendering/RenderView.h"
 #include "sky/engine/core/rendering/TextRunConstructor.h"
-#include "sky/engine/core/rendering/TrailingFloatsRootInlineBox.h"
 #include "sky/engine/core/rendering/VerticalPositionCache.h"
 #include "sky/engine/core/rendering/line/BreakingContextInlineHeaders.h"
 #include "sky/engine/core/rendering/line/LineLayoutState.h"
@@ -31,7 +30,7 @@ namespace blink {
 using namespace WTF::Unicode;
 
 RenderParagraph::RenderParagraph(ContainerNode* node)
-    : RenderBlockFlow(node)
+    : RenderBlock(node)
 {
 }
 
@@ -51,6 +50,34 @@ RenderParagraph* RenderParagraph::createAnonymous(Document& document)
     RenderParagraph* renderer = new RenderParagraph(0);
     renderer->setDocumentForAnonymous(&document);
     return renderer;
+}
+
+LayoutUnit RenderParagraph::logicalLeftSelectionOffset(RenderBlock* rootBlock, LayoutUnit position)
+{
+    LayoutUnit logicalLeft = logicalLeftOffsetForLine(false);
+    if (logicalLeft == logicalLeftOffsetForContent())
+        return RenderBlock::logicalLeftSelectionOffset(rootBlock, position);
+
+    RenderBlock* cb = this;
+    while (cb != rootBlock) {
+        logicalLeft += cb->logicalLeft();
+        cb = cb->containingBlock();
+    }
+    return logicalLeft;
+}
+
+LayoutUnit RenderParagraph::logicalRightSelectionOffset(RenderBlock* rootBlock, LayoutUnit position)
+{
+    LayoutUnit logicalRight = logicalRightOffsetForLine(false);
+    if (logicalRight == logicalRightOffsetForContent())
+        return RenderBlock::logicalRightSelectionOffset(rootBlock, position);
+
+    RenderBlock* cb = this;
+    while (cb != rootBlock) {
+        logicalRight += cb->logicalLeft();
+        cb = cb->containingBlock();
+    }
+    return logicalRight;
 }
 
 RootInlineBox* RenderParagraph::lineAtIndex(int i) const
@@ -78,6 +105,11 @@ int RenderParagraph::lineCount(const RootInlineBox* stopRootInlineBox, bool* fou
     }
 
     return count;
+}
+
+void RenderParagraph::deleteLineBoxTree()
+{
+    m_lineBoxes.deleteLineBoxTree();
 }
 
 GapRects RenderParagraph::inlineSelectionGaps(RenderBlock* rootBlock, const LayoutPoint& rootBlockPhysicalPosition, const LayoutSize& offsetFromRootBlock,
@@ -211,10 +243,121 @@ void RenderParagraph::markLinesDirtyInBlockRange(LayoutUnit logicalTop, LayoutUn
     }
 }
 
-static inline InlineBox* createInlineBoxForRenderer(RenderObject* obj, bool isRootLineBox, bool isOnlyRun = false)
+static void updateLogicalWidthForLeftAlignedBlock(bool isLeftToRightDirection, BidiRun* trailingSpaceRun, float& logicalLeft, float& totalLogicalWidth, float availableLogicalWidth)
+{
+    // The direction of the block should determine what happens with wide lines.
+    // In particular with RTL blocks, wide lines should still spill out to the left.
+    if (isLeftToRightDirection) {
+        if (totalLogicalWidth > availableLogicalWidth && trailingSpaceRun)
+            trailingSpaceRun->m_box->setLogicalWidth(std::max<float>(0, trailingSpaceRun->m_box->logicalWidth() - totalLogicalWidth + availableLogicalWidth));
+        return;
+    }
+
+    if (trailingSpaceRun)
+        trailingSpaceRun->m_box->setLogicalWidth(0);
+    else if (totalLogicalWidth > availableLogicalWidth)
+        logicalLeft -= (totalLogicalWidth - availableLogicalWidth);
+}
+
+static void updateLogicalWidthForRightAlignedBlock(bool isLeftToRightDirection, BidiRun* trailingSpaceRun, float& logicalLeft, float& totalLogicalWidth, float availableLogicalWidth)
+{
+    // Wide lines spill out of the block based off direction.
+    // So even if text-align is right, if direction is LTR, wide lines should overflow out of the right
+    // side of the block.
+    if (isLeftToRightDirection) {
+        if (trailingSpaceRun) {
+            totalLogicalWidth -= trailingSpaceRun->m_box->logicalWidth();
+            trailingSpaceRun->m_box->setLogicalWidth(0);
+        }
+        if (totalLogicalWidth < availableLogicalWidth)
+            logicalLeft += availableLogicalWidth - totalLogicalWidth;
+        return;
+    }
+
+    if (totalLogicalWidth > availableLogicalWidth && trailingSpaceRun) {
+        trailingSpaceRun->m_box->setLogicalWidth(std::max<float>(0, trailingSpaceRun->m_box->logicalWidth() - totalLogicalWidth + availableLogicalWidth));
+        totalLogicalWidth -= trailingSpaceRun->m_box->logicalWidth();
+    } else
+        logicalLeft += availableLogicalWidth - totalLogicalWidth;
+}
+
+static void updateLogicalWidthForCenterAlignedBlock(bool isLeftToRightDirection, BidiRun* trailingSpaceRun, float& logicalLeft, float& totalLogicalWidth, float availableLogicalWidth)
+{
+    float trailingSpaceWidth = 0;
+    if (trailingSpaceRun) {
+        totalLogicalWidth -= trailingSpaceRun->m_box->logicalWidth();
+        trailingSpaceWidth = std::min(trailingSpaceRun->m_box->logicalWidth(), (availableLogicalWidth - totalLogicalWidth + 1) / 2);
+        trailingSpaceRun->m_box->setLogicalWidth(std::max<float>(0, trailingSpaceWidth));
+    }
+    if (isLeftToRightDirection)
+        logicalLeft += std::max<float>((availableLogicalWidth - totalLogicalWidth) / 2, 0);
+    else
+        logicalLeft += totalLogicalWidth > availableLogicalWidth ? (availableLogicalWidth - totalLogicalWidth) : (availableLogicalWidth - totalLogicalWidth) / 2 - trailingSpaceWidth;
+}
+
+void RenderParagraph::updateLogicalWidthForAlignment(const ETextAlign& textAlign, const RootInlineBox* rootInlineBox, BidiRun* trailingSpaceRun, float& logicalLeft, float& totalLogicalWidth, float& availableLogicalWidth, unsigned expansionOpportunityCount)
+{
+    TextDirection direction;
+    if (rootInlineBox && rootInlineBox->renderer().style()->unicodeBidi() == Plaintext)
+        direction = rootInlineBox->direction();
+    else
+        direction = style()->direction();
+
+    // Armed with the total width of the line (without justification),
+    // we now examine our text-align property in order to determine where to position the
+    // objects horizontally. The total width of the line can be increased if we end up
+    // justifying text.
+    switch (textAlign) {
+    case LEFT:
+        updateLogicalWidthForLeftAlignedBlock(style()->isLeftToRightDirection(), trailingSpaceRun, logicalLeft, totalLogicalWidth, availableLogicalWidth);
+        break;
+    case RIGHT:
+        updateLogicalWidthForRightAlignedBlock(style()->isLeftToRightDirection(), trailingSpaceRun, logicalLeft, totalLogicalWidth, availableLogicalWidth);
+        break;
+    case CENTER:
+        updateLogicalWidthForCenterAlignedBlock(style()->isLeftToRightDirection(), trailingSpaceRun, logicalLeft, totalLogicalWidth, availableLogicalWidth);
+        break;
+    case JUSTIFY:
+        adjustInlineDirectionLineBounds(expansionOpportunityCount, logicalLeft, availableLogicalWidth);
+        if (expansionOpportunityCount) {
+            if (trailingSpaceRun) {
+                totalLogicalWidth -= trailingSpaceRun->m_box->logicalWidth();
+                trailingSpaceRun->m_box->setLogicalWidth(0);
+            }
+            break;
+        }
+        // Fall through
+    case TASTART:
+        if (direction == LTR)
+            updateLogicalWidthForLeftAlignedBlock(style()->isLeftToRightDirection(), trailingSpaceRun, logicalLeft, totalLogicalWidth, availableLogicalWidth);
+        else
+            updateLogicalWidthForRightAlignedBlock(style()->isLeftToRightDirection(), trailingSpaceRun, logicalLeft, totalLogicalWidth, availableLogicalWidth);
+        break;
+    case TAEND:
+        if (direction == LTR)
+            updateLogicalWidthForRightAlignedBlock(style()->isLeftToRightDirection(), trailingSpaceRun, logicalLeft, totalLogicalWidth, availableLogicalWidth);
+        else
+            updateLogicalWidthForLeftAlignedBlock(style()->isLeftToRightDirection(), trailingSpaceRun, logicalLeft, totalLogicalWidth, availableLogicalWidth);
+        break;
+    }
+}
+
+RootInlineBox* RenderParagraph::createAndAppendRootInlineBox()
+{
+    RootInlineBox* rootBox = createRootInlineBox();
+    m_lineBoxes.appendLineBox(rootBox);
+    return rootBox;
+}
+
+RootInlineBox* RenderParagraph::createRootInlineBox()
+{
+    return new RootInlineBox(*this);
+}
+
+InlineBox* RenderParagraph::createInlineBoxForRenderer(RenderObject* obj, bool isRootLineBox, bool isOnlyRun)
 {
     if (isRootLineBox)
-        return toRenderBlockFlow(obj)->createAndAppendRootInlineBox();
+        return toRenderParagraph(obj)->createAndAppendRootInlineBox();
 
     if (obj->isText()) {
         InlineTextBox* textBox = toRenderText(obj)->createInlineTextBox();
@@ -784,7 +927,6 @@ void RenderParagraph::layoutRunsAndFloatsInRange(LineLayoutState& layoutState,
             // Once BidiRunList is separated from BidiResolver this will not be needed.
             resolver.runs().deleteRuns();
             resolver.markCurrentRunEmpty(); // FIXME: This can probably be replaced by an ASSERT (or just removed).
-            layoutState.setCheckForFloatsFromLastLine(true);
             resolver.setPosition(InlineIterator(resolver.position().root(), 0, 0), 0);
             break;
         }
@@ -1242,6 +1384,44 @@ int RenderParagraph::lastLineBoxBaseline(LineDirectionMode lineDirection) const
     return -1;
 }
 
+void RenderParagraph::layout()
+{
+    ASSERT(needsLayout());
+    ASSERT(isInlineBlock() || !isInline());
+
+    if (simplifiedLayout())
+        return;
+
+    SubtreeLayoutScope layoutScope(*this);
+
+    LayoutUnit oldLeft = logicalLeft();
+    bool logicalWidthChanged = updateLogicalWidthAndColumnWidth();
+    bool relayoutChildren = logicalWidthChanged;
+
+    LayoutUnit beforeEdge = borderBefore() + paddingBefore();
+    LayoutUnit afterEdge = borderAfter() + paddingAfter();
+    LayoutUnit previousHeight = logicalHeight();
+    setLogicalHeight(beforeEdge);
+
+    layoutChildren(relayoutChildren, layoutScope, beforeEdge, afterEdge);
+
+    LayoutUnit oldClientAfterEdge = clientLogicalBottom();
+
+    updateLogicalHeight();
+
+    if (previousHeight != logicalHeight())
+        relayoutChildren = true;
+
+    layoutPositionedObjects(relayoutChildren, oldLeft != logicalLeft() ? ForcedLayoutAfterContainingBlockMoved : DefaultLayout);
+
+    // Add overflow from children (unless we're multi-column, since in that case all our child overflow is clipped anyway).
+    computeOverflow(oldClientAfterEdge);
+
+    updateLayerTransformAfterLayout();
+
+    clearNeedsLayout();
+}
+
 void RenderParagraph::layoutChildren(bool relayoutChildren, SubtreeLayoutScope& layoutScope, LayoutUnit beforeEdge, LayoutUnit afterEdge)
 {
     // Figure out if we should clear out our line boxes.
@@ -1327,58 +1507,10 @@ void RenderParagraph::layoutChildren(bool relayoutChildren, SubtreeLayoutScope& 
         checkLinesForTextOverflow();
 }
 
-void RenderParagraph::checkFloatsInCleanLine(RootInlineBox* line, Vector<FloatWithRect>& floats, size_t& floatIndex, bool& encounteredNewFloat, bool& dirtiedByFloat)
-{
-    Vector<RenderBox*>* cleanLineFloats = line->floatsPtr();
-    if (!cleanLineFloats)
-        return;
-
-    Vector<RenderBox*>::iterator end = cleanLineFloats->end();
-    for (Vector<RenderBox*>::iterator it = cleanLineFloats->begin(); it != end; ++it) {
-        RenderBox* floatingBox = *it;
-        floatingBox->layoutIfNeeded();
-        LayoutSize newSize(floatingBox->width() + floatingBox->marginWidth(), floatingBox->height() + floatingBox->marginHeight());
-        if (floats[floatIndex].object != floatingBox) {
-            encounteredNewFloat = true;
-            return;
-        }
-
-        if (floats[floatIndex].rect.size() != newSize) {
-            LayoutUnit floatTop = floats[floatIndex].rect.y();
-            LayoutUnit floatHeight = std::max(floats[floatIndex].rect.height(), newSize.height());
-            floatHeight = std::min(floatHeight, LayoutUnit::max() - floatTop);
-            line->markDirty();
-            markLinesDirtyInBlockRange(line->lineBottomWithLeading(), floatTop + floatHeight, line);
-            floats[floatIndex].rect.setSize(newSize);
-            dirtiedByFloat = true;
-        }
-        floatIndex++;
-    }
-}
-
 RootInlineBox* RenderParagraph::determineStartPosition(LineLayoutState& layoutState, InlineBidiResolver& resolver)
 {
     RootInlineBox* curr = 0;
     RootInlineBox* last = 0;
-
-    // FIXME: This entire float-checking block needs to be broken into a new function.
-    bool dirtiedByFloat = false;
-    if (!layoutState.isFullLayout()) {
-        size_t floatIndex = 0;
-        for (curr = firstRootBox(); curr && !curr->isDirty(); curr = curr->nextRootBox()) {
-            // If a new float has been inserted before this line or before its last known float, just do a full layout.
-            bool encounteredNewFloat = false;
-            checkFloatsInCleanLine(curr, layoutState.floats(), floatIndex, encounteredNewFloat, dirtiedByFloat);
-            if (encounteredNewFloat)
-                layoutState.markForFullLayout();
-
-            if (dirtiedByFloat || layoutState.isFullLayout())
-                break;
-        }
-        // Check if a new float has been inserted after the last known float.
-        if (!curr && floatIndex < layoutState.floats().size())
-            layoutState.markForFullLayout();
-    }
 
     if (layoutState.isFullLayout()) {
         // If we encountered a new float and have inline children, mark ourself to force us to issue paint invalidations.
@@ -1401,7 +1533,7 @@ RootInlineBox* RenderParagraph::determineStartPosition(LineLayoutState& layoutSt
             // We have a dirty line.
             if (RootInlineBox* prevRootBox = curr->prevRootBox()) {
                 // We have a previous line.
-                if (!dirtiedByFloat && (!prevRootBox->endsWithBreak() || !prevRootBox->lineBreakObj() || (prevRootBox->lineBreakObj()->isText() && prevRootBox->lineBreakPos() >= toRenderText(prevRootBox->lineBreakObj())->textLength())))
+                if (!prevRootBox->endsWithBreak() || !prevRootBox->lineBreakObj() || (prevRootBox->lineBreakObj()->isText() && prevRootBox->lineBreakPos() >= toRenderText(prevRootBox->lineBreakObj())->textLength()))
                     // The previous line didn't break cleanly or broke at a newline
                     // that has been deleted, so treat it as dirty too.
                     curr = prevRootBox;
@@ -1439,16 +1571,8 @@ RootInlineBox* RenderParagraph::determineStartPosition(LineLayoutState& layoutSt
 void RenderParagraph::determineEndPosition(LineLayoutState& layoutState, RootInlineBox* startLine, InlineIterator& cleanLineStart, BidiStatus& cleanLineBidiStatus)
 {
     ASSERT(!layoutState.endLine());
-    size_t floatIndex = layoutState.floatIndex();
     RootInlineBox* last = 0;
     for (RootInlineBox* curr = startLine->nextRootBox(); curr; curr = curr->nextRootBox()) {
-        if (!curr->isDirty()) {
-            bool encounteredNewFloat = false;
-            bool dirtiedByFloat = false;
-            checkFloatsInCleanLine(curr, layoutState.floats(), floatIndex, encounteredNewFloat, dirtiedByFloat);
-            if (encounteredNewFloat)
-                return;
-        }
         if (curr->isDirty())
             last = 0;
         else if (!last)

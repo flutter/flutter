@@ -2763,7 +2763,7 @@ PositionWithAffinity RenderBox::positionForPoint(const LayoutPoint& point)
     LayoutPoint adjustedPoint = point;
 
     for (RenderObject* renderObject = firstChild; renderObject; renderObject = renderObject->nextSibling()) {
-        if (!renderObject->slowFirstChild() && !renderObject->isInline() && !renderObject->isRenderBlockFlow())
+        if (!renderObject->slowFirstChild() && !renderObject->isInline() && !renderObject->isRenderParagraph())
             continue;
 
         if (!renderObject->isBox())

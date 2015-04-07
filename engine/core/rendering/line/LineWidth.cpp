@@ -31,11 +31,11 @@
 #include "sky/engine/core/rendering/line/LineWidth.h"
 
 #include "sky/engine/core/rendering/RenderBlock.h"
-#include "sky/engine/core/rendering/RenderBlockFlow.h"
+#include "sky/engine/core/rendering/RenderParagraph.h"
 
 namespace blink {
 
-LineWidth::LineWidth(RenderBlockFlow& block, bool isFirstLine, IndentTextOrNot shouldIndentText)
+LineWidth::LineWidth(RenderParagraph& block, bool isFirstLine, IndentTextOrNot shouldIndentText)
     : m_block(block)
     , m_uncommittedWidth(0)
     , m_committedWidth(0)

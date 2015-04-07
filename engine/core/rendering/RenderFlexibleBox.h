@@ -38,7 +38,7 @@ namespace blink {
 
 class RenderFlexibleBox : public RenderBlock {
 public:
-    RenderFlexibleBox(Element*);
+    RenderFlexibleBox(ContainerNode*);
     virtual ~RenderFlexibleBox();
 
     static RenderFlexibleBox* createAnonymous(Document*);
@@ -46,7 +46,7 @@ public:
     virtual const char* renderName() const override;
 
     virtual bool isFlexibleBox() const override final { return true; }
-    void layout() final;
+    void layout();
 
     virtual int baselinePosition(FontBaseline, bool firstLine, LineDirectionMode, LinePositionMode = PositionOnContainingLine) const override;
     virtual int firstLineBoxBaseline() const override;

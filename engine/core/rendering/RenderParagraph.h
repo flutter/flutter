@@ -6,30 +6,64 @@
 #define SKY_ENGINE_CORE_RENDERING_RENDERPARAGRAPH_H_
 
 #include "sky/engine/core/dom/ContainerNode.h"
-#include "sky/engine/core/rendering/RenderBlockFlow.h"
+#include "sky/engine/core/rendering/RenderBlock.h"
+#include "sky/engine/core/rendering/line/TrailingObjects.h"
 
 namespace blink {
 
+struct BidiRun;
 class ContainerNode;
+// class InlineBidiResolver;
+class InlineIterator;
 
-class RenderParagraph final : public RenderBlockFlow {
+class RenderParagraph final : public RenderBlock {
 public:
     explicit RenderParagraph(ContainerNode*);
     virtual ~RenderParagraph();
 
     static RenderParagraph* createAnonymous(Document&);
 
-    bool isRenderParagraph() const override { return true; }
+    bool isRenderParagraph() const final { return true; }
+
+    void layout() final;
+
+    LayoutUnit logicalRightOffsetForLine(bool shouldIndentText) const
+    {
+        LayoutUnit right = logicalRightOffsetForContent();
+        if (shouldIndentText && !style()->isLeftToRightDirection())
+            right -= textIndentOffset();
+        return right;
+    }
+    LayoutUnit logicalLeftOffsetForLine(bool shouldIndentText) const
+    {
+        LayoutUnit left = logicalLeftOffsetForContent();
+        if (shouldIndentText && style()->isLeftToRightDirection())
+            left += textIndentOffset();
+        return left;
+    }
+
+    LayoutUnit logicalLeftSelectionOffset(RenderBlock* rootBlock, LayoutUnit position) final;
+    LayoutUnit logicalRightSelectionOffset(RenderBlock* rootBlock, LayoutUnit position) final;
 
     virtual RootInlineBox* lineAtIndex(int) const;
     virtual int lineCount(const RootInlineBox* = 0, bool* = 0) const;
 
+    void deleteLineBoxTree() final;
+
     GapRects inlineSelectionGaps(RenderBlock* rootBlock, const LayoutPoint& rootBlockPhysicalPosition, const LayoutSize& offsetFromRootBlock,
         LayoutUnit& lastLogicalTop, LayoutUnit& lastLogicalLeft, LayoutUnit& lastLogicalRight, const PaintInfo*);
 
-protected:
-    void layoutChildren(bool relayoutChildren, SubtreeLayoutScope&, LayoutUnit beforeEdge, LayoutUnit afterEdge) final;
+    static bool shouldSkipCreatingRunsForObject(RenderObject* obj)
+    {
+        return obj->isOutOfFlowPositioned() && !obj->style()->isOriginalDisplayInlineType() && !obj->container()->isRenderInline();
+    }
 
+    // TODO(ojan): Remove the need for these.
+    using RenderBlock::lineBoxes;
+    using RenderBlock::firstLineBox;
+    using RenderBlock::lastRootBox;
+
+protected:
     void addOverflowFromChildren() final;
 
     void simplifiedNormalFlowLayout() final;
@@ -48,9 +82,16 @@ protected:
 private:
     virtual const char* renderName() const override;
 
+    void layoutChildren(bool relayoutChildren, SubtreeLayoutScope&, LayoutUnit beforeEdge, LayoutUnit afterEdge);
+
     void markLinesDirtyInBlockRange(LayoutUnit logicalTop, LayoutUnit logicalBottom, RootInlineBox* highest = 0);
 
+    void updateLogicalWidthForAlignment(const ETextAlign&, const RootInlineBox*, BidiRun* trailingSpaceRun, float& logicalLeft, float& totalLogicalWidth, float& availableLogicalWidth, unsigned expansionOpportunityCount);
+
+    RootInlineBox* createAndAppendRootInlineBox();
+    RootInlineBox* createRootInlineBox();
     InlineFlowBox* createLineBoxes(RenderObject*, const LineInfo&, InlineBox* childBox);
+    InlineBox* createInlineBoxForRenderer(RenderObject*, bool isRootLineBox, bool isOnlyRun = false);
     RootInlineBox* constructLine(BidiRunList<BidiRun>&, const LineInfo&);
     void computeInlineDirectionPositionsForLine(RootInlineBox*, const LineInfo&, BidiRun* firstRun, BidiRun* trailingSpaceRun, bool reachedEnd, GlyphOverflowAndFallbackFontsMap&, VerticalPositionCache&, WordMeasurements&);
     BidiRun* computeInlineDirectionPositionsForSegment(RootInlineBox*, const LineInfo&, ETextAlign, float& logicalLeft,
@@ -62,7 +103,6 @@ private:
     void layoutRunsAndFloatsInRange(LineLayoutState&, InlineBidiResolver&,
         const InlineIterator& cleanLineStart, const BidiStatus& cleanLineBidiStatus);
     void linkToEndLineIfNeeded(LineLayoutState&);
-    void checkFloatsInCleanLine(RootInlineBox*, Vector<FloatWithRect>&, size_t& floatIndex, bool& encounteredNewFloat, bool& dirtiedByFloat);
     RootInlineBox* determineStartPosition(LineLayoutState&, InlineBidiResolver&);
     void determineEndPosition(LineLayoutState&, RootInlineBox* startBox, InlineIterator& cleanLineStart, BidiStatus& cleanLineBidiStatus);
     bool checkPaginationAndFloatsAtEndLine(LineLayoutState&);

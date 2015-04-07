@@ -39,7 +39,7 @@
 #include "sky/engine/core/editing/VisiblePosition.h"
 #include "sky/engine/core/editing/htmlediting.h"
 #include "sky/engine/core/rendering/InlineTextBox.h"
-#include "sky/engine/core/rendering/RenderBlockFlow.h"
+#include "sky/engine/core/rendering/RenderParagraph.h"
 #include "sky/engine/core/rendering/RenderObject.h"
 #include "sky/engine/platform/heap/Handle.h"
 #include "sky/engine/platform/text/TextBoundaries.h"
@@ -881,7 +881,7 @@ bool isLogicalEndOfLine(const VisiblePosition &p)
 static inline IntPoint absoluteLineDirectionPointToLocalPointInBlock(RootInlineBox* root, int lineDirectionPoint)
 {
     ASSERT(root);
-    RenderBlockFlow& containingBlock = root->block();
+    RenderParagraph& containingBlock = root->block();
     FloatPoint absoluteBlockPoint = containingBlock.localToAbsolute(FloatPoint());
     return IntPoint(lineDirectionPoint - absoluteBlockPoint.x(), root->blockDirectionPointInLine());
 }
@@ -907,7 +907,8 @@ VisiblePosition previousLinePosition(const VisiblePosition &visiblePosition, int
     if (box) {
         root = box->root().prevRootBox();
         // We want to skip zero height boxes.
-        // This could happen in case it is a TrailingFloatsRootInlineBox.
+        // This use to happen in case it is a TrailingFloatsRootInlineBox.
+        // TODO(ojan): Can this still happen in sky?
         if (!root || !root->logicalHeight() || !root->firstLeafChild())
             root = 0;
     }
@@ -964,7 +965,8 @@ VisiblePosition nextLinePosition(const VisiblePosition &visiblePosition, int lin
     if (box) {
         root = box->root().nextRootBox();
         // We want to skip zero height boxes.
-        // This could happen in case it is a TrailingFloatsRootInlineBox.
+        // This use to happen in case it is a TrailingFloatsRootInlineBox.
+        // TODO(ojan): Can this still happen in sky?
         if (!root || !root->logicalHeight() || !root->firstLeafChild())
             root = 0;
     }

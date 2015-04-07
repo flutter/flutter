@@ -23,7 +23,6 @@ void main() {
 
   parent.setLayoutManager(() {
     if (first) {
-      first = false;
       parent.width = 200.0;
     } else {
       parent.width = 150.0;
@@ -69,6 +68,7 @@ void main() {
       expect(secondChild.offsetWidth, equals(200));
       assertNonChangingValues();
 
+      first = false;
       parent.setNeedsLayout();
 
       window.requestAnimationFrame((_) {

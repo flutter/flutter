@@ -88,7 +88,7 @@ protected:
     RootInlineBox* lastRootBox() const { return static_cast<RootInlineBox*>(lastLineBox()); }
 
 public:
-    // FIXME-BLOCKFLOW: Remove virtualizaion when all callers have moved to RenderBlockFlow
+    // FIXME-BLOCKFLOW: Remove virtualizaion when all callers have moved to RenderParagraph
     virtual void deleteLineBoxTree();
 
     virtual void addChild(RenderObject* newChild, RenderObject* beforeChild = 0) override;
@@ -308,8 +308,7 @@ protected:
     friend class LineBreaker;
 
     // FIXME: This is temporary as we move code that accesses block flow
-    // member variables out of RenderBlock and into RenderBlockFlow.
-    friend class RenderBlockFlow;
+    // member variables out of RenderBlock and into RenderParagraph.
     friend class RenderParagraph;
 };
 

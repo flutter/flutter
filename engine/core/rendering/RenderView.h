@@ -23,7 +23,7 @@
 #define SKY_ENGINE_CORE_RENDERING_RENDERVIEW_H_
 
 #include "sky/engine/core/frame/FrameView.h"
-#include "sky/engine/core/rendering/RenderBlockFlow.h"
+#include "sky/engine/core/rendering/RenderFlexibleBox.h"
 #include "sky/engine/core/rendering/RenderIFrame.h"
 #include "sky/engine/wtf/OwnPtr.h"
 
@@ -33,7 +33,7 @@ namespace blink {
 // It's dimensions match that of the logical viewport (which may be different from
 // the visible viewport in fixed-layout mode), and it is always at position (0,0)
 // relative to the document (and so isn't necessarily in view).
-class RenderView final : public RenderBlockFlow {
+class RenderView final : public RenderFlexibleBox {
 public:
     explicit RenderView(Document*);
     virtual ~RenderView();
@@ -55,8 +55,6 @@ public:
     virtual void layout() override;
     virtual void updateLogicalWidth() override;
     virtual void computeLogicalHeight(LayoutUnit logicalHeight, LayoutUnit logicalTop, LogicalExtentComputedValues&) const override;
-
-    virtual LayoutUnit availableLogicalHeight(AvailableLogicalHeightType) const override;
 
     // The same as the FrameView's layoutHeight/layoutWidth but with null check guards.
     int viewHeight() const;

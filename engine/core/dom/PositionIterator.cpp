@@ -28,6 +28,7 @@
 
 #include "sky/engine/core/editing/htmlediting.h"
 #include "sky/engine/core/rendering/RenderBlock.h"
+#include "sky/engine/core/rendering/RenderParagraph.h"
 
 namespace blink {
 
@@ -149,8 +150,8 @@ bool PositionIterator::isCandidate() const
     if (editingIgnoresContent(m_anchorNode))
         return (atStartOfNode() || atEndOfNode()) && !Position::nodeIsUserSelectNone(m_anchorNode->parentNode());
 
-    if (renderer->isRenderBlockFlow()) {
-        if (toRenderBlock(renderer)->logicalHeight()) {
+    if (renderer->isRenderParagraph()) {
+        if (toRenderParagraph(renderer)->logicalHeight()) {
             if (!Position::hasRenderedNonAnonymousDescendantsWithHeight(renderer))
                 return atStartOfNode() && !Position::nodeIsUserSelectNone(m_anchorNode);
             return m_anchorNode->hasEditableStyle() && !Position::nodeIsUserSelectNone(m_anchorNode) && Position(*this).atEditingBoundary();

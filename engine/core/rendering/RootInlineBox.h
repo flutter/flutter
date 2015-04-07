@@ -28,14 +28,14 @@ namespace blink {
 
 class EllipsisBox;
 class HitTestResult;
-class RenderBlockFlow;
+class RenderParagraph;
 
 struct BidiStatus;
 struct GapRects;
 
 class RootInlineBox : public InlineFlowBox {
 public:
-    explicit RootInlineBox(RenderBlockFlow&);
+    explicit RootInlineBox(RenderParagraph&);
 
     virtual void destroy() override final;
 
@@ -121,21 +121,10 @@ public:
 
     GapRects lineSelectionGap(RenderBlock* rootBlock, const LayoutPoint& rootBlockPhysicalPosition, const LayoutSize& offsetFromRootBlock, LayoutUnit selTop, LayoutUnit selHeight, const PaintInfo*);
 
-    RenderBlockFlow& block() const;
+    RenderParagraph& block() const;
 
     InlineBox* closestLeafChildForPoint(const IntPoint&, bool onlyEditableLeaves);
     InlineBox* closestLeafChildForLogicalLeftPosition(int, bool onlyEditableLeaves = false);
-
-    void appendFloat(RenderBox* floatingBox)
-    {
-        ASSERT(!isDirty());
-        if (m_floats)
-            m_floats->append(floatingBox);
-        else
-            m_floats= adoptPtr(new Vector<RenderBox*>(1, floatingBox));
-    }
-
-    Vector<RenderBox*>* floatsPtr() { ASSERT(!isDirty()); return m_floats.get(); }
 
     virtual void extractLineBoxFromRenderObject() override final;
     virtual void attachLineBoxToRenderObject() override final;
@@ -218,10 +207,6 @@ private:
     };
 
     OwnPtr<LineFragmentationData> m_fragmentationData;
-
-    // Floats hanging off the line are pushed into this vector during layout. It is only
-    // good for as long as the line has not been marked dirty.
-    OwnPtr<Vector<RenderBox*> > m_floats;
 
     LayoutUnit m_lineTop;
     LayoutUnit m_lineBottom;
