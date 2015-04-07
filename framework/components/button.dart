@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import '../fn.dart';
+import 'ink_well.dart';
 import 'material.dart';
 
 class Button extends Component {

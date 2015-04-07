@@ -13,29 +13,35 @@ class WidgetsApp extends App {
     top: 200px;
     left: 200px;''');
 
+  PopupMenuController controller;
+
   UINode build() {
     return new Container(
       children: [
         new Button(key: 'Go', content: new Text('Go'), level: 1),
         new Button(key: 'Back', content: new Text('Back'), level: 3),
-        new Input(),
-        new Container(
-          style: _menuStyle,
-          children: [
-            new PopupMenu(
-              items: [
-                [new Text('People & options')],
-                [new Text('New group conversation')],
-                [new Text('Turn history off')],
-                [new Text('Archive')],
-                [new Text('Delete')],
-                [new Text('Un-merge SMS')],
-                [new Text('Help & feeback')],
-              ],
-              level: 4),
-            ]
-          )
-        ]
+        new Input()
+
+        // PopupMenu requires a PopupMenuController and should be wired up
+        // to a button to create the controller only when the menu is open, etc.
+        // new Container(
+        //   style: _menuStyle,
+        //   children: [
+        //     new PopupMenu(
+        //       controller: controller,
+        //       items: [
+        //         [new Text('People & options')],
+        //         [new Text('New group conversation')],
+        //         [new Text('Turn history off')],
+        //         [new Text('Archive')],
+        //         [new Text('Delete')],
+        //         [new Text('Un-merge SMS')],
+        //         [new Text('Help & feeback')],
+        //       ],
+        //       level: 4),
+        //     ]
+        //   )
+        // ]
       );
   }
 }
