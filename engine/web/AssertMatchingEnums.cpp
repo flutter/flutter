@@ -43,7 +43,6 @@
 #include "sky/engine/core/loader/NavigationPolicy.h"
 #include "sky/engine/core/page/PageVisibilityState.h"
 #include "sky/engine/core/rendering/style/RenderStyleConstants.h"
-#include "sky/engine/platform/Cursor.h"
 #include "sky/engine/platform/fonts/FontDescription.h"
 #include "sky/engine/platform/fonts/FontSmoothingMode.h"
 #include "sky/engine/platform/graphics/filters/FilterOperation.h"
@@ -53,7 +52,6 @@
 #include "sky/engine/platform/text/TextDecoration.h"
 #include "sky/engine/platform/weborigin/ReferrerPolicy.h"
 #include "sky/engine/public/platform/WebClipboard.h"
-#include "sky/engine/public/platform/WebCursorInfo.h"
 #include "sky/engine/public/platform/WebInputEvent.h"
 #include "sky/engine/public/platform/WebReferrerPolicy.h"
 #include "sky/engine/public/platform/WebURLRequest.h"
@@ -79,51 +77,6 @@ namespace blink {
 
 #define COMPILE_ASSERT_MATCHING_UINT64(public_name, core_name) \
     COMPILE_ASSERT(public_name == core_name, mismatching_enums)
-
-COMPILE_ASSERT_MATCHING_ENUM(WebCursorInfo::TypePointer, Cursor::Pointer);
-COMPILE_ASSERT_MATCHING_ENUM(WebCursorInfo::TypeCross, Cursor::Cross);
-COMPILE_ASSERT_MATCHING_ENUM(WebCursorInfo::TypeHand, Cursor::Hand);
-COMPILE_ASSERT_MATCHING_ENUM(WebCursorInfo::TypeIBeam, Cursor::IBeam);
-COMPILE_ASSERT_MATCHING_ENUM(WebCursorInfo::TypeWait, Cursor::Wait);
-COMPILE_ASSERT_MATCHING_ENUM(WebCursorInfo::TypeHelp, Cursor::Help);
-COMPILE_ASSERT_MATCHING_ENUM(WebCursorInfo::TypeEastResize, Cursor::EastResize);
-COMPILE_ASSERT_MATCHING_ENUM(WebCursorInfo::TypeNorthResize, Cursor::NorthResize);
-COMPILE_ASSERT_MATCHING_ENUM(WebCursorInfo::TypeNorthEastResize, Cursor::NorthEastResize);
-COMPILE_ASSERT_MATCHING_ENUM(WebCursorInfo::TypeNorthWestResize, Cursor::NorthWestResize);
-COMPILE_ASSERT_MATCHING_ENUM(WebCursorInfo::TypeSouthResize, Cursor::SouthResize);
-COMPILE_ASSERT_MATCHING_ENUM(WebCursorInfo::TypeSouthEastResize, Cursor::SouthEastResize);
-COMPILE_ASSERT_MATCHING_ENUM(WebCursorInfo::TypeSouthWestResize, Cursor::SouthWestResize);
-COMPILE_ASSERT_MATCHING_ENUM(WebCursorInfo::TypeWestResize, Cursor::WestResize);
-COMPILE_ASSERT_MATCHING_ENUM(WebCursorInfo::TypeNorthSouthResize, Cursor::NorthSouthResize);
-COMPILE_ASSERT_MATCHING_ENUM(WebCursorInfo::TypeEastWestResize, Cursor::EastWestResize);
-COMPILE_ASSERT_MATCHING_ENUM(WebCursorInfo::TypeNorthEastSouthWestResize, Cursor::NorthEastSouthWestResize);
-COMPILE_ASSERT_MATCHING_ENUM(WebCursorInfo::TypeNorthWestSouthEastResize, Cursor::NorthWestSouthEastResize);
-COMPILE_ASSERT_MATCHING_ENUM(WebCursorInfo::TypeColumnResize, Cursor::ColumnResize);
-COMPILE_ASSERT_MATCHING_ENUM(WebCursorInfo::TypeRowResize, Cursor::RowResize);
-COMPILE_ASSERT_MATCHING_ENUM(WebCursorInfo::TypeMiddlePanning, Cursor::MiddlePanning);
-COMPILE_ASSERT_MATCHING_ENUM(WebCursorInfo::TypeEastPanning, Cursor::EastPanning);
-COMPILE_ASSERT_MATCHING_ENUM(WebCursorInfo::TypeNorthPanning, Cursor::NorthPanning);
-COMPILE_ASSERT_MATCHING_ENUM(WebCursorInfo::TypeNorthEastPanning, Cursor::NorthEastPanning);
-COMPILE_ASSERT_MATCHING_ENUM(WebCursorInfo::TypeNorthWestPanning, Cursor::NorthWestPanning);
-COMPILE_ASSERT_MATCHING_ENUM(WebCursorInfo::TypeSouthPanning, Cursor::SouthPanning);
-COMPILE_ASSERT_MATCHING_ENUM(WebCursorInfo::TypeSouthEastPanning, Cursor::SouthEastPanning);
-COMPILE_ASSERT_MATCHING_ENUM(WebCursorInfo::TypeSouthWestPanning, Cursor::SouthWestPanning);
-COMPILE_ASSERT_MATCHING_ENUM(WebCursorInfo::TypeWestPanning, Cursor::WestPanning);
-COMPILE_ASSERT_MATCHING_ENUM(WebCursorInfo::TypeMove, Cursor::Move);
-COMPILE_ASSERT_MATCHING_ENUM(WebCursorInfo::TypeVerticalText, Cursor::VerticalText);
-COMPILE_ASSERT_MATCHING_ENUM(WebCursorInfo::TypeCell, Cursor::Cell);
-COMPILE_ASSERT_MATCHING_ENUM(WebCursorInfo::TypeContextMenu, Cursor::ContextMenu);
-COMPILE_ASSERT_MATCHING_ENUM(WebCursorInfo::TypeAlias, Cursor::Alias);
-COMPILE_ASSERT_MATCHING_ENUM(WebCursorInfo::TypeProgress, Cursor::Progress);
-COMPILE_ASSERT_MATCHING_ENUM(WebCursorInfo::TypeNoDrop, Cursor::NoDrop);
-COMPILE_ASSERT_MATCHING_ENUM(WebCursorInfo::TypeCopy, Cursor::Copy);
-COMPILE_ASSERT_MATCHING_ENUM(WebCursorInfo::TypeNone, Cursor::None);
-COMPILE_ASSERT_MATCHING_ENUM(WebCursorInfo::TypeNotAllowed, Cursor::NotAllowed);
-COMPILE_ASSERT_MATCHING_ENUM(WebCursorInfo::TypeZoomIn, Cursor::ZoomIn);
-COMPILE_ASSERT_MATCHING_ENUM(WebCursorInfo::TypeZoomOut, Cursor::ZoomOut);
-COMPILE_ASSERT_MATCHING_ENUM(WebCursorInfo::TypeGrab, Cursor::Grab);
-COMPILE_ASSERT_MATCHING_ENUM(WebCursorInfo::TypeGrabbing, Cursor::Grabbing);
-COMPILE_ASSERT_MATCHING_ENUM(WebCursorInfo::TypeCustom, Cursor::Custom);
 
 COMPILE_ASSERT_MATCHING_ENUM(WebFontDescription::GenericFamilyNone, FontDescription::NoFamily);
 COMPILE_ASSERT_MATCHING_ENUM(WebFontDescription::GenericFamilyStandard, FontDescription::StandardFamily);

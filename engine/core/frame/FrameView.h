@@ -39,7 +39,6 @@
 namespace blink {
 
 class DocumentLifecycle;
-class Cursor;
 class Element;
 class FloatSize;
 class LocalFrame;
@@ -140,10 +139,6 @@ public:
     IntRect convertToRenderer(const RenderObject&, const IntRect&) const;
     IntPoint convertFromRenderer(const RenderObject&, const IntPoint&) const;
     IntPoint convertToRenderer(const RenderObject&, const IntPoint&) const;
-
-    bool shouldSetCursor() const;
-
-    void setCursor(const Cursor&);
 
     // FIXME: Remove this method once plugin loading is decoupled from layout.
     void flushAnyPendingPostLayoutTasks();

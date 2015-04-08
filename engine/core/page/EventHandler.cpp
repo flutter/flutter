@@ -69,32 +69,6 @@
 
 namespace blink {
 
-// The amount of time to wait for a cursor update on style and layout changes
-// Set to 50Hz, no need to be faster than common screen refresh rate
-static const double cursorUpdateInterval = 0.02;
-
-static const int maximumCursorSize = 128;
-
-// It's pretty unlikely that a scale of less than one would ever be used. But all we really
-// need to ensure here is that the scale isn't so small that integer overflow can occur when
-// dividing cursor sizes (limited above) by the scale.
-static const double minimumCursorScale = 0.001;
-
-enum NoCursorChangeType { NoCursorChange };
-
-class OptionalCursor {
-public:
-    OptionalCursor(NoCursorChangeType) : m_isCursorChange(false) { }
-    OptionalCursor(const Cursor& cursor) : m_isCursorChange(true), m_cursor(cursor) { }
-
-    bool isCursorChange() const { return m_isCursorChange; }
-    const Cursor& cursor() const { ASSERT(m_isCursorChange); return m_cursor; }
-
-private:
-    bool m_isCursorChange;
-    Cursor m_cursor;
-};
-
 class MaximumDurationTracker {
 public:
     explicit MaximumDurationTracker(double *maxDuration)
@@ -117,7 +91,6 @@ EventHandler::EventHandler(LocalFrame* frame)
     : m_frame(frame)
     , m_capturesDragging(false)
     , m_selectionInitiationState(HaveNotStartedSelection)
-    , m_cursorUpdateTimer(this, &EventHandler::cursorUpdateTimerFired)
     , m_clickCount(0)
     , m_shouldOnlyFireDragOverEvent(false)
     , m_didStartDrag(false)
@@ -132,7 +105,6 @@ EventHandler::~EventHandler()
 
 void EventHandler::clear()
 {
-    m_cursorUpdateTimer.stop();
     m_activeIntervalTimer.stop();
     m_clickCount = 0;
     m_clickNode = nullptr;
@@ -179,176 +151,10 @@ HitTestResult EventHandler::hitTestResultAtPoint(const LayoutPoint& point, HitTe
     return result;
 }
 
-void EventHandler::cursorUpdateTimerFired(Timer<EventHandler>*)
-{
-    ASSERT(m_frame);
-    ASSERT(m_frame->document());
-
-    updateCursor();
-}
-
-void EventHandler::updateCursor()
-{
-}
-
-OptionalCursor EventHandler::selectCursor(const HitTestResult& result)
-{
-    Page* page = m_frame->page();
-    if (!page)
-        return NoCursorChange;
-
-    Node* node = result.innerPossiblyPseudoNode();
-    if (!node)
-        return selectAutoCursor(result, node);
-
-    RenderObject* renderer = node->renderer();
-    RenderStyle* style = renderer ? renderer->style() : 0;
-
-    if (renderer) {
-        Cursor overrideCursor;
-        switch (renderer->getCursor(roundedIntPoint(result.localPoint()), overrideCursor)) {
-        case SetCursorBasedOnStyle:
-            break;
-        case SetCursor:
-            return overrideCursor;
-        case DoNotSetCursor:
-            return NoCursorChange;
-        }
-    }
-
-    if (style && style->cursors()) {
-        const CursorList* cursors = style->cursors();
-        for (unsigned i = 0; i < cursors->size(); ++i) {
-            StyleImage* styleImage = (*cursors)[i].image();
-            if (!styleImage)
-                continue;
-            ImageResource* cachedImage = styleImage->cachedImage();
-            if (!cachedImage)
-                continue;
-            float scale = styleImage->imageScaleFactor();
-            // Get hotspot and convert from logical pixels to physical pixels.
-            IntPoint hotSpot = (*cursors)[i].hotSpot();
-            hotSpot.scale(scale, scale);
-            IntSize size = cachedImage->imageForRenderer(renderer)->size();
-            if (cachedImage->errorOccurred())
-                continue;
-            // Limit the size of cursors (in UI pixels) so that they cannot be
-            // used to cover UI elements in chrome.
-            size.scale(1 / scale);
-            if (size.width() > maximumCursorSize || size.height() > maximumCursorSize)
-                continue;
-
-            Image* image = cachedImage->imageForRenderer(renderer);
-            // Ensure no overflow possible in calculations above.
-            if (scale < minimumCursorScale)
-                continue;
-            return Cursor(image, hotSpot, scale);
-        }
-    }
-
-    switch (style ? style->cursor() : CURSOR_AUTO) {
-    case CURSOR_AUTO: {
-        return selectAutoCursor(result, node);
-    }
-    case CURSOR_CROSS:
-        return crossCursor();
-    case CURSOR_POINTER:
-        return handCursor();
-    case CURSOR_MOVE:
-        return moveCursor();
-    case CURSOR_ALL_SCROLL:
-        return moveCursor();
-    case CURSOR_E_RESIZE:
-        return eastResizeCursor();
-    case CURSOR_W_RESIZE:
-        return westResizeCursor();
-    case CURSOR_N_RESIZE:
-        return northResizeCursor();
-    case CURSOR_S_RESIZE:
-        return southResizeCursor();
-    case CURSOR_NE_RESIZE:
-        return northEastResizeCursor();
-    case CURSOR_SW_RESIZE:
-        return southWestResizeCursor();
-    case CURSOR_NW_RESIZE:
-        return northWestResizeCursor();
-    case CURSOR_SE_RESIZE:
-        return southEastResizeCursor();
-    case CURSOR_NS_RESIZE:
-        return northSouthResizeCursor();
-    case CURSOR_EW_RESIZE:
-        return eastWestResizeCursor();
-    case CURSOR_NESW_RESIZE:
-        return northEastSouthWestResizeCursor();
-    case CURSOR_NWSE_RESIZE:
-        return northWestSouthEastResizeCursor();
-    case CURSOR_COL_RESIZE:
-        return columnResizeCursor();
-    case CURSOR_ROW_RESIZE:
-        return rowResizeCursor();
-    case CURSOR_TEXT:
-        return iBeamCursor();
-    case CURSOR_WAIT:
-        return waitCursor();
-    case CURSOR_HELP:
-        return helpCursor();
-    case CURSOR_VERTICAL_TEXT:
-        return verticalTextCursor();
-    case CURSOR_CELL:
-        return cellCursor();
-    case CURSOR_CONTEXT_MENU:
-        return contextMenuCursor();
-    case CURSOR_PROGRESS:
-        return progressCursor();
-    case CURSOR_NO_DROP:
-        return noDropCursor();
-    case CURSOR_ALIAS:
-        return aliasCursor();
-    case CURSOR_COPY:
-        return copyCursor();
-    case CURSOR_NONE:
-        return noneCursor();
-    case CURSOR_NOT_ALLOWED:
-        return notAllowedCursor();
-    case CURSOR_DEFAULT:
-        return pointerCursor();
-    case CURSOR_ZOOM_IN:
-        return zoomInCursor();
-    case CURSOR_ZOOM_OUT:
-        return zoomOutCursor();
-    case CURSOR_WEBKIT_GRAB:
-        return grabCursor();
-    case CURSOR_WEBKIT_GRABBING:
-        return grabbingCursor();
-    }
-    return pointerCursor();
-}
-
-OptionalCursor EventHandler::selectAutoCursor(const HitTestResult& result, Node* node)
-{
-    RenderObject* renderer = node ? node->renderer() : 0;
-    if (!node || !renderer)
-        return pointerCursor();
-    if (node->hasEditableStyle() || (renderer->isText() && node->canStartSelection()))
-        return iBeamCursor();
-    return pointerCursor();
-}
-
 void EventHandler::invalidateClick()
 {
     m_clickCount = 0;
     m_clickNode = nullptr;
-}
-
-void EventHandler::scheduleCursorUpdate()
-{
-    if (!m_cursorUpdateTimer.isActive())
-        m_cursorUpdateTimer.startOneShot(cursorUpdateInterval, FROM_HERE);
-}
-
-bool EventHandler::isCursorVisible() const
-{
-    return m_frame->page()->isCursorVisible();
 }
 
 void EventHandler::activeIntervalTimerFired(Timer<EventHandler>*)

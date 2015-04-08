@@ -50,9 +50,6 @@ PassRefPtr<StyleImage> ElementStyleResources::styleImage(Document& document, con
     if (value->isImageSetValue())
         return setOrPendingFromValue(property, toCSSImageSetValue(value));
 
-    if (value->isCursorImageValue())
-        return cursorOrPendingFromValue(property, toCSSCursorImageValue(value));
-
     return nullptr;
 }
 
@@ -82,14 +79,6 @@ PassRefPtr<StyleImage> ElementStyleResources::cachedOrPendingFromValue(Document&
         else
             value->restoreCachedResourceIfNeeded(document);
     }
-    return image.release();
-}
-
-PassRefPtr<StyleImage> ElementStyleResources::cursorOrPendingFromValue(CSSPropertyID property, CSSCursorImageValue* value)
-{
-    RefPtr<StyleImage> image = value->cachedOrPendingImage(m_deviceScaleFactor);
-    if (image && image->isPendingImage())
-        m_pendingImageProperties.set(property, value);
     return image.release();
 }
 

@@ -55,7 +55,6 @@ public:
     PassRefPtr<StyleImage> generatedOrPendingFromValue(CSSPropertyID, CSSImageGeneratorValue*);
     PassRefPtr<StyleImage> cachedOrPendingFromValue(Document&, CSSPropertyID, CSSImageValue*);
     PassRefPtr<StyleImage> setOrPendingFromValue(CSSPropertyID, CSSImageSetValue*);
-    PassRefPtr<StyleImage> cursorOrPendingFromValue(CSSPropertyID, CSSCursorImageValue*);
 
     const PendingImagePropertyMap& pendingImageProperties() const { return m_pendingImageProperties; }
 

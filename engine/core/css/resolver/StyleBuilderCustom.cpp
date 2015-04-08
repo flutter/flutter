@@ -44,7 +44,6 @@
 #include "gen/sky/core/StylePropertyShorthand.h"
 #include "sky/engine/core/css/BasicShapeFunctions.h"
 #include "sky/engine/core/css/CSSAspectRatioValue.h"
-#include "sky/engine/core/css/CSSCursorImageValue.h"
 #include "sky/engine/core/css/CSSFontValue.h"
 #include "sky/engine/core/css/CSSGradientValue.h"
 #include "sky/engine/core/css/CSSHelper.h"
@@ -116,39 +115,6 @@ void StyleBuilderFunctions::applyValueCSSPropertyColor(StyleResolverState& state
     }
 
     state.style()->setColor(StyleBuilderConverter::convertColor(state, value));
-}
-
-void StyleBuilderFunctions::applyInitialCSSPropertyCursor(StyleResolverState& state)
-{
-    state.style()->clearCursorList();
-    state.style()->setCursor(RenderStyle::initialCursor());
-}
-
-void StyleBuilderFunctions::applyInheritCSSPropertyCursor(StyleResolverState& state)
-{
-    state.style()->setCursor(state.parentStyle()->cursor());
-    state.style()->setCursorList(state.parentStyle()->cursors());
-}
-
-void StyleBuilderFunctions::applyValueCSSPropertyCursor(StyleResolverState& state, CSSValue* value)
-{
-    state.style()->clearCursorList();
-    if (value->isValueList()) {
-        CSSValueList* list = toCSSValueList(value);
-        int len = list->length();
-        state.style()->setCursor(CURSOR_AUTO);
-        for (int i = 0; i < len; i++) {
-            CSSValue* item = list->item(i);
-            if (item->isCursorImageValue()) {
-                CSSCursorImageValue* image = toCSSCursorImageValue(item);
-                state.style()->addCursor(state.styleImage(CSSPropertyCursor, image), image->hotSpot());
-            } else {
-                state.style()->setCursor(*toCSSPrimitiveValue(item));
-            }
-        }
-    } else {
-        state.style()->setCursor(*toCSSPrimitiveValue(value));
-    }
 }
 
 void StyleBuilderFunctions::applyValueCSSPropertyDirection(StyleResolverState& state, CSSValue* value)

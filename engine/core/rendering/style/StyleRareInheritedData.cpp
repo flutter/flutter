@@ -23,7 +23,6 @@
 #include "sky/engine/core/rendering/style/StyleRareInheritedData.h"
 
 #include "sky/engine/core/rendering/style/AppliedTextDecoration.h"
-#include "sky/engine/core/rendering/style/CursorData.h"
 #include "sky/engine/core/rendering/style/DataEquivalency.h"
 #include "sky/engine/core/rendering/style/QuotesData.h"
 #include "sky/engine/core/rendering/style/RenderStyle.h"
@@ -40,7 +39,7 @@ struct SameSizeAsStyleRareInheritedData : public RefCounted<SameSizeAsStyleRareI
     Color colors[2];
     void* ownPtrs[1];
     AtomicString atomicStrings[4];
-    void* refPtrs[3];
+    void* refPtrs[2];
     Length lengths[1];
     unsigned m_bitfields[2];
     short pagedMediaShorts[2];
@@ -100,7 +99,6 @@ StyleRareInheritedData::StyleRareInheritedData(const StyleRareInheritedData& o)
     , m_textEmphasisColor(o.m_textEmphasisColor)
     , textShadow(o.textShadow)
     , highlight(o.highlight)
-    , cursorData(o.cursorData)
     , indent(o.indent)
     , widows(o.widows)
     , orphans(o.orphans)
@@ -154,7 +152,6 @@ bool StyleRareInheritedData::operator==(const StyleRareInheritedData& o) const
         && tapHighlightColor == o.tapHighlightColor
         && shadowDataEquivalent(o)
         && highlight == o.highlight
-        && dataEquivalent(cursorData.get(), o.cursorData.get())
         && indent == o.indent
         && widows == o.widows
         && orphans == o.orphans

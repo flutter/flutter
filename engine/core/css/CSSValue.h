@@ -77,7 +77,6 @@ public:
 
     bool isAspectRatioValue() const { return m_classType == AspectRatioClass; }
     bool isBorderImageSliceValue() const { return m_classType == BorderImageSliceClass; }
-    bool isCursorImageValue() const { return m_classType == CursorImageClass; }
     bool isCrossfadeValue() const { return m_classType == CrossfadeClass; }
     bool isFontFeatureValue() const { return m_classType == FontFeatureClass; }
     bool isFontValue() const { return m_classType == FontClass; }
@@ -120,7 +119,6 @@ protected:
 
         // Image classes.
         ImageClass,
-        CursorImageClass,
 
         // Image generator classes.
         CrossfadeClass,

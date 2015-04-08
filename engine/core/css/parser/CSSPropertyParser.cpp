@@ -36,7 +36,6 @@
 #include "sky/engine/core/css/CSSBasicShapes.h"
 #include "sky/engine/core/css/CSSBorderImage.h"
 #include "sky/engine/core/css/CSSCrossfadeValue.h"
-#include "sky/engine/core/css/CSSCursorImageValue.h"
 #include "sky/engine/core/css/CSSFontFaceSrcValue.h"
 #include "sky/engine/core/css/CSSFontFeatureValue.h"
 #include "sky/engine/core/css/CSSFunctionValue.h"
@@ -548,78 +547,6 @@ bool CSSPropertyParser::parseValue(CSSPropertyID propId)
         if (parsedValue)
             m_valueList->next();
         break;
-
-    case CSSPropertyCursor: {
-        // Grammar defined by CSS3 UI and modified by CSS4 images:
-        // [ [<image> [<x> <y>]?,]*
-        // [ auto | crosshair | default | pointer | progress | move | e-resize | ne-resize |
-        // nw-resize | n-resize | se-resize | sw-resize | s-resize | w-resize | ew-resize |
-        // ns-resize | nesw-resize | nwse-resize | col-resize | row-resize | text | wait | help |
-        // vertical-text | cell | context-menu | alias | copy | no-drop | not-allowed | all-scroll |
-        // zoom-in | zoom-out | -webkit-grab | -webkit-grabbing | -webkit-zoom-in | -webkit-zoom-out ] ] | inherit
-        RefPtr<CSSValueList> list = nullptr;
-        while (value) {
-            RefPtr<CSSValue> image = nullptr;
-            if (value->unit == CSSPrimitiveValue::CSS_URI) {
-                String uri = value->string;
-                if (!uri.isNull())
-                    image = createCSSImageValueWithReferrer(uri, completeURL(uri));
-            } else if (value->unit == CSSParserValue::Function && equalIgnoringCase(value->function->name, "-webkit-image-set(")) {
-                image = parseImageSet(m_valueList);
-                if (!image)
-                    break;
-            } else
-                break;
-
-            Vector<int> coords;
-            value = m_valueList->next();
-            while (value && validUnit(value, FNumber)) {
-                coords.append(int(value->fValue));
-                value = m_valueList->next();
-            }
-            bool hasHotSpot = false;
-            IntPoint hotSpot(-1, -1);
-            int nrcoords = coords.size();
-            if (nrcoords > 0 && nrcoords != 2)
-                return false;
-            if (nrcoords == 2) {
-                hasHotSpot = true;
-                hotSpot = IntPoint(coords[0], coords[1]);
-            }
-
-            if (!list)
-                list = CSSValueList::createCommaSeparated();
-
-            if (image)
-                list->append(CSSCursorImageValue::create(image, hasHotSpot, hotSpot));
-
-            if (!consumeComma(m_valueList))
-                return false;
-            value = m_valueList->current();
-        }
-        if (list) {
-            if (!value)
-                return false;
-            if (inQuirksMode() && value->id == CSSValueHand) // MSIE 5 compatibility :/
-                list->append(cssValuePool().createIdentifierValue(CSSValuePointer));
-            else if ((value->id >= CSSValueAuto && value->id <= CSSValueWebkitZoomOut) || value->id == CSSValueCopy || value->id == CSSValueNone)
-                list->append(cssValuePool().createIdentifierValue(value->id));
-            m_valueList->next();
-            parsedValue = list.release();
-            break;
-        } else if (value) {
-            id = value->id;
-            if (inQuirksMode() && value->id == CSSValueHand) { // MSIE 5 compatibility :/
-                id = CSSValuePointer;
-                validPrimitive = true;
-            } else if ((value->id >= CSSValueAuto && value->id <= CSSValueWebkitZoomOut) || value->id == CSSValueCopy || value->id == CSSValueNone)
-                validPrimitive = true;
-        } else {
-            ASSERT_NOT_REACHED();
-            return false;
-        }
-        break;
-    }
 
     case CSSPropertyBackgroundAttachment:
     case CSSPropertyBackgroundClip:

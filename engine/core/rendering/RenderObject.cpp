@@ -1251,17 +1251,6 @@ void RenderObject::styleWillChange(StyleDifference diff, const RenderStyle& newS
     }
 }
 
-static bool areNonIdenticalCursorListsEqual(const RenderStyle* a, const RenderStyle* b)
-{
-    ASSERT(a->cursors() != b->cursors());
-    return a->cursors() && b->cursors() && *a->cursors() == *b->cursors();
-}
-
-static inline bool areCursorsEqual(const RenderStyle* a, const RenderStyle* b)
-{
-    return a->cursor() == b->cursor() && (a->cursors() == b->cursors() || areNonIdenticalCursorListsEqual(a, b));
-}
-
 void RenderObject::styleDidChange(StyleDifference diff, const RenderStyle* oldStyle)
 {
     if (s_affectsParentBlock) {
@@ -1294,11 +1283,6 @@ void RenderObject::styleDidChange(StyleDifference diff, const RenderStyle* oldSt
 
     // Don't check for paint invalidation here; we need to wait until the layer has been
     // updated by subclasses before we know if we have to invalidate paints (in setStyle()).
-
-    if (oldStyle && !areCursorsEqual(oldStyle, style())) {
-        if (LocalFrame* frame = this->frame())
-            frame->eventHandler().scheduleCursorUpdate();
-    }
 }
 
 void RenderObject::propagateStyleToAnonymousChildren(bool blockChildrenOnly)
@@ -1912,11 +1896,6 @@ PositionWithAffinity RenderObject::createPositionWithAffinity(const Position& po
 
     ASSERT(!node());
     return createPositionWithAffinity(0, DOWNSTREAM);
-}
-
-CursorDirective RenderObject::getCursor(const LayoutPoint&, Cursor&) const
-{
-    return SetCursorBasedOnStyle;
 }
 
 bool RenderObject::canUpdateSelectionOnRootLineBoxes()

@@ -42,14 +42,12 @@
 #include "sky/engine/core/frame/Settings.h"
 #include "sky/engine/core/page/Page.h"
 #include "sky/engine/core/rendering/HitTestResult.h"
-#include "sky/engine/platform/Cursor.h"
 #include "sky/engine/platform/NotImplemented.h"
 #include "sky/engine/platform/PlatformScreen.h"
 #include "sky/engine/platform/exported/WrappedResourceRequest.h"
 #include "sky/engine/platform/geometry/FloatRect.h"
 #include "sky/engine/platform/geometry/IntRect.h"
 #include "sky/engine/public/platform/Platform.h"
-#include "sky/engine/public/platform/WebCursorInfo.h"
 #include "sky/engine/public/platform/WebInputEvent.h"
 #include "sky/engine/public/platform/WebRect.h"
 #include "sky/engine/public/platform/WebURLRequest.h"
@@ -212,15 +210,6 @@ IntRect ChromeClientImpl::rootViewToScreen(const IntRect& rect) const
 WebScreenInfo ChromeClientImpl::screenInfo() const
 {
     return m_webView->client() ? m_webView->client()->screenInfo() : WebScreenInfo();
-}
-
-void ChromeClientImpl::setCursor(const Cursor& cursor)
-{
-    setCursor(WebCursorInfo(cursor));
-}
-
-void ChromeClientImpl::setCursor(const WebCursorInfo& cursor)
-{
 }
 
 String ChromeClientImpl::acceptLanguages()

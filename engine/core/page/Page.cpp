@@ -75,7 +75,6 @@ Page::Page(PageClients& pageClients, ServiceProvider* services)
     , m_deviceScaleFactor(1)
     , m_timerAlignmentInterval(DOMTimer::visiblePageAlignmentInterval())
     , m_visibilityState(PageVisibilityStateVisible)
-    , m_isCursorVisible(true)
 #if ENABLE(ASSERT)
     , m_isPainting(false)
 #endif
@@ -182,11 +181,6 @@ void Page::setVisibilityState(PageVisibilityState visibilityState, bool isInitia
 PageVisibilityState Page::visibilityState() const
 {
     return m_visibilityState;
-}
-
-bool Page::isCursorVisible() const
-{
-    return m_isCursorVisible && settings().deviceSupportsMouse();
 }
 
 void Page::addMultisamplingChangedObserver(MultisamplingChangedObserver* observer)
@@ -318,11 +312,6 @@ void Page::focusedFrameChanged(LocalFrame* frame) const
 void Page::scheduleVisualUpdate()
 {
     m_chromeClient->scheduleVisualUpdate();
-}
-
-void Page::setCursor(const Cursor& cursor)
-{
-    m_chromeClient->setCursor(cursor);
 }
 
 bool Page::shouldReportDetailedMessageForSource(const String& source)

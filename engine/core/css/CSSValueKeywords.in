@@ -266,48 +266,10 @@ flex
 inline-flex
 //none
 
-//
-// cursor
-// The order here must match the order of the ECursor enum in RenderStyleConstants.h.
-//
 auto
-crosshair
 default
-pointer
-move
-vertical-text
-cell
-context-menu
-alias
-// copy
-progress
-no-drop
-not-allowed
-zoom-in
-zoom-out
-e-resize
-ne-resize
-nw-resize
-n-resize
-se-resize
-sw-resize
-s-resize
-w-resize
-ew-resize
-ns-resize
-nesw-resize
-nwse-resize
-col-resize
-row-resize
 text
-wait
-help
-all-scroll
--webkit-grab
--webkit-grabbing
--webkit-zoom-in
--webkit-zoom-out
-// none
+
 //
 // direction
 //

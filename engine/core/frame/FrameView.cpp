@@ -366,12 +366,6 @@ AtomicString FrameView::mediaType() const
     return m_mediaType;
 }
 
-bool FrameView::shouldSetCursor() const
-{
-    Page* page = frame().page();
-    return page && page->visibilityState() != PageVisibilityStateHidden && page->focusController().isActive() && page->settings().deviceSupportsMouse();
-}
-
 // FIXME(sky): remove
 IntSize FrameView::layoutSize() const
 {
@@ -752,14 +746,6 @@ bool FrameView::isFlippedDocument() const
 {
     // FIXME(sky): Remove
     return false;
-}
-
-void FrameView::setCursor(const Cursor& cursor)
-{
-    Page* page = frame().page();
-    if (!page || !page->settings().deviceSupportsMouse())
-        return;
-    page->setCursor(cursor);
 }
 
 void FrameView::setLayoutSizeInternal(const IntSize& size)

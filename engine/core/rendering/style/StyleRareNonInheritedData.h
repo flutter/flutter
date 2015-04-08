@@ -29,7 +29,6 @@
 #include "sky/engine/core/rendering/ClipPathOperation.h"
 #include "sky/engine/core/rendering/style/BasicShapes.h"
 #include "sky/engine/core/rendering/style/CounterDirectives.h"
-#include "sky/engine/core/rendering/style/CursorData.h"
 #include "sky/engine/core/rendering/style/DataRef.h"
 #include "sky/engine/core/rendering/style/FillLayer.h"
 #include "sky/engine/core/rendering/style/NinePieceImage.h"

@@ -44,7 +44,6 @@
 namespace blink {
 
 class AffineTransform;
-class Cursor;
 class Document;
 class HitTestLocation;
 class HitTestResult;
@@ -61,12 +60,6 @@ class RenderView;
 class TransformState;
 
 struct PaintInfo;
-
-enum CursorDirective {
-    SetCursorBasedOnStyle,
-    SetCursor,
-    DoNotSetCursor
-};
 
 // Sides used when drawing borders and outlines. The values should run clockwise from top.
 enum BoxSide {
@@ -502,8 +495,6 @@ public:
     {
         return style()->colorIncludingFallback(colorProperty);
     }
-
-    virtual CursorDirective getCursor(const LayoutPoint&, Cursor&) const;
 
     struct AppliedTextDecoration {
         Color color;

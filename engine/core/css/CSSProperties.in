@@ -157,9 +157,6 @@ caption-side inherited
 
 clip animatable, converter=convertClip, custom_all
 
-// OBSOLETE
-cursor inherited, custom_all
-
 // LAYOUT
 display
 

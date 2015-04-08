@@ -48,7 +48,6 @@ class RenderBox;
 class DateTimeChooser;
 class DateTimeChooserClient;
 class WebViewImpl;
-struct WebCursorInfo;
 
 // Handles window-level notifications from WebCore on behalf of a WebView.
 class ChromeClientImpl final : public ChromeClient {
@@ -75,14 +74,12 @@ public:
     virtual void scheduleVisualUpdate() override;
     virtual IntRect rootViewToScreen(const IntRect&) const override;
     virtual WebScreenInfo screenInfo() const override;
-    virtual void setCursor(const Cursor&) override;
 
     // ChromeClient methods:
     virtual String acceptLanguages() override;
 
 private:
     WebNavigationPolicy getNavigationPolicy();
-    void setCursor(const WebCursorInfo&);
 
     WebViewImpl* m_webView;  // weak pointer
 };

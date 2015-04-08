@@ -31,7 +31,6 @@
 #include "sky/engine/core/css/CSSBorderImageSliceValue.h"
 #include "sky/engine/core/css/CSSCalculationValue.h"
 #include "sky/engine/core/css/CSSCrossfadeValue.h"
-#include "sky/engine/core/css/CSSCursorImageValue.h"
 #include "sky/engine/core/css/CSSFilterValue.h"
 #include "sky/engine/core/css/CSSFontFaceSrcValue.h"
 #include "sky/engine/core/css/CSSFontFeatureValue.h"
@@ -118,8 +117,6 @@ bool CSSValue::equals(const CSSValue& other) const
             return compareCSSValues<CSSAspectRatioValue>(*this, other);
         case BorderImageSliceClass:
             return compareCSSValues<CSSBorderImageSliceValue>(*this, other);
-        case CursorImageClass:
-            return compareCSSValues<CSSCursorImageValue>(*this, other);
         case FontClass:
             return compareCSSValues<CSSFontValue>(*this, other);
         case FontFaceSrcClass:
@@ -186,8 +183,6 @@ String CSSValue::cssText() const
         return toCSSAspectRatioValue(this)->customCSSText();
     case BorderImageSliceClass:
         return toCSSBorderImageSliceValue(this)->customCSSText();
-    case CursorImageClass:
-        return toCSSCursorImageValue(this)->customCSSText();
     case FontClass:
         return toCSSFontValue(this)->customCSSText();
     case FontFaceSrcClass:
@@ -250,9 +245,6 @@ void CSSValue::destroy()
         return;
     case BorderImageSliceClass:
         delete toCSSBorderImageSliceValue(this);
-        return;
-    case CursorImageClass:
-        delete toCSSCursorImageValue(this);
         return;
     case FontClass:
         delete toCSSFontValue(this);
@@ -329,7 +321,6 @@ PassRefPtr<CSSValue> CSSValue::cloneForCSSOM() const
     case ValueListClass:
         return toCSSValueList(this)->cloneForCSSOM();
     case ImageClass:
-    case CursorImageClass:
         return toCSSImageValue(this)->cloneForCSSOM();
     case CSSFilterClass:
         return toCSSFilterValue(this)->cloneForCSSOM();

@@ -28,7 +28,6 @@
 #include "sky/engine/core/page/FocusType.h"
 #include "sky/engine/core/page/PageAnimator.h"
 #include "sky/engine/core/page/PageVisibilityState.h"
-#include "sky/engine/platform/Cursor.h"
 #include "sky/engine/platform/HostWindow.h"
 #include "sky/engine/platform/LifecycleContext.h"
 #include "sky/engine/platform/Supplementable.h"
@@ -114,9 +113,6 @@ public:
     PageVisibilityState visibilityState() const;
     void setVisibilityState(PageVisibilityState, bool);
 
-    bool isCursorVisible() const;
-    void setIsCursorVisible(bool isVisible) { m_isCursorVisible = isVisible; }
-
 #if ENABLE(ASSERT)
     void setIsPainting(bool painting) { m_isPainting = painting; }
     bool isPainting() const { return m_isPainting; }
@@ -158,8 +154,6 @@ public:
 
     bool shouldReportDetailedMessageForSource(const String& source);
     void addMessageToConsole(LocalFrame*, MessageSource, MessageLevel, const String& message, unsigned lineNumber, const String& sourceID, const String& stackTrace);
-
-    void setCursor(const Cursor&);
 
     void* webView() const;
 
@@ -203,8 +197,6 @@ private:
     double m_timerAlignmentInterval;
 
     PageVisibilityState m_visibilityState;
-
-    bool m_isCursorVisible;
 
 #if ENABLE(ASSERT)
     bool m_isPainting;

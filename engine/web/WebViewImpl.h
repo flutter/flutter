@@ -34,6 +34,7 @@
 #include "sky/engine/core/rendering/HitTestResult.h"
 #include "sky/engine/platform/geometry/IntPoint.h"
 #include "sky/engine/platform/geometry/IntRect.h"
+#include "sky/engine/platform/graphics/Color.h"
 #include "sky/engine/public/platform/WebInputEvent.h"
 #include "sky/engine/public/platform/WebLayer.h"
 #include "sky/engine/public/platform/WebPoint.h"

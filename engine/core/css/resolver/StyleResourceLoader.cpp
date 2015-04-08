@@ -24,7 +24,6 @@
 #include "sky/engine/core/css/resolver/StyleResourceLoader.h"
 
 #include "gen/sky/core/CSSPropertyNames.h"
-#include "sky/engine/core/css/CSSCursorImageValue.h"
 #include "sky/engine/core/css/CSSImageValue.h"
 #include "sky/engine/core/css/resolver/ElementStyleResources.h"
 #include "sky/engine/core/fetch/ResourceFetcher.h"
@@ -53,10 +52,6 @@ PassRefPtr<StyleImage> StyleResourceLoader::loadPendingImage(StylePendingImage* 
         return StyleGeneratedImage::create(imageGeneratorValue);
     }
 
-    if (CSSCursorImageValue* cursorImageValue
-        = pendingImage->cssCursorImageValue())
-        return cursorImageValue->cachedImage(m_fetcher, deviceScaleFactor);
-
     if (CSSImageSetValue* imageSetValue = pendingImage->cssImageSetValue())
         return imageSetValue->cachedImageSet(m_fetcher, deviceScaleFactor, ResourceFetcher::defaultResourceOptions());
 
@@ -77,18 +72,6 @@ void StyleResourceLoader::loadPendingImages(RenderStyle* style, ElementStyleReso
             for (FillLayer* backgroundLayer = &style->accessBackgroundLayers(); backgroundLayer; backgroundLayer = backgroundLayer->next()) {
                 if (backgroundLayer->image() && backgroundLayer->image()->isPendingImage())
                     backgroundLayer->setImage(loadPendingImage(toStylePendingImage(backgroundLayer->image()), elementStyleResources.deviceScaleFactor()));
-            }
-            break;
-        }
-        case CSSPropertyCursor: {
-            if (CursorList* cursorList = style->cursors()) {
-                for (size_t i = 0; i < cursorList->size(); ++i) {
-                    CursorData& currentCursor = cursorList->at(i);
-                    if (StyleImage* image = currentCursor.image()) {
-                        if (image->isPendingImage())
-                            currentCursor.setImage(loadPendingImage(toStylePendingImage(image), elementStyleResources.deviceScaleFactor()));
-                    }
-                }
             }
             break;
         }

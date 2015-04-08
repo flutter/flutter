@@ -25,7 +25,6 @@
 #include "sky/engine/core/frame/ConsoleTypes.h"
 #include "sky/engine/core/inspector/ConsoleAPITypes.h"
 #include "sky/engine/core/page/FocusType.h"
-#include "sky/engine/platform/Cursor.h"
 #include "sky/engine/public/platform/WebScreenInfo.h"
 #include "sky/engine/wtf/Forward.h"
 
@@ -61,8 +60,6 @@ public:
     virtual blink::WebScreenInfo screenInfo() const = 0;
     virtual void scheduleVisualUpdate() = 0;
     // End methods used by HostWindow.
-
-    virtual void setCursor(const Cursor&) = 0;
 
     virtual String acceptLanguages() = 0;
 

@@ -37,13 +37,11 @@
 namespace blink {
 
 class AppliedTextDecoration;
-class CursorData;
 class QuotesData;
 class ShadowList;
 class StyleImage;
 
 typedef RefVector<AppliedTextDecoration> AppliedTextDecorationList;
-typedef RefVector<CursorData> CursorList;
 
 // This struct is for rarely used inherited CSS3, CSS2, and WebKit-specific properties.
 // By grouping them together, we save space, and only allocate this object when someone
@@ -80,7 +78,6 @@ public:
     RefPtr<ShadowList> textShadow; // Our text shadow information for shadowed text drawing.
     AtomicString highlight; // Apple-specific extension for custom highlight rendering.
 
-    RefPtr<CursorList> cursorData;
     Length indent;
 
     // Paged media properties.

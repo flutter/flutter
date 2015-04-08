@@ -467,27 +467,9 @@ void RenderStyle::updatePropertySpecificDifferences(const RenderStyle& other, St
     }
 }
 
-void RenderStyle::addCursor(PassRefPtr<StyleImage> image, const IntPoint& hotSpot)
-{
-    if (!rareInheritedData.access()->cursorData)
-        rareInheritedData.access()->cursorData = CursorList::create();
-    rareInheritedData.access()->cursorData->append(CursorData(image, hotSpot));
-}
-
-void RenderStyle::setCursorList(PassRefPtr<CursorList> other)
-{
-    rareInheritedData.access()->cursorData = other;
-}
-
 void RenderStyle::setQuotes(PassRefPtr<QuotesData> q)
 {
     rareInheritedData.access()->quotes = q;
-}
-
-void RenderStyle::clearCursorList()
-{
-    if (rareInheritedData->cursorData)
-        rareInheritedData.access()->cursorData = nullptr;
 }
 
 inline bool requireTransformOrigin(const Vector<RefPtr<TransformOperation> >& transformOperations, RenderStyle::ApplyTransformOrigin applyOrigin)

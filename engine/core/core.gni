@@ -127,8 +127,6 @@ sky_core_files = [
   "css/CSSComputedStyleDeclaration.h",
   "css/CSSCrossfadeValue.cpp",
   "css/CSSCrossfadeValue.h",
-  "css/CSSCursorImageValue.cpp",
-  "css/CSSCursorImageValue.h",
   "css/CSSCustomFontData.h",
   "css/CSSFilterValue.cpp",
   "css/CSSFilterValue.h",
@@ -956,7 +954,6 @@ sky_core_files = [
   "rendering/style/CollapsedBorderValue.h",
   "rendering/style/CounterDirectives.cpp",
   "rendering/style/CounterDirectives.h",
-  "rendering/style/CursorData.h",
   "rendering/style/DataEquivalency.h",
   "rendering/style/DataRef.h",
   "rendering/style/FillLayer.cpp",
@@ -1104,18 +1101,17 @@ core_idl_files = get_path_info([
 # Files for which bindings (.cpp and .h files) will be generated
 # 'partial interface', target (right side of) 'implements', and
 # interfaces with static bindings (in bindings/core/v8/)
-core_dependency_idl_files =
-    get_path_info([
-                    "animation/DocumentAnimation.idl",
-                    "animation/ElementAnimation.idl",
-                    "css/DocumentFontFaceSet.idl",
-                    "dom/URLUtils.idl",
-                    "dom/URLUtilsReadOnly.idl",
-                    "events/EventListener.idl",
-                    "frame/WindowBase64.idl",
-                    "frame/WindowTimers.idl",
-                  ],
-                  "abspath")
+core_dependency_idl_files = get_path_info([
+                                            "animation/DocumentAnimation.idl",
+                                            "animation/ElementAnimation.idl",
+                                            "css/DocumentFontFaceSet.idl",
+                                            "dom/URLUtils.idl",
+                                            "dom/URLUtilsReadOnly.idl",
+                                            "events/EventListener.idl",
+                                            "frame/WindowBase64.idl",
+                                            "frame/WindowTimers.idl",
+                                          ],
+                                          "abspath")
 
 # interfaces that inherit from Event, including Event itself
 core_event_idl_files = get_path_info([

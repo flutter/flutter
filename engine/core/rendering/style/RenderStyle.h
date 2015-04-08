@@ -138,7 +138,6 @@ protected:
                 && (_visibility == other._visibility)
                 && (_text_align == other._text_align)
                 && (m_textUnderline == other.m_textUnderline)
-                && (_cursor_style == other._cursor_style)
                 && (_direction == other._direction)
                 && (_white_space == other._white_space)
                 && (m_rtlOrdering == other.m_rtlOrdering)
@@ -154,7 +153,6 @@ protected:
         unsigned _visibility : 2; // EVisibility
         unsigned _text_align : 4; // ETextAlign
         unsigned m_textUnderline : 1;
-        unsigned _cursor_style : 6; // ECursor
         unsigned _direction : 1; // TextDirection
         unsigned _white_space : 3; // EWhiteSpace
         // 32 bits
@@ -243,7 +241,6 @@ protected:
         inherited_flags._visibility = initialVisibility();
         inherited_flags._text_align = initialTextAlign();
         inherited_flags.m_textUnderline = false;
-        inherited_flags._cursor_style = initialCursor();
         inherited_flags._direction = initialDirection();
         inherited_flags._white_space = initialWhiteSpace();
         inherited_flags.m_rtlOrdering = initialRTLOrdering();
@@ -592,9 +589,6 @@ public:
     const Length& paddingStart() const { return surround->padding.start(direction()); }
     const Length& paddingEnd() const { return surround->padding.end(direction()); }
 
-    ECursor cursor() const { return static_cast<ECursor>(inherited_flags._cursor_style); }
-    CursorList* cursors() const { return rareInheritedData->cursorData.get(); }
-
     bool isLink() const { return noninherited_flags.isLink; }
 
     short widows() const { return rareInheritedData->widows; }
@@ -929,11 +923,6 @@ public:
     void setPaddingLeft(const Length& v) { SET_VAR(surround, padding.m_left, v); }
     void setPaddingRight(const Length& v) { SET_VAR(surround, padding.m_right, v); }
 
-    void setCursor(ECursor c) { inherited_flags._cursor_style = c; }
-    void addCursor(PassRefPtr<StyleImage>, const IntPoint& hotSpot = IntPoint());
-    void setCursorList(PassRefPtr<CursorList>);
-    void clearCursorList();
-
     void setIsLink(bool b) { noninherited_flags.isLink = b; }
 
     bool hasAutoZIndex() const { return m_box->hasAutoZIndex(); }
@@ -1125,7 +1114,6 @@ public:
     static EWhiteSpace initialWhiteSpace() { return NORMAL; }
     static short initialHorizontalBorderSpacing() { return 0; }
     static short initialVerticalBorderSpacing() { return 0; }
-    static ECursor initialCursor() { return CURSOR_AUTO; }
     static Color initialColor() { return Color::black; }
     static StyleImage* initialListStyleImage() { return 0; }
     static unsigned initialBorderWidth() { return 3; }

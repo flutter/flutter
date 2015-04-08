@@ -31,7 +31,6 @@
 #include "sky/engine/core/page/FocusType.h"
 #include "sky/engine/core/rendering/HitTestRequest.h"
 #include "sky/engine/core/rendering/style/RenderStyleConstants.h"
-#include "sky/engine/platform/Cursor.h"
 #include "sky/engine/platform/Timer.h"
 #include "sky/engine/platform/geometry/LayoutPoint.h"
 #include "sky/engine/platform/heap/Handle.h"
@@ -53,7 +52,6 @@ class HitTestResult;
 class KeyboardEvent;
 class LocalFrame;
 class Node;
-class OptionalCursor;
 class RenderLayer;
 class RenderObject;
 class TextEvent;
@@ -76,8 +74,6 @@ public:
         HitTestRequest::HitTestRequestType hitType = HitTestRequest::ReadOnly | HitTestRequest::Active,
         const LayoutSize& padding = LayoutSize());
 
-    void scheduleCursorUpdate();
-
     void defaultKeyboardEventHandler(KeyboardEvent*);
 
     bool handleTextInputEvent(const String& text, Event* underlyingEvent = 0, TextEventInputType = TextEventInputKeyboard);
@@ -90,15 +86,8 @@ public:
     void notifyElementActivated();
 
 private:
-    OptionalCursor selectCursor(const HitTestResult&);
-    OptionalCursor selectAutoCursor(const HitTestResult&, Node*);
-
     void hoverTimerFired(Timer<EventHandler>*);
-    void cursorUpdateTimerFired(Timer<EventHandler>*);
     void activeIntervalTimerFired(Timer<EventHandler>*);
-
-    bool isCursorVisible() const;
-    void updateCursor();
 
     TouchAction intersectTouchAction(const TouchAction, const TouchAction);
     TouchAction computeEffectiveTouchAction(const Node&);
@@ -122,8 +111,6 @@ private:
     SelectionInitiationState m_selectionInitiationState;
 
     LayoutPoint m_dragStartPos;
-
-    Timer<EventHandler> m_cursorUpdateTimer;
 
     int m_clickCount;
     RefPtr<Node> m_clickNode;

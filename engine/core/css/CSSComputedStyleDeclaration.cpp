@@ -110,7 +110,6 @@ static const CSSPropertyID staticComputableProperties[] = {
     CSSPropertyCaptionSide,
     CSSPropertyClip,
     CSSPropertyColor,
-    CSSPropertyCursor,
     CSSPropertyDirection,
     CSSPropertyDisplay,
     CSSPropertyEmptyCells,
@@ -1374,22 +1373,6 @@ PassRefPtr<CSSValue> CSSComputedStyleDeclaration::getPropertyCSSValue(CSSPropert
             return cssValuePool().createColorValue(m_allowVisitedStyle ? style->colorIncludingFallback(CSSPropertyColor).rgb() : style->color().rgb());
         case CSSPropertyTabSize:
             return cssValuePool().createValue(style->tabSize(), CSSPrimitiveValue::CSS_NUMBER);
-        case CSSPropertyCursor: {
-            RefPtr<CSSValueList> list = nullptr;
-            CursorList* cursors = style->cursors();
-            if (cursors && cursors->size() > 0) {
-                list = CSSValueList::createCommaSeparated();
-                for (unsigned i = 0; i < cursors->size(); ++i)
-                    if (StyleImage* image = cursors->at(i).image())
-                        list->append(image->cssValue());
-            }
-            RefPtr<CSSValue> value = cssValuePool().createValue(style->cursor());
-            if (list) {
-                list->append(value.release());
-                return list.release();
-            }
-            return value.release();
-        }
         case CSSPropertyDirection:
             return cssValuePool().createValue(style->direction());
         case CSSPropertyDisplay:
