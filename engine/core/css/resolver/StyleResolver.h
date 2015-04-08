@@ -121,8 +121,6 @@ private:
     void applyProperties(StyleResolverState&, const StylePropertySet* properties, bool inheritedOnly);
     template <StyleApplicationPass pass>
     void applyAnimatedProperties(StyleResolverState&, const HashMap<CSSPropertyID, RefPtr<Interpolation> >&);
-    template <StyleResolver::StyleApplicationPass pass>
-    void applyAllProperty(StyleResolverState&, CSSValue*);
 
     MatchedPropertiesCache m_matchedPropertiesCache;
 

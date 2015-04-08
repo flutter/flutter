@@ -393,56 +393,12 @@ bool StyleResolver::isPropertyForPass(CSSPropertyID property)
     return firstCSSPropertyId<pass>() <= property && property <= lastCSSPropertyId<pass>();
 }
 
-// This method expands the 'all' shorthand property to longhand properties
-// and applies the expanded longhand properties.
-template <StyleResolver::StyleApplicationPass pass>
-void StyleResolver::applyAllProperty(StyleResolverState& state, CSSValue* allValue)
-{
-    bool isUnsetValue = !allValue->isInitialValue() && !allValue->isInheritedValue();
-    unsigned startCSSProperty = firstCSSPropertyId<pass>();
-    unsigned endCSSProperty = lastCSSPropertyId<pass>();
-
-    for (unsigned i = startCSSProperty; i <= endCSSProperty; ++i) {
-        CSSPropertyID propertyId = static_cast<CSSPropertyID>(i);
-
-        // StyleBuilder does not allow any expanded shorthands.
-        if (isExpandedShorthandForAll(propertyId))
-            continue;
-
-        // all shorthand spec says:
-        // The all property is a shorthand that resets all CSS properties
-        // except direction and unicode-bidi.
-        // c.f. http://dev.w3.org/csswg/css-cascade/#all-shorthand
-        // We skip applyProperty when a given property is unicode-bidi or
-        // direction.
-        if (!CSSProperty::isAffectedByAllProperty(propertyId))
-            continue;
-
-        CSSValue* value;
-        if (!isUnsetValue) {
-            value = allValue;
-        } else {
-            if (CSSPropertyMetadata::isInheritedProperty(propertyId))
-                value = cssValuePool().createInheritedValue().get();
-            else
-                value = cssValuePool().createExplicitInitialValue().get();
-        }
-        StyleBuilder::applyProperty(propertyId, state, value);
-    }
-}
-
 template <StyleResolver::StyleApplicationPass pass>
 void StyleResolver::applyProperties(StyleResolverState& state, const StylePropertySet* properties, bool inheritedOnly)
 {
     unsigned propertyCount = properties->propertyCount();
     for (unsigned i = 0; i < propertyCount; ++i) {
         StylePropertySet::PropertyReference current = properties->propertyAt(i);
-
-        CSSPropertyID property = current.id();
-        if (property == CSSPropertyAll) {
-            applyAllProperty<pass>(state, current.value());
-            continue;
-        }
 
         if (inheritedOnly && !current.isInherited()) {
             // If the property value is explicitly inherited, we need to apply further non-inherited properties
@@ -452,6 +408,7 @@ void StyleResolver::applyProperties(StyleResolverState& state, const StyleProper
             continue;
         }
 
+        CSSPropertyID property = current.id();
         if (!isPropertyForPass<pass>(property))
             continue;
         if (pass == HighPriorityProperties && property == CSSPropertyLineHeight)

@@ -500,9 +500,6 @@ z-index animatable, type_name=unsigned, custom_all
 // FIXME: We should see if any of these should actually be unreachable
 
 // OBSOLETE
-all builder_skip
-
-// OBSOLETE
 orientation builder_skip
 
 // OBSOLETE

@@ -317,8 +317,6 @@ bool isValidKeywordPropertyAndValue(CSSPropertyID propertyId, CSSValueID valueID
         return false;
 
     switch (propertyId) {
-    case CSSPropertyAll:
-        return valueID == CSSValueUnset;
     case CSSPropertyBackgroundRepeatX: // repeat | no-repeat
     case CSSPropertyBackgroundRepeatY: // repeat | no-repeat
         return valueID == CSSValueRepeat || valueID == CSSValueNoRepeat;
@@ -461,7 +459,6 @@ bool isKeywordPropertyID(CSSPropertyID propertyId)
     switch (propertyId) {
     case CSSPropertyAlignItems:
     case CSSPropertyAlignSelf:
-    case CSSPropertyAll:
     case CSSPropertyBackgroundRepeatX:
     case CSSPropertyBackgroundRepeatY:
     case CSSPropertyBorderBottomStyle:

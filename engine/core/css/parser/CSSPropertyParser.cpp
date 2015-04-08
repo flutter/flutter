@@ -5280,7 +5280,7 @@ PassRefPtr<CSSValue> CSSPropertyParser::parseWillChange()
             ASSERT(CSSPropertyMetadata::isEnabledProperty(property));
             // Now "all" is used by both CSSValue and CSSPropertyValue.
             // Need to return nullptr when currentValue is CSSPropertyAll.
-            if (property == CSSPropertyWillChange || property == CSSPropertyAll)
+            if (property == CSSPropertyWillChange)
                 return nullptr;
             values->append(cssValuePool().createIdentifierValue(property));
         } else {

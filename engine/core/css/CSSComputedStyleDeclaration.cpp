@@ -2137,9 +2137,6 @@ PassRefPtr<CSSValue> CSSComputedStyleDeclaration::getPropertyCSSValue(CSSPropert
         /* @viewport rule properties */
         case CSSPropertyOrientation:
             break;
-
-        case CSSPropertyAll:
-            return nullptr;
     }
 
     logUnimplementedPropertyID(propertyID);
