@@ -1,5 +1,5 @@
 <div>
-  <div style="background-color: green">I am Text<img src="foo.jpg"></img>
+  <div style="background-color: green">I am Text<img src="resources/united.jpg"></img>
     <a href="http://www.google.com"></a>
   </div>
 </div>
