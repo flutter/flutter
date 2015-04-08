@@ -37,3 +37,5 @@ https://github.com/domokit/mojo/issues/64 lowlevel/layers.sky [ Skip ]
 
 # Flaky
 https://github.com/domokit/mojo/issues/62 custom-elements/registration.sky [ Skip ]
+
+https://github.com/domokit/mojo/issues/81 framework/basic.sky [ Skip ]
