@@ -126,9 +126,6 @@ static const CSSPropertyID staticComputableProperties[] = {
     CSSPropertyLeft,
     CSSPropertyLetterSpacing,
     CSSPropertyLineHeight,
-    CSSPropertyListStyleImage,
-    CSSPropertyListStylePosition,
-    CSSPropertyListStyleType,
     CSSPropertyMarginBottom,
     CSSPropertyMarginLeft,
     CSSPropertyMarginRight,
@@ -1472,14 +1469,6 @@ PassRefPtr<CSSValue> CSSComputedStyleDeclaration::getPropertyCSSValue(CSSPropert
             return pixelValue(style->letterSpacing(), *style);
         case CSSPropertyLineHeight:
             return valueForLineHeight(*style);
-        case CSSPropertyListStyleImage:
-            if (style->listStyleImage())
-                return style->listStyleImage()->cssValue();
-            return cssValuePool().createIdentifierValue(CSSValueNone);
-        case CSSPropertyListStylePosition:
-            return cssValuePool().createValue(style->listStylePosition());
-        case CSSPropertyListStyleType:
-            return cssValuePool().createValue(style->listStyleType());
         case CSSPropertyWebkitLocale:
             if (style->locale().isNull())
                 return cssValuePool().createIdentifierValue(CSSValueAuto);
@@ -2045,8 +2034,6 @@ PassRefPtr<CSSValue> CSSComputedStyleDeclaration::getPropertyCSSValue(CSSPropert
             return valuesForShorthandProperty(borderTopShorthand());
         case CSSPropertyBorderWidth:
             return valuesForSidesShorthand(borderWidthShorthand());
-        case CSSPropertyListStyle:
-            return valuesForShorthandProperty(listStyleShorthand());
         case CSSPropertyMargin:
             return valuesForSidesShorthand(marginShorthand());
         case CSSPropertyOutline:

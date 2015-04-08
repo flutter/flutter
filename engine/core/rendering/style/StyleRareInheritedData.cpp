@@ -39,7 +39,7 @@ struct SameSizeAsStyleRareInheritedData : public RefCounted<SameSizeAsStyleRareI
     Color colors[2];
     void* ownPtrs[1];
     AtomicString atomicStrings[4];
-    void* refPtrs[2];
+    void* refPtrs[1];
     Length lengths[1];
     unsigned m_bitfields[2];
     short pagedMediaShorts[2];
@@ -52,8 +52,7 @@ struct SameSizeAsStyleRareInheritedData : public RefCounted<SameSizeAsStyleRareI
 COMPILE_ASSERT(sizeof(StyleRareInheritedData) == sizeof(SameSizeAsStyleRareInheritedData), StyleRareInheritedData_should_bit_pack);
 
 StyleRareInheritedData::StyleRareInheritedData()
-    : listStyleImage(RenderStyle::initialListStyleImage())
-    , textStrokeWidth(RenderStyle::initialTextStrokeWidth())
+    : textStrokeWidth(RenderStyle::initialTextStrokeWidth())
     , indent(RenderStyle::initialTextIndent())
     , widows(RenderStyle::initialWidows())
     , orphans(RenderStyle::initialOrphans())
@@ -92,7 +91,6 @@ StyleRareInheritedData::StyleRareInheritedData()
 
 StyleRareInheritedData::StyleRareInheritedData(const StyleRareInheritedData& o)
     : RefCounted<StyleRareInheritedData>()
-    , listStyleImage(o.listStyleImage)
     , m_textStrokeColor(o.m_textStrokeColor)
     , textStrokeWidth(o.textStrokeWidth)
     , m_textFillColor(o.m_textFillColor)
@@ -188,7 +186,6 @@ bool StyleRareInheritedData::operator==(const StyleRareInheritedData& o) const
         && m_tabSize == o.m_tabSize
         && m_imageRendering == o.m_imageRendering
         && m_textUnderlinePosition == o.m_textUnderlinePosition
-        && dataEquivalent(listStyleImage.get(), o.listStyleImage.get())
         && dataEquivalent(appliedTextDecorations, o.appliedTextDecorations);
 }
 

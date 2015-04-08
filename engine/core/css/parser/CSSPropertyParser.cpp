@@ -587,7 +587,6 @@ bool CSSPropertyParser::parseValue(CSSPropertyID propId)
         ASSERT(RuntimeEnabledFeatures::objectFitPositionEnabled());
         parsedValue = parseObjectPosition();
         break;
-    case CSSPropertyListStyleImage:     // <uri> | none | inherit
     case CSSPropertyBorderImageSource:
         if (id == CSSValueNone) {
             parsedValue = cssValuePool().createIdentifierValue(CSSValueNone);
@@ -1083,8 +1082,6 @@ bool CSSPropertyParser::parseValue(CSSPropertyID propId)
         // [ [ 'font-style' || 'font-variant' || 'font-weight' ]? 'font-size' [ / 'line-height' ]?
         // 'font-family' ] | inherit
         return parseFont();
-    case CSSPropertyListStyle:
-        return parseShorthand(propId, listStyleShorthand());
     case CSSPropertyWebkitTextStroke:
         return parseShorthand(propId, webkitTextStrokeShorthand());
     case CSSPropertyAnimation:

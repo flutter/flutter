@@ -139,11 +139,6 @@ String StylePropertySerializer::asText() const
         case CSSPropertyFontWeight:
             // Don't use CSSPropertyFont because old UAs can't recognize them but are important for editing.
             break;
-        case CSSPropertyListStyleType:
-        case CSSPropertyListStylePosition:
-        case CSSPropertyListStyleImage:
-            shorthandPropertyID = CSSPropertyListStyle;
-            break;
         case CSSPropertyMarginTop:
         case CSSPropertyMarginRight:
         case CSSPropertyMarginBottom:
@@ -265,8 +260,6 @@ String StylePropertySerializer::getPropertyValue(CSSPropertyID propertyID) const
         return get4Values(paddingShorthand());
     case CSSPropertyTransition:
         return getLayeredShorthandValue(transitionShorthand());
-    case CSSPropertyListStyle:
-        return getShorthandValue(listStyleShorthand());
     case CSSPropertyWebkitTextEmphasis:
         return getShorthandValue(webkitTextEmphasisShorthand());
     case CSSPropertyWebkitTextStroke:

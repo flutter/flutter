@@ -174,11 +174,6 @@ void StyleBuilderFunctions::applyValueCSSPropertyLineHeight(StyleResolverState& 
     state.style()->setLineHeight(lineHeight);
 }
 
-void StyleBuilderFunctions::applyValueCSSPropertyListStyleImage(StyleResolverState& state, CSSValue* value)
-{
-    state.style()->setListStyleImage(state.styleImage(CSSPropertyListStyleImage, value));
-}
-
 void StyleBuilderFunctions::applyInitialCSSPropertyOutlineStyle(StyleResolverState& state)
 {
     state.style()->setOutlineStyleIsAuto(RenderStyle::initialOutlineStyleIsAuto());

@@ -133,8 +133,6 @@ protected:
         {
             return (_empty_cells == other._empty_cells)
                 && (_caption_side == other._caption_side)
-                && (_list_style_type == other._list_style_type)
-                && (_list_style_position == other._list_style_position)
                 && (_visibility == other._visibility)
                 && (_text_align == other._text_align)
                 && (m_textUnderline == other.m_textUnderline)
@@ -148,8 +146,6 @@ protected:
 
         unsigned _empty_cells : 1; // EEmptyCell
         unsigned _caption_side : 2; // ECaptionSide
-        unsigned _list_style_type : 7; // EListStyleType
-        unsigned _list_style_position : 1; // EListStylePosition
         unsigned _visibility : 2; // EVisibility
         unsigned _text_align : 4; // ETextAlign
         unsigned m_textUnderline : 1;
@@ -236,8 +232,6 @@ protected:
     {
         inherited_flags._empty_cells = initialEmptyCells();
         inherited_flags._caption_side = initialCaptionSide();
-        inherited_flags._list_style_type = initialListStyleType();
-        inherited_flags._list_style_position = initialListStylePosition();
         inherited_flags._visibility = initialVisibility();
         inherited_flags._text_align = initialTextAlign();
         inherited_flags.m_textUnderline = false;
@@ -561,10 +555,6 @@ public:
     short verticalBorderSpacing() const;
     EEmptyCell emptyCells() const { return static_cast<EEmptyCell>(inherited_flags._empty_cells); }
     ECaptionSide captionSide() const { return static_cast<ECaptionSide>(inherited_flags._caption_side); }
-
-    EListStyleType listStyleType() const { return static_cast<EListStyleType>(inherited_flags._list_style_type); }
-    StyleImage* listStyleImage() const;
-    EListStylePosition listStylePosition() const { return static_cast<EListStylePosition>(inherited_flags._list_style_position); }
 
     const Length& marginTop() const { return surround->margin.top(); }
     const Length& marginBottom() const { return surround->margin.bottom(); }
@@ -905,10 +895,6 @@ public:
     void setAspectRatioDenominator(float v) { SET_VAR(rareNonInheritedData, m_aspectRatioDenominator, v); }
     void setAspectRatioNumerator(float v) { SET_VAR(rareNonInheritedData, m_aspectRatioNumerator, v); }
 
-    void setListStyleType(EListStyleType v) { inherited_flags._list_style_type = v; }
-    void setListStyleImage(PassRefPtr<StyleImage>);
-    void setListStylePosition(EListStylePosition v) { inherited_flags._list_style_position = v; }
-
     void setMarginTop(const Length& v) { SET_VAR(surround, margin.m_top, v); }
     void setMarginBottom(const Length& v) { SET_VAR(surround, margin.m_bottom, v); }
     void setMarginLeft(const Length& v) { SET_VAR(surround, margin.m_left, v); }
@@ -1102,8 +1088,6 @@ public:
     static LengthPoint initialObjectPosition() { return LengthPoint(Length(50.0, Percent), Length(50.0, Percent)); }
     static EDisplay initialDisplay() { return FLEX; }
     static EEmptyCell initialEmptyCells() { return SHOW; }
-    static EListStylePosition initialListStylePosition() { return OUTSIDE; }
-    static EListStyleType initialListStyleType() { return Disc; }
     static EOverflow initialOverflowX() { return OVISIBLE; }
     static EOverflow initialOverflowY() { return OVISIBLE; }
     static EPageBreak initialPageBreak() { return PBAUTO; }
@@ -1115,7 +1099,6 @@ public:
     static short initialHorizontalBorderSpacing() { return 0; }
     static short initialVerticalBorderSpacing() { return 0; }
     static Color initialColor() { return Color::black; }
-    static StyleImage* initialListStyleImage() { return 0; }
     static unsigned initialBorderWidth() { return 3; }
     static unsigned short initialColumnRuleWidth() { return 3; }
     static unsigned short initialOutlineWidth() { return 3; }

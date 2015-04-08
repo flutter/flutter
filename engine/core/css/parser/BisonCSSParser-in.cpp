@@ -348,12 +348,6 @@ bool isValidKeywordPropertyAndValue(CSSPropertyID propertyId, CSSValueID valueID
         return valueID == CSSValueNormal || (valueID >= CSSValueUltraCondensed && valueID <= CSSValueUltraExpanded);
     case CSSPropertyImageRendering: // auto | optimizeContrast | pixelated
         return valueID == CSSValueAuto || valueID == CSSValueWebkitOptimizeContrast || (RuntimeEnabledFeatures::imageRenderingPixelatedEnabled() && valueID == CSSValuePixelated);
-    case CSSPropertyListStylePosition: // inside | outside
-        return valueID == CSSValueInside || valueID == CSSValueOutside;
-    case CSSPropertyListStyleType:
-        // See section CSS_PROP_LIST_STYLE_TYPE of file CSSValueKeywords.in
-        // for the list of supported list-style-types.
-        return (valueID >= CSSValueDisc && valueID <= CSSValueKatakanaIroha) || valueID == CSSValueNone;
     case CSSPropertyObjectFit:
         ASSERT(RuntimeEnabledFeatures::objectFitPositionEnabled());
         return valueID == CSSValueFill || valueID == CSSValueContain || valueID == CSSValueCover || valueID == CSSValueNone || valueID == CSSValueScaleDown;
@@ -472,8 +466,6 @@ bool isKeywordPropertyID(CSSPropertyID propertyId)
     case CSSPropertyFontStyle:
     case CSSPropertyFontStretch:
     case CSSPropertyImageRendering:
-    case CSSPropertyListStylePosition:
-    case CSSPropertyListStyleType:
     case CSSPropertyObjectFit:
     case CSSPropertyOutlineStyle:
     case CSSPropertyOverflowWrap:

@@ -148,91 +148,6 @@ enum LineBreak {
     LineBreakAuto, LineBreakLoose, LineBreakNormal, LineBreakStrict, LineBreakAfterWhiteSpace
 };
 
-// The order of this enum must match the order of the list style types in CSSValueKeywords.in.
-enum EListStyleType {
-    Disc,
-    Circle,
-    Square,
-    DecimalListStyle,
-    DecimalLeadingZero,
-    ArabicIndic,
-    BinaryListStyle,
-    Bengali,
-    Cambodian,
-    Khmer,
-    Devanagari,
-    Gujarati,
-    Gurmukhi,
-    Kannada,
-    LowerHexadecimal,
-    Lao,
-    Malayalam,
-    Mongolian,
-    Myanmar,
-    Octal,
-    Oriya,
-    Persian,
-    Urdu,
-    Telugu,
-    Tibetan,
-    Thai,
-    UpperHexadecimal,
-    LowerRoman,
-    UpperRoman,
-    LowerGreek,
-    LowerAlpha,
-    LowerLatin,
-    UpperAlpha,
-    UpperLatin,
-    Afar,
-    EthiopicHalehameAaEt,
-    EthiopicHalehameAaEr,
-    Amharic,
-    EthiopicHalehameAmEt,
-    AmharicAbegede,
-    EthiopicAbegedeAmEt,
-    CjkEarthlyBranch,
-    CjkHeavenlyStem,
-    Ethiopic,
-    EthiopicHalehameGez,
-    EthiopicAbegede,
-    EthiopicAbegedeGez,
-    HangulConsonant,
-    Hangul,
-    LowerNorwegian,
-    Oromo,
-    EthiopicHalehameOmEt,
-    Sidama,
-    EthiopicHalehameSidEt,
-    Somali,
-    EthiopicHalehameSoEt,
-    Tigre,
-    EthiopicHalehameTig,
-    TigrinyaEr,
-    EthiopicHalehameTiEr,
-    TigrinyaErAbegede,
-    EthiopicAbegedeTiEr,
-    TigrinyaEt,
-    EthiopicHalehameTiEt,
-    TigrinyaEtAbegede,
-    EthiopicAbegedeTiEt,
-    UpperGreek,
-    UpperNorwegian,
-    Asterisks,
-    Footnotes,
-    Hebrew,
-    Armenian,
-    LowerArmenian,
-    UpperArmenian,
-    Georgian,
-    CJKIdeographic,
-    Hiragana,
-    Katakana,
-    HiraganaIroha,
-    KatakanaIroha,
-    NoneListStyle
-};
-
 enum EAnimPlayState {
     AnimPlayStatePlaying,
     AnimPlayStatePaused
@@ -291,8 +206,6 @@ enum EEmptyCell {
 enum ECaptionSide {
     CAPTOP, CAPBOTTOM, CAPLEFT, CAPRIGHT
 };
-
-enum EListStylePosition { OUTSIDE, INSIDE };
 
 enum EVisibility { VISIBLE, HIDDEN, COLLAPSE };
 

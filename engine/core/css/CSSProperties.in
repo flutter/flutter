@@ -191,15 +191,6 @@ left animatable, initial=initialOffset, converter=convertLengthOrAuto
 
 letter-spacing animatable, inherited, initial=initialLetterWordSpacing, converter=convertSpacing
 
-// OBSOLETE
-list-style-image animatable, inherited, custom_value
-
-// OBSOLETE
-list-style-position inherited
-
-// OBSOLETE
-list-style-type inherited
-
 // LAYOUT
 margin-bottom animatable, initial=initialMargin, converter=convertLengthOrAuto
 
@@ -533,7 +524,6 @@ flex longhands=flex-grow;flex-shrink;flex-basis
 // LAYOUT
 flex-flow longhands=flex-direction;flex-wrap
 
-list-style longhands=list-style-type;list-style-position;list-style-image
 margin longhands=margin-top;margin-right;margin-bottom;margin-left
 outline longhands=outline-color;outline-style;outline-width
 overflow longhands=overflow-x;overflow-y

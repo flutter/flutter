@@ -347,9 +347,6 @@ void AnimatedStyleBuilder::applyProperty(CSSPropertyID property, StyleResolverSt
         else
             style->setLineHeight(Length(clampTo<float>(toAnimatableDouble(value)->toDouble(), 0), Percent));
         return;
-    case CSSPropertyListStyleImage:
-        style->setListStyleImage(state.styleImage(property, toAnimatableImage(value)->toCSSValue()));
-        return;
     case CSSPropertyLetterSpacing:
         style->setLetterSpacing(clampTo<float>(toAnimatableDouble(value)->toDouble()));
         return;

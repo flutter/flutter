@@ -75,11 +75,6 @@ void StyleResourceLoader::loadPendingImages(RenderStyle* style, ElementStyleReso
             }
             break;
         }
-        case CSSPropertyListStyleImage: {
-            if (style->listStyleImage() && style->listStyleImage()->isPendingImage())
-                style->setListStyleImage(loadPendingImage(toStylePendingImage(style->listStyleImage()), elementStyleResources.deviceScaleFactor()));
-            break;
-        }
         case CSSPropertyBorderImageSource: {
             if (style->borderImageSource() && style->borderImageSource()->isPendingImage())
                 style->setBorderImageSource(loadPendingImage(toStylePendingImage(style->borderImageSource()), elementStyleResources.deviceScaleFactor()));

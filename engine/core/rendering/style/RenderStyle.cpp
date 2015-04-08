@@ -380,7 +380,6 @@ bool RenderStyle::diffNeedsFullLayout(const RenderStyle& other) const
             || rareInheritedData->m_textOrientation != other.rareInheritedData->m_textOrientation
             || rareInheritedData->m_tabSize != other.rareInheritedData->m_tabSize
             || rareInheritedData->m_lineBoxContain != other.rareInheritedData->m_lineBoxContain
-            || rareInheritedData->listStyleImage != other.rareInheritedData->listStyleImage
             || rareInheritedData->textStrokeWidth != other.rareInheritedData->textStrokeWidth)
             return true;
 
@@ -545,13 +544,6 @@ static RoundedRect::Radii calcRadiiFor(const BorderData& border, IntSize size)
             valueForLength(border.bottomLeft().height(), size.height())),
         IntSize(valueForLength(border.bottomRight().width(), size.width()),
             valueForLength(border.bottomRight().height(), size.height())));
-}
-
-StyleImage* RenderStyle::listStyleImage() const { return rareInheritedData->listStyleImage.get(); }
-void RenderStyle::setListStyleImage(PassRefPtr<StyleImage> v)
-{
-    if (rareInheritedData->listStyleImage != v)
-        rareInheritedData.access()->listStyleImage = v;
 }
 
 Color RenderStyle::color() const { return inherited->color; }

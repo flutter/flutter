@@ -132,8 +132,6 @@ bool CSSPropertyEquality::propertiesEqual(CSSPropertyID prop, const RenderStyle&
         return a.letterSpacing() == b.letterSpacing();
     case CSSPropertyLineHeight:
         return a.specifiedLineHeight() == b.specifiedLineHeight();
-    case CSSPropertyListStyleImage:
-        return dataEquivalent(a.listStyleImage(), b.listStyleImage());
     case CSSPropertyMarginBottom:
         return a.marginBottom() == b.marginBottom();
     case CSSPropertyMarginLeft:

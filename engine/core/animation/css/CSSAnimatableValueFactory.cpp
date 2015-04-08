@@ -326,8 +326,6 @@ PassRefPtr<AnimatableValue> CSSAnimatableValueFactory::create(CSSPropertyID prop
         return createFromFontWeight(style.fontWeight());
     case CSSPropertyHeight:
         return createFromLength(style.height(), style);
-    case CSSPropertyListStyleImage:
-        return createFromStyleImage(style.listStyleImage());
     case CSSPropertyLeft:
         return createFromLength(style.left(), style);
     case CSSPropertyLetterSpacing:
