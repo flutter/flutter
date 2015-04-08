@@ -151,11 +151,12 @@ protected:
         unsigned m_textUnderline : 1;
         unsigned _direction : 1; // TextDirection
         unsigned _white_space : 3; // EWhiteSpace
-        // 32 bits
 
         // non CSS2 inherited
         unsigned m_rtlOrdering : 1; // Order
         unsigned _pointerEvents : 4; // EPointerEvents
+
+        // 19 bits
     } inherited_flags;
 
 // don't inherit

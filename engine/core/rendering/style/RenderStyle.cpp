@@ -52,7 +52,7 @@ struct SameSizeAsRenderStyle : public RefCounted<SameSizeAsRenderStyle> {
     void* dataRefs[7];
 
     struct InheritedFlags {
-        unsigned m_bitfields[2];
+        unsigned m_bitfields;
     } inherited_flags;
 
     struct NonInheritedFlags {
