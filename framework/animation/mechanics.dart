@@ -17,8 +17,8 @@ class Particle extends System {
 
   Particle({this.mass: 1.0, this.velocity: 0.0, this.position: 0.0});
 
-  void applyImpluse(double impluse) {
-    velocity += impluse / mass;
+  void applyImpulse(double impulse) {
+    velocity += impulse / mass;
   }
 
   void update(double deltaT) {
@@ -78,7 +78,7 @@ class ParticleInBoxWithFriction extends ParticleInBox {
 
   void update(double deltaT) {
     double force = -_sign * friction;
-    particle.applyImpluse(force * deltaT);
+    particle.applyImpulse(force * deltaT);
     if (particle.velocity.sign != _sign)
       particle.velocity = 0.0;
     super.update(deltaT);
@@ -104,7 +104,7 @@ class ParticleAndSpringInBox extends System {
   }
 
   void update(double deltaT) {
-    particle.applyImpluse(spring.force * deltaT);
+    particle.applyImpulse(spring.force * deltaT);
     particle.update(deltaT);
     _applyInvariants();
   }
@@ -132,11 +132,11 @@ class ParticleClimbingRamp extends System {
 
   void update(double deltaT) {
     particle.update(deltaT);
-    // Note that we apply the impluse from gravity after updating the particle's
+    // Note that we apply the impulse from gravity after updating the particle's
     // position so that we overestimate the distance traveled by the particle.
     // That ensures that we actually hit the edge of the box and don't wind up
     // reversing course.
-    particle.applyImpluse(kGravity * slope * deltaT);
+    particle.applyImpulse(kGravity * slope * deltaT);
     box.confine(particle);
   }
 }
