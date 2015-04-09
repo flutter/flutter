@@ -191,10 +191,6 @@ enum TextUnderlinePosition {
     TextUnderlinePositionUnder
 };
 
-enum EEmptyCell {
-    SHOW, HIDE
-};
-
 enum EVisibility { VISIBLE, HIDDEN, COLLAPSE };
 
 // The order of this enum must match the order of the display values in CSSValueKeywords.in.

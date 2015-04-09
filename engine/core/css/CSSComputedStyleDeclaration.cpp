@@ -111,7 +111,6 @@ static const CSSPropertyID staticComputableProperties[] = {
     CSSPropertyColor,
     CSSPropertyDirection,
     CSSPropertyDisplay,
-    CSSPropertyEmptyCells,
     CSSPropertyFontFamily,
     CSSPropertyFontKerning,
     CSSPropertyFontSize,
@@ -1364,8 +1363,6 @@ PassRefPtr<CSSValue> CSSComputedStyleDeclaration::getPropertyCSSValue(CSSPropert
             return cssValuePool().createValue(style->direction());
         case CSSPropertyDisplay:
             return cssValuePool().createValue(style->display());
-        case CSSPropertyEmptyCells:
-            return cssValuePool().createValue(style->emptyCells());
         case CSSPropertyAlignContent:
             return cssValuePool().createValue(style->alignContent());
         case CSSPropertyAlignItems:

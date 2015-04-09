@@ -338,8 +338,6 @@ bool isValidKeywordPropertyAndValue(CSSPropertyID propertyId, CSSValueID valueID
         // table-column-group | table-column | table-cell | table-caption | -webkit-box | -webkit-inline-box | none
         // flex | inline-flex
         return (valueID >= CSSValueInline && valueID <= CSSValueInlineFlex) || valueID == CSSValueNone;
-    case CSSPropertyEmptyCells: // show | hide
-        return valueID == CSSValueShow || valueID == CSSValueHide;
     case CSSPropertyFontStyle: // normal | italic | oblique
         return valueID == CSSValueNormal || valueID == CSSValueItalic || valueID == CSSValueOblique;
     case CSSPropertyFontStretch: // normal | ultra-condensed | extra-condensed | condensed | semi-condensed | semi-expanded | expanded | extra-expanded | ultra-expanded
@@ -452,7 +450,6 @@ bool isKeywordPropertyID(CSSPropertyID propertyId)
     case CSSPropertyBoxSizing:
     case CSSPropertyDirection:
     case CSSPropertyDisplay:
-    case CSSPropertyEmptyCells:
     case CSSPropertyFontStyle:
     case CSSPropertyFontStretch:
     case CSSPropertyImageRendering:

@@ -131,8 +131,7 @@ protected:
     struct InheritedFlags {
         bool operator==(const InheritedFlags& other) const
         {
-            return (_empty_cells == other._empty_cells)
-                && (_visibility == other._visibility)
+            return (_visibility == other._visibility)
                 && (_text_align == other._text_align)
                 && (m_textUnderline == other.m_textUnderline)
                 && (_direction == other._direction)
@@ -143,7 +142,6 @@ protected:
 
         bool operator!=(const InheritedFlags& other) const { return !(*this == other); }
 
-        unsigned _empty_cells : 1; // EEmptyCell
         unsigned _visibility : 2; // EVisibility
         unsigned _text_align : 4; // ETextAlign
         unsigned m_textUnderline : 1;
@@ -220,7 +218,6 @@ protected:
 protected:
     void setBitDefaults()
     {
-        inherited_flags._empty_cells = initialEmptyCells();
         inherited_flags._visibility = initialVisibility();
         inherited_flags._text_align = initialTextAlign();
         inherited_flags.m_textUnderline = false;
@@ -534,7 +531,6 @@ public:
 
     short horizontalBorderSpacing() const;
     short verticalBorderSpacing() const;
-    EEmptyCell emptyCells() const { return static_cast<EEmptyCell>(inherited_flags._empty_cells); }
 
     const Length& marginTop() const { return surround->margin.top(); }
     const Length& marginBottom() const { return surround->margin.bottom(); }
@@ -856,7 +852,6 @@ public:
 
     void setHorizontalBorderSpacing(short);
     void setVerticalBorderSpacing(short);
-    void setEmptyCells(EEmptyCell v) { inherited_flags._empty_cells = v; }
 
     void setHasAspectRatio(bool b) { SET_VAR(rareNonInheritedData, m_hasAspectRatio, b); }
     void setAspectRatioDenominator(float v) { SET_VAR(rareNonInheritedData, m_aspectRatioDenominator, v); }
@@ -1038,7 +1033,6 @@ public:
     static ObjectFit initialObjectFit() { return ObjectFitFill; }
     static LengthPoint initialObjectPosition() { return LengthPoint(Length(50.0, Percent), Length(50.0, Percent)); }
     static EDisplay initialDisplay() { return FLEX; }
-    static EEmptyCell initialEmptyCells() { return SHOW; }
     static EOverflow initialOverflowX() { return OVISIBLE; }
     static EOverflow initialOverflowY() { return OVISIBLE; }
     static EPosition initialPosition() { return StaticPosition; }

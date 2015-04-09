@@ -717,36 +717,6 @@ template<> inline CSSPrimitiveValue::operator EDisplay() const
     return display;
 }
 
-template<> inline CSSPrimitiveValue::CSSPrimitiveValue(EEmptyCell e)
-    : CSSValue(PrimitiveClass)
-{
-    m_primitiveUnitType = CSS_VALUE_ID;
-    switch (e) {
-    case SHOW:
-        m_value.valueID = CSSValueShow;
-        break;
-    case HIDE:
-        m_value.valueID = CSSValueHide;
-        break;
-    }
-}
-
-template<> inline CSSPrimitiveValue::operator EEmptyCell() const
-{
-    ASSERT(isValueID());
-    switch (m_value.valueID) {
-    case CSSValueShow:
-        return SHOW;
-    case CSSValueHide:
-        return HIDE;
-    default:
-        break;
-    }
-
-    ASSERT_NOT_REACHED();
-    return SHOW;
-}
-
 template<> inline CSSPrimitiveValue::CSSPrimitiveValue(EJustifyContent e)
     : CSSValue(PrimitiveClass)
 {

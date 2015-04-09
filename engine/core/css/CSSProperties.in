@@ -158,9 +158,6 @@ clip animatable, converter=convertClip, custom_all
 display
 
 // LAYOUT
-empty-cells inherited, type_name=EEmptyCell
-
-// LAYOUT
 flex-basis animatable, converter=convertLengthOrAuto
 
 // LAYOUT
