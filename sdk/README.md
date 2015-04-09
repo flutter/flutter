@@ -83,7 +83,7 @@ Set up your computer
 3. Install the Sky SDK:
   - ``git clone https://github.com/domokit/sky_sdk.git``
 
-4. Ensure sure $DART_SDK is set to the path of your Dart SDK and 'adb'
+4. Ensure that $DART_SDK is set to the path of your Dart SDK and 'adb'
    (inside 'platform-tools' in the android sdk) is in your $PATH.
 
 Set up your device
