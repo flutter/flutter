@@ -351,10 +351,12 @@ class Text extends SkyNodeWrapper {
 
   SkyNodeWrapper get _emptyNode => _emptyText;
 
+  static final Style _displayParagraph = new Style('display:paragraph');
+
   sky.Node _createNode() {
     return sky.document.createElement('div')
                            ..setChild(new sky.Text(this.data))
-                           ..setAttribute('style', 'display:paragraph');
+                           ..setAttribute('class', _displayParagraph._className);
   }
 
   void _syncNode(SkyNodeWrapper old) {
