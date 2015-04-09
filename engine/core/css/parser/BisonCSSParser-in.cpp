@@ -364,8 +364,6 @@ bool isValidKeywordPropertyAndValue(CSSPropertyID propertyId, CSSValueID valueID
         return valueID == CSSValueVisible || valueID == CSSValueNone || valueID == CSSValueAll || valueID == CSSValueAuto || (valueID >= CSSValueVisiblepainted && valueID <= CSSValueBoundingBox);
     case CSSPropertyPosition: // static | absolute
         return valueID == CSSValueStatic || valueID == CSSValueAbsolute;
-    case CSSPropertyTableLayout: // auto | fixed
-        return valueID == CSSValueAuto || valueID == CSSValueFixed;
     case CSSPropertyTextAlignLast:
         // auto | start | end | left | right | center | justify
         ASSERT(RuntimeEnabledFeatures::css3TextEnabled());
@@ -465,7 +463,6 @@ bool isKeywordPropertyID(CSSPropertyID propertyId)
     case CSSPropertyOverflowY:
     case CSSPropertyPointerEvents:
     case CSSPropertyPosition:
-    case CSSPropertyTableLayout:
     case CSSPropertyTextAlignLast:
     case CSSPropertyTextDecorationStyle:
     case CSSPropertyTextJustify:

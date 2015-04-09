@@ -260,9 +260,6 @@ right animatable, initial=initialOffset, converter=convertLengthOrAuto
 // OBSOLETE
 size custom_all
 
-// OBSOLETE
-table-layout
-
 tab-size inherited, type_name=unsigned
 text-align inherited, custom_value
 text-align-last runtime_flag=CSS3Text, inherited, type_name=TextAlignLast

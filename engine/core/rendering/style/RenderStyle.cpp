@@ -178,7 +178,6 @@ void RenderStyle::copyNonInheritedFrom(const RenderStyle* other)
     noninherited_flags.overflowY = other->noninherited_flags.overflowY;
     noninherited_flags.verticalAlign = other->noninherited_flags.verticalAlign;
     noninherited_flags.position = other->noninherited_flags.position;
-    noninherited_flags.tableLayout = other->noninherited_flags.tableLayout;
     noninherited_flags.unicodeBidi = other->noninherited_flags.unicodeBidi;
     noninherited_flags.explicitInheritance = other->noninherited_flags.explicitInheritance;
     noninherited_flags.currentColor = other->noninherited_flags.currentColor;

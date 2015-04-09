@@ -167,7 +167,6 @@ protected:
                 && overflowY == other.overflowY
                 && verticalAlign == other.verticalAlign
                 && position == other.position
-                && tableLayout == other.tableLayout
                 && styleType == other.styleType
                 && affectedByFocus == other.affectedByFocus
                 && affectedByHover == other.affectedByHover
@@ -190,7 +189,6 @@ protected:
         unsigned overflowY : 3; // EOverflow
         unsigned verticalAlign : 4; // EVerticalAlign
         unsigned position : 1; // EPosition
-        unsigned tableLayout : 1; // ETableLayout
         unsigned unicodeBidi : 3; // EUnicodeBidi
 
         // This is set if we used viewport units when resolving a length.
@@ -236,7 +234,6 @@ protected:
         noninherited_flags.overflowY = initialOverflowY();
         noninherited_flags.verticalAlign = initialVerticalAlign();
         noninherited_flags.position = initialPosition();
-        noninherited_flags.tableLayout = initialTableLayout();
         noninherited_flags.unicodeBidi = initialUnicodeBidi();
         noninherited_flags.explicitInheritance = false;
         noninherited_flags.currentColor = false;
@@ -435,9 +432,6 @@ public:
     bool hasAutoClip() const { return visual->hasAutoClip; }
 
     EUnicodeBidi unicodeBidi() const { return static_cast<EUnicodeBidi>(noninherited_flags.unicodeBidi); }
-
-    ETableLayout tableLayout() const { return static_cast<ETableLayout>(noninherited_flags.tableLayout); }
-    bool isFixedTableLayout() const { return tableLayout() == TFIXED && !logicalWidth().isAuto(); }
 
     const Font& font() const;
     const FontMetrics& fontMetrics() const;
@@ -823,8 +817,6 @@ public:
 
     void setUnicodeBidi(EUnicodeBidi b) { noninherited_flags.unicodeBidi = b; }
 
-    void setTableLayout(ETableLayout v) { noninherited_flags.tableLayout = v; }
-
     bool setFontDescription(const FontDescription&);
     // Only used for blending font sizes when animating and for text autosizing.
     void setFontSize(float);
@@ -1050,7 +1042,6 @@ public:
     static EOverflow initialOverflowX() { return OVISIBLE; }
     static EOverflow initialOverflowY() { return OVISIBLE; }
     static EPosition initialPosition() { return StaticPosition; }
-    static ETableLayout initialTableLayout() { return TAUTO; }
     static EUnicodeBidi initialUnicodeBidi() { return UBNormal; }
     static EVisibility initialVisibility() { return VISIBLE; }
     static EWhiteSpace initialWhiteSpace() { return NORMAL; }

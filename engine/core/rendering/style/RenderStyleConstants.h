@@ -71,10 +71,6 @@ enum EVerticalAlign {
     TEXT_BOTTOM, TOP, BOTTOM, BASELINE_MIDDLE, LENGTH
 };
 
-enum ETableLayout {
-    TAUTO, TFIXED
-};
-
 enum EFillAttachment {
     LocalBackgroundAttachment, FixedBackgroundAttachment
 };

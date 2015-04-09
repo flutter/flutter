@@ -150,7 +150,6 @@ static const CSSPropertyID staticComputableProperties[] = {
     CSSPropertyPointerEvents,
     CSSPropertyPosition,
     CSSPropertyRight,
-    CSSPropertyTableLayout,
     CSSPropertyTabSize,
     CSSPropertyTextAlign,
     CSSPropertyTextAlignLast,
@@ -1577,8 +1576,6 @@ PassRefPtr<CSSValue> CSSComputedStyleDeclaration::getPropertyCSSValue(CSSPropert
             return cssValuePool().createValue(style->position());
         case CSSPropertyRight:
             return valueForPositionOffset(*style, CSSPropertyRight, renderer);
-        case CSSPropertyTableLayout:
-            return cssValuePool().createValue(style->tableLayout());
         case CSSPropertyTextAlign:
             return cssValuePool().createValue(style->textAlign());
         case CSSPropertyTextAlignLast:

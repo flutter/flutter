@@ -1042,36 +1042,6 @@ template<> inline CSSPrimitiveValue::operator EPosition() const
     return StaticPosition;
 }
 
-template<> inline CSSPrimitiveValue::CSSPrimitiveValue(ETableLayout e)
-    : CSSValue(PrimitiveClass)
-{
-    m_primitiveUnitType = CSS_VALUE_ID;
-    switch (e) {
-    case TAUTO:
-        m_value.valueID = CSSValueAuto;
-        break;
-    case TFIXED:
-        m_value.valueID = CSSValueFixed;
-        break;
-    }
-}
-
-template<> inline CSSPrimitiveValue::operator ETableLayout() const
-{
-    ASSERT(isValueID());
-    switch (m_value.valueID) {
-    case CSSValueFixed:
-        return TFIXED;
-    case CSSValueAuto:
-        return TAUTO;
-    default:
-        break;
-    }
-
-    ASSERT_NOT_REACHED();
-    return TAUTO;
-}
-
 template<> inline CSSPrimitiveValue::CSSPrimitiveValue(ETextAlign e)
     : CSSValue(PrimitiveClass)
 {
