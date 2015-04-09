@@ -1,6 +1,6 @@
 <html>
 <import src="../resources/dump-as-text.sky" />
-<body>
+<p>
 This is a dump-as-text test.
-</body>
+</p>
 </html>

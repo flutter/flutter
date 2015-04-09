@@ -276,7 +276,6 @@ private:
 public:
     static PassRefPtr<RenderStyle> create();
     static PassRefPtr<RenderStyle> createDefaultStyle();
-    static PassRefPtr<RenderStyle> createAnonymousStyleWithDisplay(const RenderStyle* parentStyle, EDisplay);
     static PassRefPtr<RenderStyle> clone(const RenderStyle*);
 
     // Computes how the style change should be propagated down the tree.
@@ -1041,7 +1040,7 @@ public:
     bool inheritedNotEqual(const RenderStyle*) const;
     bool inheritedDataShared(const RenderStyle*) const;
 
-    bool requiresOnlyBlockChildren();
+    bool requiresOnlyBlockChildren() const;
     bool isDisplayReplacedType() const { return isDisplayReplacedType(display()); }
     bool isDisplayInlineType() const { return isDisplayInlineType(display()); }
     bool isOriginalDisplayInlineType() const { return isDisplayInlineType(originalDisplay()); }

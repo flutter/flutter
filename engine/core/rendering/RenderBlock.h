@@ -157,9 +157,6 @@ public:
     virtual int lineCount(const RootInlineBox* = 0, bool* = 0) const;
     void clearTruncation();
 
-    static RenderBlock* createAnonymousWithParentRendererAndDisplay(const RenderObject*, EDisplay = PARAGRAPH);
-    RenderBlock* createAnonymousBlock(EDisplay display = PARAGRAPH) const { return createAnonymousWithParentRendererAndDisplay(this, display); }
-
     // Accessors for logical width/height and margins in the containing block's block-flow direction.
     LayoutUnit logicalWidthForChild(const RenderBox* child) const { return child->width(); }
     LayoutUnit logicalHeightForChild(const RenderBox* child) const { return child->height(); }
@@ -256,8 +253,6 @@ private:
     virtual bool isRenderBlock() const override final { return true; }
 
     virtual void dirtyLinesFromChangedChild(RenderObject* child) override final { m_lineBoxes.dirtyLinesFromChangedChild(this, child); }
-
-    void addChildIgnoringAnonymousColumnBlocks(RenderObject* newChild, RenderObject* beforeChild = 0);
 
     void insertIntoTrackedRendererMaps(RenderBox* descendant, TrackedDescendantsMap*&, TrackedContainerMap*&);
     static void removeFromTrackedRendererMaps(RenderBox* descendant, TrackedDescendantsMap*&, TrackedContainerMap*&);

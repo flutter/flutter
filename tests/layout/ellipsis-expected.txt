@@ -1,20 +1,17 @@
 layer at (0,0) size 800x600
   RenderView {#document} at (0,0) size 800x600
-    RenderFlexibleBox {sky} at (0,0) size 800x94
-layer at (0,0) size 56x69
-  RenderFlexibleBox {div} at (0,0) size 56x69 [border: (3px solid #0000FF)]
-    RenderParagraph (anonymous) at (3,3) size 50x19
-      RenderText {#text} at (0,0) size 91x19
-        text run at (0,0) width 91: "These lines"
-    RenderParagraph (anonymous) at (3,47) size 50x19
-      RenderText {#text} at (0,0) size 94x19
-        text run at (0,0) width 94: "all ellipsize."
-layer at (3,22) size 56x25 backgroundClip at (3,22) size 50x25
-  RenderParagraph {p} at (3,22) size 56x25 [border: (3px solid #FF0000)]
-    RenderText {#text} at (3,3) size 54x19
-      text run at (3,3) width 54: "should"
-layer at (0,69) size 56x25
-  RenderParagraph {p} at (0,69) size 56x25 [border: (3px solid #FF0000)]
+    RenderFlexibleBox {sky} at (0,0) size 800x50
+layer at (0,0) size 56x25
+  RenderParagraph {p} at (0,0) size 56x25 [border: (3px solid #FF0000)]
+    RenderText {#text} at (3,3) size 96x19
+      text run at (3,3) width 96: "These lines "
+    RenderInline {p} at (0,0) size 54x19 [border: (3px solid #FF0000)]
+      RenderText {#text} at (98,3) size 54x19
+        text run at (98,3) width 54: "should"
+    RenderText {#text} at (151,3) size 99x19
+      text run at (151,3) width 99: " all ellipsize."
+layer at (0,25) size 56x25
+  RenderParagraph {p} at (0,25) size 56x25 [border: (3px solid #FF0000)]
     RenderInline {span} at (0,0) size 117x19
       RenderText {#text} at (3,3) size 117x19
         text run at (3,3) width 117: "As should this."

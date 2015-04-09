@@ -45,13 +45,6 @@ const char* RenderParagraph::renderName() const
     return "RenderParagraph";
 }
 
-RenderParagraph* RenderParagraph::createAnonymous(Document& document)
-{
-    RenderParagraph* renderer = new RenderParagraph(0);
-    renderer->setDocumentForAnonymous(&document);
-    return renderer;
-}
-
 LayoutUnit RenderParagraph::logicalLeftSelectionOffset(RenderBlock* rootBlock, LayoutUnit position)
 {
     LayoutUnit logicalLeft = logicalLeftOffsetForLine(false);

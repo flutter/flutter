@@ -104,6 +104,9 @@ bool Text::textRendererIsNeeded(const RenderStyle& style, const RenderObject& pa
     if (style.display() == NONE)
         return false;
 
+    if (style.requiresOnlyBlockChildren())
+        return false;
+
     if (!containsOnlyWhitespace())
         return true;
 

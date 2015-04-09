@@ -1,7 +1,7 @@
 <import src="../resources/dump-as-render-tree.sky" />
 
 <style>
-  block, paragraph, flex {
+  block, p, flex {
     width: 100px;
     height: 100px;
     margin-bottom: 50px;
@@ -9,9 +9,8 @@
     transform: translate3d(0, 0, 0);
   }
   block { background: pink; }
-  paragraph {
+  p {
     background: orange;
-    display: paragraph;
   }
   flex {
     background: salmon;
@@ -37,11 +36,11 @@
   <spacer />
 </block>
 
-<paragraph>
+<p>
   <spacer />
   <absolute />
   <spacer />
-</paragraph>
+</p>
 
 <flex>
   <spacer />

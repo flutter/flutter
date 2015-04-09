@@ -1285,22 +1285,6 @@ void RenderObject::styleDidChange(StyleDifference diff, const RenderStyle* oldSt
     // updated by subclasses before we know if we have to invalidate paints (in setStyle()).
 }
 
-void RenderObject::propagateStyleToAnonymousChildren(bool blockChildrenOnly)
-{
-    // FIXME: We could save this call when the change only affected non-inherited properties.
-    for (RenderObject* child = slowFirstChild(); child; child = child->nextSibling()) {
-        if (!child->isAnonymous())
-            continue;
-
-        if (blockChildrenOnly && !child->isRenderBlock())
-            continue;
-
-        RefPtr<RenderStyle> newStyle = RenderStyle::createAnonymousStyleWithDisplay(style(), child->style()->display());
-        updateAnonymousChildStyle(child, newStyle.get());
-        child->setStyle(newStyle.release());
-    }
-}
-
 void RenderObject::updateFillImages(const FillLayer* oldLayers, const FillLayer& newLayers)
 {
     // Optimize the common case

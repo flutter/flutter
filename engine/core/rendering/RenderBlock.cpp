@@ -200,40 +200,15 @@ void RenderBlock::styleDidChange(StyleDifference diff, const RenderStyle* oldSty
 {
     RenderBox::styleDidChange(diff, oldStyle);
 
-    RenderStyle* newStyle = style();
-    propagateStyleToAnonymousChildren(true);
-
     // It's possible for our border/padding to change, but for the overall logical width of the block to
     // end up being the same. We keep track of this change so in layoutBlock, we can know to set relayoutChildren=true.
-    m_hasBorderOrPaddingLogicalWidthChanged = oldStyle && diff.needsFullLayout() && needsLayout() && borderOrPaddingLogicalWidthChanged(oldStyle, newStyle);
-}
-
-void RenderBlock::addChildIgnoringAnonymousColumnBlocks(RenderObject* newChild, RenderObject* beforeChild)
-{
-    if (beforeChild && beforeChild->parent() != this) {
-        RenderObject* beforeChildContainer = beforeChild->parent();
-        ASSERT(beforeChildContainer->parent() == this);
-        ASSERT(beforeChildContainer->isAnonymousBlock());
-        addChild(newChild, beforeChildContainer);
-        return;
-    }
-
-    // TODO(ojan): What should we do in this case? For now we insert an anonymous paragraph.
-    // This only happens if we have a text node directly inside a non-paragraph.
-    if (!isRenderParagraph() && newChild->isInline()) {
-        RenderBlock* newBox = createAnonymousBlock();
-        ASSERT(newBox->isRenderParagraph());
-        RenderBox::addChild(newBox, beforeChild);
-        newBox->addChild(newChild);
-        return;
-    }
-
-    RenderBox::addChild(newChild, beforeChild);
+    m_hasBorderOrPaddingLogicalWidthChanged = oldStyle && diff.needsFullLayout() && needsLayout() && borderOrPaddingLogicalWidthChanged(oldStyle, style());
 }
 
 void RenderBlock::addChild(RenderObject* newChild, RenderObject* beforeChild)
 {
-    addChildIgnoringAnonymousColumnBlocks(newChild, beforeChild);
+    ASSERT(isRenderParagraph() || !newChild->isInline());
+    RenderBox::addChild(newChild, beforeChild);
 }
 
 void RenderBlock::deleteLineBoxTree()
@@ -1607,16 +1582,6 @@ const char* RenderBlock::renderName() const
     if (isAnonymous())
         return "RenderBlock (generated)";
     return "RenderBlock";
-}
-
-// FIXME(sky): Clean up callers now that we no longer use the EDisplay argument.
-RenderBlock* RenderBlock::createAnonymousWithParentRendererAndDisplay(const RenderObject* parent, EDisplay)
-{
-    RenderBlock* newBox = RenderParagraph::createAnonymous(parent->document());
-    RefPtr<RenderStyle> newStyle = RenderStyle::createAnonymousStyleWithDisplay(parent->style(), PARAGRAPH);
-    parent->updateAnonymousChildStyle(newBox, newStyle.get());
-    newBox->setStyle(newStyle.release());
-    return newBox;
 }
 
 static bool recalcNormalFlowChildOverflowIfNeeded(RenderObject* renderer)

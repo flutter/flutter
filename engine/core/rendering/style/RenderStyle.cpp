@@ -78,15 +78,6 @@ PassRefPtr<RenderStyle> RenderStyle::createDefaultStyle()
     return adoptRef(new RenderStyle(DefaultStyle));
 }
 
-PassRefPtr<RenderStyle> RenderStyle::createAnonymousStyleWithDisplay(const RenderStyle* parentStyle, EDisplay display)
-{
-    RefPtr<RenderStyle> newStyle = RenderStyle::create();
-    newStyle->inheritFrom(parentStyle);
-    newStyle->inheritUnicodeBidiFrom(parentStyle);
-    newStyle->setDisplay(display);
-    return newStyle;
-}
-
 PassRefPtr<RenderStyle> RenderStyle::clone(const RenderStyle* other)
 {
     return adoptRef(new RenderStyle(*other));
@@ -227,7 +218,7 @@ bool RenderStyle::inheritedDataShared(const RenderStyle* other) const
         && rareInheritedData.get() == other->rareInheritedData.get();
 }
 
-bool RenderStyle::requiresOnlyBlockChildren()
+bool RenderStyle::requiresOnlyBlockChildren() const
 {
     switch (display()) {
     case PARAGRAPH:

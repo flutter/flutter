@@ -289,14 +289,9 @@ public:
         return !isFlexibleBox();
     }
 
-    bool isAnonymous() const { return m_bitfields.isAnonymous(); }
-    bool isAnonymousBlock() const
-    {
-        // This function is kept in sync with anonymous block creation conditions in
-        // RenderBlock::createAnonymousBlock(). This includes creating an anonymous
-        // RenderBlock having a BLOCK or BOX display. See https://bugs.webkit.org/show_bug.cgi?id=56709.
-        return isAnonymous() && style()->display() == PARAGRAPH;
-    }
+    // FIXME(sky): Remove.
+    bool isAnonymous() const { return false; }
+    bool isAnonymousBlock() const { return false; }
 
     bool isOutOfFlowPositioned() const { return m_bitfields.isOutOfFlowPositioned(); } // absolute or fixed positioning
     bool isPositioned() const { return m_bitfields.isPositioned(); }
@@ -620,8 +615,6 @@ protected:
     // Overrides should call the superclass at the start. |oldStyle| will be 0 the first
     // time this function is called.
     virtual void styleDidChange(StyleDifference, const RenderStyle* oldStyle);
-    void propagateStyleToAnonymousChildren(bool blockChildrenOnly = false);
-    void updateAnonymousChildStyle(const RenderObject* child, RenderStyle* style) const { }
 
     void drawLineForBoxSide(GraphicsContext*, int x1, int y1, int x2, int y2, BoxSide,
                             Color, EBorderStyle, int adjbw1, int adjbw2, bool antialias = false);

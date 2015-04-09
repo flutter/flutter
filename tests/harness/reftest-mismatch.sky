@@ -1,6 +1,6 @@
 <foo>
 <import src="../resources/run-after-display.sky" />
-This is a mismatch reftest. Should not match.
+<p>This is a mismatch reftest. Should not match.</p>
 <script>
 import "dart:sky.internals" as internals;
 

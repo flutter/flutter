@@ -1,7 +1,7 @@
 <foo>
 <import src="../resources/run-after-display.sky" />
 
-<div style="filter: grayscale(1) blur(2px); color: green;">This should be gray and blurred</div>
+<p style="filter: grayscale(1) blur(2px); color: green;">This should be gray and blurred</p>
 
 <script>
 import "dart:sky.internals" as internals;

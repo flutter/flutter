@@ -12,6 +12,6 @@ div {
 }
 </style>
 <!-- TODO(ojan): Make this a reftest once we support them. -->
-Test passes if the image below shows nested green, blue and yellow squares with a dotted black border.
+<p>Test passes if the image below shows nested green, blue and yellow squares with a dotted black border.</p>
 <div></div>
 </sky>

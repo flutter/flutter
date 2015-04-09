@@ -21,8 +21,6 @@ public:
     explicit RenderParagraph(ContainerNode*);
     virtual ~RenderParagraph();
 
-    static RenderParagraph* createAnonymous(Document&);
-
     bool isRenderParagraph() const final { return true; }
 
     void layout() final;

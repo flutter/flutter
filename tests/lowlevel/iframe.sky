@@ -1,9 +1,9 @@
 <sky>
     <import src="../resources/dump-as-render-tree.sky"/>
     <iframe id="removeMe" src="text.sky">Should not render</iframe>
-    <div>This is an <iframe style="border-style: solid; border-width: 20px" src="abarth.sky">iframe</iframe> element.</div>
-    <div style="height: 200px">Placeholder.</div>
-    <div>Small iframe should render <iframe style="height: 40px" src="abarth.sky">iframe</iframe> correctly.</div>
+    <p>This is an <iframe style="border-style: solid; border-width: 20px" src="abarth.sky">iframe</iframe> element.</p>
+    <p style="height: 200px">Placeholder.</p>
+    <p>Small iframe should render <iframe style="height: 40px" src="abarth.sky">iframe</iframe> correctly.</p>
 
     <script>
     import "dart:sky";
