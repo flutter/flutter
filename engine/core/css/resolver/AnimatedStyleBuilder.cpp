@@ -381,9 +381,6 @@ void AnimatedStyleBuilder::applyProperty(CSSPropertyID property, StyleResolverSt
         // Avoiding a value of 1 forces a layer to be created.
         style->setOpacity(clampTo<float>(toAnimatableDouble(value)->toDouble(), 0, nextafterf(1, 0)));
         return;
-    case CSSPropertyOrphans:
-        style->setOrphans(animatableValueRoundClampTo<unsigned short>(value, 1));
-        return;
     case CSSPropertyOutlineColor:
         style->setOutlineColor(toAnimatableColor(value)->color());
         return;

@@ -78,12 +78,6 @@ public:
 
     Length indent;
 
-    // Paged media properties.
-    short widows;
-    short orphans;
-    unsigned m_hasAutoWidows : 1;
-    unsigned m_hasAutoOrphans : 1;
-
     unsigned m_textStrokeColorIsCurrentColor : 1;
     unsigned m_textFillColorIsCurrentColor : 1;
     unsigned m_textEmphasisColorIsCurrentColor : 1;
@@ -113,10 +107,14 @@ public:
     // expressed by 'will-change: contents' includes descendants.
     unsigned m_subtreeWillChangeContents : 1;
 
-    AtomicString hyphenationString;
+    // Paged media properties.
+    unsigned m_hasAutoWidows : 1;
+    short widows;
+
     short hyphenationLimitBefore;
     short hyphenationLimitAfter;
     short hyphenationLimitLines;
+    AtomicString hyphenationString;
 
     AtomicString locale;
 

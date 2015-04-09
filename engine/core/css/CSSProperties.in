@@ -222,9 +222,6 @@ opacity animatable, type_name=float
 // LAYOUT
 order type_name=int
 
-// OBSOLETE
-orphans animatable, inherited, type_name=short, custom_all
-
 outline-color animatable, custom_all
 outline-offset animatable, converter=convertComputedLength<int>
 outline-style custom_all

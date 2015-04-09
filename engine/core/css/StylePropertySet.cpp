@@ -280,7 +280,6 @@ String StylePropertySet::asText() const
 // This is the list of properties we want to copy in the copyBlockProperties() function.
 // It is the list of CSS properties that apply specially to block-level elements.
 static const CSSPropertyID staticBlockProperties[] = {
-    CSSPropertyOrphans,
     CSSPropertyOverflow, // This can be also be applied to replaced elements
     CSSPropertyWebkitAspectRatio,
     CSSPropertyPageBreakAfter,

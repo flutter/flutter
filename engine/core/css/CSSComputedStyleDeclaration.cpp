@@ -137,7 +137,6 @@ static const CSSPropertyID staticComputableProperties[] = {
     CSSPropertyObjectFit,
     CSSPropertyObjectPosition,
     CSSPropertyOpacity,
-    CSSPropertyOrphans,
     CSSPropertyOutlineColor,
     CSSPropertyOutlineOffset,
     CSSPropertyOutlineStyle,
@@ -1540,10 +1539,6 @@ PassRefPtr<CSSValue> CSSComputedStyleDeclaration::getPropertyCSSValue(CSSPropert
                     Pair::KeepIdenticalValues));
         case CSSPropertyOpacity:
             return cssValuePool().createValue(style->opacity(), CSSPrimitiveValue::CSS_NUMBER);
-        case CSSPropertyOrphans:
-            if (style->hasAutoOrphans())
-                return cssValuePool().createIdentifierValue(CSSValueAuto);
-            return cssValuePool().createValue(style->orphans(), CSSPrimitiveValue::CSS_NUMBER);
         case CSSPropertyOutlineColor:
             return m_allowVisitedStyle ? cssValuePool().createColorValue(style->colorIncludingFallback(CSSPropertyOutlineColor).rgb()) : currentColorOrValidColor(*style, style->outlineColor());
         case CSSPropertyOutlineOffset:

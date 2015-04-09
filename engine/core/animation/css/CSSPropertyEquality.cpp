@@ -152,8 +152,6 @@ bool CSSPropertyEquality::propertiesEqual(CSSPropertyID prop, const RenderStyle&
         return a.objectPosition() == b.objectPosition();
     case CSSPropertyOpacity:
         return a.opacity() == b.opacity();
-    case CSSPropertyOrphans:
-        return a.orphans() == b.orphans();
     case CSSPropertyOutlineColor:
         return a.outlineColor().resolve(a.color()) == b.outlineColor().resolve(b.color());
     case CSSPropertyOutlineOffset:

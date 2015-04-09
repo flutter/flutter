@@ -42,8 +42,8 @@ struct SameSizeAsStyleRareInheritedData : public RefCounted<SameSizeAsStyleRareI
     void* refPtrs[1];
     Length lengths[1];
     unsigned m_bitfields[2];
-    short pagedMediaShorts[2];
     unsigned unsigneds[1];
+    short pagedMediaShorts[1];
     short hyphenationShorts[3];
 
     Color touchColors;
@@ -54,10 +54,6 @@ COMPILE_ASSERT(sizeof(StyleRareInheritedData) == sizeof(SameSizeAsStyleRareInher
 StyleRareInheritedData::StyleRareInheritedData()
     : textStrokeWidth(RenderStyle::initialTextStrokeWidth())
     , indent(RenderStyle::initialTextIndent())
-    , widows(RenderStyle::initialWidows())
-    , orphans(RenderStyle::initialOrphans())
-    , m_hasAutoWidows(true)
-    , m_hasAutoOrphans(true)
     , m_textStrokeColorIsCurrentColor(true)
     , m_textFillColorIsCurrentColor(true)
     , m_textEmphasisColorIsCurrentColor(true)
@@ -81,6 +77,8 @@ StyleRareInheritedData::StyleRareInheritedData()
     , m_textUnderlinePosition(RenderStyle::initialTextUnderlinePosition())
     , m_touchActionDelay(RenderStyle::initialTouchActionDelay())
     , m_subtreeWillChangeContents(false)
+    , m_hasAutoWidows(true)
+    , widows(RenderStyle::initialWidows())
     , hyphenationLimitBefore(-1)
     , hyphenationLimitAfter(-1)
     , hyphenationLimitLines(-1)
@@ -98,10 +96,6 @@ StyleRareInheritedData::StyleRareInheritedData(const StyleRareInheritedData& o)
     , textShadow(o.textShadow)
     , highlight(o.highlight)
     , indent(o.indent)
-    , widows(o.widows)
-    , orphans(o.orphans)
-    , m_hasAutoWidows(o.m_hasAutoWidows)
-    , m_hasAutoOrphans(o.m_hasAutoOrphans)
     , m_textStrokeColorIsCurrentColor(o.m_textStrokeColorIsCurrentColor)
     , m_textFillColorIsCurrentColor(o.m_textFillColorIsCurrentColor)
     , m_textEmphasisColorIsCurrentColor(o.m_textEmphasisColorIsCurrentColor)
@@ -125,10 +119,12 @@ StyleRareInheritedData::StyleRareInheritedData(const StyleRareInheritedData& o)
     , m_textUnderlinePosition(o.m_textUnderlinePosition)
     , m_touchActionDelay(o.m_touchActionDelay)
     , m_subtreeWillChangeContents(o.m_subtreeWillChangeContents)
-    , hyphenationString(o.hyphenationString)
+    , m_hasAutoWidows(o.m_hasAutoWidows)
+    , widows(o.widows)
     , hyphenationLimitBefore(o.hyphenationLimitBefore)
     , hyphenationLimitAfter(o.hyphenationLimitAfter)
     , hyphenationLimitLines(o.hyphenationLimitLines)
+    , hyphenationString(o.hyphenationString)
     , locale(o.locale)
     , textEmphasisCustomMark(o.textEmphasisCustomMark)
     , m_tabSize(o.m_tabSize)
@@ -152,9 +148,7 @@ bool StyleRareInheritedData::operator==(const StyleRareInheritedData& o) const
         && highlight == o.highlight
         && indent == o.indent
         && widows == o.widows
-        && orphans == o.orphans
         && m_hasAutoWidows == o.m_hasAutoWidows
-        && m_hasAutoOrphans == o.m_hasAutoOrphans
         && m_textStrokeColorIsCurrentColor == o.m_textStrokeColorIsCurrentColor
         && m_textFillColorIsCurrentColor == o.m_textFillColorIsCurrentColor
         && m_textEmphasisColorIsCurrentColor == o.m_textEmphasisColorIsCurrentColor

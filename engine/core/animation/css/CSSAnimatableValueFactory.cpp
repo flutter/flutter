@@ -352,8 +352,6 @@ PassRefPtr<AnimatableValue> CSSAnimatableValueFactory::create(CSSPropertyID prop
         return createFromLengthPoint(style.objectPosition(), style);
     case CSSPropertyOpacity:
         return createFromDouble(style.opacity());
-    case CSSPropertyOrphans:
-        return createFromDouble(style.orphans());
     case CSSPropertyOutlineColor:
         return createFromColor(property, style);
     case CSSPropertyOutlineOffset:
