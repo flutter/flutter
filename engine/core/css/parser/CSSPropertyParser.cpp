@@ -448,8 +448,6 @@ bool CSSPropertyParser::parseValue(CSSPropertyID propId)
     RefPtr<CSSValue> parsedValue = nullptr;
 
     switch (propId) {
-    case CSSPropertySize:                 // <length>{1,2} | auto | [ <page-size> || [ portrait | landscape] ]
-        return parseSize(propId);
 
     case CSSPropertyClip:                 // <shape> | auto | inherit
         if (id == CSSValueAuto)
@@ -1075,8 +1073,6 @@ bool CSSPropertyParser::parseValue(CSSPropertyID propId)
         return parseTransitionShorthand(propId);
     case CSSPropertyInvalid:
         return false;
-    case CSSPropertyPage:
-        return parsePage(propId);
     // CSS Text Layout Module Level 3: Vertical writing support
     case CSSPropertyWebkitTextEmphasis:
         return parseShorthand(propId, webkitTextEmphasisShorthand());
@@ -1551,101 +1547,6 @@ bool CSSPropertyParser::parse4Values(CSSPropertyID propId, const CSSPropertyID *
     }
 
     return true;
-}
-
-// auto | <identifier>
-bool CSSPropertyParser::parsePage(CSSPropertyID propId)
-{
-    ASSERT(propId == CSSPropertyPage);
-
-    if (m_valueList->size() != 1)
-        return false;
-
-    CSSParserValue* value = m_valueList->current();
-    if (!value)
-        return false;
-
-    if (value->id == CSSValueAuto) {
-        addProperty(propId, cssValuePool().createIdentifierValue(value->id));
-        return true;
-    } else if (value->id == 0 && value->unit == CSSPrimitiveValue::CSS_IDENT) {
-        addProperty(propId, createPrimitiveStringValue(value));
-        return true;
-    }
-    return false;
-}
-
-// <length>{1,2} | auto | [ <page-size> || [ portrait | landscape] ]
-bool CSSPropertyParser::parseSize(CSSPropertyID propId)
-{
-    ASSERT(propId == CSSPropertySize);
-
-    if (m_valueList->size() > 2)
-        return false;
-
-    CSSParserValue* value = m_valueList->current();
-    if (!value)
-        return false;
-
-    RefPtr<CSSValueList> parsedValues = CSSValueList::createSpaceSeparated();
-
-    // First parameter.
-    SizeParameterType paramType = parseSizeParameter(parsedValues.get(), value, None);
-    if (paramType == None)
-        return false;
-
-    // Second parameter, if any.
-    value = m_valueList->next();
-    if (value) {
-        paramType = parseSizeParameter(parsedValues.get(), value, paramType);
-        if (paramType == None)
-            return false;
-    }
-
-    addProperty(propId, parsedValues.release());
-    return true;
-}
-
-CSSPropertyParser::SizeParameterType CSSPropertyParser::parseSizeParameter(CSSValueList* parsedValues, CSSParserValue* value, SizeParameterType prevParamType)
-{
-    switch (value->id) {
-    case CSSValueAuto:
-        if (prevParamType == None) {
-            parsedValues->append(cssValuePool().createIdentifierValue(value->id));
-            return Auto;
-        }
-        return None;
-    case CSSValueLandscape:
-    case CSSValuePortrait:
-        if (prevParamType == None || prevParamType == PageSize) {
-            parsedValues->append(cssValuePool().createIdentifierValue(value->id));
-            return Orientation;
-        }
-        return None;
-    case CSSValueA3:
-    case CSSValueA4:
-    case CSSValueA5:
-    case CSSValueB4:
-    case CSSValueB5:
-    case CSSValueLedger:
-    case CSSValueLegal:
-    case CSSValueLetter:
-        if (prevParamType == None || prevParamType == Orientation) {
-            // Normalize to Page Size then Orientation order by prepending.
-            // This is not specified by the CSS3 Paged Media specification, but for simpler processing later (StyleResolver::applyPageSizeProperty).
-            parsedValues->prepend(cssValuePool().createIdentifierValue(value->id));
-            return PageSize;
-        }
-        return None;
-    case 0:
-        if (validUnit(value, FLength | FNonNeg) && (prevParamType == None || prevParamType == Length)) {
-            parsedValues->append(createPrimitiveNumericValue(value));
-            return Length;
-        }
-        return None;
-    default:
-        return None;
-    }
 }
 
 PassRefPtr<CSSValue> CSSPropertyParser::parseAttr(CSSParserValueList* args)

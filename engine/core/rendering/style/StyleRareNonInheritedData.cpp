@@ -37,12 +37,10 @@ StyleRareNonInheritedData::StyleRareNonInheritedData()
     , m_perspective(RenderStyle::initialPerspective())
     , m_perspectiveOriginX(RenderStyle::initialPerspectiveOriginX())
     , m_perspectiveOriginY(RenderStyle::initialPerspectiveOriginY())
-    , m_pageSize()
     , m_clipPath(RenderStyle::initialClipPath())
     , m_textDecorationColor(StyleColor::currentColor())
     , m_order(RenderStyle::initialOrder())
     , m_objectPosition(RenderStyle::initialObjectPosition())
-    , m_pageSizeType(PAGE_SIZE_AUTO)
     , m_transformStyle3D(RenderStyle::initialTransformStyle3D())
     , m_backfaceVisibility(RenderStyle::initialBackfaceVisibility())
     , m_alignContent(RenderStyle::initialAlignContent())
@@ -83,12 +81,10 @@ StyleRareNonInheritedData::StyleRareNonInheritedData(const StyleRareNonInherited
     , m_boxShadow(o.m_boxShadow)
     , m_animations(o.m_animations ? CSSAnimationData::create(*o.m_animations) : nullptr)
     , m_transitions(o.m_transitions ? CSSTransitionData::create(*o.m_transitions) : nullptr)
-    , m_pageSize(o.m_pageSize)
     , m_clipPath(o.m_clipPath)
     , m_textDecorationColor(o.m_textDecorationColor)
     , m_order(o.m_order)
     , m_objectPosition(o.m_objectPosition)
-    , m_pageSizeType(o.m_pageSizeType)
     , m_transformStyle3D(o.m_transformStyle3D)
     , m_backfaceVisibility(o.m_backfaceVisibility)
     , m_alignContent(o.m_alignContent)
@@ -133,12 +129,10 @@ bool StyleRareNonInheritedData::operator==(const StyleRareNonInheritedData& o) c
         && shadowDataEquivalent(o)
         && animationDataEquivalent(o)
         && transitionDataEquivalent(o)
-        && m_pageSize == o.m_pageSize
         && m_clipPath == o.m_clipPath
         && m_textDecorationColor == o.m_textDecorationColor
         && m_order == o.m_order
         && m_objectPosition == o.m_objectPosition
-        && m_pageSizeType == o.m_pageSizeType
         && m_transformStyle3D == o.m_transformStyle3D
         && m_backfaceVisibility == o.m_backfaceVisibility
         && m_alignContent == o.m_alignContent

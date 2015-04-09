@@ -254,9 +254,6 @@ position
 // LAYOUT
 right animatable, initial=initialOffset, converter=convertLengthOrAuto
 
-// OBSOLETE
-size custom_all
-
 tab-size inherited, type_name=unsigned
 text-align inherited, custom_value
 text-align-last runtime_flag=CSS3Text, inherited, type_name=TextAlignLast
@@ -453,15 +450,8 @@ z-index animatable, type_name=unsigned, custom_all
 // LAYOUT
 -webkit-max-logical-height direction_aware
 
-
-// Properties that we ignore in the StyleBuilder.
-// FIXME: We should see if any of these should actually be unreachable
-
 // OBSOLETE
 orientation builder_skip
-
-// OBSOLETE
-page builder_skip
 
 // OBSOLETE
 src builder_skip

@@ -222,18 +222,6 @@ private:
 
     PassRefPtr<CSSBasicShape> parseInsetRoundedCorners(PassRefPtr<CSSBasicShapeInset>, CSSParserValueList*);
 
-    enum SizeParameterType {
-        None,
-        Auto,
-        Length,
-        PageSize,
-        Orientation,
-    };
-
-    bool parsePage(CSSPropertyID propId);
-    bool parseSize(CSSPropertyID propId);
-    SizeParameterType parseSizeParameter(CSSValueList* parsedValues, CSSParserValue*, SizeParameterType prevParamType);
-
     bool parseFontFaceSrcURI(CSSValueList*);
     bool parseFontFaceSrcLocal(CSSValueList*);
 

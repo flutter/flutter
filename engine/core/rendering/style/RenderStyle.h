@@ -676,8 +676,6 @@ public:
     bool hasPerspective() const { return rareNonInheritedData->m_perspective > 0; }
     const Length& perspectiveOriginX() const { return rareNonInheritedData->m_perspectiveOriginX; }
     const Length& perspectiveOriginY() const { return rareNonInheritedData->m_perspectiveOriginY; }
-    const LengthSize& pageSize() const { return rareNonInheritedData->m_pageSize; }
-    PageSizeType pageSizeType() const { return static_cast<PageSizeType>(rareNonInheritedData->m_pageSizeType); }
 
     LineBoxContain lineBoxContain() const { return rareInheritedData->m_lineBoxContain; }
     Color tapHighlightColor() const { return rareInheritedData->tapHighlightColor; }
@@ -961,9 +959,6 @@ public:
     void setPerspective(float p) { SET_VAR(rareNonInheritedData, m_perspective, p); }
     void setPerspectiveOriginX(const Length& l) { SET_VAR(rareNonInheritedData, m_perspectiveOriginX, l); }
     void setPerspectiveOriginY(const Length& l) { SET_VAR(rareNonInheritedData, m_perspectiveOriginY, l); }
-    void setPageSize(const LengthSize& s) { SET_VAR(rareNonInheritedData, m_pageSize, s); }
-    void setPageSizeType(PageSizeType t) { SET_VAR(rareNonInheritedData, m_pageSizeType, t); }
-    void resetPageSizeType() { SET_VAR(rareNonInheritedData, m_pageSizeType, PAGE_SIZE_AUTO); }
 
     void setLineBoxContain(LineBoxContain c) { SET_VAR(rareInheritedData, m_lineBoxContain, c); }
     void setTapHighlightColor(const Color& c) { SET_VAR(rareInheritedData, tapHighlightColor, c); }

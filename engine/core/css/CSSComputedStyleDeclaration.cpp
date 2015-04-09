@@ -2052,11 +2052,6 @@ PassRefPtr<CSSValue> CSSComputedStyleDeclaration::getPropertyCSSValue(CSSPropert
         case CSSPropertyUnicodeRange:
             break;
 
-        /* Other unimplemented properties */
-        case CSSPropertyPage: // for @page
-        case CSSPropertySize: // for @page
-            break;
-
         /* Unimplemented -webkit- properties */
         case CSSPropertyWebkitBorderRadius:
         case CSSPropertyWebkitPerspectiveOriginX:
