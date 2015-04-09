@@ -356,7 +356,9 @@ class SkyDebugger(object):
         file_name = args.file_name
         trace = self._send_command_to_sky('/stop_tracing').content
         with open(file_name, "wb") as trace_file:
+            trace_file.write('{"traceEvents":[')
             trace_file.write(trace)
+            trace_file.write(']}')
         print "Trace saved in %s" % file_name
 
     def stop_profiling_command(self, args):
