@@ -1,7 +1,7 @@
 <html>
 <import src="resources/does-not-export.sky" as="hello" />
 <import src="../resources/dump-as-text.sky" />
-<div id="result">FAIL - Script did not execute</div>
+<p id="result">FAIL - Script did not execute</p>
 <script>
 import "dart:sky";
 

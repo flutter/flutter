@@ -1,6 +1,6 @@
 <html>
 <import src="../resources/dump-as-text.sky" />
-<body>
+<p>
 <
 <!
 <!-
@@ -11,5 +11,5 @@
 >
 </
 </>
-</body>
+</p>
 </html>

@@ -28,7 +28,7 @@
         var i = 1;
         for (Element element = tests.firstElementChild; element != null; element = element.nextElementSibling) {
             var order = int.parse(window.getComputedStyle(element)["order"]);
-            var div = document.createElement("div");
+            var p = document.createElement("p");
             var text = (order == i) ? "PASS" : "FAIL";
             text += ": <"
                 + element.tagName
@@ -39,8 +39,8 @@
                 + order.toString();
             if (order != i)
                 text += " expected " + i;
-            div.textContent = text;
-            log.appendChild(div);
+            p.textContent = text;
+            log.appendChild(p);
             ++i;
         }
     }

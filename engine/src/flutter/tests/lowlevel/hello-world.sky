@@ -1,4 +1,4 @@
 <foo>
 <import src="../resources/dump-as-render-tree.sky" />
-Hello World!
+<p>Hello World!</p>
 </foo>

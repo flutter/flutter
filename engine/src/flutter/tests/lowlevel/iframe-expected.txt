@@ -1,26 +1,21 @@
 layer at (0,0) size 800x600
   RenderView {#document} at (0,0) size 800x600
-    RenderFlexibleBox {sky} at (0,0) size 800x506
-      RenderFlexibleBox {div} at (0,0) size 800x228
-        RenderParagraph (anonymous) at (0,0) size 800x19
-          RenderText {#text} at (0,0) size 76x19
-            text run at (0,0) width 76: "This is an"
-        RenderParagraph (anonymous) at (0,209) size 800x19
-          RenderText {#text} at (0,0) size 72x19
-            text run at (0,0) width 72: "element."
-      RenderFlexibleBox {div} at (0,228) size 800x200
-        RenderParagraph (anonymous) at (0,0) size 800x19
-          RenderText {#text} at (0,0) size 99x19
-            text run at (0,0) width 99: "Placeholder."
-      RenderFlexibleBox {div} at (0,428) size 800x78
-        RenderParagraph (anonymous) at (0,0) size 800x19
-          RenderText {#text} at (0,0) size 218x19
-            text run at (0,0) width 218: "Small iframe should render"
-        RenderParagraph (anonymous) at (0,59) size 800x19
-          RenderText {#text} at (0,0) size 76x19
-            text run at (0,0) width 76: "correctly."
-layer at (0,19) size 800x190
-  RenderReplaced {iframe} at (0,19) size 800x190 [border: (20px solid #000000)]
-layer at (0,447) size 800x40
-  RenderReplaced {iframe} at (0,19) size 800x40
+    RenderFlexibleBox {sky} at (0,0) size 800x438
+      RenderParagraph {p} at (0,0) size 800x194
+        RenderText {#text} at (0,175) size 81x19
+          text run at (0,175) width 81: "This is an "
+        RenderText {#text} at (420,175) size 77x19
+          text run at (420,175) width 77: " element."
+      RenderParagraph {p} at (0,194) size 800x200
+        RenderText {#text} at (0,0) size 99x19
+          text run at (0,0) width 99: "Placeholder."
+      RenderParagraph {p} at (0,394) size 800x44
+        RenderText {#text} at (0,25) size 223x19
+          text run at (0,25) width 223: "Small iframe should render "
+        RenderText {#text} at (522,25) size 82x19
+          text run at (522,25) width 82: " correctly."
+layer at (81,0) size 340x190
+  RenderReplaced {iframe} at (80.67,0) size 340x190 [border: (20px solid #000000)]
+layer at (223,394) size 300x40
+  RenderReplaced {iframe} at (222.81,0) size 300x40
 
