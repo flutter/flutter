@@ -195,16 +195,8 @@ enum TextUnderlinePosition {
     TextUnderlinePositionUnder
 };
 
-enum EPageBreak {
-    PBAUTO, PBALWAYS, PBAVOID
-};
-
 enum EEmptyCell {
     SHOW, HIDE
-};
-
-enum ECaptionSide {
-    CAPTOP, CAPBOTTOM, CAPLEFT, CAPRIGHT
 };
 
 enum EVisibility { VISIBLE, HIDDEN, COLLAPSE };

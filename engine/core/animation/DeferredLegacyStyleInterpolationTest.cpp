@@ -27,11 +27,6 @@ protected:
     }
 };
 
-TEST_F(AnimationDeferredLegacyStyleInterpolationTest, Inherit)
-{
-    EXPECT_TRUE(test(CSSPropertyCaptionSide, "inherit"));
-}
-
 TEST_F(AnimationDeferredLegacyStyleInterpolationTest, Color)
 {
     EXPECT_FALSE(test(CSSPropertyColor, "rgb(10, 20, 30)"));

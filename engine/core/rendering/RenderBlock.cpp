@@ -1113,9 +1113,6 @@ PositionWithAffinity RenderBlock::positionForPointWithInlineChildren(const Layou
         if (!firstRootBoxWithChildren)
             firstRootBoxWithChildren = root;
 
-        if (root->isFirstAfterPageBreak() && (pointInLogicalContents.y() < root->lineTopWithLeading()))
-            break;
-
         lastRootBoxWithChildren = root;
 
         // check if this root line box is located at this y coordinate

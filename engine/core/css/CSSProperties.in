@@ -152,9 +152,6 @@ box-shadow animatable, converter=convertShadow
 // LAYOUT
 box-sizing
 
-// LAYOUT
-caption-side inherited
-
 clip animatable, converter=convertClip, custom_all
 
 // LAYOUT
@@ -247,15 +244,6 @@ padding-right animatable, initial=initialPadding, converter=convertLength
 
 // LAYOUT
 padding-top animatable, initial=initialPadding, converter=convertLength
-
-// OBSOLETE
-page-break-after type_name=EPageBreak, initial=initialPageBreak
-
-// OBSOLETE
-page-break-before type_name=EPageBreak, initial=initialPageBreak
-
-// OBSOLETE
-page-break-inside type_name=EPageBreak, initial=initialPageBreak
 
 perspective animatable, custom_value
 perspective-origin animatable, custom_all

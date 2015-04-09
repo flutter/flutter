@@ -683,46 +683,6 @@ template<> inline CSSPrimitiveValue::operator EBoxOrient() const
     return HORIZONTAL;
 }
 
-template<> inline CSSPrimitiveValue::CSSPrimitiveValue(ECaptionSide e)
-    : CSSValue(PrimitiveClass)
-{
-    m_primitiveUnitType = CSS_VALUE_ID;
-    switch (e) {
-    case CAPLEFT:
-        m_value.valueID = CSSValueLeft;
-        break;
-    case CAPRIGHT:
-        m_value.valueID = CSSValueRight;
-        break;
-    case CAPTOP:
-        m_value.valueID = CSSValueTop;
-        break;
-    case CAPBOTTOM:
-        m_value.valueID = CSSValueBottom;
-        break;
-    }
-}
-
-template<> inline CSSPrimitiveValue::operator ECaptionSide() const
-{
-    ASSERT(isValueID());
-    switch (m_value.valueID) {
-    case CSSValueLeft:
-        return CAPLEFT;
-    case CSSValueRight:
-        return CAPRIGHT;
-    case CSSValueTop:
-        return CAPTOP;
-    case CSSValueBottom:
-        return CAPBOTTOM;
-    default:
-        break;
-    }
-
-    ASSERT_NOT_REACHED();
-    return CAPTOP;
-}
-
 template<> inline CSSPrimitiveValue::CSSPrimitiveValue(EDisplay e)
     : CSSValue(PrimitiveClass)
 {
@@ -1050,43 +1010,6 @@ template<> inline CSSPrimitiveValue::operator EOverflow() const
 
     ASSERT_NOT_REACHED();
     return OVISIBLE;
-}
-
-template<> inline CSSPrimitiveValue::CSSPrimitiveValue(EPageBreak e)
-    : CSSValue(PrimitiveClass)
-{
-    m_primitiveUnitType = CSS_VALUE_ID;
-    switch (e) {
-    case PBAUTO:
-        m_value.valueID = CSSValueAuto;
-        break;
-    case PBALWAYS:
-        m_value.valueID = CSSValueAlways;
-        break;
-    case PBAVOID:
-        m_value.valueID = CSSValueAvoid;
-        break;
-    }
-}
-
-template<> inline CSSPrimitiveValue::operator EPageBreak() const
-{
-    ASSERT(isValueID());
-    switch (m_value.valueID) {
-    case CSSValueAuto:
-        return PBAUTO;
-    case CSSValueLeft:
-    case CSSValueRight:
-    case CSSValueAlways:
-        return PBALWAYS; // CSS2.1: "Conforming user agents may map left/right to always."
-    case CSSValueAvoid:
-        return PBAVOID;
-    default:
-        break;
-    }
-
-    ASSERT_NOT_REACHED();
-    return PBAUTO;
 }
 
 template<> inline CSSPrimitiveValue::CSSPrimitiveValue(EPosition e)

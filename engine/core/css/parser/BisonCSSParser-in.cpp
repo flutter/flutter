@@ -330,8 +330,6 @@ bool isValidKeywordPropertyAndValue(CSSPropertyID propertyId, CSSValueID valueID
         return valueID >= CSSValueNone && valueID <= CSSValueDouble;
     case CSSPropertyBoxSizing:
         return valueID == CSSValueBorderBox || valueID == CSSValueContentBox;
-    case CSSPropertyCaptionSide: // top | bottom | left | right
-        return valueID == CSSValueLeft || valueID == CSSValueRight || valueID == CSSValueTop || valueID == CSSValueBottom;
     case CSSPropertyDirection: // ltr | rtl
         return valueID == CSSValueLtr || valueID == CSSValueRtl;
     case CSSPropertyDisplay:
@@ -360,9 +358,6 @@ bool isValidKeywordPropertyAndValue(CSSPropertyID propertyId, CSSValueID valueID
         return valueID == CSSValueVisible || valueID == CSSValueHidden || valueID == CSSValueAuto || valueID == CSSValueOverlay;
     case CSSPropertyOverflowY: // visible | hidden | auto | overlay | -webkit-paged-x | -webkit-paged-y
         return valueID == CSSValueVisible || valueID == CSSValueHidden || valueID == CSSValueAuto || valueID == CSSValueOverlay || valueID == CSSValueWebkitPagedX || valueID == CSSValueWebkitPagedY;
-    case CSSPropertyPageBreakAfter: // auto | always | avoid | left | right
-    case CSSPropertyPageBreakBefore:
-    case CSSPropertyPageBreakInside: // avoid | auto
     case CSSPropertyPointerEvents:
         // none | visiblePainted | visibleFill | visibleStroke | visible |
         // painted | fill | stroke | auto | all | bounding-box
@@ -457,7 +452,6 @@ bool isKeywordPropertyID(CSSPropertyID propertyId)
     case CSSPropertyBorderRightStyle:
     case CSSPropertyBorderTopStyle:
     case CSSPropertyBoxSizing:
-    case CSSPropertyCaptionSide:
     case CSSPropertyDirection:
     case CSSPropertyDisplay:
     case CSSPropertyEmptyCells:
@@ -469,9 +463,6 @@ bool isKeywordPropertyID(CSSPropertyID propertyId)
     case CSSPropertyOverflowWrap:
     case CSSPropertyOverflowX:
     case CSSPropertyOverflowY:
-    case CSSPropertyPageBreakAfter:
-    case CSSPropertyPageBreakBefore:
-    case CSSPropertyPageBreakInside:
     case CSSPropertyPointerEvents:
     case CSSPropertyPosition:
     case CSSPropertyTableLayout:

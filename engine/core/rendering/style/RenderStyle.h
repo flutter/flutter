@@ -132,7 +132,6 @@ protected:
         bool operator==(const InheritedFlags& other) const
         {
             return (_empty_cells == other._empty_cells)
-                && (_caption_side == other._caption_side)
                 && (_visibility == other._visibility)
                 && (_text_align == other._text_align)
                 && (m_textUnderline == other.m_textUnderline)
@@ -145,7 +144,6 @@ protected:
         bool operator!=(const InheritedFlags& other) const { return !(*this == other); }
 
         unsigned _empty_cells : 1; // EEmptyCell
-        unsigned _caption_side : 2; // ECaptionSide
         unsigned _visibility : 2; // EVisibility
         unsigned _text_align : 4; // ETextAlign
         unsigned m_textUnderline : 1;
@@ -170,9 +168,6 @@ protected:
                 && verticalAlign == other.verticalAlign
                 && position == other.position
                 && tableLayout == other.tableLayout
-                && pageBreakBefore == other.pageBreakBefore
-                && pageBreakAfter == other.pageBreakAfter
-                && pageBreakInside == other.pageBreakInside
                 && styleType == other.styleType
                 && affectedByFocus == other.affectedByFocus
                 && affectedByHover == other.affectedByHover
@@ -204,10 +199,6 @@ protected:
 
         // 32 bits
 
-        unsigned pageBreakBefore : 2; // EPageBreak
-        unsigned pageBreakAfter : 2; // EPageBreak
-        unsigned pageBreakInside : 2; // EPageBreak
-
         unsigned styleType : 6; // PseudoId
         unsigned explicitInheritance : 1; // Explicitly inherits a non-inherited property
         unsigned currentColor : 1; // At least one color has the value 'currentColor'
@@ -232,7 +223,6 @@ protected:
     void setBitDefaults()
     {
         inherited_flags._empty_cells = initialEmptyCells();
-        inherited_flags._caption_side = initialCaptionSide();
         inherited_flags._visibility = initialVisibility();
         inherited_flags._text_align = initialTextAlign();
         inherited_flags.m_textUnderline = false;
@@ -248,9 +238,6 @@ protected:
         noninherited_flags.position = initialPosition();
         noninherited_flags.tableLayout = initialTableLayout();
         noninherited_flags.unicodeBidi = initialUnicodeBidi();
-        noninherited_flags.pageBreakBefore = initialPageBreak();
-        noninherited_flags.pageBreakAfter = initialPageBreak();
-        noninherited_flags.pageBreakInside = initialPageBreak();
         noninherited_flags.explicitInheritance = false;
         noninherited_flags.currentColor = false;
         noninherited_flags.unique = false;
@@ -554,7 +541,6 @@ public:
     short horizontalBorderSpacing() const;
     short verticalBorderSpacing() const;
     EEmptyCell emptyCells() const { return static_cast<EEmptyCell>(inherited_flags._empty_cells); }
-    ECaptionSide captionSide() const { return static_cast<ECaptionSide>(inherited_flags._caption_side); }
 
     const Length& marginTop() const { return surround->margin.top(); }
     const Length& marginBottom() const { return surround->margin.bottom(); }
@@ -580,10 +566,6 @@ public:
     const Length& paddingEnd() const { return surround->padding.end(direction()); }
 
     bool isLink() const { return noninherited_flags.isLink; }
-
-    EPageBreak pageBreakInside() const { return static_cast<EPageBreak>(noninherited_flags.pageBreakInside); }
-    EPageBreak pageBreakBefore() const { return static_cast<EPageBreak>(noninherited_flags.pageBreakBefore); }
-    EPageBreak pageBreakAfter() const { return static_cast<EPageBreak>(noninherited_flags.pageBreakAfter); }
 
     // CSS3 Getter Methods
 
@@ -883,7 +865,6 @@ public:
     void setHorizontalBorderSpacing(short);
     void setVerticalBorderSpacing(short);
     void setEmptyCells(EEmptyCell v) { inherited_flags._empty_cells = v; }
-    void setCaptionSide(ECaptionSide v) { inherited_flags._caption_side = v; }
 
     void setHasAspectRatio(bool b) { SET_VAR(rareNonInheritedData, m_hasAspectRatio, b); }
     void setAspectRatioDenominator(float v) { SET_VAR(rareNonInheritedData, m_aspectRatioDenominator, v); }
@@ -909,11 +890,6 @@ public:
     void setHasAutoZIndex() { SET_VAR(m_box, m_hasAutoZIndex, true); SET_VAR(m_box, m_zIndex, 0); }
     unsigned zIndex() const { return m_box->zIndex(); }
     void setZIndex(unsigned v) { SET_VAR(m_box, m_hasAutoZIndex, false); SET_VAR(m_box, m_zIndex, v); }
-
-    // For valid values of page-break-inside see http://www.w3.org/TR/CSS21/page.html#page-break-props
-    void setPageBreakInside(EPageBreak b) { ASSERT(b == PBAUTO || b == PBAVOID); noninherited_flags.pageBreakInside = b; }
-    void setPageBreakBefore(EPageBreak b) { noninherited_flags.pageBreakBefore = b; }
-    void setPageBreakAfter(EPageBreak b) { noninherited_flags.pageBreakAfter = b; }
 
     // CSS3 Setters
     void setOutlineOffset(int v) { SET_VAR(m_background, m_outline.m_offset, v); }
@@ -1064,7 +1040,6 @@ public:
     static OutlineIsAuto initialOutlineStyleIsAuto() { return AUTO_OFF; }
     static NinePieceImage initialNinePieceImage() { return NinePieceImage(); }
     static LengthSize initialBorderRadius() { return LengthSize(Length(0, Fixed), Length(0, Fixed)); }
-    static ECaptionSide initialCaptionSide() { return CAPTOP; }
     static LengthBox initialClip() { return LengthBox(); }
     static TextDirection initialDirection() { return LTR; }
     static TextOrientation initialTextOrientation() { return TextOrientationVerticalRight; }
@@ -1074,7 +1049,6 @@ public:
     static EEmptyCell initialEmptyCells() { return SHOW; }
     static EOverflow initialOverflowX() { return OVISIBLE; }
     static EOverflow initialOverflowY() { return OVISIBLE; }
-    static EPageBreak initialPageBreak() { return PBAUTO; }
     static EPosition initialPosition() { return StaticPosition; }
     static ETableLayout initialTableLayout() { return TAUTO; }
     static EUnicodeBidi initialUnicodeBidi() { return UBNormal; }

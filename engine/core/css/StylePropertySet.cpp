@@ -282,9 +282,6 @@ String StylePropertySet::asText() const
 static const CSSPropertyID staticBlockProperties[] = {
     CSSPropertyOverflow, // This can be also be applied to replaced elements
     CSSPropertyWebkitAspectRatio,
-    CSSPropertyPageBreakAfter,
-    CSSPropertyPageBreakBefore,
-    CSSPropertyPageBreakInside,
     CSSPropertyTextAlign,
     CSSPropertyTextAlignLast,
     CSSPropertyTextIndent,

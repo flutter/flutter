@@ -54,9 +54,6 @@ public:
     LayoutUnit lineTopWithLeading() const { return m_lineTopWithLeading; }
     LayoutUnit lineBottomWithLeading() const { return m_lineBottomWithLeading; }
 
-    bool isFirstAfterPageBreak() const { return m_fragmentationData ? m_fragmentationData->m_isFirstAfterPageBreak : false; }
-    void setIsFirstAfterPageBreak(bool isFirstAfterPageBreak) { ensureLineFragmentationData()->m_isFirstAfterPageBreak = isFirstAfterPageBreak; }
-
     LayoutUnit paginatedLineWidth() const { return m_fragmentationData ? m_fragmentationData->m_paginatedLineWidth : LayoutUnit(0); }
     void setPaginatedLineWidth(LayoutUnit width) { ensureLineFragmentationData()->m_paginatedLineWidth = width; }
 
@@ -197,13 +194,11 @@ private:
     public:
         LineFragmentationData()
             : m_paginatedLineWidth(0)
-            , m_isFirstAfterPageBreak(false)
         {
 
         }
 
         LayoutUnit m_paginatedLineWidth;
-        bool m_isFirstAfterPageBreak;
     };
 
     OwnPtr<LineFragmentationData> m_fragmentationData;

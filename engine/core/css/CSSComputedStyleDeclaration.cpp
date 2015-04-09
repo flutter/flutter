@@ -107,7 +107,6 @@ static const CSSPropertyID staticComputableProperties[] = {
     CSSPropertyBottom,
     CSSPropertyBoxShadow,
     CSSPropertyBoxSizing,
-    CSSPropertyCaptionSide,
     CSSPropertyClip,
     CSSPropertyColor,
     CSSPropertyDirection,
@@ -148,9 +147,6 @@ static const CSSPropertyID staticComputableProperties[] = {
     CSSPropertyPaddingLeft,
     CSSPropertyPaddingRight,
     CSSPropertyPaddingTop,
-    CSSPropertyPageBreakAfter,
-    CSSPropertyPageBreakBefore,
-    CSSPropertyPageBreakInside,
     CSSPropertyPointerEvents,
     CSSPropertyPosition,
     CSSPropertyRight,
@@ -1361,8 +1357,6 @@ PassRefPtr<CSSValue> CSSComputedStyleDeclaration::getPropertyCSSValue(CSSPropert
         case CSSPropertyBoxShadow:
         case CSSPropertyWebkitBoxShadow:
             return valueForShadowList(style->boxShadow(), *style, true);
-        case CSSPropertyCaptionSide:
-            return cssValuePool().createValue(style->captionSide());
         case CSSPropertyColor:
             return cssValuePool().createColorValue(m_allowVisitedStyle ? style->colorIncludingFallback(CSSPropertyColor).rgb() : style->color().rgb());
         case CSSPropertyTabSize:
@@ -1578,17 +1572,6 @@ PassRefPtr<CSSValue> CSSComputedStyleDeclaration::getPropertyCSSValue(CSSPropert
             if (paddingLeft.isFixed() || !renderer || !renderer->isBox())
                 return pixelValueForLength(paddingLeft, *style);
             return pixelValue(toRenderBox(renderer)->computedCSSPaddingLeft(), *style);
-        }
-        case CSSPropertyPageBreakAfter:
-            return cssValuePool().createValue(style->pageBreakAfter());
-        case CSSPropertyPageBreakBefore:
-            return cssValuePool().createValue(style->pageBreakBefore());
-        case CSSPropertyPageBreakInside: {
-            EPageBreak pageBreak = style->pageBreakInside();
-            ASSERT(pageBreak != PBALWAYS);
-            if (pageBreak == PBALWAYS)
-                return nullptr;
-            return cssValuePool().createValue(style->pageBreakInside());
         }
         case CSSPropertyPosition:
             return cssValuePool().createValue(style->position());
