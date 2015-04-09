@@ -451,13 +451,6 @@ bool CSSPropertyParser::parseValue(CSSPropertyID propId)
     case CSSPropertySize:                 // <length>{1,2} | auto | [ <page-size> || [ portrait | landscape] ]
         return parseSize(propId);
 
-    case CSSPropertyQuotes: // [<string> <string>]+ | none
-        if (id == CSSValueNone)
-            validPrimitive = true;
-        else
-            parsedValue = parseQuotes();
-        break;
-
     case CSSPropertyClip:                 // <shape> | auto | inherit
         if (id == CSSValueAuto)
             validPrimitive = true;
@@ -1660,23 +1653,6 @@ CSSPropertyParser::SizeParameterType CSSPropertyParser::parseSizeParameter(CSSVa
     default:
         return None;
     }
-}
-
-// [ <string> <string> ]+ | none, but none is handled in parseValue
-PassRefPtr<CSSValue> CSSPropertyParser::parseQuotes()
-{
-    RefPtr<CSSValueList> values = CSSValueList::createCommaSeparated();
-    while (CSSParserValue* val = m_valueList->current()) {
-        RefPtr<CSSValue> parsedValue = nullptr;
-        if (val->unit != CSSPrimitiveValue::CSS_STRING)
-            return nullptr;
-        parsedValue = CSSPrimitiveValue::create(val->string, CSSPrimitiveValue::CSS_STRING);
-        values->append(parsedValue.release());
-        m_valueList->next();
-    }
-    if (values->length() && values->length() % 2 == 0)
-        return values.release();
-    return nullptr;
 }
 
 PassRefPtr<CSSValue> CSSPropertyParser::parseAttr(CSSParserValueList* args)

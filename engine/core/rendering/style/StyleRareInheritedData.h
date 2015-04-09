@@ -37,7 +37,6 @@
 namespace blink {
 
 class AppliedTextDecoration;
-class QuotesData;
 class ShadowList;
 class StyleImage;
 
@@ -58,7 +57,6 @@ public:
         return !(*this == o);
     }
     bool shadowDataEquivalent(const StyleRareInheritedData&) const;
-    bool quotesDataEquivalent(const StyleRareInheritedData&) const;
 
     StyleColor textStrokeColor() const { return m_textStrokeColorIsCurrentColor ? StyleColor::currentColor() : StyleColor(m_textStrokeColor); }
     StyleColor textFillColor() const { return m_textFillColorIsCurrentColor ? StyleColor::currentColor() : StyleColor(m_textFillColor); }
@@ -118,7 +116,6 @@ public:
     AtomicString locale;
 
     AtomicString textEmphasisCustomMark;
-    RefPtr<QuotesData> quotes;
 
     unsigned m_tabSize;
 

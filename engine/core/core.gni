@@ -963,8 +963,6 @@ sky_core_files = [
   "rendering/style/NinePieceImage.cpp",
   "rendering/style/NinePieceImage.h",
   "rendering/style/OutlineValue.h",
-  "rendering/style/QuotesData.cpp",
-  "rendering/style/QuotesData.h",
   "rendering/style/RenderStyle.cpp",
   "rendering/style/RenderStyle.h",
   "rendering/style/RenderStyleConstants.h",

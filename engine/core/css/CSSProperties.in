@@ -266,9 +266,6 @@ pointer-events inherited
 // LAYOUT
 position
 
-// OBSOLETE
-quotes inherited, converter=convertQuotes
-
 // LAYOUT
 right animatable, initial=initialOffset, converter=convertLengthOrAuto
 

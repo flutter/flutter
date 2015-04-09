@@ -24,7 +24,6 @@
 
 #include "sky/engine/core/rendering/style/AppliedTextDecoration.h"
 #include "sky/engine/core/rendering/style/DataEquivalency.h"
-#include "sky/engine/core/rendering/style/QuotesData.h"
 #include "sky/engine/core/rendering/style/RenderStyle.h"
 #include "sky/engine/core/rendering/style/RenderStyleConstants.h"
 #include "sky/engine/core/rendering/style/ShadowList.h"
@@ -39,7 +38,6 @@ struct SameSizeAsStyleRareInheritedData : public RefCounted<SameSizeAsStyleRareI
     Color colors[2];
     void* ownPtrs[1];
     AtomicString atomicStrings[4];
-    void* refPtrs[1];
     Length lengths[1];
     unsigned m_bitfields[2];
     unsigned unsigneds[1];
@@ -173,7 +171,6 @@ bool StyleRareInheritedData::operator==(const StyleRareInheritedData& o) const
         && hyphenationString == o.hyphenationString
         && locale == o.locale
         && textEmphasisCustomMark == o.textEmphasisCustomMark
-        && quotesDataEquivalent(o)
         && m_tabSize == o.m_tabSize
         && m_imageRendering == o.m_imageRendering
         && m_textUnderlinePosition == o.m_textUnderlinePosition
@@ -183,11 +180,6 @@ bool StyleRareInheritedData::operator==(const StyleRareInheritedData& o) const
 bool StyleRareInheritedData::shadowDataEquivalent(const StyleRareInheritedData& o) const
 {
     return dataEquivalent(textShadow.get(), o.textShadow.get());
-}
-
-bool StyleRareInheritedData::quotesDataEquivalent(const StyleRareInheritedData& o) const
-{
-    return dataEquivalent(quotes, o.quotes);
 }
 
 } // namespace blink

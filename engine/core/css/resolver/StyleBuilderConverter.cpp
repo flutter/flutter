@@ -209,24 +209,6 @@ float StyleBuilderConverter::convertNumberOrPercentage(StyleResolverState& state
     return primitiveValue->getFloatValue() / 100.0f;
 }
 
-PassRefPtr<QuotesData> StyleBuilderConverter::convertQuotes(StyleResolverState&, CSSValue* value)
-{
-    if (value->isValueList()) {
-        CSSValueList* list = toCSSValueList(value);
-        RefPtr<QuotesData> quotes = QuotesData::create();
-        for (size_t i = 0; i < list->length(); i += 2) {
-            CSSValue* first = list->item(i);
-            CSSValue* second = list->item(i + 1);
-            String startQuote = toCSSPrimitiveValue(first)->getStringValue();
-            String endQuote = toCSSPrimitiveValue(second)->getStringValue();
-            quotes->addPair(std::make_pair(startQuote, endQuote));
-        }
-        return quotes.release();
-    }
-    // FIXME: We should assert we're a primitive value with valueID = CSSValueNone
-    return QuotesData::create();
-}
-
 LengthSize StyleBuilderConverter::convertRadius(StyleResolverState& state, CSSValue* value)
 {
     CSSPrimitiveValue* primitiveValue = toCSSPrimitiveValue(value);

@@ -29,7 +29,6 @@
 #include "sky/engine/core/rendering/RenderTheme.h"
 #include "sky/engine/core/rendering/style/AppliedTextDecoration.h"
 #include "sky/engine/core/rendering/style/DataEquivalency.h"
-#include "sky/engine/core/rendering/style/QuotesData.h"
 #include "sky/engine/core/rendering/style/ShadowList.h"
 #include "sky/engine/core/rendering/style/StyleImage.h"
 #include "sky/engine/core/rendering/style/StyleInheritedData.h"
@@ -376,9 +375,6 @@ bool RenderStyle::diffNeedsFullLayout(const RenderStyle& other) const
 
         if (!rareInheritedData->shadowDataEquivalent(*other.rareInheritedData.get()))
             return true;
-
-        if (!rareInheritedData->quotesDataEquivalent(*other.rareInheritedData.get()))
-            return true;
     }
 
     if (inherited.get() != other.inherited.get()) {
@@ -455,11 +451,6 @@ void RenderStyle::updatePropertySpecificDifferences(const RenderStyle& other, St
         if (rareNonInheritedData->m_filter != other.rareNonInheritedData->m_filter)
             diff.setFilterChanged();
     }
-}
-
-void RenderStyle::setQuotes(PassRefPtr<QuotesData> q)
-{
-    rareInheritedData.access()->quotes = q;
 }
 
 inline bool requireTransformOrigin(const Vector<RefPtr<TransformOperation> >& transformOperations, RenderStyle::ApplyTransformOrigin applyOrigin)

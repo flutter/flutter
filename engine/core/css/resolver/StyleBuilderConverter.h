@@ -31,7 +31,6 @@
 #include "sky/engine/core/css/CSSValueList.h"
 #include "sky/engine/core/css/resolver/StyleResolverState.h"
 #include "sky/engine/core/rendering/RenderView.h"
-#include "sky/engine/core/rendering/style/QuotesData.h"
 #include "sky/engine/core/rendering/style/ShadowList.h"
 #include "sky/engine/platform/LengthSize.h"
 #include "sky/engine/platform/fonts/FontDescription.h"
@@ -58,7 +57,6 @@ public:
     static LengthPoint convertLengthPoint(StyleResolverState&, CSSValue*);
     static LineBoxContain convertLineBoxContain(StyleResolverState&, CSSValue*);
     static float convertNumberOrPercentage(StyleResolverState&, CSSValue*);
-    static PassRefPtr<QuotesData> convertQuotes(StyleResolverState&, CSSValue*);
     static LengthSize convertRadius(StyleResolverState&, CSSValue*);
     static PassRefPtr<ShadowList> convertShadow(StyleResolverState&, CSSValue*);
     static float convertSpacing(StyleResolverState&, CSSValue*);

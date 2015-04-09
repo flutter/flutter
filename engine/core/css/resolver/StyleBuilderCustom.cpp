@@ -62,7 +62,6 @@
 #include "sky/engine/core/css/resolver/TransformBuilder.h"
 #include "sky/engine/core/frame/LocalFrame.h"
 #include "sky/engine/core/frame/Settings.h"
-#include "sky/engine/core/rendering/style/QuotesData.h"
 #include "sky/engine/core/rendering/style/RenderStyle.h"
 #include "sky/engine/core/rendering/style/RenderStyleConstants.h"
 #include "sky/engine/core/rendering/style/StyleGeneratedImage.h"

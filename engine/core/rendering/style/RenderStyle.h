@@ -1029,9 +1029,6 @@ public:
     CounterDirectiveMap& accessCounterDirectives();
     const CounterDirectives getCounterDirectives(const AtomicString& identifier) const;
 
-    QuotesData* quotes() const { return rareInheritedData->quotes.get(); }
-    void setQuotes(PassRefPtr<QuotesData>);
-
     const AtomicString& hyphenString() const;
 
     bool inheritedNotEqual(const RenderStyle*) const;
@@ -1190,8 +1187,6 @@ public:
 
     static WrapFlow initialWrapFlow() { return WrapFlowAuto; }
     static WrapThrough initialWrapThrough() { return WrapThroughWrap; }
-
-    static QuotesData* initialQuotes() { return 0; }
 
     // Keep these at the end.
     // FIXME: Why? Seems these should all be one big sorted list.

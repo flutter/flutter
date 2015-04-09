@@ -88,7 +88,6 @@ private:
 
     bool parseShorthand(CSSPropertyID, const StylePropertyShorthand&);
     bool parse4Values(CSSPropertyID, const CSSPropertyID* properties);
-    PassRefPtr<CSSValue> parseQuotes();
 
     PassRefPtr<CSSValue> parseAttr(CSSParserValueList* args);
 
