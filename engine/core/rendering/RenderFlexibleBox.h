@@ -41,8 +41,6 @@ public:
     RenderFlexibleBox(ContainerNode*);
     virtual ~RenderFlexibleBox();
 
-    static RenderFlexibleBox* createAnonymous(Document*);
-
     virtual const char* renderName() const override;
 
     virtual bool isFlexibleBox() const override final { return true; }

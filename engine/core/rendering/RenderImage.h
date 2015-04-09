@@ -36,8 +36,6 @@ public:
     virtual ~RenderImage();
     virtual void destroy() override;
 
-    static RenderImage* createAnonymous(Document*);
-
     void setImageResource(PassOwnPtr<RenderImageResource>);
 
     RenderImageResource* imageResource() { return m_imageResource.get(); }

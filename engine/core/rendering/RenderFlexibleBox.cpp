@@ -77,13 +77,6 @@ RenderFlexibleBox::~RenderFlexibleBox()
 {
 }
 
-RenderFlexibleBox* RenderFlexibleBox::createAnonymous(Document* document)
-{
-    RenderFlexibleBox* renderer = new RenderFlexibleBox(0);
-    renderer->setDocumentForAnonymous(document);
-    return renderer;
-}
-
 const char* RenderFlexibleBox::renderName() const
 {
     return "RenderFlexibleBox";

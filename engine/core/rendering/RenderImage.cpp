@@ -54,13 +54,6 @@ RenderImage::RenderImage(Element* element)
 {
 }
 
-RenderImage* RenderImage::createAnonymous(Document* document)
-{
-    RenderImage* image = new RenderImage(0);
-    image->setDocumentForAnonymous(document);
-    return image;
-}
-
 RenderImage::~RenderImage()
 {
 }

@@ -51,13 +51,6 @@ RenderInline::RenderInline(Element* element)
 {
 }
 
-RenderInline* RenderInline::createAnonymous(Document* document)
-{
-    RenderInline* renderer = new RenderInline(0);
-    renderer->setDocumentForAnonymous(document);
-    return renderer;
-}
-
 void RenderInline::willBeDestroyed()
 {
     // Make sure to destroy anonymous children first while they are still connected to the rest of the tree, so that they will
