@@ -154,7 +154,6 @@ static const CSSPropertyID staticComputableProperties[] = {
     CSSPropertyPointerEvents,
     CSSPropertyPosition,
     CSSPropertyRight,
-    CSSPropertySpeak,
     CSSPropertyTableLayout,
     CSSPropertyTabSize,
     CSSPropertyTextAlign,
@@ -1925,8 +1924,6 @@ PassRefPtr<CSSValue> CSSComputedStyleDeclaration::getPropertyCSSValue(CSSPropert
             rect->setLeft(pixelValue(style->clip().left().value(), *style));
             return cssValuePool().createValue(rect.release());
         }
-        case CSSPropertySpeak:
-            return cssValuePool().createValue(style->speak());
         case CSSPropertyTransform:
         case CSSPropertyWebkitTransform:
             return computedTransform(renderer, *style);

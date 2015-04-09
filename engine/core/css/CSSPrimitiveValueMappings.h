@@ -2413,32 +2413,6 @@ template<> inline CSSPrimitiveValue::operator TextRenderingMode() const
     return AutoTextRendering;
 }
 
-template<> inline CSSPrimitiveValue::CSSPrimitiveValue(ESpeak e)
-    : CSSValue(PrimitiveClass)
-{
-    m_primitiveUnitType = CSS_VALUE_ID;
-    switch (e) {
-    case SpeakNone:
-        m_value.valueID = CSSValueNone;
-        break;
-    case SpeakNormal:
-        m_value.valueID = CSSValueNormal;
-        break;
-    case SpeakSpellOut:
-        m_value.valueID = CSSValueSpellOut;
-        break;
-    case SpeakDigits:
-        m_value.valueID = CSSValueDigits;
-        break;
-    case SpeakLiteralPunctuation:
-        m_value.valueID = CSSValueLiteralPunctuation;
-        break;
-    case SpeakNoPunctuation:
-        m_value.valueID = CSSValueNoPunctuation;
-        break;
-    }
-}
-
 template<> inline CSSPrimitiveValue::operator Order() const
 {
     ASSERT(isValueID());
@@ -2467,30 +2441,6 @@ template<> inline CSSPrimitiveValue::CSSPrimitiveValue(Order e)
         m_value.valueID = CSSValueVisual;
         break;
     }
-}
-
-template<> inline CSSPrimitiveValue::operator ESpeak() const
-{
-    ASSERT(isValueID());
-    switch (m_value.valueID) {
-    case CSSValueNone:
-        return SpeakNone;
-    case CSSValueNormal:
-        return SpeakNormal;
-    case CSSValueSpellOut:
-        return SpeakSpellOut;
-    case CSSValueDigits:
-        return SpeakDigits;
-    case CSSValueLiteralPunctuation:
-        return SpeakLiteralPunctuation;
-    case CSSValueNoPunctuation:
-        return SpeakNoPunctuation;
-    default:
-        break;
-    }
-
-    ASSERT_NOT_REACHED();
-    return SpeakNormal;
 }
 
 template<> inline CSSPrimitiveValue::CSSPrimitiveValue(blink::WebBlendMode blendMode)

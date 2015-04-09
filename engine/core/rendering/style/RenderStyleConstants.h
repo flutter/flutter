@@ -232,8 +232,6 @@ enum EBackfaceVisibility {
 
 enum Hyphens { HyphensNone, HyphensManual, HyphensAuto };
 
-enum ESpeak { SpeakNone, SpeakNormal, SpeakSpellOut, SpeakDigits, SpeakLiteralPunctuation, SpeakNoPunctuation };
-
 enum TextEmphasisFill { TextEmphasisFillFilled, TextEmphasisFillOpen };
 
 enum TextEmphasisMark { TextEmphasisMarkNone, TextEmphasisMarkAuto, TextEmphasisMarkDot, TextEmphasisMarkCircle, TextEmphasisMarkDoubleCircle, TextEmphasisMarkTriangle, TextEmphasisMarkSesame, TextEmphasisMarkCustom };

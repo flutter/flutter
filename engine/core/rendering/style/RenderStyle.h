@@ -714,8 +714,6 @@ public:
 
     EImageRendering imageRendering() const { return static_cast<EImageRendering>(rareInheritedData->m_imageRendering); }
 
-    ESpeak speak() const { return static_cast<ESpeak>(rareInheritedData->speak); }
-
     FilterOperations& mutableFilter() { return rareNonInheritedData.access()->m_filter.access()->m_operations; }
     const FilterOperations& filter() const { return rareNonInheritedData->m_filter->m_operations; }
     bool hasFilter() const { return !rareNonInheritedData->m_filter->m_operations.operations().isEmpty(); }
@@ -967,7 +965,6 @@ public:
     void setTransformOriginX(const Length& l) { SET_VAR(rareNonInheritedData.access()->m_transform, m_x, l); }
     void setTransformOriginY(const Length& l) { SET_VAR(rareNonInheritedData.access()->m_transform, m_y, l); }
     void setTransformOriginZ(float f) { SET_VAR(rareNonInheritedData.access()->m_transform, m_z, f); }
-    void setSpeak(ESpeak s) { SET_VAR(rareInheritedData, speak, s); }
     void setTextDecorationColor(const StyleColor& c) { SET_VAR(rareNonInheritedData, m_textDecorationColor, c); }
     void setTextEmphasisColor(const StyleColor& c) { SET_VAR_WITH_SETTER(rareInheritedData, textEmphasisColor, setTextEmphasisColor, c); }
     void setTextEmphasisFill(TextEmphasisFill fill) { SET_VAR(rareInheritedData, textEmphasisFill, fill); }
@@ -1153,7 +1150,6 @@ public:
     static EOverflowWrap initialOverflowWrap() { return NormalOverflowWrap; }
     static LineBreak initialLineBreak() { return LineBreakAuto; }
     static const AtomicString& initialHighlight() { return nullAtom; }
-    static ESpeak initialSpeak() { return SpeakNormal; }
     static const AtomicString& initialHyphenationString() { return nullAtom; }
     static const AtomicString& initialLocale() { return nullAtom; }
     static bool initialHasAspectRatio() { return false; }

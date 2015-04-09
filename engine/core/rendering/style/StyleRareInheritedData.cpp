@@ -62,7 +62,6 @@ StyleRareInheritedData::StyleRareInheritedData()
     , overflowWrap(RenderStyle::initialOverflowWrap())
     , lineBreak(LineBreakAuto)
     , userSelect(RenderStyle::initialUserSelect())
-    , speak(SpeakNormal)
     , hyphens(HyphensManual)
     , textEmphasisFill(TextEmphasisFillFilled)
     , textEmphasisMark(TextEmphasisMarkNone)
@@ -104,7 +103,6 @@ StyleRareInheritedData::StyleRareInheritedData(const StyleRareInheritedData& o)
     , overflowWrap(o.overflowWrap)
     , lineBreak(o.lineBreak)
     , userSelect(o.userSelect)
-    , speak(o.speak)
     , hyphens(o.hyphens)
     , textEmphasisFill(o.textEmphasisFill)
     , textEmphasisMark(o.textEmphasisMark)
@@ -157,7 +155,6 @@ bool StyleRareInheritedData::operator==(const StyleRareInheritedData& o) const
         && overflowWrap == o.overflowWrap
         && lineBreak == o.lineBreak
         && userSelect == o.userSelect
-        && speak == o.speak
         && hyphens == o.hyphens
         && hyphenationLimitBefore == o.hyphenationLimitBefore
         && hyphenationLimitAfter == o.hyphenationLimitAfter

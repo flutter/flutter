@@ -276,9 +276,6 @@ right animatable, initial=initialOffset, converter=convertLengthOrAuto
 size custom_all
 
 // OBSOLETE
-speak inherited
-
-// OBSOLETE
 table-layout
 
 tab-size inherited, type_name=unsigned

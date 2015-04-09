@@ -491,14 +491,6 @@ bounding-box
 //none
 
 //
-// speech
-//
-spell-out
-digits
-literal-punctuation
-no-punctuation
-
-//
 // -webkit-font-smoothing
 //
 // auto

@@ -369,8 +369,6 @@ bool isValidKeywordPropertyAndValue(CSSPropertyID propertyId, CSSValueID valueID
         return valueID == CSSValueVisible || valueID == CSSValueNone || valueID == CSSValueAll || valueID == CSSValueAuto || (valueID >= CSSValueVisiblepainted && valueID <= CSSValueBoundingBox);
     case CSSPropertyPosition: // static | absolute
         return valueID == CSSValueStatic || valueID == CSSValueAbsolute;
-    case CSSPropertySpeak: // none | normal | spell-out | digits | literal-punctuation | no-punctuation
-        return valueID == CSSValueNone || valueID == CSSValueNormal || valueID == CSSValueSpellOut || valueID == CSSValueDigits || valueID == CSSValueLiteralPunctuation || valueID == CSSValueNoPunctuation;
     case CSSPropertyTableLayout: // auto | fixed
         return valueID == CSSValueAuto || valueID == CSSValueFixed;
     case CSSPropertyTextAlignLast:
@@ -476,7 +474,6 @@ bool isKeywordPropertyID(CSSPropertyID propertyId)
     case CSSPropertyPageBreakInside:
     case CSSPropertyPointerEvents:
     case CSSPropertyPosition:
-    case CSSPropertySpeak:
     case CSSPropertyTableLayout:
     case CSSPropertyTextAlignLast:
     case CSSPropertyTextDecorationStyle:
