@@ -400,9 +400,6 @@ transition-timing-function custom_all
 
 white-space inherited
 
-// OBSOLETE
-widows animatable, inherited, type_name=short, custom_all
-
 // LAYOUT
 width animatable, initial=initialSize, converter=convertLengthSizing
 

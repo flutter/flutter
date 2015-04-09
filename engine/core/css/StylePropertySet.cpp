@@ -289,7 +289,6 @@ static const CSSPropertyID staticBlockProperties[] = {
     CSSPropertyTextAlignLast,
     CSSPropertyTextIndent,
     CSSPropertyTextJustify,
-    CSSPropertyWidows
 };
 
 static const Vector<CSSPropertyID>& blockProperties()

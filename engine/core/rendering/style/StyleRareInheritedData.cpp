@@ -31,24 +31,6 @@
 
 namespace blink {
 
-struct SameSizeAsStyleRareInheritedData : public RefCounted<SameSizeAsStyleRareInheritedData> {
-    void* styleImage;
-    Color firstColor;
-    float firstFloat;
-    Color colors[2];
-    void* ownPtrs[1];
-    AtomicString atomicStrings[4];
-    Length lengths[1];
-    unsigned m_bitfields[2];
-    unsigned unsigneds[1];
-    short pagedMediaShorts[1];
-    short hyphenationShorts[3];
-
-    Color touchColors;
-};
-
-COMPILE_ASSERT(sizeof(StyleRareInheritedData) == sizeof(SameSizeAsStyleRareInheritedData), StyleRareInheritedData_should_bit_pack);
-
 StyleRareInheritedData::StyleRareInheritedData()
     : textStrokeWidth(RenderStyle::initialTextStrokeWidth())
     , indent(RenderStyle::initialTextIndent())
@@ -74,8 +56,6 @@ StyleRareInheritedData::StyleRareInheritedData()
     , m_textUnderlinePosition(RenderStyle::initialTextUnderlinePosition())
     , m_touchActionDelay(RenderStyle::initialTouchActionDelay())
     , m_subtreeWillChangeContents(false)
-    , m_hasAutoWidows(true)
-    , widows(RenderStyle::initialWidows())
     , hyphenationLimitBefore(-1)
     , hyphenationLimitAfter(-1)
     , hyphenationLimitLines(-1)
@@ -115,8 +95,6 @@ StyleRareInheritedData::StyleRareInheritedData(const StyleRareInheritedData& o)
     , m_textUnderlinePosition(o.m_textUnderlinePosition)
     , m_touchActionDelay(o.m_touchActionDelay)
     , m_subtreeWillChangeContents(o.m_subtreeWillChangeContents)
-    , m_hasAutoWidows(o.m_hasAutoWidows)
-    , widows(o.widows)
     , hyphenationLimitBefore(o.hyphenationLimitBefore)
     , hyphenationLimitAfter(o.hyphenationLimitAfter)
     , hyphenationLimitLines(o.hyphenationLimitLines)
@@ -143,8 +121,6 @@ bool StyleRareInheritedData::operator==(const StyleRareInheritedData& o) const
         && shadowDataEquivalent(o)
         && highlight == o.highlight
         && indent == o.indent
-        && widows == o.widows
-        && m_hasAutoWidows == o.m_hasAutoWidows
         && m_textStrokeColorIsCurrentColor == o.m_textStrokeColorIsCurrentColor
         && m_textFillColorIsCurrentColor == o.m_textFillColorIsCurrentColor
         && m_textEmphasisColorIsCurrentColor == o.m_textEmphasisColorIsCurrentColor

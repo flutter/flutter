@@ -199,8 +199,6 @@ bool CSSPropertyEquality::propertiesEqual(CSSPropertyID prop, const RenderStyle&
         return a.transform() == b.transform();
     case CSSPropertyTransformOrigin:
         return a.transformOriginX() == b.transformOriginX() && a.transformOriginY() == b.transformOriginY() && a.transformOriginZ() == b.transformOriginZ();
-    case CSSPropertyWidows:
-        return a.widows() == b.widows();
     case CSSPropertyWidth:
         return a.width() == b.width();
     case CSSPropertyWordSpacing:

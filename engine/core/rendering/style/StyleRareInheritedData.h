@@ -104,10 +104,6 @@ public:
     // expressed by 'will-change: contents' includes descendants.
     unsigned m_subtreeWillChangeContents : 1;
 
-    // Paged media properties.
-    unsigned m_hasAutoWidows : 1;
-    short widows;
-
     short hyphenationLimitBefore;
     short hyphenationLimitAfter;
     short hyphenationLimitLines;

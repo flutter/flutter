@@ -178,7 +178,6 @@ static const CSSPropertyID staticComputableProperties[] = {
     CSSPropertyUnicodeBidi,
     CSSPropertyVerticalAlign,
     CSSPropertyWhiteSpace,
-    CSSPropertyWidows,
     CSSPropertyWidth,
     CSSPropertyWillChange,
     CSSPropertyWordBreak,
@@ -1707,10 +1706,6 @@ PassRefPtr<CSSValue> CSSComputedStyleDeclaration::getPropertyCSSValue(CSSPropert
             return nullptr;
         case CSSPropertyWhiteSpace:
             return cssValuePool().createValue(style->whiteSpace());
-        case CSSPropertyWidows:
-            if (style->hasAutoWidows())
-                return cssValuePool().createIdentifierValue(CSSValueAuto);
-            return cssValuePool().createValue(style->widows(), CSSPrimitiveValue::CSS_NUMBER);
         case CSSPropertyWidth:
             if (renderer) {
                 // According to http://www.w3.org/TR/CSS2/visudet.html#the-width-property,

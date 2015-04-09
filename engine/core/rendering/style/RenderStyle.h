@@ -581,8 +581,6 @@ public:
 
     bool isLink() const { return noninherited_flags.isLink; }
 
-    short widows() const { return rareInheritedData->widows; }
-    bool hasAutoWidows() const { return rareInheritedData->m_hasAutoWidows; }
     EPageBreak pageBreakInside() const { return static_cast<EPageBreak>(noninherited_flags.pageBreakInside); }
     EPageBreak pageBreakBefore() const { return static_cast<EPageBreak>(noninherited_flags.pageBreakBefore); }
     EPageBreak pageBreakAfter() const { return static_cast<EPageBreak>(noninherited_flags.pageBreakAfter); }
@@ -912,9 +910,6 @@ public:
     unsigned zIndex() const { return m_box->zIndex(); }
     void setZIndex(unsigned v) { SET_VAR(m_box, m_hasAutoZIndex, false); SET_VAR(m_box, m_zIndex, v); }
 
-    void setHasAutoWidows() { SET_VAR(rareInheritedData, m_hasAutoWidows, true); SET_VAR(rareInheritedData, widows, initialWidows()); }
-    void setWidows(short w) { SET_VAR(rareInheritedData, m_hasAutoWidows, false); SET_VAR(rareInheritedData, widows, w); }
-
     // For valid values of page-break-inside see http://www.w3.org/TR/CSS21/page.html#page-break-props
     void setPageBreakInside(EPageBreak b) { ASSERT(b == PBAUTO || b == PBAVOID); noninherited_flags.pageBreakInside = b; }
     void setPageBreakBefore(EPageBreak b) { noninherited_flags.pageBreakBefore = b; }
@@ -1102,7 +1097,6 @@ public:
     static TextIndentLine initialTextIndentLine() { return TextIndentFirstLine; }
     static TextIndentType initialTextIndentType() { return TextIndentNormal; }
     static EVerticalAlign initialVerticalAlign() { return BASELINE; }
-    static short initialWidows() { return 2; }
     static Length initialLineHeight() { return Length(-100.0, Percent); }
     static ETextAlign initialTextAlign() { return TASTART; }
     static TextAlignLast initialTextAlignLast() { return TextAlignLastAuto; }

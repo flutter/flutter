@@ -457,9 +457,6 @@ void AnimatedStyleBuilder::applyProperty(CSSPropertyID property, StyleResolverSt
         style->setTransformOriginZ(clampTo<float>(toAnimatableDouble(animatableLengthPoint3D->z())->toDouble()));
         return;
     }
-    case CSSPropertyWidows:
-        style->setWidows(animatableValueRoundClampTo<unsigned short>(value, 1));
-        return;
     case CSSPropertyWidth:
         style->setWidth(animatableValueToLength(value, state, ValueRangeNonNegative));
         return;

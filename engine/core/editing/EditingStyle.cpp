@@ -82,7 +82,6 @@ static const CSSPropertyID staticEditingProperties[] = {
     CSSPropertyTextDecorationLine,
     CSSPropertyTextIndent,
     CSSPropertyWhiteSpace,
-    CSSPropertyWidows,
     CSSPropertyWordSpacing,
     CSSPropertyWebkitTextDecorationsInEffect,
     CSSPropertyWebkitTextFillColor,

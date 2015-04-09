@@ -695,13 +695,6 @@ bool CSSPropertyParser::parseValue(CSSPropertyID propId)
             validPrimitive = (!id && validUnit(value, FLength | FPercent));
         break;
 
-    case CSSPropertyWidows: // <integer> | inherit | auto (Ditto)
-        if (id == CSSValueAuto)
-            validPrimitive = true;
-        else
-            validPrimitive = (!id && validUnit(value, FPositiveInteger));
-        break;
-
     case CSSPropertyZIndex: // auto | <integer> | inherit
         if (id == CSSValueAuto)
             validPrimitive = true;
