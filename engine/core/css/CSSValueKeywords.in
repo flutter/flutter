@@ -108,7 +108,11 @@ monospace
 -webkit-body
 -webkit-pictograph
 
+//
+// color
+//
 currentcolor
+
 //
 // background-repeat
 //
@@ -190,13 +194,7 @@ text
 //
 ltr
 rtl
-//
-// text-transform
-//
-capitalize
-uppercase
-lowercase
-//none
+
 //
 // visibility
 //
@@ -206,31 +204,17 @@ collapse
 //
 // Unordered rest
 //
-a3
-a4
-a5
-above
 absolute
-always
-avoid
-b4
-b5
-below
 bidi-override
 blink
 both
 embed
 fixed
-hand
-hide
 invert
 -webkit-isolate
 -webkit-isolate-override
 -webkit-plaintext
 landscape
-ledger
-legal
-letter
 line-through
 local
 nowrap
@@ -240,8 +224,6 @@ portrait
 pre
 pre-line
 pre-wrap
-separate
-show
 static
 thick
 thin
@@ -315,12 +297,9 @@ wrap-reverse
 // -internal-marquee-direction
 forwards
 backwards
-ahead
 // reverse
 // left
 // right
-up
-down
 // auto
 
 // -internal-marquee-repetition
@@ -328,7 +307,6 @@ infinite
 
 // -internal-marquee-style
 // none
-slide
 // scroll
 alternate
 
@@ -371,7 +349,6 @@ ellipsis
 //
 // collapse
 // separate
-discard
 
 //
 // word-break
@@ -558,7 +535,6 @@ at
 // closest-side
 // farthest-side
 
-alphabetic
 
 // (pointer:) media feature
 // none
@@ -599,8 +575,6 @@ balance
 -webkit-paged-y
 
 // -webkit-app-region
-drag
-no-drag
 
 // text-indent
 each-line
@@ -616,11 +590,9 @@ interlace
 // normal
 // fill
 // stroke
-markers
 
 // isolation
 // auto
-isolate
 
 // touch-action-delay
 // none
@@ -656,4 +628,3 @@ contents
 // all
 // initial
 // inherit
-unset
