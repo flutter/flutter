@@ -54,9 +54,6 @@ public:
     LayoutUnit lineTopWithLeading() const { return m_lineTopWithLeading; }
     LayoutUnit lineBottomWithLeading() const { return m_lineBottomWithLeading; }
 
-    LayoutUnit paginatedLineWidth() const { return m_fragmentationData ? m_fragmentationData->m_paginatedLineWidth : LayoutUnit(0); }
-    void setPaginatedLineWidth(LayoutUnit width) { ensureLineFragmentationData()->m_paginatedLineWidth = width; }
-
     LayoutUnit selectionTop() const;
     LayoutUnit selectionBottom() const;
     LayoutUnit selectionHeight() const { return max<LayoutUnit>(0, selectionBottom() - selectionTop()); }
@@ -172,15 +169,6 @@ public:
 private:
     LayoutUnit beforeAnnotationsAdjustment() const;
 
-    struct LineFragmentationData;
-    LineFragmentationData* ensureLineFragmentationData()
-    {
-        if (!m_fragmentationData)
-            m_fragmentationData = adoptPtr(new LineFragmentationData());
-
-        return m_fragmentationData.get();
-    }
-
     // This folds into the padding at the end of InlineFlowBox on 64-bit.
     unsigned m_lineBreakPos;
 
@@ -188,20 +176,6 @@ private:
     // we can create an InlineIterator beginning just after the end of this line.
     RenderObject* m_lineBreakObj;
     RefPtr<BidiContext> m_lineBreakContext;
-
-    struct LineFragmentationData {
-        WTF_MAKE_NONCOPYABLE(LineFragmentationData); WTF_MAKE_FAST_ALLOCATED;
-    public:
-        LineFragmentationData()
-            : m_paginatedLineWidth(0)
-        {
-
-        }
-
-        LayoutUnit m_paginatedLineWidth;
-    };
-
-    OwnPtr<LineFragmentationData> m_fragmentationData;
 
     LayoutUnit m_lineTop;
     LayoutUnit m_lineBottom;
