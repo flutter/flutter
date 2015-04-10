@@ -107,8 +107,7 @@ class RenderObject : public ImageResourceClient {
     friend class RenderObjectChildList;
     WTF_MAKE_NONCOPYABLE(RenderObject);
 public:
-    // Anonymous objects should pass the document as their node, and they will then automatically be
-    // marked as anonymous in the constructor.
+    // TODO(ojan): Pass in a reference since the node can no longer be null.
     explicit RenderObject(Node*);
     virtual ~RenderObject();
 
@@ -289,10 +288,6 @@ public:
         return !isFlexibleBox();
     }
 
-    // FIXME(sky): Remove.
-    bool isAnonymous() const { return false; }
-    bool isAnonymousBlock() const { return false; }
-
     bool isOutOfFlowPositioned() const { return m_bitfields.isOutOfFlowPositioned(); } // absolute or fixed positioning
     bool isPositioned() const { return m_bitfields.isPositioned(); }
 
@@ -352,9 +347,10 @@ public:
 
     bool isRooted() const;
 
+    // TODO(ojan): Make this a reference now that it can't be null.
     Node* node() const
     {
-        return isAnonymous() ? 0 : m_node.get();
+        return m_node.get();
     }
 
     Document& document() const { return m_node->document(); }
@@ -552,7 +548,6 @@ public:
     // as a hook to detect the case of document destruction and don't waste time doing unnecessary work.
     bool documentBeingDestroyed() const;
 
-    void destroyAndCleanupAnonymousWrappers();
     virtual void destroy();
 
     // Virtual function helper for the new FlexibleBox Layout (display: -webkit-flex).
@@ -640,8 +635,6 @@ protected:
     void insertedIntoTree();
     void willBeRemovedFromTree();
 
-    void setDocumentForAnonymous(Document* document) { ASSERT(isAnonymous()); m_node = document; }
-
 private:
     bool hasImmediateNonWhitespaceTextChildOrPropertiesDependentOnColor() const;
 
@@ -705,7 +698,6 @@ private:
             , m_preferredLogicalWidthsDirty(false)
             , m_selfNeedsOverflowRecalcAfterStyleChange(false)
             , m_childNeedsOverflowRecalcAfterStyleChange(false)
-            , m_isAnonymous(!node)
             , m_isText(false)
             , m_isBox(false)
             , m_isInline(true)
@@ -735,7 +727,6 @@ private:
         ADD_BOOLEAN_BITFIELD(selfNeedsOverflowRecalcAfterStyleChange, SelfNeedsOverflowRecalcAfterStyleChange);
         ADD_BOOLEAN_BITFIELD(childNeedsOverflowRecalcAfterStyleChange, ChildNeedsOverflowRecalcAfterStyleChange);
 
-        ADD_BOOLEAN_BITFIELD(isAnonymous, IsAnonymous);
         ADD_BOOLEAN_BITFIELD(isText, IsText);
         ADD_BOOLEAN_BITFIELD(isBox, IsBox);
         ADD_BOOLEAN_BITFIELD(isInline, IsInline);

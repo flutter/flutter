@@ -743,7 +743,7 @@ Position Position::downstream(EditingBoundaryCrossingRule rule) const
     return lastVisible;
 }
 
-bool Position::hasRenderedNonAnonymousDescendantsWithHeight(RenderObject* renderer)
+bool Position::hasRenderedDescendantsWithHeight(RenderObject* renderer)
 {
     RenderObject* stop = renderer->nextInPreOrderAfterChildren();
     for (RenderObject *o = renderer->slowFirstChild(); o && o != stop; o = o->nextInPreOrder())
@@ -805,7 +805,7 @@ bool Position::isCandidate() const
 
     if (renderer->isRenderParagraph()) {
         if (toRenderParagraph(renderer)->logicalHeight()) {
-            if (!Position::hasRenderedNonAnonymousDescendantsWithHeight(renderer))
+            if (!Position::hasRenderedDescendantsWithHeight(renderer))
                 return atFirstEditingPositionForNode() && !Position::nodeIsUserSelectNone(deprecatedNode());
             return m_anchorNode->hasEditableStyle() && !Position::nodeIsUserSelectNone(deprecatedNode()) && atEditingBoundary();
         }
@@ -1004,7 +1004,7 @@ void Position::getInlineBoxAndOffset(EAffinity affinity, TextDirection primaryDi
 
     if (!renderer->isText()) {
         inlineBox = 0;
-        if (canHaveChildrenForEditing(deprecatedNode()) && renderer->isRenderParagraph() && hasRenderedNonAnonymousDescendantsWithHeight(renderer)) {
+        if (canHaveChildrenForEditing(deprecatedNode()) && renderer->isRenderParagraph() && hasRenderedDescendantsWithHeight(renderer)) {
             // Try a visually equivalent position with possibly opposite editability. This helps in case |this| is in
             // an editable block but surrounded by non-editable positions. It acts to negate the logic at the beginning
             // of RenderObject::createVisiblePosition().

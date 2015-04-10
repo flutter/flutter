@@ -139,18 +139,9 @@ void RenderBlock::willBeDestroyed()
             // is notified of DOM mutations.
             if (isSelectionBorder())
                 view()->clearSelection();
-
-            // If we are an anonymous block, then our line boxes might have children
-            // that will outlast this block. In the non-anonymous block case those
-            // children will be destroyed by the time we return from this function.
-            if (isAnonymousBlock()) {
-                for (InlineFlowBox* box = firstLineBox(); box; box = box->nextLineBox()) {
-                    while (InlineBox* childBox = box->firstChild())
-                        childBox->remove();
-                }
-            }
-        } else if (parent())
+        } else if (parent()) {
             parent()->dirtyLinesFromChangedChild(this);
+        }
     }
 
     m_lineBoxes.deleteLineBoxes();
@@ -478,7 +469,7 @@ bool RenderBlock::shouldPaintSelectionGaps() const
 
 bool RenderBlock::isSelectionRoot() const
 {
-    ASSERT(node() || isAnonymous());
+    ASSERT(node());
 
     if (node() && node()->parentNode() == document())
         return true;
@@ -832,7 +823,6 @@ TrackedRendererListHashSet* RenderBlock::positionedObjects() const
 
 void RenderBlock::insertPositionedObject(RenderBox* o)
 {
-    ASSERT(!isAnonymousBlock());
     insertIntoTrackedRendererMaps(o, gPositionedDescendantsMap, gPositionedContainerMap);
 }
 
@@ -1574,10 +1564,6 @@ const char* RenderBlock::renderName() const
         return "RenderBlock (inline-block)";
     if (isOutOfFlowPositioned())
         return "RenderBlock (positioned)";
-    if (isAnonymousBlock())
-        return "RenderBlock (anonymous)";
-    if (isAnonymous())
-        return "RenderBlock (generated)";
     return "RenderBlock";
 }
 

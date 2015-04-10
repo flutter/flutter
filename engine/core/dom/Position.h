@@ -183,7 +183,7 @@ public:
 
     TextDirection primaryDirection() const;
 
-    static bool hasRenderedNonAnonymousDescendantsWithHeight(RenderObject*);
+    static bool hasRenderedDescendantsWithHeight(RenderObject*);
     static bool nodeIsUserSelectNone(Node*);
     static bool nodeIsUserSelectAll(const Node*);
     static Node* rootUserSelectAllForNode(Node*);

@@ -64,7 +64,7 @@ struct SameSizeAsRenderText : public RenderObject {
 COMPILE_ASSERT(sizeof(RenderText) == sizeof(SameSizeAsRenderText), RenderText_should_stay_small);
 
 RenderText::RenderText(Node* node, PassRefPtr<StringImpl> str)
-    : RenderObject(!node || node->isDocumentNode() ? 0 : node)
+    : RenderObject(node)
     , m_hasTab(false)
     , m_linesDirty(false)
     , m_containsReversedText(false)
@@ -78,10 +78,7 @@ RenderText::RenderText(Node* node, PassRefPtr<StringImpl> str)
     , m_lastTextBox(0)
 {
     ASSERT(m_text);
-    // FIXME: Some clients of RenderText (and subclasses) pass Document as node to create anonymous renderer.
-    // They should be switched to passing null and using setDocumentForAnonymous.
-    if (node && node->isDocumentNode())
-        setDocumentForAnonymous(toDocument(node));
+    ASSERT(node && !node->isDocumentNode());
 
     m_isAllASCII = m_text.containsOnlyASCII();
     m_canUseSimpleFontCodePath = computeCanUseSimpleFontCodePath();

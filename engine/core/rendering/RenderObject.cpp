@@ -483,9 +483,9 @@ void RenderObject::markContainingBlocksForLayout(bool scheduleRelayout, RenderOb
         if (!container && !object->isRenderView())
             return;
         if (!last->isText() && last->style()->hasOutOfFlowPosition()) {
-            bool willSkipRelativelyPositionedInlines = !object->isRenderBlock() || object->isAnonymousBlock();
+            bool willSkipRelativelyPositionedInlines = !object->isRenderBlock();
             // Skip relatively positioned inlines and anonymous blocks to get to the enclosing RenderBlock.
-            while (object && (!object->isRenderBlock() || object->isAnonymousBlock()))
+            while (object && !object->isRenderBlock())
                 object = object->container();
             if (!object || object->posChildNeedsLayout())
                 return;
@@ -593,9 +593,6 @@ RenderBlock* RenderObject::containingBlock() const
         }
 
         if (o && !o->isRenderBlock())
-            o = o->containingBlock();
-
-        while (o && o->isAnonymousBlock())
             o = o->containingBlock();
     } else {
         while (o && ((o->isInline() && !o->isReplaced()) || !o->isRenderBlock()))
@@ -1588,25 +1585,6 @@ void RenderObject::willBeRemovedFromTree()
 
     if (isOutOfFlowPositioned() && parent()->isRenderParagraph())
         parent()->dirtyLinesFromChangedChild(this);
-}
-
-void RenderObject::destroyAndCleanupAnonymousWrappers()
-{
-    // If the tree is destroyed, there is no need for a clean-up phase.
-    if (documentBeingDestroyed()) {
-        destroy();
-        return;
-    }
-
-    RenderObject* destroyRoot = this;
-    for (RenderObject* destroyRootParent = destroyRoot->parent(); destroyRootParent && destroyRootParent->isAnonymous(); destroyRoot = destroyRootParent, destroyRootParent = destroyRootParent->parent()) {
-        if (destroyRootParent->slowFirstChild() != this || destroyRootParent->slowLastChild() != this)
-            break;
-    }
-
-    destroyRoot->destroy();
-
-    // WARNING: |this| is deleted here.
 }
 
 void RenderObject::destroy()

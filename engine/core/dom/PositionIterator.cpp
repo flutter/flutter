@@ -152,7 +152,7 @@ bool PositionIterator::isCandidate() const
 
     if (renderer->isRenderParagraph()) {
         if (toRenderParagraph(renderer)->logicalHeight()) {
-            if (!Position::hasRenderedNonAnonymousDescendantsWithHeight(renderer))
+            if (!Position::hasRenderedDescendantsWithHeight(renderer))
                 return atStartOfNode() && !Position::nodeIsUserSelectNone(m_anchorNode);
             return m_anchorNode->hasEditableStyle() && !Position::nodeIsUserSelectNone(m_anchorNode) && Position(*this).atEditingBoundary();
         }

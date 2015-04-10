@@ -40,8 +40,6 @@ RenderParagraph::~RenderParagraph()
 
 const char* RenderParagraph::renderName() const
 {
-    if (isAnonymous())
-        return "RenderParagraph (anonymous)";
     return "RenderParagraph";
 }
 
@@ -710,7 +708,7 @@ void RenderParagraph::computeInlineDirectionPositionsForLine(RootInlineBox* line
     // box is only affected if it is the first child of its parent element."
     // CSS3 "text-indent", "each-line" affects the first line of the block container as well as each line after a forced line break,
     // but does not affect lines after a soft wrap break.
-    bool isFirstLine = lineInfo.isFirstLine() && !(isAnonymousBlock() && parent()->slowFirstChild() != this);
+    bool isFirstLine = lineInfo.isFirstLine();
     bool isAfterHardLineBreak = lineBox->prevRootBox() && lineBox->prevRootBox()->endsWithBreak();
     IndentTextOrNot shouldIndentText = requiresIndent(isFirstLine, isAfterHardLineBreak, style());
     float lineLogicalLeft;
@@ -1431,8 +1429,7 @@ void RenderParagraph::layoutChildren(bool relayoutChildren, SubtreeLayoutScope& 
     // FIXME: CSS3 says that descendants that are clipped must also know how to truncate.  This is insanely
     // difficult to figure out in general (especially in the middle of doing layout), so we only handle the
     // simple case of an anonymous block truncating when it's parent is clipped.
-    bool hasTextOverflow = (style()->textOverflow() && hasOverflowClip())
-        || (isAnonymousBlock() && parent() && parent()->style()->textOverflow() && parent()->hasOverflowClip());
+    bool hasTextOverflow = style()->textOverflow() && hasOverflowClip();
 
     // Walk all the lines and delete our ellipsis line boxes if they exist.
     if (hasTextOverflow)

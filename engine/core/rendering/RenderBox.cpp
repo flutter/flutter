@@ -1594,11 +1594,10 @@ LayoutUnit RenderBox::computeContentLogicalHeightUsing(const Length& height, Lay
     return -1;
 }
 
+// FIXME(sky): Remove
 bool RenderBox::skipContainingBlockForPercentHeightCalculation(const RenderBox* containingBlock) const
 {
-    if (!containingBlock->isAnonymousBlock())
-        return false;
-    return !containingBlock->isOutOfFlowPositioned() && containingBlock->style()->logicalHeight().isAuto();
+    return false;
 }
 
 LayoutUnit RenderBox::computePercentageLogicalHeight(const Length& height) const
@@ -1726,13 +1725,7 @@ bool RenderBox::logicalHeightComputesAsNone(SizeType sizeType) const
     if (!logicalHeight.isPercent() || isOutOfFlowPositioned())
         return false;
 
-    // Anonymous block boxes are ignored when resolving percentage values that would refer to it:
-    // the closest non-anonymous ancestor box is used instead.
-    RenderBlock* containingBlock = this->containingBlock();
-    while (containingBlock->isAnonymous())
-        containingBlock = containingBlock->containingBlock();
-
-    return containingBlock->hasAutoHeightOrContainingBlockWithAutoHeight();
+    return containingBlock()->hasAutoHeightOrContainingBlockWithAutoHeight();
 }
 
 LayoutUnit RenderBox::computeReplacedLogicalHeightRespectingMinMaxHeight(LayoutUnit logicalHeight) const
@@ -1757,8 +1750,6 @@ LayoutUnit RenderBox::computeReplacedLogicalHeightUsing(const Length& logicalHei
         case Calculated:
         {
             RenderObject* cb = isOutOfFlowPositioned() ? container() : containingBlock();
-            while (cb->isAnonymous())
-                cb = cb->containingBlock();
             if (cb->isRenderBlock())
                 toRenderBlock(cb)->addPercentHeightDescendant(const_cast<RenderBox*>(this));
 
@@ -2979,17 +2970,7 @@ void RenderBox::clearLayoutOverflow()
 
 bool RenderBox::percentageLogicalHeightIsResolvableFromBlock(const RenderBlock* containingBlock, bool isOutOfFlowPositioned)
 {
-    // In quirks mode, blocks with auto height are skipped, and we keep looking for an enclosing
-    // block that may have a specified height and then use it. In strict mode, this violates the
-    // specification, which states that percentage heights just revert to auto if the containing
-    // block has an auto height. We still skip anonymous containing blocks in both modes, though, and look
-    // only at explicit containers.
     const RenderBlock* cb = containingBlock;
-    while (!cb->isRenderView() && !cb->isOutOfFlowPositioned() && cb->style()->logicalHeight().isAuto()) {
-        if (!cb->isAnonymousBlock())
-            break;
-        cb = cb->containingBlock();
-    }
 
     // A positioned element that specified both top/bottom or that specifies height should be treated as though it has a height
     // explicitly specified that can be used for any percentage computations.

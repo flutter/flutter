@@ -84,11 +84,7 @@ bool RenderBoxModelObject::hasAutoHeightOrContainingBlockWithAutoHeight() const
     if (!logicalHeightLength.isPercent() || isOutOfFlowPositioned())
         return false;
 
-    // Anonymous block boxes are ignored when resolving percentage values that would refer to it:
-    // the closest non-anonymous ancestor box is used instead.
     RenderBlock* cb = containingBlock();
-    while (cb->isAnonymous())
-        cb = cb->containingBlock();
 
     // Match RenderBox::availableLogicalHeightUsing by special casing
     // the render view. The available height is taken from the frame.

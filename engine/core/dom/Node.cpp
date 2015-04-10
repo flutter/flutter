@@ -728,7 +728,7 @@ void Node::detach(const AttachContext& context)
     DocumentLifecycle::DetachScope willDetach(document().lifecycle());
 
     if (renderer())
-        renderer()->destroyAndCleanupAnonymousWrappers();
+        renderer()->destroy();
     setRenderer(0);
 
     // Do not remove the element's hovered and active status
