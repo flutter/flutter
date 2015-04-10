@@ -618,7 +618,6 @@ public:
 
     EBoxSizing boxSizing() const { return m_box->boxSizing(); }
     EUserModify userModify() const { return static_cast<EUserModify>(rareInheritedData->userModify); }
-    EUserDrag userDrag() const { return static_cast<EUserDrag>(rareNonInheritedData->userDrag); }
     EUserSelect userSelect() const { return static_cast<EUserSelect>(rareInheritedData->userSelect); }
     TextOverflow textOverflow() const { return static_cast<TextOverflow>(rareNonInheritedData->textOverflow); }
     EWordBreak wordBreak() const { return static_cast<EWordBreak>(rareInheritedData->wordBreak); }
@@ -907,7 +906,6 @@ public:
     void setJustifySelfOverflowAlignment(OverflowAlignment overflowAlignment) { SET_VAR(rareNonInheritedData, m_justifySelfOverflowAlignment, overflowAlignment); }
 
     void setUserModify(EUserModify u) { SET_VAR(rareInheritedData, userModify, u); }
-    void setUserDrag(EUserDrag d) { SET_VAR(rareNonInheritedData, userDrag, d); }
     void setUserSelect(EUserSelect s) { SET_VAR(rareInheritedData, userSelect, s); }
     void setTextOverflow(TextOverflow overflow) { SET_VAR(rareNonInheritedData, textOverflow, overflow); }
     void setWordBreak(EWordBreak b) { SET_VAR(rareInheritedData, wordBreak, b); }
@@ -1088,7 +1086,6 @@ public:
     static ItemPosition initialJustifySelf() { return ItemPositionAuto; }
     static OverflowAlignment initialJustifySelfOverflowAlignment() { return OverflowAlignmentDefault; }
     static EUserModify initialUserModify() { return READ_ONLY; }
-    static EUserDrag initialUserDrag() { return DRAG_AUTO; }
     static EUserSelect initialUserSelect() { return SELECT_TEXT; }
     static TextOverflow initialTextOverflow() { return TextOverflowClip; }
     static EWordBreak initialWordBreak() { return NormalWordBreak; }

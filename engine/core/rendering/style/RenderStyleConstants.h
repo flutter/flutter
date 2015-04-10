@@ -115,12 +115,6 @@ enum EUserModify {
     READ_ONLY, READ_WRITE, READ_WRITE_PLAINTEXT_ONLY
 };
 
-// CSS3 User Drag Values
-
-enum EUserDrag {
-    DRAG_AUTO, DRAG_NONE, DRAG_ELEMENT
-};
-
 // CSS3 User Select Values
 
 enum EUserSelect {

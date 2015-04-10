@@ -1273,43 +1273,6 @@ template<> inline CSSPrimitiveValue::operator EUnicodeBidi() const
     return UBNormal;
 }
 
-template<> inline CSSPrimitiveValue::CSSPrimitiveValue(EUserDrag e)
-    : CSSValue(PrimitiveClass)
-{
-    m_primitiveUnitType = CSS_VALUE_ID;
-    switch (e) {
-    case DRAG_AUTO:
-        m_value.valueID = CSSValueAuto;
-        break;
-    case DRAG_NONE:
-        m_value.valueID = CSSValueNone;
-        break;
-    case DRAG_ELEMENT:
-        m_value.valueID = CSSValueElement;
-        break;
-    default:
-        break;
-    }
-}
-
-template<> inline CSSPrimitiveValue::operator EUserDrag() const
-{
-    ASSERT(isValueID());
-    switch (m_value.valueID) {
-    case CSSValueAuto:
-        return DRAG_AUTO;
-    case CSSValueNone:
-        return DRAG_NONE;
-    case CSSValueElement:
-        return DRAG_ELEMENT;
-    default:
-        break;
-    }
-
-    ASSERT_NOT_REACHED();
-    return DRAG_AUTO;
-}
-
 template<> inline CSSPrimitiveValue::CSSPrimitiveValue(EUserModify e)
     : CSSValue(PrimitiveClass)
 {

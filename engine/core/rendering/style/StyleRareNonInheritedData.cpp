@@ -49,7 +49,6 @@ StyleRareNonInheritedData::StyleRareNonInheritedData()
     , m_alignSelf(RenderStyle::initialAlignSelf())
     , m_alignSelfOverflowAlignment(RenderStyle::initialAlignSelfOverflowAlignment())
     , m_justifyContent(RenderStyle::initialJustifyContent())
-    , userDrag(RenderStyle::initialUserDrag())
     , textOverflow(RenderStyle::initialTextOverflow())
     , m_textDecorationStyle(RenderStyle::initialTextDecorationStyle())
     , m_wrapFlow(RenderStyle::initialWrapFlow())
@@ -93,7 +92,6 @@ StyleRareNonInheritedData::StyleRareNonInheritedData(const StyleRareNonInherited
     , m_alignSelf(o.m_alignSelf)
     , m_alignSelfOverflowAlignment(o.m_alignSelfOverflowAlignment)
     , m_justifyContent(o.m_justifyContent)
-    , userDrag(o.userDrag)
     , textOverflow(o.textOverflow)
     , m_textDecorationStyle(o.m_textDecorationStyle)
     , m_wrapFlow(o.m_wrapFlow)
@@ -141,7 +139,6 @@ bool StyleRareNonInheritedData::operator==(const StyleRareNonInheritedData& o) c
         && m_alignSelf == o.m_alignSelf
         && m_alignSelfOverflowAlignment == o.m_alignSelfOverflowAlignment
         && m_justifyContent == o.m_justifyContent
-        && userDrag == o.userDrag
         && textOverflow == o.textOverflow
         && m_textDecorationStyle == o.m_textDecorationStyle
         && m_wrapFlow == o.m_wrapFlow

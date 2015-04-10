@@ -345,12 +345,6 @@ clip
 ellipsis
 
 //
-// -webkit-margin-collapse
-//
-// collapse
-// separate
-
-//
 // word-break
 //
 break-all
@@ -574,8 +568,6 @@ balance
 -webkit-paged-x
 -webkit-paged-y
 
-// -webkit-app-region
-
 // text-indent
 each-line
 //hanging   // hanging exists in SVGCSSValueKeywords.in
@@ -583,16 +575,6 @@ each-line
 // (scan:) media feature
 progressive
 interlace
-
-//
-// paint-order
-//
-// normal
-// fill
-// stroke
-
-// isolation
-// auto
 
 // touch-action-delay
 // none
@@ -603,20 +585,9 @@ pan-x
 pan-y
 manipulation
 
-// justify-items / justify-self
-// auto
-// stretch
-// baseline
 last-baseline
-// center
-// start
-// end
 self-start
 self-end
-// flex-start
-// flex-end
-// left
-// right
 true
 safe
 legacy
@@ -624,7 +595,3 @@ legacy
 // will-change
 // auto
 contents
-
-// all
-// initial
-// inherit

@@ -228,7 +228,6 @@ static const CSSPropertyID staticComputableProperties[] = {
     CSSPropertyWebkitTransformOrigin,
     CSSPropertyTransformStyle,
     CSSPropertyWebkitTransformStyle,
-    CSSPropertyWebkitUserDrag,
     CSSPropertyWebkitUserModify,
     CSSPropertyWebkitUserSelect,
 };
@@ -1874,8 +1873,6 @@ PassRefPtr<CSSValue> CSSComputedStyleDeclaration::getPropertyCSSValue(CSSPropert
             return cssValuePool().createIdentifierValue(style->rtlOrdering() ? CSSValueVisual : CSSValueLogical);
         case CSSPropertyWebkitTapHighlightColor:
             return currentColorOrValidColor(*style, style->tapHighlightColor());
-        case CSSPropertyWebkitUserDrag:
-            return cssValuePool().createValue(style->userDrag());
         case CSSPropertyWebkitUserSelect:
             return cssValuePool().createValue(style->userSelect());
         case CSSPropertyBorderBottomLeftRadius:

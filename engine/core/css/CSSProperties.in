@@ -369,9 +369,6 @@ transition-property custom_all
 transition-timing-function custom_all
 
 // OBSOLETE
--webkit-user-drag
-
-// OBSOLETE
 -webkit-user-modify inherited
 
 // OBSOLETE

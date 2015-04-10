@@ -819,13 +819,6 @@ bool Node::canStartSelection() const
     if (hasEditableStyle())
         return true;
 
-    if (renderer()) {
-        RenderStyle* style = renderer()->style();
-        // We allow selections to begin within an element that has -webkit-user-select: none set,
-        // but if the element is draggable then dragging should take priority over selection.
-        if (style->userDrag() == DRAG_ELEMENT && style->userSelect() == SELECT_NONE)
-            return false;
-    }
     return parentOrShadowHostNode() ? parentOrShadowHostNode()->canStartSelection() : true;
 }
 

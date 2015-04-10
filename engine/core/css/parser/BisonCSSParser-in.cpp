@@ -419,8 +419,6 @@ bool isValidKeywordPropertyAndValue(CSSPropertyID propertyId, CSSValueID valueID
     case CSSPropertyTransformStyle:
     case CSSPropertyWebkitTransformStyle:
         return valueID == CSSValueFlat || valueID == CSSValuePreserve3d;
-    case CSSPropertyWebkitUserDrag: // auto | none | element
-        return valueID == CSSValueAuto || valueID == CSSValueNone || valueID == CSSValueElement;
     case CSSPropertyWebkitUserModify: // read-only | read-write
         return valueID == CSSValueReadOnly || valueID == CSSValueReadWrite || valueID == CSSValueReadWritePlaintextOnly;
     case CSSPropertyWebkitUserSelect: // auto | none | text | all
@@ -485,7 +483,6 @@ bool isKeywordPropertyID(CSSPropertyID propertyId)
     case CSSPropertyWebkitTextEmphasisPosition:
     case CSSPropertyTransformStyle:
     case CSSPropertyWebkitTransformStyle:
-    case CSSPropertyWebkitUserDrag:
     case CSSPropertyWebkitUserModify:
     case CSSPropertyWebkitUserSelect:
     case CSSPropertyWhiteSpace:
