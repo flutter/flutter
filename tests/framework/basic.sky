@@ -8,7 +8,7 @@ import 'dart:sky.internals' as internals;
 void main() {
   new TestApp();
   runAfterDisplay(() {
-    internals.notifyTestComplete(serializeNode(document.lastChild));
+    internals.notifyTestComplete(serializeNode(document.lastChild.previousSibling) + serializeNode(document.lastChild));
   });
 }
 </script>
