@@ -201,6 +201,7 @@ rtl
 visible
 //hidden
 collapse
+
 //
 // Unordered rest
 //
@@ -253,12 +254,6 @@ vertical
 inline-axis
 block-axis
 
-// box-pack
-// start
-// end
-// center
-// justify
-
 // box-lines
 single
 multiple
@@ -270,20 +265,6 @@ flex-end
 space-between
 space-around
 // stretch
-
-// align-items / align-self
-// flex-start
-// flex-end
-// center
-// baseline
-// stretch
-
-// justify-content
-// flex-start
-// flex-end
-// center
-// space-between
-// space-around
 
 // flex-flow
 row
@@ -409,18 +390,6 @@ visual
 // alternate
 
 alternate-reverse
-
-//
-// animation-fill-mode
-//
-// forwards
-// backwards
-// both
-
-//
-// animation-iteration-count
-//
-// infinite
 
 //
 // animation-play-state
