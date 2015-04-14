@@ -587,6 +587,42 @@ class Container extends SkyElementWrapper {
   );
 }
 
+abstract class LayoutContainer extends Container {
+
+  LayoutContainer({
+    Object key,
+    List<UINode> children,
+    Style style,
+    String inlineStyle
+  }) : super(
+    key: key,
+    children: children,
+    style: style,
+    inlineStyle: inlineStyle
+  );
+
+  sky.Node _createNode() {
+    var result = super._createNode();
+    result.setLayoutManager(() => layout(_root));
+    return result;
+  }
+
+  void _syncNode(SkyNodeWrapper old) {
+    super._syncNode(old);
+    _root.setNeedsLayout();
+  }
+
+  void layout(sky.Element skyNode);
+  // set skyNode.width (e.g., set it to skyNode.parentNode.width)
+  // for each skyNode.getChildNodes()[i]:
+  //   call .layout()
+  //   set .x, .y
+  //   set .width if you want to force a width
+  //   set .height if you want to force a height
+  // set skyNode.height
+
+}
+
 class Image extends SkyElementWrapper {
 
   String get _tagName => 'img';

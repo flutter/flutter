@@ -9,6 +9,7 @@ import 'dart:math' as math;
 import 'dart:sky' as sky;
 import 'dart:async';
 import 'scrollable.dart';
+import '../layouts/block.dart';
 
 abstract class FixedHeightScrollable extends Scrollable {
   static final Style _style = new Style('''
@@ -84,7 +85,7 @@ abstract class FixedHeightScrollable extends Scrollable {
     return new Container(
       style: _style,
       children: [
-        new Container(
+        new BlockLayout(
           style: _scrollAreaStyle,
           inlineStyle: transformStyle,
           children: buildItems(itemNumber, drawCount)
