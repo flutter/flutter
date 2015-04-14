@@ -607,8 +607,12 @@ abstract class LayoutContainer extends Container {
     return result;
   }
 
+  // If we ever reuse sky nodes for different classes, then we should 
+  // call _root.setLayoutManager(null) during _remove() here.
+
   void _syncNode(SkyNodeWrapper old) {
     super._syncNode(old);
+    _root.setLayoutManager(() => layout(_root));
     _root.setNeedsLayout();
   }
 
