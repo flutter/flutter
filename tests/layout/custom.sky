@@ -1,9 +1,11 @@
-<parent style='background-color: lightblue;'>
-  <child style='background-color: pink;'>
-    <grandchild style='background-color: red; width: 25px; height: 25px;'></grandchild>
-  </child>
-  <child2 style='background-color: salmon; height: 25px;' />
-</parent>
+<root style="width: 300px">
+  <parent style='background-color: lightblue;'>
+    <child style='background-color: pink;'>
+      <grandchild style='background-color: red; width: 25px; height: 25px;'></grandchild>
+    </child>
+    <child2 style='background-color: salmon; height: 25px;' />
+  </parent>
+</root>
 
 <script>
 import "../resources/third_party/unittest/unittest.dart";
@@ -20,6 +22,7 @@ void main() {
   var parent = document.querySelector('parent');
   var firstChild = parent.firstElementChild;
   var secondChild = parent.lastElementChild;
+  var grandChild = document.querySelector('grandchild');
 
   parent.setLayoutManager(() {
     if (first) {
@@ -58,6 +61,11 @@ void main() {
     expect(secondChild.offsetHeight, equals(25));
     expect(secondChild.offsetTop, equals(0));
     expect(secondChild.offsetLeft, equals(0));
+
+    expect(grandChild.offsetWidth, equals(25));
+    expect(grandChild.offsetHeight, equals(25));
+    expect(secondChild.offsetTop, equals(0));
+    expect(secondChild.offsetLeft, equals(0));
   };
 
   test("should have the right sizes after layout", () {
@@ -75,7 +83,32 @@ void main() {
         expect(parent.offsetWidth, equals(150));
         expect(secondChild.offsetWidth, equals(150));
         assertNonChangingValues();
-        completer.complete();
+
+        parent.setLayoutManager(null);
+
+        window.requestAnimationFrame((_) {
+          expect(parent.offsetWidth, equals(300));
+          expect(parent.offsetHeight, equals(50));
+          expect(parent.offsetTop, equals(0));
+          expect(parent.offsetLeft, equals(0));
+
+          expect(firstChild.offsetWidth, equals(300));
+          expect(firstChild.offsetHeight, equals(25));
+          expect(firstChild.offsetTop, equals(0));
+          expect(firstChild.offsetLeft, equals(0));
+
+          expect(secondChild.offsetWidth, equals(300));
+          expect(secondChild.offsetHeight, equals(25));
+          expect(secondChild.offsetTop, equals(25));
+          expect(secondChild.offsetLeft, equals(0));
+
+          expect(grandChild.offsetWidth, equals(25));
+          expect(grandChild.offsetHeight, equals(25));
+          expect(grandChild.offsetTop, equals(0));
+          expect(grandChild.offsetLeft, equals(0));
+
+          completer.complete();
+        });
       });
     });
 

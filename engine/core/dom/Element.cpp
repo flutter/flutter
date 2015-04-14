@@ -964,7 +964,9 @@ LayoutCallback* Element::layoutManager() const
 
 void Element::setLayoutManager(PassOwnPtr<LayoutCallback> callback)
 {
-    if (renderer() && !renderer()->isRenderCustomLayout()) {
+    bool isAlreadyCustomLayout = renderer() && renderer()->isRenderCustomLayout();
+    bool requiresCustomLayout = callback;
+    if (requiresCustomLayout != isAlreadyCustomLayout) {
         // We don't go through the normal reattach codepaths because
         // those are all tied to changes to the RenderStyle.
         markAncestorsWithChildNeedsStyleRecalc();
