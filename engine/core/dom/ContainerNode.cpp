@@ -875,7 +875,7 @@ Vector<RefPtr<Node>> ContainerNode::getChildNodes() const
 Vector<RefPtr<Element>> ContainerNode::getChildElements() const
 {
     Vector<RefPtr<Element>> result;
-    for (Element* element = ElementTraversal::firstWithin(*this); element; element = ElementTraversal::next(*element, this))
+    for (Element* element = ElementTraversal::firstChild(*this); element; element = ElementTraversal::nextSibling(*element))
         result.append(element);
     return result;
 }
