@@ -12,6 +12,7 @@ dot {
 }
 
 log {
+    display: paragraph;
     margin-top: 50px;
 }
 </style>
