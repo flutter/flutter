@@ -69,11 +69,7 @@ abstract class Scrollable extends Component {
     _simulation = scrollBehavior.release(particle);
     if (_simulation == null)
       return;
-    _simulation.onTick.listen((_) {
-      setState(() {
-        _scrollOffset = particle.position;
-      });
-    });
+    _simulation.onTick.listen((_) => scrollTo(particle.position));
   }
 
   Particle _createParticle([double velocity = 0.0]) {
