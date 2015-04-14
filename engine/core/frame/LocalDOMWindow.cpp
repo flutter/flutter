@@ -703,7 +703,7 @@ void LocalDOMWindow::setLocation(const String& urlString, SetLocationLocking loc
     if (!host)
         return;
     mojo::URLRequestPtr request = mojo::URLRequest::New();
-    request->url = urlString.toUTF8();
+    request->url = document()->completeURL(urlString).string().toUTF8();
     host->services()->NavigatorHost()->RequestNavigate(
         mojo::TARGET_SOURCE_NODE, request.Pass());
 }
