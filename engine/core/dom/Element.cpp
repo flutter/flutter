@@ -971,6 +971,8 @@ void Element::setLayoutManager(PassOwnPtr<LayoutCallback> callback)
         // those are all tied to changes to the RenderStyle.
         markAncestorsWithChildNeedsStyleRecalc();
         detach();
+    } else if (callback.get() != m_layoutManager) {
+        setNeedsLayout();
     }
     m_layoutManager = callback;
 }
