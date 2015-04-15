@@ -32,9 +32,7 @@ The simplest Sky app is, appropriately, HelloWorldApp:
 import 'package:sky/framework/fn.dart';
 
 class HelloWorldApp extends App {
-  Node build() {
-    return new Text('Hello, world!');
-  }
+  Node build() => new Text('Hello, world!');
 }
 
 void main() {
