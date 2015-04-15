@@ -78,6 +78,11 @@ void LineBreaker::setLineWidths(float firstWidth, int firstWidthLineCount, float
     mLineWidths.setWidths(firstWidth, firstWidthLineCount, restWidth);
 }
 
+
+void LineBreaker::setMargins(const std::vector<float>& margins) {
+    mLineWidths.setMargins(margins);
+}
+
 // This function determines whether a character is a space that disappears at end of line.
 // It is the Unicode set: [[:General_Category=Space_Separator:]-[:Line_Break=Glue:]]
 // Note: all such characters are in the BMP, so it's ok to use code units for this.
