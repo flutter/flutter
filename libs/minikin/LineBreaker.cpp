@@ -79,8 +79,8 @@ void LineBreaker::setLineWidths(float firstWidth, int firstWidthLineCount, float
 }
 
 
-void LineBreaker::setMargins(const std::vector<float>& margins) {
-    mLineWidths.setMargins(margins);
+void LineBreaker::setIndents(const std::vector<float>& indents) {
+    mLineWidths.setIndents(indents);
 }
 
 // This function determines whether a character is a space that disappears at end of line.
