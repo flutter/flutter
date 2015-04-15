@@ -84,30 +84,39 @@ void main() {
         expect(secondChild.offsetWidth, equals(150));
         assertNonChangingValues();
 
-        parent.setLayoutManager(null);
+        parent.setLayoutManager(() {
+          parent.width = 250.0;
+        });
 
         window.requestAnimationFrame((_) {
-          expect(parent.offsetWidth, equals(300));
-          expect(parent.offsetHeight, equals(50));
-          expect(parent.offsetTop, equals(0));
-          expect(parent.offsetLeft, equals(0));
+          expect(parent.offsetWidth, equals(250));
+          assertNonChangingValues();
 
-          expect(firstChild.offsetWidth, equals(300));
-          expect(firstChild.offsetHeight, equals(25));
-          expect(firstChild.offsetTop, equals(0));
-          expect(firstChild.offsetLeft, equals(0));
+          parent.setLayoutManager(null);
 
-          expect(secondChild.offsetWidth, equals(300));
-          expect(secondChild.offsetHeight, equals(25));
-          expect(secondChild.offsetTop, equals(25));
-          expect(secondChild.offsetLeft, equals(0));
+          window.requestAnimationFrame((_) {
+            expect(parent.offsetWidth, equals(300));
+            expect(parent.offsetHeight, equals(50));
+            expect(parent.offsetTop, equals(0));
+            expect(parent.offsetLeft, equals(0));
 
-          expect(grandChild.offsetWidth, equals(25));
-          expect(grandChild.offsetHeight, equals(25));
-          expect(grandChild.offsetTop, equals(0));
-          expect(grandChild.offsetLeft, equals(0));
+            expect(firstChild.offsetWidth, equals(300));
+            expect(firstChild.offsetHeight, equals(25));
+            expect(firstChild.offsetTop, equals(0));
+            expect(firstChild.offsetLeft, equals(0));
 
-          completer.complete();
+            expect(secondChild.offsetWidth, equals(300));
+            expect(secondChild.offsetHeight, equals(25));
+            expect(secondChild.offsetTop, equals(25));
+            expect(secondChild.offsetLeft, equals(0));
+
+            expect(grandChild.offsetWidth, equals(25));
+            expect(grandChild.offsetHeight, equals(25));
+            expect(grandChild.offsetTop, equals(0));
+            expect(grandChild.offsetLeft, equals(0));
+
+            completer.complete();
+          });
         });
       });
     });
