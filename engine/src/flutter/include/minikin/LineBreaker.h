@@ -44,20 +44,20 @@ class LineWidths {
             mFirstWidthLineCount = firstWidthLineCount;
             mRestWidth = restWidth;
         }
-        void setMargins(const std::vector<float>& margins) {
-            mMargins = margins;
+        void setIndents(const std::vector<float>& indents) {
+            mIndents = indents;
         }
         bool isConstant() const {
             // technically mFirstWidthLineCount == 0 would count too, but doesn't actually happen
-            return mRestWidth == mFirstWidth && mMargins.empty();
+            return mRestWidth == mFirstWidth && mIndents.empty();
         }
         float getLineWidth(int line) const {
             float width = (line < mFirstWidthLineCount) ? mFirstWidth : mRestWidth;
-            if (!mMargins.empty()) {
-                if ((size_t)line < mMargins.size()) {
-                    width -= mMargins[line];
+            if (!mIndents.empty()) {
+                if ((size_t)line < mIndents.size()) {
+                    width -= mIndents[line];
                 } else {
-                    width -= mMargins.back();
+                    width -= mIndents.back();
                 }
             }
             return width;
@@ -66,7 +66,7 @@ class LineWidths {
         float mFirstWidth;
         int mFirstWidthLineCount;
         float mRestWidth;
-        std::vector<float> mMargins;
+        std::vector<float> mIndents;
 };
 
 class TabStops {
@@ -132,7 +132,7 @@ class LineBreaker {
 
         void setLineWidths(float firstWidth, int firstWidthLineCount, float restWidth);
 
-        void setMargins(const std::vector<float>& margins);
+        void setIndents(const std::vector<float>& indents);
 
         void setTabStops(const int* stops, size_t nStops, int tabWidth) {
             mTabStops.set(stops, nStops, tabWidth);
