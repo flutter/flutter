@@ -64,10 +64,9 @@ ergonomic interface:
 ```dart
 import 'package:sky/framework/net/fetch.dart';
 
-void main() {
-  fetch('example.txt').then((Response response) {
-    print(response.bodyAsString());
-  });
+main() async {
+  var response = await fetch('example.txt');
+  print(response.bodyAsString());
 }
 ```
 
