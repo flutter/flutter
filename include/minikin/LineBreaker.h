@@ -44,17 +44,29 @@ class LineWidths {
             mFirstWidthLineCount = firstWidthLineCount;
             mRestWidth = restWidth;
         }
+        void setMargins(const std::vector<float>& margins) {
+            mMargins = margins;
+        }
         bool isConstant() const {
             // technically mFirstWidthLineCount == 0 would count too, but doesn't actually happen
-            return mRestWidth == mFirstWidth;
+            return mRestWidth == mFirstWidth && mMargins.empty();
         }
         float getLineWidth(int line) const {
-            return (line < mFirstWidthLineCount) ? mFirstWidth : mRestWidth;
+            float width = (line < mFirstWidthLineCount) ? mFirstWidth : mRestWidth;
+            if (!mMargins.empty()) {
+                if ((size_t)line < mMargins.size()) {
+                    width -= mMargins[line];
+                } else {
+                    width -= mMargins.back();
+                }
+            }
+            return width;
         }
     private:
         float mFirstWidth;
         int mFirstWidthLineCount;
         float mRestWidth;
+        std::vector<float> mMargins;
 };
 
 class TabStops {
@@ -119,6 +131,8 @@ class LineBreaker {
         void setText();
 
         void setLineWidths(float firstWidth, int firstWidthLineCount, float restWidth);
+
+        void setMargins(const std::vector<float>& margins);
 
         void setTabStops(const int* stops, size_t nStops, int tabWidth) {
             mTabStops.set(stops, nStops, tabWidth);
