@@ -4,8 +4,8 @@
 
 import "dart:sky.internals" as internals;
 import "package:mojo/public/dart/application.dart";
-import "package:mojo/public/interfaces/application/service_provider.mojom.dart";
 import 'package:mojo/public/dart/core.dart' as core;
+import "package:mojo/service_provider.mojom.dart";
 
 ApplicationConnection _initConnection() {
   int rawHandle = internals.takeServicesProvidedByEmbedder();

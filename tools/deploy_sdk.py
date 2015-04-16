@@ -170,8 +170,8 @@ def main():
     # Mojo package, lots of overlap with gen, must be copied:
     copy(src_path('mojo/public'), sdk_path('packages/mojo/lib/public'),
         dart_filter)
-    copy(os.path.join(build_dir, 'gen/mojo'), sdk_path('packages/mojo/lib'),
-        gen_filter)
+    copy(os.path.join(build_dir, 'gen/dart-gen/mojo'),
+        sdk_path('packages/mojo/lib'), gen_filter)
 
     # Mojo SDK additions:
     copy_or_link(src_path('mojo/public/dart/bindings.dart'),

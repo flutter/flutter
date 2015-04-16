@@ -5,9 +5,9 @@
 import "dart:async";
 import "dart:sky";
 import "dart:sky.internals" as internals;
-import "package:mojo/services/input_events/public/interfaces/input_event_constants.mojom.dart" as constants;
-import "package:mojo/services/input_events/public/interfaces/input_events.mojom.dart" as events;
-import "package:mojo/services/input_events/public/interfaces/input_key_codes.mojom.dart" as codes;
+import "package:mojo/input_event_constants.mojom.dart" as constants;
+import "package:mojo/input_events.mojom.dart" as events;
+import "package:mojo/input_key_codes.mojom.dart" as codes;
 import "package:sky/framework/embedder.dart";
 import "package:sky/services/testing/test_harness.mojom.dart" as harness;
 

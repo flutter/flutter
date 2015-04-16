@@ -11,9 +11,9 @@ import 'dart:typed_data';
 import 'package:mojo/public/dart/application.dart';
 import 'package:mojo/public/dart/bindings.dart';
 import 'package:mojo/public/dart/core.dart';
-import 'package:mojo/public/interfaces/application/shell.mojom.dart' as shell_mojom;
-import 'package:mojo/services/input_events/public/interfaces/input_events.mojom.dart' as input_events;
-import 'package:mojo/services/view_manager/public/interfaces/view_manager.mojom.dart' as view_manager;
+import 'package:mojo/shell.mojom.dart' as shell_mojom;
+import 'package:mojo/input_events.mojom.dart' as input_events;
+import 'package:mojo/view_manager.mojom.dart' as view_manager;
 
 // This include is a hack which only works with sky_server.  For this to work
 // in the sky_sdk, this echo_service would need to make its own dart package.
