@@ -204,6 +204,10 @@ static Dart_Isolate IsolateCreateCallback(const char* script_uri,
     DartApiScope apiScope;
     Builtin::SetNativeResolver(Builtin::kBuiltinLibrary);
     Builtin::SetNativeResolver(Builtin::kMojoInternalLibrary);
+
+    // Ensure the isolate has a root library.
+    Dart_LoadScript(Dart_NewStringFromCString("dart:empty"),
+                    Dart_NewStringFromCString(""), 0, 0);
   }
 
   Dart_ExitIsolate();
@@ -272,6 +276,10 @@ void DartController::CreateIsolateFor(Document* document) {
 
   {
     DartApiScope apiScope;
+
+    // Ensure the isolate has a root library.
+    Dart_LoadScript(Dart_NewStringFromCString("dart:empty"),
+                    Dart_NewStringFromCString(""), 0, 0);
 
     Builtin::SetNativeResolver(Builtin::kBuiltinLibrary);
     Builtin::SetNativeResolver(Builtin::kMojoInternalLibrary);
