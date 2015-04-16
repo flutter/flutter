@@ -28,8 +28,8 @@
 #include <minikin/Layout.h>
 
 using std::vector;
-
-namespace android {
+using namespace android;
+using namespace minikin;
 
 FT_Library library;  // TODO: this should not be a global
 
@@ -99,8 +99,6 @@ int runMinikinTest() {
     return 0;
 }
 
-}
-
 int main(int argc, const char** argv) {
-    return android::runMinikinTest();
+    return runMinikinTest();
 }

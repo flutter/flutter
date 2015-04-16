@@ -24,7 +24,7 @@
 #include <minikin/FontCollection.h>
 #include <minikin/MinikinFontFreeType.h>
 
-namespace android {
+namespace minikin {
 
 // The Bitmap class is for debugging. We'll probably move it out
 // of here into a separate lightweight software rendering module
@@ -34,12 +34,16 @@ public:
     Bitmap(int width, int height);
     ~Bitmap();
     void writePnm(std::ofstream& o) const;
-    void drawGlyph(const GlyphBitmap& bitmap, int x, int y);
+    void drawGlyph(const android::GlyphBitmap& bitmap, int x, int y);
 private:
     int width;
     int height;
     uint8_t* buf;
 };
+
+} // namespace minikin
+
+namespace android {
 
 struct LayoutGlyph {
     // index into mFaces and mHbFonts vectors. We could imagine
@@ -89,7 +93,7 @@ public:
     void doLayout(const uint16_t* buf, size_t start, size_t count, size_t bufSize,
         int bidiFlags, const FontStyle &style, const MinikinPaint &paint);
 
-    void draw(Bitmap*, int x0, int y0, float size) const;
+    void draw(minikin::Bitmap*, int x0, int y0, float size) const;
 
     // Deprecated. Nont needed. Remove when callers are removed.
     static void init();
