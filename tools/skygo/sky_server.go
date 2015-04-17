@@ -28,6 +28,7 @@ func (handler *skyHandlerRoot) ServeHTTP(w http.ResponseWriter, r *http.Request)
     if strings.HasSuffix(path, ".sky") {
         w.Header().Set("Content-Type", "text/sky")
     }
+    w.Header().Set("Cache-Control", "no-cache")
     http.ServeFile(w, r, path)
 }
 
