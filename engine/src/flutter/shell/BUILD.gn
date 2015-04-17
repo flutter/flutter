@@ -93,7 +93,7 @@ android_library("java") {
     "//mojo/public/java:bindings",
     "//mojo/public/java:system",
     "//mojo/services/network/public/interfaces:interfaces_java",
-    "//sky/services/keyboard",
+    "//services/keyboard",
     "//sky/services/oknet",
     "//sky/services/viewport:viewport_java",
   ]

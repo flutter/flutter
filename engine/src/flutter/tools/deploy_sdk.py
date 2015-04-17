@@ -170,6 +170,8 @@ def main():
     # Mojo package, lots of overlap with gen, must be copied:
     copy(src_path('mojo/public'), sdk_path('packages/mojo/lib/public'),
         dart_filter)
+    copy(os.path.join(build_dir, 'gen/dart-gen/keyboard'),
+        sdk_path('packages/keyboard/lib'), gen_filter)
     copy(os.path.join(build_dir, 'gen/dart-gen/mojo'),
         sdk_path('packages/mojo/lib'), gen_filter)
 
@@ -197,6 +199,8 @@ def main():
     if args.fake_pub_get_into:
         packages_dir = os.path.abspath(args.fake_pub_get_into)
         ensure_dir_exists(packages_dir)
+        make_relative_symlink(sdk_path('packages/keyboard/lib'),
+            os.path.join(packages_dir, 'keyboard'))
         make_relative_symlink(sdk_path('packages/mojo/lib'),
             os.path.join(packages_dir, 'mojo'))
         make_relative_symlink(sdk_path('packages/sky/lib'),

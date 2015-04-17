@@ -15,6 +15,7 @@ import android.view.inputmethod.InputConnection;
 
 import org.chromium.base.JNINamespace;
 import org.chromium.mojo.bindings.InterfaceRequest;
+import org.chromium.mojo.keyboard.KeyboardServiceImpl;
 import org.chromium.mojo.system.Core;
 import org.chromium.mojo.system.Pair;
 import org.chromium.mojo.system.impl.CoreImpl;
@@ -23,7 +24,6 @@ import org.chromium.mojom.sky.InputEvent;
 import org.chromium.mojom.sky.PointerData;
 import org.chromium.mojom.sky.PointerKind;
 import org.chromium.mojom.sky.ViewportObserver;
-import org.domokit.keyboard.KeyboardServiceImpl;
 
 /**
  * A view containing Sky
