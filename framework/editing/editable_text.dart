@@ -12,7 +12,7 @@ class EditableText extends Component {
     display: inline;'''
   );
 
-  static final Style _cusorStyle = new Style('''
+  static final Style _cursorStyle = new Style('''
     display: inline-flex;
     width: 2px;
     height: 1.2em;
@@ -86,7 +86,7 @@ class EditableText extends Component {
     }
 
     if (_showCursor)
-      children.add(new Container(key: 'cursor', style: _cusorStyle));
+      children.add(new Container(key: 'cursor', style: _cursorStyle));
 
     return new Container(
       style: _style,
