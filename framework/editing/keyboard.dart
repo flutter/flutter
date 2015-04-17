@@ -3,14 +3,14 @@
 // found in the LICENSE file.
 
 import '../shell.dart' as shell;
-import 'package:sky/services/keyboard/keyboard.mojom.dart';
+import 'package:keyboard/keyboard.mojom.dart';
 
 class _KeyboardConnection {
   KeyboardServiceProxy proxy;
 
   _KeyboardConnection() {
     proxy = new KeyboardServiceProxy.unbound();
-    shell.requestService(proxy);
+    shell.requestService("mojo:keyboard", proxy);
   }
 
   KeyboardService get keyboard => proxy.ptr;

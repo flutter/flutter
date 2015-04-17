@@ -15,9 +15,20 @@ final _EmbedderImpl embedder = new _EmbedderImpl();
 class _EmbedderImpl {
   ApplicationConnection _connection;
   ServiceRegistryProxy _serviceRegistry;
+  ShellProxy _shell;
+  bool _internalsHasNoShell = false;
 
-  final ShellProxy shell = new ShellProxy.fromHandle(
-      new core.MojoHandle(internals.takeShellProxyHandle()));
+  ShellProxy get shell {
+    if (_internalsHasNoShell || _shell != null) return _shell;
+
+    try {
+      _shell = new ShellProxy.fromHandle(
+          new core.MojoHandle(internals.takeShellProxyHandle()));
+    } catch (e) {
+      _internalsHasNoShell = true;
+    }
+    return _shell;
+  }
 
   ApplicationConnection get connection {
     if (_connection == null) {

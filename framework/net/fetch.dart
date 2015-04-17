@@ -24,21 +24,20 @@ Future<Response> fetch(String relativeUrl) async {
   String url = new sky.URL(relativeUrl, sky.document.baseURI).href;
 
   var net = new NetworkServiceProxy.unbound();
-  shell.requestService(net);
+  shell.requestService("mojo:network_service", net);
 
   var loader = new UrlLoaderProxy.unbound();
   net.ptr.createUrlLoader(loader);
 
   var request = new UrlRequest()
-      ..url = url
-      ..autoFollowRedirects = true;
+    ..url = url
+    ..autoFollowRedirects = true;
   var response = (await loader.ptr.start(request)).response;
 
   loader.close();
   net.close();
 
-  if (response.body == null)
-    return new Response(null);
+  if (response.body == null) return new Response(null);
 
   ByteData data = await core.DataPipeDrainer.drainHandle(response.body);
   return new Response(data);

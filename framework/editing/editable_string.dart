@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:sky/services/keyboard/keyboard.mojom.dart';
+import 'package:keyboard/keyboard.mojom.dart';
 
 typedef void StringUpdated();
 
@@ -11,8 +11,12 @@ class TextRange {
   final int end;
 
   TextRange({this.start, this.end});
-  TextRange.collapsed(int position) : start = position, end = position;
-  const TextRange.empty() : start = -1, end = -1;
+  TextRange.collapsed(int position)
+      : start = position,
+        end = position;
+  const TextRange.empty()
+      : start = -1,
+        end = -1;
 
   bool get isValid => start >= 0 && end >= 0;
   bool get isCollapsed => start == end;
@@ -44,8 +48,7 @@ class EditableString implements KeyboardClient {
   }
 
   void _delete(TextRange range) {
-    if (range.isCollapsed || !range.isValid)
-      return;
+    if (range.isCollapsed || !range.isValid) return;
     text = textBefore(range) + textAfter(range);
   }
 
@@ -62,13 +65,12 @@ class EditableString implements KeyboardClient {
     String after = textAfter(range);
 
     text = before + newText + after;
-    return new TextRange(start: before.length,
-                         end: before.length + newText.length);
+    return new TextRange(
+        start: before.length, end: before.length + newText.length);
   }
 
   TextRange _replaceOrAppend(TextRange range, String newText) {
-    if (!range.isValid)
-      return _append(newText);
+    if (!range.isValid) return _append(newText);
     return _replace(range, newText);
   }
 
@@ -89,14 +91,15 @@ class EditableString implements KeyboardClient {
   }
 
   void deleteSurroundingText(int beforeLength, int afterLength) {
-    TextRange beforeRange = new TextRange(start: selection.start - beforeLength,
-                                          end: selection.start);
-    TextRange afterRange = new TextRange(start: selection.end,
-                                         end: selection.end + afterLength);
+    TextRange beforeRange = new TextRange(
+        start: selection.start - beforeLength, end: selection.start);
+    TextRange afterRange =
+        new TextRange(start: selection.end, end: selection.end + afterLength);
     _delete(afterRange);
     _delete(beforeRange);
-    selection = new TextRange(start: selection.start - beforeLength,
-                              end: selection.end - beforeLength);
+    selection = new TextRange(
+        start: selection.start - beforeLength,
+        end: selection.end - beforeLength);
     onUpdated();
   }
 
