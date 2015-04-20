@@ -20,9 +20,9 @@ class Stocklist extends FixedHeightScrollable {
 
   List<UINode> buildItems(int start, int count) {
     return stocks
-      .skip(start)
       .where((stock) => query == null || stock.symbol.contains(
           new RegExp(query, caseSensitive: false)))
+      .skip(start)
       .take(count)
       .map((stock) => new StockRow(stock: stock))
       .toList(growable: false);
