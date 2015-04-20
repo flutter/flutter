@@ -68,6 +68,7 @@ class AnimationGenerator extends Generator {
   FrameGenerator _generator;
   Stream<double> _stream;
   bool _done = false;
+  double _lastTime;
 
   AnimationGenerator({
     this.initialDelay: 0.0,
@@ -87,11 +88,18 @@ class AnimationGenerator extends Generator {
         startTime = timeStamp;
 
       double t = (timeStamp - (startTime + initialDelay)) / duration;
-      return math.max(0.0, math.min(t, 1.0));
+      _lastTime = math.max(0.0, math.min(t, 1.0));
+      return _lastTime;
     })
     .takeWhile(_checkForCompletion)
     .where((t) => t >= 0.0)
     .map(_transform);
+  }
+
+  double get remainingTime {
+    if (_lastTime == null)
+      return duration;
+    return duration - _lastTime;
   }
 
   void cancel() {

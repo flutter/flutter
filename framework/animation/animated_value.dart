@@ -67,4 +67,11 @@ class AnimatedValue {
     _completer = new Completer();
     return _completer.future;
   }
+
+  double get remainingTime {
+    if (_animation == null)
+      return 0.0;
+    return _animation.remainingTime;
+  }
+
 }

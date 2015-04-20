@@ -6,8 +6,9 @@ import '../fn.dart';
 import 'dart:collection';
 import 'dart:sky' as sky;
 import 'ink_splash.dart';
+import 'scrollable.dart';
 
-class InkWell extends Component {
+class InkWell extends Component implements ScrollClient {
   static final Style _containmentStyleHack = new Style('''
     transform: translateX(0);''');
 
@@ -55,7 +56,28 @@ class InkWell extends Component {
                                     pointer: event.primaryPointer,
                                     onDone: () { _splashDone(splash); });
       _splashes.add(splash);
+      UINode node = parent;
+      while (node != null) {
+        if (node is Scrollable)
+          node.registerScrollClient(this);
+        node = node.parent;
+      }
     });
+  }
+
+  bool ancestorScrolled(Scrollable ancestor) {
+    _abortSplashes();
+    return false;
+  }
+
+  void handleRemoved() {
+    UINode node = parent;
+    while (node != null) {
+      if (node is Scrollable)
+        node.unregisterScrollClient(this);
+      node = node.parent;
+    }
+    super.handleRemoved();
   }
 
   void _confirmSplash(sky.GestureEvent event) {
@@ -63,6 +85,14 @@ class InkWell extends Component {
       return;
     _splashes.where((splash) => splash.pointer == event.primaryPointer)
              .forEach((splash) { splash.confirm(); });
+  }
+
+  void _abortSplashes() {
+    if (_splashes == null)
+      return;
+    setState(() {
+      _splashes.forEach((s) { s.abort(); });
+    });
   }
 
   void _cancelSplashes(sky.Event event) {

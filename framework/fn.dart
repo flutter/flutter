@@ -62,6 +62,7 @@ enum _SyncOperation { IDENTICAL, INSERTION, STATEFUL, STATELESS, REMOVAL }
 abstract class UINode {
   String _key;
   UINode _parent;
+  UINode get parent => _parent;
   sky.Node _root;
   bool _defunct = false;
 
@@ -78,7 +79,9 @@ abstract class UINode {
   void _remove() {
     _defunct = true;
     _root = null;
+    handleRemoved();
   }
+  void handleRemoved() { }
 
   int _nodeDepth;
   void _ensureDepth() {

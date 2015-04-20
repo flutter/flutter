@@ -17,6 +17,10 @@ double _velocityForFlingGesture(sky.GestureEvent event) {
       -event.velocityY)) / _kMillisecondsPerSecond;
 }
 
+abstract class ScrollClient {
+  bool ancestorScrolled(Scrollable ancestor);
+}
+
 abstract class Scrollable extends Component {
   ScrollBehavior scrollBehavior;
   double get scrollOffset => _scrollOffset;
@@ -43,12 +47,43 @@ abstract class Scrollable extends Component {
     );
   }
 
+  List<ScrollClient> _registeredScrollClients;
+
+  void registerScrollClient(ScrollClient notifiee) {
+    if (_registeredScrollClients == null)
+      _registeredScrollClients = new List<ScrollClient>();
+    setState(() {
+      _registeredScrollClients.add(notifiee);
+    });
+  }
+
+  void unregisterScrollClient(ScrollClient notifiee) {
+    if (_registeredScrollClients == null)
+      return;
+    setState(() {
+      _registeredScrollClients.remove(notifiee);
+    });
+  }
+
   bool scrollTo(double newScrollOffset) {
     if (newScrollOffset == _scrollOffset)
       return false;
     setState(() {
       _scrollOffset = newScrollOffset;
     });
+    if (_registeredScrollClients != null) {
+      var newList = null;
+      _registeredScrollClients.forEach((target) {
+        if (target.ancestorScrolled(this)) {
+          if (newList == null)
+            newList = new List<ScrollClient>();
+          newList.add(target);
+        }
+      });
+      setState(() {
+        _registeredScrollClients = newList;
+      });
+    }
     return true;
   }
 
