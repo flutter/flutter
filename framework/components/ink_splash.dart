@@ -99,7 +99,7 @@ class InkSplash extends Component {
 
   static final Style _splashStyle = new Style('''
     position: absolute;
-    background-color: rgba(0, 0, 0, 0.4);''');
+    background-color: rgba(0, 0, 0, 0.2);''');
 
   Stream<String> onStyleChanged;
 
