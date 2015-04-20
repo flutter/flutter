@@ -8,6 +8,7 @@ import '../editing/keyboard.dart';
 import '../fn.dart';
 import '../theme/colors.dart';
 import '../theme/typography.dart' as typography;
+import 'dart:sky' as sky;
 
 typedef void ValueChanged(value);
 
@@ -82,10 +83,13 @@ class Input extends Component {
 
     children.add(new EditableText(value: _editableValue, focused: focused));
 
-    return new Container(
-      style: _style,
-      inlineStyle: focused ? _focusedInlineStyle : null,
-      children: children
+    return new EventListenerNode(
+      new Container(
+        style: _style,
+        inlineStyle: focused ? _focusedInlineStyle : null,
+        children: children
+      ),
+      onPointerDown: (sky.Event e) => keyboard.showByRequest()
     );
   }
 }
