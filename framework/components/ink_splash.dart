@@ -69,7 +69,7 @@ class SplashController {
       }
       double size;
       if (_growing) {
-        sise = p;
+        size = p;
         _lastSize = p;
       } else {
         size = _lastSize;
