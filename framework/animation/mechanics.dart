@@ -4,7 +4,7 @@
 
 import 'dart:math' as math;
 
-const double kGravity = -0.980;
+const double kGravity = -0.980; // m^s-2
 
 abstract class System {
   void update(double deltaT);
@@ -26,17 +26,21 @@ class Particle extends System {
   }
 
   double get energy => 0.5 * mass * velocity * velocity;
-         set energy(double e) {
+         set energy(double e) { // J
     assert(e >= 0.0);
-    velocity = math.sqrt(2 * e / mass);
+    velocity = math.sqrt(2.0 * e / mass);
   }
 }
 
-class Box {
-  final double min;
-  final double max;
+abstract class Box {
+  void confine(Particle p);
+}
 
-  Box({this.min, this.max}) {
+class ClosedBox extends Box {
+  final double min; // m
+  final double max; // m
+
+  ClosedBox({this.min, this.max}) {
     assert(min == null || max == null || min <= max);
   }
 
@@ -51,6 +55,24 @@ class Box {
       if (p.position == max)
         p.velocity = math.min(0.0, p.velocity);
     }
+  }
+}
+
+class GeofenceBox extends Box {
+  final double min; // m
+  final double max; // m
+
+  final Function onEscape;
+
+  GeofenceBox({this.min, this.max, this.onEscape}) {
+    assert(min == null || max == null || min <= max);
+    assert(onEscape != null);
+  }
+
+  void confine(Particle p) {
+    if (((min != null) && (p.position < min)) ||
+        ((max != null) && (p.position > max)))
+      onEscape();
   }
 }
 
@@ -69,19 +91,24 @@ class ParticleInBox extends System {
 }
 
 class ParticleInBoxWithFriction extends ParticleInBox {
-  final double friction;
+  final double friction; // unitless
   final double _sign;
 
-  ParticleInBoxWithFriction({Particle particle, Box box, this.friction})
+  final Function onStop;
+
+  ParticleInBoxWithFriction({Particle particle, Box box, this.friction, this.onStop})
       : super(particle: particle, box: box),
         _sign = particle.velocity.sign;
 
   void update(double deltaT) {
-    double force = -_sign * friction;
+    double force = -_sign * friction * particle.mass * -kGravity;
     particle.applyImpulse(force * deltaT);
-    if (particle.velocity.sign != _sign)
+    if (particle.velocity.sign != _sign) {
       particle.velocity = 0.0;
+    }
     super.update(deltaT);
+    if ((particle.velocity == 0.0) && (onStop != null))
+      onStop();
   }
 }
 
@@ -116,17 +143,38 @@ class ParticleAndSpringInBox extends System {
 }
 
 class ParticleClimbingRamp extends System {
+
+  // This is technically the same as ParticleInBoxWithFriction. The
+  // difference is in how the system is set up. Here, we configure the
+  // system so as to stop by a certain distance after having been
+  // given an initial impulse from rest, whereas
+  // ParticleInBoxWithFriction is set up to stop with a consistent
+  // decelerating force assuming an initial velocity. The angle theta
+  // (0 < theta < π/2) is used to configure how much energy the
+  // particle is to start with; lower angles result in a gentler kick
+  // while higher angles result in a faster conclusion.
+
   final Particle particle;
   final Box box;
-  final double slope;
+  final double theta;
+  final double _sinTheta;
 
   ParticleClimbingRamp({
       this.particle,
       this.box,
-      this.slope,
-      double targetPosition}) {
+      double theta, // in radians
+      double targetPosition}) : this.theta = theta, this._sinTheta = math.sin(theta) {
+    assert(theta > 0.0);
+    assert(theta < math.PI / 2.0);
     double deltaPosition = targetPosition - particle.position;
-    particle.energy = -kGravity * slope * deltaPosition * particle.mass;
+    double tanTheta = math.tan(theta);
+    // We need to give the particle exactly as much (kinetic) energy
+    // as it needs to get to the top of the slope and stop with
+    // energy=0. This is exactly the same amount of energy as the
+    // potential energy at the top of the slope, which is g*h*m.
+    // If the slope's horizontal component is delta P long, then
+    // the height is delta P times tan theta.
+    particle.energy = -kGravity * (deltaPosition * tanTheta) * particle.mass;
     box.confine(particle);
   }
 
@@ -136,7 +184,27 @@ class ParticleClimbingRamp extends System {
     // position so that we overestimate the distance traveled by the particle.
     // That ensures that we actually hit the edge of the box and don't wind up
     // reversing course.
-    particle.applyImpulse(kGravity * slope * deltaT);
+    particle.applyImpulse(particle.mass * kGravity * _sinTheta * deltaT);
     box.confine(particle);
+  }
+}
+
+class Multisystem extends System {
+  final Particle particle;
+
+  System _currentSystem;
+
+  Multisystem({ this.particle, System system }) {
+    assert(system != null);
+    _currentSystem = system;
+  }
+
+  void update(double deltaT) {
+    _currentSystem.update(deltaT);
+  }
+
+  void transitionToSystem(System system) {
+    assert(system != null);
+    _currentSystem = system;
   }
 }

@@ -6,8 +6,9 @@ import 'dart:math' as math;
 import 'mechanics.dart';
 import 'generators.dart';
 
-const double _kSlope = 0.02;
-const double _kFriction = 0.004;
+const double _kScrollFriction = 0.005;
+const double _kOverscrollFriction = 0.075;
+const double _kBounceSlopeAngle = math.PI / 512.0; // radians
 
 abstract class ScrollBehavior {
   Simulation release(Particle particle) => null;
@@ -34,23 +35,34 @@ class BoundedScrollBehavior extends ScrollBehavior {
 
 class OverscrollBehavior extends ScrollBehavior {
   Simulation release(Particle particle) {
+    System system;
     if (particle.position >= 0.0) {
       if (particle.velocity == 0.0)
         return null;
-      System system = new ParticleInBoxWithFriction(
+      System slowdownSystem = new ParticleInBoxWithFriction(
         particle: particle,
-        box: new Box(min: 0.0),
-        friction: _kFriction);
-      return new Simulation(system,
-        terminationCondition: () => particle.velocity == 0.0);
+        friction: _kScrollFriction,
+        box: new GeofenceBox(min: 0.0, onEscape: () {
+          (system as Multisystem).transitionToSystem(new ParticleInBoxWithFriction(
+            particle: particle,
+            friction: _kOverscrollFriction,
+            box: new ClosedBox(),
+            onStop: () => (system as Multisystem).transitionToSystem(getBounceBackSystem(particle))
+          ));
+        }));
+      system = new Multisystem(particle: particle, system: slowdownSystem);
+    } else {
+      system = getBounceBackSystem(particle);
     }
-    System system = new ParticleClimbingRamp(
+    return new Simulation(system, terminationCondition: () => particle.position == 0.0);
+  }
+
+  System getBounceBackSystem(Particle particle) {
+    return new ParticleClimbingRamp(
         particle: particle,
-        box: new Box(max: 0.0),
-        slope: _kSlope,
+        box: new ClosedBox(max: 0.0),
+        theta: _kBounceSlopeAngle,
         targetPosition: 0.0);
-    return new Simulation(system,
-        terminationCondition: () => particle.position == 0.0);
   }
 
   double applyCurve(double scrollOffset, double scrollDelta) {
