@@ -25,10 +25,10 @@ class Particle extends System {
     position += velocity * deltaT;
   }
 
-  double get energy => 0.5 * mass * velocity * velocity;
-         set energy(double e) { // J
-    assert(e >= 0.0);
-    velocity = math.sqrt(2.0 * e / mass);
+  void setVelocityFromEnergy({double energy, double direction}) {
+    assert(direction == -1.0 || direction == 1.0);
+    assert(energy >= 0.0);
+    velocity = math.sqrt(2.0 * energy / mass) * direction;
   }
 }
 
@@ -174,7 +174,10 @@ class ParticleClimbingRamp extends System {
     // potential energy at the top of the slope, which is g*h*m.
     // If the slope's horizontal component is delta P long, then
     // the height is delta P times tan theta.
-    particle.energy = -kGravity * (deltaPosition * tanTheta) * particle.mass;
+    particle.setVelocityFromEnergy(
+      energy: (kGravity * (deltaPosition * tanTheta) * particle.mass).abs(),
+      direction: deltaPosition > 0.0 ? 1.0 : -1.0
+    );
     box.confine(particle);
   }
 

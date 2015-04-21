@@ -23,13 +23,24 @@ abstract class FixedHeightScrollable extends Scrollable {
     will-change: transform;'''
   );
 
+  FixedHeightScrollable({
+    Object key
+  }) : super(key: key);
+
+  ScrollBehavior createScrollBehavior() => new OverscrollBehavior();
+
   double _height = 0.0;
   double _itemHeight;
 
-  FixedHeightScrollable({
-    Object key,
-    ScrollBehavior scrollBehavior
-  }) : super(key: key, scrollBehavior: scrollBehavior);
+  int _itemCount = 0;
+  int get itemCount => _itemCount;
+  void set itemCount (int value) {
+    if (_itemCount != value) {
+      _itemCount = value;
+      if (_itemHeight != null)
+        scrollBehavior.contentsHeight = _itemHeight * _itemCount;
+    }
+  }
 
   void _measureHeights() {
     trace('FixedHeightScrollable::_measureHeights', () {
@@ -49,6 +60,8 @@ abstract class FixedHeightScrollable extends Scrollable {
       setState(() {
         _height = scrollRect.height;
         _itemHeight = itemRect.height;
+        scrollBehavior.containerHeight = _height;
+        scrollBehavior.contentsHeight = _itemHeight * _itemCount;
       });
     });
   }

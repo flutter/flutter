@@ -16,12 +16,15 @@ class Stocklist extends FixedHeightScrollable {
     Object key,
     this.stocks,
     this.query
-  }) : super(key: key, scrollBehavior: new OverscrollBehavior());
+  }) : super(key: key);
 
   List<UINode> buildItems(int start, int count) {
-    return stocks
-      .where((stock) => query == null || stock.symbol.contains(
-          new RegExp(query, caseSensitive: false)))
+    var filteredStocks = stocks.where((stock) {
+      return query == null ||
+             stock.symbol.contains(new RegExp(query, caseSensitive: false));
+    });
+    itemCount = filteredStocks.length;
+    return filteredStocks
       .skip(start)
       .take(count)
       .map((stock) => new StockRow(stock: stock))

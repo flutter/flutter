@@ -22,13 +22,21 @@ abstract class ScrollClient {
 }
 
 abstract class Scrollable extends Component {
-  ScrollBehavior scrollBehavior;
-  double get scrollOffset => _scrollOffset;
 
   double _scrollOffset = 0.0;
+  double get scrollOffset => _scrollOffset;
+
+  ScrollBehavior _scrollBehavior;
+  ScrollBehavior createScrollBehavior();
+  ScrollBehavior get scrollBehavior {
+    if (_scrollBehavior == null)
+      _scrollBehavior = createScrollBehavior();
+    return _scrollBehavior;
+  }
+
   Simulation _simulation;
 
-  Scrollable({Object key, this.scrollBehavior}) : super(key: key) {
+  Scrollable({Object key}) : super(key: key) {
     onDidUnmount(_stopSimulation);
   }
 
