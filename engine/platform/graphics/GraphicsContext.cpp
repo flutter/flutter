@@ -45,7 +45,6 @@
 #include "third_party/skia/include/core/SkColorFilter.h"
 #include "third_party/skia/include/core/SkData.h"
 #include "third_party/skia/include/core/SkDevice.h"
-#include "third_party/skia/include/core/SkMatrixImageFilter.h"
 #include "third_party/skia/include/core/SkPicture.h"
 #include "third_party/skia/include/core/SkRRect.h"
 #include "third_party/skia/include/core/SkRefCnt.h"
@@ -913,7 +912,7 @@ void GraphicsContext::drawPicture(PassRefPtr<SkPicture> picture, const FloatRect
     RefPtr<SkPictureImageFilter> pictureFilter = adoptRef(SkPictureImageFilter::Create(picture.get(), sourceBounds));
     SkMatrix layerScale;
     layerScale.setScale(deviceDest.width() / src.width(), deviceDest.height() / src.height());
-    RefPtr<SkMatrixImageFilter> matrixFilter = adoptRef(SkMatrixImageFilter::Create(layerScale, kLow_SkFilterQuality, pictureFilter.get()));
+    RefPtr<SkImageFilter> matrixFilter = adoptRef(SkImageFilter::CreateMatrixFilter(layerScale, kLow_SkFilterQuality, pictureFilter.get()));
     SkPaint picturePaint;
     picturePaint.setXfermodeMode(WebCoreCompositeToSkiaComposite(op, blendMode));
     picturePaint.setImageFilter(matrixFilter.get());
