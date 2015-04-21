@@ -23,7 +23,7 @@ class StockMenu extends Component {
         items: [
           [new Text('Add stock')],
           [new Text('Remove stock')],
-          [new Text('Help & feeback')],
+          [new Text('Help & feedback')],
         ],
         level: 4),
         _style
