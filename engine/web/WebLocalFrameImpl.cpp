@@ -285,7 +285,9 @@ void WebLocalFrameImpl::OnReceivedResponse(mojo::URLResponsePtr response)
     mojo::DataPipe pipe;
     frame()->mojoLoader().parse(pipe.consumer_handle.Pass());
     std::string error_response = base::StringPrintf(
-        "<error><h>Empty Body</h><l>%d %s</l><m>%s</m></t></error>",
+        "<error><h style='display: paragraph'>Empty Body</h>"
+        "<l style='display: paragraph'>%d %s</l>"
+        "<m style='display: paragraph'>%s</m></t></error>",
         response->status_code, response->status_line.get().c_str(),
         response->error->description.get().c_str());
 
