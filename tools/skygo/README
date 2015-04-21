@@ -16,4 +16,4 @@ Uploading the locally built server
 upload_to_google_storage.py is in depot_tools. It will overwrite
 sky_server.sha1. Include that change in your code review.
 
-sky_server was last built using go version go1.3 linux/amd64.
+sky_server was last built using go version go1.4.2 linux/amd64.
