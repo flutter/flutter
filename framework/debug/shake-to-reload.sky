@@ -1,13 +1,13 @@
 <script>
 import 'dart:sky';
+import 'package:sensors/sensors.mojom.dart';
 import 'package:sky/framework/shell.dart' as shell;
-import 'package:sky/services/sensors/sensors.mojom.dart';
 
 // TODO(abarth): We should factor this out into a kinematics library.
-class _ShakeDetector extends SensorListener {
+class _ShakeDetector implements SensorListener {
   _ShakeDetector() {
     SensorServiceProxy sensorService = new SensorServiceProxy.unbound();
-    shell.requestService(sensorService);
+    shell.requestService("mojo:sensors", sensorService);
 
     _stub = new SensorListenerStub.unbound()..impl = this;
     sensorService.ptr.addListener(SensorType_ACCELEROMETER, _stub);

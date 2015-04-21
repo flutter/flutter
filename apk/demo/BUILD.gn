@@ -19,9 +19,9 @@ android_library("java") {
     "//mojo/public/java:bindings",
     "//mojo/public/java:system",
     "//mojo/services/keyboard/public/interfaces:interfaces_java",
+    "//mojo/services/sensors/public/interfaces:interfaces_java",
     "//services/keyboard",
-    "//sky/services/sensors",
-    "//sky/services/sensors:interfaces_java",
+    "//services/sensors:sensors_lib",
     "//sky/shell:java",
   ]
 }
