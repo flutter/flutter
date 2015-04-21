@@ -14,7 +14,6 @@ import 'package:sky/framework/components/menu_item.dart';
 import 'package:sky/framework/components/modal_overlay.dart';
 import 'package:sky/framework/components/popup_menu.dart';
 import 'package:sky/framework/components/scaffold.dart';
-import 'package:sky/framework/debug/tracing.dart';
 import 'package:sky/framework/fn.dart';
 import 'package:sky/framework/theme/typography.dart' as typography;
 import 'package:sky/framework/theme/colors.dart';
@@ -35,14 +34,12 @@ class StocksApp extends App {
   static final Style _titleStyle = new Style('''
     ${typography.white.title};''');
 
-  StockDataFetcher _stockDataFetcher;
   List<Stock> _stocks = [];
   bool _isSearching = false;
-  bool _isShowingMenu = false;
   String _searchQuery;
 
   StocksApp() : super() {
-    _stockDataFetcher = new StockDataFetcher((StockData data) {
+    new StockDataFetcher((StockData data) {
       setState(() {
         data.appendTo(_stocks);
       });
