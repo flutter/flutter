@@ -175,16 +175,26 @@ class SkyDebugger(object):
         self.paths = self._create_paths_for_build_dir(args.build_dir)
         self.stop_command(None) # Quit any existing process.
 
-        if not os.path.exists(self.paths.mojo_shell_path):
-            print "mojo_shell not found in build_dir '%s'" % args.build_dir
-            print "Are you sure you sure that's a valid build_dir location?"
-            print "See skydb start --help for more info"
-            sys.exit(2)
-
         # FIXME: This is probably not the right way to compute is_android
         # from the build directory?
         gn_args = gn_args_from_build_dir(self.paths.build_dir)
         is_android = 'android_sdk_version' in gn_args
+
+        shell_found = True
+        if is_android:
+            apk_path = os.path.join(self.paths.build_dir, 'apks', ANDROID_APK_NAME)
+            if not os.path.exists(apk_path):
+                print "%s not found in build_dir '%s'" % \
+                    (ANDROID_APK_NAME, os.path.join(args.build_dir, 'apks'))
+                shell_found = False
+        elif not os.path.exists(self.paths.mojo_shell_path):
+            print "mojo_shell not found in build_dir '%s'" % args.build_dir
+            shell_found = False
+
+        if not shell_found:
+            print "Are you sure you sure that's a valid build_dir location?"
+            print "See skydb start --help for more info"
+            sys.exit(2)
 
         if is_android and args.gdb and not 'is_debug' in gn_args:
             # FIXME: We don't include gdbserver in the release APK...
@@ -216,8 +226,6 @@ class SkyDebugger(object):
             subprocess.check_call([ADB_PATH, 'root'])
 
             # We could make installing conditional on an argument.
-            apk_path = os.path.join(self.paths.build_dir, 'apks',
-                ANDROID_APK_NAME)
             subprocess.check_call([ADB_PATH, 'install', '-r', apk_path])
 
             port_string = 'tcp:%s' % sky_server.port
