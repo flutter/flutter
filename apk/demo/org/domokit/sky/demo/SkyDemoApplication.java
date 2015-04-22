@@ -27,14 +27,14 @@ public class SkyDemoApplication extends SkyApplication {
         ServiceRegistry.SHARED.register(SensorService.MANAGER.getName(), new ServiceFactory() {
             @Override
             public void connectToService(Context context, Core core, MessagePipeHandle pipe) {
-                new SensorServiceImpl(context, pipe);
+                SensorService.MANAGER.bind(new SensorServiceImpl(context), pipe);
             }
         });
 
         ServiceRegistry.SHARED.register(KeyboardService.MANAGER.getName(), new ServiceFactory() {
             @Override
             public void connectToService(Context context, Core core, MessagePipeHandle pipe) {
-                new KeyboardServiceImpl(context, core, pipe);
+                KeyboardService.MANAGER.bind(new KeyboardServiceImpl(context), pipe);
             }
         });
     }
