@@ -155,9 +155,6 @@ def main():
     # Sky package
     copy_or_link(src_path('sky/framework'), sdk_path('packages/sky/lib/framework'))
     copy_or_link(src_path('sky/assets'), sdk_path('packages/sky/lib/assets'))
-    # Copy gen files every time for now:
-    copy(os.path.join(build_dir, 'gen/sky'),
-        sdk_path('packages/sky/lib'), gen_filter)
 
     # Sky SDK additions:
     copy_or_link(src_path('sky/engine/bindings/builtin.dart'),
@@ -170,10 +167,8 @@ def main():
     # Mojo package, lots of overlap with gen, must be copied:
     copy(src_path('mojo/public'), sdk_path('packages/mojo/lib/public'),
         dart_filter)
-    copy(os.path.join(build_dir, 'gen/dart-gen/keyboard'),
-        sdk_path('packages/keyboard/lib'), gen_filter)
-    copy(os.path.join(build_dir, 'gen/dart-gen/mojo'),
-        sdk_path('packages/mojo/lib'), gen_filter)
+    copy(os.path.join(build_dir, 'gen/dart-gen/mojom'),
+        sdk_path('packages/mojom/lib/'), gen_filter)
 
     # Mojo SDK additions:
     copy_or_link(src_path('mojo/public/dart/bindings.dart'),
@@ -199,10 +194,10 @@ def main():
     if args.fake_pub_get_into:
         packages_dir = os.path.abspath(args.fake_pub_get_into)
         ensure_dir_exists(packages_dir)
-        make_relative_symlink(sdk_path('packages/keyboard/lib'),
-            os.path.join(packages_dir, 'keyboard'))
         make_relative_symlink(sdk_path('packages/mojo/lib'),
             os.path.join(packages_dir, 'mojo'))
+        make_relative_symlink(sdk_path('packages/mojom/lib'),
+            os.path.join(packages_dir, 'mojom'))
         make_relative_symlink(sdk_path('packages/sky/lib'),
             os.path.join(packages_dir, 'sky'))
 

@@ -8,7 +8,7 @@
 <script>
 import "../resources/event-sender.dart" as eventSender;
 import "dart:sky";
-import "package:mojo/input_key_codes.mojom.dart";
+import "package:mojom/mojo/input_key_codes.mojom.dart";
 
 void main() {
   var control = document.querySelector('.blue');
