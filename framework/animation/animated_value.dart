@@ -47,7 +47,7 @@ class AnimatedValue {
 
   void stop() {
     if (_animation != null) {
-      _animation.cancel();
+      _animation.cancel(); // will call _done() if it isn't already finished
       _done();
     }
   }
