@@ -5,11 +5,11 @@
 import "dart:async";
 import "dart:sky";
 import "dart:sky.internals" as internals;
-import "package:mojo/input_event_constants.mojom.dart" as constants;
-import "package:mojo/input_events.mojom.dart" as events;
-import "package:mojo/input_key_codes.mojom.dart" as codes;
+import "package:mojom/mojo/input_event_constants.mojom.dart" as constants;
+import "package:mojom/mojo/input_events.mojom.dart" as events;
+import "package:mojom/mojo/input_key_codes.mojom.dart" as codes;
+import "package:mojom/sky/test_harness.mojom.dart" as harness;
 import "package:sky/framework/embedder.dart";
-import "package:sky/services/testing/test_harness.mojom.dart" as harness;
 
 bool _isDone = false;
 int _keyPressesRemaining = 0;

@@ -8,8 +8,8 @@ import "dart:sky.internals" as internals;
 
 import 'package:mojo/public/dart/bindings.dart';
 import 'package:mojo/public/dart/core.dart';
-import 'package:mojo/network_service.mojom.dart';
-import 'package:mojo/url_loader.mojom.dart';
+import 'package:mojom/mojo/network_service.mojom.dart';
+import 'package:mojom/mojo/url_loader.mojom.dart';
 
 Future<String> run(url) async {
   var networkService= new NetworkServiceProxy.unbound();

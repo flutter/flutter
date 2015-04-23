@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import '../shell.dart' as shell;
-import 'package:keyboard/keyboard.mojom.dart';
+import 'package:mojom/keyboard/keyboard.mojom.dart';
 
 class _KeyboardConnection {
   KeyboardServiceProxy proxy;

@@ -1,6 +1,6 @@
 <script>
 import 'dart:sky';
-import 'package:sensors/sensors.mojom.dart';
+import 'package:mojom/sensors/sensors.mojom.dart';
 import 'package:sky/framework/shell.dart' as shell;
 
 // TODO(abarth): We should factor this out into a kinematics library.
