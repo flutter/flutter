@@ -215,11 +215,19 @@ public:
     double height() const;
     void setHeight(double);
 
+    double minContentWidth() const;
+    void setMinContentWidth(double);
+
+    double maxContentWidth() const;
+    void setMaxContentWidth(double);
+
     void setNeedsLayout();
     void layout();
 
+    LayoutCallback* intrinsicWidthsComputer() const;
     LayoutCallback* layoutManager() const;
-    void setLayoutManager(PassOwnPtr<LayoutCallback>);
+    void setLayoutManager(PassOwnPtr<LayoutCallback> layoutManager,
+        PassOwnPtr<LayoutCallback> intrinsicWidthsComputer);
 
     RenderStyle* computedStyle();
 
@@ -370,6 +378,7 @@ private:
 
     RefPtr<ElementData> m_elementData;
     OwnPtr<LayoutCallback> m_layoutManager;
+    OwnPtr<LayoutCallback> m_intrinsicWidthsComputer;
 };
 
 DEFINE_NODE_TYPE_CASTS(Element, isElementNode());

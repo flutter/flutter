@@ -12,7 +12,8 @@ namespace blink {
 class RenderCustomLayout : public RenderBlock {
 public:
     explicit RenderCustomLayout(ContainerNode* node);
-    virtual void layout() override;
+    void computePreferredLogicalWidths() final;
+    void layout() final;
     const char* renderName() const;
     bool isRenderCustomLayout() const final { return true; }
 

@@ -388,6 +388,16 @@ LayoutUnit RenderBox::maxPreferredLogicalWidth() const
     return m_maxPreferredLogicalWidth;
 }
 
+void RenderBox::setMinPreferredLogicalWidth(LayoutUnit width)
+{
+    m_minPreferredLogicalWidth = width;
+}
+
+void RenderBox::setMaxPreferredLogicalWidth(LayoutUnit width)
+{
+    m_maxPreferredLogicalWidth = width;
+}
+
 bool RenderBox::hasOverrideHeight() const
 {
     return m_rareData && m_rareData->m_overrideLogicalContentHeight != -1;

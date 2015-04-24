@@ -945,6 +945,32 @@ void Element::setHeight(double height)
         return box->setHeight(height);
 }
 
+double Element::minContentWidth() const
+{
+    if (RenderBox* box = renderBox())
+        return box->minPreferredLogicalWidth();
+    return 0;
+}
+
+void Element::setMinContentWidth(double width)
+{
+    if (RenderBox* box = renderBox())
+        return box->setMinPreferredLogicalWidth(width);
+}
+
+double Element::maxContentWidth() const
+{
+    if (RenderBox* box = renderBox())
+        return box->maxPreferredLogicalWidth();
+    return 0;
+}
+
+void Element::setMaxContentWidth(double width)
+{
+    if (RenderBox* box = renderBox())
+        return box->setMaxPreferredLogicalWidth(width);
+}
+
 void Element::setNeedsLayout()
 {
     if (RenderBox* box = renderBox())
@@ -962,19 +988,26 @@ LayoutCallback* Element::layoutManager() const
     return m_layoutManager.get();
 }
 
-void Element::setLayoutManager(PassOwnPtr<LayoutCallback> callback)
+LayoutCallback* Element::intrinsicWidthsComputer() const
+{
+    return m_intrinsicWidthsComputer.get();
+}
+
+void Element::setLayoutManager(PassOwnPtr<LayoutCallback> layoutManager,
+    PassOwnPtr<LayoutCallback> intrinsicWidthsComputer)
 {
     bool isAlreadyCustomLayout = renderer() && renderer()->isRenderCustomLayout();
-    bool requiresCustomLayout = callback;
+    bool requiresCustomLayout = layoutManager;
     if (requiresCustomLayout != isAlreadyCustomLayout) {
         // We don't go through the normal reattach codepaths because
         // those are all tied to changes to the RenderStyle.
         markAncestorsWithChildNeedsStyleRecalc();
         detach();
-    } else if (callback.get() != m_layoutManager) {
+    } else if (layoutManager.get() != m_layoutManager) {
         setNeedsLayout();
     }
-    m_layoutManager = callback;
+    m_layoutManager = layoutManager;
+    m_intrinsicWidthsComputer = intrinsicWidthsComputer;
 }
 
 void Element::childrenChanged(const ChildrenChange& change)

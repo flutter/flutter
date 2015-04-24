@@ -20,7 +20,7 @@
 
   void setNeedsLayout();
   void layout();
-  void setLayoutManager(LayoutCallback callback);
+  void setLayoutManager(LayoutCallback layout, LayoutCallback computeIntrinsicWidths);
 
   // TODO(abarth): Move to Node.
   readonly attribute CSSStyleDeclaration style;
@@ -48,4 +48,6 @@
   attribute double y;
   attribute double width;
   attribute double height;
+  attribute double minContentWidth; // Intrinsic width if all wrappable points wrap.
+  attribute double maxContentWidth; // Intrinsic width if no wrappable points wrap.
 };

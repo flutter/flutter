@@ -11,6 +11,6 @@ void main() {
   // don't need laying out.
   // This test passes if it doesn't crash and the render tree
   // has no RenderTexts.
-  document.querySelector('block').setLayoutManager(() => {});
+  document.querySelector('block').setLayoutManager(() {}, () {});
 }
 </script>

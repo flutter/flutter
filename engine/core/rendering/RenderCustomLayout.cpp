@@ -19,6 +19,13 @@ RenderCustomLayout::~RenderCustomLayout()
 {
 }
 
+void RenderCustomLayout::computePreferredLogicalWidths()
+{
+    ASSERT(node()->isElementNode());
+    toElement(node())->intrinsicWidthsComputer()->handleEvent();
+    clearPreferredLogicalWidthsDirty();
+}
+
 void RenderCustomLayout::layout()
 {
     ASSERT(node()->isElementNode());
