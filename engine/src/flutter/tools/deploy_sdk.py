@@ -115,6 +115,13 @@ def main():
     parser.add_argument('sdk_root', type=str)
     parser.add_argument('--build-dir', action='store', type=str,
         default=os.path.join(SRC_ROOT, DEFAULT_REL_BUILD_DIR))
+    parser.add_argument('--extra-mojom-dir', action='append',
+                        type=str,
+                        dest='extra_mojom_dirs',
+                        metavar='EXTRA_MOJOM_DIR',
+                        help='Extra root directory for mojom packages. '
+                             'Can be specified multiple times.',
+                        default=[])
     parser.add_argument('--non-interactive', action='store_true')
     parser.add_argument('--dev-environment', action='store_true')
     parser.add_argument('--commit', action='store_true')
@@ -167,8 +174,10 @@ def main():
     # Mojo package, lots of overlap with gen, must be copied:
     copy(src_path('mojo/public'), sdk_path('packages/mojo/lib/public'),
         dart_filter)
-    copy(os.path.join(build_dir, 'gen/dart-gen/mojom'),
-        sdk_path('packages/mojom/lib/'), gen_filter)
+    mojom_dirs = [ os.path.join(build_dir, 'gen/dart-gen/mojom') ]
+    mojom_dirs += args.extra_mojom_dirs
+    for mojom_dir in mojom_dirs:
+      copy(mojom_dir, sdk_path('packages/mojom/lib/'), gen_filter)
 
     # Mojo SDK additions:
     copy_or_link(src_path('mojo/public/dart/bindings.dart'),
