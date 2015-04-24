@@ -1,6 +1,7 @@
 CONSOLE: unittest-suite-wait-for-done
 CONSOLE: PASS: should have the right sizes after layout
+CONSOLE: PASS: intrinsic sizes should apply
 CONSOLE: 
-CONSOLE: All 1 tests passed.
+CONSOLE: All 2 tests passed.
 CONSOLE: unittest-suite-success
 DONE
