@@ -1,0 +1,29 @@
+#!/usr/bin/env python
+# Copyright (c) 2015 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import os
+import subprocess
+import urllib2
+
+sky_lib_dir = os.path.dirname(os.path.abspath(__file__))
+assets_dir = os.path.join(sky_lib_dir, 'assets')
+sha1_path = os.path.join(assets_dir, 'material-design-icons.sha1')
+
+with open(sha1_path, 'r') as f:
+    sha1 = f.read()
+
+tgz_path = os.path.join(assets_dir, 'material-design-icons.tgz')
+url = 'https://storage.googleapis.com/mojo/material-design-icons/%s' % sha1
+response = urllib2.urlopen(url)
+
+with open(tgz_path, 'wb') as f:
+    f.write(response.read())
+
+output_path = os.path.join(assets_dir, tgz_path)
+subprocess.call([
+    'tar', '-xzf', output_path, '-C', assets_dir
+])
+
+os.unlink(tgz_path)
