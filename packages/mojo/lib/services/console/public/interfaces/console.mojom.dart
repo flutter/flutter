@@ -18,10 +18,7 @@ class ConsoleReadLineParams extends bindings.Struct {
   ConsoleReadLineParams() : super(kVersions.last.size);
 
   static ConsoleReadLineParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static ConsoleReadLineParams decode(bindings.Decoder decoder0) {
@@ -67,10 +64,7 @@ class ConsoleReadLineResponseParams extends bindings.Struct {
   ConsoleReadLineResponseParams() : super(kVersions.last.size);
 
   static ConsoleReadLineResponseParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static ConsoleReadLineResponseParams decode(bindings.Decoder decoder0) {
@@ -129,10 +123,7 @@ class ConsolePrintLinesParams extends bindings.Struct {
   ConsolePrintLinesParams() : super(kVersions.last.size);
 
   static ConsolePrintLinesParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static ConsolePrintLinesParams decode(bindings.Decoder decoder0) {
@@ -200,10 +191,7 @@ class ConsolePrintLinesResponseParams extends bindings.Struct {
   ConsolePrintLinesResponseParams() : super(kVersions.last.size);
 
   static ConsolePrintLinesResponseParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static ConsolePrintLinesResponseParams decode(bindings.Decoder decoder0) {

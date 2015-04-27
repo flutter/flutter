@@ -9,6 +9,6 @@ import 'dart:async';
 import 'package:mojo/public/dart/bindings.dart' as bindings;
 import 'package:mojo/public/dart/core.dart' as core;
 
-const int EnumWithoutModule_A = 0;
+final int EnumWithoutModule_A = 0;
 
 

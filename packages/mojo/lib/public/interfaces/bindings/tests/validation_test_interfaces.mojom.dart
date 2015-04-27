@@ -19,10 +19,7 @@ class StructA extends bindings.Struct {
   StructA() : super(kVersions.last.size);
 
   static StructA deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static StructA decode(bindings.Decoder decoder0) {
@@ -74,10 +71,7 @@ class StructB extends bindings.Struct {
   StructB() : super(kVersions.last.size);
 
   static StructB deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static StructB decode(bindings.Decoder decoder0) {
@@ -130,10 +124,7 @@ class StructC extends bindings.Struct {
   StructC() : super(kVersions.last.size);
 
   static StructC deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static StructC decode(bindings.Decoder decoder0) {
@@ -185,10 +176,7 @@ class StructD extends bindings.Struct {
   StructD() : super(kVersions.last.size);
 
   static StructD deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static StructD decode(bindings.Decoder decoder0) {
@@ -241,10 +229,7 @@ class StructE extends bindings.Struct {
   StructE() : super(kVersions.last.size);
 
   static StructE deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static StructE decode(bindings.Decoder decoder0) {
@@ -304,10 +289,7 @@ class StructF extends bindings.Struct {
   StructF() : super(kVersions.last.size);
 
   static StructF deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static StructF decode(bindings.Decoder decoder0) {
@@ -364,10 +346,7 @@ class StructG extends bindings.Struct {
   StructG() : super(kVersions.last.size);
 
   static StructG deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static StructG decode(bindings.Decoder decoder0) {
@@ -441,10 +420,7 @@ class BasicStruct extends bindings.Struct {
   BasicStruct() : super(kVersions.last.size);
 
   static BasicStruct deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static BasicStruct decode(bindings.Decoder decoder0) {
@@ -496,10 +472,7 @@ class BoundsCheckTestInterfaceMethod0Params extends bindings.Struct {
   BoundsCheckTestInterfaceMethod0Params() : super(kVersions.last.size);
 
   static BoundsCheckTestInterfaceMethod0Params deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static BoundsCheckTestInterfaceMethod0Params decode(bindings.Decoder decoder0) {
@@ -551,10 +524,7 @@ class BoundsCheckTestInterfaceMethod0ResponseParams extends bindings.Struct {
   BoundsCheckTestInterfaceMethod0ResponseParams() : super(kVersions.last.size);
 
   static BoundsCheckTestInterfaceMethod0ResponseParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static BoundsCheckTestInterfaceMethod0ResponseParams decode(bindings.Decoder decoder0) {
@@ -606,10 +576,7 @@ class BoundsCheckTestInterfaceMethod1Params extends bindings.Struct {
   BoundsCheckTestInterfaceMethod1Params() : super(kVersions.last.size);
 
   static BoundsCheckTestInterfaceMethod1Params deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static BoundsCheckTestInterfaceMethod1Params decode(bindings.Decoder decoder0) {
@@ -661,10 +628,7 @@ class ConformanceTestInterfaceMethod0Params extends bindings.Struct {
   ConformanceTestInterfaceMethod0Params() : super(kVersions.last.size);
 
   static ConformanceTestInterfaceMethod0Params deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static ConformanceTestInterfaceMethod0Params decode(bindings.Decoder decoder0) {
@@ -716,10 +680,7 @@ class ConformanceTestInterfaceMethod1Params extends bindings.Struct {
   ConformanceTestInterfaceMethod1Params() : super(kVersions.last.size);
 
   static ConformanceTestInterfaceMethod1Params deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static ConformanceTestInterfaceMethod1Params decode(bindings.Decoder decoder0) {
@@ -773,10 +734,7 @@ class ConformanceTestInterfaceMethod2Params extends bindings.Struct {
   ConformanceTestInterfaceMethod2Params() : super(kVersions.last.size);
 
   static ConformanceTestInterfaceMethod2Params deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static ConformanceTestInterfaceMethod2Params decode(bindings.Decoder decoder0) {
@@ -837,10 +795,7 @@ class ConformanceTestInterfaceMethod3Params extends bindings.Struct {
   ConformanceTestInterfaceMethod3Params() : super(kVersions.last.size);
 
   static ConformanceTestInterfaceMethod3Params deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static ConformanceTestInterfaceMethod3Params decode(bindings.Decoder decoder0) {
@@ -893,10 +848,7 @@ class ConformanceTestInterfaceMethod4Params extends bindings.Struct {
   ConformanceTestInterfaceMethod4Params() : super(kVersions.last.size);
 
   static ConformanceTestInterfaceMethod4Params deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static ConformanceTestInterfaceMethod4Params decode(bindings.Decoder decoder0) {
@@ -957,10 +909,7 @@ class ConformanceTestInterfaceMethod5Params extends bindings.Struct {
   ConformanceTestInterfaceMethod5Params() : super(kVersions.last.size);
 
   static ConformanceTestInterfaceMethod5Params deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static ConformanceTestInterfaceMethod5Params decode(bindings.Decoder decoder0) {
@@ -1020,10 +969,7 @@ class ConformanceTestInterfaceMethod6Params extends bindings.Struct {
   ConformanceTestInterfaceMethod6Params() : super(kVersions.last.size);
 
   static ConformanceTestInterfaceMethod6Params deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static ConformanceTestInterfaceMethod6Params decode(bindings.Decoder decoder0) {
@@ -1092,10 +1038,7 @@ class ConformanceTestInterfaceMethod7Params extends bindings.Struct {
   ConformanceTestInterfaceMethod7Params() : super(kVersions.last.size);
 
   static ConformanceTestInterfaceMethod7Params deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static ConformanceTestInterfaceMethod7Params decode(bindings.Decoder decoder0) {
@@ -1171,10 +1114,7 @@ class ConformanceTestInterfaceMethod8Params extends bindings.Struct {
   ConformanceTestInterfaceMethod8Params() : super(kVersions.last.size);
 
   static ConformanceTestInterfaceMethod8Params deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static ConformanceTestInterfaceMethod8Params decode(bindings.Decoder decoder0) {
@@ -1260,10 +1200,7 @@ class ConformanceTestInterfaceMethod9Params extends bindings.Struct {
   ConformanceTestInterfaceMethod9Params() : super(kVersions.last.size);
 
   static ConformanceTestInterfaceMethod9Params deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static ConformanceTestInterfaceMethod9Params decode(bindings.Decoder decoder0) {
@@ -1333,10 +1270,7 @@ class ConformanceTestInterfaceMethod10Params extends bindings.Struct {
   ConformanceTestInterfaceMethod10Params() : super(kVersions.last.size);
 
   static ConformanceTestInterfaceMethod10Params deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static ConformanceTestInterfaceMethod10Params decode(bindings.Decoder decoder0) {
@@ -1428,10 +1362,7 @@ class ConformanceTestInterfaceMethod11Params extends bindings.Struct {
   ConformanceTestInterfaceMethod11Params() : super(kVersions.last.size);
 
   static ConformanceTestInterfaceMethod11Params deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static ConformanceTestInterfaceMethod11Params decode(bindings.Decoder decoder0) {
@@ -1484,10 +1415,7 @@ class ConformanceTestInterfaceMethod12Params extends bindings.Struct {
   ConformanceTestInterfaceMethod12Params() : super(kVersions.last.size);
 
   static ConformanceTestInterfaceMethod12Params deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static ConformanceTestInterfaceMethod12Params decode(bindings.Decoder decoder0) {
@@ -1539,10 +1467,7 @@ class ConformanceTestInterfaceMethod12ResponseParams extends bindings.Struct {
   ConformanceTestInterfaceMethod12ResponseParams() : super(kVersions.last.size);
 
   static ConformanceTestInterfaceMethod12ResponseParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static ConformanceTestInterfaceMethod12ResponseParams decode(bindings.Decoder decoder0) {
@@ -1585,77 +1510,6 @@ class ConformanceTestInterfaceMethod12ResponseParams extends bindings.Struct {
   }
 }
 
-class ConformanceTestInterfaceMethod13Params extends bindings.Struct {
-  static const List<bindings.StructDataHeader> kVersions = const [
-    const bindings.StructDataHeader(32, 0)
-  ];
-  Object param0 = null;
-  int param1 = 0;
-  Object param2 = null;
-
-  ConformanceTestInterfaceMethod13Params() : super(kVersions.last.size);
-
-  static ConformanceTestInterfaceMethod13Params deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
-  }
-
-  static ConformanceTestInterfaceMethod13Params decode(bindings.Decoder decoder0) {
-    if (decoder0 == null) {
-      return null;
-    }
-    ConformanceTestInterfaceMethod13Params result = new ConformanceTestInterfaceMethod13Params();
-
-    var mainDataHeader = decoder0.decodeStructDataHeader();
-    if (mainDataHeader.version <= kVersions.last.version) {
-      // Scan in reverse order to optimize for more recent versions.
-      for (int i = kVersions.length - 1; i >= 0; --i) {
-        if (mainDataHeader.version >= kVersions[i].version) {
-          if (mainDataHeader.size != kVersions[i].size)
-            throw new bindings.MojoCodecError(
-                'Header doesn\'t correspond to any known version.');
-        }
-      }
-    } else if (mainDataHeader.size < kVersions.last.size) {
-      throw new bindings.MojoCodecError(
-        'Message newer than the last known version cannot be shorter than '
-        'required by the last known version.');
-    }
-    if (mainDataHeader.version >= 0) {
-      
-      result.param0 = decoder0.decodeServiceInterface(8, true, InterfaceAProxy.newFromEndpoint);
-    }
-    if (mainDataHeader.version >= 0) {
-      
-      result.param1 = decoder0.decodeUint32(16);
-    }
-    if (mainDataHeader.version >= 0) {
-      
-      result.param2 = decoder0.decodeServiceInterface(20, true, InterfaceAProxy.newFromEndpoint);
-    }
-    return result;
-  }
-
-  void encode(bindings.Encoder encoder) {
-    var encoder0 = encoder.getStructEncoderAtOffset(kVersions.last);
-    
-    encoder0.encodeInterface(param0, 8, true);
-    
-    encoder0.encodeUint32(param1, 16);
-    
-    encoder0.encodeInterface(param2, 20, true);
-  }
-
-  String toString() {
-    return "ConformanceTestInterfaceMethod13Params("
-           "param0: $param0" ", "
-           "param1: $param1" ", "
-           "param2: $param2" ")";
-  }
-}
-
 class IntegrationTestInterfaceMethod0Params extends bindings.Struct {
   static const List<bindings.StructDataHeader> kVersions = const [
     const bindings.StructDataHeader(16, 0)
@@ -1665,10 +1519,7 @@ class IntegrationTestInterfaceMethod0Params extends bindings.Struct {
   IntegrationTestInterfaceMethod0Params() : super(kVersions.last.size);
 
   static IntegrationTestInterfaceMethod0Params deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static IntegrationTestInterfaceMethod0Params decode(bindings.Decoder decoder0) {
@@ -1721,10 +1572,7 @@ class IntegrationTestInterfaceMethod0ResponseParams extends bindings.Struct {
   IntegrationTestInterfaceMethod0ResponseParams() : super(kVersions.last.size);
 
   static IntegrationTestInterfaceMethod0ResponseParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static IntegrationTestInterfaceMethod0ResponseParams decode(bindings.Decoder decoder0) {
@@ -1766,131 +1614,6 @@ class IntegrationTestInterfaceMethod0ResponseParams extends bindings.Struct {
            "param0: $param0" ")";
   }
 }
-
-const String InterfaceAName =
-      'mojo::test::InterfaceA';
-
-abstract class InterfaceA {
-
-}
-
-
-class InterfaceAProxyImpl extends bindings.Proxy {
-  InterfaceAProxyImpl.fromEndpoint(
-      core.MojoMessagePipeEndpoint endpoint) : super.fromEndpoint(endpoint);
-
-  InterfaceAProxyImpl.fromHandle(core.MojoHandle handle) :
-      super.fromHandle(handle);
-
-  InterfaceAProxyImpl.unbound() : super.unbound();
-
-  static InterfaceAProxyImpl newFromEndpoint(
-      core.MojoMessagePipeEndpoint endpoint) =>
-      new InterfaceAProxyImpl.fromEndpoint(endpoint);
-
-  String get name => InterfaceAName;
-
-  void handleResponse(bindings.ServiceMessage message) {
-    switch (message.header.type) {
-      default:
-        throw new bindings.MojoCodecError("Unexpected message name");
-        break;
-    }
-  }
-
-  String toString() {
-    var superString = super.toString();
-    return "InterfaceAProxyImpl($superString)";
-  }
-}
-
-
-class _InterfaceAProxyCalls implements InterfaceA {
-  InterfaceAProxyImpl _proxyImpl;
-
-  _InterfaceAProxyCalls(this._proxyImpl);
-}
-
-
-class InterfaceAProxy implements bindings.ProxyBase {
-  final bindings.Proxy impl;
-  InterfaceA ptr;
-  final String name = InterfaceAName;
-
-  InterfaceAProxy(InterfaceAProxyImpl proxyImpl) :
-      impl = proxyImpl,
-      ptr = new _InterfaceAProxyCalls(proxyImpl);
-
-  InterfaceAProxy.fromEndpoint(
-      core.MojoMessagePipeEndpoint endpoint) :
-      impl = new InterfaceAProxyImpl.fromEndpoint(endpoint) {
-    ptr = new _InterfaceAProxyCalls(impl);
-  }
-
-  InterfaceAProxy.fromHandle(core.MojoHandle handle) :
-      impl = new InterfaceAProxyImpl.fromHandle(handle) {
-    ptr = new _InterfaceAProxyCalls(impl);
-  }
-
-  InterfaceAProxy.unbound() :
-      impl = new InterfaceAProxyImpl.unbound() {
-    ptr = new _InterfaceAProxyCalls(impl);
-  }
-
-  static InterfaceAProxy newFromEndpoint(
-      core.MojoMessagePipeEndpoint endpoint) =>
-      new InterfaceAProxy.fromEndpoint(endpoint);
-
-  Future close({bool immediate: false}) => impl.close(immediate: immediate);
-
-  String toString() {
-    return "InterfaceAProxy($impl)";
-  }
-}
-
-
-class InterfaceAStub extends bindings.Stub {
-  InterfaceA _impl = null;
-
-  InterfaceAStub.fromEndpoint(
-      core.MojoMessagePipeEndpoint endpoint, [this._impl])
-      : super.fromEndpoint(endpoint);
-
-  InterfaceAStub.fromHandle(core.MojoHandle handle, [this._impl])
-      : super.fromHandle(handle);
-
-  InterfaceAStub.unbound() : super.unbound();
-
-  static InterfaceAStub newFromEndpoint(
-      core.MojoMessagePipeEndpoint endpoint) =>
-      new InterfaceAStub.fromEndpoint(endpoint);
-
-  static const String name = InterfaceAName;
-
-
-
-  Future<bindings.Message> handleMessage(bindings.ServiceMessage message) {
-    assert(_impl != null);
-    switch (message.header.type) {
-      default:
-        throw new bindings.MojoCodecError("Unexpected message name");
-        break;
-    }
-    return null;
-  }
-
-  InterfaceA get impl => _impl;
-      set impl(InterfaceA d) {
-    assert(_impl == null);
-    _impl = d;
-  }
-
-  String toString() {
-    var superString = super.toString();
-    return "InterfaceAStub($superString)";
-  }
-}
-
 const int kBoundsCheckTestInterface_method0_name = 0;
 const int kBoundsCheckTestInterface_method1_name = 1;
 
@@ -2087,7 +1810,6 @@ const int kConformanceTestInterface_method9_name = 9;
 const int kConformanceTestInterface_method10_name = 10;
 const int kConformanceTestInterface_method11_name = 11;
 const int kConformanceTestInterface_method12_name = 12;
-const int kConformanceTestInterface_method13_name = 13;
 
 const String ConformanceTestInterfaceName =
       'mojo::test::ConformanceTestInterface';
@@ -2106,7 +1828,6 @@ abstract class ConformanceTestInterface {
   void method10(Map<String, int> param0);
   void method11(StructG param0);
   Future<ConformanceTestInterfaceMethod12ResponseParams> method12(double param0,[Function responseFactory = null]);
-  void method13(Object param0, int param1, Object param2);
 
 }
 
@@ -2257,15 +1978,6 @@ class _ConformanceTestInterfaceProxyCalls implements ConformanceTestInterface {
           -1,
           bindings.MessageHeader.kMessageExpectsResponse);
     }
-    void method13(Object param0, int param1, Object param2) {
-      assert(_proxyImpl.isBound);
-      var params = new ConformanceTestInterfaceMethod13Params();
-      params.param0 = param0;
-      params.param1 = param1;
-      params.param2 = param2;
-      _proxyImpl.sendMessage(params, kConformanceTestInterface_method13_name);
-    }
-  
 }
 
 
@@ -2406,11 +2118,6 @@ class ConformanceTestInterfaceStub extends bindings.Stub {
                 bindings.MessageHeader.kMessageIsResponse);
           }
         });
-        break;
-      case kConformanceTestInterface_method13_name:
-        var params = ConformanceTestInterfaceMethod13Params.deserialize(
-            message.payload);
-        _impl.method13(params.param0, params.param1, params.param2);
         break;
       default:
         throw new bindings.MojoCodecError("Unexpected message name");

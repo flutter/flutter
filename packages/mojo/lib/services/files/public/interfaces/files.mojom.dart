@@ -8,11 +8,11 @@ import 'dart:async';
 
 import 'package:mojo/public/dart/bindings.dart' as bindings;
 import 'package:mojo/public/dart/core.dart' as core;
-import 'package:mojo/files/directory.mojom.dart' as directory_mojom;
-import 'package:mojo/files/types.mojom.dart' as types_mojom;
+import 'package:mojo/services/files/public/interfaces/directory.mojom.dart' as directory_mojom;
+import 'package:mojo/services/files/public/interfaces/types.mojom.dart' as types_mojom;
 
-const int FileSystem_TEMPORARY = 0;
-const int FileSystem_DEBUG = 1;
+final int FileSystem_TEMPORARY = 0;
+final int FileSystem_DEBUG = FileSystem_TEMPORARY + 1;
 
 
 class FilesOpenFileSystemParams extends bindings.Struct {
@@ -25,10 +25,7 @@ class FilesOpenFileSystemParams extends bindings.Struct {
   FilesOpenFileSystemParams() : super(kVersions.last.size);
 
   static FilesOpenFileSystemParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static FilesOpenFileSystemParams decode(bindings.Decoder decoder0) {
@@ -87,10 +84,7 @@ class FilesOpenFileSystemResponseParams extends bindings.Struct {
   FilesOpenFileSystemResponseParams() : super(kVersions.last.size);
 
   static FilesOpenFileSystemResponseParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static FilesOpenFileSystemResponseParams decode(bindings.Decoder decoder0) {

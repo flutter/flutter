@@ -8,12 +8,12 @@ import 'dart:async';
 
 import 'package:mojo/public/dart/bindings.dart' as bindings;
 import 'package:mojo/public/dart/core.dart' as core;
-import 'package:mojo/service_provider.mojom.dart' as service_provider_mojom;
+import 'package:mojo/public/interfaces/application/service_provider.mojom.dart' as service_provider_mojom;
 
 
 class ShellConnectToApplicationParams extends bindings.Struct {
   static const List<bindings.StructDataHeader> kVersions = const [
-    const bindings.StructDataHeader(32, 0)
+    const bindings.StructDataHeader(24, 0)
   ];
   String applicationUrl = null;
   Object services = null;
@@ -22,10 +22,7 @@ class ShellConnectToApplicationParams extends bindings.Struct {
   ShellConnectToApplicationParams() : super(kVersions.last.size);
 
   static ShellConnectToApplicationParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static ShellConnectToApplicationParams decode(bindings.Decoder decoder0) {

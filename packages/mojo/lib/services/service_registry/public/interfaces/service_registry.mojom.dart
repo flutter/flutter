@@ -8,7 +8,7 @@ import 'dart:async';
 
 import 'package:mojo/public/dart/bindings.dart' as bindings;
 import 'package:mojo/public/dart/core.dart' as core;
-import 'package:mojo/service_provider.mojom.dart' as service_provider_mojom;
+import 'package:mojo/public/interfaces/application/service_provider.mojom.dart' as service_provider_mojom;
 
 
 class ServiceRegistryAddServicesParams extends bindings.Struct {
@@ -21,10 +21,7 @@ class ServiceRegistryAddServicesParams extends bindings.Struct {
   ServiceRegistryAddServicesParams() : super(kVersions.last.size);
 
   static ServiceRegistryAddServicesParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static ServiceRegistryAddServicesParams decode(bindings.Decoder decoder0) {

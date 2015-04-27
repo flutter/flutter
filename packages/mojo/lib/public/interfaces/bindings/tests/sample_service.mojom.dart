@@ -8,16 +8,16 @@ import 'dart:async';
 
 import 'package:mojo/public/dart/bindings.dart' as bindings;
 import 'package:mojo/public/dart/core.dart' as core;
-import 'package:imported/sample_import.mojom.dart' as sample_import_mojom;
-import 'package:imported/sample_import2.mojom.dart' as sample_import2_mojom;
-const kTwelve = 12;
-const kTooBigForSignedInt64 = 9999999999999999999;
-const kDoubleInfinity = double.INFINITY;
-const kDoubleNegativeInfinity = double.NEGATIVE_INFINITY;
-const kDoubleNaN = double.NAN;
-const kFloatInfinity = double.INFINITY;
-const kFloatNegativeInfinity = double.NEGATIVE_INFINITY;
-const kFloatNaN = double.NAN;
+import 'package:mojo/public/interfaces/bindings/tests/sample_import.mojom.dart' as sample_import_mojom;
+import 'package:mojo/public/interfaces/bindings/tests/sample_import2.mojom.dart' as sample_import2_mojom;
+final kTwelve = 12;
+final kTooBigForSignedInt64 = 9999999999999999999;
+final kDoubleInfinity = double.INFINITY;
+final kDoubleNegativeInfinity = double.NEGATIVE_INFINITY;
+final kDoubleNaN = double.NAN;
+final kFloatInfinity = double.INFINITY;
+final kFloatNegativeInfinity = double.NEGATIVE_INFINITY;
+final kFloatNaN = double.NAN;
 
 
 class Bar extends bindings.Struct {
@@ -25,22 +25,19 @@ class Bar extends bindings.Struct {
     const bindings.StructDataHeader(16, 0)
   ];
   
-  static const int Type_VERTICAL = 1;
-  static const int Type_HORIZONTAL = 2;
-  static const int Type_BOTH = 3;
-  static const int Type_INVALID = 4;
+  static final int Type_VERTICAL = 1;
+  static final int Type_HORIZONTAL = Type_VERTICAL + 1;
+  static final int Type_BOTH = Type_HORIZONTAL + 1;
+  static final int Type_INVALID = Type_BOTH + 1;
   int alpha = 0xff;
   int beta = 0;
   int gamma = 0;
-  int type = 1;
+  int type = Bar.Type_VERTICAL;
 
   Bar() : super(kVersions.last.size);
 
   static Bar deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static Bar decode(bindings.Decoder decoder0) {
@@ -108,7 +105,7 @@ class Foo extends bindings.Struct {
   static const List<bindings.StructDataHeader> kVersions = const [
     const bindings.StructDataHeader(96, 0)
   ];
-  static const kFooby = "Fooby";
+  static final kFooby = "Fooby";
   int x = 0;
   int y = 0;
   bool a = true;
@@ -118,7 +115,7 @@ class Foo extends bindings.Struct {
   Bar bar = null;
   List<int> data = null;
   List<Bar> extraBars = null;
-  String name = "Fooby";
+  String name = Foo.kFooby;
   List<core.MojoDataPipeConsumer> inputStreams = null;
   List<core.MojoDataPipeProducer> outputStreams = null;
   List<List<bool>> arrayOfArrayOfBools = null;
@@ -128,10 +125,7 @@ class Foo extends bindings.Struct {
   Foo() : super(kVersions.last.size);
 
   static Foo deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static Foo decode(bindings.Decoder decoder0) {
@@ -365,7 +359,7 @@ class DefaultsTest extends bindings.Struct {
     const bindings.StructDataHeader(184, 0)
   ];
   int a0 = -12;
-  int a1 = 12;
+  int a1 = kTwelve;
   int a2 = 1234;
   int a3 = 34567;
   bool a11 = true;
@@ -384,7 +378,7 @@ class DefaultsTest extends bindings.Struct {
   double a17 = 1.23E-20;
   List<int> a18 = null;
   String a19 = null;
-  int a20 = 3;
+  int a20 = Bar.Type_BOTH;
   double a29 = double.INFINITY;
   sample_import_mojom.Point a21 = null;
   sample_import2_mojom.Thing a22 = new sample_import2_mojom.Thing();
@@ -400,10 +394,7 @@ class DefaultsTest extends bindings.Struct {
   DefaultsTest() : super(kVersions.last.size);
 
   static DefaultsTest deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static DefaultsTest decode(bindings.Decoder decoder0) {
@@ -675,10 +666,7 @@ class StructWithHoleV1 extends bindings.Struct {
   StructWithHoleV1() : super(kVersions.last.size);
 
   static StructWithHoleV1 deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static StructWithHoleV1 decode(bindings.Decoder decoder0) {
@@ -739,10 +727,7 @@ class StructWithHoleV2 extends bindings.Struct {
   StructWithHoleV2() : super(kVersions.last.size);
 
   static StructWithHoleV2 deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static StructWithHoleV2 decode(bindings.Decoder decoder0) {
@@ -801,7 +786,7 @@ class StructWithHoleV2 extends bindings.Struct {
 
 class ServiceFrobinateParams extends bindings.Struct {
   static const List<bindings.StructDataHeader> kVersions = const [
-    const bindings.StructDataHeader(32, 0)
+    const bindings.StructDataHeader(24, 0)
   ];
   Foo foo = null;
   int baz = 0;
@@ -810,10 +795,7 @@ class ServiceFrobinateParams extends bindings.Struct {
   ServiceFrobinateParams() : super(kVersions.last.size);
 
   static ServiceFrobinateParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static ServiceFrobinateParams decode(bindings.Decoder decoder0) {
@@ -880,10 +862,7 @@ class ServiceFrobinateResponseParams extends bindings.Struct {
   ServiceFrobinateResponseParams() : super(kVersions.last.size);
 
   static ServiceFrobinateResponseParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static ServiceFrobinateResponseParams decode(bindings.Decoder decoder0) {
@@ -935,10 +914,7 @@ class ServiceGetPortParams extends bindings.Struct {
   ServiceGetPortParams() : super(kVersions.last.size);
 
   static ServiceGetPortParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static ServiceGetPortParams decode(bindings.Decoder decoder0) {
@@ -991,10 +967,7 @@ class PortPostMessageParams extends bindings.Struct {
   PortPostMessageParams() : super(kVersions.last.size);
 
   static PortPostMessageParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static PortPostMessageParams decode(bindings.Decoder decoder0) {
@@ -1053,10 +1026,10 @@ abstract class Service {
   Future<ServiceFrobinateResponseParams> frobinate(Foo foo,int baz,Object port,[Function responseFactory = null]);
   void getPort(Object port);
 
-  static const FAVORITE_BAZ = 1;
+  static final FAVORITE_BAZ = 1;
   
-  static const int BazOptions_REGULAR = 0;
-  static const int BazOptions_EXTRA = 1;
+  static final int BazOptions_REGULAR = 0;
+  static final int BazOptions_EXTRA = BazOptions_REGULAR + 1;
 }
 
 

@@ -8,7 +8,7 @@ import 'dart:async';
 
 import 'package:mojo/public/dart/bindings.dart' as bindings;
 import 'package:mojo/public/dart/core.dart' as core;
-import 'package:mojo/network_error.mojom.dart' as network_error_mojom;
+import 'package:mojo/services/network/public/interfaces/network_error.mojom.dart' as network_error_mojom;
 
 
 class UrlRequest extends bindings.Struct {
@@ -26,10 +26,7 @@ class UrlRequest extends bindings.Struct {
   UrlRequest() : super(kVersions.last.size);
 
   static UrlRequest deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static UrlRequest decode(bindings.Decoder decoder0) {
@@ -150,10 +147,7 @@ class UrlResponse extends bindings.Struct {
   UrlResponse() : super(kVersions.last.size);
 
   static UrlResponse deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static UrlResponse decode(bindings.Decoder decoder0) {
@@ -288,10 +282,7 @@ class UrlLoaderStatus extends bindings.Struct {
   UrlLoaderStatus() : super(kVersions.last.size);
 
   static UrlLoaderStatus deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static UrlLoaderStatus decode(bindings.Decoder decoder0) {
@@ -351,10 +342,7 @@ class UrlLoaderStartParams extends bindings.Struct {
   UrlLoaderStartParams() : super(kVersions.last.size);
 
   static UrlLoaderStartParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static UrlLoaderStartParams decode(bindings.Decoder decoder0) {
@@ -407,10 +395,7 @@ class UrlLoaderStartResponseParams extends bindings.Struct {
   UrlLoaderStartResponseParams() : super(kVersions.last.size);
 
   static UrlLoaderStartResponseParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static UrlLoaderStartResponseParams decode(bindings.Decoder decoder0) {
@@ -462,10 +447,7 @@ class UrlLoaderFollowRedirectParams extends bindings.Struct {
   UrlLoaderFollowRedirectParams() : super(kVersions.last.size);
 
   static UrlLoaderFollowRedirectParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static UrlLoaderFollowRedirectParams decode(bindings.Decoder decoder0) {
@@ -510,10 +492,7 @@ class UrlLoaderFollowRedirectResponseParams extends bindings.Struct {
   UrlLoaderFollowRedirectResponseParams() : super(kVersions.last.size);
 
   static UrlLoaderFollowRedirectResponseParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static UrlLoaderFollowRedirectResponseParams decode(bindings.Decoder decoder0) {
@@ -565,10 +544,7 @@ class UrlLoaderQueryStatusParams extends bindings.Struct {
   UrlLoaderQueryStatusParams() : super(kVersions.last.size);
 
   static UrlLoaderQueryStatusParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static UrlLoaderQueryStatusParams decode(bindings.Decoder decoder0) {
@@ -613,10 +589,7 @@ class UrlLoaderQueryStatusResponseParams extends bindings.Struct {
   UrlLoaderQueryStatusResponseParams() : super(kVersions.last.size);
 
   static UrlLoaderQueryStatusResponseParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static UrlLoaderQueryStatusResponseParams decode(bindings.Decoder decoder0) {

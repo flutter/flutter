@@ -8,8 +8,8 @@ import 'dart:async';
 
 import 'package:mojo/public/dart/bindings.dart' as bindings;
 import 'package:mojo/public/dart/core.dart' as core;
-const kRunMessageId = 0xFFFFFFFF;
-const kRunOrClosePipeMessageId = 0xFFFFFFFE;
+final kRunMessageId = 0xFFFFFFFF;
+final kRunOrClosePipeMessageId = 0xFFFFFFFE;
 
 
 class RunMessageParams extends bindings.Struct {
@@ -23,10 +23,7 @@ class RunMessageParams extends bindings.Struct {
   RunMessageParams() : super(kVersions.last.size);
 
   static RunMessageParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static RunMessageParams decode(bindings.Decoder decoder0) {
@@ -95,10 +92,7 @@ class RunResponseMessageParams extends bindings.Struct {
   RunResponseMessageParams() : super(kVersions.last.size);
 
   static RunResponseMessageParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static RunResponseMessageParams decode(bindings.Decoder decoder0) {
@@ -164,10 +158,7 @@ class QueryVersion extends bindings.Struct {
   QueryVersion() : super(kVersions.last.size);
 
   static QueryVersion deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static QueryVersion decode(bindings.Decoder decoder0) {
@@ -212,10 +203,7 @@ class QueryVersionResult extends bindings.Struct {
   QueryVersionResult() : super(kVersions.last.size);
 
   static QueryVersionResult deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static QueryVersionResult decode(bindings.Decoder decoder0) {
@@ -269,10 +257,7 @@ class RunOrClosePipeMessageParams extends bindings.Struct {
   RunOrClosePipeMessageParams() : super(kVersions.last.size);
 
   static RunOrClosePipeMessageParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static RunOrClosePipeMessageParams decode(bindings.Decoder decoder0) {
@@ -339,10 +324,7 @@ class RequireVersion extends bindings.Struct {
   RequireVersion() : super(kVersions.last.size);
 
   static RequireVersion deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static RequireVersion decode(bindings.Decoder decoder0) {

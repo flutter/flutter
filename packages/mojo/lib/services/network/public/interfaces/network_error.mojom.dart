@@ -20,10 +20,7 @@ class NetworkError extends bindings.Struct {
   NetworkError() : super(kVersions.last.size);
 
   static NetworkError deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static NetworkError decode(bindings.Decoder decoder0) {

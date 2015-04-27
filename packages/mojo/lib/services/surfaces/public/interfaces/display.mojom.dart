@@ -8,9 +8,9 @@ import 'dart:async';
 
 import 'package:mojo/public/dart/bindings.dart' as bindings;
 import 'package:mojo/public/dart/core.dart' as core;
-import 'package:mojo/context_provider.mojom.dart' as context_provider_mojom;
-import 'package:mojo/viewport_parameter_listener.mojom.dart' as viewport_parameter_listener_mojom;
-import 'package:mojo/surfaces.mojom.dart' as surfaces_mojom;
+import 'package:mojo/services/gpu/public/interfaces/context_provider.mojom.dart' as context_provider_mojom;
+import 'package:mojo/services/gpu/public/interfaces/viewport_parameter_listener.mojom.dart' as viewport_parameter_listener_mojom;
+import 'package:mojo/services/surfaces/public/interfaces/surfaces.mojom.dart' as surfaces_mojom;
 
 
 class DisplaySubmitFrameParams extends bindings.Struct {
@@ -22,10 +22,7 @@ class DisplaySubmitFrameParams extends bindings.Struct {
   DisplaySubmitFrameParams() : super(kVersions.last.size);
 
   static DisplaySubmitFrameParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static DisplaySubmitFrameParams decode(bindings.Decoder decoder0) {
@@ -77,10 +74,7 @@ class DisplaySubmitFrameResponseParams extends bindings.Struct {
   DisplaySubmitFrameResponseParams() : super(kVersions.last.size);
 
   static DisplaySubmitFrameResponseParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static DisplaySubmitFrameResponseParams decode(bindings.Decoder decoder0) {
@@ -118,7 +112,7 @@ class DisplaySubmitFrameResponseParams extends bindings.Struct {
 
 class DisplayFactoryCreateParams extends bindings.Struct {
   static const List<bindings.StructDataHeader> kVersions = const [
-    const bindings.StructDataHeader(32, 0)
+    const bindings.StructDataHeader(24, 0)
   ];
   Object contextProvider = null;
   Object returner = null;
@@ -127,10 +121,7 @@ class DisplayFactoryCreateParams extends bindings.Struct {
   DisplayFactoryCreateParams() : super(kVersions.last.size);
 
   static DisplayFactoryCreateParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static DisplayFactoryCreateParams decode(bindings.Decoder decoder0) {
@@ -160,11 +151,11 @@ class DisplayFactoryCreateParams extends bindings.Struct {
     }
     if (mainDataHeader.version >= 0) {
       
-      result.returner = decoder0.decodeServiceInterface(16, true, surfaces_mojom.ResourceReturnerProxy.newFromEndpoint);
+      result.returner = decoder0.decodeServiceInterface(12, true, surfaces_mojom.ResourceReturnerProxy.newFromEndpoint);
     }
     if (mainDataHeader.version >= 0) {
       
-      result.displayRequest = decoder0.decodeInterfaceRequest(24, false, DisplayStub.newFromEndpoint);
+      result.displayRequest = decoder0.decodeInterfaceRequest(16, false, DisplayStub.newFromEndpoint);
     }
     return result;
   }
@@ -174,9 +165,9 @@ class DisplayFactoryCreateParams extends bindings.Struct {
     
     encoder0.encodeInterface(contextProvider, 8, false);
     
-    encoder0.encodeInterface(returner, 16, true);
+    encoder0.encodeInterface(returner, 12, true);
     
-    encoder0.encodeInterfaceRequest(displayRequest, 24, false);
+    encoder0.encodeInterfaceRequest(displayRequest, 16, false);
   }
 
   String toString() {

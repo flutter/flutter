@@ -9,9 +9,9 @@ import 'dart:async';
 import 'package:mojo/public/dart/bindings.dart' as bindings;
 import 'package:mojo/public/dart/core.dart' as core;
 
-const int NetAddressFamily_UNSPECIFIED = 0;
-const int NetAddressFamily_IPV4 = 1;
-const int NetAddressFamily_IPV6 = 2;
+final int NetAddressFamily_UNSPECIFIED = 0;
+final int NetAddressFamily_IPV4 = NetAddressFamily_UNSPECIFIED + 1;
+final int NetAddressFamily_IPV6 = NetAddressFamily_IPV4 + 1;
 
 
 class NetAddressIPv4 extends bindings.Struct {
@@ -24,10 +24,7 @@ class NetAddressIPv4 extends bindings.Struct {
   NetAddressIPv4() : super(kVersions.last.size);
 
   static NetAddressIPv4 deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static NetAddressIPv4 decode(bindings.Decoder decoder0) {
@@ -87,10 +84,7 @@ class NetAddressIPv6 extends bindings.Struct {
   NetAddressIPv6() : super(kVersions.last.size);
 
   static NetAddressIPv6 deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static NetAddressIPv6 decode(bindings.Decoder decoder0) {
@@ -144,17 +138,14 @@ class NetAddress extends bindings.Struct {
   static const List<bindings.StructDataHeader> kVersions = const [
     const bindings.StructDataHeader(32, 0)
   ];
-  int family = 0;
+  int family = NetAddressFamily_UNSPECIFIED;
   NetAddressIPv4 ipv4 = null;
   NetAddressIPv6 ipv6 = null;
 
   NetAddress() : super(kVersions.last.size);
 
   static NetAddress deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static NetAddress decode(bindings.Decoder decoder0) {

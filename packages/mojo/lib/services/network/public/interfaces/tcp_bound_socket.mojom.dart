@@ -8,10 +8,10 @@ import 'dart:async';
 
 import 'package:mojo/public/dart/bindings.dart' as bindings;
 import 'package:mojo/public/dart/core.dart' as core;
-import 'package:mojo/net_address.mojom.dart' as net_address_mojom;
-import 'package:mojo/network_error.mojom.dart' as network_error_mojom;
-import 'package:mojo/tcp_connected_socket.mojom.dart' as tcp_connected_socket_mojom;
-import 'package:mojo/tcp_server_socket.mojom.dart' as tcp_server_socket_mojom;
+import 'package:mojo/services/network/public/interfaces/net_address.mojom.dart' as net_address_mojom;
+import 'package:mojo/services/network/public/interfaces/network_error.mojom.dart' as network_error_mojom;
+import 'package:mojo/services/network/public/interfaces/tcp_connected_socket.mojom.dart' as tcp_connected_socket_mojom;
+import 'package:mojo/services/network/public/interfaces/tcp_server_socket.mojom.dart' as tcp_server_socket_mojom;
 
 
 class TcpBoundSocketStartListeningParams extends bindings.Struct {
@@ -23,10 +23,7 @@ class TcpBoundSocketStartListeningParams extends bindings.Struct {
   TcpBoundSocketStartListeningParams() : super(kVersions.last.size);
 
   static TcpBoundSocketStartListeningParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static TcpBoundSocketStartListeningParams decode(bindings.Decoder decoder0) {
@@ -78,10 +75,7 @@ class TcpBoundSocketStartListeningResponseParams extends bindings.Struct {
   TcpBoundSocketStartListeningResponseParams() : super(kVersions.last.size);
 
   static TcpBoundSocketStartListeningResponseParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static TcpBoundSocketStartListeningResponseParams decode(bindings.Decoder decoder0) {
@@ -137,10 +131,7 @@ class TcpBoundSocketConnectParams extends bindings.Struct {
   TcpBoundSocketConnectParams() : super(kVersions.last.size);
 
   static TcpBoundSocketConnectParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static TcpBoundSocketConnectParams decode(bindings.Decoder decoder0) {
@@ -214,10 +205,7 @@ class TcpBoundSocketConnectResponseParams extends bindings.Struct {
   TcpBoundSocketConnectResponseParams() : super(kVersions.last.size);
 
   static TcpBoundSocketConnectResponseParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static TcpBoundSocketConnectResponseParams decode(bindings.Decoder decoder0) {

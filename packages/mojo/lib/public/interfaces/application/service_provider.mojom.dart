@@ -20,10 +20,7 @@ class ServiceProviderConnectToServiceParams extends bindings.Struct {
   ServiceProviderConnectToServiceParams() : super(kVersions.last.size);
 
   static ServiceProviderConnectToServiceParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static ServiceProviderConnectToServiceParams decode(bindings.Decoder decoder0) {

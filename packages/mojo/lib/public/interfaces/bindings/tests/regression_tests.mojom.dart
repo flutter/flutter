@@ -9,15 +9,15 @@ import 'dart:async';
 import 'package:mojo/public/dart/bindings.dart' as bindings;
 import 'package:mojo/public/dart/core.dart' as core;
 
-const int EnumWithReference_k_STEREO_AND_KEYBOARD_MIC = 30;
-const int EnumWithReference_k_MAX = 30;
+final int EnumWithReference_k_STEREO_AND_KEYBOARD_MIC = 30;
+final int EnumWithReference_k_MAX = EnumWithReference_k_STEREO_AND_KEYBOARD_MIC;
 
-const int EnumWithLowercase_PlanarF16 = 0;
-const int EnumWithLowercase_PlanarF32 = 1;
+final int EnumWithLowercase_PlanarF16 = 0;
+final int EnumWithLowercase_PlanarF32 = EnumWithLowercase_PlanarF16 + 1;
 
-const int EnumWithNumbers_k_2_1 = 4;
+final int EnumWithNumbers_k_2_1 = 4;
 
-const int EnumWithK_K = 0;
+final int EnumWithK_K = 0;
 
 
 class Edge extends bindings.Struct {
@@ -29,10 +29,7 @@ class Edge extends bindings.Struct {
   Edge() : super(kVersions.last.size);
 
   static Edge deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static Edge decode(bindings.Decoder decoder0) {
@@ -85,10 +82,7 @@ class Vertex extends bindings.Struct {
   Vertex() : super(kVersions.last.size);
 
   static Vertex deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static Vertex decode(bindings.Decoder decoder0) {
@@ -140,10 +134,7 @@ class EmptyStruct extends bindings.Struct {
   EmptyStruct() : super(kVersions.last.size);
 
   static EmptyStruct deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static EmptyStruct decode(bindings.Decoder decoder0) {
@@ -188,10 +179,7 @@ class A extends bindings.Struct {
   A() : super(kVersions.last.size);
 
   static A deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static A decode(bindings.Decoder decoder0) {
@@ -244,10 +232,7 @@ class B extends bindings.Struct {
   B() : super(kVersions.last.size);
 
   static B deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static B decode(bindings.Decoder decoder0) {
@@ -299,10 +284,7 @@ class CheckMethodWithEmptyResponseWithouParameterAndEmptyResponseParams extends 
   CheckMethodWithEmptyResponseWithouParameterAndEmptyResponseParams() : super(kVersions.last.size);
 
   static CheckMethodWithEmptyResponseWithouParameterAndEmptyResponseParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static CheckMethodWithEmptyResponseWithouParameterAndEmptyResponseParams decode(bindings.Decoder decoder0) {
@@ -346,10 +328,7 @@ class CheckMethodWithEmptyResponseWithouParameterAndEmptyResponseResponseParams 
   CheckMethodWithEmptyResponseWithouParameterAndEmptyResponseResponseParams() : super(kVersions.last.size);
 
   static CheckMethodWithEmptyResponseWithouParameterAndEmptyResponseResponseParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static CheckMethodWithEmptyResponseWithouParameterAndEmptyResponseResponseParams decode(bindings.Decoder decoder0) {
@@ -394,10 +373,7 @@ class CheckMethodWithEmptyResponseWithParameterAndEmptyResponseParams extends bi
   CheckMethodWithEmptyResponseWithParameterAndEmptyResponseParams() : super(kVersions.last.size);
 
   static CheckMethodWithEmptyResponseWithParameterAndEmptyResponseParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static CheckMethodWithEmptyResponseWithParameterAndEmptyResponseParams decode(bindings.Decoder decoder0) {
@@ -448,10 +424,7 @@ class CheckMethodWithEmptyResponseWithParameterAndEmptyResponseResponseParams ex
   CheckMethodWithEmptyResponseWithParameterAndEmptyResponseResponseParams() : super(kVersions.last.size);
 
   static CheckMethodWithEmptyResponseWithParameterAndEmptyResponseResponseParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static CheckMethodWithEmptyResponseWithParameterAndEmptyResponseResponseParams decode(bindings.Decoder decoder0) {
@@ -497,10 +470,7 @@ class CheckNameCollisionWithNameCollisionParams extends bindings.Struct {
   CheckNameCollisionWithNameCollisionParams() : super(kVersions.last.size);
 
   static CheckNameCollisionWithNameCollisionParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static CheckNameCollisionWithNameCollisionParams decode(bindings.Decoder decoder0) {
@@ -560,10 +530,7 @@ class CheckNameCollisionWithNameCollisionResponseParams extends bindings.Struct 
   CheckNameCollisionWithNameCollisionResponseParams() : super(kVersions.last.size);
 
   static CheckNameCollisionWithNameCollisionResponseParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static CheckNameCollisionWithNameCollisionResponseParams decode(bindings.Decoder decoder0) {

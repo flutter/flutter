@@ -8,10 +8,10 @@ import 'dart:async';
 
 import 'package:mojo/public/dart/bindings.dart' as bindings;
 import 'package:mojo/public/dart/core.dart' as core;
-import 'package:imported/sample_import.mojom.dart' as sample_import_mojom;
+import 'package:mojo/public/interfaces/bindings/tests/sample_import.mojom.dart' as sample_import_mojom;
 
-const int Color_RED = 0;
-const int Color_BLACK = 1;
+final int Color_RED = 0;
+final int Color_BLACK = Color_RED + 1;
 
 
 class Size extends bindings.Struct {
@@ -24,10 +24,7 @@ class Size extends bindings.Struct {
   Size() : super(kVersions.last.size);
 
   static Size deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static Size decode(bindings.Decoder decoder0) {
@@ -81,18 +78,15 @@ class Thing extends bindings.Struct {
   static const List<bindings.StructDataHeader> kVersions = const [
     const bindings.StructDataHeader(32, 0)
   ];
-  int shape = 1;
-  int color = 1;
+  int shape = sample_import_mojom.Shape_RECTANGLE;
+  int color = Color_BLACK;
   sample_import_mojom.Point location = null;
   Size size = null;
 
   Thing() : super(kVersions.last.size);
 
   static Thing deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static Thing decode(bindings.Decoder decoder0) {

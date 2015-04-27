@@ -8,8 +8,8 @@ import 'dart:async';
 
 import 'package:mojo/public/dart/bindings.dart' as bindings;
 import 'package:mojo/public/dart/core.dart' as core;
-import 'package:mojo/application.mojom.dart' as application_mojom;
-import 'package:mojo/url_loader.mojom.dart' as url_loader_mojom;
+import 'package:mojo/public/interfaces/application/application.mojom.dart' as application_mojom;
+import 'package:mojo/services/network/public/interfaces/url_loader.mojom.dart' as url_loader_mojom;
 
 
 class ContentHandlerStartApplicationParams extends bindings.Struct {
@@ -22,10 +22,7 @@ class ContentHandlerStartApplicationParams extends bindings.Struct {
   ContentHandlerStartApplicationParams() : super(kVersions.last.size);
 
   static ContentHandlerStartApplicationParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static ContentHandlerStartApplicationParams decode(bindings.Decoder decoder0) {

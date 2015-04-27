@@ -8,11 +8,11 @@ import 'dart:async';
 
 import 'package:mojo/public/dart/bindings.dart' as bindings;
 import 'package:mojo/public/dart/core.dart' as core;
-import 'package:mojo/url_loader.mojom.dart' as url_loader_mojom;
+import 'package:mojo/services/network/public/interfaces/url_loader.mojom.dart' as url_loader_mojom;
 
-const int Target_DEFAULT = 0;
-const int Target_SOURCE_NODE = 1;
-const int Target_NEW_NODE = 2;
+final int Target_DEFAULT = 0;
+final int Target_SOURCE_NODE = Target_DEFAULT + 1;
+final int Target_NEW_NODE = Target_SOURCE_NODE + 1;
 
 
 class NavigatorHostRequestNavigateParams extends bindings.Struct {
@@ -25,10 +25,7 @@ class NavigatorHostRequestNavigateParams extends bindings.Struct {
   NavigatorHostRequestNavigateParams() : super(kVersions.last.size);
 
   static NavigatorHostRequestNavigateParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static NavigatorHostRequestNavigateParams decode(bindings.Decoder decoder0) {
@@ -88,10 +85,7 @@ class NavigatorHostRequestNavigateHistoryParams extends bindings.Struct {
   NavigatorHostRequestNavigateHistoryParams() : super(kVersions.last.size);
 
   static NavigatorHostRequestNavigateHistoryParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static NavigatorHostRequestNavigateHistoryParams decode(bindings.Decoder decoder0) {
@@ -143,10 +137,7 @@ class NavigatorHostDidNavigateLocallyParams extends bindings.Struct {
   NavigatorHostDidNavigateLocallyParams() : super(kVersions.last.size);
 
   static NavigatorHostDidNavigateLocallyParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static NavigatorHostDidNavigateLocallyParams decode(bindings.Decoder decoder0) {

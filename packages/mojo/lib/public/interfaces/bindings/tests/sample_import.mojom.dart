@@ -9,18 +9,18 @@ import 'dart:async';
 import 'package:mojo/public/dart/bindings.dart' as bindings;
 import 'package:mojo/public/dart/core.dart' as core;
 
-const int Shape_RECTANGLE = 1;
-const int Shape_CIRCLE = 2;
-const int Shape_TRIANGLE = 3;
-const int Shape_LAST = 3;
+final int Shape_RECTANGLE = 1;
+final int Shape_CIRCLE = Shape_RECTANGLE + 1;
+final int Shape_TRIANGLE = Shape_CIRCLE + 1;
+final int Shape_LAST = Shape_TRIANGLE;
 
-const int AnotherShape_RECTANGLE = 10;
-const int AnotherShape_CIRCLE = 11;
-const int AnotherShape_TRIANGLE = 12;
+final int AnotherShape_RECTANGLE = 10;
+final int AnotherShape_CIRCLE = AnotherShape_RECTANGLE + 1;
+final int AnotherShape_TRIANGLE = AnotherShape_CIRCLE + 1;
 
-const int YetAnotherShape_RECTANGLE = 20;
-const int YetAnotherShape_CIRCLE = 21;
-const int YetAnotherShape_TRIANGLE = 22;
+final int YetAnotherShape_RECTANGLE = 20;
+final int YetAnotherShape_CIRCLE = YetAnotherShape_RECTANGLE + 1;
+final int YetAnotherShape_TRIANGLE = YetAnotherShape_CIRCLE + 1;
 
 
 class Point extends bindings.Struct {
@@ -33,10 +33,7 @@ class Point extends bindings.Struct {
   Point() : super(kVersions.last.size);
 
   static Point deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static Point decode(bindings.Decoder decoder0) {
@@ -94,10 +91,7 @@ class ImportedInterfaceDoSomethingParams extends bindings.Struct {
   ImportedInterfaceDoSomethingParams() : super(kVersions.last.size);
 
   static ImportedInterfaceDoSomethingParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static ImportedInterfaceDoSomethingParams decode(bindings.Decoder decoder0) {

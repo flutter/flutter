@@ -31,10 +31,7 @@ class Location extends bindings.Struct {
   Location() : super(kVersions.last.size);
 
   static Location deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static Location decode(bindings.Decoder decoder0) {

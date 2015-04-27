@@ -8,8 +8,8 @@ import 'dart:async';
 
 import 'package:mojo/public/dart/bindings.dart' as bindings;
 import 'package:mojo/public/dart/core.dart' as core;
-import 'package:http_server/http_server.mojom.dart' as http_server_mojom;
-import 'package:mojo/net_address.mojom.dart' as net_address_mojom;
+import 'package:mojo/services/http_server/public/interfaces/http_server.mojom.dart' as http_server_mojom;
+import 'package:mojo/services/network/public/interfaces/net_address.mojom.dart' as net_address_mojom;
 
 
 class HttpServerFactoryCreateHttpServerParams extends bindings.Struct {
@@ -22,10 +22,7 @@ class HttpServerFactoryCreateHttpServerParams extends bindings.Struct {
   HttpServerFactoryCreateHttpServerParams() : super(kVersions.last.size);
 
   static HttpServerFactoryCreateHttpServerParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static HttpServerFactoryCreateHttpServerParams decode(bindings.Decoder decoder0) {

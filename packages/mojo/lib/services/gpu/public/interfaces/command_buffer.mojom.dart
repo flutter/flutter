@@ -8,7 +8,7 @@ import 'dart:async';
 
 import 'package:mojo/public/dart/bindings.dart' as bindings;
 import 'package:mojo/public/dart/core.dart' as core;
-import 'package:mojo/gpu_capabilities.mojom.dart' as gpu_capabilities_mojom;
+import 'package:mojo/services/gpu/public/interfaces/gpu_capabilities.mojom.dart' as gpu_capabilities_mojom;
 
 
 class CommandBufferState extends bindings.Struct {
@@ -26,10 +26,7 @@ class CommandBufferState extends bindings.Struct {
   CommandBufferState() : super(kVersions.last.size);
 
   static CommandBufferState deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static CommandBufferState decode(bindings.Decoder decoder0) {
@@ -124,10 +121,7 @@ class CommandBufferSyncClientDidInitializeParams extends bindings.Struct {
   CommandBufferSyncClientDidInitializeParams() : super(kVersions.last.size);
 
   static CommandBufferSyncClientDidInitializeParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static CommandBufferSyncClientDidInitializeParams decode(bindings.Decoder decoder0) {
@@ -187,10 +181,7 @@ class CommandBufferSyncClientDidMakeProgressParams extends bindings.Struct {
   CommandBufferSyncClientDidMakeProgressParams() : super(kVersions.last.size);
 
   static CommandBufferSyncClientDidMakeProgressParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static CommandBufferSyncClientDidMakeProgressParams decode(bindings.Decoder decoder0) {
@@ -243,10 +234,7 @@ class CommandBufferSyncPointClientDidInsertSyncPointParams extends bindings.Stru
   CommandBufferSyncPointClientDidInsertSyncPointParams() : super(kVersions.last.size);
 
   static CommandBufferSyncPointClientDidInsertSyncPointParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static CommandBufferSyncPointClientDidInsertSyncPointParams decode(bindings.Decoder decoder0) {
@@ -298,10 +286,7 @@ class CommandBufferLostContextObserverDidLoseContextParams extends bindings.Stru
   CommandBufferLostContextObserverDidLoseContextParams() : super(kVersions.last.size);
 
   static CommandBufferLostContextObserverDidLoseContextParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static CommandBufferLostContextObserverDidLoseContextParams decode(bindings.Decoder decoder0) {
@@ -346,7 +331,7 @@ class CommandBufferLostContextObserverDidLoseContextParams extends bindings.Stru
 
 class CommandBufferInitializeParams extends bindings.Struct {
   static const List<bindings.StructDataHeader> kVersions = const [
-    const bindings.StructDataHeader(40, 0)
+    const bindings.StructDataHeader(24, 0)
   ];
   Object syncClient = null;
   Object syncPointClient = null;
@@ -356,10 +341,7 @@ class CommandBufferInitializeParams extends bindings.Struct {
   CommandBufferInitializeParams() : super(kVersions.last.size);
 
   static CommandBufferInitializeParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static CommandBufferInitializeParams decode(bindings.Decoder decoder0) {
@@ -389,15 +371,15 @@ class CommandBufferInitializeParams extends bindings.Struct {
     }
     if (mainDataHeader.version >= 0) {
       
-      result.syncPointClient = decoder0.decodeServiceInterface(16, false, CommandBufferSyncPointClientProxy.newFromEndpoint);
+      result.syncPointClient = decoder0.decodeServiceInterface(12, false, CommandBufferSyncPointClientProxy.newFromEndpoint);
     }
     if (mainDataHeader.version >= 0) {
       
-      result.lostObserver = decoder0.decodeServiceInterface(24, false, CommandBufferLostContextObserverProxy.newFromEndpoint);
+      result.lostObserver = decoder0.decodeServiceInterface(16, false, CommandBufferLostContextObserverProxy.newFromEndpoint);
     }
     if (mainDataHeader.version >= 0) {
       
-      result.sharedState = decoder0.decodeSharedBufferHandle(32, false);
+      result.sharedState = decoder0.decodeSharedBufferHandle(20, false);
     }
     return result;
   }
@@ -407,11 +389,11 @@ class CommandBufferInitializeParams extends bindings.Struct {
     
     encoder0.encodeInterface(syncClient, 8, false);
     
-    encoder0.encodeInterface(syncPointClient, 16, false);
+    encoder0.encodeInterface(syncPointClient, 12, false);
     
-    encoder0.encodeInterface(lostObserver, 24, false);
+    encoder0.encodeInterface(lostObserver, 16, false);
     
-    encoder0.encodeSharedBufferHandle(sharedState, 32, false);
+    encoder0.encodeSharedBufferHandle(sharedState, 20, false);
   }
 
   String toString() {
@@ -432,10 +414,7 @@ class CommandBufferSetGetBufferParams extends bindings.Struct {
   CommandBufferSetGetBufferParams() : super(kVersions.last.size);
 
   static CommandBufferSetGetBufferParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static CommandBufferSetGetBufferParams decode(bindings.Decoder decoder0) {
@@ -487,10 +466,7 @@ class CommandBufferFlushParams extends bindings.Struct {
   CommandBufferFlushParams() : super(kVersions.last.size);
 
   static CommandBufferFlushParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static CommandBufferFlushParams decode(bindings.Decoder decoder0) {
@@ -542,10 +518,7 @@ class CommandBufferMakeProgressParams extends bindings.Struct {
   CommandBufferMakeProgressParams() : super(kVersions.last.size);
 
   static CommandBufferMakeProgressParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static CommandBufferMakeProgressParams decode(bindings.Decoder decoder0) {
@@ -599,10 +572,7 @@ class CommandBufferRegisterTransferBufferParams extends bindings.Struct {
   CommandBufferRegisterTransferBufferParams() : super(kVersions.last.size);
 
   static CommandBufferRegisterTransferBufferParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static CommandBufferRegisterTransferBufferParams decode(bindings.Decoder decoder0) {
@@ -668,10 +638,7 @@ class CommandBufferDestroyTransferBufferParams extends bindings.Struct {
   CommandBufferDestroyTransferBufferParams() : super(kVersions.last.size);
 
   static CommandBufferDestroyTransferBufferParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static CommandBufferDestroyTransferBufferParams decode(bindings.Decoder decoder0) {
@@ -723,10 +690,7 @@ class CommandBufferInsertSyncPointParams extends bindings.Struct {
   CommandBufferInsertSyncPointParams() : super(kVersions.last.size);
 
   static CommandBufferInsertSyncPointParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static CommandBufferInsertSyncPointParams decode(bindings.Decoder decoder0) {
@@ -778,10 +742,7 @@ class CommandBufferRetireSyncPointParams extends bindings.Struct {
   CommandBufferRetireSyncPointParams() : super(kVersions.last.size);
 
   static CommandBufferRetireSyncPointParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static CommandBufferRetireSyncPointParams decode(bindings.Decoder decoder0) {
@@ -832,10 +793,7 @@ class CommandBufferEchoParams extends bindings.Struct {
   CommandBufferEchoParams() : super(kVersions.last.size);
 
   static CommandBufferEchoParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static CommandBufferEchoParams decode(bindings.Decoder decoder0) {
@@ -879,10 +837,7 @@ class CommandBufferEchoResponseParams extends bindings.Struct {
   CommandBufferEchoResponseParams() : super(kVersions.last.size);
 
   static CommandBufferEchoResponseParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static CommandBufferEchoResponseParams decode(bindings.Decoder decoder0) {

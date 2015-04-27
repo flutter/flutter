@@ -8,7 +8,7 @@ import 'dart:async';
 
 import 'package:mojo/public/dart/bindings.dart' as bindings;
 import 'package:mojo/public/dart/core.dart' as core;
-import 'package:mojo/files/types.mojom.dart' as types_mojom;
+import 'package:mojo/services/files/public/interfaces/types.mojom.dart' as types_mojom;
 
 
 class FileCloseParams extends bindings.Struct {
@@ -19,10 +19,7 @@ class FileCloseParams extends bindings.Struct {
   FileCloseParams() : super(kVersions.last.size);
 
   static FileCloseParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static FileCloseParams decode(bindings.Decoder decoder0) {
@@ -67,10 +64,7 @@ class FileCloseResponseParams extends bindings.Struct {
   FileCloseResponseParams() : super(kVersions.last.size);
 
   static FileCloseResponseParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static FileCloseResponseParams decode(bindings.Decoder decoder0) {
@@ -124,10 +118,7 @@ class FileReadParams extends bindings.Struct {
   FileReadParams() : super(kVersions.last.size);
 
   static FileReadParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static FileReadParams decode(bindings.Decoder decoder0) {
@@ -194,10 +185,7 @@ class FileReadResponseParams extends bindings.Struct {
   FileReadResponseParams() : super(kVersions.last.size);
 
   static FileReadResponseParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static FileReadResponseParams decode(bindings.Decoder decoder0) {
@@ -258,10 +246,7 @@ class FileWriteParams extends bindings.Struct {
   FileWriteParams() : super(kVersions.last.size);
 
   static FileWriteParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static FileWriteParams decode(bindings.Decoder decoder0) {
@@ -328,10 +313,7 @@ class FileWriteResponseParams extends bindings.Struct {
   FileWriteResponseParams() : super(kVersions.last.size);
 
   static FileWriteResponseParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static FileWriteResponseParams decode(bindings.Decoder decoder0) {
@@ -393,10 +375,7 @@ class FileReadToStreamParams extends bindings.Struct {
   FileReadToStreamParams() : super(kVersions.last.size);
 
   static FileReadToStreamParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static FileReadToStreamParams decode(bindings.Decoder decoder0) {
@@ -469,10 +448,7 @@ class FileReadToStreamResponseParams extends bindings.Struct {
   FileReadToStreamResponseParams() : super(kVersions.last.size);
 
   static FileReadToStreamResponseParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static FileReadToStreamResponseParams decode(bindings.Decoder decoder0) {
@@ -526,10 +502,7 @@ class FileWriteFromStreamParams extends bindings.Struct {
   FileWriteFromStreamParams() : super(kVersions.last.size);
 
   static FileWriteFromStreamParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static FileWriteFromStreamParams decode(bindings.Decoder decoder0) {
@@ -595,10 +568,7 @@ class FileWriteFromStreamResponseParams extends bindings.Struct {
   FileWriteFromStreamResponseParams() : super(kVersions.last.size);
 
   static FileWriteFromStreamResponseParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static FileWriteFromStreamResponseParams decode(bindings.Decoder decoder0) {
@@ -649,10 +619,7 @@ class FileTellParams extends bindings.Struct {
   FileTellParams() : super(kVersions.last.size);
 
   static FileTellParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static FileTellParams decode(bindings.Decoder decoder0) {
@@ -698,10 +665,7 @@ class FileTellResponseParams extends bindings.Struct {
   FileTellResponseParams() : super(kVersions.last.size);
 
   static FileTellResponseParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static FileTellResponseParams decode(bindings.Decoder decoder0) {
@@ -761,10 +725,7 @@ class FileSeekParams extends bindings.Struct {
   FileSeekParams() : super(kVersions.last.size);
 
   static FileSeekParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static FileSeekParams decode(bindings.Decoder decoder0) {
@@ -824,10 +785,7 @@ class FileSeekResponseParams extends bindings.Struct {
   FileSeekResponseParams() : super(kVersions.last.size);
 
   static FileSeekResponseParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static FileSeekResponseParams decode(bindings.Decoder decoder0) {
@@ -885,10 +843,7 @@ class FileStatParams extends bindings.Struct {
   FileStatParams() : super(kVersions.last.size);
 
   static FileStatParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static FileStatParams decode(bindings.Decoder decoder0) {
@@ -934,10 +889,7 @@ class FileStatResponseParams extends bindings.Struct {
   FileStatResponseParams() : super(kVersions.last.size);
 
   static FileStatResponseParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static FileStatResponseParams decode(bindings.Decoder decoder0) {
@@ -997,10 +949,7 @@ class FileTruncateParams extends bindings.Struct {
   FileTruncateParams() : super(kVersions.last.size);
 
   static FileTruncateParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static FileTruncateParams decode(bindings.Decoder decoder0) {
@@ -1052,10 +1001,7 @@ class FileTruncateResponseParams extends bindings.Struct {
   FileTruncateResponseParams() : super(kVersions.last.size);
 
   static FileTruncateResponseParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static FileTruncateResponseParams decode(bindings.Decoder decoder0) {
@@ -1108,10 +1054,7 @@ class FileTouchParams extends bindings.Struct {
   FileTouchParams() : super(kVersions.last.size);
 
   static FileTouchParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static FileTouchParams decode(bindings.Decoder decoder0) {
@@ -1172,10 +1115,7 @@ class FileTouchResponseParams extends bindings.Struct {
   FileTouchResponseParams() : super(kVersions.last.size);
 
   static FileTouchResponseParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static FileTouchResponseParams decode(bindings.Decoder decoder0) {
@@ -1227,10 +1167,7 @@ class FileDupParams extends bindings.Struct {
   FileDupParams() : super(kVersions.last.size);
 
   static FileDupParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static FileDupParams decode(bindings.Decoder decoder0) {
@@ -1282,10 +1219,7 @@ class FileDupResponseParams extends bindings.Struct {
   FileDupResponseParams() : super(kVersions.last.size);
 
   static FileDupResponseParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static FileDupResponseParams decode(bindings.Decoder decoder0) {
@@ -1338,10 +1272,7 @@ class FileReopenParams extends bindings.Struct {
   FileReopenParams() : super(kVersions.last.size);
 
   static FileReopenParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static FileReopenParams decode(bindings.Decoder decoder0) {
@@ -1400,10 +1331,7 @@ class FileReopenResponseParams extends bindings.Struct {
   FileReopenResponseParams() : super(kVersions.last.size);
 
   static FileReopenResponseParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static FileReopenResponseParams decode(bindings.Decoder decoder0) {
@@ -1454,10 +1382,7 @@ class FileAsBufferParams extends bindings.Struct {
   FileAsBufferParams() : super(kVersions.last.size);
 
   static FileAsBufferParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static FileAsBufferParams decode(bindings.Decoder decoder0) {
@@ -1503,10 +1428,7 @@ class FileAsBufferResponseParams extends bindings.Struct {
   FileAsBufferResponseParams() : super(kVersions.last.size);
 
   static FileAsBufferResponseParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static FileAsBufferResponseParams decode(bindings.Decoder decoder0) {
@@ -1566,10 +1488,7 @@ class FileIoctlParams extends bindings.Struct {
   FileIoctlParams() : super(kVersions.last.size);
 
   static FileIoctlParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static FileIoctlParams decode(bindings.Decoder decoder0) {
@@ -1629,10 +1548,7 @@ class FileIoctlResponseParams extends bindings.Struct {
   FileIoctlResponseParams() : super(kVersions.last.size);
 
   static FileIoctlResponseParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static FileIoctlResponseParams decode(bindings.Decoder decoder0) {

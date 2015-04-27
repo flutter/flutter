@@ -8,8 +8,8 @@ import 'dart:async';
 
 import 'package:mojo/public/dart/bindings.dart' as bindings;
 import 'package:mojo/public/dart/core.dart' as core;
-import 'package:mojo/files/file.mojom.dart' as file_mojom;
-import 'package:mojo/files/types.mojom.dart' as types_mojom;
+import 'package:mojo/services/files/public/interfaces/file.mojom.dart' as file_mojom;
+import 'package:mojo/services/files/public/interfaces/types.mojom.dart' as types_mojom;
 
 
 class DirectoryReadParams extends bindings.Struct {
@@ -20,10 +20,7 @@ class DirectoryReadParams extends bindings.Struct {
   DirectoryReadParams() : super(kVersions.last.size);
 
   static DirectoryReadParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static DirectoryReadParams decode(bindings.Decoder decoder0) {
@@ -69,10 +66,7 @@ class DirectoryReadResponseParams extends bindings.Struct {
   DirectoryReadResponseParams() : super(kVersions.last.size);
 
   static DirectoryReadResponseParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static DirectoryReadResponseParams decode(bindings.Decoder decoder0) {
@@ -149,10 +143,7 @@ class DirectoryStatParams extends bindings.Struct {
   DirectoryStatParams() : super(kVersions.last.size);
 
   static DirectoryStatParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static DirectoryStatParams decode(bindings.Decoder decoder0) {
@@ -198,10 +189,7 @@ class DirectoryStatResponseParams extends bindings.Struct {
   DirectoryStatResponseParams() : super(kVersions.last.size);
 
   static DirectoryStatResponseParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static DirectoryStatResponseParams decode(bindings.Decoder decoder0) {
@@ -262,10 +250,7 @@ class DirectoryTouchParams extends bindings.Struct {
   DirectoryTouchParams() : super(kVersions.last.size);
 
   static DirectoryTouchParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static DirectoryTouchParams decode(bindings.Decoder decoder0) {
@@ -326,10 +311,7 @@ class DirectoryTouchResponseParams extends bindings.Struct {
   DirectoryTouchResponseParams() : super(kVersions.last.size);
 
   static DirectoryTouchResponseParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static DirectoryTouchResponseParams decode(bindings.Decoder decoder0) {
@@ -383,10 +365,7 @@ class DirectoryOpenFileParams extends bindings.Struct {
   DirectoryOpenFileParams() : super(kVersions.last.size);
 
   static DirectoryOpenFileParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static DirectoryOpenFileParams decode(bindings.Decoder decoder0) {
@@ -452,10 +431,7 @@ class DirectoryOpenFileResponseParams extends bindings.Struct {
   DirectoryOpenFileResponseParams() : super(kVersions.last.size);
 
   static DirectoryOpenFileResponseParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static DirectoryOpenFileResponseParams decode(bindings.Decoder decoder0) {
@@ -509,10 +485,7 @@ class DirectoryOpenDirectoryParams extends bindings.Struct {
   DirectoryOpenDirectoryParams() : super(kVersions.last.size);
 
   static DirectoryOpenDirectoryParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static DirectoryOpenDirectoryParams decode(bindings.Decoder decoder0) {
@@ -578,10 +551,7 @@ class DirectoryOpenDirectoryResponseParams extends bindings.Struct {
   DirectoryOpenDirectoryResponseParams() : super(kVersions.last.size);
 
   static DirectoryOpenDirectoryResponseParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static DirectoryOpenDirectoryResponseParams decode(bindings.Decoder decoder0) {
@@ -634,10 +604,7 @@ class DirectoryRenameParams extends bindings.Struct {
   DirectoryRenameParams() : super(kVersions.last.size);
 
   static DirectoryRenameParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static DirectoryRenameParams decode(bindings.Decoder decoder0) {
@@ -696,10 +663,7 @@ class DirectoryRenameResponseParams extends bindings.Struct {
   DirectoryRenameResponseParams() : super(kVersions.last.size);
 
   static DirectoryRenameResponseParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static DirectoryRenameResponseParams decode(bindings.Decoder decoder0) {
@@ -752,10 +716,7 @@ class DirectoryDeleteParams extends bindings.Struct {
   DirectoryDeleteParams() : super(kVersions.last.size);
 
   static DirectoryDeleteParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static DirectoryDeleteParams decode(bindings.Decoder decoder0) {
@@ -814,10 +775,7 @@ class DirectoryDeleteResponseParams extends bindings.Struct {
   DirectoryDeleteResponseParams() : super(kVersions.last.size);
 
   static DirectoryDeleteResponseParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static DirectoryDeleteResponseParams decode(bindings.Decoder decoder0) {

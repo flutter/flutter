@@ -8,7 +8,7 @@ import 'dart:async';
 
 import 'package:mojo/public/dart/bindings.dart' as bindings;
 import 'package:mojo/public/dart/core.dart' as core;
-import 'package:sky/input_event.mojom.dart' as input_event_mojom;
+import 'package:sky/services/viewport/input_event.mojom.dart' as input_event_mojom;
 
 
 class ViewportObserverOnViewportMetricsChangedParams extends bindings.Struct {
@@ -22,10 +22,7 @@ class ViewportObserverOnViewportMetricsChangedParams extends bindings.Struct {
   ViewportObserverOnViewportMetricsChangedParams() : super(kVersions.last.size);
 
   static ViewportObserverOnViewportMetricsChangedParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static ViewportObserverOnViewportMetricsChangedParams decode(bindings.Decoder decoder0) {
@@ -91,10 +88,7 @@ class ViewportObserverOnInputEventParams extends bindings.Struct {
   ViewportObserverOnInputEventParams() : super(kVersions.last.size);
 
   static ViewportObserverOnInputEventParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static ViewportObserverOnInputEventParams decode(bindings.Decoder decoder0) {
@@ -147,10 +141,7 @@ class ViewportObserverLoadUrlParams extends bindings.Struct {
   ViewportObserverLoadUrlParams() : super(kVersions.last.size);
 
   static ViewportObserverLoadUrlParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static ViewportObserverLoadUrlParams decode(bindings.Decoder decoder0) {

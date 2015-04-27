@@ -8,7 +8,7 @@ import 'dart:async';
 
 import 'package:mojo/public/dart/bindings.dart' as bindings;
 import 'package:mojo/public/dart/core.dart' as core;
-import 'package:mojo/command_buffer.mojom.dart' as command_buffer_mojom;
+import 'package:mojo/services/gpu/public/interfaces/command_buffer.mojom.dart' as command_buffer_mojom;
 
 
 class GpuCreateOffscreenGleS2ContextParams extends bindings.Struct {
@@ -20,10 +20,7 @@ class GpuCreateOffscreenGleS2ContextParams extends bindings.Struct {
   GpuCreateOffscreenGleS2ContextParams() : super(kVersions.last.size);
 
   static GpuCreateOffscreenGleS2ContextParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static GpuCreateOffscreenGleS2ContextParams decode(bindings.Decoder decoder0) {

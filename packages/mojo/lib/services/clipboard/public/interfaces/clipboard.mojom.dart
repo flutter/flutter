@@ -19,10 +19,7 @@ class ClipboardGetSequenceNumberParams extends bindings.Struct {
   ClipboardGetSequenceNumberParams() : super(kVersions.last.size);
 
   static ClipboardGetSequenceNumberParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static ClipboardGetSequenceNumberParams decode(bindings.Decoder decoder0) {
@@ -74,10 +71,7 @@ class ClipboardGetSequenceNumberResponseParams extends bindings.Struct {
   ClipboardGetSequenceNumberResponseParams() : super(kVersions.last.size);
 
   static ClipboardGetSequenceNumberResponseParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static ClipboardGetSequenceNumberResponseParams decode(bindings.Decoder decoder0) {
@@ -129,10 +123,7 @@ class ClipboardGetAvailableMimeTypesParams extends bindings.Struct {
   ClipboardGetAvailableMimeTypesParams() : super(kVersions.last.size);
 
   static ClipboardGetAvailableMimeTypesParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static ClipboardGetAvailableMimeTypesParams decode(bindings.Decoder decoder0) {
@@ -184,10 +175,7 @@ class ClipboardGetAvailableMimeTypesResponseParams extends bindings.Struct {
   ClipboardGetAvailableMimeTypesResponseParams() : super(kVersions.last.size);
 
   static ClipboardGetAvailableMimeTypesResponseParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static ClipboardGetAvailableMimeTypesResponseParams decode(bindings.Decoder decoder0) {
@@ -256,10 +244,7 @@ class ClipboardReadMimeTypeParams extends bindings.Struct {
   ClipboardReadMimeTypeParams() : super(kVersions.last.size);
 
   static ClipboardReadMimeTypeParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static ClipboardReadMimeTypeParams decode(bindings.Decoder decoder0) {
@@ -318,10 +303,7 @@ class ClipboardReadMimeTypeResponseParams extends bindings.Struct {
   ClipboardReadMimeTypeResponseParams() : super(kVersions.last.size);
 
   static ClipboardReadMimeTypeResponseParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static ClipboardReadMimeTypeResponseParams decode(bindings.Decoder decoder0) {
@@ -374,10 +356,7 @@ class ClipboardWriteClipboardDataParams extends bindings.Struct {
   ClipboardWriteClipboardDataParams() : super(kVersions.last.size);
 
   static ClipboardWriteClipboardDataParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static ClipboardWriteClipboardDataParams decode(bindings.Decoder decoder0) {
@@ -496,13 +475,13 @@ abstract class Clipboard {
   Future<ClipboardReadMimeTypeResponseParams> readMimeType(int clipboardType,String mimeType,[Function responseFactory = null]);
   void writeClipboardData(int clipboardType, Map<String, List<int>> data);
 
-  static const MIME_TYPE_TEXT = "text/plain";
-  static const MIME_TYPE_HTML = "text/html";
-  static const MIME_TYPE_URL = "text/url";
+  static final MIME_TYPE_TEXT = "text/plain";
+  static final MIME_TYPE_HTML = "text/html";
+  static final MIME_TYPE_URL = "text/url";
   
-  static const int Type_COPY_PASTE = 0;
-  static const int Type_SELECTION = 1;
-  static const int Type_DRAG = 2;
+  static final int Type_COPY_PASTE = 0;
+  static final int Type_SELECTION = 1;
+  static final int Type_DRAG = 2;
 }
 
 

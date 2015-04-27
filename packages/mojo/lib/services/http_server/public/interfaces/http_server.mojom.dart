@@ -8,8 +8,8 @@ import 'dart:async';
 
 import 'package:mojo/public/dart/bindings.dart' as bindings;
 import 'package:mojo/public/dart/core.dart' as core;
-import 'package:http_server/http_request.mojom.dart' as http_request_mojom;
-import 'package:http_server/http_response.mojom.dart' as http_response_mojom;
+import 'package:mojo/services/http_server/public/interfaces/http_request.mojom.dart' as http_request_mojom;
+import 'package:mojo/services/http_server/public/interfaces/http_response.mojom.dart' as http_response_mojom;
 
 
 class HttpServerSetHandlerParams extends bindings.Struct {
@@ -22,10 +22,7 @@ class HttpServerSetHandlerParams extends bindings.Struct {
   HttpServerSetHandlerParams() : super(kVersions.last.size);
 
   static HttpServerSetHandlerParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static HttpServerSetHandlerParams decode(bindings.Decoder decoder0) {
@@ -84,10 +81,7 @@ class HttpServerSetHandlerResponseParams extends bindings.Struct {
   HttpServerSetHandlerResponseParams() : super(kVersions.last.size);
 
   static HttpServerSetHandlerResponseParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static HttpServerSetHandlerResponseParams decode(bindings.Decoder decoder0) {
@@ -138,10 +132,7 @@ class HttpServerGetPortParams extends bindings.Struct {
   HttpServerGetPortParams() : super(kVersions.last.size);
 
   static HttpServerGetPortParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static HttpServerGetPortParams decode(bindings.Decoder decoder0) {
@@ -186,10 +177,7 @@ class HttpServerGetPortResponseParams extends bindings.Struct {
   HttpServerGetPortResponseParams() : super(kVersions.last.size);
 
   static HttpServerGetPortResponseParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static HttpServerGetPortResponseParams decode(bindings.Decoder decoder0) {
@@ -241,10 +229,7 @@ class HttpHandlerHandleRequestParams extends bindings.Struct {
   HttpHandlerHandleRequestParams() : super(kVersions.last.size);
 
   static HttpHandlerHandleRequestParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static HttpHandlerHandleRequestParams decode(bindings.Decoder decoder0) {
@@ -297,10 +282,7 @@ class HttpHandlerHandleRequestResponseParams extends bindings.Struct {
   HttpHandlerHandleRequestResponseParams() : super(kVersions.last.size);
 
   static HttpHandlerHandleRequestResponseParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static HttpHandlerHandleRequestResponseParams decode(bindings.Decoder decoder0) {

@@ -8,9 +8,9 @@ import 'dart:async';
 
 import 'package:mojo/public/dart/bindings.dart' as bindings;
 import 'package:mojo/public/dart/core.dart' as core;
-import 'package:mojo/net_address.mojom.dart' as net_address_mojom;
-import 'package:mojo/network_error.mojom.dart' as network_error_mojom;
-import 'package:mojo/tcp_connected_socket.mojom.dart' as tcp_connected_socket_mojom;
+import 'package:mojo/services/network/public/interfaces/net_address.mojom.dart' as net_address_mojom;
+import 'package:mojo/services/network/public/interfaces/network_error.mojom.dart' as network_error_mojom;
+import 'package:mojo/services/network/public/interfaces/tcp_connected_socket.mojom.dart' as tcp_connected_socket_mojom;
 
 
 class TcpServerSocketAcceptParams extends bindings.Struct {
@@ -24,10 +24,7 @@ class TcpServerSocketAcceptParams extends bindings.Struct {
   TcpServerSocketAcceptParams() : super(kVersions.last.size);
 
   static TcpServerSocketAcceptParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static TcpServerSocketAcceptParams decode(bindings.Decoder decoder0) {
@@ -94,10 +91,7 @@ class TcpServerSocketAcceptResponseParams extends bindings.Struct {
   TcpServerSocketAcceptResponseParams() : super(kVersions.last.size);
 
   static TcpServerSocketAcceptResponseParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static TcpServerSocketAcceptResponseParams decode(bindings.Decoder decoder0) {

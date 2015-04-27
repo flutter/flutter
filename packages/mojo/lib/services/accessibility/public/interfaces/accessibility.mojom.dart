@@ -8,7 +8,7 @@ import 'dart:async';
 
 import 'package:mojo/public/dart/bindings.dart' as bindings;
 import 'package:mojo/public/dart/core.dart' as core;
-import 'package:mojo/geometry.mojom.dart' as geometry_mojom;
+import 'package:mojo/services/geometry/public/interfaces/geometry.mojom.dart' as geometry_mojom;
 
 
 class AxNode extends bindings.Struct {
@@ -25,10 +25,7 @@ class AxNode extends bindings.Struct {
   AxNode() : super(kVersions.last.size);
 
   static AxNode deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static AxNode decode(bindings.Decoder decoder0) {
@@ -118,10 +115,7 @@ class AxLink extends bindings.Struct {
   AxLink() : super(kVersions.last.size);
 
   static AxLink deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static AxLink decode(bindings.Decoder decoder0) {
@@ -173,10 +167,7 @@ class AxText extends bindings.Struct {
   AxText() : super(kVersions.last.size);
 
   static AxText deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static AxText decode(bindings.Decoder decoder0) {
@@ -227,10 +218,7 @@ class AxProviderGetTreeParams extends bindings.Struct {
   AxProviderGetTreeParams() : super(kVersions.last.size);
 
   static AxProviderGetTreeParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static AxProviderGetTreeParams decode(bindings.Decoder decoder0) {
@@ -275,10 +263,7 @@ class AxProviderGetTreeResponseParams extends bindings.Struct {
   AxProviderGetTreeResponseParams() : super(kVersions.last.size);
 
   static AxProviderGetTreeResponseParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static AxProviderGetTreeResponseParams decode(bindings.Decoder decoder0) {

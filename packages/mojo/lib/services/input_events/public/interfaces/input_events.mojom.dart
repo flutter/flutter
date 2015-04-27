@@ -8,9 +8,9 @@ import 'dart:async';
 
 import 'package:mojo/public/dart/bindings.dart' as bindings;
 import 'package:mojo/public/dart/core.dart' as core;
-import 'package:mojo/geometry.mojom.dart' as geometry_mojom;
-import 'package:mojo/input_event_constants.mojom.dart' as input_event_constants_mojom;
-import 'package:mojo/input_key_codes.mojom.dart' as input_key_codes_mojom;
+import 'package:mojo/services/geometry/public/interfaces/geometry.mojom.dart' as geometry_mojom;
+import 'package:mojo/services/input_events/public/interfaces/input_event_constants.mojom.dart' as input_event_constants_mojom;
+import 'package:mojo/services/input_events/public/interfaces/input_key_codes.mojom.dart' as input_key_codes_mojom;
 
 
 class KeyData extends bindings.Struct {
@@ -28,10 +28,7 @@ class KeyData extends bindings.Struct {
   KeyData() : super(kVersions.last.size);
 
   static KeyData deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static KeyData decode(bindings.Decoder decoder0) {
@@ -136,10 +133,7 @@ class PointerData extends bindings.Struct {
   PointerData() : super(kVersions.last.size);
 
   static PointerData deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static PointerData decode(bindings.Decoder decoder0) {
@@ -272,10 +266,7 @@ class Event extends bindings.Struct {
   Event() : super(kVersions.last.size);
 
   static Event deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static Event decode(bindings.Decoder decoder0) {

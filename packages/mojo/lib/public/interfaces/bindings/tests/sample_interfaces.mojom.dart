@@ -8,9 +8,9 @@ import 'dart:async';
 
 import 'package:mojo/public/dart/bindings.dart' as bindings;
 import 'package:mojo/public/dart/core.dart' as core;
-const kLong = 4405;
+final kLong = 4405;
 
-const int Enum_VALUE = 0;
+final int Enum_VALUE = 0;
 
 
 class ProviderEchoStringParams extends bindings.Struct {
@@ -22,10 +22,7 @@ class ProviderEchoStringParams extends bindings.Struct {
   ProviderEchoStringParams() : super(kVersions.last.size);
 
   static ProviderEchoStringParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static ProviderEchoStringParams decode(bindings.Decoder decoder0) {
@@ -77,10 +74,7 @@ class ProviderEchoStringResponseParams extends bindings.Struct {
   ProviderEchoStringResponseParams() : super(kVersions.last.size);
 
   static ProviderEchoStringResponseParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static ProviderEchoStringResponseParams decode(bindings.Decoder decoder0) {
@@ -133,10 +127,7 @@ class ProviderEchoStringsParams extends bindings.Struct {
   ProviderEchoStringsParams() : super(kVersions.last.size);
 
   static ProviderEchoStringsParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static ProviderEchoStringsParams decode(bindings.Decoder decoder0) {
@@ -196,10 +187,7 @@ class ProviderEchoStringsResponseParams extends bindings.Struct {
   ProviderEchoStringsResponseParams() : super(kVersions.last.size);
 
   static ProviderEchoStringsResponseParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static ProviderEchoStringsResponseParams decode(bindings.Decoder decoder0) {
@@ -258,10 +246,7 @@ class ProviderEchoMessagePipeHandleParams extends bindings.Struct {
   ProviderEchoMessagePipeHandleParams() : super(kVersions.last.size);
 
   static ProviderEchoMessagePipeHandleParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static ProviderEchoMessagePipeHandleParams decode(bindings.Decoder decoder0) {
@@ -313,10 +298,7 @@ class ProviderEchoMessagePipeHandleResponseParams extends bindings.Struct {
   ProviderEchoMessagePipeHandleResponseParams() : super(kVersions.last.size);
 
   static ProviderEchoMessagePipeHandleResponseParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static ProviderEchoMessagePipeHandleResponseParams decode(bindings.Decoder decoder0) {
@@ -368,10 +350,7 @@ class ProviderEchoEnumParams extends bindings.Struct {
   ProviderEchoEnumParams() : super(kVersions.last.size);
 
   static ProviderEchoEnumParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static ProviderEchoEnumParams decode(bindings.Decoder decoder0) {
@@ -423,10 +402,7 @@ class ProviderEchoEnumResponseParams extends bindings.Struct {
   ProviderEchoEnumResponseParams() : super(kVersions.last.size);
 
   static ProviderEchoEnumResponseParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static ProviderEchoEnumResponseParams decode(bindings.Decoder decoder0) {
@@ -478,10 +454,7 @@ class ProviderEchoIntParams extends bindings.Struct {
   ProviderEchoIntParams() : super(kVersions.last.size);
 
   static ProviderEchoIntParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static ProviderEchoIntParams decode(bindings.Decoder decoder0) {
@@ -533,10 +506,7 @@ class ProviderEchoIntResponseParams extends bindings.Struct {
   ProviderEchoIntResponseParams() : super(kVersions.last.size);
 
   static ProviderEchoIntResponseParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static ProviderEchoIntResponseParams decode(bindings.Decoder decoder0) {
@@ -576,181 +546,6 @@ class ProviderEchoIntResponseParams extends bindings.Struct {
   String toString() {
     return "ProviderEchoIntResponseParams("
            "a: $a" ")";
-  }
-}
-
-class IntegerAccessorGetIntegerParams extends bindings.Struct {
-  static const List<bindings.StructDataHeader> kVersions = const [
-    const bindings.StructDataHeader(8, 0)
-  ];
-
-  IntegerAccessorGetIntegerParams() : super(kVersions.last.size);
-
-  static IntegerAccessorGetIntegerParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
-  }
-
-  static IntegerAccessorGetIntegerParams decode(bindings.Decoder decoder0) {
-    if (decoder0 == null) {
-      return null;
-    }
-    IntegerAccessorGetIntegerParams result = new IntegerAccessorGetIntegerParams();
-
-    var mainDataHeader = decoder0.decodeStructDataHeader();
-    if (mainDataHeader.version <= kVersions.last.version) {
-      // Scan in reverse order to optimize for more recent versions.
-      for (int i = kVersions.length - 1; i >= 0; --i) {
-        if (mainDataHeader.version >= kVersions[i].version) {
-          if (mainDataHeader.size != kVersions[i].size)
-            throw new bindings.MojoCodecError(
-                'Header doesn\'t correspond to any known version.');
-        }
-      }
-    } else if (mainDataHeader.size < kVersions.last.size) {
-      throw new bindings.MojoCodecError(
-        'Message newer than the last known version cannot be shorter than '
-        'required by the last known version.');
-    }
-    return result;
-  }
-
-  void encode(bindings.Encoder encoder) {
-    encoder.getStructEncoderAtOffset(kVersions.last);
-  }
-
-  String toString() {
-    return "IntegerAccessorGetIntegerParams("")";
-  }
-}
-
-class IntegerAccessorGetIntegerResponseParams extends bindings.Struct {
-  static const List<bindings.StructDataHeader> kVersions = const [
-    const bindings.StructDataHeader(16, 0),
-    const bindings.StructDataHeader(24, 2)
-  ];
-  int data = 0;
-  int type = 0;
-
-  IntegerAccessorGetIntegerResponseParams() : super(kVersions.last.size);
-
-  static IntegerAccessorGetIntegerResponseParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
-  }
-
-  static IntegerAccessorGetIntegerResponseParams decode(bindings.Decoder decoder0) {
-    if (decoder0 == null) {
-      return null;
-    }
-    IntegerAccessorGetIntegerResponseParams result = new IntegerAccessorGetIntegerResponseParams();
-
-    var mainDataHeader = decoder0.decodeStructDataHeader();
-    if (mainDataHeader.version <= kVersions.last.version) {
-      // Scan in reverse order to optimize for more recent versions.
-      for (int i = kVersions.length - 1; i >= 0; --i) {
-        if (mainDataHeader.version >= kVersions[i].version) {
-          if (mainDataHeader.size != kVersions[i].size)
-            throw new bindings.MojoCodecError(
-                'Header doesn\'t correspond to any known version.');
-        }
-      }
-    } else if (mainDataHeader.size < kVersions.last.size) {
-      throw new bindings.MojoCodecError(
-        'Message newer than the last known version cannot be shorter than '
-        'required by the last known version.');
-    }
-    if (mainDataHeader.version >= 0) {
-      
-      result.data = decoder0.decodeInt64(8);
-    }
-    if (mainDataHeader.version >= 2) {
-      
-      result.type = decoder0.decodeInt32(16);
-    }
-    return result;
-  }
-
-  void encode(bindings.Encoder encoder) {
-    var encoder0 = encoder.getStructEncoderAtOffset(kVersions.last);
-    
-    encoder0.encodeInt64(data, 8);
-    
-    encoder0.encodeInt32(type, 16);
-  }
-
-  String toString() {
-    return "IntegerAccessorGetIntegerResponseParams("
-           "data: $data" ", "
-           "type: $type" ")";
-  }
-}
-
-class IntegerAccessorSetIntegerParams extends bindings.Struct {
-  static const List<bindings.StructDataHeader> kVersions = const [
-    const bindings.StructDataHeader(16, 0),
-    const bindings.StructDataHeader(24, 3)
-  ];
-  int data = 0;
-  int type = 0;
-
-  IntegerAccessorSetIntegerParams() : super(kVersions.last.size);
-
-  static IntegerAccessorSetIntegerParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
-  }
-
-  static IntegerAccessorSetIntegerParams decode(bindings.Decoder decoder0) {
-    if (decoder0 == null) {
-      return null;
-    }
-    IntegerAccessorSetIntegerParams result = new IntegerAccessorSetIntegerParams();
-
-    var mainDataHeader = decoder0.decodeStructDataHeader();
-    if (mainDataHeader.version <= kVersions.last.version) {
-      // Scan in reverse order to optimize for more recent versions.
-      for (int i = kVersions.length - 1; i >= 0; --i) {
-        if (mainDataHeader.version >= kVersions[i].version) {
-          if (mainDataHeader.size != kVersions[i].size)
-            throw new bindings.MojoCodecError(
-                'Header doesn\'t correspond to any known version.');
-        }
-      }
-    } else if (mainDataHeader.size < kVersions.last.size) {
-      throw new bindings.MojoCodecError(
-        'Message newer than the last known version cannot be shorter than '
-        'required by the last known version.');
-    }
-    if (mainDataHeader.version >= 0) {
-      
-      result.data = decoder0.decodeInt64(8);
-    }
-    if (mainDataHeader.version >= 3) {
-      
-      result.type = decoder0.decodeInt32(16);
-    }
-    return result;
-  }
-
-  void encode(bindings.Encoder encoder) {
-    var encoder0 = encoder.getStructEncoderAtOffset(kVersions.last);
-    
-    encoder0.encodeInt64(data, 8);
-    
-    encoder0.encodeInt32(type, 16);
-  }
-
-  String toString() {
-    return "IntegerAccessorSetIntegerParams("
-           "data: $data" ", "
-           "type: $type" ")";
   }
 }
 const int kProvider_echoString_name = 0;
@@ -1097,190 +892,6 @@ class ProviderStub extends bindings.Stub {
   String toString() {
     var superString = super.toString();
     return "ProviderStub($superString)";
-  }
-}
-
-const int kIntegerAccessor_getInteger_name = 0;
-const int kIntegerAccessor_setInteger_name = 1;
-
-const String IntegerAccessorName =
-      'sample::IntegerAccessor';
-
-abstract class IntegerAccessor {
-  Future<IntegerAccessorGetIntegerResponseParams> getInteger([Function responseFactory = null]);
-  void setInteger(int data, int type);
-
-}
-
-
-class IntegerAccessorProxyImpl extends bindings.Proxy {
-  IntegerAccessorProxyImpl.fromEndpoint(
-      core.MojoMessagePipeEndpoint endpoint) : super.fromEndpoint(endpoint);
-
-  IntegerAccessorProxyImpl.fromHandle(core.MojoHandle handle) :
-      super.fromHandle(handle);
-
-  IntegerAccessorProxyImpl.unbound() : super.unbound();
-
-  static IntegerAccessorProxyImpl newFromEndpoint(
-      core.MojoMessagePipeEndpoint endpoint) =>
-      new IntegerAccessorProxyImpl.fromEndpoint(endpoint);
-
-  String get name => IntegerAccessorName;
-
-  void handleResponse(bindings.ServiceMessage message) {
-    switch (message.header.type) {
-      case kIntegerAccessor_getInteger_name:
-        var r = IntegerAccessorGetIntegerResponseParams.deserialize(
-            message.payload);
-        if (!message.header.hasRequestId) {
-          throw 'Expected a message with a valid request Id.';
-        }
-        Completer c = completerMap[message.header.requestId];
-        if (c == null) {
-          throw 'Message had unknown request Id: ${message.header.requestId}';
-        }
-        completerMap.remove(message.header.requestId);
-        assert(!c.isCompleted);
-        c.complete(r);
-        break;
-      default:
-        throw new bindings.MojoCodecError("Unexpected message name");
-        break;
-    }
-  }
-
-  String toString() {
-    var superString = super.toString();
-    return "IntegerAccessorProxyImpl($superString)";
-  }
-}
-
-
-class _IntegerAccessorProxyCalls implements IntegerAccessor {
-  IntegerAccessorProxyImpl _proxyImpl;
-
-  _IntegerAccessorProxyCalls(this._proxyImpl);
-    Future<IntegerAccessorGetIntegerResponseParams> getInteger([Function responseFactory = null]) {
-      assert(_proxyImpl.isBound);
-      var params = new IntegerAccessorGetIntegerParams();
-      return _proxyImpl.sendMessageWithRequestId(
-          params,
-          kIntegerAccessor_getInteger_name,
-          -1,
-          bindings.MessageHeader.kMessageExpectsResponse);
-    }
-    void setInteger(int data, int type) {
-      assert(_proxyImpl.isBound);
-      var params = new IntegerAccessorSetIntegerParams();
-      params.data = data;
-      params.type = type;
-      _proxyImpl.sendMessage(params, kIntegerAccessor_setInteger_name);
-    }
-  
-}
-
-
-class IntegerAccessorProxy implements bindings.ProxyBase {
-  final bindings.Proxy impl;
-  IntegerAccessor ptr;
-  final String name = IntegerAccessorName;
-
-  IntegerAccessorProxy(IntegerAccessorProxyImpl proxyImpl) :
-      impl = proxyImpl,
-      ptr = new _IntegerAccessorProxyCalls(proxyImpl);
-
-  IntegerAccessorProxy.fromEndpoint(
-      core.MojoMessagePipeEndpoint endpoint) :
-      impl = new IntegerAccessorProxyImpl.fromEndpoint(endpoint) {
-    ptr = new _IntegerAccessorProxyCalls(impl);
-  }
-
-  IntegerAccessorProxy.fromHandle(core.MojoHandle handle) :
-      impl = new IntegerAccessorProxyImpl.fromHandle(handle) {
-    ptr = new _IntegerAccessorProxyCalls(impl);
-  }
-
-  IntegerAccessorProxy.unbound() :
-      impl = new IntegerAccessorProxyImpl.unbound() {
-    ptr = new _IntegerAccessorProxyCalls(impl);
-  }
-
-  static IntegerAccessorProxy newFromEndpoint(
-      core.MojoMessagePipeEndpoint endpoint) =>
-      new IntegerAccessorProxy.fromEndpoint(endpoint);
-
-  Future close({bool immediate: false}) => impl.close(immediate: immediate);
-
-  String toString() {
-    return "IntegerAccessorProxy($impl)";
-  }
-}
-
-
-class IntegerAccessorStub extends bindings.Stub {
-  IntegerAccessor _impl = null;
-
-  IntegerAccessorStub.fromEndpoint(
-      core.MojoMessagePipeEndpoint endpoint, [this._impl])
-      : super.fromEndpoint(endpoint);
-
-  IntegerAccessorStub.fromHandle(core.MojoHandle handle, [this._impl])
-      : super.fromHandle(handle);
-
-  IntegerAccessorStub.unbound() : super.unbound();
-
-  static IntegerAccessorStub newFromEndpoint(
-      core.MojoMessagePipeEndpoint endpoint) =>
-      new IntegerAccessorStub.fromEndpoint(endpoint);
-
-  static const String name = IntegerAccessorName;
-
-
-  IntegerAccessorGetIntegerResponseParams _IntegerAccessorGetIntegerResponseParamsFactory(int data, int type) {
-    var result = new IntegerAccessorGetIntegerResponseParams();
-    result.data = data;
-    result.type = type;
-    return result;
-  }
-
-  Future<bindings.Message> handleMessage(bindings.ServiceMessage message) {
-    assert(_impl != null);
-    switch (message.header.type) {
-      case kIntegerAccessor_getInteger_name:
-        var params = IntegerAccessorGetIntegerParams.deserialize(
-            message.payload);
-        return _impl.getInteger(_IntegerAccessorGetIntegerResponseParamsFactory).then((response) {
-          if (response != null) {
-            return buildResponseWithId(
-                response,
-                kIntegerAccessor_getInteger_name,
-                message.header.requestId,
-                bindings.MessageHeader.kMessageIsResponse);
-          }
-        });
-        break;
-      case kIntegerAccessor_setInteger_name:
-        var params = IntegerAccessorSetIntegerParams.deserialize(
-            message.payload);
-        _impl.setInteger(params.data, params.type);
-        break;
-      default:
-        throw new bindings.MojoCodecError("Unexpected message name");
-        break;
-    }
-    return null;
-  }
-
-  IntegerAccessor get impl => _impl;
-      set impl(IntegerAccessor d) {
-    assert(_impl == null);
-    _impl = d;
-  }
-
-  String toString() {
-    var superString = super.toString();
-    return "IntegerAccessorStub($superString)";
   }
 }
 

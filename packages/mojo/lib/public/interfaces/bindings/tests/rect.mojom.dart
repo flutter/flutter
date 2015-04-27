@@ -22,10 +22,7 @@ class Rect extends bindings.Struct {
   Rect() : super(kVersions.last.size);
 
   static Rect deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static Rect decode(bindings.Decoder decoder0) {

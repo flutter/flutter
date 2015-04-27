@@ -8,7 +8,7 @@ import 'dart:async';
 
 import 'package:mojo/public/dart/bindings.dart' as bindings;
 import 'package:mojo/public/dart/core.dart' as core;
-import 'package:mojo/files/file.mojom.dart' as file_mojom;
+import 'package:mojo/services/files/public/interfaces/file.mojom.dart' as file_mojom;
 
 
 class TerminalClientConnectToTerminalParams extends bindings.Struct {
@@ -20,10 +20,7 @@ class TerminalClientConnectToTerminalParams extends bindings.Struct {
   TerminalClientConnectToTerminalParams() : super(kVersions.last.size);
 
   static TerminalClientConnectToTerminalParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static TerminalClientConnectToTerminalParams decode(bindings.Decoder decoder0) {

@@ -8,8 +8,8 @@ import 'dart:async';
 
 import 'package:mojo/public/dart/bindings.dart' as bindings;
 import 'package:mojo/public/dart/core.dart' as core;
-import 'package:mojo/geometry.mojom.dart' as geometry_mojom;
-import 'package:mojo/input_events.mojom.dart' as input_events_mojom;
+import 'package:mojo/services/geometry/public/interfaces/geometry.mojom.dart' as geometry_mojom;
+import 'package:mojo/services/input_events/public/interfaces/input_events.mojom.dart' as input_events_mojom;
 
 
 class WindowManagerInternalCreateWindowManagerForViewManagerClientParams extends bindings.Struct {
@@ -22,10 +22,7 @@ class WindowManagerInternalCreateWindowManagerForViewManagerClientParams extends
   WindowManagerInternalCreateWindowManagerForViewManagerClientParams() : super(kVersions.last.size);
 
   static WindowManagerInternalCreateWindowManagerForViewManagerClientParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static WindowManagerInternalCreateWindowManagerForViewManagerClientParams decode(bindings.Decoder decoder0) {
@@ -84,10 +81,7 @@ class WindowManagerInternalSetViewManagerClientParams extends bindings.Struct {
   WindowManagerInternalSetViewManagerClientParams() : super(kVersions.last.size);
 
   static WindowManagerInternalSetViewManagerClientParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static WindowManagerInternalSetViewManagerClientParams decode(bindings.Decoder decoder0) {
@@ -140,10 +134,7 @@ class WindowManagerInternalClientDispatchInputEventToViewParams extends bindings
   WindowManagerInternalClientDispatchInputEventToViewParams() : super(kVersions.last.size);
 
   static WindowManagerInternalClientDispatchInputEventToViewParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static WindowManagerInternalClientDispatchInputEventToViewParams decode(bindings.Decoder decoder0) {
@@ -203,10 +194,7 @@ class WindowManagerInternalClientSetViewportSizeParams extends bindings.Struct {
   WindowManagerInternalClientSetViewportSizeParams() : super(kVersions.last.size);
 
   static WindowManagerInternalClientSetViewportSizeParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static WindowManagerInternalClientSetViewportSizeParams decode(bindings.Decoder decoder0) {
@@ -259,10 +247,7 @@ class WindowManagerInternalClientCloneAndAnimateParams extends bindings.Struct {
   WindowManagerInternalClientCloneAndAnimateParams() : super(kVersions.last.size);
 
   static WindowManagerInternalClientCloneAndAnimateParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static WindowManagerInternalClientCloneAndAnimateParams decode(bindings.Decoder decoder0) {

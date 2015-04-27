@@ -8,8 +8,8 @@ import 'dart:async';
 
 import 'package:mojo/public/dart/bindings.dart' as bindings;
 import 'package:mojo/public/dart/core.dart' as core;
-import 'package:mojo/command_buffer.mojom.dart' as command_buffer_mojom;
-import 'package:mojo/viewport_parameter_listener.mojom.dart' as viewport_parameter_listener_mojom;
+import 'package:mojo/services/gpu/public/interfaces/command_buffer.mojom.dart' as command_buffer_mojom;
+import 'package:mojo/services/gpu/public/interfaces/viewport_parameter_listener.mojom.dart' as viewport_parameter_listener_mojom;
 
 
 class ContextProviderCreateParams extends bindings.Struct {
@@ -21,10 +21,7 @@ class ContextProviderCreateParams extends bindings.Struct {
   ContextProviderCreateParams() : super(kVersions.last.size);
 
   static ContextProviderCreateParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static ContextProviderCreateParams decode(bindings.Decoder decoder0) {
@@ -76,10 +73,7 @@ class ContextProviderCreateResponseParams extends bindings.Struct {
   ContextProviderCreateResponseParams() : super(kVersions.last.size);
 
   static ContextProviderCreateResponseParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static ContextProviderCreateResponseParams decode(bindings.Decoder decoder0) {

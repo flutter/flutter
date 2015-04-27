@@ -8,57 +8,57 @@ import 'dart:async';
 
 import 'package:mojo/public/dart/bindings.dart' as bindings;
 import 'package:mojo/public/dart/core.dart' as core;
-import 'package:mojo/geometry.mojom.dart' as geometry_mojom;
-import 'package:mojo/surface_id.mojom.dart' as surface_id_mojom;
+import 'package:mojo/services/geometry/public/interfaces/geometry.mojom.dart' as geometry_mojom;
+import 'package:mojo/services/surfaces/public/interfaces/surface_id.mojom.dart' as surface_id_mojom;
 
-const int YUVColorSpace_REC_601 = 0;
-const int YUVColorSpace_REC_709 = 1;
-const int YUVColorSpace_JPEG = 2;
+final int YUVColorSpace_REC_601 = 0;
+final int YUVColorSpace_REC_709 = YUVColorSpace_REC_601 + 1;
+final int YUVColorSpace_JPEG = YUVColorSpace_REC_709 + 1;
 
-const int Material_CHECKERBOARD = 1;
-const int Material_DEBUG_BORDER = 2;
-const int Material_IO_SURFACE_CONTENT = 3;
-const int Material_PICTURE_CONTENT = 4;
-const int Material_RENDER_PASS = 5;
-const int Material_SOLID_COLOR = 6;
-const int Material_STREAM_VIDEO_CONTENT = 7;
-const int Material_SURFACE_CONTENT = 8;
-const int Material_TEXTURE_CONTENT = 9;
-const int Material_TILED_CONTENT = 10;
-const int Material_YUV_VIDEO_CONTENT = 11;
+final int Material_CHECKERBOARD = 1;
+final int Material_DEBUG_BORDER = Material_CHECKERBOARD + 1;
+final int Material_IO_SURFACE_CONTENT = Material_DEBUG_BORDER + 1;
+final int Material_PICTURE_CONTENT = Material_IO_SURFACE_CONTENT + 1;
+final int Material_RENDER_PASS = Material_PICTURE_CONTENT + 1;
+final int Material_SOLID_COLOR = Material_RENDER_PASS + 1;
+final int Material_STREAM_VIDEO_CONTENT = Material_SOLID_COLOR + 1;
+final int Material_SURFACE_CONTENT = Material_STREAM_VIDEO_CONTENT + 1;
+final int Material_TEXTURE_CONTENT = Material_SURFACE_CONTENT + 1;
+final int Material_TILED_CONTENT = Material_TEXTURE_CONTENT + 1;
+final int Material_YUV_VIDEO_CONTENT = Material_TILED_CONTENT + 1;
 
-const int SkXfermode_kClear_Mode = 0;
-const int SkXfermode_kSrc_Mode = 1;
-const int SkXfermode_kDst_Mode = 2;
-const int SkXfermode_kSrcOver_Mode = 3;
-const int SkXfermode_kDstOver_Mode = 4;
-const int SkXfermode_kSrcIn_Mode = 5;
-const int SkXfermode_kDstIn_Mode = 6;
-const int SkXfermode_kSrcOut_Mode = 7;
-const int SkXfermode_kDstOut_Mode = 8;
-const int SkXfermode_kSrcATop_Mode = 9;
-const int SkXfermode_kDstATop_Mode = 10;
-const int SkXfermode_kXor_Mode = 11;
-const int SkXfermode_kPlus_Mode = 12;
-const int SkXfermode_kModulate_Mode = 13;
-const int SkXfermode_kScreen_Mode = 14;
-const int SkXfermode_kLastCoeffMode = 14;
-const int SkXfermode_kOverlay_Mode = 15;
-const int SkXfermode_kDarken_Mode = 16;
-const int SkXfermode_kLighten_Mode = 17;
-const int SkXfermode_kColorDodge_Mode = 18;
-const int SkXfermode_kColorBurn_Mode = 19;
-const int SkXfermode_kHardLight_Mode = 20;
-const int SkXfermode_kSoftLight_Mode = 21;
-const int SkXfermode_kDifference_Mode = 22;
-const int SkXfermode_kExclusion_Mode = 23;
-const int SkXfermode_kMultiply_Mode = 24;
-const int SkXfermode_kLastSeparableMode = 24;
-const int SkXfermode_kHue_Mode = 25;
-const int SkXfermode_kSaturation_Mode = 26;
-const int SkXfermode_kColor_Mode = 27;
-const int SkXfermode_kLuminosity_Mode = 28;
-const int SkXfermode_kLastMode = 28;
+final int SkXfermode_kClear_Mode = 0;
+final int SkXfermode_kSrc_Mode = SkXfermode_kClear_Mode + 1;
+final int SkXfermode_kDst_Mode = SkXfermode_kSrc_Mode + 1;
+final int SkXfermode_kSrcOver_Mode = SkXfermode_kDst_Mode + 1;
+final int SkXfermode_kDstOver_Mode = SkXfermode_kSrcOver_Mode + 1;
+final int SkXfermode_kSrcIn_Mode = SkXfermode_kDstOver_Mode + 1;
+final int SkXfermode_kDstIn_Mode = SkXfermode_kSrcIn_Mode + 1;
+final int SkXfermode_kSrcOut_Mode = SkXfermode_kDstIn_Mode + 1;
+final int SkXfermode_kDstOut_Mode = SkXfermode_kSrcOut_Mode + 1;
+final int SkXfermode_kSrcATop_Mode = SkXfermode_kDstOut_Mode + 1;
+final int SkXfermode_kDstATop_Mode = SkXfermode_kSrcATop_Mode + 1;
+final int SkXfermode_kXor_Mode = SkXfermode_kDstATop_Mode + 1;
+final int SkXfermode_kPlus_Mode = SkXfermode_kXor_Mode + 1;
+final int SkXfermode_kModulate_Mode = SkXfermode_kPlus_Mode + 1;
+final int SkXfermode_kScreen_Mode = SkXfermode_kModulate_Mode + 1;
+final int SkXfermode_kLastCoeffMode = SkXfermode_kScreen_Mode;
+final int SkXfermode_kOverlay_Mode = SkXfermode_kLastCoeffMode + 1;
+final int SkXfermode_kDarken_Mode = SkXfermode_kOverlay_Mode + 1;
+final int SkXfermode_kLighten_Mode = SkXfermode_kDarken_Mode + 1;
+final int SkXfermode_kColorDodge_Mode = SkXfermode_kLighten_Mode + 1;
+final int SkXfermode_kColorBurn_Mode = SkXfermode_kColorDodge_Mode + 1;
+final int SkXfermode_kHardLight_Mode = SkXfermode_kColorBurn_Mode + 1;
+final int SkXfermode_kSoftLight_Mode = SkXfermode_kHardLight_Mode + 1;
+final int SkXfermode_kDifference_Mode = SkXfermode_kSoftLight_Mode + 1;
+final int SkXfermode_kExclusion_Mode = SkXfermode_kDifference_Mode + 1;
+final int SkXfermode_kMultiply_Mode = SkXfermode_kExclusion_Mode + 1;
+final int SkXfermode_kLastSeparableMode = SkXfermode_kMultiply_Mode;
+final int SkXfermode_kHue_Mode = SkXfermode_kLastSeparableMode + 1;
+final int SkXfermode_kSaturation_Mode = SkXfermode_kHue_Mode + 1;
+final int SkXfermode_kColor_Mode = SkXfermode_kSaturation_Mode + 1;
+final int SkXfermode_kLuminosity_Mode = SkXfermode_kColor_Mode + 1;
+final int SkXfermode_kLastMode = SkXfermode_kLuminosity_Mode;
 
 
 class Color extends bindings.Struct {
@@ -70,10 +70,7 @@ class Color extends bindings.Struct {
   Color() : super(kVersions.last.size);
 
   static Color deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static Color decode(bindings.Decoder decoder0) {
@@ -124,10 +121,7 @@ class CheckerboardQuadState extends bindings.Struct {
   CheckerboardQuadState() : super(kVersions.last.size);
 
   static CheckerboardQuadState deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static CheckerboardQuadState decode(bindings.Decoder decoder0) {
@@ -171,10 +165,7 @@ class DebugBorderQuadState extends bindings.Struct {
   DebugBorderQuadState() : super(kVersions.last.size);
 
   static DebugBorderQuadState deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static DebugBorderQuadState decode(bindings.Decoder decoder0) {
@@ -218,10 +209,7 @@ class IoSurfaceContentQuadState extends bindings.Struct {
   IoSurfaceContentQuadState() : super(kVersions.last.size);
 
   static IoSurfaceContentQuadState deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static IoSurfaceContentQuadState decode(bindings.Decoder decoder0) {
@@ -267,10 +255,7 @@ class RenderPassId extends bindings.Struct {
   RenderPassId() : super(kVersions.last.size);
 
   static RenderPassId deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static RenderPassId decode(bindings.Decoder decoder0) {
@@ -333,10 +318,7 @@ class RenderPassQuadState extends bindings.Struct {
   RenderPassQuadState() : super(kVersions.last.size);
 
   static RenderPassQuadState deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static RenderPassQuadState decode(bindings.Decoder decoder0) {
@@ -421,10 +403,7 @@ class SolidColorQuadState extends bindings.Struct {
   SolidColorQuadState() : super(kVersions.last.size);
 
   static SolidColorQuadState deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static SolidColorQuadState decode(bindings.Decoder decoder0) {
@@ -484,10 +463,7 @@ class SurfaceQuadState extends bindings.Struct {
   SurfaceQuadState() : super(kVersions.last.size);
 
   static SurfaceQuadState deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static SurfaceQuadState decode(bindings.Decoder decoder0) {
@@ -547,10 +523,7 @@ class TextureQuadState extends bindings.Struct {
   TextureQuadState() : super(kVersions.last.size);
 
   static TextureQuadState deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static TextureQuadState decode(bindings.Decoder decoder0) {
@@ -658,10 +631,7 @@ class TileQuadState extends bindings.Struct {
   TileQuadState() : super(kVersions.last.size);
 
   static TileQuadState deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static TileQuadState decode(bindings.Decoder decoder0) {
@@ -742,10 +712,7 @@ class StreamVideoQuadState extends bindings.Struct {
   StreamVideoQuadState() : super(kVersions.last.size);
 
   static StreamVideoQuadState deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static StreamVideoQuadState decode(bindings.Decoder decoder0) {
@@ -795,10 +762,7 @@ class YuvVideoQuadState extends bindings.Struct {
   YuvVideoQuadState() : super(kVersions.last.size);
 
   static YuvVideoQuadState deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static YuvVideoQuadState decode(bindings.Decoder decoder0) {
@@ -901,10 +865,7 @@ class Quad extends bindings.Struct {
   Quad() : super(kVersions.last.size);
 
   static Quad deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static Quad decode(bindings.Decoder decoder0) {
@@ -1081,10 +1042,7 @@ class SharedQuadState extends bindings.Struct {
   SharedQuadState() : super(kVersions.last.size);
 
   static SharedQuadState deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static SharedQuadState decode(bindings.Decoder decoder0) {
@@ -1195,10 +1153,7 @@ class Pass extends bindings.Struct {
   Pass() : super(kVersions.last.size);
 
   static Pass deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static Pass decode(bindings.Decoder decoder0) {

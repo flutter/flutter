@@ -8,7 +8,7 @@ import 'dart:async';
 
 import 'package:mojo/public/dart/bindings.dart' as bindings;
 import 'package:mojo/public/dart/core.dart' as core;
-import 'package:mojo/input_events.mojom.dart' as input_events_mojom;
+import 'package:mojo/services/input_events/public/interfaces/input_events.mojom.dart' as input_events_mojom;
 
 
 class TestHarnessOnTestCompleteParams extends bindings.Struct {
@@ -21,10 +21,7 @@ class TestHarnessOnTestCompleteParams extends bindings.Struct {
   TestHarnessOnTestCompleteParams() : super(kVersions.last.size);
 
   static TestHarnessOnTestCompleteParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static TestHarnessOnTestCompleteParams decode(bindings.Decoder decoder0) {
@@ -83,10 +80,7 @@ class TestHarnessDispatchInputEventParams extends bindings.Struct {
   TestHarnessDispatchInputEventParams() : super(kVersions.last.size);
 
   static TestHarnessDispatchInputEventParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static TestHarnessDispatchInputEventParams decode(bindings.Decoder decoder0) {

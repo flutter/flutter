@@ -9,22 +9,22 @@ import 'dart:async';
 import 'package:mojo/public/dart/bindings.dart' as bindings;
 import 'package:mojo/public/dart/core.dart' as core;
 
-const int EventType_UNKNOWN = 0;
-const int EventType_POINTER_CANCEL = 1;
-const int EventType_POINTER_DOWN = 2;
-const int EventType_POINTER_MOVE = 3;
-const int EventType_POINTER_UP = 4;
-const int EventType_GESTURE_FLING_CANCEL = 5;
-const int EventType_GESTURE_FLING_START = 6;
-const int EventType_GESTURE_LONG_PRESS = 7;
-const int EventType_GESTURE_SCROLL_BEGIN = 8;
-const int EventType_GESTURE_SCROLL_END = 9;
-const int EventType_GESTURE_SCROLL_UPDATE = 10;
-const int EventType_GESTURE_SHOW_PRESS = 11;
-const int EventType_GESTURE_TAP = 12;
-const int EventType_GESTURE_TAP_DOWN = 13;
+final int EventType_UNKNOWN = 0;
+final int EventType_POINTER_CANCEL = EventType_UNKNOWN + 1;
+final int EventType_POINTER_DOWN = EventType_POINTER_CANCEL + 1;
+final int EventType_POINTER_MOVE = EventType_POINTER_DOWN + 1;
+final int EventType_POINTER_UP = EventType_POINTER_MOVE + 1;
+final int EventType_GESTURE_FLING_CANCEL = EventType_POINTER_UP + 1;
+final int EventType_GESTURE_FLING_START = EventType_GESTURE_FLING_CANCEL + 1;
+final int EventType_GESTURE_LONG_PRESS = EventType_GESTURE_FLING_START + 1;
+final int EventType_GESTURE_SCROLL_BEGIN = EventType_GESTURE_LONG_PRESS + 1;
+final int EventType_GESTURE_SCROLL_END = EventType_GESTURE_SCROLL_BEGIN + 1;
+final int EventType_GESTURE_SCROLL_UPDATE = EventType_GESTURE_SCROLL_END + 1;
+final int EventType_GESTURE_SHOW_PRESS = EventType_GESTURE_SCROLL_UPDATE + 1;
+final int EventType_GESTURE_TAP = EventType_GESTURE_SHOW_PRESS + 1;
+final int EventType_GESTURE_TAP_DOWN = EventType_GESTURE_TAP + 1;
 
-const int PointerKind_TOUCH = 0;
+final int PointerKind_TOUCH = 0;
 
 
 class PointerData extends bindings.Struct {
@@ -52,10 +52,7 @@ class PointerData extends bindings.Struct {
   PointerData() : super(kVersions.last.size);
 
   static PointerData deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static PointerData decode(bindings.Decoder decoder0) {
@@ -225,10 +222,7 @@ class GestureData extends bindings.Struct {
   GestureData() : super(kVersions.last.size);
 
   static GestureData deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static GestureData decode(bindings.Decoder decoder0) {
@@ -325,10 +319,7 @@ class InputEvent extends bindings.Struct {
   InputEvent() : super(kVersions.last.size);
 
   static InputEvent deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static InputEvent decode(bindings.Decoder decoder0) {

@@ -8,9 +8,9 @@ import 'dart:async';
 
 import 'package:mojo/public/dart/bindings.dart' as bindings;
 import 'package:mojo/public/dart/core.dart' as core;
-import 'package:mojo/geometry.mojom.dart' as geometry_mojom;
-import 'package:mojo/context_provider.mojom.dart' as context_provider_mojom;
-import 'package:mojo/input_events.mojom.dart' as input_events_mojom;
+import 'package:mojo/services/geometry/public/interfaces/geometry.mojom.dart' as geometry_mojom;
+import 'package:mojo/services/gpu/public/interfaces/context_provider.mojom.dart' as context_provider_mojom;
+import 'package:mojo/services/input_events/public/interfaces/input_events.mojom.dart' as input_events_mojom;
 
 
 class ViewportMetrics extends bindings.Struct {
@@ -23,10 +23,7 @@ class ViewportMetrics extends bindings.Struct {
   ViewportMetrics() : super(kVersions.last.size);
 
   static ViewportMetrics deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static ViewportMetrics decode(bindings.Decoder decoder0) {
@@ -86,10 +83,7 @@ class NativeViewportCreateParams extends bindings.Struct {
   NativeViewportCreateParams() : super(kVersions.last.size);
 
   static NativeViewportCreateParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static NativeViewportCreateParams decode(bindings.Decoder decoder0) {
@@ -142,10 +136,7 @@ class NativeViewportCreateResponseParams extends bindings.Struct {
   NativeViewportCreateResponseParams() : super(kVersions.last.size);
 
   static NativeViewportCreateResponseParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static NativeViewportCreateResponseParams decode(bindings.Decoder decoder0) {
@@ -197,10 +188,7 @@ class NativeViewportShowParams extends bindings.Struct {
   NativeViewportShowParams() : super(kVersions.last.size);
 
   static NativeViewportShowParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static NativeViewportShowParams decode(bindings.Decoder decoder0) {
@@ -244,10 +232,7 @@ class NativeViewportHideParams extends bindings.Struct {
   NativeViewportHideParams() : super(kVersions.last.size);
 
   static NativeViewportHideParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static NativeViewportHideParams decode(bindings.Decoder decoder0) {
@@ -291,10 +276,7 @@ class NativeViewportCloseParams extends bindings.Struct {
   NativeViewportCloseParams() : super(kVersions.last.size);
 
   static NativeViewportCloseParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static NativeViewportCloseParams decode(bindings.Decoder decoder0) {
@@ -339,10 +321,7 @@ class NativeViewportSetSizeParams extends bindings.Struct {
   NativeViewportSetSizeParams() : super(kVersions.last.size);
 
   static NativeViewportSetSizeParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static NativeViewportSetSizeParams decode(bindings.Decoder decoder0) {
@@ -395,10 +374,7 @@ class NativeViewportSetEventDispatcherParams extends bindings.Struct {
   NativeViewportSetEventDispatcherParams() : super(kVersions.last.size);
 
   static NativeViewportSetEventDispatcherParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static NativeViewportSetEventDispatcherParams decode(bindings.Decoder decoder0) {
@@ -450,10 +426,7 @@ class NativeViewportGetContextProviderParams extends bindings.Struct {
   NativeViewportGetContextProviderParams() : super(kVersions.last.size);
 
   static NativeViewportGetContextProviderParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static NativeViewportGetContextProviderParams decode(bindings.Decoder decoder0) {
@@ -504,10 +477,7 @@ class NativeViewportRequestMetricsParams extends bindings.Struct {
   NativeViewportRequestMetricsParams() : super(kVersions.last.size);
 
   static NativeViewportRequestMetricsParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static NativeViewportRequestMetricsParams decode(bindings.Decoder decoder0) {
@@ -552,10 +522,7 @@ class NativeViewportRequestMetricsResponseParams extends bindings.Struct {
   NativeViewportRequestMetricsResponseParams() : super(kVersions.last.size);
 
   static NativeViewportRequestMetricsResponseParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static NativeViewportRequestMetricsResponseParams decode(bindings.Decoder decoder0) {
@@ -608,10 +575,7 @@ class NativeViewportEventDispatcherOnEventParams extends bindings.Struct {
   NativeViewportEventDispatcherOnEventParams() : super(kVersions.last.size);
 
   static NativeViewportEventDispatcherOnEventParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static NativeViewportEventDispatcherOnEventParams decode(bindings.Decoder decoder0) {
@@ -663,10 +627,7 @@ class NativeViewportEventDispatcherOnEventResponseParams extends bindings.Struct
   NativeViewportEventDispatcherOnEventResponseParams() : super(kVersions.last.size);
 
   static NativeViewportEventDispatcherOnEventResponseParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static NativeViewportEventDispatcherOnEventResponseParams decode(bindings.Decoder decoder0) {

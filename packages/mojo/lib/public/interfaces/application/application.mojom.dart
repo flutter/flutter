@@ -8,8 +8,8 @@ import 'dart:async';
 
 import 'package:mojo/public/dart/bindings.dart' as bindings;
 import 'package:mojo/public/dart/core.dart' as core;
-import 'package:mojo/service_provider.mojom.dart' as service_provider_mojom;
-import 'package:mojo/shell.mojom.dart' as shell_mojom;
+import 'package:mojo/public/interfaces/application/service_provider.mojom.dart' as service_provider_mojom;
+import 'package:mojo/public/interfaces/application/shell.mojom.dart' as shell_mojom;
 
 
 class ApplicationInitializeParams extends bindings.Struct {
@@ -23,10 +23,7 @@ class ApplicationInitializeParams extends bindings.Struct {
   ApplicationInitializeParams() : super(kVersions.last.size);
 
   static ApplicationInitializeParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static ApplicationInitializeParams decode(bindings.Decoder decoder0) {
@@ -103,7 +100,7 @@ class ApplicationInitializeParams extends bindings.Struct {
 
 class ApplicationAcceptConnectionParams extends bindings.Struct {
   static const List<bindings.StructDataHeader> kVersions = const [
-    const bindings.StructDataHeader(40, 0)
+    const bindings.StructDataHeader(32, 0)
   ];
   String requestorUrl = null;
   Object services = null;
@@ -113,10 +110,7 @@ class ApplicationAcceptConnectionParams extends bindings.Struct {
   ApplicationAcceptConnectionParams() : super(kVersions.last.size);
 
   static ApplicationAcceptConnectionParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static ApplicationAcceptConnectionParams decode(bindings.Decoder decoder0) {
@@ -154,7 +148,7 @@ class ApplicationAcceptConnectionParams extends bindings.Struct {
     }
     if (mainDataHeader.version >= 0) {
       
-      result.resolvedUrl = decoder0.decodeString(32, false);
+      result.resolvedUrl = decoder0.decodeString(24, false);
     }
     return result;
   }
@@ -168,7 +162,7 @@ class ApplicationAcceptConnectionParams extends bindings.Struct {
     
     encoder0.encodeInterface(exposedServices, 20, true);
     
-    encoder0.encodeString(resolvedUrl, 32, false);
+    encoder0.encodeString(resolvedUrl, 24, false);
   }
 
   String toString() {
@@ -188,10 +182,7 @@ class ApplicationRequestQuitParams extends bindings.Struct {
   ApplicationRequestQuitParams() : super(kVersions.last.size);
 
   static ApplicationRequestQuitParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static ApplicationRequestQuitParams decode(bindings.Decoder decoder0) {

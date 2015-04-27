@@ -23,10 +23,7 @@ class HttpResponse extends bindings.Struct {
   HttpResponse() : super(kVersions.last.size);
 
   static HttpResponse deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static HttpResponse decode(bindings.Decoder decoder0) {

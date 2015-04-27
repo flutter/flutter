@@ -20,10 +20,7 @@ class Point extends bindings.Struct {
   Point() : super(kVersions.last.size);
 
   static Point deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static Point decode(bindings.Decoder decoder0) {
@@ -83,10 +80,7 @@ class PointF extends bindings.Struct {
   PointF() : super(kVersions.last.size);
 
   static PointF deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static PointF decode(bindings.Decoder decoder0) {
@@ -146,10 +140,7 @@ class Size extends bindings.Struct {
   Size() : super(kVersions.last.size);
 
   static Size deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static Size decode(bindings.Decoder decoder0) {
@@ -211,10 +202,7 @@ class Rect extends bindings.Struct {
   Rect() : super(kVersions.last.size);
 
   static Rect deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static Rect decode(bindings.Decoder decoder0) {
@@ -290,10 +278,7 @@ class RectF extends bindings.Struct {
   RectF() : super(kVersions.last.size);
 
   static RectF deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static RectF decode(bindings.Decoder decoder0) {
@@ -366,10 +351,7 @@ class Transform extends bindings.Struct {
   Transform() : super(kVersions.last.size);
 
   static Transform deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static Transform decode(bindings.Decoder decoder0) {

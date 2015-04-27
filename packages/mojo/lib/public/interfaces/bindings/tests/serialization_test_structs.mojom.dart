@@ -19,10 +19,7 @@ class Struct1 extends bindings.Struct {
   Struct1() : super(kVersions.last.size);
 
   static Struct1 deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static Struct1 decode(bindings.Decoder decoder0) {
@@ -74,10 +71,7 @@ class Struct2 extends bindings.Struct {
   Struct2() : super(kVersions.last.size);
 
   static Struct2 deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static Struct2 decode(bindings.Decoder decoder0) {
@@ -129,10 +123,7 @@ class Struct3 extends bindings.Struct {
   Struct3() : super(kVersions.last.size);
 
   static Struct3 deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static Struct3 decode(bindings.Decoder decoder0) {
@@ -185,10 +176,7 @@ class Struct4 extends bindings.Struct {
   Struct4() : super(kVersions.last.size);
 
   static Struct4 deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static Struct4 decode(bindings.Decoder decoder0) {
@@ -257,10 +245,7 @@ class Struct5 extends bindings.Struct {
   Struct5() : super(kVersions.last.size);
 
   static Struct5 deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static Struct5 decode(bindings.Decoder decoder0) {
@@ -329,10 +314,7 @@ class Struct6 extends bindings.Struct {
   Struct6() : super(kVersions.last.size);
 
   static Struct6 deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static Struct6 decode(bindings.Decoder decoder0) {
@@ -386,10 +368,7 @@ class StructOfNullables extends bindings.Struct {
   StructOfNullables() : super(kVersions.last.size);
 
   static StructOfNullables deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static StructOfNullables decode(bindings.Decoder decoder0) {

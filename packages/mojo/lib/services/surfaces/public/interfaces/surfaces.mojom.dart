@@ -8,17 +8,17 @@ import 'dart:async';
 
 import 'package:mojo/public/dart/bindings.dart' as bindings;
 import 'package:mojo/public/dart/core.dart' as core;
-import 'package:mojo/geometry.mojom.dart' as geometry_mojom;
-import 'package:mojo/quads.mojom.dart' as quads_mojom;
-import 'package:mojo/surface_id.mojom.dart' as surface_id_mojom;
+import 'package:mojo/services/geometry/public/interfaces/geometry.mojom.dart' as geometry_mojom;
+import 'package:mojo/services/surfaces/public/interfaces/quads.mojom.dart' as quads_mojom;
+import 'package:mojo/services/surfaces/public/interfaces/surface_id.mojom.dart' as surface_id_mojom;
 
-const int ResourceFormat_RGBA_8888 = 0;
-const int ResourceFormat_RGBA_4444 = 1;
-const int ResourceFormat_BGRA_8888 = 2;
-const int ResourceFormat_ALPHA_8 = 3;
-const int ResourceFormat_LUMINANCE_8 = 4;
-const int ResourceFormat_RGB_565 = 5;
-const int ResourceFormat_ETC1 = 6;
+final int ResourceFormat_RGBA_8888 = 0;
+final int ResourceFormat_RGBA_4444 = ResourceFormat_RGBA_8888 + 1;
+final int ResourceFormat_BGRA_8888 = ResourceFormat_RGBA_4444 + 1;
+final int ResourceFormat_ALPHA_8 = ResourceFormat_BGRA_8888 + 1;
+final int ResourceFormat_LUMINANCE_8 = ResourceFormat_ALPHA_8 + 1;
+final int ResourceFormat_RGB_565 = ResourceFormat_LUMINANCE_8 + 1;
+final int ResourceFormat_ETC1 = ResourceFormat_RGB_565 + 1;
 
 
 class Mailbox extends bindings.Struct {
@@ -30,10 +30,7 @@ class Mailbox extends bindings.Struct {
   Mailbox() : super(kVersions.last.size);
 
   static Mailbox deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static Mailbox decode(bindings.Decoder decoder0) {
@@ -87,10 +84,7 @@ class MailboxHolder extends bindings.Struct {
   MailboxHolder() : super(kVersions.last.size);
 
   static MailboxHolder deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static MailboxHolder decode(bindings.Decoder decoder0) {
@@ -163,10 +157,7 @@ class TransferableResource extends bindings.Struct {
   TransferableResource() : super(kVersions.last.size);
 
   static TransferableResource deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static TransferableResource decode(bindings.Decoder decoder0) {
@@ -265,10 +256,7 @@ class ReturnedResource extends bindings.Struct {
   ReturnedResource() : super(kVersions.last.size);
 
   static ReturnedResource deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static ReturnedResource decode(bindings.Decoder decoder0) {
@@ -342,10 +330,7 @@ class Frame extends bindings.Struct {
   Frame() : super(kVersions.last.size);
 
   static Frame deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static Frame decode(bindings.Decoder decoder0) {
@@ -438,10 +423,7 @@ class ResourceReturnerReturnResourcesParams extends bindings.Struct {
   ResourceReturnerReturnResourcesParams() : super(kVersions.last.size);
 
   static ResourceReturnerReturnResourcesParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static ResourceReturnerReturnResourcesParams decode(bindings.Decoder decoder0) {
@@ -509,10 +491,7 @@ class SurfaceGetIdNamespaceParams extends bindings.Struct {
   SurfaceGetIdNamespaceParams() : super(kVersions.last.size);
 
   static SurfaceGetIdNamespaceParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static SurfaceGetIdNamespaceParams decode(bindings.Decoder decoder0) {
@@ -557,10 +536,7 @@ class SurfaceGetIdNamespaceResponseParams extends bindings.Struct {
   SurfaceGetIdNamespaceResponseParams() : super(kVersions.last.size);
 
   static SurfaceGetIdNamespaceResponseParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static SurfaceGetIdNamespaceResponseParams decode(bindings.Decoder decoder0) {
@@ -612,10 +588,7 @@ class SurfaceSetResourceReturnerParams extends bindings.Struct {
   SurfaceSetResourceReturnerParams() : super(kVersions.last.size);
 
   static SurfaceSetResourceReturnerParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static SurfaceSetResourceReturnerParams decode(bindings.Decoder decoder0) {
@@ -667,10 +640,7 @@ class SurfaceCreateSurfaceParams extends bindings.Struct {
   SurfaceCreateSurfaceParams() : super(kVersions.last.size);
 
   static SurfaceCreateSurfaceParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static SurfaceCreateSurfaceParams decode(bindings.Decoder decoder0) {
@@ -723,10 +693,7 @@ class SurfaceSubmitFrameParams extends bindings.Struct {
   SurfaceSubmitFrameParams() : super(kVersions.last.size);
 
   static SurfaceSubmitFrameParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static SurfaceSubmitFrameParams decode(bindings.Decoder decoder0) {
@@ -785,10 +752,7 @@ class SurfaceSubmitFrameResponseParams extends bindings.Struct {
   SurfaceSubmitFrameResponseParams() : super(kVersions.last.size);
 
   static SurfaceSubmitFrameResponseParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static SurfaceSubmitFrameResponseParams decode(bindings.Decoder decoder0) {
@@ -833,10 +797,7 @@ class SurfaceDestroySurfaceParams extends bindings.Struct {
   SurfaceDestroySurfaceParams() : super(kVersions.last.size);
 
   static SurfaceDestroySurfaceParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static SurfaceDestroySurfaceParams decode(bindings.Decoder decoder0) {

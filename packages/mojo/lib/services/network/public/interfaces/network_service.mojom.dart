@@ -8,14 +8,14 @@ import 'dart:async';
 
 import 'package:mojo/public/dart/bindings.dart' as bindings;
 import 'package:mojo/public/dart/core.dart' as core;
-import 'package:mojo/cookie_store.mojom.dart' as cookie_store_mojom;
-import 'package:mojo/net_address.mojom.dart' as net_address_mojom;
-import 'package:mojo/network_error.mojom.dart' as network_error_mojom;
-import 'package:mojo/tcp_bound_socket.mojom.dart' as tcp_bound_socket_mojom;
-import 'package:mojo/tcp_connected_socket.mojom.dart' as tcp_connected_socket_mojom;
-import 'package:mojo/udp_socket.mojom.dart' as udp_socket_mojom;
-import 'package:mojo/url_loader.mojom.dart' as url_loader_mojom;
-import 'package:mojo/web_socket.mojom.dart' as web_socket_mojom;
+import 'package:mojo/services/network/public/interfaces/cookie_store.mojom.dart' as cookie_store_mojom;
+import 'package:mojo/services/network/public/interfaces/net_address.mojom.dart' as net_address_mojom;
+import 'package:mojo/services/network/public/interfaces/network_error.mojom.dart' as network_error_mojom;
+import 'package:mojo/services/network/public/interfaces/tcp_bound_socket.mojom.dart' as tcp_bound_socket_mojom;
+import 'package:mojo/services/network/public/interfaces/tcp_connected_socket.mojom.dart' as tcp_connected_socket_mojom;
+import 'package:mojo/services/network/public/interfaces/udp_socket.mojom.dart' as udp_socket_mojom;
+import 'package:mojo/services/network/public/interfaces/url_loader.mojom.dart' as url_loader_mojom;
+import 'package:mojo/services/network/public/interfaces/web_socket.mojom.dart' as web_socket_mojom;
 
 
 class NetworkServiceCreateUrlLoaderParams extends bindings.Struct {
@@ -27,10 +27,7 @@ class NetworkServiceCreateUrlLoaderParams extends bindings.Struct {
   NetworkServiceCreateUrlLoaderParams() : super(kVersions.last.size);
 
   static NetworkServiceCreateUrlLoaderParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static NetworkServiceCreateUrlLoaderParams decode(bindings.Decoder decoder0) {
@@ -82,10 +79,7 @@ class NetworkServiceGetCookieStoreParams extends bindings.Struct {
   NetworkServiceGetCookieStoreParams() : super(kVersions.last.size);
 
   static NetworkServiceGetCookieStoreParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static NetworkServiceGetCookieStoreParams decode(bindings.Decoder decoder0) {
@@ -137,10 +131,7 @@ class NetworkServiceCreateWebSocketParams extends bindings.Struct {
   NetworkServiceCreateWebSocketParams() : super(kVersions.last.size);
 
   static NetworkServiceCreateWebSocketParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static NetworkServiceCreateWebSocketParams decode(bindings.Decoder decoder0) {
@@ -193,10 +184,7 @@ class NetworkServiceCreateTcpBoundSocketParams extends bindings.Struct {
   NetworkServiceCreateTcpBoundSocketParams() : super(kVersions.last.size);
 
   static NetworkServiceCreateTcpBoundSocketParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static NetworkServiceCreateTcpBoundSocketParams decode(bindings.Decoder decoder0) {
@@ -257,10 +245,7 @@ class NetworkServiceCreateTcpBoundSocketResponseParams extends bindings.Struct {
   NetworkServiceCreateTcpBoundSocketResponseParams() : super(kVersions.last.size);
 
   static NetworkServiceCreateTcpBoundSocketResponseParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static NetworkServiceCreateTcpBoundSocketResponseParams decode(bindings.Decoder decoder0) {
@@ -324,10 +309,7 @@ class NetworkServiceCreateTcpConnectedSocketParams extends bindings.Struct {
   NetworkServiceCreateTcpConnectedSocketParams() : super(kVersions.last.size);
 
   static NetworkServiceCreateTcpConnectedSocketParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static NetworkServiceCreateTcpConnectedSocketParams decode(bindings.Decoder decoder0) {
@@ -402,10 +384,7 @@ class NetworkServiceCreateTcpConnectedSocketResponseParams extends bindings.Stru
   NetworkServiceCreateTcpConnectedSocketResponseParams() : super(kVersions.last.size);
 
   static NetworkServiceCreateTcpConnectedSocketResponseParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static NetworkServiceCreateTcpConnectedSocketResponseParams decode(bindings.Decoder decoder0) {
@@ -466,10 +445,7 @@ class NetworkServiceCreateUdpSocketParams extends bindings.Struct {
   NetworkServiceCreateUdpSocketParams() : super(kVersions.last.size);
 
   static NetworkServiceCreateUdpSocketParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static NetworkServiceCreateUdpSocketParams decode(bindings.Decoder decoder0) {

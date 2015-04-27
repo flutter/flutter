@@ -20,10 +20,7 @@ class SurfaceId extends bindings.Struct {
   SurfaceId() : super(kVersions.last.size);
 
   static SurfaceId deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static SurfaceId decode(bindings.Decoder decoder0) {

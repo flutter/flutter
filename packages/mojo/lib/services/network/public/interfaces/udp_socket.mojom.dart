@@ -8,8 +8,8 @@ import 'dart:async';
 
 import 'package:mojo/public/dart/bindings.dart' as bindings;
 import 'package:mojo/public/dart/core.dart' as core;
-import 'package:mojo/net_address.mojom.dart' as net_address_mojom;
-import 'package:mojo/network_error.mojom.dart' as network_error_mojom;
+import 'package:mojo/services/network/public/interfaces/net_address.mojom.dart' as net_address_mojom;
+import 'package:mojo/services/network/public/interfaces/network_error.mojom.dart' as network_error_mojom;
 
 
 class UdpSocketAllowAddressReuseParams extends bindings.Struct {
@@ -20,10 +20,7 @@ class UdpSocketAllowAddressReuseParams extends bindings.Struct {
   UdpSocketAllowAddressReuseParams() : super(kVersions.last.size);
 
   static UdpSocketAllowAddressReuseParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static UdpSocketAllowAddressReuseParams decode(bindings.Decoder decoder0) {
@@ -68,10 +65,7 @@ class UdpSocketAllowAddressReuseResponseParams extends bindings.Struct {
   UdpSocketAllowAddressReuseResponseParams() : super(kVersions.last.size);
 
   static UdpSocketAllowAddressReuseResponseParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static UdpSocketAllowAddressReuseResponseParams decode(bindings.Decoder decoder0) {
@@ -124,10 +118,7 @@ class UdpSocketBindParams extends bindings.Struct {
   UdpSocketBindParams() : super(kVersions.last.size);
 
   static UdpSocketBindParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static UdpSocketBindParams decode(bindings.Decoder decoder0) {
@@ -182,10 +173,7 @@ class UdpSocketBindResponseParams extends bindings.Struct {
   UdpSocketBindResponseParams() : super(kVersions.last.size);
 
   static UdpSocketBindResponseParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static UdpSocketBindResponseParams decode(bindings.Decoder decoder0) {
@@ -253,10 +241,7 @@ class UdpSocketConnectParams extends bindings.Struct {
   UdpSocketConnectParams() : super(kVersions.last.size);
 
   static UdpSocketConnectParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static UdpSocketConnectParams decode(bindings.Decoder decoder0) {
@@ -311,10 +296,7 @@ class UdpSocketConnectResponseParams extends bindings.Struct {
   UdpSocketConnectResponseParams() : super(kVersions.last.size);
 
   static UdpSocketConnectResponseParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static UdpSocketConnectResponseParams decode(bindings.Decoder decoder0) {
@@ -382,10 +364,7 @@ class UdpSocketSetSendBufferSizeParams extends bindings.Struct {
   UdpSocketSetSendBufferSizeParams() : super(kVersions.last.size);
 
   static UdpSocketSetSendBufferSizeParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static UdpSocketSetSendBufferSizeParams decode(bindings.Decoder decoder0) {
@@ -437,10 +416,7 @@ class UdpSocketSetSendBufferSizeResponseParams extends bindings.Struct {
   UdpSocketSetSendBufferSizeResponseParams() : super(kVersions.last.size);
 
   static UdpSocketSetSendBufferSizeResponseParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static UdpSocketSetSendBufferSizeResponseParams decode(bindings.Decoder decoder0) {
@@ -493,10 +469,7 @@ class UdpSocketSetReceiveBufferSizeParams extends bindings.Struct {
   UdpSocketSetReceiveBufferSizeParams() : super(kVersions.last.size);
 
   static UdpSocketSetReceiveBufferSizeParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static UdpSocketSetReceiveBufferSizeParams decode(bindings.Decoder decoder0) {
@@ -548,10 +521,7 @@ class UdpSocketSetReceiveBufferSizeResponseParams extends bindings.Struct {
   UdpSocketSetReceiveBufferSizeResponseParams() : super(kVersions.last.size);
 
   static UdpSocketSetReceiveBufferSizeResponseParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static UdpSocketSetReceiveBufferSizeResponseParams decode(bindings.Decoder decoder0) {
@@ -604,10 +574,7 @@ class UdpSocketNegotiateMaxPendingSendRequestsParams extends bindings.Struct {
   UdpSocketNegotiateMaxPendingSendRequestsParams() : super(kVersions.last.size);
 
   static UdpSocketNegotiateMaxPendingSendRequestsParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static UdpSocketNegotiateMaxPendingSendRequestsParams decode(bindings.Decoder decoder0) {
@@ -659,10 +626,7 @@ class UdpSocketNegotiateMaxPendingSendRequestsResponseParams extends bindings.St
   UdpSocketNegotiateMaxPendingSendRequestsResponseParams() : super(kVersions.last.size);
 
   static UdpSocketNegotiateMaxPendingSendRequestsResponseParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static UdpSocketNegotiateMaxPendingSendRequestsResponseParams decode(bindings.Decoder decoder0) {
@@ -714,10 +678,7 @@ class UdpSocketReceiveMoreParams extends bindings.Struct {
   UdpSocketReceiveMoreParams() : super(kVersions.last.size);
 
   static UdpSocketReceiveMoreParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static UdpSocketReceiveMoreParams decode(bindings.Decoder decoder0) {
@@ -770,10 +731,7 @@ class UdpSocketSendToParams extends bindings.Struct {
   UdpSocketSendToParams() : super(kVersions.last.size);
 
   static UdpSocketSendToParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static UdpSocketSendToParams decode(bindings.Decoder decoder0) {
@@ -833,10 +791,7 @@ class UdpSocketSendToResponseParams extends bindings.Struct {
   UdpSocketSendToResponseParams() : super(kVersions.last.size);
 
   static UdpSocketSendToResponseParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static UdpSocketSendToResponseParams decode(bindings.Decoder decoder0) {
@@ -891,10 +846,7 @@ class UdpSocketReceiverOnReceivedParams extends bindings.Struct {
   UdpSocketReceiverOnReceivedParams() : super(kVersions.last.size);
 
   static UdpSocketReceiverOnReceivedParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static UdpSocketReceiverOnReceivedParams decode(bindings.Decoder decoder0) {

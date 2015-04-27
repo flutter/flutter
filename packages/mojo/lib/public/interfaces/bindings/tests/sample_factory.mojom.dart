@@ -8,7 +8,7 @@ import 'dart:async';
 
 import 'package:mojo/public/dart/bindings.dart' as bindings;
 import 'package:mojo/public/dart/core.dart' as core;
-import 'package:imported/sample_import.mojom.dart' as sample_import_mojom;
+import 'package:mojo/public/interfaces/bindings/tests/sample_import.mojom.dart' as sample_import_mojom;
 
 
 class Request extends bindings.Struct {
@@ -23,10 +23,7 @@ class Request extends bindings.Struct {
   Request() : super(kVersions.last.size);
 
   static Request deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static Request decode(bindings.Decoder decoder0) {
@@ -100,10 +97,7 @@ class Response extends bindings.Struct {
   Response() : super(kVersions.last.size);
 
   static Response deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static Response decode(bindings.Decoder decoder0) {
@@ -162,10 +156,7 @@ class NamedObjectSetNameParams extends bindings.Struct {
   NamedObjectSetNameParams() : super(kVersions.last.size);
 
   static NamedObjectSetNameParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static NamedObjectSetNameParams decode(bindings.Decoder decoder0) {
@@ -216,10 +207,7 @@ class NamedObjectGetNameParams extends bindings.Struct {
   NamedObjectGetNameParams() : super(kVersions.last.size);
 
   static NamedObjectGetNameParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static NamedObjectGetNameParams decode(bindings.Decoder decoder0) {
@@ -264,10 +252,7 @@ class NamedObjectGetNameResponseParams extends bindings.Struct {
   NamedObjectGetNameResponseParams() : super(kVersions.last.size);
 
   static NamedObjectGetNameResponseParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static NamedObjectGetNameResponseParams decode(bindings.Decoder decoder0) {
@@ -320,10 +305,7 @@ class FactoryDoStuffParams extends bindings.Struct {
   FactoryDoStuffParams() : super(kVersions.last.size);
 
   static FactoryDoStuffParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static FactoryDoStuffParams decode(bindings.Decoder decoder0) {
@@ -384,10 +366,7 @@ class FactoryDoStuffResponseParams extends bindings.Struct {
   FactoryDoStuffResponseParams() : super(kVersions.last.size);
 
   static FactoryDoStuffResponseParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static FactoryDoStuffResponseParams decode(bindings.Decoder decoder0) {
@@ -447,10 +426,7 @@ class FactoryDoStuff2Params extends bindings.Struct {
   FactoryDoStuff2Params() : super(kVersions.last.size);
 
   static FactoryDoStuff2Params deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static FactoryDoStuff2Params decode(bindings.Decoder decoder0) {
@@ -502,10 +478,7 @@ class FactoryDoStuff2ResponseParams extends bindings.Struct {
   FactoryDoStuff2ResponseParams() : super(kVersions.last.size);
 
   static FactoryDoStuff2ResponseParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static FactoryDoStuff2ResponseParams decode(bindings.Decoder decoder0) {
@@ -557,10 +530,7 @@ class FactoryCreateNamedObjectParams extends bindings.Struct {
   FactoryCreateNamedObjectParams() : super(kVersions.last.size);
 
   static FactoryCreateNamedObjectParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static FactoryCreateNamedObjectParams decode(bindings.Decoder decoder0) {
@@ -612,10 +582,7 @@ class FactoryRequestImportedInterfaceParams extends bindings.Struct {
   FactoryRequestImportedInterfaceParams() : super(kVersions.last.size);
 
   static FactoryRequestImportedInterfaceParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static FactoryRequestImportedInterfaceParams decode(bindings.Decoder decoder0) {
@@ -667,10 +634,7 @@ class FactoryRequestImportedInterfaceResponseParams extends bindings.Struct {
   FactoryRequestImportedInterfaceResponseParams() : super(kVersions.last.size);
 
   static FactoryRequestImportedInterfaceResponseParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static FactoryRequestImportedInterfaceResponseParams decode(bindings.Decoder decoder0) {
@@ -722,10 +686,7 @@ class FactoryTakeImportedInterfaceParams extends bindings.Struct {
   FactoryTakeImportedInterfaceParams() : super(kVersions.last.size);
 
   static FactoryTakeImportedInterfaceParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static FactoryTakeImportedInterfaceParams decode(bindings.Decoder decoder0) {
@@ -777,10 +738,7 @@ class FactoryTakeImportedInterfaceResponseParams extends bindings.Struct {
   FactoryTakeImportedInterfaceResponseParams() : super(kVersions.last.size);
 
   static FactoryTakeImportedInterfaceResponseParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static FactoryTakeImportedInterfaceResponseParams decode(bindings.Decoder decoder0) {

@@ -8,7 +8,7 @@ import 'dart:async';
 
 import 'package:mojo/public/dart/bindings.dart' as bindings;
 import 'package:mojo/public/dart/core.dart' as core;
-import 'package:mojo/location.mojom.dart' as location_mojom;
+import 'package:mojo/services/location/public/interfaces/location.mojom.dart' as location_mojom;
 
 
 class LocationServiceGetNextLocationParams extends bindings.Struct {
@@ -20,10 +20,7 @@ class LocationServiceGetNextLocationParams extends bindings.Struct {
   LocationServiceGetNextLocationParams() : super(kVersions.last.size);
 
   static LocationServiceGetNextLocationParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static LocationServiceGetNextLocationParams decode(bindings.Decoder decoder0) {
@@ -75,10 +72,7 @@ class LocationServiceGetNextLocationResponseParams extends bindings.Struct {
   LocationServiceGetNextLocationResponseParams() : super(kVersions.last.size);
 
   static LocationServiceGetNextLocationResponseParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static LocationServiceGetNextLocationResponseParams decode(bindings.Decoder decoder0) {
@@ -130,10 +124,10 @@ abstract class LocationService {
   Future<LocationServiceGetNextLocationResponseParams> getNextLocation(int priority,[Function responseFactory = null]);
 
   
-  static const int UpdatePriority_PRIORITY_BALANCED_POWER_ACCURACY = 0;
-  static const int UpdatePriority_PRIORITY_HIGH_ACCURACY = 1;
-  static const int UpdatePriority_PRIORITY_LOW_POWER = 2;
-  static const int UpdatePriority_PRIORITY_NO_POWER = 3;
+  static final int UpdatePriority_PRIORITY_BALANCED_POWER_ACCURACY = 0;
+  static final int UpdatePriority_PRIORITY_HIGH_ACCURACY = UpdatePriority_PRIORITY_BALANCED_POWER_ACCURACY + 1;
+  static final int UpdatePriority_PRIORITY_LOW_POWER = UpdatePriority_PRIORITY_HIGH_ACCURACY + 1;
+  static final int UpdatePriority_PRIORITY_NO_POWER = UpdatePriority_PRIORITY_LOW_POWER + 1;
 }
 
 

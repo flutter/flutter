@@ -8,12 +8,12 @@ import 'dart:async';
 
 import 'package:mojo/public/dart/bindings.dart' as bindings;
 import 'package:mojo/public/dart/core.dart' as core;
-import 'package:mojo/network_error.mojom.dart' as network_error_mojom;
+import 'package:mojo/services/network/public/interfaces/network_error.mojom.dart' as network_error_mojom;
 
 
 class WebSocketConnectParams extends bindings.Struct {
   static const List<bindings.StructDataHeader> kVersions = const [
-    const bindings.StructDataHeader(48, 0)
+    const bindings.StructDataHeader(40, 0)
   ];
   String url = null;
   List<String> protocols = null;
@@ -24,10 +24,7 @@ class WebSocketConnectParams extends bindings.Struct {
   WebSocketConnectParams() : super(kVersions.last.size);
 
   static WebSocketConnectParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static WebSocketConnectParams decode(bindings.Decoder decoder0) {
@@ -125,10 +122,7 @@ class WebSocketSendParams extends bindings.Struct {
   WebSocketSendParams() : super(kVersions.last.size);
 
   static WebSocketSendParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static WebSocketSendParams decode(bindings.Decoder decoder0) {
@@ -194,10 +188,7 @@ class WebSocketFlowControlParams extends bindings.Struct {
   WebSocketFlowControlParams() : super(kVersions.last.size);
 
   static WebSocketFlowControlParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static WebSocketFlowControlParams decode(bindings.Decoder decoder0) {
@@ -250,10 +241,7 @@ class WebSocketCloseParams extends bindings.Struct {
   WebSocketCloseParams() : super(kVersions.last.size);
 
   static WebSocketCloseParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static WebSocketCloseParams decode(bindings.Decoder decoder0) {
@@ -314,10 +302,7 @@ class WebSocketClientDidConnectParams extends bindings.Struct {
   WebSocketClientDidConnectParams() : super(kVersions.last.size);
 
   static WebSocketClientDidConnectParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static WebSocketClientDidConnectParams decode(bindings.Decoder decoder0) {
@@ -385,10 +370,7 @@ class WebSocketClientDidReceiveDataParams extends bindings.Struct {
   WebSocketClientDidReceiveDataParams() : super(kVersions.last.size);
 
   static WebSocketClientDidReceiveDataParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static WebSocketClientDidReceiveDataParams decode(bindings.Decoder decoder0) {
@@ -454,10 +436,7 @@ class WebSocketClientDidReceiveFlowControlParams extends bindings.Struct {
   WebSocketClientDidReceiveFlowControlParams() : super(kVersions.last.size);
 
   static WebSocketClientDidReceiveFlowControlParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static WebSocketClientDidReceiveFlowControlParams decode(bindings.Decoder decoder0) {
@@ -509,10 +488,7 @@ class WebSocketClientDidFailParams extends bindings.Struct {
   WebSocketClientDidFailParams() : super(kVersions.last.size);
 
   static WebSocketClientDidFailParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static WebSocketClientDidFailParams decode(bindings.Decoder decoder0) {
@@ -566,10 +542,7 @@ class WebSocketClientDidCloseParams extends bindings.Struct {
   WebSocketClientDidCloseParams() : super(kVersions.last.size);
 
   static WebSocketClientDidCloseParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static WebSocketClientDidCloseParams decode(bindings.Decoder decoder0) {
@@ -639,11 +612,11 @@ abstract class WebSocket {
   void flowControl(int quota);
   void close(int code, String reason);
 
-  static const ABNORMAL_CLOSE_CODE = 1006;
+  static final ABNORMAL_CLOSE_CODE = 1006;
   
-  static const int MessageType_CONTINUATION = 0;
-  static const int MessageType_TEXT = 1;
-  static const int MessageType_BINARY = 2;
+  static final int MessageType_CONTINUATION = 0;
+  static final int MessageType_TEXT = MessageType_CONTINUATION + 1;
+  static final int MessageType_BINARY = MessageType_TEXT + 1;
 }
 
 

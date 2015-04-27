@@ -19,10 +19,7 @@ class CookieStoreGetParams extends bindings.Struct {
   CookieStoreGetParams() : super(kVersions.last.size);
 
   static CookieStoreGetParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static CookieStoreGetParams decode(bindings.Decoder decoder0) {
@@ -74,10 +71,7 @@ class CookieStoreGetResponseParams extends bindings.Struct {
   CookieStoreGetResponseParams() : super(kVersions.last.size);
 
   static CookieStoreGetResponseParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static CookieStoreGetResponseParams decode(bindings.Decoder decoder0) {
@@ -130,10 +124,7 @@ class CookieStoreSetParams extends bindings.Struct {
   CookieStoreSetParams() : super(kVersions.last.size);
 
   static CookieStoreSetParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static CookieStoreSetParams decode(bindings.Decoder decoder0) {
@@ -192,10 +183,7 @@ class CookieStoreSetResponseParams extends bindings.Struct {
   CookieStoreSetResponseParams() : super(kVersions.last.size);
 
   static CookieStoreSetResponseParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static CookieStoreSetResponseParams decode(bindings.Decoder decoder0) {

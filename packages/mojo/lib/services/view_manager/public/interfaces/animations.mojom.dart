@@ -8,16 +8,16 @@ import 'dart:async';
 
 import 'package:mojo/public/dart/bindings.dart' as bindings;
 import 'package:mojo/public/dart/core.dart' as core;
-import 'package:mojo/geometry.mojom.dart' as geometry_mojom;
+import 'package:mojo/services/geometry/public/interfaces/geometry.mojom.dart' as geometry_mojom;
 
-const int AnimationTweenType_LINEAR = 0;
-const int AnimationTweenType_EASE_IN = 1;
-const int AnimationTweenType_EASE_OUT = 2;
-const int AnimationTweenType_EASE_IN_OUT = 3;
+final int AnimationTweenType_LINEAR = 0;
+final int AnimationTweenType_EASE_IN = AnimationTweenType_LINEAR + 1;
+final int AnimationTweenType_EASE_OUT = AnimationTweenType_EASE_IN + 1;
+final int AnimationTweenType_EASE_IN_OUT = AnimationTweenType_EASE_OUT + 1;
 
-const int AnimationProperty_NONE = 0;
-const int AnimationProperty_OPACITY = 1;
-const int AnimationProperty_TRANSFORM = 2;
+final int AnimationProperty_NONE = 0;
+final int AnimationProperty_OPACITY = AnimationProperty_NONE + 1;
+final int AnimationProperty_TRANSFORM = AnimationProperty_OPACITY + 1;
 
 
 class AnimationValue extends bindings.Struct {
@@ -30,10 +30,7 @@ class AnimationValue extends bindings.Struct {
   AnimationValue() : super(kVersions.last.size);
 
   static AnimationValue deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static AnimationValue decode(bindings.Decoder decoder0) {
@@ -97,10 +94,7 @@ class AnimationElement extends bindings.Struct {
   AnimationElement() : super(kVersions.last.size);
 
   static AnimationElement deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static AnimationElement decode(bindings.Decoder decoder0) {
@@ -183,10 +177,7 @@ class AnimationSequence extends bindings.Struct {
   AnimationSequence() : super(kVersions.last.size);
 
   static AnimationSequence deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static AnimationSequence decode(bindings.Decoder decoder0) {
@@ -263,10 +254,7 @@ class AnimationGroup extends bindings.Struct {
   AnimationGroup() : super(kVersions.last.size);
 
   static AnimationGroup deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static AnimationGroup decode(bindings.Decoder decoder0) {

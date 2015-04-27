@@ -8,33 +8,33 @@ import 'dart:async';
 
 import 'package:mojo/public/dart/bindings.dart' as bindings;
 import 'package:mojo/public/dart/core.dart' as core;
-const kOpenFlagRead = 0x1;
-const kOpenFlagWrite = 0x2;
-const kOpenFlagCreate = 0x4;
-const kOpenFlagExclusive = 0x8;
-const kOpenFlagAppend = 0x10;
-const kOpenFlagTruncate = 0x20;
-const kDeleteFlagFileOnly = 0x1;
-const kDeleteFlagDirectoryOnly = 0x2;
-const kDeleteFlagRecursive = 0x4;
+final kOpenFlagRead = 0x1;
+final kOpenFlagWrite = 0x2;
+final kOpenFlagCreate = 0x4;
+final kOpenFlagExclusive = 0x8;
+final kOpenFlagAppend = 0x10;
+final kOpenFlagTruncate = 0x20;
+final kDeleteFlagFileOnly = 0x1;
+final kDeleteFlagDirectoryOnly = 0x2;
+final kDeleteFlagRecursive = 0x4;
 
-const int Error_OK = 0;
-const int Error_UNKNOWN = 1;
-const int Error_INVALID_ARGUMENT = 2;
-const int Error_PERMISSION_DENIED = 3;
-const int Error_OUT_OF_RANGE = 4;
-const int Error_UNIMPLEMENTED = 5;
-const int Error_CLOSED = 6;
-const int Error_UNAVAILABLE = 7;
-const int Error_INTERNAL = 8;
+final int Error_OK = 0;
+final int Error_UNKNOWN = Error_OK + 1;
+final int Error_INVALID_ARGUMENT = Error_UNKNOWN + 1;
+final int Error_PERMISSION_DENIED = Error_INVALID_ARGUMENT + 1;
+final int Error_OUT_OF_RANGE = Error_PERMISSION_DENIED + 1;
+final int Error_UNIMPLEMENTED = Error_OUT_OF_RANGE + 1;
+final int Error_CLOSED = Error_UNIMPLEMENTED + 1;
+final int Error_UNAVAILABLE = Error_CLOSED + 1;
+final int Error_INTERNAL = Error_UNAVAILABLE + 1;
 
-const int Whence_FROM_CURRENT = 0;
-const int Whence_FROM_START = 1;
-const int Whence_FROM_END = 2;
+final int Whence_FROM_CURRENT = 0;
+final int Whence_FROM_START = Whence_FROM_CURRENT + 1;
+final int Whence_FROM_END = Whence_FROM_START + 1;
 
-const int FileType_UNKNOWN = 0;
-const int FileType_REGULAR_FILE = 1;
-const int FileType_DIRECTORY = 2;
+final int FileType_UNKNOWN = 0;
+final int FileType_REGULAR_FILE = FileType_UNKNOWN + 1;
+final int FileType_DIRECTORY = FileType_REGULAR_FILE + 1;
 
 
 class Timespec extends bindings.Struct {
@@ -47,10 +47,7 @@ class Timespec extends bindings.Struct {
   Timespec() : super(kVersions.last.size);
 
   static Timespec deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static Timespec decode(bindings.Decoder decoder0) {
@@ -110,10 +107,7 @@ class TimespecOrNow extends bindings.Struct {
   TimespecOrNow() : super(kVersions.last.size);
 
   static TimespecOrNow deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static TimespecOrNow decode(bindings.Decoder decoder0) {
@@ -176,10 +170,7 @@ class FileInformation extends bindings.Struct {
   FileInformation() : super(kVersions.last.size);
 
   static FileInformation deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static FileInformation decode(bindings.Decoder decoder0) {
@@ -255,10 +246,7 @@ class DirectoryEntry extends bindings.Struct {
   DirectoryEntry() : super(kVersions.last.size);
 
   static DirectoryEntry deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static DirectoryEntry decode(bindings.Decoder decoder0) {

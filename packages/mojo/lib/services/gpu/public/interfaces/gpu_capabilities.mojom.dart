@@ -21,10 +21,7 @@ class GpuShaderPrecision extends bindings.Struct {
   GpuShaderPrecision() : super(kVersions.last.size);
 
   static GpuShaderPrecision deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static GpuShaderPrecision decode(bindings.Decoder decoder0) {
@@ -95,10 +92,7 @@ class GpuPerStagePrecisions extends bindings.Struct {
   GpuPerStagePrecisions() : super(kVersions.last.size);
 
   static GpuPerStagePrecisions deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static GpuPerStagePrecisions decode(bindings.Decoder decoder0) {
@@ -220,10 +214,7 @@ class GpuCapabilities extends bindings.Struct {
   GpuCapabilities() : super(kVersions.last.size);
 
   static GpuCapabilities deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static GpuCapabilities decode(bindings.Decoder decoder0) {

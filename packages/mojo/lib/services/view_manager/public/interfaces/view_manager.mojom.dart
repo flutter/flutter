@@ -8,16 +8,16 @@ import 'dart:async';
 
 import 'package:mojo/public/dart/bindings.dart' as bindings;
 import 'package:mojo/public/dart/core.dart' as core;
-import 'package:mojo/geometry.mojom.dart' as geometry_mojom;
-import 'package:mojo/input_events.mojom.dart' as input_events_mojom;
-import 'package:mojo/service_provider.mojom.dart' as service_provider_mojom;
-import 'package:mojo/native_viewport.mojom.dart' as native_viewport_mojom;
-import 'package:mojo/surface_id.mojom.dart' as surface_id_mojom;
-import 'package:mojo/view_manager_constants.mojom.dart' as view_manager_constants_mojom;
+import 'package:mojo/services/geometry/public/interfaces/geometry.mojom.dart' as geometry_mojom;
+import 'package:mojo/services/input_events/public/interfaces/input_events.mojom.dart' as input_events_mojom;
+import 'package:mojo/public/interfaces/application/service_provider.mojom.dart' as service_provider_mojom;
+import 'package:mojo/services/native_viewport/public/interfaces/native_viewport.mojom.dart' as native_viewport_mojom;
+import 'package:mojo/services/surfaces/public/interfaces/surface_id.mojom.dart' as surface_id_mojom;
+import 'package:mojo/services/view_manager/public/interfaces/view_manager_constants.mojom.dart' as view_manager_constants_mojom;
 
-const int ErrorCode_NONE = 0;
-const int ErrorCode_VALUE_IN_USE = 1;
-const int ErrorCode_ILLEGAL_ARGUMENT = 2;
+final int ErrorCode_NONE = 0;
+final int ErrorCode_VALUE_IN_USE = ErrorCode_NONE + 1;
+final int ErrorCode_ILLEGAL_ARGUMENT = ErrorCode_VALUE_IN_USE + 1;
 
 
 class ViewData extends bindings.Struct {
@@ -35,10 +35,7 @@ class ViewData extends bindings.Struct {
   ViewData() : super(kVersions.last.size);
 
   static ViewData deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static ViewData decode(bindings.Decoder decoder0) {
@@ -188,10 +185,7 @@ class ViewManagerServiceCreateViewParams extends bindings.Struct {
   ViewManagerServiceCreateViewParams() : super(kVersions.last.size);
 
   static ViewManagerServiceCreateViewParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static ViewManagerServiceCreateViewParams decode(bindings.Decoder decoder0) {
@@ -243,10 +237,7 @@ class ViewManagerServiceCreateViewResponseParams extends bindings.Struct {
   ViewManagerServiceCreateViewResponseParams() : super(kVersions.last.size);
 
   static ViewManagerServiceCreateViewResponseParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static ViewManagerServiceCreateViewResponseParams decode(bindings.Decoder decoder0) {
@@ -298,10 +289,7 @@ class ViewManagerServiceDeleteViewParams extends bindings.Struct {
   ViewManagerServiceDeleteViewParams() : super(kVersions.last.size);
 
   static ViewManagerServiceDeleteViewParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static ViewManagerServiceDeleteViewParams decode(bindings.Decoder decoder0) {
@@ -353,10 +341,7 @@ class ViewManagerServiceDeleteViewResponseParams extends bindings.Struct {
   ViewManagerServiceDeleteViewResponseParams() : super(kVersions.last.size);
 
   static ViewManagerServiceDeleteViewResponseParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static ViewManagerServiceDeleteViewResponseParams decode(bindings.Decoder decoder0) {
@@ -409,10 +394,7 @@ class ViewManagerServiceSetViewBoundsParams extends bindings.Struct {
   ViewManagerServiceSetViewBoundsParams() : super(kVersions.last.size);
 
   static ViewManagerServiceSetViewBoundsParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static ViewManagerServiceSetViewBoundsParams decode(bindings.Decoder decoder0) {
@@ -472,10 +454,7 @@ class ViewManagerServiceSetViewBoundsResponseParams extends bindings.Struct {
   ViewManagerServiceSetViewBoundsResponseParams() : super(kVersions.last.size);
 
   static ViewManagerServiceSetViewBoundsResponseParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static ViewManagerServiceSetViewBoundsResponseParams decode(bindings.Decoder decoder0) {
@@ -528,10 +507,7 @@ class ViewManagerServiceSetViewVisibilityParams extends bindings.Struct {
   ViewManagerServiceSetViewVisibilityParams() : super(kVersions.last.size);
 
   static ViewManagerServiceSetViewVisibilityParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static ViewManagerServiceSetViewVisibilityParams decode(bindings.Decoder decoder0) {
@@ -590,10 +566,7 @@ class ViewManagerServiceSetViewVisibilityResponseParams extends bindings.Struct 
   ViewManagerServiceSetViewVisibilityResponseParams() : super(kVersions.last.size);
 
   static ViewManagerServiceSetViewVisibilityResponseParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static ViewManagerServiceSetViewVisibilityResponseParams decode(bindings.Decoder decoder0) {
@@ -647,10 +620,7 @@ class ViewManagerServiceSetViewPropertyParams extends bindings.Struct {
   ViewManagerServiceSetViewPropertyParams() : super(kVersions.last.size);
 
   static ViewManagerServiceSetViewPropertyParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static ViewManagerServiceSetViewPropertyParams decode(bindings.Decoder decoder0) {
@@ -716,10 +686,7 @@ class ViewManagerServiceSetViewPropertyResponseParams extends bindings.Struct {
   ViewManagerServiceSetViewPropertyResponseParams() : super(kVersions.last.size);
 
   static ViewManagerServiceSetViewPropertyResponseParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static ViewManagerServiceSetViewPropertyResponseParams decode(bindings.Decoder decoder0) {
@@ -772,10 +739,7 @@ class ViewManagerServiceAddViewParams extends bindings.Struct {
   ViewManagerServiceAddViewParams() : super(kVersions.last.size);
 
   static ViewManagerServiceAddViewParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static ViewManagerServiceAddViewParams decode(bindings.Decoder decoder0) {
@@ -834,10 +798,7 @@ class ViewManagerServiceAddViewResponseParams extends bindings.Struct {
   ViewManagerServiceAddViewResponseParams() : super(kVersions.last.size);
 
   static ViewManagerServiceAddViewResponseParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static ViewManagerServiceAddViewResponseParams decode(bindings.Decoder decoder0) {
@@ -889,10 +850,7 @@ class ViewManagerServiceRemoveViewFromParentParams extends bindings.Struct {
   ViewManagerServiceRemoveViewFromParentParams() : super(kVersions.last.size);
 
   static ViewManagerServiceRemoveViewFromParentParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static ViewManagerServiceRemoveViewFromParentParams decode(bindings.Decoder decoder0) {
@@ -944,10 +902,7 @@ class ViewManagerServiceRemoveViewFromParentResponseParams extends bindings.Stru
   ViewManagerServiceRemoveViewFromParentResponseParams() : super(kVersions.last.size);
 
   static ViewManagerServiceRemoveViewFromParentResponseParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static ViewManagerServiceRemoveViewFromParentResponseParams decode(bindings.Decoder decoder0) {
@@ -1001,10 +956,7 @@ class ViewManagerServiceReorderViewParams extends bindings.Struct {
   ViewManagerServiceReorderViewParams() : super(kVersions.last.size);
 
   static ViewManagerServiceReorderViewParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static ViewManagerServiceReorderViewParams decode(bindings.Decoder decoder0) {
@@ -1070,10 +1022,7 @@ class ViewManagerServiceReorderViewResponseParams extends bindings.Struct {
   ViewManagerServiceReorderViewResponseParams() : super(kVersions.last.size);
 
   static ViewManagerServiceReorderViewResponseParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static ViewManagerServiceReorderViewResponseParams decode(bindings.Decoder decoder0) {
@@ -1125,10 +1074,7 @@ class ViewManagerServiceGetViewTreeParams extends bindings.Struct {
   ViewManagerServiceGetViewTreeParams() : super(kVersions.last.size);
 
   static ViewManagerServiceGetViewTreeParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static ViewManagerServiceGetViewTreeParams decode(bindings.Decoder decoder0) {
@@ -1180,10 +1126,7 @@ class ViewManagerServiceGetViewTreeResponseParams extends bindings.Struct {
   ViewManagerServiceGetViewTreeResponseParams() : super(kVersions.last.size);
 
   static ViewManagerServiceGetViewTreeResponseParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static ViewManagerServiceGetViewTreeResponseParams decode(bindings.Decoder decoder0) {
@@ -1253,10 +1196,7 @@ class ViewManagerServiceSetViewSurfaceIdParams extends bindings.Struct {
   ViewManagerServiceSetViewSurfaceIdParams() : super(kVersions.last.size);
 
   static ViewManagerServiceSetViewSurfaceIdParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static ViewManagerServiceSetViewSurfaceIdParams decode(bindings.Decoder decoder0) {
@@ -1316,10 +1256,7 @@ class ViewManagerServiceSetViewSurfaceIdResponseParams extends bindings.Struct {
   ViewManagerServiceSetViewSurfaceIdResponseParams() : super(kVersions.last.size);
 
   static ViewManagerServiceSetViewSurfaceIdResponseParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static ViewManagerServiceSetViewSurfaceIdResponseParams decode(bindings.Decoder decoder0) {
@@ -1374,10 +1311,7 @@ class ViewManagerServiceEmbedUrlParams extends bindings.Struct {
   ViewManagerServiceEmbedUrlParams() : super(kVersions.last.size);
 
   static ViewManagerServiceEmbedUrlParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static ViewManagerServiceEmbedUrlParams decode(bindings.Decoder decoder0) {
@@ -1450,10 +1384,7 @@ class ViewManagerServiceEmbedUrlResponseParams extends bindings.Struct {
   ViewManagerServiceEmbedUrlResponseParams() : super(kVersions.last.size);
 
   static ViewManagerServiceEmbedUrlResponseParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static ViewManagerServiceEmbedUrlResponseParams decode(bindings.Decoder decoder0) {
@@ -1498,7 +1429,7 @@ class ViewManagerServiceEmbedUrlResponseParams extends bindings.Struct {
 
 class ViewManagerServiceEmbedParams extends bindings.Struct {
   static const List<bindings.StructDataHeader> kVersions = const [
-    const bindings.StructDataHeader(24, 0)
+    const bindings.StructDataHeader(16, 0)
   ];
   int viewId = 0;
   Object client = null;
@@ -1506,10 +1437,7 @@ class ViewManagerServiceEmbedParams extends bindings.Struct {
   ViewManagerServiceEmbedParams() : super(kVersions.last.size);
 
   static ViewManagerServiceEmbedParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static ViewManagerServiceEmbedParams decode(bindings.Decoder decoder0) {
@@ -1568,10 +1496,7 @@ class ViewManagerServiceEmbedResponseParams extends bindings.Struct {
   ViewManagerServiceEmbedResponseParams() : super(kVersions.last.size);
 
   static ViewManagerServiceEmbedResponseParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static ViewManagerServiceEmbedResponseParams decode(bindings.Decoder decoder0) {
@@ -1624,10 +1549,7 @@ class ViewManagerServicePerformActionParams extends bindings.Struct {
   ViewManagerServicePerformActionParams() : super(kVersions.last.size);
 
   static ViewManagerServicePerformActionParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static ViewManagerServicePerformActionParams decode(bindings.Decoder decoder0) {
@@ -1686,10 +1608,7 @@ class ViewManagerServicePerformActionResponseParams extends bindings.Struct {
   ViewManagerServicePerformActionResponseParams() : super(kVersions.last.size);
 
   static ViewManagerServicePerformActionResponseParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static ViewManagerServicePerformActionResponseParams decode(bindings.Decoder decoder0) {
@@ -1734,23 +1653,20 @@ class ViewManagerServicePerformActionResponseParams extends bindings.Struct {
 
 class ViewManagerClientOnEmbedParams extends bindings.Struct {
   static const List<bindings.StructDataHeader> kVersions = const [
-    const bindings.StructDataHeader(56, 0)
+    const bindings.StructDataHeader(48, 0)
   ];
   int connectionId = 0;
-  Object services = null;
+  Object viewManagerService = null;
   String embedderUrl = null;
   ViewData root = null;
-  Object viewManagerService = null;
+  Object services = null;
   Object exposedServices = null;
   core.MojoMessagePipeEndpoint windowManagerPipe = null;
 
   ViewManagerClientOnEmbedParams() : super(kVersions.last.size);
 
   static ViewManagerClientOnEmbedParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static ViewManagerClientOnEmbedParams decode(bindings.Decoder decoder0) {
@@ -1780,7 +1696,7 @@ class ViewManagerClientOnEmbedParams extends bindings.Struct {
     }
     if (mainDataHeader.version >= 0) {
       
-      result.services = decoder0.decodeInterfaceRequest(12, true, service_provider_mojom.ServiceProviderStub.newFromEndpoint);
+      result.viewManagerService = decoder0.decodeServiceInterface(12, true, ViewManagerServiceProxy.newFromEndpoint);
     }
     if (mainDataHeader.version >= 0) {
       
@@ -1793,15 +1709,15 @@ class ViewManagerClientOnEmbedParams extends bindings.Struct {
     }
     if (mainDataHeader.version >= 0) {
       
-      result.viewManagerService = decoder0.decodeServiceInterface(32, true, ViewManagerServiceProxy.newFromEndpoint);
+      result.services = decoder0.decodeInterfaceRequest(32, true, service_provider_mojom.ServiceProviderStub.newFromEndpoint);
     }
     if (mainDataHeader.version >= 0) {
       
-      result.exposedServices = decoder0.decodeServiceInterface(40, true, service_provider_mojom.ServiceProviderProxy.newFromEndpoint);
+      result.exposedServices = decoder0.decodeServiceInterface(36, true, service_provider_mojom.ServiceProviderProxy.newFromEndpoint);
     }
     if (mainDataHeader.version >= 0) {
       
-      result.windowManagerPipe = decoder0.decodeMessagePipeHandle(48, false);
+      result.windowManagerPipe = decoder0.decodeMessagePipeHandle(40, false);
     }
     return result;
   }
@@ -1811,26 +1727,26 @@ class ViewManagerClientOnEmbedParams extends bindings.Struct {
     
     encoder0.encodeUint16(connectionId, 8);
     
-    encoder0.encodeInterfaceRequest(services, 12, true);
+    encoder0.encodeInterface(viewManagerService, 12, true);
     
     encoder0.encodeString(embedderUrl, 16, false);
     
     encoder0.encodeStruct(root, 24, false);
     
-    encoder0.encodeInterface(viewManagerService, 32, true);
+    encoder0.encodeInterfaceRequest(services, 32, true);
     
-    encoder0.encodeInterface(exposedServices, 40, true);
+    encoder0.encodeInterface(exposedServices, 36, true);
     
-    encoder0.encodeMessagePipeHandle(windowManagerPipe, 48, false);
+    encoder0.encodeMessagePipeHandle(windowManagerPipe, 40, false);
   }
 
   String toString() {
     return "ViewManagerClientOnEmbedParams("
            "connectionId: $connectionId" ", "
-           "services: $services" ", "
+           "viewManagerService: $viewManagerService" ", "
            "embedderUrl: $embedderUrl" ", "
            "root: $root" ", "
-           "viewManagerService: $viewManagerService" ", "
+           "services: $services" ", "
            "exposedServices: $exposedServices" ", "
            "windowManagerPipe: $windowManagerPipe" ")";
   }
@@ -1845,10 +1761,7 @@ class ViewManagerClientOnEmbeddedAppDisconnectedParams extends bindings.Struct {
   ViewManagerClientOnEmbeddedAppDisconnectedParams() : super(kVersions.last.size);
 
   static ViewManagerClientOnEmbeddedAppDisconnectedParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static ViewManagerClientOnEmbeddedAppDisconnectedParams decode(bindings.Decoder decoder0) {
@@ -1902,10 +1815,7 @@ class ViewManagerClientOnViewBoundsChangedParams extends bindings.Struct {
   ViewManagerClientOnViewBoundsChangedParams() : super(kVersions.last.size);
 
   static ViewManagerClientOnViewBoundsChangedParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static ViewManagerClientOnViewBoundsChangedParams decode(bindings.Decoder decoder0) {
@@ -1974,10 +1884,7 @@ class ViewManagerClientOnViewViewportMetricsChangedParams extends bindings.Struc
   ViewManagerClientOnViewViewportMetricsChangedParams() : super(kVersions.last.size);
 
   static ViewManagerClientOnViewViewportMetricsChangedParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static ViewManagerClientOnViewViewportMetricsChangedParams decode(bindings.Decoder decoder0) {
@@ -2041,10 +1948,7 @@ class ViewManagerClientOnViewHierarchyChangedParams extends bindings.Struct {
   ViewManagerClientOnViewHierarchyChangedParams() : super(kVersions.last.size);
 
   static ViewManagerClientOnViewHierarchyChangedParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static ViewManagerClientOnViewHierarchyChangedParams decode(bindings.Decoder decoder0) {
@@ -2136,10 +2040,7 @@ class ViewManagerClientOnViewReorderedParams extends bindings.Struct {
   ViewManagerClientOnViewReorderedParams() : super(kVersions.last.size);
 
   static ViewManagerClientOnViewReorderedParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static ViewManagerClientOnViewReorderedParams decode(bindings.Decoder decoder0) {
@@ -2205,10 +2106,7 @@ class ViewManagerClientOnViewDeletedParams extends bindings.Struct {
   ViewManagerClientOnViewDeletedParams() : super(kVersions.last.size);
 
   static ViewManagerClientOnViewDeletedParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static ViewManagerClientOnViewDeletedParams decode(bindings.Decoder decoder0) {
@@ -2261,10 +2159,7 @@ class ViewManagerClientOnViewVisibilityChangedParams extends bindings.Struct {
   ViewManagerClientOnViewVisibilityChangedParams() : super(kVersions.last.size);
 
   static ViewManagerClientOnViewVisibilityChangedParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static ViewManagerClientOnViewVisibilityChangedParams decode(bindings.Decoder decoder0) {
@@ -2324,10 +2219,7 @@ class ViewManagerClientOnViewDrawnStateChangedParams extends bindings.Struct {
   ViewManagerClientOnViewDrawnStateChangedParams() : super(kVersions.last.size);
 
   static ViewManagerClientOnViewDrawnStateChangedParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static ViewManagerClientOnViewDrawnStateChangedParams decode(bindings.Decoder decoder0) {
@@ -2388,10 +2280,7 @@ class ViewManagerClientOnViewSharedPropertyChangedParams extends bindings.Struct
   ViewManagerClientOnViewSharedPropertyChangedParams() : super(kVersions.last.size);
 
   static ViewManagerClientOnViewSharedPropertyChangedParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static ViewManagerClientOnViewSharedPropertyChangedParams decode(bindings.Decoder decoder0) {
@@ -2458,10 +2347,7 @@ class ViewManagerClientOnViewInputEventParams extends bindings.Struct {
   ViewManagerClientOnViewInputEventParams() : super(kVersions.last.size);
 
   static ViewManagerClientOnViewInputEventParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static ViewManagerClientOnViewInputEventParams decode(bindings.Decoder decoder0) {
@@ -2520,10 +2406,7 @@ class ViewManagerClientOnViewInputEventResponseParams extends bindings.Struct {
   ViewManagerClientOnViewInputEventResponseParams() : super(kVersions.last.size);
 
   static ViewManagerClientOnViewInputEventResponseParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static ViewManagerClientOnViewInputEventResponseParams decode(bindings.Decoder decoder0) {
@@ -2569,10 +2452,7 @@ class ViewManagerClientOnPerformActionParams extends bindings.Struct {
   ViewManagerClientOnPerformActionParams() : super(kVersions.last.size);
 
   static ViewManagerClientOnPerformActionParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static ViewManagerClientOnPerformActionParams decode(bindings.Decoder decoder0) {
@@ -2631,10 +2511,7 @@ class ViewManagerClientOnPerformActionResponseParams extends bindings.Struct {
   ViewManagerClientOnPerformActionResponseParams() : super(kVersions.last.size);
 
   static ViewManagerClientOnPerformActionResponseParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static ViewManagerClientOnPerformActionResponseParams decode(bindings.Decoder decoder0) {

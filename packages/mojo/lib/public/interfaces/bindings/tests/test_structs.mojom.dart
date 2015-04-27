@@ -8,7 +8,7 @@ import 'dart:async';
 
 import 'package:mojo/public/dart/bindings.dart' as bindings;
 import 'package:mojo/public/dart/core.dart' as core;
-import 'package:mojo/test/rect.mojom.dart' as rect_mojom;
+import 'package:mojo/public/interfaces/bindings/tests/rect.mojom.dart' as rect_mojom;
 
 
 class NamedRegion extends bindings.Struct {
@@ -21,10 +21,7 @@ class NamedRegion extends bindings.Struct {
   NamedRegion() : super(kVersions.last.size);
 
   static NamedRegion deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static NamedRegion decode(bindings.Decoder decoder0) {
@@ -103,10 +100,7 @@ class RectPair extends bindings.Struct {
   RectPair() : super(kVersions.last.size);
 
   static RectPair deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static RectPair decode(bindings.Decoder decoder0) {
@@ -166,10 +160,7 @@ class EmptyStruct extends bindings.Struct {
   EmptyStruct() : super(kVersions.last.size);
 
   static EmptyStruct deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static EmptyStruct decode(bindings.Decoder decoder0) {
@@ -242,10 +233,7 @@ class NoDefaultFieldValues extends bindings.Struct {
   NoDefaultFieldValues() : super(kVersions.last.size);
 
   static NoDefaultFieldValues deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static NoDefaultFieldValues decode(bindings.Decoder decoder0) {
@@ -558,7 +546,7 @@ class DefaultFieldValues extends bindings.Struct {
   static const List<bindings.StructDataHeader> kVersions = const [
     const bindings.StructDataHeader(96, 0)
   ];
-  static const kFoo = "foo";
+  static final kFoo = "foo";
   bool f0 = true;
   int f1 = 100;
   int f2 = 100;
@@ -572,18 +560,15 @@ class DefaultFieldValues extends bindings.Struct {
   double f10 = 100.0;
   double f11 = 100;
   double f12 = 100.0;
-  String f13 = "foo";
-  String f14 = "foo";
+  String f13 = DefaultFieldValues.kFoo;
+  String f14 = DefaultFieldValues.kFoo;
   rect_mojom.Rect f15 = new rect_mojom.Rect();
   rect_mojom.Rect f16 = new rect_mojom.Rect();
 
   DefaultFieldValues() : super(kVersions.last.size);
 
   static DefaultFieldValues deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static DefaultFieldValues decode(bindings.Decoder decoder0) {
@@ -745,29 +730,26 @@ class ScopedConstants extends bindings.Struct {
     const bindings.StructDataHeader(40, 0)
   ];
   
-  static const int EType_E0 = 0;
-  static const int EType_E1 = 1;
-  static const int EType_E2 = 10;
-  static const int EType_E3 = 10;
-  static const int EType_E4 = 11;
-  static const TEN = 10;
-  static const ALSO_TEN = 10;
-  static const TEN_TOO = 10;
-  int f0 = 0;
-  int f1 = 1;
-  int f2 = 10;
-  int f3 = 10;
-  int f4 = 11;
-  int f5 = 10;
-  int f6 = 10;
+  static final int EType_E0 = 0;
+  static final int EType_E1 = EType_E0 + 1;
+  static final int EType_E2 = 10;
+  static final int EType_E3 = ScopedConstants.EType_E2;
+  static final int EType_E4 = EType_E3 + 1;
+  static final TEN = 10;
+  static final ALSO_TEN = ScopedConstants.TEN;
+  static final TEN_TOO = ScopedConstants.EType_E2;
+  int f0 = ScopedConstants.EType_E0;
+  int f1 = ScopedConstants.EType_E1;
+  int f2 = ScopedConstants.EType_E2;
+  int f3 = ScopedConstants.EType_E3;
+  int f4 = ScopedConstants.EType_E4;
+  int f5 = ScopedConstants.TEN;
+  int f6 = ScopedConstants.ALSO_TEN;
 
   ScopedConstants() : super(kVersions.last.size);
 
   static ScopedConstants deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static ScopedConstants decode(bindings.Decoder decoder0) {
@@ -872,10 +854,7 @@ class MapKeyTypes extends bindings.Struct {
   MapKeyTypes() : super(kVersions.last.size);
 
   static MapKeyTypes deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static MapKeyTypes decode(bindings.Decoder decoder0) {
@@ -1352,10 +1331,7 @@ class MapValueTypes extends bindings.Struct {
   MapValueTypes() : super(kVersions.last.size);
 
   static MapValueTypes deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static MapValueTypes decode(bindings.Decoder decoder0) {
@@ -2211,10 +2187,7 @@ class ArrayValueTypes extends bindings.Struct {
   ArrayValueTypes() : super(kVersions.last.size);
 
   static ArrayValueTypes deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static ArrayValueTypes decode(bindings.Decoder decoder0) {
@@ -2296,34 +2269,31 @@ class FloatNumberValues extends bindings.Struct {
   static const List<bindings.StructDataHeader> kVersions = const [
     const bindings.StructDataHeader(72, 0)
   ];
-  static const V0 = double.INFINITY;
-  static const V1 = double.NEGATIVE_INFINITY;
-  static const V2 = double.NAN;
-  static const V3 = double.INFINITY;
-  static const V4 = double.NEGATIVE_INFINITY;
-  static const V5 = double.NAN;
-  static const V6 = 0;
-  static const V7 = 1234567890.123;
-  static const V8 = 1.2E+20;
-  static const V9 = -1.2E+20;
-  double f0 = double.INFINITY;
-  double f1 = double.NEGATIVE_INFINITY;
-  double f2 = double.NAN;
-  double f3 = double.INFINITY;
-  double f4 = double.NEGATIVE_INFINITY;
-  double f5 = double.NAN;
-  double f6 = 0;
-  double f7 = 1234567890.123;
-  double f8 = 1.2E+20;
-  double f9 = -1.2E+20;
+  static final V0 = double.INFINITY;
+  static final V1 = double.NEGATIVE_INFINITY;
+  static final V2 = double.NAN;
+  static final V3 = double.INFINITY;
+  static final V4 = double.NEGATIVE_INFINITY;
+  static final V5 = double.NAN;
+  static final V6 = 0;
+  static final V7 = 1234567890.123;
+  static final V8 = 1.2E+20;
+  static final V9 = -1.2E+20;
+  double f0 = FloatNumberValues.V0;
+  double f1 = FloatNumberValues.V1;
+  double f2 = FloatNumberValues.V2;
+  double f3 = FloatNumberValues.V3;
+  double f4 = FloatNumberValues.V4;
+  double f5 = FloatNumberValues.V5;
+  double f6 = FloatNumberValues.V6;
+  double f7 = FloatNumberValues.V7;
+  double f8 = FloatNumberValues.V8;
+  double f9 = FloatNumberValues.V9;
 
   FloatNumberValues() : super(kVersions.last.size);
 
   static FloatNumberValues deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static FloatNumberValues decode(bindings.Decoder decoder0) {
@@ -2433,54 +2403,51 @@ class IntegerNumberValues extends bindings.Struct {
   static const List<bindings.StructDataHeader> kVersions = const [
     const bindings.StructDataHeader(88, 0)
   ];
-  static const V0 = -128;
-  static const V1 = -1;
-  static const V2 = 0;
-  static const V3 = 42;
-  static const V4 = 127;
-  static const V5 = -32768;
-  static const V6 = -1;
-  static const V7 = 0;
-  static const V8 = 12345;
-  static const V9 = 32767;
-  static const V10 = -2147483648;
-  static const V11 = -1;
-  static const V12 = 0;
-  static const V13 = 1234567890;
-  static const V14 = 2147483647;
-  static const V15 = -9007199254740991;
-  static const V16 = -1;
-  static const V17 = 0;
-  static const V18 = 1234567890123456;
-  static const V19 = 9007199254740991;
-  int f0 = -128;
-  int f1 = -1;
-  int f2 = 0;
-  int f3 = 42;
-  int f4 = 127;
-  int f5 = -32768;
-  int f6 = -1;
-  int f7 = 0;
-  int f8 = 12345;
-  int f9 = 32767;
-  int f10 = -2147483648;
-  int f11 = -1;
-  int f12 = 0;
-  int f13 = 1234567890;
-  int f14 = 2147483647;
-  int f15 = -9007199254740991;
-  int f16 = -1;
-  int f17 = 0;
-  int f18 = 1234567890123456;
-  int f19 = 9007199254740991;
+  static final V0 = -128;
+  static final V1 = -1;
+  static final V2 = 0;
+  static final V3 = 42;
+  static final V4 = 127;
+  static final V5 = -32768;
+  static final V6 = -1;
+  static final V7 = 0;
+  static final V8 = 12345;
+  static final V9 = 32767;
+  static final V10 = -2147483648;
+  static final V11 = -1;
+  static final V12 = 0;
+  static final V13 = 1234567890;
+  static final V14 = 2147483647;
+  static final V15 = -9007199254740991;
+  static final V16 = -1;
+  static final V17 = 0;
+  static final V18 = 1234567890123456;
+  static final V19 = 9007199254740991;
+  int f0 = IntegerNumberValues.V0;
+  int f1 = IntegerNumberValues.V1;
+  int f2 = IntegerNumberValues.V2;
+  int f3 = IntegerNumberValues.V3;
+  int f4 = IntegerNumberValues.V4;
+  int f5 = IntegerNumberValues.V5;
+  int f6 = IntegerNumberValues.V6;
+  int f7 = IntegerNumberValues.V7;
+  int f8 = IntegerNumberValues.V8;
+  int f9 = IntegerNumberValues.V9;
+  int f10 = IntegerNumberValues.V10;
+  int f11 = IntegerNumberValues.V11;
+  int f12 = IntegerNumberValues.V12;
+  int f13 = IntegerNumberValues.V13;
+  int f14 = IntegerNumberValues.V14;
+  int f15 = IntegerNumberValues.V15;
+  int f16 = IntegerNumberValues.V16;
+  int f17 = IntegerNumberValues.V17;
+  int f18 = IntegerNumberValues.V18;
+  int f19 = IntegerNumberValues.V19;
 
   IntegerNumberValues() : super(kVersions.last.size);
 
   static IntegerNumberValues deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static IntegerNumberValues decode(bindings.Decoder decoder0) {
@@ -2660,38 +2627,35 @@ class UnsignedNumberValues extends bindings.Struct {
   static const List<bindings.StructDataHeader> kVersions = const [
     const bindings.StructDataHeader(56, 0)
   ];
-  static const V0 = 0;
-  static const V1 = 42;
-  static const V2 = 0xFF;
-  static const V3 = 0;
-  static const V4 = 12345;
-  static const V5 = 0xFFFF;
-  static const V6 = 0;
-  static const V7 = 1234567890;
-  static const V8 = 0xFFFFFFFF;
-  static const V9 = 0;
-  static const V10 = 1234567890123456;
-  static const V11 = 9007199254740991;
-  int f0 = 0;
-  int f1 = 42;
-  int f2 = 0xFF;
-  int f3 = 0;
-  int f4 = 12345;
-  int f5 = 0xFFFF;
-  int f6 = 0;
-  int f7 = 1234567890;
-  int f8 = 0xFFFFFFFF;
-  int f9 = 0;
-  int f10 = 1234567890123456;
-  int f11 = 9007199254740991;
+  static final V0 = 0;
+  static final V1 = 42;
+  static final V2 = 0xFF;
+  static final V3 = 0;
+  static final V4 = 12345;
+  static final V5 = 0xFFFF;
+  static final V6 = 0;
+  static final V7 = 1234567890;
+  static final V8 = 0xFFFFFFFF;
+  static final V9 = 0;
+  static final V10 = 1234567890123456;
+  static final V11 = 9007199254740991;
+  int f0 = UnsignedNumberValues.V0;
+  int f1 = UnsignedNumberValues.V1;
+  int f2 = UnsignedNumberValues.V2;
+  int f3 = UnsignedNumberValues.V3;
+  int f4 = UnsignedNumberValues.V4;
+  int f5 = UnsignedNumberValues.V5;
+  int f6 = UnsignedNumberValues.V6;
+  int f7 = UnsignedNumberValues.V7;
+  int f8 = UnsignedNumberValues.V8;
+  int f9 = UnsignedNumberValues.V9;
+  int f10 = UnsignedNumberValues.V10;
+  int f11 = UnsignedNumberValues.V11;
 
   UnsignedNumberValues() : super(kVersions.last.size);
 
   static UnsignedNumberValues deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static UnsignedNumberValues decode(bindings.Decoder decoder0) {
@@ -2826,10 +2790,7 @@ class BitArrayValues extends bindings.Struct {
   BitArrayValues() : super(kVersions.last.size);
 
   static BitArrayValues deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static BitArrayValues decode(bindings.Decoder decoder0) {
@@ -2982,10 +2943,7 @@ class MultiVersionStruct extends bindings.Struct {
   MultiVersionStruct() : super(kVersions.last.size);
 
   static MultiVersionStruct deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static MultiVersionStruct decode(bindings.Decoder decoder0) {
@@ -3080,10 +3038,7 @@ class MultiVersionStructV0 extends bindings.Struct {
   MultiVersionStructV0() : super(kVersions.last.size);
 
   static MultiVersionStructV0 deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static MultiVersionStructV0 decode(bindings.Decoder decoder0) {
@@ -3137,10 +3092,7 @@ class MultiVersionStructV1 extends bindings.Struct {
   MultiVersionStructV1() : super(kVersions.last.size);
 
   static MultiVersionStructV1 deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static MultiVersionStructV1 decode(bindings.Decoder decoder0) {
@@ -3204,10 +3156,7 @@ class MultiVersionStructV3 extends bindings.Struct {
   MultiVersionStructV3() : super(kVersions.last.size);
 
   static MultiVersionStructV3 deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static MultiVersionStructV3 decode(bindings.Decoder decoder0) {
@@ -3280,10 +3229,7 @@ class MultiVersionStructV5 extends bindings.Struct {
   MultiVersionStructV5() : super(kVersions.last.size);
 
   static MultiVersionStructV5 deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static MultiVersionStructV5 decode(bindings.Decoder decoder0) {
@@ -3366,10 +3312,7 @@ class MultiVersionStructV7 extends bindings.Struct {
   MultiVersionStructV7() : super(kVersions.last.size);
 
   static MultiVersionStructV7 deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static MultiVersionStructV7 decode(bindings.Decoder decoder0) {

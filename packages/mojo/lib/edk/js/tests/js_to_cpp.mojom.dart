@@ -36,10 +36,7 @@ class EchoArgs extends bindings.Struct {
   EchoArgs() : super(kVersions.last.size);
 
   static EchoArgs deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static EchoArgs decode(bindings.Decoder decoder0) {
@@ -229,10 +226,7 @@ class EchoArgsList extends bindings.Struct {
   EchoArgsList() : super(kVersions.last.size);
 
   static EchoArgsList deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static EchoArgsList decode(bindings.Decoder decoder0) {
@@ -292,10 +286,7 @@ class CppSideStartTestParams extends bindings.Struct {
   CppSideStartTestParams() : super(kVersions.last.size);
 
   static CppSideStartTestParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static CppSideStartTestParams decode(bindings.Decoder decoder0) {
@@ -339,10 +330,7 @@ class CppSideTestFinishedParams extends bindings.Struct {
   CppSideTestFinishedParams() : super(kVersions.last.size);
 
   static CppSideTestFinishedParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static CppSideTestFinishedParams decode(bindings.Decoder decoder0) {
@@ -386,10 +374,7 @@ class CppSidePingResponseParams extends bindings.Struct {
   CppSidePingResponseParams() : super(kVersions.last.size);
 
   static CppSidePingResponseParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static CppSidePingResponseParams decode(bindings.Decoder decoder0) {
@@ -434,10 +419,7 @@ class CppSideEchoResponseParams extends bindings.Struct {
   CppSideEchoResponseParams() : super(kVersions.last.size);
 
   static CppSideEchoResponseParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static CppSideEchoResponseParams decode(bindings.Decoder decoder0) {
@@ -490,10 +472,7 @@ class CppSideBitFlipResponseParams extends bindings.Struct {
   CppSideBitFlipResponseParams() : super(kVersions.last.size);
 
   static CppSideBitFlipResponseParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static CppSideBitFlipResponseParams decode(bindings.Decoder decoder0) {
@@ -546,10 +525,7 @@ class CppSideBackPointerResponseParams extends bindings.Struct {
   CppSideBackPointerResponseParams() : super(kVersions.last.size);
 
   static CppSideBackPointerResponseParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static CppSideBackPointerResponseParams decode(bindings.Decoder decoder0) {
@@ -602,10 +578,7 @@ class JsSideSetCppSideParams extends bindings.Struct {
   JsSideSetCppSideParams() : super(kVersions.last.size);
 
   static JsSideSetCppSideParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static JsSideSetCppSideParams decode(bindings.Decoder decoder0) {
@@ -656,10 +629,7 @@ class JsSidePingParams extends bindings.Struct {
   JsSidePingParams() : super(kVersions.last.size);
 
   static JsSidePingParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static JsSidePingParams decode(bindings.Decoder decoder0) {
@@ -705,10 +675,7 @@ class JsSideEchoParams extends bindings.Struct {
   JsSideEchoParams() : super(kVersions.last.size);
 
   static JsSideEchoParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static JsSideEchoParams decode(bindings.Decoder decoder0) {
@@ -768,10 +735,7 @@ class JsSideBitFlipParams extends bindings.Struct {
   JsSideBitFlipParams() : super(kVersions.last.size);
 
   static JsSideBitFlipParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static JsSideBitFlipParams decode(bindings.Decoder decoder0) {
@@ -824,10 +788,7 @@ class JsSideBackPointerParams extends bindings.Struct {
   JsSideBackPointerParams() : super(kVersions.last.size);
 
   static JsSideBackPointerParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static JsSideBackPointerParams decode(bindings.Decoder decoder0) {

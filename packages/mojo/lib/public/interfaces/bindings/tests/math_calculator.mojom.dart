@@ -18,10 +18,7 @@ class CalculatorClearParams extends bindings.Struct {
   CalculatorClearParams() : super(kVersions.last.size);
 
   static CalculatorClearParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static CalculatorClearParams decode(bindings.Decoder decoder0) {
@@ -66,10 +63,7 @@ class CalculatorClearResponseParams extends bindings.Struct {
   CalculatorClearResponseParams() : super(kVersions.last.size);
 
   static CalculatorClearResponseParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static CalculatorClearResponseParams decode(bindings.Decoder decoder0) {
@@ -121,10 +115,7 @@ class CalculatorAddParams extends bindings.Struct {
   CalculatorAddParams() : super(kVersions.last.size);
 
   static CalculatorAddParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static CalculatorAddParams decode(bindings.Decoder decoder0) {
@@ -176,10 +167,7 @@ class CalculatorAddResponseParams extends bindings.Struct {
   CalculatorAddResponseParams() : super(kVersions.last.size);
 
   static CalculatorAddResponseParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static CalculatorAddResponseParams decode(bindings.Decoder decoder0) {
@@ -231,10 +219,7 @@ class CalculatorMultiplyParams extends bindings.Struct {
   CalculatorMultiplyParams() : super(kVersions.last.size);
 
   static CalculatorMultiplyParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static CalculatorMultiplyParams decode(bindings.Decoder decoder0) {
@@ -286,10 +271,7 @@ class CalculatorMultiplyResponseParams extends bindings.Struct {
   CalculatorMultiplyResponseParams() : super(kVersions.last.size);
 
   static CalculatorMultiplyResponseParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static CalculatorMultiplyResponseParams decode(bindings.Decoder decoder0) {

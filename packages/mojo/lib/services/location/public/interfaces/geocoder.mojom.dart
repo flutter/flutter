@@ -8,25 +8,22 @@ import 'dart:async';
 
 import 'package:mojo/public/dart/bindings.dart' as bindings;
 import 'package:mojo/public/dart/core.dart' as core;
-import 'package:mojo/location.mojom.dart' as location_mojom;
+import 'package:mojo/services/location/public/interfaces/location.mojom.dart' as location_mojom;
 
 
 class LocationType extends bindings.Struct {
   static const List<bindings.StructDataHeader> kVersions = const [
     const bindings.StructDataHeader(8, 0)
   ];
-  static const ROOFTOP = "ROOFTOP";
-  static const RANGE_INTERPOLATED = "RANGE_INTERPOLATED";
-  static const GEOMETRIC_CENTER = "GEOMETRIC_CENTER";
-  static const APPROXIMATE = "APPROXIMATE";
+  static final ROOFTOP = "ROOFTOP";
+  static final RANGE_INTERPOLATED = "RANGE_INTERPOLATED";
+  static final GEOMETRIC_CENTER = "GEOMETRIC_CENTER";
+  static final APPROXIMATE = "APPROXIMATE";
 
   LocationType() : super(kVersions.last.size);
 
   static LocationType deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static LocationType decode(bindings.Decoder decoder0) {
@@ -72,10 +69,7 @@ class Bounds extends bindings.Struct {
   Bounds() : super(kVersions.last.size);
 
   static Bounds deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static Bounds decode(bindings.Decoder decoder0) {
@@ -140,10 +134,7 @@ class ComponentRestrictions extends bindings.Struct {
   ComponentRestrictions() : super(kVersions.last.size);
 
   static ComponentRestrictions deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static ComponentRestrictions decode(bindings.Decoder decoder0) {
@@ -225,10 +216,7 @@ class Options extends bindings.Struct {
   Options() : super(kVersions.last.size);
 
   static Options deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static Options decode(bindings.Decoder decoder0) {
@@ -299,10 +287,7 @@ class Geometry extends bindings.Struct {
   Geometry() : super(kVersions.last.size);
 
   static Geometry deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static Geometry decode(bindings.Decoder decoder0) {
@@ -382,10 +367,7 @@ class Result extends bindings.Struct {
   Result() : super(kVersions.last.size);
 
   static Result deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static Result decode(bindings.Decoder decoder0) {
@@ -470,19 +452,16 @@ class Status extends bindings.Struct {
   static const List<bindings.StructDataHeader> kVersions = const [
     const bindings.StructDataHeader(8, 0)
   ];
-  static const OK = "OK";
-  static const ZERO_RESULTS = "ZERO_RESULTS";
-  static const OVER_QUERY_LIMIT = "OVER_QUERY_LIMIT";
-  static const REQUEST_DENIED = "REQUEST_DENIED";
-  static const INVALID_REQUEST = "INVALID_REQUEST";
+  static final OK = "OK";
+  static final ZERO_RESULTS = "ZERO_RESULTS";
+  static final OVER_QUERY_LIMIT = "OVER_QUERY_LIMIT";
+  static final REQUEST_DENIED = "REQUEST_DENIED";
+  static final INVALID_REQUEST = "INVALID_REQUEST";
 
   Status() : super(kVersions.last.size);
 
   static Status deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static Status decode(bindings.Decoder decoder0) {
@@ -528,10 +507,7 @@ class GeocoderAddressToLocationParams extends bindings.Struct {
   GeocoderAddressToLocationParams() : super(kVersions.last.size);
 
   static GeocoderAddressToLocationParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static GeocoderAddressToLocationParams decode(bindings.Decoder decoder0) {
@@ -592,10 +568,7 @@ class GeocoderAddressToLocationResponseParams extends bindings.Struct {
   GeocoderAddressToLocationResponseParams() : super(kVersions.last.size);
 
   static GeocoderAddressToLocationResponseParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static GeocoderAddressToLocationResponseParams decode(bindings.Decoder decoder0) {
@@ -674,10 +647,7 @@ class GeocoderLocationToAddressParams extends bindings.Struct {
   GeocoderLocationToAddressParams() : super(kVersions.last.size);
 
   static GeocoderLocationToAddressParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static GeocoderLocationToAddressParams decode(bindings.Decoder decoder0) {
@@ -739,10 +709,7 @@ class GeocoderLocationToAddressResponseParams extends bindings.Struct {
   GeocoderLocationToAddressResponseParams() : super(kVersions.last.size);
 
   static GeocoderLocationToAddressResponseParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    decoder.excessHandles.forEach((h) => h.close());
-    return result;
+    return decode(new bindings.Decoder(message));
   }
 
   static GeocoderLocationToAddressResponseParams decode(bindings.Decoder decoder0) {
