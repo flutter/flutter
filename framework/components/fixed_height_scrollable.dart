@@ -9,7 +9,6 @@ import 'dart:math' as math;
 import 'dart:sky' as sky;
 import 'dart:async';
 import 'scrollable.dart';
-import '../layouts/block.dart';
 
 abstract class FixedHeightScrollable extends Scrollable {
   static final Style _style = new Style('''
@@ -28,6 +27,7 @@ abstract class FixedHeightScrollable extends Scrollable {
   }) : super(key: key);
 
   ScrollBehavior createScrollBehavior() => new OverscrollBehavior();
+  OverscrollBehavior get scrollBehavior => super.scrollBehavior as OverscrollBehavior;
 
   double _height = 0.0;
   double _itemHeight;
@@ -106,4 +106,6 @@ abstract class FixedHeightScrollable extends Scrollable {
       ]
     );
   }
+
+  List<UINode> buildItems(int start, int count);  
 }

@@ -6,7 +6,7 @@ import '../animation/animated_value.dart';
 import '../fn.dart';
 import 'dart:mirrors';
 
-class AnimatedComponent extends Component {
+abstract class AnimatedComponent extends Component {
   AnimatedComponent({ Object key }) : super(key: key, stateful: true);
 
   animateField(AnimatedValue value, Symbol symbol) {

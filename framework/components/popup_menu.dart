@@ -6,10 +6,8 @@ import 'animated_component.dart';
 import '../animation/animated_value.dart';
 import '../fn.dart';
 import '../theme/colors.dart';
-import '../theme/view-configuration.dart';
 import 'dart:async';
 import 'dart:math' as math;
-import 'dart:sky' as sky;
 import 'material.dart';
 import 'popup_menu_item.dart';
 
@@ -44,7 +42,7 @@ class PopupMenuController {
       _state = MenuState.Hidden;
       _closeState = null;
       result.complete();
-      return;
+      return result.future;
     }
     assert(_closeState != null);
     return _closeState;

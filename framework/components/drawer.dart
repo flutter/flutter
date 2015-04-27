@@ -7,8 +7,6 @@ import '../animation/animated_value.dart';
 import '../animation/curves.dart';
 import '../fn.dart';
 import '../theme/colors.dart';
-import '../theme/shadows.dart';
-import 'dart:async';
 import 'dart:math' as math;
 import 'dart:sky' as sky;
 import 'material.dart';
