@@ -133,7 +133,7 @@ Running a Sky application
 The `sky` pub package includes a `sky_tool` script to assist in running
 Sky applications inside the `SkyDemo.apk` harness.
 
-1. ``packages/sky/lib/sky_tool --install examples/stocks/main.sky``
+1. ``packages/sky/lib/sky_tool start --install examples/stocks/main.sky``
    The --install flag is only necessary to install SkyDemo.apk if not already
    installed from the Google Play store.
 
