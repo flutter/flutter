@@ -98,7 +98,7 @@ abstract class FixedHeightScrollable extends Scrollable {
     return new Container(
       style: _style,
       children: [
-        new BlockLayout(
+        new Container(
           style: _scrollAreaStyle,
           inlineStyle: transformStyle,
           children: buildItems(itemNumber, drawCount)
