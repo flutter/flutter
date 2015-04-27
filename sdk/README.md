@@ -150,3 +150,27 @@ https://github.com/domokit/mojo/tree/master/sky/apk/stocks
 
 Eventually we plan to make this much easier and support platforms other than
 Android, but that work is yet in progress.
+
+Adding Services to MyApp
+------------------------
+
+[Mojo IPC](https://github.com/domokit/mojo) is an inter-process-communication
+system designed to provide cross-thread, cross-process, and language-agnostic
+communication between applications.  Sky uses Mojo IPC to make it possible
+to write UI code in Dart and yet depend on networking code, etc. written in
+another language.  Services are replacable, meaning that Dart code
+written to use the `network_service` remains portable to any platform
+(iOS, Android, etc.) by simply providing a 'natively' written `network_service`.
+
+Embedders of the Sky Engine and consumers of the Sky Framework can use this
+same mechanism to expose not only existing services like the
+[Keyboard](https://github.com/domokit/mojo/blob/master/mojo/services/keyboard/public/interfaces/keyboard.mojom)
+service to allow Sky Framework Dart code to interface with the underlying
+platform's Keyboard, but also to expose any additional non-Dart business logic
+to Sky/Dart UI code.
+
+As and example, [SkyApplication](https://github.com/domokit/mojo/blob/master/sky/shell/org/domokit/sky/shell/SkyApplication.java)
+exposes a mojo `network_service` (required by Sky Engine C++ code)
+[SkyDemoApplication](https://github.com/domokit/mojo/blob/master/sky/apk/demo/org/domokit/sky/demo/SkyDemoApplication.java)
+additionally exposes `keyboard_service` and `sensor_service` for use by the Sky
+Framework from Dart.
