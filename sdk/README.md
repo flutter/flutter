@@ -26,7 +26,39 @@ started.
 Examples
 --------
 
-The simplest Sky app is, appropriately, HelloWorldApp:
+Sky uses Dart and Sky applications are
+[Dart Packages](https://www.dartlang.org/docs/tutorials/shared-pkgs/).
+Application creation starts by creating a new directory and
+adding a [pubspec.yaml](https://www.dartlang.org/tools/pub/pubspec.html):
+
+ pubspec.yaml for your app:
+```yaml
+name: your_app_name
+dependencies:
+ sky: any
+```
+
+Once the pubspec is in place, create a `lib` directory (where your dart code
+will go) and run `pub get` to download all necessary dependencies and create
+the symlinks necessary for 'package:your_app_names/main.dart' includes to work.
+
+Currently the Sky Engine assumes the entry point for your application is a
+`main` function is located inside a `main.sky` file at the root of the package.
+`.sky` is an html-like format:
+```
+<sky>
+<script>
+import 'package:your_app_name/main.dart'
+
+void main() {
+  new HelloWorldApp();
+}
+</script>
+</sky>
+```
+
+The rest of the application then goes inside the `lib` directory of the package
+thus `lib/main.dart` would be:
 
 ```dart
 import 'package:sky/framework/fn.dart';
@@ -36,25 +68,21 @@ class HelloWorldApp extends App {
     return new Text('Hello, world!');
   }
 }
-
-void main() {
-  new HelloWorldApp();
-}
 ```
 
 Execution starts in `main`, which creates the `HelloWorldApp`. The framework
 then marks `HelloWorldApp` as dirty, which schedules it to build during the next
 animation frame. Each animation frame, the framework calls `build` on all the
-dirty components and diffs the virtual `UINode` hierarchy returned this frame with
-the hierarchy returned last frame. Any differences are then applied as mutations
-to the physical hierarchy retained by the engine.
+dirty components and diffs the virtual `UINode` hierarchy returned this frame
+with the hierarchy returned last frame. Any differences are then applied as
+mutations to the physical hierarchy retained by the engine.
 
-For more examples, please see the [examples directory](examples/).
+For examples, please see the [examples directory](examples/).
 
 Services
 --------
 
-Sky apps can access services from the host operating system using Mojo. For
+Sky apps can access services from the host operating system using Mojo IPC. For
 example, you can access the network using the `network_service.mojom` interface.
 Although you can use these low-level interfaces directly, you might prefer to
 access these services via libraries in the framework. For example, the
@@ -65,7 +93,7 @@ ergonomic interface:
 import 'package:sky/framework/net/fetch.dart';
 
 main() async {
-  var response = await fetch('example.txt');
+  Response response = await fetch('example.txt');
   print(response.bodyAsString());
 }
 ```
@@ -102,7 +130,23 @@ of the Android operating system.
 Running a Sky application
 -------------------------
 
+The `sky` pub package includes a `sky_tool` script to assist in running
+Sky applications inside the `SkyDemo.apk` harness.
+
 1. ``packages/sky/lib/sky_tool --install examples/stocks/main.sky``
-   The --install flag is only necessary the first time to install SkyDemo.apk.
+   The --install flag is only necessary to install SkyDemo.apk if not already
+   installed from the Google Play store.
 
 2.  Use ``adb logcat`` to view any errors or Dart print() output from the app.
+
+Building a standalone MyApp
+---------------------------
+
+Although it is possible to bundle the Sky Engine in your own app (instead of
+running your code inside SkyDemo.apk), right now doing so is difficult.
+
+There is one example of doing so if you're feeling brave:
+https://github.com/domokit/mojo/tree/master/sky/apk/stocks
+
+Eventually we plan to make this much easier and support platforms other than
+Android, but that work is yet in progress.
