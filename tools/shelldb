@@ -241,6 +241,7 @@ class Analyze(object):
             "--url-mapping=dart:sky,%s" % dart_sky_path,
             "--url-mapping=dart:sky_builtin,%s" % sky_builtin_path,
             "--package-root", dev_packages_root(build_dir),
+            "--package-warnings",
             args.app_path
         ]
         return subprocess.call(analyzer_args)
