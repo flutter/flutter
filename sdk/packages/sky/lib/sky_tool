@@ -208,6 +208,51 @@ class StopSky(object):
         pids.clear()
 
 
+class StartTracing(object):
+    def add_subparser(self, subparsers):
+        start_tracing_parser = subparsers.add_parser('start_tracing',
+            help=('start tracing a running sky instance'))
+        start_tracing_parser.set_defaults(func=self.run)
+
+    def run(self, args, pids):
+        subprocess.check_output([ADB_PATH, 'shell',
+            'am', 'broadcast',
+            '-a', 'org.domokit.sky.demo.TRACING_START'])
+
+
+TRACE_COMPLETE_REGEXP = re.compile('Trace complete')
+TRACE_FILE_REGEXP = re.compile(r'Saving trace to (?P<path>\S+)')
+
+
+class StopTracing(object):
+    def add_subparser(self, subparsers):
+        stop_tracing_parser = subparsers.add_parser('stop_tracing',
+            help=('stop tracing a running sky instance'))
+        stop_tracing_parser.set_defaults(func=self.run)
+
+    def run(self, args, pids):
+        subprocess.check_output([ADB_PATH, 'logcat', '-c'])
+        subprocess.check_output([ADB_PATH, 'shell',
+            'am', 'broadcast',
+            '-a', 'org.domokit.sky.demo.TRACING_STOP'])
+        device_path = None
+        is_complete = False
+        while not is_complete:
+            time.sleep(0.2)
+            log = subprocess.check_output([ADB_PATH, 'logcat', '-d'])
+            if device_path is None:
+                result = TRACE_FILE_REGEXP.search(log)
+                if result:
+                    device_path = result.group('path')
+            is_complete = TRACE_COMPLETE_REGEXP.search(log) is not None
+
+        print 'Downloading trace %s ...' % os.path.basename(device_path)
+
+        if device_path:
+            subprocess.check_output([ADB_PATH, 'pull', device_path])
+            subprocess.check_output([ADB_PATH, 'shell', 'rm', device_path])
+
+
 class SkyShellRunner(object):
     def _check_for_adb(self):
         try:
@@ -217,7 +262,6 @@ class SkyShellRunner(object):
             return False
         return True
 
-
     def main(self):
         logging.basicConfig(level=logging.WARNING)
         if not self._check_for_adb():
@@ -226,7 +270,7 @@ class SkyShellRunner(object):
         parser = argparse.ArgumentParser(description='Sky Demo Runner')
         subparsers = parser.add_subparsers(help='sub-command help')
 
-        for command in [StartSky(), StopSky()]:
+        for command in [StartSky(), StopSky(), StartTracing(), StopTracing()]:
             command.add_subparser(subparsers)
 
         args = parser.parse_args()
