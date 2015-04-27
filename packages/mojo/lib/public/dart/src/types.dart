@@ -6,23 +6,23 @@ part of core;
 
 class MojoResult {
   static const int kOk = 0;
-  static const int kCancelled = -1;
-  static const int kUnknown = -2;
-  static const int kInvalidArgument = -3;
-  static const int kDeadlineExceeded = -4;
-  static const int kNotFound = -5;
-  static const int kAlreadyExists = -6;
-  static const int kPermissionDenied = -7;
-  static const int kResourceExhausted = -8;
-  static const int kFailedPrecondition = -9;
-  static const int kAborted = -10;
-  static const int kOutOfRange = -11;
-  static const int kUnimplemented = -12;
-  static const int kInternal = -13;
-  static const int kUnavailable = -14;
-  static const int kDataLoss = -15;
-  static const int kBusy = -16;
-  static const int kShouldWait = -17;
+  static const int kCancelled = 1;
+  static const int kUnknown = 2;
+  static const int kInvalidArgument = 3;
+  static const int kDeadlineExceeded = 4;
+  static const int kNotFound = 5;
+  static const int kAlreadyExists = 6;
+  static const int kPermissionDenied = 7;
+  static const int kResourceExhausted = 8;
+  static const int kFailedPrecondition = 9;
+  static const int kAborted = 10;
+  static const int kOutOfRange = 11;
+  static const int kUnimplemented = 12;
+  static const int kInternal = 13;
+  static const int kUnavailable = 14;
+  static const int kDataLoss = 15;
+  static const int kBusy = 16;
+  static const int kShouldWait = 17;
 
   static const OK = const MojoResult._(kOk);
   static const CANCELLED = const MojoResult._(kCancelled);
@@ -169,7 +169,10 @@ class MojoHandleSignals {
   static const PEER_CLOSED_READABLE =
       const MojoHandleSignals._(kPeerClosed | kReadable);
   static const READWRITE = const MojoHandleSignals._(kReadWrite);
+  static const PEER_CLOSED_WRITABLE =
+      const MojoHandleSignals._(kPeerClosed | kWritable);
   static const ALL = const MojoHandleSignals._(kAll);
+
 
   final int value;
 
@@ -189,6 +192,8 @@ class MojoHandleSignals {
         return READWRITE;
       case kPeerClosed | kReadable:
         return PEER_CLOSED_READABLE;
+      case kPeerClosed | kWritable:
+        return PEER_CLOSED_WRITABLE;
       case kAll:
         return ALL;
       default:

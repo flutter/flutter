@@ -8,21 +8,24 @@ import 'dart:async';
 
 import 'package:mojo/public/dart/bindings.dart' as bindings;
 import 'package:mojo/public/dart/core.dart' as core;
-import 'package:mojo/public/interfaces/application/service_provider.mojom.dart' as service_provider_mojom;
+import 'package:mojo/service_provider.mojom.dart' as service_provider_mojom;
 
 
 class ShellConnectToApplicationParams extends bindings.Struct {
-  static const int kStructSize = 24;
-  static const bindings.StructDataHeader kDefaultStructInfo =
-      const bindings.StructDataHeader(kStructSize, 0);
+  static const List<bindings.StructDataHeader> kVersions = const [
+    const bindings.StructDataHeader(32, 0)
+  ];
   String applicationUrl = null;
   Object services = null;
   Object exposedServices = null;
 
-  ShellConnectToApplicationParams() : super(kStructSize);
+  ShellConnectToApplicationParams() : super(kVersions.last.size);
 
   static ShellConnectToApplicationParams deserialize(bindings.Message message) {
-    return decode(new bindings.Decoder(message));
+    var decoder = new bindings.Decoder(message);
+    var result = decode(decoder);
+    decoder.excessHandles.forEach((h) => h.close());
+    return result;
   }
 
   static ShellConnectToApplicationParams decode(bindings.Decoder decoder0) {
@@ -32,19 +35,29 @@ class ShellConnectToApplicationParams extends bindings.Struct {
     ShellConnectToApplicationParams result = new ShellConnectToApplicationParams();
 
     var mainDataHeader = decoder0.decodeStructDataHeader();
-    if ((mainDataHeader.size < kStructSize) ||
-        (mainDataHeader.version < 0)) {
-      throw new bindings.MojoCodecError('Malformed header');
+    if (mainDataHeader.version <= kVersions.last.version) {
+      // Scan in reverse order to optimize for more recent versions.
+      for (int i = kVersions.length - 1; i >= 0; --i) {
+        if (mainDataHeader.version >= kVersions[i].version) {
+          if (mainDataHeader.size != kVersions[i].size)
+            throw new bindings.MojoCodecError(
+                'Header doesn\'t correspond to any known version.');
+        }
+      }
+    } else if (mainDataHeader.size < kVersions.last.size) {
+      throw new bindings.MojoCodecError(
+        'Message newer than the last known version cannot be shorter than '
+        'required by the last known version.');
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.applicationUrl = decoder0.decodeString(8, false);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.services = decoder0.decodeInterfaceRequest(16, true, service_provider_mojom.ServiceProviderStub.newFromEndpoint);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.exposedServices = decoder0.decodeServiceInterface(20, true, service_provider_mojom.ServiceProviderProxy.newFromEndpoint);
     }
@@ -52,7 +65,7 @@ class ShellConnectToApplicationParams extends bindings.Struct {
   }
 
   void encode(bindings.Encoder encoder) {
-    var encoder0 = encoder.getStructEncoderAtOffset(kDefaultStructInfo);
+    var encoder0 = encoder.getStructEncoderAtOffset(kVersions.last);
     
     encoder0.encodeString(applicationUrl, 8, false);
     
@@ -154,7 +167,7 @@ class ShellProxy implements bindings.ProxyBase {
       core.MojoMessagePipeEndpoint endpoint) =>
       new ShellProxy.fromEndpoint(endpoint);
 
-  Future close({bool nodefer: false}) => impl.close(nodefer: nodefer);
+  Future close({bool immediate: false}) => impl.close(immediate: immediate);
 
   String toString() {
     return "ShellProxy($impl)";

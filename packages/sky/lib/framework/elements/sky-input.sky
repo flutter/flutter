@@ -10,6 +10,7 @@
   <style>
   :host {
     display: flex;
+    flex-direction: row;
   }
   #control {
     margin: 8px;

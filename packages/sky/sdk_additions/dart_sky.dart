@@ -77,6 +77,7 @@ part 'URL.dart';
 part 'WheelEvent.dart';
 part 'Window.dart';
 
+part 'LayoutCallback.dart';
 part 'PaintingCallback.dart';
 part 'RequestAnimationFrameCallback.dart';
 part 'VoidCallback.dart';

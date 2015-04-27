@@ -9,7 +9,7 @@ import 'dart:async';
 import 'package:mojo/public/dart/bindings.dart' as bindings;
 import 'package:mojo/public/dart/core.dart' as core;
 
-final int OrderDirection_ABOVE = 1;
-final int OrderDirection_BELOW = OrderDirection_ABOVE + 1;
+const int OrderDirection_ABOVE = 1;
+const int OrderDirection_BELOW = 2;
 
 

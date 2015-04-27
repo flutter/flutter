@@ -11,6 +11,7 @@ class Checkbox extends ButtonBase {
   static final Style _style = new Style('''
     transform: translateX(0);
     display: flex;
+    flex-direction: row;
     justify-content: center;
     align-items: center;
     -webkit-user-select: none;
@@ -64,8 +65,8 @@ class Checkbox extends ButtonBase {
     onChanged(!checked);
   }
 
-  Node buildContent() {
-    return new EventTarget(
+  UINode buildContent() {
+    return new EventListenerNode(
       new Container(
         style: _style,
         children: [

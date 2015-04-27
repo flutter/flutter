@@ -8,24 +8,27 @@ import 'dart:async';
 
 import 'package:mojo/public/dart/bindings.dart' as bindings;
 import 'package:mojo/public/dart/core.dart' as core;
-import 'package:mojo/services/network/public/interfaces/url_loader.mojom.dart' as url_loader_mojom;
+import 'package:mojo/url_loader.mojom.dart' as url_loader_mojom;
 
-final int Target_DEFAULT = 0;
-final int Target_SOURCE_NODE = Target_DEFAULT + 1;
-final int Target_NEW_NODE = Target_SOURCE_NODE + 1;
+const int Target_DEFAULT = 0;
+const int Target_SOURCE_NODE = 1;
+const int Target_NEW_NODE = 2;
 
 
 class NavigatorHostRequestNavigateParams extends bindings.Struct {
-  static const int kStructSize = 24;
-  static const bindings.StructDataHeader kDefaultStructInfo =
-      const bindings.StructDataHeader(kStructSize, 0);
+  static const List<bindings.StructDataHeader> kVersions = const [
+    const bindings.StructDataHeader(24, 0)
+  ];
   int target = 0;
   url_loader_mojom.UrlRequest request = null;
 
-  NavigatorHostRequestNavigateParams() : super(kStructSize);
+  NavigatorHostRequestNavigateParams() : super(kVersions.last.size);
 
   static NavigatorHostRequestNavigateParams deserialize(bindings.Message message) {
-    return decode(new bindings.Decoder(message));
+    var decoder = new bindings.Decoder(message);
+    var result = decode(decoder);
+    decoder.excessHandles.forEach((h) => h.close());
+    return result;
   }
 
   static NavigatorHostRequestNavigateParams decode(bindings.Decoder decoder0) {
@@ -35,15 +38,25 @@ class NavigatorHostRequestNavigateParams extends bindings.Struct {
     NavigatorHostRequestNavigateParams result = new NavigatorHostRequestNavigateParams();
 
     var mainDataHeader = decoder0.decodeStructDataHeader();
-    if ((mainDataHeader.size < kStructSize) ||
-        (mainDataHeader.version < 0)) {
-      throw new bindings.MojoCodecError('Malformed header');
+    if (mainDataHeader.version <= kVersions.last.version) {
+      // Scan in reverse order to optimize for more recent versions.
+      for (int i = kVersions.length - 1; i >= 0; --i) {
+        if (mainDataHeader.version >= kVersions[i].version) {
+          if (mainDataHeader.size != kVersions[i].size)
+            throw new bindings.MojoCodecError(
+                'Header doesn\'t correspond to any known version.');
+        }
+      }
+    } else if (mainDataHeader.size < kVersions.last.size) {
+      throw new bindings.MojoCodecError(
+        'Message newer than the last known version cannot be shorter than '
+        'required by the last known version.');
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.target = decoder0.decodeInt32(8);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       var decoder1 = decoder0.decodePointer(16, false);
       result.request = url_loader_mojom.UrlRequest.decode(decoder1);
@@ -52,7 +65,7 @@ class NavigatorHostRequestNavigateParams extends bindings.Struct {
   }
 
   void encode(bindings.Encoder encoder) {
-    var encoder0 = encoder.getStructEncoderAtOffset(kDefaultStructInfo);
+    var encoder0 = encoder.getStructEncoderAtOffset(kVersions.last);
     
     encoder0.encodeInt32(target, 8);
     
@@ -67,15 +80,18 @@ class NavigatorHostRequestNavigateParams extends bindings.Struct {
 }
 
 class NavigatorHostRequestNavigateHistoryParams extends bindings.Struct {
-  static const int kStructSize = 16;
-  static const bindings.StructDataHeader kDefaultStructInfo =
-      const bindings.StructDataHeader(kStructSize, 0);
+  static const List<bindings.StructDataHeader> kVersions = const [
+    const bindings.StructDataHeader(16, 0)
+  ];
   int delta = 0;
 
-  NavigatorHostRequestNavigateHistoryParams() : super(kStructSize);
+  NavigatorHostRequestNavigateHistoryParams() : super(kVersions.last.size);
 
   static NavigatorHostRequestNavigateHistoryParams deserialize(bindings.Message message) {
-    return decode(new bindings.Decoder(message));
+    var decoder = new bindings.Decoder(message);
+    var result = decode(decoder);
+    decoder.excessHandles.forEach((h) => h.close());
+    return result;
   }
 
   static NavigatorHostRequestNavigateHistoryParams decode(bindings.Decoder decoder0) {
@@ -85,11 +101,21 @@ class NavigatorHostRequestNavigateHistoryParams extends bindings.Struct {
     NavigatorHostRequestNavigateHistoryParams result = new NavigatorHostRequestNavigateHistoryParams();
 
     var mainDataHeader = decoder0.decodeStructDataHeader();
-    if ((mainDataHeader.size < kStructSize) ||
-        (mainDataHeader.version < 0)) {
-      throw new bindings.MojoCodecError('Malformed header');
+    if (mainDataHeader.version <= kVersions.last.version) {
+      // Scan in reverse order to optimize for more recent versions.
+      for (int i = kVersions.length - 1; i >= 0; --i) {
+        if (mainDataHeader.version >= kVersions[i].version) {
+          if (mainDataHeader.size != kVersions[i].size)
+            throw new bindings.MojoCodecError(
+                'Header doesn\'t correspond to any known version.');
+        }
+      }
+    } else if (mainDataHeader.size < kVersions.last.size) {
+      throw new bindings.MojoCodecError(
+        'Message newer than the last known version cannot be shorter than '
+        'required by the last known version.');
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.delta = decoder0.decodeInt32(8);
     }
@@ -97,7 +123,7 @@ class NavigatorHostRequestNavigateHistoryParams extends bindings.Struct {
   }
 
   void encode(bindings.Encoder encoder) {
-    var encoder0 = encoder.getStructEncoderAtOffset(kDefaultStructInfo);
+    var encoder0 = encoder.getStructEncoderAtOffset(kVersions.last);
     
     encoder0.encodeInt32(delta, 8);
   }
@@ -109,15 +135,18 @@ class NavigatorHostRequestNavigateHistoryParams extends bindings.Struct {
 }
 
 class NavigatorHostDidNavigateLocallyParams extends bindings.Struct {
-  static const int kStructSize = 16;
-  static const bindings.StructDataHeader kDefaultStructInfo =
-      const bindings.StructDataHeader(kStructSize, 0);
+  static const List<bindings.StructDataHeader> kVersions = const [
+    const bindings.StructDataHeader(16, 0)
+  ];
   String url = null;
 
-  NavigatorHostDidNavigateLocallyParams() : super(kStructSize);
+  NavigatorHostDidNavigateLocallyParams() : super(kVersions.last.size);
 
   static NavigatorHostDidNavigateLocallyParams deserialize(bindings.Message message) {
-    return decode(new bindings.Decoder(message));
+    var decoder = new bindings.Decoder(message);
+    var result = decode(decoder);
+    decoder.excessHandles.forEach((h) => h.close());
+    return result;
   }
 
   static NavigatorHostDidNavigateLocallyParams decode(bindings.Decoder decoder0) {
@@ -127,11 +156,21 @@ class NavigatorHostDidNavigateLocallyParams extends bindings.Struct {
     NavigatorHostDidNavigateLocallyParams result = new NavigatorHostDidNavigateLocallyParams();
 
     var mainDataHeader = decoder0.decodeStructDataHeader();
-    if ((mainDataHeader.size < kStructSize) ||
-        (mainDataHeader.version < 0)) {
-      throw new bindings.MojoCodecError('Malformed header');
+    if (mainDataHeader.version <= kVersions.last.version) {
+      // Scan in reverse order to optimize for more recent versions.
+      for (int i = kVersions.length - 1; i >= 0; --i) {
+        if (mainDataHeader.version >= kVersions[i].version) {
+          if (mainDataHeader.size != kVersions[i].size)
+            throw new bindings.MojoCodecError(
+                'Header doesn\'t correspond to any known version.');
+        }
+      }
+    } else if (mainDataHeader.size < kVersions.last.size) {
+      throw new bindings.MojoCodecError(
+        'Message newer than the last known version cannot be shorter than '
+        'required by the last known version.');
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.url = decoder0.decodeString(8, false);
     }
@@ -139,7 +178,7 @@ class NavigatorHostDidNavigateLocallyParams extends bindings.Struct {
   }
 
   void encode(bindings.Encoder encoder) {
-    var encoder0 = encoder.getStructEncoderAtOffset(kDefaultStructInfo);
+    var encoder0 = encoder.getStructEncoderAtOffset(kVersions.last);
     
     encoder0.encodeString(url, 8, false);
   }
@@ -252,7 +291,7 @@ class NavigatorHostProxy implements bindings.ProxyBase {
       core.MojoMessagePipeEndpoint endpoint) =>
       new NavigatorHostProxy.fromEndpoint(endpoint);
 
-  Future close({bool nodefer: false}) => impl.close(nodefer: nodefer);
+  Future close({bool immediate: false}) => impl.close(immediate: immediate);
 
   String toString() {
     return "NavigatorHostProxy($impl)";

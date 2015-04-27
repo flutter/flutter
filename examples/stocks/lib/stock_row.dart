@@ -11,6 +11,7 @@ import 'stock_data.dart';
 class StockRow extends Component {
   static final Style _style = new Style('''
     display: flex;
+    flex-direction: row;
     align-items: center;
     border-bottom: 1px solid #F4F4F4;
     padding-top: 16px;
@@ -39,14 +40,14 @@ class StockRow extends Component {
     this.stock = stock;
   }
 
-  Node build() {
+  UINode build() {
     String lastSale = "\$${stock.lastSale.toStringAsFixed(2)}";
 
     String changeInPrice = "${stock.percentChange.toStringAsFixed(2)}%";
     if (stock.percentChange > 0)
       changeInPrice = "+" + changeInPrice;
 
-    List<Node> children = [
+    List<UINode> children = [
       new StockArrow(
         percentChange: stock.percentChange
       ),

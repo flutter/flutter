@@ -12,7 +12,7 @@ class MenuDivider extends Component {
 
   MenuDivider({ Object key }) : super(key: key);
 
-  Node build() {
+  UINode build() {
     return new Container(
       style: _style
     );

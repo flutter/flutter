@@ -37,10 +37,10 @@ class MojoEventStream extends Stream<List<int>> {
     }
   }
 
-  Future close() {
+  Future close({bool immediate: false}) {
     if (_handle != null) {
       if (_isListening) {
-        return _handleWatcherClose();
+        return _handleWatcherClose(immediate: immediate);
       } else {
         _localClose();
         return new Future.value(null);
@@ -92,10 +92,10 @@ class MojoEventStream extends Stream<List<int>> {
   void enableWriteEvents() => enableSignals(MojoHandleSignals.WRITABLE);
   void enableAllEvents() => enableSignals(MojoHandleSignals.READWRITE);
 
-  Future _handleWatcherClose() {
+  Future _handleWatcherClose({bool immediate: false}) {
     assert(_handle != null);
     assert(MojoHandle._removeUnclosedHandle(_handle));
-    return MojoHandleWatcher.close(_handle.h, wait: true).then((r) {
+    return MojoHandleWatcher.close(_handle.h, wait: !immediate).then((r) {
       if (_receivePort != null) {
         _receivePort.close();
         _receivePort = null;
@@ -116,7 +116,8 @@ class MojoEventStream extends Stream<List<int>> {
 
   void _onSubscriptionStateChange() {
     if (!_controller.hasListener) {
-      close();
+      // No one is listening, close it immediately.
+      close(immediate: true);
     }
   }
 
@@ -210,9 +211,9 @@ class MojoEventStreamListener {
       }
       _isInHandler = false;
       if (signalsReceived.isPeerClosed) {
-        // nodefer is true here because there is no need to wait to close until
-        // outstanding messages are sent. The other side is gone.
-        close(nodefer: true).then((_) {
+        // immediate is true here because there is no need to wait to close
+        // until outstanding messages are sent. The other side is gone.
+        close(immediate: true).then((_) {
           if (onError != null) {
             onError();
           }
@@ -222,13 +223,13 @@ class MojoEventStreamListener {
     return subscription;
   }
 
-  Future close({bool nodefer: false}) {
+  Future close({bool immediate: false}) {
     var result;
     _isOpen = false;
     _endpoint = null;
     subscription = null;
     if (_eventStream != null) {
-      result = _eventStream.close().then((_) {
+      result = _eventStream.close(immediate: immediate).then((_) {
         _eventStream = null;
       });
     }

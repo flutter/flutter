@@ -9,10 +9,10 @@ abstract class ButtonBase extends Component {
 
   ButtonBase({ Object key }) : super(key: key);
 
-  Node buildContent();
+  UINode buildContent();
 
-  Node build() {
-    return new EventTarget(
+  UINode build() {
+    return new EventListenerNode(
       buildContent(),
       onPointerDown: _handlePointerDown,
       onPointerUp: _handlePointerUp,

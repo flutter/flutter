@@ -9,22 +9,25 @@ import 'dart:async';
 import 'package:mojo/public/dart/bindings.dart' as bindings;
 import 'package:mojo/public/dart/core.dart' as core;
 
-final int NetAddressFamily_UNSPECIFIED = 0;
-final int NetAddressFamily_IPV4 = NetAddressFamily_UNSPECIFIED + 1;
-final int NetAddressFamily_IPV6 = NetAddressFamily_IPV4 + 1;
+const int NetAddressFamily_UNSPECIFIED = 0;
+const int NetAddressFamily_IPV4 = 1;
+const int NetAddressFamily_IPV6 = 2;
 
 
 class NetAddressIPv4 extends bindings.Struct {
-  static const int kStructSize = 24;
-  static const bindings.StructDataHeader kDefaultStructInfo =
-      const bindings.StructDataHeader(kStructSize, 0);
+  static const List<bindings.StructDataHeader> kVersions = const [
+    const bindings.StructDataHeader(24, 0)
+  ];
   int port = 0;
   List<int> addr = null;
 
-  NetAddressIPv4() : super(kStructSize);
+  NetAddressIPv4() : super(kVersions.last.size);
 
   static NetAddressIPv4 deserialize(bindings.Message message) {
-    return decode(new bindings.Decoder(message));
+    var decoder = new bindings.Decoder(message);
+    var result = decode(decoder);
+    decoder.excessHandles.forEach((h) => h.close());
+    return result;
   }
 
   static NetAddressIPv4 decode(bindings.Decoder decoder0) {
@@ -34,15 +37,25 @@ class NetAddressIPv4 extends bindings.Struct {
     NetAddressIPv4 result = new NetAddressIPv4();
 
     var mainDataHeader = decoder0.decodeStructDataHeader();
-    if ((mainDataHeader.size < kStructSize) ||
-        (mainDataHeader.version < 0)) {
-      throw new bindings.MojoCodecError('Malformed header');
+    if (mainDataHeader.version <= kVersions.last.version) {
+      // Scan in reverse order to optimize for more recent versions.
+      for (int i = kVersions.length - 1; i >= 0; --i) {
+        if (mainDataHeader.version >= kVersions[i].version) {
+          if (mainDataHeader.size != kVersions[i].size)
+            throw new bindings.MojoCodecError(
+                'Header doesn\'t correspond to any known version.');
+        }
+      }
+    } else if (mainDataHeader.size < kVersions.last.size) {
+      throw new bindings.MojoCodecError(
+        'Message newer than the last known version cannot be shorter than '
+        'required by the last known version.');
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.port = decoder0.decodeUint16(8);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.addr = decoder0.decodeUint8Array(16, bindings.kNothingNullable, 4);
     }
@@ -50,7 +63,7 @@ class NetAddressIPv4 extends bindings.Struct {
   }
 
   void encode(bindings.Encoder encoder) {
-    var encoder0 = encoder.getStructEncoderAtOffset(kDefaultStructInfo);
+    var encoder0 = encoder.getStructEncoderAtOffset(kVersions.last);
     
     encoder0.encodeUint16(port, 8);
     
@@ -65,16 +78,19 @@ class NetAddressIPv4 extends bindings.Struct {
 }
 
 class NetAddressIPv6 extends bindings.Struct {
-  static const int kStructSize = 24;
-  static const bindings.StructDataHeader kDefaultStructInfo =
-      const bindings.StructDataHeader(kStructSize, 0);
+  static const List<bindings.StructDataHeader> kVersions = const [
+    const bindings.StructDataHeader(24, 0)
+  ];
   int port = 0;
   List<int> addr = null;
 
-  NetAddressIPv6() : super(kStructSize);
+  NetAddressIPv6() : super(kVersions.last.size);
 
   static NetAddressIPv6 deserialize(bindings.Message message) {
-    return decode(new bindings.Decoder(message));
+    var decoder = new bindings.Decoder(message);
+    var result = decode(decoder);
+    decoder.excessHandles.forEach((h) => h.close());
+    return result;
   }
 
   static NetAddressIPv6 decode(bindings.Decoder decoder0) {
@@ -84,15 +100,25 @@ class NetAddressIPv6 extends bindings.Struct {
     NetAddressIPv6 result = new NetAddressIPv6();
 
     var mainDataHeader = decoder0.decodeStructDataHeader();
-    if ((mainDataHeader.size < kStructSize) ||
-        (mainDataHeader.version < 0)) {
-      throw new bindings.MojoCodecError('Malformed header');
+    if (mainDataHeader.version <= kVersions.last.version) {
+      // Scan in reverse order to optimize for more recent versions.
+      for (int i = kVersions.length - 1; i >= 0; --i) {
+        if (mainDataHeader.version >= kVersions[i].version) {
+          if (mainDataHeader.size != kVersions[i].size)
+            throw new bindings.MojoCodecError(
+                'Header doesn\'t correspond to any known version.');
+        }
+      }
+    } else if (mainDataHeader.size < kVersions.last.size) {
+      throw new bindings.MojoCodecError(
+        'Message newer than the last known version cannot be shorter than '
+        'required by the last known version.');
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.port = decoder0.decodeUint16(8);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.addr = decoder0.decodeUint8Array(16, bindings.kNothingNullable, 16);
     }
@@ -100,7 +126,7 @@ class NetAddressIPv6 extends bindings.Struct {
   }
 
   void encode(bindings.Encoder encoder) {
-    var encoder0 = encoder.getStructEncoderAtOffset(kDefaultStructInfo);
+    var encoder0 = encoder.getStructEncoderAtOffset(kVersions.last);
     
     encoder0.encodeUint16(port, 8);
     
@@ -115,17 +141,20 @@ class NetAddressIPv6 extends bindings.Struct {
 }
 
 class NetAddress extends bindings.Struct {
-  static const int kStructSize = 32;
-  static const bindings.StructDataHeader kDefaultStructInfo =
-      const bindings.StructDataHeader(kStructSize, 0);
-  int family = NetAddressFamily_UNSPECIFIED;
+  static const List<bindings.StructDataHeader> kVersions = const [
+    const bindings.StructDataHeader(32, 0)
+  ];
+  int family = 0;
   NetAddressIPv4 ipv4 = null;
   NetAddressIPv6 ipv6 = null;
 
-  NetAddress() : super(kStructSize);
+  NetAddress() : super(kVersions.last.size);
 
   static NetAddress deserialize(bindings.Message message) {
-    return decode(new bindings.Decoder(message));
+    var decoder = new bindings.Decoder(message);
+    var result = decode(decoder);
+    decoder.excessHandles.forEach((h) => h.close());
+    return result;
   }
 
   static NetAddress decode(bindings.Decoder decoder0) {
@@ -135,20 +164,30 @@ class NetAddress extends bindings.Struct {
     NetAddress result = new NetAddress();
 
     var mainDataHeader = decoder0.decodeStructDataHeader();
-    if ((mainDataHeader.size < kStructSize) ||
-        (mainDataHeader.version < 0)) {
-      throw new bindings.MojoCodecError('Malformed header');
+    if (mainDataHeader.version <= kVersions.last.version) {
+      // Scan in reverse order to optimize for more recent versions.
+      for (int i = kVersions.length - 1; i >= 0; --i) {
+        if (mainDataHeader.version >= kVersions[i].version) {
+          if (mainDataHeader.size != kVersions[i].size)
+            throw new bindings.MojoCodecError(
+                'Header doesn\'t correspond to any known version.');
+        }
+      }
+    } else if (mainDataHeader.size < kVersions.last.size) {
+      throw new bindings.MojoCodecError(
+        'Message newer than the last known version cannot be shorter than '
+        'required by the last known version.');
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.family = decoder0.decodeInt32(8);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       var decoder1 = decoder0.decodePointer(16, true);
       result.ipv4 = NetAddressIPv4.decode(decoder1);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       var decoder1 = decoder0.decodePointer(24, true);
       result.ipv6 = NetAddressIPv6.decode(decoder1);
@@ -157,7 +196,7 @@ class NetAddress extends bindings.Struct {
   }
 
   void encode(bindings.Encoder encoder) {
-    var encoder0 = encoder.getStructEncoderAtOffset(kDefaultStructInfo);
+    var encoder0 = encoder.getStructEncoderAtOffset(kVersions.last);
     
     encoder0.encodeInt32(family, 8);
     

@@ -107,7 +107,7 @@ class InkSplash extends Component {
     });
   }
 
-  Node build() {
+  UINode build() {
     _ensureListening();
 
     return new Container(

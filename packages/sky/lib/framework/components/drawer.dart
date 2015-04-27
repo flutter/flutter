@@ -103,7 +103,7 @@ class Drawer extends AnimatedComponent {
     bottom: 0;'''
   );
 
-  List<Node> children;
+  List<UINode> children;
   int level;
   DrawerController controller;
 
@@ -118,13 +118,13 @@ class Drawer extends AnimatedComponent {
     animateField(controller.position, #_position);
   }
 
-  Node build() {
+  UINode build() {
     bool isClosed = _position <= -_kWidth;
     String inlineStyle = 'display: ${isClosed ? 'none' : ''}';
     String maskInlineStyle = 'opacity: ${(_position / _kWidth + 1) * 0.5}';
     String contentInlineStyle = 'transform: translateX(${_position}px)';
 
-    var mask = new EventTarget(
+    var mask = new EventListenerNode(
       new Container(
         style: _maskStyle,
         inlineStyle: maskInlineStyle
@@ -141,7 +141,7 @@ class Drawer extends AnimatedComponent {
       ),
       level: level);
 
-    return new EventTarget(
+    return new EventListenerNode(
       new Container(
         style: _style,
         inlineStyle: inlineStyle,

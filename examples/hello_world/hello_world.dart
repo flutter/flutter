@@ -5,7 +5,7 @@
 import 'package:sky/framework/fn.dart';
 
 class HelloWorldApp extends App {
-  Node build() {
+  UINode build() {
     return new Text('Hello, world!');
   }
 }

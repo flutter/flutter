@@ -11,9 +11,9 @@ import 'package:mojo/public/dart/core.dart' as core;
 
 
 class Location extends bindings.Struct {
-  static const int kStructSize = 64;
-  static const bindings.StructDataHeader kDefaultStructInfo =
-      const bindings.StructDataHeader(kStructSize, 0);
+  static const List<bindings.StructDataHeader> kVersions = const [
+    const bindings.StructDataHeader(64, 0)
+  ];
   int time = 0;
   bool hasElapsedRealTimeNanos = false;
   bool hasAltitude = false;
@@ -28,10 +28,13 @@ class Location extends bindings.Struct {
   double bearing = 0.0;
   double accuracy = 0.0;
 
-  Location() : super(kStructSize);
+  Location() : super(kVersions.last.size);
 
   static Location deserialize(bindings.Message message) {
-    return decode(new bindings.Decoder(message));
+    var decoder = new bindings.Decoder(message);
+    var result = decode(decoder);
+    decoder.excessHandles.forEach((h) => h.close());
+    return result;
   }
 
   static Location decode(bindings.Decoder decoder0) {
@@ -41,59 +44,69 @@ class Location extends bindings.Struct {
     Location result = new Location();
 
     var mainDataHeader = decoder0.decodeStructDataHeader();
-    if ((mainDataHeader.size < kStructSize) ||
-        (mainDataHeader.version < 0)) {
-      throw new bindings.MojoCodecError('Malformed header');
+    if (mainDataHeader.version <= kVersions.last.version) {
+      // Scan in reverse order to optimize for more recent versions.
+      for (int i = kVersions.length - 1; i >= 0; --i) {
+        if (mainDataHeader.version >= kVersions[i].version) {
+          if (mainDataHeader.size != kVersions[i].size)
+            throw new bindings.MojoCodecError(
+                'Header doesn\'t correspond to any known version.');
+        }
+      }
+    } else if (mainDataHeader.size < kVersions.last.size) {
+      throw new bindings.MojoCodecError(
+        'Message newer than the last known version cannot be shorter than '
+        'required by the last known version.');
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.time = decoder0.decodeUint64(8);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.hasElapsedRealTimeNanos = decoder0.decodeBool(16, 0);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.hasAltitude = decoder0.decodeBool(16, 1);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.hasSpeed = decoder0.decodeBool(16, 2);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.hasBearing = decoder0.decodeBool(16, 3);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.hasAccuracy = decoder0.decodeBool(16, 4);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.speed = decoder0.decodeFloat(20);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.elapsedRealTimeNanos = decoder0.decodeUint64(24);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.latitude = decoder0.decodeDouble(32);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.longitude = decoder0.decodeDouble(40);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.altitude = decoder0.decodeDouble(48);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.bearing = decoder0.decodeFloat(56);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.accuracy = decoder0.decodeFloat(60);
     }
@@ -101,7 +114,7 @@ class Location extends bindings.Struct {
   }
 
   void encode(bindings.Encoder encoder) {
-    var encoder0 = encoder.getStructEncoderAtOffset(kDefaultStructInfo);
+    var encoder0 = encoder.getStructEncoderAtOffset(kVersions.last);
     
     encoder0.encodeUint64(time, 8);
     

@@ -28,10 +28,10 @@ abstract class Scrollable extends Component {
     onDidUnmount(_stopSimulation);
   }
 
-  Node buildContent();
+  UINode buildContent();
 
-  Node build() {
-    return new EventTarget(
+  UINode build() {
+    return new EventListenerNode(
       buildContent(),
       onPointerDown: _handlePointerDown,
       onPointerUp: _handlePointerUpOrCancel,
@@ -43,14 +43,18 @@ abstract class Scrollable extends Component {
     );
   }
 
-  bool scrollBy(double scrollDelta) {
-    var newScrollOffset = scrollBehavior.applyCurve(_scrollOffset, scrollDelta);
+  bool scrollTo(double newScrollOffset) {
     if (newScrollOffset == _scrollOffset)
       return false;
     setState(() {
       _scrollOffset = newScrollOffset;
     });
     return true;
+  }
+
+  bool scrollBy(double scrollDelta) {
+    var newScrollOffset = scrollBehavior.applyCurve(_scrollOffset, scrollDelta);
+    return scrollTo(newScrollOffset);
   }
 
   void _stopSimulation() {
@@ -65,11 +69,7 @@ abstract class Scrollable extends Component {
     _simulation = scrollBehavior.release(particle);
     if (_simulation == null)
       return;
-    _simulation.onTick.listen((_) {
-      setState(() {
-        _scrollOffset = particle.position;
-      });
-    });
+    _simulation.onTick.listen((_) => scrollTo(particle.position));
   }
 
   Particle _createParticle([double velocity = 0.0]) {

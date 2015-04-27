@@ -13,7 +13,7 @@ class EditableText extends Component {
   );
 
   static final Style _cusorStyle = new Style('''
-    display: inline-block;
+    display: inline-flex;
     width: 2px;
     height: 1.2em;
     vertical-align: top;
@@ -56,13 +56,13 @@ class EditableText extends Component {
     _showCursor = false;
   }
 
-  Node build() {
+  UINode build() {
     if (focused && _cursorTimer == null)
       _startCursorTimer();
     else if (!focused && _cursorTimer != null)
       _stopCursorTimer();
 
-    List<Node> children = new List<Node>();
+    List<UINode> children = new List<UINode>();
 
     if (!value.composing.isValid) {
       children.add(new Text(value.text));

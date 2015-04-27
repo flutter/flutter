@@ -16,7 +16,7 @@ class Radio extends ButtonBase {
 
   static final Style _style = new Style('''
     transform: translateX(0);
-    display: inline-block;
+    display: inline-flex;
     -webkit-user-select: none;
     width: 14px;
     height: 14px;
@@ -27,7 +27,7 @@ class Radio extends ButtonBase {
 
   static final Style _highlightStyle = new Style('''
     transform: translateX(0);
-    display: inline-block;
+    display: inline-flex;
     -webkit-user-select: none;
     width: 14px;
     height: 14px;
@@ -53,8 +53,8 @@ class Radio extends ButtonBase {
     this.groupValue
   }) : super(key: key);
 
-  Node buildContent() {
-    return new EventTarget(
+  UINode buildContent() {
+    return new EventListenerNode(
       new StyleNode(
         new InkWell(
           children: value == groupValue ? [new Container(style: _dotStyle)] : []

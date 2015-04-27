@@ -30,8 +30,8 @@ class MojoHandleWatcher {
   static const int kDeadlineIndefinite = -1;
 
   static const int kMojoResultOk = 0;
-  static const int kMojoResultDeadlineExceeded = -4;
-  static const int kMojoResultFailedPrecondition = -9;
+  static const int kMojoResultDeadlineExceeded = 4;
+  static const int kMojoResultFailedPrecondition = 9;
 
   static const int kMojoSignalsReadable = (1 << 0);
   static const int kMojoSignalsWritable = (1 << 1);

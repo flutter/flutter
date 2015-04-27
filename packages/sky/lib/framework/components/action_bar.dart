@@ -9,6 +9,7 @@ import 'material.dart';
 class ActionBar extends Component {
   static final Style _style = new Style('''
     display: flex;
+    flex-direction: row;
     align-items: center;
     height: 56px;
     padding: 0 8px;
@@ -19,9 +20,9 @@ class ActionBar extends Component {
     padding-left: 24px;
     flex: 1;''');
 
-  Node left;
-  Node center;
-  List<Node> right;
+  UINode left;
+  UINode center;
+  List<UINode> right;
 
   ActionBar({
     String key,
@@ -30,8 +31,8 @@ class ActionBar extends Component {
     this.right
   }) : super(key: key);
 
-  Node build() {
-    List<Node> children = [left, new StyleNode(center, _centerStyle)];
+  UINode build() {
+    List<UINode> children = [left, new StyleNode(center, _centerStyle)];
 
     if (right != null)
       children.addAll(right);

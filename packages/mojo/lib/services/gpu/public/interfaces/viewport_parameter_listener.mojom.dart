@@ -11,16 +11,19 @@ import 'package:mojo/public/dart/core.dart' as core;
 
 
 class ViewportParameterListenerOnVSyncParametersUpdatedParams extends bindings.Struct {
-  static const int kStructSize = 24;
-  static const bindings.StructDataHeader kDefaultStructInfo =
-      const bindings.StructDataHeader(kStructSize, 0);
+  static const List<bindings.StructDataHeader> kVersions = const [
+    const bindings.StructDataHeader(24, 0)
+  ];
   int timebase = 0;
   int interval = 0;
 
-  ViewportParameterListenerOnVSyncParametersUpdatedParams() : super(kStructSize);
+  ViewportParameterListenerOnVSyncParametersUpdatedParams() : super(kVersions.last.size);
 
   static ViewportParameterListenerOnVSyncParametersUpdatedParams deserialize(bindings.Message message) {
-    return decode(new bindings.Decoder(message));
+    var decoder = new bindings.Decoder(message);
+    var result = decode(decoder);
+    decoder.excessHandles.forEach((h) => h.close());
+    return result;
   }
 
   static ViewportParameterListenerOnVSyncParametersUpdatedParams decode(bindings.Decoder decoder0) {
@@ -30,15 +33,25 @@ class ViewportParameterListenerOnVSyncParametersUpdatedParams extends bindings.S
     ViewportParameterListenerOnVSyncParametersUpdatedParams result = new ViewportParameterListenerOnVSyncParametersUpdatedParams();
 
     var mainDataHeader = decoder0.decodeStructDataHeader();
-    if ((mainDataHeader.size < kStructSize) ||
-        (mainDataHeader.version < 0)) {
-      throw new bindings.MojoCodecError('Malformed header');
+    if (mainDataHeader.version <= kVersions.last.version) {
+      // Scan in reverse order to optimize for more recent versions.
+      for (int i = kVersions.length - 1; i >= 0; --i) {
+        if (mainDataHeader.version >= kVersions[i].version) {
+          if (mainDataHeader.size != kVersions[i].size)
+            throw new bindings.MojoCodecError(
+                'Header doesn\'t correspond to any known version.');
+        }
+      }
+    } else if (mainDataHeader.size < kVersions.last.size) {
+      throw new bindings.MojoCodecError(
+        'Message newer than the last known version cannot be shorter than '
+        'required by the last known version.');
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.timebase = decoder0.decodeInt64(8);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.interval = decoder0.decodeInt64(16);
     }
@@ -46,7 +59,7 @@ class ViewportParameterListenerOnVSyncParametersUpdatedParams extends bindings.S
   }
 
   void encode(bindings.Encoder encoder) {
-    var encoder0 = encoder.getStructEncoderAtOffset(kDefaultStructInfo);
+    var encoder0 = encoder.getStructEncoderAtOffset(kVersions.last);
     
     encoder0.encodeInt64(timebase, 8);
     
@@ -144,7 +157,7 @@ class ViewportParameterListenerProxy implements bindings.ProxyBase {
       core.MojoMessagePipeEndpoint endpoint) =>
       new ViewportParameterListenerProxy.fromEndpoint(endpoint);
 
-  Future close({bool nodefer: false}) => impl.close(nodefer: nodefer);
+  Future close({bool immediate: false}) => impl.close(immediate: immediate);
 
   String toString() {
     return "ViewportParameterListenerProxy($impl)";

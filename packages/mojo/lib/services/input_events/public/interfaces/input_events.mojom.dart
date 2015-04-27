@@ -8,15 +8,15 @@ import 'dart:async';
 
 import 'package:mojo/public/dart/bindings.dart' as bindings;
 import 'package:mojo/public/dart/core.dart' as core;
-import 'package:mojo/services/geometry/public/interfaces/geometry.mojom.dart' as geometry_mojom;
-import 'package:mojo/services/input_events/public/interfaces/input_event_constants.mojom.dart' as input_event_constants_mojom;
-import 'package:mojo/services/input_events/public/interfaces/input_key_codes.mojom.dart' as input_key_codes_mojom;
+import 'package:mojo/geometry.mojom.dart' as geometry_mojom;
+import 'package:mojo/input_event_constants.mojom.dart' as input_event_constants_mojom;
+import 'package:mojo/input_key_codes.mojom.dart' as input_key_codes_mojom;
 
 
 class KeyData extends bindings.Struct {
-  static const int kStructSize = 32;
-  static const bindings.StructDataHeader kDefaultStructInfo =
-      const bindings.StructDataHeader(kStructSize, 0);
+  static const List<bindings.StructDataHeader> kVersions = const [
+    const bindings.StructDataHeader(32, 0)
+  ];
   int keyCode = 0;
   bool isChar = false;
   int character = 0;
@@ -25,10 +25,13 @@ class KeyData extends bindings.Struct {
   int text = 0;
   int unmodifiedText = 0;
 
-  KeyData() : super(kStructSize);
+  KeyData() : super(kVersions.last.size);
 
   static KeyData deserialize(bindings.Message message) {
-    return decode(new bindings.Decoder(message));
+    var decoder = new bindings.Decoder(message);
+    var result = decode(decoder);
+    decoder.excessHandles.forEach((h) => h.close());
+    return result;
   }
 
   static KeyData decode(bindings.Decoder decoder0) {
@@ -38,35 +41,45 @@ class KeyData extends bindings.Struct {
     KeyData result = new KeyData();
 
     var mainDataHeader = decoder0.decodeStructDataHeader();
-    if ((mainDataHeader.size < kStructSize) ||
-        (mainDataHeader.version < 0)) {
-      throw new bindings.MojoCodecError('Malformed header');
+    if (mainDataHeader.version <= kVersions.last.version) {
+      // Scan in reverse order to optimize for more recent versions.
+      for (int i = kVersions.length - 1; i >= 0; --i) {
+        if (mainDataHeader.version >= kVersions[i].version) {
+          if (mainDataHeader.size != kVersions[i].size)
+            throw new bindings.MojoCodecError(
+                'Header doesn\'t correspond to any known version.');
+        }
+      }
+    } else if (mainDataHeader.size < kVersions.last.size) {
+      throw new bindings.MojoCodecError(
+        'Message newer than the last known version cannot be shorter than '
+        'required by the last known version.');
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.keyCode = decoder0.decodeInt32(8);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.isChar = decoder0.decodeBool(12, 0);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.character = decoder0.decodeUint16(14);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.windowsKeyCode = decoder0.decodeInt32(16);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.nativeKeyCode = decoder0.decodeInt32(20);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.text = decoder0.decodeUint16(24);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.unmodifiedText = decoder0.decodeUint16(26);
     }
@@ -74,7 +87,7 @@ class KeyData extends bindings.Struct {
   }
 
   void encode(bindings.Encoder encoder) {
-    var encoder0 = encoder.getStructEncoderAtOffset(kDefaultStructInfo);
+    var encoder0 = encoder.getStructEncoderAtOffset(kVersions.last);
     
     encoder0.encodeInt32(keyCode, 8);
     
@@ -104,9 +117,9 @@ class KeyData extends bindings.Struct {
 }
 
 class PointerData extends bindings.Struct {
-  static const int kStructSize = 56;
-  static const bindings.StructDataHeader kDefaultStructInfo =
-      const bindings.StructDataHeader(kStructSize, 0);
+  static const List<bindings.StructDataHeader> kVersions = const [
+    const bindings.StructDataHeader(56, 0)
+  ];
   int pointerId = 0;
   int kind = 0;
   double x = 0.0;
@@ -120,10 +133,13 @@ class PointerData extends bindings.Struct {
   double horizontalWheel = 0.0;
   double verticalWheel = 0.0;
 
-  PointerData() : super(kStructSize);
+  PointerData() : super(kVersions.last.size);
 
   static PointerData deserialize(bindings.Message message) {
-    return decode(new bindings.Decoder(message));
+    var decoder = new bindings.Decoder(message);
+    var result = decode(decoder);
+    decoder.excessHandles.forEach((h) => h.close());
+    return result;
   }
 
   static PointerData decode(bindings.Decoder decoder0) {
@@ -133,55 +149,65 @@ class PointerData extends bindings.Struct {
     PointerData result = new PointerData();
 
     var mainDataHeader = decoder0.decodeStructDataHeader();
-    if ((mainDataHeader.size < kStructSize) ||
-        (mainDataHeader.version < 0)) {
-      throw new bindings.MojoCodecError('Malformed header');
+    if (mainDataHeader.version <= kVersions.last.version) {
+      // Scan in reverse order to optimize for more recent versions.
+      for (int i = kVersions.length - 1; i >= 0; --i) {
+        if (mainDataHeader.version >= kVersions[i].version) {
+          if (mainDataHeader.size != kVersions[i].size)
+            throw new bindings.MojoCodecError(
+                'Header doesn\'t correspond to any known version.');
+        }
+      }
+    } else if (mainDataHeader.size < kVersions.last.size) {
+      throw new bindings.MojoCodecError(
+        'Message newer than the last known version cannot be shorter than '
+        'required by the last known version.');
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.pointerId = decoder0.decodeInt32(8);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.kind = decoder0.decodeInt32(12);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.x = decoder0.decodeFloat(16);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.y = decoder0.decodeFloat(20);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.screenX = decoder0.decodeFloat(24);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.screenY = decoder0.decodeFloat(28);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.pressure = decoder0.decodeFloat(32);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.radiusMajor = decoder0.decodeFloat(36);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.radiusMinor = decoder0.decodeFloat(40);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.orientation = decoder0.decodeFloat(44);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.horizontalWheel = decoder0.decodeFloat(48);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.verticalWheel = decoder0.decodeFloat(52);
     }
@@ -189,7 +215,7 @@ class PointerData extends bindings.Struct {
   }
 
   void encode(bindings.Encoder encoder) {
-    var encoder0 = encoder.getStructEncoderAtOffset(kDefaultStructInfo);
+    var encoder0 = encoder.getStructEncoderAtOffset(kVersions.last);
     
     encoder0.encodeInt32(pointerId, 8);
     
@@ -234,19 +260,22 @@ class PointerData extends bindings.Struct {
 }
 
 class Event extends bindings.Struct {
-  static const int kStructSize = 40;
-  static const bindings.StructDataHeader kDefaultStructInfo =
-      const bindings.StructDataHeader(kStructSize, 0);
+  static const List<bindings.StructDataHeader> kVersions = const [
+    const bindings.StructDataHeader(40, 0)
+  ];
   int action = 0;
   int flags = 0;
   int timeStamp = 0;
   KeyData keyData = null;
   PointerData pointerData = null;
 
-  Event() : super(kStructSize);
+  Event() : super(kVersions.last.size);
 
   static Event deserialize(bindings.Message message) {
-    return decode(new bindings.Decoder(message));
+    var decoder = new bindings.Decoder(message);
+    var result = decode(decoder);
+    decoder.excessHandles.forEach((h) => h.close());
+    return result;
   }
 
   static Event decode(bindings.Decoder decoder0) {
@@ -256,28 +285,38 @@ class Event extends bindings.Struct {
     Event result = new Event();
 
     var mainDataHeader = decoder0.decodeStructDataHeader();
-    if ((mainDataHeader.size < kStructSize) ||
-        (mainDataHeader.version < 0)) {
-      throw new bindings.MojoCodecError('Malformed header');
+    if (mainDataHeader.version <= kVersions.last.version) {
+      // Scan in reverse order to optimize for more recent versions.
+      for (int i = kVersions.length - 1; i >= 0; --i) {
+        if (mainDataHeader.version >= kVersions[i].version) {
+          if (mainDataHeader.size != kVersions[i].size)
+            throw new bindings.MojoCodecError(
+                'Header doesn\'t correspond to any known version.');
+        }
+      }
+    } else if (mainDataHeader.size < kVersions.last.size) {
+      throw new bindings.MojoCodecError(
+        'Message newer than the last known version cannot be shorter than '
+        'required by the last known version.');
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.action = decoder0.decodeInt32(8);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.flags = decoder0.decodeInt32(12);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.timeStamp = decoder0.decodeInt64(16);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       var decoder1 = decoder0.decodePointer(24, true);
       result.keyData = KeyData.decode(decoder1);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       var decoder1 = decoder0.decodePointer(32, true);
       result.pointerData = PointerData.decode(decoder1);
@@ -286,7 +325,7 @@ class Event extends bindings.Struct {
   }
 
   void encode(bindings.Encoder encoder) {
-    var encoder0 = encoder.getStructEncoderAtOffset(kDefaultStructInfo);
+    var encoder0 = encoder.getStructEncoderAtOffset(kVersions.last);
     
     encoder0.encodeInt32(action, 8);
     

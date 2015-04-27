@@ -8,24 +8,27 @@ import 'dart:async';
 
 import 'package:mojo/public/dart/bindings.dart' as bindings;
 import 'package:mojo/public/dart/core.dart' as core;
-import 'package:mojo/services/files/public/interfaces/directory.mojom.dart' as directory_mojom;
-import 'package:mojo/services/files/public/interfaces/types.mojom.dart' as types_mojom;
+import 'package:mojo/files/directory.mojom.dart' as directory_mojom;
+import 'package:mojo/files/types.mojom.dart' as types_mojom;
 
-final int FileSystem_TEMPORARY = 0;
-final int FileSystem_DEBUG = FileSystem_TEMPORARY + 1;
+const int FileSystem_TEMPORARY = 0;
+const int FileSystem_DEBUG = 1;
 
 
 class FilesOpenFileSystemParams extends bindings.Struct {
-  static const int kStructSize = 16;
-  static const bindings.StructDataHeader kDefaultStructInfo =
-      const bindings.StructDataHeader(kStructSize, 0);
+  static const List<bindings.StructDataHeader> kVersions = const [
+    const bindings.StructDataHeader(16, 0)
+  ];
   int fileSystem = 0;
   Object directory = null;
 
-  FilesOpenFileSystemParams() : super(kStructSize);
+  FilesOpenFileSystemParams() : super(kVersions.last.size);
 
   static FilesOpenFileSystemParams deserialize(bindings.Message message) {
-    return decode(new bindings.Decoder(message));
+    var decoder = new bindings.Decoder(message);
+    var result = decode(decoder);
+    decoder.excessHandles.forEach((h) => h.close());
+    return result;
   }
 
   static FilesOpenFileSystemParams decode(bindings.Decoder decoder0) {
@@ -35,15 +38,25 @@ class FilesOpenFileSystemParams extends bindings.Struct {
     FilesOpenFileSystemParams result = new FilesOpenFileSystemParams();
 
     var mainDataHeader = decoder0.decodeStructDataHeader();
-    if ((mainDataHeader.size < kStructSize) ||
-        (mainDataHeader.version < 0)) {
-      throw new bindings.MojoCodecError('Malformed header');
+    if (mainDataHeader.version <= kVersions.last.version) {
+      // Scan in reverse order to optimize for more recent versions.
+      for (int i = kVersions.length - 1; i >= 0; --i) {
+        if (mainDataHeader.version >= kVersions[i].version) {
+          if (mainDataHeader.size != kVersions[i].size)
+            throw new bindings.MojoCodecError(
+                'Header doesn\'t correspond to any known version.');
+        }
+      }
+    } else if (mainDataHeader.size < kVersions.last.size) {
+      throw new bindings.MojoCodecError(
+        'Message newer than the last known version cannot be shorter than '
+        'required by the last known version.');
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.fileSystem = decoder0.decodeInt32(8);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.directory = decoder0.decodeInterfaceRequest(12, false, directory_mojom.DirectoryStub.newFromEndpoint);
     }
@@ -51,7 +64,7 @@ class FilesOpenFileSystemParams extends bindings.Struct {
   }
 
   void encode(bindings.Encoder encoder) {
-    var encoder0 = encoder.getStructEncoderAtOffset(kDefaultStructInfo);
+    var encoder0 = encoder.getStructEncoderAtOffset(kVersions.last);
     
     encoder0.encodeInt32(fileSystem, 8);
     
@@ -66,15 +79,18 @@ class FilesOpenFileSystemParams extends bindings.Struct {
 }
 
 class FilesOpenFileSystemResponseParams extends bindings.Struct {
-  static const int kStructSize = 16;
-  static const bindings.StructDataHeader kDefaultStructInfo =
-      const bindings.StructDataHeader(kStructSize, 0);
+  static const List<bindings.StructDataHeader> kVersions = const [
+    const bindings.StructDataHeader(16, 0)
+  ];
   int error = 0;
 
-  FilesOpenFileSystemResponseParams() : super(kStructSize);
+  FilesOpenFileSystemResponseParams() : super(kVersions.last.size);
 
   static FilesOpenFileSystemResponseParams deserialize(bindings.Message message) {
-    return decode(new bindings.Decoder(message));
+    var decoder = new bindings.Decoder(message);
+    var result = decode(decoder);
+    decoder.excessHandles.forEach((h) => h.close());
+    return result;
   }
 
   static FilesOpenFileSystemResponseParams decode(bindings.Decoder decoder0) {
@@ -84,11 +100,21 @@ class FilesOpenFileSystemResponseParams extends bindings.Struct {
     FilesOpenFileSystemResponseParams result = new FilesOpenFileSystemResponseParams();
 
     var mainDataHeader = decoder0.decodeStructDataHeader();
-    if ((mainDataHeader.size < kStructSize) ||
-        (mainDataHeader.version < 0)) {
-      throw new bindings.MojoCodecError('Malformed header');
+    if (mainDataHeader.version <= kVersions.last.version) {
+      // Scan in reverse order to optimize for more recent versions.
+      for (int i = kVersions.length - 1; i >= 0; --i) {
+        if (mainDataHeader.version >= kVersions[i].version) {
+          if (mainDataHeader.size != kVersions[i].size)
+            throw new bindings.MojoCodecError(
+                'Header doesn\'t correspond to any known version.');
+        }
+      }
+    } else if (mainDataHeader.size < kVersions.last.size) {
+      throw new bindings.MojoCodecError(
+        'Message newer than the last known version cannot be shorter than '
+        'required by the last known version.');
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.error = decoder0.decodeInt32(8);
     }
@@ -96,7 +122,7 @@ class FilesOpenFileSystemResponseParams extends bindings.Struct {
   }
 
   void encode(bindings.Encoder encoder) {
-    var encoder0 = encoder.getStructEncoderAtOffset(kDefaultStructInfo);
+    var encoder0 = encoder.getStructEncoderAtOffset(kVersions.last);
     
     encoder0.encodeInt32(error, 8);
   }
@@ -208,7 +234,7 @@ class FilesProxy implements bindings.ProxyBase {
       core.MojoMessagePipeEndpoint endpoint) =>
       new FilesProxy.fromEndpoint(endpoint);
 
-  Future close({bool nodefer: false}) => impl.close(nodefer: nodefer);
+  Future close({bool immediate: false}) => impl.close(immediate: immediate);
 
   String toString() {
     return "FilesProxy($impl)";

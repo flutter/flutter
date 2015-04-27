@@ -8,22 +8,25 @@ import 'dart:async';
 
 import 'package:mojo/public/dart/bindings.dart' as bindings;
 import 'package:mojo/public/dart/core.dart' as core;
-import 'package:mojo/services/network/public/interfaces/net_address.mojom.dart' as net_address_mojom;
-import 'package:mojo/services/network/public/interfaces/network_error.mojom.dart' as network_error_mojom;
-import 'package:mojo/services/network/public/interfaces/tcp_connected_socket.mojom.dart' as tcp_connected_socket_mojom;
-import 'package:mojo/services/network/public/interfaces/tcp_server_socket.mojom.dart' as tcp_server_socket_mojom;
+import 'package:mojo/net_address.mojom.dart' as net_address_mojom;
+import 'package:mojo/network_error.mojom.dart' as network_error_mojom;
+import 'package:mojo/tcp_connected_socket.mojom.dart' as tcp_connected_socket_mojom;
+import 'package:mojo/tcp_server_socket.mojom.dart' as tcp_server_socket_mojom;
 
 
 class TcpBoundSocketStartListeningParams extends bindings.Struct {
-  static const int kStructSize = 16;
-  static const bindings.StructDataHeader kDefaultStructInfo =
-      const bindings.StructDataHeader(kStructSize, 0);
+  static const List<bindings.StructDataHeader> kVersions = const [
+    const bindings.StructDataHeader(16, 0)
+  ];
   Object server = null;
 
-  TcpBoundSocketStartListeningParams() : super(kStructSize);
+  TcpBoundSocketStartListeningParams() : super(kVersions.last.size);
 
   static TcpBoundSocketStartListeningParams deserialize(bindings.Message message) {
-    return decode(new bindings.Decoder(message));
+    var decoder = new bindings.Decoder(message);
+    var result = decode(decoder);
+    decoder.excessHandles.forEach((h) => h.close());
+    return result;
   }
 
   static TcpBoundSocketStartListeningParams decode(bindings.Decoder decoder0) {
@@ -33,11 +36,21 @@ class TcpBoundSocketStartListeningParams extends bindings.Struct {
     TcpBoundSocketStartListeningParams result = new TcpBoundSocketStartListeningParams();
 
     var mainDataHeader = decoder0.decodeStructDataHeader();
-    if ((mainDataHeader.size < kStructSize) ||
-        (mainDataHeader.version < 0)) {
-      throw new bindings.MojoCodecError('Malformed header');
+    if (mainDataHeader.version <= kVersions.last.version) {
+      // Scan in reverse order to optimize for more recent versions.
+      for (int i = kVersions.length - 1; i >= 0; --i) {
+        if (mainDataHeader.version >= kVersions[i].version) {
+          if (mainDataHeader.size != kVersions[i].size)
+            throw new bindings.MojoCodecError(
+                'Header doesn\'t correspond to any known version.');
+        }
+      }
+    } else if (mainDataHeader.size < kVersions.last.size) {
+      throw new bindings.MojoCodecError(
+        'Message newer than the last known version cannot be shorter than '
+        'required by the last known version.');
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.server = decoder0.decodeInterfaceRequest(8, false, tcp_server_socket_mojom.TcpServerSocketStub.newFromEndpoint);
     }
@@ -45,7 +58,7 @@ class TcpBoundSocketStartListeningParams extends bindings.Struct {
   }
 
   void encode(bindings.Encoder encoder) {
-    var encoder0 = encoder.getStructEncoderAtOffset(kDefaultStructInfo);
+    var encoder0 = encoder.getStructEncoderAtOffset(kVersions.last);
     
     encoder0.encodeInterfaceRequest(server, 8, false);
   }
@@ -57,15 +70,18 @@ class TcpBoundSocketStartListeningParams extends bindings.Struct {
 }
 
 class TcpBoundSocketStartListeningResponseParams extends bindings.Struct {
-  static const int kStructSize = 16;
-  static const bindings.StructDataHeader kDefaultStructInfo =
-      const bindings.StructDataHeader(kStructSize, 0);
+  static const List<bindings.StructDataHeader> kVersions = const [
+    const bindings.StructDataHeader(16, 0)
+  ];
   network_error_mojom.NetworkError result = null;
 
-  TcpBoundSocketStartListeningResponseParams() : super(kStructSize);
+  TcpBoundSocketStartListeningResponseParams() : super(kVersions.last.size);
 
   static TcpBoundSocketStartListeningResponseParams deserialize(bindings.Message message) {
-    return decode(new bindings.Decoder(message));
+    var decoder = new bindings.Decoder(message);
+    var result = decode(decoder);
+    decoder.excessHandles.forEach((h) => h.close());
+    return result;
   }
 
   static TcpBoundSocketStartListeningResponseParams decode(bindings.Decoder decoder0) {
@@ -75,11 +91,21 @@ class TcpBoundSocketStartListeningResponseParams extends bindings.Struct {
     TcpBoundSocketStartListeningResponseParams result = new TcpBoundSocketStartListeningResponseParams();
 
     var mainDataHeader = decoder0.decodeStructDataHeader();
-    if ((mainDataHeader.size < kStructSize) ||
-        (mainDataHeader.version < 0)) {
-      throw new bindings.MojoCodecError('Malformed header');
+    if (mainDataHeader.version <= kVersions.last.version) {
+      // Scan in reverse order to optimize for more recent versions.
+      for (int i = kVersions.length - 1; i >= 0; --i) {
+        if (mainDataHeader.version >= kVersions[i].version) {
+          if (mainDataHeader.size != kVersions[i].size)
+            throw new bindings.MojoCodecError(
+                'Header doesn\'t correspond to any known version.');
+        }
+      }
+    } else if (mainDataHeader.size < kVersions.last.size) {
+      throw new bindings.MojoCodecError(
+        'Message newer than the last known version cannot be shorter than '
+        'required by the last known version.');
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       var decoder1 = decoder0.decodePointer(8, false);
       result.result = network_error_mojom.NetworkError.decode(decoder1);
@@ -88,7 +114,7 @@ class TcpBoundSocketStartListeningResponseParams extends bindings.Struct {
   }
 
   void encode(bindings.Encoder encoder) {
-    var encoder0 = encoder.getStructEncoderAtOffset(kDefaultStructInfo);
+    var encoder0 = encoder.getStructEncoderAtOffset(kVersions.last);
     
     encoder0.encodeStruct(result, 8, false);
   }
@@ -100,18 +126,21 @@ class TcpBoundSocketStartListeningResponseParams extends bindings.Struct {
 }
 
 class TcpBoundSocketConnectParams extends bindings.Struct {
-  static const int kStructSize = 32;
-  static const bindings.StructDataHeader kDefaultStructInfo =
-      const bindings.StructDataHeader(kStructSize, 0);
+  static const List<bindings.StructDataHeader> kVersions = const [
+    const bindings.StructDataHeader(32, 0)
+  ];
   net_address_mojom.NetAddress remoteAddress = null;
   core.MojoDataPipeConsumer sendStream = null;
   core.MojoDataPipeProducer receiveStream = null;
   Object clientSocket = null;
 
-  TcpBoundSocketConnectParams() : super(kStructSize);
+  TcpBoundSocketConnectParams() : super(kVersions.last.size);
 
   static TcpBoundSocketConnectParams deserialize(bindings.Message message) {
-    return decode(new bindings.Decoder(message));
+    var decoder = new bindings.Decoder(message);
+    var result = decode(decoder);
+    decoder.excessHandles.forEach((h) => h.close());
+    return result;
   }
 
   static TcpBoundSocketConnectParams decode(bindings.Decoder decoder0) {
@@ -121,24 +150,34 @@ class TcpBoundSocketConnectParams extends bindings.Struct {
     TcpBoundSocketConnectParams result = new TcpBoundSocketConnectParams();
 
     var mainDataHeader = decoder0.decodeStructDataHeader();
-    if ((mainDataHeader.size < kStructSize) ||
-        (mainDataHeader.version < 0)) {
-      throw new bindings.MojoCodecError('Malformed header');
+    if (mainDataHeader.version <= kVersions.last.version) {
+      // Scan in reverse order to optimize for more recent versions.
+      for (int i = kVersions.length - 1; i >= 0; --i) {
+        if (mainDataHeader.version >= kVersions[i].version) {
+          if (mainDataHeader.size != kVersions[i].size)
+            throw new bindings.MojoCodecError(
+                'Header doesn\'t correspond to any known version.');
+        }
+      }
+    } else if (mainDataHeader.size < kVersions.last.size) {
+      throw new bindings.MojoCodecError(
+        'Message newer than the last known version cannot be shorter than '
+        'required by the last known version.');
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       var decoder1 = decoder0.decodePointer(8, false);
       result.remoteAddress = net_address_mojom.NetAddress.decode(decoder1);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.sendStream = decoder0.decodeConsumerHandle(16, false);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.receiveStream = decoder0.decodeProducerHandle(20, false);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.clientSocket = decoder0.decodeInterfaceRequest(24, false, tcp_connected_socket_mojom.TcpConnectedSocketStub.newFromEndpoint);
     }
@@ -146,7 +185,7 @@ class TcpBoundSocketConnectParams extends bindings.Struct {
   }
 
   void encode(bindings.Encoder encoder) {
-    var encoder0 = encoder.getStructEncoderAtOffset(kDefaultStructInfo);
+    var encoder0 = encoder.getStructEncoderAtOffset(kVersions.last);
     
     encoder0.encodeStruct(remoteAddress, 8, false);
     
@@ -167,15 +206,18 @@ class TcpBoundSocketConnectParams extends bindings.Struct {
 }
 
 class TcpBoundSocketConnectResponseParams extends bindings.Struct {
-  static const int kStructSize = 16;
-  static const bindings.StructDataHeader kDefaultStructInfo =
-      const bindings.StructDataHeader(kStructSize, 0);
+  static const List<bindings.StructDataHeader> kVersions = const [
+    const bindings.StructDataHeader(16, 0)
+  ];
   network_error_mojom.NetworkError result = null;
 
-  TcpBoundSocketConnectResponseParams() : super(kStructSize);
+  TcpBoundSocketConnectResponseParams() : super(kVersions.last.size);
 
   static TcpBoundSocketConnectResponseParams deserialize(bindings.Message message) {
-    return decode(new bindings.Decoder(message));
+    var decoder = new bindings.Decoder(message);
+    var result = decode(decoder);
+    decoder.excessHandles.forEach((h) => h.close());
+    return result;
   }
 
   static TcpBoundSocketConnectResponseParams decode(bindings.Decoder decoder0) {
@@ -185,11 +227,21 @@ class TcpBoundSocketConnectResponseParams extends bindings.Struct {
     TcpBoundSocketConnectResponseParams result = new TcpBoundSocketConnectResponseParams();
 
     var mainDataHeader = decoder0.decodeStructDataHeader();
-    if ((mainDataHeader.size < kStructSize) ||
-        (mainDataHeader.version < 0)) {
-      throw new bindings.MojoCodecError('Malformed header');
+    if (mainDataHeader.version <= kVersions.last.version) {
+      // Scan in reverse order to optimize for more recent versions.
+      for (int i = kVersions.length - 1; i >= 0; --i) {
+        if (mainDataHeader.version >= kVersions[i].version) {
+          if (mainDataHeader.size != kVersions[i].size)
+            throw new bindings.MojoCodecError(
+                'Header doesn\'t correspond to any known version.');
+        }
+      }
+    } else if (mainDataHeader.size < kVersions.last.size) {
+      throw new bindings.MojoCodecError(
+        'Message newer than the last known version cannot be shorter than '
+        'required by the last known version.');
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       var decoder1 = decoder0.decodePointer(8, false);
       result.result = network_error_mojom.NetworkError.decode(decoder1);
@@ -198,7 +250,7 @@ class TcpBoundSocketConnectResponseParams extends bindings.Struct {
   }
 
   void encode(bindings.Encoder encoder) {
-    var encoder0 = encoder.getStructEncoderAtOffset(kDefaultStructInfo);
+    var encoder0 = encoder.getStructEncoderAtOffset(kVersions.last);
     
     encoder0.encodeStruct(result, 8, false);
   }
@@ -338,7 +390,7 @@ class TcpBoundSocketProxy implements bindings.ProxyBase {
       core.MojoMessagePipeEndpoint endpoint) =>
       new TcpBoundSocketProxy.fromEndpoint(endpoint);
 
-  Future close({bool nodefer: false}) => impl.close(nodefer: nodefer);
+  Future close({bool immediate: false}) => impl.close(immediate: immediate);
 
   String toString() {
     return "TcpBoundSocketProxy($impl)";

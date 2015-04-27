@@ -8,23 +8,26 @@ import 'dart:async';
 
 import 'package:mojo/public/dart/bindings.dart' as bindings;
 import 'package:mojo/public/dart/core.dart' as core;
-import 'package:mojo/services/network/public/interfaces/network_error.mojom.dart' as network_error_mojom;
+import 'package:mojo/network_error.mojom.dart' as network_error_mojom;
 
 
 class WebSocketConnectParams extends bindings.Struct {
-  static const int kStructSize = 40;
-  static const bindings.StructDataHeader kDefaultStructInfo =
-      const bindings.StructDataHeader(kStructSize, 0);
+  static const List<bindings.StructDataHeader> kVersions = const [
+    const bindings.StructDataHeader(48, 0)
+  ];
   String url = null;
   List<String> protocols = null;
   String origin = null;
   core.MojoDataPipeConsumer sendStream = null;
   Object client = null;
 
-  WebSocketConnectParams() : super(kStructSize);
+  WebSocketConnectParams() : super(kVersions.last.size);
 
   static WebSocketConnectParams deserialize(bindings.Message message) {
-    return decode(new bindings.Decoder(message));
+    var decoder = new bindings.Decoder(message);
+    var result = decode(decoder);
+    decoder.excessHandles.forEach((h) => h.close());
+    return result;
   }
 
   static WebSocketConnectParams decode(bindings.Decoder decoder0) {
@@ -34,15 +37,25 @@ class WebSocketConnectParams extends bindings.Struct {
     WebSocketConnectParams result = new WebSocketConnectParams();
 
     var mainDataHeader = decoder0.decodeStructDataHeader();
-    if ((mainDataHeader.size < kStructSize) ||
-        (mainDataHeader.version < 0)) {
-      throw new bindings.MojoCodecError('Malformed header');
+    if (mainDataHeader.version <= kVersions.last.version) {
+      // Scan in reverse order to optimize for more recent versions.
+      for (int i = kVersions.length - 1; i >= 0; --i) {
+        if (mainDataHeader.version >= kVersions[i].version) {
+          if (mainDataHeader.size != kVersions[i].size)
+            throw new bindings.MojoCodecError(
+                'Header doesn\'t correspond to any known version.');
+        }
+      }
+    } else if (mainDataHeader.size < kVersions.last.size) {
+      throw new bindings.MojoCodecError(
+        'Message newer than the last known version cannot be shorter than '
+        'required by the last known version.');
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.url = decoder0.decodeString(8, false);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       var decoder1 = decoder0.decodePointer(16, false);
       {
@@ -54,15 +67,15 @@ class WebSocketConnectParams extends bindings.Struct {
         }
       }
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.origin = decoder0.decodeString(24, false);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.sendStream = decoder0.decodeConsumerHandle(32, false);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.client = decoder0.decodeServiceInterface(36, false, WebSocketClientProxy.newFromEndpoint);
     }
@@ -70,7 +83,7 @@ class WebSocketConnectParams extends bindings.Struct {
   }
 
   void encode(bindings.Encoder encoder) {
-    var encoder0 = encoder.getStructEncoderAtOffset(kDefaultStructInfo);
+    var encoder0 = encoder.getStructEncoderAtOffset(kVersions.last);
     
     encoder0.encodeString(url, 8, false);
     
@@ -102,17 +115,20 @@ class WebSocketConnectParams extends bindings.Struct {
 }
 
 class WebSocketSendParams extends bindings.Struct {
-  static const int kStructSize = 24;
-  static const bindings.StructDataHeader kDefaultStructInfo =
-      const bindings.StructDataHeader(kStructSize, 0);
+  static const List<bindings.StructDataHeader> kVersions = const [
+    const bindings.StructDataHeader(24, 0)
+  ];
   bool fin = false;
   int type = 0;
   int numBytes = 0;
 
-  WebSocketSendParams() : super(kStructSize);
+  WebSocketSendParams() : super(kVersions.last.size);
 
   static WebSocketSendParams deserialize(bindings.Message message) {
-    return decode(new bindings.Decoder(message));
+    var decoder = new bindings.Decoder(message);
+    var result = decode(decoder);
+    decoder.excessHandles.forEach((h) => h.close());
+    return result;
   }
 
   static WebSocketSendParams decode(bindings.Decoder decoder0) {
@@ -122,19 +138,29 @@ class WebSocketSendParams extends bindings.Struct {
     WebSocketSendParams result = new WebSocketSendParams();
 
     var mainDataHeader = decoder0.decodeStructDataHeader();
-    if ((mainDataHeader.size < kStructSize) ||
-        (mainDataHeader.version < 0)) {
-      throw new bindings.MojoCodecError('Malformed header');
+    if (mainDataHeader.version <= kVersions.last.version) {
+      // Scan in reverse order to optimize for more recent versions.
+      for (int i = kVersions.length - 1; i >= 0; --i) {
+        if (mainDataHeader.version >= kVersions[i].version) {
+          if (mainDataHeader.size != kVersions[i].size)
+            throw new bindings.MojoCodecError(
+                'Header doesn\'t correspond to any known version.');
+        }
+      }
+    } else if (mainDataHeader.size < kVersions.last.size) {
+      throw new bindings.MojoCodecError(
+        'Message newer than the last known version cannot be shorter than '
+        'required by the last known version.');
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.fin = decoder0.decodeBool(8, 0);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.type = decoder0.decodeInt32(12);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.numBytes = decoder0.decodeUint32(16);
     }
@@ -142,7 +168,7 @@ class WebSocketSendParams extends bindings.Struct {
   }
 
   void encode(bindings.Encoder encoder) {
-    var encoder0 = encoder.getStructEncoderAtOffset(kDefaultStructInfo);
+    var encoder0 = encoder.getStructEncoderAtOffset(kVersions.last);
     
     encoder0.encodeBool(fin, 8, 0);
     
@@ -160,15 +186,18 @@ class WebSocketSendParams extends bindings.Struct {
 }
 
 class WebSocketFlowControlParams extends bindings.Struct {
-  static const int kStructSize = 16;
-  static const bindings.StructDataHeader kDefaultStructInfo =
-      const bindings.StructDataHeader(kStructSize, 0);
+  static const List<bindings.StructDataHeader> kVersions = const [
+    const bindings.StructDataHeader(16, 0)
+  ];
   int quota = 0;
 
-  WebSocketFlowControlParams() : super(kStructSize);
+  WebSocketFlowControlParams() : super(kVersions.last.size);
 
   static WebSocketFlowControlParams deserialize(bindings.Message message) {
-    return decode(new bindings.Decoder(message));
+    var decoder = new bindings.Decoder(message);
+    var result = decode(decoder);
+    decoder.excessHandles.forEach((h) => h.close());
+    return result;
   }
 
   static WebSocketFlowControlParams decode(bindings.Decoder decoder0) {
@@ -178,11 +207,21 @@ class WebSocketFlowControlParams extends bindings.Struct {
     WebSocketFlowControlParams result = new WebSocketFlowControlParams();
 
     var mainDataHeader = decoder0.decodeStructDataHeader();
-    if ((mainDataHeader.size < kStructSize) ||
-        (mainDataHeader.version < 0)) {
-      throw new bindings.MojoCodecError('Malformed header');
+    if (mainDataHeader.version <= kVersions.last.version) {
+      // Scan in reverse order to optimize for more recent versions.
+      for (int i = kVersions.length - 1; i >= 0; --i) {
+        if (mainDataHeader.version >= kVersions[i].version) {
+          if (mainDataHeader.size != kVersions[i].size)
+            throw new bindings.MojoCodecError(
+                'Header doesn\'t correspond to any known version.');
+        }
+      }
+    } else if (mainDataHeader.size < kVersions.last.size) {
+      throw new bindings.MojoCodecError(
+        'Message newer than the last known version cannot be shorter than '
+        'required by the last known version.');
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.quota = decoder0.decodeInt64(8);
     }
@@ -190,7 +229,7 @@ class WebSocketFlowControlParams extends bindings.Struct {
   }
 
   void encode(bindings.Encoder encoder) {
-    var encoder0 = encoder.getStructEncoderAtOffset(kDefaultStructInfo);
+    var encoder0 = encoder.getStructEncoderAtOffset(kVersions.last);
     
     encoder0.encodeInt64(quota, 8);
   }
@@ -202,16 +241,19 @@ class WebSocketFlowControlParams extends bindings.Struct {
 }
 
 class WebSocketCloseParams extends bindings.Struct {
-  static const int kStructSize = 24;
-  static const bindings.StructDataHeader kDefaultStructInfo =
-      const bindings.StructDataHeader(kStructSize, 0);
+  static const List<bindings.StructDataHeader> kVersions = const [
+    const bindings.StructDataHeader(24, 0)
+  ];
   int code = 0;
   String reason = null;
 
-  WebSocketCloseParams() : super(kStructSize);
+  WebSocketCloseParams() : super(kVersions.last.size);
 
   static WebSocketCloseParams deserialize(bindings.Message message) {
-    return decode(new bindings.Decoder(message));
+    var decoder = new bindings.Decoder(message);
+    var result = decode(decoder);
+    decoder.excessHandles.forEach((h) => h.close());
+    return result;
   }
 
   static WebSocketCloseParams decode(bindings.Decoder decoder0) {
@@ -221,15 +263,25 @@ class WebSocketCloseParams extends bindings.Struct {
     WebSocketCloseParams result = new WebSocketCloseParams();
 
     var mainDataHeader = decoder0.decodeStructDataHeader();
-    if ((mainDataHeader.size < kStructSize) ||
-        (mainDataHeader.version < 0)) {
-      throw new bindings.MojoCodecError('Malformed header');
+    if (mainDataHeader.version <= kVersions.last.version) {
+      // Scan in reverse order to optimize for more recent versions.
+      for (int i = kVersions.length - 1; i >= 0; --i) {
+        if (mainDataHeader.version >= kVersions[i].version) {
+          if (mainDataHeader.size != kVersions[i].size)
+            throw new bindings.MojoCodecError(
+                'Header doesn\'t correspond to any known version.');
+        }
+      }
+    } else if (mainDataHeader.size < kVersions.last.size) {
+      throw new bindings.MojoCodecError(
+        'Message newer than the last known version cannot be shorter than '
+        'required by the last known version.');
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.code = decoder0.decodeUint16(8);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.reason = decoder0.decodeString(16, false);
     }
@@ -237,7 +289,7 @@ class WebSocketCloseParams extends bindings.Struct {
   }
 
   void encode(bindings.Encoder encoder) {
-    var encoder0 = encoder.getStructEncoderAtOffset(kDefaultStructInfo);
+    var encoder0 = encoder.getStructEncoderAtOffset(kVersions.last);
     
     encoder0.encodeUint16(code, 8);
     
@@ -252,17 +304,20 @@ class WebSocketCloseParams extends bindings.Struct {
 }
 
 class WebSocketClientDidConnectParams extends bindings.Struct {
-  static const int kStructSize = 32;
-  static const bindings.StructDataHeader kDefaultStructInfo =
-      const bindings.StructDataHeader(kStructSize, 0);
+  static const List<bindings.StructDataHeader> kVersions = const [
+    const bindings.StructDataHeader(32, 0)
+  ];
   String selectedSubprotocol = null;
   String extensions = null;
   core.MojoDataPipeConsumer receiveStream = null;
 
-  WebSocketClientDidConnectParams() : super(kStructSize);
+  WebSocketClientDidConnectParams() : super(kVersions.last.size);
 
   static WebSocketClientDidConnectParams deserialize(bindings.Message message) {
-    return decode(new bindings.Decoder(message));
+    var decoder = new bindings.Decoder(message);
+    var result = decode(decoder);
+    decoder.excessHandles.forEach((h) => h.close());
+    return result;
   }
 
   static WebSocketClientDidConnectParams decode(bindings.Decoder decoder0) {
@@ -272,19 +327,29 @@ class WebSocketClientDidConnectParams extends bindings.Struct {
     WebSocketClientDidConnectParams result = new WebSocketClientDidConnectParams();
 
     var mainDataHeader = decoder0.decodeStructDataHeader();
-    if ((mainDataHeader.size < kStructSize) ||
-        (mainDataHeader.version < 0)) {
-      throw new bindings.MojoCodecError('Malformed header');
+    if (mainDataHeader.version <= kVersions.last.version) {
+      // Scan in reverse order to optimize for more recent versions.
+      for (int i = kVersions.length - 1; i >= 0; --i) {
+        if (mainDataHeader.version >= kVersions[i].version) {
+          if (mainDataHeader.size != kVersions[i].size)
+            throw new bindings.MojoCodecError(
+                'Header doesn\'t correspond to any known version.');
+        }
+      }
+    } else if (mainDataHeader.size < kVersions.last.size) {
+      throw new bindings.MojoCodecError(
+        'Message newer than the last known version cannot be shorter than '
+        'required by the last known version.');
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.selectedSubprotocol = decoder0.decodeString(8, false);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.extensions = decoder0.decodeString(16, false);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.receiveStream = decoder0.decodeConsumerHandle(24, false);
     }
@@ -292,7 +357,7 @@ class WebSocketClientDidConnectParams extends bindings.Struct {
   }
 
   void encode(bindings.Encoder encoder) {
-    var encoder0 = encoder.getStructEncoderAtOffset(kDefaultStructInfo);
+    var encoder0 = encoder.getStructEncoderAtOffset(kVersions.last);
     
     encoder0.encodeString(selectedSubprotocol, 8, false);
     
@@ -310,17 +375,20 @@ class WebSocketClientDidConnectParams extends bindings.Struct {
 }
 
 class WebSocketClientDidReceiveDataParams extends bindings.Struct {
-  static const int kStructSize = 24;
-  static const bindings.StructDataHeader kDefaultStructInfo =
-      const bindings.StructDataHeader(kStructSize, 0);
+  static const List<bindings.StructDataHeader> kVersions = const [
+    const bindings.StructDataHeader(24, 0)
+  ];
   bool fin = false;
   int type = 0;
   int numBytes = 0;
 
-  WebSocketClientDidReceiveDataParams() : super(kStructSize);
+  WebSocketClientDidReceiveDataParams() : super(kVersions.last.size);
 
   static WebSocketClientDidReceiveDataParams deserialize(bindings.Message message) {
-    return decode(new bindings.Decoder(message));
+    var decoder = new bindings.Decoder(message);
+    var result = decode(decoder);
+    decoder.excessHandles.forEach((h) => h.close());
+    return result;
   }
 
   static WebSocketClientDidReceiveDataParams decode(bindings.Decoder decoder0) {
@@ -330,19 +398,29 @@ class WebSocketClientDidReceiveDataParams extends bindings.Struct {
     WebSocketClientDidReceiveDataParams result = new WebSocketClientDidReceiveDataParams();
 
     var mainDataHeader = decoder0.decodeStructDataHeader();
-    if ((mainDataHeader.size < kStructSize) ||
-        (mainDataHeader.version < 0)) {
-      throw new bindings.MojoCodecError('Malformed header');
+    if (mainDataHeader.version <= kVersions.last.version) {
+      // Scan in reverse order to optimize for more recent versions.
+      for (int i = kVersions.length - 1; i >= 0; --i) {
+        if (mainDataHeader.version >= kVersions[i].version) {
+          if (mainDataHeader.size != kVersions[i].size)
+            throw new bindings.MojoCodecError(
+                'Header doesn\'t correspond to any known version.');
+        }
+      }
+    } else if (mainDataHeader.size < kVersions.last.size) {
+      throw new bindings.MojoCodecError(
+        'Message newer than the last known version cannot be shorter than '
+        'required by the last known version.');
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.fin = decoder0.decodeBool(8, 0);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.type = decoder0.decodeInt32(12);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.numBytes = decoder0.decodeUint32(16);
     }
@@ -350,7 +428,7 @@ class WebSocketClientDidReceiveDataParams extends bindings.Struct {
   }
 
   void encode(bindings.Encoder encoder) {
-    var encoder0 = encoder.getStructEncoderAtOffset(kDefaultStructInfo);
+    var encoder0 = encoder.getStructEncoderAtOffset(kVersions.last);
     
     encoder0.encodeBool(fin, 8, 0);
     
@@ -368,15 +446,18 @@ class WebSocketClientDidReceiveDataParams extends bindings.Struct {
 }
 
 class WebSocketClientDidReceiveFlowControlParams extends bindings.Struct {
-  static const int kStructSize = 16;
-  static const bindings.StructDataHeader kDefaultStructInfo =
-      const bindings.StructDataHeader(kStructSize, 0);
+  static const List<bindings.StructDataHeader> kVersions = const [
+    const bindings.StructDataHeader(16, 0)
+  ];
   int quota = 0;
 
-  WebSocketClientDidReceiveFlowControlParams() : super(kStructSize);
+  WebSocketClientDidReceiveFlowControlParams() : super(kVersions.last.size);
 
   static WebSocketClientDidReceiveFlowControlParams deserialize(bindings.Message message) {
-    return decode(new bindings.Decoder(message));
+    var decoder = new bindings.Decoder(message);
+    var result = decode(decoder);
+    decoder.excessHandles.forEach((h) => h.close());
+    return result;
   }
 
   static WebSocketClientDidReceiveFlowControlParams decode(bindings.Decoder decoder0) {
@@ -386,11 +467,21 @@ class WebSocketClientDidReceiveFlowControlParams extends bindings.Struct {
     WebSocketClientDidReceiveFlowControlParams result = new WebSocketClientDidReceiveFlowControlParams();
 
     var mainDataHeader = decoder0.decodeStructDataHeader();
-    if ((mainDataHeader.size < kStructSize) ||
-        (mainDataHeader.version < 0)) {
-      throw new bindings.MojoCodecError('Malformed header');
+    if (mainDataHeader.version <= kVersions.last.version) {
+      // Scan in reverse order to optimize for more recent versions.
+      for (int i = kVersions.length - 1; i >= 0; --i) {
+        if (mainDataHeader.version >= kVersions[i].version) {
+          if (mainDataHeader.size != kVersions[i].size)
+            throw new bindings.MojoCodecError(
+                'Header doesn\'t correspond to any known version.');
+        }
+      }
+    } else if (mainDataHeader.size < kVersions.last.size) {
+      throw new bindings.MojoCodecError(
+        'Message newer than the last known version cannot be shorter than '
+        'required by the last known version.');
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.quota = decoder0.decodeInt64(8);
     }
@@ -398,7 +489,7 @@ class WebSocketClientDidReceiveFlowControlParams extends bindings.Struct {
   }
 
   void encode(bindings.Encoder encoder) {
-    var encoder0 = encoder.getStructEncoderAtOffset(kDefaultStructInfo);
+    var encoder0 = encoder.getStructEncoderAtOffset(kVersions.last);
     
     encoder0.encodeInt64(quota, 8);
   }
@@ -410,15 +501,18 @@ class WebSocketClientDidReceiveFlowControlParams extends bindings.Struct {
 }
 
 class WebSocketClientDidFailParams extends bindings.Struct {
-  static const int kStructSize = 16;
-  static const bindings.StructDataHeader kDefaultStructInfo =
-      const bindings.StructDataHeader(kStructSize, 0);
+  static const List<bindings.StructDataHeader> kVersions = const [
+    const bindings.StructDataHeader(16, 0)
+  ];
   String message = null;
 
-  WebSocketClientDidFailParams() : super(kStructSize);
+  WebSocketClientDidFailParams() : super(kVersions.last.size);
 
   static WebSocketClientDidFailParams deserialize(bindings.Message message) {
-    return decode(new bindings.Decoder(message));
+    var decoder = new bindings.Decoder(message);
+    var result = decode(decoder);
+    decoder.excessHandles.forEach((h) => h.close());
+    return result;
   }
 
   static WebSocketClientDidFailParams decode(bindings.Decoder decoder0) {
@@ -428,11 +522,21 @@ class WebSocketClientDidFailParams extends bindings.Struct {
     WebSocketClientDidFailParams result = new WebSocketClientDidFailParams();
 
     var mainDataHeader = decoder0.decodeStructDataHeader();
-    if ((mainDataHeader.size < kStructSize) ||
-        (mainDataHeader.version < 0)) {
-      throw new bindings.MojoCodecError('Malformed header');
+    if (mainDataHeader.version <= kVersions.last.version) {
+      // Scan in reverse order to optimize for more recent versions.
+      for (int i = kVersions.length - 1; i >= 0; --i) {
+        if (mainDataHeader.version >= kVersions[i].version) {
+          if (mainDataHeader.size != kVersions[i].size)
+            throw new bindings.MojoCodecError(
+                'Header doesn\'t correspond to any known version.');
+        }
+      }
+    } else if (mainDataHeader.size < kVersions.last.size) {
+      throw new bindings.MojoCodecError(
+        'Message newer than the last known version cannot be shorter than '
+        'required by the last known version.');
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.message = decoder0.decodeString(8, false);
     }
@@ -440,7 +544,7 @@ class WebSocketClientDidFailParams extends bindings.Struct {
   }
 
   void encode(bindings.Encoder encoder) {
-    var encoder0 = encoder.getStructEncoderAtOffset(kDefaultStructInfo);
+    var encoder0 = encoder.getStructEncoderAtOffset(kVersions.last);
     
     encoder0.encodeString(message, 8, false);
   }
@@ -452,17 +556,20 @@ class WebSocketClientDidFailParams extends bindings.Struct {
 }
 
 class WebSocketClientDidCloseParams extends bindings.Struct {
-  static const int kStructSize = 24;
-  static const bindings.StructDataHeader kDefaultStructInfo =
-      const bindings.StructDataHeader(kStructSize, 0);
+  static const List<bindings.StructDataHeader> kVersions = const [
+    const bindings.StructDataHeader(24, 0)
+  ];
   bool wasClean = false;
   int code = 0;
   String reason = null;
 
-  WebSocketClientDidCloseParams() : super(kStructSize);
+  WebSocketClientDidCloseParams() : super(kVersions.last.size);
 
   static WebSocketClientDidCloseParams deserialize(bindings.Message message) {
-    return decode(new bindings.Decoder(message));
+    var decoder = new bindings.Decoder(message);
+    var result = decode(decoder);
+    decoder.excessHandles.forEach((h) => h.close());
+    return result;
   }
 
   static WebSocketClientDidCloseParams decode(bindings.Decoder decoder0) {
@@ -472,19 +579,29 @@ class WebSocketClientDidCloseParams extends bindings.Struct {
     WebSocketClientDidCloseParams result = new WebSocketClientDidCloseParams();
 
     var mainDataHeader = decoder0.decodeStructDataHeader();
-    if ((mainDataHeader.size < kStructSize) ||
-        (mainDataHeader.version < 0)) {
-      throw new bindings.MojoCodecError('Malformed header');
+    if (mainDataHeader.version <= kVersions.last.version) {
+      // Scan in reverse order to optimize for more recent versions.
+      for (int i = kVersions.length - 1; i >= 0; --i) {
+        if (mainDataHeader.version >= kVersions[i].version) {
+          if (mainDataHeader.size != kVersions[i].size)
+            throw new bindings.MojoCodecError(
+                'Header doesn\'t correspond to any known version.');
+        }
+      }
+    } else if (mainDataHeader.size < kVersions.last.size) {
+      throw new bindings.MojoCodecError(
+        'Message newer than the last known version cannot be shorter than '
+        'required by the last known version.');
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.wasClean = decoder0.decodeBool(8, 0);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.code = decoder0.decodeUint16(10);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.reason = decoder0.decodeString(16, false);
     }
@@ -492,7 +609,7 @@ class WebSocketClientDidCloseParams extends bindings.Struct {
   }
 
   void encode(bindings.Encoder encoder) {
-    var encoder0 = encoder.getStructEncoderAtOffset(kDefaultStructInfo);
+    var encoder0 = encoder.getStructEncoderAtOffset(kVersions.last);
     
     encoder0.encodeBool(wasClean, 8, 0);
     
@@ -522,11 +639,11 @@ abstract class WebSocket {
   void flowControl(int quota);
   void close(int code, String reason);
 
-  static final ABNORMAL_CLOSE_CODE = 1006;
+  static const ABNORMAL_CLOSE_CODE = 1006;
   
-  static final int MessageType_CONTINUATION = 0;
-  static final int MessageType_TEXT = MessageType_CONTINUATION + 1;
-  static final int MessageType_BINARY = MessageType_TEXT + 1;
+  static const int MessageType_CONTINUATION = 0;
+  static const int MessageType_TEXT = 1;
+  static const int MessageType_BINARY = 2;
 }
 
 
@@ -631,7 +748,7 @@ class WebSocketProxy implements bindings.ProxyBase {
       core.MojoMessagePipeEndpoint endpoint) =>
       new WebSocketProxy.fromEndpoint(endpoint);
 
-  Future close({bool nodefer: false}) => impl.close(nodefer: nodefer);
+  Future close({bool immediate: false}) => impl.close(immediate: immediate);
 
   String toString() {
     return "WebSocketProxy($impl)";
@@ -827,7 +944,7 @@ class WebSocketClientProxy implements bindings.ProxyBase {
       core.MojoMessagePipeEndpoint endpoint) =>
       new WebSocketClientProxy.fromEndpoint(endpoint);
 
-  Future close({bool nodefer: false}) => impl.close(nodefer: nodefer);
+  Future close({bool immediate: false}) => impl.close(immediate: immediate);
 
   String toString() {
     return "WebSocketClientProxy($impl)";

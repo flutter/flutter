@@ -21,6 +21,7 @@ class FloatingActionButton extends Component {
     transform: translateX(0);
     position: absolute;
     display: flex;
+    flex-direction: row;
     justify-content: center;
     align-items: center;
     top: 0;
@@ -29,14 +30,14 @@ class FloatingActionButton extends Component {
     bottom: 0;
     -webkit-clip-path: circle(28px at center);''');
 
-  Node content;
+  UINode content;
   int level;
 
   FloatingActionButton({ Object key, this.content, this.level: 0 })
       : super(key: key);
 
-  Node build() {
-    List<Node> children = [];
+  UINode build() {
+    List<UINode> children = [];
 
     if (content != null)
       children.add(content);

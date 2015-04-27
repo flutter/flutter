@@ -12,13 +12,13 @@ class ModalOverlay extends Component {
     bottom: 0;
     right: 0;''');
 
-  List<Node> children;
+  List<UINode> children;
   GestureEventListener onDismiss;
 
   ModalOverlay({ Object key, this.children, this.onDismiss }) : super(key: key);
 
-  Node build() {
-    return new EventTarget(
+  UINode build() {
+    return new EventListenerNode(
       new Container(
         style: _style,
         children: children),

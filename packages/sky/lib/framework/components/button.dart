@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import '../fn.dart';
+import 'ink_well.dart';
 import 'material.dart';
 
 class Button extends Component {
@@ -19,12 +20,12 @@ class Button extends Component {
     border-radius: 2px;'''
   );
 
-  Node content;
+  UINode content;
   int level;
 
   Button({ Object key, this.content, this.level }) : super(key: key);
 
-  Node build() {
+  UINode build() {
     return new StyleNode(
       new Material(
         content: new InkWell(children: [content]),

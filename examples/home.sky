@@ -1,5 +1,6 @@
 #!mojo mojo:sky_viewer
 <style>
+ div { display: paragraph; }
  .h1 { font-size: 2em; margin: 1em; }
  .p { margin: 0.5em 1em; color: #bcd8f5; font-weight: 900; }
 </style>

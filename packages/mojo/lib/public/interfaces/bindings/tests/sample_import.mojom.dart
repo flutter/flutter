@@ -9,31 +9,34 @@ import 'dart:async';
 import 'package:mojo/public/dart/bindings.dart' as bindings;
 import 'package:mojo/public/dart/core.dart' as core;
 
-final int Shape_RECTANGLE = 1;
-final int Shape_CIRCLE = Shape_RECTANGLE + 1;
-final int Shape_TRIANGLE = Shape_CIRCLE + 1;
-final int Shape_LAST = Shape_TRIANGLE;
+const int Shape_RECTANGLE = 1;
+const int Shape_CIRCLE = 2;
+const int Shape_TRIANGLE = 3;
+const int Shape_LAST = 3;
 
-final int AnotherShape_RECTANGLE = 10;
-final int AnotherShape_CIRCLE = AnotherShape_RECTANGLE + 1;
-final int AnotherShape_TRIANGLE = AnotherShape_CIRCLE + 1;
+const int AnotherShape_RECTANGLE = 10;
+const int AnotherShape_CIRCLE = 11;
+const int AnotherShape_TRIANGLE = 12;
 
-final int YetAnotherShape_RECTANGLE = 20;
-final int YetAnotherShape_CIRCLE = YetAnotherShape_RECTANGLE + 1;
-final int YetAnotherShape_TRIANGLE = YetAnotherShape_CIRCLE + 1;
+const int YetAnotherShape_RECTANGLE = 20;
+const int YetAnotherShape_CIRCLE = 21;
+const int YetAnotherShape_TRIANGLE = 22;
 
 
 class Point extends bindings.Struct {
-  static const int kStructSize = 16;
-  static const bindings.StructDataHeader kDefaultStructInfo =
-      const bindings.StructDataHeader(kStructSize, 0);
+  static const List<bindings.StructDataHeader> kVersions = const [
+    const bindings.StructDataHeader(16, 0)
+  ];
   int x = 0;
   int y = 0;
 
-  Point() : super(kStructSize);
+  Point() : super(kVersions.last.size);
 
   static Point deserialize(bindings.Message message) {
-    return decode(new bindings.Decoder(message));
+    var decoder = new bindings.Decoder(message);
+    var result = decode(decoder);
+    decoder.excessHandles.forEach((h) => h.close());
+    return result;
   }
 
   static Point decode(bindings.Decoder decoder0) {
@@ -43,15 +46,25 @@ class Point extends bindings.Struct {
     Point result = new Point();
 
     var mainDataHeader = decoder0.decodeStructDataHeader();
-    if ((mainDataHeader.size < kStructSize) ||
-        (mainDataHeader.version < 0)) {
-      throw new bindings.MojoCodecError('Malformed header');
+    if (mainDataHeader.version <= kVersions.last.version) {
+      // Scan in reverse order to optimize for more recent versions.
+      for (int i = kVersions.length - 1; i >= 0; --i) {
+        if (mainDataHeader.version >= kVersions[i].version) {
+          if (mainDataHeader.size != kVersions[i].size)
+            throw new bindings.MojoCodecError(
+                'Header doesn\'t correspond to any known version.');
+        }
+      }
+    } else if (mainDataHeader.size < kVersions.last.size) {
+      throw new bindings.MojoCodecError(
+        'Message newer than the last known version cannot be shorter than '
+        'required by the last known version.');
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.x = decoder0.decodeInt32(8);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.y = decoder0.decodeInt32(12);
     }
@@ -59,7 +72,7 @@ class Point extends bindings.Struct {
   }
 
   void encode(bindings.Encoder encoder) {
-    var encoder0 = encoder.getStructEncoderAtOffset(kDefaultStructInfo);
+    var encoder0 = encoder.getStructEncoderAtOffset(kVersions.last);
     
     encoder0.encodeInt32(x, 8);
     
@@ -74,14 +87,17 @@ class Point extends bindings.Struct {
 }
 
 class ImportedInterfaceDoSomethingParams extends bindings.Struct {
-  static const int kStructSize = 8;
-  static const bindings.StructDataHeader kDefaultStructInfo =
-      const bindings.StructDataHeader(kStructSize, 0);
+  static const List<bindings.StructDataHeader> kVersions = const [
+    const bindings.StructDataHeader(8, 0)
+  ];
 
-  ImportedInterfaceDoSomethingParams() : super(kStructSize);
+  ImportedInterfaceDoSomethingParams() : super(kVersions.last.size);
 
   static ImportedInterfaceDoSomethingParams deserialize(bindings.Message message) {
-    return decode(new bindings.Decoder(message));
+    var decoder = new bindings.Decoder(message);
+    var result = decode(decoder);
+    decoder.excessHandles.forEach((h) => h.close());
+    return result;
   }
 
   static ImportedInterfaceDoSomethingParams decode(bindings.Decoder decoder0) {
@@ -91,15 +107,25 @@ class ImportedInterfaceDoSomethingParams extends bindings.Struct {
     ImportedInterfaceDoSomethingParams result = new ImportedInterfaceDoSomethingParams();
 
     var mainDataHeader = decoder0.decodeStructDataHeader();
-    if ((mainDataHeader.size < kStructSize) ||
-        (mainDataHeader.version < 0)) {
-      throw new bindings.MojoCodecError('Malformed header');
+    if (mainDataHeader.version <= kVersions.last.version) {
+      // Scan in reverse order to optimize for more recent versions.
+      for (int i = kVersions.length - 1; i >= 0; --i) {
+        if (mainDataHeader.version >= kVersions[i].version) {
+          if (mainDataHeader.size != kVersions[i].size)
+            throw new bindings.MojoCodecError(
+                'Header doesn\'t correspond to any known version.');
+        }
+      }
+    } else if (mainDataHeader.size < kVersions.last.size) {
+      throw new bindings.MojoCodecError(
+        'Message newer than the last known version cannot be shorter than '
+        'required by the last known version.');
     }
     return result;
   }
 
   void encode(bindings.Encoder encoder) {
-    encoder.getStructEncoderAtOffset(kDefaultStructInfo);
+    encoder.getStructEncoderAtOffset(kVersions.last);
   }
 
   String toString() {
@@ -189,7 +215,7 @@ class ImportedInterfaceProxy implements bindings.ProxyBase {
       core.MojoMessagePipeEndpoint endpoint) =>
       new ImportedInterfaceProxy.fromEndpoint(endpoint);
 
-  Future close({bool nodefer: false}) => impl.close(nodefer: nodefer);
+  Future close({bool immediate: false}) => impl.close(immediate: immediate);
 
   String toString() {
     return "ImportedInterfaceProxy($impl)";

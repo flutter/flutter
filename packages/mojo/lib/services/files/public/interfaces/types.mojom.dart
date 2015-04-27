@@ -8,46 +8,49 @@ import 'dart:async';
 
 import 'package:mojo/public/dart/bindings.dart' as bindings;
 import 'package:mojo/public/dart/core.dart' as core;
-final kOpenFlagRead = 0x1;
-final kOpenFlagWrite = 0x2;
-final kOpenFlagCreate = 0x4;
-final kOpenFlagExclusive = 0x8;
-final kOpenFlagAppend = 0x10;
-final kOpenFlagTruncate = 0x20;
-final kDeleteFlagFileOnly = 0x1;
-final kDeleteFlagDirectoryOnly = 0x2;
-final kDeleteFlagRecursive = 0x4;
+const kOpenFlagRead = 0x1;
+const kOpenFlagWrite = 0x2;
+const kOpenFlagCreate = 0x4;
+const kOpenFlagExclusive = 0x8;
+const kOpenFlagAppend = 0x10;
+const kOpenFlagTruncate = 0x20;
+const kDeleteFlagFileOnly = 0x1;
+const kDeleteFlagDirectoryOnly = 0x2;
+const kDeleteFlagRecursive = 0x4;
 
-final int Error_OK = 0;
-final int Error_UNKNOWN = Error_OK + 1;
-final int Error_INVALID_ARGUMENT = Error_UNKNOWN + 1;
-final int Error_PERMISSION_DENIED = Error_INVALID_ARGUMENT + 1;
-final int Error_OUT_OF_RANGE = Error_PERMISSION_DENIED + 1;
-final int Error_UNIMPLEMENTED = Error_OUT_OF_RANGE + 1;
-final int Error_CLOSED = Error_UNIMPLEMENTED + 1;
-final int Error_UNAVAILABLE = Error_CLOSED + 1;
-final int Error_INTERNAL = Error_UNAVAILABLE + 1;
+const int Error_OK = 0;
+const int Error_UNKNOWN = 1;
+const int Error_INVALID_ARGUMENT = 2;
+const int Error_PERMISSION_DENIED = 3;
+const int Error_OUT_OF_RANGE = 4;
+const int Error_UNIMPLEMENTED = 5;
+const int Error_CLOSED = 6;
+const int Error_UNAVAILABLE = 7;
+const int Error_INTERNAL = 8;
 
-final int Whence_FROM_CURRENT = 0;
-final int Whence_FROM_START = Whence_FROM_CURRENT + 1;
-final int Whence_FROM_END = Whence_FROM_START + 1;
+const int Whence_FROM_CURRENT = 0;
+const int Whence_FROM_START = 1;
+const int Whence_FROM_END = 2;
 
-final int FileType_UNKNOWN = 0;
-final int FileType_REGULAR_FILE = FileType_UNKNOWN + 1;
-final int FileType_DIRECTORY = FileType_REGULAR_FILE + 1;
+const int FileType_UNKNOWN = 0;
+const int FileType_REGULAR_FILE = 1;
+const int FileType_DIRECTORY = 2;
 
 
 class Timespec extends bindings.Struct {
-  static const int kStructSize = 24;
-  static const bindings.StructDataHeader kDefaultStructInfo =
-      const bindings.StructDataHeader(kStructSize, 0);
+  static const List<bindings.StructDataHeader> kVersions = const [
+    const bindings.StructDataHeader(24, 0)
+  ];
   int seconds = 0;
   int nanoseconds = 0;
 
-  Timespec() : super(kStructSize);
+  Timespec() : super(kVersions.last.size);
 
   static Timespec deserialize(bindings.Message message) {
-    return decode(new bindings.Decoder(message));
+    var decoder = new bindings.Decoder(message);
+    var result = decode(decoder);
+    decoder.excessHandles.forEach((h) => h.close());
+    return result;
   }
 
   static Timespec decode(bindings.Decoder decoder0) {
@@ -57,15 +60,25 @@ class Timespec extends bindings.Struct {
     Timespec result = new Timespec();
 
     var mainDataHeader = decoder0.decodeStructDataHeader();
-    if ((mainDataHeader.size < kStructSize) ||
-        (mainDataHeader.version < 0)) {
-      throw new bindings.MojoCodecError('Malformed header');
+    if (mainDataHeader.version <= kVersions.last.version) {
+      // Scan in reverse order to optimize for more recent versions.
+      for (int i = kVersions.length - 1; i >= 0; --i) {
+        if (mainDataHeader.version >= kVersions[i].version) {
+          if (mainDataHeader.size != kVersions[i].size)
+            throw new bindings.MojoCodecError(
+                'Header doesn\'t correspond to any known version.');
+        }
+      }
+    } else if (mainDataHeader.size < kVersions.last.size) {
+      throw new bindings.MojoCodecError(
+        'Message newer than the last known version cannot be shorter than '
+        'required by the last known version.');
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.seconds = decoder0.decodeInt64(8);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.nanoseconds = decoder0.decodeInt32(16);
     }
@@ -73,7 +86,7 @@ class Timespec extends bindings.Struct {
   }
 
   void encode(bindings.Encoder encoder) {
-    var encoder0 = encoder.getStructEncoderAtOffset(kDefaultStructInfo);
+    var encoder0 = encoder.getStructEncoderAtOffset(kVersions.last);
     
     encoder0.encodeInt64(seconds, 8);
     
@@ -88,16 +101,19 @@ class Timespec extends bindings.Struct {
 }
 
 class TimespecOrNow extends bindings.Struct {
-  static const int kStructSize = 24;
-  static const bindings.StructDataHeader kDefaultStructInfo =
-      const bindings.StructDataHeader(kStructSize, 0);
+  static const List<bindings.StructDataHeader> kVersions = const [
+    const bindings.StructDataHeader(24, 0)
+  ];
   bool now = false;
   Timespec timespec = null;
 
-  TimespecOrNow() : super(kStructSize);
+  TimespecOrNow() : super(kVersions.last.size);
 
   static TimespecOrNow deserialize(bindings.Message message) {
-    return decode(new bindings.Decoder(message));
+    var decoder = new bindings.Decoder(message);
+    var result = decode(decoder);
+    decoder.excessHandles.forEach((h) => h.close());
+    return result;
   }
 
   static TimespecOrNow decode(bindings.Decoder decoder0) {
@@ -107,15 +123,25 @@ class TimespecOrNow extends bindings.Struct {
     TimespecOrNow result = new TimespecOrNow();
 
     var mainDataHeader = decoder0.decodeStructDataHeader();
-    if ((mainDataHeader.size < kStructSize) ||
-        (mainDataHeader.version < 0)) {
-      throw new bindings.MojoCodecError('Malformed header');
+    if (mainDataHeader.version <= kVersions.last.version) {
+      // Scan in reverse order to optimize for more recent versions.
+      for (int i = kVersions.length - 1; i >= 0; --i) {
+        if (mainDataHeader.version >= kVersions[i].version) {
+          if (mainDataHeader.size != kVersions[i].size)
+            throw new bindings.MojoCodecError(
+                'Header doesn\'t correspond to any known version.');
+        }
+      }
+    } else if (mainDataHeader.size < kVersions.last.size) {
+      throw new bindings.MojoCodecError(
+        'Message newer than the last known version cannot be shorter than '
+        'required by the last known version.');
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.now = decoder0.decodeBool(8, 0);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       var decoder1 = decoder0.decodePointer(16, true);
       result.timespec = Timespec.decode(decoder1);
@@ -124,7 +150,7 @@ class TimespecOrNow extends bindings.Struct {
   }
 
   void encode(bindings.Encoder encoder) {
-    var encoder0 = encoder.getStructEncoderAtOffset(kDefaultStructInfo);
+    var encoder0 = encoder.getStructEncoderAtOffset(kVersions.last);
     
     encoder0.encodeBool(now, 8, 0);
     
@@ -139,18 +165,21 @@ class TimespecOrNow extends bindings.Struct {
 }
 
 class FileInformation extends bindings.Struct {
-  static const int kStructSize = 40;
-  static const bindings.StructDataHeader kDefaultStructInfo =
-      const bindings.StructDataHeader(kStructSize, 0);
+  static const List<bindings.StructDataHeader> kVersions = const [
+    const bindings.StructDataHeader(40, 0)
+  ];
   int type = 0;
   int size = 0;
   Timespec atime = null;
   Timespec mtime = null;
 
-  FileInformation() : super(kStructSize);
+  FileInformation() : super(kVersions.last.size);
 
   static FileInformation deserialize(bindings.Message message) {
-    return decode(new bindings.Decoder(message));
+    var decoder = new bindings.Decoder(message);
+    var result = decode(decoder);
+    decoder.excessHandles.forEach((h) => h.close());
+    return result;
   }
 
   static FileInformation decode(bindings.Decoder decoder0) {
@@ -160,24 +189,34 @@ class FileInformation extends bindings.Struct {
     FileInformation result = new FileInformation();
 
     var mainDataHeader = decoder0.decodeStructDataHeader();
-    if ((mainDataHeader.size < kStructSize) ||
-        (mainDataHeader.version < 0)) {
-      throw new bindings.MojoCodecError('Malformed header');
+    if (mainDataHeader.version <= kVersions.last.version) {
+      // Scan in reverse order to optimize for more recent versions.
+      for (int i = kVersions.length - 1; i >= 0; --i) {
+        if (mainDataHeader.version >= kVersions[i].version) {
+          if (mainDataHeader.size != kVersions[i].size)
+            throw new bindings.MojoCodecError(
+                'Header doesn\'t correspond to any known version.');
+        }
+      }
+    } else if (mainDataHeader.size < kVersions.last.size) {
+      throw new bindings.MojoCodecError(
+        'Message newer than the last known version cannot be shorter than '
+        'required by the last known version.');
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.type = decoder0.decodeInt32(8);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.size = decoder0.decodeInt64(16);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       var decoder1 = decoder0.decodePointer(24, true);
       result.atime = Timespec.decode(decoder1);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       var decoder1 = decoder0.decodePointer(32, true);
       result.mtime = Timespec.decode(decoder1);
@@ -186,7 +225,7 @@ class FileInformation extends bindings.Struct {
   }
 
   void encode(bindings.Encoder encoder) {
-    var encoder0 = encoder.getStructEncoderAtOffset(kDefaultStructInfo);
+    var encoder0 = encoder.getStructEncoderAtOffset(kVersions.last);
     
     encoder0.encodeInt32(type, 8);
     
@@ -207,16 +246,19 @@ class FileInformation extends bindings.Struct {
 }
 
 class DirectoryEntry extends bindings.Struct {
-  static const int kStructSize = 24;
-  static const bindings.StructDataHeader kDefaultStructInfo =
-      const bindings.StructDataHeader(kStructSize, 0);
+  static const List<bindings.StructDataHeader> kVersions = const [
+    const bindings.StructDataHeader(24, 0)
+  ];
   int type = 0;
   String name = null;
 
-  DirectoryEntry() : super(kStructSize);
+  DirectoryEntry() : super(kVersions.last.size);
 
   static DirectoryEntry deserialize(bindings.Message message) {
-    return decode(new bindings.Decoder(message));
+    var decoder = new bindings.Decoder(message);
+    var result = decode(decoder);
+    decoder.excessHandles.forEach((h) => h.close());
+    return result;
   }
 
   static DirectoryEntry decode(bindings.Decoder decoder0) {
@@ -226,15 +268,25 @@ class DirectoryEntry extends bindings.Struct {
     DirectoryEntry result = new DirectoryEntry();
 
     var mainDataHeader = decoder0.decodeStructDataHeader();
-    if ((mainDataHeader.size < kStructSize) ||
-        (mainDataHeader.version < 0)) {
-      throw new bindings.MojoCodecError('Malformed header');
+    if (mainDataHeader.version <= kVersions.last.version) {
+      // Scan in reverse order to optimize for more recent versions.
+      for (int i = kVersions.length - 1; i >= 0; --i) {
+        if (mainDataHeader.version >= kVersions[i].version) {
+          if (mainDataHeader.size != kVersions[i].size)
+            throw new bindings.MojoCodecError(
+                'Header doesn\'t correspond to any known version.');
+        }
+      }
+    } else if (mainDataHeader.size < kVersions.last.size) {
+      throw new bindings.MojoCodecError(
+        'Message newer than the last known version cannot be shorter than '
+        'required by the last known version.');
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.type = decoder0.decodeInt32(8);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.name = decoder0.decodeString(16, false);
     }
@@ -242,7 +294,7 @@ class DirectoryEntry extends bindings.Struct {
   }
 
   void encode(bindings.Encoder encoder) {
-    var encoder0 = encoder.getStructEncoderAtOffset(kDefaultStructInfo);
+    var encoder0 = encoder.getStructEncoderAtOffset(kVersions.last);
     
     encoder0.encodeInt32(type, 8);
     

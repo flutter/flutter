@@ -21,7 +21,7 @@ class LocalServiceProvider implements ServiceProvider {
     _stub.onError = f;
   }
 
-  Future close({bool nodefer: false}) => _stub.close(nodefer: nodefer);
+  Future close({bool immediate: false}) => _stub.close(immediate: immediate);
 
   void connectToService(
       String interfaceName, core.MojoMessagePipeEndpoint pipe) {
@@ -101,7 +101,7 @@ class ApplicationConnection {
     });
   }
 
-  Future close({bool nodefer: false}) {
+  Future close({bool immediate: false}) {
     var rspCloseFuture;
     var lspCloseFuture;
     if (remoteServiceProvider != null) {
@@ -111,7 +111,7 @@ class ApplicationConnection {
       rspCloseFuture = new Future.value(null);
     }
     if (_localServiceProvider != null) {
-      lspCloseFuture = _localServiceProvider.close(nodefer: nodefer);
+      lspCloseFuture = _localServiceProvider.close(immediate: immediate);
       _localServiceProvider = null;
     } else {
       lspCloseFuture = new Future.value(null);

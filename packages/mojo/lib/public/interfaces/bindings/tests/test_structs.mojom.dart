@@ -8,20 +8,23 @@ import 'dart:async';
 
 import 'package:mojo/public/dart/bindings.dart' as bindings;
 import 'package:mojo/public/dart/core.dart' as core;
-import 'package:mojo/public/interfaces/bindings/tests/rect.mojom.dart' as rect_mojom;
+import 'package:mojo/test/rect.mojom.dart' as rect_mojom;
 
 
 class NamedRegion extends bindings.Struct {
-  static const int kStructSize = 24;
-  static const bindings.StructDataHeader kDefaultStructInfo =
-      const bindings.StructDataHeader(kStructSize, 0);
+  static const List<bindings.StructDataHeader> kVersions = const [
+    const bindings.StructDataHeader(24, 0)
+  ];
   String name = null;
   List<rect_mojom.Rect> rects = null;
 
-  NamedRegion() : super(kStructSize);
+  NamedRegion() : super(kVersions.last.size);
 
   static NamedRegion deserialize(bindings.Message message) {
-    return decode(new bindings.Decoder(message));
+    var decoder = new bindings.Decoder(message);
+    var result = decode(decoder);
+    decoder.excessHandles.forEach((h) => h.close());
+    return result;
   }
 
   static NamedRegion decode(bindings.Decoder decoder0) {
@@ -31,15 +34,25 @@ class NamedRegion extends bindings.Struct {
     NamedRegion result = new NamedRegion();
 
     var mainDataHeader = decoder0.decodeStructDataHeader();
-    if ((mainDataHeader.size < kStructSize) ||
-        (mainDataHeader.version < 0)) {
-      throw new bindings.MojoCodecError('Malformed header');
+    if (mainDataHeader.version <= kVersions.last.version) {
+      // Scan in reverse order to optimize for more recent versions.
+      for (int i = kVersions.length - 1; i >= 0; --i) {
+        if (mainDataHeader.version >= kVersions[i].version) {
+          if (mainDataHeader.size != kVersions[i].size)
+            throw new bindings.MojoCodecError(
+                'Header doesn\'t correspond to any known version.');
+        }
+      }
+    } else if (mainDataHeader.size < kVersions.last.size) {
+      throw new bindings.MojoCodecError(
+        'Message newer than the last known version cannot be shorter than '
+        'required by the last known version.');
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.name = decoder0.decodeString(8, true);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       var decoder1 = decoder0.decodePointer(16, true);
       if (decoder1 == null) {
@@ -58,7 +71,7 @@ class NamedRegion extends bindings.Struct {
   }
 
   void encode(bindings.Encoder encoder) {
-    var encoder0 = encoder.getStructEncoderAtOffset(kDefaultStructInfo);
+    var encoder0 = encoder.getStructEncoderAtOffset(kVersions.last);
     
     encoder0.encodeString(name, 8, true);
     
@@ -81,16 +94,19 @@ class NamedRegion extends bindings.Struct {
 }
 
 class RectPair extends bindings.Struct {
-  static const int kStructSize = 24;
-  static const bindings.StructDataHeader kDefaultStructInfo =
-      const bindings.StructDataHeader(kStructSize, 0);
+  static const List<bindings.StructDataHeader> kVersions = const [
+    const bindings.StructDataHeader(24, 0)
+  ];
   rect_mojom.Rect first = null;
   rect_mojom.Rect second = null;
 
-  RectPair() : super(kStructSize);
+  RectPair() : super(kVersions.last.size);
 
   static RectPair deserialize(bindings.Message message) {
-    return decode(new bindings.Decoder(message));
+    var decoder = new bindings.Decoder(message);
+    var result = decode(decoder);
+    decoder.excessHandles.forEach((h) => h.close());
+    return result;
   }
 
   static RectPair decode(bindings.Decoder decoder0) {
@@ -100,16 +116,26 @@ class RectPair extends bindings.Struct {
     RectPair result = new RectPair();
 
     var mainDataHeader = decoder0.decodeStructDataHeader();
-    if ((mainDataHeader.size < kStructSize) ||
-        (mainDataHeader.version < 0)) {
-      throw new bindings.MojoCodecError('Malformed header');
+    if (mainDataHeader.version <= kVersions.last.version) {
+      // Scan in reverse order to optimize for more recent versions.
+      for (int i = kVersions.length - 1; i >= 0; --i) {
+        if (mainDataHeader.version >= kVersions[i].version) {
+          if (mainDataHeader.size != kVersions[i].size)
+            throw new bindings.MojoCodecError(
+                'Header doesn\'t correspond to any known version.');
+        }
+      }
+    } else if (mainDataHeader.size < kVersions.last.size) {
+      throw new bindings.MojoCodecError(
+        'Message newer than the last known version cannot be shorter than '
+        'required by the last known version.');
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       var decoder1 = decoder0.decodePointer(8, true);
       result.first = rect_mojom.Rect.decode(decoder1);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       var decoder1 = decoder0.decodePointer(16, true);
       result.second = rect_mojom.Rect.decode(decoder1);
@@ -118,7 +144,7 @@ class RectPair extends bindings.Struct {
   }
 
   void encode(bindings.Encoder encoder) {
-    var encoder0 = encoder.getStructEncoderAtOffset(kDefaultStructInfo);
+    var encoder0 = encoder.getStructEncoderAtOffset(kVersions.last);
     
     encoder0.encodeStruct(first, 8, true);
     
@@ -133,14 +159,17 @@ class RectPair extends bindings.Struct {
 }
 
 class EmptyStruct extends bindings.Struct {
-  static const int kStructSize = 8;
-  static const bindings.StructDataHeader kDefaultStructInfo =
-      const bindings.StructDataHeader(kStructSize, 0);
+  static const List<bindings.StructDataHeader> kVersions = const [
+    const bindings.StructDataHeader(8, 0)
+  ];
 
-  EmptyStruct() : super(kStructSize);
+  EmptyStruct() : super(kVersions.last.size);
 
   static EmptyStruct deserialize(bindings.Message message) {
-    return decode(new bindings.Decoder(message));
+    var decoder = new bindings.Decoder(message);
+    var result = decode(decoder);
+    decoder.excessHandles.forEach((h) => h.close());
+    return result;
   }
 
   static EmptyStruct decode(bindings.Decoder decoder0) {
@@ -150,15 +179,25 @@ class EmptyStruct extends bindings.Struct {
     EmptyStruct result = new EmptyStruct();
 
     var mainDataHeader = decoder0.decodeStructDataHeader();
-    if ((mainDataHeader.size < kStructSize) ||
-        (mainDataHeader.version < 0)) {
-      throw new bindings.MojoCodecError('Malformed header');
+    if (mainDataHeader.version <= kVersions.last.version) {
+      // Scan in reverse order to optimize for more recent versions.
+      for (int i = kVersions.length - 1; i >= 0; --i) {
+        if (mainDataHeader.version >= kVersions[i].version) {
+          if (mainDataHeader.size != kVersions[i].size)
+            throw new bindings.MojoCodecError(
+                'Header doesn\'t correspond to any known version.');
+        }
+      }
+    } else if (mainDataHeader.size < kVersions.last.size) {
+      throw new bindings.MojoCodecError(
+        'Message newer than the last known version cannot be shorter than '
+        'required by the last known version.');
     }
     return result;
   }
 
   void encode(bindings.Encoder encoder) {
-    encoder.getStructEncoderAtOffset(kDefaultStructInfo);
+    encoder.getStructEncoderAtOffset(kVersions.last);
   }
 
   String toString() {
@@ -167,9 +206,9 @@ class EmptyStruct extends bindings.Struct {
 }
 
 class NoDefaultFieldValues extends bindings.Struct {
-  static const int kStructSize = 160;
-  static const bindings.StructDataHeader kDefaultStructInfo =
-      const bindings.StructDataHeader(kStructSize, 0);
+  static const List<bindings.StructDataHeader> kVersions = const [
+    const bindings.StructDataHeader(160, 0)
+  ];
   bool f0 = false;
   int f1 = 0;
   int f2 = 0;
@@ -200,10 +239,13 @@ class NoDefaultFieldValues extends bindings.Struct {
   EmptyStruct f27 = null;
   EmptyStruct f28 = null;
 
-  NoDefaultFieldValues() : super(kStructSize);
+  NoDefaultFieldValues() : super(kVersions.last.size);
 
   static NoDefaultFieldValues deserialize(bindings.Message message) {
-    return decode(new bindings.Decoder(message));
+    var decoder = new bindings.Decoder(message);
+    var result = decode(decoder);
+    decoder.excessHandles.forEach((h) => h.close());
+    return result;
   }
 
   static NoDefaultFieldValues decode(bindings.Decoder decoder0) {
@@ -213,103 +255,113 @@ class NoDefaultFieldValues extends bindings.Struct {
     NoDefaultFieldValues result = new NoDefaultFieldValues();
 
     var mainDataHeader = decoder0.decodeStructDataHeader();
-    if ((mainDataHeader.size < kStructSize) ||
-        (mainDataHeader.version < 0)) {
-      throw new bindings.MojoCodecError('Malformed header');
+    if (mainDataHeader.version <= kVersions.last.version) {
+      // Scan in reverse order to optimize for more recent versions.
+      for (int i = kVersions.length - 1; i >= 0; --i) {
+        if (mainDataHeader.version >= kVersions[i].version) {
+          if (mainDataHeader.size != kVersions[i].size)
+            throw new bindings.MojoCodecError(
+                'Header doesn\'t correspond to any known version.');
+        }
+      }
+    } else if (mainDataHeader.size < kVersions.last.size) {
+      throw new bindings.MojoCodecError(
+        'Message newer than the last known version cannot be shorter than '
+        'required by the last known version.');
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.f0 = decoder0.decodeBool(8, 0);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.f1 = decoder0.decodeInt8(9);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.f2 = decoder0.decodeUint8(10);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.f3 = decoder0.decodeInt16(12);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.f4 = decoder0.decodeUint16(14);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.f5 = decoder0.decodeInt32(16);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.f6 = decoder0.decodeUint32(20);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.f7 = decoder0.decodeInt64(24);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.f8 = decoder0.decodeUint64(32);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.f9 = decoder0.decodeFloat(40);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.f13 = decoder0.decodeMessagePipeHandle(44, false);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.f10 = decoder0.decodeDouble(48);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.f11 = decoder0.decodeString(56, false);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.f12 = decoder0.decodeString(64, true);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.f14 = decoder0.decodeConsumerHandle(72, false);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.f15 = decoder0.decodeProducerHandle(76, false);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.f16 = decoder0.decodeMessagePipeHandle(80, true);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.f17 = decoder0.decodeConsumerHandle(84, true);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.f18 = decoder0.decodeProducerHandle(88, true);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.f19 = decoder0.decodeHandle(92, false);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.f20 = decoder0.decodeHandle(96, true);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.f21 = decoder0.decodeSharedBufferHandle(100, false);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.f22 = decoder0.decodeSharedBufferHandle(104, true);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       var decoder1 = decoder0.decodePointer(112, false);
       {
@@ -321,7 +373,7 @@ class NoDefaultFieldValues extends bindings.Struct {
         }
       }
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       var decoder1 = decoder0.decodePointer(120, false);
       {
@@ -333,7 +385,7 @@ class NoDefaultFieldValues extends bindings.Struct {
         }
       }
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       var decoder1 = decoder0.decodePointer(128, true);
       if (decoder1 == null) {
@@ -347,7 +399,7 @@ class NoDefaultFieldValues extends bindings.Struct {
         }
       }
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       var decoder1 = decoder0.decodePointer(136, true);
       if (decoder1 == null) {
@@ -361,12 +413,12 @@ class NoDefaultFieldValues extends bindings.Struct {
         }
       }
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       var decoder1 = decoder0.decodePointer(144, false);
       result.f27 = EmptyStruct.decode(decoder1);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       var decoder1 = decoder0.decodePointer(152, true);
       result.f28 = EmptyStruct.decode(decoder1);
@@ -375,7 +427,7 @@ class NoDefaultFieldValues extends bindings.Struct {
   }
 
   void encode(bindings.Encoder encoder) {
-    var encoder0 = encoder.getStructEncoderAtOffset(kDefaultStructInfo);
+    var encoder0 = encoder.getStructEncoderAtOffset(kVersions.last);
     
     encoder0.encodeBool(f0, 8, 0);
     
@@ -503,10 +555,10 @@ class NoDefaultFieldValues extends bindings.Struct {
 }
 
 class DefaultFieldValues extends bindings.Struct {
-  static const int kStructSize = 96;
-  static const bindings.StructDataHeader kDefaultStructInfo =
-      const bindings.StructDataHeader(kStructSize, 0);
-  static final kFoo = "foo";
+  static const List<bindings.StructDataHeader> kVersions = const [
+    const bindings.StructDataHeader(96, 0)
+  ];
+  static const kFoo = "foo";
   bool f0 = true;
   int f1 = 100;
   int f2 = 100;
@@ -520,15 +572,18 @@ class DefaultFieldValues extends bindings.Struct {
   double f10 = 100.0;
   double f11 = 100;
   double f12 = 100.0;
-  String f13 = DefaultFieldValues.kFoo;
-  String f14 = DefaultFieldValues.kFoo;
+  String f13 = "foo";
+  String f14 = "foo";
   rect_mojom.Rect f15 = new rect_mojom.Rect();
   rect_mojom.Rect f16 = new rect_mojom.Rect();
 
-  DefaultFieldValues() : super(kStructSize);
+  DefaultFieldValues() : super(kVersions.last.size);
 
   static DefaultFieldValues deserialize(bindings.Message message) {
-    return decode(new bindings.Decoder(message));
+    var decoder = new bindings.Decoder(message);
+    var result = decode(decoder);
+    decoder.excessHandles.forEach((h) => h.close());
+    return result;
   }
 
   static DefaultFieldValues decode(bindings.Decoder decoder0) {
@@ -538,76 +593,86 @@ class DefaultFieldValues extends bindings.Struct {
     DefaultFieldValues result = new DefaultFieldValues();
 
     var mainDataHeader = decoder0.decodeStructDataHeader();
-    if ((mainDataHeader.size < kStructSize) ||
-        (mainDataHeader.version < 0)) {
-      throw new bindings.MojoCodecError('Malformed header');
+    if (mainDataHeader.version <= kVersions.last.version) {
+      // Scan in reverse order to optimize for more recent versions.
+      for (int i = kVersions.length - 1; i >= 0; --i) {
+        if (mainDataHeader.version >= kVersions[i].version) {
+          if (mainDataHeader.size != kVersions[i].size)
+            throw new bindings.MojoCodecError(
+                'Header doesn\'t correspond to any known version.');
+        }
+      }
+    } else if (mainDataHeader.size < kVersions.last.size) {
+      throw new bindings.MojoCodecError(
+        'Message newer than the last known version cannot be shorter than '
+        'required by the last known version.');
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.f0 = decoder0.decodeBool(8, 0);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.f1 = decoder0.decodeInt8(9);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.f2 = decoder0.decodeUint8(10);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.f3 = decoder0.decodeInt16(12);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.f4 = decoder0.decodeUint16(14);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.f5 = decoder0.decodeInt32(16);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.f6 = decoder0.decodeUint32(20);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.f7 = decoder0.decodeInt64(24);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.f8 = decoder0.decodeUint64(32);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.f9 = decoder0.decodeFloat(40);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.f10 = decoder0.decodeFloat(44);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.f11 = decoder0.decodeDouble(48);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.f12 = decoder0.decodeDouble(56);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.f13 = decoder0.decodeString(64, false);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.f14 = decoder0.decodeString(72, true);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       var decoder1 = decoder0.decodePointer(80, false);
       result.f15 = rect_mojom.Rect.decode(decoder1);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       var decoder1 = decoder0.decodePointer(88, true);
       result.f16 = rect_mojom.Rect.decode(decoder1);
@@ -616,7 +681,7 @@ class DefaultFieldValues extends bindings.Struct {
   }
 
   void encode(bindings.Encoder encoder) {
-    var encoder0 = encoder.getStructEncoderAtOffset(kDefaultStructInfo);
+    var encoder0 = encoder.getStructEncoderAtOffset(kVersions.last);
     
     encoder0.encodeBool(f0, 8, 0);
     
@@ -676,30 +741,33 @@ class DefaultFieldValues extends bindings.Struct {
 }
 
 class ScopedConstants extends bindings.Struct {
-  static const int kStructSize = 40;
-  static const bindings.StructDataHeader kDefaultStructInfo =
-      const bindings.StructDataHeader(kStructSize, 0);
+  static const List<bindings.StructDataHeader> kVersions = const [
+    const bindings.StructDataHeader(40, 0)
+  ];
   
-  static final int EType_E0 = 0;
-  static final int EType_E1 = EType_E0 + 1;
-  static final int EType_E2 = 10;
-  static final int EType_E3 = ScopedConstants.EType_E2;
-  static final int EType_E4 = EType_E3 + 1;
-  static final TEN = 10;
-  static final ALSO_TEN = ScopedConstants.TEN;
-  static final TEN_TOO = ScopedConstants.EType_E2;
-  int f0 = ScopedConstants.EType_E0;
-  int f1 = ScopedConstants.EType_E1;
-  int f2 = ScopedConstants.EType_E2;
-  int f3 = ScopedConstants.EType_E3;
-  int f4 = ScopedConstants.EType_E4;
-  int f5 = ScopedConstants.TEN;
-  int f6 = ScopedConstants.ALSO_TEN;
+  static const int EType_E0 = 0;
+  static const int EType_E1 = 1;
+  static const int EType_E2 = 10;
+  static const int EType_E3 = 10;
+  static const int EType_E4 = 11;
+  static const TEN = 10;
+  static const ALSO_TEN = 10;
+  static const TEN_TOO = 10;
+  int f0 = 0;
+  int f1 = 1;
+  int f2 = 10;
+  int f3 = 10;
+  int f4 = 11;
+  int f5 = 10;
+  int f6 = 10;
 
-  ScopedConstants() : super(kStructSize);
+  ScopedConstants() : super(kVersions.last.size);
 
   static ScopedConstants deserialize(bindings.Message message) {
-    return decode(new bindings.Decoder(message));
+    var decoder = new bindings.Decoder(message);
+    var result = decode(decoder);
+    decoder.excessHandles.forEach((h) => h.close());
+    return result;
   }
 
   static ScopedConstants decode(bindings.Decoder decoder0) {
@@ -709,35 +777,45 @@ class ScopedConstants extends bindings.Struct {
     ScopedConstants result = new ScopedConstants();
 
     var mainDataHeader = decoder0.decodeStructDataHeader();
-    if ((mainDataHeader.size < kStructSize) ||
-        (mainDataHeader.version < 0)) {
-      throw new bindings.MojoCodecError('Malformed header');
+    if (mainDataHeader.version <= kVersions.last.version) {
+      // Scan in reverse order to optimize for more recent versions.
+      for (int i = kVersions.length - 1; i >= 0; --i) {
+        if (mainDataHeader.version >= kVersions[i].version) {
+          if (mainDataHeader.size != kVersions[i].size)
+            throw new bindings.MojoCodecError(
+                'Header doesn\'t correspond to any known version.');
+        }
+      }
+    } else if (mainDataHeader.size < kVersions.last.size) {
+      throw new bindings.MojoCodecError(
+        'Message newer than the last known version cannot be shorter than '
+        'required by the last known version.');
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.f0 = decoder0.decodeInt32(8);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.f1 = decoder0.decodeInt32(12);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.f2 = decoder0.decodeInt32(16);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.f3 = decoder0.decodeInt32(20);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.f4 = decoder0.decodeInt32(24);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.f5 = decoder0.decodeInt32(28);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.f6 = decoder0.decodeInt32(32);
     }
@@ -745,7 +823,7 @@ class ScopedConstants extends bindings.Struct {
   }
 
   void encode(bindings.Encoder encoder) {
-    var encoder0 = encoder.getStructEncoderAtOffset(kDefaultStructInfo);
+    var encoder0 = encoder.getStructEncoderAtOffset(kVersions.last);
     
     encoder0.encodeInt32(f0, 8);
     
@@ -775,9 +853,9 @@ class ScopedConstants extends bindings.Struct {
 }
 
 class MapKeyTypes extends bindings.Struct {
-  static const int kStructSize = 104;
-  static const bindings.StructDataHeader kDefaultStructInfo =
-      const bindings.StructDataHeader(kStructSize, 0);
+  static const List<bindings.StructDataHeader> kVersions = const [
+    const bindings.StructDataHeader(104, 0)
+  ];
   Map<bool, bool> f0 = null;
   Map<int, int> f1 = null;
   Map<int, int> f2 = null;
@@ -791,10 +869,13 @@ class MapKeyTypes extends bindings.Struct {
   Map<double, double> f10 = null;
   Map<String, String> f11 = null;
 
-  MapKeyTypes() : super(kStructSize);
+  MapKeyTypes() : super(kVersions.last.size);
 
   static MapKeyTypes deserialize(bindings.Message message) {
-    return decode(new bindings.Decoder(message));
+    var decoder = new bindings.Decoder(message);
+    var result = decode(decoder);
+    decoder.excessHandles.forEach((h) => h.close());
+    return result;
   }
 
   static MapKeyTypes decode(bindings.Decoder decoder0) {
@@ -804,11 +885,21 @@ class MapKeyTypes extends bindings.Struct {
     MapKeyTypes result = new MapKeyTypes();
 
     var mainDataHeader = decoder0.decodeStructDataHeader();
-    if ((mainDataHeader.size < kStructSize) ||
-        (mainDataHeader.version < 0)) {
-      throw new bindings.MojoCodecError('Malformed header');
+    if (mainDataHeader.version <= kVersions.last.version) {
+      // Scan in reverse order to optimize for more recent versions.
+      for (int i = kVersions.length - 1; i >= 0; --i) {
+        if (mainDataHeader.version >= kVersions[i].version) {
+          if (mainDataHeader.size != kVersions[i].size)
+            throw new bindings.MojoCodecError(
+                'Header doesn\'t correspond to any known version.');
+        }
+      }
+    } else if (mainDataHeader.size < kVersions.last.size) {
+      throw new bindings.MojoCodecError(
+        'Message newer than the last known version cannot be shorter than '
+        'required by the last known version.');
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       var decoder1 = decoder0.decodePointer(8, false);
       {
@@ -827,7 +918,7 @@ class MapKeyTypes extends bindings.Struct {
             keys0, values0);
       }
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       var decoder1 = decoder0.decodePointer(16, false);
       {
@@ -846,7 +937,7 @@ class MapKeyTypes extends bindings.Struct {
             keys0, values0);
       }
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       var decoder1 = decoder0.decodePointer(24, false);
       {
@@ -865,7 +956,7 @@ class MapKeyTypes extends bindings.Struct {
             keys0, values0);
       }
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       var decoder1 = decoder0.decodePointer(32, false);
       {
@@ -884,7 +975,7 @@ class MapKeyTypes extends bindings.Struct {
             keys0, values0);
       }
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       var decoder1 = decoder0.decodePointer(40, false);
       {
@@ -903,7 +994,7 @@ class MapKeyTypes extends bindings.Struct {
             keys0, values0);
       }
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       var decoder1 = decoder0.decodePointer(48, false);
       {
@@ -922,7 +1013,7 @@ class MapKeyTypes extends bindings.Struct {
             keys0, values0);
       }
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       var decoder1 = decoder0.decodePointer(56, false);
       {
@@ -941,7 +1032,7 @@ class MapKeyTypes extends bindings.Struct {
             keys0, values0);
       }
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       var decoder1 = decoder0.decodePointer(64, false);
       {
@@ -960,7 +1051,7 @@ class MapKeyTypes extends bindings.Struct {
             keys0, values0);
       }
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       var decoder1 = decoder0.decodePointer(72, false);
       {
@@ -979,7 +1070,7 @@ class MapKeyTypes extends bindings.Struct {
             keys0, values0);
       }
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       var decoder1 = decoder0.decodePointer(80, false);
       {
@@ -998,7 +1089,7 @@ class MapKeyTypes extends bindings.Struct {
             keys0, values0);
       }
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       var decoder1 = decoder0.decodePointer(88, false);
       {
@@ -1017,7 +1108,7 @@ class MapKeyTypes extends bindings.Struct {
             keys0, values0);
       }
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       var decoder1 = decoder0.decodePointer(96, false);
       {
@@ -1056,7 +1147,7 @@ class MapKeyTypes extends bindings.Struct {
   }
 
   void encode(bindings.Encoder encoder) {
-    var encoder0 = encoder.getStructEncoderAtOffset(kDefaultStructInfo);
+    var encoder0 = encoder.getStructEncoderAtOffset(kVersions.last);
     
     if (f0 == null) {
       encoder0.encodeNullPointer(8, false);
@@ -1245,9 +1336,9 @@ class MapKeyTypes extends bindings.Struct {
 }
 
 class MapValueTypes extends bindings.Struct {
-  static const int kStructSize = 80;
-  static const bindings.StructDataHeader kDefaultStructInfo =
-      const bindings.StructDataHeader(kStructSize, 0);
+  static const List<bindings.StructDataHeader> kVersions = const [
+    const bindings.StructDataHeader(80, 0)
+  ];
   Map<String, List<String>> f0 = null;
   Map<String, List<String>> f1 = null;
   Map<String, List<String>> f2 = null;
@@ -1258,10 +1349,13 @@ class MapValueTypes extends bindings.Struct {
   Map<String, Map<String, String>> f7 = null;
   Map<String, List<Map<String, String>>> f8 = null;
 
-  MapValueTypes() : super(kStructSize);
+  MapValueTypes() : super(kVersions.last.size);
 
   static MapValueTypes deserialize(bindings.Message message) {
-    return decode(new bindings.Decoder(message));
+    var decoder = new bindings.Decoder(message);
+    var result = decode(decoder);
+    decoder.excessHandles.forEach((h) => h.close());
+    return result;
   }
 
   static MapValueTypes decode(bindings.Decoder decoder0) {
@@ -1271,11 +1365,21 @@ class MapValueTypes extends bindings.Struct {
     MapValueTypes result = new MapValueTypes();
 
     var mainDataHeader = decoder0.decodeStructDataHeader();
-    if ((mainDataHeader.size < kStructSize) ||
-        (mainDataHeader.version < 0)) {
-      throw new bindings.MojoCodecError('Malformed header');
+    if (mainDataHeader.version <= kVersions.last.version) {
+      // Scan in reverse order to optimize for more recent versions.
+      for (int i = kVersions.length - 1; i >= 0; --i) {
+        if (mainDataHeader.version >= kVersions[i].version) {
+          if (mainDataHeader.size != kVersions[i].size)
+            throw new bindings.MojoCodecError(
+                'Header doesn\'t correspond to any known version.');
+        }
+      }
+    } else if (mainDataHeader.size < kVersions.last.size) {
+      throw new bindings.MojoCodecError(
+        'Message newer than the last known version cannot be shorter than '
+        'required by the last known version.');
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       var decoder1 = decoder0.decodePointer(8, false);
       {
@@ -1318,7 +1422,7 @@ class MapValueTypes extends bindings.Struct {
             keys0, values0);
       }
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       var decoder1 = decoder0.decodePointer(16, false);
       {
@@ -1363,7 +1467,7 @@ class MapValueTypes extends bindings.Struct {
             keys0, values0);
       }
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       var decoder1 = decoder0.decodePointer(24, false);
       {
@@ -1406,7 +1510,7 @@ class MapValueTypes extends bindings.Struct {
             keys0, values0);
       }
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       var decoder1 = decoder0.decodePointer(32, false);
       {
@@ -1449,7 +1553,7 @@ class MapValueTypes extends bindings.Struct {
             keys0, values0);
       }
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       var decoder1 = decoder0.decodePointer(40, false);
       {
@@ -1502,7 +1606,7 @@ class MapValueTypes extends bindings.Struct {
             keys0, values0);
       }
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       var decoder1 = decoder0.decodePointer(48, false);
       {
@@ -1553,7 +1657,7 @@ class MapValueTypes extends bindings.Struct {
             keys0, values0);
       }
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       var decoder1 = decoder0.decodePointer(56, false);
       {
@@ -1589,7 +1693,7 @@ class MapValueTypes extends bindings.Struct {
             keys0, values0);
       }
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       var decoder1 = decoder0.decodePointer(64, false);
       {
@@ -1655,7 +1759,7 @@ class MapValueTypes extends bindings.Struct {
             keys0, values0);
       }
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       var decoder1 = decoder0.decodePointer(72, false);
       {
@@ -1733,7 +1837,7 @@ class MapValueTypes extends bindings.Struct {
   }
 
   void encode(bindings.Encoder encoder) {
-    var encoder0 = encoder.getStructEncoderAtOffset(kDefaultStructInfo);
+    var encoder0 = encoder.getStructEncoderAtOffset(kVersions.last);
     
     if (f0 == null) {
       encoder0.encodeNullPointer(8, false);
@@ -2094,9 +2198,9 @@ class MapValueTypes extends bindings.Struct {
 }
 
 class ArrayValueTypes extends bindings.Struct {
-  static const int kStructSize = 56;
-  static const bindings.StructDataHeader kDefaultStructInfo =
-      const bindings.StructDataHeader(kStructSize, 0);
+  static const List<bindings.StructDataHeader> kVersions = const [
+    const bindings.StructDataHeader(56, 0)
+  ];
   List<int> f0 = null;
   List<int> f1 = null;
   List<int> f2 = null;
@@ -2104,10 +2208,13 @@ class ArrayValueTypes extends bindings.Struct {
   List<double> f4 = null;
   List<double> f5 = null;
 
-  ArrayValueTypes() : super(kStructSize);
+  ArrayValueTypes() : super(kVersions.last.size);
 
   static ArrayValueTypes deserialize(bindings.Message message) {
-    return decode(new bindings.Decoder(message));
+    var decoder = new bindings.Decoder(message);
+    var result = decode(decoder);
+    decoder.excessHandles.forEach((h) => h.close());
+    return result;
   }
 
   static ArrayValueTypes decode(bindings.Decoder decoder0) {
@@ -2117,31 +2224,41 @@ class ArrayValueTypes extends bindings.Struct {
     ArrayValueTypes result = new ArrayValueTypes();
 
     var mainDataHeader = decoder0.decodeStructDataHeader();
-    if ((mainDataHeader.size < kStructSize) ||
-        (mainDataHeader.version < 0)) {
-      throw new bindings.MojoCodecError('Malformed header');
+    if (mainDataHeader.version <= kVersions.last.version) {
+      // Scan in reverse order to optimize for more recent versions.
+      for (int i = kVersions.length - 1; i >= 0; --i) {
+        if (mainDataHeader.version >= kVersions[i].version) {
+          if (mainDataHeader.size != kVersions[i].size)
+            throw new bindings.MojoCodecError(
+                'Header doesn\'t correspond to any known version.');
+        }
+      }
+    } else if (mainDataHeader.size < kVersions.last.size) {
+      throw new bindings.MojoCodecError(
+        'Message newer than the last known version cannot be shorter than '
+        'required by the last known version.');
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.f0 = decoder0.decodeInt8Array(8, bindings.kNothingNullable, bindings.kUnspecifiedArrayLength);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.f1 = decoder0.decodeInt16Array(16, bindings.kNothingNullable, bindings.kUnspecifiedArrayLength);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.f2 = decoder0.decodeInt32Array(24, bindings.kNothingNullable, bindings.kUnspecifiedArrayLength);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.f3 = decoder0.decodeInt64Array(32, bindings.kNothingNullable, bindings.kUnspecifiedArrayLength);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.f4 = decoder0.decodeFloatArray(40, bindings.kNothingNullable, bindings.kUnspecifiedArrayLength);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.f5 = decoder0.decodeDoubleArray(48, bindings.kNothingNullable, bindings.kUnspecifiedArrayLength);
     }
@@ -2149,7 +2266,7 @@ class ArrayValueTypes extends bindings.Struct {
   }
 
   void encode(bindings.Encoder encoder) {
-    var encoder0 = encoder.getStructEncoderAtOffset(kDefaultStructInfo);
+    var encoder0 = encoder.getStructEncoderAtOffset(kVersions.last);
     
     encoder0.encodeInt8Array(f0, 8, bindings.kNothingNullable, bindings.kUnspecifiedArrayLength);
     
@@ -2176,34 +2293,37 @@ class ArrayValueTypes extends bindings.Struct {
 }
 
 class FloatNumberValues extends bindings.Struct {
-  static const int kStructSize = 72;
-  static const bindings.StructDataHeader kDefaultStructInfo =
-      const bindings.StructDataHeader(kStructSize, 0);
-  static final V0 = double.INFINITY;
-  static final V1 = double.NEGATIVE_INFINITY;
-  static final V2 = double.NAN;
-  static final V3 = double.INFINITY;
-  static final V4 = double.NEGATIVE_INFINITY;
-  static final V5 = double.NAN;
-  static final V6 = 0;
-  static final V7 = 1234567890.123;
-  static final V8 = 1.2E+20;
-  static final V9 = -1.2E+20;
-  double f0 = FloatNumberValues.V0;
-  double f1 = FloatNumberValues.V1;
-  double f2 = FloatNumberValues.V2;
-  double f3 = FloatNumberValues.V3;
-  double f4 = FloatNumberValues.V4;
-  double f5 = FloatNumberValues.V5;
-  double f6 = FloatNumberValues.V6;
-  double f7 = FloatNumberValues.V7;
-  double f8 = FloatNumberValues.V8;
-  double f9 = FloatNumberValues.V9;
+  static const List<bindings.StructDataHeader> kVersions = const [
+    const bindings.StructDataHeader(72, 0)
+  ];
+  static const V0 = double.INFINITY;
+  static const V1 = double.NEGATIVE_INFINITY;
+  static const V2 = double.NAN;
+  static const V3 = double.INFINITY;
+  static const V4 = double.NEGATIVE_INFINITY;
+  static const V5 = double.NAN;
+  static const V6 = 0;
+  static const V7 = 1234567890.123;
+  static const V8 = 1.2E+20;
+  static const V9 = -1.2E+20;
+  double f0 = double.INFINITY;
+  double f1 = double.NEGATIVE_INFINITY;
+  double f2 = double.NAN;
+  double f3 = double.INFINITY;
+  double f4 = double.NEGATIVE_INFINITY;
+  double f5 = double.NAN;
+  double f6 = 0;
+  double f7 = 1234567890.123;
+  double f8 = 1.2E+20;
+  double f9 = -1.2E+20;
 
-  FloatNumberValues() : super(kStructSize);
+  FloatNumberValues() : super(kVersions.last.size);
 
   static FloatNumberValues deserialize(bindings.Message message) {
-    return decode(new bindings.Decoder(message));
+    var decoder = new bindings.Decoder(message);
+    var result = decode(decoder);
+    decoder.excessHandles.forEach((h) => h.close());
+    return result;
   }
 
   static FloatNumberValues decode(bindings.Decoder decoder0) {
@@ -2213,47 +2333,57 @@ class FloatNumberValues extends bindings.Struct {
     FloatNumberValues result = new FloatNumberValues();
 
     var mainDataHeader = decoder0.decodeStructDataHeader();
-    if ((mainDataHeader.size < kStructSize) ||
-        (mainDataHeader.version < 0)) {
-      throw new bindings.MojoCodecError('Malformed header');
+    if (mainDataHeader.version <= kVersions.last.version) {
+      // Scan in reverse order to optimize for more recent versions.
+      for (int i = kVersions.length - 1; i >= 0; --i) {
+        if (mainDataHeader.version >= kVersions[i].version) {
+          if (mainDataHeader.size != kVersions[i].size)
+            throw new bindings.MojoCodecError(
+                'Header doesn\'t correspond to any known version.');
+        }
+      }
+    } else if (mainDataHeader.size < kVersions.last.size) {
+      throw new bindings.MojoCodecError(
+        'Message newer than the last known version cannot be shorter than '
+        'required by the last known version.');
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.f0 = decoder0.decodeDouble(8);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.f1 = decoder0.decodeDouble(16);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.f2 = decoder0.decodeDouble(24);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.f3 = decoder0.decodeFloat(32);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.f4 = decoder0.decodeFloat(36);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.f5 = decoder0.decodeFloat(40);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.f6 = decoder0.decodeFloat(44);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.f7 = decoder0.decodeDouble(48);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.f8 = decoder0.decodeDouble(56);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.f9 = decoder0.decodeDouble(64);
     }
@@ -2261,7 +2391,7 @@ class FloatNumberValues extends bindings.Struct {
   }
 
   void encode(bindings.Encoder encoder) {
-    var encoder0 = encoder.getStructEncoderAtOffset(kDefaultStructInfo);
+    var encoder0 = encoder.getStructEncoderAtOffset(kVersions.last);
     
     encoder0.encodeDouble(f0, 8);
     
@@ -2300,54 +2430,57 @@ class FloatNumberValues extends bindings.Struct {
 }
 
 class IntegerNumberValues extends bindings.Struct {
-  static const int kStructSize = 88;
-  static const bindings.StructDataHeader kDefaultStructInfo =
-      const bindings.StructDataHeader(kStructSize, 0);
-  static final V0 = -128;
-  static final V1 = -1;
-  static final V2 = 0;
-  static final V3 = 42;
-  static final V4 = 127;
-  static final V5 = -32768;
-  static final V6 = -1;
-  static final V7 = 0;
-  static final V8 = 12345;
-  static final V9 = 32767;
-  static final V10 = -2147483648;
-  static final V11 = -1;
-  static final V12 = 0;
-  static final V13 = 1234567890;
-  static final V14 = 2147483647;
-  static final V15 = -9007199254740991;
-  static final V16 = -1;
-  static final V17 = 0;
-  static final V18 = 1234567890123456;
-  static final V19 = 9007199254740991;
-  int f0 = IntegerNumberValues.V0;
-  int f1 = IntegerNumberValues.V1;
-  int f2 = IntegerNumberValues.V2;
-  int f3 = IntegerNumberValues.V3;
-  int f4 = IntegerNumberValues.V4;
-  int f5 = IntegerNumberValues.V5;
-  int f6 = IntegerNumberValues.V6;
-  int f7 = IntegerNumberValues.V7;
-  int f8 = IntegerNumberValues.V8;
-  int f9 = IntegerNumberValues.V9;
-  int f10 = IntegerNumberValues.V10;
-  int f11 = IntegerNumberValues.V11;
-  int f12 = IntegerNumberValues.V12;
-  int f13 = IntegerNumberValues.V13;
-  int f14 = IntegerNumberValues.V14;
-  int f15 = IntegerNumberValues.V15;
-  int f16 = IntegerNumberValues.V16;
-  int f17 = IntegerNumberValues.V17;
-  int f18 = IntegerNumberValues.V18;
-  int f19 = IntegerNumberValues.V19;
+  static const List<bindings.StructDataHeader> kVersions = const [
+    const bindings.StructDataHeader(88, 0)
+  ];
+  static const V0 = -128;
+  static const V1 = -1;
+  static const V2 = 0;
+  static const V3 = 42;
+  static const V4 = 127;
+  static const V5 = -32768;
+  static const V6 = -1;
+  static const V7 = 0;
+  static const V8 = 12345;
+  static const V9 = 32767;
+  static const V10 = -2147483648;
+  static const V11 = -1;
+  static const V12 = 0;
+  static const V13 = 1234567890;
+  static const V14 = 2147483647;
+  static const V15 = -9007199254740991;
+  static const V16 = -1;
+  static const V17 = 0;
+  static const V18 = 1234567890123456;
+  static const V19 = 9007199254740991;
+  int f0 = -128;
+  int f1 = -1;
+  int f2 = 0;
+  int f3 = 42;
+  int f4 = 127;
+  int f5 = -32768;
+  int f6 = -1;
+  int f7 = 0;
+  int f8 = 12345;
+  int f9 = 32767;
+  int f10 = -2147483648;
+  int f11 = -1;
+  int f12 = 0;
+  int f13 = 1234567890;
+  int f14 = 2147483647;
+  int f15 = -9007199254740991;
+  int f16 = -1;
+  int f17 = 0;
+  int f18 = 1234567890123456;
+  int f19 = 9007199254740991;
 
-  IntegerNumberValues() : super(kStructSize);
+  IntegerNumberValues() : super(kVersions.last.size);
 
   static IntegerNumberValues deserialize(bindings.Message message) {
-    return decode(new bindings.Decoder(message));
+    var decoder = new bindings.Decoder(message);
+    var result = decode(decoder);
+    decoder.excessHandles.forEach((h) => h.close());
+    return result;
   }
 
   static IntegerNumberValues decode(bindings.Decoder decoder0) {
@@ -2357,87 +2490,97 @@ class IntegerNumberValues extends bindings.Struct {
     IntegerNumberValues result = new IntegerNumberValues();
 
     var mainDataHeader = decoder0.decodeStructDataHeader();
-    if ((mainDataHeader.size < kStructSize) ||
-        (mainDataHeader.version < 0)) {
-      throw new bindings.MojoCodecError('Malformed header');
+    if (mainDataHeader.version <= kVersions.last.version) {
+      // Scan in reverse order to optimize for more recent versions.
+      for (int i = kVersions.length - 1; i >= 0; --i) {
+        if (mainDataHeader.version >= kVersions[i].version) {
+          if (mainDataHeader.size != kVersions[i].size)
+            throw new bindings.MojoCodecError(
+                'Header doesn\'t correspond to any known version.');
+        }
+      }
+    } else if (mainDataHeader.size < kVersions.last.size) {
+      throw new bindings.MojoCodecError(
+        'Message newer than the last known version cannot be shorter than '
+        'required by the last known version.');
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.f0 = decoder0.decodeInt8(8);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.f1 = decoder0.decodeInt8(9);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.f2 = decoder0.decodeInt8(10);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.f3 = decoder0.decodeInt8(11);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.f4 = decoder0.decodeInt8(12);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.f5 = decoder0.decodeInt16(14);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.f6 = decoder0.decodeInt16(16);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.f7 = decoder0.decodeInt16(18);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.f8 = decoder0.decodeInt16(20);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.f9 = decoder0.decodeInt16(22);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.f10 = decoder0.decodeInt32(24);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.f11 = decoder0.decodeInt32(28);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.f12 = decoder0.decodeInt32(32);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.f13 = decoder0.decodeInt32(36);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.f14 = decoder0.decodeInt32(40);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.f15 = decoder0.decodeInt64(48);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.f16 = decoder0.decodeInt64(56);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.f17 = decoder0.decodeInt64(64);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.f18 = decoder0.decodeInt64(72);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.f19 = decoder0.decodeInt64(80);
     }
@@ -2445,7 +2588,7 @@ class IntegerNumberValues extends bindings.Struct {
   }
 
   void encode(bindings.Encoder encoder) {
-    var encoder0 = encoder.getStructEncoderAtOffset(kDefaultStructInfo);
+    var encoder0 = encoder.getStructEncoderAtOffset(kVersions.last);
     
     encoder0.encodeInt8(f0, 8);
     
@@ -2514,38 +2657,41 @@ class IntegerNumberValues extends bindings.Struct {
 }
 
 class UnsignedNumberValues extends bindings.Struct {
-  static const int kStructSize = 56;
-  static const bindings.StructDataHeader kDefaultStructInfo =
-      const bindings.StructDataHeader(kStructSize, 0);
-  static final V0 = 0;
-  static final V1 = 42;
-  static final V2 = 0xFF;
-  static final V3 = 0;
-  static final V4 = 12345;
-  static final V5 = 0xFFFF;
-  static final V6 = 0;
-  static final V7 = 1234567890;
-  static final V8 = 0xFFFFFFFF;
-  static final V9 = 0;
-  static final V10 = 1234567890123456;
-  static final V11 = 9007199254740991;
-  int f0 = UnsignedNumberValues.V0;
-  int f1 = UnsignedNumberValues.V1;
-  int f2 = UnsignedNumberValues.V2;
-  int f3 = UnsignedNumberValues.V3;
-  int f4 = UnsignedNumberValues.V4;
-  int f5 = UnsignedNumberValues.V5;
-  int f6 = UnsignedNumberValues.V6;
-  int f7 = UnsignedNumberValues.V7;
-  int f8 = UnsignedNumberValues.V8;
-  int f9 = UnsignedNumberValues.V9;
-  int f10 = UnsignedNumberValues.V10;
-  int f11 = UnsignedNumberValues.V11;
+  static const List<bindings.StructDataHeader> kVersions = const [
+    const bindings.StructDataHeader(56, 0)
+  ];
+  static const V0 = 0;
+  static const V1 = 42;
+  static const V2 = 0xFF;
+  static const V3 = 0;
+  static const V4 = 12345;
+  static const V5 = 0xFFFF;
+  static const V6 = 0;
+  static const V7 = 1234567890;
+  static const V8 = 0xFFFFFFFF;
+  static const V9 = 0;
+  static const V10 = 1234567890123456;
+  static const V11 = 9007199254740991;
+  int f0 = 0;
+  int f1 = 42;
+  int f2 = 0xFF;
+  int f3 = 0;
+  int f4 = 12345;
+  int f5 = 0xFFFF;
+  int f6 = 0;
+  int f7 = 1234567890;
+  int f8 = 0xFFFFFFFF;
+  int f9 = 0;
+  int f10 = 1234567890123456;
+  int f11 = 9007199254740991;
 
-  UnsignedNumberValues() : super(kStructSize);
+  UnsignedNumberValues() : super(kVersions.last.size);
 
   static UnsignedNumberValues deserialize(bindings.Message message) {
-    return decode(new bindings.Decoder(message));
+    var decoder = new bindings.Decoder(message);
+    var result = decode(decoder);
+    decoder.excessHandles.forEach((h) => h.close());
+    return result;
   }
 
   static UnsignedNumberValues decode(bindings.Decoder decoder0) {
@@ -2555,55 +2701,65 @@ class UnsignedNumberValues extends bindings.Struct {
     UnsignedNumberValues result = new UnsignedNumberValues();
 
     var mainDataHeader = decoder0.decodeStructDataHeader();
-    if ((mainDataHeader.size < kStructSize) ||
-        (mainDataHeader.version < 0)) {
-      throw new bindings.MojoCodecError('Malformed header');
+    if (mainDataHeader.version <= kVersions.last.version) {
+      // Scan in reverse order to optimize for more recent versions.
+      for (int i = kVersions.length - 1; i >= 0; --i) {
+        if (mainDataHeader.version >= kVersions[i].version) {
+          if (mainDataHeader.size != kVersions[i].size)
+            throw new bindings.MojoCodecError(
+                'Header doesn\'t correspond to any known version.');
+        }
+      }
+    } else if (mainDataHeader.size < kVersions.last.size) {
+      throw new bindings.MojoCodecError(
+        'Message newer than the last known version cannot be shorter than '
+        'required by the last known version.');
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.f0 = decoder0.decodeUint8(8);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.f1 = decoder0.decodeUint8(9);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.f2 = decoder0.decodeUint8(10);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.f3 = decoder0.decodeUint16(12);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.f4 = decoder0.decodeUint16(14);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.f5 = decoder0.decodeUint16(16);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.f6 = decoder0.decodeUint32(20);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.f7 = decoder0.decodeUint32(24);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.f8 = decoder0.decodeUint32(28);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.f9 = decoder0.decodeUint64(32);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.f10 = decoder0.decodeUint64(40);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.f11 = decoder0.decodeUint64(48);
     }
@@ -2611,7 +2767,7 @@ class UnsignedNumberValues extends bindings.Struct {
   }
 
   void encode(bindings.Encoder encoder) {
-    var encoder0 = encoder.getStructEncoderAtOffset(kDefaultStructInfo);
+    var encoder0 = encoder.getStructEncoderAtOffset(kVersions.last);
     
     encoder0.encodeUint8(f0, 8);
     
@@ -2656,9 +2812,9 @@ class UnsignedNumberValues extends bindings.Struct {
 }
 
 class BitArrayValues extends bindings.Struct {
-  static const int kStructSize = 64;
-  static const bindings.StructDataHeader kDefaultStructInfo =
-      const bindings.StructDataHeader(kStructSize, 0);
+  static const List<bindings.StructDataHeader> kVersions = const [
+    const bindings.StructDataHeader(64, 0)
+  ];
   List<bool> f0 = null;
   List<bool> f1 = null;
   List<bool> f2 = null;
@@ -2667,10 +2823,13 @@ class BitArrayValues extends bindings.Struct {
   List<List<bool>> f5 = null;
   List<List<bool>> f6 = null;
 
-  BitArrayValues() : super(kStructSize);
+  BitArrayValues() : super(kVersions.last.size);
 
   static BitArrayValues deserialize(bindings.Message message) {
-    return decode(new bindings.Decoder(message));
+    var decoder = new bindings.Decoder(message);
+    var result = decode(decoder);
+    decoder.excessHandles.forEach((h) => h.close());
+    return result;
   }
 
   static BitArrayValues decode(bindings.Decoder decoder0) {
@@ -2680,27 +2839,37 @@ class BitArrayValues extends bindings.Struct {
     BitArrayValues result = new BitArrayValues();
 
     var mainDataHeader = decoder0.decodeStructDataHeader();
-    if ((mainDataHeader.size < kStructSize) ||
-        (mainDataHeader.version < 0)) {
-      throw new bindings.MojoCodecError('Malformed header');
+    if (mainDataHeader.version <= kVersions.last.version) {
+      // Scan in reverse order to optimize for more recent versions.
+      for (int i = kVersions.length - 1; i >= 0; --i) {
+        if (mainDataHeader.version >= kVersions[i].version) {
+          if (mainDataHeader.size != kVersions[i].size)
+            throw new bindings.MojoCodecError(
+                'Header doesn\'t correspond to any known version.');
+        }
+      }
+    } else if (mainDataHeader.size < kVersions.last.size) {
+      throw new bindings.MojoCodecError(
+        'Message newer than the last known version cannot be shorter than '
+        'required by the last known version.');
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.f0 = decoder0.decodeBoolArray(8, bindings.kNothingNullable, 1);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.f1 = decoder0.decodeBoolArray(16, bindings.kNothingNullable, 7);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.f2 = decoder0.decodeBoolArray(24, bindings.kNothingNullable, 9);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.f3 = decoder0.decodeBoolArray(32, bindings.kNothingNullable, bindings.kUnspecifiedArrayLength);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       var decoder1 = decoder0.decodePointer(40, false);
       {
@@ -2712,7 +2881,7 @@ class BitArrayValues extends bindings.Struct {
         }
       }
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       var decoder1 = decoder0.decodePointer(48, false);
       {
@@ -2724,7 +2893,7 @@ class BitArrayValues extends bindings.Struct {
         }
       }
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       var decoder1 = decoder0.decodePointer(56, false);
       {
@@ -2740,7 +2909,7 @@ class BitArrayValues extends bindings.Struct {
   }
 
   void encode(bindings.Encoder encoder) {
-    var encoder0 = encoder.getStructEncoderAtOffset(kDefaultStructInfo);
+    var encoder0 = encoder.getStructEncoderAtOffset(kVersions.last);
     
     encoder0.encodeBoolArray(f0, 8, bindings.kNothingNullable, 1);
     
@@ -2794,9 +2963,14 @@ class BitArrayValues extends bindings.Struct {
 }
 
 class MultiVersionStruct extends bindings.Struct {
-  static const int kStructSize = 48;
-  static const bindings.StructDataHeader kDefaultStructInfo =
-      const bindings.StructDataHeader(kStructSize, 9);
+  static const List<bindings.StructDataHeader> kVersions = const [
+    const bindings.StructDataHeader(16, 0),
+    const bindings.StructDataHeader(24, 1),
+    const bindings.StructDataHeader(32, 3),
+    const bindings.StructDataHeader(40, 5),
+    const bindings.StructDataHeader(48, 7),
+    const bindings.StructDataHeader(48, 9)
+  ];
   int fInt32 = 0;
   core.MojoMessagePipeEndpoint fMessagePipe = null;
   rect_mojom.Rect fRect = null;
@@ -2805,10 +2979,13 @@ class MultiVersionStruct extends bindings.Struct {
   bool fBool = false;
   int fInt16 = 0;
 
-  MultiVersionStruct() : super(kStructSize);
+  MultiVersionStruct() : super(kVersions.last.size);
 
   static MultiVersionStruct deserialize(bindings.Message message) {
-    return decode(new bindings.Decoder(message));
+    var decoder = new bindings.Decoder(message);
+    var result = decode(decoder);
+    decoder.excessHandles.forEach((h) => h.close());
+    return result;
   }
 
   static MultiVersionStruct decode(bindings.Decoder decoder0) {
@@ -2818,36 +2995,46 @@ class MultiVersionStruct extends bindings.Struct {
     MultiVersionStruct result = new MultiVersionStruct();
 
     var mainDataHeader = decoder0.decodeStructDataHeader();
-    if ((mainDataHeader.size < kStructSize) ||
-        (mainDataHeader.version < 9)) {
-      throw new bindings.MojoCodecError('Malformed header');
+    if (mainDataHeader.version <= kVersions.last.version) {
+      // Scan in reverse order to optimize for more recent versions.
+      for (int i = kVersions.length - 1; i >= 0; --i) {
+        if (mainDataHeader.version >= kVersions[i].version) {
+          if (mainDataHeader.size != kVersions[i].size)
+            throw new bindings.MojoCodecError(
+                'Header doesn\'t correspond to any known version.');
+        }
+      }
+    } else if (mainDataHeader.size < kVersions.last.size) {
+      throw new bindings.MojoCodecError(
+        'Message newer than the last known version cannot be shorter than '
+        'required by the last known version.');
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.fInt32 = decoder0.decodeInt32(8);
     }
-    {
+    if (mainDataHeader.version >= 7) {
       
       result.fMessagePipe = decoder0.decodeMessagePipeHandle(12, true);
     }
-    {
+    if (mainDataHeader.version >= 1) {
       
       var decoder1 = decoder0.decodePointer(16, true);
       result.fRect = rect_mojom.Rect.decode(decoder1);
     }
-    {
+    if (mainDataHeader.version >= 3) {
       
       result.fString = decoder0.decodeString(24, true);
     }
-    {
+    if (mainDataHeader.version >= 5) {
       
-      result.fArray = decoder0.decodeInt8Array(32, bindings.kNothingNullable, bindings.kUnspecifiedArrayLength);
+      result.fArray = decoder0.decodeInt8Array(32, bindings.kArrayNullable, bindings.kUnspecifiedArrayLength);
     }
-    {
+    if (mainDataHeader.version >= 7) {
       
       result.fBool = decoder0.decodeBool(40, 0);
     }
-    {
+    if (mainDataHeader.version >= 9) {
       
       result.fInt16 = decoder0.decodeInt16(42);
     }
@@ -2855,7 +3042,7 @@ class MultiVersionStruct extends bindings.Struct {
   }
 
   void encode(bindings.Encoder encoder) {
-    var encoder0 = encoder.getStructEncoderAtOffset(kDefaultStructInfo);
+    var encoder0 = encoder.getStructEncoderAtOffset(kVersions.last);
     
     encoder0.encodeInt32(fInt32, 8);
     
@@ -2865,7 +3052,7 @@ class MultiVersionStruct extends bindings.Struct {
     
     encoder0.encodeString(fString, 24, true);
     
-    encoder0.encodeInt8Array(fArray, 32, bindings.kNothingNullable, bindings.kUnspecifiedArrayLength);
+    encoder0.encodeInt8Array(fArray, 32, bindings.kArrayNullable, bindings.kUnspecifiedArrayLength);
     
     encoder0.encodeBool(fBool, 40, 0);
     
@@ -2885,15 +3072,18 @@ class MultiVersionStruct extends bindings.Struct {
 }
 
 class MultiVersionStructV0 extends bindings.Struct {
-  static const int kStructSize = 16;
-  static const bindings.StructDataHeader kDefaultStructInfo =
-      const bindings.StructDataHeader(kStructSize, 0);
+  static const List<bindings.StructDataHeader> kVersions = const [
+    const bindings.StructDataHeader(16, 0)
+  ];
   int fInt32 = 0;
 
-  MultiVersionStructV0() : super(kStructSize);
+  MultiVersionStructV0() : super(kVersions.last.size);
 
   static MultiVersionStructV0 deserialize(bindings.Message message) {
-    return decode(new bindings.Decoder(message));
+    var decoder = new bindings.Decoder(message);
+    var result = decode(decoder);
+    decoder.excessHandles.forEach((h) => h.close());
+    return result;
   }
 
   static MultiVersionStructV0 decode(bindings.Decoder decoder0) {
@@ -2903,11 +3093,21 @@ class MultiVersionStructV0 extends bindings.Struct {
     MultiVersionStructV0 result = new MultiVersionStructV0();
 
     var mainDataHeader = decoder0.decodeStructDataHeader();
-    if ((mainDataHeader.size < kStructSize) ||
-        (mainDataHeader.version < 0)) {
-      throw new bindings.MojoCodecError('Malformed header');
+    if (mainDataHeader.version <= kVersions.last.version) {
+      // Scan in reverse order to optimize for more recent versions.
+      for (int i = kVersions.length - 1; i >= 0; --i) {
+        if (mainDataHeader.version >= kVersions[i].version) {
+          if (mainDataHeader.size != kVersions[i].size)
+            throw new bindings.MojoCodecError(
+                'Header doesn\'t correspond to any known version.');
+        }
+      }
+    } else if (mainDataHeader.size < kVersions.last.size) {
+      throw new bindings.MojoCodecError(
+        'Message newer than the last known version cannot be shorter than '
+        'required by the last known version.');
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.fInt32 = decoder0.decodeInt32(8);
     }
@@ -2915,7 +3115,7 @@ class MultiVersionStructV0 extends bindings.Struct {
   }
 
   void encode(bindings.Encoder encoder) {
-    var encoder0 = encoder.getStructEncoderAtOffset(kDefaultStructInfo);
+    var encoder0 = encoder.getStructEncoderAtOffset(kVersions.last);
     
     encoder0.encodeInt32(fInt32, 8);
   }
@@ -2927,16 +3127,20 @@ class MultiVersionStructV0 extends bindings.Struct {
 }
 
 class MultiVersionStructV1 extends bindings.Struct {
-  static const int kStructSize = 24;
-  static const bindings.StructDataHeader kDefaultStructInfo =
-      const bindings.StructDataHeader(kStructSize, 1);
+  static const List<bindings.StructDataHeader> kVersions = const [
+    const bindings.StructDataHeader(16, 0),
+    const bindings.StructDataHeader(24, 1)
+  ];
   int fInt32 = 0;
   rect_mojom.Rect fRect = null;
 
-  MultiVersionStructV1() : super(kStructSize);
+  MultiVersionStructV1() : super(kVersions.last.size);
 
   static MultiVersionStructV1 deserialize(bindings.Message message) {
-    return decode(new bindings.Decoder(message));
+    var decoder = new bindings.Decoder(message);
+    var result = decode(decoder);
+    decoder.excessHandles.forEach((h) => h.close());
+    return result;
   }
 
   static MultiVersionStructV1 decode(bindings.Decoder decoder0) {
@@ -2946,15 +3150,25 @@ class MultiVersionStructV1 extends bindings.Struct {
     MultiVersionStructV1 result = new MultiVersionStructV1();
 
     var mainDataHeader = decoder0.decodeStructDataHeader();
-    if ((mainDataHeader.size < kStructSize) ||
-        (mainDataHeader.version < 1)) {
-      throw new bindings.MojoCodecError('Malformed header');
+    if (mainDataHeader.version <= kVersions.last.version) {
+      // Scan in reverse order to optimize for more recent versions.
+      for (int i = kVersions.length - 1; i >= 0; --i) {
+        if (mainDataHeader.version >= kVersions[i].version) {
+          if (mainDataHeader.size != kVersions[i].size)
+            throw new bindings.MojoCodecError(
+                'Header doesn\'t correspond to any known version.');
+        }
+      }
+    } else if (mainDataHeader.size < kVersions.last.size) {
+      throw new bindings.MojoCodecError(
+        'Message newer than the last known version cannot be shorter than '
+        'required by the last known version.');
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.fInt32 = decoder0.decodeInt32(8);
     }
-    {
+    if (mainDataHeader.version >= 1) {
       
       var decoder1 = decoder0.decodePointer(16, true);
       result.fRect = rect_mojom.Rect.decode(decoder1);
@@ -2963,7 +3177,7 @@ class MultiVersionStructV1 extends bindings.Struct {
   }
 
   void encode(bindings.Encoder encoder) {
-    var encoder0 = encoder.getStructEncoderAtOffset(kDefaultStructInfo);
+    var encoder0 = encoder.getStructEncoderAtOffset(kVersions.last);
     
     encoder0.encodeInt32(fInt32, 8);
     
@@ -2978,17 +3192,22 @@ class MultiVersionStructV1 extends bindings.Struct {
 }
 
 class MultiVersionStructV3 extends bindings.Struct {
-  static const int kStructSize = 32;
-  static const bindings.StructDataHeader kDefaultStructInfo =
-      const bindings.StructDataHeader(kStructSize, 3);
+  static const List<bindings.StructDataHeader> kVersions = const [
+    const bindings.StructDataHeader(16, 0),
+    const bindings.StructDataHeader(24, 1),
+    const bindings.StructDataHeader(32, 3)
+  ];
   int fInt32 = 0;
   rect_mojom.Rect fRect = null;
   String fString = null;
 
-  MultiVersionStructV3() : super(kStructSize);
+  MultiVersionStructV3() : super(kVersions.last.size);
 
   static MultiVersionStructV3 deserialize(bindings.Message message) {
-    return decode(new bindings.Decoder(message));
+    var decoder = new bindings.Decoder(message);
+    var result = decode(decoder);
+    decoder.excessHandles.forEach((h) => h.close());
+    return result;
   }
 
   static MultiVersionStructV3 decode(bindings.Decoder decoder0) {
@@ -2998,20 +3217,30 @@ class MultiVersionStructV3 extends bindings.Struct {
     MultiVersionStructV3 result = new MultiVersionStructV3();
 
     var mainDataHeader = decoder0.decodeStructDataHeader();
-    if ((mainDataHeader.size < kStructSize) ||
-        (mainDataHeader.version < 3)) {
-      throw new bindings.MojoCodecError('Malformed header');
+    if (mainDataHeader.version <= kVersions.last.version) {
+      // Scan in reverse order to optimize for more recent versions.
+      for (int i = kVersions.length - 1; i >= 0; --i) {
+        if (mainDataHeader.version >= kVersions[i].version) {
+          if (mainDataHeader.size != kVersions[i].size)
+            throw new bindings.MojoCodecError(
+                'Header doesn\'t correspond to any known version.');
+        }
+      }
+    } else if (mainDataHeader.size < kVersions.last.size) {
+      throw new bindings.MojoCodecError(
+        'Message newer than the last known version cannot be shorter than '
+        'required by the last known version.');
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.fInt32 = decoder0.decodeInt32(8);
     }
-    {
+    if (mainDataHeader.version >= 1) {
       
       var decoder1 = decoder0.decodePointer(16, true);
       result.fRect = rect_mojom.Rect.decode(decoder1);
     }
-    {
+    if (mainDataHeader.version >= 3) {
       
       result.fString = decoder0.decodeString(24, true);
     }
@@ -3019,7 +3248,7 @@ class MultiVersionStructV3 extends bindings.Struct {
   }
 
   void encode(bindings.Encoder encoder) {
-    var encoder0 = encoder.getStructEncoderAtOffset(kDefaultStructInfo);
+    var encoder0 = encoder.getStructEncoderAtOffset(kVersions.last);
     
     encoder0.encodeInt32(fInt32, 8);
     
@@ -3037,18 +3266,24 @@ class MultiVersionStructV3 extends bindings.Struct {
 }
 
 class MultiVersionStructV5 extends bindings.Struct {
-  static const int kStructSize = 40;
-  static const bindings.StructDataHeader kDefaultStructInfo =
-      const bindings.StructDataHeader(kStructSize, 5);
+  static const List<bindings.StructDataHeader> kVersions = const [
+    const bindings.StructDataHeader(16, 0),
+    const bindings.StructDataHeader(24, 1),
+    const bindings.StructDataHeader(32, 3),
+    const bindings.StructDataHeader(40, 5)
+  ];
   int fInt32 = 0;
   rect_mojom.Rect fRect = null;
   String fString = null;
   List<int> fArray = null;
 
-  MultiVersionStructV5() : super(kStructSize);
+  MultiVersionStructV5() : super(kVersions.last.size);
 
   static MultiVersionStructV5 deserialize(bindings.Message message) {
-    return decode(new bindings.Decoder(message));
+    var decoder = new bindings.Decoder(message);
+    var result = decode(decoder);
+    decoder.excessHandles.forEach((h) => h.close());
+    return result;
   }
 
   static MultiVersionStructV5 decode(bindings.Decoder decoder0) {
@@ -3058,32 +3293,42 @@ class MultiVersionStructV5 extends bindings.Struct {
     MultiVersionStructV5 result = new MultiVersionStructV5();
 
     var mainDataHeader = decoder0.decodeStructDataHeader();
-    if ((mainDataHeader.size < kStructSize) ||
-        (mainDataHeader.version < 5)) {
-      throw new bindings.MojoCodecError('Malformed header');
+    if (mainDataHeader.version <= kVersions.last.version) {
+      // Scan in reverse order to optimize for more recent versions.
+      for (int i = kVersions.length - 1; i >= 0; --i) {
+        if (mainDataHeader.version >= kVersions[i].version) {
+          if (mainDataHeader.size != kVersions[i].size)
+            throw new bindings.MojoCodecError(
+                'Header doesn\'t correspond to any known version.');
+        }
+      }
+    } else if (mainDataHeader.size < kVersions.last.size) {
+      throw new bindings.MojoCodecError(
+        'Message newer than the last known version cannot be shorter than '
+        'required by the last known version.');
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.fInt32 = decoder0.decodeInt32(8);
     }
-    {
+    if (mainDataHeader.version >= 1) {
       
       var decoder1 = decoder0.decodePointer(16, true);
       result.fRect = rect_mojom.Rect.decode(decoder1);
     }
-    {
+    if (mainDataHeader.version >= 3) {
       
       result.fString = decoder0.decodeString(24, true);
     }
-    {
+    if (mainDataHeader.version >= 5) {
       
-      result.fArray = decoder0.decodeInt8Array(32, bindings.kNothingNullable, bindings.kUnspecifiedArrayLength);
+      result.fArray = decoder0.decodeInt8Array(32, bindings.kArrayNullable, bindings.kUnspecifiedArrayLength);
     }
     return result;
   }
 
   void encode(bindings.Encoder encoder) {
-    var encoder0 = encoder.getStructEncoderAtOffset(kDefaultStructInfo);
+    var encoder0 = encoder.getStructEncoderAtOffset(kVersions.last);
     
     encoder0.encodeInt32(fInt32, 8);
     
@@ -3091,7 +3336,7 @@ class MultiVersionStructV5 extends bindings.Struct {
     
     encoder0.encodeString(fString, 24, true);
     
-    encoder0.encodeInt8Array(fArray, 32, bindings.kNothingNullable, bindings.kUnspecifiedArrayLength);
+    encoder0.encodeInt8Array(fArray, 32, bindings.kArrayNullable, bindings.kUnspecifiedArrayLength);
   }
 
   String toString() {
@@ -3104,9 +3349,13 @@ class MultiVersionStructV5 extends bindings.Struct {
 }
 
 class MultiVersionStructV7 extends bindings.Struct {
-  static const int kStructSize = 48;
-  static const bindings.StructDataHeader kDefaultStructInfo =
-      const bindings.StructDataHeader(kStructSize, 7);
+  static const List<bindings.StructDataHeader> kVersions = const [
+    const bindings.StructDataHeader(16, 0),
+    const bindings.StructDataHeader(24, 1),
+    const bindings.StructDataHeader(32, 3),
+    const bindings.StructDataHeader(40, 5),
+    const bindings.StructDataHeader(48, 7)
+  ];
   int fInt32 = 0;
   core.MojoMessagePipeEndpoint fMessagePipe = null;
   rect_mojom.Rect fRect = null;
@@ -3114,10 +3363,13 @@ class MultiVersionStructV7 extends bindings.Struct {
   List<int> fArray = null;
   bool fBool = false;
 
-  MultiVersionStructV7() : super(kStructSize);
+  MultiVersionStructV7() : super(kVersions.last.size);
 
   static MultiVersionStructV7 deserialize(bindings.Message message) {
-    return decode(new bindings.Decoder(message));
+    var decoder = new bindings.Decoder(message);
+    var result = decode(decoder);
+    decoder.excessHandles.forEach((h) => h.close());
+    return result;
   }
 
   static MultiVersionStructV7 decode(bindings.Decoder decoder0) {
@@ -3127,32 +3379,42 @@ class MultiVersionStructV7 extends bindings.Struct {
     MultiVersionStructV7 result = new MultiVersionStructV7();
 
     var mainDataHeader = decoder0.decodeStructDataHeader();
-    if ((mainDataHeader.size < kStructSize) ||
-        (mainDataHeader.version < 7)) {
-      throw new bindings.MojoCodecError('Malformed header');
+    if (mainDataHeader.version <= kVersions.last.version) {
+      // Scan in reverse order to optimize for more recent versions.
+      for (int i = kVersions.length - 1; i >= 0; --i) {
+        if (mainDataHeader.version >= kVersions[i].version) {
+          if (mainDataHeader.size != kVersions[i].size)
+            throw new bindings.MojoCodecError(
+                'Header doesn\'t correspond to any known version.');
+        }
+      }
+    } else if (mainDataHeader.size < kVersions.last.size) {
+      throw new bindings.MojoCodecError(
+        'Message newer than the last known version cannot be shorter than '
+        'required by the last known version.');
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.fInt32 = decoder0.decodeInt32(8);
     }
-    {
+    if (mainDataHeader.version >= 7) {
       
       result.fMessagePipe = decoder0.decodeMessagePipeHandle(12, true);
     }
-    {
+    if (mainDataHeader.version >= 1) {
       
       var decoder1 = decoder0.decodePointer(16, true);
       result.fRect = rect_mojom.Rect.decode(decoder1);
     }
-    {
+    if (mainDataHeader.version >= 3) {
       
       result.fString = decoder0.decodeString(24, true);
     }
-    {
+    if (mainDataHeader.version >= 5) {
       
-      result.fArray = decoder0.decodeInt8Array(32, bindings.kNothingNullable, bindings.kUnspecifiedArrayLength);
+      result.fArray = decoder0.decodeInt8Array(32, bindings.kArrayNullable, bindings.kUnspecifiedArrayLength);
     }
-    {
+    if (mainDataHeader.version >= 7) {
       
       result.fBool = decoder0.decodeBool(40, 0);
     }
@@ -3160,7 +3422,7 @@ class MultiVersionStructV7 extends bindings.Struct {
   }
 
   void encode(bindings.Encoder encoder) {
-    var encoder0 = encoder.getStructEncoderAtOffset(kDefaultStructInfo);
+    var encoder0 = encoder.getStructEncoderAtOffset(kVersions.last);
     
     encoder0.encodeInt32(fInt32, 8);
     
@@ -3170,7 +3432,7 @@ class MultiVersionStructV7 extends bindings.Struct {
     
     encoder0.encodeString(fString, 24, true);
     
-    encoder0.encodeInt8Array(fArray, 32, bindings.kNothingNullable, bindings.kUnspecifiedArrayLength);
+    encoder0.encodeInt8Array(fArray, 32, bindings.kArrayNullable, bindings.kUnspecifiedArrayLength);
     
     encoder0.encodeBool(fBool, 40, 0);
   }

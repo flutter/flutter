@@ -14,7 +14,7 @@ final _EmbedderImpl embedder = new _EmbedderImpl();
 
 class _EmbedderImpl {
   ApplicationConnection _connection;
-  ServiceRegistry _serviceRegistry;
+  ServiceRegistryProxy _serviceRegistry;
 
   final ShellProxy shell = new ShellProxy.fromHandle(
       new core.MojoHandle(internals.takeShellProxyHandle()));

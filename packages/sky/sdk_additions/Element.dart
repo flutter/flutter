@@ -26,6 +26,14 @@ class Element extends ParentNode {
     int get clientTop native "Element_clientTop_Getter";
     int get clientWidth native "Element_clientWidth_Getter";
     int get clientHeight native "Element_clientHeight_Getter";
+    double get x native "Element_x_Getter";
+    void set x(double value) native "Element_x_Setter";
+    double get y native "Element_y_Getter";
+    void set y(double value) native "Element_y_Setter";
+    double get width native "Element_width_Getter";
+    void set width(double value) native "Element_width_Setter";
+    double get height native "Element_height_Getter";
+    void set height(double value) native "Element_height_Setter";
 
     // Methods
     bool hasAttribute(String name) native "Element_hasAttribute_Callback";
@@ -34,6 +42,9 @@ class Element extends ParentNode {
     void removeAttribute(String name) native "Element_removeAttribute_Callback";
     List<Attr> getAttributes() native "Element_getAttributes_Callback";
     void requestPaint(PaintingCallback callback) native "Element_requestPaint_Callback";
+    void setNeedsLayout() native "Element_setNeedsLayout_Callback";
+    void layout() native "Element_layout_Callback";
+    void setLayoutManager(LayoutCallback callback) native "Element_setLayoutManager_Callback";
     bool matches(String selectors) native "Element_matches_Callback";
     void focus() native "Element_focus_Callback";
     void blur() native "Element_blur_Callback";

@@ -5,8 +5,7 @@
 library test_unions.mojom;
 
 import 'dart:async';
-
-import 'package:mojo/public/dart/bindings.dart' as bindings;
-import 'package:mojo/public/dart/core.dart' as core;
+import 'dart:mojo.bindings' as bindings;
+import 'dart:mojo.core' as core;
 
 

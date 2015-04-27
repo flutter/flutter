@@ -41,9 +41,11 @@ class _ApplicationImpl implements application_mojom.Application {
   @override
   void requestQuit() => _application._requestQuitAndClose();
 
-  Future close({bool nodefer: false}) {
-    if (shell != null) shell.close();
-    return _stub.close();
+  Future close({bool immediate: false}) {
+    if (shell != null) {
+      shell.close(immediate: immediate);
+    }
+    return _stub.close(immediate: immediate);
   }
 }
 
@@ -104,11 +106,11 @@ abstract class Application {
     });
   }
 
-  Future close() {
+  Future close({bool immediate: false}) {
     assert(_applicationImpl != null);
-    _applicationConnections.forEach((c) => c.close());
+    _applicationConnections.forEach((c) => c.close(immediate: immediate));
     _applicationConnections.clear();
-    return _applicationImpl.close();
+    return _applicationImpl.close(immediate: immediate);
   }
 
   // This method closes all the application connections. Used during apptesting.

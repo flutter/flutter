@@ -11,15 +11,15 @@ import 'package:mojo/public/dart/core.dart' as core;
 
 
 class CompletionData extends bindings.Struct {
-  static const int kStructSize = 40;
-  static const bindings.StructDataHeader kDefaultStructInfo =
-      const bindings.StructDataHeader(kStructSize, 0);
+  static const List<bindings.StructDataHeader> kVersions = const [
+    const bindings.StructDataHeader(40, 0)
+  ];
   int id = 0;
   int position = 0;
   String text = null;
   String label = null;
 
-  CompletionData() : super(kStructSize);
+  CompletionData() : super(kVersions.last.size);
 
   static CompletionData deserialize(bindings.Message message) {
     return decode(new bindings.Decoder(message));
@@ -32,23 +32,33 @@ class CompletionData extends bindings.Struct {
     CompletionData result = new CompletionData();
 
     var mainDataHeader = decoder0.decodeStructDataHeader();
-    if ((mainDataHeader.size < kStructSize) ||
-        (mainDataHeader.version < 0)) {
-      throw new bindings.MojoCodecError('Malformed header');
+    if (mainDataHeader.version <= kVersions.last.version) {
+      // Scan in reverse order to optimize for more recent versions.
+      for (int i = kVersions.length - 1; i >= 0; --i) {
+        if (mainDataHeader.version >= kVersions[i].version) {
+          if (mainDataHeader.size != kVersions[i].size)
+            throw new bindings.MojoCodecError(
+                'Header doesn\'t correspond to any known version.');
+        }
+      }
+    } else if (mainDataHeader.size < kVersions.last.size) {
+      throw new bindings.MojoCodecError(
+        'Message newer than the last known version cannot be shorter than '
+        'required by the last known version.');
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.id = decoder0.decodeInt64(8);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.position = decoder0.decodeInt32(16);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.text = decoder0.decodeString(24, false);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.label = decoder0.decodeString(32, false);
     }
@@ -56,7 +66,7 @@ class CompletionData extends bindings.Struct {
   }
 
   void encode(bindings.Encoder encoder) {
-    var encoder0 = encoder.getStructEncoderAtOffset(kDefaultStructInfo);
+    var encoder0 = encoder.getStructEncoderAtOffset(kVersions.last);
     
     encoder0.encodeInt64(id, 8);
     
@@ -77,14 +87,14 @@ class CompletionData extends bindings.Struct {
 }
 
 class CorrectionData extends bindings.Struct {
-  static const int kStructSize = 32;
-  static const bindings.StructDataHeader kDefaultStructInfo =
-      const bindings.StructDataHeader(kStructSize, 0);
+  static const List<bindings.StructDataHeader> kVersions = const [
+    const bindings.StructDataHeader(32, 0)
+  ];
   int offset = 0;
   String oldText = null;
   String newText = null;
 
-  CorrectionData() : super(kStructSize);
+  CorrectionData() : super(kVersions.last.size);
 
   static CorrectionData deserialize(bindings.Message message) {
     return decode(new bindings.Decoder(message));
@@ -97,19 +107,29 @@ class CorrectionData extends bindings.Struct {
     CorrectionData result = new CorrectionData();
 
     var mainDataHeader = decoder0.decodeStructDataHeader();
-    if ((mainDataHeader.size < kStructSize) ||
-        (mainDataHeader.version < 0)) {
-      throw new bindings.MojoCodecError('Malformed header');
+    if (mainDataHeader.version <= kVersions.last.version) {
+      // Scan in reverse order to optimize for more recent versions.
+      for (int i = kVersions.length - 1; i >= 0; --i) {
+        if (mainDataHeader.version >= kVersions[i].version) {
+          if (mainDataHeader.size != kVersions[i].size)
+            throw new bindings.MojoCodecError(
+                'Header doesn\'t correspond to any known version.');
+        }
+      }
+    } else if (mainDataHeader.size < kVersions.last.size) {
+      throw new bindings.MojoCodecError(
+        'Message newer than the last known version cannot be shorter than '
+        'required by the last known version.');
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.offset = decoder0.decodeInt32(8);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.oldText = decoder0.decodeString(16, false);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.newText = decoder0.decodeString(24, false);
     }
@@ -117,7 +137,7 @@ class CorrectionData extends bindings.Struct {
   }
 
   void encode(bindings.Encoder encoder) {
-    var encoder0 = encoder.getStructEncoderAtOffset(kDefaultStructInfo);
+    var encoder0 = encoder.getStructEncoderAtOffset(kVersions.last);
     
     encoder0.encodeInt32(offset, 8);
     
@@ -135,12 +155,12 @@ class CorrectionData extends bindings.Struct {
 }
 
 class KeyboardClientCommitCompletionParams extends bindings.Struct {
-  static const int kStructSize = 16;
-  static const bindings.StructDataHeader kDefaultStructInfo =
-      const bindings.StructDataHeader(kStructSize, 0);
+  static const List<bindings.StructDataHeader> kVersions = const [
+    const bindings.StructDataHeader(16, 0)
+  ];
   CompletionData completion = null;
 
-  KeyboardClientCommitCompletionParams() : super(kStructSize);
+  KeyboardClientCommitCompletionParams() : super(kVersions.last.size);
 
   static KeyboardClientCommitCompletionParams deserialize(bindings.Message message) {
     return decode(new bindings.Decoder(message));
@@ -153,11 +173,21 @@ class KeyboardClientCommitCompletionParams extends bindings.Struct {
     KeyboardClientCommitCompletionParams result = new KeyboardClientCommitCompletionParams();
 
     var mainDataHeader = decoder0.decodeStructDataHeader();
-    if ((mainDataHeader.size < kStructSize) ||
-        (mainDataHeader.version < 0)) {
-      throw new bindings.MojoCodecError('Malformed header');
+    if (mainDataHeader.version <= kVersions.last.version) {
+      // Scan in reverse order to optimize for more recent versions.
+      for (int i = kVersions.length - 1; i >= 0; --i) {
+        if (mainDataHeader.version >= kVersions[i].version) {
+          if (mainDataHeader.size != kVersions[i].size)
+            throw new bindings.MojoCodecError(
+                'Header doesn\'t correspond to any known version.');
+        }
+      }
+    } else if (mainDataHeader.size < kVersions.last.size) {
+      throw new bindings.MojoCodecError(
+        'Message newer than the last known version cannot be shorter than '
+        'required by the last known version.');
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       var decoder1 = decoder0.decodePointer(8, false);
       result.completion = CompletionData.decode(decoder1);
@@ -166,7 +196,7 @@ class KeyboardClientCommitCompletionParams extends bindings.Struct {
   }
 
   void encode(bindings.Encoder encoder) {
-    var encoder0 = encoder.getStructEncoderAtOffset(kDefaultStructInfo);
+    var encoder0 = encoder.getStructEncoderAtOffset(kVersions.last);
     
     encoder0.encodeStruct(completion, 8, false);
   }
@@ -178,12 +208,12 @@ class KeyboardClientCommitCompletionParams extends bindings.Struct {
 }
 
 class KeyboardClientCommitCorrectionParams extends bindings.Struct {
-  static const int kStructSize = 16;
-  static const bindings.StructDataHeader kDefaultStructInfo =
-      const bindings.StructDataHeader(kStructSize, 0);
+  static const List<bindings.StructDataHeader> kVersions = const [
+    const bindings.StructDataHeader(16, 0)
+  ];
   CorrectionData correction = null;
 
-  KeyboardClientCommitCorrectionParams() : super(kStructSize);
+  KeyboardClientCommitCorrectionParams() : super(kVersions.last.size);
 
   static KeyboardClientCommitCorrectionParams deserialize(bindings.Message message) {
     return decode(new bindings.Decoder(message));
@@ -196,11 +226,21 @@ class KeyboardClientCommitCorrectionParams extends bindings.Struct {
     KeyboardClientCommitCorrectionParams result = new KeyboardClientCommitCorrectionParams();
 
     var mainDataHeader = decoder0.decodeStructDataHeader();
-    if ((mainDataHeader.size < kStructSize) ||
-        (mainDataHeader.version < 0)) {
-      throw new bindings.MojoCodecError('Malformed header');
+    if (mainDataHeader.version <= kVersions.last.version) {
+      // Scan in reverse order to optimize for more recent versions.
+      for (int i = kVersions.length - 1; i >= 0; --i) {
+        if (mainDataHeader.version >= kVersions[i].version) {
+          if (mainDataHeader.size != kVersions[i].size)
+            throw new bindings.MojoCodecError(
+                'Header doesn\'t correspond to any known version.');
+        }
+      }
+    } else if (mainDataHeader.size < kVersions.last.size) {
+      throw new bindings.MojoCodecError(
+        'Message newer than the last known version cannot be shorter than '
+        'required by the last known version.');
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       var decoder1 = decoder0.decodePointer(8, false);
       result.correction = CorrectionData.decode(decoder1);
@@ -209,7 +249,7 @@ class KeyboardClientCommitCorrectionParams extends bindings.Struct {
   }
 
   void encode(bindings.Encoder encoder) {
-    var encoder0 = encoder.getStructEncoderAtOffset(kDefaultStructInfo);
+    var encoder0 = encoder.getStructEncoderAtOffset(kVersions.last);
     
     encoder0.encodeStruct(correction, 8, false);
   }
@@ -221,13 +261,13 @@ class KeyboardClientCommitCorrectionParams extends bindings.Struct {
 }
 
 class KeyboardClientCommitTextParams extends bindings.Struct {
-  static const int kStructSize = 24;
-  static const bindings.StructDataHeader kDefaultStructInfo =
-      const bindings.StructDataHeader(kStructSize, 0);
+  static const List<bindings.StructDataHeader> kVersions = const [
+    const bindings.StructDataHeader(24, 0)
+  ];
   String text = null;
   int newCursorPosition = 0;
 
-  KeyboardClientCommitTextParams() : super(kStructSize);
+  KeyboardClientCommitTextParams() : super(kVersions.last.size);
 
   static KeyboardClientCommitTextParams deserialize(bindings.Message message) {
     return decode(new bindings.Decoder(message));
@@ -240,15 +280,25 @@ class KeyboardClientCommitTextParams extends bindings.Struct {
     KeyboardClientCommitTextParams result = new KeyboardClientCommitTextParams();
 
     var mainDataHeader = decoder0.decodeStructDataHeader();
-    if ((mainDataHeader.size < kStructSize) ||
-        (mainDataHeader.version < 0)) {
-      throw new bindings.MojoCodecError('Malformed header');
+    if (mainDataHeader.version <= kVersions.last.version) {
+      // Scan in reverse order to optimize for more recent versions.
+      for (int i = kVersions.length - 1; i >= 0; --i) {
+        if (mainDataHeader.version >= kVersions[i].version) {
+          if (mainDataHeader.size != kVersions[i].size)
+            throw new bindings.MojoCodecError(
+                'Header doesn\'t correspond to any known version.');
+        }
+      }
+    } else if (mainDataHeader.size < kVersions.last.size) {
+      throw new bindings.MojoCodecError(
+        'Message newer than the last known version cannot be shorter than '
+        'required by the last known version.');
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.text = decoder0.decodeString(8, false);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.newCursorPosition = decoder0.decodeInt32(16);
     }
@@ -256,7 +306,7 @@ class KeyboardClientCommitTextParams extends bindings.Struct {
   }
 
   void encode(bindings.Encoder encoder) {
-    var encoder0 = encoder.getStructEncoderAtOffset(kDefaultStructInfo);
+    var encoder0 = encoder.getStructEncoderAtOffset(kVersions.last);
     
     encoder0.encodeString(text, 8, false);
     
@@ -271,13 +321,13 @@ class KeyboardClientCommitTextParams extends bindings.Struct {
 }
 
 class KeyboardClientDeleteSurroundingTextParams extends bindings.Struct {
-  static const int kStructSize = 16;
-  static const bindings.StructDataHeader kDefaultStructInfo =
-      const bindings.StructDataHeader(kStructSize, 0);
+  static const List<bindings.StructDataHeader> kVersions = const [
+    const bindings.StructDataHeader(16, 0)
+  ];
   int beforeLength = 0;
   int afterLength = 0;
 
-  KeyboardClientDeleteSurroundingTextParams() : super(kStructSize);
+  KeyboardClientDeleteSurroundingTextParams() : super(kVersions.last.size);
 
   static KeyboardClientDeleteSurroundingTextParams deserialize(bindings.Message message) {
     return decode(new bindings.Decoder(message));
@@ -290,15 +340,25 @@ class KeyboardClientDeleteSurroundingTextParams extends bindings.Struct {
     KeyboardClientDeleteSurroundingTextParams result = new KeyboardClientDeleteSurroundingTextParams();
 
     var mainDataHeader = decoder0.decodeStructDataHeader();
-    if ((mainDataHeader.size < kStructSize) ||
-        (mainDataHeader.version < 0)) {
-      throw new bindings.MojoCodecError('Malformed header');
+    if (mainDataHeader.version <= kVersions.last.version) {
+      // Scan in reverse order to optimize for more recent versions.
+      for (int i = kVersions.length - 1; i >= 0; --i) {
+        if (mainDataHeader.version >= kVersions[i].version) {
+          if (mainDataHeader.size != kVersions[i].size)
+            throw new bindings.MojoCodecError(
+                'Header doesn\'t correspond to any known version.');
+        }
+      }
+    } else if (mainDataHeader.size < kVersions.last.size) {
+      throw new bindings.MojoCodecError(
+        'Message newer than the last known version cannot be shorter than '
+        'required by the last known version.');
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.beforeLength = decoder0.decodeInt32(8);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.afterLength = decoder0.decodeInt32(12);
     }
@@ -306,7 +366,7 @@ class KeyboardClientDeleteSurroundingTextParams extends bindings.Struct {
   }
 
   void encode(bindings.Encoder encoder) {
-    var encoder0 = encoder.getStructEncoderAtOffset(kDefaultStructInfo);
+    var encoder0 = encoder.getStructEncoderAtOffset(kVersions.last);
     
     encoder0.encodeInt32(beforeLength, 8);
     
@@ -321,13 +381,13 @@ class KeyboardClientDeleteSurroundingTextParams extends bindings.Struct {
 }
 
 class KeyboardClientSetComposingRegionParams extends bindings.Struct {
-  static const int kStructSize = 16;
-  static const bindings.StructDataHeader kDefaultStructInfo =
-      const bindings.StructDataHeader(kStructSize, 0);
+  static const List<bindings.StructDataHeader> kVersions = const [
+    const bindings.StructDataHeader(16, 0)
+  ];
   int start = 0;
   int end = 0;
 
-  KeyboardClientSetComposingRegionParams() : super(kStructSize);
+  KeyboardClientSetComposingRegionParams() : super(kVersions.last.size);
 
   static KeyboardClientSetComposingRegionParams deserialize(bindings.Message message) {
     return decode(new bindings.Decoder(message));
@@ -340,15 +400,25 @@ class KeyboardClientSetComposingRegionParams extends bindings.Struct {
     KeyboardClientSetComposingRegionParams result = new KeyboardClientSetComposingRegionParams();
 
     var mainDataHeader = decoder0.decodeStructDataHeader();
-    if ((mainDataHeader.size < kStructSize) ||
-        (mainDataHeader.version < 0)) {
-      throw new bindings.MojoCodecError('Malformed header');
+    if (mainDataHeader.version <= kVersions.last.version) {
+      // Scan in reverse order to optimize for more recent versions.
+      for (int i = kVersions.length - 1; i >= 0; --i) {
+        if (mainDataHeader.version >= kVersions[i].version) {
+          if (mainDataHeader.size != kVersions[i].size)
+            throw new bindings.MojoCodecError(
+                'Header doesn\'t correspond to any known version.');
+        }
+      }
+    } else if (mainDataHeader.size < kVersions.last.size) {
+      throw new bindings.MojoCodecError(
+        'Message newer than the last known version cannot be shorter than '
+        'required by the last known version.');
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.start = decoder0.decodeInt32(8);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.end = decoder0.decodeInt32(12);
     }
@@ -356,7 +426,7 @@ class KeyboardClientSetComposingRegionParams extends bindings.Struct {
   }
 
   void encode(bindings.Encoder encoder) {
-    var encoder0 = encoder.getStructEncoderAtOffset(kDefaultStructInfo);
+    var encoder0 = encoder.getStructEncoderAtOffset(kVersions.last);
     
     encoder0.encodeInt32(start, 8);
     
@@ -371,13 +441,13 @@ class KeyboardClientSetComposingRegionParams extends bindings.Struct {
 }
 
 class KeyboardClientSetComposingTextParams extends bindings.Struct {
-  static const int kStructSize = 24;
-  static const bindings.StructDataHeader kDefaultStructInfo =
-      const bindings.StructDataHeader(kStructSize, 0);
+  static const List<bindings.StructDataHeader> kVersions = const [
+    const bindings.StructDataHeader(24, 0)
+  ];
   String text = null;
   int newCursorPosition = 0;
 
-  KeyboardClientSetComposingTextParams() : super(kStructSize);
+  KeyboardClientSetComposingTextParams() : super(kVersions.last.size);
 
   static KeyboardClientSetComposingTextParams deserialize(bindings.Message message) {
     return decode(new bindings.Decoder(message));
@@ -390,15 +460,25 @@ class KeyboardClientSetComposingTextParams extends bindings.Struct {
     KeyboardClientSetComposingTextParams result = new KeyboardClientSetComposingTextParams();
 
     var mainDataHeader = decoder0.decodeStructDataHeader();
-    if ((mainDataHeader.size < kStructSize) ||
-        (mainDataHeader.version < 0)) {
-      throw new bindings.MojoCodecError('Malformed header');
+    if (mainDataHeader.version <= kVersions.last.version) {
+      // Scan in reverse order to optimize for more recent versions.
+      for (int i = kVersions.length - 1; i >= 0; --i) {
+        if (mainDataHeader.version >= kVersions[i].version) {
+          if (mainDataHeader.size != kVersions[i].size)
+            throw new bindings.MojoCodecError(
+                'Header doesn\'t correspond to any known version.');
+        }
+      }
+    } else if (mainDataHeader.size < kVersions.last.size) {
+      throw new bindings.MojoCodecError(
+        'Message newer than the last known version cannot be shorter than '
+        'required by the last known version.');
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.text = decoder0.decodeString(8, false);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.newCursorPosition = decoder0.decodeInt32(16);
     }
@@ -406,7 +486,7 @@ class KeyboardClientSetComposingTextParams extends bindings.Struct {
   }
 
   void encode(bindings.Encoder encoder) {
-    var encoder0 = encoder.getStructEncoderAtOffset(kDefaultStructInfo);
+    var encoder0 = encoder.getStructEncoderAtOffset(kVersions.last);
     
     encoder0.encodeString(text, 8, false);
     
@@ -421,13 +501,13 @@ class KeyboardClientSetComposingTextParams extends bindings.Struct {
 }
 
 class KeyboardClientSetSelectionParams extends bindings.Struct {
-  static const int kStructSize = 16;
-  static const bindings.StructDataHeader kDefaultStructInfo =
-      const bindings.StructDataHeader(kStructSize, 0);
+  static const List<bindings.StructDataHeader> kVersions = const [
+    const bindings.StructDataHeader(16, 0)
+  ];
   int start = 0;
   int end = 0;
 
-  KeyboardClientSetSelectionParams() : super(kStructSize);
+  KeyboardClientSetSelectionParams() : super(kVersions.last.size);
 
   static KeyboardClientSetSelectionParams deserialize(bindings.Message message) {
     return decode(new bindings.Decoder(message));
@@ -440,15 +520,25 @@ class KeyboardClientSetSelectionParams extends bindings.Struct {
     KeyboardClientSetSelectionParams result = new KeyboardClientSetSelectionParams();
 
     var mainDataHeader = decoder0.decodeStructDataHeader();
-    if ((mainDataHeader.size < kStructSize) ||
-        (mainDataHeader.version < 0)) {
-      throw new bindings.MojoCodecError('Malformed header');
+    if (mainDataHeader.version <= kVersions.last.version) {
+      // Scan in reverse order to optimize for more recent versions.
+      for (int i = kVersions.length - 1; i >= 0; --i) {
+        if (mainDataHeader.version >= kVersions[i].version) {
+          if (mainDataHeader.size != kVersions[i].size)
+            throw new bindings.MojoCodecError(
+                'Header doesn\'t correspond to any known version.');
+        }
+      }
+    } else if (mainDataHeader.size < kVersions.last.size) {
+      throw new bindings.MojoCodecError(
+        'Message newer than the last known version cannot be shorter than '
+        'required by the last known version.');
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.start = decoder0.decodeInt32(8);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.end = decoder0.decodeInt32(12);
     }
@@ -456,7 +546,7 @@ class KeyboardClientSetSelectionParams extends bindings.Struct {
   }
 
   void encode(bindings.Encoder encoder) {
-    var encoder0 = encoder.getStructEncoderAtOffset(kDefaultStructInfo);
+    var encoder0 = encoder.getStructEncoderAtOffset(kVersions.last);
     
     encoder0.encodeInt32(start, 8);
     
@@ -471,12 +561,12 @@ class KeyboardClientSetSelectionParams extends bindings.Struct {
 }
 
 class KeyboardServiceShowParams extends bindings.Struct {
-  static const int kStructSize = 16;
-  static const bindings.StructDataHeader kDefaultStructInfo =
-      const bindings.StructDataHeader(kStructSize, 0);
+  static const List<bindings.StructDataHeader> kVersions = const [
+    const bindings.StructDataHeader(16, 0)
+  ];
   Object client = null;
 
-  KeyboardServiceShowParams() : super(kStructSize);
+  KeyboardServiceShowParams() : super(kVersions.last.size);
 
   static KeyboardServiceShowParams deserialize(bindings.Message message) {
     return decode(new bindings.Decoder(message));
@@ -489,11 +579,21 @@ class KeyboardServiceShowParams extends bindings.Struct {
     KeyboardServiceShowParams result = new KeyboardServiceShowParams();
 
     var mainDataHeader = decoder0.decodeStructDataHeader();
-    if ((mainDataHeader.size < kStructSize) ||
-        (mainDataHeader.version < 0)) {
-      throw new bindings.MojoCodecError('Malformed header');
+    if (mainDataHeader.version <= kVersions.last.version) {
+      // Scan in reverse order to optimize for more recent versions.
+      for (int i = kVersions.length - 1; i >= 0; --i) {
+        if (mainDataHeader.version >= kVersions[i].version) {
+          if (mainDataHeader.size != kVersions[i].size)
+            throw new bindings.MojoCodecError(
+                'Header doesn\'t correspond to any known version.');
+        }
+      }
+    } else if (mainDataHeader.size < kVersions.last.size) {
+      throw new bindings.MojoCodecError(
+        'Message newer than the last known version cannot be shorter than '
+        'required by the last known version.');
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.client = decoder0.decodeServiceInterface(8, false, KeyboardClientProxy.newFromEndpoint);
     }
@@ -501,7 +601,7 @@ class KeyboardServiceShowParams extends bindings.Struct {
   }
 
   void encode(bindings.Encoder encoder) {
-    var encoder0 = encoder.getStructEncoderAtOffset(kDefaultStructInfo);
+    var encoder0 = encoder.getStructEncoderAtOffset(kVersions.last);
     
     encoder0.encodeInterface(client, 8, false);
   }
@@ -513,11 +613,11 @@ class KeyboardServiceShowParams extends bindings.Struct {
 }
 
 class KeyboardServiceHideParams extends bindings.Struct {
-  static const int kStructSize = 8;
-  static const bindings.StructDataHeader kDefaultStructInfo =
-      const bindings.StructDataHeader(kStructSize, 0);
+  static const List<bindings.StructDataHeader> kVersions = const [
+    const bindings.StructDataHeader(8, 0)
+  ];
 
-  KeyboardServiceHideParams() : super(kStructSize);
+  KeyboardServiceHideParams() : super(kVersions.last.size);
 
   static KeyboardServiceHideParams deserialize(bindings.Message message) {
     return decode(new bindings.Decoder(message));
@@ -530,15 +630,25 @@ class KeyboardServiceHideParams extends bindings.Struct {
     KeyboardServiceHideParams result = new KeyboardServiceHideParams();
 
     var mainDataHeader = decoder0.decodeStructDataHeader();
-    if ((mainDataHeader.size < kStructSize) ||
-        (mainDataHeader.version < 0)) {
-      throw new bindings.MojoCodecError('Malformed header');
+    if (mainDataHeader.version <= kVersions.last.version) {
+      // Scan in reverse order to optimize for more recent versions.
+      for (int i = kVersions.length - 1; i >= 0; --i) {
+        if (mainDataHeader.version >= kVersions[i].version) {
+          if (mainDataHeader.size != kVersions[i].size)
+            throw new bindings.MojoCodecError(
+                'Header doesn\'t correspond to any known version.');
+        }
+      }
+    } else if (mainDataHeader.size < kVersions.last.size) {
+      throw new bindings.MojoCodecError(
+        'Message newer than the last known version cannot be shorter than '
+        'required by the last known version.');
     }
     return result;
   }
 
   void encode(bindings.Encoder encoder) {
-    encoder.getStructEncoderAtOffset(kDefaultStructInfo);
+    encoder.getStructEncoderAtOffset(kVersions.last);
   }
 
   String toString() {
@@ -688,7 +798,7 @@ class KeyboardClientProxy implements bindings.ProxyBase {
       core.MojoMessagePipeEndpoint endpoint) =>
       new KeyboardClientProxy.fromEndpoint(endpoint);
 
-  Future close({bool nodefer: false}) => impl.close(nodefer: nodefer);
+  Future close({bool immediate: false}) => impl.close(immediate: immediate);
 
   String toString() {
     return "KeyboardClientProxy($impl)";
@@ -865,7 +975,7 @@ class KeyboardServiceProxy implements bindings.ProxyBase {
       core.MojoMessagePipeEndpoint endpoint) =>
       new KeyboardServiceProxy.fromEndpoint(endpoint);
 
-  Future close({bool nodefer: false}) => impl.close(nodefer: nodefer);
+  Future close({bool immediate: false}) => impl.close(immediate: immediate);
 
   String toString() {
     return "KeyboardServiceProxy($impl)";

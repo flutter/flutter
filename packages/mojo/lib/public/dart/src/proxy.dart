@@ -47,12 +47,12 @@ abstract class Proxy extends core.MojoEventStreamListener {
   }
 
   @override
-  Future close({bool nodefer: false}) {
+  Future close({bool immediate: false}) {
     for (var completer in _completerMap.values) {
       completer.completeError(new ProxyCloseException('Proxy closed'));
     }
     _completerMap.clear();
-    return super.close(nodefer: nodefer);
+    return super.close(immediate: immediate);
   }
 
   void sendMessage(Struct message, int name) {

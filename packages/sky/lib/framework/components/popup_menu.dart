@@ -41,7 +41,7 @@ class PopupMenu extends AnimatedComponent {
     box-sizing: border-box;
     background-color: ${Grey[50]};''');
 
-  List<List<Node>> items;
+  List<List<UINode>> items;
   int level;
   PopupMenuController controller;
 
@@ -82,9 +82,9 @@ class PopupMenu extends AnimatedComponent {
     });
   }
 
-  Node build() {
+  UINode build() {
     int i = 0;
-    List<Node> children = new List.from(items.map((List<Node> item) {
+    List<UINode> children = new List.from(items.map((List<UINode> item) {
       double opacity = _opacityFor(i);
       return new PopupMenuItem(key: i++, children: item, opacity: opacity);
     }));

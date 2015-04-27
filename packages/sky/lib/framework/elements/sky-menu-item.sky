@@ -12,12 +12,14 @@
   <style>
     :host {
       display: flex;
+      flex-direction: row;
       align-items: center;
       height: 48px;
       -webkit-user-select: none;
     }
     #background {
       display: flex;
+      flex-direction: row;
       align-items: center;
       height: 100%;
       flex: 1;

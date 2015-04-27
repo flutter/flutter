@@ -8,13 +8,13 @@ import 'dart:async';
 
 import 'package:mojo/public/dart/bindings.dart' as bindings;
 import 'package:mojo/public/dart/core.dart' as core;
-import 'package:mojo/services/gpu/public/interfaces/gpu_capabilities.mojom.dart' as gpu_capabilities_mojom;
+import 'package:mojo/gpu_capabilities.mojom.dart' as gpu_capabilities_mojom;
 
 
 class CommandBufferState extends bindings.Struct {
-  static const int kStructSize = 40;
-  static const bindings.StructDataHeader kDefaultStructInfo =
-      const bindings.StructDataHeader(kStructSize, 0);
+  static const List<bindings.StructDataHeader> kVersions = const [
+    const bindings.StructDataHeader(40, 0)
+  ];
   int numEntries = 0;
   int getOffset = 0;
   int putOffset = 0;
@@ -23,10 +23,13 @@ class CommandBufferState extends bindings.Struct {
   int contextLostReason = 0;
   int generation = 0;
 
-  CommandBufferState() : super(kStructSize);
+  CommandBufferState() : super(kVersions.last.size);
 
   static CommandBufferState deserialize(bindings.Message message) {
-    return decode(new bindings.Decoder(message));
+    var decoder = new bindings.Decoder(message);
+    var result = decode(decoder);
+    decoder.excessHandles.forEach((h) => h.close());
+    return result;
   }
 
   static CommandBufferState decode(bindings.Decoder decoder0) {
@@ -36,35 +39,45 @@ class CommandBufferState extends bindings.Struct {
     CommandBufferState result = new CommandBufferState();
 
     var mainDataHeader = decoder0.decodeStructDataHeader();
-    if ((mainDataHeader.size < kStructSize) ||
-        (mainDataHeader.version < 0)) {
-      throw new bindings.MojoCodecError('Malformed header');
+    if (mainDataHeader.version <= kVersions.last.version) {
+      // Scan in reverse order to optimize for more recent versions.
+      for (int i = kVersions.length - 1; i >= 0; --i) {
+        if (mainDataHeader.version >= kVersions[i].version) {
+          if (mainDataHeader.size != kVersions[i].size)
+            throw new bindings.MojoCodecError(
+                'Header doesn\'t correspond to any known version.');
+        }
+      }
+    } else if (mainDataHeader.size < kVersions.last.size) {
+      throw new bindings.MojoCodecError(
+        'Message newer than the last known version cannot be shorter than '
+        'required by the last known version.');
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.numEntries = decoder0.decodeInt32(8);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.getOffset = decoder0.decodeInt32(12);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.putOffset = decoder0.decodeInt32(16);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.token = decoder0.decodeInt32(20);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.error = decoder0.decodeInt32(24);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.contextLostReason = decoder0.decodeInt32(28);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.generation = decoder0.decodeUint32(32);
     }
@@ -72,7 +85,7 @@ class CommandBufferState extends bindings.Struct {
   }
 
   void encode(bindings.Encoder encoder) {
-    var encoder0 = encoder.getStructEncoderAtOffset(kDefaultStructInfo);
+    var encoder0 = encoder.getStructEncoderAtOffset(kVersions.last);
     
     encoder0.encodeInt32(numEntries, 8);
     
@@ -102,16 +115,19 @@ class CommandBufferState extends bindings.Struct {
 }
 
 class CommandBufferSyncClientDidInitializeParams extends bindings.Struct {
-  static const int kStructSize = 24;
-  static const bindings.StructDataHeader kDefaultStructInfo =
-      const bindings.StructDataHeader(kStructSize, 0);
+  static const List<bindings.StructDataHeader> kVersions = const [
+    const bindings.StructDataHeader(24, 0)
+  ];
   bool success = false;
   gpu_capabilities_mojom.GpuCapabilities capabilities = null;
 
-  CommandBufferSyncClientDidInitializeParams() : super(kStructSize);
+  CommandBufferSyncClientDidInitializeParams() : super(kVersions.last.size);
 
   static CommandBufferSyncClientDidInitializeParams deserialize(bindings.Message message) {
-    return decode(new bindings.Decoder(message));
+    var decoder = new bindings.Decoder(message);
+    var result = decode(decoder);
+    decoder.excessHandles.forEach((h) => h.close());
+    return result;
   }
 
   static CommandBufferSyncClientDidInitializeParams decode(bindings.Decoder decoder0) {
@@ -121,15 +137,25 @@ class CommandBufferSyncClientDidInitializeParams extends bindings.Struct {
     CommandBufferSyncClientDidInitializeParams result = new CommandBufferSyncClientDidInitializeParams();
 
     var mainDataHeader = decoder0.decodeStructDataHeader();
-    if ((mainDataHeader.size < kStructSize) ||
-        (mainDataHeader.version < 0)) {
-      throw new bindings.MojoCodecError('Malformed header');
+    if (mainDataHeader.version <= kVersions.last.version) {
+      // Scan in reverse order to optimize for more recent versions.
+      for (int i = kVersions.length - 1; i >= 0; --i) {
+        if (mainDataHeader.version >= kVersions[i].version) {
+          if (mainDataHeader.size != kVersions[i].size)
+            throw new bindings.MojoCodecError(
+                'Header doesn\'t correspond to any known version.');
+        }
+      }
+    } else if (mainDataHeader.size < kVersions.last.size) {
+      throw new bindings.MojoCodecError(
+        'Message newer than the last known version cannot be shorter than '
+        'required by the last known version.');
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.success = decoder0.decodeBool(8, 0);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       var decoder1 = decoder0.decodePointer(16, false);
       result.capabilities = gpu_capabilities_mojom.GpuCapabilities.decode(decoder1);
@@ -138,7 +164,7 @@ class CommandBufferSyncClientDidInitializeParams extends bindings.Struct {
   }
 
   void encode(bindings.Encoder encoder) {
-    var encoder0 = encoder.getStructEncoderAtOffset(kDefaultStructInfo);
+    var encoder0 = encoder.getStructEncoderAtOffset(kVersions.last);
     
     encoder0.encodeBool(success, 8, 0);
     
@@ -153,15 +179,18 @@ class CommandBufferSyncClientDidInitializeParams extends bindings.Struct {
 }
 
 class CommandBufferSyncClientDidMakeProgressParams extends bindings.Struct {
-  static const int kStructSize = 16;
-  static const bindings.StructDataHeader kDefaultStructInfo =
-      const bindings.StructDataHeader(kStructSize, 0);
+  static const List<bindings.StructDataHeader> kVersions = const [
+    const bindings.StructDataHeader(16, 0)
+  ];
   CommandBufferState state = null;
 
-  CommandBufferSyncClientDidMakeProgressParams() : super(kStructSize);
+  CommandBufferSyncClientDidMakeProgressParams() : super(kVersions.last.size);
 
   static CommandBufferSyncClientDidMakeProgressParams deserialize(bindings.Message message) {
-    return decode(new bindings.Decoder(message));
+    var decoder = new bindings.Decoder(message);
+    var result = decode(decoder);
+    decoder.excessHandles.forEach((h) => h.close());
+    return result;
   }
 
   static CommandBufferSyncClientDidMakeProgressParams decode(bindings.Decoder decoder0) {
@@ -171,11 +200,21 @@ class CommandBufferSyncClientDidMakeProgressParams extends bindings.Struct {
     CommandBufferSyncClientDidMakeProgressParams result = new CommandBufferSyncClientDidMakeProgressParams();
 
     var mainDataHeader = decoder0.decodeStructDataHeader();
-    if ((mainDataHeader.size < kStructSize) ||
-        (mainDataHeader.version < 0)) {
-      throw new bindings.MojoCodecError('Malformed header');
+    if (mainDataHeader.version <= kVersions.last.version) {
+      // Scan in reverse order to optimize for more recent versions.
+      for (int i = kVersions.length - 1; i >= 0; --i) {
+        if (mainDataHeader.version >= kVersions[i].version) {
+          if (mainDataHeader.size != kVersions[i].size)
+            throw new bindings.MojoCodecError(
+                'Header doesn\'t correspond to any known version.');
+        }
+      }
+    } else if (mainDataHeader.size < kVersions.last.size) {
+      throw new bindings.MojoCodecError(
+        'Message newer than the last known version cannot be shorter than '
+        'required by the last known version.');
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       var decoder1 = decoder0.decodePointer(8, false);
       result.state = CommandBufferState.decode(decoder1);
@@ -184,7 +223,7 @@ class CommandBufferSyncClientDidMakeProgressParams extends bindings.Struct {
   }
 
   void encode(bindings.Encoder encoder) {
-    var encoder0 = encoder.getStructEncoderAtOffset(kDefaultStructInfo);
+    var encoder0 = encoder.getStructEncoderAtOffset(kVersions.last);
     
     encoder0.encodeStruct(state, 8, false);
   }
@@ -196,15 +235,18 @@ class CommandBufferSyncClientDidMakeProgressParams extends bindings.Struct {
 }
 
 class CommandBufferSyncPointClientDidInsertSyncPointParams extends bindings.Struct {
-  static const int kStructSize = 16;
-  static const bindings.StructDataHeader kDefaultStructInfo =
-      const bindings.StructDataHeader(kStructSize, 0);
+  static const List<bindings.StructDataHeader> kVersions = const [
+    const bindings.StructDataHeader(16, 0)
+  ];
   int syncPoint = 0;
 
-  CommandBufferSyncPointClientDidInsertSyncPointParams() : super(kStructSize);
+  CommandBufferSyncPointClientDidInsertSyncPointParams() : super(kVersions.last.size);
 
   static CommandBufferSyncPointClientDidInsertSyncPointParams deserialize(bindings.Message message) {
-    return decode(new bindings.Decoder(message));
+    var decoder = new bindings.Decoder(message);
+    var result = decode(decoder);
+    decoder.excessHandles.forEach((h) => h.close());
+    return result;
   }
 
   static CommandBufferSyncPointClientDidInsertSyncPointParams decode(bindings.Decoder decoder0) {
@@ -214,11 +256,21 @@ class CommandBufferSyncPointClientDidInsertSyncPointParams extends bindings.Stru
     CommandBufferSyncPointClientDidInsertSyncPointParams result = new CommandBufferSyncPointClientDidInsertSyncPointParams();
 
     var mainDataHeader = decoder0.decodeStructDataHeader();
-    if ((mainDataHeader.size < kStructSize) ||
-        (mainDataHeader.version < 0)) {
-      throw new bindings.MojoCodecError('Malformed header');
+    if (mainDataHeader.version <= kVersions.last.version) {
+      // Scan in reverse order to optimize for more recent versions.
+      for (int i = kVersions.length - 1; i >= 0; --i) {
+        if (mainDataHeader.version >= kVersions[i].version) {
+          if (mainDataHeader.size != kVersions[i].size)
+            throw new bindings.MojoCodecError(
+                'Header doesn\'t correspond to any known version.');
+        }
+      }
+    } else if (mainDataHeader.size < kVersions.last.size) {
+      throw new bindings.MojoCodecError(
+        'Message newer than the last known version cannot be shorter than '
+        'required by the last known version.');
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.syncPoint = decoder0.decodeUint32(8);
     }
@@ -226,7 +278,7 @@ class CommandBufferSyncPointClientDidInsertSyncPointParams extends bindings.Stru
   }
 
   void encode(bindings.Encoder encoder) {
-    var encoder0 = encoder.getStructEncoderAtOffset(kDefaultStructInfo);
+    var encoder0 = encoder.getStructEncoderAtOffset(kVersions.last);
     
     encoder0.encodeUint32(syncPoint, 8);
   }
@@ -238,15 +290,18 @@ class CommandBufferSyncPointClientDidInsertSyncPointParams extends bindings.Stru
 }
 
 class CommandBufferLostContextObserverDidLoseContextParams extends bindings.Struct {
-  static const int kStructSize = 16;
-  static const bindings.StructDataHeader kDefaultStructInfo =
-      const bindings.StructDataHeader(kStructSize, 0);
+  static const List<bindings.StructDataHeader> kVersions = const [
+    const bindings.StructDataHeader(16, 0)
+  ];
   int contextLostReason = 0;
 
-  CommandBufferLostContextObserverDidLoseContextParams() : super(kStructSize);
+  CommandBufferLostContextObserverDidLoseContextParams() : super(kVersions.last.size);
 
   static CommandBufferLostContextObserverDidLoseContextParams deserialize(bindings.Message message) {
-    return decode(new bindings.Decoder(message));
+    var decoder = new bindings.Decoder(message);
+    var result = decode(decoder);
+    decoder.excessHandles.forEach((h) => h.close());
+    return result;
   }
 
   static CommandBufferLostContextObserverDidLoseContextParams decode(bindings.Decoder decoder0) {
@@ -256,11 +311,21 @@ class CommandBufferLostContextObserverDidLoseContextParams extends bindings.Stru
     CommandBufferLostContextObserverDidLoseContextParams result = new CommandBufferLostContextObserverDidLoseContextParams();
 
     var mainDataHeader = decoder0.decodeStructDataHeader();
-    if ((mainDataHeader.size < kStructSize) ||
-        (mainDataHeader.version < 0)) {
-      throw new bindings.MojoCodecError('Malformed header');
+    if (mainDataHeader.version <= kVersions.last.version) {
+      // Scan in reverse order to optimize for more recent versions.
+      for (int i = kVersions.length - 1; i >= 0; --i) {
+        if (mainDataHeader.version >= kVersions[i].version) {
+          if (mainDataHeader.size != kVersions[i].size)
+            throw new bindings.MojoCodecError(
+                'Header doesn\'t correspond to any known version.');
+        }
+      }
+    } else if (mainDataHeader.size < kVersions.last.size) {
+      throw new bindings.MojoCodecError(
+        'Message newer than the last known version cannot be shorter than '
+        'required by the last known version.');
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.contextLostReason = decoder0.decodeInt32(8);
     }
@@ -268,7 +333,7 @@ class CommandBufferLostContextObserverDidLoseContextParams extends bindings.Stru
   }
 
   void encode(bindings.Encoder encoder) {
-    var encoder0 = encoder.getStructEncoderAtOffset(kDefaultStructInfo);
+    var encoder0 = encoder.getStructEncoderAtOffset(kVersions.last);
     
     encoder0.encodeInt32(contextLostReason, 8);
   }
@@ -280,18 +345,21 @@ class CommandBufferLostContextObserverDidLoseContextParams extends bindings.Stru
 }
 
 class CommandBufferInitializeParams extends bindings.Struct {
-  static const int kStructSize = 24;
-  static const bindings.StructDataHeader kDefaultStructInfo =
-      const bindings.StructDataHeader(kStructSize, 0);
+  static const List<bindings.StructDataHeader> kVersions = const [
+    const bindings.StructDataHeader(40, 0)
+  ];
   Object syncClient = null;
   Object syncPointClient = null;
   Object lostObserver = null;
   core.MojoSharedBuffer sharedState = null;
 
-  CommandBufferInitializeParams() : super(kStructSize);
+  CommandBufferInitializeParams() : super(kVersions.last.size);
 
   static CommandBufferInitializeParams deserialize(bindings.Message message) {
-    return decode(new bindings.Decoder(message));
+    var decoder = new bindings.Decoder(message);
+    var result = decode(decoder);
+    decoder.excessHandles.forEach((h) => h.close());
+    return result;
   }
 
   static CommandBufferInitializeParams decode(bindings.Decoder decoder0) {
@@ -301,39 +369,49 @@ class CommandBufferInitializeParams extends bindings.Struct {
     CommandBufferInitializeParams result = new CommandBufferInitializeParams();
 
     var mainDataHeader = decoder0.decodeStructDataHeader();
-    if ((mainDataHeader.size < kStructSize) ||
-        (mainDataHeader.version < 0)) {
-      throw new bindings.MojoCodecError('Malformed header');
+    if (mainDataHeader.version <= kVersions.last.version) {
+      // Scan in reverse order to optimize for more recent versions.
+      for (int i = kVersions.length - 1; i >= 0; --i) {
+        if (mainDataHeader.version >= kVersions[i].version) {
+          if (mainDataHeader.size != kVersions[i].size)
+            throw new bindings.MojoCodecError(
+                'Header doesn\'t correspond to any known version.');
+        }
+      }
+    } else if (mainDataHeader.size < kVersions.last.size) {
+      throw new bindings.MojoCodecError(
+        'Message newer than the last known version cannot be shorter than '
+        'required by the last known version.');
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.syncClient = decoder0.decodeServiceInterface(8, false, CommandBufferSyncClientProxy.newFromEndpoint);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
-      result.syncPointClient = decoder0.decodeServiceInterface(12, false, CommandBufferSyncPointClientProxy.newFromEndpoint);
+      result.syncPointClient = decoder0.decodeServiceInterface(16, false, CommandBufferSyncPointClientProxy.newFromEndpoint);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
-      result.lostObserver = decoder0.decodeServiceInterface(16, false, CommandBufferLostContextObserverProxy.newFromEndpoint);
+      result.lostObserver = decoder0.decodeServiceInterface(24, false, CommandBufferLostContextObserverProxy.newFromEndpoint);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
-      result.sharedState = decoder0.decodeSharedBufferHandle(20, false);
+      result.sharedState = decoder0.decodeSharedBufferHandle(32, false);
     }
     return result;
   }
 
   void encode(bindings.Encoder encoder) {
-    var encoder0 = encoder.getStructEncoderAtOffset(kDefaultStructInfo);
+    var encoder0 = encoder.getStructEncoderAtOffset(kVersions.last);
     
     encoder0.encodeInterface(syncClient, 8, false);
     
-    encoder0.encodeInterface(syncPointClient, 12, false);
+    encoder0.encodeInterface(syncPointClient, 16, false);
     
-    encoder0.encodeInterface(lostObserver, 16, false);
+    encoder0.encodeInterface(lostObserver, 24, false);
     
-    encoder0.encodeSharedBufferHandle(sharedState, 20, false);
+    encoder0.encodeSharedBufferHandle(sharedState, 32, false);
   }
 
   String toString() {
@@ -346,15 +424,18 @@ class CommandBufferInitializeParams extends bindings.Struct {
 }
 
 class CommandBufferSetGetBufferParams extends bindings.Struct {
-  static const int kStructSize = 16;
-  static const bindings.StructDataHeader kDefaultStructInfo =
-      const bindings.StructDataHeader(kStructSize, 0);
+  static const List<bindings.StructDataHeader> kVersions = const [
+    const bindings.StructDataHeader(16, 0)
+  ];
   int buffer = 0;
 
-  CommandBufferSetGetBufferParams() : super(kStructSize);
+  CommandBufferSetGetBufferParams() : super(kVersions.last.size);
 
   static CommandBufferSetGetBufferParams deserialize(bindings.Message message) {
-    return decode(new bindings.Decoder(message));
+    var decoder = new bindings.Decoder(message);
+    var result = decode(decoder);
+    decoder.excessHandles.forEach((h) => h.close());
+    return result;
   }
 
   static CommandBufferSetGetBufferParams decode(bindings.Decoder decoder0) {
@@ -364,11 +445,21 @@ class CommandBufferSetGetBufferParams extends bindings.Struct {
     CommandBufferSetGetBufferParams result = new CommandBufferSetGetBufferParams();
 
     var mainDataHeader = decoder0.decodeStructDataHeader();
-    if ((mainDataHeader.size < kStructSize) ||
-        (mainDataHeader.version < 0)) {
-      throw new bindings.MojoCodecError('Malformed header');
+    if (mainDataHeader.version <= kVersions.last.version) {
+      // Scan in reverse order to optimize for more recent versions.
+      for (int i = kVersions.length - 1; i >= 0; --i) {
+        if (mainDataHeader.version >= kVersions[i].version) {
+          if (mainDataHeader.size != kVersions[i].size)
+            throw new bindings.MojoCodecError(
+                'Header doesn\'t correspond to any known version.');
+        }
+      }
+    } else if (mainDataHeader.size < kVersions.last.size) {
+      throw new bindings.MojoCodecError(
+        'Message newer than the last known version cannot be shorter than '
+        'required by the last known version.');
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.buffer = decoder0.decodeInt32(8);
     }
@@ -376,7 +467,7 @@ class CommandBufferSetGetBufferParams extends bindings.Struct {
   }
 
   void encode(bindings.Encoder encoder) {
-    var encoder0 = encoder.getStructEncoderAtOffset(kDefaultStructInfo);
+    var encoder0 = encoder.getStructEncoderAtOffset(kVersions.last);
     
     encoder0.encodeInt32(buffer, 8);
   }
@@ -388,15 +479,18 @@ class CommandBufferSetGetBufferParams extends bindings.Struct {
 }
 
 class CommandBufferFlushParams extends bindings.Struct {
-  static const int kStructSize = 16;
-  static const bindings.StructDataHeader kDefaultStructInfo =
-      const bindings.StructDataHeader(kStructSize, 0);
+  static const List<bindings.StructDataHeader> kVersions = const [
+    const bindings.StructDataHeader(16, 0)
+  ];
   int putOffset = 0;
 
-  CommandBufferFlushParams() : super(kStructSize);
+  CommandBufferFlushParams() : super(kVersions.last.size);
 
   static CommandBufferFlushParams deserialize(bindings.Message message) {
-    return decode(new bindings.Decoder(message));
+    var decoder = new bindings.Decoder(message);
+    var result = decode(decoder);
+    decoder.excessHandles.forEach((h) => h.close());
+    return result;
   }
 
   static CommandBufferFlushParams decode(bindings.Decoder decoder0) {
@@ -406,11 +500,21 @@ class CommandBufferFlushParams extends bindings.Struct {
     CommandBufferFlushParams result = new CommandBufferFlushParams();
 
     var mainDataHeader = decoder0.decodeStructDataHeader();
-    if ((mainDataHeader.size < kStructSize) ||
-        (mainDataHeader.version < 0)) {
-      throw new bindings.MojoCodecError('Malformed header');
+    if (mainDataHeader.version <= kVersions.last.version) {
+      // Scan in reverse order to optimize for more recent versions.
+      for (int i = kVersions.length - 1; i >= 0; --i) {
+        if (mainDataHeader.version >= kVersions[i].version) {
+          if (mainDataHeader.size != kVersions[i].size)
+            throw new bindings.MojoCodecError(
+                'Header doesn\'t correspond to any known version.');
+        }
+      }
+    } else if (mainDataHeader.size < kVersions.last.size) {
+      throw new bindings.MojoCodecError(
+        'Message newer than the last known version cannot be shorter than '
+        'required by the last known version.');
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.putOffset = decoder0.decodeInt32(8);
     }
@@ -418,7 +522,7 @@ class CommandBufferFlushParams extends bindings.Struct {
   }
 
   void encode(bindings.Encoder encoder) {
-    var encoder0 = encoder.getStructEncoderAtOffset(kDefaultStructInfo);
+    var encoder0 = encoder.getStructEncoderAtOffset(kVersions.last);
     
     encoder0.encodeInt32(putOffset, 8);
   }
@@ -430,15 +534,18 @@ class CommandBufferFlushParams extends bindings.Struct {
 }
 
 class CommandBufferMakeProgressParams extends bindings.Struct {
-  static const int kStructSize = 16;
-  static const bindings.StructDataHeader kDefaultStructInfo =
-      const bindings.StructDataHeader(kStructSize, 0);
+  static const List<bindings.StructDataHeader> kVersions = const [
+    const bindings.StructDataHeader(16, 0)
+  ];
   int lastGetOffset = 0;
 
-  CommandBufferMakeProgressParams() : super(kStructSize);
+  CommandBufferMakeProgressParams() : super(kVersions.last.size);
 
   static CommandBufferMakeProgressParams deserialize(bindings.Message message) {
-    return decode(new bindings.Decoder(message));
+    var decoder = new bindings.Decoder(message);
+    var result = decode(decoder);
+    decoder.excessHandles.forEach((h) => h.close());
+    return result;
   }
 
   static CommandBufferMakeProgressParams decode(bindings.Decoder decoder0) {
@@ -448,11 +555,21 @@ class CommandBufferMakeProgressParams extends bindings.Struct {
     CommandBufferMakeProgressParams result = new CommandBufferMakeProgressParams();
 
     var mainDataHeader = decoder0.decodeStructDataHeader();
-    if ((mainDataHeader.size < kStructSize) ||
-        (mainDataHeader.version < 0)) {
-      throw new bindings.MojoCodecError('Malformed header');
+    if (mainDataHeader.version <= kVersions.last.version) {
+      // Scan in reverse order to optimize for more recent versions.
+      for (int i = kVersions.length - 1; i >= 0; --i) {
+        if (mainDataHeader.version >= kVersions[i].version) {
+          if (mainDataHeader.size != kVersions[i].size)
+            throw new bindings.MojoCodecError(
+                'Header doesn\'t correspond to any known version.');
+        }
+      }
+    } else if (mainDataHeader.size < kVersions.last.size) {
+      throw new bindings.MojoCodecError(
+        'Message newer than the last known version cannot be shorter than '
+        'required by the last known version.');
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.lastGetOffset = decoder0.decodeInt32(8);
     }
@@ -460,7 +577,7 @@ class CommandBufferMakeProgressParams extends bindings.Struct {
   }
 
   void encode(bindings.Encoder encoder) {
-    var encoder0 = encoder.getStructEncoderAtOffset(kDefaultStructInfo);
+    var encoder0 = encoder.getStructEncoderAtOffset(kVersions.last);
     
     encoder0.encodeInt32(lastGetOffset, 8);
   }
@@ -472,17 +589,20 @@ class CommandBufferMakeProgressParams extends bindings.Struct {
 }
 
 class CommandBufferRegisterTransferBufferParams extends bindings.Struct {
-  static const int kStructSize = 24;
-  static const bindings.StructDataHeader kDefaultStructInfo =
-      const bindings.StructDataHeader(kStructSize, 0);
+  static const List<bindings.StructDataHeader> kVersions = const [
+    const bindings.StructDataHeader(24, 0)
+  ];
   int id = 0;
   core.MojoSharedBuffer transferBuffer = null;
   int size = 0;
 
-  CommandBufferRegisterTransferBufferParams() : super(kStructSize);
+  CommandBufferRegisterTransferBufferParams() : super(kVersions.last.size);
 
   static CommandBufferRegisterTransferBufferParams deserialize(bindings.Message message) {
-    return decode(new bindings.Decoder(message));
+    var decoder = new bindings.Decoder(message);
+    var result = decode(decoder);
+    decoder.excessHandles.forEach((h) => h.close());
+    return result;
   }
 
   static CommandBufferRegisterTransferBufferParams decode(bindings.Decoder decoder0) {
@@ -492,19 +612,29 @@ class CommandBufferRegisterTransferBufferParams extends bindings.Struct {
     CommandBufferRegisterTransferBufferParams result = new CommandBufferRegisterTransferBufferParams();
 
     var mainDataHeader = decoder0.decodeStructDataHeader();
-    if ((mainDataHeader.size < kStructSize) ||
-        (mainDataHeader.version < 0)) {
-      throw new bindings.MojoCodecError('Malformed header');
+    if (mainDataHeader.version <= kVersions.last.version) {
+      // Scan in reverse order to optimize for more recent versions.
+      for (int i = kVersions.length - 1; i >= 0; --i) {
+        if (mainDataHeader.version >= kVersions[i].version) {
+          if (mainDataHeader.size != kVersions[i].size)
+            throw new bindings.MojoCodecError(
+                'Header doesn\'t correspond to any known version.');
+        }
+      }
+    } else if (mainDataHeader.size < kVersions.last.size) {
+      throw new bindings.MojoCodecError(
+        'Message newer than the last known version cannot be shorter than '
+        'required by the last known version.');
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.id = decoder0.decodeInt32(8);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.transferBuffer = decoder0.decodeSharedBufferHandle(12, false);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.size = decoder0.decodeUint32(16);
     }
@@ -512,7 +642,7 @@ class CommandBufferRegisterTransferBufferParams extends bindings.Struct {
   }
 
   void encode(bindings.Encoder encoder) {
-    var encoder0 = encoder.getStructEncoderAtOffset(kDefaultStructInfo);
+    var encoder0 = encoder.getStructEncoderAtOffset(kVersions.last);
     
     encoder0.encodeInt32(id, 8);
     
@@ -530,15 +660,18 @@ class CommandBufferRegisterTransferBufferParams extends bindings.Struct {
 }
 
 class CommandBufferDestroyTransferBufferParams extends bindings.Struct {
-  static const int kStructSize = 16;
-  static const bindings.StructDataHeader kDefaultStructInfo =
-      const bindings.StructDataHeader(kStructSize, 0);
+  static const List<bindings.StructDataHeader> kVersions = const [
+    const bindings.StructDataHeader(16, 0)
+  ];
   int id = 0;
 
-  CommandBufferDestroyTransferBufferParams() : super(kStructSize);
+  CommandBufferDestroyTransferBufferParams() : super(kVersions.last.size);
 
   static CommandBufferDestroyTransferBufferParams deserialize(bindings.Message message) {
-    return decode(new bindings.Decoder(message));
+    var decoder = new bindings.Decoder(message);
+    var result = decode(decoder);
+    decoder.excessHandles.forEach((h) => h.close());
+    return result;
   }
 
   static CommandBufferDestroyTransferBufferParams decode(bindings.Decoder decoder0) {
@@ -548,11 +681,21 @@ class CommandBufferDestroyTransferBufferParams extends bindings.Struct {
     CommandBufferDestroyTransferBufferParams result = new CommandBufferDestroyTransferBufferParams();
 
     var mainDataHeader = decoder0.decodeStructDataHeader();
-    if ((mainDataHeader.size < kStructSize) ||
-        (mainDataHeader.version < 0)) {
-      throw new bindings.MojoCodecError('Malformed header');
+    if (mainDataHeader.version <= kVersions.last.version) {
+      // Scan in reverse order to optimize for more recent versions.
+      for (int i = kVersions.length - 1; i >= 0; --i) {
+        if (mainDataHeader.version >= kVersions[i].version) {
+          if (mainDataHeader.size != kVersions[i].size)
+            throw new bindings.MojoCodecError(
+                'Header doesn\'t correspond to any known version.');
+        }
+      }
+    } else if (mainDataHeader.size < kVersions.last.size) {
+      throw new bindings.MojoCodecError(
+        'Message newer than the last known version cannot be shorter than '
+        'required by the last known version.');
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.id = decoder0.decodeInt32(8);
     }
@@ -560,7 +703,7 @@ class CommandBufferDestroyTransferBufferParams extends bindings.Struct {
   }
 
   void encode(bindings.Encoder encoder) {
-    var encoder0 = encoder.getStructEncoderAtOffset(kDefaultStructInfo);
+    var encoder0 = encoder.getStructEncoderAtOffset(kVersions.last);
     
     encoder0.encodeInt32(id, 8);
   }
@@ -572,15 +715,18 @@ class CommandBufferDestroyTransferBufferParams extends bindings.Struct {
 }
 
 class CommandBufferInsertSyncPointParams extends bindings.Struct {
-  static const int kStructSize = 16;
-  static const bindings.StructDataHeader kDefaultStructInfo =
-      const bindings.StructDataHeader(kStructSize, 0);
+  static const List<bindings.StructDataHeader> kVersions = const [
+    const bindings.StructDataHeader(16, 0)
+  ];
   bool retire = false;
 
-  CommandBufferInsertSyncPointParams() : super(kStructSize);
+  CommandBufferInsertSyncPointParams() : super(kVersions.last.size);
 
   static CommandBufferInsertSyncPointParams deserialize(bindings.Message message) {
-    return decode(new bindings.Decoder(message));
+    var decoder = new bindings.Decoder(message);
+    var result = decode(decoder);
+    decoder.excessHandles.forEach((h) => h.close());
+    return result;
   }
 
   static CommandBufferInsertSyncPointParams decode(bindings.Decoder decoder0) {
@@ -590,11 +736,21 @@ class CommandBufferInsertSyncPointParams extends bindings.Struct {
     CommandBufferInsertSyncPointParams result = new CommandBufferInsertSyncPointParams();
 
     var mainDataHeader = decoder0.decodeStructDataHeader();
-    if ((mainDataHeader.size < kStructSize) ||
-        (mainDataHeader.version < 0)) {
-      throw new bindings.MojoCodecError('Malformed header');
+    if (mainDataHeader.version <= kVersions.last.version) {
+      // Scan in reverse order to optimize for more recent versions.
+      for (int i = kVersions.length - 1; i >= 0; --i) {
+        if (mainDataHeader.version >= kVersions[i].version) {
+          if (mainDataHeader.size != kVersions[i].size)
+            throw new bindings.MojoCodecError(
+                'Header doesn\'t correspond to any known version.');
+        }
+      }
+    } else if (mainDataHeader.size < kVersions.last.size) {
+      throw new bindings.MojoCodecError(
+        'Message newer than the last known version cannot be shorter than '
+        'required by the last known version.');
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.retire = decoder0.decodeBool(8, 0);
     }
@@ -602,7 +758,7 @@ class CommandBufferInsertSyncPointParams extends bindings.Struct {
   }
 
   void encode(bindings.Encoder encoder) {
-    var encoder0 = encoder.getStructEncoderAtOffset(kDefaultStructInfo);
+    var encoder0 = encoder.getStructEncoderAtOffset(kVersions.last);
     
     encoder0.encodeBool(retire, 8, 0);
   }
@@ -614,15 +770,18 @@ class CommandBufferInsertSyncPointParams extends bindings.Struct {
 }
 
 class CommandBufferRetireSyncPointParams extends bindings.Struct {
-  static const int kStructSize = 16;
-  static const bindings.StructDataHeader kDefaultStructInfo =
-      const bindings.StructDataHeader(kStructSize, 0);
+  static const List<bindings.StructDataHeader> kVersions = const [
+    const bindings.StructDataHeader(16, 0)
+  ];
   int syncPoint = 0;
 
-  CommandBufferRetireSyncPointParams() : super(kStructSize);
+  CommandBufferRetireSyncPointParams() : super(kVersions.last.size);
 
   static CommandBufferRetireSyncPointParams deserialize(bindings.Message message) {
-    return decode(new bindings.Decoder(message));
+    var decoder = new bindings.Decoder(message);
+    var result = decode(decoder);
+    decoder.excessHandles.forEach((h) => h.close());
+    return result;
   }
 
   static CommandBufferRetireSyncPointParams decode(bindings.Decoder decoder0) {
@@ -632,11 +791,21 @@ class CommandBufferRetireSyncPointParams extends bindings.Struct {
     CommandBufferRetireSyncPointParams result = new CommandBufferRetireSyncPointParams();
 
     var mainDataHeader = decoder0.decodeStructDataHeader();
-    if ((mainDataHeader.size < kStructSize) ||
-        (mainDataHeader.version < 0)) {
-      throw new bindings.MojoCodecError('Malformed header');
+    if (mainDataHeader.version <= kVersions.last.version) {
+      // Scan in reverse order to optimize for more recent versions.
+      for (int i = kVersions.length - 1; i >= 0; --i) {
+        if (mainDataHeader.version >= kVersions[i].version) {
+          if (mainDataHeader.size != kVersions[i].size)
+            throw new bindings.MojoCodecError(
+                'Header doesn\'t correspond to any known version.');
+        }
+      }
+    } else if (mainDataHeader.size < kVersions.last.size) {
+      throw new bindings.MojoCodecError(
+        'Message newer than the last known version cannot be shorter than '
+        'required by the last known version.');
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.syncPoint = decoder0.decodeUint32(8);
     }
@@ -644,7 +813,7 @@ class CommandBufferRetireSyncPointParams extends bindings.Struct {
   }
 
   void encode(bindings.Encoder encoder) {
-    var encoder0 = encoder.getStructEncoderAtOffset(kDefaultStructInfo);
+    var encoder0 = encoder.getStructEncoderAtOffset(kVersions.last);
     
     encoder0.encodeUint32(syncPoint, 8);
   }
@@ -656,14 +825,17 @@ class CommandBufferRetireSyncPointParams extends bindings.Struct {
 }
 
 class CommandBufferEchoParams extends bindings.Struct {
-  static const int kStructSize = 8;
-  static const bindings.StructDataHeader kDefaultStructInfo =
-      const bindings.StructDataHeader(kStructSize, 0);
+  static const List<bindings.StructDataHeader> kVersions = const [
+    const bindings.StructDataHeader(8, 0)
+  ];
 
-  CommandBufferEchoParams() : super(kStructSize);
+  CommandBufferEchoParams() : super(kVersions.last.size);
 
   static CommandBufferEchoParams deserialize(bindings.Message message) {
-    return decode(new bindings.Decoder(message));
+    var decoder = new bindings.Decoder(message);
+    var result = decode(decoder);
+    decoder.excessHandles.forEach((h) => h.close());
+    return result;
   }
 
   static CommandBufferEchoParams decode(bindings.Decoder decoder0) {
@@ -673,15 +845,25 @@ class CommandBufferEchoParams extends bindings.Struct {
     CommandBufferEchoParams result = new CommandBufferEchoParams();
 
     var mainDataHeader = decoder0.decodeStructDataHeader();
-    if ((mainDataHeader.size < kStructSize) ||
-        (mainDataHeader.version < 0)) {
-      throw new bindings.MojoCodecError('Malformed header');
+    if (mainDataHeader.version <= kVersions.last.version) {
+      // Scan in reverse order to optimize for more recent versions.
+      for (int i = kVersions.length - 1; i >= 0; --i) {
+        if (mainDataHeader.version >= kVersions[i].version) {
+          if (mainDataHeader.size != kVersions[i].size)
+            throw new bindings.MojoCodecError(
+                'Header doesn\'t correspond to any known version.');
+        }
+      }
+    } else if (mainDataHeader.size < kVersions.last.size) {
+      throw new bindings.MojoCodecError(
+        'Message newer than the last known version cannot be shorter than '
+        'required by the last known version.');
     }
     return result;
   }
 
   void encode(bindings.Encoder encoder) {
-    encoder.getStructEncoderAtOffset(kDefaultStructInfo);
+    encoder.getStructEncoderAtOffset(kVersions.last);
   }
 
   String toString() {
@@ -690,14 +872,17 @@ class CommandBufferEchoParams extends bindings.Struct {
 }
 
 class CommandBufferEchoResponseParams extends bindings.Struct {
-  static const int kStructSize = 8;
-  static const bindings.StructDataHeader kDefaultStructInfo =
-      const bindings.StructDataHeader(kStructSize, 0);
+  static const List<bindings.StructDataHeader> kVersions = const [
+    const bindings.StructDataHeader(8, 0)
+  ];
 
-  CommandBufferEchoResponseParams() : super(kStructSize);
+  CommandBufferEchoResponseParams() : super(kVersions.last.size);
 
   static CommandBufferEchoResponseParams deserialize(bindings.Message message) {
-    return decode(new bindings.Decoder(message));
+    var decoder = new bindings.Decoder(message);
+    var result = decode(decoder);
+    decoder.excessHandles.forEach((h) => h.close());
+    return result;
   }
 
   static CommandBufferEchoResponseParams decode(bindings.Decoder decoder0) {
@@ -707,15 +892,25 @@ class CommandBufferEchoResponseParams extends bindings.Struct {
     CommandBufferEchoResponseParams result = new CommandBufferEchoResponseParams();
 
     var mainDataHeader = decoder0.decodeStructDataHeader();
-    if ((mainDataHeader.size < kStructSize) ||
-        (mainDataHeader.version < 0)) {
-      throw new bindings.MojoCodecError('Malformed header');
+    if (mainDataHeader.version <= kVersions.last.version) {
+      // Scan in reverse order to optimize for more recent versions.
+      for (int i = kVersions.length - 1; i >= 0; --i) {
+        if (mainDataHeader.version >= kVersions[i].version) {
+          if (mainDataHeader.size != kVersions[i].size)
+            throw new bindings.MojoCodecError(
+                'Header doesn\'t correspond to any known version.');
+        }
+      }
+    } else if (mainDataHeader.size < kVersions.last.size) {
+      throw new bindings.MojoCodecError(
+        'Message newer than the last known version cannot be shorter than '
+        'required by the last known version.');
     }
     return result;
   }
 
   void encode(bindings.Encoder encoder) {
-    encoder.getStructEncoderAtOffset(kDefaultStructInfo);
+    encoder.getStructEncoderAtOffset(kVersions.last);
   }
 
   String toString() {
@@ -816,7 +1011,7 @@ class CommandBufferSyncClientProxy implements bindings.ProxyBase {
       core.MojoMessagePipeEndpoint endpoint) =>
       new CommandBufferSyncClientProxy.fromEndpoint(endpoint);
 
-  Future close({bool nodefer: false}) => impl.close(nodefer: nodefer);
+  Future close({bool immediate: false}) => impl.close(immediate: immediate);
 
   String toString() {
     return "CommandBufferSyncClientProxy($impl)";
@@ -960,7 +1155,7 @@ class CommandBufferSyncPointClientProxy implements bindings.ProxyBase {
       core.MojoMessagePipeEndpoint endpoint) =>
       new CommandBufferSyncPointClientProxy.fromEndpoint(endpoint);
 
-  Future close({bool nodefer: false}) => impl.close(nodefer: nodefer);
+  Future close({bool immediate: false}) => impl.close(immediate: immediate);
 
   String toString() {
     return "CommandBufferSyncPointClientProxy($impl)";
@@ -1099,7 +1294,7 @@ class CommandBufferLostContextObserverProxy implements bindings.ProxyBase {
       core.MojoMessagePipeEndpoint endpoint) =>
       new CommandBufferLostContextObserverProxy.fromEndpoint(endpoint);
 
-  Future close({bool nodefer: false}) => impl.close(nodefer: nodefer);
+  Future close({bool immediate: false}) => impl.close(immediate: immediate);
 
   String toString() {
     return "CommandBufferLostContextObserverProxy($impl)";
@@ -1331,7 +1526,7 @@ class CommandBufferProxy implements bindings.ProxyBase {
       core.MojoMessagePipeEndpoint endpoint) =>
       new CommandBufferProxy.fromEndpoint(endpoint);
 
-  Future close({bool nodefer: false}) => impl.close(nodefer: nodefer);
+  Future close({bool immediate: false}) => impl.close(immediate: immediate);
 
   String toString() {
     return "CommandBufferProxy($impl)";

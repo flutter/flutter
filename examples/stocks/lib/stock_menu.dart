@@ -16,7 +16,7 @@ class StockMenu extends Component {
 
   StockMenu({Object key, this.controller}) : super(key: key);
 
-  Node build() {
+  UINode build() {
     return new StyleNode(
       new PopupMenu(
         controller: controller,

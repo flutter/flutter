@@ -11,17 +11,20 @@ import 'package:mojo/public/dart/core.dart' as core;
 
 
 class GpuShaderPrecision extends bindings.Struct {
-  static const int kStructSize = 24;
-  static const bindings.StructDataHeader kDefaultStructInfo =
-      const bindings.StructDataHeader(kStructSize, 0);
+  static const List<bindings.StructDataHeader> kVersions = const [
+    const bindings.StructDataHeader(24, 0)
+  ];
   int minRange = 0;
   int maxRange = 0;
   int precision = 0;
 
-  GpuShaderPrecision() : super(kStructSize);
+  GpuShaderPrecision() : super(kVersions.last.size);
 
   static GpuShaderPrecision deserialize(bindings.Message message) {
-    return decode(new bindings.Decoder(message));
+    var decoder = new bindings.Decoder(message);
+    var result = decode(decoder);
+    decoder.excessHandles.forEach((h) => h.close());
+    return result;
   }
 
   static GpuShaderPrecision decode(bindings.Decoder decoder0) {
@@ -31,19 +34,29 @@ class GpuShaderPrecision extends bindings.Struct {
     GpuShaderPrecision result = new GpuShaderPrecision();
 
     var mainDataHeader = decoder0.decodeStructDataHeader();
-    if ((mainDataHeader.size < kStructSize) ||
-        (mainDataHeader.version < 0)) {
-      throw new bindings.MojoCodecError('Malformed header');
+    if (mainDataHeader.version <= kVersions.last.version) {
+      // Scan in reverse order to optimize for more recent versions.
+      for (int i = kVersions.length - 1; i >= 0; --i) {
+        if (mainDataHeader.version >= kVersions[i].version) {
+          if (mainDataHeader.size != kVersions[i].size)
+            throw new bindings.MojoCodecError(
+                'Header doesn\'t correspond to any known version.');
+        }
+      }
+    } else if (mainDataHeader.size < kVersions.last.size) {
+      throw new bindings.MojoCodecError(
+        'Message newer than the last known version cannot be shorter than '
+        'required by the last known version.');
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.minRange = decoder0.decodeInt32(8);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.maxRange = decoder0.decodeInt32(12);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.precision = decoder0.decodeInt32(16);
     }
@@ -51,7 +64,7 @@ class GpuShaderPrecision extends bindings.Struct {
   }
 
   void encode(bindings.Encoder encoder) {
-    var encoder0 = encoder.getStructEncoderAtOffset(kDefaultStructInfo);
+    var encoder0 = encoder.getStructEncoderAtOffset(kVersions.last);
     
     encoder0.encodeInt32(minRange, 8);
     
@@ -69,9 +82,9 @@ class GpuShaderPrecision extends bindings.Struct {
 }
 
 class GpuPerStagePrecisions extends bindings.Struct {
-  static const int kStructSize = 56;
-  static const bindings.StructDataHeader kDefaultStructInfo =
-      const bindings.StructDataHeader(kStructSize, 0);
+  static const List<bindings.StructDataHeader> kVersions = const [
+    const bindings.StructDataHeader(56, 0)
+  ];
   GpuShaderPrecision lowInt = null;
   GpuShaderPrecision mediumInt = null;
   GpuShaderPrecision highInt = null;
@@ -79,10 +92,13 @@ class GpuPerStagePrecisions extends bindings.Struct {
   GpuShaderPrecision mediumFloat = null;
   GpuShaderPrecision highFloat = null;
 
-  GpuPerStagePrecisions() : super(kStructSize);
+  GpuPerStagePrecisions() : super(kVersions.last.size);
 
   static GpuPerStagePrecisions deserialize(bindings.Message message) {
-    return decode(new bindings.Decoder(message));
+    var decoder = new bindings.Decoder(message);
+    var result = decode(decoder);
+    decoder.excessHandles.forEach((h) => h.close());
+    return result;
   }
 
   static GpuPerStagePrecisions decode(bindings.Decoder decoder0) {
@@ -92,36 +108,46 @@ class GpuPerStagePrecisions extends bindings.Struct {
     GpuPerStagePrecisions result = new GpuPerStagePrecisions();
 
     var mainDataHeader = decoder0.decodeStructDataHeader();
-    if ((mainDataHeader.size < kStructSize) ||
-        (mainDataHeader.version < 0)) {
-      throw new bindings.MojoCodecError('Malformed header');
+    if (mainDataHeader.version <= kVersions.last.version) {
+      // Scan in reverse order to optimize for more recent versions.
+      for (int i = kVersions.length - 1; i >= 0; --i) {
+        if (mainDataHeader.version >= kVersions[i].version) {
+          if (mainDataHeader.size != kVersions[i].size)
+            throw new bindings.MojoCodecError(
+                'Header doesn\'t correspond to any known version.');
+        }
+      }
+    } else if (mainDataHeader.size < kVersions.last.size) {
+      throw new bindings.MojoCodecError(
+        'Message newer than the last known version cannot be shorter than '
+        'required by the last known version.');
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       var decoder1 = decoder0.decodePointer(8, false);
       result.lowInt = GpuShaderPrecision.decode(decoder1);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       var decoder1 = decoder0.decodePointer(16, false);
       result.mediumInt = GpuShaderPrecision.decode(decoder1);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       var decoder1 = decoder0.decodePointer(24, false);
       result.highInt = GpuShaderPrecision.decode(decoder1);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       var decoder1 = decoder0.decodePointer(32, false);
       result.lowFloat = GpuShaderPrecision.decode(decoder1);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       var decoder1 = decoder0.decodePointer(40, false);
       result.mediumFloat = GpuShaderPrecision.decode(decoder1);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       var decoder1 = decoder0.decodePointer(48, false);
       result.highFloat = GpuShaderPrecision.decode(decoder1);
@@ -130,7 +156,7 @@ class GpuPerStagePrecisions extends bindings.Struct {
   }
 
   void encode(bindings.Encoder encoder) {
-    var encoder0 = encoder.getStructEncoderAtOffset(kDefaultStructInfo);
+    var encoder0 = encoder.getStructEncoderAtOffset(kVersions.last);
     
     encoder0.encodeStruct(lowInt, 8, false);
     
@@ -157,9 +183,9 @@ class GpuPerStagePrecisions extends bindings.Struct {
 }
 
 class GpuCapabilities extends bindings.Struct {
-  static const int kStructSize = 80;
-  static const bindings.StructDataHeader kDefaultStructInfo =
-      const bindings.StructDataHeader(kStructSize, 0);
+  static const List<bindings.StructDataHeader> kVersions = const [
+    const bindings.StructDataHeader(80, 0)
+  ];
   GpuPerStagePrecisions vertexShaderPrecisions = null;
   GpuPerStagePrecisions fragmentShaderPrecisions = null;
   int maxCombinedTextureImageUnits = 0;
@@ -191,10 +217,13 @@ class GpuCapabilities extends bindings.Struct {
   bool blendEquationAdvanced = false;
   bool blendEquationAdvancedCoherent = false;
 
-  GpuCapabilities() : super(kStructSize);
+  GpuCapabilities() : super(kVersions.last.size);
 
   static GpuCapabilities deserialize(bindings.Message message) {
-    return decode(new bindings.Decoder(message));
+    var decoder = new bindings.Decoder(message);
+    var result = decode(decoder);
+    decoder.excessHandles.forEach((h) => h.close());
+    return result;
   }
 
   static GpuCapabilities decode(bindings.Decoder decoder0) {
@@ -204,129 +233,139 @@ class GpuCapabilities extends bindings.Struct {
     GpuCapabilities result = new GpuCapabilities();
 
     var mainDataHeader = decoder0.decodeStructDataHeader();
-    if ((mainDataHeader.size < kStructSize) ||
-        (mainDataHeader.version < 0)) {
-      throw new bindings.MojoCodecError('Malformed header');
+    if (mainDataHeader.version <= kVersions.last.version) {
+      // Scan in reverse order to optimize for more recent versions.
+      for (int i = kVersions.length - 1; i >= 0; --i) {
+        if (mainDataHeader.version >= kVersions[i].version) {
+          if (mainDataHeader.size != kVersions[i].size)
+            throw new bindings.MojoCodecError(
+                'Header doesn\'t correspond to any known version.');
+        }
+      }
+    } else if (mainDataHeader.size < kVersions.last.size) {
+      throw new bindings.MojoCodecError(
+        'Message newer than the last known version cannot be shorter than '
+        'required by the last known version.');
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       var decoder1 = decoder0.decodePointer(8, false);
       result.vertexShaderPrecisions = GpuPerStagePrecisions.decode(decoder1);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       var decoder1 = decoder0.decodePointer(16, false);
       result.fragmentShaderPrecisions = GpuPerStagePrecisions.decode(decoder1);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.maxCombinedTextureImageUnits = decoder0.decodeInt32(24);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.maxCubeMapTextureSize = decoder0.decodeInt32(28);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.maxFragmentUniformVectors = decoder0.decodeInt32(32);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.maxRenderbufferSize = decoder0.decodeInt32(36);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.maxTextureImageUnits = decoder0.decodeInt32(40);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.maxTextureSize = decoder0.decodeInt32(44);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.maxVaryingVectors = decoder0.decodeInt32(48);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.maxVertexAttribs = decoder0.decodeInt32(52);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.maxVertexTextureImageUnits = decoder0.decodeInt32(56);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.maxVertexUniformVectors = decoder0.decodeInt32(60);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.numCompressedTextureFormats = decoder0.decodeInt32(64);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.numShaderBinaryFormats = decoder0.decodeInt32(68);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.bindGeneratesResourceChromium = decoder0.decodeInt32(72);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.postSubBuffer = decoder0.decodeBool(76, 0);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.eglImageExternal = decoder0.decodeBool(76, 1);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.textureFormatBgra8888 = decoder0.decodeBool(76, 2);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.textureFormatEtc1 = decoder0.decodeBool(76, 3);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.textureFormatEtc1Npot = decoder0.decodeBool(76, 4);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.textureRectangle = decoder0.decodeBool(76, 5);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.iosurface = decoder0.decodeBool(76, 6);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.textureUsage = decoder0.decodeBool(76, 7);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.textureStorage = decoder0.decodeBool(77, 0);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.discardFramebuffer = decoder0.decodeBool(77, 1);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.syncQuery = decoder0.decodeBool(77, 2);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.image = decoder0.decodeBool(77, 3);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.futureSyncPoints = decoder0.decodeBool(77, 4);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.blendEquationAdvanced = decoder0.decodeBool(77, 5);
     }
-    {
+    if (mainDataHeader.version >= 0) {
       
       result.blendEquationAdvancedCoherent = decoder0.decodeBool(77, 6);
     }
@@ -334,7 +373,7 @@ class GpuCapabilities extends bindings.Struct {
   }
 
   void encode(bindings.Encoder encoder) {
-    var encoder0 = encoder.getStructEncoderAtOffset(kDefaultStructInfo);
+    var encoder0 = encoder.getStructEncoderAtOffset(kVersions.last);
     
     encoder0.encodeStruct(vertexShaderPrecisions, 8, false);
     

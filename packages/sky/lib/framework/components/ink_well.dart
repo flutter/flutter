@@ -14,7 +14,7 @@ class InkWell extends Component {
   LinkedHashSet<SplashController> _splashes;
 
   String inlineStyle;
-  List<Node> children;
+  List<UINode> children;
 
   InkWell({ Object key, this.inlineStyle, this.children })
       : super(key: key) {
@@ -23,8 +23,8 @@ class InkWell extends Component {
     });
   }
 
-  Node build() {
-    List<Node> childrenIncludingSplashes = [];
+  UINode build() {
+    List<UINode> childrenIncludingSplashes = [];
 
     if (_splashes != null) {
       childrenIncludingSplashes.addAll(
@@ -34,7 +34,7 @@ class InkWell extends Component {
     if (children != null)
       childrenIncludingSplashes.addAll(children);
 
-    return new EventTarget(
+    return new EventListenerNode(
       new Container(
         style: _containmentStyleHack,
         inlineStyle: inlineStyle,

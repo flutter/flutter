@@ -16,12 +16,12 @@ class Material extends Component {
     new Style('box-shadow: ${Shadow[5]}'),
   ];
 
-  Node content;
+  UINode content;
   int level;
 
   Material({ Object key, this.content, this.level: 0 }) : super(key: key);
 
-  Node build() {
+  UINode build() {
     return new StyleNode(content, _shadowStyle[level]);
   }
 }
