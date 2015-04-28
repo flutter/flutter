@@ -131,13 +131,23 @@ Running a Sky application
 -------------------------
 
 The `sky` pub package includes a `sky_tool` script to assist in running
-Sky applications inside the `SkyDemo.apk` harness.
+Sky applications inside the `SkyDemo.apk` harness.  The sky_tool script expects
+to be run from the root directory of your application pub package.  To run
+one of the examples in this SDK, try:
 
-1. ``packages/sky/sky_tool start --install examples/stocks/main.sky``
+1. ``cd examples/stocks``
+
+2. ``pub get`` to set up a copy of the sky package in the app directory.
+
+3. ``./packages/sky/sky_tool start --install``
    The --install flag is only necessary to install SkyDemo.apk if not already
-   installed from the Google Play store.
+   installed on the device.
 
-2.  Use ``adb logcat`` to view any errors or Dart print() output from the app.
+4. Use ``adb logcat`` to view any errors or Dart print() output from the app.
+   ``adb logcat -s chromium`` can be used to filter only adb messages from
+   `SkyDemo.apk` (which for
+   [legacy reasons](https://github.com/domokit/mojo/issues/129) still uses the
+   android log tag 'chromium').
 
 Measuring Performance
 ---------------------
