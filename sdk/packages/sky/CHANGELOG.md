@@ -1,3 +1,11 @@
+## 0.0.5+dart-summit-7
+
+  - Fix crash in sky_tool stop_tracing.
+
+## 0.0.5+dart-summit-6
+
+  - Fix missing include in sky_tool causing failure.
+
 ## 0.0.5+dart-summit-5
 
   - Added sky_tool start_tracing and stop_tracing.
