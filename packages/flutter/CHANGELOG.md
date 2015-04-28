@@ -6,6 +6,10 @@
 
   - Added download_material_design_icons script.
 
+## 0.0.5+dart-summit-3
+
+  - Fix typo in lib/sky_tool causing syntax error when run.
+
 ## 0.0.5+dart-summit-2
 
   - Various demo fixes and added ChangeLogs.
