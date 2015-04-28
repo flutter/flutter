@@ -133,11 +133,31 @@ Running a Sky application
 The `sky` pub package includes a `sky_tool` script to assist in running
 Sky applications inside the `SkyDemo.apk` harness.
 
-1. ``packages/sky/lib/sky_tool start --install examples/stocks/main.sky``
+1. ``packages/sky/sky_tool start --install examples/stocks/main.sky``
    The --install flag is only necessary to install SkyDemo.apk if not already
    installed from the Google Play store.
 
 2.  Use ``adb logcat`` to view any errors or Dart print() output from the app.
+
+Measuring Performance
+---------------------
+
+Sky has support for generating trace files compatible with
+[Chrome's about:tracing](https://www.chromium.org/developers/how-tos/trace-event-profiling-tool).
+
+`packages/sky/sky_tool start_tracing` and `packages/sky/sky_tool stop_tracing`
+are the commands to use.
+
+Due to https://github.com/domokit/mojo/issues/127 tracing currently
+requires root access on the device.
+
+Debugging
+---------
+
+Dart's [Observatory](https://www.dartlang.org/tools/observatory/)
+(VM Debugger & Profiler) support in Sky is
+[in progress](https://codereview.chromium.org/1107803002) and should
+be released shortly after Dart Summit 2015.
 
 Building a standalone MyApp
 ---------------------------

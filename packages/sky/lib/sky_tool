@@ -13,6 +13,7 @@ import socket
 import subprocess
 import sys
 import urlparse
+import time
 
 # TODO(eseidel): This should be BIN_DIR.
 LIB_DIR = os.path.realpath(os.path.dirname(os.path.abspath(__file__)))
