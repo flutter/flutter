@@ -1,0 +1,3 @@
+name: widgets
+dependencies:
+ sky: any
