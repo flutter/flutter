@@ -43,7 +43,7 @@ will go) and run `pub get` to download all necessary dependencies and create
 the symlinks necessary for 'package:your_app_names/main.dart' includes to work.
 
 Currently the Sky Engine assumes the entry point for your application is a
-`main` function is located inside a `main.sky` file at the root of the package.
+`main` function located inside a `main.sky` file at the root of the package.
 `.sky` is an html-like format:
 ```
 <sky>
