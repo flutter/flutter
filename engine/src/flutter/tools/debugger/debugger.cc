@@ -28,13 +28,13 @@ namespace debugger {
 class SkyDebugger : public mojo::ApplicationDelegate,
                     public http_server::HttpHandler {
  public:
-  SkyDebugger() : is_tracing_(false), handler_binding_(this) {}
+  SkyDebugger() : is_tracing_(false), app_(nullptr), handler_binding_(this) {}
   ~SkyDebugger() override {}
 
  private:
   // mojo::ApplicationDelegate:
   void Initialize(mojo::ApplicationImpl* app) override {
-    app->ConnectToService("mojo:tracing", &tracing_);
+    app_ = app;
     app->ConnectToService("mojo:window_manager", &window_manager_);
 
     // Format: --args-for="app_url command_port"
@@ -140,6 +140,8 @@ class SkyDebugger : public mojo::ApplicationDelegate,
       return;
     }
 
+    if (!tracing_)
+      app_->ConnectToService("mojo:tracing", &tracing_);
     is_tracing_ = true;
     mojo::DataPipe pipe;
     tracing_->Start(pipe.producer_handle.Pass(), mojo::String("*"));
@@ -185,6 +187,7 @@ class SkyDebugger : public mojo::ApplicationDelegate,
   }
 
   bool is_tracing_;
+  mojo::ApplicationImpl* app_;
   mojo::WindowManagerPtr window_manager_;
   tracing::TraceCoordinatorPtr tracing_;
   std::string url_;
