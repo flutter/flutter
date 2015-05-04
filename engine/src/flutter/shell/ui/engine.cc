@@ -58,7 +58,8 @@ mojo::ServiceProviderPtr Engine::CreateServiceProvider() {
       base::Bind(CreateJavaServiceProvider,
                  base::Passed(mojo::MakeRequest<mojo::ServiceProvider>(
                      pipe.handle1.Pass()))));
-  return mojo::MakeProxy<mojo::ServiceProvider>(pipe.handle0.Pass());
+  return mojo::MakeProxy(
+      mojo::InterfacePtrInfo<mojo::ServiceProvider>(pipe.handle0.Pass(), 0u));
 }
 
 void Engine::Init() {
