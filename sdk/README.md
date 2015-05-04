@@ -48,7 +48,7 @@ Currently the Sky Engine assumes the entry point for your application is a
 ```
 <sky>
 <script>
-import 'package:your_app_name/main.dart'
+import 'package:your_app_name/main.dart';
 
 void main() {
   new HelloWorldApp();
