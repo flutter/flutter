@@ -82,11 +82,13 @@ PassRefPtr<DartValue> HTMLIFrameElement::takeExposedServicesHandle(DartState*)
 
 void HTMLIFrameElement::embedViewManagerClient(RefPtr<DartValue> client)
 {
-  if (!m_contentView)
-    return;
+    if (!m_contentView)
+        return;
 
-  m_contentView->Embed(mojo::MakeProxy<mojo::ViewManagerClient>(
-      DartConverter<mojo::ScopedMessagePipeHandle>::FromDart(client->dart_value())));
+    mojo::ScopedMessagePipeHandle handle = DartConverter<mojo::ScopedMessagePipeHandle>::FromDart(client->dart_value());
+    mojo::ViewManagerClientPtr client_ptr = mojo::MakeProxy(
+        mojo::InterfacePtrInfo<mojo::ViewManagerClient>(handle.Pass(), 0u));
+    m_contentView->Embed(client_ptr.Pass());
 }
 
 void HTMLIFrameElement::navigateView()
@@ -105,7 +107,7 @@ void HTMLIFrameElement::navigateView()
 
     m_contentView->Embed(mojo::String::From(url.string().utf8().data()),
         mojo::GetProxy(&m_services),
-        mojo::MakeProxy<mojo::ServiceProvider>(exposedServicesPipe.handle1.Pass()));
+        mojo::MakeProxy(mojo::InterfacePtrInfo<mojo::ServiceProvider>(exposedServicesPipe.handle1.Pass(), 0u)));
 }
 
 }

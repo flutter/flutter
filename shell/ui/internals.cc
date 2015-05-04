@@ -77,7 +77,7 @@ Internals::~Internals() {
 }
 
 mojo::Handle Internals::TakeServicesProvidedByEmbedder() {
-  return service_provider_.PassMessagePipe().release();
+  return service_provider_.PassInterface().PassHandle().release();
 }
 
 }  // namespace shell

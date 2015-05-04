@@ -198,11 +198,11 @@ mojo::ScopedMessagePipeHandle DocumentView::TakeServicesProvidedToEmbedder() {
 }
 
 mojo::ScopedMessagePipeHandle DocumentView::TakeServicesProvidedByEmbedder() {
-  return services_provided_by_embedder_.PassMessagePipe();
+  return services_provided_by_embedder_.PassInterface().PassHandle();
 }
 
 mojo::ScopedMessagePipeHandle DocumentView::TakeServiceRegistry() {
-  return service_registry_.PassMessagePipe();
+  return service_registry_.PassInterface().PassHandle();
 }
 
 mojo::Shell* DocumentView::GetShell() {

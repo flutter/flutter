@@ -172,7 +172,7 @@ mojo::Handle Internals::TakeShellProxyHandle() {
   mojo::ShellPtr shell;
   if (!shell_binding_.is_bound())
     shell_binding_.Bind(GetProxy(&shell));
-  return shell.PassMessagePipe().release();
+  return shell.PassInterface().PassHandle().release();
 }
 
 void Internals::ConnectToApplication(
