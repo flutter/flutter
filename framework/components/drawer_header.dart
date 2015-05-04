@@ -4,7 +4,7 @@
 
 import '../fn.dart';
 import '../theme/colors.dart';
-import '../theme/view-configuration.dart';
+import '../theme/view_configuration.dart';
 
 class DrawerHeader extends Component {
   static final Style _style = new Style('''

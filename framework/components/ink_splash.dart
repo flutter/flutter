@@ -5,7 +5,7 @@
 import '../animation/animated_value.dart';
 import '../animation/curves.dart';
 import '../fn.dart';
-import '../theme/view-configuration.dart' as config;
+import '../theme/view_configuration.dart' as config;
 import 'dart:async';
 import 'dart:math' as math;
 import 'dart:sky' as sky;
