@@ -89,7 +89,7 @@ action("generate_snapshot_bin") {
     "--output_bin",
     rebase_path(isolate_snapshot, root_build_dir),
     "--target_os",
-    os,
+    target_os,
     "--url_mapping=dart:sky,$dart_sky_path",
     "--url_mapping=dart:mojo.internal,$internal_path",
     "--url_mapping=dart:sky_builtin,$builtin_path",
