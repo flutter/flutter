@@ -39,7 +39,7 @@ public class SkyApplication extends BaseChromiumApplication {
     }
 
     private void initializeJavaUtils() {
-        PathUtils.setPrivateDataDirectorySuffix(PRIVATE_DATA_DIRECTORY_SUFFIX);
+        PathUtils.setPrivateDataDirectorySuffix(PRIVATE_DATA_DIRECTORY_SUFFIX, getApplicationContext());
     }
 
     private void initializeNative() {
