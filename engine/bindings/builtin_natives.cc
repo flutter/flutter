@@ -87,7 +87,8 @@ static Dart_Handle GetClosure(Dart_Handle builtin_library, const char* name) {
   return closure;
 }
 
-static void InitDartInternal(Dart_Handle builtin_library) {
+static void InitDartInternal(Dart_Handle builtin_library,
+                             BuiltinNatives::IsolateType isolate_type) {
   Dart_Handle print = GetClosure(builtin_library, "_getPrintClosure");
   Dart_Handle timer = GetClosure(builtin_library, "_getCreateTimerClosure");
 
@@ -96,35 +97,55 @@ static void InitDartInternal(Dart_Handle builtin_library) {
   DART_CHECK_VALID(Dart_SetField(
       internal_library, ToDart("_printClosure"), print));
 
-  Dart_Handle vm_hooks_name = ToDart("VMLibraryHooks");
-  Dart_Handle vm_hooks = Dart_GetClass(internal_library, vm_hooks_name);
-  DART_CHECK_VALID(vm_hooks);
-  Dart_Handle timer_name = ToDart("timerFactory");
-  DART_CHECK_VALID(Dart_SetField(vm_hooks, timer_name, timer));
+  if (isolate_type == BuiltinNatives::MainIsolate) {
+    Dart_Handle vm_hooks_name = ToDart("VMLibraryHooks");
+    Dart_Handle vm_hooks = Dart_GetClass(internal_library, vm_hooks_name);
+    DART_CHECK_VALID(vm_hooks);
+    Dart_Handle timer_name = ToDart("timerFactory");
+    DART_CHECK_VALID(Dart_SetField(vm_hooks, timer_name, timer));
+  } else {
+    CHECK(isolate_type == BuiltinNatives::DartIOIsolate);
+    Dart_Handle io_lib = DartBuiltin::LookupLibrary("dart:io");
+    Dart_Handle setup_hooks = Dart_NewStringFromCString("_setupHooks");
+    DART_CHECK_VALID(Dart_Invoke(io_lib, setup_hooks, 0, NULL));
+    Dart_Handle isolate_lib = DartBuiltin::LookupLibrary("dart:isolate");
+    DART_CHECK_VALID(Dart_Invoke(isolate_lib, setup_hooks, 0, NULL));
+  }
 }
 
-static void InitDartCore(Dart_Handle builtin) {
+static void InitDartCore(Dart_Handle builtin,
+                         BuiltinNatives::IsolateType isolate_type) {
   Dart_Handle get_base_url = GetClosure(builtin, "_getGetBaseURLClosure");
   Dart_Handle core_library = DartBuiltin::LookupLibrary("dart:core");
   DART_CHECK_VALID(Dart_SetField(core_library,
       ToDart("_uriBaseClosure"), get_base_url));
 }
 
-static void InitDartAsync(Dart_Handle builtin_library) {
-  Dart_Handle schedule_microtask =
-      GetClosure(builtin_library, "_getScheduleMicrotaskClosure");
+static void InitDartAsync(Dart_Handle builtin_library,
+                          BuiltinNatives::IsolateType isolate_type) {
+  Dart_Handle schedule_microtask;
+  if (isolate_type == BuiltinNatives::MainIsolate) {
+    schedule_microtask =
+        GetClosure(builtin_library, "_getScheduleMicrotaskClosure");
+  } else {
+    CHECK(isolate_type == BuiltinNatives::DartIOIsolate);
+    Dart_Handle isolate_lib = DartBuiltin::LookupLibrary("dart:isolate");
+    Dart_Handle method_name =
+        Dart_NewStringFromCString("_getIsolateScheduleImmediateClosure");
+    schedule_microtask = Dart_Invoke(isolate_lib, method_name, 0, NULL);
+  }
   Dart_Handle async_library = DartBuiltin::LookupLibrary("dart:async");
   Dart_Handle set_schedule_microtask = ToDart("_setScheduleImmediateClosure");
   DART_CHECK_VALID(Dart_Invoke(async_library, set_schedule_microtask, 1,
                                &schedule_microtask));
 }
 
-void BuiltinNatives::Init() {
+void BuiltinNatives::Init(IsolateType isolate_type) {
   Dart_Handle builtin = Builtin::LoadAndCheckLibrary(Builtin::kBuiltinLibrary);
   DART_CHECK_VALID(builtin);
-  InitDartInternal(builtin);
-  InitDartCore(builtin);
-  InitDartAsync(builtin);
+  InitDartInternal(builtin, isolate_type);
+  InitDartCore(builtin, isolate_type);
+  InitDartAsync(builtin, isolate_type);
 }
 
 // Implementation of native functions which are used for some
@@ -163,6 +184,7 @@ void ScheduleMicrotask(Dart_NativeArguments args) {
   if (LogIfError(closure) || !Dart_IsClosure(closure))
     return;
   DartState* dart_state = DartState::Current();
+  CHECK(dart_state);
   Microtask::enqueueMicrotask(base::Bind(&ExecuteMicrotask,
     dart_state->GetWeakPtr(), DartValue::Create(dart_state, closure)));
 }
@@ -182,6 +204,7 @@ void Timer_create(Dart_NativeArguments args) {
   DART_CHECK_VALID(Dart_GetNativeBooleanArgument(args, 2, &repeating));
 
   DOMDartState* state = DOMDartState::Current();
+  CHECK(state);
   int timer_id = DOMTimer::install(state->document(),
                                    ScheduledAction::Create(state, closure),
                                    milliseconds,
@@ -194,6 +217,7 @@ void Timer_cancel(Dart_NativeArguments args) {
   DART_CHECK_VALID(Dart_GetNativeIntegerArgument(args, 0, &timer_id));
 
   DOMDartState* state = DOMDartState::Current();
+  CHECK(state);
   DOMTimer::removeByID(state->document(), timer_id);
 }
 

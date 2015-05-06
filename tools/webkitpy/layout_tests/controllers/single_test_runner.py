@@ -307,6 +307,10 @@ class SingleTestRunner(object):
             failures.append(test_failures.FailureMissingAudio())
         return failures
 
+    # FIXME: This won't be needed once we have flags for Sky that suppress the
+    # Observatory messages.
+    _filter_observatory_messages = re.compile(r"^CONSOLE: Observatory listening on.*\n", re.MULTILINE)
+
     def _get_normalized_output_text(self, output):
         """Returns the normalized text output, i.e. the output in which
         the end-of-line characters are normalized to "\n"."""
@@ -314,7 +318,9 @@ class SingleTestRunner(object):
         # changed to "\r\n" by our system (Python/Cygwin), resulting in
         # "\r\r\n", when, in fact, we wanted to compare the text output with
         # the normalized text expectation files.
-        return output.replace("\r\r\n", "\r\n").replace("\r\n", "\n")
+        normalized_lines = output.replace("\r\r\n", "\r\n").replace("\r\n", "\n")
+        normalized_lines = re.sub(self._filter_observatory_messages, r"", normalized_lines)
+        return normalized_lines
 
     # FIXME: This function also creates the image diff. Maybe that work should
     # be handled elsewhere?

@@ -18,6 +18,7 @@ class Builtin {
     kBuiltinLibrary,
     kSkyLibrary,
     kMojoInternalLibrary,
+    kIOLibrary,
     kInvalidLibrary,
   };
 

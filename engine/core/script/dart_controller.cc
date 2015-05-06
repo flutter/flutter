@@ -9,6 +9,7 @@
 #include "base/logging.h"
 #include "base/single_thread_task_runner.h"
 #include "base/trace_event/trace_event.h"
+#include "dart/runtime/bin/embedded_dart_io.h"
 #include "dart/runtime/include/dart_mirrors_api.h"
 #include "sky/engine/bindings/builtin.h"
 #include "sky/engine/bindings/builtin_natives.h"
@@ -21,8 +22,10 @@
 #include "sky/engine/core/html/imports/HTMLImport.h"
 #include "sky/engine/core/html/imports/HTMLImportChild.h"
 #include "sky/engine/core/loader/FrameLoaderClient.h"
+#include "sky/engine/core/script/dart_debugger.h"
 #include "sky/engine/core/script/dart_dependency_catcher.h"
 #include "sky/engine/core/script/dart_loader.h"
+#include "sky/engine/core/script/dart_service_isolate.h"
 #include "sky/engine/core/script/dom_dart_state.h"
 #include "sky/engine/public/platform/Platform.h"
 #include "sky/engine/tonic/dart_api_scope.h"
@@ -176,9 +179,36 @@ static bool IsServiceIsolateURL(const char* url_name) {
       String(url_name) == DART_VM_SERVICE_ISOLATE_NAME;
 }
 
+static void EnsureHandleWatcherStarted() {
+  static bool handle_watcher_started = false;
+  if (handle_watcher_started)
+    return;
+
+  // TODO(dart): Call Dart_Cleanup (ensure the handle watcher isolate is closed)
+  // during shutdown.
+  Dart_Handle mojo_core_lib =
+      Builtin::LoadAndCheckLibrary(Builtin::kMojoInternalLibrary);
+  CHECK(!LogIfError((mojo_core_lib)));
+  Dart_Handle handle_watcher_type = Dart_GetType(
+      mojo_core_lib,
+      Dart_NewStringFromCString("MojoHandleWatcher"),
+      0,
+      nullptr);
+  CHECK(!LogIfError(handle_watcher_type));
+  CHECK(!LogIfError(Dart_Invoke(
+      handle_watcher_type,
+      Dart_NewStringFromCString("_start"),
+      0,
+      nullptr)));
+
+  // RunLoop until the handle watcher isolate is spun-up.
+  CHECK(!LogIfError(Dart_RunLoop()));
+  handle_watcher_started = true;
+}
+
 // TODO(rafaelw): Right now this only supports the creation of the handle
-// watcher isolate. Presumably, we'll want application isolates to spawn their
-// own isolates.
+// watcher isolate and the service isolate. Presumably, we'll want application
+// isolates to spawn their own isolates.
 static Dart_Isolate IsolateCreateCallback(const char* script_uri,
                                           const char* main,
                                           const char* package_root,
@@ -186,8 +216,34 @@ static Dart_Isolate IsolateCreateCallback(const char* script_uri,
                                           char** error) {
 
   if (IsServiceIsolateURL(script_uri)) {
-    return Dart_CreateIsolate(script_uri, "main", kDartIsolateSnapshotBuffer,
-          nullptr, error);
+    CHECK(kDartIsolateSnapshotBuffer);
+    DartState* dart_state = new DartState();
+    Dart_Isolate isolate = Dart_CreateIsolate(script_uri,
+                                              "main",
+                                              kDartIsolateSnapshotBuffer,
+                                              nullptr,
+                                              error);
+    CHECK(isolate) << error;
+    dart_state->set_isolate(isolate);
+    CHECK(Dart_IsServiceIsolate(isolate));
+    CHECK(!LogIfError(Dart_SetLibraryTagHandler(LibraryTagHandler)));
+    {
+      DartApiScope apiScope;
+      Builtin::SetNativeResolver(Builtin::kBuiltinLibrary);
+      Builtin::SetNativeResolver(Builtin::kMojoInternalLibrary);
+      Builtin::SetNativeResolver(Builtin::kIOLibrary);
+      BuiltinNatives::Init(BuiltinNatives::DartIOIsolate);
+      // Start the handle watcher from the service isolate so it isn't available
+      // for debugging or general Observatory interaction.
+      EnsureHandleWatcherStarted();
+      std::string ip = "127.0.0.1";
+      const intptr_t port = 0;  // Automatic port assignment.
+      const bool service_isolate_booted =
+          DartServiceIsolate::Startup(ip, port, LibraryTagHandler, error);
+      CHECK(service_isolate_booted) << error;
+    }
+    Dart_ExitIsolate();
+    return isolate;
   }
 
   // Create & start the handle watcher isolate
@@ -204,6 +260,7 @@ static Dart_Isolate IsolateCreateCallback(const char* script_uri,
     DartApiScope apiScope;
     Builtin::SetNativeResolver(Builtin::kBuiltinLibrary);
     Builtin::SetNativeResolver(Builtin::kMojoInternalLibrary);
+    Builtin::SetNativeResolver(Builtin::kIOLibrary);
 
     // Ensure the isolate has a root library.
     Dart_LoadScript(Dart_NewStringFromCString("dart:empty"),
@@ -233,33 +290,6 @@ static void MessageNotifyCallback(Dart_Isolate dest_isolate) {
       base::Bind(&CallHandleMessage, DartState::From(dest_isolate)->GetWeakPtr()));
 }
 
-static void EnsureHandleWatcherStarted() {
-  static bool handle_watcher_started = false;
-  if (handle_watcher_started)
-    return;
-
-  // TODO(dart): Call Dart_Cleanup (ensure the handle watcher isolate is closed)
-  // during shutdown.
-  Dart_Handle mojo_core_lib =
-      Builtin::LoadAndCheckLibrary(Builtin::kMojoInternalLibrary);
-  CHECK(!LogIfError((mojo_core_lib)));
-  Dart_Handle handle_watcher_type = Dart_GetType(
-      mojo_core_lib,
-      Dart_NewStringFromCString("MojoHandleWatcher"),
-      0,
-      nullptr);
-  CHECK(!LogIfError(handle_watcher_type));
-  CHECK(!LogIfError(Dart_Invoke(
-      handle_watcher_type,
-      Dart_NewStringFromCString("_start"),
-      0,
-      nullptr)));
-
-  // RunLoop until the handle watcher isolate is spun-up.
-  CHECK(!LogIfError(Dart_RunLoop()));
-  handle_watcher_started = true;
-}
-
 void DartController::CreateIsolateFor(Document* document) {
   DCHECK(document);
   CHECK(kDartIsolateSnapshotBuffer);
@@ -283,7 +313,8 @@ void DartController::CreateIsolateFor(Document* document) {
 
     Builtin::SetNativeResolver(Builtin::kBuiltinLibrary);
     Builtin::SetNativeResolver(Builtin::kMojoInternalLibrary);
-    BuiltinNatives::Init();
+    Builtin::SetNativeResolver(Builtin::kIOLibrary);
+    BuiltinNatives::Init(BuiltinNatives::MainIsolate);
 
     builtin_sky_ = adoptPtr(new BuiltinSky(dart_state()));
     dart_state()->class_library().set_provider(builtin_sky_.get());
@@ -312,13 +343,20 @@ void DartController::InitVM() {
   argv = kCheckedModeArgs;
 #endif
 
+  dart::bin::BootstrapDartIo();
+
   CHECK(Dart_SetVMFlags(argc, argv));
+  // This should be called before calling Dart_Initialize.
+  DartDebugger::InitDebugger();
   CHECK(Dart_Initialize(kDartVmIsolateSnapshotBuffer,
                         IsolateCreateCallback,
                         nullptr,  // Isolate interrupt callback.
                         UnhandledExceptionCallback, IsolateShutdownCallback,
                         // File IO callbacks.
                         nullptr, nullptr, nullptr, nullptr, nullptr));
+  // Wait for load port- ensures handle watcher and service isolates are
+  // running.
+  Dart_ServiceWaitForLoadPort();
 }
 
 } // namespace blink

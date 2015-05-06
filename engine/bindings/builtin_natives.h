@@ -12,12 +12,17 @@ namespace blink {
 
 class BuiltinNatives {
  public:
+  enum IsolateType {
+    MainIsolate,
+    DartIOIsolate,
+  };
+
   static Dart_NativeFunction NativeLookup(Dart_Handle name,
                                           int argument_count,
                                           bool* auto_setup_scope);
   static const uint8_t* NativeSymbol(Dart_NativeFunction native_function);
 
-  static void Init();
+  static void Init(IsolateType isolate_type);
 
  private:
   DISALLOW_IMPLICIT_CONSTRUCTORS(BuiltinNatives);

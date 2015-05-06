@@ -6,6 +6,7 @@
 #include "sky/engine/bindings/builtin.h"
 
 #include "base/logging.h"
+#include "bin/io_natives.h"
 #include "dart/runtime/include/dart_api.h"
 #include "gen/sky/bindings/DartGlobal.h"
 #include "sky/engine/bindings/builtin_natives.h"
@@ -31,6 +32,7 @@ const LibraryDescriptor kBuiltinLibraries[] = {
      BuiltinNatives::NativeLookup},
     {"dart:sky", true, skySnapshotSymbolizer, skySnapshotResolver},
     {"dart:mojo.internal", true, MojoNativeSymbol, MojoNativeLookup},
+    {"dart:io", true, dart::bin::IONativeSymbol, dart::bin::IONativeLookup },
 };
 
 }  // namespace

@@ -4,6 +4,7 @@
 
 import("//sky/engine/build/scripts/scripts.gni")
 import("//sky/engine/core/core.gni")
+import("//mojo/dart/embedder/embedder.gni")
 
 visibility = [ "//sky/engine/*" ]
 
@@ -52,19 +53,39 @@ source_set("prerequisites") {
   ]
 }
 
+dart_embedder_resources("generate_sky_embedder_service_isolate_resources_cc") {
+  deps = [
+    "//mojo/dart/embedder:deploy_observatory",
+  ]
+  inputs = [
+    "//sky/engine/core/script/dart_service_isolate/loader.dart",
+    "//sky/engine/core/script/dart_service_isolate/main.dart",
+    "//sky/engine/core/script/dart_service_isolate/resources.dart",
+    "//sky/engine/core/script/dart_service_isolate/server.dart",
+  ]
+  root_prefix = "//sky/engine/core/script/"
+  input_directory = "$root_out_dir/observatory/deployed/web/"
+  output = "$target_gen_dir/sky_embedder_service_isolate_resources.cc"
+  table_name = "sky_embedder_service_isolate"
+}
+
 static_library("core") {
   output_name = "sky_core"
 
   deps = [
     ":core_generated",
+    ":generate_sky_embedder_service_isolate_resources_cc",
     ":libraries",
     ":prerequisites",
     "//sky/engine/platform",
     "//sky/engine/bindings",
+    "//dart/runtime/bin:embedded_dart_io",
     "//dart/runtime/bin:libdart_withcore",
   ]
 
   sources = sky_core_files
+
+  sources += [ "$target_gen_dir/sky_embedder_service_isolate_resources.cc" ]
 
   include_dirs = [
     # Needed for dart_mirrors_api.h in dart_controller.cc

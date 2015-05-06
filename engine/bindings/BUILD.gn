@@ -30,6 +30,9 @@ source_set("bindings") {
     "scheduled_action.cc",
     "scheduled_action.h",
   ]
+
+  defines = [ "DART_IO_SECURE_SOCKET_DISABLED" ]
+
   deps = [
     "//base",
     "//dart/runtime/bin:libdart_withcore",
@@ -38,12 +41,14 @@ source_set("bindings") {
     "//sky/engine/platform:platform",
     "//sky/engine/tonic",
     "//sky/engine/wtf",
+    "//dart/runtime/bin:embedded_dart_io",
     ":generated_bindings",
     ":snapshot_cc",
   ]
   include_dirs = [
     "..",
     "$root_build_dir",
+    rebase_path("//dart/runtime"),
   ]
 }
 
