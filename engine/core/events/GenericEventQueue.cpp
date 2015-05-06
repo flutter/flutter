@@ -56,7 +56,9 @@ bool GenericEventQueue::enqueueEvent(PassRefPtr<Event> event)
     if (event->target() == m_owner)
         event->setTarget(nullptr);
 
-    TRACE_EVENT_ASYNC_BEGIN1("event", "GenericEventQueue:enqueueEvent", event.get(), "type", event->type().ascii().data());
+    TRACE_EVENT_ASYNC_BEGIN1("event", "GenericEventQueue:enqueueEvent",
+                             event.get(), "type",
+                             TRACE_STR_COPY(event->type().ascii().data()));
     m_pendingEvents.append(event);
 
     if (!m_timer.isActive())
@@ -71,7 +73,10 @@ bool GenericEventQueue::cancelEvent(Event* event)
 
     if (found) {
         m_pendingEvents.remove(m_pendingEvents.find(event));
-        TRACE_EVENT_ASYNC_END2("event", "GenericEventQueue:enqueueEvent", event, "type", event->type().ascii().data(), "status", "cancelled");
+        TRACE_EVENT_ASYNC_END2("event", "GenericEventQueue:enqueueEvent", event,
+                               "type",
+                               TRACE_STR_COPY(event->type().ascii().data()),
+                               "status", "cancelled");
     }
 
     if (m_pendingEvents.isEmpty())
@@ -111,7 +116,10 @@ void GenericEventQueue::cancelAllEvents()
 
     for (size_t i = 0; i < m_pendingEvents.size(); ++i) {
         Event* event = m_pendingEvents[i].get();
-        TRACE_EVENT_ASYNC_END2("event", "GenericEventQueue:enqueueEvent", event, "type", event->type().ascii().data(), "status", "cancelled");
+        TRACE_EVENT_ASYNC_END2("event", "GenericEventQueue:enqueueEvent", event,
+                               "type",
+                               TRACE_STR_COPY(event->type().ascii().data()),
+                               "status", "cancelled");
     }
     m_pendingEvents.clear();
 }

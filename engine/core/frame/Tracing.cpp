@@ -21,13 +21,17 @@ Tracing::~Tracing()
 void Tracing::begin(const String& name)
 {
     StringUTF8Adaptor utf8(name);
-    TRACE_EVENT_COPY_BEGIN0("script", utf8.data());
+    // TRACE_EVENT_COPY_BEGIN0 needs a c-style null-terminated string.
+    CString cstring(utf8.data(), utf8.length());
+    TRACE_EVENT_COPY_BEGIN0("script", cstring.data());
 }
 
 void Tracing::end(const String& name)
 {
     StringUTF8Adaptor utf8(name);
-    TRACE_EVENT_COPY_END0("script", utf8.data());
+    // TRACE_EVENT_COPY_END0 needs a c-style null-terminated string.
+    CString cstring(utf8.data(), utf8.length());
+    TRACE_EVENT_COPY_END0("script", cstring.data());
 }
 
 } // namespace blink

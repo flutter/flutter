@@ -311,7 +311,8 @@ static String inputTypeToName(WebInputEvent::Type type)
 
 bool WebViewImpl::handleInputEvent(const WebInputEvent& inputEvent)
 {
-    TRACE_EVENT1("input", "WebViewImpl::handleInputEvent", "type", inputTypeToName(inputEvent.type).ascii().data());
+    TRACE_EVENT1("input", "WebViewImpl::handleInputEvent", "type",
+                 TRACE_STR_COPY(inputTypeToName(inputEvent.type).ascii().data()));
 
     if (WebInputEvent::isPointerEventType(inputEvent.type)) {
         const WebPointerEvent& event = static_cast<const WebPointerEvent&>(inputEvent);
