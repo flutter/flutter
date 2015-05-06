@@ -41,14 +41,14 @@
 #include "sky/engine/public/web/Sky.h"
 #include "sky/engine/testing/platform/platform_impl.h"
 
-int runHelper(TestSuite* testSuite) {
+int runHelper(base::TestSuite* testSuite) {
   base::MessageLoopForUI message_loop;
   blink::initialize(new sky::PlatformImpl());
   return testSuite->Run();
 }
 
 int main(int argc, char** argv) {
-  TestSuite test_suite(argc, argv);
+    base::TestSuite test_suite(argc, argv);
   return base::LaunchUnitTests(
       argc, argv, Bind(&runHelper, Unretained(&test_suite)));
 }
