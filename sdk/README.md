@@ -1,3 +1,14 @@
+Contributing
+============
+
+[sky_sdk](https://github.com/domokit/sky_sdk) is generated from the
+[mojo repository](https://github.com/domokit/mojo) using
+[deploy_sdk.py](https://github.com/domokit/mojo/blob/master/sky/tools/deploy_sdk.py)
+Static files (including this README.md) are located under
+[sky/sdk](https://github.com/domokit/mojo/tree/master/sky/sdk).  Pull
+requests and issue reports are glady accepted at the
+[mojo repository](https://github.com/domokit/mojo)!
+
 Sky
 ===
 
