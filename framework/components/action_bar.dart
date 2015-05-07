@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import '../fn.dart';
-import '../theme/view-configuration.dart';
+import '../theme/view_configuration.dart';
 import 'material.dart';
 
 class ActionBar extends Component {
