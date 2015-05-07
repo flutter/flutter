@@ -174,10 +174,27 @@ def main():
     # Mojo package, lots of overlap with gen, must be copied:
     copy(src_path('mojo/public'), sdk_path('packages/mojo/lib/public'),
         dart_filter)
-    mojom_dirs = [ os.path.join(build_dir, 'gen/dart-gen/mojom') ]
-    mojom_dirs += args.extra_mojom_dirs
-    for mojom_dir in mojom_dirs:
-      copy(mojom_dir, sdk_path('packages/mojom/lib/'), gen_filter)
+
+    # By convention the generated .mojom.dart files in a pub package
+    # go under $PACKAGE/lib/mojom.
+    # The mojo package owns all the .mojom.dart files that are not in the 'sky'
+    # mojom module.
+    def non_sky_gen_filter(path):
+        if os.path.isdir(path) and path.endswith('sky'):
+            return False
+        return gen_filter(path)
+    mojo_package_mojom_dir = sdk_path('packages/mojo/lib/mojom')
+    copy(os.path.join(build_dir, 'gen/dart-gen/mojom'), mojo_package_mojom_dir,
+         non_sky_gen_filter)
+
+    # The Sky package owns the .mojom.dart files in the 'sky' mojom module.
+    def sky_gen_filter(path):
+        if os.path.isfile(path) and not os.path.dirname(path).endswith('sky'):
+            return False
+        return gen_filter(path)
+    sky_package_mojom_dir = sdk_path('packages/sky/lib/mojom')
+    copy(os.path.join(build_dir, 'gen/dart-gen/mojom'), sky_package_mojom_dir,
+         sky_gen_filter)
 
     # Mojo SDK additions:
     copy_or_link(src_path('mojo/public/dart/bindings.dart'),
@@ -205,10 +222,13 @@ def main():
         ensure_dir_exists(packages_dir)
         make_relative_symlink(sdk_path('packages/mojo/lib'),
             os.path.join(packages_dir, 'mojo'))
-        make_relative_symlink(sdk_path('packages/mojom/lib'),
-            os.path.join(packages_dir, 'mojom'))
         make_relative_symlink(sdk_path('packages/sky/lib'),
             os.path.join(packages_dir, 'sky'))
+
+        mojom_dirs = [ mojo_package_mojom_dir, sky_package_mojom_dir ]
+        mojom_dirs += args.extra_mojom_dirs
+        for mojom_dir in mojom_dirs:
+          copy(mojom_dir, os.path.join(packages_dir, 'mojom'), gen_filter)
 
     if should_commit:
         # Kinda a hack to make a prettier build dir for the commit:
