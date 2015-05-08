@@ -20,7 +20,7 @@ Sky consists of two components:
 
 1. *The Sky engine.* The engine is the core of the system. Written in C++, the
    engine provides the muscle of the Sky system. The engine provides
-   several primitives, including a soft real-time scheduler and a hierarchial,
+   several primitives, including a soft real-time scheduler and a hierarchical,
    retained-mode graphics system, that let you build high-quality apps.
 
 2. *The Sky framework.* The [framework](packages/sky/lib/framework) makes it
@@ -203,7 +203,7 @@ Adding Services to MyApp
 system designed to provide cross-thread, cross-process, and language-agnostic
 communication between applications.  Sky uses Mojo IPC to make it possible
 to write UI code in Dart and yet depend on networking code, etc. written in
-another language.  Services are replacable, meaning that Dart code
+another language.  Services are replicable, meaning that Dart code
 written to use the `network_service` remains portable to any platform
 (iOS, Android, etc.) by simply providing a 'natively' written `network_service`.
 
