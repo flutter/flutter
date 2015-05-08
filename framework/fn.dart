@@ -8,50 +8,14 @@ import 'dart:async';
 import 'dart:collection';
 import 'dart:sky' as sky;
 import 'reflect.dart' as reflect;
+import 'layout.dart';
+
+export 'layout.dart' show Style;
 
 final sky.Tracing _tracing = sky.window.tracing;
 
 final bool _shouldLogRenderDuration = false;
 final bool _shouldTrace = false;
-
-class Style {
-  final String _className;
-  static final Map<String, Style> _cache = new HashMap<String, Style>();
-
-  static int _nextStyleId = 1;
-
-  static String _getNextClassName() { return "style${_nextStyleId++}"; }
-
-  Style extend(Style other) {
-    var className = "$_className ${other._className}";
-
-    return _cache.putIfAbsent(className, () {
-      return new Style._internal(className);
-    });
-  }
-
-  factory Style(String styles) {
-    return _cache.putIfAbsent(styles, () {
-      var className = _getNextClassName();
-      sky.Element styleNode = sky.document.createElement('style');
-      styleNode.setChild(new sky.Text(".$className { $styles }"));
-      sky.document.appendChild(styleNode);
-      return new Style._internal(className);
-    });
-  }
-
-  Style._internal(this._className);
-}
-
-void _parentInsertBefore(sky.ParentNode parent,
-                         sky.Node node,
-                         sky.Node ref) {
-  if (ref != null) {
-    ref.insertBefore([node]);
-  } else {
-    parent.appendChild(node);
-  }
-}
 
 enum _SyncOperation { IDENTICAL, INSERTION, STATEFUL, STATELESS, REMOVAL }
 
@@ -63,7 +27,7 @@ abstract class UINode {
   String _key;
   UINode _parent;
   UINode get parent => _parent;
-  sky.Node _root;
+  RenderCSS _root;
   bool _defunct = false;
 
   UINode({ Object key }) {
@@ -74,7 +38,7 @@ abstract class UINode {
   // if the |old| node has become stateful and should be retained.
   bool _willSync(UINode old) => false;
 
-  void _sync(UINode old, sky.ParentNode host, sky.Node insertBefore);
+  void _sync(UINode old, RenderCSSContainer host, RenderCSS insertBefore);
 
   void _remove() {
     _defunct = true;
@@ -118,8 +82,8 @@ abstract class UINode {
   }
 
   // Returns the child which should be retained as the child of this node.
-  UINode _syncChild(UINode node, UINode oldNode, sky.ParentNode host,
-      sky.Node insertBefore) {
+  UINode _syncChild(UINode node, UINode oldNode, RenderCSSContainer host,
+      RenderCSS insertBefore) {
 
     assert(oldNode == null || node._key == oldNode._key);
 
@@ -139,7 +103,7 @@ abstract class UINode {
       _traceSync(_SyncOperation.STATEFUL, node._key);
       oldNode._sync(node, host, insertBefore);
       node._defunct = true;
-      assert(oldNode._root is sky.Node);
+      assert(oldNode._root is RenderCSS);
       return oldNode;
     }
 
@@ -154,7 +118,7 @@ abstract class UINode {
     if (oldNode != null)
       oldNode._defunct = true;
 
-    assert(node._root is sky.Node);
+    assert(node._root is RenderCSS);
     return node;
   }
 }
@@ -164,14 +128,16 @@ abstract class ContentNode extends UINode {
 
   ContentNode(UINode content) : this.content = content, super(key: content._key);
 
-  void _sync(UINode old, sky.ParentNode host, sky.Node insertBefore) {
+  void _sync(UINode old, RenderCSSContainer host, RenderCSS insertBefore) {
     UINode oldContent = old == null ? null : (old as ContentNode).content;
     content = _syncChild(content, oldContent, host, insertBefore);
+    assert(content._root != null);
     _root = content._root;
   }
 
   void _remove() {
-    _removeChild(content);
+    if (content != null)
+      _removeChild(content);
     super._remove();
   }
 }
@@ -183,31 +149,33 @@ class StyleNode extends ContentNode {
 }
 
 /*
- * SkyNodeWrappers correspond to a desired state of a sky.Node. They are fully
+ * SkyNodeWrappers correspond to a desired state of a RenderCSS. They are fully
  * immutable, with one exception: A UINode which is a Component which lives within
  * an SkyElementWrapper's children list, may be replaced with the "old" instance if it
  * has become stateful.
  */
 abstract class SkyNodeWrapper extends UINode {
 
-  static final Map<sky.Node, SkyNodeWrapper> _nodeMap =
-      new HashMap<sky.Node, SkyNodeWrapper>();
+  static final Map<RenderCSS, SkyNodeWrapper> _nodeMap =
+      new HashMap<RenderCSS, SkyNodeWrapper>();
 
-  static SkyNodeWrapper _getMounted(sky.Node node) => _nodeMap[node];
+  static SkyNodeWrapper _getMounted(RenderCSS node) => _nodeMap[node];
 
   SkyNodeWrapper({ Object key }) : super(key: key);
 
   SkyNodeWrapper get _emptyNode;
 
-  sky.Node _createNode();
+  RenderCSS _createNode();
 
-  void _sync(UINode old, sky.ParentNode host, sky.Node insertBefore) {
+  void _sync(UINode old, RenderCSSContainer host, RenderCSS insertBefore) {
     if (old == null) {
       _root = _createNode();
-      _parentInsertBefore(host, _root, insertBefore);
+      assert(_root != null);
+      host.add(_root, before: insertBefore);
       old = _emptyNode;
     } else {
       _root = old._root;
+      assert(_root != null);
     }
 
     _nodeMap[_root] = this;
@@ -216,9 +184,14 @@ abstract class SkyNodeWrapper extends UINode {
 
   void _syncNode(SkyNodeWrapper old);
 
+  void _removeChild(UINode node) {
+    assert(_root is RenderCSSContainer);
+    _root.remove(node._root);
+    super._removeChild(node);
+  }
+
   void _remove() {
     assert(_root != null);
-    _root.remove();
     _nodeMap.remove(_root);
     super._remove();
   }
@@ -314,12 +287,12 @@ class EventListenerNode extends ContentNode  {
   }
 
   static void _dispatchEvent(sky.Event e) {
-    UINode target = SkyNodeWrapper._getMounted(e.target);
+    UINode target = SkyNodeWrapper._getMounted(bridgeEventTargetToRenderNode(e.target));
 
     // TODO(rafaelw): StopPropagation?
     while (target != null) {
       if (target is EventListenerNode) {
-        (target as EventListenerNode)._handleEvent(e);
+        target._handleEvent(e);
       }
 
       target = target._parent;
@@ -332,7 +305,7 @@ class EventListenerNode extends ContentNode  {
     }
   }
 
-  void _sync(UINode old, sky.ParentNode host, sky.Node insertBefore) {
+  void _sync(UINode old, RenderCSSContainer host, RenderCSS insertBefore) {
     for (var type in listeners.keys) {
       _ensureDocumentListener(type);
     }
@@ -354,19 +327,15 @@ class Text extends SkyNodeWrapper {
 
   SkyNodeWrapper get _emptyNode => _emptyText;
 
-  static final Style _displayParagraph = new Style('display:paragraph');
-
-  sky.Node _createNode() {
-    return sky.document.createElement('div')
-                           ..setChild(new sky.Text(this.data))
-                           ..setAttribute('class', _displayParagraph._className);
+  RenderCSSText _root;
+  RenderCSS _createNode() {
+    return new RenderCSSText(this, this.data);
   }
 
   void _syncNode(SkyNodeWrapper old) {
     if (old == _emptyText)
       return; // we set inside _createNode();
-
-    (_root.firstChild as sky.Text).data = data;
+    _root.data = data;
   }
 }
 
@@ -374,15 +343,9 @@ final List<UINode> _emptyList = new List<UINode>();
 
 abstract class SkyElementWrapper extends SkyNodeWrapper {
 
-  String get _tagName;
-
-  sky.Node _createNode() => sky.document.createElement(_tagName);
-
   final List<UINode> children;
   final Style style;
   final String inlineStyle;
-
-  String _class;
 
   SkyElementWrapper({
     Object key,
@@ -396,17 +359,18 @@ abstract class SkyElementWrapper extends SkyNodeWrapper {
   }
 
   void _remove() {
-    super._remove();
-    if (children != null) {
-      for (var child in children) {
-        _removeChild(child);
-      }
+    assert(children != null);
+    for (var child in children) {
+      assert(child != null);
+      _removeChild(child);
     }
+    super._remove();
   }
 
   bool _debugHasDuplicateIds() {
     var idSet = new HashSet<String>();
     for (var child in children) {
+      assert(child != null);
       if (child is Text) {
         continue; // Text nodes all have the same key and are never reordered.
       }
@@ -419,42 +383,28 @@ abstract class SkyElementWrapper extends SkyNodeWrapper {
     return false;
   }
 
-  void _ensureClass() {
-    if (_class == null) {
-      List<Style> styles = new List<Style>();
-      if (style != null) {
-        styles.add(style);
-      }
-
-      UINode parent = _parent;
-      while (parent != null && parent is! SkyNodeWrapper) {
-        if (parent is StyleNode && (parent as StyleNode).style != null)
-          styles.add((parent as StyleNode).style);
-
-        parent = parent._parent;
-      }
-
-      _class = styles.map((s) => s._className).join(' ');
-    }
-  }
-
   void _syncNode(SkyNodeWrapper old) {
     SkyElementWrapper oldSkyElementWrapper = old as SkyElementWrapper;
-    sky.Element root = _root as sky.Element;
 
-    _ensureClass();
-    if (_class != oldSkyElementWrapper._class && _class != '')
-      root.setAttribute('class', _class);
+    List<Style> styles = new List<Style>();
+    if (style != null)
+      styles.add(style);
+    UINode parent = _parent;
+    while (parent != null && parent is! SkyNodeWrapper) {
+      if (parent is StyleNode && parent.style != null)
+        styles.add(parent.style);
+      parent = parent._parent;
+    }
+    _root.updateStyles(styles);
 
-    if (inlineStyle != oldSkyElementWrapper.inlineStyle)
-      root.setAttribute('style', inlineStyle);
+    _root.updateInlineStyle(inlineStyle);
 
     _syncChildren(oldSkyElementWrapper);
   }
 
   void _syncChildren(SkyElementWrapper oldSkyElementWrapper) {
-    sky.Element root = _root as sky.Element;
-    assert(root != null);
+    if (_root is! RenderCSSContainer)
+      return;
 
     var startIndex = 0;
     var endIndex = children.length;
@@ -463,12 +413,13 @@ abstract class SkyElementWrapper extends SkyNodeWrapper {
     var oldStartIndex = 0;
     var oldEndIndex = oldChildren.length;
 
-    sky.Node nextSibling = null;
+    RenderCSS nextSibling = null;
     UINode currentNode = null;
     UINode oldNode = null;
 
     void sync(int atIndex) {
       children[atIndex] = _syncChild(currentNode, oldNode, _root, nextSibling);
+      assert(children[atIndex] != null);
     }
 
     // Scan backwards from end of list while nodes can be directly synced
@@ -484,7 +435,6 @@ abstract class SkyElementWrapper extends SkyNodeWrapper {
       endIndex--;
       oldEndIndex--;
       sync(endIndex);
-      nextSibling = currentNode._root;
     }
 
     HashMap<String, UINode> oldNodeIdMap = null;
@@ -526,19 +476,22 @@ abstract class SkyElementWrapper extends SkyNodeWrapper {
         return false;
 
       oldNodeIdMap[currentNode._key] = null; // mark it reordered.
-      _parentInsertBefore(root, oldNode._root, nextSibling);
+      assert(_root is RenderCSSContainer);
+      assert(oldNode._root is RenderCSSContainer);
+      oldSkyElementWrapper._root.remove(oldNode._root);
+      _root.add(oldNode._root, before: nextSibling);
       return true;
     }
 
     // Scan forwards, this time we may re-order;
-    nextSibling = root.firstChild;
+    nextSibling = _root.firstChild;
     while (startIndex < endIndex && oldStartIndex < oldEndIndex) {
       currentNode = children[startIndex];
       oldNode = oldChildren[oldStartIndex];
 
       if (currentNode._key == oldNode._key) {
         assert(currentNode.runtimeType == oldNode.runtimeType);
-        nextSibling = nextSibling.nextSibling;
+        nextSibling = _root.childAfter(nextSibling);
         sync(startIndex);
         startIndex++;
         advanceOldStartIndex();
@@ -571,7 +524,7 @@ abstract class SkyElementWrapper extends SkyNodeWrapper {
 
 class Container extends SkyElementWrapper {
 
-  String get _tagName => 'div';
+  RenderCSS _createNode() => new RenderCSSContainer(this);
 
   static final Container _emptyContainer = new Container();
 
@@ -590,49 +543,10 @@ class Container extends SkyElementWrapper {
   );
 }
 
-abstract class LayoutContainer extends Container {
-
-  LayoutContainer({
-    Object key,
-    List<UINode> children,
-    Style style,
-    String inlineStyle
-  }) : super(
-    key: key,
-    children: children,
-    style: style,
-    inlineStyle: inlineStyle
-  );
-
-  sky.Node _createNode() {
-    var result = super._createNode();
-    result.setLayoutManager(() => layout(_root));
-    return result;
-  }
-
-  // If we ever reuse sky nodes for different classes, then we should 
-  // call _root.setLayoutManager(null) during _remove() here.
-
-  void _syncNode(SkyNodeWrapper old) {
-    super._syncNode(old);
-    _root.setLayoutManager(() => layout(_root));
-    _root.setNeedsLayout();
-  }
-
-  void layout(sky.Element skyNode);
-  // set skyNode.width (e.g., set it to skyNode.parentNode.width)
-  // for each skyNode.getChildNodes()[i]:
-  //   call .layout()
-  //   set .x, .y
-  //   set .width if you want to force a width
-  //   set .height if you want to force a height
-  // set skyNode.height
-
-}
-
 class Image extends SkyElementWrapper {
 
-  String get _tagName => 'img';
+  RenderCSSImage _root;
+  RenderCSSImage _createNode() => new RenderCSSImage(this, this.src, this.width, this.height);
 
   static final Image _emptyImage = new Image();
 
@@ -659,56 +573,7 @@ class Image extends SkyElementWrapper {
 
   void _syncNode(UINode old) {
     super._syncNode(old);
-
-    Image oldImage = old as Image;
-    sky.HTMLImageElement skyImage = _root as sky.HTMLImageElement;
-
-    if (src != oldImage.src)
-      skyImage.src = src;
-
-    if (width != oldImage.width)
-      skyImage.style['width'] = '${width}px';
-
-    if (height != oldImage.height)
-      skyImage.style['height'] = '${height}px';
-  }
-}
-
-class Anchor extends SkyElementWrapper {
-
-  String get _tagName => 'a';
-
-  static final Anchor _emptyAnchor = new Anchor();
-
-  UINode get _emptyNode => _emptyAnchor;
-
-  final String href;
-  final int width;
-  final int height;
-
-  Anchor({
-    Object key,
-    List<UINode> children,
-    Style style,
-    String inlineStyle,
-    this.width,
-    this.height,
-    this.href
-  }) : super(
-    key: key,
-    children: children,
-    style: style,
-    inlineStyle: inlineStyle
-  );
-
-  void _syncNode(UINode old) {
-    super._syncNode(old);
-
-    Anchor oldAnchor = old as Anchor;
-    sky.HTMLAnchorElement skyAnchor = _root as sky.HTMLAnchorElement;
-
-    if (href != oldAnchor.href)
-      skyAnchor.href = href;
+    _root.configure(this.src, this.width, this.height);
   }
 }
 
@@ -789,9 +654,6 @@ abstract class Component extends UINode {
   bool get _isBuilding => _currentlyBuilding == this;
   bool _dirty = true;
 
-  sky.Node get _host => _root.parentNode;
-  sky.Node get _insertionPoint => _root == null ? _root : _root.nextSibling;
-
   UINode _built;
   final int _order;
   static int _currentOrder = 0;
@@ -835,7 +697,7 @@ abstract class Component extends UINode {
 
   // TODO(rafaelw): It seems wrong to expose DOM at all. This is presently
   // needed to get sizing info.
-  sky.Node getRoot() => _root;
+  RenderCSS getRoot() => _root;
 
   void _remove() {
     assert(_built != null);
@@ -871,7 +733,7 @@ abstract class Component extends UINode {
    * 3) Syncing against an old version
    *      assert(_built == null && old != null)
    */
-  void _sync(UINode old, sky.ParentNode host, sky.Node insertBefore) {
+  void _sync(UINode old, RenderCSSContainer host, RenderCSS insertBefore) {
     assert(!_defunct);
     assert(_built == null || old == null);
 
@@ -898,15 +760,15 @@ abstract class Component extends UINode {
     _built = _syncChild(_built, oldBuilt, host, insertBefore);
     _dirty = false;
     _root = _built._root;
+    assert(_root != null);
   }
 
   void _buildIfDirty() {
     if (!_dirty || _defunct)
       return;
 
-    assert(_host != null);
     _trace('$_key rebuilding...');
-    _sync(null, _host, _insertionPoint);
+    _sync(null, null, null); // TODO(ianh): figure out how passing "null, null, null" here is ok
   }
 
   void scheduleBuild() {
@@ -927,11 +789,18 @@ abstract class Component extends UINode {
 }
 
 abstract class App extends Component {
-  sky.Node _host;
+  RenderCSS _host;
 
   App() : super(stateful: true) {
-    _host = sky.document.createElement('div');
-    sky.document.appendChild(_host);
+    _host = new RenderCSSRoot(this);
     _scheduleComponentForRender(this);
+  }
+
+  void _buildIfDirty() {
+    if (!_dirty || _defunct)
+      return;
+
+    _trace('$_key rebuilding...');
+    _sync(null, _host, _root);
   }
 }

@@ -45,14 +45,13 @@ class InkWell extends Component implements ScrollClient {
     );
   }
 
-  sky.ClientRect _getBoundingRect() => (getRoot() as sky.Element).getBoundingClientRect();
-
   void _startSplash(sky.GestureEvent event) {
     setState(() {
       if (_splashes == null)
         _splashes = new LinkedHashSet<SplashController>();
       var splash;
-      splash = new SplashController(_getBoundingRect(), event.x, event.y,
+      var root = getRoot();
+      splash = new SplashController(root.rect, event.x, event.y,
                                     pointer: event.primaryPointer,
                                     onDone: () { _splashDone(splash); });
       _splashes.add(splash);

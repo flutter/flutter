@@ -8,16 +8,16 @@ import '../fn.dart';
 import '../theme/view_configuration.dart' as config;
 import 'dart:async';
 import 'dart:math' as math;
-import 'dart:sky' as sky;
+import '../layout.dart';
 
 const double _kSplashConfirmedDuration = 350.0;
 const double _kSplashUnconfirmedDuration = config.kDefaultLongPressTimeout;
 const double _kSplashAbortDuration = 100.0;
 const double _kSplashInitialDelay = 0.0; // we could delay initially in case the user scrolls
 
-double _getSplashTargetSize(sky.ClientRect rect, double x, double y) {
-  return 2.0 * math.max(math.max(x - rect.left, rect.right - x),
-                        math.max(y - rect.top, rect.bottom - y));
+double _getSplashTargetSize(Rect rect, double x, double y) {
+  return 2.0 * math.max(math.max(x - rect.x, rect.x + rect.width - x),
+                        math.max(y - rect.y, rect.y + rect.height - y));
 }
 
 class SplashController {
@@ -56,10 +56,10 @@ class SplashController {
     _size.stop();
   }
 
-  SplashController(sky.ClientRect rect, double x, double y,
+  SplashController(Rect rect, double x, double y,
                    { this.pointer, Function onDone })
-      : _offsetX = x - rect.left,
-        _offsetY = y - rect.top,
+      : _offsetX = x - rect.x,
+        _offsetY = y - rect.y,
         _targetSize = _getSplashTargetSize(rect, x, y) {
 
     _styleStream = _size.onValueChanged.map((p) {

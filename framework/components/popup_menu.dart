@@ -92,8 +92,8 @@ class PopupMenu extends AnimatedComponent {
   void _measureSize() {
     setState(() {
       var root = getRoot();
-      _width = root.clientWidth;
-      _height = root.clientHeight;
+      _width = root.width.round();
+      _height = root.height.round();
     });
   }
 
