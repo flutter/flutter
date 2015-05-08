@@ -1,7 +1,6 @@
-<div>
-  <div style="background-color: green">
-    <div class="style1">I am Text</div>
-    <img src="resources/united.jpg"></img>
-    <a href="http://www.google.com"></a>
+<div debug="Instance of 'TestApp'">
+  <div debug="Instance of 'Container'" class="" style="background-color: green">
+    <div class="style1" debug="Instance of 'Text'">I am Text</div>
+    <img debug="Instance of 'Image'" src="resources/united.jpg" class=""></img>
   </div>
 </div><style>.style1 { display:paragraph }</style>
