@@ -78,7 +78,7 @@ constructor looks like this:
   Checkbox({ Object key, this.onChanged, this.checked }) : super(key: key);
 ```
 
-What this means is that the `Checkbox` component is *never* "owns" the state of
+What this means is that the `Checkbox` component *never* "owns" the state of
 the checkbox. It's current state is handed into the `checked` parameter, and
 when a click occurs, the checkbox invokes its `onChanged` callback with the
 value it thinks it should be changed to -- but it never directly changes the
