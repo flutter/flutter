@@ -88,6 +88,9 @@ dirty components and diffs the virtual `UINode` hierarchy returned this frame
 with the hierarchy returned last frame. Any differences are then applied as
 mutations to the physical hierarchy retained by the engine.
 
+Skip down to "Running a Sky application" to learn how to load and run this
+example on your device.
+
 For examples, please see the [examples directory](examples/).
 
 Services
@@ -150,9 +153,10 @@ one of the examples in this SDK, try:
 
 2. ``pub get`` to set up a copy of the sky package in the app directory.
 
-3. ``./packages/sky/sky_tool start --install``
-   The --install flag is only necessary to install SkyDemo.apk if not already
-   installed on the device.
+3. ``./packages/sky/sky_tool start`` to start the dev server and upload your
+   app to the device.
+   (NOTE: add a ``--install`` flag to install SkyDemo.apk if not already
+   installed on the device.)
 
 4. Use ``adb logcat`` to view any errors or Dart print() output from the app.
    ``adb logcat -s chromium`` can be used to filter only adb messages from
