@@ -1,14 +1,3 @@
-Contributing
-============
-
-[sky_sdk](https://github.com/domokit/sky_sdk) is generated from the
-[mojo repository](https://github.com/domokit/mojo) using
-[deploy_sdk.py](https://github.com/domokit/mojo/blob/master/sky/tools/deploy_sdk.py)
-Static files (including this README.md) are located under
-[sky/sdk](https://github.com/domokit/mojo/tree/master/sky/sdk).  Pull
-requests and issue reports are glady accepted at the
-[mojo repository](https://github.com/domokit/mojo)!
-
 Sky
 ===
 
@@ -59,7 +48,7 @@ Currently the Sky Engine assumes the entry point for your application is a
 ```
 <sky>
 <script>
-import 'package:your_app_name/main.dart';
+import 'package:your_app_name/main.dart'
 
 void main() {
   new HelloWorldApp();
@@ -123,6 +112,12 @@ Set up your computer
 
 4. Ensure that $DART_SDK is set to the path of your Dart SDK and 'adb'
    (inside 'platform-tools' in the android sdk) is in your $PATH.
+   
+For Windows users
+-----------------
+
+You will need to install Python 2.7.9 on your computer. Go on the Python site and download Python 2.7.9 : https://www.python.org/downloads/ .
+Once Python will be installed, put Python installation directory in your PATH environment variable.
 
 Set up your device
 ------------------
@@ -148,11 +143,14 @@ one of the examples in this SDK, try:
 
 1. ``cd examples/stocks``
 
-2. ``pub get`` to set up a copy of the sky package in the app directory.
+2. ``pub get`` to set up a copy of the sky package in the app directory. For Windows users, you will need to copy packages\sky\apks\SkyDemo.apk to examples\stocks\packages\apks\
 
 3. ``./packages/sky/sky_tool start --install``
    The --install flag is only necessary to install SkyDemo.apk if not already
    installed on the device.
+   
+   A this stage, there is a little difference if you are a Windows user. You must use the following command line :
+   ``python .\packages\sky\sky_tool start --install``
 
 4. Use ``adb logcat`` to view any errors or Dart print() output from the app.
    ``adb logcat -s chromium`` can be used to filter only adb messages from
