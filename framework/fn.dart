@@ -543,6 +543,37 @@ class Container extends SkyElementWrapper {
   );
 }
 
+class FlexContainer extends SkyElementWrapper {
+
+  RenderCSSFlex _root;
+  RenderCSSFlex _createNode() => new RenderCSSFlex(this, this.direction);
+
+  static final FlexContainer _emptyContainer = new FlexContainer();
+    // direction doesn't matter if it's empty
+
+  SkyNodeWrapper get _emptyNode => _emptyContainer;
+
+  final FlexDirection direction;
+
+  FlexContainer({
+    Object key,
+    List<UINode> children,
+    Style style,
+    String inlineStyle,
+    this.direction: FlexDirection.Row
+  }) : super(
+    key: key,
+    children: children,
+    style: style,
+    inlineStyle: inlineStyle
+  );
+
+  void _syncNode(UINode old) {
+    super._syncNode(old);
+    _root.direction = direction;
+  }
+}
+
 class Image extends SkyElementWrapper {
 
   RenderCSSImage _root;

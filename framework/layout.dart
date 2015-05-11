@@ -254,7 +254,11 @@ abstract class RenderCSS extends RenderBox {
   sky.Element createSkyElement();
 
   void updateStyles(List<Style> styles) {
-    _skyElement.setAttribute('class', styles.map((s) => s._className).join(' '));
+    _skyElement.setAttribute('class', stylesToClasses(styles));
+  }
+
+  String stylesToClasses(List<Style> styles) {
+    return styles.map((s) => s._className).join(' ');
   }
 
   void updateInlineStyle(String newStyle) {
@@ -312,6 +316,39 @@ class RenderCSSContainer extends RenderCSS with ContainerRenderNodeMixin<RenderC
   void remove(RenderCSS child) {
     child._skyElement.remove();
     super.remove(child);
+  }
+
+}
+
+class FlexBoxParentData extends CSSParentData { }
+
+enum FlexDirection { Row }
+
+class RenderCSSFlex extends RenderCSSContainer {
+
+  RenderCSSFlex(debug, FlexDirection direction) : _direction = direction, super(debug);
+
+  FlexDirection _direction;
+  FlexDirection get direction => _direction;
+  void set direction (FlexDirection value) {
+    _direction = value;
+    markNeedsLayout();
+  }
+
+  void setupPos(RenderNode child) {
+    if (child.parentData is! FlexBoxParentData)
+      child.parentData = new FlexBoxParentData();
+  }
+
+  static final Style _displayFlex = new Style('display:flex');
+  static final Style _displayFlexRow = new Style('flex-direction:row');
+
+  String stylesToClasses(List<Style> styles) {
+    var settings = _displayFlex._className;
+    switch (_direction) {
+      case FlexDirection.Row: settings += ' ' + _displayFlexRow._className;
+    }
+    return super.stylesToClasses(styles) + ' ' + settings;
   }
 
 }

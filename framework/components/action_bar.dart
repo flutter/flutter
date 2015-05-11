@@ -3,13 +3,12 @@
 // found in the LICENSE file.
 
 import '../fn.dart';
+import '../layout.dart';
 import '../theme/view_configuration.dart';
 import 'material.dart';
 
 class ActionBar extends Component {
   static final Style _style = new Style('''
-    display: flex;
-    flex-direction: row;
     align-items: center;
     height: 56px;
     padding: 0 8px;
@@ -38,7 +37,10 @@ class ActionBar extends Component {
       children.addAll(right);
 
     return new Material(
-      content: new Container(style: _style, children: children),
+      content: new FlexContainer(
+        style: _style,
+        children: children,
+        direction: FlexDirection.Row),
       level: 2);
   }
 }
