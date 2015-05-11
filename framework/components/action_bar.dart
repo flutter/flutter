@@ -16,8 +16,9 @@ class ActionBar extends Component {
     padding-top: ${kStatusBarHeight}px;''');
 
   static Style _centerStyle = new Style('''
-    padding-left: 24px;
-    flex: 1;''');
+    padding-left: 24px;''');
+
+  static FlexBoxParentData _centerLayoutSettings = new FlexBoxParentData()..flex = 1;
 
   UINode left;
   UINode center;
@@ -31,7 +32,7 @@ class ActionBar extends Component {
   }) : super(key: key);
 
   UINode build() {
-    List<UINode> children = [left, new StyleNode(center, _centerStyle)];
+    List<UINode> children = [left, new StyleNode(new ParentDataNode(center, _centerLayoutSettings), _centerStyle)];
 
     if (right != null)
       children.addAll(right);

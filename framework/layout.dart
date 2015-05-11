@@ -53,6 +53,10 @@ class ParentData {
     detachSiblings();
   }
   void detachSiblings() { } // workaround for lack of inter-class mixins in Dart
+  void merge(ParentData other) {
+    // override this in subclasses to merge in data from other into this
+    assert(other.runtimeType == this.runtimeType);
+  }
 }
 
 abstract class RenderNode extends Node {
@@ -261,8 +265,16 @@ abstract class RenderCSS extends RenderBox {
     return styles.map((s) => s._className).join(' ');
   }
 
+  String _inlineStyles = '';
+  String _additionalStylesFromParent = ''; // used internally to propagate parentData settings to the child
+
   void updateInlineStyle(String newStyle) {
-    _skyElement.setAttribute('style', newStyle);
+    _inlineStyles = newStyle;
+    _updateInlineStyleAttribute();
+  }
+
+  void _updateInlineStyleAttribute() {
+    _skyElement.setAttribute('style', "$_inlineStyles;$_additionalStylesFromParent");
   }
 
   double get width {
@@ -320,7 +332,14 @@ class RenderCSSContainer extends RenderCSS with ContainerRenderNodeMixin<RenderC
 
 }
 
-class FlexBoxParentData extends CSSParentData { }
+class FlexBoxParentData extends CSSParentData {
+  int flex;
+  void merge(FlexBoxParentData other) {
+    if (other.flex != null)
+      flex = other.flex;
+    super.merge(other);
+  }
+}
 
 enum FlexDirection { Row }
 
@@ -349,6 +368,21 @@ class RenderCSSFlex extends RenderCSSContainer {
       case FlexDirection.Row: settings += ' ' + _displayFlexRow._className;
     }
     return super.stylesToClasses(styles) + ' ' + settings;
+  }
+
+  void markNeedsLayout() {
+    super.markNeedsLayout();
+
+    // pretend we did the layout:
+    RenderCSS child = _firstChild;
+    while (child != null) {
+      assert(child.parentData is FlexBoxParentData);
+      if (child.parentData.flex != null) {
+        child._additionalStylesFromParent = 'flex:${child.parentData.flex};';
+        child._updateInlineStyleAttribute();
+      }
+      child = child.parentData.nextSibling;
+    }
   }
 
 }
