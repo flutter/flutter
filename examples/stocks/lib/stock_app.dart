@@ -21,6 +21,11 @@ import 'stock_data.dart';
 import 'stock_list.dart';
 import 'stock_menu.dart';
 
+import 'dart:async';
+import 'package:sky/framework/layout.dart';
+
+const bool debug = false; // set to true to dump the DOM for debugging purposes
+
 class StocksApp extends App {
   DrawerController _drawerController = new DrawerController();
   PopupMenuController _menuController;
@@ -39,6 +44,8 @@ class StocksApp extends App {
   String _searchQuery;
 
   StocksApp() : super() {
+    if (debug)
+      new Timer(new Duration(seconds: 1), dumpState);
     new StockDataFetcher((StockData data) {
       setState(() {
         data.appendTo(_stocks);
