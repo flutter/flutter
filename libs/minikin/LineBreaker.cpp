@@ -113,6 +113,9 @@ float LineBreaker::addStyleRun(MinikinPaint* paint, const FontCollection* typefa
 
         // a heuristic that seems to perform well
         hyphenPenalty = 0.5 * paint->size * paint->scaleX * mLineWidths.getLineWidth(0);
+        if (mHyphenationFrequency == kHyphenationFrequency_Normal) {
+            hyphenPenalty *= 4.0; // TODO: Replace with a better value after some testing
+        }
     }
 
     size_t current = (size_t)mBreakIterator->current();
@@ -140,7 +143,9 @@ float LineBreaker::addStyleRun(MinikinPaint* paint, const FontCollection* typefa
             // Override ICU's treatment of soft hyphen as a break opportunity, because we want it
             // to be a hyphen break, with penalty and drawing behavior.
             if (c != CHAR_SOFT_HYPHEN) {
-                if (paint != nullptr && mHyphenator != nullptr && wordEnd > lastBreak) {
+                if (paint != nullptr && mHyphenator != nullptr &&
+                        mHyphenationFrequency != kHyphenationFrequency_None &&
+                        wordEnd > lastBreak) {
                     mHyphenator->hyphenate(&mHyphBuf, &mTextBuf[lastBreak], wordEnd - lastBreak);
     #if VERBOSE_DEBUG
                     std::string hyphenatedString;
@@ -426,6 +431,7 @@ void LineBreaker::finish() {
         mFlags.shrink_to_fit();
     }
     mStrategy = kBreakStrategy_Greedy;
+    mHyphenationFrequency = kHyphenationFrequency_Normal;
 }
 
 }  // namespace android
