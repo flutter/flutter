@@ -36,6 +36,12 @@ enum BreakStrategy {
     kBreakStrategy_Balanced = 2
 };
 
+enum HyphenationFrequency {
+    kHyphenationFrequency_None = 0,
+    kHyphenationFrequency_Normal = 1,
+    kHyphenationFrequency_Full = 2
+};
+
 // TODO: want to generalize to be able to handle array of line widths
 class LineWidths {
     public:
@@ -142,6 +148,12 @@ class LineBreaker {
 
         void setStrategy(BreakStrategy strategy) { mStrategy = strategy; }
 
+        HyphenationFrequency getHyphenationFrequency() const { return mHyphenationFrequency; }
+
+        void setHyphenationFrequency(HyphenationFrequency frequency) {
+            mHyphenationFrequency = frequency;
+        }
+
         // TODO: this class is actually fairly close to being general and not tied to using
         // Minikin to do the shaping of the strings. The main thing that would need to be changed
         // is having some kind of callback (or virtual class, or maybe even template), which could
@@ -218,6 +230,7 @@ class LineBreaker {
 
         // layout parameters
         BreakStrategy mStrategy = kBreakStrategy_Greedy;
+        HyphenationFrequency mHyphenationFrequency = kHyphenationFrequency_Normal;
         LineWidths mLineWidths;
         TabStops mTabStops;
 
