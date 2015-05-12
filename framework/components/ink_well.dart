@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import '../fn.dart';
+import '../layout.dart';
 import 'dart:collection';
 import 'dart:sky' as sky;
 import 'ink_splash.dart';
@@ -10,6 +11,7 @@ import 'scrollable.dart';
 
 class InkWell extends Component implements ScrollClient {
   static final Style _containmentStyleHack = new Style('''
+    align-items: center;
     transform: translateX(0);''');
 
   LinkedHashSet<SplashController> _splashes;
@@ -36,7 +38,8 @@ class InkWell extends Component implements ScrollClient {
       childrenIncludingSplashes.addAll(children);
 
     return new EventListenerNode(
-      new Container(
+      new FlexContainer(
+        direction: FlexDirection.Row,
         style: _containmentStyleHack,
         inlineStyle: inlineStyle,
         children: childrenIncludingSplashes),

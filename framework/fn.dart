@@ -320,31 +320,6 @@ class EventListenerNode extends ContentNode  {
   }
 }
 
-class Text extends SkyNodeWrapper {
-  final String data;
-
-  // Text nodes are special cases of having non-unique keys (which don't need
-  // to be assigned as part of the API). Since they are unique in not having
-  // children, there's little point to reordering, so we always just re-assign
-  // the data.
-  Text(this.data) : super(key:'*text*');
-
-  static final Text _emptyText = new Text(null);
-
-  SkyNodeWrapper get _emptyNode => _emptyText;
-
-  RenderCSSText _root;
-  RenderCSS _createNode() {
-    return new RenderCSSText(this, this.data);
-  }
-
-  void _syncNode(SkyNodeWrapper old) {
-    if (old == _emptyText)
-      return; // we set inside _createNode();
-    _root.data = data;
-  }
-}
-
 final List<UINode> _emptyList = new List<UINode>();
 
 abstract class SkyElementWrapper extends SkyNodeWrapper {
@@ -591,6 +566,36 @@ class FlexContainer extends SkyElementWrapper {
   void _syncNode(UINode old) {
     super._syncNode(old);
     _root.direction = direction;
+  }
+}
+
+class Text extends SkyElementWrapper {
+
+  RenderCSSText _root;
+  RenderCSSText _createNode() => new RenderCSSText(this, this.data);
+
+  static final Text _emptyText = new Text('');
+
+  SkyNodeWrapper get _emptyNode => _emptyText;
+
+  final String data;
+
+  // Text nodes are special cases of having non-unique keys (which don't need
+  // to be assigned as part of the API). Since they are unique in not having
+  // children, there's little point to reordering, so we always just re-assign
+  // the data.
+  Text(this.data, {
+    Style style,
+    String inlineStyle
+  }) : super(
+    key: '*text*',
+    style: style,
+    inlineStyle: inlineStyle
+  );
+
+  void _syncNode(UINode old) {
+    super._syncNode(old);
+    _root.data = data;
   }
 }
 

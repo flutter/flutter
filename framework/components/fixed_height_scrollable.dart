@@ -77,7 +77,7 @@ abstract class FixedHeightScrollable extends Scrollable {
         transformStyle =
           'transform: translateY(${(-scrollOffset).toStringAsFixed(2)}px)';
       } else {
-        drawCount = (_height / _itemHeight).round() + 1;
+        drawCount = (_height / _itemHeight).ceil() + 1;
         double alignmentDelta = -scrollOffset % _itemHeight;
         if (alignmentDelta != 0.0)
           alignmentDelta -= _itemHeight;

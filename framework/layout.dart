@@ -381,7 +381,7 @@ class RenderCSSFlex extends RenderCSSContainer {
     while (child != null) {
       assert(child.parentData is FlexBoxParentData);
       if (child.parentData.flex != null) {
-        child._additionalStylesFromParent = 'flex:${child.parentData.flex};';
+        child._additionalStylesFromParent = 'flex:${child.parentData.flex}';
         child._updateInlineStyleAttribute();
       }
       child = child.parentData.nextSibling;
@@ -398,10 +398,13 @@ class RenderCSSText extends RenderCSS {
 
   static final Style _displayParagraph = new Style('display:paragraph');
 
+  String stylesToClasses(List<Style> styles) {
+    return super.stylesToClasses(styles) + ' ' + _displayParagraph._className;
+  }
+
   sky.Element createSkyElement() {
     return sky.document.createElement('div')
                       ..setChild(new sky.Text())
-                      ..setAttribute('class', _displayParagraph._className)
                       ..setAttribute('debug', debug.toString());
   }
 
