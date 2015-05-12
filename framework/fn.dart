@@ -148,12 +148,6 @@ class StyleNode extends ContentNode {
   StyleNode(UINode content, this.style): super(content);
 }
 
-class ParentDataNode extends ContentNode {
-  final ParentData parentData;
-
-  ParentDataNode(UINode content, this.parentData): super(content);
-}
-
 /*
  * SkyNodeWrappers correspond to a desired state of a RenderCSS. They are fully
  * immutable, with one exception: A UINode which is a Component which lives within
@@ -395,28 +389,14 @@ abstract class SkyElementWrapper extends SkyNodeWrapper {
     List<Style> styles = new List<Style>();
     if (style != null)
       styles.add(style);
-    ParentData parentData = null;
     UINode parent = _parent;
     while (parent != null && parent is! SkyNodeWrapper) {
       if (parent is StyleNode && parent.style != null)
         styles.add(parent.style);
-      else
-      if (parent is ParentDataNode && parent.parentData != null) {
-        if (parentData != null)
-          parentData.merge(parent.parentData); // this will throw if the types aren't the same
-        else
-          parentData = parent.parentData;
-      }
       parent = parent._parent;
     }
     _root.updateStyles(styles);
-    if (parentData != null) {
-      assert(_root.parentData != null);
-      _root.parentData.merge(parentData); // this will throw if the types aren't approriate
-      assert(parent != null);
-      assert(parent._root != null);
-      parent._root.markNeedsLayout();
-    }
+
     _root.updateInlineStyle(inlineStyle);
 
     _syncChildren(oldSkyElementWrapper);
