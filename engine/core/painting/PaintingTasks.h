@@ -11,12 +11,13 @@
 namespace blink {
 class DisplayList;
 class Element;
+class Node;
 class PaintingCallback;
 
 class PaintingTasks {
 public:
     static void enqueueRequest(PassRefPtr<Element>, PassOwnPtr<PaintingCallback>);
-    static void enqueueCommit(PassRefPtr<Element>, PassRefPtr<DisplayList>);
+    static void enqueueCommit(PassRefPtr<Node>, PassRefPtr<DisplayList>);
 
     static bool serviceRequests();
     static void drainCommits();

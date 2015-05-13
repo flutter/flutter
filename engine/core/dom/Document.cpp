@@ -104,6 +104,8 @@
 #include "sky/engine/core/page/EventHandler.h"
 #include "sky/engine/core/page/FocusController.h"
 #include "sky/engine/core/page/Page.h"
+#include "sky/engine/core/painting/PaintingTasks.h"
+#include "sky/engine/core/painting/Picture.h"
 #include "sky/engine/core/rendering/HitTestResult.h"
 #include "sky/engine/core/rendering/RenderView.h"
 #include "sky/engine/platform/DateComponents.h"
@@ -2202,6 +2204,19 @@ bool Document::hasFocus() const
         return false;
     Frame* focusedFrame = page->focusController().focusedFrame();
     return focusedFrame && focusedFrame == frame();
+}
+
+Picture* Document::rootPicture() const
+{
+    return m_picture.get();
+}
+
+void Document::setRootPicture(PassRefPtr<Picture> picture)
+{
+    m_picture = picture;
+    if (m_picture)
+        PaintingTasks::enqueueCommit(this, m_picture->displayList());
+    scheduleVisualUpdate();
 }
 
 } // namespace blink

@@ -29,10 +29,10 @@ struct RequestTask {
 };
 
 struct CommitTask {
-    CommitTask(PassRefPtr<Element> e, PassRefPtr<DisplayList> d)
-        : element(e), displayList(d) { }
+    CommitTask(PassRefPtr<Node> n, PassRefPtr<DisplayList> d)
+        : node(n), displayList(d) { }
 
-    RefPtr<Element> element;
+    RefPtr<Node> node;
     RefPtr<DisplayList> displayList;
 };
 
@@ -55,9 +55,9 @@ void PaintingTasks::enqueueRequest(PassRefPtr<Element> element, PassOwnPtr<Paint
     requests().append(adoptPtr(new RequestTask(element, callback)));
 }
 
-void PaintingTasks::enqueueCommit(PassRefPtr<Element> element, PassRefPtr<DisplayList> displayList)
+void PaintingTasks::enqueueCommit(PassRefPtr<Node> node, PassRefPtr<DisplayList> displayList)
 {
-    commits().append(CommitTask(element, displayList));
+    commits().append(CommitTask(node, displayList));
 }
 
 bool PaintingTasks::serviceRequests()
@@ -86,7 +86,7 @@ bool PaintingTasks::serviceRequests()
 void PaintingTasks::drainCommits()
 {
     for (auto& commit : commits()) {
-        RenderObject* renderer = commit.element->renderer();
+        RenderObject* renderer = commit.node->renderer();
         if (!renderer || !renderer->isBox())
             return;
         toRenderBox(renderer)->setCustomPainting(commit.displayList.release());

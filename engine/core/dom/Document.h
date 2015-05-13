@@ -63,10 +63,11 @@ namespace blink {
 class AbstractModule;
 class AnimationTimeline;
 class Attr;
-class CSSStyleDeclaration;
-class CSSStyleSheet;
 class Comment;
 class ConsoleMessage;
+class CSSStyleDeclaration;
+class CSSStyleSheet;
+class CustomElementRegistry;
 class DocumentFragment;
 class DocumentLifecycleNotifier;
 class DocumentLoadTiming;
@@ -82,28 +83,28 @@ class FloatRect;
 class Frame;
 class FrameHost;
 class FrameView;
+class HitTestRequest;
 class HTMLDocumentParser;
 class HTMLElement;
 class HTMLImport;
 class HTMLImportLoader;
 class HTMLImportsController;
 class HTMLScriptElement;
-class HitTestRequest;
 class LayoutPoint;
 class LocalDOMWindow;
 class LocalFrame;
 class Location;
 class MediaQueryListListener;
 class MediaQueryMatcher;
-class CustomElementRegistry;
 class Page;
+class Picture;
 class QualifiedName;
 class Range;
 class RenderView;
 class RequestAnimationFrameCallback;
 class ResourceFetcher;
-class ScriptRunner;
 class ScriptedAnimationController;
+class ScriptRunner;
 class SegmentedString;
 class SelectorQueryCache;
 class Settings;
@@ -494,6 +495,9 @@ public:
 
     void didRecalculateStyleForElement() { ++m_styleRecalcElementCounter; }
 
+    Picture* rootPicture() const;
+    void setRootPicture(PassRefPtr<Picture> picture);
+
 protected:
     explicit Document(const DocumentInit&);
 
@@ -678,6 +682,8 @@ private:
 
     int m_styleRecalcElementCounter;
     mutable DocumentLoadTiming m_documentLoadTiming;
+
+    RefPtr<Picture> m_picture;
 };
 
 inline void Document::scheduleRenderTreeUpdateIfNeeded()

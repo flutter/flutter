@@ -69,4 +69,6 @@ callback CustomElementConstructor = Element ();
     readonly attribute boolean hidden;
 
     readonly attribute HTMLScriptElement currentScript;
+
+    attribute Picture rootPicture;
 };

@@ -491,6 +491,8 @@ protected:
 
     void updateIntrinsicContentLogicalHeight(LayoutUnit intrinsicContentLogicalHeight) const { m_intrinsicContentLogicalHeight = intrinsicContentLogicalHeight; }
 
+    void paintCustomPainting(PaintInfo& paintInfo, const LayoutPoint& paintOffset);
+
 private:
     void updateTransformationMatrix();
     void updateTransform(const RenderStyle* oldStyle);

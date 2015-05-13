@@ -196,7 +196,7 @@ void RenderView::paint(PaintInfo& paintInfo, const LayoutPoint& paintOffset, Vec
     paintObject(paintInfo, paintOffset, layers);
 }
 
-void RenderView::paintBoxDecorationBackground(PaintInfo& paintInfo, const LayoutPoint&)
+void RenderView::paintBoxDecorationBackground(PaintInfo& paintInfo, const LayoutPoint& paintOffset)
 {
     if (!view())
         return;
@@ -216,6 +216,7 @@ void RenderView::paintBoxDecorationBackground(PaintInfo& paintInfo, const Layout
             paintInfo.context->clearRect(paintInfo.rect);
         }
     }
+    paintCustomPainting(paintInfo, paintOffset);
 }
 
 void RenderView::absoluteQuads(Vector<FloatQuad>& quads) const
