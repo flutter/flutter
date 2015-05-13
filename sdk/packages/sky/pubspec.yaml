@@ -5,3 +5,4 @@ homepage: https://github.com/domokit/mojo/tree/master/sky
 version: 0.0.5
 dependencies:
   mojo: '>=0.0.1 <1.0.0'
+  mojom: '>=0.0.4 <1.0.0'

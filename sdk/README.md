@@ -50,8 +50,10 @@ dependencies:
 ```
 
 Once the pubspec is in place, create a `lib` directory (where your dart code
-will go) and run `pub get` to download all necessary dependencies and create
-the symlinks necessary for 'package:your_app_names/main.dart' includes to work.
+will go), ensure that the 'dart' and 'pub' executables are on your $PATH and
+run the following:
+
+`pub get && pub run sky:init`.
 
 Currently the Sky Engine assumes the entry point for your application is a
 `main` function located inside a `main.sky` file at the root of the package.
