@@ -1,0 +1,46 @@
+<sky>
+<style>
+div {
+    height: 200px;
+    background-color: lightblue;
+}
+</style>
+<div id="canvas" />
+<script>
+import 'dart:math' as math;
+import 'dart:sky';
+
+void main() {
+  var element = document.getElementById('canvas');
+  element.requestPaint((PaintingContext context) {
+    Paint paint = new Paint();
+    double radius = math.min(context.width, context.height) / 2.0;
+
+    context.save();
+
+    context.clipRect([0.0, 0.0, context.width, radius]);
+
+    context.translate(context.width / 2.0, context.height / 2.0);
+    paint.setARGB(128, 255, 0, 255);
+    context.rotateDegrees(45.0);
+    context.drawRect([-radius, -radius, radius, radius], paint);
+
+    // Scale x and y by 0.5.
+    var scaleMatrix = [
+        0.5, 0.0, 0.0,
+        0.0, 0.5, 0.0,
+        0.0, 0.0, 1.0
+    ];
+    context.concat(scaleMatrix);
+    paint.setARGB(128, 0, 255, 0);
+    context.drawCircle(0.0, 0.0, radius, paint);
+
+    context.restore();
+
+    context.drawCircle(0.0, 0.0, radius, paint);
+
+    context.commit();
+  });
+}
+</script>
+</sky>
