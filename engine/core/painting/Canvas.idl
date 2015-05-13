@@ -1,11 +1,28 @@
 // Copyright 2015 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+
+// TODO(mpcomplete): Figure out a better SkMatrix/SkRect representation.
 interface Canvas {
   // Height and width are used for culling optimizations and do not necessarily
   // imply that the Canvas is backed by a buffer with any specific bounds.
-  readonly attribute double height;
-  readonly attribute double width;
+  readonly attribute float height;
+  readonly attribute float width;
 
-  void drawCircle(double x, double y, double radius, Paint paint);
+  void save();
+  void saveLayer(float[] bounds4 /* optional */, Paint paint /* optional */);
+  void restore();
+
+  void translate(float dx, float dy);
+  void scale(float sx, float sy);
+  void rotateDegrees(float degrees);
+  void skew(float sx, float sy);
+  void concat(float[] matrix9);
+
+  void clipRect(float[] rect4);
+
+  void drawPaint(Paint paint);
+  void drawRect(float[] rect4, Paint paint);
+  void drawOval(float[] rect4, Paint paint);
+  void drawCircle(float x, float y, float radius, Paint paint);
 };

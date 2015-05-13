@@ -6,6 +6,7 @@
 #define SKY_ENGINE_CORE_PAINTING_PAINTINGCONTEXT_H_
 
 #include "sky/engine/core/painting/Canvas.h"
+#include "sky/engine/wtf/Vector.h"
 
 namespace blink {
 class Element;

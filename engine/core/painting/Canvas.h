@@ -22,10 +22,25 @@ public:
 
     // Width/Height define a culling rect which Skia may use for optimizing
     // out draw calls issued outside the rect.
-    double width() const { return m_size.width(); }
-    double height() const { return m_size.height(); }
+    float width() const { return m_size.width(); }
+    float height() const { return m_size.height(); }
 
-    void drawCircle(double x, double y, double radius, Paint* paint);
+    void save();
+    void saveLayer(const Vector<float>& bounds, const Paint* paint);
+    void restore();
+
+    void translate(float dx, float dy);
+    void scale(float sx, float sy);
+    void rotateDegrees(float degrees);
+    void skew(float sx, float sy);
+    void concat(const Vector<float>& matrix);
+
+    void clipRect(const Vector<float>& rect);
+
+    void drawPaint(Paint* paint);
+    void drawRect(const Vector<float>& rect, const Paint* paint);
+    void drawOval(const Vector<float>& rect, const Paint* paint);
+    void drawCircle(float x, float y, float radius, Paint* paint);
 
 protected:
     PassRefPtr<DisplayList> finishRecording();
