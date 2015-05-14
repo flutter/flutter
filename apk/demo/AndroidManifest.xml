@@ -5,7 +5,7 @@
  -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="org.domokit.sky.demo"
-    android:versionCode="3"
+    android:versionCode="7"
     android:versionName="0.0.1">
 
     <uses-sdk android:minSdkVersion="14" android:targetSdkVersion="21" />
