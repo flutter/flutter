@@ -27,8 +27,6 @@ import 'package:sky/framework/layout.dart';
 const bool debug = false; // set to true to dump the DOM for debugging purposes
 
 class StocksApp extends App {
-  DrawerController _drawerController = new DrawerController();
-  PopupMenuController _menuController;
 
   static final Style _actionBarStyle = new Style('''
     background-color: ${Purple[500]};''');
@@ -40,8 +38,6 @@ class StocksApp extends App {
     ${typography.white.title};''');
 
   List<Stock> _stocks = [];
-  bool _isSearching = false;
-  String _searchQuery;
 
   StocksApp() : super() {
     if (debug)
@@ -51,7 +47,11 @@ class StocksApp extends App {
         data.appendTo(_stocks);
       });
     });
+    _drawerController = new DrawerController(_handleDrawerStatusChanged);
   }
+
+  bool _isSearching = false;
+  String _searchQuery;
 
   void _handleSearchBegin(_) {
     setState(() {
@@ -71,6 +71,17 @@ class StocksApp extends App {
       _searchQuery = query;
     });
   }
+
+  DrawerController _drawerController;
+  bool _drawerShowing = false;
+
+  void _handleDrawerStatusChanged(bool showing) {
+    setState(() {
+      _drawerShowing = showing;
+    });
+  }
+
+  PopupMenuController _menuController;
 
   void _handleMenuShow(_) {
     setState(() {
@@ -167,7 +178,7 @@ class StocksApp extends App {
       content: new Stocklist(stocks: _stocks, query: _searchQuery),
       fab: new FloatingActionButton(
         content: new Icon(type: 'content/add_white', size: 24), level: 3),
-      drawer: buildDrawer(),
+      drawer: _drawerShowing ? buildDrawer() : null,
       overlays: overlays
     );
   }

@@ -9,12 +9,18 @@ import 'dart:mirrors';
 abstract class AnimatedComponent extends Component {
   AnimatedComponent({ Object key }) : super(key: key, stateful: true);
 
+  var _debugAnimatedFields = new Set<Symbol>();
+  bool _debugIsNotYetAnimated(Symbol s) {
+    return _debugAnimatedFields.add(s);
+  }
+
   animateField(AnimatedValue value, Symbol symbol) {
     // TODO(rafaelw): Assert symbol is present on |this|, is private and
     // is over the same parameterized type as the animated value.
     var mirror = reflect(this);
     var subscription;
 
+    assert(_debugIsNotYetAnimated(symbol));
     mirror.setField(symbol, value.value);
 
     onDidMount(() {

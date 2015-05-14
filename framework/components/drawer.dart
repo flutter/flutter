@@ -17,17 +17,30 @@ const double _kBaseSettleDurationMS = 246.0;
 const double _kMaxSettleDurationMS = 600.0;
 const Curve _kAnimationCurve = parabolicRise;
 
+typedef void DrawerStatusChangeHandler (bool showing);
+
 class DrawerController {
-  final AnimatedValue position = new AnimatedValue(-_kWidth);
+
+  DrawerController(this.onStatusChange) {
+    position = new AnimatedValue(-_kWidth, onChange: _checkValue);
+  }
+  final DrawerStatusChangeHandler onStatusChange;
+  AnimatedValue position;
+
+  bool _oldClosedState = true;
+  void _checkValue() {
+    var newClosedState = isClosed;
+    if (onStatusChange != null && _oldClosedState != newClosedState) {
+      onStatusChange(!newClosedState);
+      _oldClosedState = newClosedState;
+    }
+  }
 
   bool get isClosed => position.value == -_kWidth;
-
   bool get _isMostlyClosed => position.value <= -_kWidth / 2;
-
   void toggle(_) => _isMostlyClosed ? _open() : _close();
 
   void handleMaskTap(_) => _close();
-
   void handlePointerDown(_) => position.stop();
 
   void handlePointerMove(sky.PointerEvent event) {
@@ -71,7 +84,8 @@ class DrawerController {
     double distance = (targetPosition - position.value).abs();
     double duration = distance / velocityX;
 
-    position.animateTo(targetPosition, duration, curve: linear);
+    if (distance > 0)
+      position.animateTo(targetPosition, duration, curve: linear);
   }
 }
 
@@ -117,8 +131,6 @@ class Drawer extends AnimatedComponent {
   }
 
   UINode build() {
-    bool isClosed = _position <= -_kWidth;
-    String inlineStyle = 'display: ${isClosed ? 'none' : ''}';
     String maskInlineStyle = 'opacity: ${(_position / _kWidth + 1) * 0.5}';
     String contentInlineStyle = 'transform: translateX(${_position}px)';
 
@@ -142,7 +154,6 @@ class Drawer extends AnimatedComponent {
     return new EventListenerNode(
       new Container(
         style: _style,
-        inlineStyle: inlineStyle,
         children: [ mask, content ]
       ),
       onPointerDown: controller.handlePointerDown,

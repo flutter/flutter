@@ -6,15 +6,19 @@ import 'curves.dart';
 import 'dart:async';
 import 'generators.dart';
 
+typedef void Callback ();
+
 class AnimatedValue {
-  StreamController _controller = new StreamController(sync: true);
+  StreamController _controller = new StreamController.broadcast(sync: true);
   AnimationGenerator _animation;
   Completer _completer;
   double _value;
 
-  AnimatedValue(double initial) {
+  AnimatedValue(double initial, { Callback onChange }) {
     _value = initial;
+    _onChange = onChange;
   }
+  Callback _onChange;
 
   // A stream of change in value from |initial|. The stream does not
   // contain the initial value. Consumers should check the initial value via
@@ -33,6 +37,8 @@ class AnimatedValue {
   void _setValue(double value) {
     _value = value;
     _controller.add(_value);
+    if (_onChange != null)
+      _onChange();
   }
 
   void _done() {
