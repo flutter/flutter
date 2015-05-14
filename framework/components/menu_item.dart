@@ -9,18 +9,12 @@ import 'ink_well.dart';
 
 class MenuItem extends ButtonBase {
   static final Style _style = new Style('''
-    transform: translateX(0);
-    display: flex;
-    flex-direction: row;
     align-items: center;
     height: 48px;
     -webkit-user-select: none;'''
   );
 
   static final Style _highlightStyle = new Style('''
-    transform: translateX(0);
-    display: flex;
-    flex-direction: row;
     align-items: center;
     height: 48px;
     background: rgba(153, 153, 153, 0.4);

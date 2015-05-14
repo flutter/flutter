@@ -8,11 +8,7 @@ import 'material.dart';
 
 class Button extends Component {
   static final Style _style = new Style('''
-    display: inline-flex;
-    transform: translateX(0);
     -webkit-user-select: none;
-    justify-content: center;
-    align-items: center;
     height: 36px;
     min-width: 64px;
     padding: 0 8px;

@@ -11,17 +11,13 @@ class FloatingActionButton extends Component {
   // TODO(abarth): We need a better way to become a container for absolutely
   // positioned elements.
   static final Style _style = new Style('''
-    transform: translateX(0);
     width: 56px;
     height: 56px;
     background-color: ${Red[500]};
     border-radius: 28px;'''
   );
   static final Style _clipStyle = new Style('''
-    transform: translateX(0);
     position: absolute;
-    display: flex;
-    flex-direction: row;
     justify-content: center;
     align-items: center;
     top: 0;

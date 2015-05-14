@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import '../fn.dart';
+import '../layout.dart';
 import 'button_base.dart';
 import 'dart:sky' as sky;
 
@@ -11,8 +12,6 @@ typedef void ValueChanged(value);
 class Checkbox extends ButtonBase {
   static final Style _style = new Style('''
     transform: translateX(0);
-    display: flex;
-    flex-direction: row;
     justify-content: center;
     align-items: center;
     -webkit-user-select: none;
@@ -68,8 +67,9 @@ class Checkbox extends ButtonBase {
 
   UINode buildContent() {
     return new EventListenerNode(
-      new Container(
+      new FlexContainer(
         style: _style,
+        direction: FlexDirection.Row,
         children: [
           new Container(
             style: highlight ? _containerHighlightStyle : _containerStyle,
