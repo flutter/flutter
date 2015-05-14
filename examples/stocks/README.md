@@ -3,15 +3,15 @@ This sample app is our main test harness right now.
 Follow these steps to make sure everything works, comparing the
 results to earlier builds:
 
- 1. Load the app
- 2. Scroll down and up.
- 3. Fling down.
- 4. Fling up. Verify that it bounces at the top.
- 5. Tap on rows. Make sure they get ink splashes.
- 6. Open the drawer.
- 7. Slide the drawer in and out.
- 8. Check that you can change the radio buttons.
- 9. Check for ink splashes on each row but not in the header.
+1. Load the app
+2. Scroll down and up.
+3. Fling down.
+4. Fling up. Verify that it bounces at the top.
+5. Tap on rows. Make sure they get ink splashes.
+6. Open the drawer.
+7. Slide the drawer in and out.
+8. Check that you can change the radio buttons.
+9. Check for ink splashes on each row but not in the header.
 10. Check that you can't scroll the list with the drawer out.
 11. Close the drawer.
 12. Open the menu.
