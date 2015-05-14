@@ -344,7 +344,7 @@ class FlexBoxParentData extends CSSParentData {
   }
 }
 
-enum FlexDirection { Row }
+enum FlexDirection { Row, Column }
 
 class RenderCSSFlex extends RenderCSSContainer {
 
@@ -364,11 +364,13 @@ class RenderCSSFlex extends RenderCSSContainer {
 
   static final Style _displayFlex = new Style('display:flex');
   static final Style _displayFlexRow = new Style('flex-direction:row');
+  static final Style _displayFlexColumn = new Style('flex-direction:column');
 
   String stylesToClasses(List<Style> styles) {
     var settings = _displayFlex._className;
     switch (_direction) {
-      case FlexDirection.Row: settings += ' ' + _displayFlexRow._className;
+      case FlexDirection.Row: settings += ' ' + _displayFlexRow._className; break;
+      case FlexDirection.Column: settings += ' ' + _displayFlexColumn._className; break;
     }
     return super.stylesToClasses(styles) + ' ' + settings;
   }

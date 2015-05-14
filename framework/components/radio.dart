@@ -5,7 +5,6 @@
 import '../fn.dart';
 import 'button_base.dart';
 import 'ink_well.dart';
-import 'material.dart';
 
 typedef void ValueChanged(value);
 
@@ -15,9 +14,6 @@ class Radio extends ButtonBase {
   ValueChanged onChanged;
 
   static final Style _style = new Style('''
-    transform: translateX(0);
-    display: inline-flex;
-    -webkit-user-select: none;
     width: 14px;
     height: 14px;
     border-radius: 7px;
@@ -26,9 +22,6 @@ class Radio extends ButtonBase {
   );
 
   static final Style _highlightStyle = new Style('''
-    transform: translateX(0);
-    display: inline-flex;
-    -webkit-user-select: none;
     width: 14px;
     height: 14px;
     border-radius: 7px;
@@ -38,7 +31,6 @@ class Radio extends ButtonBase {
   );
 
   static final Style _dotStyle = new Style('''
-    -webkit-user-select: none;
     width: 10px;
     height: 10px;
     border-radius: 5px;

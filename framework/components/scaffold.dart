@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import '../fn.dart';
+import '../layout.dart';
 import 'drawer.dart';
 import 'floating_action_button.dart';
 import 'package:sky/framework/theme/typography.dart' as typography;
@@ -13,12 +14,9 @@ class Scaffold extends Component {
     ${typography.black.body1};''');
 
   static final Style _mainStyle = new Style('''
-    display: flex;
-    flex-direction: column;
     height: -webkit-fill-available;''');
 
-  static final Style _contentStyle = new Style('''
-    flex: 1;''');
+  static final FlexBoxParentData _contentParentData = new FlexBoxParentData()..flex = 1;
 
   static final Style _fabStyle = new Style('''
     position: absolute;
@@ -49,10 +47,11 @@ class Scaffold extends Component {
 
   UINode build() {
     List<UINode> children = [
-      new Container(
+      new FlexContainer(
         key: 'Main',
+        direction: FlexDirection.Column,
         style: _mainStyle,
-        children: [header, new StyleNode(content, _contentStyle)])
+        children: [header, new ParentDataNode(content, _contentParentData)])
     ];
 
     if (fab != null)
