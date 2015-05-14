@@ -8,12 +8,8 @@ import 'dart:async';
 import 'editable_string.dart';
 
 class EditableText extends Component {
-  static final Style _style = new Style('''
-    display: inline;'''
-  );
 
   static final Style _cursorStyle = new Style('''
-    display: inline-flex;
     width: 2px;
     height: 1.2em;
     vertical-align: top;
@@ -21,7 +17,6 @@ class EditableText extends Component {
   );
 
   static final Style _composingStyle = new Style('''
-    display: inline;
     text-decoration: underline;'''
   );
 
@@ -65,31 +60,30 @@ class EditableText extends Component {
     List<UINode> children = new List<UINode>();
 
     if (!value.composing.isValid) {
-      children.add(new Text(value.text));
+      children.add(new TextFragment(value.text));
     } else {
       String beforeComposing = value.textBefore(value.composing);
       if (!beforeComposing.isEmpty)
-        children.add(new Text(beforeComposing));
+        children.add(new TextFragment(beforeComposing));
 
       String composing = value.textInside(value.composing);
       if (!composing.isEmpty) {
-        children.add(new Container(
+        children.add(new TextFragment(
+          composing,
           key: 'composing',
-          style: _composingStyle,
-          children: [new Text(composing)]
+          style: _composingStyle
         ));
       }
 
       String afterComposing = value.textAfter(value.composing);
       if (!afterComposing.isEmpty)
-        children.add(new Text(afterComposing));
+        children.add(new TextFragment(afterComposing));
     }
 
     if (_showCursor)
       children.add(new Container(key: 'cursor', style: _cursorStyle));
 
-    return new Container(
-      style: _style,
+    return new Paragraph(
       children: children
     );
   }

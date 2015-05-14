@@ -1,6 +1,11 @@
 <div debug="Instance of 'TestApp'">
   <div debug="Instance of 'Container'" class="" style="background-color: green">
-    <div debug="Instance of 'Text'" class=" style1" style="">I am Text</div>
+    <div debug="Instance of 'Paragraph'" class=" style1" style="">
+      <div debug="Instance of 'TextFragment'" class=" style2" style="">I am Text</div>
+    </div>
     <img debug="Instance of 'Image'" src="resources/united.jpg" class="" style=""></img>
   </div>
-</div><style>.style1 { display:paragraph }</style>
+</div>
+<style>.style1 { display:paragraph }</style>
+<style>.style2 { display:inline }</style>
+

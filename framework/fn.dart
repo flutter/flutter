@@ -38,6 +38,8 @@ abstract class UINode {
   // if the |old| node has become stateful and should be retained.
   bool _willSync(UINode old) => false;
 
+  bool get interchangeable => false; // if true, then keys can be duplicated
+
   void _sync(UINode old, RenderCSSContainer host, RenderCSS insertBefore);
 
   void _remove() {
@@ -334,7 +336,7 @@ abstract class SkyElementWrapper extends SkyNodeWrapper {
     this.style,
     this.inlineStyle
   }) : this.children = children == null ? _emptyList : children,
-       super(key:key) {
+       super(key: key) {
 
     assert(!_debugHasDuplicateIds());
   }
@@ -352,12 +354,11 @@ abstract class SkyElementWrapper extends SkyNodeWrapper {
     var idSet = new HashSet<String>();
     for (var child in children) {
       assert(child != null);
-      if (child is Text) {
-        continue; // Text nodes all have the same key and are never reordered.
-      }
+      if (child.interchangeable)
+        continue; // when these nodes are reordered, we just reassign the data
 
       if (!idSet.add(child._key)) {
-        throw '''If multiple (non-Text) nodes of the same type exist as children
+        throw '''If multiple non-interchangeable nodes of the same type exist as children
                 of another node, they must have unique keys.
                 Duplicate: "${child._key}"''';
       }
@@ -456,22 +457,21 @@ abstract class SkyElementWrapper extends SkyNodeWrapper {
       oldNodeIdMap = new HashMap<String, UINode>();
       for (int i = oldStartIndex; i < oldEndIndex; i++) {
         var node = oldChildren[i];
-        if (node is! Text) {
+        if (!node.interchangeable)
           oldNodeIdMap.putIfAbsent(node._key, () => node);
-        }
       }
     }
 
     bool searchForOldNode() {
-      if (currentNode is Text)
-        return false; // Never re-order Text nodes.
+      if (currentNode.interchangeable)
+        return false; // never re-order these nodes
 
       ensureOldIdMap();
       oldNode = oldNodeIdMap[currentNode._key];
       if (oldNode == null)
         return false;
 
-      oldNodeIdMap[currentNode._key] = null; // mark it reordered.
+      oldNodeIdMap[currentNode._key] = null; // mark it reordered
       assert(_root is RenderCSSContainer);
       assert(oldNode._root is RenderCSSContainer);
       oldSkyElementWrapper._root.remove(oldNode._root);
@@ -520,13 +520,36 @@ abstract class SkyElementWrapper extends SkyNodeWrapper {
 
 class Container extends SkyElementWrapper {
 
-  RenderCSS _createNode() => new RenderCSSContainer(this);
+  RenderCSSContainer _root;
+  RenderCSSContainer _createNode() => new RenderCSSContainer(this);
 
   static final Container _emptyContainer = new Container();
 
   SkyNodeWrapper get _emptyNode => _emptyContainer;
 
   Container({
+    Object key,
+    List<UINode> children,
+    Style style,
+    String inlineStyle
+  }) : super(
+    key: key,
+    children: children,
+    style: style,
+    inlineStyle: inlineStyle
+  );
+}
+
+class Paragraph extends SkyElementWrapper {
+
+  RenderCSSParagraph _root;
+  RenderCSSParagraph _createNode() => new RenderCSSParagraph(this);
+
+  static final Paragraph _emptyContainer = new Paragraph();
+
+  SkyNodeWrapper get _emptyNode => _emptyContainer;
+
+  Paragraph({
     Object key,
     List<UINode> children,
     Style style,
@@ -570,26 +593,23 @@ class FlexContainer extends SkyElementWrapper {
   }
 }
 
-class Text extends SkyElementWrapper {
+class TextFragment extends SkyElementWrapper {
 
-  RenderCSSText _root;
-  RenderCSSText _createNode() => new RenderCSSText(this, this.data);
+  RenderCSSInline _root;
+  RenderCSSInline _createNode() => new RenderCSSInline(this, this.data);
 
-  static final Text _emptyText = new Text('');
+  static final TextFragment _emptyText = new TextFragment('');
 
   SkyNodeWrapper get _emptyNode => _emptyText;
 
   final String data;
 
-  // Text nodes are special cases of having non-unique keys (which don't need
-  // to be assigned as part of the API). Since they are unique in not having
-  // children, there's little point to reordering, so we always just re-assign
-  // the data.
-  Text(this.data, {
+  TextFragment(this.data, {
+    Object key,
     Style style,
     String inlineStyle
   }) : super(
-    key: '*text*',
+    key: key,
     style: style,
     inlineStyle: inlineStyle
   );
@@ -615,7 +635,6 @@ class Image extends SkyElementWrapper {
 
   Image({
     Object key,
-    List<UINode> children,
     Style style,
     String inlineStyle,
     this.width,
@@ -623,7 +642,6 @@ class Image extends SkyElementWrapper {
     this.src
   }) : super(
     key: key,
-    children: children,
     style: style,
     inlineStyle: inlineStyle
   );
@@ -737,7 +755,7 @@ abstract class Component extends UINode {
   Component({ Object key, bool stateful })
       : _stateful = stateful != null ? stateful : false,
         _order = _currentOrder + 1,
-        super(key:key);
+        super(key: key);
 
   Component.fromArgs(Object key, bool stateful)
       : this(key: key, stateful: stateful);
@@ -860,4 +878,11 @@ abstract class App extends Component {
     _trace('$_key rebuilding...');
     _sync(null, _host, _root);
   }
+}
+
+class Text extends Component {
+  Text(this.data) : super(key: '*text*');
+  final String data;
+  bool get interchangeable => true;
+  UINode build() => new Paragraph(children: [new TextFragment(data)]);
 }

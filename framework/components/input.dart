@@ -6,6 +6,7 @@ import '../editing/editable_string.dart';
 import '../editing/editable_text.dart';
 import '../editing/keyboard.dart';
 import '../fn.dart';
+import '../layout.dart';
 import '../theme/colors.dart';
 import '../theme/typography.dart' as typography;
 import 'dart:sky' as sky;
@@ -14,7 +15,6 @@ typedef void ValueChanged(value);
 
 class Input extends Component {
   static final Style _style = new Style('''
-    display: paragraph;
     transform: translateX(0);
     margin: 8px;
     padding: 8px;
@@ -84,7 +84,8 @@ class Input extends Component {
     children.add(new EditableText(value: _editableValue, focused: focused));
 
     return new EventListenerNode(
-      new Container(
+      new FlexContainer(
+        direction: FlexDirection.Column,
         style: _style,
         inlineStyle: focused ? _focusedInlineStyle : null,
         children: children

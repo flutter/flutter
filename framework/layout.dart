@@ -392,16 +392,28 @@ class RenderCSSFlex extends RenderCSSContainer {
 
 }
 
-class RenderCSSText extends RenderCSS {
+class RenderCSSParagraph extends RenderCSSContainer {
 
-  RenderCSSText(debug, String newData) : super(debug) {
-    data = newData;
-  }
+  RenderCSSParagraph(debug) : super(debug);
 
   static final Style _displayParagraph = new Style('display:paragraph');
 
   String stylesToClasses(List<Style> styles) {
     return super.stylesToClasses(styles) + ' ' + _displayParagraph._className;
+  }
+
+}
+
+class RenderCSSInline extends RenderCSS {
+
+  RenderCSSInline(debug, String newData) : super(debug) {
+    data = newData;
+  }
+
+  static final Style _displayInline = new Style('display:inline');
+
+  String stylesToClasses(List<Style> styles) {
+    return super.stylesToClasses(styles) + ' ' + _displayInline._className;
   }
 
   sky.Element createSkyElement() {
