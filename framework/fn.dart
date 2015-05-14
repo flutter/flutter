@@ -358,7 +358,8 @@ abstract class SkyElementWrapper extends SkyNodeWrapper {
 
       if (!idSet.add(child._key)) {
         throw '''If multiple (non-Text) nodes of the same type exist as children
-                 of another node, they must have unique keys.''';
+                of another node, they must have unique keys.
+                Duplicate: "${child._key}"''';
       }
     }
     return false;

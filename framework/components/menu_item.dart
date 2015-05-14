@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import '../fn.dart';
+import '../layout.dart';
 import 'button_base.dart';
 import 'icon.dart';
 import 'ink_well.dart';
@@ -32,27 +33,32 @@ class MenuItem extends ButtonBase {
 
   List<UINode> children;
   String icon;
+  GestureEventListener onGestureTap;
 
-  MenuItem({ Object key, this.icon, this.children }) : super(key: key);
+  MenuItem({ Object key, this.icon, this.children, this.onGestureTap }) : super(key: key);
 
   UINode buildContent() {
-    return new StyleNode(
-      new InkWell(
-        children: [
-          new StyleNode(
-            new Icon(
-              size: 24,
-              type: "${icon}_grey600"
+    return new EventListenerNode(
+      new StyleNode(
+        new InkWell(
+          children: [
+            new StyleNode(
+              new Icon(
+                size: 24,
+                type: "${icon}_grey600"
+              ),
+              _iconStyle
             ),
-            _iconStyle
-          ),
-          new Container(
-            style: _labelStyle,
-            children: children
-          )
-        ]
+            new FlexContainer(
+              direction: FlexDirection.Row,
+              style: _labelStyle,
+              children: children
+            )
+          ]
+        ),
+        highlight ? _highlightStyle : _style
       ),
-      highlight ? _highlightStyle : _style
+      onGestureTap: onGestureTap
     );
   }
 }
