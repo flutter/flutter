@@ -13,6 +13,7 @@ import 'package:sky/framework/components/menu_divider.dart';
 import 'package:sky/framework/components/menu_item.dart';
 import 'package:sky/framework/components/modal_overlay.dart';
 import 'package:sky/framework/components/popup_menu.dart';
+import 'package:sky/framework/components/radio.dart';
 import 'package:sky/framework/components/scaffold.dart';
 import 'package:sky/framework/fn.dart';
 import 'package:sky/framework/theme/typography.dart' as typography;
@@ -25,6 +26,8 @@ import 'dart:async';
 import 'package:sky/framework/layout.dart';
 
 const bool debug = false; // set to true to dump the DOM for debugging purposes
+
+enum StockMode { Optimistic, Pessimistic }
 
 class StocksApp extends App {
 
@@ -100,6 +103,22 @@ class StocksApp extends App {
     });
   }
 
+  bool _autorefresh = false;
+  void _handleAutorefreshChanged(bool value) {
+    setState(() {
+      _autorefresh = value;
+    });
+  }
+
+  StockMode _stockMode = StockMode.Optimistic;
+  void _handleStockModeChange(StockMode value) {
+    setState(() {
+      _stockMode = value;
+    });
+  }
+
+  static FlexBoxParentData _flex1 = new FlexBoxParentData()..flex = 1;
+
   Drawer buildDrawer() {
     return new Drawer(
       controller: _drawerController,
@@ -107,14 +126,31 @@ class StocksApp extends App {
       children: [
         new DrawerHeader(children: [new Text('Stocks')]),
         new MenuItem(
-          key: 'Inbox',
-          icon: 'content/inbox',
-          children: [new Text('Inbox')]),
-        new MenuDivider(),
+          key: 'Stock list',
+          icon: 'action/assessment',
+          children: [new Text('Stock List')]),
         new MenuItem(
-          key: 'Drafts',
-          icon: 'content/drafts',
-          children: [new Text('Drafts')]),
+          key: 'Account Balance',
+          icon: 'action/account_balance',
+          children: [new Text('Account Balance')]),
+        new MenuDivider(key: 'div1'),
+        new MenuItem(
+          key: 'Optimistic Menu Item',
+          icon: 'action/thumb_up',
+          onGestureTap: (event) => _handleStockModeChange(StockMode.Optimistic),
+          children: [
+            new ParentDataNode(new Text('Optimistic'), _flex1),
+            new Radio(key: 'optimistic-radio', value: StockMode.Optimistic, groupValue: _stockMode, onChanged: _handleStockModeChange)
+          ]),
+        new MenuItem(
+          key: 'Pessimistic Menu Item',
+          icon: 'action/thumb_down',
+          onGestureTap: (event) => _handleStockModeChange(StockMode.Pessimistic),
+          children: [
+            new ParentDataNode(new Text('Pessimistic'), _flex1),
+            new Radio(key: 'pessimistic-radio', value: StockMode.Pessimistic, groupValue: _stockMode, onChanged: _handleStockModeChange)
+          ]),
+        new MenuDivider(key: 'div2'),
         new MenuItem(
           key: 'Settings',
           icon: 'action/settings',
@@ -165,7 +201,11 @@ class StocksApp extends App {
     if (_menuController == null)
       return;
     overlays.add(new ModalOverlay(
-      children: [new StockMenu(controller: _menuController)],
+      children: [new StockMenu(
+        controller: _menuController,
+        autorefresh: _autorefresh,
+        onAutorefreshChanged: _handleAutorefreshChanged
+      )],
       onDismiss: _handleMenuHide));
   }
 
