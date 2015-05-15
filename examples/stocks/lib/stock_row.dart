@@ -4,14 +4,13 @@
 
 import 'package:sky/framework/components/ink_well.dart';
 import 'package:sky/framework/fn.dart';
+import 'package:sky/framework/layout.dart';
 import 'package:sky/framework/theme/typography.dart' as typography;
 import 'stock_arrow.dart';
 import 'stock_data.dart';
 
 class StockRow extends Component {
   static final Style _style = new Style('''
-    display: flex;
-    flex-direction: row;
     align-items: center;
     border-bottom: 1px solid #F4F4F4;
     padding-top: 16px;
@@ -20,9 +19,7 @@ class StockRow extends Component {
     padding-bottom: 20px;'''
   );
 
-  static final Style _tickerStyle = new Style('''
-    flex: 1;'''
-  );
+  static final FlexBoxParentData _tickerFlex = new FlexBoxParentData()..flex = 1;
 
   static final Style _lastSaleStyle = new Style('''
     text-align: right;
@@ -51,10 +48,12 @@ class StockRow extends Component {
       new StockArrow(
         percentChange: stock.percentChange
       ),
-      new Container(
-        key: 'Ticker',
-        style: _tickerStyle,
-        children: [new Text(stock.symbol)]
+      new ParentDataNode(
+        new Container(
+          key: 'Ticker',
+          children: [new Text(stock.symbol)]
+        ),
+        _tickerFlex
       ),
       new Container(
         key: 'LastSale',
