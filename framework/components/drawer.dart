@@ -97,22 +97,13 @@ class Drawer extends AnimatedComponent {
 
   static final Style _maskStyle = new Style('''
     background-color: black;
-    will-change: opacity;
-    position: absolute;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    right: 0;'''
+    will-change: opacity;'''
   );
 
   static final Style _contentStyle = new Style('''
     background-color: ${Grey[50]};
     will-change: transform;
-    position: absolute;
-    width: ${_kWidth}px;
-    top: 0;
-    left: 0;
-    bottom: 0;'''
+    width: ${_kWidth}px;'''
   );
 
   List<UINode> children;
@@ -152,7 +143,7 @@ class Drawer extends AnimatedComponent {
       level: level);
 
     return new EventListenerNode(
-      new Container(
+      new FillStackContainer(
         style: _style,
         children: [ mask, content ]
       ),

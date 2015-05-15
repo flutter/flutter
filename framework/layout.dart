@@ -398,6 +398,63 @@ class RenderCSSFlex extends RenderCSSContainer {
 
 }
 
+class StackParentData extends CSSParentData {
+  double top;
+  double left;
+  double right;
+  double bottom;
+  void merge(StackParentData other) {
+    if (other.top != null)
+      top = other.top;
+    if (other.left != null)
+      left = other.left;
+    if (other.right != null)
+      right = other.right;
+    if (other.bottom != null)
+      bottom = other.bottom;
+    super.merge(other);
+  }
+}
+
+class RenderCSSStack extends RenderCSSContainer {
+
+  RenderCSSStack(debug) : super(debug);
+
+  void setupPos(RenderNode child) {
+    if (child.parentData is! StackParentData)
+      child.parentData = new StackParentData();
+  }
+
+  static final Style _displayPosition = new Style._addToCache('transform:translateX(0);position:relative');
+
+  String stylesToClasses(List<Style> styles) {
+    return super.stylesToClasses(styles) + ' ' + _displayPosition._className;
+  }
+
+  void markNeedsLayout() {
+    super.markNeedsLayout();
+
+    // pretend we did the layout:
+    RenderCSS child = _firstChild;
+    while (child != null) {
+      assert(child.parentData is StackParentData);
+      var style = 'position:absolute;';
+      if (child.parentData.top != null)
+        style += 'top:${child.parentData.top};';
+      if (child.parentData.left != null)
+        style += 'left:${child.parentData.left};';
+      if (child.parentData.right != null)
+        style += 'right:${child.parentData.right};';
+      if (child.parentData.bottom != null)
+        style += 'bottom:${child.parentData.bottom};';
+      child._additionalStylesFromParent = style;
+      child._updateInlineStyleAttribute();
+      child = child.parentData.nextSibling;
+    }
+  }
+
+}
+
 class RenderCSSParagraph extends RenderCSSContainer {
 
   RenderCSSParagraph(debug) : super(debug);

@@ -593,6 +593,42 @@ class FlexContainer extends SkyElementWrapper {
   }
 }
 
+class FillStackContainer extends SkyElementWrapper {
+
+  RenderCSSStack _root;
+  RenderCSSStack _createNode() => new RenderCSSStack(this);
+
+  static final FillStackContainer _emptyContainer = new FillStackContainer();
+
+  SkyNodeWrapper get _emptyNode => _emptyContainer;
+
+  FillStackContainer({
+    Object key,
+    List<UINode> children,
+    Style style,
+    String inlineStyle
+  }) : super(
+    key: key,
+    children: _positionNodesToFill(children),
+    style: style,
+    inlineStyle: inlineStyle
+  );
+
+  static StackParentData _fillParentData = new StackParentData()
+                                                 ..top = 0.0
+                                                 ..left = 0.0
+                                                 ..right = 0.0
+                                                 ..bottom = 0.0;
+
+  static List<UINode> _positionNodesToFill(List<UINode> input) {
+    if (input == null)
+      return null;
+    return input.map((node) {
+      return new ParentDataNode(node, _fillParentData);
+    }).toList();
+  }
+}
+
 class TextFragment extends SkyElementWrapper {
 
   RenderCSSInline _root;
