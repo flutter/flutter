@@ -4,13 +4,12 @@
 
 import 'dart:math';
 import 'package:sky/framework/fn.dart';
+import 'package:sky/framework/layout.dart';
 
 class StockArrow extends Component {
   static final Style _style = new Style('''
     width: 40px;
     height: 40px;
-    display: flex;
-    flex-direction: row;
     align-items: center;
     justify-content: center;
     border-radius: 40px;
@@ -79,8 +78,9 @@ class StockArrow extends Component {
     bool up = percentChange > 0;
     String type = up ? 'bottom' : 'top';
 
-    return new Container(
+    return new FlexContainer(
       inlineStyle: 'border-color: $border',
+      direction: FlexDirection.Row,
       style: _style,
       children: [
         new Container(

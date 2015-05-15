@@ -20,21 +20,26 @@ class Style {
     var className = "$_className ${other._className}";
 
     return _cache.putIfAbsent(className, () {
-      return new Style._internal(className);
+      return new Style._construct(className);
     });
   }
 
   factory Style(String styles) {
+    assert(!styles.contains(new RegExp('\\b(display|flex|flex-direction)\\b')));
+    return new Style._addToCache(styles);
+  }
+
+  factory Style._addToCache(String styles) {
     return _cache.putIfAbsent(styles, () {
       var className = _getNextClassName();
       sky.Element styleNode = sky.document.createElement('style');
       styleNode.setChild(new sky.Text(".$className { $styles }"));
       sky.document.appendChild(styleNode);
-      return new Style._internal(className);
+      return new Style._construct(className);
     });
   }
 
-  Style._internal(this._className);
+  Style._construct(this._className);
 }
 
 class Rect {
@@ -269,6 +274,7 @@ abstract class RenderCSS extends RenderBox {
   String _additionalStylesFromParent = ''; // used internally to propagate parentData settings to the child
 
   void updateInlineStyle(String newStyle) {
+    assert(newStyle == null || !newStyle.contains(new RegExp('\\b(display|flex|flex-direction)\\b')));
     _inlineStyles = newStyle != null ? newStyle : '';
     _updateInlineStyleAttribute();
   }
@@ -362,9 +368,9 @@ class RenderCSSFlex extends RenderCSSContainer {
       child.parentData = new FlexBoxParentData();
   }
 
-  static final Style _displayFlex = new Style('display:flex');
-  static final Style _displayFlexRow = new Style('flex-direction:row');
-  static final Style _displayFlexColumn = new Style('flex-direction:column');
+  static final Style _displayFlex = new Style._addToCache('display:flex');
+  static final Style _displayFlexRow = new Style._addToCache('flex-direction:row');
+  static final Style _displayFlexColumn = new Style._addToCache('flex-direction:column');
 
   String stylesToClasses(List<Style> styles) {
     var settings = _displayFlex._className;
@@ -396,7 +402,7 @@ class RenderCSSParagraph extends RenderCSSContainer {
 
   RenderCSSParagraph(debug) : super(debug);
 
-  static final Style _displayParagraph = new Style('display:paragraph');
+  static final Style _displayParagraph = new Style._addToCache('display:paragraph');
 
   String stylesToClasses(List<Style> styles) {
     return super.stylesToClasses(styles) + ' ' + _displayParagraph._className;
@@ -410,7 +416,7 @@ class RenderCSSInline extends RenderCSS {
     data = newData;
   }
 
-  static final Style _displayInline = new Style('display:inline');
+  static final Style _displayInline = new Style._addToCache('display:inline');
 
   String stylesToClasses(List<Style> styles) {
     return super.stylesToClasses(styles) + ' ' + _displayInline._className;

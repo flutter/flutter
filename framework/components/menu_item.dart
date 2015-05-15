@@ -27,9 +27,10 @@ class MenuItem extends ButtonBase {
   );
 
   static final Style _labelStyle = new Style('''
-    padding: 0px 16px;
-    flex: 1;'''
+    padding: 0px 16px;'''
   );
+
+  static final FlexBoxParentData _labelFlex = new FlexBoxParentData()..flex = 1;
 
   List<UINode> children;
   String icon;
@@ -49,10 +50,13 @@ class MenuItem extends ButtonBase {
               ),
               _iconStyle
             ),
-            new FlexContainer(
-              direction: FlexDirection.Row,
-              style: _labelStyle,
-              children: children
+            new ParentDataNode(
+              new FlexContainer(
+                direction: FlexDirection.Row,
+                style: _labelStyle,
+                children: children
+              ),
+              _labelFlex
             )
           ]
         ),
