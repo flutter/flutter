@@ -25,9 +25,10 @@ public class SkyMain {
     /**
      * Initializes the native system.
      **/
-    static void ensureInitialized(Context applicationContext) {
-        if (sInitialized)
+    public static void ensureInitialized(Context applicationContext) {
+        if (sInitialized) {
             return;
+        }
         try {
             ResourceExtractor resourceExtractor = ResourceExtractor.get(applicationContext);
             resourceExtractor.startExtractingResources();
