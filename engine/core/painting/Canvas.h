@@ -6,6 +6,7 @@
 #define SKY_ENGINE_CORE_PAINTING_CANVAS_H_
 
 #include "sky/engine/core/painting/Paint.h"
+#include "sky/engine/core/painting/Picture.h"
 #include "sky/engine/platform/graphics/DisplayList.h"
 #include "sky/engine/tonic/dart_wrappable.h"
 #include "sky/engine/wtf/PassRefPtr.h"
@@ -36,6 +37,8 @@ public:
     void concat(const Vector<float>& matrix);
 
     void clipRect(const Vector<float>& rect);
+
+    void drawPicture(Picture* picture);
 
     void drawPaint(Paint* paint);
     void drawRect(const Vector<float>& rect, const Paint* paint);

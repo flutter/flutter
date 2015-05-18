@@ -111,6 +111,15 @@ void Canvas::clipRect(const Vector<float>& rect)
     m_canvas->clipRect(toSkRect(rect));
 }
 
+void Canvas::drawPicture(Picture* picture)
+{
+    if (!m_canvas)
+        return;
+    ASSERT(picture);
+    ASSERT(m_displayList->isRecording());
+    m_canvas->drawPicture(picture->displayList()->picture());
+}
+
 void Canvas::drawPaint(Paint* paint)
 {
     if (!m_canvas)

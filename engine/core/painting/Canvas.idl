@@ -21,6 +21,8 @@ interface Canvas {
 
   void clipRect(float[] rect4);
 
+  void drawPicture(Picture picture);
+
   void drawPaint(Paint paint);
   void drawRect(float[] rect4, Paint paint);
   void drawOval(float[] rect4, Paint paint);
