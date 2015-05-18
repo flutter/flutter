@@ -50,4 +50,6 @@
   attribute double height;
   attribute double minContentWidth; // Intrinsic width if all wrappable points wrap.
   attribute double maxContentWidth; // Intrinsic width if no wrappable points wrap.
+
+  void paint(PictureRecorder recorder);
 };

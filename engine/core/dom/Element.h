@@ -53,6 +53,7 @@ class IntSize;
 class LayoutCallback;
 class MutableStylePropertySet;
 class PaintingCallback;
+class PictureRecorder;
 class PropertySetCSSStyleDeclaration;
 class PseudoElement;
 class ShadowRoot;
@@ -297,6 +298,9 @@ public:
 
     const AtomicString& dir();
     void setDir(const AtomicString&);
+
+    // Dart exposed:
+    void paint(PictureRecorder*);
 
 protected:
     Element(const QualifiedName& tagName, Document*, ConstructionType);

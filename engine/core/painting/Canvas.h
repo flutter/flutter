@@ -42,6 +42,8 @@ public:
     void drawOval(const Vector<float>& rect, const Paint* paint);
     void drawCircle(float x, float y, float radius, Paint* paint);
 
+    SkCanvas* skCanvas() { return m_canvas; }
+
 protected:
     PassRefPtr<DisplayList> finishRecording();
 

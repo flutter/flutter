@@ -78,6 +78,7 @@
 #include "sky/engine/core/page/Page.h"
 #include "sky/engine/core/painting/PaintingCallback.h"
 #include "sky/engine/core/painting/PaintingTasks.h"
+#include "sky/engine/core/painting/PictureRecorder.h"
 #include "sky/engine/core/rendering/RenderCustomLayout.h"
 #include "sky/engine/core/rendering/RenderLayer.h"
 #include "sky/engine/core/rendering/RenderView.h"
@@ -1683,6 +1684,20 @@ bool Element::affectedByIdSelector(const AtomicString& idValue) const
     if (ShadowRoot* shadowRoot = this->shadowRoot())
         return shadowRoot->scopedStyleResolver().hasSelectorForId(idValue);
     return false;
+}
+
+void Element::paint(PictureRecorder* recorder)
+{
+    if (!renderer() || !renderer()->isBox())
+        return;
+    RenderBox* box = toRenderBox(renderer());
+    GraphicsContext context(recorder->skCanvas());
+
+    // Very simplified painting to allow painting an arbitrary (layer-less) subtree.
+    Vector<RenderBox*> layers;
+    PaintInfo paintInfo(&context, box->absoluteBoundingBoxRect(), box);
+    box->paint(paintInfo, LayoutPoint(), layers);
+    // Note we're ignoring any layers encountered.
 }
 
 } // namespace blink
