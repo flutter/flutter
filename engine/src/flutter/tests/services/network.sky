@@ -1,15 +1,16 @@
 #!mojo mojo:sky_viewer
 <sky>
 <script>
-import '/sky/framework/embedder.dart';
 import 'dart:async';
 import 'dart:typed_data';
 import "dart:sky.internals" as internals;
 
-import 'package:mojo/public/dart/bindings.dart';
-import 'package:mojo/public/dart/core.dart';
+import 'package:mojo/bindings.dart';
+import 'package:mojo/core.dart';
 import 'package:mojom/mojo/network_service.mojom.dart';
 import 'package:mojom/mojo/url_loader.mojom.dart';
+
+import 'package:sky/framework/embedder.dart';
 
 Future<String> run(url) async {
   var networkService= new NetworkServiceProxy.unbound();
