@@ -156,56 +156,6 @@ class ParentDataNode extends ContentNode {
   ParentDataNode(UINode content, this.parentData): super(content);
 }
 
-/*
- * RenderNodeWrappers correspond to a desired state of a RenderCSS.
- * They are fully immutable, with one exception: A UINode which is a
- * Component which lives within an OneChildListRenderNodeWrapper's
- * children list, may be replaced with the "old" instance if it has
- * become stateful.
- */
-abstract class RenderNodeWrapper extends UINode {
-
-  static final Map<RenderCSS, RenderNodeWrapper> _nodeMap =
-      new HashMap<RenderCSS, RenderNodeWrapper>();
-
-  static RenderNodeWrapper _getMounted(RenderCSS node) => _nodeMap[node];
-
-  RenderNodeWrapper({ Object key }) : super(key: key);
-
-  RenderNodeWrapper get _emptyNode;
-
-  RenderCSS _createNode();
-
-  void _sync(UINode old, RenderCSSContainer host, RenderCSS insertBefore) {
-    if (old == null) {
-      _root = _createNode();
-      assert(_root != null);
-      host.add(_root, before: insertBefore);
-      old = _emptyNode;
-    } else {
-      _root = old._root;
-      assert(_root != null);
-    }
-
-    _nodeMap[_root] = this;
-    _syncNode(old);
-  }
-
-  void _syncNode(RenderNodeWrapper old);
-
-  void _removeChild(UINode node) {
-    assert(_root is RenderCSSContainer);
-    _root.remove(node._root);
-    super._removeChild(node);
-  }
-
-  void _remove() {
-    assert(_root != null);
-    _nodeMap.remove(_root);
-    super._remove();
-  }
-}
-
 typedef GestureEventListener(sky.GestureEvent e);
 typedef PointerEventListener(sky.PointerEvent e);
 typedef EventListener(sky.Event e);
@@ -320,6 +270,56 @@ class EventListenerNode extends ContentNode  {
     }
 
     super._sync(old, host, insertBefore);
+  }
+}
+
+/*
+ * RenderNodeWrappers correspond to a desired state of a RenderCSS.
+ * They are fully immutable, with one exception: A UINode which is a
+ * Component which lives within an OneChildListRenderNodeWrapper's
+ * children list, may be replaced with the "old" instance if it has
+ * become stateful.
+ */
+abstract class RenderNodeWrapper extends UINode {
+
+  static final Map<RenderCSS, RenderNodeWrapper> _nodeMap =
+      new HashMap<RenderCSS, RenderNodeWrapper>();
+
+  static RenderNodeWrapper _getMounted(RenderCSS node) => _nodeMap[node];
+
+  RenderNodeWrapper({ Object key }) : super(key: key);
+
+  RenderNodeWrapper get _emptyNode;
+
+  RenderCSS _createNode();
+
+  void _sync(UINode old, RenderCSSContainer host, RenderCSS insertBefore) {
+    if (old == null) {
+      _root = _createNode();
+      assert(_root != null);
+      host.add(_root, before: insertBefore);
+      old = _emptyNode;
+    } else {
+      _root = old._root;
+      assert(_root != null);
+    }
+
+    _nodeMap[_root] = this;
+    _syncNode(old);
+  }
+
+  void _syncNode(RenderNodeWrapper old);
+
+  void _removeChild(UINode node) {
+    assert(_root is RenderCSSContainer);
+    _root.remove(node._root);
+    super._removeChild(node);
+  }
+
+  void _remove() {
+    assert(_root != null);
+    _nodeMap.remove(_root);
+    super._remove();
   }
 }
 
