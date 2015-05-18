@@ -157,21 +157,22 @@ class ParentDataNode extends ContentNode {
 }
 
 /*
- * SkyNodeWrappers correspond to a desired state of a RenderCSS. They are fully
- * immutable, with one exception: A UINode which is a Component which lives within
- * an SkyElementWrapper's children list, may be replaced with the "old" instance if it
- * has become stateful.
+ * RenderNodeWrappers correspond to a desired state of a RenderCSS.
+ * They are fully immutable, with one exception: A UINode which is a
+ * Component which lives within an OneChildListRenderNodeWrapper's
+ * children list, may be replaced with the "old" instance if it has
+ * become stateful.
  */
-abstract class SkyNodeWrapper extends UINode {
+abstract class RenderNodeWrapper extends UINode {
 
-  static final Map<RenderCSS, SkyNodeWrapper> _nodeMap =
-      new HashMap<RenderCSS, SkyNodeWrapper>();
+  static final Map<RenderCSS, RenderNodeWrapper> _nodeMap =
+      new HashMap<RenderCSS, RenderNodeWrapper>();
 
-  static SkyNodeWrapper _getMounted(RenderCSS node) => _nodeMap[node];
+  static RenderNodeWrapper _getMounted(RenderCSS node) => _nodeMap[node];
 
-  SkyNodeWrapper({ Object key }) : super(key: key);
+  RenderNodeWrapper({ Object key }) : super(key: key);
 
-  SkyNodeWrapper get _emptyNode;
+  RenderNodeWrapper get _emptyNode;
 
   RenderCSS _createNode();
 
@@ -190,7 +191,7 @@ abstract class SkyNodeWrapper extends UINode {
     _syncNode(old);
   }
 
-  void _syncNode(SkyNodeWrapper old);
+  void _syncNode(RenderNodeWrapper old);
 
   void _removeChild(UINode node) {
     assert(_root is RenderCSSContainer);
@@ -295,7 +296,7 @@ class EventListenerNode extends ContentNode  {
   }
 
   static void _dispatchEvent(sky.Event e) {
-    UINode target = SkyNodeWrapper._getMounted(bridgeEventTargetToRenderNode(e.target));
+    UINode target = RenderNodeWrapper._getMounted(bridgeEventTargetToRenderNode(e.target));
 
     // TODO(rafaelw): StopPropagation?
     while (target != null) {
@@ -324,13 +325,13 @@ class EventListenerNode extends ContentNode  {
 
 final List<UINode> _emptyList = new List<UINode>();
 
-abstract class SkyElementWrapper extends SkyNodeWrapper {
+abstract class OneChildListRenderNodeWrapper extends RenderNodeWrapper {
 
   final List<UINode> children;
   final Style style;
   final String inlineStyle;
 
-  SkyElementWrapper({
+  OneChildListRenderNodeWrapper({
     Object key,
     List<UINode> children,
     this.style,
@@ -366,15 +367,15 @@ abstract class SkyElementWrapper extends SkyNodeWrapper {
     return false;
   }
 
-  void _syncNode(SkyNodeWrapper old) {
-    SkyElementWrapper oldSkyElementWrapper = old as SkyElementWrapper;
+  void _syncNode(RenderNodeWrapper old) {
+    OneChildListRenderNodeWrapper oldOneChildListRenderNodeWrapper = old as OneChildListRenderNodeWrapper;
 
     List<Style> styles = new List<Style>();
     if (style != null)
       styles.add(style);
     ParentData parentData = null;
     UINode parent = _parent;
-    while (parent != null && parent is! SkyNodeWrapper) {
+    while (parent != null && parent is! RenderNodeWrapper) {
       if (parent is StyleNode && parent.style != null)
         styles.add(parent.style);
       else
@@ -396,17 +397,17 @@ abstract class SkyElementWrapper extends SkyNodeWrapper {
     }
     _root.updateInlineStyle(inlineStyle);
 
-    _syncChildren(oldSkyElementWrapper);
+    _syncChildren(oldOneChildListRenderNodeWrapper);
   }
 
-  void _syncChildren(SkyElementWrapper oldSkyElementWrapper) {
+  void _syncChildren(OneChildListRenderNodeWrapper oldOneChildListRenderNodeWrapper) {
     if (_root is! RenderCSSContainer)
       return;
 
     var startIndex = 0;
     var endIndex = children.length;
 
-    var oldChildren = oldSkyElementWrapper.children;
+    var oldChildren = oldOneChildListRenderNodeWrapper.children;
     var oldStartIndex = 0;
     var oldEndIndex = oldChildren.length;
 
@@ -474,7 +475,7 @@ abstract class SkyElementWrapper extends SkyNodeWrapper {
       oldNodeIdMap[currentNode._key] = null; // mark it reordered
       assert(_root is RenderCSSContainer);
       assert(oldNode._root is RenderCSSContainer);
-      oldSkyElementWrapper._root.remove(oldNode._root);
+      oldOneChildListRenderNodeWrapper._root.remove(oldNode._root);
       _root.add(oldNode._root, before: nextSibling);
       return true;
     }
@@ -518,14 +519,14 @@ abstract class SkyElementWrapper extends SkyNodeWrapper {
   }
 }
 
-class Container extends SkyElementWrapper {
+class Container extends OneChildListRenderNodeWrapper {
 
   RenderCSSContainer _root;
   RenderCSSContainer _createNode() => new RenderCSSContainer(this);
 
   static final Container _emptyContainer = new Container();
 
-  SkyNodeWrapper get _emptyNode => _emptyContainer;
+  RenderNodeWrapper get _emptyNode => _emptyContainer;
 
   Container({
     Object key,
@@ -540,14 +541,14 @@ class Container extends SkyElementWrapper {
   );
 }
 
-class Paragraph extends SkyElementWrapper {
+class Paragraph extends OneChildListRenderNodeWrapper {
 
   RenderCSSParagraph _root;
   RenderCSSParagraph _createNode() => new RenderCSSParagraph(this);
 
   static final Paragraph _emptyContainer = new Paragraph();
 
-  SkyNodeWrapper get _emptyNode => _emptyContainer;
+  RenderNodeWrapper get _emptyNode => _emptyContainer;
 
   Paragraph({
     Object key,
@@ -562,7 +563,7 @@ class Paragraph extends SkyElementWrapper {
   );
 }
 
-class FlexContainer extends SkyElementWrapper {
+class FlexContainer extends OneChildListRenderNodeWrapper {
 
   RenderCSSFlex _root;
   RenderCSSFlex _createNode() => new RenderCSSFlex(this, this.direction);
@@ -570,7 +571,7 @@ class FlexContainer extends SkyElementWrapper {
   static final FlexContainer _emptyContainer = new FlexContainer();
     // direction doesn't matter if it's empty
 
-  SkyNodeWrapper get _emptyNode => _emptyContainer;
+  RenderNodeWrapper get _emptyNode => _emptyContainer;
 
   final FlexDirection direction;
 
@@ -593,14 +594,14 @@ class FlexContainer extends SkyElementWrapper {
   }
 }
 
-class FillStackContainer extends SkyElementWrapper {
+class FillStackContainer extends OneChildListRenderNodeWrapper {
 
   RenderCSSStack _root;
   RenderCSSStack _createNode() => new RenderCSSStack(this);
 
   static final FillStackContainer _emptyContainer = new FillStackContainer();
 
-  SkyNodeWrapper get _emptyNode => _emptyContainer;
+  RenderNodeWrapper get _emptyNode => _emptyContainer;
 
   FillStackContainer({
     Object key,
@@ -629,14 +630,14 @@ class FillStackContainer extends SkyElementWrapper {
   }
 }
 
-class TextFragment extends SkyElementWrapper {
+class TextFragment extends OneChildListRenderNodeWrapper {
 
   RenderCSSInline _root;
   RenderCSSInline _createNode() => new RenderCSSInline(this, this.data);
 
   static final TextFragment _emptyText = new TextFragment('');
 
-  SkyNodeWrapper get _emptyNode => _emptyText;
+  RenderNodeWrapper get _emptyNode => _emptyText;
 
   final String data;
 
@@ -656,14 +657,14 @@ class TextFragment extends SkyElementWrapper {
   }
 }
 
-class Image extends SkyElementWrapper {
+class Image extends OneChildListRenderNodeWrapper {
 
   RenderCSSImage _root;
   RenderCSSImage _createNode() => new RenderCSSImage(this, this.src, this.width, this.height);
 
   static final Image _emptyImage = new Image();
 
-  SkyNodeWrapper get _emptyNode => _emptyImage;
+  RenderNodeWrapper get _emptyNode => _emptyImage;
 
   final String src;
   final int width;
