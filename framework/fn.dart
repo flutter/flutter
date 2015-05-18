@@ -287,11 +287,17 @@ abstract class RenderNodeWrapper extends UINode {
 
   static RenderNodeWrapper _getMounted(RenderCSS node) => _nodeMap[node];
 
-  RenderNodeWrapper({ Object key }) : super(key: key);
+  RenderNodeWrapper({
+    Object key,
+    this.style,
+    this.inlineStyle
+  }) : super(key: key);
 
-  RenderNodeWrapper get _emptyNode;
+  final Style style;
+  final String inlineStyle;
 
   RenderCSS _createNode();
+  RenderNodeWrapper get _emptyNode;
 
   void _sync(UINode old, RenderCSSContainer host, RenderCSS insertBefore) {
     if (old == null) {
@@ -305,10 +311,39 @@ abstract class RenderNodeWrapper extends UINode {
     }
 
     _nodeMap[_root] = this;
-    _syncNode(old);
+    _syncRenderNode(old);
   }
 
-  void _syncNode(RenderNodeWrapper old);
+  void _syncRenderNode(RenderNodeWrapper old) {
+    RenderNodeWrapper oldRenderNodeWrapper = old as RenderNodeWrapper;
+
+    List<Style> styles = new List<Style>();
+    if (style != null)
+      styles.add(style);
+    ParentData parentData = null;
+    UINode parent = _parent;
+    while (parent != null && parent is! RenderNodeWrapper) {
+      if (parent is StyleNode && parent.style != null)
+        styles.add(parent.style);
+      else
+      if (parent is ParentDataNode && parent.parentData != null) {
+        if (parentData != null)
+          parentData.merge(parent.parentData); // this will throw if the types aren't the same
+        else
+          parentData = parent.parentData;
+      }
+      parent = parent._parent;
+    }
+    _root.updateStyles(styles);
+    if (parentData != null) {
+      assert(_root.parentData != null);
+      _root.parentData.merge(parentData); // this will throw if the types aren't approriate
+      assert(parent != null);
+      assert(parent._root != null);
+      parent._root.markNeedsLayout();
+    }
+    _root.updateInlineStyle(inlineStyle);
+  }
 
   void _removeChild(UINode node) {
     assert(_root is RenderCSSContainer);
@@ -328,17 +363,18 @@ final List<UINode> _emptyList = new List<UINode>();
 abstract class OneChildListRenderNodeWrapper extends RenderNodeWrapper {
 
   final List<UINode> children;
-  final Style style;
-  final String inlineStyle;
 
   OneChildListRenderNodeWrapper({
     Object key,
     List<UINode> children,
-    this.style,
-    this.inlineStyle
+    Style style,
+    String inlineStyle
   }) : this.children = children == null ? _emptyList : children,
-       super(key: key) {
-
+  super(
+    key: key,
+    style: style,
+    inlineStyle: inlineStyle
+  ) {
     assert(!_debugHasDuplicateIds());
   }
 
@@ -367,47 +403,16 @@ abstract class OneChildListRenderNodeWrapper extends RenderNodeWrapper {
     return false;
   }
 
-  void _syncNode(RenderNodeWrapper old) {
-    OneChildListRenderNodeWrapper oldOneChildListRenderNodeWrapper = old as OneChildListRenderNodeWrapper;
+  void _syncRenderNode(OneChildListRenderNodeWrapper old) {
+    super._syncRenderNode(old);
 
-    List<Style> styles = new List<Style>();
-    if (style != null)
-      styles.add(style);
-    ParentData parentData = null;
-    UINode parent = _parent;
-    while (parent != null && parent is! RenderNodeWrapper) {
-      if (parent is StyleNode && parent.style != null)
-        styles.add(parent.style);
-      else
-      if (parent is ParentDataNode && parent.parentData != null) {
-        if (parentData != null)
-          parentData.merge(parent.parentData); // this will throw if the types aren't the same
-        else
-          parentData = parent.parentData;
-      }
-      parent = parent._parent;
-    }
-    _root.updateStyles(styles);
-    if (parentData != null) {
-      assert(_root.parentData != null);
-      _root.parentData.merge(parentData); // this will throw if the types aren't approriate
-      assert(parent != null);
-      assert(parent._root != null);
-      parent._root.markNeedsLayout();
-    }
-    _root.updateInlineStyle(inlineStyle);
-
-    _syncChildren(oldOneChildListRenderNodeWrapper);
-  }
-
-  void _syncChildren(OneChildListRenderNodeWrapper oldOneChildListRenderNodeWrapper) {
     if (_root is! RenderCSSContainer)
       return;
 
     var startIndex = 0;
     var endIndex = children.length;
 
-    var oldChildren = oldOneChildListRenderNodeWrapper.children;
+    var oldChildren = old.children;
     var oldStartIndex = 0;
     var oldEndIndex = oldChildren.length;
 
@@ -475,7 +480,7 @@ abstract class OneChildListRenderNodeWrapper extends RenderNodeWrapper {
       oldNodeIdMap[currentNode._key] = null; // mark it reordered
       assert(_root is RenderCSSContainer);
       assert(oldNode._root is RenderCSSContainer);
-      oldOneChildListRenderNodeWrapper._root.remove(oldNode._root);
+      old._root.remove(oldNode._root);
       _root.add(oldNode._root, before: nextSibling);
       return true;
     }
@@ -588,8 +593,8 @@ class FlexContainer extends OneChildListRenderNodeWrapper {
     inlineStyle: inlineStyle
   );
 
-  void _syncNode(UINode old) {
-    super._syncNode(old);
+  void _syncRenderNode(UINode old) {
+    super._syncRenderNode(old);
     _root.direction = direction;
   }
 }
@@ -630,7 +635,7 @@ class FillStackContainer extends OneChildListRenderNodeWrapper {
   }
 }
 
-class TextFragment extends OneChildListRenderNodeWrapper {
+class TextFragment extends RenderNodeWrapper {
 
   RenderCSSInline _root;
   RenderCSSInline _createNode() => new RenderCSSInline(this, this.data);
@@ -651,13 +656,13 @@ class TextFragment extends OneChildListRenderNodeWrapper {
     inlineStyle: inlineStyle
   );
 
-  void _syncNode(UINode old) {
-    super._syncNode(old);
+  void _syncRenderNode(UINode old) {
+    super._syncRenderNode(old);
     _root.data = data;
   }
 }
 
-class Image extends OneChildListRenderNodeWrapper {
+class Image extends RenderNodeWrapper {
 
   RenderCSSImage _root;
   RenderCSSImage _createNode() => new RenderCSSImage(this, this.src, this.width, this.height);
@@ -683,8 +688,8 @@ class Image extends OneChildListRenderNodeWrapper {
     inlineStyle: inlineStyle
   );
 
-  void _syncNode(UINode old) {
-    super._syncNode(old);
+  void _syncRenderNode(UINode old) {
+    super._syncRenderNode(old);
     _root.configure(this.src, this.width, this.height);
   }
 }
