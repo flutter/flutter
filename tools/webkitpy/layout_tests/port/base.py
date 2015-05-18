@@ -1089,11 +1089,8 @@ class Port(object):
         be the case when the tests aren't run on the host platform."""
         return True
 
-    def _sky_sdk_path(self):
-        return self._build_path('gen/sky_sdk')
-
     def _dart_packages_root(self):
-        return os.path.join(self._sky_sdk_path(), 'packages_root')
+        return self._build_path('gen/dart-pkg/packages')
 
     def server_command_line(self):
         path = (self._options.path_to_server or
@@ -1112,17 +1109,6 @@ class Port(object):
         Ports can stub this out if they don't need a web server to be running."""
         assert not self._http_server, 'Already running an http server.'
         subprocess.call(self.path_to_script('download_sky_server'))
-        print # Make blank line before calling deploy_sdk.
-        subprocess.call([
-            self.path_to_script('deploy_sdk.py'),
-            '--build-dir', self._build_path(),
-            '--non-interactive',
-            '--dev-environment',
-            self._sky_sdk_path(),
-            '--fake-pub-get-into',
-            self._dart_packages_root()
-        ])
-
         self._http_server = subprocess.Popen(self.server_command_line())
 
     def start_websocket_server(self):

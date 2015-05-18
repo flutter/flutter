@@ -6,7 +6,7 @@ import '../shell.dart' as shell;
 import 'dart:async';
 import 'dart:sky' as sky;
 import 'dart:typed_data';
-import 'package:mojo/public/dart/core.dart' as core;
+import 'package:mojo/core.dart' as core;
 import 'package:mojom/mojo/network_service.mojom.dart';
 import 'package:mojom/mojo/url_loader.mojom.dart';
 
