@@ -7,7 +7,7 @@ import '../layout.dart';
 import '../theme/view_configuration.dart';
 import 'material.dart';
 
-class ActionBar extends Component {
+class ToolBar extends Component {
   static final Style _style = new Style('''
     align-items: center;
     height: 56px;
@@ -24,7 +24,7 @@ class ActionBar extends Component {
   UINode center;
   List<UINode> right;
 
-  ActionBar({
+  ToolBar({
     String key,
     this.left,
     this.center,
