@@ -8,6 +8,7 @@
 #include "sky/engine/bindings/builtin.h"
 #include "sky/engine/core/frame/LocalDOMWindow.h"
 #include "sky/engine/core/script/dom_dart_state.h"
+#include "sky/engine/core/view/View.h"
 #include "sky/engine/tonic/dart_error.h"
 
 namespace blink {
@@ -25,6 +26,11 @@ void BuiltinSky::InstallWindow(DOMDartState* dart_state) {
     ToDart("window"),
     ToDart(dart_state->CurrentWindow()))));
   // TODO(abarth): Retain the document wrapper.
+}
+
+void BuiltinSky::InstallView(View* view) {
+  CHECK(!LogIfError(
+      Dart_SetField(library_.value(), ToDart("view"), ToDart(view))));
 }
 
 Dart_Handle BuiltinSky::GetClassByName(const char* class_name) {

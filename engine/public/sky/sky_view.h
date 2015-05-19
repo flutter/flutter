@@ -6,6 +6,7 @@
 #define SKY_ENGINE_PUBLIC_SKY_SKY_VIEW_H_
 
 #include <memory>
+#include "base/memory/weak_ptr.h"
 #include "skia/ext/refptr.h"
 #include "sky/engine/public/platform/WebCommon.h"
 #include "sky/engine/public/platform/WebURL.h"
@@ -14,11 +15,12 @@
 
 namespace blink {
 class DartController;
+class SkyViewClient;
 class WebInputEvent;
 
 class SkyView {
  public:
-  static std::unique_ptr<SkyView> Create();
+  static std::unique_ptr<SkyView> Create(SkyViewClient* client);
   ~SkyView();
 
   void SetDisplayMetrics(const SkyDisplayMetrics& metrics);
@@ -27,9 +29,17 @@ class SkyView {
   bool HandleInputEvent(const WebInputEvent& event);
 
  private:
-  SkyView();
+  explicit SkyView(SkyViewClient* client);
 
+  void SchedulePaint();
+
+  class Data;
+
+  SkyViewClient* client_;
   std::unique_ptr<DartController> dart_controller_;
+  std::unique_ptr<Data> data_;
+
+  base::WeakPtrFactory<SkyView> weak_factory_;
 
   DISALLOW_COPY_AND_ASSIGN(SkyView);
 };

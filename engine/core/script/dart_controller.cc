@@ -348,6 +348,13 @@ void DartController::CreateIsolateFor(PassOwnPtr<DOMDartState> state,
   Dart_ExitIsolate();
 }
 
+void DartController::InstallView(View* view) {
+  DartIsolateScope isolate_scope(dart_state()->isolate());
+  DartApiScope dart_api_scope;
+
+  builtin_sky_->InstallView(view);
+}
+
 void DartController::ClearForClose() {
   // Don't use a DartIsolateScope here since we never exit the isolate.
   Dart_EnterIsolate(dom_dart_state_->isolate());

@@ -18,6 +18,7 @@ public:
     ~Picture() override;
     static PassRefPtr<Picture> create(PassRefPtr<DisplayList>);
 
+    SkPicture* toSkia() const { return m_displayList->picture(); }
     DisplayList* displayList() const { return m_displayList.get(); }
 
 private:

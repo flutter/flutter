@@ -16,6 +16,7 @@
 #include "skia/ext/refptr.h"
 #include "sky/engine/public/platform/ServiceProvider.h"
 #include "sky/engine/public/sky/sky_view.h"
+#include "sky/engine/public/sky/sky_view_client.h"
 #include "sky/engine/public/web/WebFrameClient.h"
 #include "sky/engine/public/web/WebViewClient.h"
 #include "sky/shell/gpu_delegate.h"
@@ -34,7 +35,8 @@ class Engine : public UIDelegate,
                public blink::ServiceProvider,
                public mojo::NavigatorHost,
                public blink::WebFrameClient,
-               public blink::WebViewClient {
+               public blink::WebViewClient,
+               public blink::SkyViewClient {
  public:
   struct Config {
     ServiceProviderContext* service_provider_context;
@@ -74,6 +76,9 @@ class Engine : public UIDelegate,
   blink::ServiceProvider* services() override;
   void didCreateIsolate(blink::WebLocalFrame* frame,
                         Dart_Isolate isolate) override;
+
+  // SkyViewClient methods:
+  void SchedulePaint() override;
 
   // Services methods:
   mojo::NavigatorHost* NavigatorHost() override;

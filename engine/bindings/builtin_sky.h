@@ -12,6 +12,7 @@
 
 namespace blink {
 class DOMDartState;
+class View;
 
 class BuiltinSky : public DartClassProvider {
  public:
@@ -19,6 +20,7 @@ class BuiltinSky : public DartClassProvider {
   ~BuiltinSky();
 
   void InstallWindow(DOMDartState* dart_state);
+  void InstallView(View* view);
 
   // DartClassProvider:
   Dart_Handle GetClassByName(const char* class_name) override;

@@ -18,4 +18,6 @@ part '{{callback.name}}.dart';
 Window window;
 Document get document => window.document;
 
+View view;
+
 typedef EventListener(Event event);

@@ -117,7 +117,7 @@ void Canvas::drawPicture(Picture* picture)
         return;
     ASSERT(picture);
     ASSERT(m_displayList->isRecording());
-    m_canvas->drawPicture(picture->displayList()->picture());
+    m_canvas->drawPicture(picture->toSkia());
 }
 
 void Canvas::drawPaint(const Paint* paint)
