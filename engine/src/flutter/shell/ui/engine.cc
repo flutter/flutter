@@ -161,6 +161,8 @@ void Engine::OnInputEvent(InputEventPtr event) {
       ConvertEvent(event, device_pixel_ratio_);
   if (!web_event)
     return;
+  if (sky_view_)
+    sky_view_->HandleInputEvent(*web_event);
   if (web_view_)
     web_view_->handleInputEvent(*web_event);
 }
