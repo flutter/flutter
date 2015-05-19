@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:sky/framework/components/action_bar.dart';
+import 'package:sky/framework/components/tool_bar.dart';
 import 'package:sky/framework/components/drawer.dart';
 import 'package:sky/framework/components/drawer_header.dart';
 import 'package:sky/framework/components/floating_action_button.dart';
@@ -31,7 +31,7 @@ enum StockMode { Optimistic, Pessimistic }
 
 class StocksApp extends App {
 
-  static final Style _actionBarStyle = new Style('''
+  static final Style _toolBarStyle = new Style('''
     background-color: ${Purple[500]};''');
 
   static final Style _searchBarStyle = new Style('''
@@ -163,9 +163,9 @@ class StocksApp extends App {
     );
   }
 
-  UINode buildActionBar() {
+  UINode buildToolBar() {
     return new StyleNode(
-      new ActionBar(
+      new ToolBar(
         left: new IconButton(
           icon: 'navigation/menu_white',
           onGestureTap: _drawerController.toggle),
@@ -180,13 +180,13 @@ class StocksApp extends App {
             icon: 'navigation/more_vert_white',
             onGestureTap: _handleMenuShow)
         ]),
-      _actionBarStyle);
+      _toolBarStyle);
   }
 
   // TODO(abarth): Should we factor this into a SearchBar in the framework?
   UINode buildSearchBar() {
     return new StyleNode(
-      new ActionBar(
+      new ToolBar(
         left: new IconButton(
           icon: 'navigation/arrow_back_grey600',
           onGestureTap: _handleSearchEnd),
@@ -214,7 +214,7 @@ class StocksApp extends App {
     addMenuToOverlays(overlays);
 
     return new Scaffold(
-      header: _isSearching ? buildSearchBar() : buildActionBar(),
+      header: _isSearching ? buildSearchBar() : buildToolBar(),
       content: new Stocklist(stocks: _stocks, query: _searchQuery),
       fab: new FloatingActionButton(
         content: new Icon(type: 'content/add_white', size: 24), level: 3),
