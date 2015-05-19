@@ -109,6 +109,7 @@ abstract class UINode {
       return oldNode;
     }
 
+    assert(!node._defunct);
     node._parent = this;
 
     if (oldNode == null) {
