@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// TODO(mpcomplete): Figure out a better SkMatrix/SkRect representation.
-interface Canvas {
+// TODO(mpcomplete): Figure out a better SkMatrix representation.
+[CustomDart] interface Canvas {
   // Height and width are used for culling optimizations and do not necessarily
   // imply that the Canvas is backed by a buffer with any specific bounds.
   readonly attribute float height;

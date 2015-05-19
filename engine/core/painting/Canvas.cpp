@@ -120,7 +120,7 @@ void Canvas::drawPicture(Picture* picture)
     m_canvas->drawPicture(picture->displayList()->picture());
 }
 
-void Canvas::drawPaint(Paint* paint)
+void Canvas::drawPaint(const Paint* paint)
 {
     if (!m_canvas)
         return;
@@ -147,7 +147,7 @@ void Canvas::drawOval(const Vector<float>& rect, const Paint* paint)
     m_canvas->drawOval(toSkRect(rect), paint->paint());
 }
 
-void Canvas::drawCircle(float x, float y, float radius, Paint* paint)
+void Canvas::drawCircle(float x, float y, float radius, const Paint* paint)
 {
     if (!m_canvas)
         return;

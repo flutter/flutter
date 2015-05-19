@@ -106,8 +106,8 @@ class CodeGeneratorDart(object):
             (interface_name, interface_info['component_dir'])
             for interface_name, interface_info in interfaces_info.iteritems()))
 
-    def generate_code(self, definitions, interface_name, idl_pickle_filename,
-                      only_if_changed):
+    def generate_code(self, definitions, interface_name,
+                      idl_filename, idl_pickle_filename, only_if_changed):
         """Returns .h/.cpp/.dart code as (header_text, cpp_text, dart_text)."""
         try:
             interface = definitions.interfaces[interface_name]
@@ -149,6 +149,15 @@ class CodeGeneratorDart(object):
 
         template_contents['cpp_includes'] = sorted(includes)
 
+        # If CustomDart is set, read the custom dart file and add it to our
+        # template parameters.
+        if 'CustomDart' in interface.extended_attributes:
+          dart_filename = os.path.join(os.path.dirname(idl_filename),
+                                       interface.name + ".dart")
+          with open(dart_filename) as dart_file:
+              custom_dartcode = dart_file.read()
+              template_contents['custom_dartcode'] = custom_dartcode
+
         idl_world = {'interface': None, 'callback': None}
 
         # Load the pickle file for this IDL.
@@ -178,6 +187,7 @@ class CodeGeneratorDart(object):
         header_text = header_template.render(template_contents)
         cpp_text = cpp_template.render(template_contents)
         dart_text = dart_template.render(template_contents)
+
         return header_text, cpp_text, dart_text
 
     def load_global_pickles(self, global_entries):

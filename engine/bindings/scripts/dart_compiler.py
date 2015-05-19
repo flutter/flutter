@@ -83,6 +83,7 @@ class IdlCompiler(object):
         definitions = self.reader.read_idl_definitions(idl_filename)
         output_code_list = self.code_generator.generate_code(definitions,
                                                              interface_name,
+                                                             idl_filename,
                                                              idl_pickle_filename,
                                                              self.only_if_changed)
 

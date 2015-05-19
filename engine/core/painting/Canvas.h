@@ -39,11 +39,10 @@ public:
     void clipRect(const Vector<float>& rect);
 
     void drawPicture(Picture* picture);
-
-    void drawPaint(Paint* paint);
+    void drawPaint(const Paint* paint);
     void drawRect(const Vector<float>& rect, const Paint* paint);
     void drawOval(const Vector<float>& rect, const Paint* paint);
-    void drawCircle(float x, float y, float radius, Paint* paint);
+    void drawCircle(float x, float y, float radius, const Paint* paint);
 
     SkCanvas* skCanvas() { return m_canvas; }
 
