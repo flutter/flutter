@@ -201,16 +201,8 @@ class SkyDebugger(object):
             print "Cannot debug Release builds on Android"
             sys.exit(2)
 
-        sdk_root = os.path.join(self.paths.build_dir, 'gen', 'sky_sdk')
-        packages_root = os.path.join(sdk_root, 'packages_root')
-        subprocess.check_call([
-            os.path.join(self.paths.sky_tools_directory, 'deploy_sdk.py'),
-            '--build-dir', self.paths.build_dir,
-            '--non-interactive',
-            '--dev-environment',
-            '--fake-pub-get-into', packages_root,
-            sdk_root,
-        ])
+        dart_pkg_dir = os.path.join(self.paths.build_dir, 'gen', 'dart-pkg')
+        packages_root = os.path.join(dart_pkg_dir, 'packages')
 
         sky_server = self.sky_server_for_args(args, packages_root)
         self.pids['sky_server_pid'] = sky_server.start()
