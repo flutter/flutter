@@ -19,6 +19,7 @@ namespace blink {
 class DartState;
 class DartDependency;
 class DartDependencyCatcher;
+class KURL;
 
 // TODO(abarth): This class seems more complicated than it needs to be. Is
 // there some way of simplifying this system? For example, we have a bunch
@@ -33,6 +34,8 @@ class DartLoader {
   static Dart_Handle HandleLibraryTag(Dart_LibraryTag tag,
                                       Dart_Handle library,
                                       Dart_Handle url);
+
+  void LoadLibrary(const KURL& url);
 
   void WaitForDependencies(const HashSet<DartDependency*>& dependencies,
                            const base::Closure& callback);

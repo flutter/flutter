@@ -231,16 +231,19 @@ void DartLoader::WaitForDependencies(
       adoptPtr(new DependencyWatcher(dependencies, callback)));
 }
 
-Dart_Handle DartLoader::Import(Dart_Handle library, Dart_Handle url) {
-  KURL parsed_url(ParsedURLString, StringFromDart(url));
-  const auto& result = pending_libraries_.add(parsed_url.string(), nullptr);
+void DartLoader::LoadLibrary(const KURL& url) {
+  const auto& result = pending_libraries_.add(url.string(), nullptr);
   if (result.isNewEntry) {
-    OwnPtr<Job> job = adoptPtr(new ImportJob(this, parsed_url));
+    OwnPtr<Job> job = adoptPtr(new ImportJob(this, url));
     result.storedValue->value = job.get();
     jobs_.add(job.release());
   }
   if (dependency_catcher_)
     dependency_catcher_->AddDependency(result.storedValue->value);
+}
+
+Dart_Handle DartLoader::Import(Dart_Handle library, Dart_Handle url) {
+  LoadLibrary(KURL(ParsedURLString, StringFromDart(url)));
   return Dart_True();
 }
 

@@ -52,7 +52,7 @@ static const char* kCheckedModeArgs[] = {
 extern const uint8_t* kDartVmIsolateSnapshotBuffer;
 extern const uint8_t* kDartIsolateSnapshotBuffer;
 
-DartController::DartController() {
+DartController::DartController() : weak_factory_(this) {
 }
 
 DartController::~DartController() {
@@ -105,6 +105,24 @@ Dart_Handle DartController::CreateLibrary(AbstractModule* module,
     return nullptr;
 
   return library;
+}
+
+void DartController::DidLoadMainLibrary(KURL url) {
+  DCHECK(Dart_CurrentIsolate() == dart_state()->isolate());
+  DartApiScope dart_api_scope;
+
+  Dart_Handle library = Dart_LookupLibrary(
+      StringToDart(dart_state(), url.string()));
+  CHECK(!LogIfError(library));
+  DartInvokeAppField(library, ToDart("main"), 0, nullptr);
+}
+
+void DartController::LoadMainLibrary(const KURL& url) {
+  DartLoader& loader = dart_state()->loader();
+  DartDependencyCatcher dependency_catcher(loader);
+  loader.LoadLibrary(url);
+  loader.WaitForDependencies(dependency_catcher.dependencies(),
+                             base::Bind(&DartController::DidLoadMainLibrary, weak_factory_.GetWeakPtr(), url));
 }
 
 void DartController::LoadScriptInModule(

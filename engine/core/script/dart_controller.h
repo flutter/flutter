@@ -7,6 +7,7 @@
 
 #include "base/callback_forward.h"
 #include "base/macros.h"
+#include "base/memory/weak_ptr.h"
 #include "dart/runtime/include/dart_api.h"
 #include "sky/engine/wtf/OwnPtr.h"
 #include "sky/engine/wtf/text/AtomicString.h"
@@ -19,6 +20,7 @@ class DOMDartState;
 class DartValue;
 class Document;
 class HTMLScriptElement;
+class KURL;
 
 class DartController {
  public:
@@ -29,6 +31,8 @@ class DartController {
 
   typedef base::Callback<void(RefPtr<AbstractModule>, RefPtr<DartValue>)>
       LoadFinishedCallback;
+
+  void LoadMainLibrary(const KURL& url);
 
   void LoadScriptInModule(AbstractModule* module,
                           const String& source,
@@ -49,8 +53,12 @@ class DartController {
                             const String& source,
                             const TextPosition& position);
 
+  void DidLoadMainLibrary(KURL url);
+
   OwnPtr<DOMDartState> dom_dart_state_;
   OwnPtr<BuiltinSky> builtin_sky_;
+
+  base::WeakPtrFactory<DartController> weak_factory_;
 
   DISALLOW_COPY_AND_ASSIGN(DartController);
 };

@@ -13,6 +13,7 @@
 #include "third_party/skia/include/core/SkPicture.h"
 
 namespace blink {
+class DartController;
 class WebInputEvent;
 
 class SkyView {
@@ -27,6 +28,10 @@ class SkyView {
 
  private:
   SkyView();
+
+  std::unique_ptr<DartController> dart_controller_;
+
+  DISALLOW_COPY_AND_ASSIGN(SkyView);
 };
 
 } // namespace blink

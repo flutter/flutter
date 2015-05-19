@@ -5,6 +5,9 @@
 #include "config.h"
 #include "sky/engine/public/sky/sky_view.h"
 
+#include "sky/engine/core/script/dart_controller.h"
+#include "sky/engine/platform/weborigin/KURL.h"
+
 namespace blink {
 
 std::unique_ptr<SkyView> SkyView::Create() {
@@ -15,12 +18,19 @@ SkyView::SkyView() {
 }
 
 SkyView::~SkyView() {
+  // TODO(abarth): Move this work into the DartController destructor once we
+  // remove the Frame code path.
+  if (dart_controller_)
+    dart_controller_->ClearForClose();
 }
 
 void SkyView::SetDisplayMetrics(const SkyDisplayMetrics& metrics) {
 }
 
 void SkyView::Load(const WebURL& url) {
+  dart_controller_.reset(new DartController);
+  dart_controller_->CreateIsolateFor(nullptr);
+  dart_controller_->LoadMainLibrary(url);
 }
 
 skia::RefPtr<SkPicture> SkyView::Paint() {
