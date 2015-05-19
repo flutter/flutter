@@ -6,6 +6,7 @@
 #include "sky/engine/public/sky/sky_view.h"
 
 #include "sky/engine/core/script/dart_controller.h"
+#include "sky/engine/core/script/dom_dart_state.h"
 #include "sky/engine/platform/weborigin/KURL.h"
 
 namespace blink {
@@ -29,7 +30,7 @@ void SkyView::SetDisplayMetrics(const SkyDisplayMetrics& metrics) {
 
 void SkyView::Load(const WebURL& url) {
   dart_controller_.reset(new DartController);
-  dart_controller_->CreateIsolateFor(nullptr);
+  dart_controller_->CreateIsolateFor(adoptPtr(new DOMDartState(nullptr)), url);
   dart_controller_->LoadMainLibrary(url);
 }
 

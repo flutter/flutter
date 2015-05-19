@@ -65,6 +65,7 @@
 #include "sky/engine/core/page/Page.h"
 #include "sky/engine/core/rendering/style/RenderStyle.h"
 #include "sky/engine/core/script/dart_controller.h"
+#include "sky/engine/core/script/dom_dart_state.h"
 #include "sky/engine/platform/EventDispatchForbiddenScope.h"
 #include "sky/engine/platform/PlatformScreen.h"
 #include "sky/engine/platform/geometry/FloatRect.h"
@@ -226,9 +227,16 @@ PassRefPtr<Document> LocalDOMWindow::installNewDocument(const DocumentInit& init
     m_document = Document::create(init);
     m_application = Application::create(m_document.get(), m_document.get(), m_document->url().string());
     m_eventQueue = DOMWindowEventQueue::create(m_document.get());
-    m_frame->dart().CreateIsolateFor(m_document.get());
-    m_document->attach();
+    m_frame->dart().CreateIsolateFor(adoptPtr(new DOMDartState(m_document.get())), m_document->url());
 
+    {
+        Dart_Isolate isolate = m_frame->dart().dart_state()->isolate();
+        DartIsolateScope scope(isolate);
+        DartApiScope api_scope;
+        m_document->frame()->loaderClient()->didCreateIsolate(isolate);
+    }
+
+    m_document->attach();
     return m_document;
 }
 

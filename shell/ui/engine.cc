@@ -70,8 +70,10 @@ void Engine::BeginFrame(base::TimeTicks frame_time) {
   double interval_sec = 1.0 / 60;
   blink::WebBeginFrameArgs args(frame_time_sec, deadline_sec, interval_sec);
 
-  web_view_->beginFrame(args);
-  web_view_->layout();
+  if (web_view_) {
+    web_view_->beginFrame(args);
+    web_view_->layout();
+  }
 }
 
 skia::RefPtr<SkPicture> Engine::Paint() {
@@ -83,7 +85,9 @@ skia::RefPtr<SkPicture> Engine::Paint() {
       physical_size_.width(), physical_size_.height(), &factory,
       SkPictureRecorder::kComputeSaveLayerInfo_RecordFlag));
 
-  web_view_->paint(canvas.get(), blink::WebRect(gfx::Rect(physical_size_)));
+  if (web_view_)
+    web_view_->paint(canvas.get(), blink::WebRect(gfx::Rect(physical_size_)));
+
   return skia::AdoptRef(recorder.endRecordingAsPicture());
 }
 
@@ -143,6 +147,13 @@ void Engine::OnInputEvent(InputEventPtr event) {
 }
 
 void Engine::LoadURL(const mojo::String& url) {
+  // Enable SkyView here.
+  if (false) {
+    sky_view_ = blink::SkyView::Create();
+    sky_view_->Load(GURL(url));
+    return;
+  }
+
   // Something bad happens if you try to call WebView::close and replace
   // the webview.  So for now we just load into the existing one. :/
   if (!web_view_)

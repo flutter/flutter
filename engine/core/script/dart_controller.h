@@ -18,7 +18,6 @@ class AbstractModule;
 class BuiltinSky;
 class DOMDartState;
 class DartValue;
-class Document;
 class HTMLScriptElement;
 class KURL;
 
@@ -43,7 +42,8 @@ class DartController {
                               HTMLScriptElement* script);
 
   void ClearForClose();
-  void CreateIsolateFor(Document* document);
+  void CreateIsolateFor(PassOwnPtr<DOMDartState> dom_dart_state,
+                        const KURL& url);
 
   DOMDartState* dart_state() const { return dom_dart_state_.get(); }
 

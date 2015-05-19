@@ -15,6 +15,7 @@
 #include "mojo/services/navigation/public/interfaces/navigation.mojom.h"
 #include "skia/ext/refptr.h"
 #include "sky/engine/public/platform/ServiceProvider.h"
+#include "sky/engine/public/sky/sky_view.h"
 #include "sky/engine/public/web/WebFrameClient.h"
 #include "sky/engine/public/web/WebViewClient.h"
 #include "sky/shell/gpu_delegate.h"
@@ -89,7 +90,10 @@ class Engine : public UIDelegate,
   mojo::ServiceProviderPtr service_provider_;
   scoped_ptr<PlatformImpl> platform_impl_;
   scoped_ptr<Animator> animator_;
+
+  std::unique_ptr<blink::SkyView> sky_view_;
   blink::WebView* web_view_;
+
   float device_pixel_ratio_;
   gfx::Size physical_size_;
   mojo::Binding<ViewportObserver> viewport_observer_binding_;

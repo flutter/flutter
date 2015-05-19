@@ -12,7 +12,6 @@ namespace blink {
 
 DOMDartState::DOMDartState(Document* document)
     : document_(document), loader_(adoptPtr(new DartLoader(this))) {
-  DCHECK(document_);
 }
 
 DOMDartState::~DOMDartState() {
@@ -27,10 +26,12 @@ Document* DOMDartState::CurrentDocument() {
 }
 
 LocalFrame* DOMDartState::CurrentFrame() {
+  DCHECK(Current()->document_);
   return Current()->document_->frame();
 }
 
 LocalDOMWindow* DOMDartState::CurrentWindow() {
+  DCHECK(Current()->document_);
   return Current()->document_->domWindow();
 }
 

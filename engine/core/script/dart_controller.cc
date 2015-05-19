@@ -111,6 +111,9 @@ void DartController::DidLoadMainLibrary(KURL url) {
   DCHECK(Dart_CurrentIsolate() == dart_state()->isolate());
   DartApiScope dart_api_scope;
 
+  if (LogIfError(Dart_FinalizeLoading(true)))
+    return;
+
   Dart_Handle library = Dart_LookupLibrary(
       StringToDart(dart_state(), url.string()));
   CHECK(!LogIfError(library));
@@ -308,13 +311,13 @@ static void MessageNotifyCallback(Dart_Isolate dest_isolate) {
       base::Bind(&CallHandleMessage, DartState::From(dest_isolate)->GetWeakPtr()));
 }
 
-void DartController::CreateIsolateFor(Document* document) {
-  DCHECK(document);
+void DartController::CreateIsolateFor(PassOwnPtr<DOMDartState> state,
+                                      const KURL& url) {
   CHECK(kDartIsolateSnapshotBuffer);
   char* error = nullptr;
-  dom_dart_state_ = adoptPtr(new DOMDartState(document));
+  dom_dart_state_ = state;
   Dart_Isolate isolate = Dart_CreateIsolate(
-      document->url().string().utf8().data(), "main", kDartIsolateSnapshotBuffer,
+      url.string().utf8().data(), "main", kDartIsolateSnapshotBuffer,
       static_cast<DartState*>(dom_dart_state_.get()), &error);
   Dart_SetMessageNotifyCallback(MessageNotifyCallback);
   CHECK(isolate) << error;
@@ -336,9 +339,9 @@ void DartController::CreateIsolateFor(Document* document) {
 
     builtin_sky_ = adoptPtr(new BuiltinSky(dart_state()));
     dart_state()->class_library().set_provider(builtin_sky_.get());
-    builtin_sky_->InstallWindow(dart_state());
 
-    document->frame()->loaderClient()->didCreateIsolate(isolate);
+    if (dart_state()->document())
+      builtin_sky_->InstallWindow(dart_state());
 
     EnsureHandleWatcherStarted();
   }
