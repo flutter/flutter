@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-library stock_arrow;
-
 import 'dart:math';
 import 'package:sky/framework/fn.dart';
 import 'package:sky/framework/layout.dart';
