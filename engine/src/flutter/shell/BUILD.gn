@@ -9,16 +9,25 @@ import("//build/config/android/rules.gni")
 
 generate_jni("jni_headers") {
   sources = [
-    "org/domokit/sky/shell/JavaServiceProvider.java",
-    "org/domokit/sky/shell/PlatformView.java",
-    "org/domokit/sky/shell/SkyMain.java",
-    "org/domokit/sky/shell/TracingController.java",
+    "android/org/domokit/sky/shell/PlatformServiceProvider.java",
+    "android/org/domokit/sky/shell/PlatformView.java",
+    "android/org/domokit/sky/shell/SkyMain.java",
+    "android/org/domokit/sky/shell/TracingController.java",
   ]
   jni_package = "sky/shell"
 }
 
 shared_library("sky_shell") {
   sources = [
+    "android/library_loader.cc",
+    "android/platform_service_provider.cc",
+    "android/platform_service_provider.h",
+    "android/platform_view.cc",
+    "android/platform_view.h",
+    "android/sky_main.cc",
+    "android/sky_main.h",
+    "android/tracing_controller.cc",
+    "android/tracing_controller.h",
     "gpu/ganesh_context.cc",
     "gpu/ganesh_context.h",
     "gpu/ganesh_surface.cc",
@@ -27,17 +36,9 @@ shared_library("sky_shell") {
     "gpu/rasterizer.h",
     "gpu_delegate.cc",
     "gpu_delegate.h",
-    "java_service_provider.cc",
-    "java_service_provider.h",
-    "library_loader.cc",
-    "platform_view.cc",
-    "platform_view.h",
+    "service_provider.h",
     "shell.cc",
     "shell.h",
-    "sky_main.cc",
-    "sky_main.h",
-    "tracing_controller.cc",
-    "tracing_controller.h",
     "ui/animator.cc",
     "ui/animator.h",
     "ui/engine.cc",
@@ -75,15 +76,15 @@ shared_library("sky_shell") {
 
 android_library("java") {
   java_files = [
-    "org/domokit/sky/shell/GestureProvider.java",
-    "org/domokit/sky/shell/JavaServiceProvider.java",
-    "org/domokit/sky/shell/PlatformView.java",
-    "org/domokit/sky/shell/ServiceFactory.java",
-    "org/domokit/sky/shell/ServiceRegistry.java",
-    "org/domokit/sky/shell/SkyActivity.java",
-    "org/domokit/sky/shell/SkyApplication.java",
-    "org/domokit/sky/shell/SkyMain.java",
-    "org/domokit/sky/shell/TracingController.java",
+    "android/org/domokit/sky/shell/GestureProvider.java",
+    "android/org/domokit/sky/shell/PlatformServiceProvider.java",
+    "android/org/domokit/sky/shell/PlatformView.java",
+    "android/org/domokit/sky/shell/ServiceFactory.java",
+    "android/org/domokit/sky/shell/ServiceRegistry.java",
+    "android/org/domokit/sky/shell/SkyActivity.java",
+    "android/org/domokit/sky/shell/SkyApplication.java",
+    "android/org/domokit/sky/shell/SkyMain.java",
+    "android/org/domokit/sky/shell/TracingController.java",
   ]
 
   deps = [

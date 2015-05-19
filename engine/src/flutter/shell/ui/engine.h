@@ -19,6 +19,7 @@
 #include "sky/engine/public/web/WebViewClient.h"
 #include "sky/shell/gpu_delegate.h"
 #include "sky/shell/ui_delegate.h"
+#include "sky/shell/service_provider.h"
 #include "third_party/skia/include/core/SkPicture.h"
 #include "ui/gfx/geometry/size.h"
 
@@ -35,7 +36,7 @@ class Engine : public UIDelegate,
                public blink::WebViewClient {
  public:
   struct Config {
-    scoped_refptr<base::SingleThreadTaskRunner> java_task_runner;
+    ServiceProviderContext* service_provider_context;
 
     base::WeakPtr<GPUDelegate> gpu_delegate;
     scoped_refptr<base::SingleThreadTaskRunner> gpu_task_runner;
@@ -82,7 +83,6 @@ class Engine : public UIDelegate,
   void DidNavigateLocally(const mojo::String& url) override;
   void RequestNavigateHistory(int32_t delta) override;
 
-  mojo::ServiceProviderPtr CreateServiceProvider();
   void UpdateWebViewSize();
 
   Config config_;

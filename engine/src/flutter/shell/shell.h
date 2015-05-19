@@ -10,40 +10,38 @@
 #include "base/memory/scoped_ptr.h"
 #include "base/threading/thread.h"
 
-namespace base {
-class SingleThreadTaskRunner;
-}
-
 namespace sky {
 namespace shell {
 class Engine;
-class Rasterizer;
 class PlatformView;
+class Rasterizer;
+class ServiceProviderContext;
 
 class Shell {
  public:
   ~Shell();
 
   static void Init(
-      scoped_refptr<base::SingleThreadTaskRunner> java_task_runner);
+      scoped_ptr<ServiceProviderContext> service_provider_context);
   static Shell& Shared();
 
   PlatformView* view() const { return view_.get(); }
 
  private:
-  explicit Shell(scoped_refptr<base::SingleThreadTaskRunner> java_task_runner);
+  explicit Shell(scoped_ptr<ServiceProviderContext> service_provider_context);
 
   void InitGPU(const base::Thread::Options& options);
   void InitUI(const base::Thread::Options& options);
   void InitView();
 
-  scoped_refptr<base::SingleThreadTaskRunner> java_task_runner_;
   scoped_ptr<base::Thread> gpu_thread_;
   scoped_ptr<base::Thread> ui_thread_;
 
   scoped_ptr<PlatformView> view_;
   scoped_ptr<Rasterizer> rasterizer_;
   scoped_ptr<Engine> engine_;
+
+  scoped_ptr<ServiceProviderContext> service_provider_context_;
 
   DISALLOW_COPY_AND_ASSIGN(Shell);
 };
