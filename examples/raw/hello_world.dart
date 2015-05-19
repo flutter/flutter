@@ -5,22 +5,38 @@
 import "dart:math";
 import 'dart:sky';
 
-void main() {
-  print("Hello, world");
-
+Picture draw(int a, int r, int g, int b) {
   double width = view.width;
   double height = view.height;
 
   PictureRecorder recorder = new PictureRecorder(width, height);
   double radius = min(width, height) * 0.45;
 
-  Paint paint = new Paint()..setARGB(255, 0, 255, 0);
-
+  Paint paint = new Paint()..setARGB(a, r, g, b);
   recorder.drawCircle(width / 2, height / 2, radius, paint);
+  return recorder.endRecording();
+}
 
-  print("Storing picture");
-  view.picture = recorder.endRecording();
+bool handleEvent(Event event) {
+  if (event.type == "pointerdown") {
+    view.picture = draw(255, 0, 0, 255);
+    view.schedulePaint();
+    return true;
+  }
 
-  print("Scheduling paint");
+  if (event.type == "pointerup") {
+    view.picture = draw(255, 0, 255, 0);
+    view.schedulePaint();
+    return true;
+  }
+
+  return false;
+}
+
+void main() {
+  print("Hello, world");
+  view.picture = draw(255, 0, 255, 0);
   view.schedulePaint();
+
+  view.setEventCallback(handleEvent);
 }
