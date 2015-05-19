@@ -58,6 +58,17 @@ def gn_args_from_build_dir(build_dir):
     return config
 
 
+def ensure_assets_are_downloaded(build_dir):
+    sky_pkg_dir = os.path.join(build_dir, 'gen', 'dart-pkg', 'sky')
+    sky_pkg_lib_dir = os.path.join(sky_pkg_dir, 'lib')
+    sky_icons_dir = \
+        os.path.join(sky_pkg_lib_dir, 'assets', 'material-design-icons')
+    if not os.path.isdir(sky_icons_dir):
+        logging.info('NOTE: sky/assets/material-design-icons missing, '
+                     'Running `download_material_design_icons` for you.')
+        subprocess.check_call(
+            [os.path.join(sky_pkg_lib_dir, 'download_material_design_icons')])
+
 class SkyDebugger(object):
     def __init__(self):
         self.pids = {}
@@ -179,6 +190,8 @@ class SkyDebugger(object):
         # from the build directory?
         gn_args = gn_args_from_build_dir(self.paths.build_dir)
         is_android = 'android_sdk_version' in gn_args
+
+        ensure_assets_are_downloaded(args.build_dir)
 
         shell_found = True
         if is_android:
