@@ -44,15 +44,21 @@ class Node {
   }
   detachChildren() { } // workaround for lack of inter-class mixins in Dart
 
-  void setAsChild(Node child) { // only for use by subclasses
+  Node _parent;
+  Node get parent => _parent;
+  void adoptChild(Node child) { // only for use by subclasses
     assert(child != null);
+    assert(child._parent == null);
+    child._parent = this;
     if (attached)
       child.attach();
     redepthChild(child);
   }
   void dropChild(Node child) { // only for use by subclasses
     assert(child != null);
+    assert(child._parent == this);
     assert(child.attached == attached);
+    child._parent = null;
     if (attached)
       child.detach();
   }

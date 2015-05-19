@@ -78,11 +78,11 @@ abstract class RenderNode extends Node {
       child.parentData = new ParentData();
   }
 
-  void setAsChild(RenderNode child) { // only for use by subclasses
+  void adoptChild(RenderNode child) { // only for use by subclasses
     // call this whenever you decide a node is a child
     assert(child != null);
     setupPos(child);
-    super.setAsChild(child);
+    super.adoptChild(child);
   }
   void dropChild(RenderNode child) { // only for use by subclasses
     assert(child != null);
@@ -149,7 +149,7 @@ abstract class ContainerRenderNodeMixin<ChildType extends RenderNode, ParentData
     assert(child != before);
     assert(child != _firstChild);
     assert(child != _lastChild);
-    setAsChild(child);
+    adoptChild(child);
     assert(child.parentData is ParentDataType);
     assert(child.parentData.nextSibling == null);
     assert(child.parentData.previousSibling == null);
