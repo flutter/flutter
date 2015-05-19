@@ -35,6 +35,20 @@ PID_FILE_KEYS = frozenset([
     'build_dir',
 ])
 
+_IGNORED_PATTERNS = [
+  # Ignored because they're not indicative of specific errors.
+  re.compile(r'^$'),
+  re.compile(r'^Analyzing \['),
+  re.compile(r'^No issues found'),
+  re.compile(r'^[0-9]+ errors? and [0-9]+ warnings? found.'),
+  re.compile(r'^([0-9]+|No) (error|warning|issue)s? found.'),
+
+  # TODO: Remove once sdk-extensions are in place
+  re.compile(r'^\[error\] Native functions can only be declared in'),
+  # TODO: Remove this once dev SDK includes Uri.directory constructor.
+  re.compile(r'.*The class \'Uri\' does not have a constructor \'directory\''),
+]
+
 # This 'strict dictionary' approach is useful for catching typos.
 class Pids(object):
     def __init__(self, known_keys, contents=None):
@@ -111,11 +125,8 @@ def _url_from_args(args, pids):
     return _convert_to_sky_url(url)
 
 
-def dev_sdk_root(build_dir):
-    return os.path.join(build_dir, 'gen', 'sky_sdk')
-
 def dev_packages_root(build_dir):
-    return os.path.join(dev_sdk_root(build_dir), 'packages_root')
+    return os.path.join(build_dir, 'gen', 'dart-pkg', 'packages')
 
 
 class StartSky(object):
@@ -155,18 +166,7 @@ class StartSky(object):
             print "'%s' does not exist?" % apk_path
             return 2
 
-        sdk_root = dev_sdk_root(args.build_dir)
         packages_root = dev_packages_root(args.build_dir)
-        sky_tools_directory = os.path.join(SRC_ROOT, 'sky/tools')
-        subprocess.check_call([
-            os.path.join(sky_tools_directory, 'deploy_sdk.py'),
-            '--build-dir', args.build_dir,
-            '--non-interactive',
-            '--dev-environment',
-            '--fake-pub-get-into', packages_root,
-            sdk_root,
-        ])
-
         sky_server = self._sky_server_for_args(args, packages_root)
         pids['sky_server_pid'] = sky_server.start()
         pids['sky_server_port'] = sky_server.port
@@ -237,15 +237,34 @@ class Analyze(object):
         bindings_path = os.path.join(build_dir, 'gen/sky/bindings')
         sky_builtin_path = \
             os.path.join(SRC_ROOT, 'sky/engine/bindings/builtin.dart')
+        sky_internals_path = \
+            os.path.join(SRC_ROOT, 'sky/sdk/lib/internals.dart')
         dart_sky_path = os.path.join(bindings_path, 'dart_sky.dart')
         analyzer_args = [ANALYZER_PATH,
+            "--url-mapping=dart:sky.internals,%s" % sky_internals_path,
             "--url-mapping=dart:sky,%s" % dart_sky_path,
             "--url-mapping=dart:sky_builtin,%s" % sky_builtin_path,
             "--package-root", dev_packages_root(build_dir),
             "--package-warnings",
             args.app_path
         ]
-        return subprocess.call(analyzer_args)
+        try:
+          subprocess.check_output(analyzer_args,
+                                  shell=False,
+                                  stderr=subprocess.STDOUT)
+        except subprocess.CalledProcessError as e:
+          errors = set(l for l in e.output.split('\n')
+                       if not any(p.match(l) for p in _IGNORED_PATTERNS))
+          # If we do not have any errors left after filtering, return 0.
+          if len(errors) == 0:
+            return 0
+          # Print errors.
+          for error in sorted(errors):
+            print >> sys.stderr, error
+          # Return analyzer error code.
+          return e.returncode
+        return 0
+
 
 class StartTracing(object):
     def add_subparser(self, subparsers):
