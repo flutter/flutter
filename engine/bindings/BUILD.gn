@@ -35,13 +35,14 @@ source_set("bindings") {
 
   deps = [
     "//base",
+    "//dart/runtime/bin:embedded_dart_io",
     "//dart/runtime/bin:libdart_withcore",
     "//mojo/public/c/system",
     "//mojo/public/cpp/system",
+    "//sky/engine/core:prerequisites",
     "//sky/engine/platform:platform",
     "//sky/engine/tonic",
     "//sky/engine/wtf",
-    "//dart/runtime/bin:embedded_dart_io",
     ":generated_bindings",
     ":snapshot_cc",
   ]
