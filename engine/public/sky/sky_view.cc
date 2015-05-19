@@ -14,7 +14,8 @@
 
 namespace blink {
 
-struct SkyView::Data {
+class SkyView::Data {
+ public:
   RefPtr<View> view_;
 };
 
