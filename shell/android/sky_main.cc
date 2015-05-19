@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "sky/shell/sky_main.h"
+#include "sky/shell/android/sky_main.h"
 
 #include "base/android/jni_android.h"
 #include "base/android/jni_array.h"
@@ -18,6 +18,7 @@
 #include "base/run_loop.h"
 #include "base/threading/simple_thread.h"
 #include "jni/SkyMain_jni.h"
+#include "sky/shell/service_provider.h"
 #include "sky/shell/shell.h"
 #include "ui/gl/gl_surface_egl.h"
 
@@ -57,7 +58,8 @@ static void Init(JNIEnv* env, jclass clazz, jobject context) {
   base::i18n::InitializeICU();
   gfx::GLSurface::InitializeOneOff();
 
-  Shell::Init(g_java_message_loop.Get()->task_runner());
+  Shell::Init(make_scoped_ptr(new ServiceProviderContext(
+      g_java_message_loop.Get()->task_runner())));
 }
 
 bool RegisterSkyMain(JNIEnv* env) {

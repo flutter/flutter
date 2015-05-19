@@ -10,16 +10,16 @@
 #include "base/bind.h"
 #include "base/logging.h"
 #include "mojo/android/system/core_impl.h"
-#include "sky/shell/java_service_provider.h"
-#include "sky/shell/platform_view.h"
-#include "sky/shell/sky_main.h"
-#include "sky/shell/tracing_controller.h"
+#include "sky/shell/android/platform_service_provider.h"
+#include "sky/shell/android/platform_view.h"
+#include "sky/shell/android/sky_main.h"
+#include "sky/shell/android/tracing_controller.h"
 
 namespace {
 
 base::android::RegistrationMethod kSkyRegisteredMethods[] = {
     {"CoreImpl", mojo::android::RegisterCoreImpl},
-    {"JavaServiceProvider", sky::shell::RegisterJavaServiceProvider},
+    {"PlatformServiceProvider", sky::shell::RegisterPlatformServiceProvider},
     {"PlatformView", sky::shell::PlatformView::Register},
     {"SkyMain", sky::shell::RegisterSkyMain},
     {"TracingController", sky::shell::RegisterTracingController},

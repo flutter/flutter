@@ -18,7 +18,7 @@ import org.chromium.mojom.mojo.ServiceProvider;
  * A collection of services implemented in Java.
  **/
 @JNINamespace("sky::shell")
-public class JavaServiceProvider implements ServiceProvider {
+public class PlatformServiceProvider implements ServiceProvider {
     private Core mCore;
     private Context mContext;
 
@@ -27,10 +27,10 @@ public class JavaServiceProvider implements ServiceProvider {
     public static void create(Context context, int nativeHandle) {
         Core core = CoreImpl.getInstance();
         MessagePipeHandle pipe = core.acquireNativeHandle(nativeHandle).toMessagePipeHandle();
-        ServiceProvider.MANAGER.bind(new JavaServiceProvider(core, context), pipe);
+        ServiceProvider.MANAGER.bind(new PlatformServiceProvider(core, context), pipe);
     }
 
-    public JavaServiceProvider(Core core, Context context) {
+    public PlatformServiceProvider(Core core, Context context) {
         assert core != null;
         assert context != null;
         mCore = core;

@@ -13,7 +13,7 @@
 #include "sky/engine/public/web/WebSettings.h"
 #include "sky/engine/public/web/WebView.h"
 #include "sky/services/platform/platform_impl.h"
-#include "sky/shell/java_service_provider.h"
+#include "sky/shell/service_provider.h"
 #include "sky/shell/ui/animator.h"
 #include "sky/shell/ui/input_event_converter.h"
 #include "sky/shell/ui/internals.h"
@@ -51,21 +51,10 @@ base::WeakPtr<Engine> Engine::GetWeakPtr() {
   return weak_factory_.GetWeakPtr();
 }
 
-mojo::ServiceProviderPtr Engine::CreateServiceProvider() {
-  mojo::MessagePipe pipe;
-  config_.java_task_runner->PostTask(
-      FROM_HERE,
-      base::Bind(CreateJavaServiceProvider,
-                 base::Passed(mojo::MakeRequest<mojo::ServiceProvider>(
-                     pipe.handle1.Pass()))));
-  return mojo::MakeProxy(
-      mojo::InterfacePtrInfo<mojo::ServiceProvider>(pipe.handle0.Pass(), 0u));
-}
-
 void Engine::Init() {
   TRACE_EVENT0("sky", "Engine::Init");
 
-  service_provider_ = CreateServiceProvider();
+  service_provider_ = CreateServiceProvider(config_.service_provider_context);
   mojo::NetworkServicePtr network_service;
   mojo::ConnectToService(service_provider_.get(), &network_service);
   platform_impl_.reset(new PlatformImpl(network_service.Pass()));
@@ -178,7 +167,8 @@ void Engine::scheduleVisualUpdate() {
 
 void Engine::didCreateIsolate(blink::WebLocalFrame* frame,
                               Dart_Isolate isolate) {
-  Internals::Create(isolate, CreateServiceProvider());
+  Internals::Create(isolate,
+                    CreateServiceProvider(config_.service_provider_context));
 }
 
 blink::ServiceProvider* Engine::services() {
