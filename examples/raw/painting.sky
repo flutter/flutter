@@ -18,12 +18,14 @@ void main() {
 
     context.save();
 
-    context.clipRect([0.0, 0.0, context.width, radius]);
+    context.clipRect(new Rect()..setLTRB(0.0, 0.0, context.width, radius));
 
     context.translate(context.width / 2.0, context.height / 2.0);
     paint.setARGB(128, 255, 0, 255);
     context.rotateDegrees(45.0);
-    context.drawRect([-radius, -radius, radius, radius], paint);
+
+    context.drawRect(new Rect()..setLTRB(-radius, -radius, radius, radius),
+                     paint);
 
     // Scale x and y by 0.5.
     var scaleMatrix = [
