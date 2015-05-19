@@ -85,6 +85,13 @@ skia::RefPtr<SkPicture> Engine::Paint() {
       physical_size_.width(), physical_size_.height(), &factory,
       SkPictureRecorder::kComputeSaveLayerInfo_RecordFlag));
 
+  if (sky_view_) {
+    skia::RefPtr<SkPicture> picture = sky_view_->Paint();
+    canvas->clear(SK_ColorBLACK);
+    if (picture)
+      canvas->drawPicture(picture.get());
+  }
+
   if (web_view_)
     web_view_->paint(canvas.get(), blink::WebRect(gfx::Rect(physical_size_)));
 
@@ -149,7 +156,7 @@ void Engine::OnInputEvent(InputEventPtr event) {
 void Engine::LoadURL(const mojo::String& url) {
   // Enable SkyView here.
   if (false) {
-    sky_view_ = blink::SkyView::Create();
+    sky_view_ = blink::SkyView::Create(this);
     sky_view_->Load(GURL(url));
     return;
   }
@@ -180,6 +187,10 @@ void Engine::didCreateIsolate(blink::WebLocalFrame* frame,
                               Dart_Isolate isolate) {
   Internals::Create(isolate,
                     CreateServiceProvider(config_.service_provider_context));
+}
+
+void Engine::SchedulePaint() {
+  animator_->RequestFrame();
 }
 
 blink::ServiceProvider* Engine::services() {
