@@ -8,8 +8,8 @@ import 'dart:sky';
 void main() {
   print("Hello, world");
 
-  double width = 500.0;
-  double height = 500.0;
+  double width = view.width;
+  double height = view.height;
 
   PictureRecorder recorder = new PictureRecorder(width, height);
   double radius = min(width, height) * 0.45;

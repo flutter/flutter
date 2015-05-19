@@ -3,6 +3,10 @@
 // found in the LICENSE file.
 
 interface View {
+  readonly attribute double devicePixelRatio;
+  readonly attribute double width;
+  readonly attribute double height;
+
   attribute Picture picture;
 
   void schedulePaint();

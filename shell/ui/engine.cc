@@ -8,6 +8,8 @@
 #include "base/trace_event/trace_event.h"
 #include "mojo/public/cpp/application/connect.h"
 #include "sky/engine/public/platform/WebInputEvent.h"
+#include "sky/engine/public/platform/sky_display_metrics.h"
+#include "sky/engine/public/platform/sky_display_metrics.h"
 #include "sky/engine/public/web/Sky.h"
 #include "sky/engine/public/web/WebLocalFrame.h"
 #include "sky/engine/public/web/WebSettings.h"
@@ -88,6 +90,7 @@ skia::RefPtr<SkPicture> Engine::Paint() {
   if (sky_view_) {
     skia::RefPtr<SkPicture> picture = sky_view_->Paint();
     canvas->clear(SK_ColorBLACK);
+    canvas->scale(device_pixel_ratio_, device_pixel_ratio_);
     if (picture)
       canvas->drawPicture(picture.get());
   }
@@ -121,6 +124,14 @@ void Engine::OnViewportMetricsChanged(int width, int height,
                                       float device_pixel_ratio) {
   physical_size_.SetSize(width, height);
   device_pixel_ratio_ = device_pixel_ratio;
+
+  if (sky_view_) {
+    blink::SkyDisplayMetrics metrics;
+    metrics.physical_size = physical_size_;
+    metrics.device_pixel_ratio = device_pixel_ratio_;
+    sky_view_->SetDisplayMetrics(metrics);
+  }
+
   if (web_view_)
     UpdateWebViewSize();
 }
@@ -150,7 +161,8 @@ void Engine::OnInputEvent(InputEventPtr event) {
       ConvertEvent(event, device_pixel_ratio_);
   if (!web_event)
     return;
-  web_view_->handleInputEvent(*web_event);
+  if (web_view_)
+    web_view_->handleInputEvent(*web_event);
 }
 
 void Engine::LoadURL(const mojo::String& url) {

@@ -37,11 +37,14 @@ SkyView::~SkyView() {
 }
 
 void SkyView::SetDisplayMetrics(const SkyDisplayMetrics& metrics) {
+  display_metrics_ = metrics;
+  data_->view_->setDisplayMetrics(display_metrics_);
 }
 
 void SkyView::Load(const WebURL& url) {
   data_->view_ = View::create(base::Bind(
       &SkyView::SchedulePaint, weak_factory_.GetWeakPtr()));
+  data_->view_->setDisplayMetrics(display_metrics_);
 
   dart_controller_.reset(new DartController);
   dart_controller_->CreateIsolateFor(adoptPtr(new DOMDartState(nullptr)), url);

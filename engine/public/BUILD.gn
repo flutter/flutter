@@ -68,6 +68,7 @@ source_set("platform_headers") {
     "platform/WebURLResponse.h",
     "platform/WebUnitTestSupport.h",
     "platform/WebVector.h",
+    "platform/sky_display_metrics.h",
     "platform/android/WebSandboxSupport.h",
     "platform/linux/WebFallbackFont.h",
     "platform/linux/WebFontInfo.h",

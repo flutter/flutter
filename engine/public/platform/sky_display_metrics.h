@@ -10,8 +10,8 @@
 namespace blink {
 
 struct SkyDisplayMetrics {
-  WebSize size;
-  float device_pixel_ratio;
+  WebSize physical_size;
+  float device_pixel_ratio = 1.0;
 };
 
 } // namespace blink

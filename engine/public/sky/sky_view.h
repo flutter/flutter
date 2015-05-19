@@ -10,7 +10,7 @@
 #include "skia/ext/refptr.h"
 #include "sky/engine/public/platform/WebCommon.h"
 #include "sky/engine/public/platform/WebURL.h"
-#include "sky/engine/public/sky/sky_display_metrics.h"
+#include "sky/engine/public/platform/sky_display_metrics.h"
 #include "third_party/skia/include/core/SkPicture.h"
 
 namespace blink {
@@ -36,6 +36,7 @@ class SkyView {
   class Data;
 
   SkyViewClient* client_;
+  SkyDisplayMetrics display_metrics_;
   std::unique_ptr<DartController> dart_controller_;
   std::unique_ptr<Data> data_;
 

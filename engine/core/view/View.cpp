@@ -21,9 +21,26 @@ View::~View()
 {
 }
 
+double View::width() const
+{
+    double w = m_displayMetrics.physical_size.width;
+    return w / m_displayMetrics.device_pixel_ratio;
+}
+
+double View::height() const
+{
+    double h = m_displayMetrics.physical_size.height;
+    return h / m_displayMetrics.device_pixel_ratio;
+}
+
 void View::schedulePaint()
 {
     m_schedulePaintCallback.Run();
+}
+
+void View::setDisplayMetrics(const SkyDisplayMetrics& metrics)
+{
+    m_displayMetrics = metrics;
 }
 
 } // namespace blink
