@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+library animation_curves;
+
 double _evaluateCubic(double a, double b, double m) {
   // TODO(abarth): Would Math.pow be faster?
   return 3 * a * (1 - m) * (1 - m) * m + 3 * b * (1 - m) * m * m + m * m * m;

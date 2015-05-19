@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+library components_input;
+
 import '../editing/editable_string.dart';
 import '../editing/editable_text.dart';
 import '../editing/keyboard.dart';

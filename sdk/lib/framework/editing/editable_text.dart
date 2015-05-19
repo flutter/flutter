@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+library editing_editable_text;
+
 import '../fn.dart';
 import '../theme/colors.dart';
 import 'dart:async';

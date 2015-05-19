@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+library theme_typography;
+
 // See http://www.google.com/design/spec/style/typography.html
 
 const String _display4 = 'font-size: 112px; font-weight: 300';

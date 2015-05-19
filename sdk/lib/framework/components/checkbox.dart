@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+library components_checkbox;
+
 import '../fn.dart';
 import '../layout.dart';
 import 'button_base.dart';

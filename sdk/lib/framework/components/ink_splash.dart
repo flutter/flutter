@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+library components_ink_splash;
+
 import '../animation/animated_value.dart';
 import '../animation/curves.dart';
 import '../fn.dart';
