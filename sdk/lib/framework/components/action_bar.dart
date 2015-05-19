@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-library components_action_bar;
-
 import '../fn.dart';
 import '../layout.dart';
 import '../theme/view_configuration.dart';

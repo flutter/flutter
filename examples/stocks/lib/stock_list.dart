@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-library stock_list;
-
 import 'package:sky/framework/components/fixed_height_scrollable.dart';
 import 'package:sky/framework/fn.dart';
 import 'stock_data.dart';

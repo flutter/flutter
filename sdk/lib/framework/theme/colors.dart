@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-library theme_colors;
-
 const Map<int, String> Red = const {
    50: '#FFEBEE',
   100: '#FFCDD2',

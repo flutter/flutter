@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-library components_fixed_height_scrollable;
-
 import '../animation/scroll_behavior.dart';
 import '../debug/tracing.dart';
 import '../fn.dart';
@@ -104,5 +102,5 @@ abstract class FixedHeightScrollable extends Scrollable {
     );
   }
 
-  List<UINode> buildItems(int start, int count);
+  List<UINode> buildItems(int start, int count);  
 }

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-library components_icon;
-
 import '../fn.dart';
 
 // TODO(eseidel): This should use package:.

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-library components_drawer_header;
-
 import '../fn.dart';
 import '../layout.dart';
 import '../theme/colors.dart';
