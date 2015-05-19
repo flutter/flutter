@@ -38,9 +38,19 @@ void View::schedulePaint()
     m_schedulePaintCallback.Run();
 }
 
+void View::setEventCallback(PassOwnPtr<EventCallback> callback)
+{
+    m_eventCallback = callback;
+}
+
 void View::setDisplayMetrics(const SkyDisplayMetrics& metrics)
 {
     m_displayMetrics = metrics;
+}
+
+bool View::handleInputEvent(PassRefPtr<Event> event)
+{
+    return m_eventCallback && m_eventCallback->handleEvent(event.get());
 }
 
 } // namespace blink

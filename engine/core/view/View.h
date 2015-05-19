@@ -7,6 +7,7 @@
 
 #include "base/callback.h"
 #include "sky/engine/core/painting/Picture.h"
+#include "sky/engine/core/view/EventCallback.h"
 #include "sky/engine/public/platform/sky_display_metrics.h"
 #include "sky/engine/tonic/dart_wrappable.h"
 #include "sky/engine/wtf/PassRefPtr.h"
@@ -27,15 +28,19 @@ public:
     Picture* picture() const { return m_picture.get(); }
     void setPicture(Picture* picture) { m_picture = picture; }
 
+    void setEventCallback(PassOwnPtr<EventCallback> callback);
+
     void schedulePaint();
 
     void setDisplayMetrics(const SkyDisplayMetrics& metrics);
+    bool handleInputEvent(PassRefPtr<Event> event);
 
 private:
     explicit View(const base::Closure& schedulePaintCallback);
 
     base::Closure m_schedulePaintCallback;
     SkyDisplayMetrics m_displayMetrics;
+    OwnPtr<EventCallback> m_eventCallback;
     RefPtr<Picture> m_picture;
 };
 

@@ -1109,6 +1109,7 @@ core_idl_files = get_path_info([
                                  "painting/PaintingContext.idl",
                                  "painting/Picture.idl",
                                  "painting/PictureRecorder.idl",
+                                 "view/EventCallback.idl",
                                  "view/View.idl",
                                ],
                                "abspath")

@@ -9,5 +9,6 @@ interface View {
 
   attribute Picture picture;
 
+  void setEventCallback(EventCallback callback);
   void schedulePaint();
 };
