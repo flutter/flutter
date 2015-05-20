@@ -48,7 +48,7 @@ abstract class RenderNode extends AbstractNode {
   // node out, and any other nodes who happen to know exactly what
   // kind of node that is.
   ParentData parentData;
-  void setupPos(RenderNode child) {
+  void setParentData(RenderNode child) {
     // override this to setup .parentData correctly for your class
     if (child.parentData is! ParentData)
       child.parentData = new ParentData();
@@ -57,7 +57,7 @@ abstract class RenderNode extends AbstractNode {
   void adoptChild(RenderNode child) { // only for use by subclasses
     // call this whenever you decide a node is a child
     assert(child != null);
-    setupPos(child);
+    setParentData(child);
     super.adoptChild(child);
   }
   void dropChild(RenderNode child) { // only for use by subclasses
@@ -404,7 +404,7 @@ class BoxParentData extends ParentData {
 
 abstract class RenderBox extends RenderNode {
 
-  void setupPos(RenderNode child) {
+  void setParentData(RenderNode child) {
     if (child.parentData is! BoxParentData)
       child.parentData = new BoxParentData();
   }
@@ -568,7 +568,7 @@ class RenderBlock extends RenderBox with ContainerRenderNodeMixin<RenderBox, Blo
     }
   }
 
-  void setupPos(RenderBox child) {
+  void setParentData(RenderBox child) {
     if (child.parentData is! BlockParentData)
       child.parentData = new BlockParentData();
   }
