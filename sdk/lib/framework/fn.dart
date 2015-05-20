@@ -886,7 +886,7 @@ abstract class Component extends UINode {
       return;
 
     _trace('$_key rebuilding...');
-    _sync(null, null, null); // TODO(ianh): figure out how passing "null, null, null" here is ok
+    _sync(null, _root.parent, _root.parent.childAfter(_root));
   }
 
   void scheduleBuild() {
