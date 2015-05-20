@@ -67,6 +67,7 @@ dart_pkg("sdk") {
     "lib/framework/embedder.dart",
     "lib/framework/fn.dart",
     "lib/framework/layout.dart",
+    "lib/framework/layout2.dart",
     "lib/framework/layouts/block.dart",
     "lib/framework/net/fetch.dart",
     "lib/framework/node.dart",

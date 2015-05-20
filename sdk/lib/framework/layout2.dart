@@ -228,7 +228,7 @@ abstract class RenderNode extends AbstractNode {
     var ancestor = this;
     while (ancestor.parent != null)
       ancestor = ancestor.parent;
-    assert(ancestor is Screen);
+    assert(ancestor is RenderView);
     ancestor.paintFrame();
   }
   void paint(RenderNodeDisplayList canvas) { }
@@ -450,11 +450,11 @@ abstract class RenderBox extends RenderNode {
 }
 
 
-// SCREEN LAYOUT MANAGER
+// RENDER VIEW LAYOUT MANAGER
 
-class Screen extends RenderNode {
+class RenderView extends RenderNode {
 
-  Screen({
+  RenderView({
     RenderBox root,
     this.timeForRotation: const Duration(microseconds: 83333)
   }) {
@@ -474,7 +474,7 @@ class Screen extends RenderNode {
   RenderBox _root;
   RenderBox get root => _root;
   void set root (RenderBox value) {
-    assert(root != null);
+    assert(value != null);
     _root = value;
     adoptChild(_root);
     markNeedsLayout();
@@ -547,12 +547,12 @@ class EdgeDims {
 
 class BlockParentData extends BoxParentData with ContainerParentDataMixin<RenderBox> { }
 
-class BlockBox extends RenderBox with ContainerRenderNodeMixin<RenderBox, BlockParentData> {
+class RenderBlock extends RenderBox with ContainerRenderNodeMixin<RenderBox, BlockParentData> {
   // lays out RenderBox children in a vertical stack
   // uses the maximum width provided by the parent
   // sizes itself to the height of its child stack
 
-  BlockBox({
+  RenderBlock({
     EdgeDims padding: const EdgeDims(0.0, 0.0, 0.0, 0.0)
   }) {
     _padding = padding;
