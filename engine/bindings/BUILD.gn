@@ -331,8 +331,15 @@ action("generate_dart_globals") {
   ]
 }
 
+copy("copy_core_dart_files") {
+  sources = core_dart_files
+  outputs = [
+    "$bindings_output_dir/{{source_file_part}}",
+  ]
+}
+
 action("generate_dart_sky") {
-  sources = core_idl_files
+  sources = core_idl_files + core_dart_files
   script = "$bindings_scripts_dir/compiler.py"
 
   file_list = "$target_gen_dir/${target_name}_file_list.txt"
@@ -355,6 +362,7 @@ action("generate_dart_sky") {
   ]
 
   deps = [
+    ":copy_core_dart_files",
     ":compile_idls",
   ]
 }

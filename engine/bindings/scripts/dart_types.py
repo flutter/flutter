@@ -114,6 +114,7 @@ CPP_SPECIAL_CONVERSION_RULES = {
     'boolean': 'bool',
     'unrestricted double': 'double',
     'unrestricted float': 'float',
+    'Rect': 'Rect',  # Pass Rect by value, not pointer.
 }
 
 
@@ -352,6 +353,7 @@ DART_TO_CPP_VALUE = {
     # FIXME(vsm): This is an enum type (defined in StorageQuota.idl).
     # We should handle it automatically, but map to a String for now.
     'StorageType': 'DartUtilities::dartToString(args, {index}, exception, {auto_scope})',
+    'Rect': 'DartConverter<{implemented_as}>::FromArguments{null_check}(args, {index}, exception)',
 }
 
 

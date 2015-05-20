@@ -3,14 +3,14 @@
 // found in the LICENSE file.
 
 // TODO(mpcomplete): Figure out a better SkMatrix representation.
-[CustomDart] interface Canvas {
+interface Canvas {
   // Height and width are used for culling optimizations and do not necessarily
   // imply that the Canvas is backed by a buffer with any specific bounds.
   readonly attribute float height;
   readonly attribute float width;
 
   void save();
-  void saveLayer(float[] bounds4 /* optional */, Paint paint /* optional */);
+  void saveLayer(Rect bounds /* optional */, Paint paint /* optional */);
   void restore();
 
   void translate(float dx, float dy);
@@ -19,12 +19,12 @@
   void skew(float sx, float sy);
   void concat(float[] matrix9);
 
-  void clipRect(float[] rect4);
+  void clipRect(Rect rect);
 
   void drawPicture(Picture picture);
 
   void drawPaint(Paint paint);
-  void drawRect(float[] rect4, Paint paint);
-  void drawOval(float[] rect4, Paint paint);
+  void drawRect(Rect rect, Paint paint);
+  void drawOval(Rect rect, Paint paint);
   void drawCircle(float x, float y, float radius, Paint paint);
 };

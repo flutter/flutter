@@ -847,6 +847,8 @@ sky_core_files = [
   "painting/Picture.h",
   "painting/PictureRecorder.cpp",
   "painting/PictureRecorder.h",
+  "painting/Rect.cpp",
+  "painting/Rect.h",
   "rendering/BidiRun.h",
   "rendering/BidiRunForLine.cpp",
   "rendering/BidiRunForLine.h",
@@ -1113,6 +1115,8 @@ core_idl_files = get_path_info([
                                  "view/View.idl",
                                ],
                                "abspath")
+
+core_dart_files = get_path_info([ "painting/Rect.dart" ], "abspath")
 
 # Files for which bindings (.cpp and .h files) will be generated
 # 'partial interface', target (right side of) 'implements', and

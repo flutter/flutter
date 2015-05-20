@@ -6,6 +6,7 @@
 library dart.sky;
 
 import "dart:nativewrappers";
+import 'dart:typed_data';
 
 {% for interface in interfaces %}
 part '{{interface.name}}.dart';

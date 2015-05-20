@@ -19,9 +19,8 @@ part of dart.sky;
     {%- endfor -%}
 {%- endmacro -%}
 
-{%- set prefix = "_" if custom_dartcode else "" -%}
 {% if not constructors and not custom_constructors %}abstract {% endif -%}
-class {{prefix}}{{interface_name}} extends
+class {{interface_name}} extends
     {{ parent_interface if parent_interface else 'NativeFieldWrapperClass2' }} {
     // Constructors
 {# TODO(eseidel): We only ever have one constructor. #}
@@ -40,15 +39,15 @@ class {{prefix}}{{interface_name}} extends
 
     // Attributes
 {% for attribute in attributes %}
-    {{ attribute.dart_type }} get {{prefix}}{{ attribute.name }} native "{{interface_name}}_{{ attribute.name }}_Getter";
+    {{ attribute.dart_type }} get {{ attribute.name }} native "{{interface_name}}_{{ attribute.name }}_Getter";
 {% if not attribute.is_read_only %}
-    void set {{prefix}}{{ attribute.name }}({{ attribute.dart_type }} value) native "{{interface_name}}_{{ attribute.name }}_Setter";
+    void set {{ attribute.name }}({{ attribute.dart_type }} value) native "{{interface_name}}_{{ attribute.name }}_Setter";
 {% endif %}
 {% endfor %}
 
     // Methods
 {% for method in methods %}
-    {{method.dart_type}} {{prefix}}{{method.name}}({{ args_macro(method.arguments)}}) native "{{interface_name}}_{{ method.name }}_Callback";
+    {{method.dart_type}} {{method.name}}({{ args_macro(method.arguments)}}) native "{{interface_name}}_{{ method.name }}_Callback";
 {% endfor %}
 
     // Operators
@@ -59,5 +58,3 @@ class {{prefix}}{{interface_name}} extends
     void operator[]=(String name, String value) native "{{interface_name}}___setter___Callback";
 {% endif %}
 }
-
-{{custom_dartcode}}
