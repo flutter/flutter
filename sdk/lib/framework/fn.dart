@@ -32,6 +32,7 @@ abstract class UINode {
 
   UINode({ Object key }) {
     _key = key == null ? "$runtimeType" : "$runtimeType-$key";
+    assert(this is App || _inRenderDirtyComponents); // you should not build the UI tree ahead of time, build it only during build()
   }
 
   // Subclasses which implements Nodes that become stateful may return true
