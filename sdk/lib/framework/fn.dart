@@ -6,6 +6,7 @@ library fn;
 
 import 'dart:async';
 import 'dart:collection';
+import 'dart:mirrors';
 import 'dart:sky' as sky;
 import 'reflect.dart' as reflect;
 import 'layout.dart';
@@ -41,7 +42,9 @@ abstract class UINode {
 
   bool get interchangeable => false; // if true, then keys can be duplicated
 
-  void _sync(UINode old, RenderCSSContainer host, RenderCSS insertBefore);
+  void _sync(UINode old, dynamic slot);
+  // 'slot' is the identifier that the parent RenderNodeWrapper uses to know
+  // where to put this descendant
 
   void _remove() {
     _defunct = true;
@@ -49,6 +52,13 @@ abstract class UINode {
     handleRemoved();
   }
   void handleRemoved() { }
+
+  UINode findAncestor(Type targetType) {
+    var ancestor = _parent;
+    while (ancestor != null && !reflectClass(ancestor.runtimeType).isSubtypeOf(reflectClass(targetType)))
+      ancestor = ancestor._parent;
+    return ancestor;
+  }
 
   int _nodeDepth;
   void _ensureDepth() {
@@ -85,9 +95,8 @@ abstract class UINode {
   }
 
   // Returns the child which should be retained as the child of this node.
-  UINode _syncChild(UINode node, UINode oldNode, RenderCSSContainer host,
-      RenderCSS insertBefore) {
-
+  UINode _syncChild(UINode node, UINode oldNode, dynamic slot) {
+    assert(node != null);
     assert(oldNode == null || node._key == oldNode._key);
 
     if (node == oldNode) {
@@ -104,7 +113,7 @@ abstract class UINode {
 
     if (node._willSync(oldNode)) {
       _traceSync(_SyncOperation.STATEFUL, node._key);
-      oldNode._sync(node, host, insertBefore);
+      oldNode._sync(node, slot);
       node._defunct = true;
       assert(oldNode._root is RenderCSS);
       return oldNode;
@@ -118,7 +127,7 @@ abstract class UINode {
     } else {
       _traceSync(_SyncOperation.STATELESS, node._key);
     }
-    node._sync(oldNode, host, insertBefore);
+    node._sync(oldNode, slot);
     if (oldNode != null)
       oldNode._defunct = true;
 
@@ -132,9 +141,9 @@ abstract class ContentNode extends UINode {
 
   ContentNode(UINode content) : this.content = content, super(key: content._key);
 
-  void _sync(UINode old, RenderCSSContainer host, RenderCSS insertBefore) {
+  void _sync(UINode old, dynamic slot) {
     UINode oldContent = old == null ? null : (old as ContentNode).content;
-    content = _syncChild(content, oldContent, host, insertBefore);
+    content = _syncChild(content, oldContent, slot);
     assert(content._root != null);
     _root = content._root;
   }
@@ -266,12 +275,11 @@ class EventListenerNode extends ContentNode  {
     }
   }
 
-  void _sync(UINode old, RenderCSSContainer host, RenderCSS insertBefore) {
+  void _sync(UINode old, dynamic slot) {
     for (var type in listeners.keys) {
       _ensureDocumentListener(type);
     }
-
-    super._sync(old, host, insertBefore);
+    super._sync(old, slot);
   }
 }
 
@@ -301,11 +309,15 @@ abstract class RenderNodeWrapper extends UINode {
   RenderCSS _createNode();
   RenderNodeWrapper get _emptyNode;
 
-  void _sync(UINode old, RenderCSSContainer host, RenderCSS insertBefore) {
+  void insert(RenderNodeWrapper child, dynamic slot);
+
+  void _sync(UINode old, dynamic slot) {
     if (old == null) {
       _root = _createNode();
       assert(_root != null);
-      host.add(_root, before: insertBefore);
+      var ancestor = findAncestor(RenderNodeWrapper);
+      if (ancestor is RenderNodeWrapper)
+        ancestor.insert(this, slot);
       old = _emptyNode;
     } else {
       _root = old._root;
@@ -364,6 +376,9 @@ final List<UINode> _emptyList = new List<UINode>();
 
 abstract class OneChildListRenderNodeWrapper extends RenderNodeWrapper {
 
+  // In OneChildListRenderNodeWrapper subclasses, slots are RenderCSS nodes
+  // to use as the "insert before" sibling in RenderCSSContainer.add() calls
+
   final List<UINode> children;
 
   OneChildListRenderNodeWrapper({
@@ -378,6 +393,11 @@ abstract class OneChildListRenderNodeWrapper extends RenderNodeWrapper {
     inlineStyle: inlineStyle
   ) {
     assert(!_debugHasDuplicateIds());
+  }
+
+  void insert(RenderNodeWrapper child, dynamic slot) {
+    assert(slot == null || slot is RenderCSS);
+    _root.add(child._root, before: slot);
   }
 
   void _remove() {
@@ -423,7 +443,7 @@ abstract class OneChildListRenderNodeWrapper extends RenderNodeWrapper {
     UINode oldNode = null;
 
     void sync(int atIndex) {
-      children[atIndex] = _syncChild(currentNode, oldNode, _root, nextSibling);
+      children[atIndex] = _syncChild(currentNode, oldNode, nextSibling);
       assert(children[atIndex] != null);
     }
 
@@ -482,8 +502,10 @@ abstract class OneChildListRenderNodeWrapper extends RenderNodeWrapper {
       oldNodeIdMap[currentNode._key] = null; // mark it reordered
       assert(_root is RenderCSSContainer);
       assert(oldNode._root is RenderCSSContainer);
+
       old._root.remove(oldNode._root);
       _root.add(oldNode._root, before: nextSibling);
+
       return true;
     }
 
@@ -780,6 +802,7 @@ abstract class Component extends UINode {
   static Component _currentlyBuilding;
   List<Function> _mountCallbacks;
   List<Function> _unmountCallbacks;
+  dynamic _slot; // cached slot from the last time we were synced
 
   void onDidMount(Function fn) {
     if (_mountCallbacks == null)
@@ -852,11 +875,13 @@ abstract class Component extends UINode {
    * 3) Syncing against an old version
    *      assert(_built == null && old != null)
    */
-  void _sync(UINode old, RenderCSSContainer host, RenderCSS insertBefore) {
+  void _sync(UINode old, dynamic slot) {
     assert(!_defunct);
     assert(_built == null || old == null);
 
     Component oldComponent = old as Component;
+
+    _slot = slot;
 
     var oldBuilt;
     if (oldComponent == null) {
@@ -876,7 +901,7 @@ abstract class Component extends UINode {
     _currentlyBuilding = null;
     _currentOrder = lastOrder;
 
-    _built = _syncChild(_built, oldBuilt, host, insertBefore);
+    _built = _syncChild(_built, oldBuilt, slot);
     _dirty = false;
     _root = _built._root;
     assert(_root != null);
@@ -887,7 +912,8 @@ abstract class Component extends UINode {
       return;
 
     _trace('$_key rebuilding...');
-    _sync(null, _root.parent, _root.parent.childAfter(_root));
+    assert(_root != null);
+    _sync(null, _slot);
   }
 
   void scheduleBuild() {
@@ -920,7 +946,10 @@ abstract class App extends Component {
       return;
 
     _trace('$_key rebuilding...');
-    _sync(null, _host, _root);
+    _sync(null, null);
+    if (_root.parent == null)
+      _host.add(_root);
+    assert(_root.parent == _host);
   }
 }
 
