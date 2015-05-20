@@ -1,6 +1,6 @@
 library node;
 
-class Node {
+class AbstractNode {
 
   // Nodes always have a 'depth' greater than their ancestors'.
   // There's no guarantee regarding depth between siblings. The depth
@@ -15,7 +15,7 @@ class Node {
 
   int _depth = 0;
   int get depth => _depth;
-  void redepthChild(Node child) { // internal, do not call
+  void redepthChild(AbstractNode child) { // internal, do not call
     assert(child._attached == _attached);
     if (child._depth <= _depth) {
       child._depth = _depth + 1;
@@ -44,9 +44,9 @@ class Node {
   }
   detachChildren() { } // workaround for lack of inter-class mixins in Dart
 
-  Node _parent;
-  Node get parent => _parent;
-  void adoptChild(Node child) { // only for use by subclasses
+  AbstractNode _parent;
+  AbstractNode get parent => _parent;
+  void adoptChild(AbstractNode child) { // only for use by subclasses
     assert(child != null);
     assert(child._parent == null);
     child._parent = this;
@@ -54,7 +54,7 @@ class Node {
       child.attach();
     redepthChild(child);
   }
-  void dropChild(Node child) { // only for use by subclasses
+  void dropChild(AbstractNode child) { // only for use by subclasses
     assert(child != null);
     assert(child._parent == this);
     assert(child.attached == attached);

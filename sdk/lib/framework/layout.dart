@@ -1,5 +1,7 @@
 library layout;
 
+// This version of layout.dart is a shim version of layout2.dart that is backed using CSS and <div>s.
+
 import 'node.dart';
 import 'dart:sky' as sky;
 import 'dart:collection';
@@ -64,7 +66,7 @@ class ParentData {
   }
 }
 
-abstract class RenderNode extends Node {
+abstract class RenderNode extends AbstractNode {
 
   // LAYOUT
 
