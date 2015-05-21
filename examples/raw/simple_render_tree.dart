@@ -6,16 +6,29 @@ import 'dart:math';
 import 'dart:sky';
 import 'package:sky/framework/layout2.dart';
 
-class RenderBlueCircle extends RenderBox {
-  void paint(RenderNodeDisplayList canvas) {
-    double radius = min(width, height) * 0.45;
-    Paint paint = new Paint()..setARGB(255, 0, 255, 255);
-    canvas.drawCircle(width / 2, height / 2, radius, paint);
+class RenderSolidColor extends RenderDecoratedBox {
+  RenderSolidColor(int backgroundColor)
+      : super(new BoxDecoration(backgroundColor: backgroundColor));
+
+  BoxDimensions getIntrinsicDimensions(BoxConstraints constraints) {
+    return new BoxDimensions.withConstraints(constraints, height: 200.0);
+  }
+
+  void layout(BoxConstraints constraints, { RenderNode relayoutSubtreeRoot }) {
+    setWidth(constraints, constraints.maxWidth);
+    setHeight(constraints, 200.0);
+    layoutDone();
   }
 }
 
 void main() {
-  RenderView renderView = new RenderView(root: new RenderBlueCircle());
+  var root = new RenderBlock(
+      decoration: new BoxDecoration(backgroundColor: 0xFF00FFFF));
+
+  root.add(new RenderSolidColor(0xFF00FF00));
+  root.add(new RenderSolidColor(0xFF0000FF));
+
+  RenderView renderView = new RenderView(root: root);
   renderView.layout(newWidth: view.width, newHeight: view.height);
   renderView.paintFrame();
 }
