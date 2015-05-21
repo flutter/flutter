@@ -258,7 +258,7 @@ static Dart_Isolate IsolateCreateCallback(const char* script_uri,
       // for debugging or general Observatory interaction.
       EnsureHandleWatcherStarted();
       std::string ip = "127.0.0.1";
-      const intptr_t port = 0;  // Automatic port assignment.
+      const intptr_t port = 8181;
       const bool service_isolate_booted =
           DartServiceIsolate::Startup(ip, port, LibraryTagHandler, error);
       CHECK(service_isolate_booted) << error;
