@@ -94,6 +94,8 @@ public:
 
     BLINK_EXPORT static void enableLaxMixedContentChecking(bool);
 
+    BLINK_EXPORT static void enableObservatory(bool);
+
 private:
     WebRuntimeFeatures();
 };

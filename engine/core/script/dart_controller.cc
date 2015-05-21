@@ -11,6 +11,7 @@
 #include "base/trace_event/trace_event.h"
 #include "dart/runtime/bin/embedded_dart_io.h"
 #include "dart/runtime/include/dart_mirrors_api.h"
+#include "gen/sky/platform/RuntimeEnabledFeatures.h"
 #include "sky/engine/bindings/builtin.h"
 #include "sky/engine/bindings/builtin_natives.h"
 #include "sky/engine/bindings/builtin_sky.h"
@@ -257,11 +258,13 @@ static Dart_Isolate IsolateCreateCallback(const char* script_uri,
       // Start the handle watcher from the service isolate so it isn't available
       // for debugging or general Observatory interaction.
       EnsureHandleWatcherStarted();
-      std::string ip = "127.0.0.1";
-      const intptr_t port = 8181;
-      const bool service_isolate_booted =
-          DartServiceIsolate::Startup(ip, port, LibraryTagHandler, error);
-      CHECK(service_isolate_booted) << error;
+      if (RuntimeEnabledFeatures::observatoryEnabled()) {
+        std::string ip = "127.0.0.1";
+        const intptr_t port = 8181;
+        const bool service_isolate_booted =
+            DartServiceIsolate::Startup(ip, port, LibraryTagHandler, error);
+        CHECK(service_isolate_booted) << error;
+      }
     }
     Dart_ExitIsolate();
     return isolate;

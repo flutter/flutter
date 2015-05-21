@@ -118,3 +118,5 @@ WOFF2 status=stable
 PseudoClassesInMatchingCriteriaInAuthorShadowTrees status=test
 
 CredentialManager status=test
+
+Observatory status=stable

@@ -176,4 +176,9 @@ void WebRuntimeFeatures::enableLaxMixedContentChecking(bool enable)
     RuntimeEnabledFeatures::setLaxMixedContentCheckingEnabled(enable);
 }
 
+void WebRuntimeFeatures::enableObservatory(bool enable)
+{
+    RuntimeEnabledFeatures::setObservatoryEnabled(enable);
+}
+
 } // namespace blink

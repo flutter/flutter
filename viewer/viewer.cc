@@ -15,6 +15,7 @@
 #include "mojo/public/cpp/application/interface_factory_impl.h"
 #include "mojo/services/content_handler/public/interfaces/content_handler.mojom.h"
 #include "sky/engine/public/web/Sky.h"
+#include "sky/engine/public/web/WebRuntimeFeatures.h"
 #include "sky/services/platform/platform_impl.h"
 #include "sky/viewer/content_handler_impl.h"
 #include "sky/viewer/document_view.h"
@@ -33,6 +34,8 @@ class Viewer : public mojo::ApplicationDelegate,
   // Overridden from ApplicationDelegate:
   void Initialize(mojo::ApplicationImpl* app) override {
     RuntimeFlags::Initialize(app);
+
+    blink::WebRuntimeFeatures::enableObservatory(!RuntimeFlags::Get().testing());
 
     mojo::NetworkServicePtr network_service;
     app->ConnectToService("mojo:network_service", &network_service);
