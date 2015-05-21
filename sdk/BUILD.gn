@@ -85,5 +85,9 @@ dart_pkg("sdk") {
     "//sky/services/testing:bindings",
   ]
 
+  datadeps = [
+    "//sky/engine/bindings",
+  ]
+
   sdk_ext_directory = "$root_gen_dir/sky/bindings"
 }
