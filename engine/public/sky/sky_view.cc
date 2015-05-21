@@ -49,13 +49,17 @@ void SkyView::SetDisplayMetrics(const SkyDisplayMetrics& metrics) {
 
 void SkyView::Load(const WebURL& url) {
   data_->view_ = View::create(base::Bind(
-      &SkyView::SchedulePaint, weak_factory_.GetWeakPtr()));
+      &SkyView::ScheduleFrame, weak_factory_.GetWeakPtr()));
   data_->view_->setDisplayMetrics(display_metrics_);
 
   dart_controller_.reset(new DartController);
   dart_controller_->CreateIsolateFor(adoptPtr(new DOMDartState(nullptr)), url);
   dart_controller_->InstallView(data_->view_.get());
   dart_controller_->LoadMainLibrary(url);
+}
+
+void SkyView::BeginFrame(base::TimeTicks frame_time) {
+  data_->view_->beginFrame(frame_time);
 }
 
 skia::RefPtr<SkPicture> SkyView::Paint() {
@@ -90,8 +94,8 @@ bool SkyView::HandleInputEvent(const WebInputEvent& inputEvent) {
   return false;
 }
 
-void SkyView::SchedulePaint() {
-  client_->SchedulePaint();
+void SkyView::ScheduleFrame() {
+  client_->ScheduleFrame();
 }
 
 } // namespace blink

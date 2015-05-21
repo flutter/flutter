@@ -9,7 +9,7 @@ namespace blink {
 
 class SkyViewClient {
  public:
-  virtual void SchedulePaint() = 0;
+  virtual void ScheduleFrame() = 0;
 
  protected:
   virtual ~SkyViewClient();

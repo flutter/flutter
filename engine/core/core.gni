@@ -1028,6 +1028,8 @@ sky_core_files = [
   "script/dom_dart_state.cc",
   "script/dom_dart_state.h",
   "script/monitor.h",
+  "view/BeginFrameCallback.h",
+  "view/EventCallback.h",
   "view/View.cpp",
   "view/View.h",
 ]
@@ -1111,6 +1113,7 @@ core_idl_files = get_path_info([
                                  "painting/PaintingContext.idl",
                                  "painting/Picture.idl",
                                  "painting/PictureRecorder.idl",
+                                 "view/BeginFrameCallback.idl",
                                  "view/EventCallback.idl",
                                  "view/View.idl",
                                ],

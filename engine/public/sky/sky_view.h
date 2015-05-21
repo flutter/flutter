@@ -7,6 +7,7 @@
 
 #include <memory>
 #include "base/memory/weak_ptr.h"
+#include "base/time/time.h"
 #include "skia/ext/refptr.h"
 #include "sky/engine/public/platform/WebCommon.h"
 #include "sky/engine/public/platform/WebURL.h"
@@ -25,13 +26,15 @@ class SkyView {
 
   void SetDisplayMetrics(const SkyDisplayMetrics& metrics);
   void Load(const WebURL& url);
+
+  void BeginFrame(base::TimeTicks frame_time);
   skia::RefPtr<SkPicture> Paint();
   bool HandleInputEvent(const WebInputEvent& event);
 
  private:
   explicit SkyView(SkyViewClient* client);
 
-  void SchedulePaint();
+  void ScheduleFrame();
 
   class Data;
 

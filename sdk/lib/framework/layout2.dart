@@ -218,7 +218,7 @@ abstract class RenderNode extends AbstractNode {
 
   // HIT TESTING  
 
-  void handlePointer(sky.PointerEvent event) {
+  bool handlePointer(sky.PointerEvent event, { double x: 0.0, double y: 0.0 }) {
     // override this if you have children, to hand it to the appropriate child
     // override this if you want to do anything with the pointer event
   }
@@ -229,6 +229,10 @@ abstract class RenderNode extends AbstractNode {
   static bool _debugDoingPaint = false;
   void markNeedsPaint() {
     assert(!_debugDoingPaint);
+    // TODO(abarth): It's very redunant to call this for every node in the
+    // render tree during layout. We should instead compute a summary bit and
+    // call it once at the end of layout.
+    sky.view.scheduleFrame();
   }
   void paint(RenderNodeDisplayList canvas) { }
 
@@ -468,19 +472,26 @@ class BoxDecoration {
 }
 
 class RenderDecoratedBox extends RenderBox {
-  BoxDecoration decoration;
+  BoxDecoration _decoration;
 
-  RenderDecoratedBox(this.decoration);
+  RenderDecoratedBox(BoxDecoration decoration) : _decoration = decoration;
+
+  void setBoxDecoration(BoxDecoration decoration) {
+    if (_decoration == decoration)
+      return;
+    _decoration = decoration;
+    markNeedsPaint();
+  }
 
   void paint(RenderNodeDisplayList canvas) {
     assert(width != null);
     assert(height != null);
 
-    if (decoration == null)
+    if (_decoration == null)
       return;
 
-    if (decoration.backgroundColor != null) {
-      sky.Paint paint = new sky.Paint()..color = decoration.backgroundColor;
+    if (_decoration.backgroundColor != null) {
+      sky.Paint paint = new sky.Paint()..color = _decoration.backgroundColor;
       canvas.drawRect(new sky.Rect()..setLTRB(0.0, 0.0, width, height), paint);
     }
   }
@@ -547,6 +558,12 @@ class RenderView extends RenderNode {
     assert(false); // nobody tells the screen to rotate, the whole rotate() dance is started from our layout()
   }
 
+  bool handlePointer(sky.PointerEvent event, { double x: 0.0, double y: 0.0 }) {
+    if (x < 0.0 || x >= root.width || y < 0.0 || y >= root.height)
+      return false;
+    return root.handlePointer(event, x: x, y: y);
+  }
+
   void paint(RenderNodeDisplayList canvas) {
     canvas.paintChild(root, 0.0, 0.0);
   }
@@ -556,7 +573,6 @@ class RenderView extends RenderNode {
     var canvas = new RenderNodeDisplayList(sky.view.width, sky.view.height);
     paint(canvas);
     sky.view.picture = canvas.endRecording();
-    sky.view.schedulePaint();
     RenderNode._debugDoingPaint = false;
   }
 
@@ -669,19 +685,20 @@ class RenderBlock extends RenderDecoratedBox with ContainerRenderNodeMixin<Rende
     layoutDone();
   }
 
-  void handlePointer(sky.PointerEvent event, { double x: 0.0, double y: 0.0 }) {
+  bool handlePointer(sky.PointerEvent event, { double x: 0.0, double y: 0.0 }) {
     // the x, y parameters have the top left of the node's box as the origin
     RenderBox child = _lastChild;
     while (child != null) {
       assert(child.parentData is BlockParentData);
       if ((x >= child.parentData.x) && (x < child.parentData.x + child.width) &&
           (y >= child.parentData.y) && (y < child.parentData.y + child.height)) {
-        child.handlePointer(event, x: x-child.parentData.x, y: y-child.parentData.y);
+        if (child.handlePointer(event, x: x-child.parentData.x, y: y-child.parentData.y))
+          return true;
         break;
       }
       child = child.parentData.previousSibling;
     }
-    super.handlePointer(event);
+    return super.handlePointer(event, x: x, y: y);
   }
 
   void paint(RenderNodeDisplayList canvas) {
@@ -756,17 +773,21 @@ class ScaffoldBox extends RenderBox {
     layoutDone();
   }
 
-  void handlePointer(sky.PointerEvent event, { double x: 0.0, double y: 0.0 }) {
+  bool handlePointer(sky.PointerEvent event, { double x: 0.0, double y: 0.0 }) {
     if ((drawer != null) && (x < drawer.width)) {
-      drawer.handlePointer(event, x: x, y: y);
+      if (drawer.handlePointer(event, x: x, y: y))
+        return true;
     } else if ((toolbar != null) && (y < toolbar.height)) {
-      toolbar.handlePointer(event, x: x, y: y);
+      if (toolbar.handlePointer(event, x: x, y: y))
+        return true;
     } else if ((statusbar != null) && (y > (statusbar.parentData as BoxParentData).y)) {
-      statusbar.handlePointer(event, x: x, y: y-(statusbar.parentData as BoxParentData).y);
+      if (statusbar.handlePointer(event, x: x, y: y-(statusbar.parentData as BoxParentData).y))
+        return true;
     } else {
-      body.handlePointer(event, x: x, y: y-(body.parentData as BoxParentData).y);
+      if (body.handlePointer(event, x: x, y: y-(body.parentData as BoxParentData).y))
+        return true;
     }
-    super.handlePointer(event, x: x, y: y);
+    return super.handlePointer(event, x: x, y: y);
   }
 
   void paint(RenderNodeDisplayList canvas) {

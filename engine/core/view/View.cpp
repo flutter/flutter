@@ -7,13 +7,13 @@
 
 namespace blink {
 
-PassRefPtr<View> View::create(const base::Closure& schedulePaintCallback)
+PassRefPtr<View> View::create(const base::Closure& scheduleFrameCallback)
 {
-    return adoptRef(new View(schedulePaintCallback));
+    return adoptRef(new View(scheduleFrameCallback));
 }
 
-View::View(const base::Closure& schedulePaintCallback)
-    : m_schedulePaintCallback(schedulePaintCallback)
+View::View(const base::Closure& scheduleFrameCallback)
+    : m_scheduleFrameCallback(scheduleFrameCallback)
 {
 }
 
@@ -33,14 +33,19 @@ double View::height() const
     return h / m_displayMetrics.device_pixel_ratio;
 }
 
-void View::schedulePaint()
-{
-    m_schedulePaintCallback.Run();
-}
-
 void View::setEventCallback(PassOwnPtr<EventCallback> callback)
 {
     m_eventCallback = callback;
+}
+
+void View::setBeginFrameCallback(PassOwnPtr<BeginFrameCallback> callback)
+{
+    m_beginFrameCallback = callback;
+}
+
+void View::scheduleFrame()
+{
+    m_scheduleFrameCallback.Run();
 }
 
 void View::setDisplayMetrics(const SkyDisplayMetrics& metrics)
@@ -51,6 +56,14 @@ void View::setDisplayMetrics(const SkyDisplayMetrics& metrics)
 bool View::handleInputEvent(PassRefPtr<Event> event)
 {
     return m_eventCallback && m_eventCallback->handleEvent(event.get());
+}
+
+void View::beginFrame(base::TimeTicks frameTime)
+{
+    if (!m_beginFrameCallback)
+        return;
+    double frameTimeMS = (frameTime - base::TimeTicks()).InMillisecondsF();
+    m_beginFrameCallback->handleEvent(frameTimeMS);
 }
 
 } // namespace blink

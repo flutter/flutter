@@ -78,7 +78,7 @@ class Engine : public UIDelegate,
                         Dart_Isolate isolate) override;
 
   // SkyViewClient methods:
-  void SchedulePaint() override;
+  void ScheduleFrame() override;
 
   // Services methods:
   mojo::NavigatorHost* NavigatorHost() override;

@@ -72,6 +72,9 @@ void Engine::BeginFrame(base::TimeTicks frame_time) {
   double interval_sec = 1.0 / 60;
   blink::WebBeginFrameArgs args(frame_time_sec, deadline_sec, interval_sec);
 
+  if (sky_view_)
+    sky_view_->BeginFrame(frame_time);
+
   if (web_view_) {
     web_view_->beginFrame(args);
     web_view_->layout();
@@ -203,7 +206,7 @@ void Engine::didCreateIsolate(blink::WebLocalFrame* frame,
                     CreateServiceProvider(config_.service_provider_context));
 }
 
-void Engine::SchedulePaint() {
+void Engine::ScheduleFrame() {
   animator_->RequestFrame();
 }
 

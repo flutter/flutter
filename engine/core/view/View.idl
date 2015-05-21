@@ -10,5 +10,7 @@ interface View {
   attribute Picture picture;
 
   void setEventCallback(EventCallback callback);
-  void schedulePaint();
+
+  void setBeginFrameCallback(BeginFrameCallback callback);
+  void scheduleFrame();
 };
