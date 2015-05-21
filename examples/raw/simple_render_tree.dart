@@ -18,8 +18,8 @@ class RenderSolidColor extends RenderDecoratedBox {
   }
 
   void layout(BoxConstraints constraints, { RenderNode relayoutSubtreeRoot }) {
-    setWidth(constraints, constraints.maxWidth);
-    setHeight(constraints, 200.0);
+    width = constraints.constrainWidth(constraints.maxWidth);
+    height = constraints.constrainHeight(200.0);
     layoutDone();
   }
 
@@ -57,7 +57,8 @@ void main() {
   view.setBeginFrameCallback(beginFrame);
 
   var root = new RenderBlock(
-      decoration: new BoxDecoration(backgroundColor: 0xFF00FFFF));
+      decoration: new BoxDecoration(backgroundColor: 0xFF00FFFF),
+      padding: const EdgeDims(10.0, 10.0, 10.0, 10.0));
 
   root.add(new RenderSolidColor(0xFF00FF00));
   root.add(new RenderSolidColor(0xFF0000FF));
