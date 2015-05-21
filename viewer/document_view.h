@@ -22,10 +22,13 @@
 #include "sky/compositor/layer_client.h"
 #include "sky/compositor/layer_host_client.h"
 #include "sky/engine/public/platform/ServiceProvider.h"
+#include "sky/engine/public/sky/sky_view.h"
+#include "sky/engine/public/sky/sky_view_client.h"
 #include "sky/engine/public/web/WebFrameClient.h"
 #include "sky/engine/public/web/WebViewClient.h"
 #include "sky/services/testing/test_harness.mojom.h"
 #include "ui/events/gestures/gesture_types.h"
+
 
 namespace mojo {
 class ViewManager;
@@ -41,6 +44,7 @@ class LayerHost;
 class DocumentView : public blink::ServiceProvider,
                      public blink::WebFrameClient,
                      public blink::WebViewClient,
+                     public blink::SkyViewClient,
                      public mojo::ViewManagerDelegate,
                      public mojo::ViewObserver,
                      public sky::LayerClient,
@@ -65,6 +69,9 @@ class DocumentView : public blink::ServiceProvider,
   void OnSurfaceIdAvailable(mojo::SurfaceIdPtr surface_id) override;
   // sky::LayerClient
   void PaintContents(SkCanvas* canvas, const gfx::Rect& clip) override;
+
+  // SkyViewClient methods:
+  void ScheduleFrame() override;
 
   void StartDebuggerInspectorBackend();
 
@@ -135,6 +142,7 @@ class DocumentView : public blink::ServiceProvider,
   mojo::Shell* shell_;
   TestHarnessPtr test_harness_;
   mojo::NavigatorHostPtr navigator_host_;
+  std::unique_ptr<blink::SkyView> sky_view_;
   blink::WebView* web_view_;
   mojo::View* root_;
   mojo::ViewManagerClientFactory view_manager_client_factory_;

@@ -6,8 +6,10 @@
 #define SKY_ENGINE_PUBLIC_SKY_SKY_VIEW_H_
 
 #include <memory>
+
 #include "base/memory/weak_ptr.h"
 #include "base/time/time.h"
+#include "mojo/services/network/public/interfaces/url_loader.mojom.h"
 #include "skia/ext/refptr.h"
 #include "sky/engine/public/platform/WebCommon.h"
 #include "sky/engine/public/platform/WebURL.h"
@@ -24,10 +26,13 @@ class SkyView {
   static std::unique_ptr<SkyView> Create(SkyViewClient* client);
   ~SkyView();
 
+  const SkyDisplayMetrics& display_metrics() const { return display_metrics_; }
   void SetDisplayMetrics(const SkyDisplayMetrics& metrics);
-  void Load(const WebURL& url);
-
   void BeginFrame(base::TimeTicks frame_time);
+
+  // Sky can either issue the load itself or use an existing response pipe.
+  void Load(const WebURL& url, mojo::URLResponsePtr response = nullptr);
+
   skia::RefPtr<SkPicture> Paint();
   bool HandleInputEvent(const WebInputEvent& event);
 

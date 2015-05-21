@@ -9,6 +9,7 @@
 #include "base/macros.h"
 #include "base/memory/weak_ptr.h"
 #include "dart/runtime/include/dart_api.h"
+#include "mojo/services/network/public/interfaces/url_loader.mojom.h"
 #include "sky/engine/wtf/OwnPtr.h"
 #include "sky/engine/wtf/text/AtomicString.h"
 #include "sky/engine/wtf/text/TextPosition.h"
@@ -32,7 +33,8 @@ class DartController {
   typedef base::Callback<void(RefPtr<AbstractModule>, RefPtr<DartValue>)>
       LoadFinishedCallback;
 
-  void LoadMainLibrary(const KURL& url);
+  // Can either issue the url load ourselves or take an existing response:
+  void LoadMainLibrary(const KURL& url, mojo::URLResponsePtr response = nullptr);
 
   void LoadScriptInModule(AbstractModule* module,
                           const String& source,

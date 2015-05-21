@@ -47,8 +47,15 @@ class DartLoader::Job : public DartDependency,
                         public MojoFetcher::Client,
                         public DataPipeDrainer::Client {
  public:
-  Job(DartLoader* loader, const KURL& url)
-      : loader_(loader), url_(url), fetcher_(this, url) {}
+  Job(DartLoader* loader, const KURL& url, mojo::URLResponsePtr response)
+      : loader_(loader), url_(url)
+  {
+    if (!response) {
+      fetcher_ = adoptPtr(new MojoFetcher(this, url));
+    } else {
+      OnReceivedResponse(response.Pass());
+    }
+  }
 
   const KURL& url() const { return url_; }
 
@@ -74,14 +81,14 @@ class DartLoader::Job : public DartDependency,
   // Subclasses must implement OnDataComplete.
 
   KURL url_;
-  MojoFetcher fetcher_;
+  OwnPtr<MojoFetcher> fetcher_;
   OwnPtr<DataPipeDrainer> drainer_;
 };
 
 class DartLoader::ImportJob : public Job {
  public:
-  ImportJob(DartLoader* loader, const KURL& url)
-    : Job(loader, url) {
+  ImportJob(DartLoader* loader, const KURL& url, mojo::URLResponsePtr response = nullptr)
+    : Job(loader, url, response.Pass()) {
     TRACE_EVENT_ASYNC_BEGIN1("sky", "DartLoader::ImportJob", this,
                              "url", url.string().ascii().toStdString());
   }
@@ -97,7 +104,7 @@ class DartLoader::ImportJob : public Job {
 class DartLoader::SourceJob : public Job {
  public:
   SourceJob(DartLoader* loader, const KURL& url, Dart_Handle library)
-      : Job(loader, url), library_(loader->dart_state(), library) {
+      : Job(loader, url, nullptr), library_(loader->dart_state(), library) {
     TRACE_EVENT_ASYNC_BEGIN1("sky", "DartLoader::SourceJob", this,
                              "url", url.string().ascii().toStdString());
   }
@@ -231,7 +238,7 @@ void DartLoader::WaitForDependencies(
       adoptPtr(new DependencyWatcher(dependencies, callback)));
 }
 
-void DartLoader::LoadLibrary(const KURL& url) {
+void DartLoader::LoadLibrary(const KURL& url, mojo::URLResponsePtr response) {
   const auto& result = pending_libraries_.add(url.string(), nullptr);
   if (result.isNewEntry) {
     OwnPtr<Job> job = adoptPtr(new ImportJob(this, url));

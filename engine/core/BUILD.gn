@@ -23,6 +23,7 @@ source_set("libraries") {
     "//mojo/public/interfaces/application",
     "//mojo/services/keyboard/public/interfaces",
     "//mojo/services/navigation/public/interfaces",
+    "//mojo/services/network/public/interfaces",
     "//mojo/services/view_manager/public/cpp",
     "//skia",
     "//sky/engine/tonic:tonic",

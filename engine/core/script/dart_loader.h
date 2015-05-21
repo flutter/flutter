@@ -9,6 +9,7 @@
 #include "base/macros.h"
 #include "base/memory/weak_ptr.h"
 #include "dart/runtime/include/dart_api.h"
+#include "mojo/services/network/public/interfaces/url_loader.mojom.h"
 #include "sky/engine/wtf/HashMap.h"
 #include "sky/engine/wtf/HashSet.h"
 #include "sky/engine/wtf/OwnPtr.h"
@@ -35,7 +36,7 @@ class DartLoader {
                                       Dart_Handle library,
                                       Dart_Handle url);
 
-  void LoadLibrary(const KURL& url);
+  void LoadLibrary(const KURL& url, mojo::URLResponsePtr response = nullptr);
 
   void WaitForDependencies(const HashSet<DartDependency*>& dependencies,
                            const base::Closure& callback);

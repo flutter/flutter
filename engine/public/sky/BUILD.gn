@@ -8,6 +8,7 @@ source_set("sky") {
     "//skia",
     "//sky/engine/core",
     "//sky/engine/platform",
+    "//mojo/services/network/public/interfaces",
   ]
 
   configs += [

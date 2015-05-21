@@ -150,7 +150,8 @@ void DocumentView::OnEmbed(
 
   // TODO(abarth): We should ask the view whether it is focused instead of
   // assuming that we're focused.
-  web_view_->setFocus(true);
+  if (web_view_)
+    web_view_->setFocus(true);
   root_->AddObserver(this);
 }
 
@@ -159,6 +160,14 @@ void DocumentView::OnViewManagerDisconnected(mojo::ViewManager* view_manager) {
 }
 
 void DocumentView::Load(mojo::URLResponsePtr response) {
+  // Enable SkyView here.
+  if (false) {
+    sky_view_ = blink::SkyView::Create(this);
+    initializeLayerTreeView();
+    sky_view_->Load(GURL(response->url), response.Pass());
+    return;
+  }
+
   web_view_ = blink::WebView::create(this);
   ConfigureSettings(web_view_->settings());
   web_view_->setMainFrame(blink::WebLocalFrame::create(this));
@@ -210,17 +219,25 @@ mojo::Shell* DocumentView::GetShell() {
 }
 
 void DocumentView::BeginFrame(base::TimeTicks frame_time) {
-  double frame_time_sec = (frame_time - base::TimeTicks()).InSecondsF();
-  double deadline_sec = frame_time_sec;
-  double interval_sec = 1.0/60;
-  blink::WebBeginFrameArgs web_begin_frame_args(
-      frame_time_sec, deadline_sec, interval_sec);
-  web_view_->beginFrame(web_begin_frame_args);
-  web_view_->layout();
-  blink::WebSize size = web_view_->size();
-  float device_pixel_ratio = GetDevicePixelRatio();
-  root_layer_->SetSize(gfx::Size(size.width * device_pixel_ratio,
-                                 size.height * device_pixel_ratio));
+  if (sky_view_) {
+    sky_view_->BeginFrame(frame_time);
+    root_layer_->SetSize(sky_view_->display_metrics().physical_size);
+  }
+  if (web_view_) {
+    double frame_time_sec = (frame_time - base::TimeTicks()).InSecondsF();
+    double deadline_sec = frame_time_sec;
+    double interval_sec = 1.0/60;
+    blink::WebBeginFrameArgs web_begin_frame_args(
+        frame_time_sec, deadline_sec, interval_sec);
+
+    web_view_->beginFrame(web_begin_frame_args);
+    web_view_->layout();
+
+    blink::WebSize size = web_view_->size();
+    float device_pixel_ratio = GetDevicePixelRatio();
+    root_layer_->SetSize(gfx::Size(size.width * device_pixel_ratio,
+                                   size.height * device_pixel_ratio));
+  }
 }
 
 void DocumentView::OnSurfaceIdAvailable(mojo::SurfaceIdPtr surface_id) {
@@ -230,11 +247,20 @@ void DocumentView::OnSurfaceIdAvailable(mojo::SurfaceIdPtr surface_id) {
 
 void DocumentView::PaintContents(SkCanvas* canvas, const gfx::Rect& clip) {
   blink::WebRect rect(clip.x(), clip.y(), clip.width(), clip.height());
-  web_view_->paint(canvas, rect);
+
+  if (sky_view_) {
+    skia::RefPtr<SkPicture> picture = sky_view_->Paint();
+    canvas->clear(SK_ColorBLACK);
+    canvas->scale(GetDevicePixelRatio(), GetDevicePixelRatio());
+    if (picture)
+      canvas->drawPicture(picture.get());
+  }
+
+  if (web_view_)
+    web_view_->paint(canvas, rect);
 }
 
 void DocumentView::scheduleVisualUpdate() {
-  DCHECK(web_view_);
   layer_host_->SetNeedsAnimate();
 }
 
@@ -313,19 +339,34 @@ void DocumentView::OnViewViewportMetricsChanged(
     const mojo::ViewportMetrics& old_metrics,
     const mojo::ViewportMetrics& new_metrics) {
   DCHECK_EQ(view, root_);
-  web_view_->setDeviceScaleFactor(GetDevicePixelRatio());
+
+  if (web_view_) {
+    web_view_->setDeviceScaleFactor(GetDevicePixelRatio());
+  }
   UpdateRootSizeAndViewportMetrics(root_->bounds());
 }
 
 void DocumentView::UpdateRootSizeAndViewportMetrics(
     const mojo::Rect& new_bounds) {
   float device_pixel_ratio = GetDevicePixelRatio();
+
+  if (sky_view_) {
+    blink::SkyDisplayMetrics metrics;
+    mojo::Rect bounds = root_->bounds();
+    metrics.physical_size = blink::WebSize(bounds.width, bounds.height);
+    metrics.device_pixel_ratio = device_pixel_ratio;
+    sky_view_->SetDisplayMetrics(metrics);
+    return;
+  }
+
   web_view_->resize(blink::WebSize(new_bounds.width / device_pixel_ratio,
                                    new_bounds.height / device_pixel_ratio));
 }
 
 void DocumentView::OnViewFocusChanged(mojo::View* gained_focus,
                                       mojo::View* lost_focus) {
+  if (sky_view_)
+    return;
   if (root_ == lost_focus) {
     web_view_->setFocus(false);
   } else if (root_ == gained_focus) {
@@ -346,6 +387,11 @@ void DocumentView::OnViewInputEvent(
       ConvertEvent(event, device_pixel_ratio);
   if (!web_event)
     return;
+
+  if (sky_view_) {
+    sky_view_->HandleInputEvent(*web_event);
+    return;
+  }
 
   ui::GestureRecognizer* recognizer = ui::GestureRecognizer::Get();
   scoped_ptr<ui::TouchEvent> touch_event =
@@ -383,6 +429,11 @@ void DocumentView::InitServiceRegistry() {
   service_registry_service_provider_binding_.reset(
       new mojo::StrongBinding<mojo::ServiceProvider>(sp_impl, &sp));
   service_registry_->AddServices(interface_names.Pass(), sp.Pass());
+}
+
+void DocumentView::ScheduleFrame() {
+  DCHECK(sky_view_);
+  layer_host_->SetNeedsAnimate();
 }
 
 }  // namespace sky

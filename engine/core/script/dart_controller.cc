@@ -120,10 +120,10 @@ void DartController::DidLoadMainLibrary(KURL url) {
   DartInvokeAppField(library, ToDart("main"), 0, nullptr);
 }
 
-void DartController::LoadMainLibrary(const KURL& url) {
+void DartController::LoadMainLibrary(const KURL& url, mojo::URLResponsePtr response) {
   DartLoader& loader = dart_state()->loader();
   DartDependencyCatcher dependency_catcher(loader);
-  loader.LoadLibrary(url);
+  loader.LoadLibrary(url, response.Pass());
   loader.WaitForDependencies(dependency_catcher.dependencies(),
                              base::Bind(&DartController::DidLoadMainLibrary, weak_factory_.GetWeakPtr(), url));
 }
