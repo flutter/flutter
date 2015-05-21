@@ -401,10 +401,24 @@ class BoxConstraints {
     this.minHeight: 0.0,
     this.maxHeight: double.INFINITY});
 
+  const BoxConstraints.tight({ width: width, height: height })
+    : minWidth = width,
+      maxWidth = width,
+      minHeight = height,
+      maxHeight = height;
+
   final double minWidth;
   final double maxWidth;
   final double minHeight;
   final double maxHeight;
+
+  double constrainWidth(double width) {
+    return clamp(min: minWidth, max: maxWidth, value: width);
+  }
+
+  double constrainHeight(double height) {
+    return clamp(min: minHeight, max: maxHeight, value: height);
+  }
 }
 
 class BoxDimensions {
@@ -412,8 +426,8 @@ class BoxDimensions {
 
   BoxDimensions.withConstraints(
       BoxConstraints constraints, {double width: 0.0, double height: 0.0}) {
-    this.width = clamp(min: minWidth, max: maxWidth, value: width);
-    this.height = clamp(min: minHeight, max: maxHeight, value: height);
+    this.width = constraints.constrainWidth(width);
+    this.height = constraints.constrainHeight(height);
   }
 
   final double width;
@@ -442,29 +456,17 @@ abstract class RenderBox extends RenderNode {
   }
 
   void layout(BoxConstraints constraints, { RenderNode relayoutSubtreeRoot }) {
-    setWidth(constraints, 0.0);
-    setHeight(constraints, 0.0);
+    width = constraints.constrainWidth(0.0);
+    height = constraints.constrainHeight(0.0);
     layoutDone();
   }
 
   double width;
   double height;
-
-  void setWidth(BoxConstraints constraints, double newWidth) {
-    width = clamp(min: constraints.minWidth,
-                  max: constraints.maxWidth,
-                  value: newWidth);
-  }
-
-  void setHeight(BoxConstraints constraints, double newHeight) {
-    height = clamp(min: constraints.minHeight,
-                   max: constraints.maxHeight,
-                   value: newHeight);
-  }
 }
 
 class BoxDecoration {
-  BoxDecoration({
+  const BoxDecoration({
     this.backgroundColor
   });
 
@@ -628,9 +630,8 @@ class RenderBlock extends RenderDecoratedBox with ContainerRenderNodeMixin<Rende
   // child positions if they're not needed to determine dimensions)
   BoxDimensions getIntrinsicDimensions(BoxConstraints constraints) {
     double outerHeight = _padding.top + _padding.bottom;
-    // TODO(abarth): Shouldn't this have a value: maxWidth?
-    double outerWidth = clamp(min: constraints.minWidth,
-                              max: constraints.maxWidth);
+    double outerWidth = constraints.constrainWidth(constraints.maxWidth);
+    assert(outerWidth < double.INFINITY);
     double innerWidth = outerWidth - (_padding.left + _padding.right);
     RenderBox child = _firstChild;
     BoxConstraints constraints = new BoxConstraints(minWidth: innerWidth,
@@ -641,12 +642,8 @@ class RenderBlock extends RenderDecoratedBox with ContainerRenderNodeMixin<Rende
       child = child.parentData.nextSibling;
     }
 
-    return new BoxDimensions(
-      width: outerWidth,
-      height: clamp(min: constraints.minHeight,
-                    max: constraints.maxHeight,
-                    value: outerHeight)
-    );
+    return new BoxDimensions(width: outerWidth,
+                             height: constraints.constrainHeight(outerHeight));
   }
 
   double _minHeight; // value cached from parent for relayout call
@@ -655,8 +652,8 @@ class RenderBlock extends RenderDecoratedBox with ContainerRenderNodeMixin<Rende
     if (relayoutSubtreeRoot != null)
       saveRelayoutSubtreeRoot(relayoutSubtreeRoot);
     relayoutSubtreeRoot = relayoutSubtreeRoot == null ? this : relayoutSubtreeRoot;
-    // TODO(abarth): Shouldn't this be setWidth(constaints, constraints.maxWidth)?
-    width = clamp(min: constraints.minWidth, max: constraints.maxWidth);
+    width = constraints.constrainWidth(constraints.maxWidth);
+    assert(width < double.INFINITY);
     _minHeight = constraints.minHeight;
     _maxHeight = constraints.maxHeight;
     internalLayout(relayoutSubtreeRoot);
@@ -676,7 +673,7 @@ class RenderBlock extends RenderDecoratedBox with ContainerRenderNodeMixin<Rende
       child.layout(new BoxConstraints(minWidth: innerWidth, maxWidth: innerWidth),
                    relayoutSubtreeRoot: relayoutSubtreeRoot);
       assert(child.parentData is BlockParentData);
-      child.parentData.x = 0.0; // TODO(abarth): Shouldn't this be _padding.left?
+      child.parentData.x = _padding.left;
       child.parentData.y = y;
       y += child.height;
       child = child.parentData.nextSibling;
@@ -743,8 +740,8 @@ class ScaffoldBox extends RenderBox {
   final RenderBox drawer;
 
   void layout(BoxConstraints constraints, { RenderNode relayoutSubtreeRoot }) {
-    setHeight(constraints, 0.0);
-    setWidth(constraints, 0.0);
+    width = constraints.constrainWidth(0.0);
+    height = constraints.constrainHeight(0.0);
     relayout();
   }
 
@@ -754,20 +751,20 @@ class ScaffoldBox extends RenderBox {
   void relayout() {
     double bodyHeight = height;
     if (toolbar != null) {
-      toolbar.layout(new BoxConstraints(minWidth: width, maxWidth: width, minHeight: kToolbarHeight, maxHeight: kToolbarHeight));
+      toolbar.layout(new BoxConstraints.tight(width: width, height: kToolbarHeight));
       assert(toolbar.parentData is BoxParentData);
       toolbar.parentData.x = 0.0;
       toolbar.parentData.y = 0.0;
       bodyHeight -= kToolbarHeight;
     }
     if (statusbar != null) {
-      statusbar.layout(new BoxConstraints(minWidth: width, maxWidth: width, minHeight: kStatusbarHeight, maxHeight: kStatusbarHeight));
+      statusbar.layout(new BoxConstraints.tight(width: width, height: kStatusbarHeight));
       assert(statusbar.parentData is BoxParentData);
       statusbar.parentData.x = 0.0;
       statusbar.parentData.y = height - kStatusbarHeight;
       bodyHeight -= kStatusbarHeight;
     }
-    body.layout(new BoxConstraints(minWidth: width, maxWidth: width, minHeight: bodyHeight, maxHeight: bodyHeight));
+    body.layout(new BoxConstraints.tight(width: width, height: bodyHeight));
     if (drawer != null)
       drawer.layout(new BoxConstraints(minWidth: 0.0, maxWidth: width, minHeight: height, maxHeight: height));
     layoutDone();
