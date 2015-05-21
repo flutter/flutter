@@ -20,13 +20,13 @@ Picture draw(int a, int r, int g, int b) {
 bool handleEvent(Event event) {
   if (event.type == "pointerdown") {
     view.picture = draw(255, 0, 0, 255);
-    view.schedulePaint();
+    view.scheduleFrame();
     return true;
   }
 
   if (event.type == "pointerup") {
     view.picture = draw(255, 0, 255, 0);
-    view.schedulePaint();
+    view.scheduleFrame();
     return true;
   }
 
@@ -36,7 +36,7 @@ bool handleEvent(Event event) {
 void main() {
   print("Hello, world");
   view.picture = draw(255, 0, 255, 0);
-  view.schedulePaint();
+  view.scheduleFrame();
 
   view.setEventCallback(handleEvent);
 }
