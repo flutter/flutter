@@ -170,10 +170,11 @@ void Engine::OnInputEvent(InputEventPtr event) {
     web_view_->handleInputEvent(*web_event);
 }
 
-void Engine::LoadURL(const mojo::String& url) {
-  if (!WebView::shouldUseWebView(responseURL)) {
+void Engine::LoadURL(const mojo::String& mojo_url) {
+  GURL url(mojo_url);
+  if (!blink::WebView::shouldUseWebView(url)) {
     sky_view_ = blink::SkyView::Create(this);
-    sky_view_->Load(GURL(url));
+    sky_view_->Load(url);
     return;
   }
 
@@ -186,7 +187,7 @@ void Engine::LoadURL(const mojo::String& url) {
   ConfigureSettings(web_view_->settings());
   web_view_->setMainFrame(blink::WebLocalFrame::create(this));
   UpdateWebViewSize();
-  web_view_->mainFrame()->load(GURL(url));
+  web_view_->mainFrame()->load(url);
 }
 
 void Engine::frameDetached(blink::WebFrame* frame) {
