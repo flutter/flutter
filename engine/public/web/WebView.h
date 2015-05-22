@@ -37,6 +37,8 @@
 #include "sky/engine/public/web/WebPageVisibilityState.h"
 #include "sky/engine/public/web/WebWidget.h"
 
+class GURL;
+
 namespace blink {
 
 class WebFrame;
@@ -48,6 +50,9 @@ struct WebPoint;
 
 class WebView : public WebWidget {
 public:
+    // I've added this here so that it dies when WebView does. :)
+    static bool shouldUseWebView(const GURL& url);
+
     // Initialization ------------------------------------------------------
 
     // Creates a WebView that is NOT yet initialized. You will need to

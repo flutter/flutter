@@ -83,6 +83,7 @@
 #include "sky/engine/wtf/CurrentTime.h"
 #include "sky/engine/wtf/RefPtr.h"
 #include "sky/engine/wtf/TemporaryChange.h"
+#include "url/gurl.h"
 
 // Get rid of WTF's pow define so we can use std::pow.
 #undef pow
@@ -91,6 +92,20 @@
 namespace blink {
 
 // WebView ----------------------------------------------------------------
+
+bool WebView::shouldUseWebView(const GURL& url)
+{
+    std::string filename = url.ExtractFileName();
+    int hashStart = filename.find('#');
+    if (hashStart != -1)
+        filename.resize(hashStart);
+    int queryStart = filename.find('?');
+    if (queryStart != -1)
+        filename.resize(queryStart);
+    // For now .dart indicates we should use SkyView. Eventually we'll
+    // use SkyView for all urls regardless of file extension.
+    return !EndsWith(filename, ".dart", false);
+}
 
 WebView* WebView::create(WebViewClient* client)
 {

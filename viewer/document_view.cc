@@ -158,21 +158,24 @@ void DocumentView::OnEmbed(
 void DocumentView::OnViewManagerDisconnected(mojo::ViewManager* view_manager) {
   // TODO(aa): Need to figure out how shutdown works.
 }
-
 void DocumentView::Load(mojo::URLResponsePtr response) {
-  // Enable SkyView here.
-  if (false) {
+  GURL responseURL(response->url);
+
+  if (!blink::WebView::shouldUseWebView(responseURL)) {
     sky_view_ = blink::SkyView::Create(this);
     initializeLayerTreeView();
-    sky_view_->Load(GURL(response->url), response.Pass());
+    sky_view_->Load(responseURL, response.Pass());
     return;
   }
+
+  if (!RuntimeFlags::Get().testing())
+    LOG(WARNING) << ".sky support is deprecated, please use .dart for main()";
 
   web_view_ = blink::WebView::create(this);
   ConfigureSettings(web_view_->settings());
   web_view_->setMainFrame(blink::WebLocalFrame::create(this));
   web_view_->mainFrame()->loadFromDataPipeWithURL(
-      response->body.Pass(), GURL(response->url));
+      response->body.Pass(), responseURL);
 }
 
 void DocumentView::initializeLayerTreeView() {
