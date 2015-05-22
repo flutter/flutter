@@ -171,12 +171,13 @@ void Engine::OnInputEvent(InputEventPtr event) {
 }
 
 void Engine::LoadURL(const mojo::String& url) {
-  // Enable SkyView here.
-  if (false) {
+  if (!WebView::shouldUseWebView(responseURL)) {
     sky_view_ = blink::SkyView::Create(this);
     sky_view_->Load(GURL(url));
     return;
   }
+
+  LOG(WARNING) << ".sky support is deprecated, please use .dart for main()";
 
   // Something bad happens if you try to call WebView::close and replace
   // the webview.  So for now we just load into the existing one. :/
