@@ -101,6 +101,9 @@ class DocumentView : public blink::ServiceProvider,
   void didCreateIsolate(blink::WebLocalFrame* frame,
                         Dart_Isolate isolate) override;
 
+  // SkyViewClient methods:
+  void DidCreateIsolate(Dart_Isolate isolate) override;
+
   // WebViewClient methods:
   blink::ServiceProvider* services() override;
 

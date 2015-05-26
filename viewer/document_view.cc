@@ -322,6 +322,10 @@ void DocumentView::didCreateIsolate(blink::WebLocalFrame* frame,
   Internals::Create(isolate, this);
 }
 
+void DocumentView::DidCreateIsolate(Dart_Isolate isolate) {
+  Internals::Create(isolate, this);
+}
+
 blink::ServiceProvider* DocumentView::services() {
   return this;
 }

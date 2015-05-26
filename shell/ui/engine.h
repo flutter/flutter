@@ -74,11 +74,14 @@ class Engine : public UIDelegate,
   void scheduleVisualUpdate() override;
   blink::WebScreenInfo screenInfo() override;
   blink::ServiceProvider* services() override;
+
+  // WebFrameClient methods:
   void didCreateIsolate(blink::WebLocalFrame* frame,
                         Dart_Isolate isolate) override;
 
   // SkyViewClient methods:
   void ScheduleFrame() override;
+  void DidCreateIsolate(Dart_Isolate isolate) override;
 
   // Services methods:
   mojo::NavigatorHost* NavigatorHost() override;

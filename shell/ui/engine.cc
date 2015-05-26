@@ -208,6 +208,11 @@ void Engine::didCreateIsolate(blink::WebLocalFrame* frame,
                     CreateServiceProvider(config_.service_provider_context));
 }
 
+void Engine::DidCreateIsolate(Dart_Isolate isolate) {
+  Internals::Create(isolate,
+                    CreateServiceProvider(config_.service_provider_context));
+}
+
 void Engine::ScheduleFrame() {
   animator_->RequestFrame();
 }

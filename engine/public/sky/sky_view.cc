@@ -55,6 +55,14 @@ void SkyView::Load(const WebURL& url, mojo::URLResponsePtr response) {
   dart_controller_.reset(new DartController);
   dart_controller_->CreateIsolateFor(adoptPtr(new DOMDartState(nullptr)), url);
   dart_controller_->InstallView(data_->view_.get());
+
+  {
+    Dart_Isolate isolate = dart_controller_->dart_state()->isolate();
+    DartIsolateScope scope(isolate);
+    DartApiScope api_scope;
+    client_->DidCreateIsolate(isolate);
+  }
+
   dart_controller_->LoadMainLibrary(url, response.Pass());
 }
 
