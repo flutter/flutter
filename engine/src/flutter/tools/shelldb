@@ -20,6 +20,7 @@ SKY_ROOT = os.path.dirname(SKY_TOOLS_DIR)
 SRC_ROOT = os.path.dirname(SKY_ROOT)
 
 SKY_SERVER_PORT = 9888
+OBSERVATORY_PORT = 8181
 DEFAULT_URL = "sky://domokit.github.io/sky_home"
 APK_NAME = 'SkyDemo.apk'
 ADB_PATH = os.path.join(SRC_ROOT,
@@ -194,6 +195,16 @@ class StartSky(object):
         if args.install:
             # -r to replace an existing apk, -d to allow version downgrade.
             subprocess.check_call([ADB_PATH, 'install', '-r', '-d', apk_path])
+        else:
+            subprocess.check_call([
+                ADB_PATH, 'shell', 'am', 'force-stop', ANDROID_PACKAGE
+            ])
+
+        # Set up port forwarding for observatory
+        port_string = 'tcp:%s' % OBSERVATORY_PORT
+        subprocess.check_call([
+            ADB_PATH, 'forward', port_string, port_string
+        ])
 
         port_string = 'tcp:%s' % sky_server.port
         subprocess.check_call([
