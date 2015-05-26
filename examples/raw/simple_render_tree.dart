@@ -11,11 +11,9 @@ class RenderSolidColor extends RenderDecoratedBox {
   final double desiredWidth;
   final int backgroundColor;
 
-  RenderSolidColor(int backgroundColor, { double desiredHeight: double.INFINITY,
-                                          double desiredWidth: double.INFINITY })
-      : desiredHeight = desiredHeight,
-        desiredWidth = desiredWidth,
-        backgroundColor = backgroundColor,
+  RenderSolidColor(int backgroundColor, { this.desiredHeight: double.INFINITY,
+                                          this.desiredWidth: double.INFINITY })
+      : backgroundColor = backgroundColor,
         super(new BoxDecoration(backgroundColor: backgroundColor));
 
   BoxDimensions getIntrinsicDimensions(BoxConstraints constraints) {
