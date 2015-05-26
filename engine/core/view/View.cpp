@@ -53,9 +53,10 @@ void View::setDisplayMetrics(const SkyDisplayMetrics& metrics)
     m_displayMetrics = metrics;
 }
 
-bool View::handleInputEvent(PassRefPtr<Event> event)
+void View::handleInputEvent(PassRefPtr<Event> event)
 {
-    return m_eventCallback && m_eventCallback->handleEvent(event.get());
+    if (m_eventCallback)
+        m_eventCallback->handleEvent(event.get());
 }
 
 void View::beginFrame(base::TimeTicks frameTime)

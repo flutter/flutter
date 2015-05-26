@@ -3,5 +3,5 @@
 // found in the LICENSE file.
 
 callback interface EventCallback {
-  boolean handleEvent(Event event);
+  void handleEvent(Event event);
 };

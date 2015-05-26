@@ -4,6 +4,7 @@
 
 import 'dart:math';
 import 'dart:sky';
+import 'package:sky/framework/app.dart';
 import 'package:sky/framework/layout2.dart';
 
 // Material design colors. :p
@@ -40,7 +41,7 @@ class RenderTouchDemo extends RenderBox {
 
   RenderTouchDemo();
 
-  bool handlePointer(PointerEvent event, { double x: 0.0, double y: 0.0 }) {
+  void handlePointer(PointerEvent event) {
     switch (event.type) {
       case 'pointerdown':
         int color = colors[event.pointer.remainder(colors.length)];
@@ -57,7 +58,6 @@ class RenderTouchDemo extends RenderBox {
         break;
     }
     markNeedsPaint();
-    return true;
   }
 
   void paint(RenderNodeDisplayList canvas) {
@@ -67,25 +67,8 @@ class RenderTouchDemo extends RenderBox {
   }
 }
 
-RenderView renderView;
-
-void beginFrame(double timeStamp) {
-  RenderNode.flushLayout();
-  renderView.paintFrame();
-}
-
-bool handleEvent(Event event) {
-  if (event is! PointerEvent)
-    return false;
-  return renderView.handlePointer(event, x: event.x, y: event.y);
-}
+AppView app;
 
 void main() {
-  view.setEventCallback(handleEvent);
-  view.setBeginFrameCallback(beginFrame);
-
-  renderView = new RenderView(root: new RenderTouchDemo());
-  renderView.layout(newWidth: view.width, newHeight: view.height);
-
-  view.scheduleFrame();
+  app = new AppView(new RenderTouchDemo());
 }

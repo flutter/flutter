@@ -18,6 +18,7 @@ dart_pkg("sdk") {
     "lib/framework/animation/generators.dart",
     "lib/framework/animation/mechanics.dart",
     "lib/framework/animation/scroll_behavior.dart",
+    "lib/framework/app.dart",
     "lib/framework/components/animated_component.dart",
     "lib/framework/components/button.dart",
     "lib/framework/components/button_base.dart",

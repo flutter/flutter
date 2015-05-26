@@ -11,7 +11,7 @@ class Event;
 class EventCallback {
 public:
     virtual ~EventCallback() { }
-    virtual bool handleEvent(Event* event) = 0;
+    virtual void handleEvent(Event* event) = 0;
 };
 
 }

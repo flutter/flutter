@@ -36,7 +36,7 @@ public:
     void scheduleFrame();
 
     void setDisplayMetrics(const SkyDisplayMetrics& metrics);
-    bool handleInputEvent(PassRefPtr<Event> event);
+    void handleInputEvent(PassRefPtr<Event> event);
     void beginFrame(base::TimeTicks frameTime);
 
 private:

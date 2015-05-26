@@ -1,3 +1,7 @@
+// Copyright 2015 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 library layout;
 
 // This version of layout.dart is an update to the other one, this one using new APIs.
@@ -217,15 +221,6 @@ abstract class RenderNode extends AbstractNode {
   }) { }
 
 
-  // HIT TESTING  
-
-  bool handlePointer(sky.PointerEvent event, { double x: 0.0, double y: 0.0 }) {
-    // override this if you have children, to hand it to the appropriate child
-    // override this if you want to do anything with the pointer event
-    return false;
-  }
-
-
   // PAINTING
 
   static bool _debugDoingPaint = false;
@@ -238,8 +233,39 @@ abstract class RenderNode extends AbstractNode {
   }
   void paint(RenderNodeDisplayList canvas) { }
 
+
+  // HIT TESTING  
+
+  void handlePointer(sky.PointerEvent event) {
+    // override this if you have a client, to hand it to the client
+    // override this if you want to do anything with the pointer event
+  }
+
+  // RenderNode subclasses are expected to have a method like the
+  // following (with the signature being whatever passes for coordinates
+  // for this particular class):
+  // bool hitTest(HitTestResult result, { double x, double y }) {
+  //   // If (x,y) is not inside this node, then return false.
+  //   // Otherwise:
+  //   // For each child that intersects x,y, in z-order starting from the top,
+  //   // call hitTest() for that child, passing it /result/, and the coordinates
+  //   // converted to the child's coordinate origin, and stop at the first child
+  //   // that returns true.
+  //   // Then, add yourself to /result/, and return true.
+  // }
+  // You must not add yourself to /result/ if you return false.
+
 }
 
+class HitTestResult {
+  final List<RenderNode> path = new List<RenderNode>();
+
+  RenderNode get result => path.first;
+
+  void add(RenderNode node) {
+    path.add(node);
+  }
+}
 
 // GENERIC MIXIN FOR RENDER NODES THAT TAKE A LIST OF CHILDREN
 
@@ -465,6 +491,15 @@ abstract class RenderBox extends RenderNode {
     layoutDone();
   }
 
+  bool hitTest(HitTestResult result, { double x, double y }) {
+    if (x < 0.0 || x >= width || y < 0.0 || y >= height)
+      return false;
+    hitTestChildren(result, x: x, y: y);
+    result.add(this);
+    return true;
+  }
+  void hitTestChildren(HitTestResult result, { double x, double y }) { }
+
   double width;
   double height;
 }
@@ -564,10 +599,14 @@ class RenderView extends RenderNode {
     assert(false); // nobody tells the screen to rotate, the whole rotate() dance is started from our layout()
   }
 
-  bool handlePointer(sky.PointerEvent event, { double x: 0.0, double y: 0.0 }) {
-    if (x < 0.0 || x >= root.width || y < 0.0 || y >= root.height)
+  bool hitTest(HitTestResult result, { double x, double y }) {
+    assert(root != null);
+    if (x < 0.0 || x >= width || y < 0.0 || y >= height)
       return false;
-    return root.handlePointer(event, x: x, y: y);
+    if (x >= 0.0 && x < root.width && y >= 0.0 && y < root.height)
+      root.hitTest(result, x: x, y: y);
+    result.add(this);
+    return true;
   }
 
   void paint(RenderNodeDisplayList canvas) {
@@ -586,20 +625,19 @@ class RenderView extends RenderNode {
 
 // DEFAULT BEHAVIORS FOR RENDERBOX CONTAINERS
 abstract class RenderBoxContainerDefaultsMixin<ChildType extends RenderBox, ParentDataType extends ContainerParentDataMixin<ChildType>> implements ContainerRenderNodeMixin<ChildType, ParentDataType> {
-  bool defaultHandlePointer(sky.PointerEvent event, double x, double y) {
+
+  void defaultHitTestChildren(HitTestResult result, { double x, double y }) {
     // the x, y parameters have the top left of the node's box as the origin
     ChildType child = lastChild;
     while (child != null) {
       assert(child.parentData is BoxParentData);
       if ((x >= child.parentData.x) && (x < child.parentData.x + child.width) &&
           (y >= child.parentData.y) && (y < child.parentData.y + child.height)) {
-        if (child.handlePointer(event, x: x-child.parentData.x, y: y-child.parentData.y))
-          return true;
-        break;
+        if (child.hitTest(result, x: x-child.parentData.x, y: y-child.parentData.y))
+          break;
       }
       child = child.parentData.previousSibling;
     }
-    return false;
   }
 
   void defaultPaint(RenderNodeDisplayList canvas) {
@@ -714,8 +752,8 @@ class RenderBlock extends RenderDecoratedBox with ContainerRenderNodeMixin<Rende
     layoutDone();
   }
 
-  bool handlePointer(sky.PointerEvent event, { double x: 0.0, double y: 0.0 }) {
-    return defaultHandlePointer(event, x, y) || super.handlePointer(event, x: x, y: y);
+  void hitTestChildren(HitTestResult result, { double x, double y }) {
+    defaultHitTestChildren(result, x: x, y: y);
   }
 
   void paint(RenderNodeDisplayList canvas) {
@@ -846,8 +884,8 @@ class RenderFlex extends RenderDecoratedBox with ContainerRenderNodeMixin<Render
     layoutDone();
   }
 
-  bool handlePointer(sky.PointerEvent event, { double x: 0.0, double y: 0.0 }) {
-    return defaultHandlePointer(event, x, y) || super.handlePointer(event, x: x, y: y);
+  void hitTestChildren(HitTestResult result, { double x, double y }) {
+    defaultHitTestChildren(result, x: x, y: y);
   }
 
   void paint(RenderNodeDisplayList canvas) {
@@ -902,21 +940,16 @@ class ScaffoldBox extends RenderBox {
     layoutDone();
   }
 
-  bool handlePointer(sky.PointerEvent event, { double x: 0.0, double y: 0.0 }) {
+  void hitTestChildren(HitTestResult result, { double x, double y }) {
     if ((drawer != null) && (x < drawer.width)) {
-      if (drawer.handlePointer(event, x: x, y: y))
-        return true;
+      drawer.hitTest(result, x: x, y: y);
     } else if ((toolbar != null) && (y < toolbar.height)) {
-      if (toolbar.handlePointer(event, x: x, y: y))
-        return true;
+      toolbar.hitTest(result, x: x, y: y);
     } else if ((statusbar != null) && (y > (statusbar.parentData as BoxParentData).y)) {
-      if (statusbar.handlePointer(event, x: x, y: y-(statusbar.parentData as BoxParentData).y))
-        return true;
+      statusbar.hitTest(result, x: x, y: y-(statusbar.parentData as BoxParentData).y);
     } else {
-      if (body.handlePointer(event, x: x, y: y-(body.parentData as BoxParentData).y))
-        return true;
+      body.hitTest(result, x: x, y: y-(body.parentData as BoxParentData).y);
     }
-    return super.handlePointer(event, x: x, y: y);
   }
 
   void paint(RenderNodeDisplayList canvas) {

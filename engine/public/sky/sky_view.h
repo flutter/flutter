@@ -34,7 +34,7 @@ class SkyView {
   void Load(const WebURL& url, mojo::URLResponsePtr response = nullptr);
 
   skia::RefPtr<SkPicture> Paint();
-  bool HandleInputEvent(const WebInputEvent& event);
+  void HandleInputEvent(const WebInputEvent& event);
 
  private:
   explicit SkyView(SkyViewClient* client);

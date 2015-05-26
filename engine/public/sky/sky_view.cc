@@ -68,30 +68,23 @@ skia::RefPtr<SkPicture> SkyView::Paint() {
   return skia::RefPtr<SkPicture>();
 }
 
-bool SkyView::HandleInputEvent(const WebInputEvent& inputEvent) {
+void SkyView::HandleInputEvent(const WebInputEvent& inputEvent) {
   TRACE_EVENT0("input", "SkyView::HandleInputEvent");
 
   if (WebInputEvent::isPointerEventType(inputEvent.type)) {
       const WebPointerEvent& event = static_cast<const WebPointerEvent&>(inputEvent);
-      return data_->view_->handleInputEvent(PointerEvent::create(event));
-  }
-
-  if (WebInputEvent::isGestureEventType(inputEvent.type)) {
+      data_->view_->handleInputEvent(PointerEvent::create(event));
+  } else if (WebInputEvent::isGestureEventType(inputEvent.type)) {
       const WebGestureEvent& event = static_cast<const WebGestureEvent&>(inputEvent);
-      return data_->view_->handleInputEvent(GestureEvent::create(event));
-  }
-
-  if (WebInputEvent::isKeyboardEventType(inputEvent.type)) {
+      data_->view_->handleInputEvent(GestureEvent::create(event));
+  } else if (WebInputEvent::isKeyboardEventType(inputEvent.type)) {
       const WebKeyboardEvent& event = static_cast<const WebKeyboardEvent&>(inputEvent);
-      return data_->view_->handleInputEvent(KeyboardEvent::create(event));
-  }
-
-  if (WebInputEvent::isWheelEventType(inputEvent.type)) {
+      data_->view_->handleInputEvent(KeyboardEvent::create(event));
+  } else if (WebInputEvent::isWheelEventType(inputEvent.type)) {
       const WebWheelEvent& event = static_cast<const WebWheelEvent&>(inputEvent);
-      return data_->view_->handleInputEvent(WheelEvent::create(event));
+      data_->view_->handleInputEvent(WheelEvent::create(event));
   }
 
-  return false;
 }
 
 void SkyView::ScheduleFrame() {
