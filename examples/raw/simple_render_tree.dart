@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:math';
 import 'dart:sky';
+import 'package:sky/framework/app.dart';
 import 'package:sky/framework/layout2.dart';
 
 class RenderSolidColor extends RenderDecoratedBox {
@@ -28,39 +28,17 @@ class RenderSolidColor extends RenderDecoratedBox {
     layoutDone();
   }
 
-  bool handlePointer(PointerEvent event, { double x: 0.0, double y: 0.0 }) {
-    if (event.type == 'pointerdown') {
+  void handlePointer(PointerEvent event) {
+    if (event.type == 'pointerdown')
       setBoxDecoration(new BoxDecoration(backgroundColor: 0xFFFF0000));
-      return true;
-    }
-
-    if (event.type == 'pointerup') {
+    else if (event.type == 'pointerup')
       setBoxDecoration(new BoxDecoration(backgroundColor: backgroundColor));
-      return true;
-    }
-
-    return false;
   }
 }
 
-RenderView renderView;
-
-void beginFrame(double timeStamp) {
-  RenderNode.flushLayout();
-
-  renderView.paintFrame();
-}
-
-bool handleEvent(Event event) {
-  if (event is! PointerEvent)
-    return false;
-  return renderView.handlePointer(event, x: event.x, y: event.y);
-}
+AppView app;
 
 void main() {
-  view.setEventCallback(handleEvent);
-  view.setBeginFrameCallback(beginFrame);
-
   var root = new RenderFlex(
       direction: FlexDirection.Vertical,
       decoration: new BoxDecoration(backgroundColor: 0xFF000000));
@@ -98,8 +76,6 @@ void main() {
   root.add(row);
   row.parentData.flex = 3;
 
-  renderView = new RenderView(root: root);
-  renderView.layout(newWidth: view.width, newHeight: view.height);
+  app = new AppView(root);
 
-  view.scheduleFrame();
 }

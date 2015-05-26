@@ -4,6 +4,7 @@
 
 import 'dart:math' as math;
 import 'dart:sky' as sky;
+import 'package:sky/framework/app.dart';
 import 'package:sky/framework/layout2.dart';
 
 const double kTwoPi = 2 * math.PI;
@@ -77,6 +78,17 @@ abstract class RenderSector extends RenderNode {
     layoutDone();
   }
 
+  bool hitTest(HitTestResult result, { double radius, double theta }) {
+    assert(parentData is SectorParentData);
+    if (radius < parentData.radius || radius >= parentData.radius + deltaRadius ||
+        theta < parentData.theta || theta >= parentData.theta + deltaTheta)
+      return false;
+    hitTestChildren(result, radius: radius, theta: theta);
+    result.add(this);
+    return true;
+  }
+  void hitTestChildren(HitTestResult result, { double radius, double theta }) { }
+
   double deltaRadius;
   double deltaTheta;
 }
@@ -119,7 +131,21 @@ class RenderDecoratedSector extends RenderSector {
 
 class SectorChildListParentData extends SectorParentData with ContainerParentDataMixin<RenderSector> { }
 
-class RenderSectorRing extends RenderDecoratedSector with ContainerRenderNodeMixin<RenderSector, SectorChildListParentData> {
+class RenderSectorWithChildren extends RenderDecoratedSector with ContainerRenderNodeMixin<RenderSector, SectorChildListParentData> {
+  RenderSectorWithChildren(BoxDecoration decoration) : super(decoration);
+
+  void hitTestChildren(HitTestResult result, { double radius, double theta }) {
+    RenderSector child = lastChild;
+    while (child != null) {
+      assert(child.parentData is SectorChildListParentData);
+      if (child.hitTest(result, radius: radius, theta: theta))
+        return;
+      child = child.parentData.previousSibling;
+    }
+  }
+}
+
+class RenderSectorRing extends RenderSectorWithChildren {
   // lays out RenderSector children in a ring
 
   RenderSectorRing({
@@ -229,8 +255,6 @@ class RenderSectorRing extends RenderDecoratedSector with ContainerRenderNodeMix
     deltaTheta = innerTheta;
   }
 
-  // TODO(ianh): hit testing et al is pending on adam's patch
-
   // paint origin is 0,0 of our circle
   // each sector then knows how to paint itself at its location
   void paint(RenderNodeDisplayList canvas) {
@@ -246,7 +270,7 @@ class RenderSectorRing extends RenderDecoratedSector with ContainerRenderNodeMix
 
 }
 
-class RenderSectorSlice extends RenderDecoratedSector with ContainerRenderNodeMixin<RenderSector, SectorChildListParentData> {
+class RenderSectorSlice extends RenderSectorWithChildren {
   // lays out RenderSector children in a stack
 
   RenderSectorSlice({
@@ -351,8 +375,6 @@ class RenderSectorSlice extends RenderDecoratedSector with ContainerRenderNodeMi
     deltaRadius = childRadius - this.parentData.radius;
   }
 
-  // TODO(ianh): hit testing et al is pending on adam's patch
-
   // paint origin is 0,0 of our circle
   // each sector then knows how to paint itself at its location
   void paint(RenderNodeDisplayList canvas) {
@@ -436,13 +458,31 @@ class RenderBoxToRenderSectorAdapter extends RenderBox {
   double width;
   double height;
 
-  // TODO(ianh): hit testing et al is pending on adam's patch
-
   // paint origin is 0,0 of our circle
   void paint(RenderNodeDisplayList canvas) {
     super.paint(canvas);
     if (child != null)
       canvas.paintChild(child, width/2.0, height/2.0);
+  }
+
+  bool hitTest(HitTestResult result, { double x, double y }) {
+    if (child == null)
+      return false;
+    // translate to our origin
+    x -= width/2.0;
+    y -= height/2.0;
+    // convert to radius/theta
+    double radius = math.sqrt(x*x+y*y);
+    double theta = (math.atan2(x, -y) - math.PI/2.0) % kTwoPi;
+    if (radius < innerRadius)
+      return false;
+    if (radius >= innerRadius + child.deltaRadius)
+      return false;
+    if (theta > child.deltaTheta)
+      return false;
+    child.hitTest(result, radius: radius, theta: theta);
+    result.add(this);
+    return true;
   }
   
 }
@@ -451,10 +491,12 @@ class RenderSolidColor extends RenderDecoratedSector {
   RenderSolidColor(int backgroundColor, {
     this.desiredDeltaRadius: double.INFINITY,
     this.desiredDeltaTheta: kTwoPi
-  }) : super(new BoxDecoration(backgroundColor: backgroundColor));
+  }) : this.backgroundColor = backgroundColor,
+       super(new BoxDecoration(backgroundColor: backgroundColor));
 
   double desiredDeltaRadius;
   double desiredDeltaTheta;
+  final int backgroundColor;
 
   SectorDimensions getIntrinsicDimensions(SectorConstraints constraints, double radius) {
     return new SectorDimensions.withConstraints(constraints, deltaTheta: 1.0); // 1.0 radians
@@ -465,39 +507,28 @@ class RenderSolidColor extends RenderDecoratedSector {
     deltaTheta = constraints.constrainDeltaTheta(desiredDeltaTheta);
     layoutDone();
   }
+
+  void handlePointer(sky.PointerEvent event) {
+    if (event.type == 'pointerdown')
+      setBoxDecoration(new BoxDecoration(backgroundColor: 0xFFFF0000));
+    else if (event.type == 'pointerup')
+      setBoxDecoration(new BoxDecoration(backgroundColor: backgroundColor));
+  }
 }
 
-RenderView renderView;
-
-void beginFrame(double timeStamp) {
-  RenderNode.flushLayout();
-
-  renderView.paintFrame();
-}
-
-bool handleEvent(sky.Event event) {
-  if (event is! sky.PointerEvent)
-    return false;
-  return renderView.handlePointer(event, x: event.x, y: event.y);
-}
+AppView app;
 
 void main() {
-  print("test...");
-  sky.view.setEventCallback(handleEvent);
-  sky.view.setBeginFrameCallback(beginFrame);
 
-  var rootCircle = new RenderSectorRing(padding: 10.0);
-  rootCircle.add(new RenderSolidColor(0xFF00FFFF, desiredDeltaTheta: kTwoPi * 0.25));
-  rootCircle.add(new RenderSolidColor(0xFF0000FF, desiredDeltaTheta: kTwoPi * 0.3));
-  var stack = new RenderSectorSlice(padding: 10.0);
+  var rootCircle = new RenderSectorRing(padding: 20.0);
+  rootCircle.add(new RenderSolidColor(0xFF00FFFF, desiredDeltaTheta: kTwoPi * 0.15));
+  rootCircle.add(new RenderSolidColor(0xFF0000FF, desiredDeltaTheta: kTwoPi * 0.4));
+  var stack = new RenderSectorSlice(padding: 2.0);
   stack.add(new RenderSolidColor(0xFFFFFF00, desiredDeltaRadius: 20.0));
   stack.add(new RenderSolidColor(0xFFFF9000, desiredDeltaRadius: 20.0));
-  stack.add(new RenderSolidColor(0xFF00FF00, desiredDeltaRadius: 20.0));
+  stack.add(new RenderSolidColor(0xFF00FF00));
   rootCircle.add(stack);
 
   var root = new RenderBoxToRenderSectorAdapter(innerRadius: 50.0, child: rootCircle);
-  renderView = new RenderView(root: root);
-  renderView.layout(newWidth: sky.view.width, newHeight: sky.view.height);
-
-  sky.view.scheduleFrame();
+  app = new AppView(root);
 }
