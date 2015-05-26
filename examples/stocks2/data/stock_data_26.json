@@ -1,0 +1,1002 @@
+[
+  [
+    "TFSC", 
+    "1347 Capital Corp.", 
+    "9.43", 
+    "$56.09M", 
+    "2014", 
+    "Finance", 
+    "Business Services", 
+    "http://www.nasdaq.com/symbol/tfsc"
+  ], 
+  [
+    "TFSCR", 
+    "1347 Capital Corp.", 
+    "0.37", 
+    "n/a", 
+    "2014", 
+    "Finance", 
+    "Business Services", 
+    "http://www.nasdaq.com/symbol/tfscr"
+  ], 
+  [
+    "TFSCU", 
+    "1347 Capital Corp.", 
+    "9.97", 
+    "$41.67M", 
+    "2014", 
+    "n/a", 
+    "n/a", 
+    "http://www.nasdaq.com/symbol/tfscu"
+  ], 
+  [
+    "TFSCW", 
+    "1347 Capital Corp.", 
+    "0.2", 
+    "n/a", 
+    "2014", 
+    "Finance", 
+    "Business Services", 
+    "http://www.nasdaq.com/symbol/tfscw"
+  ], 
+  [
+    "TFSL", 
+    "TFS Financial Corporation", 
+    "14.18", 
+    "$4.23B", 
+    "n/a", 
+    "Finance", 
+    "Savings Institutions", 
+    "http://www.nasdaq.com/symbol/tfsl"
+  ], 
+  [
+    "TGA", 
+    "Transglobe Energy Corp", 
+    "3.03", 
+    "$228.04M", 
+    "n/a", 
+    "Energy", 
+    "Oil & Gas Production", 
+    "http://www.nasdaq.com/symbol/tga"
+  ], 
+  [
+    "TGEN", 
+    "Tecogen Inc.", 
+    "5.2099", 
+    "$82.36M", 
+    "2014", 
+    "Capital Goods", 
+    "Industrial Machinery/Components", 
+    "http://www.nasdaq.com/symbol/tgen"
+  ], 
+  [
+    "TGLS", 
+    "Tecnoglass Inc.", 
+    "9.8377", 
+    "$240.07M", 
+    "2012", 
+    "Consumer Durables", 
+    "Electronic Components", 
+    "http://www.nasdaq.com/symbol/tgls"
+  ], 
+  [
+    "TGTX", 
+    "TG Therapeutics, Inc.", 
+    "13.5", 
+    "$593.52M", 
+    "n/a", 
+    "Health Care", 
+    "Major Pharmaceuticals", 
+    "http://www.nasdaq.com/symbol/tgtx"
+  ], 
+  [
+    "THFF", 
+    "First Financial Corporation Indiana", 
+    "34.29", 
+    "$442.54M", 
+    "n/a", 
+    "Finance", 
+    "Major Banks", 
+    "http://www.nasdaq.com/symbol/thff"
+  ], 
+  [
+    "THLD", 
+    "Threshold Pharmaceuticals, Inc.", 
+    "4.35", 
+    "$272.96M", 
+    "2005", 
+    "Health Care", 
+    "Major Pharmaceuticals", 
+    "http://www.nasdaq.com/symbol/thld"
+  ], 
+  [
+    "THOR", 
+    "Thoratec Corporation", 
+    "40.5", 
+    "$2.17B", 
+    "n/a", 
+    "Health Care", 
+    "Biotechnology: Electromedical & Electrotherapeutic Apparatus", 
+    "http://www.nasdaq.com/symbol/thor"
+  ], 
+  [
+    "THRM", 
+    "Gentherm Inc", 
+    "42.27", 
+    "$1.51B", 
+    "n/a", 
+    "Capital Goods", 
+    "Auto Parts:O.E.M.", 
+    "http://www.nasdaq.com/symbol/thrm"
+  ], 
+  [
+    "THRX", 
+    "Theravance, Inc.", 
+    "18.22", 
+    "$2.1B", 
+    "2004", 
+    "Health Care", 
+    "Major Pharmaceuticals", 
+    "http://www.nasdaq.com/symbol/thrx"
+  ], 
+  [
+    "THST", 
+    "Truett-Hurst, Inc.", 
+    "2.82", 
+    "$10.85M", 
+    "2013", 
+    "Consumer Non-Durables", 
+    "Beverages (Production/Distribution)", 
+    "http://www.nasdaq.com/symbol/thst"
+  ], 
+  [
+    "THTI", 
+    "THT Heat Transfer Technology, Inc.", 
+    "1.04", 
+    "$21.27M", 
+    "n/a", 
+    "Capital Goods", 
+    "Metal Fabrications", 
+    "http://www.nasdaq.com/symbol/thti"
+  ], 
+  [
+    "TICC", 
+    "TICC Capital Corp.", 
+    "7.61", 
+    "$459.32M", 
+    "2003", 
+    "n/a", 
+    "n/a", 
+    "http://www.nasdaq.com/symbol/ticc"
+  ], 
+  [
+    "TIGR", 
+    "TigerLogic Corporation", 
+    "0.35", 
+    "$10.83M", 
+    "n/a", 
+    "Technology", 
+    "Computer Software: Prepackaged Software", 
+    "http://www.nasdaq.com/symbol/tigr"
+  ], 
+  [
+    "TILE", 
+    "Interface, Inc.", 
+    "18.91", 
+    "$1.25B", 
+    "n/a", 
+    "Consumer Durables", 
+    "Home Furnishings", 
+    "http://www.nasdaq.com/symbol/tile"
+  ], 
+  [
+    "TINY", 
+    "Harris & Harris Group, Inc.", 
+    "3.19", 
+    "$99.67M", 
+    "n/a", 
+    "Finance", 
+    "Finance/Investors Services", 
+    "http://www.nasdaq.com/symbol/tiny"
+  ], 
+  [
+    "TIPT", 
+    "Tiptree Financial Inc.", 
+    "7.1", 
+    "$295.36M", 
+    "n/a", 
+    "Finance", 
+    "Specialty Insurers", 
+    "http://www.nasdaq.com/symbol/tipt"
+  ], 
+  [
+    "TISA", 
+    "Top Image Systems, Ltd.", 
+    "3.12", 
+    "$55.58M", 
+    "1996", 
+    "Technology", 
+    "Computer peripheral equipment", 
+    "http://www.nasdaq.com/symbol/tisa"
+  ], 
+  [
+    "TITN", 
+    "Titan Machinery Inc.", 
+    "14.89", 
+    "$318.81M", 
+    "2007", 
+    "Consumer Services", 
+    "Other Specialty Stores", 
+    "http://www.nasdaq.com/symbol/titn"
+  ], 
+  [
+    "TIVO", 
+    "TiVo Inc.", 
+    "10.83", 
+    "$1.11B", 
+    "1999", 
+    "Consumer Services", 
+    "Television Services", 
+    "http://www.nasdaq.com/symbol/tivo"
+  ], 
+  [
+    "TKAI", 
+    "Tokai Pharmaceuticals, Inc.", 
+    "14.49", 
+    "$324.31M", 
+    "2014", 
+    "Health Care", 
+    "Major Pharmaceuticals", 
+    "http://www.nasdaq.com/symbol/tkai"
+  ], 
+  [
+    "TKMR", 
+    "Tekmira Pharmaceuticals Corp", 
+    "19.89", 
+    "$446.3M", 
+    "n/a", 
+    "Health Care", 
+    "Major Pharmaceuticals", 
+    "http://www.nasdaq.com/symbol/tkmr"
+  ], 
+  [
+    "TLF", 
+    "Tandy Leather Factory, Inc.", 
+    "8.99", 
+    "$92.11M", 
+    "n/a", 
+    "Consumer Non-Durables", 
+    "Apparel", 
+    "http://www.nasdaq.com/symbol/tlf"
+  ], 
+  [
+    "TLMR", 
+    "Talmer Bancorp, Inc.", 
+    "13.7", 
+    "$965.9M", 
+    "2014", 
+    "Finance", 
+    "Major Banks", 
+    "http://www.nasdaq.com/symbol/tlmr"
+  ], 
+  [
+    "TLOG", 
+    "TetraLogic Pharmaceuticals Corporation", 
+    "4.94", 
+    "$110.24M", 
+    "2013", 
+    "Health Care", 
+    "Major Pharmaceuticals", 
+    "http://www.nasdaq.com/symbol/tlog"
+  ], 
+  [
+    "TNAV", 
+    "TeleNav, Inc.", 
+    "8.23", 
+    "$328.4M", 
+    "2010", 
+    "Capital Goods", 
+    "Industrial Machinery/Components", 
+    "http://www.nasdaq.com/symbol/tnav"
+  ], 
+  [
+    "TNDM", 
+    "Tandem Diabetes Care, Inc.", 
+    "13.54", 
+    "$320M", 
+    "2013", 
+    "Health Care", 
+    "Medical/Dental Instruments", 
+    "http://www.nasdaq.com/symbol/tndm"
+  ], 
+  [
+    "TNGO", 
+    "Tangoe, Inc.", 
+    "12.19", 
+    "$473.51M", 
+    "2011", 
+    "Technology", 
+    "Computer Software: Prepackaged Software", 
+    "http://www.nasdaq.com/symbol/tngo"
+  ], 
+  [
+    "TNXP", 
+    "Tonix Pharmaceuticals Holding Corp.", 
+    "6.25", 
+    "$98.16M", 
+    "n/a", 
+    "Health Care", 
+    "Major Pharmaceuticals", 
+    "http://www.nasdaq.com/symbol/tnxp"
+  ], 
+  [
+    "TOPS", 
+    "TOP Ships Inc.", 
+    "1.18", 
+    "$22.38M", 
+    "n/a", 
+    "Transportation", 
+    "Marine Transportation", 
+    "http://www.nasdaq.com/symbol/tops"
+  ], 
+  [
+    "TORM          ", 
+    "TOR Minerals International Inc", 
+    "7.21", 
+    "$21.73M", 
+    "1988", 
+    "Basic Industries", 
+    "Major Chemicals", 
+    "http://www.nasdaq.com/symbol/torm          "
+  ], 
+  [
+    "TOUR", 
+    "Tuniu Corporation", 
+    "15.03", 
+    "$729.75M", 
+    "2014", 
+    "Consumer Services", 
+    "Transportation Services", 
+    "http://www.nasdaq.com/symbol/tour"
+  ], 
+  [
+    "TOWN", 
+    "Towne Bank", 
+    "15.63", 
+    "$552M", 
+    "n/a", 
+    "n/a", 
+    "n/a", 
+    "http://www.nasdaq.com/symbol/town"
+  ], 
+  [
+    "TQQQ", 
+    "ProShares UltraPro QQQ Fund", 
+    "111.33", 
+    "$1.02B", 
+    "n/a", 
+    "n/a", 
+    "n/a", 
+    "http://www.nasdaq.com/symbol/tqqq"
+  ], 
+  [
+    "TRAK", 
+    "Dealertrack Technologies, Inc.", 
+    "44.95", 
+    "$2.43B", 
+    "2005", 
+    "Technology", 
+    "EDP Services", 
+    "http://www.nasdaq.com/symbol/trak"
+  ], 
+  [
+    "TRCB", 
+    "Two River Bancorp", 
+    "8.57", 
+    "$68M", 
+    "n/a", 
+    "Finance", 
+    "Major Banks", 
+    "http://www.nasdaq.com/symbol/trcb"
+  ], 
+  [
+    "TRCH", 
+    "Torchlight Energy Resources, Inc.", 
+    "0.513", 
+    "$11.9M", 
+    "n/a", 
+    "Energy", 
+    "Oil & Gas Production", 
+    "http://www.nasdaq.com/symbol/trch"
+  ], 
+  [
+    "TREE", 
+    "LendingTree, Inc.", 
+    "43.84", 
+    "$496.55M", 
+    "n/a", 
+    "Finance", 
+    "Finance: Consumer Services", 
+    "http://www.nasdaq.com/symbol/tree"
+  ], 
+  [
+    "TRGT", 
+    "Targacept, Inc.", 
+    "2.6", 
+    "$89.21M", 
+    "2006", 
+    "Health Care", 
+    "Major Pharmaceuticals", 
+    "http://www.nasdaq.com/symbol/trgt"
+  ], 
+  [
+    "TRIB", 
+    "Trinity Biotech plc", 
+    "17.82", 
+    "$411.18M", 
+    "1992", 
+    "Health Care", 
+    "Biotechnology: In Vitro & In Vivo Diagnostic Substances", 
+    "http://www.nasdaq.com/symbol/trib"
+  ], 
+  [
+    "TRIL", 
+    "Trillium Therapeutics Inc.", 
+    "13.57", 
+    "$58.09M", 
+    "n/a", 
+    "Health Care", 
+    "Major Pharmaceuticals", 
+    "http://www.nasdaq.com/symbol/tril"
+  ], 
+  [
+    "TRIP", 
+    "TripAdvisor, Inc.", 
+    "88.78", 
+    "$12.69B", 
+    "n/a", 
+    "Technology", 
+    "Computer Software: Programming, Data Processing", 
+    "http://www.nasdaq.com/symbol/trip"
+  ], 
+  [
+    "TRIV", 
+    "TriVascular Technologies, Inc.", 
+    "10.51", 
+    "$214.08M", 
+    "2014", 
+    "Health Care", 
+    "Medical/Dental Instruments", 
+    "http://www.nasdaq.com/symbol/triv"
+  ], 
+  [
+    "TRMB", 
+    "Trimble Navigation Limited", 
+    "26.53", 
+    "$6.87B", 
+    "1990", 
+    "Capital Goods", 
+    "Industrial Machinery/Components", 
+    "http://www.nasdaq.com/symbol/trmb"
+  ], 
+  [
+    "TRMK", 
+    "Trustmark Corporation", 
+    "23.33", 
+    "$1.57B", 
+    "n/a", 
+    "Finance", 
+    "Major Banks", 
+    "http://www.nasdaq.com/symbol/trmk"
+  ], 
+  [
+    "TRNS", 
+    "Transcat, Inc.", 
+    "9.25", 
+    "$63.23M", 
+    "n/a", 
+    "Capital Goods", 
+    "Electrical Products", 
+    "http://www.nasdaq.com/symbol/trns"
+  ], 
+  [
+    "TRNX", 
+    "Tornier N.V.", 
+    "25.65", 
+    "$1.25B", 
+    "2011", 
+    "Health Care", 
+    "Industrial Specialties", 
+    "http://www.nasdaq.com/symbol/trnx"
+  ], 
+  [
+    "TROV", 
+    "TrovaGene, Inc.", 
+    "5.01", 
+    "$120.84M", 
+    "n/a", 
+    "Health Care", 
+    "Biotechnology: Biological Products (No Diagnostic Substances)", 
+    "http://www.nasdaq.com/symbol/trov"
+  ], 
+  [
+    "TROVU", 
+    "TrovaGene, Inc.", 
+    "15.82", 
+    "n/a", 
+    "n/a", 
+    "Health Care", 
+    "Biotechnology: Biological Products (No Diagnostic Substances)", 
+    "http://www.nasdaq.com/symbol/trovu"
+  ], 
+  [
+    "TROVW", 
+    "TrovaGene, Inc.", 
+    "3.94", 
+    "n/a", 
+    "n/a", 
+    "Health Care", 
+    "Biotechnology: Biological Products (No Diagnostic Substances)", 
+    "http://www.nasdaq.com/symbol/trovw"
+  ], 
+  [
+    "TROW", 
+    "T. Rowe Price Group, Inc.", 
+    "83.53", 
+    "$21.78B", 
+    "1986", 
+    "Finance", 
+    "Investment Bankers/Brokers/Service", 
+    "http://www.nasdaq.com/symbol/trow"
+  ], 
+  [
+    "TRS", 
+    "TriMas Corporation", 
+    "30", 
+    "$1.36B", 
+    "2007", 
+    "Capital Goods", 
+    "Industrial Specialties", 
+    "http://www.nasdaq.com/symbol/trs"
+  ], 
+  [
+    "TRST", 
+    "TrustCo Bank Corp NY", 
+    "6.7", 
+    "$635.78M", 
+    "n/a", 
+    "Finance", 
+    "Major Banks", 
+    "http://www.nasdaq.com/symbol/trst"
+  ], 
+  [
+    "TRTL", 
+    "Terrapin 3 Acquisition Corporation", 
+    "9.95", 
+    "$264.61M", 
+    "2014", 
+    "Finance", 
+    "Business Services", 
+    "http://www.nasdaq.com/symbol/trtl"
+  ], 
+  [
+    "TRTLU", 
+    "Terrapin 3 Acquisition Corporation", 
+    "10.07", 
+    "$186.3M", 
+    "2014", 
+    "Finance", 
+    "Business Services", 
+    "http://www.nasdaq.com/symbol/trtlu"
+  ], 
+  [
+    "TRTLW", 
+    "Terrapin 3 Acquisition Corporation", 
+    "0.27", 
+    "n/a", 
+    "2014", 
+    "Finance", 
+    "Business Services", 
+    "http://www.nasdaq.com/symbol/trtlw"
+  ], 
+  [
+    "TRUE", 
+    "TrueCar, Inc.", 
+    "17.95", 
+    "$1.42B", 
+    "2014", 
+    "Technology", 
+    "Computer Software: Programming, Data Processing", 
+    "http://www.nasdaq.com/symbol/true"
+  ], 
+  [
+    "TRVN", 
+    "Trevena, Inc.", 
+    "5.44", 
+    "$213.42M", 
+    "2014", 
+    "Health Care", 
+    "Major Pharmaceuticals", 
+    "http://www.nasdaq.com/symbol/trvn"
+  ], 
+  [
+    "TSBK", 
+    "Timberland Bancorp, Inc.", 
+    "10.7", 
+    "$75.46M", 
+    "n/a", 
+    "Finance", 
+    "Banks", 
+    "http://www.nasdaq.com/symbol/tsbk"
+  ], 
+  [
+    "TSC", 
+    "TriState Capital Holdings, Inc.", 
+    "9.92", 
+    "$284.83M", 
+    "2013", 
+    "Finance", 
+    "Major Banks", 
+    "http://www.nasdaq.com/symbol/tsc"
+  ], 
+  [
+    "TSCO", 
+    "Tractor Supply Company", 
+    "88.12", 
+    "$12B", 
+    "1994", 
+    "Consumer Services", 
+    "RETAIL: Building Materials", 
+    "http://www.nasdaq.com/symbol/tsco"
+  ], 
+  [
+    "TSEM", 
+    "Tower Semiconductor Ltd.", 
+    "13.69", 
+    "$872.1M", 
+    "1994", 
+    "Technology", 
+    "Semiconductors", 
+    "http://www.nasdaq.com/symbol/tsem"
+  ], 
+  [
+    "TSLA", 
+    "Tesla Motors, Inc.", 
+    "217.11", 
+    "$27.22B", 
+    "2010", 
+    "Capital Goods", 
+    "Auto Manufacturing", 
+    "http://www.nasdaq.com/symbol/tsla"
+  ], 
+  [
+    "TSRA", 
+    "Tessera Technologies, Inc.", 
+    "39.92", 
+    "$2.11B", 
+    "2003", 
+    "Technology", 
+    "Semiconductors", 
+    "http://www.nasdaq.com/symbol/tsra"
+  ], 
+  [
+    "TSRE", 
+    "Trade Street Residential, Inc.", 
+    "7.95", 
+    "$291.75M", 
+    "2013", 
+    "Consumer Services", 
+    "Real Estate Investment Trusts", 
+    "http://www.nasdaq.com/symbol/tsre"
+  ], 
+  [
+    "TSRI", 
+    "TSR, Inc.", 
+    "4.1147", 
+    "$8.07M", 
+    "n/a", 
+    "Technology", 
+    "EDP Services", 
+    "http://www.nasdaq.com/symbol/tsri"
+  ], 
+  [
+    "TSRO", 
+    "TESARO, Inc.", 
+    "44.2", 
+    "$1.59B", 
+    "2012", 
+    "Health Care", 
+    "Major Pharmaceuticals", 
+    "http://www.nasdaq.com/symbol/tsro"
+  ], 
+  [
+    "TST", 
+    "TheStreet, Inc.", 
+    "2.02", 
+    "$69.6M", 
+    "n/a", 
+    "Consumer Services", 
+    "Newspapers/Magazines", 
+    "http://www.nasdaq.com/symbol/tst"
+  ], 
+  [
+    "TSYS", 
+    "TeleCommunication Systems, Inc.", 
+    "3.27", 
+    "$195.07M", 
+    "2000", 
+    "Technology", 
+    "Computer Software: Prepackaged Software", 
+    "http://www.nasdaq.com/symbol/tsys"
+  ], 
+  [
+    "TTEC", 
+    "TeleTech Holdings, Inc.", 
+    "23.72", 
+    "$1.16B", 
+    "1996", 
+    "Technology", 
+    "Professional Services", 
+    "http://www.nasdaq.com/symbol/ttec"
+  ], 
+  [
+    "TTEK", 
+    "Tetra Tech, Inc.", 
+    "24.99", 
+    "$1.54B", 
+    "1991", 
+    "Consumer Services", 
+    "Military/Government/Technical", 
+    "http://www.nasdaq.com/symbol/ttek"
+  ], 
+  [
+    "TTGT", 
+    "TechTarget, Inc.", 
+    "11.29", 
+    "$372.26M", 
+    "2007", 
+    "Miscellaneous", 
+    "Business Services", 
+    "http://www.nasdaq.com/symbol/ttgt"
+  ], 
+  [
+    "TTHI", 
+    "Transition Therapeutics, Inc.", 
+    "7.05", 
+    "$273.92M", 
+    "n/a", 
+    "Consumer Durables", 
+    "Specialty Chemicals", 
+    "http://www.nasdaq.com/symbol/tthi"
+  ], 
+  [
+    "TTMI", 
+    "TTM Technologies, Inc.", 
+    "8.75", 
+    "$729.27M", 
+    "2000", 
+    "Technology", 
+    "Electrical Products", 
+    "http://www.nasdaq.com/symbol/ttmi"
+  ], 
+  [
+    "TTOO", 
+    "T2 Biosystems, Inc.", 
+    "17.52", 
+    "$351.13M", 
+    "2014", 
+    "Health Care", 
+    "Medical/Dental Instruments", 
+    "http://www.nasdaq.com/symbol/ttoo"
+  ], 
+  [
+    "TTPH", 
+    "Tetraphase Pharmaceuticals, Inc.", 
+    "41.66", 
+    "$1.28B", 
+    "2013", 
+    "Health Care", 
+    "Major Pharmaceuticals", 
+    "http://www.nasdaq.com/symbol/ttph"
+  ], 
+  [
+    "TTS", 
+    "Tile Shop Hldgs, Inc.", 
+    "11.1", 
+    "$569.59M", 
+    "n/a", 
+    "Consumer Services", 
+    "Home Furnishings", 
+    "http://www.nasdaq.com/symbol/tts"
+  ], 
+  [
+    "TTWO", 
+    "Take-Two Interactive Software, Inc.", 
+    "27.005", 
+    "$2.28B", 
+    "1997", 
+    "Technology", 
+    "Computer Software: Prepackaged Software", 
+    "http://www.nasdaq.com/symbol/ttwo"
+  ], 
+  [
+    "TUBE", 
+    "TubeMogul, Inc.", 
+    "15.99", 
+    "$476.38M", 
+    "2014", 
+    "Technology", 
+    "Computer Software: Prepackaged Software", 
+    "http://www.nasdaq.com/symbol/tube"
+  ], 
+  [
+    "TUES", 
+    "Tuesday Morning Corp.", 
+    "19.46", 
+    "$853.21M", 
+    "1999", 
+    "Consumer Services", 
+    "Department/Specialty Retail Stores", 
+    "http://www.nasdaq.com/symbol/tues"
+  ], 
+  [
+    "TUSA", 
+    "First Trust Total US Market AlphaDEX ETF", 
+    "26.7199", 
+    "$6.68M", 
+    "n/a", 
+    "n/a", 
+    "n/a", 
+    "http://www.nasdaq.com/symbol/tusa"
+  ], 
+  [
+    "TVIX", 
+    "VelocityShares Daily 2x VIX Short Term ETN", 
+    "2.28", 
+    "$31.74M", 
+    "n/a", 
+    "Finance", 
+    "Investment Bankers/Brokers/Service", 
+    "http://www.nasdaq.com/symbol/tvix"
+  ], 
+  [
+    "TVIZ", 
+    "VelocityShares Daily 2x VIX Medium Term ETN", 
+    "21", 
+    "$892332", 
+    "n/a", 
+    "Finance", 
+    "Investment Bankers/Brokers/Service", 
+    "http://www.nasdaq.com/symbol/tviz"
+  ], 
+  [
+    "TWER", 
+    "Towerstream Corporation", 
+    "2.3", 
+    "$153.3M", 
+    "n/a", 
+    "Consumer Services", 
+    "Telecommunications Equipment", 
+    "http://www.nasdaq.com/symbol/twer"
+  ], 
+  [
+    "TWIN", 
+    "Twin Disc, Incorporated", 
+    "17.43", 
+    "$196.7M", 
+    "n/a", 
+    "Technology", 
+    "Industrial Machinery/Components", 
+    "http://www.nasdaq.com/symbol/twin"
+  ], 
+  [
+    "TWMC", 
+    "Trans World Entertainment Corp.", 
+    "3.67", 
+    "$115.45M", 
+    "n/a", 
+    "Consumer Services", 
+    "Consumer Electronics/Video Chains", 
+    "http://www.nasdaq.com/symbol/twmc"
+  ], 
+  [
+    "TWOU", 
+    "2U, Inc.", 
+    "17.62", 
+    "$714.35M", 
+    "2014", 
+    "Technology", 
+    "Computer Software: Prepackaged Software", 
+    "http://www.nasdaq.com/symbol/twou"
+  ], 
+  [
+    "TXN", 
+    "Texas Instruments Incorporated", 
+    "58.52", 
+    "$61.81B", 
+    "n/a", 
+    "Technology", 
+    "Semiconductors", 
+    "http://www.nasdaq.com/symbol/txn"
+  ], 
+  [
+    "TXRH", 
+    "Texas Roadhouse, Inc.", 
+    "36.26", 
+    "$2.52B", 
+    "2004", 
+    "Consumer Services", 
+    "Restaurants", 
+    "http://www.nasdaq.com/symbol/txrh"
+  ], 
+  [
+    "TYPE", 
+    "Monotype Imaging Holdings Inc.", 
+    "32.82", 
+    "$1.29B", 
+    "2007", 
+    "Technology", 
+    "EDP Services", 
+    "http://www.nasdaq.com/symbol/type"
+  ], 
+  [
+    "TZOO", 
+    "Travelzoo Inc.", 
+    "9.68", 
+    "$142.59M", 
+    "n/a", 
+    "Technology", 
+    "EDP Services", 
+    "http://www.nasdaq.com/symbol/tzoo"
+  ], 
+  [
+    "UACL", 
+    "Universal Truckload Services, Inc.", 
+    "24.87", 
+    "$745.32M", 
+    "2005", 
+    "Transportation", 
+    "Trucking Freight/Courier Services", 
+    "http://www.nasdaq.com/symbol/uacl"
+  ], 
+  [
+    "UAE", 
+    "iShares MSCI UAE Capped ETF", 
+    "19.99", 
+    "$43.98M", 
+    "n/a", 
+    "n/a", 
+    "n/a", 
+    "http://www.nasdaq.com/symbol/uae"
+  ], 
+  [
+    "UBCP", 
+    "United Bancorp, Inc.", 
+    "7.95", 
+    "$42.73M", 
+    "n/a", 
+    "Finance", 
+    "Major Banks", 
+    "http://www.nasdaq.com/symbol/ubcp"
+  ], 
+  [
+    "UBFO", 
+    "United Security Bancshares", 
+    "5.05", 
+    "$78.68M", 
+    "n/a", 
+    "Finance", 
+    "Major Banks", 
+    "http://www.nasdaq.com/symbol/ubfo"
+  ], 
+  [
+    "UBIC", 
+    "UBIC, Inc.", 
+    "18.9699", 
+    "$335.87M", 
+    "2013", 
+    "Technology", 
+    "EDP Services", 
+    "http://www.nasdaq.com/symbol/ubic"
+  ]
+]
