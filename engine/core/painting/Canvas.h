@@ -5,6 +5,7 @@
 #ifndef SKY_ENGINE_CORE_PAINTING_CANVAS_H_
 #define SKY_ENGINE_CORE_PAINTING_CANVAS_H_
 
+#include "sky/engine/core/painting/CanvasPath.h"
 #include "sky/engine/core/painting/Paint.h"
 #include "sky/engine/core/painting/Picture.h"
 #include "sky/engine/core/painting/Rect.h"
@@ -44,6 +45,7 @@ public:
     void drawRect(const Rect& rect, const Paint* paint);
     void drawOval(const Rect& rect, const Paint* paint);
     void drawCircle(float x, float y, float radius, const Paint* paint);
+    void drawPath(const CanvasPath* path, const Paint* paint);
 
     SkCanvas* skCanvas() { return m_canvas; }
 

@@ -79,7 +79,7 @@ abstract class RenderNode extends AbstractNode {
   void saveRelayoutSubtreeRoot(RenderNode relayoutSubtreeRoot) {
     _relayoutSubtreeRoot = relayoutSubtreeRoot;
     assert(_relayoutSubtreeRoot == null || _relayoutSubtreeRoot._relayoutSubtreeRoot == null);
-    assert(_relayoutSubtreeRoot == null || _relayoutSubtreeRoot == parent || _relayoutSubtreeRoot == parent._relayoutSubtreeRoot);
+    assert(_relayoutSubtreeRoot == null || _relayoutSubtreeRoot == parent || (parent is RenderNode && _relayoutSubtreeRoot == parent._relayoutSubtreeRoot));
   }
   bool debugAncestorsAlreadyMarkedNeedsLayout() {
     if (_relayoutSubtreeRoot == null)
@@ -103,6 +103,7 @@ abstract class RenderNode extends AbstractNode {
       return;
     }
     _needsLayout = true;
+    assert(parent is RenderNode);
     if (_relayoutSubtreeRoot != null)
       parent.markNeedsLayout();
     else
@@ -402,7 +403,7 @@ class BoxConstraints {
     this.minHeight: 0.0,
     this.maxHeight: double.INFINITY});
 
-  const BoxConstraints.tight({ width: width, height: height })
+  const BoxConstraints.tight({ double width: 0.0, double height: 0.0 })
     : minWidth = width,
       maxWidth = width,
       minHeight = height,
@@ -420,14 +421,17 @@ class BoxConstraints {
   double constrainHeight(double height) {
     return clamp(min: minHeight, max: maxHeight, value: height);
   }
+
+  bool get isInfinite => maxWidth >= double.INFINITY || maxHeight >= double.INFINITY;
 }
 
 class BoxDimensions {
-  const BoxDimensions({this.width, this.height});
+  const BoxDimensions({ this.width: 0.0, this.height: 0.0 });
 
   BoxDimensions.withConstraints(
-      BoxConstraints constraints, {double width: 0.0, double height: 0.0})
-    : width = constraints.constrainWidth(width),
+    BoxConstraints constraints,
+    { double width: 0.0, double height: 0.0 }
+  ) : width = constraints.constrainWidth(width),
       height = constraints.constrainHeight(height);
 
   final double width;
@@ -661,7 +665,7 @@ class RenderBlock extends RenderDecoratedBox with ContainerRenderNodeMixin<Rende
     double outerWidth = constraints.constrainWidth(constraints.maxWidth);
     assert(outerWidth < double.INFINITY);
     double innerWidth = outerWidth - (_padding.left + _padding.right);
-    RenderBox child = _firstChild;
+    RenderBox child = firstChild;
     BoxConstraints innerConstraints = new BoxConstraints(minWidth: innerWidth,
                                                          maxWidth: innerWidth);
     while (child != null) {
@@ -696,7 +700,7 @@ class RenderBlock extends RenderDecoratedBox with ContainerRenderNodeMixin<Rende
     assert(_maxHeight != null);
     double y = _padding.top;
     double innerWidth = width - (_padding.left + _padding.right);
-    RenderBox child = _firstChild;
+    RenderBox child = firstChild;
     while (child != null) {
       child.layout(new BoxConstraints(minWidth: innerWidth, maxWidth: innerWidth),
                    relayoutSubtreeRoot: relayoutSubtreeRoot);
@@ -776,21 +780,19 @@ class RenderFlex extends RenderDecoratedBox with ContainerRenderNodeMixin<Render
 
   int _getFlex(RenderBox child) {
     assert(child.parentData is FlexBoxParentData);
-    return (child.parentData.flex != null ? child.parentData.flex : 0);
+    return child.parentData.flex != null ? child.parentData.flex : 0;
   }
 
   void internalLayout(RenderNode relayoutSubtreeRoot) {
     // Based on http://www.w3.org/TR/css-flexbox-1/ Section 9.7 Resolving Flexible Lengths
     // Steps 1-3. Determine used flex factor, size inflexible items, calculate free space
-    int numFlexibleChildren = 0;
     int totalFlex = 0;
     assert(_constraints != null);
     double freeSpace = (_direction == FlexDirection.Horizontal) ? _constraints.maxWidth : _constraints.maxHeight;
-    RenderBox child = _firstChild;
+    RenderBox child = firstChild;
     while (child != null) {
       int flex = _getFlex(child);
       if (flex > 0) {
-        numFlexibleChildren++;
         totalFlex += child.parentData.flex;
       } else {
         BoxConstraints constraints = new BoxConstraints(maxHeight: _constraints.maxHeight,
@@ -805,7 +807,7 @@ class RenderFlex extends RenderDecoratedBox with ContainerRenderNodeMixin<Render
     // Steps 4-5. Distribute remaining space to flexible children.
     double spacePerFlex = totalFlex > 0 ? (freeSpace / totalFlex) : 0.0;
     double usedSpace = 0.0;
-    child = _firstChild;
+    child = firstChild;
     while (child != null) {
       int flex = _getFlex(child);
       if (flex > 0) {

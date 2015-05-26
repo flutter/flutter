@@ -145,6 +145,16 @@ void Canvas::drawCircle(float x, float y, float radius, const Paint* paint)
     m_canvas->drawCircle(x, y, radius, paint->paint());
 }
 
+void Canvas::drawPath(const CanvasPath* path, const Paint* paint)
+{
+    if (!m_canvas)
+        return;
+    ASSERT(path);
+    ASSERT(paint);
+    ASSERT(m_displayList->isRecording());
+    m_canvas->drawPath(path->path(), paint->paint());
+}
+
 PassRefPtr<DisplayList> Canvas::finishRecording()
 {
     if (!isRecording())
