@@ -262,6 +262,19 @@ class HitTestResult {
   }
 }
 
+abstract class RenderNodeWithChildMixin<ChildType extends RenderNode> {
+  ChildType _child;
+  ChildType get child => _child;
+  void set child (ChildType value) {
+    if (_child != null)
+      dropChild(_child);
+    _child = value;
+    if (_child != null)
+      adoptChild(_child);
+    markNeedsLayout();
+  }
+}
+
 // GENERIC MIXIN FOR RENDER NODES THAT TAKE A LIST OF CHILDREN
 
 abstract class ContainerParentDataMixin<ChildType extends RenderNode> {
@@ -536,16 +549,38 @@ class RenderDecoratedBox extends RenderBox {
 
 }
 
+class RenderDecoratedCircle extends RenderDecoratedBox with RenderNodeWithChildMixin<RenderBox> {
+  RenderDecoratedCircle({
+    BoxDecoration decoration,
+    RenderBox child
+  }) : super(decoration) {
+    this.child = child;
+  }
+
+  void paint(RenderNodeDisplayList canvas) {
+    assert(width != null);
+    assert(height != null);
+
+    if (_decoration == null)
+      return;
+
+    if (_decoration.backgroundColor != null) {
+      sky.Paint paint = new sky.Paint()..color = _decoration.backgroundColor;
+      canvas.drawCircle(new sky.Rect()..setLTRB(0.0, 0.0, width, height), paint);
+    }
+  }
+}
+
 
 // RENDER VIEW LAYOUT MANAGER
 
-class RenderView extends RenderNode {
+class RenderView extends RenderNode with RenderNodeWithChildMixin<RenderBox> {
 
   RenderView({
-    RenderBox root,
+    RenderBox child,
     this.timeForRotation: const Duration(microseconds: 83333)
   }) {
-    this.root = root;
+    this.child = child;
   }
 
   double _width;
@@ -557,25 +592,14 @@ class RenderView extends RenderNode {
   int get orientation => _orientation;
   Duration timeForRotation;
 
-  RenderBox _root;
-  RenderBox get root => _root;
-  void set root (RenderBox value) {
-    if (_root != null)
-      dropChild(_root);
-    _root = value;
-    if (_root != null)
-      adoptChild(_root);
-    markNeedsLayout();
-  }
-
   void layout({
     double newWidth,
     double newHeight,
     int newOrientation
   }) {
     if (newOrientation != orientation) {
-      if (orientation != null && root != null)
-        root.rotate(oldAngle: orientation, newAngle: newOrientation, time: timeForRotation);
+      if (orientation != null && child != null)
+        child.rotate(oldAngle: orientation, newAngle: newOrientation, time: timeForRotation);
       _orientation = newOrientation;
     }
     if ((newWidth != width) || (newHeight != height)) {
@@ -588,15 +612,15 @@ class RenderView extends RenderNode {
   }
 
   void relayout() {
-    if (root != null) {
-      root.layout(new BoxConstraints(
+    if (child != null) {
+      child.layout(new BoxConstraints(
         minWidth: width,
         maxWidth: width,
         minHeight: height,
         maxHeight: height
       ));
-      assert(root.width == width);
-      assert(root.height == height);
+      assert(child.width == width);
+      assert(child.height == height);
     }
     layoutDone();
   }
@@ -608,17 +632,17 @@ class RenderView extends RenderNode {
   bool hitTest(HitTestResult result, { double x, double y }) {
     if (x < 0.0 || x >= width || y < 0.0 || y >= height)
       return false;
-    if (root != null) {
-      if (x >= 0.0 && x < root.width && y >= 0.0 && y < root.height)
-        root.hitTest(result, x: x, y: y);
+    if (child != null) {
+      if (x >= 0.0 && x < child.width && y >= 0.0 && y < child.height)
+        child.hitTest(result, x: x, y: y);
     }
     result.add(this);
     return true;
   }
 
   void paint(RenderNodeDisplayList canvas) {
-    if (root != null)
-      canvas.paintChild(root, 0.0, 0.0);
+    if (child != null)
+      canvas.paintChild(child, 0.0, 0.0);
   }
 
   void paintFrame() {

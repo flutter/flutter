@@ -624,6 +624,28 @@ class FillStackContainer extends OneChildListRenderNodeWrapper {
   }
 }
 
+abstract class OneChildRenderNodeWrapper extends RenderNodeWrapper {
+
+  final UINode child;
+  RenderNodeWithChildMixin root;
+
+  OneChildRenderNodeWrapper({
+    Object key,
+    this.child
+  }) : super(key: key);
+
+  void insert(RenderNodeWrapper child, dynamic slot) {
+    assert(slot == null);
+    root.child = child.root;
+  }
+
+  void _remove() {
+    assert(child != null);
+    removeChild(child);
+    super._remove();
+  }
+}
+
 class TextFragment extends RenderNodeWrapper {
 
   RenderCSSInline root;

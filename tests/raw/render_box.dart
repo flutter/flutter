@@ -32,7 +32,7 @@ void main() {
 
   test("should size to render view", () {
     RenderSizedBox root = new RenderSizedBox();
-    RenderView renderView = new RenderView(root: root);
+    RenderView renderView = new RenderView(child: root);
     renderView.layout(newWidth: sky.view.width, newHeight: sky.view.height);
     expect(root.width, equals(sky.view.width));
     expect(root.height, equals(sky.view.height));

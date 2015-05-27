@@ -11,7 +11,7 @@ class AppView {
     sky.view.setEventCallback(_handleEvent);
     sky.view.setBeginFrameCallback(_beginFrame);
 
-    _renderView = new RenderView(root: root);
+    _renderView = new RenderView(child: root);
     _renderView.attach();
     _renderView.layout(newWidth: sky.view.width, newHeight: sky.view.height);
   
@@ -20,9 +20,9 @@ class AppView {
 
   RenderView _renderView;
 
-  RenderBox get root => _renderView.root;
+  RenderBox get root => _renderView.child;
   void set root(RenderBox value) {
-    _renderView.root = value;
+    _renderView.child = value;
   }
 
   void _beginFrame(double timeStamp) {
