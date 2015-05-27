@@ -26,7 +26,7 @@ abstract class UINode {
   String _key;
   UINode _parent;
   UINode get parent => _parent;
-  RenderCSS _root;
+  RenderCSS root;
   bool _defunct = false;
 
   UINode({ Object key }) {
@@ -46,7 +46,7 @@ abstract class UINode {
 
   void _remove() {
     _defunct = true;
-    _root = null;
+    root = null;
     handleRemoved();
   }
   void handleRemoved() { }
@@ -87,7 +87,7 @@ abstract class UINode {
     _trace('_sync($outString) $key');
   }
 
-  void _removeChild(UINode node) {
+  void removeChild(UINode node) {
     _traceSync(_SyncOperation.REMOVAL, node._key);
     node._remove();
   }
@@ -106,14 +106,14 @@ abstract class UINode {
     // new component was built that could re-use some of it. Consider
     // syncing the new VDOM against the old one.
     if (oldNode != null && node._key != oldNode._key) {
-      _removeChild(oldNode);
+      removeChild(oldNode);
     }
 
     if (node._willSync(oldNode)) {
       _traceSync(_SyncOperation.STATEFUL, node._key);
       oldNode._sync(node, slot);
       node._defunct = true;
-      assert(oldNode._root is RenderCSS);
+      assert(oldNode.root is RenderCSS);
       return oldNode;
     }
 
@@ -129,7 +129,7 @@ abstract class UINode {
     if (oldNode != null)
       oldNode._defunct = true;
 
-    assert(node._root is RenderCSS);
+    assert(node.root is RenderCSS);
     return node;
   }
 }
@@ -142,13 +142,13 @@ abstract class ContentNode extends UINode {
   void _sync(UINode old, dynamic slot) {
     UINode oldContent = old == null ? null : (old as ContentNode).content;
     content = _syncChild(content, oldContent, slot);
-    assert(content._root != null);
-    _root = content._root;
+    assert(content.root != null);
+    root = content.root;
   }
 
   void _remove() {
     if (content != null)
-      _removeChild(content);
+      removeChild(content);
     super._remove();
   }
 }
@@ -304,29 +304,29 @@ abstract class RenderNodeWrapper extends UINode {
   final Style style;
   final String inlineStyle;
 
-  RenderCSS _createNode();
-  RenderNodeWrapper get _emptyNode;
+  RenderCSS createNode();
+  RenderNodeWrapper get emptyNode;
 
   void insert(RenderNodeWrapper child, dynamic slot);
 
   void _sync(UINode old, dynamic slot) {
     if (old == null) {
-      _root = _createNode();
-      assert(_root != null);
+      root = createNode();
+      assert(root != null);
       var ancestor = findAncestor(RenderNodeWrapper);
       if (ancestor is RenderNodeWrapper)
         ancestor.insert(this, slot);
-      old = _emptyNode;
+      old = emptyNode;
     } else {
-      _root = old._root;
-      assert(_root != null);
+      root = old.root;
+      assert(root != null);
     }
 
-    _nodeMap[_root] = this;
-    _syncRenderNode(old);
+    _nodeMap[root] = this;
+    syncRenderNode(old);
   }
 
-  void _syncRenderNode(RenderNodeWrapper old) {
+  void syncRenderNode(RenderNodeWrapper old) {
     RenderNodeWrapper oldRenderNodeWrapper = old as RenderNodeWrapper;
 
     List<Style> styles = new List<Style>();
@@ -346,26 +346,26 @@ abstract class RenderNodeWrapper extends UINode {
       }
       parent = parent._parent;
     }
-    _root.updateStyles(styles);
+    root.updateStyles(styles);
     if (parentData != null) {
-      assert(_root.parentData != null);
-      _root.parentData.merge(parentData); // this will throw if the types aren't approriate
+      assert(root.parentData != null);
+      root.parentData.merge(parentData); // this will throw if the types aren't approriate
       assert(parent != null);
-      assert(parent._root != null);
-      parent._root.markNeedsLayout();
+      assert(parent.root != null);
+      parent.root.markNeedsLayout();
     }
-    _root.updateInlineStyle(inlineStyle);
+    root.updateInlineStyle(inlineStyle);
   }
 
-  void _removeChild(UINode node) {
-    assert(_root is RenderCSSContainer);
-    _root.remove(node._root);
-    super._removeChild(node);
+  void removeChild(UINode node) {
+    assert(root is RenderCSSContainer);
+    root.remove(node.root);
+    super.removeChild(node);
   }
 
   void _remove() {
-    assert(_root != null);
-    _nodeMap.remove(_root);
+    assert(root != null);
+    _nodeMap.remove(root);
     super._remove();
   }
 }
@@ -395,14 +395,14 @@ abstract class OneChildListRenderNodeWrapper extends RenderNodeWrapper {
 
   void insert(RenderNodeWrapper child, dynamic slot) {
     assert(slot == null || slot is RenderCSS);
-    _root.add(child._root, before: slot);
+    root.add(child.root, before: slot);
   }
 
   void _remove() {
     assert(children != null);
     for (var child in children) {
       assert(child != null);
-      _removeChild(child);
+      removeChild(child);
     }
     super._remove();
   }
@@ -423,10 +423,10 @@ abstract class OneChildListRenderNodeWrapper extends RenderNodeWrapper {
     return false;
   }
 
-  void _syncRenderNode(OneChildListRenderNodeWrapper old) {
-    super._syncRenderNode(old);
+  void syncRenderNode(OneChildListRenderNodeWrapper old) {
+    super.syncRenderNode(old);
 
-    if (_root is! RenderCSSContainer)
+    if (root is! RenderCSSContainer)
       return;
 
     var startIndex = 0;
@@ -498,24 +498,24 @@ abstract class OneChildListRenderNodeWrapper extends RenderNodeWrapper {
         return false;
 
       oldNodeIdMap[currentNode._key] = null; // mark it reordered
-      assert(_root is RenderCSSContainer);
-      assert(oldNode._root is RenderCSSContainer);
+      assert(root is RenderCSSContainer);
+      assert(oldNode.root is RenderCSSContainer);
 
-      old._root.remove(oldNode._root);
-      _root.add(oldNode._root, before: nextSibling);
+      old.root.remove(oldNode.root);
+      root.add(oldNode.root, before: nextSibling);
 
       return true;
     }
 
     // Scan forwards, this time we may re-order;
-    nextSibling = _root.firstChild;
+    nextSibling = root.firstChild;
     while (startIndex < endIndex && oldStartIndex < oldEndIndex) {
       currentNode = children[startIndex];
       oldNode = oldChildren[oldStartIndex];
 
       if (currentNode._key == oldNode._key) {
         assert(currentNode.runtimeType == oldNode.runtimeType);
-        nextSibling = _root.childAfter(nextSibling);
+        nextSibling = root.childAfter(nextSibling);
         sync(startIndex);
         startIndex++;
         advanceOldStartIndex();
@@ -540,7 +540,7 @@ abstract class OneChildListRenderNodeWrapper extends RenderNodeWrapper {
     currentNode = null;
     while (oldStartIndex < oldEndIndex) {
       oldNode = oldChildren[oldStartIndex];
-      _removeChild(oldNode);
+      removeChild(oldNode);
       advanceOldStartIndex();
     }
   }
@@ -548,12 +548,12 @@ abstract class OneChildListRenderNodeWrapper extends RenderNodeWrapper {
 
 class Container extends OneChildListRenderNodeWrapper {
 
-  RenderCSSContainer _root;
-  RenderCSSContainer _createNode() => new RenderCSSContainer(this);
+  RenderCSSContainer root;
+  RenderCSSContainer createNode() => new RenderCSSContainer(this);
 
   static final Container _emptyContainer = new Container();
 
-  RenderNodeWrapper get _emptyNode => _emptyContainer;
+  RenderNodeWrapper get emptyNode => _emptyContainer;
 
   Container({
     Object key,
@@ -570,12 +570,12 @@ class Container extends OneChildListRenderNodeWrapper {
 
 class Paragraph extends OneChildListRenderNodeWrapper {
 
-  RenderCSSParagraph _root;
-  RenderCSSParagraph _createNode() => new RenderCSSParagraph(this);
+  RenderCSSParagraph root;
+  RenderCSSParagraph createNode() => new RenderCSSParagraph(this);
 
   static final Paragraph _emptyContainer = new Paragraph();
 
-  RenderNodeWrapper get _emptyNode => _emptyContainer;
+  RenderNodeWrapper get emptyNode => _emptyContainer;
 
   Paragraph({
     Object key,
@@ -592,13 +592,13 @@ class Paragraph extends OneChildListRenderNodeWrapper {
 
 class FlexContainer extends OneChildListRenderNodeWrapper {
 
-  RenderCSSFlex _root;
-  RenderCSSFlex _createNode() => new RenderCSSFlex(this, this.direction);
+  RenderCSSFlex root;
+  RenderCSSFlex createNode() => new RenderCSSFlex(this, this.direction);
 
   static final FlexContainer _emptyContainer = new FlexContainer();
     // direction doesn't matter if it's empty
 
-  RenderNodeWrapper get _emptyNode => _emptyContainer;
+  RenderNodeWrapper get emptyNode => _emptyContainer;
 
   final FlexDirection direction;
 
@@ -615,20 +615,20 @@ class FlexContainer extends OneChildListRenderNodeWrapper {
     inlineStyle: inlineStyle
   );
 
-  void _syncRenderNode(UINode old) {
-    super._syncRenderNode(old);
-    _root.direction = direction;
+  void syncRenderNode(UINode old) {
+    super.syncRenderNode(old);
+    root.direction = direction;
   }
 }
 
 class FillStackContainer extends OneChildListRenderNodeWrapper {
 
-  RenderCSSStack _root;
-  RenderCSSStack _createNode() => new RenderCSSStack(this);
+  RenderCSSStack root;
+  RenderCSSStack createNode() => new RenderCSSStack(this);
 
   static final FillStackContainer _emptyContainer = new FillStackContainer();
 
-  RenderNodeWrapper get _emptyNode => _emptyContainer;
+  RenderNodeWrapper get emptyNode => _emptyContainer;
 
   FillStackContainer({
     Object key,
@@ -659,12 +659,12 @@ class FillStackContainer extends OneChildListRenderNodeWrapper {
 
 class TextFragment extends RenderNodeWrapper {
 
-  RenderCSSInline _root;
-  RenderCSSInline _createNode() => new RenderCSSInline(this, this.data);
+  RenderCSSInline root;
+  RenderCSSInline createNode() => new RenderCSSInline(this, this.data);
 
   static final TextFragment _emptyText = new TextFragment('');
 
-  RenderNodeWrapper get _emptyNode => _emptyText;
+  RenderNodeWrapper get emptyNode => _emptyText;
 
   final String data;
 
@@ -678,20 +678,20 @@ class TextFragment extends RenderNodeWrapper {
     inlineStyle: inlineStyle
   );
 
-  void _syncRenderNode(UINode old) {
-    super._syncRenderNode(old);
-    _root.data = data;
+  void syncRenderNode(UINode old) {
+    super.syncRenderNode(old);
+    root.data = data;
   }
 }
 
 class Image extends RenderNodeWrapper {
 
-  RenderCSSImage _root;
-  RenderCSSImage _createNode() => new RenderCSSImage(this, this.src, this.width, this.height);
+  RenderCSSImage root;
+  RenderCSSImage createNode() => new RenderCSSImage(this, this.src, this.width, this.height);
 
   static final Image _emptyImage = new Image();
 
-  RenderNodeWrapper get _emptyNode => _emptyImage;
+  RenderNodeWrapper get emptyNode => _emptyImage;
 
   final String src;
   final int width;
@@ -710,9 +710,9 @@ class Image extends RenderNodeWrapper {
     inlineStyle: inlineStyle
   );
 
-  void _syncRenderNode(UINode old) {
-    super._syncRenderNode(old);
-    _root.configure(this.src, this.width, this.height);
+  void syncRenderNode(UINode old) {
+    super.syncRenderNode(old);
+    root.configure(this.src, this.width, this.height);
   }
 }
 
@@ -837,12 +837,12 @@ abstract class Component extends UINode {
 
   // TODO(rafaelw): It seems wrong to expose DOM at all. This is presently
   // needed to get sizing info.
-  RenderCSS getRoot() => _root;
+  RenderCSS getRoot() => root;
 
   void _remove() {
     assert(_built != null);
-    assert(_root != null);
-    _removeChild(_built);
+    assert(root != null);
+    removeChild(_built);
     _built = null;
     _enqueueDidUnmount(this);
     super._remove();
@@ -901,8 +901,8 @@ abstract class Component extends UINode {
 
     _built = _syncChild(_built, oldBuilt, slot);
     _dirty = false;
-    _root = _built._root;
-    assert(_root != null);
+    root = _built.root;
+    assert(root != null);
   }
 
   void _buildIfDirty() {
@@ -910,7 +910,7 @@ abstract class Component extends UINode {
       return;
 
     _trace('$_key rebuilding...');
-    assert(_root != null);
+    assert(root != null);
     _sync(null, _slot);
   }
 
@@ -945,9 +945,9 @@ abstract class App extends Component {
 
     _trace('$_key rebuilding...');
     _sync(null, null);
-    if (_root.parent == null)
-      _host.add(_root);
-    assert(_root.parent == _host);
+    if (root.parent == null)
+      _host.add(root);
+    assert(root.parent == _host);
   }
 }
 
