@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import '../animation/animated_value.dart';
-import '../fn.dart';
+import '../fn2.dart';
 import 'dart:mirrors';
 
 abstract class AnimatedComponent extends Component {

@@ -4,11 +4,11 @@
 
 import '../animation/animated_value.dart';
 import '../animation/curves.dart';
-import '../fn.dart';
+import '../fn2.dart';
 import '../theme/view_configuration.dart' as config;
 import 'dart:async';
 import 'dart:math' as math;
-import '../layout.dart';
+import '../layout2.dart';
 
 const double _kSplashConfirmedDuration = 350.0;
 const double _kSplashUnconfirmedDuration = config.kDefaultLongPressTimeout;

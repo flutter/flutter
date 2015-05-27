@@ -2,11 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../fn.dart';
-import '../layout.dart';
+import '../fn2.dart';
+import '../layout2.dart';
 import 'drawer.dart';
 import 'floating_action_button.dart';
-import 'package:sky/framework/theme/typography.dart' as typography;
+import '../theme/typography.dart' as typography;
 
 class Scaffold extends Component {
   static final Style _style = new Style('''

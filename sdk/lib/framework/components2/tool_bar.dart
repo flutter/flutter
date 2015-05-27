@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../fn.dart';
-import '../layout.dart';
+import '../fn2.dart';
+import '../layout2.dart';
 import '../theme/view_configuration.dart';
 import 'material.dart';
 

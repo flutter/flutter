@@ -4,7 +4,7 @@
 
 import '../animation/scroll_behavior.dart';
 import '../debug/tracing.dart';
-import '../fn.dart';
+import '../fn2.dart';
 import 'dart:math' as math;
 import 'dart:async';
 import 'scrollable.dart';

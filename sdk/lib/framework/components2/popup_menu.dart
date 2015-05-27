@@ -4,7 +4,7 @@
 
 import 'animated_component.dart';
 import '../animation/animated_value.dart';
-import '../fn.dart';
+import '../fn2.dart';
 import '../theme/colors.dart';
 import 'dart:async';
 import 'dart:math' as math;

@@ -5,7 +5,7 @@
 import '../animation/generators.dart';
 import '../animation/mechanics.dart';
 import '../animation/scroll_behavior.dart';
-import '../fn.dart';
+import '../fn2.dart';
 import '../theme/view_configuration.dart' as config;
 import 'dart:math' as math;
 import 'dart:sky' as sky;

@@ -5,7 +5,7 @@
 import 'animated_component.dart';
 import '../animation/animated_value.dart';
 import '../animation/curves.dart';
-import '../fn.dart';
+import '../fn2.dart';
 import '../theme/colors.dart';
 import 'dart:math' as math;
 import 'dart:sky' as sky;

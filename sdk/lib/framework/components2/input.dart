@@ -5,8 +5,8 @@
 import '../editing/editable_string.dart';
 import '../editing/editable_text.dart';
 import '../editing/keyboard.dart';
-import '../fn.dart';
-import '../layout.dart';
+import '../fn2.dart';
+import '../layout2.dart';
 import '../theme/colors.dart';
 import '../theme/typography.dart' as typography;
 import 'dart:sky' as sky;
