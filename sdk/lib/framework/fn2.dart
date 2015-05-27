@@ -93,14 +93,19 @@ abstract class UINode {
   }
 
   // Returns the child which should be retained as the child of this node.
-  UINode _syncChild(UINode node, UINode oldNode, dynamic slot) {
-    assert(node != null);
-    assert(oldNode == null || node._key == oldNode._key);
+  UINode syncChild(UINode node, UINode oldNode, dynamic slot) {
 
     if (node == oldNode) {
-      _traceSync(_SyncOperation.IDENTICAL, node._key);
+      _traceSync(_SyncOperation.IDENTICAL, node == null ? '*null*' : node._key);
       return node; // Nothing to do. Subtrees must be identical.
     }
+
+    if (node == null) {
+      // the child in this slot has gone away
+      removeChild(oldNode);
+      return null;
+    }
+    assert(oldNode == null || node._key == oldNode._key);
 
     // TODO(rafaelw): This eagerly removes the old DOM. It may be that a
     // new component was built that could re-use some of it. Consider
@@ -141,7 +146,7 @@ abstract class ContentNode extends UINode {
 
   void _sync(UINode old, dynamic slot) {
     UINode oldContent = old == null ? null : (old as ContentNode).content;
-    content = _syncChild(content, oldContent, slot);
+    content = syncChild(content, oldContent, slot);
     assert(content.root != null);
     root = content.root;
   }
@@ -441,7 +446,7 @@ abstract class OneChildListRenderNodeWrapper extends RenderNodeWrapper {
     UINode oldNode = null;
 
     void sync(int atIndex) {
-      children[atIndex] = _syncChild(currentNode, oldNode, nextSibling);
+      children[atIndex] = syncChild(currentNode, oldNode, nextSibling);
       assert(children[atIndex] != null);
     }
 
@@ -899,7 +904,7 @@ abstract class Component extends UINode {
     _currentlyBuilding = null;
     _currentOrder = lastOrder;
 
-    _built = _syncChild(_built, oldBuilt, slot);
+    _built = syncChild(_built, oldBuilt, slot);
     _dirty = false;
     root = _built.root;
     assert(root != null);
