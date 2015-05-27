@@ -6,8 +6,9 @@
 #include "sky/engine/tonic/dart_state.h"
 
 #include "sky/engine/tonic/dart_class_library.h"
-#include "sky/engine/tonic/dart_string_cache.h"
 #include "sky/engine/tonic/dart_exception_factory.h"
+#include "sky/engine/tonic/dart_string_cache.h"
+#include "sky/engine/tonic/dart_timer_heap.h"
 #include "sky/engine/wtf/PassOwnPtr.h"
 
 namespace blink {
@@ -23,6 +24,7 @@ DartState::DartState()
       class_library_(adoptPtr(new DartClassLibrary)),
       string_cache_(adoptPtr(new DartStringCache)),
       exception_factory_(adoptPtr(new DartExceptionFactory(this))),
+      timer_heap_(adoptPtr(new DartTimerHeap())),
       weak_factory_(this) {
 }
 

@@ -12,6 +12,7 @@
 #include "base/bind.h"
 #include "base/logging.h"
 #include "base/macros.h"
+#include "base/time/time.h"
 #include "dart/runtime/include/dart_api.h"
 #include "sky/engine/bindings/builtin.h"
 #include "sky/engine/core/dom/Microtask.h"
@@ -22,6 +23,7 @@
 #include "sky/engine/tonic/dart_invoke.h"
 #include "sky/engine/tonic/dart_isolate_scope.h"
 #include "sky/engine/tonic/dart_state.h"
+#include "sky/engine/tonic/dart_timer_heap.h"
 #include "sky/engine/tonic/dart_value.h"
 #include "sky/engine/wtf/text/WTFString.h"
 
@@ -190,7 +192,9 @@ void ScheduleMicrotask(Dart_NativeArguments args) {
 }
 
 void GetBaseURLString(Dart_NativeArguments args) {
-  String url = DOMDartState::CurrentDocument()->url().string();
+  String url;
+  if (Document* document = DOMDartState::CurrentDocument())
+    url = document->url().string();
   Dart_SetReturnValue(args, StringToDart(DartState::Current(), url));
 }
 
@@ -203,12 +207,15 @@ void Timer_create(Dart_NativeArguments args) {
   bool repeating = false;
   DART_CHECK_VALID(Dart_GetNativeBooleanArgument(args, 2, &repeating));
 
-  DOMDartState* state = DOMDartState::Current();
+  DartState* state = DartState::Current();
   CHECK(state);
-  int timer_id = DOMTimer::install(state->document(),
-                                   ScheduledAction::Create(state, closure),
-                                   milliseconds,
-                                   !repeating);
+
+  OwnPtr<DartTimerHeap::Task> task = adoptPtr(new DartTimerHeap::Task);
+  task->closure.Set(state, closure);
+  task->delay = base::TimeDelta::FromMilliseconds(milliseconds);
+  task->repeating = repeating;
+
+  int timer_id = state->timer_heap().Add(task.release());
   Dart_SetIntegerReturnValue(args, timer_id);
 }
 
@@ -216,9 +223,9 @@ void Timer_cancel(Dart_NativeArguments args) {
   int64_t timer_id = 0;
   DART_CHECK_VALID(Dart_GetNativeIntegerArgument(args, 0, &timer_id));
 
-  DOMDartState* state = DOMDartState::Current();
+  DartState* state = DartState::Current();
   CHECK(state);
-  DOMTimer::removeByID(state->document(), timer_id);
+  state->timer_heap().Remove(timer_id);
 }
 
 }  // namespace blink

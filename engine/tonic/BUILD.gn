@@ -35,6 +35,8 @@ source_set("tonic") {
     "dart_string.h",
     "dart_string_cache.cc",
     "dart_string_cache.h",
+    "dart_timer_heap.cc",
+    "dart_timer_heap.h",
     "dart_value.cc",
     "dart_value.h",
     "dart_wrappable.cc",

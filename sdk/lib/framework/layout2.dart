@@ -720,16 +720,15 @@ class RenderBlock extends RenderDecoratedBox with ContainerRenderNodeMixin<Rende
                              height: constraints.constrainHeight(outerHeight));
   }
 
-  double _minHeight; // value cached from parent for relayout call
-  double _maxHeight; // value cached from parent for relayout call
+  BoxConstraints _constraints; // value cached from parent for relayout call
   void layout(BoxConstraints constraints, { RenderNode relayoutSubtreeRoot }) {
     if (relayoutSubtreeRoot != null)
       saveRelayoutSubtreeRoot(relayoutSubtreeRoot);
-    relayoutSubtreeRoot = relayoutSubtreeRoot == null ? this : relayoutSubtreeRoot;
+    else
+      relayoutSubtreeRoot = this;
     width = constraints.constrainWidth(constraints.maxWidth);
     assert(width < double.INFINITY);
-    _minHeight = constraints.minHeight;
-    _maxHeight = constraints.maxHeight;
+    _constraints = constraints;
     internalLayout(relayoutSubtreeRoot);
   }
 
@@ -738,8 +737,7 @@ class RenderBlock extends RenderDecoratedBox with ContainerRenderNodeMixin<Rende
   }
 
   void internalLayout(RenderNode relayoutSubtreeRoot) {
-    assert(_minHeight != null);
-    assert(_maxHeight != null);
+    assert(_constraints != null);
     double y = _padding.top;
     double innerWidth = width - (_padding.left + _padding.right);
     RenderBox child = firstChild;
@@ -752,7 +750,7 @@ class RenderBlock extends RenderDecoratedBox with ContainerRenderNodeMixin<Rende
       y += child.height;
       child = child.parentData.nextSibling;
     }
-    height = clamp(min: _minHeight, value: y + _padding.bottom, max: _maxHeight);
+    height = _constraints.constrainHeight(y + _padding.bottom);
     layoutDone();
   }
 
@@ -807,7 +805,8 @@ class RenderFlex extends RenderDecoratedBox with ContainerRenderNodeMixin<Render
   void layout(BoxConstraints constraints, { RenderNode relayoutSubtreeRoot }) {
     if (relayoutSubtreeRoot != null)
       saveRelayoutSubtreeRoot(relayoutSubtreeRoot);
-    relayoutSubtreeRoot = relayoutSubtreeRoot == null ? this : relayoutSubtreeRoot;
+    else
+      relayoutSubtreeRoot = this;
     _constraints = constraints;
     width = _constraints.constrainWidth(_constraints.maxWidth);
     height = _constraints.constrainHeight(_constraints.maxHeight);

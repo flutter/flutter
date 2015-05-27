@@ -1,9 +1,9 @@
 <import src="../resources/run-after-display.sky" />
 <script>
-import 'basic.dart';
-import 'dart:sky';
 import '../resources/dom_serializer.dart';
+import 'dart:sky';
 import 'dart:sky.internals' as internals;
+import 'resources/basic.dart';
 
 void main() {
   new TestApp();
