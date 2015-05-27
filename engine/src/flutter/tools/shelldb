@@ -14,6 +14,8 @@ import subprocess
 import sys
 import time
 import urlparse
+import hashlib
+import tempfile
 
 SKY_TOOLS_DIR = os.path.dirname(os.path.abspath(__file__))
 SKY_ROOT = os.path.dirname(SKY_TOOLS_DIR)
@@ -26,6 +28,7 @@ APK_NAME = 'SkyDemo.apk'
 ADB_PATH = os.path.join(SRC_ROOT,
     'third_party/android_tools/sdk/platform-tools/adb')
 ANDROID_PACKAGE = "org.domokit.sky.demo"
+SHA1_PATH = '/sdcard/%s/%s.sha1' % (ANDROID_PACKAGE, APK_NAME)
 
 PID_FILE_PATH = "/tmp/skydemo.pids"
 PID_FILE_KEYS = frozenset([
@@ -193,12 +196,33 @@ class StartSky(object):
         pids['build_dir'] = os.path.abspath(args.build_dir)
 
         if args.install:
-            # -r to replace an existing apk, -d to allow version downgrade.
-            subprocess.check_call([ADB_PATH, 'install', '-r', '-d', apk_path])
+            # We might need to install a new APK, so check SHA1
+            source_sha1 = hashlib.sha1(open(apk_path, 'rb').read()).hexdigest()
+            dest_sha1 = subprocess.check_output([ADB_PATH, 'shell', 'cat', SHA1_PATH])
+            use_existing_apk = False
+            if source_sha1 == dest_sha1:
+                # Make sure that the APK didn't get uninstalled somehow
+                use_existing_apk = subprocess.check_output([
+                    ADB_PATH, 'shell', 'pm', 'list', 'packages', ANDROID_PACKAGE
+                ])
         else:
+            # User is telling us not to bother installing an APK
+            use_existing_apk = True
+
+        if use_existing_apk:
+            # APK is already on the device, we only need to stop it
             subprocess.check_call([
                 ADB_PATH, 'shell', 'am', 'force-stop', ANDROID_PACKAGE
             ])
+        else:
+            # Slow path, need to upload a new APK to the device
+            # -r to replace an existing apk, -d to allow version downgrade.
+            subprocess.check_call([ADB_PATH, 'install', '-r', '-d', apk_path])
+            # record the SHA1 of the APK we just pushed
+            with tempfile.NamedTemporaryFile() as fp:
+                fp.write(source_sha1)
+                fp.seek(0)
+                subprocess.check_call([ADB_PATH, 'push', fp.name, SHA1_PATH])
 
         # Set up port forwarding for observatory
         port_string = 'tcp:%s' % OBSERVATORY_PORT
