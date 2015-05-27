@@ -98,10 +98,12 @@ class RenderDecoratedSector extends RenderSector {
 
   RenderDecoratedSector(BoxDecoration decoration) : _decoration = decoration;
 
-  void setBoxDecoration(BoxDecoration decoration) {
-    if (_decoration == decoration)
+  BoxDecoration _decoration;
+  BoxDecoration get decoration => _decoration;
+  void set decoration (BoxDecoration value) {
+    if (value == _decoration)
       return;
-    _decoration = decoration;
+    _decoration = value;
     markNeedsPaint();
   }
 
