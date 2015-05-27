@@ -18,6 +18,7 @@ import subprocess
 import sys
 import time
 import urlparse
+import platform
 
 SUPPORTED_MIME_TYPES = [
     'text/html',
@@ -531,9 +532,14 @@ class SkyDebugger(object):
             symbol_search_paths = system_lib_dirs + symbol_search_paths
 
             # TODO(eseidel): We need to look up the toolchain somehow?
-            gdb_path = os.path.join(SRC_ROOT, 'third_party/android_tools/ndk/'
-                'toolchains/arm-linux-androideabi-4.9/prebuilt/linux-x86_64/'
-                'bin/arm-linux-androideabi-gdb')
+            if platform.system() == 'Darwin':
+                gdb_path = os.path.join(SRC_ROOT, 'third_party/android_tools/ndk/'
+                    'toolchains/arm-linux-androideabi-4.9/prebuilt/darwin-x86_64/'
+                    'bin/arm-linux-androideabi-gdb')
+            else:
+                gdb_path = os.path.join(SRC_ROOT, 'third_party/android_tools/ndk/'
+                    'toolchains/arm-linux-androideabi-4.9/prebuilt/linux-x86_64/'
+                    'bin/arm-linux-androideabi-gdb')
 
         # Set solib-search-path after letting android modify symbol_search_paths
         eval_commands.append(
