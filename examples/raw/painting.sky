@@ -14,13 +14,14 @@ void main() {
   var element = document.getElementById('canvas');
   element.requestPaint((PaintingContext context) {
     Paint paint = new Paint();
-    double radius = math.min(context.width, context.height) / 2.0;
+    Point mid = new Point(context.width / 2.0, context.height / 2.0);
+    double radius = math.min(mid.x, mid.y);
 
     context.save();
 
     context.clipRect(new Rect()..setLTRB(0.0, 0.0, context.width, radius));
 
-    context.translate(context.width / 2.0, context.height / 2.0);
+    context.translate(mid.x, mid.y);
     paint.setARGB(128, 255, 0, 255);
     context.rotateDegrees(45.0);
 
