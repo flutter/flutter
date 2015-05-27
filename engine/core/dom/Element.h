@@ -41,6 +41,7 @@ class ActiveAnimations;
 class Attr;
 class Attribute;
 class CSSStyleDeclaration;
+class Canvas;
 class ClientRect;
 class ClientRectList;
 class DOMTokenList;
@@ -53,7 +54,6 @@ class IntSize;
 class LayoutCallback;
 class MutableStylePropertySet;
 class PaintingCallback;
-class PictureRecorder;
 class PropertySetCSSStyleDeclaration;
 class PseudoElement;
 class ShadowRoot;
@@ -300,7 +300,7 @@ public:
     void setDir(const AtomicString&);
 
     // Dart exposed:
-    void paint(PictureRecorder*);
+    void paint(Canvas*);
 
 protected:
     Element(const QualifiedName& tagName, Document*, ConstructionType);

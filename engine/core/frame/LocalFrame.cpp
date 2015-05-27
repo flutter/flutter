@@ -74,8 +74,10 @@ inline LocalFrame::LocalFrame(FrameLoaderClient* client, FrameHost* host)
     , m_newEventHandler(adoptPtr(new NewEventHandler(*this)))
     , m_console(FrameConsole::create(*this))
     , m_inputMethodController(InputMethodController::create(*this))
+    , m_document(nullptr)
 {
-    page()->setMainFrame(this);
+    if (page())
+        page()->setMainFrame(this);
 }
 
 PassRefPtr<LocalFrame> LocalFrame::create(FrameLoaderClient* client, FrameHost* host)
@@ -235,8 +237,15 @@ RenderView* LocalFrame::contentRenderer() const
     return document() ? document()->renderView() : 0;
 }
 
+void LocalFrame::setDocument(Document* document)
+{
+    m_document = document;
+}
+
 Document* LocalFrame::document() const
 {
+    if (m_document)
+        return m_document;
     return m_domWindow ? m_domWindow->document() : 0;
 }
 
@@ -280,7 +289,6 @@ PassRefPtr<Range> LocalFrame::rangeForPoint(const IntPoint& framePoint)
 void LocalFrame::createView(const IntSize& viewportSize, const Color& backgroundColor, bool transparent)
 {
     ASSERT(this);
-    ASSERT(page());
 
     setView(nullptr);
 

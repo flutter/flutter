@@ -40,9 +40,22 @@ PassOwnPtr<FrameHost> FrameHost::create(Page& page, ServiceProvider* services)
     return adoptPtr(new FrameHost(page, services));
 }
 
+PassOwnPtr<FrameHost> FrameHost::createDummy(Settings* settings)
+{
+    return adoptPtr(new FrameHost(settings));
+}
+
 FrameHost::FrameHost(Page& page, ServiceProvider* services)
     : m_page(&page)
     , m_services(services)
+    , m_settings(nullptr)
+{
+}
+
+FrameHost::FrameHost(Settings* settings)
+    : m_page(nullptr)
+    , m_services(nullptr)
+    , m_settings(settings)
 {
 }
 
@@ -53,12 +66,16 @@ FrameHost::~FrameHost()
 
 Settings& FrameHost::settings() const
 {
+    if (m_settings)
+        return *m_settings;
     return m_page->settings();
 }
 
 float FrameHost::deviceScaleFactor() const
 {
-    return m_page->deviceScaleFactor();
+    if (m_page)
+        return m_page->deviceScaleFactor();
+    return 1.0;
 }
 
 }

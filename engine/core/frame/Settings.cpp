@@ -38,7 +38,8 @@ static const bool defaultSmartInsertDeleteEnabled = false;
 #endif
 
 Settings::Settings()
-    : m_openGLMultisamplingEnabled(false)
+    : m_delegate(nullptr)
+    , m_openGLMultisamplingEnabled(false)
     SETTINGS_INITIALIZER_LIST
 {
 }

@@ -527,8 +527,8 @@ void InlineTextBox::paint(PaintInfo& paintInfo, const LayoutPoint& paintOffset, 
     FloatRect boxRect(boxOrigin, LayoutSize(logicalWidth(), logicalHeight()));
 
     // Determine whether or not we have composition underlines to draw.
-    bool containsComposition = renderer().node() && renderer().frame()->inputMethodController().compositionNode() == renderer().node();
-    bool useCustomUnderlines = containsComposition && renderer().frame()->inputMethodController().compositionUsesCustomUnderlines();
+    bool containsComposition = renderer().frame() && renderer().node() && renderer().frame()->inputMethodController().compositionNode() == renderer().node();
+    bool useCustomUnderlines = renderer().frame() && containsComposition && renderer().frame()->inputMethodController().compositionUsesCustomUnderlines();
 
     bool haveSelection = selectionState() != RenderObject::SelectionNone;
 

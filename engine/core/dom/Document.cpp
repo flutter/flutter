@@ -253,6 +253,7 @@ Document::Document(const DocumentInit& initializer)
     , m_templateDocumentHost(nullptr)
     , m_hasViewportUnits(false)
     , m_styleRecalcElementCounter(0)
+    , m_frameView(nullptr)
 {
     setClient(this);
 
@@ -332,13 +333,6 @@ Document::~Document()
     InspectorCounters::decrementCounter(InspectorCounters::DocumentCounter);
 }
 
-PassRefPtr<Document> Document::create(Document& document)
-{
-    DocumentInit init = DocumentInit::fromContext(document.contextDocument())
-        .withElementRegistry(document.elementRegistry());
-    return adoptRef(new Document(init));
-}
-
 #if !ENABLE(OILPAN)
 void Document::dispose()
 {
@@ -413,6 +407,11 @@ PassRefPtr<Element> Document::createElement(const AtomicString& name, ExceptionS
     }
 
     return HTMLElementFactory::createElement(name, *this, false);
+}
+
+PassRefPtr<Text> Document::createText(const String& text)
+{
+    return Text::create(*this, text);
 }
 
 void Document::registerElement(const AtomicString& name, PassRefPtr<DartValue> type, ExceptionState& es)
@@ -829,6 +828,8 @@ void Document::setStateForNewFormElements(const Vector<String>& stateVector)
 
 FrameView* Document::view() const
 {
+    if (m_frameView)
+        return m_frameView;
     return m_frame ? m_frame->view() : 0;
 }
 
@@ -904,7 +905,8 @@ void Document::scheduleRenderTreeUpdate()
 
 void Document::scheduleVisualUpdate()
 {
-    page()->animator().scheduleVisualUpdate();
+    if (page())
+        page()->animator().scheduleVisualUpdate();
 }
 
 void Document::updateDistributionIfNeeded()

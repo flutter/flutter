@@ -22,9 +22,10 @@ callback CustomElementConstructor = Element ();
 
 [
     Constructor(),
-    ConstructorCallWith=Document,
 ] interface Document : ParentNode {
     [CustomElementCallbacks, RaisesException] Element createElement(DOMString tagName);
+    Text createText(DOMString text);
+
     DocumentFragment createDocumentFragment();
 
     [CustomElementCallbacks, RaisesException, TypeChecking=Interface] Node importNode(Node node, [Named] optional boolean deep = false);

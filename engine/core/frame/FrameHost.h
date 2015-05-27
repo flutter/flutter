@@ -56,6 +56,8 @@ class FrameHost final {
     WTF_MAKE_NONCOPYABLE(FrameHost); WTF_MAKE_FAST_ALLOCATED;
 public:
     static PassOwnPtr<FrameHost> create(Page&, ServiceProvider*);
+    static PassOwnPtr<FrameHost> createDummy(Settings*);
+
     ~FrameHost();
 
     // Careful: This function will eventually be removed.
@@ -71,9 +73,11 @@ public:
 
 private:
     FrameHost(Page&, ServiceProvider*);
+    FrameHost(Settings*);
 
     Page* m_page;
     ServiceProvider* m_services;
+    Settings* m_settings;
 };
 
 }

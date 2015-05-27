@@ -86,7 +86,6 @@ public:
     void setNeedsLayout();
 
     // Methods for getting/setting the size Blink should use to layout the contents.
-    // FIXME(sky): Remove the scrollbars argument now that FrameView doesn't scroll.
     IntSize layoutSize() const;
     void setLayoutSize(const IntSize&);
 

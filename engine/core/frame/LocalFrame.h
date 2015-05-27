@@ -80,6 +80,7 @@ namespace blink {
         void detachFromFrameHost();
 
         virtual void setDOMWindow(PassRefPtr<LocalDOMWindow>) override;
+        void setDocument(Document*);
         FrameView* view() const;
         Document* document() const;
 
@@ -134,6 +135,8 @@ namespace blink {
         const OwnPtr<NewEventHandler> m_newEventHandler;
         const OwnPtr<FrameConsole> m_console;
         OwnPtr<InputMethodController> m_inputMethodController;
+
+        Document* m_document;
     };
 
     inline FrameView* LocalFrame::view() const

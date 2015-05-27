@@ -53,7 +53,7 @@ Frame::Frame(FrameClient* client, FrameHost* host)
     : m_host(host)
     , m_client(client)
 {
-    ASSERT(page());
+    // ASSERT(page());
 
 #ifndef NDEBUG
     frameCounter.increment();

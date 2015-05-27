@@ -128,9 +128,6 @@ public:
     }
     virtual ~Document();
 
-    // Called by JS.
-    static PassRefPtr<Document> create(Document&);
-
     MediaQueryMatcher& mediaQueryMatcher();
 
     void mediaQueryAffectingValueChanged();
@@ -164,6 +161,7 @@ public:
     Location* location() const;
 
     PassRefPtr<Element> createElement(const AtomicString& name, ExceptionState&);
+    PassRefPtr<Text> createText(const String& text);
     PassRefPtr<DocumentFragment> createDocumentFragment();
     PassRefPtr<Node> importNode(Node* importedNode, bool deep, ExceptionState&);
     PassRefPtr<Element> createElement(const QualifiedName&, bool createdByParser);
@@ -498,6 +496,9 @@ public:
     Picture* rootPicture() const;
     void setRootPicture(PassRefPtr<Picture> picture);
 
+    void setFrame(LocalFrame* frame) { m_frame = frame; }
+    void setFrameView(FrameView* view) { m_frameView = view; }
+
 protected:
     explicit Document(const DocumentInit&);
 
@@ -684,6 +685,8 @@ private:
     mutable DocumentLoadTiming m_documentLoadTiming;
 
     RefPtr<Picture> m_picture;
+
+    FrameView* m_frameView;
 };
 
 inline void Document::scheduleRenderTreeUpdateIfNeeded()

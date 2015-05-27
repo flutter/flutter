@@ -1686,12 +1686,12 @@ bool Element::affectedByIdSelector(const AtomicString& idValue) const
     return false;
 }
 
-void Element::paint(PictureRecorder* recorder)
+void Element::paint(Canvas* canvas)
 {
     if (!renderer() || !renderer()->isBox())
         return;
     RenderBox* box = toRenderBox(renderer());
-    GraphicsContext context(recorder->skCanvas());
+    GraphicsContext context(canvas->skCanvas());
 
     // Very simplified painting to allow painting an arbitrary (layer-less) subtree.
     Vector<RenderBox*> layers;

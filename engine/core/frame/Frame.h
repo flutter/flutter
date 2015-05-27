@@ -39,6 +39,7 @@ class WebLayer;
 namespace blink {
 
 class ChromeClient;
+class Document;
 class FrameClient;
 class FrameHost;
 class LocalDOMWindow;
@@ -72,6 +73,7 @@ protected:
     Frame(FrameClient*, FrameHost*);
 
     FrameHost* m_host;
+    Document* m_document;
 
     RefPtr<LocalDOMWindow> m_domWindow;
 

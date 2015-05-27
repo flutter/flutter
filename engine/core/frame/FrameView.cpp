@@ -264,7 +264,6 @@ void FrameView::layout(bool allowSubtree)
     // We should never layout a Document which is not in a LocalFrame.
     ASSERT(m_frame);
     ASSERT(m_frame->view() == this);
-    ASSERT(m_frame->page());
 
     ScriptForbiddenScope forbidScript;
 

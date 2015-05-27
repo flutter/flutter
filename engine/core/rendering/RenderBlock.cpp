@@ -437,6 +437,8 @@ bool RenderBlock::hasCaret() const
 
 void RenderBlock::paintCarets(PaintInfo& paintInfo, const LayoutPoint& paintOffset)
 {
+    if (!frame())
+        return;
     FrameSelection& selection = frame()->selection();
     if (hasCursorCaret(selection, this)) {
         selection.paintCaret(paintInfo.context, paintOffset, paintInfo.rect);
