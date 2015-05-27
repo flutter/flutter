@@ -504,6 +504,7 @@ abstract class RenderBox extends RenderNode {
   double height;
 }
 
+// This must be immutable, because we won't notice when it changes
 class BoxDecoration {
   const BoxDecoration({
     this.backgroundColor
@@ -513,14 +514,15 @@ class BoxDecoration {
 }
 
 class RenderDecoratedBox extends RenderBox {
-  BoxDecoration _decoration;
 
   RenderDecoratedBox(BoxDecoration decoration) : _decoration = decoration;
 
-  void setBoxDecoration(BoxDecoration decoration) {
-    if (_decoration == decoration)
+  BoxDecoration _decoration;
+  BoxDecoration get decoration => _decoration;
+  void set decoration (BoxDecoration value) {
+    if (value == _decoration)
       return;
-    _decoration = decoration;
+    _decoration = value;
     markNeedsPaint();
   }
 
@@ -536,6 +538,7 @@ class RenderDecoratedBox extends RenderBox {
       canvas.drawRect(new sky.Rect()..setLTRB(0.0, 0.0, width, height), paint);
     }
   }
+
 }
 
 
@@ -680,7 +683,7 @@ class RenderBlock extends RenderDecoratedBox with ContainerRenderNodeMixin<Rende
 
   EdgeDims _padding;
   EdgeDims get padding => _padding;
-  void set padding(EdgeDims value) {
+  void set padding (EdgeDims value) {
     assert(value != null);
     if (_padding != value) {
       _padding = value;

@@ -30,9 +30,9 @@ class RenderSolidColor extends RenderDecoratedBox {
 
   void handlePointer(PointerEvent event) {
     if (event.type == 'pointerdown')
-      setBoxDecoration(new BoxDecoration(backgroundColor: 0xFFFF0000));
+      decoration = new BoxDecoration(backgroundColor: 0xFFFF0000);
     else if (event.type == 'pointerup')
-      setBoxDecoration(new BoxDecoration(backgroundColor: backgroundColor));
+      decoration = new BoxDecoration(backgroundColor: backgroundColor);
   }
 }
 
