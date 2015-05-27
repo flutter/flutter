@@ -40,6 +40,20 @@ void main() {
 
     context.restore();
 
+    var builder = new LayerDrawLooperBuilder()
+        ..addLayerOnTop(
+            new DrawLooperLayerInfo()..setOffset(150.0, 0.0)..setPaintBits(-1),
+            (Paint layerPaint) {
+          // TODO(mpcomplete): This won't do anything until we add support for
+          // setting the color filter.
+          layerPaint.setARGB(128, 0, 0, 255);
+        })
+        ..addLayerOnTop(
+            new DrawLooperLayerInfo()..setOffset(75.0, 75.0)..setPaintBits(0),
+            (Paint layerPaint) {
+          layerPaint.setARGB(128, 255, 0, 0);
+        });
+    paint.setDrawLooper(builder.build());
     context.drawCircle(0.0, 0.0, radius, paint);
 
     context.commit();
