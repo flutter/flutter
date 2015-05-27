@@ -146,7 +146,7 @@ class RenderScaffold extends RenderDecoratedBox {
 
   void hitTestChildren(HitTestResult result, { double x, double y }) {
     assert(floatingActionButton == null || floatingActionButton.parentData is BoxParentData);
-    assert(statusBar == null || statusBar.parentData is BoxParentData);
+    assert(statusbar == null || statusbar.parentData is BoxParentData);
     if ((drawer != null) && (x < drawer.width)) {
       drawer.hitTest(result, x: x, y: y);
     } else if ((floatingActionButton != null) && (x >= floatingActionButton.parentData.x) && (x < floatingActionButton.parentData.x + floatingActionButton.width)
@@ -156,7 +156,7 @@ class RenderScaffold extends RenderDecoratedBox {
       toolbar.hitTest(result, x: x, y: y);
     } else if ((statusbar != null) && (y > statusbar.parentData.y)) {
       statusbar.hitTest(result, x: x, y: y-statusbar.parentData.y);
-    } else {
+    } else if (body != null) {
       body.hitTest(result, x: x, y: y-body.parentData.y);
     }
   }
