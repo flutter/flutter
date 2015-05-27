@@ -67,15 +67,14 @@ void Engine::Init() {
 void Engine::BeginFrame(base::TimeTicks frame_time) {
   TRACE_EVENT0("sky", "Engine::BeginFrame");
 
-  double frame_time_sec = (frame_time - base::TimeTicks()).InSecondsF();
-  double deadline_sec = frame_time_sec;
-  double interval_sec = 1.0 / 60;
-  blink::WebBeginFrameArgs args(frame_time_sec, deadline_sec, interval_sec);
-
   if (sky_view_)
     sky_view_->BeginFrame(frame_time);
 
   if (web_view_) {
+    double frame_time_sec = (frame_time - base::TimeTicks()).InSecondsF();
+    double deadline_sec = frame_time_sec;
+    double interval_sec = 1.0 / 60;
+    blink::WebBeginFrameArgs args(frame_time_sec, deadline_sec, interval_sec);
     web_view_->beginFrame(args);
     web_view_->layout();
   }

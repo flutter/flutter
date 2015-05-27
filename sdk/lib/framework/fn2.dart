@@ -10,8 +10,9 @@ import 'dart:mirrors';
 import 'dart:sky' as sky;
 import 'reflect.dart' as reflect;
 import 'layout2.dart';
+import 'app.dart';
 
-final sky.Tracing _tracing = sky.window.tracing;
+// final sky.Tracing _tracing = sky.window.tracing;
 
 final bool _shouldLogRenderDuration = false;
 final bool _shouldTrace = false;
@@ -26,7 +27,7 @@ abstract class UINode {
   String _key;
   UINode _parent;
   UINode get parent => _parent;
-  RenderCSS root;
+  RenderNode root;
   bool _defunct = false;
 
   UINode({ Object key }) {
@@ -94,7 +95,6 @@ abstract class UINode {
 
   // Returns the child which should be retained as the child of this node.
   UINode syncChild(UINode node, UINode oldNode, dynamic slot) {
-
     if (node == oldNode) {
       _traceSync(_SyncOperation.IDENTICAL, node == null ? '*null*' : node._key);
       return node; // Nothing to do. Subtrees must be identical.
@@ -118,7 +118,7 @@ abstract class UINode {
       _traceSync(_SyncOperation.STATEFUL, node._key);
       oldNode._sync(node, slot);
       node._defunct = true;
-      assert(oldNode.root is RenderCSS);
+      assert(oldNode.root is RenderNode);
       return oldNode;
     }
 
@@ -134,7 +134,7 @@ abstract class UINode {
     if (oldNode != null)
       oldNode._defunct = true;
 
-    assert(node.root is RenderCSS);
+    assert(node.root is RenderNode);
     return node;
   }
 }
@@ -156,12 +156,6 @@ abstract class ContentNode extends UINode {
       removeChild(content);
     super._remove();
   }
-}
-
-class StyleNode extends ContentNode {
-  final Style style;
-
-  StyleNode(UINode content, this.style): super(content);
 }
 
 class ParentDataNode extends ContentNode {
@@ -287,7 +281,7 @@ class EventListenerNode extends ContentNode  {
 }
 
 /*
- * RenderNodeWrappers correspond to a desired state of a RenderCSS.
+ * RenderNodeWrappers correspond to a desired state of a RenderNode.
  * They are fully immutable, with one exception: A UINode which is a
  * Component which lives within an OneChildListRenderNodeWrapper's
  * children list, may be replaced with the "old" instance if it has
@@ -295,21 +289,16 @@ class EventListenerNode extends ContentNode  {
  */
 abstract class RenderNodeWrapper extends UINode {
 
-  static final Map<RenderCSS, RenderNodeWrapper> _nodeMap =
-      new HashMap<RenderCSS, RenderNodeWrapper>();
+  static final Map<RenderNode, RenderNodeWrapper> _nodeMap =
+      new HashMap<RenderNode, RenderNodeWrapper>();
 
-  static RenderNodeWrapper _getMounted(RenderCSS node) => _nodeMap[node];
+  static RenderNodeWrapper _getMounted(RenderNode node) => _nodeMap[node];
 
   RenderNodeWrapper({
-    Object key,
-    this.style,
-    this.inlineStyle
+    Object key
   }) : super(key: key);
 
-  final Style style;
-  final String inlineStyle;
-
-  RenderCSS createNode();
+  RenderNode createNode();
   RenderNodeWrapper get emptyNode;
 
   void insert(RenderNodeWrapper child, dynamic slot);
@@ -332,17 +321,9 @@ abstract class RenderNodeWrapper extends UINode {
   }
 
   void syncRenderNode(RenderNodeWrapper old) {
-    RenderNodeWrapper oldRenderNodeWrapper = old as RenderNodeWrapper;
-
-    List<Style> styles = new List<Style>();
-    if (style != null)
-      styles.add(style);
     ParentData parentData = null;
     UINode parent = _parent;
     while (parent != null && parent is! RenderNodeWrapper) {
-      if (parent is StyleNode && parent.style != null)
-        styles.add(parent.style);
-      else
       if (parent is ParentDataNode && parent.parentData != null) {
         if (parentData != null)
           parentData.merge(parent.parentData); // this will throw if the types aren't the same
@@ -351,7 +332,6 @@ abstract class RenderNodeWrapper extends UINode {
       }
       parent = parent._parent;
     }
-    root.updateStyles(styles);
     if (parentData != null) {
       assert(root.parentData != null);
       root.parentData.merge(parentData); // this will throw if the types aren't approriate
@@ -359,11 +339,9 @@ abstract class RenderNodeWrapper extends UINode {
       assert(parent.root != null);
       parent.root.markNeedsLayout();
     }
-    root.updateInlineStyle(inlineStyle);
   }
 
   void removeChild(UINode node) {
-    assert(root is RenderCSSContainer);
     root.remove(node.root);
     super.removeChild(node);
   }
@@ -379,27 +357,23 @@ final List<UINode> _emptyList = new List<UINode>();
 
 abstract class OneChildListRenderNodeWrapper extends RenderNodeWrapper {
 
-  // In OneChildListRenderNodeWrapper subclasses, slots are RenderCSS nodes
-  // to use as the "insert before" sibling in RenderCSSContainer.add() calls
+  // In OneChildListRenderNodeWrapper subclasses, slots are RenderNode nodes
+  // to use as the "insert before" sibling in ContainerRenderNodeMixin.add() calls
 
   final List<UINode> children;
 
   OneChildListRenderNodeWrapper({
     Object key,
-    List<UINode> children,
-    Style style,
-    String inlineStyle
+    List<UINode> children
   }) : this.children = children == null ? _emptyList : children,
   super(
-    key: key,
-    style: style,
-    inlineStyle: inlineStyle
+    key: key
   ) {
     assert(!_debugHasDuplicateIds());
   }
 
   void insert(RenderNodeWrapper child, dynamic slot) {
-    assert(slot == null || slot is RenderCSS);
+    assert(slot == null || slot is RenderNode);
     root.add(child.root, before: slot);
   }
 
@@ -431,7 +405,7 @@ abstract class OneChildListRenderNodeWrapper extends RenderNodeWrapper {
   void syncRenderNode(OneChildListRenderNodeWrapper old) {
     super.syncRenderNode(old);
 
-    if (root is! RenderCSSContainer)
+    if (root is! ContainerRenderNodeMixin)
       return;
 
     var startIndex = 0;
@@ -441,7 +415,7 @@ abstract class OneChildListRenderNodeWrapper extends RenderNodeWrapper {
     var oldStartIndex = 0;
     var oldEndIndex = oldChildren.length;
 
-    RenderCSS nextSibling = null;
+    RenderNode nextSibling = null;
     UINode currentNode = null;
     UINode oldNode = null;
 
@@ -503,8 +477,8 @@ abstract class OneChildListRenderNodeWrapper extends RenderNodeWrapper {
         return false;
 
       oldNodeIdMap[currentNode._key] = null; // mark it reordered
-      assert(root is RenderCSSContainer);
-      assert(oldNode.root is RenderCSSContainer);
+      assert(root is ContainerRenderNodeMixin);
+      assert(oldNode.root is ContainerRenderNodeMixin);
 
       old.root.remove(oldNode.root);
       root.add(oldNode.root, before: nextSibling);
@@ -562,14 +536,10 @@ class Container extends OneChildListRenderNodeWrapper {
 
   Container({
     Object key,
-    List<UINode> children,
-    Style style,
-    String inlineStyle
+    List<UINode> children
   }) : super(
     key: key,
-    children: children,
-    style: style,
-    inlineStyle: inlineStyle
+    children: children
   );
 }
 
@@ -584,21 +554,17 @@ class Paragraph extends OneChildListRenderNodeWrapper {
 
   Paragraph({
     Object key,
-    List<UINode> children,
-    Style style,
-    String inlineStyle
+    List<UINode> children
   }) : super(
     key: key,
-    children: children,
-    style: style,
-    inlineStyle: inlineStyle
+    children: children
   );
 }
 
 class FlexContainer extends OneChildListRenderNodeWrapper {
 
-  RenderCSSFlex root;
-  RenderCSSFlex createNode() => new RenderCSSFlex(this, this.direction);
+  RenderFlex root;
+  RenderFlex createNode() => new RenderFlex(this, this.direction);
 
   static final FlexContainer _emptyContainer = new FlexContainer();
     // direction doesn't matter if it's empty
@@ -610,20 +576,20 @@ class FlexContainer extends OneChildListRenderNodeWrapper {
   FlexContainer({
     Object key,
     List<UINode> children,
-    Style style,
-    String inlineStyle,
-    this.direction: FlexDirection.Row
+    this.direction: FlexDirection.Horizontal
   }) : super(
     key: key,
-    children: children,
-    style: style,
-    inlineStyle: inlineStyle
+    children: children
   );
 
   void syncRenderNode(UINode old) {
     super.syncRenderNode(old);
     root.direction = direction;
   }
+}
+
+class FlexExpandingChild extends ParentDataNode {
+  FlexExpandingChild(UINode content, [int flex = 1]): super(content, new FlexBoxParentData()..flex = flex);
 }
 
 class FillStackContainer extends OneChildListRenderNodeWrapper {
@@ -637,14 +603,10 @@ class FillStackContainer extends OneChildListRenderNodeWrapper {
 
   FillStackContainer({
     Object key,
-    List<UINode> children,
-    Style style,
-    String inlineStyle
+    List<UINode> children
   }) : super(
     key: key,
-    children: _positionNodesToFill(children),
-    style: style,
-    inlineStyle: inlineStyle
+    children: _positionNodesToFill(children)
   );
 
   static StackParentData _fillParentData = new StackParentData()
@@ -674,13 +636,9 @@ class TextFragment extends RenderNodeWrapper {
   final String data;
 
   TextFragment(this.data, {
-    Object key,
-    Style style,
-    String inlineStyle
+    Object key
   }) : super(
-    key: key,
-    style: style,
-    inlineStyle: inlineStyle
+    key: key
   );
 
   void syncRenderNode(UINode old) {
@@ -704,15 +662,11 @@ class Image extends RenderNodeWrapper {
 
   Image({
     Object key,
-    Style style,
-    String inlineStyle,
     this.width,
     this.height,
     this.src
   }) : super(
-    key: key,
-    style: style,
-    inlineStyle: inlineStyle
+    key: key
   );
 
   void syncRenderNode(UINode old) {
@@ -754,7 +708,7 @@ bool _buildScheduled = false;
 bool _inRenderDirtyComponents = false;
 
 void _buildDirtyComponents() {
-  _tracing.begin('fn::_buildDirtyComponents');
+  //_tracing.begin('fn::_buildDirtyComponents');
 
   Stopwatch sw;
   if (_shouldLogRenderDuration)
@@ -781,7 +735,7 @@ void _buildDirtyComponents() {
     print('Render took ${sw.elapsedMicroseconds} microseconds');
   }
 
-  _tracing.end('fn::_buildDirtyComponents');
+  //_tracing.end('fn::_buildDirtyComponents');
 }
 
 void _scheduleComponentForRender(Component c) {
@@ -842,7 +796,7 @@ abstract class Component extends UINode {
 
   // TODO(rafaelw): It seems wrong to expose DOM at all. This is presently
   // needed to get sizing info.
-  RenderCSS getRoot() => root;
+  RenderNode getRoot() => root;
 
   void _remove() {
     assert(_built != null);
@@ -937,22 +891,22 @@ abstract class Component extends UINode {
 }
 
 abstract class App extends Component {
-  RenderCSS _host;
 
   App() : super(stateful: true) {
-    _host = new RenderCSSRoot(this);
+    _appView = new AppView(null);
     _scheduleComponentForRender(this);
   }
 
-  void _buildIfDirty() {
-    if (!_dirty || _defunct)
-      return;
+  AppView _appView;
 
-    _trace('$_key rebuilding...');
+  void _buildIfDirty() {
+    assert(_dirty);
+    assert(!_defunct);
+    _trace('$_key rebuilding app...');
     _sync(null, null);
     if (root.parent == null)
-      _host.add(root);
-    assert(root.parent == _host);
+      _appView.root = root;
+    assert(root.parent is RenderView);
   }
 }
 
@@ -961,4 +915,55 @@ class Text extends Component {
   final String data;
   bool get interchangeable => true;
   UINode build() => new Paragraph(children: [new TextFragment(data)]);
+}
+
+
+// for now, but only for now:
+
+class RenderSolidColor extends RenderDecoratedBox {
+  final double desiredHeight;
+  final double desiredWidth;
+  final int backgroundColor;
+
+  RenderSolidColor(int backgroundColor, { this.desiredHeight: double.INFINITY,
+                                          this.desiredWidth: double.INFINITY })
+      : backgroundColor = backgroundColor,
+        super(new BoxDecoration(backgroundColor: backgroundColor));
+
+  BoxDimensions getIntrinsicDimensions(BoxConstraints constraints) {
+    return new BoxDimensions.withConstraints(constraints,
+                                             height: desiredHeight,
+                                             width: desiredWidth);
+  }
+
+  void layout(BoxConstraints constraints, { RenderNode relayoutSubtreeRoot }) {
+    width = constraints.constrainWidth(desiredWidth);
+    height = constraints.constrainHeight(desiredHeight);
+    layoutDone();
+  }
+
+  void handlePointer(sky.PointerEvent event) {
+    if (event.type == 'pointerdown')
+      decoration = new BoxDecoration(backgroundColor: 0xFFFF0000);
+    else if (event.type == 'pointerup')
+      decoration = new BoxDecoration(backgroundColor: backgroundColor);
+  }
+}
+
+class Rectangle extends RenderNodeWrapper {
+
+  Rectangle(this.color, {
+    Object key
+  }) : super(
+    key: key
+  );
+
+  final int color;
+
+  RenderSolidColor root;
+  RenderSolidColor createNode() => new RenderSolidColor(color, desiredWidth: 40.0, desiredHeight: 130.0);
+
+  static final Rectangle _emptyRectangle = new Rectangle(0);
+  RenderNodeWrapper get emptyNode => _emptyRectangle;
+
 }

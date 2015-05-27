@@ -101,11 +101,12 @@ abstract class RenderNode extends AbstractNode {
       return;
     }
     _needsLayout = true;
-    assert(parent is RenderNode);
-    if (_relayoutSubtreeRoot != null)
+    if (_relayoutSubtreeRoot != null) {
+      assert(parent is RenderNode);
       parent.markNeedsLayout();
-    else
+    } else {
       _nodesNeedingLayout.add(this);
+    }
   }
   static void flushLayout() {
     _debugDoingLayout = true;
@@ -581,6 +582,8 @@ class RenderView extends RenderNode {
       _width = newWidth;
       _height = newHeight;
       relayout();
+    } else {
+      layoutDone();
     }
   }
 
@@ -595,6 +598,7 @@ class RenderView extends RenderNode {
       assert(root.width == width);
       assert(root.height == height);
     }
+    layoutDone();
   }
 
   void rotate({ int oldAngle, int newAngle, Duration time }) {

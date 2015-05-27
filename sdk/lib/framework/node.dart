@@ -1,5 +1,3 @@
-library node;
-
 class AbstractNode {
 
   // Nodes always have a 'depth' greater than their ancestors'.
