@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 
 import 'dart:math';
-import 'package:sky/framework/fn.dart';
-import 'package:sky/framework/layout.dart';
+import 'package:sky/framework/fn2.dart';
+import 'package:sky/framework/layout2.dart';
 
 class StockArrow extends Component {
   static final Style _style = new Style('''
