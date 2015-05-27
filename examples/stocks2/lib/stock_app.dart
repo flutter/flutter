@@ -14,7 +14,7 @@
 // import 'package:sky/framework/components2/modal_overlay.dart';
 // import 'package:sky/framework/components2/popup_menu.dart';
 // import 'package:sky/framework/components2/radio.dart';
-// import 'package:sky/framework/components2/scaffold.dart';
+import 'package:sky/framework/components2/scaffold.dart';
 import 'package:sky/framework/fn2.dart';
 import 'package:sky/framework/theme/typography.dart' as typography;
 import 'package:sky/framework/theme/colors.dart';
@@ -161,39 +161,40 @@ class StocksApp extends App {
   //   );
   // }
 
-  // UINode buildToolBar() {
-  //   return new StyleNode(
-  //     new ToolBar(
-  //       left: new IconButton(
-  //         icon: 'navigation/menu_white',
-  //         onGestureTap: _drawerController.toggle),
-  //       center: new Container(
-  //         style: _titleStyle,
-  //         children: [new Text('Stocks')]),
-  //       right: [
-  //         new IconButton(
-  //           icon: 'action/search_white',
-  //           onGestureTap: _handleSearchBegin),
-  //         new IconButton(
-  //           icon: 'navigation/more_vert_white',
-  //           onGestureTap: _handleMenuShow)
-  //       ]),
-  //     _toolBarStyle);
-  // }
+  UINode buildToolBar() {
+    return new Rectangle(0xFF00FF00);
+    // return new StyleNode(
+    //   new ToolBar(
+    //     left: new IconButton(
+    //       icon: 'navigation/menu_white',
+    //       onGestureTap: _drawerController.toggle),
+    //     center: new Container(
+    //       style: _titleStyle,
+    //       children: [new Text('Stocks')]),
+    //     right: [
+    //       new IconButton(
+    //         icon: 'action/search_white',
+    //         onGestureTap: _handleSearchBegin),
+    //       new IconButton(
+    //         icon: 'navigation/more_vert_white',
+    //         onGestureTap: _handleMenuShow)
+    //     ]),
+    //   _toolBarStyle);
+  }
 
-  // // TODO(abarth): Should we factor this into a SearchBar in the framework?
-  // UINode buildSearchBar() {
-  //   return new StyleNode(
-  //     new ToolBar(
-  //       left: new IconButton(
-  //         icon: 'navigation/arrow_back_grey600',
-  //         onGestureTap: _handleSearchEnd),
-  //       center: new Input(
-  //         focused: true,
-  //         placeholder: 'Search stocks',
-  //         onChanged: _handleSearchQueryChanged)),
-  //     _searchBarStyle);
-  // }
+  // TODO(abarth): Should we factor this into a SearchBar in the framework?
+  UINode buildSearchBar() {
+    // return new StyleNode(
+    //   new ToolBar(
+    //     left: new IconButton(
+    //       icon: 'navigation/arrow_back_grey600',
+    //       onGestureTap: _handleSearchEnd),
+    //     center: new Input(
+    //       focused: true,
+    //       placeholder: 'Search stocks',
+    //       onChanged: _handleSearchQueryChanged)),
+    //   _searchBarStyle);
+  }
 
   // void addMenuToOverlays(List<UINode> overlays) {
   //   if (_menuController == null)
@@ -211,17 +212,19 @@ class StocksApp extends App {
     // List<UINode> overlays = [];
     // addMenuToOverlays(overlays);
 
-    // return new Scaffold(
-    //   header: _isSearching ? buildSearchBar() : buildToolBar(),
-    //   content: new Stocklist(stocks: _stocks, query: _searchQuery),
-    //   fab: new FloatingActionButton(
+    return new Scaffold(
+       toolbar: _isSearching ? buildSearchBar() : buildToolBar()
+    // ,
+    //   body: new Stocklist(stocks: _stocks, query: _searchQuery),
+    //   floatingActionButton: new FloatingActionButton(
     //     content: new Icon(type: 'content/add_white', size: 24), level: 3),
     //   drawer: _drawerShowing ? buildDrawer() : null,
     //   overlays: overlays
-    // );
+    );
   }
 }
 
 void main() {
+  print("starting stocks app!");
   new StocksApp();
 }

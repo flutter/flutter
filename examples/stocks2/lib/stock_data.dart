@@ -55,7 +55,7 @@ class StockDataFetcher {
   final StockDataCallback callback;
 
   StockDataFetcher(this.callback) {
-    _fetchNextChunk();
+    // _fetchNextChunk(); // TODO(ianh): crashes
   }
 
   void _fetchNextChunk() {
