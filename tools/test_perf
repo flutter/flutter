@@ -10,6 +10,7 @@ import os
 import re
 import requests
 import skypy.configuration as configuration
+import skypy.skyserver
 import subprocess
 
 
@@ -69,10 +70,9 @@ class PerfHarness(object):
         self.args = args
 
     def _start_server(self):
-        subprocess.call(os.path.join(self.paths.sky_tools_directory,
-            'download_sky_server'))
+        # TODO(eseidel): Shouldn't this just use skyserver.py?
         return subprocess.Popen([
-            os.path.join(self.paths.src_root, 'out', 'downloads', 'sky_server'),
+            SkyServer.sky_server_path(),
             self.paths.src_root,
             str(HTTP_PORT),
             '-t', self.args.configuration

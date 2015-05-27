@@ -30,7 +30,7 @@ determine whether its using android, for example.
 Running tests manually
 ----------------------
 
-* ``out/downloads/sky_server -t Debug . 8000`` (If you don't have ``sky_server`` yet, run ``sky/tools/download_sky_server``.)
+* ``sky/tools/skygo/linux64/sky_server -t Debug . 8000``
 * ``out/Debug/mojo_shell --args-for="mojo:native_viewport_service --use-headless-config --use-osmesa" --args-for"=mojo:sky_viewer --testing" --content-handlers=text/sky,mojo:sky_viewer --url-mappings=mojo:window_manager=mojo:sky_tester,mojo:surfaces_service=mojo:fake_surfaces_service mojo:window_manager``
 * The ``sky_tester`` should print ``#READY`` when ready
 * Type the URL you wish to run, for example ``http://127.0.0.1:8000/sky/tests/lowlevel/text.html``, and press the enter key
