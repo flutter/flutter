@@ -16,6 +16,7 @@ import org.chromium.mojo.system.DataPipe;
 import org.chromium.mojo.system.MessagePipeHandle;
 import org.chromium.mojo.system.MojoException;
 import org.chromium.mojom.mojo.CookieStore;
+import org.chromium.mojom.mojo.HttpServerDelegate;
 import org.chromium.mojom.mojo.NetAddress;
 import org.chromium.mojom.mojo.NetworkService;
 import org.chromium.mojom.mojo.TcpBoundSocket;
@@ -42,8 +43,9 @@ public class NetworkServiceImpl implements NetworkService {
         assert core != null;
         mCore = core;
 
-        if (sThreadPool == null)
+        if (sThreadPool == null) {
             sThreadPool = Executors.newCachedThreadPool();
+        }
 
         if (sClient == null) {
             sClient = new OkHttpClient();
@@ -101,5 +103,11 @@ public class NetworkServiceImpl implements NetworkService {
     @Override
     public void createUdpSocket(InterfaceRequest<UdpSocket> socket) {
         socket.close();
+    }
+
+    @Override
+    public void createHttpServer(NetAddress localAddress, HttpServerDelegate delegate,
+            CreateHttpServerResponse callback) {
+        delegate.close();
     }
 }

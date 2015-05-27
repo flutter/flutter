@@ -21,6 +21,7 @@ import org.chromium.mojo.system.DataPipe;
 import org.chromium.mojo.system.MojoException;
 import org.chromium.mojo.system.MojoResult;
 import org.chromium.mojo.system.Pair;
+import org.chromium.mojom.mojo.HttpHeader;
 import org.chromium.mojom.mojo.NetworkError;
 import org.chromium.mojom.mojo.UrlLoader;
 import org.chromium.mojom.mojo.UrlLoaderStatus;
@@ -120,11 +121,8 @@ public class UrlLoaderImpl implements UrlLoader {
                 new Request.Builder().url(request.url).method(request.method, null);
 
         if (request.headers != null) {
-            for (String header : request.headers) {
-                String[] parts = header.split(":");
-                String name = parts[0].trim();
-                String value = parts.length > 1 ? parts[1].trim() : "";
-                builder.addHeader(name, value);
+            for (HttpHeader header : request.headers) {
+                builder.addHeader(header.name, header.value);
             }
         }
 
@@ -160,11 +158,12 @@ public class UrlLoaderImpl implements UrlLoader {
                 }
 
                 Headers headers = response.headers();
-                urlResponse.headers = new String[headers.size()];
+                urlResponse.headers = new HttpHeader[headers.size()];
                 for (int i = 0; i < headers.size(); ++i) {
-                    String name = headers.name(i);
-                    String value = headers.value(i);
-                    urlResponse.headers[i] = name + ": " + value;
+                    HttpHeader header = new HttpHeader();
+                    header.name = headers.name(i);
+                    header.value = headers.value(i);
+                    urlResponse.headers[i] = header;
                 }
 
                 ResponseBody body = response.body();
@@ -172,8 +171,9 @@ public class UrlLoaderImpl implements UrlLoader {
                 if (mediaType != null) {
                     urlResponse.mimeType = mediaType.type() + "/" + mediaType.subtype();
                     Charset charset = mediaType.charset();
-                    if (charset != null)
+                    if (charset != null) {
                         urlResponse.charset = charset.displayName();
+                    }
                 }
 
                 Pair<DataPipe.ProducerHandle, DataPipe.ConsumerHandle> handles =
