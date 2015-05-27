@@ -6,6 +6,17 @@ import 'layout2.dart';
 import 'dart:sky' as sky;
 
 class AppView {
+
+  AppView(RenderBox root) {
+    sky.view.setEventCallback(_handleEvent);
+    sky.view.setBeginFrameCallback(_beginFrame);
+
+    _renderView = new RenderView(root: root);
+    _renderView.layout(newWidth: sky.view.width, newHeight: sky.view.height);
+  
+    sky.view.scheduleFrame();
+  }
+
   RenderView _renderView;
 
   void _beginFrame(double timeStamp) {
@@ -23,13 +34,4 @@ class AppView {
     });
   }
 
-  AppView(RenderBox root) {
-    sky.view.setEventCallback(_handleEvent);
-    sky.view.setBeginFrameCallback(_beginFrame);
-
-    _renderView = new RenderView(root: root);
-    _renderView.layout(newWidth: sky.view.width, newHeight: sky.view.height);
-  
-    sky.view.scheduleFrame();
-  }
 }
