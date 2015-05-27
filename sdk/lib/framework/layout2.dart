@@ -2,13 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-library layout;
-
-// This version of layout.dart is an update to the other one, this one using new APIs.
-// It will not work in a stock Sky setup currently.
-
 import 'node.dart';
-
 import 'dart:sky' as sky;
 
 // ABSTRACT LAYOUT
@@ -550,7 +544,6 @@ class RenderView extends RenderNode {
     RenderBox root,
     this.timeForRotation: const Duration(microseconds: 83333)
   }) {
-    assert(root != null);
     this.root = root;
   }
 
@@ -566,9 +559,11 @@ class RenderView extends RenderNode {
   RenderBox _root;
   RenderBox get root => _root;
   void set root (RenderBox value) {
-    assert(value != null);
+    if (_root != null)
+      dropChild(_root);
     _root = value;
-    adoptChild(_root);
+    if (_root != null)
+      adoptChild(_root);
     markNeedsLayout();
   }
 
@@ -577,9 +572,8 @@ class RenderView extends RenderNode {
     double newHeight,
     int newOrientation
   }) {
-    assert(root != null);
     if (newOrientation != orientation) {
-      if (orientation != null)
+      if (orientation != null && root != null)
         root.rotate(oldAngle: orientation, newAngle: newOrientation, time: timeForRotation);
       _orientation = newOrientation;
     }
@@ -591,11 +585,16 @@ class RenderView extends RenderNode {
   }
 
   void relayout() {
-    assert(root != null);
-    root.layout(new BoxConstraints(
-        minWidth: width, maxWidth: width, minHeight: height, maxHeight: height));
-    assert(root.width == width);
-    assert(root.height == height);
+    if (root != null) {
+      root.layout(new BoxConstraints(
+        minWidth: width,
+        maxWidth: width,
+        minHeight: height,
+        maxHeight: height
+      ));
+      assert(root.width == width);
+      assert(root.height == height);
+    }
   }
 
   void rotate({ int oldAngle, int newAngle, Duration time }) {
@@ -603,17 +602,19 @@ class RenderView extends RenderNode {
   }
 
   bool hitTest(HitTestResult result, { double x, double y }) {
-    assert(root != null);
     if (x < 0.0 || x >= width || y < 0.0 || y >= height)
       return false;
-    if (x >= 0.0 && x < root.width && y >= 0.0 && y < root.height)
-      root.hitTest(result, x: x, y: y);
+    if (root != null) {
+      if (x >= 0.0 && x < root.width && y >= 0.0 && y < root.height)
+        root.hitTest(result, x: x, y: y);
+    }
     result.add(this);
     return true;
   }
 
   void paint(RenderNodeDisplayList canvas) {
-    canvas.paintChild(root, 0.0, 0.0);
+    if (root != null)
+      canvas.paintChild(root, 0.0, 0.0);
   }
 
   void paintFrame() {
@@ -895,74 +896,4 @@ class RenderFlex extends RenderDecoratedBox with ContainerRenderNodeMixin<Render
     super.paint(canvas);
     defaultPaint(canvas);
   }
-}
-
-// SCAFFOLD LAYOUT MANAGER
-
-// a sample special-purpose layout manager
-
-class ScaffoldBox extends RenderBox {
-
-  ScaffoldBox(this.toolbar, this.body, this.statusbar, this.drawer) {
-    assert(body != null);
-  }
-
-  final RenderBox toolbar;
-  final RenderBox body;
-  final RenderBox statusbar;
-  final RenderBox drawer;
-
-  void layout(BoxConstraints constraints, { RenderNode relayoutSubtreeRoot }) {
-    width = constraints.constrainWidth(0.0);
-    height = constraints.constrainHeight(0.0);
-    relayout();
-  }
-
-  static const kToolbarHeight = 100.0;
-  static const kStatusbarHeight = 50.0;
-
-  void relayout() {
-    double bodyHeight = height;
-    if (toolbar != null) {
-      toolbar.layout(new BoxConstraints.tight(width: width, height: kToolbarHeight));
-      assert(toolbar.parentData is BoxParentData);
-      toolbar.parentData.x = 0.0;
-      toolbar.parentData.y = 0.0;
-      bodyHeight -= kToolbarHeight;
-    }
-    if (statusbar != null) {
-      statusbar.layout(new BoxConstraints.tight(width: width, height: kStatusbarHeight));
-      assert(statusbar.parentData is BoxParentData);
-      statusbar.parentData.x = 0.0;
-      statusbar.parentData.y = height - kStatusbarHeight;
-      bodyHeight -= kStatusbarHeight;
-    }
-    body.layout(new BoxConstraints.tight(width: width, height: bodyHeight));
-    if (drawer != null)
-      drawer.layout(new BoxConstraints(minWidth: 0.0, maxWidth: width, minHeight: height, maxHeight: height));
-    layoutDone();
-  }
-
-  void hitTestChildren(HitTestResult result, { double x, double y }) {
-    if ((drawer != null) && (x < drawer.width)) {
-      drawer.hitTest(result, x: x, y: y);
-    } else if ((toolbar != null) && (y < toolbar.height)) {
-      toolbar.hitTest(result, x: x, y: y);
-    } else if ((statusbar != null) && (y > (statusbar.parentData as BoxParentData).y)) {
-      statusbar.hitTest(result, x: x, y: y-(statusbar.parentData as BoxParentData).y);
-    } else {
-      body.hitTest(result, x: x, y: y-(body.parentData as BoxParentData).y);
-    }
-  }
-
-  void paint(RenderNodeDisplayList canvas) {
-    canvas.paintChild(body, (body.parentData as BoxParentData).x, (body.parentData as BoxParentData).y);
-    if (statusbar != null)
-      canvas.paintChild(statusbar, (statusbar.parentData as BoxParentData).x, (statusbar.parentData as BoxParentData).y);
-    if (toolbar != null)
-      canvas.paintChild(toolbar, (toolbar.parentData as BoxParentData).x, (toolbar.parentData as BoxParentData).y);
-    if (drawer != null)
-      canvas.paintChild(drawer, (drawer.parentData as BoxParentData).x, (drawer.parentData as BoxParentData).y);
-  }
-
 }
