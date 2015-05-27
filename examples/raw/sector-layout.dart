@@ -94,7 +94,6 @@ abstract class RenderSector extends RenderNode {
 }
 
 class RenderDecoratedSector extends RenderSector {
-  BoxDecoration _decoration;
 
   RenderDecoratedSector(BoxDecoration decoration) : _decoration = decoration;
 
@@ -512,9 +511,9 @@ class RenderSolidColor extends RenderDecoratedSector {
 
   void handlePointer(sky.PointerEvent event) {
     if (event.type == 'pointerdown')
-      setBoxDecoration(new BoxDecoration(backgroundColor: 0xFFFF0000));
+      decoration = new BoxDecoration(backgroundColor: 0xFFFF0000);
     else if (event.type == 'pointerup')
-      setBoxDecoration(new BoxDecoration(backgroundColor: backgroundColor));
+      decoration = new BoxDecoration(backgroundColor: backgroundColor);
   }
 }
 
