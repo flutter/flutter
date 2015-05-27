@@ -1125,7 +1125,11 @@ core_idl_files = get_path_info([
                                ],
                                "abspath")
 
-core_dart_files = get_path_info([ "painting/Rect.dart" ], "abspath")
+core_dart_files = get_path_info([
+                                  "painting/Rect.dart",
+                                  "painting/Point.dart",
+                                ],
+                                "abspath")
 
 # Files for which bindings (.cpp and .h files) will be generated
 # 'partial interface', target (right side of) 'implements', and
