@@ -9,6 +9,7 @@ import os
 import sys
 import subprocess
 import json
+import platform
 
 
 def library_paths(build_dir):
@@ -44,10 +45,14 @@ def compute_path_to_app_id_map(paths, cache, cache_mtime):
     for path in paths:
         app_id = get_cached_app_id(path, cache, cache_mtime)
         if not app_id:
-            logging.info('sha256sum %s' % path)
+            if platform.system() == 'Darwin':
+                logging.info('shasum -a 256 %s' % path)
+                output = subprocess.check_output(['shasum', '-a', '256', path])
+            else:
+                logging.info('sha256sum %s' % path)
+                output = subprocess.check_output(['sha256sum', path])
             # Example output:
             # f82a3551478a9a0e010adccd675053b9 png_viewer.mojo
-            output = subprocess.check_output(['sha256sum', path])
             app_id = output.strip().split()[0]
         path_to_app_id_map[path] = app_id
     return path_to_app_id_map
