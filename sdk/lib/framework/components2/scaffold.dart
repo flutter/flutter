@@ -96,12 +96,10 @@ class RenderScaffold extends RenderDecoratedBox {
     double bodyHeight = height;
     double bodyPosition = 0.0;
     if (toolbar != null) {
-    print("laying out toolbar...");
       toolbar.layout(new BoxConstraints.tight(width: width, height: kToolbarHeight));
       assert(toolbar.parentData is BoxParentData);
       toolbar.parentData.x = 0.0;
       toolbar.parentData.y = 0.0;
-    print("...at ${toolbar.parentData.x},${toolbar.parentData.y} dim ${toolbar.width}x${toolbar.height}");
       bodyPosition = kToolbarHeight;
       bodyHeight -= kToolbarHeight;
     }
