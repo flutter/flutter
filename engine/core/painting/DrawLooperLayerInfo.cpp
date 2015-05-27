@@ -3,24 +3,14 @@
 // found in the LICENSE file.
 
 #include "sky/engine/config.h"
-#include "sky/engine/core/painting/Paint.h"
-
-#include "sky/engine/core/painting/DrawLooper.h"
+#include "sky/engine/core/painting/DrawLooperLayerInfo.h"
 
 namespace blink {
 
-Paint::Paint()
-{
+DrawLooperLayerInfo::DrawLooperLayerInfo() {
 }
 
-Paint::~Paint()
-{
-}
-
-void Paint::setDrawLooper(DrawLooper* looper)
-{
-    ASSERT(looper);
-    m_paint.setLooper(looper->looper());
+DrawLooperLayerInfo::~DrawLooperLayerInfo() {
 }
 
 } // namespace blink
