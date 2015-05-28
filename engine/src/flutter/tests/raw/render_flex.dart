@@ -6,7 +6,9 @@ import '../resources/third_party/unittest/unittest.dart';
 import '../resources/unit.dart';
 import 'dart:sky' as sky;
 import 'package:sky/framework/app.dart';
-import 'package:sky/framework/layout2.dart';
+import 'package:sky/framework/rendering/render_block.dart';
+import 'package:sky/framework/rendering/render_box.dart';
+import 'package:sky/framework/rendering/render_flex.dart';
 
 class RenderSolidColor extends RenderDecoratedBox {
   final sky.Size desiredSize;
@@ -41,13 +43,13 @@ void main() {
   test("should flex", () {
     RenderFlex flexRoot = new RenderFlex(direction: FlexDirection.Vertical);
 
-    RenderNode root = new RenderDecoratedBox(
+    RenderDecoratedBox root = new RenderDecoratedBox(
       decoration: new BoxDecoration(backgroundColor: 0xFF000000),
       child: flexRoot
     );
 
     void addFlexChildSolidColor(RenderFlex parent, int backgroundColor, { int flex: 0 }) {
-      RenderNode child = new RenderSolidColor(backgroundColor);
+      RenderSolidColor child = new RenderSolidColor(backgroundColor);
       parent.add(child);
       child.parentData.flex = flex;
     }
