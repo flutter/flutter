@@ -7,22 +7,19 @@ import 'package:sky/framework/app.dart';
 import 'package:sky/framework/layout2.dart';
 
 class RenderSolidColor extends RenderDecoratedBox {
-  final double desiredHeight;
-  final double desiredWidth;
+  final Size desiredSize;
   final int backgroundColor;
 
-  RenderSolidColor(int backgroundColor, { this.desiredHeight: double.INFINITY,
-                                          this.desiredWidth: double.INFINITY })
+  RenderSolidColor(int backgroundColor, { this.desiredSize: const Size.infinite() })
       : backgroundColor = backgroundColor,
-        super(new BoxDecoration(backgroundColor: backgroundColor));
+        super(decoration: new BoxDecoration(backgroundColor: backgroundColor));
 
   Size getIntrinsicDimensions(BoxConstraints constraints) {
     return constraints.constrain(new Size(desiredWidth, desiredHeight));
   }
 
   void performLayout() {
-    width = constraints.constrainWidth(desiredWidth);
-    height = constraints.constrainHeight(desiredHeight);
+    size = constraints.constrain(desiredSize);
   }
 
   void handlePointer(PointerEvent event) {
@@ -36,12 +33,15 @@ class RenderSolidColor extends RenderDecoratedBox {
 AppView app;
 
 void main() {
-  var root = new RenderFlex(
-      direction: FlexDirection.Vertical,
-      decoration: new BoxDecoration(backgroundColor: 0xFF000000));
+  RenderFlex flexRoot = new RenderFlex(direction: FlexDirection.Vertical);
+
+  RenderNode root = new RenderDecoratedBox(
+    decoration: new BoxDecoration(backgroundColor: 0xFF606060),
+    child: flexRoot
+  );
 
   RenderNode child = new RenderSolidColor(0xFFFFFF00);
-  root.add(child);
+  flexRoot.add(child);
   child.parentData.flex = 2;
 
   // The internet is a beautiful place.  https://baconipsum.com/
@@ -51,8 +51,11 @@ andouille leberkas capicola meatloaf. Chicken pig ball tip pork picanha bresaola
 alcatra. Pork pork belly alcatra, flank chuck drumstick biltong doner jowl.
 Pancetta meatball tongue tenderloin rump tail jowl boudin.""";
 
-  child = new RenderParagraph(meatyString);
-  root.add(child);
+  child = new RenderDecoratedBox(
+    decoration: new BoxDecoration(backgroundColor: 0xFFFFFFFF),
+    child: new RenderParagraph(text: meatyString, color: 0xFF009900)
+  );
+  flexRoot.add(child);
   child.parentData.flex = 1;
 
   app = new AppView(root);
