@@ -968,14 +968,20 @@ class RenderFlex extends RenderDecoratedBox with ContainerRenderNodeMixin<Render
   }
 }
 
+class RenderInline extends RenderNode {
+  String data;
+
+  RenderInline(this.data);
+}
+
 class RenderParagraph extends RenderDecoratedBox {
-  final String text;
-  LayoutRoot _layoutRoot = new LayoutRoot();
-  Document _document;
+  String text;
+  sky.LayoutRoot _layoutRoot = new sky.LayoutRoot();
+  sky.Document _document;
 
   RenderParagraph(String this.text) :
    super(new BoxDecoration(backgroundColor: 0xFFFFFFFF)) {
-    _document = new Document();
+    _document = new sky.Document();
     _layoutRoot.rootElement = _document.createElement('p');
     _layoutRoot.rootElement.appendChild(_document.createText(this.text));
   }
@@ -983,9 +989,12 @@ class RenderParagraph extends RenderDecoratedBox {
   void performLayout() {
     _layoutRoot.maxWidth = constraints.maxWidth;
     _layoutRoot.minWidth = constraints.minWidth;
+    _layoutRoot.minHeight = constraints.minHeight;
+    _layoutRoot.maxHeight = constraints.maxHeight;
     _layoutRoot.layout();
     width = _layoutRoot.rootElement.width;
-    height = _layoutRoot.rootElement.height;
+    // TODO(eseidel): LayoutRoot will not expand to fill height. :(
+    height = _constraints.constrainHeight(_layoutRoot.rootElement.height);
   }
 
   void hitTestChildren(HitTestResult result, { double x, double y }) {

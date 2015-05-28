@@ -543,10 +543,11 @@ class Container extends OneChildListRenderNodeWrapper {
   );
 }
 
-class Paragraph extends OneChildListRenderNodeWrapper {
+class Paragraph extends RenderNodeWrapper {
 
-  RenderCSSParagraph root;
-  RenderCSSParagraph createNode() => new RenderCSSParagraph(this);
+  RenderParagraph root;
+  RenderParagraph createNode() => new RenderParagraph(text);
+  String text;
 
   static final Paragraph _emptyContainer = new Paragraph();
 
@@ -554,11 +555,15 @@ class Paragraph extends OneChildListRenderNodeWrapper {
 
   Paragraph({
     Object key,
-    List<UINode> children
+    this.text
   }) : super(
-    key: key,
-    children: children
+    key: key
   );
+
+  void syncRenderNode(UINode old) {
+    super.syncRenderNode(old);
+    root.text = text;
+  }
 }
 
 class FlexContainer extends OneChildListRenderNodeWrapper {
@@ -643,29 +648,6 @@ abstract class OneChildRenderNodeWrapper extends RenderNodeWrapper {
     assert(child != null);
     removeChild(child);
     super._remove();
-  }
-}
-
-class TextFragment extends RenderNodeWrapper {
-
-  RenderCSSInline root;
-  RenderCSSInline createNode() => new RenderCSSInline(this, this.data);
-
-  static final TextFragment _emptyText = new TextFragment('');
-
-  RenderNodeWrapper get emptyNode => _emptyText;
-
-  final String data;
-
-  TextFragment(this.data, {
-    Object key
-  }) : super(
-    key: key
-  );
-
-  void syncRenderNode(UINode old) {
-    super.syncRenderNode(old);
-    root.data = data;
   }
 }
 
@@ -936,7 +918,7 @@ class Text extends Component {
   Text(this.data) : super(key: '*text*');
   final String data;
   bool get interchangeable => true;
-  UINode build() => new Paragraph(children: [new TextFragment(data)]);
+  UINode build() => new Paragraph(text: data);
 }
 
 
