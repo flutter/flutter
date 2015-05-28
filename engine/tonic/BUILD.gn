@@ -52,6 +52,7 @@ source_set("tonic") {
   ]
 
   public_deps = [
-    "//dart/runtime/bin:libdart_withcore",
+    "//dart/runtime:libdart",
+    "//dart/runtime/vm:libdart_platform",
   ]
 }

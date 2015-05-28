@@ -36,7 +36,7 @@ source_set("bindings") {
   deps = [
     "//base",
     "//dart/runtime/bin:embedded_dart_io",
-    "//dart/runtime/bin:libdart_withcore",
+    "//dart/runtime:libdart",
     "//mojo/public/c/system",
     "//mojo/public/cpp/system",
     "//sky/engine/core:prerequisites",
@@ -370,7 +370,8 @@ action("generate_dart_sky") {
 source_set("generated_bindings") {
   deps = [
     "//base",
-    "//dart/runtime/bin:libdart_withcore",
+    "//dart/runtime:libdart",
+    "//dart/runtime/vm:libdart_platform",
     "//gpu/command_buffer/client:gles2_c_lib",
     "//mojo/application",
     "//mojo/common",
