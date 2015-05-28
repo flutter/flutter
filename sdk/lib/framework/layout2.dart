@@ -825,19 +825,19 @@ class RenderBlock extends RenderDecoratedBox with ContainerRenderNodeMixin<Rende
 
   void performLayout() {
     assert(constraints is BoxConstraints);
-    size.width = constraints.constrainWidth(constraints.maxWidth);
-    assert(size.width < double.INFINITY);
+    double width = constraints.constrainWidth(constraints.maxWidth);
     double y = 0.0;
-    double innerWidth = size.width;
     RenderBox child = firstChild;
     while (child != null) {
-      child.layout(new BoxConstraints(minWidth: innerWidth, maxWidth: innerWidth), parentUsesSize: true);
+      child.layout(new BoxConstraints(minWidth: width, maxWidth: width), parentUsesSize: true);
       assert(child.parentData is BlockParentData);
       child.parentData.position = new sky.Point(0.0, y);
       y += child.size.height;
       child = child.parentData.nextSibling;
     }
-    size.height = constraints.constrainHeight(y);
+    size = new sky.Size(width, constraints.constrainHeight(y));
+    assert(size.width < double.INFINITY);
+    assert(size.height < double.INFINITY);
   }
 
   void hitTestChildren(HitTestResult result, { sky.Point position }) {
