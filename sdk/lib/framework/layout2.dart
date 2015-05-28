@@ -502,28 +502,40 @@ abstract class RenderProxyBox extends RenderBox with RenderNodeWithChildMixin<Re
   }
 
   sky.Size getIntrinsicDimensions(BoxConstraints constraints) {
-    return child.getIntrinsicDimensions(constraints);
+    if (child != null)
+      return child.getIntrinsicDimensions(constraints);
+    return super.getIntrinsicDimensions(constraints);
   }
 
   void performLayout() {
-    child.layout(constraints, parentUsesSize: true);
-    size = child.size;
+    if (child != null) {
+      child.layout(constraints, parentUsesSize: true);
+      size = child.size;
+    } else {
+      performResize();
+    }
   }
 
   void hitTestChildren(HitTestResult result, { sky.Point position }) {
-    child.hitTest(result, position: position);
+    if (child != null)
+      child.hitTest(result, position: position);
+    else
+      super.hitTestChildren(result, position: position);
   }
 
   void paint(RenderNodeDisplayList canvas) {
-    child.paint(canvas);
+    if (child != null)
+      child.paint(canvas);
   }
 }
 
 class RenderSizedBox extends RenderProxyBox {
   final sky.Size desiredSize;
 
-  RenderSizedBox(RenderBox child, [this.desiredSize = const sky.Size.infinite()])
-      : super(child);
+  RenderSizedBox({
+    RenderBox child, 
+    this.desiredSize: const sky.Size.infinite()
+  }) : super(child);
 
   sky.Size getIntrinsicDimensions(BoxConstraints constraints) {
     return constraints.constrain(desiredSize);
@@ -603,9 +615,12 @@ class BoxDecoration {
   final int backgroundColor;
 }
 
-class RenderDecoratedBox extends RenderBox {
+class RenderDecoratedBox extends RenderProxyBox {
 
-  RenderDecoratedBox(BoxDecoration decoration) : _decoration = decoration;
+  RenderDecoratedBox({
+    BoxDecoration decoration,
+    RenderBox child
+  }) : _decoration = decoration, super(child);
 
   BoxDecoration _decoration;
   BoxDecoration get decoration => _decoration;
@@ -614,10 +629,6 @@ class RenderDecoratedBox extends RenderBox {
       return;
     _decoration = value;
     markNeedsPaint();
-  }
-
-  void performLayout() {
-    size = constraints.constrain(new sky.Size.infinite());
   }
 
   void paint(RenderNodeDisplayList canvas) {
@@ -631,29 +642,9 @@ class RenderDecoratedBox extends RenderBox {
       sky.Paint paint = new sky.Paint()..color = _decoration.backgroundColor;
       canvas.drawRect(new sky.Rect.fromLTRB(0.0, 0.0, size.width, size.height), paint);
     }
-  }
-}
-
-class RenderDecoratedCircle extends RenderDecoratedBox with RenderNodeWithChildMixin<RenderBox> {
-  RenderDecoratedCircle({
-    BoxDecoration decoration,
-    RenderBox child
-  }) : super(decoration) {
-    this.child = child;
+    super.paint(canvas);
   }
 
-  void paint(RenderNodeDisplayList canvas) {
-    assert(size.width != null);
-    assert(size.height != null);
-
-    if (_decoration == null)
-      return;
-
-    if (_decoration.backgroundColor != null) {
-      sky.Paint paint = new sky.Paint()..color = _decoration.backgroundColor;
-      canvas.drawCircle(0.0, 0.0, (size.width + size.height) / 2, paint);
-    }
-  }
 }
 
 
@@ -769,15 +760,11 @@ abstract class RenderBoxContainerDefaultsMixin<ChildType extends RenderBox, Pare
 
 class BlockParentData extends BoxParentData with ContainerParentDataMixin<RenderBox> { }
 
-class RenderBlock extends RenderDecoratedBox with ContainerRenderNodeMixin<RenderBox, BlockParentData>,
-                                                  RenderBoxContainerDefaultsMixin<RenderBox, BlockParentData> {
+class RenderBlock extends RenderBox with ContainerRenderNodeMixin<RenderBox, BlockParentData>,
+                                         RenderBoxContainerDefaultsMixin<RenderBox, BlockParentData> {
   // lays out RenderBox children in a vertical stack
   // uses the maximum width provided by the parent
   // sizes itself to the height of its child stack
-
-  RenderBlock({
-    BoxDecoration decoration
-  }) : super(decoration);
 
   void setParentData(RenderBox child) {
     if (child.parentData is! BlockParentData)
@@ -827,7 +814,6 @@ class RenderBlock extends RenderDecoratedBox with ContainerRenderNodeMixin<Rende
   }
 
   void paint(RenderNodeDisplayList canvas) {
-    super.paint(canvas);
     defaultPaint(canvas);
   }
 
@@ -846,14 +832,13 @@ class FlexBoxParentData extends BoxParentData with ContainerParentDataMixin<Rend
 
 enum FlexDirection { Horizontal, Vertical }
 
-class RenderFlex extends RenderDecoratedBox with ContainerRenderNodeMixin<RenderBox, FlexBoxParentData>,
-                                                 RenderBoxContainerDefaultsMixin<RenderBox, BlockParentData> {
+class RenderFlex extends RenderBox with ContainerRenderNodeMixin<RenderBox, FlexBoxParentData>,
+                                        RenderBoxContainerDefaultsMixin<RenderBox, BlockParentData> {
   // lays out RenderBox children using flexible layout
 
   RenderFlex({
-    BoxDecoration decoration,
     FlexDirection direction: FlexDirection.Horizontal
-  }) : super(decoration), _direction = direction;
+  }) : _direction = direction;
 
   FlexDirection _direction;
   FlexDirection get direction => _direction;
@@ -945,7 +930,6 @@ class RenderFlex extends RenderDecoratedBox with ContainerRenderNodeMixin<Render
   }
 
   void paint(RenderNodeDisplayList canvas) {
-    super.paint(canvas);
     defaultPaint(canvas);
   }
 }
@@ -956,16 +940,38 @@ class RenderInline extends RenderNode {
   RenderInline(this.data);
 }
 
-class RenderParagraph extends RenderDecoratedBox {
-  String text;
-  sky.LayoutRoot _layoutRoot = new sky.LayoutRoot();
-  sky.Document _document;
+class RenderParagraph extends RenderBox {
 
-  RenderParagraph(String this.text) :
-   super(new BoxDecoration(backgroundColor: 0xFFFFFFFF)) {
-    _document = new sky.Document();
+  RenderParagraph({
+    String text,
+    int color
+  }) : _color = color {
     _layoutRoot.rootElement = _document.createElement('p');
-    _layoutRoot.rootElement.appendChild(_document.createText(this.text));
+    this.text = text;
+  }
+
+  final sky.Document _document = new sky.Document();
+  final sky.LayoutRoot _layoutRoot = new sky.LayoutRoot();
+
+  String get text => (_layoutRoot.rootElement.firstChild as sky.Text).data;
+  void set text (String value) {
+    _layoutRoot.rootElement.setChild(_document.createText(value));
+    markNeedsLayout();
+  }
+
+  int _color = 0xFF000000;
+  int get color => _color;
+  void set color (int value) {
+    if (_color != value) {
+      _color = value;
+      markNeedsPaint();
+    }
+  }
+
+  sky.Size getIntrinsicDimensions(BoxConstraints constraints) {
+    assert(false);
+    return null;
+    // we don't currently support this for RenderParagraph
   }
 
   void performLayout() {
@@ -974,17 +980,14 @@ class RenderParagraph extends RenderDecoratedBox {
     _layoutRoot.minHeight = constraints.minHeight;
     _layoutRoot.maxHeight = constraints.maxHeight;
     _layoutRoot.layout();
-    width = _layoutRoot.rootElement.width;
-    // TODO(eseidel): LayoutRoot will not expand to fill height. :(
-    height = _constraints.constrainHeight(_layoutRoot.rootElement.height);
-  }
-
-  void hitTestChildren(HitTestResult result, { double x, double y }) {
-    // defaultHitTestChildren(result, x: x, y: y);
+    size = constraints.constrain(new sky.Size(_layoutRoot.rootElement.width, _layoutRoot.rootElement.height));
   }
 
   void paint(RenderNodeDisplayList canvas) {
-    super.paint(canvas);
+    // _layoutRoot.rootElement.style['color'] = 'rgba(' + ...color... + ')';
     _layoutRoot.paint(canvas);
   }
+
+  // we should probably expose a way to do precise (inter-glpyh) hit testing
+
 }

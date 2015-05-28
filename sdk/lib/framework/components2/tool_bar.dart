@@ -39,7 +39,6 @@ class ToolBar extends Component {
 
     return new Material(
       content: new FlexContainer(
-        style: _style,
         children: children,
         direction: FlexDirection.Row),
       level: 2);

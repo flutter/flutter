@@ -12,7 +12,10 @@ void main() {
 
   test("should size to render view", () {
     RenderSizedBox root = new RenderSizedBox(
-        new RenderDecoratedBox(new BoxDecoration(backgroundColor: 0xFF00FF00)));
+      child: new RenderDecoratedBox(
+        decoration: new BoxDecoration(backgroundColor: 0xFF00FF00)
+      )
+    );
     RenderView renderView = new RenderView(child: root);
     renderView.layout(new ViewConstraints(width: sky.view.width, height: sky.view.height));
     expect(root.size.width, equals(sky.view.width));

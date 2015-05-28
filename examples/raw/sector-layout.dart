@@ -416,7 +416,9 @@ class RenderBoxToRenderSectorAdapter extends RenderBox {
     } else {
       assert(child is RenderSector);
       assert(!constraints.isInfinite);
+      print("constraint maxes: ${constraints.maxWidth} and ${constraints.maxHeight}");
       double maxChildDeltaRadius = math.min(constraints.maxWidth, constraints.maxHeight) / 2.0 - innerRadius;
+      print("maxChildDeltaRadius = $maxChildDeltaRadius");
       assert(child.parentData is SectorParentData);
       child.parentData.radius = innerRadius;
       child.parentData.theta = 0.0;
