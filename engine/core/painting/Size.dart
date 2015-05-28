@@ -4,9 +4,22 @@
 
 part of dart.sky;
 
+/// Holds a 2D floating-point size.
 class Size {
   double width;
   double height;
 
-  Point(this.width, this.height);
+  Size(this.width, this.height);
+
+  bool operator ==(other) {
+    if (!(other is Size)) return false;
+    return width == other.width && height == other.height;
+  }
+  int get hashCode {
+    int result = 373;
+    result = 37 * result + width.hashCode;
+    result = 37 * result + height.hashCode;
+    return result;
+  }
+  String toString() => "Size($width, $height)";
 }

@@ -4,9 +4,22 @@
 
 part of dart.sky;
 
+/// Holds 2 floating-point coordinates.
 class Point {
   double x;
   double y;
 
   Point(this.x, this.y);
+
+  bool operator ==(other) {
+    if (!(other is Point)) return false;
+    return x == other.x && y == other.y;
+  }
+  int get hashCode {
+    int result = 373;
+    result = 37 * result + x.hashCode;
+    result = 37 * result + y.hashCode;
+    return result;
+  }
+  String toString() => "Point($x, $y)";
 }
