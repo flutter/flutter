@@ -6,36 +6,6 @@ import 'dart:sky';
 import 'package:sky/framework/app.dart';
 import 'package:sky/framework/layout2.dart';
 
-class RenderParagraph extends RenderDecoratedBox {
-  final String text;
-  LayoutRoot _layoutRoot = new LayoutRoot();
-  Document _document;
-
-  RenderParagraph(String this.text) :
-   super(new BoxDecoration(backgroundColor: 0xFFFFFFFF)) {
-    _document = new Document();
-    _layoutRoot.rootElement = _document.createElement('p');
-    _layoutRoot.rootElement.appendChild(_document.createText(this.text));
-  }
-
-  void performLayout() {
-    _layoutRoot.maxWidth = constraints.maxWidth;
-    _layoutRoot.minWidth = constraints.minWidth;
-    _layoutRoot.layout();
-    width = _layoutRoot.rootElement.width;
-    height = _layoutRoot.rootElement.height;
-  }
-
-  void hitTestChildren(HitTestResult result, { double x, double y }) {
-    // defaultHitTestChildren(result, x: x, y: y);
-  }
-
-  void paint(RenderNodeDisplayList canvas) {
-    super.paint(canvas);
-    _layoutRoot.paint(canvas);
-  }
-}
-
 class RenderSolidColor extends RenderDecoratedBox {
   final double desiredHeight;
   final double desiredWidth;
