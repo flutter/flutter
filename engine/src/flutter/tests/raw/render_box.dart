@@ -7,27 +7,12 @@ import '../resources/unit.dart';
 import 'dart:sky' as sky;
 import 'package:sky/framework/layout2.dart';
 
-class RenderSizedBox extends RenderBox {
-  final sky.Size desiredSize;
-
-  RenderSizedBox({ this.desiredSize });
-
-  BoxDimensions getIntrinsicDimensions(BoxConstraints constraints) {
-    return new BoxDimensions.withConstraints(constraints,
-                                             width: desiredSize.width,
-                                             height: desiredSize.height);
-  }
-
-  void performLayout() {
-    size = constraints.constrain(desiredSize);
-  }
-}
-
 void main() {
   initUnit();
 
   test("should size to render view", () {
-    RenderSizedBox root = new RenderSizedBox(desiredSize: new sky.Size.infinite());
+    RenderSizedBox root = new RenderSizedBox(
+        new RenderDecoratedBox(new BoxDecoration(backgroundColor: 0xFF00FF00)));
     RenderView renderView = new RenderView(child: root);
     renderView.layout(new ViewConstraints(width: sky.view.width, height: sky.view.height));
     expect(root.size.width, equals(sky.view.width));
