@@ -637,14 +637,6 @@ bool RenderBox::hitTestLayer(RenderLayer* rootLayer, RenderLayer* containerLayer
     layer()->stackingNode()->updateLayerListsIfNeeded();
     layer()->update3DTransformedDescendantStatus();
 
-    // Check for hit test on backface if backface-visibility is 'hidden'
-    if (localTransformState && style()->backfaceVisibility() == BackfaceVisibilityHidden) {
-        TransformationMatrix invertedMatrix = localTransformState->m_accumulatedTransform.inverse();
-        // If the z-vector of the matrix is negative, the back is facing towards the viewer.
-        if (invertedMatrix.m33() < 0)
-            return 0;
-    }
-
     RefPtr<HitTestingTransformState> unflattenedTransformState = localTransformState;
     if (localTransformState && !style()->preserves3D()) {
         // Keep a copy of the pre-flattening state, for computing z-offsets for the container

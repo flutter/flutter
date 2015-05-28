@@ -385,9 +385,6 @@ bool isValidKeywordPropertyAndValue(CSSPropertyID propertyId, CSSValueID valueID
     case CSSPropertyTouchActionDelay: // none | script
         ASSERT(RuntimeEnabledFeatures::cssTouchActionDelayEnabled());
         return valueID == CSSValueScript || valueID == CSSValueNone;
-    case CSSPropertyBackfaceVisibility:
-    case CSSPropertyWebkitBackfaceVisibility:
-        return valueID == CSSValueVisible || valueID == CSSValueHidden;
     case CSSPropertyWebkitBoxDecorationBreak:
         return valueID == CSSValueClone || valueID == CSSValueSlice;
     case CSSPropertyAlignContent:
@@ -465,8 +462,6 @@ bool isKeywordPropertyID(CSSPropertyID propertyId)
     case CSSPropertyTextRendering:
     case CSSPropertyTouchActionDelay:
     case CSSPropertyUnicodeBidi:
-    case CSSPropertyBackfaceVisibility:
-    case CSSPropertyWebkitBackfaceVisibility:
     case CSSPropertyWebkitBorderAfterStyle:
     case CSSPropertyWebkitBorderBeforeStyle:
     case CSSPropertyWebkitBorderEndStyle:

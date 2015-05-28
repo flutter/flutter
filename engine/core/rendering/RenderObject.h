@@ -338,7 +338,6 @@ public:
 
     bool hasTransform() const { return m_bitfields.hasTransform(); }
     bool hasClipPath() const { return style() && style()->clipPath(); }
-    bool hasHiddenBackface() const { return style() && style()->backfaceVisibility() == BackfaceVisibilityHidden; }
 
     inline bool preservesNewline() const;
 
@@ -360,9 +359,6 @@ public:
     // If paintInvalidationContainer and paintInvalidationContainerSkipped are not null, on return *paintInvalidationContainerSkipped
     // is true if the renderer returned is an ancestor of paintInvalidationContainer.
     RenderObject* container(const RenderBox* paintInvalidationContainer = 0, bool* paintInvalidationContainerSkipped = 0) const;
-
-    // TODO(esprehn): Remove this.
-    RenderObject* hoverAncestor() const { return parent(); }
 
     Element* offsetParent() const;
 
@@ -501,6 +497,7 @@ public:
     const RenderView* containerForPaintInvalidation() const;
     const RenderBox* adjustCompositedContainerForSpecialAncestors(const RenderBox* paintInvalidationContainer) const;
 
+    // Overriden by RenderText for character length, used in line layout code.
     virtual unsigned length() const { return 1; }
 
     // FIXME(sky): Remove
@@ -591,8 +588,6 @@ public:
     virtual void addFocusRingRects(Vector<IntRect>&, const LayoutPoint& /* additionalOffset */, const RenderBox* /* paintContainer */ = 0) const { };
 
     RespectImageOrientationEnum shouldRespectImageOrientation() const;
-
-    bool isRelayoutBoundaryForInspector() const;
 
     bool onlyNeededPositionedMovementLayout() const { return m_bitfields.onlyNeededPositionedMovementLayout(); }
     void setOnlyNeededPositionedMovementLayout(bool b) { m_bitfields.setOnlyNeededPositionedMovementLayout(b); }

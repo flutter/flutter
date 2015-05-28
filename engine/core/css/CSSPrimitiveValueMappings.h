@@ -267,37 +267,6 @@ template<> inline CSSPrimitiveValue::operator CompositeOperator() const
     return CompositeClear;
 }
 
-template<> inline CSSPrimitiveValue::CSSPrimitiveValue(EBackfaceVisibility e)
-    : CSSValue(PrimitiveClass)
-{
-    m_primitiveUnitType = CSS_VALUE_ID;
-    switch (e) {
-    case BackfaceVisibilityVisible:
-        m_value.valueID = CSSValueVisible;
-        break;
-    case BackfaceVisibilityHidden:
-        m_value.valueID = CSSValueHidden;
-        break;
-    }
-}
-
-template<> inline CSSPrimitiveValue::operator EBackfaceVisibility() const
-{
-    ASSERT(isValueID());
-    switch (m_value.valueID) {
-    case CSSValueVisible:
-        return BackfaceVisibilityVisible;
-    case CSSValueHidden:
-        return BackfaceVisibilityHidden;
-    default:
-        break;
-    }
-
-    ASSERT_NOT_REACHED();
-    return BackfaceVisibilityHidden;
-}
-
-
 template<> inline CSSPrimitiveValue::CSSPrimitiveValue(EFillAttachment e)
     : CSSValue(PrimitiveClass)
 {

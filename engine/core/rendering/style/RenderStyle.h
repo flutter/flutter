@@ -670,7 +670,6 @@ public:
     ETransformStyle3D transformStyle3D() const { return static_cast<ETransformStyle3D>(rareNonInheritedData->m_transformStyle3D); }
     bool preserves3D() const { return rareNonInheritedData->m_transformStyle3D == TransformStyle3DPreserve3D; }
 
-    EBackfaceVisibility backfaceVisibility() const { return static_cast<EBackfaceVisibility>(rareNonInheritedData->m_backfaceVisibility); }
     float perspective() const { return rareNonInheritedData->m_perspective; }
     bool hasPerspective() const { return rareNonInheritedData->m_perspective > 0; }
     const Length& perspectiveOriginX() const { return rareNonInheritedData->m_perspectiveOriginX; }
@@ -953,7 +952,6 @@ public:
     }
 
     void setTransformStyle3D(ETransformStyle3D b) { SET_VAR(rareNonInheritedData, m_transformStyle3D, b); }
-    void setBackfaceVisibility(EBackfaceVisibility b) { SET_VAR(rareNonInheritedData, m_backfaceVisibility, b); }
     void setPerspective(float p) { SET_VAR(rareNonInheritedData, m_perspective, p); }
     void setPerspectiveOriginX(const Length& l) { SET_VAR(rareNonInheritedData, m_perspectiveOriginX, l); }
     void setPerspectiveOriginY(const Length& l) { SET_VAR(rareNonInheritedData, m_perspectiveOriginY, l); }
@@ -1107,7 +1105,6 @@ public:
     static EPointerEvents initialPointerEvents() { return PE_AUTO; }
     static float initialTransformOriginZ() { return 0; }
     static ETransformStyle3D initialTransformStyle3D() { return TransformStyle3DFlat; }
-    static EBackfaceVisibility initialBackfaceVisibility() { return BackfaceVisibilityVisible; }
     static float initialPerspective() { return 0; }
     static Length initialPerspectiveOriginX() { return Length(50.0, Percent); }
     static Length initialPerspectiveOriginY() { return Length(50.0, Percent); }

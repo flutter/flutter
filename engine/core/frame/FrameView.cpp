@@ -316,7 +316,7 @@ void FrameView::layout(bool allowSubtree)
                 m_lastViewportSize = layoutSize();
             }
 
-            m_size = LayoutSize(layoutSize().width(), layoutSize().height());
+            m_size = LayoutSize(layoutSize());
         }
 
         layer = rootForThisLayout->enclosingLayer();

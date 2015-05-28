@@ -1875,11 +1875,6 @@ bool RenderObject::nodeAtFloatPoint(const HitTestRequest&, HitTestResult&, const
     return false;
 }
 
-bool RenderObject::isRelayoutBoundaryForInspector() const
-{
-    return objectIsRelayoutBoundary(this);
-}
-
 bool RenderObject::isAllowedToModifyRenderTreeStructure(Document& document)
 {
     return document.lifecycle().stateAllowsRenderTreeMutations();

@@ -42,7 +42,6 @@ StyleRareNonInheritedData::StyleRareNonInheritedData()
     , m_order(RenderStyle::initialOrder())
     , m_objectPosition(RenderStyle::initialObjectPosition())
     , m_transformStyle3D(RenderStyle::initialTransformStyle3D())
-    , m_backfaceVisibility(RenderStyle::initialBackfaceVisibility())
     , m_alignContent(RenderStyle::initialAlignContent())
     , m_alignItems(RenderStyle::initialAlignItems())
     , m_alignItemsOverflowAlignment(RenderStyle::initialAlignItemsOverflowAlignment())
@@ -85,7 +84,6 @@ StyleRareNonInheritedData::StyleRareNonInheritedData(const StyleRareNonInherited
     , m_order(o.m_order)
     , m_objectPosition(o.m_objectPosition)
     , m_transformStyle3D(o.m_transformStyle3D)
-    , m_backfaceVisibility(o.m_backfaceVisibility)
     , m_alignContent(o.m_alignContent)
     , m_alignItems(o.m_alignItems)
     , m_alignItemsOverflowAlignment(o.m_alignItemsOverflowAlignment)
@@ -132,7 +130,6 @@ bool StyleRareNonInheritedData::operator==(const StyleRareNonInheritedData& o) c
         && m_order == o.m_order
         && m_objectPosition == o.m_objectPosition
         && m_transformStyle3D == o.m_transformStyle3D
-        && m_backfaceVisibility == o.m_backfaceVisibility
         && m_alignContent == o.m_alignContent
         && m_alignItems == o.m_alignItems
         && m_alignItemsOverflowAlignment == o.m_alignItemsOverflowAlignment

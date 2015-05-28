@@ -204,10 +204,6 @@ enum ETransformStyle3D {
     TransformStyle3DFlat, TransformStyle3DPreserve3D
 };
 
-enum EBackfaceVisibility {
-    BackfaceVisibilityVisible, BackfaceVisibilityHidden
-};
-
 enum Hyphens { HyphensNone, HyphensManual, HyphensAuto };
 
 enum TextEmphasisFill { TextEmphasisFillFilled, TextEmphasisFillOpen };

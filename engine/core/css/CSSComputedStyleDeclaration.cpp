@@ -179,8 +179,6 @@ static const CSSPropertyID staticComputableProperties[] = {
     CSSPropertyWordWrap,
     CSSPropertyZIndex,
 
-    CSSPropertyBackfaceVisibility,
-    CSSPropertyWebkitBackfaceVisibility,
     CSSPropertyWebkitBackgroundClip,
     CSSPropertyWebkitBackgroundComposite,
     CSSPropertyWebkitBackgroundOrigin,
@@ -1830,9 +1828,6 @@ PassRefPtr<CSSValue> CSSComputedStyleDeclaration::getPropertyCSSValue(CSSPropert
             if (!style->hasAspectRatio())
                 return cssValuePool().createIdentifierValue(CSSValueNone);
             return CSSAspectRatioValue::create(style->aspectRatioNumerator(), style->aspectRatioDenominator());
-        case CSSPropertyBackfaceVisibility:
-        case CSSPropertyWebkitBackfaceVisibility:
-            return cssValuePool().createIdentifierValue((style->backfaceVisibility() == BackfaceVisibilityHidden) ? CSSValueHidden : CSSValueVisible);
         case CSSPropertyWebkitBorderImage:
             return valueForNinePieceImage(style->borderImage(), *style);
         case CSSPropertyBorderImageOutset:

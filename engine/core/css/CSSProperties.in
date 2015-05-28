@@ -111,7 +111,6 @@ align-items custom_all
 // LAYOUT
 align-self custom_all
 
-backface-visibility
 background-attachment custom_all
 background-clip custom_all
 background-color animatable, custom_all
@@ -311,7 +310,6 @@ animation-timing-function custom_all
 
 filter animatable, custom_value
 -webkit-aspect-ratio inherited, custom_all
--webkit-backface-visibility use_handlers_for=CSSPropertyBackfaceVisibility
 -webkit-background-clip use_handlers_for=CSSPropertyBackgroundClip
 -webkit-background-composite custom_all
 -webkit-background-origin use_handlers_for=CSSPropertyBackgroundOrigin

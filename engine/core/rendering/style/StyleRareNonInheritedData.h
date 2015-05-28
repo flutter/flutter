@@ -100,7 +100,6 @@ public:
     LengthPoint m_objectPosition;
 
     unsigned m_transformStyle3D : 1; // ETransformStyle3D
-    unsigned m_backfaceVisibility : 1; // EBackfaceVisibility
 
     unsigned m_alignContent : 3; // EAlignContent
     unsigned m_alignItems : 4; // ItemPosition
