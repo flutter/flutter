@@ -416,11 +416,11 @@ class BoxConstraints {
     this.minHeight: 0.0,
     this.maxHeight: double.INFINITY});
 
-  const BoxConstraints.tight({ double width: 0.0, double height: 0.0 })
-    : minWidth = width,
-      maxWidth = width,
-      minHeight = height,
-      maxHeight = height;
+  BoxConstraints.tight(sky.Size size)
+    : minWidth = size.width,
+      maxWidth = size.width,
+      minHeight = size.height,
+      maxHeight = size.height;
 
   BoxConstraints deflate(EdgeDims edges) {
     assert(edges != null);
@@ -510,6 +510,47 @@ abstract class RenderBox extends RenderNode {
   sky.Size size = new sky.Size(0.0, 0.0);
 }
 
+abstract class RenderProxyBox extends RenderBox with RenderNodeWithChildMixin<RenderBox> {
+  RenderProxyBox(RenderBox child) {
+    this.child = child;
+  }
+
+  BoxDimensions getIntrinsicDimensions(BoxConstraints constraints) {
+    return child.getIntrinsicDimensions(constraints);
+  }
+
+  void performLayout() {
+    child.layout(constraints, parentUsesSize: true);
+    size = child.size;
+  }
+
+  void hitTestChildren(HitTestResult result, { sky.Point position }) {
+    child.hitTest(result, position: position);
+  }
+
+  void paint(RenderNodeDisplayList canvas) {
+    child.paint(canvas);
+  }
+}
+
+class RenderSizedBox extends RenderProxyBox {
+  final sky.Size desiredSize;
+
+  RenderSizedBox(RenderBox child, [this.desiredSize = const sky.Size.infinite()])
+      : super(child);
+
+  BoxDimensions getIntrinsicDimensions(BoxConstraints constraints) {
+    return new BoxDimensions.withConstraints(constraints,
+                                             width: desiredSize.width,
+                                             height: desiredSize.height);
+  }
+
+  void performLayout() {
+    size = constraints.constrain(desiredSize);
+    child.layout(new BoxConstraints.tight(size));
+  }
+}
+
 class RenderPadding extends RenderBox with RenderNodeWithChildMixin<RenderBox> {
 
   RenderPadding(EdgeDims padding, RenderBox child) {
@@ -591,6 +632,10 @@ class RenderDecoratedBox extends RenderBox {
     markNeedsPaint();
   }
 
+  void performLayout() {
+    size = constraints.constrain(new sky.Size.infinite());
+  }
+
   void paint(RenderNodeDisplayList canvas) {
     assert(size.width != null);
     assert(size.height != null);
@@ -603,7 +648,6 @@ class RenderDecoratedBox extends RenderBox {
       canvas.drawRect(new sky.Rect.fromLTRB(0.0, 0.0, size.width, size.height), paint);
     }
   }
-
 }
 
 class RenderDecoratedCircle extends RenderDecoratedBox with RenderNodeWithChildMixin<RenderBox> {
@@ -674,7 +718,7 @@ class RenderView extends RenderNode with RenderNodeWithChildMixin<RenderBox> {
   }
   void performLayout() {
     if (child != null) {
-      child.layout(new BoxConstraints.tight(width: width, height: height));
+      child.layout(new BoxConstraints.tight(_size));
       assert(child.size.width == width);
       assert(child.size.height == height);
     }

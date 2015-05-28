@@ -96,20 +96,20 @@ class RenderScaffold extends RenderDecoratedBox {
     double bodyHeight = size.height;
     double bodyPosition = 0.0;
     if (toolbar != null) {
-      toolbar.layout(new BoxConstraints.tight(width: size.width, height: kToolbarHeight));
+      toolbar.layout(new BoxConstraints.tight(new sky.Size(size.width, kToolbarHeight)));
       assert(toolbar.parentData is BoxParentData);
       toolbar.parentData.position = new sky.Point(0.0, 0.0);
       bodyPosition = kToolbarHeight;
       bodyHeight -= kToolbarHeight;
     }
     if (statusbar != null) {
-      statusbar.layout(new BoxConstraints.tight(width: size.width, height: kStatusbarHeight));
+      statusbar.layout(new BoxConstraints.tight(new sky.Size(size.width, kStatusbarHeight)));
       assert(statusbar.parentData is BoxParentData);
       statusbar.parentData.position = new sky.Point(0.0, size.height - kStatusbarHeight);
       bodyHeight -= kStatusbarHeight;
     }
     if (body != null) {
-      body.layout(new BoxConstraints.tight(width: size.width, height: bodyHeight));
+      body.layout(new BoxConstraints.tight(new sky.Size(size.width, bodyHeight)));
       assert(body.parentData is BoxParentData);
       body.parentData.position = new sky.Point(0.0, bodyPosition);
     }

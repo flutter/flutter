@@ -29,7 +29,11 @@ class Rect {
   }
 
   Rect.fromLTRB(double left, double top, double right, double bottom) {
-    setLTRB(left, top, right, bottom);
+    _value
+      ..[0] = left
+      ..[1] = top
+      ..[2] = right
+      ..[3] = bottom;
   }
 
   Point get upperLeft => new Point(left, top);
@@ -42,14 +46,6 @@ class Rect {
   // right edges.
   bool contains(Point point) =>
       point.x >= left && point.x < right && point.y >= top && point.y < bottom;
-
-  void setLTRB(double left, double top, double right, double bottom) {
-    _value
-      ..[0] = left
-      ..[1] = top
-      ..[2] = right
-      ..[3] = bottom;
-  }
 
   bool operator ==(other) {
     if (!(other is Rect)) return false;
