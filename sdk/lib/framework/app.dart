@@ -20,21 +20,40 @@ class AppView {
 
   RenderView _renderView;
 
+  Map<int, HitTestResult> _hitTestResultForPointer = new Map<int, HitTestResult>();
+
   RenderBox get root => _renderView.child;
   void set root(RenderBox value) {
     _renderView.child = value;
   }
-
   void _beginFrame(double timeStamp) {
     RenderNode.flushLayout();
     _renderView.paintFrame();
   }
 
   void _handleEvent(sky.Event event) {
-    if (event is! sky.PointerEvent)
-      return;
-    HitTestResult result = new HitTestResult();
-    _renderView.hitTest(result, x: event.x, y: event.y);
+    if (event is sky.PointerEvent)
+      _handlePointerEvent(event);
+  }
+
+  void _handlePointerEvent(sky.PointerEvent event) {
+    HitTestResult result;
+    switch(event.type) {
+      case 'pointerdown':
+        result = new HitTestResult();
+        _renderView.hitTest(result, x: event.x, y: event.y);
+        _hitTestResultForPointer[event.pointer] = result;
+        break;
+      case 'pointerup':
+      case 'pointercancel':
+        result = _hitTestResultForPointer[event.pointer];
+        _hitTestResultForPointer.remove(event.pointer);
+        break;
+      case 'pointermove':
+        result = _hitTestResultForPointer[event.pointer];
+        break;
+    }
+    assert(result != null);
     result.path.reversed.forEach((RenderNode node) {
       node.handlePointer(event);
     });
