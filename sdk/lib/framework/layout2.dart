@@ -74,14 +74,11 @@ abstract class RenderNode extends AbstractNode {
   bool _needsLayout = true;
   bool get needsLayout => _needsLayout;
   RenderNode _relayoutSubtreeRoot;
-  void saveRelayoutSubtreeRoot(RenderNode relayoutSubtreeRoot) {
-    _relayoutSubtreeRoot = relayoutSubtreeRoot;
-    assert(_relayoutSubtreeRoot == null || _relayoutSubtreeRoot._relayoutSubtreeRoot == null);
-    assert(_relayoutSubtreeRoot == null || _relayoutSubtreeRoot == parent || (parent is RenderNode && _relayoutSubtreeRoot == parent._relayoutSubtreeRoot));
-  }
+  dynamic _constraints;
+  dynamic get constraints => _constraints;
   bool debugAncestorsAlreadyMarkedNeedsLayout() {
     if (_relayoutSubtreeRoot == null)
-      return true;
+      return true; // we haven't yet done layout even once, so there's nothing for us to do
     RenderNode node = this;
     while (node != _relayoutSubtreeRoot) {
       assert(node._relayoutSubtreeRoot == _relayoutSubtreeRoot);
@@ -90,7 +87,7 @@ abstract class RenderNode extends AbstractNode {
       if (!node._needsLayout)
         return false;
     }
-    assert(node._relayoutSubtreeRoot == null);
+    assert(node._relayoutSubtreeRoot == node);
     return true;
   }
   void markNeedsLayout() {
@@ -101,7 +98,8 @@ abstract class RenderNode extends AbstractNode {
       return;
     }
     _needsLayout = true;
-    if (_relayoutSubtreeRoot != null) {
+    assert(_relayoutSubtreeRoot != null);
+    if (_relayoutSubtreeRoot != this) {
       assert(parent is RenderNode);
       parent.markNeedsLayout();
     } else {
@@ -120,8 +118,8 @@ abstract class RenderNode extends AbstractNode {
   }
   void _doLayout() {
     try {
-      assert(_relayoutSubtreeRoot == null);
-      relayout();
+      assert(_relayoutSubtreeRoot == this);
+      performLayout();
     } catch (e, stack) {
       print('Exception raised during layout of ${this}: ${e}');
       print(stack);
@@ -129,75 +127,36 @@ abstract class RenderNode extends AbstractNode {
     }
     assert(!_needsLayout); // check that the relayout() method marked us "not dirty"
   }
-  /* // this method's signature is subclass-specific, but will exist in
-     // some form in all subclasses:
-     void layout({arguments..., RenderNode relayoutSubtreeRoot}) {
-       bool childArgumentsChanged = ...; // true if arguments we're going to pass to the children are different than last time, false otherwise
-       if (this node has an opinion about its size, e.g. because it autosizes based on kids, or has an intrinsic dimension) {
-         if (relayoutSubtreeRoot != null) {
-           saveRelayoutSubtreeRoot(relayoutSubtreeRoot);
-           // for each child, if we are going to size ourselves around them:
-           if (child.needsLayout || childArgumentsChanged)
-             child.layout(... relayoutSubtreeRoot: relayoutSubtreeRoot);
-           width = ...;
-           height = ...;
-         } else {
-           saveRelayoutSubtreeRoot(null); // you can skip this if there's no way you would ever have called saveRelayoutSubtreeRoot() before
-           // we're the root of the relayout subtree
-           // for each child, if we are going to size ourselves around them:
-           if (child.needsLayout || childArgumentsChanged)
-             child.layout(... relayoutSubtreeRoot: this);
-           width = ...;
-           height = ...;
-         }
-       } else {
-         // we're sizing ourselves exclusively on input from the parent (arguments to this function)
-         // ignore relayoutSubtreeRoot
-         saveRelayoutSubtreeRoot(null); // you can skip this if there's no way you would ever have called saveRelayoutSubtreeRoot() before
-         width = ...; // based on input from arguments only
-         height = ...; // based on input from arguments only
-       }
-       // for each child whose size we'll ignore when deciding ours:
-       if (child.needsLayout || childArgumentsChanged)
-         child.layout(... relayoutSubtreeRoot: null); // or just omit relayoutSubtreeRoot
-       layoutDone();
-       return;
-     }
-  */
-  void relayout() {
+  void layout(dynamic constraints, { bool parentUsesSize: false }) {
+    RenderNode relayoutSubtreeRoot;
+    if (!parentUsesSize || sizedByParent || parent is! RenderNode)
+      relayoutSubtreeRoot = this;
+    else
+      relayoutSubtreeRoot = parent._relayoutSubtreeRoot;
+    if (!needsLayout && constraints == _constraints && relayoutSubtreeRoot == _relayoutSubtreeRoot)
+      return;
+    _constraints = constraints;
+    _relayoutSubtreeRoot = relayoutSubtreeRoot;
+    if (sizedByParent)
+      performResize();
+    performLayout();
+    _needsLayout = false;
+    markNeedsPaint();
+  }
+  bool get sizedByParent => false; // return true if the constraints are the only input to the sizing algorithm (in particular, child nodes have no impact)
+  void performResize(); // set the local dimensions, using only the constraints (only called if sizedByParent is true)
+  void performLayout();
     // Override this to perform relayout without your parent's
     // involvement.
     //
-    // This is what is called after the first layout(), if you mark
-    // yourself dirty and don't have a _relayoutSubtreeRoot set; in
-    // other words, either if your parent doesn't care what size you
-    // are (and thus didn't pass a relayoutSubtreeRoot to your
-    // layout() method) or if you sized yourself entirely based on
-    // what your parents told you, and not based on your children (and
-    // thus you never called saveRelayoutSubtreeRoot()).
+    // This is called during layout. If sizedByParent is true, then
+    // performLayout() should not change your dimensions, only do that
+    // in performResize(). If sizedByParent is false, then set both
+    // your dimensions and do your children's layout here.
     //
-    // In the former case, you can resize yourself here at will. In
-    // the latter case, just leave your dimensions unchanged.
-    //
-    // If _relayoutSubtreeRoot is set (i.e. you called saveRelayout-
-    // SubtreeRoot() in your layout(), with a relayoutSubtreeRoot
-    // argument that was non-null), then if you mark yourself as dirty
-    // then we'll tell that subtree root instead, and the layout will
-    // occur via the layout() tree rather than starting from this
-    // relayout() method.
-    //
-    // when calling children's layout() methods, skip any children
-    // that have needsLayout == false unless the arguments you are
-    // passing in have changed since the last time
-    assert(_relayoutSubtreeRoot == null);
-    layoutDone();
-  }
-  void layoutDone({bool needsPaint: true}) {
-    // make sure to call this at the end of your layout() or relayout()
-    _needsLayout = false;
-    if (needsPaint)
-      markNeedsPaint();
-  }
+    // When calling layout() on your children, pass in
+    // "parentUsesSize: true" if your size or layout is dependent on
+    // your child's size.
 
   // when the parent has rotated (e.g. when the screen has been turned
   // 90 degrees), immediately prior to layout() being called for the
@@ -221,7 +180,7 @@ abstract class RenderNode extends AbstractNode {
   static bool _debugDoingPaint = false;
   void markNeedsPaint() {
     assert(!_debugDoingPaint);
-    // TODO(abarth): It's very redunant to call this for every node in the
+    // TODO(abarth): It's very redundant to call this for every node in the
     // render tree during layout. We should instead compute a summary bit and
     // call it once at the end of layout.
     sky.view.scheduleFrame();
@@ -523,10 +482,19 @@ abstract class RenderBox extends RenderNode {
     return new BoxDimensions.withConstraints(constraints);
   }
 
-  void layout(BoxConstraints constraints, { RenderNode relayoutSubtreeRoot }) {
+  BoxConstraints get constraints => super.constraints as BoxConstraints;
+  void performResize() {
+    // default behaviour for subclasses that have sizedByParent = true
     width = constraints.constrainWidth(0.0);
     height = constraints.constrainHeight(0.0);
-    layoutDone();
+    assert(height < double.INFINITY);
+    assert(width < double.INFINITY);
+  }
+  void performLayout() {
+    // descendants have to either override performLayout() to set both
+    // width and height and lay out children, or, set sizedByParent to
+    // true so that performResize()'s logic above does its thing.
+    assert(sizedByParent);
   }
 
   bool hitTest(HitTestResult result, { double x, double y }) {
@@ -566,19 +534,15 @@ class RenderPadding extends RenderBox with RenderNodeWithChildMixin<RenderBox> {
     return child.getIntrinsicDimensions(constraints);
   }
 
-  void layout(BoxConstraints constraints, { RenderNode relayoutSubtreeRoot }) {
+  void performLayout() {
     assert(padding != null);
-    constraints = constraints.deflate(padding);
+    BoxConstraints innerConstraints = constraints.deflate(padding);
     if (child == null) {
-      width = constraints.constrainWidth(padding.left + padding.right);
-      height = constraints.constrainHeight(padding.top + padding.bottom);
+      width = innerConstraints.constrainWidth(padding.left + padding.right);
+      height = innerConstraints.constrainHeight(padding.top + padding.bottom);
       return;
     }
-    if (relayoutSubtreeRoot != null)
-      saveRelayoutSubtreeRoot(relayoutSubtreeRoot);
-    else
-      relayoutSubtreeRoot = this;
-    child.layout(constraints, relayoutSubtreeRoot: relayoutSubtreeRoot);
+    child.layout(innerConstraints, parentUsesSize: true);
     assert(child.parentData is BoxParentData);
     child.parentData.x = padding.left;
     child.parentData.y = padding.top;
@@ -664,6 +628,18 @@ class RenderDecoratedCircle extends RenderDecoratedBox with RenderNodeWithChildM
 
 // RENDER VIEW LAYOUT MANAGER
 
+class ViewConstraints {
+
+  const ViewConstraints({
+    this.width: 0.0, this.height: 0.0, this.orientation: null
+  });
+
+  final double width;
+  final double height;
+  final int orientation;
+
+}
+
 class RenderView extends RenderNode with RenderNodeWithChildMixin<RenderBox> {
 
   RenderView({
@@ -682,36 +658,29 @@ class RenderView extends RenderNode with RenderNodeWithChildMixin<RenderBox> {
   int get orientation => _orientation;
   Duration timeForRotation;
 
-  void layout({
-    double newWidth,
-    double newHeight,
-    int newOrientation
-  }) {
-    if (newOrientation != orientation) {
-      if (orientation != null && child != null)
-        child.rotate(oldAngle: orientation, newAngle: newOrientation, time: timeForRotation);
-      _orientation = newOrientation;
+  ViewConstraints get constraints => super.constraints as ViewConstraints;
+  bool get sizedByParent => true;
+  void performResize() {
+    if (constraints.orientation != _orientation) {
+      if (_orientation != null && child != null)
+        child.rotate(oldAngle: _orientation, newAngle: constraints.orientation, time: timeForRotation);
+      _orientation = constraints.orientation;
     }
-    if ((newWidth != width) || (newHeight != height)) {
-      _width = newWidth;
-      _height = newHeight;
-      relayout();
-    } else {
-      layoutDone();
-    }
+    _width = constraints.width;
+    _height = constraints.height;
+    assert(height < double.INFINITY);
+    assert(width < double.INFINITY);
   }
-
-  void relayout() {
+  void performLayout() {
     if (child != null) {
       child.layout(new BoxConstraints.tight(width: width, height: height));
       assert(child.width == width);
       assert(child.height == height);
     }
-    layoutDone();
   }
 
   void rotate({ int oldAngle, int newAngle, Duration time }) {
-    assert(false); // nobody tells the screen to rotate, the whole rotate() dance is started from our layout()
+    assert(false); // nobody tells the screen to rotate, the whole rotate() dance is started from our performResize()
   }
 
   bool hitTest(HitTestResult result, { double x, double y }) {
@@ -805,38 +774,22 @@ class RenderBlock extends RenderDecoratedBox with ContainerRenderNodeMixin<Rende
                              height: constraints.constrainHeight(outerHeight));
   }
 
-  BoxConstraints _constraints; // value cached from parent for relayout call
-  void layout(BoxConstraints constraints, { RenderNode relayoutSubtreeRoot }) {
-    if (relayoutSubtreeRoot != null)
-      saveRelayoutSubtreeRoot(relayoutSubtreeRoot);
-    else
-      relayoutSubtreeRoot = this;
+  void performLayout() {
+    assert(constraints is BoxConstraints);
     width = constraints.constrainWidth(constraints.maxWidth);
     assert(width < double.INFINITY);
-    _constraints = constraints;
-    internalLayout(relayoutSubtreeRoot);
-  }
-
-  void relayout() {
-    internalLayout(this);
-  }
-
-  void internalLayout(RenderNode relayoutSubtreeRoot) {
-    assert(_constraints != null);
     double y = 0.0;
     double innerWidth = width;
     RenderBox child = firstChild;
     while (child != null) {
-      child.layout(new BoxConstraints(minWidth: innerWidth, maxWidth: innerWidth),
-                   relayoutSubtreeRoot: relayoutSubtreeRoot);
+      child.layout(new BoxConstraints(minWidth: innerWidth, maxWidth: innerWidth), parentUsesSize: true);
       assert(child.parentData is BlockParentData);
       child.parentData.x = 0.0;
       child.parentData.y = y;
       y += child.height;
       child = child.parentData.nextSibling;
     }
-    height = _constraints.constrainHeight(y);
-    layoutDone();
+    height = constraints.constrainHeight(y);
   }
 
   void hitTestChildren(HitTestResult result, { double x, double y }) {
@@ -886,22 +839,12 @@ class RenderFlex extends RenderDecoratedBox with ContainerRenderNodeMixin<Render
       child.parentData = new FlexBoxParentData();
   }
 
-  BoxConstraints _constraints;  // value cached from parent for relayout call
-  void layout(BoxConstraints constraints, { RenderNode relayoutSubtreeRoot }) {
-    if (relayoutSubtreeRoot != null)
-      saveRelayoutSubtreeRoot(relayoutSubtreeRoot);
-    else
-      relayoutSubtreeRoot = this;
-    _constraints = constraints;
+  bool get sizedByParent => true;
+  void performResize() {
     width = _constraints.constrainWidth(_constraints.maxWidth);
     height = _constraints.constrainHeight(_constraints.maxHeight);
     assert(height < double.INFINITY);
     assert(width < double.INFINITY);
-    internalLayout(relayoutSubtreeRoot);
-  }
-
-  void relayout() {
-    internalLayout(this);
   }
 
   int _getFlex(RenderBox child) {
@@ -909,22 +852,21 @@ class RenderFlex extends RenderDecoratedBox with ContainerRenderNodeMixin<Render
     return child.parentData.flex != null ? child.parentData.flex : 0;
   }
 
-  void internalLayout(RenderNode relayoutSubtreeRoot) {
+  void performLayout() {
     // Based on http://www.w3.org/TR/css-flexbox-1/ Section 9.7 Resolving Flexible Lengths
     // Steps 1-3. Determine used flex factor, size inflexible items, calculate free space
     int totalFlex = 0;
-    assert(_constraints != null);
-    double freeSpace = (_direction == FlexDirection.Horizontal) ? _constraints.maxWidth : _constraints.maxHeight;
+    assert(constraints != null);
+    double freeSpace = (_direction == FlexDirection.Horizontal) ? constraints.maxWidth : constraints.maxHeight;
     RenderBox child = firstChild;
     while (child != null) {
       int flex = _getFlex(child);
       if (flex > 0) {
         totalFlex += child.parentData.flex;
       } else {
-        BoxConstraints constraints = new BoxConstraints(maxHeight: _constraints.maxHeight,
-                                                        maxWidth: _constraints.maxWidth);
-        child.layout(constraints,
-                     relayoutSubtreeRoot: relayoutSubtreeRoot);
+        BoxConstraints innerConstraints = new BoxConstraints(maxHeight: constraints.maxHeight,
+                                                             maxWidth: constraints.maxWidth);
+        child.layout(innerConstraints, parentUsesSize: true);
         freeSpace -= (_direction == FlexDirection.Horizontal) ? child.width : child.height;
       }
       child = child.parentData.nextSibling;
@@ -938,20 +880,20 @@ class RenderFlex extends RenderDecoratedBox with ContainerRenderNodeMixin<Render
       int flex = _getFlex(child);
       if (flex > 0) {
         double spaceForChild = spacePerFlex * flex;
-        BoxConstraints constraints;
+        BoxConstraints innerConstraints;
         switch (_direction) {
           case FlexDirection.Horizontal:
-            constraints = new BoxConstraints(maxHeight: _constraints.maxHeight,
-                                             minWidth: spaceForChild,
-                                             maxWidth: spaceForChild);
+            innerConstraints = new BoxConstraints(maxHeight: constraints.maxHeight,
+                                                  minWidth: spaceForChild,
+                                                  maxWidth: spaceForChild);
             break;
           case FlexDirection.Vertical:
-            constraints = new BoxConstraints(minHeight: spaceForChild,
-                                             maxHeight: spaceForChild,
-                                             maxWidth: _constraints.maxWidth);
+            innerConstraints = new BoxConstraints(minHeight: spaceForChild,
+                                                  maxHeight: spaceForChild,
+                                                  maxWidth: constraints.maxWidth);
             break;
         }
-        child.layout(constraints, relayoutSubtreeRoot: relayoutSubtreeRoot);
+        child.layout(innerConstraints, parentUsesSize: true);
       }
 
       // For now, center the flex items in the cross direction
@@ -959,17 +901,16 @@ class RenderFlex extends RenderDecoratedBox with ContainerRenderNodeMixin<Render
         case FlexDirection.Horizontal:
           child.parentData.x = usedSpace;
           usedSpace += child.width;
-          child.parentData.y = height / 2 - child.height / 2;
+          child.parentData.y = height / 2.0 - child.height / 2.0;
           break;
         case FlexDirection.Vertical:
           child.parentData.y = usedSpace;
           usedSpace += child.height;
-          child.parentData.x = width / 2 - child.width / 2;
+          child.parentData.x = width / 2.0 - child.width / 2.0;
           break;
       }
       child = child.parentData.nextSibling;
     }
-    layoutDone();
   }
 
   void hitTestChildren(HitTestResult result, { double x, double y }) {

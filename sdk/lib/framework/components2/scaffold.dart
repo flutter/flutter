@@ -79,12 +79,12 @@ class RenderScaffold extends RenderDecoratedBox {
     markNeedsLayout();
   }
 
-  void layout(BoxConstraints constraints, { RenderNode relayoutSubtreeRoot }) {
+  bool get sizedByParent => true;
+  void performResize() {
     width = constraints.constrainWidth(double.INFINITY);
     assert(width < double.INFINITY);
     height = constraints.constrainHeight(double.INFINITY);
     assert(height < double.INFINITY);
-    relayout();
   }
 
   static const kToolbarHeight = 100.0;
@@ -92,7 +92,7 @@ class RenderScaffold extends RenderDecoratedBox {
   static const kButtonX = -16.0; // from right edge of body
   static const kButtonY = -16.0; // from bottom edge of body
 
-  void relayout() {
+  void performLayout() {
     double bodyHeight = height;
     double bodyPosition = 0.0;
     if (toolbar != null) {
@@ -128,7 +128,6 @@ class RenderScaffold extends RenderDecoratedBox {
       floatingActionButton.parentData.x = width - xButtonX;
       floatingActionButton.parentData.y = bodyPosition + bodyHeight - kButtonY;
     }
-    layoutDone();
   }
 
   void paint(RenderNodeDisplayList canvas) {

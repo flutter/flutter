@@ -13,7 +13,7 @@ class AppView {
 
     _renderView = new RenderView(child: root);
     _renderView.attach();
-    _renderView.layout(newWidth: sky.view.width, newHeight: sky.view.height);
+    _renderView.layout(new ViewConstraints(width: sky.view.width, height: sky.view.height));
 
     sky.view.scheduleFrame();
   }

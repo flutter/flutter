@@ -72,10 +72,17 @@ abstract class RenderSector extends RenderNode {
     return new SectorDimensions.withConstraints(constraints);
   }
 
-  void layout(SectorConstraints constraints, { RenderNode relayoutSubtreeRoot }) {
+  SectorConstraints get constraints => super.constraints as SectorConstraints;
+  void performResize() {
+    // default behaviour for subclasses that have sizedByParent = true
     deltaRadius = constraints.constrainDeltaRadius(0.0);
     deltaTheta = constraints.constrainDeltaTheta(0.0);
-    layoutDone();
+  }
+  void performLayout() {
+    // descendants have to either override performLayout() to set both
+    // the dimensions and lay out children, or, set sizedByParent to
+    // true so that performResize()'s logic above does its thing.
+    assert(sizedByParent);
   }
 
   bool hitTest(HitTestResult result, { double radius, double theta }) {
@@ -210,30 +217,15 @@ class RenderSectorRing extends RenderSectorWithChildren {
                                                 deltaTheta: innerTheta);
   }
 
-  SectorConstraints _constraints;
-  void layout(SectorConstraints constraints, { RenderNode relayoutSubtreeRoot }) {
-    if (relayoutSubtreeRoot != null)
-      saveRelayoutSubtreeRoot(relayoutSubtreeRoot);
-    relayoutSubtreeRoot = relayoutSubtreeRoot == null ? this : relayoutSubtreeRoot;
+  void performLayout() {
+    assert(this.parentData is SectorParentData);
     deltaRadius = constraints.constrainDeltaRadius(desiredDeltaRadius);
     assert(deltaRadius < double.INFINITY);
-    _constraints = constraints;
-    internalLayout(relayoutSubtreeRoot);
-  }
-
-  void relayout() {
-    // TODO(ianh): avoid code duplication
-    assert(parentData is SectorParentData);
-    internalLayout(this);
-  }
-
-  void internalLayout(RenderNode relayoutSubtreeRoot) {
-    assert(this.parentData is SectorParentData);
     double innerDeltaRadius = deltaRadius - padding * 2.0;
     double childRadius = this.parentData.radius + padding;
     double paddingTheta = math.atan(padding / (this.parentData.radius + deltaRadius));
     double innerTheta = paddingTheta; // increments with each child
-    double remainingDeltaTheta = _constraints.maxDeltaTheta - (innerTheta + paddingTheta);
+    double remainingDeltaTheta = constraints.maxDeltaTheta - (innerTheta + paddingTheta);
     RenderSector child = firstChild;
     while (child != null) {
       SectorConstraints innerConstraints = new SectorConstraints(
@@ -243,7 +235,7 @@ class RenderSectorRing extends RenderSectorWithChildren {
       assert(child.parentData is SectorParentData);
       child.parentData.theta = innerTheta;
       child.parentData.radius = childRadius;
-      child.layout(innerConstraints, relayoutSubtreeRoot: relayoutSubtreeRoot);
+      child.layout(innerConstraints, parentUsesSize: true);
       innerTheta += child.deltaTheta;
       remainingDeltaTheta -= child.deltaTheta;
       assert(child.parentData is SectorChildListParentData);
@@ -333,30 +325,15 @@ class RenderSectorSlice extends RenderSectorWithChildren {
                                                 deltaTheta: outerDeltaTheta);
   }
 
-  SectorConstraints _constraints;
-  void layout(SectorConstraints constraints, { RenderNode relayoutSubtreeRoot }) {
-    if (relayoutSubtreeRoot != null)
-      saveRelayoutSubtreeRoot(relayoutSubtreeRoot);
-    relayoutSubtreeRoot = relayoutSubtreeRoot == null ? this : relayoutSubtreeRoot;
+  void performLayout() {
+    assert(this.parentData is SectorParentData);
     deltaTheta = constraints.constrainDeltaTheta(desiredDeltaTheta);
     assert(deltaTheta <= kTwoPi);
-    _constraints = constraints;
-    internalLayout(relayoutSubtreeRoot);
-  }
-
-  void relayout() {
-    // TODO(ianh): avoid code duplication
-    assert(parentData is SectorParentData);
-    internalLayout(this);
-  }
-
-  void internalLayout(RenderNode relayoutSubtreeRoot) {
-    assert(this.parentData is SectorParentData);
     double paddingTheta = math.atan(padding / this.parentData.radius);
     double innerTheta = this.parentData.theta + paddingTheta;
     double innerDeltaTheta = deltaTheta - paddingTheta * 2.0;
     double childRadius = this.parentData.radius + padding;
-    double remainingDeltaRadius = _constraints.maxDeltaRadius - (padding * 2.0);
+    double remainingDeltaRadius = constraints.maxDeltaRadius - (padding * 2.0);
     RenderSector child = firstChild;
     while (child != null) {
       SectorConstraints innerConstraints = new SectorConstraints(
@@ -365,7 +342,7 @@ class RenderSectorSlice extends RenderSectorWithChildren {
       );
       child.parentData.theta = innerTheta;
       child.parentData.radius = childRadius;
-      child.layout(innerConstraints);
+      child.layout(innerConstraints, parentUsesSize: true);
       childRadius += child.deltaRadius;
       remainingDeltaRadius -= child.deltaRadius;
       assert(child.parentData is SectorChildListParentData);
@@ -433,10 +410,7 @@ class RenderBoxToRenderSectorAdapter extends RenderBox {
     return new BoxDimensions.withConstraints(constraints, width: dimension, height: dimension);
   }
 
-  void layout(BoxConstraints constraints, { RenderNode relayoutSubtreeRoot }) {
-    if (relayoutSubtreeRoot != null)
-      saveRelayoutSubtreeRoot(relayoutSubtreeRoot);
-    relayoutSubtreeRoot = relayoutSubtreeRoot == null ? this : relayoutSubtreeRoot;
+  void performLayout() {
     BoxDimensions ourDimensions;
     if (child == null) {
       ourDimensions = new BoxDimensions.withConstraints(constraints, width: 0.0, height: 0.0);
@@ -447,13 +421,12 @@ class RenderBoxToRenderSectorAdapter extends RenderBox {
       assert(child.parentData is SectorParentData);
       child.parentData.radius = innerRadius;
       child.parentData.theta = 0.0;
-      child.layout(new SectorConstraints(maxDeltaRadius: maxChildDeltaRadius), relayoutSubtreeRoot: relayoutSubtreeRoot);
+      child.layout(new SectorConstraints(maxDeltaRadius: maxChildDeltaRadius), parentUsesSize: true);
       double dimension = (innerRadius + child.deltaRadius) * 2.0;
       ourDimensions = new BoxDimensions.withConstraints(constraints, width: dimension, height: dimension);
     }
     width = ourDimensions.width;
     height = ourDimensions.height;
-    layoutDone();
   }
 
   double width;
@@ -503,10 +476,9 @@ class RenderSolidColor extends RenderDecoratedSector {
     return new SectorDimensions.withConstraints(constraints, deltaTheta: 1.0); // 1.0 radians
   }
 
-  void layout(SectorConstraints constraints, { RenderNode relayoutSubtreeRoot }) {
+  void performLayout() {
     deltaRadius = constraints.constrainDeltaRadius(desiredDeltaRadius);
     deltaTheta = constraints.constrainDeltaTheta(desiredDeltaTheta);
-    layoutDone();
   }
 
   void handlePointer(sky.PointerEvent event) {

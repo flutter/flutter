@@ -564,7 +564,7 @@ class Paragraph extends OneChildListRenderNodeWrapper {
 class FlexContainer extends OneChildListRenderNodeWrapper {
 
   RenderFlex root;
-  RenderFlex createNode() => new RenderFlex(this, this.direction);
+  RenderFlex createNode() => new RenderFlex(direction: this.direction);
 
   static final FlexContainer _emptyContainer = new FlexContainer();
     // direction doesn't matter if it's empty
@@ -958,10 +958,9 @@ class RenderSolidColor extends RenderDecoratedBox {
                                              width: desiredWidth);
   }
 
-  void layout(BoxConstraints constraints, { RenderNode relayoutSubtreeRoot }) {
+  void performLayout() {
     width = constraints.constrainWidth(desiredWidth);
     height = constraints.constrainHeight(desiredHeight);
-    layoutDone();
   }
 
   void handlePointer(sky.PointerEvent event) {
