@@ -16,10 +16,8 @@ class RenderSolidColor extends RenderDecoratedBox {
       : backgroundColor = backgroundColor,
         super(new BoxDecoration(backgroundColor: backgroundColor));
 
-  BoxDimensions getIntrinsicDimensions(BoxConstraints constraints) {
-    return new BoxDimensions.withConstraints(constraints,
-                                             height: desiredHeight,
-                                             width: desiredWidth);
+  Size getIntrinsicDimensions(BoxConstraints constraints) {
+    return constraints.constrain(new Size(desiredWidth, desiredHeight));
   }
 
   void performLayout() {

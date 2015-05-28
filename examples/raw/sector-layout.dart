@@ -398,16 +398,16 @@ class RenderBoxToRenderSectorAdapter extends RenderBox {
       child.parentData = new SectorParentData();
   }
 
-  BoxDimensions getIntrinsicDimensions(BoxConstraints constraints) {
+  sky.Size getIntrinsicDimensions(BoxConstraints constraints) {
     if (child == null)
-      return new BoxDimensions.withConstraints(constraints, width: 0.0, height: 0.0);
+      return constraints.constrain(new sky.Size(0.0, 0.0));
     assert(child is RenderSector);
     assert(child.parentData is SectorParentData);
     assert(!constraints.isInfinite);
     double maxChildDeltaRadius = math.min(constraints.maxWidth, constraints.maxHeight) / 2.0 - innerRadius;
     SectorDimensions childDimensions = child.getIntrinsicDimensions(new SectorConstraints(maxDeltaRadius: maxChildDeltaRadius), innerRadius);
     double dimension = (innerRadius + childDimensions.deltaRadius) * 2.0;
-    return new BoxDimensions.withConstraints(constraints, width: dimension, height: dimension);
+    return constraints.constrain(new sky.Size(dimension, dimension));
   }
 
   void performLayout() {

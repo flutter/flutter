@@ -452,20 +452,6 @@ class BoxConstraints {
   bool get isInfinite => maxWidth >= double.INFINITY || maxHeight >= double.INFINITY;
 }
 
-// TODO(abarth): Replace with sky.Size.
-class BoxDimensions {
-  const BoxDimensions({ this.width: 0.0, this.height: 0.0 });
-
-  BoxDimensions.withConstraints(
-    BoxConstraints constraints,
-    { double width: 0.0, double height: 0.0 }
-  ) : width = constraints.constrainWidth(width),
-      height = constraints.constrainHeight(height);
-
-  final double width;
-  final double height;
-}
-
 class BoxParentData extends ParentData {
   sky.Point position = new sky.Point(0.0, 0.0);
 }
@@ -482,8 +468,8 @@ abstract class RenderBox extends RenderNode {
   // if it must, but it should be as cheap as possible; just get the
   // dimensions and nothing else (e.g. don't calculate hypothetical
   // child positions if they're not needed to determine dimensions)
-  BoxDimensions getIntrinsicDimensions(BoxConstraints constraints) {
-    return new BoxDimensions.withConstraints(constraints);
+  sky.Size getIntrinsicDimensions(BoxConstraints constraints) {
+    return constraints.constrain(new sky.Size(0.0, 0.0));
   }
 
   BoxConstraints get constraints => super.constraints as BoxConstraints;
@@ -515,7 +501,7 @@ abstract class RenderProxyBox extends RenderBox with RenderNodeWithChildMixin<Re
     this.child = child;
   }
 
-  BoxDimensions getIntrinsicDimensions(BoxConstraints constraints) {
+  sky.Size getIntrinsicDimensions(BoxConstraints constraints) {
     return child.getIntrinsicDimensions(constraints);
   }
 
@@ -539,10 +525,8 @@ class RenderSizedBox extends RenderProxyBox {
   RenderSizedBox(RenderBox child, [this.desiredSize = const sky.Size.infinite()])
       : super(child);
 
-  BoxDimensions getIntrinsicDimensions(BoxConstraints constraints) {
-    return new BoxDimensions.withConstraints(constraints,
-                                             width: desiredSize.width,
-                                             height: desiredSize.height);
+  sky.Size getIntrinsicDimensions(BoxConstraints constraints) {
+    return constraints.constrain(desiredSize);
   }
 
   void performLayout() {
@@ -569,7 +553,7 @@ class RenderPadding extends RenderBox with RenderNodeWithChildMixin<RenderBox> {
     }
   }
 
-  BoxDimensions getIntrinsicDimensions(BoxConstraints constraints) {
+  sky.Size getIntrinsicDimensions(BoxConstraints constraints) {
     assert(padding != null);
     constraints = constraints.deflate(padding);
     if (child == null)
@@ -805,22 +789,20 @@ class RenderBlock extends RenderDecoratedBox with ContainerRenderNodeMixin<Rende
   // if it must, but it should be as cheap as possible; just get the
   // dimensions and nothing else (e.g. don't calculate hypothetical
   // child positions if they're not needed to determine dimensions)
-  BoxDimensions getIntrinsicDimensions(BoxConstraints constraints) {
-    double outerHeight = 0.0;
-    double outerWidth = constraints.constrainWidth(constraints.maxWidth);
-    assert(outerWidth < double.INFINITY);
-    double innerWidth = outerWidth;
+  sky.Size getIntrinsicDimensions(BoxConstraints constraints) {
+    double height = 0.0;
+    double width = constraints.constrainWidth(constraints.maxWidth);
+    assert(width < double.INFINITY);
     RenderBox child = firstChild;
-    BoxConstraints innerConstraints = new BoxConstraints(minWidth: innerWidth,
-                                                         maxWidth: innerWidth);
+    BoxConstraints innerConstraints = new BoxConstraints(minWidth: width,
+                                                         maxWidth: width);
     while (child != null) {
-      outerHeight += child.getIntrinsicDimensions(innerConstraints).height;
+      height += child.getIntrinsicDimensions(innerConstraints).height;
       assert(child.parentData is BlockParentData);
       child = child.parentData.nextSibling;
     }
 
-    return new BoxDimensions(width: outerWidth,
-                             height: constraints.constrainHeight(outerHeight));
+    return new sky.Size(width, constraints.constrainHeight(height));
   }
 
   void performLayout() {
