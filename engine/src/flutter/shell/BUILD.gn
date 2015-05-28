@@ -55,7 +55,7 @@ shared_library("sky_shell") {
     "//base",
     "//base:i18n",
     "//build/config/sanitizers:deps",
-    "//dart/runtime/bin:libdart_withcore",
+    "//dart/runtime:libdart",
     "//mojo/android:libsystem_java",
     "//mojo/common",
     "//mojo/edk/system",
