@@ -22,12 +22,19 @@ class Rect {
       ..[3] = point.y + size.height;
   }
 
+  Rect.fromSize(Size size) {
+    _value
+      ..[2] = size.width
+      ..[3] = size.height;
+  }
+
   Rect.fromLTRB(double left, double top, double right, double bottom) {
     setLTRB(left, top, right, bottom);
   }
 
   Point get upperLeft => new Point(left, top);
   Point get lowerRight => new Point(right, bottom);
+  Point get center => new Point(left + right / 2.0, top + bottom / 2.0);
 
   Size get size => new Size(right - left, bottom - top);
 

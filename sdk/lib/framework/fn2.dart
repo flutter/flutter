@@ -943,24 +943,21 @@ class Text extends Component {
 // for now, but only for now:
 
 class RenderSolidColor extends RenderDecoratedBox {
-  final double desiredHeight;
-  final double desiredWidth;
+  final sky.Size desiredSize;
   final int backgroundColor;
 
-  RenderSolidColor(int backgroundColor, { this.desiredHeight: double.INFINITY,
-                                          this.desiredWidth: double.INFINITY })
+  RenderSolidColor(int backgroundColor, { this.desiredSize })
       : backgroundColor = backgroundColor,
         super(new BoxDecoration(backgroundColor: backgroundColor));
 
   BoxDimensions getIntrinsicDimensions(BoxConstraints constraints) {
     return new BoxDimensions.withConstraints(constraints,
-                                             height: desiredHeight,
-                                             width: desiredWidth);
+                                             width: desiredSize.width,
+                                             height: desiredSize.height);
   }
 
   void performLayout() {
-    width = constraints.constrainWidth(desiredWidth);
-    height = constraints.constrainHeight(desiredHeight);
+    size = constraints.constrain(desiredSize);
   }
 
   void handlePointer(sky.PointerEvent event) {
@@ -982,7 +979,7 @@ class Rectangle extends RenderNodeWrapper {
   final int color;
 
   RenderSolidColor root;
-  RenderSolidColor createNode() => new RenderSolidColor(color, desiredWidth: 40.0, desiredHeight: 130.0);
+  RenderSolidColor createNode() => new RenderSolidColor(color, desiredSize: new sky.Size(40.0, 130.0));
 
   static final Rectangle _emptyRectangle = new Rectangle(0);
   RenderNodeWrapper get emptyNode => _emptyRectangle;

@@ -256,7 +256,7 @@ class RenderSectorRing extends RenderSectorWithChildren {
     RenderSector child = firstChild;
     while (child != null) {
       assert(child.parentData is SectorChildListParentData);
-      canvas.paintChild(child, 0.0, 0.0);
+      canvas.paintChild(child, new sky.Point(0.0, 0.0));
       child = child.parentData.nextSibling;
     }
   }
@@ -361,7 +361,7 @@ class RenderSectorSlice extends RenderSectorWithChildren {
     RenderSector child = firstChild;
     while (child != null) {
       assert(child.parentData is SectorChildListParentData);
-      canvas.paintChild(child, 0.0, 0.0);
+      canvas.paintChild(child, new sky.Point(0.0, 0.0));
       child = child.parentData.nextSibling;
     }
   }
@@ -411,9 +411,8 @@ class RenderBoxToRenderSectorAdapter extends RenderBox {
   }
 
   void performLayout() {
-    BoxDimensions ourDimensions;
     if (child == null) {
-      ourDimensions = new BoxDimensions.withConstraints(constraints, width: 0.0, height: 0.0);
+      size = constraints.constrain(new sky.Size(0.0, 0.0));
     } else {
       assert(child is RenderSector);
       assert(!constraints.isInfinite);
@@ -423,28 +422,27 @@ class RenderBoxToRenderSectorAdapter extends RenderBox {
       child.parentData.theta = 0.0;
       child.layout(new SectorConstraints(maxDeltaRadius: maxChildDeltaRadius), parentUsesSize: true);
       double dimension = (innerRadius + child.deltaRadius) * 2.0;
-      ourDimensions = new BoxDimensions.withConstraints(constraints, width: dimension, height: dimension);
+      size = constraints.constrain(new sky.Size(dimension, dimension));
     }
-    width = ourDimensions.width;
-    height = ourDimensions.height;
   }
-
-  double width;
-  double height;
 
   // paint origin is 0,0 of our circle
   void paint(RenderNodeDisplayList canvas) {
     super.paint(canvas);
-    if (child != null)
-      canvas.paintChild(child, width/2.0, height/2.0);
+    if (child != null) {
+      sky.Rect bounds = new sky.Rect.fromSize(size);
+      canvas.paintChild(child, bounds.center);
+    }
   }
 
-  bool hitTest(HitTestResult result, { double x, double y }) {
+  bool hitTest(HitTestResult result, { sky.Point position }) {
+    double x = position.x;
+    double y = position.y;
     if (child == null)
       return false;
     // translate to our origin
-    x -= width/2.0;
-    y -= height/2.0;
+    x -= size.width/2.0;
+    y -= size.height/2.0;
     // convert to radius/theta
     double radius = math.sqrt(x*x+y*y);
     double theta = (math.atan2(x, -y) - math.PI/2.0) % kTwoPi;

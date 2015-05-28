@@ -8,22 +8,18 @@ import 'dart:sky' as sky;
 import 'package:sky/framework/layout2.dart';
 
 class RenderSizedBox extends RenderBox {
-  final double desiredHeight;
-  final double desiredWidth;
+  final sky.Size desiredSize;
 
-  RenderSizedBox({ this.desiredHeight: double.INFINITY,
-                   this.desiredWidth: double.INFINITY });
+  RenderSizedBox({ this.desiredSize });
 
   BoxDimensions getIntrinsicDimensions(BoxConstraints constraints) {
     return new BoxDimensions.withConstraints(constraints,
-                                             height: desiredHeight,
-                                             width: desiredWidth);
+                                             width: desiredSize.width,
+                                             height: desiredSize.height);
   }
 
-  void layout(BoxConstraints constraints, { RenderNode relayoutSubtreeRoot }) {
-    width = constraints.constrainWidth(desiredWidth);
-    height = constraints.constrainHeight(desiredHeight);
-    layoutDone();
+  void performLayout() {
+    size = constraints.constrain(desiredSize);
   }
 }
 
@@ -31,10 +27,10 @@ void main() {
   initUnit();
 
   test("should size to render view", () {
-    RenderSizedBox root = new RenderSizedBox();
+    RenderSizedBox root = new RenderSizedBox(desiredSize: new sky.Size.infinite());
     RenderView renderView = new RenderView(child: root);
-    renderView.layout(newWidth: sky.view.width, newHeight: sky.view.height);
-    expect(root.width, equals(sky.view.width));
-    expect(root.height, equals(sky.view.height));
+    renderView.layout(new ViewConstraints(width: sky.view.width, height: sky.view.height));
+    expect(root.size.width, equals(sky.view.width));
+    expect(root.size.height, equals(sky.view.height));
   });
 }

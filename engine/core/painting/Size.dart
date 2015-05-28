@@ -11,6 +11,8 @@ class Size {
 
   Size(this.width, this.height);
 
+  Size.infinite() : width = double.INFINITY, height = double.INFINITY;
+
   bool operator ==(other) {
     if (!(other is Size)) return false;
     return width == other.width && height == other.height;

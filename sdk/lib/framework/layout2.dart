@@ -34,9 +34,9 @@ double clamp({double min: 0.0, double value: 0.0, double max: double.INFINITY}) 
 
 class RenderNodeDisplayList extends sky.PictureRecorder {
   RenderNodeDisplayList(double width, double height) : super(width, height);
-  void paintChild(RenderNode child, double x, double y) {
+  void paintChild(RenderNode child, sky.Point position) {
     save();
-    translate(x, y);
+    translate(position.x, position.y);
     child.paint(this);
     restore();
   }
@@ -198,7 +198,7 @@ abstract class RenderNode extends AbstractNode {
   // RenderNode subclasses are expected to have a method like the
   // following (with the signature being whatever passes for coordinates
   // for this particular class):
-  // bool hitTest(HitTestResult result, { double x, double y }) {
+  // bool hitTest(HitTestResult result, { sky.Point position }) {
   //   // If (x,y) is not inside this node, then return false. (You
   //   // can assume that the given coordinate is inside your
   //   // dimensions. You only need to check this if you're an
@@ -445,9 +445,14 @@ class BoxConstraints {
     return clamp(min: minHeight, max: maxHeight, value: height);
   }
 
+  sky.Size constrain(sky.Size size) {
+    return new sky.Size(constrainWidth(size.width), constrainHeight(size.height));
+  }
+
   bool get isInfinite => maxWidth >= double.INFINITY || maxHeight >= double.INFINITY;
 }
 
+// TODO(abarth): Replace with sky.Size.
 class BoxDimensions {
   const BoxDimensions({ this.width: 0.0, this.height: 0.0 });
 
@@ -462,8 +467,7 @@ class BoxDimensions {
 }
 
 class BoxParentData extends ParentData {
-  double x = 0.0;
-  double y = 0.0;
+  sky.Point position = new sky.Point(0.0, 0.0);
 }
 
 abstract class RenderBox extends RenderNode {
@@ -485,10 +489,9 @@ abstract class RenderBox extends RenderNode {
   BoxConstraints get constraints => super.constraints as BoxConstraints;
   void performResize() {
     // default behaviour for subclasses that have sizedByParent = true
-    width = constraints.constrainWidth(0.0);
-    height = constraints.constrainHeight(0.0);
-    assert(height < double.INFINITY);
-    assert(width < double.INFINITY);
+    size = constraints.constrain(new sky.Size(0.0, 0.0));
+    assert(size.height < double.INFINITY);
+    assert(size.width < double.INFINITY);
   }
   void performLayout() {
     // descendants have to either override performLayout() to set both
@@ -497,15 +500,14 @@ abstract class RenderBox extends RenderNode {
     assert(sizedByParent);
   }
 
-  bool hitTest(HitTestResult result, { double x, double y }) {
-    hitTestChildren(result, x: x, y: y);
+  bool hitTest(HitTestResult result, { sky.Point position }) {
+    hitTestChildren(result, position: position);
     result.add(this);
     return true;
   }
-  void hitTestChildren(HitTestResult result, { double x, double y }) { }
+  void hitTestChildren(HitTestResult result, { sky.Point position }) { }
 
-  double width;
-  double height;
+  sky.Size size = new sky.Size(0.0, 0.0);
 }
 
 class RenderPadding extends RenderBox with RenderNodeWithChildMixin<RenderBox> {
@@ -538,29 +540,30 @@ class RenderPadding extends RenderBox with RenderNodeWithChildMixin<RenderBox> {
     assert(padding != null);
     BoxConstraints innerConstraints = constraints.deflate(padding);
     if (child == null) {
-      width = innerConstraints.constrainWidth(padding.left + padding.right);
-      height = innerConstraints.constrainHeight(padding.top + padding.bottom);
+      size = innerConstraints.constrain(
+          new sky.Size(padding.left + padding.right, padding.top + padding.bottom));
       return;
     }
     child.layout(innerConstraints, parentUsesSize: true);
     assert(child.parentData is BoxParentData);
-    child.parentData.x = padding.left;
-    child.parentData.y = padding.top;
-    width = constraints.constrainWidth(padding.left + child.width + padding.right);
-    height = constraints.constrainHeight(padding.top + child.height + padding.bottom);
+    child.parentData.position = new sky.Point(padding.left, padding.top);
+    size = constraints.constrain(new sky.Size(padding.left + child.size.width + padding.right,
+                                              padding.top + child.size.height + padding.bottom));
   }
 
   void paint(RenderNodeDisplayList canvas) {
     if (child != null)
-      canvas.paintChild(child, child.parentData.x, child.parentData.y);
+      canvas.paintChild(child, child.parentData.position);
   }
 
-  void hitTestChildren(HitTestResult result, { double x, double y }) {
+  void hitTestChildren(HitTestResult result, { sky.Point position }) {
     if (child != null) {
       assert(child.parentData is BoxParentData);
-      if ((x >= child.parentData.x) && (x < child.parentData.x + child.width) &&
-          (y >= child.parentData.y) && (y < child.parentData.y + child.height))
-        child.hitTest(result, x: x+child.parentData.x, y: y+child.parentData.y);
+      sky.Rect childBounds = new sky.Rect.fromPointAndSize(child.parentData.position, child.size);
+      if (childBounds.contains(position)) {
+        child.hitTest(result, position: new sky.Point(position.x - child.parentData.position.x,
+                                                      position.y - child.parentData.position.y));
+      }
     }
   }
 
@@ -589,15 +592,15 @@ class RenderDecoratedBox extends RenderBox {
   }
 
   void paint(RenderNodeDisplayList canvas) {
-    assert(width != null);
-    assert(height != null);
+    assert(size.width != null);
+    assert(size.height != null);
 
     if (_decoration == null)
       return;
 
     if (_decoration.backgroundColor != null) {
       sky.Paint paint = new sky.Paint()..color = _decoration.backgroundColor;
-      canvas.drawRect(new sky.Rect()..setLTRB(0.0, 0.0, width, height), paint);
+      canvas.drawRect(new sky.Rect.fromLTRB(0.0, 0.0, size.width, size.height), paint);
     }
   }
 
@@ -612,15 +615,15 @@ class RenderDecoratedCircle extends RenderDecoratedBox with RenderNodeWithChildM
   }
 
   void paint(RenderNodeDisplayList canvas) {
-    assert(width != null);
-    assert(height != null);
+    assert(size.width != null);
+    assert(size.height != null);
 
     if (_decoration == null)
       return;
 
     if (_decoration.backgroundColor != null) {
       sky.Paint paint = new sky.Paint()..color = _decoration.backgroundColor;
-      canvas.drawCircle(new sky.Rect()..setLTRB(0.0, 0.0, width, height), paint);
+      canvas.drawCircle(0.0, 0.0, (size.width + size.height) / 2, paint);
     }
   }
 }
@@ -649,10 +652,9 @@ class RenderView extends RenderNode with RenderNodeWithChildMixin<RenderBox> {
     this.child = child;
   }
 
-  double _width;
-  double get width => _width;
-  double _height;
-  double get height => _height;
+  sky.Size _size = new sky.Size(0.0, 0.0);
+  double get width => _size.width;
+  double get height => _size.height;
 
   int _orientation; // 0..3
   int get orientation => _orientation;
@@ -666,16 +668,15 @@ class RenderView extends RenderNode with RenderNodeWithChildMixin<RenderBox> {
         child.rotate(oldAngle: _orientation, newAngle: constraints.orientation, time: timeForRotation);
       _orientation = constraints.orientation;
     }
-    _width = constraints.width;
-    _height = constraints.height;
-    assert(height < double.INFINITY);
-    assert(width < double.INFINITY);
+    _size = new sky.Size(constraints.width, constraints.height);
+    assert(_size.height < double.INFINITY);
+    assert(_size.width < double.INFINITY);
   }
   void performLayout() {
     if (child != null) {
       child.layout(new BoxConstraints.tight(width: width, height: height));
-      assert(child.width == width);
-      assert(child.height == height);
+      assert(child.size.width == width);
+      assert(child.size.height == height);
     }
   }
 
@@ -683,16 +684,19 @@ class RenderView extends RenderNode with RenderNodeWithChildMixin<RenderBox> {
     assert(false); // nobody tells the screen to rotate, the whole rotate() dance is started from our performResize()
   }
 
-  bool hitTest(HitTestResult result, { double x, double y }) {
-    if (child != null && x >= 0.0 && x < child.width && y >= 0.0 && y < child.height)
-      child.hitTest(result, x: x, y: y);
+  bool hitTest(HitTestResult result, { sky.Point position }) {
+    if (child != null) {
+      sky.Rect childBounds = new sky.Rect.fromSize(child.size);
+      if (childBounds.contains(position))
+        child.hitTest(result, position: position);
+    }
     result.add(this);
     return true;
   }
 
   void paint(RenderNodeDisplayList canvas) {
     if (child != null)
-      canvas.paintChild(child, 0.0, 0.0);
+      canvas.paintChild(child, new sky.Point(0.0, 0.0));
   }
 
   void paintFrame() {
@@ -708,14 +712,15 @@ class RenderView extends RenderNode with RenderNodeWithChildMixin<RenderBox> {
 // DEFAULT BEHAVIORS FOR RENDERBOX CONTAINERS
 abstract class RenderBoxContainerDefaultsMixin<ChildType extends RenderBox, ParentDataType extends ContainerParentDataMixin<ChildType>> implements ContainerRenderNodeMixin<ChildType, ParentDataType> {
 
-  void defaultHitTestChildren(HitTestResult result, { double x, double y }) {
+  void defaultHitTestChildren(HitTestResult result, { sky.Point position }) {
     // the x, y parameters have the top left of the node's box as the origin
     ChildType child = lastChild;
     while (child != null) {
       assert(child.parentData is BoxParentData);
-      if ((x >= child.parentData.x) && (x < child.parentData.x + child.width) &&
-          (y >= child.parentData.y) && (y < child.parentData.y + child.height)) {
-        if (child.hitTest(result, x: x-child.parentData.x, y: y-child.parentData.y))
+      sky.Rect childBounds = new sky.Rect.fromPointAndSize(child.parentData.position, child.size);
+      if (childBounds.contains(position)) {
+        if (child.hitTest(result, position: new sky.Point(position.x - child.parentData.position.x,
+                                                          position.y - child.parentData.position.y)))
           break;
       }
       child = child.parentData.previousSibling;
@@ -726,7 +731,7 @@ abstract class RenderBoxContainerDefaultsMixin<ChildType extends RenderBox, Pare
     RenderBox child = firstChild;
     while (child != null) {
       assert(child.parentData is BoxParentData);
-      canvas.paintChild(child, child.parentData.x, child.parentData.y);
+      canvas.paintChild(child, child.parentData.position);
       child = child.parentData.nextSibling;
     }
   }
@@ -776,24 +781,23 @@ class RenderBlock extends RenderDecoratedBox with ContainerRenderNodeMixin<Rende
 
   void performLayout() {
     assert(constraints is BoxConstraints);
-    width = constraints.constrainWidth(constraints.maxWidth);
-    assert(width < double.INFINITY);
+    size.width = constraints.constrainWidth(constraints.maxWidth);
+    assert(size.width < double.INFINITY);
     double y = 0.0;
-    double innerWidth = width;
+    double innerWidth = size.width;
     RenderBox child = firstChild;
     while (child != null) {
       child.layout(new BoxConstraints(minWidth: innerWidth, maxWidth: innerWidth), parentUsesSize: true);
       assert(child.parentData is BlockParentData);
-      child.parentData.x = 0.0;
-      child.parentData.y = y;
-      y += child.height;
+      child.parentData.position = new sky.Point(0.0, y);
+      y += child.size.height;
       child = child.parentData.nextSibling;
     }
-    height = constraints.constrainHeight(y);
+    size.height = constraints.constrainHeight(y);
   }
 
-  void hitTestChildren(HitTestResult result, { double x, double y }) {
-    defaultHitTestChildren(result, x: x, y: y);
+  void hitTestChildren(HitTestResult result, { sky.Point position }) {
+    defaultHitTestChildren(result, position: position);
   }
 
   void paint(RenderNodeDisplayList canvas) {
@@ -841,10 +845,9 @@ class RenderFlex extends RenderDecoratedBox with ContainerRenderNodeMixin<Render
 
   bool get sizedByParent => true;
   void performResize() {
-    width = _constraints.constrainWidth(_constraints.maxWidth);
-    height = _constraints.constrainHeight(_constraints.maxHeight);
-    assert(height < double.INFINITY);
-    assert(width < double.INFINITY);
+    size = _constraints.constrain(new sky.Size(_constraints.maxWidth, _constraints.maxHeight));
+    assert(size.height < double.INFINITY);
+    assert(size.width < double.INFINITY);
   }
 
   int _getFlex(RenderBox child) {
@@ -867,7 +870,7 @@ class RenderFlex extends RenderDecoratedBox with ContainerRenderNodeMixin<Render
         BoxConstraints innerConstraints = new BoxConstraints(maxHeight: constraints.maxHeight,
                                                              maxWidth: constraints.maxWidth);
         child.layout(innerConstraints, parentUsesSize: true);
-        freeSpace -= (_direction == FlexDirection.Horizontal) ? child.width : child.height;
+        freeSpace -= (_direction == FlexDirection.Horizontal) ? child.size.width : child.size.height;
       }
       child = child.parentData.nextSibling;
     }
@@ -899,22 +902,20 @@ class RenderFlex extends RenderDecoratedBox with ContainerRenderNodeMixin<Render
       // For now, center the flex items in the cross direction
       switch (_direction) {
         case FlexDirection.Horizontal:
-          child.parentData.x = usedSpace;
-          usedSpace += child.width;
-          child.parentData.y = height / 2.0 - child.height / 2.0;
+          child.parentData.position = new sky.Point(usedSpace, size.height / 2.0 - child.size.height / 2.0);
+          usedSpace += child.size.width;
           break;
         case FlexDirection.Vertical:
-          child.parentData.y = usedSpace;
-          usedSpace += child.height;
-          child.parentData.x = width / 2.0 - child.width / 2.0;
+          child.parentData.position = new sky.Point(size.width / 2.0 - child.size.width / 2.0, usedSpace);
+          usedSpace += child.size.height;
           break;
       }
       child = child.parentData.nextSibling;
     }
   }
 
-  void hitTestChildren(HitTestResult result, { double x, double y }) {
-    defaultHitTestChildren(result, x: x, y: y);
+  void hitTestChildren(HitTestResult result, { sky.Point position }) {
+    defaultHitTestChildren(result, position: position);
   }
 
   void paint(RenderNodeDisplayList canvas) {

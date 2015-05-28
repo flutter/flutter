@@ -5,6 +5,7 @@
 import '../fn2.dart';
 import '../layout2.dart';
 import '../theme/typography.dart' as typography;
+import 'dart:sky' as sky;
 
 // RenderNode
 class RenderScaffold extends RenderDecoratedBox {
@@ -81,10 +82,9 @@ class RenderScaffold extends RenderDecoratedBox {
 
   bool get sizedByParent => true;
   void performResize() {
-    width = constraints.constrainWidth(double.INFINITY);
-    assert(width < double.INFINITY);
-    height = constraints.constrainHeight(double.INFINITY);
-    assert(height < double.INFINITY);
+    size = constraints.constrain(new sky.Size.infinite());
+    assert(size.width < double.INFINITY);
+    assert(size.height < double.INFINITY);
   }
 
   static const kToolbarHeight = 100.0;
@@ -93,70 +93,65 @@ class RenderScaffold extends RenderDecoratedBox {
   static const kButtonY = -16.0; // from bottom edge of body
 
   void performLayout() {
-    double bodyHeight = height;
+    double bodyHeight = size.height;
     double bodyPosition = 0.0;
     if (toolbar != null) {
-      toolbar.layout(new BoxConstraints.tight(width: width, height: kToolbarHeight));
+      toolbar.layout(new BoxConstraints.tight(width: size.width, height: kToolbarHeight));
       assert(toolbar.parentData is BoxParentData);
-      toolbar.parentData.x = 0.0;
-      toolbar.parentData.y = 0.0;
+      toolbar.parentData.position = new sky.Point(0.0, 0.0);
       bodyPosition = kToolbarHeight;
       bodyHeight -= kToolbarHeight;
     }
     if (statusbar != null) {
-      statusbar.layout(new BoxConstraints.tight(width: width, height: kStatusbarHeight));
+      statusbar.layout(new BoxConstraints.tight(width: size.width, height: kStatusbarHeight));
       assert(statusbar.parentData is BoxParentData);
-      statusbar.parentData.x = 0.0;
-      statusbar.parentData.y = height - kStatusbarHeight;
+      statusbar.parentData.position = new sky.Point(0.0, size.height - kStatusbarHeight);
       bodyHeight -= kStatusbarHeight;
     }
     if (body != null) {
-      body.layout(new BoxConstraints.tight(width: width, height: bodyHeight));
+      body.layout(new BoxConstraints.tight(width: size.width, height: bodyHeight));
       assert(body.parentData is BoxParentData);
-      body.parentData.x = 0.0;
-      body.parentData.y = bodyPosition;
+      body.parentData.position = new sky.Point(0.0, bodyPosition);
     }
     if (drawer != null) {
-      drawer.layout(new BoxConstraints(minWidth: 0.0, maxWidth: width, minHeight: height, maxHeight: height));
+      drawer.layout(new BoxConstraints(minWidth: 0.0, maxWidth: size.width, minHeight: size.height, maxHeight: size.height));
       assert(drawer.parentData is BoxParentData);
-      drawer.parentData.x = 0.0;
-      drawer.parentData.y = 0.0;
+      drawer.parentData.position = new sky.Point(0.0, 0.0);
     }
     if (floatingActionButton != null) {
-      floatingActionButton.layout(new BoxConstraints(minWidth: 0.0, maxWidth: width, minHeight: height, maxHeight: height));
+      floatingActionButton.layout(new BoxConstraints(minWidth: 0.0, maxWidth: size.width, minHeight: size.height, maxHeight: size.height));
       assert(floatingActionButton.parentData is BoxParentData);
-      floatingActionButton.parentData.x = width - xButtonX;
-      floatingActionButton.parentData.y = bodyPosition + bodyHeight - kButtonY;
+      floatingActionButton.parentData.position = new sky.Point(size.width - xButtonX, bodyPosition + bodyHeight - kButtonY);
     }
   }
 
   void paint(RenderNodeDisplayList canvas) {
     if (body != null)
-      canvas.paintChild(body, (body.parentData as BoxParentData).x, (body.parentData as BoxParentData).y);
+      canvas.paintChild(body, (body.parentData as BoxParentData).position);
     if (statusbar != null)
-      canvas.paintChild(statusbar, (statusbar.parentData as BoxParentData).x, (statusbar.parentData as BoxParentData).y);
+      canvas.paintChild(statusbar, (statusbar.parentData as BoxParentData).position);
     if (toolbar != null)
-      canvas.paintChild(toolbar, (toolbar.parentData as BoxParentData).x, (toolbar.parentData as BoxParentData).y);
+      canvas.paintChild(toolbar, (toolbar.parentData as BoxParentData).position);
     if (floatingActionButton != null)
-      canvas.paintChild(floatingActionButton, (floatingActionButton.parentData as BoxParentData).x, (floatingActionButton.parentData as BoxParentData).y);
+      canvas.paintChild(floatingActionButton, (floatingActionButton.parentData as BoxParentData).position);
     if (drawer != null)
-      canvas.paintChild(drawer, (drawer.parentData as BoxParentData).x, (drawer.parentData as BoxParentData).y);
+      canvas.paintChild(drawer, (drawer.parentData as BoxParentData).position);
   }
 
-  void hitTestChildren(HitTestResult result, { double x, double y }) {
+  void hitTestChildren(HitTestResult result, { sky.Point position }) {
     assert(floatingActionButton == null || floatingActionButton.parentData is BoxParentData);
     assert(statusbar == null || statusbar.parentData is BoxParentData);
-    if ((drawer != null) && (x < drawer.width)) {
-      drawer.hitTest(result, x: x, y: y);
-    } else if ((floatingActionButton != null) && (x >= floatingActionButton.parentData.x) && (x < floatingActionButton.parentData.x + floatingActionButton.width)
-                                              && (y >= floatingActionButton.parentData.y) && (y < floatingActionButton.parentData.y + floatingActionButton.height)) {
-      floatingActionButton.hitTest(result, x: x-floatingActionButton.parentData.x, y: y-floatingActionButton.parentData.y);
-    } else if ((toolbar != null) && (y < toolbar.height)) {
-      toolbar.hitTest(result, x: x, y: y);
-    } else if ((statusbar != null) && (y > statusbar.parentData.y)) {
-      statusbar.hitTest(result, x: x, y: y-statusbar.parentData.y);
+    if ((drawer != null) && (x < drawer.size.width)) {
+      drawer.hitTest(result, position: position);
+    } else if ((floatingActionButton != null) && (position.x >= floatingActionButton.parentData.position.x) && (position.x < floatingActionButton.parentData.position.x + floatingActionButton.size.width)
+                                              && (position.y >= floatingActionButton.parentData.position.y) && (position.y < floatingActionButton.parentData.position.y + floatingActionButton.size.height)) {
+      floatingActionButton.hitTest(result, position: new sky.Point(position.x - floatingActionButton.parentData.position.x, position.y - floatingActionButton.parentData.position.y));
+    } else if ((toolbar != null) && (position.y < toolbar.size.height)) {
+      toolbar.hitTest(result, position: position);
+    } else if ((statusbar != null) && (position.y > statusbar.parentData.position.y)) {
+      statusbar.hitTest(result, position: new sky.Point(position.x, position.y - statusbar.parentData.position.y));
     } else if (body != null) {
-      body.hitTest(result, x: x, y: y-body.parentData.y);
+      body.hitTest(result, position: new sky.Point(position.x, position.y - body.parentData.position.y));
     }
   }
 

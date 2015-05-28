@@ -41,7 +41,7 @@ class AppView {
     switch(event.type) {
       case 'pointerdown':
         result = new HitTestResult();
-        _renderView.hitTest(result, x: event.x, y: event.y);
+        _renderView.hitTest(result, position: new sky.Point(event.x, event.y));
         _hitTestResultForPointer[event.pointer] = result;
         break;
       case 'pointerup':
@@ -54,7 +54,7 @@ class AppView {
         // In the case of mouse hover we won't already have a cached down.
         if (result == null) {
           result = new HitTestResult();
-          _renderView.hitTest(result, x: event.x, y: event.y);
+          _renderView.hitTest(result, position: new sky.Point(event.x, event.y));
         }
         break;
     }

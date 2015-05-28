@@ -7,24 +7,22 @@ import 'package:sky/framework/app.dart';
 import 'package:sky/framework/layout2.dart';
 
 class RenderSolidColor extends RenderDecoratedBox {
-  final double desiredHeight;
-  final double desiredWidth;
+  final Size desiredSize;
   final int backgroundColor;
 
-  RenderSolidColor(int backgroundColor, { this.desiredHeight: double.INFINITY,
-                                          this.desiredWidth: double.INFINITY })
+  RenderSolidColor(int backgroundColor, { this.desiredSize })
       : backgroundColor = backgroundColor,
-        super(new BoxDecoration(backgroundColor: backgroundColor));
+        super(new BoxDecoration(backgroundColor: backgroundColor)) {
+  }
 
   BoxDimensions getIntrinsicDimensions(BoxConstraints constraints) {
     return new BoxDimensions.withConstraints(constraints,
-                                             height: desiredHeight,
-                                             width: desiredWidth);
+                                             width: desiredSize.width,
+                                             height: desiredSize.height);
   }
 
   void performLayout() {
-    width = constraints.constrainWidth(desiredWidth);
-    height = constraints.constrainHeight(desiredHeight);
+    size = constraints.constrain(desiredSize);
   }
 
   void handlePointer(PointerEvent event) {
@@ -43,7 +41,7 @@ void main() {
       decoration: new BoxDecoration(backgroundColor: 0xFF000000));
 
   void addFlexChild(RenderFlex parent, int backgroundColor, { int flex: 0 }) {
-    RenderNode child = new RenderSolidColor(backgroundColor);
+    RenderNode child = new RenderSolidColor(backgroundColor, desiredSize: new Size.infinite());
     parent.add(child);
     child.parentData.flex = flex;
   }
@@ -52,13 +50,13 @@ void main() {
   addFlexChild(root, 0xFFFFFF00, flex: 1);
 
   // Turquoise box
-  root.add(new RenderSolidColor(0x7700FFFF, desiredHeight: 100.0, desiredWidth: 100.0));
+  root.add(new RenderSolidColor(0x7700FFFF, desiredSize: new Size(100.0, 100.0)));
 
   // Green and cyan render block with padding
   var renderBlock = new RenderBlock(decoration: new BoxDecoration(backgroundColor: 0xFFFFFFFF));
 
-  renderBlock.add(new RenderSolidColor(0xFF00FF00, desiredHeight: 50.0, desiredWidth: 100.0));
-  renderBlock.add(new RenderSolidColor(0x7700FFFF, desiredHeight: 100.0, desiredWidth: 50.0));
+  renderBlock.add(new RenderSolidColor(0xFF00FF00, desiredSize: new Size(100.0, 50.0)));
+  renderBlock.add(new RenderSolidColor(0x7700FFFF, desiredSize: new Size(50.0, 100.0)));
 
   root.add(new RenderPadding(const EdgeDims(10.0, 10.0, 10.0, 10.0), renderBlock));
 
