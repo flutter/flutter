@@ -15,7 +15,7 @@ void beginFrame(double timeStamp) {
   PictureRecorder canvas = new PictureRecorder(view.width, view.height);
   canvas.translate(view.width / 2.0, view.height / 2.0);
   canvas.rotateDegrees(delta / 10);
-  canvas.drawRect(new Rect()..setLTRB(-100.0, -100.0, 100.0, 100.0),
+  canvas.drawRect(new Rect.fromLTRB(-100.0, -100.0, 100.0, 100.0),
                   new Paint()..setARGB(255, 0, 255, 0));
 
   double sin = math.sin(delta / 200);

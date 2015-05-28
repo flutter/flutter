@@ -126,10 +126,10 @@ class RenderDecoratedSector extends RenderSector {
       sky.Paint paint = new sky.Paint()..color = _decoration.backgroundColor;
       sky.Path path = new sky.Path();
       double outerRadius = (parentData.radius + deltaRadius);
-      sky.Rect outerBounds = new sky.Rect()..setLTRB(-outerRadius, -outerRadius, outerRadius, outerRadius);
+      sky.Rect outerBounds = new sky.Rect.fromLTRB(-outerRadius, -outerRadius, outerRadius, outerRadius);
       path.arcTo(outerBounds, deg(parentData.theta), deg(deltaTheta), true);
       double innerRadius = parentData.radius;
-      sky.Rect innerBounds = new sky.Rect()..setLTRB(-innerRadius, -innerRadius, innerRadius, innerRadius);
+      sky.Rect innerBounds = new sky.Rect.fromLTRB(-innerRadius, -innerRadius, innerRadius, innerRadius);
       path.arcTo(innerBounds, deg(parentData.theta + deltaTheta), deg(-deltaTheta), false);
       path.close();
       canvas.drawPath(path, paint);

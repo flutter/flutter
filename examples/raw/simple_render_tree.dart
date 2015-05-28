@@ -10,7 +10,7 @@ class RenderSolidColor extends RenderDecoratedBox {
   final Size desiredSize;
   final int backgroundColor;
 
-  RenderSolidColor(int backgroundColor, { this.desiredSize })
+  RenderSolidColor(int backgroundColor, { this.desiredSize: const sky.Size.infinite() })
       : backgroundColor = backgroundColor,
         super(new BoxDecoration(backgroundColor: backgroundColor)) {
   }
@@ -41,7 +41,7 @@ void main() {
       decoration: new BoxDecoration(backgroundColor: 0xFF000000));
 
   void addFlexChild(RenderFlex parent, int backgroundColor, { int flex: 0 }) {
-    RenderNode child = new RenderSolidColor(backgroundColor, desiredSize: new Size.infinite());
+    RenderNode child = new RenderSolidColor(backgroundColor);
     parent.add(child);
     child.parentData.flex = flex;
   }
