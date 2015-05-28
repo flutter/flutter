@@ -4,9 +4,9 @@
 
 part of dart.sky;
 
-class Point {
-  double x;
-  double y;
+class Size {
+  double width;
+  double height;
 
-  Point(this.x, this.y);
+  Point(this.width, this.height);
 }
