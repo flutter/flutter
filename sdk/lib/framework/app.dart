@@ -14,7 +14,7 @@ class AppView {
     _renderView = new RenderView(child: root);
     _renderView.attach();
     _renderView.layout(newWidth: sky.view.width, newHeight: sky.view.height);
-  
+
     sky.view.scheduleFrame();
   }
 
@@ -51,6 +51,11 @@ class AppView {
         break;
       case 'pointermove':
         result = _hitTestResultForPointer[event.pointer];
+        // In the case of mouse hover we won't already have a cached down.
+        if (result == null) {
+          result = new HitTestResult();
+          _renderView.hitTest(result, x: event.x, y: event.y);
+        }
         break;
     }
     assert(result != null);
