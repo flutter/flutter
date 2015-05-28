@@ -22,10 +22,9 @@ class RenderSolidColor extends RenderDecoratedBox {
                                              width: desiredWidth);
   }
 
-  void layout(BoxConstraints constraints, { RenderNode relayoutSubtreeRoot }) {
+  void performLayout() {
     width = constraints.constrainWidth(desiredWidth);
     height = constraints.constrainHeight(desiredHeight);
-    layoutDone();
   }
 
   void handlePointer(PointerEvent event) {
