@@ -5,18 +5,19 @@
 import '../fn2.dart';
 import '../theme/typography.dart' as typography;
 import 'dart:sky' as sky;
+import '../rendering/render_box.dart';
+import '../rendering/render_node.dart';
 
 // RenderNode
-class RenderScaffold extends RenderDecoratedBox {
+class RenderScaffold extends RenderBox {
 
   RenderScaffold({
-    BoxDecoration decoration,
     RenderBox toolbar,
     RenderBox body,
     RenderBox statusbar,
     RenderBox drawer,
     RenderBox floatingActionButton
-  }) : super(decoration) {
+  }) {
     this.toolbar = toolbar;
     this.body = body;
     this.statusbar = statusbar;
@@ -120,7 +121,7 @@ class RenderScaffold extends RenderDecoratedBox {
     if (floatingActionButton != null) {
       floatingActionButton.layout(new BoxConstraints(minWidth: 0.0, maxWidth: size.width, minHeight: size.height, maxHeight: size.height));
       assert(floatingActionButton.parentData is BoxParentData);
-      floatingActionButton.parentData.position = new sky.Point(size.width - xButtonX, bodyPosition + bodyHeight - kButtonY);
+      floatingActionButton.parentData.position = new sky.Point(size.width - kButtonX, bodyPosition + bodyHeight - kButtonY);
     }
   }
 
@@ -140,7 +141,7 @@ class RenderScaffold extends RenderDecoratedBox {
   void hitTestChildren(HitTestResult result, { sky.Point position }) {
     assert(floatingActionButton == null || floatingActionButton.parentData is BoxParentData);
     assert(statusbar == null || statusbar.parentData is BoxParentData);
-    if ((drawer != null) && (x < drawer.size.width)) {
+    if ((drawer != null) && (position.x < drawer.size.width)) {
       drawer.hitTest(result, position: position);
     } else if ((floatingActionButton != null) && (position.x >= floatingActionButton.parentData.position.x) && (position.x < floatingActionButton.parentData.position.x + floatingActionButton.size.width)
                                               && (position.y >= floatingActionButton.parentData.position.y) && (position.y < floatingActionButton.parentData.position.y + floatingActionButton.size.height)) {
