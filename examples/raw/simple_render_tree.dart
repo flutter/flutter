@@ -56,14 +56,12 @@ void main() {
   root.add(new RenderSolidColor(0x7700FFFF, desiredHeight: 100.0, desiredWidth: 100.0));
 
   // Green and cyan render block with padding
-  var renderBlock = new RenderBlock(
-      decoration: new BoxDecoration(backgroundColor: 0xFFFFFFFF),
-      padding: const EdgeDims(10.0, 10.0, 10.0, 10.0));
+  var renderBlock = new RenderBlock(decoration: new BoxDecoration(backgroundColor: 0xFFFFFFFF));
 
   renderBlock.add(new RenderSolidColor(0xFF00FF00, desiredHeight: 50.0, desiredWidth: 100.0));
   renderBlock.add(new RenderSolidColor(0x7700FFFF, desiredHeight: 100.0, desiredWidth: 50.0));
 
-  root.add(renderBlock);
+  root.add(new RenderPadding(const EdgeDims(10.0, 10.0, 10.0, 10.0), renderBlock));
 
   var row = new RenderFlex(
     direction: FlexDirection.Horizontal,
