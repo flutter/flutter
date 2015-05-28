@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:sky/framework/fn2.dart';
-import 'package:sky/framework/layout2.dart';
 import 'package:sky/framework/components2/popup_menu.dart';
 import 'package:sky/framework/components2/checkbox.dart';
 import 'package:sky/framework/theme/view_configuration.dart';

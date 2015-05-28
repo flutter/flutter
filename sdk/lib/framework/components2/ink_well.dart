@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import '../fn2.dart';
-import '../layout2.dart';
 import 'dart:collection';
 import 'dart:sky' as sky;
 import 'ink_splash.dart';

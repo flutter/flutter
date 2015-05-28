@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import '../fn2.dart';
-import '../layout2.dart';
 import '../theme/view_configuration.dart';
 import 'material.dart';
 

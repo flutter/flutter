@@ -9,8 +9,12 @@ import 'dart:collection';
 import 'dart:mirrors';
 import 'dart:sky' as sky;
 import 'reflect.dart' as reflect;
-import 'layout2.dart';
 import 'app.dart';
+import 'rendering/render_block.dart';
+import 'rendering/render_box.dart';
+import 'rendering/render_flex.dart';
+import 'rendering/render_node.dart';
+import 'rendering/render_paragraph.dart';
 
 // final sky.Tracing _tracing = sky.window.tracing;
 

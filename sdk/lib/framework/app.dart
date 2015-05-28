@@ -2,8 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'layout2.dart';
 import 'dart:sky' as sky;
+import 'rendering/render_box.dart';
+import 'rendering/render_node.dart';
 
 class AppView {
 

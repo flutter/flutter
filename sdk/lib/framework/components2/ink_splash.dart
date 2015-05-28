@@ -8,7 +8,6 @@ import '../fn2.dart';
 import '../theme/view_configuration.dart' as config;
 import 'dart:async';
 import 'dart:math' as math;
-import '../layout2.dart';
 
 const double _kSplashConfirmedDuration = 350.0;
 const double _kSplashUnconfirmedDuration = config.kDefaultLongPressTimeout;
