@@ -5,8 +5,8 @@
 #include "sky/engine/config.h"
 #include "sky/engine/core/painting/Point.h"
 
+#include "sky/engine/core/script/dom_dart_state.h"
 #include "sky/engine/tonic/dart_error.h"
-#include "sky/engine/tonic/dart_state.h"
 #include "base/logging.h"
 
 namespace blink {
@@ -22,13 +22,15 @@ Point DartConverter<Point, void>::FromArgumentsWithNullCheck(
   Dart_Handle dartPoint = Dart_GetNativeArgument(args, index);
   DCHECK(!LogIfError(dartPoint));
 
-  Dart_Handle xValue = Dart_GetField(dartPoint, Dart_NewStringFromCString("x"));
-  Dart_Handle yValue = Dart_GetField(dartPoint, Dart_NewStringFromCString("y"));
+  Dart_Handle x_value =
+      Dart_GetField(dartPoint, DOMDartState::Current()->x_handle());
+  Dart_Handle y_value =
+      Dart_GetField(dartPoint, DOMDartState::Current()->y_handle());
 
   double x = 0.0, y = 0.0;
-  Dart_Handle err = Dart_DoubleValue(xValue, &x);
+  Dart_Handle err = Dart_DoubleValue(x_value, &x);
   DCHECK(!LogIfError(err));
-  err = Dart_DoubleValue(xValue, &y);
+  err = Dart_DoubleValue(y_value, &y);
   DCHECK(!LogIfError(err));
   result.sk_point.set(x, y);
   result.is_null = false;

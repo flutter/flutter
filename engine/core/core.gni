@@ -859,6 +859,8 @@ sky_core_files = [
   "painting/Picture.h",
   "painting/PictureRecorder.cpp",
   "painting/PictureRecorder.h",
+  "painting/Point.cpp",
+  "painting/Point.h",
   "painting/Rect.cpp",
   "painting/Rect.h",
   "rendering/BidiRun.h",

@@ -50,12 +50,15 @@ class DartState : public base::SupportsUserData {
   void set_isolate(Dart_Isolate isolate) {
     CHECK(!isolate_);
     isolate_ = isolate;
+    DidSetIsolate();
   }
 
   DartClassLibrary& class_library() { return *class_library_; }
   DartStringCache& string_cache() { return *string_cache_; }
   DartExceptionFactory& exception_factory() { return *exception_factory_; }
   DartTimerHeap& timer_heap() { return *timer_heap_; }
+
+  virtual void DidSetIsolate() {}
 
  private:
   Dart_Isolate isolate_;

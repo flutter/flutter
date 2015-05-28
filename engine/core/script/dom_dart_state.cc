@@ -17,6 +17,13 @@ DOMDartState::DOMDartState(Document* document)
 DOMDartState::~DOMDartState() {
 }
 
+void DOMDartState::DidSetIsolate() {
+  Scope dart_scope(this);
+  x_handle_.Set(this, Dart_NewStringFromCString("x"));
+  y_handle_.Set(this, Dart_NewStringFromCString("y"));
+  value_handle_.Set(this, Dart_NewStringFromCString("_value"));
+}
+
 DOMDartState* DOMDartState::Current() {
   return static_cast<DOMDartState*>(DartState::Current());
 }
@@ -35,4 +42,4 @@ LocalDOMWindow* DOMDartState::CurrentWindow() {
   return Current()->document_->domWindow();
 }
 
-}
+}  // namespace blink

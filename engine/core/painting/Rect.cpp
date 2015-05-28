@@ -5,8 +5,9 @@
 #include "sky/engine/config.h"
 #include "sky/engine/core/painting/Rect.h"
 
+#include "sky/engine/core/script/dom_dart_state.h"
 #include "sky/engine/tonic/dart_error.h"
-#include "sky/engine/tonic/dart_state.h"
+#include "sky/engine/tonic/dart_value.h"
 #include "base/logging.h"
 
 namespace blink {
@@ -22,8 +23,8 @@ Rect DartConverter<Rect, void>::FromArgumentsWithNullCheck(
   Dart_Handle dart_rect = Dart_GetNativeArgument(args, index);
   DCHECK(!LogIfError(dart_rect));
 
-  Dart_Handle value = Dart_GetField(dart_rect,
-                                    Dart_NewStringFromCString("_value"));
+  Dart_Handle value =
+      Dart_GetField(dart_rect, DOMDartState::Current()->value_handle());
   if (Dart_IsNull(value))
     return result;
 

@@ -20,6 +20,8 @@ class DOMDartState : public DartState {
   explicit DOMDartState(Document* document);
   ~DOMDartState() override;
 
+  virtual void DidSetIsolate();
+
   static DOMDartState* Current();
 
   static Document* CurrentDocument();
@@ -29,11 +31,20 @@ class DOMDartState : public DartState {
   Document* document() const { return document_.get(); }
   DartLoader& loader() const { return *loader_; }
 
+  // Cached handles to strings used in Dart/C++ conversions.
+  Dart_Handle x_handle() { return x_handle_.value(); }
+  Dart_Handle y_handle() { return y_handle_.value(); }
+  Dart_Handle value_handle() { return value_handle_.value(); }
+
  private:
   RefPtr<Document> document_;
   OwnPtr<DartLoader> loader_;
+
+  DartPersistentValue x_handle_;
+  DartPersistentValue y_handle_;
+  DartPersistentValue value_handle_;
 };
 
-}
+}  // namespace blink
 
 #endif // SKY_ENGINE_CORE_SCRIPT_DOM_DART_STATE_H_
