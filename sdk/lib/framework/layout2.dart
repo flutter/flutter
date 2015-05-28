@@ -240,7 +240,10 @@ abstract class RenderNode extends AbstractNode {
   // following (with the signature being whatever passes for coordinates
   // for this particular class):
   // bool hitTest(HitTestResult result, { double x, double y }) {
-  //   // If (x,y) is not inside this node, then return false.
+  //   // If (x,y) is not inside this node, then return false. (You
+  //   // can assume that the given coordinate is inside your
+  //   // dimensions. You only need to check this if you're an
+  //   // irregular shape, e.g. if you have a hole.)
   //   // Otherwise:
   //   // For each child that intersects x,y, in z-order starting from the top,
   //   // call hitTest() for that child, passing it /result/, and the coordinates
@@ -262,6 +265,9 @@ class HitTestResult {
   }
 }
 
+
+// GENERIC MIXIN FOR RENDER NODES WITH ONE CHILD
+
 abstract class RenderNodeWithChildMixin<ChildType extends RenderNode> {
   ChildType _child;
   ChildType get child => _child;
@@ -275,7 +281,8 @@ abstract class RenderNodeWithChildMixin<ChildType extends RenderNode> {
   }
 }
 
-// GENERIC MIXIN FOR RENDER NODES THAT TAKE A LIST OF CHILDREN
+
+// GENERIC MIXIN FOR RENDER NODES WITH A LIST OF CHILDREN
 
 abstract class ContainerParentDataMixin<ChildType extends RenderNode> {
   ChildType previousSibling;
@@ -430,6 +437,19 @@ abstract class ContainerRenderNodeMixin<ChildType extends RenderNode, ParentData
 // GENERIC BOX RENDERING
 // Anything that has a concept of x, y, width, height is going to derive from this
 
+class EdgeDims {
+  // used for e.g. padding
+  const EdgeDims(this.top, this.right, this.bottom, this.left);
+  final double top;
+  final double right;
+  final double bottom;
+  final double left;
+  operator ==(EdgeDims other) => (top == other.top) ||
+                                 (right == other.right) ||
+                                 (bottom == other.bottom) ||
+                                 (left == other.left);
+}
+
 class BoxConstraints {
   const BoxConstraints({
     this.minWidth: 0.0,
@@ -442,6 +462,16 @@ class BoxConstraints {
       maxWidth = width,
       minHeight = height,
       maxHeight = height;
+
+  BoxConstraints deflate(EdgeDims edges) {
+    assert(edges != null);
+    return new BoxConstraints(
+      minWidth: minWidth,
+      maxWidth: maxWidth - (edges.left + edges.right),
+      minHeight: minHeight,
+      maxHeight: maxHeight - (edges.top + edges.bottom)
+    );
+  }
 
   final double minWidth;
   final double maxWidth;
@@ -500,8 +530,6 @@ abstract class RenderBox extends RenderNode {
   }
 
   bool hitTest(HitTestResult result, { double x, double y }) {
-    if (x < 0.0 || x >= width || y < 0.0 || y >= height)
-      return false;
     hitTestChildren(result, x: x, y: y);
     result.add(this);
     return true;
@@ -510,6 +538,68 @@ abstract class RenderBox extends RenderNode {
 
   double width;
   double height;
+}
+
+class RenderPadding extends RenderBox with RenderNodeWithChildMixin<RenderBox> {
+
+  RenderPadding(EdgeDims padding, RenderBox child) {
+    assert(padding != null);
+    this.padding = padding;
+    this.child = child;
+  }
+
+  EdgeDims _padding;
+  EdgeDims get padding => _padding;
+  void set padding (EdgeDims value) {
+    assert(value != null);
+    if (_padding != value) {
+      _padding = value;
+      markNeedsLayout();
+    }
+  }
+
+  BoxDimensions getIntrinsicDimensions(BoxConstraints constraints) {
+    assert(padding != null);
+    constraints = constraints.deflate(padding);
+    if (child == null)
+      return super.getIntrinsicDimensions(constraints);
+    return child.getIntrinsicDimensions(constraints);
+  }
+
+  void layout(BoxConstraints constraints, { RenderNode relayoutSubtreeRoot }) {
+    assert(padding != null);
+    constraints = constraints.deflate(padding);
+    if (child == null) {
+      width = constraints.constrainWidth(padding.left + padding.right);
+      height = constraints.constrainHeight(padding.top + padding.bottom);
+      return;
+    }
+    if (relayoutSubtreeRoot != null)
+      saveRelayoutSubtreeRoot(relayoutSubtreeRoot);
+    else
+      relayoutSubtreeRoot = this;
+    child.layout(constraints, relayoutSubtreeRoot: relayoutSubtreeRoot);
+    assert(child.parentData is BoxParentData);
+    child.parentData.x = padding.left;
+    child.parentData.y = padding.top;
+    width = constraints.constrainWidth(padding.left + child.width + padding.right);
+    height = constraints.constrainHeight(padding.top + child.height + padding.bottom);
+  }
+
+  void paint(RenderNodeDisplayList canvas) {
+    if (child != null)
+      canvas.paintChild(child, child.parentData.x, child.parentData.y);
+  }
+
+  void hitTestChildren(HitTestResult result, { double x, double y }) {
+    if (child != null) {
+      assert(child.parentData is BoxParentData);
+      if ((x >= child.parentData.x) && (x < child.parentData.x + child.width) &&
+          (y >= child.parentData.y) && (y < child.parentData.y + child.height))
+        child.hitTest(result, x: x+child.parentData.x, y: y+child.parentData.y);
+    }
+  }
+
 }
 
 // This must be immutable, because we won't notice when it changes
@@ -613,12 +703,7 @@ class RenderView extends RenderNode with RenderNodeWithChildMixin<RenderBox> {
 
   void relayout() {
     if (child != null) {
-      child.layout(new BoxConstraints(
-        minWidth: width,
-        maxWidth: width,
-        minHeight: height,
-        maxHeight: height
-      ));
+      child.layout(new BoxConstraints.tight(width: width, height: height));
       assert(child.width == width);
       assert(child.height == height);
     }
@@ -630,12 +715,8 @@ class RenderView extends RenderNode with RenderNodeWithChildMixin<RenderBox> {
   }
 
   bool hitTest(HitTestResult result, { double x, double y }) {
-    if (x < 0.0 || x >= width || y < 0.0 || y >= height)
-      return false;
-    if (child != null) {
-      if (x >= 0.0 && x < child.width && y >= 0.0 && y < child.height)
-        child.hitTest(result, x: x, y: y);
-    }
+    if (child != null && x >= 0.0 && x < child.width && y >= 0.0 && y < child.height)
+      child.hitTest(result, x: x, y: y);
     result.add(this);
     return true;
   }
@@ -684,19 +765,6 @@ abstract class RenderBoxContainerDefaultsMixin<ChildType extends RenderBox, Pare
 
 // BLOCK LAYOUT MANAGER
 
-class EdgeDims {
-  // used for e.g. padding
-  const EdgeDims(this.top, this.right, this.bottom, this.left);
-  final double top;
-  final double right;
-  final double bottom;
-  final double left;
-  operator ==(EdgeDims other) => (top == other.top) ||
-                                 (right == other.right) ||
-                                 (bottom == other.bottom) ||
-                                 (left == other.left);
-}
-
 class BlockParentData extends BoxParentData with ContainerParentDataMixin<RenderBox> { }
 
 class RenderBlock extends RenderDecoratedBox with ContainerRenderNodeMixin<RenderBox, BlockParentData>,
@@ -706,19 +774,8 @@ class RenderBlock extends RenderDecoratedBox with ContainerRenderNodeMixin<Rende
   // sizes itself to the height of its child stack
 
   RenderBlock({
-    BoxDecoration decoration,
-    EdgeDims padding: const EdgeDims(0.0, 0.0, 0.0, 0.0)
-  }) : super(decoration), _padding = padding;
-
-  EdgeDims _padding;
-  EdgeDims get padding => _padding;
-  void set padding (EdgeDims value) {
-    assert(value != null);
-    if (_padding != value) {
-      _padding = value;
-      markNeedsLayout();
-    }
-  }
+    BoxDecoration decoration
+  }) : super(decoration);
 
   void setParentData(RenderBox child) {
     if (child.parentData is! BlockParentData)
@@ -731,10 +788,10 @@ class RenderBlock extends RenderDecoratedBox with ContainerRenderNodeMixin<Rende
   // dimensions and nothing else (e.g. don't calculate hypothetical
   // child positions if they're not needed to determine dimensions)
   BoxDimensions getIntrinsicDimensions(BoxConstraints constraints) {
-    double outerHeight = _padding.top + _padding.bottom;
+    double outerHeight = 0.0;
     double outerWidth = constraints.constrainWidth(constraints.maxWidth);
     assert(outerWidth < double.INFINITY);
-    double innerWidth = outerWidth - (_padding.left + _padding.right);
+    double innerWidth = outerWidth;
     RenderBox child = firstChild;
     BoxConstraints innerConstraints = new BoxConstraints(minWidth: innerWidth,
                                                          maxWidth: innerWidth);
@@ -766,19 +823,19 @@ class RenderBlock extends RenderDecoratedBox with ContainerRenderNodeMixin<Rende
 
   void internalLayout(RenderNode relayoutSubtreeRoot) {
     assert(_constraints != null);
-    double y = _padding.top;
-    double innerWidth = width - (_padding.left + _padding.right);
+    double y = 0.0;
+    double innerWidth = width;
     RenderBox child = firstChild;
     while (child != null) {
       child.layout(new BoxConstraints(minWidth: innerWidth, maxWidth: innerWidth),
                    relayoutSubtreeRoot: relayoutSubtreeRoot);
       assert(child.parentData is BlockParentData);
-      child.parentData.x = _padding.left;
+      child.parentData.x = 0.0;
       child.parentData.y = y;
       y += child.height;
       child = child.parentData.nextSibling;
     }
-    height = _constraints.constrainHeight(y + _padding.bottom);
+    height = _constraints.constrainHeight(y);
     layoutDone();
   }
 
