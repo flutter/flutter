@@ -8,6 +8,7 @@ import "dart:sky.internals" as internals;
 import 'package:mojo/bindings.dart';
 import 'package:mojo/core.dart';
 import 'package:mojom/mojo/network_service.mojom.dart';
+import 'package:mojom/mojo/url_request.mojom.dart';
 import 'package:mojom/mojo/url_loader.mojom.dart';
 
 import 'package:sky/framework/embedder.dart';

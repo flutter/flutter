@@ -13,6 +13,7 @@ android_library("oknet") {
 
   deps = [
     "//base:base_java",
+    "//mojo/public/interfaces/network:network_java",
     "//mojo/public/java:bindings",
     "//mojo/public/java:system",
     "//mojo/services/network/public/interfaces:interfaces_java",
