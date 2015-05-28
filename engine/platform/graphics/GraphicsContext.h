@@ -217,7 +217,7 @@ public:
     const SkRect& textRegion() const { return m_textRegion; }
 
     SkColorFilter* colorFilter() const;
-    void setColorFilter(ColorFilter);
+    void setColorFilter(ColorFilterObsolete);
     // ---------- End state management methods -----------------
 
     // Get the contents of the image buffer
@@ -316,7 +316,7 @@ public:
     void drawLineForDocumentMarker(const FloatPoint&, float width, DocumentMarkerLineStyle);
 
     void beginTransparencyLayer(float opacity, const FloatRect* = 0);
-    void beginLayer(float opacity, CompositeOperator, const FloatRect* = 0, ColorFilter = ColorFilterNone, ImageFilter* = 0);
+    void beginLayer(float opacity, CompositeOperator, const FloatRect* = 0, ColorFilterObsolete = ColorFilterNone, ImageFilter* = 0);
     void endLayer();
 
     bool hasShadow() const;
@@ -405,7 +405,7 @@ private:
     static void setPathFromConvexPoints(SkPath*, size_t, const FloatPoint*);
     static void setRadii(SkVector*, IntSize, IntSize, IntSize, IntSize);
 
-    static PassRefPtr<SkColorFilter> WebCoreColorFilterToSkiaColorFilter(ColorFilter);
+    static PassRefPtr<SkColorFilter> WebCoreColorFilterToSkiaColorFilter(ColorFilterObsolete);
 
     static inline int focusRingOutset(int offset) { return 0; }
     static inline int focusRingWidth(int width) { return 1; }

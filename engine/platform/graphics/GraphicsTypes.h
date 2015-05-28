@@ -103,7 +103,7 @@ enum TextDrawingMode {
 typedef unsigned TextDrawingModeFlags;
 
 // FIXME(sky): Remove this enum.
-enum ColorFilter {
+enum ColorFilterObsolete {
     ColorFilterNone,
 };
 

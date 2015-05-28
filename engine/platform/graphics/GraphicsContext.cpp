@@ -343,7 +343,7 @@ SkColorFilter* GraphicsContext::colorFilter() const
     return immutableState()->colorFilter();
 }
 
-void GraphicsContext::setColorFilter(ColorFilter colorFilter)
+void GraphicsContext::setColorFilter(ColorFilterObsolete colorFilter)
 {
     GraphicsContextState* stateToSet = mutableState();
 
@@ -389,7 +389,7 @@ void GraphicsContext::beginTransparencyLayer(float opacity, const FloatRect* bou
     beginLayer(opacity, immutableState()->compositeOperator(), bounds);
 }
 
-void GraphicsContext::beginLayer(float opacity, CompositeOperator op, const FloatRect* bounds, ColorFilter colorFilter, ImageFilter* imageFilter)
+void GraphicsContext::beginLayer(float opacity, CompositeOperator op, const FloatRect* bounds, ColorFilterObsolete colorFilter, ImageFilter* imageFilter)
 {
     if (contextDisabled())
         return;
@@ -1579,7 +1579,7 @@ void GraphicsContext::setRadii(SkVector* radii, IntSize topLeft, IntSize topRigh
         SkIntToScalar(bottomLeft.height()));
 }
 
-PassRefPtr<SkColorFilter> GraphicsContext::WebCoreColorFilterToSkiaColorFilter(ColorFilter colorFilter)
+PassRefPtr<SkColorFilter> GraphicsContext::WebCoreColorFilterToSkiaColorFilter(ColorFilterObsolete colorFilter)
 {
     // FIXME(sky): Remove
     return nullptr;

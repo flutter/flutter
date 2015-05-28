@@ -33,13 +33,6 @@ void LayerDrawLooperBuilder::addLayerOnTop(
   paint->setPaint(*sk_paint);
   callback->handleEvent(paint.get());
   *sk_paint = paint->paint();
-
-  // TODO(mpcomplete): Remove this when we add color filter support to Paint's
-  // API.
-  SkColor skColor = sk_paint->getColor();
-  RefPtr<SkColorFilter> cf = adoptRef(
-      SkColorFilter::CreateModeFilter(skColor, SkXfermode::kSrcIn_Mode));
-  sk_paint->setColorFilter(cf.get());
 }
 
 } // namespace blink
