@@ -125,7 +125,7 @@ abstract class RenderNode extends AbstractNode {
       print(stack);
       return;
     }
-    assert(!_needsLayout); // check that the relayout() method marked us "not dirty"
+    _needsLayout = false;
   }
   void layout(dynamic constraints, { bool parentUsesSize: false }) {
     RenderNode relayoutSubtreeRoot;
