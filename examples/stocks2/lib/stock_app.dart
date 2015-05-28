@@ -23,7 +23,6 @@ import 'stock_data.dart';
 // import 'stock_menu.dart';
 
 import 'dart:async';
-import 'package:sky/framework/layout2.dart';
 
 enum StockMode { Optimistic, Pessimistic }
 

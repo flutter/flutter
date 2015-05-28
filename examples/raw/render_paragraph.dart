@@ -4,7 +4,10 @@
 
 import 'dart:sky';
 import 'package:sky/framework/app.dart';
-import 'package:sky/framework/layout2.dart';
+import 'package:sky/framework/rendering/render_box.dart';
+import 'package:sky/framework/rendering/render_node.dart';
+import 'package:sky/framework/rendering/render_flex.dart';
+import 'package:sky/framework/rendering/render_paragraph.dart';
 
 class RenderSolidColor extends RenderDecoratedBox {
   final Size desiredSize;
@@ -15,7 +18,7 @@ class RenderSolidColor extends RenderDecoratedBox {
         super(decoration: new BoxDecoration(backgroundColor: backgroundColor));
 
   Size getIntrinsicDimensions(BoxConstraints constraints) {
-    return constraints.constrain(new Size(desiredWidth, desiredHeight));
+    return constraints.constrain(desiredSize);
   }
 
   void performLayout() {

@@ -4,7 +4,6 @@
 
 import 'package:sky/framework/components2/ink_well.dart';
 import 'package:sky/framework/fn2.dart';
-import 'package:sky/framework/layout2.dart';
 import 'package:sky/framework/theme/typography.dart' as typography;
 import 'stock_arrow.dart';
 import 'stock_data.dart';
