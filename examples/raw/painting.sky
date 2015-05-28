@@ -19,13 +19,13 @@ void main() {
 
     context.save();
 
-    context.clipRect(new Rect()..setLTRB(0.0, 0.0, context.width, radius));
+    context.clipRect(new Rect.fromLTRB(0.0, 0.0, context.width, radius));
 
     context.translate(mid.x, mid.y);
     paint.setARGB(128, 255, 0, 255);
     context.rotateDegrees(45.0);
 
-    context.drawRect(new Rect()..setLTRB(-radius, -radius, radius, radius),
+    context.drawRect(new Rect.fromLTRB(-radius, -radius, radius, radius),
                      paint);
 
     // Scale x and y by 0.5.
@@ -40,17 +40,24 @@ void main() {
 
     context.restore();
 
+    context.translate(0.0, 50.0);
     var builder = new LayerDrawLooperBuilder()
         ..addLayerOnTop(
-            new DrawLooperLayerInfo()..setOffset(150.0, 0.0)..setPaintBits(-1),
+            new DrawLooperLayerInfo()
+              ..setOffset(150.0, 0.0)..setPaintBits(-1)..setColorMode(1),
             (Paint layerPaint) {
-          // TODO(mpcomplete): This won't do anything until we add support for
-          // setting the color filter.
-          layerPaint.setARGB(128, 0, 0, 255);
+          layerPaint.setARGB(128, 255, 255, 0);
+          layerPaint.setColorFilter(new ColorFilter(0x770000ff, 5));
         })
         ..addLayerOnTop(
-            new DrawLooperLayerInfo()..setOffset(75.0, 75.0)..setPaintBits(0),
+            new DrawLooperLayerInfo()..setOffset(75.0, 75.0)..setColorMode(1),
             (Paint layerPaint) {
+          layerPaint.setARGB(128, 255, 0, 0);
+        })
+        ..addLayerOnTop(
+            new DrawLooperLayerInfo()..setOffset(225.0, 75.0),
+            (Paint layerPaint) {
+          // Since this layer uses a DST color mode, this has no effect.
           layerPaint.setARGB(128, 255, 0, 0);
         });
     paint.setDrawLooper(builder.build());
