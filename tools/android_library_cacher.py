@@ -57,6 +57,8 @@ def main():
         dest_dir = os.path.dirname(dest_file)
         if not os.path.exists(dest_dir):
             os.makedirs(dest_dir)
+        if os.path.exists(dest_file):
+            continue
         print '%s -> %s' % (library_path, dest_file)
         pull_cmd = [ADB_PATH, 'pull', library_path, dest_file]
         subprocess.check_call(pull_cmd, stderr=dev_null)
