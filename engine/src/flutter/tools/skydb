@@ -37,12 +37,13 @@ ANDROID_APK_NAME = 'MojoShell.apk'
 
 PID_FILE_PATH = "/tmp/skydb.pids"
 CACHE_LINKS_PATH = '/tmp/mojo_cache_links'
-# TODO(iansf): Fix undefined behavior when you have more than one device attached.
-SYSTEM_LIBS_ROOT_PATH = '/tmp/device_libs/%s' % (subprocess.check_output(['adb', 'get-serialno']).strip())
 
 SRC_ROOT = skypy.paths.Paths('ignored').src_root
 ADB_PATH = os.path.join(SRC_ROOT,
     'third_party/android_tools/sdk/platform-tools/adb')
+
+# TODO(iansf): Fix undefined behavior when you have more than one device attached.
+SYSTEM_LIBS_ROOT_PATH = '/tmp/device_libs/%s' % (subprocess.check_output([ADB_PATH, 'get-serialno']).strip())
 
 
 # FIXME: Move this into mopy.config
