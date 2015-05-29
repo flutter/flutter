@@ -7,9 +7,11 @@
 
 #include "sky/engine/core/dom/Document.h"
 #include "sky/engine/core/dom/Element.h"
+#include "sky/engine/core/painting/CanvasImage.h"
 #include "sky/engine/core/painting/PaintingTasks.h"
 #include "sky/engine/platform/geometry/IntRect.h"
 #include "third_party/skia/include/core/SkCanvas.h"
+#include "third_party/skia/include/core/SkBitmap.h"
 
 namespace blink {
 
@@ -153,6 +155,17 @@ void Canvas::drawPath(const CanvasPath* path, const Paint* paint)
     ASSERT(paint);
     ASSERT(m_displayList->isRecording());
     m_canvas->drawPath(path->path(), paint->paint());
+}
+
+void Canvas::drawImage(const CanvasImage* image,
+                       float x,
+                       float y,
+                       const Paint* paint) {
+  if (!m_canvas)
+    return;
+  ASSERT(image);
+  ASSERT(m_displayList->isRecording());
+  m_canvas->drawBitmap(image->bitmap(), x, y, &paint->paint());
 }
 
 PassRefPtr<DisplayList> Canvas::finishRecording()

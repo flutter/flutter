@@ -28,4 +28,5 @@ interface Canvas {
   void drawOval(Rect rect, Paint paint);
   void drawCircle(float x, float y, float radius, Paint paint);
   void drawPath(Path path, Paint paint);
+  void drawImage(Image image, float x, float y, Paint paint);
 };

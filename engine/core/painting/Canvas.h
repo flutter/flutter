@@ -16,6 +16,7 @@
 
 namespace blink {
 class Element;
+class CanvasImage;
 
 class Canvas : public RefCounted<Canvas>, public DartWrappable {
     DEFINE_WRAPPERTYPEINFO();
@@ -46,6 +47,10 @@ public:
     void drawOval(const Rect& rect, const Paint* paint);
     void drawCircle(float x, float y, float radius, const Paint* paint);
     void drawPath(const CanvasPath* path, const Paint* paint);
+    void drawImage(const CanvasImage* image,
+                   float x,
+                   float y,
+                   const Paint* paint);
 
     SkCanvas* skCanvas() { return m_canvas; }
 
