@@ -5,22 +5,25 @@
 
 from skypy.skyserver import SkyServer
 import argparse
+import hashlib
 import json
 import logging
 import os
+import pipes
+import platform
 import re
 import signal
 import subprocess
 import sys
+import tempfile
 import time
 import urlparse
-import hashlib
-import tempfile
 
 SKY_TOOLS_DIR = os.path.dirname(os.path.abspath(__file__))
 SKY_ROOT = os.path.dirname(SKY_TOOLS_DIR)
 SRC_ROOT = os.path.dirname(SKY_ROOT)
 
+GDB_PORT = 8888
 SKY_SERVER_PORT = 9888
 OBSERVATORY_PORT = 8181
 DEFAULT_URL = "sky://domokit.github.io/sky_home"
@@ -37,7 +40,12 @@ PID_FILE_KEYS = frozenset([
     'sky_server_port',
     'sky_server_root',
     'build_dir',
+    'sky_shell_pid',
+    'remote_gdbserver_port',
 ])
+
+# TODO(iansf): Fix undefined behavior when you have more than one device attached.
+SYSTEM_LIBS_ROOT_PATH = '/tmp/device_libs/%s' % (subprocess.check_output(['adb', 'get-serialno']).strip())
 
 _IGNORED_PATTERNS = [
   # Ignored because they're not indicative of specific errors.
@@ -153,6 +161,7 @@ class StartSky(object):
         start_parser = subparsers.add_parser('start',
             help='launch SkyShell.apk on the device')
         start_parser.add_argument('build_dir', type=str)
+        start_parser.add_argument('--gdb', action="store_true")
         start_parser.add_argument('url_or_path', nargs='?', type=str,
             default=DEFAULT_URL)
         start_parser.add_argument('--no_install', action="store_false",
@@ -178,6 +187,20 @@ class StartSky(object):
         server_root = self._server_root_for_url(args.url_or_path)
         sky_server = SkyServer(SKY_SERVER_PORT, configuration, server_root, packages_root)
         return sky_server
+
+    def _find_remote_pid_for_package(self, package):
+        ps_output = subprocess.check_output([ADB_PATH, 'shell', 'ps'])
+        for line in ps_output.split('\n'):
+            fields = line.split()
+            if fields and fields[-1] == package:
+                return fields[1]
+        return None
+
+    def _find_install_location_for_package(self, package):
+        pm_command = [ADB_PATH, 'shell', 'pm', 'path', package]
+        pm_output = subprocess.check_output(pm_command)
+        # e.g. package:/data/app/org.chromium.mojo.shell-1/base.apk
+        return pm_output.split(':')[-1]
 
     def run(self, args, pids):
         apk_path = os.path.join(args.build_dir, 'apks', APK_NAME)
@@ -236,10 +259,123 @@ class StartSky(object):
         ])
         pids['remote_sky_server_port'] = sky_server.port
 
+
         subprocess.check_call([ADB_PATH, 'shell',
             'am', 'start',
             '-a', 'android.intent.action.VIEW',
             '-d', _url_from_args(args, pids)])
+
+        if not args.gdb:
+            return
+
+        # TODO(eseidel): am start -W does not seem to work?
+        pid_tries = 0
+        while True:
+            pid = self._find_remote_pid_for_package(ANDROID_PACKAGE)
+            if pid or pid_tries > 3:
+                break
+            logging.debug('No pid for %s yet, waiting' % ANDROID_PACKAGE)
+            time.sleep(5)
+            pid_tries += 1
+
+        if not pid:
+            logging.error('Failed to find pid on device!')
+            return
+
+        pids['sky_shell_pid'] = pid
+
+        # We push our own copy of gdbserver with the package since
+        # the default gdbserver is a different version from our gdb.
+        package_path = \
+            self._find_install_location_for_package(ANDROID_PACKAGE)
+        gdb_server_path = os.path.join(
+            os.path.dirname(package_path), 'lib/arm/gdbserver')
+        gdbserver_cmd = [
+            ADB_PATH, 'shell',
+            gdb_server_path, '--attach',
+            ':%d' % GDB_PORT,
+            str(pid)
+        ]
+        print ' '.join(map(pipes.quote, gdbserver_cmd))
+        subprocess.Popen(gdbserver_cmd)
+
+        port_string = 'tcp:%d' % GDB_PORT
+        subprocess.check_call([
+            ADB_PATH, 'forward', port_string, port_string
+        ])
+        pids['remote_gdbserver_port'] = GDB_PORT
+
+
+class GDBAttach(object):
+    def add_subparser(self, subparsers):
+        start_parser = subparsers.add_parser('gdb_attach',
+            help='attach to gdbserver running on device')
+        start_parser.set_defaults(func=self.run)
+
+    def _pull_system_libraries(self, pids, system_libs_root):
+        # Pull down the system libraries this pid has already mapped in.
+        # TODO(eseidel): This does not handle dynamic loads.
+        library_cacher_path = os.path.join(
+            SKY_TOOLS_DIR, 'android_library_cacher.py')
+        subprocess.call([
+            library_cacher_path, system_libs_root, pids['sky_shell_pid']
+        ])
+
+        # TODO(eseidel): adb_gdb does, this, unclear why solib-absolute-prefix
+        # doesn't make this explicit listing not necessary?
+        return subprocess.check_output([
+            'find', system_libs_root,
+            '-mindepth', '1',
+            '-maxdepth', '4',
+            '-type', 'd',
+        ]).strip().split('\n')
+
+    def run(self, args, pids):
+        symbol_search_paths = [
+            pids['build_dir'],
+        ]
+        gdb_path = '/usr/bin/gdb'
+
+        eval_commands = [
+            'directory %s' % SRC_ROOT,
+            # TODO(eseidel): What file do I point it at?  The apk?
+            #'file %s' % self.paths.mojo_shell_path,
+            'target remote localhost:%s' % GDB_PORT,
+        ]
+
+        system_lib_dirs = self._pull_system_libraries(pids,
+            SYSTEM_LIBS_ROOT_PATH)
+        eval_commands.append(
+            'set solib-absolute-prefix %s' % SYSTEM_LIBS_ROOT_PATH)
+
+        symbol_search_paths = system_lib_dirs + symbol_search_paths
+
+        # TODO(eseidel): We need to look up the toolchain somehow?
+        if platform.system() == 'Darwin':
+            gdb_path = os.path.join(SRC_ROOT, 'third_party/android_tools/ndk/'
+                'toolchains/arm-linux-androideabi-4.9/prebuilt/darwin-x86_64/'
+                'bin/arm-linux-androideabi-gdb')
+        else:
+            gdb_path = os.path.join(SRC_ROOT, 'third_party/android_tools/ndk/'
+                'toolchains/arm-linux-androideabi-4.9/prebuilt/linux-x86_64/'
+                'bin/arm-linux-androideabi-gdb')
+
+        # Set solib-search-path after letting android modify symbol_search_paths
+        eval_commands.append(
+            'set solib-search-path %s' % ':'.join(symbol_search_paths))
+
+        exec_command = [gdb_path]
+        for command in eval_commands:
+            exec_command += ['--eval-command', command]
+
+        print " ".join(exec_command)
+
+        # Write out our pid file before we exec ourselves.
+        pids.write_to(PID_FILE_PATH)
+
+        # Exec gdb directly to avoid python intercepting symbols, etc.
+        os.execv(exec_command[0], exec_command)
+
 
 
 class StopSky(object):
@@ -259,12 +395,24 @@ class StopSky(object):
         except OSError:
             logging.info('%s (%d) already gone.' % (name, pid))
 
+    def _adb_reverse_remove(self, port):
+        port_string = 'tcp:%s' % port
+        subprocess.call([ADB_PATH, 'reverse', '--remove', port_string])
+
+    def _adb_forward_remove(self, port):
+        port_string = 'tcp:%s' % port
+        subprocess.call([ADB_PATH, 'forward', '--remove', port_string])
+
     def run(self, args, pids):
         self._kill_if_exists(pids, 'sky_server_pid', 'sky_server')
 
         if 'remote_sky_server_port' in pids:
-            port_string = 'tcp:%s' % pids['remote_sky_server_port']
-            subprocess.call([ADB_PATH, 'reverse', '--remove', port_string])
+            self._adb_reverse_remove(pids['remote_sky_server_port'])
+
+        if 'remote_gdbserver_port' in pids:
+            self._kill_if_exists('adb_shell_gdbserver_pid',
+                'adb shell gdbserver')
+            self._adb_forward_remove(pids['remote_gdbserver_port'])
 
         subprocess.call([
             ADB_PATH, 'shell', 'am', 'force-stop', ANDROID_PACKAGE])
@@ -373,6 +521,7 @@ class SkyShellRunner(object):
             StartSky(),
             StopSky(),
             Analyze(),
+            GDBAttach(),
             StartTracing(),
             StopTracing(),
         ]
