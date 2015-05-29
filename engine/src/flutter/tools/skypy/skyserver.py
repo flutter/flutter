@@ -6,6 +6,7 @@ import socket
 import subprocess
 import logging
 import os.path
+import stat
 import platform
 
 SKYPY_PATH = os.path.dirname(os.path.abspath(__file__))
@@ -32,10 +33,10 @@ class SkyServer(object):
 
         if platform.system() == 'Linux':
             platform_dir = 'linux64'
-        elif platform.system() == 'Mac':
+        elif platform.system() == 'Darwin':
             platform_dir = 'mac'
         else:
-            assert False, 'No sky_server binary for this platform?'
+            assert False, 'No sky_server binary for this platform: ' + platform.system()
 
         return os.path.join(SKYGO_PATH, platform_dir, 'sky_server')
 
@@ -47,6 +48,10 @@ class SkyServer(object):
             return
 
         server_path = self.sky_server_path()
+        st = os.stat(self.sky_server_path())
+        if not (stat.S_IXUSR & st[stat.ST_MODE]):
+            logging.warn('Changing the permissions of %s to be executable.', self.sky_server_path())
+            os.chmod(self.sky_server_path(), st[stat.ST_MODE] | stat.S_IEXEC)
         server_command = [
             server_path,
             '-t', self.configuration,
