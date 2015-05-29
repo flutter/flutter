@@ -4,6 +4,7 @@
 
 import '../resources/third_party/unittest/unittest.dart';
 import '../resources/unit.dart';
+import '../resources/display_list.dart';
 import 'dart:sky' as sky;
 import 'package:sky/framework/app.dart';
 import 'package:sky/framework/rendering/render_block.dart';
@@ -35,7 +36,7 @@ class RenderSolidColor extends RenderDecoratedBox {
   }
 }
 
-AppView app;
+TestApp app;
 
 void main() {
   initUnit();
@@ -86,8 +87,7 @@ void main() {
 
     flexRoot.add(decoratedRow);
     decoratedRow.parentData.flex = 3;
-
-    app = new AppView(root);
+    app = new TestApp(root);
 
     expect(root.size.width, equals(sky.view.width));
     expect(root.size.height, equals(sky.view.height));
