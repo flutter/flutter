@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import '../node.dart';
+import 'dart:math' as math;
 import 'dart:sky' as sky;
 
 class ParentData {
@@ -22,21 +23,15 @@ double clamp({double min: 0.0, double value: 0.0, double max: double.INFINITY}) 
   assert(min != null);
   assert(value != null);
   assert(max != null);
-
-  if (value > max)
-    value = max;
-  if (value < min)
-    value = min;
-  return value;
+  return math.max(min, math.min(max, value));
 }
 
 class RenderNodeDisplayList extends sky.PictureRecorder {
   RenderNodeDisplayList(double width, double height) : super(width, height);
   void paintChild(RenderNode child, sky.Point position) {
-    save();
     translate(position.x, position.y);
     child.paint(this);
-    restore();
+    translate(-position.x, -position.y);
   }
 }
 
