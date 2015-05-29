@@ -4,6 +4,7 @@
 
 import '../resources/third_party/unittest/unittest.dart';
 import '../resources/unit.dart';
+import '../resources/display_list.dart';
 import 'dart:sky' as sky;
 import 'package:sky/framework/rendering/render_box.dart';
 
@@ -16,9 +17,11 @@ void main() {
         decoration: new BoxDecoration(backgroundColor: 0xFF00FF00)
       )
     );
-    RenderView renderView = new RenderView(child: root);
+    TestView renderView = new TestView(child: root);
     renderView.layout(new ViewConstraints(width: sky.view.width, height: sky.view.height));
     expect(root.size.width, equals(sky.view.width));
     expect(root.size.height, equals(sky.view.height));
+    renderView.paintFrame();
+    print(renderView.lastPaint); // TODO(ianh): figure out how to make this fit the unit testing framework better
   });
 }
