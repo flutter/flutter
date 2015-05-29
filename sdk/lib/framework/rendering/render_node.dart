@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import '../node.dart';
+import '../scheduler.dart' as scheduler;
 import 'dart:math' as math;
 import 'dart:sky' as sky;
 
@@ -173,10 +174,7 @@ abstract class RenderNode extends AbstractNode {
   static bool debugDoingPaint = false;
   void markNeedsPaint() {
     assert(!debugDoingPaint);
-    // TODO(abarth): It's very redundant to call this for every node in the
-    // render tree during layout. We should instead compute a summary bit and
-    // call it once at the end of layout.
-    sky.view.scheduleFrame();
+    scheduler.ensureVisualUpdate();
   }
   void paint(RenderNodeDisplayList canvas) { }
 

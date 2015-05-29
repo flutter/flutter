@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import '../scheduler.dart' as scheduler;
 import 'curves.dart';
 import 'dart:async';
 import 'dart:math' as math;
-import 'dart:sky' as sky;
 import 'mechanics.dart';
 
 abstract class Generator {
@@ -34,7 +34,7 @@ class FrameGenerator extends Generator {
       return;
     }
     if (_animationId != 0) {
-      sky.window.cancelAnimationFrame(_animationId);
+      scheduler.cancelAnimationFrame(_animationId);
     }
     _animationId = 0;
     _cancelled = true;
@@ -45,7 +45,7 @@ class FrameGenerator extends Generator {
 
   void _scheduleTick() {
     assert(_animationId == 0);
-    _animationId = sky.window.requestAnimationFrame(_tick);
+    _animationId = scheduler.requestAnimationFrame(_tick);
   }
 
   void _tick(double timeStamp) {

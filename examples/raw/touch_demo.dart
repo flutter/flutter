@@ -61,6 +61,10 @@ class RenderTouchDemo extends RenderBox {
     markNeedsPaint();
   }
 
+  void performLayout() {
+    size = constraints.constrain(new Size.infinite());
+  }
+
   void paint(RenderNodeDisplayList canvas) {
     dots.forEach((_, Dot dot) {
       dot.paint(canvas);

@@ -5,18 +5,20 @@
 import 'dart:sky' as sky;
 import 'rendering/render_box.dart';
 import 'rendering/render_node.dart';
+import 'scheduler.dart' as scheduler;
 
 class AppView {
 
   AppView(RenderBox root) {
     sky.view.setEventCallback(_handleEvent);
-    sky.view.setBeginFrameCallback(_beginFrame);
+    scheduler.init();
+    scheduler.addPersistentFrameCallback(_beginFrame);
 
     _renderView = new RenderView(child: root);
     _renderView.attach();
     _renderView.layout(new ViewConstraints(width: sky.view.width, height: sky.view.height));
 
-    sky.view.scheduleFrame();
+    scheduler.ensureVisualUpdate();
   }
 
   RenderView _renderView;
