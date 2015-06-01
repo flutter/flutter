@@ -35,6 +35,7 @@ class DOMDartState : public DartState {
   Dart_Handle x_handle() { return x_handle_.value(); }
   Dart_Handle y_handle() { return y_handle_.value(); }
   Dart_Handle value_handle() { return value_handle_.value(); }
+  Dart_Handle color_class() { return color_class_.value(); }
 
  private:
   RefPtr<Document> document_;
@@ -43,6 +44,7 @@ class DOMDartState : public DartState {
   DartPersistentValue x_handle_;
   DartPersistentValue y_handle_;
   DartPersistentValue value_handle_;
+  DartPersistentValue color_class_;
 };
 
 }  // namespace blink
