@@ -720,7 +720,7 @@ CPP_VALUE_TO_DART_VALUE = {
     'DartValue': 'DartConverter<DartValue*>::ToDart({cpp_value})',
     # General
     'array': 'VectorToDart({cpp_value})',
-    'DOMWrapper': 'DartConverter<{idl_type}*>::ToDart({cpp_value})',
+    'DOMWrapper': 'DartConverter<{cpp_type}>::ToDart({cpp_value})',
 }
 
 
@@ -730,7 +730,7 @@ def cpp_value_to_dart_value(idl_type, cpp_value, creation_context='', extended_a
     idl_type, cpp_value = preprocess_idl_type_and_value(idl_type, cpp_value, extended_attributes)
     this_dart_conversion_type = idl_type.dart_conversion_type(extended_attributes)
     format_string = CPP_VALUE_TO_DART_VALUE[this_dart_conversion_type]
-    statement = format_string.format(cpp_value=cpp_value, idl_type=idl_type.base_type)
+    statement = format_string.format(cpp_value=cpp_value, cpp_type=cpp_type(idl_type, raw_type=True))
     return statement
 
 IdlTypeBase.cpp_value_to_dart_value = cpp_value_to_dart_value
