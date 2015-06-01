@@ -114,9 +114,7 @@ CPP_SPECIAL_CONVERSION_RULES = {
     'boolean': 'bool',
     'unrestricted double': 'double',
     'unrestricted float': 'float',
-    # Pass these by value, not pointer.
-    'Rect': 'Rect',
-    'Color': 'CanvasColor',
+    'Rect': 'Rect',  # Pass Rect by value, not pointer.
 }
 
 
@@ -356,7 +354,6 @@ DART_TO_CPP_VALUE = {
     # We should handle it automatically, but map to a String for now.
     'StorageType': 'DartUtilities::dartToString(args, {index}, exception, {auto_scope})',
     'Rect': 'DartConverter<{implemented_as}>::FromArguments{null_check}(args, {index}, exception)',
-    'Color': 'DartConverter<CanvasColor>::FromArguments{null_check}(args, {index}, exception)',
 }
 
 
@@ -621,7 +618,6 @@ DART_SET_RETURN_VALUE = {
     # Typed arrays don't have special Dart* classes for Dart.
     'ArrayBuffer': 'Dart_SetReturnValue(args, DartUtilities::arrayBufferToDart({cpp_value}))',
     'TypedList': 'Dart_SetReturnValue(args, DartUtilities::arrayBufferViewToDart({cpp_value}))',
-    'Color': 'DartConverter<CanvasColor>::SetReturnValue(args, {cpp_value})',
 }
 
 

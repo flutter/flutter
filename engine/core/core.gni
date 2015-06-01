@@ -837,8 +837,6 @@ sky_core_files = [
   "page/SpellCheckerClient.h",
   "painting/Canvas.cpp",
   "painting/Canvas.h",
-  "painting/CanvasColor.cpp",
-  "painting/CanvasColor.h",
   "painting/CanvasImage.cpp",
   "painting/CanvasImage.h",
   "painting/CanvasPath.cpp",
@@ -1150,7 +1148,6 @@ core_idl_files = get_path_info([
                                "abspath")
 
 core_dart_files = get_path_info([
-                                  "painting/Color.dart",
                                   "painting/Point.dart",
                                   "painting/Rect.dart",
                                   "painting/Size.dart",
