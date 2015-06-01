@@ -22,7 +22,7 @@ void main() {
     context.clipRect(new Rect.fromLTRB(0.0, 0.0, context.width, radius));
 
     context.translate(mid.x, mid.y);
-    paint.setARGB(128, 255, 0, 255);
+    paint.color = const Color.fromARGB(128, 255, 0, 255);
     context.rotateDegrees(45.0);
 
     context.drawRect(new Rect.fromLTRB(-radius, -radius, radius, radius),
@@ -35,7 +35,7 @@ void main() {
         0.0, 0.0, 1.0
     ];
     context.concat(scaleMatrix);
-    paint.setARGB(128, 0, 255, 0);
+    paint.color = const Color.fromARGB(128, 0, 255, 0);
     context.drawCircle(0.0, 0.0, radius, paint);
 
     context.restore();
@@ -46,19 +46,19 @@ void main() {
             new DrawLooperLayerInfo()
               ..setOffset(150.0, 0.0)..setPaintBits(-1)..setColorMode(1),
             (Paint layerPaint) {
-          layerPaint.setARGB(128, 255, 255, 0);
+          layerPaint.color = const Color.fromARGB(128, 255, 255, 0);
           layerPaint.setColorFilter(new ColorFilter(0x770000ff, 5));
         })
         ..addLayerOnTop(
             new DrawLooperLayerInfo()..setOffset(75.0, 75.0)..setColorMode(1),
             (Paint layerPaint) {
-          layerPaint.setARGB(128, 255, 0, 0);
+          layerPaint.color = const Color.fromARGB(128, 255, 0, 0);
         })
         ..addLayerOnTop(
             new DrawLooperLayerInfo()..setOffset(225.0, 75.0),
             (Paint layerPaint) {
           // Since this layer uses a DST color mode, this has no effect.
-          layerPaint.setARGB(128, 255, 0, 0);
+          layerPaint.color = const Color.fromARGB(128, 255, 0, 0);
         });
     paint.setDrawLooper(builder.build());
     context.drawCircle(0.0, 0.0, radius, paint);
