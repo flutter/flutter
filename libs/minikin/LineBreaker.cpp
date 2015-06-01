@@ -37,6 +37,12 @@ const float SCORE_INFTY = std::numeric_limits<float>::max();
 const float SCORE_OVERFULL = 1e12f;
 const float SCORE_DESPERATE = 1e10f;
 
+// Very long words trigger O(n^2) behavior in hyphenation, so we disable hyphenation for
+// unreasonably long words. This is somewhat of a heuristic because extremely long words
+// are possible in some languages. This does mean that very long real words can get
+// broken by desperate breaks, with no hyphens.
+const size_t LONGEST_HYPHENATED_WORD = 45;
+
 // When the text buffer is within this limit, capacity of vectors is retained at finish(),
 // to avoid allocation.
 const size_t MAX_TEXT_BUF_RETAIN = 32678;
@@ -145,7 +151,7 @@ float LineBreaker::addStyleRun(MinikinPaint* paint, const FontCollection* typefa
             if (c != CHAR_SOFT_HYPHEN) {
                 if (paint != nullptr && mHyphenator != nullptr &&
                         mHyphenationFrequency != kHyphenationFrequency_None &&
-                        wordEnd > lastBreak) {
+                        wordEnd > lastBreak && wordEnd - lastBreak <= LONGEST_HYPHENATED_WORD) {
                     mHyphenator->hyphenate(&mHyphBuf, &mTextBuf[lastBreak], wordEnd - lastBreak);
     #if VERBOSE_DEBUG
                     std::string hyphenatedString;
