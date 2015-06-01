@@ -9,11 +9,11 @@ group("sky") {
   testonly = true
 
   deps = [
-    "//sky/sdk",
+    "//services/debugger",
     "//sky/engine/platform:platform_unittests",
     "//sky/engine/web:sky_unittests",
     "//sky/engine/wtf:unittests",
-    "//sky/tools/debugger",
+    "//sky/sdk",
     "//sky/tools/imagediff",
     "//sky/tools/tester",
     "//sky/viewer",

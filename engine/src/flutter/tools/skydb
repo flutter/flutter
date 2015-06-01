@@ -119,8 +119,8 @@ class SkyDebugger(object):
             '--v=1',
             '--content-handlers=%s' % ','.join(content_handlers),
             '--url-mappings=mojo:window_manager=mojo:kiosk_wm',
-            '--args-for=mojo:sky_debugger %d' % remote_command_port,
-            'mojo:sky_debugger',
+            '--args-for=mojo:debugger %d' % remote_command_port,
+            'mojo:debugger',
         ]
 
         if args.url_or_path:
