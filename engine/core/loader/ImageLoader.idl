@@ -3,9 +3,8 @@
 // found in the LICENSE file.
 
 [
-  Constructor(),
-  ImplementedAs=CanvasImage,
-] interface Image {
-    readonly attribute long width;
-    readonly attribute long height;
+  Constructor(DOMString src, ImageLoaderCallback callback),
+  ImplementedAs=CanvasImageLoader,
+] interface ImageLoader {
+    void load();
 };

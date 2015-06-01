@@ -7,7 +7,7 @@
 
 namespace blink {
 
-CanvasImage::CanvasImage() : imageLoader_(adoptPtr(new NewImageLoader(this))) {
+CanvasImage::CanvasImage() {
 }
 
 CanvasImage::~CanvasImage() {
@@ -19,21 +19,6 @@ int CanvasImage::width() const {
 
 int CanvasImage::height() const {
   return bitmap_.height();
-}
-
-void CanvasImage::setSrc(const String& url) {
-  // TODO(jackson): Figure out how to determine the proper base URL here
-  KURL newSrcURL = KURL(KURL(), url);
-  if (srcURL_ != newSrcURL) {
-    srcURL_ = newSrcURL;
-    imageLoader_->Load(srcURL_);
-  }
-}
-
-void CanvasImage::OnLoadFinished(const SkBitmap& result) {
-  // TODO(jackson): We'll eventually need a notification pathway for
-  // when the image load is complete so that we know to repaint, etc.
-  bitmap_ = result;
 }
 
 }  // namespace blink
