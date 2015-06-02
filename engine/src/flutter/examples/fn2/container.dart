@@ -4,13 +4,25 @@
 
 import 'dart:sky' as sky;
 import 'package:sky/framework/fn2.dart';
+import 'package:sky/framework/rendering/box.dart';
 
 class ContainerApp extends App {
   UINode build() {
     return new EventListenerNode(
       new BlockContainer(children: [
         new Rectangle(0xFF00FFFF, key: 1),
-        new Rectangle(0xFF00FF00, key: 2),
+        new Container(
+          padding: new EdgeDims.all(10.0),
+          margin: new EdgeDims.all(10.0),
+          desiredSize: new sky.Size(double.INFINITY, 100.0),
+          decoration: new BoxDecoration(backgroundColor: 0xFF00FF00),
+          child: new BlockContainer(
+              children: [
+                  new Container(
+                      decoration: new BoxDecoration(backgroundColor: 0xFFFFFF00),
+                      desiredSize: new sky.Size(double.INFINITY, 20.0)
+                  )
+              ])),
         new Rectangle(0xFF0000FF, key: 3)
       ]),
       onPointerDown: _handlePointerDown);
