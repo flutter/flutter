@@ -5,8 +5,8 @@
 import 'dart:math';
 import 'dart:sky';
 import 'package:sky/framework/app.dart';
-import 'package:sky/framework/rendering/render_box.dart';
-import 'package:sky/framework/rendering/render_node.dart';
+import 'package:sky/framework/rendering/box.dart';
+import 'package:sky/framework/rendering/node.dart';
 
 // Material design colors. :p
 List<int> colors = [

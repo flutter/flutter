@@ -4,8 +4,8 @@
 
 import 'dart:sky' as sky;
 import 'package:sky/framework/app.dart';
-import 'package:sky/framework/rendering/render_box.dart';
-import 'package:sky/framework/rendering/render_node.dart';
+import 'package:sky/framework/rendering/box.dart';
+import 'package:sky/framework/rendering/node.dart';
 import 'package:sky/framework/animation/animated_value.dart';
 import 'package:sky/framework/animation/curves.dart';
 

@@ -5,8 +5,8 @@
 import 'dart:math' as math;
 import 'dart:sky' as sky;
 import 'package:sky/framework/app.dart';
-import 'package:sky/framework/rendering/render_box.dart';
-import 'package:sky/framework/rendering/render_node.dart';
+import 'package:sky/framework/rendering/box.dart';
+import 'package:sky/framework/rendering/node.dart';
 
 const double kTwoPi = 2 * math.PI;
 

@@ -4,10 +4,10 @@
 
 import 'dart:sky';
 import 'package:sky/framework/app.dart';
-import 'package:sky/framework/rendering/render_box.dart';
-import 'package:sky/framework/rendering/render_node.dart';
-import 'package:sky/framework/rendering/render_flex.dart';
-import 'package:sky/framework/rendering/render_paragraph.dart';
+import 'package:sky/framework/rendering/box.dart';
+import 'package:sky/framework/rendering/node.dart';
+import 'package:sky/framework/rendering/flex.dart';
+import 'package:sky/framework/rendering/paragraph.dart';
 
 class RenderSolidColor extends RenderDecoratedBox {
   final Size desiredSize;
