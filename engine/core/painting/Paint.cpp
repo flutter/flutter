@@ -7,6 +7,7 @@
 
 #include "sky/engine/core/painting/ColorFilter.h"
 #include "sky/engine/core/painting/DrawLooper.h"
+#include "sky/engine/core/painting/MaskFilter.h"
 
 namespace blink {
 
@@ -28,6 +29,12 @@ void Paint::setColorFilter(ColorFilter* filter)
 {
     ASSERT(filter);
     m_paint.setColorFilter(filter->filter());
+}
+
+void Paint::setMaskFilter(MaskFilter* filter)
+{
+    ASSERT(filter);
+    m_paint.setMaskFilter(filter->filter());
 }
 
 } // namespace blink

@@ -12,4 +12,5 @@
   void setARGB(unsigned long a, unsigned long r, unsigned long g, unsigned long b);
   void setDrawLooper(DrawLooper looper);
   void setColorFilter(ColorFilter filter);
+  void setMaskFilter(MaskFilter filter);
 };

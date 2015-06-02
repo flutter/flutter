@@ -19,8 +19,9 @@ part of dart.sky;
     {%- endfor -%}
 {%- endmacro -%}
 
+{%- set prefix = "_" if custom_dartcode else "" -%}
 {% if not constructors and not custom_constructors %}abstract {% endif -%}
-class {{interface_name}} extends
+class {{prefix}}{{interface_name}} extends
     {{ parent_interface if parent_interface else 'NativeFieldWrapperClass2' }} {
     // Constructors
 {# TODO(eseidel): We only ever have one constructor. #}
@@ -30,7 +31,7 @@ class {{interface_name}} extends
         {{ arg.dart_type }} {{ arg.name }}{% if not loop.last %}, {% endif %}
     {%- endfor -%}
     ) native "{{interface_name}}_constructorCallback";
-    {{interface_name}}({{ args_macro(constructor.arguments) }}) { _constructor(
+    {{prefix}}{{interface_name}}({{ args_macro(constructor.arguments) }}) { _constructor(
     {%- for arg in constructor.arguments -%}
         {{ arg.name }}{% if not loop.last %}, {% endif %}
     {%- endfor -%}
@@ -39,15 +40,15 @@ class {{interface_name}} extends
 
     // Attributes
 {% for attribute in attributes %}
-    {{ attribute.dart_type }} get {{ attribute.name }} native "{{interface_name}}_{{ attribute.name }}_Getter";
+    {{ attribute.dart_type }} get {{prefix}}{{ attribute.name }} native "{{interface_name}}_{{ attribute.name }}_Getter";
 {% if not attribute.is_read_only %}
-    void set {{ attribute.name }}({{ attribute.dart_type }} value) native "{{interface_name}}_{{ attribute.name }}_Setter";
+    void set {{prefix}}{{ attribute.name }}({{ attribute.dart_type }} value) native "{{interface_name}}_{{ attribute.name }}_Setter";
 {% endif %}
 {% endfor %}
 
     // Methods
 {% for method in methods %}
-    {{method.dart_type}} {{method.name}}({{ args_macro(method.arguments)}}) native "{{interface_name}}_{{ method.name }}_Callback";
+    {{method.dart_type}} {{prefix}}{{method.name}}({{ args_macro(method.arguments)}}) native "{{interface_name}}_{{ method.name }}_Callback";
 {% endfor %}
 
     // Operators
@@ -58,3 +59,5 @@ class {{interface_name}} extends
     void operator[]=(String name, String value) native "{{interface_name}}___setter___Callback";
 {% endif %}
 }
+
+{{custom_dartcode}}

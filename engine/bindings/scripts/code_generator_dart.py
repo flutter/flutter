@@ -149,6 +149,15 @@ class CodeGeneratorDart(object):
 
         template_contents['cpp_includes'] = sorted(includes)
 
+        # If CustomDart is set, read the custom dart file and add it to our
+        # template parameters.
+        if 'CustomDart' in interface.extended_attributes:
+          dart_filename = os.path.join(os.path.dirname(idl_filename),
+                                       interface.name + ".dart")
+          with open(dart_filename) as dart_file:
+              custom_dartcode = dart_file.read()
+              template_contents['custom_dartcode'] = custom_dartcode
+
         idl_world = {'interface': None, 'callback': None}
 
         # Load the pickle file for this IDL.
