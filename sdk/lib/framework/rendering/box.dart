@@ -11,10 +11,14 @@ import 'dart:sky' as sky;
 class EdgeDims {
   // used for e.g. padding
   const EdgeDims(this.top, this.right, this.bottom, this.left);
+  const EdgeDims.all(double value)
+      : top = value, right = value, bottom = value, left = value;
+
   final double top;
   final double right;
   final double bottom;
   final double left;
+
   operator ==(EdgeDims other) => (top == other.top) ||
                                  (right == other.right) ||
                                  (bottom == other.bottom) ||
@@ -142,26 +146,38 @@ abstract class RenderProxyBox extends RenderBox with RenderNodeWithChildMixin<Re
 }
 
 class RenderSizedBox extends RenderProxyBox {
-  final sky.Size desiredSize;
 
   RenderSizedBox({
     RenderBox child, 
-    this.desiredSize: const sky.Size.infinite()
-  }) : super(child);
+    sky.Size desiredSize: const sky.Size.infinite()
+  }) : super(child) {
+    assert(desiredSize != null);
+    this.desiredSize = desiredSize;
+  }
+
+  sky.Size _desiredSize;
+  sky.Size get desiredSize => _desiredSize;
+  void set desiredSize (sky.Size value) {
+    assert(value != null);
+    if (_desiredSize == value)
+      return;
+    _desiredSize = value;
+    markNeedsLayout();
+  }
 
   sky.Size getIntrinsicDimensions(BoxConstraints constraints) {
-    return constraints.constrain(desiredSize);
+    return constraints.constrain(_desiredSize);
   }
 
   void performLayout() {
-    size = constraints.constrain(desiredSize);
+    size = constraints.constrain(_desiredSize);
     child.layout(new BoxConstraints.tight(size));
   }
 }
 
 class RenderPadding extends RenderBox with RenderNodeWithChildMixin<RenderBox> {
 
-  RenderPadding(EdgeDims padding, RenderBox child) {
+  RenderPadding({ EdgeDims padding, RenderBox child }) {
     assert(padding != null);
     this.padding = padding;
     this.child = child;
@@ -171,10 +187,10 @@ class RenderPadding extends RenderBox with RenderNodeWithChildMixin<RenderBox> {
   EdgeDims get padding => _padding;
   void set padding (EdgeDims value) {
     assert(value != null);
-    if (_padding != value) {
-      _padding = value;
-      markNeedsLayout();
-    }
+    if (_padding == value)
+      return;
+    _padding = value;
+    markNeedsLayout();
   }
 
   sky.Size getIntrinsicDimensions(BoxConstraints constraints) {

@@ -183,9 +183,6 @@ class Scaffold extends RenderNodeWrapper {
   RenderScaffold root;
   RenderScaffold createNode() => new RenderScaffold();
 
-  static final Scaffold _emptyScaffold = new Scaffold();
-  RenderNodeWrapper get emptyNode => _emptyScaffold;
-
   void insert(RenderNodeWrapper child, dynamic slot) {
     switch (slot) {
       case #toolbar: root.toolbar = toolbar == null ? null : toolbar.root; break;

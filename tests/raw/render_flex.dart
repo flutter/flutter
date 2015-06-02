@@ -72,7 +72,7 @@ void main() {
       child: renderBlock
     );
 
-    flexRoot.add(new RenderPadding(const EdgeDims(10.0, 10.0, 10.0, 10.0), renderDecoratedBlock));
+    flexRoot.add(new RenderPadding(padding: const EdgeDims.all(10.0), child: renderDecoratedBlock));
 
     var row = new RenderFlex(direction: FlexDirection.Horizontal);
 

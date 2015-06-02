@@ -327,6 +327,74 @@ abstract class RenderNodeWrapper extends UINode {
   }
 }
 
+abstract class OneChildRenderNodeWrapper extends RenderNodeWrapper {
+  final UINode child;
+
+  OneChildRenderNodeWrapper({ this.child, Object key }) : super(key: key);
+
+  void insert(RenderNodeWrapper child, dynamic slot) {
+    assert(slot == null);
+    root.child = child.root;
+  }
+
+  void syncRenderNode(RenderNodeWrapper old) {
+    super.syncRenderNode(old);
+    UINode oldChild = old == null ? null : (old as OneChildRenderNodeWrapper).child;
+    syncChild(child, oldChild, null);
+  }
+
+  void _remove() {
+    assert(child != null);
+    removeChild(child);
+    super._remove();
+  }
+}
+
+class Padding extends OneChildRenderNodeWrapper {
+  RenderPadding root;
+  final EdgeDims padding;
+
+  Padding({ this.padding, UINode child, Object key })
+    : super(child: child, key: key);
+
+  RenderPadding createNode() => new RenderPadding(padding: padding);
+
+  void syncRenderNode(Padding old) {
+    super.syncRenderNode(old);
+    root.padding = padding;
+  }
+}
+
+class DecoratedBox extends OneChildRenderNodeWrapper {
+  RenderDecoratedBox root;
+  final BoxDecoration decoration;
+
+  DecoratedBox({ this.decoration, UINode child, Object key })
+    : super(child: child, key: key);
+
+  RenderDecoratedBox createNode() => new RenderDecoratedBox(decoration: decoration);
+
+  void syncRenderNode(DecoratedBox old) {
+    super.syncRenderNode(old);
+    root.decoration = decoration;
+  }
+}
+
+class SizedBox extends OneChildRenderNodeWrapper {
+  RenderSizedBox root;
+  final sky.Size desiredSize;
+
+  SizedBox({ this.desiredSize, UINode child, Object key })
+    : super(child: child, key: key);
+
+  RenderSizedBox createNode() => new RenderSizedBox(desiredSize: desiredSize);
+
+  void syncRenderNode(DecoratedBox old) {
+    super.syncRenderNode(old);
+    root.desiredSize = desiredSize;
+  }
+}
+
 final List<UINode> _emptyList = new List<UINode>();
 
 abstract class OneChildListRenderNodeWrapper extends RenderNodeWrapper {
@@ -778,6 +846,41 @@ abstract class Component extends UINode {
   }
 
   UINode build();
+}
+
+class Container extends Component {
+  final UINode child;
+  final EdgeDims margin;
+  final BoxDecoration decoration;
+  final sky.Size desiredSize;
+  final EdgeDims padding;
+
+  Container({
+    Object key,
+    this.child,
+    this.margin,
+    this.decoration,
+    this.desiredSize,
+    this.padding
+  }) : super(key: key);
+
+  UINode build() {
+    UINode current = child;
+
+    if (padding != null)
+      current = new Padding(padding: padding, child: current);
+
+    if (decoration != null)
+      current = new DecoratedBox(decoration: decoration, child: current);
+
+    if (desiredSize != null)
+      current = new SizedBox(desiredSize: desiredSize, child: current);
+
+    if (margin != null)
+      current = new Padding(padding: margin, child: current);
+
+    return current;
+  }
 }
 
 class _AppView extends AppView {
