@@ -2,44 +2,48 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:sky' as sky;
 import '../fn2.dart';
 import '../theme/view_configuration.dart';
-import 'material.dart';
+import '../rendering/box.dart';
+import '../rendering/flex.dart';
+// import 'material.dart';
 
 class ToolBar extends Component {
-  static final Style _style = new Style('''
-    align-items: center;
-    height: 56px;
-    padding: 0 8px;
-    transition: background-color 0.3s;
-    padding-top: ${kStatusBarHeight}px;''');
-
-  static Style _centerStyle = new Style('''
-    padding-left: 24px;''');
-
-  static FlexBoxParentData _centerLayoutSettings = new FlexBoxParentData()..flex = 1;
-
   UINode left;
   UINode center;
   List<UINode> right;
+  sky.Color backgroundColor;
 
   ToolBar({
     String key,
     this.left,
     this.center,
-    this.right
+    this.right,
+    this.backgroundColor
   }) : super(key: key);
 
   UINode build() {
-    List<UINode> children = [left, new StyleNode(new ParentDataNode(center, _centerLayoutSettings), _centerStyle)];
+    List<UINode> children = [
+      left,
+      new FlexExpandingChild(
+        new Padding(
+          child: center,
+          padding: new EdgeDims.onlyLeft(24.0)
+        ))
+    ];
 
     if (right != null)
       children.addAll(right);
 
-    return new Material(
-      content: new FlexContainer(
+    return new Container(
+      child: new FlexContainer(
         children: children,
-        direction: FlexDirection.Row),
-      level: 2);
+        direction: FlexDirection.Horizontal
+      ),
+      desiredSize: new sky.Size.fromHeight(56.0),
+      // padding: new EdgeDims(kStatusBarHeight.toDouble(), 8.0, 0.0, 8.0),
+      decoration: new BoxDecoration(backgroundColor: backgroundColor.value)
+    );
   }
 }

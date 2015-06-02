@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:sky' as sky;
+
 const Map<int, String> Red = const {
    50: '#FFEBEE',
   100: '#FFCDD2',
@@ -248,3 +250,7 @@ const Map<int, String> BlueGrey = const {
   800: '#37474F',
   900: '#263238',
 };
+
+sky.Color colorFromCSSHexColorString(String colorString) {
+  return new sky.Color(int.parse("FF" + colorString.substring(1), radix: 16));
+}

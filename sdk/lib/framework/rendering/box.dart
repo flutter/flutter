@@ -14,6 +14,15 @@ class EdgeDims {
   const EdgeDims.all(double value)
       : top = value, right = value, bottom = value, left = value;
 
+  const EdgeDims.onlyLeft(double value)
+      : top = 0.0, right = 0.0, bottom = 0.0, left = value;
+  const EdgeDims.onlyRight(double value)
+    : top = 0.0, right = value, bottom = 0.0, left = 0.0;
+  const EdgeDims.onlyTop(double value)
+    : top = value, right = 0.0, bottom = 0.0, left = 0.0;
+  const EdgeDims.onlyBottom(double value)
+    : top = 0.0, right = 0.0, bottom = value, left = 0.0;
+
   final double top;
   final double right;
   final double bottom;
@@ -148,7 +157,7 @@ abstract class RenderProxyBox extends RenderBox with RenderNodeWithChildMixin<Re
 class RenderSizedBox extends RenderProxyBox {
 
   RenderSizedBox({
-    RenderBox child, 
+    RenderBox child,
     sky.Size desiredSize: const sky.Size.infinite()
   }) : super(child) {
     assert(desiredSize != null);

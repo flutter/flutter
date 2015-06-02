@@ -577,7 +577,7 @@ class BlockContainer extends OneChildListRenderNodeWrapper {
 
 class Paragraph extends RenderNodeWrapper {
   RenderParagraph root;
-  RenderParagraph createNode() => new RenderParagraph(text);
+  RenderParagraph createNode() => new RenderParagraph(text: text);
 
   final String text;
 
@@ -925,41 +925,4 @@ class Text extends Component {
   final String data;
   bool get interchangeable => true;
   UINode build() => new Paragraph(text: data);
-}
-
-
-// for now, but only for now:
-
-class RenderSolidColor extends RenderDecoratedBox {
-  final sky.Size desiredSize;
-  final int backgroundColor;
-
-  RenderSolidColor(int backgroundColor, { this.desiredSize })
-      : backgroundColor = backgroundColor,
-        super(decoration: new BoxDecoration(backgroundColor: backgroundColor));
-
-  sky.Size getIntrinsicDimensions(BoxConstraints constraints) {
-    return constraints.constrain(desiredSize);
-  }
-
-  void performLayout() {
-    size = constraints.constrain(desiredSize);
-  }
-
-  void handlePointer(sky.PointerEvent event) {
-    if (event.type == 'pointerdown')
-      decoration = new BoxDecoration(backgroundColor: 0xFFFF0000);
-    else if (event.type == 'pointerup')
-      decoration = new BoxDecoration(backgroundColor: backgroundColor);
-  }
-}
-
-class Rectangle extends RenderNodeWrapper {
-  RenderSolidColor root;
-  RenderSolidColor createNode() =>
-      new RenderSolidColor(color, desiredSize: new sky.Size(40.0, 130.0));
-
-  final int color;
-
-  Rectangle(this.color, { Object key }) : super(key: key);
 }
