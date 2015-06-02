@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// import 'package:sky/framework/components2/tool_bar.dart';
+import 'package:sky/framework/components2/tool_bar.dart';
 // import 'package:sky/framework/components2/drawer.dart';
 // import 'package:sky/framework/components2/drawer_header.dart';
 // import 'package:sky/framework/components2/floating_action_button.dart';
 // import 'package:sky/framework/components2/icon.dart';
-// import 'package:sky/framework/components2/icon_button.dart';
+import 'package:sky/framework/components2/icon_button.dart';
 // import 'package:sky/framework/components2/input.dart';
 // import 'package:sky/framework/components2/menu_divider.dart';
 // import 'package:sky/framework/components2/menu_item.dart';
@@ -19,17 +19,16 @@ import 'package:sky/framework/fn2.dart';
 import 'package:sky/framework/theme/typography.dart' as typography;
 import 'package:sky/framework/theme/colors.dart';
 import 'stock_data.dart';
+import 'package:sky/framework/rendering/box.dart';
 // import 'stock_list.dart';
 // import 'stock_menu.dart';
 
 import 'dart:async';
+import 'dart:sky' as sky;
 
 enum StockMode { Optimistic, Pessimistic }
 
 class StocksApp extends App {
-
-  // static final Style _toolBarStyle = new Style('''
-  //   background-color: ${Purple[500]};''');
 
   // static final Style _searchBarStyle = new Style('''
   //   background-color: ${Grey[50]};''');
@@ -161,24 +160,21 @@ class StocksApp extends App {
   // }
 
   UINode buildToolBar() {
-    return new Rectangle(0xFF00FF00);
-    // return new StyleNode(
-    //   new ToolBar(
-    //     left: new IconButton(
-    //       icon: 'navigation/menu_white',
-    //       onGestureTap: _drawerController.toggle),
-    //     center: new Container(
-    //       style: _titleStyle,
-    //       children: [new Text('Stocks')]),
-    //     right: [
-    //       new IconButton(
-    //         icon: 'action/search_white',
-    //         onGestureTap: _handleSearchBegin),
-    //       new IconButton(
-    //         icon: 'navigation/more_vert_white',
-    //         onGestureTap: _handleMenuShow)
-    //     ]),
-    //   _toolBarStyle);
+    return new ToolBar(
+        left: new IconButton(
+          icon: 'navigation/menu_white',
+          onGestureTap: (_) => true), // _drawerController.toggle),
+        center: new Text('Stocks'),
+        right: [
+          new IconButton(
+            icon: 'action/search_white',
+            onGestureTap: _handleSearchBegin),
+          new IconButton(
+            icon: 'navigation/more_vert_white',
+            onGestureTap: _handleMenuShow)
+        ],
+        backgroundColor: colorFromCSSHexColorString(Purple[500])
+      );
   }
 
   // TODO(abarth): Should we factor this into a SearchBar in the framework?
@@ -210,16 +206,22 @@ class StocksApp extends App {
   UINode build() {
     // List<UINode> overlays = [];
     // addMenuToOverlays(overlays);
+    return new Container(
+      child: new BlockContainer(children: [buildToolBar()]),
+      decoration: new BoxDecoration(
+        backgroundColor: 0xFFFFFFFF
+      )
+    );
 
-    return new Scaffold(
-       toolbar: _isSearching ? buildSearchBar() : buildToolBar()
+    // return new Scaffold(
+    //    toolbar: _isSearching ? buildSearchBar() : buildToolBar()
     // ,
     //   body: new Stocklist(stocks: _stocks, query: _searchQuery),
     //   floatingActionButton: new FloatingActionButton(
     //     content: new Icon(type: 'content/add_white', size: 24), level: 3),
     //   drawer: _drawerShowing ? buildDrawer() : null,
     //   overlays: overlays
-    );
+    // );
   }
 }
 
