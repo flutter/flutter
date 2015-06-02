@@ -23,7 +23,7 @@ class TestDisplayList extends RenderNodeDisplayList {
   }
 
   String explainPaint(sky.Paint paint) {
-    return "Paint(0x${paint.color.toRadixString(16).padLeft(8, '0')})";
+    return "Paint(0x${paint.color.value.toRadixString(16).padLeft(8, '0')})";
   }
 
   void save() {

@@ -33,7 +33,7 @@ class InkSplash {
 
   void paint(RenderNodeDisplayList canvas) {
     int opacity = (_kInitialOpacity * (1.0 - (radius.value / _kTargetSize))).floor();
-    _paint.color = opacity << 24;
+    _paint.color = new sky.Color(opacity << 24);
     canvas.drawCircle(position.x, position.y, radius.value, _paint);
   }
 }
@@ -57,7 +57,7 @@ class InkWell extends RenderBox {
 
   void paint(RenderNodeDisplayList canvas) {
     canvas.drawRect(new sky.Rect.fromLTRB(0.0, 0.0, size.width, size.height),
-                    new sky.Paint()..color = 0xFFCCCCCC);
+                    new sky.Paint()..color = const sky.Color(0xFFCCCCCC));
     for (InkSplash splash in _splashes)
       splash.paint(canvas);
   }

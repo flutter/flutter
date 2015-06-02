@@ -5,6 +5,7 @@
 #ifndef SKY_ENGINE_CORE_PAINTING_PAINT_H_
 #define SKY_ENGINE_CORE_PAINTING_PAINT_H_
 
+#include "sky/engine/core/painting/CanvasColor.h"
 #include "sky/engine/tonic/dart_wrappable.h"
 #include "sky/engine/wtf/PassRefPtr.h"
 #include "sky/engine/wtf/RefCounted.h"
@@ -29,6 +30,7 @@ public:
 
     unsigned color() const { return m_paint.getColor(); }
     void setColor(unsigned color) { m_paint.setColor(color); }
+    void setColor(CanvasColor color) { m_paint.setColor(color.sk_color); }
 
     void setARGB(unsigned a, unsigned r, unsigned g, unsigned b)
     {
