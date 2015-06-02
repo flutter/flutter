@@ -52,6 +52,8 @@ void main() {
           layerPaint.setColorFilter(
               new ColorFilter(const Color.fromARGB(128, 0, 0, 255),
                               TransferMode.srcInMode));
+          layerPaint.setMaskFilter(
+              new MaskFilter.Blur(BlurStyle.normal, 3.0, highQuality: true));
         })
         ..addLayerOnTop(
             new DrawLooperLayerInfo()

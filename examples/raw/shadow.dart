@@ -10,22 +10,25 @@ void beginFrame(double timeStamp) {
   canvas.translate(size + 10.0, size + 10.0);
 
   Paint paint = new Paint();
-  paint.setARGB(255, 0, 255, 0);
+  paint.color = const Color.fromARGB(255, 0, 255, 0);
   var builder = new LayerDrawLooperBuilder()
     // Shadow layer.
     ..addLayerOnTop(
         new DrawLooperLayerInfo()
+          ..setPaintBits(-1)
           ..setOffset(const Point(5.0, 5.0))
           ..setColorMode(TransferMode.srcInMode),
         (Paint layerPaint) {
-      layerPaint.setARGB(128, 55, 55, 55);
-      // TODO(mpcomplete): add blur filter
+      layerPaint.color = const Color.fromARGB(128, 55, 55, 55);
+      layerPaint.setMaskFilter(
+          new MaskFilter.Blur(BlurStyle.normal, 5.0, highQuality: true));
     })
     // Main layer.
     ..addLayerOnTop(new DrawLooperLayerInfo(), (Paint) {});
   paint.setDrawLooper(builder.build());
 
-  canvas.drawPaint(new Paint()..setARGB(255, 255, 255, 255));
+  canvas.drawPaint(
+      new Paint()..color = const Color.fromARGB(255, 255, 255, 255));
   canvas.drawRect(new Rect.fromLTRB(-size, -size, size, size), paint);
   view.picture = canvas.endRecording();
 }
