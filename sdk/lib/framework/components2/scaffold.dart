@@ -5,8 +5,8 @@
 import '../fn2.dart';
 import '../theme/typography.dart' as typography;
 import 'dart:sky' as sky;
-import '../rendering/render_box.dart';
-import '../rendering/render_node.dart';
+import '../rendering/box.dart';
+import '../rendering/node.dart';
 
 // RenderNode
 class RenderScaffold extends RenderBox {

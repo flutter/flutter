@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 
 import 'dart:sky' as sky;
-import 'rendering/render_box.dart';
-import 'rendering/render_node.dart';
+import 'rendering/box.dart';
+import 'rendering/node.dart';
 import 'scheduler.dart' as scheduler;
 
 class AppView {

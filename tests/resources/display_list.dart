@@ -1,6 +1,6 @@
 
-import 'package:sky/framework/rendering/render_node.dart';
-import 'package:sky/framework/rendering/render_box.dart';
+import 'package:sky/framework/rendering/node.dart';
+import 'package:sky/framework/rendering/box.dart';
 import 'dart:sky' as sky;
 
 typedef void Logger (String s);

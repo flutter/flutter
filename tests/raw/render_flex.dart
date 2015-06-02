@@ -7,9 +7,9 @@ import '../resources/unit.dart';
 import '../resources/display_list.dart';
 import 'dart:sky' as sky;
 import 'package:sky/framework/app.dart';
-import 'package:sky/framework/rendering/render_block.dart';
-import 'package:sky/framework/rendering/render_box.dart';
-import 'package:sky/framework/rendering/render_flex.dart';
+import 'package:sky/framework/rendering/block.dart';
+import 'package:sky/framework/rendering/box.dart';
+import 'package:sky/framework/rendering/flex.dart';
 
 class RenderSolidColor extends RenderDecoratedBox {
   final sky.Size desiredSize;

@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 
 import 'dart:sky' as sky;
-import 'render_box.dart';
-import 'render_node.dart';
+import 'box.dart';
+import 'node.dart';
 
 class BlockParentData extends BoxParentData with ContainerParentDataMixin<RenderBox> { }
 

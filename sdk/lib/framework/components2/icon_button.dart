@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import '../fn2.dart';
+import '../rendering/box.dart';
 import 'icon.dart';
 
 class IconButton extends Component {
