@@ -275,7 +275,6 @@ abstract class RenderNodeWrapper extends UINode {
   }) : super(key: key);
 
   RenderNode createNode();
-  RenderNodeWrapper get emptyNode;
 
   void insert(RenderNodeWrapper child, dynamic slot);
 
@@ -286,7 +285,6 @@ abstract class RenderNodeWrapper extends UINode {
       var ancestor = findAncestor(RenderNodeWrapper);
       if (ancestor is RenderNodeWrapper)
         ancestor.insert(this, slot);
-      old = emptyNode;
     } else {
       root = old.root;
       assert(root != null);
@@ -387,7 +385,7 @@ abstract class OneChildListRenderNodeWrapper extends RenderNodeWrapper {
     var startIndex = 0;
     var endIndex = children.length;
 
-    var oldChildren = old.children;
+    var oldChildren = old == null ? [] : old.children;
     var oldStartIndex = 0;
     var oldEndIndex = oldChildren.length;
 
@@ -502,39 +500,20 @@ abstract class OneChildListRenderNodeWrapper extends RenderNodeWrapper {
 }
 
 class BlockContainer extends OneChildListRenderNodeWrapper {
-
   RenderBlock root;
   RenderBlock createNode() => new RenderBlock();
 
-  static final BlockContainer _emptyContainer = new BlockContainer();
-
-  RenderNodeWrapper get emptyNode => _emptyContainer;
-
-  BlockContainer({
-    Object key,
-    List<UINode> children
-  }) : super(
-    key: key,
-    children: children
-  );
+  BlockContainer({ Object key, List<UINode> children })
+    : super(key: key, children: children);
 }
 
 class Paragraph extends RenderNodeWrapper {
-
   RenderParagraph root;
   RenderParagraph createNode() => new RenderParagraph(text);
-  String text;
 
-  static final Paragraph _emptyContainer = new Paragraph();
+  final String text;
 
-  RenderNodeWrapper get emptyNode => _emptyContainer;
-
-  Paragraph({
-    Object key,
-    this.text
-  }) : super(
-    key: key
-  );
+  Paragraph({ Object key, this.text }) : super(key: key);
 
   void syncRenderNode(UINode old) {
     super.syncRenderNode(old);
@@ -543,14 +522,8 @@ class Paragraph extends RenderNodeWrapper {
 }
 
 class FlexContainer extends OneChildListRenderNodeWrapper {
-
   RenderFlex root;
   RenderFlex createNode() => new RenderFlex(direction: this.direction);
-
-  static final FlexContainer _emptyContainer = new FlexContainer();
-    // direction doesn't matter if it's empty
-
-  RenderNodeWrapper get emptyNode => _emptyContainer;
 
   final FlexDirection direction;
 
@@ -558,10 +531,7 @@ class FlexContainer extends OneChildListRenderNodeWrapper {
     Object key,
     List<UINode> children,
     this.direction: FlexDirection.Horizontal
-  }) : super(
-    key: key,
-    children: children
-  );
+  }) : super(key: key, children: children);
 
   void syncRenderNode(UINode old) {
     super.syncRenderNode(old);
@@ -570,71 +540,13 @@ class FlexContainer extends OneChildListRenderNodeWrapper {
 }
 
 class FlexExpandingChild extends ParentDataNode {
-  FlexExpandingChild(UINode content, [int flex = 1]): super(content, new FlexBoxParentData()..flex = flex);
-}
-
-class FillStackContainer extends OneChildListRenderNodeWrapper {
-
-  RenderCSSStack root;
-  RenderCSSStack createNode() => new RenderCSSStack(this);
-
-  static final FillStackContainer _emptyContainer = new FillStackContainer();
-
-  RenderNodeWrapper get emptyNode => _emptyContainer;
-
-  FillStackContainer({
-    Object key,
-    List<UINode> children
-  }) : super(
-    key: key,
-    children: _positionNodesToFill(children)
-  );
-
-  static StackParentData _fillParentData = new StackParentData()
-                                                 ..top = 0.0
-                                                 ..left = 0.0
-                                                 ..right = 0.0
-                                                 ..bottom = 0.0;
-
-  static List<UINode> _positionNodesToFill(List<UINode> input) {
-    if (input == null)
-      return null;
-    return input.map((node) {
-      return new ParentDataNode(node, _fillParentData);
-    }).toList();
-  }
-}
-
-abstract class OneChildRenderNodeWrapper extends RenderNodeWrapper {
-
-  final UINode child;
-  RenderNodeWithChildMixin root;
-
-  OneChildRenderNodeWrapper({
-    Object key,
-    this.child
-  }) : super(key: key);
-
-  void insert(RenderNodeWrapper child, dynamic slot) {
-    assert(slot == null);
-    root.child = child.root;
-  }
-
-  void _remove() {
-    assert(child != null);
-    removeChild(child);
-    super._remove();
-  }
+  FlexExpandingChild(UINode content, [int flex = 1])
+    : super(content, new FlexBoxParentData()..flex = flex);
 }
 
 class Image extends RenderNodeWrapper {
-
   RenderCSSImage root;
   RenderCSSImage createNode() => new RenderCSSImage(this, this.src, this.width, this.height);
-
-  static final Image _emptyImage = new Image();
-
-  RenderNodeWrapper get emptyNode => _emptyImage;
 
   final String src;
   final int width;
@@ -645,9 +557,7 @@ class Image extends RenderNodeWrapper {
     this.width,
     this.height,
     this.src
-  }) : super(
-    key: key
-  );
+  }) : super(key: key);
 
   void syncRenderNode(UINode old) {
     super.syncRenderNode(old);
@@ -942,19 +852,11 @@ class RenderSolidColor extends RenderDecoratedBox {
 }
 
 class Rectangle extends RenderNodeWrapper {
-
-  Rectangle(this.color, {
-    Object key
-  }) : super(
-    key: key
-  );
+  RenderSolidColor root;
+  RenderSolidColor createNode() =>
+      new RenderSolidColor(color, desiredSize: new sky.Size(40.0, 130.0));
 
   final int color;
 
-  RenderSolidColor root;
-  RenderSolidColor createNode() => new RenderSolidColor(color, desiredSize: new sky.Size(40.0, 130.0));
-
-  static final Rectangle _emptyRectangle = new Rectangle(0);
-  RenderNodeWrapper get emptyNode => _emptyRectangle;
-
+  Rectangle(this.color, { Object key }) : super(key: key);
 }
