@@ -168,14 +168,12 @@ class ParentDataNode extends ContentNode {
   ParentDataNode(UINode content, this.parentData): super(content);
 }
 
-typedef GestureEventListener(sky.GestureEvent e);
-typedef PointerEventListener(sky.PointerEvent e);
-typedef EventListener(sky.Event e);
+typedef void GestureEventListener(sky.GestureEvent e);
+typedef void PointerEventListener(sky.PointerEvent e);
+typedef void EventListener(sky.Event e);
 
 class EventListenerNode extends ContentNode  {
   final Map<String, sky.EventListener> listeners;
-
-  static final Set<String> _registeredEvents = new HashSet<String>();
 
   static Map<String, sky.EventListener> _createListeners({
     EventListener onWheel,
@@ -255,32 +253,6 @@ class EventListenerNode extends ContentNode  {
     if (listener != null) {
       listener(e);
     }
-  }
-
-  static void _dispatchEvent(sky.Event e) {
-    UINode target = RenderNodeWrapper._getMounted(bridgeEventTargetToRenderNode(e.target));
-
-    // TODO(rafaelw): StopPropagation?
-    while (target != null) {
-      if (target is EventListenerNode) {
-        target._handleEvent(e);
-      }
-
-      target = target._parent;
-    }
-  }
-
-  static void _ensureDocumentListener(String eventType) {
-    if (_registeredEvents.add(eventType)) {
-      sky.document.addEventListener(eventType, _dispatchEvent);
-    }
-  }
-
-  void _sync(UINode old, dynamic slot) {
-    for (var type in listeners.keys) {
-      _ensureDocumentListener(type);
-    }
-    super._sync(old, slot);
   }
 }
 
@@ -898,10 +870,27 @@ abstract class Component extends UINode {
   UINode build();
 }
 
+class _AppView extends AppView {
+  _AppView() : super(null);
+
+  void dispatchPointerEvent(sky.PointerEvent event, HitTestResult result) {
+    super.dispatchPointerEvent(event, result);
+
+    UINode target = RenderNodeWrapper._getMounted(result.path.first);
+
+    // TODO(rafaelw): StopPropagation?
+    while (target != null) {
+      if (target is EventListenerNode)
+        target._handleEvent(event);
+      target = target._parent;
+    }
+  }
+}
+
 abstract class App extends Component {
 
   App() : super(stateful: true) {
-    _appView = new AppView(null);
+    _appView = new _AppView();
     _scheduleComponentForRender(this);
   }
 
@@ -934,7 +923,7 @@ class RenderSolidColor extends RenderDecoratedBox {
 
   RenderSolidColor(int backgroundColor, { this.desiredSize })
       : backgroundColor = backgroundColor,
-        super(new BoxDecoration(backgroundColor: backgroundColor));
+        super(decoration: new BoxDecoration(backgroundColor: backgroundColor));
 
   sky.Size getIntrinsicDimensions(BoxConstraints constraints) {
     return constraints.constrain(desiredSize);

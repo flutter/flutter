@@ -16,7 +16,8 @@ class AppView {
 
     _renderView = new RenderView(child: root);
     _renderView.attach();
-    _renderView.layout(new ViewConstraints(width: sky.view.width, height: sky.view.height));
+    _renderView.layout(new ViewConstraints(width: sky.view.width,
+                                           height: sky.view.height));
 
     scheduler.ensureVisualUpdate();
   }
@@ -61,10 +62,12 @@ class AppView {
         }
         break;
     }
-    assert(result != null);
-    result.path.reversed.forEach((RenderNode node) {
-      node.handlePointer(event);
-    });
+    dispatchPointerEvent(event, result);
   }
 
+  void dispatchPointerEvent(sky.PointerEvent event, HitTestResult result) {
+    assert(result != null);
+    for (RenderNode node in result.path.reversed)
+      node.handlePointer(event);
+  }
 }
