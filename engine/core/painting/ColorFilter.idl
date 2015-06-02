@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 [
-  // TODO(mpcomplete): add Color and SkXfermode::Mode types.
-  Constructor(unsigned long color, unsigned long transferMode),
+  Constructor(Color color, TransferMode transferMode),
 ] interface ColorFilter {
 };

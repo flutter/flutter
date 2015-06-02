@@ -115,8 +115,10 @@ CPP_SPECIAL_CONVERSION_RULES = {
     'unrestricted double': 'double',
     'unrestricted float': 'float',
     # Pass these by value, not pointer.
-    'Rect': 'Rect',
     'Color': 'CanvasColor',
+    'Point': 'Point',
+    'Rect': 'Rect',
+    'TransferMode': 'TransferMode',
 }
 
 
@@ -320,6 +322,8 @@ def set_component_dirs(new_component_dirs):
 # TODO(terry): Need to fix to handle getter/setters for onEvent.
 DART_FIX_ME = 'DART_UNIMPLEMENTED(/* Conversion unimplemented*/);'
 
+PASS_BY_VALUE_FORMAT = 'DartConverter<{implemented_as}>::FromArguments{null_check}(args, {index}, exception)'
+
 # For a given IDL type, the DartHandle to C++ conversion.
 DART_TO_CPP_VALUE = {
     # Basic
@@ -355,8 +359,12 @@ DART_TO_CPP_VALUE = {
     # FIXME(vsm): This is an enum type (defined in StorageQuota.idl).
     # We should handle it automatically, but map to a String for now.
     'StorageType': 'DartUtilities::dartToString(args, {index}, exception, {auto_scope})',
-    'Rect': 'DartConverter<{implemented_as}>::FromArguments{null_check}(args, {index}, exception)',
-    'Color': 'DartConverter<CanvasColor>::FromArguments{null_check}(args, {index}, exception)',
+
+    # Pass-by-value types.
+    'Color': PASS_BY_VALUE_FORMAT,
+    'Point': PASS_BY_VALUE_FORMAT,
+    'Rect': PASS_BY_VALUE_FORMAT,
+    'TransferMode': PASS_BY_VALUE_FORMAT,
 }
 
 
@@ -372,6 +380,7 @@ def dart_value_to_cpp_value(idl_type, extended_attributes, variable_name,
     idl_type = idl_type.preprocessed_type
     add_includes_for_type(idl_type)
     base_idl_type = idl_type.base_type
+    implemented_as = idl_type.implemented_as
 
     if 'EnforceRange' in extended_attributes:
         arguments = ', '.join([variable_name, 'EnforceRange', 'exceptionState'])
@@ -379,6 +388,9 @@ def dart_value_to_cpp_value(idl_type, extended_attributes, variable_name,
         arguments = ', '.join([variable_name, 'es'])
     else:
         arguments = variable_name
+
+    if base_idl_type in CPP_SPECIAL_CONVERSION_RULES:
+        implemented_as = CPP_SPECIAL_CONVERSION_RULES[base_idl_type]
 
     if base_idl_type in DART_TO_CPP_VALUE:
         cpp_expression_format = DART_TO_CPP_VALUE[base_idl_type]
@@ -407,7 +419,7 @@ def dart_value_to_cpp_value(idl_type, extended_attributes, variable_name,
                                         arguments=arguments,
                                         index=index,
                                         idl_type=base_idl_type,
-                                        implemented_as=idl_type.implemented_as,
+                                        implemented_as=implemented_as,
                                         auto_scope=DartUtilities.bool_to_cpp(auto_scope))
 
 

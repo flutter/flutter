@@ -6,6 +6,8 @@
 #define SKY_ENGINE_CORE_PAINTING_DRAWLOOPERLAYERINFO_H_
 
 #include "dart/runtime/include/dart_api.h"
+#include "sky/engine/core/painting/Point.h"
+#include "sky/engine/core/painting/TransferMode.h"
 #include "sky/engine/tonic/dart_wrappable.h"
 #include "third_party/skia/include/effects/SkLayerDrawLooper.h"
 
@@ -22,10 +24,8 @@ class DrawLooperLayerInfo : public RefCounted<DrawLooperLayerInfo>,
   ~DrawLooperLayerInfo() override;
 
   void setPaintBits(unsigned bits) { layer_info_.fPaintBits = bits; }
-  void setColorMode(unsigned mode) {
-    layer_info_.fColorMode = static_cast<SkXfermode::Mode>(mode);
-  }
-  void setOffset(float x, float y) { layer_info_.fOffset.set(x, y); }
+  void setColorMode(TransferMode m) { layer_info_.fColorMode = m.sk_mode; }
+  void setOffset(Point offset) { layer_info_.fOffset = offset.sk_point; }
   void setPostTranslate(bool val) { layer_info_.fPostTranslate = val; }
 
   const SkLayerDrawLooper::LayerInfo& layer_info() const { return layer_info_; }

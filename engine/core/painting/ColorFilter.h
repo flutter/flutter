@@ -5,6 +5,8 @@
 #ifndef SKY_ENGINE_CORE_PAINTING_COLORFILTER_H_
 #define SKY_ENGINE_CORE_PAINTING_COLORFILTER_H_
 
+#include "sky/engine/core/painting/CanvasColor.h"
+#include "sky/engine/core/painting/TransferMode.h"
 #include "sky/engine/tonic/dart_wrappable.h"
 #include "sky/engine/wtf/PassRefPtr.h"
 #include "sky/engine/wtf/RefCounted.h"
@@ -16,7 +18,8 @@ class ColorFilter : public RefCounted<ColorFilter>, public DartWrappable {
   DEFINE_WRAPPERTYPEINFO();
  public:
   ~ColorFilter() override;
-  static PassRefPtr<ColorFilter> create(unsigned color, unsigned transfer_mode);
+  static PassRefPtr<ColorFilter> create(CanvasColor color,
+                                        TransferMode transfer_mode);
 
   SkColorFilter* filter() { return filter_.get(); }
 

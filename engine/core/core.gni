@@ -872,6 +872,8 @@ sky_core_files = [
   "painting/Point.h",
   "painting/Rect.cpp",
   "painting/Rect.h",
+  "painting/TransferMode.cpp",
+  "painting/TransferMode.h",
   "rendering/BidiRun.h",
   "rendering/BidiRunForLine.cpp",
   "rendering/BidiRunForLine.h",
@@ -1157,6 +1159,7 @@ core_dart_files = get_path_info([
                                   "painting/Point.dart",
                                   "painting/Rect.dart",
                                   "painting/Size.dart",
+                                  "painting/TransferMode.dart",
                                 ],
                                 "abspath")
 
