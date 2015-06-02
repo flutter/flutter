@@ -6,5 +6,4 @@
   Constructor(DOMString src, ImageLoaderCallback callback),
   ImplementedAs=CanvasImageLoader,
 ] interface ImageLoader {
-    void load();
 };

@@ -3,10 +3,13 @@
 // found in the LICENSE file.
 
 import 'dart:sky';
+import 'package:sky/framework/net/image_cache.dart' as image_cache;
 
 double timeBase = null;
 
 Image image = null;
+String url1 = "https://www.dartlang.org/logos/dart-logo.png";
+String url2 = "http://i2.kym-cdn.com/photos/images/facebook/000/581/296/c09.jpg";
 
 void beginFrame(double timeStamp) {
   if (timeBase == null) timeBase = timeStamp;
@@ -22,15 +25,32 @@ void beginFrame(double timeStamp) {
   view.scheduleFrame();
 }
 
+void handleImageLoad(result) {
+  if (result != image) {
+    print("${result.width}x${result.width} image loaded!");
+    image = result;
+    view.scheduleFrame();
+  } else {
+    print("Existing image was loaded again");
+  }
+}
+
+bool handleEvent(Event event) {
+  if (event.type == "pointerdown") {
+    return true;
+  }
+
+  if (event.type == "pointerup") {
+    image_cache.load(url2, handleImageLoad);
+    return true;
+  }
+
+  return false;
+}
+
 void main() {
-  new ImageLoader("https://www.dartlang.org/logos/dart-logo.png", (result) {
-    if (result != null) {
-      print("${result.width}x${result.width} image loaded!");
-      image = result;
-      view.scheduleFrame();
-    } else {
-      print("Image failed to load");
-    }
-  }).load();
+  image_cache.load(url1, handleImageLoad);
+  image_cache.load(url1, handleImageLoad);
+  view.setEventCallback(handleEvent);
   view.setBeginFrameCallback(beginFrame);
 }

@@ -28,8 +28,6 @@ class CanvasImageLoader : public MojoFetcher::Client,
   }
   virtual ~CanvasImageLoader();
 
-  void load();
-
   // MojoFetcher::Client
   void OnReceivedResponse(mojo::URLResponsePtr) override;
 
@@ -43,8 +41,6 @@ class CanvasImageLoader : public MojoFetcher::Client,
   OwnPtr<MojoFetcher> fetcher_;
   OwnPtr<mojo::common::DataPipeDrainer> drainer_;
   RefPtr<SharedBuffer> buffer_;
-
-  KURL url_;
   OwnPtr<ImageLoaderCallback> callback_;
 };
 

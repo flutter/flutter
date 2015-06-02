@@ -13,14 +13,11 @@ namespace blink {
 CanvasImageLoader::CanvasImageLoader(const String& src, PassOwnPtr<ImageLoaderCallback> callback)
   : callback_(callback) {
   // TODO(jackson): Figure out how to determine the proper base URL here
-  url_ = KURL(KURL(), src);
+  KURL url = KURL(KURL(), src);
+  fetcher_ = adoptPtr(new MojoFetcher(this, url));
 }
 
 CanvasImageLoader::~CanvasImageLoader() {
-}
-
-void CanvasImageLoader::load() {
-  fetcher_ = adoptPtr(new MojoFetcher(this, url_));
 }
 
 void CanvasImageLoader::OnReceivedResponse(mojo::URLResponsePtr response) {

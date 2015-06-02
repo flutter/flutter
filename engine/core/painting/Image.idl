@@ -6,6 +6,6 @@
   Constructor(),
   ImplementedAs=CanvasImage,
 ] interface Image {
-    readonly attribute long width;
-    readonly attribute long height;
+    readonly attribute long width;  // width in number of image pixels
+    readonly attribute long height; // height in number of image pixels
 };
