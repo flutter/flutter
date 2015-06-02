@@ -8,7 +8,11 @@ import 'package:sky/framework/fn2.dart';
 class ContainerApp extends App {
   UINode build() {
     return new EventListenerNode(
-      new Rectangle(0xFF00FFFF),
+      new BlockContainer(children: [
+        new Rectangle(0xFF00FFFF, key: 1),
+        new Rectangle(0xFF00FF00, key: 2),
+        new Rectangle(0xFF0000FF, key: 3)
+      ]),
       onPointerDown: _handlePointerDown);
   }
 

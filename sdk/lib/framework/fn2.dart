@@ -501,16 +501,16 @@ abstract class OneChildListRenderNodeWrapper extends RenderNodeWrapper {
   }
 }
 
-class Container extends OneChildListRenderNodeWrapper {
+class BlockContainer extends OneChildListRenderNodeWrapper {
 
-  RenderCSSContainer root;
-  RenderCSSContainer createNode() => new RenderCSSContainer(this);
+  RenderBlock root;
+  RenderBlock createNode() => new RenderBlock();
 
-  static final Container _emptyContainer = new Container();
+  static final BlockContainer _emptyContainer = new BlockContainer();
 
   RenderNodeWrapper get emptyNode => _emptyContainer;
 
-  Container({
+  BlockContainer({
     Object key,
     List<UINode> children
   }) : super(
