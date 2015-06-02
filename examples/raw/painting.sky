@@ -44,18 +44,24 @@ void main() {
     var builder = new LayerDrawLooperBuilder()
         ..addLayerOnTop(
             new DrawLooperLayerInfo()
-              ..setOffset(150.0, 0.0)..setPaintBits(-1)..setColorMode(1),
+              ..setOffset(const Point(150.0, 0.0))
+              ..setColorMode(TransferMode.srcMode)
+              ..setPaintBits(-1),
             (Paint layerPaint) {
           layerPaint.color = const Color.fromARGB(128, 255, 255, 0);
-          layerPaint.setColorFilter(new ColorFilter(0x770000ff, 5));
+          layerPaint.setColorFilter(
+              new ColorFilter(const Color.fromARGB(128, 0, 0, 255),
+                              TransferMode.srcInMode));
         })
         ..addLayerOnTop(
-            new DrawLooperLayerInfo()..setOffset(75.0, 75.0)..setColorMode(1),
+            new DrawLooperLayerInfo()
+              ..setOffset(const Point(75.0, 75.0))
+              ..setColorMode(TransferMode.srcMode),
             (Paint layerPaint) {
           layerPaint.color = const Color.fromARGB(128, 255, 0, 0);
         })
         ..addLayerOnTop(
-            new DrawLooperLayerInfo()..setOffset(225.0, 75.0),
+            new DrawLooperLayerInfo()..setOffset(const Point(225.0, 75.0)),
             (Paint layerPaint) {
           // Since this layer uses a DST color mode, this has no effect.
           layerPaint.color = const Color.fromARGB(128, 255, 0, 0);

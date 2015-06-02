@@ -14,7 +14,9 @@ void beginFrame(double timeStamp) {
   var builder = new LayerDrawLooperBuilder()
     // Shadow layer.
     ..addLayerOnTop(
-        new DrawLooperLayerInfo()..setOffset(5.0, 5.0)..setColorMode(5),
+        new DrawLooperLayerInfo()
+          ..setOffset(const Point(5.0, 5.0))
+          ..setColorMode(TransferMode.srcInMode),
         (Paint layerPaint) {
       layerPaint.setARGB(128, 55, 55, 55);
       // TODO(mpcomplete): add blur filter
