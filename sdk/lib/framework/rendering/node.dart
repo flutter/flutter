@@ -98,6 +98,7 @@ abstract class RenderNode extends AbstractNode {
       parent.markNeedsLayout();
     } else {
       _nodesNeedingLayout.add(this);
+      scheduler.ensureVisualUpdate();
     }
   }
   static void flushLayout() {
