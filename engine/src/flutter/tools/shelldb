@@ -44,8 +44,7 @@ PID_FILE_KEYS = frozenset([
     'remote_gdbserver_port',
 ])
 
-# TODO(iansf): Fix undefined behavior when you have more than one device attached.
-SYSTEM_LIBS_ROOT_PATH = '/tmp/device_libs/%s' % (subprocess.check_output(['adb', 'get-serialno']).strip())
+SYSTEM_LIBS_ROOT_PATH = '/tmp/device_libs'
 
 _IGNORED_PATTERNS = [
   # Ignored because they're not indicative of specific errors.
@@ -343,10 +342,12 @@ class GDBAttach(object):
             'target remote localhost:%s' % GDB_PORT,
         ]
 
-        system_lib_dirs = self._pull_system_libraries(pids,
-            SYSTEM_LIBS_ROOT_PATH)
-        eval_commands.append(
-            'set solib-absolute-prefix %s' % SYSTEM_LIBS_ROOT_PATH)
+        # TODO(iansf): Fix undefined behavior when you have more than one device attached.
+        device_id = subprocess.check_output([ADB_PATH, 'get-serialno']).strip()
+        device_libs_path = os.path.join(SYSTEM_LIBS_ROOT_PATH, device_id)
+
+        system_lib_dirs = self._pull_system_libraries(pids, device_libs_path)
+        eval_commands.append('set solib-absolute-prefix %s' % device_libs_path)
 
         symbol_search_paths = system_lib_dirs + symbol_search_paths
 
