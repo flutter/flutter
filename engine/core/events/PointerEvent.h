@@ -77,8 +77,8 @@ public:
     double orientation() const { return m_orientation; }
     double tilt() const { return m_tilt; }
 
-    void setDX(double dx) { m_dx = dx; }
-    void setDY(double dy) { m_dy = dy; }
+    void setDx(double dx) { m_dx = dx; }
+    void setDy(double dy) { m_dy = dy; }
 
 private:
     PointerEvent();

@@ -2,14 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'animated_component.dart';
 import '../animation/animated_value.dart';
 import '../animation/curves.dart';
 import '../fn2.dart';
+import '../rendering/box.dart';
 import '../theme/colors.dart';
+import 'animated_component.dart';
 import 'dart:math' as math;
 import 'dart:sky' as sky;
 import 'material.dart';
+import 'package:vector_math/vector_math.dart';
 
 const double _kWidth = 304.0;
 const double _kMinFlingVelocity = 0.4;
@@ -90,22 +92,6 @@ class DrawerController {
 }
 
 class Drawer extends AnimatedComponent {
-  // TODO(abarth): We need a better way to become a container for absolutely
-  // positioned elements.
-  static final Style _style = new Style('''
-    transform: translateX(0);''');
-
-  static final Style _maskStyle = new Style('''
-    background-color: black;
-    will-change: opacity;'''
-  );
-
-  static final Style _contentStyle = new Style('''
-    background-color: ${Grey[50]};
-    will-change: transform;
-    width: ${_kWidth}px;'''
-  );
-
   List<UINode> children;
   int level;
   DrawerController controller;
@@ -122,13 +108,15 @@ class Drawer extends AnimatedComponent {
   }
 
   UINode build() {
-    String maskInlineStyle = 'opacity: ${(_position / _kWidth + 1) * 0.5}';
-    String contentInlineStyle = 'transform: translateX(${_position}px)';
+    Matrix4 transform = new Matrix4.identity();
+    transform.translate(_position);
+
+    sky.Color maskColor = new sky.Color(((_position / _kWidth + 1) * 0xFF).floor() << 24);
 
     var mask = new EventListenerNode(
       new Container(
-        style: _maskStyle,
-        inlineStyle: maskInlineStyle
+        desiredSize: new sky.Size.infinite(),
+        decoration: new BoxDecoration(backgroundColor: maskColor)
       ),
       onGestureTap: controller.handleMaskTap,
       onGestureFlingStart: controller.handleFlingStart
@@ -136,15 +124,15 @@ class Drawer extends AnimatedComponent {
 
     Material content = new Material(
       content: new Container(
-        style: _contentStyle,
-        inlineStyle: contentInlineStyle,
-        children: children
+        decoration: new BoxDecoration(backgroundColor: new sky.Color(0xFFFFFFFF)),
+        desiredSize: new sky.Size.fromWidth(_kWidth),
+        transform: transform,
+        child: new BlockContainer(children: children)
       ),
       level: level);
 
     return new EventListenerNode(
-      new FillStackContainer(
-        style: _style,
+      new StackContainer(
         children: [ mask, content ]
       ),
       onPointerDown: controller.handlePointerDown,

@@ -79,8 +79,8 @@ HitTestResult NewEventHandler::performHitTest(const LayoutPoint& point)
 bool NewEventHandler::dispatchPointerEvent(PointerState& state, const WebPointerEvent& event)
 {
     RefPtr<PointerEvent> pointerEvent = PointerEvent::create(event);
-    pointerEvent->setDX(event.x - state.x);
-    pointerEvent->setDY(event.y - state.y);
+    pointerEvent->setDx(event.x - state.x);
+    pointerEvent->setDy(event.y - state.y);
     state.x = event.x;
     state.y = event.y;
     // TODO(abarth): Keep track of how many pointers are targeting the same node

@@ -101,6 +101,7 @@ dart_pkg("sdk") {
     "lib/framework/rendering/flex.dart",
     "lib/framework/rendering/node.dart",
     "lib/framework/rendering/paragraph.dart",
+    "lib/framework/rendering/stack.dart",
     "lib/framework/scheduler.dart",
     "lib/framework/shell.dart",
     "lib/framework/theme/colors.dart",

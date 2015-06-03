@@ -50,6 +50,12 @@ class BoxConstraints {
       minHeight = size.height,
       maxHeight = size.height;
 
+  BoxConstraints.loose(sky.Size size)
+    : minWidth = 0.0,
+      maxWidth = size.width,
+      minHeight = 0.0,
+      maxHeight = size.height;
+
   BoxConstraints deflate(EdgeDims edges) {
     assert(edges != null);
     double horizontal = edges.left + edges.right;
@@ -347,9 +353,9 @@ class RenderTransform extends RenderProxyBox {
 
     canvas.save();
     canvas.concat([
-      storage[ 0], storage[ 1], storage[ 3],
-      storage[ 4], storage[ 5], storage[ 7],
-      storage[12], storage[13], storage[15],
+      storage[ 0], storage[ 4], storage[12],
+      storage[ 1], storage[ 5], storage[13],
+      storage[ 3], storage[ 7], storage[15],
     ]);
     super.paint(canvas);
     canvas.restore();

@@ -16,6 +16,7 @@ import 'rendering/box.dart';
 import 'rendering/flex.dart';
 import 'rendering/node.dart';
 import 'rendering/paragraph.dart';
+import 'rendering/stack.dart';
 
 // final sky.Tracing _tracing = sky.window.tracing;
 
@@ -390,7 +391,7 @@ class SizedBox extends OneChildRenderNodeWrapper {
 
   RenderSizedBox createNode() => new RenderSizedBox(desiredSize: desiredSize);
 
-  void syncRenderNode(DecoratedBox old) {
+  void syncRenderNode(SizedBox old) {
     super.syncRenderNode(old);
     root.desiredSize = desiredSize;
   }
@@ -588,6 +589,14 @@ class BlockContainer extends OneChildListRenderNodeWrapper {
   RenderBlock createNode() => new RenderBlock();
 
   BlockContainer({ Object key, List<UINode> children })
+    : super(key: key, children: children);
+}
+
+class StackContainer extends OneChildListRenderNodeWrapper {
+  RenderStack root;
+  RenderStack createNode() => new RenderStack();
+
+  StackContainer({ Object key, List<UINode> children })
     : super(key: key, children: children);
 }
 
@@ -885,9 +894,6 @@ class Container extends Component {
   UINode build() {
     UINode current = child;
 
-    if (transform != null)
-      current = new Transform(transform: transform, child: current);
-
     if (padding != null)
       current = new Padding(padding: padding, child: current);
 
@@ -899,6 +905,9 @@ class Container extends Component {
 
     if (margin != null)
       current = new Padding(padding: margin, child: current);
+
+    if (transform != null)
+      current = new Transform(transform: transform, child: current);
 
     return current;
   }

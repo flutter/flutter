@@ -9,8 +9,8 @@
     [InitializedByEventConstructor] readonly attribute DOMString kind;
     [InitializedByEventConstructor] readonly attribute double x;
     [InitializedByEventConstructor] readonly attribute double y;
-    [InitializedByEventConstructor] readonly attribute double dx;
-    [InitializedByEventConstructor] readonly attribute double dy;
+    [InitializedByEventConstructor] attribute double dx;
+    [InitializedByEventConstructor] attribute double dy;
     [InitializedByEventConstructor] readonly attribute long buttons;
     [InitializedByEventConstructor] readonly attribute boolean down;
     [InitializedByEventConstructor] readonly attribute boolean primary;
