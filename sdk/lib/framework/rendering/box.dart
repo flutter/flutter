@@ -55,9 +55,9 @@ class BoxConstraints {
     double horizontal = edges.left + edges.right;
     double vertical = edges.top + edges.bottom;
     return new BoxConstraints(
-      minWidth: math.min(0.0, minWidth - horizontal),
+      minWidth: math.max(0.0, minWidth - horizontal),
       maxWidth: maxWidth - horizontal,
-      minHeight: math.min(0.0, minHeight - vertical),
+      minHeight: math.max(0.0, minHeight - vertical),
       maxHeight: maxHeight - vertical
     );
   }

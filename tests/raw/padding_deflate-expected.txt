@@ -1,0 +1,7 @@
+CONSOLE: unittest-suite-wait-for-done
+CONSOLE: TestView enabled
+CONSOLE: PASS: should not have a 0 sized colored Box
+CONSOLE: 
+CONSOLE: All 1 tests passed.
+CONSOLE: unittest-suite-success
+DONE
