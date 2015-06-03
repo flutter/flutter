@@ -638,23 +638,22 @@ class FlexExpandingChild extends ParentDataNode {
 }
 
 class Image extends RenderNodeWrapper {
-  RenderCSSImage root;
-  RenderCSSImage createNode() => new RenderCSSImage(this, this.src, this.width, this.height);
+  RenderImage root;
+  RenderImage createNode() => new RenderImage(this.src, this.size);
 
   final String src;
-  final int width;
-  final int height;
+  final sky.Size size;
 
   Image({
     Object key,
-    this.width,
-    this.height,
-    this.src
+    this.src,
+    this.size
   }) : super(key: key);
 
   void syncRenderNode(UINode old) {
     super.syncRenderNode(old);
-    root.configure(this.src, this.width, this.height);
+    root.src = src;
+    root.requestedSize = size;
   }
 }
 

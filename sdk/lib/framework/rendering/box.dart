@@ -7,6 +7,7 @@ import 'dart:sky' as sky;
 import 'dart:typed_data';
 import 'node.dart';
 import 'package:vector_math/vector_math.dart';
+import 'package:sky/framework/net/image_cache.dart' as image_cache;
 
 // GENERIC BOX RENDERING
 // Anything that has a concept of x, y, width, height is going to derive from this
@@ -253,6 +254,80 @@ class RenderPadding extends RenderBox with RenderNodeWithChildMixin<RenderBox> {
     }
   }
 
+}
+
+class RenderImage extends RenderBox {
+
+  RenderImage(String url, sky.Size dimensions) {
+    requestedSize = dimensions;
+    src = url;
+  }
+
+  sky.Image _image;
+  String _src;
+  String get src => _src;
+  void set src (String value) {
+    if (value == _src)
+      return;
+    _src = value;
+    image_cache.load(_src, (result) {
+      _image = result;
+      if (requestedSize.width == null || requestedSize.height == null)
+        markNeedsLayout();
+      markNeedsPaint();
+    });
+  }
+
+  sky.Size _requestedSize;
+  sky.Size get requestedSize => _requestedSize;
+  void set requestedSize (sky.Size value) {
+    if (value == _requestedSize)
+      return;
+    _requestedSize = value;
+    markNeedsLayout();
+  }
+
+  void performLayout() {
+    // If there's no image, we can't size ourselves automatically
+    if (_image == null) {
+      double width = requestedSize.width == null ? 0.0 : requestedSize.width;
+      double height = requestedSize.height == null ? 0.0 : requestedSize.height;
+      size = constraints.constrain(new sky.Size(width, height));
+      return;
+    }
+
+    // If neither height nor width are specified, use inherent image dimensions
+    // If only one dimension is specified, adjust the other dimension to
+    // maintain the aspect ratio
+    if (requestedSize.width == null) {
+      if (requestedSize.height == null) {
+        size = constraints.constrain(new sky.Size(_image.width, _image.height));
+      } else {
+        double width = requestedSize.height * _image.width / _image.height;
+        size = constraints.constrain(new sky.Size(width, requestedSize.height));
+      }
+    } else if (requestedSize.height == null) {
+      double height = requestedSize.width * _image.height / _image.width;
+      size = constraints.constrain(new sky.Size(requestedSize.width, height));
+    } else {
+      size = constraints.constrain(requestedSize);
+    }
+  }
+
+  void paint(RenderNodeDisplayList canvas) {
+    if (_image == null) return;
+    bool needsScale = size.width != _image.width || size.height != _image.height;
+    if (needsScale) {
+      double widthScale = size.width / _image.width;
+      double heightScale = size.height / _image.height;
+      canvas.save();
+      canvas.scale(widthScale, heightScale);
+    }
+    sky.Paint paint = new sky.Paint();
+    canvas.drawImage(_image, 0.0, 0.0, paint);
+    if (needsScale)
+      canvas.restore();
+  }
 }
 
 // This must be immutable, because we won't notice when it changes

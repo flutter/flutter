@@ -229,6 +229,14 @@ abstract class RenderNodeWithChildMixin<ChildType extends RenderNode> {
       adoptChild(_child);
     markNeedsLayout();
   }
+  void attachChildren() {
+    if (_child != null)
+      _child.attach();
+  }
+  void detachChildren() {
+    if (_child != null)
+      _child.detach();
+  }
 }
 
 
