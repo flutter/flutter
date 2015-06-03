@@ -463,7 +463,7 @@ class RenderBoxToRenderSectorAdapter extends RenderBox {
 }
 
 class RenderSolidColor extends RenderDecoratedSector {
-  RenderSolidColor(int backgroundColor, {
+  RenderSolidColor(sky.Color backgroundColor, {
     this.desiredDeltaRadius: double.INFINITY,
     this.desiredDeltaTheta: kTwoPi
   }) : this.backgroundColor = backgroundColor,
@@ -471,7 +471,7 @@ class RenderSolidColor extends RenderDecoratedSector {
 
   double desiredDeltaRadius;
   double desiredDeltaTheta;
-  final int backgroundColor;
+  final sky.Color backgroundColor;
 
   SectorDimensions getIntrinsicDimensions(SectorConstraints constraints, double radius) {
     return new SectorDimensions.withConstraints(constraints, deltaTheta: 1.0); // 1.0 radians
@@ -484,7 +484,7 @@ class RenderSolidColor extends RenderDecoratedSector {
 
   void handlePointer(sky.PointerEvent event) {
     if (event.type == 'pointerdown')
-      decoration = new BoxDecoration(backgroundColor: 0xFFFF0000);
+      decoration = new BoxDecoration(backgroundColor: const sky.Color(0xFFFF0000));
     else if (event.type == 'pointerup')
       decoration = new BoxDecoration(backgroundColor: backgroundColor);
   }
@@ -495,12 +495,12 @@ AppView app;
 void main() {
 
   var rootCircle = new RenderSectorRing(padding: 20.0);
-  rootCircle.add(new RenderSolidColor(0xFF00FFFF, desiredDeltaTheta: kTwoPi * 0.15));
-  rootCircle.add(new RenderSolidColor(0xFF0000FF, desiredDeltaTheta: kTwoPi * 0.4));
+  rootCircle.add(new RenderSolidColor(const sky.Color(0xFF00FFFF), desiredDeltaTheta: kTwoPi * 0.15));
+  rootCircle.add(new RenderSolidColor(const sky.Color(0xFF0000FF), desiredDeltaTheta: kTwoPi * 0.4));
   var stack = new RenderSectorSlice(padding: 2.0);
-  stack.add(new RenderSolidColor(0xFFFFFF00, desiredDeltaRadius: 20.0));
-  stack.add(new RenderSolidColor(0xFFFF9000, desiredDeltaRadius: 20.0));
-  stack.add(new RenderSolidColor(0xFF00FF00));
+  stack.add(new RenderSolidColor(const sky.Color(0xFFFFFF00), desiredDeltaRadius: 20.0));
+  stack.add(new RenderSolidColor(const sky.Color(0xFFFF9000), desiredDeltaRadius: 20.0));
+  stack.add(new RenderSolidColor(const sky.Color(0xFF00FF00)));
   rootCircle.add(stack);
 
   var root = new RenderBoxToRenderSectorAdapter(innerRadius: 50.0, child: rootCircle);

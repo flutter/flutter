@@ -14,11 +14,11 @@ class ContainerApp extends App {
           padding: new EdgeDims.all(10.0),
           margin: new EdgeDims.all(10.0),
           desiredSize: new sky.Size(double.INFINITY, 100.0),
-          decoration: new BoxDecoration(backgroundColor: 0xFF00FF00),
+          decoration: new BoxDecoration(backgroundColor: const sky.Color(0xFF00FF00)),
           child: new BlockContainer(
               children: [
                   new Container(
-                      decoration: new BoxDecoration(backgroundColor: 0xFFFFFF00),
+                      decoration: new BoxDecoration(backgroundColor: const sky.Color(0xFFFFFF00)),
                       desiredSize: new sky.Size(double.INFINITY, 20.0)
                   )
               ])),

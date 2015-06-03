@@ -209,7 +209,7 @@ class StocksApp extends App {
     return new Container(
       child: new BlockContainer(children: [buildToolBar()]),
       decoration: new BoxDecoration(
-        backgroundColor: 0xFFFFFFFF
+        backgroundColor: const sky.Color(0xFFFFFFFF)
       )
     );
 
