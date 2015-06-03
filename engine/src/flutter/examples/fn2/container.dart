@@ -38,11 +38,16 @@ class ContainerApp extends App {
                   ),
               ])),
       ]),
-      onPointerDown: _handlePointerDown);
+      onPointerDown: _handlePointerDown,
+      onGestureTap: _handleGestureTap);
   }
 
   void _handlePointerDown(sky.PointerEvent event) {
     print("_handlePointerDown");
+  }
+
+  void _handleGestureTap(sky.GestureEvent event) {
+    print("_handleGestureTap");
   }
 }
 
