@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:sky/framework/components2/tool_bar.dart';
-// import 'package:sky/framework/components2/drawer.dart';
+import 'package:sky/framework/components2/drawer.dart';
 // import 'package:sky/framework/components2/drawer_header.dart';
 // import 'package:sky/framework/components2/floating_action_button.dart';
 // import 'package:sky/framework/components2/icon.dart';
@@ -46,7 +46,7 @@ class StocksApp extends App {
         data.appendTo(_stocks);
       });
     });
-    // _drawerController = new DrawerController(_handleDrawerStatusChanged);
+    _drawerController = new DrawerController(_handleDrawerStatusChanged);
   }
 
   bool _isSearching = false;
@@ -71,7 +71,7 @@ class StocksApp extends App {
     });
   }
 
-  // DrawerController _drawerController;
+  DrawerController _drawerController;
   bool _drawerShowing = false;
 
   void _handleDrawerStatusChanged(bool showing) {
@@ -115,10 +115,11 @@ class StocksApp extends App {
 
   // static FlexBoxParentData _flex1 = new FlexBoxParentData()..flex = 1;
 
-  // Drawer buildDrawer() {
-  //   return new Drawer(
-  //     controller: _drawerController,
-  //     level: 3,
+  Drawer buildDrawer() {
+    return new Drawer(
+      controller: _drawerController,
+      level: 3
+  // ,
   //     children: [
   //       new DrawerHeader(children: [new Text('Stocks')]),
   //       new MenuItem(
@@ -155,15 +156,15 @@ class StocksApp extends App {
   //         key: 'Help & Feedback',
   //         icon: 'action/help',
   //         children: [new Text('Help & Feedback')])
-  //     ]
-  //   );
-  // }
+  //    ]
+    );
+  }
 
   UINode buildToolBar() {
     return new ToolBar(
         left: new IconButton(
           icon: 'navigation/menu_white',
-          onGestureTap: (_) => true), // _drawerController.toggle),
+          onGestureTap: (_) => _drawerController.toggle),
         center: new Text('Stocks'),
         right: [
           new IconButton(
@@ -206,13 +207,12 @@ class StocksApp extends App {
   UINode build() {
     List<UINode> overlays = [
       new Scaffold(
-        toolbar: _isSearching ? buildSearchBar() : buildToolBar()
-        // ,
+        toolbar: _isSearching ? buildSearchBar() : buildToolBar(),
         // body: new Stocklist(stocks: _stocks, query: _searchQuery),
         // floatingActionButton: new FloatingActionButton(
         //   content: new Icon(type: 'content/add_white', size: 24),
         //   level: 3),
-        // drawer: _drawerShowing ? buildDrawer() : null
+        drawer: _drawerShowing ? buildDrawer() : null
       ),
     ];
     addMenuToOverlays(overlays);
