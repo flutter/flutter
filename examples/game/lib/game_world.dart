@@ -6,28 +6,22 @@ class GameWorld extends TransformNode {
   List<Body> bodies = [];
   Image _image;
   
-  GameWorld(double width, double height) {
-    this.width = width;
-    this.height = height;
+  GameWorld(ImageMap images) {
+    this.width = 1024.0;
+    this.height = 1024.0;
     
     world = new World.withGravity(new Vector2(0.0, 0.0));
     
     // Load and add background
-    Image imgBg = new Image()..src="https://raw.githubusercontent.com/slembcke/GalacticGuardian.spritebuilder/GDC/Packages/SpriteBuilder%20Resources.sbpack/resources-auto/BurnTexture.png";
+    Image imgBg = images["https://raw.githubusercontent.com/slembcke/GalacticGuardian.spritebuilder/GDC/Packages/SpriteBuilder%20Resources.sbpack/resources-auto/BurnTexture.png"];
     SpriteNode sprtBg = new SpriteNode.withImage(imgBg);
     sprtBg.width = width;
     sprtBg.height = height;
     sprtBg.pivot = new Vector2(0.0, 0.0);
     this.children.add(sprtBg);
 
-    SpriteNode sprtCenter = new SpriteNode.withImage(imgBg);
-    sprtCenter.width = 32.0;
-    sprtCenter.height = 32.0;
-    sprtCenter.position = new Vector2(512.0, 512.0);
-    this.children.add(sprtCenter);
-
     // Load asteroid image
-    _image = new Image()..src="https://raw.githubusercontent.com/slembcke/GalacticGuardian.spritebuilder/GDC/Packages/SpriteBuilder%20Resources.sbpack/Sprites/resources-auto/asteroid_big_002.png";
+    _image = images["https://raw.githubusercontent.com/slembcke/GalacticGuardian.spritebuilder/GDC/Packages/SpriteBuilder%20Resources.sbpack/Sprites/resources-auto/asteroid_big_002.png"];
 
     // Add some asteroids to the game world
     for (int i = 0; i < 50; i++) {
