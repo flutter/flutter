@@ -41,7 +41,7 @@ class SpriteBox extends RenderBox {
     size = constraints.constrain(new Size.infinite());
   }
 
-  void handlePointer(PointerEvent event) {
+  void handleEvent(Event event) {
     switch (event.type) {
       case 'pointerdown':
         print("pointerdown");

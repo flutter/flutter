@@ -180,12 +180,15 @@ abstract class RenderNode extends AbstractNode {
   void paint(RenderNodeDisplayList canvas) { }
 
 
-  // HIT TESTING
+  // EVENTS
 
-  void handlePointer(sky.PointerEvent event) {
+  void handleEvent(sky.Event event) {
     // override this if you have a client, to hand it to the client
-    // override this if you want to do anything with the pointer event
+    // override this if you want to do anything with the event
   }
+
+
+  // HIT TESTING
 
   // RenderNode subclasses are expected to have a method like the
   // following (with the signature being whatever passes for coordinates

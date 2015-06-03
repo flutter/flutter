@@ -915,8 +915,8 @@ class Container extends Component {
 class _AppView extends AppView {
   _AppView() : super(null);
 
-  void dispatchPointerEvent(sky.PointerEvent event, HitTestResult result) {
-    super.dispatchPointerEvent(event, result);
+  void dispatchEvent(sky.Event event, HitTestResult result) {
+    super.dispatchEvent(event, result);
 
     UINode target = RenderNodeWrapper._getMounted(result.path.first);
 

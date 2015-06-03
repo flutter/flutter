@@ -43,8 +43,21 @@ class AppView {
   }
 
   void _handleEvent(sky.Event event) {
-    if (event is sky.PointerEvent)
+    if (event is sky.PointerEvent) {
       _handlePointerEvent(event);
+    } else if (event is sky.GestureEvent) {
+      HitTestResult result = new HitTestResult();
+      _renderView.hitTest(result, position: new sky.Point(event.x, event.y));
+      dispatchEvent(event, result);
+    }
+  }
+
+  PointerState _createStateForPointer(sky.PointerEvent event, sky.Point position) {
+    HitTestResult result = new HitTestResult();
+    _renderView.hitTest(result, position: position);
+    PointerState state = new PointerState(result: result, lastPosition: position);
+    _stateForPointer[event.pointer] = state;
+    return state;
   }
 
   void _handlePointerEvent(sky.PointerEvent event) {
@@ -53,10 +66,7 @@ class AppView {
     PointerState state;
     switch(event.type) {
       case 'pointerdown':
-        HitTestResult result = new HitTestResult();
-        _renderView.hitTest(result, position: position);
-        state = new PointerState(result: result, lastPosition: position);
-        _stateForPointer[event.pointer] = state;
+        state = _createStateForPointer(event, position);
         break;
       case 'pointerup':
       case 'pointercancel':
@@ -66,22 +76,20 @@ class AppView {
       case 'pointermove':
         state = _stateForPointer[event.pointer];
         // In the case of mouse hover we won't already have a cached down.
-        if (state.result == null) {
-          state.result = new HitTestResult();
-          _renderView.hitTest(state.result, position: position);
-        }
+        if (state == null)
+          state = _createStateForPointer(event, position);
         break;
     }
     event.dx = position.x - state.lastPosition.x;
     event.dy = position.y - state.lastPosition.y;
     state.lastPosition = position;
 
-    dispatchPointerEvent(event, state.result);
+    dispatchEvent(event, state.result);
   }
 
-  void dispatchPointerEvent(sky.PointerEvent event, HitTestResult result) {
+  void dispatchEvent(sky.Event event, HitTestResult result) {
     assert(result != null);
     for (RenderNode node in result.path.reversed)
-      node.handlePointer(event);
+      node.handleEvent(event);
   }
 }

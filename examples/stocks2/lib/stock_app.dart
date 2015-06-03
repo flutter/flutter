@@ -164,7 +164,7 @@ class StocksApp extends App {
     return new ToolBar(
         left: new IconButton(
           icon: 'navigation/menu_white',
-          onGestureTap: (_) => _drawerController.toggle),
+          onGestureTap: _drawerController.toggle),
         center: new Text('Stocks'),
         right: [
           new IconButton(
