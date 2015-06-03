@@ -21,6 +21,13 @@ declare_args() {
 
   # Experimental support for the Dart VM.
   sky_use_dart = false
+
+  # Default to strict mode in debug builds.
+  if (is_debug) {
+    sky_dart_strict_mode = true
+  } else {
+    sky_dart_strict_mode = false
+  }
 }
 
 # feature_defines_list ---------------------------------------------------------
@@ -40,6 +47,10 @@ if (!is_mac) {
 
 if (sky_asserts_always_on) {
   feature_defines_list += [ "ENABLE_ASSERT=1" ]
+}
+
+if (sky_dart_strict_mode) {
+  feature_defines_list += [ "ENABLE_DART_STRICT=1" ]
 }
 
 if (sky_use_dart) {

@@ -41,7 +41,7 @@
 
 namespace blink {
 
-#if ENABLE(ASSERT)
+#if ENABLE(DART_STRICT)
 static const char* kCheckedModeArgs[] = {
   "--enable_asserts",
   "--enable_type_checks",
@@ -369,7 +369,7 @@ void DartController::InitVM() {
   int argc = 0;
   const char** argv = nullptr;
 
-#if ENABLE(ASSERT)
+#if ENABLE(DART_STRICT)
   argc = arraysize(kCheckedModeArgs);
   argv = kCheckedModeArgs;
 #endif
