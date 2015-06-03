@@ -13,9 +13,9 @@ import 'package:sky/framework/rendering/flex.dart';
 
 class RenderSolidColor extends RenderDecoratedBox {
   final sky.Size desiredSize;
-  final int backgroundColor;
+  final sky.Color backgroundColor;
 
-  RenderSolidColor(int backgroundColor, { this.desiredSize: const sky.Size.infinite() })
+  RenderSolidColor(sky.Color backgroundColor, { this.desiredSize: const sky.Size.infinite() })
       : backgroundColor = backgroundColor,
         super(decoration: new BoxDecoration(backgroundColor: backgroundColor)) {
   }
@@ -30,7 +30,7 @@ class RenderSolidColor extends RenderDecoratedBox {
 
   void handlePointer(sky.PointerEvent event) {
     if (event.type == 'pointerdown')
-      decoration = new BoxDecoration(backgroundColor: 0xFFFF0000);
+      decoration = new BoxDecoration(backgroundColor: const sky.Color(0xFFFF0000));
     else if (event.type == 'pointerup')
       decoration = new BoxDecoration(backgroundColor: backgroundColor);
   }
@@ -45,30 +45,30 @@ void main() {
     RenderFlex flexRoot = new RenderFlex(direction: FlexDirection.Vertical);
 
     RenderDecoratedBox root = new RenderDecoratedBox(
-      decoration: new BoxDecoration(backgroundColor: 0xFF000000),
+      decoration: new BoxDecoration(backgroundColor: const sky.Color(0xFF000000)),
       child: flexRoot
     );
 
-    void addFlexChildSolidColor(RenderFlex parent, int backgroundColor, { int flex: 0 }) {
+    void addFlexChildSolidColor(RenderFlex parent, sky.Color backgroundColor, { int flex: 0 }) {
       RenderSolidColor child = new RenderSolidColor(backgroundColor);
       parent.add(child);
       child.parentData.flex = flex;
     }
 
     // Yellow bar at top
-    addFlexChildSolidColor(flexRoot, 0xFFFFFF00, flex: 1);
+    addFlexChildSolidColor(flexRoot, const sky.Color(0xFFFFFF00), flex: 1);
 
     // Turquoise box
-    flexRoot.add(new RenderSolidColor(0x7700FFFF, desiredSize: new sky.Size(100.0, 100.0)));
+    flexRoot.add(new RenderSolidColor(const sky.Color(0x7700FFFF), desiredSize: new sky.Size(100.0, 100.0)));
 
     // Green and cyan render block with padding
     var renderBlock = new RenderBlock();
 
-    renderBlock.add(new RenderSolidColor(0xFF00FF00, desiredSize: new sky.Size(100.0, 50.0)));
-    renderBlock.add(new RenderSolidColor(0x7700FFFF, desiredSize: new sky.Size(50.0, 100.0)));
+    renderBlock.add(new RenderSolidColor(const sky.Color(0xFF00FF00), desiredSize: new sky.Size(100.0, 50.0)));
+    renderBlock.add(new RenderSolidColor(const sky.Color(0x7700FFFF), desiredSize: new sky.Size(50.0, 100.0)));
 
     var renderDecoratedBlock = new RenderDecoratedBox(
-      decoration: new BoxDecoration(backgroundColor: 0xFFFFFFFF),
+      decoration: new BoxDecoration(backgroundColor: const sky.Color(0xFFFFFFFF)),
       child: renderBlock
     );
 
@@ -77,11 +77,11 @@ void main() {
     var row = new RenderFlex(direction: FlexDirection.Horizontal);
 
     // Purple and blue cells
-    addFlexChildSolidColor(row, 0x77FF00FF, flex: 1);
-    addFlexChildSolidColor(row, 0xFF0000FF, flex: 2);
+    addFlexChildSolidColor(row, const sky.Color(0x77FF00FF), flex: 1);
+    addFlexChildSolidColor(row, const sky.Color(0xFF0000FF), flex: 2);
 
     var decoratedRow = new RenderDecoratedBox(
-      decoration: new BoxDecoration(backgroundColor: 0xFF333333),
+      decoration: new BoxDecoration(backgroundColor: const sky.Color(0xFF333333)),
       child: row
     );
 

@@ -15,10 +15,10 @@ void main() {
 
   test("padding", () {
     var size = new RenderSizedBox(desiredSize: new sky.Size(double.INFINITY, 100.0));
-    var inner = new RenderDecoratedBox(decoration: new BoxDecoration(backgroundColor: 0xFF00FF00), child: size);
+    var inner = new RenderDecoratedBox(decoration: new BoxDecoration(backgroundColor: const sky.Color(0xFF00FF00)), child: size);
     var padding = new RenderPadding(padding: new EdgeDims.all(50.0), child: inner);
     var block = new RenderBlock(children: [padding]);
-    var outer = new RenderDecoratedBox(decoration: new BoxDecoration(backgroundColor: 0xFF0000FF), child: block);
+    var outer = new RenderDecoratedBox(decoration: new BoxDecoration(backgroundColor: const sky.Color(0xFF0000FF)), child: block);
     app = new TestApp(outer);
   });
 }
