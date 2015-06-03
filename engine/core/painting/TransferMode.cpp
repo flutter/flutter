@@ -12,6 +12,11 @@
 
 namespace blink {
 
+// If this fails, it's because SkXfermode has changed. We need to change
+// TransferMode.dart to ensure the TransferMode enum is in sync with the C++
+// values.
+COMPILE_ASSERT(SkXfermode::kLastMode == 28, Need_to_update_TransferMode_dart);
+
 // Convert dart_mode => SkXfermode::Mode.
 SkXfermode::Mode DartConverter<TransferMode>::FromArgumentsWithNullCheck(
     Dart_NativeArguments args,
@@ -23,7 +28,7 @@ SkXfermode::Mode DartConverter<TransferMode>::FromArgumentsWithNullCheck(
   DCHECK(!LogIfError(dart_mode));
 
   Dart_Handle value =
-      Dart_GetField(dart_mode, DOMDartState::Current()->value_handle());
+      Dart_GetField(dart_mode, DOMDartState::Current()->index_handle());
 
   uint64_t mode = 0;
   Dart_Handle rv = Dart_IntegerToUint64(value, &mode);

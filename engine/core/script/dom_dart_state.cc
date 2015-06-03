@@ -22,6 +22,7 @@ void DOMDartState::DidSetIsolate() {
   Scope dart_scope(this);
   x_handle_.Set(this, Dart_NewStringFromCString("x"));
   y_handle_.Set(this, Dart_NewStringFromCString("y"));
+  index_handle_.Set(this, Dart_NewStringFromCString("index"));
   value_handle_.Set(this, Dart_NewStringFromCString("_value"));
 
   Dart_Handle sky_library = DartBuiltin::LookupLibrary("dart:sky");
