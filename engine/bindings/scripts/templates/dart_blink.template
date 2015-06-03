@@ -19,6 +19,8 @@ part '{{callback.name}}.dart';
 Window window;
 Document get document => window.document;
 
+final Tracing tracing = new Tracing();
+
 View view;
 
 typedef EventListener(Event event);
