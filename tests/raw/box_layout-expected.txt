@@ -1,0 +1,19 @@
+CONSOLE: unittest-suite-wait-for-done
+CONSOLE: TestView enabled
+CONSOLE: 
+PAINT FOR FRAME #1 ----------------------------------------------
+1 | TestDisplayList() constructor: 800.0 x 600.0
+1 | paintChild at 0.0,0.0
+1 |  | TestDisplayList() constructor: 800.0 x 600.0
+1 |  | drawRect(0.0:0.0:600.0:800.0, Paint(0xff0000ff))
+1 |  | paintChild at 0.0,0.0
+1 |  |  | TestDisplayList() constructor: 800.0 x 600.0
+1 |  |  | paintChild at 50.0,50.0
+1 |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+1 |  |  |  | drawRect(0.0:0.0:100.0:700.0, Paint(0xff00ff00))
+------------------------------------------------------------------------
+CONSOLE: PASS: padding
+CONSOLE: 
+CONSOLE: All 1 tests passed.
+CONSOLE: unittest-suite-success
+DONE

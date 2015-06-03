@@ -14,6 +14,13 @@ class RenderBlock extends RenderBox with ContainerRenderNodeMixin<RenderBox, Blo
   // uses the maximum width provided by the parent
   // sizes itself to the height of its child stack
 
+  RenderBlock({
+    List<RenderBox> children
+  }) {
+    if (children != null)
+      children.forEach((child) { add(child); });
+  }
+
   void setParentData(RenderBox child) {
     if (child.parentData is! BlockParentData)
       child.parentData = new BlockParentData();

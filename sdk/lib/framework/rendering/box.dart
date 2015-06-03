@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math' as math;
 import 'dart:sky' as sky;
 import 'dart:typed_data';
 import 'node.dart';
@@ -51,11 +52,13 @@ class BoxConstraints {
 
   BoxConstraints deflate(EdgeDims edges) {
     assert(edges != null);
+    double horizontal = edges.left + edges.right;
+    double vertical = edges.top + edges.bottom;
     return new BoxConstraints(
-      minWidth: minWidth,
-      maxWidth: maxWidth - (edges.left + edges.right),
-      minHeight: minHeight,
-      maxHeight: maxHeight - (edges.top + edges.bottom)
+      minWidth: math.min(0.0, minWidth - horizontal),
+      maxWidth: maxWidth - horizontal,
+      minHeight: math.min(0.0, minHeight - vertical),
+      maxHeight: maxHeight - vertical
     );
   }
 
@@ -182,7 +185,8 @@ class RenderSizedBox extends RenderProxyBox {
 
   void performLayout() {
     size = constraints.constrain(_desiredSize);
-    child.layout(new BoxConstraints.tight(size));
+    if (child != null)
+      child.layout(new BoxConstraints.tight(size));
   }
 }
 
@@ -429,7 +433,7 @@ class RenderView extends RenderNode with RenderNodeWithChildMixin<RenderBox> {
 
   void paintFrame() {
     RenderNode.debugDoingPaint = true;
-    var canvas = new RenderNodeDisplayList(sky.view.width, sky.view.height);
+    RenderNodeDisplayList canvas = new RenderNodeDisplayList(sky.view.width, sky.view.height);
     paint(canvas);
     sky.view.picture = canvas.endRecording();
     RenderNode.debugDoingPaint = false;
