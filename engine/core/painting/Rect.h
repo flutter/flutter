@@ -17,8 +17,8 @@ class Rect {
   bool is_null;
 };
 
-template<>
-struct DartConverter<Rect, void> {
+template <>
+struct DartConverter<Rect> {
   static Rect FromArgumentsWithNullCheck(Dart_NativeArguments args,
                                          int index,
                                          Dart_Handle& exception);

@@ -12,7 +12,7 @@
 namespace blink {
 
 // Convert dartPoint.x,y ==> SkPoint.
-Point DartConverter<Point, void>::FromArgumentsWithNullCheck(
+Point DartConverter<Point>::FromArgumentsWithNullCheck(
     Dart_NativeArguments args,
     int index,
     Dart_Handle& exception) {

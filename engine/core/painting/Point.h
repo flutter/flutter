@@ -17,8 +17,8 @@ class Point {
   bool is_null;
 };
 
-template<>
-struct DartConverter<Point, void> {
+template <>
+struct DartConverter<Point> {
   static Point FromArgumentsWithNullCheck(Dart_NativeArguments args,
                                           int index,
                                           Dart_Handle& exception);

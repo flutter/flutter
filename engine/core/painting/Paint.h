@@ -29,9 +29,8 @@ public:
     bool isAntiAlias() const { return m_paint.isAntiAlias(); }
     void setIsAntiAlias(bool value) { m_paint.setAntiAlias(value); }
 
-    unsigned color() const { return m_paint.getColor(); }
-    void setColor(unsigned color) { m_paint.setColor(color); }
-    void setColor(CanvasColor color) { m_paint.setColor(color.sk_color); }
+    SkColor color() const { return m_paint.getColor(); }
+    void setColor(SkColor color) { m_paint.setColor(color); }
 
     void setARGB(unsigned a, unsigned r, unsigned g, unsigned b)
     {

@@ -13,10 +13,9 @@
 namespace blink {
 
 // Convert dart_rect._value[0...3] ==> SkRect.
-Rect DartConverter<Rect, void>::FromArgumentsWithNullCheck(
-    Dart_NativeArguments args,
-    int index,
-    Dart_Handle& exception) {
+Rect DartConverter<Rect>::FromArgumentsWithNullCheck(Dart_NativeArguments args,
+                                                     int index,
+                                                     Dart_Handle& exception) {
   Rect result;
   result.is_null = true;
 

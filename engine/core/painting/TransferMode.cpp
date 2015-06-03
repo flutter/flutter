@@ -13,11 +13,11 @@
 namespace blink {
 
 // Convert dart_mode => SkXfermode::Mode.
-TransferMode DartConverter<TransferMode, void>::FromArgumentsWithNullCheck(
+SkXfermode::Mode DartConverter<TransferMode>::FromArgumentsWithNullCheck(
     Dart_NativeArguments args,
     int index,
     Dart_Handle& exception) {
-  TransferMode result;
+  SkXfermode::Mode result;
 
   Dart_Handle dart_mode = Dart_GetNativeArgument(args, index);
   DCHECK(!LogIfError(dart_mode));
@@ -29,7 +29,7 @@ TransferMode DartConverter<TransferMode, void>::FromArgumentsWithNullCheck(
   Dart_Handle rv = Dart_IntegerToUint64(value, &mode);
   DCHECK(!LogIfError(rv));
 
-  result.sk_mode = static_cast<SkXfermode::Mode>(mode);
+  result = static_cast<SkXfermode::Mode>(mode);
   return result;
 }
 

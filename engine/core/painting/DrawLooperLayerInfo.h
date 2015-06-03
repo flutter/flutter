@@ -24,7 +24,7 @@ class DrawLooperLayerInfo : public RefCounted<DrawLooperLayerInfo>,
   ~DrawLooperLayerInfo() override;
 
   void setPaintBits(unsigned bits) { layer_info_.fPaintBits = bits; }
-  void setColorMode(TransferMode m) { layer_info_.fColorMode = m.sk_mode; }
+  void setColorMode(SkXfermode::Mode mode) { layer_info_.fColorMode = mode; }
   void setOffset(Point offset) { layer_info_.fOffset = offset.sk_point; }
   void setPostTranslate(bool val) { layer_info_.fPostTranslate = val; }
 

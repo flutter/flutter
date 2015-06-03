@@ -8,10 +8,10 @@
 namespace blink {
 
 // static
-PassRefPtr<ColorFilter> ColorFilter::create(CanvasColor color,
-                                            TransferMode transfer_mode) {
-  return adoptRef(new ColorFilter(adoptRef(SkColorFilter::CreateModeFilter(
-      color.sk_color, transfer_mode.sk_mode))));
+PassRefPtr<ColorFilter> ColorFilter::create(SkColor color,
+                                            SkXfermode::Mode transfer_mode) {
+  return adoptRef(new ColorFilter(
+      adoptRef(SkColorFilter::CreateModeFilter(color, transfer_mode))));
 }
 
 ColorFilter::ColorFilter(PassRefPtr<SkColorFilter> filter)

@@ -13,17 +13,14 @@
 
 namespace blink {
 
-class CanvasColor {
- public:
-  SkColor sk_color;
-};
+class CanvasColor {};
 
-template<>
-struct DartConverter<CanvasColor, void> {
-  static CanvasColor FromArgumentsWithNullCheck(Dart_NativeArguments args,
-                                                int index,
-                                                Dart_Handle& exception);
-  static void SetReturnValue(Dart_NativeArguments args, unsigned val);
+template <>
+struct DartConverter<CanvasColor> {
+  static SkColor FromArgumentsWithNullCheck(Dart_NativeArguments args,
+                                            int index,
+                                            Dart_Handle& exception);
+  static void SetReturnValue(Dart_NativeArguments args, SkColor val);
 };
 
 } // namespace blink

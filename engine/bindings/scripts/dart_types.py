@@ -115,10 +115,10 @@ CPP_SPECIAL_CONVERSION_RULES = {
     'unrestricted double': 'double',
     'unrestricted float': 'float',
     # Pass these by value, not pointer.
-    'Color': 'CanvasColor',
+    'Color': 'SkColor',
     'Point': 'Point',
     'Rect': 'Rect',
-    'TransferMode': 'TransferMode',
+    'TransferMode': 'SkXfermode::Mode',
 }
 
 
@@ -322,7 +322,8 @@ def set_component_dirs(new_component_dirs):
 # TODO(terry): Need to fix to handle getter/setters for onEvent.
 DART_FIX_ME = 'DART_UNIMPLEMENTED(/* Conversion unimplemented*/);'
 
-PASS_BY_VALUE_FORMAT = 'DartConverter<{implemented_as}>::FromArguments{null_check}(args, {index}, exception)'
+def pass_by_value_format(typename):
+  return 'DartConverter<%s>::FromArguments{null_check}(args, {index}, exception)' % typename
 
 # For a given IDL type, the DartHandle to C++ conversion.
 DART_TO_CPP_VALUE = {
@@ -361,10 +362,10 @@ DART_TO_CPP_VALUE = {
     'StorageType': 'DartUtilities::dartToString(args, {index}, exception, {auto_scope})',
 
     # Pass-by-value types.
-    'Color': PASS_BY_VALUE_FORMAT,
-    'Point': PASS_BY_VALUE_FORMAT,
-    'Rect': PASS_BY_VALUE_FORMAT,
-    'TransferMode': PASS_BY_VALUE_FORMAT,
+    'Color': pass_by_value_format('CanvasColor'),
+    'Point': pass_by_value_format('{implemented_as}'),
+    'Rect': pass_by_value_format('{implemented_as}'),
+    'TransferMode': pass_by_value_format('TransferMode'),
 }
 
 

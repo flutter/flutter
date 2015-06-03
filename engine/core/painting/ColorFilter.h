@@ -18,8 +18,8 @@ class ColorFilter : public RefCounted<ColorFilter>, public DartWrappable {
   DEFINE_WRAPPERTYPEINFO();
  public:
   ~ColorFilter() override;
-  static PassRefPtr<ColorFilter> create(CanvasColor color,
-                                        TransferMode transfer_mode);
+  static PassRefPtr<ColorFilter> create(SkColor color,
+                                        SkXfermode::Mode transfer_mode);
 
   SkColorFilter* filter() { return filter_.get(); }
 

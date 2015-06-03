@@ -13,16 +13,13 @@
 
 namespace blink {
 
-class TransferMode {
- public:
-  SkXfermode::Mode sk_mode;
-};
+class TransferMode {};
 
-template<>
-struct DartConverter<TransferMode, void> {
-  static TransferMode FromArgumentsWithNullCheck(Dart_NativeArguments args,
-                                                 int index,
-                                                 Dart_Handle& exception);
+template <>
+struct DartConverter<TransferMode> {
+  static SkXfermode::Mode FromArgumentsWithNullCheck(Dart_NativeArguments args,
+                                                     int index,
+                                                     Dart_Handle& exception);
 };
 
 } // namespace blink
