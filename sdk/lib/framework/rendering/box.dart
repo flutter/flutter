@@ -251,11 +251,7 @@ class RenderPadding extends RenderBox with RenderNodeWithChildMixin<RenderBox> {
 
 // This must be immutable, because we won't notice when it changes
 class BoxDecoration {
-  // TODO(mpcomplete): go through and change the users of this class to pass
-  // a Color object.
-  BoxDecoration({
-    backgroundColor
-  }) : backgroundColor = new sky.Color(backgroundColor);
+  const BoxDecoration({this.backgroundColor});
 
   final sky.Color backgroundColor;
 }

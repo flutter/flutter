@@ -30,7 +30,7 @@ class Icon extends Component {
     // TODO(jackson): Use a real image.
     return new Container(
       desiredSize: new sky.Size(size.toDouble(), size.toDouble()),
-      decoration: new BoxDecoration(backgroundColor: 0xFFFF0000)
+      decoration: new BoxDecoration(backgroundColor: const sky.Color(0xFFFF0000))
     );
     // return new Image(width: size, height: size,
     //   src: '${kAssetBase}/${category}/2x_web/ic_${subtype}_${size}dp.png');

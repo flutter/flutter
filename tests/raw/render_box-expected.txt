@@ -5,7 +5,7 @@ PAINT FOR FRAME #1 ----------------------------------------------
 1 | TestDisplayList() constructor: 800.0 x 600.0
 1 | paintChild at 0.0,0.0
 1 |  | TestDisplayList() constructor: 800.0 x 600.0
-1 |  | drawRect(0.0:0.0:600.0:800.0, Paint(0xff00ff00))
+1 |  | drawRect(0.0:0.0:600.0:800.0, Paint(Color(0xff00ff00)))
 ------------------------------------------------------------------------
 CONSOLE: PASS: should size to render view
 CONSOLE: 

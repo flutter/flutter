@@ -15,4 +15,7 @@ class Color {
               ((g & 0xff) << 8) |
               ((b & 0xff) << 0));
 
+  bool operator ==(other) => other is Color && _value == other._value;
+  int get hashCode => _value.hashCode;
+  String toString() => "Color(0x${_value.toRadixString(16).padLeft(8, '0')})";
 }

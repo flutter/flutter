@@ -11,9 +11,9 @@ import 'package:sky/framework/rendering/paragraph.dart';
 
 class RenderSolidColor extends RenderDecoratedBox {
   final Size desiredSize;
-  final int backgroundColor;
+  final Color backgroundColor;
 
-  RenderSolidColor(int backgroundColor, { this.desiredSize: const Size.infinite() })
+  RenderSolidColor(Color backgroundColor, { this.desiredSize: const Size.infinite() })
       : backgroundColor = backgroundColor,
         super(decoration: new BoxDecoration(backgroundColor: backgroundColor));
 
@@ -27,7 +27,7 @@ class RenderSolidColor extends RenderDecoratedBox {
 
   void handlePointer(PointerEvent event) {
     if (event.type == 'pointerdown')
-      decoration = new BoxDecoration(backgroundColor: 0xFFFF0000);
+      decoration = new BoxDecoration(backgroundColor: const Color(0xFFFF0000));
     else if (event.type == 'pointerup')
       decoration = new BoxDecoration(backgroundColor: backgroundColor);
   }
@@ -39,11 +39,11 @@ void main() {
   RenderFlex flexRoot = new RenderFlex(direction: FlexDirection.Vertical);
 
   RenderNode root = new RenderDecoratedBox(
-    decoration: new BoxDecoration(backgroundColor: 0xFF606060),
+    decoration: new BoxDecoration(backgroundColor: const Color(0xFF606060)),
     child: flexRoot
   );
 
-  RenderNode child = new RenderSolidColor(0xFFFFFF00);
+  RenderNode child = new RenderSolidColor(const Color(0xFFFFFF00));
   flexRoot.add(child);
   child.parentData.flex = 2;
 
@@ -55,8 +55,8 @@ alcatra. Pork pork belly alcatra, flank chuck drumstick biltong doner jowl.
 Pancetta meatball tongue tenderloin rump tail jowl boudin.""";
 
   child = new RenderDecoratedBox(
-    decoration: new BoxDecoration(backgroundColor: 0xFFFFFFFF),
-    child: new RenderParagraph(text: meatyString, color: 0xFF009900)
+    decoration: new BoxDecoration(backgroundColor: const Color(0xFFFFFFFF)),
+    child: new RenderParagraph(text: meatyString, color: const Color(0xFF009900))
   );
   flexRoot.add(child);
   child.parentData.flex = 1;

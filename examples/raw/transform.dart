@@ -12,7 +12,7 @@ AppView app;
 
 void main() {
   RenderDecoratedBox green = new RenderDecoratedBox(
-      decoration: new BoxDecoration(backgroundColor: 0xFF00FF00));
+      decoration: new BoxDecoration(backgroundColor: const sky.Color(0xFF00FF00)));
   RenderSizedBox box = new RenderSizedBox(
       desiredSize: new sky.Size(200.0, 200.0), child: green);
 

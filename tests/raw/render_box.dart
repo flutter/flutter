@@ -14,7 +14,7 @@ void main() {
   test("should size to render view", () {
     RenderSizedBox root = new RenderSizedBox(
       child: new RenderDecoratedBox(
-        decoration: new BoxDecoration(backgroundColor: 0xFF00FF00)
+        decoration: new BoxDecoration(backgroundColor: const sky.Color(0xFF00FF00))
       )
     );
     TestView renderView = new TestView(child: root);
