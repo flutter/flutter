@@ -191,30 +191,32 @@ class StocksApp extends App {
     //   _searchBarStyle);
   }
 
-  // void addMenuToOverlays(List<UINode> overlays) {
-  //   if (_menuController == null)
-  //     return;
-  //   overlays.add(new ModalOverlay(
-  //     children: [new StockMenu(
-  //       controller: _menuController,
-  //       autorefresh: _autorefresh,
-  //       onAutorefreshChanged: _handleAutorefreshChanged
-  //     )],
-  //     onDismiss: _handleMenuHide));
-  // }
+  void addMenuToOverlays(List<UINode> overlays) {
+    // if (_menuController == null)
+    //   return;
+    // overlays.add(new ModalOverlay(
+    //   children: [new StockMenu(
+    //     controller: _menuController,
+    //     autorefresh: _autorefresh,
+    //     onAutorefreshChanged: _handleAutorefreshChanged
+    //   )],
+    //   onDismiss: _handleMenuHide));
+  }
 
   UINode build() {
-    // List<UINode> overlays = [];
-    // addMenuToOverlays(overlays);
-    return new Scaffold(
-       toolbar: _isSearching ? buildSearchBar() : buildToolBar()
-    // ,
-    //   body: new Stocklist(stocks: _stocks, query: _searchQuery),
-    //   floatingActionButton: new FloatingActionButton(
-    //     content: new Icon(type: 'content/add_white', size: 24), level: 3),
-    //   drawer: _drawerShowing ? buildDrawer() : null,
-    //   overlays: overlays
-    );
+    List<UINode> overlays = [
+      new Scaffold(
+        toolbar: _isSearching ? buildSearchBar() : buildToolBar()
+        // ,
+        // body: new Stocklist(stocks: _stocks, query: _searchQuery),
+        // floatingActionButton: new FloatingActionButton(
+        //   content: new Icon(type: 'content/add_white', size: 24),
+        //   level: 3),
+        // drawer: _drawerShowing ? buildDrawer() : null
+      ),
+    ];
+    addMenuToOverlays(overlays);
+    return new StackContainer(children: overlays);
   }
 }
 
