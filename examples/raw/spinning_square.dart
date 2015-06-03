@@ -7,6 +7,7 @@ import 'dart:sky';
 double timeBase = null;
 
 void beginFrame(double timeStamp) {
+  tracing.begin('beginFrame');
   if (timeBase == null)
     timeBase = timeStamp;
   double delta = timeStamp - timeBase;
@@ -17,6 +18,7 @@ void beginFrame(double timeStamp) {
                   new Paint()..setARGB(255, 0, 255, 0));
   view.picture = canvas.endRecording();
   view.scheduleFrame();
+  tracing.end('beginFrame');
 }
 
 void main() {
