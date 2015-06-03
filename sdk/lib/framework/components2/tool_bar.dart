@@ -42,7 +42,7 @@ class ToolBar extends Component {
         direction: FlexDirection.Horizontal
       ),
       desiredSize: new sky.Size.fromHeight(56.0),
-      // padding: new EdgeDims(kStatusBarHeight.toDouble(), 8.0, 0.0, 8.0),
+      padding: new EdgeDims(kStatusBarHeight.toDouble(), 8.0, 0.0, 8.0),
       decoration: new BoxDecoration(backgroundColor: backgroundColor)
     );
   }

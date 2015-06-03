@@ -206,22 +206,15 @@ class StocksApp extends App {
   UINode build() {
     // List<UINode> overlays = [];
     // addMenuToOverlays(overlays);
-    return new Container(
-      child: new BlockContainer(children: [buildToolBar()]),
-      decoration: new BoxDecoration(
-        backgroundColor: const sky.Color(0xFFFFFFFF)
-      )
-    );
-
-    // return new Scaffold(
-    //    toolbar: _isSearching ? buildSearchBar() : buildToolBar()
+    return new Scaffold(
+       toolbar: _isSearching ? buildSearchBar() : buildToolBar()
     // ,
     //   body: new Stocklist(stocks: _stocks, query: _searchQuery),
     //   floatingActionButton: new FloatingActionButton(
     //     content: new Icon(type: 'content/add_white', size: 24), level: 3),
     //   drawer: _drawerShowing ? buildDrawer() : null,
     //   overlays: overlays
-    // );
+    );
   }
 }
 
