@@ -10,7 +10,6 @@ class ContainerApp extends App {
   UINode build() {
     return new EventListenerNode(
       new BlockContainer(children: [
-        new Rectangle(0xFF00FFFF, key: 1),
         new Container(
           padding: new EdgeDims.all(10.0),
           margin: new EdgeDims.all(10.0),
@@ -23,7 +22,6 @@ class ContainerApp extends App {
                       desiredSize: new sky.Size(double.INFINITY, 20.0)
                   )
               ])),
-        new Rectangle(0xFF0000FF, key: 3)
       ]),
       onPointerDown: _handlePointerDown);
   }

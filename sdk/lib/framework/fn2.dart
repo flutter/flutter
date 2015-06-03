@@ -4,12 +4,13 @@
 
 library fn;
 
+import 'app.dart';
 import 'dart:async';
 import 'dart:collection';
 import 'dart:mirrors';
 import 'dart:sky' as sky;
+import 'package:vector_math/vector_math.dart';
 import 'reflect.dart' as reflect;
-import 'app.dart';
 import 'rendering/block.dart';
 import 'rendering/box.dart';
 import 'rendering/flex.dart';
@@ -392,6 +393,21 @@ class SizedBox extends OneChildRenderNodeWrapper {
   void syncRenderNode(DecoratedBox old) {
     super.syncRenderNode(old);
     root.desiredSize = desiredSize;
+  }
+}
+
+class Transform extends OneChildRenderNodeWrapper {
+  RenderTransform root;
+  final Matrix4 transform;
+
+  Transform({ this.transform, UINode child, Object key })
+    : super(child: child, key: key);
+
+  RenderTransform createNode() => new RenderTransform(transform: transform);
+
+  void syncRenderNode(Transform old) {
+    super.syncRenderNode(old);
+    root.transform = transform;
   }
 }
 
@@ -850,6 +866,7 @@ abstract class Component extends UINode {
 
 class Container extends Component {
   final UINode child;
+  final Matrix4 transform;
   final EdgeDims margin;
   final BoxDecoration decoration;
   final sky.Size desiredSize;
@@ -858,6 +875,7 @@ class Container extends Component {
   Container({
     Object key,
     this.child,
+    this.transform,
     this.margin,
     this.decoration,
     this.desiredSize,
@@ -866,6 +884,9 @@ class Container extends Component {
 
   UINode build() {
     UINode current = child;
+
+    if (transform != null)
+      current = new Transform(transform: transform, child: current);
 
     if (padding != null)
       current = new Padding(padding: padding, child: current);

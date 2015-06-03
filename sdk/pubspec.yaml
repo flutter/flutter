@@ -6,3 +6,4 @@ version: 0.0.5
 dependencies:
   mojo: '>=0.0.1 <1.0.0'
   mojom: '>=0.0.4 <1.0.0'
+  vector_math: '>=1.4.3 <2.0.0'

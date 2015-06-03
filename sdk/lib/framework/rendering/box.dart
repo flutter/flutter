@@ -2,8 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'node.dart';
 import 'dart:sky' as sky;
+import 'dart:typed_data';
+import 'node.dart';
+import 'package:vector_math/vector_math.dart';
 
 // GENERIC BOX RENDERING
 // Anything that has a concept of x, y, width, height is going to derive from this
@@ -283,7 +285,75 @@ class RenderDecoratedBox extends RenderProxyBox {
     }
     super.paint(canvas);
   }
+}
 
+class RenderTransform extends RenderProxyBox {
+  RenderTransform({
+    Matrix4 transform,
+    RenderBox child
+  }) : super(child) {
+    assert(transform != null);
+    this.transform = transform;
+  }
+
+  Matrix4 _transform;
+
+  void set transform (Matrix4 value) {
+    assert(value != null);
+    if (_transform == value)
+      return;
+    _transform = new Matrix4.copy(value);
+    markNeedsPaint();
+  }
+
+  void rotateX(double radians) {
+    _transform.rotateX(radians);
+    markNeedsPaint();
+  }
+
+  void rotateY(double radians) {
+    _transform.rotateY(radians);
+    markNeedsPaint();
+  }
+
+  void rotateZ(double radians) {
+    _transform.rotateZ(radians);
+    markNeedsPaint();
+  }
+
+  void translate(x, [double y = 0.0, double z = 0.0]) {
+    _transform.translate(x, y, z);
+    markNeedsPaint();
+  }
+
+  void scale(x, [double y, double z]) {
+    _transform.scale(x, y, z);
+    markNeedsPaint();
+  }
+
+  void hitTestChildren(HitTestResult result, { sky.Point position }) {
+    Matrix4 inverse = new Matrix4.zero();
+    double det = inverse.copyInverse(_transform);
+    // TODO(abarth): Check the determinant for degeneracy.
+
+    Vector3 position3 = new Vector3(position.x, position.y, 0.0);
+    Vector3 transformed3 = inverse.transform3(position3);
+    sky.Point transformed = new sky.Point(transformed3.x, transformed3.y);
+    super.hitTestChildren(result, position: transformed);
+  }
+
+  void paint(RenderNodeDisplayList canvas) {
+    Float32List storage = _transform.storage;
+
+    canvas.save();
+    canvas.concat([
+      storage[ 0], storage[ 1], storage[ 3],
+      storage[ 4], storage[ 5], storage[ 7],
+      storage[12], storage[13], storage[15],
+    ]);
+    super.paint(canvas);
+    canvas.restore();
+  }
 }
 
 
