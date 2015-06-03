@@ -10,7 +10,7 @@ import '../rendering/box.dart';
 const String kAssetBase = '/packages/sky/assets/material-design-icons';
 
 class Icon extends Component {
-  int size;
+  double size;
   String type;
 
   Icon({
@@ -27,12 +27,9 @@ class Icon extends Component {
       category = parts[0];
       subtype = parts[1];
     }
-    // TODO(jackson): Use a real image.
-    return new Container(
-      desiredSize: new sky.Size(size.toDouble(), size.toDouble()),
-      decoration: new BoxDecoration(backgroundColor: const sky.Color(0xFFFF0000))
+    return new Image(
+      size: new sky.Size(size, size),
+      src: '${kAssetBase}/${category}/2x_web/ic_${subtype}_${size}dp.png'
     );
-    // return new Image(width: size, height: size,
-    //   src: '${kAssetBase}/${category}/2x_web/ic_${subtype}_${size}dp.png');
   }
 }

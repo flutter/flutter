@@ -16,7 +16,7 @@ class IconButton extends Component {
   UINode build() {
     return new EventListenerNode(
       new Padding(
-        child: new Icon(type: icon, size: 24),
+        child: new Icon(type: icon, size: 24.0),
         padding: const EdgeDims.all(8.0)),
       onGestureTap: onGestureTap);
   }
