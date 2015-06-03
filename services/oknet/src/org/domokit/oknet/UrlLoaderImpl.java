@@ -29,6 +29,8 @@ import org.chromium.mojom.mojo.UrlRequest;
 import org.chromium.mojom.mojo.UrlResponse;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.concurrent.Executor;
@@ -117,8 +119,23 @@ public class UrlLoaderImpl implements UrlLoader {
         mIsLoading = true;
         mError = null;
 
+        URL url = null;
+        try {
+            url = new URL(request.url);
+        } catch (MalformedURLException e) {
+            Log.w(TAG, "Failed to parse url " + request.url);
+            mError = new NetworkError();
+            // TODO(abarth): Which mError.code should we set?
+            mError.description = e.toString();
+            UrlResponse urlResponse = new UrlResponse();
+            urlResponse.url = request.url;
+            urlResponse.error = mError;
+            callback.call(urlResponse);
+            return;
+        }
+
         Request.Builder builder =
-                new Request.Builder().url(request.url).method(request.method, null);
+                new Request.Builder().url(url).method(request.method, null);
 
         if (request.headers != null) {
             for (HttpHeader header : request.headers) {
