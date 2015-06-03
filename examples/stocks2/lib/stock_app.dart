@@ -16,8 +16,8 @@ import 'package:sky/framework/components2/icon_button.dart';
 // import 'package:sky/framework/components2/radio.dart';
 import 'package:sky/framework/components2/scaffold.dart';
 import 'package:sky/framework/fn2.dart';
-import 'package:sky/framework/theme/typography.dart' as typography;
-import 'package:sky/framework/theme/colors.dart';
+import 'package:sky/framework/theme2/typography.dart' as typography;
+import 'package:sky/framework/theme2/colors.dart' as colors;
 import 'stock_data.dart';
 import 'package:sky/framework/rendering/box.dart';
 // import 'stock_list.dart';
@@ -173,7 +173,7 @@ class StocksApp extends App {
             icon: 'navigation/more_vert_white',
             onGestureTap: _handleMenuShow)
         ],
-        backgroundColor: colorFromCSSHexColorString(Purple[500])
+        backgroundColor: colors.Purple[500]
       );
   }
 

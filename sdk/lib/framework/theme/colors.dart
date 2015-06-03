@@ -250,7 +250,3 @@ const Map<int, String> BlueGrey = const {
   800: '#37474F',
   900: '#263238',
 };
-
-sky.Color colorFromCSSHexColorString(String colorString) {
-  return new sky.Color(int.parse("FF" + colorString.substring(1), radix: 16));
-}

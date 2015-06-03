@@ -108,6 +108,10 @@ dart_pkg("sdk") {
     "lib/framework/theme/shadows.dart",
     "lib/framework/theme/typography.dart",
     "lib/framework/theme/view_configuration.dart",
+    "lib/framework/theme2/colors.dart",
+    "lib/framework/theme2/shadows.dart",
+    "lib/framework/theme2/typography.dart",
+    "lib/framework/theme2/view_configuration.dart",
     "lib/sky_tool",
     "pubspec.yaml",
   ]
