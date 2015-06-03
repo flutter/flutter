@@ -5,6 +5,17 @@
 import 'dart:sky' as sky;
 import 'package:sky/framework/fn2.dart';
 import 'package:sky/framework/rendering/box.dart';
+import '../lib/solid_color_box.dart';
+
+class Rectangle extends RenderNodeWrapper {
+  RenderSolidColorBox root;
+  RenderSolidColorBox createNode() =>
+      new RenderSolidColorBox(color, desiredSize: new sky.Size(40.0, 130.0));
+
+  final int color;
+
+  Rectangle(this.color, { Object key }) : super(key: key);
+}
 
 class ContainerApp extends App {
   UINode build() {
@@ -20,7 +31,11 @@ class ContainerApp extends App {
                   new Container(
                       decoration: new BoxDecoration(backgroundColor: const sky.Color(0xFFFFFF00)),
                       desiredSize: new sky.Size(double.INFINITY, 20.0)
-                  )
+                  ),
+                  new Image(src: "https://www.dartlang.org/logos/dart-logo.png",
+                            size: new sky.Size(300.0, 300.0),
+                            key: 1
+                  ),
               ])),
       ]),
       onPointerDown: _handlePointerDown);

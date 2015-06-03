@@ -8,30 +8,7 @@ import 'package:sky/framework/rendering/box.dart';
 import 'package:sky/framework/rendering/node.dart';
 import 'package:sky/framework/rendering/flex.dart';
 import 'package:sky/framework/rendering/paragraph.dart';
-
-class RenderSolidColor extends RenderDecoratedBox {
-  final Size desiredSize;
-  final Color backgroundColor;
-
-  RenderSolidColor(Color backgroundColor, { this.desiredSize: const Size.infinite() })
-      : backgroundColor = backgroundColor,
-        super(decoration: new BoxDecoration(backgroundColor: backgroundColor));
-
-  Size getIntrinsicDimensions(BoxConstraints constraints) {
-    return constraints.constrain(desiredSize);
-  }
-
-  void performLayout() {
-    size = constraints.constrain(desiredSize);
-  }
-
-  void handlePointer(PointerEvent event) {
-    if (event.type == 'pointerdown')
-      decoration = new BoxDecoration(backgroundColor: const Color(0xFFFF0000));
-    else if (event.type == 'pointerup')
-      decoration = new BoxDecoration(backgroundColor: backgroundColor);
-  }
-}
+import '../lib/solid_color_box.dart';
 
 AppView app;
 
@@ -43,7 +20,7 @@ void main() {
     child: flexRoot
   );
 
-  RenderNode child = new RenderSolidColor(const Color(0xFFFFFF00));
+  RenderNode child = new RenderSolidColorBox(const Color(0xFFFFFF00));
   flexRoot.add(child);
   child.parentData.flex = 2;
 
