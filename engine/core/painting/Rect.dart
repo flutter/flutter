@@ -44,18 +44,22 @@ class Rect {
 
   // Rects are inclusive of the top and left edges but exclusive of the bottom
   // right edges.
-  bool contains(Point point) =>
-      point.x >= left && point.x < right && point.y >= top && point.y < bottom;
+  bool contains(Point point) {
+    return point.x >= left && point.x < right && point.y >= top && point.y < bottom;
+  }
 
   bool operator ==(other) {
-    if (!(other is Rect)) return false;
+    if (other is! Rect)
+      return false;
     for (var i = 0; i < 4; ++i) {
-      if (_value[i] != other._value[i]) return false;
+      if (_value[i] != other._value[i])
+        return false;
     }
     return true;
   }
+
   int get hashCode {
     return _value.fold(373, (value, item) => (37 * value + item.hashCode));
   }
-  String toString() => "Rect.LTRB($left, $top, $right, $bottom)";
+  String toString() => "Rect.fromLTRB($left, $top, $right, $bottom)";
 }

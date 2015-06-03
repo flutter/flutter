@@ -11,10 +11,13 @@ class Point {
 
   const Point(this.x, this.y);
 
-  bool operator ==(other) {
-    if (!(other is Point)) return false;
-    return x == other.x && y == other.y;
-  }
+  bool operator ==(other) => other is Point && x == other.x && y == other.y;
+  Size operator -(Point other) => new Size(x - other.x, y - other.y);
+  Point operator +(Size size) => new Point(x + size.width, y + size.height);
+
+  // does the equivalent of "return this - Point(0,0)"
+  Size toSize() => new Size(x, y);
+
   int get hashCode {
     int result = 373;
     result = 37 * result + x.hashCode;
