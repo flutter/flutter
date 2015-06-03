@@ -482,7 +482,7 @@ class RenderSolidColor extends RenderDecoratedSector {
     deltaTheta = constraints.constrainDeltaTheta(desiredDeltaTheta);
   }
 
-  void handlePointer(sky.PointerEvent event) {
+  void handleEvent(sky.Event event) {
     if (event.type == 'pointerdown')
       decoration = new BoxDecoration(backgroundColor: const sky.Color(0xFFFF0000));
     else if (event.type == 'pointerup')

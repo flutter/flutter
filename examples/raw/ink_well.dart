@@ -41,7 +41,7 @@ class InkSplash {
 class InkWell extends RenderBox {
   final List<InkSplash> _splashes = new List<InkSplash>();
 
-  void handlePointer(sky.PointerEvent event) {
+  void handleEvent(sky.Event event) {
     switch (event.type) {
       case 'pointerdown':
         _splashes.add(new InkSplash(position: new sky.Point(event.x, event.y),
