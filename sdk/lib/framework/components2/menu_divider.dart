@@ -2,19 +2,23 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:sky' as sky;
 import '../fn2.dart';
+import '../rendering/box.dart';
 
 class MenuDivider extends Component {
-  static final Style _style = new Style('''
-    margin: 8px 0;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.12);'''
-  );
-
   MenuDivider({ Object key }) : super(key: key);
 
   UINode build() {
     return new Container(
-      style: _style
+      decoration: const BoxDecoration(
+        border: const Border(
+          bottom: const BorderSide(
+            color: const sky.Color.fromARGB(31, 0, 0, 0)
+          )
+        )
+      ),
+      margin: const EdgeDims.symmetric(vertical: 8.0)
     );
   }
 }
