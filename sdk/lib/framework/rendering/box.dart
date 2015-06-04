@@ -601,6 +601,62 @@ class RenderSizeObserver extends RenderProxyBox {
   }
 }
 
+// This must be immutable, because we won't notice when it changes
+class BoxShadow {
+  const BoxShadow({
+    this.color,
+    this.offset,
+    this.blur
+  });
+
+  final sky.Size offset;
+  final double blur;
+  final sky.Color color;
+}
+
+class RenderShadowedBox extends RenderProxyBox {
+
+  RenderShadowedBox({
+    BoxShadow shadow,
+    RenderBox child
+  }) : _shadow = shadow, super(child);
+
+  BoxShadow _shadow;
+  BoxShadow get shadow => _shadow;
+  void set shadow (BoxShadow value) {
+    if (value == _shadow)
+      return;
+    _shadow = value;
+    markNeedsPaint();
+  }
+
+  sky.Paint _createShadowPaint(BoxShadow shadow) {
+    // TODO(eseidel): This should not be hard-coded yellow.
+    sky.Paint paint = new sky.Paint()..color = const sky.Color.fromARGB(255, 0, 255, 0);
+    var builder = new sky.LayerDrawLooperBuilder()
+      // Shadow layer.
+      ..addLayerOnTop(
+          new sky.DrawLooperLayerInfo()
+            ..setPaintBits(-1)
+            ..setOffset(shadow.offset.toPoint())
+            ..setColorMode(sky.TransferMode.srcMode),
+          (sky.Paint layerPaint) {
+        layerPaint.color = shadow.color;
+        layerPaint.setMaskFilter(
+          new sky.MaskFilter.Blur(sky.BlurStyle.normal, shadow.blur, highQuality: true));
+      })
+      // Main layer.
+      ..addLayerOnTop(new sky.DrawLooperLayerInfo(), (_) {});
+    paint.setDrawLooper(builder.build());
+    return paint;
+  }
+
+  void paint(RenderObjectDisplayList canvas) {
+    sky.Paint paint = _createShadowPaint(_shadow);
+    canvas.drawRect(new sky.Rect.fromLTRB(0.0, 0.0, size.width, size.height), paint);
+    super.paint(canvas);
+  }
+}
 
 // RENDER VIEW LAYOUT MANAGER
 
