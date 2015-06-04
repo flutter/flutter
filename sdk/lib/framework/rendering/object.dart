@@ -265,7 +265,11 @@ abstract class RenderObjectWithChildMixin<ChildType extends RenderObject> {
     if (_child != null)
       _child.detach();
   }
-  String debugDescribeChildren(String prefix) => '${prefix}child: ${child.toString(prefix)}';
+  String debugDescribeChildren(String prefix) {
+    if (child != null)
+      return '${prefix}child: ${child.toString(prefix)}';
+    return '';
+  }
 }
 
 
