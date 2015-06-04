@@ -36,7 +36,7 @@ class EdgeDims {
                                  (left == other.left);
 
   int get hashCode {
-    value = 373;
+    int value = 373;
     value = 37 * value + top.hashCode;
     value = 37 * value + left.hashCode;
     value = 37 * value + bottom.hashCode;
@@ -97,7 +97,7 @@ class BoxConstraints {
   bool get isInfinite => maxWidth >= double.INFINITY || maxHeight >= double.INFINITY;
 
   int get hashCode {
-    value = 373;
+    int value = 373;
     value = 37 * value + minWidth.hashCode;
     value = 37 * value + maxWidth.hashCode;
     value = 37 * value + minHeight.hashCode;
@@ -336,7 +336,7 @@ class RenderImage extends RenderBox {
     // maintain the aspect ratio
     if (requestedSize.width == null) {
       if (requestedSize.height == null) {
-        size = constraints.constrain(new sky.Size(_image.width, _image.height));
+        size = constraints.constrain(new sky.Size(_image.width.toDouble(), _image.height.toDouble()));
       } else {
         double width = requestedSize.height * _image.width / _image.height;
         size = constraints.constrain(new sky.Size(width, requestedSize.height));

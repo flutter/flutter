@@ -69,10 +69,10 @@ class InkWell extends Component implements ScrollClient {
   //   });
   // }
 
-  // bool ancestorScrolled(Scrollable ancestor) {
+  bool ancestorScrolled(Scrollable ancestor) {
   //   _abortSplashes();
-  //   return false;
-  // }
+    return false;
+  }
 
   // void handleRemoved() {
   //   UINode node = parent;

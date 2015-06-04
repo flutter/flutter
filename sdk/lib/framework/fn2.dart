@@ -463,6 +463,7 @@ abstract class MultiChildRenderObjectWrapper extends RenderObjectWrapper {
 
   void insert(RenderObjectWrapper child, dynamic slot) {
     assert(slot == null || slot is RenderObject);
+    assert(root is ContainerRenderObjectMixin);
     root.add(child.root, before: slot);
   }
 
@@ -648,6 +649,11 @@ class Paragraph extends RenderObjectWrapper {
     super.syncRenderObject(old);
     root.text = text;
   }
+
+  void insert(RenderObjectWrapper child, dynamic slot) {
+    assert(false);
+    // Paragraph does not support having children currently
+  }
 }
 
 class FlexContainer extends MultiChildRenderObjectWrapper {
@@ -690,6 +696,11 @@ class Image extends RenderObjectWrapper {
     super.syncRenderObject(old);
     root.src = src;
     root.requestedSize = size;
+  }
+
+  void insert(RenderObjectWrapper child, dynamic slot) {
+    assert(false);
+    // Image does not support having children currently
   }
 }
 
