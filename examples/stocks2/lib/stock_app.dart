@@ -204,7 +204,7 @@ class StocksApp extends App {
     List<UINode> overlays = [
       new Scaffold(
         toolbar: _isSearching ? buildSearchBar() : buildToolBar(),
-        // body: new Stocklist(stocks: _stocks, query: _searchQuery),
+        body: new Stocklist(stocks: _stocks, query: _searchQuery),
         // floatingActionButton: new FloatingActionButton(
         //   content: new Icon(type: 'content/add_white', size: 24),
         //   level: 3),

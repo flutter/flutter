@@ -46,6 +46,22 @@ class RenderScaffold extends RenderBox {
     markNeedsLayout();
   }
 
+  void attachChildren() {
+    for (ScaffoldSlots slot in ScaffoldSlots.values) {
+      RenderBox box = _slots[slot];
+      if (box != null)
+        box.attach();
+    }
+  }
+
+  void detachChildren() {
+    for (ScaffoldSlots slot in ScaffoldSlots.values) {
+      RenderBox box = _slots[slot];
+      if (box != null)
+        box.detach();
+    }
+  }
+
   ScaffoldSlots remove(RenderBox child) {
     assert(child != null);
     for (ScaffoldSlots slot in ScaffoldSlots.values) {
