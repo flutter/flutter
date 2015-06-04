@@ -70,14 +70,11 @@ abstract class FixedHeightScrollable extends Scrollable {
       }
     }
 
-    // TODO(abarth): Add a clip.
-    return new BlockContainer(
-      children: [
-        new Transform(
-          transform: transform,
-          child: new BlockContainer(children: buildItems(itemNumber, drawCount))
-        )
-      ]
+    return new Clip(
+      child: new Transform(
+        transform: transform,
+        child: new BlockContainer(children: buildItems(itemNumber, drawCount))
+      )
     );
   }
 

@@ -352,6 +352,15 @@ abstract class OneChildRenderObjectWrapper extends RenderObjectWrapper {
   }
 }
 
+class Clip extends OneChildRenderObjectWrapper {
+  RenderClip root;
+
+  Clip({ UINode child, Object key })
+    : super(child: child, key: key);
+
+  RenderClip createNode() => new RenderClip();
+}
+
 class Padding extends OneChildRenderObjectWrapper {
   RenderPadding root;
   final EdgeDims padding;

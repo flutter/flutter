@@ -215,6 +215,19 @@ class RenderSizedBox extends RenderProxyBox {
   }
 }
 
+class RenderClip extends RenderProxyBox {
+  RenderClip({ RenderBox child }) : super(child);
+
+  void paint(RenderObjectDisplayList canvas) {
+    if (child != null) {
+      canvas.save();
+      canvas.clipRect(new sky.Rect.fromSize(size));
+      child.paint(canvas);
+      canvas.restore();
+    }
+  }
+}
+
 class RenderPadding extends RenderBox with RenderObjectWithChildMixin<RenderBox> {
 
   RenderPadding({ EdgeDims padding, RenderBox child }) {
