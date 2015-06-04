@@ -46,18 +46,24 @@ abstract class RenderObject extends AbstractNode {
   ParentData parentData;
   void setParentData(RenderObject child) {
     // override this to setup .parentData correctly for your class
+    assert(!_debugDoingLayout);
+    assert(!debugDoingPaint);
     if (child.parentData is! ParentData)
       child.parentData = new ParentData();
   }
 
   void adoptChild(RenderObject child) { // only for use by subclasses
     // call this whenever you decide a node is a child
+    assert(!_debugDoingLayout);
+    assert(!debugDoingPaint);
     assert(child != null);
     setParentData(child);
     super.adoptChild(child);
     markNeedsLayout();
   }
   void dropChild(RenderObject child) { // only for use by subclasses
+    assert(!_debugDoingLayout);
+    assert(!debugDoingPaint);
     assert(child != null);
     assert(child.parentData != null);
     child.parentData.detach();
