@@ -49,7 +49,7 @@ class SpriteBox extends RenderBox {
     }
   }
 
-  void paint(RenderNodeDisplayList canvas) {
+  void paint(RenderObjectDisplayList canvas) {
     // Move to correct coordinate space before drawing
     double scaleX = 1.0;
     double scaleY = 1.0;
