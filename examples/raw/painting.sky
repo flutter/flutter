@@ -8,6 +8,7 @@ div {
 <div id="canvas" />
 <script>
 import 'dart:math' as math;
+import 'dart:typed_data';
 import 'dart:sky';
 
 void main() {
@@ -29,11 +30,12 @@ void main() {
                      paint);
 
     // Scale x and y by 0.5.
-    var scaleMatrix = [
-        0.5, 0.0, 0.0,
-        0.0, 0.5, 0.0,
-        0.0, 0.0, 1.0
-    ];
+    var scaleMatrix = new Float32List.fromList([
+        0.5, 0.0, 0.0, 0.0,
+        0.0, 0.5, 0.0, 0.0,
+        0.0, 0.0, 0.0, 0.0,
+        0.0, 0.0, 0.0, 1.0,
+    ]);
     context.concat(scaleMatrix);
     paint.color = const Color.fromARGB(128, 0, 255, 0);
     context.drawCircle(0.0, 0.0, radius, paint);
