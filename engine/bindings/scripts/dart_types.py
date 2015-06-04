@@ -116,6 +116,7 @@ CPP_SPECIAL_CONVERSION_RULES = {
     'unrestricted float': 'float',
     # Pass these by value, not pointer.
     'Color': 'SkColor',
+    'Float32List': 'Float32List',
     'Point': 'Point',
     'Rect': 'Rect',
     'TransferMode': 'SkXfermode::Mode',
@@ -363,6 +364,7 @@ DART_TO_CPP_VALUE = {
 
     # Pass-by-value types.
     'Color': pass_by_value_format('CanvasColor'),
+    'Float32List': pass_by_value_format('Float32List'),
     'Point': pass_by_value_format('{implemented_as}'),
     'Rect': pass_by_value_format('{implemented_as}'),
     'TransferMode': pass_by_value_format('TransferMode'),

@@ -17,7 +17,7 @@ interface Canvas {
   void scale(float sx, float sy);
   void rotateDegrees(float degrees);
   void skew(float sx, float sy);
-  void concat(float[] matrix9);
+  void concat(Float32List matrix4);
 
   void clipRect(Rect rect);
 

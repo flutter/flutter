@@ -42,6 +42,8 @@ source_set("tonic") {
     "dart_wrappable.cc",
     "dart_wrappable.h",
     "dart_wrapper_info.h",
+    "float32_list.cc",
+    "float32_list.h",
     "mojo_converter.h",
   ]
 

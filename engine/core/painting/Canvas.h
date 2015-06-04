@@ -11,6 +11,7 @@
 #include "sky/engine/core/painting/Rect.h"
 #include "sky/engine/platform/graphics/DisplayList.h"
 #include "sky/engine/tonic/dart_wrappable.h"
+#include "sky/engine/tonic/float32_list.h"
 #include "sky/engine/wtf/PassRefPtr.h"
 #include "sky/engine/wtf/RefCounted.h"
 
@@ -37,7 +38,7 @@ public:
     void scale(float sx, float sy);
     void rotateDegrees(float degrees);
     void skew(float sx, float sy);
-    void concat(const Vector<float>& matrix);
+    void concat(const Float32List& matrix4);
 
     void clipRect(const Rect& rect);
 

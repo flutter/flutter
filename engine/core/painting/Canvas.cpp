@@ -83,14 +83,27 @@ void Canvas::skew(float sx, float sy)
     m_canvas->skew(sx, sy);
 }
 
-void Canvas::concat(const Vector<float>& matrix)
+void Canvas::concat(const Float32List& matrix4)
 {
     if (!m_canvas)
         return;
     ASSERT(m_displayList->isRecording());
-    ASSERT(matrix.size() == 9);
+    ASSERT(matrix4.data());
+
+    // TODO(mpcomplete): how can we raise an error in this case?
+    if (matrix4.num_elements() != 16)
+      return;
+
     SkMatrix sk_matrix;
-    sk_matrix.set9(matrix.data());
+    // Mappings from SkMatrix-index to input-index.
+    static const int kMappings[] = {
+      0, 4, 12,
+      1, 5, 13,
+      3, 7, 15,
+    };
+    for (intptr_t i = 0; i < 9; ++i)
+      sk_matrix[i] = matrix4.data()[kMappings[i]];
+
     m_canvas->concat(sk_matrix);
 }
 
