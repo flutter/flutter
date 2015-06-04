@@ -3,27 +3,14 @@
 // found in the LICENSE file.
 
 import '../animation/scroll_behavior.dart';
-import '../debug/tracing.dart';
 import '../fn2.dart';
-import 'dart:math' as math;
 import 'dart:async';
+import 'dart:math' as math;
+import 'package:vector_math/vector_math.dart';
 import 'scrollable.dart';
 
 abstract class FixedHeightScrollable extends Scrollable {
-  static final Style _style = new Style('''
-    overflow: hidden;
-    position: relative;
-    will-change: transform;'''
-  );
-
-  static final Style _scrollAreaStyle = new Style('''
-    position:relative;
-    will-change: transform;'''
-  );
-
-  FixedHeightScrollable({
-    Object key
-  }) : super(key: key);
+  FixedHeightScrollable({ Object key }) : super(key: key);
 
   ScrollBehavior createScrollBehavior() => new OverscrollBehavior();
   OverscrollBehavior get scrollBehavior => super.scrollBehavior as OverscrollBehavior;
@@ -42,23 +29,16 @@ abstract class FixedHeightScrollable extends Scrollable {
   }
 
   void _measureHeights() {
-    trace('FixedHeightScrollable::_measureHeights', () {
-      if (_itemHeight != null)
-        return;
-      var root = getRoot();
-      if (root == null)
-        return;
-      var item = root.firstChild.firstChild;
-      if (item == null)
-        return;
-      setState(() {
-        _height = root.height;
-        assert(_height > 0);
-        _itemHeight = item.height;
-        assert(_itemHeight > 0);
-        scrollBehavior.containerHeight = _height;
-        scrollBehavior.contentsHeight = _itemHeight * _itemCount;
-      });
+    if (_itemHeight != null)
+      return;
+    setState(() {
+      // TODO(abarth): Actually measure these heights.
+      _height = 500.0; // root.height;
+      assert(_height > 0);
+      _itemHeight = 100.0; // item.height;
+      assert(_itemHeight > 0);
+      scrollBehavior.containerHeight = _height;
+      scrollBehavior.contentsHeight = _itemHeight * _itemCount;
     });
   }
 
@@ -70,12 +50,13 @@ abstract class FixedHeightScrollable extends Scrollable {
     if (_itemHeight == null)
       new Future.microtask(_measureHeights);
 
+    Matrix4 transform = new Matrix4.identity();
+
     if (_height > 0.0 && _itemHeight != null) {
       if (scrollOffset < 0.0) {
         double visibleHeight = _height + scrollOffset;
         drawCount = (visibleHeight / _itemHeight).round() + 1;
-        transformStyle =
-          'transform: translateY(${(-scrollOffset).toStringAsFixed(2)}px)';
+        transform.translate(0.0, -scrollOffset);
       } else {
         drawCount = (_height / _itemHeight).ceil() + 1;
         double alignmentDelta = -scrollOffset % _itemHeight;
@@ -85,18 +66,16 @@ abstract class FixedHeightScrollable extends Scrollable {
         double drawStart = scrollOffset + alignmentDelta;
         itemNumber = math.max(0, (drawStart / _itemHeight).floor());
 
-        transformStyle =
-            'transform: translateY(${(alignmentDelta).toStringAsFixed(2)}px)';
+        transform.translate(0.0, alignmentDelta);
       }
     }
 
-    return new Container(
-      style: _style,
+    // TODO(abarth): Add a clip.
+    return new BlockContainer(
       children: [
-        new Container(
-          style: _scrollAreaStyle,
-          inlineStyle: transformStyle,
-          children: buildItems(itemNumber, drawCount)
+        new Transform(
+          transform: transform,
+          child: new BlockContainer(children: buildItems(itemNumber, drawCount))
         )
       ]
     );
