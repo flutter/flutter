@@ -55,12 +55,18 @@ abstract class RenderNode extends AbstractNode {
     assert(child != null);
     setParentData(child);
     super.adoptChild(child);
+    markNeedsLayout();
   }
   void dropChild(RenderNode child) { // only for use by subclasses
     assert(child != null);
     assert(child.parentData != null);
     child.parentData.detach();
+    if (child._relayoutSubtreeRoot != child) {
+      child._relayoutSubtreeRoot = null;
+      child._needsLayout = true;
+    }
     super.dropChild(child);
+    markNeedsLayout();
   }
 
   static List<RenderNode> _nodesNeedingLayout = new List<RenderNode>();
@@ -231,7 +237,6 @@ abstract class RenderNodeWithChildMixin<ChildType extends RenderNode> {
     _child = value;
     if (_child != null)
       adoptChild(_child);
-    markNeedsLayout();
   }
   void attachChildren() {
     if (_child != null)
@@ -336,7 +341,6 @@ abstract class ContainerRenderNodeMixin<ChildType extends RenderNode, ParentData
         assert(before.parentData.previousSibling == child);
       }
     }
-    markNeedsLayout();
   }
   void remove(ChildType child) {
     assert(child.parentData is ParentDataType);
@@ -359,7 +363,6 @@ abstract class ContainerRenderNodeMixin<ChildType extends RenderNode, ParentData
     child.parentData.previousSibling = null;
     child.parentData.nextSibling = null;
     dropChild(child);
-    markNeedsLayout();
   }
   void redepthChildren() {
     ChildType child = _firstChild;

@@ -48,7 +48,7 @@ class RenderScaffold extends RenderBox {
 
   ScaffoldSlots remove(RenderBox child) {
     assert(child != null);
-    for (ScaffoldSlots slot in ScaffoldSlots) {
+    for (ScaffoldSlots slot in ScaffoldSlots.values) {
       if (_slots[slot] == child) {
         this[slot] = null;
         return slot;

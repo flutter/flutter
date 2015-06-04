@@ -317,11 +317,6 @@ abstract class RenderNodeWrapper extends UINode {
     }
   }
 
-  void removeChild(UINode node) {
-    root.remove(node.root);
-    super.removeChild(node);
-  }
-
   void _remove() {
     assert(root != null);
     _nodeMap.remove(root);
@@ -334,20 +329,25 @@ abstract class OneChildRenderNodeWrapper extends RenderNodeWrapper {
 
   OneChildRenderNodeWrapper({ this.child, Object key }) : super(key: key);
 
-  void insert(RenderNodeWrapper child, dynamic slot) {
-    assert(slot == null);
-    root.child = child.root;
-  }
-
   void syncRenderNode(RenderNodeWrapper old) {
     super.syncRenderNode(old);
     UINode oldChild = old == null ? null : (old as OneChildRenderNodeWrapper).child;
     syncChild(child, oldChild, null);
   }
 
+  void insert(RenderNodeWrapper child, dynamic slot) {
+    assert(slot == null);
+    root.child = child.root;
+  }
+
+  void removeChild(UINode node) {
+    root.child = null;
+    super.removeChild(node);
+  }
+
   void _remove() {
-    assert(child != null);
-    removeChild(child);
+    if (child != null)
+      removeChild(child);
     super._remove();
   }
 }
@@ -434,6 +434,12 @@ abstract class OneChildListRenderNodeWrapper extends RenderNodeWrapper {
   void insert(RenderNodeWrapper child, dynamic slot) {
     assert(slot == null || slot is RenderNode);
     root.add(child.root, before: slot);
+  }
+
+  void removeChild(UINode node) {
+    assert(root is ContainerRenderNodeMixin);
+    root.remove(node.root);
+    super.removeChild(node);
   }
 
   void _remove() {
