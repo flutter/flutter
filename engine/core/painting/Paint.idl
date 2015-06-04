@@ -13,4 +13,5 @@
   void setDrawLooper(DrawLooper looper);
   void setColorFilter(ColorFilter filter);
   void setMaskFilter(MaskFilter filter);
+  void setTransferMode(TransferMode transferMode);
 };

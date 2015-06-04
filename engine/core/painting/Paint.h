@@ -6,6 +6,7 @@
 #define SKY_ENGINE_CORE_PAINTING_PAINT_H_
 
 #include "sky/engine/core/painting/CanvasColor.h"
+#include "sky/engine/core/painting/TransferMode.h"
 #include "sky/engine/tonic/dart_wrappable.h"
 #include "sky/engine/wtf/PassRefPtr.h"
 #include "sky/engine/wtf/RefCounted.h"
@@ -42,6 +43,8 @@ public:
 
     const SkPaint& paint() const { return m_paint; }
     void setPaint(const SkPaint& paint) { m_paint = paint; }
+
+    void setTransferMode(SkXfermode::Mode transfer_mode);
 
 private:
     Paint();

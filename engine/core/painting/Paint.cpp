@@ -37,4 +37,9 @@ void Paint::setMaskFilter(MaskFilter* filter)
     m_paint.setMaskFilter(filter->filter());
 }
 
+void Paint::setTransferMode(SkXfermode::Mode transfer_mode)
+{
+    m_paint.setXfermodeMode(transfer_mode);
+}
+
 } // namespace blink

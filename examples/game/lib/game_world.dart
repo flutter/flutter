@@ -66,6 +66,8 @@ class GameWorld extends TransformNode {
     SpriteNode sprt = new SpriteNode.withImage(_image);
     sprt.width = radius*2;
     sprt.height = radius*2;
+    sprt.colorOverlay = new Color(0x33ff0000);
+    sprt.transferMode = TransferMode.plusMode;
     body.userData = sprt;
     this.children.add(sprt);
   }
