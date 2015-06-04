@@ -9,7 +9,7 @@ import 'package:sky/framework/components2/drawer.dart';
 // import 'package:sky/framework/components2/icon.dart';
 import 'package:sky/framework/components2/icon_button.dart';
 // import 'package:sky/framework/components2/input.dart';
-// import 'package:sky/framework/components2/menu_divider.dart';
+import 'package:sky/framework/components2/menu_divider.dart';
 import 'package:sky/framework/components2/menu_item.dart';
 // import 'package:sky/framework/components2/modal_overlay.dart';
 // import 'package:sky/framework/components2/popup_menu.dart';
@@ -129,7 +129,7 @@ class StocksApp extends App {
           key: 'Account Balance',
           icon: 'action/account_balance',
           children: [new Text('Account Balance')]),
-        // new MenuDivider(key: 'div1'),
+        new MenuDivider(key: 'div1'),
         // new MenuItem(
         //   key: 'Optimistic Menu Item',
         //   icon: 'action/thumb_up',
