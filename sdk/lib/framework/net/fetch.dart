@@ -4,7 +4,6 @@
 
 import '../shell.dart' as shell;
 import 'dart:async';
-import 'dart:sky' as sky;
 import 'dart:typed_data';
 import 'package:mojo/core.dart' as core;
 import 'package:mojom/mojo/network_service.mojom.dart';
@@ -22,7 +21,7 @@ class Response {
 }
 
 Future<Response> fetch(String relativeUrl) async {
-  String url = new sky.URL(relativeUrl, sky.document.baseURI).href;
+  String url = Uri.base.resolve(relativeUrl).toString();
 
   var net = new NetworkServiceProxy.unbound();
   shell.requestService("mojo:network_service", net);
