@@ -12,10 +12,13 @@ void main() {
   initUnit();
 
   test("should not have a 0 sized colored Box", () {
-    var coloredBox = new RenderDecoratedBox();
+    var coloredBox = new RenderDecoratedBox(
+      decoration: new BoxDecoration()
+    );
     var paddingBox = new RenderPadding(padding: const EdgeDims.all(10.0),
         child: coloredBox);
     RenderBox root = new RenderDecoratedBox(
+      decoration: new BoxDecoration(),
       child: paddingBox
     );
     TestView renderView = new TestView(child: root);
