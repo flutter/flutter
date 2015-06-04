@@ -560,6 +560,28 @@ class RenderTransform extends RenderProxyBox {
   }
 }
 
+typedef void SizeChangedCallback(sky.Size newSize);
+
+class RenderSizeObserver extends RenderProxyBox {
+  RenderSizeObserver({
+    this.callback,
+    RenderBox child
+  }) : super(child) {
+    assert(callback != null);
+  }
+
+  SizeChangedCallback callback;
+
+  void performLayout() {
+    sky.Size oldSize = size;
+
+    super.performLayout();
+
+    if (oldSize != size)
+      callback(size);
+  }
+}
+
 
 // RENDER VIEW LAYOUT MANAGER
 

@@ -421,6 +421,27 @@ class Transform extends OneChildRenderObjectWrapper {
   }
 }
 
+class SizeObserver extends OneChildRenderObjectWrapper {
+  RenderSizeObserver root;
+  final SizeChangedCallback callback;
+
+  SizeObserver({ this.callback, UINode child, Object key })
+    : super(child: child, key: key);
+
+  RenderSizeObserver createNode() => new RenderSizeObserver(callback: callback);
+
+  void syncRenderObject(SizeObserver old) {
+    super.syncRenderObject(old);
+    root.callback = callback;
+  }
+
+  void _remove() {
+    root.callback = null;
+    super._remove();
+  }
+}
+
+
 final List<UINode> _emptyList = new List<UINode>();
 
 abstract class MultiChildRenderObjectWrapper extends RenderObjectWrapper {

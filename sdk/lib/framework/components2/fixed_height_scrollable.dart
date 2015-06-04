@@ -6,74 +6,69 @@ import '../animation/scroll_behavior.dart';
 import '../fn2.dart';
 import 'dart:async';
 import 'dart:math' as math;
+import 'dart:sky' as sky;
 import 'package:vector_math/vector_math.dart';
 import 'scrollable.dart';
 
 abstract class FixedHeightScrollable extends Scrollable {
-  FixedHeightScrollable({ Object key }) : super(key: key);
+  FixedHeightScrollable({ this.itemHeight, Object key }) : super(key: key) {
+    assert(itemHeight != null);
+  }
 
   ScrollBehavior createScrollBehavior() => new OverscrollBehavior();
   OverscrollBehavior get scrollBehavior => super.scrollBehavior as OverscrollBehavior;
 
-  double _height = 0.0;
-  double _itemHeight;
+  double _height;
+  final double itemHeight;
 
   int _itemCount = 0;
   int get itemCount => _itemCount;
   void set itemCount (int value) {
     if (_itemCount != value) {
       _itemCount = value;
-      if (_itemHeight != null)
-        scrollBehavior.contentsHeight = _itemHeight * _itemCount;
+      scrollBehavior.contentsHeight = itemHeight * _itemCount;
     }
   }
 
-  void _measureHeights() {
-    if (_itemHeight != null)
-      return;
+  void _handleSizeChanged(sky.Size newSize) {
     setState(() {
-      // TODO(abarth): Actually measure these heights.
-      _height = 500.0; // root.height;
-      assert(_height > 0);
-      _itemHeight = 100.0; // item.height;
-      assert(_itemHeight > 0);
+      _height = newSize.height;
       scrollBehavior.containerHeight = _height;
-      scrollBehavior.contentsHeight = _itemHeight * _itemCount;
     });
   }
 
   UINode buildContent() {
     var itemNumber = 0;
-    var drawCount = 1;
-    var transformStyle = '';
-
-    if (_itemHeight == null)
-      new Future.microtask(_measureHeights);
+    var itemCount = 0;
 
     Matrix4 transform = new Matrix4.identity();
 
-    if (_height > 0.0 && _itemHeight != null) {
+    if (_height != null && _height > 0.0) {
       if (scrollOffset < 0.0) {
         double visibleHeight = _height + scrollOffset;
-        drawCount = (visibleHeight / _itemHeight).round() + 1;
+        itemCount = (visibleHeight / itemHeight).round() + 1;
         transform.translate(0.0, -scrollOffset);
       } else {
-        drawCount = (_height / _itemHeight).ceil() + 1;
-        double alignmentDelta = -scrollOffset % _itemHeight;
+        itemCount = (_height / itemHeight).ceil() + 1;
+        double alignmentDelta = -scrollOffset % itemHeight;
         if (alignmentDelta != 0.0)
-          alignmentDelta -= _itemHeight;
+          alignmentDelta -= itemHeight;
 
         double drawStart = scrollOffset + alignmentDelta;
-        itemNumber = math.max(0, (drawStart / _itemHeight).floor());
+        itemNumber = math.max(0, (drawStart / itemHeight).floor());
 
         transform.translate(0.0, alignmentDelta);
       }
     }
 
-    return new Clip(
-      child: new Transform(
-        transform: transform,
-        child: new BlockContainer(children: buildItems(itemNumber, drawCount))
+    return new SizeObserver(
+      callback: _handleSizeChanged,
+      child: new Clip(
+        child: new Transform(
+          transform: transform,
+          child: new BlockContainer(
+            children: buildItems(itemNumber, itemCount))
+        )
       )
     );
   }
