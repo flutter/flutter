@@ -6,6 +6,9 @@ class SpriteNode extends TransformNode {
   
   Image _image;
   bool constrainProportions = false;
+  double _opacity = 1.0;
+  Color colorOverlay;
+  TransferMode transferMode;
   
   SpriteNode() {
     this.pivot = new Vector2(0.5, 0.5);
@@ -15,7 +18,14 @@ class SpriteNode extends TransformNode {
     this.pivot = new Vector2(0.5, 0.5);
     _image = image;
   }
-  
+
+  double get opacity => _opacity;
+
+  void set opacity(double opacity) {
+    assert(opacity >= 0.0 && opacity <= 1.0);
+    _opacity = opacity;
+  }
+
   void paint(PictureRecorder canvas) {
 
     if (_image != null && _image.width > 0 && _image.height > 0) {
@@ -37,7 +47,18 @@ class SpriteNode extends TransformNode {
       }
       
       canvas.scale(scaleX, scaleY);
-      canvas.drawImage(_image, 0.0, 0.0, new Paint()..setARGB(255, 255, 255, 255));
+
+      // Setup paint object for opacity and transfer mode
+      Paint paint = new Paint();
+      paint.setARGB((255.0*_opacity).toInt(), 255, 255, 255);
+      if (colorOverlay != null) {
+        paint.setColorFilter(new ColorFilter(colorOverlay, TransferMode.srcATopMode));
+      }
+      if (transferMode != null) {
+        paint.setTransferMode(transferMode);
+      }
+
+      canvas.drawImage(_image, 0.0, 0.0, paint);
       canvas.restore();
     }
     else {
