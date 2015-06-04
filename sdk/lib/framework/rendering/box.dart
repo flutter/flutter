@@ -191,7 +191,7 @@ class RenderSizedBox extends RenderProxyBox {
 
   RenderSizedBox({
     RenderBox child,
-    sky.Size desiredSize: const sky.Size.infinite()
+    sky.Size desiredSize: sky.Size.infinite
   }) : super(child) {
     assert(desiredSize != null);
     this.desiredSize = desiredSize;
@@ -377,7 +377,7 @@ class BorderSide {
   final sky.Color color;
   final double width;
 
-  static const None = const BorderSide(width: 0.0);
+  static const none = const BorderSide(width: 0.0);
 
   int get hashCode {
     int value = 373;
@@ -390,10 +390,10 @@ class BorderSide {
 
 class Border {
   const Border({
-    this.top: BorderSide.None,
-    this.right: BorderSide.None,
-    this.bottom: BorderSide.None,
-    this.left: BorderSide.None
+    this.top: BorderSide.none,
+    this.right: BorderSide.none,
+    this.bottom: BorderSide.none,
+    this.left: BorderSide.none
   });
   const Border.all(BorderSide side) :
     top = side,

@@ -62,7 +62,7 @@ class RenderTouchDemo extends RenderBox {
   }
 
   void performLayout() {
-    size = constraints.constrain(new Size.infinite());
+    size = constraints.constrain(Size.infinite);
   }
 
   void paint(RenderObjectDisplayList canvas) {

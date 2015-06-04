@@ -52,7 +52,7 @@ class InkWell extends RenderBox {
   }
 
   void performLayout() {
-    size = constraints.constrain(new sky.Size.infinite());
+    size = constraints.constrain(sky.Size.infinite);
   }
 
   void paint(RenderObjectDisplayList canvas) {

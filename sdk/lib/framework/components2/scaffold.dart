@@ -75,7 +75,7 @@ class RenderScaffold extends RenderBox {
 
   bool get sizedByParent => true;
   void performResize() {
-    size = constraints.constrain(new sky.Size.infinite());
+    size = constraints.constrain(sky.Size.infinite);
     assert(size.width < double.INFINITY);
     assert(size.height < double.INFINITY);
   }

@@ -15,7 +15,7 @@ class RenderSolidColor extends RenderDecoratedBox {
   final sky.Size desiredSize;
   final sky.Color backgroundColor;
 
-  RenderSolidColor(sky.Color backgroundColor, { this.desiredSize: const sky.Size.infinite() })
+  RenderSolidColor(sky.Color backgroundColor, { this.desiredSize: sky.Size.infinite })
       : backgroundColor = backgroundColor,
         super(decoration: new BoxDecoration(backgroundColor: backgroundColor)) {
   }

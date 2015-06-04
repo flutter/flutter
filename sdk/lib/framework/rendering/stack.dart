@@ -23,11 +23,11 @@ class RenderStack extends RenderBox with ContainerRenderObjectMixin<RenderBox, S
   }
 
   sky.Size getIntrinsicDimensions(BoxConstraints constraints) {
-    return constraints.constrain(new sky.Size.infinite());
+    return constraints.constrain(sky.Size.infinite);
   }
 
   void performLayout() {
-    size = constraints.constrain(new sky.Size.infinite());
+    size = constraints.constrain(sky.Size.infinite);
     assert(size.width < double.INFINITY);
     assert(size.height < double.INFINITY);
     BoxConstraints innerConstraints = new BoxConstraints.loose(size);

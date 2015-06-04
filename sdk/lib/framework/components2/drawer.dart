@@ -115,7 +115,7 @@ class Drawer extends AnimatedComponent {
 
     var mask = new EventListenerNode(
       new Container(
-        desiredSize: new sky.Size.infinite(),
+        desiredSize: sky.Size.infinite,
         decoration: new BoxDecoration(backgroundColor: maskColor)
       ),
       onGestureTap: controller.handleMaskTap,
