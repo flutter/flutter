@@ -10,7 +10,7 @@ import '../rendering/box.dart';
 const String kAssetBase = '/packages/sky/assets/material-design-icons';
 
 class Icon extends Component {
-  double size;
+  int size;
   String type;
 
   Icon({
@@ -28,7 +28,7 @@ class Icon extends Component {
       subtype = parts[1];
     }
     return new Image(
-      size: new sky.Size(size, size),
+      size: new sky.Size(size.toDouble(), size.toDouble()),
       src: '${kAssetBase}/${category}/2x_web/ic_${subtype}_${size}dp.png'
     );
   }

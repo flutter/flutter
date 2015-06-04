@@ -5,15 +5,15 @@
 #include "sky/engine/config.h"
 #include "sky/engine/core/loader/CanvasImageLoader.h"
 #include "sky/engine/core/painting/CanvasImage.h"
-#include "sky/engine/platform/image-decoders/ImageDecoder.h"
+#include "sky/engine/core/script/dom_dart_state.h"
 #include "sky/engine/platform/SharedBuffer.h"
+#include "sky/engine/platform/image-decoders/ImageDecoder.h"
 
 namespace blink {
 
 CanvasImageLoader::CanvasImageLoader(const String& src, PassOwnPtr<ImageLoaderCallback> callback)
   : callback_(callback) {
-  // TODO(jackson): Figure out how to determine the proper base URL here
-  KURL url = KURL(KURL(), src);
+  KURL url = KURL(DOMDartState::Current()->url(), src);
   fetcher_ = adoptPtr(new MojoFetcher(this, url));
 }
 

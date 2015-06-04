@@ -44,7 +44,7 @@ class MenuItem extends ButtonBase {
           children: [
             new StyleNode(
               new Icon(
-                size: 24.0,
+                size: 24,
                 type: "${icon}_grey600"
               ),
               _iconStyle
