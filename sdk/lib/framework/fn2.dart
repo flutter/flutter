@@ -261,7 +261,7 @@ class EventListenerNode extends ContentNode  {
 /*
  * RenderObjectWrappers correspond to a desired state of a RenderObject.
  * They are fully immutable, with one exception: A UINode which is a
- * Component which lives within an OneChildListRenderObjectWrapper's
+ * Component which lives within an MultiChildRenderObjectWrapper's
  * children list, may be replaced with the "old" instance if it has
  * become stateful.
  */
@@ -414,14 +414,14 @@ class Transform extends OneChildRenderObjectWrapper {
 
 final List<UINode> _emptyList = new List<UINode>();
 
-abstract class OneChildListRenderObjectWrapper extends RenderObjectWrapper {
+abstract class MultiChildRenderObjectWrapper extends RenderObjectWrapper {
 
-  // In OneChildListRenderObjectWrapper subclasses, slots are RenderObject nodes
+  // In MultiChildRenderObjectWrapper subclasses, slots are RenderObject nodes
   // to use as the "insert before" sibling in ContainerRenderObjectMixin.add() calls
 
   final List<UINode> children;
 
-  OneChildListRenderObjectWrapper({
+  MultiChildRenderObjectWrapper({
     Object key,
     List<UINode> children
   }) : this.children = children == null ? _emptyList : children,
@@ -467,7 +467,7 @@ abstract class OneChildListRenderObjectWrapper extends RenderObjectWrapper {
     return false;
   }
 
-  void syncRenderObject(OneChildListRenderObjectWrapper old) {
+  void syncRenderObject(MultiChildRenderObjectWrapper old) {
     super.syncRenderObject(old);
 
     if (root is! ContainerRenderObjectMixin)
@@ -590,7 +590,7 @@ abstract class OneChildListRenderObjectWrapper extends RenderObjectWrapper {
   }
 }
 
-class BlockContainer extends OneChildListRenderObjectWrapper {
+class BlockContainer extends MultiChildRenderObjectWrapper {
   RenderBlock root;
   RenderBlock createNode() => new RenderBlock();
 
@@ -598,7 +598,7 @@ class BlockContainer extends OneChildListRenderObjectWrapper {
     : super(key: key, children: children);
 }
 
-class StackContainer extends OneChildListRenderObjectWrapper {
+class StackContainer extends MultiChildRenderObjectWrapper {
   RenderStack root;
   RenderStack createNode() => new RenderStack();
 
@@ -620,7 +620,7 @@ class Paragraph extends RenderObjectWrapper {
   }
 }
 
-class FlexContainer extends OneChildListRenderObjectWrapper {
+class FlexContainer extends MultiChildRenderObjectWrapper {
   RenderFlex root;
   RenderFlex createNode() => new RenderFlex(direction: this.direction);
 
