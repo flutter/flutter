@@ -350,11 +350,62 @@ class RenderImage extends RenderBox {
   }
 }
 
+class BorderSide {
+  const BorderSide({
+    this.color: const sky.Color(0xFF000000),
+    this.width: 1.0
+  });
+  final sky.Color color;
+  final double width;
+
+  static const None = const BorderSide(width: 0.0);
+
+  int get hashCode {
+    int value = 373;
+    value = 37 * value * color.hashCode;
+    value = 37 * value * width.hashCode;
+    return value;
+  }
+  String toString() => 'BorderSide($color, $width)';
+}
+
+class Border {
+  const Border({
+    this.top: BorderSide.None,
+    this.right: BorderSide.None,
+    this.bottom: BorderSide.None,
+    this.left: BorderSide.None
+  });
+  const Border.all(BorderSide side) :
+    top = side,
+    right = side,
+    bottom = side,
+    left = side;
+  final BorderSide top;
+  final BorderSide right;
+  final BorderSide bottom;
+  final BorderSide left;
+
+  int get hashCode {
+    int value = 373;
+    value = 37 * value * top.hashCode;
+    value = 37 * value * right.hashCode;
+    value = 37 * value * bottom.hashCode;
+    value = 37 * value * left.hashCode;
+    return value;
+  }
+  String toString() => 'Border($top, $right, $bottom, $left)';
+}
+
 // This must be immutable, because we won't notice when it changes
 class BoxDecoration {
-  const BoxDecoration({this.backgroundColor});
+  const BoxDecoration({
+    this.backgroundColor,
+    this.border
+  });
 
   final sky.Color backgroundColor;
+  final Border border;
 }
 
 class RenderDecoratedBox extends RenderProxyBox {
@@ -362,11 +413,14 @@ class RenderDecoratedBox extends RenderProxyBox {
   RenderDecoratedBox({
     BoxDecoration decoration,
     RenderBox child
-  }) : _decoration = decoration, super(child);
+  }) : _decoration = decoration, super(child) {
+    assert(_decoration != null);
+  }
 
   BoxDecoration _decoration;
   BoxDecoration get decoration => _decoration;
   void set decoration (BoxDecoration value) {
+    assert(value != null);
     if (value == _decoration)
       return;
     _decoration = value;
@@ -377,13 +431,57 @@ class RenderDecoratedBox extends RenderProxyBox {
     assert(size.width != null);
     assert(size.height != null);
 
-    if (_decoration == null)
-      return;
-
     if (_decoration.backgroundColor != null) {
       sky.Paint paint = new sky.Paint()..color = _decoration.backgroundColor;
       canvas.drawRect(new sky.Rect.fromLTRB(0.0, 0.0, size.width, size.height), paint);
     }
+
+    if (_decoration.border != null) {
+      assert(_decoration.border.top != null);
+      assert(_decoration.border.right != null);
+      assert(_decoration.border.bottom != null);
+      assert(_decoration.border.left != null);
+
+      sky.Paint paint = new sky.Paint();
+      sky.Path path;
+
+      paint.color = _decoration.border.top.color;
+      path = new sky.Path();
+      path.moveTo(0.0,0.0);
+      path.lineTo(_decoration.border.left.width, _decoration.border.top.width);
+      path.lineTo(size.width - _decoration.border.right.width, _decoration.border.top.width);
+      path.lineTo(size.width, 0.0);
+      path.close();
+      canvas.drawPath(path, paint);
+
+      paint.color = _decoration.border.right.color;
+      path = new sky.Path();
+      path.moveTo(size.width, 0.0);
+      path.lineTo(size.width - _decoration.border.right.width, _decoration.border.top.width);
+      path.lineTo(size.width - _decoration.border.right.width, size.height - _decoration.border.bottom.width);
+      path.lineTo(size.width, size.height);
+      path.close();
+      canvas.drawPath(path, paint);
+
+      paint.color = _decoration.border.bottom.color;
+      path = new sky.Path();
+      path.moveTo(size.width, size.height);
+      path.lineTo(size.width - _decoration.border.right.width, size.height - _decoration.border.bottom.width);
+      path.lineTo(_decoration.border.left.width, size.height - _decoration.border.bottom.width);
+      path.lineTo(0.0, size.height);
+      path.close();
+      canvas.drawPath(path, paint);
+
+      paint.color = _decoration.border.left.color;
+      path = new sky.Path();
+      path.moveTo(0.0, size.height);
+      path.lineTo(_decoration.border.left.width, size.height - _decoration.border.bottom.width);
+      path.lineTo(_decoration.border.left.width, _decoration.border.top.width);
+      path.lineTo(0.0,0.0);
+      path.close();
+      canvas.drawPath(path, paint);
+    }
+
     super.paint(canvas);
   }
 }
