@@ -329,9 +329,9 @@ abstract class OneChildRenderObjectWrapper extends RenderObjectWrapper {
 
   OneChildRenderObjectWrapper({ this.child, Object key }) : super(key: key);
 
-  void syncRenderObject(RenderNodeWrapper old) {
-    super.syncRenderNode(old);
-    UINode oldChild = old == null ? null : (old as OneChildRenderNodeWrapper).child;
+  void syncRenderObject(RenderObjectWrapper old) {
+    super.syncRenderObject(old);
+    UINode oldChild = old == null ? null : (old as OneChildRenderObjectWrapper).child;
     syncChild(child, oldChild, null);
   }
 
@@ -437,7 +437,7 @@ abstract class OneChildListRenderObjectWrapper extends RenderObjectWrapper {
   }
 
   void removeChild(UINode node) {
-    assert(root is ContainerRenderNodeMixin);
+    assert(root is ContainerRenderObjectMixin);
     root.remove(node.root);
     super.removeChild(node);
   }
