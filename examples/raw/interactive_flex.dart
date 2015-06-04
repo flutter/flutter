@@ -9,7 +9,7 @@ import 'package:sky/framework/app.dart';
 import 'package:sky/framework/rendering/box.dart';
 import 'package:sky/framework/rendering/block.dart';
 import 'package:sky/framework/rendering/flex.dart';
-import 'package:sky/framework/rendering/node.dart';
+import 'package:sky/framework/rendering/object.dart';
 import 'package:sky/framework/rendering/paragraph.dart';
 import '../lib/solid_color_box.dart';
 

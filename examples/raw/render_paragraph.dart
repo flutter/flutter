@@ -5,7 +5,7 @@
 import 'dart:sky';
 import 'package:sky/framework/app.dart';
 import 'package:sky/framework/rendering/box.dart';
-import 'package:sky/framework/rendering/node.dart';
+import 'package:sky/framework/rendering/object.dart';
 import 'package:sky/framework/rendering/flex.dart';
 import 'package:sky/framework/rendering/paragraph.dart';
 import '../lib/solid_color_box.dart';
@@ -15,12 +15,12 @@ AppView app;
 void main() {
   RenderFlex flexRoot = new RenderFlex(direction: FlexDirection.Vertical);
 
-  RenderNode root = new RenderDecoratedBox(
+  RenderObject root = new RenderDecoratedBox(
     decoration: new BoxDecoration(backgroundColor: const Color(0xFF606060)),
     child: flexRoot
   );
 
-  RenderNode child = new RenderSolidColorBox(const Color(0xFFFFFF00));
+  RenderObject child = new RenderSolidColorBox(const Color(0xFFFFFF00));
   flexRoot.add(child);
   child.parentData.flex = 2;
 
