@@ -7,7 +7,7 @@ import 'package:sky/framework/fn2.dart';
 import 'package:sky/framework/rendering/box.dart';
 import '../lib/solid_color_box.dart';
 
-class Rectangle extends RenderNodeWrapper {
+class Rectangle extends RenderObjectWrapper {
   RenderSolidColorBox root;
   RenderSolidColorBox createNode() =>
       new RenderSolidColorBox(color, desiredSize: new sky.Size(40.0, 130.0));
