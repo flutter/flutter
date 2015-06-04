@@ -53,7 +53,7 @@ void main() {
     child.parentData.flex = flex;
   }
 
-  var row = new RenderFlex(direction: FlexDirection.Horizontal);
+  var row = new RenderFlex(direction: FlexDirection.horizontal);
 
   // Left cell
   addFlexChildSolidColor(row, const Color(0xFF00D2B8), flex: 1);
@@ -64,7 +64,7 @@ void main() {
   var padding = new RenderPadding(padding: const EdgeDims.all(10.0), child: image);
   row.add(padding);
 
-  RenderFlex column = new RenderFlex(direction: FlexDirection.Vertical);
+  RenderFlex column = new RenderFlex(direction: FlexDirection.vertical);
 
   // Top cell
   addFlexChildSolidColor(column, const Color(0xFF55DDCA), flex: 1);

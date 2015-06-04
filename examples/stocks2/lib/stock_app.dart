@@ -26,7 +26,7 @@ import 'package:sky/framework/rendering/box.dart';
 import 'dart:async';
 import 'dart:sky' as sky;
 
-enum StockMode { Optimistic, Pessimistic }
+enum StockMode { optimistic, pessimistic }
 
 class StocksApp extends App {
 
@@ -106,7 +106,7 @@ class StocksApp extends App {
     });
   }
 
-  StockMode _stockMode = StockMode.Optimistic;
+  StockMode _stockMode = StockMode.optimistic;
   void _handleStockModeChange(StockMode value) {
     setState(() {
       _stockMode = value;
@@ -133,18 +133,18 @@ class StocksApp extends App {
         // new MenuItem(
         //   key: 'Optimistic Menu Item',
         //   icon: 'action/thumb_up',
-        //   onGestureTap: (event) => _handleStockModeChange(StockMode.Optimistic),
+        //   onGestureTap: (event) => _handleStockModeChange(StockMode.optimistic),
         //   children: [
         //     new ParentDataNode(new Text('Optimistic'), _flex1),
-        //     new Radio(key: 'optimistic-radio', value: StockMode.Optimistic, groupValue: _stockMode, onChanged: _handleStockModeChange)
+        //     new Radio(key: 'optimistic-radio', value: StockMode.optimistic, groupValue: _stockMode, onChanged: _handleStockModeChange)
         //   ]),
         // new MenuItem(
         //   key: 'Pessimistic Menu Item',
         //   icon: 'action/thumb_down',
-        //   onGestureTap: (event) => _handleStockModeChange(StockMode.Pessimistic),
+        //   onGestureTap: (event) => _handleStockModeChange(StockMode.pessimistic),
         //   children: [
         //     new ParentDataNode(new Text('Pessimistic'), _flex1),
-        //     new Radio(key: 'pessimistic-radio', value: StockMode.Pessimistic, groupValue: _stockMode, onChanged: _handleStockModeChange)
+        //     new Radio(key: 'pessimistic-radio', value: StockMode.pessimistic, groupValue: _stockMode, onChanged: _handleStockModeChange)
         //   ]),
         // new MenuDivider(key: 'div2'),
         new MenuItem(

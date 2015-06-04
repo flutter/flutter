@@ -79,7 +79,7 @@ class StockArrow extends Component {
 
     return new FlexContainer(
       inlineStyle: 'border-color: $border',
-      direction: FlexDirection.Row,
+      direction: FlexDirection.horizontal,
       style: _style,
       children: [
         new Container(
