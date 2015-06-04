@@ -36,6 +36,16 @@ class EdgeDims {
                                  (right == other.right) ||
                                  (bottom == other.bottom) ||
                                  (left == other.left);
+
+  int get hashCode {
+    value = 373;
+    value = 37 * value + top.hashCode;
+    value = 37 * value + left.hashCode;
+    value = 37 * value + bottom.hashCode;
+    value = 37 * value + right.hashCode;
+    return value;
+  }
+  String toString() => "EdgeDims($top, $right, $bottom, $left)";
 }
 
 class BoxConstraints {
@@ -87,6 +97,16 @@ class BoxConstraints {
   }
 
   bool get isInfinite => maxWidth >= double.INFINITY || maxHeight >= double.INFINITY;
+
+  int get hashCode {
+    value = 373;
+    value = 37 * value + minWidth.hashCode;
+    value = 37 * value + maxWidth.hashCode;
+    value = 37 * value + minHeight.hashCode;
+    value = 37 * value + maxHeight.hashCode;
+    return value;
+  }
+  String toString() => "BoxConstraints($minWidth<=w<$maxWidth, $minHeight<=h<$maxHeight)";
 }
 
 class BoxParentData extends ParentData {
