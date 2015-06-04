@@ -553,14 +553,8 @@ class RenderTransform extends RenderProxyBox {
   }
 
   void paint(RenderObjectDisplayList canvas) {
-    Float32List storage = _transform.storage;
-
     canvas.save();
-    canvas.concat([
-      storage[ 0], storage[ 4], storage[12],
-      storage[ 1], storage[ 5], storage[13],
-      storage[ 3], storage[ 7], storage[15],
-    ]);
+    canvas.concat(_transform.storage);
     super.paint(canvas);
     canvas.restore();
   }
