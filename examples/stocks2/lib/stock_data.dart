@@ -55,11 +55,11 @@ class StockDataFetcher {
   final StockDataCallback callback;
 
   StockDataFetcher(this.callback) {
-    // _fetchNextChunk(); // TODO(ianh): crashes
+    _fetchNextChunk();
   }
 
   void _fetchNextChunk() {
-    fetch('data/stock_data_${_currentChunk++}.json').then((Response response) {
+    fetch('../data/stock_data_${_currentChunk++}.json').then((Response response) {
       String json = response.bodyAsString();
       JsonDecoder decoder = new JsonDecoder();
 

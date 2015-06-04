@@ -20,7 +20,7 @@ import 'package:sky/framework/theme2/typography.dart' as typography;
 import 'package:sky/framework/theme2/colors.dart' as colors;
 import 'stock_data.dart';
 import 'package:sky/framework/rendering/box.dart';
-// import 'stock_list.dart';
+import 'stock_list.dart';
 // import 'stock_menu.dart';
 
 import 'dart:async';

@@ -15,7 +15,7 @@ class Stocklist extends FixedHeightScrollable {
     Object key,
     this.stocks,
     this.query
-  }) : super(key: key);
+  }) : super(itemHeight: StockRow.kHeight, key: key);
 
   List<UINode> buildItems(int start, int count) {
     var filteredStocks = stocks.where((stock) {
