@@ -127,19 +127,22 @@ void Engine::OnViewportMetricsChanged(int width, int height,
   physical_size_.SetSize(width, height);
   device_pixel_ratio_ = device_pixel_ratio;
 
-  if (sky_view_) {
-    blink::SkyDisplayMetrics metrics;
-    metrics.physical_size = physical_size_;
-    metrics.device_pixel_ratio = device_pixel_ratio_;
-    sky_view_->SetDisplayMetrics(metrics);
-  }
+  if (sky_view_)
+    UpdateSkyViewSize();
 
   if (web_view_)
     UpdateWebViewSize();
 }
 
-void Engine::UpdateWebViewSize()
-{
+void Engine::UpdateSkyViewSize() {
+  CHECK(sky_view_);
+  blink::SkyDisplayMetrics metrics;
+  metrics.physical_size = physical_size_;
+  metrics.device_pixel_ratio = device_pixel_ratio_;
+  sky_view_->SetDisplayMetrics(metrics);
+}
+
+void Engine::UpdateWebViewSize() {
   CHECK(web_view_);
   web_view_->setDeviceScaleFactor(device_pixel_ratio_);
   gfx::SizeF size = gfx::ScaleSize(physical_size_, 1 / device_pixel_ratio_);
@@ -172,8 +175,13 @@ void Engine::OnInputEvent(InputEventPtr event) {
 void Engine::LoadURL(const mojo::String& mojo_url) {
   GURL url(mojo_url);
   if (!blink::WebView::shouldUseWebView(url)) {
+    if (web_view_) {
+      web_view_->close();
+      web_view_ = nullptr;
+    }
     sky_view_ = blink::SkyView::Create(this);
     sky_view_->Load(url);
+    UpdateSkyViewSize();
     return;
   }
 

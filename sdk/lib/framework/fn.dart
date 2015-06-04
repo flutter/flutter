@@ -609,7 +609,7 @@ class FlexContainer extends OneChildListRenderNodeWrapper {
     List<UINode> children,
     Style style,
     String inlineStyle,
-    this.direction: FlexDirection.horizontal
+    this.direction: FlexDirection.Row
   }) : super(
     key: key,
     children: children,

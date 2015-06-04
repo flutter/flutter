@@ -92,6 +92,7 @@ class Engine : public UIDelegate,
   void DidNavigateLocally(const mojo::String& url) override;
   void RequestNavigateHistory(int32_t delta) override;
 
+  void UpdateSkyViewSize();
   void UpdateWebViewSize();
 
   Config config_;
