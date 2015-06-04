@@ -33,11 +33,15 @@ class AppView {
 
   Map<int, PointerState> _stateForPointer = new Map<int, PointerState>();
 
+  Function onFrame;
+
   RenderBox get root => _renderView.child;
   void set root(RenderBox value) {
     _renderView.child = value;
   }
   void _beginFrame(double timeStamp) {
+    if (onFrame != null)
+      onFrame();
     RenderObject.flushLayout();
     _renderView.paintFrame();
   }
@@ -92,4 +96,11 @@ class AppView {
     for (RenderObject node in result.path.reversed)
       node.handleEvent(event);
   }
+
+  String toString() => 'Render Tree:\n${_renderView}';
+
+  void debugDumpRenderTree() {
+    toString().split('\n').forEach(print);
+  }
+  
 }

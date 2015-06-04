@@ -224,12 +224,9 @@ abstract class RenderObject extends AbstractNode {
   String toString([String prefix = '']) {
     String header = '${runtimeType}\n';
     prefix += '  ';
-    String settings = '${debugDescribeSettings(prefix)}';
-    if (settings != '')
-      settings += '\n';
-    return '${header}${settings}${debugDescribeChildren(prefix)}';
+    return '${header}${debugDescribeSettings(prefix)}${debugDescribeChildren(prefix)}';
   }
-  String debugDescribeSettings(String prefix) => '${prefix}parentData: ${parentData}';
+  String debugDescribeSettings(String prefix) => '${prefix}parentData: ${parentData}\n';
   String debugDescribeChildren(String prefix) => '';
 
 }
@@ -425,8 +422,6 @@ abstract class ContainerRenderObjectMixin<ChildType extends RenderObject, Parent
     int count = 1;
     ChildType child = _firstChild;
     while (child != null) {
-      if (result != '')
-        result += '\n';
       result += '${prefix}child ${count}: ${child.toString(prefix)}';
       count += 1;
       child = child.parentData.nextSibling;

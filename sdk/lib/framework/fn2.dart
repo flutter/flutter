@@ -985,6 +985,7 @@ abstract class App extends Component {
   }
 
   AppView _appView;
+  AppView get appView => _appView;
 
   void _buildIfDirty() {
     assert(_dirty);

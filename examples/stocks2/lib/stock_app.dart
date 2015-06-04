@@ -218,5 +218,9 @@ class StocksApp extends App {
 
 void main() {
   print("starting stocks app!");
-  new StocksApp();
+  App app = new StocksApp();
+  app.appView.onFrame = () {
+    // uncomment this for debugging:
+    // app.appView.debugDumpRenderTree();
+  };
 }

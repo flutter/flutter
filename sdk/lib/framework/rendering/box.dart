@@ -150,6 +150,8 @@ abstract class RenderBox extends RenderObject {
   void hitTestChildren(HitTestResult result, { sky.Point position }) { }
 
   sky.Size size = new sky.Size(0.0, 0.0);
+
+  String debugDescribeSettings(String prefix) => '${super.debugDescribeSettings(prefix)}${prefix}size: ${size}\n';
 }
 
 abstract class RenderProxyBox extends RenderBox with RenderObjectWithChildMixin<RenderBox> {
@@ -215,7 +217,7 @@ class RenderSizedBox extends RenderProxyBox {
       child.layout(new BoxConstraints.tight(size));
   }
 
-  String debugDescribeSettings(String prefix) => '${prefix}desiredSize: ${desiredSize}';
+  String debugDescribeSettings(String prefix) => '${super.debugDescribeSettings(prefix)}${prefix}desiredSize: ${desiredSize}\n';
 }
 
 class RenderClip extends RenderProxyBox {
@@ -288,7 +290,7 @@ class RenderPadding extends RenderBox with RenderObjectWithChildMixin<RenderBox>
     }
   }
 
-  String debugDescribeSettings(String prefix) => '${prefix}padding: ${padding}';
+  String debugDescribeSettings(String prefix) => '${super.debugDescribeSettings(prefix)}${prefix}padding: ${padding}\n';
 }
 
 class RenderImage extends RenderBox {
@@ -364,7 +366,7 @@ class RenderImage extends RenderBox {
       canvas.restore();
   }
 
-  String debugDescribeSettings(String prefix) => '${prefix}url: ${src}\n${prefix}dimensions: ${requestedSize}';
+  String debugDescribeSettings(String prefix) => '${super.debugDescribeSettings(prefix)}${prefix}url: ${src}\n${prefix}dimensions: ${requestedSize}\n';
 }
 
 class BorderSide {
@@ -513,7 +515,7 @@ class RenderDecoratedBox extends RenderProxyBox {
     super.paint(canvas);
   }
 
-  String debugDescribeSettings(String prefix) => '${prefix}decoration:\n${decoration.toString(prefix + "  ")}';
+  String debugDescribeSettings(String prefix) => '${super.debugDescribeSettings(prefix)}${prefix}decoration:\n${decoration.toString(prefix + "  ")}\n';
 }
 
 class RenderTransform extends RenderProxyBox {
@@ -576,6 +578,12 @@ class RenderTransform extends RenderProxyBox {
     canvas.concat(_transform.storage);
     super.paint(canvas);
     canvas.restore();
+  }
+
+  String debugDescribeSettings(String prefix) {
+    List<String> result = _transform.toString().split('\n').map((s) => '$prefix  $s\n').toList();
+    result.removeLast();
+    return '${super.debugDescribeSettings(prefix)}${prefix}transform matrix:\n${result.join()}';
   }
 }
 
