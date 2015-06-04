@@ -192,9 +192,7 @@ void ScheduleMicrotask(Dart_NativeArguments args) {
 }
 
 void GetBaseURLString(Dart_NativeArguments args) {
-  String url;
-  if (Document* document = DOMDartState::CurrentDocument())
-    url = document->url().string();
+  String url = DOMDartState::Current()->url();
   Dart_SetReturnValue(args, StringToDart(DartState::Current(), url));
 }
 

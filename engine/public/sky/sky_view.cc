@@ -53,7 +53,7 @@ void SkyView::Load(const WebURL& url, mojo::URLResponsePtr response) {
   data_->view_->setDisplayMetrics(display_metrics_);
 
   dart_controller_.reset(new DartController);
-  dart_controller_->CreateIsolateFor(adoptPtr(new DOMDartState(nullptr)), url);
+  dart_controller_->CreateIsolateFor(adoptPtr(new DOMDartState(nullptr, url)));
   dart_controller_->InstallView(data_->view_.get());
 
   {

@@ -314,13 +314,13 @@ static void MessageNotifyCallback(Dart_Isolate dest_isolate) {
       base::Bind(&CallHandleMessage, DartState::From(dest_isolate)->GetWeakPtr()));
 }
 
-void DartController::CreateIsolateFor(PassOwnPtr<DOMDartState> state,
-                                      const KURL& url) {
+void DartController::CreateIsolateFor(PassOwnPtr<DOMDartState> state) {
   CHECK(kDartIsolateSnapshotBuffer);
   char* error = nullptr;
   dom_dart_state_ = state;
   Dart_Isolate isolate = Dart_CreateIsolate(
-      url.string().utf8().data(), "main", kDartIsolateSnapshotBuffer,
+      dom_dart_state_->url().string().utf8().data(), "main",
+      kDartIsolateSnapshotBuffer,
       static_cast<DartState*>(dom_dart_state_.get()), &error);
   Dart_SetMessageNotifyCallback(MessageNotifyCallback);
   CHECK(isolate) << error;

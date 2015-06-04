@@ -45,8 +45,7 @@ class DartController {
                               HTMLScriptElement* script);
 
   void ClearForClose();
-  void CreateIsolateFor(PassOwnPtr<DOMDartState> dom_dart_state,
-                        const KURL& url);
+  void CreateIsolateFor(PassOwnPtr<DOMDartState> dom_dart_state);
   void InstallView(View* view);
 
   DOMDartState* dart_state() const { return dom_dart_state_.get(); }

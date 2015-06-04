@@ -11,8 +11,8 @@
 
 namespace blink {
 
-DOMDartState::DOMDartState(Document* document)
-    : document_(document), loader_(adoptPtr(new DartLoader(this))) {
+DOMDartState::DOMDartState(Document* document, const KURL& url)
+    : document_(document), url_(url), loader_(adoptPtr(new DartLoader(this))) {
 }
 
 DOMDartState::~DOMDartState() {

@@ -17,7 +17,7 @@ class LocalDOMWindow;
 
 class DOMDartState : public DartState {
  public:
-  explicit DOMDartState(Document* document);
+  explicit DOMDartState(Document* document, const KURL& url);
   ~DOMDartState() override;
 
   virtual void DidSetIsolate();
@@ -27,6 +27,8 @@ class DOMDartState : public DartState {
   static Document* CurrentDocument();
   static LocalFrame* CurrentFrame();
   static LocalDOMWindow* CurrentWindow();
+
+  const KURL& url() const { return url_; }
 
   Document* document() const { return document_.get(); }
   DartLoader& loader() const { return *loader_; }
@@ -40,6 +42,7 @@ class DOMDartState : public DartState {
 
  private:
   RefPtr<Document> document_;
+  KURL url_;
   OwnPtr<DartLoader> loader_;
 
   DartPersistentValue x_handle_;
