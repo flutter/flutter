@@ -574,7 +574,8 @@ abstract class MultiChildRenderObjectWrapper extends RenderObjectWrapper {
 
       oldNodeIdMap[currentNode._key] = null; // mark it reordered
       assert(root is ContainerRenderObjectMixin);
-      assert(oldNode.root is ContainerRenderObjectMixin);
+      assert(old.root is ContainerRenderObjectMixin);
+      assert(oldNode.root != null);
 
       old.root.remove(oldNode.root);
       root.add(oldNode.root, before: nextSibling);
