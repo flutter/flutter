@@ -29,7 +29,7 @@ class ToolBar extends Component {
       new FlexExpandingChild(
         new Padding(
           child: center,
-          padding: new EdgeDims.onlyLeft(24.0)
+          padding: new EdgeDims.only(left: 24.0)
         ))
     ];
 

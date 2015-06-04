@@ -2,34 +2,19 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:sky' as sky;
 import '../fn2.dart';
+import '../rendering/box.dart';
+import '../rendering/flex.dart';
 import 'button_base.dart';
 import 'icon.dart';
 import 'ink_well.dart';
 
 class MenuItem extends ButtonBase {
-  static final Style _style = new Style('''
-    align-items: center;
-    height: 48px;
-    -webkit-user-select: none;'''
-  );
 
-  static final Style _highlightStyle = new Style('''
-    align-items: center;
-    height: 48px;
-    background: rgba(153, 153, 153, 0.4);
-    -webkit-user-select: none;'''
-  );
-
-  static final Style _iconStyle = new Style('''
-    padding: 0px 16px;'''
-  );
-
-  static final Style _labelStyle = new Style('''
-    padding: 0px 16px;'''
-  );
-
-  static final FlexBoxParentData _labelFlex = new FlexBoxParentData()..flex = 1;
+  static const BoxDecoration highlightDecoration = const BoxDecoration(
+    backgroundColor: const sky.Color.fromARGB(102, 153, 153, 153)
+  ); 
 
   List<UINode> children;
   String icon;
@@ -39,27 +24,27 @@ class MenuItem extends ButtonBase {
 
   UINode buildContent() {
     return new EventListenerNode(
-      new StyleNode(
-        new InkWell(
+      new Container(
+        child: new InkWell(
           children: [
-            new StyleNode(
-              new Icon(
-                size: 24,
-                type: "${icon}_grey600"
-              ),
-              _iconStyle
+            new Padding(
+              child: new Icon(type: "${icon}_grey600", size: 24),
+              padding: const EdgeDims.symmetric(horizontal: 16.0)
             ),
-            new ParentDataNode(
-              new FlexContainer(
-                direction: FlexDirection.Row,
-                style: _labelStyle,
-                children: children
+            new FlexExpandingChild(
+              new Padding(
+                child: new FlexContainer(
+                  direction: FlexDirection.Horizontal,
+                  children: children
+                ),
+                padding: const EdgeDims.symmetric(horizontal: 16.0)
               ),
-              _labelFlex
+              1
             )
           ]
         ),
-        highlight ? _highlightStyle : _style
+        desiredSize: const sky.Size.fromHeight(48.0),
+        decoration: highlight ? highlightDecoration : null
       ),
       onGestureTap: onGestureTap
     );

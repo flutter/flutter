@@ -10,7 +10,7 @@ import 'package:sky/framework/components2/drawer.dart';
 import 'package:sky/framework/components2/icon_button.dart';
 // import 'package:sky/framework/components2/input.dart';
 // import 'package:sky/framework/components2/menu_divider.dart';
-// import 'package:sky/framework/components2/menu_item.dart';
+import 'package:sky/framework/components2/menu_item.dart';
 // import 'package:sky/framework/components2/modal_overlay.dart';
 // import 'package:sky/framework/components2/popup_menu.dart';
 // import 'package:sky/framework/components2/radio.dart';
@@ -118,45 +118,44 @@ class StocksApp extends App {
   Drawer buildDrawer() {
     return new Drawer(
       controller: _drawerController,
-      level: 3
-  // ,
-  //     children: [
-  //       new DrawerHeader(children: [new Text('Stocks')]),
-  //       new MenuItem(
-  //         key: 'Stock list',
-  //         icon: 'action/assessment',
-  //         children: [new Text('Stock List')]),
-  //       new MenuItem(
-  //         key: 'Account Balance',
-  //         icon: 'action/account_balance',
-  //         children: [new Text('Account Balance')]),
-  //       new MenuDivider(key: 'div1'),
-  //       new MenuItem(
-  //         key: 'Optimistic Menu Item',
-  //         icon: 'action/thumb_up',
-  //         onGestureTap: (event) => _handleStockModeChange(StockMode.Optimistic),
-  //         children: [
-  //           new ParentDataNode(new Text('Optimistic'), _flex1),
-  //           new Radio(key: 'optimistic-radio', value: StockMode.Optimistic, groupValue: _stockMode, onChanged: _handleStockModeChange)
-  //         ]),
-  //       new MenuItem(
-  //         key: 'Pessimistic Menu Item',
-  //         icon: 'action/thumb_down',
-  //         onGestureTap: (event) => _handleStockModeChange(StockMode.Pessimistic),
-  //         children: [
-  //           new ParentDataNode(new Text('Pessimistic'), _flex1),
-  //           new Radio(key: 'pessimistic-radio', value: StockMode.Pessimistic, groupValue: _stockMode, onChanged: _handleStockModeChange)
-  //         ]),
-  //       new MenuDivider(key: 'div2'),
-  //       new MenuItem(
-  //         key: 'Settings',
-  //         icon: 'action/settings',
-  //         children: [new Text('Settings')]),
-  //       new MenuItem(
-  //         key: 'Help & Feedback',
-  //         icon: 'action/help',
-  //         children: [new Text('Help & Feedback')])
-  //    ]
+      level: 3,
+      children: [
+        // new DrawerHeader(children: [new Text('Stocks')]),
+        new MenuItem(
+          key: 'Stock list',
+          icon: 'action/assessment',
+          children: [new Text('Stock List')]),
+        new MenuItem(
+          key: 'Account Balance',
+          icon: 'action/account_balance',
+          children: [new Text('Account Balance')]),
+        // new MenuDivider(key: 'div1'),
+        // new MenuItem(
+        //   key: 'Optimistic Menu Item',
+        //   icon: 'action/thumb_up',
+        //   onGestureTap: (event) => _handleStockModeChange(StockMode.Optimistic),
+        //   children: [
+        //     new ParentDataNode(new Text('Optimistic'), _flex1),
+        //     new Radio(key: 'optimistic-radio', value: StockMode.Optimistic, groupValue: _stockMode, onChanged: _handleStockModeChange)
+        //   ]),
+        // new MenuItem(
+        //   key: 'Pessimistic Menu Item',
+        //   icon: 'action/thumb_down',
+        //   onGestureTap: (event) => _handleStockModeChange(StockMode.Pessimistic),
+        //   children: [
+        //     new ParentDataNode(new Text('Pessimistic'), _flex1),
+        //     new Radio(key: 'pessimistic-radio', value: StockMode.Pessimistic, groupValue: _stockMode, onChanged: _handleStockModeChange)
+        //   ]),
+        // new MenuDivider(key: 'div2'),
+        new MenuItem(
+          key: 'Settings',
+          icon: 'action/settings',
+          children: [new Text('Settings')]),
+        new MenuItem(
+          key: 'Help & Feedback',
+          icon: 'action/help',
+          children: [new Text('Help & Feedback')])
+     ]
     );
   }
 

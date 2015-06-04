@@ -17,15 +17,13 @@ class EdgeDims {
   const EdgeDims(this.top, this.right, this.bottom, this.left);
   const EdgeDims.all(double value)
       : top = value, right = value, bottom = value, left = value;
-
-  const EdgeDims.onlyLeft(double value)
-      : top = 0.0, right = 0.0, bottom = 0.0, left = value;
-  const EdgeDims.onlyRight(double value)
-    : top = 0.0, right = value, bottom = 0.0, left = 0.0;
-  const EdgeDims.onlyTop(double value)
-    : top = value, right = 0.0, bottom = 0.0, left = 0.0;
-  const EdgeDims.onlyBottom(double value)
-    : top = 0.0, right = 0.0, bottom = value, left = 0.0;
+  const EdgeDims.only({ this.top: 0.0,
+                        this.right: 0.0,
+                        this.bottom: 0.0,
+                        this.left: 0.0 });
+  const EdgeDims.symmetric({ double vertical: 0.0,
+                             double horizontal: 0.0 })
+    : top = vertical, left = horizontal, bottom = vertical, right = horizontal;
 
   final double top;
   final double right;
