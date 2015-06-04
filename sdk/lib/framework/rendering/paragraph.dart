@@ -4,9 +4,9 @@
 
 import 'dart:sky' as sky;
 import 'box.dart';
-import 'node.dart';
+import 'object.dart';
 
-class RenderInline extends RenderNode {
+class RenderInline extends RenderObject {
   String data;
 
   RenderInline(this.data);
@@ -55,7 +55,7 @@ class RenderParagraph extends RenderBox {
     size = constraints.constrain(new sky.Size(_layoutRoot.rootElement.width, _layoutRoot.rootElement.height));
   }
 
-  void paint(RenderNodeDisplayList canvas) {
+  void paint(RenderObjectDisplayList canvas) {
     // _layoutRoot.rootElement.style['color'] = 'rgba(' + ...color... + ')';
     _layoutRoot.paint(canvas);
   }

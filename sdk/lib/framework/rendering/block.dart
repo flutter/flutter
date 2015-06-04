@@ -4,11 +4,11 @@
 
 import 'dart:sky' as sky;
 import 'box.dart';
-import 'node.dart';
+import 'object.dart';
 
 class BlockParentData extends BoxParentData with ContainerParentDataMixin<RenderBox> { }
 
-class RenderBlock extends RenderBox with ContainerRenderNodeMixin<RenderBox, BlockParentData>,
+class RenderBlock extends RenderBox with ContainerRenderObjectMixin<RenderBox, BlockParentData>,
                                          RenderBoxContainerDefaultsMixin<RenderBox, BlockParentData> {
   // lays out RenderBox children in a vertical stack
   // uses the maximum width provided by the parent
@@ -68,7 +68,7 @@ class RenderBlock extends RenderBox with ContainerRenderNodeMixin<RenderBox, Blo
     defaultHitTestChildren(result, position: position);
   }
 
-  void paint(RenderNodeDisplayList canvas) {
+  void paint(RenderObjectDisplayList canvas) {
     defaultPaint(canvas);
   }
 

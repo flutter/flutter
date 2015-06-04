@@ -4,7 +4,7 @@
 
 import 'dart:sky' as sky;
 import 'box.dart';
-import 'node.dart';
+import 'object.dart';
 
 class FlexBoxParentData extends BoxParentData with ContainerParentDataMixin<RenderBox> {
   int flex;
@@ -17,7 +17,7 @@ class FlexBoxParentData extends BoxParentData with ContainerParentDataMixin<Rend
 
 enum FlexDirection { Horizontal, Vertical }
 
-class RenderFlex extends RenderBox with ContainerRenderNodeMixin<RenderBox, FlexBoxParentData>,
+class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, FlexBoxParentData>,
                                         RenderBoxContainerDefaultsMixin<RenderBox, FlexBoxParentData> {
   // lays out RenderBox children using flexible layout
 
@@ -114,7 +114,7 @@ class RenderFlex extends RenderBox with ContainerRenderNodeMixin<RenderBox, Flex
     defaultHitTestChildren(result, position: position);
   }
 
-  void paint(RenderNodeDisplayList canvas) {
+  void paint(RenderObjectDisplayList canvas) {
     defaultPaint(canvas);
   }
 }

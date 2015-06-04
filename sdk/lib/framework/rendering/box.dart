@@ -5,7 +5,7 @@
 import 'dart:math' as math;
 import 'dart:sky' as sky;
 import 'dart:typed_data';
-import 'node.dart';
+import 'object.dart';
 import 'package:vector_math/vector_math.dart';
 import 'package:sky/framework/net/image_cache.dart' as image_cache;
 
@@ -113,9 +113,9 @@ class BoxParentData extends ParentData {
   sky.Point position = new sky.Point(0.0, 0.0);
 }
 
-abstract class RenderBox extends RenderNode {
+abstract class RenderBox extends RenderObject {
 
-  void setParentData(RenderNode child) {
+  void setParentData(RenderObject child) {
     if (child.parentData is! BoxParentData)
       child.parentData = new BoxParentData();
   }
@@ -153,7 +153,7 @@ abstract class RenderBox extends RenderNode {
   sky.Size size = new sky.Size(0.0, 0.0);
 }
 
-abstract class RenderProxyBox extends RenderBox with RenderNodeWithChildMixin<RenderBox> {
+abstract class RenderProxyBox extends RenderBox with RenderObjectWithChildMixin<RenderBox> {
   RenderProxyBox(RenderBox child) {
     this.child = child;
   }
@@ -180,7 +180,7 @@ abstract class RenderProxyBox extends RenderBox with RenderNodeWithChildMixin<Re
       super.hitTestChildren(result, position: position);
   }
 
-  void paint(RenderNodeDisplayList canvas) {
+  void paint(RenderObjectDisplayList canvas) {
     if (child != null)
       child.paint(canvas);
   }
@@ -217,7 +217,7 @@ class RenderSizedBox extends RenderProxyBox {
   }
 }
 
-class RenderPadding extends RenderBox with RenderNodeWithChildMixin<RenderBox> {
+class RenderPadding extends RenderBox with RenderObjectWithChildMixin<RenderBox> {
 
   RenderPadding({ EdgeDims padding, RenderBox child }) {
     assert(padding != null);
@@ -258,7 +258,7 @@ class RenderPadding extends RenderBox with RenderNodeWithChildMixin<RenderBox> {
                                               padding.top + child.size.height + padding.bottom));
   }
 
-  void paint(RenderNodeDisplayList canvas) {
+  void paint(RenderObjectDisplayList canvas) {
     if (child != null)
       canvas.paintChild(child, child.parentData.position);
   }
@@ -334,7 +334,7 @@ class RenderImage extends RenderBox {
     }
   }
 
-  void paint(RenderNodeDisplayList canvas) {
+  void paint(RenderObjectDisplayList canvas) {
     if (_image == null) return;
     bool needsScale = size.width != _image.width || size.height != _image.height;
     if (needsScale) {
@@ -373,7 +373,7 @@ class RenderDecoratedBox extends RenderProxyBox {
     markNeedsPaint();
   }
 
-  void paint(RenderNodeDisplayList canvas) {
+  void paint(RenderObjectDisplayList canvas) {
     assert(size.width != null);
     assert(size.height != null);
 
@@ -443,7 +443,7 @@ class RenderTransform extends RenderProxyBox {
     super.hitTestChildren(result, position: transformed);
   }
 
-  void paint(RenderNodeDisplayList canvas) {
+  void paint(RenderObjectDisplayList canvas) {
     Float32List storage = _transform.storage;
 
     canvas.save();
@@ -472,7 +472,7 @@ class ViewConstraints {
 
 }
 
-class RenderView extends RenderNode with RenderNodeWithChildMixin<RenderBox> {
+class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox> {
 
   RenderView({
     RenderBox child,
@@ -523,23 +523,23 @@ class RenderView extends RenderNode with RenderNodeWithChildMixin<RenderBox> {
     return true;
   }
 
-  void paint(RenderNodeDisplayList canvas) {
+  void paint(RenderObjectDisplayList canvas) {
     if (child != null)
       canvas.paintChild(child, new sky.Point(0.0, 0.0));
   }
 
   void paintFrame() {
-    RenderNode.debugDoingPaint = true;
-    RenderNodeDisplayList canvas = new RenderNodeDisplayList(sky.view.width, sky.view.height);
+    RenderObject.debugDoingPaint = true;
+    RenderObjectDisplayList canvas = new RenderObjectDisplayList(sky.view.width, sky.view.height);
     paint(canvas);
     sky.view.picture = canvas.endRecording();
-    RenderNode.debugDoingPaint = false;
+    RenderObject.debugDoingPaint = false;
   }
 
 }
 
 // DEFAULT BEHAVIORS FOR RENDERBOX CONTAINERS
-abstract class RenderBoxContainerDefaultsMixin<ChildType extends RenderBox, ParentDataType extends ContainerParentDataMixin<ChildType>> implements ContainerRenderNodeMixin<ChildType, ParentDataType> {
+abstract class RenderBoxContainerDefaultsMixin<ChildType extends RenderBox, ParentDataType extends ContainerParentDataMixin<ChildType>> implements ContainerRenderObjectMixin<ChildType, ParentDataType> {
 
   void defaultHitTestChildren(HitTestResult result, { sky.Point position }) {
     // the x, y parameters have the top left of the node's box as the origin
@@ -556,7 +556,7 @@ abstract class RenderBoxContainerDefaultsMixin<ChildType extends RenderBox, Pare
     }
   }
 
-  void defaultPaint(RenderNodeDisplayList canvas) {
+  void defaultPaint(RenderObjectDisplayList canvas) {
     RenderBox child = firstChild;
     while (child != null) {
       assert(child.parentData is ParentDataType);

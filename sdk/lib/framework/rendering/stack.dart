@@ -4,11 +4,11 @@
 
 import 'dart:sky' as sky;
 import 'box.dart';
-import 'node.dart';
+import 'object.dart';
 
 class StackParentData extends BoxParentData with ContainerParentDataMixin<RenderBox> { }
 
-class RenderStack extends RenderBox with ContainerRenderNodeMixin<RenderBox, StackParentData>,
+class RenderStack extends RenderBox with ContainerRenderObjectMixin<RenderBox, StackParentData>,
                                          RenderBoxContainerDefaultsMixin<RenderBox, StackParentData> {
   RenderStack({
     List<RenderBox> children
@@ -46,7 +46,7 @@ class RenderStack extends RenderBox with ContainerRenderNodeMixin<RenderBox, Sta
     defaultHitTestChildren(result, position: position);
   }
 
-  void paint(RenderNodeDisplayList canvas) {
+  void paint(RenderObjectDisplayList canvas) {
     defaultPaint(canvas);
   }
 }

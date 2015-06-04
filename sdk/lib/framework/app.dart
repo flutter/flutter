@@ -4,7 +4,7 @@
 
 import 'dart:sky' as sky;
 import 'rendering/box.dart';
-import 'rendering/node.dart';
+import 'rendering/object.dart';
 import 'scheduler.dart' as scheduler;
 
 class PointerState {
@@ -38,7 +38,7 @@ class AppView {
     _renderView.child = value;
   }
   void _beginFrame(double timeStamp) {
-    RenderNode.flushLayout();
+    RenderObject.flushLayout();
     _renderView.paintFrame();
   }
 
@@ -89,7 +89,7 @@ class AppView {
 
   void dispatchEvent(sky.Event event, HitTestResult result) {
     assert(result != null);
-    for (RenderNode node in result.path.reversed)
+    for (RenderObject node in result.path.reversed)
       node.handleEvent(event);
   }
 }

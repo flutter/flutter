@@ -1,11 +1,11 @@
 
-import 'package:sky/framework/rendering/node.dart';
+import 'package:sky/framework/rendering/object.dart';
 import 'package:sky/framework/rendering/box.dart';
 import 'dart:sky' as sky;
 
 typedef void Logger (String s);
 
-class TestDisplayList extends RenderNodeDisplayList {
+class TestDisplayList extends RenderObjectDisplayList {
   TestDisplayList(double width, double height, this.logger, { this.indent: '' }) :
     this.width = width,
     this.height = height,
@@ -86,7 +86,7 @@ class TestDisplayList extends RenderNodeDisplayList {
     log("drawPath(Path, ${explainPaint(paint)})");
   }
 
-  void paintChild(RenderNode child, sky.Point position) {
+  void paintChild(RenderObject child, sky.Point position) {
     log("paintChild at ${position.x},${position.y}");
     child.paint(new TestDisplayList(width, height, logger, indent: "$indent  |"));
   }
@@ -109,13 +109,13 @@ class TestView extends RenderView {
   }
 
   void paintFrame() {
-    RenderNode.debugDoingPaint = true;
+    RenderObject.debugDoingPaint = true;
     frame += 1;
     log("PAINT FOR FRAME #${frame} ----------------------------------------------");
     var canvas = new TestDisplayList(sky.view.width, sky.view.height, log, indent: "${frame} |");
     paint(canvas);
     log("------------------------------------------------------------------------");
-    RenderNode.debugDoingPaint = false;
+    RenderObject.debugDoingPaint = false;
   }
 
 }
@@ -137,7 +137,7 @@ class TestApp {
     _renderView.child = value;
   }
   void _beginFrame(double timeStamp) {
-    RenderNode.flushLayout();
+    RenderObject.flushLayout();
     _renderView.paintFrame();
     print(_renderView.lastPaint); // TODO(ianh): figure out how to make this fit the unit testing framework better
   }

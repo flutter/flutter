@@ -5,7 +5,7 @@
 import '../fn2.dart';
 import 'dart:sky' as sky;
 import '../rendering/box.dart';
-import '../rendering/node.dart';
+import '../rendering/object.dart';
 
 
 enum ScaffoldSlots {
@@ -107,7 +107,7 @@ class RenderScaffold extends RenderBox {
     }
   }
 
-  void paint(RenderNodeDisplayList canvas) {
+  void paint(RenderObjectDisplayList canvas) {
     for (ScaffoldSlots slot in [ScaffoldSlots.Body, ScaffoldSlots.StatusBar, ScaffoldSlots.Toolbar, ScaffoldSlots.FloatingActionButton, ScaffoldSlots.Drawer]) {
       RenderBox box = _slots[slot];
       if (box != null) {
@@ -132,7 +132,7 @@ class RenderScaffold extends RenderBox {
 
 }
 
-class Scaffold extends RenderNodeWrapper {
+class Scaffold extends RenderObjectWrapper {
 
   // static final Style _style = new Style('''
   //   ${typography.typeface};
@@ -158,7 +158,7 @@ class Scaffold extends RenderNodeWrapper {
   RenderScaffold root;
   RenderScaffold createNode() => new RenderScaffold();
 
-  void insert(RenderNodeWrapper child, ScaffoldSlots slot) {
+  void insert(RenderObjectWrapper child, ScaffoldSlots slot) {
     root[slot] = child != null ? child.root : null;
   }
 
@@ -168,8 +168,8 @@ class Scaffold extends RenderNodeWrapper {
     super.removeChild(node);
   }
 
-  void syncRenderNode(UINode old) {
-    super.syncRenderNode(old);
+  void syncRenderObject(UINode old) {
+    super.syncRenderObject(old);
     syncChild(toolbar, old is Scaffold ? old.toolbar : null, ScaffoldSlots.Toolbar);
     syncChild(body, old is Scaffold ? old.body : null, ScaffoldSlots.Body);
     syncChild(statusbar, old is Scaffold ? old.statusbar : null, ScaffoldSlots.StatusBar);

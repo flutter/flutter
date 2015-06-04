@@ -99,7 +99,7 @@ dart_pkg("sdk") {
     "lib/framework/rendering/block.dart",
     "lib/framework/rendering/box.dart",
     "lib/framework/rendering/flex.dart",
-    "lib/framework/rendering/node.dart",
+    "lib/framework/rendering/object.dart",
     "lib/framework/rendering/paragraph.dart",
     "lib/framework/rendering/stack.dart",
     "lib/framework/scheduler.dart",
