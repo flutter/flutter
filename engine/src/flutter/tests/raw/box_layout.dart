@@ -6,7 +6,7 @@ import 'dart:sky' as sky;
 import 'package:sky/framework/app.dart';
 import 'package:sky/framework/rendering/box.dart';
 import 'package:sky/framework/rendering/block.dart';
-import 'package:sky/framework/rendering/node.dart';
+import 'package:sky/framework/rendering/object.dart';
 
 TestApp app;
 
