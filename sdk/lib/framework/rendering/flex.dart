@@ -13,6 +13,7 @@ class FlexBoxParentData extends BoxParentData with ContainerParentDataMixin<Rend
       flex = other.flex;
     super.merge(other);
   }
+  String toString() => '${super.toString()}; flex=$flex';
 }
 
 enum FlexDirection { horizontal, vertical }

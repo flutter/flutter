@@ -109,6 +109,7 @@ class BoxConstraints {
 
 class BoxParentData extends ParentData {
   sky.Point position = new sky.Point(0.0, 0.0);
+  String toString() => 'position=$position';
 }
 
 abstract class RenderBox extends RenderObject {
@@ -213,6 +214,8 @@ class RenderSizedBox extends RenderProxyBox {
     if (child != null)
       child.layout(new BoxConstraints.tight(size));
   }
+
+  String debugDescribeSettings(String prefix) => '${prefix}desiredSize: ${desiredSize}';
 }
 
 class RenderClip extends RenderProxyBox {
@@ -285,6 +288,7 @@ class RenderPadding extends RenderBox with RenderObjectWithChildMixin<RenderBox>
     }
   }
 
+  String debugDescribeSettings(String prefix) => '${prefix}padding: ${padding}';
 }
 
 class RenderImage extends RenderBox {
@@ -359,6 +363,8 @@ class RenderImage extends RenderBox {
     if (needsScale)
       canvas.restore();
   }
+
+  String debugDescribeSettings(String prefix) => '${prefix}url: ${src}\n${prefix}dimensions: ${requestedSize}';
 }
 
 class BorderSide {
@@ -417,6 +423,17 @@ class BoxDecoration {
 
   final sky.Color backgroundColor;
   final Border border;
+
+  String toString([String prefix = '']) {
+    List<String> result = [];
+    if (backgroundColor != null)
+      result.add('${prefix}backgroundColor: $backgroundColor');
+    if (border != null)
+      result.add('${prefix}border: $border');
+    if (result.isEmpty)
+      return '${prefix}<no decorations specified>';
+    return result.join('\n');
+  }
 }
 
 class RenderDecoratedBox extends RenderProxyBox {
@@ -495,6 +512,8 @@ class RenderDecoratedBox extends RenderProxyBox {
 
     super.paint(canvas);
   }
+
+  String debugDescribeSettings(String prefix) => '${prefix}decoration:\n${decoration.toString(prefix + "  ")}';
 }
 
 class RenderTransform extends RenderProxyBox {

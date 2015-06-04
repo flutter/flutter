@@ -16,6 +16,7 @@ class ParentData {
     // override this in subclasses to merge in data from other into this
     assert(other.runtimeType == this.runtimeType);
   }
+  String toString() => '<none>';
 }
 
 const kLayoutDirections = 4;
@@ -219,6 +220,18 @@ abstract class RenderObject extends AbstractNode {
   // }
   // You must not add yourself to /result/ if you return false.
 
+
+  String toString([String prefix = '']) {
+    String header = '${runtimeType}\n';
+    prefix += '  ';
+    String settings = '${debugDescribeSettings(prefix)}';
+    if (settings != '')
+      settings += '\n';
+    return '${header}${settings}${debugDescribeChildren(prefix)}';
+  }
+  String debugDescribeSettings(String prefix) => '${prefix}parentData: ${parentData}';
+  String debugDescribeChildren(String prefix) => '';
+
 }
 
 class HitTestResult {
@@ -252,6 +265,7 @@ abstract class RenderObjectWithChildMixin<ChildType extends RenderObject> {
     if (_child != null)
       _child.detach();
   }
+  String debugDescribeChildren(String prefix) => '${prefix}child: ${child.toString(prefix)}';
 }
 
 
@@ -400,5 +414,19 @@ abstract class ContainerRenderObjectMixin<ChildType extends RenderObject, Parent
   ChildType childAfter(ChildType child) {
     assert(child.parentData is ParentDataType);
     return child.parentData.nextSibling;
+  }
+
+  String debugDescribeChildren(String prefix) {
+    String result = '';
+    int count = 1;
+    ChildType child = _firstChild;
+    while (child != null) {
+      if (result != '')
+        result += '\n';
+      result += '${prefix}child ${count}: ${child.toString(prefix)}';
+      count += 1;
+      child = child.parentData.nextSibling;
+    }
+    return result;
   }
 }

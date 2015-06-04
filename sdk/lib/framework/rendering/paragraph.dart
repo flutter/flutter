@@ -61,4 +61,6 @@ class RenderParagraph extends RenderBox {
   }
 
   // we should probably expose a way to do precise (inter-glpyh) hit testing
+
+  String debugDescribeChildren(String prefix) => '${prefix}TEXT (${color}): ${text}';
 }
