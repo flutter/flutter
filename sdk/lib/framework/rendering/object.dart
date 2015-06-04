@@ -222,9 +222,22 @@ abstract class RenderObject extends AbstractNode {
 
 
   String toString([String prefix = '']) {
-    String header = '${runtimeType}\n';
+    String header = '${runtimeType}';
+    if (_relayoutSubtreeRoot != null && _relayoutSubtreeRoot != this) {
+      int count = 1;
+      RenderObject target = parent;
+      while (target != null && target != _relayoutSubtreeRoot) {
+        target = target.parent as RenderObject;
+        count += 1;
+      }
+      header += ' relayoutSubtreeRoot=up$count';
+    }
+    if (_needsLayout)
+      header += ' NEEDS-LAYOUT';
+    if (!attached)
+      header += ' DETACHED';
     prefix += '  ';
-    return '${header}${debugDescribeSettings(prefix)}${debugDescribeChildren(prefix)}';
+    return '${header}\n${debugDescribeSettings(prefix)}${debugDescribeChildren(prefix)}';
   }
   String debugDescribeSettings(String prefix) => '${prefix}parentData: ${parentData}\n';
   String debugDescribeChildren(String prefix) => '';
