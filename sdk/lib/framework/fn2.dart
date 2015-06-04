@@ -23,7 +23,7 @@ import 'rendering/stack.dart';
 final bool _shouldLogRenderDuration = false;
 final bool _shouldTrace = false;
 
-enum _SyncOperation { IDENTICAL, INSERTION, STATEFUL, STATELESS, REMOVAL }
+enum _SyncOperation { identical, insertion, stateful, stateless, removal }
 
 /*
  * All Effen nodes derive from UINode. All nodes have a _parent, a _key and
@@ -95,14 +95,14 @@ abstract class UINode {
   }
 
   void removeChild(UINode node) {
-    _traceSync(_SyncOperation.REMOVAL, node._key);
+    _traceSync(_SyncOperation.removal, node._key);
     node._remove();
   }
 
   // Returns the child which should be retained as the child of this node.
   UINode syncChild(UINode node, UINode oldNode, dynamic slot) {
     if (node == oldNode) {
-      _traceSync(_SyncOperation.IDENTICAL, node == null ? '*null*' : node._key);
+      _traceSync(_SyncOperation.identical, node == null ? '*null*' : node._key);
       return node; // Nothing to do. Subtrees must be identical.
     }
 
@@ -121,7 +121,7 @@ abstract class UINode {
     }
 
     if (node._willSync(oldNode)) {
-      _traceSync(_SyncOperation.STATEFUL, node._key);
+      _traceSync(_SyncOperation.stateful, node._key);
       oldNode._sync(node, slot);
       node._defunct = true;
       assert(oldNode.root is RenderObject);
@@ -132,9 +132,9 @@ abstract class UINode {
     node._parent = this;
 
     if (oldNode == null) {
-      _traceSync(_SyncOperation.INSERTION, node._key);
+      _traceSync(_SyncOperation.insertion, node._key);
     } else {
-      _traceSync(_SyncOperation.STATELESS, node._key);
+      _traceSync(_SyncOperation.stateless, node._key);
     }
     node._sync(oldNode, slot);
     if (oldNode != null)
@@ -638,7 +638,7 @@ class FlexContainer extends MultiChildRenderObjectWrapper {
   FlexContainer({
     Object key,
     List<UINode> children,
-    this.direction: FlexDirection.Horizontal
+    this.direction: FlexDirection.horizontal
   }) : super(key: key, children: children);
 
   void syncRenderObject(UINode old) {

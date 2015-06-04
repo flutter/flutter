@@ -377,8 +377,8 @@ class RenderCSSFlex extends RenderCSSContainer {
   String stylesToClasses(List<Style> styles) {
     var settings = _displayFlex._className;
     switch (_direction) {
-      case FlexDirection.Row: settings += ' ' + _displayFlexRow._className; break;
-      case FlexDirection.Column: settings += ' ' + _displayFlexColumn._className; break;
+      case FlexDirection.horizontal: settings += ' ' + _displayFlexRow._className; break;
+      case FlexDirection.vertical: settings += ' ' + _displayFlexColumn._className; break;
     }
     return super.stylesToClasses(styles) + ' ' + settings;
   }

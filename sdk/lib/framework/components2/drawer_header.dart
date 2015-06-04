@@ -27,7 +27,7 @@ class DrawerHeader extends Component {
 
   UINode build() {
     return new FlexContainer(
-      direction: FlexDirection.Column,
+      direction: FlexDirection.vertical,
       style: _style,
       children: [
         new ParentDataNode(

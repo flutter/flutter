@@ -28,7 +28,7 @@ class InkWell extends Component implements ScrollClient {
   InkWell({ Object key, this.children }) : super(key: key);
 
   UINode build() {
-    return new FlexContainer(direction: FlexDirection.Horizontal, children: children);
+    return new FlexContainer(direction: FlexDirection.horizontal, children: children);
     // List<UINode> childrenIncludingSplashes = [];
 
     // if (_splashes != null) {
@@ -41,7 +41,7 @@ class InkWell extends Component implements ScrollClient {
 
     // return new EventListenerNode(
     //   new FlexContainer(
-    //     direction: FlexDirection.Row,
+    //     direction: FlexDirection.horizontal,
     //     style: _containmentStyleHack,
     //     inlineStyle: inlineStyle,
     //     children: childrenIncludingSplashes),

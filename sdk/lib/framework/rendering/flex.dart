@@ -15,14 +15,14 @@ class FlexBoxParentData extends BoxParentData with ContainerParentDataMixin<Rend
   }
 }
 
-enum FlexDirection { Horizontal, Vertical }
+enum FlexDirection { horizontal, vertical }
 
 class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, FlexBoxParentData>,
                                         RenderBoxContainerDefaultsMixin<RenderBox, FlexBoxParentData> {
   // lays out RenderBox children using flexible layout
 
   RenderFlex({
-    FlexDirection direction: FlexDirection.Horizontal
+    FlexDirection direction: FlexDirection.horizontal
   }) : _direction = direction;
 
   FlexDirection _direction;
@@ -56,7 +56,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     // Steps 1-3. Determine used flex factor, size inflexible items, calculate free space
     int totalFlex = 0;
     assert(constraints != null);
-    double freeSpace = (_direction == FlexDirection.Horizontal) ? constraints.maxWidth : constraints.maxHeight;
+    double freeSpace = (_direction == FlexDirection.horizontal) ? constraints.maxWidth : constraints.maxHeight;
     RenderBox child = firstChild;
     while (child != null) {
       int flex = _getFlex(child);
@@ -66,7 +66,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
         BoxConstraints innerConstraints = new BoxConstraints(maxHeight: constraints.maxHeight,
                                                              maxWidth: constraints.maxWidth);
         child.layout(innerConstraints, parentUsesSize: true);
-        freeSpace -= (_direction == FlexDirection.Horizontal) ? child.size.width : child.size.height;
+        freeSpace -= (_direction == FlexDirection.horizontal) ? child.size.width : child.size.height;
       }
       child = child.parentData.nextSibling;
     }
@@ -81,12 +81,12 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
         double spaceForChild = spacePerFlex * flex;
         BoxConstraints innerConstraints;
         switch (_direction) {
-          case FlexDirection.Horizontal:
+          case FlexDirection.horizontal:
             innerConstraints = new BoxConstraints(maxHeight: constraints.maxHeight,
                                                   minWidth: spaceForChild,
                                                   maxWidth: spaceForChild);
             break;
-          case FlexDirection.Vertical:
+          case FlexDirection.vertical:
             innerConstraints = new BoxConstraints(minHeight: spaceForChild,
                                                   maxHeight: spaceForChild,
                                                   maxWidth: constraints.maxWidth);
@@ -97,11 +97,11 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
 
       // For now, center the flex items in the cross direction
       switch (_direction) {
-        case FlexDirection.Horizontal:
+        case FlexDirection.horizontal:
           child.parentData.position = new sky.Point(usedSpace, size.height / 2.0 - child.size.height / 2.0);
           usedSpace += child.size.width;
           break;
-        case FlexDirection.Vertical:
+        case FlexDirection.vertical:
           child.parentData.position = new sky.Point(size.width / 2.0 - child.size.width / 2.0, usedSpace);
           usedSpace += child.size.height;
           break;

@@ -39,7 +39,7 @@ class ToolBar extends Component {
     return new Container(
       child: new FlexContainer(
         children: children,
-        direction: FlexDirection.Horizontal
+        direction: FlexDirection.horizontal
       ),
       desiredSize: new sky.Size.fromHeight(56.0),
       padding: new EdgeDims(kStatusBarHeight.toDouble(), 8.0, 0.0, 8.0),

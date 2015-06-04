@@ -84,7 +84,7 @@ class Input extends Component {
 
     return new EventListenerNode(
       new FlexContainer(
-        direction: FlexDirection.Column,
+        direction: FlexDirection.vertical,
         style: _style,
         inlineStyle: focused ? _focusedInlineStyle : null,
         children: children

@@ -68,7 +68,7 @@ class Checkbox extends ButtonBase {
     return new EventListenerNode(
       new FlexContainer(
         style: _style,
-        direction: FlexDirection.Row,
+        direction: FlexDirection.horizontal,
         children: [
           new Container(
             style: highlight ? _containerHighlightStyle : _containerStyle,

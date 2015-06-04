@@ -15,31 +15,31 @@ const double _kMenuOpenDuration = 300.0;
 const double _kMenuCloseDuration = 200.0;
 const double _kMenuCloseDelay = 100.0;
 
-enum MenuState { Hidden, Opening, Open, Closing }
+enum MenuState { hidden, opening, open, closing }
 
 class PopupMenuController {
   AnimatedValue position = new AnimatedValue(0.0);
-  MenuState _state = MenuState.Hidden;
+  MenuState _state = MenuState.hidden;
   MenuState get state => _state;
 
-  bool get canReact => (_state == MenuState.Opening) || (_state == MenuState.Open);
+  bool get canReact => (_state == MenuState.opening) || (_state == MenuState.open);
 
   open() async {
-    if (_state != MenuState.Hidden)
+    if (_state != MenuState.hidden)
       return;
-    _state = MenuState.Opening;
+    _state = MenuState.opening;
     if (await position.animateTo(1.0, _kMenuOpenDuration) == 1.0)
-      _state = MenuState.Open;
+      _state = MenuState.open;
   }
 
   Future _closeState;
   close() async {
     var result = new Completer();
     _closeState = result.future;
-    if ((_state == MenuState.Opening) || (_state == MenuState.Open)) {
-      _state = MenuState.Closing;
+    if ((_state == MenuState.opening) || (_state == MenuState.open)) {
+      _state = MenuState.closing;
       await position.animateTo(0.0, _kMenuCloseDuration, initialDelay: _kMenuCloseDelay);
-      _state = MenuState.Hidden;
+      _state = MenuState.hidden;
       _closeState = null;
       result.complete();
       return result.future;

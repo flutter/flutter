@@ -13,7 +13,7 @@ import '../lib/solid_color_box.dart';
 AppView app;
 
 void main() {
-  RenderFlex flexRoot = new RenderFlex(direction: FlexDirection.Vertical);
+  RenderFlex flexRoot = new RenderFlex(direction: FlexDirection.vertical);
 
   RenderObject root = new RenderDecoratedBox(
     decoration: new BoxDecoration(backgroundColor: const Color(0xFF606060)),

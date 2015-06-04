@@ -42,7 +42,7 @@ void main() {
   initUnit();
 
   test("should flex", () {
-    RenderFlex flexRoot = new RenderFlex(direction: FlexDirection.Vertical);
+    RenderFlex flexRoot = new RenderFlex(direction: FlexDirection.vertical);
 
     RenderDecoratedBox root = new RenderDecoratedBox(
       decoration: new BoxDecoration(backgroundColor: const sky.Color(0xFF000000)),
@@ -74,7 +74,7 @@ void main() {
 
     flexRoot.add(new RenderPadding(padding: const EdgeDims.all(10.0), child: renderDecoratedBlock));
 
-    var row = new RenderFlex(direction: FlexDirection.Horizontal);
+    var row = new RenderFlex(direction: FlexDirection.horizontal);
 
     // Purple and blue cells
     addFlexChildSolidColor(row, const sky.Color(0x77FF00FF), flex: 1);

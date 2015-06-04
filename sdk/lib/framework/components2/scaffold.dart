@@ -9,11 +9,11 @@ import '../rendering/object.dart';
 
 
 enum ScaffoldSlots {
-  Toolbar,
-  Body,
-  StatusBar,
-  Drawer,
-  FloatingActionButton
+  toolbar,
+  body,
+  statusBar,
+  drawer,
+  floatingActionButton
 }
 
 class RenderScaffold extends RenderBox {
@@ -25,11 +25,11 @@ class RenderScaffold extends RenderBox {
     RenderBox drawer,
     RenderBox floatingActionButton
   }) {
-    this[ScaffoldSlots.Toolbar] = toolbar;
-    this[ScaffoldSlots.Body] = body;
-    this[ScaffoldSlots.StatusBar] = statusbar;
-    this[ScaffoldSlots.Drawer] = drawer;
-    this[ScaffoldSlots.FloatingActionButton] = floatingActionButton;
+    this[ScaffoldSlots.toolbar] = toolbar;
+    this[ScaffoldSlots.body] = body;
+    this[ScaffoldSlots.statusBar] = statusbar;
+    this[ScaffoldSlots.drawer] = drawer;
+    this[ScaffoldSlots.floatingActionButton] = floatingActionButton;
   }
 
   Map<ScaffoldSlots, RenderBox> _slots = new Map<ScaffoldSlots, RenderBox>();
@@ -72,35 +72,35 @@ class RenderScaffold extends RenderBox {
   void performLayout() {
     double bodyHeight = size.height;
     double bodyPosition = 0.0;
-    if (_slots[ScaffoldSlots.Toolbar] != null) {
-      RenderBox toolbar = _slots[ScaffoldSlots.Toolbar];
+    if (_slots[ScaffoldSlots.toolbar] != null) {
+      RenderBox toolbar = _slots[ScaffoldSlots.toolbar];
       toolbar.layout(new BoxConstraints.tight(new sky.Size(size.width, kToolbarHeight)));
       assert(toolbar.parentData is BoxParentData);
       toolbar.parentData.position = new sky.Point(0.0, 0.0);
       bodyPosition = kToolbarHeight;
       bodyHeight -= kToolbarHeight;
     }
-    if (_slots[ScaffoldSlots.StatusBar] != null) {
-      RenderBox statusbar = _slots[ScaffoldSlots.StatusBar];
+    if (_slots[ScaffoldSlots.statusBar] != null) {
+      RenderBox statusbar = _slots[ScaffoldSlots.statusBar];
       statusbar.layout(new BoxConstraints.tight(new sky.Size(size.width, kStatusbarHeight)));
       assert(statusbar.parentData is BoxParentData);
       statusbar.parentData.position = new sky.Point(0.0, size.height - kStatusbarHeight);
       bodyHeight -= kStatusbarHeight;
     }
-    if (_slots[ScaffoldSlots.Body] != null) {
-      RenderBox body = _slots[ScaffoldSlots.Body];
+    if (_slots[ScaffoldSlots.body] != null) {
+      RenderBox body = _slots[ScaffoldSlots.body];
       body.layout(new BoxConstraints.tight(new sky.Size(size.width, bodyHeight)));
       assert(body.parentData is BoxParentData);
       body.parentData.position = new sky.Point(0.0, bodyPosition);
     }
-    if (_slots[ScaffoldSlots.Drawer] != null) {
-      RenderBox drawer = _slots[ScaffoldSlots.Drawer];
+    if (_slots[ScaffoldSlots.drawer] != null) {
+      RenderBox drawer = _slots[ScaffoldSlots.drawer];
       drawer.layout(new BoxConstraints(minWidth: 0.0, maxWidth: size.width, minHeight: size.height, maxHeight: size.height));
       assert(drawer.parentData is BoxParentData);
       drawer.parentData.position = new sky.Point(0.0, 0.0);
     }
-    if (_slots[ScaffoldSlots.FloatingActionButton] != null) {
-      RenderBox floatingActionButton = _slots[ScaffoldSlots.FloatingActionButton];
+    if (_slots[ScaffoldSlots.floatingActionButton] != null) {
+      RenderBox floatingActionButton = _slots[ScaffoldSlots.floatingActionButton];
       floatingActionButton.layout(new BoxConstraints(minWidth: 0.0, maxWidth: size.width, minHeight: size.height, maxHeight: size.height));
       assert(floatingActionButton.parentData is BoxParentData);
       floatingActionButton.parentData.position = new sky.Point(size.width - kButtonX, bodyPosition + bodyHeight - kButtonY);
@@ -108,7 +108,7 @@ class RenderScaffold extends RenderBox {
   }
 
   void paint(RenderObjectDisplayList canvas) {
-    for (ScaffoldSlots slot in [ScaffoldSlots.Body, ScaffoldSlots.StatusBar, ScaffoldSlots.Toolbar, ScaffoldSlots.FloatingActionButton, ScaffoldSlots.Drawer]) {
+    for (ScaffoldSlots slot in [ScaffoldSlots.body, ScaffoldSlots.statusBar, ScaffoldSlots.toolbar, ScaffoldSlots.floatingActionButton, ScaffoldSlots.drawer]) {
       RenderBox box = _slots[slot];
       if (box != null) {
         assert(box.parentData is BoxParentData);
@@ -118,7 +118,7 @@ class RenderScaffold extends RenderBox {
   }
 
   void hitTestChildren(HitTestResult result, { sky.Point position }) {
-    for (ScaffoldSlots slot in [ScaffoldSlots.Drawer, ScaffoldSlots.FloatingActionButton, ScaffoldSlots.Toolbar, ScaffoldSlots.StatusBar, ScaffoldSlots.Body]) {
+    for (ScaffoldSlots slot in [ScaffoldSlots.drawer, ScaffoldSlots.floatingActionButton, ScaffoldSlots.toolbar, ScaffoldSlots.statusBar, ScaffoldSlots.body]) {
       RenderBox box = _slots[slot];
       if (box != null) {
         assert(box.parentData is BoxParentData);
@@ -170,11 +170,11 @@ class Scaffold extends RenderObjectWrapper {
 
   void syncRenderObject(UINode old) {
     super.syncRenderObject(old);
-    syncChild(toolbar, old is Scaffold ? old.toolbar : null, ScaffoldSlots.Toolbar);
-    syncChild(body, old is Scaffold ? old.body : null, ScaffoldSlots.Body);
-    syncChild(statusbar, old is Scaffold ? old.statusbar : null, ScaffoldSlots.StatusBar);
-    syncChild(drawer, old is Scaffold ? old.drawer : null, ScaffoldSlots.Drawer);
-    syncChild(floatingActionButton, old is Scaffold ? old.floatingActionButton : null, ScaffoldSlots.FloatingActionButton);
+    syncChild(toolbar, old is Scaffold ? old.toolbar : null, ScaffoldSlots.toolbar);
+    syncChild(body, old is Scaffold ? old.body : null, ScaffoldSlots.body);
+    syncChild(statusbar, old is Scaffold ? old.statusbar : null, ScaffoldSlots.statusBar);
+    syncChild(drawer, old is Scaffold ? old.drawer : null, ScaffoldSlots.drawer);
+    syncChild(floatingActionButton, old is Scaffold ? old.floatingActionButton : null, ScaffoldSlots.floatingActionButton);
   }
 
 }
