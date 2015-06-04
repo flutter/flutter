@@ -8,9 +8,9 @@ import 'package:sky/framework/components2/drawer.dart';
 // import 'package:sky/framework/components2/floating_action_button.dart';
 // import 'package:sky/framework/components2/icon.dart';
 import 'package:sky/framework/components2/icon_button.dart';
-// import 'package:sky/framework/components2/input.dart';
 import 'package:sky/framework/components2/menu_divider.dart';
 import 'package:sky/framework/components2/menu_item.dart';
+import 'package:sky/framework/components2/input.dart';
 // import 'package:sky/framework/components2/modal_overlay.dart';
 // import 'package:sky/framework/components2/popup_menu.dart';
 // import 'package:sky/framework/components2/radio.dart';
@@ -29,9 +29,6 @@ import 'dart:sky' as sky;
 enum StockMode { optimistic, pessimistic }
 
 class StocksApp extends App {
-
-  // static final Style _searchBarStyle = new Style('''
-  //   background-color: ${Grey[50]};''');
 
   // static final Style _titleStyle = new Style('''
   //   ${typography.white.title};''');
@@ -179,16 +176,16 @@ class StocksApp extends App {
 
   // TODO(abarth): Should we factor this into a SearchBar in the framework?
   UINode buildSearchBar() {
-    // return new StyleNode(
-    //   new ToolBar(
-    //     left: new IconButton(
-    //       icon: 'navigation/arrow_back_grey600',
-    //       onGestureTap: _handleSearchEnd),
-    //     center: new Input(
-    //       focused: true,
-    //       placeholder: 'Search stocks',
-    //       onChanged: _handleSearchQueryChanged)),
-    //   _searchBarStyle);
+    return new ToolBar(
+      left: new IconButton(
+        icon: 'navigation/arrow_back_grey600',
+        onGestureTap: _handleSearchEnd),
+      center: new Input(
+        focused: true,
+        placeholder: 'Search stocks',
+        onChanged: _handleSearchQueryChanged),
+      backgroundColor: colors.Grey[50]
+    );
   }
 
   void addMenuToOverlays(List<UINode> overlays) {
