@@ -8,16 +8,15 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.os.Environment;
 import android.util.Log;
+
+import org.chromium.base.JNINamespace;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
-
-import org.chromium.base.JNINamespace;
 
 /**
  * A controller for the tracing system.
@@ -38,6 +37,10 @@ class TracingController {
         mIntentFilter = new TracingIntentFilter(context);
 
         mContext.registerReceiver(mBroadcastReceiver, mIntentFilter);
+    }
+
+    public void stop() {
+        mContext.unregisterReceiver(mBroadcastReceiver);
     }
 
     private String generateTracingFilePath() {
