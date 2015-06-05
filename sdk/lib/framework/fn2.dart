@@ -17,6 +17,9 @@ import 'rendering/flex.dart';
 import 'rendering/object.dart';
 import 'rendering/paragraph.dart';
 import 'rendering/stack.dart';
+export 'rendering/object.dart' show Point, Size, Rect, Color, Paint, Path;
+export 'rendering/box.dart' show BoxDecoration, Border, BorderSide, EdgeDims;
+export 'rendering/flex.dart' show FlexDirection;
 
 // final sky.Tracing _tracing = sky.window.tracing;
 
@@ -399,7 +402,7 @@ class DecoratedBox extends OneChildRenderObjectWrapper {
 
 class SizedBox extends OneChildRenderObjectWrapper {
   RenderSizedBox root;
-  final sky.Size desiredSize;
+  final Size desiredSize;
 
   SizedBox({ this.desiredSize, UINode child, Object key })
     : super(child: child, key: key);
@@ -718,7 +721,7 @@ class Image extends RenderObjectWrapper {
   RenderImage createNode() => new RenderImage(this.src, this.size);
 
   final String src;
-  final sky.Size size;
+  final Size size;
 
   Image({
     Object key,
@@ -958,7 +961,7 @@ class Container extends Component {
   final Matrix4 transform;
   final EdgeDims margin;
   final BoxDecoration decoration;
-  final sky.Size desiredSize;
+  final Size desiredSize;
   final EdgeDims padding;
 
   Container({

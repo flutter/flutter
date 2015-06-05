@@ -2,18 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:sky' as sky;
 import '../fn2.dart';
 import '../theme/view_configuration.dart';
-import '../rendering/box.dart';
-import '../rendering/flex.dart';
 // import 'material.dart';
 
 class ToolBar extends Component {
   UINode left;
   UINode center;
   List<UINode> right;
-  sky.Color backgroundColor;
+  Color backgroundColor;
 
   ToolBar({
     String key,
@@ -41,7 +38,7 @@ class ToolBar extends Component {
         children: children,
         direction: FlexDirection.horizontal
       ),
-      desiredSize: new sky.Size.fromHeight(56.0),
+      desiredSize: new Size.fromHeight(56.0),
       padding: new EdgeDims(kStatusBarHeight.toDouble(), 8.0, 0.0, 8.0),
       decoration: new BoxDecoration(backgroundColor: backgroundColor)
     );

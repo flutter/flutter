@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:sky' as sky;
 import 'box.dart';
 import 'object.dart';
 
@@ -42,7 +41,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
 
   bool get sizedByParent => true;
   void performResize() {
-    size = constraints.constrain(new sky.Size(constraints.maxWidth, constraints.maxHeight));
+    size = constraints.constrain(new Size(constraints.maxWidth, constraints.maxHeight));
     assert(size.height < double.INFINITY);
     assert(size.width < double.INFINITY);
   }
@@ -99,11 +98,11 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
       // For now, center the flex items in the cross direction
       switch (_direction) {
         case FlexDirection.horizontal:
-          child.parentData.position = new sky.Point(usedSpace, size.height / 2.0 - child.size.height / 2.0);
+          child.parentData.position = new Point(usedSpace, size.height / 2.0 - child.size.height / 2.0);
           usedSpace += child.size.width;
           break;
         case FlexDirection.vertical:
-          child.parentData.position = new sky.Point(size.width / 2.0 - child.size.width / 2.0, usedSpace);
+          child.parentData.position = new Point(size.width / 2.0 - child.size.width / 2.0, usedSpace);
           usedSpace += child.size.height;
           break;
       }
@@ -111,7 +110,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     }
   }
 
-  void hitTestChildren(HitTestResult result, { sky.Point position }) {
+  void hitTestChildren(HitTestResult result, { Point position }) {
     defaultHitTestChildren(result, position: position);
   }
 

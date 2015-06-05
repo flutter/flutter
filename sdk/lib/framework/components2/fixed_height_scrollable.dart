@@ -6,7 +6,6 @@ import '../animation/scroll_behavior.dart';
 import '../fn2.dart';
 import 'dart:async';
 import 'dart:math' as math;
-import 'dart:sky' as sky;
 import 'package:vector_math/vector_math.dart';
 import 'scrollable.dart';
 
@@ -30,7 +29,7 @@ abstract class FixedHeightScrollable extends Scrollable {
     }
   }
 
-  void _handleSizeChanged(sky.Size newSize) {
+  void _handleSizeChanged(Size newSize) {
     setState(() {
       _height = newSize.height;
       scrollBehavior.containerHeight = _height;

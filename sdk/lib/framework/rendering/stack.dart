@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:sky' as sky;
 import 'box.dart';
 import 'object.dart';
 
@@ -22,17 +21,17 @@ class RenderStack extends RenderBox with ContainerRenderObjectMixin<RenderBox, S
       child.parentData = new StackParentData();
   }
 
-  sky.Size getIntrinsicDimensions(BoxConstraints constraints) {
-    return constraints.constrain(sky.Size.infinite);
+  Size getIntrinsicDimensions(BoxConstraints constraints) {
+    return constraints.constrain(Size.infinite);
   }
 
   void performLayout() {
-    size = constraints.constrain(sky.Size.infinite);
+    size = constraints.constrain(Size.infinite);
     assert(size.width < double.INFINITY);
     assert(size.height < double.INFINITY);
     BoxConstraints innerConstraints = new BoxConstraints.loose(size);
 
-    sky.Point origin = new sky.Point(0.0, 0.0);
+    Point origin = new Point(0.0, 0.0);
     RenderBox child = firstChild;
     while (child != null) {
       child.layout(innerConstraints);
@@ -42,7 +41,7 @@ class RenderStack extends RenderBox with ContainerRenderObjectMixin<RenderBox, S
     }
   }
 
-  void hitTestChildren(HitTestResult result, { sky.Point position }) {
+  void hitTestChildren(HitTestResult result, { Point position }) {
     defaultHitTestChildren(result, position: position);
   }
 

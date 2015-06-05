@@ -4,12 +4,11 @@
 
 import 'package:sky/framework/theme2/colors.dart' as colors;
 
-import 'dart:sky' as sky;
 import '../fn2.dart';
-import '../rendering/box.dart';
 import '../rendering/object.dart';
 import 'button_base.dart';
 import 'ink_well.dart';
+import 'dart:sky' as sky;
 
 typedef void ValueChanged(value);
 
@@ -27,18 +26,18 @@ class Radio extends ButtonBase {
 
   UINode buildContent() {
     // TODO(jackson): This should change colors with the theme
-    sky.Color color = highlight ? colors.Purple[500] : const sky.Color(0x8A000000);
+    Color color = highlight ? colors.Purple[500] : const Color(0x8A000000);
     const double diameter = 16.0;
     const double outerRadius = diameter / 2;
     const double innerRadius = 5.0;
     return new EventListenerNode(
       new Container(
         margin: const EdgeDims.symmetric(horizontal: 5.0),
-        desiredSize: new sky.Size(diameter, diameter),
+        desiredSize: new Size(diameter, diameter),
         child: new CustomPaint(
           callback: (sky.Canvas canvas) {
 
-            sky.Paint paint = new sky.Paint()..color = color;
+            Paint paint = new Paint()..color = color;
 
             // Draw the outer circle
             paint.setStyle(sky.PaintingStyle.stroke);

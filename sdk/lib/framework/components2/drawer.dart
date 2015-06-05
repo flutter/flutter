@@ -5,7 +5,6 @@
 import '../animation/animated_value.dart';
 import '../animation/curves.dart';
 import '../fn2.dart';
-import '../rendering/box.dart';
 import '../theme/colors.dart';
 import 'animated_component.dart';
 import 'dart:math' as math;
@@ -111,11 +110,11 @@ class Drawer extends AnimatedComponent {
     Matrix4 transform = new Matrix4.identity();
     transform.translate(_position);
 
-    sky.Color maskColor = new sky.Color(((_position / _kWidth + 1) * 0xFF).floor() << 24);
+    Color maskColor = new Color(((_position / _kWidth + 1) * 0xFF).floor() << 24);
 
     var mask = new EventListenerNode(
       new Container(
-        desiredSize: sky.Size.infinite,
+        desiredSize: Size.infinite,
         decoration: new BoxDecoration(backgroundColor: maskColor)
       ),
       onGestureTap: controller.handleMaskTap,
@@ -124,8 +123,8 @@ class Drawer extends AnimatedComponent {
 
     Material content = new Material(
       content: new Container(
-        decoration: new BoxDecoration(backgroundColor: new sky.Color(0xFFFFFFFF)),
-        desiredSize: new sky.Size.fromWidth(_kWidth),
+        decoration: new BoxDecoration(backgroundColor: new Color(0xFFFFFFFF)),
+        desiredSize: new Size.fromWidth(_kWidth),
         transform: transform,
         child: new BlockContainer(children: children)
       ),

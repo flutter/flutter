@@ -2,9 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:sky' as sky;
 import '../fn2.dart';
-import '../rendering/box.dart';
 
 // TODO(eseidel): This should use package:.
 const String kAssetBase = '/packages/sky/assets/material-design-icons';
@@ -28,7 +26,7 @@ class Icon extends Component {
       subtype = parts[1];
     }
     return new Image(
-      size: new sky.Size(size.toDouble(), size.toDouble()),
+      size: new Size(size.toDouble(), size.toDouble()),
       src: '${kAssetBase}/${category}/2x_web/ic_${subtype}_${size}dp.png'
     );
   }

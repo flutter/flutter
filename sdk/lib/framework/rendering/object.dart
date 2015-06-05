@@ -6,6 +6,8 @@ import '../node.dart';
 import '../scheduler.dart' as scheduler;
 import 'dart:math' as math;
 import 'dart:sky' as sky;
+import 'dart:sky' show Point, Size, Rect, Color, Paint, Path;
+export 'dart:sky' show Point, Size, Rect, Color, Paint, Path;
 
 class ParentData {
   void detach() {
@@ -30,7 +32,7 @@ double clamp({double min: 0.0, double value: 0.0, double max: double.INFINITY}) 
 
 class RenderObjectDisplayList extends sky.PictureRecorder {
   RenderObjectDisplayList(double width, double height) : super(width, height);
-  void paintChild(RenderObject child, sky.Point position) {
+  void paintChild(RenderObject child, Point position) {
     translate(position.x, position.y);
     child.paint(this);
     translate(-position.x, -position.y);
@@ -211,7 +213,7 @@ abstract class RenderObject extends AbstractNode {
   // RenderObject subclasses are expected to have a method like the
   // following (with the signature being whatever passes for coordinates
   // for this particular class):
-  // bool hitTest(HitTestResult result, { sky.Point position }) {
+  // bool hitTest(HitTestResult result, { Point position }) {
   //   // If (x,y) is not inside this node, then return false. (You
   //   // can assume that the given coordinate is inside your
   //   // dimensions. You only need to check this if you're an

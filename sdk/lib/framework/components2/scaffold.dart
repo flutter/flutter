@@ -3,10 +3,8 @@
 // found in the LICENSE file.
 
 import '../fn2.dart';
-import 'dart:sky' as sky;
 import '../rendering/box.dart';
 import '../rendering/object.dart';
-
 
 enum ScaffoldSlots {
   toolbar,
@@ -75,7 +73,7 @@ class RenderScaffold extends RenderBox {
 
   bool get sizedByParent => true;
   void performResize() {
-    size = constraints.constrain(sky.Size.infinite);
+    size = constraints.constrain(Size.infinite);
     assert(size.width < double.INFINITY);
     assert(size.height < double.INFINITY);
   }
@@ -90,34 +88,34 @@ class RenderScaffold extends RenderBox {
     double bodyPosition = 0.0;
     if (_slots[ScaffoldSlots.toolbar] != null) {
       RenderBox toolbar = _slots[ScaffoldSlots.toolbar];
-      toolbar.layout(new BoxConstraints.tight(new sky.Size(size.width, kToolbarHeight)));
+      toolbar.layout(new BoxConstraints.tight(new Size(size.width, kToolbarHeight)));
       assert(toolbar.parentData is BoxParentData);
-      toolbar.parentData.position = new sky.Point(0.0, 0.0);
+      toolbar.parentData.position = new Point(0.0, 0.0);
       bodyPosition = kToolbarHeight;
       bodyHeight -= kToolbarHeight;
     }
     if (_slots[ScaffoldSlots.statusBar] != null) {
       RenderBox statusbar = _slots[ScaffoldSlots.statusBar];
-      statusbar.layout(new BoxConstraints.tight(new sky.Size(size.width, kStatusbarHeight)));
+      statusbar.layout(new BoxConstraints.tight(new Size(size.width, kStatusbarHeight)));
       assert(statusbar.parentData is BoxParentData);
-      statusbar.parentData.position = new sky.Point(0.0, size.height - kStatusbarHeight);
+      statusbar.parentData.position = new Point(0.0, size.height - kStatusbarHeight);
       bodyHeight -= kStatusbarHeight;
     }
     if (_slots[ScaffoldSlots.body] != null) {
       RenderBox body = _slots[ScaffoldSlots.body];
-      body.layout(new BoxConstraints.tight(new sky.Size(size.width, bodyHeight)));
+      body.layout(new BoxConstraints.tight(new Size(size.width, bodyHeight)));
       assert(body.parentData is BoxParentData);
-      body.parentData.position = new sky.Point(0.0, bodyPosition);
+      body.parentData.position = new Point(0.0, bodyPosition);
     }
     if (_slots[ScaffoldSlots.drawer] != null) {
       RenderBox drawer = _slots[ScaffoldSlots.drawer];
       drawer.layout(new BoxConstraints(minWidth: 0.0, maxWidth: size.width, minHeight: size.height, maxHeight: size.height));
       assert(drawer.parentData is BoxParentData);
-      drawer.parentData.position = new sky.Point(0.0, 0.0);
+      drawer.parentData.position = new Point(0.0, 0.0);
     }
     if (_slots[ScaffoldSlots.floatingActionButton] != null) {
       RenderBox floatingActionButton = _slots[ScaffoldSlots.floatingActionButton];
-      sky.Size area = new sky.Size(size.width + kButtonX, size.height + kButtonY);
+      Size area = new Size(size.width + kButtonX, size.height + kButtonY);
       floatingActionButton.layout(new BoxConstraints.loose(area));
       assert(floatingActionButton.parentData is BoxParentData);
       floatingActionButton.parentData.position = (area - floatingActionButton.size).toPoint();
@@ -134,12 +132,12 @@ class RenderScaffold extends RenderBox {
     }
   }
 
-  void hitTestChildren(HitTestResult result, { sky.Point position }) {
+  void hitTestChildren(HitTestResult result, { Point position }) {
     for (ScaffoldSlots slot in [ScaffoldSlots.drawer, ScaffoldSlots.floatingActionButton, ScaffoldSlots.toolbar, ScaffoldSlots.statusBar, ScaffoldSlots.body]) {
       RenderBox box = _slots[slot];
       if (box != null) {
         assert(box.parentData is BoxParentData);
-        if (new sky.Rect.fromPointAndSize(box.parentData.position, box.size).contains(position)) {
+        if (new Rect.fromPointAndSize(box.parentData.position, box.size).contains(position)) {
           if (box.hitTest(result, position: (position - box.parentData.position).toPoint()))
             return;
         }

@@ -9,7 +9,7 @@ import 'scheduler.dart' as scheduler;
 
 class PointerState {
   HitTestResult result;
-  sky.Point lastPosition;
+  Point lastPosition;
 
   PointerState({ this.result, this.lastPosition });
 }
@@ -51,12 +51,12 @@ class AppView {
       _handlePointerEvent(event);
     } else if (event is sky.GestureEvent) {
       HitTestResult result = new HitTestResult();
-      _renderView.hitTest(result, position: new sky.Point(event.x, event.y));
+      _renderView.hitTest(result, position: new Point(event.x, event.y));
       dispatchEvent(event, result);
     }
   }
 
-  PointerState _createStateForPointer(sky.PointerEvent event, sky.Point position) {
+  PointerState _createStateForPointer(sky.PointerEvent event, Point position) {
     HitTestResult result = new HitTestResult();
     _renderView.hitTest(result, position: position);
     PointerState state = new PointerState(result: result, lastPosition: position);
@@ -65,7 +65,7 @@ class AppView {
   }
 
   void _handlePointerEvent(sky.PointerEvent event) {
-    sky.Point position = new sky.Point(event.x, event.y);
+    Point position = new Point(event.x, event.y);
 
     PointerState state;
     switch(event.type) {

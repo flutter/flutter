@@ -16,7 +16,7 @@ class RenderParagraph extends RenderBox {
 
   RenderParagraph({
     String text,
-    sky.Color color
+    Color color
   }) : _color = color {
     _layoutRoot.rootElement = _document.createElement('p');
     this.text = text;
@@ -31,16 +31,16 @@ class RenderParagraph extends RenderBox {
     markNeedsLayout();
   }
 
-  sky.Color _color = const sky.Color(0xFF000000);
-  sky.Color get color => _color;
-  void set color (sky.Color value) {
+  Color _color = const Color(0xFF000000);
+  Color get color => _color;
+  void set color (Color value) {
     if (_color != value) {
       _color = value;
       markNeedsPaint();
     }
   }
 
-  sky.Size getIntrinsicDimensions(BoxConstraints constraints) {
+  Size getIntrinsicDimensions(BoxConstraints constraints) {
     assert(false);
     return null;
     // we don't currently support this for RenderParagraph
@@ -52,7 +52,7 @@ class RenderParagraph extends RenderBox {
     _layoutRoot.minHeight = constraints.minHeight;
     _layoutRoot.maxHeight = constraints.maxHeight;
     _layoutRoot.layout();
-    size = constraints.constrain(new sky.Size(_layoutRoot.rootElement.width, _layoutRoot.rootElement.height));
+    size = constraints.constrain(new Size(_layoutRoot.rootElement.width, _layoutRoot.rootElement.height));
   }
 
   void paint(RenderObjectDisplayList canvas) {

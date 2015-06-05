@@ -2,10 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:sky' as sky;
 import '../fn2.dart';
-import '../rendering/box.dart';
-import '../rendering/flex.dart';
 import 'button_base.dart';
 import 'icon.dart';
 import 'ink_well.dart';
@@ -13,7 +10,7 @@ import 'ink_well.dart';
 class MenuItem extends ButtonBase {
 
   static const BoxDecoration highlightDecoration = const BoxDecoration(
-    backgroundColor: const sky.Color.fromARGB(102, 153, 153, 153)
+    backgroundColor: const Color.fromARGB(102, 153, 153, 153)
   ); 
 
   List<UINode> children;
@@ -43,7 +40,7 @@ class MenuItem extends ButtonBase {
             )
           ]
         ),
-        desiredSize: const sky.Size.fromHeight(48.0),
+        desiredSize: const Size.fromHeight(48.0),
         decoration: highlight ? highlightDecoration : null
       ),
       onGestureTap: onGestureTap

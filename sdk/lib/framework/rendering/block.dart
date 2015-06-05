@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:sky' as sky;
 import 'box.dart';
 import 'object.dart';
 
@@ -31,7 +30,7 @@ class RenderBlock extends RenderBox with ContainerRenderObjectMixin<RenderBox, B
   // if it must, but it should be as cheap as possible; just get the
   // dimensions and nothing else (e.g. don't calculate hypothetical
   // child positions if they're not needed to determine dimensions)
-  sky.Size getIntrinsicDimensions(BoxConstraints constraints) {
+  Size getIntrinsicDimensions(BoxConstraints constraints) {
     double height = 0.0;
     double width = constraints.constrainWidth(constraints.maxWidth);
     assert(width < double.INFINITY);
@@ -44,7 +43,7 @@ class RenderBlock extends RenderBox with ContainerRenderObjectMixin<RenderBox, B
       child = child.parentData.nextSibling;
     }
 
-    return new sky.Size(width, constraints.constrainHeight(height));
+    return new Size(width, constraints.constrainHeight(height));
   }
 
   void performLayout() {
@@ -55,16 +54,16 @@ class RenderBlock extends RenderBox with ContainerRenderObjectMixin<RenderBox, B
     while (child != null) {
       child.layout(new BoxConstraints(minWidth: width, maxWidth: width), parentUsesSize: true);
       assert(child.parentData is BlockParentData);
-      child.parentData.position = new sky.Point(0.0, y);
+      child.parentData.position = new Point(0.0, y);
       y += child.size.height;
       child = child.parentData.nextSibling;
     }
-    size = new sky.Size(width, constraints.constrainHeight(y));
+    size = new Size(width, constraints.constrainHeight(y));
     assert(size.width < double.INFINITY);
     assert(size.height < double.INFINITY);
   }
 
-  void hitTestChildren(HitTestResult result, { sky.Point position }) {
+  void hitTestChildren(HitTestResult result, { Point position }) {
     defaultHitTestChildren(result, position: position);
   }
 

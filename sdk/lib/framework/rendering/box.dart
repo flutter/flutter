@@ -53,13 +53,13 @@ class BoxConstraints {
     this.minHeight: 0.0,
     this.maxHeight: double.INFINITY});
 
-  BoxConstraints.tight(sky.Size size)
+  BoxConstraints.tight(Size size)
     : minWidth = size.width,
       maxWidth = size.width,
       minHeight = size.height,
       maxHeight = size.height;
 
-  BoxConstraints.loose(sky.Size size)
+  BoxConstraints.loose(Size size)
     : minWidth = 0.0,
       maxWidth = size.width,
       minHeight = 0.0,
@@ -90,8 +90,8 @@ class BoxConstraints {
     return clamp(min: minHeight, max: maxHeight, value: height);
   }
 
-  sky.Size constrain(sky.Size size) {
-    return new sky.Size(constrainWidth(size.width), constrainHeight(size.height));
+  Size constrain(Size size) {
+    return new Size(constrainWidth(size.width), constrainHeight(size.height));
   }
 
   bool get isInfinite => maxWidth >= double.INFINITY || maxHeight >= double.INFINITY;
@@ -108,7 +108,7 @@ class BoxConstraints {
 }
 
 class BoxParentData extends ParentData {
-  sky.Point position = new sky.Point(0.0, 0.0);
+  Point position = new Point(0.0, 0.0);
   String toString() => 'position=$position';
 }
 
@@ -124,14 +124,14 @@ abstract class RenderBox extends RenderObject {
   // if it must, but it should be as cheap as possible; just get the
   // dimensions and nothing else (e.g. don't calculate hypothetical
   // child positions if they're not needed to determine dimensions)
-  sky.Size getIntrinsicDimensions(BoxConstraints constraints) {
-    return constraints.constrain(new sky.Size(0.0, 0.0));
+  Size getIntrinsicDimensions(BoxConstraints constraints) {
+    return constraints.constrain(new Size(0.0, 0.0));
   }
 
   BoxConstraints get constraints => super.constraints as BoxConstraints;
   void performResize() {
     // default behaviour for subclasses that have sizedByParent = true
-    size = constraints.constrain(new sky.Size(0.0, 0.0));
+    size = constraints.constrain(new Size(0.0, 0.0));
     assert(size.height < double.INFINITY);
     assert(size.width < double.INFINITY);
   }
@@ -142,14 +142,14 @@ abstract class RenderBox extends RenderObject {
     assert(sizedByParent);
   }
 
-  bool hitTest(HitTestResult result, { sky.Point position }) {
+  bool hitTest(HitTestResult result, { Point position }) {
     hitTestChildren(result, position: position);
     result.add(this);
     return true;
   }
-  void hitTestChildren(HitTestResult result, { sky.Point position }) { }
+  void hitTestChildren(HitTestResult result, { Point position }) { }
 
-  sky.Size size = new sky.Size(0.0, 0.0);
+  Size size = new Size(0.0, 0.0);
 
   String debugDescribeSettings(String prefix) => '${super.debugDescribeSettings(prefix)}${prefix}size: ${size}\n';
 }
@@ -159,7 +159,7 @@ abstract class RenderProxyBox extends RenderBox with RenderObjectWithChildMixin<
     this.child = child;
   }
 
-  sky.Size getIntrinsicDimensions(BoxConstraints constraints) {
+  Size getIntrinsicDimensions(BoxConstraints constraints) {
     if (child != null)
       return child.getIntrinsicDimensions(constraints);
     return super.getIntrinsicDimensions(constraints);
@@ -174,7 +174,7 @@ abstract class RenderProxyBox extends RenderBox with RenderObjectWithChildMixin<
     }
   }
 
-  void hitTestChildren(HitTestResult result, { sky.Point position }) {
+  void hitTestChildren(HitTestResult result, { Point position }) {
     if (child != null)
       child.hitTest(result, position: position);
     else
@@ -191,15 +191,15 @@ class RenderSizedBox extends RenderProxyBox {
 
   RenderSizedBox({
     RenderBox child,
-    sky.Size desiredSize: sky.Size.infinite
+    Size desiredSize: Size.infinite
   }) : super(child) {
     assert(desiredSize != null);
     this.desiredSize = desiredSize;
   }
 
-  sky.Size _desiredSize;
-  sky.Size get desiredSize => _desiredSize;
-  void set desiredSize (sky.Size value) {
+  Size _desiredSize;
+  Size get desiredSize => _desiredSize;
+  void set desiredSize (Size value) {
     assert(value != null);
     if (_desiredSize == value)
       return;
@@ -207,7 +207,7 @@ class RenderSizedBox extends RenderProxyBox {
     markNeedsLayout();
   }
 
-  sky.Size getIntrinsicDimensions(BoxConstraints constraints) {
+  Size getIntrinsicDimensions(BoxConstraints constraints) {
     return constraints.constrain(_desiredSize);
   }
 
@@ -226,7 +226,7 @@ class RenderClip extends RenderProxyBox {
   void paint(RenderObjectDisplayList canvas) {
     if (child != null) {
       canvas.save();
-      canvas.clipRect(new sky.Rect.fromSize(size));
+      canvas.clipRect(new Rect.fromSize(size));
       child.paint(canvas);
       canvas.restore();
     }
@@ -251,7 +251,7 @@ class RenderPadding extends RenderBox with RenderObjectWithChildMixin<RenderBox>
     markNeedsLayout();
   }
 
-  sky.Size getIntrinsicDimensions(BoxConstraints constraints) {
+  Size getIntrinsicDimensions(BoxConstraints constraints) {
     assert(padding != null);
     constraints = constraints.deflate(padding);
     if (child == null)
@@ -264,13 +264,13 @@ class RenderPadding extends RenderBox with RenderObjectWithChildMixin<RenderBox>
     BoxConstraints innerConstraints = constraints.deflate(padding);
     if (child == null) {
       size = innerConstraints.constrain(
-          new sky.Size(padding.left + padding.right, padding.top + padding.bottom));
+          new Size(padding.left + padding.right, padding.top + padding.bottom));
       return;
     }
     child.layout(innerConstraints, parentUsesSize: true);
     assert(child.parentData is BoxParentData);
-    child.parentData.position = new sky.Point(padding.left, padding.top);
-    size = constraints.constrain(new sky.Size(padding.left + child.size.width + padding.right,
+    child.parentData.position = new Point(padding.left, padding.top);
+    size = constraints.constrain(new Size(padding.left + child.size.width + padding.right,
                                               padding.top + child.size.height + padding.bottom));
   }
 
@@ -279,12 +279,12 @@ class RenderPadding extends RenderBox with RenderObjectWithChildMixin<RenderBox>
       canvas.paintChild(child, child.parentData.position);
   }
 
-  void hitTestChildren(HitTestResult result, { sky.Point position }) {
+  void hitTestChildren(HitTestResult result, { Point position }) {
     if (child != null) {
       assert(child.parentData is BoxParentData);
-      sky.Rect childBounds = new sky.Rect.fromPointAndSize(child.parentData.position, child.size);
+      Rect childBounds = new Rect.fromPointAndSize(child.parentData.position, child.size);
       if (childBounds.contains(position)) {
-        child.hitTest(result, position: new sky.Point(position.x - child.parentData.position.x,
+        child.hitTest(result, position: new Point(position.x - child.parentData.position.x,
                                                       position.y - child.parentData.position.y));
       }
     }
@@ -295,7 +295,7 @@ class RenderPadding extends RenderBox with RenderObjectWithChildMixin<RenderBox>
 
 class RenderImage extends RenderBox {
 
-  RenderImage(String url, sky.Size dimensions) {
+  RenderImage(String url, Size dimensions) {
     requestedSize = dimensions;
     src = url;
   }
@@ -315,9 +315,9 @@ class RenderImage extends RenderBox {
     });
   }
 
-  sky.Size _requestedSize;
-  sky.Size get requestedSize => _requestedSize;
-  void set requestedSize (sky.Size value) {
+  Size _requestedSize;
+  Size get requestedSize => _requestedSize;
+  void set requestedSize (Size value) {
     if (value == _requestedSize)
       return;
     _requestedSize = value;
@@ -329,7 +329,7 @@ class RenderImage extends RenderBox {
     if (_image == null) {
       double width = requestedSize.width == null ? 0.0 : requestedSize.width;
       double height = requestedSize.height == null ? 0.0 : requestedSize.height;
-      size = constraints.constrain(new sky.Size(width, height));
+      size = constraints.constrain(new Size(width, height));
       return;
     }
 
@@ -338,14 +338,14 @@ class RenderImage extends RenderBox {
     // maintain the aspect ratio
     if (requestedSize.width == null) {
       if (requestedSize.height == null) {
-        size = constraints.constrain(new sky.Size(_image.width.toDouble(), _image.height.toDouble()));
+        size = constraints.constrain(new Size(_image.width.toDouble(), _image.height.toDouble()));
       } else {
         double width = requestedSize.height * _image.width / _image.height;
-        size = constraints.constrain(new sky.Size(width, requestedSize.height));
+        size = constraints.constrain(new Size(width, requestedSize.height));
       }
     } else if (requestedSize.height == null) {
       double height = requestedSize.width * _image.height / _image.width;
-      size = constraints.constrain(new sky.Size(requestedSize.width, height));
+      size = constraints.constrain(new Size(requestedSize.width, height));
     } else {
       size = constraints.constrain(requestedSize);
     }
@@ -360,7 +360,7 @@ class RenderImage extends RenderBox {
       canvas.save();
       canvas.scale(widthScale, heightScale);
     }
-    sky.Paint paint = new sky.Paint();
+    Paint paint = new Paint();
     canvas.drawImage(_image, 0.0, 0.0, paint);
     if (needsScale)
       canvas.restore();
@@ -371,10 +371,10 @@ class RenderImage extends RenderBox {
 
 class BorderSide {
   const BorderSide({
-    this.color: const sky.Color(0xFF000000),
+    this.color: const Color(0xFF000000),
     this.width: 1.0
   });
-  final sky.Color color;
+  final Color color;
   final double width;
 
   static const none = const BorderSide(width: 0.0);
@@ -423,7 +423,7 @@ class BoxDecoration {
     this.border
   });
 
-  final sky.Color backgroundColor;
+  final Color backgroundColor;
   final Border border;
 
   String toString([String prefix = '']) {
@@ -462,8 +462,8 @@ class RenderDecoratedBox extends RenderProxyBox {
     assert(size.height != null);
 
     if (_decoration.backgroundColor != null) {
-      sky.Paint paint = new sky.Paint()..color = _decoration.backgroundColor;
-      canvas.drawRect(new sky.Rect.fromLTRB(0.0, 0.0, size.width, size.height), paint);
+      Paint paint = new Paint()..color = _decoration.backgroundColor;
+      canvas.drawRect(new Rect.fromLTRB(0.0, 0.0, size.width, size.height), paint);
     }
 
     if (_decoration.border != null) {
@@ -472,11 +472,11 @@ class RenderDecoratedBox extends RenderProxyBox {
       assert(_decoration.border.bottom != null);
       assert(_decoration.border.left != null);
 
-      sky.Paint paint = new sky.Paint();
-      sky.Path path;
+      Paint paint = new Paint();
+      Path path;
 
       paint.color = _decoration.border.top.color;
-      path = new sky.Path();
+      path = new Path();
       path.moveTo(0.0,0.0);
       path.lineTo(_decoration.border.left.width, _decoration.border.top.width);
       path.lineTo(size.width - _decoration.border.right.width, _decoration.border.top.width);
@@ -485,7 +485,7 @@ class RenderDecoratedBox extends RenderProxyBox {
       canvas.drawPath(path, paint);
 
       paint.color = _decoration.border.right.color;
-      path = new sky.Path();
+      path = new Path();
       path.moveTo(size.width, 0.0);
       path.lineTo(size.width - _decoration.border.right.width, _decoration.border.top.width);
       path.lineTo(size.width - _decoration.border.right.width, size.height - _decoration.border.bottom.width);
@@ -494,7 +494,7 @@ class RenderDecoratedBox extends RenderProxyBox {
       canvas.drawPath(path, paint);
 
       paint.color = _decoration.border.bottom.color;
-      path = new sky.Path();
+      path = new Path();
       path.moveTo(size.width, size.height);
       path.lineTo(size.width - _decoration.border.right.width, size.height - _decoration.border.bottom.width);
       path.lineTo(_decoration.border.left.width, size.height - _decoration.border.bottom.width);
@@ -503,7 +503,7 @@ class RenderDecoratedBox extends RenderProxyBox {
       canvas.drawPath(path, paint);
 
       paint.color = _decoration.border.left.color;
-      path = new sky.Path();
+      path = new Path();
       path.moveTo(0.0, size.height);
       path.lineTo(_decoration.border.left.width, size.height - _decoration.border.bottom.width);
       path.lineTo(_decoration.border.left.width, _decoration.border.top.width);
@@ -562,14 +562,14 @@ class RenderTransform extends RenderProxyBox {
     markNeedsPaint();
   }
 
-  void hitTestChildren(HitTestResult result, { sky.Point position }) {
+  void hitTestChildren(HitTestResult result, { Point position }) {
     Matrix4 inverse = new Matrix4.zero();
     double det = inverse.copyInverse(_transform);
     // TODO(abarth): Check the determinant for degeneracy.
 
     Vector3 position3 = new Vector3(position.x, position.y, 0.0);
     Vector3 transformed3 = inverse.transform3(position3);
-    sky.Point transformed = new sky.Point(transformed3.x, transformed3.y);
+    Point transformed = new Point(transformed3.x, transformed3.y);
     super.hitTestChildren(result, position: transformed);
   }
 
@@ -587,7 +587,7 @@ class RenderTransform extends RenderProxyBox {
   }
 }
 
-typedef void SizeChangedCallback(sky.Size newSize);
+typedef void SizeChangedCallback(Size newSize);
 
 class RenderSizeObserver extends RenderProxyBox {
   RenderSizeObserver({
@@ -600,7 +600,7 @@ class RenderSizeObserver extends RenderProxyBox {
   SizeChangedCallback callback;
 
   void performLayout() {
-    sky.Size oldSize = size;
+    Size oldSize = size;
 
     super.performLayout();
 
@@ -617,9 +617,9 @@ class BoxShadow {
     this.blur
   });
 
-  final sky.Size offset;
+  final Size offset;
   final double blur;
-  final sky.Color color;
+  final Color color;
 }
 
 class RenderShadowedBox extends RenderProxyBox {
@@ -638,9 +638,9 @@ class RenderShadowedBox extends RenderProxyBox {
     markNeedsPaint();
   }
 
-  sky.Paint _createShadowPaint(BoxShadow shadow) {
+  Paint _createShadowPaint(BoxShadow shadow) {
     // TODO(eseidel): This should not be hard-coded yellow.
-    sky.Paint paint = new sky.Paint()..color = const sky.Color.fromARGB(255, 0, 255, 0);
+    Paint paint = new Paint()..color = const Color.fromARGB(255, 0, 255, 0);
     var builder = new sky.LayerDrawLooperBuilder()
       // Shadow layer.
       ..addLayerOnTop(
@@ -648,7 +648,7 @@ class RenderShadowedBox extends RenderProxyBox {
             ..setPaintBits(-1)
             ..setOffset(shadow.offset.toPoint())
             ..setColorMode(sky.TransferMode.srcMode),
-          (sky.Paint layerPaint) {
+          (Paint layerPaint) {
         layerPaint.color = shadow.color;
         layerPaint.setMaskFilter(
           new sky.MaskFilter.Blur(sky.BlurStyle.normal, shadow.blur, highQuality: true));
@@ -660,8 +660,8 @@ class RenderShadowedBox extends RenderProxyBox {
   }
 
   void paint(RenderObjectDisplayList canvas) {
-    sky.Paint paint = _createShadowPaint(_shadow);
-    canvas.drawRect(new sky.Rect.fromLTRB(0.0, 0.0, size.width, size.height), paint);
+    Paint paint = _createShadowPaint(_shadow);
+    canvas.drawRect(new Rect.fromLTRB(0.0, 0.0, size.width, size.height), paint);
     super.paint(canvas);
   }
 }
@@ -716,7 +716,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     this.child = child;
   }
 
-  sky.Size _size = new sky.Size(0.0, 0.0);
+  Size _size = new Size(0.0, 0.0);
   double get width => _size.width;
   double get height => _size.height;
 
@@ -732,7 +732,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
         child.rotate(oldAngle: _orientation, newAngle: constraints.orientation, time: timeForRotation);
       _orientation = constraints.orientation;
     }
-    _size = new sky.Size(constraints.width, constraints.height);
+    _size = new Size(constraints.width, constraints.height);
     assert(_size.height < double.INFINITY);
     assert(_size.width < double.INFINITY);
   }
@@ -748,9 +748,9 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     assert(false); // nobody tells the screen to rotate, the whole rotate() dance is started from our performResize()
   }
 
-  bool hitTest(HitTestResult result, { sky.Point position }) {
+  bool hitTest(HitTestResult result, { Point position }) {
     if (child != null) {
-      sky.Rect childBounds = new sky.Rect.fromSize(child.size);
+      Rect childBounds = new Rect.fromSize(child.size);
       if (childBounds.contains(position))
         child.hitTest(result, position: position);
     }
@@ -760,7 +760,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
 
   void paint(RenderObjectDisplayList canvas) {
     if (child != null)
-      canvas.paintChild(child, new sky.Point(0.0, 0.0));
+      canvas.paintChild(child, new Point(0.0, 0.0));
   }
 
   void paintFrame() {
@@ -776,14 +776,14 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
 // DEFAULT BEHAVIORS FOR RENDERBOX CONTAINERS
 abstract class RenderBoxContainerDefaultsMixin<ChildType extends RenderBox, ParentDataType extends ContainerParentDataMixin<ChildType>> implements ContainerRenderObjectMixin<ChildType, ParentDataType> {
 
-  void defaultHitTestChildren(HitTestResult result, { sky.Point position }) {
+  void defaultHitTestChildren(HitTestResult result, { Point position }) {
     // the x, y parameters have the top left of the node's box as the origin
     ChildType child = lastChild;
     while (child != null) {
       assert(child.parentData is ParentDataType);
-      sky.Rect childBounds = new sky.Rect.fromPointAndSize(child.parentData.position, child.size);
+      Rect childBounds = new Rect.fromPointAndSize(child.parentData.position, child.size);
       if (childBounds.contains(position)) {
-        if (child.hitTest(result, position: new sky.Point(position.x - child.parentData.position.x,
+        if (child.hitTest(result, position: new Point(position.x - child.parentData.position.x,
                                                           position.y - child.parentData.position.y)))
           break;
       }
