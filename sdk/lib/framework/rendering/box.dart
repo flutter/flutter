@@ -680,14 +680,20 @@ class RenderCustomPaint extends RenderProxyBox {
 
   CustomPaintCallback _callback;
   void set callback (CustomPaintCallback value) {
-    assert(value != null);
+    assert(value != null || !attached);
     if (_callback == value)
       return;
     _callback = value;
     markNeedsPaint();
   }
 
+  void attach() {
+    assert(_callback != null);
+    super.attach();
+  }
+
   void paint(RenderObjectDisplayList canvas) {
+    assert(_callback != null);
     _callback(canvas);
     super.paint(canvas);
   }
