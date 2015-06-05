@@ -5,8 +5,8 @@
 import 'package:sky/framework/components2/tool_bar.dart';
 import 'package:sky/framework/components2/drawer.dart';
 // import 'package:sky/framework/components2/drawer_header.dart';
-// import 'package:sky/framework/components2/floating_action_button.dart';
-// import 'package:sky/framework/components2/icon.dart';
+import 'package:sky/framework/components2/floating_action_button.dart';
+import 'package:sky/framework/components2/icon.dart';
 import 'package:sky/framework/components2/icon_button.dart';
 import 'package:sky/framework/components2/menu_divider.dart';
 import 'package:sky/framework/components2/menu_item.dart';
@@ -203,9 +203,9 @@ class StocksApp extends App {
       new Scaffold(
         toolbar: _isSearching ? buildSearchBar() : buildToolBar(),
         body: new Stocklist(stocks: _stocks, query: _searchQuery),
-        // floatingActionButton: new FloatingActionButton(
-        //   content: new Icon(type: 'content/add_white', size: 24),
-        //   level: 3),
+        floatingActionButton: new FloatingActionButton(
+          content: new Icon(type: 'content/add_white', size: 24),
+          level: 3),
         drawer: _drawerShowing ? buildDrawer() : null
       ),
     ];
