@@ -23,6 +23,7 @@ import org.chromium.mojom.mojo.TcpBoundSocket;
 import org.chromium.mojom.mojo.TcpConnectedSocket;
 import org.chromium.mojom.mojo.UdpSocket;
 import org.chromium.mojom.mojo.UrlLoader;
+import org.chromium.mojom.mojo.UrlLoaderInterceptorFactory;
 import org.chromium.mojom.mojo.WebSocket;
 
 import java.io.File;
@@ -109,5 +110,10 @@ public class NetworkServiceImpl implements NetworkService {
     public void createHttpServer(NetAddress localAddress, HttpServerDelegate delegate,
             CreateHttpServerResponse callback) {
         delegate.close();
+    }
+
+    @Override
+    public void registerUrlLoaderInterceptor(UrlLoaderInterceptorFactory factory) {
+        factory.close();
     }
 }
