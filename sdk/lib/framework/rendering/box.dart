@@ -666,6 +666,33 @@ class RenderShadowedBox extends RenderProxyBox {
   }
 }
 
+typedef void CustomPaintCallback(RenderObjectDisplayList canvas);
+
+class RenderCustomPaint extends RenderProxyBox {
+
+  RenderCustomPaint({
+    CustomPaintCallback callback,
+    RenderBox child
+  }) : super(child) {
+    assert(callback != null);
+    _callback = callback;
+  }
+
+  CustomPaintCallback _callback;
+  void set callback (CustomPaintCallback value) {
+    assert(value != null);
+    if (_callback == value)
+      return;
+    _callback = value;
+    markNeedsPaint();
+  }
+
+  void paint(RenderObjectDisplayList canvas) {
+    _callback(canvas);
+    super.paint(canvas);
+  }
+}
+
 // RENDER VIEW LAYOUT MANAGER
 
 class ViewConstraints {

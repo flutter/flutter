@@ -33,6 +33,12 @@ public:
     SkColor color() const { return m_paint.getColor(); }
     void setColor(SkColor color) { m_paint.setColor(color); }
 
+    unsigned short style() const { return m_paint.getStyle(); }
+    void setStyle(unsigned short style) { m_paint.setStyle(static_cast<SkPaint::Style>(style)); }
+
+    SkScalar strokeWidth() const { return m_paint.getStrokeWidth(); }
+    void setStrokeWidth(SkScalar strokeWidth) { m_paint.setStrokeWidth(strokeWidth); }
+
     void setARGB(unsigned a, unsigned r, unsigned g, unsigned b)
     {
         m_paint.setARGB(a, r, g, b);

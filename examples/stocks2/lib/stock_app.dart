@@ -13,7 +13,7 @@ import 'package:sky/framework/components2/menu_item.dart';
 import 'package:sky/framework/components2/input.dart';
 // import 'package:sky/framework/components2/modal_overlay.dart';
 // import 'package:sky/framework/components2/popup_menu.dart';
-// import 'package:sky/framework/components2/radio.dart';
+import 'package:sky/framework/components2/radio.dart';
 import 'package:sky/framework/components2/scaffold.dart';
 import 'package:sky/framework/fn2.dart';
 import 'package:sky/framework/theme2/typography.dart' as typography;
@@ -110,8 +110,6 @@ class StocksApp extends App {
     });
   }
 
-  // static FlexBoxParentData _flex1 = new FlexBoxParentData()..flex = 1;
-
   Drawer buildDrawer() {
     return new Drawer(
       controller: _drawerController,
@@ -127,23 +125,23 @@ class StocksApp extends App {
           icon: 'action/account_balance',
           children: [new Text('Account Balance')]),
         new MenuDivider(key: 'div1'),
-        // new MenuItem(
-        //   key: 'Optimistic Menu Item',
-        //   icon: 'action/thumb_up',
-        //   onGestureTap: (event) => _handleStockModeChange(StockMode.optimistic),
-        //   children: [
-        //     new ParentDataNode(new Text('Optimistic'), _flex1),
-        //     new Radio(key: 'optimistic-radio', value: StockMode.optimistic, groupValue: _stockMode, onChanged: _handleStockModeChange)
-        //   ]),
-        // new MenuItem(
-        //   key: 'Pessimistic Menu Item',
-        //   icon: 'action/thumb_down',
-        //   onGestureTap: (event) => _handleStockModeChange(StockMode.pessimistic),
-        //   children: [
-        //     new ParentDataNode(new Text('Pessimistic'), _flex1),
-        //     new Radio(key: 'pessimistic-radio', value: StockMode.pessimistic, groupValue: _stockMode, onChanged: _handleStockModeChange)
-        //   ]),
-        // new MenuDivider(key: 'div2'),
+        new MenuItem(
+          key: 'Optimistic Menu Item',
+          icon: 'action/thumb_up',
+          onGestureTap: (event) => _handleStockModeChange(StockMode.optimistic),
+          children: [
+            new FlexExpandingChild(new Text('Optimistic'), 1),
+            new Radio(key: 'optimistic-radio', value: StockMode.optimistic, groupValue: _stockMode, onChanged: _handleStockModeChange)
+          ]),
+        new MenuItem(
+          key: 'Pessimistic Menu Item',
+          icon: 'action/thumb_down',
+          onGestureTap: (event) => _handleStockModeChange(StockMode.pessimistic),
+          children: [
+            new FlexExpandingChild(new Text('Pessimistic'), 1),
+            new Radio(key: 'pessimistic-radio', value: StockMode.pessimistic, groupValue: _stockMode, onChanged: _handleStockModeChange)
+          ]),
+        new MenuDivider(key: 'div2'),
         new MenuItem(
           key: 'Settings',
           icon: 'action/settings',

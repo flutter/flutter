@@ -5,6 +5,14 @@
 [
   Constructor(),
 ] interface Paint {
+  // Style
+  const unsigned short FILL_STYLE            = 0;
+  const unsigned short STROKE_STYLE          = 1;
+  const unsigned short STROKE_AND_FILL_STYLE = 2;
+
+  // TODO(jackson): we could wrap this enum like we did for |color|
+  attribute unsigned short style;
+  attribute float strokeWidth;
   attribute boolean isAntiAlias;
   attribute Color color;
 

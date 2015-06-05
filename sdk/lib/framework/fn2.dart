@@ -441,6 +441,26 @@ class SizeObserver extends OneChildRenderObjectWrapper {
   }
 }
 
+// TODO(jackson) need a mechanism for marking the RenderCustomPaint as needing paint
+class CustomPaint extends OneChildRenderObjectWrapper {
+  RenderCustomPaint root;
+  final CustomPaintCallback callback;
+
+  CustomPaint({ this.callback, UINode child, Object key })
+    : super(child: child, key: key);
+
+  RenderCustomPaint createNode() => new RenderCustomPaint(callback: callback);
+
+  void syncRenderObject(CustomPaint old) {
+    super.syncRenderObject(old);
+    root.callback = callback;
+  }
+
+  void _remove() {
+    root.callback = null;
+    super._remove();
+  }
+}
 
 final List<UINode> _emptyList = new List<UINode>();
 
