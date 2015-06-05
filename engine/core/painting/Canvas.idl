@@ -21,10 +21,11 @@ interface Canvas {
 
   void clipRect(Rect rect);
 
+  void drawLine(float x0, float y0, float x1, float y1, Paint paint);
   void drawPicture(Picture picture);
-
   void drawPaint(Paint paint);
   void drawRect(Rect rect, Paint paint);
+  void drawRRect(RRect rrect, Paint paint);
   void drawOval(Rect rect, Paint paint);
   void drawCircle(float x, float y, float radius, Paint paint);
   void drawPath(Path path, Paint paint);

@@ -115,6 +115,15 @@ void Canvas::clipRect(const Rect& rect)
     m_canvas->clipRect(rect.sk_rect);
 }
 
+void Canvas::drawLine(float x0, float y0, float x1, float y1, const Paint* paint)
+{
+    if (!m_canvas)
+        return;
+    ASSERT(paint);
+    ASSERT(m_displayList->isRecording());
+    m_canvas->drawLine(x0, y0, x1, y1, paint->paint());
+}
+
 void Canvas::drawPicture(Picture* picture)
 {
     if (!m_canvas)
@@ -140,6 +149,16 @@ void Canvas::drawRect(const Rect& rect, const Paint* paint)
     ASSERT(paint);
     ASSERT(m_displayList->isRecording());
     m_canvas->drawRect(rect.sk_rect, paint->paint());
+}
+
+void Canvas::drawRRect(const RRect* rrect, const Paint* paint)
+{
+    if (!m_canvas)
+        return;
+    ASSERT(rrect);
+    ASSERT(paint);
+    ASSERT(m_displayList->isRecording());
+    m_canvas->drawRRect(rrect->rrect(), paint->paint());
 }
 
 void Canvas::drawOval(const Rect& rect, const Paint* paint)

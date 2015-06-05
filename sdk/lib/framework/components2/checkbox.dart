@@ -2,58 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../fn2.dart';
-import 'button_base.dart';
+import 'package:sky/framework/theme2/colors.dart' as colors;
+
 import 'dart:sky' as sky;
+import '../fn2.dart';
+import '../rendering/box.dart';
+import '../rendering/object.dart';
+import 'button_base.dart';
 
 typedef void ValueChanged(value);
 
 class Checkbox extends ButtonBase {
-  static final Style _style = new Style('''
-    transform: translateX(0);
-    justify-content: center;
-    align-items: center;
-    -webkit-user-select: none;
-    cursor: pointer;
-    width: 30px;
-    height: 30px;'''
-  );
-
-  static final Style _containerStyle = new Style('''
-    border: solid 2px;
-    border-color: rgba(90, 90, 90, 0.25);
-    width: 10px;
-    height: 10px;'''
-  );
-
-  static final Style _containerHighlightStyle = new Style('''
-    border: solid 2px;
-    border-color: rgba(90, 90, 90, 0.25);
-    width: 10px;
-    height: 10px;
-    border-radius: 10px;
-    background-color: orange;
-    border-color: orange;'''
-  );
-
-  static final Style _uncheckedStyle = new Style('''
-    top: 0px;
-    left: 0px;'''
-  );
-
-  static final Style _checkedStyle = new Style('''
-    top: 0px;
-    left: 0px;
-    transform: translate(2px, -15px) rotate(45deg);
-    width: 10px;
-    height: 20px;
-    border-style: solid;
-    border-top: none;
-    border-left: none;
-    border-right-width: 2px;
-    border-bottom-width: 2px;
-    border-color: #0f9d58;'''
-  );
 
   bool checked;
   ValueChanged onChanged;
@@ -65,20 +24,40 @@ class Checkbox extends ButtonBase {
   }
 
   UINode buildContent() {
+    // TODO(jackson): This should change colors with the theme
+    sky.Color color = highlight ? colors.Purple[500] : const sky.Color(0x8A000000);
+    const double edgeSize = 20.0;
+    const double edgeRadius = 1.0;
     return new EventListenerNode(
-      new FlexContainer(
-        style: _style,
-        direction: FlexDirection.horizontal,
-        children: [
-          new Container(
-            style: highlight ? _containerHighlightStyle : _containerStyle,
-            children: [
-              new Container(
-                style: checked ? _checkedStyle : _uncheckedStyle
-              )
-            ]
-          )
-        ]
+      new Container(
+        margin: const EdgeDims.symmetric(horizontal: 5.0),
+        desiredSize: new sky.Size(edgeSize + 2.0, edgeSize + 2.0),
+        child: new CustomPaint(
+          callback: (sky.Canvas canvas) {
+
+            sky.Paint paint = new sky.Paint()..color = color;
+                                             ..isAntiAlias = true;
+                                             ..strokeWidth = 2.0;
+
+            // Draw the outer rrect
+            paint.setStyle(checked ? sky.PaintingStyle.strokeAndFill : sky.PaintingStyle.stroke);
+            sky.Rect rect = new sky.Rect.fromLTRB(0.0, 0.0, edgeSize, edgeSize);
+            sky.RRect rrect = new sky.RRect()..setRectXY(rect, edgeRadius, edgeRadius);
+            canvas.drawRRect(rrect, paint);
+
+            // Draw the inner check
+            if (checked) {
+              // TODO(jackson): Use the theme color
+              paint.color = const sky.Color(0xFFFFFFFF);
+              paint.setStyle(sky.PaintingStyle.stroke);
+              sky.Path path = new sky.Path();
+              path.moveTo(edgeSize * 0.2, edgeSize * 0.5);
+              path.lineTo(edgeSize * 0.4, edgeSize * 0.7);
+              path.lineTo(edgeSize * 0.8, edgeSize * 0.3);
+              canvas.drawPath(path, paint);
+            }
+          }
+        )
       ),
       onGestureTap: _handleClick
     );

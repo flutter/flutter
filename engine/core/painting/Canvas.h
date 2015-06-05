@@ -8,6 +8,7 @@
 #include "sky/engine/core/painting/CanvasPath.h"
 #include "sky/engine/core/painting/Paint.h"
 #include "sky/engine/core/painting/Picture.h"
+#include "sky/engine/core/painting/RRect.h"
 #include "sky/engine/core/painting/Rect.h"
 #include "sky/engine/platform/graphics/DisplayList.h"
 #include "sky/engine/tonic/dart_wrappable.h"
@@ -42,9 +43,11 @@ public:
 
     void clipRect(const Rect& rect);
 
+    void drawLine(float x0, float y0, float x1, float y1, const Paint* paint);
     void drawPicture(Picture* picture);
     void drawPaint(const Paint* paint);
     void drawRect(const Rect& rect, const Paint* paint);
+    void drawRRect(const RRect* rrect, const Paint* paint);
     void drawOval(const Rect& rect, const Paint* paint);
     void drawCircle(float x, float y, float radius, const Paint* paint);
     void drawPath(const CanvasPath* path, const Paint* paint);
