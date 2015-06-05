@@ -3,29 +3,15 @@
 // found in the LICENSE file.
 
 import '../fn2.dart';
-import '../theme/colors.dart';
+import '../rendering/box.dart';
+import '../theme2/colors.dart';
+import 'dart:sky' as sky;
 import 'ink_well.dart';
 import 'material.dart';
 
-class FloatingActionButton extends Component {
-  // TODO(abarth): We need a better way to become a container for absolutely
-  // positioned elements.
-  static final Style _style = new Style('''
-    width: 56px;
-    height: 56px;
-    background-color: ${Red[500]};
-    border-radius: 28px;'''
-  );
-  static final Style _clipStyle = new Style('''
-    position: absolute;
-    justify-content: center;
-    align-items: center;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    -webkit-clip-path: circle(28px at center);''');
+const double _kSize = 56.0;
 
+class FloatingActionButton extends Component {
   UINode content;
   int level;
 
@@ -39,9 +25,14 @@ class FloatingActionButton extends Component {
       children.add(content);
 
     return new Material(
-      content: new Container(
-        style: _style,
-        children: [new StyleNode(new InkWell(children: children), _clipStyle)]),
+      content: new CustomPaint(
+        callback: (sky.Canvas canvas) {
+          const double radius = _kSize / 2.0;
+          canvas.drawCircle(radius, radius, radius, new sky.Paint()..color = Red[500]);
+        },
+        child: new Container(
+          desiredSize: const sky.Size(_kSize, _kSize),
+          child: new InkWell(children: children))),
       level: level);
   }
 }

@@ -117,9 +117,10 @@ class RenderScaffold extends RenderBox {
     }
     if (_slots[ScaffoldSlots.floatingActionButton] != null) {
       RenderBox floatingActionButton = _slots[ScaffoldSlots.floatingActionButton];
-      floatingActionButton.layout(new BoxConstraints(minWidth: 0.0, maxWidth: size.width, minHeight: size.height, maxHeight: size.height));
+      sky.Size area = new sky.Size(size.width + kButtonX, size.height + kButtonY);
+      floatingActionButton.layout(new BoxConstraints.loose(area));
       assert(floatingActionButton.parentData is BoxParentData);
-      floatingActionButton.parentData.position = new sky.Point(size.width - kButtonX, bodyPosition + bodyHeight - kButtonY);
+      floatingActionButton.parentData.position = (area - floatingActionButton.size).toPoint();
     }
   }
 

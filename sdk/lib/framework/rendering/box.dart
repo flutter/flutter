@@ -666,7 +666,7 @@ class RenderShadowedBox extends RenderProxyBox {
   }
 }
 
-typedef void CustomPaintCallback(RenderObjectDisplayList canvas);
+typedef void CustomPaintCallback(sky.Canvas canvas);
 
 class RenderCustomPaint extends RenderProxyBox {
 

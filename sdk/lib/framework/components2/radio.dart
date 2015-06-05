@@ -36,7 +36,7 @@ class Radio extends ButtonBase {
         margin: const EdgeDims.symmetric(horizontal: 5.0),
         desiredSize: new sky.Size(diameter, diameter),
         child: new CustomPaint(
-          callback: (RenderObjectDisplayList canvas) {
+          callback: (sky.Canvas canvas) {
 
             sky.Paint paint = new sky.Paint()..color = color;
 

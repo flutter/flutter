@@ -18,6 +18,8 @@ class Size {
   static const Size infinite = const Size(double.INFINITY, double.INFINITY);
 
   bool operator ==(other) => other is Size && width == other.width && height == other.height;
+  Size operator +(Size other) => new Size(width + other.width, height + other.height);
+  Size operator -(Size other) => new Size(width - other.width, height - other.height);
 
   // does the equivalent of "return new Point(0,0) + this"
   Point toPoint() => new Point(this.width, this.height);
