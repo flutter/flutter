@@ -52,7 +52,9 @@ class RenderParagraph extends RenderBox {
     _layoutRoot.minHeight = constraints.minHeight;
     _layoutRoot.maxHeight = constraints.maxHeight;
     _layoutRoot.layout();
-    size = constraints.constrain(new Size(_layoutRoot.rootElement.width, _layoutRoot.rootElement.height));
+    // rootElement.width always expands to fill, use maxContentWidth instead.
+    sky.Element root = _layoutRoot.rootElement;
+    size = constraints.constrain(new Size(root.maxContentWidth, root.height));
   }
 
   void paint(RenderObjectDisplayList canvas) {
