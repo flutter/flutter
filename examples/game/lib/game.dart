@@ -7,3 +7,4 @@ import 'sprites.dart';
 import 'package:box2d/box2d.dart';
 
 part 'game_world.dart';
+part 'game_box.dart';

@@ -37,6 +37,8 @@ class SpriteBox extends RenderBox {
   double get systemWidth => _systemWidth;
   double get systemHeight => _systemHeight;
 
+  TransformNode get rootNode => _rootNode;
+
   void performLayout() {
     size = constraints.constrain(Size.infinite);
   }
