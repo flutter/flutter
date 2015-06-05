@@ -336,13 +336,19 @@ abstract class OneChildRenderObjectWrapper extends RenderObjectWrapper {
   }
 
   void insert(RenderObjectWrapper child, dynamic slot) {
+    final root = this.root; // TODO(ianh): Remove this once the analyzer is cleverer
     assert(slot == null);
+    assert(root is RenderObjectWithChildMixin);
     root.child = child.root;
+    assert(root == this.root); // TODO(ianh): Remove this once the analyzer is cleverer
   }
 
   void removeChild(UINode node) {
+    final root = this.root; // TODO(ianh): Remove this once the analyzer is cleverer
+    assert(root is RenderObjectWithChildMixin);
     root.child = null;
     super.removeChild(node);
+    assert(root == this.root); // TODO(ianh): Remove this once the analyzer is cleverer
   }
 
   void remove() {
@@ -482,15 +488,19 @@ abstract class MultiChildRenderObjectWrapper extends RenderObjectWrapper {
   }
 
   void insert(RenderObjectWrapper child, dynamic slot) {
+    final root = this.root; // TODO(ianh): Remove this once the analyzer is cleverer
     assert(slot == null || slot is RenderObject);
     assert(root is ContainerRenderObjectMixin);
     root.add(child.root, before: slot);
+    assert(root == this.root); // TODO(ianh): Remove this once the analyzer is cleverer
   }
 
   void removeChild(UINode node) {
+    final root = this.root; // TODO(ianh): Remove this once the analyzer is cleverer
     assert(root is ContainerRenderObjectMixin);
     root.remove(node.root);
     super.removeChild(node);
+    assert(root == this.root); // TODO(ianh): Remove this once the analyzer is cleverer
   }
 
   void remove() {
@@ -521,6 +531,7 @@ abstract class MultiChildRenderObjectWrapper extends RenderObjectWrapper {
   void syncRenderObject(MultiChildRenderObjectWrapper old) {
     super.syncRenderObject(old);
 
+    final root = this.root; // TODO(ianh): Remove this once the analyzer is cleverer
     if (root is! ContainerRenderObjectMixin)
       return;
 
@@ -597,7 +608,7 @@ abstract class MultiChildRenderObjectWrapper extends RenderObjectWrapper {
       assert(old.root is ContainerRenderObjectMixin);
       assert(oldNode.root != null);
 
-      old.root.remove(oldNode.root);
+      (old.root as ContainerRenderObjectMixin).remove(oldNode.root); // TODO(ianh): Remove cast once the analyzer is cleverer
       root.add(oldNode.root, before: nextSibling);
 
       return true;
@@ -639,6 +650,8 @@ abstract class MultiChildRenderObjectWrapper extends RenderObjectWrapper {
       removeChild(oldNode);
       advanceOldStartIndex();
     }
+
+    assert(root == this.root); // TODO(ianh): Remove this once the analyzer is cleverer
   }
 }
 

@@ -44,7 +44,7 @@ abstract class RenderObject extends AbstractNode {
   // parentData is only for use by the RenderObject that actually lays this
   // node out, and any other nodes who happen to know exactly what
   // kind of node that is.
-  ParentData parentData;
+  dynamic parentData; // TODO(ianh): change the type of this back to ParentData once the analyzer is cleverer
   void setParentData(RenderObject child) {
     // override this to setup .parentData correctly for your class
     assert(!_debugDoingLayout);
@@ -107,8 +107,10 @@ abstract class RenderObject extends AbstractNode {
     _needsLayout = true;
     assert(_relayoutSubtreeRoot != null);
     if (_relayoutSubtreeRoot != this) {
+      final parent = this.parent; // TODO(ianh): Remove this once the analyzer is cleverer
       assert(parent is RenderObject);
       parent.markNeedsLayout();
+      assert(parent == this.parent); // TODO(ianh): Remove this once the analyzer is cleverer
     } else {
       _nodesNeedingLayout.add(this);
       scheduler.ensureVisualUpdate();
@@ -136,11 +138,13 @@ abstract class RenderObject extends AbstractNode {
     _needsLayout = false;
   }
   void layout(dynamic constraints, { bool parentUsesSize: false }) {
+    final parent = this.parent; // TODO(ianh): Remove this once the analyzer is cleverer
     RenderObject relayoutSubtreeRoot;
     if (!parentUsesSize || sizedByParent || parent is! RenderObject)
       relayoutSubtreeRoot = this;
     else
       relayoutSubtreeRoot = parent._relayoutSubtreeRoot;
+    assert(parent == this.parent); // TODO(ianh): Remove this once the analyzer is cleverer
     if (!needsLayout && constraints == _constraints && relayoutSubtreeRoot == _relayoutSubtreeRoot)
       return;
     _constraints = constraints;
@@ -150,6 +154,7 @@ abstract class RenderObject extends AbstractNode {
     performLayout();
     _needsLayout = false;
     markNeedsPaint();
+    assert(parent == this.parent); // TODO(ianh): Remove this once the analyzer is cleverer
   }
   bool get sizedByParent => false; // return true if the constraints are the only input to the sizing algorithm (in particular, child nodes have no impact)
   void performResize(); // set the local dimensions, using only the constraints (only called if sizedByParent is true)
@@ -257,7 +262,7 @@ class HitTestResult {
 
 // GENERIC MIXIN FOR RENDER NODES WITH ONE CHILD
 
-abstract class RenderObjectWithChildMixin<ChildType extends RenderObject> {
+abstract class RenderObjectWithChildMixin<ChildType extends RenderObject> implements RenderObject {
   ChildType _child;
   ChildType get child => _child;
   void set child (ChildType value) {
