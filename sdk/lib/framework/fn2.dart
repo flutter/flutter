@@ -51,7 +51,7 @@ abstract class UINode {
   // 'slot' is the identifier that the parent RenderObjectWrapper uses to know
   // where to put this descendant
 
-  void _remove() {
+  void remove() {
     _defunct = true;
     root = null;
     handleRemoved();
@@ -96,7 +96,7 @@ abstract class UINode {
 
   void removeChild(UINode node) {
     _traceSync(_SyncOperation.removal, node._key);
-    node._remove();
+    node.remove();
   }
 
   // Returns the child which should be retained as the child of this node.
@@ -157,10 +157,10 @@ abstract class ContentNode extends UINode {
     root = content.root;
   }
 
-  void _remove() {
+  void remove() {
     if (content != null)
       removeChild(content);
-    super._remove();
+    super.remove();
   }
 }
 
@@ -317,10 +317,10 @@ abstract class RenderObjectWrapper extends UINode {
     }
   }
 
-  void _remove() {
+  void remove() {
     assert(root != null);
     _nodeMap.remove(root);
-    super._remove();
+    super.remove();
   }
 }
 
@@ -345,10 +345,10 @@ abstract class OneChildRenderObjectWrapper extends RenderObjectWrapper {
     super.removeChild(node);
   }
 
-  void _remove() {
+  void remove() {
     if (child != null)
       removeChild(child);
-    super._remove();
+    super.remove();
   }
 }
 
@@ -435,9 +435,9 @@ class SizeObserver extends OneChildRenderObjectWrapper {
     root.callback = callback;
   }
 
-  void _remove() {
+  void remove() {
     root.callback = null;
-    super._remove();
+    super.remove();
   }
 }
 
@@ -456,9 +456,9 @@ class CustomPaint extends OneChildRenderObjectWrapper {
     root.callback = callback;
   }
 
-  void _remove() {
+  void remove() {
     root.callback = null;
-    super._remove();
+    super.remove();
   }
 }
 
@@ -493,13 +493,13 @@ abstract class MultiChildRenderObjectWrapper extends RenderObjectWrapper {
     super.removeChild(node);
   }
 
-  void _remove() {
+  void remove() {
     assert(children != null);
     for (var child in children) {
       assert(child != null);
       removeChild(child);
     }
-    super._remove();
+    super.remove();
   }
 
   bool _debugHasDuplicateIds() {
@@ -848,13 +848,13 @@ abstract class Component extends UINode {
   // needed to get sizing info.
   RenderObject getRoot() => root;
 
-  void _remove() {
+  void remove() {
     assert(_built != null);
     assert(root != null);
     removeChild(_built);
     _built = null;
     _enqueueDidUnmount(this);
-    super._remove();
+    super.remove();
   }
 
   bool _willSync(UINode old) {

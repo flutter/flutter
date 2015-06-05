@@ -187,6 +187,20 @@ class Scaffold extends RenderObjectWrapper {
     super.removeChild(node);
   }
 
+  void remove() {
+    if (toolbar != null)
+      removeChild(toolbar);
+    if (body != null)
+      removeChild(body);
+    if (statusbar != null)
+      removeChild(statusbar);
+    if (drawer != null)
+      removeChild(drawer);
+    if (floatingActionButton != null)
+      removeChild(floatingActionButton);
+    super.remove();
+  }
+
   void syncRenderObject(UINode old) {
     super.syncRenderObject(old);
     syncChild(toolbar, old is Scaffold ? old.toolbar : null, ScaffoldSlots.toolbar);
