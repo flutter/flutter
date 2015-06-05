@@ -120,6 +120,7 @@ CPP_SPECIAL_CONVERSION_RULES = {
     'Point': 'Point',
     'Rect': 'Rect',
     'TransferMode': 'SkXfermode::Mode',
+    'PaintingStyle': 'SkPaint::Style',
 }
 
 
@@ -368,6 +369,7 @@ DART_TO_CPP_VALUE = {
     'Point': pass_by_value_format('{implemented_as}'),
     'Rect': pass_by_value_format('{implemented_as}'),
     'TransferMode': pass_by_value_format('TransferMode'),
+    'PaintingStyle': pass_by_value_format('PaintingStyle'),
 }
 
 

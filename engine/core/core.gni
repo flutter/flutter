@@ -864,6 +864,8 @@ sky_core_files = [
   "painting/PaintingCallback.h",
   "painting/PaintingContext.cpp",
   "painting/PaintingContext.h",
+  "painting/PaintingStyle.cpp",
+  "painting/PaintingStyle.h",
   "painting/PaintingTasks.cpp",
   "painting/PaintingTasks.h",
   "painting/Picture.cpp",
@@ -1159,6 +1161,7 @@ core_idl_files = get_path_info([
 
 core_dart_files = get_path_info([
                                   "painting/Color.dart",
+                                  "painting/PaintingStyle.dart",
                                   "painting/Point.dart",
                                   "painting/Rect.dart",
                                   "painting/Size.dart",

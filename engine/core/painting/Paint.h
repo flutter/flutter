@@ -6,6 +6,7 @@
 #define SKY_ENGINE_CORE_PAINTING_PAINT_H_
 
 #include "sky/engine/core/painting/CanvasColor.h"
+#include "sky/engine/core/painting/PaintingStyle.h"
 #include "sky/engine/core/painting/TransferMode.h"
 #include "sky/engine/tonic/dart_wrappable.h"
 #include "sky/engine/wtf/PassRefPtr.h"
@@ -33,9 +34,6 @@ public:
     SkColor color() const { return m_paint.getColor(); }
     void setColor(SkColor color) { m_paint.setColor(color); }
 
-    unsigned short style() const { return m_paint.getStyle(); }
-    void setStyle(unsigned short style) { m_paint.setStyle(static_cast<SkPaint::Style>(style)); }
-
     SkScalar strokeWidth() const { return m_paint.getStrokeWidth(); }
     void setStrokeWidth(SkScalar strokeWidth) { m_paint.setStrokeWidth(strokeWidth); }
 
@@ -46,11 +44,11 @@ public:
     void setDrawLooper(DrawLooper* looper);
     void setColorFilter(ColorFilter* filter);
     void setMaskFilter(MaskFilter* filter);
+    void setStyle(SkPaint::Style style);
+    void setTransferMode(SkXfermode::Mode transfer_mode);
 
     const SkPaint& paint() const { return m_paint; }
     void setPaint(const SkPaint& paint) { m_paint = paint; }
-
-    void setTransferMode(SkXfermode::Mode transfer_mode);
 
 private:
     Paint();

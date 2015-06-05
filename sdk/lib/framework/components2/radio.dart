@@ -41,13 +41,13 @@ class Radio extends ButtonBase {
             sky.Paint paint = new sky.Paint()..color = color;
 
             // Draw the outer circle
-            paint.style = 1; // SkPaint::STROKE_STYLE;
+            paint.setStyle(sky.PaintingStyle.stroke);
             paint.strokeWidth = 2.0;
             canvas.drawCircle(outerRadius, outerRadius, outerRadius, paint);
 
             // Draw the inner circle
             if (value == groupValue) {
-              paint.style = 0; // SkPaint::FILL_STYLE;
+              paint.setStyle(sky.PaintingStyle.fill);
               canvas.drawCircle(outerRadius, outerRadius, innerRadius, paint);
             }
           }
