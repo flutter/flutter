@@ -719,16 +719,19 @@ class FlexContainer extends MultiChildRenderObjectWrapper {
   RenderFlex createNode() => new RenderFlex(direction: this.direction);
 
   final FlexDirection direction;
+  final FlexJustifyContent justifyContent;
 
   FlexContainer({
     Object key,
     List<UINode> children,
-    this.direction: FlexDirection.horizontal
+    this.direction: FlexDirection.horizontal,
+    this.justifyContent: FlexJustifyContent.flexStart
   }) : super(key: key, children: children);
 
   void syncRenderObject(UINode old) {
     super.syncRenderObject(old);
     root.direction = direction;
+    root.justifyContent = justifyContent;
   }
 }
 

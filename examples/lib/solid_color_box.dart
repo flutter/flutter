@@ -9,7 +9,7 @@ class RenderSolidColorBox extends RenderDecoratedBox {
   final Size desiredSize;
   final Color backgroundColor;
 
-  RenderSolidColorBox(Color backgroundColor, { this.desiredSize: const Size.infinite() })
+  RenderSolidColorBox(Color backgroundColor, { this.desiredSize: Size.infinite })
       : backgroundColor = backgroundColor,
         super(decoration: new BoxDecoration(backgroundColor: backgroundColor));
 

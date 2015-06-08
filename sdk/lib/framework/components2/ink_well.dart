@@ -28,7 +28,10 @@ class InkWell extends Component implements ScrollClient {
   InkWell({ Object key, this.children }) : super(key: key);
 
   UINode build() {
-    return new FlexContainer(direction: FlexDirection.horizontal, children: children);
+    return new FlexContainer(
+      direction: FlexDirection.horizontal,
+      justifyContent: FlexJustifyContent.center,
+      children: children);
     // List<UINode> childrenIncludingSplashes = [];
 
     // if (_splashes != null) {
