@@ -18,7 +18,24 @@ namespace blink {
 // DartConvert converts types back and forth from Sky to Dart. The template
 // parameter |T| determines what kind of type conversion to perform.
 template <typename T, typename Enable = void>
-struct DartConverter {};
+struct DartConverter {
+};
+
+// This is to work around the fact that typedefs do not create new types. If you
+// have a typedef, and want it to use a different converter, specialize this
+// template and override the types here.
+// Ex:
+//   typedef int ColorType;  // Want to use a different converter.
+//   class ColorConverterType {};  // Dummy type.
+//   template<> struct DartConvertType<ColorConverterType> {
+//     using ConverterType = ColorConverterType;
+//     using ValueType = ColorType;
+//   };
+template <typename T>
+struct DartConverterTypes {
+  using ConverterType = T;
+  using ValueType = T;
+};
 
 ////////////////////////////////////////////////////////////////////////////////
 // Boolean
@@ -227,21 +244,25 @@ struct DartConverter<AtomicString> {
 
 template <typename T>
 struct DartConverter<Vector<T>> {
-  static Dart_Handle ToDart(const Vector<T>& val) {
+  using ValueType = typename DartConverterTypes<T>::ValueType;
+  using ConverterType = typename DartConverterTypes<T>::ConverterType;
+
+  static Dart_Handle ToDart(const Vector<ValueType>& val) {
     Dart_Handle list = Dart_NewList(val.size());
     if (Dart_IsError(list))
       return list;
     for (size_t i = 0; i < val.size(); i++) {
       Dart_Handle result =
-          Dart_ListSetAt(list, i, DartConverter<T>::ToDart(val[i]));
+          Dart_ListSetAt(list, i,
+                         DartConverter<ConverterType>::ToDart(val[i]));
       if (Dart_IsError(result))
         return result;
     }
     return list;
   }
 
-  static Vector<T> FromDart(Dart_Handle handle) {
-    Vector<T> result;
+  static Vector<ValueType> FromDart(Dart_Handle handle) {
+    Vector<ValueType> result;
     if (!Dart_IsList(handle))
       return result;
     intptr_t length = 0;
@@ -251,15 +272,15 @@ struct DartConverter<Vector<T>> {
       Dart_Handle item = Dart_ListGetAt(handle, i);
       DCHECK(!Dart_IsError(item));
       DCHECK(item);
-      result.append(DartConverter<T>::FromDart(item));
+      result.append(DartConverter<ConverterType>::FromDart(item));
     }
     return result;
   }
 
-  static Vector<T> FromArguments(Dart_NativeArguments args,
-                                 int index,
-                                 Dart_Handle& exception,
-                                 bool auto_scope = true) {
+  static Vector<ValueType> FromArguments(Dart_NativeArguments args,
+                                          int index,
+                                          Dart_Handle& exception,
+                                          bool auto_scope = true) {
     // TODO(abarth): What should we do with auto_scope?
     return FromDart(Dart_GetNativeArgument(args, index));
   }

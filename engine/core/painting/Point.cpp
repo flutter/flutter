@@ -11,21 +11,17 @@
 
 namespace blink {
 
-// Convert dartPoint.x,y ==> SkPoint.
-Point DartConverter<Point>::FromArgumentsWithNullCheck(
-    Dart_NativeArguments args,
-    int index,
-    Dart_Handle& exception) {
+// Convert handle.x,y ==> SkPoint.
+Point DartConverter<Point>::FromDart(Dart_Handle handle) {
   Point result;
   result.is_null = true;
 
-  Dart_Handle dartPoint = Dart_GetNativeArgument(args, index);
-  DCHECK(!LogIfError(dartPoint));
+  DCHECK(!LogIfError(handle));
 
   Dart_Handle x_value =
-      Dart_GetField(dartPoint, DOMDartState::Current()->x_handle());
+      Dart_GetField(handle, DOMDartState::Current()->x_handle());
   Dart_Handle y_value =
-      Dart_GetField(dartPoint, DOMDartState::Current()->y_handle());
+      Dart_GetField(handle, DOMDartState::Current()->y_handle());
 
   double x = 0.0, y = 0.0;
   Dart_Handle err = Dart_DoubleValue(x_value, &x);
@@ -35,6 +31,13 @@ Point DartConverter<Point>::FromArgumentsWithNullCheck(
   result.sk_point.set(x, y);
   result.is_null = false;
   return result;
+}
+
+Point DartConverter<Point>::FromArgumentsWithNullCheck(
+    Dart_NativeArguments args,
+    int index,
+    Dart_Handle& exception) {
+  return FromDart(Dart_GetNativeArgument(args, index));
 }
 
 } // namespace blink

@@ -26,8 +26,12 @@ void main() {
     paint.color = const Color.fromARGB(128, 255, 0, 255);
     context.rotateDegrees(45.0);
 
+    Gradient yellowBlue = new Gradient.Linear(
+        [new Point(-radius, -radius), new Point(0.0, 0.0)],
+        [const Color(0xFFFFFF00), const Color(0xFF0000FF)],
+        null);
     context.drawRect(new Rect.fromLTRB(-radius, -radius, radius, radius),
-                     paint);
+                     new Paint()..setShader(yellowBlue));
 
     // Scale x and y by 0.5.
     var scaleMatrix = new Float32List.fromList([

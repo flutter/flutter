@@ -366,12 +366,11 @@ DART_TO_CPP_VALUE = {
     # Pass-by-value types.
     'Color': pass_by_value_format('CanvasColor'),
     'Float32List': pass_by_value_format('Float32List'),
-    'Point': pass_by_value_format('{implemented_as}'),
-    'Rect': pass_by_value_format('{implemented_as}'),
+    'Point': pass_by_value_format('Point'),
+    'Rect': pass_by_value_format('Rect'),
     'TransferMode': pass_by_value_format('TransferMode'),
     'PaintingStyle': pass_by_value_format('PaintingStyle'),
 }
-
 
 def dart_value_to_cpp_value(idl_type, extended_attributes, variable_name,
                             null_check, has_type_checking_interface,
@@ -428,12 +427,19 @@ def dart_value_to_cpp_value(idl_type, extended_attributes, variable_name,
                                         auto_scope=DartUtilities.bool_to_cpp(auto_scope))
 
 
+# Special mappings for arrays of types.
+INNER_TYPE_FOR_ARRAY = {
+    'SkColor': 'CanvasColor'
+}
+
 def dart_value_to_cpp_value_array_or_sequence(native_array_element_type, variable_name, index):
     # Index is None for setters, index (starting at 0) for method arguments,
     # and is used to provide a human-readable exception message
     if index is None:
         index = 0  # special case, meaning "setter"
     this_cpp_type = native_array_element_type.cpp_type
+    if this_cpp_type in INNER_TYPE_FOR_ARRAY:
+      this_cpp_type = INNER_TYPE_FOR_ARRAY[this_cpp_type]
     expression_format = '{variable_name} = DartConverter<Vector<{cpp_type}>>::FromArguments(args, {index}, exception)'
     expression = expression_format.format(native_array_element_type=native_array_element_type.name,
                                           cpp_type=this_cpp_type, index=index,

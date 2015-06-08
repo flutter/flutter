@@ -12,16 +12,7 @@
 
 namespace blink {
 
-// Convert dart_color => SkColor.
-SkColor DartConverter<CanvasColor>::FromArgumentsWithNullCheck(
-    Dart_NativeArguments args,
-    int index,
-    Dart_Handle& exception) {
-  SkColor result;
-
-  Dart_Handle dart_color = Dart_GetNativeArgument(args, index);
-  DCHECK(!LogIfError(dart_color));
-
+SkColor DartConverter<CanvasColor>::FromDart(Dart_Handle dart_color) {
   Dart_Handle value =
       Dart_GetField(dart_color, DOMDartState::Current()->value_handle());
 
@@ -30,8 +21,16 @@ SkColor DartConverter<CanvasColor>::FromArgumentsWithNullCheck(
   DCHECK(!LogIfError(rv));
   DCHECK(color <= 0xffffffff);
 
-  result = static_cast<SkColor>(color);
-  return result;
+  return static_cast<SkColor>(color);
+}
+
+SkColor DartConverter<CanvasColor>::FromArgumentsWithNullCheck(
+    Dart_NativeArguments args,
+    int index,
+    Dart_Handle& exception) {
+  Dart_Handle dart_color = Dart_GetNativeArgument(args, index);
+  DCHECK(!LogIfError(dart_color));
+  return FromDart(dart_color);
 }
 
 void DartConverter<CanvasColor>::SetReturnValue(Dart_NativeArguments args,

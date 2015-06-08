@@ -16,7 +16,14 @@ namespace blink {
 class CanvasColor {};
 
 template <>
+struct DartConverterTypes<CanvasColor> {
+  using ConverterType = CanvasColor;
+  using ValueType = SkColor;
+};
+
+template <>
 struct DartConverter<CanvasColor> {
+  static SkColor FromDart(Dart_Handle handle);
   static SkColor FromArgumentsWithNullCheck(Dart_NativeArguments args,
                                             int index,
                                             Dart_Handle& exception);

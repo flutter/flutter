@@ -19,6 +19,7 @@ class Point {
 
 template <>
 struct DartConverter<Point> {
+  static Point FromDart(Dart_Handle handle);
   static Point FromArgumentsWithNullCheck(Dart_NativeArguments args,
                                           int index,
                                           Dart_Handle& exception);

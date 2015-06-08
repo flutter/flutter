@@ -18,6 +18,7 @@ namespace blink {
 class DrawLooper;
 class ColorFilter;
 class MaskFilter;
+class Shader;
 
 class Paint : public RefCounted<Paint>, public DartWrappable {
     DEFINE_WRAPPERTYPEINFO();
@@ -44,6 +45,7 @@ public:
     void setDrawLooper(DrawLooper* looper);
     void setColorFilter(ColorFilter* filter);
     void setMaskFilter(MaskFilter* filter);
+    void setShader(Shader* shader);
     void setStyle(SkPaint::Style style);
     void setTransferMode(SkXfermode::Mode transfer_mode);
 
