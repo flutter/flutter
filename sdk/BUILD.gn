@@ -7,6 +7,7 @@ import("//mojo/public/dart/rules.gni")
 dart_pkg("sdk") {
   sources = [
     "CHANGELOG.md",
+    "README.md",
     "bin/init.dart",
     "lib/assets/.gitignore",
     "lib/assets/material-design-icons.sha1",
