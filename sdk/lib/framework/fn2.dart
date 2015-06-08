@@ -24,25 +24,68 @@ export 'rendering/flex.dart' show FlexDirection;
 // final sky.Tracing _tracing = sky.window.tracing;
 
 final bool _shouldLogRenderDuration = false;
-final bool _shouldTrace = false;
-
-enum _SyncOperation { identical, insertion, stateful, stateless, removal }
 
 /*
  * All Effen nodes derive from UINode. All nodes have a _parent, a _key and
  * can be sync'd.
  */
 abstract class UINode {
-  String _key;
-  UINode _parent;
-  UINode get parent => _parent;
-  RenderObject root;
-  bool _defunct = false;
 
   UINode({ Object key }) {
     _key = key == null ? "$runtimeType" : "$runtimeType-$key";
     assert(this is App || _inRenderDirtyComponents); // you should not build the UI tree ahead of time, build it only during build()
   }
+
+  String _key;
+  String get key => _key;
+
+  UINode _parent;
+  UINode get parent => _parent;
+
+  bool _mounted = false;
+  bool _wasMounted = false;
+  bool get mounted => _mounted;
+  static bool _notifyingMountStatus = false;
+  static Set<UINode> _mountedChanged = new HashSet<UINode>();
+
+  void setParent(UINode newParent) {
+    assert(!_notifyingMountStatus);
+    _parent = newParent;
+    if (newParent == null) {
+      if (_mounted) {
+        _mounted = false;
+        _mountedChanged.add(this);
+      }
+    } else {
+      assert(newParent._mounted);
+      if (_parent._mounted != _mounted) {
+        _mounted = _parent._mounted;
+        _mountedChanged.add(this);
+      }
+    }
+  }
+
+  static void _notifyMountStatusChanged() {
+    try {
+      _notifyingMountStatus = true;
+      for (UINode node in _mountedChanged) {
+        if (node._wasMounted != node._mounted) {
+          if (node._mounted)
+            node._didMount();
+          else
+            node._didUnmount();
+          node._wasMounted = node._mounted;
+        }
+      });
+      _mountedChanged.clear();
+    } finally {
+      _notifyingMountStatus = false;
+    }
+  }
+  void _didMount() { }
+  void _didUnmount() { }
+
+  RenderObject root;
 
   // Subclasses which implements Nodes that become stateful may return true
   // if the |old| node has become stateful and should be retained.
@@ -55,11 +98,9 @@ abstract class UINode {
   // where to put this descendant
 
   void remove() {
-    _defunct = true;
     root = null;
-    handleRemoved();
+    setParent(null);
   }
-  void handleRemoved() { }
 
   UINode findAncestor(Type targetType) {
     var ancestor = _parent;
@@ -68,81 +109,43 @@ abstract class UINode {
     return ancestor;
   }
 
-  int _nodeDepth;
-  void _ensureDepth() {
-    if (_nodeDepth == null) {
-      if (_parent != null) {
-        _parent._ensureDepth();
-        _nodeDepth = _parent._nodeDepth + 1;
-      } else {
-        _nodeDepth = 0;
-      }
-    }
-  }
-
-  void _trace(String message) {
-    if (!_shouldTrace)
-      return;
-
-    _ensureDepth();
-    print((' ' * _nodeDepth) + message);
-  }
-
-  void _traceSync(_SyncOperation op, String key) {
-    if (!_shouldTrace)
-      return;
-
-    String opString = op.toString().toLowerCase();
-    String outString = opString.substring(opString.indexOf('.') + 1);
-    _trace('_sync($outString) $key');
-  }
-
   void removeChild(UINode node) {
-    _traceSync(_SyncOperation.removal, node._key);
     node.remove();
   }
 
   // Returns the child which should be retained as the child of this node.
   UINode syncChild(UINode node, UINode oldNode, dynamic slot) {
+
     if (node == oldNode) {
-      _traceSync(_SyncOperation.identical, node == null ? '*null*' : node._key);
+      assert(node == null || node.mounted);
       return node; // Nothing to do. Subtrees must be identical.
     }
 
     if (node == null) {
       // the child in this slot has gone away
+      assert(oldNode.mounted);
       removeChild(oldNode);
+      assert(!oldNode.mounted);
       return null;
     }
-    assert(oldNode == null || node._key == oldNode._key);
 
-    // TODO(rafaelw): This eagerly removes the old DOM. It may be that a
-    // new component was built that could re-use some of it. Consider
-    // syncing the new VDOM against the old one.
-    if (oldNode != null && node._key != oldNode._key) {
-      removeChild(oldNode);
-    }
-
-    if (node._willSync(oldNode)) {
-      _traceSync(_SyncOperation.stateful, node._key);
+    if (oldNode != null && node._key == oldNode._key && node._willSync(oldNode)) {
+      assert(oldNode.mounted);
+      assert(!node.mounted);
       oldNode._sync(node, slot);
-      node._defunct = true;
       assert(oldNode.root is RenderObject);
       return oldNode;
     }
 
-    assert(!node._defunct);
-    node._parent = this;
-
-    if (oldNode == null) {
-      _traceSync(_SyncOperation.insertion, node._key);
-    } else {
-      _traceSync(_SyncOperation.stateless, node._key);
+    if (oldNode != null && node._key != oldNode._key) {
+      assert(oldNode.mounted);
+      removeChild(oldNode);
+      oldNode = null;
     }
-    node._sync(oldNode, slot);
-    if (oldNode != null)
-      oldNode._defunct = true;
 
+    assert(!node.mounted);
+    node.setParent(this);
+    node._sync(oldNode, slot);
     assert(node.root is RenderObject);
     return node;
   }
@@ -284,6 +287,7 @@ abstract class RenderObjectWrapper extends UINode {
   void insert(RenderObjectWrapper child, dynamic slot);
 
   void _sync(UINode old, dynamic slot) {
+    assert(parent != null);
     if (old == null) {
       root = createNode();
       assert(root != null);
@@ -292,31 +296,30 @@ abstract class RenderObjectWrapper extends UINode {
         ancestor.insert(this, slot);
     } else {
       root = old.root;
-      assert(root != null);
     }
-
+    assert(mounted);
+    assert(root != null);
     _nodeMap[root] = this;
     syncRenderObject(old);
   }
 
   void syncRenderObject(RenderObjectWrapper old) {
     ParentData parentData = null;
-    UINode parent = _parent;
-    while (parent != null && parent is! RenderObjectWrapper) {
-      if (parent is ParentDataNode && parent.parentData != null) {
+    UINode ancestor = parent;
+    while (ancestor != null && ancestor is! RenderObjectWrapper) {
+      if (ancestor is ParentDataNode && ancestor.parentData != null) {
         if (parentData != null)
-          parentData.merge(parent.parentData); // this will throw if the types aren't the same
+          parentData.merge(ancestor.parentData); // this will throw if the types aren't the same
         else
-          parentData = parent.parentData;
+          parentData = ancestor.parentData;
       }
-      parent = parent._parent;
+      ancestor = ancestor.parent;
     }
     if (parentData != null) {
       assert(root.parentData != null);
-      root.parentData.merge(parentData); // this will throw if the types aren't approriate
-      assert(parent != null);
-      assert(parent.root != null);
-      parent.root.markNeedsLayout();
+      root.parentData.merge(parentData); // this will throw if the types aren't appropriate
+      if (parent.root != null)
+        parent.root.markNeedsLayout();
     }
   }
 
@@ -741,34 +744,6 @@ class Image extends RenderObjectWrapper {
   }
 }
 
-
-Set<Component> _mountedComponents = new HashSet<Component>();
-Set<Component> _unmountedComponents = new HashSet<Component>();
-
-void _enqueueDidMount(Component c) {
-  assert(!_notifingMountStatus);
-  _mountedComponents.add(c);
-}
-
-void _enqueueDidUnmount(Component c) {
-  assert(!_notifingMountStatus);
-  _unmountedComponents.add(c);
-}
-
-bool _notifingMountStatus = false;
-
-void _notifyMountStatusChanged() {
-  try {
-    _notifingMountStatus = true;
-    _unmountedComponents.forEach((c) => c._didUnmount());
-    _mountedComponents.forEach((c) => c._didMount());
-    _mountedComponents.clear();
-    _unmountedComponents.clear();
-  } finally {
-    _notifingMountStatus = false;
-  }
-}
-
 List<Component> _dirtyComponents = new List<Component>();
 bool _buildScheduled = false;
 bool _inRenderDirtyComponents = false;
@@ -794,7 +769,7 @@ void _buildDirtyComponents() {
     _inRenderDirtyComponents = false;
   }
 
-  _notifyMountStatusChanged();
+  UINode._notifyMountStatusChanged();
 
   if (_shouldLogRenderDuration) {
     sw.stop();
@@ -841,7 +816,6 @@ abstract class Component extends UINode {
     _unmountCallbacks.add(fn);
   }
 
-
   Component({ Object key, bool stateful })
       : _stateful = stateful != null ? stateful : false,
         _order = _currentOrder + 1,
@@ -851,13 +825,17 @@ abstract class Component extends UINode {
       : this(key: key, stateful: stateful);
 
   void _didMount() {
+    super._didMount();
     if (_mountCallbacks != null)
-      _mountCallbacks.forEach((fn) => fn());
+      for (Function fn in _mountCallbacks)
+        fn();
   }
 
   void _didUnmount() {
+    super._didUnmount();
     if (_unmountCallbacks != null)
-      _unmountCallbacks.forEach((fn) => fn());
+      for (Function fn in _unmountCallbacks)
+        fn();
   }
 
   // TODO(rafaelw): It seems wrong to expose DOM at all. This is presently
@@ -869,7 +847,6 @@ abstract class Component extends UINode {
     assert(root != null);
     removeChild(_built);
     _built = null;
-    _enqueueDidUnmount(this);
     super.remove();
   }
 
@@ -899,7 +876,6 @@ abstract class Component extends UINode {
    *      assert(_built == null && old != null)
    */
   void _sync(UINode old, dynamic slot) {
-    assert(!_defunct);
     assert(_built == null || old == null);
 
     Component oldComponent = old as Component;
@@ -914,27 +890,25 @@ abstract class Component extends UINode {
       oldBuilt = oldComponent._built;
     }
 
-    if (oldBuilt == null)
-      _enqueueDidMount(this);
-
     int lastOrder = _currentOrder;
     _currentOrder = _order;
     _currentlyBuilding = this;
     _built = build();
+    assert(_built != null);
     _currentlyBuilding = null;
     _currentOrder = lastOrder;
 
     _built = syncChild(_built, oldBuilt, slot);
+    assert(_built != null);
     _dirty = false;
     root = _built.root;
     assert(root != null);
   }
 
   void _buildIfDirty() {
-    if (!_dirty || _defunct)
+    if (!_dirty || !_mounted)
       return;
 
-    _trace('$_key rebuilding...');
     assert(root != null);
     _sync(null, _slot);
   }
@@ -946,7 +920,7 @@ abstract class Component extends UINode {
   void setState(Function fn()) {
     _stateful = true;
     fn();
-    if (_isBuilding || _dirty || _defunct)
+    if (_isBuilding || _dirty || !_mounted)
       return;
 
     _dirty = true;
@@ -1018,6 +992,7 @@ abstract class App extends Component {
   App() : super(stateful: true) {
     _appView = new _AppView();
     _scheduleComponentForRender(this);
+    _mounted = true;
   }
 
   AppView _appView;
@@ -1025,8 +1000,7 @@ abstract class App extends Component {
 
   void _buildIfDirty() {
     assert(_dirty);
-    assert(!_defunct);
-    _trace('$_key rebuilding app...');
+    assert(_mounted);
     _sync(null, null);
     if (root.parent == null)
       _appView.root = root;
