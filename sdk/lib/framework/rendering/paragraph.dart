@@ -76,7 +76,9 @@ class RenderParagraph extends RenderBox {
   }
 
   void paint(RenderObjectDisplayList canvas) {
-    // _layoutRoot.rootElement.style['color'] = 'rgba(' + ...color... + ')';
+    if (_color != null)
+      _layoutRoot.rootElement.style['color'] =
+          'rgba(${_color.red}, ${_color.green}, ${_color.blue}, ${_color.alpha / 255.0 })';
     _layoutRoot.paint(canvas);
   }
 

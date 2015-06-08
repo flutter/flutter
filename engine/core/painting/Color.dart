@@ -15,6 +15,11 @@ class Color {
               ((g & 0xff) << 8) |
               ((b & 0xff) << 0));
 
+  int get alpha => (0xff000000 & _value) >> 24;
+  int get red => (0x00ff0000 & _value) >> 16;
+  int get green => (0x0000ff00 & _value) >> 8;
+  int get blue => (0x000000ff & _value) >> 0;
+
   bool operator ==(other) => other is Color && _value == other._value;
 
   int get hashCode => _value.hashCode;
