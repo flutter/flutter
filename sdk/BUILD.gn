@@ -119,11 +119,13 @@ dart_pkg("sdk") {
     "pubspec.yaml",
   ]
 
+  # List of mojom targets that the sky pkg exports
   deps = [
-    "//sky/services/testing:bindings",
+    "//sky/services/viewport",
   ]
 
   datadeps = [
+    "//sky/services/testing:bindings",
     "//sky/engine/bindings",
   ]
 
