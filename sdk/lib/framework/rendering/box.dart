@@ -77,6 +77,14 @@ class BoxConstraints {
     );
   }
 
+  BoxConstraints apply(BoxConstraints constraints) {
+    return new BoxConstraints(
+      minWidth: math.max(minWidth, constraints.minWidth),
+      maxWidth: math.min(maxWidth, constraints.maxWidth),
+      minHeight: math.max(minHeight, constraints.minHeight),
+      maxHeight: math.min(maxHeight, constraints.maxHeight));
+  }
+
   final double minWidth;
   final double maxWidth;
   final double minHeight;
@@ -192,9 +200,8 @@ class RenderSizedBox extends RenderProxyBox {
   RenderSizedBox({
     RenderBox child,
     Size desiredSize: Size.infinite
-  }) : super(child) {
+  }) : super(child), _desiredSize = desiredSize {
     assert(desiredSize != null);
-    this.desiredSize = desiredSize;
   }
 
   Size _desiredSize;
@@ -218,6 +225,42 @@ class RenderSizedBox extends RenderProxyBox {
   }
 
   String debugDescribeSettings(String prefix) => '${super.debugDescribeSettings(prefix)}${prefix}desiredSize: ${desiredSize}\n';
+}
+
+class RenderConstrainedBox extends RenderProxyBox {
+  RenderConstrainedBox({
+    RenderBox child,
+    BoxConstraints additionalConstraints
+  }) : super(child), _additionalConstraints = additionalConstraints {
+    assert(additionalConstraints != null);
+  }
+
+  BoxConstraints _additionalConstraints;
+  BoxConstraints get additionalConstraints => _additionalConstraints;
+  void set additionalConstraints (BoxConstraints value) {
+    assert(value != null);
+    if (_additionalConstraints == value)
+      return;
+    _additionalConstraints = value;
+    markNeedsLayout();
+  }
+
+  Size getIntrinsicDimensions(BoxConstraints constraints) {
+    if (child == null)
+      return constraints.constrain(Size.zero);
+    return child.getIntrinsicDimensions(constraints.apply(_additionalConstraints));
+  }
+
+  void performLayout() {
+    if (child != null) {
+      child.layout(constraints.apply(_additionalConstraints));
+      size = child.size;
+    } else {
+      performResize();
+    }
+  }
+
+  String debugDescribeSettings(String prefix) => '${super.debugDescribeSettings(prefix)}${prefix}additionalConstraints: ${additionalConstraints}\n';
 }
 
 class RenderClip extends RenderProxyBox {

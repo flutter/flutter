@@ -18,7 +18,7 @@ import 'rendering/object.dart';
 import 'rendering/paragraph.dart';
 import 'rendering/stack.dart';
 export 'rendering/object.dart' show Point, Size, Rect, Color, Paint, Path;
-export 'rendering/box.dart' show BoxDecoration, Border, BorderSide, EdgeDims;
+export 'rendering/box.dart' show BoxConstraints, BoxDecoration, Border, BorderSide, EdgeDims;
 export 'rendering/flex.dart' show FlexDirection;
 
 // final sky.Tracing _tracing = sky.window.tracing;
@@ -418,6 +418,21 @@ class SizedBox extends OneChildRenderObjectWrapper {
   void syncRenderObject(SizedBox old) {
     super.syncRenderObject(old);
     root.desiredSize = desiredSize;
+  }
+}
+
+class ConstrainedBox extends OneChildRenderObjectWrapper {
+  RenderConstrainedBox root;
+  final BoxConstraints constraints;
+
+  ConstrainedBox({ this.constraints, UINode child, Object key })
+    : super(child: child, key: key);
+
+  RenderConstrainedBox createNode() => new RenderConstrainedBox(additionalConstraints: constraints);
+
+  void syncRenderObject(ConstrainedBox old) {
+    super.syncRenderObject(old);
+    root.additionalConstraints = constraints;
   }
 }
 
@@ -935,20 +950,22 @@ abstract class Component extends UINode {
 
 class Container extends Component {
   final UINode child;
-  final Matrix4 transform;
-  final EdgeDims margin;
+  final BoxConstraints constraints;
   final BoxDecoration decoration;
-  final Size desiredSize;
+  final EdgeDims margin;
   final EdgeDims padding;
+  final Matrix4 transform;
+  final Size desiredSize;
 
   Container({
     Object key,
     this.child,
-    this.transform,
-    this.margin,
+    this.constraints,
     this.decoration,
     this.desiredSize,
-    this.padding
+    this.margin,
+    this.padding,
+    this.transform
   }) : super(key: key);
 
   UINode build() {
@@ -962,6 +979,9 @@ class Container extends Component {
 
     if (desiredSize != null)
       current = new SizedBox(desiredSize: desiredSize, child: current);
+
+    if (constraints != null)
+      current = new ConstrainedBox(constraints: constraints);
 
     if (margin != null)
       current = new Padding(padding: margin, child: current);
