@@ -2,7 +2,7 @@ name: sky
 author: Chromium Authors <sky-dev@googlegroups.com>
 description: Dart files to support executing inside Sky.
 homepage: https://github.com/domokit/mojo/tree/master/sky
-version: 0.0.5
+version: 0.0.6
 dependencies:
   mojo: '>=0.0.1 <1.0.0'
   mojom: '>=0.0.4 <1.0.0'
