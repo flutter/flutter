@@ -5,7 +5,7 @@
 import 'animated_component.dart';
 import '../animation/animated_value.dart';
 import '../fn2.dart';
-import '../theme/colors.dart';
+import '../theme2/colors.dart';
 import 'dart:async';
 import 'dart:math' as math;
 import 'material.dart';
@@ -50,24 +50,18 @@ class PopupMenuController {
 }
 
 class PopupMenu extends AnimatedComponent {
-  static final Style _style = new Style('''
-    border-radius: 2px;
-    padding: 8px 0;
-    box-sizing: border-box;
-    background-color: ${Grey[50]};''');
-
   List<List<UINode>> items;
   int level;
   PopupMenuController controller;
 
   double _position;
-  int _width;
-  int _height;
+  // int _width;
+  // int _height;
 
   PopupMenu({ Object key, this.controller, this.items, this.level })
       : super(key: key) {
     animateField(controller.position, #_position);
-    onDidMount(_measureSize);
+    // onDidMount(_measureSize);
   }
 
   double _opacityFor(int i) {
@@ -79,23 +73,23 @@ class PopupMenu extends AnimatedComponent {
     return math.max(0.0, math.min(1.0, (_position - start) / duration));
   }
 
-  String _inlineStyle() {
-    if (_position == null || _position == 1.0 ||
-        _height == null || _width == null)
-      return null;
-    return '''
-      opacity: ${math.min(1.0, _position * 3.0)};
-      width: ${math.min(_width, _width * (0.5 + _position * 2.0))}px;
-      height: ${math.min(_height, _height * _position * 1.5)}px;''';
-  }
+  // String _inlineStyle() {
+  //   if (_position == null || _position == 1.0 ||
+  //       _height == null || _width == null)
+  //     return null;
+  //   return '''
+  //     opacity: ${math.min(1.0, _position * 3.0)};
+  //     width: ${math.min(_width, _width * (0.5 + _position * 2.0))}px;
+  //     height: ${math.min(_height, _height * _position * 1.5)}px;''';
+  // }
 
-  void _measureSize() {
-    setState(() {
-      var root = getRoot();
-      _width = root.width.round();
-      _height = root.height.round();
-    });
-  }
+  // void _measureSize() {
+  //   setState(() {
+  //     var root = getRoot();
+  //     _width = root.width.round();
+  //     _height = root.height.round();
+  //   });
+  // }
 
   UINode build() {
     int i = 0;
@@ -106,9 +100,11 @@ class PopupMenu extends AnimatedComponent {
 
     return new Material(
       content: new Container(
-        style: _style,
-        inlineStyle: _inlineStyle(),
-        children: children
+        padding: const EdgeDims.all(8.0),
+        // border-radius: 2px
+        decoration: new BoxDecoration(backgroundColor: Grey[50]),
+        // inlineStyle: _inlineStyle(),
+        child: new BlockContainer(children: children)
       ),
       level: level);
   }

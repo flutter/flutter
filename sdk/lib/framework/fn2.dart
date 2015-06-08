@@ -981,7 +981,7 @@ class Container extends Component {
       current = new SizedBox(desiredSize: desiredSize, child: current);
 
     if (constraints != null)
-      current = new ConstrainedBox(constraints: constraints);
+      current = new ConstrainedBox(constraints: constraints, child: current);
 
     if (margin != null)
       current = new Padding(padding: margin, child: current);

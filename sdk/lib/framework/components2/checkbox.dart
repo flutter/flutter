@@ -35,8 +35,8 @@ class Checkbox extends ButtonBase {
         child: new CustomPaint(
           callback: (sky.Canvas canvas) {
 
-            sky.Paint paint = new sky.Paint()..color = color;
-                                             ..isAntiAlias = true;
+            sky.Paint paint = new sky.Paint()..color = color
+                                             ..isAntiAlias = true
                                              ..strokeWidth = 2.0;
 
             // Draw the outer rrect
