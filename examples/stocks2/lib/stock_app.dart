@@ -4,7 +4,7 @@
 
 import 'package:sky/framework/components2/tool_bar.dart';
 import 'package:sky/framework/components2/drawer.dart';
-// import 'package:sky/framework/components2/drawer_header.dart';
+import 'package:sky/framework/components2/drawer_header.dart';
 import 'package:sky/framework/components2/floating_action_button.dart';
 import 'package:sky/framework/components2/icon.dart';
 import 'package:sky/framework/components2/icon_button.dart';
@@ -115,7 +115,7 @@ class StocksApp extends App {
       controller: _drawerController,
       level: 3,
       children: [
-        // new DrawerHeader(children: [new Text('Stocks')]),
+        new DrawerHeader(children: [new Text('Stocks')]),
         new MenuItem(
           key: 'Stock list',
           icon: 'action/assessment',
