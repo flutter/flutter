@@ -37,6 +37,13 @@ const float SCORE_INFTY = std::numeric_limits<float>::max();
 const float SCORE_OVERFULL = 1e12f;
 const float SCORE_DESPERATE = 1e10f;
 
+// Multiplier for hyphen penalty on last line.
+const float LAST_LINE_PENALTY_MULTIPLIER = 4.0f;
+// Penalty assigned to each line break (to try to minimize number of lines)
+// TODO: when we implement full justification (so spaces can shrink and stretch), this is
+// probably not the most appropriate method.
+const float LINE_PENALTY_MULTIPLIER = 2.0f;
+
 // Very long words trigger O(n^2) behavior in hyphenation, so we disable hyphenation for
 // unreasonably long words. This is somewhat of a heuristic because extremely long words
 // are possible in some languages. This does mean that very long real words can get
@@ -122,6 +129,8 @@ float LineBreaker::addStyleRun(MinikinPaint* paint, const FontCollection* typefa
         if (mHyphenationFrequency == kHyphenationFrequency_Normal) {
             hyphenPenalty *= 4.0; // TODO: Replace with a better value after some testing
         }
+
+        mLinePenalty = std::max(mLinePenalty, hyphenPenalty * LINE_PENALTY_MULTIPLIER);
     }
 
     size_t current = (size_t)mBreakIterator->current();
@@ -235,17 +244,6 @@ void LineBreaker::addWordBreak(size_t offset, ParaWidth preBreak, ParaWidth post
     addCandidate(cand);
 }
 
-// TODO: for justified text, refine with shrink/stretch
-float LineBreaker::computeScore(float delta, bool atEnd) {
-    if (delta < 0) {
-        return SCORE_OVERFULL;
-    } else if (atEnd && mStrategy != kBreakStrategy_Balanced) {
-        return 0.0;
-    } else {
-        return delta * delta;
-    }
-}
-
 // TODO performance: could avoid populating mCandidates if greedy only
 void LineBreaker::addCandidate(Candidate cand) {
     size_t candIndex = mCandidates.size();
@@ -320,55 +318,7 @@ void LineBreaker::finishBreaksOptimal() {
     std::reverse(mFlags.begin(), mFlags.end());
 }
 
-void LineBreaker::computeBreaksOptimal() {
-    size_t active = 0;
-    size_t nCand = mCandidates.size();
-    for (size_t i = 1; i < nCand; i++) {
-        bool atEnd = i == nCand - 1;
-        float best = SCORE_INFTY;
-        size_t bestPrev = 0;
-
-        size_t lineNumberLast = mCandidates[active].lineNumber;
-        float width = mLineWidths.getLineWidth(lineNumberLast);
-        ParaWidth leftEdge = mCandidates[i].postBreak - width;
-        float bestHope = 0;
-
-        for (size_t j = active; j < i; j++) {
-            size_t lineNumber = mCandidates[j].lineNumber;
-            if (lineNumber != lineNumberLast) {
-                float widthNew = mLineWidths.getLineWidth(lineNumber);
-                if (widthNew != width) {
-                    leftEdge = mCandidates[i].postBreak - width;
-                    bestHope = 0;
-                    width = widthNew;
-                }
-                lineNumberLast = lineNumber;
-            }
-            float jScore = mCandidates[j].score;
-            if (jScore + bestHope >= best) continue;
-            float delta = mCandidates[j].preBreak - leftEdge;
-
-            float widthScore = computeScore(delta, atEnd);
-            if (delta < 0) {
-                active = j + 1;
-            } else {
-                bestHope = widthScore;
-            }
-
-            float score = jScore + widthScore;
-            if (score <= best) {
-                best = score;
-                bestPrev = j;
-            }
-        }
-        mCandidates[i].score = best + mCandidates[i].penalty;
-        mCandidates[i].prev = bestPrev;
-        mCandidates[i].lineNumber = mCandidates[bestPrev].lineNumber + 1;
-    }
-    finishBreaksOptimal();
-}
-
-void LineBreaker::computeBreaksOptimalRect() {
+void LineBreaker::computeBreaksOptimal(bool isRectangle) {
     size_t active = 0;
     size_t nCand = mCandidates.size();
     float width = mLineWidths.getLineWidth(0);
@@ -376,19 +326,43 @@ void LineBreaker::computeBreaksOptimalRect() {
         bool atEnd = i == nCand - 1;
         float best = SCORE_INFTY;
         size_t bestPrev = 0;
+        size_t lineNumberLast = 0;
 
-        // Width-based component of score increases as line gets shorter, so score will always be
-        // at least this.
+        if (!isRectangle) {
+            size_t lineNumberLast = mCandidates[active].lineNumber;
+            width = mLineWidths.getLineWidth(lineNumberLast);
+        }
+        ParaWidth leftEdge = mCandidates[i].postBreak - width;
         float bestHope = 0;
 
-        ParaWidth leftEdge = mCandidates[i].postBreak - width;
         for (size_t j = active; j < i; j++) {
-            // TODO performance: can break if bestHope >= best; worth it?
+            if (!isRectangle) {
+                size_t lineNumber = mCandidates[j].lineNumber;
+                if (lineNumber != lineNumberLast) {
+                    float widthNew = mLineWidths.getLineWidth(lineNumber);
+                    if (widthNew != width) {
+                        leftEdge = mCandidates[i].postBreak - width;
+                        bestHope = 0;
+                        width = widthNew;
+                    }
+                    lineNumberLast = lineNumber;
+                }
+            }
             float jScore = mCandidates[j].score;
             if (jScore + bestHope >= best) continue;
             float delta = mCandidates[j].preBreak - leftEdge;
 
-            float widthScore = computeScore(delta, atEnd);
+            // compute width score for line
+            float widthScore = 0.0f;
+            if (delta < 0) {
+                widthScore = SCORE_OVERFULL;
+            } else if (atEnd && mStrategy != kBreakStrategy_Balanced) {
+                // increase penalty for hyphen on last line
+                widthScore = LAST_LINE_PENALTY_MULTIPLIER * mCandidates[j].penalty;
+            } else {
+                widthScore = delta * delta;
+            }
+
             if (delta < 0) {
                 active = j + 1;
             } else {
@@ -401,8 +375,9 @@ void LineBreaker::computeBreaksOptimalRect() {
                 bestPrev = j;
             }
         }
-        mCandidates[i].score = best + mCandidates[i].penalty;
+        mCandidates[i].score = best + mCandidates[i].penalty + mLinePenalty;
         mCandidates[i].prev = bestPrev;
+        mCandidates[i].lineNumber = mCandidates[bestPrev].lineNumber + 1;
     }
     finishBreaksOptimal();
 }
@@ -410,10 +385,8 @@ void LineBreaker::computeBreaksOptimalRect() {
 size_t LineBreaker::computeBreaks() {
     if (mStrategy == kBreakStrategy_Greedy) {
         computeBreaksGreedy();
-    } else if (mLineWidths.isConstant()) {
-        computeBreaksOptimalRect();
     } else {
-        computeBreaksOptimal();
+        computeBreaksOptimal(mLineWidths.isConstant());
     }
     return mBreaks.size();
 }
@@ -438,6 +411,7 @@ void LineBreaker::finish() {
     }
     mStrategy = kBreakStrategy_Greedy;
     mHyphenationFrequency = kHyphenationFrequency_Normal;
+    mLinePenalty = 0.0f;
 }
 
 }  // namespace android
