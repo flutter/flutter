@@ -123,7 +123,7 @@ class TransformNode {
     canvas.save();
     
     canvas.translate(_position[0], _position[1]);
-    canvas.rotateDegrees(_rotation);
+    canvas.rotate(degrees2radians(_rotation));
     canvas.translate(-_width*_pivot[0], -_height*_pivot[1]);
     
     // TODO: Use transformation matrix instead of individual calls
