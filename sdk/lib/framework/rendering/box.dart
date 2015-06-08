@@ -116,7 +116,7 @@ class BoxConstraints {
 }
 
 class BoxParentData extends ParentData {
-  Point position = new Point(0.0, 0.0);
+  Point position = Point.origin;
   String toString() => 'position=$position';
 }
 
@@ -809,7 +809,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
 
   void paint(RenderObjectDisplayList canvas) {
     if (child != null)
-      canvas.paintChild(child, new Point(0.0, 0.0));
+      canvas.paintChild(child, Point.origin);
   }
 
   void paintFrame() {

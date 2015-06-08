@@ -31,12 +31,11 @@ class RenderStack extends RenderBox with ContainerRenderObjectMixin<RenderBox, S
     assert(size.height < double.INFINITY);
     BoxConstraints innerConstraints = new BoxConstraints.loose(size);
 
-    Point origin = new Point(0.0, 0.0);
     RenderBox child = firstChild;
     while (child != null) {
       child.layout(innerConstraints);
       assert(child.parentData is StackParentData);
-      child.parentData.position = origin;
+      child.parentData.position = Point.origin;
       child = child.parentData.nextSibling;
     }
   }

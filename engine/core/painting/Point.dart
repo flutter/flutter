@@ -15,6 +15,8 @@ class Point {
   Size operator -(Point other) => new Size(x - other.x, y - other.y);
   Point operator +(Size size) => new Point(x + size.width, y + size.height);
 
+  static const Point origin = const Point(0.0, 0.0);
+
   // does the equivalent of "return this - Point(0,0)"
   Size toSize() => new Size(x, y);
 

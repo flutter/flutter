@@ -90,7 +90,7 @@ class RenderScaffold extends RenderBox {
       RenderBox toolbar = _slots[ScaffoldSlots.toolbar];
       toolbar.layout(new BoxConstraints.tight(new Size(size.width, kToolbarHeight)));
       assert(toolbar.parentData is BoxParentData);
-      toolbar.parentData.position = new Point(0.0, 0.0);
+      toolbar.parentData.position = Point.origin;
       bodyPosition = kToolbarHeight;
       bodyHeight -= kToolbarHeight;
     }
@@ -111,7 +111,7 @@ class RenderScaffold extends RenderBox {
       RenderBox drawer = _slots[ScaffoldSlots.drawer];
       drawer.layout(new BoxConstraints(minWidth: 0.0, maxWidth: size.width, minHeight: size.height, maxHeight: size.height));
       assert(drawer.parentData is BoxParentData);
-      drawer.parentData.position = new Point(0.0, 0.0);
+      drawer.parentData.position = Point.origin;
     }
     if (_slots[ScaffoldSlots.floatingActionButton] != null) {
       RenderBox floatingActionButton = _slots[ScaffoldSlots.floatingActionButton];
