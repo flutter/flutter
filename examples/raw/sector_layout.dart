@@ -257,7 +257,7 @@ class RenderSectorRing extends RenderSectorWithChildren {
     RenderSector child = firstChild;
     while (child != null) {
       assert(child.parentData is SectorChildListParentData);
-      canvas.paintChild(child, new Point(0.0, 0.0));
+      canvas.paintChild(child, Point.origin);
       child = child.parentData.nextSibling;
     }
   }
@@ -362,7 +362,7 @@ class RenderSectorSlice extends RenderSectorWithChildren {
     RenderSector child = firstChild;
     while (child != null) {
       assert(child.parentData is SectorChildListParentData);
-      canvas.paintChild(child, new Point(0.0, 0.0));
+      canvas.paintChild(child, Point.origin);
       child = child.parentData.nextSibling;
     }
   }
