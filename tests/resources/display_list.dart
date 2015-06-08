@@ -46,8 +46,8 @@ class TestDisplayList extends RenderObjectDisplayList {
     log("scale($sx, $sy)");
   }
 
-  void rotateDegrees(double degrees) {
-    log("rotateDegrees($degrees)");
+  void rotate(double radians) {
+    log("rotate($radians)");
   }
 
   void skew(double sx, double sy) {

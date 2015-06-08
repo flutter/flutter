@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math' as math;
 import 'dart:sky';
 import 'package:sky/framework/net/image_cache.dart' as image_cache;
 
@@ -16,7 +17,7 @@ void beginFrame(double timeStamp) {
   double delta = timeStamp - timeBase;
   PictureRecorder canvas = new PictureRecorder(view.width, view.height);
   canvas.translate(view.width / 2.0, view.height / 2.0);
-  canvas.rotateDegrees(delta / 10);
+  canvas.rotate(math.PI * delta / 1800);
   canvas.scale(0.2, 0.2);
   Paint paint = new Paint()..setARGB(255, 0, 255, 0);
   if (image != null)

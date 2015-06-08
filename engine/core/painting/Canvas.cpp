@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include "math.h"
+
 #include "sky/engine/config.h"
 #include "sky/engine/core/painting/Canvas.h"
 
@@ -67,12 +69,12 @@ void Canvas::scale(float sx, float sy)
     m_canvas->scale(sx, sy);
 }
 
-void Canvas::rotateDegrees(float degrees)
+void Canvas::rotate(float radians)
 {
     if (!m_canvas)
         return;
     ASSERT(m_displayList->isRecording());
-    m_canvas->rotate(degrees);
+    m_canvas->rotate(radians * 180.0/M_PI);
 }
 
 void Canvas::skew(float sx, float sy)

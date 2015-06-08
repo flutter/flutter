@@ -10,8 +10,6 @@ import 'package:sky/framework/rendering/object.dart';
 
 const double kTwoPi = 2 * math.PI;
 
-double deg(double radians) => radians * 180.0 / math.PI;
-
 class SectorConstraints {
   const SectorConstraints({
     this.minDeltaRadius: 0.0,
@@ -128,10 +126,10 @@ class RenderDecoratedSector extends RenderSector {
       Path path = new Path();
       double outerRadius = (parentData.radius + deltaRadius);
       Rect outerBounds = new Rect.fromLTRB(-outerRadius, -outerRadius, outerRadius, outerRadius);
-      path.arcTo(outerBounds, deg(parentData.theta), deg(deltaTheta), true);
+      path.arcTo(outerBounds, parentData.theta, deltaTheta, true);
       double innerRadius = parentData.radius;
       Rect innerBounds = new Rect.fromLTRB(-innerRadius, -innerRadius, innerRadius, innerRadius);
-      path.arcTo(innerBounds, deg(parentData.theta + deltaTheta), deg(-deltaTheta), false);
+      path.arcTo(innerBounds, parentData.theta + deltaTheta, -deltaTheta, false);
       path.close();
       canvas.drawPath(path, paint);
     }

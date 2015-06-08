@@ -5,6 +5,8 @@
 #ifndef SKY_ENGINE_CORE_PAINTING_PATH_H_
 #define SKY_ENGINE_CORE_PAINTING_PATH_H_
 
+#include "math.h"
+
 #include "sky/engine/core/painting/Rect.h"
 #include "sky/engine/tonic/dart_wrappable.h"
 #include "sky/engine/wtf/PassRefPtr.h"
@@ -38,7 +40,7 @@ public:
 
     void arcTo(const Rect& rect, float startAngle, float sweepAngle, bool forceMoveTo)
     {
-        m_path.arcTo(rect.sk_rect, startAngle, sweepAngle, forceMoveTo);
+        m_path.arcTo(rect.sk_rect, startAngle*180.0/M_PI, sweepAngle*180.0/M_PI, forceMoveTo);
     }
 
     void close()

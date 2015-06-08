@@ -37,7 +37,7 @@ public:
 
     void translate(float dx, float dy);
     void scale(float sx, float sy);
-    void rotateDegrees(float degrees);
+    void rotate(float radians);
     void skew(float sx, float sy);
     void concat(const Float32List& matrix4);
 

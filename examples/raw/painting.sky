@@ -24,7 +24,7 @@ void main() {
 
     context.translate(mid.x, mid.y);
     paint.color = const Color.fromARGB(128, 255, 0, 255);
-    context.rotateDegrees(45.0);
+    context.rotate(math.PI/4.0);
 
     Gradient yellowBlue = new Gradient.Linear(
         [new Point(-radius, -radius), new Point(0.0, 0.0)],
