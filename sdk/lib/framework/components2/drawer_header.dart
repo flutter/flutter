@@ -3,43 +3,48 @@
 // found in the LICENSE file.
 
 import '../fn2.dart';
-import '../theme/colors.dart';
-import '../theme/view_configuration.dart';
+import '../theme2/colors.dart';
+import '../theme2/view_configuration.dart';
 
 class DrawerHeader extends Component {
-  static final Style _style = new Style('''
-    height: ${140 + kStatusBarHeight}px;
-    background-color: ${BlueGrey[50]};
-    border-bottom: 1px solid #D1D9E1;
-    padding-bottom: 7px;
-    margin-bottom: 8px;'''
-  );
-
-  static final FlexBoxParentData _spacerParentData = new FlexBoxParentData()..flex = 1;
-
-  static final Style _labelStyle = new Style('''
-    padding: 0 16px;'''
-  );
 
   List<UINode> children;
 
   DrawerHeader({ Object key, this.children }) : super(key: key);
 
   UINode build() {
-    return new FlexContainer(
-      direction: FlexDirection.vertical,
-      style: _style,
-      children: [
-        new ParentDataNode(
-          new Container(key: 'Spacer'),
-          _spacerParentData
-        ),
-        new Container(
-          key: 'Label',
-          style: _labelStyle,
-          children: children
+    return new Container(
+      key: 'drawer-header-outside',
+      desiredSize: const Size.fromHeight(kStatusBarHeight + kMaterialDrawerHeight),
+      decoration: new BoxDecoration(
+        backgroundColor: BlueGrey[50],
+        border: const Border(
+          bottom: const BorderSide(
+            color: const Color(0xFFD1D9E1),
+            width: 1.0
+          )
         )
-      ]
+      ),
+      padding: const EdgeDims.only(bottom: 7.0),
+      margin: const EdgeDims.only(bottom: 8.0),
+      child: new FlexContainer(
+        key: 'drawer-header-inside',
+        direction: FlexDirection.vertical,
+        children: [
+          new FlexExpandingChild(new Container(
+            key: 'drawer-header-spacer',
+            desiredSize: Size.infinite
+           )),
+          new Container(
+            key: 'drawer-header-label',
+            padding: const EdgeDims.symmetric(horizontal: 16.0),
+            child: new FlexContainer(
+              direction: FlexDirection.horizontal,
+              children: children
+            )
+          )
+        ]
+      )
     );
   }
 }

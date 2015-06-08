@@ -407,8 +407,11 @@ class SizedBox extends OneChildRenderObjectWrapper {
   RenderSizedBox root;
   final Size desiredSize;
 
-  SizedBox({ this.desiredSize, UINode child, Object key })
-    : super(child: child, key: key);
+  SizedBox({
+    this.desiredSize: sky.Size.infinite,
+    UINode child,
+    Object key
+  }) : super(child: child, key: key);
 
   RenderSizedBox createNode() => new RenderSizedBox(desiredSize: desiredSize);
 
@@ -965,6 +968,9 @@ class Container extends Component {
 
     if (transform != null)
       current = new Transform(transform: transform, child: current);
+
+    if (current == null)
+      current = new SizedBox();
 
     return current;
   }

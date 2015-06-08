@@ -6,6 +6,7 @@
 // https://github.com/android/platform_frameworks_base/blob/master/core/java/android/view/ViewConfiguration.java
 
 const double kStatusBarHeight = 25.0;
+const double kMaterialDrawerHeight = 140.0;
 const double kScrollbarSize = 10.0;
 const double kScrollbarFadeDuration = 250.0;
 const double kScrollbarFadeDelay = 300.0;
