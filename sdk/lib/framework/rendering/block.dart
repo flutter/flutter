@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'box.dart';
+import 'dart:math' as math;
 import 'object.dart';
 
 class BlockParentData extends BoxParentData with ContainerParentDataMixin<RenderBox> { }
@@ -49,11 +50,14 @@ class RenderBlock extends RenderBox with ContainerRenderObjectMixin<RenderBox, B
     return width;
   }
 
+  BoxConstraints _getInnerConstraintsForWidth(double width) {
+    return new BoxConstraints(minWidth: width, maxWidth: width);
+  }
+
   double _getIntrinsicHeight(BoxConstraints constraints) {
     double height = 0.0;
     double width = constraints.constrainWidth(constraints.maxWidth);
-    BoxConstraints innerConstraints = new BoxConstraints(minWidth: width,
-                                                         maxWidth: width);
+    BoxConstraints innerConstraints = _getInnerConstraintsForWidth(width);
     RenderBox child = firstChild;
     while (child != null) {
       double childHeight = child.getMinIntrinsicHeight(innerConstraints);
@@ -75,10 +79,11 @@ class RenderBlock extends RenderBox with ContainerRenderObjectMixin<RenderBox, B
   void performLayout() {
     assert(constraints is BoxConstraints);
     double width = constraints.constrainWidth(constraints.maxWidth);
+    BoxConstraints innerConstraints = _getInnerConstraintsForWidth(width);
     double y = 0.0;
     RenderBox child = firstChild;
     while (child != null) {
-      child.layout(new BoxConstraints(minWidth: width, maxWidth: width), parentUsesSize: true);
+      child.layout(innerConstraints, parentUsesSize: true);
       assert(child.parentData is BlockParentData);
       child.parentData.position = new Point(0.0, y);
       y += child.size.height;

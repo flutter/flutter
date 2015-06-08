@@ -85,6 +85,20 @@ class BoxConstraints {
       maxHeight: math.min(maxHeight, constraints.maxHeight));
   }
 
+  BoxConstraints applyWidth(double width) {
+    return new BoxConstraints(minWidth: width,
+                              maxWidth: width,
+                              minHeight: minHeight,
+                              maxHeight: maxHeight);
+  }
+
+  BoxConstraints applyHeight(double height) {
+    return new BoxConstraints(minWidth: minWidth,
+                              maxWidth: maxWidth,
+                              minHeight: height,
+                              maxHeight: height);
+  }
+
   final double minWidth;
   final double maxWidth;
   final double minHeight;
@@ -329,6 +343,49 @@ class RenderConstrainedBox extends RenderProxyBox {
   String debugDescribeSettings(String prefix) => '${super.debugDescribeSettings(prefix)}${prefix}additionalConstraints: ${additionalConstraints}\n';
 }
 
+class RenderShrinkWrapWidth extends RenderProxyBox {
+  RenderShrinkWrapWidth({ RenderBox child }) : super(child);
+
+  BoxConstraints _getInnerConstraints(BoxConstraints constraints) {
+    double width = child.getMaxIntrinsicWidth(constraints);
+    assert(width == constraints.constrainWidth(width));
+    return constraints.applyWidth(width);
+  }
+
+  double getMinIntrinsicWidth(BoxConstraints constraints) {
+    if (child != null)
+      return child.getMaxIntrinsicWidth(constraints);
+    return constraints.constrainWidth(0.0);
+  }
+
+  double getMaxIntrinsicWidth(BoxConstraints constraints) {
+    if (child != null)
+      return child.getMaxIntrinsicWidth(constraints);
+    return constraints.constrainWidth(0.0);
+  }
+
+  double getMinIntrinsicHeight(BoxConstraints constraints) {
+    if (child != null)
+      return child.getMinIntrinsicHeight(_getInnerConstraints(constraints));
+    return constraints.constrainWidth(0.0);
+  }
+
+  double getMaxIntrinsicHeight(BoxConstraints constraints) {
+    if (child != null)
+      return child.getMaxIntrinsicHeight(_getInnerConstraints(constraints));
+    return constraints.constrainWidth(0.0);
+  }
+
+  void performLayout() {
+    if (child != null) {
+      child.layout(_getInnerConstraints(constraints));
+      size = child.size;
+    } else {
+      performResize();
+    }
+  }
+}
+
 class RenderClip extends RenderProxyBox {
   RenderClip({ RenderBox child }) : super(child);
 
@@ -361,27 +418,31 @@ class RenderPadding extends RenderBox with RenderObjectWithChildMixin<RenderBox>
   }
 
   double getMinIntrinsicWidth(BoxConstraints constraints) {
+    double totalPadding = padding.left + padding.right;
     if (child != null)
-      return child.getMinIntrinsicWidth(constraints.deflate(padding));
-    return constraints.constrainWidth(padding.left + padding.right);
+      return child.getMinIntrinsicWidth(constraints.deflate(padding)) + totalPadding;
+    return constraints.constrainWidth(totalPadding);
   }
 
   double getMaxIntrinsicWidth(BoxConstraints constraints) {
+    double totalPadding = padding.left + padding.right;
     if (child != null)
-      return child.getMaxIntrinsicWidth(constraints.deflate(padding));
-    return constraints.constrainWidth(padding.left + padding.right);
+      return child.getMaxIntrinsicWidth(constraints.deflate(padding)) + totalPadding;
+    return constraints.constrainWidth(totalPadding);
   }
 
   double getMinIntrinsicHeight(BoxConstraints constraints) {
+    double totalPadding = padding.top + padding.bottom;
     if (child != null)
-      return child.getMinIntrinsicHeight(constraints.deflate(padding));
-    return constraints.constrainHeight(padding.top + padding.bottom);
+      return child.getMinIntrinsicHeight(constraints.deflate(padding)) + totalPadding;
+    return constraints.constrainHeight(totalPadding);
   }
 
   double getMaxIntrinsicHeight(BoxConstraints constraints) {
+    double totalPadding = padding.top + padding.bottom;
     if (child != null)
-      return child.getMaxIntrinsicHeight(constraints.deflate(padding));
-    return constraints.constrainHeight(padding.top + padding.bottom);
+      return child.getMaxIntrinsicHeight(constraints.deflate(padding)) + totalPadding;
+    return constraints.constrainHeight(totalPadding);
   }
 
   void performLayout() {

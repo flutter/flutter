@@ -437,6 +437,14 @@ class ConstrainedBox extends OneChildRenderObjectWrapper {
   }
 }
 
+class ShrinkWrapWidth extends OneChildRenderObjectWrapper {
+  RenderShrinkWrapWidth root;
+
+  ShrinkWrapWidth({ UINode child, Object key }) : super(child: child, key: key);
+
+  RenderShrinkWrapWidth createNode() => new RenderShrinkWrapWidth();
+}
+
 class Transform extends OneChildRenderObjectWrapper {
   RenderTransform root;
   final Matrix4 transform;
