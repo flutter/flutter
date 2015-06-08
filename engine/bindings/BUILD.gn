@@ -334,7 +334,7 @@ action("generate_dart_globals") {
 copy("copy_core_dart_files") {
   sources = core_dart_files
   outputs = [
-    "$bindings_output_dir/{{source_file_part}}",
+    "$bindings_output_dir/Custom{{source_file_part}}",
   ]
 }
 

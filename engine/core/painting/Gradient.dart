@@ -2,8 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Extends the generated _Gradient interface via the CustomDart attribute.
+part of dart.sky;
 
+// Extends the generated _Gradient interface via the PrivateDart attribute.
 class Gradient extends _Gradient {
   // TODO(mpcomplete): Support other gradient types.
   // TODO(mpcomplete): Maybe pass a list of (color, colorStop) pairs instead?

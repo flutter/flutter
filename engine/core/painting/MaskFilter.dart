@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Extends the generated _MaskFilter interface via the CustomDart attribute.
+part of dart.sky;
 
 /// Blur styles. These mirror SkBlurStyle and must be kept in sync.
 enum BlurStyle {
@@ -12,6 +12,7 @@ enum BlurStyle {
   inner,  /// Fuzzy inside, nothing outside.
 }
 
+// Extends the generated _MaskFilter interface via the PrivateDart attribute.
 class MaskFilter extends _MaskFilter {
   MaskFilter.Blur(BlurStyle style, double sigma,
                   {bool ignoreTransform: false, bool highQuality: false})

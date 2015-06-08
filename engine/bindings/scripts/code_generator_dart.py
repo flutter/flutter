@@ -149,14 +149,10 @@ class CodeGeneratorDart(object):
 
         template_contents['cpp_includes'] = sorted(includes)
 
-        # If CustomDart is set, read the custom dart file and add it to our
+        # If PrivateDart is set, read the custom dart file and add it to our
         # template parameters.
-        if 'CustomDart' in interface.extended_attributes:
-          dart_filename = os.path.join(os.path.dirname(idl_filename),
-                                       interface.name + ".dart")
-          with open(dart_filename) as dart_file:
-              custom_dartcode = dart_file.read()
-              template_contents['custom_dartcode'] = custom_dartcode
+        if 'PrivateDart' in interface.extended_attributes:
+          template_contents['private_dart'] = True
 
         idl_world = {'interface': None, 'callback': None}
 
@@ -201,7 +197,7 @@ class CodeGeneratorDart(object):
                     # Special case: any .dart files in the list should be added
                     # to dart_sky.dart directly, but don't need to be processed.
                     interface_name = os.path.splitext(os.path.basename(filename))[0]
-                    world['interfaces'].append({'name': interface_name})
+                    world['interfaces'].append({'name': "Custom" + interface_name})
                     continue
                 interface_name = idl_filename_to_interface_name(filename)
                 idl_pickle_filename = interface_name + "_globals.pickle"

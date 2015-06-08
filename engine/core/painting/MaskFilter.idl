@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 [
-  CustomDart,
+  PrivateDart,
   Constructor(unsigned long style, double sigma, unsigned long flags)
 ] interface MaskFilter {
 };

@@ -4,7 +4,7 @@
 
 [
     ImplementedAs=CanvasGradient,
-    CustomDart,
+    PrivateDart,
     Constructor(unsigned long gradientType, Point[] endPoints, Color[] colors, float[] colorStops)
 ] interface Gradient : Shader {
 };

@@ -42,10 +42,6 @@ Constructor
 ConstructorCallWith=ExecutionContext|Document
 Custom=|Getter|Setter|VisitDOMWrapper|Wrap|PropertyGetter|PropertyEnumerator|PropertyQuery
 CustomConstructor
-# Sky addition: if present, the IDL compiler will generate a private Dart
-# interface to be extended by an auxilary file <Interface>.dart next to
-# <Interface>.idl.
-CustomDart
 CustomElementCallbacks
 Default=Undefined
 DependentLifetime
@@ -67,6 +63,9 @@ NotEnumerable
 NotScriptWrappable
 OverrideBuiltins
 PartialInterfaceImplementedAs=*
+# If present, the generated interface will be prefixed with underscores so
+# that it's private to the dart:sky module.
+PrivateDart
 PutForwards=*
 RaisesException=|Getter|Setter|Constructor
 Reflect=|*
