@@ -15,6 +15,7 @@ class Size {
   const Size.fromWidth(this.width) : height = double.INFINITY;
   const Size.fromHeight(this.height) : width = double.INFINITY;
 
+  static const Size zero = const Size(0.0, 0.0);
   static const Size infinite = const Size(double.INFINITY, double.INFINITY);
 
   bool operator ==(other) => other is Size && width == other.width && height == other.height;

@@ -125,13 +125,13 @@ abstract class RenderBox extends RenderObject {
   // dimensions and nothing else (e.g. don't calculate hypothetical
   // child positions if they're not needed to determine dimensions)
   Size getIntrinsicDimensions(BoxConstraints constraints) {
-    return constraints.constrain(new Size(0.0, 0.0));
+    return constraints.constrain(Size.zero);
   }
 
   BoxConstraints get constraints => super.constraints as BoxConstraints;
   void performResize() {
     // default behaviour for subclasses that have sizedByParent = true
-    size = constraints.constrain(new Size(0.0, 0.0));
+    size = constraints.constrain(Size.zero);
     assert(size.height < double.INFINITY);
     assert(size.width < double.INFINITY);
   }
@@ -149,7 +149,7 @@ abstract class RenderBox extends RenderObject {
   }
   void hitTestChildren(HitTestResult result, { Point position }) { }
 
-  Size size = new Size(0.0, 0.0);
+  Size size = Size.zero;
 
   String debugDescribeSettings(String prefix) => '${super.debugDescribeSettings(prefix)}${prefix}size: ${size}\n';
 }
@@ -722,7 +722,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     this.child = child;
   }
 
-  Size _size = new Size(0.0, 0.0);
+  Size _size = Size.zero;
   double get width => _size.width;
   double get height => _size.height;
 
