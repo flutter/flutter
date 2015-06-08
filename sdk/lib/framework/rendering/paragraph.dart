@@ -40,10 +40,28 @@ class RenderParagraph extends RenderBox {
     }
   }
 
-  Size getIntrinsicDimensions(BoxConstraints constraints) {
+  // We don't currently support this for RenderParagraph
+  double getMinIntrinsicWidth(BoxConstraints constraints) {
     assert(false);
-    return null;
-    // we don't currently support this for RenderParagraph
+    return constraints.constrainWidth(0.0);
+  }
+
+  // We don't currently support this for RenderParagraph
+  double getMaxIntrinsicWidth(BoxConstraints constraints) {
+    assert(false);
+    return constraints.constrainWidth(0.0);
+  }
+
+  // We don't currently support this for RenderParagraph
+  double getMinIntrinsicHeight(BoxConstraints constraints) {
+    assert(false);
+    return constraints.constrainHeight(0.0);
+  }
+
+  // We don't currently support this for RenderParagraph
+  double getMaxIntrinsicHeight(BoxConstraints constraints) {
+    assert(false);
+    return constraints.constrainHeight(0.0);
   }
 
   void performLayout() {

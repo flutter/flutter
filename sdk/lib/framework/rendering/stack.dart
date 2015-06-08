@@ -21,8 +21,20 @@ class RenderStack extends RenderBox with ContainerRenderObjectMixin<RenderBox, S
       child.parentData = new StackParentData();
   }
 
-  Size getIntrinsicDimensions(BoxConstraints constraints) {
-    return constraints.constrain(Size.infinite);
+  double getMinIntrinsicWidth(BoxConstraints constraints) {
+    return constraints.constrainWidth(double.INFINITY);
+  }
+
+  double getMaxIntrinsicWidth(BoxConstraints constraints) {
+    return constraints.constrainWidth(double.INFINITY);
+  }
+
+  double getMinIntrinsicHeight(BoxConstraints constraints) {
+    return constraints.constrainHeight(double.INFINITY);
+  }
+
+  double getMaxIntrinsicHeight(BoxConstraints constraints) {
+    return constraints.constrainHeight(double.INFINITY);
   }
 
   void performLayout() {

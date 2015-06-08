@@ -20,8 +20,20 @@ class RenderSolidColor extends RenderDecoratedBox {
         super(decoration: new BoxDecoration(backgroundColor: backgroundColor)) {
   }
 
-  sky.Size getIntrinsicDimensions(BoxConstraints constraints) {
-    return constraints.constrain(desiredSize);
+  double getMinIntrinsicWidth(BoxConstraints constraints) {
+    return constraints.constrainWidth(desiredSize.width);
+  }
+
+  double getMaxIntrinsicWidth(BoxConstraints constraints) {
+    return constraints.constrainWidth(desiredSize.width);
+  }
+
+  double getMinIntrinsicHeight(BoxConstraints constraints) {
+    return constraints.constrainHeight(desiredSize.height);
+  }
+
+  double getMaxIntrinsicHeight(BoxConstraints constraints) {
+    return constraints.constrainHeight(desiredSize.height);
   }
 
   void performLayout() {

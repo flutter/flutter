@@ -25,25 +25,51 @@ class RenderBlock extends RenderBox with ContainerRenderObjectMixin<RenderBox, B
       child.parentData = new BlockParentData();
   }
 
-  // override this to report what dimensions you would have if you
-  // were laid out with the given constraints this can walk the tree
-  // if it must, but it should be as cheap as possible; just get the
-  // dimensions and nothing else (e.g. don't calculate hypothetical
-  // child positions if they're not needed to determine dimensions)
-  Size getIntrinsicDimensions(BoxConstraints constraints) {
-    double height = 0.0;
-    double width = constraints.constrainWidth(constraints.maxWidth);
-    assert(width < double.INFINITY);
+  double getMinIntrinsicWidth(BoxConstraints constraints) {
+    double width = 0.0;
+    BoxConstraints innerConstraints = new BoxConstraints(
+        minWidth: constraints.minWidth, maxWidth: constraints.maxWidth);
     RenderBox child = firstChild;
-    BoxConstraints innerConstraints = new BoxConstraints(minWidth: width,
-                                                         maxWidth: width);
     while (child != null) {
-      height += child.getIntrinsicDimensions(innerConstraints).height;
-      assert(child.parentData is BlockParentData);
+      width = math.max(width, child.getMinIntrinsicWidth(innerConstraints));
       child = child.parentData.nextSibling;
     }
+    return width;
+  }
 
-    return new Size(width, constraints.constrainHeight(height));
+  double getMaxIntrinsicWidth(BoxConstraints constraints) {
+    double width = 0.0;
+    BoxConstraints innerConstraints = new BoxConstraints(
+        minWidth: constraints.minWidth, maxWidth: constraints.maxWidth);
+    RenderBox child = firstChild;
+    while (child != null) {
+      width = math.max(width, child.getMaxIntrinsicWidth(innerConstraints));
+      child = child.parentData.nextSibling;
+    }
+    return width;
+  }
+
+  double _getIntrinsicHeight(BoxConstraints constraints) {
+    double height = 0.0;
+    double width = constraints.constrainWidth(constraints.maxWidth);
+    BoxConstraints innerConstraints = new BoxConstraints(minWidth: width,
+                                                         maxWidth: width);
+    RenderBox child = firstChild;
+    while (child != null) {
+      double childHeight = child.getMinIntrinsicHeight(innerConstraints);
+      assert(childHeight == child.getMaxIntrinsicHeight(innerConstraints));
+      height += childHeight;
+      child = child.parentData.nextSibling;
+    }
+    return height;
+  }
+
+  double getMinIntrinsicHeight(BoxConstraints constraints) {
+    return _getIntrinsicHeight(constraints);
+  }
+
+  double getMaxIntrinsicHeight(BoxConstraints constraints) {
+    return _getIntrinsicHeight(constraints);
   }
 
   void performLayout() {

@@ -57,6 +57,30 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
       child.parentData = new FlexBoxParentData();
   }
 
+  // We don't currently support this for RenderFlex
+  double getMinIntrinsicWidth(BoxConstraints constraints) {
+    assert(false);
+    return constraints.constrainWidth(0.0);
+  }
+
+  // We don't currently support this for RenderFlex
+  double getMaxIntrinsicWidth(BoxConstraints constraints) {
+    assert(false);
+    return constraints.constrainWidth(0.0);
+  }
+
+  // We don't currently support this for RenderFlex
+  double getMinIntrinsicHeight(BoxConstraints constraints) {
+    assert(false);
+    return constraints.constrainHeight(0.0);
+  }
+
+  // We don't currently support this for RenderFlex
+  double getMaxIntrinsicHeight(BoxConstraints constraints) {
+    assert(false);
+    return constraints.constrainHeight(0.0);
+  }
+
   bool get sizedByParent => true;
   void performResize() {
     size = constraints.constrain(new Size(constraints.maxWidth, constraints.maxHeight));
