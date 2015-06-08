@@ -80,8 +80,8 @@ class RenderScaffold extends RenderBox {
 
   static const kToolbarHeight = 100.0;
   static const kStatusbarHeight = 50.0;
-  static const kButtonX = -16.0; // from right edge of body
-  static const kButtonY = -16.0; // from bottom edge of body
+  static const kButtonX = 16.0; // left from right edge of body
+  static const kButtonY = 16.0; // up from bottom edge of body
 
   void performLayout() {
     double bodyHeight = size.height;
@@ -115,7 +115,7 @@ class RenderScaffold extends RenderBox {
     }
     if (_slots[ScaffoldSlots.floatingActionButton] != null) {
       RenderBox floatingActionButton = _slots[ScaffoldSlots.floatingActionButton];
-      Size area = new Size(size.width + kButtonX, size.height + kButtonY);
+      Size area = new Size(size.width - kButtonX, size.height - kButtonY);
       floatingActionButton.layout(new BoxConstraints.loose(area));
       assert(floatingActionButton.parentData is BoxParentData);
       floatingActionButton.parentData.position = (area - floatingActionButton.size).toPoint();

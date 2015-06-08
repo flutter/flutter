@@ -33,7 +33,8 @@ class Radio extends ButtonBase {
     return new EventListenerNode(
       new Container(
         margin: const EdgeDims.symmetric(horizontal: 5.0),
-        desiredSize: new Size(diameter, diameter),
+        width: diameter,
+        height: diameter,
         child: new CustomPaint(
           callback: (sky.Canvas canvas) {
 

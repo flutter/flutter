@@ -40,7 +40,7 @@ class MenuItem extends ButtonBase {
             )
           ]
         ),
-        desiredSize: const Size.fromHeight(48.0),
+        height: 48.0,
         decoration: highlight ? highlightDecoration : null
       ),
       onGestureTap: onGestureTap

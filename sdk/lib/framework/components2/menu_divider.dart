@@ -9,6 +9,7 @@ class MenuDivider extends Component {
 
   UINode build() {
     return new Container(
+      height: 0.0,
       decoration: const BoxDecoration(
         border: const Border(
           bottom: const BorderSide(

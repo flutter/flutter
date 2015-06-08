@@ -31,7 +31,8 @@ class Checkbox extends ButtonBase {
     return new EventListenerNode(
       new Container(
         margin: const EdgeDims.symmetric(horizontal: 5.0),
-        desiredSize: new sky.Size(edgeSize + 2.0, edgeSize + 2.0),
+        width: edgeSize + 2.0,
+        height: edgeSize + 2.0,
         child: new CustomPaint(
           callback: (sky.Canvas canvas) {
 

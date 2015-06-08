@@ -113,10 +113,7 @@ class Drawer extends AnimatedComponent {
     Color maskColor = new Color(((_position / _kWidth + 1) * 0xFF).floor() << 24);
 
     var mask = new EventListenerNode(
-      new Container(
-        desiredSize: Size.infinite,
-        decoration: new BoxDecoration(backgroundColor: maskColor)
-      ),
+      new Container(decoration: new BoxDecoration(backgroundColor: maskColor)),
       onGestureTap: controller.handleMaskTap,
       onGestureFlingStart: controller.handleFlingStart
     );
@@ -124,7 +121,7 @@ class Drawer extends AnimatedComponent {
     Material content = new Material(
       content: new Container(
         decoration: new BoxDecoration(backgroundColor: new Color(0xFFFFFFFF)),
-        desiredSize: new Size.fromWidth(_kWidth),
+        width: _kWidth,
         transform: transform,
         child: new BlockContainer(children: children)
       ),

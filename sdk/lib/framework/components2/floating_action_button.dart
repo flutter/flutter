@@ -31,7 +31,8 @@ class FloatingActionButton extends Component {
           canvas.drawCircle(radius, radius, radius, new sky.Paint()..color = Red[500]);
         },
         child: new Container(
-          desiredSize: const sky.Size(_kSize, _kSize),
+          width: _kSize,
+          height: _kSize,
           child: new InkWell(children: children))),
       level: level);
   }

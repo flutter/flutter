@@ -408,10 +408,11 @@ class SizedBox extends OneChildRenderObjectWrapper {
   final Size desiredSize;
 
   SizedBox({
-    this.desiredSize: sky.Size.infinite,
+    double width: double.INFINITY,
+    double height: double.INFINITY,
     UINode child,
     Object key
-  }) : super(child: child, key: key);
+  }) : desiredSize = new Size(width, height), super(child: child, key: key);
 
   RenderSizedBox createNode() => new RenderSizedBox(desiredSize: desiredSize);
 
@@ -958,14 +959,16 @@ class Container extends Component {
   final EdgeDims margin;
   final EdgeDims padding;
   final Matrix4 transform;
-  final Size desiredSize;
+  final double width;
+  final double height;
 
   Container({
     Object key,
     this.child,
     this.constraints,
     this.decoration,
-    this.desiredSize,
+    this.width,
+    this.height,
     this.margin,
     this.padding,
     this.transform
@@ -974,14 +977,21 @@ class Container extends Component {
   UINode build() {
     UINode current = child;
 
+    if (child == null && width == null && height == null)
+      current = new SizedBox();
+
     if (padding != null)
       current = new Padding(padding: padding, child: current);
 
     if (decoration != null)
       current = new DecoratedBox(decoration: decoration, child: current);
 
-    if (desiredSize != null)
-      current = new SizedBox(desiredSize: desiredSize, child: current);
+    if (width != null || height != null)
+      current = new SizedBox(
+        width: width == null ? double.INFINITY : width,
+        height: height == null ? double.INFINITY : height,
+        child: current
+      );
 
     if (constraints != null)
       current = new ConstrainedBox(constraints: constraints, child: current);
@@ -991,9 +1001,6 @@ class Container extends Component {
 
     if (transform != null)
       current = new Transform(transform: transform, child: current);
-
-    if (current == null)
-      current = new SizedBox();
 
     return current;
   }
