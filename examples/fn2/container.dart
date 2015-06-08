@@ -24,13 +24,13 @@ class ContainerApp extends App {
         new Container(
           padding: new EdgeDims.all(10.0),
           margin: new EdgeDims.all(10.0),
-          desiredSize: new sky.Size(double.INFINITY, 100.0),
+          height: 100.0,
           decoration: new BoxDecoration(backgroundColor: const sky.Color(0xFF00FF00)),
           child: new BlockContainer(
               children: [
                   new Container(
                       decoration: new BoxDecoration(backgroundColor: const sky.Color(0xFFFFFF00)),
-                      desiredSize: new sky.Size(double.INFINITY, 20.0)
+                      height: 20.0,
                   ),
                   new Image(src: "https://www.dartlang.org/logos/dart-logo.png",
                             size: new sky.Size(300.0, 300.0),

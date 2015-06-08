@@ -32,21 +32,21 @@ class StockRow extends Component {
       // ),
       new FlexExpandingChild(new Text(stock.symbol)),
       new Container(
-        desiredSize: const sky.Size.fromWidth(75.0),
+        width: 75.0,
         padding: const EdgeDims.only(right: 16.0),
         // text-align: right
         child: new Text(lastSale)
       ),
       // text-align: right, ${typography.black.caption};
       new SizedBox(
-        desiredSize: const sky.Size.fromWidth(75.0),
+        width: 75.0,
         child: new Text(changeInPrice)
       ),
     ];
 
     return new Container(
       padding: const EdgeDims(16.0, 16.0, 20.0, 16.0),
-      desiredSize: const sky.Size.fromHeight(kHeight),
+      height: kHeight,
       decoration: const BoxDecoration(
         backgroundColor: const sky.Color(0xFFFFFFFF),
         border: const Border(
