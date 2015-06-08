@@ -37,6 +37,8 @@ LayoutRoot::LayoutRoot()
 
 LayoutRoot::~LayoutRoot()
 {
+    if (!m_document->needsAttach())
+        m_document->detach();
 }
 
 Element* LayoutRoot::rootElement() const
