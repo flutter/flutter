@@ -11,8 +11,8 @@ import 'package:sky/framework/components2/icon_button.dart';
 import 'package:sky/framework/components2/menu_divider.dart';
 import 'package:sky/framework/components2/menu_item.dart';
 import 'package:sky/framework/components2/input.dart';
-// import 'package:sky/framework/components2/modal_overlay.dart';
-// import 'package:sky/framework/components2/popup_menu.dart';
+import 'package:sky/framework/components2/modal_overlay.dart';
+import 'package:sky/framework/components2/popup_menu.dart';
 import 'package:sky/framework/components2/radio.dart';
 import 'package:sky/framework/components2/scaffold.dart';
 import 'package:sky/framework/fn2.dart';
@@ -21,7 +21,7 @@ import 'package:sky/framework/theme2/colors.dart' as colors;
 import 'stock_data.dart';
 import 'package:sky/framework/rendering/box.dart';
 import 'stock_list.dart';
-// import 'stock_menu.dart';
+import 'stock_menu.dart';
 
 import 'dart:async';
 import 'dart:sky' as sky;
@@ -77,22 +77,22 @@ class StocksApp extends App {
     });
   }
 
-  // PopupMenuController _menuController;
+  PopupMenuController _menuController;
 
   void _handleMenuShow(_) {
     setState(() {
-      // _menuController = new PopupMenuController();
-      // _menuController.open();
+      _menuController = new PopupMenuController();
+      _menuController.open();
     });
   }
 
   void _handleMenuHide(_) {
     setState(() {
-      // _menuController.close().then((_) {
-      //   setState(() {
-      //     _menuController = null;
-      //   });
-      // });
+      _menuController.close().then((_) {
+        setState(() {
+          _menuController = null;
+        });
+      });
     });
   }
 
@@ -187,15 +187,15 @@ class StocksApp extends App {
   }
 
   void addMenuToOverlays(List<UINode> overlays) {
-    // if (_menuController == null)
-    //   return;
-    // overlays.add(new ModalOverlay(
-    //   children: [new StockMenu(
-    //     controller: _menuController,
-    //     autorefresh: _autorefresh,
-    //     onAutorefreshChanged: _handleAutorefreshChanged
-    //   )],
-    //   onDismiss: _handleMenuHide));
+    if (_menuController == null)
+      return;
+    overlays.add(new ModalOverlay(
+      children: [new StockMenu(
+        controller: _menuController,
+        autorefresh: _autorefresh,
+        onAutorefreshChanged: _handleAutorefreshChanged
+      )],
+      onDismiss: _handleMenuHide));
   }
 
   UINode build() {

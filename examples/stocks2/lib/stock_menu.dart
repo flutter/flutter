@@ -8,10 +8,10 @@ import 'package:sky/framework/components2/checkbox.dart';
 import 'package:sky/framework/theme/view_configuration.dart';
 
 class StockMenu extends Component {
-  static final Style _style = new Style('''
-    position: absolute;
-    right: 8px;
-    top: ${8 + kStatusBarHeight}px;''');
+  // static final Style _style = new Style('''
+  //   position: absolute;
+  //   right: 8px;
+  //   top: ${8 + kStatusBarHeight}px;''');
 
   PopupMenuController controller;
 
@@ -20,24 +20,20 @@ class StockMenu extends Component {
   final bool autorefresh;
   final ValueChanged onAutorefreshChanged;
 
-  static FlexBoxParentData _flex1 = new FlexBoxParentData()..flex = 1;
-
   UINode build() {
     var checkbox = new Checkbox(
       checked: this.autorefresh,
       onChanged: this.onAutorefreshChanged
     );
 
-    return new StyleNode(
-      new PopupMenu(
-        controller: controller,
-        items: [
-          [new Text('Add stock')],
-          [new Text('Remove stock')],
-          [new ParentDataNode(new Text('Autorefresh'), _flex1), checkbox],
-        ],
-        level: 4),
-        _style
+    return new PopupMenu(
+      controller: controller,
+      items: [
+        [new Text('Add stock')],
+        [new Text('Remove stock')],
+        // [new FlexExpandingChild(new Text('Autorefresh')), checkbox],
+      ],
+      level: 4
     );
   }
 }
