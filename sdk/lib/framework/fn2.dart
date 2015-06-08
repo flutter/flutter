@@ -76,7 +76,7 @@ abstract class UINode {
             node._didUnmount();
           node._wasMounted = node._mounted;
         }
-      });
+      }
       _mountedChanged.clear();
     } finally {
       _notifyingMountStatus = false;
