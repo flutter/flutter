@@ -38,7 +38,8 @@ class Viewer : public mojo::ApplicationDelegate,
     blink::WebRuntimeFeatures::enableObservatory(!RuntimeFlags::Get().testing());
 
     mojo::NetworkServicePtr network_service;
-    app->ConnectToService("mojo:network_service", &network_service);
+    app->ConnectToService("mojo:authenticated_network_service",
+                          &network_service);
     platform_impl_.reset(new PlatformImpl(network_service.Pass()));
     blink::initialize(platform_impl_.get());
 

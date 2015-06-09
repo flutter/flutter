@@ -24,7 +24,7 @@ Future<Response> fetch(String relativeUrl) async {
   String url = Uri.base.resolve(relativeUrl).toString();
 
   var net = new NetworkServiceProxy.unbound();
-  shell.requestService("mojo:network_service", net);
+  shell.requestService("mojo:authenticated_network_service", net);
 
   var loader = new UrlLoaderProxy.unbound();
   net.ptr.createUrlLoader(loader);

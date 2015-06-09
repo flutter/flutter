@@ -25,7 +25,7 @@ class SkyApplication : public mojo::Application {
                   const mojo::String& url) override {
     shell_ = shell.Pass();
     mojo::ServiceProviderPtr service_provider;
-    shell_->ConnectToApplication("mojo:network_service",
+    shell_->ConnectToApplication("mojo:authenticated_network_service",
                                  mojo::GetProxy(&service_provider), nullptr);
     mojo::ConnectToService(service_provider.get(), &network_service_);
   }
