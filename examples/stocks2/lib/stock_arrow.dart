@@ -2,91 +2,61 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:math';
 import 'package:sky/framework/fn2.dart';
+import 'package:vector_math/vector_math.dart';
+import 'package:sky/framework/rendering/box.dart';
+import 'package:sky/framework/rendering/object.dart';
+import 'package:sky/framework/theme2/colors.dart' as colors;
+
+import 'dart:math' as math;
+import 'dart:sky' as sky;
 
 class StockArrow extends Component {
-  static final Style _style = new Style('''
-    width: 40px;
-    height: 40px;
-    align-items: center;
-    justify-content: center;
-    border-radius: 40px;
-    margin-right: 16px;
-    border: 1px solid transparent;'''
-  );
-
-  static final Style _upStyle = new Style('''
-    width: 0;
-    height: 0;
-    border-left: 9px solid transparent;
-    border-right: 9px solid transparent;
-    margin-bottom: 3px;
-    border-bottom: 9px solid white;'''
-  );
-
-  static final Style _downStyle = new Style('''
-    width: 0;
-    height: 0;
-    border-left: 9px solid transparent;
-    border-right: 9px solid transparent;
-    margin-top: 3px;
-    border-top: 9px solid white'''
-  );
-
   double percentChange;
 
   StockArrow({ Object key, this.percentChange }) : super(key: key);
 
-  // TODO(abarth): These should use sky/framework/theme/colors.dart.
-  final List<String> _kRedColors = [
-    '#E57373',
-    '#EF5350',
-    '#F44336',
-    '#E53935',
-    '#D32F2F',
-    '#C62828',
-    '#B71C1C',
-  ];
-
-  // TODO(abarth): These should use sky/framework/theme/colors.dart.
-  final List<String> _kGreenColors = [
-    '#81C784',
-    '#66BB6A',
-    '#4CAF50',
-    '#43A047',
-    '#388E3C',
-    '#2E7D32',
-    '#1B5E20',
-  ];
-
   int _colorIndexForPercentChange(double percentChange) {
-    // Currently the max is 10%.
     double maxPercent = 10.0;
-    return max(0, ((percentChange.abs() / maxPercent) * _kGreenColors.length).floor());
+    double normalizedPercentChange = math.min(percentChange.abs(), maxPercent) / maxPercent;
+    return 100 + (normalizedPercentChange * 8.0).floor() * 100;
   }
 
-  String _colorForPercentChange(double percentChange) {
+  Color _colorForPercentChange(double percentChange) {
     if (percentChange > 0)
-      return _kGreenColors[_colorIndexForPercentChange(percentChange)];
-    return _kRedColors[_colorIndexForPercentChange(percentChange)];
+      return colors.Green[_colorIndexForPercentChange(percentChange)];
+    return colors.Red[_colorIndexForPercentChange(percentChange)];
   }
 
   UINode build() {
-    String border = _colorForPercentChange(percentChange).toString();
-    bool up = percentChange > 0;
-    String type = up ? 'bottom' : 'top';
-
-    return new FlexContainer(
-      inlineStyle: 'border-color: $border',
-      direction: FlexDirection.horizontal,
-      style: _style,
-      children: [
-        new Container(
-          inlineStyle: 'border-$type-color: $border',
-          style: up ? _upStyle : _downStyle
-        )
-      ]
-    );
+    // TODO(jackson): This should change colors with the theme
+    Color color = _colorForPercentChange(percentChange);
+    const double size = 40.0;
+    var arrow = new CustomPaint(callback: (sky.Canvas canvas) {
+      Paint paint = new Paint()..color = color;
+      paint.setStyle(sky.PaintingStyle.stroke);
+      paint.strokeWidth = 2.0;
+      var padding = paint.strokeWidth * 3.0;
+      var w = size - padding * 2.0;
+      var h = size - padding * 2.0;
+      canvas.save();
+      canvas.translate(padding, padding);
+      if (percentChange < 0.0) {
+        var cx = w / 2.0;
+        var cy = h / 2.0;
+        canvas.translate(cx, cy);
+        canvas.rotate(math.PI);
+        canvas.translate(-cx, -cy);
+      }
+      canvas.drawLine(0.0, h, w, h, paint);
+      canvas.drawLine(w, h, w / 2.0, 0.0, paint);
+      canvas.drawLine(w / 2.0, 0.0, 0.0, h, paint);
+      canvas.restore();
+    });
+    return new Container(
+        child: arrow,
+        width: size,
+        height: size,
+        margin: const EdgeDims.symmetric(horizontal: 5.0));
   }
 }
