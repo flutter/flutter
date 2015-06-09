@@ -4,6 +4,7 @@
 
 import '../fn2.dart';
 import '../rendering/box.dart';
+import '../painting/shadows.dart';
 import '../theme2/colors.dart';
 import 'dart:sky' as sky;
 import 'ink_well.dart';
@@ -28,7 +29,13 @@ class FloatingActionButton extends Component {
       content: new CustomPaint(
         callback: (sky.Canvas canvas) {
           const double radius = _kSize / 2.0;
-          canvas.drawCircle(radius, radius, radius, new sky.Paint()..color = Red[500]);
+          sky.Paint paint = new sky.Paint()..color = Red[500];
+          var builder = new ShadowDrawLooperBuilder()
+            ..addShadow(const sky.Size(0.0, 5.0),
+                        const sky.Color(0x77000000),
+                        5.0);
+          paint.setDrawLooper(builder.build());
+          canvas.drawCircle(radius, radius, radius, paint);
         },
         child: new Container(
           width: _kSize,

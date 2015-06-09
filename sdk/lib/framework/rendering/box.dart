@@ -6,6 +6,7 @@ import 'dart:math' as math;
 import 'dart:sky' as sky;
 import 'dart:typed_data';
 import 'object.dart';
+import '../painting/shadows.dart';
 import 'package:vector_math/vector_math.dart';
 import 'package:sky/framework/net/image_cache.dart' as image_cache;
 
@@ -703,22 +704,9 @@ class RenderDecoratedBox extends RenderProxyBox {
         paint.color = _decoration.backgroundColor;
 
       if (_decoration.boxShadow != null) {
-        var builder = new sky.LayerDrawLooperBuilder();
-        for (BoxShadow boxShadow in _decoration.boxShadow) {
-          builder.addLayerOnTop(
-                new sky.DrawLooperLayerInfo()
-                  ..setPaintBits(-1)
-                  ..setOffset(boxShadow.offset.toPoint())
-                  ..setColorMode(sky.TransferMode.srcMode),
-                (Paint layerPaint) {
-              layerPaint.color = boxShadow.color;
-              layerPaint.setMaskFilter(
-                new sky.MaskFilter.Blur(sky.BlurStyle.normal,
-                                        boxShadow.blur,
-                                        highQuality: true));
-            });
-        }
-        builder.addLayerOnTop(new sky.DrawLooperLayerInfo(), (_) {});
+        var builder = new ShadowDrawLooperBuilder();
+        for (BoxShadow boxShadow in _decoration.boxShadow)
+          builder.addShadow(boxShadow.offset, boxShadow.color, boxShadow.blur);
         paint.setDrawLooper(builder.build());
       }
 
