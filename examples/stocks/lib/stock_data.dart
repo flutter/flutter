@@ -59,7 +59,7 @@ class StockDataFetcher {
   }
 
   void _fetchNextChunk() {
-    fetch('data/stock_data_${_currentChunk++}.json').then((Response response) {
+    fetchBody('data/stock_data_${_currentChunk++}.json').then((Response response) {
       String json = response.bodyAsString();
       JsonDecoder decoder = new JsonDecoder();
 
