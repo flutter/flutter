@@ -99,13 +99,13 @@ class PopupMenu extends AnimatedComponent {
       return new PopupMenuItem(key: i++, children: item, opacity: opacity);
     }));
 
-    // border-radius: 2px
     // inlineStyle: _inlineStyle(),
     return new ShrinkWrapWidth(
       child: new Container(
         padding: const EdgeDims.all(8.0),
         decoration: new BoxDecoration(
           backgroundColor: Grey[50],
+          borderRadius: 2.0,
           boxShadow: Shadow[level]),
         child: new BlockContainer(children: children)
       )

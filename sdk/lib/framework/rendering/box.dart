@@ -649,10 +649,12 @@ class BoxDecoration {
   const BoxDecoration({
     this.backgroundColor,
     this.border,
+    this.borderRadius,
     this.boxShadow
   });
 
   final Color backgroundColor;
+  final double borderRadius;
   final Border border;
   final List<BoxShadow> boxShadow;
 
@@ -662,10 +664,10 @@ class BoxDecoration {
       result.add('${prefix}backgroundColor: $backgroundColor');
     if (border != null)
       result.add('${prefix}border: $border');
-    if (boxShadow != null) {
-      for (BoxShadow shadow in boxShadow)
-        result.add('${prefix}boxShadow: $shadow');
-    }
+    if (borderRadius != null)
+      result.add('${prefix}borderRadius: $borderRadius');
+    if (boxShadow != null)
+      result.add('${prefix}boxShadow: ${boxShadow.map((shadow) => shadow.toString())}');
     if (result.isEmpty)
       return '${prefix}<no decorations specified>';
     return result.join('\n');
@@ -730,10 +732,17 @@ class RenderDecoratedBox extends RenderProxyBox {
     assert(size.width != null);
     assert(size.height != null);
 
-    if (_decoration.backgroundColor != null || _decoration.boxShadow != null)
-      canvas.drawRect(new Rect.fromLTRB(0.0, 0.0, size.width, size.height), _backgroundPaint);
+    if (_decoration.backgroundColor != null || _decoration.boxShadow != null) {
+      Rect rect = new Rect.fromLTRB(0.0, 0.0, size.width, size.height);
+      if (_decoration.borderRadius == null)
+        canvas.drawRect(rect, _backgroundPaint);
+      else
+        canvas.drawRRect(new sky.RRect()..setRectXY(rect, _decoration.borderRadius, _decoration.borderRadius), _backgroundPaint);
+    }
 
     if (_decoration.border != null) {
+      assert(_decoration.borderRadius == null); // TODO(abarth): Implement borders with border radius.
+
       assert(_decoration.border.top != null);
       assert(_decoration.border.right != null);
       assert(_decoration.border.bottom != null);
