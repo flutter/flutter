@@ -11,7 +11,7 @@ class MenuItem extends ButtonBase {
 
   static const BoxDecoration highlightDecoration = const BoxDecoration(
     backgroundColor: const Color.fromARGB(102, 153, 153, 153)
-  ); 
+  );
 
   List<UINode> children;
   String icon;
@@ -36,7 +36,7 @@ class MenuItem extends ButtonBase {
                 ),
                 padding: const EdgeDims.symmetric(horizontal: 16.0)
               ),
-              1
+              flex: 1
             )
           ]
         ),

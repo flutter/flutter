@@ -154,7 +154,7 @@ abstract class UINode {
 abstract class ContentNode extends UINode {
   UINode content;
 
-  ContentNode(UINode content) : this.content = content, super(key: content._key);
+  ContentNode(UINode content, { Object key }) : this.content = content, super(key: key);
 
   void _sync(UINode old, dynamic slot) {
     UINode oldContent = old == null ? null : (old as ContentNode).content;
@@ -173,7 +173,7 @@ abstract class ContentNode extends UINode {
 class ParentDataNode extends ContentNode {
   final ParentData parentData;
 
-  ParentDataNode(UINode content, this.parentData): super(content);
+  ParentDataNode(UINode content, this.parentData, { Object key }): super(content, key: key);
 }
 
 typedef void GestureEventListener(sky.GestureEvent e);
@@ -754,8 +754,8 @@ class FlexContainer extends MultiChildRenderObjectWrapper {
 }
 
 class FlexExpandingChild extends ParentDataNode {
-  FlexExpandingChild(UINode content, [int flex = 1])
-    : super(content, new FlexBoxParentData()..flex = flex);
+  FlexExpandingChild(UINode content, { int flex: 1, Object key })
+    : super(content, new FlexBoxParentData()..flex = flex, key: key);
 }
 
 class Image extends RenderObjectWrapper {

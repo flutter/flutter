@@ -130,7 +130,7 @@ class StocksApp extends App {
           icon: 'action/thumb_up',
           onGestureTap: (event) => _handleStockModeChange(StockMode.optimistic),
           children: [
-            new FlexExpandingChild(new Text('Optimistic'), 1),
+            new FlexExpandingChild(new Text('Optimistic'), flex: 1),
             new Radio(key: 'optimistic-radio', value: StockMode.optimistic, groupValue: _stockMode, onChanged: _handleStockModeChange)
           ]),
         new MenuItem(
@@ -138,7 +138,7 @@ class StocksApp extends App {
           icon: 'action/thumb_down',
           onGestureTap: (event) => _handleStockModeChange(StockMode.pessimistic),
           children: [
-            new FlexExpandingChild(new Text('Pessimistic'), 1),
+            new FlexExpandingChild(new Text('Pessimistic'), flex: 1),
             new Radio(key: 'pessimistic-radio', value: StockMode.pessimistic, groupValue: _stockMode, onChanged: _handleStockModeChange)
           ]),
         new MenuDivider(key: 'div2'),
