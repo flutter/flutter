@@ -704,6 +704,15 @@ class StackContainer extends MultiChildRenderObjectWrapper {
     : super(key: key, children: children);
 }
 
+class StackPositionedChild extends ParentDataNode {
+  StackPositionedChild(UINode content, {
+    double top, double right, double bottom, double left
+  }) : super(content, new StackParentData()..top = top
+                                           ..right = right
+                                           ..bottom = bottom
+                                           ..left = left);
+}
+
 class Paragraph extends RenderObjectWrapper {
   RenderParagraph root;
   RenderParagraph createNode() => new RenderParagraph(text: text);

@@ -86,8 +86,22 @@ class BoxConstraints {
   }
 
   BoxConstraints applyWidth(double width) {
-    return new BoxConstraints(minWidth: width,
-                              maxWidth: width,
+    return new BoxConstraints(minWidth: math.max(minWidth, width),
+                              maxWidth: math.min(maxWidth, width),
+                              minHeight: minHeight,
+                              maxHeight: maxHeight);
+  }
+
+  BoxConstraints applyMinWidth(double width) {
+    return new BoxConstraints(minWidth: math.max(minWidth, width),
+                              maxWidth: maxWidth,
+                              minHeight: minHeight,
+                              maxHeight: maxHeight);
+  }
+
+  BoxConstraints applyMaxWidth(double width) {
+    return new BoxConstraints(minWidth: minWidth,
+                              maxWidth: math.min(maxWidth, width),
                               minHeight: minHeight,
                               maxHeight: maxHeight);
   }
@@ -95,8 +109,22 @@ class BoxConstraints {
   BoxConstraints applyHeight(double height) {
     return new BoxConstraints(minWidth: minWidth,
                               maxWidth: maxWidth,
-                              minHeight: height,
-                              maxHeight: height);
+                              minHeight: math.max(minHeight, height),
+                              maxHeight: math.min(maxHeight, height));
+  }
+
+  BoxConstraints applyMinHeight(double height) {
+    return new BoxConstraints(minWidth: minWidth,
+                              maxWidth: maxWidth,
+                              minHeight: math.max(minHeight, height),
+                              maxHeight: maxHeight);
+  }
+
+  BoxConstraints applyMaxHeight(double height) {
+    return new BoxConstraints(minWidth: minWidth,
+                              maxWidth: maxWidth,
+                              minHeight: minHeight,
+                              maxHeight: math.min(maxHeight, height));
   }
 
   final double minWidth;

@@ -5,7 +5,26 @@
 import 'box.dart';
 import 'object.dart';
 
-class StackParentData extends BoxParentData with ContainerParentDataMixin<RenderBox> { }
+class StackParentData extends BoxParentData with ContainerParentDataMixin<RenderBox> {
+  double top;
+  double right;
+  double bottom;
+  double left;
+
+  void merge(StackParentData other) {
+    if (other.top != null)
+      top = other.top;
+    if (other.right != null)
+      right = other.right;
+    if (other.bottom != null)
+      bottom = other.bottom;
+    if (other.left != null)
+      left = other.left;
+    super.merge(other);
+  }
+
+  String toString() => '${super.toString()}; top=$top; right=$right; bottom=$bottom, left=$left';
+}
 
 class RenderStack extends RenderBox with ContainerRenderObjectMixin<RenderBox, StackParentData>,
                                          RenderBoxContainerDefaultsMixin<RenderBox, StackParentData> {
@@ -45,9 +64,43 @@ class RenderStack extends RenderBox with ContainerRenderObjectMixin<RenderBox, S
 
     RenderBox child = firstChild;
     while (child != null) {
-      child.layout(innerConstraints);
       assert(child.parentData is StackParentData);
-      child.parentData.position = Point.origin;
+      StackParentData parentData = child.parentData;
+
+      BoxConstraints childConstraints = innerConstraints;
+
+      if (parentData.left != null && parentData.right != null)
+        childConstraints = childConstraints.applyWidth(parentData.right - parentData.left);
+      else if (parentData.left != null)
+        childConstraints = childConstraints.applyMaxWidth(size.width - parentData.left);
+      else if (parentData.right != null)
+        childConstraints = childConstraints.applyMaxWidth(size.width - parentData.right);
+
+      if (parentData.top != null && parentData.bottom != null)
+        childConstraints = childConstraints.applyHeight(parentData.bottom - parentData.top);
+      else if (parentData.top != null)
+        childConstraints = childConstraints.applyMaxHeight(size.height - parentData.top);
+      else if (parentData.bottom != null)
+        childConstraints = childConstraints.applyMaxHeight(size.width - parentData.bottom);
+
+      child.layout(childConstraints);
+
+      double x = 0.0;
+      if (parentData.left != null)
+        x = parentData.left;
+      else if (parentData.right != null)
+        x = size.width - parentData.right - child.size.width;
+      assert(x >= 0.0 && x + child.size.width <= size.width);
+
+      double y = 0.0;
+      if (parentData.top != null)
+        y = parentData.top;
+      else if (parentData.bottom != null)
+        y = size.height - parentData.bottom - child.size.height;
+      assert(y >= 0.0 && y + child.size.height <= size.height);
+
+      parentData.position = new Point(x, y);
+
       child = child.parentData.nextSibling;
     }
   }

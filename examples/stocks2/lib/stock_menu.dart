@@ -8,11 +8,6 @@ import 'package:sky/framework/components2/checkbox.dart';
 import 'package:sky/framework/theme/view_configuration.dart';
 
 class StockMenu extends Component {
-  // static final Style _style = new Style('''
-  //   position: absolute;
-  //   right: 8px;
-  //   top: ${8 + kStatusBarHeight}px;''');
-
   PopupMenuController controller;
 
   StockMenu({Object key, this.controller, this.autorefresh: false, this.onAutorefreshChanged}) : super(key: key);
@@ -26,14 +21,18 @@ class StockMenu extends Component {
       onChanged: this.onAutorefreshChanged
     );
 
-    return new PopupMenu(
-      controller: controller,
-      items: [
-        [new Text('Add stock')],
-        [new Text('Remove stock')],
-        // [new FlexExpandingChild(new Text('Autorefresh')), checkbox],
-      ],
-      level: 4
+    return new StackPositionedChild(
+      new PopupMenu(
+        controller: controller,
+        items: [
+          [new Text('Add stock')],
+          [new Text('Remove stock')],
+          // [new FlexExpandingChild(new Text('Autorefresh')), checkbox],
+        ],
+        level: 4
+      ),
+      right: 8.0,
+      top: 8.0 + kStatusBarHeight
     );
   }
 }

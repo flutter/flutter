@@ -8,11 +8,13 @@ import 'object.dart';
 
 class FlexBoxParentData extends BoxParentData with ContainerParentDataMixin<RenderBox> {
   int flex;
+
   void merge(FlexBoxParentData other) {
     if (other.flex != null)
       flex = other.flex;
     super.merge(other);
   }
+
   String toString() => '${super.toString()}; flex=$flex';
 }
 
