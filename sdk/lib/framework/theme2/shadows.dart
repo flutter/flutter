@@ -2,10 +2,58 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-const Map<int, String> Shadow = const {
-  1: '0  1px  3px rgba(0,0,0,0.12), 0  1px  2px rgba(0,0,0,0.24)',
-  2: '0  3px  6px rgba(0,0,0,0.16), 0  3px  6px rgba(0,0,0,0.23)',
-  3: '0 10px 20px rgba(0,0,0,0.19), 0  6px  6px rgba(0,0,0,0.23)',
-  4: '0 14px 28px rgba(0,0,0,0.25), 0 10px 10px rgba(0,0,0,0.22)',
-  5: '0 19px 38px rgba(0,0,0,0.30), 0 15px 12px rgba(0,0,0,0.22)',
+import '../rendering/box.dart';
+import 'dart:sky' show Color, Size;
+
+const Map<int, List<BoxShadow>> Shadow = const {
+  1: const [
+    const BoxShadow(
+      color: const Color(0x1F000000),
+      offset: const Size(0.0, 1.0),
+      blur: 3.0),
+    const BoxShadow(
+      color: const Color(0x3D000000),
+      offset: const Size(0.0, 1.0),
+      blur: 2.0),
+    ],
+  2: const [
+    const BoxShadow(
+      color: const Color(0x29000000),
+      offset: const Size(0.0, 3.0),
+      blur: 6.0),
+    const BoxShadow(
+      color: const Color(0x3B000000),
+      offset: const Size(0.0, 3.0),
+      blur: 6.0),
+  ],
+  3: const [
+    const BoxShadow(
+      color: const Color(0x30000000),
+      offset: const Size(0.0, 10.0),
+      blur: 20.0),
+    const BoxShadow(
+      color: const Color(0x3B000000),
+      offset: const Size(0.0, 6.0),
+      blur: 6.0),
+  ],
+  4: const [
+    const BoxShadow(
+      color: const Color(0x40000000),
+      offset: const Size(0.0, 14.0),
+      blur: 28.0),
+    const BoxShadow(
+      color: const Color(0x38000000),
+      offset: const Size(0.0, 10.0),
+      blur: 10.0),
+  ],
+  5: const [
+    const BoxShadow(
+      color: const Color(0x4E000000),
+      offset: const Size(0.0, 19.0),
+      blur: 28.0),
+    const BoxShadow(
+      color: const Color(0x38000000),
+      offset: const Size(0.0, 15.0),
+      blur: 12.0),
+  ],
 };

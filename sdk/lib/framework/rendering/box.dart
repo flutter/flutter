@@ -630,15 +630,31 @@ class Border {
   String toString() => 'Border($top, $right, $bottom, $left)';
 }
 
+class BoxShadow {
+  const BoxShadow({
+    this.color,
+    this.offset,
+    this.blur
+  });
+
+  final Color color;
+  final Size offset;
+  final double blur;
+
+  String toString() => 'BoxShadow($color, $offset, $blur)';
+}
+
 // This must be immutable, because we won't notice when it changes
 class BoxDecoration {
   const BoxDecoration({
     this.backgroundColor,
-    this.border
+    this.border,
+    this.boxShadow
   });
 
   final Color backgroundColor;
   final Border border;
+  final List<BoxShadow> boxShadow;
 
   String toString([String prefix = '']) {
     List<String> result = [];
@@ -646,6 +662,8 @@ class BoxDecoration {
       result.add('${prefix}backgroundColor: $backgroundColor');
     if (border != null)
       result.add('${prefix}border: $border');
+    // if (boxShadow != null)
+    //   result.add('${prefix}boxShadow: $boxShadow');
     if (result.isEmpty)
       return '${prefix}<no decorations specified>';
     return result.join('\n');
@@ -668,17 +686,50 @@ class RenderDecoratedBox extends RenderProxyBox {
     if (value == _decoration)
       return;
     _decoration = value;
+    _cachedBackgroundPaint = null;
     markNeedsPaint();
+  }
+
+  Paint _cachedBackgroundPaint;
+  Paint get _backgroundPaint {
+    if (_cachedBackgroundPaint == null) {
+      Paint paint = new Paint();
+
+      if (_decoration.backgroundColor != null)
+        paint.color = _decoration.backgroundColor;
+
+      if (_decoration.boxShadow != null) {
+        var builder = new sky.LayerDrawLooperBuilder();
+        for (BoxShadow boxShadow in _decoration.boxShadow) {
+          builder.addLayerOnTop(
+                new sky.DrawLooperLayerInfo()
+                  ..setPaintBits(-1)
+                  ..setOffset(boxShadow.offset.toPoint())
+                  ..setColorMode(sky.TransferMode.srcMode),
+                (Paint layerPaint) {
+              layerPaint.color = boxShadow.color;
+              layerPaint.setMaskFilter(
+                new sky.MaskFilter.Blur(sky.BlurStyle.normal,
+                                        boxShadow.blur,
+                                        highQuality: true));
+            });
+        }
+        builder.addLayerOnTop(new sky.DrawLooperLayerInfo(), (_) {});
+        paint.setDrawLooper(builder.build());
+      }
+
+      _cachedBackgroundPaint = paint;
+    }
+
+    return _cachedBackgroundPaint;
   }
 
   void paint(RenderObjectDisplayList canvas) {
     assert(size.width != null);
     assert(size.height != null);
 
-    if (_decoration.backgroundColor != null) {
-      Paint paint = new Paint()..color = _decoration.backgroundColor;
-      canvas.drawRect(new Rect.fromLTRB(0.0, 0.0, size.width, size.height), paint);
-    }
+    if (_decoration.backgroundColor != null || _decoration.boxShadow != null)
+      canvas.drawRect(new Rect.fromLTRB(0.0, 0.0, size.width, size.height), _backgroundPaint);
 
     if (_decoration.border != null) {
       assert(_decoration.border.top != null);
@@ -820,63 +871,6 @@ class RenderSizeObserver extends RenderProxyBox {
 
     if (oldSize != size)
       callback(size);
-  }
-}
-
-// This must be immutable, because we won't notice when it changes
-class BoxShadow {
-  const BoxShadow({
-    this.color,
-    this.offset,
-    this.blur
-  });
-
-  final Size offset;
-  final double blur;
-  final Color color;
-}
-
-class RenderShadowedBox extends RenderProxyBox {
-
-  RenderShadowedBox({
-    BoxShadow shadow,
-    RenderBox child
-  }) : _shadow = shadow, super(child);
-
-  BoxShadow _shadow;
-  BoxShadow get shadow => _shadow;
-  void set shadow (BoxShadow value) {
-    if (value == _shadow)
-      return;
-    _shadow = value;
-    markNeedsPaint();
-  }
-
-  Paint _createShadowPaint(BoxShadow shadow) {
-    // TODO(eseidel): This should not be hard-coded yellow.
-    Paint paint = new Paint()..color = const Color.fromARGB(255, 0, 255, 0);
-    var builder = new sky.LayerDrawLooperBuilder()
-      // Shadow layer.
-      ..addLayerOnTop(
-          new sky.DrawLooperLayerInfo()
-            ..setPaintBits(-1)
-            ..setOffset(shadow.offset.toPoint())
-            ..setColorMode(sky.TransferMode.srcMode),
-          (Paint layerPaint) {
-        layerPaint.color = shadow.color;
-        layerPaint.setMaskFilter(
-          new sky.MaskFilter.Blur(sky.BlurStyle.normal, shadow.blur, highQuality: true));
-      })
-      // Main layer.
-      ..addLayerOnTop(new sky.DrawLooperLayerInfo(), (_) {});
-    paint.setDrawLooper(builder.build());
-    return paint;
-  }
-
-  void paint(RenderObjectDisplayList canvas) {
-    Paint paint = _createShadowPaint(_shadow);
-    canvas.drawRect(new Rect.fromLTRB(0.0, 0.0, size.width, size.height), paint);
-    super.paint(canvas);
   }
 }
 

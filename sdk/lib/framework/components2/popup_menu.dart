@@ -2,10 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'animated_component.dart';
 import '../animation/animated_value.dart';
 import '../fn2.dart';
 import '../theme2/colors.dart';
+import '../theme2/shadows.dart';
+import 'animated_component.dart';
 import 'dart:async';
 import 'dart:math' as math;
 import 'material.dart';
@@ -98,16 +99,15 @@ class PopupMenu extends AnimatedComponent {
       return new PopupMenuItem(key: i++, children: item, opacity: opacity);
     }));
 
+    // border-radius: 2px
+    // inlineStyle: _inlineStyle(),
     return new ShrinkWrapWidth(
-      child: new Material(
-        content: new Container(
-          padding: const EdgeDims.all(8.0),
-          // border-radius: 2px
-          decoration: new BoxDecoration(backgroundColor: Grey[50]),
-          // inlineStyle: _inlineStyle(),
-          child: new BlockContainer(children: children)
-        ),
-        level: level
+      child: new Container(
+        padding: const EdgeDims.all(8.0),
+        decoration: new BoxDecoration(
+          backgroundColor: Grey[50],
+          boxShadow: Shadow[level]),
+        child: new BlockContainer(children: children)
       )
     );
   }
