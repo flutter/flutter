@@ -5,7 +5,8 @@
 import '../animation/animated_value.dart';
 import '../animation/curves.dart';
 import '../fn2.dart';
-import '../theme/colors.dart';
+import '../theme2/colors.dart';
+import '../theme2/shadows.dart';
 import 'animated_component.dart';
 import 'dart:math' as math;
 import 'dart:sky' as sky;
@@ -110,7 +111,8 @@ class Drawer extends AnimatedComponent {
     Matrix4 transform = new Matrix4.identity();
     transform.translate(_position);
 
-    Color maskColor = new Color(((_position / _kWidth + 1) * 0xFF).floor() << 24);
+    double scaler = _position / _kWidth + 1;
+    Color maskColor = new Color.fromARGB((0x7F * scaler).floor(), 0, 0, 0);
 
     var mask = new EventListenerNode(
       new Container(decoration: new BoxDecoration(backgroundColor: maskColor)),
@@ -118,14 +120,14 @@ class Drawer extends AnimatedComponent {
       onGestureFlingStart: controller.handleFlingStart
     );
 
-    Material content = new Material(
-      content: new Container(
-        decoration: new BoxDecoration(backgroundColor: new Color(0xFFFFFFFF)),
-        width: _kWidth,
-        transform: transform,
-        child: new BlockContainer(children: children)
-      ),
-      level: level);
+    Container content = new Container(
+      decoration: new BoxDecoration(
+        backgroundColor: Grey[50],
+        boxShadow: Shadow[level]),
+      width: _kWidth,
+      transform: transform,
+      child: new BlockContainer(children: children)
+    );
 
     return new EventListenerNode(
       new StackContainer(

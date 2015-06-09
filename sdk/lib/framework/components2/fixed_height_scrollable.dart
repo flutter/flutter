@@ -63,10 +63,15 @@ abstract class FixedHeightScrollable extends Scrollable {
     return new SizeObserver(
       callback: _handleSizeChanged,
       child: new Clip(
-        child: new Transform(
-          transform: transform,
-          child: new BlockContainer(
-            children: buildItems(itemNumber, itemCount))
+        child: new DecoratedBox(
+          decoration: const BoxDecoration(
+            backgroundColor: const Color(0xFFFFFFFF)
+          ),
+          child: new Transform(
+            transform: transform,
+            child: new BlockContainer(
+              children: buildItems(itemNumber, itemCount))
+          )
         )
       )
     );

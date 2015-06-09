@@ -4,7 +4,7 @@
 
 import '../fn2.dart';
 import '../theme/view_configuration.dart';
-// import 'material.dart';
+import '../theme2/shadows.dart';
 
 class ToolBar extends Component {
   UINode left;
@@ -40,7 +40,10 @@ class ToolBar extends Component {
       ),
       height: 56.0,
       padding: new EdgeDims(kStatusBarHeight.toDouble(), 8.0, 0.0, 8.0),
-      decoration: new BoxDecoration(backgroundColor: backgroundColor)
+      decoration: new BoxDecoration(
+        backgroundColor: backgroundColor,
+        boxShadow: Shadow[2]
+      )
     );
   }
 }
