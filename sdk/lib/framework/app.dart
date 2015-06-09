@@ -18,18 +18,20 @@ class AppView {
 
   AppView(RenderBox root) {
     sky.view.setEventCallback(_handleEvent);
+    sky.view.setMetricsChangedCallback(_handleMetricsChanged);
     scheduler.init();
     scheduler.addPersistentFrameCallback(_beginFrame);
 
     _renderView = new RenderView(child: root);
     _renderView.attach();
-    _renderView.layout(new ViewConstraints(width: sky.view.width,
-                                           height: sky.view.height));
-
-    scheduler.ensureVisualUpdate();
+    _renderView.rootConstraints = _viewConstraints;
+    _renderView.layout(_renderView.rootConstraints);
   }
 
   RenderView _renderView;
+
+  ViewConstraints get _viewConstraints =>
+      new ViewConstraints(width: sky.view.width, height: sky.view.height);
 
   Map<int, PointerState> _stateForPointer = new Map<int, PointerState>();
 
@@ -54,6 +56,10 @@ class AppView {
       _renderView.hitTest(result, position: new Point(event.x, event.y));
       dispatchEvent(event, result);
     }
+  }
+
+  void _handleMetricsChanged() {
+    _renderView.rootConstraints = _viewConstraints;
   }
 
   PointerState _createStateForPointer(sky.PointerEvent event, Point position) {

@@ -38,6 +38,11 @@ void View::setEventCallback(PassOwnPtr<EventCallback> callback)
     m_eventCallback = callback;
 }
 
+void View::setMetricsChangedCallback(PassOwnPtr<VoidCallback> callback)
+{
+    m_metricsChangedCallback = callback;
+}
+
 void View::setBeginFrameCallback(PassOwnPtr<BeginFrameCallback> callback)
 {
     m_beginFrameCallback = callback;
@@ -51,6 +56,8 @@ void View::scheduleFrame()
 void View::setDisplayMetrics(const SkyDisplayMetrics& metrics)
 {
     m_displayMetrics = metrics;
+    if (m_metricsChangedCallback)
+        m_metricsChangedCallback->handleEvent();
 }
 
 void View::handleInputEvent(PassRefPtr<Event> event)

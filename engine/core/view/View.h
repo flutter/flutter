@@ -7,6 +7,7 @@
 
 #include "base/callback.h"
 #include "base/time/time.h"
+#include "sky/engine/core/html/VoidCallback.h"
 #include "sky/engine/core/painting/Picture.h"
 #include "sky/engine/core/view/BeginFrameCallback.h"
 #include "sky/engine/core/view/EventCallback.h"
@@ -32,6 +33,8 @@ public:
 
     void setEventCallback(PassOwnPtr<EventCallback> callback);
 
+    void setMetricsChangedCallback(PassOwnPtr<VoidCallback> callback);
+
     void setBeginFrameCallback(PassOwnPtr<BeginFrameCallback> callback);
     void scheduleFrame();
 
@@ -45,6 +48,7 @@ private:
     base::Closure m_scheduleFrameCallback;
     SkyDisplayMetrics m_displayMetrics;
     OwnPtr<EventCallback> m_eventCallback;
+    OwnPtr<VoidCallback> m_metricsChangedCallback;
     OwnPtr<BeginFrameCallback> m_beginFrameCallback;
     RefPtr<Picture> m_picture;
 };

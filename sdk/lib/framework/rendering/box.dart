@@ -947,19 +947,27 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   int get orientation => _orientation;
   Duration timeForRotation;
 
+  ViewConstraints _rootConstraints;
+  ViewConstraints get rootConstraints => _rootConstraints;
+  void set rootConstraints(ViewConstraints value) {
+    if (_rootConstraints == value)
+      return;
+    _rootConstraints = value;
+    markNeedsLayout();
+  }
+
   ViewConstraints get constraints => super.constraints as ViewConstraints;
-  bool get sizedByParent => true;
-  void performResize() {
-    if (constraints.orientation != _orientation) {
+
+  void performLayout() {
+    if (_rootConstraints.orientation != _orientation) {
       if (_orientation != null && child != null)
-        child.rotate(oldAngle: _orientation, newAngle: constraints.orientation, time: timeForRotation);
-      _orientation = constraints.orientation;
+        child.rotate(oldAngle: _orientation, newAngle: _rootConstraints.orientation, time: timeForRotation);
+      _orientation = _rootConstraints.orientation;
     }
-    _size = new Size(constraints.width, constraints.height);
+    _size = new Size(_rootConstraints.width, _rootConstraints.height);
     assert(_size.height < double.INFINITY);
     assert(_size.width < double.INFINITY);
-  }
-  void performLayout() {
+
     if (child != null) {
       child.layout(new BoxConstraints.tight(_size));
       assert(child.size.width == width);
