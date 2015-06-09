@@ -15,7 +15,8 @@ import 'package:sky/framework/embedder.dart';
 
 Future<String> run(url) async {
   var networkService= new NetworkServiceProxy.unbound();
-  embedder.connectToService("mojo:network_service", networkService);
+  embedder.connectToService("mojo:authenticated_network_service",
+      networkService);
 
   var urlLoader = new UrlLoaderProxy.unbound();
   networkService.ptr.createUrlLoader(urlLoader);
