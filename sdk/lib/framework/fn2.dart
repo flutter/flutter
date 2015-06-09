@@ -153,13 +153,16 @@ abstract class UINode {
   }
 }
 
-abstract class ContentNode extends UINode {
+// Descendants of TagNode provide a way to tag RenderObjectWrapper and
+// Component nodes with annotations, such as event listeners,
+// stylistic information, etc.
+abstract class TagNode extends UINode {
   UINode content;
 
-  ContentNode(UINode content, { Object key }) : this.content = content, super(key: key);
+  TagNode(UINode content, { Object key }) : this.content = content, super(key: key);
 
   void _sync(UINode old, dynamic slot) {
-    UINode oldContent = old == null ? null : (old as ContentNode).content;
+    UINode oldContent = old == null ? null : (old as TagNode).content;
     content = syncChild(content, oldContent, slot);
     assert(content.root != null);
     root = content.root;
@@ -172,7 +175,7 @@ abstract class ContentNode extends UINode {
   }
 }
 
-class ParentDataNode extends ContentNode {
+class ParentDataNode extends TagNode {
   final ParentData parentData;
 
   ParentDataNode(UINode content, this.parentData, { Object key }): super(content, key: key);
@@ -182,7 +185,7 @@ typedef void GestureEventListener(sky.GestureEvent e);
 typedef void PointerEventListener(sky.PointerEvent e);
 typedef void EventListener(sky.Event e);
 
-class EventListenerNode extends ContentNode  {
+class EventListenerNode extends TagNode  {
   final Map<String, sky.EventListener> listeners;
 
   static Map<String, sky.EventListener> _createListeners({
