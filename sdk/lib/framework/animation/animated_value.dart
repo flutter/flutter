@@ -9,7 +9,7 @@ import 'generators.dart';
 typedef void Callback ();
 
 class AnimatedValue {
-  StreamController _controller = new StreamController.broadcast(sync: true);
+  StreamController<double> _controller = new StreamController<double>.broadcast(sync: true);
   AnimationGenerator _animation;
   Completer _completer;
   double _value;

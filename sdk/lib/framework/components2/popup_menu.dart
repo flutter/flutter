@@ -61,7 +61,9 @@ class PopupMenu extends AnimatedComponent {
 
   PopupMenu({ Object key, this.controller, this.items, this.level })
       : super(key: key) {
-    animateField(controller.position, #_position);
+    animate(controller.position, (double value) {
+      _position = value;
+    });
     // onDidMount(_measureSize);
   }
 

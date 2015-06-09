@@ -4,32 +4,23 @@
 
 import '../animation/animated_value.dart';
 import '../fn2.dart';
-import 'dart:mirrors';
+import 'dart:async';
+
+typedef void SetterFunction(double value);
 
 abstract class AnimatedComponent extends Component {
+
   AnimatedComponent({ Object key }) : super(key: key, stateful: true);
 
-  var _debugAnimatedFields = new Set<Symbol>();
-  bool _debugIsNotYetAnimated(Symbol s) {
-    return _debugAnimatedFields.add(s);
-  }
-
-  animateField(AnimatedValue value, Symbol symbol) {
-    // TODO(rafaelw): Assert symbol is present on |this|, is private and
-    // is over the same parameterized type as the animated value.
-    var mirror = reflect(this);
-    var subscription;
-
-    assert(_debugIsNotYetAnimated(symbol));
-    mirror.setField(symbol, value.value);
-
+  animate(AnimatedValue value, SetterFunction setter) {
+    setter(value.value);
+    StreamSubscription<double> subscription;
     onDidMount(() {
       subscription = value.onValueChanged.listen((_) {
-        mirror.setField(symbol, value.value);
+        setter(value.value);
         scheduleBuild();
       });
     });
-
     onDidUnmount(() {
       if (subscription != null) {
         subscription.cancel();
@@ -37,4 +28,5 @@ abstract class AnimatedComponent extends Component {
       }
     });
   }
+
 }

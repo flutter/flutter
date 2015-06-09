@@ -104,7 +104,9 @@ class Drawer extends AnimatedComponent {
     this.children,
     this.level: 0
   }) : super(key: key) {
-    animateField(controller.position, #_position);
+    animate(controller.position, (double value) {
+      _position = value;
+    });
   }
 
   UINode build() {
