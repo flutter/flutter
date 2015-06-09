@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 [
+  PrivateDart,
   Constructor(Color color, TransferMode transferMode),
 ] interface ColorFilter {
 };

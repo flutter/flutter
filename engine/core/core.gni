@@ -1170,6 +1170,7 @@ core_idl_files = get_path_info([
 
 core_dart_files = get_path_info([
                                   "painting/Color.dart",
+                                  "painting/ColorFilter.dart",
                                   "painting/Gradient.dart",
                                   "painting/MaskFilter.dart",
                                   "painting/PaintingStyle.dart",
