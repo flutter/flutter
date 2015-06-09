@@ -37,7 +37,8 @@ base::WeakPtr<Rasterizer> Rasterizer::GetWeakPtr() {
 }
 
 void Rasterizer::OnAcceleratedWidgetAvailable(gfx::AcceleratedWidget widget) {
-  surface_ = gfx::GLSurface::CreateViewGLSurface(widget);
+  surface_ = gfx::GLSurface::CreateViewGLSurface(widget,
+                                                 gfx::SurfaceConfiguration());
   CHECK(surface_) << "GLSurface required.";
 }
 
