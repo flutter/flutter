@@ -18,6 +18,7 @@ class Shader : public RefCounted<Shader>, public DartWrappable {
   ~Shader() override;
 
   SkShader* shader() { return shader_.get(); }
+  void set_shader(PassRefPtr<SkShader> shader) { shader_ = shader; }
 
  protected:
   Shader(PassRefPtr<SkShader> shader);

@@ -64,9 +64,14 @@ void main() {
         ..addLayerOnTop(
             new DrawLooperLayerInfo()
               ..setOffset(const Point(75.0, 75.0))
-              ..setColorMode(TransferMode.srcMode),
+              ..setColorMode(TransferMode.srcMode)
+              ..setPaintBits(-1),
             (Paint layerPaint) {
-          layerPaint.color = const Color.fromARGB(128, 255, 0, 0);
+          Gradient redYellow = new Gradient.Radial(
+              new Point(0.0, 0.0), radius,
+              [const Color(0xFFFFFF00), const Color(0xFFFF0000)],
+              null);
+          layerPaint.setShader(redYellow);
         })
         ..addLayerOnTop(
             new DrawLooperLayerInfo()..setOffset(const Point(225.0, 75.0)),

@@ -5,6 +5,9 @@
 [
     ImplementedAs=CanvasGradient,
     PrivateDart,
-    Constructor(unsigned long gradientType, Point[] endPoints, Color[] colors, float[] colorStops)
+    Constructor()
 ] interface Gradient : Shader {
+  void initLinear(Point[] endPoints, Color[] colors, float[] colorStops);
+  void initRadial(Point center, double radius, Color[] colors,
+                  float[] colorStops);
 };

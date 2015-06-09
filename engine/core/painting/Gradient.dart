@@ -6,19 +6,30 @@ part of dart.sky;
 
 // Extends the generated _Gradient interface via the PrivateDart attribute.
 class Gradient extends _Gradient {
-  // TODO(mpcomplete): Support other gradient types.
   // TODO(mpcomplete): Maybe pass a list of (color, colorStop) pairs instead?
   Gradient.Linear(List<Point> endPoints,
                   List<Color> colors,
                   List<double> colorStops)
-      : super(0, endPoints, colors, _validate(colorStops, colors));
+      : super() {
+    if (endPoints == null || endPoints.length != 2)
+      throw new ArgumentError("Expected exactly 2 [endPoints].");
+    validateColorStops(colors, colorStops);
+    this._initLinear(endPoints, colors, colorStops);
+  }
 
-  // TODO(mpcomplete): Figure out a good way to validate arguments.
-  static List<double> _validate(colorStops, colors) {
+  Gradient.Radial(Point center,
+                  double radius,
+                  List<Color> colors,
+                  List<double> colorStops)
+      : super() {
+    validateColorStops(colors, colorStops);
+    this._initRadial(center, radius, colors, colorStops);
+  }
+
+  void validateColorStops(List<Color> colors, List<double> colorStops) {
     if (colorStops != null && colors.length != colorStops.length) {
       throw new ArgumentError(
           "[colors] and [colorStops] parameters must be equal length.");
     }
-    return colorStops;
   }
 }

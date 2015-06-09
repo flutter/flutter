@@ -5,31 +5,42 @@
 #include "sky/engine/config.h"
 #include "sky/engine/core/painting/CanvasGradient.h"
 
-#include "base/logging.h"
-#include "sky/engine/core/painting/Picture.h"
-
 namespace blink {
 
-PassRefPtr<CanvasGradient> CanvasGradient::create(
-    int type,
-    const Vector<Point>& end_points,
-    const Vector<SkColor>& colors,
-    const Vector<float>& color_stops) {
-  ASSERT(type == 0);  // Only 1 supported type so far.
+PassRefPtr<CanvasGradient> CanvasGradient::create() {
+  return adoptRef(new CanvasGradient());
+}
+
+void CanvasGradient::initLinear(const Vector<Point>& end_points,
+                                const Vector<SkColor>& colors,
+                                const Vector<float>& color_stops) {
   ASSERT(end_points.size() == 2);
   ASSERT(colors.size() == color_stops.size() || color_stops.data() == nullptr);
   SkPoint sk_end_points[2];
   for (int i = 0; i < 2; ++i)
     sk_end_points[i] = end_points[i].sk_point;
 
+  // TODO(mpcomplete): allow setting the TileMode.
   SkShader* shader = SkGradientShader::CreateLinear(
       sk_end_points, colors.data(), color_stops.data(), colors.size(),
       SkShader::kClamp_TileMode);
-  return adoptRef(new CanvasGradient(adoptRef(shader)));
+  set_shader(adoptRef(shader));
 }
 
-CanvasGradient::CanvasGradient(PassRefPtr<SkShader> shader)
-    : Shader(shader)
+void CanvasGradient::initRadial(const Point& center,
+                                double radius,
+                                const Vector<SkColor>& colors,
+                                const Vector<float>& color_stops) {
+  ASSERT(colors.size() == color_stops.size() || color_stops.data() == nullptr);
+
+  SkShader* shader = SkGradientShader::CreateRadial(
+      center.sk_point, radius, colors.data(), color_stops.data(), colors.size(),
+      SkShader::kClamp_TileMode);
+  set_shader(adoptRef(shader));
+}
+
+CanvasGradient::CanvasGradient()
+    : Shader(nullptr)
 {
 }
 
@@ -37,4 +48,4 @@ CanvasGradient::~CanvasGradient()
 {
 }
 
-} // namespace blink
+}  // namespace blink
