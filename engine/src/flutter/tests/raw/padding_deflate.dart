@@ -7,6 +7,7 @@ import '../resources/third_party/unittest/unittest.dart';
 import '../resources/unit.dart';
 import '../resources/display_list.dart';
 import 'package:sky/framework/rendering/box.dart';
+import 'package:sky/framework/rendering/object.dart';
 
 void main() {
   initUnit();
@@ -22,7 +23,10 @@ void main() {
       child: paddingBox
     );
     TestView renderView = new TestView(child: root);
-    renderView.layout(new ViewConstraints(width: sky.view.width, height: sky.view.height));
+    renderView.attach();
+    renderView.rootConstraints = new ViewConstraints(width: sky.view.width, height: sky.view.height);
+    renderView.scheduleInitialLayout();
+    RenderObject.flushLayout();
     expect(coloredBox.size.width, equals(sky.view.width - 20));
     expect(coloredBox.size.height, equals(sky.view.height - 20));
   });
