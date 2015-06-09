@@ -185,6 +185,9 @@ void Engine::LoadURL(const mojo::String& mojo_url) {
     return;
   }
 
+  if (sky_view_)
+    sky_view_ = nullptr;
+
   LOG(WARNING) << ".sky support is deprecated, please use .dart for main()";
 
   // Something bad happens if you try to call WebView::close and replace
