@@ -5,13 +5,14 @@
 import 'dart:sky' as sky;
 import 'package:sky/framework/components2/ink_well.dart';
 import 'package:sky/framework/fn2.dart';
+import 'package:sky/framework/rendering/flex.dart';
 import 'package:sky/framework/rendering/box.dart';
 import 'package:sky/framework/theme/typography.dart' as typography;
 import 'stock_arrow.dart';
 import 'stock_data.dart';
 
 class StockRow extends Component {
-  static const double kHeight = 100.0;
+  static const double kHeight = 70.0;
 
   Stock stock;
 
@@ -23,36 +24,28 @@ class StockRow extends Component {
     String lastSale = "\$${stock.lastSale.toStringAsFixed(2)}";
 
     String changeInPrice = "${stock.percentChange.toStringAsFixed(2)}%";
-    if (stock.percentChange > 0)
-      changeInPrice = "+" + changeInPrice;
+    if (stock.percentChange > 0) changeInPrice = "+" + changeInPrice;
 
     List<UINode> children = [
-      new StockArrow(
-        percentChange: stock.percentChange
-      ),
-      new FlexExpandingChild(new Text(stock.symbol)),
       new Container(
-        width: 75.0,
-        padding: const EdgeDims.only(right: 16.0),
-        // text-align: right
-        child: new Text(lastSale)
-      ),
-      // text-align: right, ${typography.black.caption};
-      new SizedBox(
-        width: 75.0,
-        child: new Text(changeInPrice)
-      ),
+          child: new StockArrow(percentChange: stock.percentChange),
+          margin: const EdgeDims.only(right: 5.0)),
+      new FlexExpandingChild(new Text(stock.symbol), flex: 2, key: "symbol"),
+      // TODO(hansmuller): text-align: right
+      new FlexExpandingChild(new Text(lastSale), key: "lastSale"),
+      // TODO(hansmuller): text-align: right, ${typography.black.caption};
+      new FlexExpandingChild(new Text(changeInPrice), key: "changeInPrice")
     ];
 
     return new Container(
       padding: const EdgeDims(16.0, 16.0, 20.0, 16.0),
-      height: kHeight,
+      height: kHeight, // TODO(hansmuller): This shouldn't be needed
       decoration: const BoxDecoration(
-        backgroundColor: const sky.Color(0xFFFFFFFF),
-        border: const Border(
-          bottom: const BorderSide(
-            color: const sky.Color(0xFFF4F4F4),
-            width: 1.0))),
+          backgroundColor: const sky.Color(0xFFFFFFFF),
+          border: const Border(
+              bottom: const BorderSide(
+                  color: const sky.Color(0xFFF4F4F4),
+                  width: 1.0))),
       child: new FlexContainer(children: children));
   }
 }

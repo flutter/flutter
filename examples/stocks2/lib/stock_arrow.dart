@@ -34,25 +34,37 @@ class StockArrow extends Component {
     const double size = 40.0;
     var arrow = new CustomPaint(callback: (sky.Canvas canvas) {
       Paint paint = new Paint()..color = color;
-      paint.setStyle(sky.PaintingStyle.stroke);
-      paint.strokeWidth = 2.0;
+      paint.strokeWidth = 1.0;
       var padding = paint.strokeWidth * 3.0;
-      var w = size - padding * 2.0;
-      var h = size - padding * 2.0;
+      var r = size / 2.0 - padding;
       canvas.save();
       canvas.translate(padding, padding);
+
+      // The arrow (below) is drawn upwards by default.
       if (percentChange < 0.0) {
-        var cx = w / 2.0;
-        var cy = h / 2.0;
-        canvas.translate(cx, cy);
+        canvas.translate(r, r);
         canvas.rotate(math.PI);
-        canvas.translate(-cx, -cy);
+        canvas.translate(-r, -r);
       }
-      canvas.drawLine(0.0, h, w, h, paint);
-      canvas.drawLine(w, h, w / 2.0, 0.0, paint);
-      canvas.drawLine(w / 2.0, 0.0, 0.0, h, paint);
+
+      // Draw the (equliateral triangle) arrow.
+      var dx = math.sqrt(3.0) * r / 2.0;
+      var path = new Path();
+      path.moveTo(r, 0.0);
+      path.lineTo(r + dx, r * 1.5);
+      path.lineTo(r - dx, r * 1.5);
+      path.lineTo(r, 0.0);
+      path.close();
+      paint.setStyle(sky.PaintingStyle.fill);
+      canvas.drawPath(path, paint);
+
+      // Draw a circle that circumscribes the arrow.
+      paint.setStyle(sky.PaintingStyle.stroke);
+      canvas.drawCircle(r, r, r + 2.0, paint);
+
       canvas.restore();
     });
+
     return new Container(
         child: arrow,
         width: size,
