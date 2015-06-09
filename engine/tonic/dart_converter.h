@@ -77,7 +77,7 @@ struct DartConverterInteger {
   static T FromDart(Dart_Handle handle) {
     int64_t result = 0;
     Dart_IntegerToInt64(handle, &result);
-    return result;
+    return static_cast<T>(result);
   }
 
   static T FromArguments(Dart_NativeArguments args,
@@ -85,7 +85,7 @@ struct DartConverterInteger {
                          Dart_Handle& exception) {
     int64_t result = 0;
     Dart_GetNativeIntegerArgument(args, index, &result);
-    return result;
+    return static_cast<T>(result);
   }
 };
 
@@ -157,6 +157,24 @@ struct DartConverter<float> : public DartConverterFloatingPoint<float> {};
 
 template <>
 struct DartConverter<double> : public DartConverterFloatingPoint<double> {};
+
+////////////////////////////////////////////////////////////////////////////////
+// Enums
+
+template <typename T>
+struct DartConverterEnum {
+  static T FromArguments(Dart_NativeArguments args,
+                         int index,
+                         Dart_Handle& exception) {
+    Dart_Handle enum_handle = Dart_GetNativeArgument(args, index);
+    Dart_Handle index_handle =
+        Dart_GetField(enum_handle, DartState::Current()->index_handle());
+
+    uint64_t enum_index = 0;
+    Dart_IntegerToUint64(index_handle, &enum_index);
+    return static_cast<T>(enum_index);
+  }
+};
 
 ////////////////////////////////////////////////////////////////////////////////
 // Strings

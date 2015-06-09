@@ -20,10 +20,9 @@ DOMDartState::~DOMDartState() {
 
 void DOMDartState::DidSetIsolate() {
   Scope dart_scope(this);
-  x_handle_.Set(this, Dart_NewStringFromCString("x"));
-  y_handle_.Set(this, Dart_NewStringFromCString("y"));
-  index_handle_.Set(this, Dart_NewStringFromCString("index"));
-  value_handle_.Set(this, Dart_NewStringFromCString("_value"));
+  x_handle_.Set(this, ToDart("x"));
+  y_handle_.Set(this, ToDart("y"));
+  value_handle_.Set(this, ToDart("_value"));
 
   Dart_Handle sky_library = DartBuiltin::LookupLibrary("dart:sky");
   color_class_.Set(this, Dart_GetType(sky_library, ToDart("Color"), 0, 0));

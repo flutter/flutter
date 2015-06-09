@@ -13,6 +13,13 @@
 
 namespace blink {
 
+class TileMode {};
+
+template <>
+struct DartConverter<TileMode> : public DartConverterEnum<SkShader::TileMode> {};
+
+COMPILE_ASSERT(SkShader::kTileModeCount == 3, Need_to_update_Gradient_dart);
+
 class CanvasGradient : public Shader {
     DEFINE_WRAPPERTYPEINFO();
  public:
@@ -22,12 +29,12 @@ class CanvasGradient : public Shader {
   void initLinear(const Vector<Point>& end_points,
                   const Vector<SkColor>& colors,
                   const Vector<float>& color_stops,
-                  unsigned tile_mode);
+                  SkShader::TileMode tile_mode);
   void initRadial(const Point& center,
                   double radius,
                   const Vector<SkColor>& colors,
                   const Vector<float>& color_stops,
-                  unsigned tile_mode);
+                  SkShader::TileMode tile_mode);
 
  private:
   CanvasGradient();

@@ -5,10 +5,7 @@
 #ifndef SKY_ENGINE_CORE_PAINTING_TRANSFERMODE_H_
 #define SKY_ENGINE_CORE_PAINTING_TRANSFERMODE_H_
 
-#include "sky/engine/core/painting/Rect.h"
-#include "sky/engine/tonic/dart_wrappable.h"
-#include "sky/engine/wtf/PassRefPtr.h"
-#include "sky/engine/wtf/RefCounted.h"
+#include "sky/engine/tonic/dart_converter.h"
 #include "third_party/skia/include/core/SkXfermode.h"
 
 namespace blink {
@@ -16,11 +13,13 @@ namespace blink {
 class TransferMode {};
 
 template <>
-struct DartConverter<TransferMode> {
-  static SkXfermode::Mode FromArgumentsWithNullCheck(Dart_NativeArguments args,
-                                                     int index,
-                                                     Dart_Handle& exception);
-};
+struct DartConverter<TransferMode>
+    : public DartConverterEnum<SkXfermode::Mode> {};
+
+// If this fails, it's because SkXfermode has changed. We need to change
+// TransferMode.dart to ensure the TransferMode enum is in sync with the C++
+// values.
+COMPILE_ASSERT(SkXfermode::kLastMode == 28, Need_to_update_TransferMode_dart);
 
 } // namespace blink
 

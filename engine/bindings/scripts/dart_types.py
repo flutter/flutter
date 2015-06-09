@@ -123,6 +123,7 @@ CPP_SPECIAL_CONVERSION_RULES = {
     'Point': 'Point',
     'Rect': 'Rect',
     'MojoDataPipeConsumer': 'mojo::ScopedDataPipeConsumerHandle',
+    'TileMode': 'SkShader::TileMode',
     'TransferMode': 'SkXfermode::Mode',
     'PaintingStyle': 'SkPaint::Style',
 }
@@ -329,8 +330,8 @@ def set_component_dirs(new_component_dirs):
 # TODO(terry): Need to fix to handle getter/setters for onEvent.
 DART_FIX_ME = 'DART_UNIMPLEMENTED(/* Conversion unimplemented*/);'
 
-def pass_by_value_format(typename):
-  return 'DartConverter<%s>::FromArguments{null_check}(args, {index}, exception)' % typename
+def pass_by_value_format(typename, null_check="{null_check}"):
+  return 'DartConverter<%s>::FromArguments%s(args, {index}, exception)' % (typename, null_check)
 
 # For a given IDL type, the DartHandle to C++ conversion.
 DART_TO_CPP_VALUE = {
@@ -373,8 +374,9 @@ DART_TO_CPP_VALUE = {
     'Float32List': pass_by_value_format('Float32List'),
     'Point': pass_by_value_format('Point'),
     'Rect': pass_by_value_format('Rect'),
-    'TransferMode': pass_by_value_format('TransferMode'),
-    'PaintingStyle': pass_by_value_format('PaintingStyle'),
+    'TileMode': pass_by_value_format('TileMode', ''),
+    'TransferMode': pass_by_value_format('TransferMode', ''),
+    'PaintingStyle': pass_by_value_format('PaintingStyle', ''),
     'MojoDataPipeConsumer': pass_by_value_format('mojo::ScopedDataPipeConsumerHandle'),
 }
 

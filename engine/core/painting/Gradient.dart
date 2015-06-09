@@ -21,7 +21,7 @@ class Gradient extends _Gradient {
     if (endPoints == null || endPoints.length != 2)
       throw new ArgumentError("Expected exactly 2 [endPoints].");
     validateColorStops(colors, colorStops);
-    this._initLinear(endPoints, colors, colorStops, tileMode.index);
+    this._initLinear(endPoints, colors, colorStops, tileMode);
   }
 
   Gradient.Radial(Point center,
@@ -31,7 +31,7 @@ class Gradient extends _Gradient {
                   [TileMode tileMode = TileMode.clamp])
       : super() {
     validateColorStops(colors, colorStops);
-    this._initRadial(center, radius, colors, colorStops, tileMode.index);
+    this._initRadial(center, radius, colors, colorStops, tileMode);
   }
 
   void validateColorStops(List<Color> colors, List<double> colorStops) {

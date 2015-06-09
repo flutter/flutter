@@ -6,6 +6,7 @@
 #include "sky/engine/tonic/dart_state.h"
 
 #include "sky/engine/tonic/dart_class_library.h"
+#include "sky/engine/tonic/dart_converter.h"
 #include "sky/engine/tonic/dart_exception_factory.h"
 #include "sky/engine/tonic/dart_string_cache.h"
 #include "sky/engine/tonic/dart_timer_heap.h"
@@ -29,6 +30,14 @@ DartState::DartState()
 }
 
 DartState::~DartState() {
+}
+
+void DartState::DidSetIsolateInternal() {
+  {
+    Scope dart_scope(this);
+    index_handle_.Set(this, ToDart("index"));
+  }
+  DidSetIsolate();
 }
 
 DartState* DartState::From(Dart_Isolate isolate) {

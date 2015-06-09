@@ -8,7 +8,7 @@
     Constructor()
 ] interface Gradient : Shader {
   void initLinear(Point[] endPoints, Color[] colors, float[] colorStops,
-                  /*TileMode*/unsigned long tileMode);
+                  TileMode tileMode);
   void initRadial(Point center, double radius, Color[] colors,
-                  float[] colorStops, /*TileMode*/unsigned long tileMode);
+                  float[] colorStops, TileMode tileMode);
 };

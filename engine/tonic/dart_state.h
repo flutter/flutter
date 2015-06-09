@@ -11,6 +11,7 @@
 #include "dart/runtime/include/dart_api.h"
 #include "sky/engine/tonic/dart_api_scope.h"
 #include "sky/engine/tonic/dart_isolate_scope.h"
+#include "sky/engine/tonic/dart_persistent_value.h"
 #include "sky/engine/wtf/OwnPtr.h"
 #include "sky/engine/wtf/PassRefPtr.h"
 #include "sky/engine/wtf/RefCounted.h"
@@ -50,7 +51,7 @@ class DartState : public base::SupportsUserData {
   void set_isolate(Dart_Isolate isolate) {
     CHECK(!isolate_);
     isolate_ = isolate;
-    DidSetIsolate();
+    DidSetIsolateInternal();
   }
 
   DartClassLibrary& class_library() { return *class_library_; }
@@ -58,9 +59,13 @@ class DartState : public base::SupportsUserData {
   DartExceptionFactory& exception_factory() { return *exception_factory_; }
   DartTimerHeap& timer_heap() { return *timer_heap_; }
 
+  Dart_Handle index_handle() { return index_handle_.value(); }
+
   virtual void DidSetIsolate() {}
 
  private:
+  void DidSetIsolateInternal();
+
   Dart_Isolate isolate_;
   OwnPtr<DartClassLibrary> class_library_;
   OwnPtr<DartStringCache> string_cache_;
@@ -68,6 +73,7 @@ class DartState : public base::SupportsUserData {
   OwnPtr<DartTimerHeap> timer_heap_;
 
   base::WeakPtrFactory<DartState> weak_factory_;
+  DartPersistentValue index_handle_;
 
   DISALLOW_COPY_AND_ASSIGN(DartState);
 };
