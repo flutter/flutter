@@ -56,8 +56,8 @@ void main() {
             (Paint layerPaint) {
           layerPaint.color = const Color.fromARGB(128, 255, 255, 0);
           layerPaint.setColorFilter(
-              new ColorFilter(const Color.fromARGB(128, 0, 0, 255),
-                              TransferMode.srcInMode));
+              new ColorFilter.Mode(const Color.fromARGB(128, 0, 0, 255),
+                                   TransferMode.srcInMode));
           layerPaint.setMaskFilter(
               new MaskFilter.Blur(BlurStyle.normal, 3.0, highQuality: true));
         })
