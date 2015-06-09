@@ -888,10 +888,6 @@ abstract class Component extends UINode {
         fn();
   }
 
-  // TODO(rafaelw): It seems wrong to expose DOM at all. This is presently
-  // needed to get sizing info.
-  RenderObject getRoot() => root;
-
   void remove() {
     assert(_built != null);
     assert(root != null);
