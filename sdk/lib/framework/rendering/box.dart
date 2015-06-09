@@ -159,7 +159,12 @@ class BoxConstraints {
 }
 
 class BoxParentData extends ParentData {
-  Point position = Point.origin;
+  Point _position = Point.origin;
+  Point get position => _position;
+  void set position(Point value) {
+    assert(RenderObject.debugDoingLayout);
+    _position = value;
+  }
   String toString() => 'position=$position';
 }
 
@@ -218,7 +223,12 @@ abstract class RenderBox extends RenderObject {
   }
   void hitTestChildren(HitTestResult result, { Point position }) { }
 
-  Size size = Size.zero;
+  Size _size = Size.zero;
+  Size get size => _size;
+  void set size(Size value) {
+    assert(RenderObject.debugDoingLayout);
+    _size = value;
+  }
 
   String debugDescribeSettings(String prefix) => '${super.debugDescribeSettings(prefix)}${prefix}size: ${size}\n';
 }

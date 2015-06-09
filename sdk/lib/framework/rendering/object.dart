@@ -49,7 +49,7 @@ abstract class RenderObject extends AbstractNode {
   dynamic parentData; // TODO(ianh): change the type of this back to ParentData once the analyzer is cleverer
   void setParentData(RenderObject child) {
     // override this to setup .parentData correctly for your class
-    assert(!_debugDoingLayout);
+    assert(!debugDoingLayout);
     assert(!debugDoingPaint);
     if (child.parentData is! ParentData)
       child.parentData = new ParentData();
@@ -57,7 +57,7 @@ abstract class RenderObject extends AbstractNode {
 
   void adoptChild(RenderObject child) { // only for use by subclasses
     // call this whenever you decide a node is a child
-    assert(!_debugDoingLayout);
+    assert(!debugDoingLayout);
     assert(!debugDoingPaint);
     assert(child != null);
     setParentData(child);
@@ -65,7 +65,7 @@ abstract class RenderObject extends AbstractNode {
     markNeedsLayout();
   }
   void dropChild(RenderObject child) { // only for use by subclasses
-    assert(!_debugDoingLayout);
+    assert(!debugDoingLayout);
     assert(!debugDoingPaint);
     assert(child != null);
     assert(child.parentData != null);
@@ -80,6 +80,7 @@ abstract class RenderObject extends AbstractNode {
 
   static List<RenderObject> _nodesNeedingLayout = new List<RenderObject>();
   static bool _debugDoingLayout = false;
+  static bool get debugDoingLayout => _debugDoingLayout;
   bool _needsLayout = true;
   bool get needsLayout => _needsLayout;
   RenderObject _relayoutSubtreeRoot;
@@ -100,7 +101,7 @@ abstract class RenderObject extends AbstractNode {
     return true;
   }
   void markNeedsLayout() {
-    assert(!_debugDoingLayout);
+    assert(!debugDoingLayout);
     assert(!debugDoingPaint);
     if (_needsLayout) {
       assert(debugAncestorsAlreadyMarkedNeedsLayout());
