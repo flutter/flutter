@@ -886,6 +886,9 @@ abstract class Component extends UINode {
   bool _dirty = true;
   bool _disqualifiedFromEverAppearingAgain = false;
 
+  UINode _built;
+  dynamic _slot; // cached slot from the last time we were synced
+
   List<Function> _mountCallbacks;
   List<Function> _unmountCallbacks;
 
