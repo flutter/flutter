@@ -44,7 +44,7 @@ Future<UrlResponse> fetchUrl(String relativeUrl) async {
 }
 
 Future<Response> fetchBody(String relativeUrl) async {
-  UrlResponse response = await fetchMojo(relativeUrl);
+  UrlResponse response = await fetchUrl(relativeUrl);
   if (response.body == null) return new Response(null);
 
   ByteData data = await core.DataPipeDrainer.drainHandle(response.body);
