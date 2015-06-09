@@ -662,8 +662,10 @@ class BoxDecoration {
       result.add('${prefix}backgroundColor: $backgroundColor');
     if (border != null)
       result.add('${prefix}border: $border');
-    // if (boxShadow != null)
-    //   result.add('${prefix}boxShadow: $boxShadow');
+    if (boxShadow != null) {
+      for (BoxShadow shadow in boxShadow)
+        result.add('${prefix}boxShadow: $shadow');
+    }
     if (result.isEmpty)
       return '${prefix}<no decorations specified>';
     return result.join('\n');
