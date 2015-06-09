@@ -7,7 +7,7 @@ import 'package:sky/framework/components2/ink_well.dart';
 import 'package:sky/framework/fn2.dart';
 import 'package:sky/framework/rendering/box.dart';
 import 'package:sky/framework/theme/typography.dart' as typography;
-// import 'stock_arrow.dart';
+import 'stock_arrow.dart';
 import 'stock_data.dart';
 
 class StockRow extends Component {
@@ -27,9 +27,9 @@ class StockRow extends Component {
       changeInPrice = "+" + changeInPrice;
 
     List<UINode> children = [
-      // new StockArrow(
-      //   percentChange: stock.percentChange
-      // ),
+      new StockArrow(
+        percentChange: stock.percentChange
+      ),
       new FlexExpandingChild(new Text(stock.symbol)),
       new Container(
         width: 75.0,
