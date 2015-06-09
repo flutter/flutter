@@ -7,41 +7,32 @@
 #define SKY_ENGINE_CORE_LOADER_CANVASIMAGELOADER_H_
 
 #include "mojo/common/data_pipe_drainer.h"
-#include "sky/engine/core/loader/ImageLoaderCallback.h"
+#include "sky/engine/core/loader/ImageDecoderCallback.h"
 #include "sky/engine/platform/SharedBuffer.h"
-#include "sky/engine/platform/fetcher/MojoFetcher.h"
 #include "sky/engine/tonic/dart_wrappable.h"
 #include "sky/engine/wtf/OwnPtr.h"
 #include "sky/engine/wtf/text/AtomicString.h"
 
 namespace blink {
 
-class CanvasImageLoader : public MojoFetcher::Client,
-                          public mojo::common::DataPipeDrainer::Client,
-                          public RefCounted<CanvasImageLoader>,
-                          public DartWrappable {
+class CanvasImageDecoder : public mojo::common::DataPipeDrainer::Client,
+                           public RefCounted<CanvasImageDecoder>,
+                           public DartWrappable {
   DEFINE_WRAPPERTYPEINFO();
  public:
-  static PassRefPtr<CanvasImageLoader> create(const String& src, PassOwnPtr<ImageLoaderCallback> callback)
-  {
-    return adoptRef(new CanvasImageLoader(src, callback));
-  }
-  virtual ~CanvasImageLoader();
-
-  // MojoFetcher::Client
-  void OnReceivedResponse(mojo::URLResponsePtr) override;
+  static PassRefPtr<CanvasImageDecoder> create(mojo::ScopedDataPipeConsumerHandle handle, PassOwnPtr<ImageDecoderCallback> callback);
+  virtual ~CanvasImageDecoder();
 
   // mojo::common::DataPipeDrainer::Client
   void OnDataAvailable(const void*, size_t) override;
   void OnDataComplete() override;
 
  private:
-  explicit CanvasImageLoader(const String& src, PassOwnPtr<ImageLoaderCallback> callback);
+  CanvasImageDecoder(mojo::ScopedDataPipeConsumerHandle handle, PassOwnPtr<ImageDecoderCallback> callback);
 
-  OwnPtr<MojoFetcher> fetcher_;
   OwnPtr<mojo::common::DataPipeDrainer> drainer_;
   RefPtr<SharedBuffer> buffer_;
-  OwnPtr<ImageLoaderCallback> callback_;
+  OwnPtr<ImageDecoderCallback> callback_;
 };
 
 }  // namespace blink

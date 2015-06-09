@@ -109,7 +109,7 @@ ergonomic interface:
 import 'package:sky/framework/net/fetch.dart';
 
 main() async {
-  Response response = await fetch('example.txt');
+  Response response = await fetchBody('example.txt');
   print(response.bodyAsString());
 }
 ```

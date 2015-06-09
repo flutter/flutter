@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 [
-  Constructor(DOMString src, ImageLoaderCallback callback),
-  ImplementedAs=CanvasImageLoader,
-] interface ImageLoader {
+  Constructor(MojoDataPipeConsumer consumer, ImageDecoderCallback callback),
+  ImplementedAs=CanvasImageDecoder,
+] interface ImageDecoder {
 };

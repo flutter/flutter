@@ -25,6 +25,20 @@ struct DartConverter<mojo::ScopedHandleBase<HandleType>> {
   static Dart_Handle ToDart(mojo::ScopedHandleBase<HandleType> mojo_handle) {
     return Dart_NewInteger(static_cast<int64_t>(mojo_handle.release().value()));
   }
+
+  static mojo::ScopedHandleBase<HandleType> FromArgumentsWithNullCheck(
+      Dart_NativeArguments args,
+      int index,
+      Dart_Handle& exception,
+      bool auto_scope = true) {
+    int64_t mojo_handle64 = 0;
+    Dart_Handle result = Dart_GetNativeIntegerArgument(args, index, &mojo_handle64);
+    if (Dart_IsError(result) || !mojo_handle64)
+      return mojo::ScopedHandleBase<HandleType>();
+
+    HandleType mojo_handle(static_cast<MojoHandle>(mojo_handle64));
+    return mojo::MakeScopedHandle(mojo_handle);
+  }
 };
 
 }  // namespace blink

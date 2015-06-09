@@ -116,9 +116,13 @@ CPP_SPECIAL_CONVERSION_RULES = {
     'unrestricted float': 'float',
     # Pass these by value, not pointer.
     'Color': 'SkColor',
+    # These direct conversions appear to be working around
+    # dart_value_to_cpp_value using CPP_SPECIAL_CONVERSION_RULES directly
+    # instead of calling cpp_type.
     'Float32List': 'Float32List',
     'Point': 'Point',
     'Rect': 'Rect',
+    'MojoDataPipeConsumer': 'mojo::ScopedDataPipeConsumerHandle',
     'TransferMode': 'SkXfermode::Mode',
     'PaintingStyle': 'SkPaint::Style',
 }
@@ -256,6 +260,7 @@ INCLUDES_FOR_TYPE = {
     'NodeList': set(['sky/engine/core/dom/NodeList.h',
                      'sky/engine/core/dom/StaticNodeList.h']),
     'DartValue': set(['sky/engine/tonic/dart_value.h']),
+    'MojoDataPipeConsumer': set(['sky/engine/tonic/mojo_converter.h']),
 }
 
 
@@ -370,6 +375,7 @@ DART_TO_CPP_VALUE = {
     'Rect': pass_by_value_format('Rect'),
     'TransferMode': pass_by_value_format('TransferMode'),
     'PaintingStyle': pass_by_value_format('PaintingStyle'),
+    'MojoDataPipeConsumer': pass_by_value_format('mojo::ScopedDataPipeConsumerHandle'),
 }
 
 def dart_value_to_cpp_value(idl_type, extended_attributes, variable_name,
@@ -512,6 +518,7 @@ IDL_TO_DART_TYPE = {
     'boolean': 'bool',
     'void': 'void',
     'unsigned long': 'int',
+    'MojoDataPipeConsumer': 'int',
 }
 
 def idl_type_to_dart_type(idl_type):

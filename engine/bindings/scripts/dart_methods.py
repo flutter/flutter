@@ -154,6 +154,10 @@ def cpp_value(interface, method, number_of_arguments):
         if idl_type.is_typed_array_type:
             return '%s.get()' % argument_name
 
+        # TODO(eseidel): This should check cpp_type.endswith('Handle')
+        if idl_type.name == 'MojoDataPipeConsumer':
+            return '%s.Pass()' % argument_name
+
         if idl_type.name == 'EventListener':
             if (interface.name == 'EventTarget' and
                 method.name == 'removeEventListener'):
@@ -161,9 +165,7 @@ def cpp_value(interface, method, number_of_arguments):
                 # EventTarget::removeEventListener
                 return '%s.get()' % argument_name
             return argument.name
-        if (idl_type.is_callback_interface or
-            idl_type.name in ['NodeFilter', 'XPathNSResolver']):
-            # FIXME: remove this special case
+        if idl_type.is_callback_interface:
             return '%s.release()' % argument_name
         return argument_name
 

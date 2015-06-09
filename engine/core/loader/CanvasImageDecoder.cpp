@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 #include "sky/engine/config.h"
-#include "sky/engine/core/loader/CanvasImageLoader.h"
+#include "sky/engine/core/loader/CanvasImageDecoder.h"
 #include "sky/engine/core/painting/CanvasImage.h"
 #include "sky/engine/core/script/dom_dart_state.h"
 #include "sky/engine/platform/SharedBuffer.h"
@@ -11,30 +11,27 @@
 
 namespace blink {
 
-CanvasImageLoader::CanvasImageLoader(const String& src, PassOwnPtr<ImageLoaderCallback> callback)
+PassRefPtr<CanvasImageDecoder> CanvasImageDecoder::create(
+  mojo::ScopedDataPipeConsumerHandle handle,
+  PassOwnPtr<ImageDecoderCallback> callback)
+{
+  return adoptRef(new CanvasImageDecoder(handle.Pass(), callback));
+}
+
+CanvasImageDecoder::CanvasImageDecoder(mojo::ScopedDataPipeConsumerHandle handle, PassOwnPtr<ImageDecoderCallback> callback)
   : callback_(callback) {
-  KURL url = KURL(DOMDartState::Current()->url(), src);
-  fetcher_ = adoptPtr(new MojoFetcher(this, url));
-}
-
-CanvasImageLoader::~CanvasImageLoader() {
-}
-
-void CanvasImageLoader::OnReceivedResponse(mojo::URLResponsePtr response) {
-  if (response->status_code != 200) {
-    callback_->handleEvent(nullptr);
-    return;
-  }
   buffer_ = SharedBuffer::create();
-  drainer_ =
-      adoptPtr(new mojo::common::DataPipeDrainer(this, response->body.Pass()));
+  drainer_ = adoptPtr(new mojo::common::DataPipeDrainer(this, handle.Pass()));
 }
 
-void CanvasImageLoader::OnDataAvailable(const void* data, size_t num_bytes) {
+CanvasImageDecoder::~CanvasImageDecoder() {
+}
+
+void CanvasImageDecoder::OnDataAvailable(const void* data, size_t num_bytes) {
   buffer_->append(static_cast<const char*>(data), num_bytes);
 }
 
-void CanvasImageLoader::OnDataComplete() {
+void CanvasImageDecoder::OnDataComplete() {
   OwnPtr<ImageDecoder> decoder =
       ImageDecoder::create(*buffer_.get(), ImageSource::AlphaPremultiplied,
                            ImageSource::GammaAndColorProfileIgnored);

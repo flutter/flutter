@@ -2,17 +2,19 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:sky' as sky;
+import 'dart:sky';
 import 'dart:collection';
+import 'fetch.dart';
+import 'package:mojom/mojo/url_response.mojom.dart';
 
-final HashMap<String, List<sky.ImageLoaderCallback>> _pendingRequests =
-  new HashMap<String, List<sky.ImageLoaderCallback>>();
+final HashMap<String, List<ImageDecoderCallback>> _pendingRequests =
+  new HashMap<String, List<ImageDecoderCallback>>();
 
-final HashMap<String, sky.Image> _completedRequests =
-  new HashMap<String, sky.Image>();
+final HashMap<String, Image> _completedRequests =
+  new HashMap<String, Image>();
 
-void load(String url, sky.ImageLoaderCallback callback) {
-  sky.Image result = _completedRequests[url];
+void load(String url, ImageDecoderCallback callback) {
+  Image result = _completedRequests[url];
   if (result != null) {
     callback(_completedRequests[url]);
     return;
@@ -21,13 +23,15 @@ void load(String url, sky.ImageLoaderCallback callback) {
   bool newRequest = false;
   _pendingRequests.putIfAbsent(url, () {
     newRequest = true;
-    return new List<sky.ImageLoaderCallback>();
+    return new List<ImageDecoderCallback>();
   }).add(callback);
   if (newRequest) {
-    new sky.ImageLoader(url, (image) {
-      _completedRequests[url] = image;
-      _pendingRequests[url].forEach((c) => c(image));
-      _pendingRequests.remove(url);
+    fetchUrl(url).then((UrlResponse response) {
+      new ImageDecoder(response.body.handle.h, (image) {
+        _completedRequests[url] = image;
+        _pendingRequests[url].forEach((c) => c(image));
+        _pendingRequests.remove(url);
+      });
     });
   }
 }

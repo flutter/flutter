@@ -9,9 +9,9 @@
 
 namespace blink {
 
-class ImageLoaderCallback {
+class ImageDecoderCallback {
 public:
-    virtual ~ImageLoaderCallback() {}
+    virtual ~ImageDecoderCallback() {}
     virtual void handleEvent(CanvasImage* result) = 0;
 };
 
