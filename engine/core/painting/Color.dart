@@ -5,15 +5,15 @@
 part of dart.sky;
 
 class Color {
-  final int _value;
-  int get value => _value;
-
   const Color(this._value);
   const Color.fromARGB(int a, int r, int g, int b) :
     _value = (((a & 0xff) << 24) |
               ((r & 0xff) << 16) |
               ((g & 0xff) << 8) |
               ((b & 0xff) << 0));
+
+  final int _value;
+  int get value => _value;
 
   int get alpha => (0xff000000 & _value) >> 24;
   int get red => (0x00ff0000 & _value) >> 16;

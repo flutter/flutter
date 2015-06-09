@@ -7,13 +7,12 @@ part of dart.sky;
 /// Holds a 2D floating-point size.
 /// Think of this as a vector from Point(0,0) to Point(size.width, size.height)
 class Size {
-  final double width;
-  final double height;
-
   const Size(this.width, this.height);
-
   const Size.fromWidth(this.width) : height = double.INFINITY;
   const Size.fromHeight(this.height) : width = double.INFINITY;
+
+  final double width;
+  final double height;
 
   static const Size zero = const Size(0.0, 0.0);
   static const Size infinite = const Size(double.INFINITY, double.INFINITY);

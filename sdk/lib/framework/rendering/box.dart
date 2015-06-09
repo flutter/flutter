@@ -133,12 +133,19 @@ class BoxConstraints {
   final double minHeight;
   final double maxHeight;
 
+  static double _clamp({double min: 0.0, double value: 0.0, double max: double.INFINITY}) {
+    assert(min != null);
+    assert(value != null);
+    assert(max != null);
+    return math.max(min, math.min(max, value));
+  }
+
   double constrainWidth(double width) {
-    return clamp(min: minWidth, max: maxWidth, value: width);
+    return _clamp(min: minWidth, max: maxWidth, value: width);
   }
 
   double constrainHeight(double height) {
-    return clamp(min: minHeight, max: maxHeight, value: height);
+    return _clamp(min: minHeight, max: maxHeight, value: height);
   }
 
   Size constrain(Size size) {
@@ -620,11 +627,13 @@ class Border {
     this.bottom: BorderSide.none,
     this.left: BorderSide.none
   });
+
   const Border.all(BorderSide side) :
     top = side,
     right = side,
     bottom = side,
     left = side;
+
   final BorderSide top;
   final BorderSide right;
   final BorderSide bottom;

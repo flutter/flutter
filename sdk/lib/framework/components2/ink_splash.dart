@@ -20,6 +20,36 @@ double _getSplashTargetSize(Rect rect, double x, double y) {
 }
 
 class SplashController {
+
+  SplashController(Rect rect, double x, double y,
+                   { this.pointer, Function onDone })
+      : _offsetX = x - rect.x,
+        _offsetY = y - rect.y,
+        _targetSize = _getSplashTargetSize(rect, x, y) {
+
+    _styleStream = _size.onValueChanged.map((p) {
+      if (p == _targetSize) {
+        onDone();
+      }
+      double size;
+      if (_growing) {
+        size = p;
+        _lastSize = p;
+      } else {
+        size = _lastSize;
+      }
+      return '''
+        top: ${_offsetY - size/2}px;
+        left: ${_offsetX - size/2}px;
+        width: ${size}px;
+        height: ${size}px;
+        border-radius: ${size}px;
+        opacity: ${1.0 - (p / _targetSize)};''';
+    });
+
+    start();
+  }
+
   final int pointer;
   Stream<String> get onStyleChanged => _styleStream;
 
@@ -55,37 +85,14 @@ class SplashController {
     _size.stop();
   }
 
-  SplashController(Rect rect, double x, double y,
-                   { this.pointer, Function onDone })
-      : _offsetX = x - rect.x,
-        _offsetY = y - rect.y,
-        _targetSize = _getSplashTargetSize(rect, x, y) {
-
-    _styleStream = _size.onValueChanged.map((p) {
-      if (p == _targetSize) {
-        onDone();
-      }
-      double size;
-      if (_growing) {
-        size = p;
-        _lastSize = p;
-      } else {
-        size = _lastSize;
-      }
-      return '''
-        top: ${_offsetY - size/2}px;
-        left: ${_offsetX - size/2}px;
-        width: ${size}px;
-        height: ${size}px;
-        border-radius: ${size}px;
-        opacity: ${1.0 - (p / _targetSize)};''';
-    });
-
-    start();
-  }
 }
 
 class InkSplash extends Component {
+
+  InkSplash(Stream<String> onStyleChanged)
+    : onStyleChanged = onStyleChanged,
+      super(stateful: true, key: onStyleChanged.hashCode);
+
   static final Style _clipperStyle = new Style('''
     position: absolute;
     pointer-events: none;
@@ -104,10 +111,6 @@ class InkSplash extends Component {
   double _offsetX;
   double _offsetY;
   String _inlineStyle;
-
-  InkSplash(Stream<String> onStyleChanged)
-    : onStyleChanged = onStyleChanged,
-      super(stateful: true, key: onStyleChanged.hashCode);
 
   bool _listening = false;
 
@@ -137,4 +140,5 @@ class InkSplash extends Component {
       ]
     );
   }
+
 }

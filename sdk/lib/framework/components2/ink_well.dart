@@ -10,6 +10,9 @@ import 'dart:sky' as sky;
 import 'scrollable.dart';
 
 class InkWell extends Component implements ScrollClient {
+
+  InkWell({ Object key, this.children }) : super(key: key);
+
   // static final Style _containmentStyleHack = new Style('''
   //   align-items: center;
   //   transform: translateX(0);''');
@@ -24,8 +27,6 @@ class InkWell extends Component implements ScrollClient {
   //     _cancelSplashes(null);
   //   });
   // }
-
-  InkWell({ Object key, this.children }) : super(key: key);
 
   UINode build() {
     return new FlexContainer(
@@ -121,4 +122,5 @@ class InkWell extends Component implements ScrollClient {
   //       _splashes = null;
   //   });
   // }
+
 }

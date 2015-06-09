@@ -6,13 +6,15 @@ part of dart.sky;
 
 /// Holds 4 floating-point coordinates for a rectangle.
 class Rect {
-  final Float32List _value = new Float32List(4);
-  double get left => _value[0];
-  double get top => _value[1];
-  double get right => _value[2];
-  double get bottom => _value[3];
-
   Rect();
+
+  Rect.fromLTRB(double left, double top, double right, double bottom) {
+    _value
+      ..[0] = left
+      ..[1] = top
+      ..[2] = right
+      ..[3] = bottom;
+  }
 
   Rect.fromPointAndSize(Point point, Size size) {
     _value
@@ -28,13 +30,11 @@ class Rect {
       ..[3] = size.height;
   }
 
-  Rect.fromLTRB(double left, double top, double right, double bottom) {
-    _value
-      ..[0] = left
-      ..[1] = top
-      ..[2] = right
-      ..[3] = bottom;
-  }
+  final Float32List _value = new Float32List(4);
+  double get left => _value[0];
+  double get top => _value[1];
+  double get right => _value[2];
+  double get bottom => _value[3];
 
   Point get upperLeft => new Point(left, top);
   Point get lowerRight => new Point(right, bottom);
@@ -58,8 +58,6 @@ class Rect {
     return true;
   }
 
-  int get hashCode {
-    return _value.fold(373, (value, item) => (37 * value + item.hashCode));
-  }
+  int get hashCode =>_value.fold(373, (value, item) => (37 * value + item.hashCode));
   String toString() => "Rect.fromLTRB($left, $top, $right, $bottom)";
 }

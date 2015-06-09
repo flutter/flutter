@@ -6,6 +6,9 @@ import '../fn2.dart';
 import '../theme/shadows.dart';
 
 class Material extends Component {
+
+  Material({ Object key, this.content, this.level: 0 }) : super(key: key);
+
   // static final List<Style> _shadowStyle = [
   //   null,
   //   new Style('box-shadow: ${Shadow[1]}'),
@@ -18,11 +21,10 @@ class Material extends Component {
   UINode content;
   int level;
 
-  Material({ Object key, this.content, this.level: 0 }) : super(key: key);
-
   UINode build() {
     // TODO(eseidel): Add a shadow.
     // return new StyleNode(content, _shadowStyle[level]);
     return content;
   }
+
 }

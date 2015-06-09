@@ -157,9 +157,10 @@ abstract class UINode {
 // Component nodes with annotations, such as event listeners,
 // stylistic information, etc.
 abstract class TagNode extends UINode {
-  UINode content;
 
   TagNode(UINode content, { Object key }) : this.content = content, super(key: key);
+
+  UINode content;
 
   void _sync(UINode old, dynamic slot) {
     UINode oldContent = old == null ? null : (old as TagNode).content;
@@ -173,12 +174,12 @@ abstract class TagNode extends UINode {
       removeChild(content);
     super.remove();
   }
+
 }
 
 class ParentDataNode extends TagNode {
-  final ParentData parentData;
-
   ParentDataNode(UINode content, this.parentData, { Object key }): super(content, key: key);
+  final ParentData parentData;
 }
 
 typedef void GestureEventListener(sky.GestureEvent e);
@@ -186,6 +187,36 @@ typedef void PointerEventListener(sky.PointerEvent e);
 typedef void EventListener(sky.Event e);
 
 class EventListenerNode extends TagNode  {
+
+  EventListenerNode(UINode content, {
+    EventListener onWheel,
+    GestureEventListener onGestureFlingCancel,
+    GestureEventListener onGestureFlingStart,
+    GestureEventListener onGestureScrollStart,
+    GestureEventListener onGestureScrollUpdate,
+    GestureEventListener onGestureTap,
+    GestureEventListener onGestureTapDown,
+    PointerEventListener onPointerCancel,
+    PointerEventListener onPointerDown,
+    PointerEventListener onPointerMove,
+    PointerEventListener onPointerUp,
+    Map<String, sky.EventListener> custom
+  }) : listeners = _createListeners(
+         onWheel: onWheel,
+         onGestureFlingCancel: onGestureFlingCancel,
+         onGestureFlingStart: onGestureFlingStart,
+         onGestureScrollUpdate: onGestureScrollUpdate,
+         onGestureScrollStart: onGestureScrollStart,
+         onGestureTap: onGestureTap,
+         onGestureTapDown: onGestureTapDown,
+         onPointerCancel: onPointerCancel,
+         onPointerDown: onPointerDown,
+         onPointerMove: onPointerMove,
+         onPointerUp: onPointerUp,
+         custom: custom
+       ),
+       super(content);
+
   final Map<String, sky.EventListener> listeners;
 
   static Map<String, sky.EventListener> _createListeners({
@@ -232,41 +263,13 @@ class EventListenerNode extends TagNode  {
     return listeners;
   }
 
-  EventListenerNode(UINode content, {
-    EventListener onWheel,
-    GestureEventListener onGestureFlingCancel,
-    GestureEventListener onGestureFlingStart,
-    GestureEventListener onGestureScrollStart,
-    GestureEventListener onGestureScrollUpdate,
-    GestureEventListener onGestureTap,
-    GestureEventListener onGestureTapDown,
-    PointerEventListener onPointerCancel,
-    PointerEventListener onPointerDown,
-    PointerEventListener onPointerMove,
-    PointerEventListener onPointerUp,
-    Map<String, sky.EventListener> custom
-  }) : listeners = _createListeners(
-         onWheel: onWheel,
-         onGestureFlingCancel: onGestureFlingCancel,
-         onGestureFlingStart: onGestureFlingStart,
-         onGestureScrollUpdate: onGestureScrollUpdate,
-         onGestureScrollStart: onGestureScrollStart,
-         onGestureTap: onGestureTap,
-         onGestureTapDown: onGestureTapDown,
-         onPointerCancel: onPointerCancel,
-         onPointerDown: onPointerDown,
-         onPointerMove: onPointerMove,
-         onPointerUp: onPointerUp,
-         custom: custom
-       ),
-       super(content);
-
   void _handleEvent(sky.Event e) {
     sky.EventListener listener = listeners[e.type];
     if (listener != null) {
       listener(e);
     }
   }
+
 }
 
 /*
@@ -278,11 +281,6 @@ class EventListenerNode extends TagNode  {
  */
 abstract class RenderObjectWrapper extends UINode {
 
-  static final Map<RenderObject, RenderObjectWrapper> _nodeMap =
-      new HashMap<RenderObject, RenderObjectWrapper>();
-
-  static RenderObjectWrapper _getMounted(RenderObject node) => _nodeMap[node];
-
   RenderObjectWrapper({
     Object key
   }) : super(key: key);
@@ -290,6 +288,11 @@ abstract class RenderObjectWrapper extends UINode {
   RenderObject createNode();
 
   void insert(RenderObjectWrapper child, dynamic slot);
+
+  static final Map<RenderObject, RenderObjectWrapper> _nodeMap =
+      new HashMap<RenderObject, RenderObjectWrapper>();
+
+  static RenderObjectWrapper _getMounted(RenderObject node) => _nodeMap[node];
 
   void _sync(UINode old, dynamic slot) {
     assert(parent != null);
@@ -336,10 +339,11 @@ abstract class RenderObjectWrapper extends UINode {
 }
 
 abstract class OneChildRenderObjectWrapper extends RenderObjectWrapper {
-  UINode _child;
-  UINode get child => _child;
 
   OneChildRenderObjectWrapper({ UINode child, Object key }) : _child = child, super(key: key);
+
+  UINode _child;
+  UINode get child => _child;
 
   void syncRenderObject(RenderObjectWrapper old) {
     super.syncRenderObject(old);
@@ -368,23 +372,26 @@ abstract class OneChildRenderObjectWrapper extends RenderObjectWrapper {
       removeChild(child);
     super.remove();
   }
+
 }
 
 class Clip extends OneChildRenderObjectWrapper {
-  RenderClip root;
 
   Clip({ UINode child, Object key })
     : super(child: child, key: key);
 
+  RenderClip root;
   RenderClip createNode() => new RenderClip();
+
 }
 
 class Padding extends OneChildRenderObjectWrapper {
-  RenderPadding root;
-  final EdgeDims padding;
 
   Padding({ this.padding, UINode child, Object key })
     : super(child: child, key: key);
+
+  RenderPadding root;
+  final EdgeDims padding;
 
   RenderPadding createNode() => new RenderPadding(padding: padding);
 
@@ -392,14 +399,16 @@ class Padding extends OneChildRenderObjectWrapper {
     super.syncRenderObject(old);
     root.padding = padding;
   }
+
 }
 
 class DecoratedBox extends OneChildRenderObjectWrapper {
-  RenderDecoratedBox root;
-  final BoxDecoration decoration;
 
   DecoratedBox({ this.decoration, UINode child, Object key })
     : super(child: child, key: key);
+
+  RenderDecoratedBox root;
+  final BoxDecoration decoration;
 
   RenderDecoratedBox createNode() => new RenderDecoratedBox(decoration: decoration);
 
@@ -407,11 +416,10 @@ class DecoratedBox extends OneChildRenderObjectWrapper {
     super.syncRenderObject(old);
     root.decoration = decoration;
   }
+
 }
 
 class SizedBox extends OneChildRenderObjectWrapper {
-  RenderSizedBox root;
-  final Size desiredSize;
 
   SizedBox({
     double width: double.INFINITY,
@@ -420,20 +428,25 @@ class SizedBox extends OneChildRenderObjectWrapper {
     Object key
   }) : desiredSize = new Size(width, height), super(child: child, key: key);
 
+  RenderSizedBox root;
+  final Size desiredSize;
+
   RenderSizedBox createNode() => new RenderSizedBox(desiredSize: desiredSize);
 
   void syncRenderObject(SizedBox old) {
     super.syncRenderObject(old);
     root.desiredSize = desiredSize;
   }
+
 }
 
 class ConstrainedBox extends OneChildRenderObjectWrapper {
-  RenderConstrainedBox root;
-  final BoxConstraints constraints;
 
   ConstrainedBox({ this.constraints, UINode child, Object key })
     : super(child: child, key: key);
+
+  RenderConstrainedBox root;
+  final BoxConstraints constraints;
 
   RenderConstrainedBox createNode() => new RenderConstrainedBox(additionalConstraints: constraints);
 
@@ -441,22 +454,26 @@ class ConstrainedBox extends OneChildRenderObjectWrapper {
     super.syncRenderObject(old);
     root.additionalConstraints = constraints;
   }
+
 }
 
 class ShrinkWrapWidth extends OneChildRenderObjectWrapper {
-  RenderShrinkWrapWidth root;
 
   ShrinkWrapWidth({ UINode child, Object key }) : super(child: child, key: key);
 
+  RenderShrinkWrapWidth root;
+
   RenderShrinkWrapWidth createNode() => new RenderShrinkWrapWidth();
+
 }
 
 class Transform extends OneChildRenderObjectWrapper {
-  RenderTransform root;
-  final Matrix4 transform;
 
   Transform({ this.transform, UINode child, Object key })
     : super(child: child, key: key);
+
+  RenderTransform root;
+  final Matrix4 transform;
 
   RenderTransform createNode() => new RenderTransform(transform: transform);
 
@@ -464,14 +481,16 @@ class Transform extends OneChildRenderObjectWrapper {
     super.syncRenderObject(old);
     root.transform = transform;
   }
+
 }
 
 class SizeObserver extends OneChildRenderObjectWrapper {
-  RenderSizeObserver root;
-  final SizeChangedCallback callback;
 
   SizeObserver({ this.callback, UINode child, Object key })
     : super(child: child, key: key);
+
+  RenderSizeObserver root;
+  final SizeChangedCallback callback;
 
   RenderSizeObserver createNode() => new RenderSizeObserver(callback: callback);
 
@@ -484,15 +503,17 @@ class SizeObserver extends OneChildRenderObjectWrapper {
     root.callback = null;
     super.remove();
   }
+
 }
 
 // TODO(jackson) need a mechanism for marking the RenderCustomPaint as needing paint
 class CustomPaint extends OneChildRenderObjectWrapper {
-  RenderCustomPaint root;
-  final CustomPaintCallback callback;
 
   CustomPaint({ this.callback, UINode child, Object key })
     : super(child: child, key: key);
+
+  RenderCustomPaint root;
+  final CustomPaintCallback callback;
 
   RenderCustomPaint createNode() => new RenderCustomPaint(callback: callback);
 
@@ -505,6 +526,7 @@ class CustomPaint extends OneChildRenderObjectWrapper {
     root.callback = null;
     super.remove();
   }
+
 }
 
 final List<UINode> _emptyList = new List<UINode>();
@@ -513,8 +535,6 @@ abstract class MultiChildRenderObjectWrapper extends RenderObjectWrapper {
 
   // In MultiChildRenderObjectWrapper subclasses, slots are RenderObject nodes
   // to use as the "insert before" sibling in ContainerRenderObjectMixin.add() calls
-
-  final List<UINode> children;
 
   MultiChildRenderObjectWrapper({
     Object key,
@@ -525,6 +545,8 @@ abstract class MultiChildRenderObjectWrapper extends RenderObjectWrapper {
   ) {
     assert(!_debugHasDuplicateIds());
   }
+
+  final List<UINode> children;
 
   void insert(RenderObjectWrapper child, dynamic slot) {
     final root = this.root; // TODO(ianh): Remove this once the analyzer is cleverer
@@ -693,22 +715,27 @@ abstract class MultiChildRenderObjectWrapper extends RenderObjectWrapper {
 
     assert(root == this.root); // TODO(ianh): Remove this once the analyzer is cleverer
   }
+
 }
 
 class BlockContainer extends MultiChildRenderObjectWrapper {
-  RenderBlock root;
-  RenderBlock createNode() => new RenderBlock();
 
   BlockContainer({ Object key, List<UINode> children })
     : super(key: key, children: children);
+
+  RenderBlock root;
+  RenderBlock createNode() => new RenderBlock();
+
 }
 
 class StackContainer extends MultiChildRenderObjectWrapper {
-  RenderStack root;
-  RenderStack createNode() => new RenderStack();
 
   StackContainer({ Object key, List<UINode> children })
     : super(key: key, children: children);
+
+  RenderStack root;
+  RenderStack createNode() => new RenderStack();
+
 }
 
 class StackPositionedChild extends ParentDataNode {
@@ -721,12 +748,13 @@ class StackPositionedChild extends ParentDataNode {
 }
 
 class Paragraph extends RenderObjectWrapper {
+
+  Paragraph({ Object key, this.text }) : super(key: key);
+
   RenderParagraph root;
   RenderParagraph createNode() => new RenderParagraph(text: text);
 
   final String text;
-
-  Paragraph({ Object key, this.text }) : super(key: key);
 
   void syncRenderObject(UINode old) {
     super.syncRenderObject(old);
@@ -737,14 +765,10 @@ class Paragraph extends RenderObjectWrapper {
     assert(false);
     // Paragraph does not support having children currently
   }
+
 }
 
 class FlexContainer extends MultiChildRenderObjectWrapper {
-  RenderFlex root;
-  RenderFlex createNode() => new RenderFlex(direction: this.direction);
-
-  final FlexDirection direction;
-  final FlexJustifyContent justifyContent;
 
   FlexContainer({
     Object key,
@@ -753,11 +777,18 @@ class FlexContainer extends MultiChildRenderObjectWrapper {
     this.justifyContent: FlexJustifyContent.flexStart
   }) : super(key: key, children: children);
 
+  RenderFlex root;
+  RenderFlex createNode() => new RenderFlex(direction: this.direction);
+
+  final FlexDirection direction;
+  final FlexJustifyContent justifyContent;
+
   void syncRenderObject(UINode old) {
     super.syncRenderObject(old);
     root.direction = direction;
     root.justifyContent = justifyContent;
   }
+
 }
 
 class FlexExpandingChild extends ParentDataNode {
@@ -766,17 +797,18 @@ class FlexExpandingChild extends ParentDataNode {
 }
 
 class Image extends RenderObjectWrapper {
-  RenderImage root;
-  RenderImage createNode() => new RenderImage(this.src, this.size);
-
-  final String src;
-  final Size size;
 
   Image({
     Object key,
     this.src,
     this.size
   }) : super(key: key);
+
+  RenderImage root;
+  RenderImage createNode() => new RenderImage(this.src, this.size);
+
+  final String src;
+  final Size size;
 
   void syncRenderObject(UINode old) {
     super.syncRenderObject(old);
@@ -788,6 +820,7 @@ class Image extends RenderObjectWrapper {
     assert(false);
     // Image does not support having children currently
   }
+
 }
 
 Set<Component> _dirtyComponents = new Set<Component>();
@@ -837,19 +870,24 @@ void _scheduleComponentForRender(Component c) {
 }
 
 abstract class Component extends UINode {
-  bool get _isBuilding => _currentlyBuilding == this;
-  bool _dirty = true;
 
+  Component({ Object key, bool stateful })
+      : _stateful = stateful != null ? stateful : false,
+        _order = _currentOrder + 1,
+        super(key: key);
+
+  Component.fromArgs(Object key, bool stateful)
+      : this(key: key, stateful: stateful);
+
+  static Component _currentlyBuilding;
+  bool get _isBuilding => _currentlyBuilding == this;
+
+  bool _stateful;
+  bool _dirty = true;
   bool _disqualifiedFromEverAppearingAgain = false;
 
-  UINode _built;
-  final int _order;
-  static int _currentOrder = 0;
-  bool _stateful;
-  static Component _currentlyBuilding;
   List<Function> _mountCallbacks;
   List<Function> _unmountCallbacks;
-  dynamic _slot; // cached slot from the last time we were synced
 
   void onDidMount(Function fn) {
     if (_mountCallbacks == null)
@@ -864,14 +902,6 @@ abstract class Component extends UINode {
 
     _unmountCallbacks.add(fn);
   }
-
-  Component({ Object key, bool stateful })
-      : _stateful = stateful != null ? stateful : false,
-        _order = _currentOrder + 1,
-        super(key: key);
-
-  Component.fromArgs(Object key, bool stateful)
-      : this(key: key, stateful: stateful);
 
   void _didMount() {
     assert(!_disqualifiedFromEverAppearingAgain);
@@ -915,6 +945,9 @@ abstract class Component extends UINode {
     oldComponent._dirty = true;
     return true;
   }
+
+  final int _order;
+  static int _currentOrder = 0;
 
   /* There are three cases here:
    * 1) Building for the first time:
@@ -980,17 +1013,10 @@ abstract class Component extends UINode {
   }
 
   UINode build();
+
 }
 
 class Container extends Component {
-  final UINode child;
-  final BoxConstraints constraints;
-  final BoxDecoration decoration;
-  final EdgeDims margin;
-  final EdgeDims padding;
-  final Matrix4 transform;
-  final double width;
-  final double height;
 
   Container({
     Object key,
@@ -1003,6 +1029,15 @@ class Container extends Component {
     this.padding,
     this.transform
   }) : super(key: key);
+
+  final UINode child;
+  final BoxConstraints constraints;
+  final BoxDecoration decoration;
+  final EdgeDims margin;
+  final EdgeDims padding;
+  final Matrix4 transform;
+  final double width;
+  final double height;
 
   UINode build() {
     UINode current = child;
@@ -1034,6 +1069,7 @@ class Container extends Component {
 
     return current;
   }
+
 }
 
 class _AppView extends AppView {
@@ -1072,6 +1108,7 @@ abstract class App extends Component {
       _appView.root = root;
     assert(root.parent is RenderView);
   }
+
 }
 
 class Text extends Component {

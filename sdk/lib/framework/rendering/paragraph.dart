@@ -7,9 +7,8 @@ import 'box.dart';
 import 'object.dart';
 
 class RenderInline extends RenderObject {
-  String data;
-
   RenderInline(this.data);
+  String data;
 }
 
 // Unfortunately, using full precision floating point here causes bad layouts

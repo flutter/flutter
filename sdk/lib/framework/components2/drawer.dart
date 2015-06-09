@@ -89,14 +89,10 @@ class DrawerController {
     if (distance > 0)
       position.animateTo(targetPosition, duration, curve: linear);
   }
+
 }
 
 class Drawer extends AnimatedComponent {
-  List<UINode> children;
-  int level;
-  DrawerController controller;
-
-  double _position;
 
   Drawer({
     Object key,
@@ -108,6 +104,12 @@ class Drawer extends AnimatedComponent {
       _position = value;
     });
   }
+
+  List<UINode> children;
+  int level;
+  DrawerController controller;
+
+  double _position;
 
   UINode build() {
     Matrix4 transform = new Matrix4.identity();
@@ -141,4 +143,5 @@ class Drawer extends AnimatedComponent {
       onPointerCancel: controller.handlePointerCancel
     );
   }
+
 }

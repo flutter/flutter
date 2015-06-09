@@ -9,6 +9,8 @@ import 'ink_well.dart';
 
 class MenuItem extends ButtonBase {
 
+  MenuItem({ Object key, this.icon, this.children, this.onGestureTap }) : super(key: key);
+
   static const BoxDecoration highlightDecoration = const BoxDecoration(
     backgroundColor: const Color.fromARGB(102, 153, 153, 153)
   );
@@ -16,8 +18,6 @@ class MenuItem extends ButtonBase {
   List<UINode> children;
   String icon;
   GestureEventListener onGestureTap;
-
-  MenuItem({ Object key, this.icon, this.children, this.onGestureTap }) : super(key: key);
 
   UINode buildContent() {
     return new EventListenerNode(
@@ -46,4 +46,5 @@ class MenuItem extends ButtonBase {
       onGestureTap: onGestureTap
     );
   }
+
 }

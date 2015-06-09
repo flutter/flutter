@@ -7,11 +7,12 @@ import '../rendering/box.dart';
 import 'icon.dart';
 
 class IconButton extends Component {
-  String icon;
-  GestureEventListener onGestureTap;
 
   IconButton({ String icon: '', this.onGestureTap })
     : super(key: icon), icon = icon;
+
+  String icon;
+  GestureEventListener onGestureTap;
 
   UINode build() {
     return new EventListenerNode(
@@ -20,4 +21,5 @@ class IconButton extends Component {
         padding: const EdgeDims.all(8.0)),
       onGestureTap: onGestureTap);
   }
+
 }

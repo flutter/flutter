@@ -6,10 +6,10 @@ import '../fn2.dart';
 import 'ink_well.dart';
 
 class PopupMenuItem extends Component {
+  PopupMenuItem({ Object key, this.children, this.opacity}) : super(key: key);
+
   List<UINode> children;
   double opacity;
-
-  PopupMenuItem({ Object key, this.children, this.opacity}) : super(key: key);
 
   UINode build() {
     return new Container(

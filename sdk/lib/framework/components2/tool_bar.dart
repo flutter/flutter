@@ -7,10 +7,6 @@ import '../theme/view_configuration.dart';
 import '../theme2/shadows.dart';
 
 class ToolBar extends Component {
-  UINode left;
-  UINode center;
-  List<UINode> right;
-  Color backgroundColor;
 
   ToolBar({
     String key,
@@ -19,6 +15,11 @@ class ToolBar extends Component {
     this.right,
     this.backgroundColor
   }) : super(key: key);
+
+  UINode left;
+  UINode center;
+  List<UINode> right;
+  Color backgroundColor;
 
   UINode build() {
     List<UINode> children = [
@@ -46,4 +47,5 @@ class ToolBar extends Component {
       )
     );
   }
+
 }

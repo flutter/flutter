@@ -23,6 +23,10 @@ abstract class ScrollClient {
 
 abstract class Scrollable extends Component {
 
+  Scrollable({Object key}) : super(key: key) {
+    onDidUnmount(_stopSimulation);
+  }
+
   double _scrollOffset = 0.0;
   double get scrollOffset => _scrollOffset;
 
@@ -35,10 +39,6 @@ abstract class Scrollable extends Component {
   }
 
   Simulation _simulation;
-
-  Scrollable({Object key}) : super(key: key) {
-    onDidUnmount(_stopSimulation);
-  }
 
   UINode buildContent();
 
@@ -143,4 +143,5 @@ abstract class Scrollable extends Component {
   void _handleWheel(sky.WheelEvent event) {
     scrollBy(-event.offsetY);
   }
+
 }

@@ -13,9 +13,6 @@ import 'dart:sky' as sky;
 typedef void ValueChanged(value);
 
 class Radio extends ButtonBase {
-  Object value;
-  Object groupValue;
-  ValueChanged onChanged;
 
   Radio({
     Object key,
@@ -23,6 +20,10 @@ class Radio extends ButtonBase {
     this.value,
     this.groupValue
   }) : super(key: key);
+
+  Object value;
+  Object groupValue;
+  ValueChanged onChanged;
 
   UINode buildContent() {
     // TODO(jackson): This should change colors with the theme
@@ -60,4 +61,5 @@ class Radio extends ButtonBase {
   void _handleClick(_) {
     onChanged(value);
   }
+
 }

@@ -8,9 +8,9 @@ import '../theme2/view_configuration.dart';
 
 class DrawerHeader extends Component {
 
-  List<UINode> children;
-
   DrawerHeader({ Object key, this.children }) : super(key: key);
+
+  List<UINode> children;
 
   UINode build() {
     return new Container(
@@ -44,4 +44,5 @@ class DrawerHeader extends Component {
       )
     );
   }
+
 }

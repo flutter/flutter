@@ -23,13 +23,6 @@ class ParentData {
 
 const kLayoutDirections = 4;
 
-double clamp({double min: 0.0, double value: 0.0, double max: double.INFINITY}) {
-  assert(min != null);
-  assert(value != null);
-  assert(max != null);
-  return math.max(min, math.min(max, value));
-}
-
 class RenderObjectDisplayList extends sky.PictureRecorder {
   RenderObjectDisplayList(double width, double height) : super(width, height);
   void paintChild(RenderObject child, Point position) {

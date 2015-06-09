@@ -14,10 +14,10 @@ typedef void ValueChanged(value);
 
 class Checkbox extends ButtonBase {
 
+  Checkbox({ Object key, this.onChanged, this.checked }) : super(key: key);
+
   bool checked;
   ValueChanged onChanged;
-
-  Checkbox({ Object key, this.onChanged, this.checked }) : super(key: key);
 
   void _handleClick(sky.Event e) {
     onChanged(!checked);
@@ -63,4 +63,5 @@ class Checkbox extends ButtonBase {
       onGestureTap: _handleClick
     );
   }
+
 }

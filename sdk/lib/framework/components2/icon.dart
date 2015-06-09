@@ -8,14 +8,15 @@ import '../fn2.dart';
 const String kAssetBase = '/packages/sky/assets/material-design-icons';
 
 class Icon extends Component {
-  int size;
-  String type;
 
   Icon({
     String key,
     this.size,
     this.type: ''
   }) : super(key: key);
+
+  int size;
+  String type;
 
   UINode build() {
     String category = '';
@@ -30,4 +31,5 @@ class Icon extends Component {
       src: '${kAssetBase}/${category}/2x_web/ic_${subtype}_${size}dp.png'
     );
   }
+
 }

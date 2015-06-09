@@ -51,13 +51,6 @@ class PopupMenuController {
 }
 
 class PopupMenu extends AnimatedComponent {
-  List<List<UINode>> items;
-  int level;
-  PopupMenuController controller;
-
-  double _position;
-  // int _width;
-  // int _height;
 
   PopupMenu({ Object key, this.controller, this.items, this.level })
       : super(key: key) {
@@ -66,6 +59,14 @@ class PopupMenu extends AnimatedComponent {
     });
     // onDidMount(_measureSize);
   }
+
+  List<List<UINode>> items;
+  int level;
+  PopupMenuController controller;
+
+  double _position;
+  // int _width;
+  // int _height;
 
   double _opacityFor(int i) {
     if (_position == null || _position == 1.0)
@@ -113,4 +114,5 @@ class PopupMenu extends AnimatedComponent {
       )
     );
   }
+
 }

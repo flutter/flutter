@@ -13,11 +13,12 @@ import 'material.dart';
 const double _kSize = 56.0;
 
 class FloatingActionButton extends Component {
-  UINode content;
-  int level;
 
   FloatingActionButton({ Object key, this.content, this.level: 0 })
       : super(key: key);
+
+  UINode content;
+  int level;
 
   UINode build() {
     List<UINode> children = [];
@@ -43,4 +44,5 @@ class FloatingActionButton extends Component {
           child: new InkWell(children: children))),
       level: level);
   }
+
 }

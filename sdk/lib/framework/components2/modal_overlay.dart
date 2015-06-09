@@ -5,6 +5,9 @@
 import '../fn2.dart';
 
 class ModalOverlay extends Component {
+
+  ModalOverlay({ Object key, this.children, this.onDismiss }) : super(key: key);
+
   // static final Style _style = new Style('''
   //   position: absolute;
   //   top: 0;
@@ -15,11 +18,10 @@ class ModalOverlay extends Component {
   List<UINode> children;
   GestureEventListener onDismiss;
 
-  ModalOverlay({ Object key, this.children, this.onDismiss }) : super(key: key);
-
   UINode build() {
     return new EventListenerNode(
       new StackContainer(children: children),
       onGestureTap: onDismiss);
   }
+
 }

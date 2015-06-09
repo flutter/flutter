@@ -5,7 +5,6 @@
 import '../fn2.dart';
 
 abstract class ButtonBase extends Component {
-  bool highlight = false;
 
   ButtonBase({ Object key }) : super(key: key);
 
@@ -19,6 +18,8 @@ abstract class ButtonBase extends Component {
       onPointerCancel: _handlePointerCancel
     );
   }
+
+  bool highlight = false;
 
   void _handlePointerDown(_) {
     setState(() {
