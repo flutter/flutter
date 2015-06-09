@@ -9,7 +9,7 @@ Building
 Running applications
 --------------------
 
-* ``./sky/tools/mojodb start out/Debug [url]``
+* ``./mojo/tools/mojodb start out/Debug [url]``
 
     `mojodb` has numerous commands, visible via `mojodb help`.  Common ones include:
     * `mojodb start` BUILD_DIR [url]
