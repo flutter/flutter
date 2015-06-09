@@ -956,8 +956,6 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     markNeedsLayout();
   }
 
-  ViewConstraints get constraints => super.constraints as ViewConstraints;
-
   void performLayout() {
     if (_rootConstraints.orientation != _orientation) {
       if (_orientation != null && child != null)

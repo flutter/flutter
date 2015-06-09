@@ -25,7 +25,7 @@ class AppView {
     _renderView = new RenderView(child: root);
     _renderView.attach();
     _renderView.rootConstraints = _viewConstraints;
-    _renderView.layout(_renderView.rootConstraints);
+    _renderView.scheduleInitialLayout();
   }
 
   RenderView _renderView;

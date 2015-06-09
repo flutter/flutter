@@ -119,6 +119,14 @@ abstract class RenderObject extends AbstractNode {
       scheduler.ensureVisualUpdate();
     }
   }
+  void scheduleInitialLayout() {
+    assert(attached);
+    assert(parent == null);
+    assert(_relayoutSubtreeRoot == null);
+    _relayoutSubtreeRoot = this;
+    _nodesNeedingLayout.add(this);
+    scheduler.ensureVisualUpdate();
+  }
   static void flushLayout() {
     _debugDoingLayout = true;
     List<RenderObject> dirtyNodes = _nodesNeedingLayout;

@@ -125,7 +125,9 @@ class TestApp {
   TestApp(RenderBox root) {
     _renderView = new TestView(child: root);
     _renderView.attach();
-    _renderView.layout(new ViewConstraints(width: sky.view.width, height: sky.view.height));
+    _renderView.rootConstraints = new ViewConstraints(width: sky.view.width, height: sky.view.height);
+    _renderView.scheduleInitialLayout();
+    RenderObject.flushLayout();
     _renderView.paintFrame();
     print(_renderView.lastPaint); // TODO(ianh): figure out how to make this fit the unit testing framework better
   }

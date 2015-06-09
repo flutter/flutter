@@ -7,6 +7,7 @@ import '../resources/unit.dart';
 import '../resources/display_list.dart';
 import 'dart:sky' as sky;
 import 'package:sky/framework/rendering/box.dart';
+import 'package:sky/framework/rendering/object.dart';
 
 void main() {
   initUnit();
@@ -18,7 +19,10 @@ void main() {
       )
     );
     TestView renderView = new TestView(child: root);
-    renderView.layout(new ViewConstraints(width: sky.view.width, height: sky.view.height));
+    renderView.attach();
+    renderView.rootConstraints = new ViewConstraints(width: sky.view.width, height: sky.view.height);
+    renderView.scheduleInitialLayout();
+    RenderObject.flushLayout();
     expect(root.size.width, equals(sky.view.width));
     expect(root.size.height, equals(sky.view.height));
     renderView.paintFrame();
