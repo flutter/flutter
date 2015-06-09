@@ -40,7 +40,7 @@ class DrawerController {
 
   bool get isClosed => position.value == -_kWidth;
   bool get _isMostlyClosed => position.value <= -_kWidth / 2;
-  void toggle(_) => _isMostlyClosed ? _open() : _close();
+  void toggle() => _isMostlyClosed ? _open() : _close();
 
   void handleMaskTap(_) => _close();
   void handlePointerDown(_) => position.stop();

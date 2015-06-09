@@ -116,6 +116,8 @@ abstract class UINode {
   // Returns the child which should be retained as the child of this node.
   UINode syncChild(UINode node, UINode oldNode, dynamic slot) {
 
+    assert(oldNode is! Component || !oldNode._disqualifiedFromEverAppearingAgain);
+
     if (node == oldNode) {
       assert(node == null || node.mounted);
       return node; // Nothing to do. Subtrees must be identical.
@@ -331,14 +333,15 @@ abstract class RenderObjectWrapper extends UINode {
 }
 
 abstract class OneChildRenderObjectWrapper extends RenderObjectWrapper {
-  final UINode child;
+  UINode _child;
+  UINode get child => _child;
 
-  OneChildRenderObjectWrapper({ this.child, Object key }) : super(key: key);
+  OneChildRenderObjectWrapper({ UINode child, Object key }) : _child = child, super(key: key);
 
   void syncRenderObject(RenderObjectWrapper old) {
     super.syncRenderObject(old);
     UINode oldChild = old == null ? null : (old as OneChildRenderObjectWrapper).child;
-    syncChild(child, oldChild, null);
+    _child = syncChild(child, oldChild, null);
   }
 
   void insert(RenderObjectWrapper child, dynamic slot) {
@@ -531,6 +534,7 @@ abstract class MultiChildRenderObjectWrapper extends RenderObjectWrapper {
   void removeChild(UINode node) {
     final root = this.root; // TODO(ianh): Remove this once the analyzer is cleverer
     assert(root is ContainerRenderObjectMixin);
+    assert(node.root.parent == root);
     root.remove(node.root);
     super.removeChild(node);
     assert(root == this.root); // TODO(ianh): Remove this once the analyzer is cleverer
@@ -783,7 +787,7 @@ class Image extends RenderObjectWrapper {
   }
 }
 
-List<Component> _dirtyComponents = new List<Component>();
+Set<Component> _dirtyComponents = new Set<Component>();
 bool _buildScheduled = false;
 bool _inRenderDirtyComponents = false;
 
@@ -797,8 +801,9 @@ void _buildDirtyComponents() {
   try {
     _inRenderDirtyComponents = true;
 
-    _dirtyComponents.sort((a, b) => a._order - b._order);
-    for (var comp in _dirtyComponents) {
+    List<Component> sortedDirtyComponents = _dirtyComponents.toList();
+    sortedDirtyComponents.sort((Component a, Component b) => a._order - b._order);
+    for (var comp in sortedDirtyComponents) {
       comp._buildIfDirty();
     }
 
@@ -832,6 +837,8 @@ abstract class Component extends UINode {
   bool get _isBuilding => _currentlyBuilding == this;
   bool _dirty = true;
 
+  bool _disqualifiedFromEverAppearingAgain = false;
+
   UINode _built;
   final int _order;
   static int _currentOrder = 0;
@@ -864,6 +871,7 @@ abstract class Component extends UINode {
       : this(key: key, stateful: stateful);
 
   void _didMount() {
+    assert(!_disqualifiedFromEverAppearingAgain);
     super._didMount();
     if (_mountCallbacks != null)
       for (Function fn in _mountCallbacks)
@@ -890,6 +898,8 @@ abstract class Component extends UINode {
   }
 
   bool _willSync(UINode old) {
+    assert(!_disqualifiedFromEverAppearingAgain);
+
     Component oldComponent = old as Component;
     if (oldComponent == null || !oldComponent._stateful)
       return false;
@@ -898,6 +908,7 @@ abstract class Component extends UINode {
     _stateful = false;
     _built = oldComponent._built;
     assert(_built != null);
+    _disqualifiedFromEverAppearingAgain = true;
 
     // Make |oldComponent| the "new" component
     reflect.copyPublicFields(this, oldComponent);
@@ -916,6 +927,7 @@ abstract class Component extends UINode {
    */
   void _sync(UINode old, dynamic slot) {
     assert(_built == null || old == null);
+    assert(!_disqualifiedFromEverAppearingAgain);
 
     Component oldComponent = old as Component;
 
@@ -945,6 +957,7 @@ abstract class Component extends UINode {
   }
 
   void _buildIfDirty() {
+    assert(!_disqualifiedFromEverAppearingAgain);
     if (!_dirty || !_mounted)
       return;
 
@@ -957,6 +970,7 @@ abstract class Component extends UINode {
   }
 
   void setState(Function fn()) {
+    assert(!_disqualifiedFromEverAppearingAgain);
     _stateful = true;
     fn();
     if (_isBuilding || _dirty || !_mounted)

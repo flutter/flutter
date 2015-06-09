@@ -158,20 +158,23 @@ class Scaffold extends RenderObjectWrapper {
 
   Scaffold({
     Object key,
-    this.toolbar,
-    this.body,
-    this.statusbar,
-    this.drawer,
-    this.floatingActionButton
-  }) : super(
-    key: key
-  );
+    UINode toolbar,
+    UINode body,
+    UINode statusbar,
+    UINode drawer,
+    UINode floatingActionButton
+  }) : _toolbar = toolbar,
+       _body = body,
+       _statusbar = statusbar,
+       _drawer = drawer,
+       _floatingActionButton = floatingActionButton,
+       super(key: key);
 
-  final UINode toolbar;
-  final UINode body;
-  final UINode statusbar;
-  final UINode drawer;
-  final UINode floatingActionButton;
+  UINode _toolbar;
+  UINode _body;
+  UINode _statusbar;
+  UINode _drawer;
+  UINode _floatingActionButton;
 
   RenderScaffold root;
   RenderScaffold createNode() => new RenderScaffold();
@@ -187,26 +190,26 @@ class Scaffold extends RenderObjectWrapper {
   }
 
   void remove() {
-    if (toolbar != null)
-      removeChild(toolbar);
-    if (body != null)
-      removeChild(body);
-    if (statusbar != null)
-      removeChild(statusbar);
-    if (drawer != null)
-      removeChild(drawer);
-    if (floatingActionButton != null)
-      removeChild(floatingActionButton);
+    if (_toolbar != null)
+      removeChild(_toolbar);
+    if (_body != null)
+      removeChild(_body);
+    if (_statusbar != null)
+      removeChild(_statusbar);
+    if (_drawer != null)
+      removeChild(_drawer);
+    if (_floatingActionButton != null)
+      removeChild(_floatingActionButton);
     super.remove();
   }
 
   void syncRenderObject(UINode old) {
     super.syncRenderObject(old);
-    syncChild(toolbar, old is Scaffold ? old.toolbar : null, ScaffoldSlots.toolbar);
-    syncChild(body, old is Scaffold ? old.body : null, ScaffoldSlots.body);
-    syncChild(statusbar, old is Scaffold ? old.statusbar : null, ScaffoldSlots.statusBar);
-    syncChild(drawer, old is Scaffold ? old.drawer : null, ScaffoldSlots.drawer);
-    syncChild(floatingActionButton, old is Scaffold ? old.floatingActionButton : null, ScaffoldSlots.floatingActionButton);
+    _toolbar = syncChild(_toolbar, old is Scaffold ? old._toolbar : null, ScaffoldSlots.toolbar);
+    _body = syncChild(_body, old is Scaffold ? old._body : null, ScaffoldSlots.body);
+    _statusbar = syncChild(_statusbar, old is Scaffold ? old._statusbar : null, ScaffoldSlots.statusBar);
+    _drawer = syncChild(_drawer, old is Scaffold ? old._drawer : null, ScaffoldSlots.drawer);
+    _floatingActionButton = syncChild(_floatingActionButton, old is Scaffold ? old._floatingActionButton : null, ScaffoldSlots.floatingActionButton);
   }
 
 }
