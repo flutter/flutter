@@ -21,11 +21,13 @@ class CanvasGradient : public Shader {
 
   void initLinear(const Vector<Point>& end_points,
                   const Vector<SkColor>& colors,
-                  const Vector<float>& color_stops);
+                  const Vector<float>& color_stops,
+                  unsigned tile_mode);
   void initRadial(const Point& center,
                   double radius,
                   const Vector<SkColor>& colors,
-                  const Vector<float>& color_stops);
+                  const Vector<float>& color_stops,
+                  unsigned tile_mode);
 
  private:
   CanvasGradient();

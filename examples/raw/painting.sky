@@ -68,9 +68,9 @@ void main() {
               ..setPaintBits(-1),
             (Paint layerPaint) {
           Gradient redYellow = new Gradient.Radial(
-              new Point(0.0, 0.0), radius,
+              new Point(0.0, 0.0), radius/3.0,
               [const Color(0xFFFFFF00), const Color(0xFFFF0000)],
-              null);
+              null, TileMode.mirror);
           layerPaint.setShader(redYellow);
         })
         ..addLayerOnTop(

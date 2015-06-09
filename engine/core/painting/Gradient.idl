@@ -7,7 +7,8 @@
     PrivateDart,
     Constructor()
 ] interface Gradient : Shader {
-  void initLinear(Point[] endPoints, Color[] colors, float[] colorStops);
+  void initLinear(Point[] endPoints, Color[] colors, float[] colorStops,
+                  /*TileMode*/unsigned long tileMode);
   void initRadial(Point center, double radius, Color[] colors,
-                  float[] colorStops);
+                  float[] colorStops, /*TileMode*/unsigned long tileMode);
 };

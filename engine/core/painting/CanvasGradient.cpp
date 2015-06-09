@@ -13,9 +13,11 @@ PassRefPtr<CanvasGradient> CanvasGradient::create() {
 
 void CanvasGradient::initLinear(const Vector<Point>& end_points,
                                 const Vector<SkColor>& colors,
-                                const Vector<float>& color_stops) {
+                                const Vector<float>& color_stops,
+                                unsigned tile_mode) {
   ASSERT(end_points.size() == 2);
   ASSERT(colors.size() == color_stops.size() || color_stops.data() == nullptr);
+  ASSERT(tile_mode < SkShader::kTileModeCount);
   SkPoint sk_end_points[2];
   for (int i = 0; i < 2; ++i)
     sk_end_points[i] = end_points[i].sk_point;
@@ -23,19 +25,21 @@ void CanvasGradient::initLinear(const Vector<Point>& end_points,
   // TODO(mpcomplete): allow setting the TileMode.
   SkShader* shader = SkGradientShader::CreateLinear(
       sk_end_points, colors.data(), color_stops.data(), colors.size(),
-      SkShader::kClamp_TileMode);
+      static_cast<SkShader::TileMode>(tile_mode));
   set_shader(adoptRef(shader));
 }
 
 void CanvasGradient::initRadial(const Point& center,
                                 double radius,
                                 const Vector<SkColor>& colors,
-                                const Vector<float>& color_stops) {
+                                const Vector<float>& color_stops,
+                                unsigned tile_mode) {
   ASSERT(colors.size() == color_stops.size() || color_stops.data() == nullptr);
+  ASSERT(tile_mode < SkShader::kTileModeCount);
 
   SkShader* shader = SkGradientShader::CreateRadial(
       center.sk_point, radius, colors.data(), color_stops.data(), colors.size(),
-      SkShader::kClamp_TileMode);
+      static_cast<SkShader::TileMode>(tile_mode));
   set_shader(adoptRef(shader));
 }
 
