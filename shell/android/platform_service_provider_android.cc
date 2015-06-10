@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "sky/shell/android/platform_service_provider.h"
+#include "sky/shell/android/platform_service_provider_android.h"
 
 #include "base/android/jni_android.h"
 #include "base/bind.h"
@@ -23,16 +23,16 @@ void CreatePlatformServiceProvider(
       request.PassMessagePipe().release().value());
 }
 
-} // namespace
+}  // namespace
 
 bool RegisterPlatformServiceProvider(JNIEnv* env) {
   return RegisterNativesImpl(env);
 }
 
 mojo::ServiceProviderPtr CreateServiceProvider(
-        ServiceProviderContext* context) {
+    ServiceProviderContext* context) {
   mojo::MessagePipe pipe;
-  context->java_task_runner->PostTask(
+  context->platform_task_runner->PostTask(
       FROM_HERE,
       base::Bind(CreatePlatformServiceProvider,
                  base::Passed(mojo::MakeRequest<mojo::ServiceProvider>(

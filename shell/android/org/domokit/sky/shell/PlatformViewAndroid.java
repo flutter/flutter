@@ -29,16 +29,16 @@ import org.chromium.mojom.sky.ViewportObserver;
  * A view containing Sky
  */
 @JNINamespace("sky::shell")
-public class PlatformView extends SurfaceView
+public class PlatformViewAndroid extends SurfaceView
         implements GestureProvider.OnGestureListener {
-    private static final String TAG = "PlatformView";
+    private static final String TAG = "PlatformViewAndroid";
 
     private long mNativePlatformView;
     private ViewportObserver.Proxy mViewportObserver;
     private final SurfaceHolder.Callback mSurfaceCallback;
     private GestureProvider mGestureProvider;
 
-    public PlatformView(Context context) {
+    public PlatformViewAndroid(Context context) {
         super(context);
 
         setFocusable(true);
@@ -102,20 +102,26 @@ public class PlatformView extends SurfaceView
 
     private int getTypeForAction(int maskedAction) {
         // Primary pointer:
-        if (maskedAction == MotionEvent.ACTION_DOWN)
+        if (maskedAction == MotionEvent.ACTION_DOWN) {
             return EventType.POINTER_DOWN;
-        if (maskedAction == MotionEvent.ACTION_UP)
+        }
+        if (maskedAction == MotionEvent.ACTION_UP) {
             return EventType.POINTER_UP;
+        }
         // Secondary pointer:
-        if (maskedAction == MotionEvent.ACTION_POINTER_DOWN)
+        if (maskedAction == MotionEvent.ACTION_POINTER_DOWN) {
             return EventType.POINTER_DOWN;
-        if (maskedAction == MotionEvent.ACTION_POINTER_UP)
+        }
+        if (maskedAction == MotionEvent.ACTION_POINTER_UP) {
             return EventType.POINTER_UP;
+        }
         // All pointers:
-        if (maskedAction == MotionEvent.ACTION_MOVE)
+        if (maskedAction == MotionEvent.ACTION_MOVE) {
             return EventType.POINTER_MOVE;
-        if (maskedAction == MotionEvent.ACTION_CANCEL)
+        }
+        if (maskedAction == MotionEvent.ACTION_CANCEL) {
             return EventType.POINTER_CANCEL;
+        }
         return EventType.UNKNOWN;
     }
 
@@ -183,7 +189,8 @@ public class PlatformView extends SurfaceView
     }
 
     private static native long nativeAttach(int inputObserverHandle);
-    private static native void nativeDetach(long nativePlatformView);
-    private static native void nativeSurfaceCreated(long nativePlatformView, Surface surface);
-    private static native void nativeSurfaceDestroyed(long nativePlatformView);
+    private static native void nativeDetach(long nativePlatformViewAndroid);
+    private static native void nativeSurfaceCreated(long nativePlatformViewAndroid,
+                                                    Surface surface);
+    private static native void nativeSurfaceDestroyed(long nativePlatformViewAndroid);
 }

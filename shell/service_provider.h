@@ -18,13 +18,10 @@ namespace shell {
 
 class ServiceProviderContext {
  public:
-#if defined(OS_ANDROID)
-  ServiceProviderContext(
-      scoped_refptr<base::SingleThreadTaskRunner> runner)
-    : java_task_runner(runner.Pass()) {}
+  ServiceProviderContext(scoped_refptr<base::SingleThreadTaskRunner> runner)
+      : platform_task_runner(runner.Pass()) {}
 
-  scoped_refptr<base::SingleThreadTaskRunner> java_task_runner;
-#endif
+  scoped_refptr<base::SingleThreadTaskRunner> platform_task_runner;
 };
 
 // Implemented in platform_service_provider.cc for each platform.
