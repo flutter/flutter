@@ -118,11 +118,11 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
       switch(_direction) {
         case FlexDirection.horizontal:
           childConstraints = new BoxConstraints(maxWidth: constraints.maxWidth);
-          availableMainSpace = innerConstraints.maxWidth;
+          availableMainSpace = constraints.maxWidth;
           break;
         case FlexDirection.vertical:
           childConstraints = new BoxConstraints(maxHeight: constraints.maxHeight);
-          availableMainSpace = innerConstraints.maxHeight;
+          availableMainSpace = constraints.maxHeight;
           break;
       }
 
@@ -187,9 +187,9 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
       // Ensure that we don't violate the given constraints with our result
       switch(_direction) {
         case FlexDirection.horizontal:
-          return innerConstraints.constrainHeight(maxCrossSize);
+          return constraints.constrainHeight(maxCrossSize);
         case FlexDirection.vertical:
-          return innerConstraints.constrainWidth(maxCrossSize);
+          return constraints.constrainWidth(maxCrossSize);
       }
     }
   }
