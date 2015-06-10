@@ -40,10 +40,14 @@ class FloatingActionButton extends Component {
           paint.setDrawLooper(builder.build());
           canvas.drawCircle(radius, radius, radius, paint);
         },
-        child: new Container(
-          width: _kSize,
-          height: _kSize,
-          child: new InkWell(children: children))),
+        child: new ClipOval(
+          child: new Container(
+            width: _kSize,
+            height: _kSize,
+            child: new InkWell(children: children)
+          )
+        )
+      ),
       level: level);
   }
 

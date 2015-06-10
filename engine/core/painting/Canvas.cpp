@@ -117,6 +117,22 @@ void Canvas::clipRect(const Rect& rect)
     m_canvas->clipRect(rect.sk_rect);
 }
 
+void Canvas::clipRRect(const RRect* rrect)
+{
+    if (!m_canvas)
+        return;
+    ASSERT(m_displayList->isRecording());
+    m_canvas->clipRRect(rrect->rrect());
+}
+
+void Canvas::clipPath(const CanvasPath* path)
+{
+    if (!m_canvas)
+        return;
+    ASSERT(m_displayList->isRecording());
+    m_canvas->clipPath(path->path());
+}
+
 void Canvas::drawLine(float x0, float y0, float x1, float y1, const Paint* paint)
 {
     if (!m_canvas)

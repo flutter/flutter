@@ -439,13 +439,29 @@ class RenderShrinkWrapWidth extends RenderProxyBox {
   }
 }
 
-class RenderClip extends RenderProxyBox {
-  RenderClip({ RenderBox child }) : super(child);
+class RenderClipRect extends RenderProxyBox {
+  RenderClipRect({ RenderBox child }) : super(child);
 
   void paint(RenderObjectDisplayList canvas) {
     if (child != null) {
       canvas.save();
       canvas.clipRect(new Rect.fromSize(size));
+      child.paint(canvas);
+      canvas.restore();
+    }
+  }
+}
+
+class RenderClipOval extends RenderProxyBox {
+  RenderClipOval({ RenderBox child }) : super(child);
+
+  void paint(RenderObjectDisplayList canvas) {
+    if (child != null) {
+      Rect rect = new Rect.fromSize(size);
+      canvas.saveLayer(rect, new Paint());
+      Path path = new Path();
+      path.addOval(rect);
+      canvas.clipPath(path);
       child.paint(canvas);
       canvas.restore();
     }

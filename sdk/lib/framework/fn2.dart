@@ -378,14 +378,22 @@ abstract class OneChildRenderObjectWrapper extends RenderObjectWrapper {
 
 }
 
-class Clip extends OneChildRenderObjectWrapper {
+class ClipRect extends OneChildRenderObjectWrapper {
 
-  Clip({ UINode child, Object key })
+  ClipRect({ UINode child, Object key })
     : super(child: child, key: key);
 
-  RenderClip get root { RenderClip result = super.root; return result; }
-  RenderClip createNode() => new RenderClip();
+  RenderClipRect get root { RenderClipRect result = super.root; return result; }
+  RenderClipRect createNode() => new RenderClipRect();
+}
 
+class ClipOval extends OneChildRenderObjectWrapper {
+
+  ClipOval({ UINode child, Object key })
+    : super(child: child, key: key);
+
+  RenderClipOval get root { RenderClipOval result = super.root; return result; }
+  RenderClipOval createNode() => new RenderClipOval();
 }
 
 class Padding extends OneChildRenderObjectWrapper {

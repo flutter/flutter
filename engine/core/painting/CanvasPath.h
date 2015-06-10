@@ -43,6 +43,11 @@ public:
         m_path.arcTo(rect.sk_rect, startAngle*180.0/M_PI, sweepAngle*180.0/M_PI, forceMoveTo);
     }
 
+    void addOval(const Rect& oval)
+    {
+        m_path.addOval(oval.sk_rect);
+    }
+
     void close()
     {
         m_path.close();

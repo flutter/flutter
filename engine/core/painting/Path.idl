@@ -9,5 +9,6 @@
     void moveTo(float x, float y);
     void lineTo(float x, float y);
     void arcTo(Rect rect, float startAngle, float sweepAngle, boolean forceMoveTo); // angles in radians
+    void addOval(Rect oval);
     void close();
 };

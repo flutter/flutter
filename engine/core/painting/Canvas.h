@@ -32,7 +32,7 @@ public:
     float height() const { return m_size.height(); }
 
     void save();
-    void saveLayer(const Rect& bounds, const Paint* paint);
+    void saveLayer(const Rect& bounds, const Paint* paint = nullptr);
     void restore();
 
     void translate(float dx, float dy);
@@ -42,6 +42,8 @@ public:
     void concat(const Float32List& matrix4);
 
     void clipRect(const Rect& rect);
+    void clipRRect(const RRect* rrect);
+    void clipPath(const CanvasPath* path);
 
     void drawLine(float x0, float y0, float x1, float y1, const Paint* paint);
     void drawPicture(Picture* picture);
