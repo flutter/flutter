@@ -9,7 +9,7 @@ import 'dart:math' as math;
 import 'mechanics.dart';
 
 abstract class Generator {
-  Stream<double> get onTick;
+  Stream<double> get onTick; // TODO(ianh): rename this to tickStream once we've landed the fn2 fork
   void cancel();
 }
 
