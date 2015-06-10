@@ -14,6 +14,7 @@ namespace blink {
 
 Paint::Paint()
 {
+    setIsAntiAlias(true);
 }
 
 Paint::~Paint()
