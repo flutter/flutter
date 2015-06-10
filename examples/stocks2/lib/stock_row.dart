@@ -12,13 +12,12 @@ import 'stock_arrow.dart';
 import 'stock_data.dart';
 
 class StockRow extends Component {
+
+  StockRow({ Stock stock }) : this.stock = stock, super(key: stock.symbol);
+
+  final Stock stock;
+
   static const double kHeight = 70.0;
-
-  Stock stock;
-
-  StockRow({ Stock stock }) : super(key: stock.symbol) {
-    this.stock = stock;
-  }
 
   UINode build() {
     String lastSale = "\$${stock.lastSale.toStringAsFixed(2)}";

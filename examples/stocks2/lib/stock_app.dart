@@ -46,6 +46,8 @@ class StocksApp extends App {
     _drawerController = new DrawerController(_handleDrawerStatusChanged);
   }
 
+  void syncFields(StocksApp source) { }
+
   bool _isSearching = false;
   String _searchQuery;
 

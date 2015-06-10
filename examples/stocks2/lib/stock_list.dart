@@ -8,14 +8,21 @@ import 'stock_data.dart';
 import 'stock_row.dart';
 
 class Stocklist extends FixedHeightScrollable {
-  String query;
-  List<Stock> stocks;
 
   Stocklist({
     Object key,
     this.stocks,
     this.query
   }) : super(itemHeight: StockRow.kHeight, key: key);
+
+  String query;
+  List<Stock> stocks;
+
+  void syncFields(Stocklist source) {
+    query = source.query;
+    stocks = source.stocks;
+    super.syncFields(source);
+  }
 
   List<UINode> buildItems(int start, int count) {
     var filteredStocks = stocks.where((stock) {
