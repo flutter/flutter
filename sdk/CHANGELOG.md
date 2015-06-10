@@ -1,6 +1,10 @@
+## 0.0.8
+
+  - Fix 2 crashes in SkyDemo.apk, updated widgets.  0.0.7 was skipped.
+
 ## 0.0.6
 
-  - TODO
+  - First release after Dart summit.  Adds new main.dart based workflow.
 
 ## 0.0.5+dart-summit-7
 
