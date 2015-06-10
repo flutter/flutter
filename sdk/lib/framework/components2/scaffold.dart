@@ -178,7 +178,7 @@ class Scaffold extends RenderObjectWrapper {
   UINode _drawer;
   UINode _floatingActionButton;
 
-  RenderScaffold root;
+  RenderScaffold get root => super.root as RenderScaffold;
   RenderScaffold createNode() => new RenderScaffold();
 
   void insert(RenderObjectWrapper child, ScaffoldSlots slot) {

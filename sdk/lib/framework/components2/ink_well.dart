@@ -105,7 +105,7 @@ class InkWellWrapper extends OneChildRenderObjectWrapper {
   InkWellWrapper({ UINode child, Object key })
     : super(child: child, key: key);
 
-  RenderInkWell root;
+  RenderInkWell get root => super.root as RenderInkWell;
 
   RenderInkWell createNode() => new RenderInkWell();
 }

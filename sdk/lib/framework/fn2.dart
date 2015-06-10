@@ -84,7 +84,8 @@ abstract class UINode {
   void didMount() { }
   void didUnmount() { }
 
-  RenderObject root;
+  RenderObject _root;
+  RenderObject get root => _root;
 
   // Subclasses which implements Nodes that become stateful may return true
   // if the |old| node has become stateful and should be retained.
@@ -99,7 +100,7 @@ abstract class UINode {
   // where to put this descendant
 
   void remove() {
-    root = null;
+    _root = null;
     setParent(null);
   }
 
@@ -167,7 +168,8 @@ abstract class TagNode extends UINode {
     UINode oldContent = old == null ? null : (old as TagNode).content;
     content = syncChild(content, oldContent, slot);
     assert(content.root != null);
-    root = content.root;
+    _root = content.root;
+    assert(_root == root); // in case a subclass reintroduces it
   }
 
   void remove() {
@@ -298,16 +300,16 @@ abstract class RenderObjectWrapper extends UINode {
   void _sync(UINode old, dynamic slot) {
     assert(parent != null);
     if (old == null) {
-      root = createNode();
-      assert(root != null);
+      _root = createNode();
       var ancestor = findAncestor(RenderObjectWrapper);
       if (ancestor is RenderObjectWrapper)
         ancestor.insert(this, slot);
     } else {
-      root = old.root;
+      _root = old.root;
     }
-    assert(mounted);
+    assert(_root == root); // in case a subclass reintroduces it
     assert(root != null);
+    assert(mounted);
     _nodeMap[root] = this;
     syncRenderObject(old);
   }
@@ -381,7 +383,7 @@ class Clip extends OneChildRenderObjectWrapper {
   Clip({ UINode child, Object key })
     : super(child: child, key: key);
 
-  RenderClip root;
+  RenderClip get root => super.root as RenderClip;
   RenderClip createNode() => new RenderClip();
 
 }
@@ -391,7 +393,7 @@ class Padding extends OneChildRenderObjectWrapper {
   Padding({ this.padding, UINode child, Object key })
     : super(child: child, key: key);
 
-  RenderPadding root;
+  RenderPadding get root => super.root as RenderPadding;
   final EdgeDims padding;
 
   RenderPadding createNode() => new RenderPadding(padding: padding);
@@ -408,7 +410,7 @@ class DecoratedBox extends OneChildRenderObjectWrapper {
   DecoratedBox({ this.decoration, UINode child, Object key })
     : super(child: child, key: key);
 
-  RenderDecoratedBox root;
+  RenderDecoratedBox get root => super.root as RenderDecoratedBox;
   final BoxDecoration decoration;
 
   RenderDecoratedBox createNode() => new RenderDecoratedBox(decoration: decoration);
@@ -429,7 +431,7 @@ class SizedBox extends OneChildRenderObjectWrapper {
     Object key
   }) : desiredSize = new Size(width, height), super(child: child, key: key);
 
-  RenderSizedBox root;
+  RenderSizedBox get root => super.root as RenderSizedBox;
   final Size desiredSize;
 
   RenderSizedBox createNode() => new RenderSizedBox(desiredSize: desiredSize);
@@ -446,7 +448,7 @@ class ConstrainedBox extends OneChildRenderObjectWrapper {
   ConstrainedBox({ this.constraints, UINode child, Object key })
     : super(child: child, key: key);
 
-  RenderConstrainedBox root;
+  RenderConstrainedBox get root => super.root as RenderConstrainedBox;
   final BoxConstraints constraints;
 
   RenderConstrainedBox createNode() => new RenderConstrainedBox(additionalConstraints: constraints);
@@ -462,7 +464,7 @@ class ShrinkWrapWidth extends OneChildRenderObjectWrapper {
 
   ShrinkWrapWidth({ UINode child, Object key }) : super(child: child, key: key);
 
-  RenderShrinkWrapWidth root;
+  RenderShrinkWrapWidth get root => super.root as RenderShrinkWrapWidth;
 
   RenderShrinkWrapWidth createNode() => new RenderShrinkWrapWidth();
 
@@ -473,7 +475,7 @@ class Transform extends OneChildRenderObjectWrapper {
   Transform({ this.transform, UINode child, Object key })
     : super(child: child, key: key);
 
-  RenderTransform root;
+  RenderTransform get root => super.root as RenderTransform;
   final Matrix4 transform;
 
   RenderTransform createNode() => new RenderTransform(transform: transform);
@@ -490,7 +492,7 @@ class SizeObserver extends OneChildRenderObjectWrapper {
   SizeObserver({ this.callback, UINode child, Object key })
     : super(child: child, key: key);
 
-  RenderSizeObserver root;
+  RenderSizeObserver get root => super.root as RenderSizeObserver;
   final SizeChangedCallback callback;
 
   RenderSizeObserver createNode() => new RenderSizeObserver(callback: callback);
@@ -513,7 +515,7 @@ class CustomPaint extends OneChildRenderObjectWrapper {
   CustomPaint({ this.callback, UINode child, Object key })
     : super(child: child, key: key);
 
-  RenderCustomPaint root;
+  RenderCustomPaint get root => super.root as RenderCustomPaint;
   final CustomPaintCallback callback;
 
   RenderCustomPaint createNode() => new RenderCustomPaint(callback: callback);
@@ -720,7 +722,7 @@ class BlockContainer extends MultiChildRenderObjectWrapper {
   BlockContainer({ Object key, List<UINode> children })
     : super(key: key, children: children);
 
-  RenderBlock root;
+  RenderBlock get root => super.root as RenderBlock;
   RenderBlock createNode() => new RenderBlock();
 
 }
@@ -730,7 +732,7 @@ class StackContainer extends MultiChildRenderObjectWrapper {
   StackContainer({ Object key, List<UINode> children })
     : super(key: key, children: children);
 
-  RenderStack root;
+  RenderStack get root => super.root as RenderStack;
   RenderStack createNode() => new RenderStack();
 
 }
@@ -748,7 +750,7 @@ class Paragraph extends RenderObjectWrapper {
 
   Paragraph({ Object key, this.text }) : super(key: key);
 
-  RenderParagraph root;
+  RenderParagraph get root => super.root as RenderParagraph;
   RenderParagraph createNode() => new RenderParagraph(text: text);
 
   final String text;
@@ -774,7 +776,7 @@ class FlexContainer extends MultiChildRenderObjectWrapper {
     this.justifyContent: FlexJustifyContent.flexStart
   }) : super(key: key, children: children);
 
-  RenderFlex root;
+  RenderFlex get root => super.root as RenderFlex;
   RenderFlex createNode() => new RenderFlex(direction: this.direction);
 
   final FlexDirection direction;
@@ -801,7 +803,7 @@ class Image extends RenderObjectWrapper {
     this.size
   }) : super(key: key);
 
-  RenderImage root;
+  RenderImage get root => super.root as RenderImage;
   RenderImage createNode() => new RenderImage(this.src, this.size);
 
   final String src;
@@ -969,7 +971,8 @@ abstract class Component extends UINode {
     _built = syncChild(_built, oldBuilt, slot);
     assert(_built != null);
     _dirty = false;
-    root = _built.root;
+    _root = _built.root;
+    assert(_root == root); // in case a subclass reintroduces it
     assert(root != null);
   }
 
