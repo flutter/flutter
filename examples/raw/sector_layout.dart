@@ -90,7 +90,7 @@ abstract class RenderSector extends RenderObject {
         theta < parentData.theta || theta >= parentData.theta + deltaTheta)
       return false;
     hitTestChildren(result, radius: radius, theta: theta);
-    result.add(this);
+    result.add(new HitTestEntry(this));
     return true;
   }
   void hitTestChildren(HitTestResult result, { double radius, double theta }) { }
@@ -454,7 +454,7 @@ class RenderBoxToRenderSectorAdapter extends RenderBox {
     if (theta > child.deltaTheta)
       return false;
     child.hitTest(result, radius: radius, theta: theta);
-    result.add(this);
+    result.add(new BoxHitTestEntry(this, position));
     return true;
   }
   
@@ -480,7 +480,7 @@ class RenderSolidColor extends RenderDecoratedSector {
     deltaTheta = constraints.constrainDeltaTheta(desiredDeltaTheta);
   }
 
-  void handleEvent(sky.Event event) {
+  void handleEvent(sky.Event event, HitTestEntry entry) {
     if (event.type == 'pointerdown')
       decoration = new BoxDecoration(backgroundColor: const Color(0xFFFF0000));
     else if (event.type == 'pointerup')

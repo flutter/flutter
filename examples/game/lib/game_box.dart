@@ -14,7 +14,7 @@ class GameBox extends SpriteBox {
   int _secondPointer = -1;
   Vector2 _firstPointerDownPos;
 
-  void handleEvent(Event event) {
+  void handleEvent(Event event, BoxHitTestEntry entry) {
     if (event is PointerEvent) {
       Vector2 pointerPos = new Vector2(event.x, event.y);
       int pointer = event.pointer;
