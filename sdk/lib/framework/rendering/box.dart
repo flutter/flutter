@@ -556,13 +556,12 @@ class RenderImage extends RenderBox {
     markNeedsLayout();
   }
 
-  void performLayout() {
+  Size _sizeForConstraints(BoxConstraints innerConstraints) {
     // If there's no image, we can't size ourselves automatically
     if (_image == null) {
       double width = requestedSize.width == null ? 0.0 : requestedSize.width;
       double height = requestedSize.height == null ? 0.0 : requestedSize.height;
-      size = constraints.constrain(new Size(width, height));
-      return;
+      return constraints.constrain(new Size(width, height));
     }
 
     // If neither height nor width are specified, use inherent image dimensions
@@ -570,17 +569,41 @@ class RenderImage extends RenderBox {
     // maintain the aspect ratio
     if (requestedSize.width == null) {
       if (requestedSize.height == null) {
-        size = constraints.constrain(new Size(_image.width.toDouble(), _image.height.toDouble()));
+        return constraints.constrain(new Size(_image.width.toDouble(), _image.height.toDouble()));
       } else {
         double width = requestedSize.height * _image.width / _image.height;
-        size = constraints.constrain(new Size(width, requestedSize.height));
+        return constraints.constrain(new Size(width, requestedSize.height));
       }
     } else if (requestedSize.height == null) {
       double height = requestedSize.width * _image.height / _image.width;
-      size = constraints.constrain(new Size(requestedSize.width, height));
+      return constraints.constrain(new Size(requestedSize.width, height));
     } else {
-      size = constraints.constrain(requestedSize);
+      return constraints.constrain(requestedSize);
     }
+  }
+
+  double getMinIntrinsicWidth(BoxConstraints constraints) {
+    if (requestedSize.width == null && requestedSize.height == null)
+      return constraints.constrainWidth(0.0);
+    return _sizeForConstraints(constraints).width;
+  }
+
+  double getMaxIntrinsicWidth(BoxConstraints constraints) {
+    return _sizeForConstraints(constraints).width;
+  }
+
+  double getMinIntrinsicHeight(BoxConstraints constraints) {
+    if (requestedSize.width == null && requestedSize.height == null)
+      return constraints.constrainHeight(0.0);
+    return _sizeForConstraints(constraints).height;
+  }
+
+  double getMaxIntrinsicHeight(BoxConstraints constraints) {
+    return _sizeForConstraints(constraints).height;
+  }
+
+  void performLayout() {
+    size = _sizeForConstraints(constraints);
   }
 
   void paint(RenderObjectDisplayList canvas) {
@@ -797,7 +820,7 @@ class RenderDecoratedBox extends RenderProxyBox {
     assert(size.height != null);
 
     if (_decoration.backgroundColor != null || _decoration.boxShadow != null ||
-        _deocration.gradient != null) {
+        _decoration.gradient != null) {
       Rect rect = new Rect.fromLTRB(0.0, 0.0, size.width, size.height);
       if (_decoration.borderRadius == null)
         canvas.drawRect(rect, _backgroundPaint);
