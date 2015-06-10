@@ -121,7 +121,7 @@ class PopupMenu extends AnimatedComponent {
           backgroundColor: Grey[50],
           borderRadius: 2.0,
           boxShadow: Shadow[level]),
-        child: new BlockContainer(children: children)
+        child: new Block(children)
       )
     );
   }

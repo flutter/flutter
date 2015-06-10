@@ -75,8 +75,7 @@ abstract class FixedHeightScrollable extends Scrollable {
           ),
           child: new Transform(
             transform: transform,
-            child: new BlockContainer(
-              children: buildItems(itemShowIndex, itemShowCount))
+            child: new Block(buildItems(itemShowIndex, itemShowCount))
           )
         )
       )

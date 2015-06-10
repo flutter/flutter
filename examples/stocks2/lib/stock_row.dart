@@ -44,7 +44,7 @@ class StockRow extends Component {
         decoration: const BoxDecoration(
             border: const Border(
                 bottom: const BorderSide(color: const sky.Color(0xFFF4F4F4)))),
-        child: new FlexContainer(children: children)
+        child: new Flex(children)
       )
     ]);
   }

@@ -16,7 +16,7 @@ class PopupMenuItem extends Component {
       constraints: const BoxConstraints(minWidth: 112.0),
       padding: const EdgeDims.all(16.0),
       // TODO(abarth): opacity: opacity,
-      child: new FlexContainer(children: children)
+      child: new Flex(children)
     );
   }
 }

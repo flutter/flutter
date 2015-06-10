@@ -46,10 +46,7 @@ class MenuItem extends ButtonBase {
             ),
             new FlexExpandingChild(
               new Padding(
-                child: new FlexContainer(
-                  direction: FlexDirection.horizontal,
-                  children: children
-                ),
+                child: new Flex(children, direction: FlexDirection.horizontal),
                 padding: const EdgeDims.symmetric(horizontal: 16.0)
               ),
               flex: 1

@@ -20,23 +20,22 @@ class Rectangle extends RenderObjectWrapper {
 class ContainerApp extends App {
   UINode build() {
     return new EventListenerNode(
-      new BlockContainer(children: [
+      new Block([
         new Container(
           padding: new EdgeDims.all(10.0),
           margin: new EdgeDims.all(10.0),
           height: 100.0,
           decoration: new BoxDecoration(backgroundColor: const sky.Color(0xFF00FF00)),
-          child: new BlockContainer(
-              children: [
-                  new Container(
-                      decoration: new BoxDecoration(backgroundColor: const sky.Color(0xFFFFFF00)),
-                      height: 20.0,
-                  ),
-                  new Image(src: "https://www.dartlang.org/logos/dart-logo.png",
-                            size: new sky.Size(300.0, 300.0),
-                            key: 1
-                  ),
-              ])),
+          child: new Block([
+            new Container(
+              decoration: new BoxDecoration(backgroundColor: const sky.Color(0xFFFFFF00)),
+              height: 20.0,
+            ),
+            new Image(src: "https://www.dartlang.org/logos/dart-logo.png",
+              size: new sky.Size(300.0, 300.0),
+              key: 1
+            ),
+          ])),
       ]),
       onPointerDown: _handlePointerDown,
       onGestureTap: _handleGestureTap);

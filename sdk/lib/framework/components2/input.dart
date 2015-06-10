@@ -89,12 +89,9 @@ class Input extends Component {
     children.add(new EditableText(value: _editableValue, focused: focused));
 
     return new EventListenerNode(
-      new FlexContainer(
-        direction: FlexDirection.vertical,
-        // style: _style,
-        // inlineStyle: focused ? _focusedInlineStyle : null,
-        children: children
-      ),
+      // style: _style,
+      // inlineStyle: focused ? _focusedInlineStyle : null,
+      new Flex(children, direction: FlexDirection.vertical),
       onPointerDown: (sky.Event e) => keyboard.showByRequest()
     );
   }

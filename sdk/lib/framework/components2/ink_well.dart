@@ -116,10 +116,10 @@ class InkWell extends Component {
 
   UINode build() {
     return new InkWellWrapper(
-      child: new FlexContainer(
+      child: new Flex(
+        children,
         direction: FlexDirection.horizontal,
-        justifyContent: FlexJustifyContent.center,
-        children: children
+        justifyContent: FlexJustifyContent.center
       )
     );
   }

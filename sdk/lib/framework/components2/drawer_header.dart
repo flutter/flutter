@@ -14,7 +14,6 @@ class DrawerHeader extends Component {
 
   UINode build() {
     return new Container(
-      key: 'drawer-header-outside',
       height: kStatusBarHeight + kMaterialDrawerHeight,
       decoration: new BoxDecoration(
         backgroundColor: BlueGrey[50],
@@ -27,20 +26,14 @@ class DrawerHeader extends Component {
       ),
       padding: const EdgeDims.only(bottom: 7.0),
       margin: const EdgeDims.only(bottom: 8.0),
-      child: new FlexContainer(
-        key: 'drawer-header-inside',
-        direction: FlexDirection.vertical,
-        children: [
-          new FlexExpandingChild(new Container(key: 'drawer-header-spacer')),
-          new Container(
-            key: 'drawer-header-label',
-            padding: const EdgeDims.symmetric(horizontal: 16.0),
-            child: new FlexContainer(
-              direction: FlexDirection.horizontal,
-              children: children
-            )
-          )
-        ]
+      child: new Flex([
+        new FlexExpandingChild(new Container(key: 'drawer-header-spacer')),
+        new Container(
+          key: 'drawer-header-label',
+          padding: const EdgeDims.symmetric(horizontal: 16.0),
+          child: new Flex(children, direction: FlexDirection.horizontal)
+        )],
+        direction: FlexDirection.vertical
       )
     );
   }

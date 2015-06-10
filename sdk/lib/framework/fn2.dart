@@ -717,9 +717,9 @@ abstract class MultiChildRenderObjectWrapper extends RenderObjectWrapper {
 
 }
 
-class BlockContainer extends MultiChildRenderObjectWrapper {
+class Block extends MultiChildRenderObjectWrapper {
 
-  BlockContainer({ Object key, List<UINode> children })
+  Block(List<UINode> children, { Object key })
     : super(key: key, children: children);
 
   RenderBlock get root { RenderBlock result = super.root; return result; }
@@ -727,9 +727,9 @@ class BlockContainer extends MultiChildRenderObjectWrapper {
 
 }
 
-class StackContainer extends MultiChildRenderObjectWrapper {
+class Stack extends MultiChildRenderObjectWrapper {
 
-  StackContainer({ Object key, List<UINode> children })
+  Stack(List<UINode> children, { Object key })
     : super(key: key, children: children);
 
   RenderStack get root { RenderStack result = super.root; return result; }
@@ -767,11 +767,10 @@ class Paragraph extends RenderObjectWrapper {
 
 }
 
-class FlexContainer extends MultiChildRenderObjectWrapper {
+class Flex extends MultiChildRenderObjectWrapper {
 
-  FlexContainer({
+  Flex(List<UINode> children, {
     Object key,
-    List<UINode> children,
     this.direction: FlexDirection.horizontal,
     this.justifyContent: FlexJustifyContent.flexStart
   }) : super(key: key, children: children);

@@ -20,7 +20,7 @@ class ModalOverlay extends Component {
 
   UINode build() {
     return new EventListenerNode(
-      new StackContainer(children: children),
+      new Stack(children),
       onGestureTap: onDismiss);
   }
 

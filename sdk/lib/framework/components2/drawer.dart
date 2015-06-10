@@ -150,13 +150,11 @@ class Drawer extends AnimatedComponent {
         boxShadow: Shadow[level]),
       width: _kWidth,
       transform: transform,
-      child: new BlockContainer(children: children)
+      child: new Block(children)
     );
 
     return new EventListenerNode(
-      new StackContainer(
-        children: [ mask, content ]
-      ),
+      new Stack([ mask, content ]),
       onPointerDown: controller.handlePointerDown,
       onPointerMove: controller.handlePointerMove,
       onPointerUp: controller.handlePointerUp,
