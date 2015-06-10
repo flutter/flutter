@@ -17,5 +17,7 @@ void main() {
 
 void allLoaded(ImageMap loader) {
   // Create a new app with the sprite box that contains our game world
-  app = new AppView(new GameBox(new GameWorld(loader)));
+  //app = new AppView(new GameBox(new GameWorld(loader)));
+  //print("hello");
+  app = new AppView((new SpriteBox(new GameTests(loader), SpriteBoxTransformMode.letterbox)));
 }
