@@ -1060,20 +1060,24 @@ class Container extends Component {
 }
 
 class _AppView extends AppView {
+
   _AppView() : super(null);
 
   void dispatchEvent(sky.Event event, HitTestResult result) {
     super.dispatchEvent(event, result);
-
-    UINode target = RenderObjectWrapper._getMounted(result.path.first.target);
-
-    // TODO(rafaelw): StopPropagation?
-    while (target != null) {
-      if (target is EventListenerNode)
-        target._handleEvent(event);
-      target = target._parent;
+    for (HitTestEntry entry in result.path.reversed) {
+      UINode target = RenderObjectWrapper._getMounted(entry.target);
+      if (target == null)
+        continue;
+      RenderObject targetRoot = target.root;
+      while (target != null && target.root == targetRoot) {
+        if (target is EventListenerNode)
+          target._handleEvent(event);
+        target = target._parent;
+      }      
     }
   }
+
 }
 
 abstract class App extends Component {
