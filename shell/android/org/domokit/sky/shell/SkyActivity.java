@@ -39,13 +39,13 @@ public class SkyActivity extends Activity {
     }
 
     /**
-     * @see android.app.Activity#onStop()
+     * @see android.app.Activity#onDestroy()
      */
     @Override
-    protected void onStop() {
+    protected void onDestroy() {
         // Do we need to shut down Sky too?
         mTracingController.stop();
-        super.onStop();
+        super.onDestroy();
     }
 
     public void loadUrl(String url) {
