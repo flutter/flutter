@@ -28,26 +28,26 @@ namespace android {
 // These could be considered helper methods of layout, but need only be loosely coupled, so
 // are separate.
 
-float getRunAdvance(Layout& layout, const uint16_t* buf, size_t start, size_t count,
-        size_t offset) {
+static float getRunAdvance(Layout& layout, const uint16_t* buf, size_t layoutStart, size_t start,
+        size_t count, size_t offset) {
     float advance = 0.0f;
     size_t lastCluster = start;
     float clusterWidth = 0.0f;
     for (size_t i = start; i < offset; i++) {
-        float charAdvance = layout.getCharAdvance(i - start);
+        float charAdvance = layout.getCharAdvance(i - layoutStart);
         if (charAdvance != 0.0f) {
             advance += charAdvance;
             lastCluster = i;
             clusterWidth = charAdvance;
         }
     }
-    if (offset < start + count && layout.getCharAdvance(offset - start) == 0.0f) {
+    if (offset < start + count && layout.getCharAdvance(offset - layoutStart) == 0.0f) {
         // In the middle of a cluster, distribute width of cluster so that each grapheme cluster
         // gets an equal share.
         // TODO: get caret information out of font when that's available
         size_t nextCluster;
         for (nextCluster = offset + 1; nextCluster < start + count; nextCluster++) {
-            if (layout.getCharAdvance(nextCluster - start) != 0.0f) break;
+            if (layout.getCharAdvance(nextCluster - layoutStart) != 0.0f) break;
         }
         int numGraphemeClusters = 0;
         int numGraphemeClustersAfter = 0;
@@ -65,6 +65,11 @@ float getRunAdvance(Layout& layout, const uint16_t* buf, size_t start, size_t co
         }
     }
     return advance;
+}
+
+float getRunAdvance(Layout& layout, const uint16_t* buf, size_t start, size_t count,
+        size_t offset) {
+    return getRunAdvance(layout, buf, start, start, count, offset);
 }
 
 /**
@@ -98,9 +103,10 @@ size_t getOffsetForAdvance(Layout& layout, const uint16_t* buf, size_t start, si
     float bestDist = FLT_MAX;
     for (size_t i = searchStart; i <= start + count; i++) {
         if (GraphemeBreak::isGraphemeBreak(buf, start, count, i)) {
-            // "getRunAdvance(layout, buf, start, count, bufSize, i) - advance" but more efficient
-            float delta = getRunAdvance(layout, buf, searchStart, count, i) + xSearchStart
-                    - advance;
+            // "getRunAdvance(layout, buf, start, count, i) - advance" but more efficient
+            float delta = getRunAdvance(layout, buf, start, searchStart, count - searchStart, i)
+
+                    + xSearchStart - advance;
             if (std::abs(delta) < bestDist) {
                 bestDist = std::abs(delta);
                 best = i;
