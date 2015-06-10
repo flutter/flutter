@@ -7,13 +7,22 @@ import 'button_base.dart';
 import 'icon.dart';
 import 'ink_well.dart';
 
+const BoxDecoration _kHighlightDecoration = const BoxDecoration(
+  backgroundColor: const Color.fromARGB(102, 153, 153, 153)
+);
+
+// TODO(abarth): We shouldn't need _kHighlightBoring, but currently Container
+//               isn't smarth enough to retain the components it builds when we
+//               add or remove a |decoration|. For now, we use a transparent
+//               decoration to avoid changing the structure of the tree. The
+//               right fix, however, is to make Container smarter about how it
+//               syncs its subcomponents.
+const BoxDecoration _kHighlightBoring = const BoxDecoration(
+  backgroundColor: const Color.fromARGB(0, 0, 0, 0)
+);
+
 class MenuItem extends ButtonBase {
-
   MenuItem({ Object key, this.icon, this.children, this.onGestureTap }) : super(key: key);
-
-  static const BoxDecoration highlightDecoration = const BoxDecoration(
-    backgroundColor: const Color.fromARGB(102, 153, 153, 153)
-  );
 
   List<UINode> children;
   String icon;
@@ -41,10 +50,9 @@ class MenuItem extends ButtonBase {
           ]
         ),
         height: 48.0,
-        decoration: highlight ? highlightDecoration : null
+        decoration: highlight ? _kHighlightDecoration : _kHighlightBoring
       ),
       onGestureTap: onGestureTap
     );
   }
-
 }
