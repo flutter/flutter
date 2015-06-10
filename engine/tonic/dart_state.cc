@@ -32,11 +32,17 @@ DartState::DartState()
 DartState::~DartState() {
 }
 
-void DartState::DidSetIsolateInternal() {
+void DartState::SetIsolate(Dart_Isolate isolate) {
+  CHECK(!isolate_);
+  isolate_ = isolate;
+  if (!isolate_)
+    return;
+
   {
     Scope dart_scope(this);
     index_handle_.Set(this, ToDart("index"));
   }
+
   DidSetIsolate();
 }
 

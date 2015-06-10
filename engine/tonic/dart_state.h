@@ -48,11 +48,7 @@ class DartState : public base::SupportsUserData {
   base::WeakPtr<DartState> GetWeakPtr();
 
   Dart_Isolate isolate() { return isolate_; }
-  void set_isolate(Dart_Isolate isolate) {
-    CHECK(!isolate_);
-    isolate_ = isolate;
-    DidSetIsolateInternal();
-  }
+  void SetIsolate(Dart_Isolate isolate);
 
   DartClassLibrary& class_library() { return *class_library_; }
   DartStringCache& string_cache() { return *string_cache_; }
@@ -64,16 +60,15 @@ class DartState : public base::SupportsUserData {
   virtual void DidSetIsolate() {}
 
  private:
-  void DidSetIsolateInternal();
-
   Dart_Isolate isolate_;
   OwnPtr<DartClassLibrary> class_library_;
   OwnPtr<DartStringCache> string_cache_;
   OwnPtr<DartExceptionFactory> exception_factory_;
   OwnPtr<DartTimerHeap> timer_heap_;
-
-  base::WeakPtrFactory<DartState> weak_factory_;
   DartPersistentValue index_handle_;
+
+ protected:
+  base::WeakPtrFactory<DartState> weak_factory_;
 
   DISALLOW_COPY_AND_ASSIGN(DartState);
 };

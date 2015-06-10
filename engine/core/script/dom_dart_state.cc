@@ -16,6 +16,10 @@ DOMDartState::DOMDartState(Document* document, const KURL& url)
 }
 
 DOMDartState::~DOMDartState() {
+  // We've already destroyed the isolate. Revoke any weak ptrs held by
+  // DartPersistentValues so they don't try to enter the destroyed isolate to
+  // clean themselves up.
+  weak_factory_.InvalidateWeakPtrs();
 }
 
 void DOMDartState::DidSetIsolate() {

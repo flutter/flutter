@@ -246,7 +246,7 @@ static Dart_Isolate IsolateCreateCallback(const char* script_uri,
                                               nullptr,
                                               error);
     CHECK(isolate) << error;
-    dart_state->set_isolate(isolate);
+    dart_state->SetIsolate(isolate);
     CHECK(Dart_IsServiceIsolate(isolate));
     CHECK(!LogIfError(Dart_SetLibraryTagHandler(LibraryTagHandler)));
     {
@@ -276,7 +276,7 @@ static Dart_Isolate IsolateCreateCallback(const char* script_uri,
   Dart_Isolate isolate = Dart_CreateIsolate("sky:handle_watcher", "",
       kDartIsolateSnapshotBuffer, dart_state, error);
   CHECK(isolate) << error;
-  dart_state->set_isolate(isolate);
+  dart_state->SetIsolate(isolate);
 
   CHECK(!LogIfError(Dart_SetLibraryTagHandler(LibraryTagHandler)));
 
@@ -324,7 +324,7 @@ void DartController::CreateIsolateFor(PassOwnPtr<DOMDartState> state) {
       static_cast<DartState*>(dom_dart_state_.get()), &error);
   Dart_SetMessageNotifyCallback(MessageNotifyCallback);
   CHECK(isolate) << error;
-  dom_dart_state_->set_isolate(isolate);
+  dom_dart_state_->SetIsolate(isolate);
   Dart_SetGcCallbacks(DartGCPrologue, DartGCEpilogue);
   CHECK(!LogIfError(Dart_SetLibraryTagHandler(LibraryTagHandler)));
 
@@ -362,6 +362,7 @@ void DartController::ClearForClose() {
   // Don't use a DartIsolateScope here since we never exit the isolate.
   Dart_EnterIsolate(dom_dart_state_->isolate());
   Dart_ShutdownIsolate();
+  dom_dart_state_->SetIsolate(nullptr);
   dom_dart_state_.clear();
 }
 
