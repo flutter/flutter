@@ -23,8 +23,14 @@ class SpriteBox extends RenderBox {
   double _systemHeight;
 
   SpriteBox(TransformNode rootNode, [SpriteBoxTransformMode mode = SpriteBoxTransformMode.nativePoints, double width=1024.0, double height=1024.0]) {
+    assert(rootNode != null);
+    assert(rootNode._spriteBox == null);
+
     // Setup root node
     _rootNode = rootNode;
+
+    // Assign SpriteBox reference to all the nodes
+    _addSpriteBoxReference(_rootNode);
 
     // Setup transform mode
     transformMode = mode;
@@ -32,6 +38,13 @@ class SpriteBox extends RenderBox {
     _systemHeight = height;
 
     _scheduleTick();
+  }
+
+  void _addSpriteBoxReference(TransformNode node) {
+    node._spriteBox = this;
+    for (TransformNode child in node._children) {
+      _addSpriteBoxReference(child);
+    }
   }
 
   double get systemWidth => _systemWidth;

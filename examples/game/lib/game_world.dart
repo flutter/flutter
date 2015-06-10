@@ -30,10 +30,10 @@ class GameWorld extends TransformNode {
     addBackground();
 
     // Add some asteroids to the game world
-    for (int i = 0; i < 5; i++) {
+    for (int i = 0; i < 50; i++) {
       addAsteroid(10.0);
     }
-    for (int i = 0; i < 5; i++) {
+    for (int i = 0; i < 50; i++) {
       addAsteroid(20.0);
     }
 
@@ -46,7 +46,7 @@ class GameWorld extends TransformNode {
     sprtBg.width = width;
     sprtBg.height = height;
     sprtBg.pivot = new Vector2(0.0, 0.0);
-    this.children.add(sprtBg);
+    this.addChild(sprtBg);
   }
   
   void addAsteroid([double radius=20.0]) {
@@ -87,7 +87,7 @@ class GameWorld extends TransformNode {
 //    sprt.colorOverlay = new Color(0x33ff0000);
 //    sprt.transferMode = TransferMode.plusMode;
     body.userData = sprt;
-    this.children.add(sprt);
+    this.addChild(sprt);
   }
 
   void addShip() {
@@ -127,7 +127,7 @@ class GameWorld extends TransformNode {
     sprt.height = radius*2;
     sprt.position = new Vector2(width/2.0, height/2.0);
     body.userData = sprt;
-    this.children.add(sprt);
+    this.addChild(sprt);
   }
   
   void update(double dt) {
