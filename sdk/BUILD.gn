@@ -53,7 +53,6 @@ dart_pkg("sdk") {
     "lib/framework/components2/floating_action_button.dart",
     "lib/framework/components2/icon.dart",
     "lib/framework/components2/icon_button.dart",
-    "lib/framework/components2/ink_splash.dart",
     "lib/framework/components2/ink_well.dart",
     "lib/framework/components2/input.dart",
     "lib/framework/components2/material.dart",
