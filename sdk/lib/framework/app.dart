@@ -16,7 +16,10 @@ class PointerState {
 
 class AppView {
 
-  AppView(RenderBox root) {
+  AppView([RenderBox root = null]) {
+    assert(_app == null);
+    _app = this;
+
     sky.view.setEventCallback(_handleEvent);
     sky.view.setMetricsChangedCallback(_handleMetricsChanged);
     scheduler.init();
@@ -26,7 +29,11 @@ class AppView {
     _renderView.attach();
     _renderView.rootConstraints = _viewConstraints;
     _renderView.scheduleInitialLayout();
+
+    assert(_app == this);
   }
+
+  static AppView _app; // used to enforce that we're a singleton
 
   RenderView _renderView;
 

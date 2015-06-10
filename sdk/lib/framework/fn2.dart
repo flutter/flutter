@@ -767,6 +767,13 @@ class Paragraph extends RenderObjectWrapper {
 
 }
 
+class Text extends Component {
+  Text(this.data) : super(key: '*text*');
+  final String data;
+  bool get interchangeable => true;
+  UINode build() => new Paragraph(text: data);
+}
+
 class Flex extends MultiChildRenderObjectWrapper {
 
   Flex(List<UINode> children, {
@@ -1059,11 +1066,20 @@ class Container extends Component {
 
 }
 
-class _AppView extends AppView {
+class UINodeAppView extends AppView {
 
-  _AppView() : super(null);
+  UINodeAppView() {
+    assert(_appView == null);
+  }
+
+  static UINodeAppView _appView;
+  static void initUINodeAppView() {
+    if (_appView == null)
+      _appView = new UINodeAppView();
+  }
 
   void dispatchEvent(sky.Event event, HitTestResult result) {
+    assert(_appView == this);
     super.dispatchEvent(event, result);
     for (HitTestEntry entry in result.path.reversed) {
       UINode target = RenderObjectWrapper._getMounted(entry.target);
@@ -1080,31 +1096,86 @@ class _AppView extends AppView {
 
 }
 
-abstract class App extends Component {
+abstract class AbstractUINodeRoot extends Component {
 
-  App() : super(stateful: true) {
-    _appView = new _AppView();
-    _scheduleComponentForRender(this);
+  AbstractUINodeRoot() : super(stateful: true) {
+    UINodeAppView.initUINodeAppView();
     _mounted = true;
+    _scheduleComponentForRender(this);
   }
 
-  AppView _appView;
-  AppView get appView => _appView;
+  void syncFields(AbstractUINodeRoot source) {
+    assert(false);
+    // if we get here, it implies that we have a parent
+  }
 
   void _buildIfDirty() {
     assert(_dirty);
     assert(_mounted);
+    assert(parent == null);
     _sync(null, null);
-    if (root.parent == null)
-      _appView.root = root;
+  }
+
+}
+
+abstract class App extends AbstractUINodeRoot {
+
+  App();
+
+  AppView get appView => UINodeAppView._appView;
+
+  void _buildIfDirty() {
+    super._buildIfDirty();
+
+    if (root.parent == null) {
+      // we haven't attached it yet
+      UINodeAppView._appView.root = root;
+    }
     assert(root.parent is RenderView);
   }
 
 }
 
-class Text extends Component {
-  Text(this.data) : super(key: '*text*');
-  final String data;
-  bool get interchangeable => true;
-  UINode build() => new Paragraph(text: data);
+typedef UINode Builder();
+
+class RenderNodeToUINodeAdapter extends AbstractUINodeRoot {
+
+  RenderNodeToUINodeAdapter(
+    RenderObjectWithChildMixin<RenderBox> container,
+    this.builder
+  ) : _container = container {
+    assert(builder != null);
+  }
+
+  RenderObjectWithChildMixin<RenderBox> _container;
+  RenderObjectWithChildMixin<RenderBox> get container => _container;
+  void set container(RenderObjectWithChildMixin<RenderBox> value) {
+    if (_container != value) {
+      assert(value.child == null);
+      if (root != null) {
+        assert(_container.child == root);
+        _container.child = null;
+      }
+      _container = value;
+      if (root != null) {
+        _container.child = root;
+        assert(_container.child == root);
+      }
+    }
+  }
+
+  final Builder builder;
+
+  void _buildIfDirty() {
+    super._buildIfDirty();
+    if (root.parent == null) {
+      // we haven't attached it yet
+      assert(_container.child == null);
+      _container.child = root;
+    }
+    assert(root.parent == _container);
+  }
+
+  UINode build() => builder();
+
 }
