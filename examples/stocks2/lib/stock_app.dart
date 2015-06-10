@@ -212,7 +212,7 @@ class StocksApp extends App {
       ),
     ];
     addMenuToOverlays(overlays);
-    return new StackContainer(children: overlays);
+    return new Stack(overlays);
   }
 }
 
