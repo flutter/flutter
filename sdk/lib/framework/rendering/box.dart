@@ -664,19 +664,71 @@ class BoxShadow {
   String toString() => 'BoxShadow($color, $offset, $blur)';
 }
 
+abstract class Gradient {
+  sky.Shader createShader();
+}
+
+class LinearGradient extends Gradient {
+  LinearGradient({
+    this.endPoints,
+    this.colors,
+    this.colorStops,
+    this.tileMode: sky.TileMode.clamp
+  });
+
+  String toString() =>
+      'LinearGradient($endPoints, $colors, $colorStops, $tileMode)';
+
+  sky.Shader createShader() {
+    return new sky.Gradient.Linear(this.endPoints, this.colors, this.colorStops,
+                                   this.tileMode);
+  }
+
+  final List<Point> endPoints;
+  final List<Color> colors;
+  final List<double> colorStops;
+  final sky.TileMode tileMode;
+}
+
+class RadialGradient extends Gradient {
+  RadialGradient({
+    this.center,
+    this.radius,
+    this.colors,
+    this.colorStops,
+    this.tileMode: sky.TileMode.clamp
+  });
+
+  String toString() =>
+      'RadialGradient($center, $radius, $colors, $colorStops, $tileMode)';
+
+  sky.Shader createShader() {
+    return new sky.Gradient.Radial(this.center, this.radius, this.colors,
+                                   this.colorStops, this.tileMode);
+  }
+
+  final Point center;
+  final double radius;
+  final List<Color> colors;
+  final List<double> colorStops;
+  final sky.TileMode tileMode;
+}
+
 // This must be immutable, because we won't notice when it changes
 class BoxDecoration {
   const BoxDecoration({
     this.backgroundColor,
     this.border,
     this.borderRadius,
-    this.boxShadow
+    this.boxShadow,
+    this.gradient
   });
 
   final Color backgroundColor;
   final double borderRadius;
   final Border border;
   final List<BoxShadow> boxShadow;
+  final Gradient gradient;
 
   String toString([String prefix = '']) {
     List<String> result = [];
@@ -688,6 +740,8 @@ class BoxDecoration {
       result.add('${prefix}borderRadius: $borderRadius');
     if (boxShadow != null)
       result.add('${prefix}boxShadow: ${boxShadow.map((shadow) => shadow.toString())}');
+    if (gradient != null)
+      result.add('${prefix}gradient: $gradient');
     if (result.isEmpty)
       return '${prefix}<no decorations specified>';
     return result.join('\n');
@@ -729,6 +783,9 @@ class RenderDecoratedBox extends RenderProxyBox {
         paint.setDrawLooper(builder.build());
       }
 
+      if (_decoration.gradient != null)
+        paint.setShader(_decoration.gradient.createShader());
+
       _cachedBackgroundPaint = paint;
     }
 
@@ -739,7 +796,8 @@ class RenderDecoratedBox extends RenderProxyBox {
     assert(size.width != null);
     assert(size.height != null);
 
-    if (_decoration.backgroundColor != null || _decoration.boxShadow != null) {
+    if (_decoration.backgroundColor != null || _decoration.boxShadow != null ||
+        _deocration.gradient != null) {
       Rect rect = new Rect.fromLTRB(0.0, 0.0, size.width, size.height);
       if (_decoration.borderRadius == null)
         canvas.drawRect(rect, _backgroundPaint);

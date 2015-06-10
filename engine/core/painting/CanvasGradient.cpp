@@ -21,7 +21,6 @@ void CanvasGradient::initLinear(const Vector<Point>& end_points,
   for (int i = 0; i < 2; ++i)
     sk_end_points[i] = end_points[i].sk_point;
 
-  // TODO(mpcomplete): allow setting the TileMode.
   SkShader* shader = SkGradientShader::CreateLinear(
       sk_end_points, colors.data(), color_stops.data(), colors.size(),
       tile_mode);
