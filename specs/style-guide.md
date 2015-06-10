@@ -17,10 +17,11 @@ output of the analyzer unless you've filed a bug with the Dart team.
 Use assert()s liberally.
 
 
-Classes and Enums are named UpperCamelCase. Everything else (methods,
-fields, variables, constants, enum values, etc) is lowerCamelCase.
-Global double and string constants are prefixed with k. Prefer using a
-static const in a relevant class than using a global constant.
+Types (i.e. classes, typedefs (function signature definitions) and
+enums) are named UpperCamelCase. Everything else (methods, fields,
+variables, constants, enum values, etc) is lowerCamelCase. Global
+double and string constants are prefixed with k. Prefer using a static
+const in a relevant class than using a global constant.
 
 Don't name your libraries (no ```library``` keyword). Name the files
 in ```lower_under_score.dart``` format.
