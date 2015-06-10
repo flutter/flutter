@@ -71,7 +71,7 @@ abstract class RenderSector extends RenderObject {
     return new SectorDimensions.withConstraints(constraints);
   }
 
-  SectorConstraints get constraints => super.constraints as SectorConstraints;
+  SectorConstraints get constraints { SectorConstraints result = super.constraints; return result; }
   void performResize() {
     // default behaviour for subclasses that have sizedByParent = true
     deltaRadius = constraints.constrainDeltaRadius(0.0);
