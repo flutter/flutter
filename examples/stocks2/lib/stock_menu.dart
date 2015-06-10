@@ -27,7 +27,7 @@ class StockMenu extends Component {
         items: [
           [new Text('Add stock')],
           [new Text('Remove stock')],
-          // [new FlexExpandingChild(new Text('Autorefresh')), checkbox],
+          [new FlexExpandingChild(new Text('Autorefresh')), checkbox],
         ],
         level: 4
       ),
