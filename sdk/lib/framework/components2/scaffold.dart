@@ -79,6 +79,8 @@ class RenderScaffold extends RenderBox {
     assert(size.height < double.INFINITY);
   }
 
+  // TODO(eseidel): These change based on device size!
+  // http://www.google.com/design/spec/layout/metrics-keylines.html#metrics-keylines-keylines-spacing
   static const kButtonX = 16.0; // left from right edge of body
   static const kButtonY = 16.0; // up from bottom edge of body
 

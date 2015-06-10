@@ -10,6 +10,8 @@ import 'dart:sky' as sky;
 import 'ink_well.dart';
 import 'material.dart';
 
+// TODO(eseidel): This needs to change based on device size?
+// http://www.google.com/design/spec/layout/metrics-keylines.html#metrics-keylines-keylines-spacing
 const double _kSize = 56.0;
 
 class FloatingActionButton extends Component {
