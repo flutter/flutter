@@ -41,7 +41,7 @@ static const unsigned CtrlKey = 1 << 0;
 static const unsigned AltKey = 1 << 1;
 static const unsigned ShiftKey = 1 << 2;
 static const unsigned MetaKey = 1 << 3;
-#if OS(MACOSX)
+#if OS(MACOSX) && !OS(IOS)
 // Aliases for the generic key defintions to make kbd shortcuts definitions more
 // readable on OS X.
 static const unsigned OptionKey  = AltKey;

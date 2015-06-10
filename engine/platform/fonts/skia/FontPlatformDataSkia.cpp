@@ -37,7 +37,6 @@
 
 namespace blink {
 
-#if !OS(MACOSX)
 unsigned FontPlatformData::hash() const
 {
     unsigned h = SkTypeface::UniqueID(m_typeface.get());
@@ -63,8 +62,6 @@ bool FontPlatformData::fontContainsCharacter(UChar32 character)
     paint.textToGlyphs(&character, sizeof(character), &glyph);
     return glyph;
 }
-
-#endif
 
 #if ENABLE(OPENTYPE_VERTICAL)
 PassRefPtr<OpenTypeVerticalData> FontPlatformData::verticalData() const

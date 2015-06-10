@@ -68,7 +68,7 @@ void SimpleFontData::platformInit()
     int vdmxAscent = 0, vdmxDescent = 0;
     bool isVDMXValid = false;
 
-#if OS(LINUX) || OS(ANDROID)
+#if OS(LINUX) || OS(ANDROID) || OS(IOS)
     // Manually digging up VDMX metrics is only applicable when bytecode hinting using FreeType.
     // With GDI, the metrics will already have taken this into account (as needed).
     // With DirectWrite or CoreText, no bytecode hinting is ever done.
@@ -102,7 +102,7 @@ void SimpleFontData::platformInit()
     } else {
         ascent = SkScalarRoundToInt(-metrics.fAscent);
         descent = SkScalarRoundToInt(metrics.fDescent);
-#if OS(LINUX) || OS(ANDROID)
+#if OS(LINUX) || OS(ANDROID) || OS(IOS)
         // When subpixel positioning is enabled, if the descent is rounded down, the descent part
         // of the glyph may be truncated when displayed in a 'overflow: hidden' container.
         // To avoid that, borrow 1 unit from the ascent when possible.

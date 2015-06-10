@@ -1097,7 +1097,7 @@ TEST(PartitionAllocTest, LostFreePagesBug)
     TestShutdown();
 }
 
-#if !OS(ANDROID)
+#if !OS(ANDROID) && !OS(IOS)
 
 // Make sure that malloc(-1) dies.
 // In the past, we had an integer overflow that would alias malloc(-1) to

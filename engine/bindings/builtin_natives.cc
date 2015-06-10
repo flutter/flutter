@@ -163,7 +163,7 @@ void Logger_PrintString(Dart_NativeArguments args) {
 
   String message(chars, length);
   // TODO(dart): Hook up to developer console (if/when that's a thing).
-#if OS(ANDROID)
+#if OS(ANDROID) || OS(IOS)
     LOG(INFO) << "CONSOLE: " << message.utf8().data();
 #else
     printf("CONSOLE: %s\n", message.utf8().data());

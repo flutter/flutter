@@ -53,6 +53,16 @@
 /* Always OS(POSIX) */
 #define WTF_OS_POSIX 1
 
+#ifdef __APPLE__
+/* OS(MACOSX) - Mac and iOS */
+#define WTF_OS_MACOSX 1
+#include <TargetConditionals.h>
+#if TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR
+/* OS(IOS) - iOS */
+#define WTF_OS_IOS 1
+#endif
+#endif /* __APPLE__ */
+
 /* Operating environments */
 
 #if OS(ANDROID)
