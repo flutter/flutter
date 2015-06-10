@@ -5,6 +5,7 @@
 import '../fn2.dart';
 import '../rendering/box.dart';
 import '../rendering/object.dart';
+import '../theme2/view_configuration.dart';
 
 enum ScaffoldSlots {
   toolbar,
@@ -78,8 +79,6 @@ class RenderScaffold extends RenderBox {
     assert(size.height < double.INFINITY);
   }
 
-  static const kToolbarHeight = 100.0;
-  static const kStatusbarHeight = 50.0;
   static const kButtonX = 16.0; // left from right edge of body
   static const kButtonY = 16.0; // up from bottom edge of body
 
@@ -88,11 +87,12 @@ class RenderScaffold extends RenderBox {
     double bodyPosition = 0.0;
     if (_slots[ScaffoldSlots.toolbar] != null) {
       RenderBox toolbar = _slots[ScaffoldSlots.toolbar];
-      toolbar.layout(new BoxConstraints.tight(new Size(size.width, kToolbarHeight)));
+      double toolbarHeight = kToolBarHeight + kNotificationAreaHeight;
+      toolbar.layout(new BoxConstraints.tight(new Size(size.width, toolbarHeight)));
       assert(toolbar.parentData is BoxParentData);
       toolbar.parentData.position = Point.origin;
-      bodyPosition = kToolbarHeight;
-      bodyHeight -= kToolbarHeight;
+      bodyPosition += toolbarHeight;
+      bodyHeight -= toolbarHeight;
     }
     if (_slots[ScaffoldSlots.statusBar] != null) {
       RenderBox statusbar = _slots[ScaffoldSlots.statusBar];
