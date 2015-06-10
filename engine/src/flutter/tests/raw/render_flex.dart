@@ -40,7 +40,7 @@ class RenderSolidColor extends RenderDecoratedBox {
     size = constraints.constrain(desiredSize);
   }
 
-  void handleEvent(sky.Event event) {
+  void handleEvent(sky.Event event, BoxHitTestEntry entry) {
     if (event.type == 'pointerdown')
       decoration = new BoxDecoration(backgroundColor: const sky.Color(0xFFFF0000));
     else if (event.type == 'pointerup')
