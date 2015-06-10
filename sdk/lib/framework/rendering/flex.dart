@@ -230,6 +230,14 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     return child.parentData.flex != null ? child.parentData.flex : 0;
   }
 
+  double _getCrossSize(RenderBox child) {
+    return (_direction == FlexDirection.horizontal) ? child.size.height : child.size.width;
+  }
+
+  double _getMainSize(RenderBox child) {
+    return (_direction == FlexDirection.horizontal) ? child.size.width : child.size.height;
+  }
+
   void performLayout() {
     // Based on http://www.w3.org/TR/css-flexbox-1/ Section 9.7 Resolving Flexible Lengths
     // Steps 1-3. Determine used flex factor, size inflexible items, calculate free space
@@ -249,7 +257,8 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
         BoxConstraints innerConstraints = new BoxConstraints(maxHeight: constraints.maxHeight,
                                                              maxWidth: constraints.maxWidth);
         child.layout(innerConstraints, parentUsesSize: true);
-        freeSpace -= (_direction == FlexDirection.horizontal) ? child.size.width : child.size.height;
+        freeSpace -= _getMainSize(child);
+        crossSize = math.max(crossSize, _getCrossSize(child));
       }
       child = child.parentData.nextSibling;
     }
@@ -268,19 +277,16 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
             innerConstraints = new BoxConstraints(maxHeight: constraints.maxHeight,
                                                   minWidth: spaceForChild,
                                                   maxWidth: spaceForChild);
-            child.layout(innerConstraints, parentUsesSize: true);
-            usedSpace += child.size.width;
-            crossSize = math.max(crossSize, child.size.height);
             break;
           case FlexDirection.vertical:
             innerConstraints = new BoxConstraints(minHeight: spaceForChild,
                                                   maxHeight: spaceForChild,
                                                   maxWidth: constraints.maxWidth);
-            child.layout(innerConstraints, parentUsesSize: true);
-            usedSpace += child.size.height;
-            crossSize = math.max(crossSize, child.size.width);
             break;
         }
+        child.layout(innerConstraints, parentUsesSize: true);
+        usedSpace += _getMainSize(child);
+        crossSize = math.max(crossSize, _getCrossSize(child));
       }
       child = child.parentData.nextSibling;
     }
@@ -316,27 +322,28 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     switch (_direction) {
       case FlexDirection.horizontal:
         size = constraints.constrain(new Size(mainSize, crossSize));
+        crossSize = size.height;
         break;
       case FlexDirection.vertical:
         size = constraints.constrain(new Size(crossSize, mainSize));
+        crossSize = size.width;
         break;
     }
 
     // Position elements. For now, center the flex items in the cross direction
-    double mainDimPosition = leadingSpace;
+    double childMainPosition = leadingSpace;
     child = firstChild;
     while (child != null) {
+      double childCrossPosition = crossSize / 2.0 - _getCrossSize(child) / 2.0;
       switch (_direction) {
         case FlexDirection.horizontal:
-          child.parentData.position = new Point(mainDimPosition, size.height / 2.0 - child.size.height / 2.0);
-          mainDimPosition += child.size.width;
+          child.parentData.position = new Point(childMainPosition, childCrossPosition);
           break;
         case FlexDirection.vertical:
-          child.parentData.position = new Point(size.width / 2.0 - child.size.width / 2.0, mainDimPosition);
-          mainDimPosition += child.size.height;
+          child.parentData.position = new Point(childCrossPosition, childMainPosition);
           break;
       }
-      mainDimPosition += betweenSpace;
+      childMainPosition += _getMainSize(child) + betweenSpace;
       child = child.parentData.nextSibling;
     }
   }
