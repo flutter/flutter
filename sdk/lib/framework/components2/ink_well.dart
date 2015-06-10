@@ -113,7 +113,7 @@ class InkWellWrapper extends OneChildRenderObjectWrapper {
 class InkWell extends Component {
   InkWell({ Object key, this.children }) : super(key: key);
 
-  List<UINode> children;
+  final List<UINode> children;
 
   UINode build() {
     return new InkWellWrapper(

@@ -16,10 +16,10 @@ class ToolBar extends Component {
     this.backgroundColor
   }) : super(key: key);
 
-  UINode left;
-  UINode center;
-  List<UINode> right;
-  Color backgroundColor;
+  final UINode left;
+  final UINode center;
+  final List<UINode> right;
+  final Color backgroundColor;
 
   UINode build() {
     List<UINode> children = [

@@ -19,8 +19,8 @@ class Button extends Component {
     border-radius: 2px;'''
   );
 
-  UINode content;
-  int level;
+  final UINode content;
+  final int level;
 
   UINode build() {
     return new StyleNode(

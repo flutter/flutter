@@ -10,7 +10,6 @@ import 'dart:collection';
 import 'dart:mirrors';
 import 'dart:sky' as sky;
 import 'package:vector_math/vector_math.dart';
-import 'reflect.dart' as reflect;
 import 'rendering/block.dart';
 import 'rendering/box.dart';
 import 'rendering/flex.dart';
@@ -89,7 +88,9 @@ abstract class UINode {
 
   // Subclasses which implements Nodes that become stateful may return true
   // if the |old| node has become stateful and should be retained.
-  bool _willSync(UINode old) => false;
+  // This is called immediately before _sync().
+  // Component._retainStatefulNodeIfPossible() calls syncFields().
+  bool _retainStatefulNodeIfPossible(UINode old) => false;
 
   bool get interchangeable => false; // if true, then keys can be duplicated
 
@@ -131,7 +132,7 @@ abstract class UINode {
       return null;
     }
 
-    if (oldNode != null && node._key == oldNode._key && node._willSync(oldNode)) {
+    if (oldNode != null && node._key == oldNode._key && node._retainStatefulNodeIfPossible(oldNode)) {
       assert(oldNode.mounted);
       assert(!node.mounted);
       oldNode._sync(node, slot);
@@ -929,24 +930,36 @@ abstract class Component extends UINode {
     super.remove();
   }
 
-  bool _willSync(UINode old) {
+  bool _retainStatefulNodeIfPossible(UINode old) {
     assert(!_disqualifiedFromEverAppearingAgain);
 
     Component oldComponent = old as Component;
     if (oldComponent == null || !oldComponent._stateful)
       return false;
 
-    // Make |this| the "old" Component
+    assert(key == oldComponent.key);
+
+    // Make |this|, the newly-created object, into the "old" Component, and kill it
     _stateful = false;
     _built = oldComponent._built;
     assert(_built != null);
     _disqualifiedFromEverAppearingAgain = true;
 
     // Make |oldComponent| the "new" component
-    reflect.copyPublicFields(this, oldComponent);
     oldComponent._built = null;
     oldComponent._dirty = true;
+    oldComponent.syncFields(this);
     return true;
+  }
+
+  // This is called by _retainStatefulNodeIfPossible(), during
+  // syncChild(), just before _sync() is called.
+  // This must be implemented on any subclass that can become stateful
+  // (but don't call super.syncFields() if you inherit directly from
+  // Component, since that'll fire an assert).
+  // If you don't ever become stateful, then don't override this.
+  void syncFields(Component source) {
+    assert(false);
   }
 
   final int _order;

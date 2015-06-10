@@ -18,8 +18,8 @@ class Material extends Component {
   //   new Style('box-shadow: ${Shadow[5]}'),
   // ];
 
-  UINode content;
-  int level;
+  final UINode content;
+  final int level;
 
   UINode build() {
     // TODO(eseidel): Add a shadow.

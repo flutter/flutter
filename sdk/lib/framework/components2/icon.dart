@@ -15,8 +15,8 @@ class Icon extends Component {
     this.type: ''
   }) : super(key: key);
 
-  int size;
-  String type;
+  final int size;
+  final String type;
 
   UINode build() {
     String category = '';

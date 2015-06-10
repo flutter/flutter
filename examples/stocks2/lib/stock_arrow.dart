@@ -12,9 +12,10 @@ import 'dart:math' as math;
 import 'dart:sky' as sky;
 
 class StockArrow extends Component {
-  double percentChange;
 
   StockArrow({ Object key, this.percentChange }) : super(key: key);
+
+  final double percentChange;
 
   int _colorIndexForPercentChange(double percentChange) {
     double maxPercent = 10.0;
@@ -71,4 +72,5 @@ class StockArrow extends Component {
         height: size,
         margin: const EdgeDims.symmetric(horizontal: 5.0));
   }
+
 }

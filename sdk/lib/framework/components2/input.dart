@@ -50,9 +50,16 @@ class Input extends Component {
   //   padding: 7px;
   //   border-bottom: 2px solid ${Blue[500]};''';
 
-  ValueChanged onChanged;
   String placeholder;
+  ValueChanged onChanged;
   bool focused = false;
+
+  void syncFields(Input source) {
+    placeholder = source.placeholder;
+    onChanged = source.onChanged;
+    focused = source.focused;
+    super.syncFields(source);
+  }
 
   String _value = '';
   bool _isAttachedToKeyboard = false;

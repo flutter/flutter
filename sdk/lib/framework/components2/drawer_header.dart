@@ -10,7 +10,7 @@ class DrawerHeader extends Component {
 
   DrawerHeader({ Object key, this.children }) : super(key: key);
 
-  List<UINode> children;
+  final List<UINode> children;
 
   UINode build() {
     return new Container(

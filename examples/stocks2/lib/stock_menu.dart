@@ -8,10 +8,15 @@ import 'package:sky/framework/components2/checkbox.dart';
 import 'package:sky/framework/theme/view_configuration.dart';
 
 class StockMenu extends Component {
-  PopupMenuController controller;
 
-  StockMenu({Object key, this.controller, this.autorefresh: false, this.onAutorefreshChanged}) : super(key: key);
+  StockMenu({
+    Object key,
+    this.controller,
+    this.autorefresh: false,
+    this.onAutorefreshChanged
+  }) : super(key: key);
 
+  final PopupMenuController controller;
   final bool autorefresh;
   final ValueChanged onAutorefreshChanged;
 

@@ -19,6 +19,12 @@ class Checkbox extends ButtonBase {
   bool checked;
   ValueChanged onChanged;
 
+  void syncFields(Checkbox source) {
+    checked = source.checked;
+    onChanged = source.onChanged;
+    super.syncFields(source);
+  }
+
   void _handleClick(sky.Event e) {
     onChanged(!checked);
   }

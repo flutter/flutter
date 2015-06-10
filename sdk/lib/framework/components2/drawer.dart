@@ -109,6 +109,13 @@ class Drawer extends AnimatedComponent {
   int level;
   DrawerController controller;
 
+  void syncFields(Drawer source) {
+    children = source.children;
+    level = source.level;
+    controller = source.controller;
+    super.syncFields(source);
+  }
+
   double _position;
 
   UINode build() {

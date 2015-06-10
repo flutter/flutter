@@ -16,14 +16,21 @@ class Radio extends ButtonBase {
 
   Radio({
     Object key,
-    this.onChanged,
     this.value,
-    this.groupValue
+    this.groupValue,
+    this.onChanged
   }) : super(key: key);
 
   Object value;
   Object groupValue;
   ValueChanged onChanged;
+
+  void syncFields(Radio source) {
+    value = source.value;
+    groupValue = source.groupValue;
+    onChanged = source.onChanged;
+    super.syncFields(source);
+  }
 
   UINode buildContent() {
     // TODO(jackson): This should change colors with the theme

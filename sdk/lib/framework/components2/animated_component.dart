@@ -12,6 +12,8 @@ abstract class AnimatedComponent extends Component {
 
   AnimatedComponent({ Object key }) : super(key: key, stateful: true);
 
+  void syncFields(AnimatedComponent source) { }
+
   animate(AnimatedValue value, SetterFunction setter) {
     setter(value.value);
     StreamSubscription<double> subscription;

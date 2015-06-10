@@ -60,9 +60,16 @@ class PopupMenu extends AnimatedComponent {
     // onDidMount(_measureSize);
   }
 
+  PopupMenuController controller;
   List<List<UINode>> items;
   int level;
-  PopupMenuController controller;
+
+  void syncFields(PopupMenu source) {
+    controller = source.controller;
+    items = source.items;
+    level = source.level;
+    super.syncFields(source);
+  }
 
   double _position;
   // int _width;

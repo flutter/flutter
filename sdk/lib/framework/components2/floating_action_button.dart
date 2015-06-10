@@ -17,8 +17,8 @@ class FloatingActionButton extends Component {
   FloatingActionButton({ Object key, this.content, this.level: 0 })
       : super(key: key);
 
-  UINode content;
-  int level;
+  final UINode content;
+  final int level;
 
   UINode build() {
     List<UINode> children = [];

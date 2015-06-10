@@ -12,7 +12,7 @@ const BoxDecoration _kHighlightDecoration = const BoxDecoration(
 );
 
 // TODO(abarth): We shouldn't need _kHighlightBoring, but currently Container
-//               isn't smarth enough to retain the components it builds when we
+//               isn't smart enough to retain the components it builds when we
 //               add or remove a |decoration|. For now, we use a transparent
 //               decoration to avoid changing the structure of the tree. The
 //               right fix, however, is to make Container smarter about how it
@@ -24,9 +24,16 @@ const BoxDecoration _kHighlightBoring = const BoxDecoration(
 class MenuItem extends ButtonBase {
   MenuItem({ Object key, this.icon, this.children, this.onGestureTap }) : super(key: key);
 
-  List<UINode> children;
   String icon;
+  List<UINode> children;
   GestureEventListener onGestureTap;
+
+  void syncFields(MenuItem source) {
+    icon = source.icon;
+    children = source.children;
+    onGestureTap = source.onGestureTap;
+    super.syncFields(source);
+  }
 
   UINode buildContent() {
     return new EventListenerNode(

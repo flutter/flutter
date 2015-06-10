@@ -15,8 +15,8 @@ class ModalOverlay extends Component {
   //   bottom: 0;
   //   right: 0;''');
 
-  List<UINode> children;
-  GestureEventListener onDismiss;
+  final List<UINode> children;
+  final GestureEventListener onDismiss;
 
   UINode build() {
     return new EventListenerNode(

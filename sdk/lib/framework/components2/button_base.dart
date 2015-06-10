@@ -6,20 +6,13 @@ import '../fn2.dart';
 
 abstract class ButtonBase extends Component {
 
-  ButtonBase({ Object key }) : super(key: key);
+  ButtonBase({ Object key, this.highlight: false }) : super(key: key);
 
-  UINode buildContent();
+  bool highlight;
 
-  UINode build() {
-    return new EventListenerNode(
-      buildContent(),
-      onPointerDown: _handlePointerDown,
-      onPointerUp: _handlePointerUp,
-      onPointerCancel: _handlePointerCancel
-    );
+  void syncFields(ButtonBase source) {
+    highlight = source.highlight;
   }
-
-  bool highlight = false;
 
   void _handlePointerDown(_) {
     setState(() {
@@ -36,4 +29,16 @@ abstract class ButtonBase extends Component {
       highlight = false;
     });
   }
+
+  UINode build() {
+    return new EventListenerNode(
+      buildContent(),
+      onPointerDown: _handlePointerDown,
+      onPointerUp: _handlePointerUp,
+      onPointerCancel: _handlePointerCancel
+    );
+  }
+
+  UINode buildContent();
+
 }

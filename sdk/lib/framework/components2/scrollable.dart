@@ -23,9 +23,11 @@ abstract class ScrollClient {
 
 abstract class Scrollable extends Component {
 
-  Scrollable({Object key}) : super(key: key) {
+  Scrollable({Object key}) : super(key: key, stateful: true) {
     onDidUnmount(_stopSimulation);
   }
+
+  void syncFields(Scrollable source) { }
 
   double _scrollOffset = 0.0;
   double get scrollOffset => _scrollOffset;
