@@ -204,7 +204,7 @@ abstract class RenderObject extends AbstractNode {
 
   // EVENTS
 
-  void handleEvent(sky.Event event) {
+  void handleEvent(sky.Event event, HitTestEntry entry) {
     // override this if you have a client, to hand it to the client
     // override this if you want to do anything with the event
   }
@@ -253,13 +253,17 @@ abstract class RenderObject extends AbstractNode {
 
 }
 
+class HitTestEntry {
+  const HitTestEntry(this.target);
+
+  final RenderObject target;
+}
+
 class HitTestResult {
-  final List<RenderObject> path = new List<RenderObject>();
+  final List<HitTestEntry> path = new List<HitTestEntry>();
 
-  RenderObject get result => path.first;
-
-  void add(RenderObject node) {
-    path.add(node);
+  void add(HitTestEntry data) {
+    path.add(data);
   }
 }
 

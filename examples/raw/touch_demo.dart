@@ -42,7 +42,7 @@ class RenderTouchDemo extends RenderBox {
 
   RenderTouchDemo();
 
-  void handleEvent(sky.Event event) {
+  void handleEvent(Event event, BoxHitTestEntry entry) {
     switch (event.type) {
       case 'pointerdown':
         int color = colors[event.pointer.remainder(colors.length)];

@@ -165,6 +165,13 @@ class BoxConstraints {
   String toString() => "BoxConstraints($minWidth<=w<$maxWidth, $minHeight<=h<$maxHeight)";
 }
 
+class BoxHitTestEntry extends HitTestEntry {
+  const BoxHitTestEntry(RenderBox target, this.localPosition)
+    : super(target);
+
+  final Point localPosition;
+}
+
 class BoxParentData extends ParentData {
   Point _position = Point.origin;
   Point get position => _position;
@@ -225,7 +232,7 @@ abstract class RenderBox extends RenderObject {
 
   bool hitTest(HitTestResult result, { Point position }) {
     hitTestChildren(result, position: position);
-    result.add(this);
+    result.add(new BoxHitTestEntry(this, position));
     return true;
   }
   void hitTestChildren(HitTestResult result, { Point position }) { }
@@ -1073,7 +1080,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
       if (childBounds.contains(position))
         child.hitTest(result, position: position);
     }
-    result.add(this);
+    result.add(new HitTestEntry(this));
     return true;
   }
 

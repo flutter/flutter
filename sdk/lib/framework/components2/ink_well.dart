@@ -66,11 +66,11 @@ class RenderInkWell extends RenderProxyBox {
 
   final List<InkSplash> _splashes = new List<InkSplash>();
 
-  void handleEvent(sky.Event event) {
+  void handleEvent(sky.Event event, BoxHitTestEntry entry) {
     switch (event.type) {
       case 'gesturetapdown':
         // TODO(abarth): We should position the splash at the location of the tap.
-        _startSplash(event.primaryPointer, new Point(size.width / 2.0, size.height / 2.0));
+        _startSplash(event.primaryPointer, entry.localPosition);
         break;
       case 'gesturetap':
         _confirmSplash(event.primaryPointer);

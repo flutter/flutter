@@ -99,8 +99,8 @@ class AppView {
 
   void dispatchEvent(sky.Event event, HitTestResult result) {
     assert(result != null);
-    for (RenderObject node in result.path.reversed)
-      node.handleEvent(event);
+    for (HitTestEntry entry in result.path.reversed)
+      entry.target.handleEvent(event, entry);
   }
 
   String toString() => 'Render Tree:\n${_renderView}';

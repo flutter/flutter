@@ -1063,7 +1063,7 @@ class _AppView extends AppView {
   void dispatchEvent(sky.Event event, HitTestResult result) {
     super.dispatchEvent(event, result);
 
-    UINode target = RenderObjectWrapper._getMounted(result.path.first);
+    UINode target = RenderObjectWrapper._getMounted(result.path.first.target);
 
     // TODO(rafaelw): StopPropagation?
     while (target != null) {
