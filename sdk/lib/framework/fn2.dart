@@ -530,8 +530,6 @@ class CustomPaint extends OneChildRenderObjectWrapper {
 
 }
 
-final List<UINode> _emptyList = new List<UINode>();
-
 abstract class MultiChildRenderObjectWrapper extends RenderObjectWrapper {
 
   // In MultiChildRenderObjectWrapper subclasses, slots are RenderObject nodes
@@ -540,10 +538,8 @@ abstract class MultiChildRenderObjectWrapper extends RenderObjectWrapper {
   MultiChildRenderObjectWrapper({
     Object key,
     List<UINode> children
-  }) : this.children = children == null ? _emptyList : children,
-  super(
-    key: key
-  ) {
+  }) : this.children = children == null ? const [] : children,
+       super(key: key) {
     assert(!_debugHasDuplicateIds());
   }
 

@@ -51,8 +51,7 @@ same order (unless the order matters).
 
 All variables and arguments are typed; don't use "var", "dynamic", or
 "Object" in any case where you could figure out the actual type.
-Always specialise generic types where possible. Even for ```[]``` and
-```{}``` literals, include the types.
+Always specialise generic types where possible.
 
 Aim for a line length of 80 characters, but go over if breaking the
 line would make it less readable.
