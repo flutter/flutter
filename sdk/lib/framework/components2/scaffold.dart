@@ -20,13 +20,13 @@ class RenderScaffold extends RenderBox {
   RenderScaffold({
     RenderBox toolbar,
     RenderBox body,
-    RenderBox statusbar,
+    RenderBox statusBar,
     RenderBox drawer,
     RenderBox floatingActionButton
   }) {
     this[ScaffoldSlots.toolbar] = toolbar;
     this[ScaffoldSlots.body] = body;
-    this[ScaffoldSlots.statusBar] = statusbar;
+    this[ScaffoldSlots.statusBar] = statusBar;
     this[ScaffoldSlots.drawer] = drawer;
     this[ScaffoldSlots.floatingActionButton] = floatingActionButton;
   }
@@ -97,11 +97,11 @@ class RenderScaffold extends RenderBox {
       bodyHeight -= toolbarHeight;
     }
     if (_slots[ScaffoldSlots.statusBar] != null) {
-      RenderBox statusbar = _slots[ScaffoldSlots.statusBar];
-      statusbar.layout(new BoxConstraints.tight(new Size(size.width, kStatusbarHeight)));
-      assert(statusbar.parentData is BoxParentData);
-      statusbar.parentData.position = new Point(0.0, size.height - kStatusbarHeight);
-      bodyHeight -= kStatusbarHeight;
+      RenderBox statusBar = _slots[ScaffoldSlots.statusBar];
+      statusBar.layout(new BoxConstraints.tight(new Size(size.width, kStatusBarHeight)));
+      assert(statusBar.parentData is BoxParentData);
+      statusBar.parentData.position = new Point(0.0, size.height - kStatusBarHeight);
+      bodyHeight -= kStatusBarHeight;
     }
     if (_slots[ScaffoldSlots.body] != null) {
       RenderBox body = _slots[ScaffoldSlots.body];
@@ -162,19 +162,19 @@ class Scaffold extends RenderObjectWrapper {
     Object key,
     UINode toolbar,
     UINode body,
-    UINode statusbar,
+    UINode statusBar,
     UINode drawer,
     UINode floatingActionButton
   }) : _toolbar = toolbar,
        _body = body,
-       _statusbar = statusbar,
+       _statusBar = statusBar,
        _drawer = drawer,
        _floatingActionButton = floatingActionButton,
        super(key: key);
 
   UINode _toolbar;
   UINode _body;
-  UINode _statusbar;
+  UINode _statusBar;
   UINode _drawer;
   UINode _floatingActionButton;
 
@@ -196,8 +196,8 @@ class Scaffold extends RenderObjectWrapper {
       removeChild(_toolbar);
     if (_body != null)
       removeChild(_body);
-    if (_statusbar != null)
-      removeChild(_statusbar);
+    if (_statusBar != null)
+      removeChild(_statusBar);
     if (_drawer != null)
       removeChild(_drawer);
     if (_floatingActionButton != null)
@@ -209,7 +209,7 @@ class Scaffold extends RenderObjectWrapper {
     super.syncRenderObject(old);
     _toolbar = syncChild(_toolbar, old is Scaffold ? old._toolbar : null, ScaffoldSlots.toolbar);
     _body = syncChild(_body, old is Scaffold ? old._body : null, ScaffoldSlots.body);
-    _statusbar = syncChild(_statusbar, old is Scaffold ? old._statusbar : null, ScaffoldSlots.statusBar);
+    _statusBar = syncChild(_statusBar, old is Scaffold ? old._statusBar : null, ScaffoldSlots.statusBar);
     _drawer = syncChild(_drawer, old is Scaffold ? old._drawer : null, ScaffoldSlots.drawer);
     _floatingActionButton = syncChild(_floatingActionButton, old is Scaffold ? old._floatingActionButton : null, ScaffoldSlots.floatingActionButton);
   }
