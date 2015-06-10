@@ -5,7 +5,6 @@
 #include "sky/engine/config.h"
 #include "sky/engine/core/loader/CanvasImageDecoder.h"
 #include "sky/engine/core/painting/CanvasImage.h"
-#include "sky/engine/core/script/dom_dart_state.h"
 #include "sky/engine/platform/SharedBuffer.h"
 #include "sky/engine/platform/image-decoders/ImageDecoder.h"
 
@@ -18,8 +17,11 @@ PassRefPtr<CanvasImageDecoder> CanvasImageDecoder::create(
   return adoptRef(new CanvasImageDecoder(handle.Pass(), callback));
 }
 
-CanvasImageDecoder::CanvasImageDecoder(mojo::ScopedDataPipeConsumerHandle handle, PassOwnPtr<ImageDecoderCallback> callback)
+CanvasImageDecoder::CanvasImageDecoder(
+    mojo::ScopedDataPipeConsumerHandle handle,
+    PassOwnPtr<ImageDecoderCallback> callback)
   : callback_(callback) {
+  CHECK(callback_);
   buffer_ = SharedBuffer::create();
   drainer_ = adoptPtr(new mojo::common::DataPipeDrainer(this, handle.Pass()));
 }
@@ -35,14 +37,21 @@ void CanvasImageDecoder::OnDataComplete() {
   OwnPtr<ImageDecoder> decoder =
       ImageDecoder::create(*buffer_.get(), ImageSource::AlphaPremultiplied,
                            ImageSource::GammaAndColorProfileIgnored);
-  decoder->setData(buffer_.get(), true);
-  if (!decoder->failed() && decoder->frameCount() > 0) {
-    RefPtr<CanvasImage> resultImage = CanvasImage::create();
-    resultImage->setBitmap(decoder->frameBufferAtIndex(0)->getSkBitmap());
-    callback_->handleEvent(resultImage.get());
-  } else {
+  // decoder can be null if the buffer we was empty and we couldn't even guess
+  // what type of image to decode.
+  if (!decoder) {
     callback_->handleEvent(nullptr);
+    return;
   }
+  decoder->setData(buffer_.get(), true);
+  if (decoder->failed() || decoder->frameCount() == 0) {
+    callback_->handleEvent(nullptr);
+    return;
+  }
+
+  RefPtr<CanvasImage> resultImage = CanvasImage::create();
+  resultImage->setBitmap(decoder->frameBufferAtIndex(0)->getSkBitmap());
+  callback_->handleEvent(resultImage.get());
 }
 
 }  // namespace blink

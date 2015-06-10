@@ -13,6 +13,12 @@ final HashMap<String, List<ImageDecoderCallback>> _pendingRequests =
 final HashMap<String, Image> _completedRequests =
   new HashMap<String, Image>();
 
+void _loadComplete(url, image) {
+  _completedRequests[url] = image;
+  _pendingRequests[url].forEach((c) => c(image));
+  _pendingRequests.remove(url);
+}
+
 void load(String url, ImageDecoderCallback callback) {
   Image result = _completedRequests[url];
   if (result != null) {
@@ -27,11 +33,12 @@ void load(String url, ImageDecoderCallback callback) {
   }).add(callback);
   if (newRequest) {
     fetchUrl(url).then((UrlResponse response) {
-      new ImageDecoder(response.body.handle.h, (image) {
-        _completedRequests[url] = image;
-        _pendingRequests[url].forEach((c) => c(image));
-        _pendingRequests.remove(url);
-      });
+      if (response.statusCode >= 400) {
+        _loadComplete(url, null);
+        return;
+      }
+      new ImageDecoder(response.body.handle.h,
+          (image) => _loadComplete(url, image));
     });
   }
 }
