@@ -6,6 +6,7 @@ import 'dart:sky';
 import 'package:sky/framework/app.dart';
 import 'package:sky/framework/rendering/box.dart';
 import 'package:sky/framework/rendering/flex.dart';
+import 'package:sky/framework/theme2/colors.dart';
 import 'package:sky/framework/theme2/shadows.dart';
 
 AppView app;
@@ -13,7 +14,9 @@ AppView app;
 void main() {
   var coloredBox = new RenderDecoratedBox(
     decoration: new BoxDecoration(
-      backgroundColor: const Color(0xFFFAFAFA),
+      gradient: new RadialGradient(
+        center: Point.origin, radius: 500.0,
+        colors: [Yellow[500], Blue[500]]),
       boxShadow: Shadow[3])
   );
   var paddedBox = new RenderPadding(
