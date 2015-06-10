@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "sky/shell/android/platform_view.h"
+#include "sky/shell/android/platform_view_android.h"
 
 #include <android/input.h>
 #include <android/native_window_jni.h>
@@ -10,7 +10,7 @@
 #include "base/android/jni_android.h"
 #include "base/bind.h"
 #include "base/location.h"
-#include "jni/PlatformView_jni.h"
+#include "jni/PlatformViewAndroid_jni.h"
 #include "sky/shell/shell.h"
 
 namespace sky {
@@ -25,32 +25,20 @@ static jlong Attach(JNIEnv* env, jclass clazz, jint viewportObserverHandle) {
 }
 
 // static
-bool PlatformView::Register(JNIEnv* env) {
+bool PlatformViewAndroid::Register(JNIEnv* env) {
   return RegisterNativesImpl(env);
 }
 
-PlatformView::PlatformView(const Config& config)
-    : config_(config), window_(nullptr) {
-}
-
-PlatformView::~PlatformView() {
+PlatformViewAndroid::~PlatformViewAndroid() {
   if (window_)
     ReleaseWindow();
 }
 
-void PlatformView::ConnectToViewportObserver(
-    mojo::InterfaceRequest<ViewportObserver> request) {
-  config_.ui_task_runner->PostTask(
-      FROM_HERE,
-      base::Bind(&UIDelegate::ConnectToViewportObserver, config_.ui_delegate,
-                 base::Passed(&request)));
-}
-
-void PlatformView::Detach(JNIEnv* env, jobject obj) {
+void PlatformViewAndroid::Detach(JNIEnv* env, jobject obj) {
   DCHECK(!window_);
 }
 
-void PlatformView::SurfaceCreated(JNIEnv* env, jobject obj, jobject jsurface) {
+void PlatformViewAndroid::SurfaceCreated(JNIEnv* env, jobject obj, jobject jsurface) {
   base::android::ScopedJavaLocalRef<jobject> protector(env, jsurface);
   // Note: This ensures that any local references used by
   // ANativeWindow_fromSurface are released immediately. This is needed as a
@@ -59,20 +47,16 @@ void PlatformView::SurfaceCreated(JNIEnv* env, jobject obj, jobject jsurface) {
     base::android::ScopedJavaLocalFrame scoped_local_reference_frame(env);
     window_ = ANativeWindow_fromSurface(env, jsurface);
   }
-  config_.ui_task_runner->PostTask(
-      FROM_HERE, base::Bind(&UIDelegate::OnAcceleratedWidgetAvailable,
-                            config_.ui_delegate, window_));
+  SurfaceWasCreated();
 }
 
-void PlatformView::SurfaceDestroyed(JNIEnv* env, jobject obj) {
+void PlatformViewAndroid::SurfaceDestroyed(JNIEnv* env, jobject obj) {
   DCHECK(window_);
-  config_.ui_task_runner->PostTask(
-      FROM_HERE,
-      base::Bind(&UIDelegate::OnOutputSurfaceDestroyed, config_.ui_delegate));
+  SurfaceWasDestroyed();
   ReleaseWindow();
 }
 
-void PlatformView::ReleaseWindow() {
+void PlatformViewAndroid::ReleaseWindow() {
   ANativeWindow_release(window_);
   window_ = nullptr;
 }

@@ -15,7 +15,7 @@ import android.view.WindowManager;
  */
 public class SkyActivity extends Activity {
     private TracingController mTracingController;
-    private PlatformView mView;
+    private PlatformViewAndroid mView;
 
     /**
      * @see android.app.Activity#onCreate(android.os.Bundle)
@@ -33,7 +33,7 @@ public class SkyActivity extends Activity {
                 | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
 
         SkyMain.ensureInitialized(getApplicationContext());
-        mView = new PlatformView(this);
+        mView = new PlatformViewAndroid(this);
         setContentView(mView);
         mTracingController = new TracingController(this);
     }

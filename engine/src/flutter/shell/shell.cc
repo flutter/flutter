@@ -9,8 +9,7 @@
 #include "mojo/common/message_pump_mojo.h"
 #include "mojo/edk/embedder/embedder.h"
 #include "mojo/edk/embedder/simple_platform_support.h"
-#include "sky/shell/android/platform_service_provider.h"
-#include "sky/shell/android/platform_view.h"
+#include "sky/shell/platform_view.h"
 #include "sky/shell/gpu/rasterizer.h"
 #include "sky/shell/ui/engine.h"
 
