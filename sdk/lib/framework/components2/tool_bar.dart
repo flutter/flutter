@@ -35,15 +35,11 @@ class ToolBar extends Component {
     if (right != null)
       children.addAll(right);
 
-    // TODO(hansmuller): use align-items:flex-end when Flex supports it.
-    UINode bottomJustifiedChild = new Flex([
-        new Container(child: new Flex(children), height: kToolBarHeight)
-      ],
-      direction: FlexDirection.vertical,
-      justifyContent: FlexJustifyContent.flexEnd);
-
     return new Container(
-      child: bottomJustifiedChild,
+      child: new Flex(
+        [new Container(child: new Flex(children), height: kToolBarHeight)],
+        alignItems: FlexAlignItems.flexEnd
+      ),
       padding: new EdgeDims.symmetric(horizontal: 8.0),
       decoration: new BoxDecoration(
         backgroundColor: backgroundColor,

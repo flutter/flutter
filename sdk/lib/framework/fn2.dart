@@ -787,7 +787,8 @@ class Flex extends MultiChildRenderObjectWrapper {
   Flex(List<UINode> children, {
     Object key,
     this.direction: FlexDirection.horizontal,
-    this.justifyContent: FlexJustifyContent.flexStart
+    this.justifyContent: FlexJustifyContent.flexStart,
+    this.alignItems: FlexAlignItems.center
   }) : super(key: key, children: children);
 
   RenderFlex get root { RenderFlex result = super.root; return result; }
@@ -795,11 +796,13 @@ class Flex extends MultiChildRenderObjectWrapper {
 
   final FlexDirection direction;
   final FlexJustifyContent justifyContent;
+  final FlexAlignItems alignItems;
 
   void syncRenderObject(UINode old) {
     super.syncRenderObject(old);
     root.direction = direction;
     root.justifyContent = justifyContent;
+    root.alignItems = alignItems;
   }
 
 }
