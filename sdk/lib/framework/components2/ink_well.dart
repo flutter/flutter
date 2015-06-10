@@ -8,29 +8,29 @@ import '../fn2.dart';
 import '../rendering/box.dart';
 import '../rendering/flex.dart';
 import '../rendering/object.dart';
-import '../theme/view_configuration.dart' as config;
 import 'dart:async';
 import 'dart:collection';
 import 'dart:math' as math;
 import 'dart:sky' as sky;
 
 const int _kSplashInitialOpacity = 0x80;
-const double _kSplashInitialSize = 0.0;
-const double _kSplashConfirmedDuration = 350.0;
-const double _kSplashUnconfirmedDuration = config.kDefaultLongPressTimeout;
 const double _kSplashInitialDelay = 0.0; // we could delay initially in case the user scrolls
+const double _kSplashInitialSize = 0.0;
+const double _kSplashConfirmedVelocity = 0.3;
+const double _kSplashUnconfirmedVelocity = 0.1;
 
 double _getSplashTargetSize(Size bounds, Point position) {
-  return 2.0 * math.max(math.max(position.x, bounds.width - position.x),
-                        math.max(position.y, bounds.height - position.y));
+  return math.max(math.max(position.x, bounds.width - position.x),
+                  math.max(position.y, bounds.height - position.y));
 }
 
 class InkSplash {
   InkSplash(this.pointer, this.position, this.well) {
     _targetRadius = _getSplashTargetSize(well.size, position);
+    double duration = _targetRadius / _kSplashUnconfirmedVelocity;
     _radius = new AnimatedValue(_kSplashInitialSize, onChange: _handleRadiusChange);
-    _radius.animateTo(_targetRadius, _kSplashUnconfirmedDuration,
-                      curve: easeOut, initialDelay: _kSplashInitialDelay);
+    _radius.animateTo(_targetRadius, duration, curve: easeOut,
+                      initialDelay: _kSplashInitialDelay);
   }
 
   final int pointer;
@@ -41,8 +41,7 @@ class InkSplash {
   AnimatedValue _radius;
 
   void confirm() {
-    double fractionRemaining = (_targetRadius - _radius.value) / _targetRadius;
-    double duration = fractionRemaining * _kSplashConfirmedDuration;
+    double duration = (_targetRadius - _radius.value) / _kSplashConfirmedVelocity;
     if (duration <= 0.0)
       return;
     _radius.animateTo(_targetRadius, duration, curve: easeOut);
