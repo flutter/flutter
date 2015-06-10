@@ -70,9 +70,9 @@ abstract class UINode {
       for (UINode node in _mountedChanged) {
         if (node._wasMounted != node._mounted) {
           if (node._mounted)
-            node._didMount();
+            node.didMount();
           else
-            node._didUnmount();
+            node.didUnmount();
           node._wasMounted = node._mounted;
         }
       }
@@ -81,8 +81,8 @@ abstract class UINode {
       _notifyingMountStatus = false;
     }
   }
-  void _didMount() { }
-  void _didUnmount() { }
+  void didMount() { }
+  void didUnmount() { }
 
   RenderObject root;
 
@@ -886,36 +886,9 @@ abstract class Component extends UINode {
   UINode _built;
   dynamic _slot; // cached slot from the last time we were synced
 
-  List<Function> _mountCallbacks;
-  List<Function> _unmountCallbacks;
-
-  void onDidMount(Function fn) {
-    if (_mountCallbacks == null)
-      _mountCallbacks = new List<Function>();
-
-    _mountCallbacks.add(fn);
-  }
-
-  void onDidUnmount(Function fn) {
-    if (_unmountCallbacks == null)
-      _unmountCallbacks = new List<Function>();
-
-    _unmountCallbacks.add(fn);
-  }
-
-  void _didMount() {
+  void didMount() {
     assert(!_disqualifiedFromEverAppearingAgain);
-    super._didMount();
-    if (_mountCallbacks != null)
-      for (Function fn in _mountCallbacks)
-        fn();
-  }
-
-  void _didUnmount() {
-    super._didUnmount();
-    if (_unmountCallbacks != null)
-      for (Function fn in _unmountCallbacks)
-        fn();
+    super.didMount();
   }
 
   void remove() {

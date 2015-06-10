@@ -23,9 +23,7 @@ abstract class ScrollClient {
 
 abstract class Scrollable extends Component {
 
-  Scrollable({Object key}) : super(key: key, stateful: true) {
-    onDidUnmount(_stopSimulation);
-  }
+  Scrollable({Object key}) : super(key: key, stateful: true);
 
   void syncFields(Scrollable source) { }
 
@@ -100,6 +98,11 @@ abstract class Scrollable extends Component {
   bool scrollBy(double scrollDelta) {
     var newScrollOffset = scrollBehavior.applyCurve(_scrollOffset, scrollDelta);
     return scrollTo(newScrollOffset);
+  }
+
+  void didUnmount() {
+    _stopSimulation();
+    super.didUnmount();
   }
 
   void _stopSimulation() {

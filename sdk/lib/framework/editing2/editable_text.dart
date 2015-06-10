@@ -9,6 +9,9 @@ import 'editable_string.dart';
 
 class EditableText extends Component {
 
+  EditableText({Object key, this.value, this.focused})
+      : super(key: key, stateful: true);
+
   // static final Style _cursorStyle = new Style('''
   //   width: 2px;
   //   height: 1.2em;
@@ -22,16 +25,14 @@ class EditableText extends Component {
 
   EditableString value;
   bool focused;
+
+  void syncFields(EditableText source) {
+    value = source.value;
+    focused = source.focused;
+  }
+
   Timer _cursorTimer;
   bool _showCursor = false;
-
-  EditableText({Object key, this.value, this.focused})
-      : super(key: key, stateful: true) {
-    onDidUnmount(() {
-      if (_cursorTimer != null)
-        _stopCursorTimer();
-    });
-  }
 
   void _cursorTick(Timer timer) {
     setState(() {
@@ -43,6 +44,12 @@ class EditableText extends Component {
     _showCursor = true;
     _cursorTimer = new Timer.periodic(
         new Duration(milliseconds: 500), _cursorTick);
+  }
+
+  void didUnmount() {
+    if (_cursorTimer != null)
+      _stopCursorTimer();
+    super.didUnmount();
   }
 
   void _stopCursorTimer() {

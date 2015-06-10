@@ -57,7 +57,6 @@ class PopupMenu extends AnimatedComponent {
     animate(controller.position, (double value) {
       _position = value;
     });
-    // onDidMount(_measureSize);
   }
 
   PopupMenuController controller;
@@ -92,6 +91,11 @@ class PopupMenu extends AnimatedComponent {
   //     opacity: ${math.min(1.0, _position * 3.0)};
   //     width: ${math.min(_width, _width * (0.5 + _position * 2.0))}px;
   //     height: ${math.min(_height, _height * _position * 1.5)}px;''';
+  // }
+
+  // void didMount() {
+  //   _measureSize();
+  //   super.didMount();
   // }
 
   // void _measureSize() {

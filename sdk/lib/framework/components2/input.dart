@@ -20,12 +20,10 @@ class Input extends Component {
          this.onChanged,
          this.focused})
       : super(key: key, stateful: true) {
-    _editableValue = new EditableString(text: _value,
-                                        onUpdated: _handleTextUpdated);
-    onDidUnmount(() {
-      if (_isAttachedToKeyboard)
-        keyboard.hide();
-    });
+    _editableValue = new EditableString(
+      text: _value,
+      onUpdated: _handleTextUpdated
+    );
   }
 
   // static final Style _style = new Style('''
@@ -58,7 +56,6 @@ class Input extends Component {
     placeholder = source.placeholder;
     onChanged = source.onChanged;
     focused = source.focused;
-    super.syncFields(source);
   }
 
   String _value = '';
@@ -100,6 +97,12 @@ class Input extends Component {
       ),
       onPointerDown: (sky.Event e) => keyboard.showByRequest()
     );
+  }
+
+  void didUnmount() {
+    if (_isAttachedToKeyboard)
+      keyboard.hide();
+    super.didUnmount();
   }
 
 }
