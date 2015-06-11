@@ -13,20 +13,33 @@ group("sky") {
     "//sky/engine/platform:platform_unittests",
     "//sky/engine/web:sky_unittests",
     "//sky/engine/wtf:unittests",
-    "//sky/sdk",
     "//sky/tools/imagediff",
     "//sky/tools/tester",
     "//sky/viewer",
+    ":sky_apk",
   ]
 
   if (is_android) {
-    deps += [
-      "//sky/apk/demo",
-      "//sky/apk/stocks",
-    ]
+    deps += [ "//sky/apk/stocks" ]
   }
 
   if (!is_android) {
     deps += [ "//third_party/mesa:osmesa" ]
+  }
+}
+
+group("sky_apk") {
+  testonly = true
+
+  deps = [
+    "//mojo/dart/mojo_services",
+    "//mojo/dart/mojom",
+    "//mojo/public/dart:mojo",
+    "//sky/sdk",
+    "//third_party/dart-pkg",
+  ]
+
+  if (is_android) {
+    deps += [ "//sky/apk/demo" ]
   }
 }
