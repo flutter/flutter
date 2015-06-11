@@ -1,0 +1,10 @@
+#!mojo mojo:sky_viewer
+<sky>
+<script>
+import 'sky_home.dart';
+
+void main() {
+  new SkyHome();
+}
+</script>
+</sky>
