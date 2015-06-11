@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:sky/framework/fn2.dart';
+import 'package:sky/framework/widgets/wrappers.dart';
 
 class HelloWorldApp extends App {
   UINode build() {
