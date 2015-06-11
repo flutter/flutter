@@ -19,6 +19,7 @@ enum EventType {
   GESTURE_SHOW_PRESS,
   GESTURE_TAP,
   GESTURE_TAP_DOWN,
+  BACK,
 };
 
 enum PointerKind {

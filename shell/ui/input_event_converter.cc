@@ -104,6 +104,12 @@ scoped_ptr<blink::WebInputEvent> BuildWebGestureEvent(
   return web_event.Pass();
 }
 
+scoped_ptr<blink::WebInputEvent> BuildWebBackEvent(const InputEventPtr& event) {
+  scoped_ptr<blink::WebInputEvent> web_event(blink::WebInputEvent::create());
+  web_event->type = blink::WebInputEvent::Back;
+  return web_event.Pass();
+}
+
 }  // namespace
 
 scoped_ptr<blink::WebInputEvent> ConvertEvent(const InputEventPtr& event,
@@ -124,6 +130,8 @@ scoped_ptr<blink::WebInputEvent> ConvertEvent(const InputEventPtr& event,
     case EVENT_TYPE_GESTURE_TAP:
     case EVENT_TYPE_GESTURE_TAP_DOWN:
       return BuildWebGestureEvent(event, device_pixel_ratio);
+    case EVENT_TYPE_BACK:
+      return BuildWebBackEvent(event);
     case EVENT_TYPE_UNKNOWN:
       NOTIMPLEMENTED() << "ConvertEvent received unexpected EVENT_TYPE_UNKNOWN";
   }

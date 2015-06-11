@@ -48,6 +48,17 @@ public class SkyActivity extends Activity {
         super.onDestroy();
     }
 
+    @Override
+    public void onBackPressed() {
+        if (mView != null) {
+            mView.onBackPressed();
+            // TODO(abarth): We should have some way to trigger the default
+            // back behavior.
+            return;
+        }
+        super.onBackPressed();
+    }
+
     public void loadUrl(String url) {
         mView.loadUrl(url);
     }

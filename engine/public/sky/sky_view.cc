@@ -91,6 +91,8 @@ void SkyView::HandleInputEvent(const WebInputEvent& inputEvent) {
   } else if (WebInputEvent::isWheelEventType(inputEvent.type)) {
       const WebWheelEvent& event = static_cast<const WebWheelEvent&>(inputEvent);
       data_->view_->handleInputEvent(WheelEvent::create(event));
+  } else if (inputEvent.type == WebInputEvent::Back) {
+      data_->view_->handleInputEvent(Event::create("back"));
   }
 
 }

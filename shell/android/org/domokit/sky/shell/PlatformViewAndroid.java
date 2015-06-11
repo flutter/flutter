@@ -176,6 +176,12 @@ public class PlatformViewAndroid extends SurfaceView
         mViewportObserver.onInputEvent(event);
     }
 
+    public void onBackPressed() {
+        InputEvent event = new InputEvent();
+        event.type = EventType.BACK;
+        mViewportObserver.onInputEvent(event);
+    }
+
     public void loadUrl(String url) {
         mViewportObserver.loadUrl(url);
     }

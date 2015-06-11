@@ -123,6 +123,8 @@ public:
         GestureTypeLast = GesturePinchUpdate,
 
         WheelEvent,
+
+        Back,
     };
 
     enum Modifiers {
@@ -185,6 +187,10 @@ public:
     static bool isWheelEventType(int type)
     {
         return type == WheelEvent;
+    }
+
+    static WebInputEvent* create() {
+        return new WebInputEvent(sizeof(WebInputEvent));
     }
 
 protected:
