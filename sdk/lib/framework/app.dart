@@ -16,7 +16,7 @@ class PointerState {
 
 class AppView {
 
-  AppView([RenderBox root = null]) {
+  AppView({ RenderBox root: null, RenderView renderViewOverride }) {
     assert(_app == null);
     _app = this;
 
@@ -25,10 +25,15 @@ class AppView {
     scheduler.init();
     scheduler.addPersistentFrameCallback(_beginFrame);
 
-    _renderView = new RenderView(child: root);
-    _renderView.attach();
-    _renderView.rootConstraints = _viewConstraints;
-    _renderView.scheduleInitialLayout();
+    if (renderViewOverride == null) {
+      _renderView = new RenderView(child: root);
+      _renderView.attach();
+      _renderView.rootConstraints = _viewConstraints;
+      _renderView.scheduleInitialLayout();
+    } else {
+      _renderView = renderViewOverride;
+    }
+    assert(_renderView != null);
 
     assert(_app == this);
   }

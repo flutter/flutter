@@ -1,14 +1,14 @@
-import '../resources/third_party/unittest/unittest.dart';
-import '../resources/unit.dart';
-import '../resources/display_list.dart';
 import 'dart:math' as math;
 import 'dart:sky' as sky;
+
 import 'package:sky/framework/app.dart';
-import 'package:sky/framework/rendering/box.dart';
 import 'package:sky/framework/rendering/block.dart';
+import 'package:sky/framework/rendering/box.dart';
 import 'package:sky/framework/rendering/object.dart';
 
-TestApp app;
+import '../resources/display_list.dart';
+import '../resources/third_party/unittest/unittest.dart';
+import '../resources/unit.dart';
 
 void main() {
   initUnit();
@@ -19,6 +19,6 @@ void main() {
     var padding = new RenderPadding(padding: new EdgeDims.all(50.0), child: inner);
     var block = new RenderBlock(children: [padding]);
     var outer = new RenderDecoratedBox(decoration: new BoxDecoration(backgroundColor: const sky.Color(0xFF0000FF)), child: block);
-    app = new TestApp(outer);
+    new TestRenderView(outer);
   });
 }

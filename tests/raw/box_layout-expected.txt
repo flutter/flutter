@@ -1,16 +1,16 @@
 CONSOLE: unittest-suite-wait-for-done
-CONSOLE: TestView enabled
+CONSOLE: TestRenderView enabled
 CONSOLE: 
 PAINT FOR FRAME #1 ----------------------------------------------
 1 | TestDisplayList() constructor: 800.0 x 600.0
-1 | paintChild at 0.0,0.0
+1 | paintChild RenderDecoratedBox at Point(0.0, 0.0)
 1 |  | TestDisplayList() constructor: 800.0 x 600.0
-1 |  | drawRect(0.0:0.0:600.0:800.0, Paint(Color(0xff0000ff)))
-1 |  | paintChild at 0.0,0.0
+1 |  | drawRect(Rect.fromLTRB(0.0, 0.0, 800.0, 600.0), Paint(Color(0xff0000ff)))
+1 |  | paintChild RenderPadding at Point(0.0, 0.0)
 1 |  |  | TestDisplayList() constructor: 800.0 x 600.0
-1 |  |  | paintChild at 50.0,50.0
+1 |  |  | paintChild RenderDecoratedBox at Point(50.0, 50.0)
 1 |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
-1 |  |  |  | drawRect(0.0:0.0:100.0:700.0, Paint(Color(0xff00ff00)))
+1 |  |  |  | drawRect(Rect.fromLTRB(0.0, 0.0, 700.0, 100.0), Paint(Color(0xff00ff00)))
 ------------------------------------------------------------------------
 CONSOLE: PASS: padding
 CONSOLE: 

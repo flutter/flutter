@@ -1,0 +1,59 @@
+CONSOLE: TestRenderView enabled
+CONSOLE: 
+PAINT FOR FRAME #1 ----------------------------------------------
+1 | TestDisplayList() constructor: 800.0 x 600.0
+------------------------------------------------------------------------
+CONSOLE: unittest-suite-wait-for-done
+CONSOLE: 
+PAINT FOR FRAME #2 ----------------------------------------------
+2 | TestDisplayList() constructor: 800.0 x 600.0
+2 | paintChild RenderStack at Point(0.0, 0.0)
+2 |  | TestDisplayList() constructor: 800.0 x 600.0
+2 |  | paintChild RenderScaffold at Point(0.0, 0.0)
+2 |  |  | TestDisplayList() constructor: 800.0 x 600.0
+2 |  |  | paintChild RenderSizeObserver at Point(0.0, 81.0)
+2 |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+2 |  |  |  | save
+2 |  |  |  | clipRect(Rect.fromLTRB(0.0, 0.0, 800.0, 519.0))
+2 |  |  |  | drawRect(Rect.fromLTRB(0.0, 0.0, 800.0, 519.0), Paint(Color(0xffffffff)))
+2 |  |  |  | save
+2 |  |  |  | concat([1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0])
+2 |  |  |  | restore
+2 |  |  |  | restore
+2 |  |  | paintChild RenderDecoratedBox at Point(0.0, 0.0)
+2 |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+2 |  |  |  | drawRect(Rect.fromLTRB(0.0, 0.0, 800.0, 81.0), Paint(Color(0xff9c27b0)))
+2 |  |  |  | paintChild RenderFlex at Point(8.0, 0.0)
+2 |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+2 |  |  |  |  | paintChild RenderSizedBox at Point(0.0, 25.0)
+2 |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+2 |  |  |  |  |  | paintChild RenderPadding at Point(0.0, 8.0)
+2 |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  | paintChild RenderImage at Point(8.0, 8.0)
+2 |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+2 |  |  |  |  |  | paintChild RenderPadding at Point(40.0, 18.5)
+2 |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  | paintChild RenderParagraph at Point(24.0, 0.0)
+2 |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+2 |  |  |  |  |  | paintChild RenderPadding at Point(704.0, 8.0)
+2 |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  | paintChild RenderImage at Point(8.0, 8.0)
+2 |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+2 |  |  |  |  |  | paintChild RenderPadding at Point(744.0, 8.0)
+2 |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  | paintChild RenderImage at Point(8.0, 8.0)
+2 |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+2 |  |  | paintChild RenderCustomPaint at Point(728.0, 528.0)
+2 |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+2 |  |  |  | drawCircle(28.0, 28.0, 28.0, Paint(Color(0xfff44336)))
+2 |  |  |  | saveLayer(Rect.fromLTRB(0.0, 0.0, 56.0, 56.0), Paint(Color(0xff000000)))
+2 |  |  |  | clipPath(Instance of 'Path')
+2 |  |  |  | paintChild RenderImage at Point(16.0, 16.0)
+2 |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+2 |  |  |  | restore
+------------------------------------------------------------------------
+CONSOLE: PASS: launching stock app
+CONSOLE: 
+CONSOLE: All 1 tests passed.
+CONSOLE: unittest-suite-success
+DONE

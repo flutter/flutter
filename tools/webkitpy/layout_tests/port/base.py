@@ -247,11 +247,7 @@ class Port(object):
         return False
 
     def default_timeout_ms(self):
-        # TODO(esprehn): Remove this hack.
-        timeout_ms = 30 * 1000
-        # if self.get_option('configuration') == 'Debug':
-        #     # Debug is usually 2x-3x slower than Release.
-        #     return 3 * timeout_ms
+        timeout_ms = 4000
         return timeout_ms
 
     def driver_stop_timeout(self):

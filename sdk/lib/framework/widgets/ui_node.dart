@@ -747,15 +747,15 @@ abstract class MultiChildRenderObjectWrapper extends RenderObjectWrapper {
 
 class UINodeAppView extends AppView {
 
-  UINodeAppView() {
+  UINodeAppView({ RenderView renderViewOverride: null })
+      : super(renderViewOverride: renderViewOverride) {
     assert(_appView == null);
   }
 
   static UINodeAppView _appView;
   static AppView get appView => _appView;
-  static void initUINodeAppView() {
-    if (_appView == null)
-      _appView = new UINodeAppView();
+  static void initUINodeAppView({ RenderView renderViewOverride: null }) {
+    _appView = new UINodeAppView(renderViewOverride: renderViewOverride);
   }
 
   void dispatchEvent(sky.Event event, HitTestResult result) {
@@ -778,8 +778,8 @@ class UINodeAppView extends AppView {
 
 abstract class AbstractUINodeRoot extends Component {
 
-  AbstractUINodeRoot() : super(stateful: true) {
-    UINodeAppView.initUINodeAppView();
+  AbstractUINodeRoot({ RenderView renderViewOverride }) : super(stateful: true) {
+    UINodeAppView.initUINodeAppView(renderViewOverride: renderViewOverride);
     _mounted = true;
     _scheduleComponentForRender(this);
   }
@@ -800,7 +800,7 @@ abstract class AbstractUINodeRoot extends Component {
 
 abstract class App extends AbstractUINodeRoot {
 
-  App();
+  App({ RenderView renderViewOverride }) : super(renderViewOverride: renderViewOverride);
 
   void _buildIfDirty() {
     super._buildIfDirty();
@@ -821,7 +821,7 @@ class RenderObjectToUINodeAdapter extends AbstractUINodeRoot {
   RenderObjectToUINodeAdapter(
     RenderObjectWithChildMixin<RenderBox> container,
     this.builder
-  ) : _container = container {
+  ) : _container = container, super() {
     assert(builder != null);
   }
 
