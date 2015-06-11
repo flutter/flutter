@@ -25,8 +25,6 @@ class PlatformViewAndroid : public PlatformView {
  private:
   void ReleaseWindow();
 
-  ANativeWindow* window_;
-
   DISALLOW_COPY_AND_ASSIGN(PlatformViewAndroid);
 };
 
