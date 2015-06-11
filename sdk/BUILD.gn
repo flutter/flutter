@@ -98,6 +98,7 @@ dart_pkg("sdk") {
     "lib/framework/net/fetch.dart",
     "lib/framework/net/image_cache.dart",
     "lib/framework/node.dart",
+    "lib/framework/painting/box_painter.dart",
     "lib/framework/painting/shadows.dart",
     "lib/framework/reflect.dart",
     "lib/framework/rendering/block.dart",
