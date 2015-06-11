@@ -55,7 +55,7 @@ class Sprite extends NodeWithSize {
       Paint paint = new Paint();
       paint.setARGB((255.0*_opacity).toInt(), 255, 255, 255);
       if (colorOverlay != null) {
-        paint.setColorFilter(new ColorFilter.Mode(colorOverlay, TransferMode.srcATopMode));
+        paint.setColorFilter(new ColorFilter.mode(colorOverlay, TransferMode.srcATopMode));
       }
       if (transferMode != null) {
         paint.setTransferMode(transferMode);
