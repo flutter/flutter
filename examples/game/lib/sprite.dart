@@ -53,7 +53,7 @@ class Sprite extends NodeWithSize {
 
       // Setup paint object for opacity and transfer mode
       Paint paint = new Paint();
-      paint.color = Color.fromARGB((255.0*_opacity).toInt(), 255, 255, 255);
+      paint.color = new Color.fromARGB((255.0*_opacity).toInt(), 255, 255, 255);
       if (colorOverlay != null) {
         paint.setColorFilter(new ColorFilter.mode(colorOverlay, TransferMode.srcATopMode));
       }
@@ -66,7 +66,7 @@ class Sprite extends NodeWithSize {
     else {
       // Paint a red square for missing texture
       canvas.drawRect(new Rect.fromLTRB(0.0, 0.0, size.width, size.height),
-          new Paint()..color = Color.fromARGB(255, 255, 0, 0));
+          new Paint()..color = const Color.fromARGB(255, 255, 0, 0));
     }
     canvas.restore();
   }

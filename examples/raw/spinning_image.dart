@@ -19,7 +19,7 @@ void beginFrame(double timeStamp) {
   canvas.translate(view.width / 2.0, view.height / 2.0);
   canvas.rotate(math.PI * delta / 1800);
   canvas.scale(0.2, 0.2);
-  Paint paint = new Paint()..color = Color.fromARGB(255, 0, 255, 0);
+  Paint paint = new Paint()..color = const Color.fromARGB(255, 0, 255, 0);
   if (image != null)
     canvas.drawImage(image, -image.width / 2.0, -image.height / 2.0, paint);
   view.picture = canvas.endRecording();

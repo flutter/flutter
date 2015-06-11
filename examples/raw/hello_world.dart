@@ -12,7 +12,7 @@ Picture draw(int a, int r, int g, int b) {
   PictureRecorder recorder = new PictureRecorder(width, height);
   double radius = min(width, height) * 0.45;
 
-  Paint paint = new Paint()..color = Color.fromARGB(a, r, g, b);
+  Paint paint = new Paint()..color = new Color.fromARGB(a, r, g, b);
   recorder.drawCircle(width / 2, height / 2, radius, paint);
   return recorder.endRecording();
 }

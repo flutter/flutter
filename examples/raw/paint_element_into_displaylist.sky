@@ -11,7 +11,7 @@ void main() {
   double width = window.innerWidth.toDouble();
   double height = window.innerHeight.toDouble();
   PictureRecorder recorder = new PictureRecorder(width, height);
-  Paint paint = new Paint()..color = Color.fromARGB(255, 0, 255, 0);
+  Paint paint = new Paint()..color = const Color.fromARGB(255, 0, 255, 0);
   recorder.drawCircle(50.0, 50.0, 50.0, paint);
   recorder.translate(10.0, 10.0);
   root.paint(recorder);
