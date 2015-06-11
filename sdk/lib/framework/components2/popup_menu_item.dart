@@ -12,11 +12,15 @@ class PopupMenuItem extends Component {
   final double opacity;
 
   UINode build() {
-    return new Container(
-      constraints: const BoxConstraints(minWidth: 112.0),
-      padding: const EdgeDims.all(16.0),
-      // TODO(abarth): opacity: opacity,
-      child: new Flex(children)
+    return new Opacity(
+      opacity: opacity,
+      child: new InkWell(
+        children: [new Container(
+          constraints: const BoxConstraints(minWidth: 112.0),
+          padding: const EdgeDims.all(16.0),
+          child: new Flex(children)
+        )]
+      )
     );
   }
 }

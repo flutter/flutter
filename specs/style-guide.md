@@ -19,9 +19,9 @@ Use assert()s liberally.
 
 Types (i.e. classes, typedefs (function signature definitions) and
 enums) are named UpperCamelCase. Everything else (methods, fields,
-variables, constants, enum values, etc) is lowerCamelCase. Global
-double and string constants are prefixed with k. Prefer using a static
-const in a relevant class than using a global constant.
+variables, constants, enum values, etc) is lowerCamelCase. Constant
+doubles and strings are prefixed with k. Prefer using a local const
+or a static const in a relevant class than using a global constant.
 
 Don't name your libraries (no ```library``` keyword). Name the files
 in ```lower_under_score.dart``` format.

@@ -30,7 +30,7 @@ class FloatingActionButton extends Component {
 
     return new Material(
       content: new CustomPaint(
-        callback: (sky.Canvas canvas) {
+        callback: (sky.Canvas canvas, Size size) {
           const double radius = _kSize / 2.0;
           sky.Paint paint = new sky.Paint()..color = Red[500];
           var builder = new ShadowDrawLooperBuilder()

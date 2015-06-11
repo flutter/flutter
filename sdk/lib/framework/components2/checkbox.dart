@@ -32,23 +32,23 @@ class Checkbox extends ButtonBase {
   UINode buildContent() {
     // TODO(jackson): This should change colors with the theme
     sky.Color color = highlight ? colors.Purple[500] : const sky.Color(0x8A000000);
-    const double edgeSize = 20.0;
-    const double edgeRadius = 1.0;
+    const double kEdgeSize = 20.0;
+    const double kEdgeRadius = 1.0;
     return new EventListenerNode(
       new Container(
         margin: const EdgeDims.symmetric(horizontal: 5.0),
-        width: edgeSize + 2.0,
-        height: edgeSize + 2.0,
+        width: kEdgeSize + 2.0,
+        height: kEdgeSize + 2.0,
         child: new CustomPaint(
-          callback: (sky.Canvas canvas) {
+          callback: (sky.Canvas canvas, Size size) {
 
             sky.Paint paint = new sky.Paint()..color = color
                                              ..strokeWidth = 2.0;
 
             // Draw the outer rrect
             paint.setStyle(checked ? sky.PaintingStyle.strokeAndFill : sky.PaintingStyle.stroke);
-            sky.Rect rect = new sky.Rect.fromLTRB(0.0, 0.0, edgeSize, edgeSize);
-            sky.RRect rrect = new sky.RRect()..setRectXY(rect, edgeRadius, edgeRadius);
+            sky.Rect rect = new sky.Rect.fromLTRB(0.0, 0.0, kEdgeSize, kEdgeSize);
+            sky.RRect rrect = new sky.RRect()..setRectXY(rect, kEdgeRadius, kEdgeRadius);
             canvas.drawRRect(rrect, paint);
 
             // Draw the inner check
@@ -57,9 +57,9 @@ class Checkbox extends ButtonBase {
               paint.color = const sky.Color(0xFFFFFFFF);
               paint.setStyle(sky.PaintingStyle.stroke);
               sky.Path path = new sky.Path();
-              path.moveTo(edgeSize * 0.2, edgeSize * 0.5);
-              path.lineTo(edgeSize * 0.4, edgeSize * 0.7);
-              path.lineTo(edgeSize * 0.8, edgeSize * 0.3);
+              path.moveTo(kEdgeSize * 0.2, kEdgeSize * 0.5);
+              path.lineTo(kEdgeSize * 0.4, kEdgeSize * 0.7);
+              path.lineTo(kEdgeSize * 0.8, kEdgeSize * 0.3);
               canvas.drawPath(path, paint);
             }
           }

@@ -2,13 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+import 'dart:math' as math;
+import 'dart:sky' as sky;
+
 import '../animation/animated_value.dart';
 import '../fn2.dart';
+import '../painting/box_painter.dart';
 import '../theme2/colors.dart';
 import '../theme2/shadows.dart';
 import 'animated_component.dart';
-import 'dart:async';
-import 'dart:math' as math;
 import 'material.dart';
 import 'popup_menu_item.dart';
 
@@ -54,6 +57,11 @@ class PopupMenu extends AnimatedComponent {
 
   PopupMenu({ Object key, this.controller, this.items, this.level })
       : super(key: key) {
+    _painter = new BoxPainter(new BoxDecoration(
+      backgroundColor: Grey[50],
+      borderRadius: 2.0,
+      boxShadow: Shadow[level]));
+
     animate(controller.position, (double value) {
       _position = value;
     });
@@ -67,44 +75,21 @@ class PopupMenu extends AnimatedComponent {
     controller = source.controller;
     items = source.items;
     level = source.level;
+    _painter = source._painter;
     super.syncFields(source);
   }
 
   double _position;
-  // int _width;
-  // int _height;
+  BoxPainter _painter;
 
   double _opacityFor(int i) {
     if (_position == null || _position == 1.0)
-      return null;
+      return 1.0;
     double unit = 1.0 / items.length;
     double duration = 1.5 * unit;
     double start = i * unit;
     return math.max(0.0, math.min(1.0, (_position - start) / duration));
   }
-
-  // String _inlineStyle() {
-  //   if (_position == null || _position == 1.0 ||
-  //       _height == null || _width == null)
-  //     return null;
-  //   return '''
-  //     opacity: ${math.min(1.0, _position * 3.0)};
-  //     width: ${math.min(_width, _width * (0.5 + _position * 2.0))}px;
-  //     height: ${math.min(_height, _height * _position * 1.5)}px;''';
-  // }
-
-  // void didMount() {
-  //   _measureSize();
-  //   super.didMount();
-  // }
-
-  // void _measureSize() {
-  //   setState(() {
-  //     var root = getRoot();
-  //     _width = root.width.round();
-  //     _height = root.height.round();
-  //   });
-  // }
 
   UINode build() {
     int i = 0;
@@ -113,17 +98,19 @@ class PopupMenu extends AnimatedComponent {
       return new PopupMenuItem(key: i++, children: item, opacity: opacity);
     }));
 
-    // inlineStyle: _inlineStyle(),
     return new Opacity(
       opacity: math.min(1.0, _position * 3.0),
       child: new ShrinkWrapWidth(
-        child: new Container(
-          padding: const EdgeDims.all(8.0),
-          decoration: new BoxDecoration(
-            backgroundColor: Grey[50],
-            borderRadius: 2.0,
-            boxShadow: Shadow[level]),
-          child: new Block(children)
+        child: new CustomPaint(
+          callback: (sky.Canvas canvas, Size size) {
+            double width = math.min(size.width, size.width * (0.5 + _position * 2.0));
+            double height = math.min(size.height, size.height * _position * 1.5);
+            _painter.paint(canvas, new Rect.fromLTRB(size.width - width, 0.0, width, height));
+          },
+          child: new Container(
+            padding: const EdgeDims.all(8.0),
+            child: new Block(children)
+          )
         )
       )
     );

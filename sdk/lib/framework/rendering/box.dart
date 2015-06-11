@@ -811,7 +811,7 @@ class RenderSizeObserver extends RenderProxyBox {
   }
 }
 
-typedef void CustomPaintCallback(sky.Canvas canvas);
+typedef void CustomPaintCallback(sky.Canvas canvas, Size size);
 
 class RenderCustomPaint extends RenderProxyBox {
 
@@ -839,7 +839,7 @@ class RenderCustomPaint extends RenderProxyBox {
 
   void paint(RenderObjectDisplayList canvas) {
     assert(_callback != null);
-    _callback(canvas);
+    _callback(canvas, size);
     super.paint(canvas);
   }
 }

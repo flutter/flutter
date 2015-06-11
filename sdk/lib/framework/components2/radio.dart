@@ -35,28 +35,28 @@ class Radio extends ButtonBase {
   UINode buildContent() {
     // TODO(jackson): This should change colors with the theme
     Color color = highlight ? colors.Purple[500] : const Color(0x8A000000);
-    const double diameter = 16.0;
-    const double outerRadius = diameter / 2;
-    const double innerRadius = 5.0;
+    const double kDiameter = 16.0;
+    const double kOuterRadius = kDiameter / 2;
+    const double kInnerRadius = 5.0;
     return new EventListenerNode(
       new Container(
         margin: const EdgeDims.symmetric(horizontal: 5.0),
-        width: diameter,
-        height: diameter,
+        width: kDiameter,
+        height: kDiameter,
         child: new CustomPaint(
-          callback: (sky.Canvas canvas) {
+          callback: (sky.Canvas canvas, Size size) {
 
             Paint paint = new Paint()..color = color;
 
             // Draw the outer circle
             paint.setStyle(sky.PaintingStyle.stroke);
             paint.strokeWidth = 2.0;
-            canvas.drawCircle(outerRadius, outerRadius, outerRadius, paint);
+            canvas.drawCircle(kOuterRadius, kOuterRadius, kOuterRadius, paint);
 
             // Draw the inner circle
             if (value == groupValue) {
               paint.setStyle(sky.PaintingStyle.fill);
-              canvas.drawCircle(outerRadius, outerRadius, innerRadius, paint);
+              canvas.drawCircle(kOuterRadius, kOuterRadius, kInnerRadius, paint);
             }
           }
         )
