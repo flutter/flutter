@@ -3,11 +3,13 @@
 // found in the LICENSE file.
 
 import 'dart:sky' as sky;
-import '../resources/third_party/unittest/unittest.dart';
-import '../resources/unit.dart';
-import '../resources/display_list.dart';
+
 import 'package:sky/framework/rendering/box.dart';
 import 'package:sky/framework/rendering/object.dart';
+
+import '../resources/display_list.dart';
+import '../resources/third_party/unittest/unittest.dart';
+import '../resources/unit.dart';
 
 void main() {
   initUnit();
@@ -22,11 +24,7 @@ void main() {
       decoration: new BoxDecoration(),
       child: paddingBox
     );
-    TestView renderView = new TestView(child: root);
-    renderView.attach();
-    renderView.rootConstraints = new ViewConstraints(width: sky.view.width, height: sky.view.height);
-    renderView.scheduleInitialLayout();
-    RenderObject.flushLayout();
+    new TestRenderView(root);
     expect(coloredBox.size.width, equals(sky.view.width - 20));
     expect(coloredBox.size.height, equals(sky.view.height - 20));
   });

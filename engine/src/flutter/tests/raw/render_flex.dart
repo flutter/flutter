@@ -2,14 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../resources/third_party/unittest/unittest.dart';
-import '../resources/unit.dart';
-import '../resources/display_list.dart';
 import 'dart:sky' as sky;
+
 import 'package:sky/framework/app.dart';
 import 'package:sky/framework/rendering/block.dart';
 import 'package:sky/framework/rendering/box.dart';
 import 'package:sky/framework/rendering/flex.dart';
+
+import '../resources/display_list.dart';
+import '../resources/third_party/unittest/unittest.dart';
+import '../resources/unit.dart';
 
 class RenderSolidColor extends RenderDecoratedBox {
   final sky.Size desiredSize;
@@ -47,8 +49,6 @@ class RenderSolidColor extends RenderDecoratedBox {
       decoration = new BoxDecoration(backgroundColor: backgroundColor);
   }
 }
-
-TestApp app;
 
 void main() {
   initUnit();
@@ -99,7 +99,8 @@ void main() {
 
     flexRoot.add(decoratedRow);
     decoratedRow.parentData.flex = 3;
-    app = new TestApp(root);
+
+    new TestRenderView(root);
 
     expect(root.size.width, equals(sky.view.width));
     expect(root.size.height, equals(sky.view.height));

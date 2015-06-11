@@ -2,12 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../resources/third_party/unittest/unittest.dart';
-import '../resources/unit.dart';
-import '../resources/display_list.dart';
 import 'dart:sky' as sky;
+
 import 'package:sky/framework/rendering/box.dart';
 import 'package:sky/framework/rendering/object.dart';
+
+import '../resources/display_list.dart';
+import '../resources/third_party/unittest/unittest.dart';
+import '../resources/unit.dart';
 
 void main() {
   initUnit();
@@ -18,14 +20,8 @@ void main() {
         decoration: new BoxDecoration(backgroundColor: const sky.Color(0xFF00FF00))
       )
     );
-    TestView renderView = new TestView(child: root);
-    renderView.attach();
-    renderView.rootConstraints = new ViewConstraints(width: sky.view.width, height: sky.view.height);
-    renderView.scheduleInitialLayout();
-    RenderObject.flushLayout();
+    new TestRenderView(root);
     expect(root.size.width, equals(sky.view.width));
     expect(root.size.height, equals(sky.view.height));
-    renderView.paintFrame();
-    print(renderView.lastPaint); // TODO(ianh): figure out how to make this fit the unit testing framework better
   });
 }
