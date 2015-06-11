@@ -16,7 +16,7 @@ void beginFrame(double timeStamp) {
   canvas.translate(view.width / 2.0, view.height / 2.0);
   canvas.rotate(math.PI * delta / 1800);
   canvas.drawRect(new Rect.fromLTRB(-100.0, -100.0, 100.0, 100.0),
-                  new Paint()..setARGB(255, 0, 255, 0));
+                  new Paint()..color = Color.fromARGB(255, 0, 255, 0));
 
   double sin = math.sin(delta / 200);
   layoutRoot.maxWidth = 150.0 + (50 * sin);
