@@ -8,6 +8,6 @@ part of dart.sky;
 class ColorFilter extends _ColorFilter {
   // This is the only ColorFilter type we need, but use a named constructor so
   // we can add more in the future.
-  ColorFilter.Mode(Color color, TransferMode transferMode)
+  ColorFilter.mode(Color color, TransferMode transferMode)
       : super(color, transferMode) {}
 }

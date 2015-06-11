@@ -14,7 +14,7 @@ enum BlurStyle {
 
 // Extends the generated _MaskFilter interface via the PrivateDart attribute.
 class MaskFilter extends _MaskFilter {
-  MaskFilter.Blur(BlurStyle style, double sigma,
+  MaskFilter.blur(BlurStyle style, double sigma,
                   {bool ignoreTransform: false, bool highQuality: false})
       : super(style.index, sigma, _makeBlurFlags(ignoreTransform, highQuality));
 

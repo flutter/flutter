@@ -18,7 +18,7 @@ class ShadowDrawLooperBuilder {
           (sky.Paint layerPaint) {
         layerPaint.color = color;
         layerPaint.setMaskFilter(
-          new sky.MaskFilter.Blur(sky.BlurStyle.normal,
+          new sky.MaskFilter.blur(sky.BlurStyle.normal,
                                   blur,
                                   highQuality: true));
       });
