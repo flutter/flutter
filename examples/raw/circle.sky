@@ -14,7 +14,7 @@ void main() {
   var element = document.getElementById('canvas');
   element.requestPaint((PaintingContext context) {
     Paint paint = new Paint();
-    paint.color = Color.fromARGB(128, 0, 255, 0);
+    paint.color = const Color.fromARGB(128, 0, 255, 0);
     double radius = math.min(context.width, context.height) / 2.0;
     context.drawCircle(context.width / 2.0, context.height / 2.0, radius, paint);
     context.commit();
