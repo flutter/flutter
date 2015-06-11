@@ -4,7 +4,6 @@
 
 import 'dart:math' as math;
 import 'dart:sky' as sky;
-import 'dart:typed_data';
 import 'object.dart';
 import '../painting/box_painter.dart';
 import 'package:vector_math/vector_math.dart';

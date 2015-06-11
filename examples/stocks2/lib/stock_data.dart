@@ -4,6 +4,7 @@
 
 import 'dart:convert';
 import 'dart:math';
+
 import 'package:sky/framework/net/fetch.dart';
 
 // Snapshot from http://www.nasdaq.com/screening/company-list.aspx

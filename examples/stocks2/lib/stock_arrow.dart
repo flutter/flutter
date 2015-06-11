@@ -2,14 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:sky/framework/fn2.dart';
-import 'package:vector_math/vector_math.dart';
+import 'dart:math' as math;
+import 'dart:sky' as sky;
+
 import 'package:sky/framework/rendering/box.dart';
 import 'package:sky/framework/rendering/object.dart';
 import 'package:sky/framework/theme2/colors.dart' as colors;
-
-import 'dart:math' as math;
-import 'dart:sky' as sky;
+import 'package:sky/framework/widgets/wrappers.dart';
 
 class StockArrow extends Component {
 

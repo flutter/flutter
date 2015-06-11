@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:sky/framework/fn2.dart';
-import 'package:sky/framework/components2/popup_menu.dart';
-import 'package:sky/framework/components2/checkbox.dart';
+import 'package:sky/framework/widgets/checkbox.dart';
+import 'package:sky/framework/widgets/popup_menu.dart';
+import 'package:sky/framework/widgets/wrappers.dart';
 import 'package:sky/framework/theme/view_configuration.dart';
 
 class StockMenu extends Component {

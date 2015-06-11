@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../fn2.dart';
 import '../rendering/box.dart';
 import '../rendering/object.dart';
 import '../theme2/view_configuration.dart';
+import 'ui_node.dart';
 
 enum ScaffoldSlots {
   toolbar,

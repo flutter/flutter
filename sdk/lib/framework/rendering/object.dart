@@ -4,7 +4,6 @@
 
 import '../node.dart';
 import '../scheduler.dart' as scheduler;
-import 'dart:math' as math;
 import 'dart:sky' as sky;
 import 'dart:sky' show Point, Size, Rect, Color, Paint, Path;
 export 'dart:sky' show Point, Size, Rect, Color, Paint, Path;

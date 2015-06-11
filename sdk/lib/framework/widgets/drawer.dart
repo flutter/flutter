@@ -2,16 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math' as math;
+import 'dart:sky' as sky;
+
+import 'package:vector_math/vector_math.dart';
+
 import '../animation/animated_value.dart';
 import '../animation/curves.dart';
-import '../fn2.dart';
 import '../theme2/colors.dart';
 import '../theme2/shadows.dart';
 import 'animated_component.dart';
-import 'dart:math' as math;
-import 'dart:sky' as sky;
-import 'material.dart';
-import 'package:vector_math/vector_math.dart';
+import 'wrappers.dart';
 
 // TODO(eseidel): Draw width should vary based on device size:
 // http://www.google.com/design/spec/layout/structure.html#structure-side-nav

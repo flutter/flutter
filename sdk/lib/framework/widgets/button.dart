@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../fn2.dart';
 import 'ink_well.dart';
 import 'material.dart';
+import 'wrappers.dart';
 
 class Button extends Component {
 

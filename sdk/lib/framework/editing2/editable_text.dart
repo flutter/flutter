@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../fn2.dart';
-import '../theme/colors.dart';
 import 'dart:async';
+
+import '../widgets/wrappers.dart';
 import 'editable_string.dart';
 
 class EditableText extends Component {

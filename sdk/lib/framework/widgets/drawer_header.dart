@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../fn2.dart';
 import '../theme2/colors.dart';
 import '../theme2/view_configuration.dart';
+import 'wrappers.dart';
 
 class DrawerHeader extends Component {
 
