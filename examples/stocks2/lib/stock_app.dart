@@ -2,7 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:sky/framework/app.dart';
 import 'package:sky/framework/editing2/input.dart';
+import 'package:sky/framework/rendering/box.dart';
 import 'package:sky/framework/theme2/colors.dart' as colors;
 import 'package:sky/framework/widgets/drawer.dart';
 import 'package:sky/framework/widgets/drawer_header.dart';
@@ -32,7 +34,7 @@ class StocksApp extends App {
 
   List<Stock> _stocks = [];
 
-  StocksApp() : super() {
+  StocksApp({ RenderView renderViewOverride }) : super(renderViewOverride: renderViewOverride) {
     // if (debug)
     //   new Timer(new Duration(seconds: 1), dumpState);
     new StockDataFetcher((StockData data) {
