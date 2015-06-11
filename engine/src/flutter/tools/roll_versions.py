@@ -3,8 +3,11 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+import os
+import subprocess
 import yaml
 import xml.etree.ElementTree as ET
+
 
 PUBSPECS = [
     'sky/sdk/pubspec.yaml',
@@ -38,6 +41,15 @@ def sort_dict(unsorted):
     return sorted_dict
 
 
+def count_commits(start, end):
+    return subprocess.check_output([
+        'git', 'rev-list', '%s...%s' % (start, end)]).count('\n')
+
+
+def last_commit_to(file_path):
+    return subprocess.check_output(['git', 'log', '-1', '--format=%h', file_path]).strip()
+
+
 def update_pubspec(pubspec):
     # TODO(eseidel): This does not prserve any manual sort-order of the yaml.
     with open(pubspec, 'r') as stream:
@@ -48,6 +60,20 @@ def update_pubspec(pubspec):
 
     with open(pubspec, 'w') as stream:
         yaml.dump(spec, stream=stream, default_flow_style=False)
+    return spec['version']
+
+
+def update_changelog(changelog, pubspec, version):
+    old = last_commit_to(pubspec)
+    new = last_commit_to('.')
+    url = "https://github.com/domokit/mojo/compare/%s...%s" % (old, new)
+    count = count_commits(old, new)
+    message = """## %s
+
+  - %s changes: %s
+
+""" % (version, count, url)
+    prepend_to_file(message, changelog)
 
 
 def prepend_to_file(to_prepend, filepath):
@@ -77,9 +103,13 @@ def update_manifest(manifest):
 
 
 def main():
+    # Should chdir to the root directory.
+
     print 'Pub packages:'
     for pubspec in PUBSPECS:
-        update_pubspec(pubspec)
+        new_version = update_pubspec(pubspec)
+        changelog = os.path.join(os.path.dirname(pubspec), 'CHANGELOG.md')
+        update_changelog(changelog, pubspec, new_version)
 
     # TODO(eseidel): Without this ET uses 'ns0' for 'android' which is wrong.
     ET.register_namespace('android', 'http://schemas.android.com/apk/res/android')
