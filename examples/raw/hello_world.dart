@@ -30,6 +30,11 @@ bool handleEvent(Event event) {
     return true;
   }
 
+  if (event.type == "back") {
+    print("Pressed back button.");
+    return true;
+  }
+
   return false;
 }
 
