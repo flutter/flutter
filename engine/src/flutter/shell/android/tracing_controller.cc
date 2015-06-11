@@ -8,6 +8,7 @@
 #include "base/android/jni_string.h"
 #include "base/files/file_util.h"
 #include "base/macros.h"
+#include "base/trace_event/trace_config.h"
 #include "base/trace_event/trace_event.h"
 #include "jni/TracingController_jni.h"
 
@@ -45,9 +46,8 @@ static void StartTracing(JNIEnv* env, jclass clazz) {
   LOG(INFO) << "Starting trace";
 
   base::trace_event::TraceLog::GetInstance()->SetEnabled(
-      base::trace_event::CategoryFilter("*"),
-      base::trace_event::TraceLog::RECORDING_MODE,
-      base::trace_event::TraceOptions(base::trace_event::RECORD_UNTIL_FULL));
+      base::trace_event::TraceConfig("*", base::trace_event::RECORD_UNTIL_FULL),
+      base::trace_event::TraceLog::RECORDING_MODE);
 }
 
 static void StopTracing(JNIEnv* env, jclass clazz, jstring path) {
