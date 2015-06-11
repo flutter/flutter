@@ -85,7 +85,7 @@ class LinearGradient extends Gradient {
       'LinearGradient($endPoints, $colors, $colorStops, $tileMode)';
 
   sky.Shader createShader() {
-    return new sky.Gradient.Linear(this.endPoints, this.colors, this.colorStops,
+    return new sky.Gradient.linear(this.endPoints, this.colors, this.colorStops,
                                    this.tileMode);
   }
 
@@ -108,7 +108,7 @@ class RadialGradient extends Gradient {
       'RadialGradient($center, $radius, $colors, $colorStops, $tileMode)';
 
   sky.Shader createShader() {
-    return new sky.Gradient.Radial(this.center, this.radius, this.colors,
+    return new sky.Gradient.radial(this.center, this.radius, this.colors,
                                    this.colorStops, this.tileMode);
   }
 

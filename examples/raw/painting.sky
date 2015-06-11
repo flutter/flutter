@@ -26,10 +26,9 @@ void main() {
     paint.color = const Color.fromARGB(128, 255, 0, 255);
     context.rotate(math.PI/4.0);
 
-    Gradient yellowBlue = new Gradient.Linear(
+    Gradient yellowBlue = new Gradient.linear(
         [new Point(-radius, -radius), new Point(0.0, 0.0)],
-        [const Color(0xFFFFFF00), const Color(0xFF0000FF)],
-        null);
+        [const Color(0xFFFFFF00), const Color(0xFF0000FF)]);
     context.drawRect(new Rect.fromLTRB(-radius, -radius, radius, radius),
                      new Paint()..setShader(yellowBlue));
 
@@ -67,7 +66,7 @@ void main() {
               ..setColorMode(TransferMode.srcMode)
               ..setPaintBits(-1),
             (Paint layerPaint) {
-          Gradient redYellow = new Gradient.Radial(
+          Gradient redYellow = new Gradient.radial(
               new Point(0.0, 0.0), radius/3.0,
               [const Color(0xFFFFFF00), const Color(0xFFFF0000)],
               null, TileMode.mirror);
