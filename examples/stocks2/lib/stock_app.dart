@@ -16,6 +16,7 @@ import 'package:sky/framework/widgets/popup_menu.dart';
 import 'package:sky/framework/widgets/radio.dart';
 import 'package:sky/framework/widgets/scaffold.dart';
 import 'package:sky/framework/widgets/tool_bar.dart';
+import 'package:sky/framework/widgets/ui_node.dart';
 import 'package:sky/framework/widgets/wrappers.dart';
 
 import 'stock_data.dart';
@@ -213,7 +214,7 @@ class StocksApp extends App {
 void main() {
   print("starting stocks app!");
   App app = new StocksApp();
-  app.appView.onFrame = () {
+  UINodeAppView.appView.onFrame = () {
     // uncomment this for debugging:
     // app.appView.debugDumpRenderTree();
   };

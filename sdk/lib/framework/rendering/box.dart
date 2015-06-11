@@ -248,8 +248,9 @@ abstract class RenderBox extends RenderObject {
   String debugDescribeSettings(String prefix) => '${super.debugDescribeSettings(prefix)}${prefix}size: ${size}\n';
 }
 
-abstract class RenderProxyBox extends RenderBox with RenderObjectWithChildMixin<RenderBox> {
-  RenderProxyBox(RenderBox child) {
+class RenderProxyBox extends RenderBox with RenderObjectWithChildMixin<RenderBox> {
+
+  RenderProxyBox([RenderBox child = null]) {
     this.child = child;
   }
 
@@ -297,6 +298,7 @@ abstract class RenderProxyBox extends RenderBox with RenderObjectWithChildMixin<
     if (child != null)
       child.paint(canvas);
   }
+
 }
 
 class RenderSizedBox extends RenderProxyBox {

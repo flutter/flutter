@@ -28,7 +28,7 @@ abstract class UINode {
 
   UINode({ Object key }) {
     _key = key == null ? "$runtimeType" : "$runtimeType-$key";
-    assert(this is App || _inRenderDirtyComponents); // you should not build the UI tree ahead of time, build it only during build()
+    assert(this is AbstractUINodeRoot || _inRenderDirtyComponents); // you should not build the UI tree ahead of time, build it only during build()
   }
 
   String _key;
@@ -752,6 +752,7 @@ class UINodeAppView extends AppView {
   }
 
   static UINodeAppView _appView;
+  static AppView get appView => _appView;
   static void initUINodeAppView() {
     if (_appView == null)
       _appView = new UINodeAppView();
@@ -800,8 +801,6 @@ abstract class AbstractUINodeRoot extends Component {
 abstract class App extends AbstractUINodeRoot {
 
   App();
-
-  AppView get appView => UINodeAppView._appView;
 
   void _buildIfDirty() {
     super._buildIfDirty();
