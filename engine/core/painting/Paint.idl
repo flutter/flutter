@@ -9,8 +9,6 @@
   attribute boolean isAntiAlias;
   attribute Color color;
 
-  // TODO(mpcomplete): remove this in favor of assigning to |color|.
-  void setARGB(unsigned long a, unsigned long r, unsigned long g, unsigned long b);
   void setDrawLooper(DrawLooper looper);
   void setColorFilter(ColorFilter filter);
   void setMaskFilter(MaskFilter filter);

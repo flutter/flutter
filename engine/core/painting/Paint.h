@@ -38,10 +38,6 @@ public:
     SkScalar strokeWidth() const { return m_paint.getStrokeWidth(); }
     void setStrokeWidth(SkScalar strokeWidth) { m_paint.setStrokeWidth(strokeWidth); }
 
-    void setARGB(unsigned a, unsigned r, unsigned g, unsigned b)
-    {
-        m_paint.setARGB(a, r, g, b);
-    }
     void setDrawLooper(DrawLooper* looper);
     void setColorFilter(ColorFilter* filter);
     void setMaskFilter(MaskFilter* filter);
