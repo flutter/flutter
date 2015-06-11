@@ -916,11 +916,16 @@ class RenderTransform extends RenderProxyBox {
 
   Matrix4 _transform;
 
-  void set transform (Matrix4 value) {
+  void set transform(Matrix4 value) {
     assert(value != null);
     if (_transform == value)
       return;
     _transform = new Matrix4.copy(value);
+    markNeedsPaint();
+  }
+
+  void setIdentity() {
+    _transform.setIdentity();
     markNeedsPaint();
   }
 
