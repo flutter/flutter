@@ -5,23 +5,9 @@
 [
   Constructor(),
 ] interface DrawLooperLayerInfo {
-  // Bits specifies which aspects of the layer's paint should replace the
-  // corresponding aspects on the draw's paint.
-  // ENTIRE_PAINT_BITS means use the layer's paint completely.
-  // 0 means ignore the layer's paint... except for colorMode, which is
-  // always applied.
-  // TODO(mpcomplete): maybe these should each be functions (e.g. useStyle()).
-  // TODO(mpcomplete): the IDL compiler doesn't use these for anything?
-  // TODO(mpcomplete): dart style says to name these like 'styleBit'.
-  const unsigned long STYLE_BIT        = 0x1;
-  const unsigned long TEXT_SKEWX_BIT   = 0x2;
-  const unsigned long PATH_EFFECT_BIT  = 0x4;
-  const unsigned long MASK_FILTER_BIT  = 0x8;
-  const unsigned long SHADER_BIT       = 0x10;
-  const unsigned long COLOR_FILTER_BIT = 0x20;
-  const unsigned long XFERMODE_BIT     = 0x40;
-  const unsigned long ENTIRE_PAINT_BITS = -1;
-
+  // Specifies which aspects of the layer's paint should replace the
+  // corresponding aspects on the draw's paint. Use PaintBits, defined in
+  // DrawLooperLayerInfo.dart.
   void setPaintBits(unsigned long bits);
   void setColorMode(TransferMode mode);
   // TODO(eseidel): Offset should be a Size not a Point.
