@@ -71,15 +71,9 @@ class EditableText extends Component {
       // children.add(new TextFragment(value.text));
       hack += value.text;
     } else {
-      String beforeComposing = value.textBefore(value.composing);
-      if (!beforeComposing.isEmpty) {
-        // children.add(new TextFragment(beforeComposing));
-        hack += value.beforeComposing;
-      }
-
-      String composing = value.textInside(value.composing);
-      hack += value.composing;
-      hack += value.afterComposing;
+      hack += value.textBefore(value.composing);
+      hack += value.textInside(value.composing);
+      hack += value.textAfter(value.composing);
       // if (!composing.isEmpty) {
       //   children.add(new TextFragment(
       //     composing,

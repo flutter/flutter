@@ -90,7 +90,7 @@ class Input extends Component {
     return new EventListenerNode(
       // style: _style,
       // inlineStyle: focused ? _focusedInlineStyle : null,
-      new Flex(children, direction: FlexDirection.vertical),
+      new Stack(children),
       onPointerDown: (sky.Event e) => keyboard.showByRequest()
     );
   }
