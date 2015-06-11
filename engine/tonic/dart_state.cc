@@ -33,7 +33,6 @@ DartState::~DartState() {
 }
 
 void DartState::SetIsolate(Dart_Isolate isolate) {
-  CHECK(!isolate_);
   isolate_ = isolate;
   if (!isolate_)
     return;
