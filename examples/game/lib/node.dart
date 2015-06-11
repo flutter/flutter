@@ -4,27 +4,22 @@ double degrees2radians(double degrees) => degrees * Math.PI/180.8;
 
 double radians2degrees(double radians) => radians * 180.0/Math.PI;
 
-class TransformNode {
+class Node {
 
   // Member variables
 
   SpriteBox _spriteBox;
-  TransformNode _parent;
+  Node _parent;
 
-  Vector2 _position;
+  Point _position;
   double _rotation;
   
   bool _isMatrixDirty;
-  Matrix3 _transform;
-  Matrix3 _pivotTransform;
-  
-  double _width;
-  double _height;
+  Matrix4 _transformMatrix;
+  Matrix4 _transformMatrixFromWorld;
 
   double _scaleX;
   double _scaleY;
-  
-  Vector2 _pivot;
 
   bool visible;
 
@@ -33,20 +28,16 @@ class TransformNode {
   int _childrenLastAddedOrder;
   bool _childrenNeedSorting;
 
-  List<TransformNode>_children;
+  List<Node>_children;
 
   // Constructors
   
-  TransformNode() {
-    _width = 0.0;
-    _height = 0.0;
+  Node() {
     _rotation = 0.0;
-    _pivot = new Vector2(0.0, 0.0);
-    _position = new Vector2(0.0, 0.0);
+    _position = new Point(0.0, 0.0);
     _scaleX = _scaleY = 1.0;
     _isMatrixDirty = false;
-    _transform = new Matrix3.identity();
-    _pivotTransform = new Matrix3.identity();
+    _transformMatrix = new Matrix4.identity();
     _children = [];
     _childrenNeedSorting = false;
     _childrenLastAddedOrder = 0;
@@ -57,7 +48,7 @@ class TransformNode {
 
   SpriteBox get spriteBox => _spriteBox;
 
-  TransformNode get parent => _parent;
+  Node get parent => _parent;
   
   double get rotation => _rotation;
   
@@ -66,31 +57,10 @@ class TransformNode {
     _isMatrixDirty = true;
   }
 
-  Vector2 get position => _position;
+  Point get position => _position;
   
-  void set position(Vector2 position) {
+  void set position(Point position) {
     _position = position;
-    _isMatrixDirty = true;
-  }
-  
-  double get width => _width;
-  
-  void set width(double width) {
-    _width = width;
-    _isMatrixDirty = true;
-  }
-  
-  double get height => _height;
-    
-  void set height(double height) {
-    _height = height;
-    _isMatrixDirty = true;
-  }
-  
-  Vector2 get pivot => _pivot;
-  
-  void set pivot(Vector2 pivot) {
-    _pivot = pivot;
     _isMatrixDirty = true;
   }
 
@@ -113,11 +83,11 @@ class TransformNode {
     _isMatrixDirty = true;
   }
 
-  List<TransformNode> get children => _children;
+  List<Node> get children => _children;
 
   // Adding and removing children
 
-  void addChild(TransformNode child) {
+  void addChild(Node child) {
     assert(child._parent == null);
 
     _childrenNeedSorting = true;
@@ -128,7 +98,7 @@ class TransformNode {
     child._addedOrder = _childrenLastAddedOrder;
   }
 
-  void removeChild(TransformNode child) {
+  void removeChild(Node child) {
     if (_children.remove(child)) {
       child._parent = null;
       child._spriteBox = null;
@@ -141,7 +111,7 @@ class TransformNode {
   }
 
   void removeAllChildren() {
-    for (TransformNode child in _children) {
+    for (Node child in _children) {
       child._parent = null;
       child._spriteBox = null;
     }
@@ -151,16 +121,14 @@ class TransformNode {
 
   // Calculating the transformation matrix
   
-  Matrix3 get transformMatrix {
+  Matrix4 get transformMatrix {
     if (!_isMatrixDirty) {
-      return _transform;
+      return _transformMatrix;
     }
-   
-    Vector2 pivotInPoints = new Vector2(_width * _pivot[0], _height * _pivot[1]);
     
     double cx, sx, cy, sy;
     
-    if (_rotation == 0) {
+    if (_rotation == 0.0) {
       cx = 1.0;
       sx = 0.0;
       cy = 1.0;
@@ -175,22 +143,70 @@ class TransformNode {
       cy = Math.cos(radiansY);
       sy = Math.sin(radiansY);
     }
-    
-    // TODO: Add support for scale
-    double scaleX = 1.0;
-    double scaleY = 1.0;
-    
+
     // Create transformation matrix for scale, position and rotation
-    _transform.setValues(cy * scaleX, sy * scaleX, 0.0,
-               -sx * scaleY, cx * scaleY, 0.0,
-               _position[0], _position[1], 1.0);
+    _transformMatrix.setValues(cy * _scaleX, sy * _scaleX, 0.0, 0.0,
+               -sx * _scaleY, cx * _scaleY, 0.0, 0.0,
+               0.0, 0.0, 1.0, 0.0,
+              _position.x, _position.y, 0.0, 1.0
+    );
     
-    if (_pivot.x != 0 || _pivot.y != 0) {
-      _pivotTransform.setValues(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, pivotInPoints[0], pivotInPoints[1], 1.0);
-      _transform.multiply(_pivotTransform);
+    return _transformMatrix;
+  }
+
+  // Transforms to other nodes
+
+  Matrix4 _nodeToBoxMatrix() {
+    Matrix4 t = transformMatrix;
+
+    Node p = this.parent;
+    while (p != null) {
+      t = new Matrix4.copy(p.transformMatrix).multiply(t);
+      p = p.parent;
     }
-    
-    return _transform;
+    return t;
+  }
+
+  Matrix4 _boxToNodeMatrix() {
+    Matrix4 t = _nodeToBoxMatrix();
+    t.invert();
+    return t;
+  }
+
+  Point convertPointToNodeSpace(Point boxPoint) {
+    assert(boxPoint != null);
+    assert(_spriteBox != null);
+
+    Vector4 v =_boxToNodeMatrix().transform(new Vector4(boxPoint.x, boxPoint.y, 0.0, 1.0));
+    return new Point(v[0], v[1]);
+  }
+
+  Point convertPointToBoxSpace(Point nodePoint) {
+    assert(nodePoint != null);
+    assert(_spriteBox != null);
+
+    Vector4 v =_nodeToBoxMatrix().transform(new Vector4(nodePoint.x, nodePoint.y, 0.0, 1.0));
+    return new Point(v[0], v[1]);
+  }
+
+  Point convertPointFromNode(Point point, Node node) {
+    assert(node != null);
+    assert(point != null);
+    assert(_spriteBox != null);
+    assert(_spriteBox == node._spriteBox);
+
+    Point boxPoint = node.convertPointToBoxSpace(point);
+    Point localPoint = convertPointToNodeSpace(boxPoint);
+
+    return localPoint;
+  }
+
+  // Hit test
+
+  bool hitTest(Point nodePoint) {
+    assert(nodePoint != null);
+
+    return false;
   }
 
   // Rendering
@@ -206,16 +222,13 @@ class TransformNode {
   
   void prePaint(PictureRecorder canvas) {
     canvas.save();
-    
-    canvas.translate(_position[0], _position[1]);
-    canvas.rotate(degrees2radians(_rotation));
-    canvas.scale(_scaleX, _scaleY);
-    canvas.translate(-_width*_pivot[0], -_height*_pivot[1]);
-    
-    // TODO: Use transformation matrix instead of individual calls
-//    List<double> matrix = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0];
-//    this.transformMatrix.copyIntoArray(matrix);
-//    canvas.concat(matrix);
+
+    // TODO: Can this be done more efficiently?
+    // Get the transformation matrix and apply transform
+    List<double> matrix = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0];
+    this.transformMatrix.copyIntoArray(matrix);
+    Float32List list32 = new Float32List.fromList(matrix);
+    canvas.concat(list32);
   }
   
   void paint(PictureRecorder canvas) {
@@ -225,7 +238,7 @@ class TransformNode {
   void visitChildren(PictureRecorder canvas) {
     // Sort children primarily by zPosition, secondarily by added order
     if (_childrenNeedSorting) {
-      _children.sort((TransformNode a, TransformNode b) {
+      _children.sort((Node a, Node b) {
         if (a._zPosition == b._zPosition) {
           return b._addedOrder - a._addedOrder;
         }

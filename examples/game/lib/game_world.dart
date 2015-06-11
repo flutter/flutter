@@ -1,6 +1,6 @@
 part of game;
 
-class GameWorld extends TransformNode {
+class GameWorld extends Node {
   
   World world;
   List<Body> bodies = [];
@@ -42,7 +42,7 @@ class GameWorld extends TransformNode {
   }
 
   void addBackground() {
-    SpriteNode sprtBg = new SpriteNode.withImage(_imgBg);
+    Sprite sprtBg = new Sprite.withImage(_imgBg);
     sprtBg.width = width;
     sprtBg.height = height;
     sprtBg.pivot = new Vector2(0.0, 0.0);
@@ -81,7 +81,7 @@ class GameWorld extends TransformNode {
     bodies.add(body);
 
     // Create sprite
-    SpriteNode sprt = new SpriteNode.withImage(_imgAsteroid);
+    Sprite sprt = new Sprite.withImage(_imgAsteroid);
     sprt.width = radius*2;
     sprt.height = radius*2;
 //    sprt.colorOverlay = new Color(0x33ff0000);
@@ -122,7 +122,7 @@ class GameWorld extends TransformNode {
     _bodyShip = body;
 
     // Create sprite
-    SpriteNode sprt = new SpriteNode.withImage(_imgShip);
+    Sprite sprt = new Sprite.withImage(_imgShip);
     sprt.width = radius*2;
     sprt.height = radius*2;
     sprt.position = new Vector2(width/2.0, height/2.0);
@@ -155,7 +155,7 @@ class GameWorld extends TransformNode {
   }
   
   void updateBody(Body body) {
-    SpriteNode sprt = body.userData;
+    Sprite sprt = body.userData;
     double rot = 0.0; //body.getRotation();
     
     // Check bounds and warp objects

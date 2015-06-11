@@ -2,7 +2,7 @@ part of sprites;
 
 // TODO: Actually draw images
 
-class SpriteNode extends TransformNode {
+class Sprite extends NodeWithSize {
   
   Image _image;
   bool constrainProportions = false;
@@ -10,12 +10,12 @@ class SpriteNode extends TransformNode {
   Color colorOverlay;
   TransferMode transferMode;
   
-  SpriteNode() {
-    this.pivot = new Vector2(0.5, 0.5);
+  Sprite() {
   }
   
-  SpriteNode.withImage(Image image) : super() {
-    this.pivot = new Vector2(0.5, 0.5);
+  Sprite.withImage(Image image) {
+    this.pivot = new Point(0.5, 0.5);
+    this.size = new Size(image.width.toDouble(), image.height.toDouble());
     _image = image;
   }
 
@@ -27,21 +27,24 @@ class SpriteNode extends TransformNode {
   }
 
   void paint(PictureRecorder canvas) {
+    canvas.save();
+
+    // Account for pivot point
+    applyTransformForPivot(canvas);
 
     if (_image != null && _image.width > 0 && _image.height > 0) {
-      canvas.save();
       
-      double scaleX = _width/_image.width;
-      double scaleY = _height/_image.height;
+      double scaleX = size.width/_image.width;
+      double scaleY = size.height/_image.height;
       
       if (constrainProportions) {
         // Constrain proportions, using the smallest scale and by centering the image
         if (scaleX < scaleY) {
-          canvas.translate(0.0, (_height - scaleX * _image.height)/2.0);
+          canvas.translate(0.0, (size.height - scaleX * _image.height)/2.0);
           scaleY = scaleX;
         }
         else {
-          canvas.translate((_width - scaleY * _image.width)/2.0, 0.0);
+          canvas.translate((size.width - scaleY * _image.width)/2.0, 0.0);
           scaleX = scaleY;
         }
       }
@@ -59,13 +62,12 @@ class SpriteNode extends TransformNode {
       }
 
       canvas.drawImage(_image, 0.0, 0.0, paint);
-      canvas.restore();
     }
     else {
       // Paint a red square for missing texture
-      canvas.drawRect(new Rect.fromLTRB(0.0, 0.0, this.width, this.height),
+      canvas.drawRect(new Rect.fromLTRB(0.0, 0.0, size.width, size.height),
           new Paint()..setARGB(255, 255, 0, 0));
     }
+    canvas.restore();
   }
-  
 }
