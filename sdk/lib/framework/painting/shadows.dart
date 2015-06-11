@@ -12,7 +12,7 @@ class ShadowDrawLooperBuilder {
   void addShadow(sky.Size offset, sky.Color color, double blur) {
     builder_.addLayerOnTop(
           new sky.DrawLooperLayerInfo()
-            ..setPaintBits(PaintBits.all)
+            ..setPaintBits(sky.PaintBits.all)
             ..setOffset(offset.toPoint())
             ..setColorMode(sky.TransferMode.srcMode),
           (sky.Paint layerPaint) {
