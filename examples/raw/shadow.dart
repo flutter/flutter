@@ -15,7 +15,7 @@ void beginFrame(double timeStamp) {
     // Shadow layer.
     ..addLayerOnTop(
         new DrawLooperLayerInfo()
-          ..setPaintBits(-1)
+          ..setPaintBits(PaintBits.all)
           ..setOffset(const Point(5.0, 5.0))
           ..setColorMode(TransferMode.srcInMode),
         (Paint layerPaint) {
