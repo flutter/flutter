@@ -119,7 +119,9 @@ void DartController::DidLoadMainLibrary(KURL url) {
 
   Dart_Handle library = Dart_LookupLibrary(
       StringToDart(dart_state(), url.string()));
-  CHECK(!LogIfError(library));
+  // TODO(eseidel): We need to load a 404 page instead!
+  if (LogIfError(library))
+    return;
   DartInvokeAppField(library, ToDart("main"), 0, nullptr);
 }
 

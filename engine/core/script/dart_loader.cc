@@ -239,6 +239,11 @@ void DartLoader::WaitForDependencies(
 }
 
 void DartLoader::LoadLibrary(const KURL& url, mojo::URLResponsePtr response) {
+  if (response && response->status_code >= 400) {
+    LOG(ERROR) << url.string().utf8().data()
+        << " failed with " << response->status_code;
+  }
+
   const auto& result = pending_libraries_.add(url.string(), nullptr);
   if (result.isNewEntry) {
     OwnPtr<Job> job = adoptPtr(new ImportJob(this, url));

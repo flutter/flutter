@@ -76,9 +76,14 @@ public class UrlLoaderImpl implements UrlLoader {
                     buffer.put(tmp);
                     mProducer.endWriteData(result == -1 ? 0 : result);
                 } catch (MojoException e) {
-                    if (e.getMojoResult() != MojoResult.SHOULD_WAIT)
+                    // No one read the pipe, they just closed it.
+                    if (e.getMojoResult() == MojoResult.FAILED_PRECONDITION) {
+                        break;
+                    } else if (e.getMojoResult() == MojoResult.SHOULD_WAIT) {
+                        mCore.wait(mProducer, Core.HandleSignals.WRITABLE, -1);
+                    } else {
                         throw e;
-                    mCore.wait(mProducer, Core.HandleSignals.WRITABLE, -1);
+                    }
                 } catch (IOException e) {
                     Log.e(TAG, "mSource.read failed", e);
                     break;
