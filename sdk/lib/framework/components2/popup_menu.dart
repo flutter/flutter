@@ -114,14 +114,17 @@ class PopupMenu extends AnimatedComponent {
     }));
 
     // inlineStyle: _inlineStyle(),
-    return new ShrinkWrapWidth(
-      child: new Container(
-        padding: const EdgeDims.all(8.0),
-        decoration: new BoxDecoration(
-          backgroundColor: Grey[50],
-          borderRadius: 2.0,
-          boxShadow: Shadow[level]),
-        child: new Block(children)
+    return new Opacity(
+      opacity: math.min(1.0, _position * 3.0),
+      child: new ShrinkWrapWidth(
+        child: new Container(
+          padding: const EdgeDims.all(8.0),
+          decoration: new BoxDecoration(
+            backgroundColor: Grey[50],
+            borderRadius: 2.0,
+            boxShadow: Shadow[level]),
+          child: new Block(children)
+        )
       )
     );
   }

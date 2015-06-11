@@ -22,6 +22,9 @@ Rect DartConverter<Rect>::FromArgumentsWithNullCheck(Dart_NativeArguments args,
   Dart_Handle dart_rect = Dart_GetNativeArgument(args, index);
   DCHECK(!LogIfError(dart_rect));
 
+  if (Dart_IsNull(dart_rect))
+    return result;
+
   Dart_Handle value =
       Dart_GetField(dart_rect, DOMDartState::Current()->value_handle());
   if (Dart_IsNull(value))

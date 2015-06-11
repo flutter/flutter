@@ -378,6 +378,21 @@ abstract class OneChildRenderObjectWrapper extends RenderObjectWrapper {
 
 }
 
+class Opacity extends OneChildRenderObjectWrapper {
+  Opacity({ this.opacity, UINode child, Object key })
+    : super(child: child, key: key);
+
+  RenderOpacity get root { RenderOpacity result = super.root; return result; }
+  final double opacity;
+
+  RenderOpacity createNode() => new RenderOpacity(opacity: opacity);
+
+  void syncRenderObject(Opacity old) {
+    super.syncRenderObject(old);
+    root.opacity = opacity;
+  }
+}
+
 class ClipRect extends OneChildRenderObjectWrapper {
 
   ClipRect({ UINode child, Object key })

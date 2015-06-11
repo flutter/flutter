@@ -439,6 +439,45 @@ class RenderShrinkWrapWidth extends RenderProxyBox {
   }
 }
 
+class RenderOpacity extends RenderProxyBox {
+  RenderOpacity({ RenderBox child, double opacity })
+    : this._opacity = opacity, super(child) {
+    assert(opacity >= 0.0 && opacity <= 1.0);
+  }
+
+  double _opacity;
+  double get opacity => _opacity;
+  void set opacity (double value) {
+    assert(value != null);
+    assert(value >= 0.0 && value <= 1.0);
+    if (_opacity == value)
+      return;
+    _opacity = value;
+    markNeedsPaint();
+  }
+
+  void paint(RenderObjectDisplayList canvas) {
+    if (child != null) {
+      int a = (_opacity * 255).round();
+
+      if (a == 0)
+        return;
+
+      if (a == 255) {
+        child.paint(canvas);
+        return;
+      }
+
+      Paint paint = new Paint()
+        ..color = new Color.fromARGB(a, 0, 0, 0)
+        ..setTransferMode(sky.TransferMode.srcOverMode);
+      canvas.saveLayer(null, paint);
+      child.paint(canvas);
+      canvas.restore();
+    }
+  }
+}
+
 class RenderClipRect extends RenderProxyBox {
   RenderClipRect({ RenderBox child }) : super(child);
 
