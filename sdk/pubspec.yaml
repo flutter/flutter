@@ -6,4 +6,4 @@ dependencies:
 description: Dart files to support executing inside Sky.
 homepage: https://github.com/domokit/mojo/tree/master/sky
 name: sky
-version: 0.0.9
+version: 0.0.10

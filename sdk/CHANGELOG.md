@@ -1,3 +1,7 @@
+## 0.0.10
+
+  - 23 changes: https://github.com/domokit/mojo/compare/1b7bcee...be9dad7
+
 ## 0.0.8
 
   - Fix 2 crashes in SkyDemo.apk, updated widgets.  0.0.7 was skipped.
