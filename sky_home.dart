@@ -29,18 +29,18 @@ class SkyHome extends App {
 
   UINode build() {
     List<UINode> children = [
-      new SkyLink('Stocks2 App', '/examples/stocks2/lib/stock_app.dart'),
-      new SkyLink('Interactive Flex', '/examples/raw/interactive_flex.dart'),
-      new SkyLink('Ink Well', '/examples/raw/ink_well.dart'),
-      new SkyLink('Box2D Game', '/examples/game/main.dart'),
-      new SkyLink('Sector Layout', '/examples/raw/sector_layout.dart'),
+      new SkyLink('Stocks2 App', 'examples/stocks2/lib/stock_app.dart'),
+      new SkyLink('Box2D Game', 'examples/game/main.dart'),
+      new SkyLink('Interactive Flex', 'examples/rendering/interactive_flex.dart'),
+      new SkyLink('Sector Layout', 'examples/rendering/sector_layout.dart'),
+      new SkyLink('Touch Demo', 'examples/rendering/touch_demo.dart'),
 
       // TODO(eseidel): We could use to separate these groups?
-      new SkyLink('Stocks App (Old)', '/examples/stocks/main.sky'),
-      new SkyLink('Touch Demo (Old)', '/examples/raw/touch-demo.sky'),
-      new SkyLink('Spinning Square (Old)', '/examples/raw/spinning-square.sky'),
+      new SkyLink('Stocks App (Old)', 'examples/stocks/main.sky'),
+      new SkyLink('Touch Demo (Old)', 'examples/raw/touch-demo.sky'),
+      new SkyLink('Spinning Square (Old)', 'examples/raw/spinning-square.sky'),
 
-      new SkyLink('Licences (Old)', '/LICENSES.sky'),
+      new SkyLink('Licences (Old)', 'LICENSES.sky'),
     ];
 
     return new Scaffold(

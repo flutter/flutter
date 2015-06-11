@@ -134,19 +134,12 @@ class BoxConstraints {
   final double minHeight;
   final double maxHeight;
 
-  static double _clamp({double min: 0.0, double value: 0.0, double max: double.INFINITY}) {
-    assert(min != null);
-    assert(value != null);
-    assert(max != null);
-    return math.max(min, math.min(max, value));
-  }
-
   double constrainWidth(double width) {
-    return _clamp(min: minWidth, max: maxWidth, value: width);
+    return clamp(min: minWidth, max: maxWidth, value: width);
   }
 
   double constrainHeight(double height) {
-    return _clamp(min: minHeight, max: maxHeight, value: height);
+    return clamp(min: minHeight, max: maxHeight, value: height);
   }
 
   Size constrain(Size size) {
@@ -190,19 +183,19 @@ abstract class RenderBox extends RenderObject {
       child.parentData = new BoxParentData();
   }
 
-  // getMinIntrinsicWidth() should return the minimum width that this box could 
+  // getMinIntrinsicWidth() should return the minimum width that this box could
   // be without failing to render its contents within itself.
   double getMinIntrinsicWidth(BoxConstraints constraints) {
     return constraints.constrainWidth(0.0);
   }
 
-  // getMaxIntrinsicWidth() should return the smallest width beyond which 
+  // getMaxIntrinsicWidth() should return the smallest width beyond which
   // increasing the width never decreases the height.
   double getMaxIntrinsicWidth(BoxConstraints constraints) {
     return constraints.constrainWidth(0.0);
   }
 
-  // getMinIntrinsicHeight() should return the minimum height that this box could 
+  // getMinIntrinsicHeight() should return the minimum height that this box could
   // be without failing to render its contents within itself.
   double getMinIntrinsicHeight(BoxConstraints constraints) {
     return constraints.constrainHeight(0.0);

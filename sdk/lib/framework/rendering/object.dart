@@ -2,10 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../node.dart';
-import '../scheduler.dart' as scheduler;
+import 'dart:math' as math;
 import 'dart:sky' as sky;
 import 'dart:sky' show Point, Size, Rect, Color, Paint, Path;
+
+import '../node.dart';
+import '../scheduler.dart' as scheduler;
+
 export 'dart:sky' show Point, Size, Rect, Color, Paint, Path;
 
 class ParentData {
@@ -264,6 +267,13 @@ class HitTestResult {
   void add(HitTestEntry data) {
     path.add(data);
   }
+}
+
+double clamp({ double min: 0.0, double value: 0.0, double max: double.INFINITY }) {
+  assert(min != null);
+  assert(value != null);
+  assert(max != null);
+  return math.max(min, math.min(max, value));
 }
 
 
