@@ -12,21 +12,32 @@
 #include "base/location.h"
 #include "jni/PlatformViewAndroid_jni.h"
 #include "sky/shell/shell.h"
+#include "sky/shell/shell_view.h"
 
 namespace sky {
 namespace shell {
 
 static jlong Attach(JNIEnv* env, jclass clazz, jint viewportObserverHandle) {
-  PlatformView* view = Shell::Shared().view();
+  ShellView* shell_view = new ShellView(Shell::Shared());
+  auto view = static_cast<PlatformViewAndroid*>(shell_view->view());
+  view->SetShellView(make_scoped_ptr(shell_view));
   view->ConnectToViewportObserver(
       mojo::MakeRequest<ViewportObserver>(mojo::ScopedMessagePipeHandle(
           mojo::MessagePipeHandle(viewportObserverHandle))));
-  return reinterpret_cast<jlong>(view);
+  return reinterpret_cast<jlong>(shell_view->view());
 }
 
 // static
 bool PlatformViewAndroid::Register(JNIEnv* env) {
   return RegisterNativesImpl(env);
+}
+
+PlatformView* PlatformView::Create(const Config& config) {
+  return new PlatformViewAndroid(config);
+}
+
+PlatformViewAndroid::PlatformViewAndroid(const Config& config)
+  : PlatformView(config) {
 }
 
 PlatformViewAndroid::~PlatformViewAndroid() {
@@ -36,6 +47,8 @@ PlatformViewAndroid::~PlatformViewAndroid() {
 
 void PlatformViewAndroid::Detach(JNIEnv* env, jobject obj) {
   DCHECK(!window_);
+  shell_view_.reset();
+  // Note: |this| has been destroyed at this point.
 }
 
 void PlatformViewAndroid::SurfaceCreated(JNIEnv* env, jobject obj, jobject jsurface) {
@@ -54,6 +67,11 @@ void PlatformViewAndroid::SurfaceDestroyed(JNIEnv* env, jobject obj) {
   DCHECK(window_);
   SurfaceWasDestroyed();
   ReleaseWindow();
+}
+
+void PlatformViewAndroid::SetShellView(scoped_ptr<ShellView> shell_view) {
+  DCHECK(!shell_view_);
+  shell_view_ = shell_view.Pass();
 }
 
 void PlatformViewAndroid::ReleaseWindow() {

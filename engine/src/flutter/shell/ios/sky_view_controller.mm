@@ -8,10 +8,14 @@
 #import <UIKit/UIKit.h>
 #import <QuartzCore/QuartzCore.h>
 
+#include "sky/shell/shell_view.h"
+
 @implementation SkyViewController
 
 - (void)loadView {
-  SkySurface* surface = [[SkySurface alloc] init];
+
+  ShellView* shell_view = new sky::shell::ShellView(sky::shell::Shell::Shared());
+  SkySurface* surface = [[SkySurface alloc] initWithShellView: shell_view];
 
   surface.autoresizingMask =
       UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;

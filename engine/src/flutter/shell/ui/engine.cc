@@ -33,6 +33,8 @@ void ConfigureSettings(blink::WebSettings* settings) {
   settings->setLoadsImagesAutomatically(true);
 }
 
+PlatformImpl* g_platform_impl = nullptr;
+
 }
 
 Engine::Engine(const Config& config)
@@ -53,15 +55,17 @@ base::WeakPtr<Engine> Engine::GetWeakPtr() {
   return weak_factory_.GetWeakPtr();
 }
 
-void Engine::Init() {
+void Engine::Init(ServiceProviderContext* service_provider_context) {
   TRACE_EVENT0("sky", "Engine::Init");
 
-  service_provider_ = CreateServiceProvider(config_.service_provider_context);
+  mojo::ServiceProviderPtr service_provider =
+      CreateServiceProvider(service_provider_context);
   mojo::NetworkServicePtr network_service;
-  mojo::ConnectToService(service_provider_.get(), &network_service);
-  platform_impl_.reset(new PlatformImpl(network_service.Pass()));
+  mojo::ConnectToService(service_provider.get(), &network_service);
 
-  blink::initialize(platform_impl_.get());
+  DCHECK(!g_platform_impl);
+  g_platform_impl = new PlatformImpl(network_service.Pass());
+  blink::initialize(g_platform_impl);
 }
 
 void Engine::BeginFrame(base::TimeTicks frame_time) {

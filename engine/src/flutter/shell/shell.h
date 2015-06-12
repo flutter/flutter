@@ -8,13 +8,12 @@
 #include "base/macros.h"
 #include "base/memory/ref_counted.h"
 #include "base/memory/scoped_ptr.h"
+#include "base/message_loop/message_loop.h"
 #include "base/threading/thread.h"
+#include "sky/shell/service_provider.h"
 
 namespace sky {
 namespace shell {
-class Engine;
-class PlatformView;
-class Rasterizer;
 class ServiceProviderContext;
 
 class Shell {
@@ -25,22 +24,26 @@ class Shell {
       scoped_ptr<ServiceProviderContext> service_provider_context);
   static Shell& Shared();
 
-  PlatformView* view() const { return view_.get(); }
+  scoped_refptr<base::SingleThreadTaskRunner> gpu_task_runner() const {
+    return gpu_thread_->message_loop()->task_runner();
+  }
+
+  scoped_refptr<base::SingleThreadTaskRunner> ui_task_runner() const {
+    return ui_thread_->message_loop()->task_runner();
+  }
+
+  ServiceProviderContext* service_provider_context() const {
+    return service_provider_context_.get();
+  }
 
  private:
   explicit Shell(scoped_ptr<ServiceProviderContext> service_provider_context);
 
   void InitGPU(const base::Thread::Options& options);
   void InitUI(const base::Thread::Options& options);
-  void InitView();
 
   scoped_ptr<base::Thread> gpu_thread_;
   scoped_ptr<base::Thread> ui_thread_;
-
-  scoped_ptr<PlatformView> view_;
-  scoped_ptr<Rasterizer> rasterizer_;
-  scoped_ptr<Engine> engine_;
-
   scoped_ptr<ServiceProviderContext> service_provider_context_;
 
   DISALLOW_COPY_AND_ASSIGN(Shell);

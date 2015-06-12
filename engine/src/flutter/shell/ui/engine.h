@@ -50,7 +50,7 @@ class Engine : public UIDelegate,
 
   base::WeakPtr<Engine> GetWeakPtr();
 
-  void Init();
+  static void Init(ServiceProviderContext* service_provider_context);
 
   void BeginFrame(base::TimeTicks frame_time);
   skia::RefPtr<SkPicture> Paint();
@@ -96,8 +96,6 @@ class Engine : public UIDelegate,
   void UpdateWebViewSize();
 
   Config config_;
-  mojo::ServiceProviderPtr service_provider_;
-  scoped_ptr<PlatformImpl> platform_impl_;
   scoped_ptr<Animator> animator_;
 
   std::unique_ptr<blink::SkyView> sky_view_;

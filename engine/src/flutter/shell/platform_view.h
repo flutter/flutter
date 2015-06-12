@@ -19,13 +19,16 @@ class PlatformView {
     scoped_refptr<base::SingleThreadTaskRunner> ui_task_runner;
   };
 
-  explicit PlatformView(const Config& config);
+  static PlatformView* Create(const Config& config);
+
   virtual ~PlatformView();
 
   void ConnectToViewportObserver(
       mojo::InterfaceRequest<ViewportObserver> request);
 
  protected:
+  explicit PlatformView(const Config& config);
+
   void SurfaceWasCreated();
   void SurfaceWasDestroyed();
 
