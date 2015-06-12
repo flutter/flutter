@@ -10,7 +10,7 @@ import '../rendering/stack.dart';
 import 'ui_node.dart';
 
 export '../rendering/box.dart' show BoxConstraints, BoxDecoration, Border, BorderSide, EdgeDims;
-export '../rendering/flex.dart' show FlexDirection;
+export '../rendering/flex.dart' show FlexDirection, FlexJustifyContent, FlexAlignItems;
 export '../rendering/object.dart' show Point, Size, Rect, Color, Paint, Path;
 export 'ui_node.dart' show UINode, Component, App, EventListenerNode, ParentDataNode;
 

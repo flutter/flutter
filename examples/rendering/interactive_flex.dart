@@ -90,6 +90,6 @@ Pancetta meatball tongue tenderloin rump tail jowl boudin.""";
     child: row
   );
 
-  app = new AppView(root);
+  app = new AppView(root: root);
   view.setEventCallback(handleEvent);
 }

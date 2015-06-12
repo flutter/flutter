@@ -42,5 +42,5 @@ void main() {
     child: new RenderPadding(child: table, padding: new EdgeDims.symmetric(vertical: 50.0))
   );
 
-  app = new AppView(root);
+  app = new AppView(root: root);
 }

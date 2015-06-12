@@ -23,14 +23,14 @@ class ToolBar extends Component {
   final Color backgroundColor;
 
   UINode build() {
-    List<UINode> children = [
-      left,
-      new FlexExpandingChild(
-        new Padding(
-          child: center,
-          padding: new EdgeDims.only(left: 24.0)
-        ))
-    ];
+    List<UINode> children = new List<UINode>();
+    if (left != null)
+      children.add(left);
+
+    if (center != null) {
+      children.add(new FlexExpandingChild(
+        new Padding(child: center, padding: new EdgeDims.only(left: 24.0))));
+    }
 
     if (right != null)
       children.addAll(right);

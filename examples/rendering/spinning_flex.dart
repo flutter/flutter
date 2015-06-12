@@ -32,7 +32,7 @@ void main() {
 
   RenderPadding root = new RenderPadding(padding: new EdgeDims.all(20.0), child: transformBox);
 
-  app = new AppView(root);
+  app = new AppView(root: root);
 
   addPersistentFrameCallback(rotate);
 }

@@ -53,7 +53,7 @@
 		Sky Load URL
 	-->
 	<key>com.google.sky.load_url</key>
-	<string>https://domokit.github.io/sky_home</string>
+	<string>https://domokit.github.io/home.dart</string>
 
 	<!--
 		FIXME(csg): Xcode, as part of its build process, adds the following

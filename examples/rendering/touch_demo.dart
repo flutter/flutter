@@ -88,5 +88,5 @@ void main() {
   // Make the paragraph not fill the whole screen so it doesn't eat events.
   para.parentData..top = 40.0
                  ..left = 20.0;
-  app = new AppView(stack);
+  app = new AppView(root: stack);
 }
