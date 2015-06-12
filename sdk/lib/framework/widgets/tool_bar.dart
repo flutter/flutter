@@ -43,7 +43,7 @@ class ToolBar extends Component {
       padding: new EdgeDims.symmetric(horizontal: 8.0),
       decoration: new BoxDecoration(
         backgroundColor: backgroundColor,
-        boxShadow: Shadow[2]
+        boxShadow: shadows[2]
       )
     );
   }

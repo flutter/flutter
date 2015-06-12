@@ -11,7 +11,6 @@ import '../painting/box_painter.dart';
 import '../theme2/colors.dart';
 import '../theme2/shadows.dart';
 import 'animated_component.dart';
-import 'material.dart';
 import 'popup_menu_item.dart';
 import 'wrappers.dart';
 
@@ -60,7 +59,7 @@ class PopupMenu extends AnimatedComponent {
     _painter = new BoxPainter(new BoxDecoration(
       backgroundColor: Grey[50],
       borderRadius: 2.0,
-      boxShadow: Shadow[level]));
+      boxShadow: shadows[level]));
 
     animate(controller.position, (double value) {
       _position = value;

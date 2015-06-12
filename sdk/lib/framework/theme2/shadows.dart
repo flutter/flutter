@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../rendering/box.dart';
+import '../painting/box_painter.dart';
 import 'dart:sky' show Color, Size;
 
-const Map<int, List<BoxShadow>> Shadow = const {
+const Map<int, List<BoxShadow>> shadows = const {
   1: const [
     const BoxShadow(
       color: const Color(0x1F000000),

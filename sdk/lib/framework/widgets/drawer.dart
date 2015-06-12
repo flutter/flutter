@@ -148,7 +148,7 @@ class Drawer extends AnimatedComponent {
     Container content = new Container(
       decoration: new BoxDecoration(
         backgroundColor: Grey[50],
-        boxShadow: Shadow[level]),
+        boxShadow: shadows[level]),
       width: _kWidth,
       transform: transform,
       child: new Block(children)

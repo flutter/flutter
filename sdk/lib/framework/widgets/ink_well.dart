@@ -8,7 +8,6 @@ import 'dart:sky' as sky;
 import '../animation/animated_value.dart';
 import '../animation/curves.dart';
 import '../rendering/box.dart';
-import '../rendering/flex.dart';
 import '../rendering/object.dart';
 import 'ui_node.dart';
 import 'wrappers.dart';
@@ -100,27 +99,11 @@ class RenderInkWell extends RenderProxyBox {
   }
 }
 
-class InkWellWrapper extends OneChildRenderObjectWrapper {
-  InkWellWrapper({ UINode child, Object key })
+class InkWell extends OneChildRenderObjectWrapper {
+  InkWell({ UINode child, Object key })
     : super(child: child, key: key);
 
   RenderInkWell get root { RenderInkWell result = super.root; return result; }
 
   RenderInkWell createNode() => new RenderInkWell();
-}
-
-class InkWell extends Component {
-  InkWell({ Object key, this.children }) : super(key: key);
-
-  final List<UINode> children;
-
-  UINode build() {
-    return new InkWellWrapper(
-      child: new Flex(
-        children,
-        direction: FlexDirection.horizontal,
-        justifyContent: FlexJustifyContent.center
-      )
-    );
-  }
 }

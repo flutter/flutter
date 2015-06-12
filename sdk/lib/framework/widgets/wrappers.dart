@@ -127,6 +127,17 @@ class Padding extends OneChildRenderObjectWrapper {
 
 }
 
+class Center extends OneChildRenderObjectWrapper {
+
+  Center({ UINode child, Object key })
+    : super(child: child, key: key);
+
+  RenderPositionedBox get root { RenderPositionedBox result = super.root; return result; }
+
+  RenderPositionedBox createNode() => new RenderPositionedBox();
+
+}
+
 class SizedBox extends OneChildRenderObjectWrapper {
 
   SizedBox({

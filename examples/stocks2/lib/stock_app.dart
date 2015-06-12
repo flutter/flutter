@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:sky/framework/app.dart';
 import 'package:sky/framework/editing2/input.dart';
 import 'package:sky/framework/rendering/box.dart';
 import 'package:sky/framework/theme2/colors.dart' as colors;
@@ -203,8 +202,8 @@ class StocksApp extends App {
         toolbar: _isSearching ? buildSearchBar() : buildToolBar(),
         body: new Stocklist(stocks: _stocks, query: _searchQuery),
         floatingActionButton: new FloatingActionButton(
-          content: new Icon(type: 'content/add_white', size: 24),
-          level: 3),
+          child: new Icon(type: 'content/add_white', size: 24)
+        ),
         drawer: _drawerShowing ? buildDrawer() : null
       ),
     ];

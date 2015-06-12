@@ -2,10 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:sky' as sky;
-
-import '../painting/shadows.dart';
 import '../theme2/colors.dart';
+import '../theme2/edges.dart';
+import 'button_base.dart';
 import 'ink_well.dart';
 import 'material.dart';
 import 'wrappers.dart';
@@ -14,41 +13,26 @@ import 'wrappers.dart';
 // http://www.google.com/design/spec/layout/metrics-keylines.html#metrics-keylines-keylines-spacing
 const double _kSize = 56.0;
 
-class FloatingActionButton extends Component {
+class FloatingActionButton extends ButtonBase {
 
-  FloatingActionButton({ Object key, this.content, this.level: 0 })
+  FloatingActionButton({ Object key, this.child })
       : super(key: key);
 
-  final UINode content;
-  final int level;
+  final UINode child;
 
-  UINode build() {
-    List<UINode> children = [];
-
-    if (content != null)
-      children.add(content);
-
+  UINode buildContent() {
     return new Material(
-      content: new CustomPaint(
-        callback: (sky.Canvas canvas, Size size) {
-          const double radius = _kSize / 2.0;
-          sky.Paint paint = new sky.Paint()..color = Red[500];
-          var builder = new ShadowDrawLooperBuilder()
-            ..addShadow(const sky.Size(0.0, 5.0),
-                        const sky.Color(0x77000000),
-                        5.0);
-          paint.setDrawLooper(builder.build());
-          canvas.drawCircle(radius, radius, radius, paint);
-        },
-        child: new ClipOval(
-          child: new Container(
-            width: _kSize,
-            height: _kSize,
-            child: new InkWell(children: children)
-          )
+      child: new ClipOval(
+        child: new Container(
+          width: _kSize,
+          height: _kSize,
+          child: new InkWell(child: new Center(child: child))
         )
       ),
-      level: level);
+      color: Red[500],
+      edge: MaterialEdge.circle,
+      level: highlight ? 3 : 2
+    );
   }
 
 }

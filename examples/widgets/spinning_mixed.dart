@@ -7,6 +7,7 @@ import 'dart:sky' as sky;
 import 'package:sky/framework/rendering/box.dart';
 import 'package:sky/framework/rendering/flex.dart';
 import 'package:sky/framework/scheduler.dart';
+import 'package:sky/framework/widgets/raised_button.dart';
 import 'package:sky/framework/widgets/ui_node.dart';
 import 'package:sky/framework/widgets/wrappers.dart';
 import 'package:vector_math/vector_math.dart';
@@ -40,9 +41,12 @@ UINode builder() {
         padding: new EdgeDims.all(10.0),
         margin: new EdgeDims.all(10.0),
         decoration: new BoxDecoration(backgroundColor: const Color(0xFFCCCCCC)),
-        child: new Image(src: "https://www.dartlang.org/logos/dart-logo.png",
-          size: new Size(300.0, 300.0),
-          key: 1
+        child: new RaisedButton(
+          child: new Flex([
+            new Image(src: "https://www.dartlang.org/logos/dart-logo.png"),
+            new Text('PRESS ME'),
+          ]),
+          onPressed: () => print("Hello World")
         )
       ),
       new Rectangle(const Color(0xFFFFFF00), key: 'b'),

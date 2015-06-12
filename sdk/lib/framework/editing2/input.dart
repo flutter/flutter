@@ -4,7 +4,6 @@
 
 import 'dart:sky' as sky;
 
-import '../rendering/flex.dart';
 import '../widgets/wrappers.dart';
 import 'editable_string.dart';
 import 'editable_text.dart';

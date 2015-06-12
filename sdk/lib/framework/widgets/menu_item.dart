@@ -40,7 +40,7 @@ class MenuItem extends ButtonBase {
     return new EventListenerNode(
       new Container(
         child: new InkWell(
-          children: [
+          child: new Flex([
             new Padding(
               child: new Icon(type: "${icon}_grey600", size: 24),
               padding: const EdgeDims.symmetric(horizontal: 16.0)
@@ -52,7 +52,7 @@ class MenuItem extends ButtonBase {
               ),
               flex: 1
             )
-          ]
+          ])
         ),
         height: 48.0,
         decoration: highlight ? _kHighlightDecoration : _kHighlightBoring

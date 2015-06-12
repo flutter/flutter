@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math' as math;
 import 'dart:sky' as sky;
 import 'dart:sky' show Point, Size, Rect, Color, Paint, Path;
 import 'shadows.dart';
@@ -119,14 +120,17 @@ class RadialGradient extends Gradient {
   final sky.TileMode tileMode;
 }
 
+enum Shape { rectangle, circle }
+
 // This must be immutable, because we won't notice when it changes
 class BoxDecoration {
   const BoxDecoration({
-    this.backgroundColor,
-    this.border,
-    this.borderRadius,
-    this.boxShadow,
-    this.gradient
+    this.backgroundColor, // null = don't draw background
+    this.border, // null = don't draw border
+    this.borderRadius, // null = use more efficient background drawing; note that this must be null for circles
+    this.boxShadow, // null = don't draw shadows
+    this.gradient, // null = don't allocate gradient objects
+    this.shape: Shape.rectangle
   });
 
   final Color backgroundColor;
@@ -134,6 +138,7 @@ class BoxDecoration {
   final Border border;
   final List<BoxShadow> boxShadow;
   final Gradient gradient;
+  final Shape shape;
 
   String toString([String prefix = '']) {
     List<String> result = [];
@@ -147,6 +152,8 @@ class BoxDecoration {
       result.add('${prefix}boxShadow: ${boxShadow.map((shadow) => shadow.toString())}');
     if (gradient != null)
       result.add('${prefix}gradient: $gradient');
+    if (shape != Shape.rectangle)
+      result.add('${prefix}shape: $shape');
     if (result.isEmpty)
       return '${prefix}<no decorations specified>';
     return result.join('\n');
@@ -195,14 +202,26 @@ class BoxPainter {
   void paint(sky.Canvas canvas, Rect rect) {
     if (_decoration.backgroundColor != null || _decoration.boxShadow != null ||
         _decoration.gradient != null) {
-      if (_decoration.borderRadius == null)
-        canvas.drawRect(rect, _backgroundPaint);
-      else
-        canvas.drawRRect(new sky.RRect()..setRectXY(rect, _decoration.borderRadius, _decoration.borderRadius), _backgroundPaint);
+      switch (_decoration.shape) {
+        case Shape.circle:
+          assert(_decoration.borderRadius == null);
+          Point center = rect.center;
+          Size size = rect.size;
+          double radius = math.min(size.width, size.height) / 2.0;
+          canvas.drawCircle(center.x, center.y, radius, _backgroundPaint);
+          break;
+        case Shape.rectangle:
+          if (_decoration.borderRadius == null)
+            canvas.drawRect(rect, _backgroundPaint);
+          else
+            canvas.drawRRect(new sky.RRect()..setRectXY(rect, _decoration.borderRadius, _decoration.borderRadius), _backgroundPaint);
+          break;
+      }
     }
 
     if (_decoration.border != null) {
       assert(_decoration.borderRadius == null); // TODO(abarth): Implement borders with border radius.
+      assert(_decoration.shape == Shape.rectangle); // TODO(ianh): Implement borders on circles.
 
       assert(_decoration.border.top != null);
       assert(_decoration.border.right != null);

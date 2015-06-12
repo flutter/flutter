@@ -230,6 +230,7 @@ const Map<int, Color> Grey = const {
   100: const Color(0xFFF5F5F5),
   200: const Color(0xFFEEEEEE),
   300: const Color(0xFFE0E0E0),
+  350: const Color(0xFFD6D6D6), // only for raised button while pressed
   400: const Color(0xFFBDBDBD),
   500: const Color(0xFF9E9E9E),
   600: const Color(0xFF757575),

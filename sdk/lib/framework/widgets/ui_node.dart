@@ -755,7 +755,8 @@ class UINodeAppView extends AppView {
   static UINodeAppView _appView;
   static AppView get appView => _appView;
   static void initUINodeAppView({ RenderView renderViewOverride: null }) {
-    _appView = new UINodeAppView(renderViewOverride: renderViewOverride);
+    if (_appView == null)
+      _appView = new UINodeAppView(renderViewOverride: renderViewOverride);
   }
 
   void dispatchEvent(sky.Event event, HitTestResult result) {

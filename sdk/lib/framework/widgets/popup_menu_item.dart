@@ -15,11 +15,11 @@ class PopupMenuItem extends Component {
     return new Opacity(
       opacity: opacity,
       child: new InkWell(
-        children: [new Container(
+        child: new Container(
           constraints: const BoxConstraints(minWidth: 112.0),
           padding: const EdgeDims.all(16.0),
           child: new Flex(children)
-        )]
+        )
       )
     );
   }

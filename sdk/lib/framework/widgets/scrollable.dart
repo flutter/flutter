@@ -8,7 +8,9 @@ import 'dart:sky' as sky;
 import '../animation/generators.dart';
 import '../animation/mechanics.dart';
 import '../animation/scroll_behavior.dart';
-import '../theme/view_configuration.dart' as config;
+import '../theme2/edges.dart';
+import '../theme2/view_configuration.dart' as config;
+import 'material.dart';
 import 'wrappers.dart';
 
 const double _kMillisecondsPerSecond = 1000.0;
@@ -45,7 +47,10 @@ abstract class Scrollable extends Component {
 
   UINode build() {
     return new EventListenerNode(
-      buildContent(),
+      new Material(
+        child: buildContent(),
+        edge: MaterialEdge.canvas
+      ),
       onPointerDown: _handlePointerDown,
       onPointerUp: _handlePointerUpOrCancel,
       onPointerCancel: _handlePointerUpOrCancel,
