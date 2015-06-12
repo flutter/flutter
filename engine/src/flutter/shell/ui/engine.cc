@@ -116,6 +116,8 @@ void Engine::OnAcceleratedWidgetAvailable(gfx::AcceleratedWidget widget) {
   config_.gpu_task_runner->PostTask(
       FROM_HERE, base::Bind(&GPUDelegate::OnAcceleratedWidgetAvailable,
                             config_.gpu_delegate, widget));
+  if (sky_view_)
+    scheduleVisualUpdate();
   if (web_view_)
     scheduleVisualUpdate();
 }

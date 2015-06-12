@@ -36,6 +36,7 @@ group("sky_apk") {
     "//mojo/dart/mojom",
     "//mojo/public/dart:mojo",
     "//sky/sdk",
+    "//sky/services/intents",
     "//third_party/dart-pkg",
   ]
 
