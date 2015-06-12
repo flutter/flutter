@@ -26,9 +26,12 @@ class Icon extends Component {
       category = parts[0];
       subtype = parts[1];
     }
+    // TODO(eseidel): This clearly isn't correct.  Not sure what would be.
+    // Should we use the ios images on ios?
+    String density = 'drawable-xxhdpi';
     return new Image(
       size: new Size(size.toDouble(), size.toDouble()),
-      src: '${kAssetBase}/${category}/2x_web/ic_${subtype}_${size}dp.png'
+      src: '${kAssetBase}/${category}/${density}/ic_${subtype}_${size}dp.png'
     );
   }
 
