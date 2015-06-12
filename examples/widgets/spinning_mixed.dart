@@ -13,6 +13,7 @@ import 'package:sky/framework/widgets/wrappers.dart';
 import 'package:vector_math/vector_math.dart';
 
 import '../lib/solid_color_box.dart';
+import '../../tests/resources/display_list.dart';
 
 // Solid colour, RenderObject version
 void addFlexChildSolidColor(RenderFlex parent, sky.Color backgroundColor, { int flex: 0 }) {
@@ -59,6 +60,8 @@ UINode builder() {
 double timeBase;
 RenderTransform transformBox;
 
+final TestRenderView tester = new TestRenderView();
+
 void rotate(double timeStamp) {
   if (timeBase == null)
     timeBase = timeStamp;
@@ -68,9 +71,21 @@ void rotate(double timeStamp) {
   transformBox.translate(transformBox.size.width / 2.0, transformBox.size.height / 2.0);
   transformBox.rotateZ(delta);
   transformBox.translate(-transformBox.size.width / 2.0, -transformBox.size.height / 2.0);
+
+  // tester.checkFrame();
 }
 
+final bool debugDisplayList = false; // set this to true to use the test rendering logic
+
 void main() {
+  // Because we're going to use UINodes, we want to initialise its
+  // AppView, not use the default one. We don't really need to do
+  // this, because RenderObjectToUINodeAdapter does it for us, but
+  // it's good practice in case we happen to not have a
+  // RenderObjectToUINodeAdapter in our tree at startup, or in case we
+  // want a renderViewOverride.
+  UINodeAppView.initUINodeAppView(renderViewOverride: debugDisplayList ? tester : null);
+
   RenderFlex flexRoot = new RenderFlex(direction: FlexDirection.vertical);
 
   RenderProxyBox proxy = new RenderProxyBox();
@@ -83,13 +98,6 @@ void main() {
   transformBox = new RenderTransform(child: flexRoot, transform: new Matrix4.identity());
   RenderPadding root = new RenderPadding(padding: new EdgeDims.all(20.0), child: transformBox);
 
-  // Because we're going to use UINodes, we want to initialise its
-  // AppView, not use the default one. We don't really need to do
-  // this, because RenderObjectToUINodeAdapter does it for us, but
-  // it's good practice in case we happen to not have a
-  // RenderObjectToUINodeAdapter in our tree at startup.
-  UINodeAppView.initUINodeAppView();
   UINodeAppView.appView.root = root;
-
   addPersistentFrameCallback(rotate);
 }
