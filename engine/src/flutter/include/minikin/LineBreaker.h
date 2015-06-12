@@ -200,9 +200,6 @@ class LineBreaker {
 
         float currentLineWidth() const;
 
-        // compute shrink/stretch penalty for line
-        float computeScore(float delta, bool atEnd);
-
         void addWordBreak(size_t offset, ParaWidth preBreak, ParaWidth postBreak, float penalty,
                 uint8_t hyph);
 
@@ -213,10 +210,7 @@ class LineBreaker {
 
         void computeBreaksGreedy();
 
-        void computeBreaksOptimal();
-
-        // special case when LineWidth is constant (layout is rectangle)
-        void computeBreaksOptimalRect();
+        void computeBreaksOptimal(bool isRectangular);
 
         void finishBreaksOptimal();
 
@@ -241,6 +235,7 @@ class LineBreaker {
 
         ParaWidth mWidth = 0;
         std::vector<Candidate> mCandidates;
+        float mLinePenalty = 0.0f;
 
         // the following are state for greedy breaker (updated while adding style runs)
         size_t mLastBreak;
