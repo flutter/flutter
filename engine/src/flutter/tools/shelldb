@@ -26,7 +26,7 @@ SRC_ROOT = os.path.dirname(SKY_ROOT)
 GDB_PORT = 8888
 SKY_SERVER_PORT = 9888
 OBSERVATORY_PORT = 8181
-DEFAULT_URL = "sky://domokit.github.io/sky_home"
+DEFAULT_URL = "sky://domokit.github.io/home.dart"
 APK_NAME = 'SkyDemo.apk'
 ADB_PATH = os.path.join(SRC_ROOT,
     'third_party/android_tools/sdk/platform-tools/adb')
