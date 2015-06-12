@@ -22,7 +22,7 @@ void main() {
   var paddedBox = new RenderPadding(
     padding: const EdgeDims.all(50.0),
     child: coloredBox);
-  app = new AppView(new RenderDecoratedBox(
+  app = new AppView(root: new RenderDecoratedBox(
     decoration: const BoxDecoration(
       backgroundColor: const Color(0xFFFFFFFF)
     ),

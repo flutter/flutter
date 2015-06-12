@@ -77,5 +77,5 @@ void main() {
       )
     ),
   ]);
-  app = new AppView(root);
+  app = new AppView(root: root);
 }

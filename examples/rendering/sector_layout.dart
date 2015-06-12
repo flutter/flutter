@@ -502,5 +502,5 @@ void main() {
   rootCircle.add(stack);
 
   var root = new RenderBoxToRenderSectorAdapter(innerRadius: 50.0, child: rootCircle);
-  app = new AppView(root);
+  app = new AppView(root: root);
 }

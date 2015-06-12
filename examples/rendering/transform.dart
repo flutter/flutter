@@ -23,5 +23,5 @@ void main() {
 
   RenderFlex flex = new RenderFlex();
   flex.add(spin);
-  app = new AppView(flex);
+  app = new AppView(root: flex);
 }
