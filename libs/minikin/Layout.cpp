@@ -729,7 +729,17 @@ void Layout::doLayoutRun(const uint16_t* buf, size_t start, size_t count, size_t
                 // TODO: check whether this is really the desired semantics. It could have the
                 // effect of assigning the hyphen width to a nonspacing mark
                 unsigned int lastCluster = srunend - 1;
-                hb_buffer_add(buffer, 0x2010, lastCluster);
+
+                hb_codepoint_t hyphenChar = 0x2010; // HYPHEN
+                hb_codepoint_t glyph;
+                // Fallback to ASCII HYPHEN-MINUS if the font didn't have a glyph for HYPHEN. Note
+                // that we intentionally don't do anything special if the font doesn't have a
+                // HYPHEN-MINUS either, so a tofu could be shown, hinting towards something
+                // missing.
+                if (!hb_font_get_glyph(hbFont, hyphenChar, 0, &glyph)) {
+                    hyphenChar = 0x002D; // HYPHEN-MINUS
+                }
+                hb_buffer_add(buffer, hyphenChar, lastCluster);
             }
             hb_shape(hbFont, buffer, features.empty() ? NULL : &features[0], features.size());
             unsigned int numGlyphs;
