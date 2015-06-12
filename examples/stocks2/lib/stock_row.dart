@@ -37,8 +37,8 @@ class StockRow extends Component {
     ];
 
     // TODO(hansmuller): An explicit |height| shouldn't be needed
-    return new InkWell(children: [
-      new Container(
+    return new InkWell(
+      child: new Container(
         padding: const EdgeDims(16.0, 16.0, 20.0, 16.0),
         height: kHeight,
         decoration: const BoxDecoration(
@@ -46,6 +46,6 @@ class StockRow extends Component {
                 bottom: const BorderSide(color: const sky.Color(0xFFF4F4F4)))),
         child: new Flex(children)
       )
-    ]);
+    );
   }
 }
