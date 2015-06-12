@@ -6,4 +6,6 @@
 
 @interface SkySurface : UIView
 
+-(instancetype) initWithShellView:(sky::shell::ShellView *) shellView;
+
 @end

@@ -7,6 +7,10 @@
 namespace sky {
 namespace shell {
 
+PlatformView* PlatformView::Create(const Config& config) {
+  return new PlatformViewIOS(config);
+}
+
 void PlatformViewIOS::SurfaceCreated(gfx::AcceleratedWidget widget) {
   DCHECK(window_ == 0);
   window_ = widget;

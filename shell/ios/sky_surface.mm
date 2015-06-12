@@ -8,9 +8,10 @@
 #import <OpenGLES/EAGL.h>
 #import <OpenGLES/EAGLDrawable.h>
 
-#include "sky/shell/ui_delegate.h"
-#include "sky/shell/shell.h"
 #include "sky/shell/ios/platform_view_ios.h"
+#include "sky/shell/shell.h"
+#include "sky/shell/shell_view.h"
+#include "sky/shell/ui_delegate.h"
 
 #include "mojo/public/cpp/bindings/interface_request.h"
 #include "sky/services/viewport/input_event.mojom.h"
@@ -38,6 +39,14 @@ static inline sky::EventType EventTypeFromUITouchPhase(UITouchPhase phase) {
   BOOL _platformViewInitialized;
 
   sky::ViewportObserverPtr _viewport_observer;
+  scoped_ptr<sky::shell::ShellView> _shell_view;
+}
+
+-(instancetype) initWithShellView:(sky::shell::ShellView *) shellView {
+  self = [super init];
+  if (self)
+    _shell_view.reset(shellView);
+  return self;
 }
 
 - (gfx::AcceleratedWidget)acceleratedWidget {
@@ -80,8 +89,7 @@ static inline sky::EventType EventTypeFromUITouchPhase(UITouchPhase phase) {
 }
 
 - (sky::shell::PlatformViewIOS*)platformView {
-  auto view = static_cast<sky::shell::PlatformViewIOS*>(
-      sky::shell::Shell::Shared().view());
+  auto view = static_cast<sky::shell::PlatformViewIOS*>(_shell_view->view());
   DCHECK(view);
   return view;
 }
@@ -95,7 +103,7 @@ static inline sky::EventType EventTypeFromUITouchPhase(UITouchPhase phase) {
 }
 
 - (void)connectToViewportObserverAndLoad {
-  auto view = sky::shell::Shell::Shared().view();
+  auto view = static_cast<sky::shell::PlatformViewIOS*>(_shell_view->view());
   auto interface_request = mojo::GetProxy(&_viewport_observer);
   view->ConnectToViewportObserver(interface_request.Pass());
 

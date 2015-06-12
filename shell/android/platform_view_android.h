@@ -11,10 +11,13 @@ struct ANativeWindow;
 
 namespace sky {
 namespace shell {
+class ShellView;
 
 class PlatformViewAndroid : public PlatformView {
  public:
   static bool Register(JNIEnv* env);
+
+  PlatformViewAndroid(const Config& config);
   ~PlatformViewAndroid() override;
 
   // Called from Java
@@ -22,8 +25,16 @@ class PlatformViewAndroid : public PlatformView {
   void SurfaceCreated(JNIEnv* env, jobject obj, jobject jsurface);
   void SurfaceDestroyed(JNIEnv* env, jobject obj);
 
+  void SetShellView(scoped_ptr<ShellView> shell_view);
+
  private:
   void ReleaseWindow();
+
+  // In principle, the ShellView should own the PlatformView, but because our
+  // lifetime is controlled by the Android view hierarchy, we flip around the
+  // ownership and have the shell_view owned by Java. We reset this pointer in
+  // |Detach|, which will eventually cause |~PlatformViewAndroid|.
+  scoped_ptr<ShellView> shell_view_;
 
   DISALLOW_COPY_AND_ASSIGN(PlatformViewAndroid);
 };
