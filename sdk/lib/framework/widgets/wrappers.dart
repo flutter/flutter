@@ -49,19 +49,21 @@ class DecoratedBox extends OneChildRenderObjectWrapper {
 
 }
 
-// TODO(jackson) need a mechanism for marking the RenderCustomPaint as needing paint
 class CustomPaint extends OneChildRenderObjectWrapper {
 
-  CustomPaint({ this.callback, UINode child, Object key })
+  CustomPaint({ this.callback, this.token, UINode child, Object key })
     : super(child: child, key: key);
 
   RenderCustomPaint get root { RenderCustomPaint result = super.root; return result; }
   final CustomPaintCallback callback;
+  final dynamic token;  // set this to be repainted automatically when the token changes
 
   RenderCustomPaint createNode() => new RenderCustomPaint(callback: callback);
 
   void syncRenderObject(CustomPaint old) {
     super.syncRenderObject(old);
+    if (old != null && old.token != token)
+      root.markNeedsPaint();
     root.callback = callback;
   }
 
