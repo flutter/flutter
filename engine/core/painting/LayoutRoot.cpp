@@ -28,8 +28,10 @@ LayoutRoot::LayoutRoot()
     , m_maxHeight(0)
 {
     m_settings = Settings::create();
-    m_settings->setDefaultFixedFontSize(13);
-    m_settings->setDefaultFontSize(16);
+    // Using 14px default to match Material Design English Body1:
+    // http://www.google.com/design/spec/style/typography.html#typography-typeface
+    m_settings->setDefaultFixedFontSize(14);
+    m_settings->setDefaultFontSize(14);
     m_frameHost = FrameHost::createDummy(m_settings.get());
     m_frame = LocalFrame::create(nullptr, m_frameHost.get());
     m_frame->createView(IntSize(), Color::white, false);

@@ -4,53 +4,50 @@
 
 // See http://www.google.com/design/spec/style/typography.html
 
-const String _display4 = 'font-size: 112px; font-weight: 300';
-const String _display3 = 'font-size:  56px; font-weight: 400';
-const String _display2 = 'font-size:  45px; font-weight: 400';
-const String _display1 = 'font-size:  34px; font-weight: 400';
-const String _headline = 'font-size:  24px; font-weight: 400';
-const String _title    = 'font-size:  20px; font-weight: 500';
-const String _subhead  = 'font-size:  16px; font-weight: 400';
-const String _body2    = 'font-size:  14px; font-weight: 500';
-const String _body1    = 'font-size:  14px; font-weight: 400';
-const String _caption  = 'font-size:  12px; font-weight: 400';
-const String _button   = 'font-size:  14px; font-weight: 500';
+import 'dart:sky';
 
-class _Black {
-  final String display4 = 'color: #757575; ${_display4}'; // 54%
-  final String display3 = 'color: #757575; ${_display3}'; // 54%
-  final String display2 = 'color: #757575; ${_display2}'; // 54%
-  final String display1 = 'color: #757575; ${_display1}'; // 54%
-  final String headline = 'color: #212121; ${_headline}'; // 87%
-  final String title    = 'color: #212121; ${_title}';    // 87%
-  final String subhead  = 'color: #212121; ${_subhead}';  // 87%
-  final String body2    = 'color: #212121; ${_body2}';    // 87%
-  final String body1    = 'color: #212121; ${_body1}';    // 87%
-  final String caption  = 'color: #757575; ${_caption}';  // 54%
-  final String button   = 'color: #212121; ${_button}';   // 87%
+import '../rendering/paragraph.dart';
 
-  const _Black();
+// TODO(eseidel): Font weights are supposed to be language relative!
+// These values are for English-like text.
+class _TextTheme {
+  _TextTheme(Color color54, Color color87)
+    : display4 = new TextStyle(fontSize: 112.0, fontWeight: FontWeight.light,   color: color54),
+      display3 = new TextStyle(fontSize:  56.0, fontWeight: FontWeight.regular, color: color54),
+      display2 = new TextStyle(fontSize:  45.0, fontWeight: FontWeight.regular, color: color54),
+      display1 = new TextStyle(fontSize:  34.0, fontWeight: FontWeight.regular, color: color54),
+      headline = new TextStyle(fontSize:  24.0, fontWeight: FontWeight.regular, color: color87),
+      title    = new TextStyle(fontSize:  20.0, fontWeight: FontWeight.medium,  color: color87),
+      subhead  = new TextStyle(fontSize:  16.0, fontWeight: FontWeight.regular, color: color87),
+      body2    = new TextStyle(fontSize:  14.0, fontWeight: FontWeight.medium,  color: color87),
+      body1    = new TextStyle(fontSize:  14.0, fontWeight: FontWeight.regular, color: color87),
+      caption  = new TextStyle(fontSize:  12.0, fontWeight: FontWeight.regular, color: color54),
+      button   = new TextStyle(fontSize:  14.0, fontWeight: FontWeight.medium,  color: color87);
+
+  final TextStyle display4;
+  final TextStyle display3;
+  final TextStyle display2;
+  final TextStyle display1;
+  final TextStyle headline;
+  final TextStyle title;
+  final TextStyle subhead;
+  final TextStyle body2;
+  final TextStyle body1;
+  final TextStyle caption;
+  final TextStyle button;
 }
 
-const _Black black = const _Black();
 
-class _White {
-  final String display4 = 'color: #8A8A8A; ${_display4}'; // 54%
-  final String display3 = 'color: #8A8A8A; ${_display3}'; // 54%
-  final String display2 = 'color: #8A8A8A; ${_display2}'; // 54%
-  final String display1 = 'color: #8A8A8A; ${_display1}'; // 54%
-  final String headline = 'color: #DEDEDE; ${_headline}'; // 87%
-  final String title    = 'color: #DEDEDE; ${_title}';    // 87%
-  final String subhead  = 'color: #DEDEDE; ${_subhead}';  // 87%
-  final String body2    = 'color: #DEDEDE; ${_body2}';    // 87%
-  final String body1    = 'color: #DEDEDE; ${_body1}';    // 87%
-  final String caption  = 'color: #8A8A8A; ${_caption}';  // 54%
-  final String button   = 'color: #DEDEDE; ${_button}';   // 87%
+final _TextTheme black = new _TextTheme(
+  const Color(0xFF757575),
+  const Color(0xFF212121)
+);
 
-  const _White();
-}
 
-const _White white = const _White();
+final _TextTheme white = new _TextTheme(
+  const Color(0xFF8A8A8A),
+  const Color(0xFFDEDEDE)
+);
 
 // TODO(abarth): Maybe this should be hard-coded in Scaffold?
 const String typeface = 'font-family: sans-serif';

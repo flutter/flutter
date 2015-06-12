@@ -331,16 +331,18 @@ class FlexExpandingChild extends ParentDataNode {
 
 class Paragraph extends RenderObjectWrapper {
 
-  Paragraph({ Object key, this.text }) : super(key: key);
+  Paragraph({ Object key, this.text, this.style }) : super(key: key);
 
   RenderParagraph get root { RenderParagraph result = super.root; return result; }
-  RenderParagraph createNode() => new RenderParagraph(text: text);
+  RenderParagraph createNode() => new RenderParagraph(text: text, style: style);
 
   final String text;
+  final TextStyle style;
 
   void syncRenderObject(UINode old) {
     super.syncRenderObject(old);
     root.text = text;
+    root.style = style;
   }
 
   void insert(RenderObjectWrapper child, dynamic slot) {
@@ -351,10 +353,11 @@ class Paragraph extends RenderObjectWrapper {
 }
 
 class Text extends Component {
-  Text(this.data) : super(key: '*text*');
+  Text(this.data, { TextStyle this.style }) : super(key: '*text*');
   final String data;
+  final TextStyle style;
   bool get interchangeable => true;
-  UINode build() => new Paragraph(text: data);
+  UINode build() => new Paragraph(text: data, style: style);
 }
 
 class Image extends RenderObjectWrapper {

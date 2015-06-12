@@ -4,7 +4,9 @@
 
 import 'package:sky/framework/editing2/input.dart';
 import 'package:sky/framework/rendering/box.dart';
+import 'package:sky/framework/rendering/paragraph.dart';
 import 'package:sky/framework/theme2/colors.dart' as colors;
+import 'package:sky/framework/theme2/typography.dart' as typography;
 import 'package:sky/framework/widgets/drawer.dart';
 import 'package:sky/framework/widgets/drawer_header.dart';
 import 'package:sky/framework/widgets/floating_action_button.dart';
@@ -27,9 +29,6 @@ import 'stock_menu.dart';
 enum StockMode { optimistic, pessimistic }
 
 class StocksApp extends App {
-
-  // static final Style _titleStyle = new Style('''
-  //   ${typography.white.title};''');
 
   List<Stock> _stocks = [];
 
@@ -157,7 +156,7 @@ class StocksApp extends App {
         left: new IconButton(
           icon: 'navigation/menu_white',
           onGestureTap: (_) => _drawerController.toggle()),
-        center: new Text('Stocks'),
+        center: new Text('Stocks', style: typography.white.title),
         right: [
           new IconButton(
             icon: 'action/search_white',

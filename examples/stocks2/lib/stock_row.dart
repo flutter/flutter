@@ -5,8 +5,10 @@
 import 'dart:sky' as sky;
 
 import 'package:sky/framework/rendering/box.dart';
-import 'package:sky/framework/widgets/wrappers.dart';
+import 'package:sky/framework/theme2/typography.dart' as typography;
 import 'package:sky/framework/widgets/ink_well.dart';
+import 'package:sky/framework/widgets/wrappers.dart';
+import 'package:sky/framework/rendering/paragraph.dart';
 
 import 'stock_arrow.dart';
 import 'stock_data.dart';
@@ -31,9 +33,12 @@ class StockRow extends Component {
           margin: const EdgeDims.only(right: 5.0)),
       new FlexExpandingChild(new Text(stock.symbol), flex: 2, key: "symbol"),
       // TODO(hansmuller): text-align: right
-      new FlexExpandingChild(new Text(lastSale), key: "lastSale"),
-      // TODO(hansmuller): text-align: right, ${typography.black.caption};
-      new FlexExpandingChild(new Text(changeInPrice), key: "changeInPrice")
+      new FlexExpandingChild(new Text(lastSale,
+            style: const TextStyle(textAlign: TextAlign.right)),
+          key: "lastSale"),
+      new FlexExpandingChild(new Text(changeInPrice,
+          style: typography.black.caption.copyWith(textAlign: TextAlign.right)),
+        key: "changeInPrice")
     ];
 
     // TODO(hansmuller): An explicit |height| shouldn't be needed

@@ -744,7 +744,6 @@ abstract class MultiChildRenderObjectWrapper extends RenderObjectWrapper {
 
 }
 
-
 class UINodeAppView extends AppView {
 
   UINodeAppView({ RenderView renderViewOverride: null })
@@ -771,7 +770,7 @@ class UINodeAppView extends AppView {
         if (target is EventListenerNode)
           target._handleEvent(event);
         target = target._parent;
-      }      
+      }
     }
   }
 
@@ -856,5 +855,4 @@ class RenderObjectToUINodeAdapter extends AbstractUINodeRoot {
   }
 
   UINode build() => builder();
-
 }

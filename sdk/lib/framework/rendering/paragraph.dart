@@ -11,6 +11,64 @@ class RenderInline extends RenderObject {
   String data;
 }
 
+enum FontWeight {
+  light, // 300
+  regular, // 400
+  medium, // 500
+}
+
+enum TextAlign {
+  left,
+  right,
+  center
+}
+
+class TextStyle {
+  const TextStyle({
+    this.color,
+    this.fontSize,
+    this.fontWeight,
+    this.textAlign
+  });
+
+  final Color color;
+  final double fontSize; // in pixels
+  final FontWeight fontWeight;
+  final TextAlign textAlign;
+
+  TextStyle copyWith({
+    Color color,
+    double fontSize,
+    FontWeight fontWeight,
+    TextAlign textAlign
+  }) {
+    return new TextStyle(
+      color: color != null ? color : this.color,
+      fontSize: fontSize != null ? fontSize : this.fontSize,
+      fontWeight: fontWeight != null ? fontWeight : this.fontWeight,
+      textAlign: textAlign != null ? textAlign : this.textAlign
+    );
+  }
+
+  bool operator ==(other) {
+    return other is TextStyle &&
+      color == other.color &&
+      fontSize == other.fontSize &&
+      fontWeight == other.fontWeight &&
+      textAlign == other.textAlign;
+  }
+
+  int get hashCode {
+    // Use Quiver: https://github.com/domokit/mojo/issues/236
+    int value = 373;
+    value = 37 * value + color.hashCode;
+    value = 37 * value + fontSize.hashCode;
+    value = 37 * value + fontWeight.hashCode;
+    value = 37 * value + textAlign.hashCode;
+    return value;
+  }
+}
+
 // Unfortunately, using full precision floating point here causes bad layouts
 // because floating point math isn't associative. If we add and subtract
 // padding, for example, we'll get different values when we estimate sizes and
@@ -26,8 +84,9 @@ class RenderParagraph extends RenderBox {
 
   RenderParagraph({
     String text,
-    Color color
-  }) : _color = color {
+    Color color,
+    TextStyle style
+  }) : _style = style {
     _layoutRoot.rootElement = _document.createElement('p');
     this.text = text;
   }
@@ -41,12 +100,13 @@ class RenderParagraph extends RenderBox {
     markNeedsLayout();
   }
 
-  Color _color = const Color(0xFF000000);
-  Color get color => _color;
-  void set color (Color value) {
-    if (_color != value) {
-      _color = value;
-      markNeedsPaint();
+  TextStyle _style;
+  TextStyle get style => _style;
+  void set style (TextStyle value) {
+    if (_style != value) {
+      // TODO(hansmuller): decide if a new layout or paint is needed
+      markNeedsLayout();
+      _style = value;
     }
   }
 
@@ -106,9 +166,30 @@ class RenderParagraph extends RenderBox {
     if (_constraintsForCurrentLayout != constraints && constraints != null)
       _layout(constraints);
 
-    if (_color != null) {
-      _layoutRoot.rootElement.style['color'] =
-          'rgba(${_color.red}, ${_color.green}, ${_color.blue}, ${_color.alpha / 255.0 })';
+    if (style != null) {
+      var cssStyle = _layoutRoot.rootElement.style;
+      if (style.color != null) {
+        Color c = style.color;
+        cssStyle['color'] =
+            'rgba(${c.red}, ${c.green}, ${c.blue}, ${c.alpha / 255.0})';
+      }
+      if (style.fontSize != null) {
+        cssStyle['font-size'] = "${style.fontSize}px";
+      }
+      if (style.fontWeight != null) {
+        cssStyle['font-weight'] = const {
+          FontWeight.light: '300',
+          FontWeight.regular: '400',
+          FontWeight.medium: '500',
+        }[style.fontWeight];
+      }
+      if (style.textAlign != null) {
+        cssStyle['text-align'] = const {
+          TextAlign.left: 'left',
+          TextAlign.right: 'right',
+          TextAlign.center: 'center',
+        }[style.textAlign];
+      }
     }
     _layoutRoot.paint(canvas);
   }
