@@ -14,6 +14,7 @@ import org.domokit.sky.shell.SkyActivity;
  * Main activity for SkyDemo.
  */
 public class SkyDemoActivity extends SkyActivity {
+
     /**
      * @see android.app.Activity#onCreate(android.os.Bundle)
      */

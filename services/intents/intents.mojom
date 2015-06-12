@@ -1,0 +1,18 @@
+// Copyright 2015 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+module intents;
+
+struct Intent {
+  string action;
+  string url;
+};
+
+// TODO(abarth): This interface seems very specific to Android. Do we want to
+//               have a higher-level abstraction here? Do we want a collection
+//               of services that only work on specific platforms? We need to
+//               figure out how to rationalize this interface across platforms.
+interface ActivityManager {
+  startActivity(Intent intent);
+};

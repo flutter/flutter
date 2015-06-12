@@ -22,6 +22,8 @@ android_library("java") {
     "//mojo/services/sensors/public/interfaces:interfaces_java",
     "//services/keyboard",
     "//services/sensors:sensors_lib",
+    "//sky/services/intents:intents_lib",
+    "//sky/services/intents:interfaces_java",
     "//sky/shell:java",
   ]
 }
