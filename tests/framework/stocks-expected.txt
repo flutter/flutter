@@ -11,11 +11,11 @@ PAINT FOR FRAME #2 ----------------------------------------------
 2 |  | TestDisplayList() constructor: 800.0 x 600.0
 2 |  | paintChild RenderScaffold at Point(0.0, 0.0)
 2 |  |  | TestDisplayList() constructor: 800.0 x 600.0
-2 |  |  | paintChild RenderSizeObserver at Point(0.0, 81.0)
+2 |  |  | paintChild RenderDecoratedBox at Point(0.0, 81.0)
 2 |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+2 |  |  |  | drawRect(Rect.fromLTRB(0.0, 0.0, 800.0, 519.0), Paint(Color(0xfffafafa)))
 2 |  |  |  | save
 2 |  |  |  | clipRect(Rect.fromLTRB(0.0, 0.0, 800.0, 519.0))
-2 |  |  |  | drawRect(Rect.fromLTRB(0.0, 0.0, 800.0, 519.0), Paint(Color(0xffffffff)))
 2 |  |  |  | save
 2 |  |  |  | concat([1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0])
 2 |  |  |  | restore
@@ -43,7 +43,7 @@ PAINT FOR FRAME #2 ----------------------------------------------
 2 |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
 2 |  |  |  |  |  |  | paintChild RenderImage at Point(8.0, 8.0)
 2 |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
-2 |  |  | paintChild RenderCustomPaint at Point(728.0, 528.0)
+2 |  |  | paintChild RenderDecoratedBox at Point(728.0, 528.0)
 2 |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
 2 |  |  |  | drawCircle(28.0, 28.0, 28.0, Paint(Color(0xfff44336)))
 2 |  |  |  | saveLayer(Rect.fromLTRB(0.0, 0.0, 56.0, 56.0), Paint(Color(0xff000000)))

@@ -5,7 +5,7 @@
 enum MaterialEdge { canvas, card, circle }
 
 const Map<MaterialEdge, double> edges = const {
-  MaterialEdge.canvas: 0.0,
+  MaterialEdge.canvas: null,
   MaterialEdge.card: 2.0,
   MaterialEdge.circle: null,
 };

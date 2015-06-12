@@ -67,6 +67,21 @@ class TextStyle {
     value = 37 * value + textAlign.hashCode;
     return value;
   }
+
+  String toString([String prefix = '']) {
+    List<String> result = [];
+    if (color != null)
+      result.add('${prefix}color: $color');
+    if (fontSize != null)
+      result.add('${prefix}fontSize: $fontSize');
+    if (fontWeight != null)
+      result.add('${prefix}fontWeight: fontWeight');
+    if (textAlign != null)
+      result.add('${prefix}textAlign: textAlign');
+    if (result.isEmpty)
+      return '${prefix}<no style specified>';
+    return result.join('\n');
+  }
 }
 
 // Unfortunately, using full precision floating point here causes bad layouts
@@ -196,5 +211,5 @@ class RenderParagraph extends RenderBox {
 
   // we should probably expose a way to do precise (inter-glpyh) hit testing
 
-  String debugDescribeSettings(String prefix) => '${super.debugDescribeSettings(prefix)}${prefix}color: ${color}\n${prefix}text: ${text}\n';
+  String debugDescribeSettings(String prefix) => '${super.debugDescribeSettings(prefix)}${prefix}style:\n${style.toString("$prefix  ")}\n${prefix}text: ${text}\n';
 }
