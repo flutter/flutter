@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../theme2/edges.dart';
 import '../theme2/colors.dart';
+import '../theme2/edges.dart';
+import 'basic.dart';
 import 'button_base.dart';
 import 'ink_well.dart';
 import 'material.dart';
-import 'basic.dart';
 
 enum RaisedButtonTheme { light, dark }
 

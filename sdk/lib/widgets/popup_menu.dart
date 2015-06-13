@@ -6,13 +6,13 @@ import 'dart:async';
 import 'dart:math' as math;
 import 'dart:sky' as sky;
 
-import '../animation/animated_value.dart';
+import '../framework/animation/animated_value.dart';
 import '../painting/box_painter.dart';
 import '../theme2/colors.dart';
 import '../theme2/shadows.dart';
 import 'animated_component.dart';
-import 'popup_menu_item.dart';
 import 'basic.dart';
+import 'popup_menu_item.dart';
 
 const double _kMenuOpenDuration = 300.0;
 const double _kMenuCloseDuration = 200.0;

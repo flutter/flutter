@@ -3,9 +3,9 @@
 // found in the LICENSE file.
 
 import 'dart:sky' as sky;
-import 'package:sky/framework/app.dart';
-import 'package:sky/framework/rendering/flex.dart';
-import 'package:sky/framework/rendering/box.dart';
+import 'package:sky/app/view.dart';
+import 'package:sky/rendering/flex.dart';
+import 'package:sky/rendering/box.dart';
 import 'package:vector_math/vector_math.dart';
 
 AppView app;

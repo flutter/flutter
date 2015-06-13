@@ -3,9 +3,9 @@
 // found in the LICENSE file.
 
 import '../rendering/box.dart';
+import 'basic.dart';
 import 'icon.dart';
 import 'ui_node.dart';
-import 'basic.dart';
 
 class IconButton extends Component {
 

@@ -2,11 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'basic.dart';
 import 'button_base.dart';
 import 'icon.dart';
 import 'ink_well.dart';
 import 'ui_node.dart';
-import 'basic.dart';
 
 const BoxDecoration _kHighlightDecoration = const BoxDecoration(
   backgroundColor: const Color.fromARGB(102, 153, 153, 153)

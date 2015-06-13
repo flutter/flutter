@@ -3,8 +3,9 @@
 // found in the LICENSE file.
 
 import 'dart:sky' as sky;
-import 'rendering/box.dart';
-import 'rendering/object.dart';
+
+import '../rendering/box.dart';
+import '../rendering/object.dart';
 import 'scheduler.dart' as scheduler;
 
 class PointerState {

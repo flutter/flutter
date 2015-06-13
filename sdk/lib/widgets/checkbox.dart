@@ -4,10 +4,10 @@
 
 import 'dart:sky' as sky;
 
-import 'package:sky/framework/theme2/colors.dart' as colors;
+import 'package:sky/theme2/colors.dart' as colors;
 
-import '../animation/animated_value.dart';
-import '../animation/curves.dart';
+import '../framework/animation/animated_value.dart';
+import '../framework/animation/curves.dart';
 import '../rendering/box.dart';
 import 'animated_component.dart';
 import 'basic.dart';

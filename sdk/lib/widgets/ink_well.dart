@@ -5,12 +5,12 @@
 import 'dart:math' as math;
 import 'dart:sky' as sky;
 
-import '../animation/animated_value.dart';
-import '../animation/curves.dart';
+import '../framework/animation/animated_value.dart';
+import '../framework/animation/curves.dart';
 import '../rendering/box.dart';
 import '../rendering/object.dart';
-import 'ui_node.dart';
 import 'basic.dart';
+import 'ui_node.dart';
 
 const int _kSplashInitialOpacity = 0x80;
 const double _kSplashInitialDelay = 0.0; // we could delay initially in case the user scrolls

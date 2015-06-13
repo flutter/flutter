@@ -4,12 +4,12 @@
 
 import 'dart:sky';
 import 'dart:math' as math;
-import 'package:sky/framework/app.dart';
-import 'package:sky/framework/rendering/box.dart';
-import 'package:sky/framework/rendering/block.dart';
-import 'package:sky/framework/rendering/flex.dart';
-import 'package:sky/framework/rendering/object.dart';
-import 'package:sky/framework/rendering/paragraph.dart';
+import 'package:sky/app/view.dart';
+import 'package:sky/rendering/box.dart';
+import 'package:sky/rendering/block.dart';
+import 'package:sky/rendering/flex.dart';
+import 'package:sky/rendering/object.dart';
+import 'package:sky/rendering/paragraph.dart';
 import '../lib/solid_color_box.dart';
 
 AppView app;

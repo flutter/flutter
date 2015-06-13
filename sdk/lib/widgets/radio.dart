@@ -4,11 +4,10 @@
 
 import 'dart:sky' as sky;
 
-import 'package:sky/framework/theme2/colors.dart' as colors;
-
 import '../rendering/object.dart';
-import 'button_base.dart';
+import '../theme2/colors.dart' as colors;
 import 'basic.dart';
+import 'button_base.dart';
 
 typedef void ValueChanged(value);
 

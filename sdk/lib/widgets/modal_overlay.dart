@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'ui_node.dart';
 import 'basic.dart';
+import 'ui_node.dart';
 
 class ModalOverlay extends Component {
 

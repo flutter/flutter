@@ -5,12 +5,12 @@
 import 'dart:math';
 import 'dart:sky';
 
-import 'package:sky/framework/app.dart';
-import 'package:sky/framework/rendering/box.dart';
-import 'package:sky/framework/rendering/object.dart';
-import 'package:sky/framework/rendering/paragraph.dart';
-import 'package:sky/framework/rendering/stack.dart';
-import 'package:sky/framework/theme2/colors.dart';
+import 'package:sky/app/view.dart';
+import 'package:sky/rendering/box.dart';
+import 'package:sky/rendering/object.dart';
+import 'package:sky/rendering/paragraph.dart';
+import 'package:sky/rendering/stack.dart';
+import 'package:sky/theme2/colors.dart';
 
 // Material design colors. :p
 List<Color> colors = [

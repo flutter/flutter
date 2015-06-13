@@ -5,10 +5,10 @@
 import 'dart:math' as math;
 import 'dart:sky' as sky;
 
-import 'package:sky/framework/net/image_cache.dart' as image_cache;
 import 'package:vector_math/vector_math.dart';
 
-import '../debug/utils.dart';
+import '../framework/debug/utils.dart';
+import '../framework/net/image_cache.dart' as image_cache;
 import '../painting/box_painter.dart';
 import 'object.dart';
 

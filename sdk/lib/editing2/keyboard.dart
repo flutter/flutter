@@ -2,8 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../shell.dart' as shell;
 import 'package:mojom/keyboard/keyboard.mojom.dart';
+
+import '../framework/shell.dart' as shell;
 
 class _KeyboardConnection {
   KeyboardServiceProxy proxy;

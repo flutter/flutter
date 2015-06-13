@@ -5,13 +5,13 @@
 import 'dart:math' as math;
 import 'dart:sky' as sky;
 
-import '../animation/generators.dart';
-import '../animation/mechanics.dart';
-import '../animation/scroll_behavior.dart';
+import '../framework/animation/generators.dart';
+import '../framework/animation/mechanics.dart';
+import '../framework/animation/scroll_behavior.dart';
 import '../theme2/edges.dart';
 import '../theme2/view_configuration.dart' as config;
-import 'material.dart';
 import 'basic.dart';
+import 'material.dart';
 
 const double _kMillisecondsPerSecond = 1000.0;
 

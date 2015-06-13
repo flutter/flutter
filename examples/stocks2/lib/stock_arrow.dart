@@ -5,10 +5,10 @@
 import 'dart:math' as math;
 import 'dart:sky' as sky;
 
-import 'package:sky/framework/rendering/box.dart';
-import 'package:sky/framework/rendering/object.dart';
-import 'package:sky/framework/theme2/colors.dart' as colors;
-import 'package:sky/framework/widgets/basic.dart';
+import 'package:sky/rendering/box.dart';
+import 'package:sky/rendering/object.dart';
+import 'package:sky/theme2/colors.dart' as colors;
+import 'package:sky/widgets/basic.dart';
 
 class StockArrow extends Component {
 

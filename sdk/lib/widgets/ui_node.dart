@@ -7,7 +7,7 @@ import 'dart:collection';
 import 'dart:mirrors';
 import 'dart:sky' as sky;
 
-import '../app.dart';
+import '../app/view.dart';
 import '../rendering/box.dart';
 import '../rendering/object.dart';
 
