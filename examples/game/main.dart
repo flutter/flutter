@@ -1,7 +1,7 @@
 import 'dart:sky';
 import 'lib/game.dart';
 import 'lib/sprites.dart';
-import 'package:sky/framework/app.dart';
+import 'package:sky/app/view.dart';
 
 AppView app;
 

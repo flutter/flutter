@@ -4,12 +4,12 @@
 
 import 'dart:sky' as sky;
 
-import 'package:sky/framework/rendering/box.dart';
-import 'package:sky/framework/rendering/flex.dart';
-import 'package:sky/framework/scheduler.dart';
-import 'package:sky/framework/widgets/raised_button.dart';
-import 'package:sky/framework/widgets/ui_node.dart';
-import 'package:sky/framework/widgets/basic.dart';
+import 'package:sky/app/scheduler.dart';
+import 'package:sky/rendering/box.dart';
+import 'package:sky/rendering/flex.dart';
+import 'package:sky/widgets/basic.dart';
+import 'package:sky/widgets/raised_button.dart';
+import 'package:sky/widgets/ui_node.dart';
 import 'package:vector_math/vector_math.dart';
 
 import '../lib/solid_color_box.dart';
