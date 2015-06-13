@@ -4,8 +4,8 @@
 
 import 'dart:sky' as sky;
 
-import 'package:sky/framework/rendering/box.dart';
-import 'package:sky/framework/rendering/object.dart';
+import 'package:sky/rendering/box.dart';
+import 'package:sky/rendering/object.dart';
 
 import '../resources/display_list.dart';
 import '../resources/third_party/unittest/unittest.dart';

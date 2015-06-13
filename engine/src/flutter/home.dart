@@ -6,14 +6,14 @@ import 'dart:sky';
 
 import 'package:mojom/intents/intents.mojom.dart';
 import 'package:sky/framework/shell.dart' as shell;
-import 'package:sky/framework/theme2/colors.dart' as colors;
-import 'package:sky/framework/theme2/edges.dart';
-import 'package:sky/framework/theme2/typography.dart' as typography;
-import 'package:sky/framework/widgets/material.dart';
-import 'package:sky/framework/widgets/raised_button.dart';
-import 'package:sky/framework/widgets/scaffold.dart';
-import 'package:sky/framework/widgets/tool_bar.dart';
-import 'package:sky/framework/widgets/basic.dart';
+import 'package:sky/theme2/colors.dart' as colors;
+import 'package:sky/theme2/edges.dart';
+import 'package:sky/theme2/typography.dart' as typography;
+import 'package:sky/widgets/material.dart';
+import 'package:sky/widgets/raised_button.dart';
+import 'package:sky/widgets/scaffold.dart';
+import 'package:sky/widgets/tool_bar.dart';
+import 'package:sky/widgets/basic.dart';
 
 void launch(String relativeUrl) {
   Uri url = Uri.base.resolve(relativeUrl);
