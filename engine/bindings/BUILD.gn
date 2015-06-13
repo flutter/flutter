@@ -384,6 +384,7 @@ source_set("generated_bindings") {
     "//mojo/services/navigation/public/interfaces",
     "//mojo/services/view_manager/public/cpp",
     "//skia",
+    "//sky/engine/core:core_names",
     "//sky/engine/wtf",
     "//third_party/angle:translator",
     "//third_party/iccjpeg",
