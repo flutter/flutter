@@ -10,7 +10,7 @@ import '../animation/animated_value.dart';
 import '../animation/curves.dart';
 import '../rendering/box.dart';
 import 'animated_component.dart';
-import 'wrappers.dart';
+import 'basic.dart';
 
 typedef void ValueChanged(value);
 

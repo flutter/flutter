@@ -12,7 +12,7 @@ import '../theme2/colors.dart';
 import '../theme2/shadows.dart';
 import 'animated_component.dart';
 import 'popup_menu_item.dart';
-import 'wrappers.dart';
+import 'basic.dart';
 
 const double _kMenuOpenDuration = 300.0;
 const double _kMenuCloseDuration = 200.0;

@@ -8,7 +8,7 @@ import 'package:vector_math/vector_math.dart';
 
 import '../animation/scroll_behavior.dart';
 import 'scrollable.dart';
-import 'wrappers.dart';
+import 'basic.dart';
 
 abstract class FixedHeightScrollable extends Scrollable {
 

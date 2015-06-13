@@ -11,7 +11,7 @@ import '../animation/scroll_behavior.dart';
 import '../theme2/edges.dart';
 import '../theme2/view_configuration.dart' as config;
 import 'material.dart';
-import 'wrappers.dart';
+import 'basic.dart';
 
 const double _kMillisecondsPerSecond = 1000.0;
 

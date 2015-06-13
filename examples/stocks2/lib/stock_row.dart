@@ -7,7 +7,7 @@ import 'dart:sky' as sky;
 import 'package:sky/framework/rendering/box.dart';
 import 'package:sky/framework/theme2/typography.dart' as typography;
 import 'package:sky/framework/widgets/ink_well.dart';
-import 'package:sky/framework/widgets/wrappers.dart';
+import 'package:sky/framework/widgets/basic.dart';
 import 'package:sky/framework/rendering/paragraph.dart';
 
 import 'stock_arrow.dart';

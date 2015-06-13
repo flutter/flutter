@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'wrappers.dart';
+import 'basic.dart';
 
 // TODO(eseidel): This should use package:.
 const String kAssetBase = '/packages/sky/assets/material-design-icons';

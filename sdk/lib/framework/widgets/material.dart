@@ -6,7 +6,7 @@ import '../painting/box_painter.dart';
 import '../theme2/colors.dart';
 import '../theme2/edges.dart';
 import '../theme2/shadows.dart';
-import 'wrappers.dart';
+import 'basic.dart';
 
 class Material extends Component {
 

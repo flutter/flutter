@@ -4,7 +4,7 @@
 
 import '../theme2/colors.dart';
 import '../theme2/view_configuration.dart';
-import 'wrappers.dart';
+import 'basic.dart';
 
 class DrawerHeader extends Component {
 

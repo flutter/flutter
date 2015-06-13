@@ -4,7 +4,7 @@
 
 import 'dart:async';
 
-import '../widgets/wrappers.dart';
+import '../widgets/basic.dart';
 import 'editable_string.dart';
 
 class EditableText extends Component {

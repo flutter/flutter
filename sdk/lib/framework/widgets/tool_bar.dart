@@ -5,7 +5,7 @@
 import '../rendering/flex.dart';
 import '../theme2/shadows.dart';
 import '../theme2/view_configuration.dart';
-import 'wrappers.dart';
+import 'basic.dart';
 
 class ToolBar extends Component {
 

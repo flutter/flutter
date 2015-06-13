@@ -12,7 +12,7 @@ import '../animation/curves.dart';
 import '../theme2/colors.dart';
 import '../theme2/shadows.dart';
 import 'animated_component.dart';
-import 'wrappers.dart';
+import 'basic.dart';
 
 // TODO(eseidel): Draw width should vary based on device size:
 // http://www.google.com/design/spec/layout/structure.html#structure-side-nav

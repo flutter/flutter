@@ -10,7 +10,7 @@ import '../animation/curves.dart';
 import '../rendering/box.dart';
 import '../rendering/object.dart';
 import 'ui_node.dart';
-import 'wrappers.dart';
+import 'basic.dart';
 
 const int _kSplashInitialOpacity = 0x80;
 const double _kSplashInitialDelay = 0.0; // we could delay initially in case the user scrolls

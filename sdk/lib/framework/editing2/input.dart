@@ -4,7 +4,7 @@
 
 import 'dart:sky' as sky;
 
-import '../widgets/wrappers.dart';
+import '../widgets/basic.dart';
 import 'editable_string.dart';
 import 'editable_text.dart';
 import 'keyboard.dart';

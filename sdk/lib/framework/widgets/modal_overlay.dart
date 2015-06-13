@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'ui_node.dart';
-import 'wrappers.dart';
+import 'basic.dart';
 
 class ModalOverlay extends Component {
 

@@ -6,7 +6,7 @@ import 'button_base.dart';
 import 'icon.dart';
 import 'ink_well.dart';
 import 'ui_node.dart';
-import 'wrappers.dart';
+import 'basic.dart';
 
 const BoxDecoration _kHighlightDecoration = const BoxDecoration(
   backgroundColor: const Color.fromARGB(102, 153, 153, 153)

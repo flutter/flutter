@@ -5,7 +5,7 @@
 import '../rendering/box.dart';
 import 'icon.dart';
 import 'ui_node.dart';
-import 'wrappers.dart';
+import 'basic.dart';
 
 class IconButton extends Component {
 
