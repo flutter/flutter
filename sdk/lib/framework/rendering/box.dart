@@ -4,15 +4,25 @@
 
 import 'dart:math' as math;
 import 'dart:sky' as sky;
-import 'object.dart';
-import '../painting/box_painter.dart';
-import 'package:vector_math/vector_math.dart';
+
 import 'package:sky/framework/net/image_cache.dart' as image_cache;
+import 'package:vector_math/vector_math.dart';
+
+import '../debug/utils.dart';
+import '../painting/box_painter.dart';
+import 'object.dart';
 
 export '../painting/box_painter.dart';
 
 // GENERIC BOX RENDERING
 // Anything that has a concept of x, y, width, height is going to derive from this
+
+// This class should only be used in debug builds
+class _DebugSize extends Size {
+  _DebugSize(Size source, this._owner, this._canBeUsedByParent): super.copy(source);
+  final RenderBox _owner;
+  final bool _canBeUsedByParent;
+}
 
 class EdgeDims {
   // used for e.g. padding
@@ -153,7 +163,10 @@ class BoxConstraints {
   }
 
   Size constrain(Size size) {
-    return new Size(constrainWidth(size.width), constrainHeight(size.height));
+    Size result = new Size(constrainWidth(size.width), constrainHeight(size.height));
+    if (size is _DebugSize)
+      result = new _DebugSize(result, size._owner, size._canBeUsedByParent);
+    return result;
   }
 
   bool get isInfinite => maxWidth >= double.INFINITY || maxHeight >= double.INFINITY;
@@ -220,6 +233,24 @@ abstract class RenderBox extends RenderObject {
     return constraints.constrainHeight(0.0);
   }
 
+  // This whole block should only be here in debug builds
+  bool _debugDoingThisLayout = false;
+  bool _debugCanParentUseSize;
+  void layoutWithoutResize() {
+    _debugDoingThisLayout = true;
+    _debugCanParentUseSize = false;
+    super.layoutWithoutResize();
+    _debugCanParentUseSize = null;
+    _debugDoingThisLayout = false;
+  }
+  void layout(dynamic constraints, { bool parentUsesSize: false }) {
+    _debugDoingThisLayout = true;
+    _debugCanParentUseSize = parentUsesSize;
+    super.layout(constraints, parentUsesSize: parentUsesSize);
+    _debugCanParentUseSize = null;
+    _debugDoingThisLayout = false;
+  }
+
   BoxConstraints get constraints { BoxConstraints result = super.constraints; return result; }
   void performResize() {
     // default behaviour for subclasses that have sizedByParent = true
@@ -241,11 +272,19 @@ abstract class RenderBox extends RenderObject {
   }
   void hitTestChildren(HitTestResult result, { Point position }) { }
 
+  // TODO(ianh): In non-debug builds, this should all just be:
+  // Size size = Size.zero;
+  // In debug builds, however:
   Size _size = Size.zero;
   Size get size => _size;
   void set size(Size value) {
     assert(RenderObject.debugDoingLayout);
-    _size = value;
+    assert(_debugDoingThisLayout);
+    if (value is _DebugSize) {
+      assert(value._canBeUsedByParent);
+      assert(value._owner.parent == this);
+    }
+    _size = inDebugBuild ? new _DebugSize(value, this, _debugCanParentUseSize) : value;
   }
 
   String debugDescribeSettings(String prefix) => '${super.debugDescribeSettings(prefix)}${prefix}size: ${size}\n';
@@ -394,7 +433,7 @@ class RenderConstrainedBox extends RenderProxyBox {
 
   void performLayout() {
     if (child != null) {
-      child.layout(constraints.apply(_additionalConstraints));
+      child.layout(constraints.apply(_additionalConstraints), parentUsesSize: true);
       size = child.size;
     } else {
       performResize();
@@ -439,7 +478,7 @@ class RenderShrinkWrapWidth extends RenderProxyBox {
 
   void performLayout() {
     if (child != null) {
-      child.layout(_getInnerConstraints(constraints));
+      child.layout(_getInnerConstraints(constraints), parentUsesSize: true);
       size = child.size;
     } else {
       performResize();
@@ -663,7 +702,7 @@ class RenderPositionedBox extends RenderShiftedBox {
 
   void performLayout() {
     if (child != null) {
-      child.layout(constraints.loosen());
+      child.layout(constraints.loosen(), parentUsesSize: true);
       size = constraints.constrain(child.size);
       assert(child.parentData is BoxParentData);
       Size delta = size - child.size;

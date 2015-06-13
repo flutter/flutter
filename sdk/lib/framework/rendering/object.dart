@@ -128,11 +128,11 @@ abstract class RenderObject extends AbstractNode {
     _nodesNeedingLayout = new List<RenderObject>();
     dirtyNodes..sort((a, b) => a.depth - b.depth)..forEach((node) {
       if (node._needsLayout && node.attached)
-        node._doLayout();
+        node.layoutWithoutResize();
     });
     _debugDoingLayout = false;
   }
-  void _doLayout() {
+  void layoutWithoutResize() {
     try {
       assert(_relayoutSubtreeRoot == this);
       performLayout();

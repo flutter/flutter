@@ -45,6 +45,7 @@ dart_pkg("sdk") {
     "lib/framework/components/tool_bar.dart",
     "lib/framework/debug/shake-to-reload.sky",
     "lib/framework/debug/tracing.dart",
+    "lib/framework/debug/utils.dart",
     "lib/framework/editing/editable_string.dart",
     "lib/framework/editing/editable_text.dart",
     "lib/framework/editing/keyboard.dart",

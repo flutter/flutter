@@ -211,5 +211,11 @@ class RenderParagraph extends RenderBox {
 
   // we should probably expose a way to do precise (inter-glpyh) hit testing
 
-  String debugDescribeSettings(String prefix) => '${super.debugDescribeSettings(prefix)}${prefix}style:\n${style.toString("$prefix  ")}\n${prefix}text: ${text}\n';
+  String debugDescribeSettings(String prefix) {
+    String result = '${super.debugDescribeSettings(prefix)}';
+    if (style != null)
+      result += '${prefix}style:\n' + style.toString('$prefix  ') + '\n';
+    result += '${prefix}text: ${text}\n';
+    return result;
+  }
 }

@@ -71,11 +71,7 @@ void rotate(double timeStamp) {
   transformBox.translate(transformBox.size.width / 2.0, transformBox.size.height / 2.0);
   transformBox.rotateZ(delta);
   transformBox.translate(-transformBox.size.width / 2.0, -transformBox.size.height / 2.0);
-
-  // tester.checkFrame();
 }
-
-final bool debugDisplayList = false; // set this to true to use the test rendering logic
 
 void main() {
   // Because we're going to use UINodes, we want to initialise its
@@ -84,7 +80,7 @@ void main() {
   // it's good practice in case we happen to not have a
   // RenderObjectToUINodeAdapter in our tree at startup, or in case we
   // want a renderViewOverride.
-  UINodeAppView.initUINodeAppView(renderViewOverride: debugDisplayList ? tester : null);
+  UINodeAppView.initUINodeAppView();
 
   RenderFlex flexRoot = new RenderFlex(direction: FlexDirection.vertical);
 

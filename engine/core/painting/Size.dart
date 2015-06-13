@@ -8,6 +8,7 @@ part of dart.sky;
 /// Think of this as a vector from Point(0,0) to Point(size.width, size.height)
 class Size {
   const Size(this.width, this.height);
+  Size.copy(Size source) : width = source.width, height = source.height;
   const Size.fromWidth(this.width) : height = double.INFINITY;
   const Size.fromHeight(this.height) : width = double.INFINITY;
 
