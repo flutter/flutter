@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:sky/framework/widgets/fixed_height_scrollable.dart';
-import 'package:sky/framework/widgets/wrappers.dart';
+import 'package:sky/framework/widgets/basic.dart';
 
 import 'stock_data.dart';
 import 'stock_row.dart';
