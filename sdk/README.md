@@ -216,7 +216,7 @@ service to allow Sky Framework Dart code to interface with the underlying
 platform's Keyboard, but also to expose any additional non-Dart business logic
 to Sky/Dart UI code.
 
-As and example, [SkyApplication](https://github.com/domokit/mojo/blob/master/sky/shell/org/domokit/sky/shell/SkyApplication.java)
+As an example, [SkyApplication](https://github.com/domokit/mojo/blob/master/sky/shell/org/domokit/sky/shell/SkyApplication.java)
 exposes a mojo `network_service` (required by Sky Engine C++ code)
 [SkyDemoApplication](https://github.com/domokit/mojo/blob/master/sky/apk/demo/org/domokit/sky/demo/SkyDemoApplication.java)
 additionally exposes `keyboard_service` and `sensor_service` for use by the Sky
