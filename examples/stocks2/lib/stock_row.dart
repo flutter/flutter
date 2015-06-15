@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:sky' as sky;
-
 import 'package:sky/rendering/box.dart';
 import 'package:sky/theme2/typography.dart' as typography;
 import 'package:sky/widgets/ink_well.dart';
@@ -19,7 +17,7 @@ class StockRow extends Component {
 
   final Stock stock;
 
-  static const double kHeight = 70.0;
+  static const double kHeight = 79.0;
 
   UINode build() {
     String lastSale = "\$${stock.lastSale.toStringAsFixed(2)}";
@@ -48,7 +46,7 @@ class StockRow extends Component {
         height: kHeight,
         decoration: const BoxDecoration(
             border: const Border(
-                bottom: const BorderSide(color: const sky.Color(0xFFF4F4F4)))),
+                bottom: const BorderSide(color: const Color(0xFFF4F4F4)))),
         child: new Flex(children)
       )
     );
