@@ -1,0 +1,28 @@
+# Copyright 2014 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+executable("packager") {
+  output_name = "sky_packager"
+
+  sources = [
+    "loader.cc",
+    "loader.h",
+    "logging.cc",
+    "logging.h",
+    "main.cc",
+    "scopes.h",
+    "switches.cc",
+    "switches.h",
+    "vm.cc",
+    "vm.h",
+  ]
+
+  deps = [
+    "//base",
+    "//dart/runtime/vm:libdart_platform",
+    "//dart/runtime:libdart",
+    "//sky/engine/bindings:snapshot_cc",
+    "//third_party/zlib",
+  ]
+}
