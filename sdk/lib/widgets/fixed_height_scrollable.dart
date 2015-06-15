@@ -12,7 +12,8 @@ import 'scrollable.dart';
 
 abstract class FixedHeightScrollable extends Scrollable {
 
-  FixedHeightScrollable({ this.itemHeight, Object key }) : super(key: key) {
+  FixedHeightScrollable({ this.itemHeight, Color backgroundColor, Object key })
+      : super(key: key, backgroundColor: backgroundColor) {
     assert(itemHeight != null);
   }
 
@@ -78,6 +79,6 @@ abstract class FixedHeightScrollable extends Scrollable {
     );
   }
 
-  List<UINode> buildItems(int start, int count);  
+  List<UINode> buildItems(int start, int count);
 
 }

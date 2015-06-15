@@ -26,9 +26,13 @@ abstract class ScrollClient {
 
 abstract class Scrollable extends Component {
 
-  Scrollable({Object key}) : super(key: key, stateful: true);
+  Scrollable({ Object key, Color this.backgroundColor }) : super(key: key, stateful: true);
 
-  void syncFields(Scrollable source) { }
+  Color backgroundColor;
+
+  void syncFields(Scrollable source) {
+    backgroundColor = source.backgroundColor;
+  }
 
   double _scrollOffset = 0.0;
   double get scrollOffset => _scrollOffset;
@@ -49,7 +53,8 @@ abstract class Scrollable extends Component {
     return new EventListenerNode(
       new Material(
         child: buildContent(),
-        edge: MaterialEdge.canvas
+        edge: MaterialEdge.canvas,
+        color: backgroundColor
       ),
       onPointerDown: _handlePointerDown,
       onPointerUp: _handlePointerUpOrCancel,
