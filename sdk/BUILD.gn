@@ -84,6 +84,7 @@ dart_pkg("sdk") {
     "lib/framework/theme/shadows.dart",
     "lib/framework/theme/typography.dart",
     "lib/framework/theme/view_configuration.dart",
+    "lib/internals.dart",
     "lib/painting/box_painter.dart",
     "lib/painting/shadows.dart",
     "lib/rendering/block.dart",
