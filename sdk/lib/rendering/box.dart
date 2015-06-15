@@ -72,6 +72,14 @@ class BoxConstraints {
       minHeight = size.height,
       maxHeight = size.height;
 
+  BoxConstraints.tightFor({
+    double width,
+    double height
+  }): minWidth = width != null ? width : 0.0,
+      maxWidth = width != null ? width : double.INFINITY,
+      minHeight = height != null ? height : 0.0,
+      maxHeight = height != null ? height : double.INFINITY;
+
   BoxConstraints.loose(Size size)
     : minWidth = 0.0,
       maxWidth = size.width,
@@ -101,29 +109,30 @@ class BoxConstraints {
 
   BoxConstraints apply(BoxConstraints constraints) {
     return new BoxConstraints(
-      minWidth: math.max(minWidth, constraints.minWidth),
-      maxWidth: math.min(maxWidth, constraints.maxWidth),
-      minHeight: math.max(minHeight, constraints.minHeight),
-      maxHeight: math.min(maxHeight, constraints.maxHeight));
+      minWidth: clamp(min: constraints.minWidth, max: constraints.maxWidth, value: minWidth),
+      maxWidth: clamp(min: constraints.minWidth, max: constraints.maxWidth, value: maxWidth),
+      minHeight: clamp(min: constraints.minHeight, max: constraints.maxHeight, value: minHeight),
+      maxHeight: clamp(min: constraints.minHeight, max: constraints.maxHeight, value: maxHeight)
+    );
   }
 
   BoxConstraints applyWidth(double width) {
-    return new BoxConstraints(minWidth: math.max(minWidth, width),
-                              maxWidth: math.min(maxWidth, width),
+    return new BoxConstraints(minWidth: math.max(math.min(maxWidth, width), minWidth),
+                              maxWidth: math.max(math.min(maxWidth, width), minWidth),
                               minHeight: minHeight,
                               maxHeight: maxHeight);
   }
 
-  BoxConstraints applyMinWidth(double width) {
-    return new BoxConstraints(minWidth: math.max(minWidth, width),
-                              maxWidth: maxWidth,
+  BoxConstraints applyMinWidth(double newMinWidth) {
+    return new BoxConstraints(minWidth: math.max(minWidth, newMinWidth),
+                              maxWidth: math.max(maxWidth, newMinWidth),
                               minHeight: minHeight,
                               maxHeight: maxHeight);
   }
 
-  BoxConstraints applyMaxWidth(double width) {
+  BoxConstraints applyMaxWidth(double newMaxWidth) {
     return new BoxConstraints(minWidth: minWidth,
-                              maxWidth: math.min(maxWidth, width),
+                              maxWidth: math.min(maxWidth, newMaxWidth),
                               minHeight: minHeight,
                               maxHeight: maxHeight);
   }
@@ -131,22 +140,22 @@ class BoxConstraints {
   BoxConstraints applyHeight(double height) {
     return new BoxConstraints(minWidth: minWidth,
                               maxWidth: maxWidth,
-                              minHeight: math.max(minHeight, height),
-                              maxHeight: math.min(maxHeight, height));
+                              minHeight: math.max(math.min(maxHeight, height), minHeight),
+                              maxHeight: math.max(math.min(maxHeight, height), minHeight));
   }
 
-  BoxConstraints applyMinHeight(double height) {
+  BoxConstraints applyMinHeight(double newMinHeight) {
     return new BoxConstraints(minWidth: minWidth,
                               maxWidth: maxWidth,
-                              minHeight: math.max(minHeight, height),
-                              maxHeight: maxHeight);
+                              minHeight: math.max(minHeight, newMinHeight),
+                              maxHeight: math.max(maxHeight, newMinHeight));
   }
 
-  BoxConstraints applyMaxHeight(double height) {
+  BoxConstraints applyMaxHeight(double newMaxHeight) {
     return new BoxConstraints(minWidth: minWidth,
                               maxWidth: maxWidth,
                               minHeight: minHeight,
-                              maxHeight: math.min(maxHeight, height));
+                              maxHeight: math.min(maxHeight, newMaxHeight));
   }
 
   final double minWidth;
@@ -345,50 +354,6 @@ class RenderProxyBox extends RenderBox with RenderObjectWithChildMixin<RenderBox
 
 }
 
-class RenderSizedBox extends RenderProxyBox {
-
-  RenderSizedBox({
-    RenderBox child,
-    Size desiredSize: Size.infinite
-  }) : super(child), _desiredSize = desiredSize {
-    assert(desiredSize != null);
-  }
-
-  Size _desiredSize;
-  Size get desiredSize => _desiredSize;
-  void set desiredSize (Size value) {
-    assert(value != null);
-    if (_desiredSize == value)
-      return;
-    _desiredSize = value;
-    markNeedsLayout();
-  }
-
-  double getMinIntrinsicWidth(BoxConstraints constraints) {
-    return constraints.constrainWidth(_desiredSize.width);
-  }
-
-  double getMaxIntrinsicWidth(BoxConstraints constraints) {
-    return constraints.constrainWidth(_desiredSize.width);
-  }
-
-  double getMinIntrinsicHeight(BoxConstraints constraints) {
-    return constraints.constrainHeight(_desiredSize.height);
-  }
-
-  double getMaxIntrinsicHeight(BoxConstraints constraints) {
-    return constraints.constrainHeight(_desiredSize.height);
-  }
-
-  void performLayout() {
-    size = constraints.constrain(_desiredSize);
-    if (child != null)
-      child.layout(new BoxConstraints.tight(size));
-  }
-
-  String debugDescribeSettings(String prefix) => '${super.debugDescribeSettings(prefix)}${prefix}desiredSize: ${desiredSize}\n';
-}
-
 class RenderConstrainedBox extends RenderProxyBox {
   RenderConstrainedBox({
     RenderBox child,
@@ -409,34 +374,34 @@ class RenderConstrainedBox extends RenderProxyBox {
 
   double getMinIntrinsicWidth(BoxConstraints constraints) {
     if (child != null)
-      return child.getMinIntrinsicWidth(constraints.apply(_additionalConstraints));
+      return child.getMinIntrinsicWidth(_additionalConstraints.apply(constraints));
     return constraints.constrainWidth(0.0);
   }
 
   double getMaxIntrinsicWidth(BoxConstraints constraints) {
     if (child != null)
-      return child.getMaxIntrinsicWidth(constraints.apply(_additionalConstraints));
+      return child.getMaxIntrinsicWidth(_additionalConstraints.apply(constraints));
     return constraints.constrainWidth(0.0);
   }
 
   double getMinIntrinsicHeight(BoxConstraints constraints) {
     if (child != null)
-      return child.getMinIntrinsicHeight(constraints.apply(_additionalConstraints));
+      return child.getMinIntrinsicHeight(_additionalConstraints.apply(constraints));
     return constraints.constrainHeight(0.0);
   }
 
   double getMaxIntrinsicHeight(BoxConstraints constraints) {
     if (child != null)
-      return child.getMaxIntrinsicHeight(constraints.apply(_additionalConstraints));
+      return child.getMaxIntrinsicHeight(_additionalConstraints.apply(constraints));
     return constraints.constrainHeight(0.0);
   }
 
   void performLayout() {
     if (child != null) {
-      child.layout(constraints.apply(_additionalConstraints), parentUsesSize: true);
+      child.layout(_additionalConstraints.apply(constraints), parentUsesSize: true);
       size = child.size;
     } else {
-      performResize();
+      size = _additionalConstraints.apply(constraints).constrain(Size.zero);
     }
   }
 

@@ -14,7 +14,7 @@ void main() {
   initUnit();
 
   test("padding", () {
-    var size = new RenderSizedBox(desiredSize: new sky.Size(double.INFINITY, 100.0));
+    var size = new RenderConstrainedBox(additionalConstraints: new BoxConstraints().applyHeight(100.0));
     var inner = new RenderDecoratedBox(decoration: new BoxDecoration(backgroundColor: const sky.Color(0xFF00FF00)), child: size);
     var padding = new RenderPadding(padding: new EdgeDims.all(50.0), child: inner);
     var block = new RenderBlock(children: [padding]);

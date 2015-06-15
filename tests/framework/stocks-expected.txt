@@ -25,7 +25,7 @@ PAINT FOR FRAME #2 ----------------------------------------------
 2 |  |  |  | drawRect(Rect.fromLTRB(0.0, 0.0, 800.0, 81.0), Paint(Color(0xff9c27b0)))
 2 |  |  |  | paintChild RenderFlex at Point(8.0, 0.0)
 2 |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
-2 |  |  |  |  | paintChild RenderSizedBox at Point(0.0, 25.0)
+2 |  |  |  |  | paintChild RenderConstrainedBox at Point(0.0, 25.0)
 2 |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
 2 |  |  |  |  |  | paintChild RenderPadding at Point(0.0, 8.0)
 2 |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0

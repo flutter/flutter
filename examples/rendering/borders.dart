@@ -16,8 +16,8 @@ void main() {
   var root = new RenderBlock(children: [
     new RenderPadding(
       padding: new EdgeDims.all(10.0),
-      child: new RenderSizedBox(
-        desiredSize: new sky.Size.fromHeight(100.0),
+      child: new RenderConstrainedBox(
+        additionalConstraints: new BoxConstraints.tightFor(height: 100.0),
         child: new RenderDecoratedBox(
           decoration: new BoxDecoration(
             backgroundColor: new sky.Color(0xFFFFFF00)
@@ -27,8 +27,8 @@ void main() {
     ),
     new RenderPadding(
       padding: new EdgeDims.all(10.0),
-      child: new RenderSizedBox(
-        desiredSize: new sky.Size.fromHeight(100.0),
+      child: new RenderConstrainedBox(
+        additionalConstraints: new BoxConstraints.tightFor(height: 100.0),
         child: new RenderDecoratedBox(
           decoration: new BoxDecoration(
             border: new Border(
@@ -44,8 +44,8 @@ void main() {
     ),
     new RenderPadding(
       padding: new EdgeDims.all(10.0),
-      child: new RenderSizedBox(
-        desiredSize: new sky.Size.fromHeight(100.0),
+      child: new RenderConstrainedBox(
+        additionalConstraints: new BoxConstraints.tightFor(height: 100.0),
         child: new RenderDecoratedBox(
           decoration: new BoxDecoration(
             backgroundColor: new sky.Color(0xFFFFFF00)
@@ -55,8 +55,8 @@ void main() {
     ),
     new RenderPadding(
       padding: new EdgeDims.all(10.0),
-      child: new RenderSizedBox(
-        desiredSize: new sky.Size.fromHeight(100.0),
+      child: new RenderConstrainedBox(
+        additionalConstraints: new BoxConstraints.tightFor(height: 100.0),
         child: new RenderDecoratedBox(
           decoration: new BoxDecoration(
             backgroundColor: new sky.Color(0xFFFFFF00)
@@ -66,8 +66,8 @@ void main() {
     ),
     new RenderPadding(
       padding: new EdgeDims.all(10.0),
-      child: new RenderSizedBox(
-        desiredSize: new sky.Size.fromHeight(100.0),
+      child: new RenderConstrainedBox(
+        additionalConstraints: new BoxConstraints.tightFor(height: 100.0),
         child: new RenderDecoratedBox(
           decoration: new BoxDecoration(
             backgroundColor: new sky.Color(0xFFFFFF00)

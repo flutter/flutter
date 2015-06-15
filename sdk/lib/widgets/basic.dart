@@ -143,20 +143,31 @@ class Center extends OneChildRenderObjectWrapper {
 class SizedBox extends OneChildRenderObjectWrapper {
 
   SizedBox({
-    double width: double.INFINITY,
-    double height: double.INFINITY,
+    this.width,
+    this.height,
     UINode child,
     Object key
-  }) : desiredSize = new Size(width, height), super(child: child, key: key);
+  }) : super(child: child, key: key);
 
-  RenderSizedBox get root { RenderSizedBox result = super.root; return result; }
-  final Size desiredSize;
+  RenderConstrainedBox get root { RenderConstrainedBox result = super.root; return result; }
 
-  RenderSizedBox createNode() => new RenderSizedBox(desiredSize: desiredSize);
+  final double width;
+  final double height;
+
+  RenderConstrainedBox createNode() => new RenderConstrainedBox(additionalConstraints: _additionalConstraints());
+
+  BoxConstraints _additionalConstraints() {
+    var result = const BoxConstraints();
+    if (width != null)
+      result = result.applyWidth(width);
+    if (height != null)
+      result = result.applyHeight(height);
+    return result;
+  }
 
   void syncRenderObject(SizedBox old) {
     super.syncRenderObject(old);
-    root.desiredSize = desiredSize;
+    root.additionalConstraints = _additionalConstraints();
   }
 
 }
@@ -240,7 +251,10 @@ class Container extends Component {
     UINode current = child;
 
     if (child == null && width == null && height == null)
-      current = new SizedBox();
+      current = new SizedBox(
+        width: double.INFINITY,
+        height: double.INFINITY
+      );
 
     if (padding != null)
       current = new Padding(padding: padding, child: current);
@@ -250,8 +264,8 @@ class Container extends Component {
 
     if (width != null || height != null)
       current = new SizedBox(
-        width: width == null ? double.INFINITY : width,
-        height: height == null ? double.INFINITY : height,
+        width: width,
+        height: height,
         child: current
       );
 

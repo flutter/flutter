@@ -250,7 +250,7 @@ abstract class RenderObject extends AbstractNode {
     prefix += '  ';
     return '${header}\n${debugDescribeSettings(prefix)}${debugDescribeChildren(prefix)}';
   }
-  String debugDescribeSettings(String prefix) => '${prefix}parentData: ${parentData}\n';
+  String debugDescribeSettings(String prefix) => '${prefix}parentData: ${parentData}\n${prefix}constraints: ${constraints}\n';
   String debugDescribeChildren(String prefix) => '';
 
 }
