@@ -1,8 +1,8 @@
 part of sprites;
 
-double degrees2radians(double degrees) => degrees * Math.PI/180.8;
+double convertDegrees2Radians(double degrees) => degrees * Math.PI/180.8;
 
-double radians2degrees(double radians) => radians * 180.0/Math.PI;
+double convertRadians2Degrees(double radians) => radians * 180.0/Math.PI;
 
 class Node {
 
@@ -28,19 +28,22 @@ class Node {
   int _childrenLastAddedOrder;
   bool _childrenNeedSorting;
 
+  bool paused = false;
+
   List<Node>_children;
 
   // Constructors
   
   Node() {
     _rotation = 0.0;
-    _position = new Point(0.0, 0.0);
+    _position = Point.origin;
     _scaleX = _scaleY = 1.0;
     _isMatrixDirty = false;
     _transformMatrix = new Matrix4.identity();
     _children = [];
     _childrenNeedSorting = false;
     _childrenLastAddedOrder = 0;
+    _zPosition = 0.0;
     visible = true;
   }
 
@@ -107,7 +110,7 @@ class Node {
 
   void removeFromParent() {
     assert(_parent != null);
-    _parent.removeFromParent();
+    _parent.removeChild(this);
   }
 
   void removeAllChildren() {
@@ -135,8 +138,8 @@ class Node {
       sy = 0.0;
     }
     else {
-      double radiansX = degrees2radians(_rotation);
-      double radiansY = degrees2radians(_rotation);
+      double radiansX = convertDegrees2Radians(_rotation);
+      double radiansY = convertDegrees2Radians(_rotation);
       
       cx = Math.cos(radiansX);
       sx = Math.sin(radiansX);
@@ -157,19 +160,29 @@ class Node {
   // Transforms to other nodes
 
   Matrix4 _nodeToBoxMatrix() {
+    assert(_spriteBox != null);
+
     Matrix4 t = transformMatrix;
 
+    // Apply transforms from parents
     Node p = this.parent;
     while (p != null) {
       t = new Matrix4.copy(p.transformMatrix).multiply(t);
       p = p.parent;
     }
+
+    // Apply transform from sprite box
+    t = new Matrix4.copy(_spriteBox.transformMatrix).multiply(t);
+
     return t;
   }
 
   Matrix4 _boxToNodeMatrix() {
+    assert(_spriteBox != null);
+
     Matrix4 t = _nodeToBoxMatrix();
     t.invert();
+
     return t;
   }
 
@@ -223,12 +236,8 @@ class Node {
   void prePaint(PictureRecorder canvas) {
     canvas.save();
 
-    // TODO: Can this be done more efficiently?
     // Get the transformation matrix and apply transform
-    List<double> matrix = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0];
-    this.transformMatrix.copyIntoArray(matrix);
-    Float32List list32 = new Float32List.fromList(matrix);
-    canvas.concat(list32);
+    canvas.concat(transformMatrix.storage);
   }
   
   void paint(PictureRecorder canvas) {
@@ -240,7 +249,7 @@ class Node {
     if (_childrenNeedSorting) {
       _children.sort((Node a, Node b) {
         if (a._zPosition == b._zPosition) {
-          return b._addedOrder - a._addedOrder;
+          return a._addedOrder - b._addedOrder;
         }
         else if (a._zPosition > b._zPosition) {
           return 1;
@@ -263,6 +272,8 @@ class Node {
   // Receiving update calls
 
   void update(double dt) {
+  }
 
+  void spriteBoxPerformedLayout() {
   }
 }

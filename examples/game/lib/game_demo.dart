@@ -7,6 +7,5 @@ import 'sprites.dart';
 import 'package:box2d/box2d.dart';
 import 'package:sky/rendering/box.dart';
 
-part 'game_world.dart';
-part 'game_box.dart';
-part 'game_tests.dart';
+part 'game_demo_world.dart';
+part 'game_demo_box.dart';
