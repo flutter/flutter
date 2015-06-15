@@ -11,7 +11,7 @@ executable("packager") {
     "logging.cc",
     "logging.h",
     "main.cc",
-    "scopes.h",
+    "scope.h",
     "switches.cc",
     "switches.h",
     "vm.cc",
