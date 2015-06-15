@@ -12,9 +12,12 @@ AppView app;
 
 void main() {
   RenderDecoratedBox green = new RenderDecoratedBox(
-      decoration: new BoxDecoration(backgroundColor: const sky.Color(0xFF00FF00)));
-  RenderSizedBox box = new RenderSizedBox(
-      desiredSize: new sky.Size(200.0, 200.0), child: green);
+    decoration: new BoxDecoration(backgroundColor: const sky.Color(0xFF00FF00))
+  );
+  RenderConstrainedBox box = new RenderConstrainedBox(
+    additionalConstraints: new BoxConstraints.tight(const Size(200.0, 200.0)),
+    child: green
+  );
 
   Matrix4 transform = new Matrix4.identity();
   RenderTransform spin = new RenderTransform(
