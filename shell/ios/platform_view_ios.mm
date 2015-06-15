@@ -11,6 +11,13 @@ PlatformView* PlatformView::Create(const Config& config) {
   return new PlatformViewIOS(config);
 }
 
+PlatformViewIOS::PlatformViewIOS(const Config& config)
+  : PlatformView(config) {
+}
+
+PlatformViewIOS::~PlatformViewIOS() {
+}
+
 void PlatformViewIOS::SurfaceCreated(gfx::AcceleratedWidget widget) {
   DCHECK(window_ == 0);
   window_ = widget;

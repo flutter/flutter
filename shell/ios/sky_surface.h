@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #import <UIKit/UIKit.h>
+#import "sky/shell/shell_view.h"
 
 @interface SkySurface : UIView
 

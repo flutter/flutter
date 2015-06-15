@@ -103,9 +103,8 @@ static inline sky::EventType EventTypeFromUITouchPhase(UITouchPhase phase) {
 }
 
 - (void)connectToViewportObserverAndLoad {
-  auto view = static_cast<sky::shell::PlatformViewIOS*>(_shell_view->view());
   auto interface_request = mojo::GetProxy(&_viewport_observer);
-  view->ConnectToViewportObserver(interface_request.Pass());
+  self.platformView->ConnectToViewportObserver(interface_request.Pass());
 
   mojo::String string(self.skyInitialLoadURL.UTF8String);
   _viewport_observer->LoadURL(string);

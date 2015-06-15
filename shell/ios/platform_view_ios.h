@@ -12,6 +12,8 @@ namespace shell {
 
 class PlatformViewIOS : public PlatformView {
  public:
+  explicit PlatformViewIOS(const Config& config);
+  ~PlatformViewIOS() override;
   void SurfaceCreated(gfx::AcceleratedWidget widget);
   void SurfaceDestroyed(void);
 
