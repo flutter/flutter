@@ -15,10 +15,8 @@ void main() {
   initUnit();
 
   test("should size to render view", () {
-    RenderSizedBox root = new RenderSizedBox(
-      child: new RenderDecoratedBox(
-        decoration: new BoxDecoration(backgroundColor: const sky.Color(0xFF00FF00))
-      )
+    RenderBox root = new RenderDecoratedBox(
+      decoration: new BoxDecoration(backgroundColor: const sky.Color(0xFF00FF00))
     );
     new TestRenderView(root);
     expect(root.size.width, equals(sky.view.width));
