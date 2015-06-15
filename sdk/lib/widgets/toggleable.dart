@@ -51,7 +51,7 @@ abstract class Toggleable extends AnimatedComponent {
   void customPaintCallback(sky.Canvas canvas, Size size) {
     assert(false);
   }
-  Size get size => const Size.zero;
+  Size get size => Size.zero;
   EdgeDims get margin => const EdgeDims.symmetric(horizontal: 5.0);
   double get duration => 200.0;
   Curve get curveUp => easeIn;
