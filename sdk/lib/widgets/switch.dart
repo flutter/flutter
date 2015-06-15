@@ -11,6 +11,7 @@ import '../painting/shadows.dart';
 import '../rendering/box.dart';
 import 'basic.dart';
 import 'toggleable.dart';
+export 'toggleable.dart' show ValueChanged;
 
 // TODO(jackson): This should change colors with the theme
 sky.Color _kThumbOnColor = colors.Purple[500];

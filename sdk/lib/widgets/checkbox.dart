@@ -8,6 +8,7 @@ import 'package:sky/theme2/colors.dart' as colors;
 
 import 'basic.dart';
 import 'toggleable.dart';
+export 'toggleable.dart' show ValueChanged;
 
 const double _kMidpoint = 0.5;
 const sky.Color _kUncheckedColor = const sky.Color(0x8A000000);
