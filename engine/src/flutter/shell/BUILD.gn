@@ -157,6 +157,8 @@ if (is_android) {
         "platform_view.h",
         "shell.cc",
         "shell.h",
+        "shell_view.cc",
+        "shell_view.h",
         "ui/animator.cc",
         "ui/animator.h",
         "ui/engine.cc",
