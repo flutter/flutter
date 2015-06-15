@@ -1,22 +1,22 @@
 part of game;
 
-const double _steeringThreshold = 20.0;
-const double _steeringMax = 50.0;
+const double _steeringThreshold = 0.0;
+const double _steeringMax = 150.0;
 
-class GameBox extends SpriteBox {
+class GameDemoBox extends SpriteBox {
 
-  GameBox(GameWorld game) : super(game, SpriteBoxTransformMode.letterbox);
+  GameDemoBox(GameDemoWorld game) : super(game, SpriteBoxTransformMode.letterbox);
 
-  GameWorld get _gameWorld => this.rootNode;
+  GameDemoWorld get _gameWorld => this.rootNode;
 
   // Handle pointers
   int _firstPointer = -1;
   int _secondPointer = -1;
-  Vector2 _firstPointerDownPos;
+  Point _firstPointerDownPos;
 
   void handleEvent(Event event, BoxHitTestEntry entry) {
     if (event is PointerEvent) {
-      Vector2 pointerPos = new Vector2(event.x, event.y);
+      Point pointerPos = new Point(event.x, event.y);
       int pointer = event.pointer;
 
       switch (event.type) {
@@ -29,7 +29,7 @@ class GameBox extends SpriteBox {
           else if (_secondPointer == -1) {
             // Assign second pointer
             _secondPointer = pointer;
-            _gameWorld.controlThrust(1.0);
+            _gameWorld.controlFire();
           }
           else {
             // There is a pointer used for steering, let's fire instead
@@ -39,14 +39,23 @@ class GameBox extends SpriteBox {
         case 'pointermove':
           if (pointer == _firstPointer) {
             // Handle turning control
-            double deltaX = pointerPos[0] - _firstPointerDownPos[0];
+            double joystickX = 0.0;
+            double deltaX = pointerPos.x - _firstPointerDownPos.x;
             if (deltaX > _steeringThreshold || deltaX < -_steeringThreshold) {
-              double turnForce = (deltaX - _steeringThreshold)/(_steeringMax - _steeringThreshold);
-              if (turnForce > 1.0) turnForce = 1.0;
-              if (turnForce < -1.0) turnForce = -1.0;
-              _gameWorld.controlSteering(turnForce);
-              print("steering: $turnForce");
+              joystickX = (deltaX - _steeringThreshold)/(_steeringMax - _steeringThreshold);
+              if (joystickX > 1.0) joystickX = 1.0;
+              if (joystickX < -1.0) joystickX = -1.0;
             }
+
+            double joystickY = 0.0;
+            double deltaY = pointerPos.y - _firstPointerDownPos.y;
+            if (deltaY > _steeringThreshold || deltaY < -_steeringThreshold) {
+              joystickY = (deltaY - _steeringThreshold)/(_steeringMax - _steeringThreshold);
+              if (joystickY > 1.0) joystickY = 1.0;
+              if (joystickY < -1.0) joystickY = -1.0;
+            }
+
+            _gameWorld.controlSteering(joystickX, joystickY);
           }
           break;
         case 'pointerup':
@@ -55,11 +64,11 @@ class GameBox extends SpriteBox {
             // Un-assign the first pointer
             _firstPointer = -1;
             _firstPointerDownPos = null;
-            _gameWorld.controlSteering(null);
+            _gameWorld.controlSteering(0.0, 0.0);
           }
           else if (pointer == _secondPointer) {
             _secondPointer = -1;
-            _gameWorld.controlThrust(null);
+            _gameWorld.controlFire();
           }
           break;
         default:

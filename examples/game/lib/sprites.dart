@@ -2,7 +2,7 @@ library sprites;
 
 import 'dart:sky';
 import 'dart:math' as Math;
-import 'package:vector_math/vector_math_64.dart';
+import 'package:vector_math/vector_math.dart';
 import 'dart:typed_data';
 import 'package:sky/rendering/box.dart';
 import 'package:sky/rendering/object.dart';

@@ -14,8 +14,8 @@ class Sprite extends NodeWithSize {
   }
   
   Sprite.withImage(Image image) {
-    this.pivot = new Point(0.5, 0.5);
-    this.size = new Size(image.width.toDouble(), image.height.toDouble());
+    pivot = new Point(0.5, 0.5);
+    size = new Size(image.width.toDouble(), image.height.toDouble());
     _image = image;
   }
 

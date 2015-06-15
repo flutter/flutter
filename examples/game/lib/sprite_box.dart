@@ -19,10 +19,16 @@ class SpriteBox extends RenderBox {
   // Tracking of frame rate and updates
   double _lastTimeStamp;
   int _numFrames = 0;
+  double _frameRate = 0.0;
 
+  // Transformation mode
   SpriteBoxTransformMode transformMode;
   double _systemWidth;
   double _systemHeight;
+
+  // Cached transformation matrix
+  Matrix4 _transformMatrix;
+  bool _transformMatrixIsDirty;
 
   // Setup
 
@@ -40,6 +46,8 @@ class SpriteBox extends RenderBox {
     transformMode = mode;
     _systemWidth = width;
     _systemHeight = height;
+
+    _transformMatrixIsDirty = true;
 
     _scheduleTick();
   }
@@ -60,6 +68,8 @@ class SpriteBox extends RenderBox {
 
   void performLayout() {
     size = constraints.constrain(Size.infinite);
+    _transformMatrixIsDirty = true;
+    _callSpriteBoxPerformedLayout(_rootNode);
   }
 
   // Event handling
@@ -69,8 +79,15 @@ class SpriteBox extends RenderBox {
 
   // Rendering
 
-  void paint(RenderObjectDisplayList canvas) {
-    // Move to correct coordinate space before drawing
+  Matrix4 get transformMatrix {
+    // Get cached matrix if available
+    if (!_transformMatrixIsDirty && _transformMatrix != null) {
+      return _transformMatrix;
+    }
+
+    _transformMatrix = new Matrix4.identity();
+
+    // Calculate matrix
     double scaleX = 1.0;
     double scaleY = 1.0;
     double offsetX = 0.0;
@@ -122,10 +139,17 @@ class SpriteBox extends RenderBox {
         break;
     }
 
+    _transformMatrix.translate(offsetX, offsetY);
+    _transformMatrix.scale(scaleX, scaleY);
+
+    return _transformMatrix;
+  }
+
+  void paint(RenderObjectDisplayList canvas) {
     canvas.save();
 
-    canvas.translate(offsetX, offsetY);
-    canvas.scale(scaleX, scaleY);
+    // Move to correct coordinate space before drawing
+    canvas.concat(transformMatrix.storage);
 
     // Draw the sprite tree
     _rootNode.visit(canvas);
@@ -151,11 +175,29 @@ class SpriteBox extends RenderBox {
     // Count the number of frames we've been running
     _numFrames += 1;
 
-    // Print frame rate
-    if (_numFrames % 60 == 0) print("delta: ${delta} fps: ${1.0/delta}");
+    _frameRate = 1.0/delta;
 
-    _rootNode.update(delta);
+    // Print frame rate
+    if (_numFrames % 60 == 0) print("delta: $delta fps: $_frameRate");
+
+    _callUpdate(_rootNode, delta);
     _scheduleTick();
+  }
+
+  void _callUpdate(Node node, double dt) {
+    node.update(dt);
+    for (Node child in node.children) {
+      if (!child.paused) {
+        _callUpdate(child, dt);
+      }
+    }
+  }
+
+  void _callSpriteBoxPerformedLayout(Node node) {
+    node.spriteBoxPerformedLayout();
+    for (Node child in node.children) {
+      _callSpriteBoxPerformedLayout(child);
+    }
   }
 
   // Hit tests
