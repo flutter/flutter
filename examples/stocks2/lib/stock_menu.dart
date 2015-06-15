@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:sky/widgets/checkbox.dart';
-import 'package:sky/widgets/toggleable.dart';
 import 'package:sky/widgets/popup_menu.dart';
 import 'package:sky/widgets/basic.dart';
 import 'package:sky/framework/theme/view_configuration.dart';
