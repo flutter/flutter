@@ -93,8 +93,6 @@ class EditableText extends Component {
     //     // style: _cursorStyle
     //     ));
 
-    return new Paragraph(
-      text: hack
-    );
+    return new Text(hack);
   }
 }

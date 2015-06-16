@@ -31,9 +31,12 @@ andouille leberkas capicola meatloaf. Chicken pig ball tip pork picanha bresaola
 alcatra. Pork pork belly alcatra, flank chuck drumstick biltong doner jowl.
 Pancetta meatball tongue tenderloin rump tail jowl boudin.""";
 
+  var text = new InlineStyle(
+      new TextStyle(color:  const Color(0xFF009900)),
+      [new InlineText(meatyString)]);
   child = new RenderDecoratedBox(
     decoration: new BoxDecoration(backgroundColor: const Color(0xFFFFFFFF)),
-    child: new RenderParagraph(text: meatyString, color: const Color(0xFF009900))
+    child: new RenderParagraph(text)
   );
   flexRoot.add(child);
   child.parentData.flex = 1;

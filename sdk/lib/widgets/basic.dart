@@ -345,25 +345,22 @@ class Flexible extends ParentDataNode {
     : super(child, new FlexBoxParentData()..flex = flex, key: key);
 }
 
-class Paragraph extends RenderObjectWrapper {
-
-  Paragraph({ String key, this.text, this.style }) : super(key: key);
+class Inline extends RenderObjectWrapper {
+  Inline({ Object key, this.text }) : super(key: key);
 
   RenderParagraph get root => super.root;
-  RenderParagraph createNode() => new RenderParagraph(text: text, style: style);
+  RenderParagraph createNode() => new RenderParagraph(text);
 
-  final String text;
-  final TextStyle style;
+  final InlineBase text;
 
   void syncRenderObject(Widget old) {
     super.syncRenderObject(old);
-    root.text = text;
-    root.style = style;
+    root.inline = text;
   }
 
   void insert(RenderObjectWrapper child, dynamic slot) {
     assert(false);
-    // Paragraph does not support having children currently
+    // Inline does not support having children currently
   }
 
 }
@@ -373,7 +370,11 @@ class Text extends Component {
   final String data;
   final TextStyle style;
   bool get interchangeable => true;
-  Widget build() => new Paragraph(text: data, style: style);
+  Widget build() {
+    InlineBase text = new InlineText(data);
+    if (style != null) text = new InlineStyle(style, [text]);
+    return new Inline(text: text);
+  }
 }
 
 class Image extends RenderObjectWrapper {

@@ -31,7 +31,7 @@ PAINT FOR FRAME #2 ----------------------------------------------
 2 |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
 2 |  |  |  |  |  |  | paintChild RenderImage at Point(8.0, 8.0)
 2 |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
-2 |  |  |  |  |  | paintChild RenderPadding at Point(40.0, 20.0)
+2 |  |  |  |  |  | paintChild RenderPadding at Point(40.0, 16.0)
 2 |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
 2 |  |  |  |  |  |  | paintChild RenderParagraph at Point(24.0, 0.0)
 2 |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0

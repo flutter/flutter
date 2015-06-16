@@ -7,11 +7,6 @@ import 'dart:sky' as sky;
 import 'box.dart';
 import 'object.dart';
 
-class RenderInline extends RenderObject {
-  RenderInline(this.data);
-  String data;
-}
-
 enum FontWeight {
   light, // 300
   regular, // 400
@@ -69,6 +64,29 @@ class TextStyle {
     return value;
   }
 
+  void _applyToCSSStyle(sky.CSSStyleDeclaration cssStyle) {
+    if (color != null) {
+      cssStyle['color'] = 'rgba(${color.red}, ${color.green}, ${color.blue}, ${color.alpha / 255.0})';
+    }
+    if (fontSize != null) {
+      cssStyle['font-size'] = "${fontSize}px";
+    }
+    if (fontWeight != null) {
+      cssStyle['font-weight'] = const {
+        FontWeight.light: '300',
+        FontWeight.regular: '400',
+        FontWeight.medium: '500',
+      }[fontWeight];
+    }
+    if (textAlign != null) {
+      cssStyle['text-align'] = const {
+        TextAlign.left: 'left',
+        TextAlign.right: 'right',
+        TextAlign.center: 'center',
+      }[textAlign];
+    }
+  }
+
   String toString([String prefix = '']) {
     List<String> result = [];
     if (color != null)
@@ -76,11 +94,59 @@ class TextStyle {
     if (fontSize != null)
       result.add('${prefix}fontSize: $fontSize');
     if (fontWeight != null)
-      result.add('${prefix}fontWeight: fontWeight');
+      result.add('${prefix}fontWeight: $fontWeight');
     if (textAlign != null)
-      result.add('${prefix}textAlign: textAlign');
+      result.add('${prefix}textAlign: $textAlign');
     if (result.isEmpty)
       return '${prefix}<no style specified>';
+    return result.join('\n');
+  }
+}
+
+class InlineBase {
+  sky.Node _toDOM(sky.Document owner);
+  String toString([String prefix = '']);
+}
+
+class InlineText extends InlineBase {
+  InlineText(this.text) {
+    assert(text != null);
+  }
+
+  final String text;
+
+  sky.Node _toDOM(sky.Document owner) {
+    return owner.createText(text);
+  }
+
+  String toString([String prefix = '']) => '${prefix}InlineText: "${text}"';
+}
+
+class InlineStyle extends InlineBase {
+  InlineStyle(this.style, this.children) {
+    assert(style != null && children != null);
+  }
+
+  final TextStyle style;
+  final List<InlineBase> children;
+
+  sky.Node _toDOM(sky.Document owner) {
+    sky.Element parent = owner.createElement('t');
+    style._applyToCSSStyle(parent.style);
+    for (InlineBase child in children) {
+      parent.appendChild(child._toDOM(owner));
+    }
+    return parent;
+  }
+
+  String toString([String prefix = '']) {
+    List<String> result = [];
+    result.add('${prefix}InlineStyle:');
+    var indent = '${prefix}  ';
+    result.add('${style.toString(indent)}');
+    for (InlineBase child in children) {
+      result.add(child.toString(indent));
+    }
     return result.join('\n');
   }
 }
@@ -98,35 +164,23 @@ double _applyFloatingPointHack(double layoutValue) {
 
 class RenderParagraph extends RenderBox {
 
-  RenderParagraph({
-    String text,
-    Color color,
-    TextStyle style
-  }) : _style = style {
+  RenderParagraph(InlineBase inlineValue) {
     _layoutRoot.rootElement = _document.createElement('p');
-    this.text = text;
+    inline = inlineValue;
   }
 
   final sky.Document _document = new sky.Document();
   final sky.LayoutRoot _layoutRoot = new sky.LayoutRoot();
 
-  String get text => (_layoutRoot.rootElement.firstChild as sky.Text).data;
-  void set text (String value) {
-    _layoutRoot.rootElement.setChild(_document.createText(value));
+  InlineBase _inline;
+  BoxConstraints _constraintsForCurrentLayout;
+
+  String get inline => _inline;
+  void set inline (InlineBase value) {
+    _inline = value;
+    _layoutRoot.rootElement.setChild(_inline._toDOM(_document));
     markNeedsLayout();
   }
-
-  TextStyle _style;
-  TextStyle get style => _style;
-  void set style (TextStyle value) {
-    if (_style != value) {
-      // TODO(hansmuller): decide if a new layout or paint is needed
-      markNeedsLayout();
-      _style = value;
-    }
-  }
-
-  BoxConstraints _constraintsForCurrentLayout;
 
   sky.Element _layout(BoxConstraints constraints) {
     _layoutRoot.maxWidth = constraints.maxWidth;
@@ -182,31 +236,6 @@ class RenderParagraph extends RenderBox {
     if (_constraintsForCurrentLayout != constraints && constraints != null)
       _layout(constraints);
 
-    if (style != null) {
-      var cssStyle = _layoutRoot.rootElement.style;
-      if (style.color != null) {
-        Color c = style.color;
-        cssStyle['color'] =
-            'rgba(${c.red}, ${c.green}, ${c.blue}, ${c.alpha / 255.0})';
-      }
-      if (style.fontSize != null) {
-        cssStyle['font-size'] = "${style.fontSize}px";
-      }
-      if (style.fontWeight != null) {
-        cssStyle['font-weight'] = const {
-          FontWeight.light: '300',
-          FontWeight.regular: '400',
-          FontWeight.medium: '500',
-        }[style.fontWeight];
-      }
-      if (style.textAlign != null) {
-        cssStyle['text-align'] = const {
-          TextAlign.left: 'left',
-          TextAlign.right: 'right',
-          TextAlign.center: 'center',
-        }[style.textAlign];
-      }
-    }
     _layoutRoot.paint(canvas);
   }
 
@@ -214,9 +243,7 @@ class RenderParagraph extends RenderBox {
 
   String debugDescribeSettings(String prefix) {
     String result = '${super.debugDescribeSettings(prefix)}';
-    if (style != null)
-      result += '${prefix}style:\n' + style.toString('$prefix  ') + '\n';
-    result += '${prefix}text: ${text}\n';
+    result += '${prefix}inline: ${inline}\n';
     return result;
   }
 }
