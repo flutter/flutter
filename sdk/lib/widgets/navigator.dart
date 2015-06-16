@@ -7,51 +7,79 @@ import 'basic.dart';
 typedef Widget Builder(Navigator navigator);
 
 abstract class RouteBase {
-  RouteBase({this.name});
+  RouteBase({ this.name });
   final String name;
   Widget build(Navigator navigator);
 }
 
 class Route extends RouteBase {
-  Route({String name, this.builder}) : super(name: name);
+  Route({ String name, this.builder }) : super(name: name);
   final Builder builder;
   Widget build(Navigator navigator) => builder(navigator);
 }
 
 class Navigator extends Component {
-  Navigator({Object key, this.currentRoute, this.routes})
-    : super(key: key, stateful: true);
-
-  RouteBase currentRoute;
-  List<RouteBase> routes;
- 
-  void syncFields(Navigator source) {
-    currentRoute = source.currentRoute;
-    routes = source.routes;
-  }
-
-  void pushNamedRoute(String name) {
-    assert(routes != null);
-    for (RouteBase route in routes) {
-      if (route.name == name) {
-        setState(() {
-          currentRoute = route;
-        });
-        return;
+  Navigator({ Object key, RouteBase defaultRoute, List<RouteBase> routes })
+    : super(key: key, stateful: true) {
+    if (routes != null) {
+      if (defaultRoute == null)
+        defaultRoute = routes[0];
+      for (Route route in routes) {
+        if (route.name != null)
+          namedRoutes[route.name] = route;
       }
     }
-    assert(false);  // route not found
+    assert(defaultRoute != null);
+    _history.add(defaultRoute);
   }
 
-  void pushRoute(RouteBase route) {
+  List<RouteBase> _history = new List<RouteBase>();
+  int _historyIndex = 0;
+  Map<String, RouteBase> namedRoutes = new Map<String, RouteBase>();
+
+  void syncFields(Navigator source) {
+    namedRoutes = source.namedRoutes;
+  }
+
+  void pushNamed(String name) {
+    Route route = namedRoutes[name];
+    assert(route != null);
+    push(route);
+  }
+
+  void push(RouteBase route) {
     setState(() {
-      currentRoute = route;
+      // Discard future history
+      _history.removeRange(_historyIndex + 1, _history.length);
+      _historyIndex = _history.length;
+      _history.add(route);
+    });
+  }
+
+  void pop() {
+    setState(() {
+      if (_historyIndex > 0) {
+        _history.removeLast();
+        _historyIndex--;
+      }
+    });
+  }
+
+  void back() {
+    setState(() {
+      if (_historyIndex > 0)
+        _historyIndex--;
+    });
+  }
+
+  void forward() {
+    setState(() {
+      _historyIndex++;
+      assert(_historyIndex < _history.length);
     });
   }
 
   Widget build() {
-    Route route = currentRoute == null ? routes[0] : currentRoute;
-    assert(route != null);
-    return route.build(this);
+    return _history[_historyIndex].build(this);
   }
 }
