@@ -8,9 +8,8 @@ import 'material_button.dart';
 
 export 'material_button.dart' show MaterialButtonTheme;
 
-class RaisedButton extends MaterialButton {
-
-  RaisedButton({
+class FlatButton extends MaterialButton {
+  FlatButton({
     String key,
     Widget child,
     bool enabled: true,
@@ -23,25 +22,15 @@ class RaisedButton extends MaterialButton {
              theme: theme);
 
   Color get color {
-    if (enabled) {
-      switch (theme) {
-        case MaterialButtonTheme.light:
-          if (highlight)
-            return Grey[350];
-          else
-            return Grey[300];
-          break;
-        case MaterialButtonTheme.dark:
-          if (highlight)
-            return Blue[700];
-          else
-            return Blue[600];
-          break;
-      }
-    } else {
-      return Grey[350];
+    if (!enabled || !highlight)
+      return null;
+    switch (theme) {
+      case MaterialButtonTheme.light:
+        return Grey[400];
+      case MaterialButtonTheme.dark:
+        return Grey[200];
     }
   }
 
-  int get level => enabled ? (highlight ? 2 : 1) : 0;
+  int get level => null;
 }
