@@ -260,7 +260,7 @@ abstract class RenderBox extends RenderObject {
     _debugDoingThisLayout = false;
   }
 
-  BoxConstraints get constraints { BoxConstraints result = super.constraints; return result; }
+  BoxConstraints get constraints => super.constraints;
   void performResize() {
     // default behaviour for subclasses that have sizedByParent = true
     size = constraints.constrain(Size.zero);

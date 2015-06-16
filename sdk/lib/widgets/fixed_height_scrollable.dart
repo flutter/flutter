@@ -25,7 +25,7 @@ abstract class FixedHeightScrollable extends Scrollable {
   }
 
   ScrollBehavior createScrollBehavior() => new OverscrollBehavior();
-  OverscrollBehavior get scrollBehavior => super.scrollBehavior as OverscrollBehavior;
+  OverscrollBehavior get scrollBehavior => super.scrollBehavior;
 
   int _itemCount = 0;
   int get itemCount => _itemCount;
