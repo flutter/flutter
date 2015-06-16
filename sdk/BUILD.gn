@@ -124,7 +124,7 @@ dart_pkg("sdk") {
     "lib/widgets/switch.dart",
     "lib/widgets/toggleable.dart",
     "lib/widgets/tool_bar.dart",
-    "lib/widgets/ui_node.dart",
+    "lib/widgets/widget.dart",
     "pubspec.yaml",
   ]
 
