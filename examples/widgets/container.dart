@@ -38,8 +38,8 @@ class ContainerApp extends App {
             )
           ])
         ),
-        new FlexExpandingChild(
-          new Container(
+        new Flexible(
+          child: new Container(
             decoration: new BoxDecoration(backgroundColor: const Color(0xFF00FFFF))
           )
         ),

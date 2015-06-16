@@ -27,7 +27,7 @@ class DrawerHeader extends Component {
       padding: const EdgeDims.only(bottom: 7.0),
       margin: const EdgeDims.only(bottom: 8.0),
       child: new Flex([
-        new FlexExpandingChild(new Container(key: 'drawer-header-spacer')),
+        new Flexible(child: new Container(key: 'drawer-header-spacer')),
         new Container(
           key: 'drawer-header-label',
           padding: const EdgeDims.symmetric(horizontal: 16.0),

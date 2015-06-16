@@ -306,9 +306,13 @@ class Stack extends MultiChildRenderObjectWrapper {
 
 }
 
-class StackPositionedChild extends ParentDataNode {
-  StackPositionedChild(UINode content, {
-    double top, double right, double bottom, double left
+class Positioned extends ParentDataNode {
+  Positioned({
+    UINode child,
+    double top,
+    double right,
+    double bottom,
+    double left
   }) : super(content, new StackParentData()..top = top
                                            ..right = right
                                            ..bottom = bottom
@@ -340,9 +344,9 @@ class Flex extends MultiChildRenderObjectWrapper {
 
 }
 
-class FlexExpandingChild extends ParentDataNode {
-  FlexExpandingChild(UINode content, { int flex: 1, Object key })
-    : super(content, new FlexBoxParentData()..flex = flex, key: key);
+class Flexible extends ParentDataNode {
+  Flexible({ UINode child, int flex: 1, Object key })
+    : super(child, new FlexBoxParentData()..flex = flex, key: key);
 }
 
 class Paragraph extends RenderObjectWrapper {

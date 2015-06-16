@@ -45,8 +45,8 @@ class MenuItem extends ButtonBase {
               child: new Icon(type: "${icon}_grey600", size: 24),
               padding: const EdgeDims.symmetric(horizontal: 16.0)
             ),
-            new FlexExpandingChild(
-              new Padding(
+            new Flexible(
+              child: new Padding(
                 child: new Flex(children, direction: FlexDirection.horizontal),
                 padding: const EdgeDims.symmetric(horizontal: 16.0)
               ),

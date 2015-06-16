@@ -27,8 +27,8 @@ class Rectangle extends Component {
   Rectangle(this.color, { Object key }) : super(key: key);
   final Color color;
   UINode build() {
-    return new FlexExpandingChild(
-      new Container(
+    return new Flexible(
+      child: new Container(
         decoration: new BoxDecoration(backgroundColor: color)
       )
     );

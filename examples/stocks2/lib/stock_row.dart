@@ -29,12 +29,12 @@ class StockRow extends Component {
       new Container(
           child: new StockArrow(percentChange: stock.percentChange),
           margin: const EdgeDims.only(right: 5.0)),
-      new FlexExpandingChild(new Text(stock.symbol), flex: 2, key: "symbol"),
+      new Flexible(child: new Text(stock.symbol), flex: 2, key: "symbol"),
       // TODO(hansmuller): text-align: right
-      new FlexExpandingChild(new Text(lastSale,
+      new Flexible(child: new Text(lastSale,
             style: const TextStyle(textAlign: TextAlign.right)),
           key: "lastSale"),
-      new FlexExpandingChild(new Text(changeInPrice,
+      new Flexible(child: new Text(changeInPrice,
           style: typography.black.caption.copyWith(textAlign: TextAlign.right)),
         key: "changeInPrice")
     ];
