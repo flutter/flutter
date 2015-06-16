@@ -10,12 +10,15 @@
 namespace sky {
 namespace shell {
 
-GaneshSurface::GaneshSurface(GaneshContext* context, const gfx::Size& size) {
+GaneshSurface::GaneshSurface(intptr_t window_fbo,
+              GaneshContext* context,
+              const gfx::Size& size) {
   GrBackendRenderTargetDesc desc;
   desc.fWidth = size.width();
   desc.fHeight = size.height();
   desc.fConfig = kSkia8888_GrPixelConfig;
   desc.fOrigin = kBottomLeft_GrSurfaceOrigin;
+  desc.fRenderTargetHandle = window_fbo;
 
   auto target = skia::AdoptRef(context->gr()->wrapBackendRenderTarget(desc));
   DCHECK(target);
