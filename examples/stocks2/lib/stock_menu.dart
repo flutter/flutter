@@ -30,9 +30,9 @@ class StockMenu extends Component {
       child: new PopupMenu(
         controller: controller,
         items: [
-          [new Text('Add stock')],
-          [new Text('Remove stock')],
-          [new Flexible(child: new Text('Autorefresh')), checkbox],
+          new Text('Add stock'),
+          new Text('Remove stock'),
+          new Flex([new Flexible(child: new Text('Autorefresh')), checkbox]),
         ],
         level: 4
       ),
