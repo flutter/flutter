@@ -29,7 +29,7 @@ class WebSocketClient extends Client {
         return;
       }
       var serial = map['id'];
-      onMessage(serial, new Message.fromJsonRpc(map));
+      onMessage(serial, new Message.fromJsonRpc(this, map));
     } else {
       socket.close(BINARY_MESSAGE_ERROR_CODE, 'Message must be a string.');
     }
@@ -151,7 +151,7 @@ class Server {
       request.response.close();
       return;
     }
-    var message = new Message.fromUri(request.uri);
+    var message = new Message.fromUri(this, request.uri);
     var client = new HttpRequestClient(request, _service);
     client.onMessage(null, message);
   }
