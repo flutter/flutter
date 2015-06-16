@@ -18,21 +18,17 @@ void InitDartVM() {
   const char** argv = nullptr;
 
   CHECK(Dart_SetVMFlags(argc, argv));
-  CHECK(Dart_Initialize(blink::kDartVmIsolateSnapshotBuffer,
-                        nullptr,  // Isolate created callback.
-                        nullptr,  // Isolate interrupt callback.
-                        nullptr,  // Unhandled exception callback.
-                        nullptr,  // Isolate shutdown callback.
-                        // File IO callbacks.
-                        nullptr, nullptr, nullptr, nullptr, nullptr));
+  CHECK(Dart_Initialize(blink::kDartVmIsolateSnapshotBuffer, nullptr, nullptr,
+                        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+                        nullptr));
 }
 
 Dart_Isolate CreateDartIsolate() {
   CHECK(blink::kDartIsolateSnapshotBuffer);
   char* error = nullptr;
-  Dart_Isolate isolate =
-      Dart_CreateIsolate("http://example.com", "main",
-                         blink::kDartIsolateSnapshotBuffer, nullptr, &error);
+  Dart_Isolate isolate = Dart_CreateIsolate("http://example.com", "main",
+                                            blink::kDartIsolateSnapshotBuffer,
+                                            nullptr, nullptr, &error);
 
   CHECK(isolate) << error;
   CHECK(!LogIfError(Dart_SetLibraryTagHandler(HandleLibraryTag)));

@@ -238,17 +238,15 @@ static void EnsureHandleWatcherStarted() {
 static Dart_Isolate IsolateCreateCallback(const char* script_uri,
                                           const char* main,
                                           const char* package_root,
+                                          Dart_IsolateFlags* flags,
                                           void* callback_data,
                                           char** error) {
-
   if (IsServiceIsolateURL(script_uri)) {
     CHECK(kDartIsolateSnapshotBuffer);
     DartState* dart_state = new DartState();
-    Dart_Isolate isolate = Dart_CreateIsolate(script_uri,
-                                              "main",
-                                              kDartIsolateSnapshotBuffer,
-                                              nullptr,
-                                              error);
+    Dart_Isolate isolate =
+        Dart_CreateIsolate(script_uri, "main", kDartIsolateSnapshotBuffer,
+                           nullptr, nullptr, error);
     CHECK(isolate) << error;
     dart_state->SetIsolate(isolate);
     CHECK(Dart_IsServiceIsolate(isolate));
@@ -277,8 +275,9 @@ static Dart_Isolate IsolateCreateCallback(const char* script_uri,
   // Create & start the handle watcher isolate
   CHECK(kDartIsolateSnapshotBuffer);
   DartState* dart_state = new DartState();
-  Dart_Isolate isolate = Dart_CreateIsolate("sky:handle_watcher", "",
-      kDartIsolateSnapshotBuffer, dart_state, error);
+  Dart_Isolate isolate =
+      Dart_CreateIsolate("sky:handle_watcher", "", kDartIsolateSnapshotBuffer,
+                         nullptr, dart_state, error);
   CHECK(isolate) << error;
   dart_state->SetIsolate(isolate);
 
@@ -324,7 +323,7 @@ void DartController::CreateIsolateFor(PassOwnPtr<DOMDartState> state) {
   dom_dart_state_ = state;
   Dart_Isolate isolate = Dart_CreateIsolate(
       dom_dart_state_->url().string().utf8().data(), "main",
-      kDartIsolateSnapshotBuffer,
+      kDartIsolateSnapshotBuffer, nullptr,
       static_cast<DartState*>(dom_dart_state_.get()), &error);
   Dart_SetMessageNotifyCallback(MessageNotifyCallback);
   CHECK(isolate) << error;
