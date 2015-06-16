@@ -54,7 +54,7 @@ void Rasterizer::Draw(skia::RefPtr<SkPicture> picture) {
 
   EnsureGLContext();
   CHECK(context_->MakeCurrent(surface_.get()));
-  EnsureGaneshSurface(size);
+  EnsureGaneshSurface(surface_->GetBackingFrameBufferObject(), size);
 
   DrawPicture(picture.get());
   surface_->SwapBuffers();
@@ -84,9 +84,11 @@ void Rasterizer::EnsureGLContext() {
   ganesh_context_.reset(new GaneshContext(context_.get()));
 }
 
-void Rasterizer::EnsureGaneshSurface(const gfx::Size& size) {
+void Rasterizer::EnsureGaneshSurface(intptr_t window_fbo,
+                                     const gfx::Size& size) {
   if (!ganesh_surface_ || ganesh_surface_->size() != size)
-    ganesh_surface_.reset(new GaneshSurface(ganesh_context_.get(), size));
+    ganesh_surface_.reset(
+      new GaneshSurface(window_fbo, ganesh_context_.get(), size));
 }
 
 }  // namespace shell

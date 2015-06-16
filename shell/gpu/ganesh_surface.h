@@ -15,11 +15,13 @@ namespace sky {
 namespace shell {
 
 // GaneshSurface holds an SkSurface configured to render with Ganesh. Using the
-// provided GaneshContext, GaneshSurface wraps an SkSurface around FBO 0 so that
-// you can use |canvas()| to draw to FBO 0.
+// provided GaneshContext, GaneshSurface wraps an SkSurface around the window
+// bound FBO so that you can use |canvas()| to draw to that window bound FBO.
 class GaneshSurface {
  public:
-  GaneshSurface(GaneshContext* context, const gfx::Size& size);
+  GaneshSurface(intptr_t window_fbo,
+                GaneshContext* context,
+                const gfx::Size& size);
   ~GaneshSurface();
 
   SkCanvas* canvas() const { return surface_->getCanvas(); }
