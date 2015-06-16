@@ -68,7 +68,6 @@ class GameDemoBox extends SpriteBox {
           }
           else if (pointer == _secondPointer) {
             _secondPointer = -1;
-            _gameWorld.controlFire();
           }
           break;
         default:
