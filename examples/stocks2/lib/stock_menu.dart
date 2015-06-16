@@ -26,13 +26,13 @@ class StockMenu extends Component {
       onChanged: this.onAutorefreshChanged
     );
 
-    return new StackPositionedChild(
-      new PopupMenu(
+    return new Positioned(
+      child: new PopupMenu(
         controller: controller,
         items: [
           [new Text('Add stock')],
           [new Text('Remove stock')],
-          [new FlexExpandingChild(new Text('Autorefresh')), checkbox],
+          [new Flexible(child: new Text('Autorefresh')), checkbox],
         ],
         level: 4
       ),
