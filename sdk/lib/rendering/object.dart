@@ -65,10 +65,7 @@ abstract class RenderObject extends AbstractNode {
     assert(child != null);
     assert(child.parentData != null);
     child.parentData.detach();
-    if (child._relayoutSubtreeRoot != child) {
-      child._relayoutSubtreeRoot = null;
-      child._needsLayout = true;
-    }
+    child._cleanRelayoutSubtreeRoot();
     super.dropChild(child);
     markNeedsLayout();
   }
@@ -114,6 +111,14 @@ abstract class RenderObject extends AbstractNode {
       scheduler.ensureVisualUpdate();
     }
   }
+  void _cleanRelayoutSubtreeRoot() {
+    if (_relayoutSubtreeRoot != this) {
+      _relayoutSubtreeRoot = null;
+      _needsLayout = true;
+      _cleanRelayoutSubtreeRootChildren();
+    }
+  }
+  void _cleanRelayoutSubtreeRootChildren() { } // workaround for lack of inter-class mixins in Dart
   void scheduleInitialLayout() {
     assert(attached);
     assert(parent == null);
@@ -297,6 +302,10 @@ abstract class RenderObjectWithChildMixin<ChildType extends RenderObject> implem
     if (_child != null)
       _child.detach();
   }
+  void _cleanRelayoutSubtreeRootChildren() {
+    if (_child != null)
+      _child._cleanRelayoutSubtreeRoot();
+  }
   String debugDescribeChildren(String prefix) {
     if (child != null)
       return '${prefix}child: ${child.toString(prefix)}';
@@ -440,6 +449,14 @@ abstract class ContainerRenderObjectMixin<ChildType extends RenderObject, Parent
     ChildType child = _firstChild;
     while (child != null) {
       child.detach();
+      assert(child.parentData is ParentDataType);
+      child = child.parentData.nextSibling;
+    }
+  }
+  void _cleanRelayoutSubtreeRootChildren() {
+    ChildType child = _firstChild;
+    while (child != null) {
+      child._cleanRelayoutSubtreeRoot();
       assert(child.parentData is ParentDataType);
       child = child.parentData.nextSibling;
     }
