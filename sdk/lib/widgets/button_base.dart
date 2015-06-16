@@ -30,7 +30,7 @@ abstract class ButtonBase extends Component {
     });
   }
 
-  UINode build() {
+  Widget build() {
     return new EventListenerNode(
       buildContent(),
       onPointerDown: _handlePointerDown,
@@ -39,6 +39,6 @@ abstract class ButtonBase extends Component {
     );
   }
 
-  UINode buildContent();
+  Widget buildContent();
 
 }

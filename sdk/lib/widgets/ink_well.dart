@@ -10,7 +10,7 @@ import '../framework/animation/curves.dart';
 import '../rendering/box.dart';
 import '../rendering/object.dart';
 import 'basic.dart';
-import 'ui_node.dart';
+import 'widget.dart';
 
 const int _kSplashInitialOpacity = 0x80;
 const double _kSplashInitialDelay = 0.0; // we could delay initially in case the user scrolls
@@ -100,7 +100,7 @@ class RenderInkWell extends RenderProxyBox {
 }
 
 class InkWell extends OneChildRenderObjectWrapper {
-  InkWell({ String key, UINode child })
+  InkWell({ String key, Widget child })
     : super(key: key, child: child);
 
   RenderInkWell get root => super.root;

@@ -57,7 +57,7 @@ abstract class Toggleable extends AnimatedComponent {
   Curve get curveUp => easeIn;
   Curve get curveDown => easeOut;
 
-  UINode build() {
+  Widget build() {
     return new EventListenerNode(
       new Container(
         margin: margin,

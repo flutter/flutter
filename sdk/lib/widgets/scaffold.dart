@@ -5,7 +5,7 @@
 import '../rendering/box.dart';
 import '../rendering/object.dart';
 import '../theme2/view_configuration.dart';
-import 'ui_node.dart';
+import 'widget.dart';
 
 enum ScaffoldSlots {
   toolbar,
@@ -160,11 +160,11 @@ class Scaffold extends RenderObjectWrapper {
 
   Scaffold({
     String key,
-    UINode toolbar,
-    UINode body,
-    UINode statusBar,
-    UINode drawer,
-    UINode floatingActionButton
+    Widget toolbar,
+    Widget body,
+    Widget statusBar,
+    Widget drawer,
+    Widget floatingActionButton
   }) : _toolbar = toolbar,
        _body = body,
        _statusBar = statusBar,
@@ -172,11 +172,11 @@ class Scaffold extends RenderObjectWrapper {
        _floatingActionButton = floatingActionButton,
        super(key: key);
 
-  UINode _toolbar;
-  UINode _body;
-  UINode _statusBar;
-  UINode _drawer;
-  UINode _floatingActionButton;
+  Widget _toolbar;
+  Widget _body;
+  Widget _statusBar;
+  Widget _drawer;
+  Widget _floatingActionButton;
 
   RenderScaffold get root => super.root;
   RenderScaffold createNode() => new RenderScaffold();
@@ -185,7 +185,7 @@ class Scaffold extends RenderObjectWrapper {
     root[slot] = child != null ? child.root : null;
   }
 
-  void removeChild(UINode node) {
+  void removeChild(Widget node) {
     assert(node != null);
     root.remove(node.root);
     super.removeChild(node);
@@ -205,7 +205,7 @@ class Scaffold extends RenderObjectWrapper {
     super.remove();
   }
 
-  void syncRenderObject(UINode old) {
+  void syncRenderObject(Widget old) {
     super.syncRenderObject(old);
     _toolbar = syncChild(_toolbar, old is Scaffold ? old._toolbar : null, ScaffoldSlots.toolbar);
     _body = syncChild(_body, old is Scaffold ? old._body : null, ScaffoldSlots.body);

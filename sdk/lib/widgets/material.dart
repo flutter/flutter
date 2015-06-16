@@ -18,14 +18,14 @@ class Material extends Component {
     this.color
   }) : super(key: key);
 
-  final UINode child;
+  final Widget child;
   final int level;
   final MaterialEdge edge;
   final Color color;
 
   // TODO(ianh): we should make this animate level changes and color changes
 
-  UINode build() {
+  Widget build() {
     return new Container(
       decoration: new BoxDecoration(
         boxShadow: shadows[level],

@@ -10,18 +10,18 @@ import '../rendering/flex.dart';
 import '../rendering/object.dart';
 import '../rendering/paragraph.dart';
 import '../rendering/stack.dart';
-import 'ui_node.dart';
+import 'widget.dart';
 
 export '../rendering/box.dart' show BoxConstraints, BoxDecoration, Border, BorderSide, EdgeDims;
 export '../rendering/flex.dart' show FlexDirection, FlexJustifyContent, FlexAlignItems;
 export '../rendering/object.dart' show Point, Size, Rect, Color, Paint, Path;
-export 'ui_node.dart' show UINode, Component, App, EventListenerNode, ParentDataNode;
+export 'widget.dart' show Widget, Component, App, EventListenerNode, ParentDataNode;
 
 
 // PAINTING NODES
 
 class Opacity extends OneChildRenderObjectWrapper {
-  Opacity({ String key, this.opacity, UINode child })
+  Opacity({ String key, this.opacity, Widget child })
     : super(key: key, child: child);
 
   RenderOpacity get root => super.root;
@@ -37,7 +37,7 @@ class Opacity extends OneChildRenderObjectWrapper {
 
 class DecoratedBox extends OneChildRenderObjectWrapper {
 
-  DecoratedBox({ String key, this.decoration, UINode child })
+  DecoratedBox({ String key, this.decoration, Widget child })
     : super(key: key, child: child);
 
   RenderDecoratedBox get root => super.root;
@@ -54,7 +54,7 @@ class DecoratedBox extends OneChildRenderObjectWrapper {
 
 class CustomPaint extends OneChildRenderObjectWrapper {
 
-  CustomPaint({ String key, this.callback, this.token, UINode child })
+  CustomPaint({ String key, this.callback, this.token, Widget child })
     : super(key: key, child: child);
 
   RenderCustomPaint get root => super.root;
@@ -78,7 +78,7 @@ class CustomPaint extends OneChildRenderObjectWrapper {
 }
 
 class ClipRect extends OneChildRenderObjectWrapper {
-  ClipRect({ String key, UINode child })
+  ClipRect({ String key, Widget child })
     : super(key: key, child: child);
 
   RenderClipRect get root => super.root;
@@ -86,7 +86,7 @@ class ClipRect extends OneChildRenderObjectWrapper {
 }
 
 class ClipOval extends OneChildRenderObjectWrapper {
-  ClipOval({ String key, UINode child })
+  ClipOval({ String key, Widget child })
     : super(key: key, child: child);
 
   RenderClipOval get root => super.root;
@@ -98,7 +98,7 @@ class ClipOval extends OneChildRenderObjectWrapper {
 
 class Transform extends OneChildRenderObjectWrapper {
 
-  Transform({ String key, this.transform, UINode child })
+  Transform({ String key, this.transform, Widget child })
     : super(key: key, child: child);
 
   RenderTransform get root => super.root;
@@ -115,7 +115,7 @@ class Transform extends OneChildRenderObjectWrapper {
 
 class Padding extends OneChildRenderObjectWrapper {
 
-  Padding({ String key, this.padding, UINode child })
+  Padding({ String key, this.padding, Widget child })
     : super(key: key, child: child);
 
   RenderPadding get root => super.root;
@@ -131,7 +131,7 @@ class Padding extends OneChildRenderObjectWrapper {
 }
 
 class Center extends OneChildRenderObjectWrapper {
-  Center({ String key, UINode child })
+  Center({ String key, Widget child })
     : super(key: key, child: child);
 
   RenderPositionedBox get root => super.root;
@@ -144,7 +144,7 @@ class SizedBox extends OneChildRenderObjectWrapper {
     String key,
     this.width,
     this.height,
-    UINode child
+    Widget child
   }) : super(key: key, child: child);
 
   RenderConstrainedBox get root => super.root;
@@ -172,7 +172,7 @@ class SizedBox extends OneChildRenderObjectWrapper {
 
 class ConstrainedBox extends OneChildRenderObjectWrapper {
 
-  ConstrainedBox({ String key, this.constraints, UINode child })
+  ConstrainedBox({ String key, this.constraints, Widget child })
     : super(key: key, child: child);
 
   RenderConstrainedBox get root => super.root;
@@ -189,7 +189,7 @@ class ConstrainedBox extends OneChildRenderObjectWrapper {
 }
 
 class ShrinkWrapWidth extends OneChildRenderObjectWrapper {
-  ShrinkWrapWidth({ String key, UINode child })
+  ShrinkWrapWidth({ String key, Widget child })
     : super(key: key, child: child);
 
   RenderShrinkWrapWidth get root => super.root;
@@ -198,7 +198,7 @@ class ShrinkWrapWidth extends OneChildRenderObjectWrapper {
 
 class SizeObserver extends OneChildRenderObjectWrapper {
 
-  SizeObserver({ String key, this.callback, UINode child })
+  SizeObserver({ String key, this.callback, Widget child })
     : super(key: key, child: child);
 
   RenderSizeObserver get root => super.root;
@@ -235,7 +235,7 @@ class Container extends Component {
     this.transform
   }) : super(key: key);
 
-  final UINode child;
+  final Widget child;
   final BoxConstraints constraints;
   final BoxDecoration decoration;
   final EdgeDims margin;
@@ -244,8 +244,8 @@ class Container extends Component {
   final double width;
   final double height;
 
-  UINode build() {
-    UINode current = child;
+  Widget build() {
+    Widget current = child;
 
     if (child == null && width == null && height == null)
       current = new SizedBox(
@@ -284,7 +284,7 @@ class Container extends Component {
 // LAYOUT NODES
 
 class Block extends MultiChildRenderObjectWrapper {
-  Block(List<UINode> children, { String key })
+  Block(List<Widget> children, { String key })
     : super(key: key, children: children);
 
   RenderBlock get root => super.root;
@@ -292,7 +292,7 @@ class Block extends MultiChildRenderObjectWrapper {
 }
 
 class Stack extends MultiChildRenderObjectWrapper {
-  Stack(List<UINode> children, { String key })
+  Stack(List<Widget> children, { String key })
     : super(key: key, children: children);
 
   RenderStack get root => super.root;
@@ -302,7 +302,7 @@ class Stack extends MultiChildRenderObjectWrapper {
 class Positioned extends ParentDataNode {
   Positioned({
     String key,
-    UINode child,
+    Widget child,
     double top,
     double right,
     double bottom,
@@ -317,7 +317,7 @@ class Positioned extends ParentDataNode {
 
 class Flex extends MultiChildRenderObjectWrapper {
 
-  Flex(List<UINode> children, {
+  Flex(List<Widget> children, {
     String key,
     this.direction: FlexDirection.horizontal,
     this.justifyContent: FlexJustifyContent.flexStart,
@@ -331,7 +331,7 @@ class Flex extends MultiChildRenderObjectWrapper {
   final FlexJustifyContent justifyContent;
   final FlexAlignItems alignItems;
 
-  void syncRenderObject(UINode old) {
+  void syncRenderObject(Widget old) {
     super.syncRenderObject(old);
     root.direction = direction;
     root.justifyContent = justifyContent;
@@ -341,7 +341,7 @@ class Flex extends MultiChildRenderObjectWrapper {
 }
 
 class Flexible extends ParentDataNode {
-  Flexible({ String key, UINode child, int flex: 1 })
+  Flexible({ String key, Widget child, int flex: 1 })
     : super(child, new FlexBoxParentData()..flex = flex, key: key);
 }
 
@@ -355,7 +355,7 @@ class Paragraph extends RenderObjectWrapper {
   final String text;
   final TextStyle style;
 
-  void syncRenderObject(UINode old) {
+  void syncRenderObject(Widget old) {
     super.syncRenderObject(old);
     root.text = text;
     root.style = style;
@@ -373,7 +373,7 @@ class Text extends Component {
   final String data;
   final TextStyle style;
   bool get interchangeable => true;
-  UINode build() => new Paragraph(text: data, style: style);
+  Widget build() => new Paragraph(text: data, style: style);
 }
 
 class Image extends RenderObjectWrapper {
@@ -390,7 +390,7 @@ class Image extends RenderObjectWrapper {
   final String src;
   final Size size;
 
-  void syncRenderObject(UINode old) {
+  void syncRenderObject(Widget old) {
     super.syncRenderObject(old);
     root.src = src;
     root.requestedSize = size;
@@ -403,9 +403,9 @@ class Image extends RenderObjectWrapper {
 
 }
 
-class UINodeToRenderBoxAdapter extends RenderObjectWrapper {
+class WidgetToRenderBoxAdapter extends RenderObjectWrapper {
 
-  UINodeToRenderBoxAdapter(RenderBox renderBox)
+  WidgetToRenderBoxAdapter(RenderBox renderBox)
     : this.renderBox = renderBox,
       super(key: renderBox.hashCode.toString());
 
@@ -414,18 +414,18 @@ class UINodeToRenderBoxAdapter extends RenderObjectWrapper {
 
   final RenderBox renderBox;
 
-  void syncRenderObject(UINode old) {
+  void syncRenderObject(Widget old) {
     super.syncRenderObject(old);
     if (old != null) {
-      assert(old is UINodeToRenderBoxAdapter);
+      assert(old is WidgetToRenderBoxAdapter);
       assert(root == old.renderBox);
     }
   }
 
   void insert(RenderObjectWrapper child, dynamic slot) {
     assert(false);
-    // UINodeToRenderBoxAdapter cannot have UINode children; by
-    // definition, it is the transition out of the UINode world.
+    // WidgetToRenderBoxAdapter cannot have Widget children; by
+    // definition, it is the transition out of the Widget world.
   }
 
 }

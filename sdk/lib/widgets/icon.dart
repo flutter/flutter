@@ -18,7 +18,7 @@ class Icon extends Component {
   final int size;
   final String type;
 
-  UINode build() {
+  Widget build() {
     String category = '';
     String subtype = '';
     List<String> parts = type.split('/');

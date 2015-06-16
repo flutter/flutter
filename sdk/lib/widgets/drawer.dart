@@ -119,7 +119,7 @@ class Drawer extends AnimatedComponent {
     });
   }
 
-  List<UINode> children;
+  List<Widget> children;
   int level;
   DrawerController controller;
 
@@ -132,7 +132,7 @@ class Drawer extends AnimatedComponent {
 
   double _position;
 
-  UINode build() {
+  Widget build() {
     Matrix4 transform = new Matrix4.identity();
     transform.translate(_position);
 

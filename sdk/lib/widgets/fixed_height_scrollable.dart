@@ -44,7 +44,7 @@ abstract class FixedHeightScrollable extends Scrollable {
     });
   }
 
-  UINode buildContent() {
+  Widget buildContent() {
     var itemShowIndex = 0;
     var itemShowCount = 0;
 
@@ -79,6 +79,6 @@ abstract class FixedHeightScrollable extends Scrollable {
     );
   }
 
-  List<UINode> buildItems(int start, int count);
+  List<Widget> buildItems(int start, int count);
 
 }

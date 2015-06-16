@@ -48,9 +48,9 @@ abstract class Scrollable extends Component {
 
   Simulation _simulation;
 
-  UINode buildContent();
+  Widget buildContent();
 
-  UINode build() {
+  Widget build() {
     return new EventListenerNode(
       new Material(
         child: buildContent(),

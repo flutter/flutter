@@ -58,13 +58,13 @@ class EditableText extends Component {
     _showCursor = false;
   }
 
-  UINode build() {
+  Widget build() {
     if (focused && _cursorTimer == null)
       _startCursorTimer();
     else if (!focused && _cursorTimer != null)
       _stopCursorTimer();
 
-    //List<UINode> children = new List<UINode>();
+    //List<Widget> children = new List<Widget>();
     String hack = "";
 
     if (!value.composing.isValid) {

@@ -20,7 +20,7 @@ import 'package:sky/widgets/popup_menu.dart';
 import 'package:sky/widgets/radio.dart';
 import 'package:sky/widgets/scaffold.dart';
 import 'package:sky/widgets/tool_bar.dart';
-import 'package:sky/widgets/ui_node.dart';
+import 'package:sky/widgets/widget.dart';
 
 import 'stock_data.dart';
 import 'stock_list.dart';
@@ -151,7 +151,7 @@ class StocksApp extends App {
     );
   }
 
-  UINode buildToolBar() {
+  Widget buildToolBar() {
     return new ToolBar(
         left: new IconButton(
           icon: 'navigation/menu_white',
@@ -170,7 +170,7 @@ class StocksApp extends App {
   }
 
   // TODO(abarth): Should we factor this into a SearchBar in the framework?
-  UINode buildSearchBar() {
+  Widget buildSearchBar() {
     return new ToolBar(
       left: new IconButton(
         icon: 'navigation/arrow_back_grey600',
@@ -183,7 +183,7 @@ class StocksApp extends App {
     );
   }
 
-  void addMenuToOverlays(List<UINode> overlays) {
+  void addMenuToOverlays(List<Widget> overlays) {
     if (_menuController == null)
       return;
     overlays.add(new ModalOverlay(
@@ -195,8 +195,8 @@ class StocksApp extends App {
       onDismiss: _handleMenuHide));
   }
 
-  UINode build() {
-    List<UINode> overlays = [
+  Widget build() {
+    List<Widget> overlays = [
       new Scaffold(
         toolbar: _isSearching ? buildSearchBar() : buildToolBar(),
         body: new Stocklist(stocks: _stocks, query: _searchQuery),
@@ -214,8 +214,8 @@ class StocksApp extends App {
 void main() {
   print("starting stocks app!");
   App app = new StocksApp();
-  UINodeAppView.appView.onFrame = () {
+  WidgetAppView.appView.onFrame = () {
     // uncomment this for debugging:
-    // UINodeAppView.appView.debugDumpRenderTree();
+    // WidgetAppView.appView.debugDumpRenderTree();
   };
 }

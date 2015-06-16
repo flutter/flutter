@@ -31,7 +31,7 @@ class Radio extends ButtonBase {
     super.syncFields(source);
   }
 
-  UINode buildContent() {
+  Widget buildContent() {
     // TODO(jackson): This should change colors with the theme
     Color color = highlight ? colors.Purple[500] : const Color(0x8A000000);
     const double kDiameter = 16.0;

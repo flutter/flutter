@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'basic.dart';
-import 'ui_node.dart';
+import 'widget.dart';
 
 class ModalOverlay extends Component {
 
@@ -16,10 +16,10 @@ class ModalOverlay extends Component {
   //   bottom: 0;
   //   right: 0;''');
 
-  final List<UINode> children;
+  final List<Widget> children;
   final GestureEventListener onDismiss;
 
-  UINode build() {
+  Widget build() {
     return new EventListenerNode(
       new Stack(children),
       onGestureTap: onDismiss);

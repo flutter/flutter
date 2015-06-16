@@ -14,7 +14,7 @@ import 'package:sky/widgets/material.dart';
 import 'package:sky/widgets/raised_button.dart';
 import 'package:sky/widgets/scaffold.dart';
 import 'package:sky/widgets/tool_bar.dart';
-import 'package:sky/widgets/ui_node.dart';
+import 'package:sky/widgets/widget.dart';
 
 import '../rendering/sector_layout.dart';
 
@@ -72,7 +72,7 @@ class SectorApp extends App {
     });
   }
 
-  UINode build() {
+  Widget build() {
     return new Scaffold(
       toolbar: new ToolBar(
           center: new Text('Sector Layout in a Widget Tree', style: white.title),
@@ -91,7 +91,7 @@ class SectorApp extends App {
                         new Container(
                           padding: new EdgeDims.all(4.0),
                           margin: new EdgeDims.only(right: 10.0),
-                          child: new UINodeToRenderBoxAdapter(sectorAddIcon)
+                          child: new WidgetToRenderBoxAdapter(sectorAddIcon)
                         ),
                         new Text('ADD SECTOR'),
                       ])
@@ -106,7 +106,7 @@ class SectorApp extends App {
                         new Container(
                           padding: new EdgeDims.all(4.0),
                           margin: new EdgeDims.only(right: 10.0),
-                          child: new UINodeToRenderBoxAdapter(sectorRemoveIcon)
+                          child: new WidgetToRenderBoxAdapter(sectorRemoveIcon)
                         ),
                         new Text('REMOVE SECTOR'),
                       ])
@@ -124,7 +124,7 @@ class SectorApp extends App {
                   border: new Border.all(new BorderSide(color: new Color(0xFF000000)))
                 ),
                 padding: new EdgeDims.all(8.0),
-                child: new UINodeToRenderBoxAdapter(sectors)
+                child: new WidgetToRenderBoxAdapter(sectors)
               )
             ),
           ],
@@ -138,8 +138,8 @@ class SectorApp extends App {
 
 void main() {
   App app = new SectorApp();
-  UINodeAppView.appView.onFrame = () {
+  WidgetAppView.appView.onFrame = () {
     // uncomment this for debugging:
-    // UINodeAppView.appView.debugDumpRenderTree();
+    // WidgetAppView.appView.debugDumpRenderTree();
   };
 }

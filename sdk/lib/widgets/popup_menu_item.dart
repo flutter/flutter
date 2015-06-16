@@ -8,10 +8,10 @@ import 'ink_well.dart';
 class PopupMenuItem extends Component {
   PopupMenuItem({ String key, this.child, this.opacity}) : super(key: key);
 
-  final UINode child;
+  final Widget child;
   final double opacity;
 
-  UINode build() {
+  Widget build() {
     return new Opacity(
       opacity: opacity,
       child: new InkWell(

@@ -67,7 +67,7 @@ class PopupMenu extends AnimatedComponent {
   }
 
   PopupMenuController controller;
-  List<UINode> items;
+  List<Widget> items;
   int level;
 
   void syncFields(PopupMenu source) {
@@ -90,9 +90,9 @@ class PopupMenu extends AnimatedComponent {
     return math.max(0.0, math.min(1.0, (_position - start) / duration));
   }
 
-  UINode build() {
+  Widget build() {
     int i = 0;
-    List<UINode> children = new List.from(items.map((UINode item) {
+    List<Widget> children = new List.from(items.map((Widget item) {
       double opacity = _opacityFor(i);
       return new PopupMenuItem(key: '${key}-${item.key}',
                                child: item,

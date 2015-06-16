@@ -10,9 +10,9 @@ class DrawerHeader extends Component {
 
   DrawerHeader({ String key, this.children }) : super(key: key);
 
-  final List<UINode> children;
+  final List<Widget> children;
 
-  UINode build() {
+  Widget build() {
     return new Container(
       height: kStatusBarHeight + kMaterialDrawerHeight,
       decoration: new BoxDecoration(

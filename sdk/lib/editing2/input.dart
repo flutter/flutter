@@ -69,13 +69,13 @@ class Input extends Component {
     }
   }
 
-  UINode build() {
+  Widget build() {
     if (focused && !_isAttachedToKeyboard) {
       keyboard.show(_editableValue.stub);
       _isAttachedToKeyboard = true;
     }
 
-    List<UINode> children = [];
+    List<Widget> children = [];
 
     if (placeholder != null && _value.isEmpty) {
       children.add(new Container(

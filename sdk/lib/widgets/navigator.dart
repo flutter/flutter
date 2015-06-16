@@ -4,18 +4,18 @@
 
 import 'basic.dart';
 
-typedef UINode Builder(Navigator navigator);
+typedef Widget Builder(Navigator navigator);
 
 abstract class RouteBase {
   RouteBase({this.name});
   final String name;
-  UINode build(Navigator navigator);
+  Widget build(Navigator navigator);
 }
 
 class Route extends RouteBase {
   Route({String name, this.builder}) : super(name: name);
   final Builder builder;
-  UINode build(Navigator navigator) => builder(navigator);
+  Widget build(Navigator navigator) => builder(navigator);
 }
 
 class Navigator extends Component {
@@ -49,7 +49,7 @@ class Navigator extends Component {
     });
   }
 
-  UINode build() {
+  Widget build() {
     Route route = currentRoute == null ? routes[0] : currentRoute;
     assert(route != null);
     return route.build(this);

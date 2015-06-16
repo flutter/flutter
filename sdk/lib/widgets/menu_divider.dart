@@ -7,7 +7,7 @@ import 'basic.dart';
 class MenuDivider extends Component {
   MenuDivider({ String key }) : super(key: key);
 
-  UINode build() {
+  Widget build() {
     return new Container(
       height: 0.0,
       decoration: const BoxDecoration(

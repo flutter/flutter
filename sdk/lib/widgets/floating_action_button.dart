@@ -17,9 +17,9 @@ class FloatingActionButton extends ButtonBase {
 
   FloatingActionButton({ String key, this.child }) : super(key: key);
 
-  final UINode child;
+  final Widget child;
 
-  UINode buildContent() {
+  Widget buildContent() {
     return new Material(
       child: new ClipOval(
         child: new Container(

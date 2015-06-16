@@ -20,7 +20,7 @@ class StockMenu extends Component {
   final bool autorefresh;
   final ValueChanged onAutorefreshChanged;
 
-  UINode build() {
+  Widget build() {
     var checkbox = new Checkbox(
       value: this.autorefresh,
       onChanged: this.onAutorefreshChanged

@@ -21,7 +21,7 @@ class RaisedButton extends ButtonBase {
     this.theme: RaisedButtonTheme.light
   }) : super(key: key);
 
-  UINode child;
+  Widget child;
   bool enabled;
   Function onPressed;
   RaisedButtonTheme theme;
@@ -34,8 +34,8 @@ class RaisedButton extends ButtonBase {
     super.syncFields(source);
   }
 
-  UINode buildContent() {
-    UINode contents = new Container(
+  Widget buildContent() {
+    Widget contents = new Container(
       padding: new EdgeDims.symmetric(horizontal: 8.0),
       child: new Center(child: child) // TODO(ianh): figure out a way to compell the child to have gray text when disabled...
     );

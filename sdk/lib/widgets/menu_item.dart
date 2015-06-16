@@ -6,7 +6,7 @@ import 'basic.dart';
 import 'button_base.dart';
 import 'icon.dart';
 import 'ink_well.dart';
-import 'ui_node.dart';
+import 'widget.dart';
 
 const BoxDecoration _kHighlightDecoration = const BoxDecoration(
   backgroundColor: const Color.fromARGB(102, 153, 153, 153)
@@ -27,7 +27,7 @@ class MenuItem extends ButtonBase {
     : super(key: key);
 
   String icon;
-  List<UINode> children;
+  List<Widget> children;
   GestureEventListener onGestureTap;
 
   void syncFields(MenuItem source) {
@@ -37,7 +37,7 @@ class MenuItem extends ButtonBase {
     super.syncFields(source);
   }
 
-  UINode buildContent() {
+  Widget buildContent() {
     return new EventListenerNode(
       new Container(
         child: new InkWell(
