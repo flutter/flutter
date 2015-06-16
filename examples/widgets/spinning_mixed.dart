@@ -9,7 +9,7 @@ import 'package:sky/rendering/box.dart';
 import 'package:sky/rendering/flex.dart';
 import 'package:sky/widgets/basic.dart';
 import 'package:sky/widgets/raised_button.dart';
-import 'package:sky/widgets/ui_node.dart';
+import 'package:sky/widgets/widget.dart';
 import 'package:vector_math/vector_math.dart';
 
 import '../lib/solid_color_box.dart';
@@ -26,7 +26,7 @@ void addFlexChildSolidColor(RenderFlex parent, sky.Color backgroundColor, { int 
 class Rectangle extends Component {
   Rectangle(this.color, { String key }) : super(key: key);
   final Color color;
-  UINode build() {
+  Widget build() {
     return new Flexible(
       child: new Container(
         decoration: new BoxDecoration(backgroundColor: color)
@@ -35,7 +35,7 @@ class Rectangle extends Component {
   }
 }
 
-UINode builder() {
+Widget builder() {
   return new Flex([
       new Rectangle(const Color(0xFF00FFFF), key: 'a'),
       new Container(
@@ -74,18 +74,18 @@ void rotate(double timeStamp) {
 }
 
 void main() {
-  // Because we're going to use UINodes, we want to initialise its
+  // Because we're going to use Widgets, we want to initialise its
   // AppView, not use the default one. We don't really need to do
-  // this, because RenderBoxToUINodeAdapter does it for us, but
+  // this, because RenderBoxToWidgetAdapter does it for us, but
   // it's good practice in case we happen to not have a
-  // RenderBoxToUINodeAdapter in our tree at startup, or in case we
+  // RenderBoxToWidgetAdapter in our tree at startup, or in case we
   // want a renderViewOverride.
-  UINodeAppView.initUINodeAppView();
+  WidgetAppView.initWidgetAppView();
 
   RenderFlex flexRoot = new RenderFlex(direction: FlexDirection.vertical);
 
   RenderProxyBox proxy = new RenderProxyBox();
-  new RenderBoxToUINodeAdapter(proxy, builder); // adds itself to proxy
+  new RenderBoxToWidgetAdapter(proxy, builder); // adds itself to proxy
 
   addFlexChildSolidColor(flexRoot, const sky.Color(0xFFFF00FF), flex: 1);
   flexRoot.add(proxy);
@@ -94,6 +94,6 @@ void main() {
   transformBox = new RenderTransform(child: flexRoot, transform: new Matrix4.identity());
   RenderPadding root = new RenderPadding(padding: new EdgeDims.all(20.0), child: transformBox);
 
-  UINodeAppView.appView.root = root;
+  WidgetAppView.appView.root = root;
   addPersistentFrameCallback(rotate);
 }

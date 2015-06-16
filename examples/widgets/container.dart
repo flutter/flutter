@@ -8,7 +8,7 @@ import 'package:sky/widgets/raised_button.dart';
 import 'package:sky/widgets/basic.dart';
 
 class ContainerApp extends App {
-  UINode build() {
+  Widget build() {
     return new Flex([
         new Container(
           key: 'a',

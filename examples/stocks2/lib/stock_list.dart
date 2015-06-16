@@ -25,7 +25,7 @@ class Stocklist extends FixedHeightScrollable {
     super.syncFields(source);
   }
 
-  List<UINode> buildItems(int start, int count) {
+  List<Widget> buildItems(int start, int count) {
     var filteredStocks = stocks.where((stock) {
       return query == null ||
              stock.symbol.contains(new RegExp(query, caseSensitive: false));

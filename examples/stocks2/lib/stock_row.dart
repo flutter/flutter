@@ -19,13 +19,13 @@ class StockRow extends Component {
 
   static const double kHeight = 79.0;
 
-  UINode build() {
+  Widget build() {
     String lastSale = "\$${stock.lastSale.toStringAsFixed(2)}";
 
     String changeInPrice = "${stock.percentChange.toStringAsFixed(2)}%";
     if (stock.percentChange > 0) changeInPrice = "+" + changeInPrice;
 
-    List<UINode> children = [
+    List<Widget> children = [
       new Container(
           child: new StockArrow(percentChange: stock.percentChange),
           margin: const EdgeDims.only(right: 5.0)),

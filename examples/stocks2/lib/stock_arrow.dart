@@ -28,7 +28,7 @@ class StockArrow extends Component {
     return colors.Red[_colorIndexForPercentChange(percentChange)];
   }
 
-  UINode build() {
+  Widget build() {
     // TODO(jackson): This should change colors with the theme
     Color color = _colorForPercentChange(percentChange);
     const double kSize = 40.0;
