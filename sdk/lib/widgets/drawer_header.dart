@@ -8,7 +8,7 @@ import 'basic.dart';
 
 class DrawerHeader extends Component {
 
-  DrawerHeader({ Object key, this.children }) : super(key: key);
+  DrawerHeader({ String key, this.children }) : super(key: key);
 
   final List<UINode> children;
 

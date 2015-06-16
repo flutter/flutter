@@ -20,7 +20,7 @@ const double _kEdgeRadius = 1.0;
 class Checkbox extends Toggleable {
 
   Checkbox({
-    Object key,
+    String key,
     bool value,
     ValueChanged onChanged
   }) : super(key: key, value: value, onChanged: onChanged);

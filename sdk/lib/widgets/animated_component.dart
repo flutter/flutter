@@ -18,7 +18,7 @@ class _AnimationEntry {
 
 abstract class AnimatedComponent extends Component {
 
-  AnimatedComponent({ Object key }) : super(key: key, stateful: true);
+  AnimatedComponent({ String key }) : super(key: key, stateful: true);
 
   void syncFields(AnimatedComponent source) { }
 

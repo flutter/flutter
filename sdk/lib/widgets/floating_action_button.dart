@@ -15,8 +15,7 @@ const double _kSize = 56.0;
 
 class FloatingActionButton extends ButtonBase {
 
-  FloatingActionButton({ Object key, this.child })
-      : super(key: key);
+  FloatingActionButton({ String key, this.child }) : super(key: key);
 
   final UINode child;
 

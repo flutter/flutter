@@ -159,7 +159,7 @@ class Scaffold extends RenderObjectWrapper {
   //   ${typography.black.body1};''');
 
   Scaffold({
-    Object key,
+    String key,
     UINode toolbar,
     UINode body,
     UINode statusBar,
@@ -178,7 +178,7 @@ class Scaffold extends RenderObjectWrapper {
   UINode _drawer;
   UINode _floatingActionButton;
 
-  RenderScaffold get root { RenderScaffold result = super.root; return result; }
+  RenderScaffold get root => super.root;
   RenderScaffold createNode() => new RenderScaffold();
 
   void insert(RenderObjectWrapper child, ScaffoldSlots slot) {

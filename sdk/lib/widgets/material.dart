@@ -11,7 +11,7 @@ import 'basic.dart';
 class Material extends Component {
 
   Material({
-    Object key,
+    String key,
     this.child,
     this.edge: MaterialEdge.card,
     this.level: 0,

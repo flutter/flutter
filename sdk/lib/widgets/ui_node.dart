@@ -15,18 +15,13 @@ export '../rendering/box.dart' show BoxConstraints, BoxDecoration, Border, Borde
 export '../rendering/flex.dart' show FlexDirection;
 export '../rendering/object.dart' show Point, Size, Rect, Color, Paint, Path;
 
-
-// final sky.Tracing _tracing = sky.window.tracing;
-
 final bool _shouldLogRenderDuration = false;
 
-/*
- * All Effen nodes derive from UINode. All nodes have a _parent, a _key and
- * can be sync'd.
- */
+// All Effen nodes derive from UINode. All nodes have a _parent, a _key and
+// can be sync'd.
 abstract class UINode {
 
-  UINode({ Object key }) {
+  UINode({ String key }) {
     _key = key == null ? "$runtimeType" : "$runtimeType-$key";
     assert(this is AbstractUINodeRoot || _inRenderDirtyComponents); // you should not build the UI tree ahead of time, build it only during build()
   }
@@ -157,7 +152,8 @@ abstract class UINode {
 // stylistic information, etc.
 abstract class TagNode extends UINode {
 
-  TagNode(UINode content, { Object key }) : this.content = content, super(key: key);
+  TagNode(UINode content, { String key })
+    : this.content = content, super(key: key);
 
   UINode content;
 
@@ -178,7 +174,8 @@ abstract class TagNode extends UINode {
 }
 
 class ParentDataNode extends TagNode {
-  ParentDataNode(UINode content, this.parentData, { Object key }): super(content, key: key);
+  ParentDataNode(UINode content, this.parentData, { String key })
+    : super(content, key: key);
   final ParentData parentData;
 }
 
@@ -275,13 +272,10 @@ class EventListenerNode extends TagNode  {
 
 abstract class Component extends UINode {
 
-  Component({ Object key, bool stateful })
+  Component({ String key, bool stateful })
       : _stateful = stateful != null ? stateful : false,
         _order = _currentOrder + 1,
         super(key: key);
-
-  Component.fromArgs(Object key, bool stateful)
-      : this(key: key, stateful: stateful);
 
   static Component _currentlyBuilding;
   bool get _isBuilding => _currentlyBuilding == this;
@@ -341,14 +335,13 @@ abstract class Component extends UINode {
   final int _order;
   static int _currentOrder = 0;
 
-  /* There are three cases here:
-   * 1) Building for the first time:
-   *      assert(_built == null && old == null)
-   * 2) Re-building (because a dirty flag got set):
-   *      assert(_built != null && old == null)
-   * 3) Syncing against an old version
-   *      assert(_built == null && old != null)
-   */
+  // There are three cases here:
+  // 1) Building for the first time:
+  //      assert(_built == null && old == null)
+  // 2) Re-building (because a dirty flag got set):
+  //      assert(_built != null && old == null)
+  // 3) Syncing against an old version
+  //      assert(_built == null && old != null)
   void _sync(UINode old, dynamic slot) {
     assert(_built == null || old == null);
     assert(!_disqualifiedFromEverAppearingAgain);
@@ -456,18 +449,14 @@ void _scheduleComponentForRender(Component c) {
 }
 
 
-/*
- * RenderObjectWrappers correspond to a desired state of a RenderObject.
- * They are fully immutable, with one exception: A UINode which is a
- * Component which lives within an MultiChildRenderObjectWrapper's
- * children list, may be replaced with the "old" instance if it has
- * become stateful.
- */
+// RenderObjectWrappers correspond to a desired state of a RenderObject.
+// They are fully immutable, with one exception: A UINode which is a
+// Component which lives within an MultiChildRenderObjectWrapper's
+// children list, may be replaced with the "old" instance if it has
+// become stateful.
 abstract class RenderObjectWrapper extends UINode {
 
-  RenderObjectWrapper({
-    Object key
-  }) : super(key: key);
+  RenderObjectWrapper({ String key }) : super(key: key);
 
   RenderObject createNode();
 
@@ -524,7 +513,8 @@ abstract class RenderObjectWrapper extends UINode {
 
 abstract class OneChildRenderObjectWrapper extends RenderObjectWrapper {
 
-  OneChildRenderObjectWrapper({ UINode child, Object key }) : _child = child, super(key: key);
+  OneChildRenderObjectWrapper({ UINode child, String key })
+    : _child = child, super(key: key);
 
   UINode _child;
   UINode get child => _child;
@@ -564,11 +554,9 @@ abstract class MultiChildRenderObjectWrapper extends RenderObjectWrapper {
   // In MultiChildRenderObjectWrapper subclasses, slots are RenderObject nodes
   // to use as the "insert before" sibling in ContainerRenderObjectMixin.add() calls
 
-  MultiChildRenderObjectWrapper({
-    Object key,
-    List<UINode> children
-  }) : this.children = children == null ? const [] : children,
-       super(key: key) {
+  MultiChildRenderObjectWrapper({ String key, List<UINode> children })
+    : this.children = children == null ? const [] : children,
+      super(key: key) {
     assert(!_debugHasDuplicateIds());
   }
 

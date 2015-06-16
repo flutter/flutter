@@ -13,7 +13,7 @@ typedef void ValueChanged(value);
 
 class Input extends Component {
 
-  Input({Object key,
+  Input({String key,
          this.placeholder,
          this.onChanged,
          this.focused})

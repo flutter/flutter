@@ -100,10 +100,9 @@ class RenderInkWell extends RenderProxyBox {
 }
 
 class InkWell extends OneChildRenderObjectWrapper {
-  InkWell({ UINode child, Object key })
-    : super(child: child, key: key);
+  InkWell({ String key, UINode child })
+    : super(key: key, child: child);
 
-  RenderInkWell get root { RenderInkWell result = super.root; return result; }
-
+  RenderInkWell get root => super.root;
   RenderInkWell createNode() => new RenderInkWell();
 }

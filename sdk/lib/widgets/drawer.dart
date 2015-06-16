@@ -109,7 +109,7 @@ class DrawerController {
 class Drawer extends AnimatedComponent {
 
   Drawer({
-    Object key,
+    String key,
     this.controller,
     this.children,
     this.level: 0

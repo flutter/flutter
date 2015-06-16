@@ -7,7 +7,7 @@ import 'ui_node.dart';
 
 class ModalOverlay extends Component {
 
-  ModalOverlay({ Object key, this.children, this.onDismiss }) : super(key: key);
+  ModalOverlay({ String key, this.children, this.onDismiss }) : super(key: key);
 
   // static final Style _style = new Style('''
   //   position: absolute;

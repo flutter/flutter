@@ -9,7 +9,7 @@ import 'editable_string.dart';
 
 class EditableText extends Component {
 
-  EditableText({Object key, this.value, this.focused})
+  EditableText({String key, this.value, this.focused})
       : super(key: key, stateful: true);
 
   // static final Style _cursorStyle = new Style('''

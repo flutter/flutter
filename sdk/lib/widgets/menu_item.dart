@@ -23,7 +23,8 @@ const BoxDecoration _kHighlightBoring = const BoxDecoration(
 );
 
 class MenuItem extends ButtonBase {
-  MenuItem({ Object key, this.icon, this.children, this.onGestureTap }) : super(key: key);
+  MenuItem({ String key, this.icon, this.children, this.onGestureTap })
+    : super(key: key);
 
   String icon;
   List<UINode> children;

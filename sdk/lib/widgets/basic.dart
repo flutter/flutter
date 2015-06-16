@@ -1,3 +1,6 @@
+// Copyright 2015 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
 
 import 'package:vector_math/vector_math.dart';
 
@@ -18,10 +21,10 @@ export 'ui_node.dart' show UINode, Component, App, EventListenerNode, ParentData
 // PAINTING NODES
 
 class Opacity extends OneChildRenderObjectWrapper {
-  Opacity({ this.opacity, UINode child, Object key })
-    : super(child: child, key: key);
+  Opacity({ String key, this.opacity, UINode child })
+    : super(key: key, child: child);
 
-  RenderOpacity get root { RenderOpacity result = super.root; return result; }
+  RenderOpacity get root => super.root;
   final double opacity;
 
   RenderOpacity createNode() => new RenderOpacity(opacity: opacity);
@@ -34,10 +37,10 @@ class Opacity extends OneChildRenderObjectWrapper {
 
 class DecoratedBox extends OneChildRenderObjectWrapper {
 
-  DecoratedBox({ this.decoration, UINode child, Object key })
-    : super(child: child, key: key);
+  DecoratedBox({ String key, this.decoration, UINode child })
+    : super(key: key, child: child);
 
-  RenderDecoratedBox get root { RenderDecoratedBox result = super.root; return result; }
+  RenderDecoratedBox get root => super.root;
   final BoxDecoration decoration;
 
   RenderDecoratedBox createNode() => new RenderDecoratedBox(decoration: decoration);
@@ -51,10 +54,10 @@ class DecoratedBox extends OneChildRenderObjectWrapper {
 
 class CustomPaint extends OneChildRenderObjectWrapper {
 
-  CustomPaint({ this.callback, this.token, UINode child, Object key })
-    : super(child: child, key: key);
+  CustomPaint({ String key, this.callback, this.token, UINode child })
+    : super(key: key, child: child);
 
-  RenderCustomPaint get root { RenderCustomPaint result = super.root; return result; }
+  RenderCustomPaint get root => super.root;
   final CustomPaintCallback callback;
   final dynamic token;  // set this to be repainted automatically when the token changes
 
@@ -75,20 +78,18 @@ class CustomPaint extends OneChildRenderObjectWrapper {
 }
 
 class ClipRect extends OneChildRenderObjectWrapper {
+  ClipRect({ String key, UINode child })
+    : super(key: key, child: child);
 
-  ClipRect({ UINode child, Object key })
-    : super(child: child, key: key);
-
-  RenderClipRect get root { RenderClipRect result = super.root; return result; }
+  RenderClipRect get root => super.root;
   RenderClipRect createNode() => new RenderClipRect();
 }
 
 class ClipOval extends OneChildRenderObjectWrapper {
+  ClipOval({ String key, UINode child })
+    : super(key: key, child: child);
 
-  ClipOval({ UINode child, Object key })
-    : super(child: child, key: key);
-
-  RenderClipOval get root { RenderClipOval result = super.root; return result; }
+  RenderClipOval get root => super.root;
   RenderClipOval createNode() => new RenderClipOval();
 }
 
@@ -97,10 +98,10 @@ class ClipOval extends OneChildRenderObjectWrapper {
 
 class Transform extends OneChildRenderObjectWrapper {
 
-  Transform({ this.transform, UINode child, Object key })
-    : super(child: child, key: key);
+  Transform({ String key, this.transform, UINode child })
+    : super(key: key, child: child);
 
-  RenderTransform get root { RenderTransform result = super.root; return result; }
+  RenderTransform get root => super.root;
   final Matrix4 transform;
 
   RenderTransform createNode() => new RenderTransform(transform: transform);
@@ -114,10 +115,10 @@ class Transform extends OneChildRenderObjectWrapper {
 
 class Padding extends OneChildRenderObjectWrapper {
 
-  Padding({ this.padding, UINode child, Object key })
-    : super(child: child, key: key);
+  Padding({ String key, this.padding, UINode child })
+    : super(key: key, child: child);
 
-  RenderPadding get root { RenderPadding result = super.root; return result; }
+  RenderPadding get root => super.root;
   final EdgeDims padding;
 
   RenderPadding createNode() => new RenderPadding(padding: padding);
@@ -130,26 +131,23 @@ class Padding extends OneChildRenderObjectWrapper {
 }
 
 class Center extends OneChildRenderObjectWrapper {
+  Center({ String key, UINode child })
+    : super(key: key, child: child);
 
-  Center({ UINode child, Object key })
-    : super(child: child, key: key);
-
-  RenderPositionedBox get root { RenderPositionedBox result = super.root; return result; }
-
+  RenderPositionedBox get root => super.root;
   RenderPositionedBox createNode() => new RenderPositionedBox();
-
 }
 
 class SizedBox extends OneChildRenderObjectWrapper {
 
   SizedBox({
+    String key,
     this.width,
     this.height,
-    UINode child,
-    Object key
-  }) : super(child: child, key: key);
+    UINode child
+  }) : super(key: key, child: child);
 
-  RenderConstrainedBox get root { RenderConstrainedBox result = super.root; return result; }
+  RenderConstrainedBox get root => super.root;
 
   final double width;
   final double height;
@@ -174,10 +172,11 @@ class SizedBox extends OneChildRenderObjectWrapper {
 
 class ConstrainedBox extends OneChildRenderObjectWrapper {
 
-  ConstrainedBox({ this.constraints, UINode child, Object key })
-    : super(child: child, key: key);
+  ConstrainedBox({ String key, this.constraints, UINode child })
+    : super(key: key, child: child);
 
-  RenderConstrainedBox get root { RenderConstrainedBox result = super.root; return result; }
+  RenderConstrainedBox get root => super.root;
+
   final BoxConstraints constraints;
 
   RenderConstrainedBox createNode() => new RenderConstrainedBox(additionalConstraints: constraints);
@@ -190,21 +189,19 @@ class ConstrainedBox extends OneChildRenderObjectWrapper {
 }
 
 class ShrinkWrapWidth extends OneChildRenderObjectWrapper {
+  ShrinkWrapWidth({ String key, UINode child })
+    : super(key: key, child: child);
 
-  ShrinkWrapWidth({ UINode child, Object key }) : super(child: child, key: key);
-
-  RenderShrinkWrapWidth get root { RenderShrinkWrapWidth result = super.root; return result; }
-
+  RenderShrinkWrapWidth get root => super.root;
   RenderShrinkWrapWidth createNode() => new RenderShrinkWrapWidth();
-
 }
 
 class SizeObserver extends OneChildRenderObjectWrapper {
 
-  SizeObserver({ this.callback, UINode child, Object key })
-    : super(child: child, key: key);
+  SizeObserver({ String key, this.callback, UINode child })
+    : super(key: key, child: child);
 
-  RenderSizeObserver get root { RenderSizeObserver result = super.root; return result; }
+  RenderSizeObserver get root => super.root;
   final SizeChangedCallback callback;
 
   RenderSizeObserver createNode() => new RenderSizeObserver(callback: callback);
@@ -227,7 +224,7 @@ class SizeObserver extends OneChildRenderObjectWrapper {
 class Container extends Component {
 
   Container({
-    Object key,
+    String key,
     this.child,
     this.constraints,
     this.decoration,
@@ -287,48 +284,47 @@ class Container extends Component {
 // LAYOUT NODES
 
 class Block extends MultiChildRenderObjectWrapper {
-
-  Block(List<UINode> children, { Object key })
+  Block(List<UINode> children, { String key })
     : super(key: key, children: children);
 
-  RenderBlock get root { RenderBlock result = super.root; return result; }
+  RenderBlock get root => super.root;
   RenderBlock createNode() => new RenderBlock();
-
 }
 
 class Stack extends MultiChildRenderObjectWrapper {
-
-  Stack(List<UINode> children, { Object key })
+  Stack(List<UINode> children, { String key })
     : super(key: key, children: children);
 
-  RenderStack get root { RenderStack result = super.root; return result; }
+  RenderStack get root => super.root;
   RenderStack createNode() => new RenderStack();
-
 }
 
 class Positioned extends ParentDataNode {
   Positioned({
+    String key,
     UINode child,
     double top,
     double right,
     double bottom,
     double left
-  }) : super(content, new StackParentData()..top = top
-                                           ..right = right
-                                           ..bottom = bottom
-                                           ..left = left);
+  }) : super(content,
+             new StackParentData()..top = top
+                                  ..right = right
+                                  ..bottom = bottom
+                                  ..left = left,
+             key: key);
 }
 
 class Flex extends MultiChildRenderObjectWrapper {
 
   Flex(List<UINode> children, {
-    Object key,
+    String key,
     this.direction: FlexDirection.horizontal,
     this.justifyContent: FlexJustifyContent.flexStart,
     this.alignItems: FlexAlignItems.center
   }) : super(key: key, children: children);
 
-  RenderFlex get root { RenderFlex result = super.root; return result; }
+  RenderFlex get root => super.root;
   RenderFlex createNode() => new RenderFlex(direction: this.direction);
 
   final FlexDirection direction;
@@ -345,15 +341,15 @@ class Flex extends MultiChildRenderObjectWrapper {
 }
 
 class Flexible extends ParentDataNode {
-  Flexible({ UINode child, int flex: 1, Object key })
+  Flexible({ String key, UINode child, int flex: 1 })
     : super(child, new FlexBoxParentData()..flex = flex, key: key);
 }
 
 class Paragraph extends RenderObjectWrapper {
 
-  Paragraph({ Object key, this.text, this.style }) : super(key: key);
+  Paragraph({ String key, this.text, this.style }) : super(key: key);
 
-  RenderParagraph get root { RenderParagraph result = super.root; return result; }
+  RenderParagraph get root => super.root;
   RenderParagraph createNode() => new RenderParagraph(text: text, style: style);
 
   final String text;
@@ -383,12 +379,12 @@ class Text extends Component {
 class Image extends RenderObjectWrapper {
 
   Image({
-    Object key,
+    String key,
     this.src,
     this.size
   }) : super(key: key);
 
-  RenderImage get root { RenderImage result = super.root; return result; }
+  RenderImage get root => super.root;
   RenderImage createNode() => new RenderImage(this.src, this.size);
 
   final String src;

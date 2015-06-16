@@ -29,7 +29,7 @@ class Switch extends Toggleable {
   // TODO(jackson): Hit-test the switch so that it can respond to both taps and swipe gestures
 
   Switch({
-    Object key,
+    String key,
     bool value,
     ValueChanged onChanged
   }) : super(key: key, value: value, onChanged: onChanged);

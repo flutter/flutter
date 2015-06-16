@@ -54,7 +54,7 @@ class PopupMenuController {
 
 class PopupMenu extends AnimatedComponent {
 
-  PopupMenu({ Object key, this.controller, this.items, this.level })
+  PopupMenu({ String key, this.controller, this.items, this.level })
       : super(key: key) {
     _painter = new BoxPainter(new BoxDecoration(
       backgroundColor: Grey[50],
@@ -94,7 +94,10 @@ class PopupMenu extends AnimatedComponent {
     int i = 0;
     List<UINode> children = new List.from(items.map((List<UINode> item) {
       double opacity = _opacityFor(i);
-      return new PopupMenuItem(key: i++, children: item, opacity: opacity);
+      // TODO(abarth): Using |i| for the key here seems wrong.
+      return new PopupMenuItem(key: (i++).toString(),
+                               children: item
+                               opacity: opacity);
     }));
 
     return new Opacity(

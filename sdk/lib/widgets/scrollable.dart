@@ -26,7 +26,8 @@ abstract class ScrollClient {
 
 abstract class Scrollable extends Component {
 
-  Scrollable({ Object key, Color this.backgroundColor }) : super(key: key, stateful: true);
+  Scrollable({ String key, Color this.backgroundColor })
+    : super(key: key, stateful: true);
 
   Color backgroundColor;
 

@@ -24,7 +24,7 @@ void addFlexChildSolidColor(RenderFlex parent, sky.Color backgroundColor, { int 
 
 // Solid colour, Widget version
 class Rectangle extends Component {
-  Rectangle(this.color, { Object key }) : super(key: key);
+  Rectangle(this.color, { String key }) : super(key: key);
   final Color color;
   UINode build() {
     return new Flexible(

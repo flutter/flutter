@@ -14,7 +14,7 @@ enum RaisedButtonTheme { light, dark }
 class RaisedButton extends ButtonBase {
 
   RaisedButton({
-    Object key,
+    String key,
     this.child,
     this.enabled: true,
     this.onPressed,

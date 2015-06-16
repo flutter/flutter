@@ -16,7 +16,7 @@ const double _kCheckDuration = 200.0;
 abstract class Toggleable extends AnimatedComponent {
 
   Toggleable({
-    Object key,
+    String key,
     this.value,
     this.onChanged
   }) : super(key: key) {
