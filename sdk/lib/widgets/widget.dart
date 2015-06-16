@@ -22,7 +22,7 @@ final bool _shouldLogRenderDuration = false;
 abstract class Widget {
 
   Widget({ String key }) {
-    _key = key == null ? "$runtimeType" : "$runtimeType-$key";
+    _key = key != null ? key : runtimeType.toString();
     assert(this is AbstractWidgetRoot || _inRenderDirtyComponents); // you should not build the UI tree ahead of time, build it only during build()
   }
 
@@ -124,7 +124,7 @@ abstract class Widget {
       return null;
     }
 
-    if (oldNode != null && node._key == oldNode._key && node._retainStatefulNodeIfPossible(oldNode)) {
+    if (oldNode != null && oldNode.runtimeType == node.runtimeType && node.key == oldNode.key && node._retainStatefulNodeIfPossible(oldNode)) {
       assert(oldNode.mounted);
       assert(!node.mounted);
       oldNode._sync(node, slot);
@@ -132,7 +132,7 @@ abstract class Widget {
       return oldNode;
     }
 
-    if (oldNode != null && node._key != oldNode._key) {
+    if (oldNode != null && (oldNode.runtimeType != node.runtimeType || node.key != oldNode.key)) {
       assert(oldNode.mounted);
       removeChild(oldNode);
       oldNode = null;
@@ -307,6 +307,7 @@ abstract class Component extends Widget {
     if (oldComponent == null || !oldComponent._stateful)
       return false;
 
+    assert(runtimeType == oldComponent.runtimeType);
     assert(key == oldComponent.key);
 
     // Make |this|, the newly-created object, into the "old" Component, and kill it
@@ -513,7 +514,7 @@ abstract class RenderObjectWrapper extends Widget {
 
 abstract class OneChildRenderObjectWrapper extends RenderObjectWrapper {
 
-  OneChildRenderObjectWrapper({ Widget child, String key })
+  OneChildRenderObjectWrapper({ String key, Widget child })
     : _child = child, super(key: key);
 
   Widget _child;
@@ -595,10 +596,8 @@ abstract class MultiChildRenderObjectWrapper extends RenderObjectWrapper {
       if (child.interchangeable)
         continue; // when these nodes are reordered, we just reassign the data
 
-      if (!idSet.add(child._key)) {
-        throw '''If multiple non-interchangeable nodes of the same type exist as children
-                of another node, they must have unique keys.
-                Duplicate: "${child._key}"''';
+      if (!idSet.add(child.key)) {
+        throw '''If multiple non-interchangeable nodes exist as children of another node, they must have unique keys. Duplicate: "${child.key}"''';
       }
     }
     return false;
@@ -633,7 +632,7 @@ abstract class MultiChildRenderObjectWrapper extends RenderObjectWrapper {
       currentNode = children[endIndex - 1];
       oldNode = oldChildren[oldEndIndex - 1];
 
-      if (currentNode._key != oldNode._key) {
+      if (currentNode.runtimeType != oldNode.runtimeType || currentNode.key != oldNode.key) {
         break;
       }
 
@@ -653,7 +652,7 @@ abstract class MultiChildRenderObjectWrapper extends RenderObjectWrapper {
     void advanceOldStartIndex() {
       oldStartIndex++;
       while (oldStartIndex < oldEndIndex &&
-             oldNodeReordered(oldChildren[oldStartIndex]._key)) {
+             oldNodeReordered(oldChildren[oldStartIndex].key)) {
         oldStartIndex++;
       }
     }
@@ -666,7 +665,7 @@ abstract class MultiChildRenderObjectWrapper extends RenderObjectWrapper {
       for (int i = oldStartIndex; i < oldEndIndex; i++) {
         var node = oldChildren[i];
         if (!node.interchangeable)
-          oldNodeIdMap.putIfAbsent(node._key, () => node);
+          oldNodeIdMap.putIfAbsent(node.key, () => node);
       }
     }
 
@@ -675,11 +674,11 @@ abstract class MultiChildRenderObjectWrapper extends RenderObjectWrapper {
         return false; // never re-order these nodes
 
       ensureOldIdMap();
-      oldNode = oldNodeIdMap[currentNode._key];
+      oldNode = oldNodeIdMap[currentNode.key];
       if (oldNode == null)
         return false;
 
-      oldNodeIdMap[currentNode._key] = null; // mark it reordered
+      oldNodeIdMap[currentNode.key] = null; // mark it reordered
       assert(root is ContainerRenderObjectMixin);
       assert(old.root is ContainerRenderObjectMixin);
       assert(oldNode.root != null);
@@ -696,8 +695,7 @@ abstract class MultiChildRenderObjectWrapper extends RenderObjectWrapper {
       currentNode = children[startIndex];
       oldNode = oldChildren[oldStartIndex];
 
-      if (currentNode._key == oldNode._key) {
-        assert(currentNode.runtimeType == oldNode.runtimeType);
+      if (currentNode.runtimeType == oldNode.runtimeType && currentNode.key == oldNode.key) {
         nextSibling = root.childAfter(nextSibling);
         sync(startIndex);
         startIndex++;
