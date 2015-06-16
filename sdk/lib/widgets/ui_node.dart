@@ -804,9 +804,9 @@ abstract class App extends AbstractUINodeRoot {
 
 typedef UINode Builder();
 
-class RenderObjectToUINodeAdapter extends AbstractUINodeRoot {
+class RenderBoxToUINodeAdapter extends AbstractUINodeRoot {
 
-  RenderObjectToUINodeAdapter(
+  RenderBoxToUINodeAdapter(
     RenderObjectWithChildMixin<RenderBox> container,
     this.builder
   ) : _container = container, super() {

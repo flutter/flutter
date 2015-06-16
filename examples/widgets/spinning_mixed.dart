@@ -76,16 +76,16 @@ void rotate(double timeStamp) {
 void main() {
   // Because we're going to use UINodes, we want to initialise its
   // AppView, not use the default one. We don't really need to do
-  // this, because RenderObjectToUINodeAdapter does it for us, but
+  // this, because RenderBoxToUINodeAdapter does it for us, but
   // it's good practice in case we happen to not have a
-  // RenderObjectToUINodeAdapter in our tree at startup, or in case we
+  // RenderBoxToUINodeAdapter in our tree at startup, or in case we
   // want a renderViewOverride.
   UINodeAppView.initUINodeAppView();
 
   RenderFlex flexRoot = new RenderFlex(direction: FlexDirection.vertical);
 
   RenderProxyBox proxy = new RenderProxyBox();
-  new RenderObjectToUINodeAdapter(proxy, builder); // adds itself to proxy
+  new RenderBoxToUINodeAdapter(proxy, builder); // adds itself to proxy
 
   addFlexChildSolidColor(flexRoot, const sky.Color(0xFFFF00FF), flex: 1);
   flexRoot.add(proxy);

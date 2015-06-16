@@ -1,5 +1,6 @@
 
 import 'dart:sky' as sky;
+import "dart:sky.internals" as internals;
 
 import 'package:sky/rendering/box.dart';
 import 'package:sky/rendering/object.dart';
@@ -142,10 +143,16 @@ class TestRenderView extends RenderView {
     RenderObject.debugDoingPaint = false;
   }
 
+  // TEST API:
+
   void checkFrame() {
     RenderObject.flushLayout();
     paintFrame();
     print(lastPaint); // TODO(ianh): figure out how to make this fit the unit testing framework better
+  }
+
+  void endTest() {
+    internals.notifyTestComplete("PAINTED $frame FRAMES");
   }
 
 }

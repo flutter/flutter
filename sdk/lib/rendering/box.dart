@@ -178,7 +178,7 @@ class BoxConstraints {
     return result;
   }
 
-  bool get isInfinite => maxWidth >= double.INFINITY || maxHeight >= double.INFINITY;
+  bool get isInfinite => maxWidth >= double.INFINITY && maxHeight >= double.INFINITY;
 
   int get hashCode {
     int value = 373;

@@ -307,7 +307,7 @@ class Positioned extends ParentDataNode {
     double right,
     double bottom,
     double left
-  }) : super(content,
+  }) : super(child,
              new StackParentData()..top = top
                                   ..right = right
                                   ..bottom = bottom
@@ -399,6 +399,33 @@ class Image extends RenderObjectWrapper {
   void insert(RenderObjectWrapper child, dynamic slot) {
     assert(false);
     // Image does not support having children currently
+  }
+
+}
+
+class UINodeToRenderBoxAdapter extends RenderObjectWrapper {
+
+  UINodeToRenderBoxAdapter(RenderBox renderBox)
+    : this.renderBox = renderBox,
+      super(key: renderBox.hashCode.toString());
+
+  RenderBox get root => super.root;
+  RenderBox createNode() => this.renderBox;
+
+  final RenderBox renderBox;
+
+  void syncRenderObject(UINode old) {
+    super.syncRenderObject(old);
+    if (old != null) {
+      assert(old is UINodeToRenderBoxAdapter);
+      assert(root == old.renderBox);
+    }
+  }
+
+  void insert(RenderObjectWrapper child, dynamic slot) {
+    assert(false);
+    // UINodeToRenderBoxAdapter cannot have UINode children; by
+    // definition, it is the transition out of the UINode world.
   }
 
 }

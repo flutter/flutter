@@ -99,7 +99,7 @@ abstract class RenderSector extends RenderObject {
   double deltaTheta;
 }
 
-class RenderDecoratedSector extends RenderSector {
+abstract class RenderDecoratedSector extends RenderSector {
 
   RenderDecoratedSector(BoxDecoration decoration) : _decoration = decoration;
 
@@ -134,6 +134,7 @@ class RenderDecoratedSector extends RenderSector {
       canvas.drawPath(path, paint);
     }
   }
+
 }
 
 class SectorChildListParentData extends SectorParentData with ContainerParentDataMixin<RenderSector> { }
@@ -397,9 +398,31 @@ class RenderBoxToRenderSectorAdapter extends RenderBox {
       child.parentData = new SectorParentData();
   }
 
-  Size getIntrinsicDimensions(BoxConstraints constraints) {
+  double getMinIntrinsicWidth(BoxConstraints constraints) {
     if (child == null)
-      return constraints.constrain(Size.zero);
+      return super.getMinIntrinsicWidth(constraints);
+    return getIntrinsicDimensions(constraints).width;
+  }
+
+  double getMaxIntrinsicWidth(BoxConstraints constraints) {
+    if (child == null)
+      return super.getMaxIntrinsicWidth(constraints);
+    return getIntrinsicDimensions(constraints).width;
+  }
+
+  double getMinIntrinsicHeight(BoxConstraints constraints) {
+    if (child == null)
+      return super.getMinIntrinsicHeight(constraints);
+    return getIntrinsicDimensions(constraints).height;
+  }
+
+  double getMaxIntrinsicHeight(BoxConstraints constraints) {
+    if (child == null)
+      return super.getMaxIntrinsicHeight(constraints);
+    return getIntrinsicDimensions(constraints).height;
+  }
+
+  Size getIntrinsicDimensions(BoxConstraints constraints) {
     assert(child is RenderSector);
     assert(child.parentData is SectorParentData);
     assert(!constraints.isInfinite);
@@ -415,9 +438,7 @@ class RenderBoxToRenderSectorAdapter extends RenderBox {
     } else {
       assert(child is RenderSector);
       assert(!constraints.isInfinite);
-      print("constraint maxes: ${constraints.maxWidth} and ${constraints.maxHeight}");
       double maxChildDeltaRadius = math.min(constraints.maxWidth, constraints.maxHeight) / 2.0 - innerRadius;
-      print("maxChildDeltaRadius = $maxChildDeltaRadius");
       assert(child.parentData is SectorParentData);
       child.parentData.radius = innerRadius;
       child.parentData.theta = 0.0;
@@ -472,7 +493,7 @@ class RenderSolidColor extends RenderDecoratedSector {
   final Color backgroundColor;
 
   SectorDimensions getIntrinsicDimensions(SectorConstraints constraints, double radius) {
-    return new SectorDimensions.withConstraints(constraints, deltaTheta: 1.0); // 1.0 radians
+    return new SectorDimensions.withConstraints(constraints, deltaTheta: desiredDeltaTheta);
   }
 
   void performLayout() {
@@ -488,19 +509,18 @@ class RenderSolidColor extends RenderDecoratedSector {
   }
 }
 
-AppView app;
-
-void main() {
-
-  var rootCircle = new RenderSectorRing(padding: 20.0);
+RenderBox buildSectorExample() {
+  RenderSectorRing rootCircle = new RenderSectorRing(padding: 20.0);
   rootCircle.add(new RenderSolidColor(const Color(0xFF00FFFF), desiredDeltaTheta: kTwoPi * 0.15));
   rootCircle.add(new RenderSolidColor(const Color(0xFF0000FF), desiredDeltaTheta: kTwoPi * 0.4));
-  var stack = new RenderSectorSlice(padding: 2.0);
+  RenderSectorSlice stack = new RenderSectorSlice(padding: 2.0);
   stack.add(new RenderSolidColor(const Color(0xFFFFFF00), desiredDeltaRadius: 20.0));
   stack.add(new RenderSolidColor(const Color(0xFFFF9000), desiredDeltaRadius: 20.0));
   stack.add(new RenderSolidColor(const Color(0xFF00FF00)));
   rootCircle.add(stack);
+  return new RenderBoxToRenderSectorAdapter(innerRadius: 50.0, child: rootCircle);
+}
 
-  var root = new RenderBoxToRenderSectorAdapter(innerRadius: 50.0, child: rootCircle);
-  app = new AppView(root: root);
+void main() {
+  new AppView(root: buildSectorExample());
 }
