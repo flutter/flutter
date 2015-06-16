@@ -67,7 +67,7 @@ class PopupMenu extends AnimatedComponent {
   }
 
   PopupMenuController controller;
-  List<List<UINode>> items;
+  List<UINode> items;
   int level;
 
   void syncFields(PopupMenu source) {
@@ -92,11 +92,10 @@ class PopupMenu extends AnimatedComponent {
 
   UINode build() {
     int i = 0;
-    List<UINode> children = new List.from(items.map((List<UINode> item) {
+    List<UINode> children = new List.from(items.map((UINode item) {
       double opacity = _opacityFor(i);
-      // TODO(abarth): Using |i| for the key here seems wrong.
-      return new PopupMenuItem(key: (i++).toString(),
-                               children: item
+      return new PopupMenuItem(key: '${key}-${item.key}',
+                               child: item,
                                opacity: opacity);
     }));
 

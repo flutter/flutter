@@ -6,9 +6,9 @@ import 'basic.dart';
 import 'ink_well.dart';
 
 class PopupMenuItem extends Component {
-  PopupMenuItem({ String key, this.children, this.opacity}) : super(key: key);
+  PopupMenuItem({ String key, this.child, this.opacity}) : super(key: key);
 
-  final List<UINode> children;
+  final UINode child;
   final double opacity;
 
   UINode build() {
@@ -18,7 +18,7 @@ class PopupMenuItem extends Component {
         child: new Container(
           constraints: const BoxConstraints(minWidth: 112.0),
           padding: const EdgeDims.all(16.0),
-          child: new Flex(children)
+          child: child
         )
       )
     );
