@@ -114,6 +114,7 @@ dart_pkg("sdk") {
     "lib/widgets/menu_divider.dart",
     "lib/widgets/menu_item.dart",
     "lib/widgets/modal_overlay.dart",
+    "lib/widgets/navigator.dart",
     "lib/widgets/popup_menu.dart",
     "lib/widgets/popup_menu_item.dart",
     "lib/widgets/radio.dart",
