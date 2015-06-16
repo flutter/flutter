@@ -80,13 +80,14 @@ class RenderTouchDemo extends RenderBox {
 AppView app;
 
 void main() {
-  var para = new RenderParagraph(text: "Touch me!");
+  var paragraph = new RenderParagraph(new InlineText("Touch me!"));
   var stack = new RenderStack(children: [
     new RenderTouchDemo(),
-    para,
+    paragraph,
   ]);
-  // Make the paragraph not fill the whole screen so it doesn't eat events.
-  para.parentData..top = 40.0
-                 ..left = 20.0;
+  // Prevent the RenderParagraph from filling the whole screen so
+  // that it doesn't eat events.
+  paragraph.parentData..top = 40.0
+                      ..left = 20.0;
   app = new AppView(root: stack);
 }
