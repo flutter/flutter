@@ -11,7 +11,7 @@ import 'stock_row.dart';
 class Stocklist extends FixedHeightScrollable {
 
   Stocklist({
-    Object key,
+    String key,
     this.stocks,
     this.query
   }) : super(itemHeight: StockRow.kHeight, key: key);

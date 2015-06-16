@@ -10,7 +10,7 @@ import 'package:sky/framework/theme/view_configuration.dart';
 class StockMenu extends Component {
 
   StockMenu({
-    Object key,
+    String key,
     this.controller,
     this.autorefresh: false,
     this.onAutorefreshChanged
