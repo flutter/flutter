@@ -359,7 +359,7 @@ class Inline extends RenderObjectWrapper {
     root.inline = text;
   }
 
-  void insert(RenderObjectWrapper child, dynamic slot) {
+  void insertChildRoot(RenderObjectWrapper child, dynamic slot) {
     assert(false);
     // Inline does not support having children currently
   }
@@ -398,7 +398,7 @@ class Image extends RenderObjectWrapper {
     root.requestedSize = size;
   }
 
-  void insert(RenderObjectWrapper child, dynamic slot) {
+  void insertChildRoot(RenderObjectWrapper child, dynamic slot) {
     assert(false);
     // Image does not support having children currently
   }
@@ -424,7 +424,7 @@ class WidgetToRenderBoxAdapter extends RenderObjectWrapper {
     }
   }
 
-  void insert(RenderObjectWrapper child, dynamic slot) {
+  void insertChildRoot(RenderObjectWrapper child, dynamic slot) {
     assert(false);
     // WidgetToRenderBoxAdapter cannot have Widget children; by
     // definition, it is the transition out of the Widget world.

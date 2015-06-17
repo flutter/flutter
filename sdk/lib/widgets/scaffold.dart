@@ -181,7 +181,7 @@ class Scaffold extends RenderObjectWrapper {
   RenderScaffold get root => super.root;
   RenderScaffold createNode() => new RenderScaffold();
 
-  void insert(RenderObjectWrapper child, ScaffoldSlots slot) {
+  void insertChildRoot(RenderObjectWrapper child, ScaffoldSlots slot) {
     root[slot] = child != null ? child.root : null;
   }
 

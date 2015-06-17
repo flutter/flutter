@@ -491,7 +491,7 @@ abstract class RenderObjectWrapper extends Widget {
   static RenderObjectWrapper _getMounted(RenderObject node) => _nodeMap[node];
 
   RenderObjectWrapper _ancestor;
-  void insert(RenderObjectWrapper child, dynamic slot);
+  void insertChildRoot(RenderObjectWrapper child, dynamic slot);
   void detachChildRoot(RenderObjectWrapper child);
 
   void _sync(Widget old, dynamic slot) {
@@ -503,7 +503,7 @@ abstract class RenderObjectWrapper extends Widget {
       _root = createNode();
       _ancestor = findAncestor(RenderObjectWrapper);
       if (_ancestor is RenderObjectWrapper)
-        _ancestor.insert(this, slot);
+        _ancestor.insertChildRoot(this, slot);
     } else {
       _root = old.root;
       _ancestor = old._ancestor;
@@ -563,7 +563,7 @@ abstract class OneChildRenderObjectWrapper extends RenderObjectWrapper {
     _child = syncChild(child, oldChild, null);
   }
 
-  void insert(RenderObjectWrapper child, dynamic slot) {
+  void insertChildRoot(RenderObjectWrapper child, dynamic slot) {
     final root = this.root; // TODO(ianh): Remove this once the analyzer is cleverer
     assert(root is RenderObjectWithChildMixin);
     assert(slot == null);
@@ -600,7 +600,7 @@ abstract class MultiChildRenderObjectWrapper extends RenderObjectWrapper {
 
   final List<Widget> children;
 
-  void insert(RenderObjectWrapper child, dynamic slot) {
+  void insertChildRoot(RenderObjectWrapper child, dynamic slot) {
     final root = this.root; // TODO(ianh): Remove this once the analyzer is cleverer
     assert(slot == null || slot is RenderObject);
     assert(root is ContainerRenderObjectMixin);
