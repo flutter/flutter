@@ -9,18 +9,22 @@ import 'widget.dart';
 
 class IconButton extends Component {
 
-  IconButton({ String icon: '', this.onGestureTap })
+  IconButton({ String icon: '', this.onPressed })
     : super(key: icon), icon = icon;
 
   final String icon;
-  final GestureEventListener onGestureTap;
+  final Function onPressed;
 
   Widget build() {
     return new Listener(
       child: new Padding(
         child: new Icon(type: icon, size: 24),
         padding: const EdgeDims.all(8.0)),
-      onGestureTap: onGestureTap);
+      onGestureTap: (_) {
+        if (onPressed != null)
+          onPressed();
+      }
+    );
   }
 
 }

@@ -15,22 +15,39 @@ const double _kSize = 56.0;
 
 class FloatingActionButton extends ButtonBase {
 
-  FloatingActionButton({ String key, this.child }) : super(key: key);
+  FloatingActionButton({
+    String key,
+    this.child,
+    Function onPressed
+  }) : super(key: key);
 
-  final Widget child;
+  Widget child;
+  Function onPressed;
+
+  void syncFields(FloatingActionButton source) {
+    super.syncFields(source);
+    child = source.child;
+    onPressed = source.onPressed;
+  }
 
   Widget buildContent() {
     return new Material(
-      child: new ClipOval(
-        child: new Container(
-          width: _kSize,
-          height: _kSize,
-          child: new InkWell(child: new Center(child: child))
-        )
-      ),
       color: Red[500],
       edge: MaterialEdge.circle,
-      level: highlight ? 3 : 2
+      level: highlight ? 3 : 2,
+      child: new ClipOval(
+        child: new Listener(
+          onGestureTap: (_) {
+            if (onPressed != null)
+              onPressed();
+          },
+          child: new Container(
+            width: _kSize,
+            height: _kSize,
+            child: new InkWell(child: new Center(child: child))
+          )
+        )
+      )
     );
   }
 

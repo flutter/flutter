@@ -9,20 +9,17 @@ class ModalOverlay extends Component {
 
   ModalOverlay({ String key, this.children, this.onDismiss }) : super(key: key);
 
-  // static final Style _style = new Style('''
-  //   position: absolute;
-  //   top: 0;
-  //   left: 0;
-  //   bottom: 0;
-  //   right: 0;''');
-
   final List<Widget> children;
-  final GestureEventListener onDismiss;
+  final Function onDismiss;
 
   Widget build() {
     return new Listener(
-      child: new Stack(children),
-      onGestureTap: onDismiss);
+      onGestureTap: (_) {
+        if (onDismiss != null)
+          onDismiss();
+      },
+      child: new Stack(children)
+    );
   }
 
 }

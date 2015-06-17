@@ -23,42 +23,45 @@ const BoxDecoration _kHighlightBoring = const BoxDecoration(
 );
 
 class MenuItem extends ButtonBase {
-  MenuItem({ String key, this.icon, this.children, this.onGestureTap })
+  MenuItem({ String key, this.icon, this.children, this.onPressed })
     : super(key: key);
 
   String icon;
   List<Widget> children;
-  GestureEventListener onGestureTap;
+  Function onPressed;
 
   void syncFields(MenuItem source) {
     icon = source.icon;
     children = source.children;
-    onGestureTap = source.onGestureTap;
+    onPressed = source.onPressed;
     super.syncFields(source);
   }
 
   Widget buildContent() {
     return new Listener(
+      onGestureTap: (_) {
+        if (onPressed != null)
+          onPressed();
+      },
       child: new Container(
+        height: 48.0,
+        decoration: highlight ? _kHighlightDecoration : _kHighlightBoring,
         child: new InkWell(
           child: new Flex([
             new Padding(
-              child: new Icon(type: "${icon}_grey600", size: 24),
-              padding: const EdgeDims.symmetric(horizontal: 16.0)
+              padding: const EdgeDims.symmetric(horizontal: 16.0),
+              child: new Icon(type: "${icon}_grey600", size: 24)
             ),
             new Flexible(
+              flex: 1,
               child: new Padding(
-                child: new Flex(children, direction: FlexDirection.horizontal),
                 padding: const EdgeDims.symmetric(horizontal: 16.0)
-              ),
-              flex: 1
+                child: new Flex(children, direction: FlexDirection.horizontal),
+              )
             )
           ])
-        ),
-        height: 48.0,
-        decoration: highlight ? _kHighlightDecoration : _kHighlightBoring
-      ),
-      onGestureTap: onGestureTap
+        )
+      )
     );
   }
 }

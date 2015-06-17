@@ -29,7 +29,7 @@ class StockSettings extends Component {
     return new ToolBar(
       left: new IconButton(
         icon: 'navigation/arrow_back_white',
-        onGestureTap: (_) => _navigator.pop()),
+        onPressed: _navigator.pop),
       center: new Text('Settings', style: typography.white.title),
       backgroundColor: colors.Purple[500]
     );
@@ -42,7 +42,7 @@ class StockSettings extends Component {
       child: new Block([
         new MenuItem(
           icon: 'action/thumb_up',
-          onGestureTap: (event) => _handleAwesomeChanged(!_awesome),
+          onPressed: () => _handleAwesomeChanged(!_awesome),
           children: [
             new Flexible(child: new Text('Everything is awesome')),
             new Checkbox(value: _awesome, onChanged: _handleAwesomeChanged)
