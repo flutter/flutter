@@ -33,7 +33,7 @@ class Dialog extends Component {
       children.add(content);
 
     if (actions != null)
-      children.add(content);
+      children.add(actions);
 
     return new Stack([
       new Listener(
