@@ -758,7 +758,7 @@ class WidgetAppView extends AppView {
         continue;
       RenderObject targetRoot = target.root;
       while (target != null && target.root == targetRoot) {
-        if (target is EventListener)
+        if (target is Listener)
           target._handleEvent(event);
         target = target._parent;
       }
