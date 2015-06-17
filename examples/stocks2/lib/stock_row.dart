@@ -2,11 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:sky/painting/text_style.dart';
 import 'package:sky/rendering/box.dart';
 import 'package:sky/theme2/typography.dart' as typography;
 import 'package:sky/widgets/ink_well.dart';
 import 'package:sky/widgets/basic.dart';
-import 'package:sky/rendering/paragraph.dart';
 
 import 'stock_arrow.dart';
 import 'stock_data.dart';
