@@ -46,13 +46,13 @@ class StockHome extends Component {
   bool _isSearching = false;
   String _searchQuery;
 
-  void _handleSearchBegin(_) {
+  void _handleSearchBegin() {
     setState(() {
       _isSearching = true;
     });
   }
 
-  void _handleSearchEnd(_) {
+  void _handleSearchEnd() {
     setState(() {
       _isSearching = false;
       _searchQuery = null;
@@ -76,14 +76,14 @@ class StockHome extends Component {
 
   PopupMenuController _menuController;
 
-  void _handleMenuShow(_) {
+  void _handleMenuShow() {
     setState(() {
       _menuController = new PopupMenuController();
       _menuController.open();
     });
   }
 
-  void _handleMenuHide(_) {
+  void _handleMenuHide() {
     setState(() {
       _menuController.close().then((_) {
         setState(() {
@@ -122,14 +122,14 @@ class StockHome extends Component {
         new MenuDivider(),
         new MenuItem(
           icon: 'action/thumb_up',
-          onGestureTap: (event) => _handleStockModeChange(StockMode.optimistic),
+          onPressed: () => _handleStockModeChange(StockMode.optimistic),
           children: [
             new Flexible(child: new Text('Optimistic')),
             new Radio(value: StockMode.optimistic, groupValue: _stockMode, onChanged: _handleStockModeChange)
           ]),
         new MenuItem(
           icon: 'action/thumb_down',
-          onGestureTap: (event) => _handleStockModeChange(StockMode.pessimistic),
+          onPressed: () => _handleStockModeChange(StockMode.pessimistic),
           children: [
             new Flexible(child: new Text('Pessimistic')),
             new Radio(value: StockMode.pessimistic, groupValue: _stockMode, onChanged: _handleStockModeChange)
@@ -137,7 +137,7 @@ class StockHome extends Component {
         new MenuDivider(),
         new MenuItem(
           icon: 'action/settings',
-          onGestureTap: (event) => _navigator.pushNamed('/settings'),
+          onPressed: () => _navigator.pushNamed('/settings'),
           children: [new Text('Settings')]),
         new MenuItem(
           icon: 'action/help',
@@ -150,15 +150,15 @@ class StockHome extends Component {
     return new ToolBar(
         left: new IconButton(
           icon: 'navigation/menu_white',
-          onGestureTap: (_) => _drawerController.toggle()),
+          onPressed: _drawerController.toggle),
         center: new Text('Stocks', style: typography.white.title),
         right: [
           new IconButton(
             icon: 'action/search_white',
-            onGestureTap: _handleSearchBegin),
+            onPressed: _handleSearchBegin),
           new IconButton(
             icon: 'navigation/more_vert_white',
-            onGestureTap: _handleMenuShow)
+            onPressed: _handleMenuShow)
         ],
         backgroundColor: colors.Purple[500]
       );
@@ -169,7 +169,7 @@ class StockHome extends Component {
     return new ToolBar(
       left: new IconButton(
         icon: 'navigation/arrow_back_grey600',
-        onGestureTap: _handleSearchEnd),
+        onPressed: _handleSearchEnd),
       center: new Input(
         focused: true,
         placeholder: 'Search stocks',
