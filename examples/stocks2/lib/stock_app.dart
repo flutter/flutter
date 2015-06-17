@@ -12,8 +12,6 @@ import 'stock_settings.dart';
 
 class StocksApp extends App {
 
-  StocksApp({ RenderView renderViewOverride }) : super(renderViewOverride: renderViewOverride);
-
   NavigationState _navState = new NavigationState([
     new Route(name: '/', builder: (navigator) => new StockHome(navigator)),
     new Route(name: '/settings', builder: (navigator) => new StockSettings(navigator)),
@@ -37,7 +35,7 @@ class StocksApp extends App {
 
 void main() {
   print("starting stocks app!");
-  App app = new StocksApp();
+  runApp(new StocksApp());
   WidgetAppView.appView.onFrame = () {
     // uncomment this for debugging:
     // WidgetAppView.appView.debugDumpRenderTree();

@@ -11,5 +11,5 @@ class HelloWorldApp extends App {
 }
 
 void main() {
-  new HelloWorldApp();
+  runApp(new HelloWorldApp());
 }

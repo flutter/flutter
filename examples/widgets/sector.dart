@@ -137,7 +137,7 @@ class SectorApp extends App {
 }
 
 void main() {
-  App app = new SectorApp();
+  runApp(new SectorApp());
   WidgetAppView.appView.onFrame = () {
     // uncomment this for debugging:
     // WidgetAppView.appView.debugDumpRenderTree();
