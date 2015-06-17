@@ -55,7 +55,7 @@ class AppView {
 
   final List<EventListener> _eventListeners = new List<EventListener>();
   void addEventListener(EventListener e) => _eventListeners.add(e);
-  void removeEventListener(EventListener e) => _eventListeners.remove(e);
+  bool removeEventListener(EventListener e) => _eventListeners.remove(e);
 
   RenderBox get root => _renderView.child;
   void set root(RenderBox value) {
