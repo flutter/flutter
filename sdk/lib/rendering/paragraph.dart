@@ -103,7 +103,7 @@ class TextStyle {
   }
 }
 
-class InlineBase {
+abstract class InlineBase {
   sky.Node _toDOM(sky.Document owner);
   String toString([String prefix = '']);
 }
@@ -124,7 +124,8 @@ class InlineText extends InlineBase {
 
 class InlineStyle extends InlineBase {
   InlineStyle(this.style, this.children) {
-    assert(style != null && children != null);
+    assert(style != null);
+    assert(children != null);
   }
 
   final TextStyle style;
@@ -182,7 +183,7 @@ class RenderParagraph extends RenderBox {
     markNeedsLayout();
   }
 
-  sky.Element _layout(BoxConstraints constraints) {
+  void _layout(BoxConstraints constraints) {
     _layoutRoot.maxWidth = constraints.maxWidth;
     _layoutRoot.minWidth = constraints.minWidth;
     _layoutRoot.minHeight = constraints.minHeight;

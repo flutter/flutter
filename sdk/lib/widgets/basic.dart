@@ -419,7 +419,7 @@ class WidgetToRenderBoxAdapter extends RenderObjectWrapper {
     super.syncRenderObject(old);
     if (old != null) {
       assert(old is WidgetToRenderBoxAdapter);
-      assert(root == old.renderBox);
+      assert(root == old.root);
     }
   }
 
