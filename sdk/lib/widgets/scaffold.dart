@@ -185,10 +185,12 @@ class Scaffold extends RenderObjectWrapper {
     root[slot] = child != null ? child.root : null;
   }
 
-  void removeChild(Widget node) {
-    assert(node != null);
-    root.remove(node.root);
-    super.removeChild(node);
+  void detachChildRoot(RenderObjectWrapper child) {
+    final root = this.root; // TODO(ianh): Remove this once the analyzer is cleverer
+    assert(root is RenderScaffold);
+    assert(root == child.root.parent);
+    root.remove(child.root);
+    assert(root == this.root); // TODO(ianh): Remove this once the analyzer is cleverer
   }
 
   void remove() {

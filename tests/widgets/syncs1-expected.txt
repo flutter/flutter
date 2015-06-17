@@ -1,0 +1,108 @@
+CONSOLE: TestRenderView enabled
+CONSOLE: 
+PAINT FOR FRAME #1 ----------------------------------------------
+1 | TestDisplayList() constructor: 800.0 x 600.0
+------------------------------------------------------------------------
+CONSOLE: 
+PAINT FOR FRAME #2 ----------------------------------------------
+2 | TestDisplayList() constructor: 800.0 x 600.0
+2 | paintChild RenderBlock at Point(0.0, 0.0)
+2 |  | TestDisplayList() constructor: 800.0 x 600.0
+2 |  | paintChild RenderConstrainedBox at Point(0.0, 0.0)
+2 |  |  | TestDisplayList() constructor: 800.0 x 600.0
+2 |  |  | paintChild RenderDecoratedBox at Point(0.0, 0.0)
+2 |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+2 |  |  |  | drawRect(Rect.fromLTRB(0.0, 0.0, 425.0, 250.0), Paint(Color(0xff00ffff)))
+2 |  |  | paintChild RenderPadding at Point(425.0, 99.0)
+2 |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+2 |  |  |  | paintChild RenderConstrainedBox at Point(8.0, 8.0)
+2 |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+2 |  |  |  |  | drawRRect(Instance of 'RRect', Paint(Color(0xffe0e0e0)))
+2 |  |  |  |  | paintChild RenderPositionedBox at Point(8.0, 0.0)
+2 |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+2 |  |  |  |  |  | paintChild RenderParagraph at Point(0.0, 10.0)
+2 |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+2 |  | paintChild RenderConstrainedBox at Point(0.0, 250.0)
+2 |  |  | TestDisplayList() constructor: 800.0 x 600.0
+2 |  |  | paintChild RenderDecoratedBox at Point(0.0, 0.0)
+2 |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+2 |  |  |  | drawRect(Rect.fromLTRB(0.0, 0.0, 800.0, 250.0), Paint(Color(0xff00ffff)))
+2 |  |  | paintChild RenderPadding at Point(0.0, 0.0)
+2 |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+2 |  |  |  | paintChild RenderConstrainedBox at Point(8.0, 8.0)
+2 |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+2 |  |  |  |  | drawRRect(Instance of 'RRect', Paint(Color(0xffe0e0e0)))
+2 |  |  |  |  | paintChild RenderPositionedBox at Point(8.0, 0.0)
+2 |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+2 |  |  |  |  |  | paintChild RenderParagraph at Point(212.5, 109.0)
+2 |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+------------------------------------------------------------------------
+CONSOLE: 
+PAINT FOR FRAME #3 ----------------------------------------------
+3 | TestDisplayList() constructor: 800.0 x 600.0
+3 | paintChild RenderBlock at Point(0.0, 0.0)
+3 |  | TestDisplayList() constructor: 800.0 x 600.0
+3 |  | paintChild RenderConstrainedBox at Point(0.0, 0.0)
+3 |  |  | TestDisplayList() constructor: 800.0 x 600.0
+3 |  |  | paintChild RenderDecoratedBox at Point(0.0, 0.0)
+3 |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+3 |  |  |  | drawRect(Rect.fromLTRB(0.0, 0.0, 549.0, 250.0), Paint(Color(0xefff9f00)))
+3 |  |  | paintChild RenderPadding at Point(549.0, 99.0)
+3 |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+3 |  |  |  | paintChild RenderConstrainedBox at Point(8.0, 8.0)
+3 |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+3 |  |  |  |  | drawRRect(Instance of 'RRect', Paint(Color(0xffe0e0e0)))
+3 |  |  |  |  | paintChild RenderPositionedBox at Point(8.0, 0.0)
+3 |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+3 |  |  |  |  |  | paintChild RenderParagraph at Point(0.0, 10.0)
+3 |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+3 |  | paintChild RenderConstrainedBox at Point(0.0, 250.0)
+3 |  |  | TestDisplayList() constructor: 800.0 x 600.0
+3 |  |  | paintChild RenderDecoratedBox at Point(0.0, 0.0)
+3 |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+3 |  |  |  | drawRect(Rect.fromLTRB(0.0, 0.0, 800.0, 250.0), Paint(Color(0xefff9f00)))
+3 |  |  | paintChild RenderPadding at Point(0.0, 0.0)
+3 |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+3 |  |  |  | paintChild RenderConstrainedBox at Point(8.0, 8.0)
+3 |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+3 |  |  |  |  | drawRRect(Instance of 'RRect', Paint(Color(0xffe0e0e0)))
+3 |  |  |  |  | paintChild RenderPositionedBox at Point(8.0, 0.0)
+3 |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+3 |  |  |  |  |  | paintChild RenderParagraph at Point(274.5, 109.0)
+3 |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+------------------------------------------------------------------------
+CONSOLE: 
+PAINT FOR FRAME #4 ----------------------------------------------
+4 | TestDisplayList() constructor: 800.0 x 600.0
+4 | paintChild RenderBlock at Point(0.0, 0.0)
+4 |  | TestDisplayList() constructor: 800.0 x 600.0
+4 |  | paintChild RenderConstrainedBox at Point(0.0, 0.0)
+4 |  |  | TestDisplayList() constructor: 800.0 x 600.0
+4 |  |  | paintChild RenderDecoratedBox at Point(0.0, 0.0)
+4 |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+4 |  |  |  | drawRect(Rect.fromLTRB(0.0, 0.0, 425.0, 250.0), Paint(Color(0xff00ffff)))
+4 |  |  | paintChild RenderPadding at Point(425.0, 99.0)
+4 |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+4 |  |  |  | paintChild RenderConstrainedBox at Point(8.0, 8.0)
+4 |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+4 |  |  |  |  | drawRRect(Instance of 'RRect', Paint(Color(0xffe0e0e0)))
+4 |  |  |  |  | paintChild RenderPositionedBox at Point(8.0, 0.0)
+4 |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+4 |  |  |  |  |  | paintChild RenderParagraph at Point(0.0, 10.0)
+4 |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+4 |  | paintChild RenderConstrainedBox at Point(0.0, 250.0)
+4 |  |  | TestDisplayList() constructor: 800.0 x 600.0
+4 |  |  | paintChild RenderDecoratedBox at Point(0.0, 0.0)
+4 |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+4 |  |  |  | drawRect(Rect.fromLTRB(0.0, 0.0, 800.0, 250.0), Paint(Color(0xff00ffff)))
+4 |  |  | paintChild RenderPadding at Point(0.0, 0.0)
+4 |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+4 |  |  |  | paintChild RenderConstrainedBox at Point(8.0, 8.0)
+4 |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+4 |  |  |  |  | drawRRect(Instance of 'RRect', Paint(Color(0xffe0e0e0)))
+4 |  |  |  |  | paintChild RenderPositionedBox at Point(8.0, 0.0)
+4 |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+4 |  |  |  |  |  | paintChild RenderParagraph at Point(212.5, 109.0)
+4 |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+------------------------------------------------------------------------
+PAINTED 4 FRAMES
