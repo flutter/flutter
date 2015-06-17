@@ -94,9 +94,7 @@ class PopupMenu extends AnimatedComponent {
     int i = 0;
     List<Widget> children = new List.from(items.map((Widget item) {
       double opacity = _opacityFor(i);
-      return new PopupMenuItem(key: '${key}-${item.key}',
-                               child: item,
-                               opacity: opacity);
+      return new PopupMenuItem(child: item, opacity: opacity);
     }));
 
     return new Opacity(

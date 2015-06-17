@@ -41,12 +41,11 @@ class StockSettings extends Component {
       decoration: new BoxDecoration(backgroundColor: colors.Grey[50]),
       child: new Block([
         new MenuItem(
-          key: 'Optimistic Setting',
           icon: 'action/thumb_up',
           onGestureTap: (event) => _handleAwesomeChanged(!_awesome),
           children: [
             new Flexible(child: new Text('Everything is awesome')),
-            new Checkbox(key: 'awesome', value: _awesome, onChanged: _handleAwesomeChanged)
+            new Checkbox(value: _awesome, onChanged: _handleAwesomeChanged)
           ]
         ),
       ])

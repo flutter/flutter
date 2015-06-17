@@ -68,12 +68,15 @@ abstract class FixedHeightScrollable extends Scrollable {
       }
     }
 
+    List<Widget> items = buildItems(itemShowIndex, itemShowCount);
+    assert(items.every((item) => item.key != null));
+
     return new SizeObserver(
       callback: _handleSizeChanged,
       child: new ClipRect(
         child: new Transform(
           transform: transform,
-          child: new Block(buildItems(itemShowIndex, itemShowCount))
+          child: new Block(items)
         )
       )
     );

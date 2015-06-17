@@ -21,8 +21,7 @@ final bool _shouldLogRenderDuration = false;
 // can be sync'd.
 abstract class Widget {
 
-  Widget({ String key }) {
-    _key = key != null ? key : runtimeType.toString();
+  Widget({ String key }) : _key = key {
     assert(this is AbstractWidgetRoot || this is App || _inRenderDirtyComponents); // you should not build the UI tree ahead of time, build it only during build()
   }
 
@@ -83,8 +82,6 @@ abstract class Widget {
   // This is called immediately before _sync().
   // Component._retainStatefulNodeIfPossible() calls syncFields().
   bool _retainStatefulNodeIfPossible(Widget old) => false;
-
-  bool get interchangeable => false; // if true, then keys can be duplicated
 
   void _sync(Widget old, dynamic slot);
   // 'slot' is the identifier that the parent RenderObjectWrapper uses to know
@@ -154,7 +151,11 @@ abstract class Widget {
     return node;
   }
 
-  String toString() => '$runtimeType($key)';
+  String toString() {
+    if (key == null)
+      return '$runtimeType(unkeyed)';
+    return '$runtimeType("$key")';
+  }
 
 }
 
@@ -628,11 +629,11 @@ abstract class MultiChildRenderObjectWrapper extends RenderObjectWrapper {
     var idSet = new HashSet<String>();
     for (var child in children) {
       assert(child != null);
-      if (child.interchangeable)
+      if (child.key == null)
         continue; // when these nodes are reordered, we just reassign the data
 
       if (!idSet.add(child.key)) {
-        throw '''If multiple non-interchangeable nodes exist as children of another node, they must have unique keys. Duplicate: "${child.key}"''';
+        throw '''If multiple keyed nodes exist as children of another node, they must have unique keys. $this has duplicate child key "${child.key}".''';
       }
     }
     return false;
@@ -700,13 +701,13 @@ abstract class MultiChildRenderObjectWrapper extends RenderObjectWrapper {
       oldNodeIdMap = new HashMap<String, Widget>();
       for (int i = oldStartIndex; i < oldEndIndex; i++) {
         var node = oldChildren[i];
-        if (!node.interchangeable)
+        if (node.key != null)
           oldNodeIdMap.putIfAbsent(node.key, () => node);
       }
     }
 
     bool searchForOldNode() {
-      if (currentNode.interchangeable)
+      if (currentNode.key == null)
         return false; // never re-order these nodes
 
       ensureOldIdMap();

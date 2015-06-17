@@ -27,16 +27,25 @@ class StockRow extends Component {
 
     List<Widget> children = [
       new Container(
-          child: new StockArrow(percentChange: stock.percentChange),
-          margin: const EdgeDims.only(right: 5.0)),
-      new Flexible(child: new Text(stock.symbol), flex: 2, key: "symbol"),
-      // TODO(hansmuller): text-align: right
-      new Flexible(child: new Text(lastSale,
-            style: const TextStyle(textAlign: TextAlign.right)),
-          key: "lastSale"),
-      new Flexible(child: new Text(changeInPrice,
-          style: typography.black.caption.copyWith(textAlign: TextAlign.right)),
-        key: "changeInPrice")
+        child: new StockArrow(percentChange: stock.percentChange),
+        margin: const EdgeDims.only(right: 5.0)
+      ),
+      new Flexible(
+        child: new Text(stock.symbol),
+        flex: 2
+      ),
+      new Flexible(
+        child: new Text(
+          lastSale,
+          style: const TextStyle(textAlign: TextAlign.right)
+        )
+      ),
+      new Flexible(
+        child: new Text(
+          changeInPrice,
+          style: typography.black.caption.copyWith(textAlign: TextAlign.right)
+        )
+      )
     ];
 
     // TODO(hansmuller): An explicit |height| shouldn't be needed

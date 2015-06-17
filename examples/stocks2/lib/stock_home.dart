@@ -114,38 +114,32 @@ class StockHome extends Component {
       children: [
         new DrawerHeader(children: [new Text('Stocks')]),
         new MenuItem(
-          key: 'Stock list',
           icon: 'action/assessment',
           children: [new Text('Stock List')]),
         new MenuItem(
-          key: 'Account Balance',
           icon: 'action/account_balance',
           children: [new Text('Account Balance')]),
-        new MenuDivider(key: 'div1'),
+        new MenuDivider(),
         new MenuItem(
-          key: 'Optimistic Menu Item',
           icon: 'action/thumb_up',
           onGestureTap: (event) => _handleStockModeChange(StockMode.optimistic),
           children: [
             new Flexible(child: new Text('Optimistic')),
-            new Radio(key: 'optimistic-radio', value: StockMode.optimistic, groupValue: _stockMode, onChanged: _handleStockModeChange)
+            new Radio(value: StockMode.optimistic, groupValue: _stockMode, onChanged: _handleStockModeChange)
           ]),
         new MenuItem(
-          key: 'Pessimistic Menu Item',
           icon: 'action/thumb_down',
           onGestureTap: (event) => _handleStockModeChange(StockMode.pessimistic),
           children: [
             new Flexible(child: new Text('Pessimistic')),
-            new Radio(key: 'pessimistic-radio', value: StockMode.pessimistic, groupValue: _stockMode, onChanged: _handleStockModeChange)
+            new Radio(value: StockMode.pessimistic, groupValue: _stockMode, onChanged: _handleStockModeChange)
           ]),
-        new MenuDivider(key: 'div2'),
+        new MenuDivider(),
         new MenuItem(
-          key: 'Settings',
           icon: 'action/settings',
           onGestureTap: (event) => _navigator.pushNamed('/settings'),
           children: [new Text('Settings')]),
         new MenuItem(
-          key: 'Help & Feedback',
           icon: 'action/help',
           children: [new Text('Help & Feedback')])
      ]
