@@ -6,102 +6,7 @@ import 'dart:sky' as sky;
 
 import 'box.dart';
 import 'object.dart';
-
-enum FontWeight {
-  light, // 300
-  regular, // 400
-  medium, // 500
-}
-
-enum TextAlign {
-  left,
-  right,
-  center
-}
-
-class TextStyle {
-  const TextStyle({
-    this.color,
-    this.fontSize,
-    this.fontWeight,
-    this.textAlign
-  });
-
-  final Color color;
-  final double fontSize; // in pixels
-  final FontWeight fontWeight;
-  final TextAlign textAlign;
-
-  TextStyle copyWith({
-    Color color,
-    double fontSize,
-    FontWeight fontWeight,
-    TextAlign textAlign
-  }) {
-    return new TextStyle(
-      color: color != null ? color : this.color,
-      fontSize: fontSize != null ? fontSize : this.fontSize,
-      fontWeight: fontWeight != null ? fontWeight : this.fontWeight,
-      textAlign: textAlign != null ? textAlign : this.textAlign
-    );
-  }
-
-  bool operator ==(other) {
-    return other is TextStyle &&
-      color == other.color &&
-      fontSize == other.fontSize &&
-      fontWeight == other.fontWeight &&
-      textAlign == other.textAlign;
-  }
-
-  int get hashCode {
-    // Use Quiver: https://github.com/domokit/mojo/issues/236
-    int value = 373;
-    value = 37 * value + color.hashCode;
-    value = 37 * value + fontSize.hashCode;
-    value = 37 * value + fontWeight.hashCode;
-    value = 37 * value + textAlign.hashCode;
-    return value;
-  }
-
-  void _applyToCSSStyle(sky.CSSStyleDeclaration cssStyle) {
-    if (color != null) {
-      cssStyle['color'] = 'rgba(${color.red}, ${color.green}, ${color.blue}, ${color.alpha / 255.0})';
-    }
-    if (fontSize != null) {
-      cssStyle['font-size'] = "${fontSize}px";
-    }
-    if (fontWeight != null) {
-      cssStyle['font-weight'] = const {
-        FontWeight.light: '300',
-        FontWeight.regular: '400',
-        FontWeight.medium: '500',
-      }[fontWeight];
-    }
-    if (textAlign != null) {
-      cssStyle['text-align'] = const {
-        TextAlign.left: 'left',
-        TextAlign.right: 'right',
-        TextAlign.center: 'center',
-      }[textAlign];
-    }
-  }
-
-  String toString([String prefix = '']) {
-    List<String> result = [];
-    if (color != null)
-      result.add('${prefix}color: $color');
-    if (fontSize != null)
-      result.add('${prefix}fontSize: $fontSize');
-    if (fontWeight != null)
-      result.add('${prefix}fontWeight: $fontWeight');
-    if (textAlign != null)
-      result.add('${prefix}textAlign: $textAlign');
-    if (result.isEmpty)
-      return '${prefix}<no style specified>';
-    return result.join('\n');
-  }
-}
+import '../painting/text_style.dart';
 
 abstract class InlineBase {
   sky.Node _toDOM(sky.Document owner);
@@ -133,7 +38,7 @@ class InlineStyle extends InlineBase {
 
   sky.Node _toDOM(sky.Document owner) {
     sky.Element parent = owner.createElement('t');
-    style._applyToCSSStyle(parent.style);
+    style.applyToCSSStyle(parent.style);
     for (InlineBase child in children) {
       parent.appendChild(child._toDOM(owner));
     }

@@ -4,6 +4,7 @@
 
 import 'package:vector_math/vector_math.dart';
 
+import '../painting/text_style.dart';
 import '../rendering/block.dart';
 import '../rendering/box.dart';
 import '../rendering/flex.dart';

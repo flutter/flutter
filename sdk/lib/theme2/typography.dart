@@ -6,23 +6,23 @@
 
 import 'dart:sky';
 
-import '../rendering/paragraph.dart';
+import '../painting/text_style.dart';
 
 // TODO(eseidel): Font weights are supposed to be language relative!
 // These values are for English-like text.
 class _TextTheme {
   _TextTheme(Color color54, Color color87)
-    : display4 = new TextStyle(fontSize: 112.0, fontWeight: FontWeight.light,   color: color54),
-      display3 = new TextStyle(fontSize:  56.0, fontWeight: FontWeight.regular, color: color54),
-      display2 = new TextStyle(fontSize:  45.0, fontWeight: FontWeight.regular, color: color54),
-      display1 = new TextStyle(fontSize:  34.0, fontWeight: FontWeight.regular, color: color54),
-      headline = new TextStyle(fontSize:  24.0, fontWeight: FontWeight.regular, color: color87),
-      title    = new TextStyle(fontSize:  20.0, fontWeight: FontWeight.medium,  color: color87),
-      subhead  = new TextStyle(fontSize:  16.0, fontWeight: FontWeight.regular, color: color87),
-      body2    = new TextStyle(fontSize:  14.0, fontWeight: FontWeight.medium,  color: color87),
-      body1    = new TextStyle(fontSize:  14.0, fontWeight: FontWeight.regular, color: color87),
-      caption  = new TextStyle(fontSize:  12.0, fontWeight: FontWeight.regular, color: color54),
-      button   = new TextStyle(fontSize:  14.0, fontWeight: FontWeight.medium,  color: color87);
+    : display4 = new TextStyle(fontSize: 112.0, fontWeight: FontWeight.w100, color: color54),
+      display3 = new TextStyle(fontSize:  56.0, fontWeight: FontWeight.w400, color: color54),
+      display2 = new TextStyle(fontSize:  45.0, fontWeight: FontWeight.w400, color: color54),
+      display1 = new TextStyle(fontSize:  34.0, fontWeight: FontWeight.w400, color: color54),
+      headline = new TextStyle(fontSize:  24.0, fontWeight: FontWeight.w400, color: color87),
+      title    = new TextStyle(fontSize:  20.0, fontWeight: FontWeight.w500, color: color87),
+      subhead  = new TextStyle(fontSize:  16.0, fontWeight: FontWeight.w400, color: color87),
+      body2    = new TextStyle(fontSize:  14.0, fontWeight: FontWeight.w500, color: color87),
+      body1    = new TextStyle(fontSize:  14.0, fontWeight: FontWeight.w400, color: color87),
+      caption  = new TextStyle(fontSize:  12.0, fontWeight: FontWeight.w400, color: color54),
+      button   = new TextStyle(fontSize:  14.0, fontWeight: FontWeight.w500, color: color87);
 
   final TextStyle display4;
   final TextStyle display3;

@@ -4,6 +4,7 @@
 
 import 'dart:sky';
 import 'package:sky/app/view.dart';
+import 'package:sky/painting/text_style.dart';
 import 'package:sky/rendering/box.dart';
 import 'package:sky/rendering/object.dart';
 import 'package:sky/rendering/flex.dart';

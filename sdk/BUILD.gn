@@ -69,6 +69,7 @@ dart_pkg("sdk") {
     "lib/internals.dart",
     "lib/painting/box_painter.dart",
     "lib/painting/shadows.dart",
+    "lib/painting/text_style.dart",
     "lib/rendering/block.dart",
     "lib/rendering/box.dart",
     "lib/rendering/flex.dart",
