@@ -15,6 +15,8 @@ class PointerState {
   PointerState({ this.result, this.lastPosition });
 }
 
+typedef void EventListener(sky.Event event);
+
 class AppView {
 
   AppView({ RenderBox root: null, RenderView renderViewOverride }) {
@@ -51,7 +53,9 @@ class AppView {
 
   Function onFrame;
 
-  List<sky.EventListener> eventListeners = new List<sky.EventListener>();
+  final List<EventListener> _eventListeners = new List<EventListener>();
+  void addEventListener(EventListener e) => _eventListeners.add(e);
+  void removeEventListener(EventListener e) => _eventListeners.remove(e);
 
   RenderBox get root => _renderView.child;
   void set root(RenderBox value) {
@@ -72,8 +76,8 @@ class AppView {
       _renderView.hitTest(result, position: new Point(event.x, event.y));
       dispatchEvent(event, result);
     } else {
-      for (sky.EventListener listener in eventListeners) {
-        listener(event);
+      for (EventListener e in _eventListeners) {
+        e(event);
       }
     }
   }
