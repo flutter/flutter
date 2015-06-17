@@ -12,6 +12,16 @@
 #include "base/mac/scoped_nsautorelease_pool.h"
 #include "ui/gl/gl_surface.h"
 
+extern "C" {
+// TODO(csg): HACK! boringssl accesses this on Android using a weak symbol
+// instead of a global. Till the patch for that lands and propagates to Sky, we
+// specify the same here to get workable builds on iOS. This is a hack! Will
+// go away.
+unsigned long getauxval(unsigned long type) {
+  return 0;
+}
+}
+
 static void InitializeLogging() {
   logging::LoggingSettings settings;
   settings.logging_dest = logging::LOG_TO_SYSTEM_DEBUG_LOG;
