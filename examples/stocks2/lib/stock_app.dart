@@ -2,212 +2,27 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:sky/editing2/input.dart';
-import 'package:sky/rendering/box.dart';
-import 'package:sky/rendering/paragraph.dart';
-import 'package:sky/theme2/colors.dart' as colors;
-import 'package:sky/theme2/typography.dart' as typography;
 import 'package:sky/widgets/basic.dart';
-import 'package:sky/widgets/drawer.dart';
-import 'package:sky/widgets/drawer_header.dart';
-import 'package:sky/widgets/floating_action_button.dart';
-import 'package:sky/widgets/icon.dart';
-import 'package:sky/widgets/icon_button.dart';
-import 'package:sky/widgets/menu_divider.dart';
-import 'package:sky/widgets/menu_item.dart';
-import 'package:sky/widgets/modal_overlay.dart';
-import 'package:sky/widgets/popup_menu.dart';
-import 'package:sky/widgets/radio.dart';
-import 'package:sky/widgets/scaffold.dart';
-import 'package:sky/widgets/tool_bar.dart';
+import 'package:sky/widgets/navigator.dart';
 import 'package:sky/widgets/widget.dart';
 
-import 'stock_data.dart';
-import 'stock_list.dart';
-import 'stock_menu.dart';
-
-enum StockMode { optimistic, pessimistic }
+import 'stock_home.dart';
+import 'stock_settings.dart';
 
 class StocksApp extends App {
-
-  List<Stock> _stocks = [];
-
-  StocksApp({ RenderView renderViewOverride }) : super(renderViewOverride: renderViewOverride) {
-    // if (debug)
-    //   new Timer(new Duration(seconds: 1), dumpState);
-    new StockDataFetcher((StockData data) {
-      setState(() {
-        data.appendTo(_stocks);
-      });
-    });
-    _drawerController = new DrawerController(_handleDrawerStatusChanged);
-  }
-
-  bool _isSearching = false;
-  String _searchQuery;
-
-  void _handleSearchBegin(_) {
-    setState(() {
-      _isSearching = true;
-    });
-  }
-
-  void _handleSearchEnd(_) {
-    setState(() {
-      _isSearching = false;
-      _searchQuery = null;
-    });
-  }
-
-  void _handleSearchQueryChanged(String query) {
-    setState(() {
-      _searchQuery = query;
-    });
-  }
-
-  DrawerController _drawerController;
-  bool _drawerShowing = false;
-
-  void _handleDrawerStatusChanged(bool showing) {
-    setState(() {
-      _drawerShowing = showing;
-    });
-  }
-
-  PopupMenuController _menuController;
-
-  void _handleMenuShow(_) {
-    setState(() {
-      _menuController = new PopupMenuController();
-      _menuController.open();
-    });
-  }
-
-  void _handleMenuHide(_) {
-    setState(() {
-      _menuController.close().then((_) {
-        setState(() {
-          _menuController = null;
-        });
-      });
-    });
-  }
-
-  bool _autorefresh = false;
-  void _handleAutorefreshChanged(bool value) {
-    setState(() {
-      _autorefresh = value;
-    });
-  }
-
-  StockMode _stockMode = StockMode.optimistic;
-  void _handleStockModeChange(StockMode value) {
-    setState(() {
-      _stockMode = value;
-    });
-  }
-
-  Drawer buildDrawer() {
-    return new Drawer(
-      controller: _drawerController,
-      level: 3,
-      children: [
-        new DrawerHeader(children: [new Text('Stocks')]),
-        new MenuItem(
-          key: 'Stock list',
-          icon: 'action/assessment',
-          children: [new Text('Stock List')]),
-        new MenuItem(
-          key: 'Account Balance',
-          icon: 'action/account_balance',
-          children: [new Text('Account Balance')]),
-        new MenuDivider(key: 'div1'),
-        new MenuItem(
-          key: 'Optimistic Menu Item',
-          icon: 'action/thumb_up',
-          onGestureTap: (event) => _handleStockModeChange(StockMode.optimistic),
-          children: [
-            new Flexible(child: new Text('Optimistic')),
-            new Radio(key: 'optimistic-radio', value: StockMode.optimistic, groupValue: _stockMode, onChanged: _handleStockModeChange)
-          ]),
-        new MenuItem(
-          key: 'Pessimistic Menu Item',
-          icon: 'action/thumb_down',
-          onGestureTap: (event) => _handleStockModeChange(StockMode.pessimistic),
-          children: [
-            new Flexible(child: new Text('Pessimistic')),
-            new Radio(key: 'pessimistic-radio', value: StockMode.pessimistic, groupValue: _stockMode, onChanged: _handleStockModeChange)
-          ]),
-        new MenuDivider(key: 'div2'),
-        new MenuItem(
-          key: 'Settings',
-          icon: 'action/settings',
-          children: [new Text('Settings')]),
-        new MenuItem(
-          key: 'Help & Feedback',
-          icon: 'action/help',
-          children: [new Text('Help & Feedback')])
-     ]
-    );
-  }
-
-  Widget buildToolBar() {
-    return new ToolBar(
-        left: new IconButton(
-          icon: 'navigation/menu_white',
-          onGestureTap: (_) => _drawerController.toggle()),
-        center: new Text('Stocks', style: typography.white.title),
-        right: [
-          new IconButton(
-            icon: 'action/search_white',
-            onGestureTap: _handleSearchBegin),
-          new IconButton(
-            icon: 'navigation/more_vert_white',
-            onGestureTap: _handleMenuShow)
-        ],
-        backgroundColor: colors.Purple[500]
-      );
-  }
-
-  // TODO(abarth): Should we factor this into a SearchBar in the framework?
-  Widget buildSearchBar() {
-    return new ToolBar(
-      left: new IconButton(
-        icon: 'navigation/arrow_back_grey600',
-        onGestureTap: _handleSearchEnd),
-      center: new Input(
-        focused: true,
-        placeholder: 'Search stocks',
-        onChanged: _handleSearchQueryChanged),
-      backgroundColor: colors.Grey[50]
-    );
-  }
-
-  void addMenuToOverlays(List<Widget> overlays) {
-    if (_menuController == null)
-      return;
-    overlays.add(new ModalOverlay(
-      children: [new StockMenu(
-        controller: _menuController,
-        autorefresh: _autorefresh,
-        onAutorefreshChanged: _handleAutorefreshChanged
-      )],
-      onDismiss: _handleMenuHide));
-  }
-
   Widget build() {
-    List<Widget> overlays = [
-      new Scaffold(
-        toolbar: _isSearching ? buildSearchBar() : buildToolBar(),
-        body: new Stocklist(stocks: _stocks, query: _searchQuery),
-        floatingActionButton: new FloatingActionButton(
-          child: new Icon(type: 'content/add_white', size: 24)
+    return new Navigator(
+      routes: [
+        new Route(
+          name: '/', 
+          builder: (navigator) => new StockHome(navigator)
         ),
-        drawer: _drawerShowing ? buildDrawer() : null
-      ),
-    ];
-    addMenuToOverlays(overlays);
-    return new Stack(overlays);
+        new Route(
+          name: '/settings', 
+          builder: (navigator) => new StockSettings(navigator)
+        ),
+      ]
+    );
   }
 }
 
