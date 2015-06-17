@@ -160,10 +160,7 @@ class TestRenderView extends RenderView {
 }
 
 class TestApp extends App {
-  TestApp({
-    this.builder,
-    RenderView renderViewOverride
-  }) : super(renderViewOverride: renderViewOverride);
+  TestApp({ this.builder });
 
   Function builder;
 
@@ -176,7 +173,7 @@ class WidgetTester {
   TestRenderView renderView = new TestRenderView();
 
   Future test(Function builder) {
-    new TestApp(renderViewOverride: renderView, builder: builder);
+    runApp(new TestApp(builder: builder), renderViewOverride: renderView);
     return new Future.microtask(renderView.checkFrame);
   }
 

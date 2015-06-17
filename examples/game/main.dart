@@ -23,7 +23,7 @@ void main() {
 
 void allLoaded(ImageMap loader) {
   _loader = loader;
-  new GameDemoApp();
+  runApp(new GameDemoApp());
 }
 
 class GameDemoApp extends App {

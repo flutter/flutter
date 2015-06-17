@@ -18,7 +18,7 @@ void main() {
   TestRenderView testRenderView = new TestRenderView();
 
   test("launching stock app", () {
-    new StocksApp(renderViewOverride: testRenderView);
+    runApp(new StocksApp(), renderViewOverride: testRenderView);
     new Future.microtask(testRenderView.checkFrame);
   });
 }

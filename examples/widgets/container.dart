@@ -51,5 +51,5 @@ class ContainerApp extends App {
 }
 
 void main() {
-  new ContainerApp();
+  runApp(new ContainerApp());
 }

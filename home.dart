@@ -79,5 +79,5 @@ class SkyHome extends App {
 }
 
 void main() {
-  new SkyHome();
+  runApp(new SkyHome());
 }

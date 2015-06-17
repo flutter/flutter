@@ -42,6 +42,7 @@ class AppView {
   static AppView _app; // used to enforce that we're a singleton
 
   RenderView _renderView;
+  RenderView get renderView => _renderView;
 
   ViewConstraints get _viewConstraints =>
       new ViewConstraints(width: sky.view.width, height: sky.view.height);

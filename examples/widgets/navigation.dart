@@ -73,5 +73,5 @@ class NavigationExampleApp extends App {
 }
 
 void main() {
-  App app = new NavigationExampleApp();
+  runApp(new NavigationExampleApp());
 }

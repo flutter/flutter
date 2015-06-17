@@ -23,7 +23,7 @@ abstract class Widget {
 
   Widget({ String key }) {
     _key = key != null ? key : runtimeType.toString();
-    assert(this is AbstractWidgetRoot || _inRenderDirtyComponents); // you should not build the UI tree ahead of time, build it only during build()
+    assert(this is AbstractWidgetRoot || this is App || _inRenderDirtyComponents); // you should not build the UI tree ahead of time, build it only during build()
   }
 
   String _key;
@@ -474,7 +474,10 @@ abstract class RenderObjectWrapper extends Widget {
   static RenderObjectWrapper _getMounted(RenderObject node) => _nodeMap[node];
 
   void _sync(Widget old, dynamic slot) {
-    assert(parent != null);
+    // TODO(abarth): We should split RenderObjectWrapper into two pieces so that
+    //               RenderViewObject doesn't need to inherit all this code it
+    //               doesn't need.
+    assert(parent != null || this is RenderViewWrapper);
     if (old == null) {
       _root = createNode();
       var ancestor = findAncestor(RenderObjectWrapper);
@@ -767,10 +770,14 @@ class WidgetAppView extends AppView {
 
 }
 
+abstract class App extends Component {
+  // Override this to handle back button behavior in your app
+  void onBack() { }
+}
+
 abstract class AbstractWidgetRoot extends Component {
 
-  AbstractWidgetRoot({ RenderView renderViewOverride }) : super(stateful: true) {
-    WidgetAppView.initWidgetAppView(renderViewOverride: renderViewOverride);
+  AbstractWidgetRoot() : super(stateful: true) {
     _mounted = true;
     _scheduleComponentForRender(this);
   }
@@ -789,27 +796,24 @@ abstract class AbstractWidgetRoot extends Component {
 
 }
 
-abstract class App extends AbstractWidgetRoot {
+class RenderViewWrapper extends OneChildRenderObjectWrapper {
+  RenderViewWrapper({ String key, Widget child }) : super(key: key, child: child);
 
-  App({ RenderView renderViewOverride }) : super(renderViewOverride: renderViewOverride);
+  RenderView get root => super.root;
+  RenderView createNode() => WidgetAppView._appView.renderView;
+}
 
-  void _buildIfDirty() {
-    super._buildIfDirty();
+class AppContainer extends AbstractWidgetRoot {
+  AppContainer(this.app);
 
-    if (root.parent == null) {
-      // we haven't attached it yet
-      WidgetAppView._appView.root = root;
-      WidgetAppView._appView.eventListeners.add((event) {
-        if (event.type == "back")
-          onBack();
-      });
-    }
-    assert(root.parent is RenderView);
-  }
+  final App app;
 
-  // Override this to handle back button behavior in your app
-  void onBack() { }
+  Widget build() => new RenderViewWrapper(child: app);
+}
 
+void runApp(App app, { RenderView renderViewOverride }) {
+  WidgetAppView.initWidgetAppView(renderViewOverride: renderViewOverride);
+  new AppContainer(app);
 }
 
 typedef Widget Builder();
