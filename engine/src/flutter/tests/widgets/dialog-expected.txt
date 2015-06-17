@@ -1,0 +1,24 @@
+CONSOLE: TestRenderView enabled
+CONSOLE: 
+PAINT FOR FRAME #1 ----------------------------------------------
+1 | TestDisplayList() constructor: 800.0 x 600.0
+------------------------------------------------------------------------
+CONSOLE: 
+PAINT FOR FRAME #2 ----------------------------------------------
+2 | TestDisplayList() constructor: 800.0 x 600.0
+2 | paintChild RenderStack at Point(0.0, 0.0)
+2 |  | TestDisplayList() constructor: 800.0 x 600.0
+2 |  | paintChild RenderDecoratedBox at Point(0.0, 0.0)
+2 |  |  | TestDisplayList() constructor: 800.0 x 600.0
+2 |  |  | drawRect(Rect.fromLTRB(0.0, 0.0, 800.0, 600.0), Paint(Color(0x7f000000)))
+2 |  | paintChild RenderPositionedBox at Point(0.0, 0.0)
+2 |  |  | TestDisplayList() constructor: 800.0 x 600.0
+2 |  |  | paintChild RenderConstrainedBox at Point(260.0, 284.0)
+2 |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+2 |  |  |  | drawRRect(Instance of 'RRect', Paint(Color(0xfffafafa)))
+2 |  |  |  | paintChild RenderParagraph at Point(0.0, 0.0)
+2 |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+2 |  |  |  | paintChild RenderParagraph at Point(0.0, 16.0)
+2 |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+------------------------------------------------------------------------
+PAINTED 2 FRAMES
