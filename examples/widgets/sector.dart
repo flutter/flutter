@@ -28,7 +28,7 @@ RenderBox initCircle() {
 class SectorApp extends App {
 
   RenderBoxToRenderSectorAdapter sectors = initCircle();
-  math.Random rand = new math.Random();
+  math.Random rand = new math.Random(1);
 
   void addSector() {
     double deltaTheta;
