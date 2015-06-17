@@ -37,8 +37,8 @@ class Radio extends ButtonBase {
     const double kDiameter = 16.0;
     const double kOuterRadius = kDiameter / 2;
     const double kInnerRadius = 5.0;
-    return new EventListenerNode(
-      new Container(
+    return new Listener(
+      child: new Container(
         margin: const EdgeDims.symmetric(horizontal: 5.0),
         width: kDiameter,
         height: kDiameter,

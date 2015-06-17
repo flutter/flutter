@@ -187,9 +187,10 @@ typedef void GestureEventListener(sky.GestureEvent e);
 typedef void PointerEventListener(sky.PointerEvent e);
 typedef void EventListener(sky.Event e);
 
-class EventListenerNode extends TagNode  {
+class Listener extends TagNode  {
 
-  EventListenerNode(Widget content, {
+  Listener({
+    Widget child,
     EventListener onWheel,
     GestureEventListener onGestureFlingCancel,
     GestureEventListener onGestureFlingStart,
@@ -216,7 +217,7 @@ class EventListenerNode extends TagNode  {
          onPointerUp: onPointerUp,
          custom: custom
        ),
-       super(content);
+       super(child);
 
   final Map<String, sky.EventListener> listeners;
 
@@ -757,7 +758,7 @@ class WidgetAppView extends AppView {
         continue;
       RenderObject targetRoot = target.root;
       while (target != null && target.root == targetRoot) {
-        if (target is EventListenerNode)
+        if (target is EventListener)
           target._handleEvent(event);
         target = target._parent;
       }

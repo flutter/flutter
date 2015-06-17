@@ -38,8 +38,8 @@ class MenuItem extends ButtonBase {
   }
 
   Widget buildContent() {
-    return new EventListenerNode(
-      new Container(
+    return new Listener(
+      child: new Container(
         child: new InkWell(
           child: new Flex([
             new Padding(

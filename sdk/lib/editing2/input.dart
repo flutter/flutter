@@ -86,11 +86,11 @@ class Input extends Component {
 
     children.add(new EditableText(value: _editableValue, focused: focused));
 
-    return new EventListenerNode(
+    return new Listener(
       // style: _style,
       // inlineStyle: focused ? _focusedInlineStyle : null,
-      new Stack(children),
-      onPointerDown: (sky.Event e) => keyboard.showByRequest()
+      child: new Stack(children),
+      onPointerDown: (_) => keyboard.showByRequest()
     );
   }
 

@@ -20,8 +20,8 @@ class ModalOverlay extends Component {
   final GestureEventListener onDismiss;
 
   Widget build() {
-    return new EventListenerNode(
-      new Stack(children),
+    return new Listener(
+      child: new Stack(children),
       onGestureTap: onDismiss);
   }
 

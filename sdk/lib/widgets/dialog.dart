@@ -36,7 +36,10 @@ class Dialog extends Component {
       children.add(content);
 
     return new Stack([
-      new EventListenerNode(mask, onGestureTap: (_) => onDismiss()),
+      new Listener(
+        child: mask,
+        onGestureTap: (_) => onDismiss()
+      ),
       new Center(
         child: new ConstrainedBox(
           constraints: new BoxConstraints(minWidth: 280.0),

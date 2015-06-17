@@ -16,8 +16,8 @@ class IconButton extends Component {
   final GestureEventListener onGestureTap;
 
   Widget build() {
-    return new EventListenerNode(
-      new Padding(
+    return new Listener(
+      child: new Padding(
         child: new Icon(type: icon, size: 24),
         padding: const EdgeDims.all(8.0)),
       onGestureTap: onGestureTap);

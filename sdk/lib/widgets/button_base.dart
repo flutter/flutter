@@ -31,8 +31,8 @@ abstract class ButtonBase extends Component {
   }
 
   Widget build() {
-    return new EventListenerNode(
-      buildContent(),
+    return new Listener(
+      child: buildContent(),
       onPointerDown: _handlePointerDown,
       onPointerUp: _handlePointerUp,
       onPointerCancel: _handlePointerCancel

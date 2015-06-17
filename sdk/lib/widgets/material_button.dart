@@ -41,8 +41,8 @@ abstract class MaterialButton extends ButtonBase {
       padding: new EdgeDims.symmetric(horizontal: 8.0),
       child: new Center(child: child) // TODO(ianh): figure out a way to compell the child to have gray text when disabled...
     );
-    return new EventListenerNode(
-      new Container(
+    return new Listener(
+      child: new Container(
         height: 36.0,
         constraints: new BoxConstraints(minWidth: 88.0),
         margin: new EdgeDims.all(8.0),

@@ -51,8 +51,8 @@ abstract class Scrollable extends Component {
   Widget buildContent();
 
   Widget build() {
-    return new EventListenerNode(
-      new Material(
+    return new Listener(
+      child: new Material(
         child: buildContent(),
         edge: MaterialEdge.canvas,
         color: backgroundColor
