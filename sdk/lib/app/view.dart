@@ -50,6 +50,8 @@ class AppView {
 
   Function onFrame;
 
+  List<sky.EventListener> eventListeners = new List<sky.EventListener>();
+
   RenderBox get root => _renderView.child;
   void set root(RenderBox value) {
     _renderView.child = value;
@@ -68,6 +70,10 @@ class AppView {
       HitTestResult result = new HitTestResult();
       _renderView.hitTest(result, position: new Point(event.x, event.y));
       dispatchEvent(event, result);
+    } else {
+      for (sky.EventListener listener in eventListeners) {
+        listener(event);
+      }
     }
   }
 

@@ -14,19 +14,24 @@ class StocksApp extends App {
 
   StocksApp({ RenderView renderViewOverride }) : super(renderViewOverride: renderViewOverride);
 
+  NavigationState _navState = new NavigationState([
+    new Route(name: '/', builder: (navigator) => new StockHome(navigator)),
+    new Route(name: '/settings', builder: (navigator) => new StockSettings(navigator)),
+  ]);
+
+  void onBack() {
+    if (_navState.hasPrevious()) {
+      setState(() {
+        _navState.pop();
+      });
+      return;
+    }
+    print ("Should exit app here");
+    // TODO(jackson): Need a way to invoke default back behavior here
+  }
+
   Widget build() {
-    return new Navigator(
-      routes: [
-        new Route(
-          name: '/', 
-          builder: (navigator) => new StockHome(navigator)
-        ),
-        new Route(
-          name: '/settings', 
-          builder: (navigator) => new StockSettings(navigator)
-        ),
-      ]
-    );
+    return new Navigator(_navState);
   }
 }
 

@@ -799,9 +799,16 @@ abstract class App extends AbstractWidgetRoot {
     if (root.parent == null) {
       // we haven't attached it yet
       WidgetAppView._appView.root = root;
+      WidgetAppView._appView.eventListeners.add((event) {
+        if (event.type == "back")
+          onBack();
+      });
     }
     assert(root.parent is RenderView);
   }
+
+  // Override this to handle back button behavior in your app
+  void onBack() { }
 
 }
 

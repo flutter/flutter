@@ -18,28 +18,23 @@ class Route extends RouteBase {
   Widget build(Navigator navigator) => builder(navigator);
 }
 
-class Navigator extends Component {
-  Navigator({ Object key, RouteBase defaultRoute, List<RouteBase> routes })
-    : super(key: key, stateful: true) {
-    if (routes != null) {
-      if (defaultRoute == null)
-        defaultRoute = routes[0];
-      for (Route route in routes) {
-        if (route.name != null)
-          namedRoutes[route.name] = route;
-      }
+class NavigationState {
+
+  NavigationState(List<Route> routes) {
+    for (Route route in routes) {
+      if (route.name != null)
+        namedRoutes[route.name] = route;
     }
-    assert(defaultRoute != null);
-    _history.add(defaultRoute);
+    history.add(routes[0]);
   }
 
-  List<RouteBase> _history = new List<RouteBase>();
-  int _historyIndex = 0;
+  List<RouteBase> history = new List<RouteBase>();
+  int historyIndex = 0;
   Map<String, RouteBase> namedRoutes = new Map<String, RouteBase>();
 
-  void syncFields(Navigator source) {
-    namedRoutes = source.namedRoutes;
-  }
+  RouteBase get currentRoute => history[historyIndex];
+  bool hasPrevious() => historyIndex > 0;
+  bool hasNext() => history.length > historyIndex + 1;
 
   void pushNamed(String name) {
     Route route = namedRoutes[name];
@@ -48,38 +43,67 @@ class Navigator extends Component {
   }
 
   void push(RouteBase route) {
+    // Discard future history
+    history.removeRange(historyIndex + 1, history.length);
+    historyIndex = history.length;
+    history.add(route);
+  }
+
+  void pop() {
+    if (historyIndex > 0) {
+      history.removeLast();
+      historyIndex--;
+    }
+  }
+
+  void back() {
+    if (historyIndex > 0)
+      historyIndex--;
+  }
+
+  void forward() {
+    historyIndex++;
+    assert(historyIndex < history.length);
+  }
+}
+
+class Navigator extends Component {
+
+  Navigator(this.state, { String key }) : super(key: key);
+
+  NavigationState state;
+
+  void pushNamed(String name) {
     setState(() {
-      // Discard future history
-      _history.removeRange(_historyIndex + 1, _history.length);
-      _historyIndex = _history.length;
-      _history.add(route);
+      state.pushNamed(name);
+    });
+  }
+
+  void push(RouteBase route) {
+    setState(() {
+      state.push(route);
     });
   }
 
   void pop() {
     setState(() {
-      if (_historyIndex > 0) {
-        _history.removeLast();
-        _historyIndex--;
-      }
+      state.pop();
     });
   }
 
   void back() {
     setState(() {
-      if (_historyIndex > 0)
-        _historyIndex--;
+      state.back();
     });
   }
 
   void forward() {
     setState(() {
-      _historyIndex++;
-      assert(_historyIndex < _history.length);
+      state.forward();
     });
   }
 
   Widget build() {
-    return _history[_historyIndex].build(this);
+    return state.currentRoute.build(this);
   }
 }

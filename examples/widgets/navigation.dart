@@ -65,8 +65,10 @@ List<Route> routes = [
 ];
 
 class NavigationExampleApp extends App {
+  NavigationState _navState = new NavigationState(routes);
+
   Widget build() {
-    return new Flex([new Navigator(routes: routes)]);
+    return new Flex([new Navigator(_navState)]);
   }
 }
 
