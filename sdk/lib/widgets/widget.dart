@@ -503,8 +503,6 @@ abstract class RenderObjectWrapper extends Widget {
       _ancestor = findAncestor(RenderObjectWrapper);
       if (_ancestor is RenderObjectWrapper)
         _ancestor.insert(this, slot);
-      else
-        print("$this has no ancestor");
     } else {
       _root = old.root;
       _ancestor = old._ancestor;
