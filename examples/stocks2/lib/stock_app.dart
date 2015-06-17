@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:sky/rendering/box.dart';
 import 'package:sky/widgets/basic.dart';
 import 'package:sky/widgets/navigator.dart';
 import 'package:sky/widgets/widget.dart';
@@ -10,6 +11,9 @@ import 'stock_home.dart';
 import 'stock_settings.dart';
 
 class StocksApp extends App {
+
+  StocksApp({ RenderView renderViewOverride }) : super(renderViewOverride: renderViewOverride);
+
   Widget build() {
     return new Navigator(
       routes: [
