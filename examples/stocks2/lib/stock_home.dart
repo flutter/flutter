@@ -3,8 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:sky/editing2/input.dart';
-import 'package:sky/rendering/box.dart';
-import 'package:sky/rendering/paragraph.dart';
 import 'package:sky/theme2/colors.dart' as colors;
 import 'package:sky/theme2/typography.dart' as typography;
 import 'package:sky/widgets/basic.dart';

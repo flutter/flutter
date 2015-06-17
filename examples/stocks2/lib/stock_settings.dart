@@ -2,17 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:sky' as sky;
-
 import 'package:sky/theme2/colors.dart' as colors;
 import 'package:sky/theme2/typography.dart' as typography;
 import 'package:sky/widgets/basic.dart';
 import 'package:sky/widgets/checkbox.dart';
 import 'package:sky/widgets/icon_button.dart';
-import 'package:sky/widgets/menu_divider.dart';
 import 'package:sky/widgets/menu_item.dart';
 import 'package:sky/widgets/navigator.dart';
-import 'package:sky/widgets/raised_button.dart';
 import 'package:sky/widgets/scaffold.dart';
 import 'package:sky/widgets/tool_bar.dart';
 
