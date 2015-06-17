@@ -1,0 +1,683 @@
+CONSOLE: TestRenderView enabled
+CONSOLE: 
+PAINT FOR FRAME #1 ----------------------------------------------
+1 | TestDisplayList() constructor: 800.0 x 600.0
+------------------------------------------------------------------------
+CONSOLE: 
+PAINT FOR FRAME #2 ----------------------------------------------
+2 | TestDisplayList() constructor: 800.0 x 600.0
+2 | paintChild RenderScaffold at Point(0.0, 0.0)
+2 |  | TestDisplayList() constructor: 800.0 x 600.0
+2 |  | paintChild RenderDecoratedBox at Point(0.0, 81.0)
+2 |  |  | TestDisplayList() constructor: 800.0 x 600.0
+2 |  |  | drawRect(Rect.fromLTRB(0.0, 0.0, 800.0, 519.0), Paint(Color(0xfffafafa)))
+2 |  |  | paintChild RenderPadding at Point(0.0, 0.0)
+2 |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+2 |  |  |  | paintChild RenderFlex at Point(8.0, 25.0)
+2 |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+2 |  |  |  |  | paintChild RenderPadding at Point(103.25, 0.0)
+2 |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+2 |  |  |  |  |  | paintChild RenderConstrainedBox at Point(8.0, 8.0)
+2 |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  | drawRRect(Instance of 'RRect', Paint(Color(0xffe0e0e0)))
+2 |  |  |  |  |  |  | paintChild RenderPositionedBox at Point(8.0, 0.0)
+2 |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  |  | paintChild RenderShrinkWrapWidth at Point(0.0, 0.0)
+2 |  |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  |  |  | paintChild RenderPadding at Point(0.0, 0.0)
+2 |  |  |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  |  |  |  | paintChild RenderPadding at Point(0.0, 0.0)
+2 |  |  |  |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  |  |  |  |  | paintChild RenderBoxToRenderSectorAdapter at Point(4.0, 4.0)
+2 |  |  |  |  |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderSectorRing at Point(14.0, 14.0)
+2 |  |  |  |  |  |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderSolidColor at Point(0.0, 0.0)
+2 |  |  |  |  |  |  |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  |  |  |  |  |  |  |  | drawPath(Instance of 'Path', Paint(Color(0xff909090)))
+2 |  |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderSolidColor at Point(0.0, 0.0)
+2 |  |  |  |  |  |  |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  |  |  |  |  |  |  |  | drawPath(Instance of 'Path', Paint(Color(0xff909090)))
+2 |  |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderSolidColor at Point(0.0, 0.0)
+2 |  |  |  |  |  |  |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  |  |  |  |  |  |  |  | drawPath(Instance of 'Path', Paint(Color(0xff00dd00)))
+2 |  |  |  |  |  |  |  |  | paintChild RenderParagraph at Point(46.0, 10.0)
+2 |  |  |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+2 |  |  |  |  | paintChild RenderPadding at Point(480.75, 0.0)
+2 |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+2 |  |  |  |  |  | paintChild RenderConstrainedBox at Point(8.0, 8.0)
+2 |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  | drawRRect(Instance of 'RRect', Paint(Color(0xffd6d6d6)))
+2 |  |  |  |  |  |  | paintChild RenderPositionedBox at Point(8.0, 0.0)
+2 |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  |  | paintChild RenderShrinkWrapWidth at Point(0.0, 0.0)
+2 |  |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  |  |  | paintChild RenderPadding at Point(0.0, 0.0)
+2 |  |  |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  |  |  |  | paintChild RenderPadding at Point(0.0, 0.0)
+2 |  |  |  |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  |  |  |  |  | paintChild RenderBoxToRenderSectorAdapter at Point(4.0, 4.0)
+2 |  |  |  |  |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderSectorRing at Point(14.0, 14.0)
+2 |  |  |  |  |  |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderSolidColor at Point(0.0, 0.0)
+2 |  |  |  |  |  |  |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  |  |  |  |  |  |  |  | drawPath(Instance of 'Path', Paint(Color(0xff909090)))
+2 |  |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderSolidColor at Point(0.0, 0.0)
+2 |  |  |  |  |  |  |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  |  |  |  |  |  |  |  | drawPath(Instance of 'Path', Paint(Color(0xff909090)))
+2 |  |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderSolidColor at Point(0.0, 0.0)
+2 |  |  |  |  |  |  |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  |  |  |  |  |  |  |  | drawPath(Instance of 'Path', Paint(Color(0xffdd0000)))
+2 |  |  |  |  |  |  |  |  | paintChild RenderParagraph at Point(46.0, 10.0)
+2 |  |  |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+2 |  |  | paintChild RenderPadding at Point(191.5, 102.0)
+2 |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+2 |  |  |  | paintChild RenderDecoratedBox at Point(8.0, 8.0)
+2 |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+2 |  |  |  |  | drawPath(Instance of 'Path', Paint(Color(0xff000000)))
+2 |  |  |  |  | drawPath(Instance of 'Path', Paint(Color(0xff000000)))
+2 |  |  |  |  | drawPath(Instance of 'Path', Paint(Color(0xff000000)))
+2 |  |  |  |  | drawPath(Instance of 'Path', Paint(Color(0xff000000)))
+2 |  |  |  |  | paintChild RenderBoxToRenderSectorAdapter at Point(8.0, 8.0)
+2 |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+2 |  |  |  |  |  | paintChild RenderSectorRing at Point(192.5, 192.5)
+2 |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+2 |  | paintChild RenderDecoratedBox at Point(0.0, 0.0)
+2 |  |  | TestDisplayList() constructor: 800.0 x 600.0
+2 |  |  | drawRect(Rect.fromLTRB(0.0, 0.0, 800.0, 81.0), Paint(Color(0xff2196f3)))
+2 |  |  | paintChild RenderFlex at Point(8.0, 0.0)
+2 |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+2 |  |  |  | paintChild RenderConstrainedBox at Point(0.0, 25.0)
+2 |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+2 |  |  |  |  | paintChild RenderPadding at Point(0.0, 16.0)
+2 |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+2 |  |  |  |  |  | paintChild RenderParagraph at Point(24.0, 0.0)
+2 |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+------------------------------------------------------------------------
+CONSOLE: 
+PAINT FOR FRAME #3 ----------------------------------------------
+3 | TestDisplayList() constructor: 800.0 x 600.0
+3 | paintChild RenderScaffold at Point(0.0, 0.0)
+3 |  | TestDisplayList() constructor: 800.0 x 600.0
+3 |  | paintChild RenderDecoratedBox at Point(0.0, 81.0)
+3 |  |  | TestDisplayList() constructor: 800.0 x 600.0
+3 |  |  | drawRect(Rect.fromLTRB(0.0, 0.0, 800.0, 519.0), Paint(Color(0xfffafafa)))
+3 |  |  | paintChild RenderPadding at Point(0.0, 0.0)
+3 |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+3 |  |  |  | paintChild RenderFlex at Point(8.0, 25.0)
+3 |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+3 |  |  |  |  | paintChild RenderPadding at Point(103.25, 0.0)
+3 |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+3 |  |  |  |  |  | paintChild RenderConstrainedBox at Point(8.0, 8.0)
+3 |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+3 |  |  |  |  |  |  | drawRRect(Instance of 'RRect', Paint(Color(0xffe0e0e0)))
+3 |  |  |  |  |  |  | paintChild RenderPositionedBox at Point(8.0, 0.0)
+3 |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+3 |  |  |  |  |  |  |  | paintChild RenderShrinkWrapWidth at Point(0.0, 0.0)
+3 |  |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+3 |  |  |  |  |  |  |  |  | paintChild RenderPadding at Point(0.0, 0.0)
+3 |  |  |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+3 |  |  |  |  |  |  |  |  |  | paintChild RenderPadding at Point(0.0, 0.0)
+3 |  |  |  |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+3 |  |  |  |  |  |  |  |  |  |  | paintChild RenderBoxToRenderSectorAdapter at Point(4.0, 4.0)
+3 |  |  |  |  |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+3 |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderSectorRing at Point(14.0, 14.0)
+3 |  |  |  |  |  |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+3 |  |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderSolidColor at Point(0.0, 0.0)
+3 |  |  |  |  |  |  |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+3 |  |  |  |  |  |  |  |  |  |  |  |  |  | drawPath(Instance of 'Path', Paint(Color(0xff909090)))
+3 |  |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderSolidColor at Point(0.0, 0.0)
+3 |  |  |  |  |  |  |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+3 |  |  |  |  |  |  |  |  |  |  |  |  |  | drawPath(Instance of 'Path', Paint(Color(0xff909090)))
+3 |  |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderSolidColor at Point(0.0, 0.0)
+3 |  |  |  |  |  |  |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+3 |  |  |  |  |  |  |  |  |  |  |  |  |  | drawPath(Instance of 'Path', Paint(Color(0xff00dd00)))
+3 |  |  |  |  |  |  |  |  | paintChild RenderParagraph at Point(46.0, 10.0)
+3 |  |  |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+3 |  |  |  |  | paintChild RenderPadding at Point(480.75, 0.0)
+3 |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+3 |  |  |  |  |  | paintChild RenderConstrainedBox at Point(8.0, 8.0)
+3 |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+3 |  |  |  |  |  |  | drawRRect(Instance of 'RRect', Paint(Color(0xffe0e0e0)))
+3 |  |  |  |  |  |  | paintChild RenderPositionedBox at Point(8.0, 0.0)
+3 |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+3 |  |  |  |  |  |  |  | paintChild RenderShrinkWrapWidth at Point(0.0, 0.0)
+3 |  |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+3 |  |  |  |  |  |  |  |  | paintChild RenderPadding at Point(0.0, 0.0)
+3 |  |  |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+3 |  |  |  |  |  |  |  |  |  | paintChild RenderPadding at Point(0.0, 0.0)
+3 |  |  |  |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+3 |  |  |  |  |  |  |  |  |  |  | paintChild RenderBoxToRenderSectorAdapter at Point(4.0, 4.0)
+3 |  |  |  |  |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+3 |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderSectorRing at Point(14.0, 14.0)
+3 |  |  |  |  |  |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+3 |  |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderSolidColor at Point(0.0, 0.0)
+3 |  |  |  |  |  |  |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+3 |  |  |  |  |  |  |  |  |  |  |  |  |  | drawPath(Instance of 'Path', Paint(Color(0xff909090)))
+3 |  |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderSolidColor at Point(0.0, 0.0)
+3 |  |  |  |  |  |  |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+3 |  |  |  |  |  |  |  |  |  |  |  |  |  | drawPath(Instance of 'Path', Paint(Color(0xff909090)))
+3 |  |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderSolidColor at Point(0.0, 0.0)
+3 |  |  |  |  |  |  |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+3 |  |  |  |  |  |  |  |  |  |  |  |  |  | drawPath(Instance of 'Path', Paint(Color(0xffdd0000)))
+3 |  |  |  |  |  |  |  |  | paintChild RenderParagraph at Point(46.0, 10.0)
+3 |  |  |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+3 |  |  | paintChild RenderPadding at Point(191.5, 102.0)
+3 |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+3 |  |  |  | paintChild RenderDecoratedBox at Point(8.0, 8.0)
+3 |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+3 |  |  |  |  | drawPath(Instance of 'Path', Paint(Color(0xff000000)))
+3 |  |  |  |  | drawPath(Instance of 'Path', Paint(Color(0xff000000)))
+3 |  |  |  |  | drawPath(Instance of 'Path', Paint(Color(0xff000000)))
+3 |  |  |  |  | drawPath(Instance of 'Path', Paint(Color(0xff000000)))
+3 |  |  |  |  | paintChild RenderBoxToRenderSectorAdapter at Point(8.0, 8.0)
+3 |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+3 |  |  |  |  |  | paintChild RenderSectorRing at Point(192.5, 192.5)
+3 |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+3 |  |  |  |  |  |  | paintChild RenderSolidColor at Point(0.0, 0.0)
+3 |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+3 |  |  |  |  |  |  |  | drawPath(Instance of 'Path', Paint(Color(0xff85c594)))
+3 |  | paintChild RenderDecoratedBox at Point(0.0, 0.0)
+3 |  |  | TestDisplayList() constructor: 800.0 x 600.0
+3 |  |  | drawRect(Rect.fromLTRB(0.0, 0.0, 800.0, 81.0), Paint(Color(0xff2196f3)))
+3 |  |  | paintChild RenderFlex at Point(8.0, 0.0)
+3 |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+3 |  |  |  | paintChild RenderConstrainedBox at Point(0.0, 25.0)
+3 |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+3 |  |  |  |  | paintChild RenderPadding at Point(0.0, 16.0)
+3 |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+3 |  |  |  |  |  | paintChild RenderParagraph at Point(24.0, 0.0)
+3 |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+------------------------------------------------------------------------
+CONSOLE: 
+PAINT FOR FRAME #4 ----------------------------------------------
+4 | TestDisplayList() constructor: 800.0 x 600.0
+4 | paintChild RenderScaffold at Point(0.0, 0.0)
+4 |  | TestDisplayList() constructor: 800.0 x 600.0
+4 |  | paintChild RenderDecoratedBox at Point(0.0, 81.0)
+4 |  |  | TestDisplayList() constructor: 800.0 x 600.0
+4 |  |  | drawRect(Rect.fromLTRB(0.0, 0.0, 800.0, 519.0), Paint(Color(0xfffafafa)))
+4 |  |  | paintChild RenderPadding at Point(0.0, 0.0)
+4 |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+4 |  |  |  | paintChild RenderFlex at Point(8.0, 25.0)
+4 |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+4 |  |  |  |  | paintChild RenderPadding at Point(103.25, 0.0)
+4 |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+4 |  |  |  |  |  | paintChild RenderConstrainedBox at Point(8.0, 8.0)
+4 |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+4 |  |  |  |  |  |  | drawRRect(Instance of 'RRect', Paint(Color(0xffe0e0e0)))
+4 |  |  |  |  |  |  | paintChild RenderPositionedBox at Point(8.0, 0.0)
+4 |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+4 |  |  |  |  |  |  |  | paintChild RenderShrinkWrapWidth at Point(0.0, 0.0)
+4 |  |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+4 |  |  |  |  |  |  |  |  | paintChild RenderPadding at Point(0.0, 0.0)
+4 |  |  |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+4 |  |  |  |  |  |  |  |  |  | paintChild RenderPadding at Point(0.0, 0.0)
+4 |  |  |  |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+4 |  |  |  |  |  |  |  |  |  |  | paintChild RenderBoxToRenderSectorAdapter at Point(4.0, 4.0)
+4 |  |  |  |  |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+4 |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderSectorRing at Point(14.0, 14.0)
+4 |  |  |  |  |  |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+4 |  |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderSolidColor at Point(0.0, 0.0)
+4 |  |  |  |  |  |  |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+4 |  |  |  |  |  |  |  |  |  |  |  |  |  | drawPath(Instance of 'Path', Paint(Color(0xff909090)))
+4 |  |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderSolidColor at Point(0.0, 0.0)
+4 |  |  |  |  |  |  |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+4 |  |  |  |  |  |  |  |  |  |  |  |  |  | drawPath(Instance of 'Path', Paint(Color(0xff909090)))
+4 |  |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderSolidColor at Point(0.0, 0.0)
+4 |  |  |  |  |  |  |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+4 |  |  |  |  |  |  |  |  |  |  |  |  |  | drawPath(Instance of 'Path', Paint(Color(0xff00dd00)))
+4 |  |  |  |  |  |  |  |  | paintChild RenderParagraph at Point(46.0, 10.0)
+4 |  |  |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+4 |  |  |  |  | paintChild RenderPadding at Point(480.75, 0.0)
+4 |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+4 |  |  |  |  |  | paintChild RenderConstrainedBox at Point(8.0, 8.0)
+4 |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+4 |  |  |  |  |  |  | drawRRect(Instance of 'RRect', Paint(Color(0xffe0e0e0)))
+4 |  |  |  |  |  |  | paintChild RenderPositionedBox at Point(8.0, 0.0)
+4 |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+4 |  |  |  |  |  |  |  | paintChild RenderShrinkWrapWidth at Point(0.0, 0.0)
+4 |  |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+4 |  |  |  |  |  |  |  |  | paintChild RenderPadding at Point(0.0, 0.0)
+4 |  |  |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+4 |  |  |  |  |  |  |  |  |  | paintChild RenderPadding at Point(0.0, 0.0)
+4 |  |  |  |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+4 |  |  |  |  |  |  |  |  |  |  | paintChild RenderBoxToRenderSectorAdapter at Point(4.0, 4.0)
+4 |  |  |  |  |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+4 |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderSectorRing at Point(14.0, 14.0)
+4 |  |  |  |  |  |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+4 |  |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderSolidColor at Point(0.0, 0.0)
+4 |  |  |  |  |  |  |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+4 |  |  |  |  |  |  |  |  |  |  |  |  |  | drawPath(Instance of 'Path', Paint(Color(0xff909090)))
+4 |  |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderSolidColor at Point(0.0, 0.0)
+4 |  |  |  |  |  |  |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+4 |  |  |  |  |  |  |  |  |  |  |  |  |  | drawPath(Instance of 'Path', Paint(Color(0xff909090)))
+4 |  |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderSolidColor at Point(0.0, 0.0)
+4 |  |  |  |  |  |  |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+4 |  |  |  |  |  |  |  |  |  |  |  |  |  | drawPath(Instance of 'Path', Paint(Color(0xffdd0000)))
+4 |  |  |  |  |  |  |  |  | paintChild RenderParagraph at Point(46.0, 10.0)
+4 |  |  |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+4 |  |  | paintChild RenderPadding at Point(191.5, 102.0)
+4 |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+4 |  |  |  | paintChild RenderDecoratedBox at Point(8.0, 8.0)
+4 |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+4 |  |  |  |  | drawPath(Instance of 'Path', Paint(Color(0xff000000)))
+4 |  |  |  |  | drawPath(Instance of 'Path', Paint(Color(0xff000000)))
+4 |  |  |  |  | drawPath(Instance of 'Path', Paint(Color(0xff000000)))
+4 |  |  |  |  | drawPath(Instance of 'Path', Paint(Color(0xff000000)))
+4 |  |  |  |  | paintChild RenderBoxToRenderSectorAdapter at Point(8.0, 8.0)
+4 |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+4 |  |  |  |  |  | paintChild RenderSectorRing at Point(192.5, 192.5)
+4 |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+4 |  |  |  |  |  |  | paintChild RenderSolidColor at Point(0.0, 0.0)
+4 |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+4 |  |  |  |  |  |  |  | drawPath(Instance of 'Path', Paint(Color(0xff85c594)))
+4 |  |  |  |  |  |  | paintChild RenderSolidColor at Point(0.0, 0.0)
+4 |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+4 |  |  |  |  |  |  |  | drawPath(Instance of 'Path', Paint(Color(0xffe6ade9)))
+4 |  | paintChild RenderDecoratedBox at Point(0.0, 0.0)
+4 |  |  | TestDisplayList() constructor: 800.0 x 600.0
+4 |  |  | drawRect(Rect.fromLTRB(0.0, 0.0, 800.0, 81.0), Paint(Color(0xff2196f3)))
+4 |  |  | paintChild RenderFlex at Point(8.0, 0.0)
+4 |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+4 |  |  |  | paintChild RenderConstrainedBox at Point(0.0, 25.0)
+4 |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+4 |  |  |  |  | paintChild RenderPadding at Point(0.0, 16.0)
+4 |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+4 |  |  |  |  |  | paintChild RenderParagraph at Point(24.0, 0.0)
+4 |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+------------------------------------------------------------------------
+CONSOLE: 
+PAINT FOR FRAME #5 ----------------------------------------------
+5 | TestDisplayList() constructor: 800.0 x 600.0
+5 | paintChild RenderScaffold at Point(0.0, 0.0)
+5 |  | TestDisplayList() constructor: 800.0 x 600.0
+5 |  | paintChild RenderDecoratedBox at Point(0.0, 81.0)
+5 |  |  | TestDisplayList() constructor: 800.0 x 600.0
+5 |  |  | drawRect(Rect.fromLTRB(0.0, 0.0, 800.0, 519.0), Paint(Color(0xfffafafa)))
+5 |  |  | paintChild RenderPadding at Point(0.0, 0.0)
+5 |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+5 |  |  |  | paintChild RenderFlex at Point(8.0, 25.0)
+5 |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+5 |  |  |  |  | paintChild RenderPadding at Point(103.25, 0.0)
+5 |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+5 |  |  |  |  |  | paintChild RenderConstrainedBox at Point(8.0, 8.0)
+5 |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+5 |  |  |  |  |  |  | drawRRect(Instance of 'RRect', Paint(Color(0xffe0e0e0)))
+5 |  |  |  |  |  |  | paintChild RenderPositionedBox at Point(8.0, 0.0)
+5 |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+5 |  |  |  |  |  |  |  | paintChild RenderShrinkWrapWidth at Point(0.0, 0.0)
+5 |  |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+5 |  |  |  |  |  |  |  |  | paintChild RenderPadding at Point(0.0, 0.0)
+5 |  |  |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+5 |  |  |  |  |  |  |  |  |  | paintChild RenderPadding at Point(0.0, 0.0)
+5 |  |  |  |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+5 |  |  |  |  |  |  |  |  |  |  | paintChild RenderBoxToRenderSectorAdapter at Point(4.0, 4.0)
+5 |  |  |  |  |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+5 |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderSectorRing at Point(14.0, 14.0)
+5 |  |  |  |  |  |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+5 |  |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderSolidColor at Point(0.0, 0.0)
+5 |  |  |  |  |  |  |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+5 |  |  |  |  |  |  |  |  |  |  |  |  |  | drawPath(Instance of 'Path', Paint(Color(0xff909090)))
+5 |  |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderSolidColor at Point(0.0, 0.0)
+5 |  |  |  |  |  |  |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+5 |  |  |  |  |  |  |  |  |  |  |  |  |  | drawPath(Instance of 'Path', Paint(Color(0xff909090)))
+5 |  |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderSolidColor at Point(0.0, 0.0)
+5 |  |  |  |  |  |  |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+5 |  |  |  |  |  |  |  |  |  |  |  |  |  | drawPath(Instance of 'Path', Paint(Color(0xff00dd00)))
+5 |  |  |  |  |  |  |  |  | paintChild RenderParagraph at Point(46.0, 10.0)
+5 |  |  |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+5 |  |  |  |  | paintChild RenderPadding at Point(480.75, 0.0)
+5 |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+5 |  |  |  |  |  | paintChild RenderConstrainedBox at Point(8.0, 8.0)
+5 |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+5 |  |  |  |  |  |  | drawRRect(Instance of 'RRect', Paint(Color(0xffe0e0e0)))
+5 |  |  |  |  |  |  | paintChild RenderPositionedBox at Point(8.0, 0.0)
+5 |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+5 |  |  |  |  |  |  |  | paintChild RenderShrinkWrapWidth at Point(0.0, 0.0)
+5 |  |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+5 |  |  |  |  |  |  |  |  | paintChild RenderPadding at Point(0.0, 0.0)
+5 |  |  |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+5 |  |  |  |  |  |  |  |  |  | paintChild RenderPadding at Point(0.0, 0.0)
+5 |  |  |  |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+5 |  |  |  |  |  |  |  |  |  |  | paintChild RenderBoxToRenderSectorAdapter at Point(4.0, 4.0)
+5 |  |  |  |  |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+5 |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderSectorRing at Point(14.0, 14.0)
+5 |  |  |  |  |  |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+5 |  |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderSolidColor at Point(0.0, 0.0)
+5 |  |  |  |  |  |  |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+5 |  |  |  |  |  |  |  |  |  |  |  |  |  | drawPath(Instance of 'Path', Paint(Color(0xff909090)))
+5 |  |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderSolidColor at Point(0.0, 0.0)
+5 |  |  |  |  |  |  |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+5 |  |  |  |  |  |  |  |  |  |  |  |  |  | drawPath(Instance of 'Path', Paint(Color(0xff909090)))
+5 |  |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderSolidColor at Point(0.0, 0.0)
+5 |  |  |  |  |  |  |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+5 |  |  |  |  |  |  |  |  |  |  |  |  |  | drawPath(Instance of 'Path', Paint(Color(0xffdd0000)))
+5 |  |  |  |  |  |  |  |  | paintChild RenderParagraph at Point(46.0, 10.0)
+5 |  |  |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+5 |  |  | paintChild RenderPadding at Point(191.5, 102.0)
+5 |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+5 |  |  |  | paintChild RenderDecoratedBox at Point(8.0, 8.0)
+5 |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+5 |  |  |  |  | drawPath(Instance of 'Path', Paint(Color(0xff000000)))
+5 |  |  |  |  | drawPath(Instance of 'Path', Paint(Color(0xff000000)))
+5 |  |  |  |  | drawPath(Instance of 'Path', Paint(Color(0xff000000)))
+5 |  |  |  |  | drawPath(Instance of 'Path', Paint(Color(0xff000000)))
+5 |  |  |  |  | paintChild RenderBoxToRenderSectorAdapter at Point(8.0, 8.0)
+5 |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+5 |  |  |  |  |  | paintChild RenderSectorRing at Point(192.5, 192.5)
+5 |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+5 |  |  |  |  |  |  | paintChild RenderSolidColor at Point(0.0, 0.0)
+5 |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+5 |  |  |  |  |  |  |  | drawPath(Instance of 'Path', Paint(Color(0xff85c594)))
+5 |  |  |  |  |  |  | paintChild RenderSolidColor at Point(0.0, 0.0)
+5 |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+5 |  |  |  |  |  |  |  | drawPath(Instance of 'Path', Paint(Color(0xffe6ade9)))
+5 |  |  |  |  |  |  | paintChild RenderSolidColor at Point(0.0, 0.0)
+5 |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+5 |  |  |  |  |  |  |  | drawPath(Instance of 'Path', Paint(Color(0xffbee9dd)))
+5 |  | paintChild RenderDecoratedBox at Point(0.0, 0.0)
+5 |  |  | TestDisplayList() constructor: 800.0 x 600.0
+5 |  |  | drawRect(Rect.fromLTRB(0.0, 0.0, 800.0, 81.0), Paint(Color(0xff2196f3)))
+5 |  |  | paintChild RenderFlex at Point(8.0, 0.0)
+5 |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+5 |  |  |  | paintChild RenderConstrainedBox at Point(0.0, 25.0)
+5 |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+5 |  |  |  |  | paintChild RenderPadding at Point(0.0, 16.0)
+5 |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+5 |  |  |  |  |  | paintChild RenderParagraph at Point(24.0, 0.0)
+5 |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+------------------------------------------------------------------------
+CONSOLE: 
+PAINT FOR FRAME #6 ----------------------------------------------
+6 | TestDisplayList() constructor: 800.0 x 600.0
+6 | paintChild RenderScaffold at Point(0.0, 0.0)
+6 |  | TestDisplayList() constructor: 800.0 x 600.0
+6 |  | paintChild RenderDecoratedBox at Point(0.0, 81.0)
+6 |  |  | TestDisplayList() constructor: 800.0 x 600.0
+6 |  |  | drawRect(Rect.fromLTRB(0.0, 0.0, 800.0, 519.0), Paint(Color(0xfffafafa)))
+6 |  |  | paintChild RenderPadding at Point(0.0, 0.0)
+6 |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+6 |  |  |  | paintChild RenderFlex at Point(8.0, 25.0)
+6 |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+6 |  |  |  |  | paintChild RenderPadding at Point(103.25, 0.0)
+6 |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+6 |  |  |  |  |  | paintChild RenderConstrainedBox at Point(8.0, 8.0)
+6 |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+6 |  |  |  |  |  |  | drawRRect(Instance of 'RRect', Paint(Color(0xffe0e0e0)))
+6 |  |  |  |  |  |  | paintChild RenderPositionedBox at Point(8.0, 0.0)
+6 |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+6 |  |  |  |  |  |  |  | paintChild RenderShrinkWrapWidth at Point(0.0, 0.0)
+6 |  |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+6 |  |  |  |  |  |  |  |  | paintChild RenderPadding at Point(0.0, 0.0)
+6 |  |  |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+6 |  |  |  |  |  |  |  |  |  | paintChild RenderPadding at Point(0.0, 0.0)
+6 |  |  |  |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+6 |  |  |  |  |  |  |  |  |  |  | paintChild RenderBoxToRenderSectorAdapter at Point(4.0, 4.0)
+6 |  |  |  |  |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+6 |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderSectorRing at Point(14.0, 14.0)
+6 |  |  |  |  |  |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+6 |  |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderSolidColor at Point(0.0, 0.0)
+6 |  |  |  |  |  |  |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+6 |  |  |  |  |  |  |  |  |  |  |  |  |  | drawPath(Instance of 'Path', Paint(Color(0xff909090)))
+6 |  |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderSolidColor at Point(0.0, 0.0)
+6 |  |  |  |  |  |  |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+6 |  |  |  |  |  |  |  |  |  |  |  |  |  | drawPath(Instance of 'Path', Paint(Color(0xff909090)))
+6 |  |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderSolidColor at Point(0.0, 0.0)
+6 |  |  |  |  |  |  |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+6 |  |  |  |  |  |  |  |  |  |  |  |  |  | drawPath(Instance of 'Path', Paint(Color(0xff00dd00)))
+6 |  |  |  |  |  |  |  |  | paintChild RenderParagraph at Point(46.0, 10.0)
+6 |  |  |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+6 |  |  |  |  | paintChild RenderPadding at Point(480.75, 0.0)
+6 |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+6 |  |  |  |  |  | paintChild RenderConstrainedBox at Point(8.0, 8.0)
+6 |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+6 |  |  |  |  |  |  | drawRRect(Instance of 'RRect', Paint(Color(0xffe0e0e0)))
+6 |  |  |  |  |  |  | paintChild RenderPositionedBox at Point(8.0, 0.0)
+6 |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+6 |  |  |  |  |  |  |  | paintChild RenderShrinkWrapWidth at Point(0.0, 0.0)
+6 |  |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+6 |  |  |  |  |  |  |  |  | paintChild RenderPadding at Point(0.0, 0.0)
+6 |  |  |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+6 |  |  |  |  |  |  |  |  |  | paintChild RenderPadding at Point(0.0, 0.0)
+6 |  |  |  |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+6 |  |  |  |  |  |  |  |  |  |  | paintChild RenderBoxToRenderSectorAdapter at Point(4.0, 4.0)
+6 |  |  |  |  |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+6 |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderSectorRing at Point(14.0, 14.0)
+6 |  |  |  |  |  |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+6 |  |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderSolidColor at Point(0.0, 0.0)
+6 |  |  |  |  |  |  |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+6 |  |  |  |  |  |  |  |  |  |  |  |  |  | drawPath(Instance of 'Path', Paint(Color(0xff909090)))
+6 |  |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderSolidColor at Point(0.0, 0.0)
+6 |  |  |  |  |  |  |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+6 |  |  |  |  |  |  |  |  |  |  |  |  |  | drawPath(Instance of 'Path', Paint(Color(0xff909090)))
+6 |  |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderSolidColor at Point(0.0, 0.0)
+6 |  |  |  |  |  |  |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+6 |  |  |  |  |  |  |  |  |  |  |  |  |  | drawPath(Instance of 'Path', Paint(Color(0xffdd0000)))
+6 |  |  |  |  |  |  |  |  | paintChild RenderParagraph at Point(46.0, 10.0)
+6 |  |  |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+6 |  |  | paintChild RenderPadding at Point(191.5, 102.0)
+6 |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+6 |  |  |  | paintChild RenderDecoratedBox at Point(8.0, 8.0)
+6 |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+6 |  |  |  |  | drawPath(Instance of 'Path', Paint(Color(0xff000000)))
+6 |  |  |  |  | drawPath(Instance of 'Path', Paint(Color(0xff000000)))
+6 |  |  |  |  | drawPath(Instance of 'Path', Paint(Color(0xff000000)))
+6 |  |  |  |  | drawPath(Instance of 'Path', Paint(Color(0xff000000)))
+6 |  |  |  |  | paintChild RenderBoxToRenderSectorAdapter at Point(8.0, 8.0)
+6 |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+6 |  |  |  |  |  | paintChild RenderSectorRing at Point(192.5, 192.5)
+6 |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+6 |  |  |  |  |  |  | paintChild RenderSolidColor at Point(0.0, 0.0)
+6 |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+6 |  |  |  |  |  |  |  | drawPath(Instance of 'Path', Paint(Color(0xff85c594)))
+6 |  |  |  |  |  |  | paintChild RenderSolidColor at Point(0.0, 0.0)
+6 |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+6 |  |  |  |  |  |  |  | drawPath(Instance of 'Path', Paint(Color(0xffe6ade9)))
+6 |  | paintChild RenderDecoratedBox at Point(0.0, 0.0)
+6 |  |  | TestDisplayList() constructor: 800.0 x 600.0
+6 |  |  | drawRect(Rect.fromLTRB(0.0, 0.0, 800.0, 81.0), Paint(Color(0xff2196f3)))
+6 |  |  | paintChild RenderFlex at Point(8.0, 0.0)
+6 |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+6 |  |  |  | paintChild RenderConstrainedBox at Point(0.0, 25.0)
+6 |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+6 |  |  |  |  | paintChild RenderPadding at Point(0.0, 16.0)
+6 |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+6 |  |  |  |  |  | paintChild RenderParagraph at Point(24.0, 0.0)
+6 |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+------------------------------------------------------------------------
+CONSOLE: 
+PAINT FOR FRAME #7 ----------------------------------------------
+7 | TestDisplayList() constructor: 800.0 x 600.0
+7 | paintChild RenderScaffold at Point(0.0, 0.0)
+7 |  | TestDisplayList() constructor: 800.0 x 600.0
+7 |  | paintChild RenderDecoratedBox at Point(0.0, 81.0)
+7 |  |  | TestDisplayList() constructor: 800.0 x 600.0
+7 |  |  | drawRect(Rect.fromLTRB(0.0, 0.0, 800.0, 519.0), Paint(Color(0xfffafafa)))
+7 |  |  | paintChild RenderPadding at Point(0.0, 0.0)
+7 |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+7 |  |  |  | paintChild RenderFlex at Point(8.0, 25.0)
+7 |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+7 |  |  |  |  | paintChild RenderPadding at Point(103.25, 0.0)
+7 |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+7 |  |  |  |  |  | paintChild RenderConstrainedBox at Point(8.0, 8.0)
+7 |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+7 |  |  |  |  |  |  | drawRRect(Instance of 'RRect', Paint(Color(0xffe0e0e0)))
+7 |  |  |  |  |  |  | paintChild RenderPositionedBox at Point(8.0, 0.0)
+7 |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+7 |  |  |  |  |  |  |  | paintChild RenderShrinkWrapWidth at Point(0.0, 0.0)
+7 |  |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+7 |  |  |  |  |  |  |  |  | paintChild RenderPadding at Point(0.0, 0.0)
+7 |  |  |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+7 |  |  |  |  |  |  |  |  |  | paintChild RenderPadding at Point(0.0, 0.0)
+7 |  |  |  |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+7 |  |  |  |  |  |  |  |  |  |  | paintChild RenderBoxToRenderSectorAdapter at Point(4.0, 4.0)
+7 |  |  |  |  |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+7 |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderSectorRing at Point(14.0, 14.0)
+7 |  |  |  |  |  |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+7 |  |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderSolidColor at Point(0.0, 0.0)
+7 |  |  |  |  |  |  |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+7 |  |  |  |  |  |  |  |  |  |  |  |  |  | drawPath(Instance of 'Path', Paint(Color(0xff909090)))
+7 |  |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderSolidColor at Point(0.0, 0.0)
+7 |  |  |  |  |  |  |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+7 |  |  |  |  |  |  |  |  |  |  |  |  |  | drawPath(Instance of 'Path', Paint(Color(0xff909090)))
+7 |  |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderSolidColor at Point(0.0, 0.0)
+7 |  |  |  |  |  |  |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+7 |  |  |  |  |  |  |  |  |  |  |  |  |  | drawPath(Instance of 'Path', Paint(Color(0xff00dd00)))
+7 |  |  |  |  |  |  |  |  | paintChild RenderParagraph at Point(46.0, 10.0)
+7 |  |  |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+7 |  |  |  |  | paintChild RenderPadding at Point(480.75, 0.0)
+7 |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+7 |  |  |  |  |  | paintChild RenderConstrainedBox at Point(8.0, 8.0)
+7 |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+7 |  |  |  |  |  |  | drawRRect(Instance of 'RRect', Paint(Color(0xffe0e0e0)))
+7 |  |  |  |  |  |  | paintChild RenderPositionedBox at Point(8.0, 0.0)
+7 |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+7 |  |  |  |  |  |  |  | paintChild RenderShrinkWrapWidth at Point(0.0, 0.0)
+7 |  |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+7 |  |  |  |  |  |  |  |  | paintChild RenderPadding at Point(0.0, 0.0)
+7 |  |  |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+7 |  |  |  |  |  |  |  |  |  | paintChild RenderPadding at Point(0.0, 0.0)
+7 |  |  |  |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+7 |  |  |  |  |  |  |  |  |  |  | paintChild RenderBoxToRenderSectorAdapter at Point(4.0, 4.0)
+7 |  |  |  |  |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+7 |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderSectorRing at Point(14.0, 14.0)
+7 |  |  |  |  |  |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+7 |  |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderSolidColor at Point(0.0, 0.0)
+7 |  |  |  |  |  |  |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+7 |  |  |  |  |  |  |  |  |  |  |  |  |  | drawPath(Instance of 'Path', Paint(Color(0xff909090)))
+7 |  |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderSolidColor at Point(0.0, 0.0)
+7 |  |  |  |  |  |  |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+7 |  |  |  |  |  |  |  |  |  |  |  |  |  | drawPath(Instance of 'Path', Paint(Color(0xff909090)))
+7 |  |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderSolidColor at Point(0.0, 0.0)
+7 |  |  |  |  |  |  |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+7 |  |  |  |  |  |  |  |  |  |  |  |  |  | drawPath(Instance of 'Path', Paint(Color(0xffdd0000)))
+7 |  |  |  |  |  |  |  |  | paintChild RenderParagraph at Point(46.0, 10.0)
+7 |  |  |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+7 |  |  | paintChild RenderPadding at Point(191.5, 102.0)
+7 |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+7 |  |  |  | paintChild RenderDecoratedBox at Point(8.0, 8.0)
+7 |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+7 |  |  |  |  | drawPath(Instance of 'Path', Paint(Color(0xff000000)))
+7 |  |  |  |  | drawPath(Instance of 'Path', Paint(Color(0xff000000)))
+7 |  |  |  |  | drawPath(Instance of 'Path', Paint(Color(0xff000000)))
+7 |  |  |  |  | drawPath(Instance of 'Path', Paint(Color(0xff000000)))
+7 |  |  |  |  | paintChild RenderBoxToRenderSectorAdapter at Point(8.0, 8.0)
+7 |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+7 |  |  |  |  |  | paintChild RenderSectorRing at Point(192.5, 192.5)
+7 |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+7 |  |  |  |  |  |  | paintChild RenderSolidColor at Point(0.0, 0.0)
+7 |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+7 |  |  |  |  |  |  |  | drawPath(Instance of 'Path', Paint(Color(0xff85c594)))
+7 |  | paintChild RenderDecoratedBox at Point(0.0, 0.0)
+7 |  |  | TestDisplayList() constructor: 800.0 x 600.0
+7 |  |  | drawRect(Rect.fromLTRB(0.0, 0.0, 800.0, 81.0), Paint(Color(0xff2196f3)))
+7 |  |  | paintChild RenderFlex at Point(8.0, 0.0)
+7 |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+7 |  |  |  | paintChild RenderConstrainedBox at Point(0.0, 25.0)
+7 |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+7 |  |  |  |  | paintChild RenderPadding at Point(0.0, 16.0)
+7 |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+7 |  |  |  |  |  | paintChild RenderParagraph at Point(24.0, 0.0)
+7 |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+------------------------------------------------------------------------
+CONSOLE: 
+PAINT FOR FRAME #8 ----------------------------------------------
+8 | TestDisplayList() constructor: 800.0 x 600.0
+8 | paintChild RenderScaffold at Point(0.0, 0.0)
+8 |  | TestDisplayList() constructor: 800.0 x 600.0
+8 |  | paintChild RenderDecoratedBox at Point(0.0, 81.0)
+8 |  |  | TestDisplayList() constructor: 800.0 x 600.0
+8 |  |  | drawRect(Rect.fromLTRB(0.0, 0.0, 800.0, 519.0), Paint(Color(0xfffafafa)))
+8 |  |  | paintChild RenderPadding at Point(0.0, 0.0)
+8 |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+8 |  |  |  | paintChild RenderFlex at Point(8.0, 25.0)
+8 |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+8 |  |  |  |  | paintChild RenderPadding at Point(103.25, 0.0)
+8 |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+8 |  |  |  |  |  | paintChild RenderConstrainedBox at Point(8.0, 8.0)
+8 |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+8 |  |  |  |  |  |  | drawRRect(Instance of 'RRect', Paint(Color(0xffe0e0e0)))
+8 |  |  |  |  |  |  | paintChild RenderPositionedBox at Point(8.0, 0.0)
+8 |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+8 |  |  |  |  |  |  |  | paintChild RenderShrinkWrapWidth at Point(0.0, 0.0)
+8 |  |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+8 |  |  |  |  |  |  |  |  | paintChild RenderPadding at Point(0.0, 0.0)
+8 |  |  |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+8 |  |  |  |  |  |  |  |  |  | paintChild RenderPadding at Point(0.0, 0.0)
+8 |  |  |  |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+8 |  |  |  |  |  |  |  |  |  |  | paintChild RenderBoxToRenderSectorAdapter at Point(4.0, 4.0)
+8 |  |  |  |  |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+8 |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderSectorRing at Point(14.0, 14.0)
+8 |  |  |  |  |  |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+8 |  |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderSolidColor at Point(0.0, 0.0)
+8 |  |  |  |  |  |  |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+8 |  |  |  |  |  |  |  |  |  |  |  |  |  | drawPath(Instance of 'Path', Paint(Color(0xff909090)))
+8 |  |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderSolidColor at Point(0.0, 0.0)
+8 |  |  |  |  |  |  |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+8 |  |  |  |  |  |  |  |  |  |  |  |  |  | drawPath(Instance of 'Path', Paint(Color(0xff909090)))
+8 |  |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderSolidColor at Point(0.0, 0.0)
+8 |  |  |  |  |  |  |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+8 |  |  |  |  |  |  |  |  |  |  |  |  |  | drawPath(Instance of 'Path', Paint(Color(0xff00dd00)))
+8 |  |  |  |  |  |  |  |  | paintChild RenderParagraph at Point(46.0, 10.0)
+8 |  |  |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+8 |  |  |  |  | paintChild RenderPadding at Point(480.75, 0.0)
+8 |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+8 |  |  |  |  |  | paintChild RenderConstrainedBox at Point(8.0, 8.0)
+8 |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+8 |  |  |  |  |  |  | drawRRect(Instance of 'RRect', Paint(Color(0xffe0e0e0)))
+8 |  |  |  |  |  |  | paintChild RenderPositionedBox at Point(8.0, 0.0)
+8 |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+8 |  |  |  |  |  |  |  | paintChild RenderShrinkWrapWidth at Point(0.0, 0.0)
+8 |  |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+8 |  |  |  |  |  |  |  |  | paintChild RenderPadding at Point(0.0, 0.0)
+8 |  |  |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+8 |  |  |  |  |  |  |  |  |  | paintChild RenderPadding at Point(0.0, 0.0)
+8 |  |  |  |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+8 |  |  |  |  |  |  |  |  |  |  | paintChild RenderBoxToRenderSectorAdapter at Point(4.0, 4.0)
+8 |  |  |  |  |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+8 |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderSectorRing at Point(14.0, 14.0)
+8 |  |  |  |  |  |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+8 |  |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderSolidColor at Point(0.0, 0.0)
+8 |  |  |  |  |  |  |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+8 |  |  |  |  |  |  |  |  |  |  |  |  |  | drawPath(Instance of 'Path', Paint(Color(0xff909090)))
+8 |  |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderSolidColor at Point(0.0, 0.0)
+8 |  |  |  |  |  |  |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+8 |  |  |  |  |  |  |  |  |  |  |  |  |  | drawPath(Instance of 'Path', Paint(Color(0xff909090)))
+8 |  |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderSolidColor at Point(0.0, 0.0)
+8 |  |  |  |  |  |  |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+8 |  |  |  |  |  |  |  |  |  |  |  |  |  | drawPath(Instance of 'Path', Paint(Color(0xffdd0000)))
+8 |  |  |  |  |  |  |  |  | paintChild RenderParagraph at Point(46.0, 10.0)
+8 |  |  |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+8 |  |  | paintChild RenderPadding at Point(191.5, 102.0)
+8 |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+8 |  |  |  | paintChild RenderDecoratedBox at Point(8.0, 8.0)
+8 |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+8 |  |  |  |  | drawPath(Instance of 'Path', Paint(Color(0xff000000)))
+8 |  |  |  |  | drawPath(Instance of 'Path', Paint(Color(0xff000000)))
+8 |  |  |  |  | drawPath(Instance of 'Path', Paint(Color(0xff000000)))
+8 |  |  |  |  | drawPath(Instance of 'Path', Paint(Color(0xff000000)))
+8 |  |  |  |  | paintChild RenderBoxToRenderSectorAdapter at Point(8.0, 8.0)
+8 |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+8 |  |  |  |  |  | paintChild RenderSectorRing at Point(192.5, 192.5)
+8 |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+8 |  |  |  |  |  |  | paintChild RenderSolidColor at Point(0.0, 0.0)
+8 |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+8 |  |  |  |  |  |  |  | drawPath(Instance of 'Path', Paint(Color(0xff85c594)))
+8 |  |  |  |  |  |  | paintChild RenderSolidColor at Point(0.0, 0.0)
+8 |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+8 |  |  |  |  |  |  |  | drawPath(Instance of 'Path', Paint(Color(0xff92ab8e)))
+8 |  | paintChild RenderDecoratedBox at Point(0.0, 0.0)
+8 |  |  | TestDisplayList() constructor: 800.0 x 600.0
+8 |  |  | drawRect(Rect.fromLTRB(0.0, 0.0, 800.0, 81.0), Paint(Color(0xff2196f3)))
+8 |  |  | paintChild RenderFlex at Point(8.0, 0.0)
+8 |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+8 |  |  |  | paintChild RenderConstrainedBox at Point(0.0, 25.0)
+8 |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+8 |  |  |  |  | paintChild RenderPadding at Point(0.0, 16.0)
+8 |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+8 |  |  |  |  |  | paintChild RenderParagraph at Point(24.0, 0.0)
+8 |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+------------------------------------------------------------------------
+PAINTED 8 FRAMES
