@@ -429,4 +429,9 @@ class WidgetToRenderBoxAdapter extends RenderObjectWrapper {
     // definition, it is the transition out of the Widget world.
   }
 
+  void remove() {
+    parent.detachChildRoot(this);
+    super.remove();
+  }
+
 }
