@@ -165,35 +165,35 @@ abstract class Widget {
 // stylistic information, etc.
 abstract class TagNode extends Widget {
 
-  TagNode(Widget content, { String key })
-    : this.content = content, super(key: key);
+  TagNode(Widget child, { String key })
+    : this.child = child, super(key: key);
 
-  Widget content;
+  Widget child;
 
   void _sync(Widget old, dynamic slot) {
-    Widget oldContent = old == null ? null : (old as TagNode).content;
-    content = syncChild(content, oldContent, slot);
-    assert(content.root != null);
-    _root = content.root;
+    Widget oldChild = old == null ? null : (old as TagNode).child;
+    child = syncChild(child, oldChild, slot);
+    assert(child.root != null);
+    _root = child.root;
     assert(_root == root); // in case a subclass reintroduces it
   }
 
   void remove() {
-    if (content != null)
-      removeChild(content);
+    if (child != null)
+      removeChild(child);
     super.remove();
   }
 
   void detachRoot() {
-    if (content != null)
-      content.detachRoot();
+    if (child != null)
+      child.detachRoot();
   }
 
 }
 
 class ParentDataNode extends TagNode {
-  ParentDataNode(Widget content, this.parentData, { String key })
-    : super(content, key: key);
+  ParentDataNode(Widget child, this.parentData, { String key })
+    : super(child, key: key);
   final ParentData parentData;
 }
 
