@@ -18,5 +18,5 @@ main() async {
     );
   });
 
-  await tester.endTest();
+  tester.endTest();
 }

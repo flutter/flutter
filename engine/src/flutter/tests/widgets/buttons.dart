@@ -24,5 +24,5 @@ main() async {
     return new Center(child: new FloatingActionButton(child: new Text("+")));
   });
 
-  await tester.endTest();
+  tester.endTest();
 }
