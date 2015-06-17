@@ -84,7 +84,6 @@ class SectorApp extends App {
               padding: new EdgeDims.symmetric(horizontal: 8.0, vertical: 25.0),
               child: new Flex([
                   new RaisedButton(
-                    key: 'add-button',
                     enabled: enabledAdd,
                     child: new ShrinkWrapWidth(
                       child: new Flex([
@@ -99,7 +98,6 @@ class SectorApp extends App {
                     onPressed: addSector
                   ),
                   new RaisedButton(
-                    key: 'remove-button',
                     enabled: enabledRemove,
                     child: new ShrinkWrapWidth(
                       child: new Flex([
