@@ -69,16 +69,16 @@ import 'package:sky/widgets/basic.dart';
 class MyToolBar extends Component {
   Widget build() {
     return new Container(
+      decoration: const BoxDecoration(
+        backgroundColor: const Color(0xFF00FFFF),
+      ),
+      height: 56.0,
+      padding: new EdgeDims.symmetric(horizontal: 8.0),
       child: new Flex([
         new Image(src: 'menu.png', size: const Size(25.0, 25.0)),
         new Flexible(child: new Text('My awesome toolbar')),
         new Image(src: 'search.png', size: const Size(25.0, 25.0)),
-      ]),
-      height: 56.0,
-      padding: new EdgeDims.symmetric(horizontal: 8.0),
-      decoration: const BoxDecoration(
-        backgroundColor: const Color(0xFF00FFFF),
-      )
+      ])
     );
   }
 }
@@ -113,8 +113,9 @@ void main() {
 ```
 
 Here, we've used the `Center` widget to center the toolbar within the view, both
-vertically and horizontally. Because the toolbar uses a flexible layout
-internally, it expands to fill all the available horizontal space.
+vertically and horizontally. If we didn't center the toolbar, it would fill the
+view, both vertically and horizontally, because the root widget is sized to fill
+the view.
 
 Listening to Events
 -------------------
@@ -137,18 +138,18 @@ final BoxDecoration _decoration = new BoxDecoration(
 class MyButton extends Component {
   Widget build() {
     return new Listener(
+      onGestureTap: (event) {
+        print('MyButton was tapped!');
+      },
       child: new Container(
-        child: new Center(
-          child: new Text('Engage')
-        ),
         height: 36.0,
         padding: new EdgeDims.all(8.0),
         margin: new EdgeDims.symmetric(horizontal: 8.0),
-        decoration: _decoration
-      ),
-      onGestureTap: (event) {
-        print('MyButton was tapped!');
-      }
+        decoration: _decoration,
+        child: new Center(
+          child: new Text('Engage')
+        )
+      )
     );
   }
 }
@@ -180,17 +181,17 @@ class MyButton extends Component {
 
   Widget build() {
     return new Listener(
-      child: new Container(
-        child: new Center(child: child),
-        height: 36.0,
-        padding: new EdgeDims.all(8.0),
-        margin: new EdgeDims.symmetric(horizontal: 8.0),
-        decoration: _decoration
-      ),
       onGestureTap: (_) {
         if (onPressed != null)
           onPressed();
-      }
+      },
+      child: new Container(
+        height: 36.0,
+        padding: new EdgeDims.all(8.0),
+        margin: new EdgeDims.symmetric(horizontal: 8.0),
+        decoration: _decoration,
+        child: new Center(child: child)
+      )
     );
   }
 }
@@ -208,8 +209,8 @@ button:
         child: new Flex([
           new Image(src: 'thumbs-up.png', size: const Size(25.0, 25.0)),
           new Container(
-            child: new Text('Thumbs up'),
             padding: new EdgeDims.only(left: 10.0)
+            child: new Text('Thumbs up'),
           )
         ])
       )
