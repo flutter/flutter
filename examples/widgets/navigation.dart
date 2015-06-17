@@ -16,12 +16,10 @@ List<Route> routes = [
       child: new Block([
         new Text("You are at home"),
         new RaisedButton(
-          key: 'b',
           child: new Text('GO SHOPPING'),
           onPressed: () => navigator.pushNamed('shopping')
         ),
         new RaisedButton(
-          key: 'a',
           child: new Text('START ADVENTURE'),
           onPressed: () => navigator.pushNamed('adventure')
         )
@@ -36,12 +34,10 @@ List<Route> routes = [
       child: new Block([
         new Text("Village Shop"),
         new RaisedButton(
-          key: 'a',
           child: new Text('RETURN HOME'),
           onPressed: () => navigator.back()
         ),
         new RaisedButton(
-          key: 'b',
           child: new Text('GO TO DUNGEON'),
           onPressed: () => navigator.push(routes[2])
         )

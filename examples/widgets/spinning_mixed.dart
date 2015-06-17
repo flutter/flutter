@@ -37,7 +37,7 @@ class Rectangle extends Component {
 
 Widget builder() {
   return new Flex([
-      new Rectangle(const Color(0xFF00FFFF), key: 'a'),
+      new Rectangle(const Color(0xFF00FFFF)),
       new Container(
         padding: new EdgeDims.all(10.0),
         margin: new EdgeDims.all(10.0),
@@ -50,7 +50,7 @@ Widget builder() {
           onPressed: () => print("Hello World")
         )
       ),
-      new Rectangle(const Color(0xFFFFFF00), key: 'b'),
+      new Rectangle(const Color(0xFFFFFF00)),
     ],
     direction: FlexDirection.vertical,
     justifyContent: FlexJustifyContent.spaceBetween

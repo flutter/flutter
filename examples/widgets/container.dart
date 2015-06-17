@@ -11,7 +11,6 @@ class ContainerApp extends App {
   Widget build() {
     return new Flex([
         new Container(
-          key: 'a',
           padding: new EdgeDims.all(10.0),
           margin: new EdgeDims.all(10.0),
           decoration: new BoxDecoration(backgroundColor: const Color(0xFFCCCCCC)),
@@ -21,17 +20,14 @@ class ContainerApp extends App {
           )
         ),
         new Container(
-          key: 'b',
           decoration: new BoxDecoration(backgroundColor: const Color(0xFFFFFF00)),
           padding: new EdgeDims.symmetric(horizontal: 50.0, vertical: 75.0),
           child: new Flex([
             new RaisedButton(
-              key: 'b1',
               child: new Text('PRESS ME'),
               onPressed: () => print("Hello World")
             ),
             new RaisedButton(
-              key: 'b2',
               child: new Text('DISABLED'),
               onPressed: () => print("Hello World"),
               enabled: false
