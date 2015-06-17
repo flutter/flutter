@@ -124,7 +124,10 @@ abstract class Widget {
       return null;
     }
 
-    if (oldNode != null && oldNode.runtimeType == node.runtimeType && node.key == oldNode.key && node._retainStatefulNodeIfPossible(oldNode)) {
+    if (oldNode != null &&
+        oldNode.runtimeType == node.runtimeType &&
+        oldNode.key == node.key &&
+        node._retainStatefulNodeIfPossible(oldNode)) {
       assert(oldNode.mounted);
       assert(!node.mounted);
       oldNode._sync(node, slot);
@@ -132,7 +135,8 @@ abstract class Widget {
       return oldNode;
     }
 
-    if (oldNode != null && (oldNode.runtimeType != node.runtimeType || node.key != oldNode.key)) {
+    if (oldNode != null &&
+        (oldNode.runtimeType != node.runtimeType || oldNode.key != node.key)) {
       assert(oldNode.mounted);
       removeChild(oldNode);
       oldNode = null;
