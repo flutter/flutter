@@ -175,7 +175,7 @@ class RenderParagraph extends RenderBox {
   InlineBase _inline;
   BoxConstraints _constraintsForCurrentLayout;
 
-  String get inline => _inline;
+  InlineBase get inline => _inline;
   void set inline (InlineBase value) {
     _inline = value;
     _layoutRoot.rootElement.setChild(_inline._toDOM(_document));
