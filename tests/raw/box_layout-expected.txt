@@ -1,4 +1,3 @@
-CONSOLE: unittest-suite-wait-for-done
 CONSOLE: TestRenderView enabled
 CONSOLE: 
 PAINT FOR FRAME #1 ----------------------------------------------
@@ -12,8 +11,4 @@ PAINT FOR FRAME #1 ----------------------------------------------
 1 |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
 1 |  |  |  | drawRect(Rect.fromLTRB(0.0, 0.0, 700.0, 100.0), Paint(Color(0xff00ff00)))
 ------------------------------------------------------------------------
-CONSOLE: PASS: padding
-CONSOLE: 
-CONSOLE: All 1 tests passed.
-CONSOLE: unittest-suite-success
-DONE
+PAINTED 1 FRAMES

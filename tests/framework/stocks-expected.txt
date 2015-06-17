@@ -3,7 +3,6 @@ CONSOLE:
 PAINT FOR FRAME #1 ----------------------------------------------
 1 | TestDisplayList() constructor: 800.0 x 600.0
 ------------------------------------------------------------------------
-CONSOLE: unittest-suite-wait-for-done
 CONSOLE: 
 PAINT FOR FRAME #2 ----------------------------------------------
 2 | TestDisplayList() constructor: 800.0 x 600.0
@@ -52,8 +51,4 @@ PAINT FOR FRAME #2 ----------------------------------------------
 2 |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
 2 |  |  |  | restore
 ------------------------------------------------------------------------
-CONSOLE: PASS: launching stock app
-CONSOLE: 
-CONSOLE: All 1 tests passed.
-CONSOLE: unittest-suite-success
-DONE
+PAINTED 2 FRAMES

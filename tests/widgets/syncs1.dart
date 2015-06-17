@@ -81,20 +81,14 @@ class FiddleApp extends App {
   }
 }
 
-main() {
+main() async {
   TestRenderView renderViewOverride = new TestRenderView();
   FiddleApp app = new FiddleApp();
   runApp(app, renderViewOverride: renderViewOverride);
-  new Future.microtask(() {
-    renderViewOverride.checkFrame();
-    app.toggle();
-    new Future.microtask(() {
-      renderViewOverride.checkFrame();
-      app.toggle();
-      new Future.microtask(() {
-        renderViewOverride.checkFrame();
-        renderViewOverride.endTest();
-      });
-    });
-  });
+  await renderViewOverride.checkFrame();
+  app.toggle();
+  await renderViewOverride.checkFrame();
+  app.toggle();
+  await renderViewOverride.checkFrame();
+  renderViewOverride.endTest();
 }

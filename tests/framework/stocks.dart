@@ -9,16 +9,10 @@ import 'package:sky/widgets/widget.dart';
 
 import '../../examples/stocks2/lib/stock_app.dart';
 import '../resources/display_list.dart';
-import '../resources/third_party/unittest/unittest.dart';
-import '../resources/unit.dart';
 
-void main() {
-  initUnit();
-
+main() async {
   TestRenderView testRenderView = new TestRenderView();
-
-  test("launching stock app", () {
-    runApp(new StocksApp(), renderViewOverride: testRenderView);
-    new Future.microtask(testRenderView.checkFrame);
-  });
+  runApp(new StocksApp(), renderViewOverride: testRenderView);
+  await testRenderView.checkFrame();
+  testRenderView.endTest();
 }
