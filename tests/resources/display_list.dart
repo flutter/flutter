@@ -1,7 +1,9 @@
 
+import 'dart:async';
 import 'dart:sky' as sky;
 import "dart:sky.internals" as internals;
 
+import 'package:sky/widgets/basic.dart';
 import 'package:sky/rendering/box.dart';
 import 'package:sky/rendering/object.dart';
 
@@ -155,4 +157,30 @@ class TestRenderView extends RenderView {
     internals.notifyTestComplete("PAINTED $frame FRAMES");
   }
 
+}
+
+class TestApp extends App {
+  TestApp({
+    this.builder,
+    RenderView renderViewOverride
+  }) : super(renderViewOverride: renderViewOverride);
+
+  Function builder;
+
+  Widget build() {
+    return builder();
+  }
+}
+
+class WidgetTester {
+  TestRenderView renderView = new TestRenderView();
+
+  Future test(Function builder) {
+    new TestApp(renderViewOverride: renderView, builder: builder);
+    return new Future.microtask(renderView.checkFrame);
+  }
+
+  Future endTest() {
+    return new Future.microtask(renderView.endTest);
+  }
 }
