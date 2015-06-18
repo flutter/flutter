@@ -22,7 +22,13 @@ int EventFlagsToWebInputEventModifiers(int flags) {
       (flags & mojo::EVENT_FLAGS_CAPS_LOCK_DOWN ?
        blink::WebInputEvent::CapsLockOn : 0) |
       (flags & mojo::EVENT_FLAGS_ALT_DOWN ?
-       blink::WebInputEvent::AltKey : 0);
+       blink::WebInputEvent::AltKey : 0) |
+      (flags & mojo::EVENT_FLAGS_LEFT_MOUSE_BUTTON ?
+       blink::WebInputEvent::LeftButtonDown : 0) |
+      (flags & mojo::EVENT_FLAGS_MIDDLE_MOUSE_BUTTON ?
+       blink::WebInputEvent::MiddleButtonDown : 0) |
+      (flags & mojo::EVENT_FLAGS_RIGHT_MOUSE_BUTTON ?
+       blink::WebInputEvent::RightButtonDown : 0);
 }
 
 int UIEventFlagsToWebInputEventModifiers(int flags) {
@@ -66,6 +72,13 @@ scoped_ptr<blink::WebInputEvent> BuildWebPointerEvent(
     web_event->pointer = event->pointer_data->pointer_id;
   } else {
     web_event->kind = blink::WebPointerEvent::Mouse;
+    // Set the buttons according to http://www.w3.org/TR/pointerevents/
+    int buttons = 0;
+    int modifiers = web_event->modifiers;
+    buttons |= modifiers & blink::WebInputEvent::LeftButtonDown ? 1 << 0 : 0;
+    buttons |= modifiers & blink::WebInputEvent::RightButtonDown ? 1 << 1 : 0;
+    buttons |= modifiers & blink::WebInputEvent::MiddleButtonDown ? 1 << 2 : 0;
+    web_event->buttons = buttons;
   }
 
   web_event->x = event->pointer_data->x / device_pixel_ratio;
