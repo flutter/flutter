@@ -381,7 +381,7 @@ class Inline extends LeafRenderObjectWrapper {
 }
 
 class Text extends Component {
-  Text(data, { String key, TextStyle this.style }) : super(key: key);
+  Text(this.data, { String key, TextStyle this.style }) : super(key: key);
   final String data;
   final TextStyle style;
   bool get interchangeable => true;
