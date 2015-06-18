@@ -221,4 +221,159 @@ button:
 State
 -----
 
-TODO(abarth)
+By default, components are stateless. Components usually receive
+arguments from their parent component in their constructor, which they typically
+store in `final` member variables. When a component is asked to `build`, it uses
+these stored values to derive new arguments for the subcomponents it creates.
+For example, the generic version of `MyButton` above follows this pattern. In
+this way, state naturally flows "down" the component hierachy.
+
+Some components, however, have mutable state that represents the transient state
+of that part of the user interface. For example, consider a dialog widget with
+a checkbox. While the dialog is open, the user might check and uncheck the
+checkbox several times before closing the dialog and committing the final value
+of the checkbox to the underlying application data model.
+
+```dart
+class MyCheckbox extends Component {
+  MyCheckbox({ this.value, this.onChanged });
+
+  final bool value;
+  final Function onChanged;
+
+  Widget build() {
+    Color color = value ? const Color(0xFF00FF00) : const Color(0xFF0000FF);
+    return new Listener(
+      onGestureTap: (_) => onChanged(!value),
+      child: new Container(
+        height: 25.0,
+        width: 25.0,
+        decoration: new BoxDecoration(backgroundColor: color)
+      )
+    );
+  }
+}
+
+class MyDialog extends Component {
+  MyDialog({ this.onDismissed }) : super(stateful: true);
+
+  Function onDismissed;
+  bool _checkboxValue = false;
+
+  void _handleCheckboxValueChanged(bool value) {
+    setState(() {
+      _checkboxValue = value;
+    });
+  }
+
+  void syncFields(MyDialog source) {
+    onDismissed = source.onDismissed;
+  }
+
+  Widget build() {
+    return new Flex([
+      new MyCheckbox(
+        value: _checkboxValue,
+        onChanged: _handleCheckboxValueChanged
+      ),
+      new MyButton(
+        onPressed: () => onDismissed(_checkboxValue),
+        child: new Text("Save")
+      ),
+    ],
+    justifyContent: FlexJustifyContent.center);
+  }
+}
+```
+
+The `MyCheckbox` component follows the pattern for stateless components. It
+stores the values it receives in its constructor in `final` member variables,
+which it then uses during its `build` function. Notice that when the user taps
+on the checkbox, the checkbox itself doesn't use `value`. Instead, the checkbox
+calls a function it received from its parent component. This pattern lets you
+store state higher in the component hierarchy, which causes the state to persist
+for longer periods of time. In the extreme, the state stored on the `App`
+component persists for the lifetime of the application.
+
+The `MyDialog` component is more complicated because it is a stateful component.
+Let's walk through the differences in `MyDialog` caused by its being stateful:
+
+ * `MyDialog` passes `stateful: true` to the `Component` constructor, marking
+   the component stateful.
+
+ * `MyDialog` has non-`final` member variables. Over the lifetime of the dialog,
+   we'll need to modify the values of these member variables, which means we
+   cannot mark them `final`.
+
+ * `MyDialog` has private member variables. By convention, components store
+   values they receive from their parent in public member variables and store
+   their own internal, transient state in private member variables. There's no
+   requirement to follow this convention, but we've found that it helps keep us
+   organized.
+
+ * Whenever `MyDialog` modifies its transient state, the dialog does so inside
+   a `setState` callback. Using `setState` is important because it marks the
+   component as dirty and schedules it to be rebuilt. If a component modifies
+   its transient state outside of a `setState` callback, the framework won't
+   know that the component has changed state and might not call the component's
+   `build` function, which means the user interface might not update to reflect
+   the changed state.
+
+ * `MyDialog` implements the `syncFields` member function. To understand
+   `syncFields`, we'll need to dive a bit deeper into how the `build` function
+   is used by the framework.
+
+   A component's `build` function returns a tree of widgets that represent a
+   "virtual" description of its appearance. The first time the framework calls
+   `build`, the framework walks this description and creates a "physical" tree
+   of `RenderObjects` that matches the description. When the framework calls
+   `build` again, the component still returns a fresh description of its
+   appearence, but this time the framework compares the new description with the
+   previous description and makes the minimal modifications to the underlying
+   `RenderObjects` to make them match the new description.
+
+   In this process, old stateless components are discarded and the new stateless
+   components created by the parent component are retained in the widget
+   hierchy. Old _stateful_ components, however, cannot simply be discarded
+   because they contain state that needs to be preserved. Instead, the old
+   stateful components are retained in the widget hiearchy and asked to
+   `syncFields` with the new instance of the component created by the parent in
+   its `build` function.
+
+   Without `syncFields`, the new values the parent component passed to the
+   `MyDialog` constructor in the parent's `build` function would be lost because
+   they would be stored only as member variables on the new instance of the
+   component, which is not retained in the component hiearchy. Typically, the
+   `syncFields` function in a component will copy the public member
+   variables from the `source` instance of the component to the retained
+   instance of the component because, by convention, these public member
+   variables hold the values passed in by the parent component.
+
+Finally, when the user taps on the "Save" button, `MyDialog` follows the same
+pattern as `MyCheckbox` and calls a function passed in by its parent component
+to return the final value of the checkbox up the hierarchy.
+
+Keys
+----
+
+If a component requires fine-grained control over which widgets sync with each
+other, the component can assign keys to the widgets it builds. Without keys, the
+framework matches widgets in the current and previous build according to their
+`runtimeType` and the order in which they appear. With keys, the framework
+requires that the two widgets have the same `key` as well as the same
+`runtimeType`.
+
+Keys are most useful in components that build many instances of the same type of
+widget. For example, consider an infinite list component that builds just enough
+copies of a particular widget to fill its visible region:
+
+ * Without keys, the first entry in the current build would always sync with the
+   first entry in the previous build, even if, semantically, the first entry in
+   the list just scrolled off screen and is no longer visible in the viewport.
+
+ * By assigning each entry in the list a "semantic" key, the infinite list can
+   be more efficient because the framework will sync entries with matching
+   semantic keys and therefore similiar (or identical) visual appearances.
+   Moreover, syncing the entries semantically means that state retained in
+   stateful subcomponents will remain attached to the same semantic entry rather
+   than the entry in the same numerical position in the viewport.
