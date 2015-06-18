@@ -91,10 +91,13 @@ const uint8_t* Symbolizer(Dart_NativeFunction native_function) {
 }
 
 const char kLibraryName[] = "dart:sky.internals";
+
+// When editing this, also update sky/sdk/lib/internals.dart
+// so that the analyzer can see it
 const char kLibrarySource[] = R"DART(
 String contentAsText() native "contentAsText";
-void notifyTestComplete(String test_result) native "notifyTestComplete";
 String renderTreeAsText() native "renderTreeAsText";
+void notifyTestComplete(String test_result) native "notifyTestComplete";
 int takeShellProxyHandle() native "takeShellProxyHandle";
 int takeServicesProvidedByEmbedder() native "takeServicesProvidedByEmbedder";
 int takeServicesProvidedToEmbedder() native "takeServicesProvidedToEmbedder";

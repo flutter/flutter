@@ -4,5 +4,11 @@
 
 library sky.internals;
 
-int takeServicesProvidedByEmbedder() native "takeServicesProvidedByEmbedder";
+String contentAsText() native "contentAsText";
+String renderTreeAsText() native "renderTreeAsText";
+void notifyTestComplete(String test_result) native "notifyTestComplete";
 
+int takeShellProxyHandle() native "takeShellProxyHandle";
+int takeServicesProvidedByEmbedder() native "takeServicesProvidedByEmbedder";
+int takeServicesProvidedToEmbedder() native "takeServicesProvidedToEmbedder";
+int takeServiceRegistry() native "takeServiceRegistry";
