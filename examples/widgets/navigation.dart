@@ -4,13 +4,12 @@
 
 import 'package:sky/widgets/basic.dart';
 import 'package:sky/widgets/navigator.dart';
-import 'package:sky/widgets/transition.dart';
 import 'package:sky/widgets/raised_button.dart';
 
 List<Route> routes = [
   new Route(
     name: 'home',
-    builder: (navigator) => new Container(
+    builder: (navigator, route) => new Container(
       padding: const EdgeDims.all(20.0),
       decoration: new BoxDecoration(backgroundColor: const Color(0xFFCCCCCC)),
       child: new Block([
@@ -28,14 +27,14 @@ List<Route> routes = [
   ),
   new Route(
     name: 'shopping',
-    builder: (navigator) => new Container(
+    builder: (navigator, route) => new Container(
       padding: const EdgeDims.all(20.0),
       decoration: new BoxDecoration(backgroundColor: const Color(0xFFBF5FFF)),
       child: new Block([
         new Text("Village Shop"),
         new RaisedButton(
           child: new Text('RETURN HOME'),
-          onPressed: () => navigator.back()
+          onPressed: () => navigator.pop()
         ),
         new RaisedButton(
           child: new Text('GO TO DUNGEON'),
@@ -46,7 +45,7 @@ List<Route> routes = [
   ),
   new Route(
     name: 'adventure',
-    builder: (navigator) => new Container(
+    builder: (navigator, route) => new Container(
       padding: const EdgeDims.all(20.0),
       decoration: new BoxDecoration(backgroundColor: const Color(0xFFDC143C)),
       child: new Block([

@@ -54,9 +54,9 @@ class DrawerController {
 
   bool get isClosed => position.value == -_kWidth;
   bool get _isMostlyClosed => position.value <= -_kWidth / 2;
-  void toggle() => _isMostlyClosed ? _open() : _close();
+  void toggle() => _isMostlyClosed ? open() : close();
 
-  void handleMaskTap(_) => _close();
+  void handleMaskTap(_) => close();
   void handlePointerDown(_) => position.stop();
 
   void handlePointerMove(sky.PointerEvent event) {
@@ -75,11 +75,11 @@ class DrawerController {
       _settle();
   }
 
-  void _open() => _animateToPosition(0.0);
+  void open() => _animateToPosition(0.0);
 
-  void _close() => _animateToPosition(-_kWidth);
+  void close() => _animateToPosition(-_kWidth);
 
-  void _settle() => _isMostlyClosed ? _close() : _open();
+  void _settle() => _isMostlyClosed ? close() : open();
 
   void _animateToPosition(double targetPosition) {
     double distance = (targetPosition - position.value).abs();

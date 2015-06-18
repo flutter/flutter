@@ -4,18 +4,34 @@
 
 import 'basic.dart';
 
-typedef Widget Builder(Navigator navigator);
+typedef Widget Builder(Navigator navigator, RouteBase route);
 
 abstract class RouteBase {
   RouteBase({ this.name });
   final String name;
-  Widget build(Navigator navigator);
+  Widget build(Navigator navigator, RouteBase route);
+  void popState() { }
 }
 
 class Route extends RouteBase {
   Route({ String name, this.builder }) : super(name: name);
   final Builder builder;
-  Widget build(Navigator navigator) => builder(navigator);
+  Widget build(Navigator navigator, RouteBase route) => builder(navigator, route);
+}
+
+class RouteState extends RouteBase {
+
+  RouteState({this.callback, this.route, String name}) : super(name: name);
+
+  RouteBase route;
+  Function callback;
+
+  Widget build(Navigator navigator, _) => route.build(navigator, this);
+
+  void popState() {
+    if (callback != null)
+      callback(this);
+  }
 }
 
 class NavigationState {
@@ -51,30 +67,32 @@ class NavigationState {
 
   void pop() {
     if (historyIndex > 0) {
+      history[historyIndex].popState();
       history.removeLast();
       historyIndex--;
     }
-  }
-
-  void back() {
-    if (historyIndex > 0)
-      historyIndex--;
-  }
-
-  void forward() {
-    historyIndex++;
-    assert(historyIndex < history.length);
   }
 }
 
 class Navigator extends Component {
 
-  Navigator(this.state, { String key }) : super(key: key);
+  Navigator(this.state, { String key }) : super(key: key, stateful: true);
 
   NavigationState state;
 
   void syncFields(Navigator source) {
     state = source.state;
+  }
+
+  RouteBase get currentRoute => state.currentRoute;
+
+  void pushState(String name, Function callback) {
+    RouteBase route = new RouteState(
+      name: name,
+      callback: callback,
+      route: state.currentRoute
+    );
+    push(route);
   }
 
   void pushNamed(String name) {
@@ -95,19 +113,7 @@ class Navigator extends Component {
     });
   }
 
-  void back() {
-    setState(() {
-      state.back();
-    });
-  }
-
-  void forward() {
-    setState(() {
-      state.forward();
-    });
-  }
-
   Widget build() {
-    return state.currentRoute.build(this);
+    return state.currentRoute.build(this, state.currentRoute);
   }
 }
