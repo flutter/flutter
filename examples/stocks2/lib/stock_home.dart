@@ -29,19 +29,19 @@ enum StockMode { optimistic, pessimistic }
 
 class StockHome extends Component {
 
-  StockHome(this._navigator) {
+  StockHome(this.navigator, RouteBase route, this.stocks) : super(stateful: true) {
     // if (debug)
     //   new Timer(new Duration(seconds: 1), dumpState);
-    new StockDataFetcher((StockData data) {
-      setState(() {
-        data.appendTo(_stocks);
-      });
-    });
     _drawerController = new DrawerController(_handleDrawerStatusChanged);
   }
 
-  List<Stock> _stocks = [];
-  Navigator _navigator;
+  void syncFields(StockHome source) {
+    navigator = source.navigator;
+    stocks = source.stocks;
+  }
+
+  Navigator navigator;
+  List<Stock> stocks;
 
   bool _isSearching = false;
   String _searchQuery;
@@ -69,6 +69,9 @@ class StockHome extends Component {
   bool _drawerShowing = false;
 
   void _handleDrawerStatusChanged(bool showing) {
+    if (!showing && navigator.currentRoute.name == "/drawer") {
+      navigator.pop();
+    }
     setState(() {
       _drawerShowing = showing;
     });
@@ -137,7 +140,7 @@ class StockHome extends Component {
         new MenuDivider(),
         new MenuItem(
           icon: 'action/settings',
-          onPressed: () => _navigator.pushNamed('/settings'),
+          onPressed: () => navigator.pushNamed('/settings'),
           children: [new Text('Settings')]),
         new MenuItem(
           icon: 'action/help',
@@ -146,11 +149,18 @@ class StockHome extends Component {
     );
   }
 
+  void _handleOpenDrawer() {
+    _drawerController.open();
+    navigator.pushState("/drawer", (_) {
+      _drawerController.close();
+    });
+  }
+
   Widget buildToolBar() {
     return new ToolBar(
         left: new IconButton(
           icon: 'navigation/menu_white',
-          onPressed: _drawerController.toggle),
+          onPressed: _handleOpenDrawer),
         center: new Text('Stocks', style: typography.white.title),
         right: [
           new IconButton(
@@ -194,7 +204,7 @@ class StockHome extends Component {
     List<Widget> overlays = [
       new Scaffold(
         toolbar: _isSearching ? buildSearchBar() : buildToolBar(),
-        body: new Stocklist(stocks: _stocks, query: _searchQuery),
+        body: new Stocklist(stocks: stocks, query: _searchQuery),
         floatingActionButton: new FloatingActionButton(
           child: new Icon(type: 'content/add_white', size: 24)
         ),
