@@ -4,7 +4,6 @@
 
 import 'dart:async';
 
-import 'package:sky/app/view.dart';
 import 'package:sky/widgets/widget.dart';
 
 import '../../examples/widgets/sector.dart';

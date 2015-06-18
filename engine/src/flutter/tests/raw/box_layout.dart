@@ -1,7 +1,6 @@
 import 'dart:math' as math;
 import 'dart:sky' as sky;
 
-import 'package:sky/app/view.dart';
 import 'package:sky/rendering/block.dart';
 import 'package:sky/rendering/box.dart';
 import 'package:sky/rendering/object.dart';
