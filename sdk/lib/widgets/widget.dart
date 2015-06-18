@@ -820,12 +820,12 @@ abstract class App extends Component {
 
   void didMount() {
     super.didMount();
-    WidgetAppView.appView.addEventListener(_handleEvent);
+    SkyBinding.instance.addEventListener(_handleEvent);
   }
 
   void didUnmount() {
     super.didUnmount();
-    WidgetAppView.appView.removeEventListener(_handleEvent);
+    SkyBinding.instance.removeEventListener(_handleEvent);
   }
 
   // Override this to handle back button behavior in your app
