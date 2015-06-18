@@ -9,7 +9,9 @@ abstract class NodeWithSize extends Node {
     pivot = Point.origin;
   }
 
-  NodeWithSize.withSize(Size this.size, [Point this.pivot]);
+  NodeWithSize.withSize(Size this.size, [Point this.pivot]) {
+    if (pivot == null) pivot = Point.origin;
+  }
 
   void applyTransformForPivot(PictureRecorder canvas) {
     if (pivot.x != 0 || pivot.y != 0) {

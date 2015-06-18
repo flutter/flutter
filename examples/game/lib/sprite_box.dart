@@ -28,7 +28,8 @@ class SpriteBox extends RenderBox {
 
   // Cached transformation matrix
   Matrix4 _transformMatrix;
-  bool _transformMatrixIsDirty;
+
+  List<Node> _eventTargets;
 
   // Setup
 
@@ -46,8 +47,6 @@ class SpriteBox extends RenderBox {
     transformMode = mode;
     _systemWidth = width;
     _systemHeight = height;
-
-    _transformMatrixIsDirty = true;
 
     _scheduleTick();
   }
@@ -68,20 +67,80 @@ class SpriteBox extends RenderBox {
 
   void performLayout() {
     size = constraints.constrain(Size.infinite);
-    _transformMatrixIsDirty = true;
+    _invalidateTransformMatrix();
     _callSpriteBoxPerformedLayout(_rootNode);
   }
 
   // Event handling
 
-  void handleEvent(Event event, BoxHitTestEntry entry) {
+  void _addEventTargets(Node node, List<Node> eventTargets) {
+    if (node.userInteractionEnabled) {
+      eventTargets.add(node);
+    }
+    for (Node child in node.children) {
+      _addEventTargets(child, eventTargets);
+    }
+  }
+
+  void handleEvent(Event event, SpriteBoxHitTestEntry entry) {
+    if (event is PointerEvent) {
+
+      if (event.type == 'pointerdown') {
+        // Build list of event targets
+        if (_eventTargets == null) {
+          _eventTargets = [];
+          _addEventTargets(_rootNode, _eventTargets);
+        }
+
+        // Find the once that are hit by the pointer
+        List<Node> nodeTargets = [];
+        for (int i = _eventTargets.length - 1; i >= 0; i--) {
+          Node node = _eventTargets[i];
+
+          // Check if the node is ready to handle a pointer
+          if (node.handleMultiplePointers || node._handlingPointer == null) {
+            // Do the hit test
+            Point posInNodeSpace = node.convertPointToNodeSpace(entry.localPosition);
+            if (node.hitTest(posInNodeSpace)) {
+              nodeTargets.add(node);
+              node._handlingPointer = event.pointer;
+            }
+          }
+        }
+
+        entry.nodeTargets = nodeTargets;
+      }
+
+      // Pass the event down to nodes that were hit by the pointerdown
+      List<Node> targets = entry.nodeTargets;
+      for (Node node in targets) {
+        // Check if this event should be dispatched
+        if (node.handleMultiplePointers || event.pointer == node._handlingPointer) {
+          // Dispatch event
+          bool consumedEvent = node.handleEvent(new SpriteBoxEvent(new Point(event.x, event.y), event.type, event.pointer));
+          if (consumedEvent == null || consumedEvent) break;
+        }
+      }
+
+      // De-register pointer for nodes that doesn't handle multiple pointers
+      for (Node node in targets) {
+        if (event.type == 'pointerup' || event.type == 'pointercancel') {
+          node._handlingPointer = null;
+        }
+      }
+    }
+  }
+
+  bool hitTest(HitTestResult result, { Point position }) {
+    result.add(new SpriteBoxHitTestEntry(this, position));
+    return true;
   }
 
   // Rendering
 
   Matrix4 get transformMatrix {
     // Get cached matrix if available
-    if (!_transformMatrixIsDirty && _transformMatrix != null) {
+    if (_transformMatrix != null) {
       return _transformMatrix;
     }
 
@@ -143,6 +202,11 @@ class SpriteBox extends RenderBox {
     _transformMatrix.scale(scaleX, scaleY);
 
     return _transformMatrix;
+  }
+
+  void _invalidateTransformMatrix() {
+    _transformMatrix = null;
+    _rootNode._invalidateToBoxTransformMatrix();
   }
 
   void paint(RenderObjectDisplayList canvas) {
@@ -224,4 +288,17 @@ class SpriteBox extends RenderBox {
       list.add(node);
     }
   }
+}
+
+class SpriteBoxHitTestEntry extends BoxHitTestEntry {
+  List<Node> nodeTargets;
+  SpriteBoxHitTestEntry(RenderBox target, Point localPosition) : super(target, localPosition);
+}
+
+class SpriteBoxEvent {
+  Point boxPosition;
+  String type;
+  int pointer;
+
+  SpriteBoxEvent(this.boxPosition, this.type, this.pointer);
 }

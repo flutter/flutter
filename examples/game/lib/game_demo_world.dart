@@ -70,6 +70,9 @@ class GameDemoWorld extends NodeWithSize {
 
     // Add nebula
     addNebula();
+
+    userInteractionEnabled = true;
+    handleMultiplePointers = true;
   }
 
   // Methods for adding game objects
@@ -200,6 +203,73 @@ class GameDemoWorld extends NodeWithSize {
   void controlFire() {
     addLaser();
   }
+
+  // Handle pointer events
+
+  int _firstPointer = -1;
+  int _secondPointer = -1;
+  Point _firstPointerDownPos;
+
+  bool handleEvent(SpriteBoxEvent event) {
+    Point pointerPos = convertPointToNodeSpace(event.boxPosition);
+    int pointer = event.pointer;
+
+    switch (event.type) {
+      case 'pointerdown':
+        if (_firstPointer == -1) {
+          // Assign the first pointer
+          _firstPointer = pointer;
+          _firstPointerDownPos = pointerPos;
+        }
+        else if (_secondPointer == -1) {
+          // Assign second pointer
+          _secondPointer = pointer;
+          controlFire();
+        }
+        else {
+          // There is a pointer used for steering, let's fire instead
+          controlFire();
+        }
+        break;
+      case 'pointermove':
+        if (pointer == _firstPointer) {
+          // Handle turning control
+          double joystickX = 0.0;
+          double deltaX = pointerPos.x - _firstPointerDownPos.x;
+          if (deltaX > _steeringThreshold || deltaX < -_steeringThreshold) {
+            joystickX = (deltaX - _steeringThreshold)/(_steeringMax - _steeringThreshold);
+            if (joystickX > 1.0) joystickX = 1.0;
+            if (joystickX < -1.0) joystickX = -1.0;
+          }
+
+          double joystickY = 0.0;
+          double deltaY = pointerPos.y - _firstPointerDownPos.y;
+          if (deltaY > _steeringThreshold || deltaY < -_steeringThreshold) {
+            joystickY = (deltaY - _steeringThreshold)/(_steeringMax - _steeringThreshold);
+            if (joystickY > 1.0) joystickY = 1.0;
+            if (joystickY < -1.0) joystickY = -1.0;
+          }
+
+          controlSteering(joystickX, joystickY);
+        }
+        break;
+      case 'pointerup':
+      case 'pointercancel':
+        if (pointer == _firstPointer) {
+          // Un-assign the first pointer
+          _firstPointer = -1;
+          _firstPointerDownPos = null;
+          controlSteering(0.0, 0.0);
+        }
+        else if (pointer == _secondPointer) {
+          _secondPointer = -1;
+        }
+        break;
+      default:
+        break;
+    }
+    return true;
+  }
 }
 
 // Game objects
@@ -230,6 +300,18 @@ class Asteroid extends Sprite {
 
     _movementVector = new Point(_rand.nextDouble() * _maxAsteroidSpeed * 2 - _maxAsteroidSpeed,
                                 _rand.nextDouble() * _maxAsteroidSpeed * 2 - _maxAsteroidSpeed);
+
+    userInteractionEnabled = true;
+  }
+
+  bool handleEvent(SpriteBoxEvent event) {
+    if (event.type == "pointerdown") {
+      colorOverlay = new Color(0x99ff0000);
+    }
+    else if (event.type == "pointerup") {
+      colorOverlay = null;
+    }
+    return false;
   }
 }
 
