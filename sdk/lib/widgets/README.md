@@ -43,21 +43,21 @@ Basic Widgets
 Sky comes with a suite of powerful basic widgets, of which the following are
 very commonly used:
 
- * `Text`. The `Text` widget lets you create a run of styled text within your
+ * `Text`: The `Text` widget lets you create a run of styled text within your
    application.
 
- * `Flex`. The `Flex` widget lets you create flexible layouts in both the
+ * `Flex`: The `Flex` widget lets you create flexible layouts in both the
    horizontal and vertical direction. Its design is based on the web's flexbox
    layout model. You can also use the simpler `Block` widget to create vertical
    layouts of inflexible items.
 
- * `Container`. The `Container` widget lets you create rectangular visual
+ * `Container`: The `Container` widget lets you create rectangular visual
    element. A container can be decorated with a `BoxDecoration`, such as a
    background, a border, or a shadow. A `Container` can also have margins,
    padding, and constraints applied to its size. In addition, a `Container` can
    be transformed in three dimensional space using a matrix.
 
- * `Image`. The `Image` widget lets you display an image, referenced using a
+ * `Image`: The `Image` widget lets you display an image, referenced using a
    URL. The underlying image is cached, which means if several `Image` widgets
    refer to the same URL, they'll share the underlying image resource.
 
@@ -70,10 +70,10 @@ class MyToolBar extends Component {
   Widget build() {
     return new Container(
       decoration: const BoxDecoration(
-        backgroundColor: const Color(0xFF00FFFF),
+        backgroundColor: const Color(0xFF00FFFF)
       ),
       height: 56.0,
-      padding: new EdgeDims.symmetric(horizontal: 8.0),
+      padding: const EdgeDims.symmetric(horizontal: 8.0),
       child: new Flex([
         new Image(src: 'menu.png', size: const Size(25.0, 25.0)),
         new Flexible(child: new Text('My awesome toolbar')),
@@ -130,7 +130,7 @@ import 'package:sky/widgets/basic.dart';
 final BoxDecoration _decoration = new BoxDecoration(
   borderRadius: 5.0,
   gradient: new LinearGradient(
-    endPoints: [ Point.origin, new Point(0.0, 36.0) ],
+    endPoints: [ Point.origin, const Point(0.0, 36.0) ],
     colors: [ const Color(0xFFEEEEEE), const Color(0xFFCCCCCC) ]
   )
 );
@@ -143,8 +143,8 @@ class MyButton extends Component {
       },
       child: new Container(
         height: 36.0,
-        padding: new EdgeDims.all(8.0),
-        margin: new EdgeDims.symmetric(horizontal: 8.0),
+        padding: const EdgeDims.all(8.0),
+        margin: const EdgeDims.symmetric(horizontal: 8.0),
         decoration: _decoration,
         child: new Center(
           child: new Text('Engage')
@@ -187,8 +187,8 @@ class MyButton extends Component {
       },
       child: new Container(
         height: 36.0,
-        padding: new EdgeDims.all(8.0),
-        margin: new EdgeDims.symmetric(horizontal: 8.0),
+        padding: const EdgeDims.all(8.0),
+        margin: const EdgeDims.symmetric(horizontal: 8.0),
         decoration: _decoration,
         child: new Center(child: child)
       )
@@ -209,8 +209,8 @@ button:
         child: new Flex([
           new Image(src: 'thumbs-up.png', size: const Size(25.0, 25.0)),
           new Container(
-            padding: new EdgeDims.only(left: 10.0)
-            child: new Text('Thumbs up'),
+            padding: const EdgeDims.only(left: 10.0),
+            child: new Text('Thumbs up')
           )
         ])
       )
