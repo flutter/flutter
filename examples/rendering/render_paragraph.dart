@@ -3,15 +3,15 @@
 // found in the LICENSE file.
 
 import 'dart:sky';
-import 'package:sky/app/view.dart';
+
 import 'package:sky/painting/text_style.dart';
 import 'package:sky/rendering/box.dart';
-import 'package:sky/rendering/object.dart';
 import 'package:sky/rendering/flex.dart';
+import 'package:sky/rendering/object.dart';
 import 'package:sky/rendering/paragraph.dart';
-import '../lib/solid_color_box.dart';
+import 'package:sky/rendering/sky_binding.dart';
 
-AppView app;
+import '../lib/solid_color_box.dart';
 
 void main() {
   RenderFlex flexRoot = new RenderFlex(direction: FlexDirection.vertical);
@@ -42,5 +42,5 @@ Pancetta meatball tongue tenderloin rump tail jowl boudin.""";
   flexRoot.add(child);
   child.parentData.flex = 1;
 
-  app = new AppView(root: root);
+  new SkyBinding(root: root);
 }

@@ -35,8 +35,8 @@ class StocksApp extends App {
 void main() {
   print("starting stocks app!");
   runApp(new StocksApp());
-  WidgetAppView.appView.onFrame = () {
+  WidgetSkyBinding.skyBinding.onFrame = () {
     // uncomment this for debugging:
-    // WidgetAppView.appView.debugDumpRenderTree();
+    // WidgetSkyBinding.skyBinding.debugDumpRenderTree();
   };
 }

@@ -4,15 +4,15 @@
 
 import 'dart:sky';
 import 'dart:math' as math;
-import 'package:sky/app/view.dart';
-import 'package:sky/rendering/box.dart';
+
 import 'package:sky/rendering/block.dart';
+import 'package:sky/rendering/box.dart';
 import 'package:sky/rendering/flex.dart';
 import 'package:sky/rendering/object.dart';
 import 'package:sky/rendering/paragraph.dart';
-import '../lib/solid_color_box.dart';
+import 'package:sky/rendering/sky_binding.dart';
 
-AppView app;
+import '../lib/solid_color_box.dart';
 
 // Attempts to draw
 // http://www.w3.org/TR/2015/WD-css-flexbox-1-20150514/images/flex-pack.svg
@@ -42,5 +42,5 @@ void main() {
     child: new RenderPadding(child: table, padding: new EdgeDims.symmetric(vertical: 50.0))
   );
 
-  app = new AppView(root: root);
+  new SkyBinding(root: root);
 }

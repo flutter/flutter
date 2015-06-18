@@ -4,14 +4,16 @@
 
 import 'dart:sky';
 import 'dart:math' as math;
+
 import 'package:sky/framework/net/image_cache.dart' as image_cache;
-import 'package:sky/app/view.dart';
 import 'package:sky/painting/text_style.dart';
-import 'package:sky/rendering/box.dart';
 import 'package:sky/rendering/block.dart';
+import 'package:sky/rendering/box.dart';
 import 'package:sky/rendering/flex.dart';
 import 'package:sky/rendering/object.dart';
 import 'package:sky/rendering/paragraph.dart';
+import 'package:sky/rendering/sky_binding.dart';
+
 import '../lib/solid_color_box.dart';
 
 class Touch {
@@ -35,7 +37,6 @@ class RenderImageGrow extends RenderImage {
   }
 }
 
-AppView app;
 RenderImageGrow image;
 
 Map<int, Touch> touches = new Map();
@@ -95,6 +96,6 @@ Pancetta meatball tongue tenderloin rump tail jowl boudin.""";
     child: row
   );
 
-  app = new AppView(root: root);
+  new SkyBinding(root: root);
   view.setEventCallback(handleEvent);
 }

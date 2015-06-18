@@ -4,9 +4,9 @@
 
 import 'dart:sky' as sky;
 
-import '../rendering/box.dart';
-import '../rendering/object.dart';
-import 'scheduler.dart' as scheduler;
+import '../app/scheduler.dart' as scheduler;
+import 'box.dart';
+import 'object.dart';
 
 class PointerState {
   HitTestResult result;
@@ -17,9 +17,9 @@ class PointerState {
 
 typedef void EventListener(sky.Event event);
 
-class AppView {
+class SkyBinding {
 
-  AppView({ RenderBox root: null, RenderView renderViewOverride }) {
+  SkyBinding({ RenderBox root: null, RenderView renderViewOverride }) {
     assert(_app == null);
     _app = this;
 
@@ -41,7 +41,7 @@ class AppView {
     assert(_app == this);
   }
 
-  static AppView _app; // used to enforce that we're a singleton
+  static SkyBinding _app; // used to enforce that we're a singleton
 
   RenderView _renderView;
   RenderView get renderView => _renderView;

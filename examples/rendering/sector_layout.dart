@@ -4,9 +4,10 @@
 
 import 'dart:math' as math;
 import 'dart:sky' as sky;
-import 'package:sky/app/view.dart';
+
 import 'package:sky/rendering/box.dart';
 import 'package:sky/rendering/object.dart';
+import 'package:sky/rendering/sky_binding.dart';
 
 const double kTwoPi = 2 * math.PI;
 
@@ -522,5 +523,5 @@ RenderBox buildSectorExample() {
 }
 
 void main() {
-  new AppView(root: buildSectorExample());
+  new SkyBinding(root: buildSectorExample());
 }

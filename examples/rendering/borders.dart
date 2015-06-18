@@ -4,15 +4,12 @@
 
 import 'dart:math' as math;
 import 'dart:sky' as sky;
-import 'package:sky/app/view.dart';
-import 'package:sky/rendering/box.dart';
-import 'package:sky/rendering/block.dart';
 
-AppView app;
+import 'package:sky/rendering/block.dart';
+import 'package:sky/rendering/box.dart';
+import 'package:sky/rendering/sky_binding.dart';
 
 void main() {
-
-
   var root = new RenderBlock(children: [
     new RenderPadding(
       padding: new EdgeDims.all(10.0),
@@ -76,5 +73,5 @@ void main() {
       )
     ),
   ]);
-  app = new AppView(root: root);
+  new SkyBinding(root: root);
 }

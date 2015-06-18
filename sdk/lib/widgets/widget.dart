@@ -7,9 +7,9 @@ import 'dart:collection';
 import 'dart:mirrors';
 import 'dart:sky' as sky;
 
-import '../app/view.dart';
 import '../rendering/box.dart';
 import '../rendering/object.dart';
+import '../rendering/sky_binding.dart';
 
 export '../rendering/box.dart' show BoxConstraints, BoxDecoration, Border, BorderSide, EdgeDims;
 export '../rendering/flex.dart' show FlexDirection;
@@ -767,22 +767,22 @@ abstract class MultiChildRenderObjectWrapper extends RenderObjectWrapper {
 
 }
 
-class WidgetAppView extends AppView {
+class WidgetSkyBinding extends SkyBinding {
 
-  WidgetAppView({ RenderView renderViewOverride: null })
+  WidgetSkyBinding({ RenderView renderViewOverride: null })
       : super(renderViewOverride: renderViewOverride) {
-    assert(_appView == null);
+    assert(_skyBinding == null);
   }
 
-  static WidgetAppView _appView;
-  static AppView get appView => _appView;
-  static void initWidgetAppView({ RenderView renderViewOverride: null }) {
-    if (_appView == null)
-      _appView = new WidgetAppView(renderViewOverride: renderViewOverride);
+  static WidgetSkyBinding _skyBinding;
+  static SkyBinding get skyBinding => _skyBinding;
+  static void initWidgetSkyBinding({ RenderView renderViewOverride: null }) {
+    if (_skyBinding == null)
+      _skyBinding = new WidgetSkyBinding(renderViewOverride: renderViewOverride);
   }
 
   void dispatchEvent(sky.Event event, HitTestResult result) {
-    assert(_appView == this);
+    assert(_skyBinding == this);
     super.dispatchEvent(event, result);
     for (HitTestEntry entry in result.path.reversed) {
       Widget target = RenderObjectWrapper._getMounted(entry.target);
@@ -829,7 +829,7 @@ class RenderViewWrapper extends OneChildRenderObjectWrapper {
   RenderViewWrapper({ String key, Widget child }) : super(key: key, child: child);
 
   RenderView get root => super.root;
-  RenderView createNode() => WidgetAppView._appView.renderView;
+  RenderView createNode() => WidgetSkyBinding._skyBinding.renderView;
 }
 
 class AppContainer extends AbstractWidgetRoot {
@@ -841,7 +841,7 @@ class AppContainer extends AbstractWidgetRoot {
 }
 
 void runApp(App app, { RenderView renderViewOverride }) {
-  WidgetAppView.initWidgetAppView(renderViewOverride: renderViewOverride);
+  WidgetSkyBinding.initWidgetSkyBinding(renderViewOverride: renderViewOverride);
   new AppContainer(app);
 }
 

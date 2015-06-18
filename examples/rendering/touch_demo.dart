@@ -5,10 +5,10 @@
 import 'dart:math';
 import 'dart:sky';
 
-import 'package:sky/app/view.dart';
 import 'package:sky/rendering/box.dart';
 import 'package:sky/rendering/object.dart';
 import 'package:sky/rendering/paragraph.dart';
+import 'package:sky/rendering/sky_binding.dart';
 import 'package:sky/rendering/stack.dart';
 import 'package:sky/theme2/colors.dart';
 
@@ -77,8 +77,6 @@ class RenderTouchDemo extends RenderBox {
   }
 }
 
-AppView app;
-
 void main() {
   var paragraph = new RenderParagraph(new InlineText("Touch me!"));
   var stack = new RenderStack(children: [
@@ -89,5 +87,5 @@ void main() {
   // that it doesn't eat events.
   paragraph.parentData..top = 40.0
                       ..left = 20.0;
-  app = new AppView(root: stack);
+  new SkyBinding(root: stack);
 }
