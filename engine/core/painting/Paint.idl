@@ -15,4 +15,6 @@
   void setShader(Shader shader);
   void setStyle(PaintingStyle style);
   void setTransferMode(TransferMode transferMode);
+
+  DOMString toString();
 };

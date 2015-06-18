@@ -10,13 +10,20 @@ import 'package:sky/rendering/object.dart';
 import '../resources/display_list.dart';
 import '../resources/third_party/unittest/unittest.dart';
 import '../resources/unit.dart';
+import 'package:sky/theme2/colors.dart';
+import 'package:sky/theme2/shadows.dart';
 
 void main() {
   initUnit();
 
   test("should size to render view", () {
     RenderBox root = new RenderDecoratedBox(
-      decoration: new BoxDecoration(backgroundColor: const sky.Color(0xFF00FF00))
+      decoration: new BoxDecoration(
+        backgroundColor: const sky.Color(0xFF00FF00),
+        gradient: new RadialGradient(
+          center: Point.origin, radius: 500.0,
+          colors: [Yellow[500], Blue[500]]),
+        boxShadow: shadows[3])
     );
     new TestRenderView(root);
     expect(root.size.width, equals(sky.view.width));

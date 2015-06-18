@@ -10,12 +10,12 @@ PAINT FOR FRAME #2 ----------------------------------------------
 2 |  | TestDisplayList() constructor: 800.0 x 600.0
 2 |  | paintChild RenderDecoratedBox at Point(0.0, 0.0)
 2 |  |  | TestDisplayList() constructor: 800.0 x 600.0
-2 |  |  | drawRect(Rect.fromLTRB(0.0, 0.0, 800.0, 600.0), Paint(Color(0x7f000000)))
+2 |  |  | drawRect(Rect.fromLTRB(0.0, 0.0, 800.0, 600.0), Paint(color:Color(0x7f000000)))
 2 |  | paintChild RenderPositionedBox at Point(0.0, 0.0)
 2 |  |  | TestDisplayList() constructor: 800.0 x 600.0
 2 |  |  | paintChild RenderConstrainedBox at Point(260.0, 276.0)
 2 |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
-2 |  |  |  | drawRRect(Instance of 'RRect', Paint(Color(0xfffafafa)))
+2 |  |  |  | drawRRect(Instance of 'RRect', Paint(color:Color(0xfffafafa), drawLooper:true))
 2 |  |  |  | paintChild RenderParagraph at Point(0.0, 0.0)
 2 |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
 2 |  |  |  | paintChild RenderParagraph at Point(0.0, 16.0)

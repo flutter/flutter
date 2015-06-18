@@ -26,17 +26,12 @@ class TestDisplayList extends RenderObjectDisplayList {
     logger("${indent} ${s}");
   }
 
-  String explainPaint(Paint paint) {
-    assert(paint.toString() == "Instance of 'Paint'"); // if this assertion fails, remove all calls to explainPaint with just inlining $paint
-    return "Paint(${paint.color})";
-  }
-
   void save() {
     log("save");
   }
 
   void saveLayer(Rect bounds, Paint paint) {
-    log("saveLayer($bounds, ${explainPaint(paint)})");
+    log("saveLayer($bounds, $paint)");
   }
 
   void restore() {
@@ -76,7 +71,7 @@ class TestDisplayList extends RenderObjectDisplayList {
   }
 
   void drawLine(double x0, double y0, double x1, double y1, Paint paint) {
-    log("drawLine($x0, $y0, $x1, $y1, ${explainPaint(paint)})");
+    log("drawLine($x0, $y0, $x1, $y1, $paint)");
   }
 
   void drawPicture(sky.Picture picture) {
@@ -84,31 +79,31 @@ class TestDisplayList extends RenderObjectDisplayList {
   }
 
   void drawPaint(Paint paint) {
-    log("drawPaint(${explainPaint(paint)})");
+    log("drawPaint($paint)");
   }
 
   void drawRect(Rect rect, Paint paint) {
-    log("drawRect($rect, ${explainPaint(paint)})");
+    log("drawRect($rect, $paint)");
   }
 
   void drawRRect(sky.RRect rrect, Paint paint) {
-    log("drawRRect($rrect, ${explainPaint(paint)})");
+    log("drawRRect($rrect, $paint)");
   }
 
   void drawOval(Rect rect, Paint paint) {
-    log("drawOval($rect, ${explainPaint(paint)})");
+    log("drawOval($rect, $paint)");
   }
 
   void drawCircle(double x, double y, double radius, Paint paint) {
-    log("drawCircle($x, $y, $radius, ${explainPaint(paint)})");
+    log("drawCircle($x, $y, $radius, $paint)");
   }
 
   void drawPath(Path path, Paint paint) {
-    log("drawPath($path, ${explainPaint(paint)})");
+    log("drawPath($path, $paint)");
   }
 
   void drawImage(sky.Image image, double x, double y, Paint paint) {
-    log("drawImage($image, $x, $y, ${explainPaint(paint)})");
+    log("drawImage($image, $x, $y, $paint)");
   }
 
   void paintChild(RenderObject child, Point position) {
