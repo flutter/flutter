@@ -16,7 +16,7 @@ void main() {
       gradient: new RadialGradient(
         center: Point.origin, radius: 500.0,
         colors: [Yellow[500], Blue[500]]),
-      boxShadow: Shadow[3])
+      boxShadow: shadows[3])
   );
   var paddedBox = new RenderPadding(
     padding: const EdgeDims.all(50.0),

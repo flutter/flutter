@@ -17,7 +17,7 @@ void beginFrame(double timeStamp) {
         new DrawLooperLayerInfo()
           ..setPaintBits(PaintBits.all)
           ..setOffset(const Point(5.0, 5.0))
-          ..setColorMode(TransferMode.srcIn),
+          ..setColorMode(TransferMode.src),
         (Paint layerPaint) {
       layerPaint.color = const Color.fromARGB(128, 55, 55, 55);
       layerPaint.setMaskFilter(
