@@ -380,6 +380,29 @@ class Inline extends LeafRenderObjectWrapper {
 
 }
 
+class StyledText extends Component {
+  // elements ::= "string" | [<text-style> <elements>*]
+  // Where "string" is text to display and text-style is an instance of
+  // TextStyle. The text-style applies to all of the elements that follow.
+  StyledText({ this.elements, String key }) : super(key: key);
+
+  final dynamic elements;
+
+  InlineBase _toInline(dynamic element) {
+    if (element is String) {
+      return new InlineText(element);
+    }
+    if (element is Iterable && element.first is TextStyle) {
+      return new InlineStyle(element.first, element.skip(1).map(_toInline).toList());
+    }
+    throw new ArgumentError("invalid elements");
+  }
+
+  Widget build() {
+    return new Inline(text: _toInline(elements));
+  }
+}
+
 class Text extends Component {
   Text(this.data, { String key, TextStyle this.style }) : super(key: key);
   final String data;
