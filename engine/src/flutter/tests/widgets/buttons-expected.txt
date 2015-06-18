@@ -12,7 +12,7 @@ PAINT FOR FRAME #2 ----------------------------------------------
 2 |  |  | TestDisplayList() constructor: 800.0 x 600.0
 2 |  |  | paintChild RenderConstrainedBox at Point(8.0, 8.0)
 2 |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
-2 |  |  |  | drawRRect(Instance of 'RRect', Paint(Color(0xffe0e0e0)))
+2 |  |  |  | drawRRect(Instance of 'RRect', Paint(color:Color(0xffe0e0e0), drawLooper:true))
 2 |  |  |  | paintChild RenderPositionedBox at Point(8.0, 0.0)
 2 |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
 2 |  |  |  |  | paintChild RenderParagraph at Point(6.0, 10.0)
@@ -27,7 +27,7 @@ PAINT FOR FRAME #3 ----------------------------------------------
 3 |  |  | TestDisplayList() constructor: 800.0 x 600.0
 3 |  |  | paintChild RenderConstrainedBox at Point(8.0, 8.0)
 3 |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
-3 |  |  |  | drawRRect(Instance of 'RRect', Paint(Color(0xfffafafa)))
+3 |  |  |  | drawRRect(Instance of 'RRect', Paint(color:Color(0xfffafafa)))
 3 |  |  |  | paintChild RenderPositionedBox at Point(8.0, 0.0)
 3 |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
 3 |  |  |  |  | paintChild RenderParagraph at Point(6.0, 10.0)
@@ -40,8 +40,8 @@ PAINT FOR FRAME #4 ----------------------------------------------
 4 |  | TestDisplayList() constructor: 800.0 x 600.0
 4 |  | paintChild RenderDecoratedBox at Point(372.0, 272.0)
 4 |  |  | TestDisplayList() constructor: 800.0 x 600.0
-4 |  |  | drawCircle(28.0, 28.0, 28.0, Paint(Color(0xfff44336)))
-4 |  |  | saveLayer(Rect.fromLTRB(0.0, 0.0, 56.0, 56.0), Paint(Color(0xff000000)))
+4 |  |  | drawCircle(28.0, 28.0, 28.0, Paint(color:Color(0xfff44336), drawLooper:true))
+4 |  |  | saveLayer(Rect.fromLTRB(0.0, 0.0, 56.0, 56.0), Paint(color:Color(0xff000000)))
 4 |  |  | clipPath(Instance of 'Path')
 4 |  |  | paintChild RenderParagraph at Point(22.0, 20.0)
 4 |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
