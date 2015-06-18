@@ -1,0 +1,79 @@
+#!/usr/bin/env python
+# Copyright 2014 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import argparse
+import os
+import re
+import subprocess
+import sys
+
+SKY_TOOLS_DIR = os.path.dirname(os.path.abspath(__file__))
+SKY_ROOT = os.path.dirname(SKY_TOOLS_DIR)
+SRC_ROOT = os.path.dirname(SKY_ROOT)
+
+_IGNORED_PATTERNS = [
+  # Ignored because they're not indicative of specific errors.
+  re.compile(r'^$'),
+  re.compile(r'^Analyzing \['),
+  re.compile(r'^No issues found'),
+  re.compile(r'^[0-9]+ errors? and [0-9]+ warnings? found.'),
+  re.compile(r'^([0-9]+|No) (error|warning|issue)s? found.'),
+
+  # Ignored because they don't affect Sky code
+  re.compile(r'\[hint\] When compiled to JS, this test might return true when the left hand side is an int'),
+
+  # TODO: Remove once sdk-extensions are in place
+  re.compile(r'^\[error\] Native functions can only be declared in'),
+
+  # TODO: Fix all the warnings in the mojo packages
+  re.compile(r'.*/dart-pkg/mojom/'),
+  re.compile(r'.*/dart-pkg/mojo/'),
+
+  # TODO: Remove this once Sky no longer generates this warning.
+  # dartbug.com/22836
+  re.compile(r'.*cannot both be unnamed'),
+
+  # TODO: Remove this once Sky no longer generates this warning.
+  # dartbug.com/23606
+  re.compile(r'^\[warning] Missing concrete implementation of \'RenderObject.toString\''),
+]
+
+def main():
+    parser = argparse.ArgumentParser(description='Sky Analyzer')
+    parser.add_argument('--congratulate', action="store_true")
+    parser.add_argument('build_dir', type=str)
+    parser.add_argument('app_path', type=str)
+    args = parser.parse_args()
+    build_dir = args.build_dir
+    analyzer_path = os.path.join(SRC_ROOT, 'third_party/dart-sdk/dart-sdk/bin/dartanalyzer')
+    dart_sky_path = os.path.join(build_dir, 'gen/sky/bindings/dart_sky.dart')
+    dart_sky_internals_path = os.path.join(SRC_ROOT, 'sky/sdk/lib/internals.dart')
+    dart_sky_builtin_path = os.path.join(SRC_ROOT, 'sky/engine/bindings/builtin.dart')
+    packages_root = os.path.join(build_dir, 'gen/dart-pkg/packages')
+    analyzer_args = [analyzer_path,
+        "--url-mapping=dart:sky,%s" % dart_sky_path,
+        "--url-mapping=dart:sky.internals,%s" % dart_sky_internals_path,
+        "--url-mapping=dart:sky_builtin,%s" % dart_sky_builtin_path,
+        "--package-root", packages_root,
+        "--package-warnings",
+        args.app_path
+    ]
+    try:
+      subprocess.check_output(analyzer_args, stderr=subprocess.STDOUT)
+    except subprocess.CalledProcessError as e:
+      errors = [l for l in e.output.split('\n')
+                if not any(p.match(l) for p in _IGNORED_PATTERNS)]
+      if len(errors) > 0:
+        for error in errors:
+          print >> sys.stderr, error
+        # Propagate analyzer error code.
+        return e.returncode
+    # If we do not have any errors left after filtering, return 0.
+    if args.congratulate:
+      print >> sys.stdout, "No analyzer warnings!"
+    return 0
+
+if __name__ == '__main__':
+    sys.exit(main())

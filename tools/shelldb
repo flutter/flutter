@@ -46,23 +46,6 @@ PID_FILE_KEYS = frozenset([
 
 SYSTEM_LIBS_ROOT_PATH = '/tmp/device_libs'
 
-_IGNORED_PATTERNS = [
-  # Ignored because they're not indicative of specific errors.
-  re.compile(r'^$'),
-  re.compile(r'^Analyzing \['),
-  re.compile(r'^No issues found'),
-  re.compile(r'^[0-9]+ errors? and [0-9]+ warnings? found.'),
-  re.compile(r'^([0-9]+|No) (error|warning|issue)s? found.'),
-
-  # TODO: Remove once sdk-extensions are in place
-  re.compile(r'^\[error\] Native functions can only be declared in'),
-  # TODO: Remove this once dev SDK includes Uri.directory constructor.
-  re.compile(r'.*The class \'Uri\' does not have a constructor \'directory\''),
-  # TODO: Remove this once Sky no longer generates this warning.
-  # dartbug.com/22836
-  re.compile(r'.*cannot both be unnamed'),
-]
-
 # This 'strict dictionary' approach is useful for catching typos.
 class Pids(object):
     def __init__(self, known_keys, contents=None):
@@ -153,6 +136,17 @@ def ensure_assets_are_downloaded(build_dir):
                      'Running `download_material_design_icons` for you.')
         subprocess.check_call(
             [os.path.join(sky_pkg_lib_dir, 'download_material_design_icons')])
+
+
+class SetBuildDir(object):
+    def add_subparser(self, subparsers):
+        start_parser = subparsers.add_parser('set_build_dir',
+            help='force the build_dir to a particular value without starting Sky')
+        start_parser.add_argument('build_dir', type=str)
+        start_parser.set_defaults(func=self.run)
+
+    def run(self, args, pids):
+        pids['build_dir'] = os.path.abspath(args.build_dir)
 
 
 class StartSky(object):
@@ -426,6 +420,7 @@ class Analyze(object):
         analyze_parser = subparsers.add_parser('analyze',
             help=('run the dart analyzer with sky url mappings'))
         analyze_parser.add_argument('app_path', type=str)
+        analyze_parser.add_argument('--congratulate', action="store_true")
         analyze_parser.set_defaults(func=self.run)
 
     def run(self, args, pids):
@@ -433,38 +428,25 @@ class Analyze(object):
         if not build_dir:
             logging.fatal("pids file missing build_dir. Try 'start' first.")
             return 2
-        ANALYZER_PATH = 'third_party/dart-sdk/dart-sdk/bin/dartanalyzer'
-
-        bindings_path = os.path.join(build_dir, 'gen/sky/bindings')
-        sky_builtin_path = \
-            os.path.join(SRC_ROOT, 'sky/engine/bindings/builtin.dart')
-        sky_internals_path = \
-            os.path.join(SRC_ROOT, 'sky/sdk/lib/internals.dart')
-        dart_sky_path = os.path.join(bindings_path, 'dart_sky.dart')
-        analyzer_args = [ANALYZER_PATH,
-            "--url-mapping=dart:sky.internals,%s" % sky_internals_path,
-            "--url-mapping=dart:sky,%s" % dart_sky_path,
-            "--url-mapping=dart:sky_builtin,%s" % sky_builtin_path,
-            "--package-root", dev_packages_root(build_dir),
-            "--package-warnings",
+        analyzer_path = os.path.join(SRC_ROOT, 'sky/tools/skyanalyzer')
+        analyzer_args = [
+            analyzer_path,
+            build_dir,
             args.app_path
         ]
+        if args.congratulate:
+          analyzer_args.append('--congratulate')
         try:
-          subprocess.check_output(analyzer_args,
-                                  shell=False,
-                                  stderr=subprocess.STDOUT)
+          output = subprocess.check_output(analyzer_args, stderr=subprocess.STDOUT)
+          result = 0
         except subprocess.CalledProcessError as e:
-          errors = set(l for l in e.output.split('\n')
-                       if not any(p.match(l) for p in _IGNORED_PATTERNS))
-          # If we do not have any errors left after filtering, return 0.
-          if len(errors) == 0:
-            return 0
-          # Print errors.
-          for error in sorted(errors):
-            print >> sys.stderr, error
-          # Return analyzer error code.
-          return e.returncode
-        return 0
+          output = e.output
+          result = e.returncode
+        lines = output.split('\n')
+        lines.pop()
+        for line in lines:
+          print >> sys.stderr, line
+        return result
 
 
 class StartTracing(object):
@@ -519,6 +501,7 @@ class SkyShellRunner(object):
         subparsers = parser.add_subparsers(help='sub-command help')
 
         commands = [
+            SetBuildDir(),
             StartSky(),
             StopSky(),
             Analyze(),
