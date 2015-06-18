@@ -1,0 +1,8 @@
+CONSOLE: unittest-suite-wait-for-done
+CONSOLE: PASS: paint set to black
+CONSOLE: PASS: color created with out of bounds value
+CONSOLE: PASS: color created with wildly out of bounds value
+CONSOLE: 
+CONSOLE: All 3 tests passed.
+CONSOLE: unittest-suite-success
+DONE
