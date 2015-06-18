@@ -24,7 +24,7 @@ class HelloWorldApp extends App {
 }
 
 void main() {
-  new HelloWorldApp();
+  runApp(new HelloWorldApp());
 }
 ```
 
@@ -108,7 +108,7 @@ class DemoApp extends App {
 }
 
 void main() {
-  new DemoApp();
+  runApp(new DemoApp());
 }
 ```
 
