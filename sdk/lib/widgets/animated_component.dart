@@ -4,7 +4,7 @@
 
 import 'dart:async';
 
-import '../framework/animation/animated_value.dart';
+import '../animation/animated_value.dart';
 import 'basic.dart';
 
 typedef void SetterFunction(double value);

@@ -5,9 +5,9 @@
 import 'dart:math' as math;
 import 'dart:sky' as sky;
 
-import '../framework/animation/generators.dart';
-import '../framework/animation/mechanics.dart';
-import '../framework/animation/scroll_behavior.dart';
+import '../animation/generators.dart';
+import '../animation/mechanics.dart';
+import '../animation/scroll_behavior.dart';
 import '../theme2/edges.dart';
 import '../theme2/view_configuration.dart' as config;
 import 'basic.dart';

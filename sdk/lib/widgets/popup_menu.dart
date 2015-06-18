@@ -6,7 +6,7 @@ import 'dart:async';
 import 'dart:math' as math;
 import 'dart:sky' as sky;
 
-import '../framework/animation/animated_value.dart';
+import '../animation/animated_value.dart';
 import '../painting/box_painter.dart';
 import '../theme2/colors.dart';
 import '../theme2/shadows.dart';

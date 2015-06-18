@@ -5,8 +5,8 @@
 import 'dart:math' as math;
 import 'dart:sky' as sky;
 
-import '../framework/animation/animated_value.dart';
-import '../framework/animation/curves.dart';
+import '../animation/animated_value.dart';
+import '../animation/curves.dart';
 import '../rendering/box.dart';
 import '../rendering/object.dart';
 import 'basic.dart';

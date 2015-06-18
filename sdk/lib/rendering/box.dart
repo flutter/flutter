@@ -7,8 +7,8 @@ import 'dart:sky' as sky;
 
 import 'package:vector_math/vector_math.dart';
 
-import '../framework/debug/utils.dart';
-import '../framework/net/image_cache.dart' as image_cache;
+import '../debug/utils.dart';
+import '../mojo/net/image_cache.dart' as image_cache;
 import '../painting/box_painter.dart';
 import 'object.dart';
 
