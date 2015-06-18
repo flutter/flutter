@@ -416,7 +416,7 @@ abstract class Component extends Widget {
 
   void setState(Function fn()) {
     assert(!_disqualifiedFromEverAppearingAgain);
-    _stateful = true;
+    assert(_stateful);
     fn();
     if (_isBuilding || _dirty || !_mounted)
       return;
@@ -813,6 +813,10 @@ class WidgetSkyBinding extends SkyBinding {
 }
 
 abstract class App extends Component {
+
+  // Apps are assumed to be stateful
+  App({ String key }) : super(key: key, stateful: true);
+
   void _handleEvent(sky.Event event) {
     if (event.type == 'back')
       onBack();

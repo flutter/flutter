@@ -6,7 +6,7 @@ import 'basic.dart';
 
 abstract class ButtonBase extends Component {
 
-  ButtonBase({ String key, this.highlight: false }) : super(key: key);
+  ButtonBase({ String key, this.highlight: false }) : super(key: key, stateful: true);
 
   bool highlight;
 
