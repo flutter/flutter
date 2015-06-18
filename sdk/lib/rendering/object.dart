@@ -6,10 +6,13 @@ import 'dart:math' as math;
 import 'dart:sky' as sky;
 import 'dart:sky' show Point, Size, Rect, Color, Paint, Path;
 
-import '../app/scheduler.dart' as scheduler;
-import '../framework/node.dart';
+import '../base/hit_test.dart';
+import '../base/node.dart';
+import '../base/scheduler.dart' as scheduler;
 
 export 'dart:sky' show Point, Size, Rect, Color, Paint, Path;
+export '../base/hit_test.dart' show HitTestTarget, HitTestEntry, HitTestResult;
+
 
 class ParentData {
   void detach() {
@@ -34,7 +37,7 @@ class RenderObjectDisplayList extends sky.PictureRecorder {
   }
 }
 
-abstract class RenderObject extends AbstractNode {
+abstract class RenderObject extends AbstractNode implements HitTestTarget {
 
   // LAYOUT
 
@@ -258,20 +261,6 @@ abstract class RenderObject extends AbstractNode {
   String debugDescribeSettings(String prefix) => '${prefix}parentData: ${parentData}\n${prefix}constraints: ${constraints}\n';
   String debugDescribeChildren(String prefix) => '';
 
-}
-
-class HitTestEntry {
-  const HitTestEntry(this.target);
-
-  final RenderObject target;
-}
-
-class HitTestResult {
-  final List<HitTestEntry> path = new List<HitTestEntry>();
-
-  void add(HitTestEntry data) {
-    path.add(data);
-  }
 }
 
 double clamp({ double min: 0.0, double value: 0.0, double max: double.INFINITY }) {

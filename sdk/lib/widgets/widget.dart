@@ -7,6 +7,7 @@ import 'dart:collection';
 import 'dart:mirrors';
 import 'dart:sky' as sky;
 
+import '../base/hit_test.dart';
 import '../rendering/box.dart';
 import '../rendering/object.dart';
 import '../rendering/sky_binding.dart';
@@ -505,6 +506,7 @@ abstract class RenderObjectWrapper extends Widget {
       if (_ancestor is RenderObjectWrapper)
         _ancestor.insertChildRoot(this, slot);
     } else {
+      assert(old is RenderObjectWrapper);
       _root = old.root;
       _ancestor = old._ancestor;
     }
@@ -784,19 +786,16 @@ abstract class MultiChildRenderObjectWrapper extends RenderObjectWrapper {
 class WidgetSkyBinding extends SkyBinding {
 
   WidgetSkyBinding({ RenderView renderViewOverride: null })
-      : super(renderViewOverride: renderViewOverride) {
-    assert(_skyBinding == null);
-  }
+      : super(renderViewOverride: renderViewOverride);
 
-  static WidgetSkyBinding _skyBinding;
-  static SkyBinding get skyBinding => _skyBinding;
   static void initWidgetSkyBinding({ RenderView renderViewOverride: null }) {
-    if (_skyBinding == null)
-      _skyBinding = new WidgetSkyBinding(renderViewOverride: renderViewOverride);
+    if (SkyBinding.instance == null)
+      new WidgetSkyBinding(renderViewOverride: renderViewOverride);
+    assert(SkyBinding.instance is WidgetSkyBinding);
   }
 
   void dispatchEvent(sky.Event event, HitTestResult result) {
-    assert(_skyBinding == this);
+    assert(SkyBinding.instance == this);
     super.dispatchEvent(event, result);
     for (HitTestEntry entry in result.path.reversed) {
       Widget target = RenderObjectWrapper._getMounted(entry.target);
@@ -841,16 +840,15 @@ abstract class AbstractWidgetRoot extends Component {
 
 class RenderViewWrapper extends OneChildRenderObjectWrapper {
   RenderViewWrapper({ String key, Widget child }) : super(key: key, child: child);
-
   RenderView get root => super.root;
-  RenderView createNode() => WidgetSkyBinding._skyBinding.renderView;
+  RenderView createNode() => SkyBinding.instance.renderView;
 }
 
 class AppContainer extends AbstractWidgetRoot {
-  AppContainer(this.app);
-
+  AppContainer(this.app) {
+    assert(SkyBinding.instance is WidgetSkyBinding);
+  }
   final App app;
-
   Widget build() => new RenderViewWrapper(child: app);
 }
 

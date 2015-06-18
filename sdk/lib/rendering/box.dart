@@ -7,7 +7,7 @@ import 'dart:sky' as sky;
 
 import 'package:vector_math/vector_math.dart';
 
-import '../debug/utils.dart';
+import '../base/debug.dart';
 import '../mojo/net/image_cache.dart' as image_cache;
 import '../painting/box_painter.dart';
 import 'object.dart';
@@ -192,9 +192,7 @@ class BoxConstraints {
 }
 
 class BoxHitTestEntry extends HitTestEntry {
-  const BoxHitTestEntry(RenderBox target, this.localPosition)
-    : super(target);
-
+  const BoxHitTestEntry(HitTestTarget target, this.localPosition) : super(target);
   final Point localPosition;
 }
 

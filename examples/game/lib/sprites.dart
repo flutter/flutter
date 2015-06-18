@@ -1,13 +1,14 @@
 library sprites;
 
-import 'dart:sky';
 import 'dart:math' as Math;
-import 'package:vector_math/vector_math.dart';
+import 'dart:sky';
 import 'dart:typed_data';
+
+import 'package:sky/base/scheduler.dart' as scheduler;
+import 'package:sky/mojo/net/image_cache.dart' as image_cache;
 import 'package:sky/rendering/box.dart';
 import 'package:sky/rendering/object.dart';
-import 'package:sky/app/scheduler.dart' as scheduler;
-import 'package:sky/framework/net/image_cache.dart' as image_cache;
+import 'package:vector_math/vector_math.dart';
 
 part 'sprite_box.dart';
 part 'node.dart';

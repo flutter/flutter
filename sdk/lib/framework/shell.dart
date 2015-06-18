@@ -3,10 +3,12 @@
 // found in the LICENSE file.
 
 import "dart:sky.internals" as internals;
-import "embedder.dart";
+
 import "package:mojo/application.dart";
 import 'package:mojo/core.dart' as core;
 import "package:mojom/mojo/service_provider.mojom.dart";
+
+import "embedder.dart";
 
 ApplicationConnection _initConnection() {
   int rawHandle = internals.takeServicesProvidedByEmbedder();

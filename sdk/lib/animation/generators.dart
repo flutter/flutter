@@ -5,7 +5,7 @@
 import 'dart:async';
 import 'dart:math' as math;
 
-import '../app/scheduler.dart' as scheduler;
+import '../base/scheduler.dart' as scheduler;
 import 'curves.dart';
 import 'mechanics.dart';
 

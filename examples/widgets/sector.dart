@@ -6,6 +6,7 @@ import 'dart:math' as math;
 
 import 'package:sky/rendering/box.dart';
 import 'package:sky/rendering/flex.dart';
+import 'package:sky/rendering/sky_binding.dart';
 import 'package:sky/theme2/colors.dart';
 import 'package:sky/theme2/edges.dart';
 import 'package:sky/theme2/typography.dart';
@@ -136,8 +137,8 @@ class SectorApp extends App {
 
 void main() {
   runApp(new SectorApp());
-  WidgetSkyBinding.skyBinding.onFrame = () {
+  SkyBinding.instance.onFrame = () {
     // uncomment this for debugging:
-    // WidgetSkyBinding.skyBinding.debugDumpRenderTree();
+    // SkyBinding.instance.debugDumpRenderTree();
   };
 }

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:sky' as sky;
-
 import '../widgets/basic.dart';
 import 'editable_string.dart';
 import 'editable_text.dart';

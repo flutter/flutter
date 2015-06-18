@@ -4,15 +4,15 @@
 
 import 'dart:sky' as sky;
 
-import '../app/scheduler.dart' as scheduler;
+import '../base/scheduler.dart' as scheduler;
+import '../base/hit_test.dart';
 import 'box.dart';
 import 'object.dart';
 
 class PointerState {
+  PointerState({ this.result, this.lastPosition });
   HitTestResult result;
   Point lastPosition;
-
-  PointerState({ this.result, this.lastPosition });
 }
 
 typedef void EventListener(sky.Event event);
@@ -20,43 +20,41 @@ typedef void EventListener(sky.Event event);
 class SkyBinding {
 
   SkyBinding({ RenderBox root: null, RenderView renderViewOverride }) {
-    assert(_app == null);
-    _app = this;
+    assert(_instance == null);
+    _instance = this;
 
     sky.view.setEventCallback(_handleEvent);
+
     sky.view.setMetricsChangedCallback(_handleMetricsChanged);
     scheduler.init();
-    scheduler.addPersistentFrameCallback(_beginFrame);
-
     if (renderViewOverride == null) {
       _renderView = new RenderView(child: root);
       _renderView.attach();
-      _renderView.rootConstraints = _viewConstraints;
+      _renderView.rootConstraints = _createConstraints();
       _renderView.scheduleInitialLayout();
     } else {
       _renderView = renderViewOverride;
     }
     assert(_renderView != null);
+    scheduler.addPersistentFrameCallback(_beginFrame);
 
-    assert(_app == this);
+    assert(_instance == this);
   }
 
-  static SkyBinding _app; // used to enforce that we're a singleton
+  static SkyBinding _instance; // used to enforce that we're a singleton
+  static SkyBinding get instance => _instance;
 
   RenderView _renderView;
   RenderView get renderView => _renderView;
 
-  ViewConstraints get _viewConstraints =>
-      new ViewConstraints(width: sky.view.width, height: sky.view.height);
-
-  Map<int, PointerState> _stateForPointer = new Map<int, PointerState>();
+  ViewConstraints _createConstraints() {
+    return new ViewConstraints(width: sky.view.width, height: sky.view.height);
+  }
+  void _handleMetricsChanged() {
+    _renderView.rootConstraints = _createConstraints();
+  }
 
   Function onFrame;
-
-  final List<EventListener> _eventListeners = new List<EventListener>();
-  void addEventListener(EventListener e) => _eventListeners.add(e);
-  bool removeEventListener(EventListener e) => _eventListeners.remove(e);
-
   RenderBox get root => _renderView.child;
   void set root(RenderBox value) {
     _renderView.child = value;
@@ -68,6 +66,10 @@ class SkyBinding {
     _renderView.paintFrame();
   }
 
+  final List<EventListener> _eventListeners = new List<EventListener>();
+  void addEventListener(EventListener e) => _eventListeners.add(e);
+  bool removeEventListener(EventListener e) => _eventListeners.remove(e);
+
   void _handleEvent(sky.Event event) {
     if (event is sky.PointerEvent) {
       _handlePointerEvent(event);
@@ -76,15 +78,12 @@ class SkyBinding {
       _renderView.hitTest(result, position: new Point(event.x, event.y));
       dispatchEvent(event, result);
     } else {
-      for (EventListener e in _eventListeners) {
+      for (EventListener e in _eventListeners)
         e(event);
-      }
     }
   }
 
-  void _handleMetricsChanged() {
-    _renderView.rootConstraints = _viewConstraints;
-  }
+  Map<int, PointerState> _stateForPointer = new Map<int, PointerState>();
 
   PointerState _createStateForPointer(sky.PointerEvent event, Point position) {
     HitTestResult result = new HitTestResult();

@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:sky/rendering/sky_binding.dart';
 import 'package:sky/widgets/basic.dart';
 import 'package:sky/widgets/navigator.dart';
 import 'package:sky/widgets/widget.dart';
@@ -35,8 +36,8 @@ class StocksApp extends App {
 void main() {
   print("starting stocks app!");
   runApp(new StocksApp());
-  WidgetSkyBinding.skyBinding.onFrame = () {
+  SkyBinding.instance.onFrame = () {
     // uncomment this for debugging:
-    // WidgetSkyBinding.skyBinding.debugDumpRenderTree();
+    // SkyBinding.instance.debugDumpRenderTree();
   };
 }
