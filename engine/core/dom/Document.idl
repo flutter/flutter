@@ -24,7 +24,7 @@ callback CustomElementConstructor = Element ();
     Constructor(),
 ] interface Document : ParentNode {
     [CustomElementCallbacks, RaisesException] Element createElement(DOMString tagName);
-    Text createText(DOMString text);
+    Text createText(DOMString? text);
 
     DocumentFragment createDocumentFragment();
 
