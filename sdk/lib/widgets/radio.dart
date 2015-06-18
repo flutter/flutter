@@ -5,7 +5,7 @@
 import 'dart:sky' as sky;
 
 import '../rendering/object.dart';
-import '../theme2/colors.dart' as colors;
+import '../theme/colors.dart' as colors;
 import 'basic.dart';
 import 'button_base.dart';
 

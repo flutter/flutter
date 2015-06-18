@@ -6,9 +6,9 @@ import 'dart:sky';
 
 import 'package:mojom/intents/intents.mojom.dart';
 import 'package:sky/framework/shell.dart' as shell;
-import 'package:sky/theme2/colors.dart' as colors;
-import 'package:sky/theme2/edges.dart';
-import 'package:sky/theme2/typography.dart' as typography;
+import 'package:sky/theme/colors.dart' as colors;
+import 'package:sky/theme/edges.dart';
+import 'package:sky/theme/typography.dart' as typography;
 import 'package:sky/widgets/material.dart';
 import 'package:sky/widgets/raised_button.dart';
 import 'package:sky/widgets/scaffold.dart';

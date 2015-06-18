@@ -3,9 +3,9 @@
 // found in the LICENSE file.
 
 import '../painting/box_painter.dart';
-import '../theme2/colors.dart';
-import '../theme2/edges.dart';
-import '../theme2/shadows.dart';
+import '../theme/colors.dart';
+import '../theme/edges.dart';
+import '../theme/shadows.dart';
 import 'basic.dart';
 
 class Material extends Component {

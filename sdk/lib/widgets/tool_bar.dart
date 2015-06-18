@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 
 import '../rendering/flex.dart';
-import '../theme2/shadows.dart';
-import '../theme2/view_configuration.dart';
+import '../theme/shadows.dart';
+import '../theme/view_configuration.dart';
 import 'basic.dart';
 
 class ToolBar extends Component {

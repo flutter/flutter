@@ -4,7 +4,7 @@
 
 import '../rendering/box.dart';
 import '../rendering/object.dart';
-import '../theme2/view_configuration.dart';
+import '../theme/view_configuration.dart';
 import 'widget.dart';
 
 enum ScaffoldSlots {

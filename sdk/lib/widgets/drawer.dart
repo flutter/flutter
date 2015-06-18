@@ -9,8 +9,8 @@ import 'package:vector_math/vector_math.dart';
 
 import '../animation/animated_value.dart';
 import '../animation/curves.dart';
-import '../theme2/colors.dart';
-import '../theme2/shadows.dart';
+import '../theme/colors.dart';
+import '../theme/shadows.dart';
 import 'animated_component.dart';
 import 'basic.dart';
 

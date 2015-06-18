@@ -8,8 +8,8 @@ import 'dart:sky' as sky;
 
 import '../animation/animated_value.dart';
 import '../painting/box_painter.dart';
-import '../theme2/colors.dart';
-import '../theme2/shadows.dart';
+import '../theme/colors.dart';
+import '../theme/shadows.dart';
 import 'animated_component.dart';
 import 'basic.dart';
 import 'popup_menu_item.dart';

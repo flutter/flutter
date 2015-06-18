@@ -4,8 +4,8 @@
 
 import 'dart:sky' as sky;
 
-import 'package:sky/theme2/colors.dart' as colors;
-import 'package:sky/theme2/shadows.dart';
+import 'package:sky/theme/colors.dart' as colors;
+import 'package:sky/theme/shadows.dart';
 
 import '../painting/shadows.dart';
 import '../rendering/box.dart';

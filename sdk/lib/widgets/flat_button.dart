@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../theme2/colors.dart';
+import '../theme/colors.dart';
 import 'basic.dart';
 import 'material_button.dart';
 

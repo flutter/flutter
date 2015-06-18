@@ -7,7 +7,7 @@ import 'dart:sky' as sky;
 
 import 'package:sky/rendering/box.dart';
 import 'package:sky/rendering/object.dart';
-import 'package:sky/theme2/colors.dart' as colors;
+import 'package:sky/theme/colors.dart' as colors;
 import 'package:sky/widgets/basic.dart';
 
 class StockArrow extends Component {

@@ -4,7 +4,7 @@
 
 import 'dart:sky' as sky;
 
-import 'package:sky/theme2/colors.dart' as colors;
+import 'package:sky/theme/colors.dart' as colors;
 
 import 'basic.dart';
 import 'toggleable.dart';

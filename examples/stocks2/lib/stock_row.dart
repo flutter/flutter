@@ -4,7 +4,7 @@
 
 import 'package:sky/painting/text_style.dart';
 import 'package:sky/rendering/box.dart';
-import 'package:sky/theme2/typography.dart' as typography;
+import 'package:sky/theme/typography.dart' as typography;
 import 'package:sky/widgets/ink_well.dart';
 import 'package:sky/widgets/basic.dart';
 
