@@ -16,6 +16,7 @@ import org.chromium.mojo.system.DataPipe;
 import org.chromium.mojo.system.MessagePipeHandle;
 import org.chromium.mojo.system.MojoException;
 import org.chromium.mojom.mojo.CookieStore;
+import org.chromium.mojom.mojo.HostResolver;
 import org.chromium.mojom.mojo.HttpServerDelegate;
 import org.chromium.mojom.mojo.NetAddress;
 import org.chromium.mojom.mojo.NetworkService;
@@ -115,5 +116,10 @@ public class NetworkServiceImpl implements NetworkService {
     @Override
     public void registerUrlLoaderInterceptor(UrlLoaderInterceptorFactory factory) {
         factory.close();
+    }
+
+    @Override
+    public void createHostResolver(InterfaceRequest<HostResolver> resolver) {
+        resolver.close();
     }
 }
