@@ -109,11 +109,11 @@ abstract class Widget {
   // Returns the child which should be retained as the child of this node.
   Widget syncChild(Widget node, Widget oldNode, dynamic slot) {
 
-    assert(oldNode is! Component || !oldNode._disqualifiedFromEverAppearingAgain);
+    assert(oldNode is! Component || (oldNode is Component && !oldNode._disqualifiedFromEverAppearingAgain)); // TODO(ianh): Simplify this once the analyzer is cleverer
 
     if (node == oldNode) {
       assert(node == null || node.mounted);
-      assert(node is! RenderObjectWrapper || node._ancestor != null);
+      assert(node is! RenderObjectWrapper || (node is RenderObjectWrapper && node._ancestor != null)); // TODO(ianh): Simplify this once the analyzer is cleverer
       return node; // Nothing to do. Subtrees must be identical.
     }
 
@@ -495,7 +495,7 @@ abstract class RenderObjectWrapper extends Widget {
   void insertChildRoot(RenderObjectWrapper child, dynamic slot);
   void detachChildRoot(RenderObjectWrapper child);
 
-  void _sync(Widget old, dynamic slot) {
+  void _sync(RenderObjectWrapper old, dynamic slot) {
     // TODO(abarth): We should split RenderObjectWrapper into two pieces so that
     //               RenderViewObject doesn't need to inherit all this code it
     //               doesn't need.

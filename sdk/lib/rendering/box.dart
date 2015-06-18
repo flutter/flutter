@@ -893,7 +893,7 @@ class RenderTransform extends RenderProxyBox {
 
   void hitTestChildren(HitTestResult result, { Point position }) {
     Matrix4 inverse = new Matrix4.zero();
-    double det = inverse.copyInverse(_transform);
+    /* double det = */ inverse.copyInverse(_transform);
     // TODO(abarth): Check the determinant for degeneracy.
 
     Vector3 position3 = new Vector3(position.x, position.y, 0.0);
