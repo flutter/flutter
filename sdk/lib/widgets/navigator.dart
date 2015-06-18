@@ -73,6 +73,10 @@ class Navigator extends Component {
 
   NavigationState state;
 
+  void syncFields(Navigator source) {
+    state = source.state;
+  }
+
   void pushNamed(String name) {
     setState(() {
       state.pushNamed(name);

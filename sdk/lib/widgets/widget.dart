@@ -813,6 +813,21 @@ class WidgetSkyBinding extends SkyBinding {
 }
 
 abstract class App extends Component {
+  void _handleEvent(sky.Event event) {
+    if (event.type == 'back')
+      onBack();
+  }
+
+  void didMount() {
+    super.didMount();
+    WidgetAppView.appView.addEventListener(_handleEvent);
+  }
+
+  void didUnmount() {
+    super.didUnmount();
+    WidgetAppView.appView.removeEventListener(_handleEvent);
+  }
+
   // Override this to handle back button behavior in your app
   void onBack() { }
 }
