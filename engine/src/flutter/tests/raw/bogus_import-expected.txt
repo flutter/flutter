@@ -1,0 +1,6 @@
+CONSOLE: unittest-suite-wait-for-done
+CONSOLE: PASS: shouldn't crash on a bogus import (see line 1)
+CONSOLE: 
+CONSOLE: All 1 tests passed.
+CONSOLE: unittest-suite-success
+DONE
