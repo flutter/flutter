@@ -7,37 +7,37 @@ part of dart.sky;
 /// List of predefined color transfer modes. This list comes from Skia's
 /// SkXfermode.h and the values (order) should be kept in sync.
 enum TransferMode {
-  clearMode,
-  srcMode,
-  dstMode,
-  srcOverMode,
-  dstOverMode,
-  srcInMode,
-  dstInMode,
-  srcOutMode,
-  dstOutMode,
-  srcATopMode,
-  dstATopMode,
-  xorMode,
-  plusMode,
-  modulateMode,
+  clear,
+  src,
+  dst,
+  srcOver,
+  dstOver,
+  srcIn,
+  dstIn,
+  srcOut,
+  dstOut,
+  srcATop,
+  dstATop,
+  xor,
+  plus,
+  modulate,
 
   // Following blend modes are defined in the CSS Compositing standard.
-  screenMode,  /// The last coeff mode.
+  screen,  /// The last coeff mode.
 
-  overlayMode,
-  darkenMode,
-  lightenMode,
-  colorDodgeMode,
-  colorBurnMode,
-  hardLightMode,
-  softLightMode,
-  differenceMode,
-  exclusionMode,
-  multiplyMode,  /// The last separable mode.
+  overlay,
+  darken,
+  lighten,
+  colorDodge,
+  colorBurn,
+  hardLight,
+  softLight,
+  difference,
+  exclusion,
+  multiply,  /// The last separable mode.
 
-  hueMode,
-  saturationMode,
-  colorMode,
-  luminosityMode,
+  hue,
+  saturation,
+  color,
+  luminosity,
 }

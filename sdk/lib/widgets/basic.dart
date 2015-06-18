@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:sky' as sky;
+
 import 'package:vector_math/vector_math.dart';
 
 import '../painting/text_style.dart';
@@ -33,6 +35,23 @@ class Opacity extends OneChildRenderObjectWrapper {
   void syncRenderObject(Opacity old) {
     super.syncRenderObject(old);
     root.opacity = opacity;
+  }
+}
+
+class ColorFilter extends OneChildRenderObjectWrapper {
+  ColorFilter({ String key, this.color, this.transferMode, Widget child })
+    : super(key: key, child: child);
+
+  RenderColorFilter get root => super.root;
+  final Color color;
+  final sky.TransferMode transferMode;
+
+  RenderColorFilter createNode() => new RenderColorFilter(color: color, transferMode: transferMode);
+
+  void syncRenderObject(ColorFilter old) {
+    super.syncRenderObject(old);
+    root.color = color;
+    root.transferMode = transferMode;
   }
 }
 

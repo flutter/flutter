@@ -269,7 +269,7 @@ class Laser extends Sprite {
     size = new Size(20.0, 20.0);
     position = ship.position;
     rotation = ship.rotation + 90.0;
-    transferMode = TransferMode.plusMode;
+    transferMode = TransferMode.plus;
     double rotRadians = convertDegrees2Radians(rotation);
     _movementVector = pointMult(new Point(Math.sin(rotRadians), -Math.cos(rotRadians)), 10.0);
     _movementVector = new Point(_movementVector.x + ship._movementVector[0], _movementVector.y + ship._movementVector[1]);
@@ -305,7 +305,7 @@ class StarField extends Node {
   void paint(PictureRecorder canvas) {
     // Setup paint object for opacity and transfer mode
     Paint paint = new Paint();
-    paint.setTransferMode(TransferMode.plusMode);
+    paint.setTransferMode(TransferMode.plus);
 
     double baseScaleX = 32.0/_img.width;
     double baseScaleY = 32.0/_img.height;

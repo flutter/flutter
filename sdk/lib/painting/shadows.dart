@@ -14,7 +14,7 @@ class ShadowDrawLooperBuilder {
           new sky.DrawLooperLayerInfo()
             ..setPaintBits(sky.PaintBits.all)
             ..setOffset(offset.toPoint())
-            ..setColorMode(sky.TransferMode.srcMode),
+            ..setColorMode(sky.TransferMode.src),
           (sky.Paint layerPaint) {
         layerPaint.color = color;
         layerPaint.setMaskFilter(

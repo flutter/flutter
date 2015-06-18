@@ -482,7 +482,43 @@ class RenderOpacity extends RenderProxyBox {
 
       Paint paint = new Paint()
         ..color = new Color.fromARGB(a, 0, 0, 0)
-        ..setTransferMode(sky.TransferMode.srcOverMode);
+        ..setTransferMode(sky.TransferMode.srcOver);
+      canvas.saveLayer(null, paint);
+      child.paint(canvas);
+      canvas.restore();
+    }
+  }
+}
+
+class RenderColorFilter extends RenderProxyBox {
+  RenderColorFilter({ RenderBox child, Color color, sky.TransferMode transferMode })
+    : _color = color, _transferMode = transferMode, super(child) {
+  }
+
+  Color _color;
+  Color get color => _color;
+  void set color (Color value) {
+    assert(value != null);
+    if (_color == value)
+      return;
+    _color = value;
+    markNeedsPaint();
+  }
+
+  sky.TransferMode _transferMode;
+  sky.TransferMode get transferMode => _transferMode;
+  void set transferMode (sky.TransferMode value) {
+    assert(value != null);
+    if (_transferMode == value)
+      return;
+    _transferMode = value;
+    markNeedsPaint();
+  }
+
+  void paint(RenderObjectDisplayList canvas) {
+    if (child != null) {
+      Paint paint = new Paint()
+        ..setColorFilter(new sky.ColorFilter.mode(_color, _transferMode));
       canvas.saveLayer(null, paint);
       child.paint(canvas);
       canvas.restore();
