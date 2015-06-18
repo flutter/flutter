@@ -27,6 +27,7 @@ class StocksApp extends App {
   }
 
   void didMount() {
+    super.didMount();
     new StockDataFetcher((StockData data) {
       setState(() {
         data.appendTo(_stocks);
