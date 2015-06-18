@@ -75,12 +75,12 @@ void rotate(double timeStamp) {
 
 void main() {
   // Because we're going to use Widgets, we want to initialise its
-  // AppView, not use the default one. We don't really need to do
+  // SkyBinding, not use the default one. We don't really need to do
   // this, because RenderBoxToWidgetAdapter does it for us, but
   // it's good practice in case we happen to not have a
   // RenderBoxToWidgetAdapter in our tree at startup, or in case we
   // want a renderViewOverride.
-  WidgetAppView.initWidgetAppView();
+  WidgetSkyBinding.initWidgetSkyBinding();
 
   RenderFlex flexRoot = new RenderFlex(direction: FlexDirection.vertical);
 
@@ -94,6 +94,6 @@ void main() {
   transformBox = new RenderTransform(child: flexRoot, transform: new Matrix4.identity());
   RenderPadding root = new RenderPadding(padding: new EdgeDims.all(20.0), child: transformBox);
 
-  WidgetAppView.appView.root = root;
+  WidgetSkyBinding.skyBinding.root = root;
   addPersistentFrameCallback(rotate);
 }

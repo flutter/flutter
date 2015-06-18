@@ -3,13 +3,12 @@
 // found in the LICENSE file.
 
 import 'dart:sky';
-import 'package:sky/app/view.dart';
+
 import 'package:sky/rendering/box.dart';
 import 'package:sky/rendering/flex.dart';
+import 'package:sky/rendering/sky_binding.dart';
 import 'package:sky/theme2/colors.dart';
 import 'package:sky/theme2/shadows.dart';
-
-AppView app;
 
 void main() {
   var coloredBox = new RenderDecoratedBox(
@@ -22,7 +21,7 @@ void main() {
   var paddedBox = new RenderPadding(
     padding: const EdgeDims.all(50.0),
     child: coloredBox);
-  app = new AppView(root: new RenderDecoratedBox(
+  new SkyBinding(root: new RenderDecoratedBox(
     decoration: const BoxDecoration(
       backgroundColor: const Color(0xFFFFFFFF)
     ),

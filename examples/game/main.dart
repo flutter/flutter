@@ -1,12 +1,11 @@
 import 'dart:sky';
+
+import 'package:sky/widgets/basic.dart';
+import 'package:sky/widgets/raised_button.dart';
+import 'package:sky/widgets/widget.dart';
+
 import 'lib/game_demo.dart';
 import 'lib/sprites.dart';
-import 'package:sky/widgets/basic.dart';
-import 'package:sky/app/view.dart';
-import 'package:sky/widgets/ui_node.dart';
-import 'package:sky/widgets/raised_button.dart';
-
-AppView app;
 
 void main() {
   // Load images
@@ -28,7 +27,7 @@ void allLoaded(ImageMap loader) {
 
 class GameDemoApp extends App {
 
-  UINode build() {
+  Widget build() {
     return new Stack([
       new GameDemo(),
 //      new StackPositionedChild(
@@ -53,7 +52,7 @@ ImageMap _loader;
 
 class GameDemo extends OneChildRenderObjectWrapper {
 
-  GameDemo({ UINode child, Object key })
+  GameDemo({ Widget child, Object key })
   : super(child: child, key: key);
 
   GameDemoBox get root { return super.root; }

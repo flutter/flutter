@@ -3,12 +3,11 @@
 // found in the LICENSE file.
 
 import 'dart:sky' as sky;
-import 'package:sky/app/view.dart';
-import 'package:sky/rendering/flex.dart';
-import 'package:sky/rendering/box.dart';
-import 'package:vector_math/vector_math.dart';
 
-AppView app;
+import 'package:sky/rendering/box.dart';
+import 'package:sky/rendering/flex.dart';
+import 'package:sky/rendering/sky_binding.dart';
+import 'package:vector_math/vector_math.dart';
 
 void main() {
   RenderDecoratedBox green = new RenderDecoratedBox(
@@ -26,5 +25,5 @@ void main() {
 
   RenderFlex flex = new RenderFlex();
   flex.add(spin);
-  app = new AppView(root: flex);
+  new SkyBinding(root: flex);
 }
