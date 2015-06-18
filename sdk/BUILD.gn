@@ -65,7 +65,6 @@ dart_pkg("sdk") {
     "lib/framework/fn.dart",
     "lib/framework/layout.dart",
     "lib/framework/net/fetch.dart",
-    "lib/framework/net/image_cache.dart",
     "lib/framework/node.dart",
     "lib/framework/reflect.dart",
     "lib/framework/shell.dart",

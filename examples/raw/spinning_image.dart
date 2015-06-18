@@ -4,7 +4,7 @@
 
 import 'dart:math' as math;
 import 'dart:sky';
-import 'package:sky/framework/net/image_cache.dart' as image_cache;
+import 'package:sky/mojo/net/image_cache.dart' as image_cache;
 
 double timeBase = null;
 
