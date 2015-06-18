@@ -9,9 +9,23 @@ import 'package:sky/widgets/widget.dart';
 import '../../examples/stocks2/lib/stock_app.dart';
 import '../resources/display_list.dart';
 
+class TestStocksApp extends StocksApp {
+
+  Completer _completer = new Completer();
+  Future get isMounted => _completer.future;
+
+  void didMount() {
+    super.didMount();
+    _completer.complete();
+  }
+}
+
 main() async {
   TestRenderView testRenderView = new TestRenderView();
-  runApp(new StocksApp(), renderViewOverride: testRenderView);
+  TestStocksApp app = new TestStocksApp();
+  runApp(app, renderViewOverride: testRenderView);
+  await testRenderView.checkFrame();
+  await app.isMounted;
   await testRenderView.checkFrame();
   testRenderView.endTest();
 }

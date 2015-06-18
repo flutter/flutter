@@ -10,8 +10,8 @@ import 'package:sky/rendering/object.dart';
 import '../resources/display_list.dart';
 import '../resources/third_party/unittest/unittest.dart';
 import '../resources/unit.dart';
-import 'package:sky/theme2/colors.dart';
-import 'package:sky/theme2/shadows.dart';
+import 'package:sky/theme/colors.dart';
+import 'package:sky/theme/shadows.dart';
 
 void main() {
   initUnit();
