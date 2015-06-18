@@ -365,7 +365,7 @@ class Flexible extends ParentDataNode {
     : super(child, new FlexBoxParentData()..flex = flex, key: key);
 }
 
-class Inline extends RenderObjectWrapper {
+class Inline extends LeafRenderObjectWrapper {
   Inline({ String key, this.text }) : super(key: key);
 
   RenderParagraph get root => super.root;
@@ -378,15 +378,10 @@ class Inline extends RenderObjectWrapper {
     root.inline = text;
   }
 
-  void insertChildRoot(RenderObjectWrapper child, dynamic slot) {
-    assert(false);
-    // Inline does not support having children currently
-  }
-
 }
 
 class Text extends Component {
-  Text(data, { String key, TextStyle this.style }) : data = data, super(key: key);
+  Text(data, { String key, TextStyle this.style }) : super(key: key);
   final String data;
   final TextStyle style;
   bool get interchangeable => true;
@@ -397,13 +392,15 @@ class Text extends Component {
   }
 }
 
-class Image extends RenderObjectWrapper {
+class Image extends LeafRenderObjectWrapper {
 
   Image({
-    String key,
-    this.src,
+    src,
     this.size
-  }) : super(key: key);
+  }) : src = src,
+       super(key: src) {
+    assert(src != null);
+  }
 
   RenderImage get root => super.root;
   RenderImage createNode() => new RenderImage(this.src, this.size);
@@ -417,17 +414,12 @@ class Image extends RenderObjectWrapper {
     root.requestedSize = size;
   }
 
-  void insertChildRoot(RenderObjectWrapper child, dynamic slot) {
-    assert(false);
-    // Image does not support having children currently
-  }
-
 }
 
-class WidgetToRenderBoxAdapter extends RenderObjectWrapper {
+class WidgetToRenderBoxAdapter extends LeafRenderObjectWrapper {
 
   WidgetToRenderBoxAdapter(RenderBox renderBox)
-    : this.renderBox = renderBox,
+    : renderBox = renderBox,
       super(key: renderBox.hashCode.toString());
 
   RenderBox get root => super.root;
@@ -441,12 +433,6 @@ class WidgetToRenderBoxAdapter extends RenderObjectWrapper {
       assert(old is WidgetToRenderBoxAdapter);
       assert(root == old.root);
     }
-  }
-
-  void insertChildRoot(RenderObjectWrapper child, dynamic slot) {
-    assert(false);
-    // WidgetToRenderBoxAdapter cannot have Widget children; by
-    // definition, it is the transition out of the Widget world.
   }
 
   void remove() {

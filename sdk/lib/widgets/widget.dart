@@ -549,6 +549,20 @@ abstract class RenderObjectWrapper extends Widget {
 
 }
 
+abstract class LeafRenderObjectWrapper extends RenderObjectWrapper {
+
+  LeafRenderObjectWrapper({ String key }) : super(key: key);
+
+  void insertChildRoot(RenderObjectWrapper child, dynamic slot) {
+    assert(false);
+  }
+
+  void detachChildRoot(RenderObjectWrapper child) {
+    assert(false);
+  }
+
+}
+
 abstract class OneChildRenderObjectWrapper extends RenderObjectWrapper {
 
   OneChildRenderObjectWrapper({ String key, Widget child })
