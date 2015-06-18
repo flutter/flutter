@@ -4,9 +4,10 @@
 
 import 'dart:sky' as sky;
 
-import 'package:sky/app/scheduler.dart';
+import 'package:sky/base/scheduler.dart';
 import 'package:sky/rendering/box.dart';
 import 'package:sky/rendering/flex.dart';
+import 'package:sky/rendering/sky_binding.dart';
 import 'package:sky/widgets/basic.dart';
 import 'package:sky/widgets/raised_button.dart';
 import 'package:sky/widgets/widget.dart';
@@ -94,6 +95,6 @@ void main() {
   transformBox = new RenderTransform(child: flexRoot, transform: new Matrix4.identity());
   RenderPadding root = new RenderPadding(padding: new EdgeDims.all(20.0), child: transformBox);
 
-  WidgetSkyBinding.skyBinding.root = root;
+  SkyBinding.instance.root = root;
   addPersistentFrameCallback(rotate);
 }
