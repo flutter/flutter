@@ -22,6 +22,7 @@ class Sprite extends NodeWithSize {
   double get opacity => _opacity;
 
   void set opacity(double opacity) {
+    assert(opacity != null);
     assert(opacity >= 0.0 && opacity <= 1.0);
     _opacity = opacity;
   }

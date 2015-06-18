@@ -13,10 +13,10 @@ class Node {
 
   Point _position;
   double _rotation;
-  
-  bool _isMatrixDirty;
+
   Matrix4 _transformMatrix;
-  Matrix4 _transformMatrixFromWorld;
+  Matrix4 _transformMatrixNodeToBox;
+  Matrix4 _transformMatrixBoxToNode;
 
   double _scaleX;
   double _scaleY;
@@ -30,6 +30,10 @@ class Node {
 
   bool paused = false;
 
+  bool _userInteractionEnabled = false;
+  bool handleMultiplePointers = false;
+  int _handlingPointer;
+
   List<Node>_children;
 
   // Constructors
@@ -38,7 +42,6 @@ class Node {
     _rotation = 0.0;
     _position = Point.origin;
     _scaleX = _scaleY = 1.0;
-    _isMatrixDirty = false;
     _transformMatrix = new Matrix4.identity();
     _children = [];
     _childrenNeedSorting = false;
@@ -56,20 +59,23 @@ class Node {
   double get rotation => _rotation;
   
   void set rotation(double rotation) {
+    assert(rotation != null);
     _rotation = rotation;
-    _isMatrixDirty = true;
+    _invalidateTransformMatrix();
   }
 
   Point get position => _position;
   
   void set position(Point position) {
+    assert(position != null);
     _position = position;
-    _isMatrixDirty = true;
+    _invalidateTransformMatrix();
   }
 
   double get zPosition => _zPosition;
 
   void set zPosition(double zPosition) {
+    assert(zPosition != null);
     _zPosition = zPosition;
     if (_parent != null) {
       _parent._childrenNeedSorting = true;
@@ -82,8 +88,9 @@ class Node {
   }
 
   void set scale(double scale) {
+    assert(scale != null);
     _scaleX = _scaleY = scale;
-    _isMatrixDirty = true;
+    _invalidateTransformMatrix();
   }
 
   List<Node> get children => _children;
@@ -91,6 +98,7 @@ class Node {
   // Adding and removing children
 
   void addChild(Node child) {
+    assert(child != null);
     assert(child._parent == null);
 
     _childrenNeedSorting = true;
@@ -99,12 +107,15 @@ class Node {
     child._spriteBox = this._spriteBox;
     _childrenLastAddedOrder += 1;
     child._addedOrder = _childrenLastAddedOrder;
+    if (_spriteBox != null) _spriteBox._eventTargets = null;
   }
 
   void removeChild(Node child) {
+    assert(child != null);
     if (_children.remove(child)) {
       child._parent = null;
       child._spriteBox = null;
+      if (_spriteBox != null) _spriteBox._eventTargets = null;
     }
   }
 
@@ -120,12 +131,13 @@ class Node {
     }
     _children = [];
     _childrenNeedSorting = false;
+    if (_spriteBox != null) _spriteBox._eventTargets = null;
   }
 
   // Calculating the transformation matrix
   
   Matrix4 get transformMatrix {
-    if (!_isMatrixDirty) {
+    if (_transformMatrix != null) {
       return _transformMatrix;
     }
     
@@ -148,42 +160,58 @@ class Node {
     }
 
     // Create transformation matrix for scale, position and rotation
-    _transformMatrix.setValues(cy * _scaleX, sy * _scaleX, 0.0, 0.0,
+    _transformMatrix = new Matrix4(cy * _scaleX, sy * _scaleX, 0.0, 0.0,
                -sx * _scaleY, cx * _scaleY, 0.0, 0.0,
                0.0, 0.0, 1.0, 0.0,
-              _position.x, _position.y, 0.0, 1.0
-    );
+              _position.x, _position.y, 0.0, 1.0);
     
     return _transformMatrix;
+  }
+
+  void _invalidateTransformMatrix() {
+    _transformMatrix = null;
+    _invalidateToBoxTransformMatrix();
+  }
+
+  void _invalidateToBoxTransformMatrix () {
+    _transformMatrixNodeToBox = null;
+    _transformMatrixBoxToNode = null;
+
+    for (Node child in children) {
+      child._invalidateToBoxTransformMatrix();
+    }
   }
 
   // Transforms to other nodes
 
   Matrix4 _nodeToBoxMatrix() {
     assert(_spriteBox != null);
-
-    Matrix4 t = transformMatrix;
-
-    // Apply transforms from parents
-    Node p = this.parent;
-    while (p != null) {
-      t = new Matrix4.copy(p.transformMatrix).multiply(t);
-      p = p.parent;
+    if (_transformMatrixNodeToBox != null) {
+      return _transformMatrixNodeToBox;
     }
 
-    // Apply transform from sprite box
-    t = new Matrix4.copy(_spriteBox.transformMatrix).multiply(t);
-
-    return t;
+    if (_parent == null) {
+      // Base case, we are at the top
+      assert(this == _spriteBox.rootNode);
+      _transformMatrixNodeToBox = new Matrix4.copy(_spriteBox.transformMatrix).multiply(transformMatrix);
+    }
+    else {
+      _transformMatrixNodeToBox = new Matrix4.copy(_parent._nodeToBoxMatrix()).multiply(transformMatrix);
+    }
+    return _transformMatrixNodeToBox;
   }
 
   Matrix4 _boxToNodeMatrix() {
     assert(_spriteBox != null);
 
-    Matrix4 t = _nodeToBoxMatrix();
-    t.invert();
+    if (_transformMatrixBoxToNode != null) {
+      return _transformMatrixBoxToNode;
+    }
 
-    return t;
+    _transformMatrixBoxToNode = new Matrix4.copy(_nodeToBoxMatrix());
+    _transformMatrixBoxToNode.invert();
+
+    return _transformMatrixBoxToNode;
   }
 
   Point convertPointToNodeSpace(Point boxPoint) {
@@ -225,6 +253,7 @@ class Node {
   // Rendering
   
   void visit(PictureRecorder canvas) {
+    assert(canvas != null);
     if (!visible) return;
 
     prePaint(canvas);
@@ -241,7 +270,6 @@ class Node {
   }
   
   void paint(PictureRecorder canvas) {
-    
   }
  
   void visitChildren(PictureRecorder canvas) {
@@ -275,5 +303,18 @@ class Node {
   }
 
   void spriteBoxPerformedLayout() {
+  }
+
+  // Handling user interaction
+
+  bool get userInteractionEnabled => _userInteractionEnabled;
+
+  void set userInteractionEnabled(bool userInteractionEnabled) {
+    _userInteractionEnabled = userInteractionEnabled;
+    if (_spriteBox != null) _spriteBox._eventTargets = null;
+  }
+
+  bool handleEvent(SpriteBoxEvent event) {
+    return false;
   }
 }
