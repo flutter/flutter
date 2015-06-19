@@ -21,7 +21,7 @@ abstract class NodeWithSize extends Node {
     }
   }
 
-  bool hitTest (Point nodePoint) {
+  bool isPointInside (Point nodePoint) {
 
     double minX = -size.width * pivot.x;
     double minY = -size.height * pivot.y;

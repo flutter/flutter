@@ -74,11 +74,27 @@ class SpriteBox extends RenderBox {
   // Event handling
 
   void _addEventTargets(Node node, List<Node> eventTargets) {
+    List children = node.children;
+    int i = 0;
+
+    // Add childrens that are behind this node
+    while (i < children.length) {
+      Node child = children[i];
+      if (child.zPosition >= 0.0) break;
+      _addEventTargets(child, eventTargets);
+      i++;
+    }
+
+    // Add this node
     if (node.userInteractionEnabled) {
       eventTargets.add(node);
     }
-    for (Node child in node.children) {
+
+    // Add children in front of this node
+    while (i < children.length) {
+      Node child = children[i];
       _addEventTargets(child, eventTargets);
+      i++;
     }
   }
 
@@ -101,7 +117,7 @@ class SpriteBox extends RenderBox {
           if (node.handleMultiplePointers || node._handlingPointer == null) {
             // Do the hit test
             Point posInNodeSpace = node.convertPointToNodeSpace(entry.localPosition);
-            if (node.hitTest(posInNodeSpace)) {
+            if (node.isPointInside(posInNodeSpace)) {
               nodeTargets.add(node);
               node._handlingPointer = event.pointer;
             }
@@ -221,7 +237,7 @@ class SpriteBox extends RenderBox {
     canvas.concat(transformMatrix.storage);
 
     // Draw the sprite tree
-    _rootNode.visit(canvas);
+    _rootNode._visit(canvas);
 
     canvas.restore();
   }
@@ -289,7 +305,7 @@ class SpriteBox extends RenderBox {
     }
     // Do the hit test
     Point posInNodeSpace = node.convertPointToNodeSpace(position);
-    if (node.hitTest(posInNodeSpace)) {
+    if (node.isPointInside(posInNodeSpace)) {
       list.add(node);
     }
   }
