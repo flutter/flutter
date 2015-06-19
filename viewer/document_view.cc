@@ -394,18 +394,18 @@ void DocumentView::OnViewInputEvent(
   if (!web_event)
     return;
 
-  if (sky_view_) {
-    sky_view_->HandleInputEvent(*web_event);
-    return;
-  }
-
   ui::GestureRecognizer* recognizer = ui::GestureRecognizer::Get();
   scoped_ptr<ui::TouchEvent> touch_event =
       ConvertToUITouchEvent(*web_event, device_pixel_ratio);
   if (touch_event)
     recognizer->ProcessTouchEventPreDispatch(*touch_event, this);
 
-  bool handled = web_view_->handleInputEvent(*web_event);
+  bool handled = false;
+
+  if (web_view_)
+    handled = web_view_->handleInputEvent(*web_event);
+  if (sky_view_)
+    sky_view_->HandleInputEvent(*web_event);
 
   if (touch_event) {
     ui::EventResult result = handled ? ui::ER_UNHANDLED : ui::ER_UNHANDLED;
@@ -414,8 +414,12 @@ void DocumentView::OnViewInputEvent(
       for (auto& gesture : *gestures) {
         scoped_ptr<blink::WebInputEvent> gesture_event =
             ConvertEvent(*gesture, device_pixel_ratio);
-        if (gesture_event)
-          web_view_->handleInputEvent(*gesture_event);
+        if (gesture_event) {
+          if (web_view_)
+            web_view_->handleInputEvent(*gesture_event);
+          if (sky_view_)
+            sky_view_->HandleInputEvent(*gesture_event);
+        }
       }
     }
   }
