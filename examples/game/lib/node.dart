@@ -93,7 +93,26 @@ class Node {
     _invalidateTransformMatrix();
   }
 
-  List<Node> get children => _children;
+  double get scaleX => _scaleX;
+
+  void set scaleX(double scaleX) {
+    assert(scaleX != null);
+    _scaleX = scaleX;
+    _invalidateTransformMatrix();
+  }
+
+  double get scaleY => _scaleY;
+
+  void set scaleY(double scaleY) {
+    assert(scaleY != null);
+    _scaleY = scaleY;
+    _invalidateTransformMatrix();
+  }
+
+  List<Node> get children {
+    _sortChildren();
+    return _children;
+  }
 
   // Adding and removing children
 
@@ -132,6 +151,24 @@ class Node {
     _children = [];
     _childrenNeedSorting = false;
     if (_spriteBox != null) _spriteBox._eventTargets = null;
+  }
+
+  void _sortChildren() {
+    // Sort children primarily by zPosition, secondarily by added order
+    if (_childrenNeedSorting) {
+      _children.sort((Node a, Node b) {
+        if (a._zPosition == b._zPosition) {
+          return a._addedOrder - b._addedOrder;
+        }
+        else if (a._zPosition > b._zPosition) {
+          return 1;
+        }
+        else {
+          return -1;
+        }
+      });
+      _childrenNeedSorting = false;
+    }
   }
 
   // Calculating the transformation matrix
@@ -244,7 +281,7 @@ class Node {
 
   // Hit test
 
-  bool hitTest(Point nodePoint) {
+  bool isPointInside(Point nodePoint) {
     assert(nodePoint != null);
 
     return false;
@@ -252,17 +289,16 @@ class Node {
 
   // Rendering
   
-  void visit(PictureRecorder canvas) {
+  void _visit(PictureRecorder canvas) {
     assert(canvas != null);
     if (!visible) return;
 
-    prePaint(canvas);
-    paint(canvas);
-    visitChildren(canvas);
-    postPaint(canvas);
+    _prePaint(canvas);
+    _visitChildren(canvas);
+    _postPaint(canvas);
   }
   
-  void prePaint(PictureRecorder canvas) {
+  void _prePaint(PictureRecorder canvas) {
     canvas.save();
 
     // Get the transformation matrix and apply transform
@@ -272,28 +308,32 @@ class Node {
   void paint(PictureRecorder canvas) {
   }
  
-  void visitChildren(PictureRecorder canvas) {
-    // Sort children primarily by zPosition, secondarily by added order
-    if (_childrenNeedSorting) {
-      _children.sort((Node a, Node b) {
-        if (a._zPosition == b._zPosition) {
-          return a._addedOrder - b._addedOrder;
-        }
-        else if (a._zPosition > b._zPosition) {
-          return 1;
-        }
-        else {
-          return -1;
-        }
-      });
-      _childrenNeedSorting = false;
+  void _visitChildren(PictureRecorder canvas) {
+    // Sort children if needed
+    _sortChildren();
+
+    int i = 0;
+
+    // Visit children behind this node
+    while (i < _children.length) {
+      Node child = _children[i];
+      if (child.zPosition >= 0.0) break;
+      child._visit(canvas);
+      i++;
     }
 
-    // Visit each child
-    _children.forEach((child) => child.visit(canvas));
+    // Paint this node
+    paint(canvas);
+
+    // Visit children in front of this node
+    while (i < _children.length) {
+      Node child = _children[i];
+      child._visit(canvas);
+      i++;
+    }
   }
   
-  void postPaint(PictureRecorder canvas) {
+  void _postPaint(PictureRecorder canvas) {
     canvas.restore();
   }
 
