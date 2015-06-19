@@ -343,15 +343,49 @@ Let's walk through the differences in `MyDialog` caused by its being stateful:
    Without `syncFields`, the new values the parent component passed to the
    `MyDialog` constructor in the parent's `build` function would be lost because
    they would be stored only as member variables on the new instance of the
-   component, which is not retained in the component hiearchy. Typically, the
-   `syncFields` function in a component will copy the public member
-   variables from the `source` instance of the component to the retained
-   instance of the component because, by convention, these public member
-   variables hold the values passed in by the parent component.
+   component, which is not retained in the component hiearchy. Therefore, the
+   `syncFields` function in a component should update `this` to account for the
+   new values the parent passed to `source` because `source` is the authorative
+   source of those values.
+
+   By convention, components typically store the values they receive from their
+   parents in public member variables and their own internal state in private
+   member variables. Therefore, a typical `syncFields` implementation will copy
+   the public, but not the private, member variables from `source`. When
+   following this convention, there is no need to copy over the private member
+   variables because those represent the internal state of the object and `this`
+   is the authoritative source of that state.
 
 Finally, when the user taps on the "Save" button, `MyDialog` follows the same
 pattern as `MyCheckbox` and calls a function passed in by its parent component
 to return the final value of the checkbox up the hierarchy.
+
+didMount and didUnmount
+-----------------------
+
+When a component is inserted into the widget tree, the framework calls the
+`didMount` function on the component. When a component is removed from the
+widget tree, the framework calls the `didUnmount` function on the component.
+In some situations, a component that has been unmounted might again be mounted.
+For example, a stateful component might receive a pre-built component from its
+parent (similar to `child` from the `MyButton` example above) that the stateful
+component might incorporate, then not incorporate, and then later incorporate
+again in the widget tree it builds, according to its changing state.
+
+Typically, a stateful component will override `didMount` to initialize any
+non-trivial internal state. Initializing internal state in `didMount` is more
+efficient (and less error-prone) than initializing that state during the
+component's constructor because parent executes the component's constructor each
+time the parent rebuilds even though the framework mounts only the first
+instance into the widget heiarchy. (Instead of mounting later instances, the
+framework passes them to the original instance in `syncFields` so that the first
+instance of the component can incorporate the values passed by the parent to the
+component's constructor.)
+
+Components often override `didUnmount` to release resources or to cancel
+subscriptions to event streams from outside the widget hierachy. When overriding
+either `didMount` or `didUnmount`, a component should call its superclass's
+`didMount` or `didUnmount` function.
 
 Keys
 ----
