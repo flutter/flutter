@@ -71,6 +71,7 @@ dart_pkg("sdk") {
     "lib/framework/theme/typography.dart",
     "lib/framework/theme/view_configuration.dart",
     "lib/internals.dart",
+    "lib/mojo/asset_bundle.dart",
     "lib/mojo/embedder.dart",
     "lib/mojo/net/fetch.dart",
     "lib/mojo/net/image_cache.dart",
