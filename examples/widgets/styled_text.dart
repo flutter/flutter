@@ -43,13 +43,14 @@ HAL: This mission is too important for me to allow you to jeopardize it.''';
 
   final TextStyle daveStyle = new TextStyle(color: Indigo[400]);
   final TextStyle halStyle = new TextStyle(color: Red[400], fontFamily: "monospace");
-  final TextStyle boldStyle = new TextStyle(fontWeight: bold);
+  final TextStyle boldStyle = const TextStyle(fontWeight: bold);
+  final TextStyle underlineStyle = const TextStyle(decoration: underline);
   
   Component toStyledText(String name, String text) {
     TextStyle lineStyle = (name == "Dave") ? daveStyle : halStyle;
     return new StyledText(
       key: text,
-      elements: [lineStyle, [boldStyle, name + ":"], text]
+      elements: [lineStyle, [boldStyle, [underlineStyle, name], ":"], text]
     );
   }
 
