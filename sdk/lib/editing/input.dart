@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import '../painting/text_style.dart';
+import '../theme/colors.dart';
+import '../theme/typography.dart' as typography;
 import '../widgets/basic.dart';
 import 'editable_string.dart';
 import 'editable_text.dart';
@@ -22,27 +25,7 @@ class Input extends Component {
     );
   }
 
-  // static final Style _style = new Style('''
-  //   transform: translateX(0);
-  //   margin: 8px;
-  //   padding: 8px;
-  //   border-bottom: 1px solid ${Grey[200]};
-  //   align-self: center;
-  //   height: 1.2em;
-  //   white-space: pre;
-  //   overflow: hidden;'''
-  // );
-
-  // static final Style _placeholderStyle = new Style('''
-  //   top: 8px;
-  //   left: 8px;
-  //   position: absolute;
-  //   ${typography.black.caption};'''
-  // );
-
-  // static final String _focusedInlineStyle = '''
-  //   padding: 7px;
-  //   border-bottom: 2px solid ${Blue[500]};''';
+  static final TextStyle _placeholderStyle = typography.black.caption;
 
   String placeholder;
   ValueChanged onChanged;
@@ -73,21 +56,28 @@ class Input extends Component {
       _isAttachedToKeyboard = true;
     }
 
-    List<Widget> children = [];
-
+    List<Widget> textChildren = <Widget>[];
     if (placeholder != null && _value.isEmpty) {
-      children.add(new Container(
-          // style: _placeholderStyle,
-          child: new Text(placeholder)
-      ));
+      textChildren.add(new Text(placeholder, style: _placeholderStyle));
     }
+    textChildren.add(
+      new EditableText(value: _editableValue, focused: focused)
+    );
 
-    children.add(new EditableText(value: _editableValue, focused: focused));
+    Border focusHighlight = new Border(bottom: new BorderSide(
+      color: focused ? Blue[400] : Grey[200],
+      width: focused ? 2.0 : 1.0
+    ));
+
+    // TODO(hansmuller): white-space: pre, height: 1.2em.
+    Container input = new Container(
+      child: new Stack(textChildren),
+      padding: const EdgeDims.only(left: 8.0, right: 8.0, bottom: 12.0),
+      decoration: new BoxDecoration(border: focusHighlight)
+    );
 
     return new Listener(
-      // style: _style,
-      // inlineStyle: focused ? _focusedInlineStyle : null,
-      child: new Stack(children),
+      child: input,
       onPointerDown: (_) => keyboard.showByRequest()
     );
   }
@@ -97,5 +87,4 @@ class Input extends Component {
       keyboard.hide();
     super.didUnmount();
   }
-
 }

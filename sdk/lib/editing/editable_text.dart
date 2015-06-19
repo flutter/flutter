@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import '../painting/text_style.dart';
 import '../widgets/basic.dart';
 import 'editable_string.dart';
 
@@ -17,10 +18,6 @@ class EditableText extends Component {
   //   height: 1.2em;
   //   vertical-align: top;
   //   background-color: ${Blue[500]};'''
-  // );
-
-  // static final Style _composingStyle = new Style('''
-  //   text-decoration: underline;'''
   // );
 
   EditableString value;
@@ -64,35 +61,15 @@ class EditableText extends Component {
     else if (!focused && _cursorTimer != null)
       _stopCursorTimer();
 
-    //List<Widget> children = new List<Widget>();
-    String hack = "";
-
     if (!value.composing.isValid) {
-      // children.add(new TextFragment(value.text));
-      hack += value.text;
-    } else {
-      hack += value.textBefore(value.composing);
-      hack += value.textInside(value.composing);
-      hack += value.textAfter(value.composing);
-      // if (!composing.isEmpty) {
-      //   children.add(new TextFragment(
-      //     composing,
-      //     key: 'composing',
-      //     style: _composingStyle
-      //   ));
-      // }
-
-      // String afterComposing = value.textAfter(value.composing);
-      // if (!afterComposing.isEmpty)
-      //   children.add(new TextFragment(afterComposing));
+      return new Text(value.text);
     }
 
-    // if (_showCursor)
-    //   children.add(new Container(
-    //     key: 'cursor',
-    //     // style: _cursorStyle
-    //     ));
-
-    return new Text(hack);
+    return new StyledText(elements: [
+      const TextStyle(),
+      value.textBefore(value.composing),
+      [const TextStyle(decoration: underline), value.textInside(value.composing)],
+      value.textAfter(value.composing)
+    ]);
   }
 }
