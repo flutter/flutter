@@ -31,6 +31,7 @@
 import logging
 import optparse
 import os
+import subprocess
 import sys
 import traceback
 
@@ -70,7 +71,7 @@ def main(argv, stdout, stderr):
         return test_run_results.UNEXPECTED_ERROR_EXIT_STATUS
 
     try:
-        run_details = run(port, options, args, stderr)
+        run_details = run_tests(port, options, args, stderr)
         if ((run_details.exit_code not in test_run_results.ERROR_CODES or
              run_details.exit_code == test_run_results.EARLY_EXIT_STATUS) and
             not run_details.initial_results.keyboard_interrupted):
@@ -81,7 +82,11 @@ def main(argv, stdout, stderr):
             gen_dash_board = GenerateDashBoard(port)
             gen_dash_board.generate()
 
-        return run_details.exit_code
+        if run_details.exit_code != 0:
+            return run_details.exit_code
+
+        analyzer_result = run_analyzer(port, options, args, stderr)
+        return analyzer_result
 
     # We need to still handle KeyboardInterrupt, atleast for webkitpy unittest cases.
     except KeyboardInterrupt:
@@ -369,7 +374,7 @@ def _set_up_derived_options(port, options, args):
     if not options.skipped:
         options.skipped = 'default'
 
-def run(port, options, args, logging_stream):
+def run_tests(port, options, args, logging_stream):
     logger = logging.getLogger()
     logger.setLevel(logging.DEBUG if options.debug_rwt_logging else logging.INFO)
 
@@ -385,6 +390,26 @@ def run(port, options, args, logging_stream):
         return run_details
     finally:
         printer.cleanup()
+
+def run_analyzer(port, options, args, logging_stream):
+    build_dir = port.analyzer_build_directory()
+    test_dir = os.path.dirname(os.path.abspath(__file__))
+    sky_tools_dir = os.path.dirname(os.path.dirname(test_dir))
+    analyzer_path = os.path.join(sky_tools_dir, 'skyanalyzer')
+    src_dir = os.path.dirname(os.path.dirname(sky_tools_dir))
+    analyzer_target_path = os.path.join(src_dir, 'sky/examples/stocks2/lib/stock_app.dart')
+    analyzer_args = [
+        analyzer_path,
+        build_dir,
+        analyzer_target_path
+    ]
+    try:
+        output = subprocess.check_output(analyzer_args, stderr=subprocess.STDOUT)
+    except subprocess.CalledProcessError as e:
+        print >> logging_stream, "Analyzer found new issues:"
+        print >> logging_stream, e.output
+        return e.returncode
+    return 0
 
 if __name__ == '__main__':
     sys.exit(main(sys.argv[1:], sys.stdout, sys.stderr))

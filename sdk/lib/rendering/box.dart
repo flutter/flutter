@@ -1011,6 +1011,10 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     markNeedsLayout();
   }
 
+  void performResize() {
+    assert(false);
+  }
+
   void performLayout() {
     if (_rootConstraints.orientation != _orientation) {
       if (_orientation != null && child != null)
