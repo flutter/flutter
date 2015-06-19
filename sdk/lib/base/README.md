@@ -1,2 +1,7 @@
-Libraries in this directory depend on nothing but Dart's core
-libraries and the ```dart:sky``` library exposed by Sky's platform.
+Sky Base
+========
+
+Dependencies
+------------
+
+No dependencies except for `dart:sky` and Dart's core libraries.

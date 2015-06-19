@@ -411,3 +411,13 @@ copies of a particular widget to fill its visible region:
    Moreover, syncing the entries semantically means that state retained in
    stateful subcomponents will remain attached to the same semantic entry rather
    than the entry in the same numerical position in the viewport.
+
+Dependencies
+------------
+
+ * `package:vector_math`
+ * [`package:sky/animation`](../animation)
+ * [`package:sky/base`](../base)
+ * [`package:sky/painting`](../painting)
+ * [`package:sky/rendering`](../rendering)
+ * [`package:sky/theme`](../theme)
