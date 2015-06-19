@@ -29,7 +29,7 @@ class GameDemoApp extends App {
 
   Widget build() {
     return new Stack([
-      new GameDemo(),
+      new SpriteWidget(new GameDemoWorld(_loader)),
 //      new StackPositionedChild(
 //        new Flex([
 //          new FlexExpandingChild(
@@ -49,12 +49,3 @@ class GameDemoApp extends App {
 }
 
 ImageMap _loader;
-
-class GameDemo extends OneChildRenderObjectWrapper {
-
-  GameDemo({ Widget child, Object key })
-  : super(child: child, key: key);
-
-  GameDemoBox get root { return super.root; }
-  GameDemoBox createNode() => new GameDemoBox(new GameDemoWorld(_loader));
-}

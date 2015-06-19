@@ -1,5 +1,8 @@
 part of game;
 
+const double _steeringThreshold = 0.0;
+const double _steeringMax = 150.0;
+
 // Random generator
 Math.Random _rand = new Math.Random();
 
@@ -357,7 +360,7 @@ class Laser extends Sprite {
     _movementVector = new Point(_movementVector.x + ship._movementVector[0], _movementVector.y + ship._movementVector[1]);
   }
 
-  bool move() {
+  void move() {
     position = pointAdd(position, _movementVector);
     _frameCount++;
   }

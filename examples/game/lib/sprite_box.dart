@@ -14,7 +14,7 @@ class SpriteBox extends RenderBox {
   // Member variables
 
   // Root node for drawing
-  Node _rootNode;
+  NodeWithSize _rootNode;
 
   // Tracking of frame rate and updates
   double _lastTimeStamp;
@@ -23,8 +23,8 @@ class SpriteBox extends RenderBox {
 
   // Transformation mode
   SpriteBoxTransformMode transformMode;
-  double _systemWidth;
-  double _systemHeight;
+//  double _systemWidth;
+//  double _systemHeight;
 
   // Cached transformation matrix
   Matrix4 _transformMatrix;
@@ -33,7 +33,7 @@ class SpriteBox extends RenderBox {
 
   // Setup
 
-  SpriteBox(Node rootNode, [SpriteBoxTransformMode mode = SpriteBoxTransformMode.nativePoints, double width=1024.0, double height=1024.0]) {
+  SpriteBox(NodeWithSize rootNode, [SpriteBoxTransformMode mode = SpriteBoxTransformMode.nativePoints]) {
     assert(rootNode != null);
     assert(rootNode._spriteBox == null);
 
@@ -45,8 +45,8 @@ class SpriteBox extends RenderBox {
 
     // Setup transform mode
     transformMode = mode;
-    _systemWidth = width;
-    _systemHeight = height;
+//    _systemWidth = rootNode.size.width;
+//    _systemHeight = rootNode.size.height;
 
     _scheduleTick();
   }
@@ -60,10 +60,10 @@ class SpriteBox extends RenderBox {
 
   // Properties
 
-  double get systemWidth => _systemWidth;
-  double get systemHeight => _systemHeight;
+  double get systemWidth => rootNode.size.width;
+  double get systemHeight => rootNode.size.height;
 
-  Node get rootNode => _rootNode;
+  NodeWithSize get rootNode => _rootNode;
 
   void performLayout() {
     size = constraints.constrain(Size.infinite);
@@ -152,44 +152,49 @@ class SpriteBox extends RenderBox {
     double offsetX = 0.0;
     double offsetY = 0.0;
 
+    double systemWidth = rootNode.size.width;
+    double systemHeight = rootNode.size.height;
+
     switch(transformMode) {
       case SpriteBoxTransformMode.stretch:
-        scaleX = size.width/_systemWidth;
-        scaleY = size.height/_systemHeight;
+        scaleX = size.width/systemWidth;
+        scaleY = size.height/systemHeight;
         break;
       case SpriteBoxTransformMode.letterbox:
-        scaleX = size.width/_systemWidth;
-        scaleY = size.height/_systemHeight;
+        scaleX = size.width/systemWidth;
+        scaleY = size.height/systemHeight;
         if (scaleX > scaleY) {
           scaleY = scaleX;
-          offsetY = (size.height - scaleY * _systemHeight)/2.0;
+          offsetY = (size.height - scaleY * systemHeight)/2.0;
         }
         else {
           scaleX = scaleY;
-          offsetX = (size.width - scaleX * _systemWidth)/2.0;
+          offsetX = (size.width - scaleX * systemWidth)/2.0;
         }
         break;
       case SpriteBoxTransformMode.scaleToFit:
-        scaleX = size.width/_systemWidth;
-        scaleY = size.height/_systemHeight;
+        scaleX = size.width/systemWidth;
+        scaleY = size.height/systemHeight;
         if (scaleX < scaleY) {
           scaleY = scaleX;
-          offsetY = (size.height - scaleY * _systemHeight)/2.0;
+          offsetY = (size.height - scaleY * systemHeight)/2.0;
         }
         else {
           scaleX = scaleY;
-          offsetX = (size.width - scaleX * _systemWidth)/2.0;
+          offsetX = (size.width - scaleX * systemWidth)/2.0;
         }
         break;
       case SpriteBoxTransformMode.fixedWidth:
-        scaleX = size.width/_systemWidth;
+        scaleX = size.width/systemWidth;
         scaleY = scaleX;
-        _systemHeight = size.height/scaleX;
+        systemHeight = size.height/scaleX;
+        rootNode.size = new Size(systemWidth, systemHeight);
         break;
       case SpriteBoxTransformMode.fixedHeight:
-        scaleY = size.height/_systemHeight;
+        scaleY = size.height/systemHeight;
         scaleX = scaleY;
-        _systemWidth = size.width/scaleY;
+        systemWidth = size.width/scaleY;
+        rootNode.size = new Size(systemWidth, systemHeight);
         break;
       case SpriteBoxTransformMode.nativePoints:
         break;
