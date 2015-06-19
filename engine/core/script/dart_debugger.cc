@@ -5,8 +5,8 @@
 #include "sky/engine/core/script/dart_debugger.h"
 
 #include "dart/runtime/include/dart_api.h"
-#include "dart/runtime/include/dart_debugger_api.h"
 #include "dart/runtime/include/dart_native_api.h"
+#include "dart/runtime/include/dart_tools_api.h"
 
 
 namespace blink {
