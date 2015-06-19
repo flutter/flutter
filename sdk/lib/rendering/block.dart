@@ -80,11 +80,12 @@ class RenderBlock extends RenderBox with ContainerRenderObjectMixin<RenderBox, B
   void performLayout() {
     assert(constraints is BoxConstraints);
     double width = constraints.constrainWidth(constraints.maxWidth);
+    bool usesChildSize = !constraints.hasTightHeight;
     BoxConstraints innerConstraints = _getInnerConstraintsForWidth(width);
     double y = 0.0;
     RenderBox child = firstChild;
     while (child != null) {
-      child.layout(innerConstraints, parentUsesSize: true);
+      child.layout(innerConstraints, parentUsesSize: usesChildSize);
       assert(child.parentData is BlockParentData);
       child.parentData.position = new Point(0.0, y);
       y += child.size.height;

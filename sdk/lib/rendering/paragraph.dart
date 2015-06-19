@@ -24,6 +24,9 @@ class InlineText extends InlineBase {
     return owner.createText(text);
   }
 
+  bool operator ==(other) => other is InlineText && text == other.text;
+  int get hashCode => text.hashCode;
+
   String toString([String prefix = '']) => '${prefix}InlineText: "${text}"';
 }
 
@@ -43,6 +46,28 @@ class InlineStyle extends InlineBase {
       parent.appendChild(child._toDOM(owner));
     }
     return parent;
+  }
+
+  bool operator ==(other) {
+    if (identical(this, other))
+      return true;
+    if (other is! InlineStyle
+        || style != other.style
+        || children.length != other.children.length)
+      return false;
+    for (int i = 0; i < children.length; ++i) {
+      if (children[i] != other.children[i])
+        return false;
+    }
+    return true;
+  }
+
+  int get hashCode {
+    int value = 373;
+    value = 37 * value + style.hashCode;
+    for (InlineBase child in children)
+      value = 37 * value + child.hashCode;
+    return value;
   }
 
   String toString([String prefix = '']) {
@@ -83,6 +108,8 @@ class RenderParagraph extends RenderBox {
 
   InlineBase get inline => _inline;
   void set inline (InlineBase value) {
+    if (_inline == value)
+      return;
     _inline = value;
     _layoutRoot.rootElement.setChild(_inline._toDOM(_document));
     markNeedsLayout();

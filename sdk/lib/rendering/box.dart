@@ -42,10 +42,15 @@ class EdgeDims {
   final double bottom;
   final double left;
 
-  operator ==(EdgeDims other) => (top == other.top) ||
-                                 (right == other.right) ||
-                                 (bottom == other.bottom) ||
-                                 (left == other.left);
+  bool operator ==(other) {
+    if (identical(this, other))
+      return true;
+    return other is EdgeDims
+        && top == other.top
+        && right == other.right
+        && bottom == other.bottom
+        && left == other.left;
+  }
 
   int get hashCode {
     int value = 373;
@@ -180,6 +185,19 @@ class BoxConstraints {
 
   bool get isInfinite => maxWidth >= double.INFINITY && maxHeight >= double.INFINITY;
 
+  bool get hasTightWidth => minWidth == maxWidth;
+  bool get hasTightHeight => minHeight == maxHeight;
+  bool get isTight => hasTightWidth && hasTightHeight;
+
+  bool operator ==(other) {
+    if (identical(this, other))
+      return true;
+    return other is BoxConstraints &&
+           minWidth == other.minWidth &&
+           maxWidth == other.maxWidth &&
+           minHeight == other.minHeight &&
+           maxHeight == other.maxHeight;
+  }
   int get hashCode {
     int value = 373;
     value = 37 * value + minWidth.hashCode;
@@ -188,6 +206,7 @@ class BoxConstraints {
     value = 37 * value + maxHeight.hashCode;
     return value;
   }
+
   String toString() => "BoxConstraints($minWidth<=w<$maxWidth, $minHeight<=h<$maxHeight)";
 }
 
@@ -1052,11 +1071,16 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   }
 
   void paintFrame() {
+    sky.tracing.begin('RenderView.paintFrame');
     RenderObject.debugDoingPaint = true;
-    RenderObjectDisplayList canvas = new RenderObjectDisplayList(sky.view.width, sky.view.height);
-    paint(canvas);
-    sky.view.picture = canvas.endRecording();
-    RenderObject.debugDoingPaint = false;
+    try {
+      RenderObjectDisplayList canvas = new RenderObjectDisplayList(sky.view.width, sky.view.height);
+      paint(canvas);
+      sky.view.picture = canvas.endRecording();
+    } finally {
+      RenderObject.debugDoingPaint = false;
+      sky.tracing.end('RenderView.paintFrame');
+    }
   }
 
 }

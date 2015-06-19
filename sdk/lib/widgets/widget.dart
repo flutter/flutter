@@ -57,6 +57,7 @@ abstract class Widget {
 
   static void _notifyMountStatusChanged() {
     try {
+      sky.tracing.begin("Widget._notifyMountStatusChanged");
       _notifyingMountStatus = true;
       for (Widget node in _mountedChanged) {
         if (node._wasMounted != node._mounted) {
@@ -70,6 +71,7 @@ abstract class Widget {
       _mountedChanged.clear();
     } finally {
       _notifyingMountStatus = false;
+      sky.tracing.end("Widget._notifyMountStatusChanged");
     }
   }
   void didMount() { }
@@ -434,13 +436,12 @@ bool _buildScheduled = false;
 bool _inRenderDirtyComponents = false;
 
 void _buildDirtyComponents() {
-  //_tracing.begin('fn::_buildDirtyComponents');
-
   Stopwatch sw;
   if (_shouldLogRenderDuration)
     sw = new Stopwatch()..start();
 
   try {
+    sky.tracing.begin('Widgets._buildDirtyComponents');
     _inRenderDirtyComponents = true;
 
     List<Component> sortedDirtyComponents = _dirtyComponents.toList();
@@ -453,6 +454,7 @@ void _buildDirtyComponents() {
     _buildScheduled = false;
   } finally {
     _inRenderDirtyComponents = false;
+    sky.tracing.end('Widgets._buildDirtyComponents');
   }
 
   Widget._notifyMountStatusChanged();
@@ -461,8 +463,6 @@ void _buildDirtyComponents() {
     sw.stop();
     print('Render took ${sw.elapsedMicroseconds} microseconds');
   }
-
-  //_tracing.end('fn::_buildDirtyComponents');
 }
 
 void _scheduleComponentForRender(Component c) {
@@ -736,8 +736,12 @@ abstract class MultiChildRenderObjectWrapper extends RenderObjectWrapper {
       assert(old.root is ContainerRenderObjectMixin);
       assert(oldNode.root != null);
 
-      (old.root as ContainerRenderObjectMixin).remove(oldNode.root); // TODO(ianh): Remove cast once the analyzer is cleverer
-      root.add(oldNode.root, before: nextSibling);
+      if (old.root == root) {
+        root.move(oldNode.root, before: nextSibling);
+      } else {
+        (old.root as ContainerRenderObjectMixin).remove(oldNode.root); // TODO(ianh): Remove cast once the analyzer is cleverer
+        root.add(oldNode.root, before: nextSibling);
+      }
 
       return true;
     }

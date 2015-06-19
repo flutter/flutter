@@ -131,14 +131,19 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     scheduler.ensureVisualUpdate();
   }
   static void flushLayout() {
+    sky.tracing.begin('RenderObject.flushLayout');
     _debugDoingLayout = true;
-    List<RenderObject> dirtyNodes = _nodesNeedingLayout;
-    _nodesNeedingLayout = new List<RenderObject>();
-    dirtyNodes..sort((a, b) => a.depth - b.depth)..forEach((node) {
-      if (node._needsLayout && node.attached)
-        node.layoutWithoutResize();
-    });
-    _debugDoingLayout = false;
+    try {
+      List<RenderObject> dirtyNodes = _nodesNeedingLayout;
+      _nodesNeedingLayout = new List<RenderObject>();
+      dirtyNodes..sort((a, b) => a.depth - b.depth)..forEach((node) {
+        if (node._needsLayout && node.attached)
+          node.layoutWithoutResize();
+      });
+    } finally {
+      _debugDoingLayout = false;
+      sky.tracing.end('RenderObject.flushLayout');
+    }
   }
   void layoutWithoutResize() {
     try {
@@ -350,13 +355,7 @@ abstract class ContainerRenderObjectMixin<ChildType extends RenderObject, Parent
 
   ChildType _firstChild;
   ChildType _lastChild;
-  void add(ChildType child, { ChildType before }) {
-    assert(child != this);
-    assert(before != this);
-    assert(child != before);
-    assert(child != _firstChild);
-    assert(child != _lastChild);
-    adoptChild(child);
+  void _addToChildList(ChildType child, { ChildType before }) {
     assert(child.parentData is ParentDataType);
     assert(child.parentData.nextSibling == null);
     assert(child.parentData.previousSibling == null);
@@ -396,7 +395,16 @@ abstract class ContainerRenderObjectMixin<ChildType extends RenderObject, Parent
       }
     }
   }
-  void remove(ChildType child) {
+  void add(ChildType child, { ChildType before }) {
+    assert(child != this);
+    assert(before != this);
+    assert(child != before);
+    assert(child != _firstChild);
+    assert(child != _lastChild);
+    adoptChild(child);
+    _addToChildList(child, before: before);
+  }
+  void _removeFromChildList(ChildType child) {
     assert(child.parentData is ParentDataType);
     assert(_debugUltimatePreviousSiblingOf(child, equals: _firstChild));
     assert(_debugUltimateNextSiblingOf(child, equals: _lastChild));
@@ -416,7 +424,21 @@ abstract class ContainerRenderObjectMixin<ChildType extends RenderObject, Parent
     }
     child.parentData.previousSibling = null;
     child.parentData.nextSibling = null;
+  }
+  void remove(ChildType child) {
+    _removeFromChildList(child);
     dropChild(child);
+  }
+  void move(ChildType child, { ChildType before }) {
+    assert(child != this);
+    assert(before != this);
+    assert(child != before);
+    assert(child.parent == this);
+    assert(child.parentData is ParentDataType);
+    if (child.parentData.nextSibling == before)
+      return;
+    _removeFromChildList(child);
+    _addToChildList(child, before: before);
   }
   void redepthChildren() {
     ChildType child = _firstChild;

@@ -105,6 +105,8 @@ class TextStyle {
   }
 
   bool operator ==(other) {
+    if (identical(this, other))
+      return true;
     return other is TextStyle &&
       color == other.color &&
       fontFamily == other.fontFamily && 
