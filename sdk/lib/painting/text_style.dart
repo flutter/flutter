@@ -39,9 +39,9 @@ enum TextDecoration {
   lineThrough
 }
 
-const underline = const <TextDecoration> [TextDecoration.underline];
-const overline = const <TextDecoration> [TextDecoration.overline];
-const lineThrough = const <TextDecoration> [TextDecoration.lineThrough];
+const underline = const <TextDecoration>[TextDecoration.underline];
+const overline = const <TextDecoration>[TextDecoration.overline];
+const lineThrough = const <TextDecoration>[TextDecoration.lineThrough];
 
 enum TextDecorationStyle {
   solid,
@@ -58,7 +58,7 @@ class TextStyle {
     this.fontSize,
     this.fontWeight,
     this.textAlign,
-    List<TextDecoration> this.decoration,
+    this.decoration,
     this.decorationColor,
     this.decorationStyle
   });
@@ -68,20 +68,9 @@ class TextStyle {
   final double fontSize; // in pixels
   final FontWeight fontWeight;
   final TextAlign textAlign;
-  final List<TextDecoration> decoration;
+  final List<TextDecoration> decoration; // TODO(ianh): Switch this to a Set<> once Dart supports constant Sets
   final Color decorationColor;
   final TextDecorationStyle decorationStyle;
-
-  String _decorationToString() {
-    assert(decoration != null);
-    const toCSS = const {
-      TextDecoration.none: 'none',
-      TextDecoration.underline: 'underline',
-      TextDecoration.overline: 'overline',
-      TextDecoration.lineThrough: 'lineThrough'
-    };
-    return decoration.map((d) => toCSS[d]).join(' ');
-  }
 
   TextStyle copyWith({
     Color color,
@@ -102,6 +91,77 @@ class TextStyle {
       decorationColor: decorationColor != null ? decorationColor : this.decorationColor,
       decorationStyle: decorationStyle != null ? decorationStyle : this.decorationStyle
     );
+  }
+
+  static String _colorToCSSString(Color color) {
+    return 'rgba(${color.red}, ${color.green}, ${color.blue}, ${color.alpha / 255.0})';
+  }
+
+  static String _fontFamilyToCSSString(String fontFamily) {
+    // TODO(hansmuller): escape the fontFamily string.
+    return fontFamily;
+  }
+
+  static String _decorationToCSSString(List<TextDecoration> decoration) {
+    assert(decoration != null);
+    const toCSS = const <TextDecoration, String>{
+      TextDecoration.none: 'none',
+      TextDecoration.underline: 'underline',
+      TextDecoration.overline: 'overline',
+      TextDecoration.lineThrough: 'lineThrough'
+    };
+    return decoration.map((d) => toCSS[d]).join(' ');
+  }
+
+  static String _decorationStyleToCSSString(TextDecorationStyle decorationStyle) {
+    assert(decorationStyle != null);
+    const toCSS = const <TextDecorationStyle, String>{
+      TextDecorationStyle.solid: 'solid',
+      TextDecorationStyle.double: 'double',
+      TextDecorationStyle.dotted: 'dotted',
+      TextDecorationStyle.dashed: 'dashed',
+      TextDecorationStyle.wavy: 'wavy'
+    };
+    return toCSS[decorationStyle];
+  }
+
+  void applyToCSSStyle(CSSStyleDeclaration cssStyle) {
+    if (color != null) {
+      cssStyle['color'] = _colorToCSSString(color);
+    }
+    if (fontFamily != null) {
+      cssStyle['font-family'] = _fontFamilyToCSSString(fontFamily);
+    }
+    if (fontSize != null) {
+      cssStyle['font-size'] = "${fontSize}px";
+    }
+    if (fontWeight != null) {
+      cssStyle['font-weight'] = const {
+        FontWeight.w100: '100',
+        FontWeight.w200: '200',
+        FontWeight.w300: '300',
+        FontWeight.w400: '400',
+        FontWeight.w500: '500',
+        FontWeight.w600: '600',
+        FontWeight.w700: '700',
+        FontWeight.w800: '800',
+        FontWeight.w900: '900'
+      }[fontWeight];
+    }
+    if (textAlign != null) {
+      cssStyle['text-align'] = const {
+        TextAlign.left: 'left',
+        TextAlign.right: 'right',
+        TextAlign.center: 'center',
+      }[textAlign];
+    }
+    if (decoration != null) {
+      cssStyle['text-decoration'] = _decorationToCSSString(decoration);
+      if (decorationColor != null)
+        cssStyle['text-decoration-color'] = _colorToCSSString(decorationColor);
+      if (decorationStyle != null)
+        cssStyle['text-decoration-style'] = _decorationStyleToCSSString(decorationStyle);
+    }
   }
 
   bool operator ==(other) {
@@ -132,43 +192,6 @@ class TextStyle {
     return value;
   }
 
-  void applyToCSSStyle(CSSStyleDeclaration cssStyle) {
-    if (color != null) {
-      cssStyle['color'] = 'rgba(${color.red}, ${color.green}, ${color.blue}, ${color.alpha / 255.0})';
-    }
-    // TODO(hansmuller): escape the fontFamily string.
-    if (fontFamily != null) {
-      cssStyle['font-family'] = fontFamily;
-    }
-    if (fontSize != null) {
-      cssStyle['font-size'] = "${fontSize}px";
-    }
-    if (fontWeight != null) {
-      cssStyle['font-weight'] = const {
-        FontWeight.w100: '100',
-        FontWeight.w200: '200',
-        FontWeight.w300: '300',
-        FontWeight.w400: '400',
-        FontWeight.w500: '500',
-        FontWeight.w600: '600',
-        FontWeight.w700: '700',
-        FontWeight.w800: '800',
-        FontWeight.w900: '900'
-      }[fontWeight];
-    }
-    if (textAlign != null) {
-      cssStyle['text-align'] = const {
-        TextAlign.left: 'left',
-        TextAlign.right: 'right',
-        TextAlign.center: 'center',
-      }[textAlign];
-    }
-    if (decoration != null) {
-      cssStyle['text-decoration'] = _decorationToString();
-    }
-    // TODO(hansmuller): add support for decoration color and style.
-  }
-
   String toString([String prefix = '']) {
     List<String> result = [];
     if (color != null)
@@ -183,7 +206,7 @@ class TextStyle {
     if (textAlign != null)
       result.add('${prefix}textAlign: $textAlign');
     if (decoration != null)
-      result.add('${prefix}decoration: ${_decorationToString()}');
+      result.add('${prefix}decoration: $decoration');
     if (decorationColor != null)
       result.add('${prefix}decorationColor: $decorationColor');
     if (decorationStyle != null)
