@@ -46,7 +46,7 @@ adding a [pubspec.yaml](https://www.dartlang.org/tools/pub/pubspec.html):
 ```yaml
 name: your_app_name
 dependencies:
- sky: any
+  sky: any
 ```
 
 Once the pubspec is in place, create a `lib` directory (where your dart code
@@ -56,44 +56,39 @@ run the following:
 `pub get && pub run sky:init`.
 
 Currently the Sky Engine assumes the entry point for your application is a
-`main` function located inside a `main.sky` file at the root of the package.
-`.sky` is an html-like format:
-```
-<sky>
-<script>
-import 'package:your_app_name/main.dart';
-
-void main() {
-  new HelloWorldApp();
-}
-</script>
-</sky>
-```
-
-The rest of the application then goes inside the `lib` directory of the package
-thus `lib/main.dart` would be:
+`main` function in a Dart file inside your package:
 
 ```dart
-import 'package:sky/framework/fn.dart';
+import 'package:sky/widgets/basic.dart';
 
 class HelloWorldApp extends App {
-  UINode build() {
+  Widget build() {
     return new Text('Hello, world!');
   }
 }
+
+void main() {
+  runApp(new HelloWorldApp());
+}
 ```
 
-Execution starts in `main`, which creates the `HelloWorldApp`. The framework
-then marks `HelloWorldApp` as dirty, which schedules it to build during the next
-animation frame. Each animation frame, the framework calls `build` on all the
-dirty components and diffs the virtual `UINode` hierarchy returned this frame
-with the hierarchy returned last frame. Any differences are then applied as
-mutations to the physical hierarchy retained by the engine.
+Execution starts in `main`, which instructs the framework to run a new
+instance of the `HelloWorldApp`. The framework then calls the `build()`
+function on `HelloWorldApp` to create a tree of widgets, some of which might
+be other `Components`, which in turn have `build()` functions that generate
+more widgets iteratively to create the widget hierarchy.
 
-Skip down to "Running a Sky application" to learn how to load and run this
-example on your device.
+Later, if a `Component` changes state, the framework calls that component's
+`build()` function again to create a new widget tree. The framework diffs the
+new widget tree against the old widget tree and any differences are applyed
+to the underlying render tree.
 
-For examples, please see the [examples directory](examples/).
+ * To learn more about the widget system, please see the
+   [widgets tutorial](lib/widgets/README.md).
+ * To learn how to run Sky on your device, please see the
+   [Running a Sky application](#running-a-sky-application) section in this
+   document.
+ * To dive into examples, please see the [examples directory](examples/).
 
 Services
 --------
@@ -106,7 +101,7 @@ access these services via libraries in the framework. For example, the
 ergonomic interface:
 
 ```dart
-import 'package:sky/framework/net/fetch.dart';
+import 'package:sky/mojo/net/fetch.dart';
 
 main() async {
   Response response = await fetchBody('example.txt');
@@ -120,14 +115,14 @@ Set up your computer
 1. Install the Dart SDK:
   - https://www.dartlang.org/tools/download.html
 
-2. Install the ``adb`` tool from the Android SDK:
+2. Install the `adb` tool from the Android SDK:
   - https://developer.android.com/sdk/installing/index.html
 
 3. Install the Sky SDK:
-  - ``git clone https://github.com/domokit/sky_sdk.git``
+  - `git clone https://github.com/domokit/sky_sdk.git`
 
-4. Ensure that $DART_SDK is set to the path of your Dart SDK and 'adb'
-   (inside 'platform-tools' in the android sdk) is in your $PATH.
+4. Ensure that `$DART_SDK` is set to the path of your Dart SDK and `adb`
+   (inside `platform-tools` in the android sdk) is in your `$PATH`.
 
 Set up your device
 ------------------
@@ -135,10 +130,10 @@ Set up your device
 Currently Sky requires an Android device running the Lollipop (or newer) version
 of the Android operating system.
 
-1. Enable developer mode on your device by visiting ``Settings > About phone``
-   and tapping the ``Build number`` field five times.
+1. Enable developer mode on your device by visiting `Settings > About phone`
+   and tapping the `Build number` field five times.
 
-2. Enable ``USB debugging`` in ``Settings > Developer options``.
+2. Enable `USB debugging` in `Settings > Developer options`.
 
 3. Using a USB cable, plug your phone into your computer. If prompted on your
    device, authorize your computer to access your device.
@@ -147,24 +142,24 @@ Running a Sky application
 -------------------------
 
 The `sky` pub package includes a `sky_tool` script to assist in running
-Sky applications inside the `SkyDemo.apk` harness.  The sky_tool script expects
-to be run from the root directory of your application pub package.  To run
-one of the examples in this SDK, try:
+Sky applications inside the `SkyDemo.apk` harness.  The `sky_tool` script
+expects to be run from the root directory of your application pub package. To
+run one of the examples in this SDK, try:
 
-1. ``cd examples/stocks``
+1. `cd examples/stocks`
 
-2. ``pub get`` to set up a copy of the sky package in the app directory.
+2. `pub get` to set up a copy of the sky package in the app directory.
 
-3. ``./packages/sky/sky_tool start`` to start the dev server and upload your
+3. `./packages/sky/sky_tool start` to start the dev server and upload your
    app to the device.
-   (NOTE: add a ``--install`` flag to install SkyDemo.apk if not already
+   (NOTE: add a `--install` flag to install `SkyDemo.apk` if it is not already
    installed on the device.)
 
-4. Use ``adb logcat`` to view any errors or Dart print() output from the app.
-   ``adb logcat -s chromium`` can be used to filter only adb messages from
+4. Use `adb logcat` to view any errors or Dart `print()` output from the app.
+   `adb logcat -s chromium` can be used to filter only adb messages from
    `SkyDemo.apk` (which for
    [legacy reasons](https://github.com/domokit/mojo/issues/129) still uses the
-   android log tag 'chromium').
+   android log tag `chromium`).
 
 Measuring Performance
 ---------------------
@@ -181,10 +176,9 @@ requires root access on the device.
 Debugging
 ---------
 
-Dart's [Observatory](https://www.dartlang.org/tools/observatory/)
-(VM Debugger & Profiler) support in Sky is
-[in progress](https://codereview.chromium.org/1107803002) and should
-be released shortly after Dart Summit 2015.
+Sky uses [Observatory](https://www.dartlang.org/tools/observatory/) for
+debugging and profiling. While running your Sky app using `sky_tool`, you can
+access Observatory by navigating your web browser to http://localhost:8181/.
 
 Building a standalone MyApp
 ---------------------------
