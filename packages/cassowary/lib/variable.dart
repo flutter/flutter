@@ -9,12 +9,4 @@ class Variable extends EquationMember {
   Variable(this.value);
 
   Expression asExpression() => new Expression([new Term(this, 1.0)], 0.0);
-
-  EquationMember operator *(double m) {
-    return new Term(this, m);
-  }
-
-  EquationMember operator /(double m) {
-    return new Term(this, 1.0 / m);
-  }
 }

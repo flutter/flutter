@@ -13,12 +13,4 @@ class Term extends EquationMember {
 
   Expression asExpression() =>
       new Expression([new Term(this.variable, this.coefficient)], 0.0);
-
-  EquationMember operator *(double m) {
-    return new Term(this.variable, this.coefficient * m);
-  }
-
-  EquationMember operator /(double m) {
-    return new Term(this.variable, this.coefficient / m);
-  }
 }

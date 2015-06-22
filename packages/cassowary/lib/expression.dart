@@ -105,13 +105,12 @@ class Expression extends EquationMember {
   EquationMember operator *(double m) {
     var terms = this.terms.fold(new List<Term>(), (list, term) => list
       ..add(new Term(term.variable, term.coefficient * m)));
-    return new Expression(terms, this.constant);
+    return new Expression(terms, this.constant * m);
   }
 
-  // TODO(csg): Figure out how to dry this up.
   EquationMember operator /(double m) {
     var terms = this.terms.fold(new List<Term>(), (list, term) => list
       ..add(new Term(term.variable, term.coefficient / m)));
-    return new Expression(terms, this.constant);
+    return new Expression(terms, this.constant / m);
   }
 }

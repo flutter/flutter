@@ -16,4 +16,8 @@ abstract class EquationMember {
   Expression operator +(EquationMember m) => asExpression() + m;
 
   Expression operator -(EquationMember m) => asExpression() - m;
+
+  Expression operator *(double m) => asExpression() * m;
+
+  Expression operator /(double m) => asExpression() / m;
 }

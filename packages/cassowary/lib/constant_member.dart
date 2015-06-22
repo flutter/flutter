@@ -9,14 +9,6 @@ class ConstantMember extends EquationMember {
   ConstantMember(this.value);
 
   Expression asExpression() => new Expression([], this.value);
-
-  EquationMember operator *(double m) {
-    return new ConstantMember(this.value * m);
-  }
-
-  EquationMember operator /(double m) {
-    return new ConstantMember(this.value / m);
-  }
 }
 
 ConstantMember CM(num value) {
