@@ -11,59 +11,8 @@ class Term extends EquationMember {
 
   Term(this.variable, this.coefficient);
 
-  Expression _asExpression() =>
+  Expression asExpression() =>
       new Expression([new Term(this.variable, this.coefficient)], 0.0);
-
-  Constraint operator >=(EquationMember m) => _asExpression() >= m;
-
-  Constraint operator <=(EquationMember m) => _asExpression() <= m;
-
-  operator ==(EquationMember m) => _asExpression() == m;
-
-  Expression operator +(EquationMember m) {
-    if (m is ConstantMember) {
-      return new Expression([this], m.value);
-    }
-
-    if (m is Variable) {
-      return new Expression([this, new Term(m, 1.0)], 0.0);
-    }
-
-    if (m is Term) {
-      return new Expression([this, m], 0.0);
-    }
-
-    if (m is Expression) {
-      return new Expression(
-          new List.from(m.terms)..insert(0, this), m.constant);
-    }
-
-    assert(false);
-    return null;
-  }
-
-  Expression operator -(EquationMember m) {
-    if (m is ConstantMember) {
-      return new Expression([this], -m.value);
-    }
-
-    if (m is Variable) {
-      return new Expression([this, new Term(m, -1.0)], 0.0);
-    }
-
-    if (m is Term) {
-      return new Expression([this, new Term(m.variable, -m.coefficient)], 0.0);
-    }
-
-    if (m is Expression) {
-      var negatedTerms = m.terms.fold(new List<Term>(),
-          (list, t) => list..add(new Term(t.variable, -t.coefficient)));
-      return new Expression(negatedTerms..insert(0, this), -m.constant);
-    }
-
-    assert(false);
-    return null;
-  }
 
   EquationMember operator *(double m) {
     return new Term(this.variable, this.coefficient * m);

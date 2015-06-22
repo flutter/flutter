@@ -4,4 +4,16 @@
 
 part of cassowary;
 
-abstract class EquationMember {}
+abstract class EquationMember {
+  Expression asExpression();
+
+  Constraint operator >=(EquationMember m) => asExpression() >= m;
+
+  Constraint operator <=(EquationMember m) => asExpression() <= m;
+
+  operator ==(EquationMember m) => asExpression() == m;
+
+  Expression operator +(EquationMember m) => asExpression() + m;
+
+  Expression operator -(EquationMember m) => asExpression() - m;
+}

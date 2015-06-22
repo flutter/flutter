@@ -12,6 +12,8 @@ class Expression extends EquationMember {
 
   Expression(this.terms, this.constant);
 
+  Expression asExpression() => this;
+
   Constraint _createConstraint(
       EquationMember /* rhs */ value, Relation relation) {
     if (value is ConstantMember) {
