@@ -10,3 +10,4 @@ part 'term.dart';
 part 'variable.dart';
 part 'equation_member.dart';
 part 'constant_member.dart';
+part 'solver.dart';

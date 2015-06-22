@@ -194,7 +194,7 @@ void main() {
     var left = new Variable(10.0);
     var right = new Variable(100.0);
 
-    var c = right - left >= 25.0;
+    var c = right - left >= CM(25.0);
     expect(c is Constraint, true);
   });
 
@@ -244,17 +244,17 @@ void main() {
     var left = new Variable(2.0);
     var right = new Variable(10.0);
 
-    var c1 = right - left >= 20.0;
+    var c1 = right - left >= CM(20.0);
     expect(c1 is Constraint, true);
     expect(c1.expression.constant, -20.0);
     expect(c1.relation, Relation.greaterThanOrEqualTo);
 
-    var c2 = (right - left == 30.0) as Constraint;
+    var c2 = (right - left == CM(30.0)) as Constraint;
     expect(c2 is Constraint, true);
     expect(c2.expression.constant, -30.0);
     expect(c2.relation, Relation.equalTo);
 
-    var c3 = right - left <= 30.0;
+    var c3 = right - left <= CM(30.0);
     expect(c3 is Constraint, true);
     expect(c3.expression.constant, -30.0);
     expect(c3.relation, Relation.lessThanOrEqualTo);
@@ -264,10 +264,79 @@ void main() {
     var left = new Variable(2.0);
     var right = new Variable(10.0);
 
-    var c = (right - left >= 200.0) | 750.0;
+    var c = (right - left >= CM(200.0)) | 750.0;
     expect(c is Constraint, true);
     expect(c.expression.terms.length, 2);
     expect(c.expression.constant, -200.0);
     expect(c.priority, 750.0);
+  });
+
+  test('solver', () {
+    var s = new Solver();
+
+    var left = new Variable(2.0);
+    var right = new Variable(100.0);
+
+    var c1 = right - left >= CM(200.0);
+    var c2 = right + left >= CM(0.0);
+
+    // TODO: Add assertions for this
+    s << c1 << c2;
+  });
+
+  test('constraint_complex', () {
+    var e = new Variable(200.0) - new Variable(100.0);
+
+    // Constant
+    var c1 = e >= CM(50.0);
+    expect(c1 is Constraint, true);
+    expect(c1.expression.terms.length, 2);
+    expect(c1.expression.constant, -50.0);
+
+    // Variable
+    var c2 = e >= new Variable(2.0);
+    expect(c2 is Constraint, true);
+    expect(c2.expression.terms.length, 3);
+    expect(c2.expression.constant, 0.0);
+
+    // Term
+    var c3 = e >= new Term(new Variable(2.0), 1.0);
+    expect(c3 is Constraint, true);
+    expect(c3.expression.terms.length, 3);
+    expect(c3.expression.constant, 0.0);
+
+    // Expression
+    var c4 = e >= new Expression([new Term(new Variable(2.0), 1.0)], 20.0);
+    expect(c4 is Constraint, true);
+    expect(c4.expression.terms.length, 3);
+    expect(c4.expression.constant, -20.0);
+  });
+
+  test('constraint_complex_non_exprs', () {
+    // Constant
+    var c1 = CM(100.0) >= CM(50.0);
+    expect(c1 is Constraint, true);
+    expect(c1.expression.terms.length, 0);
+    expect(c1.expression.constant, 50.0);
+
+    // Variable
+    var c2 = new Variable(100.0) >= new Variable(2.0);
+    expect(c2 is Constraint, true);
+    expect(c2.expression.terms.length, 2);
+    expect(c2.expression.constant, 0.0);
+
+    // Term
+    var t = new Term(new Variable(100.0), 1.0);
+    var c3 = t >= new Term(new Variable(2.0), 1.0);
+    expect(c3 is Constraint, true);
+    expect(c3.expression.terms.length, 2);
+    expect(c3.expression.constant, 0.0);
+
+    // Expression
+    var e = new Expression([t], 0.0);
+    var c4 = e >= new Expression([new Term(new Variable(2.0), 1.0)], 20.0);
+    expect(c4 is Constraint, true);
+    expect(c4.expression.terms.length, 2);
+    expect(c4.expression.constant, -20.0);
   });
 }

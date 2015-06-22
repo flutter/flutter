@@ -8,6 +8,14 @@ class ConstantMember extends EquationMember {
   double value = 0.0;
   ConstantMember(this.value);
 
+  Expression _asExpression() => new Expression([], this.value);
+
+  Constraint operator >=(EquationMember m) => _asExpression() >= m;
+
+  Constraint operator <=(EquationMember m) => _asExpression() <= m;
+
+  operator ==(EquationMember m) => _asExpression() == m;
+
   Expression operator +(EquationMember m) {
     if (m is ConstantMember) {
       return new Expression([], this.value + m.value);

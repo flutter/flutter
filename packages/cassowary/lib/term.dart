@@ -11,6 +11,15 @@ class Term extends EquationMember {
 
   Term(this.variable, this.coefficient);
 
+  Expression _asExpression() =>
+      new Expression([new Term(this.variable, this.coefficient)], 0.0);
+
+  Constraint operator >=(EquationMember m) => _asExpression() >= m;
+
+  Constraint operator <=(EquationMember m) => _asExpression() <= m;
+
+  operator ==(EquationMember m) => _asExpression() == m;
+
   Expression operator +(EquationMember m) {
     if (m is ConstantMember) {
       return new Expression([this], m.value);

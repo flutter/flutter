@@ -12,18 +12,44 @@ class Expression extends EquationMember {
 
   Expression(this.terms, this.constant);
 
-  Constraint _createConstraint(double value, Relation relation) {
-    return new Constraint(
-        new Expression(this.terms, this.constant + value), relation);
+  Constraint _createConstraint(
+      EquationMember /* rhs */ value, Relation relation) {
+    if (value is ConstantMember) {
+      return new Constraint(new Expression(
+          new List.from(this.terms), this.constant - value.value), relation);
+    }
+
+    if (value is Variable) {
+      var newTerms = new List<Term>.from(this.terms)
+        ..add(new Term(value, -1.0));
+      return new Constraint(new Expression(newTerms, this.constant), relation);
+    }
+
+    if (value is Term) {
+      var newTerms = new List<Term>.from(this.terms)
+        ..add(new Term(value.variable, -value.coefficient));
+      return new Constraint(new Expression(newTerms, this.constant), relation);
+    }
+
+    if (value is Expression) {
+      var newTerms = value.terms.fold(new List<Term>.from(this.terms),
+          (list, t) => list..add(new Term(t.variable, -t.coefficient)));
+      return new Constraint(
+          new Expression(newTerms, this.constant - value.constant), relation);
+    }
+
+    assert(false);
+    return null;
   }
 
-  Constraint operator >=(double value) =>
-      _createConstraint(-value, Relation.greaterThanOrEqualTo);
+  Constraint operator >=(EquationMember value) =>
+      _createConstraint(value, Relation.greaterThanOrEqualTo);
 
-  Constraint operator <=(double value) =>
-      _createConstraint(-value, Relation.lessThanOrEqualTo);
+  Constraint operator <=(EquationMember value) =>
+      _createConstraint(value, Relation.lessThanOrEqualTo);
 
-  operator ==(double value) => _createConstraint(-value, Relation.equalTo);
+  operator ==(EquationMember value) =>
+      _createConstraint(value, Relation.equalTo);
 
   Expression operator +(EquationMember m) {
     if (m is ConstantMember) {

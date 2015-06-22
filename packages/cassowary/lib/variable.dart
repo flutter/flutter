@@ -8,6 +8,14 @@ class Variable extends EquationMember {
   double value = 0.0;
   Variable(this.value);
 
+  Expression _asExpression() => new Expression([new Term(this, 1.0)], 0.0);
+
+  Constraint operator >=(EquationMember m) => _asExpression() >= m;
+
+  Constraint operator <=(EquationMember m) => _asExpression() <= m;
+
+  operator ==(EquationMember m) => _asExpression() == m;
+
   Expression operator +(EquationMember m) {
     if (m is ConstantMember) {
       return new Expression([new Term(this, 1.0)], m.value);
