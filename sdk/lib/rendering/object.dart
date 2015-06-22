@@ -37,6 +37,11 @@ class RenderObjectDisplayList extends sky.PictureRecorder {
   }
 }
 
+abstract class Constraints {
+  const Constraints();
+  bool get isTight;
+}
+
 abstract class RenderObject extends AbstractNode implements HitTestTarget {
 
   // LAYOUT
@@ -79,8 +84,8 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   bool _needsLayout = true;
   bool get needsLayout => _needsLayout;
   RenderObject _relayoutSubtreeRoot;
-  dynamic _constraints;
-  dynamic get constraints => _constraints;
+  Constraints _constraints;
+  Constraints get constraints => _constraints;
   bool debugAncestorsAlreadyMarkedNeedsLayout() {
     if (_relayoutSubtreeRoot == null)
       return true; // we haven't yet done layout even once, so there's nothing for us to do
@@ -156,10 +161,10 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     }
     _needsLayout = false;
   }
-  void layout(dynamic constraints, { bool parentUsesSize: false }) {
+  void layout(Constraints constraints, { bool parentUsesSize: false }) {
     final parent = this.parent; // TODO(ianh): Remove this once the analyzer is cleverer
     RenderObject relayoutSubtreeRoot;
-    if (!parentUsesSize || sizedByParent || parent is! RenderObject)
+    if (!parentUsesSize || sizedByParent || constraints.isTight || parent is! RenderObject)
       relayoutSubtreeRoot = this;
     else
       relayoutSubtreeRoot = parent._relayoutSubtreeRoot;

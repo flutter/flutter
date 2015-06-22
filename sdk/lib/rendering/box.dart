@@ -63,7 +63,7 @@ class EdgeDims {
   String toString() => "EdgeDims($top, $right, $bottom, $left)";
 }
 
-class BoxConstraints {
+class BoxConstraints extends Constraints {
   const BoxConstraints({
     this.minWidth: 0.0,
     this.maxWidth: double.INFINITY,
@@ -185,8 +185,8 @@ class BoxConstraints {
 
   bool get isInfinite => maxWidth >= double.INFINITY && maxHeight >= double.INFINITY;
 
-  bool get hasTightWidth => minWidth == maxWidth;
-  bool get hasTightHeight => minHeight == maxHeight;
+  bool get hasTightWidth => minWidth >= maxWidth;
+  bool get hasTightHeight => minHeight >= maxHeight;
   bool get isTight => hasTightWidth && hasTightHeight;
 
   bool operator ==(other) {

@@ -11,7 +11,7 @@ import 'package:sky/rendering/sky_binding.dart';
 
 const double kTwoPi = 2 * math.PI;
 
-class SectorConstraints {
+class SectorConstraints extends Constraints {
   const SectorConstraints({
     this.minDeltaRadius: 0.0,
     this.maxDeltaRadius: double.INFINITY,
@@ -37,6 +37,8 @@ class SectorConstraints {
   double constrainDeltaTheta(double deltaTheta) {
     return clamp(min: minDeltaTheta, max: maxDeltaTheta, value: deltaTheta);
   }
+
+  bool get isTight => minDeltaTheta >= maxDeltaTheta && minDeltaTheta >= maxDeltaTheta;
 }
 
 class SectorDimensions {
@@ -72,7 +74,7 @@ abstract class RenderSector extends RenderObject {
     return new SectorDimensions.withConstraints(constraints);
   }
 
-  SectorConstraints get constraints { SectorConstraints result = super.constraints; return result; }
+  SectorConstraints get constraints => super.constraints;
   void performResize() {
     // default behaviour for subclasses that have sizedByParent = true
     deltaRadius = constraints.constrainDeltaRadius(0.0);
