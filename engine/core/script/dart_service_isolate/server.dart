@@ -151,8 +151,8 @@ class Server {
       request.response.close();
       return;
     }
-    var message = new Message.fromUri(this, request.uri);
     var client = new HttpRequestClient(request, _service);
+    var message = new Message.fromUri(client, request.uri);
     client.onMessage(null, message);
   }
 
