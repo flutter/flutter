@@ -60,3 +60,22 @@ We recommend using the [Dart
 ``test``](https://pub.dartlang.org/packages/test) testing framework.
 See [``sky/tests/raw/color_bounds.dart``](tests/raw/color_bounds.dart)
 for an example.
+
+Debugging Sky
+-------------
+
+This document aims to explain how to debug Sky itself.
+
+=== C++
+
+Launch a debug Sky build on Linux as follows (where `app.dart` is the
+test you are running and trying to debug):
+
+```bash
+mojodb start --gdb out/Debug app.dart
+mojodb gdb_attach
+```
+
+=== Dart
+
+Use Observatory.
