@@ -169,8 +169,7 @@ class StockHome extends Component {
           new IconButton(
             icon: 'navigation/more_vert_white',
             onPressed: _handleMenuShow)
-        ],
-        backgroundColor: colors.Purple[500]
+        ]
       );
   }
 

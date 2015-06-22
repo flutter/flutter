@@ -3,13 +3,13 @@
 // found in the LICENSE file.
 
 import 'package:sky/theme/colors.dart' as colors;
-import 'package:sky/theme/typography.dart' as typography;
 import 'package:sky/widgets/basic.dart';
 import 'package:sky/widgets/checkbox.dart';
 import 'package:sky/widgets/icon_button.dart';
 import 'package:sky/widgets/menu_item.dart';
 import 'package:sky/widgets/navigator.dart';
 import 'package:sky/widgets/scaffold.dart';
+import 'package:sky/widgets/theme.dart';
 import 'package:sky/widgets/tool_bar.dart';
 
 class StockSettings extends Component {
@@ -30,8 +30,7 @@ class StockSettings extends Component {
       left: new IconButton(
         icon: 'navigation/arrow_back_white',
         onPressed: _navigator.pop),
-      center: new Text('Settings', style: typography.white.title),
-      backgroundColor: colors.Purple[500]
+      center: new Text('Settings', style: Theme.of(this).text.title)
     );
   }
 
