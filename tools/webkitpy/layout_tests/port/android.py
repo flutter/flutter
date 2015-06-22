@@ -598,15 +598,15 @@ class AndroidPort(base.Port):
                 return test_run_results.SYS_DEPS_EXIT_STATUS
         return test_run_results.OK_EXIT_STATUS
 
-    def requires_http_server(self):
+    def requires_sky_server(self):
         """Chromium Android runs tests on devices, and uses the HTTP server to
         serve the actual layout tests to the test driver."""
         return True
 
-    def start_http_server(self, additional_dirs, number_of_drivers):
+    def start_sky_server(self, additional_dirs, number_of_drivers):
         additional_dirs[PERF_TEST_PATH_PREFIX] = self.perf_tests_dir()
         additional_dirs[LAYOUT_TEST_PATH_PREFIX] = self.layout_tests_dir()
-        super(AndroidPort, self).start_http_server(additional_dirs, number_of_drivers)
+        super(AndroidPort, self).start_sky_server(additional_dirs, number_of_drivers)
 
     def create_driver(self, worker_number, no_timeout=False):
         return ChromiumAndroidDriver(self, worker_number, pixel_tests=self.get_option('pixel_tests'),
@@ -649,8 +649,8 @@ class AndroidPort(base.Port):
     def _path_to_wdiff(self):
         return self._host_port._path_to_wdiff()
 
-    def _shut_down_http_server(self, pid):
-        return self._host_port._shut_down_http_server(pid)
+    def _shut_down_sky_server(self, pid):
+        return self._host_port._shut_down_sky_server(pid)
 
     def _driver_class(self):
         return ChromiumAndroidDriver

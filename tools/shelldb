@@ -174,11 +174,8 @@ class StartSky(object):
         return server_root
 
     def _sky_server_for_args(self, args, packages_root):
-        # FIXME: This is a hack.  sky_server should just take a build_dir
-        # not a magical "configuration" name.
-        configuration = os.path.basename(os.path.normpath(args.build_dir))
         server_root = self._server_root_for_url(args.url_or_path)
-        sky_server = SkyServer(SKY_SERVER_PORT, configuration, server_root, packages_root)
+        sky_server = SkyServer(SKY_SERVER_PORT, server_root, packages_root)
         return sky_server
 
     def _find_remote_pid_for_package(self, package):

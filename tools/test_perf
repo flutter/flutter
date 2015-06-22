@@ -15,9 +15,8 @@ import subprocess
 
 
 SUPPORTED_MIME_TYPES = [
-    'text/html',
     'text/sky',
-    'text/plain',
+    'application/dart',
 ]
 HTTP_PORT = 9999
 URL_ROOT = 'http://localhost:%s/' % HTTP_PORT

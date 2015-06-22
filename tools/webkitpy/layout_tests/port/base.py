@@ -188,7 +188,7 @@ class Port(object):
         self._config = port_config.Config(self._executive, self._filesystem, self.port_name)
 
         self._helper = None
-        self._http_server = None
+        self._sky_server = None
         self._websocket_server = None
         self._image_differ = None
         self._server_process_constructor = server_process.ServerProcess  # overridable for testing
@@ -229,9 +229,10 @@ class Port(object):
             return ['--dump-render-tree']
         if driver_name == self.MOJO_SHELL_NAME:
             return [
+                # TODO(ianh): Remove text/sky once we remove .sky files
                 '--args-for=mojo:native_viewport_service --use-headless-config --use-osmesa',
                 '--args-for=mojo:sky_viewer --testing',
-                '--content-handlers=text/sky,mojo:sky_viewer,text/plain,mojo:sky_viewer',
+                '--content-handlers=text/sky,mojo:sky_viewer,application/dart,mojo:sky_viewer',
                 '--url-mappings=mojo:window_manager=mojo:sky_tester,mojo:surfaces_service=mojo:fake_surfaces_service',
                 'mojo:window_manager',
             ]
@@ -1084,7 +1085,7 @@ class Port(object):
             if not is_ready.startswith('ready'):
                 _log.error("layout_test_helper failed to be ready")
 
-    def requires_http_server(self):
+    def requires_sky_server(self):
         """Does the port require an HTTP server for running tests? This could
         be the case when the tests aren't run on the host platform."""
         return True
@@ -1092,23 +1093,13 @@ class Port(object):
     def _dart_packages_root(self):
         return self._build_path('gen/dart-pkg/packages')
 
-    def server_command_line(self):
-        # TODO(eseidel): Shouldn't this just use skyserver.py?
-        path = (self._options.path_to_server or SkyServer.sky_server_path())
-        return [
-            path,
-            '-t', self.get_option('configuration'),
-            self.path_from_chromium_base(),
-            '8000',
-            self._dart_packages_root()
-        ]
-
-    def start_http_server(self, additional_dirs, number_of_drivers):
+    def start_sky_server(self, additional_dirs, number_of_drivers):
         """Start a web server. Raise an error if it can't start or is already running.
 
         Ports can stub this out if they don't need a web server to be running."""
-        assert not self._http_server, 'Already running an http server.'
-        self._http_server = subprocess.Popen(self.server_command_line())
+        assert not self._sky_server, 'Already running an http server.'
+        self._sky_server = SkyServer(8000, self.path_from_chromium_base(), self._dart_packages_root())
+        self._sky_server.start()
 
     def start_websocket_server(self):
         """Start a web server. Raise an error if it can't start or is already running.
@@ -1141,11 +1132,11 @@ class Port(object):
             finally:
                 self._helper = None
 
-    def stop_http_server(self):
-        """Shut down the http server if it is running. Do nothing if it isn't."""
-        if self._http_server:
-            self._http_server.terminate()
-            self._http_server = None
+    def stop_sky_server(self):
+        """Shut down the Http server if it is running. Do nothing if it isn't."""
+        if self._sky_server:
+            self._sky_server.stop()
+            self._sky_server = None
 
     def stop_websocket_server(self):
         """Shut down the websocket server if it is running. Do nothing if it isn't."""

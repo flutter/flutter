@@ -485,7 +485,7 @@ class TestPort(Port):
     def _driver_class(self):
         return TestDriver
 
-    def start_http_server(self, additional_dirs, number_of_drivers):
+    def start_sky_server(self, additional_dirs, number_of_drivers):
         pass
 
     def start_websocket_server(self):
@@ -494,7 +494,7 @@ class TestPort(Port):
     def acquire_http_lock(self):
         pass
 
-    def stop_http_server(self):
+    def stop_sky_server(self):
         pass
 
     def stop_websocket_server(self):

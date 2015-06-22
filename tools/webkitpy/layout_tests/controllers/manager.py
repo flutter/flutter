@@ -323,9 +323,9 @@ class Manager(object):
         return self._runner.run_tests(self._expectations, test_inputs, tests_to_skip, num_workers, retrying)
 
     def _start_servers(self, tests_to_run):
-        if self._port.requires_http_server() or any(self._is_http_test(test) for test in tests_to_run):
+        if self._port.requires_sky_server() or any(self._is_http_test(test) for test in tests_to_run):
             self._printer.write_update('Starting HTTP server ...')
-            self._port.start_http_server(additional_dirs={}, number_of_drivers=self._options.max_locked_shards)
+            self._port.start_sky_server(additional_dirs={}, number_of_drivers=self._options.max_locked_shards)
             self._http_server_started = True
 
         if any(self._is_websocket_test(test) for test in tests_to_run):
@@ -337,7 +337,7 @@ class Manager(object):
         if self._http_server_started:
             self._printer.write_update('Stopping HTTP server ...')
             self._http_server_started = False
-            self._port.stop_http_server()
+            self._port.stop_sky_server()
         if self._websockets_server_started:
             self._printer.write_update('Stopping WebSocket server ...')
             self._websockets_server_started = False
