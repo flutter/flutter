@@ -41,6 +41,7 @@
 #include "sky/engine/core/rendering/RenderBlock.h"
 #include "sky/engine/core/rendering/RenderTheme.h"
 #include "sky/engine/core/rendering/style/ShadowList.h"
+#include "sky/engine/platform/animation/UnitBezier.h"
 #include "sky/engine/platform/fonts/FontCache.h"
 #include "sky/engine/platform/fonts/GlyphBuffer.h"
 #include "sky/engine/platform/fonts/WidthIterator.h"
@@ -778,24 +779,6 @@ static int computeUnderlineOffset(const TextUnderlinePosition underlinePosition,
     return fontMetrics.ascent() + gap;
 }
 
-static void adjustStepToDecorationLength(float& step, float& controlPointDistance, float length)
-{
-    ASSERT(step > 0);
-
-    if (length <= 0)
-        return;
-
-    unsigned stepCount = static_cast<unsigned>(length / step);
-
-    // Each Bezier curve starts at the same pixel that the previous one
-    // ended. We need to subtract (stepCount - 1) pixels when calculating the
-    // length covered to account for that.
-    float uncoveredLength = length - (stepCount * step - (stepCount - 1));
-    float adjustment = uncoveredLength / stepCount;
-    step += adjustment;
-    controlPointDistance += adjustment;
-}
-
 struct CurveAlongX {
   static inline float x(const FloatPoint& p) { return p.x(); }
   static inline float y(const FloatPoint& p) { return p.y(); }
@@ -869,16 +852,40 @@ template <class Curve> static void strokeWavyTextDecorationInternal(GraphicsCont
         x2 = Curve::x(p1);
     }
 
-    adjustStepToDecorationLength(step, controlPointDistance, x2 - x1);
-
     FloatPoint controlPoint1 = Curve::p(0, yAxis + controlPointDistance);
     FloatPoint controlPoint2 = Curve::p(0, yAxis - controlPointDistance);
 
-    for (float x = x1; x + 2 * step <= x2;) {
+    float x;
+    for (x = x1; x + 2 * step <= x2;) {
         Curve::setX(controlPoint1, x + step);
         Curve::setX(controlPoint2, x + step);
         x += 2 * step;
         path.addBezierCurveTo(controlPoint1, controlPoint2, Curve::p(x, yAxis));
+    }
+
+    if (x < x2) {
+      Curve::setX(controlPoint1, x + step);
+      Curve::setX(controlPoint2, x + step);
+      float xScale = 1.0 / (2 * step);
+      float yScale = 1.0 / (2 * controlPointDistance);
+      OwnPtr<UnitBezier> bezier = adoptPtr(new UnitBezier((Curve::x(controlPoint1) - x) * xScale,
+                                                          (Curve::y(controlPoint1) - yAxis) * yScale,
+                                                          (Curve::x(controlPoint2) - x) * xScale,
+                                                          (Curve::y(controlPoint2) - yAxis) * yScale));
+      float t = bezier->solveCurveX((x2 - x) / (2.0 * step), std::numeric_limits<double>::epsilon());
+      // following math based on http://stackoverflow.com/a/879213
+      float u1 = 1.0 - t;
+      float qxb =  x * u1 * u1 + Curve::x(controlPoint1) * 2 * t * u1 + Curve::x(controlPoint2) * t * t;
+      float qxd = Curve::x(controlPoint1) * u1 * u1 + Curve::x(controlPoint2) * 2 * t * u1 + (x+step) * t * t;
+      float qyb =  yAxis * u1 * u1 + Curve::y(controlPoint1) * 2 * t * u1 + Curve::y(controlPoint2) * t * t;
+      float qyd = Curve::y(controlPoint1) * u1 * u1 + Curve::y(controlPoint2) * 2 * t * u1 + yAxis * t * t;
+      float xb = x * u1 + Curve::x(controlPoint1) * t;
+      float yb = yAxis * u1 + Curve::y(controlPoint1) * t;
+      float xc = qxb;
+      float xd = qxb * u1 + qxd * t;
+      float yc = qyb;
+      float yd = qyb * u1 + qyd * t;
+      path.addBezierCurveTo(Curve::p(xb, yb), Curve::p(xc, yc), Curve::p(xd, yd));
     }
 
     context->setShouldAntialias(true);
