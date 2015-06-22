@@ -16,9 +16,8 @@ SKY_ROOT = os.path.dirname(SKY_TOOLS_PATH)
 SRC_ROOT = os.path.dirname(SKY_ROOT)
 
 class SkyServer(object):
-    def __init__(self, port, configuration, root, package_root):
+    def __init__(self, port, root, package_root):
         self.port = port
-        self.configuration = configuration
         self.root = root
         self.package_root = package_root
         self.server = None
@@ -54,9 +53,8 @@ class SkyServer(object):
             os.chmod(self.sky_server_path(), st[stat.ST_MODE] | stat.S_IEXEC)
         server_command = [
             server_path,
-            '-t', self.configuration,
+            '-p', str(self.port),
             self.root,
-            str(self.port),
             self.package_root,
         ]
         self.server = subprocess.Popen(server_command)

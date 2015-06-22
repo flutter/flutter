@@ -1,5 +1,5 @@
 sky_server instructions
-#######################
+=======================
 
 Building locally:
 1. cd sky/tools/skygo/linux64 (or your current platform)

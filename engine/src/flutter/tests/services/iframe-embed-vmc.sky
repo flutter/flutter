@@ -14,10 +14,7 @@ import 'package:mojo/core.dart';
 import 'package:mojom/mojo/shell.mojom.dart' as shell_mojom;
 import 'package:mojom/mojo/input_events.mojom.dart' as input_events;
 import 'package:mojom/mojo/view_manager.mojom.dart' as view_manager;
-
-// This include is a hack which only works with sky_server.  For this to work
-// in the sky_sdk, this echo_service would need to make its own dart package.
-import '/gen/services/js/test/echo_service.mojom.dart' as echo_service_mojom;
+import 'package:mojom/mojo/echo_service.mojom.dart' as echo_service_mojom;
 
 class IFrameEmbed extends Application {
   IFrameEmbed.fromHandle(MojoHandle handle) : super.fromHandle(handle);
