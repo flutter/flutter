@@ -51,7 +51,7 @@ class SkyHome extends App {
       new SkyDemo('Stocks App', 'examples/stocks2/lib/stock_app.dart'),
       new SkyDemo('Astroids Game', 'examples/game/main.dart'),
       new SkyDemo('Interactive Flex', 'examples/rendering/interactive_flex.dart'),
-      new SkyDemo('Sector Layout', 'examples/rendering/sector_layout.dart'),
+      new SkyDemo('Sector Layout', 'examples/widgets/sector.dart'),
       new SkyDemo('Touch Demo', 'examples/rendering/touch_demo.dart'),
 
       // TODO(eseidel): We could use to separate these groups?
