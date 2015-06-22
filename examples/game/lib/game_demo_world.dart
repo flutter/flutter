@@ -42,7 +42,7 @@ class GameDemoWorld extends NodeWithSize {
   StarField _starField;
   Nebula _nebula;
   
-  GameDemoWorld(ImageMap images) : super.withSize(new Size(_gameSizeWidth, _gameSizeHeight)) {
+  GameDemoWorld(ImageMap images) : super(new Size(_gameSizeWidth, _gameSizeHeight)) {
 
     // Fetch images
     _imgBg = images["https://raw.githubusercontent.com/slembcke/GalacticGuardian.spritebuilder/GDC/Packages/SpriteBuilder%20Resources.sbpack/resources-auto/BurnTexture.png"];
@@ -81,7 +81,7 @@ class GameDemoWorld extends NodeWithSize {
   // Methods for adding game objects
 
   void addBackground() {
-    Sprite sprtBg = new Sprite.withImage(_imgBg);
+    Sprite sprtBg = new Sprite(_imgBg);
     sprtBg.size = new Size(_gameSizeWidth, _gameSizeHeight);
     sprtBg.pivot = Point.origin;
     _gameLayer.addChild(sprtBg);
@@ -296,7 +296,7 @@ class Asteroid extends Sprite {
     return _radius;
   }
 
-  Asteroid.withImage(Image img, AsteroidSize this._asteroidSize) : super.withImage(img) {
+  Asteroid.withImage(Image img, AsteroidSize this._asteroidSize) : super(img) {
     size = new Size(radius * 2.0, radius * 2.0);
     position = new Point(_gameSizeWidth * _rand.nextDouble(), _gameSizeHeight * _rand.nextDouble());
     rotation = 360.0 * _rand.nextDouble();
@@ -322,7 +322,7 @@ class Ship extends Sprite {
   Vector2 _movementVector;
   double _rotationTarget;
 
-  Ship.withImage(Image img) : super.withImage(img) {
+  Ship.withImage(Image img) : super(img) {
     _movementVector = new Vector2.zero();
     rotation = _rotationTarget = 270.0;
 
@@ -350,7 +350,7 @@ class Laser extends Sprite {
   Point _movementVector;
   double radius = 10.0;
 
-  Laser.withImage(Image img, Ship ship) : super.withImage(img) {
+  Laser.withImage(Image img, Ship ship) : super(img) {
     size = new Size(20.0, 20.0);
     position = ship.position;
     rotation = ship.rotation + 90.0;
@@ -436,7 +436,7 @@ class Nebula extends Node {
   Nebula.withImage(Image img) {
     for (int i = 0; i < 2; i++) {
       for (int j = 0; j < 2; j++) {
-        Sprite sprt = new Sprite.withImage(img);
+        Sprite sprt = new Sprite(img);
         sprt.pivot = Point.origin;
         sprt.position = new Point(i * _gameSizeWidth - _gameSizeWidth, j * _gameSizeHeight - _gameSizeHeight);
         addChild(sprt);

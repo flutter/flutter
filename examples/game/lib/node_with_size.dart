@@ -1,18 +1,45 @@
 part of sprites;
 
+/// The super class of any [Node] that has a size.
+///
+/// NodeWithSize adds the ability for a node to have a size and a pivot point.
 abstract class NodeWithSize extends Node {
+
+  /// Changing the size will affect the size of the rendering of the node.
+  ///
+  ///     myNode.size = new Size(1024.0, 1024.0);
   Size size;
+
+  /// The normalized point which the node is transformed around.
+  ///
+  ///     // Position myNode from is middle top
+  ///     myNode.pivot = new Point(0.5, 0.0);
   Point pivot;
 
-  NodeWithSize() {
-    size = Size.zero;
-    pivot = Point.origin;
-  }
-
-  NodeWithSize.withSize(Size this.size, [Point this.pivot]) {
+  /// Creates a new NodeWithSize.
+  ///
+  /// The default [size] is zero and the default [pivot] point is the origin. Subclasses may change the default values.
+  ///
+  ///     var myNodeWithSize = new NodeWithSize(new Size(1024.0, 1024.0));
+  NodeWithSize([Size this.size, Point this.pivot]) {
+    if (size == null) size = Size.zero;
     if (pivot == null) pivot = Point.origin;
   }
 
+  /// Call this method in your [paint] method if you want the origin of your drawing to be the top left corner of the
+  /// node's bounding box.
+  ///
+  /// If you use this method you will need to save and restore your canvas at the beginning and
+  /// end of your [paint] method.
+  ///
+  ///     void paint(PictureRecorder canvas) {
+  ///       canvas.save();
+  ///       applyTransformForPivot(canvas);
+  ///
+  ///       // Do painting here
+  ///
+  ///       canvas.restore();
+  ///     }
   void applyTransformForPivot(PictureRecorder canvas) {
     if (pivot.x != 0 || pivot.y != 0) {
       double pivotInPointsX = size.width * pivot.x;
