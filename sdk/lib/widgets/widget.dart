@@ -18,13 +18,23 @@ export '../rendering/object.dart' show Point, Size, Rect, Color, Paint, Path;
 
 final bool _shouldLogRenderDuration = false;
 
+typedef void WidgetTreeWalker(Widget);
+
 // All Effen nodes derive from Widget. All nodes have a _parent, a _key and
 // can be sync'd.
 abstract class Widget {
 
   Widget({ String key }) : _key = key {
-    assert(this is AbstractWidgetRoot || this is App || _inRenderDirtyComponents); // you should not build the UI tree ahead of time, build it only during build()
+    assert(_isConstructedDuringBuild());
   }
+
+  // TODO(jackson): Remove this workaround for limitation of Dart mixins
+  Widget._withKey(String key) : _key = key {
+    assert(_isConstructedDuringBuild());
+  }
+
+  // you should not build the UI tree ahead of time, build it only during build()
+  bool _isConstructedDuringBuild() => this is AbstractWidgetRoot || this is App || _inRenderDirtyComponents;
 
   String _key;
   String get key => _key;
@@ -54,6 +64,9 @@ abstract class Widget {
       }
     }
   }
+
+  // Override this if you have children and call walker on each child
+  void walkChildren(WidgetTreeWalker walker) { }
 
   static void _notifyMountStatusChanged() {
     try {
@@ -171,7 +184,15 @@ abstract class TagNode extends Widget {
   TagNode(Widget child, { String key })
     : this.child = child, super(key: key);
 
+  // TODO(jackson): Remove this workaround for limitation of Dart mixins
+  TagNode._withKey(Widget child, String key)
+    : this.child = child, super._withKey(key);
+
   Widget child;
+
+  void walkChildren(WidgetTreeWalker walker) {
+    walker(child);
+  }
 
   void _sync(Widget old, dynamic slot) {
     Widget oldChild = old == null ? null : (old as TagNode).child;
@@ -198,6 +219,56 @@ class ParentDataNode extends TagNode {
   ParentDataNode(Widget child, this.parentData, { String key })
     : super(child, key: key);
   final ParentData parentData;
+}
+
+abstract class _Heir implements Widget {
+  Map<Type, Inherited> _traits;
+  Inherited inheritedOfType(Type type) => _traits[type];
+
+  static _Heir _getHeirAncestor(Widget widget) {
+    Widget ancestor = widget;
+    while (ancestor != null && !(ancestor is _Heir)) {
+      ancestor = ancestor.parent;
+    }
+    return ancestor as _Heir;
+  }
+
+  void _updateTraitsFromParent(Widget parent) {
+    _Heir ancestor = _getHeirAncestor(parent);
+    if (ancestor == null || ancestor._traits == null) return;
+    _updateTraits(ancestor._traits);
+  }
+
+  void _updateTraitsRecursively(Widget widget) {
+    if (widget is _Heir)
+      widget._updateTraits(_traits);
+    else
+      widget.walkChildren(_updateTraitsRecursively);
+  }
+
+  void _updateTraits(Map<Type, Inherited> newTraits) {
+    if (newTraits != _traits) {
+      _traits = newTraits;
+      walkChildren(_updateTraitsRecursively);
+    }
+  }
+}
+
+abstract class Inherited extends TagNode with _Heir {
+  Inherited({ String key, Widget child }) : super._withKey(child, key) {
+    _traits = new Map<Type, Inherited>();
+  }
+
+  void set _traits(Map<Type, Inherited> value) {
+    super._traits = new Map<Type, Inherited>.from(value)
+                                            ..[runtimeType] = this;
+  }
+
+  // TODO(jackson): When Dart supports super in mixins we can move to _Heir
+  void setParent(Widget parent) {
+    _updateTraitsFromParent(parent);
+    super.setParent(parent);
+  }
 }
 
 typedef void GestureEventListener(sky.GestureEvent e);
@@ -291,13 +362,12 @@ class Listener extends TagNode  {
 
 }
 
-
-abstract class Component extends Widget {
+abstract class Component extends Widget with _Heir {
 
   Component({ String key, bool stateful })
       : _stateful = stateful != null ? stateful : false,
         _order = _currentOrder + 1,
-        super(key: key);
+        super._withKey(key);
 
   static Component _currentlyBuilding;
   bool get _isBuilding => _currentlyBuilding == this;
@@ -312,6 +382,12 @@ abstract class Component extends Widget {
   void didMount() {
     assert(!_disqualifiedFromEverAppearingAgain);
     super.didMount();
+  }
+
+  // TODO(jackson): When Dart supports super in mixins we can move to _Heir
+  void setParent(Widget parent) {
+    _updateTraitsFromParent(parent);
+    super.setParent(parent);
   }
 
   void remove() {
@@ -573,6 +649,10 @@ abstract class OneChildRenderObjectWrapper extends RenderObjectWrapper {
   Widget _child;
   Widget get child => _child;
 
+  void walkChildren(WidgetTreeWalker walker) {
+    walker(child);
+  }
+
   void syncRenderObject(RenderObjectWrapper old) {
     super.syncRenderObject(old);
     Widget oldChild = old == null ? null : (old as OneChildRenderObjectWrapper).child;
@@ -600,7 +680,6 @@ abstract class OneChildRenderObjectWrapper extends RenderObjectWrapper {
       removeChild(child);
     super.remove();
   }
-
 }
 
 abstract class MultiChildRenderObjectWrapper extends RenderObjectWrapper {
@@ -615,6 +694,11 @@ abstract class MultiChildRenderObjectWrapper extends RenderObjectWrapper {
   }
 
   final List<Widget> children;
+
+  void walkChildren(WidgetTreeWalker walker) {
+    for(Widget child in children)
+      walker(child);
+  }
 
   void insertChildRoot(RenderObjectWrapper child, dynamic slot) {
     final root = this.root; // TODO(ianh): Remove this once the analyzer is cleverer

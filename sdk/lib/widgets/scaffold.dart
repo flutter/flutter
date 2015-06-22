@@ -181,6 +181,19 @@ class Scaffold extends RenderObjectWrapper {
   RenderScaffold get root => super.root;
   RenderScaffold createNode() => new RenderScaffold();
 
+  void walkChildren(WidgetTreeWalker walker) {
+    if (_toolbar != null)
+      walker(_toolbar);
+    if (_body != null)
+      walker(_body);
+    if (_statusBar != null)
+      walker(_statusBar);
+    if (_drawer != null)
+      walker(_drawer);
+    if (_floatingActionButton != null)
+      walker(_floatingActionButton);
+  }
+
   void insertChildRoot(RenderObjectWrapper child, ScaffoldSlots slot) {
     root[slot] = child != null ? child.root : null;
   }
@@ -194,16 +207,7 @@ class Scaffold extends RenderObjectWrapper {
   }
 
   void remove() {
-    if (_toolbar != null)
-      removeChild(_toolbar);
-    if (_body != null)
-      removeChild(_body);
-    if (_statusBar != null)
-      removeChild(_statusBar);
-    if (_drawer != null)
-      removeChild(_drawer);
-    if (_floatingActionButton != null)
-      removeChild(_floatingActionButton);
+    walkChildren((Widget child) => removeChild(child));
     super.remove();
   }
 

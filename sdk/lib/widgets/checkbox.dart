@@ -4,7 +4,7 @@
 
 import 'dart:sky' as sky;
 
-import 'package:sky/theme/colors.dart' as colors;
+import 'package:sky/widgets/theme.dart';
 
 import 'basic.dart';
 import 'toggleable.dart';
@@ -12,8 +12,6 @@ export 'toggleable.dart' show ValueChanged;
 
 const double _kMidpoint = 0.5;
 const sky.Color _kUncheckedColor = const sky.Color(0x8A000000);
-// TODO(jackson): This should change colors with the theme
-sky.Color _kCheckedColor = colors.Purple[500];
 const double _kEdgeSize = 20.0;
 const double _kEdgeRadius = 1.0;
 
@@ -59,10 +57,11 @@ class Checkbox extends Toggleable {
 
       // Solid filled rrect
       paint.setStyle(sky.PaintingStyle.strokeAndFill);
+      Color themeColor = Theme.of(this).color[500];
       paint.color = new Color.fromARGB((t * 255).floor(),
-                                       _kCheckedColor.red,
-                                       _kCheckedColor.green,
-                                       _kCheckedColor.blue);
+                                       themeColor.red,
+                                       themeColor.green,
+                                       themeColor.blue);
       canvas.drawRRect(rrect, paint);
 
       // White inner check

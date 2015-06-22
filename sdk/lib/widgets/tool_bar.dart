@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:sky/widgets/theme.dart';
+
 import '../rendering/flex.dart';
 import '../theme/shadows.dart';
 import '../theme/view_configuration.dart';
@@ -48,7 +50,7 @@ class ToolBar extends Component {
       ),
       padding: new EdgeDims.symmetric(horizontal: 8.0),
       decoration: new BoxDecoration(
-        backgroundColor: backgroundColor,
+        backgroundColor: backgroundColor == null ? Theme.of(this).color[500] : backgroundColor,
         boxShadow: shadows[2]
       )
     );

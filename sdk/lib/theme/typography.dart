@@ -10,8 +10,8 @@ import '../painting/text_style.dart';
 
 // TODO(eseidel): Font weights are supposed to be language relative!
 // These values are for English-like text.
-class _TextTheme {
-  _TextTheme(Color color54, Color color87)
+class TextTheme {
+  TextTheme._(Color color54, Color color87)
     : display4 = new TextStyle(fontSize: 112.0, fontWeight: FontWeight.w100, color: color54),
       display3 = new TextStyle(fontSize:  56.0, fontWeight: FontWeight.w400, color: color54),
       display2 = new TextStyle(fontSize:  45.0, fontWeight: FontWeight.w400, color: color54),
@@ -38,13 +38,13 @@ class _TextTheme {
 }
 
 
-final _TextTheme black = new _TextTheme(
+final TextTheme black = new TextTheme._(
   const Color(0xFF757575),
   const Color(0xFF212121)
 );
 
 
-final _TextTheme white = new _TextTheme(
+final TextTheme white = new TextTheme._(
   const Color(0xFF8A8A8A),
   const Color(0xFFDEDEDE)
 );
