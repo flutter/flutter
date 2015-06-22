@@ -66,7 +66,7 @@ Debugging Sky
 
 This document aims to explain how to debug Sky itself.
 
-=== C++
+### C++
 
 Launch a debug Sky build on Linux as follows (where `app.dart` is the
 test you are running and trying to debug):
@@ -76,6 +76,13 @@ mojodb start --gdb out/Debug app.dart
 mojodb gdb_attach
 ```
 
-=== Dart
+Once gdb has loaded, hit `c` to start the app. The linux simulator
+will load (slowly), after spawning many threads. When your app
+crashes, it will pause in the debugger. At that point, regular gdb
+commands will work: `n` to step over the current statement, `s` to
+step into the current statement, `f` to step out of the current block,
+`c` to continue until the next breakpoint or exception.
+
+### Dart
 
 Use Observatory.
