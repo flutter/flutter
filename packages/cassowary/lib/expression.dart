@@ -6,6 +6,7 @@ part of cassowary;
 
 class Expression extends EquationMember {
   final List<Term> terms;
+
   final double constant;
   double get value => terms.fold(constant, (value, term) => value + term.value);
 

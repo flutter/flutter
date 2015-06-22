@@ -12,4 +12,6 @@ class Constraint {
   double priority = 1000.0;
 
   Constraint(this.expression, this.relation);
+
+  Constraint operator |(double p) => this..priority = p;
 }

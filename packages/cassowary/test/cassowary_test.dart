@@ -259,4 +259,15 @@ void main() {
     expect(c3.expression.constant, -30.0);
     expect(c3.relation, Relation.lessThanOrEqualTo);
   });
+
+  test('constraint_strength_update', () {
+    var left = new Variable(2.0);
+    var right = new Variable(10.0);
+
+    var c = (right - left >= 200.0) | 750.0;
+    expect(c is Constraint, true);
+    expect(c.expression.terms.length, 2);
+    expect(c.expression.constant, -200.0);
+    expect(c.priority, 750.0);
+  });
 }
