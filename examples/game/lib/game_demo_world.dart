@@ -22,12 +22,9 @@ const int _numStarsInStarField = 150;
 class GameDemoWorld extends NodeWithSize {
 
   // Images
-  Image _imgBg;
-  Image _imgAsteroid;
-  Image _imgShip;
-  Image _imgLaser;
-  Image _imgStar;
   Image _imgNebula;
+
+  SpriteSheet _spriteSheet;
 
   // Inputs
   double _joystickX = 0.0;
@@ -42,15 +39,10 @@ class GameDemoWorld extends NodeWithSize {
   StarField _starField;
   Nebula _nebula;
   
-  GameDemoWorld(ImageMap images) : super(new Size(_gameSizeWidth, _gameSizeHeight)) {
+  GameDemoWorld(ImageMap images, this._spriteSheet) : super(new Size(_gameSizeWidth, _gameSizeHeight)) {
 
     // Fetch images
-    _imgBg = images["https://raw.githubusercontent.com/slembcke/GalacticGuardian.spritebuilder/GDC/Packages/SpriteBuilder%20Resources.sbpack/resources-auto/BurnTexture.png"];
-    _imgAsteroid = images["https://raw.githubusercontent.com/slembcke/GalacticGuardian.spritebuilder/GDC/Packages/SpriteBuilder%20Resources.sbpack/Sprites/resources-auto/asteroid_big_002.png"];
-    _imgShip = images["https://raw.githubusercontent.com/slembcke/GalacticGuardian.spritebuilder/GDC/Packages/SpriteBuilder%20Resources.sbpack/Sprites/resources-auto/GG_blueship_Lv3.png"];
-    _imgLaser = images["https://raw.githubusercontent.com/slembcke/GalacticGuardian.spritebuilder/GDC/Packages/SpriteBuilder%20Resources.sbpack/Sprites/resources-auto/laserBlue.png"];
-    _imgStar = images["https://raw.githubusercontent.com/slembcke/GalacticGuardian.spritebuilder/GDC/Packages/SpriteBuilder%20Resources.sbpack/Sprites/resources-auto/laserFlashPurple.png"];
-    _imgNebula = images["https://raw.githubusercontent.com/slembcke/GalacticGuardian.spritebuilder/GDC/Source/Resources/NebulaClouds.png"];
+    _imgNebula = images["res/nebula.png"];
 
     _gameLayer = new Node();
     this.addChild(_gameLayer);
@@ -67,7 +59,7 @@ class GameDemoWorld extends NodeWithSize {
     addShip();
 
     // Add starfield
-    _starField = new StarField.withImage(_imgStar, _numStarsInStarField);
+    _starField = new StarField(_spriteSheet["star.png"], _numStarsInStarField);
     _starField.zPosition = -2.0;
     addChild(_starField);
 
@@ -79,16 +71,9 @@ class GameDemoWorld extends NodeWithSize {
   }
 
   // Methods for adding game objects
-
-  void addBackground() {
-    Sprite sprtBg = new Sprite(_imgBg);
-    sprtBg.size = new Size(_gameSizeWidth, _gameSizeHeight);
-    sprtBg.pivot = Point.origin;
-    _gameLayer.addChild(sprtBg);
-  }
   
   void addAsteroid(AsteroidSize size, [Point pos]) {
-    Asteroid asteroid = new Asteroid.withImage(_imgAsteroid, size);
+    Asteroid asteroid = new Asteroid(_spriteSheet["asteroid_big_1.png"], size);
     asteroid.zPosition = 1.0;
     if (pos != null) asteroid.position = pos;
     _gameLayer.addChild(asteroid);
@@ -96,14 +81,14 @@ class GameDemoWorld extends NodeWithSize {
   }
 
   void addShip() {
-    Ship ship = new Ship.withImage(_imgShip);
+    Ship ship = new Ship(_spriteSheet["ship.png"]);
     ship.zPosition = 10.0;
     _gameLayer.addChild(ship);
     _ship = ship;
   }
 
   void addLaser() {
-    Laser laser = new Laser.withImage(_imgLaser, _ship);
+    Laser laser = new Laser(_spriteSheet["laser.png"], _ship);
     laser.zPosition = 8.0;
     _lasers.add(laser);
     _gameLayer.addChild(laser);
@@ -296,7 +281,7 @@ class Asteroid extends Sprite {
     return _radius;
   }
 
-  Asteroid.withImage(Image img, AsteroidSize this._asteroidSize) : super(img) {
+  Asteroid(Texture img, AsteroidSize this._asteroidSize) : super(img) {
     size = new Size(radius * 2.0, radius * 2.0);
     position = new Point(_gameSizeWidth * _rand.nextDouble(), _gameSizeHeight * _rand.nextDouble());
     rotation = 360.0 * _rand.nextDouble();
@@ -322,7 +307,7 @@ class Ship extends Sprite {
   Vector2 _movementVector;
   double _rotationTarget;
 
-  Ship.withImage(Image img) : super(img) {
+  Ship(Texture img) : super(img) {
     _movementVector = new Vector2.zero();
     rotation = _rotationTarget = 270.0;
 
@@ -350,7 +335,7 @@ class Laser extends Sprite {
   Point _movementVector;
   double radius = 10.0;
 
-  Laser.withImage(Image img, Ship ship) : super(img) {
+  Laser(Texture img, Ship ship) : super(img) {
     size = new Size(20.0, 20.0);
     position = ship.position;
     rotation = ship.rotation + 90.0;
@@ -369,13 +354,13 @@ class Laser extends Sprite {
 // Background starfield
 
 class StarField extends Node {
-  Image _img;
+  Texture _img;
   int _numStars;
   List<Point> _starPositions;
   List<double> _starScales;
   List<double> _opacity;
 
-  StarField.withImage(Image this._img, int this._numStars) {
+  StarField(this._img, this._numStars) {
     _starPositions = [];
     _starScales = [];
     _opacity = [];
@@ -392,8 +377,8 @@ class StarField extends Node {
     Paint paint = new Paint();
     paint.setTransferMode(TransferMode.plus);
 
-    double baseScaleX = 32.0/_img.width;
-    double baseScaleY = 32.0/_img.height;
+    double baseScaleX = 32.0 / _img.size.width;
+    double baseScaleY = 32.0 / _img.size.height;
 
     // Draw each star
     for (int i = 0; i < _numStars; i++) {
@@ -404,9 +389,9 @@ class StarField extends Node {
       canvas.save();
 
       canvas.translate(pos.x, pos.y);
-      canvas.scale(baseScaleX*scale, baseScaleY*scale);
+      canvas.scale(baseScaleX * scale, baseScaleY * scale);
 
-      canvas.drawImage(_img, 0.0, 0.0, paint);
+      canvas.drawImageRect(_img.image, _img.frame, _img.spriteSourceSize, paint);
 
       canvas.restore();
     }
@@ -436,7 +421,7 @@ class Nebula extends Node {
   Nebula.withImage(Image img) {
     for (int i = 0; i < 2; i++) {
       for (int j = 0; j < 2; j++) {
-        Sprite sprt = new Sprite(img);
+        Sprite sprt = new Sprite.fromImage(img);
         sprt.pivot = Point.origin;
         sprt.position = new Point(i * _gameSizeWidth - _gameSizeWidth, j * _gameSizeHeight - _gameSizeHeight);
         addChild(sprt);

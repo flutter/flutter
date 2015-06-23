@@ -211,11 +211,19 @@ void Canvas::drawImage(const CanvasImage* image,
                        float x,
                        float y,
                        const Paint* paint) {
-  if (!m_canvas)
-    return;
-  ASSERT(image);
-  ASSERT(m_displayList->isRecording());
-  m_canvas->drawBitmap(image->bitmap(), x, y, &paint->paint());
+    if (!m_canvas)
+        return;
+    ASSERT(image);
+    ASSERT(m_displayList->isRecording());
+    m_canvas->drawBitmap(image->bitmap(), x, y, &paint->paint());
+}
+
+void Canvas::drawImageRect(const CanvasImage* image, Rect& src, Rect& dst, Paint* paint) {
+    if (!m_canvas)
+        return;
+    ASSERT(image);
+    ASSERT(m_displayList->isRecording());
+    m_canvas->drawBitmapRectToRect(image->bitmap(), &src.sk_rect, dst.sk_rect, &paint->paint());
 }
 
 PassRefPtr<DisplayList> Canvas::finishRecording()

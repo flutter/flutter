@@ -57,6 +57,7 @@ public:
                    float x,
                    float y,
                    const Paint* paint);
+    void drawImageRect(const CanvasImage* image, Rect& src, Rect& dst, Paint* paint);
 
     SkCanvas* skCanvas() { return m_canvas; }
 

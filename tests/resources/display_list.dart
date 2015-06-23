@@ -106,6 +106,10 @@ class TestDisplayList extends RenderObjectDisplayList {
     log("drawImage($image, $x, $y, $paint)");
   }
 
+  void drawImageRect(sky.Image image, sky.Rect src, sky.Rect dst, Paint paint) {
+    log("drawImageRect($image, $src, $dst, paint)");
+  }
+
   void paintChild(RenderObject child, Point position) {
     log("paintChild ${child.runtimeType} at $position");
     child.paint(new TestDisplayList(width, height, logger, indent: "$indent  |"));
