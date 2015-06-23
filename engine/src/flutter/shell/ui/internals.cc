@@ -7,6 +7,7 @@
 
 #include "mojo/public/cpp/application/connect.h"
 #include "mojo/public/cpp/bindings/array.h"
+#include "services/asset_bundle/asset_unpacker_impl.h"
 #include "sky/engine/tonic/dart_builtin.h"
 #include "sky/engine/tonic/dart_converter.h"
 #include "sky/engine/tonic/dart_error.h"
@@ -69,11 +70,21 @@ void Internals::Create(Dart_Isolate isolate,
   CHECK(!LogIfError(Dart_SetNativeResolver(library, Resolver, Symbolizer)));
 }
 
-Internals::Internals(mojo::ServiceProviderPtr service_provider)
-  : service_provider_(service_provider.Pass()) {
+Internals::Internals(mojo::ServiceProviderPtr platform_service_provider)
+  : service_provider_impl_(GetProxy(&service_provider_)),
+    platform_service_provider_(platform_service_provider.Pass()) {
+  service_provider_impl_.set_fallback_service_provider(
+      platform_service_provider_.get());
+  service_provider_impl_.AddService<mojo::asset_bundle::AssetUnpacker>(this);
 }
 
 Internals::~Internals() {
+}
+
+void Internals::Create(
+    mojo::ApplicationConnection* connection,
+    mojo::InterfaceRequest<mojo::asset_bundle::AssetUnpacker> request) {
+  new mojo::asset_bundle::AssetUnpackerImpl(request.Pass());
 }
 
 mojo::Handle Internals::TakeServicesProvidedByEmbedder() {
