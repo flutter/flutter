@@ -23,24 +23,29 @@ import 'package:sky/widgets/widget.dart';
 import 'stock_data.dart';
 import 'stock_list.dart';
 import 'stock_menu.dart';
+import 'stock_types.dart';
 
-enum StockMode { optimistic, pessimistic }
+typedef void ModeUpdater(StockMode mode);
 
 class StockHome extends Component {
 
-  StockHome(this.navigator, RouteBase route, this.stocks) : super(stateful: true) {
+  StockHome(this.navigator, this.stocks, this.stockMode, this.modeUpdater) : super(stateful: true) {
     // if (debug)
     //   new Timer(new Duration(seconds: 1), dumpState);
     _drawerController = new DrawerController(_handleDrawerStatusChanged);
   }
 
+  Navigator navigator;
+  List<Stock> stocks;
+  StockMode stockMode;
+  ModeUpdater modeUpdater;
+
   void syncFields(StockHome source) {
     navigator = source.navigator;
     stocks = source.stocks;
+    stockMode = source.stockMode;
+    modeUpdater = source.modeUpdater;
   }
-
-  Navigator navigator;
-  List<Stock> stocks;
 
   bool _isSearching = false;
   String _searchQuery;
@@ -102,11 +107,12 @@ class StockHome extends Component {
     });
   }
 
-  StockMode _stockMode = StockMode.optimistic;
   void _handleStockModeChange(StockMode value) {
     setState(() {
-      _stockMode = value;
+      stockMode = value;
     });
+    if (modeUpdater != null)
+      modeUpdater(value);
   }
 
   Drawer buildDrawer() {
@@ -127,14 +133,14 @@ class StockHome extends Component {
           onPressed: () => _handleStockModeChange(StockMode.optimistic),
           children: [
             new Flexible(child: new Text('Optimistic')),
-            new Radio(value: StockMode.optimistic, groupValue: _stockMode, onChanged: _handleStockModeChange)
+            new Radio(value: StockMode.optimistic, groupValue: stockMode, onChanged: _handleStockModeChange)
           ]),
         new MenuItem(
           icon: 'action/thumb_down',
           onPressed: () => _handleStockModeChange(StockMode.pessimistic),
           children: [
             new Flexible(child: new Text('Pessimistic')),
-            new Radio(value: StockMode.pessimistic, groupValue: _stockMode, onChanged: _handleStockModeChange)
+            new Radio(value: StockMode.pessimistic, groupValue: stockMode, onChanged: _handleStockModeChange)
           ]),
         new MenuDivider(),
         new MenuItem(

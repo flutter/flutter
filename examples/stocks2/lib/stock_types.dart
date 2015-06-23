@@ -1,0 +1,1 @@
+enum StockMode { optimistic, pessimistic }
