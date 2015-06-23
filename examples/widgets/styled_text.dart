@@ -108,11 +108,11 @@ HAL: This mission is too important for me to allow you to jeopardize it.''';
     );
 
     return new Theme(
-      data: new ThemeData(color: Blue, text: white),
+      data: new ThemeData.light(primary: Blue, darkToolbar: true),
       child: new Scaffold(
         body: new Material(child: interactiveBody),
         toolbar: new ToolBar(
-          center: new Text('Hal and Dave', style: white.title)
+          center: new Text('Hal and Dave')
         )
       )
     );

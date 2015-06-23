@@ -4,9 +4,9 @@
 
 import 'package:sky/painting/text_style.dart';
 import 'package:sky/rendering/box.dart';
-import 'package:sky/theme/typography.dart' as typography;
 import 'package:sky/widgets/ink_well.dart';
 import 'package:sky/widgets/basic.dart';
+import 'package:sky/widgets/theme.dart';
 
 import 'stock_arrow.dart';
 import 'stock_data.dart';
@@ -43,7 +43,7 @@ class StockRow extends Component {
       new Flexible(
         child: new Text(
           changeInPrice,
-          style: typography.black.caption.copyWith(textAlign: TextAlign.right)
+          style: Theme.of(this).text.caption.copyWith(textAlign: TextAlign.right)
         )
       )
     ];

@@ -5,7 +5,6 @@
 import 'package:sky/rendering/sky_binding.dart';
 import 'package:sky/theme/colors.dart' as colors;
 import 'package:sky/theme/theme_data.dart';
-import 'package:sky/theme/typography.dart' as typography;
 import 'package:sky/widgets/basic.dart';
 import 'package:sky/widgets/navigator.dart';
 import 'package:sky/widgets/theme.dart';
@@ -51,7 +50,10 @@ class StocksApp extends App {
 
   Widget build() {
     return new Theme(
-      data: new ThemeData(color: colors.Purple, text: typography.white),
+      data: new ThemeData.light(
+        primary: colors.Purple,
+        accent: colors.RedAccent,
+        darkToolbar: true),
       child: new Navigator(_navigationState)
     );
   }
