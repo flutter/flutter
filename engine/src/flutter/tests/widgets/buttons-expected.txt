@@ -27,7 +27,7 @@ PAINT FOR FRAME #3 ----------------------------------------------
 3 |  |  | TestDisplayList() constructor: 800.0 x 600.0
 3 |  |  | paintChild RenderConstrainedBox at Point(8.0, 8.0)
 3 |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
-3 |  |  |  | drawRRect(Instance of 'RRect', Paint(color:Color(0xfffafafa)))
+3 |  |  |  | drawRRect(Instance of 'RRect', Paint(color:Color(0x00000000)))
 3 |  |  |  | paintChild RenderPositionedBox at Point(8.0, 0.0)
 3 |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
 3 |  |  |  |  | paintChild RenderParagraph at Point(6.0, 10.0)
