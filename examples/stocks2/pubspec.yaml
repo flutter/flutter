@@ -4,4 +4,4 @@ description: A demo application using Sky that shows stock data
 homepage: https://github.com/domokit/sky_sdk/tree/master/examples/stocks
 version: 0.0.1
 dependencies:
-  sky: '>=0.0.1 <1.0.0'
+  sky: '>=0.0.10 <1.0.0'
