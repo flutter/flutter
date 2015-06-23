@@ -13,5 +13,27 @@ class Solver {
     return false;
   }
 
+  bool hasConstraint(Constraint c) {
+    return false;
+  }
+
+  bool addEditVariable(Variable v, double priority) {
+    return false;
+  }
+
+  bool removeEditVariable(Variable v) {
+    return false;
+  }
+
+  bool hasEditVariable(Variable v) {
+    return false;
+  }
+
+  bool suggestVariable(Variable v, double value) {
+    return false;
+  }
+
+  void updateVariable() {}
+
   Solver operator <<(Constraint c) => this..addConstraint(c);
 }

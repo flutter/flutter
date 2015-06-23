@@ -280,6 +280,8 @@ void main() {
     var c1 = right - left >= CM(200.0);
     var c2 = right + left >= CM(0.0);
 
+    expect((right >= left) is Constraint, true);
+
     // TODO: Add assertions for this
     s << c1 << c2;
   });

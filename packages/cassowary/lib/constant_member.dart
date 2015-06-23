@@ -6,6 +6,7 @@ part of cassowary;
 
 class ConstantMember extends EquationMember {
   double value = 0.0;
+
   ConstantMember(this.value);
 
   Expression asExpression() => new Expression([], this.value);
