@@ -20,7 +20,7 @@ class FlatButton extends MaterialButton {
 
   Color get color {
     if (!enabled || !highlight)
-      return null;
+      return const Color(0x00000000);
     switch (Theme.of(this).brightness) {
       case ThemeBrightness.light:
         return Grey[400];
