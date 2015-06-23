@@ -30,6 +30,7 @@ _IGNORED_PATTERNS = [
   # TODO: Fix all the warnings in the mojo packages
   re.compile(r'.*/dart-pkg/mojom/'),
   re.compile(r'.*/dart-pkg/mojo/'),
+  re.compile(r'.*/mojo/public/dart/'),
 
   # TODO: Remove this once Sky no longer generates this warning.
   # dartbug.com/22836
