@@ -13,32 +13,32 @@ class Solver {
   final Row _objective = new Row();
   final Row _artificial = new Row();
 
-  bool addConstraint(Constraint c) {
-    return false;
+  Result addConstraint(Constraint c) {
+    return Result.unimplemented;
   }
 
-  bool removeContraint(Constraint c) {
-    return false;
+  Result removeContraint(Constraint c) {
+    return Result.unimplemented;
   }
 
-  bool hasConstraint(Constraint c) {
-    return false;
+  Result hasConstraint(Constraint c) {
+    return Result.unimplemented;
   }
 
-  bool addEditVariable(Variable v, double priority) {
-    return false;
+  Result addEditVariable(Variable v, double priority) {
+    return Result.unimplemented;
   }
 
-  bool removeEditVariable(Variable v) {
-    return false;
+  Result removeEditVariable(Variable v) {
+    return Result.unimplemented;
   }
 
-  bool hasEditVariable(Variable v) {
-    return false;
+  Result hasEditVariable(Variable v) {
+    return Result.unimplemented;
   }
 
-  bool suggestVariable(Variable v, double value) {
-    return false;
+  Result suggestVariable(Variable v, double value) {
+    return Result.unimplemented;
   }
 
   void updateVariable() {}

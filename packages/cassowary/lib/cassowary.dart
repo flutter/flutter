@@ -14,3 +14,4 @@ part 'solver.dart';
 part 'symbol.dart';
 part 'row.dart';
 part 'utils.dart';
+part 'result.dart';
