@@ -28,7 +28,7 @@ class GaneshSurface;
 class Rasterizer : public GPUDelegate {
  public:
   explicit Rasterizer();
-  ~Rasterizer();
+  ~Rasterizer() override;
 
   base::WeakPtr<Rasterizer> GetWeakPtr();
 

@@ -23,7 +23,7 @@ class Internals
   : public base::SupportsUserData::Data,
     public mojo::InterfaceFactory<mojo::asset_bundle::AssetUnpacker> {
  public:
-  virtual ~Internals();
+  ~Internals() override;
 
   static void Create(Dart_Isolate isolate,
                      mojo::ServiceProviderPtr platform_service_provider);

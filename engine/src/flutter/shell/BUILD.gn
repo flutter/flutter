@@ -37,6 +37,7 @@ source_set("common") {
     "gpu_delegate.h",
     "platform_view.cc",
     "platform_view.h",
+    "service_provider.cc",
     "service_provider.h",
     "shell.cc",
     "shell.h",
@@ -168,6 +169,18 @@ if (is_android) {
       ":$scaffolding_target",
       ":sky_resources",
     ]
+  }
+} else if (is_linux) {
+  executable("shell") {
+    output_name = "sky_shell"
+
+    sources = [
+      "linux/main.cc",
+      "linux/platform_service_provider_linux.cc",
+      "linux/platform_view_linux.cc",
+    ]
+
+    deps = common_deps + [ ":common" ]
   }
 } else {
   assert(false, "Unsupported platform")
