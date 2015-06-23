@@ -26,13 +26,42 @@ Internals* GetInternals() {
   return static_cast<Internals*>(state->GetUserData(&kInternalsKey));
 }
 
+void ContentAsText(Dart_NativeArguments args) {
+  Dart_SetReturnValue(args, Dart_EmptyString());
+}
+
+void NotifyTestComplete(Dart_NativeArguments args) {
+}
+
+void RenderTreeAsText(Dart_NativeArguments args) {
+  Dart_SetReturnValue(args, Dart_EmptyString());
+}
+
+void TakeShellProxyHandle(Dart_NativeArguments args) {
+  Dart_SetIntegerReturnValue(args, 0);
+}
+
 void TakeServicesProvidedByEmbedder(Dart_NativeArguments args) {
   Dart_SetIntegerReturnValue(
       args, GetInternals()->TakeServicesProvidedByEmbedder().value());
 }
 
+void TakeServicesProvidedToEmbedder(Dart_NativeArguments args) {
+  Dart_SetIntegerReturnValue(args, 0);
+}
+
+void TakeServiceRegistry(Dart_NativeArguments args) {
+  Dart_SetIntegerReturnValue(args, 0);
+}
+
 const DartBuiltin::Natives kNativeFunctions[] = {
+    {"contentAsText", ContentAsText, 0},
+    {"notifyTestComplete", NotifyTestComplete, 1},
+    {"renderTreeAsText", RenderTreeAsText, 0},
+    {"takeShellProxyHandle", TakeShellProxyHandle, 0},
     {"takeServicesProvidedByEmbedder", TakeServicesProvidedByEmbedder, 0},
+    {"takeServicesProvidedToEmbedder", TakeServicesProvidedToEmbedder, 0},
+    {"takeServiceRegistry", TakeServiceRegistry, 0},
 };
 
 const DartBuiltin& GetBuiltin() {
