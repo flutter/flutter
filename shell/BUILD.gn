@@ -11,17 +11,51 @@ common_deps = [
   "//mojo/edk/system",
   "//mojo/public/cpp/application",
   "//mojo/public/interfaces/application",
+  "//mojo/services/asset_bundle/public/interfaces",
   "//mojo/services/navigation/public/interfaces",
   "//mojo/services/network/public/interfaces",
+  "//services/asset_bundle:lib",
   "//skia",
   "//sky/engine",
-  "//sky/engine/wtf",
   "//sky/engine/tonic",
+  "//sky/engine/wtf",
   "//sky/services/platform",
   "//sky/services/viewport",
   "//ui/gfx/geometry",
   "//ui/gl",
 ]
+
+source_set("common") {
+  sources = [
+    "gpu/ganesh_context.cc",
+    "gpu/ganesh_context.h",
+    "gpu/ganesh_surface.cc",
+    "gpu/ganesh_surface.h",
+    "gpu/rasterizer.cc",
+    "gpu/rasterizer.h",
+    "gpu_delegate.cc",
+    "gpu_delegate.h",
+    "platform_view.cc",
+    "platform_view.h",
+    "service_provider.h",
+    "shell.cc",
+    "shell.h",
+    "shell_view.cc",
+    "shell_view.h",
+    "ui/animator.cc",
+    "ui/animator.h",
+    "ui/engine.cc",
+    "ui/engine.h",
+    "ui/input_event_converter.cc",
+    "ui/input_event_converter.h",
+    "ui/internals.cc",
+    "ui/internals.h",
+    "ui_delegate.cc",
+    "ui_delegate.h",
+  ]
+
+  deps = common_deps
+}
 
 if (is_android) {
   import("//build/config/android/config.gni")
@@ -48,36 +82,12 @@ if (is_android) {
       "android/sky_main.h",
       "android/tracing_controller.cc",
       "android/tracing_controller.h",
-      "gpu/ganesh_context.cc",
-      "gpu/ganesh_context.h",
-      "gpu/ganesh_surface.cc",
-      "gpu/ganesh_surface.h",
-      "gpu/rasterizer.cc",
-      "gpu/rasterizer.h",
-      "gpu_delegate.cc",
-      "gpu_delegate.h",
-      "platform_view.cc",
-      "platform_view.h",
-      "service_provider.h",
-      "shell.cc",
-      "shell.h",
-      "shell_view.cc",
-      "shell_view.h",
-      "ui/animator.cc",
-      "ui/animator.h",
-      "ui/engine.cc",
-      "ui/engine.h",
-      "ui/input_event_converter.cc",
-      "ui/input_event_converter.h",
-      "ui/internals.cc",
-      "ui/internals.h",
-      "ui_delegate.cc",
-      "ui_delegate.h",
     ]
 
     deps = common_deps + [
              "//mojo/android:libsystem_java",
              ":jni_headers",
+             ":common",
            ]
   }
 
@@ -135,14 +145,6 @@ if (is_android) {
 
     source_set(scaffolding_target) {
       sources = [
-        "gpu/ganesh_context.cc",
-        "gpu/ganesh_context.h",
-        "gpu/ganesh_surface.cc",
-        "gpu/ganesh_surface.h",
-        "gpu/rasterizer.cc",
-        "gpu/rasterizer.h",
-        "gpu_delegate.cc",
-        "gpu_delegate.h",
         "ios/main_ios.mm",
         "ios/platform_service_provider_ios.cc",
         "ios/platform_view_ios.h",
@@ -154,26 +156,12 @@ if (is_android) {
         "ios/sky_view_controller.h",
         "ios/sky_view_controller.mm",
         "platform_view.cc",
-        "platform_view.h",
-        "shell.cc",
-        "shell.h",
-        "shell_view.cc",
-        "shell_view.h",
-        "ui/animator.cc",
-        "ui/animator.h",
-        "ui/engine.cc",
-        "ui/engine.h",
-        "ui/input_event_converter.cc",
-        "ui/input_event_converter.h",
-        "ui/internals.cc",
-        "ui/internals.h",
-        "ui_delegate.cc",
-        "ui_delegate.h",
       ]
 
-      ios_deps = [ "//sky/services/ns_net" ]
-
-      deps = common_deps + ios_deps
+      deps = common_deps + [
+               ":common",
+               "//sky/services/ns_net",
+             ]
     }
 
     deps = [

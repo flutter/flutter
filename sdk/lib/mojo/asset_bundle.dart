@@ -36,7 +36,6 @@ class AssetBundle {
 }
 
 Future<AssetBundle> fetchAssetBundle(String url) async {
-  assert(false); // mojo:asset_bundle doesn't exist yet, see https://codereview.chromium.org/1176153007
   core.MojoDataPipeConsumer bundleData = (await fetchUrl(url)).body;
 
   AssetUnpackerProxy unpacker = new AssetUnpackerProxy.unbound();
