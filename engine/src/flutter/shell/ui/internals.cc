@@ -52,9 +52,6 @@ const uint8_t* Symbolizer(Dart_NativeFunction native_function) {
 }
 
 const char kLibraryName[] = "dart:sky.internals";
-const char kLibrarySource[] = R"DART(
-int takeServicesProvidedByEmbedder() native "takeServicesProvidedByEmbedder";
-)DART";
 
 }  // namespace
 
@@ -63,10 +60,8 @@ void Internals::Create(Dart_Isolate isolate,
   DartState* state = DartState::From(isolate);
   state->SetUserData(&kInternalsKey, new Internals(service_provider.Pass()));
   Dart_Handle library =
-      Dart_LoadLibrary(Dart_NewStringFromCString(kLibraryName),
-                       Dart_NewStringFromCString(kLibrarySource), 0, 0);
+      Dart_LookupLibrary(Dart_NewStringFromCString(kLibraryName));
   CHECK(!LogIfError(library));
-  CHECK(!LogIfError(Dart_FinalizeLoading(true)));
   CHECK(!LogIfError(Dart_SetNativeResolver(library, Resolver, Symbolizer)));
 }
 
