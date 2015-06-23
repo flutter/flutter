@@ -26,7 +26,7 @@ void InitDartVM() {
 Dart_Isolate CreateDartIsolate() {
   CHECK(blink::kDartIsolateSnapshotBuffer);
   char* error = nullptr;
-  Dart_Isolate isolate = Dart_CreateIsolate("http://example.com", "main",
+  Dart_Isolate isolate = Dart_CreateIsolate("dart:snapshot", "main",
                                             blink::kDartIsolateSnapshotBuffer,
                                             nullptr, nullptr, &error);
 

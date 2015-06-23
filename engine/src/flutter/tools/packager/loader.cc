@@ -4,8 +4,6 @@
 
 #include "sky/tools/packager/loader.h"
 
-#include <utility>
-
 #include "base/command_line.h"
 #include "base/files/file_path.h"
 #include "base/files/file_util.h"
@@ -44,7 +42,7 @@ base::FilePath SimplifyPath(const base::FilePath& path) {
 
 class Loader {
  public:
-  Loader(base::FilePath package_root);
+  Loader(const base::FilePath& package_root);
 
   std::string CanonicalizePackageURL(std::string url);
   Dart_Handle CanonicalizeURL(Dart_Handle library, Dart_Handle url);
@@ -57,8 +55,8 @@ class Loader {
   DISALLOW_COPY_AND_ASSIGN(Loader);
 };
 
-Loader::Loader(base::FilePath package_root)
-    : package_root_(std::move(package_root)) {
+Loader::Loader(const base::FilePath& package_root)
+    : package_root_(package_root) {
 }
 
 std::string Loader::CanonicalizePackageURL(std::string url) {
@@ -72,7 +70,7 @@ Dart_Handle Loader::CanonicalizeURL(Dart_Handle library, Dart_Handle url) {
   if (StartsWithASCII(string, "dart:", true))
     return url;
   if (StartsWithASCII(string, "package:", true))
-    return StringToDart(CanonicalizePackageURL(std::move(string)));
+    return StringToDart(CanonicalizePackageURL(string));
   base::FilePath base_path(StringFromDart(Dart_LibraryUrl(library)));
   base::FilePath resolved_path = base_path.DirName().Append(string);
   base::FilePath normalized_path = SimplifyPath(resolved_path);
@@ -132,7 +130,7 @@ void LoadSkyInternals() {
   LogIfError(Dart_LoadLibrary(library_name, StringToDart(Fetch(url)), 0, 0));
 }
 
-void LoadScript(std::string url) {
+void LoadScript(const std::string& url) {
   LogIfError(
       Dart_LoadScript(StringToDart(url), StringToDart(Fetch(url)), 0, 0));
 }
