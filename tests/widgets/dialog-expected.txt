@@ -15,7 +15,7 @@ PAINT FOR FRAME #2 ----------------------------------------------
 2 |  |  | TestDisplayList() constructor: 800.0 x 600.0
 2 |  |  | paintChild RenderConstrainedBox at Point(260.0, 276.0)
 2 |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
-2 |  |  |  | drawRRect(Instance of 'RRect', Paint(color:Color(0xfffafafa), drawLooper:true))
+2 |  |  |  | drawRRect(Instance of 'RRect', Paint(color:Color(0xffffffff), drawLooper:true))
 2 |  |  |  | paintChild RenderParagraph at Point(0.0, 0.0)
 2 |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
 2 |  |  |  | paintChild RenderParagraph at Point(0.0, 16.0)

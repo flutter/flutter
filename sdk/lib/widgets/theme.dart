@@ -2,9 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:sky/theme/theme_data.dart';
+import '../theme/theme_data.dart';
 import 'basic.dart';
 import 'widget.dart';
+
+export '../theme/theme_data.dart' show ThemeBrightness;
 
 class Theme extends Inherited {
 
@@ -19,7 +21,7 @@ class Theme extends Inherited {
 
   final ThemeData data;
 
-  static ThemeData _kFallbackTheme = new ThemeData.fallback();
+  static final ThemeData _kFallbackTheme = new ThemeData.fallback();
 
   static ThemeData of(Component component) {
     Theme theme = component.inheritedOfType(Theme);

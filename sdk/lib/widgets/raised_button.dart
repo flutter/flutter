@@ -2,11 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../theme/colors.dart';
+import '../theme/colors.dart' as colors;
 import 'basic.dart';
 import 'material_button.dart';
-
-export 'material_button.dart' show MaterialButtonTheme;
+import 'theme.dart';
 
 class RaisedButton extends MaterialButton {
 
@@ -14,32 +13,30 @@ class RaisedButton extends MaterialButton {
     String key,
     Widget child,
     bool enabled: true,
-    Function onPressed,
-    MaterialButtonTheme theme: MaterialButtonTheme.light
+    Function onPressed
   }) : super(key: key,
              child: child,
              enabled: enabled,
-             onPressed: onPressed,
-             theme: theme);
+             onPressed: onPressed);
 
   Color get color {
     if (enabled) {
-      switch (theme) {
-        case MaterialButtonTheme.light:
+      switch (Theme.of(this).brightness) {
+        case ThemeBrightness.light:
           if (highlight)
-            return Grey[350];
+            return colors.Grey[350];
           else
-            return Grey[300];
+            return colors.Grey[300];
           break;
-        case MaterialButtonTheme.dark:
+        case ThemeBrightness.dark:
           if (highlight)
-            return Blue[700];
+            return Theme.of(this).primary[700];
           else
-            return Blue[600];
+            return Theme.of(this).primary[600];
           break;
       }
     } else {
-      return Grey[350];
+      return colors.Grey[350];
     }
   }
 

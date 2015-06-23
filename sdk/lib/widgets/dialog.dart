@@ -2,8 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import '../theme/colors.dart' as colors;
 import 'basic.dart';
 import 'material.dart';
+import "theme.dart";
 
 class Dialog extends Component {
   Dialog({
@@ -18,6 +20,15 @@ class Dialog extends Component {
   final Widget content;
   final Widget actions;
   final Function onDismiss;
+
+  Color get color {
+    switch (Theme.of(this).brightness) {
+      case ThemeBrightness.light:
+        return colors.White;
+      case ThemeBrightness.dark:
+        return colors.Grey[800];
+    }
+  }
 
   Widget build() {
     Container mask = new Container(
@@ -45,6 +56,7 @@ class Dialog extends Component {
           constraints: new BoxConstraints(minWidth: 280.0),
           child: new Material(
             level: 4,
+            color: color,
             child: new ShrinkWrapWidth(
               child: new Block(children)
             )

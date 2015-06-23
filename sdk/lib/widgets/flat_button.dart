@@ -5,29 +5,26 @@
 import '../theme/colors.dart';
 import 'basic.dart';
 import 'material_button.dart';
-
-export 'material_button.dart' show MaterialButtonTheme;
+import 'theme.dart';
 
 class FlatButton extends MaterialButton {
   FlatButton({
     String key,
     Widget child,
     bool enabled: true,
-    Function onPressed,
-    MaterialButtonTheme theme: MaterialButtonTheme.light
+    Function onPressed
   }) : super(key: key,
              child: child,
              enabled: enabled,
-             onPressed: onPressed,
-             theme: theme);
+             onPressed: onPressed);
 
   Color get color {
     if (!enabled || !highlight)
       return null;
-    switch (theme) {
-      case MaterialButtonTheme.light:
+    switch (Theme.of(this).brightness) {
+      case ThemeBrightness.light:
         return Grey[400];
-      case MaterialButtonTheme.dark:
+      case ThemeBrightness.dark:
         return Grey[200];
     }
   }
