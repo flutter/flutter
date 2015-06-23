@@ -46,4 +46,8 @@ group("sky_apk") {
       "//sky/services/intents",
     ]
   }
+
+  if (is_linux) {
+    deps += [ "//sky/shell" ]
+  }
 }

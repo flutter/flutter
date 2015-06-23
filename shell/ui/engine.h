@@ -39,6 +39,9 @@ class Engine : public UIDelegate,
                public blink::SkyViewClient {
  public:
   struct Config {
+    Config();
+    ~Config();
+
     ServiceProviderContext* service_provider_context;
 
     base::WeakPtr<GPUDelegate> gpu_delegate;

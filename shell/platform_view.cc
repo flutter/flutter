@@ -11,6 +11,12 @@
 namespace sky {
 namespace shell {
 
+PlatformView::Config::Config() {
+}
+
+PlatformView::Config::~Config() {
+}
+
 PlatformView::PlatformView(const PlatformView::Config& config)
     : config_(config), window_(0) {
 }

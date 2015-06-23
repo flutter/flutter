@@ -15,6 +15,9 @@ namespace shell {
 class PlatformView {
  public:
   struct Config {
+    Config();
+    ~Config();
+
     base::WeakPtr<UIDelegate> ui_delegate;
     scoped_refptr<base::SingleThreadTaskRunner> ui_task_runner;
   };

@@ -18,8 +18,8 @@ namespace shell {
 
 class ServiceProviderContext {
  public:
-  ServiceProviderContext(scoped_refptr<base::SingleThreadTaskRunner> runner)
-      : platform_task_runner(runner.Pass()) {}
+  ServiceProviderContext(scoped_refptr<base::SingleThreadTaskRunner> runner);
+  ~ServiceProviderContext();
 
   scoped_refptr<base::SingleThreadTaskRunner> platform_task_runner;
 };

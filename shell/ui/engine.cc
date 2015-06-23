@@ -37,6 +37,12 @@ PlatformImpl* g_platform_impl = nullptr;
 
 }
 
+Engine::Config::Config() {
+}
+
+Engine::Config::~Config() {
+}
+
 Engine::Engine(const Config& config)
     : config_(config),
       animator_(new Animator(config, this)),
