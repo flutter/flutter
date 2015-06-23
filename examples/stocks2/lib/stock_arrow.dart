@@ -35,41 +35,41 @@ class StockArrow extends Component {
     var arrow = new CustomPaint(callback: (sky.Canvas canvas, Size size) {
       Paint paint = new Paint()..color = color;
       paint.strokeWidth = 1.0;
-      var padding = paint.strokeWidth * 3.0;
-      var r = kSize / 2.0 - padding;
-      canvas.save();
-      canvas.translate(padding, padding);
+      const double padding = 2.0;
+      assert(padding > paint.strokeWidth / 2.0); // make sure the circle remains inside the box
+      double r = (kSize - padding) / 2.0; // radius of the circle
+      double centerX = padding + r;
+      double centerY = padding + r;
 
-      // The arrow (below) is drawn upwards by default.
+      // Draw the arrow.
+      double w = 8.0;
+      double h = 5.0;
+      double arrowY;
       if (percentChange < 0.0) {
-        canvas.translate(r, r);
-        canvas.rotate(math.PI);
-        canvas.translate(-r, -r);
+        h = -h;
+        arrowY = centerX + 1.0;
+      } else {
+        arrowY = centerX - 1.0;
       }
-
-      // Draw the (equliateral triangle) arrow.
-      var dx = math.sqrt(3.0) * r / 2.0;
-      var path = new Path();
-      path.moveTo(r, 0.0);
-      path.lineTo(r + dx, r * 1.5);
-      path.lineTo(r - dx, r * 1.5);
-      path.lineTo(r, 0.0);
+      Path path = new Path();
+      path.moveTo(centerX, arrowY - h); // top of the arrow
+      path.lineTo(centerX + w, arrowY + h);
+      path.lineTo(centerX - w, arrowY + h);
       path.close();
       paint.setStyle(sky.PaintingStyle.fill);
       canvas.drawPath(path, paint);
 
       // Draw a circle that circumscribes the arrow.
       paint.setStyle(sky.PaintingStyle.stroke);
-      canvas.drawCircle(r, r, r + 2.0, paint);
-
-      canvas.restore();
+      canvas.drawCircle(centerX, centerY, r, paint);
     });
 
     return new Container(
-        child: arrow,
-        width: kSize,
-        height: kSize,
-        margin: const EdgeDims.symmetric(horizontal: 5.0));
+      child: arrow,
+      width: kSize,
+      height: kSize,
+      margin: const EdgeDims.symmetric(horizontal: 5.0)
+    );
   }
 
 }
