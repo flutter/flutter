@@ -12,5 +12,6 @@ import 'dart:math';
 import 'dart:mojo.internal';
 import 'dart:mirrors';
 import 'dart:sky';
-import 'dart:sky_builtin';
+import 'dart:sky.internals';
+import 'dart:sky_builtin_natives';
 import 'dart:typed_data';

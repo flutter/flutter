@@ -48,14 +48,16 @@ def main():
     args = parser.parse_args()
     build_dir = args.build_dir
     analyzer_path = os.path.join(SRC_ROOT, 'third_party/dart-sdk/dart-sdk/bin/dartanalyzer')
+    dart_builtin_natives_path = os.path.join(SRC_ROOT, 'sky/engine/bindings/builtin_natives.dart')
+    dart_mojo_internal_path = os.path.join(SRC_ROOT, 'mojo/public/dart/sdk_ext/internal.dart')
+    dart_sky_internals_path = os.path.join(SRC_ROOT, 'sky/engine/bindings/sky_internals.dart')
     dart_sky_path = os.path.join(build_dir, 'gen/sky/bindings/dart_sky.dart')
-    dart_sky_internals_path = os.path.join(SRC_ROOT, 'sky/sdk/lib/internals.dart')
-    dart_sky_builtin_path = os.path.join(SRC_ROOT, 'sky/engine/bindings/builtin.dart')
     packages_root = os.path.join(build_dir, 'gen/dart-pkg/packages')
     analyzer_args = [analyzer_path,
+        "--url-mapping=dart:mojo.internal,%s" % dart_mojo_internal_path,
         "--url-mapping=dart:sky,%s" % dart_sky_path,
         "--url-mapping=dart:sky.internals,%s" % dart_sky_internals_path,
-        "--url-mapping=dart:sky_builtin,%s" % dart_sky_builtin_path,
+        "--url-mapping=dart:sky_builtin_natives,%s" % dart_builtin_natives_path,
         "--package-root", packages_root,
         "--package-warnings",
         args.app_path

@@ -92,28 +92,14 @@ const uint8_t* Symbolizer(Dart_NativeFunction native_function) {
 
 const char kLibraryName[] = "dart:sky.internals";
 
-// When editing this, also update sky/sdk/lib/internals.dart
-// so that the analyzer can see it
-const char kLibrarySource[] = R"DART(
-String contentAsText() native "contentAsText";
-String renderTreeAsText() native "renderTreeAsText";
-void notifyTestComplete(String test_result) native "notifyTestComplete";
-int takeShellProxyHandle() native "takeShellProxyHandle";
-int takeServicesProvidedByEmbedder() native "takeServicesProvidedByEmbedder";
-int takeServicesProvidedToEmbedder() native "takeServicesProvidedToEmbedder";
-int takeServiceRegistry() native "takeServiceRegistry";
-)DART";
-
 }  // namespace
 
 void Internals::Create(Dart_Isolate isolate, DocumentView* document_view) {
   DartState* state = DartState::From(isolate);
   state->SetUserData(&kInternalsKey, new Internals(document_view));
   Dart_Handle library =
-      Dart_LoadLibrary(Dart_NewStringFromCString(kLibraryName),
-                       Dart_NewStringFromCString(kLibrarySource), 0, 0);
+      Dart_LookupLibrary(Dart_NewStringFromCString(kLibraryName));
   CHECK(!LogIfError(library));
-  CHECK(!LogIfError(Dart_FinalizeLoading(true)));
   CHECK(!LogIfError(Dart_SetNativeResolver(library, Resolver, Symbolizer)));
 }
 

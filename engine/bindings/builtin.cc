@@ -26,7 +26,7 @@ struct LibraryDescriptor {
 
 const LibraryDescriptor kBuiltinLibraries[] = {
     /* { url_, has_natives_, native_symbol_, native_resolver_ } */
-    {"dart:sky_builtin",
+    {"dart:sky_builtin_natives",
      true,
      BuiltinNatives::NativeSymbol,
      BuiltinNatives::NativeLookup},

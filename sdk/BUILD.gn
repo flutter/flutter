@@ -70,7 +70,6 @@ dart_pkg("sdk") {
     "lib/framework/theme/shadows.dart",
     "lib/framework/theme/typography.dart",
     "lib/framework/theme/view_configuration.dart",
-    "lib/internals.dart",
     "lib/mojo/asset_bundle.dart",
     "lib/mojo/embedder.dart",
     "lib/mojo/net/fetch.dart",

@@ -60,11 +60,12 @@ action("generate_snapshot_bin") {
   ]
   inputs = [
     "//dart/runtime/tools/create_snapshot_bin.py",
-    "//sky/engine/bindings/builtin.dart",
     "//mojo/public/dart/sdk_ext/internal.dart",
     "//mojo/public/dart/sdk_ext/src/handle_watcher.dart",
     "//mojo/public/dart/sdk_ext/src/natives.dart",
     "//mojo/public/dart/sdk_ext/src/timer_queue.dart",
+    "//sky/engine/bindings/builtin_natives.dart",
+    "//sky/engine/bindings/sky_internals.dart",
     "snapshot.dart",
   ]
   vm_isolate_snapshot = "$target_gen_dir/vm_isolate_snapshot.bin"
@@ -74,9 +75,13 @@ action("generate_snapshot_bin") {
     isolate_snapshot,
   ]
 
-  builtin_path = rebase_path("//sky/engine/bindings/builtin.dart")
+  dart_mojo_internal_path =
+      rebase_path("//mojo/public/dart/sdk_ext/internal.dart")
+  dart_sky_builtin_natives_path =
+      rebase_path("//sky/engine/bindings/builtin_natives.dart")
+  dart_sky_internals_path =
+      rebase_path("//sky/engine/bindings/sky_internals.dart")
   dart_sky_path = rebase_path("$bindings_output_dir/dart_sky.dart")
-  internal_path = rebase_path("//mojo/public/dart/sdk_ext/internal.dart")
 
   gen_snapshot_dir =
       get_label_info("//dart/runtime/bin:gen_snapshot($host_toolchain)",
@@ -96,9 +101,10 @@ action("generate_snapshot_bin") {
     rebase_path(isolate_snapshot, root_build_dir),
     "--target_os",
     target_os,
+    "--url_mapping=dart:mojo.internal,$dart_mojo_internal_path",
     "--url_mapping=dart:sky,$dart_sky_path",
-    "--url_mapping=dart:mojo.internal,$internal_path",
-    "--url_mapping=dart:sky_builtin,$builtin_path",
+    "--url_mapping=dart:sky.internals,$dart_sky_internals_path",
+    "--url_mapping=dart:sky_builtin_natives,$dart_sky_builtin_natives_path",
   ]
 }
 
