@@ -176,7 +176,7 @@ class RenderParagraph extends RenderBox {
 
   String debugDescribeSettings(String prefix) {
     String result = '${super.debugDescribeSettings(prefix)}';
-    result += '${prefix}inline: ${inline}\n';
+    result += '${prefix}inline:\n${inline.toString("$prefix  ")}\n';
     return result;
   }
 }
