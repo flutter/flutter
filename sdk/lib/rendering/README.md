@@ -7,8 +7,10 @@ developers using Sky will not need to interact directly with the rendering tree.
 Instead, most developers should use [Sky widgets](../widgets/README.md), which
 are built using the render tree.
 
-Base Model
-----------
+Overview
+--------
+
+### Base Model
 
 The base class for every node in the render tree is
 [`RenderObject`](object.dart), which defines the base layout model. The base
@@ -73,16 +75,65 @@ The base model also provides two mixins for common child models:
 Subclasses of `RenderObject` are not required to use either of these child
 models and are free to invent novel child models for their specific use cases.
 
-Parent Data
------------
+### Parent Data
+
+### Box Model
+
+#### EdgeDims
+
+#### BoxConstraints
+
+### Bespoke Models
 
 
-Box Model
----------
+Using the provided subclasses
+-----------------------------
+
+### render_box.dart
+#### RenderConstrainedBox
+#### RenderShrinkWrapWidth
+#### RenderOpacity
+#### RenderColorFilter
+#### RenderClipRect
+#### RenderClipOval
+#### RenderPadding
+#### RenderPositionedBox
+#### RenderImage
+#### RenderDecoratedBox
+#### RenderTransform
+#### RenderSizeObserver
+#### RenderCustomPaint
+### RenderBlock (render_block.dart)
+### RenderFlex (render_flex.dart)
+### RenderParagraph (render_paragraph.dart)
+### RenderStack (render_stack.dart)
+
+Writing new subclasses
+----------------------
+
+### The RenderObject contract
+
+#### The ParentData contract
+
+#### Using RenderObjectWithChildMixin
+
+#### Using ContainerParentDataMixin and ContainerRenderObjectMixin
+
+### The RenderBox contract
+
+#### Using RenderProxyBox
+
+### The Hit Testing contract
 
 
-Bespoke Models
---------------
+Performance rules of thumb
+--------------------------
+
+* Avoid using transforms where mere maths would be sufficient (e.g.
+  draw your rectangle at x,y rather than translating by x,y and
+  drawing it at 0,0).
+
+* Avoid using save/restore on canvases.
 
 
 Dependencies
