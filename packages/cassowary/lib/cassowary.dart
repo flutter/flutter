@@ -12,3 +12,5 @@ part 'equation_member.dart';
 part 'constant_member.dart';
 part 'solver.dart';
 part 'symbol.dart';
+part 'row.dart';
+part 'utils.dart';
