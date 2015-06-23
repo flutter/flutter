@@ -205,8 +205,7 @@ class SpriteBox extends RenderBox {
         if (scaleX > scaleY) {
           scaleY = scaleX;
           offsetY = (size.height - scaleY * systemHeight)/2.0;
-        }
-        else {
+        } else {
           scaleX = scaleY;
           offsetX = (size.width - scaleX * systemWidth)/2.0;
         }
@@ -217,8 +216,7 @@ class SpriteBox extends RenderBox {
         if (scaleX < scaleY) {
           scaleY = scaleX;
           offsetY = (size.height - scaleY * systemHeight)/2.0;
-        }
-        else {
+        } else {
           scaleX = scaleY;
           offsetX = (size.width - scaleX * systemWidth)/2.0;
         }

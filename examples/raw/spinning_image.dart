@@ -20,8 +20,22 @@ void beginFrame(double timeStamp) {
   canvas.rotate(math.PI * delta / 1800);
   canvas.scale(0.2, 0.2);
   Paint paint = new Paint()..color = const Color.fromARGB(255, 0, 255, 0);
+
+  // Draw image
   if (image != null)
     canvas.drawImage(image, -image.width / 2.0, -image.height / 2.0, paint);
+
+  // Draw cut out of image
+  canvas.rotate(math.PI * delta / 1800);
+  if (image != null) {
+    var w = image.width.toDouble();
+    var h = image.width.toDouble();
+    canvas.drawImageRect(image,
+      new Rect.fromLTRB(w * 0.25, h * 0.25, w * 0.75, h * 0.75),
+      new Rect.fromLTRB(-w / 4.0, -h / 4.0, w / 4.0, h / 4.0),
+      paint);
+  }
+
   view.picture = canvas.endRecording();
   view.scheduleFrame();
 }

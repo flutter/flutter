@@ -3,13 +3,13 @@ part of sprites;
 /// A Sprite is a [Node] that renders a bitmap image to the screen.
 class Sprite extends NodeWithSize {
 
-  /// The image that the sprite will render to screen.
+  /// The texture that the sprite will render to screen.
   ///
-  /// If the image is null, the sprite will be rendered as a red square
+  /// If the texture is null, the sprite will be rendered as a red square
   /// marking the bounds of the sprite.
   ///
-  ///     mySprite.image = myImage;
-  Image image;
+  ///     mySprite.texture = myTexture;
+  Texture texture;
 
   /// If true, constrains the proportions of the image by scaling it down, if its proportions doesn't match the [size].
   ///
@@ -29,14 +29,28 @@ class Sprite extends NodeWithSize {
   ///     mySprite.transferMode = TransferMode.plusMode;
   TransferMode transferMode;
 
+  /// Creates a new sprite from the provided [texture].
+  ///
+  ///     var mySprite = new Sprite(myTexture)
+  Sprite([this.texture]) {
+    if (texture != null) {
+      size = texture.size;
+      pivot = texture.pivot;
+    } else {
+      pivot = new Point(0.5, 0.5);
+    }
+  }
+
   /// Creates a new sprite from the provided [image].
   ///
-  /// var mySprite = new Sprite(myImage);
-  Sprite([Image this.image]) {
+  /// var mySprite = new Sprite.fromImage(myImage);
+  Sprite.fromImage(Image image) {
+    assert(image != null);
+
+    texture = new Texture(image);
+    size = texture.size;
+
     pivot = new Point(0.5, 0.5);
-    if (image != null) {
-      size = new Size(image.width.toDouble(), image.height.toDouble());
-    }
   }
 
   /// The opacity of the sprite in the range 0.0 to 1.0.
@@ -56,19 +70,22 @@ class Sprite extends NodeWithSize {
     // Account for pivot point
     applyTransformForPivot(canvas);
 
-    if (image != null && image.width > 0 && image.height > 0) {
+    if (texture != null) {
+      double w = texture.size.width;
+      double h = texture.size.height;
+
+      if (w <= 0 || h <= 0) return;
       
-      double scaleX = size.width/image.width;
-      double scaleY = size.height/image.height;
+      double scaleX = size.width / w;
+      double scaleY = size.height / h;
       
       if (constrainProportions) {
         // Constrain proportions, using the smallest scale and by centering the image
         if (scaleX < scaleY) {
-          canvas.translate(0.0, (size.height - scaleX * image.height)/2.0);
+          canvas.translate(0.0, (size.height - scaleX * h) / 2.0);
           scaleY = scaleX;
-        }
-        else {
-          canvas.translate((size.width - scaleY * image.width)/2.0, 0.0);
+        } else {
+          canvas.translate((size.width - scaleY * w) / 2.0, 0.0);
           scaleX = scaleY;
         }
       }
@@ -85,9 +102,9 @@ class Sprite extends NodeWithSize {
         paint.setTransferMode(transferMode);
       }
 
-      canvas.drawImage(image, 0.0, 0.0, paint);
-    }
-    else {
+      // Do actual drawing of the sprite
+      canvas.drawImageRect(texture.image, texture.frame, texture.spriteSourceSize, paint);
+    } else {
       // Paint a red square for missing texture
       canvas.drawRect(new Rect.fromLTRB(0.0, 0.0, size.width, size.height),
           new Paint()..color = const Color.fromARGB(255, 255, 0, 0));
