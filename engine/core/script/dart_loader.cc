@@ -27,7 +27,7 @@ Dart_Handle CanonicalizeURL(DartState* state,
                             Dart_Handle library,
                             Dart_Handle url) {
   String string = StringFromDart(url);
-  if (string.startsWith("dart:") || string.startsWith("mojo:"))
+  if (string.startsWith("dart:"))
     return url;
   // TODO(dart): Figure out how 'package:' should work in sky.
   if (string.startsWith("package:")) {
@@ -211,14 +211,6 @@ Dart_Handle DartLoader::HandleLibraryTag(Dart_LibraryTag tag,
     return CanonicalizeURL(DartState::Current(), library, url);
   if (tag == Dart_kImportTag) {
     CHECK(WTF::isMainThread());
-
-    String string = StringFromDart(url);
-    if (string.startsWith("mojo:")) {
-      Dart_Handle mojo_library = Dart_LookupLibrary(url);
-      LogIfError(mojo_library);
-      return mojo_library;
-    }
-
     return DOMDartState::Current()->loader().Import(library, url);
   }
   if (tag == Dart_kSourceTag) {
