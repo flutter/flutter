@@ -12,24 +12,43 @@ import 'package:sky/widgets/scaffold.dart';
 import 'package:sky/widgets/theme.dart';
 import 'package:sky/widgets/tool_bar.dart';
 
+import 'stock_types.dart';
+
+typedef void SettingsUpdater({StockMode mode});
+
 class StockSettings extends Component {
 
-  StockSettings(this._navigator);
+  StockSettings(this.navigator, this.stockMode, this.updater) : super(stateful: true);
 
-  Navigator _navigator;
+  Navigator navigator;
+  StockMode stockMode;
+  SettingsUpdater updater;
 
-  bool _awesome = false;
-  void _handleAwesomeChanged(bool value) {
+  void syncFields(StockSettings source) {
+    navigator = source.navigator;
+    stockMode = source.stockMode;
+    updater = source.updater;
+  }
+
+  void _handleStockModeChanged(bool value) {
     setState(() {
-      _awesome = value;
+      stockMode = value ? StockMode.optimistic : StockMode.pessimistic;
     });
+    sendUpdates();
+  }
+
+  void sendUpdates() {
+    if (updater != null)
+      updater(
+        mode: stockMode
+      );
   }
 
   Widget buildToolBar() {
     return new ToolBar(
       left: new IconButton(
         icon: 'navigation/arrow_back_white',
-        onPressed: _navigator.pop),
+        onPressed: navigator.pop),
       center: new Text('Settings', style: Theme.of(this).text.title)
     );
   }
@@ -41,10 +60,10 @@ class StockSettings extends Component {
       child: new Block([
         new MenuItem(
           icon: 'action/thumb_up',
-          onPressed: () => _handleAwesomeChanged(!_awesome),
+          onPressed: () => _handleStockModeChanged(stockMode == StockMode.optimistic ? false : true),
           children: [
             new Flexible(child: new Text('Everything is awesome')),
-            new Checkbox(value: _awesome, onChanged: _handleAwesomeChanged)
+            new Checkbox(value: stockMode == StockMode.optimistic, onChanged: _handleStockModeChanged)
           ]
         ),
       ])

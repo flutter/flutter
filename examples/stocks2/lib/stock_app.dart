@@ -13,22 +13,45 @@ import 'package:sky/widgets/widget.dart';
 import 'stock_data.dart';
 import 'stock_home.dart';
 import 'stock_settings.dart';
+import 'stock_types.dart';
 
 class StocksApp extends App {
 
+  NavigationState _navigationState;
   StocksApp() {
     _navigationState = new NavigationState([
       new Route(
         name: '/', 
-        builder: (navigator, route) => new StockHome(navigator, route, _stocks)
+        builder: (navigator, route) => new StockHome(navigator, _stocks, stockMode, modeUpdater)
       ),
       new Route(
         name: '/settings',
-        builder: (navigator, route) => new StockSettings(navigator)
+        builder: (navigator, route) => new StockSettings(navigator, stockMode, settingsUpdater)
       ),
     ]);
   }
 
+  void onBack() {
+    setState(() {
+      _navigationState.pop();
+    });
+    // TODO(jackson): Need a way to invoke default back behavior here
+  }
+
+  StockMode stockMode = StockMode.optimistic;
+  void modeUpdater(StockMode value) {
+    setState(() {
+      stockMode = value;
+    });
+  }
+  void settingsUpdater({StockMode mode}) {
+    setState(() {
+      if (mode != null)
+        stockMode = mode;
+    });
+  }
+
+  final List<Stock> _stocks = [];
   void didMount() {
     super.didMount();
     new StockDataFetcher((StockData data) {
@@ -36,16 +59,6 @@ class StocksApp extends App {
         data.appendTo(_stocks);
       });
     });
-  }
-
-  final List<Stock> _stocks = [];
-  NavigationState _navigationState;
-
-  void onBack() {
-    setState(() {
-      _navigationState.pop();
-    });
-    // TODO(jackson): Need a way to invoke default back behavior here
   }
 
   Widget build() {
