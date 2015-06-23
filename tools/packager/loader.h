@@ -13,6 +13,6 @@ Dart_Handle HandleLibraryTag(Dart_LibraryTag tag,
                              Dart_Handle library,
                              Dart_Handle url);
 void LoadSkyInternals();
-void LoadScript(std::string url);
+void LoadScript(const std::string& url);
 
 #endif  // SKY_TOOLS_PACKAGER_LOADER_H_
