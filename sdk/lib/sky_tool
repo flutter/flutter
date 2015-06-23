@@ -24,6 +24,8 @@ APK_NAME = 'SkyDemo.apk'
 ANDROID_PACKAGE = "org.domokit.sky.demo"
 # FIXME: This assumes adb is in $PATH, we could look for ANDROID_HOME, etc?
 ADB_PATH = 'adb'
+# FIXME: Do we need to look in $DART_SDK?
+DART_PATH = 'dart'
 
 PID_FILE_PATH = "/tmp/sky_tool.pids"
 PID_FILE_KEYS = frozenset([
@@ -127,6 +129,34 @@ class StartSky(object):
     def run(self, args, pids):
         StopSky().run(args, pids)
 
+        project_or_path = os.path.abspath(args.project_or_path)
+
+        if os.path.isdir(project_or_path):
+            sky_server_root = project_or_path
+            main_dart = os.path.join(project_or_path, 'main.dart')
+            missing_msg = "Missing main.dart in project: %s" % sky_server_root
+        else:
+            # FIXME: This assumes the path is at the root of the project!
+            # Instead we should walk up looking for a pubspec.yaml
+            sky_server_root = os.path.dirname(project_or_path)
+            main_dart = project_or_path
+            missing_msg = "%s does not exist." % main_dart
+
+        if not os.path.isfile(main_dart):
+            print missing_msg
+            return 2
+
+        package_root = os.path.join(sky_server_root, 'packages')
+        if not os.path.isdir(package_root):
+            print "%s is not a valid packages path." % package_root
+            return 2
+
+        subprocess.check_call([
+            DART_PATH,
+            '--package-root=%s' % package_root,
+            'packages/mojom/generate.dart'
+        ])
+
         if not self._is_package_installed(ANDROID_PACKAGE):
             print '%s is not installed, installing.' % APK_NAME
             args.install = True
@@ -138,21 +168,6 @@ class StartSky(object):
                 return 2
 
             subprocess.check_call([ADB_PATH, 'install', '-r', apk_path])
-
-        project_or_path = os.path.abspath(args.project_or_path)
-
-        if os.path.isdir(project_or_path):
-            sky_server_root = project_or_path
-            main_sky = os.path.join(project_or_path, 'main.dart')
-            missing_msg = "Missing main.dart in project: %s" % sky_server_root
-        else:
-            sky_server_root = os.path.dirname(project_or_path)
-            main_sky = project_or_path
-            missing_msg = "%s does not exist." % main_sky
-
-        if not os.path.isfile(main_sky):
-            print missing_msg
-            return 2
 
         sky_server_port = SKY_SERVER_PORT
         pids['sky_server_port'] = sky_server_port
@@ -172,7 +187,7 @@ class StartSky(object):
 
         # The load happens on the remote device, use the remote port.
         sky_url = _url_for_path(pids['remote_sky_server_port'], sky_server_root,
-            main_sky)
+            main_dart)
 
         subprocess.check_call([ADB_PATH, 'shell',
             'am', 'start',
@@ -264,9 +279,17 @@ class SkyShellRunner(object):
             return False
         return True
 
+    def _check_for_dart(self):
+        try:
+            subprocess.check_output([DART_PATH, '--version'])
+        except OSError:
+            print "'dart' (from the Dart SDK) not in $PATH, can't continue."
+            return False
+        return True
+
     def main(self):
         logging.basicConfig(level=logging.WARNING)
-        if not self._check_for_adb():
+        if not self._check_for_adb() or not self._check_for_dart():
             sys.exit(2)
 
         parser = argparse.ArgumentParser(description='Sky Demo Runner')
