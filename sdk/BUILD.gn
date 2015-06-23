@@ -97,6 +97,7 @@ dart_pkg("sdk") {
     "lib/widgets/basic.dart",
     "lib/widgets/button_base.dart",
     "lib/widgets/checkbox.dart",
+    "lib/widgets/default_text_style.dart",
     "lib/widgets/dialog.dart",
     "lib/widgets/drawer.dart",
     "lib/widgets/drawer_header.dart",

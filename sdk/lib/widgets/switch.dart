@@ -4,19 +4,16 @@
 
 import 'dart:sky' as sky;
 
-import 'package:sky/theme/colors.dart' as colors;
 import 'package:sky/theme/shadows.dart';
 
 import '../painting/shadows.dart';
 import '../rendering/box.dart';
 import 'basic.dart';
+import 'theme.dart';
 import 'toggleable.dart';
 export 'toggleable.dart' show ValueChanged;
 
-// TODO(jackson): This should change colors with the theme
-sky.Color _kThumbOnColor = colors.Purple[500];
 const sky.Color _kThumbOffColor = const sky.Color(0xFFFAFAFA);
-sky.Color _kTrackOnColor = new sky.Color(_kThumbOnColor.value & (0x80 << 24));
 const sky.Color _kTrackOffColor = const sky.Color(0x42000000);
 const double _kSwitchWidth = 35.0;
 const double _kThumbRadius = 10.0;
@@ -37,8 +34,12 @@ class Switch extends Toggleable {
   Size get size => const Size(_kSwitchWidth + 2.0, _kSwitchHeight + 2.0);
 
   void customPaintCallback(sky.Canvas canvas, Size size) {
-    sky.Color thumbColor = value ? _kThumbOnColor : _kThumbOffColor;
-    sky.Color trackColor = value ? _kTrackOnColor : _kTrackOffColor;
+    sky.Color thumbColor = _kThumbOffColor;
+    sky.Color trackColor = _kTrackOffColor;
+    if (value) {
+      thumbColor = Theme.of(this).primary[500];
+      trackColor = new sky.Color(thumbColor.value & 0x80FFFFFF);
+    }
 
     // Draw the track rrect
     sky.Paint paint = new sky.Paint()..color = trackColor;

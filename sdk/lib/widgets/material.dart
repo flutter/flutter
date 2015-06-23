@@ -3,10 +3,11 @@
 // found in the LICENSE file.
 
 import '../painting/box_painter.dart';
-import '../theme/colors.dart';
 import '../theme/edges.dart';
 import '../theme/shadows.dart';
 import 'basic.dart';
+import 'default_text_style.dart';
+import 'theme.dart';
 
 class Material extends Component {
 
@@ -30,10 +31,10 @@ class Material extends Component {
       decoration: new BoxDecoration(
         boxShadow: shadows[level],
         borderRadius: edges[edge],
-        backgroundColor: color == null ? Grey[50] : color,
+        backgroundColor: color == null ? Theme.of(this).backgroundColor : color,
         shape: edge == MaterialEdge.circle ? Shape.circle : Shape.rectangle
       ),
-      child: child
+      child: new DefaultTextStyle(style: Theme.of(this).text.body1, child: child)
     );
   }
 

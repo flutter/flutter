@@ -19,10 +19,10 @@ class Theme extends Inherited {
 
   final ThemeData data;
 
+  static ThemeData _kFallbackTheme = new ThemeData.fallback();
+
   static ThemeData of(Component component) {
     Theme theme = component.inheritedOfType(Theme);
-    // If you hit this assert, you need to wrap your Component in a Theme
-    assert(theme != null);
-    return theme.data;
+    return theme == null ? _kFallbackTheme : theme.data;
   }
 }

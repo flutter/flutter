@@ -23,6 +23,13 @@ const Map<int, Color> Red = const {
   900: const Color(0xFFB71C1C),
 };
 
+const Map<int, Color> RedAccent = const {
+  100: const Color(0xFFFF8A80),
+  200: const Color(0xFFFF5252),
+  400: const Color(0xFFFF1744),
+  700: const Color(0xFFD50000),
+};
+
 const Map<int, Color> Pink = const {
    50: const Color(0xFFFCE4EC),
   100: const Color(0xFFF8BBD0),
@@ -34,6 +41,13 @@ const Map<int, Color> Pink = const {
   700: const Color(0xFFC2185B),
   800: const Color(0xFFAD1457),
   900: const Color(0xFF880E4F),
+};
+
+const Map<int, Color> PinkAccent = const {
+  100: const Color(0xFFFF80AB),
+  200: const Color(0xFFFF4081),
+  400: const Color(0xFFF50057),
+  700: const Color(0xFFC51162),
 };
 
 const Map<int, Color> Purple = const {
@@ -49,6 +63,13 @@ const Map<int, Color> Purple = const {
   900: const Color(0xFF4A148C),
 };
 
+const Map<int, Color> PurpleAccent = const {
+  100: const Color(0xFFEA80FC),
+  200: const Color(0xFFE040FB),
+  400: const Color(0xFFD500F9),
+  700: const Color(0xFFAA00FF),
+};
+
 const Map<int, Color> DeepPurple = const {
    50: const Color(0xFFEDE7F6),
   100: const Color(0xFFD1C4E9),
@@ -60,6 +81,13 @@ const Map<int, Color> DeepPurple = const {
   700: const Color(0xFF512DA8),
   800: const Color(0xFF4527A0),
   900: const Color(0xFF311B92),
+};
+
+const Map<int, Color> DeepPurpleAccent = const {
+  100: const Color(0xFFB388FF),
+  200: const Color(0xFF7C4DFF),
+  400: const Color(0xFF651FFF),
+  700: const Color(0xFF6200EA),
 };
 
 const Map<int, Color> Indigo = const {
@@ -75,6 +103,13 @@ const Map<int, Color> Indigo = const {
   900: const Color(0xFF1A237E),
 };
 
+const Map<int, Color> IndigoAccent = const {
+  100: const Color(0xFF8C9EFF),
+  200: const Color(0xFF536DFE),
+  400: const Color(0xFF3D5AFE),
+  700: const Color(0xFF304FFE),
+};
+
 const Map<int, Color> Blue = const {
    50: const Color(0xFFE3F2FD),
   100: const Color(0xFFBBDEFB),
@@ -86,6 +121,13 @@ const Map<int, Color> Blue = const {
   700: const Color(0xFF1976D2),
   800: const Color(0xFF1565C0),
   900: const Color(0xFF0D47A1),
+};
+
+const Map<int, Color> BlueAccent = const {
+  100: const Color(0xFF82B1FF),
+  200: const Color(0xFF448AFF),
+  400: const Color(0xFF2979FF),
+  700: const Color(0xFF2962FF),
 };
 
 const Map<int, Color> LightBlue = const {
@@ -101,6 +143,13 @@ const Map<int, Color> LightBlue = const {
   900: const Color(0xFF01579B),
 };
 
+const Map<int, Color> LightBlueAccent = const {
+  100: const Color(0xFF80D8FF),
+  200: const Color(0xFF40C4FF),
+  400: const Color(0xFF00B0FF),
+  700: const Color(0xFF0091EA),
+};
+
 const Map<int, Color> Cyan = const {
    50: const Color(0xFFE0F7FA),
   100: const Color(0xFFB2EBF2),
@@ -112,6 +161,13 @@ const Map<int, Color> Cyan = const {
   700: const Color(0xFF0097A7),
   800: const Color(0xFF00838F),
   900: const Color(0xFF006064),
+};
+
+const Map<int, Color> CyanAccent = const {
+  100: const Color(0xFF84FFFF),
+  200: const Color(0xFF18FFFF),
+  400: const Color(0xFF00E5FF),
+  700: const Color(0xFF00B8D4),
 };
 
 const Map<int, Color> Teal = const {
@@ -127,6 +183,13 @@ const Map<int, Color> Teal = const {
   900: const Color(0xFF004D40),
 };
 
+const Map<int, Color> TealAccent = const {
+  100: const Color(0xFFA7FFEB),
+  200: const Color(0xFF64FFDA),
+  400: const Color(0xFF1DE9B6),
+  700: const Color(0xFF00BFA5),
+};
+
 const Map<int, Color> Green = const {
    50: const Color(0xFFE8F5E9),
   100: const Color(0xFFC8E6C9),
@@ -138,6 +201,13 @@ const Map<int, Color> Green = const {
   700: const Color(0xFF388E3C),
   800: const Color(0xFF2E7D32),
   900: const Color(0xFF1B5E20),
+};
+
+const Map<int, Color> GreenAccent = const {
+  100: const Color(0xFFB9F6CA),
+  200: const Color(0xFF69F0AE),
+  400: const Color(0xFF00E676),
+  700: const Color(0xFF00C853),
 };
 
 const Map<int, Color> LightGreen = const {
@@ -153,6 +223,13 @@ const Map<int, Color> LightGreen = const {
   900: const Color(0xFF33691E),
 };
 
+const Map<int, Color> LightGreenAccent = const {
+  100: const Color(0xFFCCFF90),
+  200: const Color(0xFFB2FF59),
+  400: const Color(0xFF76FF03),
+  700: const Color(0xFF64DD17),
+};
+
 const Map<int, Color> Lime = const {
    50: const Color(0xFFF9FBE7),
   100: const Color(0xFFF0F4C3),
@@ -164,6 +241,13 @@ const Map<int, Color> Lime = const {
   700: const Color(0xFFAFB42B),
   800: const Color(0xFF9E9D24),
   900: const Color(0xFF827717),
+};
+
+const Map<int, Color> LimeAccent = const {
+  100: const Color(0xFFF4FF81),
+  200: const Color(0xFFEEFF41),
+  400: const Color(0xFFC6FF00),
+  700: const Color(0xFFAEEA00),
 };
 
 const Map<int, Color> Yellow = const {
@@ -179,6 +263,13 @@ const Map<int, Color> Yellow = const {
   900: const Color(0xFFF57F17),
 };
 
+const Map<int, Color> YellowAccent = const {
+  100: const Color(0xFFFFFF8D),
+  200: const Color(0xFFFFFF00),
+  400: const Color(0xFFFFEA00),
+  700: const Color(0xFFFFD600),
+};
+
 const Map<int, Color> Amber = const {
    50: const Color(0xFFFFF8E1),
   100: const Color(0xFFFFECB3),
@@ -190,6 +281,13 @@ const Map<int, Color> Amber = const {
   700: const Color(0xFFFFA000),
   800: const Color(0xFFFF8F00),
   900: const Color(0xFFFF6F00),
+};
+
+const Map<int, Color> AmberAccent = const {
+  100: const Color(0xFFFFE57F),
+  200: const Color(0xFFFFD740),
+  400: const Color(0xFFFFC400),
+  700: const Color(0xFFFFAB00),
 };
 
 const Map<int, Color> Orange = const {
@@ -205,6 +303,13 @@ const Map<int, Color> Orange = const {
   900: const Color(0xFFE65100),
 };
 
+const Map<int, Color> OrangeAccent = const {
+  100: const Color(0xFFFFD180),
+  200: const Color(0xFFFFAB40),
+  400: const Color(0xFFFF9100),
+  700: const Color(0xFFFF6D00),
+};
+
 const Map<int, Color> DeepOrange = const {
    50: const Color(0xFFFBE9E7),
   100: const Color(0xFFFFCCBC),
@@ -216,6 +321,13 @@ const Map<int, Color> DeepOrange = const {
   700: const Color(0xFFE64A19),
   800: const Color(0xFFD84315),
   900: const Color(0xFFBF360C),
+};
+
+const Map<int, Color> DeepOrangeAccent = const {
+  100: const Color(0xFFFF9E80),
+  200: const Color(0xFFFF6E40),
+  400: const Color(0xFFFF3D00),
+  700: const Color(0xFFDD2C00),
 };
 
 const Map<int, Color> Brown = const {
@@ -242,6 +354,7 @@ const Map<int, Color> Grey = const {
   600: const Color(0xFF757575),
   700: const Color(0xFF616161),
   800: const Color(0xFF424242),
+  850: const Color(0xFF303030), // only for background color in Dark theme
   900: const Color(0xFF212121),
 };
 

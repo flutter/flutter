@@ -13,6 +13,7 @@ import '../rendering/flex.dart';
 import '../rendering/object.dart';
 import '../rendering/paragraph.dart';
 import '../rendering/stack.dart';
+import 'default_text_style.dart';
 import 'widget.dart';
 
 export '../rendering/box.dart' show BoxConstraints, BoxDecoration, Border, BorderSide, EdgeDims;
@@ -410,7 +411,18 @@ class Text extends Component {
   bool get interchangeable => true;
   Widget build() {
     InlineBase text = new InlineText(data);
-    if (style != null) text = new InlineStyle(style, [text]);
+    TextStyle defaultStyle = DefaultTextStyle.of(this);
+    TextStyle combinedStyle;
+    if (defaultStyle != null) {
+      if (style != null)
+        combinedStyle = defaultStyle.merge(style);
+      else
+        combinedStyle = defaultStyle;
+    } else {
+      combinedStyle = style;      
+    }
+    if (combinedStyle != null)
+      text = new InlineStyle(combinedStyle, [text]);
     return new Inline(text: text);
   }
 }

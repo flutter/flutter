@@ -74,10 +74,11 @@ class TextStyle {
 
   TextStyle copyWith({
     Color color,
+    String fontFamily,
     double fontSize,
     FontWeight fontWeight,
     TextAlign textAlign,
-    TextDecoration decoration,
+    List<TextDecoration> decoration,
     Color decorationColor,
     TextDecorationStyle decorationStyle
   }) {
@@ -95,6 +96,19 @@ class TextStyle {
 
   static String _colorToCSSString(Color color) {
     return 'rgba(${color.red}, ${color.green}, ${color.blue}, ${color.alpha / 255.0})';
+  }
+
+  TextStyle merge(TextStyle other) {
+    return copyWith(
+      color: other.color,
+      fontFamily: other.fontFamily,
+      fontSize: other.fontSize,
+      fontWeight: other.fontWeight,
+      textAlign: other.textAlign,
+      decoration: other.decoration,
+      decorationColor: other.decorationColor,
+      decorationStyle: other.decorationStyle
+    );
   }
 
   static String _fontFamilyToCSSString(String fontFamily) {

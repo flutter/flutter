@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../theme/colors.dart';
 import '../theme/edges.dart';
 import 'basic.dart';
 import 'button_base.dart';
 import 'ink_well.dart';
 import 'material.dart';
+import 'theme.dart';
 
 // TODO(eseidel): This needs to change based on device size?
 // http://www.google.com/design/spec/layout/metrics-keylines.html#metrics-keylines-keylines-spacing
@@ -32,7 +32,7 @@ class FloatingActionButton extends ButtonBase {
 
   Widget buildContent() {
     return new Material(
-      color: Red[500],
+      color: Theme.of(this).accent[200],
       edge: MaterialEdge.circle,
       level: highlight ? 3 : 2,
       child: new ClipOval(

@@ -57,7 +57,7 @@ class Checkbox extends Toggleable {
 
       // Solid filled rrect
       paint.setStyle(sky.PaintingStyle.strokeAndFill);
-      Color themeColor = Theme.of(this).color[500];
+      Color themeColor = Theme.of(this).primary[500];
       paint.color = new Color.fromARGB((t * 255).floor(),
                                        themeColor.red,
                                        themeColor.green,

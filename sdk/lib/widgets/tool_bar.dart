@@ -8,6 +8,7 @@ import '../rendering/flex.dart';
 import '../theme/shadows.dart';
 import '../theme/view_configuration.dart';
 import 'basic.dart';
+import 'default_text_style.dart';
 
 class ToolBar extends Component {
 
@@ -33,7 +34,10 @@ class ToolBar extends Component {
       children.add(
         new Flexible(
           child: new Padding(
-            child: center,
+            child: new DefaultTextStyle(
+              style: Theme.of(this).toolbarText.title,
+              child: center
+            ),
             padding: new EdgeDims.only(left: 24.0)
           )
         )
@@ -50,7 +54,7 @@ class ToolBar extends Component {
       ),
       padding: new EdgeDims.symmetric(horizontal: 8.0),
       decoration: new BoxDecoration(
-        backgroundColor: backgroundColor == null ? Theme.of(this).color[500] : backgroundColor,
+        backgroundColor: backgroundColor == null ? Theme.of(this).primary[500] : backgroundColor,
         boxShadow: shadows[2]
       )
     );

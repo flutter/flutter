@@ -223,7 +223,7 @@ class ParentDataNode extends TagNode {
 
 abstract class _Heir implements Widget {
   Map<Type, Inherited> _traits;
-  Inherited inheritedOfType(Type type) => _traits[type];
+  Inherited inheritedOfType(Type type) => _traits == null ? null : _traits[type];
 
   static _Heir _getHeirAncestor(Widget widget) {
     Widget ancestor = widget;
