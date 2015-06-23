@@ -38,9 +38,13 @@ class SkyDemo extends Component {
   }
 
   UINode build() {
-    return new RaisedButton(
-      child: new Text(text),
-      onPressed: _handlePress
+    return new ConstrainedBox(
+      // TOOD(ianh): Fix so we don't need INFINITY here.
+      constraints: new BoxConstraints.tightFor(width: double.INFINITY),
+      child: new RaisedButton(
+        child: new Text(text),
+        onPressed: _handlePress
+      )
     );
   }
 }
