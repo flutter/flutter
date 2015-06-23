@@ -7,13 +7,17 @@ import 'dart:math';
 
 import 'package:sky/rendering/flex.dart';
 import 'package:sky/widgets/basic.dart';
+import 'package:sky/widgets/scaffold.dart';
+import 'package:sky/widgets/tool_bar.dart';
+import 'package:sky/widgets/theme.dart';
+import 'package:sky/theme/colors.dart' as colors;
 import 'package:sky/painting/text_style.dart';
 
 // Classic minesweeper-inspired game. The mouse controls are standard except
 // for left + right combo which is not implemented. For touch, the duration of
 // the pointer determines probing versus flagging.
 //
-// There are only 3 classes to understand. Game, which is contains all the 
+// There are only 3 classes to understand. Game, which is contains all the
 // logic and two UI classes: CoveredMineNode and ExposedMineNode, none of them
 // holding state.
 
@@ -92,7 +96,7 @@ class Game {
     }
   }
 
-  Widget generateBoard() {
+  Widget buildBoard() {
     bool hasCoveredCell = false;
     List<Flex> flexRows = new List<Flex>();
     for (int iy = 0; iy != 9; iy++) {
@@ -152,28 +156,28 @@ class Game {
         key: 'flxv'));
   }
 
-  Widget generateUI() {
-    Widget board = generateBoard();
+  Widget buildToolBar() {
     String banner = hasWon ?
       'Awesome!!' : alive ?
         'Mine Digger [$detectedCount-$totalMineCount]': 'Kaboom! [press here]';
 
-    return new Flex([
-      new Container(
-        padding: new EdgeDims.all(10.0),
-        margin: new EdgeDims.all(10.0),
-        decoration: new BoxDecoration(backgroundColor: const Color(0xFFC0C0C0)),
-        child: new Listener(
-          onPointerDown: handleBannerPointerDown,
-          child: new Text(banner))),
-      board,
-      new Container(
-        height: 100.0, width: 100.0,
-        decoration: new BoxDecoration(backgroundColor: const Color(0xFFCC1111))
+    return new ToolBar(
+      // FIXME: Strange to have the toolbar be tapable.
+      center: new Listener(
+        onPointerDown: handleBannerPointerDown,
+        child: new Text(banner, style: Theme.of(this.app).text.title)
       )
-    ],
-    direction: FlexDirection.vertical,
-    justifyContent: FlexJustifyContent.spaceAround);
+    );
+  }
+
+  Widget buildUI() {
+    return new Scaffold(
+      toolbar: buildToolBar(),
+      body: new Container(
+        child: new Center(child: buildBoard()),
+        decoration: new BoxDecoration(backgroundColor: colors.Grey[50])
+      )
+    );
   }
 
   void handleBannerPointerDown(sky.PointerEvent event) {
@@ -357,7 +361,7 @@ class MineDiggerApp extends App {
   }
 
   Widget build() {
-    return game.generateUI();
+    return game.buildUI();
   }
 }
 
