@@ -5,11 +5,12 @@
 import 'package:sky/theme/colors.dart' as colors;
 import 'package:sky/widgets/basic.dart';
 import 'package:sky/widgets/checkbox.dart';
+import 'package:sky/widgets/flat_button.dart';
+import 'package:sky/widgets/dialog.dart';
 import 'package:sky/widgets/icon_button.dart';
 import 'package:sky/widgets/menu_item.dart';
 import 'package:sky/widgets/navigator.dart';
 import 'package:sky/widgets/scaffold.dart';
-import 'package:sky/widgets/theme.dart';
 import 'package:sky/widgets/tool_bar.dart';
 
 import 'stock_types.dart';
@@ -23,6 +24,7 @@ class StockSettings extends Component {
   Navigator navigator;
   StockMode stockMode;
   SettingsUpdater updater;
+  bool showModeDialog = false;
 
   void syncFields(StockSettings source) {
     navigator = source.navigator;
@@ -37,6 +39,20 @@ class StockSettings extends Component {
     sendUpdates();
   }
 
+  void _confirmStockModeChange() {
+    switch (stockMode) {
+      case StockMode.optimistic:
+        _handleStockModeChanged(false);
+        break;
+      case StockMode.pessimistic:
+        showModeDialog = true;
+        navigator.pushState("/settings/confirm", (_) {
+          showModeDialog = false;
+        });
+        break;
+    }
+  }
+
   void sendUpdates() {
     if (updater != null)
       updater(
@@ -49,7 +65,7 @@ class StockSettings extends Component {
       left: new IconButton(
         icon: 'navigation/arrow_back_white',
         onPressed: navigator.pop),
-      center: new Text('Settings', style: Theme.of(this).text.title)
+      center: new Text('Settings')
     );
   }
 
@@ -60,7 +76,7 @@ class StockSettings extends Component {
       child: new Block([
         new MenuItem(
           icon: 'action/thumb_up',
-          onPressed: () => _handleStockModeChanged(stockMode == StockMode.optimistic ? false : true),
+          onPressed: () => _confirmStockModeChange(),
           children: [
             new Flexible(child: new Text('Everything is awesome')),
             new Checkbox(value: stockMode == StockMode.optimistic, onChanged: _handleStockModeChanged)
@@ -71,9 +87,30 @@ class StockSettings extends Component {
   }
 
   Widget build() {
-    return new Scaffold(
-      toolbar: buildToolBar(),
-      body: buildSettingsPane()
-    );
+    List<Widget> layers = [new Scaffold(
+        toolbar: buildToolBar(),
+        body: buildSettingsPane()
+    )];
+    if (showModeDialog) {
+      layers.add(new Dialog(
+        title: new Text("Change mode?"),
+        content: new Text("Optimistic mode means everything is awesome. Are you sure you can handle that?"),
+        onDismiss: navigator.pop,
+        actions: [
+          new FlatButton(
+            child: new Text('NO THANKS'),
+            onPressed: navigator.pop
+          ),
+          new FlatButton(
+            child: new Text('AGREE'),
+            onPressed: () {
+              _handleStockModeChanged(true);
+              navigator.pop();
+            }
+          ),
+        ]
+      ));
+    }
+    return new Stack(layers);
   }
 }
