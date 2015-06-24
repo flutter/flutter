@@ -972,6 +972,20 @@ void Element::setMaxContentWidth(double width)
         return box->setMaxPreferredLogicalWidth(width);
 }
 
+double Element::alphabeticBaseline() const
+{
+    if (RenderBox* box = renderBox())
+        return box->baselinePosition(AlphabeticBaseline, true, HorizontalLine, PositionOfInteriorLineBoxes);
+    return 0;
+}
+
+double Element::ideographicBaseline() const
+{
+    if (RenderBox* box = renderBox())
+        return box->baselinePosition(IdeographicBaseline, true, HorizontalLine, PositionOfInteriorLineBoxes);
+    return 0;
+}
+
 void Element::setNeedsLayout()
 {
     if (RenderBox* box = renderBox())

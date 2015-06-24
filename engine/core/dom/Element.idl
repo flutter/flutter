@@ -48,6 +48,8 @@
   attribute double height;
   attribute double minContentWidth; // Intrinsic width if all wrappable points wrap.
   attribute double maxContentWidth; // Intrinsic width if no wrappable points wrap.
+  readonly attribute double alphabeticBaseline; // Distance from top to alphabetic baseline of first line
+  readonly attribute double ideographicBaseline; // Distance from top to ideographic baseline of first line
 
   void paint(Canvas canvas);
 };

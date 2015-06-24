@@ -222,6 +222,9 @@ public:
     double maxContentWidth() const;
     void setMaxContentWidth(double);
 
+    double alphabeticBaseline() const;
+    double ideographicBaseline() const;
+
     void setNeedsLayout();
     void layout();
 
