@@ -10,6 +10,8 @@ The build directory will be `out/Debug` for Linux debug builds, and
 `out/Release` for Linux release builds. For Android builds, prefix
 `android_`, as in, `android_Debug`.
 
+For Sky on iOS, you can try following these [experimental instructions](https://docs.google.com/document/d/1qm8Vvyz8Mngw6EsSg4FELQ7FOegjBJ5Itg9OBJGN5JM/edit#heading=h.ikz9bdwswdct).
+
 Running applications
 --------------------
 
