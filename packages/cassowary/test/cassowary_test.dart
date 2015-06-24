@@ -282,8 +282,7 @@ void main() {
 
     expect((right >= left) is Constraint, true);
 
-    // TODO: Add assertions for this
-    s << c1 << c2;
+    expect(s.addConstraint(c1), Result.success);
   });
 
   test('constraint_complex', () {

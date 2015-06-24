@@ -46,9 +46,7 @@ class Solver {
 
     _constraints[constraint] = tag;
 
-    _optimizeObjectiveRow(_objective);
-
-    return Result.success;
+    return _optimizeObjectiveRow(_objective);
   }
 
   Result removeContraint(Constraint c) {
