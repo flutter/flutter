@@ -19,6 +19,7 @@
 namespace blink {
 class DartClassLibrary;
 class DartExceptionFactory;
+class DartLibraryLoader;
 class DartStringCache;
 class DartTimerHeap;
 
@@ -51,8 +52,9 @@ class DartState : public base::SupportsUserData {
   void SetIsolate(Dart_Isolate isolate);
 
   DartClassLibrary& class_library() { return *class_library_; }
-  DartStringCache& string_cache() { return *string_cache_; }
   DartExceptionFactory& exception_factory() { return *exception_factory_; }
+  DartLibraryLoader& library_loader() { return *library_loader_; }
+  DartStringCache& string_cache() { return *string_cache_; }
   DartTimerHeap& timer_heap() { return *timer_heap_; }
 
   Dart_Handle index_handle() { return index_handle_.value(); }
@@ -62,8 +64,9 @@ class DartState : public base::SupportsUserData {
  private:
   Dart_Isolate isolate_;
   OwnPtr<DartClassLibrary> class_library_;
-  OwnPtr<DartStringCache> string_cache_;
   OwnPtr<DartExceptionFactory> exception_factory_;
+  OwnPtr<DartLibraryLoader> library_loader_;
+  OwnPtr<DartStringCache> string_cache_;
   OwnPtr<DartTimerHeap> timer_heap_;
   DartPersistentValue index_handle_;
 

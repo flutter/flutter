@@ -2,13 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "sky/engine/core/script/dart_dependency_catcher.h"
+#include "sky/engine/tonic/dart_dependency_catcher.h"
 
-#include "sky/engine/core/script/dart_loader.h"
+#include "sky/engine/tonic/dart_library_loader.h"
 
 namespace blink {
 
-DartDependencyCatcher::DartDependencyCatcher(DartLoader& loader) : loader_(loader) {
+DartDependencyCatcher::DartDependencyCatcher(DartLibraryLoader& loader)
+    : loader_(loader) {
   loader_.set_dependency_catcher(this);
 }
 

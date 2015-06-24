@@ -2,75 +2,50 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "sky/engine/core/script/dart_loader.h"
+#include "sky/engine/tonic/dart_library_loader.h"
 
 #include "base/callback.h"
 #include "base/trace_event/trace_event.h"
 #include "mojo/common/data_pipe_drainer.h"
-#include "sky/engine/core/script/dart_dependency_catcher.h"
-#include "sky/engine/core/script/dom_dart_state.h"
-#include "sky/engine/platform/fetcher/MojoFetcher.h"
-#include "sky/engine/platform/weborigin/KURL.h"
 #include "sky/engine/tonic/dart_api_scope.h"
 #include "sky/engine/tonic/dart_converter.h"
+#include "sky/engine/tonic/dart_dependency_catcher.h"
 #include "sky/engine/tonic/dart_error.h"
 #include "sky/engine/tonic/dart_isolate_scope.h"
+#include "sky/engine/tonic/dart_library_provider.h"
+#include "sky/engine/tonic/dart_state.h"
 #include "sky/engine/wtf/MainThread.h"
 
 using mojo::common::DataPipeDrainer;
 
 namespace blink {
-namespace {
 
-Dart_Handle CanonicalizeURL(DartState* state,
-                            Dart_Handle library,
-                            Dart_Handle url) {
-  String string = StringFromDart(url);
-  if (string.startsWith("dart:"))
-    return url;
-  // TODO(dart): Figure out how 'package:' should work in sky.
-  if (string.startsWith("package:")) {
-    string.replace("package:", "/packages/");
-  }
-  String library_url_string = StringFromDart(Dart_LibraryUrl(library));
-  KURL library_url = KURL(ParsedURLString, library_url_string);
-  KURL resolved_url = KURL(library_url, string);
-  return StringToDart(state, resolved_url.string());
-}
-
-}  // namespace
-
-// A DartLoader::Job represents a network load. It fetches data from the network
-// and buffers the data in Vector. To cancel the job, delete this object.
-class DartLoader::Job : public DartDependency,
-                        public MojoFetcher::Client,
-                        public DataPipeDrainer::Client {
+// A DartLibraryLoader::Job represents a network load. It fetches data from the
+// network and buffers the data in Vector. To cancel the job, delete this
+// object.
+class DartLibraryLoader::Job : public DartDependency,
+                               public DataPipeDrainer::Client {
  public:
-  Job(DartLoader* loader, const KURL& url, mojo::URLResponsePtr response)
-      : loader_(loader), url_(url)
-  {
-    if (!response) {
-      fetcher_ = adoptPtr(new MojoFetcher(this, url));
-    } else {
-      OnReceivedResponse(response.Pass());
-    }
+  Job(DartLibraryLoader* loader, const String& name)
+      : loader_(loader), name_(name), weak_factory_(this) {
+    loader->library_provider()->GetLibraryAsStream(
+        name, base::Bind(&Job::OnStreamAvailable, weak_factory_.GetWeakPtr()));
   }
 
-  const KURL& url() const { return url_; }
+  const String& name() const { return name_; }
 
  protected:
-  DartLoader* loader_;
+  DartLibraryLoader* loader_;
   // TODO(abarth): Should we be using SharedBuffer to buffer the data?
   Vector<uint8_t> buffer_;
 
  private:
-  // MojoFetcher::Client
-  void OnReceivedResponse(mojo::URLResponsePtr response) override {
-    if (response->status_code != 200) {
+  void OnStreamAvailable(mojo::ScopedDataPipeConsumerHandle pipe) {
+    if (!pipe.is_valid()) {
       loader_->DidFailJob(this);
       return;
     }
-    drainer_ = adoptPtr(new DataPipeDrainer(this, response->body.Pass()));
+    drainer_ = adoptPtr(new DataPipeDrainer(this, pipe.Pass()));
   }
 
   // DataPipeDrainer::Client
@@ -79,33 +54,33 @@ class DartLoader::Job : public DartDependency,
   }
   // Subclasses must implement OnDataComplete.
 
-  KURL url_;
-  OwnPtr<MojoFetcher> fetcher_;
+  String name_;
   OwnPtr<DataPipeDrainer> drainer_;
+
+  base::WeakPtrFactory<Job> weak_factory_;
 };
 
-class DartLoader::ImportJob : public Job {
+class DartLibraryLoader::ImportJob : public Job {
  public:
-  ImportJob(DartLoader* loader, const KURL& url, mojo::URLResponsePtr response = nullptr)
-    : Job(loader, url, response.Pass()) {
-    TRACE_EVENT_ASYNC_BEGIN1("sky", "DartLoader::ImportJob", this,
-                             "url", url.string().ascii().toStdString());
+  ImportJob(DartLibraryLoader* loader, const String& name) : Job(loader, name) {
+    TRACE_EVENT_ASYNC_BEGIN1("sky", "DartLibraryLoader::ImportJob", this, "url",
+                             name.ascii().toStdString());
   }
 
  private:
   // DataPipeDrainer::Client
   void OnDataComplete() override {
-    TRACE_EVENT_ASYNC_END0("sky", "DartLoader::ImportJob", this);
+    TRACE_EVENT_ASYNC_END0("sky", "DartLibraryLoader::ImportJob", this);
     loader_->DidCompleteImportJob(this, buffer_);
   }
 };
 
-class DartLoader::SourceJob : public Job {
+class DartLibraryLoader::SourceJob : public Job {
  public:
-  SourceJob(DartLoader* loader, const KURL& url, Dart_Handle library)
-      : Job(loader, url, nullptr), library_(loader->dart_state(), library) {
-    TRACE_EVENT_ASYNC_BEGIN1("sky", "DartLoader::SourceJob", this,
-                             "url", url.string().ascii().toStdString());
+  SourceJob(DartLibraryLoader* loader, const String& name, Dart_Handle library)
+      : Job(loader, name), library_(loader->dart_state(), library) {
+    TRACE_EVENT_ASYNC_BEGIN1("sky", "DartLibraryLoader::SourceJob", this, "url",
+                             name.ascii().toStdString());
   }
 
   Dart_PersistentHandle library() const { return library_.value(); }
@@ -113,7 +88,7 @@ class DartLoader::SourceJob : public Job {
  private:
   // DataPipeDrainer::Client
   void OnDataComplete() override {
-    TRACE_EVENT_ASYNC_END0("sky", "DartLoader::SourceJob", this);
+    TRACE_EVENT_ASYNC_END0("sky", "DartLibraryLoader::SourceJob", this);
     loader_->DidCompleteSourceJob(this, buffer_);
   }
 
@@ -124,7 +99,7 @@ class DartLoader::SourceJob : public Job {
 // dependencies (either libraries or parts of libraries) have finished loading.
 // When the dependencies are satisfied (including transitive dependencies), then
 // the |callback| will be invoked.
-class DartLoader::DependencyWatcher {
+class DartLibraryLoader::DependencyWatcher {
  public:
   DependencyWatcher(const HashSet<DartDependency*>& dependencies,
                     const base::Closure& callback)
@@ -157,9 +132,10 @@ class DartLoader::DependencyWatcher {
 //
 // WatcherSignaler is designed to be placed on the stack as a RAII. After its
 // destructor runs, we might have executed aribitrary script.
-class DartLoader::WatcherSignaler {
+class DartLibraryLoader::WatcherSignaler {
  public:
-  WatcherSignaler(DartLoader& loader, DartDependency* resolved_dependency)
+  WatcherSignaler(DartLibraryLoader& loader,
+                  DartDependency* resolved_dependency)
       : loader_(loader),
         catcher_(adoptPtr(new DartDependencyCatcher(loader))),
         resolved_dependency_(resolved_dependency) {}
@@ -188,39 +164,40 @@ class DartLoader::WatcherSignaler {
   }
 
  private:
-  DartLoader& loader_;
+  DartLibraryLoader& loader_;
   OwnPtr<DartDependencyCatcher> catcher_;
   DartDependency* resolved_dependency_;
 };
 
-DartLoader::DartLoader(DartState* dart_state)
-    : dart_state_(dart_state->GetWeakPtr()),
+DartLibraryLoader::DartLibraryLoader(DartState* dart_state)
+    : dart_state_(dart_state),
+      library_provider_(nullptr),
       dependency_catcher_(nullptr) {
 }
 
-DartLoader::~DartLoader() {
+DartLibraryLoader::~DartLibraryLoader() {
 }
 
-Dart_Handle DartLoader::HandleLibraryTag(Dart_LibraryTag tag,
-                                         Dart_Handle library,
-                                         Dart_Handle url) {
+Dart_Handle DartLibraryLoader::HandleLibraryTag(Dart_LibraryTag tag,
+                                                Dart_Handle library,
+                                                Dart_Handle url) {
   DCHECK(Dart_IsLibrary(library));
   DCHECK(Dart_IsString(url));
   if (tag == Dart_kCanonicalizeUrl)
-    return CanonicalizeURL(DartState::Current(), library, url);
+    return DartState::Current()->library_loader().CanonicalizeURL(library, url);
   if (tag == Dart_kImportTag) {
     CHECK(WTF::isMainThread());
-    return DOMDartState::Current()->loader().Import(library, url);
+    return DartState::Current()->library_loader().Import(library, url);
   }
   if (tag == Dart_kSourceTag) {
     CHECK(WTF::isMainThread());
-    return DOMDartState::Current()->loader().Source(library, url);
+    return DartState::Current()->library_loader().Source(library, url);
   }
   DCHECK(false);
   return Dart_NewApiError("Unknown library tag.");
 }
 
-void DartLoader::WaitForDependencies(
+void DartLibraryLoader::WaitForDependencies(
     const HashSet<DartDependency*>& dependencies,
     const base::Closure& callback) {
   if (dependencies.isEmpty())
@@ -229,15 +206,10 @@ void DartLoader::WaitForDependencies(
       adoptPtr(new DependencyWatcher(dependencies, callback)));
 }
 
-void DartLoader::LoadLibrary(const KURL& url, mojo::URLResponsePtr response) {
-  if (response && response->status_code >= 400) {
-    LOG(ERROR) << url.string().utf8().data()
-        << " failed with " << response->status_code;
-  }
-
-  const auto& result = pending_libraries_.add(url.string(), nullptr);
+void DartLibraryLoader::LoadLibrary(const String& name) {
+  const auto& result = pending_libraries_.add(name, nullptr);
   if (result.isNewEntry) {
-    OwnPtr<Job> job = adoptPtr(new ImportJob(this, url));
+    OwnPtr<Job> job = adoptPtr(new ImportJob(this, name));
     result.storedValue->value = job.get();
     jobs_.add(job.release());
   }
@@ -245,40 +217,41 @@ void DartLoader::LoadLibrary(const KURL& url, mojo::URLResponsePtr response) {
     dependency_catcher_->AddDependency(result.storedValue->value);
 }
 
-Dart_Handle DartLoader::Import(Dart_Handle library, Dart_Handle url) {
-  LoadLibrary(KURL(ParsedURLString, StringFromDart(url)));
+Dart_Handle DartLibraryLoader::Import(Dart_Handle library, Dart_Handle url) {
+  LoadLibrary(StringFromDart(url));
   return Dart_True();
 }
 
-Dart_Handle DartLoader::Source(Dart_Handle library, Dart_Handle url) {
-  KURL parsed_url(ParsedURLString, StringFromDart(url));
-  OwnPtr<Job> job = adoptPtr(new SourceJob(this, parsed_url, library));
+Dart_Handle DartLibraryLoader::Source(Dart_Handle library, Dart_Handle url) {
+  OwnPtr<Job> job = adoptPtr(new SourceJob(this, StringFromDart(url), library));
   if (dependency_catcher_)
     dependency_catcher_->AddDependency(job.get());
   jobs_.add(job.release());
   return Dart_True();
 }
 
-void DartLoader::DidCompleteImportJob(ImportJob* job,
-                                      const Vector<uint8_t>& buffer) {
-  DCHECK(dart_state_);
+Dart_Handle DartLibraryLoader::CanonicalizeURL(Dart_Handle library,
+                                               Dart_Handle url) {
+  return library_provider_->CanonicalizeURL(library, url);
+}
+
+void DartLibraryLoader::DidCompleteImportJob(ImportJob* job,
+                                             const Vector<uint8_t>& buffer) {
   DartIsolateScope scope(dart_state_->isolate());
   DartApiScope api_scope;
 
   WatcherSignaler watcher_signaler(*this, job);
 
-  String url_string = job->url().string();
   LogIfError(Dart_LoadLibrary(
-      StringToDart(dart_state_.get(), url_string),
+      StringToDart(dart_state_, job->name()),
       Dart_NewStringFromUTF8(buffer.data(), buffer.size()), 0, 0));
 
-  pending_libraries_.remove(url_string);
+  pending_libraries_.remove(job->name());
   jobs_.remove(job);
 }
 
-void DartLoader::DidCompleteSourceJob(SourceJob* job,
-                                      const Vector<uint8_t>& buffer) {
-  DCHECK(dart_state_);
+void DartLibraryLoader::DidCompleteSourceJob(SourceJob* job,
+                                             const Vector<uint8_t>& buffer) {
   DartIsolateScope scope(dart_state_->isolate());
   DartApiScope api_scope;
 
@@ -286,20 +259,19 @@ void DartLoader::DidCompleteSourceJob(SourceJob* job,
 
   LogIfError(Dart_LoadSource(
       Dart_HandleFromPersistent(job->library()),
-      StringToDart(dart_state_.get(), job->url().string()),
+      StringToDart(dart_state_, job->name()),
       Dart_NewStringFromUTF8(buffer.data(), buffer.size()), 0, 0));
 
   jobs_.remove(job);
 }
 
-void DartLoader::DidFailJob(Job* job) {
-  DCHECK(dart_state_);
+void DartLibraryLoader::DidFailJob(Job* job) {
   DartIsolateScope scope(dart_state_->isolate());
   DartApiScope api_scope;
 
   WatcherSignaler watcher_signaler(*this, job);
 
-  LOG(ERROR) << "Library Load failed: " << job->url().string().utf8().data();
+  LOG(ERROR) << "Library Load failed: " << job->name().utf8().data();
   // TODO(eseidel): Call Dart_LibraryHandleError in the SourceJob case?
 
   jobs_.remove(job);

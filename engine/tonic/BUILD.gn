@@ -13,6 +13,8 @@ source_set("tonic") {
     "dart_class_provider.h",
     "dart_converter.cc",
     "dart_converter.h",
+    "dart_dependency_catcher.cc",
+    "dart_dependency_catcher.h",
     "dart_error.cc",
     "dart_error.h",
     "dart_exception_factory.cc",
@@ -27,8 +29,14 @@ source_set("tonic") {
     "dart_invoke.h",
     "dart_isolate_scope.cc",
     "dart_isolate_scope.h",
+    "dart_library_loader.cc",
+    "dart_library_loader.h",
+    "dart_library_provider.cc",
+    "dart_library_provider.h",
     "dart_persistent_value.cc",
     "dart_persistent_value.h",
+    "dart_snapshot_loader.cc",
+    "dart_snapshot_loader.h",
     "dart_state.cc",
     "dart_state.h",
     "dart_string.cc",
@@ -49,6 +57,7 @@ source_set("tonic") {
 
   deps = [
     "//base",
+    "//mojo/common",
     "//mojo/public/cpp/system",
     "//sky/engine/wtf",
   ]

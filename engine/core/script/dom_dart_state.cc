@@ -5,13 +5,12 @@
 #include "sky/engine/core/script/dom_dart_state.h"
 
 #include "sky/engine/core/dom/Document.h"
-#include "sky/engine/core/script/dart_loader.h"
 #include "sky/engine/tonic/dart_builtin.h"
 
 namespace blink {
 
 DOMDartState::DOMDartState(Document* document, const KURL& url)
-    : document_(document), url_(url), loader_(adoptPtr(new DartLoader(this))) {
+    : document_(document), url_(url) {
 }
 
 DOMDartState::~DOMDartState() {

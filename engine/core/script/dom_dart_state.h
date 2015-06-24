@@ -11,7 +11,6 @@
 #include "sky/engine/wtf/RefPtr.h"
 
 namespace blink {
-class DartLoader;
 class LocalFrame;
 class LocalDOMWindow;
 
@@ -31,7 +30,6 @@ class DOMDartState : public DartState {
   const KURL& url() const { return url_; }
 
   Document* document() const { return document_.get(); }
-  DartLoader& loader() const { return *loader_; }
 
   // Cached handles to strings used in Dart/C++ conversions.
   Dart_Handle x_handle() { return x_handle_.value(); }
@@ -42,7 +40,6 @@ class DOMDartState : public DartState {
  private:
   RefPtr<Document> document_;
   KURL url_;
-  OwnPtr<DartLoader> loader_;
 
   DartPersistentValue x_handle_;
   DartPersistentValue y_handle_;

@@ -23,18 +23,19 @@
 #include "sky/engine/core/html/imports/HTMLImportChild.h"
 #include "sky/engine/core/loader/FrameLoaderClient.h"
 #include "sky/engine/core/script/dart_debugger.h"
-#include "sky/engine/core/script/dart_dependency_catcher.h"
-#include "sky/engine/core/script/dart_loader.h"
+#include "sky/engine/core/script/dart_library_provider_network.h"
 #include "sky/engine/core/script/dart_service_isolate.h"
-#include "sky/engine/core/script/dart_snapshot_loader.h"
 #include "sky/engine/core/script/dom_dart_state.h"
 #include "sky/engine/public/platform/Platform.h"
 #include "sky/engine/tonic/dart_api_scope.h"
 #include "sky/engine/tonic/dart_class_library.h"
+#include "sky/engine/tonic/dart_dependency_catcher.h"
 #include "sky/engine/tonic/dart_error.h"
 #include "sky/engine/tonic/dart_gc_controller.h"
 #include "sky/engine/tonic/dart_invoke.h"
 #include "sky/engine/tonic/dart_isolate_scope.h"
+#include "sky/engine/tonic/dart_library_loader.h"
+#include "sky/engine/tonic/dart_snapshot_loader.h"
 #include "sky/engine/tonic/dart_state.h"
 #include "sky/engine/tonic/dart_wrappable.h"
 #include "sky/engine/wtf/text/TextPosition.h"
@@ -47,6 +48,18 @@ void CreateEmptyRootLibraryIfNeeded() {
     Dart_LoadScript(Dart_NewStringFromCString("dart:empty"), Dart_EmptyString(),
                     0, 0);
   }
+}
+
+PassOwnPtr<DartLibraryProviderNetwork::PrefetchedLibrary>
+CreatePrefetchedLibraryIfNeeded(const KURL& url,
+                                mojo::URLResponsePtr response) {
+  OwnPtr<DartLibraryProviderNetwork::PrefetchedLibrary> prefetched;
+  if (response && response->status_code == 200) {
+    prefetched = adoptPtr(new DartLibraryProviderNetwork::PrefetchedLibrary());
+    prefetched->name = url.string();
+    prefetched->pipe = response->body.Pass();
+  }
+  return prefetched.release();
 }
 
 } // namespace
@@ -139,9 +152,14 @@ void DartController::LoadMainLibrary(const KURL& url, mojo::URLResponsePtr respo
   DartState::Scope scope(dart_state());
   CreateEmptyRootLibraryIfNeeded();
 
-  DartLoader& loader = dart_state()->loader();
+  library_provider_ = adoptPtr(new DartLibraryProviderNetwork(
+      CreatePrefetchedLibraryIfNeeded(url, response.Pass())));
+
+  DartLibraryLoader& loader = dart_state()->library_loader();
+  loader.set_library_provider(library_provider_.get());
+
   DartDependencyCatcher dependency_catcher(loader);
-  loader.LoadLibrary(url, response.Pass());
+  loader.LoadLibrary(url.string());
   loader.WaitForDependencies(dependency_catcher.dependencies(),
                              base::Bind(&DartController::DidLoadMainLibrary, weak_factory_.GetWeakPtr(), url));
 }
@@ -162,7 +180,8 @@ void DartController::DidLoadSnapshot() {
 
 void DartController::LoadSnapshot(const KURL& url, mojo::URLResponsePtr response) {
   snapshot_loader_ = adoptPtr(new DartSnapshotLoader(dart_state()));
-  snapshot_loader_->LoadSnapshot(url, response.Pass(),
+  snapshot_loader_->LoadSnapshot(
+      response->body.Pass(),
       base::Bind(&DartController::DidLoadSnapshot, weak_factory_.GetWeakPtr()));
 }
 
@@ -174,7 +193,14 @@ void DartController::LoadScriptInModule(
   DartState::Scope scope(dart_state());
   CreateEmptyRootLibraryIfNeeded();
 
-  DartDependencyCatcher dependency_catcher(dart_state()->loader());
+  DartLibraryLoader& loader = dart_state()->library_loader();
+
+  if (!library_provider_) {
+    library_provider_ = adoptPtr(new DartLibraryProviderNetwork(nullptr));
+    loader.set_library_provider(library_provider_.get());
+  }
+
+  DartDependencyCatcher dependency_catcher(loader);
   Dart_Handle library_handle = CreateLibrary(module, source, position);
   if (!library_handle)
     return finished_callback.Run(nullptr, nullptr);
@@ -183,7 +209,7 @@ void DartController::LoadScriptInModule(
 
   // TODO(eseidel): Better if the library/module retained its dependencies and
   // dependency waiting could be separate from library creation.
-  dart_state()->loader().WaitForDependencies(
+  dart_state()->library_loader().WaitForDependencies(
       dependency_catcher.dependencies(),
       base::Bind(finished_callback, module, library));
 }
@@ -226,7 +252,7 @@ static void UnhandledExceptionCallback(Dart_Handle error) {
 static Dart_Handle LibraryTagHandler(Dart_LibraryTag tag,
                                      Dart_Handle library,
                                      Dart_Handle url) {
-  return DartLoader::HandleLibraryTag(tag, library, url);
+  return DartLibraryLoader::HandleLibraryTag(tag, library, url);
 }
 
 static void IsolateShutdownCallback(void* callback_data) {

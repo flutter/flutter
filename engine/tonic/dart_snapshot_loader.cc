@@ -2,11 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "sky/engine/core/script/dart_snapshot_loader.h"
+#include "sky/engine/tonic/dart_snapshot_loader.h"
 
 #include "base/callback.h"
 #include "base/trace_event/trace_event.h"
-#include "sky/engine/platform/weborigin/KURL.h"
 #include "sky/engine/tonic/dart_api_scope.h"
 #include "sky/engine/tonic/dart_converter.h"
 #include "sky/engine/tonic/dart_error.h"
@@ -24,25 +23,12 @@ DartSnapshotLoader::DartSnapshotLoader(DartState* dart_state)
 DartSnapshotLoader::~DartSnapshotLoader() {
 }
 
-void DartSnapshotLoader::LoadSnapshot(const KURL& url,
-                                      mojo::URLResponsePtr response,
+void DartSnapshotLoader::LoadSnapshot(mojo::ScopedDataPipeConsumerHandle pipe,
                                       const base::Closure& callback) {
   TRACE_EVENT_ASYNC_BEGIN0("sky", "DartSnapshotLoader::LoadSnapshot", this);
+
   callback_ = callback;
-
-  if (!response) {
-    fetcher_ = adoptPtr(new MojoFetcher(this, url));
-  } else {
-    OnReceivedResponse(response.Pass());
-  }
-}
-
-void DartSnapshotLoader::OnReceivedResponse(mojo::URLResponsePtr response) {
-  if (response->status_code != 200) {
-    callback_.Run();
-    return;
-  }
-  drainer_ = adoptPtr(new DataPipeDrainer(this, response->body.Pass()));
+  drainer_ = adoptPtr(new DataPipeDrainer(this, pipe.Pass()));
 }
 
 void DartSnapshotLoader::OnDataAvailable(const void* data, size_t num_bytes) {

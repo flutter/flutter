@@ -7,6 +7,7 @@
 #include "sky/engine/tonic/dart_class_library.h"
 #include "sky/engine/tonic/dart_converter.h"
 #include "sky/engine/tonic/dart_exception_factory.h"
+#include "sky/engine/tonic/dart_library_loader.h"
 #include "sky/engine/tonic/dart_string_cache.h"
 #include "sky/engine/tonic/dart_timer_heap.h"
 #include "sky/engine/wtf/PassOwnPtr.h"
@@ -22,8 +23,9 @@ DartState::Scope::~Scope() {
 DartState::DartState()
     : isolate_(NULL),
       class_library_(adoptPtr(new DartClassLibrary)),
-      string_cache_(adoptPtr(new DartStringCache)),
       exception_factory_(adoptPtr(new DartExceptionFactory(this))),
+      library_loader_(adoptPtr(new DartLibraryLoader(this))),
+      string_cache_(adoptPtr(new DartStringCache)),
       timer_heap_(adoptPtr(new DartTimerHeap())),
       weak_factory_(this) {
 }
