@@ -46,7 +46,8 @@ void drawText(sky.Canvas canvas, String lh) {
 
 void main() {
   // prepare the rendering
-  sky.PictureRecorder canvas = new sky.PictureRecorder(sky.view.width, sky.view.height);
+  sky.PictureRecorder recorder = new sky.PictureRecorder();
+  sky.Canvas canvas = new sky.Canvas(recorder, sky.view.width, sky.view.height);
 
   // background
   sky.Paint paint = new sky.Paint();
@@ -59,6 +60,6 @@ void main() {
   drawText(canvas, 'lh');
 
   // put it on the screen
-  sky.view.picture = canvas.endRecording();
+  sky.view.picture = recorder.endRecording();
   sky.view.scheduleFrame();
 }
