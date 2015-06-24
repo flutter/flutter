@@ -1,17 +1,17 @@
 CONSOLE: TestRenderView enabled
 CONSOLE: 
 PAINT FOR FRAME #1 ----------------------------------------------
-1 | TestDisplayList() constructor: 800.0 x 600.0
+1 | TestRenderCanvas() constructor: 800.0 x 600.0
 ------------------------------------------------------------------------
 CONSOLE: 
 PAINT FOR FRAME #2 ----------------------------------------------
-2 | TestDisplayList() constructor: 800.0 x 600.0
+2 | TestRenderCanvas() constructor: 800.0 x 600.0
 2 | paintChild RenderStack at Point(0.0, 0.0)
-2 |  | TestDisplayList() constructor: 800.0 x 600.0
+2 |  | TestRenderCanvas() constructor: 800.0 x 600.0
 2 |  | paintChild RenderScaffold at Point(0.0, 0.0)
-2 |  |  | TestDisplayList() constructor: 800.0 x 600.0
+2 |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
 2 |  |  | paintChild RenderDecoratedBox at Point(0.0, 81.0)
-2 |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+2 |  |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
 2 |  |  |  | drawRect(Rect.fromLTRB(0.0, 0.0, 800.0, 519.0), Paint(color:Color(0xfffafafa)))
 2 |  |  |  | save
 2 |  |  |  | clipRect(Rect.fromLTRB(0.0, 0.0, 800.0, 519.0))
@@ -20,46 +20,46 @@ PAINT FOR FRAME #2 ----------------------------------------------
 2 |  |  |  | restore
 2 |  |  |  | restore
 2 |  |  | paintChild RenderDecoratedBox at Point(0.0, 0.0)
-2 |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+2 |  |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
 2 |  |  |  | drawRect(Rect.fromLTRB(0.0, 0.0, 800.0, 81.0), Paint(color:Color(0xff9c27b0), drawLooper:true))
 2 |  |  |  | paintChild RenderFlex at Point(8.0, 0.0)
-2 |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+2 |  |  |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
 2 |  |  |  |  | paintChild RenderConstrainedBox at Point(0.0, 25.0)
-2 |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+2 |  |  |  |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
 2 |  |  |  |  |  | paintChild RenderPadding at Point(0.0, 8.0)
-2 |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
 2 |  |  |  |  |  |  | paintChild RenderImage at Point(8.0, 8.0)
-2 |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
 2 |  |  |  |  |  | paintChild RenderPadding at Point(40.0, 16.0)
-2 |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
 2 |  |  |  |  |  |  | paintChild RenderParagraph at Point(24.0, 0.0)
-2 |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
 2 |  |  |  |  |  | paintChild RenderPadding at Point(704.0, 8.0)
-2 |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
 2 |  |  |  |  |  |  | paintChild RenderImage at Point(8.0, 8.0)
-2 |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
 2 |  |  |  |  |  | paintChild RenderPadding at Point(744.0, 8.0)
-2 |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
 2 |  |  |  |  |  |  | paintChild RenderImage at Point(8.0, 8.0)
-2 |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
 2 |  |  | paintChild RenderDecoratedBox at Point(728.0, 528.0)
-2 |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+2 |  |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
 2 |  |  |  | drawCircle(28.0, 28.0, 28.0, Paint(color:Color(0xffff5252), drawLooper:true))
 2 |  |  |  | saveLayer(Rect.fromLTRB(0.0, 0.0, 56.0, 56.0), Paint(color:Color(0xff000000)))
 2 |  |  |  | clipPath(Instance of 'Path')
 2 |  |  |  | paintChild RenderImage at Point(16.0, 16.0)
-2 |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+2 |  |  |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
 2 |  |  |  | restore
 ------------------------------------------------------------------------
 CONSOLE: 
 PAINT FOR FRAME #3 ----------------------------------------------
-3 | TestDisplayList() constructor: 800.0 x 600.0
+3 | TestRenderCanvas() constructor: 800.0 x 600.0
 3 | paintChild RenderStack at Point(0.0, 0.0)
-3 |  | TestDisplayList() constructor: 800.0 x 600.0
+3 |  | TestRenderCanvas() constructor: 800.0 x 600.0
 3 |  | paintChild RenderScaffold at Point(0.0, 0.0)
-3 |  |  | TestDisplayList() constructor: 800.0 x 600.0
+3 |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
 3 |  |  | paintChild RenderDecoratedBox at Point(0.0, 81.0)
-3 |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+3 |  |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
 3 |  |  |  | drawRect(Rect.fromLTRB(0.0, 0.0, 800.0, 519.0), Paint(color:Color(0xfffafafa)))
 3 |  |  |  | save
 3 |  |  |  | clipRect(Rect.fromLTRB(0.0, 0.0, 800.0, 519.0))
@@ -68,35 +68,35 @@ PAINT FOR FRAME #3 ----------------------------------------------
 3 |  |  |  | restore
 3 |  |  |  | restore
 3 |  |  | paintChild RenderDecoratedBox at Point(0.0, 0.0)
-3 |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+3 |  |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
 3 |  |  |  | drawRect(Rect.fromLTRB(0.0, 0.0, 800.0, 81.0), Paint(color:Color(0xff9c27b0), drawLooper:true))
 3 |  |  |  | paintChild RenderFlex at Point(8.0, 0.0)
-3 |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+3 |  |  |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
 3 |  |  |  |  | paintChild RenderConstrainedBox at Point(0.0, 25.0)
-3 |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+3 |  |  |  |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
 3 |  |  |  |  |  | paintChild RenderPadding at Point(0.0, 8.0)
-3 |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+3 |  |  |  |  |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
 3 |  |  |  |  |  |  | paintChild RenderImage at Point(8.0, 8.0)
-3 |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+3 |  |  |  |  |  |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
 3 |  |  |  |  |  | paintChild RenderPadding at Point(40.0, 16.0)
-3 |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+3 |  |  |  |  |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
 3 |  |  |  |  |  |  | paintChild RenderParagraph at Point(24.0, 0.0)
-3 |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+3 |  |  |  |  |  |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
 3 |  |  |  |  |  | paintChild RenderPadding at Point(704.0, 8.0)
-3 |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+3 |  |  |  |  |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
 3 |  |  |  |  |  |  | paintChild RenderImage at Point(8.0, 8.0)
-3 |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+3 |  |  |  |  |  |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
 3 |  |  |  |  |  | paintChild RenderPadding at Point(744.0, 8.0)
-3 |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+3 |  |  |  |  |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
 3 |  |  |  |  |  |  | paintChild RenderImage at Point(8.0, 8.0)
-3 |  |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+3 |  |  |  |  |  |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
 3 |  |  | paintChild RenderDecoratedBox at Point(728.0, 528.0)
-3 |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+3 |  |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
 3 |  |  |  | drawCircle(28.0, 28.0, 28.0, Paint(color:Color(0xffff5252), drawLooper:true))
 3 |  |  |  | saveLayer(Rect.fromLTRB(0.0, 0.0, 56.0, 56.0), Paint(color:Color(0xff000000)))
 3 |  |  |  | clipPath(Instance of 'Path')
 3 |  |  |  | paintChild RenderImage at Point(16.0, 16.0)
-3 |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+3 |  |  |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
 3 |  |  |  | restore
 ------------------------------------------------------------------------
 PAINTED 3 FRAMES

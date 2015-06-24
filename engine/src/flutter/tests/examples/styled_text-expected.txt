@@ -1,100 +1,100 @@
 CONSOLE: TestRenderView enabled
 CONSOLE: 
 PAINT FOR FRAME #1 ----------------------------------------------
-1 | TestDisplayList() constructor: 800.0 x 600.0
+1 | TestRenderCanvas() constructor: 800.0 x 600.0
 ------------------------------------------------------------------------
 CONSOLE: 
 PAINT FOR FRAME #2 ----------------------------------------------
-2 | TestDisplayList() constructor: 800.0 x 600.0
+2 | TestRenderCanvas() constructor: 800.0 x 600.0
 2 | paintChild RenderScaffold at Point(0.0, 0.0)
-2 |  | TestDisplayList() constructor: 800.0 x 600.0
+2 |  | TestRenderCanvas() constructor: 800.0 x 600.0
 2 |  | paintChild RenderDecoratedBox at Point(0.0, 81.0)
-2 |  |  | TestDisplayList() constructor: 800.0 x 600.0
+2 |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
 2 |  |  | drawRRect(Instance of 'RRect', Paint(color:Color(0xfffafafa)))
 2 |  |  | paintChild RenderFlex at Point(8.0, 0.0)
-2 |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+2 |  |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
 2 |  |  |  | paintChild RenderParagraph at Point(0.0, 117.5)
-2 |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+2 |  |  |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
 2 |  |  |  | paintChild RenderPadding at Point(0.0, 149.5)
-2 |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+2 |  |  |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
 2 |  |  |  |  | paintChild RenderConstrainedBox at Point(64.0, 10.0)
-2 |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+2 |  |  |  |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
 2 |  |  |  |  |  | drawPath(Instance of 'Path', Paint(color:Color(0xff000000)))
 2 |  |  |  |  |  | drawPath(Instance of 'Path', Paint(color:Color(0xff000000)))
 2 |  |  |  |  |  | drawPath(Instance of 'Path', Paint(color:Color(0x18000000)))
 2 |  |  |  |  |  | drawPath(Instance of 'Path', Paint(color:Color(0xff000000)))
 2 |  |  |  | paintChild RenderParagraph at Point(0.0, 169.5)
-2 |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+2 |  |  |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
 2 |  |  |  | paintChild RenderPadding at Point(0.0, 185.5)
-2 |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+2 |  |  |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
 2 |  |  |  |  | paintChild RenderConstrainedBox at Point(64.0, 10.0)
-2 |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+2 |  |  |  |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
 2 |  |  |  |  |  | drawPath(Instance of 'Path', Paint(color:Color(0xff000000)))
 2 |  |  |  |  |  | drawPath(Instance of 'Path', Paint(color:Color(0xff000000)))
 2 |  |  |  |  |  | drawPath(Instance of 'Path', Paint(color:Color(0x18000000)))
 2 |  |  |  |  |  | drawPath(Instance of 'Path', Paint(color:Color(0xff000000)))
 2 |  |  |  | paintChild RenderParagraph at Point(0.0, 205.5)
-2 |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+2 |  |  |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
 2 |  |  |  | paintChild RenderPadding at Point(0.0, 221.5)
-2 |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+2 |  |  |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
 2 |  |  |  |  | paintChild RenderConstrainedBox at Point(64.0, 10.0)
-2 |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+2 |  |  |  |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
 2 |  |  |  |  |  | drawPath(Instance of 'Path', Paint(color:Color(0xff000000)))
 2 |  |  |  |  |  | drawPath(Instance of 'Path', Paint(color:Color(0xff000000)))
 2 |  |  |  |  |  | drawPath(Instance of 'Path', Paint(color:Color(0x18000000)))
 2 |  |  |  |  |  | drawPath(Instance of 'Path', Paint(color:Color(0xff000000)))
 2 |  |  |  | paintChild RenderParagraph at Point(0.0, 241.5)
-2 |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+2 |  |  |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
 2 |  |  |  | paintChild RenderPadding at Point(0.0, 257.5)
-2 |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+2 |  |  |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
 2 |  |  |  |  | paintChild RenderConstrainedBox at Point(64.0, 10.0)
-2 |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+2 |  |  |  |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
 2 |  |  |  |  |  | drawPath(Instance of 'Path', Paint(color:Color(0xff000000)))
 2 |  |  |  |  |  | drawPath(Instance of 'Path', Paint(color:Color(0xff000000)))
 2 |  |  |  |  |  | drawPath(Instance of 'Path', Paint(color:Color(0x18000000)))
 2 |  |  |  |  |  | drawPath(Instance of 'Path', Paint(color:Color(0xff000000)))
 2 |  |  |  | paintChild RenderParagraph at Point(0.0, 277.5)
-2 |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+2 |  |  |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
 2 |  |  |  | paintChild RenderPadding at Point(0.0, 293.5)
-2 |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+2 |  |  |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
 2 |  |  |  |  | paintChild RenderConstrainedBox at Point(64.0, 10.0)
-2 |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+2 |  |  |  |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
 2 |  |  |  |  |  | drawPath(Instance of 'Path', Paint(color:Color(0xff000000)))
 2 |  |  |  |  |  | drawPath(Instance of 'Path', Paint(color:Color(0xff000000)))
 2 |  |  |  |  |  | drawPath(Instance of 'Path', Paint(color:Color(0x18000000)))
 2 |  |  |  |  |  | drawPath(Instance of 'Path', Paint(color:Color(0xff000000)))
 2 |  |  |  | paintChild RenderParagraph at Point(0.0, 313.5)
-2 |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+2 |  |  |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
 2 |  |  |  | paintChild RenderPadding at Point(0.0, 329.5)
-2 |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+2 |  |  |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
 2 |  |  |  |  | paintChild RenderConstrainedBox at Point(64.0, 10.0)
-2 |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+2 |  |  |  |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
 2 |  |  |  |  |  | drawPath(Instance of 'Path', Paint(color:Color(0xff000000)))
 2 |  |  |  |  |  | drawPath(Instance of 'Path', Paint(color:Color(0xff000000)))
 2 |  |  |  |  |  | drawPath(Instance of 'Path', Paint(color:Color(0x18000000)))
 2 |  |  |  |  |  | drawPath(Instance of 'Path', Paint(color:Color(0xff000000)))
 2 |  |  |  | paintChild RenderParagraph at Point(0.0, 349.5)
-2 |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+2 |  |  |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
 2 |  |  |  | paintChild RenderPadding at Point(0.0, 365.5)
-2 |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+2 |  |  |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
 2 |  |  |  |  | paintChild RenderConstrainedBox at Point(64.0, 10.0)
-2 |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+2 |  |  |  |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
 2 |  |  |  |  |  | drawPath(Instance of 'Path', Paint(color:Color(0xff000000)))
 2 |  |  |  |  |  | drawPath(Instance of 'Path', Paint(color:Color(0xff000000)))
 2 |  |  |  |  |  | drawPath(Instance of 'Path', Paint(color:Color(0x18000000)))
 2 |  |  |  |  |  | drawPath(Instance of 'Path', Paint(color:Color(0xff000000)))
 2 |  |  |  | paintChild RenderParagraph at Point(0.0, 385.5)
-2 |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+2 |  |  |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
 2 |  | paintChild RenderDecoratedBox at Point(0.0, 0.0)
-2 |  |  | TestDisplayList() constructor: 800.0 x 600.0
+2 |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
 2 |  |  | drawRect(Rect.fromLTRB(0.0, 0.0, 800.0, 81.0), Paint(color:Color(0xff2196f3), drawLooper:true))
 2 |  |  | paintChild RenderFlex at Point(8.0, 0.0)
-2 |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+2 |  |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
 2 |  |  |  | paintChild RenderConstrainedBox at Point(0.0, 25.0)
-2 |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+2 |  |  |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
 2 |  |  |  |  | paintChild RenderPadding at Point(0.0, 16.0)
-2 |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+2 |  |  |  |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
 2 |  |  |  |  |  | paintChild RenderParagraph at Point(24.0, 0.0)
-2 |  |  |  |  |  |  | TestDisplayList() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
 ------------------------------------------------------------------------
 PAINTED 2 FRAMES
