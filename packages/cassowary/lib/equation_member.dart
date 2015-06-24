@@ -15,7 +15,7 @@ abstract class EquationMember {
 
   Constraint operator <=(EquationMember m) => asExpression() <= m;
 
-  operator ==(EquationMember m) => asExpression() == m;
+  /* Constraint */ operator ==(EquationMember m) => asExpression() == m;
 
   Expression operator +(EquationMember m) => asExpression() + m;
 
@@ -24,4 +24,7 @@ abstract class EquationMember {
   Expression operator *(EquationMember m) => asExpression() * m;
 
   Expression operator /(EquationMember m) => asExpression() / m;
+
+  int get hashCode =>
+      throw "An equation member is not comparable and cannot be added to collections";
 }

@@ -10,12 +10,12 @@ import 'package:cassowary/cassowary.dart';
 
 void main() {
   test('variable', () {
-    var v = new Variable(22.0);
+    var v = new Param(22.0);
     expect(v.value, 22);
   });
 
   test('variable1', () {
-    var v = new Variable(22.0);
+    var v = new Param(22.0);
     expect((v + CM(22.0)).value, 44.0);
     expect((v - CM(20.0)).value, 2.0);
   });
@@ -35,11 +35,11 @@ void main() {
   });
 
   test('expression1', () {
-    var v1 = new Variable(10.0);
-    var v2 = new Variable(10.0);
-    var v3 = new Variable(22.0);
+    var v1 = new Param(10.0);
+    var v2 = new Param(10.0);
+    var v3 = new Param(22.0);
 
-    expect(v1 is Variable, true);
+    expect(v1 is Param, true);
     expect(v1 + CM(20.0) is Expression, true);
     expect(v1 + v2 is Expression, true);
 
@@ -51,7 +51,7 @@ void main() {
   });
 
   test('expression2', () {
-    var e = new Variable(10.0) + CM(5.0);
+    var e = new Param(10.0) + CM(5.0);
     expect(e.value, 15.0);
     expect(e is Expression, true);
 
@@ -63,8 +63,8 @@ void main() {
 
     expect(e.value, 15.0);
 
-    // Variable
-    var v = new Variable(2.0);
+    // Param
+    var v = new Param(2.0);
     expect((e + v) is Expression, true);
     expect((e + v).value, 17.0);
     expect((e - v) is Expression, true);
@@ -73,7 +73,7 @@ void main() {
     expect(e.value, 15.0);
 
     // Term
-    var t = new Term(v, 2.0);
+    var t = new Term(v.variable, 2.0);
     expect((e + t) is Expression, true);
     expect((e + t).value, 19.0);
     expect((e - t) is Expression, true);
@@ -82,7 +82,7 @@ void main() {
     expect(e.value, 15.0);
 
     // Expression
-    var e2 = new Variable(7.0) + new Variable(3.0);
+    var e2 = new Param(7.0) + new Param(3.0);
     expect((e + e2) is Expression, true);
     expect((e + e2).value, 25.0);
     expect((e - e2) is Expression, true);
@@ -102,7 +102,7 @@ void main() {
     expect((t - c).value, 10.0);
 
     // Variable
-    var v = new Variable(2.0);
+    var v = new Param(2.0);
     expect((t + v) is Expression, true);
     expect((t + v).value, 14.0);
     expect((t - v) is Expression, true);
@@ -116,7 +116,7 @@ void main() {
     expect((t - t2).value, 10.0);
 
     // Expression
-    var exp = new Variable(1.0) + CM(1.0);
+    var exp = new Param(1.0) + CM(1.0);
     expect((t + exp) is Expression, true);
     expect((t + exp).value, 14.0);
     expect((t - exp) is Expression, true);
@@ -124,7 +124,7 @@ void main() {
   });
 
   test('variable3', () {
-    var v = new Variable(3.0);
+    var v = new Param(3.0);
 
     // Constant
     var c = CM(2.0);
@@ -134,7 +134,7 @@ void main() {
     expect((v - c).value, 1.0);
 
     // Variable
-    var v2 = new Variable(2.0);
+    var v2 = new Param(2.0);
     expect((v + v2) is Expression, true);
     expect((v + v2).value, 5.0);
     expect((v - v2) is Expression, true);
@@ -148,7 +148,7 @@ void main() {
     expect((v - t2).value, 1.0);
 
     // Expression
-    var exp = new Variable(1.0) + CM(1.0);
+    var exp = new Param(1.0) + CM(1.0);
     expect(exp.terms.length, 1);
 
     expect((v + exp) is Expression, true);
@@ -168,7 +168,7 @@ void main() {
     expect((c - c2).value, 1.0);
 
     // Variable
-    var v2 = new Variable(2.0);
+    var v2 = new Param(2.0);
     expect((c + v2) is Expression, true);
     expect((c + v2).value, 5.0);
     expect((c - v2) is Expression, true);
@@ -182,7 +182,7 @@ void main() {
     expect((c - t2).value, 1.0);
 
     // Expression
-    var exp = new Variable(1.0) + CM(1.0);
+    var exp = new Param(1.0) + CM(1.0);
 
     expect((c + exp) is Expression, true);
     expect((c + exp).value, 5.0);
@@ -191,15 +191,12 @@ void main() {
   });
 
   test('constraint2', () {
-    var left = new Variable(10.0);
-    var right = new Variable(100.0);
+    var left = new Param(10.0);
+    var right = new Param(100.0);
 
     var c = right - left >= CM(25.0);
     expect(c is Constraint, true);
   });
-
-  // TODO(csg): Address API inconsistency where the multipliers and divisors
-  // are doubles instead of equation members
 
   test('simple_multiplication', () {
     // Constant
@@ -207,11 +204,11 @@ void main() {
     expect((c * CM(2.0)).value, 40.0);
 
     // Variable
-    var v = new Variable(20.0);
+    var v = new Param(20.0);
     expect((v * CM(2.0)).value, 40.0);
 
     // Term
-    var t = new Term(v, 1.0);
+    var t = new Term(v.variable, 1.0);
     expect((t * CM(2.0)).value, 40.0);
 
     // Expression
@@ -225,11 +222,11 @@ void main() {
     expect((c / CM(2.0)).value, 10.0);
 
     // Variable
-    var v = new Variable(20.0);
+    var v = new Param(20.0);
     expect((v / CM(2.0)).value, 10.0);
 
     // Term
-    var t = new Term(v, 1.0);
+    var t = new Term(v.variable, 1.0);
     expect((t / CM(2.0)).value, 10.0);
 
     // Expression
@@ -237,12 +234,9 @@ void main() {
     expect((e / CM(2.0)).value, 10.0);
   });
 
-  // TODO: Support and test cases where the multipliers and divisors are more
-  // than just simple constants.
-
   test('full_constraints_setup', () {
-    var left = new Variable(2.0);
-    var right = new Variable(10.0);
+    var left = new Param(2.0);
+    var right = new Param(10.0);
 
     var c1 = right - left >= CM(20.0);
     expect(c1 is Constraint, true);
@@ -261,8 +255,8 @@ void main() {
   });
 
   test('constraint_strength_update', () {
-    var left = new Variable(2.0);
-    var right = new Variable(10.0);
+    var left = new Param(2.0);
+    var right = new Param(10.0);
 
     var c = (right - left >= CM(200.0)) | 750.0;
     expect(c is Constraint, true);
@@ -274,8 +268,8 @@ void main() {
   test('solver', () {
     var s = new Solver();
 
-    var left = new Variable(2.0);
-    var right = new Variable(100.0);
+    var left = new Param(2.0);
+    var right = new Param(100.0);
 
     var c1 = right - left >= CM(200.0);
 
@@ -285,7 +279,7 @@ void main() {
   });
 
   test('constraint_complex', () {
-    var e = new Variable(200.0) - new Variable(100.0);
+    var e = new Param(200.0) - new Param(100.0);
 
     // Constant
     var c1 = e >= CM(50.0);
@@ -294,7 +288,7 @@ void main() {
     expect(c1.expression.constant, -50.0);
 
     // Variable
-    var c2 = e >= new Variable(2.0);
+    var c2 = e >= new Param(2.0);
     expect(c2 is Constraint, true);
     expect(c2.expression.terms.length, 3);
     expect(c2.expression.constant, 0.0);
@@ -320,7 +314,7 @@ void main() {
     expect(c1.expression.constant, 50.0);
 
     // Variable
-    var c2 = new Variable(100.0) >= new Variable(2.0);
+    var c2 = new Param(100.0) >= new Param(2.0);
     expect(c2 is Constraint, true);
     expect(c2.expression.terms.length, 2);
     expect(c2.expression.constant, 0.0);
@@ -343,8 +337,8 @@ void main() {
   test('constraint_update_in_solver', () {
     var s = new Solver();
 
-    var left = new Variable(2.0);
-    var right = new Variable(100.0);
+    var left = new Param(2.0);
+    var right = new Param(100.0);
 
     var c1 = right - left >= CM(200.0);
     var c2 = right >= right;
@@ -358,8 +352,8 @@ void main() {
 
   test('test_multiplication_division_override', () {
     var c = CM(10.0);
-    var v = new Variable(c.value);
-    var t = new Term(v, 1.0);
+    var v = new Param(c.value);
+    var t = new Term(v.variable, 1.0);
     var e = new Expression([t], 0.0);
 
     // Constant
@@ -389,8 +383,8 @@ void main() {
 
   test('test_multiplication_division_exceptions', () {
     var c = CM(10.0);
-    var v = new Variable(c.value);
-    var t = new Term(v, 1.0);
+    var v = new Param(c.value);
+    var t = new Term(v.variable, 1.0);
     var e = new Expression([t], 0.0);
 
     expect((c * c).value, 100);
@@ -404,4 +398,28 @@ void main() {
     expect(() => v / c, returnsNormally);
   });
 
+  test('edit_updates', () {
+    Solver s = new Solver();
+
+    var left = new Param(0.0);
+    var right = new Param(100.0);
+    var mid = new Param(0.0);
+
+    Constraint c = left + right >= CM(2.0) * mid;
+    expect(s.addConstraint(c), Result.success);
+
+    expect(s.addEditVariable(mid.variable, 999.0), Result.success);
+    expect(
+        s.addEditVariable(mid.variable, 999.0), Result.duplicateEditVariable);
+    expect(s.removeEditVariable(mid.variable), Result.success);
+    expect(s.removeEditVariable(mid.variable), Result.unknownEditVariable);
+  });
+
+  test('bug1', () {
+    var left = new Param(0.0);
+    var right = new Param(100.0);
+    var mid = new Param(0.0);
+
+    expect(((left + right) >= (CM(2.0) * mid)) is Constraint, true);
+  });
 }

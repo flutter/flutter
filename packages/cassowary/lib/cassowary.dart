@@ -16,3 +16,4 @@ part 'row.dart';
 part 'utils.dart';
 part 'result.dart';
 part 'parser_exception.dart';
+part 'param.dart';

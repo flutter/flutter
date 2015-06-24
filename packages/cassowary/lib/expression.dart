@@ -28,8 +28,9 @@ class Expression extends EquationMember {
           relation);
     }
 
-    if (value is Variable) {
-      var newTerms = new List<Term>.from(terms)..add(new Term(value, -1.0));
+    if (value is Param) {
+      var newTerms = new List<Term>.from(terms)
+        ..add(new Term(value.variable, -1.0));
       return new Constraint(new Expression(newTerms, constant), relation);
     }
 
@@ -64,9 +65,9 @@ class Expression extends EquationMember {
       return new Expression(new List.from(terms), constant + m.value);
     }
 
-    if (m is Variable) {
+    if (m is Param) {
       return new Expression(
-          new List.from(terms)..add(new Term(m, 1.0)), constant);
+          new List.from(terms)..add(new Term(m.variable, 1.0)), constant);
     }
 
     if (m is Term) {
@@ -87,9 +88,9 @@ class Expression extends EquationMember {
       return new Expression(new List.from(terms), constant - m.value);
     }
 
-    if (m is Variable) {
+    if (m is Param) {
       return new Expression(
-          new List.from(terms)..add(new Term(m, -1.0)), constant);
+          new List.from(terms)..add(new Term(m.variable, -1.0)), constant);
     }
 
     if (m is Term) {

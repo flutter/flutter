@@ -4,11 +4,9 @@
 
 part of cassowary;
 
-class Variable extends EquationMember {
+class Variable {
   double value = 0.0;
   Variable(this.value);
 
-  bool get isConstant => false;
-
-  Expression asExpression() => new Expression([new Term(this, 1.0)], 0.0);
+  // TODO(csg): Add external variable update callbacks here
 }
