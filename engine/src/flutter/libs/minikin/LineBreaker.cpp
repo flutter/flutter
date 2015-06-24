@@ -353,12 +353,17 @@ void LineBreaker::computeBreaksOptimal(bool isRectangle) {
             float delta = mCandidates[j].preBreak - leftEdge;
 
             // compute width score for line
+
+            // Note: the "bestHope" optimization makes the assumption that, when delta is
+            // non-negative, widthScore will increase monotonically as successive candidate
+            // breaks are considered.
             float widthScore = 0.0f;
+            float additionalPenalty = 0.0f;
             if (delta < 0) {
                 widthScore = SCORE_OVERFULL;
             } else if (atEnd && mStrategy != kBreakStrategy_Balanced) {
                 // increase penalty for hyphen on last line
-                widthScore = LAST_LINE_PENALTY_MULTIPLIER * mCandidates[j].penalty;
+                additionalPenalty = LAST_LINE_PENALTY_MULTIPLIER * mCandidates[j].penalty;
             } else {
                 widthScore = delta * delta;
             }
@@ -369,7 +374,7 @@ void LineBreaker::computeBreaksOptimal(bool isRectangle) {
                 bestHope = widthScore;
             }
 
-            float score = jScore + widthScore;
+            float score = jScore + widthScore + additionalPenalty;
             if (score <= best) {
                 best = score;
                 bestPrev = j;
@@ -378,6 +383,9 @@ void LineBreaker::computeBreaksOptimal(bool isRectangle) {
         mCandidates[i].score = best + mCandidates[i].penalty + mLinePenalty;
         mCandidates[i].prev = bestPrev;
         mCandidates[i].lineNumber = mCandidates[bestPrev].lineNumber + 1;
+#ifdef VERBOSE_DEBUG
+        ALOGD("break %d: score=%g, prev=%d", i, mCandidates[i].score, mCandidates[i].prev);
+#endif
     }
     finishBreaksOptimal();
 }
