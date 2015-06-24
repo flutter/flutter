@@ -4,6 +4,7 @@
 
 #include "sky/shell/ui/internals.h"
 
+#include "base/threading/worker_pool.h"
 #include "mojo/public/cpp/application/connect.h"
 #include "mojo/public/cpp/bindings/array.h"
 #include "services/asset_bundle/asset_unpacker_impl.h"
@@ -107,7 +108,8 @@ Internals::~Internals() {
 void Internals::Create(
     mojo::ApplicationConnection* connection,
     mojo::InterfaceRequest<mojo::asset_bundle::AssetUnpacker> request) {
-  new mojo::asset_bundle::AssetUnpackerImpl(request.Pass());
+  new mojo::asset_bundle::AssetUnpackerImpl(
+      request.Pass(), base::WorkerPool::GetTaskRunner(true));
 }
 
 mojo::Handle Internals::TakeServicesProvidedByEmbedder() {
