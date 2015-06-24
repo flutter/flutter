@@ -103,19 +103,23 @@ class RenderParagraph extends RenderBox {
   final sky.Document _document = new sky.Document();
   final sky.LayoutRoot _layoutRoot = new sky.LayoutRoot();
 
-  InlineBase _inline;
-  BoxConstraints _constraintsForCurrentLayout;
+  BoxConstraints _constraintsForCurrentLayout; // when null, we don't have a current layout
 
+  InlineBase _inline;
   InlineBase get inline => _inline;
   void set inline (InlineBase value) {
     if (_inline == value)
       return;
     _inline = value;
     _layoutRoot.rootElement.setChild(_inline._toDOM(_document));
+    _constraintsForCurrentLayout = null;
     markNeedsLayout();
   }
 
   void _layout(BoxConstraints constraints) {
+    assert(constraints != null);
+    if (_constraintsForCurrentLayout == constraints)
+      return; // already cached this layout
     _layoutRoot.maxWidth = constraints.maxWidth;
     _layoutRoot.minWidth = constraints.minWidth;
     _layoutRoot.minHeight = constraints.minHeight;
@@ -166,9 +170,7 @@ class RenderParagraph extends RenderBox {
     //
     // TODO(abarth): Make computing the min/max intrinsic width/height a
     //               non-destructive operation.
-    if (_constraintsForCurrentLayout != constraints && constraints != null)
-      _layout(constraints);
-
+    _layout(constraints);
     _layoutRoot.paint(canvas);
   }
 
