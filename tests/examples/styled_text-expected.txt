@@ -13,19 +13,9 @@ PAINT FOR FRAME #2 ----------------------------------------------
 2 |  |  | drawRRect(Instance of 'RRect', Paint(color:Color(0xfffafafa)))
 2 |  |  | paintChild RenderFlex at Point(8.0, 0.0)
 2 |  |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
-2 |  |  |  | paintChild RenderParagraph at Point(0.0, 117.5)
+2 |  |  |  | paintChild RenderParagraph at Point(0.0, 95.0)
 2 |  |  |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
-2 |  |  |  | paintChild RenderPadding at Point(0.0, 149.5)
-2 |  |  |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
-2 |  |  |  |  | paintChild RenderConstrainedBox at Point(64.0, 10.0)
-2 |  |  |  |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
-2 |  |  |  |  |  | drawPath(Instance of 'Path', Paint(color:Color(0xff000000)))
-2 |  |  |  |  |  | drawPath(Instance of 'Path', Paint(color:Color(0xff000000)))
-2 |  |  |  |  |  | drawPath(Instance of 'Path', Paint(color:Color(0x18000000)))
-2 |  |  |  |  |  | drawPath(Instance of 'Path', Paint(color:Color(0xff000000)))
-2 |  |  |  | paintChild RenderParagraph at Point(0.0, 169.5)
-2 |  |  |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
-2 |  |  |  | paintChild RenderPadding at Point(0.0, 185.5)
+2 |  |  |  | paintChild RenderPadding at Point(0.0, 145.0)
 2 |  |  |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
 2 |  |  |  |  | paintChild RenderConstrainedBox at Point(64.0, 10.0)
 2 |  |  |  |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
@@ -33,19 +23,9 @@ PAINT FOR FRAME #2 ----------------------------------------------
 2 |  |  |  |  |  | drawPath(Instance of 'Path', Paint(color:Color(0xff000000)))
 2 |  |  |  |  |  | drawPath(Instance of 'Path', Paint(color:Color(0x18000000)))
 2 |  |  |  |  |  | drawPath(Instance of 'Path', Paint(color:Color(0xff000000)))
-2 |  |  |  | paintChild RenderParagraph at Point(0.0, 205.5)
+2 |  |  |  | paintChild RenderParagraph at Point(0.0, 165.0)
 2 |  |  |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
-2 |  |  |  | paintChild RenderPadding at Point(0.0, 221.5)
-2 |  |  |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
-2 |  |  |  |  | paintChild RenderConstrainedBox at Point(64.0, 10.0)
-2 |  |  |  |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
-2 |  |  |  |  |  | drawPath(Instance of 'Path', Paint(color:Color(0xff000000)))
-2 |  |  |  |  |  | drawPath(Instance of 'Path', Paint(color:Color(0xff000000)))
-2 |  |  |  |  |  | drawPath(Instance of 'Path', Paint(color:Color(0x18000000)))
-2 |  |  |  |  |  | drawPath(Instance of 'Path', Paint(color:Color(0xff000000)))
-2 |  |  |  | paintChild RenderParagraph at Point(0.0, 241.5)
-2 |  |  |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
-2 |  |  |  | paintChild RenderPadding at Point(0.0, 257.5)
+2 |  |  |  | paintChild RenderPadding at Point(0.0, 181.0)
 2 |  |  |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
 2 |  |  |  |  | paintChild RenderConstrainedBox at Point(64.0, 10.0)
 2 |  |  |  |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
@@ -53,19 +33,9 @@ PAINT FOR FRAME #2 ----------------------------------------------
 2 |  |  |  |  |  | drawPath(Instance of 'Path', Paint(color:Color(0xff000000)))
 2 |  |  |  |  |  | drawPath(Instance of 'Path', Paint(color:Color(0x18000000)))
 2 |  |  |  |  |  | drawPath(Instance of 'Path', Paint(color:Color(0xff000000)))
-2 |  |  |  | paintChild RenderParagraph at Point(0.0, 277.5)
+2 |  |  |  | paintChild RenderParagraph at Point(0.0, 201.0)
 2 |  |  |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
-2 |  |  |  | paintChild RenderPadding at Point(0.0, 293.5)
-2 |  |  |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
-2 |  |  |  |  | paintChild RenderConstrainedBox at Point(64.0, 10.0)
-2 |  |  |  |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
-2 |  |  |  |  |  | drawPath(Instance of 'Path', Paint(color:Color(0xff000000)))
-2 |  |  |  |  |  | drawPath(Instance of 'Path', Paint(color:Color(0xff000000)))
-2 |  |  |  |  |  | drawPath(Instance of 'Path', Paint(color:Color(0x18000000)))
-2 |  |  |  |  |  | drawPath(Instance of 'Path', Paint(color:Color(0xff000000)))
-2 |  |  |  | paintChild RenderParagraph at Point(0.0, 313.5)
-2 |  |  |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
-2 |  |  |  | paintChild RenderPadding at Point(0.0, 329.5)
+2 |  |  |  | paintChild RenderPadding at Point(0.0, 226.0)
 2 |  |  |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
 2 |  |  |  |  | paintChild RenderConstrainedBox at Point(64.0, 10.0)
 2 |  |  |  |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
@@ -73,9 +43,9 @@ PAINT FOR FRAME #2 ----------------------------------------------
 2 |  |  |  |  |  | drawPath(Instance of 'Path', Paint(color:Color(0xff000000)))
 2 |  |  |  |  |  | drawPath(Instance of 'Path', Paint(color:Color(0x18000000)))
 2 |  |  |  |  |  | drawPath(Instance of 'Path', Paint(color:Color(0xff000000)))
-2 |  |  |  | paintChild RenderParagraph at Point(0.0, 349.5)
+2 |  |  |  | paintChild RenderParagraph at Point(0.0, 246.0)
 2 |  |  |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
-2 |  |  |  | paintChild RenderPadding at Point(0.0, 365.5)
+2 |  |  |  | paintChild RenderPadding at Point(0.0, 262.0)
 2 |  |  |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
 2 |  |  |  |  | paintChild RenderConstrainedBox at Point(64.0, 10.0)
 2 |  |  |  |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
@@ -83,7 +53,37 @@ PAINT FOR FRAME #2 ----------------------------------------------
 2 |  |  |  |  |  | drawPath(Instance of 'Path', Paint(color:Color(0xff000000)))
 2 |  |  |  |  |  | drawPath(Instance of 'Path', Paint(color:Color(0x18000000)))
 2 |  |  |  |  |  | drawPath(Instance of 'Path', Paint(color:Color(0xff000000)))
-2 |  |  |  | paintChild RenderParagraph at Point(0.0, 385.5)
+2 |  |  |  | paintChild RenderParagraph at Point(0.0, 282.0)
+2 |  |  |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
+2 |  |  |  | paintChild RenderPadding at Point(0.0, 307.0)
+2 |  |  |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
+2 |  |  |  |  | paintChild RenderConstrainedBox at Point(64.0, 10.0)
+2 |  |  |  |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
+2 |  |  |  |  |  | drawPath(Instance of 'Path', Paint(color:Color(0xff000000)))
+2 |  |  |  |  |  | drawPath(Instance of 'Path', Paint(color:Color(0xff000000)))
+2 |  |  |  |  |  | drawPath(Instance of 'Path', Paint(color:Color(0x18000000)))
+2 |  |  |  |  |  | drawPath(Instance of 'Path', Paint(color:Color(0xff000000)))
+2 |  |  |  | paintChild RenderParagraph at Point(0.0, 327.0)
+2 |  |  |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
+2 |  |  |  | paintChild RenderPadding at Point(0.0, 343.0)
+2 |  |  |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
+2 |  |  |  |  | paintChild RenderConstrainedBox at Point(64.0, 10.0)
+2 |  |  |  |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
+2 |  |  |  |  |  | drawPath(Instance of 'Path', Paint(color:Color(0xff000000)))
+2 |  |  |  |  |  | drawPath(Instance of 'Path', Paint(color:Color(0xff000000)))
+2 |  |  |  |  |  | drawPath(Instance of 'Path', Paint(color:Color(0x18000000)))
+2 |  |  |  |  |  | drawPath(Instance of 'Path', Paint(color:Color(0xff000000)))
+2 |  |  |  | paintChild RenderParagraph at Point(0.0, 363.0)
+2 |  |  |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
+2 |  |  |  | paintChild RenderPadding at Point(0.0, 388.0)
+2 |  |  |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
+2 |  |  |  |  | paintChild RenderConstrainedBox at Point(64.0, 10.0)
+2 |  |  |  |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
+2 |  |  |  |  |  | drawPath(Instance of 'Path', Paint(color:Color(0xff000000)))
+2 |  |  |  |  |  | drawPath(Instance of 'Path', Paint(color:Color(0xff000000)))
+2 |  |  |  |  |  | drawPath(Instance of 'Path', Paint(color:Color(0x18000000)))
+2 |  |  |  |  |  | drawPath(Instance of 'Path', Paint(color:Color(0xff000000)))
+2 |  |  |  | paintChild RenderParagraph at Point(0.0, 408.0)
 2 |  |  |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
 2 |  | paintChild RenderDecoratedBox at Point(0.0, 0.0)
 2 |  |  | TestRenderCanvas() constructor: 800.0 x 600.0

@@ -4,18 +4,7 @@
 
 import 'dart:sky';
 
-enum FontWeight {
-  w100,
-  w200,
-  w300,
-  w400,
-  w500,
-  w600,
-  w700,
-  w800,
-  w900
-}
-
+enum FontWeight { w100, w200, w300, w400, w500, w600, w700, w800, w900 }
 const thin = FontWeight.w100;
 const extraLight = FontWeight.w200;
 const light = FontWeight.w300;
@@ -26,30 +15,14 @@ const bold = FontWeight.w700;
 const extraBold = FontWeight.w800;
 const black = FontWeight.w900;
 
-enum TextAlign {
-  left,
-  right,
-  center
-}
+enum TextAlign { left, right, center }
 
-enum TextDecoration {
-  none,
-  underline,
-  overline,
-  lineThrough
-}
-
+enum TextDecoration { none, underline, overline, lineThrough }
 const underline = const <TextDecoration>[TextDecoration.underline];
 const overline = const <TextDecoration>[TextDecoration.overline];
 const lineThrough = const <TextDecoration>[TextDecoration.lineThrough];
 
-enum TextDecorationStyle {
-  solid,
-  double,
-  dotted,
-  dashed,
-  wavy
-}
+enum TextDecorationStyle { solid, double, dotted, dashed, wavy }
 
 class TextStyle {
   const TextStyle({
@@ -58,6 +31,7 @@ class TextStyle {
     this.fontSize,
     this.fontWeight,
     this.textAlign,
+    this.height,
     this.decoration,
     this.decorationColor,
     this.decorationStyle
@@ -68,6 +42,7 @@ class TextStyle {
   final double fontSize; // in pixels
   final FontWeight fontWeight;
   final TextAlign textAlign;
+  final double height; // multiple of fontSize
   final List<TextDecoration> decoration; // TODO(ianh): Switch this to a Set<> once Dart supports constant Sets
   final Color decorationColor;
   final TextDecorationStyle decorationStyle;
@@ -78,6 +53,7 @@ class TextStyle {
     double fontSize,
     FontWeight fontWeight,
     TextAlign textAlign,
+    double height,
     List<TextDecoration> decoration,
     Color decorationColor,
     TextDecorationStyle decorationStyle
@@ -88,14 +64,11 @@ class TextStyle {
       fontSize: fontSize != null ? fontSize : this.fontSize,
       fontWeight: fontWeight != null ? fontWeight : this.fontWeight,
       textAlign: textAlign != null ? textAlign : this.textAlign,
+      height: height != null ? height : this.height,
       decoration: decoration != null ? decoration : this.decoration,
       decorationColor: decorationColor != null ? decorationColor : this.decorationColor,
       decorationStyle: decorationStyle != null ? decorationStyle : this.decorationStyle
     );
-  }
-
-  static String _colorToCSSString(Color color) {
-    return 'rgba(${color.red}, ${color.green}, ${color.blue}, ${color.alpha / 255.0})';
   }
 
   TextStyle merge(TextStyle other) {
@@ -105,10 +78,15 @@ class TextStyle {
       fontSize: other.fontSize,
       fontWeight: other.fontWeight,
       textAlign: other.textAlign,
+      height: other.height,
       decoration: other.decoration,
       decorationColor: other.decorationColor,
       decorationStyle: other.decorationStyle
     );
+  }
+
+  static String _colorToCSSString(Color color) {
+    return 'rgba(${color.red}, ${color.green}, ${color.blue}, ${color.alpha / 255.0})';
   }
 
   static String _fontFamilyToCSSString(String fontFamily) {
@@ -147,7 +125,7 @@ class TextStyle {
       cssStyle['font-family'] = _fontFamilyToCSSString(fontFamily);
     }
     if (fontSize != null) {
-      cssStyle['font-size'] = "${fontSize}px";
+      cssStyle['font-size'] = '${fontSize}px';
     }
     if (fontWeight != null) {
       cssStyle['font-weight'] = const {
@@ -168,6 +146,9 @@ class TextStyle {
         TextAlign.right: 'right',
         TextAlign.center: 'center',
       }[textAlign];
+    }
+    if (height != null) {
+      cssStyle['line-height'] = '${height}';
     }
     if (decoration != null) {
       cssStyle['text-decoration'] = _decorationToCSSString(decoration);
