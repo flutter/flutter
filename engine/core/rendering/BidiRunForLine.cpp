@@ -21,7 +21,6 @@
  *
  */
 
-#include "sky/engine/config.h"
 #include "sky/engine/core/rendering/BidiRunForLine.h"
 
 #include "sky/engine/core/rendering/InlineIterator.h"

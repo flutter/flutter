@@ -22,7 +22,6 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#include "sky/engine/config.h"
 #include "sky/engine/core/dom/Node.h"
 
 #include "base/trace_event/trace_event_impl.h"

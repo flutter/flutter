@@ -18,7 +18,6 @@
  * Boston, MA 02111-1307, USA.
  */
 
-#include "sky/engine/config.h"
 #include "sky/engine/core/dom/SpaceSplitString.h"
 
 #include "sky/engine/core/html/parser/HTMLParserIdioms.h"

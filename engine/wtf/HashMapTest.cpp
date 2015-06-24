@@ -23,7 +23,6 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sky/engine/config.h"
 
 #include <gtest/gtest.h>
 #include "sky/engine/wtf/HashMap.h"

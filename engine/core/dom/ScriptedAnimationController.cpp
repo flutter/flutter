@@ -23,7 +23,6 @@
  *
  */
 
-#include "sky/engine/config.h"
 #include "sky/engine/core/dom/ScriptedAnimationController.h"
 
 #include "sky/engine/core/css/MediaQueryListListener.h"

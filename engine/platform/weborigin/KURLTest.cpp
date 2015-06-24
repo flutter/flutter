@@ -31,7 +31,6 @@
 // Basic tests that verify our KURL's interface behaves the same as the
 // original KURL's.
 
-#include "sky/engine/config.h"
 #include "sky/engine/platform/weborigin/KURL.h"
 
 #include <gtest/gtest.h>

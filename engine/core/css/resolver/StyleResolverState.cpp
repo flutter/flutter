@@ -19,7 +19,6 @@
  *
  */
 
-#include "sky/engine/config.h"
 #include "sky/engine/core/css/resolver/StyleResolverState.h"
 
 #include "sky/engine/core/animation/css/CSSAnimations.h"

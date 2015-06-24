@@ -21,7 +21,6 @@
  * 02110-1301  USA
  */
 
-#include "sky/engine/config.h"
 #include "sky/engine/core/css/CSSComputedStyleDeclaration.h"
 
 #include "gen/sky/core/CSSPropertyNames.h"

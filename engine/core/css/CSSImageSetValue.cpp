@@ -23,7 +23,6 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sky/engine/config.h"
 #include "sky/engine/core/css/CSSImageSetValue.h"
 
 #include "gen/sky/core/FetchInitiatorTypeNames.h"

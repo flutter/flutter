@@ -41,7 +41,6 @@
  * version of this file under any of the LGPL, the MPL or the GPL.
  */
 
-#include "sky/engine/config.h"
 #include "sky/engine/core/rendering/RenderLayer.h"
 
 #include "gen/sky/core/CSSPropertyNames.h"

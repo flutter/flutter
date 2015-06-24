@@ -25,7 +25,6 @@
  */
 
 
-#include "sky/engine/config.h"
 #include "sky/engine/core/css/FontFaceCache.h"
 
 #include "gen/sky/platform/FontFamilyNames.h"

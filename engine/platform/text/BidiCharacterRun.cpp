@@ -21,7 +21,6 @@
  *
  */
 
-#include "sky/engine/config.h"
 #include "sky/engine/platform/text/BidiCharacterRun.h"
 
 #include "sky/engine/platform/Partitions.h"

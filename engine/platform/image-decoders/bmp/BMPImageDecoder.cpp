@@ -28,7 +28,6 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sky/engine/config.h"
 #include "platform/image-decoders/bmp/BMPImageDecoder.h"
 
 #include "sky/engine/wtf/PassOwnPtr.h"

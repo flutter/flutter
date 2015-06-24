@@ -29,7 +29,6 @@
  */
 
 #if BLINK_IMPLEMENTATION
-#include "sky/engine/config.h"
 #endif
 
 #include "base/bind.h"

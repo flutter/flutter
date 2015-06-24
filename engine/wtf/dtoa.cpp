@@ -32,7 +32,6 @@
  * file.
  */
 
-#include "sky/engine/config.h"
 #include "sky/engine/wtf/dtoa.h"
 
 #include "sky/engine/wtf/CPU.h"

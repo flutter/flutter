@@ -20,7 +20,6 @@
  *
  */
 
-#include "sky/engine/config.h"
 #include "sky/engine/core/rendering/line/LineBreaker.h"
 
 #include "sky/engine/core/rendering/line/BreakingContextInlineHeaders.h"

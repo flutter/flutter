@@ -19,7 +19,6 @@
  *
  */
 
-#include "sky/engine/config.h"
 #include "sky/engine/wtf/TypeTraits.h"
 
 #include "sky/engine/wtf/Assertions.h"

@@ -22,7 +22,6 @@
  *
  */
 
-#include "sky/engine/config.h"
 #include "sky/engine/wtf/text/StringImpl.h"
 
 #include <unicode/translit.h>

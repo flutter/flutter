@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "sky/engine/config.h"
 #include "sky/engine/tonic/dart_converter.h"
 
 // This file exists to ensure dart_converter.h doesn't miss any dependencies.

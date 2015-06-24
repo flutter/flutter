@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "sky/engine/config.h"
 #include "sky/engine/bindings/exception_messages.h"
 
 #include "sky/engine/platform/Decimal.h"

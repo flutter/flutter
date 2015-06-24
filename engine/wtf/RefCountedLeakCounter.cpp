@@ -18,7 +18,6 @@
  *
  */
 
-#include "sky/engine/config.h"
 #include "sky/engine/wtf/Assertions.h"
 #include "sky/engine/wtf/RefCountedLeakCounter.h"
 

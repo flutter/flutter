@@ -4,7 +4,6 @@
 
 // WARNING: Do not edit - generated code.
 
-#include "sky/engine/config.h"
 #include "{{dart_class}}.h"
 
 {% for filename in cpp_includes %}

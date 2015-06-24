@@ -24,7 +24,6 @@
  */
 
 
-#include "sky/engine/config.h"
 #include "sky/engine/core/page/PageLifecycleObserver.h"
 
 #include "sky/engine/core/page/Page.h"

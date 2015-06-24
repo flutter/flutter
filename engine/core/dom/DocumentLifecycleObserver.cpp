@@ -24,7 +24,6 @@
  */
 
 
-#include "sky/engine/config.h"
 #include "sky/engine/core/dom/DocumentLifecycleObserver.h"
 
 #include "sky/engine/core/dom/Document.h"

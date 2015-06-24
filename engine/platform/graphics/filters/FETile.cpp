@@ -19,7 +19,6 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#include "sky/engine/config.h"
 #include "sky/engine/platform/graphics/filters/FETile.h"
 
 #include "third_party/skia/include/effects/SkTileImageFilter.h"

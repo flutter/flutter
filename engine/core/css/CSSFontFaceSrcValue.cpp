@@ -23,7 +23,6 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sky/engine/config.h"
 #include "sky/engine/core/css/CSSFontFaceSrcValue.h"
 
 #include "gen/sky/core/FetchInitiatorTypeNames.h"

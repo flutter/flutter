@@ -24,7 +24,6 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sky/engine/config.h"
 #include "sky/engine/core/rendering/break_lines.h"
 
 #include "sky/engine/platform/text/TextBreakIterator.h"

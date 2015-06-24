@@ -72,7 +72,6 @@ or revised. This service is offered free of charge; please provide us with your
 mailing address.
 */
 
-#include "sky/engine/config.h"
 #include "platform/image-decoders/gif/GIFImageReader.h"
 
 #include <string.h>

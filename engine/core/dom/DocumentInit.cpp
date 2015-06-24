@@ -25,7 +25,6 @@
  *
  */
 
-#include "sky/engine/config.h"
 #include "sky/engine/core/dom/DocumentInit.h"
 
 #include "gen/sky/platform/RuntimeEnabledFeatures.h"

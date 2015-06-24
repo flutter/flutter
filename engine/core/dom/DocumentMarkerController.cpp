@@ -24,7 +24,6 @@
  *
  */
 
-#include "sky/engine/config.h"
 #include "sky/engine/core/dom/DocumentMarkerController.h"
 
 #include "sky/engine/core/dom/Node.h"

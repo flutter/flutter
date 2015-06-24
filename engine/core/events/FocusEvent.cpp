@@ -23,7 +23,6 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sky/engine/config.h"
 #include "sky/engine/core/events/FocusEvent.h"
 
 #include "sky/engine/core/events/Event.h"

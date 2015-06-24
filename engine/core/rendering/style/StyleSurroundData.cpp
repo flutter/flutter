@@ -19,7 +19,6 @@
  *
  */
 
-#include "sky/engine/config.h"
 #include "sky/engine/core/rendering/style/StyleSurroundData.h"
 
 namespace blink {

@@ -29,7 +29,6 @@
  *
  */
 
-#include "sky/engine/config.h"
 #include "sky/engine/core/events/EventTarget.h"
 
 #include "gen/sky/platform/RuntimeEnabledFeatures.h"

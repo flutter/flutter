@@ -27,7 +27,6 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sky/engine/config.h"
 #include "sky/engine/core/rendering/line/LineWidth.h"
 
 #include "sky/engine/core/rendering/RenderBlock.h"

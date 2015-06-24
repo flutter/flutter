@@ -26,7 +26,6 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#include "sky/engine/config.h"
 #include "sky/engine/core/css/resolver/SharedStyleFinder.h"
 
 #include "gen/sky/core/HTMLNames.h"

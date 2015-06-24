@@ -19,7 +19,6 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#include "sky/engine/config.h"
 #include "sky/engine/core/loader/ImageLoader.h"
 
 #include "sky/engine/core/dom/Document.h"

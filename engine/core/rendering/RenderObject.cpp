@@ -24,7 +24,6 @@
  *
  */
 
-#include "sky/engine/config.h"
 #include "sky/engine/core/rendering/RenderObject.h"
 
 #include <algorithm>

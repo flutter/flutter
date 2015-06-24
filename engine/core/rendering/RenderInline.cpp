@@ -20,7 +20,6 @@
  *
  */
 
-#include "sky/engine/config.h"
 #include "sky/engine/core/rendering/RenderInline.h"
 
 #include "sky/engine/core/dom/StyleEngine.h"

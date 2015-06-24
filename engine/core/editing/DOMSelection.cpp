@@ -28,7 +28,6 @@
  */
 
 
-#include "sky/engine/config.h"
 #include "sky/engine/core/editing/DOMSelection.h"
 
 #include "sky/engine/bindings/exception_messages.h"

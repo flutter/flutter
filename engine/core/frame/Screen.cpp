@@ -27,7 +27,6 @@
  */
 
 
-#include "sky/engine/config.h"
 #include "sky/engine/core/frame/Screen.h"
 
 #include "sky/engine/core/frame/FrameHost.h"

@@ -19,7 +19,6 @@
  *
  */
 
-#include "sky/engine/config.h"
 #include "sky/engine/core/rendering/style/StyleRareInheritedData.h"
 
 #include "sky/engine/core/rendering/style/AppliedTextDecoration.h"

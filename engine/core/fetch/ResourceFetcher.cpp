@@ -24,7 +24,6 @@
     pages from the web. It has a memory cache for these objects.
 */
 
-#include "sky/engine/config.h"
 #include "sky/engine/core/fetch/ResourceFetcher.h"
 
 #include "gen/sky/core/FetchInitiatorTypeNames.h"

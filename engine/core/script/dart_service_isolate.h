@@ -8,7 +8,6 @@
 #include <string>
 
 #include "include/dart_api.h"
-#include "sky/engine/config.h"
 #include "sky/engine/tonic/dart_builtin.h"
 
 namespace blink {

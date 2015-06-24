@@ -21,7 +21,6 @@
  *
  */
 
-#include "sky/engine/config.h"
 #include "sky/engine/core/rendering/style/StyleGeneratedImage.h"
 
 #include "sky/engine/core/css/CSSImageGeneratorValue.h"

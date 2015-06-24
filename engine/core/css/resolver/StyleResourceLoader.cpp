@@ -20,7 +20,6 @@
  *
  */
 
-#include "sky/engine/config.h"
 #include "sky/engine/core/css/resolver/StyleResourceLoader.h"
 
 #include "gen/sky/core/CSSPropertyNames.h"

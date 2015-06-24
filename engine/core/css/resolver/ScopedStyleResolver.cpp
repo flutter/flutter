@@ -24,7 +24,6 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sky/engine/config.h"
 #include "sky/engine/core/css/resolver/ScopedStyleResolver.h"
 
 #include "sky/engine/core/css/RuleFeature.h"

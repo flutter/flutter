@@ -24,7 +24,6 @@
  *
  */
 
-#include "sky/engine/config.h"
 #include "sky/engine/core/dom/ElementDataCache.h"
 
 #include "sky/engine/core/dom/ElementData.h"

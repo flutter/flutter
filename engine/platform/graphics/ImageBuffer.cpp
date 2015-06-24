@@ -30,7 +30,6 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sky/engine/config.h"
 #include "sky/engine/platform/graphics/ImageBuffer.h"
 
 #include "platform/image-encoders/skia/JPEGImageEncoder.h"

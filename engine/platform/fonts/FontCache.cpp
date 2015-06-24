@@ -27,7 +27,6 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sky/engine/config.h"
 #include "sky/engine/platform/fonts/FontCache.h"
 
 #include "gen/sky/platform/FontFamilyNames.h"

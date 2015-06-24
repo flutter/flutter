@@ -23,7 +23,6 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sky/engine/config.h"
 #include "sky/engine/platform/network/ProxyServer.h"
 
 #include "sky/engine/wtf/text/StringBuilder.h"

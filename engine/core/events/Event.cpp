@@ -20,7 +20,6 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#include "sky/engine/config.h"
 #include "sky/engine/core/events/Event.h"
 
 #include "gen/sky/core/EventHeaders.h"

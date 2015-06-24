@@ -29,7 +29,6 @@
  */
 
 #include "base/time/time.h"
-#include "sky/engine/config.h"
 #include "sky/engine/wtf/CurrentTime.h"
 
 namespace WTF {

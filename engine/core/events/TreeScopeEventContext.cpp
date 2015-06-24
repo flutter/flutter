@@ -24,7 +24,6 @@
  *
  */
 
-#include "sky/engine/config.h"
 #include "sky/engine/core/events/TreeScopeEventContext.h"
 
 #include "sky/engine/core/dom/StaticNodeList.h"

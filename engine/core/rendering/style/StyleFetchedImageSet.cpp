@@ -23,7 +23,6 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sky/engine/config.h"
 #include "sky/engine/core/rendering/style/StyleFetchedImageSet.h"
 
 #include "sky/engine/core/css/CSSImageSetValue.h"

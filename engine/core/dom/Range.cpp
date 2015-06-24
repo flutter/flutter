@@ -22,7 +22,6 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#include "sky/engine/config.h"
 #include "sky/engine/core/dom/Range.h"
 
 #include "sky/engine/bindings/exception_state.h"

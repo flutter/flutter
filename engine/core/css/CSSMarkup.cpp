@@ -24,7 +24,6 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#include "sky/engine/config.h"
 #include "sky/engine/core/css/CSSMarkup.h"
 
 #include "sky/engine/wtf/HexNumber.h"

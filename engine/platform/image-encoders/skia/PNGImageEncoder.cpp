@@ -28,7 +28,6 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sky/engine/config.h"
 #include "platform/image-encoders/skia/PNGImageEncoder.h"
 
 #include "sky/engine/platform/geometry/IntSize.h"

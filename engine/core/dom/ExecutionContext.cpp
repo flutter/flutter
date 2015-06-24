@@ -25,7 +25,6 @@
  *
  */
 
-#include "sky/engine/config.h"
 #include "sky/engine/core/dom/ExecutionContext.h"
 
 #include "sky/engine/core/dom/ContextLifecycleNotifier.h"

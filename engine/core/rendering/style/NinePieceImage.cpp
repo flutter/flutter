@@ -21,7 +21,6 @@
  *
  */
 
-#include "sky/engine/config.h"
 #include "sky/engine/core/rendering/style/NinePieceImage.h"
 
 #include "sky/engine/core/rendering/style/DataEquivalency.h"

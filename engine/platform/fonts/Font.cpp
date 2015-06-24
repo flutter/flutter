@@ -21,7 +21,6 @@
  *
  */
 
-#include "sky/engine/config.h"
 #include "sky/engine/platform/fonts/Font.h"
 
 #include "gen/sky/platform/RuntimeEnabledFeatures.h"

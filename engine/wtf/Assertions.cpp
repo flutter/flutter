@@ -31,7 +31,6 @@
 // we need to place this directive before any data or functions are defined.
 #pragma GCC diagnostic ignored "-Wmissing-format-attribute"
 
-#include "sky/engine/config.h"
 #include "sky/engine/wtf/Assertions.h"
 
 #include "sky/engine/wtf/Compiler.h"

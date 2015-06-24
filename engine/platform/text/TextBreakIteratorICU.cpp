@@ -19,7 +19,6 @@
  *
  */
 
-#include "sky/engine/config.h"
 #include "sky/engine/platform/text/TextBreakIterator.h"
 
 #include <unicode/rbbi.h>

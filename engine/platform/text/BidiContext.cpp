@@ -19,7 +19,6 @@
  *
  */
 
-#include "sky/engine/config.h"
 #include "sky/engine/platform/text/BidiContext.h"
 
 #include "sky/engine/wtf/StdLibExtras.h"

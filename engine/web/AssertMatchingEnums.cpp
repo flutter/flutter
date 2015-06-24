@@ -31,7 +31,6 @@
 // Use this file to assert that various public API enum values continue
 // matching blink defined enum values.
 
-#include "sky/engine/config.h"
 
 #include "sky/engine/core/dom/DocumentMarker.h"
 #include "sky/engine/core/dom/ExceptionCode.h"

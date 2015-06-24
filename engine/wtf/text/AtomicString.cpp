@@ -20,7 +20,6 @@
  *
  */
 
-#include "sky/engine/config.h"
 #include "sky/engine/wtf/text/AtomicString.h"
 
 #include "sky/engine/wtf/HashSet.h"

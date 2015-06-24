@@ -18,7 +18,6 @@
  *
  */
 
-#include "sky/engine/config.h"
 #include "platform/image-decoders/ImageDecoder.h"
 
 #include "platform/image-decoders/bmp/BMPImageDecoder.h"

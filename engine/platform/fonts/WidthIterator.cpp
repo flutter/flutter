@@ -20,7 +20,6 @@
  *
  */
 
-#include "sky/engine/config.h"
 #include "sky/engine/platform/fonts/WidthIterator.h"
 
 #include "sky/engine/platform/fonts/Character.h"

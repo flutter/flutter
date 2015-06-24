@@ -23,7 +23,6 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sky/engine/config.h"
 #include "sky/engine/platform/graphics/GradientGeneratedImage.h"
 
 #include "sky/engine/platform/geometry/FloatRect.h"

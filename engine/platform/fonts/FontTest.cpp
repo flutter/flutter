@@ -25,7 +25,6 @@
 
 // Tests for the Font class.
 
-#include "sky/engine/config.h"
 
 #include "sky/engine/platform/fonts/Character.h"
 #include "sky/engine/platform/fonts/Font.h"

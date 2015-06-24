@@ -24,7 +24,6 @@
  */
 
 
-#include "sky/engine/config.h"
 #include "sky/engine/wtf/text/CString.h"
 
 #include <string.h>

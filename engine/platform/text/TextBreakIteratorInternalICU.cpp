@@ -19,7 +19,6 @@
  *
  */
 
-#include "sky/engine/config.h"
 #include "sky/engine/platform/text/TextBreakIteratorInternalICU.h"
 
 #include "sky/engine/platform/Language.h"

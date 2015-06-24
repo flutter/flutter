@@ -23,8 +23,6 @@
  *
  */
 
-#include "config.h"
-
 #include "CSSPropertyNames.h"
 #include "core/css/CSSPrimitiveValue.h"
 #include "core/css/CSSSelector.h"

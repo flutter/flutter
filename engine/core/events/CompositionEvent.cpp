@@ -24,7 +24,6 @@
  *
  */
 
-#include "sky/engine/config.h"
 #include "sky/engine/core/events/CompositionEvent.h"
 
 namespace blink {

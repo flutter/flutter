@@ -21,7 +21,6 @@
    package by Ronald Tschalär Copyright (C) 1996-1999.
 */
 
-#include "sky/engine/config.h"
 #include "sky/engine/wtf/text/Base64.h"
 
 #include <limits.h>

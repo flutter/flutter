@@ -23,7 +23,6 @@
  *
  */
 
-#include "sky/engine/config.h"
 #include "sky/engine/core/rendering/RenderBoxModelObject.h"
 
 #include "sky/engine/core/frame/Settings.h"

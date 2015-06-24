@@ -19,7 +19,6 @@
  *
  */
 
-#include "sky/engine/config.h"
 #include "sky/engine/core/rendering/style/StyleRareNonInheritedData.h"
 
 #include "sky/engine/core/rendering/style/DataEquivalency.h"

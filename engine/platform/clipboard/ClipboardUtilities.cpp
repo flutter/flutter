@@ -28,7 +28,6 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sky/engine/config.h"
 #include "sky/engine/platform/clipboard/ClipboardUtilities.h"
 
 #include "sky/engine/platform/weborigin/KURL.h"

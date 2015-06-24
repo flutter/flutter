@@ -1,5 +1,4 @@
 %{
-#include "config.h"
 #include "platform/graphics/Color.h"
 #include <string.h>
 

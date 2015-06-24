@@ -22,7 +22,6 @@
  *
  */
 
-#include "sky/engine/config.h"
 #include "sky/engine/core/dom/NodeTraversal.h"
 
 #include "sky/engine/core/dom/ContainerNode.h"

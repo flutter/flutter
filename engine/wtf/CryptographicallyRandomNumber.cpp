@@ -27,7 +27,6 @@
  * RC4 is a registered trademark of RSA Laboratories.
  */
 
-#include "sky/engine/config.h"
 #include "sky/engine/wtf/CryptographicallyRandomNumber.h"
 
 #include "sky/engine/wtf/StdLibExtras.h"

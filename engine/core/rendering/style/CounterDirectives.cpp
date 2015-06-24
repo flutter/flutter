@@ -19,7 +19,6 @@
  *
  */
 
-#include "sky/engine/config.h"
 #include "sky/engine/core/rendering/style/CounterDirectives.h"
 #include "sky/engine/wtf/PassOwnPtr.h"
 

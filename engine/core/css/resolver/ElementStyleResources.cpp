@@ -20,7 +20,6 @@
  *
  */
 
-#include "sky/engine/config.h"
 #include "sky/engine/core/css/resolver/ElementStyleResources.h"
 
 #include "sky/engine/core/css/CSSGradientValue.h"

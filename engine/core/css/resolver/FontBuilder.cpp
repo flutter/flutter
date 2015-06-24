@@ -20,7 +20,6 @@
  *
  */
 
-#include "sky/engine/config.h"
 #include "sky/engine/core/css/resolver/FontBuilder.h"
 
 #include "sky/engine/core/css/CSSCalculationValue.h"

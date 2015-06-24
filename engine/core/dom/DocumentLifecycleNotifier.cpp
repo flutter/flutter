@@ -24,7 +24,6 @@
  */
 
 
-#include "sky/engine/config.h"
 #include "sky/engine/core/dom/DocumentLifecycleNotifier.h"
 
 #include "sky/engine/wtf/Assertions.h"

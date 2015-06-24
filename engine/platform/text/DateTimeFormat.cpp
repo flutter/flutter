@@ -23,7 +23,6 @@
  * SUCH DAMAGE.
  */
 
-#include "sky/engine/config.h"
 #include "sky/engine/platform/text/DateTimeFormat.h"
 
 #include "sky/engine/wtf/ASCIICType.h"

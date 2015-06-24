@@ -4,7 +4,6 @@
 
 #include "math.h"
 
-#include "sky/engine/config.h"
 #include "sky/engine/core/painting/Canvas.h"
 
 #include "sky/engine/core/dom/Document.h"

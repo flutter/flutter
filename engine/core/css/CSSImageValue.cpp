@@ -18,7 +18,6 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#include "sky/engine/config.h"
 #include "sky/engine/core/css/CSSImageValue.h"
 
 #include "gen/sky/core/FetchInitiatorTypeNames.h"

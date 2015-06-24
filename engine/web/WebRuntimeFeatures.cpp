@@ -28,7 +28,6 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sky/engine/config.h"
 #include "sky/engine/public/web/WebRuntimeFeatures.h"
 
 #include "gen/sky/platform/RuntimeEnabledFeatures.h"

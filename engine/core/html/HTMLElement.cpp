@@ -22,7 +22,6 @@
  *
  */
 
-#include "sky/engine/config.h"
 #include "sky/engine/core/html/HTMLElement.h"
 
 namespace blink {

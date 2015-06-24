@@ -22,7 +22,6 @@
  *
  */
 
-#include "sky/engine/config.h"
 #include "sky/engine/core/rendering/RenderText.h"
 
 #include "sky/engine/core/dom/Text.h"

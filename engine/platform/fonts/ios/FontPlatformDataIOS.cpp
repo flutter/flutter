@@ -29,7 +29,6 @@
  */
 
 #include "base/logging.h"
-#include "sky/engine/config.h"
 #include "sky/engine/platform/fonts/FontPlatformData.h"
 #include "sky/engine/platform/fonts/FontCache.h"
 

@@ -25,7 +25,6 @@
  *
  */
 
-#include "sky/engine/config.h"
 #include "sky/engine/core/rendering/RenderImageResource.h"
 
 #include "sky/engine/core/rendering/RenderImage.h"

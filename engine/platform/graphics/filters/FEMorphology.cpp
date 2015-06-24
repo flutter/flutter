@@ -22,7 +22,6 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#include "sky/engine/config.h"
 #include "sky/engine/platform/graphics/filters/FEMorphology.h"
 
 #include "sky/engine/platform/graphics/GraphicsContext.h"

@@ -21,7 +21,6 @@
  *
  */
 
-#include "sky/engine/config.h"
 #include "sky/engine/core/rendering/RenderReplaced.h"
 
 #include "gen/sky/platform/RuntimeEnabledFeatures.h"

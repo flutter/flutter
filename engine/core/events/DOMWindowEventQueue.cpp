@@ -24,7 +24,6 @@
  *
  */
 
-#include "sky/engine/config.h"
 #include "sky/engine/core/events/DOMWindowEventQueue.h"
 
 #include "sky/engine/core/events/Event.h"

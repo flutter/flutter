@@ -19,7 +19,6 @@
  *
 */
 
-#include "sky/engine/config.h"
 #include "sky/engine/core/rendering/HitTestResult.h"
 
 #include "gen/sky/core/HTMLNames.h"

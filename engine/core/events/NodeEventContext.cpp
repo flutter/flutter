@@ -24,7 +24,6 @@
  *
  */
 
-#include "sky/engine/config.h"
 #include "sky/engine/core/events/NodeEventContext.h"
 
 #include "sky/engine/core/events/Event.h"

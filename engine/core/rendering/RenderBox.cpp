@@ -23,7 +23,6 @@
  *
  */
 
-#include "sky/engine/config.h"
 #include "sky/engine/core/rendering/RenderBox.h"
 
 #include <math.h>

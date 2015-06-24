@@ -27,7 +27,6 @@
  *
  */
 
-#include "sky/engine/config.h"
 
 #include "sky/engine/platform/graphics/filters/LightSource.h"
 

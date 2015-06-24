@@ -19,7 +19,6 @@
  *
  */
 
-#include "sky/engine/config.h"
 #include "sky/engine/core/css/resolver/ElementResolveContext.h"
 
 #include "sky/engine/core/dom/Node.h"

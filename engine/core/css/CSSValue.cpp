@@ -24,7 +24,6 @@
  *
  */
 
-#include "sky/engine/config.h"
 #include "sky/engine/core/css/CSSValue.h"
 
 #include "sky/engine/core/css/CSSAspectRatioValue.h"

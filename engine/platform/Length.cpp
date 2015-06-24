@@ -22,7 +22,6 @@
  *
  */
 
-#include "sky/engine/config.h"
 #include "sky/engine/platform/Length.h"
 
 #include "sky/engine/platform/CalculationValue.h"

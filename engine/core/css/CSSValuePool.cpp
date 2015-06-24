@@ -23,7 +23,6 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sky/engine/config.h"
 #include "sky/engine/core/css/CSSValuePool.h"
 
 #include "sky/engine/core/css/CSSValueList.h"

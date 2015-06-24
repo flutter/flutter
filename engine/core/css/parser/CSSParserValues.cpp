@@ -18,7 +18,6 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#include "sky/engine/config.h"
 #include "sky/engine/core/css/parser/CSSParserValues.h"
 
 #include "sky/engine/core/css/CSSFunctionValue.h"

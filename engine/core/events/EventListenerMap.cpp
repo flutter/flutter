@@ -30,7 +30,6 @@
  *
  */
 
-#include "sky/engine/config.h"
 #include "sky/engine/core/events/EventListenerMap.h"
 
 #include "sky/engine/core/events/EventTarget.h"

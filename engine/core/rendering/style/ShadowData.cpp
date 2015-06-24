@@ -19,7 +19,6 @@
  *
  */
 
-#include "sky/engine/config.h"
 #include "sky/engine/core/rendering/style/ShadowData.h"
 
 #include "sky/engine/platform/animation/AnimationUtilities.h"

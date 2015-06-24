@@ -27,7 +27,6 @@
  * SUCH DAMAGE.
  */
 
-#include "sky/engine/config.h"
 #include "sky/engine/core/css/CSSBasicShapes.h"
 
 #include "sky/engine/core/css/CSSValuePool.h"

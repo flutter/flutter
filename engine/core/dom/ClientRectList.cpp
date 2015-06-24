@@ -24,7 +24,6 @@
  *
  */
 
-#include "sky/engine/config.h"
 #include "sky/engine/core/dom/ClientRectList.h"
 
 #include "sky/engine/core/dom/ClientRect.h"

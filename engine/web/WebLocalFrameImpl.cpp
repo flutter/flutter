@@ -69,7 +69,6 @@
 // Thie client is expected to be set whenever the WebLocalFrameImpl is attached to
 // the DOM.
 
-#include "sky/engine/config.h"
 #include "sky/engine/web/WebLocalFrameImpl.h"
 
 #include <algorithm>
