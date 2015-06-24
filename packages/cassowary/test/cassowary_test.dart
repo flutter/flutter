@@ -278,7 +278,6 @@ void main() {
     var right = new Variable(100.0);
 
     var c1 = right - left >= CM(200.0);
-    var c2 = right + left >= CM(0.0);
 
     expect((right >= left) is Constraint, true);
 
@@ -339,5 +338,21 @@ void main() {
     expect(c4 is Constraint, true);
     expect(c4.expression.terms.length, 2);
     expect(c4.expression.constant, -20.0);
+  });
+
+  test('constraint_update_in_solver', () {
+    var s = new Solver();
+
+    var left = new Variable(2.0);
+    var right = new Variable(100.0);
+
+    var c1 = right - left >= CM(200.0);
+    var c2 = right >= right;
+
+    expect(s.addConstraint(c1), Result.success);
+    expect(s.addConstraint(c1), Result.duplicateConstraint);
+    expect(s.removeConstraint(c2), Result.unknownConstraint);
+    expect(s.removeConstraint(c1), Result.success);
+    expect(s.removeConstraint(c1), Result.unknownConstraint);
   });
 }

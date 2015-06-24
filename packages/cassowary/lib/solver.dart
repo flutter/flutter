@@ -49,8 +49,37 @@ class Solver {
     return _optimizeObjectiveRow(_objective);
   }
 
-  Result removeContraint(Constraint c) {
-    return Result.unimplemented;
+  Result removeConstraint(Constraint constraint) {
+    Tag tag = _constraints[constraint];
+    if (tag == null) {
+      return Result.unknownConstraint;
+    }
+
+    tag = new Tag.fromTag(tag);
+    _constraints.remove(constraint);
+
+    _removeConstraintEffects(constraint, tag);
+
+    Row row = _rows[tag.marker];
+    if (row != null) {
+      _rows.remove(tag.marker);
+    } else {
+      _Pair<Symbol, Row> rowPair =
+          _getLeavingRowPairForMarkerSymbol(tag.marker);
+
+      if (rowPair == null) {
+        return Result.internalSolverError;
+      }
+
+      Symbol leaving = rowPair.first;
+      row = rowPair.second;
+      var removed = _rows.remove(rowPair.first);
+      assert(removed != null);
+      row.solveForSymbols(leaving, tag.marker);
+      _substitute(tag.marker, row);
+    }
+
+    return _optimizeObjectiveRow(_objective);
   }
 
   Result hasConstraint(Constraint c) {
@@ -308,6 +337,63 @@ class Solver {
     }
     return new Symbol(SymbolType.invalid, 0);
   }
+
+  void _removeConstraintEffects(Constraint cn, Tag tag) {
+    if (tag.marker.type == SymbolType.error) {
+      _removeMarkerEffects(tag.marker, cn.priority);
+    }
+    if (tag.other.type == SymbolType.error) {
+      _removeMarkerEffects(tag.other, cn.priority);
+    }
+  }
+
+  void _removeMarkerEffects(Symbol marker, double strength) {
+    Row row = _rows[marker];
+    if (row != null) {
+      _objective.insertRow(row, -strength);
+    } else {
+      _objective.insertSymbol(marker, -strength);
+    }
+  }
+
+  _Pair<Symbol, Row> _getLeavingRowPairForMarkerSymbol(Symbol marker) {
+    double r1 = double.MAX_FINITE;
+    double r2 = double.MAX_FINITE;
+
+    _Pair<Symbol, Row> first, second, third;
+
+    _rows.forEach((symbol, row) {
+      double c = row.coefficientForSymbol(marker);
+
+      if (c == 0.0) {
+        return;
+      }
+
+      if (symbol.type == SymbolType.external) {
+        third = new _Pair(symbol, row);
+      } else if (c < 0.0) {
+        double r = -row.constant / c;
+        if (r < r1) {
+          r1 = r;
+          first = new _Pair(symbol, row);
+        }
+      } else {
+        double r = row.constant / c;
+        if (r < r2) {
+          r2 = r;
+          second = new _Pair(symbol, row);
+        }
+      }
+    });
+
+    if (first != null) {
+      return first;
+    }
+    if (second != null) {
+      return second;
+    }
+    return third;
+  }
 }
 
 class Tag {
@@ -315,6 +401,9 @@ class Tag {
   Symbol other;
 
   Tag(this.marker, this.other);
+  Tag.fromTag(Tag tag)
+      : this.marker = tag.marker,
+        this.other = tag.other;
 }
 
 class EditInfo {
