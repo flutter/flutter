@@ -6,7 +6,8 @@ import 'dart:sky';
 
 void beginFrame(double timeStamp) {
   var size = 100.0;
-  PictureRecorder canvas = new PictureRecorder(view.width, view.height);
+  PictureRecorder recorder = new PictureRecorder();
+  Canvas canvas = new Canvas(recorder, view.width, view.height);
   canvas.translate(size + 10.0, size + 10.0);
 
   Paint paint = new Paint();
@@ -30,7 +31,7 @@ void beginFrame(double timeStamp) {
   canvas.drawPaint(
       new Paint()..color = const Color.fromARGB(255, 255, 255, 255));
   canvas.drawRect(new Rect.fromLTRB(-size, -size, size, size), paint);
-  view.picture = canvas.endRecording();
+  view.picture = recorder.endRecording();
 }
 
 void main() {

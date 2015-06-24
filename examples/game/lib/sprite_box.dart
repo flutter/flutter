@@ -251,7 +251,7 @@ class SpriteBox extends RenderBox {
     _rootNode._invalidateToBoxTransformMatrix();
   }
 
-  void paint(RenderObjectDisplayList canvas) {
+  void paint(RenderCanvas canvas) {
     canvas.save();
 
     // Move to correct coordinate space before drawing

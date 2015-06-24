@@ -64,7 +64,7 @@ class Sprite extends NodeWithSize {
     _opacity = opacity;
   }
 
-  void paint(PictureRecorder canvas) {
+  void paint(RenderCanvas canvas) {
     canvas.save();
 
     // Account for pivot point

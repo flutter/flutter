@@ -36,7 +36,7 @@ class Dot {
     radius = 5 + (95 * event.pressure);
   }
 
-  void paint(RenderObjectDisplayList canvas) {
+  void paint(RenderCanvas canvas) {
     canvas.drawCircle(x, y, radius, _paint);
   }
 }
@@ -69,7 +69,7 @@ class RenderTouchDemo extends RenderBox {
     size = constraints.constrain(Size.infinite);
   }
 
-  void paint(RenderObjectDisplayList canvas) {
+  void paint(RenderCanvas canvas) {
     Paint white = new Paint()..color = const Color(0xFFFFFFFF);
     canvas.drawRect(new Rect.fromSize(size), white);
     for (Dot dot in dots.values)

@@ -12,11 +12,12 @@ Picture draw(int a, int r, int g, int b) {
   double width = view.width;
   double height = view.height;
 
-  PictureRecorder recorder = new PictureRecorder(width, height);
+  PictureRecorder recorder = new PictureRecorder();
+  Canvas canvas = new Canvas(recorder, width, height);
   double radius = min(width, height) * 0.45;
 
   Paint paint = new Paint()..color = new Color.fromARGB(a, r, g, b);
-  recorder.drawRect(new Rect.fromSize(new Size(width, height)), paint);
+  canvas.drawRect(new Rect.fromSize(new Size(width, height)), paint);
   return recorder.endRecording();
 }
 

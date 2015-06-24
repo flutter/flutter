@@ -4,6 +4,7 @@
 
 import 'dart:math' as math;
 import 'dart:sky';
+
 import 'package:sky/mojo/net/image_cache.dart' as image_cache;
 
 double timeBase = null;
@@ -15,7 +16,8 @@ String url2 = "http://i2.kym-cdn.com/photos/images/facebook/000/581/296/c09.jpg"
 void beginFrame(double timeStamp) {
   if (timeBase == null) timeBase = timeStamp;
   double delta = timeStamp - timeBase;
-  PictureRecorder canvas = new PictureRecorder(view.width, view.height);
+  PictureRecorder recorder = new PictureRecorder();
+  Canvas canvas = new Canvas(recorder, view.width, view.height);
   canvas.translate(view.width / 2.0, view.height / 2.0);
   canvas.rotate(math.PI * delta / 1800);
   canvas.scale(0.2, 0.2);
@@ -36,7 +38,7 @@ void beginFrame(double timeStamp) {
       paint);
   }
 
-  view.picture = canvas.endRecording();
+  view.picture = recorder.endRecording();
   view.scheduleFrame();
 }
 
