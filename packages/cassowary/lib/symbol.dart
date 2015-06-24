@@ -7,7 +7,8 @@ part of cassowary;
 enum SymbolType { invalid, external, slack, error, dummy, }
 
 class Symbol {
-  SymbolType type;
+  final SymbolType type;
+  int tick;
 
-  Symbol(this.type);
+  Symbol(this.type, this.tick);
 }

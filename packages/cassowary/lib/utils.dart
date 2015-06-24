@@ -13,3 +13,9 @@ bool _nearZero(double value) {
 // instead. Sadly, due the lack of generic types on functions, we have to use
 // dynamic instead.
 _elvis(a, b) => a != null ? a : b;
+
+class _Pair<X, Y> {
+  X first;
+  Y second;
+  _Pair(this.first, this.second);
+}

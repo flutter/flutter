@@ -11,6 +11,9 @@ class Expression extends EquationMember {
   double get value => terms.fold(constant, (value, term) => value + term.value);
 
   Expression(this.terms, this.constant);
+  Expression.fromExpression(Expression expr)
+      : this.terms = new List<Term>.from(expr.terms),
+        this.constant = expr.constant;
 
   Expression asExpression() => this;
 
