@@ -26,10 +26,9 @@ class ParentData {
   String toString() => '<none>';
 }
 
-const kLayoutDirections = 4;
+class RenderCanvas extends sky.Canvas {
+  RenderCanvas(sky.PictureRecorder recorder, double width, double height) : super(recorder, width, height);
 
-class RenderObjectDisplayList extends sky.PictureRecorder {
-  RenderObjectDisplayList(double width, double height) : super(width, height);
   void paintChild(RenderObject child, Point position) {
     translate(position.x, position.y);
     child.paint(this);
@@ -219,7 +218,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     assert(!debugDoingPaint);
     scheduler.ensureVisualUpdate();
   }
-  void paint(RenderObjectDisplayList canvas) { }
+  void paint(RenderCanvas canvas) { }
 
 
   // EVENTS

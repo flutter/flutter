@@ -2,19 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "sky/engine/core/painting/PictureRecorder.h"
-
+#include "sky/engine/core/painting/Canvas.h"
 #include "sky/engine/core/painting/Picture.h"
+#include "sky/engine/core/painting/PictureRecorder.h"
 
 namespace blink {
 
-PassRefPtr<PictureRecorder> PictureRecorder::create(double width, double height)
-{
-    return adoptRef(new PictureRecorder(FloatSize(width, height)));
-}
-
-PictureRecorder::PictureRecorder(const FloatSize& size)
-    : Canvas(size)
+PictureRecorder::PictureRecorder()
+    : m_pictureRecorder(adoptPtr(new SkPictureRecorder()))
 {
 }
 
@@ -22,11 +17,26 @@ PictureRecorder::~PictureRecorder()
 {
 }
 
+bool PictureRecorder::isRecording() {
+    return m_canvas && m_canvas->isRecording();
+}
+
+SkCanvas* PictureRecorder::beginRecording(double width, double height)
+{
+    return m_pictureRecorder->beginRecording(width, height);
+}
+
 PassRefPtr<Picture> PictureRecorder::endRecording()
 {
     if (!isRecording())
         return nullptr;
-    return Picture::create(finishRecording());
+    RefPtr<Picture> picture = Picture::create(
+        adoptRef(m_pictureRecorder->endRecording()));
+    m_canvas->clearSkCanvas();
+    m_canvas = nullptr;
+    return picture.release();
 }
+
+void PictureRecorder::set_canvas(PassRefPtr<Canvas> canvas) { m_canvas = canvas; }
 
 } // namespace blink

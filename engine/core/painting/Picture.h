@@ -5,10 +5,10 @@
 #ifndef SKY_ENGINE_CORE_PAINTING_PICTURE_H_
 #define SKY_ENGINE_CORE_PAINTING_PICTURE_H_
 
-#include "sky/engine/platform/graphics/DisplayList.h"
 #include "sky/engine/tonic/dart_wrappable.h"
 #include "sky/engine/wtf/PassRefPtr.h"
 #include "sky/engine/wtf/RefCounted.h"
+#include "third_party/skia/include/core/SkPicture.h"
 
 namespace blink {
 
@@ -16,15 +16,14 @@ class Picture : public RefCounted<Picture>, public DartWrappable {
     DEFINE_WRAPPERTYPEINFO();
 public:
     ~Picture() override;
-    static PassRefPtr<Picture> create(PassRefPtr<DisplayList>);
+    static PassRefPtr<Picture> create(PassRefPtr<SkPicture> skPicture);
 
-    SkPicture* toSkia() const { return m_displayList->picture(); }
-    DisplayList* displayList() const { return m_displayList.get(); }
+    SkPicture* toSkia() const { return m_picture.get(); }
 
 private:
-    Picture(PassRefPtr<DisplayList>);
+    Picture(PassRefPtr<SkPicture> skPicture);
 
-    RefPtr<DisplayList> m_displayList;
+    RefPtr<SkPicture> m_picture;
 };
 
 } // namespace blink

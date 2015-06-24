@@ -158,7 +158,7 @@ class RenderParagraph extends RenderBox {
                                           _applyFloatingPointHack(root.height)));
   }
 
-  void paint(RenderObjectDisplayList canvas) {
+  void paint(RenderCanvas canvas) {
     // Ideally we could compute the min/max intrinsic width/height with a
     // non-destructive operation. However, currently, computing these values
     // will destroy state inside the layout root. If that happens, we need to

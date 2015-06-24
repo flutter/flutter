@@ -20,6 +20,7 @@ ExceptionState::ExceptionState(Context context, const char* interfaceName) {
 ExceptionState::~ExceptionState() {
 }
 
+// TODO(iansf): Implement exceptions.
 void ExceptionState::ThrowDOMException(const ExceptionCode&,
                                        const String& message) {
 }

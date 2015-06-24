@@ -335,9 +335,11 @@ static void {{static_method_name(constructor.name, overload_index)}}(Dart_Native
         ExceptionState es;
 {% endif %}
         {{generate_arguments(constructor) | indent(8)}}
+        {# TODO(iansf): The following line is incorrect if the constructor throws an exception.  In that case, we should not call AssociateWithDartWrapper, as the constructor may have returned a nullptr. #}
         {{constructor.cpp_value}}->AssociateWithDartWrapper(args);
 {% if constructor.has_exception_state %}
         if (es.had_exception()) {
+            {# TODO(iansf): The following line does not work in the case that an exception was thrown.  Investigate why. #}
             exception = es.GetDartException(args, {{constructor.auto_scope}});
             goto fail;
         }

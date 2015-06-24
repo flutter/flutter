@@ -100,7 +100,7 @@ class RenderBlock extends RenderBox with ContainerRenderObjectMixin<RenderBox, B
     defaultHitTestChildren(result, position: position);
   }
 
-  void paint(RenderObjectDisplayList canvas) {
+  void paint(RenderCanvas canvas) {
     defaultPaint(canvas);
   }
 

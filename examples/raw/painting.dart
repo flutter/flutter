@@ -7,28 +7,29 @@ import 'dart:math' as math;
 import 'dart:typed_data';
 
 void beginFrame(double timeStamp) {
-  sky.PictureRecorder context = new sky.PictureRecorder(sky.view.width, 200.0);
+  sky.PictureRecorder recorder = new sky.PictureRecorder();
+  Canvas canvas = new Canvas(recorder, sky.view.width, 200.0);
 
   sky.Paint paint = new sky.Paint();
-  sky.Point mid = new sky.Point(context.width / 2.0, context.height / 2.0);
+  sky.Point mid = new sky.Point(sky.view.width / 2.0, sky.view.height / 2.0);
   double radius = math.min(mid.x, mid.y);
 
-  context.drawPaint(new sky.Paint()..color = const sky.Color(0xFFFFFFFF));
+  canvas.drawPaint(new sky.Paint()..color = const sky.Color(0xFFFFFFFF));
 
-  context.save();
+  canvas.save();
 
-  context.translate(-mid.x/2.0, context.height*2.0);
-  context.clipRect(
-      new sky.Rect.fromLTRB(0.0, -context.height, context.width, radius));
+  canvas.translate(-mid.x/2.0, sky.view.height*2.0);
+  canvas.clipRect(
+      new sky.Rect.fromLTRB(0.0, -sky.view.height, sky.view.width, radius));
 
-  context.translate(mid.x, mid.y);
+  canvas.translate(mid.x, mid.y);
   paint.color = const sky.Color.fromARGB(128, 255, 0, 255);
-  context.rotate(math.PI/4.0);
+  canvas.rotate(math.PI/4.0);
 
   sky.Gradient yellowBlue = new sky.Gradient.linear(
       [new sky.Point(-radius, -radius), new sky.Point(0.0, 0.0)],
       [const sky.Color(0xFFFFFF00), const sky.Color(0xFF0000FF)]);
-  context.drawRect(new sky.Rect.fromLTRB(-radius, -radius, radius, radius),
+  canvas.drawRect(new sky.Rect.fromLTRB(-radius, -radius, radius, radius),
                    new sky.Paint()..setShader(yellowBlue));
 
   // Scale x and y by 0.5.
@@ -38,13 +39,13 @@ void beginFrame(double timeStamp) {
       0.0, 0.0, 0.0, 0.0,
       0.0, 0.0, 0.0, 1.0,
   ]);
-  context.concat(scaleMatrix);
+  canvas.concat(scaleMatrix);
   paint.color = const sky.Color.fromARGB(128, 0, 255, 0);
-  context.drawCircle(0.0, 0.0, radius, paint);
+  canvas.drawCircle(0.0, 0.0, radius, paint);
 
-  context.restore();
+  canvas.restore();
 
-  context.translate(0.0, 50.0);
+  canvas.translate(0.0, 50.0);
   var builder = new sky.LayerDrawLooperBuilder()
       ..addLayerOnTop(
           new sky.DrawLooperLayerInfo()
@@ -80,9 +81,9 @@ void beginFrame(double timeStamp) {
         layerPaint.color = const sky.Color.fromARGB(128, 255, 0, 0);
       });
   paint.setDrawLooper(builder.build());
-  context.drawCircle(0.0, 0.0, radius, paint);
+  canvas.drawCircle(0.0, 0.0, radius, paint);
 
-  sky.view.picture = context.endRecording();
+  sky.view.picture = recorder.endRecording();
 }
 
 void main() {

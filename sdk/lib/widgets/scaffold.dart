@@ -124,7 +124,7 @@ class RenderScaffold extends RenderBox {
     }
   }
 
-  void paint(RenderObjectDisplayList canvas) {
+  void paint(RenderCanvas canvas) {
     for (ScaffoldSlots slot in [ScaffoldSlots.body, ScaffoldSlots.statusBar, ScaffoldSlots.toolbar, ScaffoldSlots.floatingActionButton, ScaffoldSlots.drawer]) {
       RenderBox box = _slots[slot];
       if (box != null) {

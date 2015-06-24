@@ -8,14 +8,14 @@
 
 namespace blink {
 
-PassRefPtr<Picture> Picture::create(PassRefPtr<DisplayList> list)
+PassRefPtr<Picture> Picture::create(PassRefPtr<SkPicture> skPicture)
 {
-    ASSERT(list);
-    return adoptRef(new Picture(list));
+    ASSERT(skPicture);
+    return adoptRef(new Picture(skPicture));
 }
 
-Picture::Picture(PassRefPtr<DisplayList> list)
-    : m_displayList(list)
+Picture::Picture(PassRefPtr<SkPicture> skPicture)
+    : m_picture(skPicture)
 {
 }
 

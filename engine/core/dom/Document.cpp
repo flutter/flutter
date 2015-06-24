@@ -2215,8 +2215,6 @@ Picture* Document::rootPicture() const
 void Document::setRootPicture(PassRefPtr<Picture> picture)
 {
     m_picture = picture;
-    if (m_picture)
-        PaintingTasks::enqueueCommit(this, m_picture->displayList());
     scheduleVisualUpdate();
 }
 

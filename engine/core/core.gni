@@ -1151,8 +1151,6 @@ core_idl_files = get_path_info([
                                  "painting/LayoutRoot.idl",
                                  "painting/MaskFilter.idl",
                                  "painting/Paint.idl",
-                                 "painting/PaintingCallback.idl",
-                                 "painting/PaintingContext.idl",
                                  "painting/Path.idl",
                                  "painting/Picture.idl",
                                  "painting/PictureRecorder.idl",

@@ -12,12 +12,13 @@ void beginFrame(double timeStamp) {
   if (timeBase == null)
     timeBase = timeStamp;
   double delta = timeStamp - timeBase;
-  PictureRecorder canvas = new PictureRecorder(view.width, view.height);
+  PictureRecorder recorder = new PictureRecorder();
+  Canvas canvas = new Canvas(recorder, view.width, view.height);
   canvas.translate(view.width / 2.0, view.height / 2.0);
   canvas.rotate(math.PI * delta / 1800);
   canvas.drawRect(new Rect.fromLTRB(-100.0, -100.0, 100.0, 100.0),
                   new Paint()..color = const Color.fromARGB(255, 0, 255, 0));
-  view.picture = canvas.endRecording();
+  view.picture = recorder.endRecording();
   view.scheduleFrame();
   tracing.end('beginFrame');
 }

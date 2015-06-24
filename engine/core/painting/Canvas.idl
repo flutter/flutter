@@ -3,12 +3,10 @@
 // found in the LICENSE file.
 
 // TODO(mpcomplete): Figure out a better SkMatrix representation.
-interface Canvas {
-  // Height and width are used for culling optimizations and do not necessarily
-  // imply that the Canvas is backed by a buffer with any specific bounds.
-  readonly attribute float height;
-  readonly attribute float width;
-
+[
+  Constructor(PictureRecorder recorder, double width, double height),
+  RaisesException=Constructor,
+] interface Canvas {
   void save();
   // TODO(jackson): Paint should be optional, but making it optional causes crash
   void saveLayer(Rect bounds, /* optional */ Paint paint);

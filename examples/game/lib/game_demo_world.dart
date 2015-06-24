@@ -372,7 +372,7 @@ class StarField extends Node {
     }
   }
 
-  void paint(PictureRecorder canvas) {
+  void paint(RenderCanvas canvas) {
     // Setup paint object for opacity and transfer mode
     Paint paint = new Paint();
     paint.setTransferMode(TransferMode.plus);

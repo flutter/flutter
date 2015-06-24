@@ -12,7 +12,6 @@ namespace blink {
 class Element;
 
 class PaintingContext : public Canvas {
-    DEFINE_WRAPPERTYPEINFO();
 public:
     ~PaintingContext() override;
     static PassRefPtr<PaintingContext> create(PassRefPtr<Element> element, const FloatSize& size);

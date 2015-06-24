@@ -75,6 +75,7 @@
 #include "sky/engine/core/page/ChromeClient.h"
 #include "sky/engine/core/page/FocusController.h"
 #include "sky/engine/core/page/Page.h"
+#include "sky/engine/core/painting/Canvas.h"
 #include "sky/engine/core/painting/PaintingCallback.h"
 #include "sky/engine/core/painting/PaintingTasks.h"
 #include "sky/engine/core/painting/PictureRecorder.h"

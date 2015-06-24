@@ -2,9 +2,9 @@ CONSOLE: unittest-suite-wait-for-done
 CONSOLE: TestRenderView enabled
 CONSOLE: 
 PAINT FOR FRAME #1 ----------------------------------------------
-1 | TestDisplayList() constructor: 800.0 x 600.0
+1 | TestRenderCanvas() constructor: 800.0 x 600.0
 1 | paintChild RenderDecoratedBox at Point(0.0, 0.0)
-1 |  | TestDisplayList() constructor: 800.0 x 600.0
+1 |  | TestRenderCanvas() constructor: 800.0 x 600.0
 1 |  | drawRect(Rect.fromLTRB(0.0, 0.0, 800.0, 600.0), Paint(color:Color(0xff00ff00), shader: SkRadialGradient: (center: (0, 0) radius: 500 2 colors: FFFFEB3B, FF2196F3 clamp), drawLooper:true))
 ------------------------------------------------------------------------
 CONSOLE: PASS: should size to render view

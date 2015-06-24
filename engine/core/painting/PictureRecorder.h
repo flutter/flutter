@@ -5,22 +5,39 @@
 #ifndef SKY_ENGINE_CORE_PAINTING_PICTURERECORDER_H_
 #define SKY_ENGINE_CORE_PAINTING_PICTURERECORDER_H_
 
-#include "sky/engine/core/painting/Canvas.h"
+#include "sky/engine/tonic/dart_wrappable.h"
+#include "sky/engine/wtf/PassRefPtr.h"
+#include "sky/engine/wtf/RefCounted.h"
+#include "third_party/skia/include/core/SkPictureRecorder.h"
 
 namespace blink {
 
 class Picture;
+class Canvas;
 
-class PictureRecorder : public Canvas {
+class PictureRecorder : public RefCounted<PictureRecorder>,
+                        public DartWrappable {
     DEFINE_WRAPPERTYPEINFO();
 public:
-    ~PictureRecorder() override;
-    static PassRefPtr<PictureRecorder> create(double width, double height);
+    static PassRefPtr<PictureRecorder> create()
+    {
+        return adoptRef(new PictureRecorder());
+    }
 
+    ~PictureRecorder();
+
+    // PassRefPtr<Canvas> beginRecording(double width, double height);
+    SkCanvas* beginRecording(double width, double height);
     PassRefPtr<Picture> endRecording();
+    bool isRecording();
+
+    void set_canvas(PassRefPtr<Canvas> canvas);
 
 private:
-    PictureRecorder(const FloatSize& size);
+	PictureRecorder();
+
+	OwnPtr<SkPictureRecorder> m_pictureRecorder;
+	RefPtr<Canvas> m_canvas;
 };
 
 } // namespace blink

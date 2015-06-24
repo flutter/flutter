@@ -2,6 +2,7 @@
 import 'dart:async';
 import 'dart:sky' as sky;
 import "dart:sky.internals" as internals;
+import 'dart:typed_data';
 
 import 'package:sky/widgets/basic.dart';
 import 'package:sky/rendering/box.dart';
@@ -9,12 +10,12 @@ import 'package:sky/rendering/object.dart';
 
 typedef void Logger (String s);
 
-class TestDisplayList extends RenderObjectDisplayList {
-  TestDisplayList(double width, double height, this.logger, { this.indent: '' }) :
-    this.width = width,
-    this.height = height,
-    super(width, height) {
-    log("TestDisplayList() constructor: $width x $height");
+class TestRenderCanvas extends RenderCanvas {
+  TestRenderCanvas(sky.PictureRecorder recorder, double width, double height, this.logger, { this.indent: '' })
+    : width = width,
+      height = height,
+      super(recorder, width, height) {
+    log("TestRenderCanvas() constructor: $width x $height");
   }
 
   final String indent;
@@ -54,8 +55,8 @@ class TestDisplayList extends RenderObjectDisplayList {
     log("skew($sx, $sy)");
   }
 
-  void concat(List<double> matrix9) {
-    log("concat($matrix9)");
+  void concat(Float32List matrix4) {
+    log("concat($matrix4)");
   }
 
   void clipRect(Rect rect) {
@@ -112,7 +113,7 @@ class TestDisplayList extends RenderObjectDisplayList {
 
   void paintChild(RenderObject child, Point position) {
     log("paintChild ${child.runtimeType} at $position");
-    child.paint(new TestDisplayList(width, height, logger, indent: "$indent  |"));
+    child.paint(new TestRenderCanvas(new sky.PictureRecorder(), width, height, logger, indent: "$indent  |"));
   }
 }
 
@@ -138,8 +139,10 @@ class TestRenderView extends RenderView {
     frame += 1;
     lastPaint = '';
     log("PAINT FOR FRAME #${frame} ----------------------------------------------");
-    var canvas = new TestDisplayList(rootConstraints.width, rootConstraints.height, log, indent: "${frame} |");
+    var recorder = new sky.PictureRecorder();
+    var canvas = new TestRenderCanvas(recorder, rootConstraints.width, rootConstraints.height, log, indent: "${frame} |");
     paint(canvas);
+    recorder.endRecording();
     log("------------------------------------------------------------------------");
     RenderObject.debugDoingPaint = false;
   }

@@ -16,8 +16,6 @@
 
   readonly attribute ShadowRoot shadowRoot;
 
-  void requestPaint(PaintingCallback callback);
-
   void setNeedsLayout();
   void layout();
   void setLayoutManager(LayoutCallback layout, LayoutCallback computeIntrinsicWidths);

@@ -193,7 +193,7 @@ class RenderStack extends RenderBox with ContainerRenderObjectMixin<RenderBox, S
     defaultHitTestChildren(result, position: position);
   }
 
-  void paint(RenderObjectDisplayList canvas) {
+  void paint(RenderCanvas canvas) {
     defaultPaint(canvas);
   }
 }

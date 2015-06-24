@@ -16,11 +16,9 @@
 
 namespace blink {
 
-Canvas::Canvas(const FloatSize& size)
-    : m_size(size)
+Canvas::Canvas(SkCanvas* skCanvas)
+    : m_canvas(skCanvas)
 {
-    m_displayList = adoptRef(new DisplayList);
-    m_canvas = m_displayList->beginRecording(expandedIntSize(m_size));
 }
 
 Canvas::~Canvas()
@@ -31,7 +29,6 @@ void Canvas::save()
 {
     if (!m_canvas)
         return;
-    ASSERT(m_displayList->isRecording());
     m_canvas->save();
 }
 
@@ -39,7 +36,6 @@ void Canvas::saveLayer(const Rect& bounds, const Paint* paint)
 {
     if (!m_canvas)
         return;
-    ASSERT(m_displayList->isRecording());
     m_canvas->saveLayer(!bounds.is_null ? &bounds.sk_rect : nullptr,
                         paint ? &paint->paint() : nullptr);
 }
@@ -48,7 +44,6 @@ void Canvas::restore()
 {
     if (!m_canvas)
         return;
-    ASSERT(m_displayList->isRecording());
     m_canvas->restore();
 }
 
@@ -56,7 +51,6 @@ void Canvas::translate(float dx, float dy)
 {
     if (!m_canvas)
         return;
-    ASSERT(m_displayList->isRecording());
     m_canvas->translate(dx, dy);
 }
 
@@ -64,7 +58,6 @@ void Canvas::scale(float sx, float sy)
 {
     if (!m_canvas)
         return;
-    ASSERT(m_displayList->isRecording());
     m_canvas->scale(sx, sy);
 }
 
@@ -72,7 +65,6 @@ void Canvas::rotate(float radians)
 {
     if (!m_canvas)
         return;
-    ASSERT(m_displayList->isRecording());
     m_canvas->rotate(radians * 180.0/M_PI);
 }
 
@@ -80,7 +72,6 @@ void Canvas::skew(float sx, float sy)
 {
     if (!m_canvas)
         return;
-    ASSERT(m_displayList->isRecording());
     m_canvas->skew(sx, sy);
 }
 
@@ -88,7 +79,6 @@ void Canvas::concat(const Float32List& matrix4)
 {
     if (!m_canvas)
         return;
-    ASSERT(m_displayList->isRecording());
     ASSERT(matrix4.data());
 
     // TODO(mpcomplete): how can we raise an error in this case?
@@ -112,7 +102,6 @@ void Canvas::clipRect(const Rect& rect)
 {
     if (!m_canvas)
         return;
-    ASSERT(m_displayList->isRecording());
     m_canvas->clipRect(rect.sk_rect);
 }
 
@@ -120,7 +109,6 @@ void Canvas::clipRRect(const RRect* rrect)
 {
     if (!m_canvas)
         return;
-    ASSERT(m_displayList->isRecording());
     m_canvas->clipRRect(rrect->rrect());
 }
 
@@ -128,7 +116,6 @@ void Canvas::clipPath(const CanvasPath* path)
 {
     if (!m_canvas)
         return;
-    ASSERT(m_displayList->isRecording());
     m_canvas->clipPath(path->path());
 }
 
@@ -137,7 +124,6 @@ void Canvas::drawLine(float x0, float y0, float x1, float y1, const Paint* paint
     if (!m_canvas)
         return;
     ASSERT(paint);
-    ASSERT(m_displayList->isRecording());
     m_canvas->drawLine(x0, y0, x1, y1, paint->paint());
 }
 
@@ -146,7 +132,6 @@ void Canvas::drawPicture(Picture* picture)
     if (!m_canvas)
         return;
     ASSERT(picture);
-    ASSERT(m_displayList->isRecording());
     m_canvas->drawPicture(picture->toSkia());
 }
 
@@ -155,7 +140,6 @@ void Canvas::drawPaint(const Paint* paint)
     if (!m_canvas)
         return;
     ASSERT(paint);
-    ASSERT(m_displayList->isRecording());
     m_canvas->drawPaint(paint->paint());
 }
 
@@ -164,7 +148,6 @@ void Canvas::drawRect(const Rect& rect, const Paint* paint)
     if (!m_canvas)
         return;
     ASSERT(paint);
-    ASSERT(m_displayList->isRecording());
     m_canvas->drawRect(rect.sk_rect, paint->paint());
 }
 
@@ -174,7 +157,6 @@ void Canvas::drawRRect(const RRect* rrect, const Paint* paint)
         return;
     ASSERT(rrect);
     ASSERT(paint);
-    ASSERT(m_displayList->isRecording());
     m_canvas->drawRRect(rrect->rrect(), paint->paint());
 }
 
@@ -183,7 +165,6 @@ void Canvas::drawOval(const Rect& rect, const Paint* paint)
     if (!m_canvas)
         return;
     ASSERT(paint);
-    ASSERT(m_displayList->isRecording());
     m_canvas->drawOval(rect.sk_rect, paint->paint());
 }
 
@@ -192,7 +173,6 @@ void Canvas::drawCircle(float x, float y, float radius, const Paint* paint)
     if (!m_canvas)
         return;
     ASSERT(paint);
-    ASSERT(m_displayList->isRecording());
     m_canvas->drawCircle(x, y, radius, paint->paint());
 }
 
@@ -202,7 +182,6 @@ void Canvas::drawPath(const CanvasPath* path, const Paint* paint)
         return;
     ASSERT(path);
     ASSERT(paint);
-    ASSERT(m_displayList->isRecording());
     m_canvas->drawPath(path->path(), paint->paint());
 }
 
@@ -213,7 +192,6 @@ void Canvas::drawImage(const CanvasImage* image,
     if (!m_canvas)
         return;
     ASSERT(image);
-    ASSERT(m_displayList->isRecording());
     m_canvas->drawBitmap(image->bitmap(), x, y, &paint->paint());
 }
 
@@ -221,17 +199,7 @@ void Canvas::drawImageRect(const CanvasImage* image, Rect& src, Rect& dst, Paint
     if (!m_canvas)
         return;
     ASSERT(image);
-    ASSERT(m_displayList->isRecording());
     m_canvas->drawBitmapRectToRect(image->bitmap(), &src.sk_rect, dst.sk_rect, &paint->paint());
-}
-
-PassRefPtr<DisplayList> Canvas::finishRecording()
-{
-    if (!isRecording())
-        return nullptr;
-    m_canvas = nullptr;
-    m_displayList->endRecording();
-    return m_displayList.release();
 }
 
 } // namespace blink

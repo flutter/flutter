@@ -395,7 +395,7 @@ class Node {
 
   // Rendering
   
-  void _visit(PictureRecorder canvas) {
+  void _visit(RenderCanvas canvas) {
     assert(canvas != null);
     if (!visible) return;
 
@@ -404,7 +404,7 @@ class Node {
     _postPaint(canvas);
   }
   
-  void _prePaint(PictureRecorder canvas) {
+  void _prePaint(RenderCanvas canvas) {
     canvas.save();
 
     // Get the transformation matrix and apply transform
@@ -419,7 +419,7 @@ class Node {
   /// bounding box's origin, override [NodeWithSize] and call the applyTransformForPivot method before making calls for
   /// drawing.
   ///
-  ///     void paint(PictureRecorder canvas) {
+  ///     void paint(RenderCanvas canvas) {
   ///       canvas.save();
   ///       applyTransformForPivot(canvas);
   ///
@@ -427,10 +427,10 @@ class Node {
   ///
   ///       canvas.restore();
   ///     }
-  void paint(PictureRecorder canvas) {
+  void paint(RenderCanvas canvas) {
   }
  
-  void _visitChildren(PictureRecorder canvas) {
+  void _visitChildren(RenderCanvas canvas) {
     // Sort children if needed
     _sortChildren();
 
@@ -455,7 +455,7 @@ class Node {
     }
   }
   
-  void _postPaint(PictureRecorder canvas) {
+  void _postPaint(RenderCanvas canvas) {
     canvas.restore();
   }
 

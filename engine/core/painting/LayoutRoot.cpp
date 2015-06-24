@@ -9,6 +9,7 @@
 #include "sky/engine/core/frame/FrameView.h"
 #include "sky/engine/core/frame/LocalFrame.h"
 #include "sky/engine/core/frame/Settings.h"
+#include "sky/engine/core/painting/Canvas.h"
 #include "sky/engine/core/painting/PaintingTasks.h"
 #include "sky/engine/platform/geometry/IntRect.h"
 #include "third_party/skia/include/core/SkCanvas.h"
@@ -82,7 +83,7 @@ void LayoutRoot::layout()
 
 void LayoutRoot::paint(Canvas* canvas)
 {
-    if (m_document)
+    if (m_document && canvas && canvas->skCanvas())
         rootElement()->paint(canvas);
 }
 
