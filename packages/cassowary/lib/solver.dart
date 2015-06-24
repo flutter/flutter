@@ -82,20 +82,52 @@ class Solver {
     return _optimizeObjectiveRow(_objective);
   }
 
-  Result hasConstraint(Constraint c) {
-    return Result.unimplemented;
+  bool hasConstraint(Constraint constraint) {
+    return _constraints.containsKey(constraint);
   }
 
-  Result addEditVariable(Variable v, double priority) {
-    return Result.unimplemented;
+  Result addEditVariable(Variable variable, double priority) {
+    if (_edits.containsKey(variable)) {
+      return Result.duplicateEditVariable;
+    }
+
+    if (!_isValidNonRequiredPriority(priority)) {
+      return Result.badRequiredStrength;
+    }
+
+    Constraint constraint = new Constraint(
+        new Expression([new Term(variable, 1.0)], 0.0), Relation.equalTo);
+
+    if (addConstraint(constraint) != Result.success) {
+      return Result.internalSolverError;
+    }
+
+    EditInfo info = new EditInfo();
+    info.tag = _constraints[constraint];
+    info.constraint = constraint;
+    info.constant = 0.0;
+
+    _edits[variable] = info;
+
+    return Result.success;
   }
 
-  Result removeEditVariable(Variable v) {
-    return Result.unimplemented;
+  Result removeEditVariable(Variable variable) {
+    EditInfo info = _edits[variable];
+    if (info == null) {
+      return Result.unknownEditVariable;
+    }
+
+    if (removeConstraint(info.constraint) != Result.success) {
+      return Result.internalSolverError;
+    }
+
+    _edits.remove(variable);
+    return Result.success;
   }
 
-  Result hasEditVariable(Variable v) {
-    return Result.unimplemented;
+  bool hasEditVariable(Variable variable) {
+    return _edits.containsKey(variable);
   }
 
   Result suggestVariable(Variable v, double value) {
@@ -410,4 +442,8 @@ class EditInfo {
   Tag tag;
   Constraint constraint;
   double constant;
+}
+
+bool _isValidNonRequiredPriority(double priority) {
+  return (priority >= 0.0 && priority < Constraint.requiredPriority);
 }
