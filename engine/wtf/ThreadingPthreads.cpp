@@ -31,8 +31,6 @@
 #include "sky/engine/config.h"
 #include "sky/engine/wtf/Threading.h"
 
-#if USE(PTHREADS)
-
 #include <errno.h>
 #include "sky/engine/wtf/DateMath.h"
 #include "sky/engine/wtf/HashMap.h"
@@ -49,6 +47,8 @@
 #include <limits.h>
 #include <sched.h>
 #include <sys/time.h>
+
+#if USE(PTHREADS)
 
 namespace WTF {
 

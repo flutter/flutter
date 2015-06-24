@@ -21,6 +21,8 @@
 #ifndef SKY_ENGINE_WTF_FASTMALLOC_H_
 #define SKY_ENGINE_WTF_FASTMALLOC_H_
 
+#include <cstddef>
+
 #include "sky/engine/wtf/WTFExport.h"
 
 namespace WTF {

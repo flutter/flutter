@@ -29,6 +29,7 @@
 #include "sky/engine/platform/PlatformExport.h"
 #include "sky/engine/public/platform/WebBlendMode.h"
 #include "sky/engine/wtf/Forward.h"
+#include "sky/engine/wtf/OperatingSystem.h"
 #include "third_party/skia/include/core/SkPaint.h"
 #include "third_party/skia/include/core/SkPath.h"
 

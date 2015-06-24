@@ -31,6 +31,7 @@
 #ifndef SKY_ENGINE_PLATFORM_FONTS_VDMXPARSER_H_
 #define SKY_ENGINE_PLATFORM_FONTS_VDMXPARSER_H_
 
+#include <cstddef>
 #include <stdint.h>
 
 namespace blink {

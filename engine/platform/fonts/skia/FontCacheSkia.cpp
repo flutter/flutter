@@ -30,9 +30,6 @@
 
 #include "sky/engine/config.h"
 
-#if !OS(WIN) && !OS(ANDROID)
-#include "third_party/skia/include/ports/SkFontConfigInterface.h"
-#endif
 #include <unicode/locid.h>
 #include "sky/engine/platform/NotImplemented.h"
 #include "sky/engine/platform/fonts/AlternateFontFamily.h"
@@ -48,6 +45,10 @@
 #include "third_party/skia/include/core/SkStream.h"
 #include "third_party/skia/include/core/SkTypeface.h"
 #include "third_party/skia/include/ports/SkFontMgr.h"
+
+#if !OS(WIN) && !OS(ANDROID)
+#include "third_party/skia/include/ports/SkFontConfigInterface.h"
+#endif
 
 #if !OS(WIN) && !OS(ANDROID) && !OS(IOS)
 // TODO(bungeman) remove this temporary code ASAP.

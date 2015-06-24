@@ -27,8 +27,11 @@
 #define SKY_ENGINE_WTF_MATHEXTRAS_H_
 
 #include <cmath>
+#include <cstddef>
 #include <limits>
+
 #include "sky/engine/wtf/CPU.h"
+#include "sky/engine/wtf/OperatingSystem.h"
 
 const double piDouble = M_PI;
 const float piFloat = static_cast<float>(M_PI);

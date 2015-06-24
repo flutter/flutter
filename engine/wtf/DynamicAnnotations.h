@@ -48,6 +48,7 @@
  * See http://code.google.com/p/data-race-test/wiki/DynamicAnnotations for more information.
  */
 
+#include "sky/engine/wtf/OperatingSystem.h"
 #include "sky/engine/wtf/WTFExport.h"
 
 #if USE(DYNAMIC_ANNOTATIONS)

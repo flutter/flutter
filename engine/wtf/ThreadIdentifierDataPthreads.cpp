@@ -29,15 +29,14 @@
  */
 
 #include "sky/engine/config.h"
-
-#if USE(PTHREADS)
-
 #include "sky/engine/wtf/ThreadIdentifierDataPthreads.h"
 
 #include "sky/engine/wtf/Assertions.h"
 #include "sky/engine/wtf/WTF.h"
 
 #include <limits.h>
+
+#if USE(PTHREADS)
 
 // PTHREAD_KEYS_MAX might be not defined (e.g. in certain bionic versions), so explicitly define it here.
 #ifndef PTHREAD_KEYS_MAX

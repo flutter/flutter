@@ -30,6 +30,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <strings.h>
+#include "sky/engine/wtf/OperatingSystem.h"
 
 #if !HAVE(STRNSTR)
 

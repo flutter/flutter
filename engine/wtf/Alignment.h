@@ -21,9 +21,10 @@
 #ifndef SKY_ENGINE_WTF_ALIGNMENT_H_
 #define SKY_ENGINE_WTF_ALIGNMENT_H_
 
-#include <stdint.h>
 #include <algorithm>
-
+#include <cstddef>
+#include <stdint.h>
+#include "sky/engine/wtf/Compiler.h"
 
 namespace WTF {
 

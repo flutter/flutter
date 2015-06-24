@@ -22,6 +22,7 @@
 #define SKY_ENGINE_WTF_PASSREFPTR_H_
 
 #include "sky/engine/wtf/Assertions.h"
+#include "sky/engine/wtf/Compiler.h"
 #include "sky/engine/wtf/NullPtr.h"
 #include "sky/engine/wtf/RawPtr.h"
 #include "sky/engine/wtf/TypeTraits.h"

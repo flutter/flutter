@@ -25,14 +25,15 @@
 #ifndef SKY_ENGINE_PLATFORM_FONTS_OPENTYPE_OPENTYPEVERTICALDATA_H_
 #define SKY_ENGINE_PLATFORM_FONTS_OPENTYPE_OPENTYPEVERTICALDATA_H_
 
-#if ENABLE(OPENTYPE_VERTICAL)
-
 #include "sky/engine/platform/PlatformExport.h"
 #include "sky/engine/platform/fonts/Glyph.h"
 #include "sky/engine/wtf/HashMap.h"
+#include "sky/engine/wtf/OperatingSystem.h"
 #include "sky/engine/wtf/PassRefPtr.h"
 #include "sky/engine/wtf/RefCounted.h"
 #include "sky/engine/wtf/Vector.h"
+
+#if ENABLE(OPENTYPE_VERTICAL)
 
 namespace blink {
 

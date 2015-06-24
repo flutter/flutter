@@ -27,6 +27,8 @@
 #ifndef SKY_ENGINE_WTF_ARRAYBUFFERCONTENTS_H_
 #define SKY_ENGINE_WTF_ARRAYBUFFERCONTENTS_H_
 
+#include <cstddef>
+
 #include "sky/engine/wtf/ArrayBufferDeallocationObserver.h"
 #include "sky/engine/wtf/Noncopyable.h"
 #include "sky/engine/wtf/WTFExport.h"

@@ -24,6 +24,7 @@
 #include <string.h>
 #include <utility>
 #include "sky/engine/wtf/Alignment.h"
+#include "sky/engine/wtf/Compiler.h"
 #include "sky/engine/wtf/DefaultAllocator.h"
 #include "sky/engine/wtf/FastAllocBase.h"
 #include "sky/engine/wtf/Noncopyable.h"

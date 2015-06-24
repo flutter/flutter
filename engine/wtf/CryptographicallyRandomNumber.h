@@ -26,6 +26,7 @@
 #ifndef SKY_ENGINE_WTF_CRYPTOGRAPHICALLYRANDOMNUMBER_H_
 #define SKY_ENGINE_WTF_CRYPTOGRAPHICALLYRANDOMNUMBER_H_
 
+#include <cstddef>
 #include <stdint.h>
 
 #include "sky/engine/wtf/WTFExport.h"

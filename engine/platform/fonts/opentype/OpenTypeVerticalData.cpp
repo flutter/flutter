@@ -23,7 +23,6 @@
  */
 
 #include "sky/engine/config.h"
-#if ENABLE(OPENTYPE_VERTICAL)
 #include "sky/engine/platform/fonts/opentype/OpenTypeVerticalData.h"
 
 #include "sky/engine/platform/SharedBuffer.h"
@@ -32,6 +31,8 @@
 #include "sky/engine/platform/fonts/opentype/OpenTypeTypes.h"
 #include "sky/engine/platform/geometry/FloatRect.h"
 #include "sky/engine/wtf/RefPtr.h"
+
+#if ENABLE(OPENTYPE_VERTICAL)
 
 namespace blink {
 namespace OpenType {

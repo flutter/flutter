@@ -37,14 +37,16 @@
    RELEASE_ASSERT family of macros.
 
    Defining any of the symbols explicitly prevents this from having any effect.
-
 */
 
+#include <cstddef>
+
 #include "sky/engine/wtf/Compiler.h"
+#include "sky/engine/wtf/OperatingSystem.h"
 #include "sky/engine/wtf/WTFExport.h"
 
-// Users must test "#if ENABLE(ASSERT)", which helps ensure that code
-// testing this macro has included this header.
+/* Users must test "#if ENABLE(ASSERT)", which helps ensure that code
+   testing this macro has included this header. */
 #ifndef ENABLE_ASSERT
 #ifdef NDEBUG
 /* Disable ASSERT* macros in release mode by default. */

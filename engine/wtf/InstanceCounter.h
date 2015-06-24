@@ -27,6 +27,7 @@
 #define SKY_ENGINE_WTF_INSTANCECOUNTER_H_
 
 #include "sky/engine/wtf/Compiler.h"
+#include "sky/engine/wtf/OperatingSystem.h"
 #include "sky/engine/wtf/WTFExport.h"
 
 namespace WTF {

@@ -26,6 +26,8 @@
 #ifndef SKY_ENGINE_CORE_RENDERING_STYLE_RENDERSTYLECONSTANTS_H_
 #define SKY_ENGINE_CORE_RENDERING_STYLE_RENDERSTYLECONSTANTS_H_
 
+#include <cstddef>
+
 namespace blink {
 
 enum StyleRecalcChange {
