@@ -15,9 +15,6 @@
 
 namespace {
 
-static const char kSkyInternalsLibraryName[] = "dart:sky.internals";
-static const char kSkyInternalsURL[] = "package:sky/internals.dart";
-
 std::string Fetch(const std::string& url) {
   base::FilePath path(url);
   std::string source;
@@ -120,14 +117,6 @@ Dart_Handle HandleLibraryTag(Dart_LibraryTag tag,
     return GetLoader().Source(library, url);
 
   return Dart_NewApiError("Unknown library tag.");
-}
-
-void LoadSkyInternals() {
-  DartApiScope api_scope;
-
-  Dart_Handle library_name = StringToDart(kSkyInternalsLibraryName);
-  std::string url = GetLoader().CanonicalizePackageURL(kSkyInternalsURL);
-  LogIfError(Dart_LoadLibrary(library_name, StringToDart(Fetch(url)), 0, 0));
 }
 
 void LoadScript(const std::string& url) {

@@ -27,6 +27,7 @@
 #include "sky/engine/core/script/dart_dependency_catcher.h"
 #include "sky/engine/core/script/dart_loader.h"
 #include "sky/engine/core/script/dart_service_isolate.h"
+#include "sky/engine/core/script/dart_snapshot_loader.h"
 #include "sky/engine/core/script/dom_dart_state.h"
 #include "sky/engine/public/platform/Platform.h"
 #include "sky/engine/tonic/dart_api_scope.h"
@@ -40,6 +41,16 @@
 #include "sky/engine/wtf/text/TextPosition.h"
 
 namespace blink {
+namespace {
+
+void CreateEmptyRootLibraryIfNeeded() {
+  if (Dart_IsNull(Dart_RootLibrary())) {
+    Dart_LoadScript(Dart_NewStringFromCString("dart:empty"), Dart_EmptyString(),
+                    0, 0);
+  }
+}
+
+} // namespace
 
 #if ENABLE(DART_STRICT)
 static const char* kCheckedModeArgs[] = {"--enable_asserts",
@@ -126,6 +137,9 @@ void DartController::DidLoadMainLibrary(KURL url) {
 }
 
 void DartController::LoadMainLibrary(const KURL& url, mojo::URLResponsePtr response) {
+  DartState::Scope scope(dart_state());
+  CreateEmptyRootLibraryIfNeeded();
+
   DartLoader& loader = dart_state()->loader();
   DartDependencyCatcher dependency_catcher(loader);
   loader.LoadLibrary(url, response.Pass());
@@ -133,13 +147,33 @@ void DartController::LoadMainLibrary(const KURL& url, mojo::URLResponsePtr respo
                              base::Bind(&DartController::DidLoadMainLibrary, weak_factory_.GetWeakPtr(), url));
 }
 
+void DartController::DidLoadSnapshot() {
+  DCHECK(Dart_CurrentIsolate() == nullptr);
+  snapshot_loader_ = nullptr;
+
+  Dart_Isolate isolate = dart_state()->isolate();
+  DartIsolateScope isolate_scope(isolate);
+  DartApiScope dart_api_scope;
+
+  Dart_Handle library = Dart_RootLibrary();
+  if (LogIfError(library))
+    return;
+  DartInvokeAppField(library, ToDart("main"), 0, nullptr);
+}
+
+void DartController::LoadSnapshot(const KURL& url, mojo::URLResponsePtr response) {
+  snapshot_loader_ = adoptPtr(new DartSnapshotLoader(dart_state()));
+  snapshot_loader_->LoadSnapshot(url, response.Pass(),
+      base::Bind(&DartController::DidLoadSnapshot, weak_factory_.GetWeakPtr()));
+}
+
 void DartController::LoadScriptInModule(
     AbstractModule* module,
     const String& source,
     const TextPosition& position,
     const LoadFinishedCallback& finished_callback) {
-  DartIsolateScope isolate_scope(dart_state()->isolate());
-  DartApiScope dart_api_scope;
+  DartState::Scope scope(dart_state());
+  CreateEmptyRootLibraryIfNeeded();
 
   DartDependencyCatcher dependency_catcher(dart_state()->loader());
   Dart_Handle library_handle = CreateLibrary(module, source, position);
@@ -274,6 +308,7 @@ static Dart_Isolate IsolateCreateCallback(const char* script_uri,
 
   // Create & start the handle watcher isolate
   CHECK(kDartIsolateSnapshotBuffer);
+  // TODO(abarth): Who deletes this DartState instance?
   DartState* dart_state = new DartState();
   Dart_Isolate isolate =
       Dart_CreateIsolate("sky:handle_watcher", "", kDartIsolateSnapshotBuffer,
@@ -289,9 +324,8 @@ static Dart_Isolate IsolateCreateCallback(const char* script_uri,
     Builtin::SetNativeResolver(Builtin::kMojoInternalLibrary);
     Builtin::SetNativeResolver(Builtin::kIOLibrary);
 
-    // Ensure the isolate has a root library.
-    Dart_LoadScript(Dart_NewStringFromCString("dart:empty"),
-                    Dart_NewStringFromCString(""), 0, 0);
+    if (!script_uri)
+      CreateEmptyRootLibraryIfNeeded();
   }
 
   Dart_ExitIsolate();
@@ -333,10 +367,6 @@ void DartController::CreateIsolateFor(PassOwnPtr<DOMDartState> state) {
 
   {
     DartApiScope apiScope;
-
-    // Ensure the isolate has a root library.
-    Dart_LoadScript(Dart_NewStringFromCString("dart:empty"),
-                    Dart_NewStringFromCString(""), 0, 0);
 
     Builtin::SetNativeResolver(Builtin::kBuiltinLibrary);
     Builtin::SetNativeResolver(Builtin::kMojoInternalLibrary);

@@ -104,7 +104,8 @@ bool WebView::shouldUseWebView(const GURL& url)
         filename.resize(queryStart);
     // For now .dart indicates we should use SkyView. Eventually we'll
     // use SkyView for all urls regardless of file extension.
-    return !EndsWith(filename, ".dart", false);
+    return !EndsWith(filename, ".dart", false)
+        && !EndsWith(filename, ".snapshot", false);
 }
 
 WebView* WebView::create(WebViewClient* client)

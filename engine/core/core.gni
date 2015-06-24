@@ -1058,6 +1058,8 @@ sky_core_files = [
   "script/dart_loader.h",
   "script/dart_service_isolate.cc",
   "script/dart_service_isolate.h",
+  "script/dart_snapshot_loader.cc",
+  "script/dart_snapshot_loader.h",
   "script/dom_dart_state.cc",
   "script/dom_dart_state.h",
   "script/monitor.h",

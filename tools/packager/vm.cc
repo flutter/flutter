@@ -32,7 +32,6 @@ Dart_Isolate CreateDartIsolate() {
 
   CHECK(isolate) << error;
   CHECK(!LogIfError(Dart_SetLibraryTagHandler(HandleLibraryTag)));
-  LoadSkyInternals();
 
   Dart_ExitIsolate();
   return isolate;

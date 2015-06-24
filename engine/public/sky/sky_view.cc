@@ -47,7 +47,9 @@ void SkyView::SetDisplayMetrics(const SkyDisplayMetrics& metrics) {
   data_->view_->setDisplayMetrics(display_metrics_);
 }
 
-void SkyView::Load(const WebURL& url, mojo::URLResponsePtr response) {
+void SkyView::Load(const WebURL& web_url, mojo::URLResponsePtr response) {
+  KURL url = web_url;
+
   data_->view_ = View::create(base::Bind(
       &SkyView::ScheduleFrame, weak_factory_.GetWeakPtr()));
   data_->view_->setDisplayMetrics(display_metrics_);
@@ -63,7 +65,10 @@ void SkyView::Load(const WebURL& url, mojo::URLResponsePtr response) {
     client_->DidCreateIsolate(isolate);
   }
 
-  dart_controller_->LoadMainLibrary(url, response.Pass());
+  if (url.path().endsWith(".snapshot"))
+    dart_controller_->LoadSnapshot(url, response.Pass());
+  else
+    dart_controller_->LoadMainLibrary(url, response.Pass());
 }
 
 void SkyView::BeginFrame(base::TimeTicks frame_time) {
