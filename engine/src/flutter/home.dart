@@ -37,7 +37,7 @@ class SkyDemo extends Component {
     launch(href);
   }
 
-  UINode build() {
+  Widget build() {
     return new ConstrainedBox(
       // TOOD(ianh): Fix so we don't need INFINITY here.
       constraints: new BoxConstraints.tightFor(width: double.INFINITY),
@@ -50,13 +50,14 @@ class SkyDemo extends Component {
 }
 
 class SkyHome extends App {
-  UINode build() {
-    List<UINode> children = [
+  Widget build() {
+    List<Widget> children = [
       new SkyDemo('Stocks App', 'examples/stocks2/lib/stock_app.dart'),
-      new SkyDemo('Astroids Game', 'examples/game/main.dart'),
+      new SkyDemo('Asteroids Game', 'examples/game/main.dart'),
       new SkyDemo('Interactive Flex', 'examples/rendering/interactive_flex.dart'),
       new SkyDemo('Sector Layout', 'examples/widgets/sector.dart'),
       new SkyDemo('Touch Demo', 'examples/rendering/touch_demo.dart'),
+      new SkyDemo('Minedigger Game', 'examples/mine_digger/mine_digger.dart'),
 
       // TODO(eseidel): We could use to separate these groups?
       new SkyDemo('Old Stocks App', 'examples/stocks/main.sky'),
