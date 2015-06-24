@@ -7,6 +7,9 @@ part of cassowary;
 class Term extends EquationMember {
   final Variable variable;
   final double coefficient;
+
+  bool get isConstant => false;
+
   double get value => coefficient * variable.value;
 
   Term(this.variable, this.coefficient);

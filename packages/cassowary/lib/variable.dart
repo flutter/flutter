@@ -8,5 +8,7 @@ class Variable extends EquationMember {
   double value = 0.0;
   Variable(this.value);
 
+  bool get isConstant => false;
+
   Expression asExpression() => new Expression([new Term(this, 1.0)], 0.0);
 }

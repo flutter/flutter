@@ -8,6 +8,9 @@ class Expression extends EquationMember {
   final List<Term> terms;
 
   final double constant;
+
+  bool get isConstant => terms.length == 0;
+
   double get value => terms.fold(constant, (value, term) => value + term.value);
 
   Expression(this.terms, this.constant);
@@ -105,15 +108,51 @@ class Expression extends EquationMember {
     return null;
   }
 
-  EquationMember operator *(double m) {
+  EquationMember _applyMultiplicand(double m) {
     var newTerms = terms.fold(new List<Term>(), (list, term) => list
       ..add(new Term(term.variable, term.coefficient * m)));
     return new Expression(newTerms, constant * m);
   }
 
-  EquationMember operator /(double m) {
-    var newTerms = terms.fold(new List<Term>(), (list, term) => list
-      ..add(new Term(term.variable, term.coefficient / m)));
-    return new Expression(newTerms, constant / m);
+  _Pair<Expression, double> _findMulitplierAndMultiplicand(EquationMember m) {
+    // At least on of the the two members must be constant for the resulting
+    // expression to be linear
+
+    if (!this.isConstant && !m.isConstant) {
+      return null;
+    }
+
+    if (this.isConstant) {
+      return new _Pair(m.asExpression(), this.value);
+    }
+
+    if (m.isConstant) {
+      return new _Pair(this.asExpression(), m.value);
+    }
+
+    assert(false);
+    return null;
+  }
+
+  EquationMember operator *(EquationMember m) {
+    _Pair<Expression, double> args = _findMulitplierAndMultiplicand(m);
+
+    if (args == null) {
+      throw new ParserException(
+          "Could not find constant multiplicand or multiplier", [this, m]);
+      return null;
+    }
+
+    return args.first._applyMultiplicand(args.second);
+  }
+
+  EquationMember operator /(EquationMember m) {
+    if (!m.isConstant) {
+      throw new ParserException(
+          "The divisor was not a constant expression", [this, m]);
+      return null;
+    }
+
+    return this._applyMultiplicand(1.0 / m.value);
   }
 }

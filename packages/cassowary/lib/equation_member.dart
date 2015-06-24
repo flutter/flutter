@@ -7,6 +7,10 @@ part of cassowary;
 abstract class EquationMember {
   Expression asExpression();
 
+  bool get isConstant;
+
+  double get value;
+
   Constraint operator >=(EquationMember m) => asExpression() >= m;
 
   Constraint operator <=(EquationMember m) => asExpression() <= m;
@@ -17,7 +21,7 @@ abstract class EquationMember {
 
   Expression operator -(EquationMember m) => asExpression() - m;
 
-  Expression operator *(double m) => asExpression() * m;
+  Expression operator *(EquationMember m) => asExpression() * m;
 
-  Expression operator /(double m) => asExpression() / m;
+  Expression operator /(EquationMember m) => asExpression() / m;
 }

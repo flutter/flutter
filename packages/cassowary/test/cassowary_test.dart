@@ -204,37 +204,37 @@ void main() {
   test('simple_multiplication', () {
     // Constant
     var c = CM(20.0);
-    expect((c * 2.0).value, 40.0);
+    expect((c * CM(2.0)).value, 40.0);
 
     // Variable
     var v = new Variable(20.0);
-    expect((v * 2.0).value, 40.0);
+    expect((v * CM(2.0)).value, 40.0);
 
     // Term
     var t = new Term(v, 1.0);
-    expect((t * 2.0).value, 40.0);
+    expect((t * CM(2.0)).value, 40.0);
 
     // Expression
     var e = new Expression([t], 0.0);
-    expect((e * 2.0).value, 40.0);
+    expect((e * CM(2.0)).value, 40.0);
   });
 
   test('simple_division', () {
     // Constant
     var c = CM(20.0);
-    expect((c / 2.0).value, 10.0);
+    expect((c / CM(2.0)).value, 10.0);
 
     // Variable
     var v = new Variable(20.0);
-    expect((v / 2.0).value, 10.0);
+    expect((v / CM(2.0)).value, 10.0);
 
     // Term
     var t = new Term(v, 1.0);
-    expect((t / 2.0).value, 10.0);
+    expect((t / CM(2.0)).value, 10.0);
 
     // Expression
     var e = new Expression([t], 0.0);
-    expect((e / 2.0).value, 10.0);
+    expect((e / CM(2.0)).value, 10.0);
   });
 
   // TODO: Support and test cases where the multipliers and divisors are more
@@ -355,4 +355,53 @@ void main() {
     expect(s.removeConstraint(c1), Result.success);
     expect(s.removeConstraint(c1), Result.unknownConstraint);
   });
+
+  test('test_multiplication_division_override', () {
+    var c = CM(10.0);
+    var v = new Variable(c.value);
+    var t = new Term(v, 1.0);
+    var e = new Expression([t], 0.0);
+
+    // Constant
+    expect((c * CM(10.0)).value, 100);
+
+    // Variable
+    expect((v * CM(10.0)).value, 100);
+
+    // Term
+    expect((t * CM(10.0)).value, 100);
+
+    // Expression
+    expect((e * CM(10.0)).value, 100);
+
+    // Constant
+    expect((c / CM(10.0)).value, 1);
+
+    // Variable
+    expect((v / CM(10.0)).value, 1);
+
+    // Term
+    expect((t / CM(10.0)).value, 1);
+
+    // Expression
+    expect((e / CM(10.0)).value, 1);
+  });
+
+  test('test_multiplication_division_exceptions', () {
+    var c = CM(10.0);
+    var v = new Variable(c.value);
+    var t = new Term(v, 1.0);
+    var e = new Expression([t], 0.0);
+
+    expect((c * c).value, 100);
+    expect(() => v * v, throwsA(new isInstanceOf<ParserException>()));
+    expect(() => v / v, throwsA(new isInstanceOf<ParserException>()));
+    expect(() => v * t, throwsA(new isInstanceOf<ParserException>()));
+    expect(() => v / t, throwsA(new isInstanceOf<ParserException>()));
+    expect(() => v * e, throwsA(new isInstanceOf<ParserException>()));
+    expect(() => v / e, throwsA(new isInstanceOf<ParserException>()));
+    expect(() => v * c, returnsNormally);
+    expect(() => v / c, returnsNormally);
+  });
+
 }
