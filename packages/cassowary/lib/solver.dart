@@ -65,7 +65,7 @@ class Solver {
       _rows.remove(tag.marker);
     } else {
       _Pair<_Symbol, _Row> rowPair =
-          _getLeavingRowPairForMarkerSymbol(tag.marker);
+          _leavingRowPairForMarkerSymbol(tag.marker);
 
       if (rowPair == null) {
         return Result.internalSolverError;
@@ -154,7 +154,7 @@ class Solver {
 
   Solver operator <<(Constraint c) => this..addConstraint(c);
 
-  _Symbol _getSymbolForVariable(Variable variable) {
+  _Symbol _symbolForVariable(Variable variable) {
     _Symbol symbol = _vars[variable];
 
     if (symbol != null) {
@@ -173,7 +173,7 @@ class Solver {
 
     expr.terms.forEach((term) {
       if (!_nearZero(term.coefficient)) {
-        _Symbol symbol = _getSymbolForVariable(term.variable);
+        _Symbol symbol = _symbolForVariable(term.variable);
 
         _Row foundRow = _rows[symbol];
 
@@ -303,13 +303,13 @@ class Solver {
 
   Result _optimizeObjectiveRow(_Row objective) {
     while (true) {
-      _Symbol entering = _getEnteringSymbolForObjectiveRow(objective);
+      _Symbol entering = _enteringSymbolForObjectiveRow(objective);
       if (entering.type == SymbolType.invalid) {
         return Result.success;
       }
 
       _Pair<_Symbol, _Row> leavingPair =
-          _getLeavingRowForEnteringSymbol(entering);
+          _leavingRowForEnteringSymbol(entering);
 
       if (leavingPair == null) {
         return Result.internalSolverError;
@@ -324,7 +324,7 @@ class Solver {
     }
   }
 
-  _Symbol _getEnteringSymbolForObjectiveRow(_Row objective) {
+  _Symbol _enteringSymbolForObjectiveRow(_Row objective) {
     Map<_Symbol, double> cells = objective.cells;
 
     for (_Symbol symbol in cells.keys) {
@@ -336,7 +336,7 @@ class Solver {
     return new _Symbol(SymbolType.invalid, 0);
   }
 
-  _Pair<_Symbol, _Row> _getLeavingRowForEnteringSymbol(_Symbol entering) {
+  _Pair<_Symbol, _Row> _leavingRowForEnteringSymbol(_Symbol entering) {
     double ratio = double.MAX_FINITE;
     _Pair<_Symbol, _Row> result = new _Pair(null, null);
 
@@ -404,7 +404,7 @@ class Solver {
     }
   }
 
-  _Pair<_Symbol, _Row> _getLeavingRowPairForMarkerSymbol(_Symbol marker) {
+  _Pair<_Symbol, _Row> _leavingRowPairForMarkerSymbol(_Symbol marker) {
     double r1 = double.MAX_FINITE;
     double r2 = double.MAX_FINITE;
 
@@ -487,7 +487,7 @@ class Solver {
       _Row row = _rows[leaving];
 
       if (row != null && row.constant < 0.0) {
-        _Symbol entering = _getDualEnteringSymbolForRow(row);
+        _Symbol entering = _dualEnteringSymbolForRow(row);
 
         if (entering.type == SymbolType.invalid) {
           return Result.internalSolverError;
@@ -503,7 +503,7 @@ class Solver {
     return Result.success;
   }
 
-  _Symbol _getDualEnteringSymbolForRow(_Row row) {
+  _Symbol _dualEnteringSymbolForRow(_Row row) {
     _Symbol entering;
 
     double ratio = double.MAX_FINITE;
