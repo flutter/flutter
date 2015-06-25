@@ -119,6 +119,7 @@ dart_pkg("sdk") {
     "lib/widgets/scaffold.dart",
     "lib/widgets/scrollable.dart",
     "lib/widgets/switch.dart",
+    "lib/widgets/tabs.dart",
     "lib/widgets/theme.dart",
     "lib/widgets/toggleable.dart",
     "lib/widgets/tool_bar.dart",

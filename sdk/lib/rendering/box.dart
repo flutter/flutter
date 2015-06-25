@@ -163,6 +163,10 @@ class BoxConstraints extends Constraints {
                               maxHeight: math.min(maxHeight, newMaxHeight));
   }
 
+  BoxConstraints widthConstraints() => new BoxConstraints(minWidth: minWidth, maxWidth: maxWidth);
+
+  BoxConstraints heightConstraints() => new BoxConstraints(minHeight: minHeight, maxHeight: maxHeight);
+
   final double minWidth;
   final double maxWidth;
   final double minHeight;
