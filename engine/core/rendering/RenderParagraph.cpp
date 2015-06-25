@@ -1356,9 +1356,16 @@ void RenderParagraph::computeIntrinsicLogicalWidths(LayoutUnit& minLogicalWidth,
     maxLogicalWidth = std::max(minLogicalWidth, maxLogicalWidth);
 }
 
-int RenderParagraph::firstLineBoxBaseline() const
+int RenderParagraph::firstLineBoxBaseline(FontBaselineOrAuto baselineType) const
 {
-    return firstLineBox() ? firstLineBox()->logicalTop() + style(true)->fontMetrics().ascent(firstRootBox()->baselineType()) : -1;
+  if (!firstLineBox())
+    return -1;
+  FontBaseline baseline;
+  if (baselineType.m_auto)
+    baseline = firstRootBox()->baselineType();
+  else
+    baseline = baselineType.m_baseline;
+  return firstLineBox()->logicalTop() + style(true)->fontMetrics().ascent(baseline);
 }
 
 int RenderParagraph::lastLineBoxBaseline(LineDirectionMode lineDirection) const

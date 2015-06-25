@@ -225,6 +225,8 @@ class BoxParentData extends ParentData {
   String toString() => 'position=$position';
 }
 
+enum TextBaseline { alphabetic, ideographic }
+
 abstract class RenderBox extends RenderObject {
 
   void setParentData(RenderObject child) {
@@ -257,6 +259,31 @@ abstract class RenderBox extends RenderObject {
   // as getMinIntrinsicHeight().
   double getMaxIntrinsicHeight(BoxConstraints constraints) {
     return constraints.constrainHeight(0.0);
+  }
+
+  // getDistanceToBaseline() should return the distance from the
+  // y-coordinate of the position of the box to the y-coordinate of
+  // the first given baseline in the box's contents. This is used by
+  // certain layout models to align adjacent boxes on a common
+  // baseline, regardless of padding, font size differences, etc. If
+  // there is no baseline, then it should return the distance from the
+  // y-coordinate of the position of the box to the y-coordinate of
+  // the bottom of the box, i.e., the height of the box.
+  // Only call this after layout has been performed.
+  double getDistanceToBaseline(TextBaseline baseline) {
+    assert(!needsLayout);
+    double result = getDistanceToActualBaseline(baseline);
+    if (result == null)
+      return size.height;
+    return result;
+  }
+  // getDistanceToActualBaseline() should return the distance from the
+  // y-coordinate of the position of the box to the y-coordinate of
+  // the first given baseline in the box's contents, if any, or null
+  // otherwise.
+  double getDistanceToActualBaseline(TextBaseline baseline) {
+    assert(!needsLayout);
+    return null;
   }
 
   // This whole block should only be here in debug builds
@@ -346,6 +373,12 @@ class RenderProxyBox extends RenderBox with RenderObjectWithChildMixin<RenderBox
     if (child != null)
       return child.getMaxIntrinsicHeight(constraints);
     return super.getMaxIntrinsicHeight(constraints);
+  }
+
+  double getDistanceToActualBaseline(TextBaseline baseline) {
+    if (child != null)
+      return child.getDistanceToActualBaseline(baseline);
+    return super.getDistanceToActualBaseline(baseline);
   }
 
   void performLayout() {
@@ -583,6 +616,20 @@ abstract class RenderShiftedBox extends RenderBox with RenderObjectWithChildMixi
   void paint(RenderCanvas canvas) {
     if (child != null)
       canvas.paintChild(child, child.parentData.position);
+  }
+
+  double getDistanceToActualBaseline(TextBaseline baseline) {
+    double result;
+    if (child != null) {
+      assert(!needsLayout);
+      result = child.getDistanceToActualBaseline(baseline);
+      assert(child.parentData is BoxParentData);
+      if (result != null)
+        result += child.parentData.position.y;
+    } else {
+      result = super.getDistanceToActualBaseline(baseline);
+    }
+    return result;
   }
 
   void hitTestChildren(HitTestResult result, { Point position }) {
@@ -1088,6 +1135,38 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
 
 // DEFAULT BEHAVIORS FOR RENDERBOX CONTAINERS
 abstract class RenderBoxContainerDefaultsMixin<ChildType extends RenderBox, ParentDataType extends ContainerParentDataMixin<ChildType>> implements ContainerRenderObjectMixin<ChildType, ParentDataType> {
+
+  double defaultGetDistanceToFirstActualBaseline(TextBaseline baseline) {
+    assert(!needsLayout);
+    RenderBox child = firstChild;
+    while (child != null) {
+      assert(child.parentData is ParentDataType);
+      double result = child.getDistanceToActualBaseline(baseline);
+      if (result != null)
+        return result + child.parentData.position.y;
+      child = child.parentData.nextSibling;
+    }
+    return null;
+  }
+
+  double defaultGetDistanceToHighestActualBaseline(TextBaseline baseline) {
+    assert(!needsLayout);
+    double result;
+    RenderBox child = firstChild;
+    while (child != null) {
+      assert(child.parentData is ParentDataType);
+      double candidate = child.getDistanceToActualBaseline(baseline);
+      if (candidate != null) {
+        candidate += child.parentData.position.x;
+        if (result != null)
+          result = math.min(result, candidate);
+        else
+          result = candidate;
+      }
+      child = child.parentData.nextSibling;
+    }
+    return result;
+  }
 
   void defaultHitTestChildren(HitTestResult result, { Point position }) {
     // the x, y parameters have the top left of the node's box as the origin

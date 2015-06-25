@@ -74,7 +74,7 @@ protected:
 
     void computeIntrinsicLogicalWidths(LayoutUnit& minLogicalWidth, LayoutUnit& maxLogicalWidth) const final;
 
-    int firstLineBoxBaseline() const final;
+    int firstLineBoxBaseline(FontBaselineOrAuto baselineType) const final;
     int lastLineBoxBaseline(LineDirectionMode) const final;
 
 private:

@@ -47,7 +47,7 @@ public:
     void layout();
 
     virtual int baselinePosition(FontBaseline, bool firstLine, LineDirectionMode, LinePositionMode = PositionOnContainingLine) const override;
-    virtual int firstLineBoxBaseline() const override;
+    virtual int firstLineBoxBaseline(FontBaselineOrAuto baselineType) const override;
     virtual int inlineBlockBaseline(LineDirectionMode) const override;
 
     virtual void paintChildren(PaintInfo&, const LayoutPoint&, Vector<RenderBox*>& layers) override final;

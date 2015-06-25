@@ -1351,11 +1351,11 @@ LayoutUnit RenderBlock::minLineHeightForReplacedRenderer(bool isFirstLine, Layou
     return std::max<LayoutUnit>(replacedHeight, lineHeight(isFirstLine, HorizontalLine, PositionOfInteriorLineBoxes));
 }
 
-int RenderBlock::firstLineBoxBaseline() const
+int RenderBlock::firstLineBoxBaseline(FontBaselineOrAuto baselineType) const
 {
     for (RenderBox* curr = firstChildBox(); curr; curr = curr->nextSiblingBox()) {
         if (!curr->isFloatingOrOutOfFlowPositioned()) {
-            int result = curr->firstLineBoxBaseline();
+            int result = curr->firstLineBoxBaseline(baselineType);
             if (result != -1)
                 return curr->logicalTop() + result; // Translate to our coordinate space.
         }

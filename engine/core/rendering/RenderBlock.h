@@ -216,7 +216,7 @@ protected:
     virtual void computeIntrinsicLogicalWidths(LayoutUnit& minLogicalWidth, LayoutUnit& maxLogicalWidth) const override;
     virtual void computePreferredLogicalWidths() override;
 
-    virtual int firstLineBoxBaseline() const override;
+    virtual int firstLineBoxBaseline(FontBaselineOrAuto baselineType) const override;
     virtual int inlineBlockBaseline(LineDirectionMode) const override;
     virtual int lastLineBoxBaseline(LineDirectionMode) const;
 

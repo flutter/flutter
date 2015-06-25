@@ -975,14 +975,14 @@ void Element::setMaxContentWidth(double width)
 double Element::alphabeticBaseline() const
 {
     if (RenderBox* box = renderBox())
-        return box->baselinePosition(AlphabeticBaseline, true, HorizontalLine, PositionOfInteriorLineBoxes);
+        return box->firstLineBoxBaseline(FontBaselineOrAuto(AlphabeticBaseline));
     return 0;
 }
 
 double Element::ideographicBaseline() const
 {
     if (RenderBox* box = renderBox())
-        return box->baselinePosition(IdeographicBaseline, true, HorizontalLine, PositionOfInteriorLineBoxes);
+        return box->firstLineBoxBaseline(FontBaselineOrAuto(IdeographicBaseline));
     return 0;
 }
 

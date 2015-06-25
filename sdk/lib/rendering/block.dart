@@ -77,6 +77,10 @@ class RenderBlock extends RenderBox with ContainerRenderObjectMixin<RenderBox, B
     return _getIntrinsicHeight(constraints);
   }
 
+  double getDistanceToActualBaseline(TextBaseline baseline) {
+    return defaultGetDistanceToFirstActualBaseline(baseline);
+  }
+
   void performLayout() {
     assert(constraints is BoxConstraints);
     double width = constraints.constrainWidth(constraints.maxWidth);

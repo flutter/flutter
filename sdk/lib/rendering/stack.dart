@@ -107,6 +107,10 @@ class RenderStack extends RenderBox with ContainerRenderObjectMixin<RenderBox, S
     return height;
   }
 
+  double getDistanceToActualBaseline(TextBaseline baseline) {
+    return defaultGetDistanceToHighestActualBaseline(baseline);
+  }
+
   void performLayout() {
     bool hasNonPositionedChildren = false;
 

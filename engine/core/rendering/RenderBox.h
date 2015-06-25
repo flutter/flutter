@@ -66,6 +66,21 @@ enum LayerType {
     OverflowClipLayer,
 };
 
+struct FontBaselineOrAuto {
+    FontBaselineOrAuto()
+        : m_auto(true)
+        , m_baseline(AlphabeticBaseline)
+    {
+    }
+    FontBaselineOrAuto(FontBaseline baseline)
+        : m_auto(false)
+        , m_baseline(baseline)
+    {
+    }
+    bool m_auto;
+    FontBaseline m_baseline;
+};
+
 class RenderBox : public RenderBoxModelObject {
 public:
     explicit RenderBox(ContainerNode*);
@@ -429,7 +444,7 @@ public:
 
     RenderLayer* enclosingFloatPaintingLayer() const;
 
-    virtual int firstLineBoxBaseline() const { return -1; }
+    virtual int firstLineBoxBaseline(FontBaselineOrAuto baselineType) const { return -1; }
     virtual int inlineBlockBaseline(LineDirectionMode) const { return -1; } // Returns -1 if we should skip this box when computing the baseline of an inline-block.
 
     bool isFlexItem() const { return !isInline() && !isFloatingOrOutOfFlowPositioned() && parent() && parent()->isFlexibleBox(); }
