@@ -63,3 +63,16 @@ Here is a diagram summarising all this:
     +-----------------------------+ -------
 
 TODO(ianh): document dart:sky and the Host APIs somewhere
+
+Sky Engine API
+--------------
+
+The Sky engine API provides efficient, immutable wrappers
+for common Skia C++ types, notably Color, Point, and Rect.
+Because these wrappers are immutable, they are suitable
+for storage in final member variables of widget classes.
+More complex Skia wrappers such as Paint and RRect are
+mutable, to more closely match the Skia APIs. We recommend
+constructing wrappers for complex Skia classes dynamically
+during the painting phase based on the underlying state of
+the widget.

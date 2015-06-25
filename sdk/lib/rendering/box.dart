@@ -589,6 +589,45 @@ class RenderClipRect extends RenderProxyBox {
   }
 }
 
+class RenderClipRRect extends RenderProxyBox {
+  RenderClipRRect({ RenderBox child, double xRadius, double yRadius })
+    : _xRadius = xRadius, _yRadius = yRadius, super(child) {
+    assert(_xRadius != null);
+    assert(_yRadius != null);
+  }
+
+  double _xRadius;
+  double get xRadius => _xRadius;
+  void set xRadius (double value) {
+    assert(value != null);
+    if (_xRadius == value)
+      return;
+    _xRadius = value;
+    markNeedsPaint();
+  }
+
+  double _yRadius;
+  double get yRadius => _yRadius;
+  void set yRadius (double value) {
+    assert(value != null);
+    if (_yRadius == value)
+      return;
+    _yRadius = value;
+    markNeedsPaint();
+  }
+
+  void paint(RenderCanvas canvas) {
+    if (child != null) {
+      Rect rect = new Rect.fromSize(size);
+      canvas.saveLayer(rect, new Paint());
+      sky.RRect rrect = new sky.RRect()..setRectXY(rect, xRadius, yRadius);
+      canvas.clipRRect(rrect);
+      child.paint(canvas);
+      canvas.restore();
+    }
+  }
+}
+
 class RenderClipOval extends RenderProxyBox {
   RenderClipOval({ RenderBox child }) : super(child);
 

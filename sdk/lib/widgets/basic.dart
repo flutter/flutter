@@ -104,6 +104,24 @@ class ClipRect extends OneChildRenderObjectWrapper {
 
   RenderClipRect get root => super.root;
   RenderClipRect createNode() => new RenderClipRect();
+
+  // Nothing to sync, so we don't implement syncRenderObject()
+}
+
+class ClipRRect extends OneChildRenderObjectWrapper {
+  final double xRadius;
+  final double yRadius;
+  ClipRRect({ String key, Widget child, this.xRadius, this.yRadius })
+    : super(key: key, child: child);
+
+  RenderClipRRect get root => super.root;
+  RenderClipRRect createNode() => new RenderClipRRect(xRadius: xRadius, yRadius: yRadius);
+
+  void syncRenderObject(ClipRRect old) {
+    super.syncRenderObject(old);
+    root.xRadius = xRadius;
+    root.yRadius = yRadius;
+  }
 }
 
 class ClipOval extends OneChildRenderObjectWrapper {
@@ -112,8 +130,9 @@ class ClipOval extends OneChildRenderObjectWrapper {
 
   RenderClipOval get root => super.root;
   RenderClipOval createNode() => new RenderClipOval();
-}
 
+  // Nothing to sync, so we don't implement syncRenderObject()
+}
 
 // POSITIONING AND SIZING NODES
 
@@ -157,6 +176,8 @@ class Center extends OneChildRenderObjectWrapper {
 
   RenderPositionedBox get root => super.root;
   RenderPositionedBox createNode() => new RenderPositionedBox();
+
+  // Nothing to sync, so we don't implement syncRenderObject()
 }
 
 class SizedBox extends OneChildRenderObjectWrapper {
