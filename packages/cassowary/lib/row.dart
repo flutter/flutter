@@ -16,9 +16,9 @@ class _Row {
   double add(double value) => constant += value;
 
   void insertSymbol(_Symbol symbol, [double coefficient = 1.0]) {
-    double val = _elvis(cells[symbol], 0.0) + coefficient;
+    double val = _elvis(cells[symbol], 0.0);
 
-    if (_nearZero(val)) {
+    if (_nearZero(val + coefficient)) {
       cells.remove(symbol);
     } else {
       cells[symbol] = val + coefficient;

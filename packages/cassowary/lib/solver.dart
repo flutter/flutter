@@ -221,7 +221,7 @@ class Solver {
           tag.marker = slack;
           row.insertSymbol(slack, coefficient);
 
-          if (!constraint.required) {
+          if (constraint.priority < Priority.required) {
             _Symbol error = new _Symbol(_SymbolType.error, tick++);
             tag.other = error;
             row.insertSymbol(error, -coefficient);
@@ -230,7 +230,7 @@ class Solver {
         }
         break;
       case Relation.equalTo:
-        if (!constraint.required) {
+        if (constraint.priority < Priority.required) {
           _Symbol errPlus = new _Symbol(_SymbolType.error, tick++);
           _Symbol errMinus = new _Symbol(_SymbolType.error, tick++);
           tag.marker = errPlus;
@@ -605,5 +605,5 @@ class _EditInfo {
 }
 
 bool _isValidNonRequiredPriority(double priority) {
-  return (priority >= 0.0 && priority < Constraint.requiredPriority);
+  return (priority >= 0.0 && priority < Priority.required);
 }

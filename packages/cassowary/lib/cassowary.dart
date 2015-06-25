@@ -4,6 +4,8 @@
 
 library cassowary;
 
+import 'dart:math';
+
 part 'constraint.dart';
 part 'expression.dart';
 part 'term.dart';
@@ -17,3 +19,4 @@ part 'utils.dart';
 part 'result.dart';
 part 'parser_exception.dart';
 part 'param.dart';
+part 'priority.dart';

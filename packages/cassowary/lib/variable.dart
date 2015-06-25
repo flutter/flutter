@@ -17,5 +17,5 @@ class Variable {
 
   String get debugName => _elvis(name, "variable${_tick}");
 
-  String toString() => "${debugName}(=${value})";
+  String toString() => debugName;
 }
