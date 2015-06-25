@@ -131,7 +131,7 @@ static sky::InputEventPtr BasicInputEventFromRecognizer(
   self.platformView->ConnectToViewportObserver(interface_request.Pass());
 
   mojo::String string(self.skyInitialLoadURL.UTF8String);
-  _viewport_observer->LoadURL(string);
+  _viewport_observer->RunFromNetwork(string);
 }
 
 - (void)notifySurfaceDestruction {

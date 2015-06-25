@@ -69,7 +69,11 @@ class Engine : public UIDelegate,
   void OnViewportMetricsChanged(int width, int height,
                                 float device_pixel_ratio) override;
   void OnInputEvent(InputEventPtr event) override;
-  void LoadURL(const mojo::String& url) override;
+
+  void RunFromNetwork(const mojo::String& url) override;
+  void RunFromFile(const mojo::String& main,
+                   const mojo::String& package_root) override;
+  void RunFromSnapshot(mojo::ScopedDataPipeConsumerHandle snapshot) override;
 
   // WebViewClient methods:
   void frameDetached(blink::WebFrame*) override;
@@ -95,12 +99,17 @@ class Engine : public UIDelegate,
   void DidNavigateLocally(const mojo::String& url) override;
   void RequestNavigateHistory(int32_t delta) override;
 
+  void RunFromLibrary(const mojo::String& name);
+  void CloseWebViewIfNeeded();
+  void LoadUsingWebView(const mojo::String& mojo_url);
+
   void UpdateSkyViewSize();
   void UpdateWebViewSize();
 
   Config config_;
   scoped_ptr<Animator> animator_;
 
+  scoped_ptr<blink::DartLibraryProvider> dart_library_provider_;
   std::unique_ptr<blink::SkyView> sky_view_;
   blink::WebView* web_view_;
 

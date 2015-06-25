@@ -21,6 +21,7 @@ common_deps = [
   "//sky/engine/wtf",
   "//sky/services/platform",
   "//sky/services/viewport",
+  "//sky/shell/dart",
   "//ui/gfx/geometry",
   "//ui/gl",
 ]

@@ -17,6 +17,9 @@
 namespace sky {
 namespace shell {
 
+const char kMain[] = "main";
+const char kPackageRoot[] = "package-root";
+
 void Init() {
   Shell::Init(make_scoped_ptr(new ServiceProviderContext(
       base::MessageLoop::current()->task_runner())));
@@ -27,8 +30,12 @@ void Init() {
   ViewportObserverPtr viewport_observer;
   shell_view->view()->ConnectToViewportObserver(GetProxy(&viewport_observer));
 
-  // TODO(abarth): At this point we should load some content into the view.
-  // viewport_observer->LoadURL("https://domokit.github.io/home.dart");
+  base::CommandLine& command_line = *base::CommandLine::ForCurrentProcess();
+
+  std::string main = command_line.GetSwitchValueASCII(kMain);
+  std::string package_root = command_line.GetSwitchValueASCII(kPackageRoot);
+
+  viewport_observer->RunFromFile(main, package_root);
 }
 
 } // namespace shell
