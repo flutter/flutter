@@ -3,6 +3,10 @@ Sky Style Guide
 
 In general, follow our [Design Principles](design.md) for all code.
 
+The primary goal of this style guide is to improve code readability so
+that everyone, whether reading the code for the first time or
+maintaining it for years, can quickly determine what the code does. A
+secondary goal is avoiding arguments when there are disagreements.
 
 Dart
 ----
@@ -82,6 +86,26 @@ Don't put the statement part of an "if" statement on the same line as
 the expression, even if it is short. (Doing so makes it unobvious that
 there is relevant code there. This is especially important for early
 returns.)
+
+If a flow control structure has just one statement, then don't use
+braces around it except where doing so would help readability or avoid
+the dangling-else problem. Keeping the code free of boilerplate or
+redundant punctuation keeps it concise and readable.
+
+> For example,
+> ```dart
+>   if (children != null)
+>     for (RenderBox child in children)
+>       add(child);
+> ```
+> ...rather than:
+> ```dart
+>   if (children != null) {
+>     for (RenderBox child in children) {
+>       add(child);
+>     }
+>   }
+> ```
 
 
 Use the most relevant constructor or method, when there are multiple
