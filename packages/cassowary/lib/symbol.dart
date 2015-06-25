@@ -4,10 +4,10 @@
 
 part of cassowary;
 
-enum SymbolType { invalid, external, slack, error, dummy, }
+enum _SymbolType { invalid, external, slack, error, dummy, }
 
 class _Symbol {
-  final SymbolType type;
+  final _SymbolType type;
   int tick;
 
   _Symbol(this.type, this.tick);

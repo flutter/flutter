@@ -426,7 +426,7 @@ void main() {
   test('single_item', () {
     var left = new Param(-20.0);
     Solver s = new Solver();
-    s << (left >= CM(0.0));
+    s.addConstraint(left >= CM(0.0));
     s.flushVariableUpdates();
     expect(left.value, 0.0);
   });
@@ -438,9 +438,10 @@ void main() {
 
     Solver s = new Solver();
 
-    s << ((left + right == CM(2.0) * mid) as Constraint);
-    s << (right - left >= CM(100.0));
-    s << (left >= CM(0.0));
+    expect(s.addConstraint((left + right == CM(2.0) * mid) as Constraint),
+        Result.success);
+    expect(s.addConstraint(right - left >= CM(100.0)), Result.success);
+    expect(s.addConstraint(left >= CM(0.0)), Result.success);
 
     s.flushVariableUpdates();
 
