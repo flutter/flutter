@@ -550,6 +550,42 @@ class Solver {
 
     return _elvis(entering, new _Symbol(_SymbolType.invalid, 0));
   }
+
+  String toString() {
+    StringBuffer buffer = new StringBuffer();
+    String separator = "\n~~~~~~~~~";
+
+    // Objective
+    buffer.writeln(separator + " Objective");
+    buffer.writeln(_objective.toString());
+
+    // Tableau
+    buffer.writeln(separator + " Tableau");
+    _rows.forEach((symbol, row) {
+      buffer.write(symbol.toString());
+      buffer.write(" | ");
+      buffer.writeln(row.toString());
+    });
+
+    // Infeasible
+    buffer.writeln(separator + " Infeasible");
+    _infeasibleRows.forEach((symbol) => buffer.writeln(symbol.toString()));
+
+    // Variables
+    buffer.writeln(separator + " Variables");
+    _vars.forEach((variable, symbol) =>
+        buffer.writeln("${variable.toString()} = ${symbol.toString()}"));
+
+    // Edit Variables
+    buffer.writeln(separator + " Edit Variables");
+    _edits.forEach((variable, editinfo) => buffer.writeln(variable));
+
+    // Constraints
+    buffer.writeln(separator + " Constraints");
+    _constraints.forEach((constraint, _) => buffer.writeln(constraint));
+
+    return buffer.toString();
+  }
 }
 
 class _Tag {

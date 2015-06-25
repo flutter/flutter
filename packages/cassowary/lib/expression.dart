@@ -156,4 +156,17 @@ class Expression extends _EquationMember {
 
     return this._applyMultiplicand(1.0 / m.value);
   }
+
+  String toString() {
+    StringBuffer buffer = new StringBuffer();
+
+    terms.forEach((t) => buffer.write("${t}"));
+
+    if (constant != 0.0) {
+      buffer.write(constant.sign > 0.0 ? "+" : "-");
+      buffer.write(constant.abs());
+    }
+
+    return buffer.toString();
+  }
 }

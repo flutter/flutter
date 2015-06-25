@@ -16,4 +16,19 @@ class Term extends _EquationMember {
 
   Expression asExpression() =>
       new Expression([new Term(this.variable, this.coefficient)], 0.0);
+
+  String toString() {
+    StringBuffer buffer = new StringBuffer();
+
+    buffer.write(coefficient.sign > 0.0 ? "+" : "-");
+
+    if (coefficient.abs() != 1.0) {
+      buffer.write(coefficient.abs());
+      buffer.write("*");
+    }
+
+    buffer.write(variable);
+
+    return buffer.toString();
+  }
 }

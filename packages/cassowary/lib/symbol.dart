@@ -11,4 +11,26 @@ class _Symbol {
   int tick;
 
   _Symbol(this.type, this.tick);
+
+  String toString() {
+    String typeString = "unknown";
+    switch (type) {
+      case _SymbolType.invalid:
+        typeString = "i";
+        break;
+      case _SymbolType.external:
+        typeString = "v";
+        break;
+      case _SymbolType.slack:
+        typeString = "s";
+        break;
+      case _SymbolType.error:
+        typeString = "e";
+        break;
+      case _SymbolType.dummy:
+        typeString = "d";
+        break;
+    }
+    return "${typeString}${tick}";
+  }
 }

@@ -61,4 +61,15 @@ class _Row {
     cells.remove(symbol);
     insertRow(row, coefficient);
   }
+
+  String toString() {
+    StringBuffer buffer = new StringBuffer();
+
+    buffer.write(constant);
+
+    cells.forEach((symbol, value) =>
+        buffer.write(" + " + value.toString() + " * " + symbol.toString()));
+
+    return buffer.toString();
+  }
 }

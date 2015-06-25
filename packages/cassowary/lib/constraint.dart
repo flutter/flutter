@@ -24,4 +24,29 @@ class Constraint {
       required ? requiredPriority : p.clamp(0.0, requiredPriority - 1.0);
 
   Constraint operator |(double p) => this..priority = p;
+
+  String toString() {
+    StringBuffer buffer = new StringBuffer();
+    buffer.write(expression.toString());
+
+    switch (relation) {
+      case Relation.equalTo:
+        buffer.write(" <= 0 ");
+        break;
+      case Relation.greaterThanOrEqualTo:
+        buffer.write(" >= 0 ");
+        break;
+      case Relation.lessThanOrEqualTo:
+        buffer.write(" <= 0 ");
+        break;
+    }
+
+    buffer.write(" | priority = ${priority}");
+
+    if (required) {
+      buffer.write(" (required)");
+    }
+
+    return buffer.toString();
+  }
 }

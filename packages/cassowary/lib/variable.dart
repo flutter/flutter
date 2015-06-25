@@ -6,7 +6,16 @@ part of cassowary;
 
 class Variable {
   double value = 0.0;
-  Variable(this.value);
+  String name;
+
+  int _tick;
+  static int _total = 0;
+
+  Variable(this.value) : _tick = _total++;
 
   // TODO(csg): Add external variable update callbacks here
+
+  String get debugName => _elvis(name, "variable${_tick}");
+
+  String toString() => "${debugName}(=${value})";
 }
