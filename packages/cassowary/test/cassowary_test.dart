@@ -422,4 +422,30 @@ void main() {
 
     expect(((left + right) >= (CM(2.0) * mid)) is Constraint, true);
   });
+
+  test('single_item', () {
+    var left = new Param(-20.0);
+    Solver s = new Solver();
+    s << (left >= CM(0.0));
+    s.flushVariableUpdates();
+    expect(left.value, 0.0);
+  });
+
+  test('midpoints', () {
+    var left = new Param(0.0);
+    var right = new Param(0.0);
+    var mid = new Param(0.0);
+
+    Solver s = new Solver();
+
+    s << ((left + right == CM(2.0) * mid) as Constraint);
+    s << (right - left >= CM(100.0));
+    s << (left >= CM(0.0));
+
+    s.flushVariableUpdates();
+
+    expect(left.value, 0.0);
+    expect(mid.value, 50.0);
+    expect(right.value, 100.0);
+  });
 }

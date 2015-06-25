@@ -140,7 +140,7 @@ class Solver {
     return _dualOptimize();
   }
 
-  void updateVariable() {
+  void flushVariableUpdates() {
     for (Variable variable in _vars.keys) {
       _Symbol symbol = _vars[variable];
       _Row row = _rows[symbol];
