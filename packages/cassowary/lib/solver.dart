@@ -140,7 +140,17 @@ class Solver {
     return _dualOptimize();
   }
 
-  void updateVariable() {}
+  void updateVariable() {
+    for (Variable variable in _vars.keys) {
+      Symbol symbol = _vars[variable];
+      Row row = _rows[symbol];
+      if (row == null) {
+        variable.value = 0.0;
+      } else {
+        variable.value = row.constant;
+      }
+    }
+  }
 
   Solver operator <<(Constraint c) => this..addConstraint(c);
 
