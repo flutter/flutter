@@ -130,8 +130,14 @@ class Solver {
     return _edits.containsKey(variable);
   }
 
-  Result suggestVariable(Variable v, double value) {
-    return Result.unimplemented;
+  Result suggestValueForVariable(Variable variable, double value) {
+    if (!_edits.containsKey(variable)) {
+      return Result.unknownEditVariable;
+    }
+
+    _suggestValueForEditInfoWithoutDualOptimization(_edits[variable], value);
+
+    return _dualOptimize();
   }
 
   void updateVariable() {}
@@ -425,6 +431,89 @@ class Solver {
       return second;
     }
     return third;
+  }
+
+  void _suggestValueForEditInfoWithoutDualOptimization(
+      EditInfo info, double value) {
+    double delta = value - info.constant;
+    info.constant = value;
+
+    {
+      Symbol symbol = info.tag.marker;
+      Row row = _rows[info.tag.marker];
+
+      if (row != null) {
+        if (row.add(-delta) < 0.0) {
+          _infeasibleRows.add(symbol);
+        }
+        return;
+      }
+
+      symbol = info.tag.other;
+      row = _rows[info.tag.other];
+
+      if (row != null) {
+        if (row.add(delta) < 0.0) {
+          _infeasibleRows.add(symbol);
+        }
+        return;
+      }
+    }
+
+    for (Symbol symbol in _rows.keys) {
+      Row row = _rows[symbol];
+      double coeff = row.coefficientForSymbol(info.tag.marker);
+      if (coeff != 0.0 &&
+          row.add(delta * coeff) < 0.0 &&
+          symbol.type != SymbolType.external) {
+        _infeasibleRows.add(symbol);
+      }
+    }
+  }
+
+  Result _dualOptimize() {
+    while (_infeasibleRows.length != 0) {
+      Symbol leaving = _infeasibleRows.removeLast();
+      Row row = _rows[leaving];
+
+      if (row != null && row.constant < 0.0) {
+        Symbol entering = _getDualEnteringSymbolForRow(row);
+
+        if (entering.type == SymbolType.invalid) {
+          return Result.internalSolverError;
+        }
+
+        _rows.remove(leaving);
+
+        row.solveForSymbols(leaving, entering);
+        _substitute(entering, row);
+        _rows[entering] = row;
+      }
+    }
+    return Result.success;
+  }
+
+  Symbol _getDualEnteringSymbolForRow(Row row) {
+    Symbol entering;
+
+    double ratio = double.MAX_FINITE;
+
+    Map<Symbol, double> rowCells = row.cells;
+
+    for (Symbol symbol in rowCells.keys) {
+      double value = rowCells[symbol];
+
+      if (value > 0.0 && symbol.type != SymbolType.dummy) {
+        double coeff = _objective.coefficientForSymbol(symbol);
+        double r = coeff / value;
+        if (r < ratio) {
+          ratio = r;
+          entering = symbol;
+        }
+      }
+    }
+
+    return _elvis(entering, new Symbol(SymbolType.invalid, 0));
   }
 }
 
