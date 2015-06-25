@@ -171,10 +171,13 @@ class Game {
   }
 
   Widget buildUI() {
+    // FIXME: We need to build the board before we build the toolbar because
+    // we compute the win state during build step.
+    Widget board = buildBoard();
     return new Scaffold(
       toolbar: buildToolBar(),
       body: new Container(
-        child: new Center(child: buildBoard()),
+        child: new Center(child: board),
         decoration: new BoxDecoration(backgroundColor: colors.Grey[50])
       )
     );
