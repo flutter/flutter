@@ -408,6 +408,11 @@ abstract class ContainerRenderObjectMixin<ChildType extends RenderObject, Parent
     adoptChild(child);
     _addToChildList(child, before: before);
   }
+  void addAll(List<ChildType> children) {
+    if (children != null)
+      for (ChildType child in children)
+        add(child);
+  }
   void _removeFromChildList(ChildType child) {
     assert(child.parentData is ParentDataType);
     assert(_debugUltimatePreviousSiblingOf(child, equals: _firstChild));

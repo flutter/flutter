@@ -1133,8 +1133,11 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
 
 }
 
-// DEFAULT BEHAVIORS FOR RENDERBOX CONTAINERS
+// HELPER METHODS FOR RENDERBOX CONTAINERS
 abstract class RenderBoxContainerDefaultsMixin<ChildType extends RenderBox, ParentDataType extends ContainerParentDataMixin<ChildType>> implements ContainerRenderObjectMixin<ChildType, ParentDataType> {
+
+  // This class, by convention, doesn't override any members of the superclass.
+  // It only provides helper functions that subclasses can call.
 
   double defaultGetDistanceToFirstActualBaseline(TextBaseline baseline) {
     assert(!needsLayout);

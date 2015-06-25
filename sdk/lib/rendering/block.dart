@@ -18,8 +18,7 @@ class RenderBlock extends RenderBox with ContainerRenderObjectMixin<RenderBox, B
   RenderBlock({
     List<RenderBox> children
   }) {
-    if (children != null)
-      children.forEach((child) { add(child); });
+    addAll(children);
   }
 
   void setParentData(RenderBox child) {

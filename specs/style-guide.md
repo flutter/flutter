@@ -121,8 +121,14 @@ options.
 > ```
 
 
+Use for-in loops rather than forEach() where possible, since that
+saves a stack frame per iteration.
+
+
 C++
 ---
+
+Put spaces around operators in expressions.
 
 
 Java
