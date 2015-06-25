@@ -32,16 +32,13 @@
 #define SKY_ENGINE_PUBLIC_PLATFORM_WEBSTRING_H_
 
 #include <string>
-#include "sky/engine/public/platform/WebCommon.h"
-#include "sky/engine/public/platform/WebPrivatePtr.h"
 
-#if INSIDE_BLINK
-#include "sky/engine/wtf/Forward.h"
-#else
 #include "base/strings/latin1_string_conversions.h"
 #include "base/strings/nullable_string16.h"
 #include "base/strings/string16.h"
-#endif
+#include "sky/engine/public/platform/WebCommon.h"
+#include "sky/engine/public/platform/WebPrivatePtr.h"
+#include "sky/engine/wtf/Forward.h"
 
 namespace WTF {
 class StringImpl;
@@ -119,7 +116,7 @@ public:
         return *this;
     }
 
-#if INSIDE_BLINK
+
     BLINK_COMMON_EXPORT WebString(const WTF::String&);
     BLINK_COMMON_EXPORT WebString& operator=(const WTF::String&);
     BLINK_COMMON_EXPORT operator WTF::String() const;
@@ -127,7 +124,7 @@ public:
     BLINK_COMMON_EXPORT WebString(const WTF::AtomicString&);
     BLINK_COMMON_EXPORT WebString& operator=(const WTF::AtomicString&);
     BLINK_COMMON_EXPORT operator WTF::AtomicString() const;
-#else
+
     WebString(const base::string16& s)
     {
         assign(s.data(), s.length());
@@ -165,7 +162,6 @@ public:
     {
         return base::NullableString16(operator base::string16(), m_private.isNull());
     }
-#endif
 
 private:
     BLINK_COMMON_EXPORT bool is8Bit() const;

@@ -19,18 +19,12 @@
 
 namespace blink {
 
-class SkyView::Data {
- public:
-  RefPtr<View> view_;
-};
-
 std::unique_ptr<SkyView> SkyView::Create(SkyViewClient* client) {
   return std::unique_ptr<SkyView>(new SkyView(client));
 }
 
 SkyView::SkyView(SkyViewClient* client)
     : client_(client),
-      data_(new Data),
       weak_factory_(this) {
 }
 
@@ -43,39 +37,26 @@ SkyView::~SkyView() {
 
 void SkyView::SetDisplayMetrics(const SkyDisplayMetrics& metrics) {
   display_metrics_ = metrics;
-  data_->view_->setDisplayMetrics(display_metrics_);
+  view_->setDisplayMetrics(display_metrics_);
 }
 
-void SkyView::Load(const WebURL& web_url, mojo::URLResponsePtr response) {
-  KURL url = web_url;
+void SkyView::RunFromLibrary(const WebString& name,
+                             DartLibraryProvider* library_provider) {
+  CreateView(name);
+  dart_controller_->RunFromLibrary(name, library_provider);
+}
 
-  data_->view_ = View::create(base::Bind(
-      &SkyView::ScheduleFrame, weak_factory_.GetWeakPtr()));
-  data_->view_->setDisplayMetrics(display_metrics_);
-
-  dart_controller_.reset(new DartController);
-  dart_controller_->CreateIsolateFor(adoptPtr(new DOMDartState(nullptr, url)));
-  dart_controller_->InstallView(data_->view_.get());
-
-  {
-    Dart_Isolate isolate = dart_controller_->dart_state()->isolate();
-    DartIsolateScope scope(isolate);
-    DartApiScope api_scope;
-    client_->DidCreateIsolate(isolate);
-  }
-
-  if (url.path().endsWith(".snapshot"))
-    dart_controller_->LoadSnapshot(url, response.Pass());
-  else
-    dart_controller_->LoadMainLibrary(url, response.Pass());
+void SkyView::RunFromSnapshot(const WebString& name,
+                              mojo::ScopedDataPipeConsumerHandle snapshot) {
+  // TODO(abarth): Implement.
 }
 
 void SkyView::BeginFrame(base::TimeTicks frame_time) {
-  data_->view_->beginFrame(frame_time);
+  view_->beginFrame(frame_time);
 }
 
 skia::RefPtr<SkPicture> SkyView::Paint() {
-  if (Picture* picture = data_->view_->picture())
+  if (Picture* picture = view_->picture())
     return skia::SharePtr(picture->toSkia());
   return skia::RefPtr<SkPicture>();
 }
@@ -85,20 +66,38 @@ void SkyView::HandleInputEvent(const WebInputEvent& inputEvent) {
 
   if (WebInputEvent::isPointerEventType(inputEvent.type)) {
       const WebPointerEvent& event = static_cast<const WebPointerEvent&>(inputEvent);
-      data_->view_->handleInputEvent(PointerEvent::create(event));
+      view_->handleInputEvent(PointerEvent::create(event));
   } else if (WebInputEvent::isGestureEventType(inputEvent.type)) {
       const WebGestureEvent& event = static_cast<const WebGestureEvent&>(inputEvent);
-      data_->view_->handleInputEvent(GestureEvent::create(event));
+      view_->handleInputEvent(GestureEvent::create(event));
   } else if (WebInputEvent::isKeyboardEventType(inputEvent.type)) {
       const WebKeyboardEvent& event = static_cast<const WebKeyboardEvent&>(inputEvent);
-      data_->view_->handleInputEvent(KeyboardEvent::create(event));
+      view_->handleInputEvent(KeyboardEvent::create(event));
   } else if (WebInputEvent::isWheelEventType(inputEvent.type)) {
       const WebWheelEvent& event = static_cast<const WebWheelEvent&>(inputEvent);
-      data_->view_->handleInputEvent(WheelEvent::create(event));
+      view_->handleInputEvent(WheelEvent::create(event));
   } else if (inputEvent.type == WebInputEvent::Back) {
-      data_->view_->handleInputEvent(Event::create("back"));
+    view_->handleInputEvent(Event::create("back"));
   }
 
+}
+
+void SkyView::CreateView(const String& name) {
+  DCHECK(!view_);
+  DCHECK(!dart_controller_);
+
+  view_ = View::create(
+      base::Bind(&SkyView::ScheduleFrame, weak_factory_.GetWeakPtr()));
+  view_->setDisplayMetrics(display_metrics_);
+
+  dart_controller_ = adoptPtr(new DartController);
+  dart_controller_->CreateIsolateFor(adoptPtr(new DOMDartState(nullptr, name)));
+  dart_controller_->InstallView(view_.get());
+
+  Dart_Isolate isolate = dart_controller_->dart_state()->isolate();
+  DartIsolateScope scope(isolate);
+  DartApiScope api_scope;
+  client_->DidCreateIsolate(isolate);
 }
 
 void SkyView::ScheduleFrame() {

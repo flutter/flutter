@@ -9,16 +9,22 @@
 
 #include "base/memory/weak_ptr.h"
 #include "base/time/time.h"
+#include "mojo/public/cpp/system/data_pipe.h"
 #include "mojo/services/network/public/interfaces/url_loader.mojom.h"
 #include "skia/ext/refptr.h"
 #include "sky/engine/public/platform/WebCommon.h"
 #include "sky/engine/public/platform/WebURL.h"
 #include "sky/engine/public/platform/sky_display_metrics.h"
+#include "sky/engine/wtf/OwnPtr.h"
+#include "sky/engine/wtf/RefPtr.h"
+#include "sky/engine/wtf/text/WTFString.h"
 #include "third_party/skia/include/core/SkPicture.h"
 
 namespace blink {
 class DartController;
+class DartLibraryProvider;
 class SkyViewClient;
+class View;
 class WebInputEvent;
 
 class SkyView {
@@ -30,8 +36,10 @@ class SkyView {
   void SetDisplayMetrics(const SkyDisplayMetrics& metrics);
   void BeginFrame(base::TimeTicks frame_time);
 
-  // Sky can either issue the load itself or use an existing response pipe.
-  void Load(const WebURL& url, mojo::URLResponsePtr response = nullptr);
+  void RunFromLibrary(const WebString& name,
+                      DartLibraryProvider* library_provider);
+  void RunFromSnapshot(const WebString& name,
+                       mojo::ScopedDataPipeConsumerHandle snapshot);
 
   skia::RefPtr<SkPicture> Paint();
   void HandleInputEvent(const WebInputEvent& event);
@@ -39,14 +47,13 @@ class SkyView {
  private:
   explicit SkyView(SkyViewClient* client);
 
+  void CreateView(const String& name);
   void ScheduleFrame();
-
-  class Data;
 
   SkyViewClient* client_;
   SkyDisplayMetrics display_metrics_;
-  std::unique_ptr<DartController> dart_controller_;
-  std::unique_ptr<Data> data_;
+  RefPtr<View> view_;
+  OwnPtr<DartController> dart_controller_;
 
   base::WeakPtrFactory<SkyView> weak_factory_;
 

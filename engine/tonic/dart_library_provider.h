@@ -12,15 +12,16 @@
 
 namespace blink {
 
+typedef base::Callback<void(mojo::ScopedDataPipeConsumerHandle)>
+    DataPipeConsumerCallback;
+
 class DartLibraryProvider {
  public:
-  virtual void GetLibraryAsStream(
-      const String& name,
-      base::Callback<void(mojo::ScopedDataPipeConsumerHandle)> callback) = 0;
+  virtual void GetLibraryAsStream(const String& name,
+                                  DataPipeConsumerCallback callback) = 0;
 
   virtual Dart_Handle CanonicalizeURL(Dart_Handle library, Dart_Handle url) = 0;
 
- protected:
   virtual ~DartLibraryProvider();
 };
 

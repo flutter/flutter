@@ -5,10 +5,12 @@
 source_set("sky") {
   deps = [
     "//base",
+    "//mojo/public/cpp/system",
+    "//mojo/services/network/public/interfaces",
     "//skia",
     "//sky/engine/core",
     "//sky/engine/platform",
-    "//mojo/services/network/public/interfaces",
+    "//sky/engine/wtf",
   ]
 
   configs += [

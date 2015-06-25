@@ -23,7 +23,7 @@
 #include "sky/engine/core/html/imports/HTMLImportChild.h"
 #include "sky/engine/core/loader/FrameLoaderClient.h"
 #include "sky/engine/core/script/dart_debugger.h"
-#include "sky/engine/core/script/dart_library_provider_network.h"
+#include "sky/engine/core/script/dart_library_provider_webview.h"
 #include "sky/engine/core/script/dart_service_isolate.h"
 #include "sky/engine/core/script/dom_dart_state.h"
 #include "sky/engine/public/platform/Platform.h"
@@ -48,18 +48,6 @@ void CreateEmptyRootLibraryIfNeeded() {
     Dart_LoadScript(Dart_NewStringFromCString("dart:empty"), Dart_EmptyString(),
                     0, 0);
   }
-}
-
-PassOwnPtr<DartLibraryProviderNetwork::PrefetchedLibrary>
-CreatePrefetchedLibraryIfNeeded(const KURL& url,
-                                mojo::URLResponsePtr response) {
-  OwnPtr<DartLibraryProviderNetwork::PrefetchedLibrary> prefetched;
-  if (response && response->status_code == 200) {
-    prefetched = adoptPtr(new DartLibraryProviderNetwork::PrefetchedLibrary());
-    prefetched->name = url.string();
-    prefetched->pipe = response->body.Pass();
-  }
-  return prefetched.release();
 }
 
 } // namespace
@@ -133,35 +121,18 @@ Dart_Handle DartController::CreateLibrary(AbstractModule* module,
   return library;
 }
 
-void DartController::DidLoadMainLibrary(KURL url) {
+void DartController::DidLoadMainLibrary(String name) {
   DCHECK(Dart_CurrentIsolate() == dart_state()->isolate());
   DartApiScope dart_api_scope;
 
   if (LogIfError(Dart_FinalizeLoading(true)))
     return;
 
-  Dart_Handle library = Dart_LookupLibrary(
-      StringToDart(dart_state(), url.string()));
+  Dart_Handle library = Dart_LookupLibrary(StringToDart(dart_state(), name));
   // TODO(eseidel): We need to load a 404 page instead!
   if (LogIfError(library))
     return;
   DartInvokeAppField(library, ToDart("main"), 0, nullptr);
-}
-
-void DartController::LoadMainLibrary(const KURL& url, mojo::URLResponsePtr response) {
-  DartState::Scope scope(dart_state());
-  CreateEmptyRootLibraryIfNeeded();
-
-  library_provider_ = adoptPtr(new DartLibraryProviderNetwork(
-      CreatePrefetchedLibraryIfNeeded(url, response.Pass())));
-
-  DartLibraryLoader& loader = dart_state()->library_loader();
-  loader.set_library_provider(library_provider_.get());
-
-  DartDependencyCatcher dependency_catcher(loader);
-  loader.LoadLibrary(url.string());
-  loader.WaitForDependencies(dependency_catcher.dependencies(),
-                             base::Bind(&DartController::DidLoadMainLibrary, weak_factory_.GetWeakPtr(), url));
 }
 
 void DartController::DidLoadSnapshot() {
@@ -185,6 +156,21 @@ void DartController::LoadSnapshot(const KURL& url, mojo::URLResponsePtr response
       base::Bind(&DartController::DidLoadSnapshot, weak_factory_.GetWeakPtr()));
 }
 
+void DartController::RunFromLibrary(const String& name,
+                                    DartLibraryProvider* library_provider) {
+  DartState::Scope scope(dart_state());
+  CreateEmptyRootLibraryIfNeeded();
+
+  DartLibraryLoader& loader = dart_state()->library_loader();
+  loader.set_library_provider(library_provider);
+
+  DartDependencyCatcher dependency_catcher(loader);
+  loader.LoadLibrary(name);
+  loader.WaitForDependencies(dependency_catcher.dependencies(),
+                             base::Bind(&DartController::DidLoadMainLibrary,
+                                        weak_factory_.GetWeakPtr(), name));
+}
+
 void DartController::LoadScriptInModule(
     AbstractModule* module,
     const String& source,
@@ -196,7 +182,7 @@ void DartController::LoadScriptInModule(
   DartLibraryLoader& loader = dart_state()->library_loader();
 
   if (!library_provider_) {
-    library_provider_ = adoptPtr(new DartLibraryProviderNetwork(nullptr));
+    library_provider_ = adoptPtr(new DartLibraryProviderWebView());
     loader.set_library_provider(library_provider_.get());
   }
 
@@ -381,9 +367,8 @@ void DartController::CreateIsolateFor(PassOwnPtr<DOMDartState> state) {
   char* error = nullptr;
   dom_dart_state_ = state;
   Dart_Isolate isolate = Dart_CreateIsolate(
-      dom_dart_state_->url().string().utf8().data(), "main",
-      kDartIsolateSnapshotBuffer, nullptr,
-      static_cast<DartState*>(dom_dart_state_.get()), &error);
+      dom_dart_state_->url().utf8().data(), "main", kDartIsolateSnapshotBuffer,
+      nullptr, static_cast<DartState*>(dom_dart_state_.get()), &error);
   Dart_SetMessageNotifyCallback(MessageNotifyCallback);
   CHECK(isolate) << error;
   dom_dart_state_->SetIsolate(isolate);

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "sky/engine/core/script/dart_library_provider_network.h"
+#include "sky/engine/core/script/dart_library_provider_webview.h"
 
 #include "sky/engine/platform/fetcher/MojoFetcher.h"
 #include "sky/engine/platform/weborigin/KURL.h"
@@ -10,14 +10,11 @@
 
 namespace blink {
 
-typedef base::Callback<void(mojo::ScopedDataPipeConsumerHandle)>
-    CompletionCallback;
-
-class DartLibraryProviderNetwork::Job : public MojoFetcher::Client {
+class DartLibraryProviderWebView::Job : public MojoFetcher::Client {
  public:
-  Job(DartLibraryProviderNetwork* provider,
+  Job(DartLibraryProviderWebView* provider,
       const String& name,
-      CompletionCallback callback)
+      DataPipeConsumerCallback callback)
       : provider_(provider), callback_(callback) {
     fetcher_ = adoptPtr(new MojoFetcher(this, KURL(ParsedURLString, name)));
   }
@@ -35,39 +32,24 @@ class DartLibraryProviderNetwork::Job : public MojoFetcher::Client {
     // We're deleted now.
   }
 
-  DartLibraryProviderNetwork* provider_;
-  CompletionCallback callback_;
+  DartLibraryProviderWebView* provider_;
+  DataPipeConsumerCallback callback_;
   OwnPtr<MojoFetcher> fetcher_;
 };
 
-DartLibraryProviderNetwork::PrefetchedLibrary::PrefetchedLibrary() {
+DartLibraryProviderWebView::DartLibraryProviderWebView() {
 }
 
-DartLibraryProviderNetwork::PrefetchedLibrary::~PrefetchedLibrary() {
+DartLibraryProviderWebView::~DartLibraryProviderWebView() {
 }
 
-DartLibraryProviderNetwork::DartLibraryProviderNetwork(
-    PassOwnPtr<PrefetchedLibrary> prefetched)
-    : prefetched_library_(prefetched) {
-}
-
-DartLibraryProviderNetwork::~DartLibraryProviderNetwork() {
-}
-
-void DartLibraryProviderNetwork::GetLibraryAsStream(
+void DartLibraryProviderWebView::GetLibraryAsStream(
     const String& name,
-    CompletionCallback callback) {
-  if (prefetched_library_ && prefetched_library_->name == name) {
-    mojo::ScopedDataPipeConsumerHandle pipe = prefetched_library_->pipe.Pass();
-    prefetched_library_ = nullptr;
-    callback.Run(pipe.Pass());
-    return;
-  }
-
+    DataPipeConsumerCallback callback) {
   jobs_.add(adoptPtr(new Job(this, name, callback)));
 }
 
-Dart_Handle DartLibraryProviderNetwork::CanonicalizeURL(Dart_Handle library,
+Dart_Handle DartLibraryProviderWebView::CanonicalizeURL(Dart_Handle library,
                                                         Dart_Handle url) {
   String string = StringFromDart(url);
   if (string.startsWith("dart:"))

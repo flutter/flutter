@@ -10,5 +10,8 @@ import "sky/services/viewport/input_event.mojom";
 interface ViewportObserver {
   OnViewportMetricsChanged(int32 width, int32 height, float device_pixel_ratio);
   OnInputEvent(InputEvent event);
-  LoadURL(string url);
+
+  RunFromNetwork(string url);
+  RunFromFile(string main, string package_root);
+  RunFromSnapshot(handle<data_pipe_consumer> snapshot);
 };

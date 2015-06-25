@@ -183,7 +183,7 @@ public class PlatformViewAndroid extends SurfaceView
     }
 
     public void loadUrl(String url) {
-        mViewportObserver.loadUrl(url);
+        mViewportObserver.runFromNetwork(url);
     }
 
     private void attach() {

@@ -36,13 +36,13 @@
 #include "sky/engine/public/web/WebView.h"
 #include "sky/services/platform/url_request_types.h"
 #include "sky/viewer/converters/input_event_types.h"
+#include "sky/viewer/dart_library_provider_impl.h"
 #include "sky/viewer/internals.h"
 #include "sky/viewer/runtime_flags.h"
 #include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/core/SkColor.h"
 #include "third_party/skia/include/core/SkDevice.h"
 #include "ui/events/gestures/gesture_recognizer.h"
-#include "v8/include/v8.h"
 
 namespace sky {
 namespace {
@@ -92,6 +92,18 @@ scoped_ptr<ui::TouchEvent> ConvertToUITouchEvent(
                   pointer_event.y * device_pixel_ratio),
       pointer_event.pointer,
       base::TimeDelta::FromMillisecondsD(pointer_event.timeStampMS)));
+}
+
+scoped_ptr<DartLibraryProviderImpl::PrefetchedLibrary>
+CreatePrefetchedLibraryIfNeeded(const String& name,
+                                mojo::URLResponsePtr response) {
+  scoped_ptr<DartLibraryProviderImpl::PrefetchedLibrary> prefetched;
+  if (response->status_code == 200) {
+    prefetched.reset(new DartLibraryProviderImpl::PrefetchedLibrary());
+    prefetched->name = name;
+    prefetched->pipe = response->body.Pass();
+  }
+  return prefetched.Pass();
 }
 
 }  // namespace
@@ -161,9 +173,13 @@ void DocumentView::Load(mojo::URLResponsePtr response) {
   GURL responseURL(response->url);
 
   if (!blink::WebView::shouldUseWebView(responseURL)) {
+    String name = String::fromUTF8(responseURL.spec());
+    library_provider_.reset(new DartLibraryProviderImpl(
+        blink::Platform::current()->networkService(),
+        CreatePrefetchedLibraryIfNeeded(name, response.Pass())));
     sky_view_ = blink::SkyView::Create(this);
     initializeLayerTreeView();
-    sky_view_->Load(responseURL, response.Pass());
+    sky_view_->RunFromLibrary(name, library_provider_.get());
     return;
   }
 

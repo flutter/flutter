@@ -29,7 +29,6 @@
 #include "sky/services/testing/test_harness.mojom.h"
 #include "ui/events/gestures/gesture_types.h"
 
-
 namespace mojo {
 class ViewManager;
 class View;
@@ -40,6 +39,7 @@ class Rasterizer;
 class RasterizerBitmap;
 class Layer;
 class LayerHost;
+class DartLibraryProviderImpl;
 
 class DocumentView : public blink::ServiceProvider,
                      public blink::WebFrameClient,
@@ -149,12 +149,14 @@ class DocumentView : public blink::ServiceProvider,
   blink::WebView* web_view_;
   mojo::View* root_;
   mojo::ViewManagerClientFactory view_manager_client_factory_;
+  scoped_ptr<DartLibraryProviderImpl> library_provider_;
   scoped_ptr<LayerHost> layer_host_;
   scoped_refptr<Layer> root_layer_;
   RasterizerBitmap* bitmap_rasterizer_;  // Used for pixel tests.
   mojo::ServiceRegistryPtr service_registry_;
   scoped_ptr<mojo::StrongBinding<mojo::ServiceProvider>>
       service_registry_service_provider_binding_;
+
   base::WeakPtrFactory<DocumentView> weak_factory_;
 
   DISALLOW_COPY_AND_ASSIGN(DocumentView);

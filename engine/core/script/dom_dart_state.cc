@@ -9,7 +9,7 @@
 
 namespace blink {
 
-DOMDartState::DOMDartState(Document* document, const KURL& url)
+DOMDartState::DOMDartState(Document* document, const String& url)
     : document_(document), url_(url) {
 }
 
