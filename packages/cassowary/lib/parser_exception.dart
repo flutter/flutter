@@ -6,7 +6,7 @@ part of cassowary;
 
 class ParserException implements Exception {
   final String message;
-  List<EquationMember> members;
+  List<_EquationMember> members;
   ParserException(this.message, this.members);
 
   String toString() {

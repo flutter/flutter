@@ -5,13 +5,13 @@
 part of cassowary;
 
 class Solver {
-  final Map<Constraint, Tag> _constraints = new Map<Constraint, Tag>();
-  final Map<Symbol, Row> _rows = new Map<Symbol, Row>();
-  final Map<Variable, Symbol> _vars = new Map<Variable, Symbol>();
-  final Map<Variable, EditInfo> _edits = new Map<Variable, EditInfo>();
-  final List<Symbol> _infeasibleRows = new List<Symbol>();
-  final Row _objective = new Row(0.0);
-  Row _artificial = new Row(0.0);
+  final Map<Constraint, _Tag> _constraints = new Map<Constraint, _Tag>();
+  final Map<_Symbol, _Row> _rows = new Map<_Symbol, _Row>();
+  final Map<Variable, _Symbol> _vars = new Map<Variable, _Symbol>();
+  final Map<Variable, _EditInfo> _edits = new Map<Variable, _EditInfo>();
+  final List<_Symbol> _infeasibleRows = new List<_Symbol>();
+  final _Row _objective = new _Row(0.0);
+  _Row _artificial = new _Row(0.0);
   int tick = 0;
 
   Result addConstraint(Constraint constraint) {
@@ -19,12 +19,12 @@ class Solver {
       return Result.duplicateConstraint;
     }
 
-    Tag tag = new Tag(
-        new Symbol(SymbolType.invalid, 0), new Symbol(SymbolType.invalid, 0));
+    _Tag tag = new _Tag(
+        new _Symbol(SymbolType.invalid, 0), new _Symbol(SymbolType.invalid, 0));
 
-    Row row = _createRow(constraint, tag);
+    _Row row = _createRow(constraint, tag);
 
-    Symbol subject = _chooseSubjectForRow(row, tag);
+    _Symbol subject = _chooseSubjectForRow(row, tag);
 
     if (subject.type == SymbolType.invalid && _allDummiesInRow(row)) {
       if (!_nearZero(row.constant)) {
@@ -50,28 +50,28 @@ class Solver {
   }
 
   Result removeConstraint(Constraint constraint) {
-    Tag tag = _constraints[constraint];
+    _Tag tag = _constraints[constraint];
     if (tag == null) {
       return Result.unknownConstraint;
     }
 
-    tag = new Tag.fromTag(tag);
+    tag = new _Tag.fromTag(tag);
     _constraints.remove(constraint);
 
     _removeConstraintEffects(constraint, tag);
 
-    Row row = _rows[tag.marker];
+    _Row row = _rows[tag.marker];
     if (row != null) {
       _rows.remove(tag.marker);
     } else {
-      _Pair<Symbol, Row> rowPair =
+      _Pair<_Symbol, _Row> rowPair =
           _getLeavingRowPairForMarkerSymbol(tag.marker);
 
       if (rowPair == null) {
         return Result.internalSolverError;
       }
 
-      Symbol leaving = rowPair.first;
+      _Symbol leaving = rowPair.first;
       row = rowPair.second;
       var removed = _rows.remove(rowPair.first);
       assert(removed != null);
@@ -102,7 +102,7 @@ class Solver {
       return Result.internalSolverError;
     }
 
-    EditInfo info = new EditInfo();
+    _EditInfo info = new _EditInfo();
     info.tag = _constraints[constraint];
     info.constraint = constraint;
     info.constant = 0.0;
@@ -113,7 +113,7 @@ class Solver {
   }
 
   Result removeEditVariable(Variable variable) {
-    EditInfo info = _edits[variable];
+    _EditInfo info = _edits[variable];
     if (info == null) {
       return Result.unknownEditVariable;
     }
@@ -142,8 +142,8 @@ class Solver {
 
   void updateVariable() {
     for (Variable variable in _vars.keys) {
-      Symbol symbol = _vars[variable];
-      Row row = _rows[symbol];
+      _Symbol symbol = _vars[variable];
+      _Row row = _rows[symbol];
       if (row == null) {
         variable.value = 0.0;
       } else {
@@ -154,28 +154,28 @@ class Solver {
 
   Solver operator <<(Constraint c) => this..addConstraint(c);
 
-  Symbol _getSymbolForVariable(Variable variable) {
-    Symbol symbol = _vars[variable];
+  _Symbol _getSymbolForVariable(Variable variable) {
+    _Symbol symbol = _vars[variable];
 
     if (symbol != null) {
       return symbol;
     }
 
-    symbol = new Symbol(SymbolType.external, tick++);
+    symbol = new _Symbol(SymbolType.external, tick++);
     _vars[variable] = symbol;
 
     return symbol;
   }
 
-  Row _createRow(Constraint constraint, Tag tag) {
+  _Row _createRow(Constraint constraint, _Tag tag) {
     Expression expr = new Expression.fromExpression(constraint.expression);
-    Row row = new Row(expr.constant);
+    _Row row = new _Row(expr.constant);
 
     expr.terms.forEach((term) {
       if (!_nearZero(term.coefficient)) {
-        Symbol symbol = _getSymbolForVariable(term.variable);
+        _Symbol symbol = _getSymbolForVariable(term.variable);
 
-        Row foundRow = _rows[symbol];
+        _Row foundRow = _rows[symbol];
 
         if (foundRow != null) {
           row.insertRow(foundRow, term.coefficient);
@@ -192,12 +192,12 @@ class Solver {
           double coefficient =
               constraint.relation == Relation.lessThanOrEqualTo ? 1.0 : -1.0;
 
-          Symbol slack = new Symbol(SymbolType.slack, tick++);
+          _Symbol slack = new _Symbol(SymbolType.slack, tick++);
           tag.marker = slack;
           row.insertSymbol(slack, coefficient);
 
           if (!constraint.required) {
-            Symbol error = new Symbol(SymbolType.error, tick++);
+            _Symbol error = new _Symbol(SymbolType.error, tick++);
             tag.other = error;
             row.insertSymbol(error, -coefficient);
             _objective.insertSymbol(error, constraint.priority);
@@ -206,8 +206,8 @@ class Solver {
         break;
       case Relation.equalTo:
         if (!constraint.required) {
-          Symbol errPlus = new Symbol(SymbolType.error, tick++);
-          Symbol errMinus = new Symbol(SymbolType.error, tick++);
+          _Symbol errPlus = new _Symbol(SymbolType.error, tick++);
+          _Symbol errMinus = new _Symbol(SymbolType.error, tick++);
           tag.marker = errPlus;
           tag.other = errMinus;
           row.insertSymbol(errPlus, -1.0);
@@ -215,7 +215,7 @@ class Solver {
           _objective.insertSymbol(errPlus, constraint.priority);
           _objective.insertSymbol(errMinus, constraint.priority);
         } else {
-          Symbol dummy = new Symbol(SymbolType.dummy, tick++);
+          _Symbol dummy = new _Symbol(SymbolType.dummy, tick++);
           tag.marker = dummy;
           row.insertSymbol(dummy);
         }
@@ -229,8 +229,8 @@ class Solver {
     return row;
   }
 
-  Symbol _chooseSubjectForRow(Row row, Tag tag) {
-    for (Symbol symbol in row.cells.keys) {
+  _Symbol _chooseSubjectForRow(_Row row, _Tag tag) {
+    for (_Symbol symbol in row.cells.keys) {
       if (symbol.type == SymbolType.external) {
         return symbol;
       }
@@ -250,11 +250,11 @@ class Solver {
       }
     }
 
-    return new Symbol(SymbolType.invalid, 0);
+    return new _Symbol(SymbolType.invalid, 0);
   }
 
-  bool _allDummiesInRow(Row row) {
-    for (Symbol symbol in row.cells.keys) {
+  bool _allDummiesInRow(_Row row) {
+    for (_Symbol symbol in row.cells.keys) {
       if (symbol.type != SymbolType.dummy) {
         return false;
       }
@@ -262,10 +262,10 @@ class Solver {
     return true;
   }
 
-  bool _addWithArtificialVariableOnRow(Row row) {
-    Symbol artificial = new Symbol(SymbolType.slack, tick++);
-    _rows[artificial] = new Row.fromRow(row);
-    _artificial = new Row.fromRow(row);
+  bool _addWithArtificialVariableOnRow(_Row row) {
+    _Symbol artificial = new _Symbol(SymbolType.slack, tick++);
+    _rows[artificial] = new _Row.fromRow(row);
+    _artificial = new _Row.fromRow(row);
 
     Result result = _optimizeObjectiveRow(_artificial);
 
@@ -275,16 +275,16 @@ class Solver {
     }
 
     bool success = _nearZero(_artificial.constant);
-    _artificial = new Row(0.0);
+    _artificial = new _Row(0.0);
 
-    Row foundRow = _rows[artificial];
+    _Row foundRow = _rows[artificial];
     if (foundRow != null) {
       _rows.remove(artificial);
       if (foundRow.cells.isEmpty) {
         return success;
       }
 
-      Symbol entering = _anyPivotableSymbol(foundRow);
+      _Symbol entering = _anyPivotableSymbol(foundRow);
       if (entering.type == SymbolType.invalid) {
         return false;
       }
@@ -294,29 +294,29 @@ class Solver {
       _rows[entering] = foundRow;
     }
 
-    for (Row row in _rows.values) {
+    for (_Row row in _rows.values) {
       row.removeSymbol(artificial);
     }
     _objective.removeSymbol(artificial);
     return success;
   }
 
-  Result _optimizeObjectiveRow(Row objective) {
+  Result _optimizeObjectiveRow(_Row objective) {
     while (true) {
-      Symbol entering = _getEnteringSymbolForObjectiveRow(objective);
+      _Symbol entering = _getEnteringSymbolForObjectiveRow(objective);
       if (entering.type == SymbolType.invalid) {
         return Result.success;
       }
 
-      _Pair<Symbol, Row> leavingPair =
+      _Pair<_Symbol, _Row> leavingPair =
           _getLeavingRowForEnteringSymbol(entering);
 
       if (leavingPair == null) {
         return Result.internalSolverError;
       }
 
-      Symbol leaving = leavingPair.first;
-      Row row = leavingPair.second;
+      _Symbol leaving = leavingPair.first;
+      _Row row = leavingPair.second;
       _rows.remove(leavingPair.first);
       row.solveForSymbols(leaving, entering);
       _substitute(entering, row);
@@ -324,21 +324,21 @@ class Solver {
     }
   }
 
-  Symbol _getEnteringSymbolForObjectiveRow(Row objective) {
-    Map<Symbol, double> cells = objective.cells;
+  _Symbol _getEnteringSymbolForObjectiveRow(_Row objective) {
+    Map<_Symbol, double> cells = objective.cells;
 
-    for (Symbol symbol in cells.keys) {
+    for (_Symbol symbol in cells.keys) {
       if (symbol.type != SymbolType.dummy && cells[symbol] < 0.0) {
         return symbol;
       }
     }
 
-    return new Symbol(SymbolType.invalid, 0);
+    return new _Symbol(SymbolType.invalid, 0);
   }
 
-  _Pair<Symbol, Row> _getLeavingRowForEnteringSymbol(Symbol entering) {
+  _Pair<_Symbol, _Row> _getLeavingRowForEnteringSymbol(_Symbol entering) {
     double ratio = double.MAX_FINITE;
-    _Pair<Symbol, Row> result = new _Pair(null, null);
+    _Pair<_Symbol, _Row> result = new _Pair(null, null);
 
     _rows.forEach((symbol, row) {
       if (symbol.type != SymbolType.external) {
@@ -363,7 +363,7 @@ class Solver {
     return result;
   }
 
-  void _substitute(Symbol symbol, Row row) {
+  void _substitute(_Symbol symbol, _Row row) {
     _rows.forEach((first, second) {
       second.substitute(symbol, row);
       if (first.type != SymbolType.external && second.constant < 0.0) {
@@ -377,16 +377,16 @@ class Solver {
     }
   }
 
-  Symbol _anyPivotableSymbol(Row row) {
-    for (Symbol symbol in row.cells.keys) {
+  _Symbol _anyPivotableSymbol(_Row row) {
+    for (_Symbol symbol in row.cells.keys) {
       if (symbol.type == SymbolType.slack || symbol.type == SymbolType.error) {
         return symbol;
       }
     }
-    return new Symbol(SymbolType.invalid, 0);
+    return new _Symbol(SymbolType.invalid, 0);
   }
 
-  void _removeConstraintEffects(Constraint cn, Tag tag) {
+  void _removeConstraintEffects(Constraint cn, _Tag tag) {
     if (tag.marker.type == SymbolType.error) {
       _removeMarkerEffects(tag.marker, cn.priority);
     }
@@ -395,8 +395,8 @@ class Solver {
     }
   }
 
-  void _removeMarkerEffects(Symbol marker, double strength) {
-    Row row = _rows[marker];
+  void _removeMarkerEffects(_Symbol marker, double strength) {
+    _Row row = _rows[marker];
     if (row != null) {
       _objective.insertRow(row, -strength);
     } else {
@@ -404,11 +404,11 @@ class Solver {
     }
   }
 
-  _Pair<Symbol, Row> _getLeavingRowPairForMarkerSymbol(Symbol marker) {
+  _Pair<_Symbol, _Row> _getLeavingRowPairForMarkerSymbol(_Symbol marker) {
     double r1 = double.MAX_FINITE;
     double r2 = double.MAX_FINITE;
 
-    _Pair<Symbol, Row> first, second, third;
+    _Pair<_Symbol, _Row> first, second, third;
 
     _rows.forEach((symbol, row) {
       double c = row.coefficientForSymbol(marker);
@@ -444,13 +444,13 @@ class Solver {
   }
 
   void _suggestValueForEditInfoWithoutDualOptimization(
-      EditInfo info, double value) {
+      _EditInfo info, double value) {
     double delta = value - info.constant;
     info.constant = value;
 
     {
-      Symbol symbol = info.tag.marker;
-      Row row = _rows[info.tag.marker];
+      _Symbol symbol = info.tag.marker;
+      _Row row = _rows[info.tag.marker];
 
       if (row != null) {
         if (row.add(-delta) < 0.0) {
@@ -470,8 +470,8 @@ class Solver {
       }
     }
 
-    for (Symbol symbol in _rows.keys) {
-      Row row = _rows[symbol];
+    for (_Symbol symbol in _rows.keys) {
+      _Row row = _rows[symbol];
       double coeff = row.coefficientForSymbol(info.tag.marker);
       if (coeff != 0.0 &&
           row.add(delta * coeff) < 0.0 &&
@@ -483,11 +483,11 @@ class Solver {
 
   Result _dualOptimize() {
     while (_infeasibleRows.length != 0) {
-      Symbol leaving = _infeasibleRows.removeLast();
-      Row row = _rows[leaving];
+      _Symbol leaving = _infeasibleRows.removeLast();
+      _Row row = _rows[leaving];
 
       if (row != null && row.constant < 0.0) {
-        Symbol entering = _getDualEnteringSymbolForRow(row);
+        _Symbol entering = _getDualEnteringSymbolForRow(row);
 
         if (entering.type == SymbolType.invalid) {
           return Result.internalSolverError;
@@ -503,14 +503,14 @@ class Solver {
     return Result.success;
   }
 
-  Symbol _getDualEnteringSymbolForRow(Row row) {
-    Symbol entering;
+  _Symbol _getDualEnteringSymbolForRow(_Row row) {
+    _Symbol entering;
 
     double ratio = double.MAX_FINITE;
 
-    Map<Symbol, double> rowCells = row.cells;
+    Map<_Symbol, double> rowCells = row.cells;
 
-    for (Symbol symbol in rowCells.keys) {
+    for (_Symbol symbol in rowCells.keys) {
       double value = rowCells[symbol];
 
       if (value > 0.0 && symbol.type != SymbolType.dummy) {
@@ -523,22 +523,22 @@ class Solver {
       }
     }
 
-    return _elvis(entering, new Symbol(SymbolType.invalid, 0));
+    return _elvis(entering, new _Symbol(SymbolType.invalid, 0));
   }
 }
 
-class Tag {
-  Symbol marker;
-  Symbol other;
+class _Tag {
+  _Symbol marker;
+  _Symbol other;
 
-  Tag(this.marker, this.other);
-  Tag.fromTag(Tag tag)
+  _Tag(this.marker, this.other);
+  _Tag.fromTag(_Tag tag)
       : this.marker = tag.marker,
         this.other = tag.other;
 }
 
-class EditInfo {
-  Tag tag;
+class _EditInfo {
+  _Tag tag;
   Constraint constraint;
   double constant;
 }

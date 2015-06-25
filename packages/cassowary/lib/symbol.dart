@@ -6,9 +6,9 @@ part of cassowary;
 
 enum SymbolType { invalid, external, slack, error, dummy, }
 
-class Symbol {
+class _Symbol {
   final SymbolType type;
   int tick;
 
-  Symbol(this.type, this.tick);
+  _Symbol(this.type, this.tick);
 }

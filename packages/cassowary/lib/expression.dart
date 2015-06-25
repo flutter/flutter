@@ -4,7 +4,7 @@
 
 part of cassowary;
 
-class Expression extends EquationMember {
+class Expression extends _EquationMember {
   final List<Term> terms;
 
   final double constant;
@@ -21,7 +21,7 @@ class Expression extends EquationMember {
   Expression asExpression() => this;
 
   Constraint _createConstraint(
-      EquationMember /* rhs */ value, Relation relation) {
+      _EquationMember /* rhs */ value, Relation relation) {
     if (value is ConstantMember) {
       return new Constraint(
           new Expression(new List.from(terms), constant - value.value),
@@ -51,16 +51,16 @@ class Expression extends EquationMember {
     return null;
   }
 
-  Constraint operator >=(EquationMember value) =>
+  Constraint operator >=(_EquationMember value) =>
       _createConstraint(value, Relation.greaterThanOrEqualTo);
 
-  Constraint operator <=(EquationMember value) =>
+  Constraint operator <=(_EquationMember value) =>
       _createConstraint(value, Relation.lessThanOrEqualTo);
 
-  operator ==(EquationMember value) =>
+  operator ==(_EquationMember value) =>
       _createConstraint(value, Relation.equalTo);
 
-  Expression operator +(EquationMember m) {
+  Expression operator +(_EquationMember m) {
     if (m is ConstantMember) {
       return new Expression(new List.from(terms), constant + m.value);
     }
@@ -83,7 +83,7 @@ class Expression extends EquationMember {
     return null;
   }
 
-  Expression operator -(EquationMember m) {
+  Expression operator -(_EquationMember m) {
     if (m is ConstantMember) {
       return new Expression(new List.from(terms), constant - m.value);
     }
@@ -109,13 +109,13 @@ class Expression extends EquationMember {
     return null;
   }
 
-  EquationMember _applyMultiplicand(double m) {
+  _EquationMember _applyMultiplicand(double m) {
     var newTerms = terms.fold(new List<Term>(), (list, term) => list
       ..add(new Term(term.variable, term.coefficient * m)));
     return new Expression(newTerms, constant * m);
   }
 
-  _Pair<Expression, double> _findMulitplierAndMultiplicand(EquationMember m) {
+  _Pair<Expression, double> _findMulitplierAndMultiplicand(_EquationMember m) {
     // At least on of the the two members must be constant for the resulting
     // expression to be linear
 
@@ -135,7 +135,7 @@ class Expression extends EquationMember {
     return null;
   }
 
-  EquationMember operator *(EquationMember m) {
+  _EquationMember operator *(_EquationMember m) {
     _Pair<Expression, double> args = _findMulitplierAndMultiplicand(m);
 
     if (args == null) {
@@ -147,7 +147,7 @@ class Expression extends EquationMember {
     return args.first._applyMultiplicand(args.second);
   }
 
-  EquationMember operator /(EquationMember m) {
+  _EquationMember operator /(_EquationMember m) {
     if (!m.isConstant) {
       throw new ParserException(
           "The divisor was not a constant expression", [this, m]);

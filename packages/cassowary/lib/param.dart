@@ -4,7 +4,7 @@
 
 part of cassowary;
 
-class Param extends EquationMember {
+class Param extends _EquationMember {
   final Variable variable;
 
   Param.withVariable(this.variable);

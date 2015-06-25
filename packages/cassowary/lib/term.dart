@@ -4,7 +4,7 @@
 
 part of cassowary;
 
-class Term extends EquationMember {
+class Term extends _EquationMember {
   final Variable variable;
   final double coefficient;
 

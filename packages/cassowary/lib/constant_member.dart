@@ -4,7 +4,7 @@
 
 part of cassowary;
 
-class ConstantMember extends EquationMember {
+class ConstantMember extends _EquationMember {
   double value = 0.0;
 
   bool get isConstant => true;

@@ -4,26 +4,26 @@
 
 part of cassowary;
 
-abstract class EquationMember {
+abstract class _EquationMember {
   Expression asExpression();
 
   bool get isConstant;
 
   double get value;
 
-  Constraint operator >=(EquationMember m) => asExpression() >= m;
+  Constraint operator >=(_EquationMember m) => asExpression() >= m;
 
-  Constraint operator <=(EquationMember m) => asExpression() <= m;
+  Constraint operator <=(_EquationMember m) => asExpression() <= m;
 
-  /* Constraint */ operator ==(EquationMember m) => asExpression() == m;
+  /* Constraint */ operator ==(_EquationMember m) => asExpression() == m;
 
-  Expression operator +(EquationMember m) => asExpression() + m;
+  Expression operator +(_EquationMember m) => asExpression() + m;
 
-  Expression operator -(EquationMember m) => asExpression() - m;
+  Expression operator -(_EquationMember m) => asExpression() - m;
 
-  Expression operator *(EquationMember m) => asExpression() * m;
+  Expression operator *(_EquationMember m) => asExpression() * m;
 
-  Expression operator /(EquationMember m) => asExpression() / m;
+  Expression operator /(_EquationMember m) => asExpression() / m;
 
   int get hashCode =>
       throw "An equation member is not comparable and cannot be added to collections";
