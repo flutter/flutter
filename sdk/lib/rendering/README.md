@@ -137,9 +137,9 @@ Writing new subclasses
 ### The RenderObject contract
 
 If you want to define a `RenderObject` that uses a new coordinate
-system, then you have to inherit straight from `RenderObject`.
-Examples of doing this can be found in [`RenderBox`](box.dart), which
-deals in rectangles in cartesian space, and in the [sector_layout.dart
+system, then you should inherit straight from `RenderObject`. Examples
+of doing this can be found in [`RenderBox`](box.dart), which deals in
+rectangles in cartesian space, and in the [sector_layout.dart
 example](../../../examples/rendering/sector_layout.dart), which
 implements a toy model based on polar coordinates. The `RenderView`
 class, which is used internally to adapt from the host system to this
@@ -159,7 +159,7 @@ A subclass of `RenderObject` must fulfill the following contract:
   appropriately.
 
 * Layout constraints must be expressed in a Constraints subclass. This
-  subclass must implement operator== (and hashCode).
+  subclass must implement `operator==` (and `hashCode`).
 
 * Whenever the layout needs updating, the `markNeedsLayout()` method
   should be called.
