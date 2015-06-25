@@ -18,7 +18,7 @@ class Solver {
   /// add any for some reason, a cleanup is attempted so that either all
   /// constraints will be added or none.
   Result addConstraints(List<Constraint> constraints) {
-    List<Constraint> added = new List<Constraint>(constraints.length);
+    List<Constraint> added = new List<Constraint>();
     bool needsCleanup = false;
 
     Result result = Result.success;

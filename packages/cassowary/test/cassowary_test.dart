@@ -449,4 +449,23 @@ void main() {
     expect(mid.value, 50.0);
     expect(right.value, 100.0);
   });
+
+  test('addition_of_multiple', () {
+    var left = new Param(0.0);
+    var right = new Param(0.0);
+    var mid = new Param(0.0);
+
+    Solver s = new Solver();
+
+    var c = (left >= CM(0.0));
+
+    expect(s.addConstraints([
+      (left + right == CM(2.0) * mid) as Constraint,
+      (right - left >= CM(100.0)),
+      c
+    ]), Result.success);
+
+    expect(s.addConstraints([(right >= CM(-20.0)), c]),
+        Result.duplicateConstraint);
+  });
 }
