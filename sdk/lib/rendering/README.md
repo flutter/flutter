@@ -259,7 +259,10 @@ A `RenderBox` subclass is required to implement the following contract:
    The `sizedByParent` distinction is purely a performance
    optimisation. It allows nodes that only set their size based on the
    incoming constraints to skip that logic when they need to be
-   re-laid-out.
+   re-laid-out, and, more importantly, it allows the layout system to
+   treat the node as a _layout boundary_, which reduces the amount of
+   work that needs to happen when the node is marked as needing
+   layout.
 
 * The following methods must report numbers consistent with the output
   of the layout algorithm used:
