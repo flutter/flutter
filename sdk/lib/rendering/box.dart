@@ -257,7 +257,7 @@ enum TextBaseline { alphabetic, ideographic }
 
 abstract class RenderBox extends RenderObject {
 
-  void setParentData(RenderObject child) {
+  void setupParentData(RenderObject child) {
     if (child.parentData is! BoxParentData)
       child.parentData = new BoxParentData();
   }

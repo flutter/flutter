@@ -38,7 +38,7 @@ class RenderStack extends RenderBox with ContainerRenderObjectMixin<RenderBox, S
     addAll(children);
   }
 
-  void setParentData(RenderBox child) {
+  void setupParentData(RenderBox child) {
     if (child.parentData is! StackParentData)
       child.parentData = new StackParentData();
   }

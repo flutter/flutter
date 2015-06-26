@@ -79,11 +79,11 @@ models and are free to invent novel child models for their specific use cases.
 
 TODO(ianh): Describe the parent data concept.
 
-The `setParentData()` method is automatically called for each child
+The `setupParentData()` method is automatically called for each child
 when the child's parent is changed. However, if you need to
 preinitialise the `parentData` member to set its values before you add
 a node to its parent, you can preemptively call that future parent's
-`setParentData()` method with the future child as the argument.
+`setupParentData()` method with the future child as the argument.
 
 TODO(ianh): Discuss putting per-child configuration information for
 the parent on the child's parentData.
@@ -161,7 +161,7 @@ A subclass of `RenderObject` must fulfill the following contract:
 * Information about the child managed by the parent, e.g. typically
   position information and configuration for the parent's layout,
   should be stored on the `parentData` member; to this effect, a
-  ParentData subclass should be defined and the `setParentData()`
+  ParentData subclass should be defined and the `setupParentData()`
   method should be overriden to initialise the child's parent data
   appropriately.
 
@@ -215,18 +215,18 @@ A `RenderBox` subclass is required to implement the following contract:
   you fulfill their contract instead.
 
 * If it has any data to store on its children, it must define a
-  BoxParentData subclass and override setParentData() to initialise
+  BoxParentData subclass and override setupParentData() to initialise
   the child's parent data appropriately, as in the following example.
   (If the subclass has an opinion about what type its children must
   be, e.g. the way that `RenderBlock` wants its children to be
-  `RenderBox` nodes, then change the `setParentData()` signature
+  `RenderBox` nodes, then change the `setupParentData()` signature
   accordingly, to catch misuse of the method.)
 
 ```dart
   class FooParentData extends BoxParentData { ... }
 
   // In RenderFoo
-  void setParentData(RenderObject child) {
+  void setupParentData(RenderObject child) {
     if (child.parentData is! FooParentData)
       child.parentData = new FooParentData();
   }

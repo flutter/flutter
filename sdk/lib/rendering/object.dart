@@ -49,7 +49,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   // node out, and any other nodes who happen to know exactly what
   // kind of node that is.
   dynamic parentData; // TODO(ianh): change the type of this back to ParentData once the analyzer is cleverer
-  void setParentData(RenderObject child) {
+  void setupParentData(RenderObject child) {
     // override this to setup .parentData correctly for your class
     assert(!debugDoingLayout);
     assert(!debugDoingPaint);
@@ -62,7 +62,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     assert(!debugDoingLayout);
     assert(!debugDoingPaint);
     assert(child != null);
-    setParentData(child);
+    setupParentData(child);
     super.adoptChild(child);
     markNeedsLayout();
   }
