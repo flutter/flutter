@@ -468,4 +468,26 @@ void main() {
     expect(s.addConstraints([(right >= CM(-20.0)), c]),
         Result.duplicateConstraint);
   });
+
+  test('edit_constraints', () {
+    var left = new Param(0.0)..name = "left";
+    var right = new Param(0.0)..name = "right";
+    var mid = new Param(0.0)..name = "mid";
+
+    Solver s = new Solver();
+
+    expect(s.addConstraint((right + left == mid * CM(2.0)) as Constraint),
+        Result.success);
+    expect(s.addConstraint(right - left >= CM(100.0)), Result.success);
+    expect(s.addConstraint(left >= CM(0.0)), Result.success);
+
+    expect(s.addEditVariable(mid.variable, Priority.strong), Result.success);
+    expect(s.suggestValueForVariable(mid.variable, 300.0), Result.success);
+
+    s.flushVariableUpdates();
+
+    expect(left.value, 0.0);
+    expect(mid.value, 300.0);
+    expect(right.value, 600.0);
+  });
 }
