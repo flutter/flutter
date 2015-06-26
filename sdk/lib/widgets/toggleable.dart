@@ -21,6 +21,7 @@ abstract class Toggleable extends AnimatedComponent {
     this.onChanged
   }) : super(key: key) {
     toggleAnimation = new AnimatedValue(value ? 1.0 : 0.0);
+    watch(toggleAnimation);
   }
 
   bool value;

@@ -7,12 +7,9 @@ import 'dart:async';
 import '../animation/animated_value.dart';
 import 'basic.dart';
 
-typedef void SetterFunction(double value);
-
 class _AnimationEntry {
-  _AnimationEntry(this.value, this.setter);
+  _AnimationEntry(this.value);
   final AnimatedValue value;
-  final SetterFunction setter;
   StreamSubscription<double> subscription;
 }
 
@@ -24,16 +21,19 @@ abstract class AnimatedComponent extends Component {
 
   List<_AnimationEntry> _animatedFields = new List<_AnimationEntry>();
 
-  animate(AnimatedValue value, SetterFunction setter) {
+  watch(AnimatedValue value) {
     assert(!mounted);
-    setter(value.value);
-    _animatedFields.add(new _AnimationEntry(value, setter));
+    // TODO(ianh): we really should assert that we're not doing this
+    // in the constructor since doing it there is pointless and
+    // expensive, since we'll be doing it for every copy of the object
+    // even though only the first one will use it (since we're
+    // stateful, the others will all be discarded early).
+    _animatedFields.add(new _AnimationEntry(value));
   }
 
   void didMount() {
     for (_AnimationEntry entry in _animatedFields) {
       entry.subscription = entry.value.onValueChanged.listen((_) {
-        entry.setter(entry.value.value);
         scheduleBuild();
       });
     }

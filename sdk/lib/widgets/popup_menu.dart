@@ -60,10 +60,7 @@ class PopupMenu extends AnimatedComponent {
       backgroundColor: Grey[50],
       borderRadius: 2.0,
       boxShadow: shadows[level]));
-
-    animate(controller.position, (double value) {
-      _position = value;
-    });
+    watch(controller.position);
   }
 
   PopupMenuController controller;
@@ -78,16 +75,15 @@ class PopupMenu extends AnimatedComponent {
     super.syncFields(source);
   }
 
-  double _position;
   BoxPainter _painter;
 
   double _opacityFor(int i) {
-    if (_position == null || _position == 1.0)
+    if (controller.position.value == null || controller.position.value == 1.0)
       return 1.0;
     double unit = 1.0 / items.length;
     double duration = 1.5 * unit;
     double start = i * unit;
-    return math.max(0.0, math.min(1.0, (_position - start) / duration));
+    return math.max(0.0, math.min(1.0, (controller.position.value - start) / duration));
   }
 
   Widget build() {
@@ -98,12 +94,12 @@ class PopupMenu extends AnimatedComponent {
     }));
 
     return new Opacity(
-      opacity: math.min(1.0, _position * 3.0),
+      opacity: math.min(1.0, controller.position.value * 3.0),
       child: new ShrinkWrapWidth(
         child: new CustomPaint(
           callback: (sky.Canvas canvas, Size size) {
-            double width = math.min(size.width, size.width * (0.5 + _position * 2.0));
-            double height = math.min(size.height, size.height * _position * 1.5);
+            double width = math.min(size.width, size.width * (0.5 + controller.position.value * 2.0));
+            double height = math.min(size.height, size.height * controller.position.value * 1.5);
             _painter.paint(canvas, new Rect.fromLTRB(size.width - width, 0.0, width, height));
           },
           child: new Container(

@@ -114,9 +114,7 @@ class Drawer extends AnimatedComponent {
     this.children,
     this.level: 0
   }) : super(key: key) {
-    animate(controller.position, (double value) {
-      _position = value;
-    });
+    watch(controller.position);
   }
 
   List<Widget> children;
@@ -130,13 +128,11 @@ class Drawer extends AnimatedComponent {
     super.syncFields(source);
   }
 
-  double _position;
-
   Widget build() {
     Matrix4 transform = new Matrix4.identity();
-    transform.translate(_position);
+    transform.translate(controller.position.value);
 
-    double scaler = _position / _kWidth + 1;
+    double scaler = controller.position.value / _kWidth + 1;
     Color maskColor = new Color.fromARGB((0x7F * scaler).floor(), 0, 0, 0);
 
     var mask = new Listener(
