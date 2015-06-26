@@ -6,7 +6,7 @@ import 'dart:async';
 
 import 'package:sky/widgets/widget.dart';
 
-import '../../examples/widgets/styled_text.dart';
+import '../../sdk/lib/example/widgets/styled_text.dart';
 import '../resources/display_list.dart';
 
 main() async {

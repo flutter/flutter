@@ -35,7 +35,7 @@ bool handleEvent(Event event) {
     ActivityManagerProxy activityManager = new ActivityManagerProxy.unbound();
     Intent intent = new Intent()
       ..action = 'android.intent.action.VIEW'
-      ..url = 'sky://localhost:9888/sky/examples/raw/hello_world.dart';
+      ..url = 'sky://localhost:9888/sky/sdk/lib/example/raw/hello_world.dart';
     shell.requestService(null, activityManager);
     activityManager.ptr.startActivity(intent);
     return true;

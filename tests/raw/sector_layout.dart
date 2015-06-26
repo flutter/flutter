@@ -4,7 +4,7 @@
 
 import 'dart:async';
 
-import '../../examples/rendering/sector_layout.dart';
+import '../../sdk/lib/example/rendering/sector_layout.dart';
 import '../resources/display_list.dart';
 
 void main() {

@@ -6,7 +6,7 @@ import 'dart:async';
 
 import 'package:sky/widgets/widget.dart';
 
-import '../../examples/stocks2/lib/stock_app.dart';
+import '../../sdk/lib/example/stocks2/lib/stock_app.dart';
 import '../resources/display_list.dart';
 
 class TestStocksApp extends StocksApp {
