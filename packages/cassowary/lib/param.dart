@@ -8,7 +8,7 @@ class Param extends _EquationMember {
   final Variable variable;
 
   Param.withVariable(this.variable);
-  Param(double value) : this.variable = new Variable(value);
+  Param([double value = 0.0]) : this.variable = new Variable(value);
 
   bool get isConstant => false;
 
