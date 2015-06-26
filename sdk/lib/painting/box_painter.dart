@@ -4,7 +4,7 @@
 
 import 'dart:math' as math;
 import 'dart:sky' as sky;
-import 'dart:sky' show Point, Size, Rect, Color, Paint, Path;
+import 'dart:sky' show Point, Offset, Size, Rect, Color, Paint, Path;
 
 import 'shadows.dart';
 
@@ -65,7 +65,7 @@ class BoxShadow {
   });
 
   final Color color;
-  final Size offset;
+  final Offset offset;
   final double blur;
 
   String toString() => 'BoxShadow($color, $offset, $blur)';
@@ -209,7 +209,7 @@ class BoxPainter {
           Point center = rect.center;
           Size size = rect.size;
           double radius = math.min(size.width, size.height) / 2.0;
-          canvas.drawCircle(center.x, center.y, radius, _backgroundPaint);
+          canvas.drawCircle(center, radius, _backgroundPaint);
           break;
         case Shape.rectangle:
           if (_decoration.borderRadius == null)

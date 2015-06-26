@@ -34,6 +34,8 @@ class DOMDartState : public DartState {
   // Cached handles to strings used in Dart/C++ conversions.
   Dart_Handle x_handle() { return x_handle_.value(); }
   Dart_Handle y_handle() { return y_handle_.value(); }
+  Dart_Handle dx_handle() { return dx_handle_.value(); }
+  Dart_Handle dy_handle() { return dy_handle_.value(); }
   Dart_Handle value_handle() { return value_handle_.value(); }
   Dart_Handle color_class() { return color_class_.value(); }
 
@@ -43,6 +45,8 @@ class DOMDartState : public DartState {
 
   DartPersistentValue x_handle_;
   DartPersistentValue y_handle_;
+  DartPersistentValue dx_handle_;
+  DartPersistentValue dy_handle_;
   DartPersistentValue value_handle_;
   DartPersistentValue color_class_;
 };

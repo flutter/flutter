@@ -6,32 +6,44 @@ part of dart.sky;
 
 /// Holds a 2D floating-point size.
 /// Think of this as a vector from Point(0,0) to Point(size.width, size.height)
-class Size {
-  const Size(this.width, this.height);
-  Size.copy(Size source) : width = source.width, height = source.height;
-  const Size.fromWidth(this.width) : height = double.INFINITY;
-  const Size.fromHeight(this.height) : width = double.INFINITY;
+class Size extends OffsetBase {
+  const Size(double width, double height) : super(width, height);
+  Size.copy(Size source) : super(source.width, source.height);
+  const Size.fromWidth(double width) : super(width, double.INFINITY);
+  const Size.fromHeight(double height) : super(double.INFINITY, height);
 
-  final double width;
-  final double height;
+  double get width => _dx;
+  double get height => _dy;
 
   static const Size zero = const Size(0.0, 0.0);
   static const Size infinite = const Size(double.INFINITY, double.INFINITY);
 
-  bool operator ==(other) => other is Size && width == other.width && height == other.height;
-  Size operator +(Size other) => new Size(width + other.width, height + other.height);
-  Size operator -(Size other) => new Size(width - other.width, height - other.height);
-
-  bool get isInfinite => width >= double.INFINITY || height >= double.INFINITY;
-
-  // does the equivalent of "return new Point(0,0) + this"
-  Point toPoint() => new Point(this.width, this.height);
-
-  int get hashCode {
-    int result = 373;
-    result = 37 * result + width.hashCode;
-    result = 37 * result + height.hashCode;
-    return result;
+  dynamic operator -(dynamic other) {
+    if (other is Size)
+      return new Offset(width - other.width, height - other.height);
+    if (other is Offset)
+      return new Size(width - other.dx, height - other.dy);
+    throw new ArgumentError(other);
   }
+  Size operator +(Offset other) => new Size(width + other.dx, height + other.dy);
+  Size operator *(double operand) => new Size(width * operand, height * operand);
+  Size operator /(double operand) => new Size(width / operand, height / operand);
+  Size operator ~/(double operand) => new Size((width ~/ operand).toDouble(), (height ~/ operand).toDouble());
+  Size operator %(double operand) => new Size(width % operand, height % operand);
+
+  double get shortestSide {
+    double w = width.abs();
+    double h = height.abs();
+    return w < h ? w : h;
+  }
+
+  // Convenience methods that do the equivalent of calling the similarly named
+  // methods on a Rect constructed from the given origin and this size.
+  Point center(Point origin) => new Point(origin.x + width / 2.0, origin.y + height / 2.0);
+  Point topLeft(Point origin) => origin;
+  Point topRight(Point origin) => new Point(origin.x + width, origin.y);
+  Point bottomLeft(Point origin) => new Point(origin.x, origin.y + height);
+  Point bottomRight(Point origin) => new Point(origin.x + width, origin.y + height);
+
   String toString() => "Size($width, $height)";
 }

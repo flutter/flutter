@@ -11,16 +11,14 @@ import 'package:sky/rendering/object.dart';
 typedef void Logger (String s);
 
 class TestRenderCanvas extends RenderCanvas {
-  TestRenderCanvas(sky.PictureRecorder recorder, double width, double height, this.logger, { this.indent: '' })
-    : width = width,
-      height = height,
-      super(recorder, width, height) {
-    log("TestRenderCanvas() constructor: $width x $height");
+  TestRenderCanvas(sky.PictureRecorder recorder, Size size, this.logger, { this.indent: '' })
+    : size = size,
+      super(recorder, size) {
+    log("TestRenderCanvas() constructor: ${size.width} x ${size.height}");
   }
 
   final String indent;
-  final double width;
-  final double height;
+  final Size size;
 
   Logger logger;
   void log(String s) {
@@ -71,8 +69,8 @@ class TestRenderCanvas extends RenderCanvas {
     log("clipPath($path)");
   }
 
-  void drawLine(double x0, double y0, double x1, double y1, Paint paint) {
-    log("drawLine($x0, $y0, $x1, $y1, $paint)");
+  void drawLine(Point p1, Point p2, Paint paint) {
+    log("drawLine($p1, $p2, $paint)");
   }
 
   void drawPicture(sky.Picture picture) {
@@ -95,16 +93,16 @@ class TestRenderCanvas extends RenderCanvas {
     log("drawOval($rect, $paint)");
   }
 
-  void drawCircle(double x, double y, double radius, Paint paint) {
-    log("drawCircle($x, $y, $radius, $paint)");
+  void drawCircle(Point c, double radius, Paint paint) {
+    log("drawCircle($c, $radius, $paint)");
   }
 
   void drawPath(Path path, Paint paint) {
     log("drawPath($path, $paint)");
   }
 
-  void drawImage(sky.Image image, double x, double y, Paint paint) {
-    log("drawImage($image, $x, $y, $paint)");
+  void drawImage(sky.Image image, Point p, Paint paint) {
+    log("drawImage($image, $p, $paint)");
   }
 
   void drawImageRect(sky.Image image, sky.Rect src, sky.Rect dst, Paint paint) {
@@ -113,7 +111,7 @@ class TestRenderCanvas extends RenderCanvas {
 
   void paintChild(RenderObject child, Point position) {
     log("paintChild ${child.runtimeType} at $position");
-    child.paint(new TestRenderCanvas(new sky.PictureRecorder(), width, height, logger, indent: "$indent  |"));
+    child.paint(new TestRenderCanvas(new sky.PictureRecorder(), size, logger, indent: "$indent  |"));
   }
 }
 
@@ -122,7 +120,7 @@ class TestRenderView extends RenderView {
   TestRenderView([ RenderBox child = null ]) : super(child: child) {
     print("TestRenderView enabled");
     attach();
-    rootConstraints = new ViewConstraints(width: 800.0, height: 600.0); // arbitrary figures
+    rootConstraints = new ViewConstraints(size: new Size(800.0, 600.0)); // arbitrary figures
     scheduleInitialLayout();
     syncCheckFrame();
   }
@@ -140,7 +138,7 @@ class TestRenderView extends RenderView {
     lastPaint = '';
     log("PAINT FOR FRAME #${frame} ----------------------------------------------");
     var recorder = new sky.PictureRecorder();
-    var canvas = new TestRenderCanvas(recorder, rootConstraints.width, rootConstraints.height, log, indent: "${frame} |");
+    var canvas = new TestRenderCanvas(recorder, rootConstraints.size, log, indent: "${frame} |");
     paint(canvas);
     recorder.endRecording();
     log("------------------------------------------------------------------------");

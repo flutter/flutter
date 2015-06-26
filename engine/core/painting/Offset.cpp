@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "sky/engine/core/painting/Point.h"
+#include "sky/engine/core/painting/Offset.h"
 
 #include "sky/engine/core/script/dom_dart_state.h"
 #include "sky/engine/tonic/dart_error.h"
@@ -10,26 +10,26 @@
 
 namespace blink {
 
-// Convert handle.x,y ==> SkPoint.
-Point DartConverter<Point>::FromDart(Dart_Handle handle) {
+// Convert handle.x,y ==> SkSize.
+Offset DartConverter<Offset>::FromDart(Dart_Handle handle) {
   DCHECK(!LogIfError(handle));
-  Dart_Handle x_value =
-      Dart_GetField(handle, DOMDartState::Current()->x_handle());
-  Dart_Handle y_value =
-      Dart_GetField(handle, DOMDartState::Current()->y_handle());
-  double x = 0.0, y = 0.0;
-  Dart_Handle err = Dart_DoubleValue(x_value, &x);
+  Dart_Handle dx_value =
+      Dart_GetField(handle, DOMDartState::Current()->dx_handle());
+  Dart_Handle dy_value =
+      Dart_GetField(handle, DOMDartState::Current()->dy_handle());
+  double dx = 0.0, dy = 0.0;
+  Dart_Handle err = Dart_DoubleValue(dx_value, &dx);
   DCHECK(!LogIfError(err));
-  err = Dart_DoubleValue(y_value, &y);
+  err = Dart_DoubleValue(dy_value, &dy);
   DCHECK(!LogIfError(err));
 
-  Point result;
-  result.sk_point.set(x, y);
+  Offset result;
+  result.sk_size.set(dx, dy);
   result.is_null = false;
   return result;
 }
 
-Point DartConverter<Point>::FromArgumentsWithNullCheck(
+Offset DartConverter<Offset>::FromArgumentsWithNullCheck(
     Dart_NativeArguments args,
     int index,
     Dart_Handle& exception) {

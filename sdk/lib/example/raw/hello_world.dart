@@ -6,15 +6,14 @@ import "dart:math";
 import 'dart:sky';
 
 Picture draw(int a, int r, int g, int b) {
-  double width = view.width;
-  double height = view.height;
+  Size size = new Size(view.width, view.height);
 
   PictureRecorder recorder = new PictureRecorder();
-  Canvas canvas = new Canvas(recorder, width, height);
-  double radius = min(width, height) * 0.45;
+  Canvas canvas = new Canvas(recorder, size);
+  double radius = size.shortestSide * 0.45;
 
   Paint paint = new Paint()..color = new Color.fromARGB(a, r, g, b);
-  canvas.drawCircle(width / 2, height / 2, radius, paint);
+  canvas.drawCircle(size.center, radius, paint);
   return recorder.endRecording();
 }
 

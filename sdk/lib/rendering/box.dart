@@ -205,6 +205,8 @@ class BoxConstraints extends Constraints {
       result = new _DebugSize(result, size._owner, size._canBeUsedByParent);
     return result;
   }
+  Size get biggest => new Size(constrainWidth(), constrainHeight());
+  Size get smallest => new Size(constrainWidth(0.0), constrainHeight(0.0));
 
   bool get isInfinite => maxWidth >= double.INFINITY && maxHeight >= double.INFINITY;
 
@@ -839,8 +841,8 @@ class RenderPositionedBox extends RenderShiftedBox {
       child.layout(constraints.loosen(), parentUsesSize: true);
       size = constraints.constrain(child.size);
       assert(child.parentData is BoxParentData);
-      Size delta = size - child.size;
-      child.parentData.position = new Point(delta.width * horizontal, delta.height * vertical);
+      Offset delta = size - child.size;
+      child.parentData.position = (delta.scale(horizontal, vertical)).toPoint();
     } else {
       performResize();
     }
@@ -942,7 +944,7 @@ class RenderImage extends RenderBox {
       canvas.scale(widthScale, heightScale);
     }
     Paint paint = new Paint();
-    canvas.drawImage(_image, 0.0, 0.0, paint);
+    canvas.drawImage(_image, Point.origin, paint);
     if (needsScale)
       canvas.restore();
   }
@@ -1109,15 +1111,12 @@ class RenderCustomPaint extends RenderProxyBox {
 // RENDER VIEW LAYOUT MANAGER
 
 class ViewConstraints {
-
   const ViewConstraints({
-    this.width: 0.0, this.height: 0.0, this.orientation: null
+    this.size: Size.zero,
+    this.orientation
   });
-
-  final double width;
-  final double height;
+  final Size size;
   final int orientation;
-
 }
 
 class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox> {
@@ -1130,8 +1129,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   }
 
   Size _size = Size.zero;
-  double get width => _size.width;
-  double get height => _size.height;
+  Size get size => _size;
 
   int _orientation; // 0..3
   int get orientation => _orientation;
@@ -1156,7 +1154,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
         child.rotate(oldAngle: _orientation, newAngle: _rootConstraints.orientation, time: timeForRotation);
       _orientation = _rootConstraints.orientation;
     }
-    _size = new Size(_rootConstraints.width, _rootConstraints.height);
+    _size = _rootConstraints.size;
     assert(!_size.isInfinite);
 
     if (child != null)
@@ -1187,7 +1185,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     RenderObject.debugDoingPaint = true;
     try {
       sky.PictureRecorder recorder = new sky.PictureRecorder();
-      RenderCanvas canvas = new RenderCanvas(recorder, width, height);
+      RenderCanvas canvas = new RenderCanvas(recorder, _size);
       paint(canvas);
       sky.view.picture = recorder.endRecording();
     } finally {

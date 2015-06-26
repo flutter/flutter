@@ -12,7 +12,7 @@ part of dart.sky;
         {%- endif -%}
         {{ arg.dart_type }} {{ arg.name }}
         {%- if arg.is_optional %} {{ ':' if arg.is_named else '='}} {{ arg.dart_default_value }}
-        {#- TODO(eseidel): This does not support having both optional and named arguments! -#}
+        {#- TODO(eseidel): This does not support having both optional and named arguments! (then again, neither does Dart, currently) -#}
         {%- if loop.last -%}{{ '}' if arg.is_named else ']' }}{%- endif -%}
         {%- endif -%}
         {%- if not loop.last %}, {% endif %}

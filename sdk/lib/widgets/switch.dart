@@ -66,6 +66,6 @@ class Switch extends Toggleable {
       _kTrackRadius + toggleAnimation.value * (_kTrackWidth - _kTrackRadius * 2),
       _kSwitchHeight / 2.0
     );
-    canvas.drawCircle(thumbPos.x, thumbPos.y, _kThumbRadius - inset, paint);
+    canvas.drawCircle(thumbPos, _kThumbRadius - inset, paint);
   }
 }

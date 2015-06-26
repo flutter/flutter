@@ -24,6 +24,7 @@ class Rect {
       ..[3] = point.y + size.height;
   }
 
+  // assumes top-left corner is at the origin (0,0)
   Rect.fromSize(Size size) {
     _value
       ..[2] = size.width
@@ -36,9 +37,11 @@ class Rect {
   double get right => _value[2];
   double get bottom => _value[3];
 
-  Point get upperLeft => new Point(left, top);
-  Point get lowerRight => new Point(right, bottom);
   Point get center => new Point(left + right / 2.0, top + bottom / 2.0);
+  Point get topLeft => new Point(left, top);
+  Point get topRight => new Point(right, top);
+  Point get bottomLeft => new Point(left, bottom);
+  Point get bottomRight => new Point(right, bottom);
 
   Size get size => new Size(right - left, bottom - top);
 
@@ -57,7 +60,6 @@ class Rect {
     }
     return true;
   }
-
   int get hashCode =>_value.fold(373, (value, item) => (37 * value + item.hashCode));
   String toString() => "Rect.fromLTRB($left, $top, $right, $bottom)";
 }

@@ -119,12 +119,12 @@ void Canvas::clipPath(const CanvasPath* path)
     m_canvas->clipPath(path->path());
 }
 
-void Canvas::drawLine(float x0, float y0, float x1, float y1, const Paint* paint)
+void Canvas::drawLine(const Point& p1, const Point& p2, const Paint* paint)
 {
     if (!m_canvas)
         return;
     ASSERT(paint);
-    m_canvas->drawLine(x0, y0, x1, y1, paint->paint());
+    m_canvas->drawLine(p1.sk_point.x(), p1.sk_point.y(), p2.sk_point.x(), p2.sk_point.y(), paint->paint());
 }
 
 void Canvas::drawPicture(Picture* picture)
@@ -168,12 +168,12 @@ void Canvas::drawOval(const Rect& rect, const Paint* paint)
     m_canvas->drawOval(rect.sk_rect, paint->paint());
 }
 
-void Canvas::drawCircle(float x, float y, float radius, const Paint* paint)
+void Canvas::drawCircle(const Point& c, float radius, const Paint* paint)
 {
     if (!m_canvas)
         return;
     ASSERT(paint);
-    m_canvas->drawCircle(x, y, radius, paint->paint());
+    m_canvas->drawCircle(c.sk_point.x(), c.sk_point.y(), radius, paint->paint());
 }
 
 void Canvas::drawPath(const CanvasPath* path, const Paint* paint)
@@ -185,14 +185,11 @@ void Canvas::drawPath(const CanvasPath* path, const Paint* paint)
     m_canvas->drawPath(path->path(), paint->paint());
 }
 
-void Canvas::drawImage(const CanvasImage* image,
-                       float x,
-                       float y,
-                       const Paint* paint) {
+void Canvas::drawImage(const CanvasImage* image, const Point& p, const Paint* paint) {
     if (!m_canvas)
         return;
     ASSERT(image);
-    m_canvas->drawBitmap(image->bitmap(), x, y, &paint->paint());
+    m_canvas->drawBitmap(image->bitmap(), p.sk_point.x(), p.sk_point.y(), &paint->paint());
 }
 
 void Canvas::drawImageRect(const CanvasImage* image, Rect& src, Rect& dst, Paint* paint) {

@@ -120,8 +120,10 @@ CPP_SPECIAL_CONVERSION_RULES = {
     # dart_value_to_cpp_value using CPP_SPECIAL_CONVERSION_RULES directly
     # instead of calling cpp_type.
     'Float32List': 'Float32List',
+    'Offset': 'Offset',
     'Point': 'Point',
     'Rect': 'Rect',
+    'Size': 'Size',
     'MojoDataPipeConsumer': 'mojo::ScopedDataPipeConsumerHandle',
     'TileMode': 'SkShader::TileMode',
     'TransferMode': 'SkXfermode::Mode',
@@ -372,8 +374,10 @@ DART_TO_CPP_VALUE = {
     # Pass-by-value types.
     'Color': pass_by_value_format('CanvasColor'),
     'Float32List': pass_by_value_format('Float32List'),
+    'Offset': pass_by_value_format('Offset'),
     'Point': pass_by_value_format('Point'),
     'Rect': pass_by_value_format('Rect'),
+    'Size': pass_by_value_format('Size'),
     'TileMode': pass_by_value_format('TileMode', ''),
     'TransferMode': pass_by_value_format('TransferMode', ''),
     'PaintingStyle': pass_by_value_format('PaintingStyle', ''),

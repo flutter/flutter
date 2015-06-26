@@ -7,11 +7,14 @@
 
 #include "sky/engine/bindings/exception_state.h"
 #include "sky/engine/core/painting/CanvasPath.h"
+#include "sky/engine/core/painting/Offset.h"
 #include "sky/engine/core/painting/Paint.h"
 #include "sky/engine/core/painting/Picture.h"
 #include "sky/engine/core/painting/PictureRecorder.h"
+#include "sky/engine/core/painting/Point.h"
 #include "sky/engine/core/painting/RRect.h"
 #include "sky/engine/core/painting/Rect.h"
+#include "sky/engine/core/painting/Size.h"
 #include "sky/engine/platform/graphics/DisplayList.h"
 #include "sky/engine/tonic/dart_wrappable.h"
 #include "sky/engine/tonic/float32_list.h"
@@ -31,8 +34,7 @@ public:
     }
 
     static PassRefPtr<Canvas> create(PictureRecorder* recorder,
-                                     double width,
-                                     double height,
+                                     Size& bounds,
                                      ExceptionState& es) {
         ASSERT(recorder);
         if (recorder->isRecording()) {
@@ -48,7 +50,7 @@ public:
             //              but it won't crash.
         }
         PassRefPtr<Canvas> canvas = create(
-            recorder->beginRecording(width, height));
+          recorder->beginRecording(bounds.sk_size.width(), bounds.sk_size.height()));
         recorder->set_canvas(canvas.get());
         return canvas;
     }
@@ -69,18 +71,15 @@ public:
     void clipRRect(const RRect* rrect);
     void clipPath(const CanvasPath* path);
 
-    void drawLine(float x0, float y0, float x1, float y1, const Paint* paint);
+    void drawLine(const Point& p1, const Point& p2, const Paint* paint);
     void drawPicture(Picture* picture);
     void drawPaint(const Paint* paint);
     void drawRect(const Rect& rect, const Paint* paint);
     void drawRRect(const RRect* rrect, const Paint* paint);
     void drawOval(const Rect& rect, const Paint* paint);
-    void drawCircle(float x, float y, float radius, const Paint* paint);
+    void drawCircle(const Point& c, float radius, const Paint* paint);
     void drawPath(const CanvasPath* path, const Paint* paint);
-    void drawImage(const CanvasImage* image,
-                   float x,
-                   float y,
-                   const Paint* paint);
+    void drawImage(const CanvasImage* image, const Point& p, const Paint* paint);
     void drawImageRect(const CanvasImage* image, Rect& src, Rect& dst, Paint* paint);
 
     SkCanvas* skCanvas() { return m_canvas; }

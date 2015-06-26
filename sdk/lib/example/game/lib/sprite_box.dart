@@ -84,7 +84,7 @@ class SpriteBox extends RenderBox {
   NodeWithSize get rootNode => _rootNode;
 
   void performLayout() {
-    size = constraints.constrain(Size.infinite);
+    size = constraints.biggest;
     _invalidateTransformMatrix();
     _callSpriteBoxPerformedLayout(_rootNode);
   }

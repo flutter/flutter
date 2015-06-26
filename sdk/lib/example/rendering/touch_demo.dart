@@ -2,8 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:math';
-import 'dart:sky';
+import 'dart:sky' as sky;
 
 import 'package:sky/rendering/box.dart';
 import 'package:sky/rendering/object.dart';
@@ -24,20 +23,18 @@ List<Color> colors = [
 
 class Dot {
   final Paint _paint;
-  double x = 0.0;
-  double y = 0.0;
+  Point position = Point.origin;
   double radius = 0.0;
 
   Dot({ Color color }) : _paint = new Paint()..color = color;
 
-  void update(PointerEvent event) {
-    x = event.x;
-    y = event.y;
+  void update(sky.PointerEvent event) {
+    position = new Point(event.x, event.y);
     radius = 5 + (95 * event.pressure);
   }
 
   void paint(RenderCanvas canvas) {
-    canvas.drawCircle(x, y, radius, _paint);
+    canvas.drawCircle(position, radius, _paint);
   }
 }
 
@@ -46,27 +43,29 @@ class RenderTouchDemo extends RenderBox {
 
   RenderTouchDemo();
 
-  void handleEvent(Event event, BoxHitTestEntry entry) {
-    switch (event.type) {
-      case 'pointerdown':
-        Color color = colors[event.pointer.remainder(colors.length)];
-        dots[event.pointer] = new Dot(color: color)..update(event);
-        break;
-      case 'pointerup':
-        dots.remove(event.pointer);
-        break;
-      case 'pointercancel':
-        dots = new Map();
-        break;
-      case 'pointermove':
-        dots[event.pointer].update(event);
-        break;
+  void handleEvent(sky.Event event, BoxHitTestEntry entry) {
+    if (event is sky.PointerEvent) {
+      switch (event.type) {
+        case 'pointerdown':
+          Color color = colors[event.pointer.remainder(colors.length)];
+          dots[event.pointer] = new Dot(color: color)..update(event);
+          break;
+        case 'pointerup':
+          dots.remove(event.pointer);
+          break;
+        case 'pointercancel':
+          dots = new Map();
+          break;
+        case 'pointermove':
+          dots[event.pointer].update(event);
+          break;
+      }
     }
     markNeedsPaint();
   }
 
   void performLayout() {
-    size = constraints.constrain(Size.infinite);
+    size = constraints.biggest;
   }
 
   void paint(RenderCanvas canvas) {

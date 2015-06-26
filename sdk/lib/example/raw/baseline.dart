@@ -47,7 +47,7 @@ void drawText(sky.Canvas canvas, String lh) {
 void main() {
   // prepare the rendering
   sky.PictureRecorder recorder = new sky.PictureRecorder();
-  sky.Canvas canvas = new sky.Canvas(recorder, sky.view.width, sky.view.height);
+  sky.Canvas canvas = new sky.Canvas(recorder, new sky.Size(sky.view.width, sky.view.height));
 
   // background
   sky.Paint paint = new sky.Paint();

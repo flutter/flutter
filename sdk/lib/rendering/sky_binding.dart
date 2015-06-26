@@ -48,7 +48,7 @@ class SkyBinding {
   RenderView get renderView => _renderView;
 
   ViewConstraints _createConstraints() {
-    return new ViewConstraints(width: sky.view.width, height: sky.view.height);
+    return new ViewConstraints(size: new Size(sky.view.width, sky.view.height));
   }
   void _handleMetricsChanged() {
     _renderView.rootConstraints = _createConstraints();

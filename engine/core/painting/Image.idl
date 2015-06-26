@@ -6,6 +6,7 @@
   Constructor(),
   ImplementedAs=CanvasImage,
 ] interface Image {
+    // TODO(ianh): convert this to a Size
     readonly attribute long width;  // width in number of image pixels
     readonly attribute long height; // height in number of image pixels
 };

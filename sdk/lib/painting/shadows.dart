@@ -9,11 +9,11 @@ import 'dart:sky' as sky;
 class ShadowDrawLooperBuilder {
   var builder_ = new sky.LayerDrawLooperBuilder();
 
-  void addShadow(sky.Size offset, sky.Color color, double blur) {
+  void addShadow(sky.Offset offset, sky.Color color, double blur) {
     builder_.addLayerOnTop(
           new sky.DrawLooperLayerInfo()
             ..setPaintBits(sky.PaintBits.all)
-            ..setOffset(offset.toPoint())
+            ..setOffset(offset)
             ..setColorMode(sky.TransferMode.src),
           (sky.Paint layerPaint) {
         layerPaint.color = color;

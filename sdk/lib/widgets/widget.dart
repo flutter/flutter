@@ -14,7 +14,7 @@ import '../rendering/sky_binding.dart';
 
 export '../rendering/box.dart' show BoxConstraints, BoxDecoration, Border, BorderSide, EdgeDims;
 export '../rendering/flex.dart' show FlexDirection;
-export '../rendering/object.dart' show Point, Size, Rect, Color, Paint, Path;
+export '../rendering/object.dart' show Point, Offset, Size, Rect, Color, Paint, Path;
 
 final bool _shouldLogRenderDuration = false;
 

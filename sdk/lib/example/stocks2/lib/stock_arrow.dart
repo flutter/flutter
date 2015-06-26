@@ -61,7 +61,7 @@ class StockArrow extends Component {
 
       // Draw a circle that circumscribes the arrow.
       paint.setStyle(sky.PaintingStyle.stroke);
-      canvas.drawCircle(centerX, centerY, r, paint);
+      canvas.drawCircle(new Point(centerX, centerY), r, paint);
     });
 
     return new Container(

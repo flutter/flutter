@@ -18,7 +18,7 @@ import 'widget.dart';
 
 export '../rendering/box.dart' show BoxConstraints, BoxDecoration, Border, BorderSide, EdgeDims;
 export '../rendering/flex.dart' show FlexDirection, FlexJustifyContent, FlexAlignItems;
-export '../rendering/object.dart' show Point, Size, Rect, Color, Paint, Path;
+export '../rendering/object.dart' show Point, Offset, Size, Rect, Color, Paint, Path;
 export 'widget.dart' show Widget, Component, App, runApp, Listener, ParentDataNode;
 
 

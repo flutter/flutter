@@ -138,7 +138,7 @@ class RenderStack extends RenderBox with ContainerRenderObjectMixin<RenderBox, S
     if (hasNonPositionedChildren)
       size = new Size(width, height);
     else
-      size = constraints.constrain(Size.infinite);
+      size = constraints.biggest;
 
     assert(!size.isInfinite);
     assert(size.width == constraints.constrainWidth(width));

@@ -5,9 +5,9 @@
 import 'dart:sky';
 
 void beginFrame(double timeStamp) {
-  var size = 100.0;
+  double size = 100.0;
   PictureRecorder recorder = new PictureRecorder();
-  Canvas canvas = new Canvas(recorder, view.width, view.height);
+  Canvas canvas = new Canvas(recorder, new Size(view.width, view.height));
   canvas.translate(size + 10.0, size + 10.0);
 
   Paint paint = new Paint();
@@ -17,7 +17,7 @@ void beginFrame(double timeStamp) {
     ..addLayerOnTop(
         new DrawLooperLayerInfo()
           ..setPaintBits(PaintBits.all)
-          ..setOffset(const Point(5.0, 5.0))
+          ..setOffset(const Offset(5.0, 5.0))
           ..setColorMode(TransferMode.src),
         (Paint layerPaint) {
       layerPaint.color = const Color.fromARGB(128, 55, 55, 55);

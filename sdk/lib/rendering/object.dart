@@ -4,13 +4,13 @@
 
 import 'dart:math' as math;
 import 'dart:sky' as sky;
-import 'dart:sky' show Point, Size, Rect, Color, Paint, Path;
+import 'dart:sky' show Point, Offset, Size, Rect, Color, Paint, Path;
 
 import '../base/hit_test.dart';
 import '../base/node.dart';
 import '../base/scheduler.dart' as scheduler;
 
-export 'dart:sky' show Point, Size, Rect, Color, Paint, Path;
+export 'dart:sky' show Point, Offset, Size, Rect, Color, Paint, Path;
 export '../base/hit_test.dart' show HitTestTarget, HitTestEntry, HitTestResult;
 
 
@@ -27,7 +27,7 @@ class ParentData {
 }
 
 class RenderCanvas extends sky.Canvas {
-  RenderCanvas(sky.PictureRecorder recorder, double width, double height) : super(recorder, width, height);
+  RenderCanvas(sky.PictureRecorder recorder, Size bounds) : super(recorder, bounds);
 
   void paintChild(RenderObject child, Point position) {
     translate(position.x, position.y);

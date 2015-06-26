@@ -10,7 +10,6 @@
   // DrawLooperLayerInfo.dart.
   void setPaintBits(unsigned long bits);
   void setColorMode(TransferMode mode);
-  // TODO(eseidel): Offset should be a Size not a Point.
-  void setOffset(Point offset);
+  void setOffset(Offset offset);
   void setPostTranslate(boolean postTranslate);
 };

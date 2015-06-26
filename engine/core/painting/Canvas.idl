@@ -4,7 +4,7 @@
 
 // TODO(mpcomplete): Figure out a better SkMatrix representation.
 [
-  Constructor(PictureRecorder recorder, double width, double height),
+  Constructor(PictureRecorder recorder, Size bounds),
   RaisesException=Constructor,
 ] interface Canvas {
   void save();
@@ -22,14 +22,14 @@
   void clipRRect(RRect rrect);
   void clipPath(Path path);
 
-  void drawLine(float x0, float y0, float x1, float y1, Paint paint);
+  void drawLine(Point p1, Point p2, Paint paint);
   void drawPicture(Picture picture);
   void drawPaint(Paint paint);
   void drawRect(Rect rect, Paint paint);
   void drawRRect(RRect rrect, Paint paint);
   void drawOval(Rect rect, Paint paint);
-  void drawCircle(float x, float y, float radius, Paint paint);
+  void drawCircle(Point c, float radius, Paint paint);
   void drawPath(Path path, Paint paint);
-  void drawImage(Image image, float x, float y, Paint paint);
+  void drawImage(Image image, Point p, Paint paint);
   void drawImageRect(Image image, Rect src, Rect dst, Paint paint);
 };

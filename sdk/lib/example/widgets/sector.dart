@@ -10,7 +10,6 @@ import 'package:sky/rendering/sky_binding.dart';
 import 'package:sky/theme/colors.dart' as colors;
 import 'package:sky/theme/edges.dart';
 import 'package:sky/theme/theme_data.dart';
-import 'package:sky/theme/typography.dart' as typography;
 import 'package:sky/widgets/basic.dart';
 import 'package:sky/widgets/material.dart';
 import 'package:sky/widgets/raised_button.dart';

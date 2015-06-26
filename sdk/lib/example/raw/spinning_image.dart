@@ -17,7 +17,7 @@ void beginFrame(double timeStamp) {
   if (timeBase == null) timeBase = timeStamp;
   double delta = timeStamp - timeBase;
   PictureRecorder recorder = new PictureRecorder();
-  Canvas canvas = new Canvas(recorder, view.width, view.height);
+  Canvas canvas = new Canvas(recorder, new Size(view.width, view.height));
   canvas.translate(view.width / 2.0, view.height / 2.0);
   canvas.rotate(math.PI * delta / 1800);
   canvas.scale(0.2, 0.2);
@@ -25,7 +25,7 @@ void beginFrame(double timeStamp) {
 
   // Draw image
   if (image != null)
-    canvas.drawImage(image, -image.width / 2.0, -image.height / 2.0, paint);
+    canvas.drawImage(image, new Point(-image.width / 2.0, -image.height / 2.0), paint);
 
   // Draw cut out of image
   canvas.rotate(math.PI * delta / 1800);

@@ -55,7 +55,7 @@ class InkSplash {
   void paint(RenderCanvas canvas) {
     int opacity = (_kSplashInitialOpacity * (1.0 - (_radius.value / _targetRadius))).floor();
     sky.Paint paint = new sky.Paint()..color = new sky.Color(opacity << 24);
-    canvas.drawCircle(position.x, position.y, _radius.value, paint);
+    canvas.drawCircle(position, _radius.value, paint);
   }
 }
 

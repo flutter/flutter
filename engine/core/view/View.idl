@@ -4,6 +4,8 @@
 
 interface View {
   readonly attribute double devicePixelRatio;
+
+  // TODO(ianh): convert this to returning a Size
   readonly attribute double width;
   readonly attribute double height;
 
