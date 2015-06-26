@@ -453,7 +453,7 @@ abstract class ContainerRenderObjectMixin<ChildType extends RenderObject, Parent
     assert(_debugUltimatePreviousSiblingOf(child, equals: _firstChild));
     assert(_debugUltimateNextSiblingOf(child, equals: _lastChild));
     _childCount -= 1;
-    assert(_childCount > 0);
+    assert(_childCount >= 0);
     if (child.parentData.previousSibling == null) {
       assert(_firstChild == child);
       _firstChild = child.parentData.nextSibling;
