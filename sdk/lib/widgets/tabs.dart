@@ -3,15 +3,13 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
-import 'dart:sky' as sky;
 
-import 'package:sky/painting/text_style.dart';
 import 'package:sky/rendering/box.dart';
 import 'package:sky/rendering/object.dart';
-import 'package:sky/theme/colors.dart';
 import 'package:sky/widgets/basic.dart';
 import 'package:sky/widgets/icon.dart';
 import 'package:sky/widgets/ink_well.dart';
+import 'package:sky/widgets/theme.dart';
 import 'package:sky/widgets/widget.dart';
 
 typedef void SelectedIndexChanged(int selectedIndex);
@@ -20,6 +18,7 @@ const double _kTabHeight = 46.0;
 const double _kTabIndicatorHeight = 2.0;
 const double _kTabBarHeight = _kTabHeight + _kTabIndicatorHeight;
 const double _kMinTabWidth = 72.0;
+const int _kTabIconSize = 24;
 
 class TabBarParentData extends BoxParentData with
     ContainerParentDataMixin<RenderBox> { }
@@ -37,7 +36,25 @@ class RenderTabBar extends RenderBox with
     }
   }
 
-  void setParentData(RenderBox child) {
+  Color _backgroundColor;
+  Color get backgroundColor => _backgroundColor;
+  void set backgroundColor(Color value) {
+    if (_backgroundColor != value) {
+      _backgroundColor = value;
+      markNeedsPaint();
+    }
+  }
+
+  Color _indicatorColor;
+  Color get indicatorColor => _indicatorColor;
+  void set indicatorColor(Color value) {
+    if (_indicatorColor != value) {
+      _indicatorColor = value;
+      markNeedsPaint();
+    }
+  }
+
+  void setupParentData(RenderBox child) {
     if (child.parentData is! TabBarParentData)
       child.parentData = new TabBarParentData();
   }
@@ -119,16 +136,20 @@ class RenderTabBar extends RenderBox with
   }
 
   void _paintIndicator(RenderCanvas canvas, RenderBox selectedTab) {
+    if (indicatorColor == null)
+      return;
+
     var size = new Size(selectedTab.size.width, _kTabIndicatorHeight);
     var point = new Point(selectedTab.parentData.position.x, _kTabHeight);
     Rect rect = new Rect.fromPointAndSize(point, size);
-    // TODO(hansmuller): indicator color should be based on the theme.
-    canvas.drawRect(rect, new Paint()..color = White);
+    canvas.drawRect(rect, new Paint()..color = indicatorColor);
   }
 
   void paint(RenderCanvas canvas) {
-    Rect rect = new Rect.fromSize(size);
-    canvas.drawRect(rect, new Paint()..color = Blue[500]);
+    if (backgroundColor != null) {
+      Rect rect = new Rect.fromSize(size);
+      canvas.drawRect(rect, new Paint()..color = backgroundColor);
+    }
 
     int index = 0;
     RenderBox child = firstChild;
@@ -143,10 +164,17 @@ class RenderTabBar extends RenderBox with
 }
 
 class TabBarWrapper extends MultiChildRenderObjectWrapper {
-  TabBarWrapper(List<Widget> children, this.selectedIndex, { String key })
-    : super(key: key, children: children);
+  TabBarWrapper({
+    List<Widget> children,
+    this.selectedIndex,
+    this.backgroundColor,
+    this.indicatorColor,
+    String key 
+  }) : super(key: key, children: children);
 
   final int selectedIndex;
+  final Color backgroundColor;
+  final Color indicatorColor;
 
   RenderTabBar get root => super.root;
   RenderTabBar createNode() => new RenderTabBar();
@@ -154,6 +182,8 @@ class TabBarWrapper extends MultiChildRenderObjectWrapper {
   void syncRenderObject(Widget old) {
     super.syncRenderObject(old);
     root.selectedIndex = selectedIndex;
+    root.backgroundColor = backgroundColor;
+    root.indicatorColor = indicatorColor;
   }
 }
 
@@ -176,18 +206,14 @@ class Tab extends Component {
   final TabLabel label;
   final bool selected;
 
-  // TODO(hansmuller): use themes here.
-  static const TextStyle selectedStyle = const TextStyle(color: const Color(0xFFFFFFFF));
-  static const TextStyle style = const TextStyle(color: const Color(0xB2FFFFFF));
-
   Widget _buildLabelText() {
     assert(label.text != null);
-    return new Text(label.text, style: style);
+    return new Text(label.text, style: Theme.of(this).toolbarText.button);
   }
 
   Widget _buildLabelIcon() {
     assert(label.icon != null);
-    return new Icon(type: label.icon, size: 24);
+    return new Icon(type: label.icon, size: _kTabIconSize);
   }
 
   Widget build() {
@@ -254,7 +280,12 @@ class TabBar extends Component {
     for (int tabIndex = 0; tabIndex < labels.length; tabIndex++) {
       tabs.add(_toTab(labels[tabIndex], tabIndex));
     }
-    return new TabBarWrapper(tabs, selectedIndex);
+    return new TabBarWrapper(
+      children: tabs, 
+      selectedIndex: selectedIndex,
+      backgroundColor: Theme.of(this).primary[500],
+      indicatorColor: Theme.of(this).accent[200]
+    );
   }
 }
 

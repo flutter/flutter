@@ -44,8 +44,8 @@ class TabbedNavigatorApp extends App {
       .map((labels) => buildTabNavigator(labels, navigatorIndex++));
 
     ToolBar toolbar = new ToolBar(
-      center: new Text('Tabbed Navigator', style: white.title),
-      backgroundColor: Blue[500]);
+      center: new Text('Tabbed Navigator', style: white.title)
+    );
 
     return new Scaffold(
       toolbar: toolbar,
