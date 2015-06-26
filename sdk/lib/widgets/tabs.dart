@@ -63,11 +63,9 @@ class RenderTabBar extends RenderBox with
     BoxConstraints widthConstraints =
         new BoxConstraints(maxWidth: constraints.maxWidth, maxHeight: constraints.maxHeight);
     double maxWidth = 0.0;
-    int childCount = 0;
     RenderBox child = firstChild;
     while (child != null) {
       maxWidth = math.max(maxWidth, child.getMinIntrinsicWidth(widthConstraints));
-      ++childCount;
       assert(child.parentData is TabBarParentData);
       child = child.parentData.nextSibling;
     }
@@ -78,11 +76,9 @@ class RenderTabBar extends RenderBox with
     BoxConstraints widthConstraints =
         new BoxConstraints(maxWidth: constraints.maxWidth, maxHeight: constraints.maxHeight);
     double maxWidth = 0.0;
-    int childCount = 0;
     RenderBox child = firstChild;
     while (child != null) {
       maxWidth = math.max(maxWidth, child.getMaxIntrinsicWidth(widthConstraints));
-      ++childCount;
       assert(child.parentData is TabBarParentData);
       child = child.parentData.nextSibling;
     }
@@ -95,25 +91,12 @@ class RenderTabBar extends RenderBox with
 
   double getMaxIntrinsicHeight(BoxConstraints constraints) => _getIntrinsicHeight(constraints);
 
-  // TODO(hansmuller): track this value in the parent rather than computing it.
-  int _childCount() {
-    int childCount = 0;
-    RenderBox child = firstChild;
-    while (child != null) {
-      ++childCount;
-      assert(child.parentData is TabBarParentData);
-      child = child.parentData.nextSibling;
-    }
-    return childCount;
-  }
-
   void performLayout() {
     assert(constraints is BoxConstraints);
 
     size = constraints.constrain(new Size(constraints.maxWidth, _kTabBarHeight));
     assert(!size.isInfinite);
 
-    int childCount = _childCount();
     if (childCount == 0)
       return;
 

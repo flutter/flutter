@@ -367,7 +367,6 @@ abstract class ContainerParentDataMixin<ChildType extends RenderObject> {
 }
 
 abstract class ContainerRenderObjectMixin<ChildType extends RenderObject, ParentDataType extends ContainerParentDataMixin<ChildType>> implements RenderObject {
-  // abstract class that has only InlineNode children
 
   bool _debugUltimatePreviousSiblingOf(ChildType child, { ChildType equals }) {
     assert(child.parentData is ParentDataType);
@@ -388,12 +387,17 @@ abstract class ContainerRenderObjectMixin<ChildType extends RenderObject, Parent
     return child == equals;
   }
 
+  int _childCount = 0;
+  int get childCount => _childCount;
+
   ChildType _firstChild;
   ChildType _lastChild;
   void _addToChildList(ChildType child, { ChildType before }) {
     assert(child.parentData is ParentDataType);
     assert(child.parentData.nextSibling == null);
     assert(child.parentData.previousSibling == null);
+    _childCount += 1;
+    assert(_childCount > 0);
     if (before == null) {
       // append at the end (_lastChild)
       child.parentData.previousSibling = _lastChild;
@@ -448,6 +452,8 @@ abstract class ContainerRenderObjectMixin<ChildType extends RenderObject, Parent
     assert(child.parentData is ParentDataType);
     assert(_debugUltimatePreviousSiblingOf(child, equals: _firstChild));
     assert(_debugUltimateNextSiblingOf(child, equals: _lastChild));
+    _childCount -= 1;
+    assert(_childCount > 0);
     if (child.parentData.previousSibling == null) {
       assert(_firstChild == child);
       _firstChild = child.parentData.nextSibling;
