@@ -490,4 +490,15 @@ void main() {
     expect(mid.value, 300.0);
     expect(right.value, 600.0);
   });
+
+  test('test_description', () {
+    var left = new Param(0.0);
+    var right = new Param(100.0);
+    var c = right >= left;
+
+    Solver s = new Solver();
+    expect(s.addConstraint(c), Result.success);
+
+    expect(s.toString() != null, true);
+  });
 }
