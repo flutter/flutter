@@ -124,6 +124,7 @@ class Solver {
 
     Constraint constraint = new Constraint(
         new Expression([new Term(variable, 1.0)], 0.0), Relation.equalTo);
+    constraint.priority = priority;
 
     if (addConstraint(constraint) != Result.success) {
       return Result.internalSolverError;
