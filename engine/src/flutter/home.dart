@@ -39,8 +39,7 @@ class SkyDemo extends Component {
 
   Widget build() {
     return new ConstrainedBox(
-      // TOOD(ianh): Fix so we don't need INFINITY here.
-      constraints: new BoxConstraints.tightFor(width: double.INFINITY),
+      constraints: const BoxConstraints.expandWidth(),
       child: new RaisedButton(
         child: new Text(text),
         onPressed: _handlePress
