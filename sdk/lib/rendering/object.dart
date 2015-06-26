@@ -80,11 +80,20 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   static List<RenderObject> _nodesNeedingLayout = new List<RenderObject>();
   static bool _debugDoingLayout = false;
   static bool get debugDoingLayout => _debugDoingLayout;
+  bool _debugDoingThisResize = false;
+  bool get debugDoingThisResize => _debugDoingThisResize;
+  bool _debugDoingThisLayout = false;
+  bool get debugDoingThisLayout => _debugDoingThisLayout;
+  static RenderObject _debugActiveLayout = null;
+  static RenderObject get debugActiveLayout => _debugActiveLayout;
+  bool _debugCanParentUseSize;
+  bool get debugCanParentUseSize => _debugCanParentUseSize;
   bool _needsLayout = true;
   bool get needsLayout => _needsLayout;
   RenderObject _relayoutSubtreeRoot;
   Constraints _constraints;
   Constraints get constraints => _constraints;
+  bool debugDoesMeetConstraints(); // override this in a subclass to verify that your state matches the constraints object
   bool debugAncestorsAlreadyMarkedNeedsLayout() {
     if (_relayoutSubtreeRoot == null)
       return true; // we haven't yet done layout even once, so there's nothing for us to do
@@ -152,7 +161,14 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   void layoutWithoutResize() {
     try {
       assert(_relayoutSubtreeRoot == this);
+      _debugCanParentUseSize = false;
+      _debugDoingThisLayout = true;
+      RenderObject debugPreviousActiveLayout = _debugActiveLayout;
+      _debugActiveLayout = this;
       performLayout();
+      _debugActiveLayout = debugPreviousActiveLayout;
+      _debugDoingThisLayout = false;
+      _debugCanParentUseSize = null;
     } catch (e, stack) {
       print('Exception raised during layout of ${this}: ${e}');
       print(stack);
@@ -172,9 +188,20 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
       return;
     _constraints = constraints;
     _relayoutSubtreeRoot = relayoutSubtreeRoot;
-    if (sizedByParent)
+    _debugCanParentUseSize = parentUsesSize;
+    if (sizedByParent) {
+      _debugDoingThisResize = true;
       performResize();
+      _debugDoingThisResize = false;
+    }
+    _debugDoingThisLayout = true;
+    RenderObject debugPreviousActiveLayout = _debugActiveLayout;
+    _debugActiveLayout = this;
     performLayout();
+    _debugActiveLayout = debugPreviousActiveLayout;
+    _debugDoingThisLayout = false;
+    _debugCanParentUseSize = null;
+    assert(debugDoesMeetConstraints());
     _needsLayout = false;
     markNeedsPaint();
     assert(parent == this.parent); // TODO(ianh): Remove this once the analyzer is cleverer
@@ -250,6 +277,8 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
 
 
   String toString([String prefix = '']) {
+    RenderObject debugPreviousActiveLayout = _debugActiveLayout;
+    _debugActiveLayout = null;
     String header = '${runtimeType}';
     if (_relayoutSubtreeRoot != null && _relayoutSubtreeRoot != this) {
       int count = 1;
@@ -265,7 +294,9 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     if (!attached)
       header += ' DETACHED';
     prefix += '  ';
-    return '${header}\n${debugDescribeSettings(prefix)}${debugDescribeChildren(prefix)}';
+    String result = '${header}\n${debugDescribeSettings(prefix)}${debugDescribeChildren(prefix)}';
+    _debugActiveLayout = debugPreviousActiveLayout;
+    return result;
   }
   String debugDescribeSettings(String prefix) => '${prefix}parentData: ${parentData}\n${prefix}constraints: ${constraints}\n';
   String debugDescribeChildren(String prefix) => '';

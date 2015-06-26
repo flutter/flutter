@@ -193,6 +193,11 @@ class BoxConstraints extends Constraints {
   bool get hasTightHeight => minHeight >= maxHeight;
   bool get isTight => hasTightWidth && hasTightHeight;
 
+  bool contains(Size size) {
+    return (minWidth <= size.width) && (size.width <= math.max(minWidth, maxWidth)) &&
+           (minHeight <= size.height) && (size.height <= math.max(minHeight, maxHeight));
+  }
+
   bool operator ==(other) {
     if (identical(this, other))
       return true;
@@ -290,25 +295,13 @@ abstract class RenderBox extends RenderObject {
     return null;
   }
 
-  // This whole block should only be here in debug builds
-  bool _debugDoingThisLayout = false;
-  bool _debugCanParentUseSize;
-  void layoutWithoutResize() {
-    _debugDoingThisLayout = true;
-    _debugCanParentUseSize = false;
-    super.layoutWithoutResize();
-    _debugCanParentUseSize = null;
-    _debugDoingThisLayout = false;
-  }
-  void layout(dynamic constraints, { bool parentUsesSize: false }) {
-    _debugDoingThisLayout = true;
-    _debugCanParentUseSize = parentUsesSize;
-    super.layout(constraints, parentUsesSize: parentUsesSize);
-    _debugCanParentUseSize = null;
-    _debugDoingThisLayout = false;
-  }
-
   BoxConstraints get constraints => super.constraints;
+  bool debugDoesMeetConstraints() {
+    assert(constraints != null);
+    assert(_size != null);
+    assert(!_size.isInfinite);
+    return constraints.contains(_size);
+  }
   void performResize() {
     // default behaviour for subclasses that have sizedByParent = true
     size = constraints.constrain(Size.zero);
@@ -329,19 +322,34 @@ abstract class RenderBox extends RenderObject {
   }
   void hitTestChildren(HitTestResult result, { Point position }) { }
 
+  // TODO(ianh): move size up to before constraints
   // TODO(ianh): In non-debug builds, this should all just be:
   // Size size = Size.zero;
   // In debug builds, however:
   Size _size = Size.zero;
-  Size get size => _size;
+  Size get size {
+    if (_size is _DebugSize) {
+      final _DebugSize _size = this._size; // TODO(ianh): Remove this once the analyzer is cleverer
+      assert(_size._owner == this);
+      if (RenderObject.debugActiveLayout != null) {
+        // we are always allowed to access our own size (for print debugging and asserts if nothing else)
+        // other than us, the only object that's allowed to read our size is our parent, if they're said they will
+        assert(debugDoingThisResize || debugDoingThisLayout ||
+               (RenderObject.debugActiveLayout == parent && _size._canBeUsedByParent));
+      }
+      assert(_size == this._size); // TODO(ianh): Remove this once the analyzer is cleverer
+    }
+    return _size;
+  }
   void set size(Size value) {
     assert(RenderObject.debugDoingLayout);
-    assert(_debugDoingThisLayout);
+    assert((sizedByParent && debugDoingThisResize) ||
+           (!sizedByParent && debugDoingThisLayout));
     if (value is _DebugSize) {
       assert(value._canBeUsedByParent);
       assert(value._owner.parent == this);
     }
-    _size = inDebugBuild ? new _DebugSize(value, this, _debugCanParentUseSize) : value;
+    _size = inDebugBuild ? new _DebugSize(value, this, debugCanParentUseSize) : value;
   }
 
   String debugDescribeSettings(String prefix) => '${super.debugDescribeSettings(prefix)}${prefix}size: ${size}\n';
@@ -1134,11 +1142,8 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     assert(_size.height < double.INFINITY);
     assert(_size.width < double.INFINITY);
 
-    if (child != null) {
+    if (child != null)
       child.layout(new BoxConstraints.tight(_size));
-      assert(child.size.width == width);
-      assert(child.size.height == height);
-    }
   }
 
   void rotate({ int oldAngle, int newAngle, Duration time }) {

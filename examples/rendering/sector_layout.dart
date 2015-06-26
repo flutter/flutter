@@ -75,6 +75,17 @@ abstract class RenderSector extends RenderObject {
   }
 
   SectorConstraints get constraints => super.constraints;
+  bool debugDoesMeetConstraints() {
+    assert(constraints != null);
+    assert(deltaRadius != null);
+    assert(deltaRadius < double.INFINITY);
+    assert(deltaTheta != null);
+    assert(deltaTheta < double.INFINITY);
+    return constraints.minDeltaRadius <= deltaRadius &&
+           deltaRadius <= math.max(constraints.minDeltaRadius, constraints.maxDeltaRadius) &&
+           constraints.minDeltaTheta <= deltaTheta &&
+           deltaTheta <= math.max(constraints.minDeltaTheta, constraints.maxDeltaTheta);
+  }
   void performResize() {
     // default behaviour for subclasses that have sizedByParent = true
     deltaRadius = constraints.constrainDeltaRadius(0.0);

@@ -85,6 +85,13 @@ preinitialise the `parentData` member to set its values before you add
 a node to its parent, you can preemptively call that future parent's
 `setParentData()` method with the future child as the argument.
 
+TODO(ianh): Discuss putting per-child configuration information for
+the parent on the child's parentData.
+
+If you change a child's parentData dynamically, you must also call
+markNeedsLayout() on the parent, otherwise the new information will
+not take effect until something else triggers a layout.
+
 ### Box Model
 
 #### Dimensions

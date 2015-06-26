@@ -22,6 +22,8 @@ class Size {
   Size operator +(Size other) => new Size(width + other.width, height + other.height);
   Size operator -(Size other) => new Size(width - other.width, height - other.height);
 
+  bool get isInfinite => width >= double.INFINITY || height >= double.INFINITY;
+
   // does the equivalent of "return new Point(0,0) + this"
   Point toPoint() => new Point(this.width, this.height);
 

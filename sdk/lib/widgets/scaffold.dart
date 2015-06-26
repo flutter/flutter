@@ -39,9 +39,12 @@ class RenderScaffold extends RenderBox {
       return;
     if (old != null)
       dropChild(old);
-    _slots[slot] = value;
-    if (value != null)
+    if (value == null) {
+      _slots.remove(slot);
+    } else {
+      _slots[slot] = value;
       adoptChild(value);
+    }
     markNeedsLayout();
   }
 
@@ -118,7 +121,7 @@ class RenderScaffold extends RenderBox {
     if (_slots[ScaffoldSlots.floatingActionButton] != null) {
       RenderBox floatingActionButton = _slots[ScaffoldSlots.floatingActionButton];
       Size area = new Size(size.width - kButtonX, size.height - kButtonY);
-      floatingActionButton.layout(new BoxConstraints.loose(area));
+      floatingActionButton.layout(new BoxConstraints.loose(area), parentUsesSize: true);
       assert(floatingActionButton.parentData is BoxParentData);
       floatingActionButton.parentData.position = (area - floatingActionButton.size).toPoint();
     }
