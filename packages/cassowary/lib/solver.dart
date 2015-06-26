@@ -12,7 +12,7 @@ class Solver {
   final List<_Symbol> _infeasibleRows = new List<_Symbol>();
   final _Row _objective = new _Row(0.0);
   _Row _artificial = new _Row(0.0);
-  int tick = 0;
+  int tick = 1;
 
   /// Attempts to add the constraints in the list to the solver. If it cannot
   /// add any for some reason, a cleanup is attempted so that either all

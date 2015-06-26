@@ -34,7 +34,10 @@ class _Row {
     cells.remove(symbol);
   }
 
-  void reverseSign() => cells.forEach((s, v) => cells[s] = -v);
+  void reverseSign() {
+    constant = -constant;
+    cells.forEach((s, v) => cells[s] = -v);
+  }
 
   void solveForSymbol(_Symbol symbol) {
     assert(cells.containsKey(symbol));
