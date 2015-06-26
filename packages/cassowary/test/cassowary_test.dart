@@ -501,4 +501,30 @@ void main() {
 
     expect(s.toString() != null, true);
   });
+
+  test('solution_with_optimize', () {
+    Param p1 = new Param();
+    Param p2 = new Param();
+    Param p3 = new Param();
+
+    Param container = new Param();
+
+    Solver solver = new Solver();
+
+    solver.addEditVariable(container.variable, Priority.strong);
+    solver.suggestValueForVariable(container.variable, 100.0);
+
+    solver.addConstraint((p1 >= CM(30.0)) | Priority.strong);
+    solver.addConstraint(((p1 == p3) as Constraint) | Priority.medium);
+    solver.addConstraint((p2 == CM(2.0) * p1) as Constraint);
+    solver.addConstraint((container == (p1 + p2 + p3)) as Constraint);
+
+    solver.flushVariableUpdates();
+
+    expect(container.value, 100.0);
+
+    expect(p1.value, 30.0);
+    expect(p2.value, 60.0);
+    expect(p3.value, 10.0);
+  });
 }
