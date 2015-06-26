@@ -44,6 +44,8 @@ source_set("common") {
     "shell.h",
     "shell_view.cc",
     "shell_view.h",
+    "switches.cc",
+    "switches.h",
     "ui/animator.cc",
     "ui/animator.h",
     "ui/engine.cc",

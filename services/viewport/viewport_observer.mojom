@@ -13,5 +13,5 @@ interface ViewportObserver {
 
   RunFromNetwork(string url);
   RunFromFile(string main, string package_root);
-  RunFromSnapshot(handle<data_pipe_consumer> snapshot);
+  RunFromSnapshot(string url, handle<data_pipe_consumer> snapshot);
 };

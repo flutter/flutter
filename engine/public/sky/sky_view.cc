@@ -48,7 +48,8 @@ void SkyView::RunFromLibrary(const WebString& name,
 
 void SkyView::RunFromSnapshot(const WebString& name,
                               mojo::ScopedDataPipeConsumerHandle snapshot) {
-  // TODO(abarth): Implement.
+  CreateView(name);
+  dart_controller_->RunFromSnapshot(snapshot.Pass());
 }
 
 void SkyView::BeginFrame(base::TimeTicks frame_time) {

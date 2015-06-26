@@ -36,10 +36,9 @@ class DartController {
   typedef base::Callback<void(RefPtr<AbstractModule>, RefPtr<DartValue>)>
       LoadFinishedCallback;
 
-  void LoadSnapshot(const KURL& url, mojo::URLResponsePtr response = nullptr);
-
   void RunFromLibrary(const String& name,
                       DartLibraryProvider* library_provider);
+  void RunFromSnapshot(mojo::ScopedDataPipeConsumerHandle snapshot);
 
   void LoadScriptInModule(AbstractModule* module,
                           const String& source,

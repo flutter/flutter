@@ -149,10 +149,11 @@ void DartController::DidLoadSnapshot() {
   DartInvokeAppField(library, ToDart("main"), 0, nullptr);
 }
 
-void DartController::LoadSnapshot(const KURL& url, mojo::URLResponsePtr response) {
+void DartController::RunFromSnapshot(
+    mojo::ScopedDataPipeConsumerHandle snapshot) {
   snapshot_loader_ = adoptPtr(new DartSnapshotLoader(dart_state()));
   snapshot_loader_->LoadSnapshot(
-      response->body.Pass(),
+      snapshot.Pass(),
       base::Bind(&DartController::DidLoadSnapshot, weak_factory_.GetWeakPtr()));
 }
 
