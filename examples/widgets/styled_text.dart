@@ -63,7 +63,7 @@ HAL: This mission is too important for me to allow you to jeopardize it.''';
 
   Component createSeparator() {
     return new Container(
-      constraints: const BoxConstraints(minWidth: double.INFINITY, maxHeight: 0.0),
+      constraints: const BoxConstraints.expandWidth(maxHeight: 0.0),
       margin: const EdgeDims.symmetric(vertical: 10.0, horizontal: 64.0),
       decoration: const BoxDecoration(
         border: const Border(
