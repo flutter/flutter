@@ -65,7 +65,7 @@ class SectorParentData extends ParentData {
 
 abstract class RenderSector extends RenderObject {
 
-  void setParentData(RenderObject child) {
+  void setupParentData(RenderObject child) {
     if (child.parentData is! SectorParentData)
       child.parentData = new SectorParentData();
   }
@@ -197,7 +197,7 @@ class RenderSectorRing extends RenderSectorWithChildren {
     }
   }
 
-  void setParentData(RenderObject child) {
+  void setupParentData(RenderObject child) {
     // TODO(ianh): avoid code duplication
     if (child.parentData is! SectorChildListParentData)
       child.parentData = new SectorChildListParentData();
@@ -307,7 +307,7 @@ class RenderSectorSlice extends RenderSectorWithChildren {
     }
   }
 
-  void setParentData(RenderObject child) {
+  void setupParentData(RenderObject child) {
     // TODO(ianh): avoid code duplication
     if (child.parentData is! SectorChildListParentData)
       child.parentData = new SectorChildListParentData();
@@ -407,7 +407,7 @@ class RenderBoxToRenderSectorAdapter extends RenderBox {
     markNeedsLayout();
   }
 
-  void setParentData(RenderObject child) {
+  void setupParentData(RenderObject child) {
     if (child.parentData is! SectorParentData)
       child.parentData = new SectorParentData();
   }
