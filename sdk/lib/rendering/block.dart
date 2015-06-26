@@ -95,8 +95,7 @@ class RenderBlock extends RenderBox with ContainerRenderObjectMixin<RenderBox, B
       child = child.parentData.nextSibling;
     }
     size = new Size(width, constraints.constrainHeight(y));
-    assert(size.width < double.INFINITY);
-    assert(size.height < double.INFINITY);
+    assert(!size.isInfinite);
   }
 
   void hitTestChildren(HitTestResult result, { Point position }) {

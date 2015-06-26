@@ -77,7 +77,7 @@ class BoxConstraints extends Constraints {
       minHeight = size.height,
       maxHeight = size.height;
 
-  BoxConstraints.tightFor({
+  const BoxConstraints.tightFor({
     double width,
     double height
   }): minWidth = width != null ? width : 0.0,
@@ -90,6 +90,25 @@ class BoxConstraints extends Constraints {
       maxWidth = size.width,
       minHeight = 0.0,
       maxHeight = size.height;
+
+  const BoxConstraints.expandWidth({
+    this.maxHeight: double.INFINITY
+  }): minWidth = double.INFINITY,
+      maxWidth = double.INFINITY,
+      minHeight = 0.0;
+
+  const BoxConstraints.expandHeight({
+    this.maxWidth: double.INFINITY
+  }): minWidth = 0.0,
+      minHeight = double.INFINITY,
+      maxHeight = double.INFINITY;
+
+  static const BoxConstraints expand = const BoxConstraints(
+    minWidth: double.INFINITY,
+    maxWidth: double.INFINITY,
+    minHeight: double.INFINITY,
+    maxHeight: double.INFINITY
+  );
 
   BoxConstraints deflate(EdgeDims edges) {
     assert(edges != null);
@@ -172,11 +191,11 @@ class BoxConstraints extends Constraints {
   final double minHeight;
   final double maxHeight;
 
-  double constrainWidth(double width) {
+  double constrainWidth([double width = double.INFINITY]) {
     return clamp(min: minWidth, max: maxWidth, value: width);
   }
 
-  double constrainHeight(double height) {
+  double constrainHeight([double height = double.INFINITY]) {
     return clamp(min: minHeight, max: maxHeight, value: height);
   }
 
@@ -305,8 +324,7 @@ abstract class RenderBox extends RenderObject {
   void performResize() {
     // default behaviour for subclasses that have sizedByParent = true
     size = constraints.constrain(Size.zero);
-    assert(size.height < double.INFINITY);
-    assert(size.width < double.INFINITY);
+    assert(!size.isInfinite);
   }
   void performLayout() {
     // descendants have to either override performLayout() to set both
@@ -1139,8 +1157,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
       _orientation = _rootConstraints.orientation;
     }
     _size = new Size(_rootConstraints.width, _rootConstraints.height);
-    assert(_size.height < double.INFINITY);
-    assert(_size.width < double.INFINITY);
+    assert(!_size.isInfinite);
 
     if (child != null)
       child.layout(new BoxConstraints.tight(_size));

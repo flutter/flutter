@@ -94,8 +94,7 @@ class RenderTabBar extends RenderBox with
     assert(constraints is BoxConstraints);
 
     size = constraints.constrain(new Size(constraints.maxWidth, _kTabBarHeight));
-    assert(size.width < double.INFINITY);
-    assert(size.height < double.INFINITY);
+    assert(!size.isInfinite);
 
     int childCount = _childCount();
     if (childCount == 0)

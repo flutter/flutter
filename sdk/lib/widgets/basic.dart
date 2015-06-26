@@ -290,10 +290,7 @@ class Container extends Component {
     Widget current = child;
 
     if (child == null && width == null && height == null)
-      current = new SizedBox(
-        width: double.INFINITY,
-        height: double.INFINITY
-      );
+      current = new ConstrainedBox(constraints: BoxConstraints.expand);
 
     if (padding != null)
       current = new Padding(padding: padding, child: current);

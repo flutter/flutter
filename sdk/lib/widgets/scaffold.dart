@@ -78,8 +78,7 @@ class RenderScaffold extends RenderBox {
   bool get sizedByParent => true;
   void performResize() {
     size = constraints.constrain(Size.infinite);
-    assert(size.width < double.INFINITY);
-    assert(size.height < double.INFINITY);
+    assert(!size.isInfinite);
   }
 
   // TODO(eseidel): These change based on device size!

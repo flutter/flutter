@@ -70,7 +70,7 @@ class RenderStack extends RenderBox with ContainerRenderObjectMixin<RenderBox, S
       child = child.parentData.nextSibling;
     }
     if (!hasNonPositionedChildren)
-      return constraints.constrainWidth(double.INFINITY);
+      return constraints.constrainWidth();
     assert(width == constraints.constrainWidth(width));
     return width;
   }
@@ -101,7 +101,7 @@ class RenderStack extends RenderBox with ContainerRenderObjectMixin<RenderBox, S
       child = child.parentData.nextSibling;
     }
     if (!hasNonPositionedChildren)
-      return constraints.constrainHeight(double.INFINITY);
+      return constraints.constrainHeight();
     assert(height == constraints.constrainHeight(height));
     return height;
   }
@@ -140,8 +140,7 @@ class RenderStack extends RenderBox with ContainerRenderObjectMixin<RenderBox, S
     else
       size = constraints.constrain(Size.infinite);
 
-    assert(size.width < double.INFINITY);
-    assert(size.height < double.INFINITY);
+    assert(!size.isInfinite);
     assert(size.width == constraints.constrainWidth(width));
     assert(size.height == constraints.constrainHeight(height));
 
