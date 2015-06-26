@@ -514,6 +514,29 @@ static size_t getNextWordBreak(const uint16_t* chars, size_t offset, size_t len)
     return len;
 }
 
+/**
+ * Disable certain scripts (mostly those with cursive connection) from having letterspacing
+ * applied. See https://github.com/behdad/harfbuzz/issues/64 for more details.
+ */
+static bool isScriptOkForLetterspacing(hb_script_t script) {
+    return !(
+            script == HB_SCRIPT_ARABIC ||
+            script == HB_SCRIPT_NKO ||
+            script == HB_SCRIPT_PSALTER_PAHLAVI ||
+            script == HB_SCRIPT_MANDAIC ||
+            script == HB_SCRIPT_MONGOLIAN ||
+            script == HB_SCRIPT_PHAGS_PA ||
+            script == HB_SCRIPT_DEVANAGARI ||
+            script == HB_SCRIPT_BENGALI ||
+            script == HB_SCRIPT_GURMUKHI ||
+            script == HB_SCRIPT_MODI ||
+            script == HB_SCRIPT_SHARADA ||
+            script == HB_SCRIPT_SYLOTI_NAGRI ||
+            script == HB_SCRIPT_TIRHUTA ||
+            script == HB_SCRIPT_OGHAM
+            );
+}
+
 void Layout::doLayout(const uint16_t* buf, size_t start, size_t count, size_t bufSize,
         int bidiFlags, const FontStyle &style, const MinikinPaint &paint) {
     AutoMutex _l(gMinikinLock);
@@ -678,15 +701,6 @@ void Layout::doLayoutRun(const uint16_t* buf, size_t start, size_t count, size_t
 
     double size = ctx->paint.size;
     double scaleX = ctx->paint.scaleX;
-    double letterSpace = ctx->paint.letterSpacing * size * scaleX;
-    double letterSpaceHalfLeft;
-    if ((ctx->paint.paintFlags & LinearTextFlag) == 0) {
-        letterSpace = round(letterSpace);
-        letterSpaceHalfLeft = floor(letterSpace * 0.5);
-    } else {
-        letterSpaceHalfLeft = letterSpace * 0.5;
-    }
-    double letterSpaceHalfRight = letterSpace - letterSpaceHalfLeft;
 
     float x = mAdvance;
     float y = 0;
@@ -715,6 +729,21 @@ void Layout::doLayoutRun(const uint16_t* buf, size_t start, size_t count, size_t
         for (ssize_t srunstart = run.start; srunstart < run.end; srunstart = srunend) {
             srunend = srunstart;
             hb_script_t script = getScriptRun(buf + start, run.end, &srunend);
+
+            double letterSpace = 0.0;
+            double letterSpaceHalfLeft = 0.0;
+            double letterSpaceHalfRight = 0.0;
+
+            if (ctx->paint.letterSpacing != 0.0 && isScriptOkForLetterspacing(script)) {
+                letterSpace = ctx->paint.letterSpacing * size * scaleX;
+                if ((ctx->paint.paintFlags & LinearTextFlag) == 0) {
+                    letterSpace = round(letterSpace);
+                    letterSpaceHalfLeft = floor(letterSpace * 0.5);
+                } else {
+                    letterSpaceHalfLeft = letterSpace * 0.5;
+                }
+                letterSpaceHalfRight = letterSpace - letterSpaceHalfLeft;
+            }
 
             hb_buffer_clear_contents(buffer);
             hb_buffer_set_script(buffer, script);
