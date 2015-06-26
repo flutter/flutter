@@ -15,8 +15,8 @@ import 'package:sky/widgets/widget.dart';
 typedef void SelectedIndexChanged(int selectedIndex);
 
 const double _kTabHeight = 46.0;
+const double _kTextAndIconTabHeight = 72.0;
 const double _kTabIndicatorHeight = 2.0;
-const double _kTabBarHeight = _kTabHeight + _kTabIndicatorHeight;
 const double _kMinTabWidth = 72.0;
 const int _kTabIconSize = 24;
 
@@ -54,6 +54,15 @@ class RenderTabBar extends RenderBox with
     }
   }
 
+  bool _textAndIcons;
+  bool get textAndIcons => _textAndIcons;
+  void set textAndIcons(bool value) {
+    if (_textAndIcons != value) {
+      _textAndIcons = value;
+      markNeedsLayout();
+    }
+  }
+
   void setupParentData(RenderBox child) {
     if (child.parentData is! TabBarParentData)
       child.parentData = new TabBarParentData();
@@ -85,7 +94,11 @@ class RenderTabBar extends RenderBox with
     return constraints.constrainWidth(maxWidth * childCount);
   }
 
-  double _getIntrinsicHeight(BoxConstraints constraints) => constraints.constrainHeight(_kTabBarHeight);
+  double get _tabBarHeight {
+    return (textAndIcons ? _kTextAndIconTabHeight : _kTabHeight) + _kTabIndicatorHeight;
+  }
+
+  double _getIntrinsicHeight(BoxConstraints constraints) => constraints.constrainHeight(_tabBarHeight);
 
   double getMinIntrinsicHeight(BoxConstraints constraints) => _getIntrinsicHeight(constraints);
 
@@ -94,7 +107,7 @@ class RenderTabBar extends RenderBox with
   void performLayout() {
     assert(constraints is BoxConstraints);
 
-    size = constraints.constrain(new Size(constraints.maxWidth, _kTabBarHeight));
+    size = constraints.constrain(new Size(constraints.maxWidth, _tabBarHeight));
     assert(!size.isInfinite);
 
     if (childCount == 0)
@@ -123,7 +136,9 @@ class RenderTabBar extends RenderBox with
       return;
 
     var size = new Size(selectedTab.size.width, _kTabIndicatorHeight);
-    var point = new Point(selectedTab.parentData.position.x, _kTabHeight);
+    var point = new Point(
+      selectedTab.parentData.position.x,
+      _tabBarHeight - _kTabIndicatorHeight);
     Rect rect = new Rect.fromPointAndSize(point, size);
     canvas.drawRect(rect, new Paint()..color = indicatorColor);
   }
@@ -152,12 +167,14 @@ class TabBarWrapper extends MultiChildRenderObjectWrapper {
     this.selectedIndex,
     this.backgroundColor,
     this.indicatorColor,
+    this.textAndIcons,
     String key 
   }) : super(key: key, children: children);
 
   final int selectedIndex;
   final Color backgroundColor;
   final Color indicatorColor;
+  final bool textAndIcons; 
 
   RenderTabBar get root => super.root;
   RenderTabBar createNode() => new RenderTabBar();
@@ -167,6 +184,7 @@ class TabBarWrapper extends MultiChildRenderObjectWrapper {
     root.selectedIndex = selectedIndex;
     root.backgroundColor = backgroundColor;
     root.indicatorColor = indicatorColor;
+    root.textAndIcons = textAndIcons;
   }
 }
 
@@ -207,7 +225,13 @@ class Tab extends Component {
       labelContents = _buildLabelIcon();
     } else {
       labelContents = new Flex(
-        <Widget>[_buildLabelText(), _buildLabelIcon()], 
+        <Widget>[
+          new Container(
+            child: _buildLabelIcon(),
+            margin: const EdgeDims.only(bottom: 10.0)
+          ),
+          _buildLabelText()
+        ], 
         justifyContent: FlexJustifyContent.center,
         alignItems: FlexAlignItems.center,
         direction: FlexDirection.vertical
@@ -260,16 +284,18 @@ class TabBar extends Component {
   Widget build() {
     assert(labels != null && labels.isNotEmpty);
     List<Widget> tabs = <Widget>[];
+    bool textAndIcons = false;
     for (int tabIndex = 0; tabIndex < labels.length; tabIndex++) {
       tabs.add(_toTab(labels[tabIndex], tabIndex));
+      if (labels[tabIndex].text != null && labels[tabIndex].icon != null)
+        textAndIcons = true;
     }
     return new TabBarWrapper(
       children: tabs, 
       selectedIndex: selectedIndex,
       backgroundColor: Theme.of(this).primary[500],
-      indicatorColor: Theme.of(this).accent[200]
+      indicatorColor: Theme.of(this).accent[200],
+      textAndIcons: textAndIcons
     );
   }
 }
-
-
