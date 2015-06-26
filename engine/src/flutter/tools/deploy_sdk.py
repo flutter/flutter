@@ -106,7 +106,6 @@ def main():
     ensure_dir_exists(sdk_root)
     # Manually clear sdk_root above to avoid deleting dot-files.
     delete_all_non_hidden_files_in_directory(sdk_root, args.non_interactive)
-    copy(src_path('sky/examples'), sdk_path('examples'))
 
     copy(src_path('sky/sdk/README.md'), sdk_root)
 
