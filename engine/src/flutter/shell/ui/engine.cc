@@ -218,8 +218,12 @@ void Engine::RunFromFile(const mojo::String& main,
   RunFromLibrary(main);
 }
 
-void Engine::RunFromSnapshot(mojo::ScopedDataPipeConsumerHandle snapshot) {
-  // TODO(abarth): Implement.
+void Engine::RunFromSnapshot(const mojo::String& url,
+                             mojo::ScopedDataPipeConsumerHandle snapshot) {
+  CloseWebViewIfNeeded();
+  sky_view_ = blink::SkyView::Create(this);
+  sky_view_->RunFromSnapshot(blink::WebString::fromUTF8(url), snapshot.Pass());
+  UpdateSkyViewSize();
 }
 
 void Engine::LoadUsingWebView(const mojo::String& mojo_url) {

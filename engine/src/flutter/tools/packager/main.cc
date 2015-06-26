@@ -18,6 +18,12 @@
 #include "sky/tools/packager/switches.h"
 #include "sky/tools/packager/vm.h"
 
+void Usage() {
+  std::cerr << "Usage: sky_packager"
+            << " --" << switches::kPackageRoot << " --" << switches::kSnapshot
+            << " <sky-app>" << std::endl;
+}
+
 void WriteSnapshot(base::FilePath path) {
   uint8_t* buffer;
   intptr_t size;
@@ -35,12 +41,18 @@ int main(int argc, const char* argv[]) {
   base::EnableTerminationOnHeapCorruption();
   base::CommandLine::Init(argc, argv);
 
+  const base::CommandLine& command_line =
+      *base::CommandLine::ForCurrentProcess();
+
+  if (command_line.HasSwitch(switches::kHelp) ||
+      command_line.GetArgs().empty()) {
+    Usage();
+    return 0;
+  }
+
   InitDartVM();
   Dart_Isolate isolate = CreateDartIsolate();
   CHECK(isolate);
-
-  const base::CommandLine& command_line =
-      *base::CommandLine::ForCurrentProcess();
 
   DartIsolateScope scope(isolate);
   DartApiScope api_scope;
@@ -51,8 +63,8 @@ int main(int argc, const char* argv[]) {
 
   CHECK(!LogIfError(Dart_FinalizeLoading(true)));
 
-  CHECK(command_line.HasSwitch(kSnapshot)) << "Need --snapshot";
-  WriteSnapshot(command_line.GetSwitchValuePath(kSnapshot));
+  CHECK(command_line.HasSwitch(switches::kSnapshot)) << "Need --snapshot";
+  WriteSnapshot(command_line.GetSwitchValuePath(switches::kSnapshot));
 
   return 0;
 }

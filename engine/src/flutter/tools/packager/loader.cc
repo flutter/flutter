@@ -93,8 +93,10 @@ Loader* g_loader = nullptr;
 Loader& GetLoader() {
   if (!g_loader) {
     base::CommandLine& command_line = *base::CommandLine::ForCurrentProcess();
-    CHECK(command_line.HasSwitch(kPackageRoot)) << "Need --package-root";
-    g_loader = new Loader(command_line.GetSwitchValuePath(kPackageRoot));
+    CHECK(command_line.HasSwitch(switches::kPackageRoot))
+        << "Need --package-root";
+    g_loader =
+        new Loader(command_line.GetSwitchValuePath(switches::kPackageRoot));
   }
   return *g_loader;
 }
