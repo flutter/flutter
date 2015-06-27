@@ -18,10 +18,6 @@ group("sky") {
     ":sky_apk",
   ]
 
-  if (is_android) {
-    deps += [ "//sky/apk/stocks" ]
-  }
-
   if (!is_android) {
     deps += [ "//third_party/mesa:osmesa" ]
   }
