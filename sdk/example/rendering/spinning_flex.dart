@@ -11,7 +11,7 @@ import 'package:sky/rendering/flex.dart';
 import 'package:sky/rendering/sky_binding.dart';
 import 'package:vector_math/vector_math.dart';
 
-import '../lib/solid_color_box.dart';
+import 'solid_color_box.dart';
 
 double timeBase;
 RenderTransform transformBox;

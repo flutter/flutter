@@ -12,7 +12,7 @@ import 'package:sky/rendering/object.dart';
 import 'package:sky/rendering/paragraph.dart';
 import 'package:sky/rendering/sky_binding.dart';
 
-import '../lib/solid_color_box.dart';
+import 'solid_color_box.dart';
 
 // Attempts to draw
 // http://www.w3.org/TR/2015/WD-css-flexbox-1-20150514/images/flex-pack.svg

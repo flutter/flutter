@@ -6,7 +6,7 @@ import 'package:sky/widgets/basic.dart';
 
 class HelloWorldApp extends App {
   Widget build() {
-    return new Text('Hello, widgets!');
+    return new Text('Hello, world!');
   }
 }
 

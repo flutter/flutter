@@ -51,17 +51,12 @@ class SkyDemo extends Component {
 class SkyHome extends App {
   Widget build() {
     List<Widget> children = [
-      new SkyDemo('Stocks App', 'example/stocks2/lib/stock_app.dart'),
+      new SkyDemo('Stocks App', 'example/stocks/lib/main.dart'),
       new SkyDemo('Asteroids Game', 'example/game/main.dart'),
       new SkyDemo('Interactive Flex', 'example/rendering/interactive_flex.dart'),
       new SkyDemo('Sector Layout', 'example/widgets/sector.dart'),
       new SkyDemo('Touch Demo', 'example/rendering/touch_demo.dart'),
       new SkyDemo('Minedigger Game', 'example/mine_digger/lib/main.dart'),
-
-      // TODO(eseidel): We could use to separate these groups?
-      new SkyDemo('Old Stocks App', 'example/stocks/main.sky'),
-      new SkyDemo('Old Touch Demo', 'example/raw/touch-demo.sky'),
-      new SkyDemo('Old Spinning Square', 'example/raw/spinning-square.sky'),
 
       new SkyDemo('Licences (Old)', 'LICENSES.sky'),
     ];

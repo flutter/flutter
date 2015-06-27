@@ -2,92 +2,74 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:math';
-import 'package:sky/framework/fn.dart';
-import 'package:sky/framework/layout.dart';
+import 'dart:math' as math;
+import 'dart:sky' as sky;
+
+import 'package:sky/rendering/box.dart';
+import 'package:sky/rendering/object.dart';
+import 'package:sky/theme/colors.dart' as colors;
+import 'package:sky/widgets/basic.dart';
 
 class StockArrow extends Component {
-  static final Style _style = new Style('''
-    width: 40px;
-    height: 40px;
-    align-items: center;
-    justify-content: center;
-    border-radius: 40px;
-    margin-right: 16px;
-    border: 1px solid transparent;'''
-  );
 
-  static final Style _upStyle = new Style('''
-    width: 0;
-    height: 0;
-    border-left: 9px solid transparent;
-    border-right: 9px solid transparent;
-    margin-bottom: 3px;
-    border-bottom: 9px solid white;'''
-  );
+  StockArrow({ String key, this.percentChange }) : super(key: key);
 
-  static final Style _downStyle = new Style('''
-    width: 0;
-    height: 0;
-    border-left: 9px solid transparent;
-    border-right: 9px solid transparent;
-    margin-top: 3px;
-    border-top: 9px solid white'''
-  );
-
-  double percentChange;
-
-  StockArrow({ Object key, this.percentChange }) : super(key: key);
-
-  // TODO(abarth): These should use sky/framework/theme/colors.dart.
-  final List<String> _kRedColors = [
-    '#E57373',
-    '#EF5350',
-    '#F44336',
-    '#E53935',
-    '#D32F2F',
-    '#C62828',
-    '#B71C1C',
-  ];
-
-  // TODO(abarth): These should use sky/framework/theme/colors.dart.
-  final List<String> _kGreenColors = [
-    '#81C784',
-    '#66BB6A',
-    '#4CAF50',
-    '#43A047',
-    '#388E3C',
-    '#2E7D32',
-    '#1B5E20',
-  ];
+  final double percentChange;
 
   int _colorIndexForPercentChange(double percentChange) {
-    // Currently the max is 10%.
     double maxPercent = 10.0;
-    return max(0, ((percentChange.abs() / maxPercent) * _kGreenColors.length).floor());
+    double normalizedPercentChange = math.min(percentChange.abs(), maxPercent) / maxPercent;
+    return 100 + (normalizedPercentChange * 8.0).floor() * 100;
   }
 
-  String _colorForPercentChange(double percentChange) {
+  Color _colorForPercentChange(double percentChange) {
     if (percentChange > 0)
-      return _kGreenColors[_colorIndexForPercentChange(percentChange)];
-    return _kRedColors[_colorIndexForPercentChange(percentChange)];
+      return colors.Green[_colorIndexForPercentChange(percentChange)];
+    return colors.Red[_colorIndexForPercentChange(percentChange)];
   }
 
-  UINode build() {
-    String border = _colorForPercentChange(percentChange).toString();
-    bool up = percentChange > 0;
-    String type = up ? 'bottom' : 'top';
+  Widget build() {
+    // TODO(jackson): This should change colors with the theme
+    Color color = _colorForPercentChange(percentChange);
+    const double kSize = 40.0;
+    var arrow = new CustomPaint(callback: (sky.Canvas canvas, Size size) {
+      Paint paint = new Paint()..color = color;
+      paint.strokeWidth = 1.0;
+      const double padding = 2.0;
+      assert(padding > paint.strokeWidth / 2.0); // make sure the circle remains inside the box
+      double r = (kSize - padding) / 2.0; // radius of the circle
+      double centerX = padding + r;
+      double centerY = padding + r;
 
-    return new FlexContainer(
-      inlineStyle: 'border-color: $border',
-      direction: FlexDirection.Row,
-      style: _style,
-      children: [
-        new Container(
-          inlineStyle: 'border-$type-color: $border',
-          style: up ? _upStyle : _downStyle
-        )
-      ]
+      // Draw the arrow.
+      double w = 8.0;
+      double h = 5.0;
+      double arrowY;
+      if (percentChange < 0.0) {
+        h = -h;
+        arrowY = centerX + 1.0;
+      } else {
+        arrowY = centerX - 1.0;
+      }
+      Path path = new Path();
+      path.moveTo(centerX, arrowY - h); // top of the arrow
+      path.lineTo(centerX + w, arrowY + h);
+      path.lineTo(centerX - w, arrowY + h);
+      path.close();
+      paint.setStyle(sky.PaintingStyle.fill);
+      canvas.drawPath(path, paint);
+
+      // Draw a circle that circumscribes the arrow.
+      paint.setStyle(sky.PaintingStyle.stroke);
+      canvas.drawCircle(new Point(centerX, centerY), r, paint);
+    });
+
+    return new Container(
+      child: arrow,
+      width: kSize,
+      height: kSize,
+      margin: const EdgeDims.symmetric(horizontal: 5.0)
     );
   }
+
 }

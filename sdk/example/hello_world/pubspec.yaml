@@ -1,3 +1,7 @@
 name: hello_world
+author: Chromium Authors <sky-dev@googlegroups.com>
+description: Hello, world using Sky
+homepage: https://github.com/domokit/sky_sdk/tree/master/packages/sky/example/hello_world
+version: 0.0.1
 dependencies:
- sky: any
+  sky: '>=0.0.10 <1.0.0'

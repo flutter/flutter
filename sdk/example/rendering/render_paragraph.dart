@@ -11,7 +11,7 @@ import 'package:sky/rendering/object.dart';
 import 'package:sky/rendering/paragraph.dart';
 import 'package:sky/rendering/sky_binding.dart';
 
-import '../lib/solid_color_box.dart';
+import 'solid_color_box.dart';
 
 void main() {
   RenderFlex flexRoot = new RenderFlex(direction: FlexDirection.vertical);

@@ -13,8 +13,7 @@ import 'package:sky/widgets/raised_button.dart';
 import 'package:sky/widgets/widget.dart';
 import 'package:vector_math/vector_math.dart';
 
-import '../lib/solid_color_box.dart';
-import '../../tests/resources/display_list.dart';
+import '../rendering/solid_color_box.dart';
 
 // Solid colour, RenderObject version
 void addFlexChildSolidColor(RenderFlex parent, sky.Color backgroundColor, { int flex: 0 }) {
@@ -60,8 +59,6 @@ Widget builder() {
 
 double timeBase;
 RenderTransform transformBox;
-
-final TestRenderView tester = new TestRenderView();
 
 void rotate(double timeStamp) {
   if (timeBase == null)
