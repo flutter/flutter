@@ -18,6 +18,6 @@ public class StocksActivity extends SkyActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        loadUrl("https://domokit.github.io/sky/sdk/lib/example/stocks/index.sky");
+        loadUrl("https://domokit.github.io/sky/sdk/example/stocks/index.sky");
     }
 }
