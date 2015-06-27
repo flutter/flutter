@@ -8,12 +8,9 @@
 #include "base/basictypes.h"
 #include "base/bind.h"
 #include "base/command_line.h"
-#include "base/files/file_path.h"
 #include "base/i18n/icu_util.h"
 #include "base/logging.h"
 #include "base/message_loop/message_loop.h"
-#include "base/threading/worker_pool.h"
-#include "mojo/common/data_pipe_utils.h"
 #include "sky/shell/platform_view.h"
 #include "sky/shell/service_provider.h"
 #include "sky/shell/shell.h"
@@ -24,14 +21,10 @@ namespace sky {
 namespace shell {
 namespace {
 
-void Ignored(bool) {
-}
-
 void Usage() {
   std::cerr << "Usage: sky_shell"
-            << " [--" << switches::kPackageRoot << "]"
-            << " [--" << switches::kSnapshot << "]"
-            << " <sky-app>" << std::endl;
+            << " [MAIN_DART --" << switches::kPackageRoot << "=PACKAGE_ROOT]"
+            << " [--" << switches::kSnapshot << "=SNAPSHOT]" << std::endl;
 }
 
 void Init() {
@@ -46,20 +39,15 @@ void Init() {
 
   base::CommandLine& command_line = *base::CommandLine::ForCurrentProcess();
 
-  std::string main = command_line.GetArgs()[0];
   if (command_line.HasSwitch(switches::kSnapshot)) {
-    base::FilePath snapshot =
-        command_line.GetSwitchValuePath(switches::kSnapshot);
-    mojo::DataPipe pipe;
-    viewport_observer->RunFromSnapshot(main, pipe.consumer_handle.Pass());
-    scoped_refptr<base::TaskRunner> runner =
-        base::WorkerPool::GetTaskRunner(true);
-    mojo::common::CopyFromFile(snapshot, pipe.producer_handle.Pass(), 0,
-                               runner.get(), base::Bind(&Ignored));
+    std::string snapshot =
+        command_line.GetSwitchValueASCII(switches::kSnapshot);
+    viewport_observer->RunFromSnapshot(snapshot);
     return;
   }
 
   if (command_line.HasSwitch(switches::kPackageRoot)) {
+    std::string main = command_line.GetArgs()[0];
     std::string package_root =
         command_line.GetSwitchValueASCII(switches::kPackageRoot);
     viewport_observer->RunFromFile(main, package_root);
@@ -80,8 +68,7 @@ int main(int argc, const char* argv[]) {
 
   base::CommandLine& command_line = *base::CommandLine::ForCurrentProcess();
 
-  if (command_line.HasSwitch(sky::shell::switches::kHelp) ||
-      command_line.GetArgs().empty()) {
+  if (command_line.HasSwitch(sky::shell::switches::kHelp)) {
     sky::shell::Usage();
     return 0;
   }

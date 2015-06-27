@@ -73,8 +73,7 @@ class Engine : public UIDelegate,
   void RunFromNetwork(const mojo::String& url) override;
   void RunFromFile(const mojo::String& main,
                    const mojo::String& package_root) override;
-  void RunFromSnapshot(const mojo::String& url,
-                       mojo::ScopedDataPipeConsumerHandle snapshot) override;
+  void RunFromSnapshot(const mojo::String& path) override;
 
   // WebViewClient methods:
   void frameDetached(blink::WebFrame*) override;

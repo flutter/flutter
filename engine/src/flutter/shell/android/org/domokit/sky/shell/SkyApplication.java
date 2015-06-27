@@ -23,10 +23,12 @@ import org.domokit.oknet.NetworkServiceImpl;
  * state and initializations.
  */
 public class SkyApplication extends BaseChromiumApplication {
+    static final String SNAPSHOT = "snapshot_blob.bin";
+
     private static final String TAG = "SkyApplication";
     private static final String PRIVATE_DATA_DIRECTORY_SUFFIX = "sky_shell";
     private static final String[] SKY_MANDATORY_PAKS = {
-        "icudtl.dat",
+        "icudtl.dat", SNAPSHOT
     };
 
     @Override
@@ -39,7 +41,8 @@ public class SkyApplication extends BaseChromiumApplication {
     }
 
     private void initializeJavaUtils() {
-        PathUtils.setPrivateDataDirectorySuffix(PRIVATE_DATA_DIRECTORY_SUFFIX, getApplicationContext());
+        PathUtils.setPrivateDataDirectorySuffix(PRIVATE_DATA_DIRECTORY_SUFFIX,
+                                                getApplicationContext());
     }
 
     private void initializeNative() {

@@ -5,7 +5,10 @@
 #include "sky/shell/ui/engine.h"
 
 #include "base/bind.h"
+#include "base/files/file_path.h"
+#include "base/threading/worker_pool.h"
 #include "base/trace_event/trace_event.h"
+#include "mojo/common/data_pipe_utils.h"
 #include "mojo/public/cpp/application/connect.h"
 #include "sky/engine/public/platform/WebInputEvent.h"
 #include "sky/engine/public/platform/sky_display_metrics.h"
@@ -28,6 +31,17 @@ namespace sky {
 namespace shell {
 
 namespace {
+
+void Ignored(bool) {
+}
+
+mojo::ScopedDataPipeConsumerHandle Fetch(const base::FilePath& path) {
+  mojo::DataPipe pipe;
+  auto runner = base::WorkerPool::GetTaskRunner(true);
+  mojo::common::CopyFromFile(base::FilePath(path), pipe.producer_handle.Pass(),
+                             0, runner.get(), base::Bind(&Ignored));
+  return pipe.consumer_handle.Pass();
+}
 
 void ConfigureSettings(blink::WebSettings* settings) {
   settings->setDefaultFixedFontSize(13);
@@ -218,11 +232,11 @@ void Engine::RunFromFile(const mojo::String& main,
   RunFromLibrary(main);
 }
 
-void Engine::RunFromSnapshot(const mojo::String& url,
-                             mojo::ScopedDataPipeConsumerHandle snapshot) {
+void Engine::RunFromSnapshot(const mojo::String& path) {
   CloseWebViewIfNeeded();
   sky_view_ = blink::SkyView::Create(this);
-  sky_view_->RunFromSnapshot(blink::WebString::fromUTF8(url), snapshot.Pass());
+  sky_view_->RunFromSnapshot(blink::WebString::fromUTF8(path),
+                             Fetch(base::FilePath(path)));
   UpdateSkyViewSize();
 }
 

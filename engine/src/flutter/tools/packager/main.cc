@@ -31,9 +31,6 @@ void WriteSnapshot(base::FilePath path) {
 
   CHECK_EQ(base::WriteFile(path, reinterpret_cast<const char*>(buffer), size),
            size);
-
-  std::cout << "Successfully wrote snapshot to " << path.LossyDisplayName()
-            << " (" << size << " bytes)." << std::endl;
 }
 
 int main(int argc, const char* argv[]) {
