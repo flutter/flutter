@@ -133,8 +133,12 @@ dart_pkg("sdk") {
   ]
 
   datadeps = [
-    "//sky/services/testing:bindings",
+    "//mojo/dart/mojo_services",
+    "//mojo/dart/mojom",
+    "//mojo/public/dart:mojo",
     "//sky/engine/bindings",
+    "//sky/services/testing:bindings",
+    "//third_party/dart-pkg",
   ]
 
   sdk_ext_directory = "$root_gen_dir/sky/bindings"

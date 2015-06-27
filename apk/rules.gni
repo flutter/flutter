@@ -21,3 +21,79 @@ template("sky_apk") {
            ] + invoker.deps
   }
 }
+
+template("sky_app") {
+  action("gen_snapshot") {
+    main_dart = invoker.main_dart
+    package_root = "$root_gen_dir/dart-pkg/packages"
+
+    # Note: org.chromium.base.ResourceExtractor knows about 'snapshot_blob.bin'.
+    snapshot = "$target_gen_dir/snapshot_blob.bin"
+
+    inputs = [
+      main_dart,
+    ]
+    outputs = [
+      snapshot,
+    ]
+
+    sky_packager_dir =
+        get_label_info("//sky/tools/packager($host_toolchain)", "root_out_dir")
+
+    script = "//sky/tools/sky_packager.py"
+
+    src_dir = "//"
+    cwd = rebase_path(src_dir, root_build_dir)
+
+    args = [
+      rebase_path("$sky_packager_dir/sky_packager", src_dir),
+      rebase_path(main_dart, src_dir),
+      "--package-root",
+      rebase_path(package_root, src_dir),
+      "--snapshot",
+      rebase_path(snapshot, src_dir),
+      "-C",
+      cwd,
+    ]
+
+    deps = [
+      "//sky/tools/packager($host_toolchain)",
+      "//sky/sdk",
+    ]
+  }
+
+  copy_ex("assets") {
+    clear_dir = true
+    dest = "$target_gen_dir/assets"
+
+    sources = [
+      "$root_build_dir/icudtl.dat",
+      "$target_gen_dir/snapshot_blob.bin",
+    ]
+
+    deps = [
+      "//third_party/icu",
+    ]
+  }
+
+  android_apk(target_name) {
+    apk_name = invoker.apk_name
+    android_manifest = "apk/AndroidManifest.xml"
+
+    native_libs = [ "libsky_shell.so" ]
+    asset_location = "$target_gen_dir/assets"
+
+    deps = [
+      "//base:base_java",
+      "//sky/shell:assets",
+      "//sky/shell:java",
+      "//sky/shell:sky_shell",
+      ":assets",
+      ":gen_snapshot",
+    ]
+
+    if (defined(invoker.deps)) {
+      deps += invoker.deps
+    }
+  }
+}

@@ -2,9 +2,6 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-import("//build/config/ui.gni")
-import("//tools/grit/grit_rule.gni")
-
 group("sky") {
   testonly = true
 
@@ -13,6 +10,7 @@ group("sky") {
     "//sky/engine/platform:platform_unittests",
     "//sky/engine/web:sky_unittests",
     "//sky/engine/wtf:unittests",
+    "//sky/sdk/example",
     "//sky/tools/imagediff",
     "//sky/tools/packager($host_toolchain)",
     "//sky/tools/tester",
@@ -33,11 +31,7 @@ group("sky_apk") {
   testonly = true
 
   deps = [
-    "//mojo/dart/mojo_services",
-    "//mojo/dart/mojom",
-    "//mojo/public/dart:mojo",
     "//sky/sdk",
-    "//third_party/dart-pkg",
   ]
 
   if (is_android) {

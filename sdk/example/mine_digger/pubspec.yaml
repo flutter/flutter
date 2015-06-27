@@ -1,0 +1,7 @@
+name: mine_digger
+author: Chromium Authors <sky-dev@googlegroups.com>
+description: Classic minesweeper-inspired game
+homepage: https://github.com/domokit/sky_sdk/tree/master/packages/sky/example/mine_digger
+version: 0.0.1
+dependencies:
+  sky: '>=0.0.10 <1.0.0'

@@ -10,6 +10,10 @@ import android.os.Bundle;
 import android.view.View;
 import android.view.WindowManager;
 
+import org.chromium.base.PathUtils;
+
+import java.io.File;
+
 /**
  * Base class for activities that use Sky.
  */
@@ -36,6 +40,8 @@ public class SkyActivity extends Activity {
         mView = new PlatformViewAndroid(this);
         setContentView(mView);
         mTracingController = new TracingController(this);
+
+        loadSnapshotIfAvailable();
     }
 
     /**
@@ -57,6 +63,13 @@ public class SkyActivity extends Activity {
             return;
         }
         super.onBackPressed();
+    }
+
+    private void loadSnapshotIfAvailable() {
+        File snapshot = new File(PathUtils.getDataDirectory(this), SkyApplication.SNAPSHOT);
+        if (snapshot.exists()) {
+            mView.loadSnapshot(snapshot.getPath());
+        }
     }
 
     public void loadUrl(String url) {
