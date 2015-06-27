@@ -187,7 +187,7 @@ Although it is possible to bundle the Sky Engine in your own app (instead of
 running your code inside SkyDemo.apk), right now doing so is difficult.
 
 There is one example of doing so if you're feeling brave:
-https://github.com/domokit/mojo/tree/master/sky/apk/stocks
+https://github.com/domokit/mojo/tree/master/sky/sdk/example/stocks
 
 Eventually we plan to make this much easier and support platforms other than
 Android, but that work is yet in progress.

@@ -2,15 +2,11 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-group("example") {
-  testonly = true
+assert(is_android)
 
-  deps = []
+import("//sky/apk/rules.gni")
 
-  if (is_android) {
-    deps += [
-      "//sky/sdk/example/mine_digger",
-      "//sky/sdk/example/stocks",
-    ]
-  }
+sky_app("stocks") {
+  apk_name = "Stocks"
+  main_dart = "lib/main.dart"
 }
