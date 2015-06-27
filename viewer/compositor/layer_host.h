@@ -2,17 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef SKY_COMPOSITOR_LAYER_HOST_H_
-#define SKY_COMPOSITOR_LAYER_HOST_H_
+#ifndef SKY_VIEWER_COMPOSITOR_LAYER_HOST_H_
+#define SKY_VIEWER_COMPOSITOR_LAYER_HOST_H_
 
 #include "base/memory/ref_counted.h"
 #include "base/memory/scoped_ptr.h"
 #include "base/memory/weak_ptr.h"
 #include "mojo/gpu/gl_context_owner.h"
 #include "mojo/skia/ganesh_context.h"
-#include "sky/compositor/layer_host_client.h"
-#include "sky/compositor/resource_manager.h"
-#include "sky/compositor/surface_holder.h"
+#include "sky/viewer/compositor/layer_host_client.h"
+#include "sky/viewer/compositor/resource_manager.h"
+#include "sky/viewer/compositor/surface_holder.h"
 
 namespace sky {
 class ResourceManager;
@@ -74,4 +74,4 @@ class LayerHost : public SurfaceHolder::Client {
 
 }  // namespace sky
 
-#endif  // SKY_COMPOSITOR_LAYER_HOST_H_
+#endif  // SKY_VIEWER_COMPOSITOR_LAYER_HOST_H_

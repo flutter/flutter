@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "sky/compositor/layer_client.h"
+#include "sky/viewer/compositor/layer_client.h"
 
 namespace sky {
 

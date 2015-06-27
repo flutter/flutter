@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef SKY_COMPOSITOR_LAYER_CLIENT_H_
-#define SKY_COMPOSITOR_LAYER_CLIENT_H_
+#ifndef SKY_VIEWER_COMPOSITOR_LAYER_CLIENT_H_
+#define SKY_VIEWER_COMPOSITOR_LAYER_CLIENT_H_
 
 class SkCanvas;
 
@@ -23,4 +23,4 @@ class LayerClient {
 
 }  // namespace sky
 
-#endif  // SKY_COMPOSITOR_LAYER_CLIENT_H_
+#endif  // SKY_VIEWER_COMPOSITOR_LAYER_CLIENT_H_

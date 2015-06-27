@@ -2,15 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef SKY_COMPOSITOR_RESOURCE_MANAGER_H_
-#define SKY_COMPOSITOR_RESOURCE_MANAGER_H_
+#ifndef SKY_VIEWER_COMPOSITOR_RESOURCE_MANAGER_H_
+#define SKY_VIEWER_COMPOSITOR_RESOURCE_MANAGER_H_
 
 #include "base/containers/hash_tables.h"
 #include "base/memory/scoped_ptr.h"
 #include "base/memory/scoped_vector.h"
 #include "base/memory/weak_ptr.h"
 #include "mojo/services/surfaces/public/interfaces/surfaces.mojom.h"
-#include "sky/compositor/texture_cache.h"
+#include "sky/viewer/compositor/texture_cache.h"
 
 namespace gfx {
 class Size;
@@ -46,4 +46,4 @@ class ResourceManager {
 
 }  // namespace sky
 
-#endif  // SKY_COMPOSITOR_RESOURCE_MANAGER_H_
+#endif  // SKY_VIEWER_COMPOSITOR_RESOURCE_MANAGER_H_

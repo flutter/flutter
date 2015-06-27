@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "sky/compositor/picture_serializer.h"
+#include "sky/viewer/compositor/picture_serializer.h"
 
 #include "third_party/skia/include/core/SkData.h"
 #include "third_party/skia/include/core/SkPixelSerializer.h"

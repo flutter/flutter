@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "sky/compositor/layer.h"
+#include "sky/viewer/compositor/layer.h"
 
 #include "base/trace_event/trace_event.h"
-#include "sky/compositor/layer_host.h"
-#include "sky/compositor/picture_serializer.h"
-#include "sky/compositor/rasterizer.h"
+#include "sky/viewer/compositor/layer_host.h"
+#include "sky/viewer/compositor/picture_serializer.h"
+#include "sky/viewer/compositor/rasterizer.h"
 #include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/core/SkPictureRecorder.h"
 

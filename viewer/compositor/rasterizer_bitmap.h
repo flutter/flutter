@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef SKY_COMPOSITOR_DISPLAY_RASTERIZER_BITMAP_H_
-#define SKY_COMPOSITOR_DISPLAY_RASTERIZER_BITMAP_H_
+#ifndef SKY_VIEWER_COMPOSITOR_DISPLAY_RASTERIZER_BITMAP_H_
+#define SKY_VIEWER_COMPOSITOR_DISPLAY_RASTERIZER_BITMAP_H_
 
-#include "sky/compositor/rasterizer.h"
+#include "sky/viewer/compositor/rasterizer.h"
 #include "third_party/skia/include/core/SkBitmap.h"
 
 namespace sky {
@@ -28,4 +28,4 @@ class RasterizerBitmap : public Rasterizer {
 
 }  // namespace sky
 
-#endif  // SKY_COMPOSITOR_DISPLAY_RASTERIZER_BITMAP_H_
+#endif  // SKY_VIEWER_COMPOSITOR_DISPLAY_RASTERIZER_BITMAP_H_

@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef SKY_COMPOSITOR_LAYER_H_
-#define SKY_COMPOSITOR_LAYER_H_
+#ifndef SKY_VIEWER_COMPOSITOR_LAYER_H_
+#define SKY_VIEWER_COMPOSITOR_LAYER_H_
 
 #include "base/memory/ref_counted.h"
 #include "mojo/gpu/gl_texture.h"
 #include "skia/ext/refptr.h"
-#include "sky/compositor/layer_client.h"
-#include "sky/compositor/rasterizer.h"
+#include "sky/viewer/compositor/layer_client.h"
+#include "sky/viewer/compositor/rasterizer.h"
 #include "third_party/skia/include/core/SkPicture.h"
 #include "ui/gfx/geometry/rect.h"
 
@@ -48,4 +48,4 @@ class Layer : public base::RefCounted<Layer> {
 
 }  // namespace sky
 
-#endif  // SKY_COMPOSITOR_LAYER_H_
+#endif  // SKY_VIEWER_COMPOSITOR_LAYER_H_

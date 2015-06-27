@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "sky/compositor/resource_manager.h"
+#include "sky/viewer/compositor/resource_manager.h"
 
 #ifndef GL_GLEXT_PROTOTYPES
 #define GL_GLEXT_PROTOTYPES
@@ -16,7 +16,7 @@
 #include "mojo/gpu/gl_context.h"
 #include "mojo/gpu/gl_texture.h"
 #include "mojo/public/c/gles2/gles2.h"
-#include "sky/compositor/layer.h"
+#include "sky/viewer/compositor/layer.h"
 
 namespace sky {
 

@@ -2,11 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "sky/compositor/rasterizer_ganesh.h"
+#include "sky/viewer/compositor/rasterizer_ganesh.h"
 
 #include "base/trace_event/trace_event.h"
 #include "mojo/skia/ganesh_surface.h"
-#include "sky/compositor/layer_host.h"
+#include "sky/viewer/compositor/layer_host.h"
 #include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/core/SkPicture.h"
 

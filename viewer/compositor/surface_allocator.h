@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef SKY_COMPOSITOR_SURFACE_ALLOCATOR_H_
-#define SKY_COMPOSITOR_SURFACE_ALLOCATOR_H_
+#ifndef SKY_VIEWER_COMPOSITOR_SURFACE_ALLOCATOR_H_
+#define SKY_VIEWER_COMPOSITOR_SURFACE_ALLOCATOR_H_
 
 #include "base/basictypes.h"
 #include "mojo/services/surfaces/public/interfaces/surface_id.mojom.h"
@@ -26,4 +26,4 @@ class SurfaceAllocator {
 
 }  // namespace sky
 
-#endif  // SKY_COMPOSITOR_SURFACE_ALLOCATOR_H_
+#endif  // SKY_VIEWER_COMPOSITOR_SURFACE_ALLOCATOR_H_

@@ -19,14 +19,14 @@
 #include "mojo/services/view_manager/public/cpp/view_manager_client_factory.h"
 #include "mojo/services/view_manager/public/cpp/view_manager_delegate.h"
 #include "mojo/services/view_manager/public/cpp/view_observer.h"
-#include "sky/compositor/layer_client.h"
-#include "sky/compositor/layer_host_client.h"
 #include "sky/engine/public/platform/ServiceProvider.h"
 #include "sky/engine/public/sky/sky_view.h"
 #include "sky/engine/public/sky/sky_view_client.h"
 #include "sky/engine/public/web/WebFrameClient.h"
 #include "sky/engine/public/web/WebViewClient.h"
 #include "sky/services/testing/test_harness.mojom.h"
+#include "sky/viewer/compositor/layer_client.h"
+#include "sky/viewer/compositor/layer_host_client.h"
 #include "ui/events/gestures/gesture_types.h"
 
 namespace mojo {

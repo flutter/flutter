@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "sky/compositor/surface_holder.h"
+#include "sky/viewer/compositor/surface_holder.h"
 
 #include "base/bind.h"
 #include "base/message_loop/message_loop.h"
 #include "mojo/converters/geometry/geometry_type_converters.h"
 #include "mojo/public/cpp/application/connect.h"
 #include "mojo/public/interfaces/application/shell.mojom.h"
-#include "sky/compositor/surface_allocator.h"
+#include "sky/viewer/compositor/surface_allocator.h"
 
 namespace sky {
 

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "sky/compositor/texture_cache.h"
+#include "sky/viewer/compositor/texture_cache.h"
 
 #include "mojo/converters/geometry/geometry_type_converters.h"
 #include "mojo/gpu/gl_texture.h"

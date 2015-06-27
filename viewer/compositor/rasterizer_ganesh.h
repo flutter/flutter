@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef SKY_COMPOSITOR_DISPLAY_RASTERIZER_GANESH_H_
-#define SKY_COMPOSITOR_DISPLAY_RASTERIZER_GANESH_H_
+#ifndef SKY_VIEWER_COMPOSITOR_DISPLAY_RASTERIZER_GANESH_H_
+#define SKY_VIEWER_COMPOSITOR_DISPLAY_RASTERIZER_GANESH_H_
 
-#include "sky/compositor/rasterizer.h"
+#include "sky/viewer/compositor/rasterizer.h"
 
 namespace sky {
 class LayerHost;
@@ -25,4 +25,4 @@ class RasterizerGanesh : public Rasterizer {
 
 }  // namespace sky
 
-#endif  // SKY_COMPOSITOR_DISPLAY_RASTERIZER_GANESH_H_
+#endif  // SKY_VIEWER_COMPOSITOR_DISPLAY_RASTERIZER_GANESH_H_

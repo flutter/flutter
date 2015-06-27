@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef SKY_COMPOSITOR_TEXTURE_CACHE_H_
-#define SKY_COMPOSITOR_TEXTURE_CACHE_H_
+#ifndef SKY_VIEWER_COMPOSITOR_TEXTURE_CACHE_H_
+#define SKY_VIEWER_COMPOSITOR_TEXTURE_CACHE_H_
 
 #include "base/memory/scoped_ptr.h"
 #include "base/memory/scoped_vector.h"
@@ -32,4 +32,4 @@ class TextureCache {
 
 }  // namespace sky
 
-#endif  // SKY_COMPOSITOR_TEXTURE_CACHE_H_
+#endif  // SKY_VIEWER_COMPOSITOR_TEXTURE_CACHE_H_

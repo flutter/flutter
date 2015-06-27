@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "sky/compositor/layer_host.h"
+#include "sky/viewer/compositor/layer_host.h"
 
 #include "base/message_loop/message_loop.h"
 #include "base/trace_event/trace_event.h"
@@ -10,7 +10,7 @@
 #include "mojo/gpu/gl_context.h"
 #include "mojo/services/surfaces/public/cpp/surfaces_utils.h"
 #include "mojo/skia/ganesh_context.h"
-#include "sky/compositor/layer.h"
+#include "sky/viewer/compositor/layer.h"
 
 namespace sky {
 

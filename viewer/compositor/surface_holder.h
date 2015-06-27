@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef SKY_COMPOSITOR_SURFACE_HOLDER_H_
-#define SKY_COMPOSITOR_SURFACE_HOLDER_H_
+#ifndef SKY_VIEWER_COMPOSITOR_SURFACE_HOLDER_H_
+#define SKY_VIEWER_COMPOSITOR_SURFACE_HOLDER_H_
 
 #include "base/callback_forward.h"
 #include "base/memory/scoped_ptr.h"
@@ -59,4 +59,4 @@ class SurfaceHolder : public mojo::ResourceReturner {
 
 }  // namespace sky
 
-#endif  // SKY_COMPOSITOR_SURFACE_HOLDER_H_
+#endif  // SKY_VIEWER_COMPOSITOR_SURFACE_HOLDER_H_
