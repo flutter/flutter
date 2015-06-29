@@ -16,7 +16,7 @@ import '../rendering/stack.dart';
 import 'default_text_style.dart';
 import 'widget.dart';
 
-export '../rendering/box.dart' show BoxConstraints, BoxDecoration, Border, BorderSide, EdgeDims;
+export '../rendering/box.dart' show BackgroundImage, BoxConstraints, BoxDecoration, Border, BorderSide, EdgeDims;
 export '../rendering/flex.dart' show FlexDirection, FlexJustifyContent, FlexAlignItems;
 export '../rendering/object.dart' show Point, Offset, Size, Rect, Color, Paint, Path;
 export 'widget.dart' show Widget, Component, App, runApp, Listener, ParentDataNode;

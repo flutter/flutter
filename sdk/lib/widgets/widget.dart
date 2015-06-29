@@ -279,6 +279,7 @@ typedef void EventListener(sky.Event e);
 class Listener extends TagNode  {
 
   Listener({
+    String key,
     Widget child,
     EventListener onWheel,
     GestureEventListener onGestureFlingCancel,
@@ -306,7 +307,7 @@ class Listener extends TagNode  {
          onPointerUp: onPointerUp,
          custom: custom
        ),
-       super(child);
+       super(child, key: key);
 
   final Map<String, sky.EventListener> listeners;
 

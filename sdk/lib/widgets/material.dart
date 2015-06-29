@@ -10,6 +10,8 @@ import 'basic.dart';
 import 'default_text_style.dart';
 import 'theme.dart';
 
+export '../theme/edges.dart' show MaterialEdge;
+
 class Material extends Component {
 
   Material({

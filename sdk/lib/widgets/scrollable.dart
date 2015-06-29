@@ -8,7 +8,6 @@ import 'dart:sky' as sky;
 import '../animation/generators.dart';
 import '../animation/mechanics.dart';
 import '../animation/scroll_behavior.dart';
-import '../theme/edges.dart';
 import '../theme/view_configuration.dart' as config;
 import 'basic.dart';
 import 'material.dart';

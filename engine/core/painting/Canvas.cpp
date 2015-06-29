@@ -109,14 +109,14 @@ void Canvas::clipRRect(const RRect* rrect)
 {
     if (!m_canvas)
         return;
-    m_canvas->clipRRect(rrect->rrect());
+    m_canvas->clipRRect(rrect->rrect(), SkRegion::kIntersect_Op, true);
 }
 
 void Canvas::clipPath(const CanvasPath* path)
 {
     if (!m_canvas)
         return;
-    m_canvas->clipPath(path->path());
+    m_canvas->clipPath(path->path(), SkRegion::kIntersect_Op, true);
 }
 
 void Canvas::drawLine(const Point& p1, const Point& p2, const Paint* paint)

@@ -966,6 +966,10 @@ class RenderDecoratedBox extends RenderProxyBox {
   BoxDecoration get decoration => _painter.decoration;
   void set decoration (BoxDecoration value) {
     assert(value != null);
+    if (_painter.decoration.backgroundImage != null)
+      _painter.decoration.backgroundImage.removeChangeListener(markNeedsPaint);
+    if (value.backgroundImage != null)
+      value.backgroundImage.addChangeListener(markNeedsPaint);
     if (value == _painter.decoration)
       return;
     _painter.decoration = value;

@@ -6,7 +6,7 @@ import '../theme/theme_data.dart';
 import 'basic.dart';
 import 'widget.dart';
 
-export '../theme/theme_data.dart' show ThemeBrightness;
+export '../theme/theme_data.dart' show ThemeData, ThemeBrightness;
 
 class Theme extends Inherited {
 
