@@ -7,8 +7,13 @@ part of cassowary;
 class Param extends _EquationMember {
   final Variable variable;
 
-  Param.withVariable(this.variable);
-  Param([double value = 0.0]) : this.variable = new Variable(value);
+  Param.withVariable(this.variable) {
+    variable._owner = this;
+  }
+
+  Param([double value = 0.0]) : this.variable = new Variable(value) {
+    variable._owner = this;
+  }
 
   bool get isConstant => false;
 

@@ -168,16 +168,20 @@ class Solver {
     return _dualOptimize();
   }
 
-  void flushVariableUpdates() {
+  List<Param> flushParameterUpdates() {
+    List<Param> updates = new List<Param>();
+
     for (Variable variable in _vars.keys) {
       _Symbol symbol = _vars[variable];
       _Row row = _rows[symbol];
-      if (row == null) {
-        variable.value = 0.0;
-      } else {
-        variable.value = row.constant;
+
+      double updatedValue = row == null ? 0.0 : row.constant;
+
+      if (variable._applyUpdate(updatedValue) && variable._owner != null) {
+        updates.add(variable._owner);
       }
     }
+    return updates;
   }
 
   _Symbol _symbolForVariable(Variable variable) {

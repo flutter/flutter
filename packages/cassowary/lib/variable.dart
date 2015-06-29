@@ -8,12 +8,18 @@ class Variable {
   double value = 0.0;
   String name;
 
+  Param _owner;
+
   int _tick;
   static int _total = 0;
 
   Variable(this.value) : _tick = _total++;
 
-  // TODO(csg): Add external variable update callbacks here
+  bool _applyUpdate(double updated) {
+    bool res = updated != value;
+    value = updated;
+    return res;
+  }
 
   String get debugName => _elvis(name, "variable${_tick}");
 

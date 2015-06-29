@@ -427,7 +427,7 @@ void main() {
     var left = new Param(-20.0);
     Solver s = new Solver();
     s.addConstraint(left >= CM(0.0));
-    s.flushVariableUpdates();
+    s.flushParameterUpdates();
     expect(left.value, 0.0);
   });
 
@@ -443,7 +443,7 @@ void main() {
     expect(s.addConstraint(right - left >= CM(100.0)), Result.success);
     expect(s.addConstraint(left >= CM(0.0)), Result.success);
 
-    s.flushVariableUpdates();
+    s.flushParameterUpdates();
 
     expect(left.value, 0.0);
     expect(mid.value, 50.0);
@@ -484,7 +484,7 @@ void main() {
     expect(s.addEditVariable(mid.variable, Priority.strong), Result.success);
     expect(s.suggestValueForVariable(mid.variable, 300.0), Result.success);
 
-    s.flushVariableUpdates();
+    s.flushParameterUpdates();
 
     expect(left.value, 0.0);
     expect(mid.value, 300.0);
@@ -494,10 +494,14 @@ void main() {
   test('test_description', () {
     var left = new Param(0.0);
     var right = new Param(100.0);
-    var c = right >= left;
+    var c1 = right >= left;
+    var c2 = right <= left;
+    var c3 = (right == left) as Constraint;
 
     Solver s = new Solver();
-    expect(s.addConstraint(c), Result.success);
+    expect(s.addConstraint(c1), Result.success);
+    expect(s.addConstraint(c2), Result.success);
+    expect(s.addConstraint(c3), Result.success);
 
     expect(s.toString() != null, true);
   });
@@ -519,12 +523,37 @@ void main() {
     solver.addConstraint((p2 == CM(2.0) * p1) as Constraint);
     solver.addConstraint((container == (p1 + p2 + p3)) as Constraint);
 
-    solver.flushVariableUpdates();
+    solver.flushParameterUpdates();
 
     expect(container.value, 100.0);
 
     expect(p1.value, 30.0);
     expect(p2.value, 60.0);
     expect(p3.value, 10.0);
+  });
+
+  test('test_updates_collection', () {
+    Param left = new Param();
+    Param mid = new Param();
+    Param right = new Param();
+
+    Solver s = new Solver();
+
+    expect(s.addEditVariable(mid.variable, Priority.strong), Result.success);
+
+    expect(s.addConstraint((mid * CM(2.0) == left + right) as Constraint),
+        Result.success);
+    expect(s.addConstraint(left >= CM(0.0)), Result.success);
+
+    expect(s.suggestValueForVariable(mid.variable, 50.0), Result.success);
+
+    var updates = s.flushParameterUpdates();
+
+    expect(updates.length, 2);
+    expect(updates[0] is Param, true);
+
+    expect(left.value, 0.0);
+    expect(mid.value, 50.0);
+    expect(right.value, 100.0);
   });
 }
