@@ -3,17 +3,36 @@
 // found in the LICENSE file.
 
 #include "base/bind.h"
-#include "base/trace_event/trace_event.h"
-#include "mojo/public/cpp/bindings/interface_request.h"
+#include "base/bind_helpers.h"
+#include "base/lazy_instance.h"
+#include "base/location.h"
+#include "base/single_thread_task_runner.h"
+#include "mojo/public/cpp/application/service_provider_impl.h"
 #include "sky/shell/service_provider.h"
+#include "sky/shell/testing/test_runner.h"
 
 namespace sky {
 namespace shell {
+namespace {
+
+base::LazyInstance<scoped_ptr<mojo::ServiceProviderImpl>> g_service_provider =
+    LAZY_INSTANCE_INITIALIZER;
+
+static void CreateServiceProviderImpl(
+    mojo::InterfaceRequest<mojo::ServiceProvider> request) {
+  g_service_provider.Get().reset(new mojo::ServiceProviderImpl(request.Pass()));
+  g_service_provider.Get()->AddService(&TestRunner::Shared());
+}
+
+}  // namespace
 
 mojo::ServiceProviderPtr CreateServiceProvider(
     ServiceProviderContext* context) {
+  DCHECK(context);
   mojo::MessagePipe pipe;
-  // TODO(abarth): Wire pipe.handle1 up to something.
+  auto request = mojo::MakeRequest<mojo::ServiceProvider>(pipe.handle1.Pass());
+  context->platform_task_runner->PostTask(
+      FROM_HERE, base::Bind(CreateServiceProviderImpl, base::Passed(&request)));
   return mojo::MakeProxy(
       mojo::InterfacePtrInfo<mojo::ServiceProvider>(pipe.handle0.Pass(), 0u));
 }
