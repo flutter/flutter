@@ -6,21 +6,21 @@ PAINT FOR FRAME #1 ----------------------------------------------
 1 |  | TestRenderCanvas() constructor: 800.0 x 600.0
 1 |  | paintChild RenderSectorRing at Point(400.0, 300.0)
 1 |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
-1 |  |  | paintChild RenderSolidColor at Point(0.0, 0.0)
+1 |  |  | paintChild RenderSolidColor at Point(400.0, 300.0)
 1 |  |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
 1 |  |  |  | drawPath(Instance of 'Path', Paint(color:Color(0xff00ffff)))
-1 |  |  | paintChild RenderSolidColor at Point(0.0, 0.0)
+1 |  |  | paintChild RenderSolidColor at Point(400.0, 300.0)
 1 |  |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
 1 |  |  |  | drawPath(Instance of 'Path', Paint(color:Color(0xff0000ff)))
-1 |  |  | paintChild RenderSectorSlice at Point(0.0, 0.0)
+1 |  |  | paintChild RenderSectorSlice at Point(400.0, 300.0)
 1 |  |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
-1 |  |  |  | paintChild RenderSolidColor at Point(0.0, 0.0)
+1 |  |  |  | paintChild RenderSolidColor at Point(400.0, 300.0)
 1 |  |  |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
 1 |  |  |  |  | drawPath(Instance of 'Path', Paint(color:Color(0xffffff00)))
-1 |  |  |  | paintChild RenderSolidColor at Point(0.0, 0.0)
+1 |  |  |  | paintChild RenderSolidColor at Point(400.0, 300.0)
 1 |  |  |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
 1 |  |  |  |  | drawPath(Instance of 'Path', Paint(color:Color(0xffff9000)))
-1 |  |  |  | paintChild RenderSolidColor at Point(0.0, 0.0)
+1 |  |  |  | paintChild RenderSolidColor at Point(400.0, 300.0)
 1 |  |  |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
 1 |  |  |  |  | drawPath(Instance of 'Path', Paint(color:Color(0xff00ff00)))
 ------------------------------------------------------------------------
