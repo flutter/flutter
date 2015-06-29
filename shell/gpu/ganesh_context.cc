@@ -36,6 +36,7 @@ GaneshContext::GaneshContext(scoped_refptr<gfx::GLContext> gl_context)
 }
 
 GaneshContext::~GaneshContext() {
+  gr_context_->abandonContext();
 }
 
 }  // namespace shell
