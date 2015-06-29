@@ -512,6 +512,8 @@ Set<Component> _dirtyComponents = new Set<Component>();
 bool _buildScheduled = false;
 bool _inRenderDirtyComponents = false;
 
+List<int> _debugFrameTimes = <int>[];
+
 void _buildDirtyComponents() {
   Stopwatch sw;
   if (_shouldLogRenderDuration)
@@ -538,7 +540,13 @@ void _buildDirtyComponents() {
 
   if (_shouldLogRenderDuration) {
     sw.stop();
-    print('Render took ${sw.elapsedMicroseconds} microseconds');
+    _debugFrameTimes.add(sw.elapsedMicroseconds);
+    if (_debugFrameTimes.length >= 1000) {
+      _debugFrameTimes.sort();
+      const int i = 99;
+      print('_buildDirtyComponents: ${i+1}th fastest frame out of the last ${_debugFrameTimes.length}: ${_debugFrameTimes[i]} microseconds');
+      _debugFrameTimes.clear();
+    }
   }
 }
 

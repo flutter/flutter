@@ -85,11 +85,5 @@ class StocksApp extends App {
 }
 
 void main() {
-  print("starting stocks app!");
-  runApp(new StocksApp(), enableProfilingLoop: true);
-  // set enableProfilingLoop to true to make the app rebuild continually every 20ms
-  SkyBinding.instance.onFrame = () {
-    // uncomment this to print the RenderObject tree every frame:
-    // SkyBinding.instance.debugDumpRenderTree();
-  };
+  runApp(new StocksApp());
 }
