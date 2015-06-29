@@ -1,7 +1,0 @@
-CONSOLE: unittest-suite-wait-for-done
-CONSOLE: PASS: should allow sheets to apply when they match
-CONSOLE: PASS: should cause sheets to be skipped when they do not match
-CONSOLE: 
-CONSOLE: All 2 tests passed.
-CONSOLE: unittest-suite-success
-DONE
