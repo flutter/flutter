@@ -222,54 +222,8 @@ class ParentDataNode extends TagNode {
   final ParentData parentData;
 }
 
-abstract class _Heir implements Widget {
-  Map<Type, Inherited> _traits;
-  Inherited inheritedOfType(Type type) => _traits == null ? null : _traits[type];
-
-  static _Heir _getHeirAncestor(Widget widget) {
-    Widget ancestor = widget;
-    while (ancestor != null && !(ancestor is _Heir)) {
-      ancestor = ancestor.parent;
-    }
-    return ancestor as _Heir;
-  }
-
-  void _updateTraitsFromParent(Widget parent) {
-    _Heir ancestor = _getHeirAncestor(parent);
-    if (ancestor == null || ancestor._traits == null) return;
-    _updateTraits(ancestor._traits);
-  }
-
-  void _updateTraitsRecursively(Widget widget) {
-    if (widget is _Heir)
-      widget._updateTraits(_traits);
-    else
-      widget.walkChildren(_updateTraitsRecursively);
-  }
-
-  void _updateTraits(Map<Type, Inherited> newTraits) {
-    if (newTraits != _traits) {
-      _traits = newTraits;
-      walkChildren(_updateTraitsRecursively);
-    }
-  }
-}
-
-abstract class Inherited extends TagNode with _Heir {
-  Inherited({ String key, Widget child }) : super._withKey(child, key) {
-    _traits = new Map<Type, Inherited>();
-  }
-
-  void set _traits(Map<Type, Inherited> value) {
-    super._traits = new Map<Type, Inherited>.from(value)
-                                            ..[runtimeType] = this;
-  }
-
-  // TODO(jackson): When Dart supports super in mixins we can move to _Heir
-  void setParent(Widget parent) {
-    _updateTraitsFromParent(parent);
-    super.setParent(parent);
-  }
+abstract class Inherited extends TagNode {
+  Inherited({ String key, Widget child }) : super._withKey(child, key);
 }
 
 typedef void GestureEventListener(sky.GestureEvent e);
@@ -364,7 +318,7 @@ class Listener extends TagNode  {
 
 }
 
-abstract class Component extends Widget with _Heir {
+abstract class Component extends Widget {
 
   Component({ String key, bool stateful })
       : _stateful = stateful != null ? stateful : false,
@@ -386,12 +340,6 @@ abstract class Component extends Widget with _Heir {
     super.didMount();
   }
 
-  // TODO(jackson): When Dart supports super in mixins we can move to _Heir
-  void setParent(Widget parent) {
-    _updateTraitsFromParent(parent);
-    super.setParent(parent);
-  }
-
   void remove() {
     assert(_built != null);
     assert(root != null);
@@ -404,6 +352,13 @@ abstract class Component extends Widget with _Heir {
     assert(_built != null);
     assert(root != null);
     _built.detachRoot();
+  }
+
+  Inherited inheritedOfType(Type targetType) {
+    Widget ancestor = parent;
+    while (ancestor != null && ancestor.runtimeType != targetType)
+      ancestor = ancestor.parent;
+    return ancestor;
   }
 
   bool _retainStatefulNodeIfPossible(Widget old) {
