@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:sky/rendering/sky_binding.dart';
 import 'package:sky/theme/colors.dart' as colors;
 import 'package:sky/theme/theme_data.dart';
 import 'package:sky/widgets/basic.dart';
@@ -61,7 +60,7 @@ class StocksApp extends App {
     });
   }
 
-   Widget build() {
+  Widget build() {
 
     ThemeData theme;
     if (stockMode == StockMode.optimistic) {
@@ -79,7 +78,7 @@ class StocksApp extends App {
 
     return new Theme(
       data: theme,
-       child: new Navigator(_navigationState)
+        child: new Navigator(_navigationState)
      );
    }
 }
