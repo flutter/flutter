@@ -1,77 +1,77 @@
 CONSOLE: TestRenderView enabled
 CONSOLE: 
 PAINT FOR FRAME #1 ----------------------------------------------
-1 | TestRenderCanvas() constructor: 800.0 x 600.0
+1 | TestPaintingCanvas() constructor: 800.0 x 600.0
 ------------------------------------------------------------------------
 CONSOLE: 
 PAINT FOR FRAME #2 ----------------------------------------------
-2 | TestRenderCanvas() constructor: 800.0 x 600.0
+2 | TestPaintingCanvas() constructor: 800.0 x 600.0
 2 | paintChild RenderScaffold at Point(0.0, 0.0)
-2 |  | TestRenderCanvas() constructor: 800.0 x 600.0
+2 |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 2 |  | paintChild RenderDecoratedBox at Point(0.0, 81.0)
-2 |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
+2 |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 2 |  |  | drawRRect(Instance of 'RRect', Paint(color:Color(0xfffafafa)))
 2 |  |  | paintChild RenderTabBar at Point(0.0, 81.0)
-2 |  |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
+2 |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 2 |  |  |  | drawRect(Rect.fromLTRB(0.0, 81.0, 800.0, 155.0), Paint(color:Color(0xff3f51b5)))
 2 |  |  |  | paintChild RenderInkWell at Point(0.0, 81.0)
-2 |  |  |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
+2 |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 2 |  |  |  |  | paintChild RenderOpacity at Point(104.83333333333334, 81.0)
-2 |  |  |  |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
+2 |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 2 |  |  |  |  |  | paintChild RenderPadding at Point(121.33333333333334, 93.0)
-2 |  |  |  |  |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 2 |  |  |  |  |  |  | paintChild RenderImage at Point(121.33333333333334, 93.0)
-2 |  |  |  |  |  |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 2 |  |  |  |  |  | paintChild RenderParagraph at Point(104.83333333333334, 127.0)
-2 |  |  |  |  |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 2 |  |  |  |  |  |  | translate(104.83333333333334, 127.0)
 2 |  |  |  |  |  |  | translate(-104.83333333333334, -127.0)
 2 |  |  |  | drawRect(Rect.fromLTRB(0.0, 153.0, 266.6666564941406, 155.0), Paint(color:Color(0xffff4081)))
 2 |  |  |  | paintChild RenderInkWell at Point(266.6666666666667, 81.0)
-2 |  |  |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
+2 |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 2 |  |  |  |  | paintChild RenderOpacity at Point(360.0, 81.0)
-2 |  |  |  |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
+2 |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 2 |  |  |  |  |  | saveLayer(null, Paint(color:Color(0xb3000000)))
 2 |  |  |  |  |  | paintChild RenderPadding at Point(388.0, 93.0)
-2 |  |  |  |  |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 2 |  |  |  |  |  |  | paintChild RenderImage at Point(388.0, 93.0)
-2 |  |  |  |  |  |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 2 |  |  |  |  |  | paintChild RenderParagraph at Point(360.0, 127.0)
-2 |  |  |  |  |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 2 |  |  |  |  |  |  | translate(360.0, 127.0)
 2 |  |  |  |  |  |  | translate(-360.0, -127.0)
 2 |  |  |  |  |  | restore
 2 |  |  |  | paintChild RenderInkWell at Point(533.3333333333334, 81.0)
-2 |  |  |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
+2 |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 2 |  |  |  |  | paintChild RenderOpacity at Point(630.6666666666667, 81.0)
-2 |  |  |  |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
+2 |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 2 |  |  |  |  |  | saveLayer(null, Paint(color:Color(0xb3000000)))
 2 |  |  |  |  |  | paintChild RenderPadding at Point(654.6666666666667, 93.0)
-2 |  |  |  |  |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 2 |  |  |  |  |  |  | paintChild RenderImage at Point(654.6666666666667, 93.0)
-2 |  |  |  |  |  |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 2 |  |  |  |  |  | paintChild RenderParagraph at Point(630.6666666666667, 127.0)
-2 |  |  |  |  |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 2 |  |  |  |  |  |  | translate(630.6666666666667, 127.0)
 2 |  |  |  |  |  |  | translate(-630.6666666666667, -127.0)
 2 |  |  |  |  |  | restore
 2 |  |  | paintChild RenderPositionedBox at Point(310.0, 155.0)
-2 |  |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
+2 |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 2 |  |  |  | paintChild RenderParagraph at Point(310.0, 349.5)
-2 |  |  |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
+2 |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 2 |  |  |  |  | translate(310.0, 349.5)
 2 |  |  |  |  | translate(-310.0, -349.5)
 2 |  | paintChild RenderDecoratedBox at Point(0.0, 0.0)
-2 |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
+2 |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 2 |  |  | drawRect(Rect.fromLTRB(0.0, 0.0, 800.0, 81.0), Paint(color:Color(0xff3f51b5), drawLooper:true))
 2 |  |  | paintChild RenderFlex at Point(8.0, 0.0)
-2 |  |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
+2 |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 2 |  |  |  | paintChild RenderConstrainedBox at Point(8.0, 25.0)
-2 |  |  |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
+2 |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 2 |  |  |  |  | paintChild RenderPadding at Point(8.0, 41.0)
-2 |  |  |  |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
+2 |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 2 |  |  |  |  |  | paintChild RenderParagraph at Point(32.0, 41.0)
-2 |  |  |  |  |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 2 |  |  |  |  |  |  | translate(32.0, 41.0)
 2 |  |  |  |  |  |  | translate(-32.0, -41.0)
 ------------------------------------------------------------------------

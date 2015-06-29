@@ -2,35 +2,35 @@ CONSOLE: unittest-suite-wait-for-done
 CONSOLE: TestRenderView enabled
 CONSOLE: 
 PAINT FOR FRAME #1 ----------------------------------------------
-1 | TestRenderCanvas() constructor: 800.0 x 600.0
+1 | TestPaintingCanvas() constructor: 800.0 x 600.0
 1 | paintChild RenderDecoratedBox at Point(0.0, 0.0)
-1 |  | TestRenderCanvas() constructor: 800.0 x 600.0
+1 |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 1 |  | drawRect(Rect.fromLTRB(0.0, 0.0, 800.0, 600.0), Paint(color:Color(0xff000000)))
 1 |  | paintChild RenderSolidColor at Point(0.0, 0.0)
-1 |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
+1 |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 1 |  |  | drawRect(Rect.fromLTRB(0.0, 0.0, 800.0, 82.5), Paint(color:Color(0xffffff00)))
 1 |  | paintChild RenderSolidColor at Point(350.0, 82.5)
-1 |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
+1 |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 1 |  |  | drawRect(Rect.fromLTRB(350.0, 82.5, 450.0, 182.5), Paint(color:Color(0x7700ffff)))
 1 |  | paintChild RenderPadding at Point(0.0, 182.5)
-1 |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
+1 |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 1 |  |  | paintChild RenderDecoratedBox at Point(10.0, 192.5)
-1 |  |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
+1 |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 1 |  |  |  | drawRect(Rect.fromLTRB(10.0, 192.5, 790.0, 342.5), Paint(color:Color(0xffffffff)))
 1 |  |  |  | paintChild RenderSolidColor at Point(10.0, 192.5)
-1 |  |  |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
+1 |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 1 |  |  |  |  | drawRect(Rect.fromLTRB(10.0, 192.5, 790.0, 242.5), Paint(color:Color(0xff00ff00)))
 1 |  |  |  | paintChild RenderSolidColor at Point(10.0, 242.5)
-1 |  |  |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
+1 |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 1 |  |  |  |  | drawRect(Rect.fromLTRB(10.0, 242.5, 790.0, 342.5), Paint(color:Color(0x7700ffff)))
 1 |  | paintChild RenderDecoratedBox at Point(0.0, 352.5)
-1 |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
+1 |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 1 |  |  | drawRect(Rect.fromLTRB(0.0, 352.5, 800.0, 600.0), Paint(color:Color(0xff333333)))
 1 |  |  | paintChild RenderSolidColor at Point(0.0, 352.5)
-1 |  |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
+1 |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 1 |  |  |  | drawRect(Rect.fromLTRB(0.0, 352.5, 266.6666564941406, 600.0), Paint(color:Color(0x77ff00ff)))
 1 |  |  | paintChild RenderSolidColor at Point(266.6666666666667, 352.5)
-1 |  |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
+1 |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 1 |  |  |  | drawRect(Rect.fromLTRB(266.6666564941406, 352.5, 800.0, 600.0), Paint(color:Color(0xff0000ff)))
 ------------------------------------------------------------------------
 CONSOLE: PASS: should flex

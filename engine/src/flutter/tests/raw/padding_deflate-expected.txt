@@ -2,11 +2,11 @@ CONSOLE: unittest-suite-wait-for-done
 CONSOLE: TestRenderView enabled
 CONSOLE: 
 PAINT FOR FRAME #1 ----------------------------------------------
-1 | TestRenderCanvas() constructor: 800.0 x 600.0
+1 | TestPaintingCanvas() constructor: 800.0 x 600.0
 1 | paintChild RenderDecoratedBox at Point(0.0, 0.0)
-1 |  | TestRenderCanvas() constructor: 800.0 x 600.0
+1 |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 1 |  | paintChild RenderDecoratedBox at Point(10.0, 10.0)
-1 |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
+1 |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 ------------------------------------------------------------------------
 CONSOLE: PASS: should not have a 0 sized colored Box
 CONSOLE: 
