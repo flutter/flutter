@@ -46,7 +46,7 @@ abstract class Widget {
   bool _wasMounted = false;
   bool get mounted => _mounted;
   static bool _notifyingMountStatus = false;
-  static Set<Widget> _mountedChanged = new HashSet<Widget>();
+  static List<Widget> _mountedChanged = new List<Widget>();
 
   void setParent(Widget newParent) {
     assert(!_notifyingMountStatus);
@@ -141,23 +141,21 @@ abstract class Widget {
       return null;
     }
 
-    if (oldNode != null &&
-        oldNode.runtimeType == node.runtimeType &&
-        oldNode.key == node.key &&
-        node._retainStatefulNodeIfPossible(oldNode)) {
-      assert(oldNode.mounted);
-      assert(!node.mounted);
-      oldNode._sync(node, slot);
-      assert(oldNode.root is RenderObject);
-      return oldNode;
-    }
-
-    if (oldNode != null &&
-        (oldNode.runtimeType != node.runtimeType || oldNode.key != node.key)) {
-      assert(oldNode.mounted);
-      oldNode.detachRoot();
-      removeChild(oldNode);
-      oldNode = null;
+    if (oldNode != null) {
+      if (oldNode.runtimeType == node.runtimeType && oldNode.key == node.key) {
+        if (node._retainStatefulNodeIfPossible(oldNode)) {
+          assert(oldNode.mounted);
+          assert(!node.mounted);
+          oldNode._sync(node, slot);
+          assert(oldNode.root is RenderObject);
+          return oldNode;
+        }
+      } else {
+        assert(oldNode.mounted);
+        oldNode.detachRoot();
+        removeChild(oldNode);
+        oldNode = null;
+      }
     }
 
     assert(!node.mounted);
