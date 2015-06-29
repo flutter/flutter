@@ -181,9 +181,14 @@ if (is_android) {
       "linux/main.cc",
       "linux/platform_service_provider_linux.cc",
       "linux/platform_view_linux.cc",
+      "testing/test_runner.cc",
+      "testing/test_runner.h",
     ]
 
-    deps = common_deps + [ ":common" ]
+    deps = common_deps + [
+             ":common",
+             "//sky/services/testing",
+           ]
   }
 } else {
   assert(false, "Unsupported platform")

@@ -137,7 +137,7 @@ dart_pkg("sdk") {
     "//mojo/dart/mojom",
     "//mojo/public/dart:mojo",
     "//sky/engine/bindings",
-    "//sky/services/testing:bindings",
+    "//sky/services/testing",
     "//third_party/dart-pkg",
   ]
 

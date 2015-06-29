@@ -4,7 +4,7 @@
 
 import("//mojo/public/tools/bindings/mojom.gni")
 
-mojom("bindings") {
+mojom("testing") {
   sources = [
     "test_harness.mojom",
   ]

@@ -53,7 +53,7 @@ mojo_native_application("viewer") {
     "//sky/engine",
     "//sky/engine/tonic",
     "//sky/services/platform",
-    "//sky/services/testing:bindings",
+    "//sky/services/testing",
     "//sky/shell/dart",
     "//sky/viewer/compositor",
     "//third_party/icu",
