@@ -61,22 +61,35 @@ class StocksApp extends App {
     });
   }
 
-  Widget build() {
-    return new Theme(
-      data: new ThemeData.light(
+   Widget build() {
+
+    ThemeData theme;
+    if (stockMode == StockMode.optimistic) {
+      theme = new ThemeData.light(
         primary: colors.Purple,
         accent: colors.RedAccent,
-        darkToolbar: true),
-      child: new Navigator(_navigationState)
-    );
-  }
+        darkToolbar: true
+      );
+    } else {
+      theme = new ThemeData.dark(
+        primary: colors.Red,
+        accent: colors.PurpleAccent
+      );
+    }
+
+    return new Theme(
+      data: theme,
+       child: new Navigator(_navigationState)
+     );
+   }
 }
 
 void main() {
   print("starting stocks app!");
-  runApp(new StocksApp());
+  runApp(new StocksApp(), enableProfilingLoop: true);
+  // set enableProfilingLoop to true to make the app rebuild continually every 20ms
   SkyBinding.instance.onFrame = () {
-    // uncomment this for debugging:
+    // uncomment this to print the RenderObject tree every frame:
     // SkyBinding.instance.debugDumpRenderTree();
   };
 }

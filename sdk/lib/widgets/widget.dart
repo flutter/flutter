@@ -50,6 +50,8 @@ abstract class Widget {
 
   void setParent(Widget newParent) {
     assert(!_notifyingMountStatus);
+    if (_parent == newParent)
+      return;
     _parent = newParent;
     if (newParent == null) {
       if (_mounted) {
@@ -146,6 +148,7 @@ abstract class Widget {
         if (node._retainStatefulNodeIfPossible(oldNode)) {
           assert(oldNode.mounted);
           assert(!node.mounted);
+          oldNode.setParent(this);
           oldNode._sync(node, slot);
           assert(oldNode.root is RenderObject);
           return oldNode;
@@ -957,9 +960,14 @@ class AppContainer extends AbstractWidgetRoot {
   Widget build() => new RenderViewWrapper(child: app);
 }
 
-void runApp(App app, { RenderView renderViewOverride }) {
+void runApp(App app, { RenderView renderViewOverride, bool enableProfilingLoop: false }) {
   WidgetSkyBinding.initWidgetSkyBinding(renderViewOverride: renderViewOverride);
   new AppContainer(app);
+  if (enableProfilingLoop) {
+    new Timer.periodic(const Duration(milliseconds: 20), (_) {
+      app.scheduleBuild();
+    });
+  }
 }
 
 typedef Widget Builder();
