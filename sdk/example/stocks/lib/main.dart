@@ -20,11 +20,11 @@ class StocksApp extends App {
     _navigationState = new NavigationState([
       new Route(
         name: '/', 
-        builder: (navigator, route) => new StockHome(navigator, _stocks, stockMode, modeUpdater)
+        builder: (navigator, route) => new StockHome(navigator, _stocks, optimismSetting, modeUpdater)
       ),
       new Route(
         name: '/settings',
-        builder: (navigator, route) => new StockSettings(navigator, stockMode, settingsUpdater)
+        builder: (navigator, route) => new StockSettings(navigator, optimismSetting, backupSetting, settingsUpdater)
       ),
     ]);
   }
@@ -36,16 +36,19 @@ class StocksApp extends App {
     // TODO(jackson): Need a way to invoke default back behavior here
   }
 
-  StockMode stockMode = StockMode.optimistic;
-  void modeUpdater(StockMode value) {
+  StockMode optimismSetting = StockMode.optimistic;
+  BackupMode backupSetting = BackupMode.disabled;
+  void modeUpdater(StockMode optimism) {
     setState(() {
-      stockMode = value;
+      optimismSetting = optimism;
     });
   }
-  void settingsUpdater({StockMode mode}) {
+  void settingsUpdater({ StockMode optimism, BackupMode backup }) {
     setState(() {
-      if (mode != null)
-        stockMode = mode;
+      if (optimism != null)
+        optimismSetting = optimism;
+      if (backup != null)
+        backupSetting = backup;
     });
   }
 
@@ -62,7 +65,7 @@ class StocksApp extends App {
   Widget build() {
 
     ThemeData theme;
-    if (stockMode == StockMode.optimistic) {
+    if (optimismSetting == StockMode.optimistic) {
       theme = new ThemeData.light(
         primary: colors.Purple,
         accent: colors.RedAccent,

@@ -5,6 +5,7 @@
 import 'package:sky/theme/colors.dart' as colors;
 import 'package:sky/widgets/basic.dart';
 import 'package:sky/widgets/checkbox.dart';
+import 'package:sky/widgets/switch.dart';
 import 'package:sky/widgets/flat_button.dart';
 import 'package:sky/widgets/dialog.dart';
 import 'package:sky/widgets/icon_button.dart';
@@ -15,34 +16,47 @@ import 'package:sky/widgets/tool_bar.dart';
 
 import 'stock_types.dart';
 
-typedef void SettingsUpdater({StockMode mode});
+typedef void SettingsUpdater({
+  StockMode optimism,
+  BackupMode backup
+});
 
 class StockSettings extends Component {
 
-  StockSettings(this.navigator, this.stockMode, this.updater) : super(stateful: true);
+  StockSettings(this.navigator, this.optimism, this.backup, this.updater) : super(stateful: true);
 
   Navigator navigator;
-  StockMode stockMode;
+  StockMode optimism;
+  BackupMode backup;
   SettingsUpdater updater;
+
   bool showModeDialog = false;
 
   void syncFields(StockSettings source) {
     navigator = source.navigator;
-    stockMode = source.stockMode;
+    optimism = source.optimism;
+    backup = source.backup;
     updater = source.updater;
   }
 
-  void _handleStockModeChanged(bool value) {
+  void _handleOptimismChanged(bool value) {
     setState(() {
-      stockMode = value ? StockMode.optimistic : StockMode.pessimistic;
+      optimism = value ? StockMode.optimistic : StockMode.pessimistic;
     });
     sendUpdates();
   }
 
-  void _confirmStockModeChange() {
-    switch (stockMode) {
+  void _handleBackupChanged(bool value) {
+    setState(() {
+      backup = value ? BackupMode.enabled : BackupMode.disabled;
+    });
+    sendUpdates();
+  }
+
+  void _confirmOptimismChange() {
+    switch (optimism) {
       case StockMode.optimistic:
-        _handleStockModeChanged(false);
+        _handleOptimismChanged(false);
         break;
       case StockMode.pessimistic:
         showModeDialog = true;
@@ -56,7 +70,8 @@ class StockSettings extends Component {
   void sendUpdates() {
     if (updater != null)
       updater(
-        mode: stockMode
+        optimism: optimism,
+        backup: backup
       );
   }
 
@@ -70,16 +85,26 @@ class StockSettings extends Component {
   }
 
   Widget buildSettingsPane() {
+    // TODO(ianh): Once we have the gesture API hooked up, fix https://github.com/domokit/mojo/issues/281
+    // (whereby tapping the widgets below causes both the widget and the menu item to fire their callbacks)
     return new Container(
       padding: const EdgeDims.symmetric(vertical: 20.0),
       decoration: new BoxDecoration(backgroundColor: colors.Grey[50]),
       child: new Block([
         new MenuItem(
           icon: 'action/thumb_up',
-          onPressed: () => _confirmStockModeChange(),
+          onPressed: () => _confirmOptimismChange(),
           children: [
             new Flexible(child: new Text('Everything is awesome')),
-            new Checkbox(value: stockMode == StockMode.optimistic, onChanged: _handleStockModeChanged)
+            new Checkbox(value: optimism == StockMode.optimistic, onChanged: _handleOptimismChanged)
+          ]
+        ),
+        new MenuItem(
+          icon: 'action/backup',
+          onPressed: () { _handleBackupChanged(!(backup == BackupMode.enabled)); },
+          children: [
+            new Flexible(child: new Text('Back up stock list to the cloud')),
+            new Switch(value: backup == BackupMode.enabled, onChanged: _handleBackupChanged)
           ]
         ),
       ])
@@ -87,10 +112,12 @@ class StockSettings extends Component {
   }
 
   Widget build() {
-    List<Widget> layers = [new Scaffold(
+    List<Widget> layers = [
+      new Scaffold(
         toolbar: buildToolBar(),
         body: buildSettingsPane()
-    )];
+      )
+    ];
     if (showModeDialog) {
       layers.add(new Dialog(
         title: new Text("Change mode?"),
@@ -104,7 +131,7 @@ class StockSettings extends Component {
           new FlatButton(
             child: new Text('AGREE'),
             onPressed: () {
-              _handleStockModeChanged(true);
+              _handleOptimismChanged(true);
               navigator.pop();
             }
           ),

@@ -3,3 +3,4 @@
 // found in the LICENSE file.
 
 enum StockMode { optimistic, pessimistic }
+enum BackupMode { enabled, disabled }
