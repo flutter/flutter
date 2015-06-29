@@ -3,7 +3,7 @@
      Use of this source code is governed by a BSD-style license that can be
      found in the LICENSE file.
  -->
-<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="org.domokit.sky.demo" android:versionCode="12" android:versionName="0.0.12">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="org.domokit.sky.demo" android:versionCode="13" android:versionName="0.0.13">
 
     <uses-sdk android:minSdkVersion="14" android:targetSdkVersion="21" />
     <uses-permission android:name="android.permission.INTERNET" />
