@@ -14,7 +14,8 @@ String url1 = "https://www.dartlang.org/logos/dart-logo.png";
 String url2 = "http://i2.kym-cdn.com/photos/images/facebook/000/581/296/c09.jpg";
 
 void beginFrame(double timeStamp) {
-  if (timeBase == null) timeBase = timeStamp;
+  if (timeBase == null)
+    timeBase = timeStamp;
   double delta = timeStamp - timeBase;
   PictureRecorder recorder = new PictureRecorder();
   Canvas canvas = new Canvas(recorder, new Size(view.width, view.height));

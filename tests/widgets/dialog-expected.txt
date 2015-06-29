@@ -15,20 +15,26 @@ PAINT FOR FRAME #2 ----------------------------------------------
 2 |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
 2 |  |  | paintChild RenderPadding at Point(220.0, 212.5)
 2 |  |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
-2 |  |  |  | paintChild RenderConstrainedBox at Point(40.0, 24.0)
+2 |  |  |  | paintChild RenderConstrainedBox at Point(260.0, 236.5)
 2 |  |  |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
 2 |  |  |  |  | drawRRect(Instance of 'RRect', Paint(color:Color(0xffffffff), drawLooper:true))
-2 |  |  |  |  | paintChild RenderPadding at Point(0.0, 0.0)
+2 |  |  |  |  | paintChild RenderPadding at Point(260.0, 236.5)
 2 |  |  |  |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
-2 |  |  |  |  |  | paintChild RenderParagraph at Point(24.0, 24.0)
+2 |  |  |  |  |  | paintChild RenderParagraph at Point(284.0, 260.5)
 2 |  |  |  |  |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
-2 |  |  |  |  | paintChild RenderPadding at Point(0.0, 48.0)
+2 |  |  |  |  |  |  | translate(284.0, 260.5)
+2 |  |  |  |  |  |  | translate(-284.0, -260.5)
+2 |  |  |  |  | paintChild RenderPadding at Point(260.0, 284.5)
 2 |  |  |  |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
-2 |  |  |  |  |  | paintChild RenderParagraph at Point(24.0, 20.0)
+2 |  |  |  |  |  | paintChild RenderParagraph at Point(284.0, 304.5)
 2 |  |  |  |  |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
-2 |  |  |  |  | paintChild RenderFlex at Point(0.0, 111.0)
+2 |  |  |  |  |  |  | translate(284.0, 304.5)
+2 |  |  |  |  |  |  | translate(-284.0, -304.5)
+2 |  |  |  |  | paintChild RenderFlex at Point(260.0, 347.5)
 2 |  |  |  |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
-2 |  |  |  |  |  | paintChild RenderParagraph at Point(151.0, 0.0)
+2 |  |  |  |  |  | paintChild RenderParagraph at Point(411.0, 347.5)
 2 |  |  |  |  |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  | translate(411.0, 347.5)
+2 |  |  |  |  |  |  | translate(-411.0, -347.5)
 ------------------------------------------------------------------------
 PAINTED 2 FRAMES

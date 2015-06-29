@@ -29,10 +29,8 @@ class ParentData {
 class RenderCanvas extends sky.Canvas {
   RenderCanvas(sky.PictureRecorder recorder, Size bounds) : super(recorder, bounds);
 
-  void paintChild(RenderObject child, Point position) {
-    translate(position.x, position.y);
-    child.paint(this);
-    translate(-position.x, -position.y);
+  void paintChild(RenderObject child, Point point) {
+    child.paint(this, point.toOffset());
   }
 }
 
@@ -245,7 +243,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     assert(!debugDoingPaint);
     scheduler.ensureVisualUpdate();
   }
-  void paint(RenderCanvas canvas) { }
+  void paint(RenderCanvas canvas, Offset offset) { }
 
 
   // EVENTS

@@ -17,6 +17,7 @@ class Point {
   Point operator -() => new Point(-x, -y);
   Offset operator -(Point other) => new Offset(x - other.x, y - other.y);
   Point operator +(Offset other) => new Point(x + other.dx, y + other.dy);
+  Rect operator &(Size other) => new Rect.fromLTWH(x, y, other.width, other.height);
 
   // does the equivalent of "return this - Point.origin"
   Offset toOffset() => new Offset(x, y);

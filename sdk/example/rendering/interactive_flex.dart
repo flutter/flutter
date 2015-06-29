@@ -5,9 +5,7 @@
 import 'dart:sky';
 import 'dart:math' as math;
 
-import 'package:sky/mojo/net/image_cache.dart' as image_cache;
 import 'package:sky/painting/text_style.dart';
-import 'package:sky/rendering/block.dart';
 import 'package:sky/rendering/box.dart';
 import 'package:sky/rendering/flex.dart';
 import 'package:sky/rendering/object.dart';

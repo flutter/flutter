@@ -172,16 +172,20 @@ class RenderParagraph extends RenderBox {
                                           _applyFloatingPointHack(root.height)));
   }
 
-  void paint(RenderCanvas canvas) {
+  void paint(RenderCanvas canvas, Offset offset) {
     // Ideally we could compute the min/max intrinsic width/height with a
     // non-destructive operation. However, currently, computing these values
     // will destroy state inside the layout root. If that happens, we need to
     // get back the correct state by calling _layout again.
     //
-    // TODO(abarth): Make computing the min/max intrinsic width/height a
-    //               non-destructive operation.
+    // TODO(abarth): Make computing the min/max intrinsic width/height
+    // a non-destructive operation.
+    // TODO(ianh): Make LayoutRoot support a paint offset so we don't
+    // need to translate for each span of text.
     _layout(constraints);
+    canvas.translate(offset.dx, offset.dy);
     _layoutRoot.paint(canvas);
+    canvas.translate(-offset.dx, -offset.dy);
   }
 
   // we should probably expose a way to do precise (inter-glpyh) hit testing

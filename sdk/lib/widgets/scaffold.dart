@@ -126,12 +126,12 @@ class RenderScaffold extends RenderBox {
     }
   }
 
-  void paint(RenderCanvas canvas) {
+  void paint(RenderCanvas canvas, Offset offset) {
     for (ScaffoldSlots slot in [ScaffoldSlots.body, ScaffoldSlots.statusBar, ScaffoldSlots.toolbar, ScaffoldSlots.floatingActionButton, ScaffoldSlots.drawer]) {
       RenderBox box = _slots[slot];
       if (box != null) {
         assert(box.parentData is BoxParentData);
-        canvas.paintChild(box, box.parentData.position);
+        canvas.paintChild(box, box.parentData.position + offset);
       }
     }
   }
@@ -141,7 +141,7 @@ class RenderScaffold extends RenderBox {
       RenderBox box = _slots[slot];
       if (box != null) {
         assert(box.parentData is BoxParentData);
-        if (new Rect.fromPointAndSize(box.parentData.position, box.size).contains(position)) {
+        if ((box.parentData.position & box.size).contains(position)) {
           if (box.hitTest(result, position: (position - box.parentData.position).toPoint()))
             return;
         }

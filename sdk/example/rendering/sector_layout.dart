@@ -126,8 +126,8 @@ abstract class RenderDecoratedSector extends RenderSector {
     markNeedsPaint();
   }
 
-  // origin must be set to the center of the circle
-  void paint(RenderCanvas canvas) {
+  // offset must point to the center of the circle
+  void paint(RenderCanvas canvas, Offset offset) {
     assert(deltaRadius != null);
     assert(deltaTheta != null);
     assert(parentData is SectorParentData);
@@ -139,10 +139,10 @@ abstract class RenderDecoratedSector extends RenderSector {
       Paint paint = new Paint()..color = _decoration.backgroundColor;
       Path path = new Path();
       double outerRadius = (parentData.radius + deltaRadius);
-      Rect outerBounds = new Rect.fromLTRB(-outerRadius, -outerRadius, outerRadius, outerRadius);
+      Rect outerBounds = new Rect.fromLTRB(offset.dx-outerRadius, offset.dy-outerRadius, offset.dx+outerRadius, offset.dy+outerRadius);
       path.arcTo(outerBounds, parentData.theta, deltaTheta, true);
       double innerRadius = parentData.radius;
-      Rect innerBounds = new Rect.fromLTRB(-innerRadius, -innerRadius, innerRadius, innerRadius);
+      Rect innerBounds = new Rect.fromLTRB(offset.dx-innerRadius, offset.dy-innerRadius, offset.dx+innerRadius, offset.dy+innerRadius);
       path.arcTo(innerBounds, parentData.theta + deltaTheta, -deltaTheta, false);
       path.close();
       canvas.drawPath(path, paint);
@@ -262,15 +262,15 @@ class RenderSectorRing extends RenderSectorWithChildren {
     deltaTheta = innerTheta;
   }
 
-  // paint origin is 0,0 of our circle
+  // offset must point to the center of our circle
   // each sector then knows how to paint itself at its location
-  void paint(RenderCanvas canvas) {
+  void paint(RenderCanvas canvas, Offset offset) {
     // TODO(ianh): avoid code duplication
-    super.paint(canvas);
+    super.paint(canvas, offset);
     RenderSector child = firstChild;
     while (child != null) {
       assert(child.parentData is SectorChildListParentData);
-      canvas.paintChild(child, Point.origin);
+      canvas.paintChild(child, offset.toPoint());
       child = child.parentData.nextSibling;
     }
   }
@@ -367,15 +367,15 @@ class RenderSectorSlice extends RenderSectorWithChildren {
     deltaRadius = childRadius - this.parentData.radius;
   }
 
-  // paint origin is 0,0 of our circle
+  // offset must point to the center of our circle
   // each sector then knows how to paint itself at its location
-  void paint(RenderCanvas canvas) {
+  void paint(RenderCanvas canvas, Offset offset) {
     // TODO(ianh): avoid code duplication
-    super.paint(canvas);
+    super.paint(canvas, offset);
     RenderSector child = firstChild;
     while (child != null) {
       assert(child.parentData is SectorChildListParentData);
-      canvas.paintChild(child, Point.origin);
+      canvas.paintChild(child, offset.toPoint());
       child = child.parentData.nextSibling;
     }
   }
@@ -462,11 +462,11 @@ class RenderBoxToRenderSectorAdapter extends RenderBox {
     }
   }
 
-  // paint origin is 0,0 of our circle
-  void paint(RenderCanvas canvas) {
-    super.paint(canvas);
+  void paint(RenderCanvas canvas, Offset offset) {
+    super.paint(canvas, offset);
     if (child != null) {
-      Rect bounds = new Rect.fromSize(size);
+      Rect bounds = offset & size;
+      // we move the offset to the center of the circle for the RenderSectors
       canvas.paintChild(child, bounds.center);
     }
   }

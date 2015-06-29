@@ -16,19 +16,12 @@ class Rect {
       ..[3] = bottom;
   }
 
-  Rect.fromPointAndSize(Point point, Size size) {
+  Rect.fromLTWH(double left, double top, double width, double height) {
     _value
-      ..[0] = point.x
-      ..[1] = point.y
-      ..[2] = point.x + size.width
-      ..[3] = point.y + size.height;
-  }
-
-  // assumes top-left corner is at the origin (0,0)
-  Rect.fromSize(Size size) {
-    _value
-      ..[2] = size.width
-      ..[3] = size.height;
+      ..[0] = left
+      ..[1] = top
+      ..[2] = left + width
+      ..[3] = top + height;
   }
 
   final Float32List _value = new Float32List(4);

@@ -90,7 +90,7 @@ void main() {
   addFlexChildSolidColor(flexRoot, const sky.Color(0xFF0000FF), flex: 1);
 
   transformBox = new RenderTransform(child: flexRoot, transform: new Matrix4.identity());
-  RenderPadding root = new RenderPadding(padding: new EdgeDims.all(20.0), child: transformBox);
+  RenderPadding root = new RenderPadding(padding: new EdgeDims.all(80.0), child: transformBox);
 
   SkyBinding.instance.root = root;
   addPersistentFrameCallback(rotate);

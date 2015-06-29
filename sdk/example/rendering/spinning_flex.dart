@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:sky' as sky;
-import 'dart:math' as math;
 
 import 'package:sky/base/scheduler.dart';
 import 'package:sky/rendering/box.dart';

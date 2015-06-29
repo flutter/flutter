@@ -111,7 +111,7 @@ class TestRenderCanvas extends RenderCanvas {
 
   void paintChild(RenderObject child, Point position) {
     log("paintChild ${child.runtimeType} at $position");
-    child.paint(new TestRenderCanvas(new sky.PictureRecorder(), size, logger, indent: "$indent  |"));
+    child.paint(new TestRenderCanvas(new sky.PictureRecorder(), size, logger, indent: "$indent  |"), position.toOffset());
   }
 }
 
@@ -139,7 +139,7 @@ class TestRenderView extends RenderView {
     log("PAINT FOR FRAME #${frame} ----------------------------------------------");
     var recorder = new sky.PictureRecorder();
     var canvas = new TestRenderCanvas(recorder, rootConstraints.size, log, indent: "${frame} |");
-    paint(canvas);
+    paint(canvas, Offset.zero);
     recorder.endRecording();
     log("------------------------------------------------------------------------");
     RenderObject.debugDoingPaint = false;

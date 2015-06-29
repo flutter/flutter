@@ -21,6 +21,7 @@ class Offset extends OffsetBase {
   Offset operator -() => new Offset(-dx, -dy);
   Offset operator -(Offset other) => new Offset(dx - other.dx, dy - other.dy);
   Offset operator +(Offset other) => new Offset(dx + other.dx, dy + other.dy);
+  Rect operator &(Size other) => new Rect.fromLTWH(dx, dy, other.width, other.height);
 
   // does the equivalent of "return new Point(0,0) + this"
   Point toPoint() => new Point(this.dx, this.dy);

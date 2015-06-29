@@ -429,9 +429,9 @@ class RenderProxyBox extends RenderBox with RenderObjectWithChildMixin<RenderBox
       super.hitTestChildren(result, position: position);
   }
 
-  void paint(RenderCanvas canvas) {
+  void paint(RenderCanvas canvas, Offset offset) {
     if (child != null)
-      child.paint(canvas);
+      child.paint(canvas, offset);
   }
 
 }
@@ -550,7 +550,7 @@ class RenderOpacity extends RenderProxyBox {
     markNeedsPaint();
   }
 
-  void paint(RenderCanvas canvas) {
+  void paint(RenderCanvas canvas, Offset offset) {
     if (child != null) {
       int a = (_opacity * 255).round();
 
@@ -558,7 +558,7 @@ class RenderOpacity extends RenderProxyBox {
         return;
 
       if (a == 255) {
-        child.paint(canvas);
+        child.paint(canvas, offset);
         return;
       }
 
@@ -566,7 +566,7 @@ class RenderOpacity extends RenderProxyBox {
         ..color = new Color.fromARGB(a, 0, 0, 0)
         ..setTransferMode(sky.TransferMode.srcOver);
       canvas.saveLayer(null, paint);
-      child.paint(canvas);
+      child.paint(canvas, offset);
       canvas.restore();
     }
   }
@@ -597,12 +597,12 @@ class RenderColorFilter extends RenderProxyBox {
     markNeedsPaint();
   }
 
-  void paint(RenderCanvas canvas) {
+  void paint(RenderCanvas canvas, Offset offset) {
     if (child != null) {
       Paint paint = new Paint()
         ..setColorFilter(new sky.ColorFilter.mode(_color, _transferMode));
       canvas.saveLayer(null, paint);
-      child.paint(canvas);
+      child.paint(canvas, offset);
       canvas.restore();
     }
   }
@@ -611,11 +611,11 @@ class RenderColorFilter extends RenderProxyBox {
 class RenderClipRect extends RenderProxyBox {
   RenderClipRect({ RenderBox child }) : super(child);
 
-  void paint(RenderCanvas canvas) {
+  void paint(RenderCanvas canvas, Offset offset) {
     if (child != null) {
       canvas.save();
-      canvas.clipRect(new Rect.fromSize(size));
-      child.paint(canvas);
+      canvas.clipRect(offset & size);
+      child.paint(canvas, offset);
       canvas.restore();
     }
   }
@@ -648,13 +648,13 @@ class RenderClipRRect extends RenderProxyBox {
     markNeedsPaint();
   }
 
-  void paint(RenderCanvas canvas) {
+  void paint(RenderCanvas canvas, Offset offset) {
     if (child != null) {
-      Rect rect = new Rect.fromSize(size);
+      Rect rect = offset & size;
       canvas.saveLayer(rect, new Paint());
       sky.RRect rrect = new sky.RRect()..setRectXY(rect, xRadius, yRadius);
       canvas.clipRRect(rrect);
-      child.paint(canvas);
+      child.paint(canvas, offset);
       canvas.restore();
     }
   }
@@ -663,14 +663,14 @@ class RenderClipRRect extends RenderProxyBox {
 class RenderClipOval extends RenderProxyBox {
   RenderClipOval({ RenderBox child }) : super(child);
 
-  void paint(RenderCanvas canvas) {
+  void paint(RenderCanvas canvas, Offset offset) {
     if (child != null) {
-      Rect rect = new Rect.fromSize(size);
+      Rect rect = offset & size;
       canvas.saveLayer(rect, new Paint());
       Path path = new Path();
       path.addOval(rect);
       canvas.clipPath(path);
-      child.paint(canvas);
+      child.paint(canvas, offset);
       canvas.restore();
     }
   }
@@ -684,9 +684,9 @@ abstract class RenderShiftedBox extends RenderBox with RenderObjectWithChildMixi
     this.child = child;
   }
 
-  void paint(RenderCanvas canvas) {
+  void paint(RenderCanvas canvas, Offset offset) {
     if (child != null)
-      canvas.paintChild(child, child.parentData.position);
+      canvas.paintChild(child, child.parentData.position + offset);
   }
 
   double getDistanceToActualBaseline(TextBaseline baseline) {
@@ -706,7 +706,7 @@ abstract class RenderShiftedBox extends RenderBox with RenderObjectWithChildMixi
   void hitTestChildren(HitTestResult result, { Point position }) {
     if (child != null) {
       assert(child.parentData is BoxParentData);
-      Rect childBounds = new Rect.fromPointAndSize(child.parentData.position, child.size);
+      Rect childBounds = child.parentData.position & child.size;
       if (childBounds.contains(position)) {
         child.hitTest(result, position: new Point(position.x - child.parentData.position.x,
                                                       position.y - child.parentData.position.y));
@@ -934,17 +934,20 @@ class RenderImage extends RenderBox {
     size = _sizeForConstraints(constraints);
   }
 
-  void paint(RenderCanvas canvas) {
-    if (_image == null) return;
+  void paint(RenderCanvas canvas, Offset offset) {
+    if (_image == null)
+      return;
     bool needsScale = size.width != _image.width || size.height != _image.height;
     if (needsScale) {
       double widthScale = size.width / _image.width;
       double heightScale = size.height / _image.height;
       canvas.save();
+      canvas.translate(offset.dx, offset.dy);
       canvas.scale(widthScale, heightScale);
+      offset = Offset.zero;
     }
     Paint paint = new Paint();
-    canvas.drawImage(_image, Point.origin, paint);
+    canvas.drawImage(_image, offset.toPoint(), paint);
     if (needsScale)
       canvas.restore();
   }
@@ -969,11 +972,11 @@ class RenderDecoratedBox extends RenderProxyBox {
     markNeedsPaint();
   }
 
-  void paint(RenderCanvas canvas) {
+  void paint(RenderCanvas canvas, Offset offset) {
     assert(size.width != null);
     assert(size.height != null);
-    _painter.paint(canvas, new Rect.fromSize(size));
-    super.paint(canvas);
+    _painter.paint(canvas, offset & size);
+    super.paint(canvas, offset);
   }
 
   String debugDescribeSettings(String prefix) => '${super.debugDescribeSettings(prefix)}${prefix}decoration:\n${_painter.decoration.toString(prefix + "  ")}\n';
@@ -1039,10 +1042,11 @@ class RenderTransform extends RenderProxyBox {
     super.hitTestChildren(result, position: transformed);
   }
 
-  void paint(RenderCanvas canvas) {
+  void paint(RenderCanvas canvas, Offset offset) {
     canvas.save();
+    canvas.translate(offset.dx, offset.dy);
     canvas.concat(_transform.storage);
-    super.paint(canvas);
+    super.paint(canvas, Offset.zero);
     canvas.restore();
   }
 
@@ -1101,10 +1105,12 @@ class RenderCustomPaint extends RenderProxyBox {
     super.attach();
   }
 
-  void paint(RenderCanvas canvas) {
+  void paint(RenderCanvas canvas, Offset offset) {
     assert(_callback != null);
+    canvas.translate(offset.dx, offset.dy);
     _callback(canvas, size);
-    super.paint(canvas);
+    super.paint(canvas, Offset.zero);
+    canvas.translate(-offset.dx, -offset.dy);
   }
 }
 
@@ -1167,7 +1173,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
 
   bool hitTest(HitTestResult result, { Point position }) {
     if (child != null) {
-      Rect childBounds = new Rect.fromSize(child.size);
+      Rect childBounds = Point.origin & child.size;
       if (childBounds.contains(position))
         child.hitTest(result, position: position);
     }
@@ -1175,9 +1181,9 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     return true;
   }
 
-  void paint(RenderCanvas canvas) {
+  void paint(RenderCanvas canvas, Offset offset) {
     if (child != null)
-      canvas.paintChild(child, Point.origin);
+      canvas.paintChild(child, offset.toPoint());
   }
 
   void paintFrame() {
@@ -1186,7 +1192,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     try {
       sky.PictureRecorder recorder = new sky.PictureRecorder();
       RenderCanvas canvas = new RenderCanvas(recorder, _size);
-      paint(canvas);
+      paint(canvas, Offset.zero);
       sky.view.picture = recorder.endRecording();
     } finally {
       RenderObject.debugDoingPaint = false;
@@ -1239,7 +1245,7 @@ abstract class RenderBoxContainerDefaultsMixin<ChildType extends RenderBox, Pare
     ChildType child = lastChild;
     while (child != null) {
       assert(child.parentData is ParentDataType);
-      Rect childBounds = new Rect.fromPointAndSize(child.parentData.position, child.size);
+      Rect childBounds = child.parentData.position & child.size;
       if (childBounds.contains(position)) {
         if (child.hitTest(result, position: new Point(position.x - child.parentData.position.x,
                                                           position.y - child.parentData.position.y)))
@@ -1249,11 +1255,11 @@ abstract class RenderBoxContainerDefaultsMixin<ChildType extends RenderBox, Pare
     }
   }
 
-  void defaultPaint(RenderCanvas canvas) {
+  void defaultPaint(RenderCanvas canvas, Offset offset) {
     RenderBox child = firstChild;
     while (child != null) {
       assert(child.parentData is ParentDataType);
-      canvas.paintChild(child, child.parentData.position);
+      canvas.paintChild(child, child.parentData.position + offset);
       child = child.parentData.nextSibling;
     }
   }

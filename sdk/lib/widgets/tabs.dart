@@ -131,21 +131,22 @@ class RenderTabBar extends RenderBox with
     defaultHitTestChildren(result, position: position);
   }
 
-  void _paintIndicator(RenderCanvas canvas, RenderBox selectedTab) {
+  void _paintIndicator(RenderCanvas canvas, RenderBox selectedTab, Offset offset) {
     if (indicatorColor == null)
       return;
 
     var size = new Size(selectedTab.size.width, _kTabIndicatorHeight);
     var point = new Point(
       selectedTab.parentData.position.x,
-      _tabBarHeight - _kTabIndicatorHeight);
-    Rect rect = new Rect.fromPointAndSize(point, size);
+      _tabBarHeight - _kTabIndicatorHeight
+    );
+    Rect rect = (point + offset) & size;
     canvas.drawRect(rect, new Paint()..color = indicatorColor);
   }
 
-  void paint(RenderCanvas canvas) {
+  void paint(RenderCanvas canvas, Offset offset) {
     if (backgroundColor != null) {
-      Rect rect = new Rect.fromSize(size);
+      Rect rect = offset & size;
       canvas.drawRect(rect, new Paint()..color = backgroundColor);
     }
 
@@ -153,9 +154,9 @@ class RenderTabBar extends RenderBox with
     RenderBox child = firstChild;
     while (child != null) {
       assert(child.parentData is TabBarParentData);
-      canvas.paintChild(child, child.parentData.position);
+      canvas.paintChild(child, child.parentData.position + offset);
       if (index++ == selectedIndex)
-        _paintIndicator(canvas, child);
+        _paintIndicator(canvas, child, offset);
       child = child.parentData.nextSibling;
     }
   }

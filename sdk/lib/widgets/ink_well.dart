@@ -88,15 +88,16 @@ class RenderInkWell extends RenderProxyBox {
     markNeedsPaint();
   }
 
-  void paint(RenderCanvas canvas) {
+  void paint(RenderCanvas canvas, Offset offset) {
     if (!_splashes.isEmpty) {
       canvas.save();
-      canvas.clipRect(new Rect.fromSize(size));
+      canvas.translate(offset.dx, offset.dy);
+      canvas.clipRect(Point.origin & size);
       for (InkSplash splash in _splashes)
         splash.paint(canvas);
       canvas.restore();
     }
-    super.paint(canvas);
+    super.paint(canvas, offset);
   }
 }
 
