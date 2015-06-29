@@ -383,7 +383,7 @@ void LineBreaker::computeBreaksOptimal(bool isRectangle) {
         mCandidates[i].score = best + mCandidates[i].penalty + mLinePenalty;
         mCandidates[i].prev = bestPrev;
         mCandidates[i].lineNumber = mCandidates[bestPrev].lineNumber + 1;
-#ifdef VERBOSE_DEBUG
+#if VERBOSE_DEBUG
         ALOGD("break %d: score=%g, prev=%d", i, mCandidates[i].score, mCandidates[i].prev);
 #endif
     }

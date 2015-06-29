@@ -757,7 +757,7 @@ void Layout::doLayoutRun(const uint16_t* buf, size_t start, size_t count, size_t
             if (ctx->paint.hyphenEdit.hasHyphen() && srunend > srunstart) {
                 // TODO: check whether this is really the desired semantics. It could have the
                 // effect of assigning the hyphen width to a nonspacing mark
-                unsigned int lastCluster = srunend - 1;
+                unsigned int lastCluster = start + srunend - 1;
 
                 hb_codepoint_t hyphenChar = 0x2010; // HYPHEN
                 hb_codepoint_t glyph;
