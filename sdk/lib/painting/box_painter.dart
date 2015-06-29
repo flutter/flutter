@@ -207,8 +207,7 @@ class BoxPainter {
         case Shape.circle:
           assert(_decoration.borderRadius == null);
           Point center = rect.center;
-          Size size = rect.size;
-          double radius = math.min(size.width, size.height) / 2.0;
+          double radius = rect.shortestSide / 2.0;
           canvas.drawCircle(center, radius, _backgroundPaint);
           break;
         case Shape.rectangle:

@@ -30,13 +30,22 @@ class Rect {
   double get right => _value[2];
   double get bottom => _value[3];
 
-  Point get center => new Point(left + right / 2.0, top + bottom / 2.0);
+  double get width => right - left;
+  double get height => bottom - top;
+
+  Size get size => new Size(width, height);
+
+  double get shortestSide {
+    double w = width.abs();
+    double h = height.abs();
+    return w < h ? w : h;
+  }
+
+  Point get center => new Point(left + width / 2.0, top + height / 2.0);
   Point get topLeft => new Point(left, top);
   Point get topRight => new Point(right, top);
   Point get bottomLeft => new Point(left, bottom);
   Point get bottomRight => new Point(right, bottom);
-
-  Size get size => new Size(right - left, bottom - top);
 
   // Rects are inclusive of the top and left edges but exclusive of the bottom
   // right edges.
