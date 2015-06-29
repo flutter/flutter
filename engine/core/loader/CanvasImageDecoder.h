@@ -6,6 +6,7 @@
 #ifndef SKY_ENGINE_CORE_LOADER_CANVASIMAGELOADER_H_
 #define SKY_ENGINE_CORE_LOADER_CANVASIMAGELOADER_H_
 
+#include "base/memory/weak_ptr.h"
 #include "mojo/common/data_pipe_drainer.h"
 #include "sky/engine/core/loader/ImageDecoderCallback.h"
 #include "sky/engine/platform/SharedBuffer.h"
@@ -30,9 +31,13 @@ class CanvasImageDecoder : public mojo::common::DataPipeDrainer::Client,
  private:
   CanvasImageDecoder(mojo::ScopedDataPipeConsumerHandle handle, PassOwnPtr<ImageDecoderCallback> callback);
 
+  void RejectCallback();
+
   OwnPtr<mojo::common::DataPipeDrainer> drainer_;
   RefPtr<SharedBuffer> buffer_;
   OwnPtr<ImageDecoderCallback> callback_;
+
+  base::WeakPtrFactory<CanvasImageDecoder> weak_factory_;
 };
 
 }  // namespace blink

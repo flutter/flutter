@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include "base/bind.h"
+#include "base/message_loop/message_loop.h"
 #include "sky/engine/core/loader/CanvasImageDecoder.h"
 #include "sky/engine/core/painting/CanvasImage.h"
 #include "sky/engine/platform/SharedBuffer.h"
@@ -10,17 +12,23 @@
 namespace blink {
 
 PassRefPtr<CanvasImageDecoder> CanvasImageDecoder::create(
-  mojo::ScopedDataPipeConsumerHandle handle,
-  PassOwnPtr<ImageDecoderCallback> callback)
-{
+    mojo::ScopedDataPipeConsumerHandle handle,
+    PassOwnPtr<ImageDecoderCallback> callback) {
   return adoptRef(new CanvasImageDecoder(handle.Pass(), callback));
 }
 
 CanvasImageDecoder::CanvasImageDecoder(
     mojo::ScopedDataPipeConsumerHandle handle,
     PassOwnPtr<ImageDecoderCallback> callback)
-  : callback_(callback) {
+    : callback_(callback), weak_factory_(this) {
   CHECK(callback_);
+  if (!handle.is_valid()) {
+    base::MessageLoop::current()->PostTask(
+        FROM_HERE, base::Bind(&CanvasImageDecoder::RejectCallback,
+                              weak_factory_.GetWeakPtr()));
+    return;
+  }
+
   buffer_ = SharedBuffer::create();
   drainer_ = adoptPtr(new mojo::common::DataPipeDrainer(this, handle.Pass()));
 }
@@ -51,6 +59,10 @@ void CanvasImageDecoder::OnDataComplete() {
   RefPtr<CanvasImage> resultImage = CanvasImage::create();
   resultImage->setBitmap(decoder->frameBufferAtIndex(0)->getSkBitmap());
   callback_->handleEvent(resultImage.get());
+}
+
+void CanvasImageDecoder::RejectCallback() {
+  callback_->handleEvent(nullptr);
 }
 
 }  // namespace blink
