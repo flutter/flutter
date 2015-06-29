@@ -44,7 +44,7 @@ PAINT FOR FRAME #4 ----------------------------------------------
 4 |  | TestRenderCanvas() constructor: 800.0 x 600.0
 4 |  | paintChild RenderDecoratedBox at Point(372.0, 272.0)
 4 |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
-4 |  |  | drawCircle(Point(586.0, 436.0), 28.0, Paint(color:Color(0xffff4081), drawLooper:true))
+4 |  |  | drawCircle(Point(400.0, 300.0), 28.0, Paint(color:Color(0xffff4081), drawLooper:true))
 4 |  |  | saveLayer(Rect.fromLTRB(372.0, 272.0, 428.0, 328.0), Paint(color:Color(0xff000000)))
 4 |  |  | clipPath(Instance of 'Path')
 4 |  |  | paintChild RenderParagraph at Point(394.0, 292.0)
