@@ -429,7 +429,7 @@ class RenderProxyBox extends RenderBox with RenderObjectWithChildMixin<RenderBox
       super.hitTestChildren(result, position: position);
   }
 
-  void paint(RenderCanvas canvas, Offset offset) {
+  void paint(PaintingCanvas canvas, Offset offset) {
     if (child != null)
       child.paint(canvas, offset);
   }
@@ -550,7 +550,7 @@ class RenderOpacity extends RenderProxyBox {
     markNeedsPaint();
   }
 
-  void paint(RenderCanvas canvas, Offset offset) {
+  void paint(PaintingCanvas canvas, Offset offset) {
     if (child != null) {
       int a = (_opacity * 255).round();
 
@@ -597,7 +597,7 @@ class RenderColorFilter extends RenderProxyBox {
     markNeedsPaint();
   }
 
-  void paint(RenderCanvas canvas, Offset offset) {
+  void paint(PaintingCanvas canvas, Offset offset) {
     if (child != null) {
       Paint paint = new Paint()
         ..setColorFilter(new sky.ColorFilter.mode(_color, _transferMode));
@@ -611,7 +611,7 @@ class RenderColorFilter extends RenderProxyBox {
 class RenderClipRect extends RenderProxyBox {
   RenderClipRect({ RenderBox child }) : super(child);
 
-  void paint(RenderCanvas canvas, Offset offset) {
+  void paint(PaintingCanvas canvas, Offset offset) {
     if (child != null) {
       canvas.save();
       canvas.clipRect(offset & size);
@@ -648,7 +648,7 @@ class RenderClipRRect extends RenderProxyBox {
     markNeedsPaint();
   }
 
-  void paint(RenderCanvas canvas, Offset offset) {
+  void paint(PaintingCanvas canvas, Offset offset) {
     if (child != null) {
       Rect rect = offset & size;
       canvas.saveLayer(rect, new Paint());
@@ -663,7 +663,7 @@ class RenderClipRRect extends RenderProxyBox {
 class RenderClipOval extends RenderProxyBox {
   RenderClipOval({ RenderBox child }) : super(child);
 
-  void paint(RenderCanvas canvas, Offset offset) {
+  void paint(PaintingCanvas canvas, Offset offset) {
     if (child != null) {
       Rect rect = offset & size;
       canvas.saveLayer(rect, new Paint());
@@ -684,7 +684,7 @@ abstract class RenderShiftedBox extends RenderBox with RenderObjectWithChildMixi
     this.child = child;
   }
 
-  void paint(RenderCanvas canvas, Offset offset) {
+  void paint(PaintingCanvas canvas, Offset offset) {
     if (child != null)
       canvas.paintChild(child, child.parentData.position + offset);
   }
@@ -934,7 +934,7 @@ class RenderImage extends RenderBox {
     size = _sizeForConstraints(constraints);
   }
 
-  void paint(RenderCanvas canvas, Offset offset) {
+  void paint(PaintingCanvas canvas, Offset offset) {
     if (_image == null)
       return;
     bool needsScale = size.width != _image.width || size.height != _image.height;
@@ -972,7 +972,7 @@ class RenderDecoratedBox extends RenderProxyBox {
     markNeedsPaint();
   }
 
-  void paint(RenderCanvas canvas, Offset offset) {
+  void paint(PaintingCanvas canvas, Offset offset) {
     assert(size.width != null);
     assert(size.height != null);
     _painter.paint(canvas, offset & size);
@@ -1042,7 +1042,7 @@ class RenderTransform extends RenderProxyBox {
     super.hitTestChildren(result, position: transformed);
   }
 
-  void paint(RenderCanvas canvas, Offset offset) {
+  void paint(PaintingCanvas canvas, Offset offset) {
     canvas.save();
     canvas.translate(offset.dx, offset.dy);
     canvas.concat(_transform.storage);
@@ -1079,7 +1079,7 @@ class RenderSizeObserver extends RenderProxyBox {
   }
 }
 
-typedef void CustomPaintCallback(RenderCanvas canvas, Size size);
+typedef void CustomPaintCallback(PaintingCanvas canvas, Size size);
 
 class RenderCustomPaint extends RenderProxyBox {
 
@@ -1105,7 +1105,7 @@ class RenderCustomPaint extends RenderProxyBox {
     super.attach();
   }
 
-  void paint(RenderCanvas canvas, Offset offset) {
+  void paint(PaintingCanvas canvas, Offset offset) {
     assert(_callback != null);
     canvas.translate(offset.dx, offset.dy);
     _callback(canvas, size);
@@ -1181,7 +1181,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     return true;
   }
 
-  void paint(RenderCanvas canvas, Offset offset) {
+  void paint(PaintingCanvas canvas, Offset offset) {
     if (child != null)
       canvas.paintChild(child, offset.toPoint());
   }
@@ -1191,7 +1191,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     RenderObject.debugDoingPaint = true;
     try {
       sky.PictureRecorder recorder = new sky.PictureRecorder();
-      RenderCanvas canvas = new RenderCanvas(recorder, _size);
+      PaintingCanvas canvas = new PaintingCanvas(recorder, _size);
       paint(canvas, Offset.zero);
       sky.view.picture = recorder.endRecording();
     } finally {
@@ -1255,7 +1255,7 @@ abstract class RenderBoxContainerDefaultsMixin<ChildType extends RenderBox, Pare
     }
   }
 
-  void defaultPaint(RenderCanvas canvas, Offset offset) {
+  void defaultPaint(PaintingCanvas canvas, Offset offset) {
     RenderBox child = firstChild;
     while (child != null) {
       assert(child.parentData is ParentDataType);

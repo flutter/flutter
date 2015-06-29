@@ -52,7 +52,7 @@ class InkSplash {
     well.markNeedsPaint();
   }
 
-  void paint(RenderCanvas canvas) {
+  void paint(PaintingCanvas canvas) {
     int opacity = (_kSplashInitialOpacity * (1.0 - (_radius.value / _targetRadius))).floor();
     sky.Paint paint = new sky.Paint()..color = new sky.Color(opacity << 24);
     canvas.drawCircle(position, _radius.value, paint);
@@ -88,7 +88,7 @@ class RenderInkWell extends RenderProxyBox {
     markNeedsPaint();
   }
 
-  void paint(RenderCanvas canvas, Offset offset) {
+  void paint(PaintingCanvas canvas, Offset offset) {
     if (!_splashes.isEmpty) {
       canvas.save();
       canvas.translate(offset.dx, offset.dy);

@@ -32,7 +32,7 @@ abstract class NodeWithSize extends Node {
   /// If you use this method you will need to save and restore your canvas at the beginning and
   /// end of your [paint] method.
   ///
-  ///     void paint(RenderCanvas canvas) {
+  ///     void paint(PaintingCanvas canvas) {
   ///       canvas.save();
   ///       applyTransformForPivot(canvas);
   ///
@@ -40,7 +40,7 @@ abstract class NodeWithSize extends Node {
   ///
   ///       canvas.restore();
   ///     }
-  void applyTransformForPivot(RenderCanvas canvas) {
+  void applyTransformForPivot(PaintingCanvas canvas) {
     if (pivot.x != 0 || pivot.y != 0) {
       double pivotInPointsX = size.width * pivot.x;
       double pivotInPointsY = size.height * pivot.y;

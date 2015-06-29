@@ -10,11 +10,11 @@ import 'package:sky/rendering/object.dart';
 
 typedef void Logger (String s);
 
-class TestRenderCanvas extends RenderCanvas {
-  TestRenderCanvas(sky.PictureRecorder recorder, Size size, this.logger, { this.indent: '' })
+class TestPaintingCanvas extends PaintingCanvas {
+  TestPaintingCanvas(sky.PictureRecorder recorder, Size size, this.logger, { this.indent: '' })
     : size = size,
       super(recorder, size) {
-    log("TestRenderCanvas() constructor: ${size.width} x ${size.height}");
+    log("TestPaintingCanvas() constructor: ${size.width} x ${size.height}");
   }
 
   final String indent;
@@ -111,7 +111,7 @@ class TestRenderCanvas extends RenderCanvas {
 
   void paintChild(RenderObject child, Point position) {
     log("paintChild ${child.runtimeType} at $position");
-    child.paint(new TestRenderCanvas(new sky.PictureRecorder(), size, logger, indent: "$indent  |"), position.toOffset());
+    child.paint(new TestPaintingCanvas(new sky.PictureRecorder(), size, logger, indent: "$indent  |"), position.toOffset());
   }
 }
 
@@ -138,7 +138,7 @@ class TestRenderView extends RenderView {
     lastPaint = '';
     log("PAINT FOR FRAME #${frame} ----------------------------------------------");
     var recorder = new sky.PictureRecorder();
-    var canvas = new TestRenderCanvas(recorder, rootConstraints.size, log, indent: "${frame} |");
+    var canvas = new TestPaintingCanvas(recorder, rootConstraints.size, log, indent: "${frame} |");
     paint(canvas, Offset.zero);
     recorder.endRecording();
     log("------------------------------------------------------------------------");

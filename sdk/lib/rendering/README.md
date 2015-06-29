@@ -44,9 +44,10 @@ render tree:
    layout without the parent undergoing layout.
 
  * Subclasses of `RenderObject` must implement a `paint` function that draws a
-   visual representation of the object onto a `RenderCanvas`. If
+   visual representation of the object onto a `PaintingCanvas`. If
    the `RenderObject` has children, the `RenderObject` is responsible for
-   painting its children using the `paintChild` function on the `RenderCanvas`.
+   painting its children using the `paintChild` function on the
+   `PaintingCanvas`.
 
  * Subclasses of `RenderObject` must call `adoptChild` whenever they add a
    child. Similarly, they must call `dropChild` whenever they remove a child.

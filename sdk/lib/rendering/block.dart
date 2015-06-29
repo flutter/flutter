@@ -102,7 +102,7 @@ class RenderBlock extends RenderBox with ContainerRenderObjectMixin<RenderBox, B
     defaultHitTestChildren(result, position: position);
   }
 
-  void paint(RenderCanvas canvas, Offset offset) {
+  void paint(PaintingCanvas canvas, Offset offset) {
     defaultPaint(canvas, offset);
   }
 

@@ -394,7 +394,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     defaultHitTestChildren(result, position: position);
   }
 
-  void paint(RenderCanvas canvas, Offset offset) {
+  void paint(PaintingCanvas canvas, Offset offset) {
     defaultPaint(canvas, offset);
   }
 }

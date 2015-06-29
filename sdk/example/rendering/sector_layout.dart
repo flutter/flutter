@@ -127,7 +127,7 @@ abstract class RenderDecoratedSector extends RenderSector {
   }
 
   // offset must point to the center of the circle
-  void paint(RenderCanvas canvas, Offset offset) {
+  void paint(PaintingCanvas canvas, Offset offset) {
     assert(deltaRadius != null);
     assert(deltaTheta != null);
     assert(parentData is SectorParentData);
@@ -264,7 +264,7 @@ class RenderSectorRing extends RenderSectorWithChildren {
 
   // offset must point to the center of our circle
   // each sector then knows how to paint itself at its location
-  void paint(RenderCanvas canvas, Offset offset) {
+  void paint(PaintingCanvas canvas, Offset offset) {
     // TODO(ianh): avoid code duplication
     super.paint(canvas, offset);
     RenderSector child = firstChild;
@@ -369,7 +369,7 @@ class RenderSectorSlice extends RenderSectorWithChildren {
 
   // offset must point to the center of our circle
   // each sector then knows how to paint itself at its location
-  void paint(RenderCanvas canvas, Offset offset) {
+  void paint(PaintingCanvas canvas, Offset offset) {
     // TODO(ianh): avoid code duplication
     super.paint(canvas, offset);
     RenderSector child = firstChild;
@@ -462,7 +462,7 @@ class RenderBoxToRenderSectorAdapter extends RenderBox {
     }
   }
 
-  void paint(RenderCanvas canvas, Offset offset) {
+  void paint(PaintingCanvas canvas, Offset offset) {
     super.paint(canvas, offset);
     if (child != null) {
       Rect bounds = offset & size;

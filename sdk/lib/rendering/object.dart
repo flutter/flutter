@@ -26,8 +26,8 @@ class ParentData {
   String toString() => '<none>';
 }
 
-class RenderCanvas extends sky.Canvas {
-  RenderCanvas(sky.PictureRecorder recorder, Size bounds) : super(recorder, bounds);
+class PaintingCanvas extends sky.Canvas {
+  PaintingCanvas(sky.PictureRecorder recorder, Size bounds) : super(recorder, bounds);
 
   void paintChild(RenderObject child, Point point) {
     child.paint(this, point.toOffset());
@@ -243,7 +243,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     assert(!debugDoingPaint);
     scheduler.ensureVisualUpdate();
   }
-  void paint(RenderCanvas canvas, Offset offset) { }
+  void paint(PaintingCanvas canvas, Offset offset) { }
 
 
   // EVENTS

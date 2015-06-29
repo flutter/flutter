@@ -131,7 +131,7 @@ class RenderTabBar extends RenderBox with
     defaultHitTestChildren(result, position: position);
   }
 
-  void _paintIndicator(RenderCanvas canvas, RenderBox selectedTab, Offset offset) {
+  void _paintIndicator(PaintingCanvas canvas, RenderBox selectedTab, Offset offset) {
     if (indicatorColor == null)
       return;
 
@@ -144,7 +144,7 @@ class RenderTabBar extends RenderBox with
     canvas.drawRect(rect, new Paint()..color = indicatorColor);
   }
 
-  void paint(RenderCanvas canvas, Offset offset) {
+  void paint(PaintingCanvas canvas, Offset offset) {
     if (backgroundColor != null) {
       Rect rect = offset & size;
       canvas.drawRect(rect, new Paint()..color = backgroundColor);

@@ -395,7 +395,7 @@ class Node {
 
   // Rendering
   
-  void _visit(RenderCanvas canvas) {
+  void _visit(PaintingCanvas canvas) {
     assert(canvas != null);
     if (!visible) return;
 
@@ -404,7 +404,7 @@ class Node {
     _postPaint(canvas);
   }
   
-  void _prePaint(RenderCanvas canvas) {
+  void _prePaint(PaintingCanvas canvas) {
     canvas.save();
 
     // Get the transformation matrix and apply transform
@@ -419,7 +419,7 @@ class Node {
   /// bounding box's origin, override [NodeWithSize] and call the applyTransformForPivot method before making calls for
   /// drawing.
   ///
-  ///     void paint(RenderCanvas canvas) {
+  ///     void paint(PaintingCanvas canvas) {
   ///       canvas.save();
   ///       applyTransformForPivot(canvas);
   ///
@@ -427,10 +427,10 @@ class Node {
   ///
   ///       canvas.restore();
   ///     }
-  void paint(RenderCanvas canvas) {
+  void paint(PaintingCanvas canvas) {
   }
  
-  void _visitChildren(RenderCanvas canvas) {
+  void _visitChildren(PaintingCanvas canvas) {
     // Sort children if needed
     _sortChildren();
 
@@ -455,7 +455,7 @@ class Node {
     }
   }
   
-  void _postPaint(RenderCanvas canvas) {
+  void _postPaint(PaintingCanvas canvas) {
     canvas.restore();
   }
 
