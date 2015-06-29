@@ -47,7 +47,7 @@ PAINT FOR FRAME #2 ----------------------------------------------
 2 |  |  |  |  |  |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
 2 |  |  | paintChild RenderDecoratedBox at Point(728.0, 528.0)
 2 |  |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
-2 |  |  |  | drawCircle(Point(1120.0, 820.0), 28.0, Paint(color:Color(0xffff5252), drawLooper:true))
+2 |  |  |  | drawCircle(Point(756.0, 556.0), 28.0, Paint(color:Color(0xffff5252), drawLooper:true))
 2 |  |  |  | saveLayer(Rect.fromLTRB(728.0, 528.0, 784.0, 584.0), Paint(color:Color(0xff000000)))
 2 |  |  |  | clipPath(Instance of 'Path')
 2 |  |  |  | paintChild RenderImage at Point(744.0, 544.0)
@@ -98,7 +98,7 @@ PAINT FOR FRAME #3 ----------------------------------------------
 3 |  |  |  |  |  |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
 3 |  |  | paintChild RenderDecoratedBox at Point(728.0, 528.0)
 3 |  |  |  | TestRenderCanvas() constructor: 800.0 x 600.0
-3 |  |  |  | drawCircle(Point(1120.0, 820.0), 28.0, Paint(color:Color(0xffff5252), drawLooper:true))
+3 |  |  |  | drawCircle(Point(756.0, 556.0), 28.0, Paint(color:Color(0xffff5252), drawLooper:true))
 3 |  |  |  | saveLayer(Rect.fromLTRB(728.0, 528.0, 784.0, 584.0), Paint(color:Color(0xff000000)))
 3 |  |  |  | clipPath(Instance of 'Path')
 3 |  |  |  | paintChild RenderImage at Point(744.0, 544.0)
