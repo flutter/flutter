@@ -1,4 +1,9 @@
 <foo>
+<style>
+foo {
+	background-color: black;
+}
+</style>
 <import src="../resources/run-after-display.sky" />
 <p>This is a mismatch reftest. Should not match.</p>
 <script>
