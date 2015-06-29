@@ -1032,7 +1032,7 @@ public:
     static EWhiteSpace initialWhiteSpace() { return NORMAL; }
     static short initialHorizontalBorderSpacing() { return 0; }
     static short initialVerticalBorderSpacing() { return 0; }
-    static Color initialColor() { return Color::black; }
+    static Color initialColor() { return Color::white; }
     static unsigned initialBorderWidth() { return 3; }
     static unsigned short initialColumnRuleWidth() { return 3; }
     static unsigned short initialOutlineWidth() { return 3; }
