@@ -4,7 +4,7 @@
 
 import 'package:mojom/keyboard/keyboard.mojom.dart';
 
-import '../framework/shell.dart' as shell;
+import '../mojo/shell.dart' as shell;
 
 class _KeyboardConnection {
   KeyboardServiceProxy proxy;

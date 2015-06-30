@@ -9,7 +9,7 @@ import "package:mojom/mojo/input_event_constants.mojom.dart" as constants;
 import "package:mojom/mojo/input_events.mojom.dart" as events;
 import "package:mojom/mojo/input_key_codes.mojom.dart" as codes;
 import "package:mojom/sky/test_harness.mojom.dart" as harness;
-import "package:sky/framework/embedder.dart";
+import "package:sky/mojo/embedder.dart";
 
 bool _isDone = false;
 int _keyPressesRemaining = 0;

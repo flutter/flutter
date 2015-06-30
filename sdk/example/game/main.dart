@@ -1,9 +1,9 @@
 import 'dart:sky';
 
+import 'package:sky/mojo/net/fetch.dart';
 import 'package:sky/widgets/basic.dart';
 import 'package:sky/widgets/raised_button.dart';
 import 'package:sky/widgets/widget.dart';
-import 'package:sky/framework/net/fetch.dart';
 
 import 'lib/game_demo.dart';
 import 'lib/sprites.dart';

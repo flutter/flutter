@@ -32,7 +32,6 @@ crbug.com/2 services/iframe-service-provider.sky [ Skip ]
 
 # Started failing on DEPS roll.
 # https://codereview.chromium.org/1001833005/
-https://github.com/domokit/mojo/issues/64 framework/flights-app-pixels.sky [ Skip ]
 https://github.com/domokit/mojo/issues/64 lowlevel/layers.sky [ Skip ]
 
 # Flaky

@@ -5,7 +5,7 @@
 import 'package:sky/widgets/checkbox.dart';
 import 'package:sky/widgets/popup_menu.dart';
 import 'package:sky/widgets/basic.dart';
-import 'package:sky/framework/theme/view_configuration.dart';
+import 'package:sky/theme/view_configuration.dart';
 
 class StockMenu extends Component {
 

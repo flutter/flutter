@@ -5,11 +5,12 @@
 import 'dart:sky';
 
 import 'package:mojom/intents/intents.mojom.dart';
-import 'package:sky/framework/shell.dart' as shell;
+import 'package:sky/mojo/shell.dart' as shell;
 import 'package:sky/painting/box_painter.dart';
 import 'package:sky/theme/colors.dart' as colors;
 import 'package:sky/theme/edges.dart';
 import 'package:sky/theme/typography.dart' as typography;
+import 'package:sky/widgets/basic.dart';
 import 'package:sky/widgets/card.dart';
 import 'package:sky/widgets/fixed_height_scrollable.dart';
 import 'package:sky/widgets/flat_button.dart';
@@ -17,7 +18,6 @@ import 'package:sky/widgets/material.dart';
 import 'package:sky/widgets/scaffold.dart';
 import 'package:sky/widgets/theme.dart';
 import 'package:sky/widgets/tool_bar.dart';
-import 'package:sky/widgets/basic.dart';
 
 void launch(String relativeUrl) {
   Uri url = Uri.base.resolve(relativeUrl);

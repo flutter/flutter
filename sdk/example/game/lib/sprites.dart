@@ -11,7 +11,7 @@ import 'package:sky/rendering/box.dart';
 import 'package:sky/rendering/object.dart';
 import 'package:sky/widgets/widget.dart';
 import 'package:vector_math/vector_math.dart';
-import 'package:sky/framework/net/fetch.dart';
+import 'package:sky/mojo/net/fetch.dart';
 
 part 'sprite_box.dart';
 part 'sprite_widget.dart';
