@@ -5,6 +5,8 @@
 import("//build/config/android/config.gni")
 import("//build/config/android/rules.gni")
 
+package_root = "$root_gen_dir/dart-pkg/packages"
+
 template("sky_apk") {
   android_apk(target_name) {
     apk_name = invoker.apk_name
@@ -23,12 +25,11 @@ template("sky_apk") {
 }
 
 template("sky_app") {
+  # Note: org.chromium.base.ResourceExtractor knows about 'snapshot_blob.bin'.
+  snapshot = "$target_gen_dir/snapshot_blob.bin"
+
   action("gen_snapshot") {
     main_dart = invoker.main_dart
-    package_root = "$root_gen_dir/dart-pkg/packages"
-
-    # Note: org.chromium.base.ResourceExtractor knows about 'snapshot_blob.bin'.
-    snapshot = "$target_gen_dir/snapshot_blob.bin"
 
     inputs = [
       main_dart,
@@ -62,6 +63,40 @@ template("sky_app") {
     ]
   }
 
+  if (defined(invoker.sky_yaml)) {
+    app_bundle = "$target_gen_dir/${target_name}.skyx"
+
+    action("gen_bundle") {
+      asset_base = "$package_root/sky/assets/material-design-icons"
+      sky_yaml = invoker.sky_yaml
+
+      sources = [
+        sky_yaml,
+        snapshot,
+      ]
+
+      outputs = [
+        app_bundle,
+      ]
+
+      script = "//sky/tools/skyx.py"
+
+      args = [
+        rebase_path(sky_yaml, root_build_dir),
+        "--asset-base",
+        rebase_path(asset_base, root_build_dir),
+        "--snapshot",
+        rebase_path(snapshot, root_build_dir),
+        "-o",
+        rebase_path(app_bundle, root_build_dir),
+      ]
+
+      deps = [
+        ":gen_snapshot",
+      ]
+    }
+  }
+
   copy_ex("assets") {
     clear_dir = true
     dest = "$target_gen_dir/assets"
@@ -91,6 +126,10 @@ template("sky_app") {
       ":assets",
       ":gen_snapshot",
     ]
+
+    if (defined(invoker.sky_yaml)) {
+      deps += [ ":gen_bundle" ]
+    }
 
     if (defined(invoker.deps)) {
       deps += invoker.deps
