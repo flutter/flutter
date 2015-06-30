@@ -1,6 +1,4 @@
-<sky>
-<import src="../resources/dom-utils.sky" as="DomUtils" />
-<script>
+import "../resources/dom_utils.dart";
 import "../resources/third_party/unittest/unittest.dart";
 import "../resources/unit.dart";
 
@@ -9,8 +7,7 @@ import "dart:sky";
 void main() {
   initUnit();
 
-  var childElementCount = DomUtils.childElementCount;
-  var childNodeCount = DomUtils.childNodeCount;
+  var document = new Document();
 
   test("should replace elements", () {
     var parent = document.createElement("div");
@@ -23,7 +20,7 @@ void main() {
 
   test("should replace text", () {
     var parent = document.createElement("div");
-    var oldChild = parent.appendChild(new Text(" it's a text "));
+    var oldChild = parent.appendChild(document.createText(" it's a text "));
     var newChild = document.createElement("div");
     oldChild.replaceWith([newChild]);
     expect(oldChild.parentNode, isNull);
@@ -33,8 +30,8 @@ void main() {
   test("should replace children with a fragment", () {
     var fragment = document.createDocumentFragment();
     var child1 = fragment.appendChild(document.createElement("div"));
-    var child2 = fragment.appendChild(new Text(" text "));
-    var child3 = fragment.appendChild(new Text(" "));
+    var child2 = fragment.appendChild(document.createText(" text "));
+    var child3 = fragment.appendChild(document.createText(" "));
     var child4 = fragment.appendChild(document.createElement("div"));
     var parent = document.createElement("div");
     var oldChild = parent.appendChild(document.createElement("div"));
@@ -72,5 +69,3 @@ void main() {
   //   }, throws);
   // });
 }
-</script>
-</sky>

@@ -1,6 +1,4 @@
-<sky>
-<import src="../resources/dom-utils.sky" as="DomUtils" />
-<script>
+import "../resources/dom_utils.dart";
 import "../resources/third_party/unittest/unittest.dart";
 import "../resources/unit.dart";
 
@@ -9,8 +7,7 @@ import "dart:sky";
 void main() {
   initUnit();
 
-  var childElementCount = DomUtils.childElementCount;
-  var childNodeCount = DomUtils.childNodeCount;
+  Document document = new Document();
 
   test("should throw with invalid arguments", () {
     var parent = document.createElement("div");
@@ -28,8 +25,8 @@ void main() {
   test("should insert children", () {
     var parent = document.createElement("div");
     var child1 = parent.appendChild(document.createElement("div"));
-    var child2 = parent.appendChild(new Text(" text "));
-    var child3 = parent.appendChild(new Text(" "));
+    var child2 = parent.appendChild(document.createText(" text "));
+    var child3 = parent.appendChild(document.createText(" "));
     var child4 = parent.appendChild(document.createElement("div"));
     expect(child1.parentNode, equals(parent));
     expect(child2.parentNode, equals(parent));
@@ -42,8 +39,8 @@ void main() {
   test("should insert children with a fragment", () {
     var fragment = document.createDocumentFragment();
     var child1 = fragment.appendChild(document.createElement("div"));
-    var child2 = fragment.appendChild(new Text(" text "));
-    var child3 = fragment.appendChild(new Text(" "));
+    var child2 = fragment.appendChild(document.createText(" text "));
+    var child3 = fragment.appendChild(document.createText(" "));
     var child4 = fragment.appendChild(document.createElement("div"));
     var parent = document.createElement("div");
     parent.appendChild(fragment);
@@ -79,5 +76,3 @@ void main() {
   //   }, throws);
   // });
 }
-</script>
-</sky>

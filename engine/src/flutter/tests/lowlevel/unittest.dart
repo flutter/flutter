@@ -1,4 +1,3 @@
-<script>
 import "../resources/third_party/unittest/unittest.dart";
 import "../resources/unit.dart";
 
@@ -10,4 +9,3 @@ void main() {
     expect(x, equals(5));
   });
 }
-</script>>

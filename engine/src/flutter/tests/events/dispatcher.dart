@@ -1,4 +1,3 @@
-<script>
 import "../resources/third_party/unittest/unittest.dart";
 import "../resources/unit.dart";
 import "dart:sky";
@@ -100,4 +99,3 @@ void main() {
 
   });
 }
-</script>

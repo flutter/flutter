@@ -1,6 +1,3 @@
-<html>
-<foo />
-<script>
 import "../resources/third_party/unittest/unittest.dart";
 import "../resources/unit.dart";
 
@@ -10,14 +7,14 @@ void main() {
   initUnit();
 
   test('should be settable using "style" attribute', () {
-    var foo = document.querySelector('foo');
-    foo.setAttribute('style', 'color: red');
+    LayoutRoot layoutRoot = new LayoutRoot();
+    var document = new Document();
+    var foo = document.createElement('foo');
+    layoutRoot.rootElement = foo;
 
+    foo.setAttribute('style', 'color: red');
 
     expect(foo.getAttribute('style'), equals('color: red'));
     expect(foo.style["color"], equals('rgb(255, 0, 0)'));
-    expect(window.getComputedStyle(foo)["color"], equals('rgb(255, 0, 0)'));
   });
 }
-</script>
-</html>

@@ -1,5 +1,3 @@
-<sky>
-<script>
 import "../resources/third_party/unittest/unittest.dart";
 import "../resources/unit.dart";
 
@@ -47,5 +45,3 @@ void main() {
     expect(child.owner, isNull);
   });
 }
-</script>
-</sky>

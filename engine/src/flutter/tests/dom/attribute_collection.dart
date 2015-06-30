@@ -1,5 +1,3 @@
-<html>
-<script>
 import "../resources/third_party/unittest/unittest.dart";
 import "../resources/unit.dart";
 
@@ -10,6 +8,7 @@ void main() {
 
   var div;
   setUp(() {
+    var document = new Document();
     div = document.createElement("div");
   });
 
@@ -63,5 +62,3 @@ void main() {
     expect(oldAttributes[2].value, equals("2"));
   });
 }
-</script>
-</html>

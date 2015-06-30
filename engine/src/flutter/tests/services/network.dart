@@ -1,6 +1,3 @@
-#!mojo mojo:sky_viewer
-<sky>
-<script>
 import 'dart:async';
 import 'dart:typed_data';
 import "dart:sky.internals" as internals;
@@ -45,5 +42,3 @@ main() async {
   var result = await run(url);
   internals.notifyTestComplete(result);
 }
-</script>
-</sky>

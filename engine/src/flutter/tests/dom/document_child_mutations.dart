@@ -1,6 +1,4 @@
-<sky>
-<import src="../resources/dom-utils.sky" as="DomUtils" />
-<script>
+import "../resources/dom_utils.dart";
 import "../resources/third_party/unittest/unittest.dart";
 import "../resources/unit.dart";
 
@@ -10,9 +8,6 @@ void main() {
   initUnit();
 
   var doc;
-
-  var childElementCount = DomUtils.childElementCount;
-  var childNodeCount = DomUtils.childNodeCount;
 
   setUp(() {
     doc = new Document();
@@ -29,7 +24,7 @@ void main() {
   });
 
   test("should allow replacing a text child with an element", () {
-    var oldChild = doc.appendChild(new Text("text here"));
+    var oldChild = doc.appendChild(doc.createText("text here"));
     expect(childElementCount(doc), equals(0));
     expect(childNodeCount(doc), equals(1));
     var newChild = doc.createElement("div");
@@ -43,7 +38,7 @@ void main() {
   test("should allow replacing the document element with text", () {
     var oldChild = doc.appendChild(doc.createElement("div"));
     expect(childElementCount(doc), equals(1));
-    var newChild = new Text(" text ");
+    var newChild = doc.createText(" text ");
     oldChild.replaceWith([newChild]);
     expect(childElementCount(doc), equals(0));
     expect(childNodeCount(doc), equals(1));
@@ -53,8 +48,8 @@ void main() {
 
   test("should allow inserting text with a fragment", () {
     var fragment = doc.createDocumentFragment();
-    fragment.appendChild(new Text(" text "));
-    fragment.appendChild(new Text(" text "));
+    fragment.appendChild(doc.createText(" text "));
+    fragment.appendChild(doc.createText(" text "));
     expect(childNodeCount(doc), equals(0));
     doc.appendChild(fragment);
     expect(childElementCount(doc), equals(0));
@@ -65,9 +60,9 @@ void main() {
     var oldChild = doc.appendChild(doc.createElement("div"));
     expect(childElementCount(doc), equals(1));
     var fragment = doc.createDocumentFragment();
-    fragment.appendChild(new Text(" text "));
+    fragment.appendChild(doc.createText(" text "));
     var newChild = fragment.appendChild(doc.createElement("div"));
-    fragment.appendChild(new Text(" "));
+    fragment.appendChild(doc.createText(" "));
     oldChild.replaceWith([fragment]);
     expect(childElementCount(doc), equals(1));
     expect(childNodeCount(doc), equals(3));
@@ -77,7 +72,7 @@ void main() {
 
   test("should throw when inserting multiple elements", () {
     doc.appendChild(doc.createElement("div"));
-    var oldChild = doc.appendChild(new Text(" text "));
+    var oldChild = doc.appendChild(doc.createText(" text "));
     expect(childElementCount(doc), equals(1));
     var newChild = doc.createElement("div");
     // expect(() {
@@ -92,10 +87,10 @@ void main() {
     var oldChild = doc.appendChild(doc.createElement("div"));
     expect(childElementCount(doc), equals(1));
     var fragment = doc.createDocumentFragment();
-    fragment.appendChild(new Text(" text "));
+    fragment.appendChild(doc.createText(" text "));
     fragment.appendChild(doc.createElement("div"));
     fragment.appendChild(doc.createElement("div"));
-    fragment.appendChild(new Text(" "));
+    fragment.appendChild(doc.createText(" "));
     // expect(() {
     //   doc.replaceChild(fragment, 0);
     // }, throws);
@@ -104,5 +99,3 @@ void main() {
     // }, throws);
   });
 }
-</script>
-</sky>
