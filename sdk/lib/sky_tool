@@ -120,7 +120,7 @@ class StartSky(object):
             help='launch %s on the device' % APK_NAME)
         start_parser.add_argument('--install', action='store_true')
         start_parser.add_argument('project_or_path', nargs='?', type=str,
-            default='main.dart')
+            default='.')
         start_parser.set_defaults(func=self.run)
 
     def _is_package_installed(self, package_name):
@@ -134,8 +134,8 @@ class StartSky(object):
 
         if os.path.isdir(project_or_path):
             sky_server_root = project_or_path
-            main_dart = os.path.join(project_or_path, 'main.dart')
-            missing_msg = "Missing main.dart in project: %s" % sky_server_root
+            main_dart = os.path.join(project_or_path, 'lib', 'main.dart')
+            missing_msg = "Missing lib/main.dart in project: %s" % project_dir
         else:
             # FIXME: This assumes the path is at the root of the project!
             # Instead we should walk up looking for a pubspec.yaml
