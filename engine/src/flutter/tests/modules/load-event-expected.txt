@@ -1,2 +1,0 @@
-PASS: Load event fired.
-PASS: pass.sky succesfully exported this string.

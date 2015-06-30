@@ -1,7 +1,0 @@
-CONSOLE: unittest-suite-wait-for-done
-#BEGIN
-CONSOLE: PASS: should be able to send events
-CONSOLE: 
-CONSOLE: All 1 tests passed.
-CONSOLE: unittest-suite-success
-DONE

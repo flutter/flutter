@@ -1,5 +1,0 @@
-<script>
-module.import("resources/pass.sky").then(function(hello) {
-  internals.notifyTestComplete(hello);
-});
-</script>

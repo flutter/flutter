@@ -1,2 +1,0 @@
-PASS: [object Object]
-PASS: [object Object]

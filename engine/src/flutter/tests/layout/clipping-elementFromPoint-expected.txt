@@ -1,7 +1,0 @@
-CONSOLE: unittest-suite-wait-for-done
-CONSOLE: PASS: should hit test toolbar
-CONSOLE: PASS: should hit test toolbar when transformed, but clipped element overlaps
-CONSOLE: 
-CONSOLE: All 2 tests passed.
-CONSOLE: unittest-suite-success
-DONE

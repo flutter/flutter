@@ -1,9 +1,0 @@
-CONSOLE: unittest-suite-wait-for-done
-CONSOLE: PASS: pixel translate should roundtrip
-CONSOLE: PASS: percent translate should roundtrip
-CONSOLE: PASS: scale should roundtrip
-CONSOLE: PASS: removing a transform should not crash
-CONSOLE: 
-CONSOLE: All 4 tests passed.
-CONSOLE: unittest-suite-success
-DONE

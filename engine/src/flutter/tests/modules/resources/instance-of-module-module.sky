@@ -1,3 +1,0 @@
-<script>
-module.exports = module instanceof Module ? 'PASS' : 'FAIL: ' + module;
-</script>

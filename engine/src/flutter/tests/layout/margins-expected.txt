@@ -1,5 +1,0 @@
-FAIL:
-<div class="child" data-total-y="15" style="background-color: salmon">
-Expected 15 for clientTop+offsetTop, but got 10, clientTop: 0, + offsetTop: 10.
-<div class="child" data-total-y="65" style="background-color: papayawhip">
-Expected 65 for clientTop+offsetTop, but got 60, clientTop: 0, + offsetTop: 60.

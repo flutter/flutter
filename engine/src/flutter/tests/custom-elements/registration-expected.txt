@@ -1,2 +1,0 @@
-CONSOLE: PASS: FooElement attached.
-
