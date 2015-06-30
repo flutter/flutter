@@ -6,9 +6,6 @@
 
 #include "mojo/public/cpp/application/connect.h"
 #include "mojo/public/cpp/bindings/array.h"
-#include "sky/engine/public/web/WebDocument.h"
-#include "sky/engine/public/web/WebFrame.h"
-#include "sky/engine/public/web/WebView.h"
 #include "sky/engine/tonic/dart_builtin.h"
 #include "sky/engine/tonic/dart_converter.h"
 #include "sky/engine/tonic/dart_error.h"
@@ -112,16 +109,11 @@ Internals::~Internals() {
 }
 
 std::string Internals::RenderTreeAsText() {
-  if (!document_view_)
-    return std::string();
-  return document_view_->web_view()->mainFrame()->renderTreeAsText().utf8();
+  return std::string();
 }
 
 std::string Internals::ContentAsText() {
-  if (!document_view_)
-    return std::string();
-  return document_view_->web_view()->mainFrame()->contentAsText(
-      1024*1024).utf8();
+  return std::string();
 }
 
 void Internals::NotifyTestComplete(const std::string& test_result) {

@@ -22,8 +22,6 @@
 #include "sky/engine/public/platform/ServiceProvider.h"
 #include "sky/engine/public/sky/sky_view.h"
 #include "sky/engine/public/sky/sky_view_client.h"
-#include "sky/engine/public/web/WebFrameClient.h"
-#include "sky/engine/public/web/WebViewClient.h"
 #include "sky/services/testing/test_harness.mojom.h"
 #include "sky/viewer/compositor/layer_client.h"
 #include "sky/viewer/compositor/layer_host_client.h"
@@ -42,8 +40,6 @@ class LayerHost;
 class DartLibraryProviderImpl;
 
 class DocumentView : public blink::ServiceProvider,
-                     public blink::WebFrameClient,
-                     public blink::WebViewClient,
                      public blink::SkyViewClient,
                      public mojo::ViewManagerDelegate,
                      public mojo::ViewObserver,
@@ -58,8 +54,6 @@ class DocumentView : public blink::ServiceProvider,
   ~DocumentView() override;
 
   base::WeakPtr<DocumentView> GetWeakPtr();
-
-  blink::WebView* web_view() const { return web_view_; }
 
   mojo::Shell* shell() const { return shell_; }
 
@@ -83,29 +77,8 @@ class DocumentView : public blink::ServiceProvider,
   mojo::ScopedMessagePipeHandle TakeServiceRegistry();
 
  private:
-  // WebViewClient methods:
-  void initializeLayerTreeView() override;
-  void scheduleVisualUpdate() override;
-  blink::WebScreenInfo screenInfo() override;
-
-  // WebFrameClient methods:
-  mojo::View* createChildFrame() override;
-  void frameDetached(blink::WebFrame*) override;
-  blink::WebNavigationPolicy decidePolicyForNavigation(
-    const blink::WebFrameClient::NavigationPolicyInfo& info) override;
-  void didAddMessageToConsole(
-      const blink::WebConsoleMessage& message,
-      const blink::WebString& source_name,
-      unsigned source_line,
-      const blink::WebString& stack_trace) override;
-  void didCreateIsolate(blink::WebLocalFrame* frame,
-                        Dart_Isolate isolate) override;
-
   // SkyViewClient methods:
   void DidCreateIsolate(Dart_Isolate isolate) override;
-
-  // WebViewClient methods:
-  blink::ServiceProvider* services() override;
 
   // Services methods:
   mojo::NavigatorHost* NavigatorHost() override;
@@ -146,7 +119,6 @@ class DocumentView : public blink::ServiceProvider,
   TestHarnessPtr test_harness_;
   mojo::NavigatorHostPtr navigator_host_;
   std::unique_ptr<blink::SkyView> sky_view_;
-  blink::WebView* web_view_;
   mojo::View* root_;
   mojo::ViewManagerClientFactory view_manager_client_factory_;
   scoped_ptr<DartLibraryProviderImpl> library_provider_;

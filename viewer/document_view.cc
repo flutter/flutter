@@ -23,13 +23,6 @@
 #include "sky/engine/public/platform/WebInputEvent.h"
 #include "sky/engine/public/platform/WebScreenInfo.h"
 #include "sky/engine/public/web/Sky.h"
-#include "sky/engine/public/web/WebConsoleMessage.h"
-#include "sky/engine/public/web/WebDocument.h"
-#include "sky/engine/public/web/WebElement.h"
-#include "sky/engine/public/web/WebLocalFrame.h"
-#include "sky/engine/public/web/WebScriptSource.h"
-#include "sky/engine/public/web/WebSettings.h"
-#include "sky/engine/public/web/WebView.h"
 #include "sky/services/platform/url_request_types.h"
 #include "sky/viewer/compositor/layer.h"
 #include "sky/viewer/compositor/layer_host.h"
@@ -46,27 +39,6 @@
 
 namespace sky {
 namespace {
-
-void ConfigureSettings(blink::WebSettings* settings) {
-  settings->setDefaultFixedFontSize(13);
-  settings->setDefaultFontSize(16);
-  settings->setLoadsImagesAutomatically(true);
-}
-
-mojo::Target WebNavigationPolicyToNavigationTarget(
-    blink::WebNavigationPolicy policy) {
-  switch (policy) {
-    case blink::WebNavigationPolicyCurrentTab:
-      return mojo::TARGET_SOURCE_NODE;
-    case blink::WebNavigationPolicyNewBackgroundTab:
-    case blink::WebNavigationPolicyNewForegroundTab:
-    case blink::WebNavigationPolicyNewWindow:
-    case blink::WebNavigationPolicyNewPopup:
-      return mojo::TARGET_NEW_NODE;
-    default:
-      return mojo::TARGET_DEFAULT;
-  }
-}
 
 ui::EventType ConvertEventTypeToUIEventType(blink::WebInputEvent::Type type) {
   if (type == blink::WebInputEvent::PointerDown)
@@ -117,7 +89,6 @@ DocumentView::DocumentView(
       exported_services_(services.Pass()),
       imported_services_(exported_services.Pass()),
       shell_(shell),
-      web_view_(nullptr),
       root_(nullptr),
       view_manager_client_factory_(shell_, this),
       bitmap_rasterizer_(nullptr),
@@ -127,8 +98,6 @@ DocumentView::DocumentView(
 }
 
 DocumentView::~DocumentView() {
-  if (web_view_)
-    web_view_->close();
   if (root_)
     root_->RemoveObserver(this);
   ui::GestureRecognizer::Get()->CleanupStateForConsumer(this);
@@ -159,10 +128,6 @@ void DocumentView::OnEmbed(
 
   UpdateRootSizeAndViewportMetrics(root_->bounds());
 
-  // TODO(abarth): We should ask the view whether it is focused instead of
-  // assuming that we're focused.
-  if (web_view_)
-    web_view_->setFocus(true);
   root_->AddObserver(this);
 }
 
@@ -170,34 +135,17 @@ void DocumentView::OnViewManagerDisconnected(mojo::ViewManager* view_manager) {
   // TODO(aa): Need to figure out how shutdown works.
 }
 void DocumentView::Load(mojo::URLResponsePtr response) {
-  GURL responseURL(response->url);
-
-  if (!blink::WebView::shouldUseWebView(responseURL)) {
-    String name = String::fromUTF8(responseURL.spec());
-    library_provider_.reset(new DartLibraryProviderImpl(
-        blink::Platform::current()->networkService(),
-        CreatePrefetchedLibraryIfNeeded(name, response.Pass())));
-    sky_view_ = blink::SkyView::Create(this);
-    initializeLayerTreeView();
-    sky_view_->RunFromLibrary(name, library_provider_.get());
-    return;
-  }
-
-  if (!RuntimeFlags::Get().testing())
-    LOG(WARNING) << ".sky support is deprecated, please use .dart for main()";
-
-  web_view_ = blink::WebView::create(this);
-  ConfigureSettings(web_view_->settings());
-  web_view_->setMainFrame(blink::WebLocalFrame::create(this));
-  web_view_->mainFrame()->loadFromDataPipeWithURL(
-      response->body.Pass(), responseURL);
-}
-
-void DocumentView::initializeLayerTreeView() {
+  String name = String::fromUTF8(response->url);
+  library_provider_.reset(new DartLibraryProviderImpl(
+      blink::Platform::current()->networkService(),
+      CreatePrefetchedLibraryIfNeeded(name, response.Pass())));
+  sky_view_ = blink::SkyView::Create(this);
   layer_host_.reset(new LayerHost(this));
   root_layer_ = make_scoped_refptr(new Layer(this));
   root_layer_->set_rasterizer(CreateRasterizer());
   layer_host_->SetRootLayer(root_layer_);
+
+  sky_view_->RunFromLibrary(name, library_provider_.get());
 }
 
 scoped_ptr<Rasterizer> DocumentView::CreateRasterizer() {
@@ -241,21 +189,6 @@ void DocumentView::BeginFrame(base::TimeTicks frame_time) {
     sky_view_->BeginFrame(frame_time);
     root_layer_->SetSize(sky_view_->display_metrics().physical_size);
   }
-  if (web_view_) {
-    double frame_time_sec = (frame_time - base::TimeTicks()).InSecondsF();
-    double deadline_sec = frame_time_sec;
-    double interval_sec = 1.0/60;
-    blink::WebBeginFrameArgs web_begin_frame_args(
-        frame_time_sec, deadline_sec, interval_sec);
-
-    web_view_->beginFrame(web_begin_frame_args);
-    web_view_->layout();
-
-    blink::WebSize size = web_view_->size();
-    float device_pixel_ratio = GetDevicePixelRatio();
-    root_layer_->SetSize(gfx::Size(size.width * device_pixel_ratio,
-                                   size.height * device_pixel_ratio));
-  }
 }
 
 void DocumentView::OnSurfaceIdAvailable(mojo::SurfaceIdPtr surface_id) {
@@ -273,38 +206,6 @@ void DocumentView::PaintContents(SkCanvas* canvas, const gfx::Rect& clip) {
     if (picture)
       canvas->drawPicture(picture.get());
   }
-
-  if (web_view_)
-    web_view_->paint(canvas, rect);
-}
-
-void DocumentView::scheduleVisualUpdate() {
-  layer_host_->SetNeedsAnimate();
-}
-
-blink::WebScreenInfo DocumentView::screenInfo() {
-  DCHECK(root_);
-  auto& metrics = root_->viewport_metrics();
-  blink::WebScreenInfo screen;
-  screen.rect = blink::WebRect(0, 0, metrics.size->width, metrics.size->height);
-  screen.availableRect = screen.rect;
-  screen.deviceScaleFactor = metrics.device_pixel_ratio;
-  return screen;
-}
-
-mojo::View* DocumentView::createChildFrame() {
-  if (!root_)
-    return nullptr;
-
-  mojo::View* child = root_->view_manager()->CreateView();
-  child->SetVisible(true);
-  root_->AddChild(child);
-  return child;
-}
-
-void DocumentView::frameDetached(blink::WebFrame* frame) {
-  // |frame| is invalid after here.
-  frame->close();
 }
 
 float DocumentView::GetDevicePixelRatio() const {
@@ -313,36 +214,8 @@ float DocumentView::GetDevicePixelRatio() const {
   return 1.f;
 }
 
-blink::WebNavigationPolicy DocumentView::decidePolicyForNavigation(
-    const blink::WebFrameClient::NavigationPolicyInfo& info) {
-
-  if (navigator_host_.get()) {
-    navigator_host_->RequestNavigate(
-        WebNavigationPolicyToNavigationTarget(info.defaultPolicy),
-        mojo::URLRequest::From(info.urlRequest).Pass());
-  }
-
-  return blink::WebNavigationPolicyIgnore;
-}
-
-void DocumentView::didAddMessageToConsole(
-    const blink::WebConsoleMessage& message,
-    const blink::WebString& source_name,
-    unsigned source_line,
-    const blink::WebString& stack_trace) {
-}
-
-void DocumentView::didCreateIsolate(blink::WebLocalFrame* frame,
-                                    Dart_Isolate isolate) {
-  Internals::Create(isolate, this);
-}
-
 void DocumentView::DidCreateIsolate(Dart_Isolate isolate) {
   Internals::Create(isolate, this);
-}
-
-blink::ServiceProvider* DocumentView::services() {
-  return this;
 }
 
 mojo::NavigatorHost* DocumentView::NavigatorHost() {
@@ -362,9 +235,6 @@ void DocumentView::OnViewViewportMetricsChanged(
     const mojo::ViewportMetrics& new_metrics) {
   DCHECK_EQ(view, root_);
 
-  if (web_view_) {
-    web_view_->setDeviceScaleFactor(GetDevicePixelRatio());
-  }
   UpdateRootSizeAndViewportMetrics(root_->bounds());
 }
 
@@ -380,20 +250,10 @@ void DocumentView::UpdateRootSizeAndViewportMetrics(
     sky_view_->SetDisplayMetrics(metrics);
     return;
   }
-
-  web_view_->resize(blink::WebSize(new_bounds.width / device_pixel_ratio,
-                                   new_bounds.height / device_pixel_ratio));
 }
 
 void DocumentView::OnViewFocusChanged(mojo::View* gained_focus,
                                       mojo::View* lost_focus) {
-  if (sky_view_)
-    return;
-  if (root_ == lost_focus) {
-    web_view_->setFocus(false);
-  } else if (root_ == gained_focus) {
-    web_view_->setFocus(true);
-  }
 }
 
 void DocumentView::OnViewDestroyed(mojo::View* view) {
@@ -418,8 +278,6 @@ void DocumentView::OnViewInputEvent(
 
   bool handled = false;
 
-  if (web_view_)
-    handled = web_view_->handleInputEvent(*web_event);
   if (sky_view_)
     sky_view_->HandleInputEvent(*web_event);
 
@@ -431,8 +289,6 @@ void DocumentView::OnViewInputEvent(
         scoped_ptr<blink::WebInputEvent> gesture_event =
             ConvertEvent(*gesture, device_pixel_ratio);
         if (gesture_event) {
-          if (web_view_)
-            web_view_->handleInputEvent(*gesture_event);
           if (sky_view_)
             sky_view_->HandleInputEvent(*gesture_event);
         }

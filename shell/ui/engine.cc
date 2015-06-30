@@ -14,9 +14,6 @@
 #include "sky/engine/public/platform/sky_display_metrics.h"
 #include "sky/engine/public/platform/sky_display_metrics.h"
 #include "sky/engine/public/web/Sky.h"
-#include "sky/engine/public/web/WebLocalFrame.h"
-#include "sky/engine/public/web/WebSettings.h"
-#include "sky/engine/public/web/WebView.h"
 #include "sky/services/platform/platform_impl.h"
 #include "sky/shell/dart/dart_library_provider_files.h"
 #include "sky/shell/dart/dart_library_provider_network.h"
@@ -43,12 +40,6 @@ mojo::ScopedDataPipeConsumerHandle Fetch(const base::FilePath& path) {
   return pipe.consumer_handle.Pass();
 }
 
-void ConfigureSettings(blink::WebSettings* settings) {
-  settings->setDefaultFixedFontSize(13);
-  settings->setDefaultFontSize(16);
-  settings->setLoadsImagesAutomatically(true);
-}
-
 PlatformImpl* g_platform_impl = nullptr;
 
 }
@@ -62,15 +53,12 @@ Engine::Config::~Config() {
 Engine::Engine(const Config& config)
     : config_(config),
       animator_(new Animator(config, this)),
-      web_view_(nullptr),
       device_pixel_ratio_(1.0f),
       viewport_observer_binding_(this),
       weak_factory_(this) {
 }
 
 Engine::~Engine() {
-  if (web_view_)
-    web_view_->close();
 }
 
 base::WeakPtr<Engine> Engine::GetWeakPtr() {
@@ -95,15 +83,6 @@ void Engine::BeginFrame(base::TimeTicks frame_time) {
 
   if (sky_view_)
     sky_view_->BeginFrame(frame_time);
-
-  if (web_view_) {
-    double frame_time_sec = (frame_time - base::TimeTicks()).InSecondsF();
-    double deadline_sec = frame_time_sec;
-    double interval_sec = 1.0 / 60;
-    blink::WebBeginFrameArgs args(frame_time_sec, deadline_sec, interval_sec);
-    web_view_->beginFrame(args);
-    web_view_->layout();
-  }
 }
 
 skia::RefPtr<SkPicture> Engine::Paint() {
@@ -123,9 +102,6 @@ skia::RefPtr<SkPicture> Engine::Paint() {
       canvas->drawPicture(picture.get());
   }
 
-  if (web_view_)
-    web_view_->paint(canvas.get(), blink::WebRect(gfx::Rect(physical_size_)));
-
   return skia::AdoptRef(recorder.endRecordingAsPicture());
 }
 
@@ -139,9 +115,7 @@ void Engine::OnAcceleratedWidgetAvailable(gfx::AcceleratedWidget widget) {
       FROM_HERE, base::Bind(&GPUDelegate::OnAcceleratedWidgetAvailable,
                             config_.gpu_delegate, widget));
   if (sky_view_)
-    scheduleVisualUpdate();
-  if (web_view_)
-    scheduleVisualUpdate();
+    ScheduleFrame();
 }
 
 void Engine::OnOutputSurfaceDestroyed() {
@@ -157,9 +131,6 @@ void Engine::OnViewportMetricsChanged(int width, int height,
 
   if (sky_view_)
     UpdateSkyViewSize();
-
-  if (web_view_)
-    UpdateWebViewSize();
 }
 
 void Engine::UpdateSkyViewSize() {
@@ -170,24 +141,6 @@ void Engine::UpdateSkyViewSize() {
   sky_view_->SetDisplayMetrics(metrics);
 }
 
-void Engine::UpdateWebViewSize() {
-  CHECK(web_view_);
-  web_view_->setDeviceScaleFactor(device_pixel_ratio_);
-  gfx::SizeF size = gfx::ScaleSize(physical_size_, 1 / device_pixel_ratio_);
-  // FIXME: We should be able to set the size of the WebView in floating point
-  // because its in logical pixels.
-  web_view_->resize(blink::WebSize(size.width(), size.height()));
-}
-
-// TODO(eseidel): This is likely not needed anymore.
-blink::WebScreenInfo Engine::screenInfo() {
-  blink::WebScreenInfo screen;
-  screen.rect = blink::WebRect(gfx::Rect(physical_size_));
-  screen.availableRect = screen.rect;
-  screen.deviceScaleFactor = device_pixel_ratio_;
-  return screen;
-}
-
 void Engine::OnInputEvent(InputEventPtr event) {
   TRACE_EVENT0("sky", "Engine::OnInputEvent");
   scoped_ptr<blink::WebInputEvent> web_event =
@@ -196,19 +149,9 @@ void Engine::OnInputEvent(InputEventPtr event) {
     return;
   if (sky_view_)
     sky_view_->HandleInputEvent(*web_event);
-  if (web_view_)
-    web_view_->handleInputEvent(*web_event);
-}
-
-void Engine::CloseWebViewIfNeeded() {
-  if (web_view_) {
-    web_view_->close();
-    web_view_ = nullptr;
-  }
 }
 
 void Engine::RunFromLibrary(const mojo::String& name) {
-  CloseWebViewIfNeeded();
   sky_view_ = blink::SkyView::Create(this);
   sky_view_->RunFromLibrary(blink::WebString::fromUTF8(name),
                             dart_library_provider_.get());
@@ -216,10 +159,6 @@ void Engine::RunFromLibrary(const mojo::String& name) {
 }
 
 void Engine::RunFromNetwork(const mojo::String& url) {
-  if (blink::WebView::shouldUseWebView(GURL(url))) {
-    LoadUsingWebView(url);
-    return;
-  }
   dart_library_provider_.reset(
       new DartLibraryProviderNetwork(g_platform_impl->networkService()));
   RunFromLibrary(url);
@@ -233,48 +172,10 @@ void Engine::RunFromFile(const mojo::String& main,
 }
 
 void Engine::RunFromSnapshot(const mojo::String& path) {
-  CloseWebViewIfNeeded();
   sky_view_ = blink::SkyView::Create(this);
   sky_view_->RunFromSnapshot(blink::WebString::fromUTF8(path),
                              Fetch(base::FilePath(path)));
   UpdateSkyViewSize();
-}
-
-void Engine::LoadUsingWebView(const mojo::String& mojo_url) {
-  GURL url(mojo_url);
-  DCHECK(blink::WebView::shouldUseWebView(url));
-
-  if (sky_view_)
-    sky_view_ = nullptr;
-
-  LOG(WARNING) << ".sky support is deprecated, please use .dart for main()";
-
-  // Something bad happens if you try to call WebView::close and replace
-  // the webview.  So for now we just load into the existing one. :/
-  if (!web_view_)
-    web_view_ = blink::WebView::create(this);
-  ConfigureSettings(web_view_->settings());
-  web_view_->setMainFrame(blink::WebLocalFrame::create(this));
-  UpdateWebViewSize();
-  web_view_->mainFrame()->load(url);
-}
-
-void Engine::frameDetached(blink::WebFrame* frame) {
-  // |frame| is invalid after here.
-  frame->close();
-}
-
-void Engine::initializeLayerTreeView() {
-}
-
-void Engine::scheduleVisualUpdate() {
-  animator_->RequestFrame();
-}
-
-void Engine::didCreateIsolate(blink::WebLocalFrame* frame,
-                              Dart_Isolate isolate) {
-  Internals::Create(isolate,
-                    CreateServiceProvider(config_.service_provider_context));
 }
 
 void Engine::DidCreateIsolate(Dart_Isolate isolate) {
@@ -284,10 +185,6 @@ void Engine::DidCreateIsolate(Dart_Isolate isolate) {
 
 void Engine::ScheduleFrame() {
   animator_->RequestFrame();
-}
-
-blink::ServiceProvider* Engine::services() {
-  return this;
 }
 
 mojo::NavigatorHost* Engine::NavigatorHost() {

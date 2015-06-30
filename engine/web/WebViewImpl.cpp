@@ -92,23 +92,9 @@ namespace blink {
 
 // WebView ----------------------------------------------------------------
 
-bool WebView::shouldUseWebView(const GURL& url)
-{
-    std::string filename = url.ExtractFileName();
-    int hashStart = filename.find('#');
-    if (hashStart != -1)
-        filename.resize(hashStart);
-    int queryStart = filename.find('?');
-    if (queryStart != -1)
-        filename.resize(queryStart);
-    // For now .dart indicates we should use SkyView. Eventually we'll
-    // use SkyView for all urls regardless of file extension.
-    return !EndsWith(filename, ".dart", false)
-        && !EndsWith(filename, ".snapshot", false);
-}
-
 WebView* WebView::create(WebViewClient* client)
 {
+    CRASH();  // WebView is deprecated. Please use SkyView.
     // Pass the WebViewImpl's self-reference to the caller.
     return WebViewImpl::create(client);
 }

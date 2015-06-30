@@ -50,9 +50,6 @@ struct WebPoint;
 
 class WebView : public WebWidget {
 public:
-    // I've added this here so that it dies when WebView does. :)
-    static bool shouldUseWebView(const GURL& url);
-
     // Initialization ------------------------------------------------------
 
     // Creates a WebView that is NOT yet initialized. You will need to
