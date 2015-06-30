@@ -127,10 +127,6 @@ template("sky_app") {
       ":gen_snapshot",
     ]
 
-    if (defined(invoker.sky_yaml)) {
-      deps += [ ":gen_bundle" ]
-    }
-
     if (defined(invoker.deps)) {
       deps += invoker.deps
     }
