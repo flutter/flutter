@@ -306,7 +306,6 @@ class CoveredMineNode extends Component {
     if (stopwatch == null)
       return;
     // Pointer down was a touch event.
-    var ms = stopwatch.elapsedMilliseconds;
     if (stopwatch.elapsedMilliseconds < 250) {
       game.probe(posX, posY);
     } else {

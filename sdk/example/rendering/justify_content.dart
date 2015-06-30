@@ -3,9 +3,8 @@
 // found in the LICENSE file.
 
 import 'dart:sky';
-import 'dart:math' as math;
 
-import 'package:sky/rendering/block.dart';
+import 'package:sky/painting/text_style.dart';
 import 'package:sky/rendering/box.dart';
 import 'package:sky/rendering/flex.dart';
 import 'package:sky/rendering/object.dart';
@@ -14,13 +13,15 @@ import 'package:sky/rendering/sky_binding.dart';
 
 import 'solid_color_box.dart';
 
+const TextStyle style = const TextStyle(color: const Color(0xFF000000));
+
 // Attempts to draw
 // http://www.w3.org/TR/2015/WD-css-flexbox-1-20150514/images/flex-pack.svg
 void main() {
   var table = new RenderFlex(direction: FlexDirection.vertical);
 
   void addRow(FlexJustifyContent justify) {
-    RenderParagraph paragraph = new RenderParagraph(new InlineText("${justify}"));
+    RenderParagraph paragraph = new RenderParagraph(new InlineStyle(style, [new InlineText("${justify}")]));
     table.add(new RenderPadding(child: paragraph, padding: new EdgeDims.only(top: 20.0)));
     var row = new RenderFlex(direction: FlexDirection.horizontal);
     row.add(new RenderSolidColorBox(const Color(0xFFFFCCCC), desiredSize: new Size(80.0, 60.0)));

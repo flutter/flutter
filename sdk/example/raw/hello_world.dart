@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import "dart:math";
 import 'dart:sky';
 
 Picture draw(int a, int r, int g, int b) {
@@ -13,7 +12,7 @@ Picture draw(int a, int r, int g, int b) {
   double radius = size.shortestSide * 0.45;
 
   Paint paint = new Paint()..color = new Color.fromARGB(a, r, g, b);
-  canvas.drawCircle(size.center, radius, paint);
+  canvas.drawCircle(size.center(Point.origin), radius, paint);
   return recorder.endRecording();
 }
 

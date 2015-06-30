@@ -14,12 +14,13 @@ import 'package:sky/rendering/sky_binding.dart';
 RenderBox getBox(double lh) {
   RenderParagraph paragraph = new RenderParagraph(
     new InlineStyle(
-      new TextStyle(),
+      new TextStyle(
+        color: const Color(0xFF0000A0)
+      ),
       [
         new InlineText('test'),
         new InlineStyle(
           new TextStyle(
-            color: const Color(0xFF0000A0),
             fontFamily: 'serif',
             fontSize: 50.0,
             height: lh
@@ -73,6 +74,5 @@ void main() {
     getBox(1.0),
     getBox(null),
   ]);
-  var b = new SkyBinding(root: root);
-  // b.onFrame = b.debugDumpRenderTree;
+  new SkyBinding(root: root);
 }

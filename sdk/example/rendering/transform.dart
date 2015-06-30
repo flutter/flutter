@@ -14,7 +14,7 @@ void main() {
     decoration: new BoxDecoration(backgroundColor: const sky.Color(0xFF00FF00))
   );
   RenderConstrainedBox box = new RenderConstrainedBox(
-    additionalConstraints: new BoxConstraints.tight(const Size(200.0, 200.0)),
+    additionalConstraints: new BoxConstraints.tight(const sky.Size(200.0, 200.0)),
     child: green
   );
 

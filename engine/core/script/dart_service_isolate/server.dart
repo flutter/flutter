@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-part of dart_controller_service_isolate;
+part of sky_shell_dart_controller_service_isolate;
 
 class WebSocketClient extends Client {
   static const int PARSE_ERROR_CODE = 4000;

@@ -4,7 +4,6 @@
 
 import 'dart:async';
 import 'dart:sky' as sky;
-import 'dart:typed_data';
 
 import 'package:mojo/core.dart' as core;
 import 'package:mojom/mojo/asset_bundle/asset_bundle.mojom.dart';

@@ -87,11 +87,11 @@ class Texture {
     if (rotated) {
       // Calculate the rotated frame and spriteSourceSize
       Size originalFrameSize = frame.size;
-      Rect rotatedFrame = new Rect.fromPointAndSize(frame.upperLeft, new Size(originalFrameSize.height, originalFrameSize.width));
+      Rect rotatedFrame = frame.topLeft & new Size(originalFrameSize.height, originalFrameSize.width);
       Point rotatedSpriteSourcePoint = new Point(
           -spriteSourceSize.top - (spriteSourceSize.bottom - spriteSourceSize.top),
           spriteSourceSize.left);
-      Rect rotatedSpriteSourceSize = new Rect.fromPointAndSize(rotatedSpriteSourcePoint, new Size(originalFrameSize.height, originalFrameSize.width));
+      Rect rotatedSpriteSourceSize = rotatedSpriteSourcePoint & new Size(originalFrameSize.height, originalFrameSize.width);
 
       // Draw the rotated sprite
       canvas.rotate(-Math.PI/2.0);

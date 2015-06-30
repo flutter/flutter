@@ -5,7 +5,6 @@
 import 'dart:sky';
 
 import 'package:sky/rendering/box.dart';
-import 'package:sky/rendering/flex.dart';
 import 'package:sky/rendering/sky_binding.dart';
 import 'package:sky/theme/colors.dart';
 import 'package:sky/theme/shadows.dart';
