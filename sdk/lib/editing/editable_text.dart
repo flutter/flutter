@@ -3,29 +3,37 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:sky' as sky;
 
 import '../painting/text_style.dart';
+import '../rendering/object.dart';
 import '../widgets/basic.dart';
 import 'editable_string.dart';
 
+const _kCursorBlinkPeriod = 500; // milliseconds
+const _kCursorGap = 1.0;
+const _kCursorHeightOffset = 2.0;
+const _kCursorWidth = 1.0;
+
 class EditableText extends Component {
 
-  EditableText({String key, this.value, this.focused})
-      : super(key: key, stateful: true);
-
-  // static final Style _cursorStyle = new Style('''
-  //   width: 2px;
-  //   height: 1.2em;
-  //   vertical-align: top;
-  //   background-color: ${Blue[500]};'''
-  // );
+  EditableText({
+    String key,
+    this.value,
+    this.focused: false,
+    this.style,
+    this.cursorColor}) : super(key: key, stateful: true);
 
   EditableString value;
   bool focused;
+  TextStyle style;
+  Color cursorColor;
 
   void syncFields(EditableText source) {
     value = source.value;
     focused = source.focused;
+    style = source.style;
+    cursorColor = source.cursorColor;
   }
 
   Timer _cursorTimer;
@@ -40,7 +48,7 @@ class EditableText extends Component {
   void _startCursorTimer() {
     _showCursor = true;
     _cursorTimer = new Timer.periodic(
-        new Duration(milliseconds: 500), _cursorTick);
+      new Duration(milliseconds: _kCursorBlinkPeriod), _cursorTick);
   }
 
   void didUnmount() {
@@ -55,21 +63,48 @@ class EditableText extends Component {
     _showCursor = false;
   }
 
+  void _paintCursor(sky.Canvas canvas, Size size) {
+    if (!_showCursor)
+      return;
+
+    print("Draw cursor");
+    Rect cursorRect =  new Rect.fromLTWH(
+      _kCursorGap, 
+      -_kCursorHeightOffset,
+      _kCursorWidth,
+      style.fontSize + 2 * _kCursorHeightOffset
+    );
+    canvas.drawRect(cursorRect, new Paint()..color = cursorColor);
+  }
+
   Widget build() {
+    assert(style != null);
+    assert(focused != null);
+    assert(cursorColor != null);
+
     if (focused && _cursorTimer == null)
       _startCursorTimer();
     else if (!focused && _cursorTimer != null)
       _stopCursorTimer();
 
     if (!value.composing.isValid) {
-      return new Text(value.text);
+      return new Text(value.text, style: style);
     }
 
-    return new StyledText(elements: [
-      const TextStyle(),
+    TextStyle composingStyle = style.merge(const TextStyle(decoration: underline));
+    StyledText text = new StyledText(elements: [
+      style,
       value.textBefore(value.composing),
-      [const TextStyle(decoration: underline), value.textInside(value.composing)],
+      [composingStyle, value.textInside(value.composing)],
       value.textAfter(value.composing)
     ]);
+
+    Widget cursor = new Container(
+      height: style.fontSize,
+      width: _kCursorGap + _kCursorWidth,
+      child: new CustomPaint(callback: _paintCursor, token: _showCursor)
+    );
+
+    return new Flex([text, cursor]);
   }
 }

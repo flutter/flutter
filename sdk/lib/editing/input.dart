@@ -3,14 +3,16 @@
 // found in the LICENSE file.
 
 import '../painting/text_style.dart';
-import '../theme/colors.dart';
-import '../theme/typography.dart' as typography;
 import '../widgets/basic.dart';
+import '../widgets/theme.dart';
 import 'editable_string.dart';
 import 'editable_text.dart';
 import 'keyboard.dart';
 
 typedef void ValueChanged(value);
+
+const double _kHintOpacity = 0.26;
+const EdgeDims _kTextfieldPadding = const EdgeDims.symmetric(vertical: 8.0);
 
 class Input extends Component {
 
@@ -24,8 +26,6 @@ class Input extends Component {
       onUpdated: _handleTextUpdated
     );
   }
-
-  static final TextStyle _placeholderStyle = typography.black.caption;
 
   String placeholder;
   ValueChanged onChanged;
@@ -56,23 +56,33 @@ class Input extends Component {
       _isAttachedToKeyboard = true;
     }
 
+    TextStyle textStyle = Theme.of(this).text.subhead;
     List<Widget> textChildren = <Widget>[];
+
     if (placeholder != null && _value.isEmpty) {
-      textChildren.add(new Text(placeholder, style: _placeholderStyle));
+      Widget child = new Opacity(
+        key: "placeholder",
+        child: new Text(placeholder, style: textStyle),
+        opacity: _kHintOpacity
+      );
+      textChildren.add(child);
     }
-    textChildren.add(
-      new EditableText(value: _editableValue, focused: focused)
-    );
+
+    textChildren.add(new EditableText(
+      value: _editableValue, 
+      focused: focused,
+      style: textStyle,
+      cursorColor: Theme.of(this).primary[200]
+    ));
 
     Border focusHighlight = new Border(bottom: new BorderSide(
-      color: focused ? Blue[400] : Grey[200],
+      color: focused ? Theme.of(this).primary[400] : Theme.of(this).primary[200],
       width: focused ? 2.0 : 1.0
     ));
 
-    // TODO(hansmuller): white-space: pre, height: 1.2em.
     Container input = new Container(
       child: new Stack(textChildren),
-      padding: const EdgeDims.only(left: 8.0, right: 8.0, bottom: 12.0),
+      padding: _kTextfieldPadding,
       decoration: new BoxDecoration(border: focusHighlight)
     );
 
