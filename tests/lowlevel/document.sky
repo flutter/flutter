@@ -1,8 +1,0 @@
-<script>
-import "dart:sky" as sky;
-import "dart:sky.internals" as internals;
-
-void main() {
-  internals.notifyTestComplete(sky.window.document is sky.Document ? "PASS" : "FAIL");
-}
-</script>>

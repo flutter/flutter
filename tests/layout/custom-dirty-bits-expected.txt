@@ -1,4 +1,0 @@
-layer at (0,0) size 800x600
-  RenderView {#document} at (0,0) size 800x600
-    RenderCustomLayout {block} at (0,0) size 0x0
-

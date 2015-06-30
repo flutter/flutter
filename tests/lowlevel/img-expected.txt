@@ -1,6 +1,0 @@
-layer at (0,0) size 800x600
-  RenderView {#document} at (0,0) size 800x600
-    RenderFlexibleBox {foo} at (0,0) size 800x89
-      RenderImage {img} at (0,0) size 800x64
-      RenderImage {img} at (0,64) size 100x25
-

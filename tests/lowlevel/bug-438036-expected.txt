@@ -1,7 +1,0 @@
-CONSOLE: unittest-suite-wait-for-done
-CONSOLE: PASS: should grow width to 200px
-CONSOLE: PASS: should grow height to 200px
-CONSOLE: 
-CONSOLE: All 2 tests passed.
-CONSOLE: unittest-suite-success
-DONE

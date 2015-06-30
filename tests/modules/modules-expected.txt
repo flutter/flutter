@@ -1,6 +1,0 @@
-Running 2 tests
-ok 1 Module should be constructable
-ok 2 Module should have an empty object by default for exports
-2 tests
-2 pass
-0 fail

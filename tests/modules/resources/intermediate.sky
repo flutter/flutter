@@ -1,5 +1,0 @@
-<import src="../../resources/dump-as-text.sky" />
-<import src="pass.sky" as="banana" />
-<script>
-final String message = banana.kHello;
-</script>

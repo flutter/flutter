@@ -1,5 +1,0 @@
-layer at (0,0) size 800x600
-  RenderView {#document} at (0,0) size 800x600
-    RenderFlexibleBox {sky} at (0,0) size 800x50
-      RenderFlexibleBox {div} at (0,0) size 50x50 [bgcolor=#FFC0CB]
-

@@ -1,6 +1,0 @@
-PASS: <div class= id=id1> order was 1
-PASS: <div class=class2 id=null> order was 2
-PASS: <tag-name-3 class= id=null> order was 3
-PASS: <div class=class4 class4 id=null> order was 4
-PASS: <div class=class5 id=id5> order was 5
-PASS: <tag-name-6 class=class6 id=id6> order was 6
