@@ -12,7 +12,9 @@ import 'scrollable.dart';
 
 abstract class FixedHeightScrollable extends Scrollable {
 
-  FixedHeightScrollable({ String key, this.itemHeight, Color backgroundColor })
+  final EdgeDims padding;
+
+  FixedHeightScrollable({ String key, this.itemHeight, Color backgroundColor, this.padding })
       : super(key: key, backgroundColor: backgroundColor) {
     assert(itemHeight != null);
   }
@@ -32,7 +34,10 @@ abstract class FixedHeightScrollable extends Scrollable {
   void set itemCount (int value) {
     if (_itemCount != value) {
       _itemCount = value;
-      scrollBehavior.contentsHeight = itemHeight * _itemCount;
+      double contentsHeight = itemHeight * _itemCount;
+      if (padding != null)
+         contentsHeight += padding.top + padding.bottom;
+      scrollBehavior.contentsHeight = contentsHeight;
     }
   }
 
@@ -76,7 +81,10 @@ abstract class FixedHeightScrollable extends Scrollable {
       child: new ClipRect(
         child: new Transform(
           transform: transform,
-          child: new Block(items)
+          child: new Container(
+            padding: padding,
+            child: new Block(items)
+          )
         )
       )
     );

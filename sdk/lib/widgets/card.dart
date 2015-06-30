@@ -27,7 +27,7 @@ class Card extends Component {
 
   Widget build() {
     return new Container(
-      margin: const EdgeDims(8.0, 8.0, 0.0, 8.0),
+      margin: const EdgeDims.all(4.0),
       child: new Material(
         color: materialColor,
         edge: MaterialEdge.card,
