@@ -168,8 +168,8 @@ class Solver {
     return _dualOptimize();
   }
 
-  List<Param> flushParameterUpdates() {
-    List<Param> updates = new List<Param>();
+  Set flushUpdates() {
+    Set updates = new Set();
 
     for (Variable variable in _vars.keys) {
       _Symbol symbol = _vars[variable];
@@ -178,9 +178,14 @@ class Solver {
       double updatedValue = row == null ? 0.0 : row.constant;
 
       if (variable._applyUpdate(updatedValue) && variable._owner != null) {
-        updates.add(variable._owner);
+        dynamic context = variable._owner.context;
+
+        if (context != null) {
+          updates.add(context);
+        }
       }
     }
+
     return updates;
   }
 

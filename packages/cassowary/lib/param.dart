@@ -6,12 +6,17 @@ part of cassowary;
 
 class Param extends _EquationMember {
   final Variable variable;
+  final dynamic context;
 
-  Param.withVariable(this.variable) {
+  Param([double value = 0.0])
+      : variable = new Variable(value),
+        context = null {
     variable._owner = this;
   }
 
-  Param([double value = 0.0]) : this.variable = new Variable(value) {
+  Param.withContext(ctx)
+      : variable = new Variable(0.0),
+        context = ctx {
     variable._owner = this;
   }
 
