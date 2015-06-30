@@ -21,7 +21,7 @@ public:
     SkPicture* toSkia() const { return m_picture.get(); }
 
 private:
-    Picture(PassRefPtr<SkPicture> skPicture);
+    explicit Picture(PassRefPtr<SkPicture> skPicture);
 
     RefPtr<SkPicture> m_picture;
 };

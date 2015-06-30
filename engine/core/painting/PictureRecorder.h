@@ -12,8 +12,9 @@
 
 namespace blink {
 
-class Picture;
 class Canvas;
+class Drawable;
+class Picture;
 
 class PictureRecorder : public RefCounted<PictureRecorder>,
                         public DartWrappable {
@@ -29,6 +30,7 @@ public:
     // PassRefPtr<Canvas> beginRecording(double width, double height);
     SkCanvas* beginRecording(double width, double height);
     PassRefPtr<Picture> endRecording();
+    PassRefPtr<Drawable> endRecordingAsDrawable();
     bool isRecording();
 
     void set_canvas(PassRefPtr<Canvas> canvas);

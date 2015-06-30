@@ -23,7 +23,6 @@
   void clipPath(Path path);
 
   void drawLine(Point p1, Point p2, Paint paint);
-  void drawPicture(Picture picture);
   void drawPaint(Paint paint);
   void drawRect(Rect rect, Paint paint);
   void drawRRect(RRect rrect, Paint paint);
@@ -32,4 +31,6 @@
   void drawPath(Path path, Paint paint);
   void drawImage(Image image, Point p, Paint paint);
   void drawImageRect(Image image, Rect src, Rect dst, Paint paint);
+  void drawPicture(Picture picture);
+  void drawDrawable(Drawable drawable);
 };

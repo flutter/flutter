@@ -4,8 +4,6 @@
 
 #include "sky/engine/core/painting/Picture.h"
 
-#include "base/logging.h"
-
 namespace blink {
 
 PassRefPtr<Picture> Picture::create(PassRefPtr<SkPicture> skPicture)

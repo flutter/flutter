@@ -127,14 +127,6 @@ void Canvas::drawLine(const Point& p1, const Point& p2, const Paint* paint)
     m_canvas->drawLine(p1.sk_point.x(), p1.sk_point.y(), p2.sk_point.x(), p2.sk_point.y(), paint->paint());
 }
 
-void Canvas::drawPicture(Picture* picture)
-{
-    if (!m_canvas)
-        return;
-    ASSERT(picture);
-    m_canvas->drawPicture(picture->toSkia());
-}
-
 void Canvas::drawPaint(const Paint* paint)
 {
     if (!m_canvas)
@@ -197,6 +189,22 @@ void Canvas::drawImageRect(const CanvasImage* image, Rect& src, Rect& dst, Paint
         return;
     ASSERT(image);
     m_canvas->drawBitmapRectToRect(image->bitmap(), &src.sk_rect, dst.sk_rect, &paint->paint());
+}
+
+void Canvas::drawPicture(Picture* picture)
+{
+    if (!m_canvas)
+        return;
+    ASSERT(picture);
+    m_canvas->drawPicture(picture->toSkia());
+}
+
+void Canvas::drawDrawable(Drawable* drawable)
+{
+    if (!m_canvas)
+        return;
+    ASSERT(drawable);
+    m_canvas->drawDrawable(drawable->toSkia());
 }
 
 } // namespace blink

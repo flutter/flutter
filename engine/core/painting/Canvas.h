@@ -7,6 +7,7 @@
 
 #include "sky/engine/bindings/exception_state.h"
 #include "sky/engine/core/painting/CanvasPath.h"
+#include "sky/engine/core/painting/Drawable.h"
 #include "sky/engine/core/painting/Offset.h"
 #include "sky/engine/core/painting/Paint.h"
 #include "sky/engine/core/painting/Picture.h"
@@ -72,7 +73,6 @@ public:
     void clipPath(const CanvasPath* path);
 
     void drawLine(const Point& p1, const Point& p2, const Paint* paint);
-    void drawPicture(Picture* picture);
     void drawPaint(const Paint* paint);
     void drawRect(const Rect& rect, const Paint* paint);
     void drawRRect(const RRect* rrect, const Paint* paint);
@@ -81,6 +81,8 @@ public:
     void drawPath(const CanvasPath* path, const Paint* paint);
     void drawImage(const CanvasImage* image, const Point& p, const Paint* paint);
     void drawImageRect(const CanvasImage* image, Rect& src, Rect& dst, Paint* paint);
+    void drawPicture(Picture* picture);
+    void drawDrawable(Drawable* drawable);
 
     SkCanvas* skCanvas() { return m_canvas; }
     void clearSkCanvas() { m_canvas = nullptr; }
