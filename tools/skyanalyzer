@@ -47,7 +47,7 @@ def main():
     parser.add_argument('build_dir', type=str)
     parser.add_argument('app_path', type=str)
     args = parser.parse_args()
-    build_dir = args.build_dir
+    build_dir = os.path.abspath(args.build_dir)
     analyzer_path = os.path.join(SRC_ROOT, 'third_party/dart-sdk/dart-sdk/bin/dartanalyzer')
     dart_builtin_natives_path = os.path.join(SRC_ROOT, 'sky/engine/bindings/builtin_natives.dart')
     dart_mojo_internal_path = os.path.join(SRC_ROOT, 'mojo/public/dart/sdk_ext/internal.dart')
