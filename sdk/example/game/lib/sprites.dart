@@ -21,3 +21,5 @@ part 'sprite.dart';
 part 'image_map.dart';
 part 'texture.dart';
 part 'spritesheet.dart';
+part 'particle_system.dart';
+part 'color_secuence.dart';

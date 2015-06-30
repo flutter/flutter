@@ -65,9 +65,46 @@ class Texture {
                            this.spriteSourceSize, this.pivot) {
   }
 
-//  Texture textureFromRect(Rect rect, [String name = null]) {
-//    assert(rect != null);
-//    Rect frame = new Rect.fromLTRB();
-//    return new Texture._fromSpriteFrame(image, name, rect.size, false, false, );
-//  }
+  Texture textureFromRect(Rect rect, [String name = null]) {
+    assert(rect != null);
+    assert(!rotated);
+    Rect srcFrame = new Rect.fromLTWH(rect.left + frame.left, rect.top + frame.top, rect.size.width, rect.size.height);
+    Rect dstFrame = new Rect.fromLTWH(0.0, 0.0, rect.size.width, rect.size.height);
+    return new Texture._fromSpriteFrame(image, name, rect.size, false, false, srcFrame, dstFrame, new Point(0.5, 0.5));
+  }
+
+  void drawTexture(PaintingCanvas canvas, Point position, Paint paint) {
+
+    // Account for position
+    double x = position.x;
+    double y = position.y;
+    bool translate = (x != 0 || y != 0);
+    if (translate) {
+      canvas.translate(x, y);
+    }
+
+    // Draw the texture
+    if (rotated) {
+      // Calculate the rotated frame and spriteSourceSize
+      Size originalFrameSize = frame.size;
+      Rect rotatedFrame = new Rect.fromPointAndSize(frame.upperLeft, new Size(originalFrameSize.height, originalFrameSize.width));
+      Point rotatedSpriteSourcePoint = new Point(
+          -spriteSourceSize.top - (spriteSourceSize.bottom - spriteSourceSize.top),
+          spriteSourceSize.left);
+      Rect rotatedSpriteSourceSize = new Rect.fromPointAndSize(rotatedSpriteSourcePoint, new Size(originalFrameSize.height, originalFrameSize.width));
+
+      // Draw the rotated sprite
+      canvas.rotate(-Math.PI/2.0);
+      canvas.drawImageRect(image, rotatedFrame, rotatedSpriteSourceSize, paint);
+      canvas.rotate(Math.PI/2.0);
+    } else {
+      // Draw the sprite
+      canvas.drawImageRect(image, frame, spriteSourceSize, paint);
+    }
+
+    // Translate back
+    if (translate) {
+      canvas.translate(-x, -y);
+    }
+  }
 }

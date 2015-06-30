@@ -103,22 +103,7 @@ class Sprite extends NodeWithSize {
       }
 
       // Do actual drawing of the sprite
-      if (texture.rotated) {
-        // Calculate the rotated frame and spriteSourceSize
-        Size originalFrameSize = texture.frame.size;
-        Rect rotatedFrame = texture.frame.topLeft & new Size(originalFrameSize.height, originalFrameSize.width);
-        Point rotatedSpriteSourcePoint = new Point(
-            -texture.spriteSourceSize.top - (texture.spriteSourceSize.bottom - texture.spriteSourceSize.top),
-            texture.spriteSourceSize.left);
-        Rect rotatedSpriteSourceSize = rotatedSpriteSourcePoint & new Size(originalFrameSize.height, originalFrameSize.width);
-
-        // Draw the rotated sprite
-        canvas.rotate(-Math.PI/2.0);
-        canvas.drawImageRect(texture.image, rotatedFrame, rotatedSpriteSourceSize, paint);
-      } else {
-        // Draw the sprite
-        canvas.drawImageRect(texture.image, texture.frame, texture.spriteSourceSize, paint);
-      }
+      texture.drawTexture(canvas, Point.origin, paint);
     } else {
       // Paint a red square for missing texture
       canvas.drawRect(new Rect.fromLTRB(0.0, 0.0, size.width, size.height),

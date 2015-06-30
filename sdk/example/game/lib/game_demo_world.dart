@@ -90,6 +90,7 @@ class GameDemoWorld extends NodeWithSize {
   void addLaser() {
     Laser laser = new Laser(_spriteSheet["laser.png"], _ship);
     laser.zPosition = 8.0;
+    laser.constrainProportions = true;
     _lasers.add(laser);
     _gameLayer.addChild(laser);
   }
@@ -98,7 +99,17 @@ class GameDemoWorld extends NodeWithSize {
     _nebula = new Nebula.withImage(_imgNebula);
     _gameLayer.addChild(_nebula);
   }
-  
+
+  void addExplosion(AsteroidSize asteroidSize, Point position) {
+    // Add particles
+    ParticleSystem particles = new ParticleSystem(_spriteSheet["laser.png"], rotateToMovement: true,
+    startRotation:90.0, startRotationVar: 0.0, endRotation: 90.0, startSize: 0.2, startSizeVar: 0.1, endSize: 0.2, endSizeVar: 0.1,
+    numParticlesToEmit: 25, emissionRate:1000.0, blueVar: 127);
+    particles.zPosition = 1010.0;
+    particles.position = position;
+    _gameLayer.addChild(particles);
+  }
+
   void update(double dt) {
     // Move asteroids
     for (Asteroid asteroid in _asteroids) {
@@ -138,13 +149,15 @@ class GameDemoWorld extends NodeWithSize {
           laser.removeFromParent();
           _lasers.removeAt(i);
 
-          // Add asteroids
+          // Add asteroids and explosions
           if (asteroid._asteroidSize == AsteroidSize.large) {
             for (int a = 0; a < 3; a++) addAsteroid(AsteroidSize.medium, asteroid.position);
           }
           else if (asteroid._asteroidSize == AsteroidSize.medium) {
             for (int a = 0; a < 5; a++) addAsteroid(AsteroidSize.small, asteroid.position);
           }
+
+          addExplosion(asteroid._asteroidSize, asteroid.position);
 
           // Remove asteroid
           asteroid.removeFromParent();
@@ -333,10 +346,10 @@ class Ship extends Sprite {
 class Laser extends Sprite {
   int _frameCount = 0;
   Point _movementVector;
-  double radius = 10.0;
+  double radius = 20.0;
 
   Laser(Texture img, Ship ship) : super(img) {
-    size = new Size(20.0, 20.0);
+    size = new Size(30.0, 30.0);
     position = ship.position;
     rotation = ship.rotation + 90.0;
     transferMode = TransferMode.plus;
