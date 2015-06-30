@@ -41,10 +41,10 @@ PAINT FOR FRAME #2 ----------------------------------------------
 2 |  |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderSolidColor at Point(145.25, 132.0)
 2 |  |  |  |  |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 2 |  |  |  |  |  |  |  |  |  |  |  |  |  | drawPath(Instance of 'Path', Paint(color:Color(0xff00dd00)))
-2 |  |  |  |  |  |  |  |  | paintChild RenderParagraph at Point(173.25, 124.0)
+2 |  |  |  |  |  |  |  |  | paintChild RenderParagraph at Point(173.25, 122.0)
 2 |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
-2 |  |  |  |  |  |  |  |  |  | translate(173.25, 124.0)
-2 |  |  |  |  |  |  |  |  |  | translate(-173.25, -124.0)
+2 |  |  |  |  |  |  |  |  |  | translate(173.25, 122.0)
+2 |  |  |  |  |  |  |  |  |  | translate(-173.25, -122.0)
 2 |  |  |  |  | paintChild RenderPadding at Point(488.75, 106.0)
 2 |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 2 |  |  |  |  |  | paintChild RenderConstrainedBox at Point(496.75, 114.0)
@@ -71,10 +71,10 @@ PAINT FOR FRAME #2 ----------------------------------------------
 2 |  |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderSolidColor at Point(522.75, 132.0)
 2 |  |  |  |  |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 2 |  |  |  |  |  |  |  |  |  |  |  |  |  | drawPath(Instance of 'Path', Paint(color:Color(0xffdd0000)))
-2 |  |  |  |  |  |  |  |  | paintChild RenderParagraph at Point(550.75, 124.0)
+2 |  |  |  |  |  |  |  |  | paintChild RenderParagraph at Point(550.75, 122.0)
 2 |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
-2 |  |  |  |  |  |  |  |  |  | translate(550.75, 124.0)
-2 |  |  |  |  |  |  |  |  |  | translate(-550.75, -124.0)
+2 |  |  |  |  |  |  |  |  |  | translate(550.75, 122.0)
+2 |  |  |  |  |  |  |  |  |  | translate(-550.75, -122.0)
 2 |  |  | paintChild RenderPadding at Point(191.5, 183.0)
 2 |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 2 |  |  |  | paintChild RenderDecoratedBox at Point(199.5, 191.0)
@@ -94,12 +94,12 @@ PAINT FOR FRAME #2 ----------------------------------------------
 2 |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 2 |  |  |  | paintChild RenderConstrainedBox at Point(8.0, 25.0)
 2 |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
-2 |  |  |  |  | paintChild RenderPadding at Point(8.0, 41.0)
+2 |  |  |  |  | paintChild RenderPadding at Point(8.0, 39.0)
 2 |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
-2 |  |  |  |  |  | paintChild RenderParagraph at Point(32.0, 41.0)
+2 |  |  |  |  |  | paintChild RenderParagraph at Point(32.0, 39.0)
 2 |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
-2 |  |  |  |  |  |  | translate(32.0, 41.0)
-2 |  |  |  |  |  |  | translate(-32.0, -41.0)
+2 |  |  |  |  |  |  | translate(32.0, 39.0)
+2 |  |  |  |  |  |  | translate(-32.0, -39.0)
 ------------------------------------------------------------------------
 CONSOLE: 
 PAINT FOR FRAME #3 ----------------------------------------------
@@ -139,10 +139,10 @@ PAINT FOR FRAME #3 ----------------------------------------------
 3 |  |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderSolidColor at Point(145.25, 132.0)
 3 |  |  |  |  |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 3 |  |  |  |  |  |  |  |  |  |  |  |  |  | drawPath(Instance of 'Path', Paint(color:Color(0xff00dd00)))
-3 |  |  |  |  |  |  |  |  | paintChild RenderParagraph at Point(173.25, 124.0)
+3 |  |  |  |  |  |  |  |  | paintChild RenderParagraph at Point(173.25, 122.0)
 3 |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
-3 |  |  |  |  |  |  |  |  |  | translate(173.25, 124.0)
-3 |  |  |  |  |  |  |  |  |  | translate(-173.25, -124.0)
+3 |  |  |  |  |  |  |  |  |  | translate(173.25, 122.0)
+3 |  |  |  |  |  |  |  |  |  | translate(-173.25, -122.0)
 3 |  |  |  |  | paintChild RenderPadding at Point(488.75, 106.0)
 3 |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 3 |  |  |  |  |  | paintChild RenderConstrainedBox at Point(496.75, 114.0)
@@ -169,10 +169,10 @@ PAINT FOR FRAME #3 ----------------------------------------------
 3 |  |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderSolidColor at Point(522.75, 132.0)
 3 |  |  |  |  |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 3 |  |  |  |  |  |  |  |  |  |  |  |  |  | drawPath(Instance of 'Path', Paint(color:Color(0xffdd0000)))
-3 |  |  |  |  |  |  |  |  | paintChild RenderParagraph at Point(550.75, 124.0)
+3 |  |  |  |  |  |  |  |  | paintChild RenderParagraph at Point(550.75, 122.0)
 3 |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
-3 |  |  |  |  |  |  |  |  |  | translate(550.75, 124.0)
-3 |  |  |  |  |  |  |  |  |  | translate(-550.75, -124.0)
+3 |  |  |  |  |  |  |  |  |  | translate(550.75, 122.0)
+3 |  |  |  |  |  |  |  |  |  | translate(-550.75, -122.0)
 3 |  |  | paintChild RenderPadding at Point(191.5, 183.0)
 3 |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 3 |  |  |  | paintChild RenderDecoratedBox at Point(199.5, 191.0)
@@ -195,12 +195,12 @@ PAINT FOR FRAME #3 ----------------------------------------------
 3 |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 3 |  |  |  | paintChild RenderConstrainedBox at Point(8.0, 25.0)
 3 |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
-3 |  |  |  |  | paintChild RenderPadding at Point(8.0, 41.0)
+3 |  |  |  |  | paintChild RenderPadding at Point(8.0, 39.0)
 3 |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
-3 |  |  |  |  |  | paintChild RenderParagraph at Point(32.0, 41.0)
+3 |  |  |  |  |  | paintChild RenderParagraph at Point(32.0, 39.0)
 3 |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
-3 |  |  |  |  |  |  | translate(32.0, 41.0)
-3 |  |  |  |  |  |  | translate(-32.0, -41.0)
+3 |  |  |  |  |  |  | translate(32.0, 39.0)
+3 |  |  |  |  |  |  | translate(-32.0, -39.0)
 ------------------------------------------------------------------------
 CONSOLE: 
 PAINT FOR FRAME #4 ----------------------------------------------
@@ -240,10 +240,10 @@ PAINT FOR FRAME #4 ----------------------------------------------
 4 |  |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderSolidColor at Point(145.25, 132.0)
 4 |  |  |  |  |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 4 |  |  |  |  |  |  |  |  |  |  |  |  |  | drawPath(Instance of 'Path', Paint(color:Color(0xff00dd00)))
-4 |  |  |  |  |  |  |  |  | paintChild RenderParagraph at Point(173.25, 124.0)
+4 |  |  |  |  |  |  |  |  | paintChild RenderParagraph at Point(173.25, 122.0)
 4 |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
-4 |  |  |  |  |  |  |  |  |  | translate(173.25, 124.0)
-4 |  |  |  |  |  |  |  |  |  | translate(-173.25, -124.0)
+4 |  |  |  |  |  |  |  |  |  | translate(173.25, 122.0)
+4 |  |  |  |  |  |  |  |  |  | translate(-173.25, -122.0)
 4 |  |  |  |  | paintChild RenderPadding at Point(488.75, 106.0)
 4 |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 4 |  |  |  |  |  | paintChild RenderConstrainedBox at Point(496.75, 114.0)
@@ -270,10 +270,10 @@ PAINT FOR FRAME #4 ----------------------------------------------
 4 |  |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderSolidColor at Point(522.75, 132.0)
 4 |  |  |  |  |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 4 |  |  |  |  |  |  |  |  |  |  |  |  |  | drawPath(Instance of 'Path', Paint(color:Color(0xffdd0000)))
-4 |  |  |  |  |  |  |  |  | paintChild RenderParagraph at Point(550.75, 124.0)
+4 |  |  |  |  |  |  |  |  | paintChild RenderParagraph at Point(550.75, 122.0)
 4 |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
-4 |  |  |  |  |  |  |  |  |  | translate(550.75, 124.0)
-4 |  |  |  |  |  |  |  |  |  | translate(-550.75, -124.0)
+4 |  |  |  |  |  |  |  |  |  | translate(550.75, 122.0)
+4 |  |  |  |  |  |  |  |  |  | translate(-550.75, -122.0)
 4 |  |  | paintChild RenderPadding at Point(191.5, 183.0)
 4 |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 4 |  |  |  | paintChild RenderDecoratedBox at Point(199.5, 191.0)
@@ -299,12 +299,12 @@ PAINT FOR FRAME #4 ----------------------------------------------
 4 |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 4 |  |  |  | paintChild RenderConstrainedBox at Point(8.0, 25.0)
 4 |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
-4 |  |  |  |  | paintChild RenderPadding at Point(8.0, 41.0)
+4 |  |  |  |  | paintChild RenderPadding at Point(8.0, 39.0)
 4 |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
-4 |  |  |  |  |  | paintChild RenderParagraph at Point(32.0, 41.0)
+4 |  |  |  |  |  | paintChild RenderParagraph at Point(32.0, 39.0)
 4 |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
-4 |  |  |  |  |  |  | translate(32.0, 41.0)
-4 |  |  |  |  |  |  | translate(-32.0, -41.0)
+4 |  |  |  |  |  |  | translate(32.0, 39.0)
+4 |  |  |  |  |  |  | translate(-32.0, -39.0)
 ------------------------------------------------------------------------
 CONSOLE: 
 PAINT FOR FRAME #5 ----------------------------------------------
@@ -344,10 +344,10 @@ PAINT FOR FRAME #5 ----------------------------------------------
 5 |  |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderSolidColor at Point(145.25, 132.0)
 5 |  |  |  |  |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 5 |  |  |  |  |  |  |  |  |  |  |  |  |  | drawPath(Instance of 'Path', Paint(color:Color(0xff00dd00)))
-5 |  |  |  |  |  |  |  |  | paintChild RenderParagraph at Point(173.25, 124.0)
+5 |  |  |  |  |  |  |  |  | paintChild RenderParagraph at Point(173.25, 122.0)
 5 |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
-5 |  |  |  |  |  |  |  |  |  | translate(173.25, 124.0)
-5 |  |  |  |  |  |  |  |  |  | translate(-173.25, -124.0)
+5 |  |  |  |  |  |  |  |  |  | translate(173.25, 122.0)
+5 |  |  |  |  |  |  |  |  |  | translate(-173.25, -122.0)
 5 |  |  |  |  | paintChild RenderPadding at Point(488.75, 106.0)
 5 |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 5 |  |  |  |  |  | paintChild RenderConstrainedBox at Point(496.75, 114.0)
@@ -374,10 +374,10 @@ PAINT FOR FRAME #5 ----------------------------------------------
 5 |  |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderSolidColor at Point(522.75, 132.0)
 5 |  |  |  |  |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 5 |  |  |  |  |  |  |  |  |  |  |  |  |  | drawPath(Instance of 'Path', Paint(color:Color(0xffdd0000)))
-5 |  |  |  |  |  |  |  |  | paintChild RenderParagraph at Point(550.75, 124.0)
+5 |  |  |  |  |  |  |  |  | paintChild RenderParagraph at Point(550.75, 122.0)
 5 |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
-5 |  |  |  |  |  |  |  |  |  | translate(550.75, 124.0)
-5 |  |  |  |  |  |  |  |  |  | translate(-550.75, -124.0)
+5 |  |  |  |  |  |  |  |  |  | translate(550.75, 122.0)
+5 |  |  |  |  |  |  |  |  |  | translate(-550.75, -122.0)
 5 |  |  | paintChild RenderPadding at Point(191.5, 183.0)
 5 |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 5 |  |  |  | paintChild RenderDecoratedBox at Point(199.5, 191.0)
@@ -406,12 +406,12 @@ PAINT FOR FRAME #5 ----------------------------------------------
 5 |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 5 |  |  |  | paintChild RenderConstrainedBox at Point(8.0, 25.0)
 5 |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
-5 |  |  |  |  | paintChild RenderPadding at Point(8.0, 41.0)
+5 |  |  |  |  | paintChild RenderPadding at Point(8.0, 39.0)
 5 |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
-5 |  |  |  |  |  | paintChild RenderParagraph at Point(32.0, 41.0)
+5 |  |  |  |  |  | paintChild RenderParagraph at Point(32.0, 39.0)
 5 |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
-5 |  |  |  |  |  |  | translate(32.0, 41.0)
-5 |  |  |  |  |  |  | translate(-32.0, -41.0)
+5 |  |  |  |  |  |  | translate(32.0, 39.0)
+5 |  |  |  |  |  |  | translate(-32.0, -39.0)
 ------------------------------------------------------------------------
 CONSOLE: 
 PAINT FOR FRAME #6 ----------------------------------------------
@@ -451,10 +451,10 @@ PAINT FOR FRAME #6 ----------------------------------------------
 6 |  |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderSolidColor at Point(145.25, 132.0)
 6 |  |  |  |  |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 6 |  |  |  |  |  |  |  |  |  |  |  |  |  | drawPath(Instance of 'Path', Paint(color:Color(0xff00dd00)))
-6 |  |  |  |  |  |  |  |  | paintChild RenderParagraph at Point(173.25, 124.0)
+6 |  |  |  |  |  |  |  |  | paintChild RenderParagraph at Point(173.25, 122.0)
 6 |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
-6 |  |  |  |  |  |  |  |  |  | translate(173.25, 124.0)
-6 |  |  |  |  |  |  |  |  |  | translate(-173.25, -124.0)
+6 |  |  |  |  |  |  |  |  |  | translate(173.25, 122.0)
+6 |  |  |  |  |  |  |  |  |  | translate(-173.25, -122.0)
 6 |  |  |  |  | paintChild RenderPadding at Point(488.75, 106.0)
 6 |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 6 |  |  |  |  |  | paintChild RenderConstrainedBox at Point(496.75, 114.0)
@@ -481,10 +481,10 @@ PAINT FOR FRAME #6 ----------------------------------------------
 6 |  |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderSolidColor at Point(522.75, 132.0)
 6 |  |  |  |  |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 6 |  |  |  |  |  |  |  |  |  |  |  |  |  | drawPath(Instance of 'Path', Paint(color:Color(0xffdd0000)))
-6 |  |  |  |  |  |  |  |  | paintChild RenderParagraph at Point(550.75, 124.0)
+6 |  |  |  |  |  |  |  |  | paintChild RenderParagraph at Point(550.75, 122.0)
 6 |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
-6 |  |  |  |  |  |  |  |  |  | translate(550.75, 124.0)
-6 |  |  |  |  |  |  |  |  |  | translate(-550.75, -124.0)
+6 |  |  |  |  |  |  |  |  |  | translate(550.75, 122.0)
+6 |  |  |  |  |  |  |  |  |  | translate(-550.75, -122.0)
 6 |  |  | paintChild RenderPadding at Point(191.5, 183.0)
 6 |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 6 |  |  |  | paintChild RenderDecoratedBox at Point(199.5, 191.0)
@@ -510,12 +510,12 @@ PAINT FOR FRAME #6 ----------------------------------------------
 6 |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 6 |  |  |  | paintChild RenderConstrainedBox at Point(8.0, 25.0)
 6 |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
-6 |  |  |  |  | paintChild RenderPadding at Point(8.0, 41.0)
+6 |  |  |  |  | paintChild RenderPadding at Point(8.0, 39.0)
 6 |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
-6 |  |  |  |  |  | paintChild RenderParagraph at Point(32.0, 41.0)
+6 |  |  |  |  |  | paintChild RenderParagraph at Point(32.0, 39.0)
 6 |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
-6 |  |  |  |  |  |  | translate(32.0, 41.0)
-6 |  |  |  |  |  |  | translate(-32.0, -41.0)
+6 |  |  |  |  |  |  | translate(32.0, 39.0)
+6 |  |  |  |  |  |  | translate(-32.0, -39.0)
 ------------------------------------------------------------------------
 CONSOLE: 
 PAINT FOR FRAME #7 ----------------------------------------------
@@ -555,10 +555,10 @@ PAINT FOR FRAME #7 ----------------------------------------------
 7 |  |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderSolidColor at Point(145.25, 132.0)
 7 |  |  |  |  |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 7 |  |  |  |  |  |  |  |  |  |  |  |  |  | drawPath(Instance of 'Path', Paint(color:Color(0xff00dd00)))
-7 |  |  |  |  |  |  |  |  | paintChild RenderParagraph at Point(173.25, 124.0)
+7 |  |  |  |  |  |  |  |  | paintChild RenderParagraph at Point(173.25, 122.0)
 7 |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
-7 |  |  |  |  |  |  |  |  |  | translate(173.25, 124.0)
-7 |  |  |  |  |  |  |  |  |  | translate(-173.25, -124.0)
+7 |  |  |  |  |  |  |  |  |  | translate(173.25, 122.0)
+7 |  |  |  |  |  |  |  |  |  | translate(-173.25, -122.0)
 7 |  |  |  |  | paintChild RenderPadding at Point(488.75, 106.0)
 7 |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 7 |  |  |  |  |  | paintChild RenderConstrainedBox at Point(496.75, 114.0)
@@ -585,10 +585,10 @@ PAINT FOR FRAME #7 ----------------------------------------------
 7 |  |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderSolidColor at Point(522.75, 132.0)
 7 |  |  |  |  |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 7 |  |  |  |  |  |  |  |  |  |  |  |  |  | drawPath(Instance of 'Path', Paint(color:Color(0xffdd0000)))
-7 |  |  |  |  |  |  |  |  | paintChild RenderParagraph at Point(550.75, 124.0)
+7 |  |  |  |  |  |  |  |  | paintChild RenderParagraph at Point(550.75, 122.0)
 7 |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
-7 |  |  |  |  |  |  |  |  |  | translate(550.75, 124.0)
-7 |  |  |  |  |  |  |  |  |  | translate(-550.75, -124.0)
+7 |  |  |  |  |  |  |  |  |  | translate(550.75, 122.0)
+7 |  |  |  |  |  |  |  |  |  | translate(-550.75, -122.0)
 7 |  |  | paintChild RenderPadding at Point(191.5, 183.0)
 7 |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 7 |  |  |  | paintChild RenderDecoratedBox at Point(199.5, 191.0)
@@ -611,12 +611,12 @@ PAINT FOR FRAME #7 ----------------------------------------------
 7 |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 7 |  |  |  | paintChild RenderConstrainedBox at Point(8.0, 25.0)
 7 |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
-7 |  |  |  |  | paintChild RenderPadding at Point(8.0, 41.0)
+7 |  |  |  |  | paintChild RenderPadding at Point(8.0, 39.0)
 7 |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
-7 |  |  |  |  |  | paintChild RenderParagraph at Point(32.0, 41.0)
+7 |  |  |  |  |  | paintChild RenderParagraph at Point(32.0, 39.0)
 7 |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
-7 |  |  |  |  |  |  | translate(32.0, 41.0)
-7 |  |  |  |  |  |  | translate(-32.0, -41.0)
+7 |  |  |  |  |  |  | translate(32.0, 39.0)
+7 |  |  |  |  |  |  | translate(-32.0, -39.0)
 ------------------------------------------------------------------------
 CONSOLE: 
 PAINT FOR FRAME #8 ----------------------------------------------
@@ -656,10 +656,10 @@ PAINT FOR FRAME #8 ----------------------------------------------
 8 |  |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderSolidColor at Point(145.25, 132.0)
 8 |  |  |  |  |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 8 |  |  |  |  |  |  |  |  |  |  |  |  |  | drawPath(Instance of 'Path', Paint(color:Color(0xff00dd00)))
-8 |  |  |  |  |  |  |  |  | paintChild RenderParagraph at Point(173.25, 124.0)
+8 |  |  |  |  |  |  |  |  | paintChild RenderParagraph at Point(173.25, 122.0)
 8 |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
-8 |  |  |  |  |  |  |  |  |  | translate(173.25, 124.0)
-8 |  |  |  |  |  |  |  |  |  | translate(-173.25, -124.0)
+8 |  |  |  |  |  |  |  |  |  | translate(173.25, 122.0)
+8 |  |  |  |  |  |  |  |  |  | translate(-173.25, -122.0)
 8 |  |  |  |  | paintChild RenderPadding at Point(488.75, 106.0)
 8 |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 8 |  |  |  |  |  | paintChild RenderConstrainedBox at Point(496.75, 114.0)
@@ -686,10 +686,10 @@ PAINT FOR FRAME #8 ----------------------------------------------
 8 |  |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderSolidColor at Point(522.75, 132.0)
 8 |  |  |  |  |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 8 |  |  |  |  |  |  |  |  |  |  |  |  |  | drawPath(Instance of 'Path', Paint(color:Color(0xffdd0000)))
-8 |  |  |  |  |  |  |  |  | paintChild RenderParagraph at Point(550.75, 124.0)
+8 |  |  |  |  |  |  |  |  | paintChild RenderParagraph at Point(550.75, 122.0)
 8 |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
-8 |  |  |  |  |  |  |  |  |  | translate(550.75, 124.0)
-8 |  |  |  |  |  |  |  |  |  | translate(-550.75, -124.0)
+8 |  |  |  |  |  |  |  |  |  | translate(550.75, 122.0)
+8 |  |  |  |  |  |  |  |  |  | translate(-550.75, -122.0)
 8 |  |  | paintChild RenderPadding at Point(191.5, 183.0)
 8 |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 8 |  |  |  | paintChild RenderDecoratedBox at Point(199.5, 191.0)
@@ -715,11 +715,11 @@ PAINT FOR FRAME #8 ----------------------------------------------
 8 |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 8 |  |  |  | paintChild RenderConstrainedBox at Point(8.0, 25.0)
 8 |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
-8 |  |  |  |  | paintChild RenderPadding at Point(8.0, 41.0)
+8 |  |  |  |  | paintChild RenderPadding at Point(8.0, 39.0)
 8 |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
-8 |  |  |  |  |  | paintChild RenderParagraph at Point(32.0, 41.0)
+8 |  |  |  |  |  | paintChild RenderParagraph at Point(32.0, 39.0)
 8 |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
-8 |  |  |  |  |  |  | translate(32.0, 41.0)
-8 |  |  |  |  |  |  | translate(-32.0, -41.0)
+8 |  |  |  |  |  |  | translate(32.0, 39.0)
+8 |  |  |  |  |  |  | translate(-32.0, -39.0)
 ------------------------------------------------------------------------
 PAINTED 8 FRAMES
