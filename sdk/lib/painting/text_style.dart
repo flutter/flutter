@@ -5,15 +5,8 @@
 import 'dart:sky';
 
 enum FontWeight { w100, w200, w300, w400, w500, w600, w700, w800, w900 }
-const thin = FontWeight.w100;
-const extraLight = FontWeight.w200;
-const light = FontWeight.w300;
 const normal = FontWeight.w400;
-const medium = FontWeight.w500;
-const semiBold = FontWeight.w600;
 const bold = FontWeight.w700;
-const extraBold = FontWeight.w800;
-const black = FontWeight.w900;
 
 enum TextAlign { left, right, center }
 

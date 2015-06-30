@@ -108,11 +108,11 @@ PAINT FOR FRAME #2 ----------------------------------------------
 2 |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 2 |  |  |  | paintChild RenderConstrainedBox at Point(8.0, 25.0)
 2 |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
-2 |  |  |  |  | paintChild RenderPadding at Point(8.0, 41.0)
+2 |  |  |  |  | paintChild RenderPadding at Point(8.0, 39.0)
 2 |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
-2 |  |  |  |  |  | paintChild RenderParagraph at Point(32.0, 41.0)
+2 |  |  |  |  |  | paintChild RenderParagraph at Point(32.0, 39.0)
 2 |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
-2 |  |  |  |  |  |  | translate(32.0, 41.0)
-2 |  |  |  |  |  |  | translate(-32.0, -41.0)
+2 |  |  |  |  |  |  | translate(32.0, 39.0)
+2 |  |  |  |  |  |  | translate(-32.0, -39.0)
 ------------------------------------------------------------------------
 PAINTED 2 FRAMES

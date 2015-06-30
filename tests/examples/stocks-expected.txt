@@ -31,12 +31,12 @@ PAINT FOR FRAME #2 ----------------------------------------------
 2 |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 2 |  |  |  |  |  |  | paintChild RenderImage at Point(16.0, 41.0)
 2 |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
-2 |  |  |  |  |  | paintChild RenderPadding at Point(48.0, 41.0)
+2 |  |  |  |  |  | paintChild RenderPadding at Point(48.0, 39.0)
 2 |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
-2 |  |  |  |  |  |  | paintChild RenderParagraph at Point(72.0, 41.0)
+2 |  |  |  |  |  |  | paintChild RenderParagraph at Point(72.0, 39.0)
 2 |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
-2 |  |  |  |  |  |  |  | translate(72.0, 41.0)
-2 |  |  |  |  |  |  |  | translate(-72.0, -41.0)
+2 |  |  |  |  |  |  |  | translate(72.0, 39.0)
+2 |  |  |  |  |  |  |  | translate(-72.0, -39.0)
 2 |  |  |  |  |  | paintChild RenderPadding at Point(712.0, 33.0)
 2 |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 2 |  |  |  |  |  |  | paintChild RenderImage at Point(720.0, 41.0)
@@ -82,12 +82,12 @@ PAINT FOR FRAME #3 ----------------------------------------------
 3 |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 3 |  |  |  |  |  |  | paintChild RenderImage at Point(16.0, 41.0)
 3 |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
-3 |  |  |  |  |  | paintChild RenderPadding at Point(48.0, 41.0)
+3 |  |  |  |  |  | paintChild RenderPadding at Point(48.0, 39.0)
 3 |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
-3 |  |  |  |  |  |  | paintChild RenderParagraph at Point(72.0, 41.0)
+3 |  |  |  |  |  |  | paintChild RenderParagraph at Point(72.0, 39.0)
 3 |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
-3 |  |  |  |  |  |  |  | translate(72.0, 41.0)
-3 |  |  |  |  |  |  |  | translate(-72.0, -41.0)
+3 |  |  |  |  |  |  |  | translate(72.0, 39.0)
+3 |  |  |  |  |  |  |  | translate(-72.0, -39.0)
 3 |  |  |  |  |  | paintChild RenderPadding at Point(712.0, 33.0)
 3 |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 3 |  |  |  |  |  |  | paintChild RenderImage at Point(720.0, 41.0)

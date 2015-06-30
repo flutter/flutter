@@ -2,10 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import '../painting/text_style.dart';
 import 'basic.dart';
 import 'button_base.dart';
+import 'default_text_style.dart';
 import 'icon.dart';
 import 'ink_well.dart';
+import 'theme.dart';
 import 'widget.dart';
 
 const BoxDecoration _kHighlightDecoration = const BoxDecoration(
@@ -37,6 +40,13 @@ class MenuItem extends ButtonBase {
     super.syncFields(source);
   }
 
+  TextStyle get textStyle {
+    TextStyle result = Theme.of(this).text.body2;
+    if (highlight)
+      result = result.copyWith(color: Theme.of(this).primary[500]);
+    return result;
+  }
+
   Widget buildContent() {
     return new Listener(
       onGestureTap: (_) {
@@ -53,10 +63,12 @@ class MenuItem extends ButtonBase {
               child: new Icon(type: "${icon}_grey600", size: 24)
             ),
             new Flexible(
-              flex: 1,
               child: new Padding(
                 padding: const EdgeDims.symmetric(horizontal: 16.0),
-                child: new Flex(children, direction: FlexDirection.horizontal)
+                child: new DefaultTextStyle(
+                  style: textStyle,
+                  child: new Flex(children, direction: FlexDirection.horizontal)
+                )
               )
             )
           ])

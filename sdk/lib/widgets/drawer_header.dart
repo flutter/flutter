@@ -5,6 +5,8 @@
 import '../theme/colors.dart';
 import '../theme/view_configuration.dart';
 import 'basic.dart';
+import 'default_text_style.dart';
+import 'theme.dart';
 
 class DrawerHeader extends Component {
 
@@ -30,7 +32,10 @@ class DrawerHeader extends Component {
         new Flexible(child: new Container()),
         new Container(
           padding: const EdgeDims.symmetric(horizontal: 16.0),
-          child: new Flex(children, direction: FlexDirection.horizontal)
+          child: new DefaultTextStyle(
+            style: Theme.of(this).text.body2,
+            child: new Flex(children, direction: FlexDirection.horizontal)
+          )
         )],
         direction: FlexDirection.vertical
       )

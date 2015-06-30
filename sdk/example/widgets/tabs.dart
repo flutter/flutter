@@ -16,7 +16,7 @@ class TabbedNavigatorApp extends App {
 
   Widget _buildContent(String label) {
     return new Center(
-      child: new Text(label, style: const TextStyle(fontSize: 48.0, fontWeight: extraBold))
+      child: new Text(label, style: const TextStyle(fontSize: 48.0, fontWeight: FontWeight.w800))
     );
   }
 
