@@ -4,7 +4,7 @@
 
 import("//mojo/public/dart/rules.gni")
 
-dart_pkg("sdk") {
+dart_pkg("sky") {
   sources = [
     "CHANGELOG.md",
     "bin/init.dart",
@@ -143,4 +143,37 @@ dart_pkg("sdk") {
   ]
 
   sdk_ext_directory = "$root_gen_dir/sky/bindings"
+}
+
+action("material_design_icons") {
+  input_dir = "lib/assets/material-design-icons"
+  output_dir = "$root_gen_dir/dart-pkg/sky/lib/assets"
+  stamp = "$target_gen_dir/material_design_icons_linked"
+
+  sources = [
+    "lib/assets/material-design-icons.sha1",
+  ]
+  outputs = [
+    stamp,
+  ]
+
+  script = "//build/symlink.py"
+  args = [
+    "--force",
+    rebase_path(input_dir, output_dir),
+    rebase_path(output_dir, root_build_dir),
+    "--touch",
+    rebase_path(stamp, root_build_dir),
+  ]
+
+  deps = [
+    ":sky",
+  ]
+}
+
+group("sdk") {
+  deps = [
+    ":sky",
+    ":material_design_icons",
+  ]
 }

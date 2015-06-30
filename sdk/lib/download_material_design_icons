@@ -5,25 +5,34 @@
 
 import os
 import subprocess
+import sys
 import urllib2
 
-sky_lib_dir = os.path.dirname(os.path.abspath(__file__))
-assets_dir = os.path.join(sky_lib_dir, 'assets')
-sha1_path = os.path.join(assets_dir, 'material-design-icons.sha1')
+def main():
+    sky_lib_dir = os.path.dirname(os.path.abspath(__file__))
+    assets_dir = os.path.join(sky_lib_dir, 'assets')
 
-with open(sha1_path, 'r') as f:
-    sha1 = f.read()
+    if (os.path.isdir(os.path.join(assets_dir, 'material-design-icons'))):
+        return
 
-tgz_path = os.path.join(assets_dir, 'material-design-icons.tgz')
-url = 'https://storage.googleapis.com/mojo/material-design-icons/%s' % sha1
-response = urllib2.urlopen(url)
+    sha1_path = os.path.join(assets_dir, 'material-design-icons.sha1')
 
-with open(tgz_path, 'wb') as f:
-    f.write(response.read())
+    with open(sha1_path, 'r') as f:
+        sha1 = f.read()
 
-output_path = os.path.join(assets_dir, tgz_path)
-subprocess.call([
-    'tar', '-xzf', output_path, '-C', assets_dir
-])
+    tgz_path = os.path.join(assets_dir, 'material-design-icons.tgz')
+    url = 'https://storage.googleapis.com/mojo/material-design-icons/%s' % sha1
+    response = urllib2.urlopen(url)
 
-os.unlink(tgz_path)
+    with open(tgz_path, 'wb') as f:
+        f.write(response.read())
+
+    output_path = os.path.join(assets_dir, tgz_path)
+    subprocess.call([
+        'tar', '-xzf', output_path, '-C', assets_dir
+    ])
+
+    os.unlink(tgz_path)
+
+if __name__ == '__main__':
+    sys.exit(main())

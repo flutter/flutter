@@ -126,18 +126,6 @@ def dev_packages_root(build_dir):
     return os.path.join(build_dir, 'gen', 'dart-pkg', 'packages')
 
 
-def ensure_assets_are_downloaded(build_dir):
-    sky_pkg_dir = os.path.join(build_dir, 'gen', 'dart-pkg', 'sky')
-    sky_pkg_lib_dir = os.path.join(sky_pkg_dir, 'lib')
-    sky_icons_dir = \
-        os.path.join(sky_pkg_lib_dir, 'assets', 'material-design-icons')
-    if not os.path.isdir(sky_icons_dir):
-        logging.info('NOTE: sky/assets/material-design-icons missing, '
-                     'Running `download_material_design_icons` for you.')
-        subprocess.check_call(
-            [os.path.join(sky_pkg_lib_dir, 'download_material_design_icons')])
-
-
 class SetBuildDir(object):
     def add_subparser(self, subparsers):
         start_parser = subparsers.add_parser('set_build_dir',
@@ -197,8 +185,6 @@ class StartSky(object):
         if not os.path.exists(apk_path):
             print "'%s' does not exist?" % apk_path
             return 2
-
-        ensure_assets_are_downloaded(args.build_dir)
 
         packages_root = dev_packages_root(args.build_dir)
         sky_server = self._sky_server_for_args(args, packages_root)
