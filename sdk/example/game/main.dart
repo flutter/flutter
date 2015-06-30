@@ -1,5 +1,6 @@
 import 'package:sky/widgets/basic.dart';
 import 'package:sky/widgets/widget.dart';
+import 'package:sky/mojo/net/fetch.dart';
 
 import 'lib/game_demo.dart';
 import 'lib/sprites.dart';
