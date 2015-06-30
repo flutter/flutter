@@ -1,2 +1,2 @@
 # This test depends on events.md being implemented
-crbug.com/1 events/dispatcher.sky [ Skip ]
+crbug.com/1 events/dispatcher.dart [ Skip ]
