@@ -29,7 +29,6 @@ PAINT FOR FRAME #3 ----------------------------------------------
 3 |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 3 |  |  | paintChild RenderConstrainedBox at Point(356.0, 282.0)
 3 |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
-3 |  |  |  | drawRRect(Instance of 'RRect', Paint(color:Color(0x00000000)))
 3 |  |  |  | paintChild RenderPositionedBox at Point(364.0, 282.0)
 3 |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 3 |  |  |  |  | paintChild RenderParagraph at Point(370.0, 290.0)

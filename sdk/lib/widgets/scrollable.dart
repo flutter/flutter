@@ -8,9 +8,12 @@ import 'dart:sky' as sky;
 import '../animation/generators.dart';
 import '../animation/mechanics.dart';
 import '../animation/scroll_behavior.dart';
+import '../theme/colors.dart' as colors;
+import '../theme/theme_data.dart';
 import '../theme/view_configuration.dart' as config;
 import 'basic.dart';
 import 'material.dart';
+import 'theme.dart';
 
 const double _kMillisecondsPerSecond = 1000.0;
 
@@ -34,6 +37,17 @@ abstract class Scrollable extends Component {
     backgroundColor = source.backgroundColor;
   }
 
+  Color get _nonNullBackgroundColor {
+    if (backgroundColor != null)
+      return backgroundColor;
+    switch (Theme.of(this).brightness) {
+      case ThemeBrightness.light:
+        return colors.Grey[50];
+      case ThemeBrightness.dark:
+        return colors.Grey[850];
+    }
+  }
+
   double _scrollOffset = 0.0;
   double get scrollOffset => _scrollOffset;
 
@@ -54,7 +68,7 @@ abstract class Scrollable extends Component {
       child: new Material(
         child: buildContent(),
         edge: MaterialEdge.canvas,
-        color: backgroundColor
+        color: _nonNullBackgroundColor
       ),
       onPointerDown: _handlePointerDown,
       onPointerUp: _handlePointerUpOrCancel,

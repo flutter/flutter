@@ -3,7 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:sky/painting/text_style.dart';
-import 'package:sky/theme/typography.dart';
+import 'package:sky/theme/colors.dart' as colors;
+import 'package:sky/theme/typography.dart' as typography;
 import 'package:sky/widgets/basic.dart';
 import 'package:sky/widgets/material.dart';
 import 'package:sky/widgets/scaffold.dart';
@@ -45,12 +46,15 @@ class TabbedNavigatorApp extends App {
     );
 
     ToolBar toolbar = new ToolBar(
-      center: new Text('Tabbed Navigator', style: white.title)
+      center: new Text('Tabbed Navigator', style: typography.white.title)
     );
 
     return new Scaffold(
       toolbar: toolbar,
-      body: new Material(child: tabNavigator)
+      body: new Material(
+        color: colors.Grey[50],
+        child: tabNavigator
+      )
     );
   }
 }

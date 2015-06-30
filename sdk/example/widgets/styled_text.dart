@@ -6,7 +6,7 @@ import 'package:sky/painting/text_style.dart';
 import 'package:sky/rendering/box.dart';
 import 'package:sky/rendering/flex.dart';
 import 'package:sky/rendering/sky_binding.dart';
-import 'package:sky/theme/colors.dart';
+import 'package:sky/theme/colors.dart' as colors;
 import 'package:sky/widgets/basic.dart';
 import 'package:sky/widgets/material.dart';
 import 'package:sky/widgets/scaffold.dart';
@@ -41,8 +41,8 @@ HAL: This mission is too important for me to allow you to jeopardize it.''';
   // [["Dave", "Open the pod bay..."] ...]
   List<List<String>> nameLines;
 
-  final TextStyle daveStyle = new TextStyle(color: Indigo[400], height: 1.8);
-  final TextStyle halStyle = new TextStyle(color: Red[400], fontFamily: "monospace");
+  final TextStyle daveStyle = new TextStyle(color: colors.Indigo[400], height: 1.8);
+  final TextStyle halStyle = new TextStyle(color: colors.Red[400], fontFamily: "monospace");
   final TextStyle boldStyle = const TextStyle(fontWeight: bold);
   final TextStyle underlineStyle = const TextStyle(
     decoration: underline,
@@ -106,9 +106,12 @@ HAL: This mission is too important for me to allow you to jeopardize it.''';
     );
 
     return new Theme(
-      data: new ThemeData.light(primary: Blue, darkToolbar: true),
+      data: new ThemeData.light(primary: colors.Blue, darkToolbar: true),
       child: new Scaffold(
-        body: new Material(child: interactiveBody),
+        body: new Material(
+          color: colors.Grey[50],
+          child: interactiveBody
+        ),
         toolbar: new ToolBar(
           center: new Text('Hal and Dave')
         )

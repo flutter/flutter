@@ -79,6 +79,7 @@ class SectorApp extends App {
         toolbar: new ToolBar(
             center: new Text('Sector Layout in a Widget Tree')),
         body: new Material(
+          color: colors.Grey[50],
           edge: MaterialEdge.canvas,
           child: new Flex([
               new Container(
