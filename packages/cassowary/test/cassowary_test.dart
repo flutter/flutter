@@ -579,4 +579,10 @@ void main() {
     expect(mid.value, 50.0);
     expect(right.value, 90.0);
   });
+
+  test('param_context_non_final', () {
+    var p = new Param.withContext("a");
+    p.context = "b";
+    expect(p.context, "b");
+  });
 }
