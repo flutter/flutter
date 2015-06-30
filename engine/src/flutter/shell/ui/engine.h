@@ -17,8 +17,6 @@
 #include "sky/engine/public/platform/ServiceProvider.h"
 #include "sky/engine/public/sky/sky_view.h"
 #include "sky/engine/public/sky/sky_view_client.h"
-#include "sky/engine/public/web/WebFrameClient.h"
-#include "sky/engine/public/web/WebViewClient.h"
 #include "sky/shell/gpu_delegate.h"
 #include "sky/shell/ui_delegate.h"
 #include "sky/shell/service_provider.h"
@@ -34,8 +32,6 @@ class Engine : public UIDelegate,
                public ViewportObserver,
                public blink::ServiceProvider,
                public mojo::NavigatorHost,
-               public blink::WebFrameClient,
-               public blink::WebViewClient,
                public blink::SkyViewClient {
  public:
   struct Config {
@@ -75,17 +71,6 @@ class Engine : public UIDelegate,
                    const mojo::String& package_root) override;
   void RunFromSnapshot(const mojo::String& path) override;
 
-  // WebViewClient methods:
-  void frameDetached(blink::WebFrame*) override;
-  void initializeLayerTreeView() override;
-  void scheduleVisualUpdate() override;
-  blink::WebScreenInfo screenInfo() override;
-  blink::ServiceProvider* services() override;
-
-  // WebFrameClient methods:
-  void didCreateIsolate(blink::WebLocalFrame* frame,
-                        Dart_Isolate isolate) override;
-
   // SkyViewClient methods:
   void ScheduleFrame() override;
   void DidCreateIsolate(Dart_Isolate isolate) override;
@@ -100,18 +85,14 @@ class Engine : public UIDelegate,
   void RequestNavigateHistory(int32_t delta) override;
 
   void RunFromLibrary(const mojo::String& name);
-  void CloseWebViewIfNeeded();
-  void LoadUsingWebView(const mojo::String& mojo_url);
 
   void UpdateSkyViewSize();
-  void UpdateWebViewSize();
 
   Config config_;
   scoped_ptr<Animator> animator_;
 
   scoped_ptr<blink::DartLibraryProvider> dart_library_provider_;
   std::unique_ptr<blink::SkyView> sky_view_;
-  blink::WebView* web_view_;
 
   float device_pixel_ratio_;
   gfx::Size physical_size_;
