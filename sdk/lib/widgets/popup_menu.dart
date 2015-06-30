@@ -17,6 +17,10 @@ import 'popup_menu_item.dart';
 const double _kMenuOpenDuration = 300.0;
 const double _kMenuCloseDuration = 200.0;
 const double _kMenuCloseDelay = 100.0;
+const double _kMenuWidthStep = 56.0;
+const double _kMenuMinWidth = 1.5 * _kMenuWidthStep;
+const double _kMenuHorizontalPadding = 16.0;
+const double _kMenuVerticalPadding = 8.0;
 
 enum MenuState { hidden, opening, open, closing }
 
@@ -64,7 +68,7 @@ class PopupMenu extends AnimatedComponent {
   }
 
   PopupMenuController controller;
-  List<Widget> items;
+  List<PopupMenuItem> items;
   int level;
 
   void syncFields(PopupMenu source) {
@@ -95,16 +99,25 @@ class PopupMenu extends AnimatedComponent {
 
     return new Opacity(
       opacity: math.min(1.0, controller.position.value * 3.0),
-      child: new ShrinkWrapWidth(
-        child: new CustomPaint(
-          callback: (sky.Canvas canvas, Size size) {
-            double width = math.min(size.width, size.width * (0.5 + controller.position.value * 2.0));
-            double height = math.min(size.height, size.height * controller.position.value * 1.5);
-            _painter.paint(canvas, new Rect.fromLTRB(size.width - width, 0.0, width, height));
-          },
-          child: new Container(
-            padding: const EdgeDims.all(8.0),
-            child: new Block(children)
+      child: new CustomPaint(
+        callback: (sky.Canvas canvas, Size size) {
+          double width = math.min(size.width, size.width * (0.5 + controller.position.value * 2.0));
+          double height = math.min(size.height, size.height * controller.position.value * 1.5);
+          _painter.paint(canvas, new Rect.fromLTRB(size.width - width, 0.0, width, height));
+        },
+        child: new ConstrainedBox(
+          constraints: new BoxConstraints(
+            minWidth: _kMenuMinWidth
+          ),
+          child: new ShrinkWrapWidth(
+            stepWidth: _kMenuWidthStep,
+            child: new Container(
+              padding: const EdgeDims.symmetric(
+                horizontal: _kMenuHorizontalPadding,
+                vertical: _kMenuVerticalPadding
+              ),
+              child: new Block(children)
+            )
           )
         )
       )

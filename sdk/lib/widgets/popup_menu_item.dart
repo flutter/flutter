@@ -21,8 +21,7 @@ class PopupMenuItem extends Component {
       opacity: opacity,
       child: new InkWell(
         child: new Container(
-          constraints: const BoxConstraints(minWidth: 112.0),
-          padding: const EdgeDims.all(16.0),
+          height: 48.0,
           child: new DefaultTextStyle(
             style: textStyle,
             child: child

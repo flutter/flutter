@@ -231,11 +231,27 @@ class ConstrainedBox extends OneChildRenderObjectWrapper {
 }
 
 class ShrinkWrapWidth extends OneChildRenderObjectWrapper {
-  ShrinkWrapWidth({ String key, Widget child })
-    : super(key: key, child: child);
+
+  ShrinkWrapWidth({
+    String key,
+    this.stepWidth,
+    this.stepHeight,
+    Widget child
+  }): super(key: key, child: child);
 
   RenderShrinkWrapWidth get root => super.root;
+
+  final double stepWidth;
+  final double stepHeight;
+
   RenderShrinkWrapWidth createNode() => new RenderShrinkWrapWidth();
+
+  void syncRenderObject(ShrinkWrapWidth old) {
+    super.syncRenderObject(old);
+    root.stepWidth = stepWidth;
+    root.stepHeight = stepHeight;
+  }
+
 }
 
 class SizeObserver extends OneChildRenderObjectWrapper {
