@@ -41,7 +41,8 @@ static float getRunAdvance(Layout& layout, const uint16_t* buf, size_t layoutSta
             clusterWidth = charAdvance;
         }
     }
-    if (offset < start + count && layout.getCharAdvance(offset - layoutStart) == 0.0f) {
+    if (offset < start + count && layout.getCharAdvance(offset - layoutStart) == 0.0f &&
+            !GraphemeBreak::isGraphemeBreak(buf, start, count, offset)) {
         // In the middle of a cluster, distribute width of cluster so that each grapheme cluster
         // gets an equal share.
         // TODO: get caret information out of font when that's available
