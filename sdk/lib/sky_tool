@@ -20,6 +20,7 @@ LIB_DIR = os.path.realpath(os.path.dirname(os.path.abspath(__file__)))
 SKY_PACKAGE_ROOT = os.path.realpath(os.path.dirname(LIB_DIR))
 
 SKY_SERVER_PORT = 9888
+OBSERVATORY_PORT = 8181
 APK_NAME = 'SkyDemo.apk'
 ANDROID_PACKAGE = "org.domokit.sky.demo"
 # FIXME: This assumes adb is in $PATH, we could look for ANDROID_HOME, etc?
@@ -168,6 +169,12 @@ class StartSky(object):
                 return 2
 
             subprocess.check_call([ADB_PATH, 'install', '-r', apk_path])
+
+        # Set up port forwarding for observatory
+        observatory_port_string = 'tcp:%s' % OBSERVATORY_PORT
+        subprocess.check_call([
+            ADB_PATH, 'forward', observatory_port_string, observatory_port_string
+        ])
 
         sky_server_port = SKY_SERVER_PORT
         pids['sky_server_port'] = sky_server_port
