@@ -11,7 +11,7 @@ import 'package:mojom/mojo/network_service.mojom.dart';
 import 'package:mojom/mojo/url_request.mojom.dart';
 import 'package:mojom/mojo/url_loader.mojom.dart';
 
-import 'package:sky/framework/embedder.dart';
+import 'package:sky/embedder.dart';
 
 Future<String> run(url) async {
   var networkService= new NetworkServiceProxy.unbound();
