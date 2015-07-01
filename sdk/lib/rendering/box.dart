@@ -8,7 +8,6 @@ import 'dart:sky' as sky;
 import 'package:vector_math/vector_math.dart';
 
 import '../base/debug.dart';
-import '../mojo/net/image_cache.dart' as image_cache;
 import '../painting/box_painter.dart';
 import 'object.dart';
 
@@ -1015,24 +1014,18 @@ class RenderBaseline extends RenderShiftedBox {
 
 class RenderImage extends RenderBox {
 
-  RenderImage(String url, Size dimensions) {
-    requestedSize = dimensions;
-    src = url;
-  }
+  RenderImage(sky.Image image, Size requestedSize)
+    : _image = image, _requestedSize = requestedSize;
 
   sky.Image _image;
-  String _src;
-  String get src => _src;
-  void set src (String value) {
-    if (value == _src)
+  sky.Image get image => _image;
+  void set image (sky.Image value) {
+    if (value == _image)
       return;
-    _src = value;
-    image_cache.load(_src).then((result) {
-      _image = result;
-      if (requestedSize.width == null || requestedSize.height == null)
-        markNeedsLayout();
-      markNeedsPaint();
-    });
+    _image = value;
+    markNeedsPaint();
+    if (_requestedSize.width == null || _requestedSize.height == null)
+      markNeedsLayout();
   }
 
   Size _requestedSize;
@@ -1114,7 +1107,7 @@ class RenderImage extends RenderBox {
       canvas.restore();
   }
 
-  String debugDescribeSettings(String prefix) => '${super.debugDescribeSettings(prefix)}${prefix}url: ${src}\n${prefix}dimensions: ${requestedSize}\n';
+  String debugDescribeSettings(String prefix) => '${super.debugDescribeSettings(prefix)}${prefix}dimensions: ${requestedSize}\n';
 }
 
 class RenderDecoratedBox extends RenderProxyBox {

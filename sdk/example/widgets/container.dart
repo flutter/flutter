@@ -14,7 +14,7 @@ class ContainerApp extends App {
           padding: new EdgeDims.all(10.0),
           margin: new EdgeDims.all(10.0),
           decoration: new BoxDecoration(backgroundColor: const Color(0xFFCCCCCC)),
-          child: new Image(
+          child: new NetworkImage(
             src: "https://www.dartlang.org/logos/dart-logo.png",
             size: new Size(300.0, 300.0)
           )

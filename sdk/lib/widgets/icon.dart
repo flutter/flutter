@@ -29,7 +29,7 @@ class Icon extends Component {
     // TODO(eseidel): This clearly isn't correct.  Not sure what would be.
     // Should we use the ios images on ios?
     String density = 'drawable-xxhdpi';
-    return new Image(
+    return new NetworkImage(
       size: new Size(size.toDouble(), size.toDouble()),
       src: '${kAssetBase}/${category}/${density}/ic_${subtype}_${size}dp.png'
     );

@@ -2,10 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:sky' as sky;
 
 import 'package:vector_math/vector_math.dart';
 
+import '../mojo/net/image_cache.dart' as image_cache;
 import '../painting/text_style.dart';
 import '../rendering/block.dart';
 import '../rendering/box.dart';
@@ -477,7 +479,7 @@ class Text extends Component {
       else
         combinedStyle = defaultStyle;
     } else {
-      combinedStyle = style;      
+      combinedStyle = style;
     }
     if (combinedStyle != null)
       text = new InlineStyle(combinedStyle, [text]);
@@ -486,27 +488,66 @@ class Text extends Component {
 }
 
 class Image extends LeafRenderObjectWrapper {
-
-  Image({
-    src,
-    this.size
-  }) : src = src,
-       super(key: src) {
-    assert(src != null);
-  }
+  Image({ sky.Image image, this.size })
+    : image = image, super(key: image.hashCode.toString());
 
   RenderImage get root => super.root;
-  RenderImage createNode() => new RenderImage(this.src, this.size);
+  RenderImage createNode() => new RenderImage(image, size);
 
-  final String src;
+  final sky.Image image;
   final Size size;
 
   void syncRenderObject(Widget old) {
     super.syncRenderObject(old);
-    root.src = src;
+    root.image = image;
     root.requestedSize = size;
   }
+}
 
+class FutureImage extends Component {
+  FutureImage({ this.image, this.size }) : super(stateful: true);
+
+  Future<sky.Image> image;
+  Size size;
+  sky.Image _resolvedImage;
+
+  void didMount() {
+    super.didMount();
+    _resolveImage();
+  }
+
+  void _resolveImage() {
+    image.then((sky.Image resolvedImage) {
+      if (!mounted)
+        return;
+      setState(() {
+        _resolvedImage = resolvedImage;
+      });
+    });
+  }
+
+  void syncFields(FutureImage source) {
+    bool needToResolveImage = (image != source.image);
+    image = source.image;
+    size = source.size;
+    if (needToResolveImage)
+      _resolveImage();
+  }
+
+  Widget build() {
+    return new Image(image: _resolvedImage, size: size);
+  }
+}
+
+class NetworkImage extends Component {
+  NetworkImage({ String src, this.size }) : src = src, super(key: src);
+
+  final String src;
+  final Size size;
+
+  Widget build() {
+    return new FutureImage(image: image_cache.load(src), size: size);
+  }
 }
 
 class WidgetToRenderBoxAdapter extends LeafRenderObjectWrapper {
