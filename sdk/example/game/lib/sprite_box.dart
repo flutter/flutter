@@ -287,8 +287,19 @@ class SpriteBox extends RenderBox {
     // Print frame rate
     if (_numFrames % 60 == 0) print("delta: $delta fps: $_frameRate");
 
+    _runActions(_rootNode, delta);
     _callUpdate(_rootNode, delta);
     _scheduleTick();
+  }
+
+  void _runActions(Node node, double dt) {
+    if (node._actions != null) {
+      node._actions.step(dt);
+    }
+    for (int i = node.children.length - 1; i >= 0; i--) {
+      Node child = node.children[i];
+      _runActions(child, dt);
+    }
   }
 
   void _callUpdate(Node node, double dt) {

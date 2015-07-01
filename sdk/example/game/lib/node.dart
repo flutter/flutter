@@ -59,6 +59,15 @@ class Node {
 
   List<Node>_children = [];
 
+  ActionController _actions;
+
+  ActionController get actions {
+    if (_actions == null) {
+      _actions = new ActionController();
+    }
+    return _actions;
+  }
+
   // Constructors
 
   /// Creates a new [Node] without any transformation.

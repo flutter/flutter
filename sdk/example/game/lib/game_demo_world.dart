@@ -303,6 +303,12 @@ class Asteroid extends Sprite {
                                 _rand.nextDouble() * _maxAsteroidSpeed * 2 - _maxAsteroidSpeed);
 
     userInteractionEnabled = true;
+
+    // Rotate forever
+    double direction = (_rand.nextBool()) ? 360.0 : -360.0;
+    ActionTween rot = new ActionTween( (a) => rotation = a, 0.0, direction, 2.0 * _rand.nextDouble() + 2.0);
+    ActionRepeatForever repeat = new ActionRepeatForever(rot);
+    actions.run(repeat);
   }
 
   bool handleEvent(SpriteBoxEvent event) {

@@ -32,19 +32,13 @@ class ColorSequence {
       int gDelta = ((rand.nextDouble() * 2.0 - 1.0) * greenVar).toInt();
       int bDelta = ((rand.nextDouble() * 2.0 - 1.0) * blueVar).toInt();
 
-      int aNew = _clamp(color.alpha + aDelta, 0, 255);
-      int rNew = _clamp(color.red + rDelta, 0, 255);
-      int gNew = _clamp(color.green + gDelta, 0, 255);
-      int bNew = _clamp(color.blue + bDelta, 0, 255);
+      int aNew = (color.alpha + aDelta).clamp(0, 255);
+      int rNew = (color.red + rDelta).clamp(0, 255);
+      int gNew = (color.green + gDelta).clamp(0, 255);
+      int bNew = (color.blue + bDelta).clamp(0, 255);
 
       colors.add(new Color.fromARGB(aNew, rNew, gNew, bNew));
     }
-  }
-
-  int _clamp(int val, int min, int max) {
-    if (val < min) return min;
-    if (val > max) return max;
-    return val;
   }
 
   Color colorAtPosition(double pos) {
