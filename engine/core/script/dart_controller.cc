@@ -20,7 +20,6 @@
 #include "sky/engine/core/frame/LocalFrame.h"
 #include "sky/engine/core/loader/FrameLoaderClient.h"
 #include "sky/engine/core/script/dart_debugger.h"
-#include "sky/engine/core/script/dart_library_provider_webview.h"
 #include "sky/engine/core/script/dart_service_isolate.h"
 #include "sky/engine/core/script/dom_dart_state.h"
 #include "sky/engine/public/platform/Platform.h"

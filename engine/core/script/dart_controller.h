@@ -19,7 +19,6 @@ class AbstractModule;
 class BuiltinSky;
 class DOMDartState;
 class DartLibraryProvider;
-class DartLibraryProviderWebView;
 class DartSnapshotLoader;
 class DartValue;
 class KURL;
@@ -31,9 +30,6 @@ class DartController {
   ~DartController();
 
   static void InitVM();
-
-  typedef base::Callback<void(RefPtr<AbstractModule>, RefPtr<DartValue>)>
-      LoadFinishedCallback;
 
   void RunFromLibrary(const String& name,
                       DartLibraryProvider* library_provider);
@@ -51,7 +47,6 @@ class DartController {
 
   OwnPtr<DOMDartState> dom_dart_state_;
   OwnPtr<BuiltinSky> builtin_sky_;
-  OwnPtr<DartLibraryProviderWebView> library_provider_;
   OwnPtr<DartSnapshotLoader> snapshot_loader_;
 
   base::WeakPtrFactory<DartController> weak_factory_;
