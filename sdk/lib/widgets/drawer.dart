@@ -8,6 +8,7 @@ import 'dart:sky' as sky;
 import 'package:vector_math/vector_math.dart';
 
 import '../animation/animated_value.dart';
+import '../animation/animation_performance.dart';
 import '../animation/curves.dart';
 import '../theme/colors.dart';
 import '../theme/shadows.dart';
@@ -29,22 +30,26 @@ import 'basic.dart';
 
 const double _kWidth = 304.0;
 const double _kMinFlingVelocity = 0.4;
-const double _kBaseSettleDurationMS = 246.0;
-const double _kMaxSettleDurationMS = 600.0;
+const int _kBaseSettleDurationMS = 246;
 const Curve _kAnimationCurve = parabolicRise;
 
 typedef void DrawerStatusChangeHandler (bool showing);
 
 class DrawerController {
-
   DrawerController(this.onStatusChange) {
-    position = new AnimatedValue(-_kWidth, onChange: _checkValue);
+    performance = new AnimationPerformance()
+      ..duration = new Duration(milliseconds: _kBaseSettleDurationMS)
+      ..variable = position;
+    performance.timeline.onValueChanged.listen(_checkValue);
   }
   final DrawerStatusChangeHandler onStatusChange;
-  AnimatedValue position;
+
+  AnimationPerformance performance;
+  final AnimatedPosition position = new AnimatedPosition(
+      new Point(-_kWidth, 0.0), Point.origin, curve: _kAnimationCurve);
 
   bool _oldClosedState = true;
-  void _checkValue() {
+  void _checkValue(_) {
     var newClosedState = isClosed;
     if (onStatusChange != null && _oldClosedState != newClosedState) {
       onStatusChange(!newClosedState);
@@ -52,69 +57,52 @@ class DrawerController {
     }
   }
 
-  bool get isClosed => position.value == -_kWidth;
-  bool get _isMostlyClosed => position.value <= -_kWidth / 2;
-  void toggle() => _isMostlyClosed ? open() : close();
+  bool get isClosed => performance.isDismissed;
+  bool get _isMostlyClosed => position.value.x <= -_kWidth/2;
+
+  void open() => performance.play();
+
+  void close() => performance.reverse();
+
+  void _settle() => _isMostlyClosed ? close() : open();
 
   void handleMaskTap(_) => close();
-  void handlePointerDown(_) => position.stop();
+
+  // TODO(mpcomplete): Figure out how to generalize these handlers on a
+  // "PannableThingy" interface.
+  void handlePointerDown(_) => performance.stop();
 
   void handlePointerMove(sky.PointerEvent event) {
-    if (position.isAnimating)
+    if (performance.isAnimating)
       return;
-    position.value = math.min(0.0, math.max(position.value + event.dx, -_kWidth));
+    performance.progress += event.dx / _kWidth;
   }
 
   void handlePointerUp(_) {
-    if (!position.isAnimating)
+    if (!performance.isAnimating)
       _settle();
   }
 
   void handlePointerCancel(_) {
-    if (!position.isAnimating)
+    if (!performance.isAnimating)
       _settle();
   }
 
-  void open() => _animateToPosition(0.0);
-
-  void close() => _animateToPosition(-_kWidth);
-
-  void _settle() => _isMostlyClosed ? close() : open();
-
-  void _animateToPosition(double targetPosition) {
-    double distance = (targetPosition - position.value).abs();
-    if (distance != 0) {
-      double targetDuration = distance / _kWidth * _kBaseSettleDurationMS;
-      double duration = math.min(targetDuration, _kMaxSettleDurationMS);
-      position.animateTo(targetPosition, duration, curve: _kAnimationCurve);
-    }
-  }
-
   void handleFlingStart(event) {
-    double direction = event.velocityX.sign;
-    double velocityX = event.velocityX.abs() / 1000;
-    if (velocityX < _kMinFlingVelocity)
-      return;
-
-    double targetPosition = direction < 0.0 ? -_kWidth : 0.0;
-    double distance = (targetPosition - position.value).abs();
-    double duration = distance / velocityX;
-
-    if (distance > 0)
-      position.animateTo(targetPosition, duration, curve: linear);
+    double velocityX = event.velocityX / 1000;
+    if (velocityX.abs() >= _kMinFlingVelocity)
+      performance.fling(velocity: velocityX / _kWidth);
   }
-
 }
 
 class Drawer extends AnimatedComponent {
-
   Drawer({
     String key,
     this.controller,
     this.children,
     this.level: 0
   }) : super(key: key) {
-    watch(controller.position);
+    watch(controller.performance.timeline);
   }
 
   List<Widget> children;
@@ -128,34 +116,35 @@ class Drawer extends AnimatedComponent {
     super.syncFields(source);
   }
 
+  // TODO(mpcomplete): the animation system should handle building, maybe? Or
+  // at least setting the transform. Figure out how this could work for things
+  // like fades, slides, rotates, pinch, etc.
   Widget build() {
-    Matrix4 transform = new Matrix4.identity();
-    transform.translate(controller.position.value);
-
-    double scaler = controller.position.value / _kWidth + 1;
+    // TODO(mpcomplete): animate as a fade-in.
+    double scaler = controller.performance.progress + 1.0;
     Color maskColor = new Color.fromARGB((0x7F * scaler).floor(), 0, 0, 0);
 
     var mask = new Listener(
       child: new Container(decoration: new BoxDecoration(backgroundColor: maskColor)),
-      onGestureTap: controller.handleMaskTap,
-      onGestureFlingStart: controller.handleFlingStart
+      onGestureTap: controller.handleMaskTap
     );
 
-    Container content = new Container(
-      decoration: new BoxDecoration(
-        backgroundColor: Grey[50],
-        boxShadow: shadows[level]),
-      width: _kWidth,
-      transform: transform,
-      child: new Block(children)
-    );
+    Widget content = controller.position.build(
+      new Container(
+        decoration: new BoxDecoration(
+          backgroundColor: Grey[50],
+          boxShadow: shadows[level]),
+        width: _kWidth,
+        child: new Block(children)
+      ));
 
     return new Listener(
       child: new Stack([ mask, content ]),
       onPointerDown: controller.handlePointerDown,
       onPointerMove: controller.handlePointerMove,
       onPointerUp: controller.handlePointerUp,
-      onPointerCancel: controller.handlePointerCancel
+      onPointerCancel: controller.handlePointerCancel,
+      onGestureFlingStart: controller.handleFlingStart
     );
   }
 

@@ -6,6 +6,7 @@ import 'dart:math' as math;
 import 'dart:sky' as sky;
 import 'dart:sky' show Point, Offset, Size, Rect, Color, Paint, Path;
 
+import '../base/lerp.dart';
 import 'shadows.dart';
 import 'package:sky/mojo/net/image_cache.dart' as image_cache;
 
@@ -70,6 +71,13 @@ class BoxShadow {
   final double blur;
 
   String toString() => 'BoxShadow($color, $offset, $blur)';
+}
+
+BoxShadow lerpBoxShadow(BoxShadow a, BoxShadow b, double t) {
+  return new BoxShadow(
+      color: lerpColor(a.color, b.color, t),
+      offset: lerpOffset(a.offset, b.offset, t),
+      blur: lerpNum(a.blur, b.blur, t));
 }
 
 abstract class Gradient {
