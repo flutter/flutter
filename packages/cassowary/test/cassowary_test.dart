@@ -585,4 +585,11 @@ void main() {
     p.context = "b";
     expect(p.context, "b");
   });
+
+  test('check_type_of_eq_result', () {
+    Param left = new Param();
+    Param right = new Param();
+
+    expect((left == right).runtimeType, Constraint);
+  });
 }
