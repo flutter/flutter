@@ -904,7 +904,7 @@ class RenderImage extends RenderBox {
     if (value == _src)
       return;
     _src = value;
-    image_cache.load(_src, (result) {
+    image_cache.load(_src).then((result) {
       _image = result;
       if (requestedSize.width == null || requestedSize.height == null)
         markNeedsLayout();

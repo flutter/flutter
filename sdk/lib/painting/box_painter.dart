@@ -140,7 +140,7 @@ class BackgroundImage {
     this.fit: BackgroundFit.scaleDown,
     this.repeat: BackgroundRepeat.noRepeat
   }) {
-    image_cache.load(src, (image) {
+    image_cache.load(src).then((image) {
       if (image == null)
         return;
       _image = image;

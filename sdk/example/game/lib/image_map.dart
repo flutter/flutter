@@ -18,7 +18,7 @@ class ImageMap {
   }
 
   void _addURL(String url) {
-    image_cache.load(url, (Image image) {
+    image_cache.load(url).then((Image image) {
       // Store reference to image
       _images[url] = image;
 

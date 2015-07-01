@@ -59,7 +59,7 @@ bool handleEvent(Event event) {
   }
 
   if (event.type == "pointerup") {
-    image_cache.load(url2, handleImageLoad);
+    image_cache.load(url2).then(handleImageLoad);
     return true;
   }
 
@@ -67,8 +67,7 @@ bool handleEvent(Event event) {
 }
 
 void main() {
-  image_cache.load(url1, handleImageLoad);
-  image_cache.load(url1, handleImageLoad);
+  image_cache.load(url1).then(handleImageLoad);
   view.setEventCallback(handleEvent);
   view.setBeginFrameCallback(beginFrame);
 }

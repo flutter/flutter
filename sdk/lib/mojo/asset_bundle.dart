@@ -12,7 +12,7 @@ import 'shell.dart' as shell;
 import 'net/fetch.dart';
 
 Future<sky.Image> _decodeImage(core.MojoDataPipeConsumer assetData) {
-  Completer<sky.Image> completer = new Completer();
+  Completer<sky.Image> completer = new Completer<sky.Image>();
   new sky.ImageDecoder(assetData.handle.h, completer.complete);
   return completer.future;
 }

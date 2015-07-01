@@ -2,27 +2,28 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:sky';
+import 'dart:async';
+import 'dart:sky' as sky;
 import 'dart:collection';
 
 import 'package:mojom/mojo/url_response.mojom.dart';
 
 import 'fetch.dart';
 
-final HashMap<String, List<ImageDecoderCallback>> _pendingRequests =
-  new HashMap<String, List<ImageDecoderCallback>>();
+final HashMap<String, List<sky.ImageDecoderCallback>> _pendingRequests =
+  new HashMap<String, List<sky.ImageDecoderCallback>>();
 
-final HashMap<String, Image> _completedRequests =
-  new HashMap<String, Image>();
+final HashMap<String, sky.Image> _completedRequests =
+  new HashMap<String, sky.Image>();
 
-void _loadComplete(url, image) {
+void _loadComplete(String url, sky.Image image) {
   _completedRequests[url] = image;
   _pendingRequests[url].forEach((c) => c(image));
   _pendingRequests.remove(url);
 }
 
-void load(String url, ImageDecoderCallback callback) {
-  Image result = _completedRequests[url];
+void _load(String url, sky.ImageDecoderCallback callback) {
+  sky.Image result = _completedRequests[url];
   if (result != null) {
     callback(_completedRequests[url]);
     return;
@@ -31,7 +32,7 @@ void load(String url, ImageDecoderCallback callback) {
   bool newRequest = false;
   _pendingRequests.putIfAbsent(url, () {
     newRequest = true;
-    return new List<ImageDecoderCallback>();
+    return new List<sky.ImageDecoderCallback>();
   }).add(callback);
   if (newRequest) {
     fetchUrl(url).then((UrlResponse response) {
@@ -39,8 +40,15 @@ void load(String url, ImageDecoderCallback callback) {
         _loadComplete(url, null);
         return;
       }
-      new ImageDecoder(response.body.handle.h,
-          (image) => _loadComplete(url, image));
+      new sky.ImageDecoder(response.body.handle.h, (image) {
+        _loadComplete(url, image);
+      });
     });
   }
+}
+
+Future<sky.Image> load(String url) {
+  Completer<sky.Image> completer = new Completer<sky.Image>();
+  _load(url, completer.complete);
+  return completer.future;
 }
