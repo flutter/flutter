@@ -2,22 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-import("//build/config/ui.gni")
-import("//sky/engine/config.gni")
-import("//testing/test.gni")
-
 visibility = [ "//sky/*" ]
-
-platform_web_unittest_files = [
-  "//sky/engine/platform/graphics/BitmapImageTest.cpp",
-  "//sky/engine/platform/graphics/DeferredImageDecoderTest.cpp",
-  "//sky/engine/platform/graphics/ImageDecodingStoreTest.cpp",
-  "//sky/engine/platform/graphics/ImageFrameGeneratorTest.cpp",
-  "//sky/engine/platform/graphics/test/MockImageDecoder.h",
-  "//sky/engine/platform/graphics/test/MockWebGraphicsContext3D.h",
-  "//sky/engine/platform/image-decoders/gif/GIFImageDecoderTest.cpp",
-  "//sky/engine/platform/image-decoders/jpeg/JPEGImageDecoderTest.cpp",
-]
 
 component("web") {
   output_name = "sky_web"
@@ -34,76 +19,7 @@ component("web") {
   ]
 
   sources = [
-    "AssertMatchingEnums.cpp",
-    "ChromeClientImpl.cpp",
-    "ChromeClientImpl.h",
-    "CompositionUnderlineBuilder.h",
-    "CompositionUnderlineVectorBuilder.cpp",
-    "CompositionUnderlineVectorBuilder.h",
-    "EditorClientImpl.cpp",
-    "EditorClientImpl.h",
-    "FrameLoaderClientImpl.cpp",
-    "FrameLoaderClientImpl.h",
-    "SpellCheckerClientImpl.cpp",
-    "SpellCheckerClientImpl.h",
-    "WebCache.cpp",
-    "WebCachedURLRequest.cpp",
-    "WebDocument.cpp",
-    "WebElement.cpp",
-    "WebFontDescription.cpp",
-    "WebFontImpl.cpp",
-    "WebFontImpl.h",
-    "WebFrame.cpp",
     "Sky.cpp",
-    "WebLocalFrameImpl.cpp",
-    "WebLocalFrameImpl.h",
-    "WebNode.cpp",
-    "WebRange.cpp",
     "WebRuntimeFeatures.cpp",
-    "WebSettingsImpl.cpp",
-    "WebSettingsImpl.h",
-    "WebTextCheckingCompletionImpl.cpp",
-    "WebTextCheckingCompletionImpl.h",
-    "WebTextCheckingResult.cpp",
-    "WebTextInputInfo.cpp",
-    "WebTextRun.cpp",
-    "WebViewImpl.cpp",
-    "WebViewImpl.h",
-    "linux/WebFontRendering.cpp",
   ]
-}
-
-test("sky_unittests") {
-  deps = [
-    "//base",
-    "//base/test:test_support",
-    "//base:i18n",
-    "//sky/engine/testing/platform",
-    "//sky/engine/wtf:test_support",
-    "//testing/gmock",
-    "//testing/gtest",
-    "//third_party/zlib",
-    "//url",
-    ":web",
-  ]
-
-  # TODO(abarth): This is a lie - this test is not embedded in an environment
-  # that injects the system thunks, so system calls don't actually work. This
-  # just tricks the linker into thinking that an implementation of these calls
-  # will be injected at runtime so the link succeeds.
-  deps += [ "//mojo/public/platform/native:system" ]
-
-  sources = [
-    "tests/RunAllTests.cpp",
-  ]
-
-  configs += [ "//sky/engine:config" ]
-
-  if (!is_component_build) {
-    deps += [ "//sky/engine/core" ]
-
-    configs += [ "//sky/engine:inside_blink" ]
-
-    sources += platform_web_unittest_files
-  }
 }

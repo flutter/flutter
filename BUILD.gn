@@ -8,7 +8,6 @@ group("sky") {
   deps = [
     "//services/debugger",
     "//sky/engine/platform:platform_unittests",
-    "//sky/engine/web:sky_unittests",
     "//sky/engine/wtf:unittests",
     "//sky/sdk/example",
     "//sky/tools/imagediff",
