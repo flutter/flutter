@@ -399,6 +399,7 @@ source_set("generated_bindings") {
     "//third_party/qcms",
     "//third_party/zlib",
     "//url",
+    ":compile_idls",
     ":generate_dart_globals",
   ]
 
