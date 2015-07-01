@@ -69,8 +69,8 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     assert(!debugDoingPaint);
     assert(child != null);
     assert(child.parentData != null);
-    child.parentData.detach();
     child._cleanRelayoutSubtreeRoot();
+    child.parentData.detach();
     super.dropChild(child);
     markNeedsLayout();
   }
@@ -122,7 +122,6 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
       assert(parent == this.parent); // TODO(ianh): Remove this once the analyzer is cleverer
     } else {
       _nodesNeedingLayout.add(this);
-      scheduler.ensureVisualUpdate();
     }
   }
   void _cleanRelayoutSubtreeRoot() {
@@ -168,11 +167,12 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
       _debugDoingThisLayout = false;
       _debugCanParentUseSize = null;
     } catch (e, stack) {
-      print('Exception raised during layout of ${this}: ${e}');
+      print('Exception raised during layout:\n${e}\nContext:\n${this}');
       print(stack);
       return;
     }
     _needsLayout = false;
+    markNeedsPaint();
   }
   void layout(Constraints constraints, { bool parentUsesSize: false }) {
     final parent = this.parent; // TODO(ianh): Remove this once the analyzer is cleverer
@@ -217,7 +217,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     //
     // When calling layout() on your children, pass in
     // "parentUsesSize: true" if your size or layout is dependent on
-    // your child's size.
+    // your child's size or intrinsic dimensions.
 
   // when the parent has rotated (e.g. when the screen has been turned
   // 90 degrees), immediately prior to layout() being called for the

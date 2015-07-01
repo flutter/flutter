@@ -291,28 +291,63 @@ abstract class RenderBox extends RenderObject {
     return constraints.constrainHeight(0.0);
   }
 
-  // getDistanceToBaseline() should return the distance from the
+  Map<TextBaseline, double> _cachedBaselines;
+  bool _ancestorUsesBaseline = false;
+  static bool _debugDoingBaseline = false;
+  static bool _debugSetDoingBaseline(bool value) {
+    _debugDoingBaseline = value;
+    return true;
+  }
+  // getDistanceToBaseline() returns the distance from the
   // y-coordinate of the position of the box to the y-coordinate of
   // the first given baseline in the box's contents. This is used by
   // certain layout models to align adjacent boxes on a common
   // baseline, regardless of padding, font size differences, etc. If
-  // there is no baseline, then it should return the distance from the
+  // there is no baseline, then it returns the distance from the
   // y-coordinate of the position of the box to the y-coordinate of
-  // the bottom of the box, i.e., the height of the box.
-  // Only call this after layout has been performed.
+  // the bottom of the box, i.e., the height of the box. Only call
+  // this after layout has been performed. You are only allowed to
+  // call this from the parent of this node, and only during
+  // that parent's performLayout().
   double getDistanceToBaseline(TextBaseline baseline) {
     assert(!needsLayout);
+    assert(!_debugDoingBaseline);
+    final parent = this.parent; // TODO(ianh): Remove this once the analyzer is cleverer
+    assert(parent is RenderObject);
+    assert(parent == RenderObject.debugActiveLayout);
+    assert(parent.debugDoingThisLayout);
+    assert(_debugSetDoingBaseline(true));
     double result = getDistanceToActualBaseline(baseline);
+    assert(_debugSetDoingBaseline(false));
+    assert(parent == this.parent); // TODO(ianh): Remove this once the analyzer is cleverer
     if (result == null)
       return size.height;
     return result;
   }
-  // getDistanceToActualBaseline() should return the distance from the
-  // y-coordinate of the position of the box to the y-coordinate of
-  // the first given baseline in the box's contents, if any, or null
-  // otherwise.
+  // getDistanceToActualBaseline() must only be called from
+  // getDistanceToBaseline() and computeDistanceToActualBaseline(). Do
+  // not call it directly from outside those two methods. It just
+  // calls computeDistanceToActualBaseline() and caches the result.
   double getDistanceToActualBaseline(TextBaseline baseline) {
-    assert(!needsLayout);
+    assert(_debugDoingBaseline);
+    _ancestorUsesBaseline = true;
+    if (_cachedBaselines == null)
+      _cachedBaselines = new Map<TextBaseline, double>();
+    _cachedBaselines.putIfAbsent(baseline, () => computeDistanceToActualBaseline(baseline));
+    return _cachedBaselines[baseline];
+  }
+  // computeDistanceToActualBaseline() should return the distance from
+  // the y-coordinate of the position of the box to the y-coordinate
+  // of the first given baseline in the box's contents, if any, or
+  // null otherwise. This is the method that you should override in
+  // subclasses. This method (computeDistanceToActualBaseline())
+  // should not be called directly. Use getDistanceToBaseline() if you
+  // need to know the baseline of a child from performLayout(). If you
+  // need the baseline during paint, cache it during performLayout().
+  // Use getDistanceToActualBaseline() if you are implementing
+  // computeDistanceToActualBaseline() and need to defer to a child.
+  double computeDistanceToActualBaseline(TextBaseline baseline) {
+    assert(_debugDoingBaseline);
     return null;
   }
 
@@ -325,6 +360,26 @@ abstract class RenderBox extends RenderObject {
     if (!result)
       print("${this.runtimeType} does not meet its constraints. Constraints: $constraints, size: $_size");
     return result;
+  }
+
+  void markNeedsLayout() {
+    if (_cachedBaselines != null && _cachedBaselines.isNotEmpty) {
+      // if we have cached data, then someone must have used our data
+      assert(_ancestorUsesBaseline);
+      final parent = this.parent; // TODO(ianh): Remove this once the analyzer is cleverer
+      assert(parent is RenderObject);
+      parent.markNeedsLayout();
+      assert(parent == this.parent); // TODO(ianh): Remove this once the analyzer is cleverer
+      // Now that they're dirty, we can forget that they used the
+      // baseline. If they use it again, then we'll set the bit
+      // again, and if we get dirty again, we'll notify them again.
+      _ancestorUsesBaseline = false;
+      _cachedBaselines.clear();
+    } else {
+      // if we've never cached any data, then nobody can have used it
+      assert(!_ancestorUsesBaseline);
+    }
+    super.markNeedsLayout();
   }
   void performResize() {
     // default behaviour for subclasses that have sizedByParent = true
@@ -410,10 +465,10 @@ class RenderProxyBox extends RenderBox with RenderObjectWithChildMixin<RenderBox
     return super.getMaxIntrinsicHeight(constraints);
   }
 
-  double getDistanceToActualBaseline(TextBaseline baseline) {
+  double computeDistanceToActualBaseline(TextBaseline baseline) {
     if (child != null)
       return child.getDistanceToActualBaseline(baseline);
-    return super.getDistanceToActualBaseline(baseline);
+    return super.computeDistanceToActualBaseline(baseline);
   }
 
   void performLayout() {
@@ -494,6 +549,15 @@ class RenderConstrainedBox extends RenderProxyBox {
 }
 
 class RenderShrinkWrapWidth extends RenderProxyBox {
+
+  // This class will attempt to size its child to the child's maximum
+  // intrinsic width, snapped to a multiple of the stepWidth, if one
+  // is provided, and given the provided constraints; and will then
+  // adopt the child's resulting dimensions.
+
+  // Note: laying out this class is relatively expensive. Avoid using
+  // it where possible.
+
   RenderShrinkWrapWidth({
     double stepWidth,
     double stepHeight,
@@ -525,16 +589,15 @@ class RenderShrinkWrapWidth extends RenderProxyBox {
   }
 
   BoxConstraints _getInnerConstraints(BoxConstraints constraints) {
+    if (constraints.hasTightWidth)
+      return constraints;
     double width = child.getMaxIntrinsicWidth(constraints);
     assert(width == constraints.constrainWidth(width));
-    return constraints.applyWidth(width);
+    return constraints.applyWidth(applyStep(width, _stepWidth));
   }
 
   double getMinIntrinsicWidth(BoxConstraints constraints) {
-    if (child == null)
-      return constraints.constrainWidth(0.0);
-    double childResult = child.getMinIntrinsicWidth(constraints);
-    return constraints.constrainWidth(applyStep(childResult, _stepWidth));
+    return getMaxIntrinsicWidth(constraints);
   }
 
   double getMaxIntrinsicWidth(BoxConstraints constraints) {
@@ -560,12 +623,18 @@ class RenderShrinkWrapWidth extends RenderProxyBox {
 
   void performLayout() {
     if (child != null) {
-      child.layout(_getInnerConstraints(constraints), parentUsesSize: true);
-      size = new Size(applyStep(child.size.width, _stepWidth), applyStep(child.size.height, _stepHeight));
+      BoxConstraints childConstraints = _getInnerConstraints(constraints);
+      if (_stepHeight != null)
+        childConstraints.applyHeight(getMaxIntrinsicHeight(childConstraints));
+      child.layout(childConstraints, parentUsesSize: true);
+      size = child.size;
     } else {
       performResize();
     }
   }
+
+  String debugDescribeSettings(String prefix) => '${super.debugDescribeSettings(prefix)}${prefix}stepWidth: ${stepWidth}\n${prefix}stepHeight: ${stepHeight}\n';
+
 }
 
 class RenderOpacity extends RenderProxyBox {
@@ -719,12 +788,31 @@ abstract class RenderShiftedBox extends RenderBox with RenderObjectWithChildMixi
     this.child = child;
   }
 
-  void paint(PaintingCanvas canvas, Offset offset) {
+  double getMinIntrinsicWidth(BoxConstraints constraints) {
     if (child != null)
-      canvas.paintChild(child, child.parentData.position + offset);
+      return child.getMinIntrinsicWidth(constraints);
+    return super.getMinIntrinsicWidth(constraints);
   }
 
-  double getDistanceToActualBaseline(TextBaseline baseline) {
+  double getMaxIntrinsicWidth(BoxConstraints constraints) {
+    if (child != null)
+      return child.getMaxIntrinsicWidth(constraints);
+    return super.getMaxIntrinsicWidth(constraints);
+  }
+
+  double getMinIntrinsicHeight(BoxConstraints constraints) {
+    if (child != null)
+      return child.getMinIntrinsicHeight(constraints);
+    return super.getMinIntrinsicHeight(constraints);
+  }
+
+  double getMaxIntrinsicHeight(BoxConstraints constraints) {
+    if (child != null)
+      return child.getMaxIntrinsicHeight(constraints);
+    return super.getMaxIntrinsicHeight(constraints);
+  }
+
+  double computeDistanceToActualBaseline(TextBaseline baseline) {
     double result;
     if (child != null) {
       assert(!needsLayout);
@@ -733,9 +821,14 @@ abstract class RenderShiftedBox extends RenderBox with RenderObjectWithChildMixi
       if (result != null)
         result += child.parentData.position.y;
     } else {
-      result = super.getDistanceToActualBaseline(baseline);
+      result = super.computeDistanceToActualBaseline(baseline);
     }
     return result;
+  }
+
+  void paint(PaintingCanvas canvas, Offset offset) {
+    if (child != null)
+      canvas.paintChild(child, child.parentData.position + offset);
   }
 
   void hitTestChildren(HitTestResult result, { Point position }) {
@@ -820,6 +913,12 @@ class RenderPadding extends RenderShiftedBox {
 
 class RenderPositionedBox extends RenderShiftedBox {
 
+  // This box aligns a child box within itself. It's only useful for
+  // children that don't always size to fit their parent. For example,
+  // to align a box at the bottom right, you would pass this box a
+  // tight constraint that is bigger than the child's natural size,
+  // with horizontal and vertical set to 1.0.
+
   RenderPositionedBox({
     RenderBox child,
     double horizontal: 0.5,
@@ -851,30 +950,6 @@ class RenderPositionedBox extends RenderShiftedBox {
     markNeedsLayout();
   }
 
-  double getMinIntrinsicWidth(BoxConstraints constraints) {
-    if (child != null)
-      return child.getMinIntrinsicWidth(constraints);
-    return super.getMinIntrinsicWidth(constraints);
-  }
-
-  double getMaxIntrinsicWidth(BoxConstraints constraints) {
-    if (child != null)
-      return child.getMaxIntrinsicWidth(constraints);
-    return super.getMaxIntrinsicWidth(constraints);
-  }
-
-  double getMinIntrinsicHeight(BoxConstraints constraints) {
-    if (child != null)
-      return child.getMinIntrinsicHeight(constraints);
-    return super.getMinIntrinsicHeight(constraints);
-  }
-
-  double getMaxIntrinsicHeight(BoxConstraints constraints) {
-    if (child != null)
-      return child.getMaxIntrinsicHeight(constraints);
-    return super.getMaxIntrinsicHeight(constraints);
-  }
-
   void performLayout() {
     if (child != null) {
       child.layout(constraints.loosen(), parentUsesSize: true);
@@ -888,6 +963,54 @@ class RenderPositionedBox extends RenderShiftedBox {
   }
 
   String debugDescribeSettings(String prefix) => '${super.debugDescribeSettings(prefix)}${prefix}horizontal: ${horizontal}\n${prefix}vertical: ${vertical}\n';
+}
+
+class RenderBaseline extends RenderShiftedBox {
+
+  RenderBaseline({
+    RenderBox child,
+    double baseline,
+    TextBaseline baselineType
+  }) : _baseline = baseline,
+       _baselineType = baselineType,
+       super(child) {
+    assert(baseline != null);
+    assert(baselineType != null);
+  }
+
+  double _baseline;
+  double get baseline => _baseline;
+  void set baseline (double value) {
+    assert(value != null);
+    if (_baseline == value)
+      return;
+    _baseline = value;
+    markNeedsLayout();
+  }
+
+  TextBaseline _baselineType;
+  TextBaseline get baselineType => _baselineType;
+  void set baselineType (TextBaseline value) {
+    assert(value != null);
+    if (_baselineType == value)
+      return;
+    _baselineType = value;
+    markNeedsLayout();
+  }
+
+  void performLayout() {
+    if (child != null) {
+      child.layout(constraints.loosen(), parentUsesSize: true);
+      size = constraints.constrain(child.size);
+      assert(child.parentData is BoxParentData);
+      double delta = baseline - child.getDistanceToBaseline(baselineType);
+      child.parentData.position = new Point(0.0, delta);
+    } else {
+      performResize();
+    }
+  }
+
+  String debugDescribeSettings(String prefix) => '${super.debugDescribeSettings(prefix)}${prefix}baseline: ${baseline}\nbaselineType: ${baselineType}';
 }
 
 class RenderImage extends RenderBox {
@@ -1255,7 +1378,7 @@ abstract class RenderBoxContainerDefaultsMixin<ChildType extends RenderBox, Pare
   // This class, by convention, doesn't override any members of the superclass.
   // It only provides helper functions that subclasses can call.
 
-  double defaultGetDistanceToFirstActualBaseline(TextBaseline baseline) {
+  double defaultComputeDistanceToFirstActualBaseline(TextBaseline baseline) {
     assert(!needsLayout);
     RenderBox child = firstChild;
     while (child != null) {
@@ -1268,7 +1391,7 @@ abstract class RenderBoxContainerDefaultsMixin<ChildType extends RenderBox, Pare
     return null;
   }
 
-  double defaultGetDistanceToHighestActualBaseline(TextBaseline baseline) {
+  double defaultComputeDistanceToHighestActualBaseline(TextBaseline baseline) {
     assert(!needsLayout);
     double result;
     RenderBox child = firstChild;

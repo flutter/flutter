@@ -77,8 +77,8 @@ class RenderBlock extends RenderBox with ContainerRenderObjectMixin<RenderBox, B
     return _getIntrinsicHeight(constraints);
   }
 
-  double getDistanceToActualBaseline(TextBaseline baseline) {
-    return defaultGetDistanceToFirstActualBaseline(baseline);
+  double computeDistanceToActualBaseline(TextBaseline baseline) {
+    return defaultComputeDistanceToFirstActualBaseline(baseline);
   }
 
   void performLayout() {

@@ -87,16 +87,16 @@ the expression, even if it is short. (Doing so makes it unobvious that
 there is relevant code there. This is especially important for early
 returns.)
 
-If a flow control structure has just one statement, then don't use
-braces around it except where doing so would help readability or avoid
-the dangling-else problem. Keeping the code free of boilerplate or
-redundant punctuation keeps it concise and readable.
+If a flow control structure's statement is one line long, then don't
+use braces around it. (Keeping the code free of boilerplate or
+redundant punctuation keeps it concise and readable.)
 
 > For example,
 > ```dart
->   if (children != null)
+>   if (children != null) {
 >     for (RenderBox child in children)
 >       add(child);
+>   }
 > ```
 > ...rather than:
 > ```dart

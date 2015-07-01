@@ -8,6 +8,9 @@ import 'default_text_style.dart';
 import 'ink_well.dart';
 import 'theme.dart';
 
+const double kMenuItemHeight = 48.0;
+const double kBaselineOffsetFromBottom = 20.0;
+
 class PopupMenuItem extends Component {
   PopupMenuItem({ String key, this.child, this.opacity}) : super(key: key);
 
@@ -21,10 +24,13 @@ class PopupMenuItem extends Component {
       opacity: opacity,
       child: new InkWell(
         child: new Container(
-          height: 48.0,
+          height: kMenuItemHeight,
           child: new DefaultTextStyle(
             style: textStyle,
-            child: child
+            child: new Baseline(
+              baseline: kMenuItemHeight - kBaselineOffsetFromBottom,
+              child: child
+            )
           )
         )
       )

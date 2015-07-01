@@ -36,8 +36,8 @@ class StockMenu extends Component {
         ],
         level: 4
       ),
-      right: 8.0,
-      top: 8.0 + kStatusBarHeight
+      right: 0.0,
+      top: 0.0 + kStatusBarHeight
     );
   }
 }

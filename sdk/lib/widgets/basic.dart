@@ -254,6 +254,30 @@ class ShrinkWrapWidth extends OneChildRenderObjectWrapper {
 
 }
 
+class Baseline extends OneChildRenderObjectWrapper {
+
+  Baseline({
+    String key,
+    this.baseline, // in pixels
+    this.baselineType: TextBaseline.alphabetic,
+    Widget child
+  }): super(key: key, child: child);
+
+  RenderBaseline get root => super.root;
+
+  final double baseline;
+  final TextBaseline baselineType;
+
+  RenderBaseline createNode() => new RenderBaseline(baseline: baseline, baselineType: baselineType);
+
+  void syncRenderObject(Baseline old) {
+    super.syncRenderObject(old);
+    root.baseline = baseline;
+    root.baselineType = baselineType;
+  }
+
+}
+
 class SizeObserver extends OneChildRenderObjectWrapper {
 
   SizeObserver({ String key, this.callback, Widget child })

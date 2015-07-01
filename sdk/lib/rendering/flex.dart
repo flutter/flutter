@@ -246,11 +246,10 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
       childSize: (c, innerConstraints) => c.getMaxIntrinsicHeight(innerConstraints));
   }
 
-  double getDistanceToActualBaseline(TextBaseline baseline) {
-    assert(!needsLayout);
+  double computeDistanceToActualBaseline(TextBaseline baseline) {
     if (_direction == FlexDirection.horizontal)
-      return defaultGetDistanceToHighestActualBaseline(baseline);
-    return defaultGetDistanceToFirstActualBaseline(baseline);
+      return defaultComputeDistanceToHighestActualBaseline(baseline);
+    return defaultComputeDistanceToFirstActualBaseline(baseline);
   }
 
   int _getFlex(RenderBox child) {

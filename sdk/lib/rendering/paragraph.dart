@@ -154,7 +154,7 @@ class RenderParagraph extends RenderBox {
     return _getIntrinsicHeight(constraints);
   }
 
-  double getDistanceToActualBaseline(TextBaseline baseline) {
+  double computeDistanceToActualBaseline(TextBaseline baseline) {
     assert(!needsLayout);
     _layout(constraints);
     sky.Element root = _layoutRoot.rootElement;

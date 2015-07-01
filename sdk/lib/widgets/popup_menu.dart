@@ -18,7 +18,9 @@ const double _kMenuOpenDuration = 300.0;
 const double _kMenuCloseDuration = 200.0;
 const double _kMenuCloseDelay = 100.0;
 const double _kMenuWidthStep = 56.0;
-const double _kMenuMinWidth = 1.5 * _kMenuWidthStep;
+const double _kMenuMargin = 16.0; // 24.0 on tablet
+const double _kMenuMinWidth = 2.0 * _kMenuWidthStep;
+const double _kMenuMaxWidth = 5.0 * _kMenuWidthStep;
 const double _kMenuHorizontalPadding = 16.0;
 const double _kMenuVerticalPadding = 8.0;
 
@@ -82,6 +84,7 @@ class PopupMenu extends AnimatedComponent {
   BoxPainter _painter;
 
   double _opacityFor(int i) {
+    assert(controller.position.value != null);
     if (controller.position.value == null || controller.position.value == 1.0)
       return 1.0;
     double unit = 1.0 / items.length;
@@ -99,24 +102,28 @@ class PopupMenu extends AnimatedComponent {
 
     return new Opacity(
       opacity: math.min(1.0, controller.position.value * 3.0),
-      child: new CustomPaint(
-        callback: (sky.Canvas canvas, Size size) {
-          double width = math.min(size.width, size.width * (0.5 + controller.position.value * 2.0));
-          double height = math.min(size.height, size.height * controller.position.value * 1.5);
-          _painter.paint(canvas, new Rect.fromLTRB(size.width - width, 0.0, width, height));
-        },
-        child: new ConstrainedBox(
-          constraints: new BoxConstraints(
-            minWidth: _kMenuMinWidth
-          ),
-          child: new ShrinkWrapWidth(
-            stepWidth: _kMenuWidthStep,
-            child: new Container(
-              padding: const EdgeDims.symmetric(
-                horizontal: _kMenuHorizontalPadding,
-                vertical: _kMenuVerticalPadding
-              ),
-              child: new Block(children)
+      child: new Container(
+        margin: new EdgeDims.all(_kMenuMargin),
+        child: new CustomPaint(
+          callback: (sky.Canvas canvas, Size size) {
+            double width = math.min(size.width, size.width * (0.5 + controller.position.value * 2.0));
+            double height = math.min(size.height, size.height * controller.position.value * 1.5);
+            _painter.paint(canvas, new Rect.fromLTRB(size.width - width, 0.0, width, height));
+          },
+          child: new ConstrainedBox(
+            constraints: new BoxConstraints(
+              minWidth: _kMenuMinWidth,
+              maxWidth: _kMenuMaxWidth
+            ),
+            child: new ShrinkWrapWidth(
+              stepWidth: _kMenuWidthStep,
+              child: new Container(
+                padding: const EdgeDims.symmetric(
+                  horizontal: _kMenuHorizontalPadding,
+                  vertical: _kMenuVerticalPadding
+                ),
+                child: new Block(children)
+              )
             )
           )
         )
