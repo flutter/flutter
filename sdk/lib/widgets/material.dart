@@ -39,7 +39,7 @@ class Material extends AnimatedComponent {
     int level: 0,
     this.color
   }) : super(key: key) {
-    this.level = new AnimatedValue(level.toDouble());
+    this.level = new AnimatedValue(level == null ? 0.0 : level.toDouble());
     watch(this.level);
   }
 
