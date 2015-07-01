@@ -147,7 +147,7 @@ PAINT FOR FRAME #3 ----------------------------------------------
 3 |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 3 |  |  |  |  |  | paintChild RenderConstrainedBox at Point(496.75, 114.0)
 3 |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
-3 |  |  |  |  |  |  | drawRRect(Instance of 'RRect', Paint(color:Color(0xffe0e0e0), drawLooper:true))
+3 |  |  |  |  |  |  | drawRRect(Instance of 'RRect', Paint(color:Color(0xffe0e0e0)))
 3 |  |  |  |  |  |  | paintChild RenderPositionedBox at Point(504.75, 114.0)
 3 |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 3 |  |  |  |  |  |  |  | paintChild RenderShrinkWrapWidth at Point(504.75, 114.0)
@@ -248,7 +248,7 @@ PAINT FOR FRAME #4 ----------------------------------------------
 4 |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 4 |  |  |  |  |  | paintChild RenderConstrainedBox at Point(496.75, 114.0)
 4 |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
-4 |  |  |  |  |  |  | drawRRect(Instance of 'RRect', Paint(color:Color(0xffe0e0e0), drawLooper:true))
+4 |  |  |  |  |  |  | drawRRect(Instance of 'RRect', Paint(color:Color(0xffe0e0e0)))
 4 |  |  |  |  |  |  | paintChild RenderPositionedBox at Point(504.75, 114.0)
 4 |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 4 |  |  |  |  |  |  |  | paintChild RenderShrinkWrapWidth at Point(504.75, 114.0)
@@ -352,7 +352,7 @@ PAINT FOR FRAME #5 ----------------------------------------------
 5 |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 5 |  |  |  |  |  | paintChild RenderConstrainedBox at Point(496.75, 114.0)
 5 |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
-5 |  |  |  |  |  |  | drawRRect(Instance of 'RRect', Paint(color:Color(0xffe0e0e0), drawLooper:true))
+5 |  |  |  |  |  |  | drawRRect(Instance of 'RRect', Paint(color:Color(0xffe0e0e0)))
 5 |  |  |  |  |  |  | paintChild RenderPositionedBox at Point(504.75, 114.0)
 5 |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 5 |  |  |  |  |  |  |  | paintChild RenderShrinkWrapWidth at Point(504.75, 114.0)
@@ -459,7 +459,7 @@ PAINT FOR FRAME #6 ----------------------------------------------
 6 |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 6 |  |  |  |  |  | paintChild RenderConstrainedBox at Point(496.75, 114.0)
 6 |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
-6 |  |  |  |  |  |  | drawRRect(Instance of 'RRect', Paint(color:Color(0xffe0e0e0), drawLooper:true))
+6 |  |  |  |  |  |  | drawRRect(Instance of 'RRect', Paint(color:Color(0xffe0e0e0)))
 6 |  |  |  |  |  |  | paintChild RenderPositionedBox at Point(504.75, 114.0)
 6 |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 6 |  |  |  |  |  |  |  | paintChild RenderShrinkWrapWidth at Point(504.75, 114.0)
@@ -563,7 +563,7 @@ PAINT FOR FRAME #7 ----------------------------------------------
 7 |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 7 |  |  |  |  |  | paintChild RenderConstrainedBox at Point(496.75, 114.0)
 7 |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
-7 |  |  |  |  |  |  | drawRRect(Instance of 'RRect', Paint(color:Color(0xffe0e0e0), drawLooper:true))
+7 |  |  |  |  |  |  | drawRRect(Instance of 'RRect', Paint(color:Color(0xffe0e0e0)))
 7 |  |  |  |  |  |  | paintChild RenderPositionedBox at Point(504.75, 114.0)
 7 |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 7 |  |  |  |  |  |  |  | paintChild RenderShrinkWrapWidth at Point(504.75, 114.0)
@@ -664,7 +664,7 @@ PAINT FOR FRAME #8 ----------------------------------------------
 8 |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 8 |  |  |  |  |  | paintChild RenderConstrainedBox at Point(496.75, 114.0)
 8 |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
-8 |  |  |  |  |  |  | drawRRect(Instance of 'RRect', Paint(color:Color(0xffe0e0e0), drawLooper:true))
+8 |  |  |  |  |  |  | drawRRect(Instance of 'RRect', Paint(color:Color(0xffe0e0e0)))
 8 |  |  |  |  |  |  | paintChild RenderPositionedBox at Point(504.75, 114.0)
 8 |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 8 |  |  |  |  |  |  |  | paintChild RenderShrinkWrapWidth at Point(504.75, 114.0)
