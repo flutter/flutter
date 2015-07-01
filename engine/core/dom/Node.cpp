@@ -61,8 +61,6 @@
 #include "sky/engine/core/events/UIEvent.h"
 #include "sky/engine/core/frame/LocalFrame.h"
 #include "sky/engine/core/frame/Settings.h"
-#include "sky/engine/core/html/HTMLAnchorElement.h"
-#include "sky/engine/core/html/HTMLStyleElement.h"
 #include "sky/engine/core/page/EventHandler.h"
 #include "sky/engine/core/page/Page.h"
 #include "sky/engine/core/rendering/RenderBox.h"
@@ -1225,17 +1223,6 @@ static void showSubTreeAcrossFrame(const Node* node, const Node* markedNode, con
 
 Element* Node::enclosingLinkEventParentOrSelf()
 {
-    for (Node* node = this; node; node = NodeRenderingTraversal::parent(node)) {
-        // For imagemaps, the enclosing link node is the associated area element not the image itself.
-        // So we don't let images be the enclosingLinkNode, even though isLink sometimes returns true
-        // for them.
-        if (node->isLink() && !isHTMLImageElement(*node)) {
-            // Casting to Element is safe because only HTMLAnchorElement, HTMLImageElement and
-            // SVGAElement can return true for isLink().
-            return toElement(node);
-        }
-    }
-
     return 0;
 }
 

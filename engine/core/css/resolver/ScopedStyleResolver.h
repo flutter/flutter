@@ -41,7 +41,6 @@ namespace blink {
 
 class CSSStyleSheet;
 class ContainerNode;
-class HTMLStyleElement;
 class StyleSheetContents;
 
 // This class selects a RenderStyle for a given element based on a collection of stylesheets.
@@ -67,16 +66,12 @@ public:
 
     const Vector<RefPtr<CSSStyleSheet>>& authorStyleSheets() const { return m_authorStyleSheets; }
 
-    void addStyleSheetCandidateNode(HTMLStyleElement&);
-    void removeStyleSheetCandidateNode(HTMLStyleElement&);
-
 private:
     explicit ScopedStyleResolver(TreeScope&);
 
     void collectStyleSheets(Vector<RefPtr<CSSStyleSheet>>& candidateSheets);
 
     TreeScope& m_scope;
-    DocumentOrderedList m_styleSheetCandidateNodes;
     Vector<RefPtr<CSSStyleSheet>> m_authorStyleSheets;
 };
 

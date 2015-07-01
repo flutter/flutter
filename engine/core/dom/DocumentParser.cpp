@@ -26,7 +26,6 @@
 #include "sky/engine/core/dom/DocumentParser.h"
 
 #include "sky/engine/core/dom/Document.h"
-#include "sky/engine/core/html/parser/TextResourceDecoder.h"
 #include "sky/engine/wtf/Assertions.h"
 
 namespace blink {
@@ -64,4 +63,3 @@ void DocumentParser::detach()
 }
 
 };
-

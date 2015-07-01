@@ -26,8 +26,6 @@ typedef PassRefPtr<{{namespace}}Element> (*ConstructorFunction)(
 
 typedef HashMap<AtomicString, ConstructorFunction> FunctionMap;
 
-static FunctionMap* g_constructors = 0;
-
 {% for tag in tags|sort if not tag.noConstructor %}
 {% filter enable_conditional(tag.Conditional) %}
 static PassRefPtr<{{namespace}}Element> {{tag|symbol}}Constructor(
@@ -52,32 +50,11 @@ struct Create{{namespace}}FunctionMapData {
   ConstructorFunction func;
 };
 
-static void create{{namespace}}FunctionMap()
-{
-    ASSERT(!g_constructors);
-    g_constructors = new FunctionMap;
-    // Empty array initializer lists are illegal [dcl.init.aggr] and will not
-    // compile in MSVC. If tags list is empty, add check to skip this.
-    static const Create{{namespace}}FunctionMapData data[] = {
-    {% for tag in tags|sort if not tag.noConstructor %}
-    {% filter enable_conditional(tag.Conditional) %}
-        { {{tag|symbol}}Tag, {{tag|symbol}}Constructor },
-    {% endfilter %}
-    {% endfor %}
-    };
-    for (size_t i = 0; i < WTF_ARRAY_LENGTH(data); i++)
-        g_constructors->set(data[i].tag.localName(), data[i].func);
-}
-
 PassRefPtr<Element> {{namespace}}ElementFactory::createElement(
     const AtomicString& localName,
     Document& document,
     bool createdByParser)
 {
-    if (!g_constructors)
-        create{{namespace}}FunctionMap();
-    if (ConstructorFunction function = g_constructors->get(localName))
-        return function(document, createdByParser);
     return document.elementRegistry().CreateElement(document, localName);
 }
 

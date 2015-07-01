@@ -388,20 +388,4 @@ double RenderView::layoutViewportHeight() const
     return viewHeight();
 }
 
-void RenderView::addIFrame(RenderIFrame* iframe)
-{
-    m_iframes.add(iframe);
-}
-
-void RenderView::removeIFrame(RenderIFrame* iframe)
-{
-    m_iframes.remove(iframe);
-}
-
-void RenderView::updateIFramesAfterLayout()
-{
-    for (auto& iframe: m_iframes)
-        iframe->updateWidgetBounds();
-}
-
 } // namespace blink

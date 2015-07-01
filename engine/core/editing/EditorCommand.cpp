@@ -44,7 +44,6 @@
 #include "sky/engine/core/frame/FrameView.h"
 #include "sky/engine/core/frame/LocalFrame.h"
 #include "sky/engine/core/frame/Settings.h"
-#include "sky/engine/core/html/HTMLImageElement.h"
 #include "sky/engine/core/page/EditorClient.h"
 #include "sky/engine/core/page/EventHandler.h"
 #include "sky/engine/core/rendering/RenderBox.h"

@@ -31,7 +31,6 @@
 #include "sky/engine/core/fetch/MemoryCache.h"
 #include "sky/engine/core/fetch/ResourceFetcher.h"
 #include "sky/engine/core/frame/LocalFrame.h"
-#include "sky/engine/core/html/HTMLImageElement.h"
 #include "sky/engine/core/html/parser/HTMLParserIdioms.h"
 #include "sky/engine/core/rendering/RenderImage.h"
 #include "sky/engine/platform/Logging.h"

@@ -37,7 +37,6 @@
 namespace blink {
 
 class Document;
-class HTMLImportsController;
 class LocalFrame;
 class CustomElementRegistry;
 class Settings;
@@ -45,13 +44,12 @@ class Settings;
 class DocumentInit final {
     STACK_ALLOCATED();
 public:
-    explicit DocumentInit(const KURL& = KURL(), LocalFrame* = 0, WeakPtr<Document> = nullptr, HTMLImportsController* = 0);
+    explicit DocumentInit(const KURL& = KURL(), LocalFrame* = 0, WeakPtr<Document> = nullptr);
     DocumentInit(const DocumentInit&);
     ~DocumentInit();
 
     const KURL& url() const { return m_url; }
     LocalFrame* frame() const { return m_frame; }
-    HTMLImportsController* importsController() const { return m_importsController; }
 
     bool shouldSetURL() const;
     bool isSeamlessAllowedFor(Document* child) const;
@@ -78,7 +76,6 @@ private:
     RefPtr<Document> m_parent;
     RefPtr<Document> m_owner;
     WeakPtr<Document> m_contextDocument;
-    RawPtr<HTMLImportsController> m_importsController;
     RefPtr<CustomElementRegistry> m_elementRegistry;
 };
 

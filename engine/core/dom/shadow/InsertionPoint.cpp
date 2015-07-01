@@ -137,7 +137,7 @@ bool InsertionPoint::isActive() const
 
 bool InsertionPoint::isContentInsertionPoint() const
 {
-    return isHTMLContentElement(*this) && isActive();
+    return false;
 }
 
 Vector<RefPtr<Node>> InsertionPoint::getDistributedNodes()

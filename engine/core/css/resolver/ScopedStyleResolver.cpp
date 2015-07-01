@@ -34,7 +34,6 @@
 #include "sky/engine/core/dom/StyleEngine.h"
 #include "sky/engine/core/dom/TreeScope.h"
 #include "sky/engine/core/dom/shadow/ShadowRoot.h"
-#include "sky/engine/core/html/HTMLStyleElement.h"
 
 namespace blink {
 
@@ -91,28 +90,8 @@ bool ScopedStyleResolver::hasSelectorForAttribute(const AtomicString& attributeN
     return false;
 }
 
-void ScopedStyleResolver::addStyleSheetCandidateNode(HTMLStyleElement& element)
-{
-    ASSERT(element.inActiveDocument());
-    m_styleSheetCandidateNodes.add(&element);
-}
-
-void ScopedStyleResolver::removeStyleSheetCandidateNode(HTMLStyleElement& element)
-{
-    m_styleSheetCandidateNodes.remove(&element);
-}
-
 void ScopedStyleResolver::collectStyleSheets(Vector<RefPtr<CSSStyleSheet>>& sheets)
 {
-    MediaQueryEvaluator medium(m_scope.document().view());
-
-    for (Node* node : m_styleSheetCandidateNodes) {
-        ASSERT(isHTMLStyleElement(*node));
-        CSSStyleSheet* sheet = toHTMLStyleElement(node)->sheet();
-        if (sheet && (!sheet->mediaQueries() || medium.eval(sheet->mediaQueries()))) {
-            sheets.append(sheet);
-        }
-    }
 }
 
 void ScopedStyleResolver::collectMatchingAuthorRules(ElementRuleCollector& collector, CascadeOrder cascadeOrder)

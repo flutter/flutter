@@ -9,6 +9,8 @@
 
 namespace blink {
 
+const UChar kEndOfFileMarker = '\0';
+
 class MediaQueryInputStream {
     WTF_MAKE_NONCOPYABLE(MediaQueryInputStream);
     WTF_MAKE_FAST_ALLOCATED;
@@ -54,4 +56,3 @@ private:
 } // namespace blink
 
 #endif  // SKY_ENGINE_CORE_CSS_PARSER_MEDIAQUERYINPUTSTREAM_H_
-

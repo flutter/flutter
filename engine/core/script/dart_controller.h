@@ -22,7 +22,6 @@ class DartLibraryProvider;
 class DartLibraryProviderWebView;
 class DartSnapshotLoader;
 class DartValue;
-class HTMLScriptElement;
 class KURL;
 class View;
 
@@ -40,14 +39,6 @@ class DartController {
                       DartLibraryProvider* library_provider);
   void RunFromSnapshot(mojo::ScopedDataPipeConsumerHandle snapshot);
 
-  void LoadScriptInModule(AbstractModule* module,
-                          const String& source,
-                          const TextPosition& textPosition,
-                          const LoadFinishedCallback& load_finished_callback);
-  void ExecuteLibraryInModule(AbstractModule* module,
-                              Dart_Handle library,
-                              HTMLScriptElement* script);
-
   void ClearForClose();
   void CreateIsolateFor(PassOwnPtr<DOMDartState> dom_dart_state);
   void InstallView(View* view);
@@ -55,11 +46,6 @@ class DartController {
   DOMDartState* dart_state() const { return dom_dart_state_.get(); }
 
  private:
-  bool ImportChildLibraries(AbstractModule* module, Dart_Handle library);
-  Dart_Handle CreateLibrary(AbstractModule* module,
-                            const String& source,
-                            const TextPosition& position);
-
   void DidLoadMainLibrary(String url);
   void DidLoadSnapshot();
 

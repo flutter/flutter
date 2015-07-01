@@ -31,15 +31,13 @@
 #include "sky/engine/core/dom/Document.h"
 #include "sky/engine/core/dom/custom/custom_element_registry.h"
 #include "sky/engine/core/frame/LocalFrame.h"
-#include "sky/engine/core/html/imports/HTMLImportsController.h"
 
 namespace blink {
 
-DocumentInit::DocumentInit(const KURL& url, LocalFrame* frame, WeakPtr<Document> contextDocument, HTMLImportsController* importsController)
+DocumentInit::DocumentInit(const KURL& url, LocalFrame* frame, WeakPtr<Document> contextDocument)
     : m_url(url)
     , m_frame(frame)
     , m_contextDocument(contextDocument)
-    , m_importsController(importsController)
 {
 }
 
@@ -47,7 +45,6 @@ DocumentInit::DocumentInit(const DocumentInit& other)
     : m_url(other.m_url)
     , m_frame(other.m_frame)
     , m_contextDocument(other.m_contextDocument)
-    , m_importsController(other.m_importsController)
     , m_elementRegistry(other.m_elementRegistry)
 {
 }
@@ -63,11 +60,7 @@ bool DocumentInit::shouldSetURL() const
 
 LocalFrame* DocumentInit::frameForSecurityContext() const
 {
-    if (m_frame)
-        return m_frame;
-    if (m_importsController)
-        return m_importsController->master()->frame();
-    return 0;
+    return m_frame;
 }
 
 Settings* DocumentInit::settings() const
@@ -90,8 +83,7 @@ WeakPtr<Document> DocumentInit::contextDocument() const
 
 DocumentInit DocumentInit::fromContext(WeakPtr<Document> contextDocument, const KURL& url)
 {
-    return DocumentInit(url, 0, contextDocument, 0);
+    return DocumentInit(url, 0, contextDocument);
 }
 
 } // namespace blink
-

@@ -30,7 +30,6 @@
 #include "sky/engine/core/editing/VisiblePosition.h"
 #include "sky/engine/core/frame/FrameView.h"
 #include "sky/engine/core/frame/Settings.h"
-#include "sky/engine/core/html/parser/TextResourceDecoder.h"
 #include "sky/engine/core/rendering/EllipsisBox.h"
 #include "sky/engine/core/rendering/InlineTextBox.h"
 #include "sky/engine/core/rendering/RenderBlock.h"

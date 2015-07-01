@@ -411,29 +411,8 @@ void ReplaceSelectionCommand::moveElementOutOfAncestor(PassRefPtr<Element> prpEl
         removeNode(ancestor.release());
 }
 
-static inline bool nodeHasVisibleRenderText(Text& text)
-{
-    return text.renderer() && text.renderer()->renderedTextLength() > 0;
-}
-
 void ReplaceSelectionCommand::removeUnrenderedTextNodesAtEnds(InsertedNodes& insertedNodes)
 {
-    document().updateLayout();
-
-    Node* lastLeafInserted = insertedNodes.lastLeafInserted();
-    if (lastLeafInserted && lastLeafInserted->isTextNode() && !nodeHasVisibleRenderText(toText(*lastLeafInserted))
-        && !enclosingElementWithTag(firstPositionInOrBeforeNode(lastLeafInserted), HTMLNames::scriptTag)) {
-        insertedNodes.willRemoveNode(*lastLeafInserted);
-        removeNode(lastLeafInserted);
-    }
-
-    // We don't have to make sure that firstNodeInserted isn't inside a select or script element, because
-    // it is a top level node in the fragment and the user can't insert into those elements.
-    Node* firstNodeInserted = insertedNodes.firstNodeInserted();
-    if (firstNodeInserted && firstNodeInserted->isTextNode() && !nodeHasVisibleRenderText(toText(*firstNodeInserted))) {
-        insertedNodes.willRemoveNode(*firstNodeInserted);
-        removeNode(firstNodeInserted);
-    }
 }
 
 VisiblePosition ReplaceSelectionCommand::positionAtEndOfInsertedContent() const

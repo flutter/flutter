@@ -37,8 +37,6 @@
 #include "sky/engine/core/dom/ElementTraversal.h"
 #include "sky/engine/core/dom/shadow/ShadowRoot.h"
 #include "sky/engine/core/frame/Settings.h"
-#include "sky/engine/core/html/HTMLStyleElement.h"
-#include "sky/engine/core/html/imports/HTMLImportsController.h"
 #include "sky/engine/core/page/Page.h"
 #include "sky/engine/core/rendering/RenderView.h"
 

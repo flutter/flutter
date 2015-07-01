@@ -84,12 +84,7 @@ class Frame;
 class FrameHost;
 class FrameView;
 class HitTestRequest;
-class HTMLDocumentParser;
 class HTMLElement;
-class HTMLImport;
-class HTMLImportLoader;
-class HTMLImportsController;
-class HTMLScriptElement;
 class LayoutPoint;
 class LocalDOMWindow;
 class LocalFrame;
@@ -353,13 +348,6 @@ public:
     bool hasMutationObservers() const { return m_mutationObserverTypes; }
     void addMutationObserverTypes(MutationObserverOptions types) { m_mutationObserverTypes |= types; }
 
-    String title() const { return m_title; }
-    void setTitle(const String&);
-
-    Element* titleElement() const { return m_titleElement.get(); }
-    void setTitleElement(Element*);
-    void removeTitle(Element* titleElement);
-
     const AtomicString& dir();
     void setDir(const AtomicString&);
 
@@ -384,10 +372,6 @@ public:
 
     Document& topDocument() const;
     WeakPtr<Document> contextDocument();
-
-    HTMLScriptElement* currentScript() const { return !m_currentScriptStack.isEmpty() ? m_currentScriptStack.last().get() : 0; }
-    void pushCurrentScript(PassRefPtr<HTMLScriptElement>);
-    void popCurrentScript();
 
     void finishedParsing();
 
@@ -439,15 +423,6 @@ public:
 
     void registerElement(const AtomicString& name, PassRefPtr<DartValue> type, ExceptionState&);
     CustomElementRegistry& elementRegistry() const { return *m_elementRegistry; }
-
-    void setImportsController(HTMLImportsController*);
-    HTMLImportsController* importsController() const { return m_importsController; }
-    HTMLImportsController& ensureImportsController();
-    HTMLImportLoader* importLoader() const;
-    HTMLImport* import() const;
-
-    bool haveImportsLoaded() const;
-    void didLoadAllImports();
 
     unsigned activeParserCount() { return m_activeParserCount; }
     void incrementActiveParserCount() { ++m_activeParserCount; }
@@ -555,7 +530,6 @@ private:
 
     virtual double timerAlignmentInterval() const override final;
 
-    void updateTitle(const String&);
     void updateBaseURL();
 
     void resumeParserWaitingForResourcesTimerFired(Timer<Document>*);
@@ -585,13 +559,8 @@ private:
 
     LocalFrame* m_frame;
     RawPtr<LocalDOMWindow> m_domWindow;
-    // FIXME: oilpan: when we get rid of the transition types change the
-    // HTMLImportsController to not be a DocumentSupplement since it is
-    // redundant with oilpan.
-    RawPtr<HTMLImportsController> m_importsController;
 
     RefPtr<ResourceFetcher> m_fetcher;
-    RefPtr<DocumentParser> m_parser;
     unsigned m_activeParserCount;
 
     // Document URLs.
@@ -627,17 +596,11 @@ private:
 
     bool m_containsValidityStyleRules;
 
-    String m_title;
-    String m_rawTitle;
-    RefPtr<Element> m_titleElement;
-
     OwnPtr<DocumentMarkerController> m_markers;
 
     LoadEventProgress m_loadEventProgress;
 
     double m_startTime;
-
-    Vector<RefPtr<HTMLScriptElement> > m_currentScriptStack;
 
     AtomicString m_contentLanguage;
 

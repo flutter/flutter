@@ -24,7 +24,6 @@
 
 #include "sky/engine/core/frame/FrameView.h"
 #include "sky/engine/core/rendering/RenderFlexibleBox.h"
-#include "sky/engine/core/rendering/RenderIFrame.h"
 #include "sky/engine/wtf/OwnPtr.h"
 
 namespace blink {
@@ -87,10 +86,6 @@ public:
     double layoutViewportWidth() const;
     double layoutViewportHeight() const;
 
-    void addIFrame(RenderIFrame* iframe);
-    void removeIFrame(RenderIFrame* iframe);
-    void updateIFramesAfterLayout();
-
 private:
     virtual void mapLocalToContainer(const RenderBox* paintInvalidationContainer, TransformState&, MapCoordinatesFlags = ApplyContainerFlip) const override;
     virtual const RenderObject* pushMappingToContainer(const RenderBox* ancestorToStopAt, RenderGeometryMap&) const override;
@@ -110,8 +105,6 @@ private:
     unsigned m_renderCounterCount;
 
     unsigned m_hitTestCount;
-
-    WTF::HashSet<RenderIFrame*> m_iframes;
 };
 
 DEFINE_RENDER_OBJECT_TYPE_CASTS(RenderView, isRenderView());

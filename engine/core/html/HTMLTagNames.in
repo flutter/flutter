@@ -1,13 +1,2 @@
 namespace="HTML"
 fallbackInterfaceName="HTMLElement"
-
-a interfaceName=HTMLAnchorElement
-content interfaceName=HTMLContentElement
-iframe interfaceName=HTMLIFrameElement
-img interfaceName=HTMLImageElement, constructorNeedsCreatedByParser
-import
-script
-style
-template
-title
-t

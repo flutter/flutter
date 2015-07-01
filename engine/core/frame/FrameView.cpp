@@ -36,7 +36,6 @@
 #include "sky/engine/core/frame/FrameHost.h"
 #include "sky/engine/core/frame/LocalFrame.h"
 #include "sky/engine/core/frame/Settings.h"
-#include "sky/engine/core/html/parser/TextResourceDecoder.h"
 #include "sky/engine/core/loader/FrameLoaderClient.h"
 #include "sky/engine/core/page/ChromeClient.h"
 #include "sky/engine/core/page/EventHandler.h"
@@ -670,9 +669,6 @@ void FrameView::updateLayoutAndStyleForPainting()
     RefPtr<FrameView> protector(this);
 
     updateLayoutAndStyleIfNeededRecursive();
-
-    if (RenderView* view = renderView())
-        view->updateIFramesAfterLayout();
 
     // TODO(ojan): Get rid of this and just have the LayoutClean state.
     lifecycle().advanceTo(DocumentLifecycle::StyleAndLayoutClean);

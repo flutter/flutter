@@ -34,7 +34,6 @@
 #include "sky/engine/core/editing/VisibleUnits.h"
 #include "sky/engine/core/editing/htmlediting.h"
 #include "sky/engine/core/frame/LocalFrame.h"
-#include "sky/engine/core/html/HTMLStyleElement.h"
 #include "sky/engine/core/rendering/RenderText.h"
 
 namespace blink {
@@ -329,20 +328,6 @@ void DeleteSelectionCommand::deleteTextFromNode(PassRefPtr<Text> node, unsigned 
 
 void DeleteSelectionCommand::makeStylingElementsDirectChildrenOfEditableRootToPreventStyleLoss()
 {
-    RefPtr<Range> range = m_selectionToDelete.toNormalizedRange();
-    RefPtr<Node> node = range->firstNode();
-    while (node && node != range->pastLastNode()) {
-        RefPtr<Node> nextNode = NodeTraversal::next(*node);
-        if (isHTMLStyleElement(*node)) {
-            nextNode = NodeTraversal::nextSkippingChildren(*node);
-            RefPtr<Element> rootEditableElement = node->rootEditableElement();
-            if (rootEditableElement.get()) {
-                removeNode(node);
-                appendNode(node, rootEditableElement);
-            }
-        }
-        node = nextNode;
-    }
 }
 
 void DeleteSelectionCommand::handleGeneralDelete()

@@ -30,7 +30,6 @@
 #include "sky/engine/core/dom/ElementTraversal.h"
 #include "sky/engine/core/dom/NodeTraversal.h"
 #include "sky/engine/core/dom/shadow/ContentDistribution.h"
-#include "sky/engine/core/html/HTMLContentElement.h"
 #include "sky/engine/platform/EventDispatchForbiddenScope.h"
 #include "sky/engine/platform/ScriptForbiddenScope.h"
 
@@ -85,9 +84,6 @@ void DistributionPool::distributeTo(InsertionPoint* insertionPoint, ElementShado
 
     for (size_t i = 0; i < m_nodes.size(); ++i) {
         if (m_distributed[i])
-            continue;
-
-        if (isHTMLContentElement(*insertionPoint) && !toHTMLContentElement(insertionPoint)->canSelectNode(m_nodes, i))
             continue;
 
         Node* node = m_nodes[i];
@@ -271,13 +267,6 @@ void ElementShadow::collectSelectFeatureSetFrom(ShadowRoot& root)
     for (Element* element = ElementTraversal::firstWithin(root); element; element = ElementTraversal::next(*element, &root)) {
         if (ElementShadow* shadow = element->shadow())
             m_selectFeatures.add(shadow->ensureSelectFeatureSet());
-        if (!isHTMLContentElement(*element))
-            continue;
-        const CSSSelectorList& list = toHTMLContentElement(*element).selectorList();
-        for (const CSSSelector* selector = list.first(); selector; selector = CSSSelectorList::next(*selector)) {
-            for (const CSSSelector* component = selector; component; component = component->tagHistory())
-                m_selectFeatures.collectFeaturesFromSelector(*component);
-        }
     }
 }
 

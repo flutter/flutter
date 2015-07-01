@@ -82,19 +82,6 @@
 #include "sky/engine/core/frame/LocalDOMWindow.h"
 #include "sky/engine/core/frame/LocalFrame.h"
 #include "sky/engine/core/frame/Settings.h"
-#include "sky/engine/core/html/HTMLAnchorElement.h"
-#include "sky/engine/core/html/HTMLScriptElement.h"
-#include "sky/engine/core/html/HTMLStyleElement.h"
-#include "sky/engine/core/html/HTMLTemplateElement.h"
-#include "sky/engine/core/html/HTMLTitleElement.h"
-#include "sky/engine/core/html/imports/HTMLImportChild.h"
-#include "sky/engine/core/html/imports/HTMLImportLoader.h"
-#include "sky/engine/core/html/imports/HTMLImportTreeRoot.h"
-#include "sky/engine/core/html/imports/HTMLImportsController.h"
-#include "sky/engine/core/html/parser/HTMLDocumentParser.h"
-#include "sky/engine/core/html/parser/HTMLParserIdioms.h"
-#include "sky/engine/core/html/parser/NestingLevelIncrementer.h"
-#include "sky/engine/core/html/parser/TextResourceDecoder.h"
 #include "sky/engine/core/inspector/ConsoleMessage.h"
 #include "sky/engine/core/inspector/InspectorCounters.h"
 #include "sky/engine/core/loader/FrameLoaderClient.h"
@@ -225,7 +212,6 @@ Document::Document(const DocumentInit& initializer)
     , m_evaluateMediaQueriesOnStyleRecalc(false)
     , m_frame(initializer.frame())
     , m_domWindow(m_frame ? m_frame->domWindow() : 0)
-    , m_importsController(initializer.importsController())
     , m_activeParserCount(0)
     , m_resumeParserWaitingForResourcesTimer(this, &Document::resumeParserWaitingForResourcesTimerFired)
     , m_clearFocusedElementTimer(this, &Document::clearFocusedElementTimerFired)
@@ -294,21 +280,9 @@ Document::~Document()
     // gone. The Document and all the nodes in the document are gone, so maybe
     // that is OK?
     removeAllEventListenersRecursively();
-
-    // Currently we believe that Document can never outlive the parser.
-    // Although the Document may be replaced synchronously, DocumentParsers
-    // generally keep at least one reference to an Element which would in turn
-    // has a reference to the Document.  If you hit this ASSERT, then that
-    // assumption is wrong.  DocumentParser::detach() should ensure that even
-    // if the DocumentParser outlives the Document it won't cause badness.
-    ASSERT(!m_parser || m_parser->refCount() == 1);
-    detachParser();
 #endif
 
 #if !ENABLE(OILPAN)
-
-    if (m_importsController)
-        HTMLImportsController::removeFrom(*this);
 
     m_timeline->detachFromDocument();
 
@@ -342,15 +316,11 @@ void Document::dispose()
     m_focusedElement = nullptr;
     m_hoverNode = nullptr;
     m_activeHoverElement = nullptr;
-    m_titleElement = nullptr;
     m_userActionElements.documentDidRemoveLastRef();
 
     detachParser();
 
     m_elementRegistry.clear();
-
-    if (m_importsController)
-        HTMLImportsController::removeFrom(*this);
 
     // removeDetachedChildren() doesn't always unregister IDs,
     // so tear down scope information upfront to avoid having stale references in the map.
@@ -418,50 +388,10 @@ void Document::registerElement(const AtomicString& name, PassRefPtr<DartValue> t
     m_elementRegistry->RegisterElement(name, type);
 }
 
-void Document::setImportsController(HTMLImportsController* controller)
-{
-    ASSERT(!m_importsController || !controller);
-    m_importsController = controller;
-}
-
-HTMLImportsController& Document::ensureImportsController()
-{
-    if (!m_importsController) {
-        ASSERT(frame()); // The document should be the master.
-        HTMLImportsController::provideTo(*this);
-    }
-    return *m_importsController;
-}
-
-HTMLImportLoader* Document::importLoader() const
-{
-    if (!m_importsController)
-        return 0;
-    return m_importsController->loaderFor(*this);
-}
-
-HTMLImport* Document::import() const
-{
-    if (!m_importsController)
-        return 0;
-    if (HTMLImportLoader* loader = importLoader())
-        return loader->firstImport();
-    return m_importsController->root();
-}
-
-bool Document::haveImportsLoaded() const
-{
-    if (!m_importsController)
-        return true;
-    return !m_importsController->shouldBlockScriptExecution(*this);
-}
-
 LocalDOMWindow* Document::executingWindow()
 {
     if (LocalDOMWindow* owningWindow = domWindow())
         return owningWindow;
-    if (HTMLImportsController* import = this->importsController())
-        return import->master()->domWindow();
     return 0;
 }
 
@@ -510,9 +440,6 @@ PassRefPtr<Node> Document::importNode(Node* importedNode, bool deep, ExceptionSt
 
         if (deep) {
             if (!importContainerNodeChildren(oldElement, newElement, exceptionState))
-                return nullptr;
-            if (isHTMLTemplateElement(*oldElement)
-                && !importContainerNodeChildren(toHTMLTemplateElement(oldElement)->content(), toHTMLTemplateElement(newElement)->content(), exceptionState))
                 return nullptr;
         }
 
@@ -722,58 +649,6 @@ static inline String canonicalizedTitle(Document* document, const String& title)
     buffer.shrink(builderIndex + 1);
 
     return String::adopt(buffer);
-}
-
-void Document::updateTitle(const String& title)
-{
-    if (m_rawTitle == title)
-        return;
-
-    m_rawTitle = title;
-
-    String oldTitle = m_title;
-    if (m_rawTitle.isEmpty())
-        m_title = String();
-    else if (m_rawTitle.is8Bit())
-        m_title = canonicalizedTitle<LChar>(this, m_rawTitle);
-    else
-        m_title = canonicalizedTitle<UChar>(this, m_rawTitle);
-
-    if (!m_frame || oldTitle == m_title)
-        return;
-    m_frame->loaderClient()->dispatchDidReceiveTitle(m_title);
-}
-
-void Document::setTitle(const String& title)
-{
-}
-
-void Document::setTitleElement(Element* titleElement)
-{
-    // Only allow the first title element to change the title -- others have no effect.
-    if (m_titleElement && m_titleElement != titleElement) {
-        m_titleElement = Traversal<HTMLTitleElement>::firstWithin(*this);
-    } else {
-        m_titleElement = titleElement;
-    }
-
-    if (isHTMLTitleElement(m_titleElement))
-        updateTitle(toHTMLTitleElement(m_titleElement)->text());
-}
-
-void Document::removeTitle(Element* titleElement)
-{
-    if (m_titleElement != titleElement)
-        return;
-
-    m_titleElement = nullptr;
-
-    // Update title based on first title element in the document, if one exists.
-    if (HTMLTitleElement* title = Traversal<HTMLTitleElement>::firstWithin(*this))
-        setTitleElement(title);
-
-    if (!m_titleElement)
-        updateTitle(String());
 }
 
 const AtomicString& Document::dir()
@@ -1191,49 +1066,22 @@ void Document::removeAllEventListeners()
 
 void Document::detachParser()
 {
-    if (!m_parser)
-        return;
-    m_parser->detach();
-    m_parser.clear();
 }
 
 void Document::cancelParsing()
 {
-    if (!m_parser)
-        return;
-
-    // We have to clear the parser to avoid possibly triggering
-    // the onload handler when closing as a side effect of a cancel-style
-    // change, such as opening a new document or closing the window while
-    // still parsing.
-    detachParser();
-
-    // FIXME(sky): Unclear if anything below this makes any sense.
-    if (!m_frame) {
-        m_loadEventProgress = LoadEventTried;
-        return;
-    }
-    checkCompleted();
 }
 
 DocumentParser* Document::startParsing()
 {
-    ASSERT(!m_parser);
-    ASSERT(!m_isParsing);
-    ASSERT(!firstChild());
-    ASSERT(!m_focusedElement);
-
-    m_parser = HTMLDocumentParser::create(*this, false);
-    setParsing(true);
-    setReadyState(Loading);
-    return m_parser.get();
+    return nullptr;
 }
 
 void Document::implicitClose()
 {
     ASSERT(!inStyleRecalc());
 
-    bool doload = !parsing() && m_parser && !processingLoadEvent();
+    bool doload = false;
 
     // If the load was blocked because of a pending location change and the location change triggers a same document
     // navigation, don't fire load events after the same document navigation completes (unless there's an explicit open).
@@ -1284,10 +1132,6 @@ void Document::checkCompleted()
     if (parsing())
         return;
 
-    // Still waiting imports?
-    if (!haveImportsLoaded())
-        return;
-
     // Still waiting for images/scripts?
     if (fetcher()->requestCount())
         return;
@@ -1304,29 +1148,6 @@ void Document::checkCompleted()
 
 void Document::dispatchUnloadEvents()
 {
-    RefPtr<Document> protect(this);
-    if (m_parser)
-        m_parser->stopParsing();
-
-    if (m_loadEventProgress >= LoadEventTried && m_loadEventProgress <= UnloadEventInProgress) {
-        if (m_loadEventProgress < PageHideInProgress) {
-            m_loadEventProgress = PageHideInProgress;
-            if (LocalDOMWindow* window = domWindow())
-                window->dispatchEvent(PageTransitionEvent::create(EventTypeNames::pagehide, false), this);
-            if (!m_frame)
-                return;
-
-            m_loadEventProgress = UnloadEventInProgress;
-            RefPtr<Event> unloadEvent(Event::create(EventTypeNames::unload));
-            m_frame->domWindow()->dispatchEvent(unloadEvent, this);
-        }
-        m_loadEventProgress = UnloadEventHandled;
-    }
-
-    if (!m_frame)
-        return;
-
-    removeAllEventListenersRecursively();
 }
 
 Document::PageDismissalType Document::pageDismissalEventBeingDispatched() const
@@ -1400,13 +1221,6 @@ void Document::updateBaseURL()
         m_baseURL = KURL();
 }
 
-void Document::didLoadAllImports()
-{
-    if (!importLoader())
-        styleResolverChanged();
-    didLoadAllParserBlockingResources();
-}
-
 void Document::didLoadAllParserBlockingResources()
 {
     m_resumeParserWaitingForResourcesTimer.startOneShot(0, FROM_HERE);
@@ -1414,16 +1228,10 @@ void Document::didLoadAllParserBlockingResources()
 
 void Document::resumeParserWaitingForResourcesTimerFired(Timer<Document>*)
 {
-    if (!haveImportsLoaded())
-        return;
-    if (m_parser)
-        m_parser->resumeAfterWaitingForImports();
 }
 
 TextPosition Document::parserPosition() const
 {
-    if (m_parser)
-        m_parser->textPosition();
     return TextPosition::belowRangePosition();
 }
 
@@ -1966,18 +1774,6 @@ KURL Document::openSearchDescriptionURL()
     return KURL();
 }
 
-void Document::pushCurrentScript(PassRefPtr<HTMLScriptElement> newCurrentScript)
-{
-    ASSERT(newCurrentScript);
-    m_currentScriptStack.append(newCurrentScript);
-}
-
-void Document::popCurrentScript()
-{
-    ASSERT(!m_currentScriptStack.isEmpty());
-    m_currentScriptStack.removeLast();
-}
-
 Document& Document::topDocument() const
 {
     Document* doc = const_cast<Document*>(this);
@@ -2001,27 +1797,6 @@ WeakPtr<Document> Document::contextDocument()
 
 void Document::finishedParsing()
 {
-    ASSERT(!m_parser || !m_parser->isParsing());
-    ASSERT(!m_parser || m_readyState != Loading);
-    setParsing(false);
-    dispatchEvent(Event::createBubble(EventTypeNames::DOMContentLoaded));
-
-    // The loader's finishedParsing() method may invoke script that causes this object to
-    // be dereferenced (when this document is in an iframe and the onload causes the iframe's src to change).
-    // Keep it alive until we are done.
-    RefPtr<Document> protect(this);
-
-    if (RefPtr<LocalFrame> f = frame())
-        checkCompleted();
-
-    // Schedule dropping of the ElementDataCache. We keep it alive for a while after parsing finishes
-    // so that dynamically inserted content can also benefit from sharing optimizations.
-    // Note that we don't refresh the timer on cache access since that could lead to huge caches being kept
-    // alive indefinitely by something innocuous like JS setting .innerHTML repeatedly on a timer.
-    m_elementDataCacheClearTimer.startOneShot(10, FROM_HERE);
-
-    if (HTMLImportLoader* import = importLoader())
-        import->didFinishParsing();
 }
 
 void Document::elementDataCacheClearTimerFired(Timer<Document>*)
@@ -2068,14 +1843,6 @@ void Document::addMessage(PassRefPtr<ConsoleMessage> consoleMessage)
 {
     if (!m_frame)
         return;
-
-    if (consoleMessage->url().isNull() && !consoleMessage->lineNumber()) {
-        consoleMessage->setURL(url().string());
-        if (parsing() && m_parser) {
-            if (!m_parser->isWaitingForScripts() && !m_parser->isExecutingScript())
-                consoleMessage->setLineNumber(m_parser->textPosition().m_line.oneBasedInt());
-        }
-    }
     m_frame->console().addMessage(consoleMessage);
 }
 

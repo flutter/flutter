@@ -39,7 +39,6 @@
 #include "sky/engine/core/frame/FrameView.h"
 #include "sky/engine/core/frame/LocalFrame.h"
 #include "sky/engine/core/frame/Settings.h"
-#include "sky/engine/core/html/HTMLAnchorElement.h"
 #include "sky/engine/core/html/HTMLElement.h"
 #include "sky/engine/core/page/EventHandler.h"
 #include "sky/engine/core/page/Page.h"
@@ -1473,9 +1472,7 @@ bool RenderObject::isRooted() const
 
 RespectImageOrientationEnum RenderObject::shouldRespectImageOrientation() const
 {
-    // Respect the image's orientation if it's being used as a full-page image or it's
-    // an <img> and the setting to respect it everywhere is set.
-    return (document().settings() && document().settings()->shouldRespectImageOrientation() && isHTMLImageElement(node())) ? RespectImageOrientation : DoNotRespectImageOrientation;
+    return DoNotRespectImageOrientation;
 }
 
 bool RenderObject::hasEntirelyFixedBackground() const
@@ -1705,7 +1702,7 @@ void RenderObject::getTextDecorations(unsigned decorations, AppliedTextDecoratio
             }
         }
         curr = curr->parent();
-    } while (curr && decorations && (!quirksMode || !curr->node() || (!isHTMLAnchorElement(*curr->node()))));
+    } while (curr && decorations);
 
     // If we bailed out, use the element we bailed out at (typically a <font> or <a> element).
     if (decorations && curr) {

@@ -7,7 +7,6 @@
 
 #include <climits>
 #include "sky/engine/core/css/parser/MediaQueryToken.h"
-#include "sky/engine/core/html/parser/InputStreamPreprocessor.h"
 #include "sky/engine/wtf/text/WTFString.h"
 
 namespace blink {

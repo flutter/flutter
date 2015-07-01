@@ -40,7 +40,6 @@
 #include "sky/engine/core/events/EventPath.h"
 #include "sky/engine/core/frame/FrameView.h"
 #include "sky/engine/core/frame/LocalFrame.h"
-#include "sky/engine/core/html/HTMLAnchorElement.h"
 #include "sky/engine/core/page/FocusController.h"
 #include "sky/engine/core/page/Page.h"
 #include "sky/engine/core/rendering/HitTestResult.h"

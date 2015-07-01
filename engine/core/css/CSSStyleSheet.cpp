@@ -24,7 +24,6 @@
 #include "sky/engine/core/css/StyleSheetContents.h"
 #include "sky/engine/core/dom/Document.h"
 #include "sky/engine/core/dom/Node.h"
-#include "sky/engine/core/html/HTMLStyleElement.h"
 
 namespace blink {
 
@@ -37,8 +36,7 @@ static bool isAcceptableCSSStyleSheetParent(Node* parentNode)
     // document", but only in the non-oilpan version of blink. I.e. don't call
     // clearOwnerNode() in the owner's destructor in oilpan.
     return !parentNode
-        || parentNode->isDocumentNode()
-        || isHTMLStyleElement(*parentNode);
+        || parentNode->isDocumentNode();
 }
 #endif
 

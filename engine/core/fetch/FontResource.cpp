@@ -27,7 +27,6 @@
 #include "sky/engine/core/fetch/FontResource.h"
 
 #include "sky/engine/core/fetch/ResourceClientWalker.h"
-#include "sky/engine/core/html/parser/TextResourceDecoder.h"
 #include "sky/engine/platform/SharedBuffer.h"
 #include "sky/engine/platform/fonts/FontCustomPlatformData.h"
 #include "sky/engine/platform/fonts/FontPlatformData.h"

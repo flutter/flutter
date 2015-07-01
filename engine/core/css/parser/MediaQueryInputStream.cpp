@@ -4,8 +4,6 @@
 
 #include "sky/engine/core/css/parser/MediaQueryInputStream.h"
 
-#include "sky/engine/core/html/parser/InputStreamPreprocessor.h"
-
 namespace blink {
 
 MediaQueryInputStream::MediaQueryInputStream(String input)

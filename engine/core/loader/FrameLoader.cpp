@@ -47,8 +47,6 @@
 #include "sky/engine/core/frame/LocalDOMWindow.h"
 #include "sky/engine/core/frame/LocalFrame.h"
 #include "sky/engine/core/frame/Settings.h"
-#include "sky/engine/core/html/parser/HTMLDocumentParser.h"
-#include "sky/engine/core/html/parser/HTMLParserIdioms.h"
 #include "sky/engine/core/inspector/ConsoleMessage.h"
 #include "sky/engine/core/loader/DocumentLoadTiming.h"
 #include "sky/engine/core/loader/FrameFetchContext.h"

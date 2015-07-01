@@ -43,7 +43,6 @@ callback CustomElementConstructor = Element ();
     readonly attribute DOMString contentType;
 
              [TreatNullAs=NullString, CustomElementCallbacks] attribute DOMString dir;
-             [TreatNullAs=NullString, CustomElementCallbacks] attribute DOMString title;
     readonly attribute DOMString referrer;
     readonly attribute DOMString URL;
 
@@ -68,8 +67,6 @@ callback CustomElementConstructor = Element ();
     // Page visibility API.
     readonly attribute DOMString visibilityState;
     readonly attribute boolean hidden;
-
-    readonly attribute HTMLScriptElement currentScript;
 
     attribute Picture rootPicture;
 };

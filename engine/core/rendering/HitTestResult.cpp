@@ -28,9 +28,6 @@
 #include "sky/engine/core/editing/FrameSelection.h"
 #include "sky/engine/core/fetch/ImageResource.h"
 #include "sky/engine/core/frame/LocalFrame.h"
-#include "sky/engine/core/html/HTMLAnchorElement.h"
-#include "sky/engine/core/html/HTMLImageElement.h"
-#include "sky/engine/core/html/parser/HTMLParserIdioms.h"
 #include "sky/engine/core/rendering/RenderImage.h"
 
 namespace blink {

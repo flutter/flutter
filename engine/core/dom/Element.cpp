@@ -68,8 +68,6 @@
 #include "sky/engine/core/frame/LocalFrame.h"
 #include "sky/engine/core/frame/Settings.h"
 #include "sky/engine/core/html/HTMLElement.h"
-#include "sky/engine/core/html/HTMLTemplateElement.h"
-#include "sky/engine/core/html/parser/HTMLDocumentParser.h"
 #include "sky/engine/core/html/parser/HTMLParserIdioms.h"
 #include "sky/engine/core/layout/LayoutCallback.h"
 #include "sky/engine/core/page/ChromeClient.h"
@@ -1303,10 +1301,6 @@ DOMTokenList& Element::classList()
 
 KURL Element::hrefURL() const
 {
-    // FIXME: These all have href() or url(), but no common super class. Why doesn't
-    // <link> implement URLUtils?
-    if (isHTMLAnchorElement(*this))
-        return getURLAttribute(HTMLNames::hrefAttr);
     return KURL();
 }
 

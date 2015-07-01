@@ -35,8 +35,6 @@ namespace blink {
 
 class Document;
 class SegmentedString;
-class HTMLDocumentParser;
-class TextResourceDecoder;
 
 class DocumentParser : public RefCounted<DocumentParser> {
 public:

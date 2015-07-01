@@ -10,6 +10,7 @@ namespace blink {
 
 #include "sky/engine/core/css/parser/MediaQueryInputStream.h"
 #include "sky/engine/core/html/parser/HTMLParserIdioms.h"
+#include "sky/engine/wtf/text/StringBuilder.h"
 #include "sky/engine/wtf/unicode/CharacterNames.h"
 
 namespace blink {

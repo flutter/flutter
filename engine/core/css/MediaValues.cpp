@@ -13,7 +13,6 @@
 #include "sky/engine/core/frame/FrameView.h"
 #include "sky/engine/core/frame/LocalFrame.h"
 #include "sky/engine/core/frame/Settings.h"
-#include "sky/engine/core/html/imports/HTMLImportsController.h"
 #include "sky/engine/core/page/Page.h"
 #include "sky/engine/core/rendering/RenderObject.h"
 #include "sky/engine/core/rendering/RenderView.h"
@@ -189,9 +188,7 @@ bool MediaValues::computeLengthImpl(double value, CSSPrimitiveValue::UnitType ty
 
 LocalFrame* MediaValues::frameFrom(Document& document)
 {
-    Document* executingDocument = document.importsController() ? document.importsController()->master() : &document;
-    ASSERT(executingDocument);
-    return executingDocument->frame();
+    return document.frame();
 }
 
 } // namespace

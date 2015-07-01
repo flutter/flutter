@@ -18,9 +18,6 @@
 #include "sky/engine/core/app/Module.h"
 #include "sky/engine/core/dom/Element.h"
 #include "sky/engine/core/frame/LocalFrame.h"
-#include "sky/engine/core/html/HTMLScriptElement.h"
-#include "sky/engine/core/html/imports/HTMLImport.h"
-#include "sky/engine/core/html/imports/HTMLImportChild.h"
 #include "sky/engine/core/loader/FrameLoaderClient.h"
 #include "sky/engine/core/script/dart_debugger.h"
 #include "sky/engine/core/script/dart_library_provider_webview.h"
@@ -72,55 +69,6 @@ DartController::DartController() : weak_factory_(this) {
 DartController::~DartController() {
 }
 
-bool DartController::ImportChildLibraries(AbstractModule* module,
-                                          Dart_Handle library) {
-  // If the document has never seen an <import> tag, it won't have an import
-  // controller, and thus will return null for its root HTMLImport.  We could
-  // remove this null-check by always creating an ImportController.
-  HTMLImport* root = module->document()->import();
-  if (!root)
-    return true;
-
-  // TODO(abarth): Why doesn't HTMLImport do these casts for us?
-  for (HTMLImportChild* child =
-           static_cast<HTMLImportChild*>(root->firstChild());
-       child; child = static_cast<HTMLImportChild*>(child->next())) {
-    if (Element* link = child->link()) {
-      String name = link->getAttribute(HTMLNames::asAttr);
-
-      Module* child_module = child->module();
-      if (!child_module)
-        continue;
-      for (const auto& entry : child_module->libraries()) {
-        if (entry.library()->is_empty())
-          continue;
-        if (LogIfError(Dart_LibraryImportLibrary(
-                library, entry.library()->dart_value(),
-                StringToDart(dart_state(), name))))
-          return false;
-      }
-    }
-  }
-  return true;
-}
-
-Dart_Handle DartController::CreateLibrary(AbstractModule* module,
-                                          const String& source,
-                                          const TextPosition& textPosition) {
-  Dart_Handle library = Dart_LoadLibrary(
-      StringToDart(dart_state(), module->UrlForLibraryAt(textPosition)),
-      StringToDart(dart_state(), source), textPosition.m_line.zeroBasedInt(),
-      textPosition.m_column.zeroBasedInt());
-
-  if (LogIfError(library))
-    return nullptr;
-
-  if (!ImportChildLibraries(module, library))
-    return nullptr;
-
-  return library;
-}
-
 void DartController::DidLoadMainLibrary(String name) {
   DCHECK(Dart_CurrentIsolate() == dart_state()->isolate());
   DartApiScope dart_api_scope;
@@ -170,66 +118,6 @@ void DartController::RunFromLibrary(const String& name,
   loader.WaitForDependencies(dependency_catcher.dependencies(),
                              base::Bind(&DartController::DidLoadMainLibrary,
                                         weak_factory_.GetWeakPtr(), name));
-}
-
-void DartController::LoadScriptInModule(
-    AbstractModule* module,
-    const String& source,
-    const TextPosition& position,
-    const LoadFinishedCallback& finished_callback) {
-  DartState::Scope scope(dart_state());
-  CreateEmptyRootLibraryIfNeeded();
-
-  DartLibraryLoader& loader = dart_state()->library_loader();
-
-  if (!library_provider_) {
-    library_provider_ = adoptPtr(new DartLibraryProviderWebView());
-    loader.set_library_provider(library_provider_.get());
-  }
-
-  DartDependencyCatcher dependency_catcher(loader);
-  Dart_Handle library_handle = CreateLibrary(module, source, position);
-  if (!library_handle)
-    return finished_callback.Run(nullptr, nullptr);
-  RefPtr<DartValue> library = DartValue::Create(dart_state(), library_handle);
-  module->AddLibrary(library, position);
-
-  // TODO(eseidel): Better if the library/module retained its dependencies and
-  // dependency waiting could be separate from library creation.
-  dart_state()->library_loader().WaitForDependencies(
-      dependency_catcher.dependencies(),
-      base::Bind(finished_callback, module, library));
-}
-
-void DartController::ExecuteLibraryInModule(AbstractModule* module,
-                                            Dart_Handle library,
-                                            HTMLScriptElement* script) {
-  TRACE_EVENT1("sky", "DartController::ExecuteLibraryInModule",
-               "url", module->url().ascii().toStdString());
-  ASSERT(library);
-  DCHECK(Dart_CurrentIsolate() == dart_state()->isolate());
-  DartApiScope dart_api_scope;
-
-  // Don't continue if we failed to load the module.
-  if (LogIfError(Dart_FinalizeLoading(true)))
-    return;
-  const char* name = module->isApplication() ? "main" : "_init";
-
-  // main() is required, but init() is not:
-  // TODO(rmacnak): Dart_LookupFunction won't find re-exports, etc.
-  Dart_Handle entry = Dart_LookupFunction(library, ToDart(name));
-  if (module->isApplication()) {
-    DartInvokeAppField(library, ToDart(name), 0, nullptr);
-    return;
-  }
-
-  if (!Dart_IsFunction(entry))
-    return;
-
-  Dart_Handle args[] = {
-    ToDart(script),
-  };
-  DartInvokeAppField(library, ToDart(name), arraysize(args), args);
 }
 
 static void UnhandledExceptionCallback(Dart_Handle error) {

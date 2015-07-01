@@ -40,7 +40,6 @@
 #include "sky/engine/core/frame/LocalFrame.h"
 #include "sky/engine/core/frame/Settings.h"
 #include "sky/engine/core/html/HTMLElement.h"
-#include "sky/engine/core/html/imports/HTMLImportsController.h"
 #include "sky/engine/core/inspector/ConsoleMessage.h"
 #include "sky/engine/core/loader/FrameLoaderClient.h"
 #include "sky/engine/core/loader/UniqueIdentifier.h"
@@ -165,8 +164,6 @@ LocalFrame* ResourceFetcher::frame() const
     // world we should always just have one frame.
     if (!m_document)
         return 0;
-    if (m_document->importsController())
-        return m_document->importsController()->master()->frame();
     return m_document->frame();
 }
 
