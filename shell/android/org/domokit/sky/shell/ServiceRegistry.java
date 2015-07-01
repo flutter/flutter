@@ -4,6 +4,8 @@
 
 package org.domokit.sky.shell;
 
+import android.util.Log;
+
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -11,6 +13,7 @@ import java.util.TreeMap;
  * An registry for services.
  **/
 public class ServiceRegistry {
+    private static final String TAG = "ServiceRegistry";
     private Map<String, ServiceFactory> mRegistrations;
 
     public static final ServiceRegistry SHARED = new ServiceRegistry();
@@ -26,6 +29,9 @@ public class ServiceRegistry {
     }
 
     public ServiceFactory get(String interfaceName) {
+        if (!mRegistrations.containsKey(interfaceName)) {
+            Log.e(TAG, "Unknown service " + interfaceName);
+        }
         return mRegistrations.get(interfaceName);
     }
 }

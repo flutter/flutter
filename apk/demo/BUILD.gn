@@ -24,6 +24,8 @@ android_library("java") {
     "//services/sensors:sensors_lib",
     "//sky/services/intents:intents_lib",
     "//sky/services/intents:interfaces_java",
+    "//sky/services/media:media_lib",
+    "//sky/services/media:interfaces_java",
     "//sky/shell:java",
   ]
 }
