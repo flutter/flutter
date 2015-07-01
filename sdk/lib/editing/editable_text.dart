@@ -67,7 +67,6 @@ class EditableText extends Component {
     if (!_showCursor)
       return;
 
-    print("Draw cursor");
     Rect cursorRect =  new Rect.fromLTWH(
       _kCursorGap, 
       -_kCursorHeightOffset,

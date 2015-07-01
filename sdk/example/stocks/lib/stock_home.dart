@@ -17,6 +17,7 @@ import 'package:sky/widgets/navigator.dart';
 import 'package:sky/widgets/popup_menu.dart';
 import 'package:sky/widgets/radio.dart';
 import 'package:sky/widgets/scaffold.dart';
+import 'package:sky/widgets/tabs.dart';
 import 'package:sky/widgets/tool_bar.dart';
 import 'package:sky/widgets/widget.dart';
 
@@ -160,7 +161,7 @@ class StockHome extends Component {
       _drawerController.close();
     });
   }
-
+  
   Widget buildToolBar() {
     return new ToolBar(
         left: new IconButton(
@@ -176,6 +177,36 @@ class StockHome extends Component {
             onPressed: _handleMenuShow)
         ]
       );
+  }
+
+  int selectedTabIndex = 0;
+  List<String> portfolioSymbols = ["AAPL","FIZZ", "FIVE", "FLAT", "ZINC", "ZNGA"];
+
+  Widget buildPortfolioStocklist() {
+    return new Stocklist(
+     stocks: stocks.where((s) => portfolioSymbols.contains(s.symbol)).toList(), 
+     query: _searchQuery
+   );
+  }
+
+  Widget buildTabNavigator() {
+    List<TabNavigatorView> views = <TabNavigatorView>[
+      new TabNavigatorView(
+        label: const TabLabel(text: 'MARKET'),
+        builder: () => new Stocklist(stocks: stocks, query: _searchQuery)
+      ),
+      new TabNavigatorView(
+        label: const TabLabel(text: 'PORTFOLIO'),
+        builder: buildPortfolioStocklist
+      )
+    ];
+    return new TabNavigator(
+      views: views,
+      selectedIndex: selectedTabIndex,
+      onChanged: (tabIndex) {
+        setState(() { selectedTabIndex = tabIndex; } );
+      }
+    );
   }
 
   // TODO(abarth): Should we factor this into a SearchBar in the framework?
@@ -208,7 +239,7 @@ class StockHome extends Component {
     List<Widget> overlays = [
       new Scaffold(
         toolbar: _isSearching ? buildSearchBar() : buildToolBar(),
-        body: new Stocklist(stocks: stocks, query: _searchQuery),
+        body: buildTabNavigator(),
         floatingActionButton: new FloatingActionButton(
           child: new Icon(type: 'content/add_white', size: 24)
         ),

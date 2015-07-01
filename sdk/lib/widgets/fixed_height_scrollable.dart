@@ -49,6 +49,14 @@ abstract class FixedHeightScrollable extends Scrollable {
     });
   }
 
+  bool scrollTo(double newScrollOffset) {
+    if (_height != null && _height > 0.0) {
+      double maxScrollOffset = math.max(0.0, itemCount * itemHeight - _height);
+      newScrollOffset = math.min(newScrollOffset, maxScrollOffset);
+    }
+    return super.scrollTo(newScrollOffset);
+  }
+
   Widget buildContent() {
     var itemShowIndex = 0;
     var itemShowCount = 0;
