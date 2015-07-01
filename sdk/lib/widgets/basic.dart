@@ -7,6 +7,7 @@ import 'dart:sky' as sky;
 
 import 'package:vector_math/vector_math.dart';
 
+import '../mojo/asset_bundle.dart';
 import '../mojo/net/image_cache.dart' as image_cache;
 import '../painting/text_style.dart';
 import '../rendering/block.dart';
@@ -547,6 +548,19 @@ class NetworkImage extends Component {
 
   Widget build() {
     return new FutureImage(image: image_cache.load(src), size: size);
+  }
+}
+
+class AssetImage extends Component {
+  AssetImage({ this.bundle, String name, this.size })
+    : name = name, super(key: name);
+
+  final AssetBundle bundle;
+  final String name;
+  final Size size;
+
+  Widget build() {
+    return new FutureImage(image: bundle.loadImage(name), size: size);
   }
 }
 

@@ -8,31 +8,25 @@ import 'dart:sky' as sky;
 import 'package:mojo/core.dart' as core;
 import 'package:mojom/mojo/asset_bundle/asset_bundle.mojom.dart';
 
-import 'shell.dart' as shell;
 import 'net/fetch.dart';
-
-Future<sky.Image> _decodeImage(core.MojoDataPipeConsumer assetData) {
-  Completer<sky.Image> completer = new Completer<sky.Image>();
-  new sky.ImageDecoder(assetData.handle.h, completer.complete);
-  return completer.future;
-}
+import 'net/image_cache.dart' as image_cache;
+import 'shell.dart' as shell;
 
 abstract class AssetBundle {
   void close();
-  Future<sky.Image> fetchImage(String key);
+  Future<sky.Image> loadImage(String key);
 }
 
 class NetworkAssetBundle extends AssetBundle {
-  NetworkAssetBundle(Uri base_url) : _base_url = base_url;
+  NetworkAssetBundle(Uri baseUrl) : _baseUrl = baseUrl;
 
-  final Uri _base_url;
+  final Uri _baseUrl;
 
   void close() { }
 
-  Future<sky.Image> fetchImage(String name) async {
-    Uri url = _base_url.resolve(name);
-    core.MojoDataPipeConsumer assetData = (await fetchUrl(url.toString())).body;
-    return await _decodeImage(assetData);
+  Future<sky.Image> loadImage(String name) {
+    Uri url = _baseUrl.resolve(name);
+    return image_cache.load(url.toString());
   }
 }
 
@@ -50,19 +44,25 @@ class MojoAssetBundle extends AssetBundle {
   factory MojoAssetBundle.fromNetwork(String relativeUrl) {
     AssetBundleProxy bundle = new AssetBundleProxy.unbound();
     _fetchAndUnpackBundle(relativeUrl, bundle);
-    return new AssetBundle(bundle);
+    return new MojoAssetBundle(bundle);
   }
 
   AssetBundleProxy _bundle;
+  Map<String, Future<sky.Image>> _imageCache = new Map<String, Future<sky.Image>>();
 
   void close() {
     _bundle.close();
     _bundle = null;
+    _imageCache = null;
   }
 
-  Future<sky.Image> fetchImage(String name) async {
-    core.MojoDataPipeConsumer assetData =
-        (await _bundle.ptr.getAsStream(name)).assetData;
-    return await _decodeImage(assetData);
+  Future<sky.Image> loadImage(String name) {
+    return _imageCache.putIfAbsent(name, () {
+      Completer<sky.Image> completer = new Completer<sky.Image>();
+      _bundle.ptr.getAsStream(name).then((response) {
+        new sky.ImageDecoder(response.assetData.handle.h, completer.complete);
+      });
+      return completer.future;
+    });
   }
 }
