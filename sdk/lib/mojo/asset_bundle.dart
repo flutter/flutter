@@ -17,31 +17,52 @@ Future<sky.Image> _decodeImage(core.MojoDataPipeConsumer assetData) {
   return completer.future;
 }
 
-class AssetBundle {
-  AssetBundle(AssetBundleProxy this._bundle);
+abstract class AssetBundle {
+  void close();
+  Future<sky.Image> fetchImage(String key);
+}
+
+class NetworkAssetBundle extends AssetBundle {
+  NetworkAssetBundle(Uri base_url) : _base_url = base_url;
+
+  final Uri _base_url;
+
+  void close() { }
+
+  Future<sky.Image> fetchImage(String name) async {
+    Uri url = _base_url.resolve(name);
+    core.MojoDataPipeConsumer assetData = (await fetchUrl(url.toString())).body;
+    return await _decodeImage(assetData);
+  }
+}
+
+Future _fetchAndUnpackBundle(String relativeUrl, AssetBundleProxy bundle) async {
+  core.MojoDataPipeConsumer bundleData = (await fetchUrl(url)).body;
+  AssetUnpackerProxy unpacker = new AssetUnpackerProxy.unbound();
+  shell.requestService("mojo:asset_bundle", unpacker);
+  unpacker.ptr.unpackZipStream(bundleData, bundle);
+  unpacker.close();
+}
+
+class MojoAssetBundle extends AssetBundle {
+  MojoAssetBundle(AssetBundleProxy this._bundle);
+
+  factory MojoAssetBundle.fromNetwork(String relativeUrl) {
+    AssetBundleProxy bundle = new AssetBundleProxy.unbound();
+    _fetchAndUnpackBundle(relativeUrl, bundle);
+    return new AssetBundle(bundle);
+  }
+
+  AssetBundleProxy _bundle;
 
   void close() {
     _bundle.close();
     _bundle = null;
   }
 
-  Future<sky.Image> fetchImage(String path) async {
+  Future<sky.Image> fetchImage(String name) async {
     core.MojoDataPipeConsumer assetData =
-        (await _bundle.ptr.getAsStream(path)).assetData;
+        (await _bundle.ptr.getAsStream(name)).assetData;
     return await _decodeImage(assetData);
   }
-
-  AssetBundleProxy _bundle;
-}
-
-Future<AssetBundle> fetchAssetBundle(String url) async {
-  core.MojoDataPipeConsumer bundleData = (await fetchUrl(url)).body;
-
-  AssetUnpackerProxy unpacker = new AssetUnpackerProxy.unbound();
-  shell.requestService("mojo:asset_bundle", unpacker);
-  AssetBundleProxy bundle = new AssetBundleProxy.unbound();
-  unpacker.ptr.unpackZipStream(bundleData, bundle);
-  unpacker.close();
-
-  return new AssetBundle(bundle);
 }
