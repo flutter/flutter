@@ -39,7 +39,7 @@
 #include "sky/engine/core/frame/Settings.h"
 #include "sky/engine/core/Init.h"
 #include "sky/engine/core/page/Page.h"
-#include "sky/engine/core/script/dart_controller.h"
+#include "sky/engine/core/script/dart_init.h"
 #include "sky/engine/platform/LayoutTestSupport.h"
 #include "sky/engine/platform/Logging.h"
 #include "sky/engine/public/platform/Platform.h"
@@ -141,7 +141,7 @@ void initialize(Platform* platform)
     // this, initializing this lazily probably doesn't buy us much.
     WTF::UTF8Encoding();
 
-    DartController::InitVM();
+    InitDartVM();
 
     addMessageLoopObservers();
 }

@@ -35,8 +35,8 @@ class DartController {
                       DartLibraryProvider* library_provider);
   void RunFromSnapshot(mojo::ScopedDataPipeConsumerHandle snapshot);
 
-  void ClearForClose();
   void CreateIsolateFor(PassOwnPtr<DOMDartState> dom_dart_state);
+  void Shutdown();
   void InstallView(View* view);
 
   DOMDartState* dart_state() const { return dom_dart_state_.get(); }

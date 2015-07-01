@@ -226,16 +226,6 @@ PassRefPtr<Document> LocalDOMWindow::installNewDocument(const DocumentInit& init
     m_document = Document::create(init);
     m_application = Application::create(m_document.get(), m_document.get(), m_document->url().string());
     m_eventQueue = DOMWindowEventQueue::create(m_document.get());
-    m_frame->dart().CreateIsolateFor(adoptPtr(
-        new DOMDartState(m_document.get(), m_document->url().string())));
-
-    {
-        Dart_Isolate isolate = m_frame->dart().dart_state()->isolate();
-        DartIsolateScope scope(isolate);
-        DartApiScope api_scope;
-        m_document->frame()->loaderClient()->didCreateIsolate(isolate);
-    }
-
     m_document->attach();
     return m_document;
 }

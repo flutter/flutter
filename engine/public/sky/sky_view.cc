@@ -29,10 +29,6 @@ SkyView::SkyView(SkyViewClient* client)
 }
 
 SkyView::~SkyView() {
-  // TODO(abarth): Move this work into the DartController destructor once we
-  // remove the Frame code path.
-  if (dart_controller_)
-    dart_controller_->ClearForClose();
 }
 
 void SkyView::SetDisplayMetrics(const SkyDisplayMetrics& metrics) {

@@ -93,7 +93,6 @@ namespace blink {
         FrameSelection& selection() const;
         InputMethodController& inputMethodController() const;
         FetchContext& fetchContext() const;
-        DartController& dart();
         SpellChecker& spellChecker() const;
         FrameConsole& console() const;
 
@@ -127,7 +126,6 @@ namespace blink {
 
         RefPtr<FrameView> m_view;
 
-        OwnPtr<DartController> m_dart;
         const OwnPtr<Editor> m_editor;
         const OwnPtr<SpellChecker> m_spellChecker;
         const OwnPtr<FrameSelection> m_selection;
@@ -142,11 +140,6 @@ namespace blink {
     inline FrameView* LocalFrame::view() const
     {
         return m_view.get();
-    }
-
-    inline DartController& LocalFrame::dart()
-    {
-        return *m_dart;
     }
 
     inline FrameSelection& LocalFrame::selection() const

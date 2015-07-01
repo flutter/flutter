@@ -65,7 +65,6 @@ inline LocalFrame::LocalFrame(FrameLoaderClient* client, FrameHost* host)
     : Frame(client, host)
     , m_deprecatedLoader(this)
     , m_mojoLoader(adoptPtr(new MojoLoader(*this)))
-    , m_dart(adoptPtr(new DartController()))
     , m_editor(Editor::create(*this))
     , m_spellChecker(SpellChecker::create(*this))
     , m_selection(FrameSelection::create(this))
@@ -122,10 +121,6 @@ void LocalFrame::detach()
     setView(nullptr);
     willDetachFrameHost();
 
-    // Finish all cleanup work that might require talking to the embedder.
-    // Notify ScriptController that the frame is closing, since its cleanup ends up calling
-    // back to FrameLoaderClient via WindowProxy.
-    dart().ClearForClose();
     // After this, we must no longer talk to the client since this clears
     // its owning reference back to our owning LocalFrame.
     loaderClient()->detachedFromParent();
