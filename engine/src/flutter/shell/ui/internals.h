@@ -26,18 +26,22 @@ class Internals
   ~Internals() override;
 
   static void Create(Dart_Isolate isolate,
-                     mojo::ServiceProviderPtr platform_service_provider);
+                     mojo::ServiceProviderPtr platform_service_provider,
+                     mojo::asset_bundle::AssetBundlePtr root_bundle);
 
   mojo::Handle TakeServicesProvidedByEmbedder();
+  mojo::Handle TakeRootBundleHandle();
 
  private:
-  explicit Internals(mojo::ServiceProviderPtr platform_service_provider);
+  explicit Internals(mojo::ServiceProviderPtr platform_service_provider,
+                     mojo::asset_bundle::AssetBundlePtr root_bundle);
 
   // |mojo::InterfaceFactory<mojo::asset_bundle::AssetUnpacker>| implementation:
   void Create(
       mojo::ApplicationConnection* connection,
       mojo::InterfaceRequest<mojo::asset_bundle::AssetUnpacker>) override;
 
+  mojo::asset_bundle::AssetBundlePtr root_bundle_;
   mojo::ServiceProviderPtr service_provider_;
   mojo::ServiceProviderImpl service_provider_impl_;
   mojo::ServiceProviderPtr platform_service_provider_;

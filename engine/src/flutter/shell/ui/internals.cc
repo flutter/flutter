@@ -29,6 +29,11 @@ Internals* GetInternals() {
 void NotifyTestComplete(Dart_NativeArguments args) {
 }
 
+void TakeRootBundleHandle(Dart_NativeArguments args) {
+  Dart_SetIntegerReturnValue(
+      args, GetInternals()->TakeRootBundleHandle().value());
+}
+
 void TakeShellProxyHandle(Dart_NativeArguments args) {
   Dart_SetIntegerReturnValue(args, 0);
 }
@@ -48,10 +53,11 @@ void TakeServiceRegistry(Dart_NativeArguments args) {
 
 const DartBuiltin::Natives kNativeFunctions[] = {
     {"notifyTestComplete", NotifyTestComplete, 1},
-    {"takeShellProxyHandle", TakeShellProxyHandle, 0},
+    {"takeRootBundleHandle", TakeRootBundleHandle, 0},
+    {"takeServiceRegistry", TakeServiceRegistry, 0},
     {"takeServicesProvidedByEmbedder", TakeServicesProvidedByEmbedder, 0},
     {"takeServicesProvidedToEmbedder", TakeServicesProvidedToEmbedder, 0},
-    {"takeServiceRegistry", TakeServiceRegistry, 0},
+    {"takeShellProxyHandle", TakeShellProxyHandle, 0},
 };
 
 const DartBuiltin& GetBuiltin() {
@@ -75,17 +81,21 @@ const char kLibraryName[] = "dart:sky.internals";
 }  // namespace
 
 void Internals::Create(Dart_Isolate isolate,
-                       mojo::ServiceProviderPtr service_provider) {
+                       mojo::ServiceProviderPtr service_provider,
+                       mojo::asset_bundle::AssetBundlePtr root_bundle) {
   DartState* state = DartState::From(isolate);
-  state->SetUserData(&kInternalsKey, new Internals(service_provider.Pass()));
+  state->SetUserData(&kInternalsKey, new Internals(service_provider.Pass(),
+                                                   root_bundle.Pass()));
   Dart_Handle library =
       Dart_LookupLibrary(Dart_NewStringFromCString(kLibraryName));
   CHECK(!LogIfError(library));
   CHECK(!LogIfError(Dart_SetNativeResolver(library, Resolver, Symbolizer)));
 }
 
-Internals::Internals(mojo::ServiceProviderPtr platform_service_provider)
-  : service_provider_impl_(GetProxy(&service_provider_)),
+Internals::Internals(mojo::ServiceProviderPtr platform_service_provider,
+                     mojo::asset_bundle::AssetBundlePtr root_bundle)
+  : root_bundle_(root_bundle.Pass()),
+    service_provider_impl_(GetProxy(&service_provider_)),
     platform_service_provider_(platform_service_provider.Pass()) {
   service_provider_impl_.set_fallback_service_provider(
       platform_service_provider_.get());
@@ -104,6 +114,10 @@ void Internals::Create(
 
 mojo::Handle Internals::TakeServicesProvidedByEmbedder() {
   return service_provider_.PassInterface().PassHandle().release();
+}
+
+mojo::Handle Internals::TakeRootBundleHandle() {
+  return root_bundle_.PassInterface().PassHandle().release();
 }
 
 }  // namespace shell
