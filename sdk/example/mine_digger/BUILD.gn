@@ -9,4 +9,5 @@ import("//sky/apk/rules.gni")
 sky_app("mine_digger") {
   apk_name = "MineDigger"
   main_dart = "lib/main.dart"
+  sky_yaml = "sky.yaml"
 }
