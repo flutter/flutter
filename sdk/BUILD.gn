@@ -87,7 +87,7 @@ dart_pkg("sky") {
 
   # List of mojom targets that the sky pkg exports
   deps = [
-    "//sky/services/viewport",
+    "//sky/services/engine",
   ]
 
   datadeps = [

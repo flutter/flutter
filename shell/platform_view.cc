@@ -24,10 +24,10 @@ PlatformView::PlatformView(const PlatformView::Config& config)
 PlatformView::~PlatformView() {
 }
 
-void PlatformView::ConnectToViewportObserver(
-    mojo::InterfaceRequest<ViewportObserver> request) {
+void PlatformView::ConnectToEngine(
+    mojo::InterfaceRequest<SkyEngine> request) {
   config_.ui_task_runner->PostTask(
-      FROM_HERE, base::Bind(&UIDelegate::ConnectToViewportObserver,
+      FROM_HERE, base::Bind(&UIDelegate::ConnectToEngine,
                             config_.ui_delegate, base::Passed(&request)));
 }
 

@@ -17,13 +17,13 @@
 namespace sky {
 namespace shell {
 
-static jlong Attach(JNIEnv* env, jclass clazz, jint viewportObserverHandle) {
+static jlong Attach(JNIEnv* env, jclass clazz, jint skyEngineHandle) {
   ShellView* shell_view = new ShellView(Shell::Shared());
   auto view = static_cast<PlatformViewAndroid*>(shell_view->view());
   view->SetShellView(make_scoped_ptr(shell_view));
-  view->ConnectToViewportObserver(
-      mojo::MakeRequest<ViewportObserver>(mojo::ScopedMessagePipeHandle(
-          mojo::MessagePipeHandle(viewportObserverHandle))));
+  view->ConnectToEngine(
+      mojo::MakeRequest<SkyEngine>(mojo::ScopedMessagePipeHandle(
+          mojo::MessagePipeHandle(skyEngineHandle))));
   return reinterpret_cast<jlong>(shell_view->view());
 }
 

@@ -23,7 +23,7 @@ import org.chromium.mojom.sky.EventType;
 import org.chromium.mojom.sky.InputEvent;
 import org.chromium.mojom.sky.PointerData;
 import org.chromium.mojom.sky.PointerKind;
-import org.chromium.mojom.sky.ViewportObserver;
+import org.chromium.mojom.sky.SkyEngine;
 
 /**
  * A view containing Sky
@@ -34,7 +34,7 @@ public class PlatformViewAndroid extends SurfaceView
     private static final String TAG = "PlatformViewAndroid";
 
     private long mNativePlatformView;
-    private ViewportObserver.Proxy mViewportObserver;
+    private SkyEngine.Proxy mSkyEngine;
     private final SurfaceHolder.Callback mSurfaceCallback;
     private GestureProvider mGestureProvider;
 
@@ -52,8 +52,8 @@ public class PlatformViewAndroid extends SurfaceView
         mSurfaceCallback = new SurfaceHolder.Callback() {
             @Override
             public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-                assert mViewportObserver != null;
-                mViewportObserver.onViewportMetricsChanged(width, height, density);
+                assert mSkyEngine != null;
+                mSkyEngine.onViewportMetricsChanged(width, height, density);
             }
 
             @Override
@@ -145,7 +145,7 @@ public class PlatformViewAndroid extends SurfaceView
 
 
 
-        mViewportObserver.onInputEvent(inputEvent);
+        mSkyEngine.onInputEvent(inputEvent);
     }
 
     @Override
@@ -173,28 +173,28 @@ public class PlatformViewAndroid extends SurfaceView
 
     @Override
     public void onGestureEvent(InputEvent event) {
-        mViewportObserver.onInputEvent(event);
+        mSkyEngine.onInputEvent(event);
     }
 
     public void onBackPressed() {
         InputEvent event = new InputEvent();
         event.type = EventType.BACK;
-        mViewportObserver.onInputEvent(event);
+        mSkyEngine.onInputEvent(event);
     }
 
     public void loadSnapshot(String path) {
-        mViewportObserver.runFromSnapshot(path);
+        mSkyEngine.runFromSnapshot(path);
     }
 
     public void loadUrl(String url) {
-        mViewportObserver.runFromNetwork(url);
+        mSkyEngine.runFromNetwork(url);
     }
 
     private void attach() {
         Core core = CoreImpl.getInstance();
-        Pair<ViewportObserver.Proxy, InterfaceRequest<ViewportObserver>> result =
-                ViewportObserver.MANAGER.getInterfaceRequest(core);
-        mViewportObserver = result.first;
+        Pair<SkyEngine.Proxy, InterfaceRequest<SkyEngine>> result =
+                SkyEngine.MANAGER.getInterfaceRequest(core);
+        mSkyEngine = result.first;
         mNativePlatformView = nativeAttach(result.second.passHandle().releaseNativeHandle());
     }
 

@@ -8,14 +8,13 @@
 #import <OpenGLES/EAGL.h>
 #import <OpenGLES/EAGLDrawable.h>
 
-#include "sky/shell/ios/platform_view_ios.h"
-#include "sky/shell/shell.h"
-#include "sky/shell/shell_view.h"
-#include "sky/shell/ui_delegate.h"
-
-#include "mojo/public/cpp/bindings/interface_request.h"
-#include "sky/services/viewport/input_event.mojom.h"
 #include "base/time/time.h"
+#include "mojo/public/cpp/bindings/interface_request.h"
+#include "sky/services/engine/input_event.mojom.h"
+#include "sky/shell/ios/platform_view_ios.h"
+#include "sky/shell/shell_view.h"
+#include "sky/shell/shell.h"
+#include "sky/shell/ui_delegate.h"
 
 static inline sky::EventType EventTypeFromUITouchPhase(UITouchPhase phase) {
   switch (phase) {
@@ -60,7 +59,7 @@ static sky::InputEventPtr BasicInputEventFromRecognizer(
 @implementation SkySurface {
   BOOL _platformViewInitialized;
 
-  sky::ViewportObserverPtr _viewport_observer;
+  sky::SkyEnginePtr _sky_engine;
   scoped_ptr<sky::shell::ShellView> _shell_view;
 }
 
@@ -87,8 +86,8 @@ static sky::InputEventPtr BasicInputEventFromRecognizer(
   CGSize size = self.bounds.size;
   CGFloat scale = [UIScreen mainScreen].scale;
 
-  _viewport_observer->OnViewportMetricsChanged(size.width * scale,
-                                               size.height * scale, scale);
+  _sky_engine->OnViewportMetricsChanged(size.width * scale,
+                                        size.height * scale, scale);
 }
 
 - (void)configureLayerDefaults {
@@ -109,7 +108,7 @@ static sky::InputEventPtr BasicInputEventFromRecognizer(
   _platformViewInitialized = YES;
 
   [self notifySurfaceCreation];
-  [self connectToViewportObserverAndLoad];
+  [self connectToEngineAndLoad];
 }
 
 - (sky::shell::PlatformViewIOS*)platformView {
@@ -126,12 +125,12 @@ static sky::InputEventPtr BasicInputEventFromRecognizer(
   return [NSBundle mainBundle].infoDictionary[@"com.google.sky.load_url"];
 }
 
-- (void)connectToViewportObserverAndLoad {
-  auto interface_request = mojo::GetProxy(&_viewport_observer);
-  self.platformView->ConnectToViewportObserver(interface_request.Pass());
+- (void)connectToEngineAndLoad {
+  auto interface_request = mojo::GetProxy(&_sky_engine);
+  self.platformView->ConnectToEngine(interface_request.Pass());
 
   mojo::String string(self.skyInitialLoadURL.UTF8String);
-  _viewport_observer->RunFromNetwork(string);
+  _sky_engine->RunFromNetwork(string);
 }
 
 - (void)notifySurfaceDestruction {
@@ -157,7 +156,7 @@ static sky::InputEventPtr BasicInputEventFromRecognizer(
     input->pointer_data->x = windowCoordinates.x * scale;
     input->pointer_data->y = windowCoordinates.y * scale;
 
-    _viewport_observer->OnInputEvent(input.Pass());
+    _sky_engine->OnInputEvent(input.Pass());
   }
 }
 
@@ -223,7 +222,7 @@ static sky::InputEventPtr BasicInputEventFromRecognizer(
 
   auto input = BasicInputEventFromRecognizer(
     sky::EVENT_TYPE_GESTURE_FLING_START, recognizer);
-  _viewport_observer->OnInputEvent(input.Pass());
+  _sky_engine->OnInputEvent(input.Pass());
 }
 
 -(void) onLongPress:(UILongPressGestureRecognizer *) recognizer {
@@ -233,7 +232,7 @@ static sky::InputEventPtr BasicInputEventFromRecognizer(
 
   auto input = BasicInputEventFromRecognizer(sky::EVENT_TYPE_GESTURE_LONG_PRESS,
                                              recognizer);
-  _viewport_observer->OnInputEvent(input.Pass());
+  _sky_engine->OnInputEvent(input.Pass());
 }
 
 -(void) onScroll:(UIPanGestureRecognizer *) recognizer {
@@ -268,7 +267,7 @@ static sky::InputEventPtr BasicInputEventFromRecognizer(
   input->gesture_data->velocityX = velocity.x * scale;
   input->gesture_data->velocityY =  velocity.y * scale;
 
-  _viewport_observer->OnInputEvent(input.Pass());
+  _sky_engine->OnInputEvent(input.Pass());
 }
 
 -(void) onTap:(UITapGestureRecognizer *) recognizer {
@@ -279,7 +278,7 @@ static sky::InputEventPtr BasicInputEventFromRecognizer(
 
   auto input = BasicInputEventFromRecognizer(sky::EVENT_TYPE_GESTURE_TAP,
                                              recognizer);
-  _viewport_observer->OnInputEvent(input.Pass());
+  _sky_engine->OnInputEvent(input.Pass());
 }
 
 #pragma mark - Misc.

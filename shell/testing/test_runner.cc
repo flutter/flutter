@@ -60,8 +60,8 @@ TestRunner::TestRunner()
     weak_ptr_factory_(this) {
   CHECK(!g_test_runner) << "Only create one TestRunner.";
 
-  shell_view_->view()->ConnectToViewportObserver(GetProxy(&viewport_observer_));
-  viewport_observer_->OnViewportMetricsChanged(320, 640, 1.0);
+  shell_view_->view()->ConnectToEngine(GetProxy(&sky_engine_));
+  sky_engine_->OnViewportMetricsChanged(320, 640, 1.0);
 }
 
 TestRunner::~TestRunner() {
@@ -121,7 +121,7 @@ void TestRunner::Run() {
 
   if (StartsWithASCII(data.url, kFileUrlPrefix, true))
     ReplaceFirstSubstringAfterOffset(&data.url, 0, kFileUrlPrefix, "");
-  viewport_observer_->RunFromFile(data.url, package_root_);
+  sky_engine_->RunFromFile(data.url, package_root_);
 }
 
 }  // namespace shell

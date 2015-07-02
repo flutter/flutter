@@ -4,9 +4,9 @@
 
 import("//mojo/public/tools/bindings/mojom.gni")
 
-mojom("viewport") {
+mojom("engine") {
   sources = [
     "input_event.mojom",
-    "viewport_observer.mojom",
+    "sky_engine.mojom",
   ]
 }

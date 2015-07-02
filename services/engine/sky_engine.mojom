@@ -4,10 +4,10 @@
 
 module sky;
 
-import "sky/services/viewport/input_event.mojom";
+import "sky/services/engine/input_event.mojom";
 
 // TODO(eseidel): Rename this interface.
-interface ViewportObserver {
+interface SkyEngine {
   OnViewportMetricsChanged(int32 width, int32 height, float device_pixel_ratio);
   OnInputEvent(InputEvent event);
 
