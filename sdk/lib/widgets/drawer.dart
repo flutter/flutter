@@ -2,12 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:math' as math;
 import 'dart:sky' as sky;
 
-import 'package:vector_math/vector_math.dart';
-
-import '../animation/animated_value.dart';
 import '../animation/animation_performance.dart';
 import '../animation/curves.dart';
 import '../theme/colors.dart';

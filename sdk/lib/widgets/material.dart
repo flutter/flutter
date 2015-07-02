@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../base/lerp.dart';
 import '../animation/animated_value.dart';
 import '../painting/box_painter.dart';
 import '../theme/edges.dart';
