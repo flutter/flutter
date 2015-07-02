@@ -85,4 +85,14 @@ public class SkyActivity extends Activity {
     public void loadUrl(String url) {
         mView.loadUrl(url);
     }
+
+    public boolean loadBundleByName(String name) {
+        File dataDir = new File(PathUtils.getDataDirectory(this));
+        File bundle = new File(dataDir, name);
+        if (!bundle.exists()) {
+            return false;
+        }
+        mView.loadBundle(bundle.getPath());
+        return true;
+    }
 }
