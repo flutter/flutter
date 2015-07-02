@@ -6,7 +6,7 @@
 #define SKY_SHELL_UI_INPUT_EVENT_CONVERTER_H_
 
 #include "base/memory/scoped_ptr.h"
-#include "sky/services/viewport/input_event.mojom.h"
+#include "sky/services/engine/input_event.mojom.h"
 
 namespace blink {
 class WebInputEvent;

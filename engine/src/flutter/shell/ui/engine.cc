@@ -54,7 +54,7 @@ Engine::Engine(const Config& config)
     : config_(config),
       animator_(new Animator(config, this)),
       device_pixel_ratio_(1.0f),
-      viewport_observer_binding_(this),
+      binding_(this),
       weak_factory_(this) {
 }
 
@@ -105,9 +105,8 @@ skia::RefPtr<SkPicture> Engine::Paint() {
   return skia::AdoptRef(recorder.endRecordingAsPicture());
 }
 
-void Engine::ConnectToViewportObserver(
-    mojo::InterfaceRequest<ViewportObserver> request) {
-  viewport_observer_binding_.Bind(request.Pass());
+void Engine::ConnectToEngine(mojo::InterfaceRequest<SkyEngine> request) {
+  binding_.Bind(request.Pass());
 }
 
 void Engine::OnAcceleratedWidgetAvailable(gfx::AcceleratedWidget widget) {

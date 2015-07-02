@@ -26,8 +26,7 @@ class PlatformView {
 
   virtual ~PlatformView();
 
-  void ConnectToViewportObserver(
-      mojo::InterfaceRequest<ViewportObserver> request);
+  void ConnectToEngine(mojo::InterfaceRequest<SkyEngine> request);
 
  protected:
   explicit PlatformView(const Config& config);

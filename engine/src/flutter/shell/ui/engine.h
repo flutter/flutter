@@ -29,7 +29,7 @@ namespace shell {
 class Animator;
 
 class Engine : public UIDelegate,
-               public ViewportObserver,
+               public SkyEngine,
                public blink::ServiceProvider,
                public mojo::NavigatorHost,
                public blink::SkyViewClient {
@@ -55,13 +55,12 @@ class Engine : public UIDelegate,
   skia::RefPtr<SkPicture> Paint();
 
  private:
-  // UIDelegate methods:
-  void ConnectToViewportObserver(
-      mojo::InterfaceRequest<ViewportObserver> request) override;
+  // UIDelegate implementation:
+  void ConnectToEngine(mojo::InterfaceRequest<SkyEngine> request) override;
   void OnAcceleratedWidgetAvailable(gfx::AcceleratedWidget widget) override;
   void OnOutputSurfaceDestroyed() override;
 
-  // ViewportObserver:
+  // SkyEngine implementation:
   void OnViewportMetricsChanged(int width, int height,
                                 float device_pixel_ratio) override;
   void OnInputEvent(InputEventPtr event) override;
@@ -96,7 +95,7 @@ class Engine : public UIDelegate,
 
   float device_pixel_ratio_;
   gfx::Size physical_size_;
-  mojo::Binding<ViewportObserver> viewport_observer_binding_;
+  mojo::Binding<SkyEngine> binding_;
 
   base::WeakPtrFactory<Engine> weak_factory_;
 

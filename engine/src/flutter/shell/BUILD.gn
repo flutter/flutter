@@ -19,8 +19,8 @@ common_deps = [
   "//sky/engine",
   "//sky/engine/tonic",
   "//sky/engine/wtf",
+  "//sky/services/engine",
   "//sky/services/platform",
-  "//sky/services/viewport",
   "//sky/shell/dart",
   "//ui/gfx/geometry",
   "//ui/gl",
@@ -116,8 +116,8 @@ if (is_android) {
       "//mojo/public/java:system",
       "//mojo/services/network/public/interfaces:interfaces_java",
       "//services/keyboard",
+      "//sky/services/engine:engine_java",
       "//sky/services/oknet",
-      "//sky/services/viewport:viewport_java",
     ]
   }
 
