@@ -13,6 +13,7 @@ import org.chromium.mojo.system.MojoException;
 import org.chromium.mojom.intents.ActivityManager;
 import org.chromium.mojom.intents.ComponentName;
 import org.chromium.mojom.intents.Intent;
+import org.chromium.mojom.intents.StringExtra;
 
 /**
  * Android implementation of ActivityManager.
@@ -41,6 +42,12 @@ public class ActivityManagerImpl implements ActivityManager {
             android.content.ComponentName androidComponent =
                     new android.content.ComponentName(component.packageName, component.className);
             androidIntent.setComponent(androidComponent);
+        }
+
+        if (intent.stringExtras != null) {
+            for (StringExtra extra : intent.stringExtras) {
+                androidIntent.putExtra(extra.name, extra.value);
+            }
         }
 
         androidIntent.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK);

@@ -21,8 +21,18 @@ public class SkyDemoActivity extends SkyActivity {
 
         if (Intent.ACTION_MAIN.equals(action)) {
             loadUrl(DEFAULT_URL);
-        } else if (Intent.ACTION_VIEW.equals(action)) {
-            loadUrl(intent.getDataString());
+            return;
         }
+
+        if (Intent.ACTION_VIEW.equals(action)) {
+            String bundleName = intent.getStringExtra("bundleName");
+            if (bundleName != null && loadBundleByName(bundleName)) {
+                return;
+            }
+            loadUrl(intent.getDataString());
+            return;
+        }
+
+        super.onSkyReady();
     }
 }

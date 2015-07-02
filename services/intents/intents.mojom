@@ -4,6 +4,11 @@
 
 module intents;
 
+struct StringExtra {
+  string name;
+  string value;
+};
+
 struct ComponentName {
   string package_name;
   string class_name;
@@ -13,6 +18,7 @@ struct Intent {
   string action;
   string url;
   ComponentName? component;
+  array<StringExtra>? string_extras;
 };
 
 // TODO(abarth): This interface seems very specific to Android. Do we want to

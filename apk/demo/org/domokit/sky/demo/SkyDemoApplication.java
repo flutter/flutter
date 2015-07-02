@@ -16,6 +16,7 @@ import org.chromium.mojom.media.MediaService;
 import org.chromium.mojom.sensors.SensorService;
 import org.domokit.intents.ActivityManagerImpl;
 import org.domokit.media.MediaServiceImpl;
+import org.domokit.sky.shell.ResourceExtractor;
 import org.domokit.sky.shell.ServiceFactory;
 import org.domokit.sky.shell.ServiceRegistry;
 import org.domokit.sky.shell.SkyApplication;
@@ -24,32 +25,43 @@ import org.domokit.sky.shell.SkyApplication;
  * SkyDemo implementation of {@link android.app.Application}
  */
 public class SkyDemoApplication extends SkyApplication {
-    @Override
-    public void onCreate() {
-        super.onCreate();
+    private static final String[] DEMO_RESOURCES = {
+        "mine_digger.skyx",
+        "stocks.skyx",
+    };
 
-        ServiceRegistry.SHARED.register(SensorService.MANAGER.getName(), new ServiceFactory() {
+    @Override
+    protected void onBeforeResourceExtraction(ResourceExtractor extractor) {
+        super.onBeforeResourceExtraction(extractor);
+        extractor.addResources(DEMO_RESOURCES);
+    }
+
+    @Override
+    public void onServiceRegistryAvailable(ServiceRegistry registry) {
+        super.onServiceRegistryAvailable(registry);
+
+        registry.register(SensorService.MANAGER.getName(), new ServiceFactory() {
             @Override
             public void connectToService(Context context, Core core, MessagePipeHandle pipe) {
                 SensorService.MANAGER.bind(new SensorServiceImpl(context), pipe);
             }
         });
 
-        ServiceRegistry.SHARED.register(KeyboardService.MANAGER.getName(), new ServiceFactory() {
+        registry.register(KeyboardService.MANAGER.getName(), new ServiceFactory() {
             @Override
             public void connectToService(Context context, Core core, MessagePipeHandle pipe) {
                 KeyboardService.MANAGER.bind(new KeyboardServiceImpl(context), pipe);
             }
         });
 
-        ServiceRegistry.SHARED.register(ActivityManager.MANAGER.getName(), new ServiceFactory() {
+        registry.register(ActivityManager.MANAGER.getName(), new ServiceFactory() {
             @Override
             public void connectToService(Context context, Core core, MessagePipeHandle pipe) {
                 ActivityManager.MANAGER.bind(new ActivityManagerImpl(context), pipe);
             }
         });
 
-        ServiceRegistry.SHARED.register(MediaService.MANAGER.getName(), new ServiceFactory() {
+        registry.register(MediaService.MANAGER.getName(), new ServiceFactory() {
             @Override
             public void connectToService(Context context, Core core, MessagePipeHandle pipe) {
                 MediaService.MANAGER.bind(new MediaServiceImpl(context, core), pipe);

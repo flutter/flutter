@@ -19,7 +19,7 @@ import 'package:sky/widgets/scaffold.dart';
 import 'package:sky/widgets/theme.dart';
 import 'package:sky/widgets/tool_bar.dart';
 
-void launch(String relativeUrl) {
+void launch(String relativeUrl, String bundleName) {
   Uri url = Uri.base.resolve(relativeUrl);
 
   ActivityManagerProxy activityManager = new ActivityManagerProxy.unbound();
@@ -30,6 +30,14 @@ void launch(String relativeUrl) {
     ..action = 'android.intent.action.VIEW'
     ..component = component
     ..url = url.toString();
+
+  if (bundleName != null) {
+    StringExtra extra = new StringExtra()
+      ..name = 'bundleName'
+      ..value = bundleName;
+    intent.stringExtras = [extra];
+  }
+
   shell.requestService(null, activityManager);
   activityManager.ptr.startActivity(intent);
 }
@@ -37,16 +45,18 @@ void launch(String relativeUrl) {
 class SkyDemo {
   String name;
   String href;
+  String bundleName;
   String description;
   typography.TextTheme textTheme;
   BoxDecoration decoration;
-  SkyDemo({ this.name, this.href, this.description, this.textTheme, this.decoration });
+  SkyDemo({ this.name, this.href, this.bundleName, this.description, this.textTheme, this.decoration });
 }
 
 List<Widget> demos = [
   new SkyDemo(
     name: 'Stocks',
     href: 'example/stocks/lib/main.dart',
+    bundleName: 'stocks.skyx',
     description: 'Multi-screen app with scrolling list',
     textTheme: typography.black,
     decoration: new BoxDecoration(
@@ -94,7 +104,8 @@ List<Widget> demos = [
   //   'Touch Demo', 'examples/rendering/touch_demo.dart', 'Simple example showing handling of touch events at a low level'),
   new SkyDemo(
     name: 'Minedigger Game',
-    href: 'example/mine_digger/mine_digger.dart',
+    href: 'example/mine_digger/lib/main.dart',
+    bundleName: 'mine_digger.skyx',
     description: 'Clone of the classic Minesweeper game',
     textTheme: typography.white
   ),
@@ -119,7 +130,7 @@ class DemoList extends FixedHeightScrollable {
   Widget buildDemo(SkyDemo demo) {
     return new Listener(
       key: demo.name,
-      onGestureTap: (_) => launch(demo.href),
+      onGestureTap: (_) => launch(demo.href, demo.bundleName),
       child: new Container(
         height: kCardHeight,
         child: new Card(

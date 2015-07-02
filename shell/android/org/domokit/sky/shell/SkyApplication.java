@@ -41,7 +41,25 @@ public class SkyApplication extends BaseChromiumApplication {
         initJavaUtils();
         initResources();
         initNative();
-        initServiceRegistry();
+        onServiceRegistryAvailable(ServiceRegistry.SHARED);
+    }
+
+    /**
+      * Override this function to add more resources for extraction.
+      */
+    protected void onBeforeResourceExtraction(ResourceExtractor extractor) {
+        extractor.addResources(SKY_RESOURCES);
+    }
+
+    /**
+      * Override this function to register more services.
+      */
+    protected void onServiceRegistryAvailable(ServiceRegistry registry) {
+        registry.register(NetworkService.MANAGER.getName(), new ServiceFactory() {
+            public void connectToService(Context context, Core core, MessagePipeHandle pipe) {
+                new NetworkServiceImpl(context, core, pipe);
+            }
+        });
     }
 
     private void initJavaUtils() {
@@ -51,7 +69,7 @@ public class SkyApplication extends BaseChromiumApplication {
 
     private void initResources() {
         mResourceExtractor = new ResourceExtractor(getApplicationContext());
-        mResourceExtractor.addResources(SKY_RESOURCES);
+        onBeforeResourceExtraction(mResourceExtractor);
         mResourceExtractor.start();
     }
 
@@ -62,13 +80,5 @@ public class SkyApplication extends BaseChromiumApplication {
             Log.e(TAG, "Unable to load Sky Engine binary.", e);
             throw new RuntimeException(e);
         }
-    }
-
-    private void initServiceRegistry() {
-        ServiceRegistry.SHARED.register(NetworkService.MANAGER.getName(), new ServiceFactory() {
-            public void connectToService(Context context, Core core, MessagePipeHandle pipe) {
-                new NetworkServiceImpl(context, core, pipe);
-            }
-        });
     }
 }
