@@ -6,7 +6,6 @@ module sky;
 
 import "sky/services/engine/input_event.mojom";
 
-// TODO(eseidel): Rename this interface.
 interface SkyEngine {
   OnViewportMetricsChanged(int32 width, int32 height, float device_pixel_ratio);
   OnInputEvent(InputEvent event);
@@ -14,4 +13,5 @@ interface SkyEngine {
   RunFromNetwork(string url);
   RunFromFile(string main, string package_root);
   RunFromSnapshot(string path);
+  RunFromBundle(string path);
 };
