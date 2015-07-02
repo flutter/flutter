@@ -25,7 +25,7 @@ template("sky_apk") {
 }
 
 template("sky_app") {
-  # Note: org.chromium.base.ResourceExtractor knows about 'snapshot_blob.bin'.
+  # Note: org.domokit.sky.shell.SkyApplication knows about 'snapshot_blob.bin'.
   snapshot = "$target_gen_dir/snapshot_blob.bin"
 
   action("gen_snapshot") {
