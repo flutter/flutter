@@ -30,6 +30,10 @@ void NotifyTestComplete(Dart_NativeArguments args) {
   GetInternals()->NotifyTestComplete(StdStringFromDart(test_result));
 }
 
+void TakeRootBundleHandle(Dart_NativeArguments args) {
+  Dart_SetIntegerReturnValue(args, 0);
+}
+
 void TakeShellProxyHandle(Dart_NativeArguments args) {
   Dart_SetIntegerReturnValue(args,
       GetInternals()->TakeShellProxyHandle().value());
@@ -52,10 +56,11 @@ void TakeServiceRegistry(Dart_NativeArguments args) {
 
 const DartBuiltin::Natives kNativeFunctions[] = {
     {"notifyTestComplete", NotifyTestComplete, 1},
-    {"takeShellProxyHandle", TakeShellProxyHandle, 0},
+    {"takeRootBundleHandle", TakeRootBundleHandle, 0},
+    {"takeServiceRegistry", TakeServiceRegistry, 0},
     {"takeServicesProvidedByEmbedder", TakeServicesProvidedByEmbedder, 0},
     {"takeServicesProvidedToEmbedder", TakeServicesProvidedToEmbedder, 0},
-    {"takeServiceRegistry", TakeServiceRegistry, 0},
+    {"takeShellProxyHandle", TakeShellProxyHandle, 0},
 };
 
 const DartBuiltin& GetBuiltin() {

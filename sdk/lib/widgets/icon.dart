@@ -5,8 +5,14 @@
 import '../mojo/asset_bundle.dart';
 import 'basic.dart';
 
-const String _kAssetBase = '/packages/sky/assets/material-design-icons/';
-final AssetBundle _iconBundle = new NetworkAssetBundle(Uri.base.resolve(_kAssetBase));
+AssetBundle _initIconBundle() {
+  if (rootBundle != null)
+    return rootBundle;
+  const String _kAssetBase = '/packages/sky/assets/material-design-icons/';
+  return new NetworkAssetBundle(Uri.base.resolve(_kAssetBase));
+}
+
+final AssetBundle _iconBundle = _initIconBundle();
 
 class Icon extends Component {
   Icon({ String key, this.size, this.type: '' }) : super(key: key);

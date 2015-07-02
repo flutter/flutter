@@ -4,6 +4,7 @@
 
 import 'dart:async';
 import 'dart:sky' as sky;
+import "dart:sky.internals" as internals;
 
 import 'package:mojo/core.dart' as core;
 import 'package:mojom/mojo/asset_bundle/asset_bundle.mojom.dart';
@@ -66,3 +67,15 @@ class MojoAssetBundle extends AssetBundle {
     });
   }
 }
+
+AssetBundle _initRootBundle() {
+  try {
+    AssetBundleProxy bundle = new AssetBundleProxy.fromHandle(
+        new core.MojoHandle(internals.takeRootBundleHandle()));
+    return new MojoAssetBundle(bundle);
+  } catch (e) {
+    return null;
+  }
+}
+
+final AssetBundle rootBundle = _initRootBundle();

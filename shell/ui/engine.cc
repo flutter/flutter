@@ -200,7 +200,8 @@ void Engine::RunFromBundle(const mojo::String& path) {
 
 void Engine::DidCreateIsolate(Dart_Isolate isolate) {
   Internals::Create(isolate,
-                    CreateServiceProvider(config_.service_provider_context));
+                    CreateServiceProvider(config_.service_provider_context),
+                    root_bundle_.Pass());
 }
 
 void Engine::ScheduleFrame() {
