@@ -41,7 +41,7 @@ public class SkyActivity extends Activity {
         setContentView(mView);
         mTracingController = new TracingController(this);
 
-        loadSnapshotIfAvailable();
+        onSkyReady();
     }
 
     /**
@@ -65,7 +65,10 @@ public class SkyActivity extends Activity {
         super.onBackPressed();
     }
 
-    private void loadSnapshotIfAvailable() {
+    /**
+      * Override this function to customize startup behavior.
+      */
+    protected void onSkyReady() {
         File dataDir = new File(PathUtils.getDataDirectory(this));
         File snapshot = new File(dataDir, SkyApplication.SNAPSHOT);
         if (snapshot.exists()) {

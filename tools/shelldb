@@ -26,11 +26,12 @@ SRC_ROOT = os.path.dirname(SKY_ROOT)
 GDB_PORT = 8888
 SKY_SERVER_PORT = 9888
 OBSERVATORY_PORT = 8181
-DEFAULT_URL = "sky://domokit.github.io/home.dart"
+DEFAULT_URL = "https://domokit.github.io/home.dart"
 APK_NAME = 'SkyDemo.apk'
 ADB_PATH = os.path.join(SRC_ROOT,
     'third_party/android_tools/sdk/platform-tools/adb')
 ANDROID_PACKAGE = "org.domokit.sky.demo"
+ANDROID_COMPONENT = '%s/%s.SkyDemoActivity' % (ANDROID_PACKAGE, ANDROID_PACKAGE)
 SHA1_PATH = '/sdcard/%s/%s.sha1' % (ANDROID_PACKAGE, APK_NAME)
 
 PID_FILE_PATH = "/tmp/skydemo.pids"
@@ -104,12 +105,6 @@ class Pids(object):
             logging.warn('Failed to write pid file: %s' % path)
 
 
-def _convert_to_sky_url(url):
-    parts = urlparse.urlsplit(url)
-    parts = parts._replace(scheme='sky')
-    return parts.geturl()
-
-
 # A free function for possible future sharing with a 'load' command.
 def _url_from_args(args, pids):
     if urlparse.urlparse(args.url_or_path).scheme:
@@ -117,9 +112,8 @@ def _url_from_args(args, pids):
     # The load happens on the remote device, use the remote port.
     remote_sky_server_port = pids.get('remote_sky_server_port',
         pids['sky_server_port'])
-    url = SkyServer.url_for_path(remote_sky_server_port,
+    return SkyServer.url_for_path(remote_sky_server_port,
         pids['sky_server_root'], args.url_or_path)
-    return _convert_to_sky_url(url)
 
 
 def dev_packages_root(build_dir):
@@ -235,11 +229,11 @@ class StartSky(object):
         ])
         pids['remote_sky_server_port'] = sky_server.port
 
-
         subprocess.check_call([ADB_PATH, 'shell',
             'am', 'start',
             '-a', 'android.intent.action.VIEW',
-            '-d', _url_from_args(args, pids)])
+            '-d', _url_from_args(args, pids),
+            ANDROID_COMPONENT])
 
         if not args.gdb:
             return

@@ -11,6 +11,7 @@ import android.util.Log;
 
 import org.chromium.mojo.system.MojoException;
 import org.chromium.mojom.intents.ActivityManager;
+import org.chromium.mojom.intents.ComponentName;
 import org.chromium.mojom.intents.Intent;
 
 /**
@@ -34,6 +35,14 @@ public class ActivityManagerImpl implements ActivityManager {
     public void startActivity(Intent intent) {
         final android.content.Intent androidIntent = new android.content.Intent(
                 intent.action, Uri.parse(intent.url));
+
+        if (intent.component != null) {
+            ComponentName component = intent.component;
+            android.content.ComponentName androidComponent =
+                    new android.content.ComponentName(component.packageName, component.className);
+            androidIntent.setComponent(androidComponent);
+        }
+
         androidIntent.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK);
 
         try {

@@ -4,9 +4,15 @@
 
 module intents;
 
+struct ComponentName {
+  string package_name;
+  string class_name;
+};
+
 struct Intent {
   string action;
   string url;
+  ComponentName? component;
 };
 
 // TODO(abarth): This interface seems very specific to Android. Do we want to

@@ -5,8 +5,6 @@
 package org.domokit.sky.demo;
 
 import android.content.Intent;
-import android.net.Uri;
-import android.os.Bundle;
 
 import org.domokit.sky.shell.SkyActivity;
 
@@ -14,28 +12,17 @@ import org.domokit.sky.shell.SkyActivity;
  * Main activity for SkyDemo.
  */
 public class SkyDemoActivity extends SkyActivity {
+    private static final String DEFAULT_URL = "https://domokit.github.io/home.dart";
 
-    /**
-     * @see android.app.Activity#onCreate(android.os.Bundle)
-     */
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
-        String url = "https://domokit.github.io/home.dart";
+    protected void onSkyReady() {
         Intent intent = getIntent();
-        if (Intent.ACTION_VIEW.equals(intent.getAction())) {
-            Uri skyUri = intent.getData();
-            Uri httpsUri = skyUri.buildUpon().scheme("https").build();
-            // This is a hack to disable https for local testing.
-            // getHost may be null if we're passed a non-normalized url.
-            if (skyUri.getHost() != null
-                    && skyUri.getHost().equals("localhost")) {
-                httpsUri = skyUri.buildUpon().scheme("http").build();
-            }
-            url = httpsUri.toString();
-        }
+        String action = intent.getAction();
 
-        loadUrl(url);
+        if (Intent.ACTION_MAIN.equals(action)) {
+            loadUrl(DEFAULT_URL);
+        } else if (Intent.ACTION_VIEW.equals(action)) {
+            loadUrl(intent.getDataString());
+        }
     }
 }

@@ -21,11 +21,14 @@ import 'package:sky/widgets/tool_bar.dart';
 
 void launch(String relativeUrl) {
   Uri url = Uri.base.resolve(relativeUrl);
-  url = url.replace(scheme: 'sky');
 
   ActivityManagerProxy activityManager = new ActivityManagerProxy.unbound();
+  ComponentName component = new ComponentName()
+    ..packageName = 'org.domokit.sky.demo'
+    ..className = 'org.domokit.sky.demo.SkyDemoActivity';
   Intent intent = new Intent()
     ..action = 'android.intent.action.VIEW'
+    ..component = component
     ..url = url.toString();
   shell.requestService(null, activityManager);
   activityManager.ptr.startActivity(intent);
