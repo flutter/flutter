@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:math' as math;
 
 import '../base/scheduler.dart' as scheduler;
 import 'curves.dart';

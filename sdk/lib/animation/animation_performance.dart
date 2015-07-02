@@ -11,7 +11,7 @@ abstract class AnimatedVariable {
   void setFraction(double t);
 }
 
-class AnimatedType<T> extends AnimatedVariable {
+class AnimatedType<T extends dynamic> extends AnimatedVariable {
   T value;
   final T begin, end;
   final Curve curve;
