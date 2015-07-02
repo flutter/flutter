@@ -55,6 +55,8 @@ Iterable<MaterialAsset> generateMaterialAssets(Map assetDescriptor) sync* {
 }
 
 Iterable<MaterialAsset> parseMaterialAssets(Map manifestDescriptor) sync* {
+  if (manifestDescriptor == null || !manifestDescriptor.containsKey('material-design-icons'))
+    return;
   for (Map assetDescriptor in manifestDescriptor['material-design-icons']) {
     for (MaterialAsset asset in generateMaterialAssets(assetDescriptor)) {
       yield asset;
