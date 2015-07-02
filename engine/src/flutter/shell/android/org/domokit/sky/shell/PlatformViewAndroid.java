@@ -186,6 +186,10 @@ public class PlatformViewAndroid extends SurfaceView
         mSkyEngine.runFromSnapshot(path);
     }
 
+    public void loadBundle(String path) {
+        mSkyEngine.runFromBundle(path);
+    }
+
     public void loadUrl(String url) {
         mSkyEngine.runFromNetwork(url);
     }

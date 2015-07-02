@@ -23,12 +23,11 @@ import org.domokit.oknet.NetworkServiceImpl;
  */
 public class SkyApplication extends BaseChromiumApplication {
     static final String SNAPSHOT = "snapshot_blob.bin";
+    static final String APP_BUNDLE = "app.skyx";
 
     private static final String TAG = "SkyApplication";
     private static final String PRIVATE_DATA_DIRECTORY_SUFFIX = "sky_shell";
-    private static final String[] SKY_RESOURCES = {
-        "icudtl.dat", SNAPSHOT
-    };
+    private static final String[] SKY_RESOURCES = {"icudtl.dat", SNAPSHOT, APP_BUNDLE};
 
     private ResourceExtractor mResourceExtractor;
 

@@ -12,6 +12,7 @@
 #include "mojo/public/cpp/bindings/binding.h"
 #include "mojo/public/cpp/system/core.h"
 #include "mojo/public/interfaces/application/service_provider.mojom.h"
+#include "mojo/services/asset_bundle/public/interfaces/asset_bundle.mojom.h"
 #include "mojo/services/navigation/public/interfaces/navigation.mojom.h"
 #include "skia/ext/refptr.h"
 #include "sky/engine/public/platform/ServiceProvider.h"
@@ -69,6 +70,7 @@ class Engine : public UIDelegate,
   void RunFromFile(const mojo::String& main,
                    const mojo::String& package_root) override;
   void RunFromSnapshot(const mojo::String& path) override;
+  void RunFromBundle(const mojo::String& path) override;
 
   // SkyViewClient methods:
   void ScheduleFrame() override;
@@ -83,13 +85,16 @@ class Engine : public UIDelegate,
   void DidNavigateLocally(const mojo::String& url) override;
   void RequestNavigateHistory(int32_t delta) override;
 
-  void RunFromLibrary(const mojo::String& name);
+  void RunFromLibrary(const std::string& name);
+  void RunFromSnapshotStream(const std::string& name,
+                             mojo::ScopedDataPipeConsumerHandle snapshot);
 
   void UpdateSkyViewSize();
 
   Config config_;
   scoped_ptr<Animator> animator_;
 
+  mojo::asset_bundle::AssetBundlePtr root_bundle_;
   scoped_ptr<blink::DartLibraryProvider> dart_library_provider_;
   std::unique_ptr<blink::SkyView> sky_view_;
 

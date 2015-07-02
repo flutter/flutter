@@ -66,9 +66,16 @@ public class SkyActivity extends Activity {
     }
 
     private void loadSnapshotIfAvailable() {
-        File snapshot = new File(PathUtils.getDataDirectory(this), SkyApplication.SNAPSHOT);
+        File dataDir = new File(PathUtils.getDataDirectory(this));
+        File snapshot = new File(dataDir, SkyApplication.SNAPSHOT);
         if (snapshot.exists()) {
             mView.loadSnapshot(snapshot.getPath());
+            return;
+        }
+        File appBundle = new File(dataDir, SkyApplication.APP_BUNDLE);
+        if (appBundle.exists()) {
+            mView.loadBundle(appBundle.getPath());
+            return;
         }
     }
 

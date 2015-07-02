@@ -10,6 +10,7 @@
 #include "base/trace_event/trace_event.h"
 #include "mojo/common/data_pipe_utils.h"
 #include "mojo/public/cpp/application/connect.h"
+#include "services/asset_bundle/asset_unpacker_job.h"
 #include "sky/engine/public/platform/WebInputEvent.h"
 #include "sky/engine/public/platform/sky_display_metrics.h"
 #include "sky/engine/public/platform/sky_display_metrics.h"
@@ -27,6 +28,8 @@
 namespace sky {
 namespace shell {
 
+const char kSnapshotKey[] = "snapshot_blob.bin";
+
 namespace {
 
 void Ignored(bool) {
@@ -42,7 +45,9 @@ mojo::ScopedDataPipeConsumerHandle Fetch(const base::FilePath& path) {
 
 PlatformImpl* g_platform_impl = nullptr;
 
-}
+}  // namespace
+
+using mojo::asset_bundle::AssetUnpackerJob;
 
 Engine::Config::Config() {
 }
@@ -150,10 +155,18 @@ void Engine::OnInputEvent(InputEventPtr event) {
     sky_view_->HandleInputEvent(*web_event);
 }
 
-void Engine::RunFromLibrary(const mojo::String& name) {
+void Engine::RunFromLibrary(const std::string& name) {
   sky_view_ = blink::SkyView::Create(this);
   sky_view_->RunFromLibrary(blink::WebString::fromUTF8(name),
                             dart_library_provider_.get());
+  UpdateSkyViewSize();
+}
+
+void Engine::RunFromSnapshotStream(
+    const std::string& name,
+    mojo::ScopedDataPipeConsumerHandle snapshot) {
+  sky_view_ = blink::SkyView::Create(this);
+  sky_view_->RunFromSnapshot(blink::WebString::fromUTF8(name), snapshot.Pass());
   UpdateSkyViewSize();
 }
 
@@ -171,10 +184,18 @@ void Engine::RunFromFile(const mojo::String& main,
 }
 
 void Engine::RunFromSnapshot(const mojo::String& path) {
-  sky_view_ = blink::SkyView::Create(this);
-  sky_view_->RunFromSnapshot(blink::WebString::fromUTF8(path),
-                             Fetch(base::FilePath(path)));
-  UpdateSkyViewSize();
+  std::string path_str = path;
+  RunFromSnapshotStream(path_str, Fetch(base::FilePath(path_str)));
+}
+
+void Engine::RunFromBundle(const mojo::String& path) {
+  AssetUnpackerJob* unpacker = new AssetUnpackerJob(
+      mojo::GetProxy(&root_bundle_), base::WorkerPool::GetTaskRunner(true));
+  std::string path_str = path;
+  unpacker->Unpack(Fetch(base::FilePath(path_str)));
+  root_bundle_->GetAsStream(kSnapshotKey,
+                            base::Bind(&Engine::RunFromSnapshotStream,
+                                       weak_factory_.GetWeakPtr(), path_str));
 }
 
 void Engine::DidCreateIsolate(Dart_Isolate isolate) {
