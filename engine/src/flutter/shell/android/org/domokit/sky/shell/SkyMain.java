@@ -8,7 +8,6 @@ import android.content.Context;
 import android.util.Log;
 
 import org.chromium.base.JNINamespace;
-import org.chromium.base.ResourceExtractor;
 
 /**
  * A class to intialize the native code.
@@ -30,9 +29,8 @@ public class SkyMain {
             return;
         }
         try {
-            ResourceExtractor resourceExtractor = ResourceExtractor.get(applicationContext);
-            resourceExtractor.startExtractingResources();
-            resourceExtractor.waitForCompletion();
+            SkyApplication app = (SkyApplication) applicationContext;
+            app.getResourceExtractor().waitForCompletion();
             nativeInit(applicationContext);
             sInitialized = true;
         } catch (Exception e) {
