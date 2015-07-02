@@ -27,8 +27,6 @@ class Internals : public base::SupportsUserData::Data,
       mojo::InterfaceRequest<mojo::ServiceProvider> services,
       mojo::ServiceProviderPtr exposed_services) override;
 
-  std::string RenderTreeAsText();
-  std::string ContentAsText();
   void NotifyTestComplete(const std::string& test_result);
 
   mojo::Handle TakeShellProxyHandle();

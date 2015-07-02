@@ -26,15 +26,7 @@ Internals* GetInternals() {
   return static_cast<Internals*>(state->GetUserData(&kInternalsKey));
 }
 
-void ContentAsText(Dart_NativeArguments args) {
-  Dart_SetReturnValue(args, Dart_EmptyString());
-}
-
 void NotifyTestComplete(Dart_NativeArguments args) {
-}
-
-void RenderTreeAsText(Dart_NativeArguments args) {
-  Dart_SetReturnValue(args, Dart_EmptyString());
 }
 
 void TakeShellProxyHandle(Dart_NativeArguments args) {
@@ -55,9 +47,7 @@ void TakeServiceRegistry(Dart_NativeArguments args) {
 }
 
 const DartBuiltin::Natives kNativeFunctions[] = {
-    {"contentAsText", ContentAsText, 0},
     {"notifyTestComplete", NotifyTestComplete, 1},
-    {"renderTreeAsText", RenderTreeAsText, 0},
     {"takeShellProxyHandle", TakeShellProxyHandle, 0},
     {"takeServicesProvidedByEmbedder", TakeServicesProvidedByEmbedder, 0},
     {"takeServicesProvidedToEmbedder", TakeServicesProvidedToEmbedder, 0},

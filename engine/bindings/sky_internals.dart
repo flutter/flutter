@@ -6,8 +6,6 @@ library sky.internals;
 
 // TODO(abarth): Move these functions into dart:sky
 
-String contentAsText() native "contentAsText";
-String renderTreeAsText() native "renderTreeAsText";
 void notifyTestComplete(String test_result) native "notifyTestComplete";
 
 int takeShellProxyHandle() native "takeShellProxyHandle";

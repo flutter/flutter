@@ -25,19 +25,9 @@ Internals* GetInternals() {
   return static_cast<Internals*>(state->GetUserData(&kInternalsKey));
 }
 
-void ContentAsText(Dart_NativeArguments args) {
-  Dart_Handle result = StdStringToDart(GetInternals()->ContentAsText());
-  Dart_SetReturnValue(args, result);
-}
-
 void NotifyTestComplete(Dart_NativeArguments args) {
   Dart_Handle test_result = Dart_GetNativeArgument(args, 0);
   GetInternals()->NotifyTestComplete(StdStringFromDart(test_result));
-}
-
-void RenderTreeAsText(Dart_NativeArguments args) {
-  Dart_Handle result = StdStringToDart(GetInternals()->RenderTreeAsText());
-  Dart_SetReturnValue(args, result);
 }
 
 void TakeShellProxyHandle(Dart_NativeArguments args) {
@@ -61,9 +51,7 @@ void TakeServiceRegistry(Dart_NativeArguments args) {
 }
 
 const DartBuiltin::Natives kNativeFunctions[] = {
-    {"contentAsText", ContentAsText, 0},
     {"notifyTestComplete", NotifyTestComplete, 1},
-    {"renderTreeAsText", RenderTreeAsText, 0},
     {"takeShellProxyHandle", TakeShellProxyHandle, 0},
     {"takeServicesProvidedByEmbedder", TakeServicesProvidedByEmbedder, 0},
     {"takeServicesProvidedToEmbedder", TakeServicesProvidedToEmbedder, 0},
@@ -106,14 +94,6 @@ Internals::Internals(DocumentView* document_view)
 }
 
 Internals::~Internals() {
-}
-
-std::string Internals::RenderTreeAsText() {
-  return std::string();
-}
-
-std::string Internals::ContentAsText() {
-  return std::string();
 }
 
 void Internals::NotifyTestComplete(const std::string& test_result) {
