@@ -10,7 +10,9 @@ group("example") {
   if (is_android) {
     deps += [
       "//sky/sdk/example/mine_digger",
+      "//sky/sdk/example/rendering",
       "//sky/sdk/example/stocks",
+      "//sky/sdk/example/widgets",
     ]
   }
 }

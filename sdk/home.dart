@@ -19,7 +19,7 @@ import 'package:sky/widgets/scaffold.dart';
 import 'package:sky/widgets/theme.dart';
 import 'package:sky/widgets/tool_bar.dart';
 
-void launch(String relativeUrl, String bundleName) {
+void launch(String relativeUrl, String bundle) {
   Uri url = Uri.base.resolve(relativeUrl);
 
   ActivityManagerProxy activityManager = new ActivityManagerProxy.unbound();
@@ -31,10 +31,10 @@ void launch(String relativeUrl, String bundleName) {
     ..component = component
     ..url = url.toString();
 
-  if (bundleName != null) {
+  if (bundle != null) {
     StringExtra extra = new StringExtra()
       ..name = 'bundleName'
-      ..value = bundleName;
+      ..value = bundle;
     intent.stringExtras = [extra];
   }
 
@@ -45,18 +45,18 @@ void launch(String relativeUrl, String bundleName) {
 class SkyDemo {
   String name;
   String href;
-  String bundleName;
+  String bundle;
   String description;
   typography.TextTheme textTheme;
   BoxDecoration decoration;
-  SkyDemo({ this.name, this.href, this.bundleName, this.description, this.textTheme, this.decoration });
+  SkyDemo({ this.name, this.href, this.bundle, this.description, this.textTheme, this.decoration });
 }
 
 List<Widget> demos = [
   new SkyDemo(
     name: 'Stocks',
     href: 'example/stocks/lib/main.dart',
-    bundleName: 'stocks.skyx',
+    bundle: 'stocks.skyx',
     description: 'Multi-screen app with scrolling list',
     textTheme: typography.black,
     decoration: new BoxDecoration(
@@ -81,6 +81,7 @@ List<Widget> demos = [
   new SkyDemo(
     name: 'Interactive Flex',
     href: 'example/rendering/interactive_flex.dart',
+    bundle: 'interactive_flex.skyx',
     description: 'Swipe to adjust the layout of the app',
     textTheme: typography.white,
     decoration: new BoxDecoration(
@@ -90,6 +91,7 @@ List<Widget> demos = [
   new SkyDemo(
     name: 'Sector',
     href: 'example/widgets/sector.dart',
+    bundle: 'sector.skyx',
     description: 'Demo of alternative layouts',
     textTheme: typography.black,
     decoration: new BoxDecoration(
@@ -105,7 +107,7 @@ List<Widget> demos = [
   new SkyDemo(
     name: 'Minedigger Game',
     href: 'example/mine_digger/lib/main.dart',
-    bundleName: 'mine_digger.skyx',
+    bundle: 'mine_digger.skyx',
     description: 'Clone of the classic Minesweeper game',
     textTheme: typography.white
   ),
@@ -130,7 +132,7 @@ class DemoList extends FixedHeightScrollable {
   Widget buildDemo(SkyDemo demo) {
     return new Listener(
       key: demo.name,
-      onGestureTap: (_) => launch(demo.href, demo.bundleName),
+      onGestureTap: (_) => launch(demo.href, demo.bundle),
       child: new Container(
         height: kCardHeight,
         child: new Card(

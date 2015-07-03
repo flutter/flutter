@@ -1,0 +1,106 @@
+# Copyright 2015 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+declare_args() {
+  # Controls whether we build app.skyx bundles in the sky_app template below.
+  # An app.skyx bundle contains all the code an resources needed to run a Sky
+  # app offline. Unfortunately, we don't yet have all the Dart packages we need
+  # to create skyx packages installed on the build bots, so this functionality
+  # is currently disabled. This flag allows for local testing of this feature.
+  enable_skyx = false
+}
+
+package_root = "$root_gen_dir/dart-pkg/packages"
+
+template("skyx") {
+  bundle_prefix = target_name
+  bundle = "$target_gen_dir/${bundle_prefix}.skyx"
+  snapshot = "$target_gen_dir/${bundle_prefix}_snapshot.bin"
+
+  action("gen_${bundle_prefix}_snapshot") {
+    main_dart = invoker.main_dart
+
+    inputs = [
+      main_dart,
+    ]
+    outputs = [
+      snapshot,
+    ]
+
+    if (defined(invoker.sources)) {
+      inputs += sources
+    }
+
+    sky_packager_dir =
+        get_label_info("//sky/tools/packager($host_toolchain)", "root_out_dir")
+
+    script = "//sky/tools/sky_packager.py"
+
+    src_dir = "//"
+    cwd = rebase_path(src_dir, root_build_dir)
+
+    args = [
+      rebase_path("$sky_packager_dir/sky_packager", src_dir),
+      rebase_path(main_dart, src_dir),
+      "--package-root",
+      rebase_path(package_root, src_dir),
+      "--snapshot",
+      rebase_path(snapshot, src_dir),
+      "-C",
+      cwd,
+    ]
+
+    deps = [
+      "//sky/tools/packager($host_toolchain)",
+      "//sky/sdk",
+    ]
+
+    if (defined(invoker.deps)) {
+      deps += invoker.deps
+    }
+  }
+
+  action("gen_${bundle_prefix}_bundle") {
+    asset_base = "$package_root/sky/assets/material-design-icons"
+
+    sources = [
+      "//sky/tools/skyx/bin/skyx.dart",
+      snapshot,
+    ]
+
+    outputs = [
+      bundle,
+    ]
+
+    script = "//sky/tools/skyx.py"
+    args = [
+      "--asset-base",
+      rebase_path(asset_base, root_build_dir),
+      "--snapshot",
+      rebase_path(snapshot, root_build_dir),
+      "-o",
+      rebase_path(bundle, root_build_dir),
+    ]
+
+    if (defined(invoker.manifest)) {
+      sources += [ invoker.manifest ]
+      args += [
+        "--manifest",
+        rebase_path(invoker.manifest, root_build_dir),
+      ]
+    }
+
+    deps = [
+      ":gen_${bundle_prefix}_snapshot",
+    ]
+  }
+
+  group(target_name) {
+    if (enable_skyx) {
+      deps = [
+        ":gen_${bundle_prefix}_bundle",
+      ]
+    }
+  }
+}
