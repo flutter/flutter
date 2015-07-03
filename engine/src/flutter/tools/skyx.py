@@ -14,20 +14,24 @@ DART_SDK = os.path.join(SRC_ROOT, 'third_party', 'dart-sdk', 'dart-sdk', 'bin')
 
 def main():
     parser = argparse.ArgumentParser(description='Packaging tool for Sky apps')
-    parser.add_argument('manifest', type=str)
+    parser.add_argument('--manifest', type=str)
     parser.add_argument('--asset-base', type=str)
     parser.add_argument('--snapshot', type=str)
     parser.add_argument('-o', '--output-file', type=str)
     args = parser.parse_args()
 
-    subprocess.check_call([
+    command = [
         os.path.join(DART_SDK, 'dart'),
         os.path.join(SKY_TOOLS_DIR, 'skyx', 'bin', 'skyx.dart'),
         '--asset-base', args.asset_base,
         '--snapshot', args.snapshot,
         '--output-file', args.output_file,
-        args.manifest,
-    ])
+    ]
+
+    if args.manifest:
+        command += ['--manifest', args.manifest]
+
+    subprocess.check_call(command)
 
 if __name__ == '__main__':
     sys.exit(main())

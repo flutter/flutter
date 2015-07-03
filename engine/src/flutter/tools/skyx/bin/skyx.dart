@@ -65,6 +65,8 @@ Iterable<MaterialAsset> parseMaterialAssets(Map manifestDescriptor) sync* {
 }
 
 Future loadManifest(String manifestPath) async {
+  if (manifestPath == null)
+    return null;
   String manifestDescriptor = await new File(manifestPath).readAsString();
   return loadYaml(manifestDescriptor);
 }
@@ -85,8 +87,9 @@ main(List<String> argv) async {
   ArgParser parser = new ArgParser();
   parser.addFlag('help', abbr: 'h', negatable: false);
   parser.addOption('asset-base');
-  parser.addOption('snapshot');
+  parser.addOption('manifest');
   parser.addOption('output-file', abbr: 'o');
+  parser.addOption('snapshot');
 
   ArgResults args = parser.parse(argv);
   if (args['help']) {
@@ -94,8 +97,7 @@ main(List<String> argv) async {
     return;
   }
 
-  String manifestPath = args.rest.first;
-
+  String manifestPath = args['manifest'];
   Map manifestDescriptor = await loadManifest(manifestPath);
   Iterable<MaterialAsset> materialAssets = parseMaterialAssets(manifestDescriptor);
 
