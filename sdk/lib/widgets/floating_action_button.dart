@@ -17,7 +17,7 @@ class FloatingActionButton extends ButtonBase {
   FloatingActionButton({
     String key,
     this.child,
-    Function onPressed
+    this.onPressed
   }) : super(key: key);
 
   Widget child;
