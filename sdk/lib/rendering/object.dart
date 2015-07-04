@@ -122,6 +122,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
       assert(parent == this.parent); // TODO(ianh): Remove this once the analyzer is cleverer
     } else {
       _nodesNeedingLayout.add(this);
+      scheduler.ensureVisualUpdate();
     }
   }
   void _cleanRelayoutSubtreeRoot() {

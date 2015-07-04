@@ -5,6 +5,7 @@
 import 'dart:sky';
 import 'dart:math' as math;
 
+import 'package:sky/mojo/net/image_cache.dart' as image_cache;
 import 'package:sky/painting/text_style.dart';
 import 'package:sky/rendering/box.dart';
 import 'package:sky/rendering/flex.dart';
@@ -23,7 +24,7 @@ class Touch {
 class RenderImageGrow extends RenderImage {
   final Size _startingSize;
 
-  RenderImageGrow(String src, Size size) : _startingSize = size, super(src, size);
+  RenderImageGrow(Image image, Size size) : _startingSize = size, super(image, size);
 
   double _growth = 0.0;
   double get growth => _growth;
@@ -40,8 +41,8 @@ RenderImageGrow image;
 Map<int, Touch> touches = new Map();
 void handleEvent(event) {
   if (event is PointerEvent) {
-      if (event.type == 'pointermove')
-        image.growth = math.max(0.0, image.growth + event.x - touches[event.pointer].x);
+    if (event.type == 'pointermove')
+      image.growth = math.max(0.0, image.growth + event.x - touches[event.pointer].x);
     touches[event.pointer] = new Touch(event.x, event.y);
   }
 }
@@ -59,8 +60,11 @@ void main() {
   addFlexChildSolidColor(row, const Color(0xFF00D2B8), flex: 1);
 
   // Resizeable image
-  image = new RenderImageGrow("https://www.dartlang.org/logos/dart-logo.png",
-                              new Size(100.0, null));
+  image = new RenderImageGrow(null, new Size(100.0, null));
+  image_cache.load("https://www.dartlang.org/logos/dart-logo.png").then((Image dartLogo) {
+    image.image = dartLogo;
+  });
+
   var padding = new RenderPadding(padding: const EdgeDims.all(10.0), child: image);
   row.add(padding);
 

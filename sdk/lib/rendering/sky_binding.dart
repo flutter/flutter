@@ -131,5 +131,5 @@ class SkyBinding {
   void debugDumpRenderTree() {
     toString().split('\n').forEach(print);
   }
-  
+
 }
