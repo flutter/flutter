@@ -26,7 +26,6 @@
 #include "gen/sky/platform/RuntimeEnabledFeatures.h"
 #include "sky/engine/core/editing/PositionWithAffinity.h"
 #include "sky/engine/core/rendering/RenderBlock.h"
-#include "sky/engine/core/rendering/RenderImage.h"
 #include "sky/engine/core/rendering/RenderLayer.h"
 #include "sky/engine/core/rendering/RenderView.h"
 #include "sky/engine/platform/LengthFunctions.h"

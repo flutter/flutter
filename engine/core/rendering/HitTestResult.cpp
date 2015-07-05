@@ -27,7 +27,8 @@
 #include "sky/engine/core/dom/shadow/ShadowRoot.h"
 #include "sky/engine/core/editing/FrameSelection.h"
 #include "sky/engine/core/frame/LocalFrame.h"
-#include "sky/engine/core/rendering/RenderImage.h"
+#include "sky/engine/core/rendering/RenderBox.h"
+#include "sky/engine/core/rendering/RenderObject.h"
 
 namespace blink {
 
@@ -133,16 +134,6 @@ bool HitTestResult::isSelected() const
 
 Image* HitTestResult::image() const
 {
-    if (!m_innerNonSharedNode)
-        return 0;
-
-    RenderObject* renderer = m_innerNonSharedNode->renderer();
-    if (renderer && renderer->isImage()) {
-        RenderImage* image = toRenderImage(renderer);
-        if (image->cachedImage() && !image->cachedImage()->errorOccurred())
-            return image->cachedImage()->imageForRenderer(image);
-    }
-
     return 0;
 }
 

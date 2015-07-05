@@ -72,6 +72,7 @@
 #include "sky/engine/public/platform/Platform.h"
 #include "sky/engine/public/platform/ServiceProvider.h"
 #include "sky/engine/tonic/dart_gc_visitor.h"
+#include "sky/engine/wtf/HashCountedSet.h"
 #include "sky/engine/wtf/MainThread.h"
 #include "sky/engine/wtf/MathExtras.h"
 #include "sky/engine/wtf/text/WTFString.h"

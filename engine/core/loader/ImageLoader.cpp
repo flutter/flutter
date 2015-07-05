@@ -32,7 +32,6 @@
 #include "sky/engine/core/fetch/ResourceFetcher.h"
 #include "sky/engine/core/frame/LocalFrame.h"
 #include "sky/engine/core/html/parser/HTMLParserIdioms.h"
-#include "sky/engine/core/rendering/RenderImage.h"
 #include "sky/engine/platform/Logging.h"
 #include "sky/engine/public/platform/WebURLRequest.h"
 
@@ -155,9 +154,6 @@ void ImageLoader::setImageWithoutConsideringPendingLoadEvent(ImageResource* newI
         if (oldImage)
             oldImage->removeClient(this);
     }
-
-    if (RenderImageResource* imageResource = renderImageResource())
-        imageResource->resetAnimation();
 }
 
 inline void ImageLoader::crossSiteOrCSPViolationOccured(AtomicString imageSourceURL)
@@ -250,12 +246,7 @@ void ImageLoader::doUpdateFromElement(UpdateFromElementBehavior updateBehavior)
 
         if (oldImage)
             oldImage->removeClient(this);
-    } else if (updateBehavior == UpdateSizeChanged && m_element->renderer() && m_element->renderer()->isImage()) {
-        toRenderImage(m_element->renderer())->intrinsicSizeChanged();
     }
-
-    if (RenderImageResource* imageResource = renderImageResource())
-        imageResource->resetAnimation();
 
     // Only consider updating the protection ref-count of the Element immediately before returning
     // from this function as doing so might result in the destruction of this ImageLoader.
@@ -347,32 +338,8 @@ void ImageLoader::notifyFinished(Resource* resource)
     loadEventSender().dispatchEventSoon(this);
 }
 
-RenderImageResource* ImageLoader::renderImageResource()
-{
-    RenderObject* renderer = m_element->renderer();
-
-    if (!renderer)
-        return 0;
-
-    if (renderer->isImage())
-        return toRenderImage(renderer)->imageResource();
-
-    return 0;
-}
-
 void ImageLoader::updateRenderer()
 {
-    RenderImageResource* imageResource = renderImageResource();
-
-    if (!imageResource)
-        return;
-
-    // Only update the renderer if it doesn't have an image or if what we have
-    // is a complete image.  This prevents flickering in the case where a dynamic
-    // change is happening between two images.
-    ImageResource* cachedImage = imageResource->cachedImage();
-    if (m_image != cachedImage && (m_imageComplete || !cachedImage))
-        imageResource->setImageResource(m_image.get());
 }
 
 void ImageLoader::updatedHasPendingEvent()

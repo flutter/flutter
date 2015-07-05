@@ -58,7 +58,6 @@
 #include "sky/engine/core/page/FocusController.h"
 #include "sky/engine/core/page/Page.h"
 #include "sky/engine/core/rendering/HitTestResult.h"
-#include "sky/engine/core/rendering/RenderImage.h"
 #include "sky/engine/platform/weborigin/KURL.h"
 #include "sky/engine/wtf/unicode/CharacterNames.h"
 

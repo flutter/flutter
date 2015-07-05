@@ -39,7 +39,6 @@
 #include "sky/engine/core/html/HTMLElement.h"
 #include "sky/engine/core/rendering/InlineTextBox.h"
 #include "sky/engine/core/rendering/RenderBlock.h"
-#include "sky/engine/core/rendering/RenderImage.h"
 #include "sky/engine/platform/fonts/Character.h"
 #include "sky/engine/platform/fonts/Font.h"
 #include "sky/engine/platform/text/TextBoundaries.h"

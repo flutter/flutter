@@ -30,7 +30,6 @@
 #ifndef SKY_ENGINE_CORE_RENDERING_STYLE_SHAPEVALUE_H_
 #define SKY_ENGINE_CORE_RENDERING_STYLE_SHAPEVALUE_H_
 
-#include "sky/engine/core/fetch/ImageResource.h"
 #include "sky/engine/core/rendering/style/BasicShapes.h"
 #include "sky/engine/core/rendering/style/RenderStyleConstants.h"
 #include "sky/engine/core/rendering/style/StyleImage.h"
@@ -70,8 +69,6 @@ public:
     {
         if (!image())
             return false;
-        if (image()->isImageResource() || image()->isImageResourceSet())
-            return image()->cachedImage() && image()->cachedImage()->hasImage();
         return image()->isGeneratedImage();
     }
     void setImage(PassRefPtr<StyleImage> image)

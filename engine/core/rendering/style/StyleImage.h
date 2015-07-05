@@ -34,7 +34,6 @@
 
 namespace blink {
 
-class ImageResource;
 class CSSValue;
 class RenderObject;
 
@@ -66,25 +65,18 @@ public:
     virtual WrappedImagePtr data() const = 0;
     virtual float imageScaleFactor() const { return 1; }
     virtual bool knownToBeOpaque(const RenderObject*) const = 0;
-    virtual ImageResource* cachedImage() const { return 0; }
 
-    ALWAYS_INLINE bool isImageResource() const { return m_isImageResource; }
     ALWAYS_INLINE bool isPendingImage() const { return m_isPendingImage; }
     ALWAYS_INLINE bool isGeneratedImage() const { return m_isGeneratedImage; }
-    ALWAYS_INLINE bool isImageResourceSet() const { return m_isImageResourceSet; }
 
 protected:
     StyleImage()
-        : m_isImageResource(false)
-        , m_isPendingImage(false)
+        : m_isPendingImage(false)
         , m_isGeneratedImage(false)
-        , m_isImageResourceSet(false)
     {
     }
-    bool m_isImageResource:1;
     bool m_isPendingImage:1;
     bool m_isGeneratedImage:1;
-    bool m_isImageResourceSet:1;
 };
 
 #define DEFINE_STYLE_IMAGE_TYPE_CASTS(thisType, function) \

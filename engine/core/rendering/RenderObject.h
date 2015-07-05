@@ -30,7 +30,6 @@
 #include "sky/engine/core/dom/DocumentLifecycle.h"
 #include "sky/engine/core/dom/Element.h"
 #include "sky/engine/core/editing/TextAffinity.h"
-#include "sky/engine/core/fetch/ImageResourceClient.h"
 #include "sky/engine/core/html/HTMLElement.h"
 #include "sky/engine/core/rendering/HitTestRequest.h"
 #include "sky/engine/core/rendering/RenderObjectChildList.h"
@@ -102,7 +101,7 @@ const int showTreeCharacterOffset = 39;
 #endif
 
 // Base class for all rendering tree objects.
-class RenderObject : public ImageResourceClient {
+class RenderObject {
     friend class RenderBlock;
     friend class RenderObjectChildList;
     WTF_MAKE_NONCOPYABLE(RenderObject);
@@ -253,7 +252,6 @@ public:
     virtual bool isRenderBlock() const { return false; }
     virtual bool isRenderCustomLayout() const { return false; }
     virtual bool isRenderParagraph() const { return false; }
-    virtual bool isRenderImage() const { return false; }
     virtual bool isRenderInline() const { return false; }
     virtual bool isRenderView() const { return false; }
 
@@ -556,10 +554,6 @@ public:
     virtual int previousOffset(int current) const;
     virtual int previousOffsetForBackwardDeletion(int current) const;
     virtual int nextOffset(int current) const;
-
-    virtual void imageChanged(ImageResource*, const IntRect* = 0) override final;
-    virtual void imageChanged(WrappedImagePtr, const IntRect* = 0);
-    virtual bool willRenderImage(ImageResource*) override final;
 
     void selectionStartEnd(int& spos, int& epos) const;
 

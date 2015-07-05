@@ -45,8 +45,6 @@
 #include "sky/engine/core/rendering/HitTestResult.h"
 #include "sky/engine/core/rendering/RenderFlexibleBox.h"
 #include "sky/engine/core/rendering/RenderGeometryMap.h"
-#include "sky/engine/core/rendering/RenderImage.h"
-#include "sky/engine/core/rendering/RenderImageResourceStyleImage.h"
 #include "sky/engine/core/rendering/RenderInline.h"
 #include "sky/engine/core/rendering/RenderLayer.h"
 #include "sky/engine/core/rendering/RenderObjectInlines.h"
@@ -137,8 +135,7 @@ DEFINE_DEBUG_ONLY_GLOBAL(WTF::RefCountedLeakCounter, renderObjectCounter, ("Rend
 unsigned RenderObject::s_instanceCount = 0;
 
 RenderObject::RenderObject(Node* node)
-    : ImageResourceClient()
-    , m_style(nullptr)
+    : m_style(nullptr)
     , m_node(node)
     , m_parent(nullptr)
     , m_previous(nullptr)
@@ -1723,13 +1720,6 @@ void RenderObject::getTextDecorations(unsigned decorations, AppliedTextDecoratio
     }
 }
 
-bool RenderObject::willRenderImage(ImageResource*)
-{
-    // FIXME(sky): Do we want to keep this?
-    // We will not render a new image when Active DOM is suspended
-    return !document().activeDOMObjectsAreSuspended();
-}
-
 int RenderObject::caretMinOffset() const
 {
     return 0;
@@ -1766,17 +1756,6 @@ bool RenderObject::supportsTouchAction() const
     if (isInline() && !isReplaced())
         return false;
     return true;
-}
-
-void RenderObject::imageChanged(ImageResource* image, const IntRect* rect)
-{
-    imageChanged(static_cast<WrappedImagePtr>(image), rect);
-}
-
-void RenderObject::imageChanged(WrappedImagePtr, const IntRect*)
-{
-    if (parent())
-        document().scheduleVisualUpdate();
 }
 
 Element* RenderObject::offsetParent() const

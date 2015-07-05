@@ -371,12 +371,6 @@ bool ImageResource::shouldPauseAnimation(const blink::Image* image)
     if (!image || image != m_image)
         return false;
 
-    ResourceClientWalker<ImageResourceClient> w(m_clients);
-    while (ImageResourceClient* c = w.next()) {
-        if (c->willRenderImage(this))
-            return false;
-    }
-
     return true;
 }
 
