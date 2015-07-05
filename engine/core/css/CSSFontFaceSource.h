@@ -31,7 +31,6 @@
 
 namespace blink {
 
-class FontResource;
 class CSSFontFace;
 class FontDescription;
 class SimpleFontData;
@@ -45,7 +44,6 @@ public:
     virtual bool isLoaded() const { return true; }
     virtual bool isValid() const { return true; }
 
-    virtual FontResource* resource() { return 0; }
     void setFontFace(CSSFontFace* face) { m_face = face; }
 
     PassRefPtr<SimpleFontData> getFontData(const FontDescription&);

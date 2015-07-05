@@ -28,8 +28,6 @@
 #include "sky/engine/core/css/CSSFontFaceSource.h"
 #include "sky/engine/core/css/CSSFontSelector.h"
 #include "sky/engine/core/css/CSSSegmentedFontFace.h"
-#include "sky/engine/core/css/FontFaceSet.h"
-#include "sky/engine/core/css/RemoteFontFaceSource.h"
 #include "sky/engine/platform/fonts/FontDescription.h"
 #include "sky/engine/platform/fonts/SimpleFontData.h"
 
@@ -45,38 +43,6 @@ void CSSFontFace::setSegmentedFontFace(CSSSegmentedFontFace* segmentedFontFace)
 {
     ASSERT(!m_segmentedFontFace);
     m_segmentedFontFace = segmentedFontFace;
-}
-
-void CSSFontFace::didBeginLoad()
-{
-    if (loadStatus() == FontFace::Unloaded)
-        setLoadStatus(FontFace::Loading);
-}
-
-void CSSFontFace::fontLoaded(RemoteFontFaceSource* source)
-{
-    if (!isValid() || source != m_sources.first())
-        return;
-
-    if (loadStatus() == FontFace::Loading) {
-        if (source->ensureFontData()) {
-            setLoadStatus(FontFace::Loaded);
-        } else {
-            m_sources.removeFirst();
-            load();
-        }
-    }
-
-    if (m_segmentedFontFace)
-        m_segmentedFontFace->fontLoaded(this);
-}
-
-void CSSFontFace::fontLoadWaitLimitExceeded(RemoteFontFaceSource* source)
-{
-    if (!isValid() || source != m_sources.first())
-        return;
-    if (m_segmentedFontFace)
-        m_segmentedFontFace->fontLoadWaitLimitExceeded(this);
 }
 
 PassRefPtr<SimpleFontData> CSSFontFace::getFontData(const FontDescription& fontDescription)
@@ -157,26 +123,6 @@ void CSSFontFace::setLoadStatus(FontFace::LoadStatus newStatus)
         m_fontFace->setError();
     else
         m_fontFace->setLoadStatus(newStatus);
-
-    if (!m_segmentedFontFace)
-        return;
-    Document* document = m_segmentedFontFace->fontSelector()->document();
-    if (!document)
-        return;
-
-    switch (newStatus) {
-    case FontFace::Loading:
-        FontFaceSet::from(*document)->beginFontLoading(m_fontFace);
-        break;
-    case FontFace::Loaded:
-        FontFaceSet::from(*document)->fontLoaded(m_fontFace);
-        break;
-    case FontFace::Error:
-        FontFaceSet::from(*document)->loadError(m_fontFace);
-        break;
-    default:
-        break;
-    }
 }
 
 CSSFontFace::UnicodeRangeSet::UnicodeRangeSet(const Vector<UnicodeRange>& ranges)

@@ -35,13 +35,11 @@
 #include "sky/engine/bindings/exception_state.h"
 #include "sky/engine/core/css/BinaryDataFontFaceSource.h"
 #include "sky/engine/core/css/CSSFontFace.h"
-#include "sky/engine/core/css/CSSFontFaceSrcValue.h"
 #include "sky/engine/core/css/CSSFontSelector.h"
 #include "sky/engine/core/css/CSSPrimitiveValue.h"
 #include "sky/engine/core/css/CSSUnicodeRangeValue.h"
 #include "sky/engine/core/css/CSSValueList.h"
 #include "sky/engine/core/css/LocalFontFaceSource.h"
-#include "sky/engine/core/css/RemoteFontFaceSource.h"
 #include "sky/engine/core/css/StylePropertySet.h"
 #include "sky/engine/core/css/StyleRule.h"
 #include "sky/engine/core/css/parser/BisonCSSParser.h"
@@ -341,7 +339,6 @@ void FontFace::loadInternal(ExecutionContext* context)
         return;
 
     m_cssFontFace->load();
-    toDocument(context)->styleEngine()->fontSelector()->fontLoader()->loadPendingFonts();
 }
 
 FontTraits FontFace::traits() const
@@ -456,37 +453,6 @@ static PassOwnPtr<CSSFontFace> createCSSFontFace(FontFace* fontFace, CSSValue* u
 void FontFace::initCSSFontFace(Document* document, PassRefPtr<CSSValue> src)
 {
     m_cssFontFace = createCSSFontFace(this, m_unicodeRange.get());
-    if (m_error)
-        return;
-
-    // Each item in the src property's list is a single CSSFontFaceSource. Put them all into a CSSFontFace.
-    ASSERT(src);
-    ASSERT(src->isValueList());
-    CSSValueList* srcList = toCSSValueList(src.get());
-    int srcLength = srcList->length();
-
-    for (int i = 0; i < srcLength; i++) {
-        // An item in the list either specifies a string (local font name) or a URL (remote font to download).
-        CSSFontFaceSrcValue* item = toCSSFontFaceSrcValue(srcList->item(i));
-        OwnPtr<CSSFontFaceSource> source = nullptr;
-
-        if (!item->isLocal()) {
-            Settings* settings = document ? document->frame() ? document->frame()->settings() : 0 : 0;
-            bool allowDownloading = settings && settings->downloadableBinaryFontsEnabled();
-            if (allowDownloading && item->isSupportedFormat() && document) {
-                FontResource* fetched = item->fetch(document);
-                if (fetched) {
-                    FontLoader* fontLoader = document->styleEngine()->fontSelector()->fontLoader();
-                    source = adoptPtr(new RemoteFontFaceSource(fetched, fontLoader));
-                }
-            }
-        } else {
-            source = adoptPtr(new LocalFontFaceSource(item->resource()));
-        }
-
-        if (source)
-            m_cssFontFace->addSource(source.release());
-    }
 }
 
 void FontFace::initCSSFontFace(const unsigned char* data, unsigned size)

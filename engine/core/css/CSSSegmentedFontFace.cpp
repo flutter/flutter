@@ -71,16 +71,6 @@ bool CSSSegmentedFontFace::isValid() const
     return false;
 }
 
-void CSSSegmentedFontFace::fontLoaded(CSSFontFace*)
-{
-    pruneTable();
-}
-
-void CSSSegmentedFontFace::fontLoadWaitLimitExceeded(CSSFontFace*)
-{
-    pruneTable();
-}
-
 void CSSSegmentedFontFace::addFontFace(PassRefPtr<FontFace> prpFontFace, bool cssConnected)
 {
     RefPtr<FontFace> fontFace = prpFontFace;

@@ -39,7 +39,6 @@ namespace blink {
 class CSSFontSelector;
 class Document;
 class FontDescription;
-class RemoteFontFaceSource;
 class SimpleFontData;
 class StyleRuleFontFace;
 
@@ -66,10 +65,6 @@ public:
     bool isValid() const { return !m_sources.isEmpty(); }
 
     void addSource(PassOwnPtr<CSSFontFaceSource>);
-
-    void didBeginLoad();
-    void fontLoaded(RemoteFontFaceSource*);
-    void fontLoadWaitLimitExceeded(RemoteFontFaceSource*);
 
     PassRefPtr<SimpleFontData> getFontData(const FontDescription&);
 

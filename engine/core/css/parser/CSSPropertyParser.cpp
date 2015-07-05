@@ -34,7 +34,6 @@
 #include "sky/engine/core/css/CSSAspectRatioValue.h"
 #include "sky/engine/core/css/CSSBasicShapes.h"
 #include "sky/engine/core/css/CSSBorderImage.h"
-#include "sky/engine/core/css/CSSFontFaceSrcValue.h"
 #include "sky/engine/core/css/CSSFontFeatureValue.h"
 #include "sky/engine/core/css/CSSFunctionValue.h"
 #include "sky/engine/core/css/CSSGradientValue.h"
@@ -705,10 +704,6 @@ bool CSSPropertyParser::parseValue(CSSPropertyID propId)
         // auto | under | inherit
         ASSERT(RuntimeEnabledFeatures::css3TextDecorationsEnabled());
         return parseTextUnderlinePosition();
-
-    case CSSPropertySrc: // Only used within @font-face and @-webkit-filter, so cannot use inherit | initial. This is a list of urls or local references.
-        parsedValue = parseFontFaceSrc();
-        break;
 
     case CSSPropertyUnicodeRange:
         parsedValue = parseFontFaceUnicodeRange();
@@ -3197,88 +3192,6 @@ bool CSSPropertyParser::parseFontWeight()
         }
     }
     return false;
-}
-
-bool CSSPropertyParser::parseFontFaceSrcURI(CSSValueList* valueList)
-{
-    RefPtr<CSSFontFaceSrcValue> uriValue(CSSFontFaceSrcValue::create(completeURL(m_valueList->current()->string)));
-    uriValue->setReferrer(m_context.referrer());
-
-    CSSParserValue* value = m_valueList->next();
-    if (!value) {
-        valueList->append(uriValue.release());
-        return true;
-    }
-    if (value->unit == CSSParserValue::Operator && value->iValue == ',') {
-        m_valueList->next();
-        valueList->append(uriValue.release());
-        return true;
-    }
-
-    if (value->unit != CSSParserValue::Function || !equalIgnoringCase(value->function->name, "format("))
-        return false;
-
-    // FIXME: http://www.w3.org/TR/2011/WD-css3-fonts-20111004/ says that format() contains a comma-separated list of strings,
-    // but CSSFontFaceSrcValue stores only one format. Allowing one format for now.
-    CSSParserValueList* args = value->function->args.get();
-    if (!args || args->size() != 1 || (args->current()->unit != CSSPrimitiveValue::CSS_STRING && args->current()->unit != CSSPrimitiveValue::CSS_IDENT))
-        return false;
-    uriValue->setFormat(args->current()->string);
-    valueList->append(uriValue.release());
-    value = m_valueList->next();
-    if (value && value->unit == CSSParserValue::Operator && value->iValue == ',')
-        m_valueList->next();
-    return true;
-}
-
-bool CSSPropertyParser::parseFontFaceSrcLocal(CSSValueList* valueList)
-{
-    CSSParserValueList* args = m_valueList->current()->function->args.get();
-    if (!args || !args->size())
-        return false;
-
-    if (args->size() == 1 && args->current()->unit == CSSPrimitiveValue::CSS_STRING)
-        valueList->append(CSSFontFaceSrcValue::createLocal(args->current()->string));
-    else if (args->current()->unit == CSSPrimitiveValue::CSS_IDENT) {
-        StringBuilder builder;
-        for (CSSParserValue* localValue = args->current(); localValue; localValue = args->next()) {
-            if (localValue->unit != CSSPrimitiveValue::CSS_IDENT)
-                return false;
-            if (!builder.isEmpty())
-                builder.append(' ');
-            builder.append(localValue->string);
-        }
-        valueList->append(CSSFontFaceSrcValue::createLocal(builder.toString()));
-    } else
-        return false;
-
-    if (CSSParserValue* value = m_valueList->next()) {
-        if (value->unit == CSSParserValue::Operator && value->iValue == ',')
-            m_valueList->next();
-    }
-    return true;
-}
-
-PassRefPtr<CSSValueList> CSSPropertyParser::parseFontFaceSrc()
-{
-    RefPtr<CSSValueList> values(CSSValueList::createCommaSeparated());
-
-    while (CSSParserValue* value = m_valueList->current()) {
-        if (value->unit == CSSPrimitiveValue::CSS_URI) {
-            if (!parseFontFaceSrcURI(values.get()))
-                return nullptr;
-        } else if (value->unit == CSSParserValue::Function && equalIgnoringCase(value->function->name, "local(")) {
-            if (!parseFontFaceSrcLocal(values.get()))
-                return nullptr;
-        } else {
-            return nullptr;
-        }
-    }
-    if (!values->length())
-        return nullptr;
-
-    m_valueList->next();
-    return values.release();
 }
 
 PassRefPtr<CSSValueList> CSSPropertyParser::parseFontFaceUnicodeRange()

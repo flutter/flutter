@@ -67,6 +67,4 @@ callback CustomElementConstructor = Element ();
     // Page visibility API.
     readonly attribute DOMString visibilityState;
     readonly attribute boolean hidden;
-
-    attribute Picture rootPicture;
 };

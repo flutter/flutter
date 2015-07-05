@@ -27,7 +27,6 @@
 #define SKY_ENGINE_CORE_CSS_CSSFONTSELECTOR_H_
 
 #include "sky/engine/core/css/FontFaceCache.h"
-#include "sky/engine/core/css/FontLoader.h"
 #include "sky/engine/platform/fonts/FontSelector.h"
 #include "sky/engine/platform/fonts/GenericFontFamilySettings.h"
 #include "sky/engine/wtf/Forward.h"
@@ -70,7 +69,6 @@ public:
 
     Document* document() const { return m_document; }
     FontFaceCache* fontFaceCache() { return &m_fontFaceCache; }
-    FontLoader* fontLoader() { return m_fontLoader.get(); }
 
     const GenericFontFamilySettings& genericFontFamilySettings() const { return m_genericFontFamilySettings; }
     void updateGenericFontFamilySettings(Document&);
@@ -88,7 +86,6 @@ private:
     FontFaceCache m_fontFaceCache;
     HashSet<RawPtr<CSSFontSelectorClient> > m_clients;
 
-    RefPtr<FontLoader> m_fontLoader;
     GenericFontFamilySettings m_genericFontFamilySettings;
 };
 

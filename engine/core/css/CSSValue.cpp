@@ -30,7 +30,6 @@
 #include "sky/engine/core/css/CSSBorderImageSliceValue.h"
 #include "sky/engine/core/css/CSSCalculationValue.h"
 #include "sky/engine/core/css/CSSFilterValue.h"
-#include "sky/engine/core/css/CSSFontFaceSrcValue.h"
 #include "sky/engine/core/css/CSSFontFeatureValue.h"
 #include "sky/engine/core/css/CSSFontValue.h"
 #include "sky/engine/core/css/CSSFunctionValue.h"
@@ -115,8 +114,6 @@ bool CSSValue::equals(const CSSValue& other) const
             return compareCSSValues<CSSBorderImageSliceValue>(*this, other);
         case FontClass:
             return compareCSSValues<CSSFontValue>(*this, other);
-        case FontFaceSrcClass:
-            return compareCSSValues<CSSFontFaceSrcValue>(*this, other);
         case FontFeatureClass:
             return compareCSSValues<CSSFontFeatureValue>(*this, other);
         case FunctionClass:
@@ -175,8 +172,6 @@ String CSSValue::cssText() const
         return toCSSBorderImageSliceValue(this)->customCSSText();
     case FontClass:
         return toCSSFontValue(this)->customCSSText();
-    case FontFaceSrcClass:
-        return toCSSFontFaceSrcValue(this)->customCSSText();
     case FontFeatureClass:
         return toCSSFontFeatureValue(this)->customCSSText();
     case FunctionClass:
@@ -232,9 +227,6 @@ void CSSValue::destroy()
         return;
     case FontClass:
         delete toCSSFontValue(this);
-        return;
-    case FontFaceSrcClass:
-        delete toCSSFontFaceSrcValue(this);
         return;
     case FontFeatureClass:
         delete toCSSFontFeatureValue(this);

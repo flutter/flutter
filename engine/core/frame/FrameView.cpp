@@ -28,7 +28,6 @@
 
 #include "gen/sky/platform/RuntimeEnabledFeatures.h"
 #include "sky/engine/core/animation/DocumentAnimations.h"
-#include "sky/engine/core/css/FontFaceSet.h"
 #include "sky/engine/core/css/resolver/StyleResolver.h"
 #include "sky/engine/core/dom/DocumentMarkerController.h"
 #include "sky/engine/core/editing/FrameSelection.h"
@@ -541,8 +540,6 @@ void FrameView::performPostLayoutTasks()
         if (m_firstLayoutCallbackPending)
             m_firstLayoutCallbackPending = false;
     }
-
-    FontFaceSet::didLayout(*m_frame->document());
 
     sendResizeEventIfNeeded();
 }

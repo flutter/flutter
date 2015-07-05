@@ -54,9 +54,6 @@ public:
     CSSFontSelector* fontSelector() const { return m_fontSelector; }
     FontTraits traits() const { return m_traits; }
 
-    void fontLoaded(CSSFontFace*);
-    void fontLoadWaitLimitExceeded(CSSFontFace*);
-
     void addFontFace(PassRefPtr<FontFace>, bool cssConnected);
     void removeFontFace(PassRefPtr<FontFace>);
     bool isEmpty() const { return m_fontFaces.isEmpty(); }

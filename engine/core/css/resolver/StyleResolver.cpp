@@ -188,7 +188,6 @@ void StyleResolver::loadPendingResources(StyleResolverState& state)
 {
     StyleResourceLoader loader(m_document.fetcher());
     loader.loadPendingResources(state.style(), state.elementStyleResources());
-    m_document.styleEngine()->fontSelector()->fontLoader()->loadPendingFonts();
 }
 
 PassRefPtr<RenderStyle> StyleResolver::styleForElement(Element* element, RenderStyle* defaultParent)

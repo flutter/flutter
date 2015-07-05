@@ -30,7 +30,7 @@
 #include "sky/engine/core/css/CSSFontSelectorClient.h"
 #include "sky/engine/core/css/CSSSegmentedFontFace.h"
 #include "sky/engine/core/css/CSSValueList.h"
-#include "sky/engine/core/css/FontFaceSet.h"
+#include "sky/engine/core/css/FontFace.h"
 #include "sky/engine/core/css/resolver/StyleResolver.h"
 #include "sky/engine/core/dom/Document.h"
 #include "sky/engine/core/frame/LocalFrame.h"
@@ -43,7 +43,6 @@ namespace blink {
 
 CSSFontSelector::CSSFontSelector(Document* document)
     : m_document(document)
-    , m_fontLoader(FontLoader::create(this, document->fetcher()))
     , m_genericFontFamilySettings(document->frame()->settings()->genericFontFamilySettings())
 {
     // FIXME: An old comment used to say there was no need to hold a reference to m_document
@@ -53,7 +52,6 @@ CSSFontSelector::CSSFontSelector(Document* document)
     ASSERT(m_document);
     ASSERT(m_document->frame());
     FontCache::fontCache()->addClient(this);
-    FontFaceSet::from(*document)->addFontFacesToFontFaceCache(&m_fontFaceCache, this);
 }
 
 CSSFontSelector::~CSSFontSelector()
@@ -156,7 +154,6 @@ bool CSSFontSelector::isPlatformFontAvailable(const FontDescription& fontDescrip
 #if !ENABLE(OILPAN)
 void CSSFontSelector::clearDocument()
 {
-    m_fontLoader->clearResourceFetcherAndFontSelector();
     m_document = nullptr;
     m_fontFaceCache.clearAll();
 }

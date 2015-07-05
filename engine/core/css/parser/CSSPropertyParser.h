@@ -157,7 +157,6 @@ private:
     bool parseFontSize();
     bool parseFontVariant();
     bool parseFontWeight();
-    PassRefPtr<CSSValueList> parseFontFaceSrc();
     PassRefPtr<CSSValueList> parseFontFaceUnicodeRange();
 
     // CSS3 Parsing Routines (for properties specific to CSS3)
@@ -215,9 +214,6 @@ private:
     bool validWidthOrHeight(CSSParserValue*);
 
     PassRefPtr<CSSBasicShape> parseInsetRoundedCorners(PassRefPtr<CSSBasicShapeInset>, CSSParserValueList*);
-
-    bool parseFontFaceSrcURI(CSSValueList*);
-    bool parseFontFaceSrcLocal(CSSValueList*);
 
     class ImplicitScope {
         STACK_ALLOCATED();
