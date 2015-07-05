@@ -420,7 +420,7 @@ void CSSToStyleMap::mapNinePieceImage(RenderStyle* mutableStyle, CSSPropertyID p
     for (unsigned i = 0 ; i < borderImage->length() ; ++i) {
         CSSValue* current = borderImage->item(i);
 
-        if (current->isImageValue() || current->isImageGeneratorValue() || current->isImageSetValue())
+        if (current->isImageGeneratorValue())
             image.setImage(styleImage(imageProperty, current));
         else if (current->isBorderImageSliceValue())
             mapNinePieceImageSlice(current, image);

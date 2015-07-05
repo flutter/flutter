@@ -37,17 +37,11 @@ ElementStyleResources::ElementStyleResources()
 
 PassRefPtr<StyleImage> ElementStyleResources::styleImage(Document& document, const TextLinkColors& textLinkColors, Color currentColor, CSSPropertyID property, CSSValue* value)
 {
-    if (value->isImageValue())
-        return cachedOrPendingFromValue(document, property, toCSSImageValue(value));
-
     if (value->isImageGeneratorValue()) {
         if (value->isGradientValue())
             return generatedOrPendingFromValue(property, toCSSGradientValue(value)->gradientWithStylesResolved(textLinkColors, currentColor).get());
         return generatedOrPendingFromValue(property, toCSSImageGeneratorValue(value));
     }
-
-    if (value->isImageSetValue())
-        return setOrPendingFromValue(property, toCSSImageSetValue(value));
 
     return nullptr;
 }
@@ -59,26 +53,6 @@ PassRefPtr<StyleImage> ElementStyleResources::generatedOrPendingFromValue(CSSPro
         return StylePendingImage::create(value);
     }
     return StyleGeneratedImage::create(value);
-}
-
-PassRefPtr<StyleImage> ElementStyleResources::setOrPendingFromValue(CSSPropertyID property, CSSImageSetValue* value)
-{
-    RefPtr<StyleImage> image = value->cachedOrPendingImageSet(m_deviceScaleFactor);
-    if (image && image->isPendingImage())
-        m_pendingImageProperties.set(property, value);
-    return image.release();
-}
-
-PassRefPtr<StyleImage> ElementStyleResources::cachedOrPendingFromValue(Document& document, CSSPropertyID property, CSSImageValue* value)
-{
-    RefPtr<StyleImage> image = value->cachedOrPendingImage();
-    if (image) {
-        if (image->isPendingImage())
-            m_pendingImageProperties.set(property, value);
-        else
-            value->restoreCachedResourceIfNeeded(document);
-    }
-    return image.release();
 }
 
 void ElementStyleResources::clearPendingImageProperties()

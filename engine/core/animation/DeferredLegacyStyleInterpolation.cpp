@@ -5,7 +5,6 @@
 #include "sky/engine/core/animation/DeferredLegacyStyleInterpolation.h"
 
 #include "sky/engine/core/animation/LegacyStyleInterpolation.h"
-#include "sky/engine/core/css/CSSImageValue.h"
 #include "sky/engine/core/css/CSSPrimitiveValue.h"
 #include "sky/engine/core/css/CSSShadowValue.h"
 #include "sky/engine/core/css/CSSValueList.h"
@@ -36,8 +35,6 @@ bool DeferredLegacyStyleInterpolation::interpolationRequiresStyleResolve(const C
     case CSSValue::CSS_VALUE_LIST:
         return interpolationRequiresStyleResolve(toCSSValueList(value));
     case CSSValue::CSS_CUSTOM:
-        if (value.isImageValue())
-            return interpolationRequiresStyleResolve(toCSSImageValue(value));
         if (value.isShadowValue())
             return interpolationRequiresStyleResolve(toCSSShadowValue(value));
         // FIXME: consider other custom types.
@@ -95,11 +92,6 @@ bool DeferredLegacyStyleInterpolation::interpolationRequiresStyleResolve(const C
         return interpolationRequiresStyleResolve(*primitiveValue.getShapeValue());
 
     return (primitiveValue.getValueID() != CSSValueNone);
-}
-
-bool DeferredLegacyStyleInterpolation::interpolationRequiresStyleResolve(const CSSImageValue& imageValue)
-{
-    return false;
 }
 
 bool DeferredLegacyStyleInterpolation::interpolationRequiresStyleResolve(const CSSShadowValue& shadowValue)

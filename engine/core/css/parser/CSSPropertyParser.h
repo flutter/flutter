@@ -180,10 +180,6 @@ private:
     bool parseRadialGradient(CSSParserValueList*, RefPtr<CSSValue>&, CSSGradientRepeat repeating);
     bool parseGradientColorStops(CSSParserValueList*, CSSGradientValue*, bool expectComma);
 
-    bool parseCrossfade(CSSParserValueList*, RefPtr<CSSValue>&);
-
-    PassRefPtr<CSSValue> parseImageSet(CSSParserValueList*);
-
     PassRefPtr<CSSValue> parseWillChange();
 
     PassRefPtr<CSSValueList> parseFilter();
@@ -215,8 +211,6 @@ private:
 
     PassRefPtr<CSSPrimitiveValue> createPrimitiveNumericValue(CSSParserValue*);
     PassRefPtr<CSSPrimitiveValue> createPrimitiveStringValue(CSSParserValue*);
-
-    PassRefPtr<CSSValue> createCSSImageValueWithReferrer(const String& rawValue, const KURL&);
 
     bool validWidthOrHeight(CSSParserValue*);
 

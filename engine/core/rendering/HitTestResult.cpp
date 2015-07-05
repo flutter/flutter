@@ -26,7 +26,6 @@
 #include "sky/engine/core/dom/NodeRenderingTraversal.h"
 #include "sky/engine/core/dom/shadow/ShadowRoot.h"
 #include "sky/engine/core/editing/FrameSelection.h"
-#include "sky/engine/core/fetch/ImageResource.h"
 #include "sky/engine/core/frame/LocalFrame.h"
 #include "sky/engine/core/rendering/RenderImage.h"
 

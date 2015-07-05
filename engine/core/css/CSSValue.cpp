@@ -29,15 +29,12 @@
 #include "sky/engine/core/css/CSSAspectRatioValue.h"
 #include "sky/engine/core/css/CSSBorderImageSliceValue.h"
 #include "sky/engine/core/css/CSSCalculationValue.h"
-#include "sky/engine/core/css/CSSCrossfadeValue.h"
 #include "sky/engine/core/css/CSSFilterValue.h"
 #include "sky/engine/core/css/CSSFontFaceSrcValue.h"
 #include "sky/engine/core/css/CSSFontFeatureValue.h"
 #include "sky/engine/core/css/CSSFontValue.h"
 #include "sky/engine/core/css/CSSFunctionValue.h"
 #include "sky/engine/core/css/CSSGradientValue.h"
-#include "sky/engine/core/css/CSSImageSetValue.h"
-#include "sky/engine/core/css/CSSImageValue.h"
 #include "sky/engine/core/css/CSSInheritedValue.h"
 #include "sky/engine/core/css/CSSInitialValue.h"
 #include "sky/engine/core/css/CSSLineBoxContainValue.h"
@@ -128,10 +125,6 @@ bool CSSValue::equals(const CSSValue& other) const
             return compareCSSValues<CSSLinearGradientValue>(*this, other);
         case RadialGradientClass:
             return compareCSSValues<CSSRadialGradientValue>(*this, other);
-        case CrossfadeClass:
-            return compareCSSValues<CSSCrossfadeValue>(*this, other);
-        case ImageClass:
-            return compareCSSValues<CSSImageValue>(*this, other);
         case InheritedClass:
             return compareCSSValues<CSSInheritedValue>(*this, other);
         case InitialClass:
@@ -154,8 +147,6 @@ bool CSSValue::equals(const CSSValue& other) const
             return compareCSSValues<CSSLineBoxContainValue>(*this, other);
         case CalculationClass:
             return compareCSSValues<CSSCalcValue>(*this, other);
-        case ImageSetClass:
-            return compareCSSValues<CSSImageSetValue>(*this, other);
         case CSSFilterClass:
             return compareCSSValues<CSSFilterValue>(*this, other);
         default:
@@ -194,10 +185,6 @@ String CSSValue::cssText() const
         return toCSSLinearGradientValue(this)->customCSSText();
     case RadialGradientClass:
         return toCSSRadialGradientValue(this)->customCSSText();
-    case CrossfadeClass:
-        return toCSSCrossfadeValue(this)->customCSSText();
-    case ImageClass:
-        return toCSSImageValue(this)->customCSSText();
     case InheritedClass:
         return toCSSInheritedValue(this)->customCSSText();
     case InitialClass:
@@ -220,8 +207,6 @@ String CSSValue::cssText() const
         return toCSSLineBoxContainValue(this)->customCSSText();
     case CalculationClass:
         return toCSSCalcValue(this)->customCSSText();
-    case ImageSetClass:
-        return toCSSImageSetValue(this)->customCSSText();
     case CSSFilterClass:
         return toCSSFilterValue(this)->customCSSText();
     }
@@ -263,12 +248,6 @@ void CSSValue::destroy()
     case RadialGradientClass:
         delete toCSSRadialGradientValue(this);
         return;
-    case CrossfadeClass:
-        delete toCSSCrossfadeValue(this);
-        return;
-    case ImageClass:
-        delete toCSSImageValue(this);
-        return;
     case InheritedClass:
         delete toCSSInheritedValue(this);
         return;
@@ -302,9 +281,6 @@ void CSSValue::destroy()
     case CalculationClass:
         delete toCSSCalcValue(this);
         return;
-    case ImageSetClass:
-        delete toCSSImageSetValue(this);
-        return;
     case CSSFilterClass:
         delete toCSSFilterValue(this);
         return;
@@ -319,14 +295,10 @@ PassRefPtr<CSSValue> CSSValue::cloneForCSSOM() const
         return toCSSPrimitiveValue(this)->cloneForCSSOM();
     case ValueListClass:
         return toCSSValueList(this)->cloneForCSSOM();
-    case ImageClass:
-        return toCSSImageValue(this)->cloneForCSSOM();
     case CSSFilterClass:
         return toCSSFilterValue(this)->cloneForCSSOM();
     case CSSTransformClass:
         return toCSSTransformValue(this)->cloneForCSSOM();
-    case ImageSetClass:
-        return toCSSImageSetValue(this)->cloneForCSSOM();
     default:
         ASSERT(!isSubtypeExposedToCSSOM());
         return TextCloneCSSValue::create(classType(), cssText());

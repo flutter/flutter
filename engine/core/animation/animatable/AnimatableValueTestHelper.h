@@ -38,7 +38,6 @@
 
 #include "sky/engine/core/animation/animatable/AnimatableClipPathOperation.h"
 #include "sky/engine/core/animation/animatable/AnimatableColor.h"
-#include "sky/engine/core/animation/animatable/AnimatableImage.h"
 #include "sky/engine/core/animation/animatable/AnimatableNeutral.h"
 #include "sky/engine/core/animation/animatable/AnimatableRepeatable.h"
 #include "sky/engine/core/animation/animatable/AnimatableShapeValue.h"
@@ -59,7 +58,6 @@ bool operator==(const AnimatableValue&, const AnimatableValue&);
 
 void PrintTo(const AnimatableClipPathOperation&, ::std::ostream*);
 void PrintTo(const AnimatableColor&, ::std::ostream*);
-void PrintTo(const AnimatableImage&, ::std::ostream*);
 void PrintTo(const AnimatableNeutral&, ::std::ostream*);
 void PrintTo(const AnimatableRepeatable&, ::std::ostream*);
 void PrintTo(const AnimatableShapeValue&, ::std::ostream*);

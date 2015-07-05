@@ -46,7 +46,6 @@
 #include "sky/engine/core/css/CSSFontValue.h"
 #include "sky/engine/core/css/CSSGradientValue.h"
 #include "sky/engine/core/css/CSSHelper.h"
-#include "sky/engine/core/css/CSSImageSetValue.h"
 #include "sky/engine/core/css/CSSLineBoxContainValue.h"
 #include "sky/engine/core/css/CSSPrimitiveValueMappings.h"
 #include "sky/engine/core/css/CSSPropertyMetadata.h"

@@ -34,7 +34,6 @@
 #include "sky/engine/core/animation/animatable/AnimatableColor.h"
 #include "sky/engine/core/animation/animatable/AnimatableDouble.h"
 #include "sky/engine/core/animation/animatable/AnimatableFilterOperations.h"
-#include "sky/engine/core/animation/animatable/AnimatableImage.h"
 #include "sky/engine/core/animation/animatable/AnimatableLength.h"
 #include "sky/engine/core/animation/animatable/AnimatableLengthBox.h"
 #include "sky/engine/core/animation/animatable/AnimatableLengthBoxAndBool.h"
@@ -142,12 +141,7 @@ void setOnFillLayers(FillLayer& fillLayers, const AnimatableValue* value, StyleR
         const AnimatableValue* layerValue = values[i].get();
         switch (property) {
         case CSSPropertyBackgroundImage:
-            if (layerValue->isImage()) {
-                fillLayer->setImage(state.styleImage(property, toAnimatableImage(layerValue)->toCSSValue()));
-            } else {
-                ASSERT(toAnimatableUnknown(layerValue)->toCSSValueID() == CSSValueNone);
-                fillLayer->setImage(nullptr);
-            }
+            fillLayer->setImage(nullptr);
             break;
         case CSSPropertyBackgroundPositionX:
             fillLayer->setXPosition(animatableValueToLength(layerValue, state));
@@ -274,7 +268,6 @@ void AnimatedStyleBuilder::applyProperty(CSSPropertyID property, StyleResolverSt
         style->setBorderImageSlices(animatableValueToLengthBox(value, state, ValueRangeNonNegative));
         return;
     case CSSPropertyBorderImageSource:
-        style->setBorderImageSource(state.styleImage(property, toAnimatableImage(value)->toCSSValue()));
         return;
     case CSSPropertyBorderImageWidth:
         style->setBorderImageWidth(animatableValueToBorderImageLengthBox(value, state));

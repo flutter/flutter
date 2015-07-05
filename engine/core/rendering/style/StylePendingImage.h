@@ -27,8 +27,6 @@
 #define SKY_ENGINE_CORE_RENDERING_STYLE_STYLEPENDINGIMAGE_H_
 
 #include "sky/engine/core/css/CSSImageGeneratorValue.h"
-#include "sky/engine/core/css/CSSImageSetValue.h"
-#include "sky/engine/core/css/CSSImageValue.h"
 #include "sky/engine/core/rendering/style/StyleImage.h"
 #include "sky/engine/platform/graphics/Image.h"
 
@@ -45,9 +43,7 @@ public:
     virtual WrappedImagePtr data() const override { return m_value; }
 
     virtual PassRefPtr<CSSValue> cssValue() const override { return m_value; }
-    CSSImageValue* cssImageValue() const { return m_value->isImageValue() ? toCSSImageValue(m_value) : 0; }
     CSSImageGeneratorValue* cssImageGeneratorValue() const { return m_value->isImageGeneratorValue() ? toCSSImageGeneratorValue(m_value) : 0; }
-    CSSImageSetValue* cssImageSetValue() const { return m_value->isImageSetValue() ? toCSSImageSetValue(m_value) : 0; }
 
     virtual LayoutSize imageSize(const RenderObject*) const override { return LayoutSize(); }
     virtual bool imageHasRelativeWidth() const override { return false; }

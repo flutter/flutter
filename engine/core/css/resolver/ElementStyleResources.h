@@ -32,9 +32,7 @@
 namespace blink {
 
 class CSSCursorImageValue;
-class CSSImageValue;
 class CSSImageGeneratorValue;
-class CSSImageSetValue;
 class CSSValue;
 class FilterOperation;
 class StyleImage;
@@ -53,8 +51,6 @@ public:
     PassRefPtr<StyleImage> styleImage(Document&, const TextLinkColors&, Color currentColor, CSSPropertyID, CSSValue*);
 
     PassRefPtr<StyleImage> generatedOrPendingFromValue(CSSPropertyID, CSSImageGeneratorValue*);
-    PassRefPtr<StyleImage> cachedOrPendingFromValue(Document&, CSSPropertyID, CSSImageValue*);
-    PassRefPtr<StyleImage> setOrPendingFromValue(CSSPropertyID, CSSImageSetValue*);
 
     const PendingImagePropertyMap& pendingImageProperties() const { return m_pendingImageProperties; }
 

@@ -29,7 +29,6 @@
 
 #include "sky/engine/core/fetch/ImageResource.h"
 #include "sky/engine/core/rendering/RenderObject.h"
-#include "sky/engine/core/rendering/style/StyleFetchedImage.h"
 
 namespace blink {
 
@@ -46,10 +45,6 @@ RenderImageResourceStyleImage::~RenderImageResourceStyleImage()
 void RenderImageResourceStyleImage::initialize(RenderObject* renderer)
 {
     RenderImageResource::initialize(renderer);
-
-    if (m_styleImage->isImageResource())
-        m_cachedImage = toStyleFetchedImage(m_styleImage)->cachedImage();
-
     m_styleImage->addClient(m_renderer);
 }
 

@@ -35,7 +35,6 @@
 #include "sky/engine/core/animation/animatable/AnimatableColor.h"
 #include "sky/engine/core/animation/animatable/AnimatableDouble.h"
 #include "sky/engine/core/animation/animatable/AnimatableFilterOperations.h"
-#include "sky/engine/core/animation/animatable/AnimatableImage.h"
 #include "sky/engine/core/animation/animatable/AnimatableLength.h"
 #include "sky/engine/core/animation/animatable/AnimatableLengthBox.h"
 #include "sky/engine/core/animation/animatable/AnimatableLengthBoxAndBool.h"
@@ -141,10 +140,6 @@ inline static PassRefPtr<AnimatableValue> createFromLengthSize(const LengthSize&
 
 inline static PassRefPtr<AnimatableValue> createFromStyleImage(StyleImage* image)
 {
-    if (image) {
-        if (RefPtr<CSSValue> cssValue = image->cssValue())
-            return AnimatableImage::create(cssValue.release());
-    }
     return AnimatableUnknown::create(CSSValueNone);
 }
 

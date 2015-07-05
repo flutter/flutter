@@ -49,11 +49,6 @@ void PrintTo(const AnimatableColor& animColor, ::std::ostream* os)
         << animColor.color().serialized().utf8().data() << ")";
 }
 
-void PrintTo(const AnimatableImage& animImage, ::std::ostream* os)
-{
-    PrintTo(*(animImage.toCSSValue()), os, "AnimatableImage");
-}
-
 void PrintTo(const AnimatableNeutral& animValue, ::std::ostream* os)
 {
     *os << "AnimatableNeutral@" << &animValue;
@@ -138,8 +133,6 @@ void PrintTo(const AnimatableValue& animValue, ::std::ostream* os)
         PrintTo(toAnimatableClipPathOperation(animValue), os);
     else if (animValue.isColor())
         PrintTo(toAnimatableColor(animValue), os);
-    else if (animValue.isImage())
-        PrintTo(toAnimatableImage(animValue), os);
     else if (animValue.isNeutral())
         PrintTo(static_cast<const AnimatableNeutral&>(animValue), os);
     else if (animValue.isRepeatable())

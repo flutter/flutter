@@ -23,13 +23,10 @@
 #include "sky/engine/core/css/resolver/StyleResourceLoader.h"
 
 #include "gen/sky/core/CSSPropertyNames.h"
-#include "sky/engine/core/css/CSSImageValue.h"
 #include "sky/engine/core/css/resolver/ElementStyleResources.h"
 #include "sky/engine/core/fetch/ResourceFetcher.h"
 #include "sky/engine/core/rendering/style/FillLayer.h"
 #include "sky/engine/core/rendering/style/RenderStyle.h"
-#include "sky/engine/core/rendering/style/StyleFetchedImage.h"
-#include "sky/engine/core/rendering/style/StyleFetchedImageSet.h"
 #include "sky/engine/core/rendering/style/StyleGeneratedImage.h"
 #include "sky/engine/core/rendering/style/StylePendingImage.h"
 
@@ -42,17 +39,10 @@ StyleResourceLoader::StyleResourceLoader(ResourceFetcher* fetcher)
 
 PassRefPtr<StyleImage> StyleResourceLoader::loadPendingImage(StylePendingImage* pendingImage, float deviceScaleFactor)
 {
-    if (CSSImageValue* imageValue = pendingImage->cssImageValue())
-        return imageValue->cachedImage(m_fetcher, ResourceFetcher::defaultResourceOptions());
-
-    if (CSSImageGeneratorValue* imageGeneratorValue
-        = pendingImage->cssImageGeneratorValue()) {
+    if (CSSImageGeneratorValue* imageGeneratorValue = pendingImage->cssImageGeneratorValue()) {
         imageGeneratorValue->loadSubimages(m_fetcher);
         return StyleGeneratedImage::create(imageGeneratorValue);
     }
-
-    if (CSSImageSetValue* imageSetValue = pendingImage->cssImageSetValue())
-        return imageSetValue->cachedImageSet(m_fetcher, deviceScaleFactor, ResourceFetcher::defaultResourceOptions());
 
     return nullptr;
 }

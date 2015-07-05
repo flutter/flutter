@@ -77,15 +77,12 @@ public:
 
     bool isAspectRatioValue() const { return m_classType == AspectRatioClass; }
     bool isBorderImageSliceValue() const { return m_classType == BorderImageSliceClass; }
-    bool isCrossfadeValue() const { return m_classType == CrossfadeClass; }
     bool isFontFeatureValue() const { return m_classType == FontFeatureClass; }
     bool isFontValue() const { return m_classType == FontClass; }
     bool isFontFaceSrcValue() const { return m_classType == FontFaceSrcClass; }
     bool isFunctionValue() const { return m_classType == FunctionClass; }
-    bool isImageGeneratorValue() const { return m_classType >= CrossfadeClass && m_classType <= RadialGradientClass; }
+    bool isImageGeneratorValue() const { return m_classType >= LinearGradientClass && m_classType <= RadialGradientClass; }
     bool isGradientValue() const { return m_classType >= LinearGradientClass && m_classType <= RadialGradientClass; }
-    bool isImageSetValue() const { return m_classType == ImageSetClass; }
-    bool isImageValue() const { return m_classType == ImageClass; }
     bool isImplicitInitialValue() const;
     bool isInheritedValue() const { return m_classType == InheritedClass; }
     bool isInitialValue() const { return m_classType == InitialClass; }
@@ -117,11 +114,7 @@ protected:
     enum ClassType {
         PrimitiveClass,
 
-        // Image classes.
-        ImageClass,
-
         // Image generator classes.
-        CrossfadeClass,
         LinearGradientClass,
         RadialGradientClass,
 
@@ -147,7 +140,6 @@ protected:
 
         // List class types must appear after ValueListClass.
         ValueListClass,
-        ImageSetClass,
         CSSFilterClass,
         CSSTransformClass,
         // Do not append non-list class types here.

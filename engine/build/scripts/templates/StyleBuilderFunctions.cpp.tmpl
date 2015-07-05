@@ -370,7 +370,7 @@ static bool lengthTypeAndValueMatch(const BorderImageLengthBox& borderImageLengt
 {
     FillLayer* currChild = &state.style()->{{access_layers}}();
     FillLayer* prevChild = 0;
-    if (value->isValueList() && !value->isImageSetValue()) {
+    if (value->isValueList()) {
         /* Walk each value and put it into a layer, creating new layers as needed. */
         CSSValueList* valueList = toCSSValueList(value);
         for (unsigned int i = 0; i < valueList->length(); i++) {
