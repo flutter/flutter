@@ -38,7 +38,6 @@
 
 namespace blink {
 
-class Application;
 class CSSStyleDeclaration;
 class DOMSelection;
 class DOMURL;
@@ -224,7 +223,6 @@ private:
 
     void removeAllEventListenersInternal(BroadcastListenerRemoval);
 
-    RefPtr<Application> m_application;
     RefPtr<Document> m_document;
 
 #if ENABLE(ASSERT)
