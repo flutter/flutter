@@ -6,10 +6,10 @@ import 'dart:sky' as sky;
 
 import '../animation/animation_performance.dart';
 import '../animation/curves.dart';
-import '../theme/colors.dart';
 import '../theme/shadows.dart';
 import 'animated_component.dart';
 import 'basic.dart';
+import 'theme.dart';
 
 // TODO(eseidel): Draw width should vary based on device size:
 // http://www.google.com/design/spec/layout/structure.html#structure-side-nav
@@ -128,7 +128,7 @@ class Drawer extends AnimatedComponent {
     Widget content = controller.position.build(
       new Container(
         decoration: new BoxDecoration(
-          backgroundColor: Grey[50],
+          backgroundColor: Theme.of(this).canvasColor,
           boxShadow: shadows[level]),
         width: _kWidth,
         child: new Block(children)

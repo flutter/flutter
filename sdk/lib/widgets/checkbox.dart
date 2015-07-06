@@ -11,7 +11,8 @@ import 'toggleable.dart';
 export 'toggleable.dart' show ValueChanged;
 
 const double _kMidpoint = 0.5;
-const sky.Color _kUncheckedColor = const sky.Color(0x8A000000);
+const sky.Color _kLightUncheckedColor = const sky.Color(0x8A000000);
+const sky.Color _kDarkUncheckedColor = const sky.Color(0xB2FFFFFF);
 const double _kEdgeSize = 20.0;
 const double _kEdgeRadius = 1.0;
 
@@ -26,9 +27,12 @@ class Checkbox extends Toggleable {
   Size get size => const Size(_kEdgeSize + 2.0, _kEdgeSize + 2.0);
 
   void customPaintCallback(sky.Canvas canvas, Size size) {
+    ThemeData themeData = Theme.of(this);
+    Color uncheckedColor = themeData.brightness == ThemeBrightness.light ? _kLightUncheckedColor : _kDarkUncheckedColor;
+
     // Choose a color between grey and the theme color
     sky.Paint paint = new sky.Paint()..strokeWidth = 2.0
-                                     ..color = _kUncheckedColor;
+                                     ..color = uncheckedColor;
 
     // The rrect contracts slightly during the animation
     double inset = 2.0 - (toggleAnimation.value - _kMidpoint).abs() * 2.0;
@@ -46,7 +50,7 @@ class Checkbox extends Toggleable {
         new sky.Gradient.radial(
           new Point(_kEdgeSize / 2.0, _kEdgeSize / 2.0),
           _kEdgeSize * (_kMidpoint - toggleAnimation.value) * 8.0,
-          [const sky.Color(0x00000000), _kUncheckedColor]
+          [const sky.Color(0x00000000), uncheckedColor]
         )
       );
       canvas.drawRRect(rrect, paint);
@@ -57,11 +61,10 @@ class Checkbox extends Toggleable {
 
       // Solid filled rrect
       paint.setStyle(sky.PaintingStyle.strokeAndFill);
-      Color themeColor = Theme.of(this).primary[500];
       paint.color = new Color.fromARGB((t * 255).floor(),
-                                       themeColor.red,
-                                       themeColor.green,
-                                       themeColor.blue);
+                                       themeData.accentColor.red,
+                                       themeData.accentColor.green,
+                                       themeData.accentColor.blue);
       canvas.drawRRect(rrect, paint);
 
       // White inner check

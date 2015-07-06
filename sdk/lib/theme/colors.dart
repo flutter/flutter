@@ -370,3 +370,15 @@ const Map<int, Color> BlueGrey = const {
   800: const Color(0xFF37474F),
   900: const Color(0xFF263238),
 };
+
+const List<Map<int, Color>> DarkColors = const [
+  Red,
+  Pink,
+  Purple,
+  DeepPurple,
+  Indigo,
+  Blue,
+  Teal,
+  DeepOrange,
+  Brown
+];

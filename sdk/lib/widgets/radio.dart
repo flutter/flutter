@@ -5,9 +5,12 @@
 import 'dart:sky' as sky;
 
 import '../rendering/object.dart';
-import '../theme/colors.dart' as colors;
 import 'basic.dart';
 import 'button_base.dart';
+import 'theme.dart';
+
+const sky.Color _kLightOffColor = const sky.Color(0x8A000000);
+const sky.Color _kDarkOffColor = const sky.Color(0xB2FFFFFF);
 
 typedef void ValueChanged(value);
 
@@ -31,9 +34,14 @@ class Radio extends ButtonBase {
     super.syncFields(source);
   }
 
+  Color get color {
+    ThemeData themeData = Theme.of(this);
+    if (value == groupValue)
+      return themeData.accentColor;
+    return themeData.brightness == ThemeBrightness.light ? _kLightOffColor : _kDarkOffColor;
+  }
+
   Widget buildContent() {
-    // TODO(jackson): This should change colors with the theme
-    Color color = highlight ? colors.Purple[500] : const Color(0x8A000000);
     const double kDiameter = 16.0;
     const double kOuterRadius = kDiameter / 2;
     const double kInnerRadius = 5.0;

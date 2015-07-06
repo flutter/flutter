@@ -30,9 +30,9 @@ class RaisedButton extends MaterialButton {
           break;
         case ThemeBrightness.dark:
           if (highlight)
-            return Theme.of(this).primary[700];
+            return Theme.of(this).primarySwatch[700];
           else
-            return Theme.of(this).primary[600];
+            return Theme.of(this).primarySwatch[600];
           break;
       }
     } else {

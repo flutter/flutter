@@ -106,7 +106,7 @@ HAL: This mission is too important for me to allow you to jeopardize it.''';
     );
 
     return new Theme(
-      data: new ThemeData.light(primary: colors.Blue, darkToolbar: true),
+      data: new ThemeData.light(),
       child: new Scaffold(
         body: new Material(
           color: colors.Grey[50],

@@ -42,6 +42,7 @@ abstract class MaterialButton extends ButtonBase {
         constraints: new BoxConstraints(minWidth: 88.0),
         margin: new EdgeDims.all(8.0),
         child: new Material(
+          type: MaterialType.button,
           child: enabled ? new InkWell(child: contents) : contents,
           level: level,
           color: color

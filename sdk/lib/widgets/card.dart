@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import '../theme/colors.dart' as colors;
-import '../theme/edges.dart';
 import 'basic.dart';
 import 'material.dart';
 import "theme.dart";
@@ -14,27 +13,16 @@ class Card extends Component {
   final Widget child;
   final Color color;
 
-  Color get materialColor {
-    if (color != null)
-      return color;
-    switch (Theme.of(this).brightness) {
-      case ThemeBrightness.light:
-        return colors.White;
-      case ThemeBrightness.dark:
-        return colors.Grey[800];
-    }
-  }
-
   Widget build() {
     return new Container(
       margin: const EdgeDims.all(4.0),
       child: new Material(
-        color: materialColor,
-        edge: MaterialEdge.card,
+        color: color,
+        type: MaterialType.card,
         level: 2,
         child: new ClipRRect(
-          xRadius: edges[MaterialEdge.card],
-          yRadius: edges[MaterialEdge.card],
+          xRadius: edges[MaterialType.card],
+          yRadius: edges[MaterialType.card],
           child: child
         )
       )

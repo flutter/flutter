@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:sky/editing/input.dart';
-import 'package:sky/theme/colors.dart' as colors;
 import 'package:sky/widgets/basic.dart';
 import 'package:sky/widgets/drawer.dart';
 import 'package:sky/widgets/drawer_header.dart';
@@ -18,6 +17,7 @@ import 'package:sky/widgets/popup_menu.dart';
 import 'package:sky/widgets/radio.dart';
 import 'package:sky/widgets/scaffold.dart';
 import 'package:sky/widgets/tabs.dart';
+import 'package:sky/widgets/theme.dart';
 import 'package:sky/widgets/tool_bar.dart';
 import 'package:sky/widgets/widget.dart';
 
@@ -219,7 +219,7 @@ class StockHome extends Component {
         focused: true,
         placeholder: 'Search stocks',
         onChanged: _handleSearchQueryChanged),
-      backgroundColor: colors.Grey[50]
+      backgroundColor: Theme.of(this).canvasColor
     );
   }
 

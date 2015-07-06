@@ -2,11 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../theme/colors.dart';
 import '../theme/view_configuration.dart';
 import 'basic.dart';
 import 'default_text_style.dart';
 import 'theme.dart';
+
+// TODO(jackson): This class should usually render the user's
+// preferred banner image rather than a solid background
 
 class DrawerHeader extends Component {
 
@@ -18,7 +20,7 @@ class DrawerHeader extends Component {
     return new Container(
       height: kStatusBarHeight + kMaterialDrawerHeight,
       decoration: new BoxDecoration(
-        backgroundColor: BlueGrey[50],
+        backgroundColor: Theme.of(this).cardColor,
         border: const Border(
           bottom: const BorderSide(
             color: const Color(0xFFD1D9E1),

@@ -68,15 +68,23 @@ class Input extends Component {
       textChildren.add(child);
     }
 
+    ThemeData themeData = Theme.of(this);
+    Color focusHighlightColor = themeData.accentColor;
+    Color cursorColor = themeData.accentColor;
+    if (themeData.primarySwatch != null) {
+      cursorColor = Theme.of(this).primarySwatch[200];
+      focusHighlightColor = focused ? themeData.primarySwatch[400] : themeData.primarySwatch[200];
+    }
+
     textChildren.add(new EditableText(
       value: _editableValue, 
       focused: focused,
       style: textStyle,
-      cursorColor: Theme.of(this).primary[200]
+      cursorColor: cursorColor
     ));
 
     Border focusHighlight = new Border(bottom: new BorderSide(
-      color: focused ? Theme.of(this).primary[400] : Theme.of(this).primary[200],
+      color: focusHighlightColor,
       width: focused ? 2.0 : 1.0
     ));
 

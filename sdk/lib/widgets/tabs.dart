@@ -295,8 +295,8 @@ class TabBar extends Component {
     return new TabBarWrapper(
       children: tabs, 
       selectedIndex: selectedIndex,
-      backgroundColor: Theme.of(this).primary[500],
-      indicatorColor: Theme.of(this).accent[200],
+      backgroundColor: Theme.of(this).primaryColor,
+      indicatorColor: Theme.of(this).accentColor,
       textAndIcons: textAndIcons
     );
   }

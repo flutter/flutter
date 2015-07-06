@@ -37,7 +37,7 @@ class Switch extends Toggleable {
     sky.Color thumbColor = _kThumbOffColor;
     sky.Color trackColor = _kTrackOffColor;
     if (value) {
-      thumbColor = Theme.of(this).primary[500];
+      thumbColor = Theme.of(this).accentColor;
       trackColor = new sky.Color(thumbColor.value & 0x80FFFFFF);
     }
 

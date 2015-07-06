@@ -54,7 +54,7 @@ class ToolBar extends Component {
       ),
       padding: new EdgeDims.symmetric(horizontal: 8.0),
       decoration: new BoxDecoration(
-        backgroundColor: backgroundColor == null ? Theme.of(this).primary[500] : backgroundColor,
+        backgroundColor: backgroundColor == null ? Theme.of(this).primaryColor : backgroundColor,
         boxShadow: shadows[2]
       )
     );

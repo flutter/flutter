@@ -2,13 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:sky/theme/colors.dart' as colors;
 import 'package:sky/widgets/basic.dart';
 import 'package:sky/widgets/checkbox.dart';
 import 'package:sky/widgets/switch.dart';
 import 'package:sky/widgets/flat_button.dart';
 import 'package:sky/widgets/dialog.dart';
 import 'package:sky/widgets/icon_button.dart';
+import 'package:sky/widgets/material.dart';
 import 'package:sky/widgets/menu_item.dart';
 import 'package:sky/widgets/navigator.dart';
 import 'package:sky/widgets/scaffold.dart';
@@ -87,27 +87,29 @@ class StockSettings extends Component {
   Widget buildSettingsPane() {
     // TODO(ianh): Once we have the gesture API hooked up, fix https://github.com/domokit/mojo/issues/281
     // (whereby tapping the widgets below causes both the widget and the menu item to fire their callbacks)
-    return new Container(
-      padding: const EdgeDims.symmetric(vertical: 20.0),
-      decoration: new BoxDecoration(backgroundColor: colors.Grey[50]),
-      child: new Block([
-        new MenuItem(
-          icon: 'action/thumb_up',
-          onPressed: () => _confirmOptimismChange(),
-          children: [
-            new Flexible(child: new Text('Everything is awesome')),
-            new Checkbox(value: optimism == StockMode.optimistic, onChanged: _handleOptimismChanged)
-          ]
-        ),
-        new MenuItem(
-          icon: 'action/backup',
-          onPressed: () { _handleBackupChanged(!(backup == BackupMode.enabled)); },
-          children: [
-            new Flexible(child: new Text('Back up stock list to the cloud')),
-            new Switch(value: backup == BackupMode.enabled, onChanged: _handleBackupChanged)
-          ]
-        ),
-      ])
+    return new Material(
+      type: MaterialType.canvas,
+      child: new Container(
+        padding: const EdgeDims.symmetric(vertical: 20.0),
+        child: new Block([
+          new MenuItem(
+            icon: 'action/thumb_up',
+            onPressed: () => _confirmOptimismChange(),
+            children: [
+              new Flexible(child: new Text('Everything is awesome')),
+              new Checkbox(value: optimism == StockMode.optimistic, onChanged: _handleOptimismChanged)
+            ]
+          ),
+          new MenuItem(
+            icon: 'action/backup',
+            onPressed: () { _handleBackupChanged(!(backup == BackupMode.enabled)); },
+            children: [
+              new Flexible(child: new Text('Back up stock list to the cloud')),
+              new Switch(value: backup == BackupMode.enabled, onChanged: _handleBackupChanged)
+            ]
+          ),
+        ])
+      )
     );
   }
 

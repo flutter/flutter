@@ -8,7 +8,6 @@ import 'package:mojom/intents/intents.mojom.dart';
 import 'package:sky/mojo/shell.dart' as shell;
 import 'package:sky/painting/box_painter.dart';
 import 'package:sky/theme/colors.dart' as colors;
-import 'package:sky/theme/edges.dart';
 import 'package:sky/theme/typography.dart' as typography;
 import 'package:sky/widgets/basic.dart';
 import 'package:sky/widgets/card.dart';
@@ -170,14 +169,14 @@ class DemoList extends FixedHeightScrollable {
 class SkyHome extends App {
   Widget build() {
     return new Theme(
-      data: new ThemeData.dark(
-        primary: colors.Teal,
-        accent: colors.Orange
+      data: new ThemeData(
+        brightness: ThemeBrightness.dark,
+        primarySwatch: colors.Teal
       ),
       child: new Scaffold(
         toolbar: new ToolBar(center: new Text('Sky Demos')),
         body: new Material(
-          edge: MaterialEdge.canvas,
+          type: MaterialType.canvas,
           child: new DemoList()
         )
       )

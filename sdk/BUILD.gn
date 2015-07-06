@@ -44,7 +44,6 @@ dart_pkg("sky") {
     "lib/rendering/stack.dart",
     "lib/sky_tool",
     "lib/theme/colors.dart",
-    "lib/theme/edges.dart",
     "lib/theme/shadows.dart",
     "lib/theme/theme_data.dart",
     "lib/theme/typography.dart",
