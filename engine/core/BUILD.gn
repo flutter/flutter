@@ -235,7 +235,6 @@ group("core_names") {
     ":make_core_generated_event_target_factory",
     ":make_core_generated_event_target_names",
     ":make_core_generated_event_type_names",
-    ":make_core_generated_fetch_initiator_type_names",
     ":make_core_generated_html_element_factory",
     ":make_core_generated_media_type_names",
   ]
@@ -440,14 +439,6 @@ make_names("make_core_generated_event_target_names") {
   outputs = [
     "$sky_core_output_dir/EventTargetNames.cpp",
     "$sky_core_output_dir/EventTargetNames.h",
-  ]
-}
-
-make_names("make_core_generated_fetch_initiator_type_names") {
-  in_files = [ "fetch/FetchInitiatorTypeNames.in" ]
-  outputs = [
-    "$sky_core_output_dir/FetchInitiatorTypeNames.cpp",
-    "$sky_core_output_dir/FetchInitiatorTypeNames.h",
   ]
 }
 

@@ -33,7 +33,6 @@
 #include "gen/sky/core/EventNames.h"
 #include "gen/sky/core/EventTargetNames.h"
 #include "gen/sky/core/EventTypeNames.h"
-#include "gen/sky/core/FetchInitiatorTypeNames.h"
 #include "gen/sky/core/HTMLNames.h"
 #include "gen/sky/core/MediaFeatureNames.h"
 #include "gen/sky/core/MediaTypeNames.h"
@@ -55,7 +54,6 @@ void CoreInitializer::init()
     EventNames::init();
     EventTargetNames::init();
     EventTypeNames::init();
-    FetchInitiatorTypeNames::init();
     FontFamilyNames::init();
     MediaFeatureNames::init();
     MediaTypeNames::init();
