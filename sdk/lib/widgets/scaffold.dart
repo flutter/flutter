@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:sky' as sky;
+
 import '../rendering/box.dart';
 import '../rendering/object.dart';
 import '../theme/view_configuration.dart';
@@ -102,7 +104,7 @@ class RenderScaffold extends RenderBox {
     }
     if (_slots[ScaffoldSlots.toolbar] != null) {
       RenderBox toolbar = _slots[ScaffoldSlots.toolbar];
-      double toolbarHeight = kToolBarHeight + kNotificationAreaHeight;
+      double toolbarHeight = kToolBarHeight + sky.view.paddingTop;
       toolbar.layout(new BoxConstraints.tight(new Size(size.width, toolbarHeight)));
       assert(toolbar.parentData is BoxParentData);
       toolbar.parentData.position = Point.origin;

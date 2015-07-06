@@ -58,7 +58,6 @@ Engine::Config::~Config() {
 Engine::Engine(const Config& config)
     : config_(config),
       animator_(new Animator(config, this)),
-      device_pixel_ratio_(1.0f),
       binding_(this),
       weak_factory_(this) {
 }
@@ -102,7 +101,8 @@ skia::RefPtr<SkPicture> Engine::Paint() {
   if (sky_view_) {
     skia::RefPtr<SkPicture> picture = sky_view_->Paint();
     canvas->clear(SK_ColorBLACK);
-    canvas->scale(device_pixel_ratio_, device_pixel_ratio_);
+    canvas->scale(display_metrics_.device_pixel_ratio,
+                  display_metrics_.device_pixel_ratio);
     if (picture)
       canvas->drawPicture(picture.get());
   }
@@ -128,27 +128,24 @@ void Engine::OnOutputSurfaceDestroyed() {
       base::Bind(&GPUDelegate::OnOutputSurfaceDestroyed, config_.gpu_delegate));
 }
 
-void Engine::OnViewportMetricsChanged(int width, int height,
-                                      float device_pixel_ratio) {
-  physical_size_.SetSize(width, height);
-  device_pixel_ratio_ = device_pixel_ratio;
+void Engine::OnViewportMetricsChanged(ViewportMetricsPtr metrics) {
+  physical_size_.SetSize(metrics->physical_width, metrics->physical_height);
+
+  display_metrics_.physical_size = physical_size_;
+  display_metrics_.device_pixel_ratio = metrics->device_pixel_ratio;
+  display_metrics_.padding_top = metrics->padding_top;
+  display_metrics_.padding_right = metrics->padding_right;
+  display_metrics_.padding_bottom = metrics->padding_bottom;
+  display_metrics_.padding_left = metrics->padding_left;
 
   if (sky_view_)
-    UpdateSkyViewSize();
-}
-
-void Engine::UpdateSkyViewSize() {
-  CHECK(sky_view_);
-  blink::SkyDisplayMetrics metrics;
-  metrics.physical_size = physical_size_;
-  metrics.device_pixel_ratio = device_pixel_ratio_;
-  sky_view_->SetDisplayMetrics(metrics);
+    sky_view_->SetDisplayMetrics(display_metrics_);
 }
 
 void Engine::OnInputEvent(InputEventPtr event) {
   TRACE_EVENT0("sky", "Engine::OnInputEvent");
   scoped_ptr<blink::WebInputEvent> web_event =
-      ConvertEvent(event, device_pixel_ratio_);
+      ConvertEvent(event, display_metrics_.device_pixel_ratio);
   if (!web_event)
     return;
   if (sky_view_)
@@ -159,7 +156,7 @@ void Engine::RunFromLibrary(const std::string& name) {
   sky_view_ = blink::SkyView::Create(this);
   sky_view_->RunFromLibrary(blink::WebString::fromUTF8(name),
                             dart_library_provider_.get());
-  UpdateSkyViewSize();
+  sky_view_->SetDisplayMetrics(display_metrics_);
 }
 
 void Engine::RunFromSnapshotStream(
@@ -167,7 +164,7 @@ void Engine::RunFromSnapshotStream(
     mojo::ScopedDataPipeConsumerHandle snapshot) {
   sky_view_ = blink::SkyView::Create(this);
   sky_view_->RunFromSnapshot(blink::WebString::fromUTF8(name), snapshot.Pass());
-  UpdateSkyViewSize();
+  sky_view_->SetDisplayMetrics(display_metrics_);
 }
 
 void Engine::RunFromNetwork(const mojo::String& url) {

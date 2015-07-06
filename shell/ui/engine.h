@@ -62,8 +62,7 @@ class Engine : public UIDelegate,
   void OnOutputSurfaceDestroyed() override;
 
   // SkyEngine implementation:
-  void OnViewportMetricsChanged(int width, int height,
-                                float device_pixel_ratio) override;
+  void OnViewportMetricsChanged(ViewportMetricsPtr metrics) override;
   void OnInputEvent(InputEventPtr event) override;
 
   void RunFromNetwork(const mojo::String& url) override;
@@ -89,8 +88,6 @@ class Engine : public UIDelegate,
   void RunFromSnapshotStream(const std::string& name,
                              mojo::ScopedDataPipeConsumerHandle snapshot);
 
-  void UpdateSkyViewSize();
-
   Config config_;
   scoped_ptr<Animator> animator_;
 
@@ -98,8 +95,8 @@ class Engine : public UIDelegate,
   scoped_ptr<blink::DartLibraryProvider> dart_library_provider_;
   std::unique_ptr<blink::SkyView> sky_view_;
 
-  float device_pixel_ratio_;
   gfx::Size physical_size_;
+  blink::SkyDisplayMetrics display_metrics_;
   mojo::Binding<SkyEngine> binding_;
 
   base::WeakPtrFactory<Engine> weak_factory_;

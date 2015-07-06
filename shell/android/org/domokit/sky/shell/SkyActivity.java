@@ -28,16 +28,20 @@ public class SkyActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        PlatformViewAndroid.EdgeDims edgeDims = new PlatformViewAndroid.EdgeDims();
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             getWindow().addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
             getWindow().setStatusBarColor(0x40000000);
+            // TODO(abarth): We should get this value from the Android framework somehow.
+            edgeDims.top = 25.0;
         }
         getWindow().getDecorView().setSystemUiVisibility(
                 View.SYSTEM_UI_FLAG_LAYOUT_STABLE
                 | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
 
         SkyMain.ensureInitialized(getApplicationContext());
-        mView = new PlatformViewAndroid(this);
+        mView = new PlatformViewAndroid(this, edgeDims);
         setContentView(mView);
         mTracingController = new TracingController(this);
 

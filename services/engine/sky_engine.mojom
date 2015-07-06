@@ -6,8 +6,18 @@ module sky;
 
 import "sky/services/engine/input_event.mojom";
 
+struct ViewportMetrics {
+  int32 physical_width;
+  int32 physical_height;
+  float device_pixel_ratio = 1.0;
+  double padding_top;
+  double padding_right;
+  double padding_bottom;
+  double padding_left;
+};
+
 interface SkyEngine {
-  OnViewportMetricsChanged(int32 width, int32 height, float device_pixel_ratio);
+  OnViewportMetricsChanged(ViewportMetrics metrics);
   OnInputEvent(InputEvent event);
 
   RunFromNetwork(string url);

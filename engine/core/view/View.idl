@@ -5,6 +5,11 @@
 interface View {
   readonly attribute double devicePixelRatio;
 
+  readonly attribute double paddingTop;
+  readonly attribute double paddingRight;
+  readonly attribute double paddingBottom;
+  readonly attribute double paddingLeft;
+
   // TODO(ianh): convert this to returning a Size
   readonly attribute double width;
   readonly attribute double height;

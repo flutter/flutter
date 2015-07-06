@@ -5,7 +5,6 @@
 // Modeled after Android's ViewConfiguration:
 // https://github.com/android/platform_frameworks_base/blob/master/core/java/android/view/ViewConfiguration.java
 
-const double kNotificationAreaHeight = 25.0;
 // TODO(ianh): Figure out actual specced height for status bar
 const double kStatusBarHeight = 50.0;
 

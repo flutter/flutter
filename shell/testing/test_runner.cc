@@ -61,7 +61,10 @@ TestRunner::TestRunner()
   CHECK(!g_test_runner) << "Only create one TestRunner.";
 
   shell_view_->view()->ConnectToEngine(GetProxy(&sky_engine_));
-  sky_engine_->OnViewportMetricsChanged(320, 640, 1.0);
+  ViewportMetricsPtr metrics = ViewportMetrics::New();
+  metrics->physical_width = 320;
+  metrics->physical_height = 640;
+  sky_engine_->OnViewportMetricsChanged(metrics.Pass());
 }
 
 TestRunner::~TestRunner() {

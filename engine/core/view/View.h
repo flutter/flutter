@@ -25,6 +25,12 @@ public:
     static PassRefPtr<View> create(const base::Closure& scheduleFrameCallback);
 
     double devicePixelRatio() const { return m_displayMetrics.device_pixel_ratio; }
+
+    double paddingTop() const { return m_displayMetrics.padding_top; }
+    double paddingRight() const { return m_displayMetrics.padding_right; }
+    double paddingBottom() const { return m_displayMetrics.padding_bottom; }
+    double paddingLeft() const { return m_displayMetrics.padding_left; }
+
     double width() const;
     double height() const;
 
