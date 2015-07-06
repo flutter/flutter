@@ -1029,7 +1029,7 @@ public:
     static EPosition initialPosition() { return StaticPosition; }
     static EUnicodeBidi initialUnicodeBidi() { return UBNormal; }
     static EVisibility initialVisibility() { return VISIBLE; }
-    static EWhiteSpace initialWhiteSpace() { return NORMAL; }
+    static EWhiteSpace initialWhiteSpace() { return PRE_WRAP; }
     static short initialHorizontalBorderSpacing() { return 0; }
     static short initialVerticalBorderSpacing() { return 0; }
     static Color initialColor() { return Color::white; }

@@ -13,7 +13,7 @@ main() async {
   await tester.test(() {
     return new Dialog(
       title: new Text("I am a title"),
-      content: new Text("I am some content"),
+      content: new Text("I am some content\nwith a line break"),
       actions: [new Text("I am some actions")]
     );
   });
