@@ -4,6 +4,8 @@
 
 import 'dart:math' as math;
 
+import 'package:sky/animation/generators.dart';
+import 'package:sky/animation/mechanics.dart';
 import 'package:sky/animation/scroll_behavior.dart';
 import 'package:sky/painting/text_style.dart';
 import 'package:sky/rendering/box.dart';
@@ -29,6 +31,7 @@ const double _kRelativeMaxTabWidth = 56.0;
 const EdgeDims _kTabLabelPadding = const EdgeDims.symmetric(horizontal: 12.0);
 const TextStyle _kTabTextStyle = const TextStyle(textAlign: TextAlign.center);
 const int _kTabIconSize = 24;
+const double _kTabBarScrollFriction = 0.005;
 
 class TabBarParentData extends BoxParentData with
     ContainerParentDataMixin<RenderBox> { }
@@ -342,6 +345,27 @@ class Tab extends Component {
   }
 }
 
+class TabBarScrollBehavior extends ScrollBehavior {
+  TabBarScrollBehavior({ this.maxScrollOffset: 0.0 });
+
+  double maxScrollOffset;
+
+  Simulation release(Particle particle) {
+    if (particle.velocity == 0.0 || particle.position < 0.0 || particle.position >= maxScrollOffset)
+      return null;
+
+    System system = new ParticleInBoxWithFriction(
+      particle: particle,
+      friction: _kTabBarScrollFriction,
+      box: new ClosedBox(min: 0.0, max: maxScrollOffset));
+    return new Simulation(system, terminationCondition: () => particle.position == 0.0);
+  }
+
+  double applyCurve(double scrollOffset, double scrollDelta) {
+    return (scrollOffset + scrollDelta).clamp(0.0, maxScrollOffset);
+  }
+}
+
 class TabBar extends Scrollable {
   TabBar({
     String key,
@@ -366,8 +390,8 @@ class TabBar extends Scrollable {
       scrollTo(0.0);
   }
 
-  ScrollBehavior createScrollBehavior() => new BoundedScrollBehavior();
-  BoundedScrollBehavior get scrollBehavior => super.scrollBehavior;
+  ScrollBehavior createScrollBehavior() => new TabBarScrollBehavior();
+  TabBarScrollBehavior get scrollBehavior => super.scrollBehavior;
 
   void _handleTap(int tabIndex) {
     if (tabIndex != selectedIndex && onChanged != null)
@@ -393,7 +417,7 @@ class TabBar extends Scrollable {
     setState(() {
       _tabBarSize = tabBarSize;
       _tabWidths = tabWidths;
-      scrollBehavior.maxOffset =
+      scrollBehavior.maxScrollOffset =
         _tabWidths.reduce((sum, width) => sum + width) - _tabBarSize.width;
     });
   }
