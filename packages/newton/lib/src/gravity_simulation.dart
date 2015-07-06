@@ -4,13 +4,13 @@
 
 part of newton;
 
-class Gravity extends Simulation {
+class GravitySimulation extends Simulation {
   final double _x;
   final double _v;
   final double _a;
   final double _end;
 
-  Gravity(
+  GravitySimulation(
       double acceleration, double distance, double endDistance, double velocity)
       : _a = acceleration,
         _x = distance,

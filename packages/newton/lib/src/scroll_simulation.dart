@@ -7,7 +7,7 @@ part of newton;
 /// Simulates kinetic scrolling behavior between a leading and trailing
 /// boundary. Friction is applied within the extends and a spring action applied
 /// at the boundaries. This simulation can only step forward.
-class Scroll extends SimulationGroup {
+class ScrollSimulation extends SimulationGroup {
   final double _leadingExtent;
   final double _trailingExtent;
   final SpringDesc _springDesc;
@@ -17,8 +17,8 @@ class Scroll extends SimulationGroup {
   Simulation _currentSimulation;
   double _offset = 0.0;
 
-  Scroll(double position, double velocity, double leading, double trailing,
-      SpringDesc spring, double drag)
+  ScrollSimulation(double position, double velocity, double leading,
+      double trailing, SpringDesc spring, double drag)
       : _leadingExtent = leading,
         _trailingExtent = trailing,
         _springDesc = spring,
@@ -45,20 +45,20 @@ class Scroll extends SimulationGroup {
       if (position > _trailingExtent) {
         _isSpringing = true;
         _offset = intervalOffset;
-        _currentSimulation =
-            new Spring(_springDesc, position, _trailingExtent, velocity);
+        _currentSimulation = new SpringSimulation(
+            _springDesc, position, _trailingExtent, velocity);
         return;
       } else if (position < _leadingExtent) {
         _isSpringing = true;
         _offset = intervalOffset;
-        _currentSimulation =
-            new Spring(_springDesc, position, _leadingExtent, velocity);
+        _currentSimulation = new SpringSimulation(
+            _springDesc, position, _leadingExtent, velocity);
         return;
       }
     }
 
     if (_currentSimulation == null) {
-      _currentSimulation = new Friction(_drag, position, velocity);
+      _currentSimulation = new FrictionSimulation(_drag, position, velocity);
       return;
     }
   }

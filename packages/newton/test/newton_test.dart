@@ -10,7 +10,7 @@ import 'package:newton/newton.dart';
 
 void main() {
   test('test_friction', () {
-    var friction = new Friction(0.3, 100.0, 400.0);
+    var friction = new FrictionSimulation(0.3, 100.0, 400.0);
 
     expect(friction.isDone(0.0), false);
     expect(friction.x(0.0), 100);
@@ -28,7 +28,7 @@ void main() {
   });
 
   test('test_gravity', () {
-    var gravity = new Gravity(200.0, 100.0, 600.0, 0.0);
+    var gravity = new GravitySimulation(200.0, 100.0, 600.0, 0.0);
 
     expect(gravity.isDone(0.0), false);
     expect(gravity.x(0.0), 100.0);
@@ -58,25 +58,26 @@ void main() {
   });
 
   test('spring_types', () {
-    var crit = new Spring(
+    var crit = new SpringSimulation(
         new SpringDesc.withDampingRatio(1.0, 100.0, 1.0), 0.0, 300.0, 0.0);
     expect(crit.type, SpringType.criticallyDamped);
 
-    var under = new Spring(
+    var under = new SpringSimulation(
         new SpringDesc.withDampingRatio(1.0, 100.0, 0.75), 0.0, 300.0, 0.0);
     expect(under.type, SpringType.underDamped);
 
-    var over = new Spring(
+    var over = new SpringSimulation(
         new SpringDesc.withDampingRatio(1.0, 100.0, 1.25), 0.0, 300.0, 0.0);
     expect(over.type, SpringType.overDamped);
 
     // Just so we don't forget how to create a desc without the ratio.
-    var other = new Spring(new SpringDesc(1.0, 100.0, 20.0), 0.0, 20.0, 20.0);
+    var other =
+        new SpringSimulation(new SpringDesc(1.0, 100.0, 20.0), 0.0, 20.0, 20.0);
     expect(other.type, SpringType.criticallyDamped);
   });
 
   test('crit_spring', () {
-    var crit = new Spring(
+    var crit = new SpringSimulation(
         new SpringDesc.withDampingRatio(1.0, 100.0, 1.0), 0.0, 500.0, 0.0);
     expect(crit.type, SpringType.criticallyDamped);
 
@@ -98,7 +99,7 @@ void main() {
   });
 
   test('overdamped_spring', () {
-    var over = new Spring(
+    var over = new SpringSimulation(
         new SpringDesc.withDampingRatio(1.0, 100.0, 1.25), 0.0, 500.0, 0.0);
     expect(over.type, SpringType.overDamped);
 
@@ -117,7 +118,7 @@ void main() {
   });
 
   test('underdamped_spring', () {
-    var under = new Spring(
+    var under = new SpringSimulation(
         new SpringDesc.withDampingRatio(1.0, 100.0, 0.25), 0.0, 300.0, 0.0);
     expect(under.type, SpringType.underDamped);
 
@@ -136,12 +137,12 @@ void main() {
   test('test_kinetic_scroll', () {
     var spring = new SpringDesc.withDampingRatio(1.0, 50.0, 0.5);
 
-    var scroll = new Scroll(100.0, 800.0, 0.0, 300.0, spring, 0.3);
+    var scroll = new ScrollSimulation(100.0, 800.0, 0.0, 300.0, spring, 0.3);
 
     expect(scroll.isDone(0.0), false);
     expect(scroll.isDone(3.5), true);
 
-    var scroll2 = new Scroll(100.0, -800.0, 0.0, 300.0, spring, 0.3);
+    var scroll2 = new ScrollSimulation(100.0, -800.0, 0.0, 300.0, spring, 0.3);
     expect(scroll2.isDone(4.5), true);
   });
 }

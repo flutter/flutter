@@ -4,20 +4,20 @@
 
 part of newton;
 
-class Friction extends Simulation {
+class FrictionSimulation extends Simulation {
   final double _drag;
-  final double _dragNaturalLog;
+  final double _dragLog;
   final double _x;
   final double _v;
 
-  Friction(double drag, double position, double velocity)
+  FrictionSimulation(double drag, double position, double velocity)
       : _drag = drag,
-        _dragNaturalLog = Math.log(drag),
+        _dragLog = Math.log(drag),
         _x = position,
         _v = velocity;
 
   double x(double time) =>
-      _x + _v * Math.pow(_drag, time) / _dragNaturalLog - _v / _dragNaturalLog;
+      _x + _v * Math.pow(_drag, time) / _dragLog - _v / _dragLog;
 
   double dx(double time) => _v * Math.pow(_drag, time);
 

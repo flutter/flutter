@@ -32,14 +32,14 @@ enum SpringType { unknown, criticallyDamped, underDamped, overDamped, }
 
 /// Creates a spring simulation. Depending on the spring description, a
 /// critically, under or overdamped spring will be created.
-class Spring extends Simulation {
+class SpringSimulation extends Simulation {
   final double _endPosition;
 
   final _SpringSolution _solution;
 
   /// A spring description with the provided spring description, start distance,
   /// end distance and velocity.
-  Spring(SpringDesc desc, double start, double end, double velocity)
+  SpringSimulation(SpringDesc desc, double start, double end, double velocity)
       : this._endPosition = end,
         _solution = new _SpringSolution(desc, start - end, velocity);
 

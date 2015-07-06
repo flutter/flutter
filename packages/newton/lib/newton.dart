@@ -10,8 +10,8 @@ part 'src/simulation.dart';
 part 'src/simulation_group.dart';
 part 'src/utils.dart';
 
-part 'src/friction.dart';
-part 'src/gravity.dart';
-part 'src/scroll.dart';
-part 'src/spring.dart';
+part 'src/friction_simulation.dart';
+part 'src/gravity_simulation.dart';
+part 'src/scroll_simulation.dart';
+part 'src/spring_simulation.dart';
 part 'src/spring_solution.dart';
