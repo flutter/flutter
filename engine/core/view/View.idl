@@ -14,6 +14,6 @@ interface View {
   void setEventCallback(EventCallback callback);
   void setMetricsChangedCallback(VoidCallback callback);
 
-  void setBeginFrameCallback(BeginFrameCallback callback);
+  void setFrameCallback(FrameCallback callback);
   void scheduleFrame();
 };

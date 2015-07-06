@@ -24,6 +24,6 @@ void beginFrame(double timeStamp) {
 }
 
 void main() {
-  view.setBeginFrameCallback(beginFrame);
+  view.setFrameCallback(beginFrame);
   view.scheduleFrame();
 }

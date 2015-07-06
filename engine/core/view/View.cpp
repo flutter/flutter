@@ -42,9 +42,9 @@ void View::setMetricsChangedCallback(PassOwnPtr<VoidCallback> callback)
     m_metricsChangedCallback = callback;
 }
 
-void View::setBeginFrameCallback(PassOwnPtr<BeginFrameCallback> callback)
+void View::setFrameCallback(PassOwnPtr<FrameCallback> callback)
 {
-    m_beginFrameCallback = callback;
+    m_frameCallback = callback;
 }
 
 void View::scheduleFrame()
@@ -67,10 +67,10 @@ void View::handleInputEvent(PassRefPtr<Event> event)
 
 void View::beginFrame(base::TimeTicks frameTime)
 {
-    if (!m_beginFrameCallback)
+    if (!m_frameCallback)
         return;
     double frameTimeMS = (frameTime - base::TimeTicks()).InMillisecondsF();
-    m_beginFrameCallback->handleEvent(frameTimeMS);
+    m_frameCallback->handleEvent(frameTimeMS);
 }
 
 } // namespace blink

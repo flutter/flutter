@@ -88,6 +88,6 @@ void beginFrame(double timeStamp) {
 }
 
 void main() {
-  sky.view.setBeginFrameCallback(beginFrame);
+  sky.view.setFrameCallback(beginFrame);
   sky.view.scheduleFrame();
 }

@@ -27,18 +27,14 @@ void _beginFrame(double timeStamp) {
 }
 
 void init() {
-  assert(sky.window == null);
-  sky.view.setBeginFrameCallback(_beginFrame);
+  sky.view.setFrameCallback(_beginFrame);
 }
 
 void addPersistentFrameCallback(Callback callback) {
-  assert(sky.window == null);
   _persistentCallbacks.add(callback);
 }
 
 int requestAnimationFrame(Callback callback) {
-  if (sky.window != null)
-    return sky.window.requestAnimationFrame(callback);
   int id = _nextCallbackId++;
   _transientCallbacks[id] = callback;
   ensureVisualUpdate();
@@ -46,13 +42,10 @@ int requestAnimationFrame(Callback callback) {
 }
 
 void cancelAnimationFrame(int id) {
-  if (sky.window != null)
-    return sky.window.cancelAnimationFrame(id);
   _transientCallbacks.remove(id);
 }
 
 void ensureVisualUpdate() {
-  assert(sky.window == null);
   if (_haveScheduledVisualUpdate)
     return;
   sky.view.scheduleFrame();

@@ -43,6 +43,6 @@ void main() {
 
   layoutRoot.rootElement = block;
 
-  view.setBeginFrameCallback(beginFrame);
+  view.setFrameCallback(beginFrame);
   view.scheduleFrame();
 }

@@ -9,8 +9,8 @@
 #include "base/time/time.h"
 #include "sky/engine/core/html/VoidCallback.h"
 #include "sky/engine/core/painting/Picture.h"
-#include "sky/engine/core/view/BeginFrameCallback.h"
 #include "sky/engine/core/view/EventCallback.h"
+#include "sky/engine/core/view/FrameCallback.h"
 #include "sky/engine/public/platform/sky_display_metrics.h"
 #include "sky/engine/tonic/dart_wrappable.h"
 #include "sky/engine/wtf/PassRefPtr.h"
@@ -35,7 +35,7 @@ public:
 
     void setMetricsChangedCallback(PassOwnPtr<VoidCallback> callback);
 
-    void setBeginFrameCallback(PassOwnPtr<BeginFrameCallback> callback);
+    void setFrameCallback(PassOwnPtr<FrameCallback> callback);
     void scheduleFrame();
 
     void setDisplayMetrics(const SkyDisplayMetrics& metrics);
@@ -49,7 +49,7 @@ private:
     SkyDisplayMetrics m_displayMetrics;
     OwnPtr<EventCallback> m_eventCallback;
     OwnPtr<VoidCallback> m_metricsChangedCallback;
-    OwnPtr<BeginFrameCallback> m_beginFrameCallback;
+    OwnPtr<FrameCallback> m_frameCallback;
     RefPtr<Picture> m_picture;
 };
 

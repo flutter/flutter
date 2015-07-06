@@ -2,17 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef SKY_ENGINE_CORE_VIEW_BEGINFRAMECALLBACK_H_
-#define SKY_ENGINE_CORE_VIEW_BEGINFRAMECALLBACK_H_
+#ifndef SKY_ENGINE_CORE_VIEW_FRAMECALLBACK_H_
+#define SKY_ENGINE_CORE_VIEW_FRAMECALLBACK_H_
 
 namespace blink {
 
-class BeginFrameCallback {
+class FrameCallback {
 public:
-    virtual ~BeginFrameCallback() { }
+    virtual ~FrameCallback() { }
     virtual bool handleEvent(double highResTime) = 0;
 };
 
 }
 
-#endif  // SKY_ENGINE_CORE_VIEW_BEGINFRAMECALLBACK_H_
+#endif  // SKY_ENGINE_CORE_VIEW_FRAMECALLBACK_H_

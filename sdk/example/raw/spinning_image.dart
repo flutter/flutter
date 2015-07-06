@@ -69,5 +69,5 @@ bool handleEvent(Event event) {
 void main() {
   image_cache.load(url1).then(handleImageLoad);
   view.setEventCallback(handleEvent);
-  view.setBeginFrameCallback(beginFrame);
+  view.setFrameCallback(beginFrame);
 }
