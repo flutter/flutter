@@ -17,11 +17,18 @@ class SpringDesc {
   final double damping;
 
   SpringDesc(this.mass, this.springConstant, this.damping);
+
+  /// Create a spring given the mass, spring constant and the damping ratio. The
+  /// damping ratio is especially useful trying to determing the type of spring
+  /// to create. A ratio of 1.0 creates a critically damped spring, > 1.0
+  /// creates an overdamped spring and < 1.0 an underdamped one.
   SpringDesc.withDampingRatio(double mass, double springConstant, double zeta)
       : this.mass = mass,
         this.springConstant = springConstant,
         this.damping = zeta * 2.0 * Math.sqrt(mass * springConstant);
 }
+
+enum SpringType { unknown, criticallyDamped, underDamped, overDamped, }
 
 /// Creates a spring simulation. Depending on the spring description, a
 /// critically, under or overdamped spring will be created.
@@ -35,6 +42,8 @@ class Spring extends Simulation {
   Spring(SpringDesc desc, double start, double end, double velocity)
       : this._endPosition = end,
         _solution = new _SpringSolution(desc, start - end, velocity);
+
+  SpringType get type => _solution.type;
 
   double x(double time) => _endPosition + _solution.x(time);
 

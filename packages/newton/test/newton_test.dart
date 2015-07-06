@@ -56,4 +56,22 @@ void main() {
     expect(gravity.x(2.5), 725);
     expect(gravity.dx(2.5), 500.0);
   });
+
+  test('spring_types', () {
+    var crit = new Spring(
+        new SpringDesc.withDampingRatio(1.0, 100.0, 1.0), 0.0, 300.0, 0.0);
+    expect(crit.type, SpringType.criticallyDamped);
+
+    var under = new Spring(
+        new SpringDesc.withDampingRatio(1.0, 100.0, 0.75), 0.0, 300.0, 0.0);
+    expect(under.type, SpringType.underDamped);
+
+    var over = new Spring(
+        new SpringDesc.withDampingRatio(1.0, 100.0, 1.25), 0.0, 300.0, 0.0);
+    expect(over.type, SpringType.overDamped);
+
+    // Just so we don't forget how to create a desc without the ratio.
+    var other = new Spring(new SpringDesc(1.0, 100.0, 20.0), 0.0, 20.0, 20.0);
+    expect(other.type, SpringType.criticallyDamped);
+  });
 }

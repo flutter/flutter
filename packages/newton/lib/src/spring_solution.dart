@@ -20,6 +20,8 @@ abstract class _SpringSolution implements Simulatable {
 
     return null;
   }
+
+  SpringType get type;
 }
 
 class _CriticalSolution implements _SpringSolution {
@@ -31,6 +33,9 @@ class _CriticalSolution implements _SpringSolution {
     final double c2 = velocity / (r * distance);
     return new _CriticalSolution.withArgs(r, c1, c2);
   }
+
+  @override
+  SpringType get type => SpringType.criticallyDamped;
 
   _CriticalSolution.withArgs(double r, double c1, double c2)
       : _r = r,
@@ -67,6 +72,9 @@ class _OverdampedSolution implements _SpringSolution {
         _c1 = c1,
         _c2 = c2;
 
+  @override
+  SpringType get type => SpringType.overDamped;
+
   double x(double time) =>
       (_c1 * Math.pow(Math.E, _r1 * time) + _c2 * Math.pow(Math.E, _r2 * time));
 
@@ -94,6 +102,9 @@ class _UnderdampedSolution implements _SpringSolution {
         _r = r,
         _c1 = c1,
         _c2 = c2;
+
+  @override
+  SpringType get type => SpringType.underDamped;
 
   double x(double time) => Math.pow(Math.E, _r * time) *
       (_c1 * Math.cos(_w * time) + _c2 * Math.sin(_w * time));
