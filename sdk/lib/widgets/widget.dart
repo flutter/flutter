@@ -67,7 +67,11 @@ abstract class Widget {
     }
   }
 
-  // Override this if you have children and call walker on each child
+  // Override this if you have children and call walker on each child.
+  // Note that you may be called before the child has had its parent
+  // pointer set to point to you. Your walker, and any methods it
+  // invokes on your descendants, should not rely on the ancestor
+  // chain being correctly configured at this point.
   void walkChildren(WidgetTreeWalker walker) { }
 
   static void _notifyMountStatusChanged() {
@@ -118,7 +122,14 @@ abstract class Widget {
   }
 
   void removeChild(Widget node) {
+    // Call this when we no longer have a child equivalent to node.
+    // For example, when our child has changed type, or has been set to null.
+    // Do not call this when our child has been replaced by an equivalent but
+    // newer instance that will sync() with the old one, since in that case
+    // the subtree starting from the old node, as well as the render tree that
+    // belonged to the old node, continue to live on in the replacement node.
     node.remove();
+    assert(node.parent == null);
   }
 
   void detachRoot();
@@ -133,6 +144,8 @@ abstract class Widget {
       assert(newNode == null || newNode.mounted);
       assert(newNode is! RenderObjectWrapper ||
              (newNode is RenderObjectWrapper && newNode._ancestor != null)); // TODO(ianh): Simplify this once the analyzer is cleverer
+      if (newNode != null)
+        newNode.setParent(this);
       return newNode; // Nothing to do. Subtrees must be identical.
     }
 
@@ -154,6 +167,8 @@ abstract class Widget {
           oldNode._sync(newNode, slot);
           assert(oldNode.root is RenderObject);
           return oldNode;
+        } else {
+          oldNode.setParent(null);
         }
       } else {
         assert(oldNode.mounted);
@@ -163,6 +178,7 @@ abstract class Widget {
       }
     }
 
+    assert(oldNode == null || (oldNode.mounted == false && oldNode.parent == null));
     assert(!newNode.mounted);
     newNode.setParent(this);
     newNode._sync(oldNode, slot);
@@ -200,6 +216,7 @@ abstract class TagNode extends Widget {
   void _sync(Widget old, dynamic slot) {
     Widget oldChild = old == null ? null : (old as TagNode).child;
     child = syncChild(child, oldChild, slot);
+    assert(child.parent == this);
     assert(child.root != null);
     _root = child.root;
     assert(_root == root); // in case a subclass reintroduces it
@@ -462,6 +479,7 @@ abstract class Component extends Widget {
 
     _built = syncChild(_built, oldBuilt, slot);
     assert(_built != null);
+    assert(_built.parent == this);
     _dirty = false;
     _root = _built.root;
     assert(_root == root); // in case a subclass reintroduces it
@@ -663,7 +681,10 @@ abstract class OneChildRenderObjectWrapper extends RenderObjectWrapper {
   void syncRenderObject(RenderObjectWrapper old) {
     super.syncRenderObject(old);
     Widget oldChild = old == null ? null : (old as OneChildRenderObjectWrapper).child;
-    _child = syncChild(child, oldChild, null);
+    Widget newChild = child;
+    _child = syncChild(newChild, oldChild, null);
+    assert((newChild == null && child == null) || (newChild != null && child.parent == this));
+    assert(oldChild == null || child == oldChild || oldChild.parent == null);
   }
 
   void insertChildRoot(RenderObjectWrapper child, dynamic slot) {
@@ -703,7 +724,7 @@ abstract class MultiChildRenderObjectWrapper extends RenderObjectWrapper {
   final List<Widget> children;
 
   void walkChildren(WidgetTreeWalker walker) {
-    for(Widget child in children)
+    for (Widget child in children)
       walker(child);
   }
 
@@ -767,6 +788,7 @@ abstract class MultiChildRenderObjectWrapper extends RenderObjectWrapper {
     void sync(int atIndex) {
       children[atIndex] = syncChild(currentNode, oldNode, nextSibling);
       assert(children[atIndex] != null);
+      assert(children[atIndex].parent == this);
     }
 
     // Scan backwards from end of list while nodes can be directly synced
@@ -870,6 +892,7 @@ abstract class MultiChildRenderObjectWrapper extends RenderObjectWrapper {
     while (oldStartIndex < oldEndIndex) {
       oldNode = oldChildren[oldStartIndex];
       syncChild(null, oldNode, null);
+      assert(oldNode.parent == null);
       advanceOldStartIndex();
     }
 

@@ -181,19 +181,15 @@ class Scaffold extends RenderObjectWrapper {
     Widget floatingActionButton,
     Widget drawer
   }) : super(key: key) {
-    this[ScaffoldSlots.body] = body;
-    this[ScaffoldSlots.statusBar] = statusBar;
-    this[ScaffoldSlots.toolbar] = toolbar;
-    this[ScaffoldSlots.snackBar] = snackBar;
-    this[ScaffoldSlots.floatingActionButton] = floatingActionButton;
-    this[ScaffoldSlots.drawer] = drawer;
+    _slots[ScaffoldSlots.body] = body;
+    _slots[ScaffoldSlots.statusBar] = statusBar;
+    _slots[ScaffoldSlots.toolbar] = toolbar;
+    _slots[ScaffoldSlots.snackBar] = snackBar;
+    _slots[ScaffoldSlots.floatingActionButton] = floatingActionButton;
+    _slots[ScaffoldSlots.drawer] = drawer;
   }
 
   Map<ScaffoldSlots, Widget> _slots = new Map<ScaffoldSlots, Widget>();
-  Widget operator[] (ScaffoldSlots slot) => _slots[slot];
-  void operator[]= (ScaffoldSlots slot, Widget value) {
-    _slots[slot] = value;
-  }
 
   RenderScaffold get root => super.root;
   RenderScaffold createNode() => new RenderScaffold();
@@ -226,8 +222,10 @@ class Scaffold extends RenderObjectWrapper {
   void syncRenderObject(Widget old) {
     super.syncRenderObject(old);
     for (ScaffoldSlots slot in ScaffoldSlots.values) {
-      Widget widget = this[slot];
-      this[slot] = syncChild(widget, old is Scaffold ? old[slot] : null, slot);
+      Widget widget = _slots[slot];
+      _slots[slot] = syncChild(widget, old is Scaffold ? old._slots[slot] : null, slot);
+      assert((_slots[slot] == null) == (widget == null));
+      assert(_slots[slot] == null || _slots[slot].parent == this);
     }
   }
 
