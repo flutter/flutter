@@ -24,6 +24,7 @@ import org.chromium.mojom.sky.InputEvent;
 import org.chromium.mojom.sky.PointerData;
 import org.chromium.mojom.sky.PointerKind;
 import org.chromium.mojom.sky.SkyEngine;
+import org.chromium.mojom.sky.ViewportMetrics;
 
 /**
  * A view containing Sky
@@ -37,9 +38,21 @@ public class PlatformViewAndroid extends SurfaceView
     private SkyEngine.Proxy mSkyEngine;
     private final SurfaceHolder.Callback mSurfaceCallback;
     private GestureProvider mGestureProvider;
+    private final EdgeDims mPadding;
 
-    public PlatformViewAndroid(Context context) {
+    /**
+     * Dimensions in each of the four cardinal directions.
+     */
+    public static class EdgeDims {
+        public double top = 0.0;
+        public double right = 0.0;
+        public double bottom = 0.0;
+        public double left = 0.0;
+    }
+
+    public PlatformViewAndroid(Context context, EdgeDims padding) {
         super(context);
+        mPadding = padding;
 
         setFocusable(true);
         setFocusableInTouchMode(true);
@@ -53,7 +66,17 @@ public class PlatformViewAndroid extends SurfaceView
             @Override
             public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
                 assert mSkyEngine != null;
-                mSkyEngine.onViewportMetricsChanged(width, height, density);
+                ViewportMetrics metrics = new ViewportMetrics();
+                metrics.physicalWidth = width;
+                metrics.physicalHeight = height;
+                metrics.devicePixelRatio = density;
+                if (mPadding != null) {
+                    metrics.paddingTop = mPadding.top;
+                    metrics.paddingRight = mPadding.right;
+                    metrics.paddingBottom = mPadding.bottom;
+                    metrics.paddingLeft = mPadding.left;
+                }
+                mSkyEngine.onViewportMetricsChanged(metrics);
             }
 
             @Override
