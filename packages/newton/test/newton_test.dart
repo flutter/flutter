@@ -132,4 +132,16 @@ void main() {
 
     expect(under.isDone(6.0), true);
   });
+
+  test('test_kinetic_scroll', () {
+    var spring = new SpringDesc.withDampingRatio(1.0, 50.0, 0.5);
+
+    var scroll = new Scroll(100.0, 800.0, 0.0, 300.0, spring, 0.3);
+
+    expect(scroll.isDone(0.0), false);
+    expect(scroll.isDone(3.5), true);
+
+    var scroll2 = new Scroll(100.0, -800.0, 0.0, 300.0, spring, 0.3);
+    expect(scroll2.isDone(4.5), true);
+  });
 }

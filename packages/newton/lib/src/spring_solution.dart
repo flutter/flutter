@@ -34,7 +34,6 @@ class _CriticalSolution implements _SpringSolution {
     return new _CriticalSolution.withArgs(r, c1, c2);
   }
 
-  @override
   SpringType get type => SpringType.criticallyDamped;
 
   _CriticalSolution.withArgs(double r, double c1, double c2)
@@ -72,7 +71,6 @@ class _OverdampedSolution implements _SpringSolution {
         _c1 = c1,
         _c2 = c2;
 
-  @override
   SpringType get type => SpringType.overDamped;
 
   double x(double time) =>
@@ -103,7 +101,6 @@ class _UnderdampedSolution implements _SpringSolution {
         _c1 = c1,
         _c2 = c2;
 
-  @override
   SpringType get type => SpringType.underDamped;
 
   double x(double time) => Math.pow(Math.E, _r * time) *

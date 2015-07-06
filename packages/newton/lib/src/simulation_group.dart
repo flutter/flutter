@@ -4,24 +4,31 @@
 
 part of newton;
 
-/// The abstract base class of all composite simulations. Concrete subclasses
+/// The abstract base class for all composite simulations. Concrete subclasses
 /// must implement the appropriate methods to select the appropriate simulation
 /// at a given time interval. The simulation group takes care to call the `step`
 /// method at appropriate intervals. If more fine grained control over the the
-/// step is necessary, subclasses may override the `Simulatable` methods.
+/// step is necessary, subclasses may override `Simulatable` methods.
 abstract class SimulationGroup extends Simulation {
+
+  /// The currently active simulation
   Simulation get currentSimulation;
 
+  /// The time offset applied to the currently active simulation;
+  double get currentIntervalOffset;
+
+  /// Called when a significant change in the interval is detected. Subclasses
+  /// must decide if the the current simulation must be switched (or updated).
   void step(double time);
 
   double x(double time) {
     _stepIfNecessary(time);
-    return currentSimulation.x(time);
+    return currentSimulation.x(time - currentIntervalOffset);
   }
 
   double dx(double time) {
     _stepIfNecessary(time);
-    return currentSimulation.dx(time);
+    return currentSimulation.dx(time - currentIntervalOffset);
   }
 
   @override
