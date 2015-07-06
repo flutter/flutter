@@ -9,6 +9,7 @@
 #include "base/android/library_loader/library_loader_hooks.h"
 #include "base/bind.h"
 #include "base/logging.h"
+#include "mojo/android/system/base_run_loop.h"
 #include "mojo/android/system/core_impl.h"
 #include "sky/shell/android/platform_service_provider_android.h"
 #include "sky/shell/android/platform_view_android.h"
@@ -19,6 +20,7 @@ namespace {
 
 base::android::RegistrationMethod kSkyRegisteredMethods[] = {
     {"CoreImpl", mojo::android::RegisterCoreImpl},
+    {"BaseRunLoop", mojo::android::RegisterBaseRunLoop},
     {"PlatformServiceProvider", sky::shell::RegisterPlatformServiceProvider},
     {"PlatformViewAndroid", sky::shell::PlatformViewAndroid::Register},
     {"SkyMain", sky::shell::RegisterSkyMain},

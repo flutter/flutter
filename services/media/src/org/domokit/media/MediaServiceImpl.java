@@ -20,7 +20,6 @@ import java.util.concurrent.Executors;
  * Android implementation of MediaService.
  */
 public class MediaServiceImpl implements MediaService {
-    private static final String TAG = "MediaServiceImpl";
     private final Core mCore;
     private final Context mContext;
     private static ExecutorService sThreadPool;
