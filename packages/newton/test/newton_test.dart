@@ -8,8 +8,6 @@ import 'package:test/test.dart';
 
 import 'package:newton/newton.dart';
 
-typedef bool SimulationTestHandler(int millis);
-
 void main() {
   test('test_friction', () {
     var friction = new Friction(0.3, 100.0, 400.0);
@@ -27,5 +25,35 @@ void main() {
 
     expect(friction.isDone(5.0), true);
     expect(friction.x(5.0) > 431 && friction.x(5.0) < 432, true);
+  });
+
+  test('test_gravity', () {
+    var gravity = new Gravity(200.0, 100.0, 600.0, 0.0);
+
+    expect(gravity.isDone(0.0), false);
+    expect(gravity.x(0.0), 100.0);
+    expect(gravity.dx(0.0), 0.0);
+
+    // Starts at 100
+    expect(gravity.x(0.25), 106.25);
+    expect(gravity.x(0.50), 125);
+    expect(gravity.x(0.75), 156.25);
+    expect(gravity.x(1.00), 200);
+    expect(gravity.x(1.25), 256.25);
+    expect(gravity.x(1.50), 325);
+    expect(gravity.x(1.75), 406.25);
+
+    // Starts at 0.0
+    expect(gravity.dx(0.25), 50.0);
+    expect(gravity.dx(0.50), 100);
+    expect(gravity.dx(0.75), 150.00);
+    expect(gravity.dx(1.00), 200.0);
+    expect(gravity.dx(1.25), 250.0);
+    expect(gravity.dx(1.50), 300);
+    expect(gravity.dx(1.75), 350);
+
+    expect(gravity.isDone(2.5), true);
+    expect(gravity.x(2.5), 725);
+    expect(gravity.dx(2.5), 500.0);
   });
 }
