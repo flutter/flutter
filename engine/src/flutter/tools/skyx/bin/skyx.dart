@@ -14,6 +14,21 @@ const List<String> kDensities = const ['drawable-xxhdpi'];
 const List<String> kThemes = const ['white', 'black', 'grey600'];
 const List<int> kSizes = const [24];
 
+class Asset {
+  final String base;
+  final String key;
+
+  Asset({ this.base, this.key });
+}
+
+Iterable<Asset> parseAssets(Map manifestDescriptor, String manifestPath) sync* {
+  if (manifestDescriptor == null || !manifestDescriptor.containsKey('assets'))
+    return;
+  String basePath = new File(manifestPath).parent.path;
+  for (String asset in manifestDescriptor['assets'])
+    yield new Asset(base: basePath, key: asset);
+}
+
 class MaterialAsset {
   final String name;
   final String density;
@@ -71,10 +86,10 @@ Future loadManifest(String manifestPath) async {
   return loadYaml(manifestDescriptor);
 }
 
-Future<ArchiveFile> createFile(MaterialAsset asset, String assetBase) async {
-  File file = new File('${assetBase}/${asset.key}');
+Future<ArchiveFile> createFile(String key, String assetBase) async {
+  File file = new File('${assetBase}/${key}');
   List<int> content = await file.readAsBytes();
-  return new ArchiveFile.noCompress(asset.key, content.length, content);
+  return new ArchiveFile.noCompress(key, content.length, content);
 }
 
 Future<ArchiveFile> createSnapshotFile(String snapshotPath) async {
@@ -99,6 +114,7 @@ main(List<String> argv) async {
 
   String manifestPath = args['manifest'];
   Map manifestDescriptor = await loadManifest(manifestPath);
+  Iterable<Asset> assets = parseAssets(manifestDescriptor, manifestPath);
   Iterable<MaterialAsset> materialAssets = parseMaterialAssets(manifestDescriptor);
 
   Archive archive = new Archive();
@@ -107,8 +123,11 @@ main(List<String> argv) async {
   if (snapshot != null)
     archive.addFile(await createSnapshotFile(snapshot));
 
+  for (Asset asset in assets)
+    archive.addFile(await createFile(asset.key, asset.base));
+
   for (MaterialAsset asset in materialAssets)
-    archive.addFile(await createFile(asset, args['asset-base']));
+    archive.addFile(await createFile(asset.key, args['asset-base']));
 
   File outputFile = new File(args['output-file']);
   await outputFile.writeAsBytes(new ZipEncoder().encode(archive));

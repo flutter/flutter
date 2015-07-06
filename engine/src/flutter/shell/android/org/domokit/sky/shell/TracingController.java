@@ -54,7 +54,6 @@ class TracingController {
 
     class TracingIntentFilter extends IntentFilter {
         TracingIntentFilter(Context context) {
-            Log.e(TAG, context.getPackageName() + TRACING_START);
             addAction(context.getPackageName() + TRACING_START);
             addAction(context.getPackageName() + TRACING_STOP);
         }
