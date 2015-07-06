@@ -14,12 +14,13 @@ import 'package:sky/widgets/widget.dart';
 
 class TabbedNavigatorApp extends App {
   // The index of the selected tab for each of the TabNavigators constructed below.
-  List<int> selectedIndices = new List<int>.filled(4, 0);
+  List<int> selectedIndices = new List<int>.filled(5, 0);
 
-  TabNavigator _buildTabNavigator(int n, List<TabNavigatorView> views) {
+  TabNavigator _buildTabNavigator(int n, List<TabNavigatorView> views, {scrollable: false}) {
     return new TabNavigator(
       views: views,
       selectedIndex: selectedIndices[n],
+      scrollable: scrollable,
       onChanged: (tabIndex) {
         setState(() { selectedIndices[n] = tabIndex; } );
       }
@@ -72,9 +73,32 @@ class TabbedNavigatorApp extends App {
     return _buildTabNavigator(n, views);
   }
 
+  TabNavigator _buildScrollableTabNavigator(int n) {
+    Iterable<TabNavigatorView> views = [
+      "MIN WIDTH",
+      "THIS TAB LABEL IS SO WIDE THAT IT OCCUPIES TWO LINES",
+      "THIS TAB IS PRETTY WIDE TOO",
+      "MORE",
+      "TABS",
+      "TO", 
+      "STRETCH",
+      "OUT",
+      "THE",
+      "TAB BAR"
+      ]
+      .map((text) {
+        return new TabNavigatorView(
+          label: new TabLabel(text: text),
+          builder: () => _buildContent(text)
+        );
+      });
+    return _buildTabNavigator(n, views.toList(), scrollable: true);
+  }
+
+
   Container _buildCard(TabNavigator tabNavigator) {
     return new Container(
-     child: new Card(child: tabNavigator),
+     child: new Card(child: new Padding(child: tabNavigator, padding: const EdgeDims.all(8.0))),
      padding: const EdgeDims.all(12.0),
      decoration: new BoxDecoration(backgroundColor: Theme.of(this).primarySwatch[50])
     );
@@ -93,10 +117,15 @@ class TabbedNavigatorApp extends App {
       new TabNavigatorView(
         label: const TabLabel(text: 'BOTH'),
         builder: () => _buildCard(_buildTextAndIconLabelsTabNavigator(2))
+      ),
+      new TabNavigatorView(
+        label: const TabLabel(text: 'SCROLL'),
+        builder: () => _buildCard(_buildScrollableTabNavigator(3))
       )
     ];
 
-    TabNavigator tabNavigator = _buildTabNavigator(3, views);
+    TabNavigator tabNavigator = _buildTabNavigator(4, views);
+    assert(selectedIndices.length == 5);
 
     ToolBar toolbar = new ToolBar(
       center: new Text('Tabbed Navigator', style: typography.white.title)
