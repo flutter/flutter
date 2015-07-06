@@ -124,17 +124,19 @@ abstract class Widget {
   void detachRoot();
 
   // Returns the child which should be retained as the child of this node.
-  Widget syncChild(Widget node, Widget oldNode, dynamic slot) {
+  Widget syncChild(Widget newNode, Widget oldNode, dynamic slot) {
 
-    assert(oldNode is! Component || (oldNode is Component && !oldNode._disqualifiedFromEverAppearingAgain)); // TODO(ianh): Simplify this once the analyzer is cleverer
+    assert(oldNode is! Component ||
+           (oldNode is Component && !oldNode._disqualifiedFromEverAppearingAgain)); // TODO(ianh): Simplify this once the analyzer is cleverer
 
-    if (node == oldNode) {
-      assert(node == null || node.mounted);
-      assert(node is! RenderObjectWrapper || (node is RenderObjectWrapper && node._ancestor != null)); // TODO(ianh): Simplify this once the analyzer is cleverer
-      return node; // Nothing to do. Subtrees must be identical.
+    if (newNode == oldNode) {
+      assert(newNode == null || newNode.mounted);
+      assert(newNode is! RenderObjectWrapper ||
+             (newNode is RenderObjectWrapper && newNode._ancestor != null)); // TODO(ianh): Simplify this once the analyzer is cleverer
+      return newNode; // Nothing to do. Subtrees must be identical.
     }
 
-    if (node == null) {
+    if (newNode == null) {
       // the child in this slot has gone away
       assert(oldNode.mounted);
       oldNode.detachRoot();
@@ -144,12 +146,12 @@ abstract class Widget {
     }
 
     if (oldNode != null) {
-      if (oldNode.runtimeType == node.runtimeType && oldNode.key == node.key) {
-        if (node._retainStatefulNodeIfPossible(oldNode)) {
+      if (oldNode.runtimeType == newNode.runtimeType && oldNode.key == newNode.key) {
+        if (newNode._retainStatefulNodeIfPossible(oldNode)) {
           assert(oldNode.mounted);
-          assert(!node.mounted);
+          assert(!newNode.mounted);
           oldNode.setParent(this);
-          oldNode._sync(node, slot);
+          oldNode._sync(newNode, slot);
           assert(oldNode.root is RenderObject);
           return oldNode;
         }
@@ -161,11 +163,11 @@ abstract class Widget {
       }
     }
 
-    assert(!node.mounted);
-    node.setParent(this);
-    node._sync(oldNode, slot);
-    assert(node.root is RenderObject);
-    return node;
+    assert(!newNode.mounted);
+    newNode.setParent(this);
+    newNode._sync(oldNode, slot);
+    assert(newNode.root is RenderObject);
+    return newNode;
   }
 
   String toString() {
@@ -436,20 +438,18 @@ abstract class Component extends Widget {
   //      assert(_built != null && old == null)
   // 3) Syncing against an old version
   //      assert(_built == null && old != null)
-  void _sync(Widget old, dynamic slot) {
+  void _sync(Component old, dynamic slot) {
     assert(_built == null || old == null);
     assert(!_disqualifiedFromEverAppearingAgain);
-
-    Component oldComponent = old as Component;
 
     _slot = slot;
 
     var oldBuilt;
-    if (oldComponent == null) {
+    if (old == null) {
       oldBuilt = _built;
     } else {
       assert(_built == null);
-      oldBuilt = oldComponent._built;
+      oldBuilt = old._built;
     }
 
     int lastOrder = _currentOrder;
