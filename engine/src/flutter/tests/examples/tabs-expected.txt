@@ -12,14 +12,14 @@ PAINT FOR FRAME #2 ----------------------------------------------
 2 |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 2 |  |  | paintChild RenderTabBar at Point(0.0, 81.0)
 2 |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
-2 |  |  |  | drawRect(Rect.fromLTRB(0.0, 81.0, 800.0, 129.0), Paint(color:Color(0xff3f51b5)))
+2 |  |  |  | drawRect(Rect.fromLTRB(0.0, 81.0, 800.0, 129.0), Paint(color:Color(0xff2196f3)))
 2 |  |  |  | paintChild RenderInkWell at Point(0.0, 81.0)
 2 |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 2 |  |  |  |  | paintChild RenderOpacity at Point(115.33333333333334, 97.0)
 2 |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 2 |  |  |  |  |  | translate(115.33333333333334, 97.0)
 2 |  |  |  |  |  | translate(-115.33333333333334, -97.0)
-2 |  |  |  | drawRect(Rect.fromLTRB(0.0, 127.0, 266.6666564941406, 129.0), Paint(color:Color(0xffff4081)))
+2 |  |  |  | drawRect(Rect.fromLTRB(0.0, 127.0, 266.6666564941406, 129.0), Paint(color:Color(0xff2196f3)))
 2 |  |  |  | paintChild RenderInkWell at Point(266.6666666666667, 81.0)
 2 |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 2 |  |  |  |  | paintChild RenderOpacity at Point(377.5, 97.0)
@@ -38,7 +38,7 @@ PAINT FOR FRAME #2 ----------------------------------------------
 2 |  |  |  |  |  | restore
 2 |  |  | paintChild RenderDecoratedBox at Point(0.0, 129.0)
 2 |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
-2 |  |  |  | drawRect(Rect.fromLTRB(0.0, 129.0, 800.0, 600.0), Paint(color:Color(0xffe8eaf6)))
+2 |  |  |  | drawRect(Rect.fromLTRB(0.0, 129.0, 800.0, 600.0), Paint(color:Color(0xffe3f2fd)))
 2 |  |  |  | paintChild RenderPadding at Point(12.0, 141.0)
 2 |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 2 |  |  |  |  | paintChild RenderDecoratedBox at Point(16.0, 145.0)
@@ -48,14 +48,14 @@ PAINT FOR FRAME #2 ----------------------------------------------
 2 |  |  |  |  |  | clipRRect()
 2 |  |  |  |  |  | paintChild RenderTabBar at Point(16.0, 145.0)
 2 |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
-2 |  |  |  |  |  |  | drawRect(Rect.fromLTRB(16.0, 145.0, 784.0, 193.0), Paint(color:Color(0xff3f51b5)))
+2 |  |  |  |  |  |  | drawRect(Rect.fromLTRB(16.0, 145.0, 784.0, 193.0), Paint(color:Color(0xff2196f3)))
 2 |  |  |  |  |  |  | paintChild RenderInkWell at Point(16.0, 145.0)
 2 |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 2 |  |  |  |  |  |  |  | paintChild RenderOpacity at Point(96.5, 159.0)
 2 |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 2 |  |  |  |  |  |  |  |  | translate(96.5, 159.0)
 2 |  |  |  |  |  |  |  |  | translate(-96.5, -159.0)
-2 |  |  |  |  |  |  | drawRect(Rect.fromLTRB(16.0, 191.0, 208.0, 193.0), Paint(color:Color(0xffff4081)))
+2 |  |  |  |  |  |  | drawRect(Rect.fromLTRB(16.0, 191.0, 208.0, 193.0), Paint(color:Color(0xff2196f3)))
 2 |  |  |  |  |  |  | paintChild RenderInkWell at Point(208.0, 145.0)
 2 |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 2 |  |  |  |  |  |  |  | paintChild RenderOpacity at Point(287.0, 159.0)
@@ -89,7 +89,7 @@ PAINT FOR FRAME #2 ----------------------------------------------
 2 |  |  |  |  |  | restore
 2 |  | paintChild RenderDecoratedBox at Point(0.0, 0.0)
 2 |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
-2 |  |  | drawRect(Rect.fromLTRB(0.0, 0.0, 800.0, 81.0), Paint(color:Color(0xff3f51b5), drawLooper:true))
+2 |  |  | drawRect(Rect.fromLTRB(0.0, 0.0, 800.0, 81.0), Paint(color:Color(0xff2196f3), drawLooper:true))
 2 |  |  | paintChild RenderFlex at Point(8.0, 0.0)
 2 |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 2 |  |  |  | paintChild RenderConstrainedBox at Point(8.0, 25.0)
