@@ -71,7 +71,7 @@ class StocksApp extends App {
       theme = new ThemeData(
         brightness: ThemeBrightness.light,
         primarySwatch: colors.Purple,
-        accentColor: colors.RedAccent[200]
+        floatingActionButtonColor: colors.RedAccent[200]
       );
     } else {
       theme = new ThemeData(
