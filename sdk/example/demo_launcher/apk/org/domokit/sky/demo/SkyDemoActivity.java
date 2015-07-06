@@ -12,17 +12,10 @@ import org.domokit.sky.shell.SkyActivity;
  * Main activity for SkyDemo.
  */
 public class SkyDemoActivity extends SkyActivity {
-    private static final String DEFAULT_URL = "https://domokit.github.io/example/demo_launcher/lib/main.dart";
-
     @Override
     protected void onSkyReady() {
         Intent intent = getIntent();
         String action = intent.getAction();
-
-        if (Intent.ACTION_MAIN.equals(action)) {
-            loadUrl(DEFAULT_URL);
-            return;
-        }
 
         if (Intent.ACTION_VIEW.equals(action)) {
             String bundleName = intent.getStringExtra("bundleName");

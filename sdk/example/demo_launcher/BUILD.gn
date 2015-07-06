@@ -2,9 +2,15 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-import("//sky/build/skyx.gni")
+import("//sky/build/sky_app.gni")
 
-skyx("demo_launcher") {
+sky_app("demo_launcher") {
+  apk_name = "SkyDemo"
   main_dart = "lib/main.dart"
   manifest = "sky.yaml"
+
+  deps = [
+    "//sky/sdk/example/demo_launcher/apk:java",
+    "//sky/sdk/example/demo_launcher/apk:resources",
+  ]
 }

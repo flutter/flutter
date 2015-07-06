@@ -2,26 +2,8 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-import("//build/config/android/config.gni")
 import("//build/config/android/rules.gni")
 import("//sky/build/skyx.gni")
-
-template("sky_apk") {
-  android_apk(target_name) {
-    apk_name = invoker.apk_name
-    android_manifest = invoker.android_manifest
-
-    native_libs = [ "libsky_shell.so" ]
-    asset_location = "$root_build_dir/sky_shell/assets"
-
-    deps = [
-             "//base:base_java",
-             "//sky/shell:assets",
-             "//sky/shell:java",
-             "//sky/shell:sky_shell",
-           ] + invoker.deps
-  }
-}
 
 template("sky_app") {
   skyx("app") {

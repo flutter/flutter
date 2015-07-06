@@ -4,7 +4,7 @@
 
 assert(is_android)
 
-import("//sky/apk/rules.gni")
+import("//sky/build/sky_app.gni")
 
 sky_app("stocks") {
   apk_name = "Stocks"

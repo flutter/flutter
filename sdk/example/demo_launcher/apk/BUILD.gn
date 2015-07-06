@@ -6,7 +6,6 @@ assert(is_android)
 
 import("//build/config/android/config.gni")
 import("//build/config/android/rules.gni")
-import("//sky/apk/rules.gni")
 
 android_library("java") {
   java_files = [
@@ -30,16 +29,7 @@ android_library("java") {
   ]
 }
 
-sky_apk("demo") {
-  apk_name = "SkyDemo"
-  android_manifest = "AndroidManifest.xml"
-  deps = [
-    ":java",
-    ":demo_resources",
-  ]
-}
-
-android_resources("demo_resources") {
+android_resources("resources") {
   resource_dirs = [ "res" ]
   android_manifest = "AndroidManifest.xml"
 }
