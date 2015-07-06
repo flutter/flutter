@@ -36,7 +36,6 @@
 #include "sky/engine/core/editing/InputMethodController.h"
 #include "sky/engine/core/editing/SpellChecker.h"
 #include "sky/engine/core/events/Event.h"
-#include "sky/engine/core/fetch/ResourceFetcher.h"
 #include "sky/engine/core/frame/FrameConsole.h"
 #include "sky/engine/core/frame/FrameDestructionObserver.h"
 #include "sky/engine/core/frame/FrameHost.h"
@@ -45,7 +44,6 @@
 #include "sky/engine/core/frame/NewEventHandler.h"
 #include "sky/engine/core/frame/Settings.h"
 #include "sky/engine/core/loader/FrameLoaderClient.h"
-#include "sky/engine/core/loader/MojoLoader.h"
 #include "sky/engine/core/page/EventHandler.h"
 #include "sky/engine/core/page/FocusController.h"
 #include "sky/engine/core/page/Page.h"
@@ -64,7 +62,6 @@ namespace blink {
 inline LocalFrame::LocalFrame(FrameLoaderClient* client, FrameHost* host)
     : Frame(client, host)
     , m_deprecatedLoader(this)
-    , m_mojoLoader(adoptPtr(new MojoLoader(*this)))
     , m_editor(Editor::create(*this))
     , m_spellChecker(SpellChecker::create(*this))
     , m_selection(FrameSelection::create(this))
@@ -98,11 +95,6 @@ LocalFrame::~LocalFrame()
 FrameLoaderClient* LocalFrame::loaderClient() const
 {
     return static_cast<FrameLoaderClient*>(client());
-}
-
-FetchContext& LocalFrame::fetchContext() const
-{
-    return m_deprecatedLoader.fetchContext();
 }
 
 void LocalFrame::detach()

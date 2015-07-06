@@ -65,8 +65,6 @@ public:
     bool isPending() const;
     bool knownToBeOpaque(const RenderObject*) const;
 
-    void loadSubimages(ResourceFetcher*);
-
 protected:
     explicit CSSImageGeneratorValue(ClassType);
 

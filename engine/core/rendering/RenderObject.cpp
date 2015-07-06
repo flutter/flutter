@@ -35,7 +35,6 @@
 #include "sky/engine/core/editing/EditingBoundary.h"
 #include "sky/engine/core/editing/FrameSelection.h"
 #include "sky/engine/core/editing/htmlediting.h"
-#include "sky/engine/core/fetch/ResourceLoader.h"
 #include "sky/engine/core/frame/FrameView.h"
 #include "sky/engine/core/frame/LocalFrame.h"
 #include "sky/engine/core/frame/Settings.h"

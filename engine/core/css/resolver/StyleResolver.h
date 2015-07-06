@@ -98,8 +98,6 @@ private:
     // FIXME: This should probably go away, folded into FontBuilder.
     void updateFont(StyleResolverState&);
 
-    void loadPendingResources(StyleResolverState&);
-
     void matchRules(Element&, ElementRuleCollector&);
 
     void applyMatchedProperties(StyleResolverState&, const MatchResult&);

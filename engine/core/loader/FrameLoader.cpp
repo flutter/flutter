@@ -39,9 +39,6 @@
 #include "sky/engine/core/editing/Editor.h"
 #include "sky/engine/core/editing/UndoStack.h"
 #include "sky/engine/core/events/PageTransitionEvent.h"
-#include "sky/engine/core/fetch/FetchContext.h"
-#include "sky/engine/core/fetch/ResourceFetcher.h"
-#include "sky/engine/core/fetch/ResourceLoader.h"
 #include "sky/engine/core/frame/FrameHost.h"
 #include "sky/engine/core/frame/FrameView.h"
 #include "sky/engine/core/frame/LocalDOMWindow.h"
@@ -49,7 +46,6 @@
 #include "sky/engine/core/frame/Settings.h"
 #include "sky/engine/core/inspector/ConsoleMessage.h"
 #include "sky/engine/core/loader/DocumentLoadTiming.h"
-#include "sky/engine/core/loader/FrameFetchContext.h"
 #include "sky/engine/core/loader/FrameLoaderClient.h"
 #include "sky/engine/core/loader/UniqueIdentifier.h"
 #include "sky/engine/core/page/ChromeClient.h"
@@ -71,7 +67,6 @@ namespace blink {
 
 FrameLoader::FrameLoader(LocalFrame* frame)
     : m_frame(frame)
-    , m_fetchContext(FrameFetchContext::create(frame))
     , m_inStopAllLoaders(false)
 {
 }
@@ -152,8 +147,6 @@ void FrameLoader::stopAllLoaders()
     // still  parsing. Failure to do so can cause a world leak.
     if (m_frame->document()->parsing())
         stopLoading();
-
-    m_frame->document()->fetcher()->stopFetching();
 
     m_inStopAllLoaders = false;
 }

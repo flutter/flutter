@@ -26,7 +26,6 @@
 #include "sky/engine/core/editing/Caret.h"
 #include "sky/engine/core/editing/UndoStack.h"
 #include "sky/engine/core/events/Event.h"
-#include "sky/engine/core/fetch/ResourceFetcher.h"
 #include "sky/engine/core/frame/DOMTimer.h"
 #include "sky/engine/core/frame/FrameConsole.h"
 #include "sky/engine/core/frame/FrameHost.h"
@@ -211,10 +210,6 @@ void Page::settingsChanged(SettingsDelegate::ChangeType changeType)
         break;
     }
     case SettingsDelegate::ImageLoadingChange:
-        if (mainFrame() && mainFrame()->document()) {
-            mainFrame()->document()->fetcher()->setImagesEnabled(settings().imagesEnabled());
-            mainFrame()->document()->fetcher()->setAutoLoadImages(settings().loadsImagesAutomatically());
-        }
         break;
     case SettingsDelegate::FontFamilyChange:
         if (mainFrame()->document() && mainFrame()->document()->isActive())

@@ -58,7 +58,6 @@
 #include "sky/engine/core/css/resolver/StyleBuilder.h"
 #include "sky/engine/core/css/resolver/StyleResolverState.h"
 #include "sky/engine/core/css/resolver/StyleResolverStats.h"
-#include "sky/engine/core/css/resolver/StyleResourceLoader.h"
 #include "sky/engine/core/dom/NodeRenderStyle.h"
 #include "sky/engine/core/dom/StyleEngine.h"
 #include "sky/engine/core/dom/Text.h"
@@ -182,12 +181,6 @@ PassRefPtr<RenderStyle> StyleResolver::styleForDocument(Document& document)
     document.setupFontBuilder(documentStyle.get());
 
     return documentStyle.release();
-}
-
-void StyleResolver::loadPendingResources(StyleResolverState& state)
-{
-    StyleResourceLoader loader(m_document.fetcher());
-    loader.loadPendingResources(state.style(), state.elementStyleResources());
 }
 
 PassRefPtr<RenderStyle> StyleResolver::styleForElement(Element* element, RenderStyle* defaultParent)
@@ -327,9 +320,6 @@ bool StyleResolver::applyAnimatedProperties(StyleResolverState& state, Element* 
 
     applyAnimatedProperties<LowPriorityProperties>(state, activeInterpolationsForAnimations);
     applyAnimatedProperties<LowPriorityProperties>(state, activeInterpolationsForTransitions);
-
-    // Start loading resources used by animations.
-    loadPendingResources(state);
 
     ASSERT(!state.fontBuilder().fontDirty());
 
@@ -487,8 +477,6 @@ void StyleResolver::applyMatchedProperties(StyleResolverState& state, const Matc
         applyInheritedOnly = false;
 
     applyMatchedProperties<LowPriorityProperties>(state, matchResult, applyInheritedOnly);
-
-    loadPendingResources(state);
 
     if (!cachedMatchedProperties && cacheHash && MatchedPropertiesCache::isCacheable(element, state.style(), state.parentStyle())) {
         INCREMENT_STYLE_STATS_COUNTER(*this, matchedPropertyCacheAdded);

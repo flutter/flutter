@@ -47,8 +47,6 @@
 #include "sky/engine/core/events/KeyboardEvent.h"
 #include "sky/engine/core/events/ScopedEventQueue.h"
 #include "sky/engine/core/events/TextEvent.h"
-#include "sky/engine/core/fetch/ImageResource.h"
-#include "sky/engine/core/fetch/ResourceFetcher.h"
 #include "sky/engine/core/frame/FrameView.h"
 #include "sky/engine/core/frame/LocalFrame.h"
 #include "sky/engine/core/frame/Settings.h"

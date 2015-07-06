@@ -32,7 +32,6 @@
 #ifndef SKY_ENGINE_CORE_LOADER_FRAMELOADER_H_
 #define SKY_ENGINE_CORE_LOADER_FRAMELOADER_H_
 
-#include "sky/engine/core/fetch/ResourceLoaderOptions.h"
 #include "sky/engine/core/loader/FrameLoaderTypes.h"
 #include "sky/engine/platform/Timer.h"
 #include "sky/engine/platform/network/ResourceRequest.h"
@@ -46,7 +45,6 @@ class Chrome;
 class DOMWrapperWorld;
 class Document;
 class Event;
-class FetchContext;
 class Frame;
 class FrameLoaderClient;
 class LocalFrame;
@@ -76,14 +74,10 @@ public:
     // FIXME: clear() is trying to do too many things. We should break it down into smaller functions.
     void clear();
 
-    FetchContext& fetchContext() const { return *m_fetchContext; }
-
     void finishedParsing();
 
 private:
     LocalFrame* m_frame;
-
-    OwnPtr<FetchContext> m_fetchContext;
 
     bool m_inStopAllLoaders;
 };

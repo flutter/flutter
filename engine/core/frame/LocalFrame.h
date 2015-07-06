@@ -42,7 +42,6 @@ namespace blink {
     class Editor;
     class Element;
     class EventHandler;
-    class FetchContext;
     class FloatRect;
     class FloatSize;
     class FrameConsole;
@@ -52,7 +51,6 @@ namespace blink {
     class InputMethodController;
     class IntPoint;
     class IntSize;
-    class MojoLoader;
     class NewEventHandler;
     class Node;
     class Range;
@@ -89,10 +87,8 @@ namespace blink {
         Editor& editor() const;
         EventHandler& eventHandler() const;
         NewEventHandler& newEventHandler() const;
-        MojoLoader& mojoLoader() const { return *m_mojoLoader; }
         FrameSelection& selection() const;
         InputMethodController& inputMethodController() const;
-        FetchContext& fetchContext() const;
         SpellChecker& spellChecker() const;
         FrameConsole& console() const;
 
@@ -122,7 +118,6 @@ namespace blink {
 
         HashSet<FrameDestructionObserver*> m_destructionObservers;
         mutable FrameLoader m_deprecatedLoader;
-        OwnPtr<MojoLoader> m_mojoLoader;
 
         RefPtr<FrameView> m_view;
 

@@ -33,7 +33,6 @@
 #include "sky/engine/core/css/CSSValueList.h"
 #include "sky/engine/core/css/FontFace.h"
 #include "sky/engine/core/css/StyleRule.h"
-#include "sky/engine/core/fetch/ResourceFetcher.h"
 #include "sky/engine/platform/fonts/FontDescription.h"
 #include "sky/engine/wtf/text/AtomicString.h"
 

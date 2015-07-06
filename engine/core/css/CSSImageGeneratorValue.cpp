@@ -177,18 +177,4 @@ bool CSSImageGeneratorValue::knownToBeOpaque(const RenderObject* renderer) const
     return false;
 }
 
-void CSSImageGeneratorValue::loadSubimages(ResourceFetcher* fetcher)
-{
-    switch (classType()) {
-    case LinearGradientClass:
-        toCSSLinearGradientValue(this)->loadSubimages(fetcher);
-        break;
-    case RadialGradientClass:
-        toCSSRadialGradientValue(this)->loadSubimages(fetcher);
-        break;
-    default:
-        ASSERT_NOT_REACHED();
-    }
-}
-
 } // namespace blink

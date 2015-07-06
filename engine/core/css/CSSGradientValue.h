@@ -96,7 +96,6 @@ public:
     bool isPending() const { return false; }
     bool knownToBeOpaque(const RenderObject*) const;
 
-    void loadSubimages(ResourceFetcher*) { }
     PassRefPtr<CSSGradientValue> gradientWithStylesResolved(const TextLinkColors&, Color currentColor);
 
 protected:

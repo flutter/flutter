@@ -191,8 +191,6 @@ source_set("platform") {
     "exported/WrappedResourceResponse.h",
     "exported/linux/WebFontInfo.cpp",
     "exported/linux/WebFontRenderStyle.cpp",
-    "fetcher/MojoFetcher.cpp",
-    "fetcher/MojoFetcher.h",
     "fonts/AlternateFontFamily.h",
     "fonts/Character.cpp",
     "fonts/Character.h",

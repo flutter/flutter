@@ -75,7 +75,6 @@
 #include "sky/engine/core/events/HashChangeEvent.h"
 #include "sky/engine/core/events/PageTransitionEvent.h"
 #include "sky/engine/core/events/ScopedEventQueue.h"
-#include "sky/engine/core/fetch/ResourceFetcher.h"
 #include "sky/engine/core/frame/FrameConsole.h"
 #include "sky/engine/core/frame/FrameHost.h"
 #include "sky/engine/core/frame/FrameView.h"
@@ -85,7 +84,6 @@
 #include "sky/engine/core/inspector/ConsoleMessage.h"
 #include "sky/engine/core/inspector/InspectorCounters.h"
 #include "sky/engine/core/loader/FrameLoaderClient.h"
-#include "sky/engine/core/loader/ImageLoader.h"
 #include "sky/engine/core/page/ChromeClient.h"
 #include "sky/engine/core/page/EventHandler.h"
 #include "sky/engine/core/page/FocusController.h"
@@ -245,8 +243,6 @@ Document::Document(const DocumentInit& initializer)
     if (!m_elementRegistry)
         m_elementRegistry = CustomElementRegistry::Create();
 
-    m_fetcher = ResourceFetcher::create(this);
-
     // We depend on the url getting immediately set in subframes, but we
     // also depend on the url NOT getting immediately set in opened windows.
     // See fast/dom/early-frame-url.html
@@ -288,8 +284,6 @@ Document::~Document()
 
     if (m_elemSheet)
         m_elemSheet->clearOwnerNode();
-
-    m_fetcher.clear();
 
     // We must call clearRareData() here since a Document class inherits TreeScope
     // as well as Node. See a comment on TreeScope.h for the reason.
@@ -1100,11 +1094,6 @@ void Document::implicitClose()
     // onLoad event handler, as in Radar 3206524.
     detachParser();
 
-    if (frame()) {
-        ImageLoader::dispatchPendingLoadEvents();
-        ImageLoader::dispatchPendingErrorEvents();
-    }
-
     // JS running below could remove the frame or destroy the RenderView so we call
     // those two functions repeatedly and don't save them on the stack.
 
@@ -1130,10 +1119,6 @@ void Document::checkCompleted()
 
     // Are we still parsing?
     if (parsing())
-        return;
-
-    // Still waiting for images/scripts?
-    if (fetcher()->requestCount())
         return;
 
     // Still waiting for elements that don't go through a FrameLoader?

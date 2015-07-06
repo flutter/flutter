@@ -31,7 +31,6 @@
 #include "sky/engine/core/css/resolver/StyleResolver.h"
 #include "sky/engine/core/dom/DocumentMarkerController.h"
 #include "sky/engine/core/editing/FrameSelection.h"
-#include "sky/engine/core/fetch/ResourceFetcher.h"
 #include "sky/engine/core/frame/FrameHost.h"
 #include "sky/engine/core/frame/LocalFrame.h"
 #include "sky/engine/core/frame/Settings.h"

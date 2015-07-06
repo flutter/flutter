@@ -49,7 +49,6 @@ class RawResource;
 class Document;
 class LocalFrame;
 class FrameLoader;
-class ImageLoader;
 class KURL;
 class ResourceLoaderSet;
 
@@ -63,7 +62,6 @@ class ResourceLoaderSet;
 // alive past detach if scripts still reference the Document.
 class ResourceFetcher final : public RefCounted<ResourceFetcher>, public ResourceLoaderHost {
     WTF_MAKE_NONCOPYABLE(ResourceFetcher); WTF_MAKE_FAST_ALLOCATED;
-friend class ImageLoader;
 friend class ResourceCacheValidationSuppressor;
 
 public:

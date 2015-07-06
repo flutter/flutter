@@ -169,8 +169,6 @@ LocalFrame* ResourceFetcher::frame() const
 
 FetchContext& ResourceFetcher::context() const
 {
-    if (LocalFrame* frame = this->frame())
-        return frame->fetchContext();
     return FetchContext::nullInstance();
 }
 

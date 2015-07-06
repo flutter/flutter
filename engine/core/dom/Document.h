@@ -41,7 +41,6 @@
 #include "sky/engine/core/dom/TextLinkColors.h"
 #include "sky/engine/core/dom/TreeScope.h"
 #include "sky/engine/core/dom/UserActionElementSet.h"
-#include "sky/engine/core/fetch/ResourceClient.h"
 #include "sky/engine/core/loader/DocumentLoadTiming.h"
 #include "sky/engine/core/page/FocusType.h"
 #include "sky/engine/core/page/PageVisibilityState.h"
@@ -114,7 +113,7 @@ typedef int ExceptionCode;
 class Document;
 
 class Document : public ContainerNode, public TreeScope, public ExecutionContext, public ExecutionContextClient
-    , public DocumentSupplementable, public LifecycleContext<Document>, public ResourceClient {
+    , public DocumentSupplementable, public LifecycleContext<Document> {
     DEFINE_WRAPPERTYPEINFO();
 public:
     static PassRefPtr<Document> create(const DocumentInit& initializer = DocumentInit())
@@ -224,8 +223,6 @@ public:
     void updateLayout();
 
     void updateDistributionForNodeIfNeeded(Node*);
-
-    ResourceFetcher* fetcher() { return m_fetcher.get(); }
 
     virtual void attach(const AttachContext& = AttachContext()) override;
     virtual void detach(const AttachContext& = AttachContext()) override;
@@ -560,7 +557,6 @@ private:
     LocalFrame* m_frame;
     RawPtr<LocalDOMWindow> m_domWindow;
 
-    RefPtr<ResourceFetcher> m_fetcher;
     unsigned m_activeParserCount;
 
     // Document URLs.
