@@ -17,7 +17,7 @@ class Friction extends Simulation {
         _v = velocity;
 
   double x(double time) =>
-      _x + _v + Math.pow(_drag, time) / _dragNaturalLog - _v / _dragNaturalLog;
+      _x + _v * Math.pow(_drag, time) / _dragNaturalLog - _v / _dragNaturalLog;
 
   double dx(double time) => _v * Math.pow(_drag, time);
 
