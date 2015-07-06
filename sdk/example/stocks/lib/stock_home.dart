@@ -15,6 +15,7 @@ import 'package:sky/widgets/modal_overlay.dart';
 import 'package:sky/widgets/navigator.dart';
 import 'package:sky/widgets/popup_menu.dart';
 import 'package:sky/widgets/radio.dart';
+import 'package:sky/widgets/snack_bar.dart';
 import 'package:sky/widgets/scaffold.dart';
 import 'package:sky/widgets/tabs.dart';
 import 'package:sky/widgets/theme.dart';
@@ -50,6 +51,8 @@ class StockHome extends Component {
 
   bool _isSearching = false;
   String _searchQuery;
+
+  bool _isShowingSnackBar = false;
 
   void _handleSearchBegin() {
     setState(() {
@@ -223,6 +226,34 @@ class StockHome extends Component {
     );
   }
 
+  void _handleUndo() {
+    setState(() {
+      _isShowingSnackBar = false;
+    });
+  }
+
+  Widget buildSnackBar() {
+    if (!_isShowingSnackBar)
+      return null;
+    return new SnackBar(
+      content: new Text("Stock purchased!"),
+      actions: [new SnackBarAction(label: "UNDO", onPressed: _handleUndo)]
+    );
+  }
+
+  void _handleStockPurchased() {
+    setState(() {
+      _isShowingSnackBar = true;
+    });
+  }
+
+  Widget buildFloatingActionButton() {
+    return new FloatingActionButton(
+      child: new Icon(type: 'content/add_white', size: 24),
+      onPressed: _handleStockPurchased
+    );
+  }
+
   void addMenuToOverlays(List<Widget> overlays) {
     if (_menuController == null)
       return;
@@ -240,9 +271,8 @@ class StockHome extends Component {
       new Scaffold(
         toolbar: _isSearching ? buildSearchBar() : buildToolBar(),
         body: buildTabNavigator(),
-        floatingActionButton: new FloatingActionButton(
-          child: new Icon(type: 'content/add_white', size: 24)
-        ),
+        snackBar: buildSnackBar(),
+        floatingActionButton: buildFloatingActionButton(),
         drawer: _drawerShowing ? buildDrawer() : null
       ),
     ];
