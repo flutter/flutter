@@ -27,4 +27,7 @@ class Theme extends Inherited {
     Theme theme = component.inheritedOfType(Theme);
     return theme == null ? _kFallbackTheme : theme.data;
   }
+
+  bool syncShouldNotify(Theme old) => data != old.data;
+
 }

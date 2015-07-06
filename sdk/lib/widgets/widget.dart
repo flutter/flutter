@@ -223,7 +223,27 @@ class ParentDataNode extends TagNode {
 }
 
 abstract class Inherited extends TagNode {
+
   Inherited({ String key, Widget child }) : super._withKey(child, key);
+
+  void _sync(Widget old, dynamic slot) {
+    if (old != null && syncShouldNotify(old)) {
+      final Type ourRuntimeType = runtimeType;
+      void notifyChildren(Widget child) {
+        if (child is Component &&
+            child._dependencies != null &&
+            child._dependencies.contains(ourRuntimeType))
+          child._dependenciesChanged();
+        if (child.runtimeType != ourRuntimeType)
+          child.walkChildren(notifyChildren);
+      }
+      walkChildren(notifyChildren);
+    }
+    super._sync(old, slot);
+  }
+
+  bool syncShouldNotify(Inherited old);
+
 }
 
 typedef void GestureEventListener(sky.GestureEvent e);
@@ -354,33 +374,40 @@ abstract class Component extends Widget {
     _built.detachRoot();
   }
 
+  Set<Type> _dependencies;
   Inherited inheritedOfType(Type targetType) {
+    if (_dependencies == null)
+      _dependencies = new Set<Type>();
+    _dependencies.add(targetType);
     Widget ancestor = parent;
     while (ancestor != null && ancestor.runtimeType != targetType)
       ancestor = ancestor.parent;
     return ancestor;
   }
+  void _dependenciesChanged() {
+    // called by Inherited.sync()
+    scheduleBuild();
+  }
 
-  bool _retainStatefulNodeIfPossible(Widget old) {
+  bool _retainStatefulNodeIfPossible(Component old) {
     assert(!_disqualifiedFromEverAppearingAgain);
 
-    Component oldComponent = old as Component;
-    if (oldComponent == null || !oldComponent._stateful)
+    if (old == null || !old._stateful)
       return false;
 
-    assert(runtimeType == oldComponent.runtimeType);
-    assert(key == oldComponent.key);
+    assert(runtimeType == old.runtimeType);
+    assert(key == old.key);
 
     // Make |this|, the newly-created object, into the "old" Component, and kill it
     _stateful = false;
-    _built = oldComponent._built;
+    _built = old._built;
     assert(_built != null);
     _disqualifiedFromEverAppearingAgain = true;
 
-    // Make |oldComponent| the "new" component
-    oldComponent._built = null;
-    oldComponent._dirty = true;
-    oldComponent.syncFields(this);
+    // Make |old| the "new" component
+    old._built = null;
+    old._dirty = true;
+    old.syncFields(this);
     return true;
   }
 
@@ -394,6 +421,11 @@ abstract class Component extends Widget {
     assert(false);
   }
 
+  // order corresponds to _build_ order, not depth in the tree.
+  // All the Components built by a particular other Component will have the
+  // same order, regardless of whether one is subsequently inserted
+  // into another. The order is used to not tell a Component to
+  // rebuild if the Component that it built has itself been rebuilt.
   final int _order;
   static int _currentOrder = 0;
 
@@ -446,18 +478,17 @@ abstract class Component extends Widget {
   }
 
   void scheduleBuild() {
-    setState(() {});
+    assert(!_disqualifiedFromEverAppearingAgain);
+    if (_isBuilding || _dirty || !_mounted)
+      return;
+    _dirty = true;
+    _scheduleComponentForRender(this);
   }
 
   void setState(Function fn()) {
-    assert(!_disqualifiedFromEverAppearingAgain);
     assert(_stateful);
     fn();
-    if (_isBuilding || _dirty || !_mounted)
-      return;
-
-    _dirty = true;
-    _scheduleComponentForRender(this);
+    scheduleBuild();
   }
 
   Widget build();
@@ -470,24 +501,37 @@ bool _inRenderDirtyComponents = false;
 
 List<int> _debugFrameTimes = <int>[];
 
+void _absorbDirtyComponents(List<Component> list) {
+  list.addAll(_dirtyComponents);
+  _dirtyComponents.clear();
+  list.sort((Component a, Component b) => a._order - b._order);
+}
+
 void _buildDirtyComponents() {
   Stopwatch sw;
   if (_shouldLogRenderDuration)
     sw = new Stopwatch()..start();
 
+  _inRenderDirtyComponents = true;
   try {
     sky.tracing.begin('Widgets._buildDirtyComponents');
-    _inRenderDirtyComponents = true;
-
-    List<Component> sortedDirtyComponents = _dirtyComponents.toList();
-    sortedDirtyComponents.sort((Component a, Component b) => a._order - b._order);
-    for (var comp in sortedDirtyComponents) {
-      comp._buildIfDirty();
+    List<Component> sortedDirtyComponents = new List<Component>();
+    _absorbDirtyComponents(sortedDirtyComponents);
+    int index = 0;
+    while (index < sortedDirtyComponents.length) {
+      Component component = sortedDirtyComponents[index];
+      component._buildIfDirty();
+      if (_dirtyComponents.length > 0) {
+        // the following assert verifies that we're not rebuilding anyone twice in one frame
+        assert(_dirtyComponents.every((Component component) => !sortedDirtyComponents.contains(component)));
+        _absorbDirtyComponents(sortedDirtyComponents);
+        index = 0;
+      } else {
+        index += 1;
+      }
     }
-
-    _dirtyComponents.clear();
-    _buildScheduled = false;
   } finally {
+    _buildScheduled = false;
     _inRenderDirtyComponents = false;
     sky.tracing.end('Widgets._buildDirtyComponents');
   }
@@ -507,9 +551,7 @@ void _buildDirtyComponents() {
 }
 
 void _scheduleComponentForRender(Component c) {
-  assert(!_inRenderDirtyComponents);
   _dirtyComponents.add(c);
-
   if (!_buildScheduled) {
     _buildScheduled = true;
     new Future.microtask(_buildDirtyComponents);

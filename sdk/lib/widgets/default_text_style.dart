@@ -23,4 +23,7 @@ class DefaultTextStyle extends Inherited {
     DefaultTextStyle result = component.inheritedOfType(DefaultTextStyle);
     return result == null ? null : result.style;
   }
+
+  bool syncShouldNotify(DefaultTextStyle old) => style != old.style;
+
 }
