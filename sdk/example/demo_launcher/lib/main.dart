@@ -5,6 +5,7 @@
 import 'dart:sky';
 
 import 'package:mojom/intents/intents.mojom.dart';
+import 'package:sky/mojo/asset_bundle.dart';
 import 'package:sky/mojo/shell.dart' as shell;
 import 'package:sky/painting/box_painter.dart';
 import 'package:sky/theme/colors.dart' as colors;
@@ -17,6 +18,15 @@ import 'package:sky/widgets/material.dart';
 import 'package:sky/widgets/scaffold.dart';
 import 'package:sky/widgets/theme.dart';
 import 'package:sky/widgets/tool_bar.dart';
+
+AssetBundle _initBundle() {
+  if (rootBundle != null)
+    return rootBundle;
+  const String _kAssetBase = '..';
+  return new NetworkAssetBundle(Uri.base.resolve(_kAssetBase));
+}
+
+final AssetBundle _bundle = _initBundle();
 
 void launch(String relativeUrl, String bundle) {
   Uri url = Uri.base.resolve(relativeUrl);
@@ -60,7 +70,7 @@ List<Widget> demos = [
     textTheme: typography.black,
     decoration: new BoxDecoration(
       backgroundImage: new BackgroundImage(
-        src: '../assets/stocks_thumbnail.png',
+        image: _bundle.loadImage('assets/stocks_thumbnail.png'),
         fit: BackgroundFit.cover
       )
     )
@@ -72,7 +82,7 @@ List<Widget> demos = [
     textTheme: typography.white,
     decoration: new BoxDecoration(
       backgroundImage: new BackgroundImage(
-        src: '../assets/game_thumbnail.png',
+        image: _bundle.loadImage('assets/game_thumbnail.png'),
         fit: BackgroundFit.cover
       )
     )
@@ -96,7 +106,7 @@ List<Widget> demos = [
     decoration: new BoxDecoration(
       backgroundColor: colors.Black,
       backgroundImage: new BackgroundImage(
-        src: '../assets/sector_thumbnail.png',
+        image: _bundle.loadImage('assets/sector_thumbnail.png'),
         fit: BackgroundFit.cover
       )
     )
