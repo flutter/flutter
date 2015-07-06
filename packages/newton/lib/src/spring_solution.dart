@@ -23,63 +23,87 @@ abstract class _SpringSolution implements Simulatable {
 }
 
 class _CriticalSolution implements _SpringSolution {
-  double r, c1, c2;
+  final double _r, _c1, _c2;
 
-  _CriticalSolution(SpringDesc desc, double distance, double velocity) {
-    r = -desc.damping / (2.0 * desc.mass);
-    c1 = distance;
-    c2 = velocity / (r * distance);
+  factory _CriticalSolution(SpringDesc desc, double distance, double velocity) {
+    final double r = -desc.damping / (2.0 * desc.mass);
+    final double c1 = distance;
+    final double c2 = velocity / (r * distance);
+    return new _CriticalSolution.withArgs(r, c1, c2);
   }
 
-  double x(double time) => (c1 + c2 * time) * Math.pow(Math.E, r * time);
+  _CriticalSolution.withArgs(double r, double c1, double c2)
+      : _r = r,
+        _c1 = c1,
+        _c2 = c2;
+
+  double x(double time) => (_c1 + _c2 * time) * Math.pow(Math.E, _r * time);
 
   double dx(double time) {
-    final double power = Math.pow(Math.E, r * time);
-    return r * (c1 + c2 * time) * power + c2 * power;
+    final double power = Math.pow(Math.E, _r * time);
+    return _r * (_c1 + _c2 * time) * power + _c2 * power;
   }
 }
 
 class _OverdampedSolution implements _SpringSolution {
-  double r1, r2, c1, c2;
+  final double _r1, _r2, _c1, _c2;
 
-  _OverdampedSolution(SpringDesc desc, double distance, double velocity) {
-    double cmk =
+  factory _OverdampedSolution(
+      SpringDesc desc, double distance, double velocity) {
+    final double cmk =
         desc.damping * desc.damping - 4 * desc.mass * desc.springConstant;
 
-    r1 = (-desc.damping - Math.sqrt(cmk)) / (2.0 * desc.mass);
-    r2 = (-desc.damping + Math.sqrt(cmk)) / (2.0 * desc.mass);
-    c2 = (velocity - r1 * distance) / (r2 - r1);
-    c1 = distance - c2;
+    final double r1 = (-desc.damping - Math.sqrt(cmk)) / (2.0 * desc.mass);
+    final double r2 = (-desc.damping + Math.sqrt(cmk)) / (2.0 * desc.mass);
+    final double c2 = (velocity - r1 * distance) / (r2 - r1);
+    final double c1 = distance - c2;
+
+    return new _OverdampedSolution.withArgs(r1, r2, c1, c2);
   }
 
-  double x(double time) =>
-      (c1 * Math.pow(Math.E, r1 * time) + c2 * Math.pow(Math.E, r2 * time));
+  _OverdampedSolution.withArgs(double r1, double r2, double c1, double c2)
+      : _r1 = r1,
+        _r2 = r2,
+        _c1 = c1,
+        _c2 = c2;
 
-  double dx(double time) => (c1 * r1 * Math.pow(Math.E, r1 * time) +
-      c2 * r2 * Math.pow(Math.E, r2 * time));
+  double x(double time) =>
+      (_c1 * Math.pow(Math.E, _r1 * time) + _c2 * Math.pow(Math.E, _r2 * time));
+
+  double dx(double time) => (_c1 * _r1 * Math.pow(Math.E, _r1 * time) +
+      _c2 * _r2 * Math.pow(Math.E, _r2 * time));
 }
 
 class _UnderdampedSolution implements _SpringSolution {
-  double w, r, c1, c2;
+  final double _w, _r, _c1, _c2;
 
-  _UnderdampedSolution(SpringDesc desc, double distance, double velocity) {
-    w = Math.sqrt(4.0 * desc.mass * desc.springConstant -
+  factory _UnderdampedSolution(
+      SpringDesc desc, double distance, double velocity) {
+    final double w = Math.sqrt(4.0 * desc.mass * desc.springConstant -
             desc.damping * desc.damping) /
         (2.0 * desc.mass);
-    r = -(desc.damping / 2.0 * desc.mass);
-    c1 = distance;
-    c2 = (velocity - r * distance) / w;
+    final double r = -(desc.damping / 2.0 * desc.mass);
+    final double c1 = distance;
+    final double c2 = (velocity - r * distance) / w;
+
+    return new _UnderdampedSolution.withArgs(w, r, c1, c2);
   }
 
-  double x(double time) => Math.pow(Math.E, r * time) *
-      (c1 * Math.cos(w * time) + c2 * Math.sin(w * time));
+  _UnderdampedSolution.withArgs(double w, double r, double c1, double c2)
+      : _w = w,
+        _r = r,
+        _c1 = c1,
+        _c2 = c2;
+
+  double x(double time) => Math.pow(Math.E, _r * time) *
+      (_c1 * Math.cos(_w * time) + _c2 * Math.sin(_w * time));
 
   double dx(double time) {
-    final double power = Math.pow(Math.E, r * time);
-    final double cosine = Math.cos(w * time);
-    final double sine = Math.sin(w * time);
+    final double power = Math.pow(Math.E, _r * time);
+    final double cosine = Math.cos(_w * time);
+    final double sine = Math.sin(_w * time);
 
-    return power * (c2 * w * cosine - c1 * w * sine) +
-        r * power * (c2 * sine + c1 * cosine);
+    return power * (_c2 * _w * cosine - _c1 * _w * sine) +
+        _r * power * (_c2 * sine + _c1 * cosine);
   }
 }

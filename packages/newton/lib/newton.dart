@@ -7,9 +7,9 @@ library newton;
 import 'dart:math' as Math;
 
 part 'src/simulation.dart';
+part 'src/simulation_group.dart';
 part 'src/utils.dart';
 
-part 'src/fall.dart';
 part 'src/friction.dart';
 part 'src/gravity.dart';
 part 'src/scroll.dart';

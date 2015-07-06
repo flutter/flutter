@@ -16,9 +16,7 @@ abstract class Simulatable {
 /// instance of a simulation and query the same for the position and velocity
 /// of the body at a given interval.
 ///
-/// Note: All operation on subclasses of Simulation are idempotent. Composite
-/// simulations are not guaranteed to be idempotent however. FIXME(csg): How do
-/// I make this apparent?
+/// Note: All operations on subclasses of Simulation are idempotent.
 abstract class Simulation implements Simulatable {
 
   /// Returns if the simulation is done at a given time
