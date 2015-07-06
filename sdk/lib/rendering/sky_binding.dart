@@ -9,6 +9,17 @@ import '../base/hit_test.dart';
 import 'box.dart';
 import 'object.dart';
 
+int _hammingWeight(int value) {
+  if (value == 0)
+    return 0;
+  int weight = 0;
+  for (int i = 0; i < value.bitLength; ++i) {
+    if (value & (1 << i) != 0)
+      ++weight;
+  }
+  return weight;
+}
+
 class PointerState {
   PointerState({ this.result, this.lastPosition });
   HitTestResult result;
@@ -104,7 +115,8 @@ class SkyBinding {
       case 'pointerup':
       case 'pointercancel':
         state = _stateForPointer[event.pointer];
-        _stateForPointer.remove(event.pointer);
+        if (_hammingWeight(event.buttons) <= 1)
+          _stateForPointer.remove(event.pointer);
         break;
       case 'pointermove':
         state = _stateForPointer[event.pointer];
