@@ -54,32 +54,32 @@ class SkyDemo {
 List<Widget> demos = [
   new SkyDemo(
     name: 'Stocks',
-    href: 'example/stocks/lib/main.dart',
+    href: '../../stocks/lib/main.dart',
     bundle: 'stocks.skyx',
     description: 'Multi-screen app with scrolling list',
     textTheme: typography.black,
     decoration: new BoxDecoration(
       backgroundImage: new BackgroundImage(
-        src: 'example/stocks/thumbnail.png',
+        src: '../assets/stocks_thumbnail.png',
         fit: BackgroundFit.cover
       )
     )
   ),
   new SkyDemo(
     name: 'Asteroids',
-    href: 'example/game/main.dart',
+    href: '../../game/main.dart',
     description: '2D game using sprite sheets to achieve high performance',
     textTheme: typography.white,
     decoration: new BoxDecoration(
       backgroundImage: new BackgroundImage(
-        src: 'example/game/res/thumbnail.png',
+        src: '../assets/game_thumbnail.png',
         fit: BackgroundFit.cover
       )
     )
   ),
   new SkyDemo(
     name: 'Interactive Flex',
-    href: 'example/rendering/interactive_flex.dart',
+    href: '../../rendering/interactive_flex.dart',
     bundle: 'interactive_flex.skyx',
     description: 'Swipe to adjust the layout of the app',
     textTheme: typography.white,
@@ -89,32 +89,27 @@ List<Widget> demos = [
   ),
   new SkyDemo(
     name: 'Sector',
-    href: 'example/widgets/sector.dart',
+    href: '../../widgets/sector.dart',
     bundle: 'sector.skyx',
     description: 'Demo of alternative layouts',
     textTheme: typography.black,
     decoration: new BoxDecoration(
       backgroundColor: colors.Black,
       backgroundImage: new BackgroundImage(
-        src: 'example/widgets/sector_thumbnail.png',
+        src: '../assets/sector_thumbnail.png',
         fit: BackgroundFit.cover
       )
     )
   ),
   // new SkyDemo(
-  //   'Touch Demo', 'examples/rendering/touch_demo.dart', 'Simple example showing handling of touch events at a low level'),
+  //   'Touch Demo', '../../rendering/touch_demo.dart', 'Simple example showing handling of touch events at a low level'),
   new SkyDemo(
     name: 'Minedigger Game',
-    href: 'example/mine_digger/lib/main.dart',
+    href: '../../mine_digger/lib/main.dart',
     bundle: 'mine_digger.skyx',
     description: 'Clone of the classic Minesweeper game',
     textTheme: typography.white
   ),
-
-  // TODO(eseidel): We could use to separate these groups?
-  // new SkyDemo('Old Stocks App', 'examples/stocks/main.sky'),
-  // new SkyDemo('Old Touch Demo', 'examples/raw/touch-demo.sky'),
-  // new SkyDemo('Old Spinning Square', 'examples/raw/spinning-square.sky'),
 
   // TODO(jackson): This doesn't seem to be working
   // new SkyDemo('Licenses', 'LICENSES.sky'),

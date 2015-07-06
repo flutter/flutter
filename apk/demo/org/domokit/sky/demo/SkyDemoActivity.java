@@ -12,7 +12,7 @@ import org.domokit.sky.shell.SkyActivity;
  * Main activity for SkyDemo.
  */
 public class SkyDemoActivity extends SkyActivity {
-    private static final String DEFAULT_URL = "https://domokit.github.io/home.dart";
+    private static final String DEFAULT_URL = "https://domokit.github.io/example/demo_launcher/lib/main.dart";
 
     @Override
     protected void onSkyReady() {
