@@ -27,7 +27,10 @@ import 'theme.dart';
 const double _kWidth = 304.0;
 const double _kMinFlingVelocity = 0.4;
 const int _kBaseSettleDurationMS = 246;
-const Curve _kAnimationCurve = parabolicRise;
+// TODO(mpcomplete): The curve must be linear if we want the drawer to track
+// the user's finger. Odeon remedies this by attaching spring forces to the
+// initial timeline when animating (so it doesn't look linear).
+const Curve _kAnimationCurve = linear;
 
 typedef void DrawerStatusChangeHandler (bool showing);
 
@@ -117,7 +120,7 @@ class Drawer extends AnimatedComponent {
   // like fades, slides, rotates, pinch, etc.
   Widget build() {
     // TODO(mpcomplete): animate as a fade-in.
-    double scaler = controller.performance.progress + 1.0;
+    double scaler = controller.performance.progress;
     Color maskColor = new Color.fromARGB((0x7F * scaler).floor(), 0, 0, 0);
 
     var mask = new Listener(
