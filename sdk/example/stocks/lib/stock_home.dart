@@ -149,13 +149,20 @@ class StockHome extends StatefulComponent {
         new MenuDivider(),
         new MenuItem(
           icon: 'action/settings',
-          onPressed: () => navigator.pushNamed('/settings'),
+          onPressed: _handleShowSettings,
           children: [new Text('Settings')]),
         new MenuItem(
           icon: 'action/help',
           children: [new Text('Help & Feedback')])
      ]
     );
+  }
+
+  void _handleShowSettings() {
+    assert(navigator.currentRoute.name == '/drawer');
+    navigator.pop();
+    assert(navigator.currentRoute.name == '/');
+    navigator.pushNamed('/settings');
   }
 
   void _handleOpenDrawer() {
