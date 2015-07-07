@@ -1,8 +1,9 @@
 part of sprites;
 
-typedef void PointSetter(Point point);
+typedef void ActionCallback();
 
 abstract class Action {
+  Object _tag;
   bool _finished = false;
 
   void step(double dt);
@@ -123,7 +124,7 @@ abstract class ActionInstant extends Action {
 }
 
 class ActionCallFunction extends ActionInstant {
-  Function _function;
+  ActionCallback _function;
 
   ActionCallFunction(this._function);
 
@@ -132,10 +133,10 @@ class ActionCallFunction extends ActionInstant {
   }
 }
 
-class ActionRemoveFromParent extends ActionInstant {
+class ActionRemoveNode extends ActionInstant {
   Node _node;
 
-  ActionRemoveFromParent(this._node);
+  ActionRemoveNode(this._node);
 
   void fire() {
     _node.removeFromParent();
@@ -186,6 +187,12 @@ class ActionTween extends ActionInterval {
       _delta = new Point(xEnd - xStart, yEnd - yStart);
     } else if (startVal is double) {
       _delta = endVal - startVal;
+    } else if (startVal is Color) {
+      int aDelta = endVal.alpha - startVal.alpha;
+      int rDelta = endVal.red - startVal.red;
+      int gDelta = endVal.green - startVal.green;
+      int bDelta = endVal.blue - startVal.blue;
+      _delta = new _ColorDiff(aDelta, rDelta, gDelta, bDelta);
     } else {
       assert(false);
     }
@@ -195,15 +202,24 @@ class ActionTween extends ActionInterval {
     var newVal;
 
     if (startVal is Point) {
+      // Point
       double xStart = startVal.x;
       double yStart = startVal.y;
       double xDelta = _delta.x;
       double yDelta = _delta.y;
-
       newVal = new Point(xStart + xDelta * t, yStart + yDelta * t);
     } else if (startVal is double) {
+      // Doubles
       newVal = startVal + _delta * t;
+    } else if (startVal is Color) {
+      // Colors
+      int aNew = (startVal.alpha + (_delta.alpha * t).toInt()).clamp(0, 255);
+      int rNew = (startVal.red + (_delta.red * t).toInt()).clamp(0, 255);
+      int gNew = (startVal.green + (_delta.green * t).toInt()).clamp(0, 255);
+      int bNew = (startVal.blue + (_delta.blue * t).toInt()).clamp(0, 255);
+      newVal = new Color.fromARGB(aNew, rNew, gNew, bNew);
     } else {
+      // Oopses
       assert(false);
     }
 
@@ -217,9 +233,28 @@ class ActionController {
 
   ActionController();
 
-  void run(Action action) {
+  void run(Action action, [Object tag]) {
+    action._tag = tag;
     action.update(0.0);
     _actions.add(action);
+  }
+
+  void stop(Action action) {
+    _actions.remove(action);
+  }
+
+  void stopWithTag(Object tag) {
+    for (int i = _actions.length - 1; i >= 0; i--) {
+      Action action = _actions[i];
+      if (action._tag == tag) {
+        _actions.removeAt(i);
+        print("removing tag: $tag");
+      }
+    }
+  }
+
+  void stopAll() {
+    _actions.clear();
   }
 
   void step(double dt) {
@@ -232,4 +267,13 @@ class ActionController {
       }
     }
   }
+}
+
+class _ColorDiff {
+  final int alpha;
+  final int red;
+  final int green;
+  final int blue;
+
+  _ColorDiff(this.alpha, this.red, this.green, this.blue);
 }

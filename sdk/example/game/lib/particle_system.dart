@@ -283,8 +283,6 @@ void drawAtlas(Canvas canvas, Image image, List<RSTransform> transforms, List<Re
                TransferMode transferMode, Paint paint) {
   assert(transforms.length == rects.length && transforms.length == colors.length);
 
-  Paint paint = new Paint();
-
   Texture mainTexture = new Texture(image);
 
   for (int i = 0; i < transforms.length; i++) {

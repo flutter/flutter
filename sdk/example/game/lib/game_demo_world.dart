@@ -19,7 +19,11 @@ const int _lifeTimeLaser = 50;
 
 const int _numStarsInStarField = 150;
 
+const int _numFramesShieldActive = 60 * 5;
+const int _numFramesShieldFlickers = 60;
+
 class GameDemoWorld extends NodeWithSize {
+  App _app;
 
   // Images
   Image _imgNebula;
@@ -34,12 +38,17 @@ class GameDemoWorld extends NodeWithSize {
   Node _gameLayer;
 
   Ship _ship;
+  Sprite _shield;
   List<Asteroid> _asteroids = [];
   List<Laser> _lasers = [];
   StarField _starField;
   Nebula _nebula;
+
+  // Game state
+  int _numFrames = 0;
+  bool _isGameOver = false;
   
-  GameDemoWorld(ImageMap images, this._spriteSheet) : super(new Size(_gameSizeWidth, _gameSizeHeight)) {
+  GameDemoWorld(this._app, ImageMap images, this._spriteSheet) : super(new Size(_gameSizeWidth, _gameSizeHeight)) {
 
     // Fetch images
     _imgNebula = images["res/nebula.png"];
@@ -91,6 +100,15 @@ class GameDemoWorld extends NodeWithSize {
     ship.zPosition = 10.0;
     _gameLayer.addChild(ship);
     _ship = ship;
+
+    _shield = new Sprite(_spriteSheet["shield.png"]);
+    _shield.zPosition = 11.0;
+    _shield.scale = 0.5;
+    _shield.transferMode = TransferMode.plus;
+    _gameLayer.addChild(_shield);
+
+    Action rotate = new ActionRepeatForever(new ActionTween((a) => _shield.rotation = a, 0.0, 360.0, 1.0));
+    actions.run(rotate);
   }
 
   void addLaser() {
@@ -107,22 +125,51 @@ class GameDemoWorld extends NodeWithSize {
   }
 
   void addExplosion(AsteroidSize asteroidSize, Point position) {
+    Node explosionNode = new Node();
+
     // Add particles
-    ParticleSystem particles = new ParticleSystem(_spriteSheet["explosion_particle.png"], rotateToMovement: true,
-    startRotation:90.0, startRotationVar: 0.0, endRotation: 90.0, startSize: 0.3, startSizeVar: 0.1, endSize: 0.3, endSizeVar: 0.1,
-    numParticlesToEmit: 25, emissionRate:1000.0, greenVar: 127, redVar: 127);
-    particles.zPosition = 1010.0;
-    particles.position = position;
-    _gameLayer.addChild(particles);
+    ParticleSystem particlesDebris = new ParticleSystem(
+        _spriteSheet["explosion_particle.png"],
+        rotateToMovement: true,
+        startRotation:90.0,
+        startRotationVar: 0.0,
+        endRotation: 90.0,
+        startSize: 0.3,
+        startSizeVar: 0.1,
+        endSize: 0.3,
+        endSizeVar: 0.1,
+        numParticlesToEmit: 25,
+        emissionRate:1000.0,
+        greenVar: 127,
+        redVar: 127
+    );
+    particlesDebris.zPosition = 1010.0;
+    explosionNode.addChild(particlesDebris);
+
+    ParticleSystem particlesFire = new ParticleSystem(
+      _spriteSheet["fire_particle.png"],
+      colorSequence: new ColorSequence([new Color(0xffffff33), new Color(0xffff3333), new Color(0x00ff3333)], [0.0, 0.5, 1.0]),
+      numParticlesToEmit: 25,
+      emissionRate: 1000.0,
+      startSize: 0.5,
+      startSizeVar: 0.1,
+      endSize: 0.5,
+      endSizeVar: 0.1,
+      posVar: new Point(10.0, 10.0),
+      speed: 10.0,
+      speedVar: 5.0
+    );
+    particlesFire.zPosition = 1011.0;
+    explosionNode.addChild(particlesFire);
+
 
     // Add ring
     Sprite sprtRing = new Sprite(_spriteSheet["explosion_ring.png"]);
-    sprtRing.position = position;
     sprtRing.transferMode = TransferMode.plus;
-    _gameLayer.addChild(sprtRing);
+    explosionNode.addChild(sprtRing);
 
     Action scale = new ActionTween( (a) => sprtRing.scale = a, 0.2, 1.0, 1.5);
-    Action scaleAndRemove = new ActionSequence([scale, new ActionRemoveFromParent(sprtRing)]);
+    Action scaleAndRemove = new ActionSequence([scale, new ActionRemoveNode(sprtRing)]);
     Action fade = new ActionTween( (a) => sprtRing.opacity = a, 1.0, 0.0, 1.5);
     actions.run(scaleAndRemove);
     actions.run(fade);
@@ -131,22 +178,30 @@ class GameDemoWorld extends NodeWithSize {
     for (int i = 0; i < 5; i++) {
       Sprite sprtFlare = new Sprite(_spriteSheet["explosion_flare.png"]);
       sprtFlare.pivot = new Point(0.3, 1.0);
-      sprtFlare.position = position;
       sprtFlare.scaleX = 0.3;
       sprtFlare.transferMode = TransferMode.plus;
       sprtFlare.rotation = _rand.nextDouble() * 360.0;
-      _gameLayer.addChild(sprtFlare);
+      explosionNode.addChild(sprtFlare);
 
       double multiplier = _rand.nextDouble() * 0.3 + 1.0;
 
       Action scale = new ActionTween( (a) => sprtFlare.scaleY = a, 0.3 * multiplier, 0.8, 1.5 * multiplier);
-      Action scaleAndRemove = new ActionSequence([scale, new ActionRemoveFromParent(sprtFlare)]);
+      Action scaleAndRemove = new ActionSequence([scale, new ActionRemoveNode(sprtFlare)]);
       Action fadeIn = new ActionTween( (a) => sprtFlare.opacity = a, 0.0, 1.0, 0.5 * multiplier);
       Action fadeOut = new ActionTween( (a) => sprtFlare.opacity = a, 1.0, 0.0, 1.0 * multiplier);
       Action fadeInOut = new ActionSequence([fadeIn, fadeOut]);
       actions.run(scaleAndRemove);
       actions.run(fadeInOut);
     }
+
+    explosionNode.position = position;
+    explosionNode.zPosition = 1010.0;
+
+    if (asteroidSize == AsteroidSize.large) {
+      explosionNode.scale = 1.5;
+    }
+
+    _gameLayer.addChild(explosionNode);
   }
 
   void update(double dt) {
@@ -172,6 +227,7 @@ class GameDemoWorld extends NodeWithSize {
 
     // Move ship
     _ship.move();
+    _shield.position = _ship.position;
 
     // Check collisions between asteroids and lasers
     for (int i = _lasers.length -1; i >= 0; i--) {
@@ -206,9 +262,29 @@ class GameDemoWorld extends NodeWithSize {
       }
     }
 
+    // Check collisions between asteroids and ship
+    if (_numFrames > _numFramesShieldActive) {
+      // Shield is no longer active
+
+      for (int i = _asteroids.length - 1; i >= 0; i--) {
+        // Iterate over all the asteroids
+        Asteroid asteroid = _asteroids[i];
+
+        if (pointQuickDist(asteroid.position, _ship.position) < asteroid.radius + _ship.radius) {
+          killShip();
+        }
+      }
+    }
+
     // Move objects to center camera and warp objects around the edges
     centerCamera();
     warpObjects();
+
+    // Update shield
+    if (_numFrames > _numFramesShieldActive) _shield.visible = false;
+    else if (_numFrames > _numFramesShieldActive - _numFramesShieldFlickers) _shield.visible = !_shield.visible;
+
+    _numFrames++;
   }
 
   void centerCamera() {
@@ -233,14 +309,35 @@ class GameDemoWorld extends NodeWithSize {
     }
   }
 
+  void killShip() {
+    if (_isGameOver) return;
+
+    // Set game over
+    _isGameOver = true;
+
+    // Remove the ship
+    _ship.visible = false;
+
+    // Add an explosion
+    addExplosion(AsteroidSize.large, _ship.position);
+  }
+
   // Handling controls
 
   void controlSteering(double x, double y) {
+    // Reset controls if it's game over
+    if (_isGameOver) {
+      x = y = 0.0;
+    }
+
     _joystickX = x;
     _joystickY = y;
   }
 
   void controlFire() {
+    // Don't shoot if it's game over
+    if (_isGameOver) return;
+
     addLaser();
   }
 
@@ -251,6 +348,7 @@ class GameDemoWorld extends NodeWithSize {
   Point _firstPointerDownPos;
 
   bool handleEvent(SpriteBoxEvent event) {
+
     Point pointerPos = convertPointToNodeSpace(event.boxPosition);
     int pointer = event.pointer;
 
@@ -358,10 +456,14 @@ class Asteroid extends Sprite {
 
   bool handleEvent(SpriteBoxEvent event) {
     if (event.type == "pointerdown") {
-      colorOverlay = new Color(0x99ff0000);
+      actions.stopWithTag("fade");
+      colorOverlay = new Color(0x99ffffff);
     }
     else if (event.type == "pointerup") {
-      colorOverlay = null;
+      // Fade out the color overlay
+      Action fadeOut = new ActionTween((a) => this.colorOverlay = a, new Color(0x99ffffff), new Color(0x00ffffff), 1.0);
+      Action fadeOutAndRemove = new ActionSequence([fadeOut, new ActionCallFunction(() => this.colorOverlay = null)]);
+      actions.run(fadeOutAndRemove, "fade");
     }
     return false;
   }
@@ -370,6 +472,7 @@ class Asteroid extends Sprite {
 class Ship extends Sprite {
   Vector2 _movementVector;
   double _rotationTarget;
+  double radius = _shipRadius;
 
   Ship(Texture img) : super(img) {
     _movementVector = new Vector2.zero();

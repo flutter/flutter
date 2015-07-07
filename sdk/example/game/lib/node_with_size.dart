@@ -3,7 +3,7 @@ part of sprites;
 /// The super class of any [Node] that has a size.
 ///
 /// NodeWithSize adds the ability for a node to have a size and a pivot point.
-abstract class NodeWithSize extends Node {
+class NodeWithSize extends Node {
 
   /// Changing the size will affect the size of the rendering of the node.
   ///
