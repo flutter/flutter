@@ -26,17 +26,19 @@ const BoxDecoration _kHighlightBoring = const BoxDecoration(
 );
 
 class MenuItem extends ButtonBase {
-  MenuItem({ String key, this.icon, this.children, this.onPressed })
+  MenuItem({ String key, this.icon, this.children, this.onPressed, this.selected: false })
     : super(key: key);
 
   String icon;
   List<Widget> children;
   Function onPressed;
+  bool selected;
 
   void syncFields(MenuItem source) {
     icon = source.icon;
     children = source.children;
     onPressed = source.onPressed;
+    selected = source.selected;
     super.syncFields(source);
   }
 
@@ -61,7 +63,7 @@ class MenuItem extends ButtonBase {
     if (icon != null) {
       flexChildren.add(
         new Opacity(
-          opacity: highlight ? 1.0 : 0.45,
+          opacity: selected ? 1.0 : 0.45,
           child: new Padding(
             padding: const EdgeDims.symmetric(horizontal: 16.0),
             child: new Icon(type: "${icon}_${iconSuffix}", size: 24)
@@ -87,9 +89,12 @@ class MenuItem extends ButtonBase {
       },
       child: new Container(
         height: 48.0,
-        decoration: highlight ? _kHighlightDecoration : _kHighlightBoring,
-        child: new InkWell(
-          child: new Flex(flexChildren)
+        decoration: selected ? _kHighlightDecoration : _kHighlightBoring,
+        child: new Container(
+          decoration: highlight ? _kHighlightDecoration : _kHighlightBoring,
+          child: new InkWell(
+            child: new Flex(flexChildren)
+          )
         )
       )
     );

@@ -127,6 +127,7 @@ class StockHome extends StatefulComponent {
         new DrawerHeader(children: [new Text('Stocks')]),
         new MenuItem(
           icon: 'action/assessment',
+          selected: true,
           children: [new Text('Stock List')]),
         new MenuItem(
           icon: 'action/account_balance',
