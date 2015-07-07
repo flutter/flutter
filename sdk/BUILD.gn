@@ -8,6 +8,7 @@ dart_pkg("sky") {
   sources = [
     "CHANGELOG.md",
     "bin/init.dart",
+    "lib/.sdkext",
     "lib/animation/animated_value.dart",
     "lib/animation/animation_performance.dart",
     "lib/animation/curves.dart",
