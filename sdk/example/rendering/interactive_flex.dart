@@ -5,6 +5,7 @@
 import 'dart:sky';
 import 'dart:math' as math;
 
+import 'package:sky/mojo/activity.dart' as activity;
 import 'package:sky/mojo/net/image_cache.dart' as image_cache;
 import 'package:sky/painting/text_style.dart';
 import 'package:sky/rendering/box.dart';
@@ -44,6 +45,9 @@ void handleEvent(event) {
     if (event.type == 'pointermove')
       image.growth = math.max(0.0, image.growth + event.x - touches[event.pointer].x);
     touches[event.pointer] = new Touch(event.x, event.y);
+  }
+  if (event.type == "back") {
+    activity.finishCurrentActivity();
   }
 }
 

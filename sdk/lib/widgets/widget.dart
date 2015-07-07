@@ -7,8 +7,7 @@ import 'dart:collection';
 import 'dart:mirrors';
 import 'dart:sky' as sky;
 
-import 'package:mojom/intents/intents.mojom.dart';
-import 'package:sky/mojo/shell.dart' as shell;
+import 'package:sky/mojo/activity.dart' as activity;
 
 import '../base/hit_test.dart';
 import '../rendering/box.dart';
@@ -1007,9 +1006,7 @@ abstract class App extends StatefulComponent {
   // Override this to handle back button behavior in your app
   // Call super.onBack() to finish the activity
   void onBack() {
-    ActivityManagerProxy activityManager = new ActivityManagerProxy.unbound();
-    shell.requestService('mojo:sky_viewer', activityManager);
-    activityManager.ptr.finishCurrentActivity();
+    activity.finishCurrentActivity();
   }
 }
 

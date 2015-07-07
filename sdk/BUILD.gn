@@ -27,6 +27,7 @@ dart_pkg("sky") {
     "lib/editing/editable_text.dart",
     "lib/editing/input.dart",
     "lib/editing/keyboard.dart",
+    "lib/mojo/activity.dart",
     "lib/mojo/asset_bundle.dart",
     "lib/mojo/embedder.dart",
     "lib/mojo/net/fetch.dart",
