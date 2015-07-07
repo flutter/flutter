@@ -59,9 +59,7 @@ class LinuxPort(base.Port):
         finder = WebKitFinder(host.filesystem)
         webkit_base = finder.webkit_base()
         chromium_base = finder.chromium_base()
-        driver_name = getattr(options, 'driver_name', None)
-        if driver_name is None:
-            driver_name = cls.CONTENT_SHELL_NAME
+        driver_name = cls.SKY_SHELL_NAME
         if hasattr(options, 'configuration') and options.configuration:
             configuration = options.configuration
         else:

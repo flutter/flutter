@@ -426,9 +426,6 @@ class AndroidPort(base.Port):
         if not self.get_option('disable_breakpad'):
             self._dump_reader = DumpReaderAndroid(host, self._build_path())
 
-        if self.driver_name() != self.CONTENT_SHELL_NAME:
-            raise AssertionError('Layout tests on Android only support content_shell as the driver.')
-
         self._driver_details = ContentShellDriverDetails()
 
         # Initialize the AndroidDevices class which tracks available devices.
@@ -459,9 +456,6 @@ class AndroidPort(base.Port):
 
     def path_to_md5sum_host(self):
         return self._build_path(MD5SUM_HOST_FILE_NAME)
-
-    def additional_drt_flag(self):
-        return self._driver_details.additional_command_line_flags(use_breakpad=not self.get_option('disable_breakpad'))
 
     def default_timeout_ms(self):
         # Android platform has less computing power than desktop platforms.

@@ -2,12 +2,18 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "network_service_impl.h"
-#include "url_loader_impl.h"
+#include "sky/services/ns_net/network_service_impl.h"
+#include "sky/services/ns_net/url_loader_impl.h"
 #include "base/logging.h"
-#include <Foundation/Foundation.h>
 
 namespace mojo {
+
+NetworkServiceImpl::NetworkServiceImpl(InterfaceRequest<NetworkService> request)
+    : binding_(this, request.Pass()) {
+}
+
+NetworkServiceImpl::~NetworkServiceImpl() {
+}
 
 void NetworkServiceImpl::CreateURLLoader(
     InterfaceRequest<URLLoader> loader) {
@@ -54,6 +60,10 @@ void NetworkServiceImpl::CreateHttpServer(
 
 void NetworkServiceImpl::RegisterURLLoaderInterceptor(
                         URLLoaderInterceptorFactoryPtr factory) {
+  DCHECK(false);
+}
+
+void NetworkServiceImpl::CreateHostResolver(InterfaceRequest<HostResolver> host_resolver) {
   DCHECK(false);
 }
 

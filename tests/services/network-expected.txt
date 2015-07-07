@@ -1,6 +1,0 @@
-CONSOLE: url => http://127.0.0.1:8000/sky/tests/services/resources/pass.txt
-CONSOLE: status_line => HTTP/1.1 200 OK
-CONSOLE: mime_type => text/plain
-CONSOLE: read 31 bytes
-This is data from the network.
-

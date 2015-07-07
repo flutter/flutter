@@ -10,8 +10,8 @@ namespace mojo {
 
 class NetworkServiceImpl : public NetworkService {
  public:
-  explicit NetworkServiceImpl(InterfaceRequest<NetworkService> request)
-      : binding_(this, request.Pass()) {}
+  explicit NetworkServiceImpl(InterfaceRequest<NetworkService> request);
+  ~NetworkServiceImpl() override;
 
   void CreateURLLoader(InterfaceRequest<URLLoader> loader) override;
   void GetCookieStore(InterfaceRequest<CookieStore> cookie_store) override;
@@ -32,6 +32,7 @@ class NetworkServiceImpl : public NetworkService {
                         const CreateHttpServerCallback& callback) override;
   void RegisterURLLoaderInterceptor(
                         URLLoaderInterceptorFactoryPtr factory) override;
+  void CreateHostResolver(InterfaceRequest<HostResolver> host_resolver) override;
 
  private:
   StrongBinding<NetworkService> binding_;

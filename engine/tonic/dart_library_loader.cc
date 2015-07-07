@@ -242,9 +242,13 @@ void DartLibraryLoader::DidCompleteImportJob(ImportJob* job,
 
   WatcherSignaler watcher_signaler(*this, job);
 
-  LogIfError(Dart_LoadLibrary(
+  Dart_Handle result = Dart_LoadLibrary(
       StringToDart(dart_state_, job->name()),
-      Dart_NewStringFromUTF8(buffer.data(), buffer.size()), 0, 0));
+      Dart_NewStringFromUTF8(buffer.data(), buffer.size()), 0, 0);
+  if (Dart_IsError(result)) {
+    LOG(ERROR) << "Error Loading " << job->name().utf8().data() << " "
+        << Dart_GetError(result);
+  }
 
   pending_libraries_.remove(job->name());
   jobs_.remove(job);
@@ -257,10 +261,15 @@ void DartLibraryLoader::DidCompleteSourceJob(SourceJob* job,
 
   WatcherSignaler watcher_signaler(*this, job);
 
-  LogIfError(Dart_LoadSource(
+  Dart_Handle result = Dart_LoadSource(
       Dart_HandleFromPersistent(job->library()),
       StringToDart(dart_state_, job->name()),
-      Dart_NewStringFromUTF8(buffer.data(), buffer.size()), 0, 0));
+      Dart_NewStringFromUTF8(buffer.data(), buffer.size()), 0, 0);
+
+  if (Dart_IsError(result)) {
+    LOG(ERROR) << "Error Loading " << job->name().utf8().data() << " "
+        << Dart_GetError(result);
+  }
 
   jobs_.remove(job);
 }

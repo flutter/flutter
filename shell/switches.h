@@ -11,6 +11,7 @@ namespace switches {
 
 extern const char kHelp[];
 extern const char kPackageRoot[];
+extern const char kNonInteractive[];
 extern const char kSnapshot[];
 
 }  // namespace switches

@@ -221,7 +221,7 @@ class Driver(object):
         return shlex.split(wrapper_option) if wrapper_option else []
 
     def is_http_test(self, test_name):
-        return True
+        return False
 
     def test_to_uri(self, test_name):
         """Convert a test name to a URI.
@@ -330,16 +330,12 @@ class Driver(object):
         self._current_cmd_line = None
 
     def cmd_line(self, pixel_tests, per_test_args):
-        cmd = self._command_wrapper(self._port.get_option('wrapper'))
-        cmd.append(self._port._path_to_driver())
-        if self._no_timeout:
-            cmd.append('--no-timeout')
-        cmd.extend(self._port.get_option('additional_drt_flag', []))
-        cmd.extend(self._port.additional_drt_flag())
-        if self._port.get_option('enable_leak_detection'):
-            cmd.append('--enable-leak-detection')
-        cmd.extend(per_test_args)
-        return cmd
+        return [
+            self._port._path_to_driver(),
+            '--non-interactive',
+            # base's CommandLine parser is dumb, this = is required.
+            '--package-root=%s' % self._port._dart_packages_root()
+        ]
 
     def _check_for_driver_crash(self, error_line):
         if error_line == "#CRASHED\n":

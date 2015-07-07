@@ -9,6 +9,7 @@ namespace shell {
 namespace switches {
 
 const char kHelp[] = "help";
+const char kNonInteractive[] = "non-interactive";
 const char kPackageRoot[] = "package-root";
 const char kSnapshot[] = "snapshot";
 

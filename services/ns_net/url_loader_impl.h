@@ -11,7 +11,7 @@ namespace mojo {
 class URLLoaderImpl : public URLLoader {
  public:
   explicit URLLoaderImpl(InterfaceRequest<URLLoader> request);
-  ~URLLoaderImpl();
+  ~URLLoaderImpl() override;
 
   void Start(URLRequestPtr request, const StartCallback& callback) override;
   void FollowRedirect(const FollowRedirectCallback& callback) override;

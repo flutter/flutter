@@ -87,8 +87,7 @@ class Port(object):
 
     ALL_BUILD_TYPES = ('debug', 'release')
 
-    CONTENT_SHELL_NAME = 'content_shell'
-    MOJO_SHELL_NAME = 'mojo_shell'
+    SKY_SHELL_NAME = 'sky_shell'
 
     # True if the port as aac and mp3 codecs built in.
     PORT_HAS_AUDIO_CODECS_BUILT_IN = False
@@ -222,21 +221,6 @@ class Port(object):
 
     def buildbot_archives_baselines(self):
         return True
-
-    def additional_drt_flag(self):
-        driver_name = self.driver_name()
-        if driver_name == self.CONTENT_SHELL_NAME:
-            return ['--dump-render-tree']
-        if driver_name == self.MOJO_SHELL_NAME:
-            return [
-                # TODO(ianh): Remove text/sky once we remove .sky files
-                '--args-for=mojo:native_viewport_service --use-headless-config --use-osmesa',
-                '--args-for=mojo:sky_viewer --testing',
-                '--content-handlers=text/sky,mojo:sky_viewer,application/dart,mojo:sky_viewer',
-                '--url-mappings=mojo:window_manager=mojo:sky_tester,mojo:surfaces_service=mojo:fake_surfaces_service',
-                'mojo:window_manager',
-            ]
-        return []
 
     def supports_per_test_timeout(self):
         return False
@@ -524,9 +508,7 @@ class Port(object):
         return ''.join(diff_fixup(diff))
 
     def driver_name(self):
-        if self.get_option('driver_name'):
-            return self.get_option('driver_name')
-        return self.MOJO_SHELL_NAME
+        return self.SKY_SHELL_NAME
 
     def expected_baselines_by_extension(self, test_name):
         """Returns a dict mapping baseline suffix to relative path for each baseline in

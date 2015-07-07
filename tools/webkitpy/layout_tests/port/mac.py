@@ -57,8 +57,6 @@ class MacPort(base.Port):
 
     DEFAULT_BUILD_DIRECTORIES = ('xcodebuild', 'out')
 
-    CONTENT_SHELL_NAME = 'Content Shell'
-
     BUILD_REQUIREMENTS_URL = 'https://code.google.com/p/chromium/wiki/MacBuildInstructions'
 
     @classmethod

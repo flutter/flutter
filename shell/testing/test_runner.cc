@@ -62,8 +62,8 @@ TestRunner::TestRunner()
 
   shell_view_->view()->ConnectToEngine(GetProxy(&sky_engine_));
   ViewportMetricsPtr metrics = ViewportMetrics::New();
-  metrics->physical_width = 320;
-  metrics->physical_height = 640;
+  metrics->physical_width = 800;
+  metrics->physical_height = 600;
   sky_engine_->OnViewportMetricsChanged(metrics.Pass());
 }
 

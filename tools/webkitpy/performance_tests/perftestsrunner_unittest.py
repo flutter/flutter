@@ -139,8 +139,6 @@ class MainTest(unittest.TestCase):
                 '--output-json-path=a/output.json',
                 '--slave-config-json-path=a/source.json',
                 '--test-results-server=somehost',
-                '--additional-drt-flag=--enable-threaded-parser',
-                '--additional-drt-flag=--awesomesauce',
                 '--repeat=5',
                 '--test-runner-count=5',
                 '--debug'])
@@ -156,7 +154,6 @@ class MainTest(unittest.TestCase):
         self.assertEqual(options.output_json_path, 'a/output.json')
         self.assertEqual(options.slave_config_json_path, 'a/source.json')
         self.assertEqual(options.test_results_server, 'somehost')
-        self.assertEqual(options.additional_drt_flag, ['--enable-threaded-parser', '--awesomesauce'])
         self.assertEqual(options.repeat, 5)
         self.assertEqual(options.test_runner_count, 5)
 

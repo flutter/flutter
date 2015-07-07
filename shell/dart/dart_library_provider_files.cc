@@ -5,6 +5,7 @@
 #include "sky/shell/dart/dart_library_provider_files.h"
 
 #include "base/bind.h"
+#include "base/files/file_util.h"
 #include "base/strings/string_util.h"
 #include "base/threading/worker_pool.h"
 #include "mojo/common/data_pipe_utils.h"
@@ -14,14 +15,18 @@ namespace sky {
 namespace shell {
 namespace {
 
-void Ignored(bool) {
+void CopyComplete(base::FilePath file, bool success) {
+  if (!success)
+    LOG(ERROR) << "Failed to load " << file.AsUTF8Unsafe();
 }
 
 base::FilePath SimplifyPath(const base::FilePath& path) {
   std::vector<base::FilePath::StringType> components;
   path.GetComponents(&components);
-  base::FilePath result;
-  for (const auto& component : components) {
+  auto it = components.begin();
+  base::FilePath result(*it++);
+  for (; it != components.end(); it++) {
+    auto& component = *it;
     if (component == base::FilePath::kCurrentDirectory)
       continue;
     if (component == base::FilePath::kParentDirectory)
@@ -37,6 +42,8 @@ base::FilePath SimplifyPath(const base::FilePath& path) {
 DartLibraryProviderFiles::DartLibraryProviderFiles(
     const base::FilePath& package_root)
     : package_root_(package_root) {
+    CHECK(base::DirectoryExists(package_root_)) << "Invalid --package-root "
+      << "\"" << package_root_.LossyDisplayName() << "\"";
 }
 
 DartLibraryProviderFiles::~DartLibraryProviderFiles() {
@@ -52,7 +59,7 @@ void DartLibraryProviderFiles::GetLibraryAsStream(
   scoped_refptr<base::TaskRunner> runner =
       base::WorkerPool::GetTaskRunner(true);
   mojo::common::CopyFromFile(source, pipe.producer_handle.Pass(), 0,
-                             runner.get(), base::Bind(&Ignored));
+                             runner.get(), base::Bind(&CopyComplete, source));
 }
 
 std::string DartLibraryProviderFiles::CanonicalizePackageURL(std::string url) {

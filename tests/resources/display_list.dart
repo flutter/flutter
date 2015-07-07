@@ -1,12 +1,13 @@
 
 import 'dart:async';
 import 'dart:sky' as sky;
-import "dart:sky.internals" as internals;
 import 'dart:typed_data';
 
 import 'package:sky/widgets/basic.dart';
 import 'package:sky/rendering/box.dart';
 import 'package:sky/rendering/object.dart';
+
+import 'harness.dart';
 
 typedef void Logger (String s);
 
@@ -158,7 +159,7 @@ class TestRenderView extends RenderView {
   }
 
   void endTest() {
-    internals.notifyTestComplete("PAINTED $frame FRAMES");
+    notifyTestComplete("PAINTED $frame FRAMES");
   }
 
 }
