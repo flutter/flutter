@@ -30,7 +30,11 @@ AssetBundle _initBundle() {
 final AssetBundle _bundle = _initBundle();
 
 void launch(String relativeUrl, String bundle) {
-  Uri url = Uri.base.resolve(relativeUrl);
+  // TODO(eseidel): This is a hack to keep non-skyx examples working for now:
+  Uri productionBase = Uri.parse(
+    'https://domokit.github.io/example/demo_launcher/lib/main.dart');
+  Uri base = rootBundle == null ? Uri.base : productionBase;
+  Uri url = base.resolve(relativeUrl);
 
   activity.ComponentName component = new activity.ComponentName()
     ..packageName = 'org.domokit.sky.demo'
