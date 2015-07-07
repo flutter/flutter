@@ -75,7 +75,8 @@ void main() {
   RenderFlex column = new RenderFlex(direction: FlexDirection.vertical);
 
   // Top cell
-  addFlexChildSolidColor(column, const Color(0xFF55DDCA), flex: 1);
+  final Color topColor = const Color(0xFF55DDCA);
+  addFlexChildSolidColor(column, topColor, flex: 1);
 
   // The internet is a beautiful place.  https://baconipsum.com/
   String meatyString = """Bacon ipsum dolor amet ham fatback tri-tip, prosciutto
@@ -102,6 +103,7 @@ Pancetta meatball tongue tenderloin rump tail jowl boudin.""";
     child: row
   );
 
+  activity.updateTaskDescription('Interactive Flex', topColor);
   new SkyBinding(root: root);
   view.setEventCallback(handleEvent);
 }

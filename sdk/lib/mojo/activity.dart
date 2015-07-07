@@ -5,6 +5,7 @@
 import 'dart:sky';
 import 'package:mojom/intents/intents.mojom.dart';
 import 'package:sky/mojo/shell.dart' as shell;
+export 'package:mojom/intents/intents.mojom.dart' show Intent, ComponentName, StringExtra;
 
 const int NEW_DOCUMENT = 0x00080000;
 const int NEW_TASK = 0x10000000;

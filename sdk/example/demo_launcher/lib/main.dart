@@ -4,7 +4,6 @@
 
 import 'dart:sky';
 
-import 'package:mojom/intents/intents.mojom.dart';
 import 'package:sky/mojo/activity.dart' as activity;
 import 'package:sky/mojo/asset_bundle.dart';
 import 'package:sky/mojo/shell.dart' as shell;
@@ -17,6 +16,7 @@ import 'package:sky/widgets/fixed_height_scrollable.dart';
 import 'package:sky/widgets/flat_button.dart';
 import 'package:sky/widgets/material.dart';
 import 'package:sky/widgets/scaffold.dart';
+import 'package:sky/widgets/task_description.dart';
 import 'package:sky/widgets/theme.dart';
 import 'package:sky/widgets/tool_bar.dart';
 
@@ -32,18 +32,17 @@ final AssetBundle _bundle = _initBundle();
 void launch(String relativeUrl, String bundle) {
   Uri url = Uri.base.resolve(relativeUrl);
 
-  ActivityManagerProxy activityManager = new ActivityManagerProxy.unbound();
-  ComponentName component = new ComponentName()
+  activity.ComponentName component = new activity.ComponentName()
     ..packageName = 'org.domokit.sky.demo'
     ..className = 'org.domokit.sky.demo.SkyDemoActivity';
-  Intent intent = new Intent()
+  activity.Intent intent = new activity.Intent()
     ..action = 'android.intent.action.VIEW'
     ..component = component
     ..flags = activity.MULTIPLE_TASK | activity.NEW_DOCUMENT
     ..url = url.toString();
 
   if (bundle != null) {
-    StringExtra extra = new StringExtra()
+    activity.StringExtra extra = new activity.StringExtra()
       ..name = 'bundleName'
       ..value = bundle;
     intent.stringExtras = [extra];
@@ -179,11 +178,14 @@ class SkyHome extends App {
         brightness: ThemeBrightness.dark,
         primarySwatch: colors.Teal
       ),
-      child: new Scaffold(
-        toolbar: new ToolBar(center: new Text('Sky Demos')),
-        body: new Material(
-          type: MaterialType.canvas,
-          child: new DemoList()
+      child: new TaskDescription(
+        label: 'Sky Demos',
+        child: new Scaffold(
+          toolbar: new ToolBar(center: new Text('Sky Demos')),
+          body: new Material(
+            type: MaterialType.canvas,
+            child: new DemoList()
+          )
         )
       )
     );

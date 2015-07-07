@@ -11,6 +11,7 @@ import 'package:sky/widgets/basic.dart';
 import 'package:sky/widgets/material.dart';
 import 'package:sky/widgets/raised_button.dart';
 import 'package:sky/widgets/scaffold.dart';
+import 'package:sky/widgets/task_description.dart';
 import 'package:sky/widgets/theme.dart';
 import 'package:sky/widgets/tool_bar.dart';
 import 'package:sky/widgets/widget.dart';
@@ -71,64 +72,72 @@ class SectorApp extends App {
     });
   }
 
+  Widget buildBody() {
+    return new Material(
+      type: MaterialType.canvas,
+      child: new Flex([
+          new Container(
+            padding: new EdgeDims.symmetric(horizontal: 8.0, vertical: 25.0),
+            child: new Flex([
+                new RaisedButton(
+                  enabled: enabledAdd,
+                  child: new ShrinkWrapWidth(
+                    child: new Flex([
+                      new Container(
+                        padding: new EdgeDims.all(4.0),
+                        margin: new EdgeDims.only(right: 10.0),
+                        child: new WidgetToRenderBoxAdapter(sectorAddIcon)
+                      ),
+                      new Text('ADD SECTOR'),
+                    ])
+                  ),
+                  onPressed: addSector
+                ),
+                new RaisedButton(
+                  enabled: enabledRemove,
+                  child: new ShrinkWrapWidth(
+                    child: new Flex([
+                      new Container(
+                        padding: new EdgeDims.all(4.0),
+                        margin: new EdgeDims.only(right: 10.0),
+                        child: new WidgetToRenderBoxAdapter(sectorRemoveIcon)
+                      ),
+                      new Text('REMOVE SECTOR'),
+                    ])
+                  ),
+                  onPressed: removeSector
+                )
+              ],
+              justifyContent: FlexJustifyContent.spaceAround
+            )
+          ),
+          new Flexible(
+            child: new Container(
+              margin: new EdgeDims.all(8.0),
+              decoration: new BoxDecoration(
+                border: new Border.all(new BorderSide(color: new Color(0xFF000000)))
+              ),
+              padding: new EdgeDims.all(8.0),
+              child: new WidgetToRenderBoxAdapter(sectors)
+            )
+          ),
+        ],
+        direction: FlexDirection.vertical,
+        justifyContent: FlexJustifyContent.spaceBetween
+      )
+    );
+  }
+
   Widget build() {
     return new Theme(
       data: new ThemeData.light(),
-      child: new Scaffold(
-        toolbar: new ToolBar(
-            center: new Text('Sector Layout in a Widget Tree')),
-        body: new Material(
-          type: MaterialType.canvas,
-          child: new Flex([
-              new Container(
-                padding: new EdgeDims.symmetric(horizontal: 8.0, vertical: 25.0),
-                child: new Flex([
-                    new RaisedButton(
-                      enabled: enabledAdd,
-                      child: new ShrinkWrapWidth(
-                        child: new Flex([
-                          new Container(
-                            padding: new EdgeDims.all(4.0),
-                            margin: new EdgeDims.only(right: 10.0),
-                            child: new WidgetToRenderBoxAdapter(sectorAddIcon)
-                          ),
-                          new Text('ADD SECTOR'),
-                        ])
-                      ),
-                      onPressed: addSector
-                    ),
-                    new RaisedButton(
-                      enabled: enabledRemove,
-                      child: new ShrinkWrapWidth(
-                        child: new Flex([
-                          new Container(
-                            padding: new EdgeDims.all(4.0),
-                            margin: new EdgeDims.only(right: 10.0),
-                            child: new WidgetToRenderBoxAdapter(sectorRemoveIcon)
-                          ),
-                          new Text('REMOVE SECTOR'),
-                        ])
-                      ),
-                      onPressed: removeSector
-                    )
-                  ],
-                  justifyContent: FlexJustifyContent.spaceAround
-                )
-              ),
-              new Flexible(
-                child: new Container(
-                  margin: new EdgeDims.all(8.0),
-                  decoration: new BoxDecoration(
-                    border: new Border.all(new BorderSide(color: new Color(0xFF000000)))
-                  ),
-                  padding: new EdgeDims.all(8.0),
-                  child: new WidgetToRenderBoxAdapter(sectors)
-                )
-              ),
-            ],
-            direction: FlexDirection.vertical,
-            justifyContent: FlexJustifyContent.spaceBetween
-          )
+      child: new TaskDescription(
+        label: 'Sector Layout',
+        child: new Scaffold(
+          toolbar: new ToolBar(
+            center: new Text('Sector Layout in a Widget Tree')
+          ),
+          body: buildBody()
         )
       )
     );
