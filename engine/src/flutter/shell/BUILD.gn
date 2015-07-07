@@ -119,6 +119,7 @@ if (is_android) {
       "//services/keyboard",
       "//sky/services/engine:engine_java",
       "//sky/services/oknet",
+      "//sky/services/intents:intents_lib",
     ]
   }
 
