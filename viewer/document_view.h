@@ -9,7 +9,6 @@
 #include "base/memory/weak_ptr.h"
 #include "mojo/public/cpp/application/lazy_interface_ptr.h"
 #include "mojo/public/cpp/application/service_provider_impl.h"
-#include "mojo/public/cpp/bindings/interface_impl.h"
 #include "mojo/public/cpp/bindings/strong_binding.h"
 #include "mojo/public/interfaces/application/application.mojom.h"
 #include "mojo/services/content_handler/public/interfaces/content_handler.mojom.h"
