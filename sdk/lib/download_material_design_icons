@@ -4,6 +4,7 @@
 # found in the LICENSE file.
 
 import os
+import shutil
 import subprocess
 import sys
 import urllib2
@@ -11,14 +12,23 @@ import urllib2
 def main():
     sky_lib_dir = os.path.dirname(os.path.abspath(__file__))
     assets_dir = os.path.join(sky_lib_dir, 'assets')
+    icons_dir = os.path.join(assets_dir, 'material-design-icons')
+    existing_sha1_path = os.path.join(icons_dir, 'material-design-icons.sha1')
 
-    if (os.path.isdir(os.path.join(assets_dir, 'material-design-icons'))):
-        return
+    existing_sha1 = None
+    if os.path.isfile(existing_sha1_path):
+        with open(existing_sha1_path, 'r') as f:
+            existing_sha1 = f.read()
 
     sha1_path = os.path.join(assets_dir, 'material-design-icons.sha1')
 
     with open(sha1_path, 'r') as f:
         sha1 = f.read()
+
+    if existing_sha1 == sha1:
+        return
+
+    print "Downloading missing material design icons"
 
     tgz_path = os.path.join(assets_dir, 'material-design-icons.tgz')
     url = 'https://storage.googleapis.com/mojo/material-design-icons/%s' % sha1
@@ -27,9 +37,15 @@ def main():
     with open(tgz_path, 'wb') as f:
         f.write(response.read())
 
+    shutil.rmtree(icons_dir)
+
     output_path = os.path.join(assets_dir, tgz_path)
     subprocess.call([
         'tar', '-xzf', output_path, '-C', assets_dir
+    ])
+
+    subprocess.call([
+        'cp', sha1_path, icons_dir
     ])
 
     os.unlink(tgz_path)

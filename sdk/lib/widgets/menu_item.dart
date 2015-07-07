@@ -47,7 +47,39 @@ class MenuItem extends ButtonBase {
     return result;
   }
 
+  String get iconSuffix {
+    switch(Theme.of(this).brightness) {
+      case ThemeBrightness.dark:
+        return "white";
+      case ThemeBrightness.light:
+        return "black";
+    }
+  }
+
   Widget buildContent() {
+    List<Widget> flexChildren = new List<Widget>();
+    if (icon != null) {
+      flexChildren.add(
+        new Opacity(
+          opacity: highlight ? 1.0 : 0.45,
+          child: new Padding(
+            padding: const EdgeDims.symmetric(horizontal: 16.0),
+            child: new Icon(type: "${icon}_${iconSuffix}", size: 24)
+          )
+        )
+      );
+    }
+    flexChildren.add(
+      new Flexible(
+        child: new Padding(
+          padding: const EdgeDims.symmetric(horizontal: 16.0),
+          child: new DefaultTextStyle(
+            style: textStyle,
+            child: new Flex(children, direction: FlexDirection.horizontal)
+          )
+        )
+      )
+    );
     return new Listener(
       onGestureTap: (_) {
         if (onPressed != null)
@@ -57,21 +89,7 @@ class MenuItem extends ButtonBase {
         height: 48.0,
         decoration: highlight ? _kHighlightDecoration : _kHighlightBoring,
         child: new InkWell(
-          child: new Flex([
-            new Padding(
-              padding: const EdgeDims.symmetric(horizontal: 16.0),
-              child: new Icon(type: "${icon}_grey600", size: 24)
-            ),
-            new Flexible(
-              child: new Padding(
-                padding: const EdgeDims.symmetric(horizontal: 16.0),
-                child: new DefaultTextStyle(
-                  style: textStyle,
-                  child: new Flex(children, direction: FlexDirection.horizontal)
-                )
-              )
-            )
-          ])
+          child: new Flex(flexChildren)
         )
       )
     );
