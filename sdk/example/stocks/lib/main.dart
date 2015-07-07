@@ -32,10 +32,13 @@ class StocksApp extends App {
   }
 
   void onBack() {
-    setState(() {
-      _navigationState.pop();
-    });
-    // TODO(jackson): Need a way to invoke default back behavior here
+    if (_navigationState.hasPrevious()) {
+      setState(() {
+        _navigationState.pop();
+      });
+    } else {
+      super.onBack();
+    }
   }
 
   StockMode optimismSetting = StockMode.optimistic;

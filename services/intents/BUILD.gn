@@ -2,28 +2,34 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-import("//build/config/android/config.gni")
-import("//build/config/android/rules.gni")
 import("//mojo/public/tools/bindings/mojom.gni")
 
 group("intents") {
   testonly = true
 
   deps = [
-    ":intents_lib",
     ":interfaces",
   ]
+
+  if (is_android) {
+    deps += [ ":intents_lib" ]
+  }
 }
 
-android_library("intents_lib") {
-  java_files = [ "src/org/domokit/intents/ActivityManagerImpl.java" ]
+if (is_android) {
+  import("//build/config/android/config.gni")
+  import("//build/config/android/rules.gni")
 
-  deps = [
-    "//base:base_java",
-    "//mojo/public/java:bindings",
-    "//mojo/public/java:system",
-    ":interfaces_java",
-  ]
+  android_library("intents_lib") {
+    java_files = [ "src/org/domokit/intents/ActivityManagerImpl.java" ]
+
+    deps = [
+      "//base:base_java",
+      "//mojo/public/java:bindings",
+      "//mojo/public/java:system",
+      ":interfaces_java",
+    ]
+  }
 }
 
 mojom("interfaces") {

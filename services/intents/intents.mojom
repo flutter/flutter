@@ -27,4 +27,5 @@ struct Intent {
 //               figure out how to rationalize this interface across platforms.
 interface ActivityManager {
   startActivity(Intent intent);
+  finishCurrentActivity();
 };
