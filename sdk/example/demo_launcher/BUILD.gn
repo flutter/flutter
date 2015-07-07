@@ -12,7 +12,9 @@ sky_app("demo_launcher") {
   if (enable_skyx) {
     bundles = [
       "//sky/sdk/example/mine_digger",
+      "//sky/sdk/example/rendering:interactive_flex",
       "//sky/sdk/example/stocks",
+      "//sky/sdk/example/widgets:sector",
     ]
   }
 
