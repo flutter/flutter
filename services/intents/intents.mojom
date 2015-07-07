@@ -17,6 +17,7 @@ struct ComponentName {
 struct Intent {
   string action;
   string url;
+  uint32 flags;
   ComponentName? component;
   array<StringExtra>? string_extras;
 };

@@ -5,6 +5,7 @@
 import 'dart:sky';
 
 import 'package:mojom/intents/intents.mojom.dart';
+import 'package:sky/mojo/activity.dart' as activity;
 import 'package:sky/mojo/asset_bundle.dart';
 import 'package:sky/mojo/shell.dart' as shell;
 import 'package:sky/painting/box_painter.dart';
@@ -38,6 +39,7 @@ void launch(String relativeUrl, String bundle) {
   Intent intent = new Intent()
     ..action = 'android.intent.action.VIEW'
     ..component = component
+    ..flags = activity.MULTIPLE_TASK | activity.NEW_DOCUMENT
     ..url = url.toString();
 
   if (bundle != null) {
@@ -47,8 +49,7 @@ void launch(String relativeUrl, String bundle) {
     intent.stringExtras = [extra];
   }
 
-  shell.requestService(null, activityManager);
-  activityManager.ptr.startActivity(intent);
+  activity.startActivity(intent);
 }
 
 class SkyDemo {

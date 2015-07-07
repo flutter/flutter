@@ -40,6 +40,11 @@ public class ActivityManagerImpl implements ActivityManager {
 
     @Override
     public void startActivity(Intent intent) {
+        if (sCurrentActivity == null) {
+            Log.e(TAG, "Unable to startActivity");
+            return;
+        }
+
         final android.content.Intent androidIntent = new android.content.Intent(
                 intent.action, Uri.parse(intent.url));
 
@@ -56,10 +61,12 @@ public class ActivityManagerImpl implements ActivityManager {
             }
         }
 
-        androidIntent.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK);
+        if (intent.flags != 0) {
+            androidIntent.setFlags(intent.flags);
+        }
 
         try {
-            mContext.startActivity(androidIntent);
+            sCurrentActivity.startActivity(androidIntent);
         } catch (ActivityNotFoundException e) {
             Log.e(TAG, "Unable to startActivity", e);
         }

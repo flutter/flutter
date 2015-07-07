@@ -5,8 +5,22 @@
 import 'package:mojom/intents/intents.mojom.dart';
 import 'package:sky/mojo/shell.dart' as shell;
 
+const int NEW_DOCUMENT = 0x00080000;
+const int NEW_TASK = 0x10000000;
+const int MULTIPLE_TASK = 0x08000000;
+
+ActivityManagerProxy _initActivityManager() {
+  ActivityManagerProxy activityManager = new ActivityManagerProxy.unbound();
+  shell.requestService('mojo:sky_viewer', activityManager);
+  return activityManager;
+}
+
+final ActivityManagerProxy _activityManager = _initActivityManager();
+
 void finishCurrentActivity() {
-    ActivityManagerProxy activityManager = new ActivityManagerProxy.unbound();
-    shell.requestService('mojo:sky_viewer', activityManager);
-    activityManager.ptr.finishCurrentActivity();
+  _activityManager.ptr.finishCurrentActivity();
+}
+
+void startActivity(Intent intent) {
+  _activityManager.ptr.startActivity(intent);
 }
