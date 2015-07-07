@@ -131,7 +131,6 @@ void DartController::CreateIsolateFor(PassOwnPtr<DOMDartState> state) {
   Dart_SetMessageNotifyCallback(MessageNotifyCallback);
   CHECK(isolate) << error;
   dom_dart_state_->SetIsolate(isolate);
-  Dart_SetGcCallbacks(DartGCPrologue, DartGCEpilogue);
   CHECK(!LogIfError(Dart_SetLibraryTagHandler(DartLibraryTagHandler)));
 
   {
