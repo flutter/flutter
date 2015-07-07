@@ -6,6 +6,7 @@ import 'dart:convert';
 import 'dart:math';
 
 import 'package:sky/mojo/net/fetch.dart';
+import 'package:sky/mojo/asset_bundle.dart';
 
 // Snapshot from http://www.nasdaq.com/screening/company-list.aspx
 // Fetched 2/23/2014.
@@ -51,6 +52,12 @@ class StockData {
 typedef void StockDataCallback(StockData data);
 const _kChunkCount = 30;
 
+String _urlToFetch(int chunk) {
+  if (rootBundle == null)
+    return '../data/stock_data_${chunk}.json';
+  return 'https://domokit.github.io/example/stocks/data/stock_data_${chunk}.json';
+}
+
 class StockDataFetcher {
   int _currentChunk = 0;
   final StockDataCallback callback;
@@ -60,7 +67,7 @@ class StockDataFetcher {
   }
 
   void _fetchNextChunk() {
-    fetchBody('../data/stock_data_${_currentChunk++}.json').then((Response response) {
+    fetchBody(_urlToFetch(_currentChunk++)).then((Response response) {
       String json = response.bodyAsString();
       JsonDecoder decoder = new JsonDecoder();
 
