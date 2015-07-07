@@ -74,9 +74,9 @@ class NavigationState {
   }
 }
 
-class Navigator extends Component {
+class Navigator extends StatefulComponent {
 
-  Navigator(this.state, { String key }) : super(key: key, stateful: true);
+  Navigator(this.state, { String key }) : super(key: key);
 
   NavigationState state;
 

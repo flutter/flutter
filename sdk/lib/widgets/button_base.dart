@@ -4,9 +4,9 @@
 
 import 'basic.dart';
 
-abstract class ButtonBase extends Component {
+abstract class ButtonBase extends StatefulComponent {
 
-  ButtonBase({ String key, this.highlight: false }) : super(key: key, stateful: true);
+  ButtonBase({ String key, this.highlight: false }) : super(key: key);
 
   bool highlight;
 

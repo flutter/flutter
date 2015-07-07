@@ -22,7 +22,7 @@ import 'widget.dart';
 export '../rendering/box.dart' show BackgroundImage, BoxConstraints, BoxDecoration, Border, BorderSide, EdgeDims;
 export '../rendering/flex.dart' show FlexDirection, FlexJustifyContent, FlexAlignItems;
 export '../rendering/object.dart' show Point, Offset, Size, Rect, Color, Paint, Path;
-export 'widget.dart' show Widget, Component, App, runApp, Listener, ParentDataNode;
+export 'widget.dart' show Widget, Component, StatefulComponent, App, runApp, Listener, ParentDataNode;
 
 
 // PAINTING NODES
@@ -505,8 +505,8 @@ class Image extends LeafRenderObjectWrapper {
   }
 }
 
-class FutureImage extends Component {
-  FutureImage({ this.image, this.size }) : super(stateful: true);
+class FutureImage extends StatefulComponent {
+  FutureImage({ this.image, this.size });
 
   Future<sky.Image> image;
   Size size;

@@ -17,9 +17,9 @@ class _AnimationEntry {
   StreamSubscription<double> subscription;
 }
 
-abstract class AnimatedComponent extends Component {
+abstract class AnimatedComponent extends StatefulComponent {
 
-  AnimatedComponent({ String key }) : super(key: key, stateful: true);
+  AnimatedComponent({ String key }) : super(key: key);
 
   void syncFields(AnimatedComponent source) { }
 

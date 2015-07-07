@@ -14,13 +14,13 @@ typedef void ValueChanged(value);
 const double _kHintOpacity = 0.26;
 const EdgeDims _kTextfieldPadding = const EdgeDims.symmetric(vertical: 8.0);
 
-class Input extends Component {
+class Input extends StatefulComponent {
 
   Input({String key,
          this.placeholder,
          this.onChanged,
          this.focused})
-      : super(key: key, stateful: true) {
+      : super(key: key) {
     _editableValue = new EditableString(
       text: _value,
       onUpdated: _handleTextUpdated

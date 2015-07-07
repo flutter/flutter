@@ -21,9 +21,9 @@ typedef void SettingsUpdater({
   BackupMode backup
 });
 
-class StockSettings extends Component {
+class StockSettings extends StatefulComponent {
 
-  StockSettings(this.navigator, this.optimism, this.backup, this.updater) : super(stateful: true);
+  StockSettings(this.navigator, this.optimism, this.backup, this.updater);
 
   Navigator navigator;
   StockMode optimism;

@@ -137,9 +137,6 @@ abstract class Widget {
   // Returns the child which should be retained as the child of this node.
   Widget syncChild(Widget newNode, Widget oldNode, dynamic slot) {
 
-    assert(oldNode is! Component ||
-           (oldNode is Component && !oldNode._disqualifiedFromEverAppearingAgain)); // TODO(ianh): Simplify this once the analyzer is cleverer
-
     if (newNode == oldNode) {
       assert(newNode == null || newNode.mounted);
       assert(newNode is! RenderObjectWrapper ||
@@ -359,25 +356,17 @@ class Listener extends TagNode  {
 
 abstract class Component extends Widget {
 
-  Component({ String key, bool stateful })
-      : _stateful = stateful != null ? stateful : false,
-        _order = _currentOrder + 1,
+  Component({ String key })
+      : _order = _currentOrder + 1,
         super._withKey(key);
 
   static Component _currentlyBuilding;
   bool get _isBuilding => _currentlyBuilding == this;
 
-  bool _stateful;
   bool _dirty = true;
-  bool _disqualifiedFromEverAppearingAgain = false;
 
   Widget _built;
   dynamic _slot; // cached slot from the last time we were synced
-
-  void didMount() {
-    assert(!_disqualifiedFromEverAppearingAgain);
-    super.didMount();
-  }
 
   void remove() {
     assert(_built != null);
@@ -408,38 +397,6 @@ abstract class Component extends Widget {
     scheduleBuild();
   }
 
-  bool _retainStatefulNodeIfPossible(Component old) {
-    assert(!_disqualifiedFromEverAppearingAgain);
-
-    if (old == null || !old._stateful)
-      return false;
-
-    assert(runtimeType == old.runtimeType);
-    assert(key == old.key);
-
-    // Make |this|, the newly-created object, into the "old" Component, and kill it
-    _stateful = false;
-    _built = old._built;
-    assert(_built != null);
-    _disqualifiedFromEverAppearingAgain = true;
-
-    // Make |old| the "new" component
-    old._built = null;
-    old._dirty = true;
-    old.syncFields(this);
-    return true;
-  }
-
-  // This is called by _retainStatefulNodeIfPossible(), during
-  // syncChild(), just before _sync() is called.
-  // This must be implemented on any subclass that can become stateful
-  // (but don't call super.syncFields() if you inherit directly from
-  // Component, since that'll fire an assert).
-  // If you don't ever become stateful, then don't override this.
-  void syncFields(Component source) {
-    assert(false);
-  }
-
   // order corresponds to _build_ order, not depth in the tree.
   // All the Components built by a particular other Component will have the
   // same order, regardless of whether one is subsequently inserted
@@ -457,7 +414,6 @@ abstract class Component extends Widget {
   //      assert(_built == null && old != null)
   void _sync(Component old, dynamic slot) {
     assert(_built == null || old == null);
-    assert(!_disqualifiedFromEverAppearingAgain);
 
     _slot = slot;
 
@@ -487,7 +443,6 @@ abstract class Component extends Widget {
   }
 
   void _buildIfDirty() {
-    assert(!_disqualifiedFromEverAppearingAgain);
     if (!_dirty || !_mounted)
       return;
 
@@ -496,21 +451,76 @@ abstract class Component extends Widget {
   }
 
   void scheduleBuild() {
-    assert(!_disqualifiedFromEverAppearingAgain);
     if (_isBuilding || _dirty || !_mounted)
       return;
     _dirty = true;
     _scheduleComponentForRender(this);
   }
 
+  Widget build();
+
+}
+
+abstract class StatefulComponent extends Component {
+
+  StatefulComponent({ String key }) : super(key: key);
+
+  bool _disqualifiedFromEverAppearingAgain = false;
+
+  void didMount() {
+    assert(!_disqualifiedFromEverAppearingAgain);
+    super.didMount();
+  }
+
+  void _buildIfDirty() {
+    assert(!_disqualifiedFromEverAppearingAgain);
+    super._buildIfDirty();
+  }
+
+  void _sync(Widget old, dynamic slot) {
+    assert(!_disqualifiedFromEverAppearingAgain);
+    super._sync(old, slot);
+  }
+
+  Widget syncChild(Widget node, Widget oldNode, dynamic slot) {
+    assert(!_disqualifiedFromEverAppearingAgain);
+    return super.syncChild(node, oldNode, slot);
+  }
+
+  bool _retainStatefulNodeIfPossible(StatefulComponent old) {
+    assert(!_disqualifiedFromEverAppearingAgain);
+
+    if (old == null)
+      return false;
+
+    assert(runtimeType == old.runtimeType);
+    assert(key == old.key);
+
+    // Make |this|, the newly-created object, into the "old" Component, and kill it
+    _built = old._built;
+    assert(_built != null);
+    _disqualifiedFromEverAppearingAgain = true;
+
+    // Make |old| the "new" component
+    old._built = null;
+    old._dirty = true;
+    old.syncFields(this);
+    return true;
+  }
+
+  // This is called by _retainStatefulNodeIfPossible(), during
+  // syncChild(), just before _sync() is called. Derived
+  // classes should override this method to update `this` to
+  // account for the new values the parent passed to `source`.
+  // Make sure to call super.syncFields(source) unless you are
+  // extending StatefulComponent directly.
+  void syncFields(Component source);
+
   void setState(Function fn()) {
-    assert(_stateful);
+    assert(!_disqualifiedFromEverAppearingAgain);
     fn();
     scheduleBuild();
   }
-
-  Widget build();
-
 }
 
 Set<Component> _dirtyComponents = new Set<Component>();
@@ -930,10 +940,9 @@ class WidgetSkyBinding extends SkyBinding {
 
 }
 
-abstract class App extends Component {
+abstract class App extends StatefulComponent {
 
-  // Apps are assumed to be stateful
-  App({ String key }) : super(key: key, stateful: true);
+  App({ String key }) : super(key: key);
 
   void _handleEvent(sky.Event event) {
     if (event.type == 'back')
@@ -950,13 +959,15 @@ abstract class App extends Component {
     SkyBinding.instance.removeEventListener(_handleEvent);
   }
 
+  void syncFields(Component source) { }
+
   // Override this to handle back button behavior in your app
   void onBack() { }
 }
 
-abstract class AbstractWidgetRoot extends Component {
+abstract class AbstractWidgetRoot extends StatefulComponent {
 
-  AbstractWidgetRoot() : super(stateful: true) {
+  AbstractWidgetRoot() {
     _mounted = true;
     _scheduleComponentForRender(this);
   }

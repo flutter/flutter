@@ -254,8 +254,8 @@ class MyCheckbox extends Component {
   }
 }
 
-class MyDialog extends Component {
-  MyDialog({ this.onDismissed }) : super(stateful: true);
+class MyDialog extends StatefulComponent {
+  MyDialog({ this.onDismissed });
 
   Function onDismissed;
   bool _checkboxValue = false;
@@ -298,8 +298,7 @@ component persists for the lifetime of the application.
 The `MyDialog` component is more complicated because it is a stateful component.
 Let's walk through the differences in `MyDialog` caused by its being stateful:
 
- * `MyDialog` passes `stateful: true` to the `Component` constructor, marking
-   the component stateful.
+ * `MyDialog` extends StatefulComponent instead of Component.
 
  * `MyDialog` has non-`final` member variables. Over the lifetime of the dialog,
    we'll need to modify the values of these member variables, which means we

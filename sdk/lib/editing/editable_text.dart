@@ -15,14 +15,14 @@ const _kCursorGap = 1.0;
 const _kCursorHeightOffset = 2.0;
 const _kCursorWidth = 1.0;
 
-class EditableText extends Component {
+class EditableText extends StatefulComponent {
 
   EditableText({
     String key,
     this.value,
     this.focused: false,
     this.style,
-    this.cursorColor}) : super(key: key, stateful: true);
+    this.cursorColor}) : super(key: key);
 
   EditableString value;
   bool focused;

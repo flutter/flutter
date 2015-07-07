@@ -24,13 +24,13 @@ abstract class ScrollClient {
 
 enum ScrollDirection { vertical, horizontal }
 
-abstract class Scrollable extends Component {
+abstract class Scrollable extends StatefulComponent {
 
   Scrollable({
    String key,
    this.backgroundColor,
    this.direction: ScrollDirection.vertical
-  }) : super(key: key, stateful: true);
+  }) : super(key: key);
 
   Color backgroundColor;
   ScrollDirection direction;

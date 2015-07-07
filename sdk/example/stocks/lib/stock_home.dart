@@ -29,9 +29,9 @@ import 'stock_types.dart';
 
 typedef void ModeUpdater(StockMode mode);
 
-class StockHome extends Component {
+class StockHome extends StatefulComponent {
 
-  StockHome(this.navigator, this.stocks, this.stockMode, this.modeUpdater) : super(stateful: true) {
+  StockHome(this.navigator, this.stocks, this.stockMode, this.modeUpdater) {
     // if (debug)
     //   new Timer(new Duration(seconds: 1), dumpState);
     _drawerController = new DrawerController(_handleDrawerStatusChanged);

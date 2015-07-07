@@ -185,7 +185,7 @@ class Game {
 
   void handleBannerPointerDown(sky.PointerEvent event) {
     initialize();
-    app.setState((){});
+    app.scheduleBuild();
   }
 
   // User action. The user uncovers the cell which can cause losing the game.
@@ -203,7 +203,7 @@ class Game {
       // No mine, uncover nearby if possible.
       cull(x, y);
     }
-    app.setState((){});
+    app.scheduleBuild();
   }
 
   // User action. The user is sure a mine is at this location.
@@ -215,7 +215,7 @@ class Game {
       uiState[y][x] = flaggedCell;
       ++detectedCount;
     }
-    app.setState((){});
+    app.scheduleBuild();
   }
 
   // Recursively uncovers cells whose totalMineCount is zero.
