@@ -129,9 +129,9 @@ const double kCardHeight = 120.0;
 const EdgeDims kListPadding = const EdgeDims.all(4.0);
 
 class DemoList extends FixedHeightScrollable {
-  DemoList({ String key }) : super(key: key, itemHeight: kCardHeight, padding: kListPadding) {
-    itemCount = demos.length;
-  }
+  DemoList({ String key }) : super(key: key, itemHeight: kCardHeight, padding: kListPadding);
+
+  int get itemCount => demos.length;
 
   Widget buildDemo(SkyDemo demo) {
     return new Listener(

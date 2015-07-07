@@ -164,7 +164,7 @@ class StockHome extends StatefulComponent {
       _drawerController.close();
     });
   }
-  
+
   Widget buildToolBar() {
     return new ToolBar(
         left: new IconButton(
@@ -185,18 +185,30 @@ class StockHome extends StatefulComponent {
   int selectedTabIndex = 0;
   List<String> portfolioSymbols = ["AAPL","FIZZ", "FIVE", "FLAT", "ZINC", "ZNGA"];
 
+  Iterable<Stock> _filterByPortfolio(Iterable<Stock> stocks) {
+    return stocks.where((stock) => portfolioSymbols.contains(stock.symbol));
+  }
+
+  Iterable<Stock> _filterBySearchQuery(Iterable<Stock> stocks) {
+    if (_searchQuery == null)
+      return stocks;
+    RegExp regexp = new RegExp(_searchQuery, caseSensitive: false);
+    return stocks.where((stock) => stock.symbol.contains(regexp));
+  }
+
+  Widget buildMarketStockList() {
+    return new Stocklist(stocks: _filterBySearchQuery(stocks).toList());
+  }
+
   Widget buildPortfolioStocklist() {
-    return new Stocklist(
-     stocks: stocks.where((s) => portfolioSymbols.contains(s.symbol)).toList(), 
-     query: _searchQuery
-   );
+    return new Stocklist(stocks: _filterBySearchQuery(_filterByPortfolio(stocks)).toList());
   }
 
   Widget buildTabNavigator() {
     List<TabNavigatorView> views = <TabNavigatorView>[
       new TabNavigatorView(
         label: const TabLabel(text: 'MARKET'),
-        builder: () => new Stocklist(stocks: stocks, query: _searchQuery)
+        builder: buildMarketStockList
       ),
       new TabNavigatorView(
         label: const TabLabel(text: 'PORTFOLIO'),

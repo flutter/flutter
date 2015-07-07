@@ -12,34 +12,26 @@ import 'scrollable.dart';
 
 abstract class FixedHeightScrollable extends Scrollable {
 
-  final EdgeDims padding;
-
   FixedHeightScrollable({ String key, this.itemHeight, Color backgroundColor, this.padding })
       : super(key: key, backgroundColor: backgroundColor) {
     assert(itemHeight != null);
   }
 
+  EdgeDims padding;
   double itemHeight;
 
+  /// Subclasses must implement `get itemCount` to tell FixedHeightScrollable
+  /// how many items there are in the list.
+  int get itemCount;
+
   void syncFields(FixedHeightScrollable source) {
+    padding = source.padding;
     itemHeight = source.itemHeight;
     super.syncFields(source);
   }
 
   ScrollBehavior createScrollBehavior() => new OverscrollBehavior();
   OverscrollBehavior get scrollBehavior => super.scrollBehavior;
-
-  int _itemCount = 0;
-  int get itemCount => _itemCount;
-  void set itemCount (int value) {
-    if (_itemCount != value) {
-      _itemCount = value;
-      double contentsHeight = itemHeight * _itemCount;
-      if (padding != null)
-         contentsHeight += padding.top + padding.bottom;
-      scrollBehavior.contentsHeight = contentsHeight;
-    }
-  }
 
   double _height;
   void _handleSizeChanged(Size newSize) {
@@ -57,10 +49,18 @@ abstract class FixedHeightScrollable extends Scrollable {
     return super.scrollTo(newScrollOffset);
   }
 
+  void _updateContentsHeight() {
+    double contentsHeight = itemHeight * itemCount;
+    if (padding != null)
+      contentsHeight += padding.top + padding.bottom;
+    scrollBehavior.contentsHeight = contentsHeight;
+  }
+
   Widget buildContent() {
+    _updateContentsHeight();
+
     var itemShowIndex = 0;
     var itemShowCount = 0;
-
     Matrix4 transform = new Matrix4.identity();
 
     if (_height != null && _height > 0.0) {

@@ -10,28 +10,20 @@ import 'stock_row.dart';
 
 class Stocklist extends FixedHeightScrollable {
 
-  Stocklist({
-    String key,
-    this.stocks,
-    this.query
-  }) : super(itemHeight: StockRow.kHeight, key: key);
+  Stocklist({ String key, this.stocks })
+    : super(itemHeight: StockRow.kHeight, key: key);
 
-  String query;
   List<Stock> stocks;
 
+  int get itemCount => stocks.length;
+
   void syncFields(Stocklist source) {
-    query = source.query;
     stocks = source.stocks;
     super.syncFields(source);
   }
 
   List<Widget> buildItems(int start, int count) {
-    var filteredStocks = stocks.where((stock) {
-      return query == null ||
-             stock.symbol.contains(new RegExp(query, caseSensitive: false));
-    });
-    itemCount = filteredStocks.length;
-    return filteredStocks
+    return stocks
       .skip(start)
       .take(count)
       .map((stock) => new StockRow(stock: stock))
