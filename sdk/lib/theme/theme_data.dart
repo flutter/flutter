@@ -22,6 +22,7 @@ class ThemeData {
       this.primarySwatch = primarySwatch,
       canvasColor = brightness == ThemeBrightness.dark ? colors.Grey[850] : colors.Grey[50],
       cardColor = brightness == ThemeBrightness.dark ? colors.Grey[800] : colors.White,
+      dividerColor = brightness == ThemeBrightness.dark ? const Color(0x1FFFFFFF) : const Color(0x1F000000),
       text = brightness == ThemeBrightness.dark ? typography.white : typography.black {
     assert(brightness != null);
 
@@ -61,6 +62,7 @@ class ThemeData {
   final Map<int, Color> primarySwatch;
   final Color canvasColor;
   final Color cardColor;
+  final Color dividerColor;
   final typography.TextTheme text;
 
   Color _primaryColor;

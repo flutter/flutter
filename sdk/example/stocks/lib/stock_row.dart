@@ -53,9 +53,9 @@ class StockRow extends Component {
       child: new Container(
         padding: const EdgeDims(16.0, 16.0, 20.0, 16.0),
         height: kHeight,
-        decoration: const BoxDecoration(
-          border: const Border(
-            bottom: const BorderSide(color: const Color(0xFFF4F4F4))
+        decoration: new BoxDecoration(
+          border: new Border(
+            bottom: new BorderSide(color: Theme.of(this).dividerColor)
           )
         ),
         child: new Flex(children)

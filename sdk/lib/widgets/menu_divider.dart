@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'basic.dart';
+import 'theme.dart';
 
 class MenuDivider extends Component {
   MenuDivider({ String key }) : super(key: key);
@@ -10,10 +11,10 @@ class MenuDivider extends Component {
   Widget build() {
     return new Container(
       height: 0.0,
-      decoration: const BoxDecoration(
-        border: const Border(
-          bottom: const BorderSide(
-            color: const Color.fromARGB(31, 0, 0, 0)
+      decoration: new BoxDecoration(
+        border: new Border(
+          bottom: new BorderSide(
+            color: Theme.of(this).dividerColor
           )
         )
       ),
