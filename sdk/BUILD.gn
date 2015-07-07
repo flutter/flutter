@@ -81,6 +81,7 @@ dart_pkg("sky") {
     "lib/widgets/snack_bar.dart",
     "lib/widgets/switch.dart",
     "lib/widgets/tabs.dart",
+    "lib/widgets/task_description.dart",
     "lib/widgets/theme.dart",
     "lib/widgets/toggleable.dart",
     "lib/widgets/tool_bar.dart",

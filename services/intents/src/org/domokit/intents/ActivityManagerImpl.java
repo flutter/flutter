@@ -80,4 +80,19 @@ public class ActivityManagerImpl implements ActivityManager {
             Log.e(TAG, "Unable to finishCurrentActivity");
         }
     }
+
+    @Override
+    public void setTaskDescription(
+            org.chromium.mojom.intents.TaskDescription description) {
+        if (sCurrentActivity == null) {
+            return;
+        }
+        sCurrentActivity.setTaskDescription(
+                new android.app.ActivityManager.TaskDescription(
+                    description.label,
+                    null,
+                    description.primaryColor
+                )
+        );
+    }
 }

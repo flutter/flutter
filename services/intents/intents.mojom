@@ -22,6 +22,11 @@ struct Intent {
   array<StringExtra>? string_extras;
 };
 
+struct TaskDescription {
+  string? label;
+  uint32 primaryColor;
+};
+
 // TODO(abarth): This interface seems very specific to Android. Do we want to
 //               have a higher-level abstraction here? Do we want a collection
 //               of services that only work on specific platforms? We need to
@@ -29,4 +34,5 @@ struct Intent {
 interface ActivityManager {
   startActivity(Intent intent);
   finishCurrentActivity();
+  setTaskDescription(TaskDescription description);
 };

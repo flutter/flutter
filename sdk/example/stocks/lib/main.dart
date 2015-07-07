@@ -9,6 +9,7 @@ import 'package:sky/widgets/default_text_style.dart';
 import 'package:sky/widgets/navigator.dart';
 import 'package:sky/widgets/theme.dart';
 import 'package:sky/widgets/widget.dart';
+import 'package:sky/widgets/task_description.dart';
 
 import 'stock_data.dart';
 import 'stock_home.dart';
@@ -21,7 +22,7 @@ class StocksApp extends App {
   StocksApp() {
     _navigationState = new NavigationState([
       new Route(
-        name: '/', 
+        name: '/',
         builder: (navigator, route) => new StockHome(navigator, _stocks, optimismSetting, modeUpdater)
       ),
       new Route(
@@ -87,7 +88,10 @@ class StocksApp extends App {
       data: theme,
         child: new DefaultTextStyle(
           style: typography.error, // if you see this, you've forgotten to correctly configure the text style!
-          child: new Navigator(_navigationState)
+          child: new TaskDescription(
+            label: 'Stocks',
+            child: new Navigator(_navigationState)
+          )
         )
      );
    }
