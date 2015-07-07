@@ -1,5 +1,5 @@
-import "dart:sky.internals" as internals;
+import "../resources/harness.dart";
 
 void main() {
-  internals.notifyTestComplete("PASS");
+  notifyTestComplete("PASS");
 }

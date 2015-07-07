@@ -11,6 +11,7 @@
 #include "base/i18n/icu_util.h"
 #include "base/logging.h"
 #include "base/message_loop/message_loop.h"
+#include "sky/engine/public/web/WebRuntimeFeatures.h"
 #include "sky/shell/platform_view.h"
 #include "sky/shell/service_provider.h"
 #include "sky/shell/shell.h"
@@ -24,15 +25,20 @@ namespace {
 
 void Usage() {
   std::cerr << "Usage: sky_shell"
+            << " --" << switches::kNonInteractive
             << " --" << switches::kPackageRoot << "=PACKAGE_ROOT"
             << " [ MAIN_DART ]" << std::endl;
 }
 
 void Init() {
+  base::CommandLine& command_line = *base::CommandLine::ForCurrentProcess();
+  blink::WebRuntimeFeatures::enableObservatory(
+      !command_line.HasSwitch(switches::kNonInteractive));
+
   Shell::Init(make_scoped_ptr(new ServiceProviderContext(
       base::MessageLoop::current()->task_runner())));
-
-  base::CommandLine& command_line = *base::CommandLine::ForCurrentProcess();
+  // Explicitly boot the shared test runner.
+  TestRunner& runner = TestRunner::Shared();
 
   std::string package_root =
       command_line.GetSwitchValueASCII(switches::kPackageRoot);
@@ -42,8 +48,8 @@ void Init() {
   if (!args.empty())
     main = args[0];
 
-  TestRunner::Shared().set_package_root(package_root);
-  TestRunner::Shared().Start(main);
+  runner.set_package_root(package_root);
+  runner.Start(main);
 }
 
 }  // namespace
