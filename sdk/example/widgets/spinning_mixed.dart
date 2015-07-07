@@ -4,7 +4,7 @@
 
 import 'dart:sky' as sky;
 
-import 'package:sky/base/scheduler.dart';
+import 'package:sky/base/scheduler.dart' as scheduler;
 import 'package:sky/rendering/box.dart';
 import 'package:sky/rendering/flex.dart';
 import 'package:sky/rendering/sky_binding.dart';
@@ -44,7 +44,7 @@ Widget builder() {
         decoration: new BoxDecoration(backgroundColor: const Color(0xFFCCCCCC)),
         child: new RaisedButton(
           child: new Flex([
-            new Image(src: "https://www.dartlang.org/logos/dart-logo.png"),
+            new NetworkImage(src: "https://www.dartlang.org/logos/dart-logo.png"),
             new Text('PRESS ME'),
           ]),
           onPressed: () => print("Hello World")
@@ -93,5 +93,5 @@ void main() {
   RenderPadding root = new RenderPadding(padding: new EdgeDims.all(80.0), child: transformBox);
 
   SkyBinding.instance.root = root;
-  addPersistentFrameCallback(rotate);
+  scheduler.addPersistentFrameCallback(rotate);
 }

@@ -106,8 +106,10 @@ abstract class Widget {
   bool _retainStatefulNodeIfPossible(Widget old) => false;
 
   void _sync(Widget old, dynamic slot);
-  // 'slot' is the identifier that the parent RenderObjectWrapper uses to know
-  // where to put this descendant
+  void updateSlot(dynamic newSlot);
+  // 'slot' is the identifier that the ancestor RenderObjectWrapper uses to know
+  // where to put this descendant. If you just defer to a child, then make sure
+  // to pass them the slot.
 
   Widget findAncestor(Type targetType) {
     var ancestor = _parent;
@@ -183,10 +185,23 @@ abstract class Widget {
     return newNode;
   }
 
-  String toString() {
+  String toString([String prefix = '', String startPrefix = '']) {
+    String childrenString = '';
+    List<Widget> children = new List<Widget>();
+    walkChildren(children.add);
+    if (children.length > 0) {
+      Widget lastChild = children.removeLast();
+      String nextStartPrefix = prefix + ' +-';
+      String nextPrefix = prefix + ' | ';
+      for (Widget child in children)
+        childrenString += child.toString(nextPrefix, nextStartPrefix);
+      String lastStartPrefix = prefix + ' \'-';
+      String lastPrefix = prefix + '   ';
+      childrenString += lastChild.toString(lastPrefix, lastStartPrefix);
+    }
     if (key == null)
-      return '$runtimeType(unkeyed)';
-    return '$runtimeType("$key")';
+      return '$startPrefix$runtimeType(unkeyed)\n$childrenString';
+    return '$startPrefix$runtimeType("$key")\n$childrenString';
   }
 
 }
@@ -207,7 +222,8 @@ abstract class TagNode extends Widget {
   Widget child;
 
   void walkChildren(WidgetTreeWalker walker) {
-    walker(child);
+    if (child != null)
+      walker(child);
   }
 
   void _sync(Widget old, dynamic slot) {
@@ -217,6 +233,10 @@ abstract class TagNode extends Widget {
     assert(child.root != null);
     _root = child.root;
     assert(_root == root); // in case a subclass reintroduces it
+  }
+
+  void updateSlot(dynamic newSlot) {
+    child.updateSlot(newSlot);
   }
 
   void remove() {
@@ -368,6 +388,17 @@ abstract class Component extends Widget {
   Widget _built;
   dynamic _slot; // cached slot from the last time we were synced
 
+  void updateSlot(dynamic newSlot) {
+    _slot = newSlot;
+    if (_built != null)
+      _built.updateSlot(newSlot);
+  }
+
+  void walkChildren(WidgetTreeWalker walker) {
+    if (_built != null)
+      walker(_built);
+  }
+
   void remove() {
     assert(_built != null);
     assert(root != null);
@@ -415,7 +446,7 @@ abstract class Component extends Widget {
   void _sync(Component old, dynamic slot) {
     assert(_built == null || old == null);
 
-    _slot = slot;
+    updateSlot(slot);
 
     var oldBuilt;
     if (old == null) {
@@ -445,7 +476,6 @@ abstract class Component extends Widget {
   void _buildIfDirty() {
     if (!_dirty || !_mounted)
       return;
-
     assert(root != null);
     _sync(null, _slot);
   }
@@ -628,6 +658,13 @@ abstract class RenderObjectWrapper extends Widget {
     syncRenderObject(old);
   }
 
+  void updateSlot(dynamic newSlot) {
+    // We never use the slot except during sync(), in which
+    // case our parent is handing it to us anyway.
+    // We don't need to propagate this to our children, since
+    // we give them their own slots for them to fit into us.
+  }
+
   void syncRenderObject(RenderObjectWrapper old) {
     ParentData parentData = null;
     Widget ancestor = parent;
@@ -685,7 +722,8 @@ abstract class OneChildRenderObjectWrapper extends RenderObjectWrapper {
   Widget get child => _child;
 
   void walkChildren(WidgetTreeWalker walker) {
-    walker(child);
+    if (child != null)
+      walker(child);
   }
 
   void syncRenderObject(RenderObjectWrapper old) {
@@ -799,6 +837,8 @@ abstract class MultiChildRenderObjectWrapper extends RenderObjectWrapper {
       children[atIndex] = syncChild(currentNode, oldNode, nextSibling);
       assert(children[atIndex] != null);
       assert(children[atIndex].parent == this);
+      if (atIndex > 0)
+        children[atIndex-1].updateSlot(children[atIndex].root);
     }
 
     // Scan backwards from end of list while nodes can be directly synced
