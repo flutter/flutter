@@ -180,6 +180,8 @@ class StartSky(object):
             print "'%s' does not exist?" % apk_path
             return 2
 
+        StopSky().run(args, pids)
+
         packages_root = dev_packages_root(args.build_dir)
         sky_server = self._sky_server_for_args(args, packages_root)
         pids['sky_server_pid'] = sky_server.start()
@@ -382,8 +384,6 @@ class StopSky(object):
             self._adb_reverse_remove(pids['remote_sky_server_port'])
 
         if 'remote_gdbserver_port' in pids:
-            self._kill_if_exists('adb_shell_gdbserver_pid',
-                'adb shell gdbserver')
             self._adb_forward_remove(pids['remote_gdbserver_port'])
 
         subprocess.call([
