@@ -27,7 +27,7 @@ PAINT FOR FRAME #2 ----------------------------------------------
 2 |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 2 |  |  |  |  |  |  |  | translate(171.0, 14.0)
 2 |  |  |  |  |  |  |  | translate(-171.0, -14.0)
-2 |  |  |  |  | drawRect(Rect.fromLTRB(0.0, 46.0, 400.0, 48.0), Paint(color:Color(0xff9c27b0)))
+2 |  |  |  |  | drawRect(Rect.fromLTRB(0.0, 46.0, 400.0, 48.0), Paint(color:Color(0xffffffff)))
 2 |  |  |  |  | paintChild RenderInkWell at Point(400.0, 0.0)
 2 |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 2 |  |  |  |  |  | paintChild RenderPositionedBox at Point(412.0, 0.0)
@@ -107,7 +107,7 @@ PAINT FOR FRAME #3 ----------------------------------------------
 3 |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 3 |  |  |  |  |  |  |  | translate(171.0, 14.0)
 3 |  |  |  |  |  |  |  | translate(-171.0, -14.0)
-3 |  |  |  |  | drawRect(Rect.fromLTRB(0.0, 46.0, 400.0, 48.0), Paint(color:Color(0xff9c27b0)))
+3 |  |  |  |  | drawRect(Rect.fromLTRB(0.0, 46.0, 400.0, 48.0), Paint(color:Color(0xffffffff)))
 3 |  |  |  |  | paintChild RenderInkWell at Point(400.0, 0.0)
 3 |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 3 |  |  |  |  |  | paintChild RenderPositionedBox at Point(412.0, 0.0)
