@@ -11,6 +11,7 @@ import 'package:sky/painting/text_style.dart';
 import 'package:sky/rendering/box.dart';
 import 'package:sky/rendering/object.dart';
 import 'package:vector_math/vector_math.dart';
+import 'package:sky/theme/colors.dart' as colors;
 import 'package:sky/widgets/basic.dart';
 import 'package:sky/widgets/icon.dart';
 import 'package:sky/widgets/ink_well.dart';
@@ -433,11 +434,17 @@ class TabBar extends Scrollable {
         textAndIcons = true;
     }
 
+    Color backgroundColor = Theme.of(this).primaryColor;
+    Color indicatorColor = Theme.of(this).accentColor;
+    if (indicatorColor == backgroundColor) {
+      indicatorColor = colors.White;
+    }
+
     TabBarWrapper tabBarWrapper = new TabBarWrapper(
       children: tabs, 
       selectedIndex: selectedIndex,
-      backgroundColor: Theme.of(this).primaryColor,
-      indicatorColor: Theme.of(this).accentColor,
+      backgroundColor: backgroundColor,
+      indicatorColor: indicatorColor,
       textAndIcons: textAndIcons,
       scrollable: scrollable,
       onLayoutChanged: scrollable ? _layoutChanged : null
