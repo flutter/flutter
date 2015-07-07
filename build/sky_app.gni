@@ -18,6 +18,21 @@ template("sky_app") {
     }
   }
 
+  bundle_prefix = target_name
+
+  copy("copy_${bundle_prefix}_bundle") {
+    sources = [
+      "$target_gen_dir/app.skyx",
+    ]
+    outputs = [
+      "$target_gen_dir/${bundle_prefix}.skyx",
+    ]
+
+    deps = [
+      ":app",
+    ]
+  }
+
   copy_ex("assets") {
     clear_dir = true
     dest = "$target_gen_dir/assets"
@@ -31,7 +46,17 @@ template("sky_app") {
 
     if (enable_skyx) {
       sources += [ "$target_gen_dir/app.skyx" ]
-      deps += [ ":app" ]
+      deps += [ ":copy_${bundle_prefix}_bundle" ]
+
+      if (defined(invoker.bundles)) {
+        foreach(bundle, invoker.bundles) {
+          bundle_gen_dir = get_label_info(bundle, "target_gen_dir")
+          bundle_name = get_label_info(bundle, "name")
+
+          sources += [ "$bundle_gen_dir/${bundle_name}.skyx" ]
+          deps += [ bundle ]
+        }
+      }
     }
   }
 

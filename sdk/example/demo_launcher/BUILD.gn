@@ -9,6 +9,11 @@ sky_app("demo_launcher") {
   main_dart = "lib/main.dart"
   manifest = "sky.yaml"
 
+  bundles = [
+    "//sky/sdk/example/mine_digger",
+    "//sky/sdk/example/stocks",
+  ]
+
   deps = [
     "//sky/sdk/example/demo_launcher/apk:java",
     "//sky/sdk/example/demo_launcher/apk:resources",
