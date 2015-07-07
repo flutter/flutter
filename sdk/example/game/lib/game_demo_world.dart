@@ -58,8 +58,14 @@ class GameDemoWorld extends NodeWithSize {
     // Add ship
     addShip();
 
+    // Add background
+    Sprite sprtBackground = new Sprite.fromImage(images["res/starfield.png"]);
+    sprtBackground.position = new Point(512.0, 512.0);
+    sprtBackground.zPosition = -3.0;
+    addChild(sprtBackground);
+
     // Add starfield
-    _starField = new StarField(_spriteSheet["star.png"], _numStarsInStarField);
+    _starField = new StarField(_spriteSheet, _numStarsInStarField);
     _starField.zPosition = -2.0;
     addChild(_starField);
 
@@ -73,7 +79,7 @@ class GameDemoWorld extends NodeWithSize {
   // Methods for adding game objects
   
   void addAsteroid(AsteroidSize size, [Point pos]) {
-    Asteroid asteroid = new Asteroid(_spriteSheet["asteroid_big_1.png"], size);
+    Asteroid asteroid = new Asteroid(_spriteSheet, size);
     asteroid.zPosition = 1.0;
     if (pos != null) asteroid.position = pos;
     _gameLayer.addChild(asteroid);
@@ -102,12 +108,45 @@ class GameDemoWorld extends NodeWithSize {
 
   void addExplosion(AsteroidSize asteroidSize, Point position) {
     // Add particles
-    ParticleSystem particles = new ParticleSystem(_spriteSheet["laser.png"], rotateToMovement: true,
-    startRotation:90.0, startRotationVar: 0.0, endRotation: 90.0, startSize: 0.2, startSizeVar: 0.1, endSize: 0.2, endSizeVar: 0.1,
-    numParticlesToEmit: 25, emissionRate:1000.0, blueVar: 127);
+    ParticleSystem particles = new ParticleSystem(_spriteSheet["explosion_particle.png"], rotateToMovement: true,
+    startRotation:90.0, startRotationVar: 0.0, endRotation: 90.0, startSize: 0.3, startSizeVar: 0.1, endSize: 0.3, endSizeVar: 0.1,
+    numParticlesToEmit: 25, emissionRate:1000.0, greenVar: 127, redVar: 127);
     particles.zPosition = 1010.0;
     particles.position = position;
     _gameLayer.addChild(particles);
+
+    // Add ring
+    Sprite sprtRing = new Sprite(_spriteSheet["explosion_ring.png"]);
+    sprtRing.position = position;
+    sprtRing.transferMode = TransferMode.plus;
+    _gameLayer.addChild(sprtRing);
+
+    Action scale = new ActionTween( (a) => sprtRing.scale = a, 0.2, 1.0, 1.5);
+    Action scaleAndRemove = new ActionSequence([scale, new ActionRemoveFromParent(sprtRing)]);
+    Action fade = new ActionTween( (a) => sprtRing.opacity = a, 1.0, 0.0, 1.5);
+    actions.run(scaleAndRemove);
+    actions.run(fade);
+
+    // Add streaks
+    for (int i = 0; i < 5; i++) {
+      Sprite sprtFlare = new Sprite(_spriteSheet["explosion_flare.png"]);
+      sprtFlare.pivot = new Point(0.3, 1.0);
+      sprtFlare.position = position;
+      sprtFlare.scaleX = 0.3;
+      sprtFlare.transferMode = TransferMode.plus;
+      sprtFlare.rotation = _rand.nextDouble() * 360.0;
+      _gameLayer.addChild(sprtFlare);
+
+      double multiplier = _rand.nextDouble() * 0.3 + 1.0;
+
+      Action scale = new ActionTween( (a) => sprtFlare.scaleY = a, 0.3 * multiplier, 0.8, 1.5 * multiplier);
+      Action scaleAndRemove = new ActionSequence([scale, new ActionRemoveFromParent(sprtFlare)]);
+      Action fadeIn = new ActionTween( (a) => sprtFlare.opacity = a, 0.0, 1.0, 0.5 * multiplier);
+      Action fadeOut = new ActionTween( (a) => sprtFlare.opacity = a, 1.0, 0.0, 1.0 * multiplier);
+      Action fadeInOut = new ActionSequence([fadeIn, fadeOut]);
+      actions.run(scaleAndRemove);
+      actions.run(fadeInOut);
+    }
   }
 
   void update(double dt) {
@@ -294,10 +333,16 @@ class Asteroid extends Sprite {
     return _radius;
   }
 
-  Asteroid(Texture img, AsteroidSize this._asteroidSize) : super(img) {
+  Asteroid(SpriteSheet spriteSheet, AsteroidSize this._asteroidSize) {
     size = new Size(radius * 2.0, radius * 2.0);
     position = new Point(_gameSizeWidth * _rand.nextDouble(), _gameSizeHeight * _rand.nextDouble());
     rotation = 360.0 * _rand.nextDouble();
+
+    if (_asteroidSize == AsteroidSize.small) {
+      texture = spriteSheet["asteroid_small_${_rand.nextInt(2)}.png"];
+    } else {
+      texture = spriteSheet["asteroid_big_${_rand.nextInt(2)}.png"];
+    }
 
     _movementVector = new Point(_rand.nextDouble() * _maxAsteroidSpeed * 2 - _maxAsteroidSpeed,
                                 _rand.nextDouble() * _maxAsteroidSpeed * 2 - _maxAsteroidSpeed);
@@ -373,21 +418,23 @@ class Laser extends Sprite {
 // Background starfield
 
 class StarField extends Node {
-  Texture _img;
   int _numStars;
   List<Point> _starPositions;
   List<double> _starScales;
   List<double> _opacity;
+  List<Texture> _textures;
 
-  StarField(this._img, this._numStars) {
+  StarField(SpriteSheet spriteSheet, this._numStars) {
     _starPositions = [];
     _starScales = [];
     _opacity = [];
+    _textures = [];
 
     for (int i  = 0; i < _numStars; i++) {
       _starPositions.add(new Point(_rand.nextDouble() * _gameSizeWidth, _rand.nextDouble() * _gameSizeHeight));
       _starScales.add(_rand.nextDouble());
       _opacity.add(_rand.nextDouble() * 0.5 + 0.5);
+      _textures.add(spriteSheet["star_${_rand.nextInt(2)}.png"]);
     }
   }
 
@@ -396,8 +443,8 @@ class StarField extends Node {
     Paint paint = new Paint();
     paint.setTransferMode(TransferMode.plus);
 
-    double baseScaleX = 32.0 / _img.size.width;
-    double baseScaleY = 32.0 / _img.size.height;
+    double baseScaleX = 64.0 / _textures[0].size.width;
+    double baseScaleY = 64.0 / _textures[0].size.height;
 
     // Draw each star
     for (int i = 0; i < _numStars; i++) {
@@ -410,7 +457,7 @@ class StarField extends Node {
       canvas.translate(pos.x, pos.y);
       canvas.scale(baseScaleX * scale, baseScaleY * scale);
 
-      canvas.drawImageRect(_img.image, _img.frame, _img.spriteSourceSize, paint);
+      canvas.drawImageRect(_textures[i].image, _textures[i].frame, _textures[i].spriteSourceSize, paint);
 
       canvas.restore();
     }

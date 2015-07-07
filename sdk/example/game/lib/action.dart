@@ -8,6 +8,8 @@ abstract class Action {
   void step(double dt);
   void update(double t) {
   }
+
+  double get duration => 0.0;
 }
 
 abstract class ActionInterval extends Action {
@@ -53,14 +55,90 @@ class ActionRepeat extends ActionInterval {
   }
 }
 
-// TODO: Implement
 class ActionSequence extends ActionInterval {
-  final List<ActionInterval> actions;
+  Action _a;
+  Action _b;
+  double _split;
 
-  ActionSequence(this.actions) {
-    for (Action action in actions) {
-      _duration += action._duration;
+  ActionSequence(List<Action> actions) {
+    assert(actions.length >= 2);
+
+    if (actions.length == 2) {
+      // Base case
+      _a = actions[0];
+      _b = actions[1];
+    } else {
+      _a = actions[0];
+      _b = new ActionSequence(actions.sublist(1));
     }
+
+    // Calculate split and duration
+    _duration = _a.duration + _b.duration;
+    if (_duration > 0) {
+      _split = _a.duration / _duration;
+    } else {
+      _split = 1.0;
+    }
+  }
+
+  void update(double t) {
+    if (t < _split) {
+      // Play first action
+      double ta;
+      if (_split > 0.0) {
+        ta = (t / _split).clamp(0.0, 1.0);
+      } else {
+        ta = 1.0;
+      }
+      _a.update(ta);
+    } else if (t >= 1.0) {
+      // Make sure everything is finished
+      if (!_a._finished) _a.update(1.0);
+      if (!_b._finished) _b.update(1.0);
+    } else {
+      // Play second action, but first make sure the first has finished
+      if (!_a._finished) _a.update(1.0);
+      double tb;
+      if (_split < 1.0) {
+        tb = (1.0 - (1.0 - t) / (1.0 - _split)).clamp(0.0, 1.0);
+      } else {
+        tb = 1.0;
+      }
+      _b.update(tb);
+    }
+  }
+}
+
+abstract class ActionInstant extends Action {
+
+  void step(double dt) {
+  }
+
+  void update(double t) {
+    fire();
+    _finished = true;
+  }
+
+  void fire();
+}
+
+class ActionCallFunction extends ActionInstant {
+  Function _function;
+
+  ActionCallFunction(this._function);
+
+  void fire() {
+    _function();
+  }
+}
+
+class ActionRemoveFromParent extends ActionInstant {
+  Node _node;
+
+  ActionRemoveFromParent(this._node);
+
+  void fire() {
+    _node.removeFromParent();
   }
 }
 
@@ -140,6 +218,7 @@ class ActionController {
   ActionController();
 
   void run(Action action) {
+    action.update(0.0);
     _actions.add(action);
   }
 

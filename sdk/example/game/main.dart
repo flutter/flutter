@@ -10,6 +10,7 @@ void main() {
   new ImageMap([
       "res/nebula.png",
       "res/sprites.png",
+      "res/starfield.png",
     ],
     allImagesLoaded);
 }
