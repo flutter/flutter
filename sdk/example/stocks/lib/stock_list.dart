@@ -2,31 +2,22 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:sky/widgets/fixed_height_scrollable.dart';
+import 'package:sky/widgets/scrollable_list.dart';
 import 'package:sky/widgets/basic.dart';
 
 import 'stock_data.dart';
 import 'stock_row.dart';
 
-class Stocklist extends FixedHeightScrollable {
+class Stocklist extends Component {
+  Stocklist({ String key, this.stocks }) : super(key: key);
 
-  Stocklist({ String key, this.stocks })
-    : super(itemHeight: StockRow.kHeight, key: key);
+  final List<Stock> stocks;
 
-  List<Stock> stocks;
-
-  int get itemCount => stocks.length;
-
-  void syncFields(Stocklist source) {
-    stocks = source.stocks;
-    super.syncFields(source);
-  }
-
-  List<Widget> buildItems(int start, int count) {
-    return stocks
-      .skip(start)
-      .take(count)
-      .map((stock) => new StockRow(stock: stock))
-      .toList(growable: false);
+  Widget build() {
+    return new ScrollableList<Stock>(
+      items: stocks,
+      itemHeight: StockRow.kHeight,
+      itemBuilder: (stock) => new StockRow(stock: stock)
+    );
   }
 }
