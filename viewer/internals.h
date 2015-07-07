@@ -8,6 +8,7 @@
 #include "base/memory/weak_ptr.h"
 #include "base/supports_user_data.h"
 #include "dart/runtime/include/dart_api.h"
+#include "mojo/public/cpp/bindings/binding.h"
 #include "mojo/public/interfaces/application/shell.mojom.h"
 #include "sky/services/testing/test_harness.mojom.h"
 
