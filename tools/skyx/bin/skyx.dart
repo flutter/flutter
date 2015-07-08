@@ -11,7 +11,7 @@ import 'package:yaml/yaml.dart';
 
 const String kSnapshotKey = 'snapshot_blob.bin';
 const List<String> kDensities = const ['drawable-xxhdpi'];
-const List<String> kThemes = const ['white', 'black', 'grey600'];
+const List<String> kThemes = const ['white', 'black'];
 const List<int> kSizes = const [24];
 
 class Asset {
