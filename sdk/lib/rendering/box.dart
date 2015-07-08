@@ -489,7 +489,7 @@ class RenderProxyBox extends RenderBox with RenderObjectWithChildMixin<RenderBox
 
   void paint(PaintingCanvas canvas, Offset offset) {
     if (child != null)
-      child.paint(canvas, offset);
+      canvas.paintChild(child, offset.toPoint());
   }
 
 }
@@ -662,7 +662,7 @@ class RenderOpacity extends RenderProxyBox {
         return;
 
       if (a == 255) {
-        child.paint(canvas, offset);
+        canvas.paintChild(child, offset.toPoint());
         return;
       }
 
@@ -670,7 +670,7 @@ class RenderOpacity extends RenderProxyBox {
         ..color = new Color.fromARGB(a, 0, 0, 0)
         ..setTransferMode(sky.TransferMode.srcOver);
       canvas.saveLayer(null, paint);
-      child.paint(canvas, offset);
+      canvas.paintChild(child, offset.toPoint());
       canvas.restore();
     }
   }
@@ -706,7 +706,7 @@ class RenderColorFilter extends RenderProxyBox {
       Paint paint = new Paint()
         ..setColorFilter(new sky.ColorFilter.mode(_color, _transferMode));
       canvas.saveLayer(null, paint);
-      child.paint(canvas, offset);
+      canvas.paintChild(child, offset.toPoint());
       canvas.restore();
     }
   }
@@ -719,7 +719,7 @@ class RenderClipRect extends RenderProxyBox {
     if (child != null) {
       canvas.save();
       canvas.clipRect(offset & size);
-      child.paint(canvas, offset);
+      canvas.paintChild(child, offset.toPoint());
       canvas.restore();
     }
   }
@@ -758,7 +758,7 @@ class RenderClipRRect extends RenderProxyBox {
       canvas.saveLayer(rect, new Paint());
       sky.RRect rrect = new sky.RRect()..setRectXY(rect, xRadius, yRadius);
       canvas.clipRRect(rrect);
-      child.paint(canvas, offset);
+      canvas.paintChild(child, offset.toPoint());
       canvas.restore();
     }
   }
@@ -774,7 +774,7 @@ class RenderClipOval extends RenderProxyBox {
       Path path = new Path();
       path.addOval(rect);
       canvas.clipPath(path);
-      child.paint(canvas, offset);
+      canvas.paintChild(child, offset.toPoint());
       canvas.restore();
     }
   }
