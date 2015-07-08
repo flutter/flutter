@@ -12,7 +12,7 @@ import android.view.WindowManager;
 
 import org.chromium.base.PathUtils;
 
-import org.domokit.intents.ActivityManagerImpl;
+import org.domokit.activity.ActivityImpl;
 
 import java.io.File;
 
@@ -44,7 +44,7 @@ public class SkyActivity extends Activity {
 
         SkyMain.ensureInitialized(getApplicationContext());
         mView = new PlatformViewAndroid(this, edgeDims);
-        ActivityManagerImpl.setCurrentActivity(this);
+        ActivityImpl.setCurrentActivity(this);
         setContentView(mView);
         mTracingController = new TracingController(this);
 

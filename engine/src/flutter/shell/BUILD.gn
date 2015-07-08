@@ -115,11 +115,13 @@ if (is_android) {
       "//mojo/public/interfaces/application:application_java",
       "//mojo/public/java:bindings",
       "//mojo/public/java:system",
+      "//mojo/services/keyboard/public/interfaces:interfaces_java",
       "//mojo/services/network/public/interfaces:interfaces_java",
       "//services/keyboard",
+      "//sky/services/activity:activity_lib",
+      "//sky/services/activity:interfaces_java",
       "//sky/services/engine:engine_java",
       "//sky/services/oknet",
-      "//sky/services/intents:intents_lib",
     ]
   }
 
