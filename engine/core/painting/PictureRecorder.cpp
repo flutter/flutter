@@ -22,9 +22,9 @@ bool PictureRecorder::isRecording() {
     return m_canvas && m_canvas->isRecording();
 }
 
-SkCanvas* PictureRecorder::beginRecording(double width, double height)
+SkCanvas* PictureRecorder::beginRecording(Rect bounds)
 {
-    return m_pictureRecorder->beginRecording(width, height);
+    return m_pictureRecorder->beginRecording(bounds.sk_rect);
 }
 
 PassRefPtr<Picture> PictureRecorder::endRecording()

@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef SKY_ENGINE_CORE_DRAWABLE_PICTURE_H_
-#define SKY_ENGINE_CORE_DRAWABLE_PICTURE_H_
+#ifndef SKY_ENGINE_CORE_PAINTING_DRAWABLE_H_
+#define SKY_ENGINE_CORE_PAINTING_DRAWABLE_H_
 
 #include "sky/engine/core/painting/Picture.h"
 #include "sky/engine/tonic/dart_wrappable.h"
@@ -29,4 +29,4 @@ private:
 
 } // namespace blink
 
-#endif  // SKY_ENGINE_CORE_DRAWABLE_PICTURE_H_
+#endif  // SKY_ENGINE_CORE_PAINTING_DRAWABLE_H_

@@ -5,6 +5,7 @@
 #ifndef SKY_ENGINE_CORE_PAINTING_PICTURERECORDER_H_
 #define SKY_ENGINE_CORE_PAINTING_PICTURERECORDER_H_
 
+#include "sky/engine/core/painting/Rect.h"
 #include "sky/engine/tonic/dart_wrappable.h"
 #include "sky/engine/wtf/PassRefPtr.h"
 #include "sky/engine/wtf/RefCounted.h"
@@ -28,7 +29,7 @@ public:
     ~PictureRecorder();
 
     // PassRefPtr<Canvas> beginRecording(double width, double height);
-    SkCanvas* beginRecording(double width, double height);
+    SkCanvas* beginRecording(Rect bounds);
     PassRefPtr<Picture> endRecording();
     PassRefPtr<Drawable> endRecordingAsDrawable();
     bool isRecording();

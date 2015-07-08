@@ -430,6 +430,8 @@ abstract class RenderBox extends RenderObject {
     _size = inDebugBuild ? new _DebugSize(value, this, debugCanParentUseSize) : value;
   }
 
+  Rect get paintBounds => Point.origin & size;
+
   String debugDescribeSettings(String prefix) => '${super.debugDescribeSettings(prefix)}${prefix}size: ${size}\n';
 }
 
@@ -1300,6 +1302,7 @@ class ViewConstraints {
 }
 
 class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox> {
+  bool get createNewDisplayList => true;
 
   RenderView({
     RenderBox child,
@@ -1366,18 +1369,17 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
 
   void paintFrame() {
     sky.tracing.begin('RenderView.paintFrame');
-    RenderObject.debugDoingPaint = true;
     try {
       sky.PictureRecorder recorder = new sky.PictureRecorder();
-      PaintingCanvas canvas = new PaintingCanvas(recorder, _size);
-      paint(canvas, Offset.zero);
+      PaintingCanvas canvas = new PaintingCanvas(recorder, paintBounds);
+      canvas.drawPaintingNode(paintingNode, Point.origin);
       sky.view.picture = recorder.endRecording();
     } finally {
-      RenderObject.debugDoingPaint = false;
       sky.tracing.end('RenderView.paintFrame');
     }
   }
 
+  Rect get paintBounds => Point.origin & size;
 }
 
 // HELPER METHODS FOR RENDERBOX CONTAINERS

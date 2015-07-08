@@ -4,7 +4,7 @@
 
 // TODO(mpcomplete): Figure out a better SkMatrix representation.
 [
-  Constructor(PictureRecorder recorder, Size bounds),
+  Constructor(PictureRecorder recorder, Rect bounds),
   RaisesException=Constructor,
 ] interface Canvas {
   void save();
@@ -33,4 +33,5 @@
   void drawImageRect(Image image, Rect src, Rect dst, Paint paint);
   void drawPicture(Picture picture);
   void drawDrawable(Drawable drawable);
+  void drawPaintingNode(PaintingNode paintingNode, Point p);
 };

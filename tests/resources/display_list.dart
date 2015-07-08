@@ -14,7 +14,7 @@ typedef void Logger (String s);
 class TestPaintingCanvas extends PaintingCanvas {
   TestPaintingCanvas(sky.PictureRecorder recorder, Size size, this.logger, { this.indent: '' })
     : size = size,
-      super(recorder, size) {
+      super(recorder, Point.origin & size) {
     log("TestPaintingCanvas() constructor: ${size.width} x ${size.height}");
   }
 

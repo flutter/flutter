@@ -27,10 +27,17 @@ class ParentData {
 }
 
 class PaintingCanvas extends sky.Canvas {
-  PaintingCanvas(sky.PictureRecorder recorder, Size bounds) : super(recorder, bounds);
+  PaintingCanvas(sky.PictureRecorder recorder, Rect bounds) : super(recorder, bounds);
 
+  List<RenderObject> _descendentsWithPaintingCanvases = new List<RenderObject>(); // used by RenderObject._updatePaintingCanvas() to find out which RenderObjects to ask to paint
   void paintChild(RenderObject child, Point point) {
-    child.paint(this, point.toOffset());
+    if (child.createNewDisplayList) {
+      assert(!_descendentsWithPaintingCanvases.contains(child));
+      _descendentsWithPaintingCanvases.add(child);
+      drawPaintingNode(child._paintingNode, point);
+    } else {
+      child._paintOnCanvas(this, point.toOffset());
+    }
   }
 }
 
@@ -139,6 +146,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     assert(_relayoutSubtreeRoot == null);
     _relayoutSubtreeRoot = this;
     _nodesNeedingLayout.add(this);
+    _nodesNeedingPaint.add(this);
     scheduler.ensureVisualUpdate();
   }
   static void flushLayout() {
@@ -167,9 +175,8 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
       _debugActiveLayout = debugPreviousActiveLayout;
       _debugDoingThisLayout = false;
       _debugCanParentUseSize = null;
-    } catch (e, stack) {
+    } catch (e) {
       print('Exception raised during layout:\n${e}\nContext:\n${this}');
-      print(stack);
       return;
     }
     _needsLayout = false;
@@ -239,11 +246,88 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
 
   // PAINTING
 
-  static bool debugDoingPaint = false;
+  static List<RenderObject> _nodesNeedingPaint = new List<RenderObject>();
+  static bool _debugDoingPaint = false;
+  static bool get debugDoingPaint => _debugDoingPaint;
+  static void set debugDoingPaint(bool debug) {
+    _debugDoingPaint = debug;
+  }
+
+  final sky.PaintingNode _paintingNode = new sky.PaintingNode();
+  sky.PaintingNode get paintingNode {
+    assert(createNewDisplayList);
+    return _paintingNode;
+  }
+  bool _needsPaint = true;
+  bool get needsPaint => _needsPaint;
+  bool get createNewDisplayList => false;
+
   void markNeedsPaint() {
     assert(!debugDoingPaint);
-    scheduler.ensureVisualUpdate();
+    if (!attached) return; // Don't try painting things that aren't in the hierarchy
+    if (_needsPaint) return;
+    if (createNewDisplayList) {
+      _needsPaint = true;
+      _nodesNeedingPaint.add(this);
+      scheduler.ensureVisualUpdate();
+    } else {
+      assert(parent != null); // parent always exists on this path because the root node is a RenderView, which sets createNewDisplayList.
+      if (parent is RenderObject) {
+        (parent as RenderObject).markNeedsPaint(); // TODO(ianh): remove the cast once the analyzer is cleverer
+      }
+    }
   }
+
+  static void flushPaint() {
+    try {
+      _debugDoingPaint = true;
+      List<RenderObject> dirtyNodes = _nodesNeedingPaint;
+      _nodesNeedingPaint = new List<RenderObject>();
+      for (RenderObject node in dirtyNodes..sort((a, b) => a.depth - b.depth)) {
+        if (node._needsPaint && node.attached)
+          node._updatePaintingCanvas();
+      };
+      assert(_nodesNeedingPaint.length == 0);
+    } catch (e) {
+      print('Exception raised during flushPaint:\n${e}');
+    } finally {
+      _debugDoingPaint = false;
+    }
+  }
+
+  void _updatePaintingCanvas() {
+    assert(!_needsLayout);
+    assert(createNewDisplayList);
+    sky.PictureRecorder recorder = new sky.PictureRecorder();
+    PaintingCanvas canvas = new PaintingCanvas(recorder, paintBounds);
+    _needsPaint = false;
+    try {
+      _paintOnCanvas(canvas, Offset.zero);
+    } catch (e) {
+      print('Exception raised during _updatePaintingCanvas:\n${e}\nContext:\n${this}');
+      return;
+    }
+    assert(!_needsLayout); // check that the paint() method didn't mark us dirty again
+    assert(!_needsPaint); // check that the paint() method didn't mark us dirty again
+    _paintingNode.setBackingDrawable(recorder.endRecordingAsDrawable());
+
+    if (canvas._descendentsWithPaintingCanvases != null) {
+      for (RenderObject node in canvas._descendentsWithPaintingCanvases) {
+        assert(node.attached == attached);
+        if (node._needsPaint)
+          node._updatePaintingCanvas();
+      };
+    }
+  }
+
+  void _paintOnCanvas(PaintingCanvas canvas, Offset offset) {
+    _needsPaint = false;
+    paint(canvas, offset);
+    assert(!_needsPaint);
+  }
+
+  Rect get paintBounds;
+
   void paint(PaintingCanvas canvas, Offset offset) { }
 
 

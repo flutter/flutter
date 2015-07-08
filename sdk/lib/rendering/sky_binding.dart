@@ -74,6 +74,7 @@ class SkyBinding {
     if (onFrame != null)
       onFrame();
     RenderObject.flushLayout();
+    RenderObject.flushPaint();
     _renderView.paintFrame();
   }
 

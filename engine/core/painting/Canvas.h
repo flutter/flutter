@@ -10,6 +10,7 @@
 #include "sky/engine/core/painting/Drawable.h"
 #include "sky/engine/core/painting/Offset.h"
 #include "sky/engine/core/painting/Paint.h"
+#include "sky/engine/core/painting/PaintingNode.h"
 #include "sky/engine/core/painting/Picture.h"
 #include "sky/engine/core/painting/PictureRecorder.h"
 #include "sky/engine/core/painting/Point.h"
@@ -35,7 +36,7 @@ public:
     }
 
     static PassRefPtr<Canvas> create(PictureRecorder* recorder,
-                                     Size& bounds,
+                                     Rect& bounds,
                                      ExceptionState& es) {
         ASSERT(recorder);
         if (recorder->isRecording()) {
@@ -50,8 +51,7 @@ public:
             //              dart code catches the error, it will leak a canvas
             //              but it won't crash.
         }
-        PassRefPtr<Canvas> canvas = create(
-          recorder->beginRecording(bounds.sk_size.width(), bounds.sk_size.height()));
+        PassRefPtr<Canvas> canvas = create(recorder->beginRecording(bounds));
         recorder->set_canvas(canvas.get());
         return canvas;
     }
@@ -83,6 +83,7 @@ public:
     void drawImageRect(const CanvasImage* image, Rect& src, Rect& dst, Paint* paint);
     void drawPicture(Picture* picture);
     void drawDrawable(Drawable* drawable);
+    void drawPaintingNode(PaintingNode* paintingNode, const Point& p);
 
     SkCanvas* skCanvas() { return m_canvas; }
     void clearSkCanvas() { m_canvas = nullptr; }

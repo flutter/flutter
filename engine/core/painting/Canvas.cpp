@@ -207,4 +207,14 @@ void Canvas::drawDrawable(Drawable* drawable)
     m_canvas->drawDrawable(drawable->toSkia());
 }
 
+void Canvas::drawPaintingNode(PaintingNode* paintingNode, const Point& p)
+{
+    if (!m_canvas)
+        return;
+    ASSERT(paintingNode);
+    translate(p.sk_point.x(), p.sk_point.y());
+    m_canvas->drawDrawable(paintingNode->toSkia());
+    translate(-p.sk_point.x(), -p.sk_point.y());
+}
+
 } // namespace blink
