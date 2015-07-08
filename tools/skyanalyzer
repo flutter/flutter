@@ -9,6 +9,8 @@ import re
 import subprocess
 import sys
 
+from skypy.url_mappings import URLMappings
+
 SKY_TOOLS_DIR = os.path.dirname(os.path.abspath(__file__))
 SKY_ROOT = os.path.dirname(SKY_TOOLS_DIR)
 SRC_ROOT = os.path.dirname(SKY_ROOT)
@@ -46,23 +48,20 @@ def main():
     parser.add_argument('--congratulate', action="store_true")
     parser.add_argument('build_dir', type=str)
     parser.add_argument('app_path', type=str)
+
     args = parser.parse_args()
     build_dir = os.path.abspath(args.build_dir)
+
+    url_mappings = URLMappings(SRC_ROOT, build_dir)
     analyzer_path = os.path.join(SRC_ROOT, 'third_party/dart-sdk/dart-sdk/bin/dartanalyzer')
-    dart_builtin_natives_path = os.path.join(SRC_ROOT, 'sky/engine/bindings/builtin_natives.dart')
-    dart_mojo_internal_path = os.path.join(SRC_ROOT, 'mojo/public/dart/sdk_ext/internal.dart')
-    dart_sky_internals_path = os.path.join(SRC_ROOT, 'sky/engine/bindings/sky_internals.dart')
-    dart_sky_path = os.path.join(build_dir, 'gen/sky/bindings/dart_sky.dart')
     packages_root = os.path.join(build_dir, 'gen/dart-pkg/packages')
-    analyzer_args = [analyzer_path,
-        "--url-mapping=dart:mojo.internal,%s" % dart_mojo_internal_path,
-        "--url-mapping=dart:sky,%s" % dart_sky_path,
-        "--url-mapping=dart:sky.internals,%s" % dart_sky_internals_path,
-        "--url-mapping=dart:sky_builtin_natives,%s" % dart_builtin_natives_path,
+
+    analyzer_args = [
+        analyzer_path,
         "--package-root", packages_root,
-        "--package-warnings",
-        args.app_path
-    ]
+        "--package-warnings", args.app_path
+    ] + url_mappings.as_args
+
     try:
       subprocess.check_output(analyzer_args, stderr=subprocess.STDOUT)
     except subprocess.CalledProcessError as e:
