@@ -9,6 +9,7 @@ import subprocess
 import sys
 import urllib2
 
+
 def main():
     sky_lib_dir = os.path.dirname(os.path.abspath(__file__))
     assets_dir = os.path.join(sky_lib_dir, 'assets')
@@ -37,7 +38,7 @@ def main():
     with open(tgz_path, 'wb') as f:
         f.write(response.read())
 
-    shutil.rmtree(icons_dir)
+    shutil.rmtree(icons_dir, ignore_errors=True)
 
     output_path = os.path.join(assets_dir, tgz_path)
     subprocess.call([
