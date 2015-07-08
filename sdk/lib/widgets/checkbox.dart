@@ -16,8 +16,21 @@ const sky.Color _kDarkUncheckedColor = const sky.Color(0xB2FFFFFF);
 const double _kEdgeSize = 20.0;
 const double _kEdgeRadius = 1.0;
 
+/// A material design checkbox
+///
+/// The checkbox itself does not maintain any state. Instead, when the state of
+/// the checkbox changes, the component calls the `onChange` callback. Most
+/// components that use a checkbox will listen for the `onChange` callback and
+/// rebuild the checkbox with a new `value` to update the visual appearance of
+/// the checkbox.
+///
+/// <https://www.google.com/design/spec/components/lists-controls.html#lists-controls-types-of-list-controls>
 class Checkbox extends Toggleable {
 
+  /// Constructs a checkbox
+  ///
+  /// * `value` determines whether the checkbox is checked.
+  /// * `onChanged` is called whenever the state of the checkbox should change.
   Checkbox({
     String key,
     bool value,

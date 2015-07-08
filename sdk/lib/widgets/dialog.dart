@@ -8,6 +8,9 @@ import 'default_text_style.dart';
 import 'material.dart';
 import "theme.dart";
 
+/// A material design dialog
+///
+/// <https://www.google.com/design/spec/components/dialogs.html>
 class Dialog extends Component {
   Dialog({
     String key,
@@ -17,12 +20,22 @@ class Dialog extends Component {
     this.onDismiss
   }) : super(key: key);
 
+  /// The (optional) title of the dialog is displayed in a large font at the top
+  /// of the dialog.
   final Widget title;
+
+  /// The (optional) content of the dialog is displayed in the center of the
+  /// dialog in a lighter font.
   final Widget content;
+
+  /// The (optional) set of actions that are displayed at the bottom of the
+  /// dialog.
   final List<Widget> actions;
+
+  /// An (optional) callback that is called when the dialog is dismissed.
   final Function onDismiss;
 
-  Color get color {
+  Color get _color {
     switch (Theme.of(this).brightness) {
       case ThemeBrightness.light:
         return colors.White;
@@ -73,7 +86,7 @@ class Dialog extends Component {
             constraints: new BoxConstraints(minWidth: 280.0),
             child: new Material(
               level: 4,
-              color: color,
+              color: _color,
               child: new ShrinkWrapWidth(
                 child: new Block(children)
               )

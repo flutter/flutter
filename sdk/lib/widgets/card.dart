@@ -7,6 +7,9 @@ import 'basic.dart';
 import 'material.dart';
 import "theme.dart";
 
+/// A material design card
+///
+/// <https://www.google.com/design/spec/components/cards.html>
 class Card extends Component {
   Card({ String key, this.child, this.color }) : super(key: key);
 

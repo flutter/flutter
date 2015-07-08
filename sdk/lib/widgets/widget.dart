@@ -22,8 +22,7 @@ final bool _shouldLogRenderDuration = false;
 
 typedef void WidgetTreeWalker(Widget);
 
-// All Effen nodes derive from Widget. All nodes have a _parent, a _key and
-// can be sync'd.
+/// A base class for elements of the widget tree
 abstract class Widget {
 
   Widget({ String key }) : _key = key {
@@ -39,9 +38,20 @@ abstract class Widget {
   bool _isConstructedDuringBuild() => this is AbstractWidgetRoot || this is App || _inRenderDirtyComponents;
 
   String _key;
+
+  /// A semantic identifer for this widget
+  ///
+  /// Keys are used to find matches when synchronizing two widget trees, for
+  /// example after a [Component] rebuilds. Without keys, two widgets can match
+  /// if their runtimeType matches. With keys, the keys must match as well.
+  /// Assigning a key to a widget can improve performance by causing the
+  /// framework to sync widgets that share a lot of common structure and can
+  /// help match stateful components semantically rather than positionally.
   String get key => _key;
 
   Widget _parent;
+
+  /// The parent of this widget in the widget tree.
   Widget get parent => _parent;
 
   bool _mounted = false;
@@ -50,6 +60,7 @@ abstract class Widget {
   static bool _notifyingMountStatus = false;
   static List<Widget> _mountedChanged = new List<Widget>();
 
+  /// Called during the synchronizing process to update the widget's parent.
   void setParent(Widget newParent) {
     assert(!_notifyingMountStatus);
     if (_parent == newParent)
@@ -69,11 +80,13 @@ abstract class Widget {
     }
   }
 
-  // Override this if you have children and call walker on each child.
-  // Note that you may be called before the child has had its parent
-  // pointer set to point to you. Your walker, and any methods it
-  // invokes on your descendants, should not rely on the ancestor
-  // chain being correctly configured at this point.
+  /// Walks the immediate children of this widget
+  ///
+  /// Override this if you have children and call walker on each child.
+  /// Note that you may be called before the child has had its parent
+  /// pointer set to point to you. Your walker, and any methods it
+  /// invokes on your descendants, should not rely on the ancestor
+  /// chain being correctly configured at this point.
   void walkChildren(WidgetTreeWalker walker) { }
 
   static void _notifyMountStatusChanged() {
@@ -95,10 +108,16 @@ abstract class Widget {
       sky.tracing.end("Widget._notifyMountStatusChanged");
     }
   }
+
+  /// Override this function to learn when this [Widget] enters the widget tree.
   void didMount() { }
+
+  /// Override this function to learn when this [Widget] leaves the widget tree.
   void didUnmount() { }
 
   RenderObject _root;
+
+  /// The underlying [RenderObject] associated with this [Widget].
   RenderObject get root => _root;
 
   // Subclasses which implements Nodes that become stateful may return true
