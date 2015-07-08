@@ -14,6 +14,6 @@ class ConstantMember extends _EquationMember {
   Expression asExpression() => new Expression([], this.value);
 }
 
-ConstantMember CM(num value) {
+ConstantMember cm(double value) {
   return new ConstantMember(value);
 }

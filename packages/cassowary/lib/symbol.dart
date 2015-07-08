@@ -8,7 +8,7 @@ enum _SymbolType { invalid, external, slack, error, dummy, }
 
 class _Symbol {
   final _SymbolType type;
-  int tick;
+  final int tick;
 
   _Symbol(this.type, this.tick);
 

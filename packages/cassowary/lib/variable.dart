@@ -5,12 +5,12 @@
 part of cassowary;
 
 class Variable {
-  double value = 0.0;
+  double value;
   String name;
 
   Param _owner;
 
-  int _tick;
+  final int _tick;
   static int _total = 0;
 
   Variable(this.value) : _tick = _total++;

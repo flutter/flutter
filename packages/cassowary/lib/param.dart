@@ -12,8 +12,8 @@ class Param extends _EquationMember {
     variable._owner = this;
   }
 
-  Param.withContext(ctx)
-      : variable = new Variable(0.0),
+  Param.withContext(ctx, [double value = 0.0])
+      : variable = new Variable(value),
         context = ctx {
     variable._owner = this;
   }
