@@ -11,6 +11,7 @@
 import argparse
 import os
 import subprocess
+import sys
 
 DEFAULT_MOJO_ROOT = '/src/mojo/src'
 DEFAULT_SKY_SDK_ROOT = '/src/sky_sdk'
@@ -43,9 +44,9 @@ def main():
                         default=DEFAULT_DEMO_SITE_ROOT)
     args = parser.parse_args()
 
-    mojo_root = args.mojo_root
-    sky_sdk_root = args.sky_sdk_root
-    demo_site_root = args.demo_site_root
+    mojo_root = os.path.abspath(os.path.expanduser(args.mojo_root))
+    sky_sdk_root = os.path.abspath(os.path.expanduser(args.sky_sdk_root))
+    demo_site_root = os.path.abspath(os.path.expanduser(args.demo_site_root))
 
     # Derived paths:
     dart_sdk_root = os.path.join(mojo_root, 'third_party/dart-sdk/dart-sdk')
