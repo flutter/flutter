@@ -603,4 +603,25 @@ void main() {
     expect(s.addEditVariables(
          [left.variable, right.variable, mid.variable], 999.0), Result.success);
   });
+
+  test('bulk_remove_constraints_and_variables', () {
+    Solver s = new Solver();
+
+    var left = new Param(0.0);
+    var right = new Param(100.0);
+    var mid = new Param(0.0);
+
+    expect(s.addEditVariables(
+         [left.variable, right.variable, mid.variable], 999.0), Result.success);
+
+    var c1 = left <= mid;
+    var c2 = mid <= right;
+
+    expect(s.addConstraints([c1, c2]), Result.success);
+
+    expect(s.removeConstraints([c1, c2]), Result.success);
+
+    expect(s.removeEditVariables(
+                [left.variable, right.variable, mid.variable]), Result.success);
+  });
 }

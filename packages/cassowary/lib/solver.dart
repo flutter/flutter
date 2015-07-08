@@ -59,6 +59,13 @@ class Solver {
     return _optimizeObjectiveRow(_objective);
   }
 
+  Result removeConstraints(List<Constraint> constraints) {
+    _SolverBulkUpdate applier = (Constraint c) => removeConstraint(c);
+    _SolverBulkUpdate undoer = (Constraint c) => addConstraint(c);
+
+    return _bulkEdit(constraints, applier, undoer);
+  }
+
   Result removeConstraint(Constraint constraint) {
     _Tag tag = _constraints[constraint];
     if (tag == null) {
@@ -127,6 +134,14 @@ class Solver {
     _edits[variable] = info;
 
     return Result.success;
+  }
+
+  Result removeEditVariables(List<Variable> variables) {
+    _SolverBulkUpdate applier = (Variable v) => removeEditVariable(v);
+    _SolverBulkUpdate undoer = (Variable v) =>
+        addEditVariable(v, _edits[v].constraint.priority);
+
+    return _bulkEdit(variables, applier, undoer);
   }
 
   Result removeEditVariable(Variable variable) {
