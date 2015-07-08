@@ -57,7 +57,7 @@ class Expression extends _EquationMember {
   Constraint operator <=(_EquationMember value) =>
       _createConstraint(value, Relation.lessThanOrEqualTo);
 
-  Constraint operator ==(_EquationMember value) =>
+  operator ==(_EquationMember value) =>
       _createConstraint(value, Relation.equalTo);
 
   Expression operator +(_EquationMember m) {
