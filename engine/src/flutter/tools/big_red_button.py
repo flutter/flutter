@@ -1,8 +1,22 @@
-# Roll versions script:
-# /src/mojo/src/sky/apk/demo/AndroidManifest.xml version and string.
-# Update versions of pub packages:
-
-# Make a commit, upload it, land it.
+# Prepare release script.
+#
+# 1) Bump versions:
+# sky/sdk/example/demo_launcher/apk/AndroidManifest.xml
+# mojo/dart/mojo_services/pubspec.yaml
+# mojo/dart/mojom/pubspec.yaml
+# mojo/public/dart/pubspec.yaml
+# sky/sdk/pubspec.yaml
+#
+# 2) Update change logs:
+# mojo/dart/mojo_services/CHANGELOG.md
+# mojo/dart/mojom/CHANGELOG.md
+# mojo/public/dart/CHANGELOG.md
+# sky/sdk/CHANGELOG.md
+#
+# 3) Make a commit, upload it, land it.
+#
+# 4) Run this script.
+#
 
 # Useful links:
 # http://stackoverflow.com/questions/14665518/api-to-automatically-upload-apk-to-google-play
