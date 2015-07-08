@@ -19,22 +19,28 @@ class Response {
   Response(this.body);
 
   String bodyAsString() {
+    if (body == null)
+      return null;
     return new String.fromCharCodes(new Uint8List.view(body.buffer));
   }
 }
 
 Future<UrlResponse> fetch(UrlRequest request) async {
-  NetworkServiceProxy net = new NetworkServiceProxy.unbound();
-  shell.requestService("mojo:authenticated_network_service", net);
+  try {
+    NetworkServiceProxy net = new NetworkServiceProxy.unbound();
+    shell.requestService("mojo:authenticated_network_service", net);
 
-  UrlLoaderProxy loader = new UrlLoaderProxy.unbound();
-  net.ptr.createUrlLoader(loader);
+    UrlLoaderProxy loader = new UrlLoaderProxy.unbound();
+    net.ptr.createUrlLoader(loader);
 
-  UrlResponse response = (await loader.ptr.start(request)).response;
+    UrlResponse response = (await loader.ptr.start(request)).response;
 
-  loader.close();
-  net.close();
-  return response;
+    loader.close();
+    net.close();
+    return response;
+  } catch (e) {
+    return new UrlResponse()..statusCode = 500;
+  }
 }
 
 Future<UrlResponse> fetchUrl(String relativeUrl) async {

@@ -59,7 +59,7 @@ String _urlToFetch(int chunk) {
 }
 
 class StockDataFetcher {
-  int _currentChunk = 0;
+  int _nextChunk = 0;
   final StockDataCallback callback;
 
   StockDataFetcher(this.callback) {
@@ -67,13 +67,17 @@ class StockDataFetcher {
   }
 
   void _fetchNextChunk() {
-    fetchBody(_urlToFetch(_currentChunk++)).then((Response response) {
+    fetchBody(_urlToFetch(_nextChunk++)).then((Response response) {
       String json = response.bodyAsString();
+      if (json == null) {
+        print("Failed to load stock data chunk ${_nextChunk - 1}");
+        return;
+      }
       JsonDecoder decoder = new JsonDecoder();
 
       callback(new StockData(decoder.convert(json)));
 
-      if (_currentChunk < _kChunkCount)
+      if (_nextChunk < _kChunkCount)
         _fetchNextChunk();
     });
   }

@@ -27,7 +27,12 @@ class TestRunner : public mojo::InterfaceFactory<TestHarness>,
     package_root_ = package_root;
   }
 
-  void Start(const std::string& single_test_url);
+  struct SingleTest {
+    std::string path;
+    bool is_snapshot = false;
+  };
+
+  void Start(scoped_ptr<SingleTest> single_test);
 
  private:
   // mojo::InterfaceFactory<TestHarness> implementation:
@@ -48,7 +53,7 @@ class TestRunner : public mojo::InterfaceFactory<TestHarness>,
   scoped_ptr<ShellView> shell_view_;
   SkyEnginePtr sky_engine_;
 
-  std::string single_test_url_;
+  scoped_ptr<SingleTest> single_test_;
   mojo::WeakBindingSet<TestHarness> bindings_;
 
   base::WeakPtrFactory<TestRunner> weak_ptr_factory_;
