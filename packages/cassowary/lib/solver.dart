@@ -18,28 +18,10 @@ class Solver {
   /// add any for some reason, a cleanup is attempted so that either all
   /// constraints will be added or none.
   Result addConstraints(List<Constraint> constraints) {
-    List<Constraint> added = new List<Constraint>();
-    bool needsCleanup = false;
+    _SolverBulkUpdate applier = (Constraint c) => addConstraint(c);
+    _SolverBulkUpdate undoer = (Constraint c) => removeConstraint(c);
 
-    Result result = Result.success;
-
-    for (Constraint constraint in constraints) {
-      result = addConstraint(constraint);
-      if (result == Result.success) {
-        added.add(constraint);
-      } else {
-        needsCleanup = true;
-        break;
-      }
-    }
-
-    if (needsCleanup) {
-      for (Constraint constraint in added) {
-        removeConstraint(constraint);
-      }
-    }
-
-    return result;
+    return _bulkEdit(constraints, applier, undoer);
   }
 
   Result addConstraint(Constraint constraint) {
@@ -111,6 +93,13 @@ class Solver {
 
   bool hasConstraint(Constraint constraint) {
     return _constraints.containsKey(constraint);
+  }
+
+  Result addEditVariables(List<Variable> variables, double priority) {
+    _SolverBulkUpdate applier = (Variable v) => addEditVariable(v, priority);
+    _SolverBulkUpdate undoer = (Variable v) => removeEditVariable(v);
+
+    return _bulkEdit(variables, applier, undoer);
   }
 
   Result addEditVariable(Variable variable, double priority) {
@@ -187,6 +176,33 @@ class Solver {
     }
 
     return updates;
+  }
+
+  Result _bulkEdit(Iterable items,
+                   _SolverBulkUpdate applier,
+                   _SolverBulkUpdate undoer) {
+    List applied = new List();
+    bool needsCleanup = false;
+
+    Result result = Result.success;
+
+    for (dynamic item in items) {
+      result = applier(item);
+      if (result == Result.success) {
+        applied.add(item);
+      } else {
+        needsCleanup = true;
+        break;
+      }
+    }
+
+    if (needsCleanup) {
+      for (dynamic item in applied.reversed) {
+        undoer(item);
+      }
+    }
+
+    return result;
   }
 
   _Symbol _symbolForVariable(Variable variable) {
@@ -617,3 +633,5 @@ class _EditInfo {
 bool _isValidNonRequiredPriority(double priority) {
   return (priority >= 0.0 && priority < Priority.required);
 }
+
+typedef Result _SolverBulkUpdate(dynamic item);

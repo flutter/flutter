@@ -592,4 +592,15 @@ void main() {
 
     expect((left == right).runtimeType, Constraint);
   });
+
+  test('bulk_add_edit_variables', () {
+    Solver s = new Solver();
+
+    var left = new Param(0.0);
+    var right = new Param(100.0);
+    var mid = new Param(0.0);
+
+    expect(s.addEditVariables(
+         [left.variable, right.variable, mid.variable], 999.0), Result.success);
+  });
 }
