@@ -59,7 +59,7 @@ public class SkyDemoApplication extends SkyApplication {
         registry.register(ActivityManager.MANAGER.getName(), new ServiceFactory() {
             @Override
             public void connectToService(Context context, Core core, MessagePipeHandle pipe) {
-                ActivityManager.MANAGER.bind(new ActivityManagerImpl(context), pipe);
+                ActivityManager.MANAGER.bind(new ActivityManagerImpl(), pipe);
             }
         });
 

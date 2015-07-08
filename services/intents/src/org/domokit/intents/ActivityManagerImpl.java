@@ -6,7 +6,6 @@ package org.domokit.intents;
 
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
-import android.content.Context;
 import android.net.Uri;
 import android.util.Log;
 
@@ -22,10 +21,8 @@ import org.chromium.mojom.intents.StringExtra;
 public class ActivityManagerImpl implements ActivityManager {
     private static final String TAG = "ActivityManagerImpl";
     private static Activity sCurrentActivity;
-    private Context mContext;
 
-    public ActivityManagerImpl(Context context) {
-        mContext = context;
+    public ActivityManagerImpl() {
     }
 
     public static void setCurrentActivity(Activity activity) {
