@@ -21,6 +21,7 @@ struct UrlData {
   std::string url;
   std::string expected_pixel_hash;
   bool enable_pixel_dumping = false;
+  bool is_snapshot = false;
 };
 
 void WaitForURL(UrlData& data) {
@@ -76,8 +77,8 @@ TestRunner& TestRunner::Shared() {
   return *g_test_runner;
 }
 
-void TestRunner::Start(const std::string& single_test_url) {
-  single_test_url_ = single_test_url;
+void TestRunner::Start(scoped_ptr<SingleTest> single_test) {
+  single_test_ = single_test.Pass();
   PrintAndFlush("#READY\n");
   ScheduleRun();
 }
@@ -92,7 +93,7 @@ void TestRunner::OnTestComplete(const mojo::String& test_result,
   std::cerr.flush();
   bindings_.CloseAllBindings();
 
-  if (single_test_url_.length())
+  if (single_test_)
     exit(0);
   ScheduleRun();
 }
@@ -113,8 +114,9 @@ void TestRunner::ScheduleRun() {
 
 void TestRunner::Run() {
   UrlData data;
-  if (single_test_url_.length()) {
-    data.url = single_test_url_;
+  if (single_test_) {
+    data.url = single_test_->path;
+    data.is_snapshot = single_test_->is_snapshot;
   } else {
     WaitForURL(data);
   }
@@ -124,7 +126,11 @@ void TestRunner::Run() {
 
   if (StartsWithASCII(data.url, kFileUrlPrefix, true))
     ReplaceFirstSubstringAfterOffset(&data.url, 0, kFileUrlPrefix, "");
-  sky_engine_->RunFromFile(data.url, package_root_);
+
+  if (data.is_snapshot)
+    sky_engine_->RunFromSnapshot(data.url);
+  else
+    sky_engine_->RunFromFile(data.url, package_root_);
 }
 
 }  // namespace shell
