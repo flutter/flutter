@@ -19,6 +19,7 @@ import 'package:sky/widgets/scaffold.dart';
 import 'package:sky/widgets/task_description.dart';
 import 'package:sky/widgets/theme.dart';
 import 'package:sky/widgets/tool_bar.dart';
+import 'package:sky/widgets/scrollable_list.dart';
 
 AssetBundle _initBundle() {
   if (rootBundle != null)
@@ -132,11 +133,7 @@ List<Widget> demos = [
 const double kCardHeight = 120.0;
 const EdgeDims kListPadding = const EdgeDims.all(4.0);
 
-class DemoList extends FixedHeightScrollable {
-  DemoList({ String key }) : super(key: key, itemHeight: kCardHeight, padding: kListPadding);
-
-  int get itemCount => demos.length;
-
+class DemoList extends Component {
   Widget buildDemo(SkyDemo demo) {
     return new Listener(
       key: demo.name,
@@ -166,12 +163,13 @@ class DemoList extends FixedHeightScrollable {
     );
   }
 
-  List<Widget> buildItems(int start, int count) {
-    return demos
-      .skip(start)
-      .take(count)
-      .map(buildDemo)
-      .toList(growable: false);
+  Widget build() {
+    return new ScrollableList<SkyDemo>(
+      items: demos,
+      itemHeight: kCardHeight,
+      itemBuilder: buildDemo,
+      padding: kListPadding
+    );
   }
 }
 

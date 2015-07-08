@@ -15,6 +15,8 @@ class RenderBlock extends RenderBox with ContainerRenderObjectMixin<RenderBox, B
   // uses the maximum width provided by the parent
   // sizes itself to the height of its child stack
 
+  bool _hasVisualOverflow = false;
+
   RenderBlock({
     List<RenderBox> children
   }) {
@@ -94,7 +96,12 @@ class RenderBlock extends RenderBox with ContainerRenderObjectMixin<RenderBox, B
       y += child.size.height;
       child = child.parentData.nextSibling;
     }
+    // FIXME(eseidel): Block lays out its children with unconstrained height
+    // yet itself remains constrained. Remember that our children wanted to
+    // be taller than we are so we know to clip them (and not cause confusing
+    // mismatch of painting vs. hittesting).
     size = new Size(width, constraints.constrainHeight(y));
+    _hasVisualOverflow = y > size.height;
     assert(!size.isInfinite);
   }
 
@@ -103,7 +110,14 @@ class RenderBlock extends RenderBox with ContainerRenderObjectMixin<RenderBox, B
   }
 
   void paint(PaintingCanvas canvas, Offset offset) {
+    if (_hasVisualOverflow) {
+      canvas.save();
+      canvas.clipRect(offset & size);
+    }
     defaultPaint(canvas, offset);
+    if (_hasVisualOverflow) {
+      canvas.restore();
+    }
   }
 
 }
