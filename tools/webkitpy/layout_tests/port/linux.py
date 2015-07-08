@@ -33,7 +33,6 @@ from webkitpy.common.webkit_finder import WebKitFinder
 from webkitpy.layout_tests.breakpad.dump_reader_multipart import DumpReaderLinux
 from webkitpy.layout_tests.models import test_run_results
 from webkitpy.layout_tests.port import base
-from webkitpy.layout_tests.port import win
 from webkitpy.layout_tests.port import config
 
 
@@ -45,7 +44,7 @@ class LinuxPort(base.Port):
 
     SUPPORTED_VERSIONS = ('x86', 'x86_64')
 
-    FALLBACK_PATHS = { 'x86_64': [ 'linux' ] + win.WinPort.latest_platform_fallback_path() }
+    FALLBACK_PATHS = { 'x86_64': [ 'linux' ] }
     FALLBACK_PATHS['x86'] = ['linux-x86'] + FALLBACK_PATHS['x86_64']
 
     DEFAULT_BUILD_DIRECTORIES = ('out',)
