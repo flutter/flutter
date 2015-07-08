@@ -37,6 +37,7 @@ dart_pkg("sky") {
     "lib/painting/box_painter.dart",
     "lib/painting/shadows.dart",
     "lib/painting/text_style.dart",
+    "lib/rendering/auto_layout.dart",
     "lib/rendering/block.dart",
     "lib/rendering/box.dart",
     "lib/rendering/flex.dart",
