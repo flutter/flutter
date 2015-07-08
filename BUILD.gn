@@ -30,7 +30,7 @@ group("sky_apk") {
   ]
 
   if (is_android) {
-    deps += [ "//sky/services/intents" ]
+    deps += [ "//sky/services/activity" ]
   }
 
   if (is_linux) {

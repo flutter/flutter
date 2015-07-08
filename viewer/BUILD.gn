@@ -52,7 +52,7 @@ mojo_native_application("viewer") {
     "//skia",
     "//sky/engine",
     "//sky/engine/tonic",
-    "//sky/services/intents:interfaces",
+    "//sky/services/activity:interfaces",
     "//sky/services/platform",
     "//sky/services/testing",
     "//sky/shell/dart",

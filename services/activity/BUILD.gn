@@ -4,7 +4,7 @@
 
 import("//mojo/public/tools/bindings/mojom.gni")
 
-group("intents") {
+group("activity") {
   testonly = true
 
   deps = [
@@ -12,7 +12,7 @@ group("intents") {
   ]
 
   if (is_android) {
-    deps += [ ":intents_lib" ]
+    deps += [ ":activity_lib" ]
   }
 }
 
@@ -20,8 +20,8 @@ if (is_android) {
   import("//build/config/android/config.gni")
   import("//build/config/android/rules.gni")
 
-  android_library("intents_lib") {
-    java_files = [ "src/org/domokit/intents/ActivityManagerImpl.java" ]
+  android_library("activity_lib") {
+    java_files = [ "src/org/domokit/activity/ActivityImpl.java" ]
 
     deps = [
       "//base:base_java",
@@ -34,6 +34,6 @@ if (is_android) {
 
 mojom("interfaces") {
   sources = [
-    "intents.mojom",
+    "activity.mojom",
   ]
 }

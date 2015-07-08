@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-module intents;
+module activity;
 
 struct StringExtra {
   string name;
@@ -31,7 +31,7 @@ struct TaskDescription {
 //               have a higher-level abstraction here? Do we want a collection
 //               of services that only work on specific platforms? We need to
 //               figure out how to rationalize this interface across platforms.
-interface ActivityManager {
+interface Activity {
   startActivity(Intent intent);
   finishCurrentActivity();
   setTaskDescription(TaskDescription description);

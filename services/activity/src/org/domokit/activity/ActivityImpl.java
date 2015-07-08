@@ -2,30 +2,30 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-package org.domokit.intents;
+package org.domokit.activity;
 
-import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.net.Uri;
 import android.util.Log;
 
 import org.chromium.mojo.system.MojoException;
-import org.chromium.mojom.intents.ActivityManager;
-import org.chromium.mojom.intents.ComponentName;
-import org.chromium.mojom.intents.Intent;
-import org.chromium.mojom.intents.StringExtra;
+import org.chromium.mojom.activity.Activity;
+import org.chromium.mojom.activity.ComponentName;
+import org.chromium.mojom.activity.Intent;
+import org.chromium.mojom.activity.StringExtra;
+import org.chromium.mojom.activity.TaskDescription;
 
 /**
- * Android implementation of ActivityManager.
+ * Android implementation of Activity.
  */
-public class ActivityManagerImpl implements ActivityManager {
-    private static final String TAG = "ActivityManagerImpl";
-    private static Activity sCurrentActivity;
+public class ActivityImpl implements Activity {
+    private static final String TAG = "ActivityImpl";
+    private static android.app.Activity sCurrentActivity;
 
-    public ActivityManagerImpl() {
+    public ActivityImpl() {
     }
 
-    public static void setCurrentActivity(Activity activity) {
+    public static void setCurrentActivity(android.app.Activity activity) {
         sCurrentActivity = activity;
     }
 
@@ -79,8 +79,7 @@ public class ActivityManagerImpl implements ActivityManager {
     }
 
     @Override
-    public void setTaskDescription(
-            org.chromium.mojom.intents.TaskDescription description) {
+    public void setTaskDescription(TaskDescription description) {
         if (sCurrentActivity == null) {
             return;
         }

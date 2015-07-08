@@ -10,11 +10,11 @@ import org.chromium.mojo.keyboard.KeyboardServiceImpl;
 import org.chromium.mojo.sensors.SensorServiceImpl;
 import org.chromium.mojo.system.Core;
 import org.chromium.mojo.system.MessagePipeHandle;
-import org.chromium.mojom.intents.ActivityManager;
+import org.chromium.mojom.activity.Activity;
 import org.chromium.mojom.keyboard.KeyboardService;
 import org.chromium.mojom.media.MediaService;
 import org.chromium.mojom.sensors.SensorService;
-import org.domokit.intents.ActivityManagerImpl;
+import org.domokit.activity.ActivityImpl;
 import org.domokit.media.MediaServiceImpl;
 import org.domokit.sky.shell.ResourceExtractor;
 import org.domokit.sky.shell.ServiceFactory;
@@ -56,10 +56,10 @@ public class SkyDemoApplication extends SkyApplication {
             }
         });
 
-        registry.register(ActivityManager.MANAGER.getName(), new ServiceFactory() {
+        registry.register(Activity.MANAGER.getName(), new ServiceFactory() {
             @Override
             public void connectToService(Context context, Core core, MessagePipeHandle pipe) {
-                ActivityManager.MANAGER.bind(new ActivityManagerImpl(), pipe);
+                Activity.MANAGER.bind(new ActivityImpl(), pipe);
             }
         });
 

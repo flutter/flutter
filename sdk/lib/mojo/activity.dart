@@ -3,32 +3,33 @@
 // found in the LICENSE file.
 
 import 'dart:sky';
-import 'package:mojom/intents/intents.mojom.dart';
+import 'package:mojom/activity/activity.mojom.dart';
 import 'package:sky/mojo/shell.dart' as shell;
-export 'package:mojom/intents/intents.mojom.dart' show Intent, ComponentName, StringExtra;
+
+export 'package:mojom/activity/activity.mojom.dart' show Intent, ComponentName, StringExtra;
 
 const int NEW_DOCUMENT = 0x00080000;
 const int NEW_TASK = 0x10000000;
 const int MULTIPLE_TASK = 0x08000000;
 
-ActivityManagerProxy _initActivityManager() {
-  ActivityManagerProxy activityManager = new ActivityManagerProxy.unbound();
-  shell.requestService('mojo:sky_viewer', activityManager);
-  return activityManager;
+ActivityProxy _initActivity() {
+  ActivityProxy activity = new ActivityProxy.unbound();
+  shell.requestService('mojo:sky_viewer', activity);
+  return activity;
 }
 
-final ActivityManagerProxy _activityManager = _initActivityManager();
+final ActivityProxy _activity = _initActivity();
 
 Color _cachedPrimaryColor;
 String _cachedLabel;
 
 
 void finishCurrentActivity() {
-  _activityManager.ptr.finishCurrentActivity();
+  _activity.ptr.finishCurrentActivity();
 }
 
 void startActivity(Intent intent) {
-  _activityManager.ptr.startActivity(intent);
+  _activity.ptr.startActivity(intent);
 }
 
 void updateTaskDescription(String label, Color color) {
@@ -42,5 +43,5 @@ void updateTaskDescription(String label, Color color) {
     ..label = label
     ..primaryColor = (color != null ? color.value : null);
 
-  _activityManager.ptr.setTaskDescription(description);
+  _activity.ptr.setTaskDescription(description);
 }
