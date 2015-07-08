@@ -104,6 +104,10 @@ dart_pkg("sky") {
   ]
 
   sdk_ext_directory = "$root_gen_dir/sky/bindings"
+  sdk_ext_files = [
+    "//sky/engine/bindings/sky_internals.dart",
+    "//sky/engine/bindings/builtin_natives.dart",
+  ]
 }
 
 action("material_design_icons") {

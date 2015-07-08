@@ -1,3 +1,5 @@
 {
-  "dart:sky": "../sdk_ext/dart_sky.dart"
+  "dart:sky": "../sdk_ext/dart_sky.dart",
+  "dart:sky.internals": "../sdk_ext/sky_internals.dart",
+  "dart:sky_builtin_natvies": "../sdk_ext/builtin_natives.dart"
 }
