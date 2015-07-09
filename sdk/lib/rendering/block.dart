@@ -9,15 +9,15 @@ import 'object.dart';
 
 class BlockParentData extends BoxParentData with ContainerParentDataMixin<RenderBox> { }
 
-class RenderBlock extends RenderBox with ContainerRenderObjectMixin<RenderBox, BlockParentData>,
-                                         RenderBoxContainerDefaultsMixin<RenderBox, BlockParentData> {
+abstract class RenderBlockBase extends RenderBox with ContainerRenderObjectMixin<RenderBox, BlockParentData>,
+                                                      RenderBoxContainerDefaultsMixin<RenderBox, BlockParentData> {
+
   // lays out RenderBox children in a vertical stack
   // uses the maximum width provided by the parent
-  // sizes itself to the height of its child stack
 
   bool _hasVisualOverflow = false;
 
-  RenderBlock({
+  RenderBlockBase({
     List<RenderBox> children
   }) {
     addAll(children);
@@ -83,6 +83,14 @@ class RenderBlock extends RenderBox with ContainerRenderObjectMixin<RenderBox, B
     return defaultComputeDistanceToFirstActualBaseline(baseline);
   }
 
+  double _childrenHeight;
+  double get childrenHeight => _childrenHeight;
+
+  void markNeedsLayout() {
+    _childrenHeight = null;
+    super.markNeedsLayout();
+  }
+
   void performLayout() {
     assert(constraints is BoxConstraints);
     double width = constraints.constrainWidth(constraints.maxWidth);
@@ -96,13 +104,7 @@ class RenderBlock extends RenderBox with ContainerRenderObjectMixin<RenderBox, B
       y += child.size.height;
       child = child.parentData.nextSibling;
     }
-    // FIXME(eseidel): Block lays out its children with unconstrained height
-    // yet itself remains constrained. Remember that our children wanted to
-    // be taller than we are so we know to clip them (and not cause confusing
-    // mismatch of painting vs. hittesting).
-    size = new Size(width, constraints.constrainHeight(y));
-    _hasVisualOverflow = y > size.height;
-    assert(!size.isInfinite);
+    _childrenHeight = y;
   }
 
   void hitTestChildren(HitTestResult result, { Point position }) {
@@ -110,11 +112,34 @@ class RenderBlock extends RenderBox with ContainerRenderObjectMixin<RenderBox, B
   }
 
   void paint(PaintingCanvas canvas, Offset offset) {
+    defaultPaint(canvas, offset);
+  }
+
+}
+
+class RenderBlock extends RenderBlockBase {
+
+  // sizes itself to the height of its child stack
+
+  RenderBlock({ List<RenderBox> children }) : super(children: children);
+
+  void performLayout() {
+    super.performLayout();
+    // FIXME(eseidel): Block lays out its children with unconstrained height
+    // yet itself remains constrained. Remember that our children wanted to
+    // be taller than we are so we know to clip them (and not cause confusing
+    // mismatch of painting vs. hittesting).
+    _hasVisualOverflow = childrenHeight > size.height;
+    size = constraints.constrain(new Size(constraints.maxWidth, childrenHeight));
+    assert(!size.isInfinite);
+  }
+
+  void paint(PaintingCanvas canvas, Offset offset) {
     if (_hasVisualOverflow) {
       canvas.save();
       canvas.clipRect(offset & size);
     }
-    defaultPaint(canvas, offset);
+    super.paint(canvas, offset);
     if (_hasVisualOverflow) {
       canvas.restore();
     }
