@@ -81,6 +81,8 @@ class BlockViewport extends RenderObjectWrapper {
   // end of the last one. If there's no children, then the only offset
   // is 0.0.
   List<double> _offsets = <double>[0.0];
+  int _currentStartIndex = 0;
+  int _currentChildCount = 0;
 
   int _findIndexForOffsetBeforeOrAt(double offset) {
     int left = 0;
@@ -117,8 +119,28 @@ class BlockViewport extends RenderObjectWrapper {
 
   void syncRenderObject(BlockViewport old) {
     super.syncRenderObject(old);
-    if (_dirty)
+    if (_dirty) {
       root.markNeedsLayout();
+    } else {
+      if (_currentChildCount > 0) {
+        assert(_currentStartIndex >= 0);
+        assert(builder != null);
+        assert(root != null);
+        int lastIndex = _currentStartIndex + _currentChildCount;
+        for (int index = _currentStartIndex; index <= lastIndex; index += 1) {
+          Widget widget = builder(index);
+          assert(widget != null);
+          assert(widget.key != null);
+          _Key key = new _Key.fromWidget(widget);
+          Widget oldWidget = _childrenByKey[key];
+          assert(oldWidget != null);
+          assert(oldWidget.root.parent == root);
+          widget = syncChild(widget, oldWidget, root.childAfter(oldWidget.root));
+          assert(widget != null);
+          _childrenByKey[key] = widget;
+        }
+      }
+    }
   }
 
   Widget _getWidget(int index, BoxConstraints innerConstraints) {
@@ -149,6 +171,8 @@ class BlockViewport extends RenderObjectWrapper {
   }
 
   void layout(BoxConstraints constraints) {
+    if (!_dirty)
+      return;
     _dirty = false;
 
     Map<_Key, Widget> newChildren = new Map<_Key, Widget>();
@@ -261,6 +285,8 @@ class BlockViewport extends RenderObjectWrapper {
     }
 
     _childrenByKey = newChildren;
+    _currentStartIndex = startIndex;
+    _currentChildCount = _childrenByKey.length;
   }
 
 }
