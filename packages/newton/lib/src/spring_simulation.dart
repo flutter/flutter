@@ -16,10 +16,8 @@ class SpringDescription {
   ///       constructor provided for this purpose
   final double damping;
 
-  SpringDescription({double mass, double springConstant, double damping})
-      : mass = mass,
-        springConstant = springConstant,
-        damping = damping {
+  SpringDescription(
+      {double this.mass, double this.springConstant, double this.damping}) {
     assert(mass != null);
     assert(springConstant != null);
     assert(damping != null);
