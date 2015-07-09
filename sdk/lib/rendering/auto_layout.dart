@@ -53,7 +53,15 @@ abstract class _AutoLayoutParamMixin {
     solver.suggestValueForVariable(_rightEdge.variable, size.width);
   }
 
+  /// Called when the solver has updated at least one of the layout parameters
+  /// of this object. The object is now responsible for applying this update to
+  /// it other properties (if necessary)
   void _applyAutolayoutParameterUpdates();
+
+  /// Returns the set of implicit constraints that need to be applied to all
+  /// instances of this class when they are moved into a render object with an
+  /// active solver. If no implicit constraints needs to be applied, the object
+  /// may return null.
   List<al.Constraint> _constructImplicitConstraints();
 
   void _setupImplicitConstraints(al.Solver solver) {
@@ -79,16 +87,17 @@ abstract class _AutoLayoutParamMixin {
 
     _implicitConstraints = null;
   }
+
 }
 
 class AutoLayoutParentData extends BoxParentData
     with ContainerParentDataMixin<RenderBox>, _AutoLayoutParamMixin {
 
-  final RenderBox _renderBox;
-
   AutoLayoutParentData(this._renderBox) {
     _setupLayoutParameters(this);
   }
+
+  final RenderBox _renderBox;
 
   @override
   void _applyAutolayoutParameterUpdates() {
@@ -117,26 +126,23 @@ class RenderAutoLayout extends RenderBox
          RenderBoxContainerDefaultsMixin<RenderBox, AutoLayoutParentData>,
          _AutoLayoutParamMixin {
 
-  final al.Solver _solver = new al.Solver();
-  List<al.Constraint> _explicitConstraints = new List<al.Constraint>();
-
-  RenderAutoLayout({List<RenderBox> children}) {
+  RenderAutoLayout({ List<RenderBox> children }) {
     _setupLayoutParameters(this);
     _setupEditVariablesInSolver(_solver, al.Priority.required - 1);
-
     addAll(children);
   }
+
+  final al.Solver _solver = new al.Solver();
+  List<al.Constraint> _explicitConstraints = new List<al.Constraint>();
 
   /// Adds all the given constraints to the solver. Either all constraints are
   /// added or none
   al.Result addConstraints(List<al.Constraint> constraints) {
     al.Result result = _solver.addConstraints(constraints);
-
     if (result == al.Result.success) {
       markNeedsLayout();
       _explicitConstraints.addAll(constraints);
     }
-
     return result;
   }
 
@@ -166,9 +172,8 @@ class RenderAutoLayout extends RenderBox
 
   @override
   void setupParentData(RenderObject child) {
-    if (child.parentData is! AutoLayoutParentData) {
+    if (child.parentData is! AutoLayoutParentData)
       child.parentData = new AutoLayoutParentData(child);
-    }
   }
 
   @override
@@ -213,13 +218,14 @@ class RenderAutoLayout extends RenderBox
   void dropChild(RenderObject child) {
     child.parentData._collectImplicitConstraints(_solver);
 
-    // Call super last as this collects parent data
     super.dropChild(child);
   }
 
   @override
   List<al.Constraint> _constructImplicitConstraints() {
-    // Only edits are present on layout containers
+    // Only edits variables are present on layout containers. If, in the future,
+    // implicit constraints (for say margins, padding, etc.) need to be added,
+    // they must be returned from here.
     return null;
   }
 }

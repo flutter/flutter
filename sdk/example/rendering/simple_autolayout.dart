@@ -10,23 +10,23 @@ import 'package:sky/rendering/auto_layout.dart';
 import 'package:cassowary/cassowary.dart' as al;
 
 void main() {
-  var c1 = new RenderDecoratedBox(
+  RenderDecoratedBox c1 = new RenderDecoratedBox(
     decoration: new BoxDecoration(backgroundColor: const Color(0xFFFF0000))
   );
 
-  var c2 = new RenderDecoratedBox(
+  RenderDecoratedBox c2 = new RenderDecoratedBox(
     decoration: new BoxDecoration(backgroundColor: const Color(0xFF00FF00))
   );
 
-  var c3 = new RenderDecoratedBox(
+  RenderDecoratedBox c3 = new RenderDecoratedBox(
     decoration: new BoxDecoration(backgroundColor: const Color(0xFF0000FF))
   );
 
-  var c4 = new RenderDecoratedBox(
+  RenderDecoratedBox c4 = new RenderDecoratedBox(
     decoration: new BoxDecoration(backgroundColor: const Color(0xFFFFFFFF))
   );
 
-  var root = new RenderAutoLayout(children: [c1, c2, c3, c4]);
+  RenderAutoLayout root = new RenderAutoLayout(children: [c1, c2, c3, c4]);
 
   AutoLayoutParentData p1 = c1.parentData;
   AutoLayoutParentData p2 = c2.parentData;
