@@ -35,6 +35,7 @@ public:
     HyphenEdit() : hyphen(0) { }
     HyphenEdit(uint32_t hyphenInt) : hyphen(hyphenInt) { }
     bool hasHyphen() const { return hyphen != 0; }
+    bool operator==(const HyphenEdit &other) const { return hyphen == other.hyphen; }
 private:
     uint32_t hyphen;
 };
@@ -48,8 +49,7 @@ struct MinikinPaint {
             fakery(), fontFeatureSettings() { }
 
     bool skipCache() const {
-        // TODO: add hyphen to cache
-        return !fontFeatureSettings.empty() || hyphenEdit.hasHyphen();
+        return !fontFeatureSettings.empty();
     }
 
     MinikinFont *font;
