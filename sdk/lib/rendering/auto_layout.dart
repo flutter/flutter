@@ -28,8 +28,8 @@ abstract class _AutoLayoutParamMixin {
   al.Expression get width => _rightEdge - _leftEdge;
   al.Expression get height => _bottomEdge - _topEdge;
 
-  al.Expression get horizontalCenter => (_leftEdge + _rightEdge) / al.CM(2.0);
-  al.Expression get verticalCenter => (_topEdge + _bottomEdge) / al.CM(2.0);
+  al.Expression get horizontalCenter => (_leftEdge + _rightEdge) / al.cm(2.0);
+  al.Expression get verticalCenter => (_topEdge + _bottomEdge) / al.cm(2.0);
 
   void _setupLayoutParameters(dynamic context) {
     _leftEdge = new al.Param.withContext(context);
@@ -104,7 +104,7 @@ class AutoLayoutParentData extends BoxParentData
   List<al.Constraint> _constructImplicitConstraints() {
     return [
       // The left edge must be positive
-      _leftEdge >= al.CM(0.0),
+      _leftEdge >= al.cm(0.0),
 
       // Width must be positive
       _rightEdge >= _leftEdge,

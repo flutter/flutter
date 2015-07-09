@@ -46,7 +46,7 @@ void main() {
 
     // The width of the second box should be twice as much as that of the first
     // and third
-    (p2.width * al.CM(2.0) == p1.width) as al.Constraint,
+    (p2.width * al.cm(2.0) == p1.width) as al.Constraint,
 
     // The height of the three boxes should be equal to that of the container
     (p1.height == p2.height) as al.Constraint,
@@ -55,10 +55,10 @@ void main() {
 
     // The fourth box should be half as wide as the second and must be attached
     // to the right edge of the same (by its center)
-    (p4.width == p2.width / al.CM(2.0)) as al.Constraint,
-    (p4.height == al.CM(50.0)) as al.Constraint,
+    (p4.width == p2.width / al.cm(2.0)) as al.Constraint,
+    (p4.height == al.cm(50.0)) as al.Constraint,
     (p4.horizontalCenter == p2.rightEdge) as al.Constraint,
-    (p4.verticalCenter == p2.height / al.CM(2.0)) as al.Constraint,
+    (p4.verticalCenter == p2.height / al.cm(2.0)) as al.Constraint,
   ]);
 
   new SkyBinding(root: root);
