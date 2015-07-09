@@ -110,7 +110,7 @@ public:
             mStart(start), mCount(count), mId(collection->getId()), mStyle(style),
             mSize(paint.size), mScaleX(paint.scaleX), mSkewX(paint.skewX),
             mLetterSpacing(paint.letterSpacing),
-            mPaintFlags(paint.paintFlags), mIsRtl(dir) {
+            mPaintFlags(paint.paintFlags), mHyphenEdit(paint.hyphenEdit), mIsRtl(dir) {
     }
     bool operator==(const LayoutCacheKey &other) const;
     hash_t hash() const;
@@ -144,6 +144,7 @@ private:
     float mSkewX;
     float mLetterSpacing;
     int32_t mPaintFlags;
+    HyphenEdit mHyphenEdit;
     bool mIsRtl;
     // Note: any fields added to MinikinPaint must also be reflected here.
     // TODO: language matching (possibly integrate into style)
@@ -236,6 +237,7 @@ bool LayoutCacheKey::operator==(const LayoutCacheKey& other) const {
             && mSkewX == other.mSkewX
             && mLetterSpacing == other.mLetterSpacing
             && mPaintFlags == other.mPaintFlags
+            && mHyphenEdit == other.mHyphenEdit
             && mIsRtl == other.mIsRtl
             && mNchars == other.mNchars
             && !memcmp(mChars, other.mChars, mNchars * sizeof(uint16_t));
@@ -251,6 +253,7 @@ hash_t LayoutCacheKey::hash() const {
     hash = JenkinsHashMix(hash, hash_type(mSkewX));
     hash = JenkinsHashMix(hash, hash_type(mLetterSpacing));
     hash = JenkinsHashMix(hash, hash_type(mPaintFlags));
+    hash = JenkinsHashMix(hash, hash_type(mHyphenEdit.hasHyphen()));
     hash = JenkinsHashMix(hash, hash_type(mIsRtl));
     hash = JenkinsHashMixShorts(hash, mChars, mNchars);
     return JenkinsHashWhiten(hash);
