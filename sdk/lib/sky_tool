@@ -135,7 +135,7 @@ class StartSky(object):
         if os.path.isdir(project_or_path):
             sky_server_root = project_or_path
             main_dart = os.path.join(project_or_path, 'lib', 'main.dart')
-            missing_msg = "Missing lib/main.dart in project: %s" % project_dir
+            missing_msg = "Missing lib/main.dart in project: %s" % project_or_path
         else:
             # FIXME: This assumes the path is at the root of the project!
             # Instead we should walk up looking for a pubspec.yaml
