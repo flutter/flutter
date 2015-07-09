@@ -23,6 +23,7 @@ abstract class FixedHeightScrollable extends Scrollable {
   /// Subclasses must implement `get itemCount` to tell FixedHeightScrollable
   /// how many items there are in the list.
   int get itemCount;
+  int _previousItemCount;
 
   void syncFields(FixedHeightScrollable source) {
     padding = source.padding;
@@ -41,14 +42,6 @@ abstract class FixedHeightScrollable extends Scrollable {
     });
   }
 
-  bool scrollTo(double newScrollOffset) {
-    if (_height != null && _height > 0.0) {
-      double maxScrollOffset = math.max(0.0, itemCount * itemHeight - _height);
-      newScrollOffset = math.min(newScrollOffset, maxScrollOffset);
-    }
-    return super.scrollTo(newScrollOffset);
-  }
-
   void _updateContentsHeight() {
     double contentsHeight = itemHeight * itemCount;
     if (padding != null)
@@ -56,8 +49,17 @@ abstract class FixedHeightScrollable extends Scrollable {
     scrollBehavior.contentsHeight = contentsHeight;
   }
 
+  void _updateScrollOffset() {
+    if (scrollOffset > scrollBehavior.maxScrollOffset)
+      settleScrollOffset();
+  }
+
   Widget buildContent() {
-    _updateContentsHeight();
+    if (itemCount != _previousItemCount) {
+      _previousItemCount = itemCount;
+      _updateContentsHeight();
+      _updateScrollOffset();
+    }
 
     var itemShowIndex = 0;
     var itemShowCount = 0;

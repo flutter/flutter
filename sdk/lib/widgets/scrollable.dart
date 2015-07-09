@@ -27,9 +27,9 @@ enum ScrollDirection { vertical, horizontal }
 abstract class Scrollable extends StatefulComponent {
 
   Scrollable({
-   String key,
-   this.backgroundColor,
-   this.direction: ScrollDirection.vertical
+    String key,
+    this.backgroundColor,
+    this.direction: ScrollDirection.vertical
   }) : super(key: key);
 
   Color backgroundColor;
@@ -122,6 +122,10 @@ abstract class Scrollable extends StatefulComponent {
     super.didUnmount();
   }
 
+  void settleScrollOffset() {
+    _startSimulation(_createParticle());
+  }
+
   void _stopSimulation() {
     if (_simulation == null)
       return;
@@ -147,7 +151,7 @@ abstract class Scrollable extends StatefulComponent {
 
   void _handlePointerUpOrCancel(_) {
     if (_simulation == null)
-      _startSimulation(_createParticle());
+      settleScrollOffset();
   }
 
   void _handleScrollUpdate(sky.GestureEvent event) {
@@ -162,7 +166,7 @@ abstract class Scrollable extends StatefulComponent {
   }
 
   void _handleFlingCancel(sky.GestureEvent event) {
-    _startSimulation(_createParticle());
+    settleScrollOffset();
   }
 
   void _handleWheel(sky.WheelEvent event) {

@@ -58,17 +58,17 @@ class OverscrollBehavior extends ScrollBehavior {
     : _contentsHeight = contentsHeight,
       _containerHeight = containerHeight;
 
-  double get maxScroll => math.max(0.0, _contentsHeight - _containerHeight);
+  double get maxScrollOffset => math.max(0.0, _contentsHeight - _containerHeight);
 
   Simulation release(Particle particle) {
     System system;
-    if ((particle.position >= 0.0) && (particle.position < maxScroll)) {
+    if ((particle.position >= 0.0) && (particle.position < maxScrollOffset)) {
       if (particle.velocity == 0.0)
         return null;
       System slowdownSystem = new ParticleInBoxWithFriction(
         particle: particle,
         friction: _kScrollFriction,
-        box: new GeofenceBox(min: 0.0, max: maxScroll, onEscape: () {
+        box: new GeofenceBox(min: 0.0, max: maxScrollOffset, onEscape: () {
           (system as Multisystem).transitionToSystem(new ParticleInBoxWithFriction(
             particle: particle,
             friction: _kOverscrollFriction,
@@ -92,9 +92,9 @@ class OverscrollBehavior extends ScrollBehavior {
         targetPosition: 0.0);
     return new ParticleClimbingRamp(
       particle: particle,
-      box: new ClosedBox(min: maxScroll),
+      box: new ClosedBox(min: maxScrollOffset),
       theta: _kBounceSlopeAngle,
-      targetPosition: maxScroll);
+      targetPosition: maxScrollOffset);
   }
 
   double applyCurve(double scrollOffset, double scrollDelta) {
@@ -107,8 +107,8 @@ class OverscrollBehavior extends ScrollBehavior {
     // do similar things for overscroll in the other direction.
     if (newScrollOffset < 0.0) {
       newScrollOffset -= (newScrollOffset - math.min(0.0, scrollOffset)) / 2.0;
-    } else if (newScrollOffset > maxScroll) {
-      newScrollOffset -= (newScrollOffset - math.max(maxScroll, scrollOffset)) / 2.0;
+    } else if (newScrollOffset > maxScrollOffset) {
+      newScrollOffset -= (newScrollOffset - math.max(maxScrollOffset, scrollOffset)) / 2.0;
     }
     return newScrollOffset;
   }
