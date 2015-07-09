@@ -7,5 +7,7 @@ dependencies:
   cassowary: '^0.1.6'
 description: Dart files to support executing inside Sky.
 homepage: https://github.com/domokit/mojo/tree/master/sky
+environment:
+  sdk: ">=1.8.0 <2.0.0"
 name: sky
 version: 0.0.17
