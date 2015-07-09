@@ -48,7 +48,7 @@ class Checkbox extends Toggleable {
                                      ..color = uncheckedColor;
 
     // The rrect contracts slightly during the animation
-    double inset = 2.0 - (toggleAnimation.value - _kMidpoint).abs() * 2.0;
+    double inset = 2.0 - (position.value - _kMidpoint).abs() * 2.0;
     sky.Rect rect = new sky.Rect.fromLTRB(inset, inset, _kEdgeSize - inset, _kEdgeSize - inset);
     sky.RRect rrect = new sky.RRect()..setRectXY(rect, _kEdgeRadius, _kEdgeRadius);
 
@@ -57,20 +57,20 @@ class Checkbox extends Toggleable {
     canvas.drawRRect(rrect, paint);
 
     // Radial gradient that changes size
-    if (toggleAnimation.value > 0) {
+    if (position.value > 0) {
       paint.setStyle(sky.PaintingStyle.fill);
       paint.setShader(
         new sky.Gradient.radial(
           new Point(_kEdgeSize / 2.0, _kEdgeSize / 2.0),
-          _kEdgeSize * (_kMidpoint - toggleAnimation.value) * 8.0,
+          _kEdgeSize * (_kMidpoint - position.value) * 8.0,
           [const sky.Color(0x00000000), uncheckedColor]
         )
       );
       canvas.drawRRect(rrect, paint);
     }
 
-    if (toggleAnimation.value > _kMidpoint) {
-      double t = (toggleAnimation.value - _kMidpoint) / (1.0 - _kMidpoint);
+    if (position.value > _kMidpoint) {
+      double t = (position.value - _kMidpoint) / (1.0 - _kMidpoint);
 
       // Solid filled rrect
       paint.setStyle(sky.PaintingStyle.strokeAndFill);

@@ -4,14 +4,14 @@
 
 import 'dart:sky' as sky;
 
-import '../animation/animated_value.dart';
+import '../animation/animation_performance.dart';
 import '../animation/curves.dart';
 import 'animated_component.dart';
 import 'basic.dart';
 
 typedef void ValueChanged(value);
 
-const double _kCheckDuration = 200.0;
+const Duration _kCheckDuration = const Duration(milliseconds: 200);
 
 abstract class Toggleable extends AnimatedComponent {
 
@@ -20,25 +20,32 @@ abstract class Toggleable extends AnimatedComponent {
     this.value,
     this.onChanged
   }) : super(key: key) {
-    toggleAnimation = new AnimatedValue(value ? 1.0 : 0.0);
-    watch(toggleAnimation);
+    position = new AnimatedType<double>(0.0, end: 1.0);
+    performance = new AnimationPerformance()
+      ..variable = position
+      ..duration = _kCheckDuration
+      ..progress = value ? 1.0 : 0.0;
+    watchPerformance(performance);
   }
 
   bool value;
-  AnimatedValue toggleAnimation;
   ValueChanged onChanged;
+
+  AnimatedType<double> position;
+  AnimationPerformance performance;
 
   void syncFields(Toggleable source) {
     onChanged = source.onChanged;
     if (value != source.value) {
       value = source.value;
-      double targetValue = value ? 1.0 : 0.0;
-      double difference = (toggleAnimation.value - targetValue).abs();
-      if (difference > 0) {
-        toggleAnimation.stop();
-        double t = difference * duration;
-        Curve curve = targetValue > toggleAnimation.value ? curveUp : curveDown;
-        toggleAnimation.animateTo(targetValue, t, curve: curve);
+      // TODO(abarth): Setting the curve on the position means there's a
+      // discontinuity when we reverse the timeline.
+      if (value) {
+        position.curve = curveUp;
+        performance.play();
+      } else {
+        position.curve = curveDown;
+        performance.reverse();
       }
     }
     super.syncFields(source);
@@ -65,7 +72,7 @@ abstract class Toggleable extends AnimatedComponent {
         width: size.width,
         height: size.height,
         child: new CustomPaint(
-          token: toggleAnimation.value,
+          token: position.value,
           callback: customPaintCallback
         )
       ),
