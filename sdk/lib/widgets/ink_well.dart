@@ -5,7 +5,7 @@
 import 'dart:math' as math;
 import 'dart:sky' as sky;
 
-import '../animation/animated_value.dart';
+import '../animation/animation_performance.dart';
 import '../animation/curves.dart';
 import '../rendering/box.dart';
 import '../rendering/object.dart';
@@ -13,9 +13,9 @@ import 'basic.dart';
 import 'widget.dart';
 
 const int _kSplashInitialOpacity = 0x80;
-const double _kSplashInitialDelay = 0.0; // we could delay initially in case the user scrolls
-const double _kSplashInitialSize = 0.0;
+const double _kSplashCancelledVelocity = 0.3;
 const double _kSplashConfirmedVelocity = 0.3;
+const double _kSplashInitialSize = 0.0;
 const double _kSplashUnconfirmedVelocity = 0.1;
 
 double _getSplashTargetSize(Size bounds, Point position) {
@@ -26,10 +26,14 @@ double _getSplashTargetSize(Size bounds, Point position) {
 class InkSplash {
   InkSplash(this.pointer, this.position, this.well) {
     _targetRadius = _getSplashTargetSize(well.size, position);
-    double duration = _targetRadius / _kSplashUnconfirmedVelocity;
-    _radius = new AnimatedValue(_kSplashInitialSize, onChange: _handleRadiusChange);
-    _radius.animateTo(_targetRadius, duration, curve: easeOut,
-                      initialDelay: _kSplashInitialDelay);
+    _radius = new AnimatedType<double>(
+        _kSplashInitialSize, end: _targetRadius, curve: easeOut);
+
+    _performance = new AnimationPerformance()
+      ..variable = _radius
+      ..duration = new Duration(milliseconds: (_targetRadius / _kSplashUnconfirmedVelocity).floor())
+      ..addListener(_handleRadiusChange)
+      ..play();
   }
 
   final int pointer;
@@ -37,13 +41,24 @@ class InkSplash {
   final RenderInkWell well;
 
   double _targetRadius;
-  AnimatedValue _radius;
+  double _pinnedRadius;
+  AnimatedType<double> _radius;
+  AnimationPerformance _performance;
+
+  void _updateVelocity(double velocity) {
+    int duration = (_targetRadius / velocity).floor();
+    _performance
+      ..duration = new Duration(milliseconds: duration)
+      ..play();
+  }
 
   void confirm() {
-    double duration = (_targetRadius - _radius.value) / _kSplashConfirmedVelocity;
-    if (duration <= 0.0)
-      return;
-    _radius.animateTo(_targetRadius, duration, curve: easeOut);
+    _updateVelocity(_kSplashConfirmedVelocity);
+  }
+
+  void cancel() {
+    _updateVelocity(_kSplashCancelledVelocity);
+    _pinnedRadius = _radius.value;
   }
 
   void _handleRadiusChange() {
@@ -55,7 +70,8 @@ class InkSplash {
   void paint(PaintingCanvas canvas) {
     int opacity = (_kSplashInitialOpacity * (1.0 - (_radius.value / _targetRadius))).floor();
     sky.Paint paint = new sky.Paint()..color = new sky.Color(opacity << 24);
-    canvas.drawCircle(position, _radius.value, paint);
+    double radius = _pinnedRadius == null ? _radius.value : _pinnedRadius;
+    canvas.drawCircle(position, radius, paint);
   }
 }
 
@@ -84,9 +100,13 @@ class RenderInkWell extends RenderProxyBox {
     markNeedsPaint();
   }
 
-  void _confirmSplash(int pointer) {
+  void _forEachSplash(int pointer, Function callback) {
     _splashes.where((splash) => splash.pointer == pointer)
-             .forEach((splash) { splash.confirm(); });
+             .forEach(callback);
+  }
+
+  void _confirmSplash(int pointer) {
+    _forEachSplash(pointer, (splash) { splash.confirm(); });
     markNeedsPaint();
   }
 

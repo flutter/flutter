@@ -12,13 +12,14 @@ abstract class AnimatedVariable {
 }
 
 class AnimatedType<T extends dynamic> extends AnimatedVariable {
-  T value;
-  T begin, end;
-  final Curve curve;
-
   AnimatedType(this.begin, {this.end, this.curve: linear}) {
     value = begin;
   }
+
+  T value;
+  T begin;
+  T end;
+  Curve curve;
 
   void setFraction(double t) {
     if (end != null) {
