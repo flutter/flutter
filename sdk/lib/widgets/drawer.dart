@@ -40,7 +40,7 @@ class DrawerController {
     container = new AnimatedContainer()
       ..position = new AnimatedType<Point>(
           new Point(-_kWidth, 0.0), end: Point.origin, curve: _kAnimationCurve);
-    performance = container.createPerformance(container.position,
+    performance = container.createPerformance([container.position],
                                               duration: _kBaseSettleDuration)
         ..addListener(_checkValue);
   }

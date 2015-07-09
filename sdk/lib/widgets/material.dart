@@ -38,9 +38,9 @@ class Material extends AnimatedComponent {
       ..borderRadius = edges[type]
       ..shape = type == MaterialType.circle ? Shape.circle : Shape.rectangle;
     watchPerformance(_container.createPerformance(
-        _container.shadow, duration: _kAnimateShadowDuration));
+        [_container.shadow], duration: _kAnimateShadowDuration));
     watchPerformance(_container.createPerformance(
-        _container.backgroundColor, duration: _kAnimateColorDuration));
+        [_container.backgroundColor], duration: _kAnimateColorDuration));
   }
 
   Widget child;

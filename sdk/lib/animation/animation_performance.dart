@@ -29,6 +29,15 @@ class AnimatedType<T extends dynamic> extends AnimatedVariable {
   }
 }
 
+class AnimatedList extends AnimatedVariable {
+  List<AnimatedVariable> variables;
+  AnimatedList(this.variables);
+  void setFraction(double t) {
+    for (AnimatedVariable variable in variables)
+      variable.setFraction(t);
+  }
+}
+
 // This class manages a "performance" - a collection of values that change
 // based on a timeline. For example, a performance may handle an animation
 // of a menu opening by sliding and fading in (changing Y value and opacity)

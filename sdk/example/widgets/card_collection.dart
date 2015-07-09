@@ -9,6 +9,7 @@ import 'package:sky/animation/animation_performance.dart';
 import 'package:sky/base/lerp.dart';
 import 'package:sky/painting/text_style.dart';
 import 'package:sky/theme/colors.dart';
+import 'package:sky/widgets/animated_container.dart';
 import 'package:sky/widgets/basic.dart';
 import 'package:sky/widgets/card.dart';
 import 'package:sky/widgets/scaffold.dart';
@@ -27,23 +28,25 @@ class CardCollectionApp extends App {
     new TextStyle(color: White, fontSize: 18.0, fontWeight: bold);
 
   CardCollectionApp() {
-    _activeCardAnimation = new AnimationPerformance()
-      ..variable = new AnimatedType(0.0, 1.0)
-      ..duration = new Duration(milliseconds: _kCardDismissFadeoutMS)
-      ..addListener(_handleAnimationProgressChanged);
+    _activeCardTransform = new AnimatedContainer()
+      ..position = new AnimatedType<Point>(Point.origin)
+      ..opacity = new AnimatedType<double>(1.0, end: 0.0);
+    _activeCardAnimation = _activeCardTransform.createPerformance(
+        [_activeCardTransform.position, _activeCardTransform.opacity],
+        duration: new Duration(milliseconds: _kCardDismissFadeoutMS));
+    _activeCardAnimation.addListener(_handleAnimationProgressChanged);
   }
 
   int _activeCardIndex = -1;
+  AnimatedContainer _activeCardTransform;
   AnimationPerformance _activeCardAnimation;
   double _activeCardWidth;
   double _activeCardDragX = 0.0;
   bool _activeCardDragUnderway = false;
   Set<int> _dismissedCardIndices = new Set<int>();
 
-  double get _activeCardOpacity => 1.0 - _activeCardAnimation.progress;
-
-  double get _activeCardOffset {
-    return _activeCardAnimation.progress * _activeCardDragX.sign * _activeCardWidth * _kDismissCardThreshold;
+  Point get _activeCardDragEndPoint {
+    return new Point(_activeCardDragX.sign * _activeCardWidth * _kDismissCardThreshold, 0.0);
   }
 
   void _handleAnimationProgressChanged() {
@@ -55,6 +58,7 @@ class CardCollectionApp extends App {
 
   void _handleSizeChanged(Size newSize) {
     _activeCardWidth = newSize.width;
+    _activeCardTransform.position.end = _activeCardDragEndPoint;
   }
 
   void _handlePointerDown(sky.PointerEvent event, int cardIndex) {
@@ -70,10 +74,14 @@ class CardCollectionApp extends App {
     if (_activeCardWidth == null || _activeCardIndex < 0)
       return;
 
+    double oldDragX = _activeCardDragX;
     _activeCardDragX += event.dx;
     setState(() {
-      if (!_activeCardAnimation.isAnimating)
+      if (!_activeCardAnimation.isAnimating) {
+        if (oldDragX.sign != _activeCardDragX.sign)
+          _activeCardTransform.position.end = _activeCardDragEndPoint;
         _activeCardAnimation.progress = _activeCardDragX.abs() / (_activeCardWidth * _kDismissCardThreshold);
+      }
     });
   }
 
@@ -117,24 +125,12 @@ class CardCollectionApp extends App {
     // the user starts dragging it. Currently this causes Sky to drop the
     // rest of the pointer gesture, see https://github.com/domokit/mojo/issues/312.
     // As a workaround, always create the Transform and Opacity nodes.
-    /*
     if (index == _activeCardIndex) {
-      Matrix4 transform = new Matrix4.identity();
-      transform.translate(_activeCardOffset, 0.0);
-      card = new Transform(child: card, transform: transform);
-      if (_activeCardAnimation != null)
-        card = new Opacity(child: card, opacity: _activeCardOpacity);
+      card = _activeCardTransform.build(card);
+    } else {
+      card = new Transform(child: card, transform: new Matrix4.identity());
+      card = new Opacity(child: card, opacity: 1.0);
     }
-    */
-    Matrix4 transform = new Matrix4.identity();
-    double opacity = 1.0;
-    if (index == _activeCardIndex) {
-      transform.translate(_activeCardOffset, 0.0);
-      opacity = _activeCardOpacity;
-    }
-    card = new Transform(
-      child: new Opacity(child: card, opacity: opacity),
-      transform: transform);
 
     return new Listener(
       child: card,

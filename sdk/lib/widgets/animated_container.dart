@@ -15,6 +15,7 @@ import 'basic.dart';
 // animated properties. Use syncFields to update the Container's properties,
 // which will optionally animate them using an AnimationPerformance.
 class AnimatedContainer {
+  AnimatedType<double> opacity;
   AnimatedType<Point> position;
   AnimatedType<double> shadow;
   AnimatedColor backgroundColor;
@@ -28,12 +29,13 @@ class AnimatedContainer {
 
   AnimatedContainer();
 
-  AnimationPerformance createPerformance(AnimatedType variable,
+  AnimationPerformance createPerformance(List<AnimatedType> variables,
                                          {Duration duration}) {
     AnimationPerformance performance = new AnimationPerformance()
       ..duration = duration
-      ..variable = variable;
-    _variableToPerformance[variable] = performance;
+      ..variable = new AnimatedList(variables);
+    for (AnimatedVariable variable in variables)
+      _variableToPerformance[variable] = performance;
     return performance;
   }
 
@@ -53,7 +55,11 @@ class AnimatedContainer {
     if (position != null) {
       Matrix4 transform = new Matrix4.identity();
       transform.translate(position.value.x, position.value.y);
-      current = new Transform(transform: transform, child: child);
+      current = new Transform(transform: transform, child: current);
+    }
+
+    if (opacity != null) {
+      current = new Opacity(opacity: opacity.value, child: current);
     }
 
     return current;
