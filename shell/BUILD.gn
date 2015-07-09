@@ -164,7 +164,6 @@ if (is_android) {
         "ios/sky_surface.mm",
         "ios/sky_view_controller.h",
         "ios/sky_view_controller.mm",
-        "platform_view.cc",
       ]
 
       deps = common_deps + [

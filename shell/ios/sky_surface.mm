@@ -86,7 +86,7 @@ static sky::InputEventPtr BasicInputEventFromRecognizer(
   CGSize size = self.bounds.size;
   CGFloat scale = [UIScreen mainScreen].scale;
 
-  ViewportMetricsPtr metrics = ViewportMetrics::New();
+  sky::ViewportMetricsPtr metrics = sky::ViewportMetrics::New();
   metrics->physical_width = size.width * scale;
   metrics->physical_height = size.height * scale;
   metrics->device_pixel_ratio = scale;
