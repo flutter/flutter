@@ -14,6 +14,7 @@ DART_SDK = os.path.join(SRC_ROOT, 'third_party', 'dart-sdk', 'dart-sdk', 'bin')
 
 def main():
     parser = argparse.ArgumentParser(description='Packaging tool for Sky apps')
+    parser.add_argument('--package-root', type=str)
     parser.add_argument('--manifest', type=str)
     parser.add_argument('--asset-base', type=str)
     parser.add_argument('--snapshot', type=str)
@@ -22,6 +23,7 @@ def main():
 
     command = [
         os.path.join(DART_SDK, 'dart'),
+        '--package-root=%s' % args.package_root,
         os.path.join(SKY_TOOLS_DIR, 'skyx', 'bin', 'skyx.dart'),
         '--asset-base', args.asset_base,
         '--snapshot', args.snapshot,

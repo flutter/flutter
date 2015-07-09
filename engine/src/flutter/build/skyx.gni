@@ -2,15 +2,6 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-declare_args() {
-  # Controls whether we build app.skyx bundles in the sky_app template below.
-  # An app.skyx bundle contains all the code an resources needed to run a Sky
-  # app offline. Unfortunately, we don't yet have all the Dart packages we need
-  # to create skyx packages installed on the build bots, so this functionality
-  # is currently disabled. This flag allows for local testing of this feature.
-  enable_skyx = false
-}
-
 package_root = "$root_gen_dir/dart-pkg/packages"
 
 template("skyx") {
@@ -75,6 +66,8 @@ template("skyx") {
 
     script = "//sky/tools/skyx.py"
     args = [
+      "--package-root",
+      rebase_path(package_root, root_build_dir),
       "--asset-base",
       rebase_path(asset_base, root_build_dir),
       "--snapshot",
@@ -93,14 +86,13 @@ template("skyx") {
 
     deps = [
       ":gen_${bundle_prefix}_snapshot",
+      "//third_party/dart-pkg",
     ]
   }
 
   group(target_name) {
-    if (enable_skyx) {
-      deps = [
-        ":gen_${bundle_prefix}_bundle",
-      ]
-    }
+    deps = [
+      ":gen_${bundle_prefix}_bundle",
+    ]
   }
 }

@@ -2,11 +2,16 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-import("//build/config/android/rules.gni")
 import("//sky/build/skyx.gni")
 
 template("sky_app") {
-  skyx("app") {
+  skyx_target_name = target_name
+
+  if (is_android) {
+    skyx_target_name = "app"
+  }
+
+  skyx(skyx_target_name) {
     main_dart = invoker.main_dart
 
     if (defined(invoker.manifest)) {
@@ -18,65 +23,65 @@ template("sky_app") {
     }
   }
 
-  bundle_prefix = target_name
+  if (is_android) {
+    import("//build/config/android/rules.gni")
 
-  copy("copy_${bundle_prefix}_bundle") {
-    sources = [
-      "$target_gen_dir/app.skyx",
-    ]
-    outputs = [
-      "$target_gen_dir/${bundle_prefix}.skyx",
-    ]
+    bundle_prefix = target_name
 
-    deps = [
-      ":app",
-    ]
-  }
+    copy("copy_${bundle_prefix}_bundle") {
+      sources = [
+        "$target_gen_dir/app.skyx",
+      ]
+      outputs = [
+        "$target_gen_dir/${bundle_prefix}.skyx",
+      ]
 
-  copy_ex("assets") {
-    clear_dir = true
-    dest = "$target_gen_dir/assets"
+      deps = [
+        ":app",
+      ]
+    }
 
-    sources = [
-      "$root_build_dir/icudtl.dat",
-    ]
-    deps = [
-      "//third_party/icu",
-    ]
+    copy_ex("assets") {
+      clear_dir = true
+      dest = "$target_gen_dir/assets"
 
-    if (enable_skyx) {
-      sources += [ "$target_gen_dir/app.skyx" ]
-      deps += [ ":copy_${bundle_prefix}_bundle" ]
+      sources = [
+        "$root_build_dir/icudtl.dat",
+        "$target_gen_dir/app.skyx",
+      ]
+      deps = [
+        "//third_party/icu",
+        ":copy_${bundle_prefix}_bundle",
+      ]
 
       if (defined(invoker.bundles)) {
         foreach(bundle, invoker.bundles) {
           bundle_gen_dir = get_label_info(bundle, "target_gen_dir")
           bundle_name = get_label_info(bundle, "name")
-
           sources += [ "$bundle_gen_dir/${bundle_name}.skyx" ]
           deps += [ bundle ]
         }
       }
     }
-  }
 
-  android_apk(target_name) {
-    apk_name = invoker.apk_name
-    android_manifest = "apk/AndroidManifest.xml"
+    android_apk(target_name) {
+      apk_name = invoker.apk_name
+      android_manifest = "apk/AndroidManifest.xml"
 
-    native_libs = [ "libsky_shell.so" ]
-    asset_location = "$target_gen_dir/assets"
+      native_libs = [ "libsky_shell.so" ]
+      asset_location = "$target_gen_dir/assets"
 
-    deps = [
-      "//base:base_java",
-      "//sky/shell:assets",
-      "//sky/shell:java",
-      "//sky/shell:sky_shell",
-      ":assets",
-    ]
+      deps = [
+        "//base:base_java",
+        "//sky/shell:assets",
+        "//sky/shell:java",
+        "//sky/shell:sky_shell",
+        ":assets",
+      ]
 
-    if (defined(invoker.deps)) {
-      deps += invoker.deps
+      if (defined(invoker.deps)) {
+        deps += invoker.deps
+      }
     }
   }
 }
