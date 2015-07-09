@@ -16,6 +16,7 @@ dart_pkg("sky") {
     "lib/animation/generators.dart",
     "lib/animation/mechanics.dart",
     "lib/animation/scroll_behavior.dart",
+    "lib/animation/timeline.dart",
     "lib/assets/.gitignore",
     "lib/assets/material-design-icons.sha1",
     "lib/base/debug.dart",

@@ -2,10 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../animation/animated_value.dart';
 import '../animation/animation_performance.dart';
 import '../painting/box_painter.dart';
-import '../theme/shadows.dart';
 import 'animated_component.dart';
 import 'animated_container.dart';
 import 'basic.dart';
@@ -37,10 +35,10 @@ class Material extends AnimatedComponent {
     _container = new AnimatedContainer()
       ..shadow = new AnimatedType<double>(level.toDouble())
       ..backgroundColor = new AnimatedColor(_getBackgroundColor(color));
-    watch(_container.createPerformance(
-        _container.shadow, duration: _kAnimateShadowDuration).timeline);
-    watch(_container.createPerformance(
-        _container.backgroundColor, duration: _kAnimateColorDuration).timeline);
+    watchPerformance(_container.createPerformance(
+        _container.shadow, duration: _kAnimateShadowDuration));
+    watchPerformance(_container.createPerformance(
+        _container.backgroundColor, duration: _kAnimateColorDuration));
   }
 
   Widget child;

@@ -40,9 +40,9 @@ class DrawerController {
     container = new AnimatedContainer()
       ..position = new AnimatedType<Point>(
           new Point(-_kWidth, 0.0), end: Point.origin, curve: _kAnimationCurve);
-    performance = container.createPerformance(
-        container.position, duration: _kBaseSettleDuration);
-    performance.timeline.onValueChanged.listen(_checkValue);
+    performance = container.createPerformance(container.position,
+                                              duration: _kBaseSettleDuration)
+        ..addListener(_checkValue);
   }
   final DrawerStatusChangeHandler onStatusChange;
 
@@ -52,7 +52,7 @@ class DrawerController {
   double get xPosition => container.position.value.x;
 
   bool _oldClosedState = true;
-  void _checkValue(_) {
+  void _checkValue() {
     var newClosedState = isClosed;
     if (onStatusChange != null && _oldClosedState != newClosedState) {
       onStatusChange(!newClosedState);
@@ -105,7 +105,7 @@ class Drawer extends AnimatedComponent {
     this.children,
     this.level: 0
   }) : super(key: key) {
-    watch(controller.performance.timeline);
+    watchPerformance(controller.performance);
   }
 
   List<Widget> children;

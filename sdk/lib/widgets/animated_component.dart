@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import '../animation/animated_value.dart';
+import '../animation/animation_performance.dart';
 import 'basic.dart';
 
 class _AnimationEntry {
@@ -19,9 +20,10 @@ abstract class AnimatedComponent extends StatefulComponent {
 
   void syncFields(AnimatedComponent source) { }
 
-  List<_AnimationEntry> _animatedFields = new List<_AnimationEntry>();
+  final List<_AnimationEntry> _animatedFields = new List<_AnimationEntry>();
+  final List<AnimationPerformance> _watchedPerformances = new List<AnimationPerformance>();
 
-  watch(AnimatedValue value) {
+  void watch(AnimatedValue value) {
     assert(!mounted);
     // TODO(ianh): we really should assert that we're not doing this
     // in the constructor since doing it there is pointless and
@@ -31,12 +33,22 @@ abstract class AnimatedComponent extends StatefulComponent {
     _animatedFields.add(new _AnimationEntry(value));
   }
 
+  void watchPerformance(AnimationPerformance performance) {
+    assert(!mounted);
+    assert(!_watchedPerformances.contains(performance));
+    _watchedPerformances.add(performance);
+  }
+
   void didMount() {
     for (_AnimationEntry entry in _animatedFields) {
       entry.subscription = entry.value.onValueChanged.listen((_) {
         scheduleBuild();
       });
     }
+
+    for (AnimationPerformance performance in _watchedPerformances)
+      performance.addListener(scheduleBuild);
+
     super.didMount();
   }
 
@@ -46,6 +58,10 @@ abstract class AnimatedComponent extends StatefulComponent {
       entry.subscription.cancel();
       entry.subscription = null;
     }
+
+    for (AnimationPerformance performance in _watchedPerformances)
+      performance.removeListener(scheduleBuild);
+
     super.didUnmount();
   }
 

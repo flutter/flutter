@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'animated_value.dart';
+import 'timeline.dart';
 import 'curves.dart';
 
 // TODO(mpcomplete): merge this stuff with AnimatedValue somehow. We shouldn't
@@ -36,18 +36,18 @@ class AnimatedType<T extends dynamic> extends AnimatedVariable {
 // manipulating |progress|, or |fling| the timeline causing a physics-based
 // simulation to take over the progression.
 class AnimationPerformance {
+  AnimationPerformance() {
+    _timeline = new Timeline(_tick);
+  }
+
   // TODO(mpcomplete): make this a list, or composable somehow.
   AnimatedVariable variable;
-  // Advances from 0 to 1. On each tick, we'll update our variable's values.
-  AnimatedValue timeline = new AnimatedValue(0.0);
   // TODO(mpcomplete): duration should be on a director.
   Duration duration;
 
-  AnimationPerformance() {
-    timeline.onValueChanged.listen((double t) {
-      variable.setFraction(t);
-    });
-  }
+  // Advances from 0 to 1. On each tick, we'll update our variable's values.
+  Timeline _timeline;
+  Timeline get timeline => _timeline;
 
   double get progress => timeline.value;
   void set progress(double t) {
@@ -66,13 +66,6 @@ class AnimationPerformance {
     _animateTo(0.0);
   }
 
-  void _animateTo(double target) {
-    double remainingDistance = (target - timeline.value).abs();
-    timeline.stop();
-    if (remainingDistance != 0.0)
-      timeline.animateTo(target, remainingDistance * duration.inMilliseconds);
-  }
-
   void stop() {
     timeline.stop();
   }
@@ -86,6 +79,34 @@ class AnimationPerformance {
     double duration = distance / velocity.abs();
 
     if (distance > 0.0)
-      timeline.animateTo(target, duration, curve: linear);
+      timeline.animateTo(target, duration: duration);
+  }
+
+  final List<Function> _listeners = new List<Function>();
+
+  void addListener(Function listener) {
+    _listeners.add(listener);
+  }
+
+  void removeListener(Function listener) {
+    _listeners.remove(listener);
+  }
+
+  void _notifyListeners() {
+    List<Function> localListeners = new List<Function>.from(_listeners);
+    for (Function listener in localListeners)
+      listener();
+  }
+
+  void _animateTo(double target) {
+    double remainingDistance = (target - timeline.value).abs();
+    timeline.stop();
+    if (remainingDistance != 0.0)
+      timeline.animateTo(target, duration: remainingDistance * duration.inMilliseconds);
+  }
+
+  void _tick(double t) {
+    variable.setFraction(t);
+    _notifyListeners();
   }
 }

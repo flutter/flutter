@@ -29,8 +29,8 @@ class CardCollectionApp extends App {
   CardCollectionApp() {
     _activeCardAnimation = new AnimationPerformance()
       ..variable = new AnimatedType(0.0, 1.0)
-      ..duration = new Duration(milliseconds: _kCardDismissFadeoutMS);
-    _activeCardAnimation.timeline.onValueChanged.listen(_handleAnimationProgressChanged);
+      ..duration = new Duration(milliseconds: _kCardDismissFadeoutMS)
+      ..addListener(_handleAnimationProgressChanged);
   }
 
   int _activeCardIndex = -1;
@@ -46,7 +46,7 @@ class CardCollectionApp extends App {
     return _activeCardAnimation.progress * _activeCardDragX.sign * _activeCardWidth * _kDismissCardThreshold;
   }
 
-  void _handleAnimationProgressChanged(_) {
+  void _handleAnimationProgressChanged() {
     setState(() {
       if (_activeCardAnimation.isCompleted && !_activeCardDragUnderway)
         _dismissedCardIndices.add(_activeCardIndex);
@@ -101,7 +101,7 @@ class CardCollectionApp extends App {
       if (distance > 0.0) {
         double duration = 150.0 * distance / velocityX.abs();
         _activeCardDragX = velocityX.sign;
-        _activeCardAnimation.timeline.animateTo(1.0, duration);
+        _activeCardAnimation.timeline.animateTo(1.0, duration: duration);
       }
     }
   }
