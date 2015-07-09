@@ -68,7 +68,9 @@ public class SkyApplication extends BaseChromiumApplication {
     }
 
     private void initResources() {
-        mResourceExtractor = new ResourceExtractor(getApplicationContext());
+        Context context = getApplicationContext();
+        new ResourceCleaner(context).start();
+        mResourceExtractor = new ResourceExtractor(context);
         onBeforeResourceExtraction(mResourceExtractor);
         mResourceExtractor.start();
     }
