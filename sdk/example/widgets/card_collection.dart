@@ -34,16 +34,16 @@ class CardCollectionApp extends App {
   }
 
   int _activeCardIndex = -1;
-  double _activeCardAnchorX;
   AnimationPerformance _activeCardAnimation;
   double _activeCardWidth;
+  double _activeCardDragX = 0.0;
   bool _activeCardDragUnderway = false;
   Set<int> _dismissedCardIndices = new Set<int>();
 
   double get _activeCardOpacity => 1.0 - _activeCardAnimation.progress;
 
   double get _activeCardOffset {
-    return _activeCardAnimation.progress * _activeCardWidth * _kDismissCardThreshold;
+    return _activeCardAnimation.progress * _activeCardDragX.sign * _activeCardWidth * _kDismissCardThreshold;
   }
 
   void _handleAnimationProgressChanged(_) {
@@ -61,7 +61,7 @@ class CardCollectionApp extends App {
     setState(() {
       _activeCardIndex = cardIndex;
       _activeCardDragUnderway = true;
-      _activeCardAnchorX = null;
+      _activeCardDragX = 0.0;
       _activeCardAnimation.progress = 0.0;
     });
   }
@@ -70,13 +70,10 @@ class CardCollectionApp extends App {
     if (_activeCardWidth == null || _activeCardIndex < 0)
       return;
 
-    if (_activeCardAnchorX == null)
-      _activeCardAnchorX = event.x - event.dx;
-
+    _activeCardDragX += event.dx;
     setState(() {
-      double eventOffsetX = event.x - _activeCardAnchorX;
       if (!_activeCardAnimation.isAnimating)
-        _activeCardAnimation.progress = eventOffsetX / (_activeCardWidth * _kDismissCardThreshold);
+        _activeCardAnimation.progress = _activeCardDragX.abs() / (_activeCardWidth * _kDismissCardThreshold);
     });
   }
 
@@ -99,8 +96,14 @@ class CardCollectionApp extends App {
 
     _activeCardDragUnderway = false;
     double velocityX = event.velocityX / 1000;
-    if (velocityX.abs() >= _kMinCardFlingVelocity)
-      _activeCardAnimation.fling(velocity: velocityX / _activeCardWidth);
+    if (velocityX.abs() >= _kMinCardFlingVelocity) {
+      double distance = 1.0 - _activeCardAnimation.progress;
+      if (distance > 0.0) {
+        double duration = 150.0 * distance / velocityX.abs();
+        _activeCardDragX = velocityX.sign;
+        _activeCardAnimation.timeline.animateTo(1.0, duration);
+      }
+    }
   }
 
   Widget _buildCard(int index, Color color) {
@@ -110,17 +113,36 @@ class CardCollectionApp extends App {
       color: color
     );
 
-    if (index == _activeCardIndex && _activeCardOffset > 0.0) {
+    // TODO(hansmuller) The code below changes the card's widget tree when
+    // the user starts dragging it. Currently this causes Sky to drop the
+    // rest of the pointer gesture, see https://github.com/domokit/mojo/issues/312.
+    // As a workaround, always create the Transform and Opacity nodes.
+    /*
+    if (index == _activeCardIndex) {
       Matrix4 transform = new Matrix4.identity();
       transform.translate(_activeCardOffset, 0.0);
       card = new Transform(child: card, transform: transform);
       if (_activeCardAnimation != null)
         card = new Opacity(child: card, opacity: _activeCardOpacity);
     }
+    */
+    Matrix4 transform = new Matrix4.identity();
+    double opacity = 1.0;
+    if (index == _activeCardIndex) {
+      transform.translate(_activeCardOffset, 0.0);
+      opacity = _activeCardOpacity;
+    }
+    card = new Transform(
+      child: new Opacity(child: card, opacity: opacity),
+      transform: transform);
 
     return new Listener(
       child: card,
-      onPointerDown: (event) { _handlePointerDown(event, index); }
+      onPointerDown: (event) { _handlePointerDown(event, index); },
+      onPointerMove: _handlePointerMove,
+      onPointerUp: _handlePointerUpOrCancel,
+      onPointerCancel: _handlePointerUpOrCancel,
+      onGestureFlingStart: _handleFlingStart
     );
   }
 
@@ -136,18 +158,10 @@ class CardCollectionApp extends App {
       ));
     }
 
-    Widget collection = new Container(
+    return new Container(
       child: new SizeObserver(child: new Block(items), callback: _handleSizeChanged),
       padding: const EdgeDims.symmetric(vertical: 12.0, horizontal: 8.0),
       decoration: new BoxDecoration(backgroundColor: Theme.of(this).primarySwatch[50])
-    );
-
-    return new Listener(
-      child: collection,
-      onPointerMove: _handlePointerMove,
-      onPointerUp: _handlePointerUpOrCancel,
-      onPointerCancel: _handlePointerUpOrCancel,
-      onGestureFlingStart: _handleFlingStart
     );
   }
 
