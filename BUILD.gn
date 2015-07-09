@@ -14,7 +14,7 @@ group("sky") {
     "//sky/tools/packager($host_toolchain)",
     "//sky/tools/tester",
     "//sky/viewer",
-    ":sky_apk",
+    ":sky_dev",
   ]
 
   if (!is_android) {
@@ -22,7 +22,7 @@ group("sky") {
   }
 }
 
-group("sky_apk") {
+group("sky_dev") {
   testonly = true
 
   deps = [
