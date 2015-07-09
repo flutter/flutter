@@ -46,6 +46,8 @@ abstract class Constraints {
   bool get isTight;
 }
 
+typedef void LayoutCallback(Constraints constraints);
+
 abstract class RenderObject extends AbstractNode implements HitTestTarget {
 
   // LAYOUT
@@ -56,24 +58,21 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   dynamic parentData; // TODO(ianh): change the type of this back to ParentData once the analyzer is cleverer
   void setupParentData(RenderObject child) {
     // override this to setup .parentData correctly for your class
-    assert(!debugDoingLayout);
-    assert(!debugDoingPaint);
+    assert(debugCanPerformMutations);
     if (child.parentData is! ParentData)
       child.parentData = new ParentData();
   }
 
   void adoptChild(RenderObject child) { // only for use by subclasses
     // call this whenever you decide a node is a child
-    assert(!debugDoingLayout);
-    assert(!debugDoingPaint);
+    assert(debugCanPerformMutations);
     assert(child != null);
     setupParentData(child);
     super.adoptChild(child);
     markNeedsLayout();
   }
   void dropChild(RenderObject child) { // only for use by subclasses
-    assert(!debugDoingLayout);
-    assert(!debugDoingPaint);
+    assert(debugCanPerformMutations);
     assert(child != null);
     assert(child.parentData != null);
     child._cleanRelayoutSubtreeRoot();
@@ -82,7 +81,6 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     markNeedsLayout();
   }
 
-  static List<RenderObject> _nodesNeedingLayout = new List<RenderObject>();
   static bool _debugDoingLayout = false;
   static bool get debugDoingLayout => _debugDoingLayout;
   bool _debugDoingThisResize = false;
@@ -91,8 +89,24 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   bool get debugDoingThisLayout => _debugDoingThisLayout;
   static RenderObject _debugActiveLayout = null;
   static RenderObject get debugActiveLayout => _debugActiveLayout;
+  bool _debugDoingThisLayoutWithCallback = false;
+  bool _debugMutationsLocked = false;
   bool _debugCanParentUseSize;
   bool get debugCanParentUseSize => _debugCanParentUseSize;
+  bool get debugCanPerformMutations {
+    RenderObject node = this;
+    while (true) {
+      if (node._debugDoingThisLayoutWithCallback)
+        return true;
+      if (node._debugMutationsLocked)
+        return false;
+      if (node.parent is! RenderObject)
+        return true;
+      node = node.parent;
+    }
+  }
+
+  static List<RenderObject> _nodesNeedingLayout = new List<RenderObject>();
   bool _needsLayout = true;
   bool get needsLayout => _needsLayout;
   RenderObject _relayoutSubtreeRoot;
@@ -114,8 +128,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     return true;
   }
   void markNeedsLayout() {
-    assert(!debugDoingLayout);
-    assert(!debugDoingPaint);
+    assert(debugCanPerformMutations);
     if (_needsLayout) {
       assert(debugAncestorsAlreadyMarkedNeedsLayout());
       return;
@@ -167,14 +180,25 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   void layoutWithoutResize() {
     try {
       assert(_relayoutSubtreeRoot == this);
-      _debugCanParentUseSize = false;
-      _debugDoingThisLayout = true;
-      RenderObject debugPreviousActiveLayout = _debugActiveLayout;
-      _debugActiveLayout = this;
+      RenderObject debugPreviousActiveLayout;
+      assert(!_debugMutationsLocked);
+      assert(!_debugDoingThisLayoutWithCallback);
+      assert(() {
+        _debugMutationsLocked = true;
+        _debugCanParentUseSize = false;
+        _debugDoingThisLayout = true;
+        debugPreviousActiveLayout = _debugActiveLayout;
+        _debugActiveLayout = this;
+        return true;
+      });
       performLayout();
-      _debugActiveLayout = debugPreviousActiveLayout;
-      _debugDoingThisLayout = false;
-      _debugCanParentUseSize = null;
+      assert(() {
+        _debugActiveLayout = debugPreviousActiveLayout;
+        _debugDoingThisLayout = false;
+        _debugCanParentUseSize = null;
+        _debugMutationsLocked = false;
+        return true;
+      });
     } catch (e) {
       print('Exception raised during layout:\n${e}\nContext:\n${this}');
       return;
@@ -194,19 +218,33 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
       return;
     _constraints = constraints;
     _relayoutSubtreeRoot = relayoutSubtreeRoot;
-    _debugCanParentUseSize = parentUsesSize;
+    assert(!_debugMutationsLocked);
+    assert(!_debugDoingThisLayoutWithCallback);
+    assert(() {
+      _debugMutationsLocked = true;
+      _debugCanParentUseSize = parentUsesSize;
+      return true;
+    });
     if (sizedByParent) {
-      _debugDoingThisResize = true;
+      assert(() { _debugDoingThisResize = true; return true; });
       performResize();
-      _debugDoingThisResize = false;
+      assert(() { _debugDoingThisResize = false; return true; });
     }
-    _debugDoingThisLayout = true;
-    RenderObject debugPreviousActiveLayout = _debugActiveLayout;
-    _debugActiveLayout = this;
+    RenderObject debugPreviousActiveLayout;
+    assert(() {
+      _debugDoingThisLayout = true;
+      debugPreviousActiveLayout = _debugActiveLayout;
+      _debugActiveLayout = this;
+      return true;
+    });
     performLayout();
-    _debugActiveLayout = debugPreviousActiveLayout;
-    _debugDoingThisLayout = false;
-    _debugCanParentUseSize = null;
+    assert(() {
+      _debugActiveLayout = debugPreviousActiveLayout;
+      _debugDoingThisLayout = false;
+      _debugCanParentUseSize = null;
+      _debugMutationsLocked = false;
+      return true;
+    });
     assert(debugDoesMeetConstraints());
     _needsLayout = false;
     markNeedsPaint();
@@ -226,6 +264,20 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     // When calling layout() on your children, pass in
     // "parentUsesSize: true" if your size or layout is dependent on
     // your child's size or intrinsic dimensions.
+  void invokeLayoutCallback(LayoutCallback callback) {
+    assert(_debugMutationsLocked);
+    assert(_debugDoingThisLayout);
+    assert(!_debugDoingThisLayoutWithCallback);
+    assert(() {
+      _debugDoingThisLayoutWithCallback = true;
+      return true;
+    });
+    callback(constraints);
+    assert(() {
+      _debugDoingThisLayoutWithCallback = false;
+      return true;
+    });
+  }
 
   // when the parent has rotated (e.g. when the screen has been turned
   // 90 degrees), immediately prior to layout() being called for the
@@ -535,7 +587,6 @@ abstract class ContainerRenderObjectMixin<ChildType extends RenderObject, Parent
     assert(child.parentData is ParentDataType);
     assert(_debugUltimatePreviousSiblingOf(child, equals: _firstChild));
     assert(_debugUltimateNextSiblingOf(child, equals: _lastChild));
-    _childCount -= 1;
     assert(_childCount >= 0);
     if (child.parentData.previousSibling == null) {
       assert(_firstChild == child);
@@ -553,10 +604,25 @@ abstract class ContainerRenderObjectMixin<ChildType extends RenderObject, Parent
     }
     child.parentData.previousSibling = null;
     child.parentData.nextSibling = null;
+    _childCount -= 1;
   }
   void remove(ChildType child) {
     _removeFromChildList(child);
     dropChild(child);
+  }
+  void removeAll() {
+    ChildType child = _firstChild;
+    while (child != null) {
+      assert(child.parentData is ParentDataType);
+      ChildType next = child.parentData.nextSibling;
+      child.parentData.previousSibling = null;
+      child.parentData.nextSibling = null;
+      dropChild(child);
+      child = next;
+    }
+    _firstChild = null;
+    _lastChild = null;
+    _childCount = 0;
   }
   void move(ChildType child, { ChildType before }) {
     assert(child != this);

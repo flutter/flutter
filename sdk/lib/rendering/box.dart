@@ -420,7 +420,6 @@ abstract class RenderBox extends RenderObject {
     return _size;
   }
   void set size(Size value) {
-    assert(RenderObject.debugDoingLayout);
     assert((sizedByParent && debugDoingThisResize) ||
            (!sizedByParent && debugDoingThisLayout));
     if (value is _DebugSize) {
