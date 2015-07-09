@@ -92,7 +92,8 @@ dart_pkg("sky") {
 
   # List of mojom targets that the sky pkg exports
   deps = [
-    "//sky/services/engine",
+    "//sky/services/engine:interfaces",
+    "//sky/services/activity:interfaces",
   ]
 
   datadeps = [
@@ -100,7 +101,8 @@ dart_pkg("sky") {
     "//mojo/dart/mojom",
     "//mojo/public/dart:mojo",
     "//sky/engine/bindings",
-    "//sky/services/testing",
+    "//sky/services/testing:interfaces",
+    "//sky/services/media:interfaces",
     "//third_party/dart-pkg",
   ]
 

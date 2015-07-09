@@ -2,36 +2,42 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-import("//build/config/android/config.gni")
-import("//build/config/android/rules.gni")
 import("//mojo/public/tools/bindings/mojom.gni")
 
 group("media") {
   testonly = true
 
   deps = [
-    ":media_lib",
     ":interfaces",
   ]
-}
 
-android_library("media_lib") {
-  java_files = [
-    "src/org/domokit/media/MediaPlayerImpl.java",
-    "src/org/domokit/media/MediaServiceImpl.java",
-  ]
-
-  deps = [
-    "//base:base_java",
-    "//mojo/java",
-    "//mojo/public/java:bindings",
-    "//mojo/public/java:system",
-    ":interfaces_java",
-  ]
+  if (is_android) {
+    deps += [ ":media_lib" ]
+  }
 }
 
 mojom("interfaces") {
   sources = [
     "media.mojom",
   ]
+}
+
+if (is_android) {
+  import("//build/config/android/config.gni")
+  import("//build/config/android/rules.gni")
+
+  android_library("media_lib") {
+    java_files = [
+      "src/org/domokit/media/MediaPlayerImpl.java",
+      "src/org/domokit/media/MediaServiceImpl.java",
+    ]
+
+    deps = [
+      "//base:base_java",
+      "//mojo/java",
+      "//mojo/public/java:bindings",
+      "//mojo/public/java:system",
+      ":interfaces_java",
+    ]
+  }
 }

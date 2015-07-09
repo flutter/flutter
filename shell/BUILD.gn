@@ -19,7 +19,7 @@ common_deps = [
   "//sky/engine",
   "//sky/engine/tonic",
   "//sky/engine/wtf",
-  "//sky/services/engine",
+  "//sky/services/engine:interfaces",
   "//sky/services/platform",
   "//sky/shell/dart",
   "//ui/gfx/geometry",
@@ -120,7 +120,7 @@ if (is_android) {
       "//services/keyboard",
       "//sky/services/activity:activity_lib",
       "//sky/services/activity:interfaces_java",
-      "//sky/services/engine:engine_java",
+      "//sky/services/engine:interfaces_java",
       "//sky/services/oknet",
     ]
   }
@@ -191,7 +191,7 @@ if (is_android) {
 
     deps = common_deps + [
              ":common",
-             "//sky/services/testing",
+             "//sky/services/testing:interfaces",
            ]
   }
 } else {

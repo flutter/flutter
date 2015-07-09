@@ -2,11 +2,12 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-assert(is_android)
-
 import("//sky/build/sky_app.gni")
 
 sky_app("mine_digger") {
-  apk_name = "MineDigger"
   main_dart = "lib/main.dart"
+
+  if (is_android) {
+    apk_name = "MineDigger"
+  }
 }

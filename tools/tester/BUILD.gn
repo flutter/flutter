@@ -26,6 +26,6 @@ mojo_native_application("tester") {
     "//mojo/services/input_events/public/interfaces",
     "//mojo/services/view_manager/public/cpp",
     "//services/window_manager:lib",
-    "//sky/services/testing",
+    "//sky/services/testing:interfaces",
   ]
 }

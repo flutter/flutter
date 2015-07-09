@@ -5,15 +5,11 @@
 group("example") {
   testonly = true
 
-  deps = []
-
-  if (is_android) {
-    deps += [
-      "//sky/sdk/example/demo_launcher",
-      "//sky/sdk/example/mine_digger",
-      "//sky/sdk/example/rendering",
-      "//sky/sdk/example/stocks",
-      "//sky/sdk/example/widgets",
-    ]
-  }
+  deps = [
+    "//sky/sdk/example/rendering",
+    "//sky/sdk/example/demo_launcher",
+    "//sky/sdk/example/mine_digger",
+    "//sky/sdk/example/stocks",
+    "//sky/sdk/example/widgets",
+  ]
 }

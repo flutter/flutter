@@ -16,6 +16,12 @@ group("activity") {
   }
 }
 
+mojom("interfaces") {
+  sources = [
+    "activity.mojom",
+  ]
+}
+
 if (is_android) {
   import("//build/config/android/config.gni")
   import("//build/config/android/rules.gni")
@@ -30,10 +36,4 @@ if (is_android) {
       ":interfaces_java",
     ]
   }
-}
-
-mojom("interfaces") {
-  sources = [
-    "activity.mojom",
-  ]
 }
