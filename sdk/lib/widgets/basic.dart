@@ -584,7 +584,7 @@ class WidgetToRenderBoxAdapter extends LeafRenderObjectWrapper {
   }
 
   void remove() {
-    RenderObjectWrapper ancestor = findAncestor(RenderObjectWrapper);
+    RenderObjectWrapper ancestor = findAncestorRenderObjectWrapper();
     assert(ancestor is RenderObjectWrapper);
     ancestor.detachChildRoot(this);
     super.remove();

@@ -4,7 +4,6 @@
 
 import 'dart:async';
 import 'dart:collection';
-import 'dart:mirrors';
 import 'dart:sky' as sky;
 
 import 'package:sky/mojo/activity.dart' as activity;
@@ -132,9 +131,9 @@ abstract class Widget {
   // where to put this descendant. If you just defer to a child, then make sure
   // to pass them the slot.
 
-  Widget findAncestor(Type targetType) {
+  Widget findAncestorRenderObjectWrapper() {
     var ancestor = _parent;
-    while (ancestor != null && !reflectClass(ancestor.runtimeType).isSubtypeOf(reflectClass(targetType)))
+    while (ancestor != null && ancestor is! RenderObjectWrapper)
       ancestor = ancestor._parent;
     return ancestor;
   }
@@ -664,7 +663,7 @@ abstract class RenderObjectWrapper extends Widget {
     assert(parent != null || this is RenderViewWrapper);
     if (old == null) {
       _root = createNode();
-      _ancestor = findAncestor(RenderObjectWrapper);
+      _ancestor = findAncestorRenderObjectWrapper();
       if (_ancestor is RenderObjectWrapper)
         _ancestor.insertChildRoot(this, slot);
     } else {
