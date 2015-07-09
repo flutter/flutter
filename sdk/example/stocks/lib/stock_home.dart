@@ -3,6 +3,9 @@
 // found in the LICENSE file.
 
 import 'package:sky/editing/input.dart';
+import 'package:sky/animation/animation_performance.dart';
+import 'package:sky/widgets/animated_component.dart';
+import 'package:sky/widgets/animated_container.dart';
 import 'package:sky/widgets/basic.dart';
 import 'package:sky/widgets/drawer.dart';
 import 'package:sky/widgets/drawer_header.dart';
@@ -29,7 +32,9 @@ import 'stock_types.dart';
 
 typedef void ModeUpdater(StockMode mode);
 
-class StockHome extends StatefulComponent {
+const Duration _kSnackbarSlideDuration = const Duration(milliseconds: 200);
+
+class StockHome extends AnimatedComponent {
 
   StockHome(this.navigator, this.stocks, this.stockMode, this.modeUpdater) {
     // if (debug)
@@ -52,7 +57,7 @@ class StockHome extends StatefulComponent {
   bool _isSearching = false;
   String _searchQuery;
 
-  bool _isShowingSnackBar = false;
+  AnimatedContainer _snackbarTransform;
 
   void _handleSearchBegin() {
     setState(() {
@@ -248,30 +253,39 @@ class StockHome extends StatefulComponent {
 
   void _handleUndo() {
     setState(() {
-      _isShowingSnackBar = false;
+      _snackbarTransform = null;
     });
   }
 
   Widget buildSnackBar() {
-    if (!_isShowingSnackBar)
+    if (_snackbarTransform == null)
       return null;
-    return new SnackBar(
-      content: new Text("Stock purchased!"),
-      actions: [new SnackBarAction(label: "UNDO", onPressed: _handleUndo)]
-    );
+    return _snackbarTransform.build(
+      new SnackBar(
+        content: new Text("Stock purchased!"),
+        actions: [new SnackBarAction(label: "UNDO", onPressed: _handleUndo)]
+      ));
   }
 
   void _handleStockPurchased() {
     setState(() {
-      _isShowingSnackBar = true;
+      _snackbarTransform = new AnimatedContainer()
+        ..position = new AnimatedType<Point>(const Point(0.0, 45.0), end: Point.origin);
+      var performance = _snackbarTransform.createPerformance(
+          _snackbarTransform.position, duration: _kSnackbarSlideDuration);
+      watchPerformance(performance);
+      performance.play();
     });
   }
 
   Widget buildFloatingActionButton() {
-    return new FloatingActionButton(
+    var widget = new FloatingActionButton(
       child: new Icon(type: 'content/add_white', size: 24),
       onPressed: _handleStockPurchased
     );
+    if (_snackbarTransform != null)
+      widget = _snackbarTransform.build(widget);
+    return widget;
   }
 
   void addMenuToOverlays(List<Widget> overlays) {

@@ -24,19 +24,20 @@ abstract class AnimatedComponent extends StatefulComponent {
   final List<AnimationPerformance> _watchedPerformances = new List<AnimationPerformance>();
 
   void watch(AnimatedValue value) {
-    assert(!mounted);
     // TODO(ianh): we really should assert that we're not doing this
     // in the constructor since doing it there is pointless and
     // expensive, since we'll be doing it for every copy of the object
     // even though only the first one will use it (since we're
     // stateful, the others will all be discarded early).
+    assert(!mounted);
     _animatedFields.add(new _AnimationEntry(value));
   }
 
   void watchPerformance(AnimationPerformance performance) {
-    assert(!mounted);
     assert(!_watchedPerformances.contains(performance));
     _watchedPerformances.add(performance);
+    if (mounted)
+      performance.addListener(scheduleBuild);
   }
 
   void didMount() {
