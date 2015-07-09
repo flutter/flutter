@@ -17,6 +17,7 @@ class Offset extends OffsetBase {
   static const Offset infinite = const Offset(double.INFINITY, double.INFINITY);
 
   Offset scale(double scaleX, double scaleY) => new Offset(dx * scaleX, dy * scaleY);
+  Offset translate(double translateX, double translateY) => new Offset(dx + translateX, dy + translateY);
 
   Offset operator -() => new Offset(-dx, -dy);
   Offset operator -(Offset other) => new Offset(dx - other.dx, dy - other.dy);
