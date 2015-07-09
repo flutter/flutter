@@ -13,11 +13,12 @@ extern const uint8_t* kDartVmIsolateSnapshotBuffer;
 extern const uint8_t* kDartIsolateSnapshotBuffer;
 }
 
-void InitDartVM() {
-  int argc = 0;
-  const char** argv = nullptr;
+static const char* kDartArgs[] = {
+    "--enable_mirrors=false",
+};
 
-  CHECK(Dart_SetVMFlags(argc, argv));
+void InitDartVM() {
+  CHECK(Dart_SetVMFlags(arraysize(kDartArgs), kDartArgs));
   CHECK(Dart_Initialize(blink::kDartVmIsolateSnapshotBuffer, nullptr, nullptr,
                         nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
                         nullptr));

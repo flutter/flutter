@@ -228,7 +228,7 @@ class RenderTabBar extends RenderBox with
 
   void paint(PaintingCanvas canvas, Offset offset) {
     if (backgroundColor != null) {
-      double width = layoutWidths != null 
+      double width = layoutWidths != null
         ? layoutWidths.reduce((sum, width) => sum + width)
         : size.width;
       Rect rect = offset & new Size(width, size.height);
@@ -256,13 +256,13 @@ class TabBarWrapper extends MultiChildRenderObjectWrapper {
     this.textAndIcons,
     this.scrollable: false,
     this.onLayoutChanged,
-    String key 
+    String key
   }) : super(key: key, children: children);
 
   final int selectedIndex;
   final Color backgroundColor;
   final Color indicatorColor;
-  final bool textAndIcons; 
+  final bool textAndIcons;
   final bool scrollable;
   final LayoutChanged onLayoutChanged;
 
@@ -324,7 +324,7 @@ class Tab extends Component {
             margin: const EdgeDims.only(bottom: 10.0)
           ),
           _buildLabelText()
-        ], 
+        ],
         justifyContent: FlexJustifyContent.center,
         alignItems: FlexAlignItems.center,
         direction: FlexDirection.vertical
@@ -332,7 +332,7 @@ class Tab extends Component {
     }
 
     Widget highlightedLabel = new Opacity(
-      child: labelContents, 
+      child: labelContents,
       opacity: selected ? 1.0 : 0.7
     );
 
@@ -441,7 +441,7 @@ class TabBar extends Scrollable {
     }
 
     TabBarWrapper tabBarWrapper = new TabBarWrapper(
-      children: tabs, 
+      children: tabs,
       selectedIndex: selectedIndex,
       backgroundColor: backgroundColor,
       indicatorColor: indicatorColor,
