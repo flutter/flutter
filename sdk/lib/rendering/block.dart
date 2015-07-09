@@ -26,10 +26,6 @@ abstract class RenderBlockBase extends RenderBox with ContainerRenderObjectMixin
       child.parentData = new BlockParentData();
   }
 
-  double computeDistanceToActualBaseline(TextBaseline baseline) {
-    return defaultComputeDistanceToFirstActualBaseline(baseline);
-  }
-
   double _childrenHeight;
   double get childrenHeight => _childrenHeight;
 
@@ -52,14 +48,6 @@ abstract class RenderBlockBase extends RenderBox with ContainerRenderObjectMixin
       child = child.parentData.nextSibling;
     }
     _childrenHeight = y;
-  }
-
-  void hitTestChildren(HitTestResult result, { Point position }) {
-    defaultHitTestChildren(result, position: position);
-  }
-
-  void paint(PaintingCanvas canvas, Offset offset) {
-    defaultPaint(canvas, offset);
   }
 
 }
@@ -117,6 +105,10 @@ class RenderBlock extends RenderBlockBase {
     return _getIntrinsicHeight(constraints);
   }
 
+  double computeDistanceToActualBaseline(TextBaseline baseline) {
+    return defaultComputeDistanceToFirstActualBaseline(baseline);
+  }
+
   bool _hasVisualOverflow = false;
 
   void performLayout() {
@@ -136,10 +128,14 @@ class RenderBlock extends RenderBlockBase {
       canvas.save();
       canvas.clipRect(offset & size);
     }
-    super.paint(canvas, offset);
+    defaultPaint(canvas, offset);
     if (_hasVisualOverflow) {
       canvas.restore();
     }
+  }
+
+  void hitTestChildren(HitTestResult result, { Point position }) {
+    defaultHitTestChildren(result, position: position);
   }
 
 }
@@ -175,7 +171,7 @@ class RenderBlockViewport extends RenderBlockBase {
       return;
     _startOffset = value;
     if (!_inCallback)
-      markNeedsLayout();
+      markNeedsPaint();
   }
 
   double getMinIntrinsicWidth(BoxConstraints constraints) {
@@ -193,6 +189,11 @@ class RenderBlockViewport extends RenderBlockBase {
   double getMaxIntrinsicHeight(BoxConstraints constraints) {
     return constraints.constrainHeight();
   }
+
+  // We don't override computeDistanceToActualBaseline(), because we
+  // want the default behaviour (returning null). Otherwise, as you
+  // scroll the RenderBlockViewport, it would shift in its parent if
+  // the parent was baseline-aligned, which makes no sense.
 
   bool get sizedByParent => true;
 
@@ -217,8 +218,12 @@ class RenderBlockViewport extends RenderBlockBase {
   void paint(PaintingCanvas canvas, Offset offset) {
     canvas.save();
     canvas.clipRect(offset & size);
-    super.paint(canvas, offset.translate(0.0, _startOffset));
+    defaultPaint(canvas, offset.translate(0.0, startOffset));
     canvas.restore();
+  }
+
+  void hitTestChildren(HitTestResult result, { Point position }) {
+    defaultHitTestChildren(result, position: position + new Offset(0.0, -startOffset));
   }
 
 }
