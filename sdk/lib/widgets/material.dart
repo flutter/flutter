@@ -34,7 +34,7 @@ class Material extends AnimatedComponent {
     if (level == null) level = 0;
     _container = new AnimatedContainer()
       ..shadow = new AnimatedType<double>(level.toDouble())
-      ..backgroundColor = new AnimatedColor(_getBackgroundColor(type, color))
+      ..backgroundColor = _getBackgroundColor(type, color)
       ..borderRadius = edges[type]
       ..shape = type == MaterialType.circle ? Shape.circle : Shape.rectangle;
     watchPerformance(_container.createPerformance(
@@ -53,17 +53,14 @@ class Material extends AnimatedComponent {
     super.syncFields(source);
   }
 
-  Color _getBackgroundColor(MaterialType type, Color color) {
-    if (color != null)
-      return color;
-    switch (type) {
-      case MaterialType.canvas:
-        return Theme.of(this).canvasColor;
-      case MaterialType.card:
-        return Theme.of(this).cardColor;
-      default:
-        return null;
+  AnimatedColor _getBackgroundColor(MaterialType type, Color color) {
+    if (color == null) {
+      switch (type) {
+        case MaterialType.canvas: color = Theme.of(this).canvasColor; break;
+        case MaterialType.card: color = Theme.of(this).cardColor; break;
+      }
     }
+    return color == null ? null : new AnimatedColor(color);
   }
 
   Widget build() {
