@@ -13,16 +13,18 @@ abstract class AnimatedVariable {
 
 class AnimatedType<T extends dynamic> extends AnimatedVariable {
   T value;
-  final T begin, end;
+  T begin, end;
   final Curve curve;
 
-  AnimatedType(this.begin, this.end, {this.curve: linear}) {
+  AnimatedType(this.begin, {this.end, this.curve: linear}) {
     value = begin;
   }
 
   void setFraction(double t) {
-    // TODO(mpcomplete): Reverse the timeline and curve.
-    value = begin + (end - begin) * curve.transform(t);
+    if (end != null) {
+      // TODO(mpcomplete): Reverse the timeline and curve.
+      value = begin + (end - begin) * curve.transform(t);
+    }
   }
 }
 

@@ -3,9 +3,11 @@
 // found in the LICENSE file.
 
 import '../animation/animated_value.dart';
+import '../animation/animation_performance.dart';
 import '../painting/box_painter.dart';
 import '../theme/shadows.dart';
 import 'animated_component.dart';
+import 'animated_container.dart';
 import 'basic.dart';
 import 'default_text_style.dart';
 import 'theme.dart';
@@ -19,21 +21,8 @@ const Map<MaterialType, double> edges = const {
   MaterialType.button: 2.0,
 };
 
-const double _kAnimateShadowDurationMS = 100.0;
-
-List<BoxShadow> _computeShadow(double level) {
-  if (level < 1.0)  // shadows[1] is the first shadow
-    return null;
-
-  int level1 = level.floor();
-  int level2 = level.ceil();
-  double t = level - level1.toDouble();
-
-  List<BoxShadow> shadow = new List<BoxShadow>();
-  for (int i = 0; i < shadows[level1].length; ++i)
-    shadow.add(lerpBoxShadow(shadows[level1][i], shadows[level2][i], t));
-  return shadow;
-}
+const Duration _kAnimateShadowDuration = const Duration(milliseconds: 100);
+const Duration _kAnimateColorDuration = const Duration(milliseconds: 100);
 
 class Material extends AnimatedComponent {
 
@@ -42,29 +31,31 @@ class Material extends AnimatedComponent {
     this.child,
     this.type: MaterialType.card,
     int level: 0,
-    this.color
+    Color color: null
   }) : super(key: key) {
-    this.level = new AnimatedValue(level == null ? 0.0 : level.toDouble());
-    watch(this.level);
+    if (level == null) level = 0;
+    _container = new AnimatedContainer()
+      ..shadow = new AnimatedType<double>(level.toDouble())
+      ..backgroundColor = new AnimatedColor(_getBackgroundColor(color));
+    watch(_container.createPerformance(
+        _container.shadow, duration: _kAnimateShadowDuration).timeline);
+    watch(_container.createPerformance(
+        _container.backgroundColor, duration: _kAnimateColorDuration).timeline);
   }
 
   Widget child;
   MaterialType type;
-  AnimatedValue level;
-  Color color;
+
+  AnimatedContainer _container;
 
   void syncFields(Material source) {
     child = source.child;
     type = source.type;
-    // TODO(mpcomplete): duration is wrong, because the current level may be
-    // anything. We really want |rate|.
-    if (level.value != source.level.value)
-      level.animateTo(source.level.value.toDouble(), _kAnimateShadowDurationMS);
-    color = source.color;
+    _container.syncFields(source._container);
     super.syncFields(source);
   }
 
-  Color get backgroundColor {
+  Color _getBackgroundColor(Color color) {
     if (color != null)
       return color;
     switch(type) {
@@ -72,23 +63,22 @@ class Material extends AnimatedComponent {
         return Theme.of(this).canvasColor;
       case MaterialType.card:
         return Theme.of(this).cardColor;
-      default: 
+      default:
         return null;
     }
   }
 
-  // TODO(mpcomplete): make this animate color changes.
-
   Widget build() {
-    return new Container(
-      decoration: new BoxDecoration(
-        boxShadow: _computeShadow(level.value),
-        borderRadius: edges[type],
-        backgroundColor: backgroundColor,
-        shape: type == MaterialType.circle ? Shape.circle : Shape.rectangle
-      ),
-      child: new DefaultTextStyle(style: Theme.of(this).text.body1, child: child)
-    );
+    return _container.build(
+      new Container(
+        // TODO(mpcomplete): move the rest of this decoration into
+        // AnimatedContainer as non-animated values.
+        decoration: new BoxDecoration(
+          borderRadius: edges[type],
+          shape: type == MaterialType.circle ? Shape.circle : Shape.rectangle
+        ),
+        child: new DefaultTextStyle(style: Theme.of(this).text.body1, child: child)
+    ));
   }
 
 }

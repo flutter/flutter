@@ -8,6 +8,7 @@ import '../animation/animation_performance.dart';
 import '../animation/curves.dart';
 import '../theme/shadows.dart';
 import 'animated_component.dart';
+import 'animated_container.dart';
 import 'basic.dart';
 import 'theme.dart';
 
@@ -26,7 +27,7 @@ import 'theme.dart';
 
 const double _kWidth = 304.0;
 const double _kMinFlingVelocity = 0.4;
-const int _kBaseSettleDurationMS = 246;
+const Duration _kBaseSettleDuration = const Duration(milliseconds: 246);
 // TODO(mpcomplete): The curve must be linear if we want the drawer to track
 // the user's finger. Odeon remedies this by attaching spring forces to the
 // initial timeline when animating (so it doesn't look linear).
@@ -36,16 +37,19 @@ typedef void DrawerStatusChangeHandler (bool showing);
 
 class DrawerController {
   DrawerController(this.onStatusChange) {
-    performance = new AnimationPerformance()
-      ..duration = new Duration(milliseconds: _kBaseSettleDurationMS)
-      ..variable = position;
+    container = new AnimatedContainer()
+      ..position = new AnimatedType<Point>(
+          new Point(-_kWidth, 0.0), end: Point.origin, curve: _kAnimationCurve);
+    performance = container.createPerformance(
+        container.position, duration: _kBaseSettleDuration);
     performance.timeline.onValueChanged.listen(_checkValue);
   }
   final DrawerStatusChangeHandler onStatusChange;
 
   AnimationPerformance performance;
-  final AnimatedPosition position = new AnimatedPosition(
-      new Point(-_kWidth, 0.0), Point.origin, curve: _kAnimationCurve);
+  AnimatedContainer container;
+
+  double get xPosition => container.position.value.x;
 
   bool _oldClosedState = true;
   void _checkValue(_) {
@@ -57,7 +61,7 @@ class DrawerController {
   }
 
   bool get isClosed => performance.isDismissed;
-  bool get _isMostlyClosed => position.value.x <= -_kWidth/2;
+  bool get _isMostlyClosed => xPosition <= -_kWidth/2;
 
   void open() => performance.play();
 
@@ -128,7 +132,7 @@ class Drawer extends AnimatedComponent {
       onGestureTap: controller.handleMaskTap
     );
 
-    Widget content = controller.position.build(
+    Widget content = controller.container.build(
       new Container(
         decoration: new BoxDecoration(
           backgroundColor: Theme.of(this).canvasColor,
