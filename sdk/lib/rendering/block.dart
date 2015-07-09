@@ -15,8 +15,6 @@ abstract class RenderBlockBase extends RenderBox with ContainerRenderObjectMixin
   // lays out RenderBox children in a vertical stack
   // uses the maximum width provided by the parent
 
-  bool _hasVisualOverflow = false;
-
   RenderBlockBase({
     List<RenderBox> children
   }) {
@@ -123,15 +121,18 @@ class RenderBlock extends RenderBlockBase {
 
   RenderBlock({ List<RenderBox> children }) : super(children: children);
 
+  bool _hasVisualOverflow = false;
+
   void performLayout() {
     super.performLayout();
+    size = constraints.constrain(new Size(constraints.maxWidth, childrenHeight));
+    assert(!size.isInfinite);
+
     // FIXME(eseidel): Block lays out its children with unconstrained height
     // yet itself remains constrained. Remember that our children wanted to
     // be taller than we are so we know to clip them (and not cause confusing
     // mismatch of painting vs. hittesting).
     _hasVisualOverflow = childrenHeight > size.height;
-    size = constraints.constrain(new Size(constraints.maxWidth, childrenHeight));
-    assert(!size.isInfinite);
   }
 
   void paint(PaintingCanvas canvas, Offset offset) {
@@ -146,4 +147,3 @@ class RenderBlock extends RenderBlockBase {
   }
 
 }
-
