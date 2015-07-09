@@ -147,3 +147,67 @@ class RenderBlock extends RenderBlockBase {
   }
 
 }
+
+class RenderBlockViewport extends RenderBlockBase {
+
+  // sizes itself to the given constraints
+  // at the start of layout, calls callback
+
+  RenderBlockViewport({
+    LayoutCallback callback,
+    List<RenderBox> children,
+    double startOffset: 0.0
+  }) : _callback = callback, _startOffset = startOffset, super(children: children);
+
+  bool _inCallback = false;
+
+  LayoutCallback _callback;
+  LayoutCallback get callback => _callback;
+  void set callback(LayoutCallback value) {
+    assert(!_inCallback);
+    if (value == _callback)
+      return;
+    _callback = value;
+    markNeedsLayout();
+  }
+
+  // you can set this from within the callback if necessary
+  double _startOffset;
+  double get startOffset => _startOffset;
+  void set startOffset(double value) {
+    if (value == _startOffset)
+      return;
+    _startOffset = value;
+    if (!_inCallback)
+      markNeedsLayout();
+  }
+
+  bool get sizedByParent => true;
+
+  void performResize() {
+    size = constraints.biggest;
+    assert(!size.isInfinite);
+  }
+
+  bool get debugDoesLayoutWithCallback => true;
+  void performLayout() {
+    if (_callback != null) {
+      try {
+        _inCallback = true;
+        invokeLayoutCallback(_callback);
+      } finally {
+        _inCallback = false;
+      }
+    }
+    super.performLayout();
+  }
+
+  void paint(PaintingCanvas canvas, Offset offset) {
+    canvas.save();
+    canvas.clipRect(offset & size);
+    super.paint(canvas, offset.translate(0.0, _startOffset));
+    canvas.restore();
+  }
+
+}
+

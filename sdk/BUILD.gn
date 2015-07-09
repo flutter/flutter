@@ -53,6 +53,7 @@ dart_pkg("sky") {
     "lib/theme/view_configuration.dart",
     "lib/widgets/animated_component.dart",
     "lib/widgets/basic.dart",
+    "lib/widgets/block_viewport.dart",
     "lib/widgets/button_base.dart",
     "lib/widgets/card.dart",
     "lib/widgets/checkbox.dart",
