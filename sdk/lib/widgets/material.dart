@@ -27,14 +27,16 @@ class Material extends AnimatedComponent {
   Material({
     String key,
     this.child,
-    this.type: MaterialType.card,
+    MaterialType type: MaterialType.card,
     int level: 0,
     Color color: null
   }) : super(key: key) {
     if (level == null) level = 0;
     _container = new AnimatedContainer()
       ..shadow = new AnimatedType<double>(level.toDouble())
-      ..backgroundColor = new AnimatedColor(_getBackgroundColor(color));
+      ..backgroundColor = new AnimatedColor(_getBackgroundColor(type, color))
+      ..borderRadius = edges[type]
+      ..shape = type == MaterialType.circle ? Shape.circle : Shape.rectangle;
     watchPerformance(_container.createPerformance(
         _container.shadow, duration: _kAnimateShadowDuration));
     watchPerformance(_container.createPerformance(
@@ -42,21 +44,19 @@ class Material extends AnimatedComponent {
   }
 
   Widget child;
-  MaterialType type;
 
   AnimatedContainer _container;
 
   void syncFields(Material source) {
     child = source.child;
-    type = source.type;
     _container.syncFields(source._container);
     super.syncFields(source);
   }
 
-  Color _getBackgroundColor(Color color) {
+  Color _getBackgroundColor(MaterialType type, Color color) {
     if (color != null)
       return color;
-    switch(type) {
+    switch (type) {
       case MaterialType.canvas:
         return Theme.of(this).canvasColor;
       case MaterialType.card:
@@ -68,15 +68,8 @@ class Material extends AnimatedComponent {
 
   Widget build() {
     return _container.build(
-      new Container(
-        // TODO(mpcomplete): move the rest of this decoration into
-        // AnimatedContainer as non-animated values.
-        decoration: new BoxDecoration(
-          borderRadius: edges[type],
-          shape: type == MaterialType.circle ? Shape.circle : Shape.rectangle
-        ),
-        child: new DefaultTextStyle(style: Theme.of(this).text.body1, child: child)
-    ));
+        new DefaultTextStyle(style: Theme.of(this).text.body1, child: child)
+    );
   }
 
 }

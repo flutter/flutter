@@ -19,6 +19,10 @@ class AnimatedContainer {
   AnimatedType<double> shadow;
   AnimatedColor backgroundColor;
 
+  // These don't animate, but are used to build the Container anyway.
+  double borderRadius;
+  Shape shape;
+
   Map<AnimatedVariable, AnimationPerformance> _variableToPerformance =
       new Map<AnimatedVariable, AnimationPerformance>();
 
@@ -35,9 +39,12 @@ class AnimatedContainer {
 
   Widget build(Widget child) {
     Widget current = child;
-    if (shadow != null || backgroundColor != null) {
+    if (shadow != null || backgroundColor != null ||
+        borderRadius != null || shape != null) {
       current = new DecoratedBox(
         decoration: new BoxDecoration(
+          borderRadius: borderRadius,
+          shape: shape,
           boxShadow: shadow != null ? _computeShadow(shadow.value) : null,
           backgroundColor: backgroundColor != null ? backgroundColor.value : null),
         child: current);
@@ -56,6 +63,9 @@ class AnimatedContainer {
     _syncField(position, source.position);
     _syncField(shadow, source.shadow);
     _syncField(backgroundColor, source.backgroundColor);
+
+    borderRadius = source.borderRadius;
+    shape = source.shape;
   }
 
   void _syncField(AnimatedType variable, AnimatedType sourceVariable) {
