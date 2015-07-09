@@ -4,7 +4,7 @@
 
 library newton;
 
-import 'dart:math' as Math;
+import 'dart:math' as math;
 
 part 'src/simulation.dart';
 part 'src/simulation_group.dart';

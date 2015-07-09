@@ -4,7 +4,7 @@
 
 part of newton;
 
-class SpringDesc {
+class SpringDescription {
   /// The mass of the spring (m)
   final double mass;
 
@@ -16,16 +16,24 @@ class SpringDesc {
   ///       constructor provided for this purpose
   final double damping;
 
-  SpringDesc(this.mass, this.springConstant, this.damping);
+  SpringDescription({double mass, double springConstant, double damping})
+      : mass = mass,
+        springConstant = springConstant,
+        damping = damping {
+    assert(mass != null);
+    assert(springConstant != null);
+    assert(damping != null);
+  }
 
   /// Create a spring given the mass, spring constant and the damping ratio. The
   /// damping ratio is especially useful trying to determing the type of spring
   /// to create. A ratio of 1.0 creates a critically damped spring, > 1.0
   /// creates an overdamped spring and < 1.0 an underdamped one.
-  SpringDesc.withDampingRatio(double mass, double springConstant, double zeta)
-      : this.mass = mass,
-        this.springConstant = springConstant,
-        this.damping = zeta * 2.0 * Math.sqrt(mass * springConstant);
+  SpringDescription.withDampingRatio(
+      {double mass, double springConstant, double ratio: 1.0})
+      : mass = mass,
+        springConstant = springConstant,
+        damping = ratio * 2.0 * math.sqrt(mass * springConstant);
 }
 
 enum SpringType { unknown, criticallyDamped, underDamped, overDamped, }
@@ -39,7 +47,8 @@ class SpringSimulation extends Simulation {
 
   /// A spring description with the provided spring description, start distance,
   /// end distance and velocity.
-  SpringSimulation(SpringDesc desc, double start, double end, double velocity)
+  SpringSimulation(
+      SpringDescription desc, double start, double end, double velocity)
       : this._endPosition = end,
         _solution = new _SpringSolution(desc, start - end, velocity);
 

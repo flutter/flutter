@@ -10,7 +10,7 @@ part of newton;
 class ScrollSimulation extends SimulationGroup {
   final double _leadingExtent;
   final double _trailingExtent;
-  final SpringDesc _springDesc;
+  final SpringDescription _springDesc;
   final double _drag;
 
   bool _isSpringing = false;
@@ -18,7 +18,7 @@ class ScrollSimulation extends SimulationGroup {
   double _offset = 0.0;
 
   ScrollSimulation(double position, double velocity, double leading,
-      double trailing, SpringDesc spring, double drag)
+      double trailing, SpringDescription spring, double drag)
       : _leadingExtent = leading,
         _trailingExtent = trailing,
         _springDesc = spring,

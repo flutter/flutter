@@ -12,14 +12,14 @@ class FrictionSimulation extends Simulation {
 
   FrictionSimulation(double drag, double position, double velocity)
       : _drag = drag,
-        _dragLog = Math.log(drag),
+        _dragLog = math.log(drag),
         _x = position,
         _v = velocity;
 
   double x(double time) =>
-      _x + _v * Math.pow(_drag, time) / _dragLog - _v / _dragLog;
+      _x + _v * math.pow(_drag, time) / _dragLog - _v / _dragLog;
 
-  double dx(double time) => _v * Math.pow(_drag, time);
+  double dx(double time) => _v * math.pow(_drag, time);
 
   @override
   bool isDone(double time) => dx(time).abs() < 1.0;

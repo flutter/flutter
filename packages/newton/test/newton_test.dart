@@ -58,27 +58,32 @@ void main() {
   });
 
   test('spring_types', () {
-    var crit = new SpringSimulation(
-        new SpringDesc.withDampingRatio(1.0, 100.0, 1.0), 0.0, 300.0, 0.0);
+    var crit = new SpringSimulation(new SpringDescription.withDampingRatio(
+        mass: 1.0, springConstant: 100.0), 0.0, 300.0, 0.0);
     expect(crit.type, SpringType.criticallyDamped);
 
-    var under = new SpringSimulation(
-        new SpringDesc.withDampingRatio(1.0, 100.0, 0.75), 0.0, 300.0, 0.0);
+    crit = new SpringSimulation(new SpringDescription.withDampingRatio(
+        mass: 1.0, springConstant: 100.0, ratio: 1.0), 0.0, 300.0, 0.0);
+    expect(crit.type, SpringType.criticallyDamped);
+
+    var under = new SpringSimulation(new SpringDescription.withDampingRatio(
+        mass: 1.0, springConstant: 100.0, ratio: 0.75), 0.0, 300.0, 0.0);
     expect(under.type, SpringType.underDamped);
 
-    var over = new SpringSimulation(
-        new SpringDesc.withDampingRatio(1.0, 100.0, 1.25), 0.0, 300.0, 0.0);
+    var over = new SpringSimulation(new SpringDescription.withDampingRatio(
+        mass: 1.0, springConstant: 100.0, ratio: 1.25), 0.0, 300.0, 0.0);
     expect(over.type, SpringType.overDamped);
 
     // Just so we don't forget how to create a desc without the ratio.
-    var other =
-        new SpringSimulation(new SpringDesc(1.0, 100.0, 20.0), 0.0, 20.0, 20.0);
+    var other = new SpringSimulation(
+        new SpringDescription(mass: 1.0, springConstant: 100.0, damping: 20.0),
+        0.0, 20.0, 20.0);
     expect(other.type, SpringType.criticallyDamped);
   });
 
   test('crit_spring', () {
-    var crit = new SpringSimulation(
-        new SpringDesc.withDampingRatio(1.0, 100.0, 1.0), 0.0, 500.0, 0.0);
+    var crit = new SpringSimulation(new SpringDescription.withDampingRatio(
+        mass: 1.0, springConstant: 100.0, ratio: 1.0), 0.0, 500.0, 0.0);
     expect(crit.type, SpringType.criticallyDamped);
 
     expect(crit.isDone(0.0), false);
@@ -99,8 +104,8 @@ void main() {
   });
 
   test('overdamped_spring', () {
-    var over = new SpringSimulation(
-        new SpringDesc.withDampingRatio(1.0, 100.0, 1.25), 0.0, 500.0, 0.0);
+    var over = new SpringSimulation(new SpringDescription.withDampingRatio(
+        mass: 1.0, springConstant: 100.0, ratio: 1.25), 0.0, 500.0, 0.0);
     expect(over.type, SpringType.overDamped);
 
     expect(over.isDone(0.0), false);
@@ -118,8 +123,8 @@ void main() {
   });
 
   test('underdamped_spring', () {
-    var under = new SpringSimulation(
-        new SpringDesc.withDampingRatio(1.0, 100.0, 0.25), 0.0, 300.0, 0.0);
+    var under = new SpringSimulation(new SpringDescription.withDampingRatio(
+        mass: 1.0, springConstant: 100.0, ratio: 0.25), 0.0, 300.0, 0.0);
     expect(under.type, SpringType.underDamped);
 
     expect(under.isDone(0.0), false);
@@ -135,7 +140,8 @@ void main() {
   });
 
   test('test_kinetic_scroll', () {
-    var spring = new SpringDesc.withDampingRatio(1.0, 50.0, 0.5);
+    var spring = new SpringDescription.withDampingRatio(
+        mass: 1.0, springConstant: 50.0, ratio: 0.5);
 
     var scroll = new ScrollSimulation(100.0, 800.0, 0.0, 300.0, spring, 0.3);
 
