@@ -97,6 +97,10 @@ public class PlatformViewAndroid extends SurfaceView
         KeyboardServiceImpl.setActiveView(this);
     }
 
+    SkyEngine getEngine() {
+        return mSkyEngine;
+    }
+
     @Override
     protected void onDetachedFromWindow() {
         getHolder().removeCallback(mSurfaceCallback);
@@ -197,24 +201,6 @@ public class PlatformViewAndroid extends SurfaceView
     @Override
     public void onGestureEvent(InputEvent event) {
         mSkyEngine.onInputEvent(event);
-    }
-
-    public void onBackPressed() {
-        InputEvent event = new InputEvent();
-        event.type = EventType.BACK;
-        mSkyEngine.onInputEvent(event);
-    }
-
-    public void loadSnapshot(String path) {
-        mSkyEngine.runFromSnapshot(path);
-    }
-
-    public void loadBundle(String path) {
-        mSkyEngine.runFromBundle(path);
-    }
-
-    public void loadUrl(String url) {
-        mSkyEngine.runFromNetwork(url);
     }
 
     private void attach() {

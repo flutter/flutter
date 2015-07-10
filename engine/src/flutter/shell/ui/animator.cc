@@ -16,6 +16,7 @@ Animator::Animator(const Engine::Config& config, Engine* engine)
       engine_(engine),
       engine_requested_frame_(false),
       frame_in_progress_(false),
+      paused_(false),
       weak_factory_(this) {
 }
 
@@ -37,8 +38,14 @@ void Animator::RequestFrame() {
   }
 }
 
-void Animator::CancelFrameRequest() {
+void Animator::Stop() {
+  paused_ = true;
   engine_requested_frame_ = false;
+}
+
+void Animator::Start() {
+  paused_ = false;
+  RequestFrame();
 }
 
 void Animator::BeginFrame() {
@@ -62,6 +69,9 @@ void Animator::BeginFrame() {
 void Animator::OnFrameComplete() {
   DCHECK(frame_in_progress_);
   frame_in_progress_ = false;
+  if (paused_)
+    return;
+
   if (engine_requested_frame_) {
     frame_in_progress_ = true;
     BeginFrame();
