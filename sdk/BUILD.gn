@@ -8,7 +8,6 @@ dart_pkg("sky") {
   sources = [
     "CHANGELOG.md",
     "bin/init.dart",
-    "lib/_sdkext",
     "lib/animation/animation_performance.dart",
     "lib/animation/curves.dart",
     "lib/animation/fling_curve.dart",
@@ -112,6 +111,11 @@ dart_pkg("sky") {
   sdk_ext_files = [
     "//sky/engine/bindings/sky_internals.dart",
     "//sky/engine/bindings/builtin_natives.dart",
+  ]
+  sdk_ext_mappings = [
+    "dart:sky,dart_sky.dart",
+    "dart:sky.internals,sky_internals.dart",
+    "dart:sky_builtin_natvies,builtin_natives.dart",
   ]
 }
 
