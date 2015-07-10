@@ -96,7 +96,7 @@ HAL: This mission is too important for me to allow you to jeopardize it.''';
         child: new Flex(children,
           direction: FlexDirection.vertical,
           justifyContent: FlexJustifyContent.center,
-          alignItems: FlexAlignItems.flexStart
+          alignItems: FlexAlignItems.start
         )
       );
 

@@ -72,7 +72,7 @@ class Dialog extends Component {
     }
 
     if (actions != null)
-      children.add(new Flex(actions, justifyContent: FlexJustifyContent.flexEnd));
+      children.add(new Flex(actions, justifyContent: FlexJustifyContent.end));
 
     return new Stack([
       new Listener(

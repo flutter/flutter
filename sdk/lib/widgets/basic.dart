@@ -402,7 +402,7 @@ class Flex extends MultiChildRenderObjectWrapper {
   Flex(List<Widget> children, {
     String key,
     this.direction: FlexDirection.horizontal,
-    this.justifyContent: FlexJustifyContent.flexStart,
+    this.justifyContent: FlexJustifyContent.start,
     this.alignItems: FlexAlignItems.center
   }) : super(key: key, children: children);
 

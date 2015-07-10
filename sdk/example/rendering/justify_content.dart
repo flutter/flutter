@@ -32,8 +32,8 @@ void main() {
     row.parentData.flex = 1;
   }
 
-  addRow(FlexJustifyContent.flexStart);
-  addRow(FlexJustifyContent.flexEnd);
+  addRow(FlexJustifyContent.start);
+  addRow(FlexJustifyContent.end);
   addRow(FlexJustifyContent.center);
   addRow(FlexJustifyContent.spaceBetween);
   addRow(FlexJustifyContent.spaceAround);

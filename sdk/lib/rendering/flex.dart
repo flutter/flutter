@@ -22,16 +22,16 @@ class FlexBoxParentData extends BoxParentData with ContainerParentDataMixin<Rend
 enum FlexDirection { horizontal, vertical }
 
 enum FlexJustifyContent {
-  flexStart,
-  flexEnd,
+  start,
+  end,
   center,
   spaceBetween,
   spaceAround,
 }
 
 enum FlexAlignItems {
-  flexStart,
-  flexEnd,
+  start,
+  end,
   center,
 }
 
@@ -43,7 +43,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
 
   RenderFlex({
     FlexDirection direction: FlexDirection.horizontal,
-    FlexJustifyContent justifyContent: FlexJustifyContent.flexStart,
+    FlexJustifyContent justifyContent: FlexJustifyContent.start,
     FlexAlignItems alignItems: FlexAlignItems.center
   }) : _direction = direction, _justifyContent = justifyContent, _alignItems = alignItems;
 
@@ -326,11 +326,11 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     double betweenSpace;
     child = firstChild;
     switch (_justifyContent) {
-      case FlexJustifyContent.flexStart:
+      case FlexJustifyContent.start:
         leadingSpace = 0.0;
         betweenSpace = 0.0;
         break;
-      case FlexJustifyContent.flexEnd:
+      case FlexJustifyContent.end:
         leadingSpace = remainingSpace;
         betweenSpace = 0.0;
         break;
@@ -366,10 +366,10 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
       assert(child.parentData is FlexBoxParentData);
       double childCrossPosition;
       switch (_alignItems) {
-        case FlexAlignItems.flexStart:
+        case FlexAlignItems.start:
           childCrossPosition = 0.0;
           break;
-        case FlexAlignItems.flexEnd:
+        case FlexAlignItems.end:
           childCrossPosition = crossSize - _getCrossSize(child);
           break;
         case FlexAlignItems.center:

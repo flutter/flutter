@@ -67,7 +67,7 @@ class ToolBar extends Component {
         data: new IconThemeData(color: iconThemeColor),
         child: new Flex(
           [new Container(child: new Flex(children), height: kToolBarHeight)],
-          alignItems: FlexAlignItems.flexEnd
+          alignItems: FlexAlignItems.end
         )
       ),
       padding: new EdgeDims.symmetric(horizontal: 8.0),
