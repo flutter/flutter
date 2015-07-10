@@ -20,8 +20,8 @@ abstract class Toggleable extends AnimatedComponent {
     this.value,
     this.onChanged
   }) : super(key: key) {
-    position = new AnimatedType<double>(0.0, end: 1.0);
-    performance = new AnimationPerformance()
+    _position = new AnimatedType<double>(0.0, end: 1.0);
+    _performance = new AnimationPerformance()
       ..variable = position
       ..duration = _kCheckDuration
       ..progress = value ? 1.0 : 0.0;
@@ -31,8 +31,11 @@ abstract class Toggleable extends AnimatedComponent {
   bool value;
   ValueChanged onChanged;
 
-  AnimatedType<double> position;
-  AnimationPerformance performance;
+  AnimatedType<double> _position;
+  AnimatedType<double> get position => _position;
+
+  AnimationPerformance _performance;
+  AnimationPerformance get performance => _performance;
 
   void syncFields(Toggleable source) {
     onChanged = source.onChanged;
