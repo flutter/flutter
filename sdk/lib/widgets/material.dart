@@ -56,8 +56,14 @@ class Material extends AnimatedComponent {
   AnimatedColor _getBackgroundColor(MaterialType type, Color color) {
     if (color == null) {
       switch (type) {
-        case MaterialType.canvas: color = Theme.of(this).canvasColor; break;
-        case MaterialType.card: color = Theme.of(this).cardColor; break;
+        case MaterialType.canvas:
+          color = Theme.of(this).canvasColor;
+          break;
+        case MaterialType.card:
+          color = Theme.of(this).cardColor;
+          break;
+        default:
+          break;
       }
     }
     return color == null ? null : new AnimatedColor(color);
