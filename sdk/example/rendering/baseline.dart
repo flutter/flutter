@@ -5,8 +5,8 @@
 import 'dart:sky' as sky;
 
 import 'package:sky/painting/text_style.dart';
-import 'package:sky/rendering/block.dart';
 import 'package:sky/rendering/box.dart';
+import 'package:sky/rendering/flex.dart';
 import 'package:sky/rendering/object.dart';
 import 'package:sky/rendering/paragraph.dart';
 import 'package:sky/rendering/sky_binding.dart';
@@ -67,12 +67,15 @@ RenderBox getBox(double lh) {
 }
 
 void main() {
-  RenderBox root = new RenderBlock(children: [
-    new RenderConstrainedBox(
-      additionalConstraints: new BoxConstraints.tightFor(height: 50.0)
-    ),
-    getBox(1.0),
-    getBox(null),
-  ]);
+  RenderBox root = new RenderFlex(children: [
+      new RenderConstrainedBox(
+        additionalConstraints: new BoxConstraints.tightFor(height: 50.0)
+      ),
+      getBox(1.0),
+      getBox(null),
+    ],
+    direction: FlexDirection.vertical,
+    alignItems: FlexAlignItems.stretch
+  );
   new SkyBinding(root: root);
 }

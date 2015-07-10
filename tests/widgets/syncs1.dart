@@ -64,18 +64,21 @@ class FiddleApp extends App {
   }
 
   Widget build() {
-    return new Block([
-      new SizedBox(
-        key: 'flex-example',
-        height: 250.0,
-        child: arbitrarySetting ? buildFlex1() : buildFlex2()
-      ),
-      new SizedBox(
-        key: 'stack-example',
-        height: 250.0,
-        child: arbitrarySetting ? buildStack1() : buildStack2()
-      )
-    ]);
+    return new Flex([
+        new SizedBox(
+          key: 'flex-example',
+          height: 250.0,
+          child: arbitrarySetting ? buildFlex1() : buildFlex2()
+        ),
+        new SizedBox(
+          key: 'stack-example',
+          height: 250.0,
+          child: arbitrarySetting ? buildStack1() : buildStack2()
+        )
+      ],
+      direction: FlexDirection.vertical,
+      alignItems: FlexAlignItems.stretch
+    );
   }
 }
 
