@@ -1,7 +1,7 @@
 author: Chromium Authors <sky-dev@googlegroups.com>
 dependencies:
   cassowary: '^0.1.7'
-  mojo_services: '^0.0.17'
+  mojo_services: '^0.0.15'
   mojo: '^0.0.17'
   mojom: '^0.0.17'
   newton: '^0.1.0'
