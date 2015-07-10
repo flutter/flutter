@@ -33,6 +33,7 @@ enum FlexAlignItems {
   start,
   end,
   center,
+  stretch,
 }
 
 typedef double _ChildSizingFunction(RenderBox child, BoxConstraints constraints);
@@ -288,8 +289,23 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
       if (flex > 0) {
         totalFlex += child.parentData.flex;
       } else {
-        BoxConstraints innerConstraints = new BoxConstraints(maxHeight: constraints.maxHeight,
-                                                             maxWidth: constraints.maxWidth);
+        BoxConstraints innerConstraints;
+        if (alignItems == FlexAlignItems.stretch) {
+          switch (_direction) {
+            case FlexDirection.horizontal:
+              innerConstraints = new BoxConstraints(maxWidth: constraints.maxWidth,
+                                                    minHeight: constraints.minHeight,
+                                                    maxHeight: constraints.maxHeight);
+              break;
+            case FlexDirection.vertical:
+              innerConstraints = new BoxConstraints(minWidth: constraints.minWidth,
+                                                    maxWidth: constraints.maxWidth,
+                                                    maxHeight: constraints.maxHeight);
+              break;
+          }
+        } else {
+          innerConstraints = constraints.loosen();
+        }
         child.layout(innerConstraints, parentUsesSize: true);
         freeSpace -= _getMainSize(child);
         crossSize = math.max(crossSize, _getCrossSize(child));
@@ -372,6 +388,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
       assert(child.parentData is FlexBoxParentData);
       double childCrossPosition;
       switch (_alignItems) {
+        case FlexAlignItems.stretch:
         case FlexAlignItems.start:
           childCrossPosition = 0.0;
           break;
