@@ -4,13 +4,10 @@
 
 import 'dart:math' as math;
 
-import 'package:sky/animation/generators.dart';
-import 'package:sky/animation/mechanics.dart';
 import 'package:sky/animation/scroll_behavior.dart';
 import 'package:sky/painting/text_style.dart';
 import 'package:sky/rendering/box.dart';
 import 'package:sky/rendering/object.dart';
-import 'package:vector_math/vector_math.dart';
 import 'package:sky/theme/colors.dart' as colors;
 import 'package:sky/theme/typography.dart' as typography;
 import 'package:sky/widgets/basic.dart';
@@ -20,6 +17,7 @@ import 'package:sky/widgets/ink_well.dart';
 import 'package:sky/widgets/scrollable.dart';
 import 'package:sky/widgets/theme.dart';
 import 'package:sky/widgets/widget.dart';
+import 'package:vector_math/vector_math.dart';
 
 typedef void SelectedIndexChanged(int selectedIndex);
 typedef void LayoutChanged(Size size, List<double> widths);
@@ -347,27 +345,6 @@ class Tab extends Component {
   }
 }
 
-class TabBarScrollBehavior extends ScrollBehavior {
-  TabBarScrollBehavior({ this.maxScrollOffset: 0.0 });
-
-  double maxScrollOffset;
-
-  Simulation release(Particle particle) {
-    if (particle.velocity == 0.0 || particle.position < 0.0 || particle.position >= maxScrollOffset)
-      return null;
-
-    System system = new ParticleInBoxWithFriction(
-      particle: particle,
-      friction: _kTabBarScrollFriction,
-      box: new ClosedBox(min: 0.0, max: maxScrollOffset));
-    return new Simulation(system, terminationCondition: () => particle.position == 0.0);
-  }
-
-  double applyCurve(double scrollOffset, double scrollDelta) {
-    return (scrollOffset + scrollDelta).clamp(0.0, maxScrollOffset);
-  }
-}
-
 class TabBar extends Scrollable {
   TabBar({
     String key,
@@ -392,8 +369,8 @@ class TabBar extends Scrollable {
       scrollTo(0.0);
   }
 
-  ScrollBehavior createScrollBehavior() => new TabBarScrollBehavior();
-  TabBarScrollBehavior get scrollBehavior => super.scrollBehavior;
+  ScrollBehavior createScrollBehavior() => new FlingBehavior();
+  FlingBehavior get scrollBehavior => super.scrollBehavior;
 
   void _handleTap(int tabIndex) {
     if (tabIndex != selectedIndex && onChanged != null)
@@ -419,8 +396,8 @@ class TabBar extends Scrollable {
     setState(() {
       _tabBarSize = tabBarSize;
       _tabWidths = tabWidths;
-      scrollBehavior.maxScrollOffset =
-        _tabWidths.reduce((sum, width) => sum + width) - _tabBarSize.width;
+      scrollBehavior.containerSize = _tabBarSize.width;
+      scrollBehavior.contentsSize = _tabWidths.reduce((sum, width) => sum + width);
     });
   }
 

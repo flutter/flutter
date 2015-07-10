@@ -4,97 +4,71 @@
 
 import 'dart:math' as math;
 
-import 'mechanics.dart';
-import 'generators.dart';
+import 'package:newton/newton.dart';
 
-const double _kScrollFriction = 0.005;
-const double _kOverscrollFriction = 0.075;
-const double _kBounceSlopeAngle = math.PI / 512.0; // radians
+const double _kSecondsPerMillisecond = 1000.0;
 
 abstract class ScrollBehavior {
-  Simulation release(Particle particle) => null;
+  Simulation release(double position, double velocity) => null;
 
   // Returns the new scroll offset.
   double applyCurve(double scrollOffset, double scrollDelta);
 }
 
-class BoundedScrollBehavior extends ScrollBehavior {
-  double minOffset;
-  double maxOffset;
+class BoundedBehavior extends ScrollBehavior {
+  BoundedBehavior({ double contentsSize: 0.0, double containerSize: 0.0 })
+    : _contentsSize = contentsSize,
+      _containerSize = containerSize;
 
-  BoundedScrollBehavior({this.minOffset: 0.0, this.maxOffset});
+  double _contentsSize;
+  double get contentsSize => _contentsSize;
+  void set contentsSize (double value) {
+    if (_contentsSize != value) {
+      _contentsSize = value;
+      // TODO(ianh) now what? what if we have a simulation ongoing?
+    }
+  }
+
+  double _containerSize;
+  double get containerSize => _containerSize;
+  void set containerSize (double value) {
+    if (_containerSize != value) {
+      _containerSize = value;
+      // TODO(ianh) now what? what if we have a simulation ongoing?
+    }
+  }
+
+  final double minScrollOffset = 0.0;
+  double get maxScrollOffset => math.max(0.0, _contentsSize - _containerSize);
 
   double applyCurve(double scrollOffset, double scrollDelta) {
-    double newScrollOffset = scrollOffset + scrollDelta;
-    if (minOffset != null)
-      newScrollOffset = math.max(minOffset, newScrollOffset);
-    if (maxOffset != null)
-      newScrollOffset = math.min(maxOffset, newScrollOffset);
-    return newScrollOffset;
+    return (scrollOffset + scrollDelta).clamp(0.0, maxScrollOffset);
   }
 }
 
-class OverscrollBehavior extends ScrollBehavior {
+Simulation createDefaultScrollSimulation(double position, double velocity, double minScrollOffset, double maxScrollOffset) {
+  double velocityPerSecond = velocity * _kSecondsPerMillisecond;
+  SpringDescription spring = new SpringDescription.withDampingRatio(
+      mass: 1.0, springConstant: 85.0, ratio: 1.1);
+  double drag = 0.4;
+  return new ScrollSimulation(position, velocityPerSecond, minScrollOffset, maxScrollOffset, spring, drag);
+}
 
-  double _contentsHeight;
-  double get contentsHeight => _contentsHeight;
-  void set contentsHeight (double value) {
-    if (_contentsHeight != value) {
-      _contentsHeight = value;
-      // TODO(ianh) now what? what if we have a simulation ongoing?
-    }
+class FlingBehavior extends BoundedBehavior {
+  FlingBehavior({ double contentsSize: 0.0, double containerSize: 0.0 })
+    : super(contentsSize: contentsSize, containerSize: containerSize);
+
+  Simulation release(double position, double velocity) {
+    return createDefaultScrollSimulation(position, 0.0, minScrollOffset, maxScrollOffset);
   }
+}
 
-  double _containerHeight;
-  double get containerHeight => _containerHeight;
-  void set containerHeight (double value) {
-    if (_containerHeight != value) {
-      _containerHeight = value;
-      // TODO(ianh) now what? what if we have a simulation ongoing?
-    }
-  }
+class OverscrollBehavior extends BoundedBehavior {
+  OverscrollBehavior({ double contentsSize: 0.0, double containerSize: 0.0 })
+    : super(contentsSize: contentsSize, containerSize: containerSize);
 
-  OverscrollBehavior({double contentsHeight: 0.0, double containerHeight: 0.0})
-    : _contentsHeight = contentsHeight,
-      _containerHeight = containerHeight;
-
-  double get maxScrollOffset => math.max(0.0, _contentsHeight - _containerHeight);
-
-  Simulation release(Particle particle) {
-    System system;
-    if ((particle.position >= 0.0) && (particle.position < maxScrollOffset)) {
-      if (particle.velocity == 0.0)
-        return null;
-      System slowdownSystem = new ParticleInBoxWithFriction(
-        particle: particle,
-        friction: _kScrollFriction,
-        box: new GeofenceBox(min: 0.0, max: maxScrollOffset, onEscape: () {
-          (system as Multisystem).transitionToSystem(new ParticleInBoxWithFriction(
-            particle: particle,
-            friction: _kOverscrollFriction,
-            box: new ClosedBox(),
-            onStop: () => (system as Multisystem).transitionToSystem(getBounceBackSystem(particle))
-          ));
-        }));
-      system = new Multisystem(particle: particle, system: slowdownSystem);
-    } else {
-      system = getBounceBackSystem(particle);
-    }
-    return new Simulation(system, terminationCondition: () => particle.position == 0.0);
-  }
-
-  System getBounceBackSystem(Particle particle) {
-    if (particle.position < 0.0)
-      return new ParticleClimbingRamp(
-        particle: particle,
-        box: new ClosedBox(max: 0.0),
-        theta: _kBounceSlopeAngle,
-        targetPosition: 0.0);
-    return new ParticleClimbingRamp(
-      particle: particle,
-      box: new ClosedBox(min: maxScrollOffset),
-      theta: _kBounceSlopeAngle,
-      targetPosition: maxScrollOffset);
+  Simulation release(double position, double velocity) {
+    return createDefaultScrollSimulation(position, velocity, minScrollOffset, maxScrollOffset);
   }
 
   double applyCurve(double scrollOffset, double scrollDelta) {

@@ -38,7 +38,7 @@ abstract class FixedHeightScrollable extends Scrollable {
   void _handleSizeChanged(Size newSize) {
     setState(() {
       _height = newSize.height;
-      scrollBehavior.containerHeight = _height;
+      scrollBehavior.containerSize = _height;
     });
   }
 
@@ -46,7 +46,7 @@ abstract class FixedHeightScrollable extends Scrollable {
     double contentsHeight = itemHeight * itemCount;
     if (padding != null)
       contentsHeight += padding.top + padding.bottom;
-    scrollBehavior.contentsHeight = contentsHeight;
+    scrollBehavior.contentsSize = contentsHeight;
   }
 
   void _updateScrollOffset() {

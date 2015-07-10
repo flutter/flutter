@@ -47,8 +47,8 @@ class VariableHeightScrollable extends Scrollable {
 
   void _handleSizeChanged(Size newSize) {
     setState(() {
-      scrollBehavior.containerHeight = newSize.height;
-      scrollBehavior.contentsHeight = 5000.0;
+      scrollBehavior.containerSize = newSize.height;
+      scrollBehavior.contentsSize = 5000.0;
     });
   }
 
@@ -70,13 +70,13 @@ class CardCollectionApp extends App {
     new TextStyle(color: White, fontSize: 18.0, fontWeight: bold);
 
   final List<double> cardHeights = [
-    48.0, 64.0, 82.0, 46.0, 60.0, 55.0, 84.0, 96.0, 50.0, 
+    48.0, 64.0, 82.0, 46.0, 60.0, 55.0, 84.0, 96.0, 50.0,
     48.0, 64.0, 82.0, 46.0, 60.0, 55.0, 84.0, 96.0, 50.0,
     48.0, 64.0, 82.0, 46.0, 60.0, 55.0, 84.0, 96.0, 50.0
   ];
 
   List<int> visibleCardIndices;
-  
+
   CardCollectionApp() {
     _activeCardTransform = new AnimatedContainer()
       ..position = new AnimatedType<Point>(Point.origin)

@@ -4,8 +4,9 @@
 
 import 'dart:sky' as sky;
 
-import '../animation/generators.dart';
-import '../animation/mechanics.dart';
+import 'package:newton/newton.dart';
+
+import '../animation/animated_simulation.dart';
 import '../animation/scroll_behavior.dart';
 import '../theme/view_configuration.dart' as config;
 import 'basic.dart';
@@ -30,7 +31,9 @@ abstract class Scrollable extends StatefulComponent {
     String key,
     this.backgroundColor,
     this.direction: ScrollDirection.vertical
-  }) : super(key: key);
+  }) : super(key: key) {
+    _animation = new AnimatedSimulation(_tickScrollOffset);
+  }
 
   Color backgroundColor;
   ScrollDirection direction;
@@ -51,7 +54,7 @@ abstract class Scrollable extends StatefulComponent {
     return _scrollBehavior;
   }
 
-  Simulation _simulation;
+  AnimatedSimulation _animation;
 
   Widget buildContent();
 
@@ -123,26 +126,23 @@ abstract class Scrollable extends StatefulComponent {
   }
 
   void settleScrollOffset() {
-    _startSimulation(_createParticle());
+    _startSimulation();
   }
 
   void _stopSimulation() {
-    if (_simulation == null)
-      return;
-    _simulation.cancel();
-    _simulation = null;
+    _animation.stop();
   }
 
-  void _startSimulation(Particle particle) {
+  void _startSimulation({ double velocity: 0.0 }) {
     _stopSimulation();
-    _simulation = scrollBehavior.release(particle);
-    if (_simulation == null)
-      return;
-    _simulation.onTick.listen((_) => scrollTo(particle.position));
+    print("velocity=$velocity");
+    Simulation simulation = scrollBehavior.release(scrollOffset, velocity);
+    if (simulation != null)
+      _animation.start(simulation);
   }
 
-  Particle _createParticle([double velocity = 0.0]) {
-    return new Particle(position: _scrollOffset, velocity: velocity);
+  void _tickScrollOffset(double value) {
+    scrollTo(value);
   }
 
   void _handlePointerDown(_) {
@@ -150,7 +150,7 @@ abstract class Scrollable extends StatefulComponent {
   }
 
   void _handlePointerUpOrCancel(_) {
-    if (_simulation == null)
+    if (!_animation.isAnimating)
       settleScrollOffset();
   }
 
@@ -162,7 +162,7 @@ abstract class Scrollable extends StatefulComponent {
     double eventVelocity = direction == ScrollDirection.horizontal
       ? -event.velocityX
       : -event.velocityY;
-    _startSimulation(_createParticle(_velocityForFlingGesture(eventVelocity)));
+    _startSimulation(velocity: _velocityForFlingGesture(eventVelocity));
   }
 
   void _handleFlingCancel(sky.GestureEvent event) {
