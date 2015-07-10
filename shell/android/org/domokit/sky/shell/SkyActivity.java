@@ -11,6 +11,8 @@ import android.view.View;
 import android.view.WindowManager;
 
 import org.chromium.base.PathUtils;
+import org.chromium.mojom.sky.EventType;
+import org.chromium.mojom.sky.InputEvent;
 
 import org.domokit.activity.ActivityImpl;
 
@@ -64,12 +66,28 @@ public class SkyActivity extends Activity {
     @Override
     public void onBackPressed() {
         if (mView != null) {
-            mView.onBackPressed();
-            // TODO(abarth): We should have some way to trigger the default
-            // back behavior.
+            InputEvent event = new InputEvent();
+            event.type = EventType.BACK;
+            mView.getEngine().onInputEvent(event);
             return;
         }
         super.onBackPressed();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (mView != null) {
+            mView.getEngine().onActivityPaused();
+        }
+    }
+
+    @Override
+    protected void onPostResume() {
+        super.onPostResume();
+        if (mView != null) {
+            mView.getEngine().onActivityResumed();
+        }
     }
 
     /**
@@ -79,18 +97,18 @@ public class SkyActivity extends Activity {
         File dataDir = new File(PathUtils.getDataDirectory(this));
         File snapshot = new File(dataDir, SkyApplication.SNAPSHOT);
         if (snapshot.exists()) {
-            mView.loadSnapshot(snapshot.getPath());
+            mView.getEngine().runFromSnapshot(snapshot.getPath());
             return;
         }
         File appBundle = new File(dataDir, SkyApplication.APP_BUNDLE);
         if (appBundle.exists()) {
-            mView.loadBundle(appBundle.getPath());
+            mView.getEngine().runFromBundle(appBundle.getPath());
             return;
         }
     }
 
     public void loadUrl(String url) {
-        mView.loadUrl(url);
+        mView.getEngine().runFromNetwork(url);
     }
 
     public boolean loadBundleByName(String name) {
@@ -99,7 +117,7 @@ public class SkyActivity extends Activity {
         if (!bundle.exists()) {
             return false;
         }
-        mView.loadBundle(bundle.getPath());
+        mView.getEngine().runFromBundle(bundle.getPath());
         return true;
     }
 }

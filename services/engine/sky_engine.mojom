@@ -17,6 +17,9 @@ struct ViewportMetrics {
 };
 
 interface SkyEngine {
+  OnActivityPaused();
+  OnActivityResumed();
+
   OnViewportMetricsChanged(ViewportMetrics metrics);
   OnInputEvent(InputEvent event);
 

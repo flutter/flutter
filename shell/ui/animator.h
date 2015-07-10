@@ -17,7 +17,9 @@ class Animator {
   ~Animator();
 
   void RequestFrame();
-  void CancelFrameRequest();
+
+  void Start();
+  void Stop();
 
  private:
   void BeginFrame();
@@ -27,6 +29,7 @@ class Animator {
   Engine* engine_;
   bool engine_requested_frame_;
   bool frame_in_progress_;
+  bool paused_;
 
   base::WeakPtrFactory<Animator> weak_factory_;
 

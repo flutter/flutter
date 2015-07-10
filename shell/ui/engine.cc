@@ -59,6 +59,8 @@ Engine::Engine(const Config& config)
     : config_(config),
       animator_(new Animator(config, this)),
       binding_(this),
+      activity_running_(false),
+      have_surface_(false),
       weak_factory_(this) {
 }
 
@@ -118,11 +120,15 @@ void Engine::OnAcceleratedWidgetAvailable(gfx::AcceleratedWidget widget) {
   config_.gpu_task_runner->PostTask(
       FROM_HERE, base::Bind(&GPUDelegate::OnAcceleratedWidgetAvailable,
                             config_.gpu_delegate, widget));
+  have_surface_ = true;
+  StartAnimatorIfPossible();
   if (sky_view_)
     ScheduleFrame();
 }
 
 void Engine::OnOutputSurfaceDestroyed() {
+  have_surface_ = false;
+  StopAnimator();
   config_.gpu_task_runner->PostTask(
       FROM_HERE,
       base::Bind(&GPUDelegate::OnOutputSurfaceDestroyed, config_.gpu_delegate));
@@ -195,10 +201,29 @@ void Engine::RunFromBundle(const mojo::String& path) {
                                        weak_factory_.GetWeakPtr(), path_str));
 }
 
+void Engine::OnActivityPaused() {
+  activity_running_ = false;
+  StopAnimator();
+}
+
+void Engine::OnActivityResumed() {
+  activity_running_ = true;
+  StartAnimatorIfPossible();
+}
+
 void Engine::DidCreateIsolate(Dart_Isolate isolate) {
   Internals::Create(isolate,
                     CreateServiceProvider(config_.service_provider_context),
                     root_bundle_.Pass());
+}
+
+void Engine::StopAnimator() {
+  animator_->Stop();
+}
+
+void Engine::StartAnimatorIfPossible() {
+  if (activity_running_ && have_surface_)
+    animator_->Start();
 }
 
 void Engine::ScheduleFrame() {

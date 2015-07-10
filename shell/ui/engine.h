@@ -71,6 +71,9 @@ class Engine : public UIDelegate,
   void RunFromSnapshot(const mojo::String& path) override;
   void RunFromBundle(const mojo::String& path) override;
 
+  void OnActivityPaused() override;
+  void OnActivityResumed() override;
+
   // SkyViewClient methods:
   void ScheduleFrame() override;
   void DidCreateIsolate(Dart_Isolate isolate) override;
@@ -88,6 +91,9 @@ class Engine : public UIDelegate,
   void RunFromSnapshotStream(const std::string& name,
                              mojo::ScopedDataPipeConsumerHandle snapshot);
 
+  void StopAnimator();
+  void StartAnimatorIfPossible();
+
   Config config_;
   scoped_ptr<Animator> animator_;
 
@@ -98,6 +104,10 @@ class Engine : public UIDelegate,
   gfx::Size physical_size_;
   blink::SkyDisplayMetrics display_metrics_;
   mojo::Binding<SkyEngine> binding_;
+
+  // TODO(eseidel): This should move into an AnimatorStateMachine.
+  bool activity_running_;
+  bool have_surface_;
 
   base::WeakPtrFactory<Engine> weak_factory_;
 
