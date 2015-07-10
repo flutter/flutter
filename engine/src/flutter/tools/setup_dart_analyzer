@@ -19,8 +19,8 @@ SDK_EXT = os.path.join(SKY_SDK_DIR, 'lib', '_sdkext')
 
 SDK_EXT_TEMPLATE = '''{
   "dart:sky": "%(build_dir)s/gen/dart-pkg/sky/sdk_ext/dart_sky.dart",
-  "dart:sky.internals": "%(build_dir)s/gen/dart-pkg/sky/sky_internals.dart",
-  "dart:sky_builtin_natvies": "%(build_dir)s../sdk_ext/builtin_natives.dart"
+  "dart:sky.internals": "%(build_dir)s/gen/dart-pkg/sky/sdk_ext/sky_internals.dart",
+  "dart:sky_builtin_natvies": "%(build_dir)s/gen/dart-pkg/sky/sdk_ext/builtin_natives.dart"
 }'''
 
 def version_for_pubspec(pubspec_path):
@@ -48,6 +48,12 @@ def main():
     args = parser.parse_args()
 
     dart_pkg_dir = os.path.join(args.build_dir, 'gen', 'dart-pkg')
+
+    if not os.path.exists(dart_pkg_dir):
+        print 'Cannot find Dart pacakges at "%s".' % dart_pkg_dir
+        print 'Did you run `ninja -C %s sky` ?' % os.path.relpath(args.build_dir, os.getcwd())
+        return 1
+
     packages = {}
 
     with open(SKY_PUBSPEC, 'r') as stream:
