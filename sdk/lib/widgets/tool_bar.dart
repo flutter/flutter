@@ -30,14 +30,16 @@ class ToolBar extends Component {
 
   Widget build() {
     Color toolbarColor = backgroundColor;
-    IconThemeColor iconThemeColor = IconThemeColor.white;
+    IconThemeData iconThemeData;
     TextStyle defaultTextStyle = typography.white.title;
     if (toolbarColor == null) {
       ThemeData themeData = Theme.of(this);
       toolbarColor = themeData.primaryColor;
       if (themeData.primaryColorBrightness == ThemeBrightness.light) {
-        iconThemeColor = IconThemeColor.black;
         defaultTextStyle = typography.black.title;
+        iconThemeData = const IconThemeData(color: IconThemeColor.black);
+      } else {
+        iconThemeData = const IconThemeData(color: IconThemeColor.white);
       }
     }
 
@@ -49,10 +51,7 @@ class ToolBar extends Component {
       children.add(
         new Flexible(
           child: new Padding(
-            child: new DefaultTextStyle(
-              style: defaultTextStyle,
-              child: center
-            ),
+            child: center,
             padding: new EdgeDims.only(left: 24.0)
           )
         )
@@ -62,9 +61,9 @@ class ToolBar extends Component {
     if (right != null)
       children.addAll(right);
 
-    return new Container(
-      child: new IconTheme(
-        data: new IconThemeData(color: iconThemeColor),
+    Widget content = new Container(
+      child: new DefaultTextStyle(
+        style: defaultTextStyle,
         child: new Flex(
           [new Container(child: new Flex(children), height: kToolBarHeight)],
           alignItems: FlexAlignItems.end
@@ -76,6 +75,10 @@ class ToolBar extends Component {
         boxShadow: shadows[2]
       )
     );
+
+    if (iconThemeData != null)
+      content = new IconTheme(data: iconThemeData, child: content);
+    return content;
   }
 
 }

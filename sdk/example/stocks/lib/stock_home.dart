@@ -252,11 +252,14 @@ class StockHome extends AnimatedComponent {
     return new ToolBar(
       left: new IconButton(
         icon: "navigation/arrow_back",
-        onPressed: _handleSearchEnd),
+        color: Theme.of(this).accentColor,
+        onPressed: _handleSearchEnd
+      ),
       center: new Input(
         focused: true,
         placeholder: 'Search stocks',
-        onChanged: _handleSearchQueryChanged),
+        onChanged: _handleSearchQueryChanged
+      ),
       backgroundColor: Theme.of(this).canvasColor
     );
   }
