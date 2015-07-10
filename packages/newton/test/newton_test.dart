@@ -151,4 +151,29 @@ void main() {
     var scroll2 = new ScrollSimulation(100.0, -800.0, 0.0, 300.0, spring, 0.3);
     expect(scroll2.isDone(4.5), true);
   });
+
+  test('scroll_with_inf_edge_ends', () {
+    var spring = new SpringDescription.withDampingRatio(
+        mass: 1.0, springConstant: 50.0, ratio: 0.5);
+
+    var scroll =
+        new ScrollSimulation(100.0, 400.0, 0.0, double.INFINITY, spring, 0.3);
+
+    expect(scroll.isDone(0.0), false);
+    expect(scroll.x(0.0), 100);
+    expect(scroll.dx(0.0), 400.0);
+
+    expect(scroll.x(1.0) > 330 && scroll.x(1.0) < 335, true);
+
+    expect(scroll.dx(1.0), 120.0);
+    expect(scroll.dx(2.0), 36.0);
+    expect(scroll.dx(3.0), 10.8);
+    expect(scroll.dx(4.0) < 3.5, true);
+
+    expect(scroll.isDone(5.0), true);
+    expect(scroll.x(5.0) > 431 && scroll.x(5.0) < 432, true);
+
+    // We should never switch
+    expect(scroll.currentIntervalOffset, 0.0);
+  });
 }
