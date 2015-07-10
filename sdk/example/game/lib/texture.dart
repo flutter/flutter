@@ -94,9 +94,9 @@ class Texture {
       Rect rotatedSpriteSourceSize = rotatedSpriteSourcePoint & new Size(originalFrameSize.height, originalFrameSize.width);
 
       // Draw the rotated sprite
-      canvas.rotate(-Math.PI/2.0);
+      canvas.rotate(-math.PI/2.0);
       canvas.drawImageRect(image, rotatedFrame, rotatedSpriteSourceSize, paint);
-      canvas.rotate(Math.PI/2.0);
+      canvas.rotate(math.PI/2.0);
     } else {
       // Draw the sprite
       canvas.drawImageRect(image, frame, spriteSourceSize, paint);

@@ -1,8 +1,8 @@
 part of sprites;
 
-double convertDegrees2Radians(double degrees) => degrees * Math.PI/180.8;
+double convertDegrees2Radians(double degrees) => degrees * math.PI/180.8;
 
-double convertRadians2Degrees(double radians) => radians * 180.0/Math.PI;
+double convertRadians2Degrees(double radians) => radians * 180.0/math.PI;
 
 /// A base class for all objects that can be added to the sprite node tree and rendered to screen using [SpriteBox] and
 /// [SpriteWidget].
@@ -278,10 +278,10 @@ class Node {
       double radiansX = convertDegrees2Radians(_rotation);
       double radiansY = convertDegrees2Radians(_rotation);
       
-      cx = Math.cos(radiansX);
-      sx = Math.sin(radiansX);
-      cy = Math.cos(radiansY);
-      sy = Math.sin(radiansY);
+      cx = math.cos(radiansX);
+      sx = math.sin(radiansX);
+      cy = math.cos(radiansY);
+      sy = math.sin(radiansY);
     }
 
     // Create transformation matrix for scale, position and rotation

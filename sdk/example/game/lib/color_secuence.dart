@@ -24,7 +24,7 @@ class ColorSequence {
     colors = new List<Color>();
     colorStops = new List<double>.from(sequence.colorStops);
 
-    Math.Random rand = new Math.Random();
+    math.Random rand = new math.Random();
 
     for (Color color in sequence.colors) {
       int aDelta = ((rand.nextDouble() * 2.0 - 1.0) * alphaVar).toInt();

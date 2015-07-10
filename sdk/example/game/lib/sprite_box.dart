@@ -288,6 +288,7 @@ class SpriteBox extends RenderBox {
     _runActions(_rootNode, delta);
     _callUpdate(_rootNode, delta);
     _scheduleTick();
+    markNeedsPaint();
   }
 
   void _runActions(Node node, double dt) {

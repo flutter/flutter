@@ -79,7 +79,7 @@ class ParticleSystem extends Node {
   double _elapsedTime;
   int _numEmittedParticles = 0;
 
-  Math.Random _rand;
+  math.Random _rand;
 
   ParticleSystem(this.texture,
                  {this.life: 1.5,
@@ -115,7 +115,7 @@ class ParticleSystem extends Node {
                   this.numParticlesToEmit: 0,
                   this.autoRemoveOnFinish: true}) {
     _particles = new List<_Particle>();
-    _rand = new Math.Random();
+    _rand = new math.Random();
     _emitCounter = 0.0;
     _elapsedTime = 0.0;
     if (gravity == null) gravity = new Vector2.zero();
@@ -176,13 +176,13 @@ class ParticleSystem extends Node {
       particle.pos += new Vector2.copy(particle.dir).scale(dt);
 
       // Size
-      particle.size = Math.max(particle.size + particle.deltaSize * dt, 0.0);
+      particle.size = math.max(particle.size + particle.deltaSize * dt, 0.0);
 
       // Angle
       particle.rotation += particle.deltaRotation * dt;
 
       // Color
-      particle.colorPos = Math.min(particle.colorPos + particle.deltaColorPos * dt, 1.0);
+      particle.colorPos = math.min(particle.colorPos + particle.deltaColorPos * dt, 1.0);
     }
 
     if (autoRemoveOnFinish && _particles.length == 0 && _numEmittedParticles > 0) {
@@ -195,7 +195,7 @@ class ParticleSystem extends Node {
     _Particle particle = new _Particle();
 
     // Time to live
-    particle.timeToLive = Math.max(life + lifeVar * randMinus1To1(), 0.0);
+    particle.timeToLive = math.max(life + lifeVar * randMinus1To1(), 0.0);
 
     // Position
     Point srcPos = Point.origin;
@@ -203,8 +203,8 @@ class ParticleSystem extends Node {
                                srcPos.y + posVar.y * randMinus1To1());
 
     // Size
-    particle.size = Math.max(startSize + startSizeVar * randMinus1To1(), 0.0);
-    double endSizeFinal = Math.max(endSize + endSizeVar * randMinus1To1(), 0.0);
+    particle.size = math.max(startSize + startSizeVar * randMinus1To1(), 0.0);
+    double endSizeFinal = math.max(endSize + endSizeVar * randMinus1To1(), 0.0);
     particle.deltaSize = (endSizeFinal - particle.size) / particle.timeToLive;
 
     // Rotation
@@ -214,7 +214,7 @@ class ParticleSystem extends Node {
 
     // Direction
     double dirRadians = convertDegrees2Radians(direction + directionVar * randMinus1To1());
-    Vector2 dirVector = new Vector2(Math.cos(dirRadians), Math.sin(dirRadians));
+    Vector2 dirVector = new Vector2(math.cos(dirRadians), math.sin(dirRadians));
     double speedFinal = speed + speedVar * randMinus1To1();
     particle.dir = dirVector.scale(speedFinal);
 
@@ -247,12 +247,12 @@ class ParticleSystem extends Node {
       double scos;
       double ssin;
       if (rotateToMovement) {
-        double extraRotation = Math.atan2(particle.dir[1], particle.dir[0]);
-        scos = Math.cos(convertDegrees2Radians(particle.rotation) + extraRotation) * particle.size;
-        ssin = Math.sin(convertDegrees2Radians(particle.rotation) + extraRotation) * particle.size;
+        double extraRotation = math.atan2(particle.dir[1], particle.dir[0]);
+        scos = math.cos(convertDegrees2Radians(particle.rotation) + extraRotation) * particle.size;
+        ssin = math.sin(convertDegrees2Radians(particle.rotation) + extraRotation) * particle.size;
       } else {
-        scos = Math.cos(convertDegrees2Radians(particle.rotation)) * particle.size;
-        ssin = Math.sin(convertDegrees2Radians(particle.rotation)) * particle.size;
+        scos = math.cos(convertDegrees2Radians(particle.rotation)) * particle.size;
+        ssin = math.sin(convertDegrees2Radians(particle.rotation)) * particle.size;
       }
       RSTransform transform = new RSTransform(scos, ssin, particle.pos[0], particle.pos[1]);
       transforms.add(transform);
