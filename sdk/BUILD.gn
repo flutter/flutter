@@ -50,7 +50,7 @@ dart_pkg("sky") {
     "lib/theme/typography.dart",
     "lib/theme/view_configuration.dart",
     "lib/widgets/animated_component.dart",
-    "lib/widgets/animated_container.dart",
+    "lib/widgets/animation_builder.dart",
     "lib/widgets/basic.dart",
     "lib/widgets/block_viewport.dart",
     "lib/widgets/button_base.dart",

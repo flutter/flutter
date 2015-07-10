@@ -20,16 +20,19 @@ class Input extends StatefulComponent {
          this.placeholder,
          this.onChanged,
          this.focused})
-      : super(key: key) {
-    _editableValue = new EditableString(
-      text: _value,
-      onUpdated: _handleTextUpdated
-    );
-  }
+      : super(key: key);
 
   String placeholder;
   ValueChanged onChanged;
   bool focused = false;
+
+  void initState() {
+    _editableValue = new EditableString(
+      text: _value,
+      onUpdated: _handleTextUpdated
+    );
+    super.initState();
+  }
 
   void syncFields(Input source) {
     placeholder = source.placeholder;

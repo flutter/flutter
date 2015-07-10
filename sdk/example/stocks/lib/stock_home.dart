@@ -5,7 +5,7 @@
 import 'package:sky/editing/input.dart';
 import 'package:sky/animation/animation_performance.dart';
 import 'package:sky/widgets/animated_component.dart';
-import 'package:sky/widgets/animated_container.dart';
+import 'package:sky/widgets/animation_builder.dart';
 import 'package:sky/theme/colors.dart' as colors;
 import 'package:sky/widgets/basic.dart';
 import 'package:sky/widgets/drawer.dart';
@@ -58,7 +58,7 @@ class StockHome extends AnimatedComponent {
   bool _isSearching = false;
   String _searchQuery;
 
-  AnimatedContainer _snackbarTransform;
+  AnimationBuilder _snackbarTransform;
 
   void _handleSearchBegin() {
     navigator.pushState("/search", (_) {
@@ -282,7 +282,7 @@ class StockHome extends AnimatedComponent {
 
   void _handleStockPurchased() {
     setState(() {
-      _snackbarTransform = new AnimatedContainer()
+      _snackbarTransform = new AnimationBuilder()
         ..position = new AnimatedType<Point>(const Point(0.0, 45.0), end: Point.origin);
       var performance = _snackbarTransform.createPerformance(
           [_snackbarTransform.position], duration: _kSnackbarSlideDuration);

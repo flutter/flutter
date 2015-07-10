@@ -521,6 +521,7 @@ abstract class StatefulComponent extends Component {
   StatefulComponent({ String key }) : super(key: key);
 
   bool _disqualifiedFromEverAppearingAgain = false;
+  bool _isStateInitialized = false;
 
   void didMount() {
     assert(!_disqualifiedFromEverAppearingAgain);
@@ -534,6 +535,11 @@ abstract class StatefulComponent extends Component {
 
   void _sync(Widget old, dynamic slot) {
     assert(!_disqualifiedFromEverAppearingAgain);
+    // TODO(ianh): _sync should only be called once when old == null
+    if (old == null && !_isStateInitialized) {
+      initState();
+      _isStateInitialized = true;
+    }
     super._sync(old, slot);
   }
 
@@ -566,6 +572,11 @@ abstract class StatefulComponent extends Component {
   // Make sure to call super.syncFields(source) unless you are
   // extending StatefulComponent directly.
   void syncFields(Component source);
+
+  // Stateful components can override initState if they want
+  // to do non-trivial work to initialize state. This is
+  // always called before build().
+  void initState() { }
 
   void setState(Function fn()) {
     assert(!_disqualifiedFromEverAppearingAgain);

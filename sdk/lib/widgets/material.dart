@@ -5,7 +5,7 @@
 import '../animation/animation_performance.dart';
 import '../painting/box_painter.dart';
 import 'animated_component.dart';
-import 'animated_container.dart';
+import 'animation_builder.dart';
 import 'basic.dart';
 import 'default_text_style.dart';
 import 'theme.dart';
@@ -27,29 +27,44 @@ class Material extends AnimatedComponent {
   Material({
     String key,
     this.child,
-    MaterialType type: MaterialType.card,
-    int level: 0,
-    Color color: null
+    this.type: MaterialType.card,
+    this.level: 0,
+    this.color
   }) : super(key: key) {
-    if (level == null) level = 0;
-    _container = new AnimatedContainer()
+    assert(level != null);
+  }
+
+  Widget child;
+  MaterialType type;
+  int level;
+  Color color;
+
+  AnimationBuilder _builder;
+
+  void initState() {
+    _builder = new AnimationBuilder()
       ..shadow = new AnimatedType<double>(level.toDouble())
       ..backgroundColor = _getBackgroundColor(type, color)
       ..borderRadius = edges[type]
       ..shape = type == MaterialType.circle ? Shape.circle : Shape.rectangle;
-    watchPerformance(_container.createPerformance(
-        [_container.shadow], duration: _kAnimateShadowDuration));
-    watchPerformance(_container.createPerformance(
-        [_container.backgroundColor], duration: _kAnimateColorDuration));
+    watchPerformance(_builder.createPerformance(
+        [_builder.shadow], duration: _kAnimateShadowDuration));
+    watchPerformance(_builder.createPerformance(
+        [_builder.backgroundColor], duration: _kAnimateColorDuration));
+    super.initState();
   }
-
-  Widget child;
-
-  AnimatedContainer _container;
 
   void syncFields(Material source) {
     child = source.child;
-    _container.syncFields(source._container);
+    type = source.type;
+    level = source.level;
+    color = source.color;
+    _builder.updateFields(
+      shadow: new AnimatedType<double>(level.toDouble()),
+      backgroundColor: _getBackgroundColor(type, color),
+      borderRadius: edges[type],
+      shape: type == MaterialType.circle ? Shape.circle : Shape.rectangle
+    );
     super.syncFields(source);
   }
 
@@ -70,7 +85,7 @@ class Material extends AnimatedComponent {
   }
 
   Widget build() {
-    return _container.build(
+    return _builder.build(
         new DefaultTextStyle(style: Theme.of(this).text.body1, child: child)
     );
   }

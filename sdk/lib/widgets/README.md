@@ -335,7 +335,7 @@ Let's walk through the differences in `MyDialog` caused by its being stateful:
    components created by the parent component are retained in the widget
    hierchy. Old _stateful_ components, however, cannot simply be discarded
    because they contain state that needs to be preserved. Instead, the old
-   stateful components are retained in the widget hiearchy and asked to
+   stateful components are retained in the widget hierarchy and asked to
    `syncFields` with the new instance of the component created by the parent in
    its `build` function.
 
@@ -385,6 +385,22 @@ Components often override `didUnmount` to release resources or to cancel
 subscriptions to event streams from outside the widget hierachy. When overriding
 either `didMount` or `didUnmount`, a component should call its superclass's
 `didMount` or `didUnmount` function.
+
+initState
+---------
+
+The framework calls the `initState` function on stateful components before
+building them. The default implementation of initState does nothing. If your
+component requires non-trivial work to initialize its state, you should
+override initState and do it there rather than doing it in the stateful
+component's constructor. If the component doesn't need to be built (for
+example, if it was constructed just to have its fields synchronized with
+an existing stateful component) you'll avoid unnecessary work. Also, some
+operations that involve interacting with the widget hierarchy cannot be
+done in a component's constructor.
+
+When overriding `initState`, a component should call its superclass's 
+`initState` function.
 
 Keys
 ----

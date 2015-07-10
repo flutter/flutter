@@ -24,16 +24,19 @@ import 'measurement.dart';
 
 class HomeFragment extends StatefulComponent {
 
-  HomeFragment(this.navigator, this.userData) {
-    // if (debug)
-    //   new Timer(new Duration(seconds: 1), dumpState);
-    _drawerController = new DrawerController(_handleDrawerStatusChanged);
-  }
+  HomeFragment(this.navigator, this.userData);
 
   Navigator navigator;
   List<Measurement> userData;
 
   FitnessMode _fitnessMode = FitnessMode.measure;
+
+  void initState {
+    // if (debug)
+    //   new Timer(new Duration(seconds: 1), dumpState);
+    _drawerController = new DrawerController(_handleDrawerStatusChanged);
+    super.initState();
+  }
 
   void syncFields(HomeFragment source) {
     navigator = source.navigator;

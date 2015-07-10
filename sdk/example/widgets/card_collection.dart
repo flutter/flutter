@@ -10,7 +10,7 @@ import 'package:sky/animation/scroll_behavior.dart';
 import 'package:sky/base/lerp.dart';
 import 'package:sky/painting/text_style.dart';
 import 'package:sky/theme/colors.dart';
-import 'package:sky/widgets/animated_container.dart';
+import 'package:sky/widgets/animation_builder.dart';
 import 'package:sky/widgets/basic.dart';
 import 'package:sky/widgets/block_viewport.dart';
 import 'package:sky/widgets/card.dart';
@@ -78,7 +78,7 @@ class CardCollectionApp extends App {
   List<int> visibleCardIndices;
 
   CardCollectionApp() {
-    _activeCardTransform = new AnimatedContainer()
+    _activeCardTransform = new AnimationBuilder()
       ..position = new AnimatedType<Point>(Point.origin)
       ..opacity = new AnimatedType<double>(1.0, end: 0.0);
 
@@ -91,7 +91,7 @@ class CardCollectionApp extends App {
   }
 
   int _activeCardIndex = -1;
-  AnimatedContainer _activeCardTransform;
+  AnimationBuilder _activeCardTransform;
   AnimationPerformance _activeCardAnimation;
   double _activeCardWidth;
   double _activeCardDragX = 0.0;

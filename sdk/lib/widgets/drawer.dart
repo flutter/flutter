@@ -8,7 +8,7 @@ import '../animation/animation_performance.dart';
 import '../animation/curves.dart';
 import '../theme/shadows.dart';
 import 'animated_component.dart';
-import 'animated_container.dart';
+import 'animation_builder.dart';
 import 'basic.dart';
 import 'theme.dart';
 
@@ -37,19 +37,19 @@ typedef void DrawerStatusChangeHandler (bool showing);
 
 class DrawerController {
   DrawerController(this.onStatusChange) {
-    container = new AnimatedContainer()
+    builder = new AnimationBuilder()
       ..position = new AnimatedType<Point>(
           new Point(-_kWidth, 0.0), end: Point.origin, curve: _kAnimationCurve);
-    performance = container.createPerformance([container.position],
+    performance = builder.createPerformance([builder.position],
                                               duration: _kBaseSettleDuration)
         ..addListener(_checkValue);
   }
   final DrawerStatusChangeHandler onStatusChange;
 
   AnimationPerformance performance;
-  AnimatedContainer container;
+  AnimationBuilder builder;
 
-  double get xPosition => container.position.value.x;
+  double get xPosition => builder.position.value.x;
 
   bool _oldClosedState = true;
   void _checkValue() {
@@ -132,7 +132,7 @@ class Drawer extends AnimatedComponent {
       onGestureTap: controller.handleMaskTap
     );
 
-    Widget content = controller.container.build(
+    Widget content = controller.builder.build(
       new Container(
         decoration: new BoxDecoration(
           backgroundColor: Theme.of(this).canvasColor,

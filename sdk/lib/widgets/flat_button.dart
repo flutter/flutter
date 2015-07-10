@@ -29,5 +29,5 @@ class FlatButton extends MaterialButton {
     }
   }
 
-  int get level => null;
+  int get level => 0;
 }

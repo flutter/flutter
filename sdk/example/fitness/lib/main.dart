@@ -16,7 +16,9 @@ import 'fitness_types.dart';
 class FitnessApp extends App {
 
   NavigationState _navigationState;
-  FitnessApp() {
+  FitnessApp();
+
+  void initState() {
     _navigationState = new NavigationState([
       new Route(
         name: '/', 
@@ -27,6 +29,7 @@ class FitnessApp extends App {
         builder: (navigator, route) => new SettingsFragment(navigator, backupSetting, settingsUpdater)
       ),
     ]);
+    super.initState();
   }
 
   void onBack() {

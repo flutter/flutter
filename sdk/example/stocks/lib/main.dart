@@ -19,7 +19,9 @@ import 'stock_types.dart';
 class StocksApp extends App {
 
   NavigationState _navigationState;
-  StocksApp() {
+  StocksApp();
+
+  void initState() {
     _navigationState = new NavigationState([
       new Route(
         name: '/',
@@ -30,6 +32,7 @@ class StocksApp extends App {
         builder: (navigator, route) => new StockSettings(navigator, optimismSetting, backupSetting, settingsUpdater)
       ),
     ]);
+    super.initState();
   }
 
   void onBack() {

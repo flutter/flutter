@@ -11,8 +11,8 @@ import '../painting/box_painter.dart';
 import '../theme/shadows.dart';
 import 'basic.dart';
 
-// This class builds a Builder object from a collection of optionally-
-// animated properties. Use syncFields to update the Builder's properties,
+// This class builds a Container object from a collection of optionally-
+// animated properties. Use syncFields to update the Container's properties,
 // which will optionally animate them using an AnimationPerformance.
 class AnimationBuilder {
   AnimatedType<double> opacity;
@@ -65,16 +65,17 @@ class AnimationBuilder {
     return current;
   }
 
-  void syncFields(AnimationBuilder source) {
-    _syncField(position, source.position);
-    _syncField(shadow, source.shadow);
-    _syncField(backgroundColor, source.backgroundColor);
-
-    borderRadius = source.borderRadius;
-    shape = source.shape;
+  void updateFields({ AnimatedType<double> shadow,
+                      AnimatedColor backgroundColor,
+                      double borderRadius,
+                      Shape shape }) {
+    _updateField(this.shadow, shadow);
+    _updateField(this.backgroundColor, backgroundColor);
+    this.borderRadius = borderRadius;
+    this.shape = shape;
   }
 
-  void _syncField(AnimatedType variable, AnimatedType sourceVariable) {
+  void _updateField(AnimatedType variable, AnimatedType sourceVariable) {
     if (variable == null)
       return;  // TODO(mpcomplete): Should we handle transition from null?
 
