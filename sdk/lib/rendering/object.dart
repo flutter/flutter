@@ -303,6 +303,9 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
 
   static bool _debugDoingPaint = false;
   static bool get debugDoingPaint => _debugDoingPaint;
+  static void set debugDoingPaint(bool value) {
+    _debugDoingPaint = value;
+  }
   bool _debugDoingThisPaint = false;
   bool get debugDoingThisPaint => _debugDoingThisPaint;
   static RenderObject _debugActivePaint = null;
