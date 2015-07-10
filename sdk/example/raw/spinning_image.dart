@@ -18,7 +18,7 @@ void beginFrame(double timeStamp) {
     timeBase = timeStamp;
   double delta = timeStamp - timeBase;
   PictureRecorder recorder = new PictureRecorder();
-  Canvas canvas = new Canvas(recorder, new Size(view.width, view.height));
+  Canvas canvas = new Canvas(recorder, Point.origin & new Size(view.width, view.height));
   canvas.translate(view.width / 2.0, view.height / 2.0);
   canvas.rotate(math.PI * delta / 1800);
   canvas.scale(0.2, 0.2);

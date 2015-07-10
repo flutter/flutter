@@ -38,7 +38,7 @@ void drawText(sky.Canvas canvas, String lh) {
   paint.color = const sky.Color(0xFFFF9000);
   paint.setStyle(sky.PaintingStyle.stroke);
   paint.strokeWidth = 3.0;
-  canvas.drawPath(path, paint);  
+  canvas.drawPath(path, paint);
 
   // paint the text
   layoutRoot.paint(canvas);
@@ -47,7 +47,7 @@ void drawText(sky.Canvas canvas, String lh) {
 void main() {
   // prepare the rendering
   sky.PictureRecorder recorder = new sky.PictureRecorder();
-  sky.Canvas canvas = new sky.Canvas(recorder, new sky.Size(sky.view.width, sky.view.height));
+  sky.Canvas canvas = new sky.Canvas(recorder, new sky.Rect.fromLTWH(0.0, 0.0, sky.view.width, sky.view.height));
 
   // background
   sky.Paint paint = new sky.Paint();

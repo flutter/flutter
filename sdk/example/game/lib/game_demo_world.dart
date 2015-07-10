@@ -23,8 +23,6 @@ const int _numFramesShieldActive = 60 * 5;
 const int _numFramesShieldFlickers = 60;
 
 class GameDemoWorld extends NodeWithSize {
-  App _app;
-
   // Images
   Image _imgNebula;
 
@@ -33,7 +31,6 @@ class GameDemoWorld extends NodeWithSize {
   // Inputs
   double _joystickX = 0.0;
   double _joystickY = 0.0;
-  bool _fire;
 
   Node _gameLayer;
 
@@ -48,7 +45,7 @@ class GameDemoWorld extends NodeWithSize {
   int _numFrames = 0;
   bool _isGameOver = false;
 
-  GameDemoWorld(this._app, ImageMap images, this._spriteSheet) : super(new Size(_gameSizeWidth, _gameSizeHeight)) {
+  GameDemoWorld(App app, ImageMap images, this._spriteSheet) : super(new Size(_gameSizeWidth, _gameSizeHeight)) {
 
     // Fetch images
     _imgNebula = images["assets/nebula.png"];

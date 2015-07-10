@@ -6,14 +6,11 @@ import 'dart:sky';
 
 import 'package:sky/mojo/activity.dart' as activity;
 import 'package:sky/mojo/asset_bundle.dart';
-import 'package:sky/mojo/shell.dart' as shell;
 import 'package:sky/painting/box_painter.dart';
 import 'package:sky/theme/colors.dart' as colors;
 import 'package:sky/theme/typography.dart' as typography;
 import 'package:sky/widgets/basic.dart';
 import 'package:sky/widgets/card.dart';
-import 'package:sky/widgets/fixed_height_scrollable.dart';
-import 'package:sky/widgets/flat_button.dart';
 import 'package:sky/widgets/material.dart';
 import 'package:sky/widgets/scaffold.dart';
 import 'package:sky/widgets/task_description.dart';
@@ -66,7 +63,7 @@ class SkyDemo {
   SkyDemo({ this.name, this.href, this.bundle, this.description, this.textTheme, this.decoration });
 }
 
-List<Widget> demos = [
+List<SkyDemo> demos = [
   new SkyDemo(
     name: 'Stocks',
     href: '../../stocks/lib/main.dart',

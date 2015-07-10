@@ -53,7 +53,7 @@ class MojoAssetBundle extends AssetBundle {
     return new MojoAssetBundle(bundle);
   }
 
-  final AssetBundleProxy _bundle;
+  AssetBundleProxy _bundle;
   Map<String, Future<sky.Image>> _imageCache = new Map<String, Future<sky.Image>>();
   Map<String, Future<String>> _stringCache = new Map<String, Future<String>>();
 

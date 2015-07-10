@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import "dart:math";
 import 'dart:sky';
 
 PaintingNode paintingNode = null;
@@ -26,7 +25,7 @@ Picture draw(int a, int r, int g, int b) {
 
     paintingNode.setBackingDrawable(innerRecorder.endRecordingAsDrawable());
   }
-  canvas.drawPaintingNode(paintingNode);
+  canvas.drawPaintingNode(paintingNode, Point.origin);
 
   return recorder.endRecording();
 }

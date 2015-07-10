@@ -98,6 +98,8 @@ abstract class RenderSector extends RenderObject {
     assert(sizedByParent);
   }
 
+  Rect get paintBounds => new Rect.fromLTWH(0.0, 0.0, 2.0 * deltaRadius, 2.0 * deltaRadius);
+
   bool hitTest(HitTestResult result, { double radius, double theta }) {
     assert(parentData is SectorParentData);
     if (radius < parentData.radius || radius >= parentData.radius + deltaRadius ||
@@ -492,7 +494,7 @@ class RenderBoxToRenderSectorAdapter extends RenderBox {
     result.add(new BoxHitTestEntry(this, position));
     return true;
   }
-  
+
 }
 
 class RenderSolidColor extends RenderDecoratedSector {
