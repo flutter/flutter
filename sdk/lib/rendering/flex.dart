@@ -47,12 +47,11 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     FlexDirection direction: FlexDirection.horizontal,
     FlexJustifyContent justifyContent: FlexJustifyContent.start,
     FlexAlignItems alignItems: FlexAlignItems.center
-    }) : _direction = direction,
-         _justifyContent = justifyContent,
-         _alignItems = alignItems {
-      addAll(children);
-    }
-
+  }) : _direction = direction,
+       _justifyContent = justifyContent,
+       _alignItems = alignItems {
+    addAll(children);
+  }
 
   FlexDirection _direction;
   FlexDirection get direction => _direction;

@@ -4,14 +4,15 @@
 
 import 'package:sky/widgets/basic.dart';
 import 'package:sky/widgets/checkbox.dart';
-import 'package:sky/widgets/switch.dart';
-import 'package:sky/widgets/flat_button.dart';
 import 'package:sky/widgets/dialog.dart';
+import 'package:sky/widgets/flat_button.dart';
 import 'package:sky/widgets/icon_button.dart';
 import 'package:sky/widgets/material.dart';
 import 'package:sky/widgets/menu_item.dart';
 import 'package:sky/widgets/navigator.dart';
 import 'package:sky/widgets/scaffold.dart';
+import 'package:sky/widgets/scrollable_viewport.dart';
+import 'package:sky/widgets/switch.dart';
 import 'package:sky/widgets/tool_bar.dart';
 
 import 'stock_types.dart';
@@ -89,26 +90,28 @@ class StockSettings extends StatefulComponent {
     // (whereby tapping the widgets below causes both the widget and the menu item to fire their callbacks)
     return new Material(
       type: MaterialType.canvas,
-      child: new Container(
-        padding: const EdgeDims.symmetric(vertical: 20.0),
-        child: new Block([
-          new MenuItem(
-            icon: 'action/thumb_up',
-            onPressed: () => _confirmOptimismChange(),
-            children: [
-              new Flexible(child: new Text('Everything is awesome')),
-              new Checkbox(value: optimism == StockMode.optimistic, onChanged: _handleOptimismChanged)
-            ]
-          ),
-          new MenuItem(
-            icon: 'action/backup',
-            onPressed: () { _handleBackupChanged(!(backup == BackupMode.enabled)); },
-            children: [
-              new Flexible(child: new Text('Back up stock list to the cloud')),
-              new Switch(value: backup == BackupMode.enabled, onChanged: _handleBackupChanged)
-            ]
-          ),
-        ])
+      child: new ScrollableViewport(
+        child: new Container(
+          padding: const EdgeDims.symmetric(vertical: 20.0),
+          child: new Block([
+            new MenuItem(
+              icon: 'action/thumb_up',
+              onPressed: () => _confirmOptimismChange(),
+              children: [
+                new Flexible(child: new Text('Everything is awesome')),
+                new Checkbox(value: optimism == StockMode.optimistic, onChanged: _handleOptimismChanged)
+              ]
+            ),
+            new MenuItem(
+              icon: 'action/backup',
+              onPressed: () { _handleBackupChanged(!(backup == BackupMode.enabled)); },
+              children: [
+                new Flexible(child: new Text('Back up stock list to the cloud')),
+                new Switch(value: backup == BackupMode.enabled, onChanged: _handleBackupChanged)
+              ]
+            ),
+          ])
+        )
       )
     );
   }

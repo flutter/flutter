@@ -12,6 +12,11 @@ abstract class OffsetBase {
 
   bool get isInfinite => _dx >= double.INFINITY || _dy >= double.INFINITY;
 
+  bool operator <(OffsetBase other) => _dx < other._dx && _dy < other._dy;
+  bool operator <=(OffsetBase other) => _dx <= other._dx && _dy <= other._dy;
+  bool operator >(OffsetBase other) => _dx > other._dx && _dy > other._dy;
+  bool operator >=(OffsetBase other) => _dx > other._dx && _dy >= other._dy;
+
   bool operator ==(other) {
     return other is OffsetBase &&
            other.runtimeType == runtimeType &&

@@ -4,8 +4,6 @@
 
 import 'dart:math' as math;
 
-import 'package:vector_math/vector_math.dart';
-
 import '../animation/scroll_behavior.dart';
 import 'basic.dart';
 import 'scrollable.dart';
@@ -61,15 +59,16 @@ abstract class FixedHeightScrollable extends Scrollable {
       _updateScrollOffset();
     }
 
-    var itemShowIndex = 0;
-    var itemShowCount = 0;
-    Matrix4 transform = new Matrix4.identity();
+    int itemShowIndex = 0;
+    int itemShowCount = 0;
+
+    double offsetY = 0.0;
 
     if (_height != null && _height > 0.0) {
       if (scrollOffset < 0.0) {
         double visibleHeight = _height + scrollOffset;
         itemShowCount = (visibleHeight / itemHeight).round() + 1;
-        transform.translate(0.0, -scrollOffset);
+        offsetY = scrollOffset;
       } else {
         itemShowCount = (_height / itemHeight).ceil() + 1;
         double alignmentDelta = -scrollOffset % itemHeight;
@@ -79,7 +78,7 @@ abstract class FixedHeightScrollable extends Scrollable {
         double drawStart = scrollOffset + alignmentDelta;
         itemShowIndex = math.max(0, (drawStart / itemHeight).floor());
 
-        transform.translate(0.0, alignmentDelta);
+        offsetY = -alignmentDelta;
       }
     }
 
@@ -88,13 +87,11 @@ abstract class FixedHeightScrollable extends Scrollable {
 
     return new SizeObserver(
       callback: _handleSizeChanged,
-      child: new ClipRect(
-        child: new Transform(
-          transform: transform,
-          child: new Container(
-            padding: padding,
-            child: new Block(items)
-          )
+      child: new Viewport(
+        offset: offsetY,
+        child: new Container(
+          padding: padding,
+          child: new Block(items)
         )
       )
     );

@@ -1019,6 +1019,132 @@ class RenderBaseline extends RenderShiftedBox {
   String debugDescribeSettings(String prefix) => '${super.debugDescribeSettings(prefix)}${prefix}baseline: ${baseline}\nbaselineType: ${baselineType}';
 }
 
+enum ViewportScrollDirection { horizontal, vertical, both }
+
+class RenderViewport extends RenderBox with RenderObjectWithChildMixin<RenderBox> {
+
+  RenderViewport({
+    RenderBox child,
+    Offset scrollOffset,
+    ViewportScrollDirection direction: ViewportScrollDirection.vertical
+  }) : _scrollOffset = scrollOffset,
+       _scrollDirection = direction {
+    assert(_offsetIsSane(scrollOffset, direction));
+    this.child = child;
+  }
+
+  bool _offsetIsSane(Offset offset, ViewportScrollDirection direction) {
+    switch (direction) {
+      case ViewportScrollDirection.both:
+        return true;
+      case ViewportScrollDirection.horizontal:
+        return offset.dy == 0.0;
+      case ViewportScrollDirection.vertical:
+        return offset.dx == 0.0;
+    }
+  }
+
+  Offset _scrollOffset;
+  Offset get scrollOffset => _scrollOffset;
+  void set scrollOffset(Offset value) {
+    if (value == _scrollOffset)
+      return;
+    assert(_offsetIsSane(value, scrollDirection));
+    _scrollOffset = value;
+    markNeedsPaint();
+  }
+
+  ViewportScrollDirection _scrollDirection;
+  ViewportScrollDirection get scrollDirection => _scrollDirection;
+  void set scrollDirection(ViewportScrollDirection value) {
+    if (value == _scrollDirection)
+      return;
+    assert(_offsetIsSane(scrollOffset, value));
+    _scrollDirection = value;
+    markNeedsLayout();
+  }
+
+  BoxConstraints _getInnerConstraints(BoxConstraints constraints) {
+    BoxConstraints innerConstraints;
+    switch (scrollDirection) {
+      case ViewportScrollDirection.both:
+        innerConstraints = new BoxConstraints();
+        break;
+      case ViewportScrollDirection.horizontal:
+        innerConstraints = constraints.heightConstraints();
+        break;
+      case ViewportScrollDirection.vertical:
+        innerConstraints = constraints.widthConstraints();
+        break;
+    }
+    return innerConstraints;
+  }
+
+  double getMinIntrinsicWidth(BoxConstraints constraints) {
+    if (child != null)
+      return child.getMinIntrinsicWidth(_getInnerConstraints(constraints));
+    return super.getMinIntrinsicWidth(constraints);
+  }
+
+  double getMaxIntrinsicWidth(BoxConstraints constraints) {
+    if (child != null)
+      return child.getMaxIntrinsicWidth(_getInnerConstraints(constraints));
+    return super.getMaxIntrinsicWidth(constraints);
+  }
+
+  double getMinIntrinsicHeight(BoxConstraints constraints) {
+    if (child != null)
+      return child.getMinIntrinsicHeight(_getInnerConstraints(constraints));
+    return super.getMinIntrinsicHeight(constraints);
+  }
+
+  double getMaxIntrinsicHeight(BoxConstraints constraints) {
+    if (child != null)
+      return child.getMaxIntrinsicHeight(_getInnerConstraints(constraints));
+    return super.getMaxIntrinsicHeight(constraints);
+  }
+
+  // We don't override computeDistanceToActualBaseline(), because we
+  // want the default behaviour (returning null). Otherwise, as you
+  // scroll the RenderViewport, it would shift in its parent if the
+  // parent was baseline-aligned, which makes no sense.
+
+  void performLayout() {
+    if (child != null) {
+      child.layout(_getInnerConstraints(constraints), parentUsesSize: true);
+      size = constraints.constrain(child.size);
+      assert(child.parentData is BoxParentData);
+      child.parentData.position = Point.origin;
+    } else {
+      performResize();
+    }
+  }
+
+  void paint(PaintingCanvas canvas, Offset offset) {
+    if (child != null) {
+      bool _needsClip = offset < Offset.zero ||
+                        !(offset & size).contains(((offset - scrollOffset) & child.size).bottomRight);
+      if (_needsClip) {
+        canvas.save();
+        canvas.clipRect(offset & size);
+      }
+      canvas.paintChild(child, (offset - scrollOffset).toPoint());
+      if (_needsClip)
+        canvas.restore();
+    }
+  }
+
+  void hitTestChildren(HitTestResult result, { Point position }) {
+    if (child != null) {
+      assert(child.parentData is BoxParentData);
+      Rect childBounds = child.parentData.position & child.size;
+      if (childBounds.contains(position + -scrollOffset))
+        child.hitTest(result, position: position + scrollOffset);
+    }
+  }
+
+}
+
 class RenderImage extends RenderBox {
 
   RenderImage(sky.Image image, Size requestedSize)

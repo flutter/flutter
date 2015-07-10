@@ -10,6 +10,7 @@ import '../theme/shadows.dart';
 import 'animated_component.dart';
 import 'animation_builder.dart';
 import 'basic.dart';
+import 'scrollable_viewport.dart';
 import 'theme.dart';
 
 // TODO(eseidel): Draw width should vary based on device size:
@@ -138,7 +139,7 @@ class Drawer extends AnimatedComponent {
           backgroundColor: Theme.of(this).canvasColor,
           boxShadow: shadows[level]),
         width: _kWidth,
-        child: new Block(children)
+        child: new ScrollableBlock(children)
       ));
 
     return new Listener(

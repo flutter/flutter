@@ -6,7 +6,8 @@ import '../theme/colors.dart' as colors;
 import 'basic.dart';
 import 'default_text_style.dart';
 import 'material.dart';
-import "theme.dart";
+import 'scrollable_viewport.dart';
+import 'theme.dart';
 
 /// A material design dialog
 ///
@@ -88,7 +89,7 @@ class Dialog extends Component {
               level: 4,
               color: _color,
               child: new ShrinkWrapWidth(
-                child: new Block(children)
+                child: new ScrollableBlock(children)
               )
             )
           )

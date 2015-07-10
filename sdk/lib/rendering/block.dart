@@ -109,29 +109,15 @@ class RenderBlock extends RenderBlockBase {
     return defaultComputeDistanceToFirstActualBaseline(baseline);
   }
 
-  bool _hasVisualOverflow = false;
-
   void performLayout() {
+    assert(constraints.maxHeight >= double.INFINITY);
     super.performLayout();
     size = constraints.constrain(new Size(constraints.maxWidth, childrenHeight));
     assert(!size.isInfinite);
-
-    // FIXME(eseidel): Block lays out its children with unconstrained height
-    // yet itself remains constrained. Remember that our children wanted to
-    // be taller than we are so we know to clip them (and not cause confusing
-    // mismatch of painting vs. hittesting).
-    _hasVisualOverflow = childrenHeight > size.height;
   }
 
   void paint(PaintingCanvas canvas, Offset offset) {
-    if (_hasVisualOverflow) {
-      canvas.save();
-      canvas.clipRect(offset & size);
-    }
     defaultPaint(canvas, offset);
-    if (_hasVisualOverflow) {
-      canvas.restore();
-    }
   }
 
   void hitTestChildren(HitTestResult result, { Point position }) {
@@ -204,6 +190,7 @@ class RenderBlockViewport extends RenderBlockBase {
 
   bool get debugDoesLayoutWithCallback => true;
   void performLayout() {
+    assert(constraints.maxHeight < double.INFINITY);
     if (_callback != null) {
       try {
         _inCallback = true;

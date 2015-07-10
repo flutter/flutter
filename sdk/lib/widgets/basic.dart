@@ -281,6 +281,26 @@ class Baseline extends OneChildRenderObjectWrapper {
 
 }
 
+class Viewport extends OneChildRenderObjectWrapper {
+
+  Viewport({
+    String key,
+    this.offset: 0.0,
+    Widget child
+  }) : super(key: key, child: child);
+
+  final double offset;
+
+  RenderViewport get root => super.root;
+  RenderViewport createNode() => new RenderViewport(scrollOffset: new Offset(0.0, offset));
+
+  void syncRenderObject(Viewport old) {
+    super.syncRenderObject(old);
+    root.scrollOffset = new Offset(0.0, offset);
+  }
+
+}
+
 class SizeObserver extends OneChildRenderObjectWrapper {
 
   SizeObserver({ String key, this.callback, Widget child })

@@ -79,6 +79,7 @@ dart_pkg("sky") {
     "lib/widgets/scaffold.dart",
     "lib/widgets/scrollable.dart",
     "lib/widgets/scrollable_list.dart",
+    "lib/widgets/scrollable_viewport.dart",
     "lib/widgets/snack_bar.dart",
     "lib/widgets/switch.dart",
     "lib/widgets/tabs.dart",

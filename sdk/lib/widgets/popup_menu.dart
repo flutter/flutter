@@ -13,6 +13,7 @@ import '../theme/shadows.dart';
 import 'animated_component.dart';
 import 'basic.dart';
 import 'popup_menu_item.dart';
+import 'scrollable_viewport.dart';
 
 const Duration _kMenuOpenDuration = const Duration(milliseconds: 300);
 const Duration _kMenuCloseDuration = const Duration(milliseconds: 200);
@@ -146,12 +147,14 @@ class PopupMenu extends AnimatedComponent {
             ),
             child: new ShrinkWrapWidth(
               stepWidth: _kMenuWidthStep,
-              child: new Container(
-                padding: const EdgeDims.symmetric(
-                  horizontal: _kMenuHorizontalPadding,
-                  vertical: _kMenuVerticalPadding
-                ),
-                child: new Block(children)
+              child: new ScrollableViewport(
+                child: new Container(
+                  padding: const EdgeDims.symmetric(
+                    horizontal: _kMenuHorizontalPadding,
+                    vertical: _kMenuVerticalPadding
+                  ),
+                  child: new Block(children)
+                )
               )
             )
           )
