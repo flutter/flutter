@@ -6,35 +6,88 @@ import 'dart:sky' as sky;
 
 import 'package:vector_math/vector_math.dart';
 import 'package:sky/animation/animation_performance.dart';
+import 'package:sky/animation/scroll_behavior.dart';
 import 'package:sky/base/lerp.dart';
 import 'package:sky/painting/text_style.dart';
 import 'package:sky/theme/colors.dart';
 import 'package:sky/widgets/animated_container.dart';
 import 'package:sky/widgets/basic.dart';
+import 'package:sky/widgets/block_viewport.dart';
 import 'package:sky/widgets/card.dart';
 import 'package:sky/widgets/scaffold.dart';
+import 'package:sky/widgets/scrollable.dart';
 import 'package:sky/widgets/theme.dart';
 import 'package:sky/widgets/tool_bar.dart';
 import 'package:sky/widgets/widget.dart';
 
 
 const int _kCardDismissFadeoutMS = 300;
-const double _kMinCardFlingVelocity = 0.4;
-const double _kDismissCardThreshold = 0.70;
+const double _kMinFlingVelocity = 700.0;
+const double _kMinFlingVelocityDelta = 400.0;
+const double _kDismissCardThreshold = 0.6;
+
+class VariableHeightScrollable extends Scrollable {
+  VariableHeightScrollable({
+    String key,
+    this.builder,
+    this.token
+  }) : super(key: key);
+
+  IndexedBuilder builder;
+  Object token;
+
+  void syncFields(VariableHeightScrollable source) {
+    builder = source.builder;
+    token = source.token;
+    super.syncFields(source);
+  }
+
+  ScrollBehavior createScrollBehavior() => new OverscrollBehavior();
+  OverscrollBehavior get scrollBehavior => super.scrollBehavior;
+
+  void _handleSizeChanged(Size newSize) {
+    setState(() {
+      scrollBehavior.containerHeight = newSize.height;
+      scrollBehavior.contentsHeight = 5000.0;
+    });
+  }
+
+  Widget buildContent() {
+    return new SizeObserver(
+      callback: _handleSizeChanged,
+      child: new BlockViewport(
+        builder: builder,
+        startOffset: scrollOffset,
+        token: token
+      )
+    );
+  }
+}
 
 class CardCollectionApp extends App {
 
   final TextStyle cardLabelStyle =
     new TextStyle(color: White, fontSize: 18.0, fontWeight: bold);
 
+  final List<double> cardHeights = [
+    48.0, 64.0, 82.0, 46.0, 60.0, 55.0, 84.0, 96.0, 50.0, 
+    48.0, 64.0, 82.0, 46.0, 60.0, 55.0, 84.0, 96.0, 50.0,
+    48.0, 64.0, 82.0, 46.0, 60.0, 55.0, 84.0, 96.0, 50.0
+  ];
+
+  List<int> visibleCardIndices;
+  
   CardCollectionApp() {
     _activeCardTransform = new AnimatedContainer()
       ..position = new AnimatedType<Point>(Point.origin)
       ..opacity = new AnimatedType<double>(1.0, end: 0.0);
+
     _activeCardAnimation = _activeCardTransform.createPerformance(
         [_activeCardTransform.position, _activeCardTransform.opacity],
         duration: new Duration(milliseconds: _kCardDismissFadeoutMS));
     _activeCardAnimation.addListener(_handleAnimationProgressChanged);
+
+    visibleCardIndices = new List.generate(cardHeights.length, (i) => i);
   }
 
   int _activeCardIndex = -1;
@@ -43,7 +96,6 @@ class CardCollectionApp extends App {
   double _activeCardWidth;
   double _activeCardDragX = 0.0;
   bool _activeCardDragUnderway = false;
-  Set<int> _dismissedCardIndices = new Set<int>();
 
   Point get _activeCardDragEndPoint {
     return new Point(_activeCardDragX.sign * _activeCardWidth * _kDismissCardThreshold, 0.0);
@@ -52,7 +104,7 @@ class CardCollectionApp extends App {
   void _handleAnimationProgressChanged() {
     setState(() {
       if (_activeCardAnimation.isCompleted && !_activeCardDragUnderway)
-        _dismissedCardIndices.add(_activeCardIndex);
+        visibleCardIndices.remove(_activeCardIndex);
     });
   }
 
@@ -92,10 +144,16 @@ class CardCollectionApp extends App {
     setState(() {
       _activeCardDragUnderway = false;
       if (_activeCardAnimation.isCompleted)
-        _dismissedCardIndices.add(_activeCardIndex);
+        visibleCardIndices.remove(_activeCardIndex);
       else if (!_activeCardAnimation.isAnimating)
         _activeCardAnimation.progress = 0.0;
     });
+  }
+
+  bool _isHorizontalFlingGesture(sky.GestureEvent event) {
+    double vx = event.velocityX.abs();
+    double vy = event.velocityY.abs();
+    return vx - vy > _kMinFlingVelocityDelta && vx > _kMinFlingVelocity;
   }
 
   void _handleFlingStart(sky.GestureEvent event) {
@@ -103,19 +161,20 @@ class CardCollectionApp extends App {
       return;
 
     _activeCardDragUnderway = false;
-    double velocityX = event.velocityX / 1000;
-    if (velocityX.abs() >= _kMinCardFlingVelocity) {
+
+    if (_isHorizontalFlingGesture(event)) {
       double distance = 1.0 - _activeCardAnimation.progress;
       if (distance > 0.0) {
-        double duration = 150.0 * distance / velocityX.abs();
-        _activeCardDragX = velocityX.sign;
+        double duration = 250.0 * 1000.0 * distance / event.velocityX.abs();
+        _activeCardDragX = event.velocityX.sign;
         _activeCardAnimation.timeline.animateTo(1.0, duration: duration);
       }
     }
   }
 
-  Widget _buildCard(int index, Color color) {
-    Widget label = new Center(child: new Text("Item ${index}", style: cardLabelStyle));
+  Widget _buildCard(int cardIndex) {
+    Widget label = new Center(child: new Text("Item ${cardIndex}", style: cardLabelStyle));
+    Color color = lerpColor(Red[500], Blue[500], cardIndex / cardHeights.length);
     Widget card = new Card(
       child: new Padding(child: label, padding: const EdgeDims.all(8.0)),
       color: color
@@ -125,7 +184,7 @@ class CardCollectionApp extends App {
     // the user starts dragging it. Currently this causes Sky to drop the
     // rest of the pointer gesture, see https://github.com/domokit/mojo/issues/312.
     // As a workaround, always create the Transform and Opacity nodes.
-    if (index == _activeCardIndex) {
+    if (cardIndex == _activeCardIndex) {
       card = _activeCardTransform.build(card);
     } else {
       card = new Transform(child: card, transform: new Matrix4.identity());
@@ -133,8 +192,9 @@ class CardCollectionApp extends App {
     }
 
     return new Listener(
-      child: card,
-      onPointerDown: (event) { _handlePointerDown(event, index); },
+      key: "$cardIndex",
+      child: new Container(child: card, height: cardHeights[cardIndex]),
+      onPointerDown: (event) { _handlePointerDown(event, cardIndex); },
       onPointerMove: _handlePointerMove,
       onPointerUp: _handlePointerUpOrCancel,
       onPointerCancel: _handlePointerUpOrCancel,
@@ -142,31 +202,25 @@ class CardCollectionApp extends App {
     );
   }
 
-  Widget _buildCardCollection(List<double> heights) {
-    List<Widget> items = <Widget>[];
-    for(int index = 0; index < heights.length; index++) {
-      if (_dismissedCardIndices.contains(index))
-        continue;
-      Color color = lerpColor(Red[500], Blue[500], index / heights.length);
-      items.add(new Container(
-        child: _buildCard(index, color),
-        height: heights[index]
-      ));
-    }
-
-    return new Container(
-      child: new SizeObserver(child: new Block(items), callback: _handleSizeChanged),
-      padding: const EdgeDims.symmetric(vertical: 12.0, horizontal: 8.0),
-      decoration: new BoxDecoration(backgroundColor: Theme.of(this).primarySwatch[50])
-    );
+  Widget _builder(int index) {
+    if (index >= visibleCardIndices.length)
+      return null;
+    return _buildCard(visibleCardIndices[index]);
   }
 
   Widget build() {
+    Widget cardCollection = new Container(
+      padding: const EdgeDims.symmetric(vertical: 12.0, horizontal: 8.0),
+      decoration: new BoxDecoration(backgroundColor: Theme.of(this).primarySwatch[50]),
+      child: new VariableHeightScrollable(
+        builder: _builder,
+        token: visibleCardIndices.length
+      )
+    );
+
     return new Scaffold(
       toolbar: new ToolBar(center: new Text('Swipe Away')),
-      body: _buildCardCollection(
-          [48.0, 64.0, 82.0, 46.0, 60.0, 55.0, 84.0, 96.0, 50.0,
-           48.0, 64.0, 82.0, 46.0, 60.0, 55.0, 84.0, 96.0, 50.0])
+      body: new SizeObserver(child: cardCollection, callback: _handleSizeChanged)
     );
   }
 }

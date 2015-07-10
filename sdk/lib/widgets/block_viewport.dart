@@ -100,7 +100,7 @@ class BlockViewport extends RenderObjectWrapper {
     return right;
   }
 
-  bool _dirty = false;
+  bool _dirty = true;
 
   bool retainStatefulNodeIfPossible(BlockViewport newNode) {
     retainStatefulRenderObjectWrapper(newNode);
@@ -126,7 +126,7 @@ class BlockViewport extends RenderObjectWrapper {
         assert(_currentStartIndex >= 0);
         assert(builder != null);
         assert(root != null);
-        int lastIndex = _currentStartIndex + _currentChildCount;
+        int lastIndex = _currentStartIndex + _currentChildCount - 1;
         for (int index = _currentStartIndex; index <= lastIndex; index += 1) {
           Widget widget = builder(index);
           assert(widget != null);
