@@ -60,18 +60,12 @@ PAINT FOR FRAME #2 ----------------------------------------------
 2 |  |  |  |  | drawRect(Rect.fromLTRB(0.0, 104.0, 800.0, 600.0), Paint(color:Color(0xfffafafa)))
 2 |  |  |  |  | paintChild RenderSizeObserver at Point(0.0, 104.0)
 2 |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
-2 |  |  |  |  |  | paintChild RenderClipRect at Point(0.0, 104.0)
+2 |  |  |  |  |  | paintChild RenderViewport at Point(0.0, 104.0)
 2 |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 2 |  |  |  |  |  |  | save
 2 |  |  |  |  |  |  | clipRect(Rect.fromLTRB(0.0, 104.0, 800.0, 600.0))
-2 |  |  |  |  |  |  | paintChild RenderTransform at Point(0.0, 104.0)
+2 |  |  |  |  |  |  | paintChild RenderBlock at Point(0.0, 104.0)
 2 |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
-2 |  |  |  |  |  |  |  | save
-2 |  |  |  |  |  |  |  | translate(0.0, 104.0)
-2 |  |  |  |  |  |  |  | concat([1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0])
-2 |  |  |  |  |  |  |  | paintChild RenderBlock at Point(0.0, 0.0)
-2 |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
-2 |  |  |  |  |  |  |  | restore
 2 |  |  |  |  |  |  | restore
 2 |  |  | paintChild RenderDecoratedBox at Point(0.0, 0.0)
 2 |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
@@ -176,18 +170,12 @@ PAINT FOR FRAME #3 ----------------------------------------------
 3 |  |  |  |  | drawRect(Rect.fromLTRB(0.0, 104.0, 800.0, 600.0), Paint(color:Color(0xfffafafa)))
 3 |  |  |  |  | paintChild RenderSizeObserver at Point(0.0, 104.0)
 3 |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
-3 |  |  |  |  |  | paintChild RenderClipRect at Point(0.0, 104.0)
+3 |  |  |  |  |  | paintChild RenderViewport at Point(0.0, 104.0)
 3 |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 3 |  |  |  |  |  |  | save
 3 |  |  |  |  |  |  | clipRect(Rect.fromLTRB(0.0, 104.0, 800.0, 600.0))
-3 |  |  |  |  |  |  | paintChild RenderTransform at Point(0.0, 104.0)
+3 |  |  |  |  |  |  | paintChild RenderBlock at Point(0.0, 104.0)
 3 |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
-3 |  |  |  |  |  |  |  | save
-3 |  |  |  |  |  |  |  | translate(0.0, 104.0)
-3 |  |  |  |  |  |  |  | concat([1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0])
-3 |  |  |  |  |  |  |  | paintChild RenderBlock at Point(0.0, 0.0)
-3 |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
-3 |  |  |  |  |  |  |  | restore
 3 |  |  |  |  |  |  | restore
 3 |  |  | paintChild RenderDecoratedBox at Point(0.0, 0.0)
 3 |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
