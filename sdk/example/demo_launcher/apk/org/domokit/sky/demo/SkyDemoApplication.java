@@ -26,6 +26,7 @@ import org.domokit.sky.shell.SkyApplication;
  */
 public class SkyDemoApplication extends SkyApplication {
     private static final String[] DEMO_RESOURCES = {
+        "game.skyx",
         "interactive_flex.skyx",
         "mine_digger.skyx",
         "sector.skyx",

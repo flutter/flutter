@@ -6,9 +6,10 @@ group("example") {
   testonly = true
 
   deps = [
-    "//sky/sdk/example/rendering",
     "//sky/sdk/example/demo_launcher",
+    "//sky/sdk/example/game",
     "//sky/sdk/example/mine_digger",
+    "//sky/sdk/example/rendering",
     "//sky/sdk/example/stocks",
     "//sky/sdk/example/widgets",
   ]

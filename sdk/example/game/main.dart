@@ -1,34 +1,39 @@
+// Copyright 2015 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+import 'package:sky/mojo/asset_bundle.dart';
 import 'package:sky/widgets/basic.dart';
 import 'package:sky/widgets/widget.dart';
-import 'package:sky/mojo/net/fetch.dart';
 
 import 'lib/game_demo.dart';
 import 'lib/sprites.dart';
 
-void main() {
-  // Load images
-  new ImageMap([
-      "res/nebula.png",
-      "res/sprites.png",
-      "res/starfield.png",
-    ],
-    allImagesLoaded);
+AssetBundle _initBundle() {
+  if (rootBundle != null)
+    return rootBundle;
+  return new NetworkAssetBundle(Uri.base);
 }
 
-void allImagesLoaded(ImageMap loader) {
-  _loader = loader;
+final AssetBundle _bundle = _initBundle();
 
-  fetchBody("res/sprites.json").then((Response response) {
-    String json = response.bodyAsString();
-    _spriteSheet = new SpriteSheet(_loader["res/sprites.png"], json);
-    allResourcesLoaded();
-  });
-}
-
+ImageMap _loader;
+SpriteSheet _spriteSheet;
 GameDemoApp _app;
 
-void allResourcesLoaded() {
+main() async {
+  _loader = new ImageMap(_bundle);
+
+  await _loader.load([
+    'assets/nebula.png',
+    'assets/sprites.png',
+    'assets/starfield.png',
+  ]);
+
+  String json = await _bundle.loadString('assets/sprites.json');
+  _spriteSheet = new SpriteSheet(_loader['assets/sprites.png'], json);
   _app = new GameDemoApp();
+
   runApp(_app);
 }
 
@@ -58,6 +63,3 @@ class GameDemoApp extends App {
 void resetGame() {
   _app.scheduleBuild();
 }
-
-ImageMap _loader;
-SpriteSheet _spriteSheet;

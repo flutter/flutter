@@ -12,6 +12,7 @@ sky_app("demo_launcher") {
     apk_name = "SkyDemo"
 
     bundles = [
+      "//sky/sdk/example/game",
       "//sky/sdk/example/mine_digger",
       "//sky/sdk/example/rendering:interactive_flex",
       "//sky/sdk/example/stocks",

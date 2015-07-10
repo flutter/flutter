@@ -58,3 +58,8 @@ Future<Response> fetchBody(String relativeUrl) async {
   ByteData data = await core.DataPipeDrainer.drainHandle(response.body);
   return new Response(data);
 }
+
+Future<String> fetchString(String relativeUrl) async {
+  Response response = await fetchBody(relativeUrl);
+  return response.bodyAsString();
+}

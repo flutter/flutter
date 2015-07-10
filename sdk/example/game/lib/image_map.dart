@@ -1,37 +1,25 @@
+// Copyright 2015 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 part of sprites;
 
-typedef void ImageMapCallback(ImageMap preloader);
-
 class ImageMap {
+  ImageMap(AssetBundle bundle) : _bundle = bundle;
 
-  Map<String, Image> _images;
+  final AssetBundle _bundle;
+  final Map<String, Image> _images = new Map<String, Image>();
 
-  int _totalNumImages = 0;
-  int _numLoadedImages = 0;
-
-  ImageMapCallback _callback;
-
-  ImageMap(List<String> urls, ImageMapCallback this._callback) {
-    _images = new Map();
-    _totalNumImages = urls.length;
-    urls.forEach(_addURL);
+  Future<List<Image>> load(List<String> urls) {
+    return Future.wait(urls.map(_loadImage));
   }
 
-  void _addURL(String url) {
-    image_cache.load(url).then((Image image) {
-      // Store reference to image
-      _images[url] = image;
-
-      // Check if all images are loaded
-      _numLoadedImages++;
-      if (_numLoadedImages==_totalNumImages) {
-        // Everything loaded, make callback
-        _callback(this);
-      }
-    });
+  Future<Image> _loadImage(String url) async {
+    Image image = await _bundle.loadImage(url);
+    _images[url] = image;
+    return image;
   }
 
   Image getImage(String url) => _images[url];
-
   Image operator [](String url) => _images[url];
 }

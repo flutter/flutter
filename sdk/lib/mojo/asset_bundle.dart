@@ -4,7 +4,8 @@
 
 import 'dart:async';
 import 'dart:sky' as sky;
-import "dart:sky.internals" as internals;
+import 'dart:sky.internals' as internals;
+import 'dart:typed_data';
 
 import 'package:mojo/core.dart' as core;
 import 'package:mojom/mojo/asset_bundle/asset_bundle.mojom.dart';
@@ -16,6 +17,7 @@ import 'shell.dart' as shell;
 abstract class AssetBundle {
   void close();
   Future<sky.Image> loadImage(String key);
+  Future<String> loadString(String key);
 }
 
 class NetworkAssetBundle extends AssetBundle {
@@ -25,9 +27,12 @@ class NetworkAssetBundle extends AssetBundle {
 
   void close() { }
 
-  Future<sky.Image> loadImage(String name) {
-    Uri url = _baseUrl.resolve(name);
-    return image_cache.load(url.toString());
+  Future<sky.Image> loadImage(String key) {
+    return image_cache.load(_baseUrl.resolve(key).toString());
+  }
+
+  Future<String> loadString(String key) {
+    return fetchString(_baseUrl.resolve(key).toString());
   }
 }
 
@@ -48,8 +53,9 @@ class MojoAssetBundle extends AssetBundle {
     return new MojoAssetBundle(bundle);
   }
 
-  AssetBundleProxy _bundle;
+  final AssetBundleProxy _bundle;
   Map<String, Future<sky.Image>> _imageCache = new Map<String, Future<sky.Image>>();
+  Map<String, Future<String>> _stringCache = new Map<String, Future<String>>();
 
   void close() {
     _bundle.close();
@@ -57,14 +63,24 @@ class MojoAssetBundle extends AssetBundle {
     _imageCache = null;
   }
 
-  Future<sky.Image> loadImage(String name) {
-    return _imageCache.putIfAbsent(name, () {
+  Future<sky.Image> loadImage(String key) {
+    return _imageCache.putIfAbsent(key, () {
       Completer<sky.Image> completer = new Completer<sky.Image>();
-      _bundle.ptr.getAsStream(name).then((response) {
+      _bundle.ptr.getAsStream(key).then((response) {
         new sky.ImageDecoder(response.assetData.handle.h, completer.complete);
       });
       return completer.future;
     });
+  }
+
+  Future<String> _fetchString(String key) async {
+    core.MojoDataPipeConsumer pipe = (await _bundle.ptr.getAsStream(key)).assetData;
+    ByteData data = await core.DataPipeDrainer.drainHandle(pipe);
+    return new String.fromCharCodes(new Uint8List.view(data.buffer));
+  }
+
+  Future<String> loadString(String key) {
+    return _stringCache.putIfAbsent(key, () => _fetchString(key));
   }
 }
 

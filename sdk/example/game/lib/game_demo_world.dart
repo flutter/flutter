@@ -47,11 +47,11 @@ class GameDemoWorld extends NodeWithSize {
   // Game state
   int _numFrames = 0;
   bool _isGameOver = false;
-  
+
   GameDemoWorld(this._app, ImageMap images, this._spriteSheet) : super(new Size(_gameSizeWidth, _gameSizeHeight)) {
 
     // Fetch images
-    _imgNebula = images["res/nebula.png"];
+    _imgNebula = images["assets/nebula.png"];
 
     _gameLayer = new Node();
     this.addChild(_gameLayer);
@@ -68,7 +68,7 @@ class GameDemoWorld extends NodeWithSize {
     addShip();
 
     // Add background
-    Sprite sprtBackground = new Sprite.fromImage(images["res/starfield.png"]);
+    Sprite sprtBackground = new Sprite.fromImage(images["assets/starfield.png"]);
     sprtBackground.position = new Point(512.0, 512.0);
     sprtBackground.zPosition = -3.0;
     addChild(sprtBackground);
@@ -86,7 +86,7 @@ class GameDemoWorld extends NodeWithSize {
   }
 
   // Methods for adding game objects
-  
+
   void addAsteroid(AsteroidSize size, [Point pos]) {
     Asteroid asteroid = new Asteroid(_spriteSheet, size);
     asteroid.zPosition = 1.0;

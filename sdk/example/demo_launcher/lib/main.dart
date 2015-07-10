@@ -83,6 +83,7 @@ List<Widget> demos = [
   new SkyDemo(
     name: 'Asteroids',
     href: '../../game/main.dart',
+    bundle: 'game.skyx',
     description: '2D game using sprite sheets to achieve high performance',
     textTheme: typography.white,
     decoration: new BoxDecoration(
