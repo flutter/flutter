@@ -5,7 +5,6 @@
 import 'dart:async';
 
 import '../base/scheduler.dart' as scheduler;
-import 'curves.dart';
 import 'mechanics.dart';
 
 abstract class Generator {
@@ -54,71 +53,6 @@ class FrameGenerator extends Generator {
     if (!_cancelled) {
       _scheduleTick();
     }
-  }
-}
-
-class AnimationGenerator extends Generator {
-  Stream<double> get onTick => _stream;
-  final double initialDelay;
-  final double duration;
-  final double begin;
-  final double end;
-  final Curve curve;
-
-  FrameGenerator _generator;
-  Stream<double> _stream;
-  bool _done = false;
-  double _lastTime;
-
-  AnimationGenerator({
-    this.initialDelay: 0.0,
-    this.duration,
-    this.begin: 0.0,
-    this.end: 1.0,
-    this.curve: linear,
-    Function onDone
-  }) {
-    assert(curve != null);
-    assert(duration != null && duration > 0.0);
-    _generator = new FrameGenerator(onDone: onDone);
-
-    double startTime = 0.0;
-    _stream = _generator.onTick.map((timeStamp) {
-      if (startTime == 0.0)
-        startTime = timeStamp;
-
-      double t = (timeStamp - (startTime + initialDelay)) / duration;
-      _lastTime = t.clamp(0.0, 1.0);
-      return _lastTime;
-    })
-    .takeWhile(_checkForCompletion)
-    .where((t) => t >= 0.0)
-    .map(_transform);
-  }
-
-  double get remainingTime {
-    if (_lastTime == null)
-      return duration;
-    return duration - _lastTime;
-  }
-
-  void cancel() {
-    _generator.cancel();
-  }
-
-  double _transform(double t) {
-    if (_done)
-      return end;
-    return begin + (end - begin) * curve.transform(t);
-  }
-
-  // This is required because Dart Streams don't have takeUntil (inclusive).
-  bool _checkForCompletion(double t) {
-    if (_done)
-      return false;
-
-    _done = t >= 1;
-    return true;
   }
 }
 

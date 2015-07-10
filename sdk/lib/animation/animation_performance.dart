@@ -5,8 +5,6 @@
 import 'timeline.dart';
 import 'curves.dart';
 
-// TODO(mpcomplete): merge this stuff with AnimatedValue somehow. We shouldn't
-// have 2 different ways to animate values.
 abstract class AnimatedVariable {
   void setFraction(double t);
 }

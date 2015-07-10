@@ -9,7 +9,6 @@ dart_pkg("sky") {
     "CHANGELOG.md",
     "bin/init.dart",
     "lib/_sdkext",
-    "lib/animation/animated_value.dart",
     "lib/animation/animation_performance.dart",
     "lib/animation/curves.dart",
     "lib/animation/fling_curve.dart",
