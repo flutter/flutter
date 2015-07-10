@@ -49,15 +49,6 @@ class MenuItem extends ButtonBase {
     return result;
   }
 
-  String get iconSuffix {
-    switch(Theme.of(this).brightness) {
-      case ThemeBrightness.dark:
-        return "white";
-      case ThemeBrightness.light:
-        return "black";
-    }
-  }
-
   Widget buildContent() {
     List<Widget> flexChildren = new List<Widget>();
     if (icon != null) {
@@ -66,7 +57,7 @@ class MenuItem extends ButtonBase {
           opacity: selected ? 1.0 : 0.45,
           child: new Padding(
             padding: const EdgeDims.symmetric(horizontal: 16.0),
-            child: new Icon(type: "${icon}_${iconSuffix}", size: 24)
+            child: new Icon(type: icon, size: 24)
           )
         )
       );

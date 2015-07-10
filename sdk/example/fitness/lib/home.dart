@@ -116,7 +116,7 @@ class HomeFragment extends StatefulComponent {
   Widget buildToolBar() {
     return new ToolBar(
       left: new IconButton(
-        icon: 'navigation/menu_white',
+        icon: "navigation/menu",
         onPressed: _handleOpenDrawer),
       center: new Text(fitnessModeTitle)
     );
@@ -180,13 +180,13 @@ class HomeFragment extends StatefulComponent {
     switch (_fitnessMode) {
       case FitnessMode.measure:
         return new FloatingActionButton(
-          child: new Icon(type: 'content/add_white', size: 24),
+          child: new Icon(type: 'content/add', size: 24),
           onPressed: _handleMeasurementAdded
         );
       case FitnessMode.run:
         return new FloatingActionButton(
           child: new Icon(
-            type: _isRunning ? 'av/stop_white' : 'maps/directions_run_white',
+            type: _isRunning ? 'av/stop' : 'maps/directions_run',
             size: 24
           ),
           onPressed: _isRunning ? _handleRunStopped : _handleRunStarted

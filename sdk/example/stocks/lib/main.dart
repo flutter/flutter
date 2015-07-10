@@ -74,8 +74,7 @@ class StocksApp extends App {
     if (optimismSetting == StockMode.optimistic) {
       theme = new ThemeData(
         brightness: ThemeBrightness.light,
-        primarySwatch: colors.Purple,
-        floatingActionButtonColor: colors.RedAccent[200]
+        primarySwatch: colors.Purple
       );
     } else {
       theme = new ThemeData(

@@ -15,11 +15,11 @@ class ThemeData {
     ThemeBrightness brightness,
     Map<int, Color> primarySwatch,
     Color accentColor,
-    Color floatingActionButtonColor,
-    typography.TextTheme text,
-    typography.TextTheme toolbarText })
+    this.accentColorBrightness: ThemeBrightness.dark,
+    typography.TextTheme text })
     : this.brightness = brightness,
       this.primarySwatch = primarySwatch,
+      primaryColorBrightness = primarySwatch == null ? brightness : ThemeBrightness.dark,
       canvasColor = brightness == ThemeBrightness.dark ? colors.Grey[850] : colors.Grey[50],
       cardColor = brightness == ThemeBrightness.dark ? colors.Grey[800] : colors.White,
       dividerColor = brightness == ThemeBrightness.dark ? const Color(0x1FFFFFFF) : const Color(0x1F000000),
@@ -27,30 +27,19 @@ class ThemeData {
     assert(brightness != null);
 
     if (primarySwatch == null) {
-      _primaryColor = brightness == ThemeBrightness.dark ? colors.Grey[900] : colors.Grey[100];
+      if (brightness == ThemeBrightness.dark) {
+        _primaryColor = colors.Grey[900];
+      } else {
+        _primaryColor = colors.Grey[100];
+      }
     } else {
       _primaryColor = primarySwatch[500];
     }
-
+ 
     if (accentColor == null) {
       _accentColor = primarySwatch == null ? colors.Blue[500] : primarySwatch[500];
     } else {
       _accentColor = accentColor;
-    }
-
-    if (floatingActionButtonColor == null) {
-      _floatingActionButtonColor = accentColor == null ? colors.PinkAccent[200] : accentColor;
-    } else {
-      _floatingActionButtonColor = floatingActionButtonColor;
-    }
-
-    if (toolbarText == null) {
-      if (colors.DarkColors.contains(primarySwatch) || _primaryColor == colors.Grey[900])
-        _toolbarText = typography.white;
-      else
-        _toolbarText = typography.black;
-    } else {
-      _toolbarText = toolbarText;
     }
   }
 
@@ -68,12 +57,10 @@ class ThemeData {
   Color _primaryColor;
   Color get primaryColor => _primaryColor;
 
+  final ThemeBrightness primaryColorBrightness;
+ 
   Color _accentColor;
   Color get accentColor => _accentColor;
 
-  Color _floatingActionButtonColor;
-  Color get floatingActionButtonColor => _floatingActionButtonColor;
-
-  typography.TextTheme _toolbarText;
-  typography.TextTheme get toolbarText => _toolbarText;
+  final ThemeBrightness accentColorBrightness;
 }

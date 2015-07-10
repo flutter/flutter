@@ -4,6 +4,7 @@
 
 import 'basic.dart';
 import 'button_base.dart';
+import 'icon.dart';
 import 'ink_well.dart';
 import 'material.dart';
 import 'theme.dart';
@@ -17,21 +18,32 @@ class FloatingActionButton extends ButtonBase {
   FloatingActionButton({
     String key,
     this.child,
+    this.backgroundColor,
     this.onPressed
   }) : super(key: key);
 
   Widget child;
+  Color backgroundColor;
   Function onPressed;
 
   void syncFields(FloatingActionButton source) {
     super.syncFields(source);
     child = source.child;
+    backgroundColor = source.backgroundColor;
     onPressed = source.onPressed;
   }
 
   Widget buildContent() {
+    IconThemeColor iconThemeColor = IconThemeColor.white;
+    Color materialColor = backgroundColor;
+    if (materialColor == null) {
+      ThemeData themeData = Theme.of(this);
+      materialColor = themeData.accentColor;
+      iconThemeColor = themeData.accentColorBrightness == ThemeBrightness.dark ? IconThemeColor.white : IconThemeColor.black;
+    }
+
     return new Material(
-      color: Theme.of(this).floatingActionButtonColor,
+      color: materialColor,
       type: MaterialType.circle,
       level: highlight ? 3 : 2,
       child: new ClipOval(
@@ -43,7 +55,14 @@ class FloatingActionButton extends ButtonBase {
           child: new Container(
             width: _kSize,
             height: _kSize,
-            child: new InkWell(child: new Center(child: child))
+            child: new InkWell(
+              child: new Center(
+                child: new IconTheme(
+                  data: new IconThemeData(color: iconThemeColor),
+                  child: child
+                )
+              )
+            )
           )
         )
       )

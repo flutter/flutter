@@ -6,6 +6,7 @@ import 'package:sky/editing/input.dart';
 import 'package:sky/animation/animation_performance.dart';
 import 'package:sky/widgets/animated_component.dart';
 import 'package:sky/widgets/animated_container.dart';
+import 'package:sky/theme/colors.dart' as colors;
 import 'package:sky/widgets/basic.dart';
 import 'package:sky/widgets/drawer.dart';
 import 'package:sky/widgets/drawer_header.dart';
@@ -60,12 +61,21 @@ class StockHome extends AnimatedComponent {
   AnimatedContainer _snackbarTransform;
 
   void _handleSearchBegin() {
+    navigator.pushState("/search", (_) {
+      setState(() {
+        _isSearching = false;
+        _searchQuery = null;
+      });
+    });
     setState(() {
       _isSearching = true;
     });
   }
 
   void _handleSearchEnd() {
+    assert(navigator.currentRoute.name == '/search');
+    navigator.pop();
+    assert(navigator.currentRoute.name == '/');
     setState(() {
       _isSearching = false;
       _searchQuery = null;
@@ -181,15 +191,15 @@ class StockHome extends AnimatedComponent {
   Widget buildToolBar() {
     return new ToolBar(
         left: new IconButton(
-          icon: 'navigation/menu_white',
+          icon: "navigation/menu",
           onPressed: _handleOpenDrawer),
         center: new Text('Stocks'),
         right: [
           new IconButton(
-            icon: 'action/search_white',
+            icon: "action/search",
             onPressed: _handleSearchBegin),
           new IconButton(
-            icon: 'navigation/more_vert_white',
+            icon: "navigation/more_vert",
             onPressed: _handleMenuShow)
         ]
       );
@@ -241,7 +251,7 @@ class StockHome extends AnimatedComponent {
   Widget buildSearchBar() {
     return new ToolBar(
       left: new IconButton(
-        icon: 'navigation/arrow_back_grey600',
+        icon: "navigation/arrow_back",
         onPressed: _handleSearchEnd),
       center: new Input(
         focused: true,
@@ -280,7 +290,8 @@ class StockHome extends AnimatedComponent {
 
   Widget buildFloatingActionButton() {
     var widget = new FloatingActionButton(
-      child: new Icon(type: 'content/add_white', size: 24),
+      child: new Icon(type: 'content/add', size: 24),
+      backgroundColor: colors.RedAccent[200],
       onPressed: _handleStockPurchased
     );
     if (_snackbarTransform != null)

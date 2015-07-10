@@ -48,7 +48,7 @@ class TabbedNavigatorApp extends App {
     Iterable<TabNavigatorView> views = ["event", "home", "android", "alarm", "face", "language"]
       .map((icon_name) {
         return new TabNavigatorView(
-          label: new TabLabel(icon: "action/${icon_name}_white"),
+          label: new TabLabel(icon: "action/${icon_name}"),
           builder: () => _buildContent(icon_name)
         );
       });
@@ -58,15 +58,15 @@ class TabbedNavigatorApp extends App {
   TabNavigator _buildTextAndIconLabelsTabNavigator(int n) {
     List<TabNavigatorView> views = <TabNavigatorView>[
       new TabNavigatorView(
-        label: const TabLabel(text: 'STOCKS', icon: 'action/list_white'),
+        label: const TabLabel(text: 'STOCKS', icon: 'action/list'),
         builder: () => _buildContent("Stocks")
       ),
       new TabNavigatorView(
-        label: const TabLabel(text: 'PORTFOLIO', icon: 'action/account_circle_white'),
+        label: const TabLabel(text: 'PORTFOLIO', icon: 'action/account_circle'),
         builder: () => _buildContent("Portfolio")
       ),
       new TabNavigatorView(
-        label: const TabLabel(text: 'SUMMARY', icon: 'action/assessment_white'),
+        label: const TabLabel(text: 'SUMMARY', icon: 'action/assessment'),
         builder: () => _buildContent("Summary")
       )
     ];

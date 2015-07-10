@@ -4,6 +4,37 @@
 
 import '../mojo/asset_bundle.dart';
 import 'basic.dart';
+import 'theme.dart';
+import 'widget.dart';
+
+enum IconThemeColor { white, black }
+
+class IconThemeData {
+  const IconThemeData({ this.color });
+  final IconThemeColor color;
+}
+
+class IconTheme extends Inherited {
+
+  IconTheme({
+    String key,
+    this.data,
+    Widget child
+  }) : super(key: key, child: child) {
+    assert(data != null);
+    assert(child != null);
+  }
+
+  final IconThemeData data;
+
+  static IconThemeData of(Component component) {
+    IconTheme result = component.inheritedOfType(IconTheme);
+    return result == null ? null : result.data;
+  }
+
+  bool syncShouldNotify(IconTheme old) => data != old.data;
+
+}
 
 AssetBundle _initIconBundle() {
   if (rootBundle != null)
@@ -15,10 +46,29 @@ AssetBundle _initIconBundle() {
 final AssetBundle _iconBundle = _initIconBundle();
 
 class Icon extends Component {
-  Icon({ String key, this.size, this.type: '' }) : super(key: key);
+  Icon({ String key, this.size, this.type: '', this.color }) : super(key: key);
 
   final int size;
   final String type;
+  final IconThemeColor color;
+
+  String get colorSuffix {
+    IconThemeColor iconThemeColor = color;
+    if (iconThemeColor == null) {
+      IconThemeData iconThemeData = IconTheme.of(this);
+      iconThemeColor = iconThemeData == null ? null : iconThemeData.color;
+    }
+    if (iconThemeColor == null) {
+      ThemeBrightness themeBrightness = Theme.of(this).brightness;
+      iconThemeColor = themeBrightness == ThemeBrightness.dark ? IconThemeColor.white : IconThemeColor.black;
+    }
+    switch(iconThemeColor) {
+      case IconThemeColor.white:
+        return "white";
+      case IconThemeColor.black:
+        return "black";
+    }
+  }
 
   Widget build() {
     String category = '';
@@ -33,7 +83,7 @@ class Icon extends Component {
     String density = 'drawable-xxhdpi';
     return new AssetImage(
       bundle: _iconBundle,
-      name: '${category}/${density}/ic_${subtype}_${size}dp.png',
+      name: '${category}/${density}/ic_${subtype}_${colorSuffix}_${size}dp.png',
       size: new Size(size.toDouble(), size.toDouble())
     );
   }
