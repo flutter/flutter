@@ -5,7 +5,7 @@ PAINT FOR FRAME #1 ----------------------------------------------
 1 | paintChild RenderDecoratedBox at Point(0.0, 0.0)
 1 |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 1 |  | drawRect(Rect.fromLTRB(0.0, 0.0, 800.0, 600.0), Paint(color:Color(0xff0000ff)))
-1 |  | paintChild RenderBlock at Point(0.0, 0.0)
+1 |  | paintChild RenderFlex at Point(0.0, 0.0)
 1 |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 1 |  |  | paintChild RenderPadding at Point(0.0, 0.0)
 1 |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
