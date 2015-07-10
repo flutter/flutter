@@ -68,7 +68,7 @@ class EditableText extends StatefulComponent {
       return;
 
     Rect cursorRect =  new Rect.fromLTWH(
-      _kCursorGap, 
+      _kCursorGap,
       -_kCursorHeightOffset,
       _kCursorWidth,
       style.fontSize + 2 * _kCursorHeightOffset
@@ -87,6 +87,7 @@ class EditableText extends StatefulComponent {
       _stopCursorTimer();
 
     if (!value.composing.isValid) {
+      // TODO(eseidel): This is the wrong height if empty!
       return new Text(value.text, style: style);
     }
 

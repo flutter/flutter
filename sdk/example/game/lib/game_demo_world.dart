@@ -24,7 +24,7 @@ const int _numFramesShieldFlickers = 60;
 
 class GameDemoWorld extends NodeWithSize {
   // Images
-  Image _imgNebula;
+  sky.Image _imgNebula;
 
   SpriteSheet _spriteSheet;
 
@@ -101,7 +101,7 @@ class GameDemoWorld extends NodeWithSize {
     _shield = new Sprite(_spriteSheet["shield.png"]);
     _shield.zPosition = 11.0;
     _shield.scale = 0.5;
-    _shield.transferMode = TransferMode.plus;
+    _shield.transferMode = sky.TransferMode.plus;
     _gameLayer.addChild(_shield);
 
     Action rotate = new ActionRepeatForever(new ActionTween((a) => _shield.rotation = a, 0.0, 360.0, 1.0));
@@ -162,7 +162,7 @@ class GameDemoWorld extends NodeWithSize {
 
     // Add ring
     Sprite sprtRing = new Sprite(_spriteSheet["explosion_ring.png"]);
-    sprtRing.transferMode = TransferMode.plus;
+    sprtRing.transferMode = sky.TransferMode.plus;
     explosionNode.addChild(sprtRing);
 
     Action scale = new ActionTween( (a) => sprtRing.scale = a, 0.2, 1.0, 1.5);
@@ -176,7 +176,7 @@ class GameDemoWorld extends NodeWithSize {
       Sprite sprtFlare = new Sprite(_spriteSheet["explosion_flare.png"]);
       sprtFlare.pivot = new Point(0.3, 1.0);
       sprtFlare.scaleX = 0.3;
-      sprtFlare.transferMode = TransferMode.plus;
+      sprtFlare.transferMode = sky.TransferMode.plus;
       sprtFlare.rotation = _rand.nextDouble() * 360.0;
       explosionNode.addChild(sprtFlare);
 
@@ -503,7 +503,7 @@ class Laser extends Sprite {
     size = new Size(30.0, 30.0);
     position = ship.position;
     rotation = ship.rotation + 90.0;
-    transferMode = TransferMode.plus;
+    transferMode = sky.TransferMode.plus;
     double rotRadians = convertDegrees2Radians(rotation);
     _movementVector = pointMult(new Point(Math.sin(rotRadians), -Math.cos(rotRadians)), 10.0);
     _movementVector = new Point(_movementVector.x + ship._movementVector[0], _movementVector.y + ship._movementVector[1]);
@@ -541,7 +541,7 @@ class StarField extends Node {
   void paint(PaintingCanvas canvas) {
     // Setup paint object for opacity and transfer mode
     Paint paint = new Paint();
-    paint.setTransferMode(TransferMode.plus);
+    paint.setTransferMode(sky.TransferMode.plus);
 
     double baseScaleX = 64.0 / _textures[0].size.width;
     double baseScaleY = 64.0 / _textures[0].size.height;
@@ -584,7 +584,7 @@ class StarField extends Node {
 
 class Nebula extends Node {
 
-  Nebula.withImage(Image img) {
+  Nebula.withImage(sky.Image img) {
     for (int i = 0; i < 2; i++) {
       for (int j = 0; j < 2; j++) {
         Sprite sprt = new Sprite.fromImage(img);
