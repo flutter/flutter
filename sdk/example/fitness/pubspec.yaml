@@ -1,7 +1,0 @@
-name: fitness
-author: Chromium Authors <sky-dev@googlegroups.com>
-description: A demo application using Sky that tracks fitness data
-homepage: https://github.com/domokit/sky_sdk/tree/master/sdk/lib/example/stocks
-version: 0.0.1
-dependencies:
-  sky: '>=0.0.10 <1.0.0'
