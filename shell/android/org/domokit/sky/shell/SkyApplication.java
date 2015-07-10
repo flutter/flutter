@@ -12,9 +12,13 @@ import org.chromium.base.PathUtils;
 import org.chromium.base.library_loader.LibraryLoader;
 import org.chromium.base.library_loader.LibraryProcessType;
 import org.chromium.base.library_loader.ProcessInitException;
+import org.chromium.mojo.keyboard.KeyboardServiceImpl;
 import org.chromium.mojo.system.Core;
 import org.chromium.mojo.system.MessagePipeHandle;
+import org.chromium.mojom.activity.Activity;
+import org.chromium.mojom.keyboard.KeyboardService;
 import org.chromium.mojom.mojo.NetworkService;
+import org.domokit.activity.ActivityImpl;
 import org.domokit.oknet.NetworkServiceImpl;
 
 /**
@@ -56,8 +60,24 @@ public class SkyApplication extends BaseChromiumApplication {
       */
     protected void onServiceRegistryAvailable(ServiceRegistry registry) {
         registry.register(NetworkService.MANAGER.getName(), new ServiceFactory() {
+            @Override
             public void connectToService(Context context, Core core, MessagePipeHandle pipe) {
+                // TODO(eseidel): Refactor ownership to match other services.
                 new NetworkServiceImpl(context, core, pipe);
+            }
+        });
+
+        registry.register(KeyboardService.MANAGER.getName(), new ServiceFactory() {
+            @Override
+            public void connectToService(Context context, Core core, MessagePipeHandle pipe) {
+                KeyboardService.MANAGER.bind(new KeyboardServiceImpl(context), pipe);
+            }
+        });
+
+        registry.register(Activity.MANAGER.getName(), new ServiceFactory() {
+            @Override
+            public void connectToService(Context context, Core core, MessagePipeHandle pipe) {
+                Activity.MANAGER.bind(new ActivityImpl(), pipe);
             }
         });
     }

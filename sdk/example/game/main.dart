@@ -3,8 +3,11 @@
 // found in the LICENSE file.
 
 import 'package:sky/mojo/asset_bundle.dart';
+import 'package:sky/theme/colors.dart' as colors;
 import 'package:sky/widgets/basic.dart';
 import 'package:sky/widgets/widget.dart';
+import 'package:sky/widgets/task_description.dart';
+import 'package:sky/widgets/theme.dart';
 
 import 'lib/game_demo.dart';
 import 'lib/sprites.dart';
@@ -40,23 +43,22 @@ main() async {
 class GameDemoApp extends App {
 
   Widget build() {
-    return new Stack([
-      new SpriteWidget(new GameDemoWorld(_app, _loader, _spriteSheet)),
-//      new StackPositionedChild(
-//        new Flex([
-//          new FlexExpandingChild(
-//            new RaisedButton(child:new Text("Hello")),
-//            key: 1
-//          ),
-//          new FlexExpandingChild(
-//            new RaisedButton(child:new Text("Foo!")),
-//            key: 2
-//          )
-//        ]),
-//        right:0.0,
-//        top: 20.0
-//      )
-    ]);
+    // TODO(viktork): The task bar purple is the wrong purple, we may need
+    // a custom theme swatch to match the purples in the sprites.
+    ThemeData theme = new ThemeData(
+      brightness: ThemeBrightness.light,
+      primarySwatch: colors.Purple
+    );
+
+    return new Theme(
+      data: theme,
+      child: new TaskDescription(
+        label: 'Asteroids',
+        child: new SpriteWidget(
+          new GameDemoWorld(_app, _loader, _spriteSheet)
+        )
+      )
+    );
   }
 }
 
