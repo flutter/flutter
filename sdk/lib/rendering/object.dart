@@ -6,6 +6,7 @@ import 'dart:math' as math;
 import 'dart:sky' as sky;
 import 'dart:sky' show Point, Offset, Size, Rect, Color, Paint, Path;
 
+import '../base/debug.dart';
 import '../base/hit_test.dart';
 import '../base/node.dart';
 import '../base/scheduler.dart' as scheduler;
@@ -201,6 +202,8 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
       });
     } catch (e) {
       print('Exception raised during layout:\n${e}\nContext:\n${this}');
+      if (inDebugBuild)
+        rethrow;
       return;
     }
     _needsLayout = false;
@@ -298,12 +301,14 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
 
   // PAINTING
 
-  static List<RenderObject> _nodesNeedingPaint = new List<RenderObject>();
   static bool _debugDoingPaint = false;
   static bool get debugDoingPaint => _debugDoingPaint;
-  static void set debugDoingPaint(bool debug) {
-    _debugDoingPaint = debug;
-  }
+  bool _debugDoingThisPaint = false;
+  bool get debugDoingThisPaint => _debugDoingThisPaint;
+  static RenderObject _debugActivePaint = null;
+  static RenderObject get debugActivePaint => _debugActivePaint;
+
+  static List<RenderObject> _nodesNeedingPaint = new List<RenderObject>();
 
   final sky.PaintingNode _paintingNode = new sky.PaintingNode();
   sky.PaintingNode get paintingNode {
@@ -312,7 +317,6 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   }
   bool _needsPaint = true;
   bool get needsPaint => _needsPaint;
-  bool get createNewDisplayList => false;
 
   void markNeedsPaint() {
     assert(!debugDoingPaint);
@@ -340,8 +344,6 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
           node._updatePaintingCanvas();
       };
       assert(_nodesNeedingPaint.length == 0);
-    } catch (e) {
-      print('Exception raised during flushPaint:\n${e}');
     } finally {
       _debugDoingPaint = false;
     }
@@ -357,6 +359,8 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
       _paintOnCanvas(canvas, Offset.zero);
     } catch (e) {
       print('Exception raised during _updatePaintingCanvas:\n${e}\nContext:\n${this}');
+      if (inDebugBuild)
+        rethrow;
       return;
     }
     assert(!_needsLayout); // check that the paint() method didn't mark us dirty again
@@ -374,12 +378,25 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
 
   void _paintOnCanvas(PaintingCanvas canvas, Offset offset) {
     _needsPaint = false;
+    assert(!_debugDoingThisPaint);
+    RenderObject debugLastActivePaint;
+    assert(() {
+      _debugDoingThisPaint = true;
+      debugLastActivePaint = _debugActivePaint;
+      _debugActivePaint = this;
+      return true;
+    });
     paint(canvas, offset);
+    assert(() {
+      _debugActivePaint = debugLastActivePaint;
+      _debugDoingThisPaint = false;
+      return true;
+    });
     assert(!_needsPaint);
   }
 
+  bool get createNewDisplayList => false;
   Rect get paintBounds;
-
   void paint(PaintingCanvas canvas, Offset offset) { }
 
 

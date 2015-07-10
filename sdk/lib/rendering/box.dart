@@ -306,15 +306,20 @@ abstract class RenderBox extends RenderObject {
   // y-coordinate of the position of the box to the y-coordinate of
   // the bottom of the box, i.e., the height of the box. Only call
   // this after layout has been performed. You are only allowed to
-  // call this from the parent of this node, and only during
-  // that parent's performLayout().
+  // call this from the parent of this node during that parent's
+  // performLayout() or paint().
   double getDistanceToBaseline(TextBaseline baseline) {
     assert(!needsLayout);
     assert(!_debugDoingBaseline);
     final parent = this.parent; // TODO(ianh): Remove this once the analyzer is cleverer
     assert(parent is RenderObject);
-    assert(parent == RenderObject.debugActiveLayout);
-    assert(parent.debugDoingThisLayout);
+    assert(() {
+      if (RenderObject.debugDoingLayout)
+        return (parent == RenderObject.debugActiveLayout) && parent.debugDoingThisLayout;
+      if (RenderObject.debugDoingPaint)
+        return (parent == RenderObject.debugActivePaint) && parent.debugDoingThisPaint;
+      return false;
+    });
     assert(_debugSetDoingBaseline(true));
     double result = getDistanceToActualBaseline(baseline);
     assert(_debugSetDoingBaseline(false));
