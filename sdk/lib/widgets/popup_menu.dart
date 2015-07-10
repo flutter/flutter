@@ -6,7 +6,7 @@ import 'dart:async';
 import 'dart:math' as math;
 import 'dart:sky' as sky;
 
-import '../animation/animated_value.dart';
+import '../animation/animation_performance.dart';
 import '../painting/box_painter.dart';
 import '../theme/colors.dart';
 import '../theme/shadows.dart';
@@ -14,9 +14,9 @@ import 'animated_component.dart';
 import 'basic.dart';
 import 'popup_menu_item.dart';
 
-const double _kMenuOpenDuration = 300.0;
-const double _kMenuCloseDuration = 200.0;
-const double _kMenuCloseDelay = 100.0;
+const Duration _kMenuOpenDuration = const Duration(milliseconds: 300);
+const Duration _kMenuCloseDuration = const Duration(milliseconds: 200);
+const Duration _kMenuCloseDelay = const Duration(milliseconds: 100);
 const double _kMenuWidthStep = 56.0;
 const double _kMenuMargin = 16.0; // 24.0 on tablet
 const double _kMenuMinWidth = 2.0 * _kMenuWidthStep;
@@ -24,37 +24,66 @@ const double _kMenuMaxWidth = 5.0 * _kMenuWidthStep;
 const double _kMenuHorizontalPadding = 16.0;
 const double _kMenuVerticalPadding = 8.0;
 
-enum MenuState { hidden, opening, open, closing }
+enum MenuState { closed, opening, open, closing }
 
 class PopupMenuController {
-  AnimatedValue position = new AnimatedValue(0.0);
-  MenuState _state = MenuState.hidden;
+
+  PopupMenuController() {
+    position = new AnimatedType<double>(0.0, end: 1.0);
+    performance = new AnimationPerformance()
+      ..variable = position
+      ..addListener(_updateState);
+  }
+
+  AnimatedType<double> position;
+  AnimationPerformance performance;
+
+  MenuState _state = MenuState.closed;
   MenuState get state => _state;
 
   bool get canReact => (_state == MenuState.opening) || (_state == MenuState.open);
 
-  open() async {
-    if (_state != MenuState.hidden)
+  void _updateState() {
+    if (position.value == 0.0) {
+      _state = MenuState.closed;
+      if (_closeCompleter != null)
+        _closeCompleter.complete();
       return;
-    _state = MenuState.opening;
-    if (await position.animateTo(1.0, _kMenuOpenDuration) == 1.0)
+    }
+
+    if (position.value == 1.0)
       _state = MenuState.open;
   }
 
-  Future _closeState;
-  close() async {
-    var result = new Completer();
-    _closeState = result.future;
-    if ((_state == MenuState.opening) || (_state == MenuState.open)) {
-      _state = MenuState.closing;
-      await position.animateTo(0.0, _kMenuCloseDuration, initialDelay: _kMenuCloseDelay);
-      _state = MenuState.hidden;
-      _closeState = null;
-      result.complete();
-      return result.future;
+  Completer _closeCompleter;
+  Timer _closeTimer;
+
+  void open() {
+    if (_state != MenuState.closed)
+      return;
+    if (_closeTimer != null) {
+      _closeTimer.cancel();
+      _closeTimer = null;
     }
-    assert(_closeState != null);
-    return _closeState;
+    _closeCompleter = null;
+    _state = MenuState.opening;
+    performance..duration = _kMenuOpenDuration
+               ..play();
+  }
+
+  Future close() {
+    if (_state == MenuState.closing || _state == MenuState.closed)
+      return _closeCompleter.future;
+
+    _state = MenuState.closing;
+    assert(_closeCompleter == null);
+    _closeCompleter = new Completer();
+    performance.duration = _kMenuCloseDuration;
+
+    assert(_closeTimer == null);
+    _closeTimer = new Timer(_kMenuCloseDelay, performance.reverse);
+
+    return _closeCompleter.future;
   }
 }
 
@@ -66,7 +95,7 @@ class PopupMenu extends AnimatedComponent {
       backgroundColor: Grey[50],
       borderRadius: 2.0,
       boxShadow: shadows[level]));
-    watch(controller.position);
+    watchPerformance(controller.performance);
   }
 
   PopupMenuController controller;
