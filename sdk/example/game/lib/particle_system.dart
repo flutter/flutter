@@ -76,7 +76,8 @@ class ParticleSystem extends Node {
   List<_Particle> _particles;
 
   double _emitCounter;
-  double _elapsedTime;
+  // Not yet used:
+  // double _elapsedTime;
   int _numEmittedParticles = 0;
 
   math.Random _rand;
@@ -117,7 +118,7 @@ class ParticleSystem extends Node {
     _particles = new List<_Particle>();
     _rand = new math.Random();
     _emitCounter = 0.0;
-    _elapsedTime = 0.0;
+    // _elapsedTime = 0.0;
     if (gravity == null) gravity = new Vector2.zero();
     if (colorSequence == null) colorSequence = new ColorSequence.fromStartAndEndColor(new Color(0xffffffff), new Color(0x00ffffff));
   }
@@ -139,7 +140,7 @@ class ParticleSystem extends Node {
       _emitCounter -= rate;
     }
 
-    _elapsedTime += dt;
+    // _elapsedTime += dt;
 
     // Iterate over all particles
     for (int i = _particles.length -1; i >= 0; i--) {

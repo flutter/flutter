@@ -2,10 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../theme/colors.dart' as colors;
 import 'basic.dart';
 import 'material.dart';
-import "theme.dart";
 
 /// A material design card
 ///

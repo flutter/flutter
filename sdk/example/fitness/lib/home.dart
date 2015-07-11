@@ -31,7 +31,7 @@ class HomeFragment extends StatefulComponent {
 
   FitnessMode _fitnessMode = FitnessMode.measure;
 
-  void initState {
+  void initState() {
     // if (debug)
     //   new Timer(new Duration(seconds: 1), dumpState);
     _drawerController = new DrawerController(_handleDrawerStatusChanged);
