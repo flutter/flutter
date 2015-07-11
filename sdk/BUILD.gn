@@ -87,6 +87,7 @@ dart_pkg("sky") {
     "lib/widgets/theme.dart",
     "lib/widgets/toggleable.dart",
     "lib/widgets/tool_bar.dart",
+    "lib/widgets/variable_height_scrollable.dart",
     "lib/widgets/widget.dart",
     "pubspec.yaml",
   ]

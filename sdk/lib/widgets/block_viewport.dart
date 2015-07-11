@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:collection';
+
 import '../rendering/block.dart';
 import '../rendering/box.dart';
 import '../rendering/object.dart';
@@ -9,6 +11,13 @@ import 'widget.dart';
 
 // return null if index is greater than index of last entry
 typedef Widget IndexedBuilder(int index);
+
+typedef void LayoutChangedCallback(
+  int firstVisibleChildIndex, 
+  int visibleChildCount,
+  UnmodifiableListView<double> childOffsets,
+  bool didReachLastChild
+);
 
 class _Key {
   const _Key(this.type, this.key);
@@ -20,12 +29,13 @@ class _Key {
 }
 
 class BlockViewport extends RenderObjectWrapper {
-  BlockViewport({ this.builder, this.startOffset, this.token, String key })
+  BlockViewport({ this.builder, this.startOffset, this.token, this.onLayoutChanged, String key })
     : super(key: key);
 
   IndexedBuilder builder;
   double startOffset;
   Object token;
+  LayoutChangedCallback onLayoutChanged;
 
   RenderBlockViewport get root => super.root;
   RenderBlockViewport createNode() => new RenderBlockViewport();
@@ -83,6 +93,7 @@ class BlockViewport extends RenderObjectWrapper {
   List<double> _offsets = <double>[0.0];
   int _currentStartIndex = 0;
   int _currentChildCount = 0;
+  bool _didReachLastChild = false;
 
   int _findIndexForOffsetBeforeOrAt(double offset) {
     int left = 0;
@@ -113,6 +124,7 @@ class BlockViewport extends RenderObjectWrapper {
       builder = newNode.builder;
       token = newNode.token;
       _offsets = <double>[0.0];
+      _didReachLastChild = false;
     }
     return true;
   }
@@ -196,6 +208,7 @@ class BlockViewport extends RenderObjectWrapper {
           haveChildren = true;
         } else {
           haveChildren = false;
+          _didReachLastChild = true;
         }
       }
     } else {
@@ -207,8 +220,10 @@ class BlockViewport extends RenderObjectWrapper {
         // list is complete (and thus we are overscrolled).
         while (true) {
           Widget widget = _getWidget(startIndex, innerConstraints);
-          if (widget == null)
+          if (widget == null) {
+            _didReachLastChild = true;
             break;
+          }
           _Key widgetKey = new _Key.fromWidget(widget);
           if (_offsets.last > startOffset) {
             newChildren[widgetKey] = widget;
@@ -238,6 +253,7 @@ class BlockViewport extends RenderObjectWrapper {
       }
     }
     assert(haveChildren != null);
+    assert(haveChildren || _didReachLastChild);
 
     assert(startIndex >= 0);
     assert(startIndex < _offsets.length);
@@ -249,8 +265,10 @@ class BlockViewport extends RenderObjectWrapper {
       while (_offsets[index] < endOffset) {
         if (!builtChildren.containsKey(index)) {
           Widget widget = _getWidget(index, innerConstraints);
-          if (widget == null)
-            break; // reached the end of the list
+          if (widget == null) {
+            _didReachLastChild = true;
+            break;
+          }
           newChildren[new _Key.fromWidget(widget)] = widget;
           builtChildren[index] = widget;
         }
@@ -287,6 +305,15 @@ class BlockViewport extends RenderObjectWrapper {
     _childrenByKey = newChildren;
     _currentStartIndex = startIndex;
     _currentChildCount = _childrenByKey.length;
+
+    if (onLayoutChanged != null) {
+      onLayoutChanged(
+        _currentStartIndex,
+        _currentChildCount, 
+        new UnmodifiableListView<double>(_offsets),
+        _didReachLastChild
+     );
+    }
   }
 
 }
