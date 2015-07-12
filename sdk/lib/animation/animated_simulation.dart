@@ -5,8 +5,7 @@
 import 'dart:async';
 
 import 'package:newton/newton.dart';
-
-import 'timeline.dart';
+import 'package:sky/animation/timeline.dart';
 
 const double _kSecondsPerMillisecond = 1000.0;
 

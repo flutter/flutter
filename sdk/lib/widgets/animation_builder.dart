@@ -4,12 +4,12 @@
 
 import 'package:vector_math/vector_math.dart';
 
-import '../animation/animation_performance.dart';
-import '../animation/curves.dart';
-import '../base/lerp.dart';
-import '../painting/box_painter.dart';
-import '../theme/shadows.dart';
-import 'basic.dart';
+import 'package:sky/animation/animation_performance.dart';
+import 'package:sky/animation/curves.dart';
+import 'package:sky/base/lerp.dart';
+import 'package:sky/painting/box_painter.dart';
+import 'package:sky/theme/shadows.dart';
+import 'package:sky/widgets/basic.dart';
 
 // This class builds a Container object from a collection of optionally-
 // animated properties. Use syncFields to update the Container's properties,

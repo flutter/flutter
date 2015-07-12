@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'basic.dart';
-import 'button_base.dart';
-import 'ink_well.dart';
-import 'material.dart';
+import 'package:sky/widgets/basic.dart';
+import 'package:sky/widgets/button_base.dart';
+import 'package:sky/widgets/ink_well.dart';
+import 'package:sky/widgets/material.dart';
 
 // Rather than using this class directly, please use FlatButton or RaisedButton.
 abstract class MaterialButton extends ButtonBase {

@@ -7,23 +7,22 @@ import 'dart:sky' as sky;
 
 import 'package:vector_math/vector_math.dart';
 
-import '../mojo/asset_bundle.dart';
-import '../mojo/net/image_cache.dart' as image_cache;
-import '../painting/text_style.dart';
-import '../rendering/block.dart';
-import '../rendering/box.dart';
-import '../rendering/flex.dart';
-import '../rendering/object.dart';
-import '../rendering/paragraph.dart';
-import '../rendering/stack.dart';
-import 'default_text_style.dart';
-import 'widget.dart';
+import 'package:sky/mojo/asset_bundle.dart';
+import 'package:sky/mojo/net/image_cache.dart' as image_cache;
+import 'package:sky/painting/text_style.dart';
+import 'package:sky/rendering/block.dart';
+import 'package:sky/rendering/box.dart';
+import 'package:sky/rendering/flex.dart';
+import 'package:sky/rendering/object.dart';
+import 'package:sky/rendering/paragraph.dart';
+import 'package:sky/rendering/stack.dart';
+import 'package:sky/widgets/default_text_style.dart';
+import 'package:sky/widgets/widget.dart';
 
-export '../rendering/box.dart' show BackgroundImage, BoxConstraints, BoxDecoration, Border, BorderSide, EdgeDims;
-export '../rendering/flex.dart' show FlexDirection, FlexJustifyContent, FlexAlignItems;
-export '../rendering/object.dart' show Point, Offset, Size, Rect, Color, Paint, Path;
-export 'widget.dart' show Widget, Component, StatefulComponent, App, runApp, Listener, ParentDataNode;
-
+export 'package:sky/rendering/box.dart' show BackgroundImage, BoxConstraints, BoxDecoration, Border, BorderSide, EdgeDims;
+export 'package:sky/rendering/flex.dart' show FlexDirection, FlexJustifyContent, FlexAlignItems;
+export 'package:sky/rendering/object.dart' show Point, Offset, Size, Rect, Color, Paint, Path;
+export 'package:sky/widgets/widget.dart' show Widget, Component, StatefulComponent, App, runApp, Listener, ParentDataNode;
 
 // PAINTING NODES
 

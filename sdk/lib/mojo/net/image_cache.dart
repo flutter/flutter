@@ -7,8 +7,7 @@ import 'dart:collection';
 import 'dart:sky' as sky;
 
 import 'package:mojom/mojo/url_response.mojom.dart';
-
-import 'fetch.dart';
+import 'package:sky/mojo/net/fetch.dart';
 
 final HashMap<String, Future<sky.Image>> _cache =
     new HashMap<String, Future<sky.Image>>();

@@ -4,10 +4,10 @@
 
 import 'dart:sky' as sky;
 
-import '../base/scheduler.dart' as scheduler;
-import '../base/hit_test.dart';
-import 'box.dart';
-import 'object.dart';
+import 'package:sky/base/scheduler.dart' as scheduler;
+import 'package:sky/base/hit_test.dart';
+import 'package:sky/rendering/box.dart';
+import 'package:sky/rendering/object.dart';
 
 int _hammingWeight(int value) {
   if (value == 0)

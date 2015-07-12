@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../painting/text_style.dart';
-import '../widgets/basic.dart';
-import '../widgets/theme.dart';
-import 'editable_string.dart';
-import 'editable_text.dart';
-import 'keyboard.dart';
+import 'package:sky/editing/editable_string.dart';
+import 'package:sky/editing/editable_text.dart';
+import 'package:sky/mojo/keyboard.dart';
+import 'package:sky/painting/text_style.dart';
+import 'package:sky/widgets/basic.dart';
+import 'package:sky/widgets/theme.dart';
 
 typedef void ValueChanged(value);
 
@@ -80,7 +80,7 @@ class Input extends StatefulComponent {
     }
 
     textChildren.add(new EditableText(
-      value: _editableValue, 
+      value: _editableValue,
       focused: focused,
       style: textStyle,
       cursorColor: cursorColor

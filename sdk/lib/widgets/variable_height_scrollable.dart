@@ -4,11 +4,11 @@
 
 import 'dart:collection';
 
-import '../animation/scroll_behavior.dart';
-import 'basic.dart';
-import 'block_viewport.dart';
-import 'scrollable.dart';
-import 'widget.dart';
+import 'package:sky/animation/scroll_behavior.dart';
+import 'package:sky/widgets/basic.dart';
+import 'package:sky/widgets/block_viewport.dart';
+import 'package:sky/widgets/scrollable.dart';
+import 'package:sky/widgets/widget.dart';
 
 class VariableHeightScrollable extends Scrollable {
   VariableHeightScrollable({
@@ -36,7 +36,7 @@ class VariableHeightScrollable extends Scrollable {
   }
 
   void _handleLayoutChanged(
-      int firstVisibleChildIndex, 
+      int firstVisibleChildIndex,
       int visibleChildCount,
       UnmodifiableListView<double> childOffsets,
       bool didReachLastChild) {

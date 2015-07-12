@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../theme/view_configuration.dart';
-import 'basic.dart';
-import 'default_text_style.dart';
-import 'theme.dart';
+import 'package:sky/theme/view_configuration.dart';
+import 'package:sky/widgets/basic.dart';
+import 'package:sky/widgets/default_text_style.dart';
+import 'package:sky/widgets/theme.dart';
 
 // TODO(jackson): This class should usually render the user's
 // preferred banner image rather than a solid background

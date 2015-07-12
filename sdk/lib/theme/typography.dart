@@ -6,7 +6,7 @@
 
 import 'dart:sky';
 
-import '../painting/text_style.dart';
+import 'package:sky/painting/text_style.dart';
 
 // TODO(eseidel): Font weights are supposed to be language relative!
 // These values are for English-like text.
@@ -62,4 +62,3 @@ const TextStyle error = const TextStyle(
   decorationColor: const Color(0xFFFF00),
   decorationStyle: TextDecorationStyle.double
 );
-

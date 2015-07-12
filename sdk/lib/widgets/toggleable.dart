@@ -4,10 +4,10 @@
 
 import 'dart:sky' as sky;
 
-import '../animation/animation_performance.dart';
-import '../animation/curves.dart';
-import 'animated_component.dart';
-import 'basic.dart';
+import 'package:sky/animation/animation_performance.dart';
+import 'package:sky/animation/curves.dart';
+import 'package:sky/widgets/animated_component.dart';
+import 'package:sky/widgets/basic.dart';
 
 typedef void ValueChanged(value);
 

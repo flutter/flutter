@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../painting/text_style.dart';
-import '../theme/typography.dart' as typography;
-import 'basic.dart';
-import 'default_text_style.dart';
-import 'material.dart';
-import 'theme.dart';
+import 'package:sky/painting/text_style.dart';
+import 'package:sky/theme/typography.dart' as typography;
+import 'package:sky/widgets/basic.dart';
+import 'package:sky/widgets/default_text_style.dart';
+import 'package:sky/widgets/material.dart';
+import 'package:sky/widgets/theme.dart';
 
 class SnackBarAction extends Component {
   SnackBarAction({String key, this.label, this.onPressed }) : super(key: key) {

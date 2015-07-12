@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'basic.dart';
-import 'button_base.dart';
-import 'icon.dart';
-import 'ink_well.dart';
-import 'material.dart';
-import 'theme.dart';
+import 'package:sky/widgets/basic.dart';
+import 'package:sky/widgets/button_base.dart';
+import 'package:sky/widgets/icon.dart';
+import 'package:sky/widgets/ink_well.dart';
+import 'package:sky/widgets/material.dart';
+import 'package:sky/widgets/theme.dart';
 
 // TODO(eseidel): This needs to change based on device size?
 // http://www.google.com/design/spec/layout/metrics-keylines.html#metrics-keylines-keylines-spacing

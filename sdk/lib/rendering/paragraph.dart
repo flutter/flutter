@@ -4,9 +4,9 @@
 
 import 'dart:sky' as sky;
 
-import 'box.dart';
-import 'object.dart';
-import '../painting/text_style.dart';
+import 'package:sky/painting/text_style.dart';
+import 'package:sky/rendering/box.dart';
+import 'package:sky/rendering/object.dart';
 
 abstract class InlineBase {
   sky.Node _toDOM(sky.Document owner);

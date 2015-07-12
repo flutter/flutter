@@ -4,14 +4,14 @@
 
 import 'dart:sky' as sky;
 
+import 'package:sky/painting/shadows.dart';
+import 'package:sky/rendering/box.dart';
 import 'package:sky/theme/shadows.dart';
+import 'package:sky/widgets/basic.dart';
+import 'package:sky/widgets/theme.dart';
+import 'package:sky/widgets/toggleable.dart';
 
-import '../painting/shadows.dart';
-import '../rendering/box.dart';
-import 'basic.dart';
-import 'theme.dart';
-import 'toggleable.dart';
-export 'toggleable.dart' show ValueChanged;
+export 'package:sky/widgets/toggleable.dart' show ValueChanged;
 
 const sky.Color _kThumbOffColor = const sky.Color(0xFFFAFAFA);
 const sky.Color _kTrackOffColor = const sky.Color(0x42000000);

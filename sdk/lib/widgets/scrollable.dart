@@ -5,12 +5,11 @@
 import 'dart:sky' as sky;
 
 import 'package:newton/newton.dart';
-
-import '../animation/animated_simulation.dart';
-import '../animation/scroll_behavior.dart';
-import '../theme/view_configuration.dart' as config;
-import 'basic.dart';
-import 'material.dart';
+import 'package:sky/animation/animated_simulation.dart';
+import 'package:sky/animation/scroll_behavior.dart';
+import 'package:sky/theme/view_configuration.dart' as config;
+import 'package:sky/widgets/basic.dart';
+import 'package:sky/widgets/material.dart';
 
 const double _kMillisecondsPerSecond = 1000.0;
 

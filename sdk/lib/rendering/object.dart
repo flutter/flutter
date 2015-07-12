@@ -6,14 +6,13 @@ import 'dart:math' as math;
 import 'dart:sky' as sky;
 import 'dart:sky' show Point, Offset, Size, Rect, Color, Paint, Path;
 
-import '../base/debug.dart';
-import '../base/hit_test.dart';
-import '../base/node.dart';
-import '../base/scheduler.dart' as scheduler;
+import 'package:sky/base/debug.dart';
+import 'package:sky/base/hit_test.dart';
+import 'package:sky/base/node.dart';
+import 'package:sky/base/scheduler.dart' as scheduler;
 
 export 'dart:sky' show Point, Offset, Size, Rect, Color, Paint, Path;
-export '../base/hit_test.dart' show HitTestTarget, HitTestEntry, HitTestResult;
-
+export 'package:sky/base/hit_test.dart' show HitTestTarget, HitTestEntry, HitTestResult;
 
 class ParentData {
   void detach() {

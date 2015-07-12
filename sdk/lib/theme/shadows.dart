@@ -4,7 +4,7 @@
 
 import 'dart:sky' show Color, Offset;
 
-import '../painting/box_painter.dart';
+import 'package:sky/painting/box_painter.dart';
 
 const Map<int, List<BoxShadow>> shadows = const {
   1: const [

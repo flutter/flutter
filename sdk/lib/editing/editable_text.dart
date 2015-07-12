@@ -5,10 +5,10 @@
 import 'dart:async';
 import 'dart:sky' as sky;
 
-import '../painting/text_style.dart';
-import '../rendering/object.dart';
-import '../widgets/basic.dart';
-import 'editable_string.dart';
+import 'package:sky/editing/editable_string.dart';
+import 'package:sky/painting/text_style.dart';
+import 'package:sky/rendering/object.dart';
+import 'package:sky/widgets/basic.dart';
 
 const _kCursorBlinkPeriod = 500; // milliseconds
 const _kCursorGap = 1.0;

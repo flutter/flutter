@@ -4,10 +4,10 @@
 
 import 'dart:sky' as sky;
 
-import '../rendering/box.dart';
-import 'basic.dart';
-import 'icon.dart';
-import 'widget.dart';
+import 'package:sky/rendering/box.dart';
+import 'package:sky/widgets/basic.dart';
+import 'package:sky/widgets/icon.dart';
+import 'package:sky/widgets/widget.dart';
 
 class IconButton extends Component {
 

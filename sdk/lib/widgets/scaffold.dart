@@ -4,10 +4,10 @@
 
 import 'dart:sky' as sky;
 
-import '../rendering/box.dart';
-import '../rendering/object.dart';
-import '../theme/view_configuration.dart';
-import 'widget.dart';
+import 'package:sky/rendering/box.dart';
+import 'package:sky/rendering/object.dart';
+import 'package:sky/theme/view_configuration.dart';
+import 'package:sky/widgets/widget.dart';
 
 // Slots are painted in this order and hit tested in reverse of this order
 enum ScaffoldSlots {

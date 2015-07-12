@@ -4,10 +4,10 @@
 
 import 'dart:sky' as sky;
 
-import '../rendering/object.dart';
-import 'basic.dart';
-import 'button_base.dart';
-import 'theme.dart';
+import 'package:sky/rendering/object.dart';
+import 'package:sky/widgets/basic.dart';
+import 'package:sky/widgets/button_base.dart';
+import 'package:sky/widgets/theme.dart';
 
 const sky.Color _kLightOffColor = const sky.Color(0x8A000000);
 const sky.Color _kDarkOffColor = const sky.Color(0xB2FFFFFF);

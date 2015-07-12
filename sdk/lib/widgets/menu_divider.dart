@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'basic.dart';
-import 'theme.dart';
+import 'package:sky/widgets/basic.dart';
+import 'package:sky/widgets/theme.dart';
 
 class MenuDivider extends Component {
   MenuDivider({ String key }) : super(key: key);

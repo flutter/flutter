@@ -2,11 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../painting/text_style.dart';
-import 'basic.dart';
-import 'default_text_style.dart';
-import 'ink_well.dart';
-import 'theme.dart';
+import 'package:sky/painting/text_style.dart';
+import 'package:sky/widgets/basic.dart';
+import 'package:sky/widgets/default_text_style.dart';
+import 'package:sky/widgets/ink_well.dart';
+import 'package:sky/widgets/theme.dart';
 
 const double kMenuItemHeight = 48.0;
 const double kBaselineOffsetFromBottom = 20.0;

@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../theme/colors.dart' as colors;
-import 'basic.dart';
-import 'material_button.dart';
-import 'theme.dart';
+import 'package:sky/theme/colors.dart' as colors;
+import 'package:sky/widgets/basic.dart';
+import 'package:sky/widgets/material_button.dart';
+import 'package:sky/widgets/theme.dart';
 
 class RaisedButton extends MaterialButton {
 

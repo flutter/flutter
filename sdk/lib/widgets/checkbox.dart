@@ -5,9 +5,9 @@
 import 'dart:sky' as sky;
 
 import 'package:sky/widgets/theme.dart';
+import 'package:sky/widgets/basic.dart';
+import 'package:sky/widgets/toggleable.dart';
 
-import 'basic.dart';
-import 'toggleable.dart';
 export 'toggleable.dart' show ValueChanged;
 
 const double _kMidpoint = 0.5;

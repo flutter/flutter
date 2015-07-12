@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../painting/text_style.dart';
-import 'basic.dart';
-import 'button_base.dart';
-import 'default_text_style.dart';
-import 'icon.dart';
-import 'ink_well.dart';
-import 'theme.dart';
-import 'widget.dart';
+import 'package:sky/painting/text_style.dart';
+import 'package:sky/widgets/basic.dart';
+import 'package:sky/widgets/button_base.dart';
+import 'package:sky/widgets/default_text_style.dart';
+import 'package:sky/widgets/icon.dart';
+import 'package:sky/widgets/ink_well.dart';
+import 'package:sky/widgets/theme.dart';
+import 'package:sky/widgets/widget.dart';
 
 const BoxDecoration _kHighlightDecoration = const BoxDecoration(
   backgroundColor: const Color.fromARGB(102, 153, 153, 153)

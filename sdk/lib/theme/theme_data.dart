@@ -4,8 +4,8 @@
 
 import 'dart:sky';
 
-import 'typography.dart' as typography;
-import 'colors.dart' as colors;
+import 'package:sky/theme/typography.dart' as typography;
+import 'package:sky/theme/colors.dart' as colors;
 
 enum ThemeBrightness { dark, light }
 
@@ -35,7 +35,7 @@ class ThemeData {
     } else {
       _primaryColor = primarySwatch[500];
     }
- 
+
     if (accentColor == null) {
       _accentColor = primarySwatch == null ? colors.Blue[500] : primarySwatch[500];
     } else {
@@ -58,7 +58,7 @@ class ThemeData {
   Color get primaryColor => _primaryColor;
 
   final ThemeBrightness primaryColorBrightness;
- 
+
   Color _accentColor;
   Color get accentColor => _accentColor;
 

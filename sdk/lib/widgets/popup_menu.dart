@@ -6,14 +6,14 @@ import 'dart:async';
 import 'dart:math' as math;
 import 'dart:sky' as sky;
 
-import '../animation/animation_performance.dart';
-import '../painting/box_painter.dart';
-import '../theme/colors.dart';
-import '../theme/shadows.dart';
-import 'animated_component.dart';
-import 'basic.dart';
-import 'popup_menu_item.dart';
-import 'scrollable_viewport.dart';
+import 'package:sky/animation/animation_performance.dart';
+import 'package:sky/painting/box_painter.dart';
+import 'package:sky/theme/colors.dart';
+import 'package:sky/theme/shadows.dart';
+import 'package:sky/widgets/animated_component.dart';
+import 'package:sky/widgets/basic.dart';
+import 'package:sky/widgets/popup_menu_item.dart';
+import 'package:sky/widgets/scrollable_viewport.dart';
 
 const Duration _kMenuOpenDuration = const Duration(milliseconds: 300);
 const Duration _kMenuCloseDuration = const Duration(milliseconds: 200);

@@ -7,8 +7,8 @@ import 'dart:math' as math;
 import 'dart:sky' as sky;
 import 'dart:sky' show Point, Offset, Size, Rect, Color, Paint, Path;
 
-import '../base/lerp.dart';
-import 'shadows.dart';
+import 'package:sky/base/lerp.dart';
+import 'package:sky/painting/shadows.dart';
 
 class BorderSide {
   const BorderSide({

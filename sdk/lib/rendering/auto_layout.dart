@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'box.dart';
-import 'object.dart';
 import 'package:cassowary/cassowary.dart' as al;
+import 'package:sky/rendering/box.dart';
+import 'package:sky/rendering/object.dart';
 
 /// Hosts the edge parameters and vends useful methods to construct expressions
 /// for constraints. Also sets up and manages implicit constraints and edit

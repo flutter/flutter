@@ -4,8 +4,8 @@
 
 import 'dart:math' as math;
 
-import 'fixed_height_scrollable.dart';
-import 'basic.dart';
+import 'package:sky/widgets/fixed_height_scrollable.dart';
+import 'package:sky/widgets/basic.dart';
 
 typedef Widget ItemBuilder<T>(T item);
 

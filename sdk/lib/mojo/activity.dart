@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:sky';
+
 import 'package:mojom/activity/activity.mojom.dart';
 import 'package:sky/mojo/shell.dart' as shell;
 

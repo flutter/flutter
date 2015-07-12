@@ -10,8 +10,7 @@ import 'package:mojom/mojo/network_service.mojom.dart';
 import 'package:mojom/mojo/url_loader.mojom.dart';
 import 'package:mojom/mojo/url_request.mojom.dart';
 import 'package:mojom/mojo/url_response.mojom.dart';
-
-import '../shell.dart' as shell;
+import 'package:sky/mojo/shell.dart' as shell;
 
 class Response {
   ByteData body;

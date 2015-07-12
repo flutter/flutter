@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../mojo/asset_bundle.dart';
-import 'basic.dart';
-import 'theme.dart';
-import 'widget.dart';
+import 'package:sky/mojo/asset_bundle.dart';
+import 'package:sky/widgets/basic.dart';
+import 'package:sky/widgets/theme.dart';
+import 'package:sky/widgets/widget.dart';
 
 enum IconThemeColor { white, black }
 

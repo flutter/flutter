@@ -4,8 +4,8 @@
 
 import 'dart:math' as math;
 
-import 'box.dart';
-import 'object.dart';
+import 'package:sky/rendering/box.dart';
+import 'package:sky/rendering/object.dart';
 
 class BlockParentData extends BoxParentData with ContainerParentDataMixin<RenderBox> { }
 
@@ -214,4 +214,3 @@ class RenderBlockViewport extends RenderBlockBase {
   }
 
 }
-

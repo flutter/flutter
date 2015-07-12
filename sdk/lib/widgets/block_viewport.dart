@@ -4,16 +4,16 @@
 
 import 'dart:collection';
 
-import '../rendering/block.dart';
-import '../rendering/box.dart';
-import '../rendering/object.dart';
-import 'widget.dart';
+import 'package:sky/rendering/block.dart';
+import 'package:sky/rendering/box.dart';
+import 'package:sky/rendering/object.dart';
+import 'package:sky/widgets/widget.dart';
 
 // return null if index is greater than index of last entry
 typedef Widget IndexedBuilder(int index);
 
 typedef void LayoutChangedCallback(
-  int firstVisibleChildIndex, 
+  int firstVisibleChildIndex,
   int visibleChildCount,
   UnmodifiableListView<double> childOffsets,
   bool didReachLastChild
@@ -40,7 +40,7 @@ class BlockViewport extends RenderObjectWrapper {
   RenderBlockViewport get root => super.root;
   RenderBlockViewport createNode() => new RenderBlockViewport();
 
-  Map<_Key, Widget> _childrenByKey = new Map<_Key, Widget>();  
+  Map<_Key, Widget> _childrenByKey = new Map<_Key, Widget>();
 
   void walkChildren(WidgetTreeWalker walker) {
     for (Widget child in _childrenByKey.values)
@@ -299,7 +299,7 @@ class BlockViewport extends RenderObjectWrapper {
         }
         widget.updateSlot(nextSibling);
         nextSibling = widget.root;
-      }      
+      }
     }
 
     _childrenByKey = newChildren;
@@ -309,7 +309,7 @@ class BlockViewport extends RenderObjectWrapper {
     if (onLayoutChanged != null) {
       onLayoutChanged(
         _currentStartIndex,
-        _currentChildCount, 
+        _currentChildCount,
         new UnmodifiableListView<double>(_offsets),
         _didReachLastChild
      );

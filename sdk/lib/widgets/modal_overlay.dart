@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'basic.dart';
-import 'widget.dart';
+import 'package:sky/widgets/basic.dart';
+import 'package:sky/widgets/widget.dart';
 
 class ModalOverlay extends Component {
 

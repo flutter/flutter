@@ -2,13 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../animation/animation_performance.dart';
-import '../painting/box_painter.dart';
-import 'animated_component.dart';
-import 'animation_builder.dart';
-import 'basic.dart';
-import 'default_text_style.dart';
-import 'theme.dart';
+import 'package:sky/animation/animation_performance.dart';
+import 'package:sky/painting/box_painter.dart';
+import 'package:sky/widgets/animated_component.dart';
+import 'package:sky/widgets/animation_builder.dart';
+import 'package:sky/widgets/basic.dart';
+import 'package:sky/widgets/default_text_style.dart';
+import 'package:sky/widgets/theme.dart';
 
 enum MaterialType { canvas, card, circle, button }
 

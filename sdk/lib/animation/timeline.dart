@@ -4,7 +4,7 @@
 
 import 'dart:async';
 
-import '../base/scheduler.dart' as scheduler;
+import 'package:sky/base/scheduler.dart' as scheduler;
 
 class Ticker {
   Ticker(Function onTick) : _onTick = onTick;

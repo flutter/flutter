@@ -5,12 +5,12 @@
 import 'dart:math' as math;
 import 'dart:sky' as sky;
 
-import '../animation/animation_performance.dart';
-import '../animation/curves.dart';
-import '../rendering/box.dart';
-import '../rendering/object.dart';
-import 'basic.dart';
-import 'widget.dart';
+import 'package:sky/animation/animation_performance.dart';
+import 'package:sky/animation/curves.dart';
+import 'package:sky/rendering/box.dart';
+import 'package:sky/rendering/object.dart';
+import 'package:sky/widgets/basic.dart';
+import 'package:sky/widgets/widget.dart';
 
 const int _kSplashInitialOpacity = 0x80;
 const double _kSplashCancelledVelocity = 0.3;

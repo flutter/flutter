@@ -4,8 +4,8 @@
 
 import 'dart:math' as math;
 
-import 'box.dart';
-import 'object.dart';
+import 'package:sky/rendering/box.dart';
+import 'package:sky/rendering/object.dart';
 
 class FlexBoxParentData extends BoxParentData with ContainerParentDataMixin<RenderBox> {
   int flex;
@@ -165,13 +165,13 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
           switch (_direction) {
               case FlexDirection.horizontal:
                 mainSize = child.getMaxIntrinsicWidth(childConstraints);
-                BoxConstraints widthConstraints = 
+                BoxConstraints widthConstraints =
                   new BoxConstraints(minWidth: mainSize, maxWidth: mainSize);
                 crossSize = child.getMaxIntrinsicHeight(widthConstraints);
                 break;
               case FlexDirection.vertical:
                 mainSize = child.getMaxIntrinsicHeight(childConstraints);
-                BoxConstraints heightConstraints = 
+                BoxConstraints heightConstraints =
                   new BoxConstraints(minWidth: mainSize, maxWidth: mainSize);
                 crossSize = child.getMaxIntrinsicWidth(heightConstraints);
                 break;
@@ -195,7 +195,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
           double crossSize;
           switch (_direction) {
             case FlexDirection.horizontal:
-              BoxConstraints childConstraints = 
+              BoxConstraints childConstraints =
                 new BoxConstraints(minWidth: childMainSize, maxWidth: childMainSize);
               crossSize = child.getMaxIntrinsicHeight(childConstraints);
               break;
