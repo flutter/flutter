@@ -42,12 +42,12 @@ bool ensureTextureBackedSkBitmap(GrContext* gr, SkBitmap& bitmap, const IntSize&
             return false;
         GrTextureDesc desc;
         desc.fConfig = config;
-        desc.fFlags = kRenderTarget_GrTextureFlagBit | kNoStencil_GrTextureFlagBit;
+        desc.fFlags = kRenderTarget_GrSurfaceFlag;
         desc.fSampleCnt = 0;
         desc.fOrigin = origin;
         desc.fWidth = size.width();
         desc.fHeight = size.height();
-        SkAutoTUnref<GrTexture> texture(gr->createUncachedTexture(desc, 0, 0));
+        SkAutoTUnref<GrTexture> texture(gr->textureProvider()->createTexture(desc, false, 0, 0));
         if (!texture.get())
             return false;
 

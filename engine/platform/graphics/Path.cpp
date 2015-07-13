@@ -481,17 +481,17 @@ void Path::translate(const FloatSize& size)
 
 bool Path::subtractPath(const Path& other)
 {
-    return Op(m_path, other.m_path, kDifference_PathOp, &m_path);
+    return Op(m_path, other.m_path, kDifference_SkPathOp, &m_path);
 }
 
 bool Path::intersectPath(const Path& other)
 {
-    return Op(m_path, other.m_path, kIntersect_PathOp, &m_path);
+    return Op(m_path, other.m_path, kIntersect_SkPathOp, &m_path);
 }
 
 bool Path::unionPath(const Path& other)
 {
-    return Op(m_path, other.m_path, kUnion_PathOp, &m_path);
+    return Op(m_path, other.m_path, kUnion_SkPathOp, &m_path);
 }
 
 #if ENABLE(ASSERT)

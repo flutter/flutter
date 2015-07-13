@@ -147,7 +147,7 @@ bool SkPathContainsPoint(const SkPath& originalPath, const FloatPoint& point, Sk
     biggestCoord = std::max(std::max(biggestCoord, fX + 1), fY + 1);
 
     const SkScalar kMaxCoordinate = SkIntToScalar(1 << 15);
-    SkScalar scale = SkScalarDiv(kMaxCoordinate, biggestCoord);
+    SkScalar scale = kMaxCoordinate / biggestCoord;
 
     SkRegion rgn;
     SkRegion clip;
