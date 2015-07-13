@@ -39,7 +39,7 @@ class Dialog extends Component {
   Color get _color {
     switch (Theme.of(this).brightness) {
       case ThemeBrightness.light:
-        return colors.White;
+        return colors.white;
       case ThemeBrightness.dark:
         return colors.Grey[800];
     }

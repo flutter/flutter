@@ -21,11 +21,13 @@ class ThemeData {
       this.primarySwatch = primarySwatch,
       primaryColorBrightness = primarySwatch == null ? brightness : ThemeBrightness.dark,
       canvasColor = brightness == ThemeBrightness.dark ? colors.Grey[850] : colors.Grey[50],
-      cardColor = brightness == ThemeBrightness.dark ? colors.Grey[800] : colors.White,
+      cardColor = brightness == ThemeBrightness.dark ? colors.Grey[800] : colors.white,
       dividerColor = brightness == ThemeBrightness.dark ? const Color(0x1FFFFFFF) : const Color(0x1F000000),
       // Some users want the pre-multiplied color, others just want the opacity.
       hintColor = brightness == ThemeBrightness.dark ? const Color(0x42FFFFFF) : const Color(0x4C000000),
       hintOpacity = brightness == ThemeBrightness.dark ? 0.26 : 0.30,
+      highlightColor = const Color(0x66999999),
+      selectedColor = const Color(0x33999999),
       text = brightness == ThemeBrightness.dark ? typography.white : typography.black {
     assert(brightness != null);
 
@@ -56,6 +58,8 @@ class ThemeData {
   final Color cardColor;
   final Color dividerColor;
   final Color hintColor;
+  final Color highlightColor;
+  final Color selectedColor;
   final double hintOpacity;
   final typography.TextTheme text;
 

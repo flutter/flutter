@@ -416,7 +416,7 @@ class TabBar extends Scrollable {
     Color backgroundColor = themeData.primaryColor;
     Color indicatorColor = themeData.accentColor;
     if (indicatorColor == backgroundColor) {
-      indicatorColor = colors.White;
+      indicatorColor = colors.white;
     }
 
     TextStyle textStyle;

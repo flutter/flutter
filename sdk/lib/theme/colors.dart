@@ -7,8 +7,9 @@ import 'dart:sky' show Color;
 /// [Color] constants which represent Material design's
 /// [color palette](http://www.google.com/design/spec/style/color.html).
 
-const White = const Color(0xFFFFFFFF);
-const Black = const Color(0x00000000);
+const white = const Color(0xFFFFFFFF);
+const black = const Color(0xFF000000);
+const transparent = const Color(0x00000000);
 
 const Map<int, Color> Red = const {
    50: const Color(0xFFFFEBEE),

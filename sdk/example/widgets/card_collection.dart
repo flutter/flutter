@@ -18,7 +18,7 @@ import 'package:sky/widgets/widget.dart';
 class CardCollectionApp extends App {
 
   final TextStyle cardLabelStyle =
-    new TextStyle(color: White, fontSize: 18.0, fontWeight: bold);
+    new TextStyle(color: white, fontSize: 18.0, fontWeight: bold);
 
   final List<double> cardHeights = [
     48.0, 64.0, 82.0, 46.0, 60.0, 55.0, 84.0, 96.0, 50.0,
@@ -43,7 +43,7 @@ class CardCollectionApp extends App {
   Widget _builder(int index) {
     if (index >= visibleCardIndices.length)
       return null;
-    
+
     int cardIndex = visibleCardIndices[index];
     Color color = lerpColor(Red[500], Blue[500], cardIndex / cardHeights.length);
     Widget label = new Text("Item ${cardIndex}", style: cardLabelStyle);

@@ -105,7 +105,7 @@ List<SkyDemo> demos = [
     description: 'Demo of alternative layouts',
     textTheme: typography.black,
     decoration: new BoxDecoration(
-      backgroundColor: colors.Black,
+      backgroundColor: colors.black,
       backgroundImage: new BackgroundImage(
         image: _bundle.loadImage('assets/sector_thumbnail.png'),
         fit: BackgroundFit.cover

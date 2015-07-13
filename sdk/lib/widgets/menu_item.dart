@@ -2,7 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:sky' as sky;
+
 import 'package:sky/painting/text_style.dart';
+import 'package:sky/theme/colors.dart' as colors;
 import 'package:sky/widgets/basic.dart';
 import 'package:sky/widgets/button_base.dart';
 import 'package:sky/widgets/default_text_style.dart';
@@ -10,20 +13,6 @@ import 'package:sky/widgets/icon.dart';
 import 'package:sky/widgets/ink_well.dart';
 import 'package:sky/widgets/theme.dart';
 import 'package:sky/widgets/widget.dart';
-
-const BoxDecoration _kHighlightDecoration = const BoxDecoration(
-  backgroundColor: const Color.fromARGB(102, 153, 153, 153)
-);
-
-// TODO(abarth): We shouldn't need _kHighlightBoring, but currently Container
-//               isn't smart enough to retain the components it builds when we
-//               add or remove a |decoration|. For now, we use a transparent
-//               decoration to avoid changing the structure of the tree. The
-//               right fix, however, is to make Container smarter about how it
-//               syncs its subcomponents.
-const BoxDecoration _kHighlightBoring = const BoxDecoration(
-  backgroundColor: const Color.fromARGB(0, 0, 0, 0)
-);
 
 class MenuItem extends ButtonBase {
   MenuItem({ String key, this.icon, this.children, this.onPressed, this.selected: false })
@@ -42,22 +31,40 @@ class MenuItem extends ButtonBase {
     super.syncFields(source);
   }
 
-  TextStyle get textStyle {
-    TextStyle result = Theme.of(this).text.body2;
-    if (highlight)
-      result = result.copyWith(color: Theme.of(this).primaryColor);
+  TextStyle _getTextStyle(ThemeData themeData) {
+    TextStyle result = themeData.text.body2;
+    if (selected)
+      result = result.copyWith(color: themeData.primaryColor);
     return result;
   }
 
+  Color _getBackgroundColor(ThemeData themeData) {
+    if (highlight)
+      return themeData.highlightColor;
+    if (selected)
+      return themeData.selectedColor;
+    return colors.transparent;
+  }
+
   Widget buildContent() {
+    ThemeData themeData = Theme.of(this);
+
     List<Widget> flexChildren = new List<Widget>();
     if (icon != null) {
+      Widget child = new Icon(type: icon, size: 24);
+      if (selected) {
+        child = new ColorFilter(
+          color: themeData.primaryColor,
+          transferMode: sky.TransferMode.srcATop,
+          child: child
+        );
+      }
       flexChildren.add(
         new Opacity(
           opacity: selected ? 1.0 : 0.45,
           child: new Padding(
             padding: const EdgeDims.symmetric(horizontal: 16.0),
-            child: new Icon(type: icon, size: 24)
+            child: child
           )
         )
       );
@@ -67,12 +74,13 @@ class MenuItem extends ButtonBase {
         child: new Padding(
           padding: const EdgeDims.symmetric(horizontal: 16.0),
           child: new DefaultTextStyle(
-            style: textStyle,
+            style: _getTextStyle(themeData),
             child: new Flex(children, direction: FlexDirection.horizontal)
           )
         )
       )
     );
+
     return new Listener(
       onGestureTap: (_) {
         if (onPressed != null)
@@ -80,12 +88,9 @@ class MenuItem extends ButtonBase {
       },
       child: new Container(
         height: 48.0,
-        decoration: selected ? _kHighlightDecoration : _kHighlightBoring,
-        child: new Container(
-          decoration: highlight ? _kHighlightDecoration : _kHighlightBoring,
-          child: new InkWell(
-            child: new Flex(flexChildren)
-          )
+        decoration: new BoxDecoration(backgroundColor: _getBackgroundColor(themeData)),
+        child: new InkWell(
+          child: new Flex(flexChildren)
         )
       )
     );
