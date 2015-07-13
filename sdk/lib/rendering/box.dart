@@ -1288,8 +1288,6 @@ class RenderDecoratedBox extends RenderProxyBox {
 }
 
 class RenderTransform extends RenderProxyBox {
-  bool get createNewDisplayList => true;
-
   RenderTransform({
     Matrix4 transform,
     RenderBox child

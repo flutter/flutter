@@ -76,8 +76,6 @@ class InkSplash {
 }
 
 class RenderInkWell extends RenderProxyBox {
-  bool get createNewDisplayList => true;
-
   RenderInkWell({ RenderBox child }) : super(child);
 
   final List<InkSplash> _splashes = new List<InkSplash>();
