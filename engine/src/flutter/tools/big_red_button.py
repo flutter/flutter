@@ -90,6 +90,7 @@ def main():
     run(mojo_root, ['mojo/tools/mojob.py', 'build', '--android', '--release'])
     # Run tests?
 
+    run(sky_sdk_root, ['git', 'fetch'])
     run(sky_sdk_root, ['git', 'reset', '--hard', 'origin/master'])
     run(mojo_root, [
         'sky/tools/deploy_sdk.py',
@@ -99,6 +100,7 @@ def main():
     ])
     # tag for version?
 
+    run(demo_site_root, ['git', 'fetch'])
     run(demo_site_root, ['git', 'reset', '--hard', 'origin/master'])
     run(mojo_root, ['mojo/tools/deploy_domokit_site.py', demo_site_root])
     # tag for version?
