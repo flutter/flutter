@@ -57,7 +57,7 @@ def publish_apk(service, package_name, apk_path, changes_text, track):
     listing_response = service.edits().apklistings().update(
         editId=edit_id, packageName=package_name, language='en-US',
         apkVersionCode=apk_response['versionCode'],
-        body={'recentChanges': changes}).execute()
+        body={'recentChanges': changes_text}).execute()
 
     print ('Listing for language %s was updated.'
            % listing_response['language'])
