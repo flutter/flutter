@@ -6,7 +6,6 @@ import 'package:sky/theme/colors.dart' as colors;
 import 'package:sky/theme/typography.dart' as typography;
 import 'package:sky/widgets/basic.dart';
 import 'package:sky/widgets/default_text_style.dart';
-import 'package:sky/widgets/navigator.dart';
 import 'package:sky/widgets/theme.dart';
 import 'package:sky/widgets/widget.dart';
 import 'package:sky/widgets/task_description.dart';

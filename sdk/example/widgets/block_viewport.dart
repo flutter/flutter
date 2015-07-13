@@ -4,8 +4,6 @@
 
 import 'dart:math' as math;
 
-import 'package:sky/base/scheduler.dart' as scheduler;
-import 'package:sky/rendering/sky_binding.dart';
 import 'package:sky/widgets/basic.dart';
 import 'package:sky/widgets/block_viewport.dart';
 import 'package:sky/widgets/material.dart';
