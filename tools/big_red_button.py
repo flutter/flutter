@@ -1,3 +1,8 @@
+#!/usr/bin/env python
+# Copyright 2015 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
 # Prepare release script.
 #
 # 1) Bump versions:
@@ -18,22 +23,30 @@
 # 4) Run this script.
 #
 
-# Useful links:
-# http://stackoverflow.com/questions/14665518/api-to-automatically-upload-apk-to-google-play
-# https://developers.google.com/resources/api-libraries/documentation/androidpublisher/v2/python/latest/androidpublisher_v2.edits.apks.html
-
 import argparse
 import os
 import subprocess
 import sys
+import distutils.util
 
 DEFAULT_MOJO_ROOT = '/src/mojo/src'
 DEFAULT_SKY_SDK_ROOT = '/src/sky_sdk'
 DEFAULT_DEMO_SITE_ROOT = '/src/domokit.github.io'
+CONFIRM_MESSAGE = """This tool is destructive and will revert your current branch to
+origin/master among other things.  Are you sure you wish to continue?"""
+
 
 def run(cwd, args):
     print 'RUNNING:', ' '.join(args), 'IN:', cwd
     subprocess.check_call(args, cwd=cwd)
+
+
+def confirm(prompt):
+    user_input = raw_input("%s (y/N) " % prompt)
+    try:
+        return distutils.util.strtobool(user_input) == 1
+    except ValueError:
+        return False
 
 
 def main():
@@ -57,6 +70,10 @@ def main():
                         help='Path to domokit.github.io',
                         default=DEFAULT_DEMO_SITE_ROOT)
     args = parser.parse_args()
+
+    if not confirm(CONFIRM_MESSAGE):
+        print "Aborted."
+        return 1
 
     mojo_root = os.path.abspath(os.path.expanduser(args.mojo_root))
     sky_sdk_root = os.path.abspath(os.path.expanduser(args.sky_sdk_root))
