@@ -532,21 +532,6 @@ abstract class StatefulComponent extends Component {
     super._buildIfDirty();
   }
 
-  void _sync(Widget old, dynamic slot) {
-    assert(!_disqualifiedFromEverAppearingAgain);
-    // TODO(ianh): _sync should only be called once when old == null
-    if (old == null && !_isStateInitialized) {
-      initState();
-      _isStateInitialized = true;
-    }
-    super._sync(old, slot);
-  }
-
-  Widget syncChild(Widget node, Widget oldNode, dynamic slot) {
-    assert(!_disqualifiedFromEverAppearingAgain);
-    return super.syncChild(node, oldNode, slot);
-  }
-
   bool retainStatefulNodeIfPossible(StatefulComponent newNode) {
     assert(!_disqualifiedFromEverAppearingAgain);
     assert(newNode != null);
@@ -564,6 +549,21 @@ abstract class StatefulComponent extends Component {
     return true;
   }
 
+  void _sync(Widget old, dynamic slot) {
+    assert(!_disqualifiedFromEverAppearingAgain);
+    // TODO(ianh): _sync should only be called once when old == null
+    if (old == null && !_isStateInitialized) {
+      initState();
+      _isStateInitialized = true;
+    }
+    super._sync(old, slot);
+  }
+
+  // Stateful components can override initState if they want
+  // to do non-trivial work to initialize state. This is
+  // always called before build().
+  void initState() { }
+
   // This is called by retainStatefulNodeIfPossible(), during
   // syncChild(), just before _sync() is called. Derived
   // classes should override this method to update `this` to
@@ -572,10 +572,10 @@ abstract class StatefulComponent extends Component {
   // extending StatefulComponent directly.
   void syncFields(Component source);
 
-  // Stateful components can override initState if they want
-  // to do non-trivial work to initialize state. This is
-  // always called before build().
-  void initState() { }
+  Widget syncChild(Widget node, Widget oldNode, dynamic slot) {
+    assert(!_disqualifiedFromEverAppearingAgain);
+    return super.syncChild(node, oldNode, slot);
+  }
 
   void setState(Function fn()) {
     assert(!_disqualifiedFromEverAppearingAgain);
