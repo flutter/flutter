@@ -7,10 +7,11 @@ import 'package:sky/animation/curves.dart';
 
 abstract class AnimatedVariable {
   void setFraction(double t);
+  String toString();
 }
 
 class AnimatedType<T extends dynamic> extends AnimatedVariable {
-  AnimatedType(this.begin, {this.end, this.curve: linear}) {
+  AnimatedType(this.begin, { this.end, this.curve: linear }) {
     value = begin;
   }
 
@@ -25,6 +26,8 @@ class AnimatedType<T extends dynamic> extends AnimatedVariable {
       value = begin + (end - begin) * curve.transform(t);
     }
   }
+
+  String toString() => 'AnimatedType(begin=$begin, end=$end, value=$value)';
 }
 
 class AnimatedList extends AnimatedVariable {
@@ -34,6 +37,7 @@ class AnimatedList extends AnimatedVariable {
     for (AnimatedVariable variable in variables)
       variable.setFraction(t);
   }
+  String toString() => 'AnimatedList([$variables])';
 }
 
 // This class manages a "performance" - a collection of values that change

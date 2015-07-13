@@ -39,18 +39,22 @@ class Material extends AnimatedComponent {
   int level;
   Color color;
 
-  AnimationBuilder _builder;
+  final AnimationBuilder _builder = new AnimationBuilder();
 
   void initState() {
-    _builder = new AnimationBuilder()
+    _builder
       ..shadow = new AnimatedType<double>(level.toDouble())
       ..backgroundColor = _getBackgroundColor(type, color)
       ..borderRadius = edges[type]
       ..shape = type == MaterialType.circle ? Shape.circle : Shape.rectangle;
     watchPerformance(_builder.createPerformance(
-        [_builder.shadow], duration: _kAnimateShadowDuration));
+        [_builder.shadow],
+        duration: _kAnimateShadowDuration
+    ));
     watchPerformance(_builder.createPerformance(
-        [_builder.backgroundColor], duration: _kAnimateColorDuration));
+        [_builder.backgroundColor],
+        duration: _kAnimateColorDuration
+    ));
     super.initState();
   }
 

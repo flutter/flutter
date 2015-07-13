@@ -15,6 +15,9 @@ import 'package:sky/widgets/basic.dart';
 // animated properties. Use syncFields to update the Container's properties,
 // which will optionally animate them using an AnimationPerformance.
 class AnimationBuilder {
+
+  AnimationBuilder();
+
   AnimatedType<double> opacity;
   AnimatedType<Point> position;
   AnimatedType<double> shadow;
@@ -27,10 +30,8 @@ class AnimationBuilder {
   Map<AnimatedVariable, AnimationPerformance> _variableToPerformance =
       new Map<AnimatedVariable, AnimationPerformance>();
 
-  AnimationBuilder();
-
   AnimationPerformance createPerformance(List<AnimatedType> variables,
-                                         {Duration duration}) {
+                                         { Duration duration }) {
     AnimationPerformance performance = new AnimationPerformance()
       ..duration = duration
       ..variable = new AnimatedList(variables);
@@ -65,10 +66,12 @@ class AnimationBuilder {
     return current;
   }
 
-  void updateFields({ AnimatedType<double> shadow,
-                      AnimatedColor backgroundColor,
-                      double borderRadius,
-                      Shape shape }) {
+  void updateFields({
+    AnimatedType<double> shadow,
+    AnimatedColor backgroundColor,
+    double borderRadius,
+    Shape shape
+  }) {
     _updateField(this.shadow, shadow);
     _updateField(this.backgroundColor, backgroundColor);
     this.borderRadius = borderRadius;
@@ -77,7 +80,7 @@ class AnimationBuilder {
 
   void _updateField(AnimatedType variable, AnimatedType sourceVariable) {
     if (variable == null)
-      return;  // TODO(mpcomplete): Should we handle transition from null?
+      return; // TODO(mpcomplete): Should we handle transition from null?
 
     AnimationPerformance performance = _variableToPerformance[variable];
     if (performance == null) {
@@ -99,8 +102,8 @@ class AnimationBuilder {
 }
 
 class AnimatedColor extends AnimatedType<Color> {
-  AnimatedColor(Color begin, {Color end, Curve curve: linear})
-      : super(begin, end: end, curve: curve);
+  AnimatedColor(Color begin, { Color end, Curve curve: linear })
+    : super(begin, end: end, curve: curve);
 
   void setFraction(double t) {
     value = lerpColor(begin, end, t);
