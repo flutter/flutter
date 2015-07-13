@@ -57,6 +57,7 @@ dart_pkg("sky") {
     "lib/widgets/checkbox.dart",
     "lib/widgets/default_text_style.dart",
     "lib/widgets/dialog.dart",
+    "lib/widgets/dismissable.dart",
     "lib/widgets/drawer.dart",
     "lib/widgets/drawer_header.dart",
     "lib/widgets/fixed_height_scrollable.dart",
