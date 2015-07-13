@@ -30,16 +30,15 @@ class VariableHeightScrollable extends Scrollable {
   OverscrollBehavior get scrollBehavior => super.scrollBehavior;
 
   void _handleSizeChanged(Size newSize) {
-    setState(() {
-      scrollBehavior.containerSize = newSize.height;
-    });
+    scrollBehavior.containerSize = newSize.height;
   }
 
   void _handleLayoutChanged(
-      int firstVisibleChildIndex,
-      int visibleChildCount,
-      UnmodifiableListView<double> childOffsets,
-      bool didReachLastChild) {
+    int firstVisibleChildIndex,
+    int visibleChildCount,
+    UnmodifiableListView<double> childOffsets,
+    bool didReachLastChild
+  ) {
     assert(childOffsets.length > 0);
     scrollBehavior.contentsSize = didReachLastChild ? childOffsets.last : double.INFINITY;
     if (didReachLastChild && scrollOffset > scrollBehavior.maxScrollOffset)

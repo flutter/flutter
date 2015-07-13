@@ -85,6 +85,9 @@ abstract class FixedHeightScrollable extends Scrollable {
     List<Widget> items = buildItems(itemShowIndex, itemShowCount);
     assert(items.every((item) => item.key != null));
 
+    // TODO(ianh): Refactor this so that it does the building in the
+    // same frame as the size observing, similar to BlockViewport, but
+    // keeping the fixed-height optimisations.
     return new SizeObserver(
       callback: _handleSizeChanged,
       child: new Viewport(

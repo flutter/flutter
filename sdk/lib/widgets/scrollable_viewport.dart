@@ -23,16 +23,12 @@ class ScrollableViewport extends Scrollable {
   double _viewportHeight = 0.0;
   double _childHeight = 0.0;
   void _handleViewportSizeChanged(Size newSize) {
-    setState(() {
-      _viewportHeight = newSize.height;
-      _updateScrollBehaviour();
-    });
+    _viewportHeight = newSize.height;
+    _updateScrollBehaviour();
   }
   void _handleChildSizeChanged(Size newSize) {
-    setState(() {
-      _childHeight = newSize.height;
-      _updateScrollBehaviour();
-    });
+    _childHeight = newSize.height;
+    _updateScrollBehaviour();
   }
   void _updateScrollBehaviour() {
     scrollBehavior.contentsSize = _childHeight;
