@@ -5,23 +5,12 @@
 
 # Prepare release script.
 #
-# 1) Bump versions:
-# sky/sdk/example/demo_launcher/apk/AndroidManifest.xml
-# mojo/dart/mojo_services/pubspec.yaml
-# mojo/dart/mojom/pubspec.yaml
-# mojo/public/dart/pubspec.yaml
-# sky/sdk/pubspec.yaml
-#
-# 2) Update change logs:
-# mojo/dart/mojo_services/CHANGELOG.md
-# mojo/dart/mojom/CHANGELOG.md
-# mojo/public/dart/CHANGELOG.md
-# sky/sdk/CHANGELOG.md
-#
-# 3) Make a commit, upload it, land it.
-#
-# 4) Run this script.
-#
+# 1) Bump versions using sky/tools/roll_versions.py
+# 2) Add any additional information to touched CHANGELOG.md files.
+# 3) Add any release_notes/version.txt files for updated apks.
+# 4) Make a commit, upload it, land it.
+# 5) Run this script.
+# 6) Publish updated apks using sky/tools/publish_apk.py
 
 import argparse
 import os
@@ -29,15 +18,19 @@ import subprocess
 import sys
 import distutils.util
 
+
 DEFAULT_MOJO_ROOT = '/src/mojo/src'
 DEFAULT_SKY_SDK_ROOT = '/src/sky_sdk'
 DEFAULT_DEMO_SITE_ROOT = '/src/domokit.github.io'
 CONFIRM_MESSAGE = """This tool is destructive and will revert your current branch to
 origin/master among other things.  Are you sure you wish to continue?"""
+DRY_RUN = False
 
 
 def run(cwd, args):
     print 'RUNNING:', ' '.join(args), 'IN:', cwd
+    if DRY_RUN:
+        return
     subprocess.check_call(args, cwd=cwd)
 
 
@@ -49,29 +42,32 @@ def confirm(prompt):
         return False
 
 
+def publish_packages(pub_path, packages_root):
+    for package in os.listdir(packages_root):
+        package_path = os.path.join(packages_root, package)
+        if not os.path.isdir(package_path):
+            continue
+        run(package_path, [pub_path, 'publish', '--force'])
+
+
 def main():
     parser = argparse.ArgumentParser(description='Deploy!')
-    parser.add_argument('--mojo-root',
-                        action='store',
-                        type=str,
-                        metavar='mojo_root',
-                        help='Path to mojo/src',
-                        default=DEFAULT_MOJO_ROOT)
-    parser.add_argument('--sky-sdk-root',
-                        action='store',
-                        type=str,
-                        metavar='sky_sdk_root',
-                        help='Path to sky_sdk',
-                        default=DEFAULT_SKY_SDK_ROOT)
-    parser.add_argument('--demo-site-root',
-                        action='store',
-                        type=str,
-                        metavar='demo_site_root',
-                        help='Path to domokit.github.io',
-                        default=DEFAULT_DEMO_SITE_ROOT)
+    parser.add_argument('--mojo-root', help='Path to mojo/src',
+        default=DEFAULT_MOJO_ROOT)
+    parser.add_argument('--sky-sdk-root', help='Path to sky_sdk',
+        default=DEFAULT_SKY_SDK_ROOT)
+    parser.add_argument('--demo-site-root', help='Path to domokit.github.io',
+        default=DEFAULT_DEMO_SITE_ROOT)
+    parser.add_argument('--dry-run', action='store_true', default=False,
+        help='Just print commands w/o executing.')
+    parser.add_argument('--no-pub-publish', dest='publish',
+        action='store_false', default=True, help='Skip pub publish step.')
     args = parser.parse_args()
 
-    if not confirm(CONFIRM_MESSAGE):
+    global DRY_RUN
+    DRY_RUN = args.dry_run
+
+    if not args.dry_run and not confirm(CONFIRM_MESSAGE):
         print "Aborted."
         return 1
 
@@ -105,11 +101,8 @@ def main():
     run(mojo_root, ['mojo/tools/deploy_domokit_site.py', demo_site_root])
     # tag for version?
 
-    for package in os.listdir(packages_root):
-        package_path = os.path.join(packages_root, package)
-        if not os.path.isdir(package_path):
-            continue
-        run(package_path, [pub_path, 'publish', '--force'])
+    if args.publish:
+        publish_packages(pub_path, packages_root)
 
     run(sky_sdk_root, ['git', 'push'])
     run(demo_site_root, ['git', 'push'])
