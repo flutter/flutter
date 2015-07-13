@@ -90,7 +90,7 @@ class Material extends AnimatedComponent {
 
   Widget build() {
     return _builder.build(
-        new DefaultTextStyle(style: Theme.of(this).text.body1, child: child)
+      new DefaultTextStyle(style: Theme.of(this).text.body1, child: child)
     );
   }
 

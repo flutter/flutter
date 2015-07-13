@@ -206,6 +206,14 @@ abstract class Widget {
     return newNode;
   }
 
+  String _adjustPrefixWithParentCheck(Widget child, String prefix) {
+    if (child.parent == this)
+      return prefix;
+    if (child.parent == null)
+      return '$prefix [[DISCONNECTED]] ';
+    return '$prefix [[PARENT IS ${child.parent.toStringName()}]] ';
+  }
+
   String toString([String prefix = '', String startPrefix = '']) {
     String childrenString = '';
     List<Widget> children = new List<Widget>();
@@ -215,10 +223,10 @@ abstract class Widget {
       String nextStartPrefix = prefix + ' +-';
       String nextPrefix = prefix + ' | ';
       for (Widget child in children)
-        childrenString += child.toString(nextPrefix, nextStartPrefix);
-      String lastStartPrefix = prefix + ' \'-';
-      String lastPrefix = prefix + '   ';
-      childrenString += lastChild.toString(lastPrefix, lastStartPrefix);
+        childrenString += child.toString(nextPrefix, _adjustPrefixWithParentCheck(child, nextStartPrefix));
+      nextStartPrefix = prefix + ' \'-';
+      nextPrefix = prefix + '   ';
+      childrenString += lastChild.toString(nextPrefix, _adjustPrefixWithParentCheck(lastChild, nextStartPrefix));
     }
     return '$startPrefix${toStringName()}\n$childrenString';
   }
@@ -542,13 +550,14 @@ abstract class StatefulComponent extends Component {
 
     newNode._built = _built;
     _built = null;
-
-    syncFields(newNode);
     _dirty = true;
 
     return true;
   }
 
+  // because our retainStatefulNodeIfPossible() method returns true,
+  // when _sync is called, our 'old' is actually the new instance that
+  // we are to copy state from.
   void _sync(Widget old, dynamic slot) {
     assert(!_disqualifiedFromEverAppearingAgain);
     // TODO(ianh): _sync should only be called once when old == null
@@ -556,6 +565,8 @@ abstract class StatefulComponent extends Component {
       initState();
       _isStateInitialized = true;
     }
+    if (old != null)
+      syncFields(old);
     super._sync(old, slot);
   }
 
@@ -564,12 +575,10 @@ abstract class StatefulComponent extends Component {
   // always called before build().
   void initState() { }
 
-  // This is called by retainStatefulNodeIfPossible(), during
-  // syncChild(), just before _sync() is called. Derived
-  // classes should override this method to update `this` to
-  // account for the new values the parent passed to `source`.
-  // Make sure to call super.syncFields(source) unless you are
-  // extending StatefulComponent directly.
+  // This is called by _sync(). Derived classes should override this
+  // method to update `this` to account for the new values the parent
+  // passed to `source`. Make sure to call super.syncFields(source)
+  // unless you are extending StatefulComponent directly.
   void syncFields(Component source);
 
   Widget syncChild(Widget node, Widget oldNode, dynamic slot) {
@@ -1097,15 +1106,23 @@ class AppContainer extends AbstractWidgetRoot {
   Widget build() => new RenderViewWrapper(child: app);
 }
 
+AppContainer _container;
 void runApp(App app, { RenderView renderViewOverride, bool enableProfilingLoop: false }) {
   WidgetSkyBinding.initWidgetSkyBinding(renderViewOverride: renderViewOverride);
-  new AppContainer(app);
+  _container = new AppContainer(app);
   if (enableProfilingLoop) {
     new Timer.periodic(const Duration(milliseconds: 20), (_) {
       app.scheduleBuild();
     });
   }
 }
+void debugDumpApp() {
+  if (_container != null)
+    _container.toString().split('\n').forEach(print);
+  else
+    print("runApp() not yet called");
+}
+
 
 class RenderBoxToWidgetAdapter extends AbstractWidgetRoot {
 

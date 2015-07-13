@@ -355,6 +355,10 @@ Let's walk through the differences in `MyDialog` caused by its being stateful:
    variables because those represent the internal state of the object and `this`
    is the authoritative source of that state.
 
+   When implementing a `StatefulComponent`, make sure to call
+   `super.syncFields(source)` from within your `syncFields()` method,
+   unless you are extending `StatefulComponent` directly.
+
 Finally, when the user taps on the "Save" button, `MyDialog` follows the same
 pattern as `MyCheckbox` and calls a function passed in by its parent component
 to return the final value of the checkbox up the hierarchy.
@@ -426,6 +430,20 @@ copies of a particular widget to fill its visible region:
    Moreover, syncing the entries semantically means that state retained in
    stateful subcomponents will remain attached to the same semantic entry rather
    than the entry in the same numerical position in the viewport.
+
+Useful debugging tools
+----------------------
+
+This is a quick way to dump the entire widget tree to the console.
+This can be quite useful in figuring out exactly what is going on when
+working with the widgets system. For this to work, you have to have
+launched your app with `runApp()`.
+
+```dart
+import 'package:sky/widget/widget.dart';
+
+debugDumpApp();
+```
 
 Dependencies
 ------------

@@ -364,6 +364,20 @@ Performance rules of thumb
 * Avoid using save/restore on canvases.
 
 
+Useful debugging tools
+----------------------
+
+This is a quick way to dump the entire render tree to the console.
+This can be quite useful in figuring out exactly what is going on when
+working with the render tree.
+
+```dart
+import 'package:sky/rendering/sky_binding.dart';
+
+SkyBinding.instance.debugDumpRenderTree();
+```
+
+
 Dependencies
 ------------
 
