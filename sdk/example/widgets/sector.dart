@@ -146,8 +146,4 @@ class SectorApp extends App {
 
 void main() {
   runApp(new SectorApp());
-  SkyBinding.instance.onFrame = () {
-    // uncomment this for debugging:
-    // SkyBinding.instance.debugDumpRenderTree();
-  };
 }

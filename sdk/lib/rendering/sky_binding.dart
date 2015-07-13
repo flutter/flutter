@@ -65,14 +65,11 @@ class SkyBinding {
     _renderView.rootConstraints = _createConstraints();
   }
 
-  Function onFrame;
   RenderBox get root => _renderView.child;
   void set root(RenderBox value) {
     _renderView.child = value;
   }
   void _beginFrame(double timeStamp) {
-    if (onFrame != null)
-      onFrame();
     RenderObject.flushLayout();
     RenderObject.flushPaint();
     _renderView.paintFrame();

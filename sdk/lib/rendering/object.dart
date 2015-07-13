@@ -337,8 +337,9 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   }
 
   static void flushPaint() {
+    sky.tracing.begin('RenderObject.flushPaint');
+    _debugDoingPaint = true;
     try {
-      _debugDoingPaint = true;
       List<RenderObject> dirtyNodes = _nodesNeedingPaint;
       _nodesNeedingPaint = new List<RenderObject>();
       for (RenderObject node in dirtyNodes..sort((a, b) => a.depth - b.depth)) {
@@ -348,6 +349,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
       assert(_nodesNeedingPaint.length == 0);
     } finally {
       _debugDoingPaint = false;
+      sky.tracing.end('RenderObject.flushPaint');
     }
   }
 

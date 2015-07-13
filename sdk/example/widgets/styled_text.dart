@@ -49,7 +49,7 @@ HAL: This mission is too important for me to allow you to jeopardize it.''';
     decorationColor: const Color(0xFF000000),
     decorationStyle: TextDecorationStyle.wavy
   );
-  
+
   Component toStyledText(String name, String text) {
     TextStyle lineStyle = (name == "Dave") ? daveStyle : halStyle;
     return new StyledText(
@@ -122,8 +122,4 @@ HAL: This mission is too important for me to allow you to jeopardize it.''';
 
 void main() {
   runApp(new StyledTextApp());
-  SkyBinding.instance.onFrame = () {
-    // uncomment this for debugging:
-    // SkyBinding.instance.debugDumpRenderTree();
-  };
 }

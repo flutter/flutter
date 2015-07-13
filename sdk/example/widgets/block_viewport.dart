@@ -4,6 +4,7 @@
 
 import 'dart:math' as math;
 
+import 'package:sky/base/scheduler.dart' as scheduler;
 import 'package:sky/rendering/sky_binding.dart';
 import 'package:sky/widgets/basic.dart';
 import 'package:sky/widgets/block_viewport.dart';
@@ -131,8 +132,7 @@ class BlockViewportApp extends App {
 
 void main() {
   runApp(new BlockViewportApp());
-  SkyBinding.instance.onFrame = () {
-    // uncomment this for debugging:
-    // SkyBinding.instance.debugDumpRenderTree();
-  };
+  // scheduler.addPersistentFrameCallback((_) {
+  //   SkyBinding.instance.debugDumpRenderTree();
+  // });
 }

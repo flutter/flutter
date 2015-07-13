@@ -367,14 +367,17 @@ Performance rules of thumb
 Useful debugging tools
 ----------------------
 
-This is a quick way to dump the entire render tree to the console.
+This is a quick way to dump the entire render tree to the console every frame.
 This can be quite useful in figuring out exactly what is going on when
 working with the render tree.
 
 ```dart
 import 'package:sky/rendering/sky_binding.dart';
+import 'package:sky/base/scheduler.dart' as scheduler;
 
-SkyBinding.instance.debugDumpRenderTree();
+scheduler.addPersistentFrameCallback((_) {
+  SkyBinding.instance.debugDumpRenderTree();
+});
 ```
 
 
