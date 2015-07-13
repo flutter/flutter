@@ -14,8 +14,8 @@ import 'package:sky/widgets/ink_well.dart';
 import 'package:sky/widgets/theme.dart';
 import 'package:sky/widgets/widget.dart';
 
-class MenuItem extends ButtonBase {
-  MenuItem({ String key, this.icon, this.children, this.onPressed, this.selected: false })
+class DrawerItem extends ButtonBase {
+  DrawerItem({ String key, this.icon, this.children, this.onPressed, this.selected: false })
     : super(key: key);
 
   String icon;
@@ -23,7 +23,7 @@ class MenuItem extends ButtonBase {
   Function onPressed;
   bool selected;
 
-  void syncFields(MenuItem source) {
+  void syncFields(DrawerItem source) {
     icon = source.icon;
     children = source.children;
     onPressed = source.onPressed;

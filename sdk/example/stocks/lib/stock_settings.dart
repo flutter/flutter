@@ -5,10 +5,10 @@
 import 'package:sky/widgets/basic.dart';
 import 'package:sky/widgets/checkbox.dart';
 import 'package:sky/widgets/dialog.dart';
+import 'package:sky/widgets/drawer_item.dart';
 import 'package:sky/widgets/flat_button.dart';
 import 'package:sky/widgets/icon_button.dart';
 import 'package:sky/widgets/material.dart';
-import 'package:sky/widgets/menu_item.dart';
 import 'package:sky/widgets/navigator.dart';
 import 'package:sky/widgets/scaffold.dart';
 import 'package:sky/widgets/scrollable_viewport.dart';
@@ -94,7 +94,7 @@ class StockSettings extends StatefulComponent {
         child: new Container(
           padding: const EdgeDims.symmetric(vertical: 20.0),
           child: new Block([
-            new MenuItem(
+            new DrawerItem(
               icon: 'action/thumb_up',
               onPressed: () => _confirmOptimismChange(),
               children: [
@@ -102,7 +102,7 @@ class StockSettings extends StatefulComponent {
                 new Checkbox(value: optimism == StockMode.optimistic, onChanged: _handleOptimismChanged)
               ]
             ),
-            new MenuItem(
+            new DrawerItem(
               icon: 'action/backup',
               onPressed: () { _handleBackupChanged(!(backup == BackupMode.enabled)); },
               children: [

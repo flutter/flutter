@@ -3,10 +3,10 @@
 // found in the LICENSE file.
 
 import 'package:sky/widgets/basic.dart';
+import 'package:sky/widgets/drawer_item.dart';
 import 'package:sky/widgets/switch.dart';
 import 'package:sky/widgets/icon_button.dart';
 import 'package:sky/widgets/material.dart';
-import 'package:sky/widgets/menu_item.dart';
 import 'package:sky/widgets/navigator.dart';
 import 'package:sky/widgets/scaffold.dart';
 import 'package:sky/widgets/tool_bar.dart';
@@ -48,14 +48,14 @@ class SettingsFragment extends Component {
       child: new Container(
         padding: const EdgeDims.symmetric(vertical: 20.0),
         child: new Block([
-          new MenuItem(
+          new DrawerItem(
             onPressed: () { _handleBackupChanged(!(backup == BackupMode.enabled)); },
             children: [
               new Flexible(child: new Text('Back up data to the cloud')),
               new Switch(value: backup == BackupMode.enabled, onChanged: _handleBackupChanged)
             ]
           ),
-          new MenuItem(
+          new DrawerItem(
             children: [
               new Block([
                 new Text('Height'),

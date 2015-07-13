@@ -5,16 +5,16 @@
 import 'package:sky/painting/text_style.dart';
 import 'package:sky/widgets/basic.dart';
 import 'package:sky/widgets/drawer.dart';
+import 'package:sky/widgets/drawer_divider.dart';
 import 'package:sky/widgets/drawer_header.dart';
+import 'package:sky/widgets/drawer_item.dart';
 import 'package:sky/widgets/floating_action_button.dart';
-import 'package:sky/widgets/icon.dart';
 import 'package:sky/widgets/icon_button.dart';
+import 'package:sky/widgets/icon.dart';
 import 'package:sky/widgets/material.dart';
-import 'package:sky/widgets/menu_divider.dart';
-import 'package:sky/widgets/menu_item.dart';
 import 'package:sky/widgets/navigator.dart';
-import 'package:sky/widgets/snack_bar.dart';
 import 'package:sky/widgets/scaffold.dart';
+import 'package:sky/widgets/snack_bar.dart';
 import 'package:sky/widgets/theme.dart';
 import 'package:sky/widgets/tool_bar.dart';
 import 'package:sky/widgets/widget.dart';
@@ -72,22 +72,22 @@ class HomeFragment extends StatefulComponent {
       level: 3,
       children: [
         new DrawerHeader(children: [new Text('Fitness')]),
-        new MenuItem(
+        new DrawerItem(
           icon: 'action/assessment',
           onPressed: () => _handleFitnessModeChange(FitnessMode.measure),
           selected: _fitnessMode == FitnessMode.measure,
           children: [new Text('Measure')]),
-        new MenuItem(
+        new DrawerItem(
           icon: 'maps/directions_run',
           onPressed: () => _handleFitnessModeChange(FitnessMode.run),
           selected: _fitnessMode == FitnessMode.run,
           children: [new Text('Run')]),
-        new MenuDivider(),
-        new MenuItem(
+        new DrawerDivider(),
+        new DrawerItem(
           icon: 'action/settings',
           onPressed: _handleShowSettings,
           children: [new Text('Settings')]),
-        new MenuItem(
+        new DrawerItem(
           icon: 'action/help',
           children: [new Text('Help & Feedback')])
      ]

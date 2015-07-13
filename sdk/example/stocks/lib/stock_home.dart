@@ -9,12 +9,12 @@ import 'package:sky/widgets/animation_builder.dart';
 import 'package:sky/theme/colors.dart' as colors;
 import 'package:sky/widgets/basic.dart';
 import 'package:sky/widgets/drawer.dart';
+import 'package:sky/widgets/drawer_divider.dart';
 import 'package:sky/widgets/drawer_header.dart';
+import 'package:sky/widgets/drawer_item.dart';
 import 'package:sky/widgets/floating_action_button.dart';
 import 'package:sky/widgets/icon.dart';
 import 'package:sky/widgets/icon_button.dart';
-import 'package:sky/widgets/menu_divider.dart';
-import 'package:sky/widgets/menu_item.dart';
 import 'package:sky/widgets/modal_overlay.dart';
 import 'package:sky/widgets/navigator.dart';
 import 'package:sky/widgets/popup_menu.dart';
@@ -140,34 +140,34 @@ class StockHome extends AnimatedComponent {
       level: 3,
       children: [
         new DrawerHeader(children: [new Text('Stocks')]),
-        new MenuItem(
+        new DrawerItem(
           icon: 'action/assessment',
           selected: true,
           children: [new Text('Stock List')]),
-        new MenuItem(
+        new DrawerItem(
           icon: 'action/account_balance',
           children: [new Text('Account Balance')]),
-        new MenuDivider(),
-        new MenuItem(
+        new DrawerDivider(),
+        new DrawerItem(
           icon: 'action/thumb_up',
           onPressed: () => _handleStockModeChange(StockMode.optimistic),
           children: [
             new Flexible(child: new Text('Optimistic')),
             new Radio(value: StockMode.optimistic, groupValue: stockMode, onChanged: _handleStockModeChange)
           ]),
-        new MenuItem(
+        new DrawerItem(
           icon: 'action/thumb_down',
           onPressed: () => _handleStockModeChange(StockMode.pessimistic),
           children: [
             new Flexible(child: new Text('Pessimistic')),
             new Radio(value: StockMode.pessimistic, groupValue: stockMode, onChanged: _handleStockModeChange)
           ]),
-        new MenuDivider(),
-        new MenuItem(
+        new DrawerDivider(),
+        new DrawerItem(
           icon: 'action/settings',
           onPressed: _handleShowSettings,
           children: [new Text('Settings')]),
-        new MenuItem(
+        new DrawerItem(
           icon: 'action/help',
           children: [new Text('Help & Feedback')])
      ]
