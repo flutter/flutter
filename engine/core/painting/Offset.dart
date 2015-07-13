@@ -13,6 +13,8 @@ class Offset extends OffsetBase {
   double get dx => _dx;
   double get dy => _dy;
 
+  double get distance => math.sqrt(_dx * _dx + _dy * _dy);
+
   static const Offset zero = const Offset(0.0, 0.0);
   static const Offset infinite = const Offset(double.INFINITY, double.INFINITY);
 

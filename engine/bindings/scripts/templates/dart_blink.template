@@ -5,8 +5,9 @@
 // WARNING: Do not edit - generated code.
 library dart.sky;
 
-import "dart:nativewrappers";
+import 'dart:nativewrappers';
 import 'dart:typed_data';
+import 'dart:math' as math;
 
 {% for interface in interfaces %}
 part '{{interface.name}}.dart';

@@ -22,8 +22,12 @@ class AnimatedType<T extends dynamic> extends AnimatedVariable {
 
   void setFraction(double t) {
     if (end != null) {
-      // TODO(mpcomplete): Reverse the timeline and curve.
-      value = begin + (end - begin) * curve.transform(t);
+      if (t == 1.0) {
+        value = end;
+      } else {
+        // TODO(mpcomplete): Reverse the timeline and curve.
+        value = begin + (end - begin) * curve.transform(t);
+      }
     }
   }
 

@@ -19,8 +19,11 @@ const double _kSplashInitialSize = 0.0;
 const double _kSplashUnconfirmedVelocity = 0.1;
 
 double _getSplashTargetSize(Size bounds, Point position) {
-  return math.max(math.max(position.x, bounds.width - position.x),
-                  math.max(position.y, bounds.height - position.y));
+  double d1 = (position - bounds.topLeft(Point.origin)).distance;
+  double d2 = (position - bounds.topRight(Point.origin)).distance;
+  double d3 = (position - bounds.bottomLeft(Point.origin)).distance;
+  double d4 = (position - bounds.bottomRight(Point.origin)).distance;
+  return math.max(math.max(d1, d2), math.max(d3, d4)).ceil().toDouble();
 }
 
 class InkSplash {
