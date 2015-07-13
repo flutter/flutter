@@ -1,0 +1,284 @@
+CONSOLE: TestRenderView enabled
+CONSOLE: 
+PAINT FOR FRAME #1 ----------------------------------------------
+1 | TestPaintingCanvas() constructor: 800.0 x 600.0
+------------------------------------------------------------------------
+CONSOLE: 
+PAINT FOR FRAME #2 ----------------------------------------------
+2 | TestPaintingCanvas() constructor: 800.0 x 600.0
+2 | paintChild RenderScaffold at Point(0.0, 0.0)
+2 |  | TestPaintingCanvas() constructor: 800.0 x 600.0
+2 |  | paintChild RenderDecoratedBox at Point(0.0, 56.0)
+2 |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
+2 |  |  | drawRect(Rect.fromLTRB(0.0, 56.0, 800.0, 600.0), Paint(color:Color(0xffe3f2fd)))
+2 |  |  | paintChild RenderPadding at Point(0.0, 56.0)
+2 |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
+2 |  |  |  | paintChild RenderDecoratedBox at Point(8.0, 68.0)
+2 |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
+2 |  |  |  |  | drawRect(Rect.fromLTRB(8.0, 68.0, 792.0, 588.0), Paint(color:Color(0xfffafafa)))
+2 |  |  |  |  | paintChild RenderSizeObserver at Point(8.0, 68.0)
+2 |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
+2 |  |  |  |  |  | paintChild RenderBlockViewport at Point(8.0, 68.0)
+2 |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  | save
+2 |  |  |  |  |  |  | clipRect(Rect.fromLTRB(8.0, 68.0, 792.0, 588.0))
+2 |  |  |  |  |  |  | paintChild RenderSizeObserver at Point(8.0, 68.0)
+2 |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  |  | paintChild RenderOpacity at Point(8.0, 68.0)
+2 |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  |  |  | paintChild RenderTransform at Point(8.0, 68.0)
+2 |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  |  |  |  | save
+2 |  |  |  |  |  |  |  |  |  | translate(8.0, 68.0)
+2 |  |  |  |  |  |  |  |  |  | concat([1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0])
+2 |  |  |  |  |  |  |  |  |  | paintChild RenderPadding at Point(0.0, 0.0)
+2 |  |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  |  |  |  |  | paintChild RenderDecoratedBox at Point(4.0, 4.0)
+2 |  |  |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  |  |  |  |  |  | drawRRect(Instance of 'RRect', Paint(color:Color(0xfff44336), drawLooper:true))
+2 |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderClipRRect at Point(4.0, 4.0)
+2 |  |  |  |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  |  |  |  |  |  |  | saveLayer(Rect.fromLTRB(4.0, 4.0, 780.0, 52.0), Paint(color:Color(0xff000000)))
+2 |  |  |  |  |  |  |  |  |  |  |  |  | clipRRect()
+2 |  |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderConstrainedBox at Point(4.0, 4.0)
+2 |  |  |  |  |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderPadding at Point(4.0, 4.0)
+2 |  |  |  |  |  |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderPositionedBox at Point(12.0, 12.0)
+2 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderParagraph at Point(359.0, 15.5)
+2 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | translate(359.0, 15.5)
+2 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | translate(-359.0, -15.5)
+2 |  |  |  |  |  |  |  |  |  |  |  |  | restore
+2 |  |  |  |  |  |  |  |  |  | restore
+2 |  |  |  |  |  |  | paintChild RenderSizeObserver at Point(8.0, 124.0)
+2 |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  |  | paintChild RenderOpacity at Point(8.0, 124.0)
+2 |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  |  |  | paintChild RenderTransform at Point(8.0, 124.0)
+2 |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  |  |  |  | save
+2 |  |  |  |  |  |  |  |  |  | translate(8.0, 124.0)
+2 |  |  |  |  |  |  |  |  |  | concat([1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0])
+2 |  |  |  |  |  |  |  |  |  | paintChild RenderPadding at Point(0.0, 0.0)
+2 |  |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  |  |  |  |  | paintChild RenderDecoratedBox at Point(4.0, 4.0)
+2 |  |  |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  |  |  |  |  |  | drawRRect(Instance of 'RRect', Paint(color:Color(0xffee453b), drawLooper:true))
+2 |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderClipRRect at Point(4.0, 4.0)
+2 |  |  |  |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  |  |  |  |  |  |  | saveLayer(Rect.fromLTRB(4.0, 4.0, 780.0, 68.0), Paint(color:Color(0xff000000)))
+2 |  |  |  |  |  |  |  |  |  |  |  |  | clipRRect()
+2 |  |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderConstrainedBox at Point(4.0, 4.0)
+2 |  |  |  |  |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderPadding at Point(4.0, 4.0)
+2 |  |  |  |  |  |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderPositionedBox at Point(12.0, 12.0)
+2 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderParagraph at Point(359.0, 23.5)
+2 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | translate(359.0, 23.5)
+2 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | translate(-359.0, -23.5)
+2 |  |  |  |  |  |  |  |  |  |  |  |  | restore
+2 |  |  |  |  |  |  |  |  |  | restore
+2 |  |  |  |  |  |  | paintChild RenderSizeObserver at Point(8.0, 196.0)
+2 |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  |  | paintChild RenderOpacity at Point(8.0, 196.0)
+2 |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  |  |  | paintChild RenderTransform at Point(8.0, 196.0)
+2 |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  |  |  |  | save
+2 |  |  |  |  |  |  |  |  |  | translate(8.0, 196.0)
+2 |  |  |  |  |  |  |  |  |  | concat([1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0])
+2 |  |  |  |  |  |  |  |  |  | paintChild RenderPadding at Point(0.0, 0.0)
+2 |  |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  |  |  |  |  | paintChild RenderDecoratedBox at Point(4.0, 4.0)
+2 |  |  |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  |  |  |  |  |  | drawRRect(Instance of 'RRect', Paint(color:Color(0xffe84740), drawLooper:true))
+2 |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderClipRRect at Point(4.0, 4.0)
+2 |  |  |  |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  |  |  |  |  |  |  | saveLayer(Rect.fromLTRB(4.0, 4.0, 780.0, 86.0), Paint(color:Color(0xff000000)))
+2 |  |  |  |  |  |  |  |  |  |  |  |  | clipRRect()
+2 |  |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderConstrainedBox at Point(4.0, 4.0)
+2 |  |  |  |  |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderPadding at Point(4.0, 4.0)
+2 |  |  |  |  |  |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderPositionedBox at Point(12.0, 12.0)
+2 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderParagraph at Point(359.0, 32.5)
+2 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | translate(359.0, 32.5)
+2 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | translate(-359.0, -32.5)
+2 |  |  |  |  |  |  |  |  |  |  |  |  | restore
+2 |  |  |  |  |  |  |  |  |  | restore
+2 |  |  |  |  |  |  | paintChild RenderSizeObserver at Point(8.0, 286.0)
+2 |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  |  | paintChild RenderOpacity at Point(8.0, 286.0)
+2 |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  |  |  | paintChild RenderTransform at Point(8.0, 286.0)
+2 |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  |  |  |  | save
+2 |  |  |  |  |  |  |  |  |  | translate(8.0, 286.0)
+2 |  |  |  |  |  |  |  |  |  | concat([1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0])
+2 |  |  |  |  |  |  |  |  |  | paintChild RenderPadding at Point(0.0, 0.0)
+2 |  |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  |  |  |  |  | paintChild RenderDecoratedBox at Point(4.0, 4.0)
+2 |  |  |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  |  |  |  |  |  | drawRRect(Instance of 'RRect', Paint(color:Color(0xffe24945), drawLooper:true))
+2 |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderClipRRect at Point(4.0, 4.0)
+2 |  |  |  |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  |  |  |  |  |  |  | saveLayer(Rect.fromLTRB(4.0, 4.0, 780.0, 50.0), Paint(color:Color(0xff000000)))
+2 |  |  |  |  |  |  |  |  |  |  |  |  | clipRRect()
+2 |  |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderConstrainedBox at Point(4.0, 4.0)
+2 |  |  |  |  |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderPadding at Point(4.0, 4.0)
+2 |  |  |  |  |  |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderPositionedBox at Point(12.0, 12.0)
+2 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderParagraph at Point(359.0, 14.5)
+2 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | translate(359.0, 14.5)
+2 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | translate(-359.0, -14.5)
+2 |  |  |  |  |  |  |  |  |  |  |  |  | restore
+2 |  |  |  |  |  |  |  |  |  | restore
+2 |  |  |  |  |  |  | paintChild RenderSizeObserver at Point(8.0, 340.0)
+2 |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  |  | paintChild RenderOpacity at Point(8.0, 340.0)
+2 |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  |  |  | paintChild RenderTransform at Point(8.0, 340.0)
+2 |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  |  |  |  | save
+2 |  |  |  |  |  |  |  |  |  | translate(8.0, 340.0)
+2 |  |  |  |  |  |  |  |  |  | concat([1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0])
+2 |  |  |  |  |  |  |  |  |  | paintChild RenderPadding at Point(0.0, 0.0)
+2 |  |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  |  |  |  |  | paintChild RenderDecoratedBox at Point(4.0, 4.0)
+2 |  |  |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  |  |  |  |  |  | drawRRect(Instance of 'RRect', Paint(color:Color(0xffdc4c4b), drawLooper:true))
+2 |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderClipRRect at Point(4.0, 4.0)
+2 |  |  |  |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  |  |  |  |  |  |  | saveLayer(Rect.fromLTRB(4.0, 4.0, 780.0, 64.0), Paint(color:Color(0xff000000)))
+2 |  |  |  |  |  |  |  |  |  |  |  |  | clipRRect()
+2 |  |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderConstrainedBox at Point(4.0, 4.0)
+2 |  |  |  |  |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderPadding at Point(4.0, 4.0)
+2 |  |  |  |  |  |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderPositionedBox at Point(12.0, 12.0)
+2 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderParagraph at Point(359.0, 21.5)
+2 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | translate(359.0, 21.5)
+2 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | translate(-359.0, -21.5)
+2 |  |  |  |  |  |  |  |  |  |  |  |  | restore
+2 |  |  |  |  |  |  |  |  |  | restore
+2 |  |  |  |  |  |  | paintChild RenderSizeObserver at Point(8.0, 408.0)
+2 |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  |  | paintChild RenderOpacity at Point(8.0, 408.0)
+2 |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  |  |  | paintChild RenderTransform at Point(8.0, 408.0)
+2 |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  |  |  |  | save
+2 |  |  |  |  |  |  |  |  |  | translate(8.0, 408.0)
+2 |  |  |  |  |  |  |  |  |  | concat([1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0])
+2 |  |  |  |  |  |  |  |  |  | paintChild RenderPadding at Point(0.0, 0.0)
+2 |  |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  |  |  |  |  | paintChild RenderDecoratedBox at Point(4.0, 4.0)
+2 |  |  |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  |  |  |  |  |  | drawRRect(Instance of 'RRect', Paint(color:Color(0xffd64e50), drawLooper:true))
+2 |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderClipRRect at Point(4.0, 4.0)
+2 |  |  |  |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  |  |  |  |  |  |  | saveLayer(Rect.fromLTRB(4.0, 4.0, 780.0, 59.0), Paint(color:Color(0xff000000)))
+2 |  |  |  |  |  |  |  |  |  |  |  |  | clipRRect()
+2 |  |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderConstrainedBox at Point(4.0, 4.0)
+2 |  |  |  |  |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderPadding at Point(4.0, 4.0)
+2 |  |  |  |  |  |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderPositionedBox at Point(12.0, 12.0)
+2 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderParagraph at Point(359.0, 19.0)
+2 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | translate(359.0, 19.0)
+2 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | translate(-359.0, -19.0)
+2 |  |  |  |  |  |  |  |  |  |  |  |  | restore
+2 |  |  |  |  |  |  |  |  |  | restore
+2 |  |  |  |  |  |  | paintChild RenderSizeObserver at Point(8.0, 471.0)
+2 |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  |  | paintChild RenderOpacity at Point(8.0, 471.0)
+2 |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  |  |  | paintChild RenderTransform at Point(8.0, 471.0)
+2 |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  |  |  |  | save
+2 |  |  |  |  |  |  |  |  |  | translate(8.0, 471.0)
+2 |  |  |  |  |  |  |  |  |  | concat([1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0])
+2 |  |  |  |  |  |  |  |  |  | paintChild RenderPadding at Point(0.0, 0.0)
+2 |  |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  |  |  |  |  | paintChild RenderDecoratedBox at Point(4.0, 4.0)
+2 |  |  |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  |  |  |  |  |  | drawRRect(Instance of 'RRect', Paint(color:Color(0xffd05055), drawLooper:true))
+2 |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderClipRRect at Point(4.0, 4.0)
+2 |  |  |  |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  |  |  |  |  |  |  | saveLayer(Rect.fromLTRB(4.0, 4.0, 780.0, 88.0), Paint(color:Color(0xff000000)))
+2 |  |  |  |  |  |  |  |  |  |  |  |  | clipRRect()
+2 |  |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderConstrainedBox at Point(4.0, 4.0)
+2 |  |  |  |  |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderPadding at Point(4.0, 4.0)
+2 |  |  |  |  |  |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderPositionedBox at Point(12.0, 12.0)
+2 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderParagraph at Point(359.0, 33.5)
+2 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | translate(359.0, 33.5)
+2 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | translate(-359.0, -33.5)
+2 |  |  |  |  |  |  |  |  |  |  |  |  | restore
+2 |  |  |  |  |  |  |  |  |  | restore
+2 |  |  |  |  |  |  | paintChild RenderSizeObserver at Point(8.0, 563.0)
+2 |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  |  | paintChild RenderOpacity at Point(8.0, 563.0)
+2 |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  |  |  | paintChild RenderTransform at Point(8.0, 563.0)
+2 |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  |  |  |  | save
+2 |  |  |  |  |  |  |  |  |  | translate(8.0, 563.0)
+2 |  |  |  |  |  |  |  |  |  | concat([1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0])
+2 |  |  |  |  |  |  |  |  |  | paintChild RenderPadding at Point(0.0, 0.0)
+2 |  |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  |  |  |  |  | paintChild RenderDecoratedBox at Point(4.0, 4.0)
+2 |  |  |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  |  |  |  |  |  | drawRRect(Instance of 'RRect', Paint(color:Color(0xffca535a), drawLooper:true))
+2 |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderClipRRect at Point(4.0, 4.0)
+2 |  |  |  |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  |  |  |  |  |  |  | saveLayer(Rect.fromLTRB(4.0, 4.0, 780.0, 100.0), Paint(color:Color(0xff000000)))
+2 |  |  |  |  |  |  |  |  |  |  |  |  | clipRRect()
+2 |  |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderConstrainedBox at Point(4.0, 4.0)
+2 |  |  |  |  |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderPadding at Point(4.0, 4.0)
+2 |  |  |  |  |  |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderPositionedBox at Point(12.0, 12.0)
+2 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderParagraph at Point(359.0, 39.5)
+2 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | translate(359.0, 39.5)
+2 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | translate(-359.0, -39.5)
+2 |  |  |  |  |  |  |  |  |  |  |  |  | restore
+2 |  |  |  |  |  |  |  |  |  | restore
+2 |  |  |  |  |  |  | restore
+2 |  | paintChild RenderDecoratedBox at Point(0.0, 0.0)
+2 |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
+2 |  |  | drawRect(Rect.fromLTRB(0.0, 0.0, 800.0, 56.0), Paint(color:Color(0xff2196f3), drawLooper:true))
+2 |  |  | paintChild RenderPadding at Point(0.0, 0.0)
+2 |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
+2 |  |  |  | paintChild RenderFlex at Point(8.0, 0.0)
+2 |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
+2 |  |  |  |  | paintChild RenderConstrainedBox at Point(8.0, 0.0)
+2 |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
+2 |  |  |  |  |  | paintChild RenderFlex at Point(8.0, 0.0)
+2 |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  | paintChild RenderPadding at Point(8.0, 14.0)
+2 |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  |  | paintChild RenderParagraph at Point(32.0, 14.0)
+2 |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  |  |  | translate(32.0, 14.0)
+2 |  |  |  |  |  |  |  |  | translate(-32.0, -14.0)
+------------------------------------------------------------------------
+PAINTED 2 FRAMES
