@@ -7,6 +7,7 @@
 #include "base/trace_event/trace_event.h"
 #include "sky/shell/gpu/ganesh_context.h"
 #include "sky/shell/gpu/ganesh_surface.h"
+#include "sky/shell/gpu/picture_serializer.h"
 #include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/core/SkPicture.h"
 #include "ui/gl/gl_bindings.h"
@@ -58,6 +59,8 @@ void Rasterizer::Draw(skia::RefPtr<SkPicture> picture) {
 
   DrawPicture(picture.get());
   surface_->SwapBuffers();
+
+  // SerializePicture("/data/data/org.domokit.sky.demo/cache/layer0.skp", picture.get());
 }
 
 void Rasterizer::DrawPicture(SkPicture* picture) {
