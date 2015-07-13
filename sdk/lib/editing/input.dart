@@ -11,10 +11,19 @@ import 'package:sky/widgets/theme.dart';
 
 typedef void ValueChanged(value);
 
-const double _kHintOpacity = 0.26;
+// TODO(eseidel): This isn't right, it's 16px on the bottom:
+// http://www.google.com/design/spec/components/text-fields.html#text-fields-single-line-text-field
 const EdgeDims _kTextfieldPadding = const EdgeDims.symmetric(vertical: 8.0);
 
 class Input extends StatefulComponent {
+
+  // Current thinking is that Widget will have an optional globalKey
+  // or heroKey and it will ask Focus.from(this).isFocused which will
+  // check using its globalKey.
+  // Only one element can use a globalKey at a time and its' up to
+  // Widget.sync to maintain the mapping.
+  // Never makes sense to have both a localKey and a globalKey.
+  // Possibly a class HeroKey who functions as a UUID.
 
   Input({String key,
          this.placeholder,
@@ -54,29 +63,30 @@ class Input extends StatefulComponent {
   }
 
   Widget build() {
+    ThemeData themeData = Theme.of(this);
+
     if (focused && !_isAttachedToKeyboard) {
       keyboard.show(_editableValue.stub);
       _isAttachedToKeyboard = true;
     }
 
-    TextStyle textStyle = Theme.of(this).text.subhead;
+    TextStyle textStyle = themeData.text.subhead;
     List<Widget> textChildren = <Widget>[];
 
     if (placeholder != null && _value.isEmpty) {
       Widget child = new Opacity(
         key: "placeholder",
         child: new Text(placeholder, style: textStyle),
-        opacity: _kHintOpacity
+        opacity: themeData.hintOpacity
       );
       textChildren.add(child);
     }
 
-    ThemeData themeData = Theme.of(this);
     Color focusHighlightColor = themeData.accentColor;
     Color cursorColor = themeData.accentColor;
     if (themeData.primarySwatch != null) {
-      cursorColor = Theme.of(this).primarySwatch[200];
-      focusHighlightColor = focused ? themeData.primarySwatch[400] : themeData.primarySwatch[200];
+      cursorColor = themeData.primarySwatch[200];
+      focusHighlightColor = focused ? themeData.primarySwatch[400] : themeData.hintColor;
     }
 
     textChildren.add(new EditableText(

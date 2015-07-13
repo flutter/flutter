@@ -47,16 +47,14 @@ class ToolBar extends Component {
     if (left != null)
       children.add(left);
 
-    if (center != null) {
-      children.add(
-        new Flexible(
-          child: new Padding(
-            child: center,
-            padding: new EdgeDims.only(left: 24.0)
-          )
+    children.add(
+      new Flexible(
+        child: new Padding(
+          child: center,
+          padding: new EdgeDims.only(left: 24.0)
         )
-      );
-    }
+      )
+    );
 
     if (right != null)
       children.addAll(right);
