@@ -656,12 +656,25 @@ class RenderOpacity extends RenderProxyBox {
     if (_opacity == value)
       return;
     _opacity = value;
+    _cachedPaint = null;
     markNeedsPaint();
+  }
+
+  int get _alpha => (_opacity * 255).round();
+
+  Paint _cachedPaint;
+  Paint get _paint {
+    if (_cachedPaint == null) {
+      _cachedPaint =  new Paint()
+        ..color = new Color.fromARGB(_alpha, 0, 0, 0)
+        ..setTransferMode(sky.TransferMode.srcOver);
+    }
+    return _cachedPaint;
   }
 
   void paint(PaintingCanvas canvas, Offset offset) {
     if (child != null) {
-      int a = (_opacity * 255).round();
+      int a = _alpha;
 
       if (a == 0)
         return;
@@ -671,10 +684,7 @@ class RenderOpacity extends RenderProxyBox {
         return;
       }
 
-      Paint paint = new Paint()
-        ..color = new Color.fromARGB(a, 0, 0, 0)
-        ..setTransferMode(sky.TransferMode.srcOver);
-      canvas.saveLayer(null, paint);
+      canvas.saveLayer(null, _paint);
       canvas.paintChild(child, offset.toPoint());
       canvas.restore();
     }
@@ -693,6 +703,7 @@ class RenderColorFilter extends RenderProxyBox {
     if (_color == value)
       return;
     _color = value;
+    _cachedPaint = null;
     markNeedsPaint();
   }
 
@@ -703,14 +714,22 @@ class RenderColorFilter extends RenderProxyBox {
     if (_transferMode == value)
       return;
     _transferMode = value;
+    _cachedPaint = null;
     markNeedsPaint();
+  }
+
+  Paint _cachedPaint;
+  Paint get _paint {
+    if (_cachedPaint == null) {
+      _cachedPaint = new Paint()
+        ..setColorFilter(new sky.ColorFilter.mode(_color, _transferMode));
+    }
+    return _cachedPaint;
   }
 
   void paint(PaintingCanvas canvas, Offset offset) {
     if (child != null) {
-      Paint paint = new Paint()
-        ..setColorFilter(new sky.ColorFilter.mode(_color, _transferMode));
-      canvas.saveLayer(null, paint);
+      canvas.saveLayer(offset & size, _paint);
       canvas.paintChild(child, offset.toPoint());
       canvas.restore();
     }
@@ -1247,8 +1266,7 @@ class RenderImage extends RenderBox {
       canvas.scale(widthScale, heightScale);
       offset = Offset.zero;
     }
-    Paint paint = new Paint();
-    canvas.drawImage(_image, offset.toPoint(), paint);
+    canvas.drawImage(_image, offset.toPoint(), new Paint());
     if (needsScale)
       canvas.restore();
   }
