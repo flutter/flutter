@@ -32,6 +32,8 @@ source_set("common") {
     "gpu/ganesh_context.h",
     "gpu/ganesh_surface.cc",
     "gpu/ganesh_surface.h",
+    "gpu/picture_serializer.cc",
+    "gpu/picture_serializer.h",
     "gpu/rasterizer.cc",
     "gpu/rasterizer.h",
     "gpu_delegate.cc",
