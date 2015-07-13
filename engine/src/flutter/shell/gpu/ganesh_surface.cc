@@ -20,7 +20,8 @@ GaneshSurface::GaneshSurface(intptr_t window_fbo,
   desc.fOrigin = kBottomLeft_GrSurfaceOrigin;
   desc.fRenderTargetHandle = window_fbo;
 
-  auto target = skia::AdoptRef(context->gr()->wrapBackendRenderTarget(desc));
+  auto target = skia::AdoptRef(
+    context->gr()->textureProvider()->wrapBackendRenderTarget(desc));
   DCHECK(target);
   surface_ = skia::AdoptRef(SkSurface::NewRenderTargetDirect(target.get()));
   DCHECK(surface_);
