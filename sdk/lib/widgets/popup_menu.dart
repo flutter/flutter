@@ -91,17 +91,19 @@ class PopupMenuController {
 class PopupMenu extends AnimatedComponent {
 
   PopupMenu({ String key, this.controller, this.items, this.level })
-      : super(key: key) {
-    _painter = new BoxPainter(new BoxDecoration(
-      backgroundColor: Grey[50],
-      borderRadius: 2.0,
-      boxShadow: shadows[level]));
-    watchPerformance(controller.performance);
-  }
+      : super(key: key);
 
   PopupMenuController controller;
   List<PopupMenuItem> items;
   int level;
+
+  void initState() {
+    _painter = new BoxPainter(new BoxDecoration(
+      backgroundColor: Grey[50],
+      borderRadius: 2.0,
+      boxShadow: shadows[level]));
+    watch(controller.performance);
+  }
 
   void syncFields(PopupMenu source) {
     controller = source.controller;

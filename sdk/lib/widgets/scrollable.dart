@@ -30,12 +30,14 @@ abstract class Scrollable extends StatefulComponent {
     String key,
     this.backgroundColor,
     this.direction: ScrollDirection.vertical
-  }) : super(key: key) {
-    _animation = new AnimatedSimulation(_tickScrollOffset);
-  }
+  }) : super(key: key);
 
   Color backgroundColor;
   ScrollDirection direction;
+
+  void initState() {
+    _animation = new AnimatedSimulation(_tickScrollOffset);
+  }
 
   void syncFields(Scrollable source) {
     backgroundColor = source.backgroundColor;

@@ -286,7 +286,7 @@ class StockHome extends AnimatedComponent {
         ..position = new AnimatedType<Point>(const Point(0.0, 45.0), end: Point.origin);
       var performance = _snackbarTransform.createPerformance(
           [_snackbarTransform.position], duration: _kSnackbarSlideDuration);
-      watchPerformance(performance);
+      watch(performance);
       performance.play();
     });
   }

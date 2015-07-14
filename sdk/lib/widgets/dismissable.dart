@@ -45,7 +45,7 @@ class Dismissable extends AnimatedComponent {
         [_transform.position, _transform.opacity],
         duration: new Duration(milliseconds: _kCardDismissFadeoutMS));
     _performance.addListener(_handleAnimationProgressChanged);
-    watchPerformance(_performance);
+    watch(_performance);
   }
 
   void syncFields(Dismissable source) {

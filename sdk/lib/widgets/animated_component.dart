@@ -13,7 +13,7 @@ abstract class AnimatedComponent extends StatefulComponent {
 
   final List<AnimationPerformance> _watchedPerformances = new List<AnimationPerformance>();
 
-  void watchPerformance(AnimationPerformance performance) {
+  void watch(AnimationPerformance performance) {
     assert(!_watchedPerformances.contains(performance));
     _watchedPerformances.add(performance);
     if (mounted)

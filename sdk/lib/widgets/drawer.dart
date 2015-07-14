@@ -105,13 +105,15 @@ class Drawer extends AnimatedComponent {
     this.controller,
     this.children,
     this.level: 0
-  }) : super(key: key) {
-    watchPerformance(controller.performance);
-  }
+  }) : super(key: key);
 
   List<Widget> children;
   int level;
   DrawerController controller;
+
+  void initState() {
+    watch(controller.performance);
+  }
 
   void syncFields(Drawer source) {
     children = source.children;

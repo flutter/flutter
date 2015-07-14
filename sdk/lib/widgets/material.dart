@@ -47,11 +47,11 @@ class Material extends AnimatedComponent {
       ..backgroundColor = _getBackgroundColor(type, color)
       ..borderRadius = edges[type]
       ..shape = type == MaterialType.circle ? Shape.circle : Shape.rectangle;
-    watchPerformance(_builder.createPerformance(
+    watch(_builder.createPerformance(
         [_builder.shadow],
         duration: _kAnimateShadowDuration
     ));
-    watchPerformance(_builder.createPerformance(
+    watch(_builder.createPerformance(
         [_builder.backgroundColor],
         duration: _kAnimateColorDuration
     ));
