@@ -102,7 +102,8 @@ class AutoLayoutParentData extends BoxParentData
     // This is called by the parent's layout function
     // to lay our box out.
     assert(_renderBox.parentData == this);
-    assert(_renderBox.parent.debugDoingThisLayout);
+    assert(_renderBox.parent is RenderAutoLayout);
+    assert((_renderBox.parent as RenderAutoLayout).debugDoingThisLayout); // TODO(ianh): Remove cast once the analyzer is cleverer
     BoxConstraints size = new BoxConstraints.tightFor(
       width: _rightEdge.value - _leftEdge.value,
       height: _bottomEdge.value - _topEdge.value
