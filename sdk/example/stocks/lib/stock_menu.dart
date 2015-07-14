@@ -4,9 +4,10 @@
 
 import 'dart:sky' as sky;
 
-import 'package:sky/widgets/checkbox.dart';
-import 'package:sky/widgets/popup_menu.dart';
 import 'package:sky/widgets/basic.dart';
+import 'package:sky/widgets/checkbox.dart';
+import 'package:sky/widgets/popup_menu_item.dart';
+import 'package:sky/widgets/popup_menu.dart';
 
 export 'package:sky/widgets/popup_menu.dart' show PopupMenuStatus;
 
@@ -33,9 +34,9 @@ class StockMenu extends Component {
     return new Positioned(
       child: new PopupMenu(
         items: [
-          new Text('Add stock'),
-          new Text('Remove stock'),
-          new Flex([new Flexible(child: new Text('Autorefresh')), checkbox]),
+          new PopupMenuItem(child: new Text('Add stock')),
+          new PopupMenuItem(child: new Text('Remove stock')),
+          new PopupMenuItem(child: new Flex([new Flexible(child: new Text('Autorefresh')), checkbox])),
         ],
         level: 4,
         showing: showing,
