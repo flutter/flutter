@@ -24,16 +24,17 @@ export 'package:sky/rendering/flex.dart' show FlexDirection, FlexJustifyContent,
 export 'package:sky/rendering/object.dart' show Point, Offset, Size, Rect, Color, Paint, Path;
 export 'package:sky/widgets/widget.dart' show Widget, Component, StatefulComponent, App, runApp, Listener, ParentDataNode;
 
+
 // PAINTING NODES
 
 class Opacity extends OneChildRenderObjectWrapper {
   Opacity({ String key, this.opacity, Widget child })
     : super(key: key, child: child);
 
-  RenderOpacity get root => super.root;
   final double opacity;
 
   RenderOpacity createNode() => new RenderOpacity(opacity: opacity);
+  RenderOpacity get root => super.root;
 
   void syncRenderObject(Opacity old) {
     super.syncRenderObject(old);
@@ -45,11 +46,11 @@ class ColorFilter extends OneChildRenderObjectWrapper {
   ColorFilter({ String key, this.color, this.transferMode, Widget child })
     : super(key: key, child: child);
 
-  RenderColorFilter get root => super.root;
   final Color color;
   final sky.TransferMode transferMode;
 
   RenderColorFilter createNode() => new RenderColorFilter(color: color, transferMode: transferMode);
+  RenderColorFilter get root => super.root;
 
   void syncRenderObject(ColorFilter old) {
     super.syncRenderObject(old);
@@ -59,32 +60,29 @@ class ColorFilter extends OneChildRenderObjectWrapper {
 }
 
 class DecoratedBox extends OneChildRenderObjectWrapper {
-
   DecoratedBox({ String key, this.decoration, Widget child })
     : super(key: key, child: child);
 
-  RenderDecoratedBox get root => super.root;
   final BoxDecoration decoration;
 
   RenderDecoratedBox createNode() => new RenderDecoratedBox(decoration: decoration);
+  RenderDecoratedBox get root => super.root;
 
   void syncRenderObject(DecoratedBox old) {
     super.syncRenderObject(old);
     root.decoration = decoration;
   }
-
 }
 
 class CustomPaint extends OneChildRenderObjectWrapper {
-
   CustomPaint({ String key, this.callback, this.token, Widget child })
     : super(key: key, child: child);
 
-  RenderCustomPaint get root => super.root;
   final CustomPaintCallback callback;
-  final dynamic token;  // set this to be repainted automatically when the token changes
+  final dynamic token; // set this to be repainted automatically when the token changes
 
   RenderCustomPaint createNode() => new RenderCustomPaint(callback: callback);
+  RenderCustomPaint get root => super.root;
 
   void syncRenderObject(CustomPaint old) {
     super.syncRenderObject(old);
@@ -97,27 +95,27 @@ class CustomPaint extends OneChildRenderObjectWrapper {
     root.callback = null;
     super.remove();
   }
-
 }
 
 class ClipRect extends OneChildRenderObjectWrapper {
   ClipRect({ String key, Widget child })
     : super(key: key, child: child);
 
-  RenderClipRect get root => super.root;
   RenderClipRect createNode() => new RenderClipRect();
+  RenderClipRect get root => super.root;
 
   // Nothing to sync, so we don't implement syncRenderObject()
 }
 
 class ClipRRect extends OneChildRenderObjectWrapper {
-  final double xRadius;
-  final double yRadius;
-  ClipRRect({ String key, Widget child, this.xRadius, this.yRadius })
+  ClipRRect({ String key, this.xRadius, this.yRadius, Widget child })
     : super(key: key, child: child);
 
-  RenderClipRRect get root => super.root;
+  final double xRadius;
+  final double yRadius;
+
   RenderClipRRect createNode() => new RenderClipRRect(xRadius: xRadius, yRadius: yRadius);
+  RenderClipRRect get root => super.root;
 
   void syncRenderObject(ClipRRect old) {
     super.syncRenderObject(old);
@@ -130,76 +128,67 @@ class ClipOval extends OneChildRenderObjectWrapper {
   ClipOval({ String key, Widget child })
     : super(key: key, child: child);
 
-  RenderClipOval get root => super.root;
   RenderClipOval createNode() => new RenderClipOval();
+  RenderClipOval get root => super.root;
 
   // Nothing to sync, so we don't implement syncRenderObject()
 }
 
+
 // POSITIONING AND SIZING NODES
 
 class Transform extends OneChildRenderObjectWrapper {
-
   Transform({ String key, this.transform, Widget child })
     : super(key: key, child: child);
 
-  RenderTransform get root => super.root;
   final Matrix4 transform;
 
   RenderTransform createNode() => new RenderTransform(transform: transform);
+  RenderTransform get root => super.root;
 
   void syncRenderObject(Transform old) {
     super.syncRenderObject(old);
     root.transform = transform;
   }
-
 }
 
 class Padding extends OneChildRenderObjectWrapper {
-
   Padding({ String key, this.padding, Widget child })
     : super(key: key, child: child);
 
-  RenderPadding get root => super.root;
   final EdgeDims padding;
 
   RenderPadding createNode() => new RenderPadding(padding: padding);
+  RenderPadding get root => super.root;
 
   void syncRenderObject(Padding old) {
     super.syncRenderObject(old);
     root.padding = padding;
   }
-
 }
 
 class Center extends OneChildRenderObjectWrapper {
   Center({ String key, Widget child })
     : super(key: key, child: child);
 
-  RenderPositionedBox get root => super.root;
   RenderPositionedBox createNode() => new RenderPositionedBox();
+  RenderPositionedBox get root => super.root;
 
   // Nothing to sync, so we don't implement syncRenderObject()
 }
 
 class SizedBox extends OneChildRenderObjectWrapper {
-
-  SizedBox({
-    String key,
-    this.width,
-    this.height,
-    Widget child
-  }) : super(key: key, child: child);
-
-  RenderConstrainedBox get root => super.root;
+  SizedBox({ String key, this.width, this.height, Widget child })
+    : super(key: key, child: child);
 
   final double width;
   final double height;
 
   RenderConstrainedBox createNode() => new RenderConstrainedBox(additionalConstraints: _additionalConstraints());
+  RenderConstrainedBox get root => super.root;
 
   BoxConstraints _additionalConstraints() {
-    var result = const BoxConstraints();
+    BoxConstraints result = const BoxConstraints();
     if (width != null)
       result = result.applyWidth(width);
     if (height != null)
@@ -211,104 +200,80 @@ class SizedBox extends OneChildRenderObjectWrapper {
     super.syncRenderObject(old);
     root.additionalConstraints = _additionalConstraints();
   }
-
 }
 
 class ConstrainedBox extends OneChildRenderObjectWrapper {
-
   ConstrainedBox({ String key, this.constraints, Widget child })
     : super(key: key, child: child);
-
-  RenderConstrainedBox get root => super.root;
 
   final BoxConstraints constraints;
 
   RenderConstrainedBox createNode() => new RenderConstrainedBox(additionalConstraints: constraints);
+  RenderConstrainedBox get root => super.root;
 
   void syncRenderObject(ConstrainedBox old) {
     super.syncRenderObject(old);
     root.additionalConstraints = constraints;
   }
-
 }
 
 class ShrinkWrapWidth extends OneChildRenderObjectWrapper {
-
-  ShrinkWrapWidth({
-    String key,
-    this.stepWidth,
-    this.stepHeight,
-    Widget child
-  }): super(key: key, child: child);
-
-  RenderShrinkWrapWidth get root => super.root;
+  ShrinkWrapWidth({ String key, this.stepWidth, this.stepHeight, Widget child })
+    : super(key: key, child: child);
 
   final double stepWidth;
   final double stepHeight;
 
   RenderShrinkWrapWidth createNode() => new RenderShrinkWrapWidth();
+  RenderShrinkWrapWidth get root => super.root;
 
   void syncRenderObject(ShrinkWrapWidth old) {
     super.syncRenderObject(old);
     root.stepWidth = stepWidth;
     root.stepHeight = stepHeight;
   }
-
 }
 
 class Baseline extends OneChildRenderObjectWrapper {
+  Baseline({ String key, this.baseline, this.baselineType: TextBaseline.alphabetic, Widget child })
+    : super(key: key, child: child);
 
-  Baseline({
-    String key,
-    this.baseline, // in pixels
-    this.baselineType: TextBaseline.alphabetic,
-    Widget child
-  }): super(key: key, child: child);
-
-  RenderBaseline get root => super.root;
-
-  final double baseline;
+  final double baseline; // in pixels
   final TextBaseline baselineType;
 
   RenderBaseline createNode() => new RenderBaseline(baseline: baseline, baselineType: baselineType);
+  RenderBaseline get root => super.root;
 
   void syncRenderObject(Baseline old) {
     super.syncRenderObject(old);
     root.baseline = baseline;
     root.baselineType = baselineType;
   }
-
 }
 
 class Viewport extends OneChildRenderObjectWrapper {
-
-  Viewport({
-    String key,
-    this.offset: 0.0,
-    Widget child
-  }) : super(key: key, child: child);
+  Viewport({ String key, this.offset: 0.0, Widget child })
+    : super(key: key, child: child);
 
   final double offset;
 
-  RenderViewport get root => super.root;
   RenderViewport createNode() => new RenderViewport(scrollOffset: new Offset(0.0, offset));
+  RenderViewport get root => super.root;
 
   void syncRenderObject(Viewport old) {
     super.syncRenderObject(old);
     root.scrollOffset = new Offset(0.0, offset);
   }
-
 }
 
 class SizeObserver extends OneChildRenderObjectWrapper {
-
   SizeObserver({ String key, this.callback, Widget child })
     : super(key: key, child: child);
 
-  RenderSizeObserver get root => super.root;
   final SizeChangedCallback callback;
 
   RenderSizeObserver createNode() => new RenderSizeObserver(callback: callback);
+  RenderSizeObserver get root => super.root;
 
   void syncRenderObject(SizeObserver old) {
     super.syncRenderObject(old);
@@ -319,7 +284,6 @@ class SizeObserver extends OneChildRenderObjectWrapper {
     root.callback = null;
     super.remove();
   }
-
 }
 
 
@@ -388,16 +352,16 @@ class Block extends MultiChildRenderObjectWrapper {
   Block(List<Widget> children, { String key })
     : super(key: key, children: children);
 
-  RenderBlock get root => super.root;
   RenderBlock createNode() => new RenderBlock();
+  RenderBlock get root => super.root;
 }
 
 class Stack extends MultiChildRenderObjectWrapper {
   Stack(List<Widget> children, { String key })
     : super(key: key, children: children);
 
-  RenderStack get root => super.root;
   RenderStack createNode() => new RenderStack();
+  RenderStack get root => super.root;
 }
 
 class Positioned extends ParentDataNode {
@@ -425,12 +389,12 @@ class Flex extends MultiChildRenderObjectWrapper {
     this.alignItems: FlexAlignItems.center
   }) : super(key: key, children: children);
 
-  RenderFlex get root => super.root;
-  RenderFlex createNode() => new RenderFlex(direction: this.direction);
-
   final FlexDirection direction;
   final FlexJustifyContent justifyContent;
   final FlexAlignItems alignItems;
+
+  RenderFlex createNode() => new RenderFlex(direction: this.direction);
+  RenderFlex get root => super.root;
 
   void syncRenderObject(Widget old) {
     super.syncRenderObject(old);
@@ -442,23 +406,22 @@ class Flex extends MultiChildRenderObjectWrapper {
 }
 
 class Flexible extends ParentDataNode {
-  Flexible({ String key, Widget child, int flex: 1 })
+  Flexible({ String key, int flex: 1, Widget child })
     : super(child, new FlexBoxParentData()..flex = flex, key: key);
 }
 
 class Inline extends LeafRenderObjectWrapper {
   Inline({ String key, this.text }) : super(key: key);
 
-  RenderParagraph get root => super.root;
-  RenderParagraph createNode() => new RenderParagraph(text);
-
   final InlineBase text;
+
+  RenderParagraph createNode() => new RenderParagraph(text);
+  RenderParagraph get root => super.root;
 
   void syncRenderObject(Widget old) {
     super.syncRenderObject(old);
     root.inline = text;
   }
-
 }
 
 class StyledText extends Component {
@@ -470,12 +433,10 @@ class StyledText extends Component {
   final dynamic elements;
 
   InlineBase _toInline(dynamic element) {
-    if (element is String) {
+    if (element is String)
       return new InlineText(element);
-    }
-    if (element is Iterable && element.first is TextStyle) {
+    if (element is Iterable && element.first is TextStyle)
       return new InlineStyle(element.first, element.skip(1).map(_toInline).toList());
-    }
     throw new ArgumentError("invalid elements");
   }
 
@@ -486,9 +447,10 @@ class StyledText extends Component {
 
 class Text extends Component {
   Text(this.data, { String key, TextStyle this.style }) : super(key: key);
+
   final String data;
   final TextStyle style;
-  bool get interchangeable => true;
+
   Widget build() {
     InlineBase text = new InlineText(data);
     TextStyle defaultStyle = DefaultTextStyle.of(this);
@@ -509,13 +471,14 @@ class Text extends Component {
 
 class Image extends LeafRenderObjectWrapper {
   Image({ sky.Image image, this.size })
-    : image = image, super(key: image.hashCode.toString());
-
-  RenderImage get root => super.root;
-  RenderImage createNode() => new RenderImage(image, size);
+    : image = image,
+      super(key: image.hashCode.toString()); // TODO(ianh): Find a way to uniquely identify the sky.Image rather than using hashCode, which could collide
 
   final sky.Image image;
   final Size size;
+
+  RenderImage createNode() => new RenderImage(image, size);
+  RenderImage get root => super.root;
 
   void syncRenderObject(Widget old) {
     super.syncRenderObject(old);
@@ -525,16 +488,12 @@ class Image extends LeafRenderObjectWrapper {
 }
 
 class FutureImage extends StatefulComponent {
-  FutureImage({ this.image, this.size });
+  FutureImage({ String key, this.image, this.size }) : super(key: key);
 
   Future<sky.Image> image;
   Size size;
-  sky.Image _resolvedImage;
 
-  void didMount() {
-    super.didMount();
-    _resolveImage();
-  }
+  sky.Image _resolvedImage;
 
   void _resolveImage() {
     image.then((sky.Image resolvedImage) {
@@ -544,6 +503,11 @@ class FutureImage extends StatefulComponent {
         _resolvedImage = resolvedImage;
       });
     });
+  }
+
+  void didMount() {
+    super.didMount();
+    _resolveImage();
   }
 
   void syncFields(FutureImage source) {
@@ -560,7 +524,9 @@ class FutureImage extends StatefulComponent {
 }
 
 class NetworkImage extends Component {
-  NetworkImage({ String src, this.size }) : src = src, super(key: src);
+  NetworkImage({ String src, this.size })
+    : src = src,
+      super(key: src);
 
   final String src;
   final Size size;
@@ -571,11 +537,12 @@ class NetworkImage extends Component {
 }
 
 class AssetImage extends Component {
-  AssetImage({ this.bundle, String name, this.size })
-    : name = name, super(key: name);
+  AssetImage({ String name, this.bundle, this.size })
+    : name = name,
+      super(key: name);
 
-  final AssetBundle bundle;
   final String name;
+  final AssetBundle bundle;
   final Size size;
 
   Widget build() {
@@ -584,15 +551,14 @@ class AssetImage extends Component {
 }
 
 class WidgetToRenderBoxAdapter extends LeafRenderObjectWrapper {
-
   WidgetToRenderBoxAdapter(RenderBox renderBox)
     : renderBox = renderBox,
-      super(key: renderBox.hashCode.toString());
-
-  RenderBox get root => super.root;
-  RenderBox createNode() => this.renderBox;
+      super(key: renderBox.hashCode.toString()); // TODO(ianh): Find a way to uniquely identify the RenderBox rather than using hashCode, which could collide
 
   final RenderBox renderBox;
+
+  RenderBox createNode() => this.renderBox;
+  RenderBox get root => super.root;
 
   void syncRenderObject(Widget old) {
     super.syncRenderObject(old);
@@ -605,8 +571,8 @@ class WidgetToRenderBoxAdapter extends LeafRenderObjectWrapper {
   void remove() {
     RenderObjectWrapper ancestor = findAncestorRenderObjectWrapper();
     assert(ancestor is RenderObjectWrapper);
+    assert(ancestor.root == root.parent);
     ancestor.detachChildRoot(this);
     super.remove();
   }
-
 }
