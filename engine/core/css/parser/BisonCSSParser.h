@@ -46,7 +46,6 @@
 
 namespace blink {
 
-class AnimationParseContext;
 class CSSBasicShape;
 class CSSBasicShapeInset;
 class CSSBorderImageSliceValue;
@@ -88,7 +87,6 @@ public:
     static StyleColor colorFromRGBColorString(const String&);
     static bool parseSystemColor(RGBA32& color, const String&);
     static PassRefPtr<CSSValueList> parseFontFaceValue(const AtomicString&);
-    static PassRefPtr<CSSValue> parseAnimationTimingFunctionValue(const String&);
     bool parseDeclaration(MutableStylePropertySet*, const String&, CSSParserObserver*, StyleSheetContents* contextStyleSheet);
     static PassRefPtr<ImmutableStylePropertySet> parseInlineStyleDeclaration(const String&, Element*);
     bool parseAttributeMatchType(CSSSelector::AttributeMatchType&, const String&);

@@ -35,53 +35,12 @@ const StylePropertyShorthand& borderShorthandForParsing()
     return borderForParsingLonghands;
 }
 
-const StylePropertyShorthand& animationShorthandForParsing()
-{
-    // When we parse the animation shorthand we need to look for animation-name
-    // last because otherwise it might match against the keywords for fill mode,
-    // timing functions and infinite iteration. This means that animation names
-    // that are the same as keywords (e.g. 'forwards') won't always match in the
-    // shorthand. In that case the authors should be using longhands (or
-    // reconsidering their approach). This is covered by the animations spec
-    // bug: https://www.w3.org/Bugs/Public/show_bug.cgi?id=14790
-    // And in the spec (editor's draft) at:
-    // http://dev.w3.org/csswg/css3-animations/#animation-shorthand-property
-    static const CSSPropertyID animationPropertiesForParsing[] = {
-        CSSPropertyAnimationDuration,
-        CSSPropertyAnimationTimingFunction,
-        CSSPropertyAnimationDelay,
-        CSSPropertyAnimationIterationCount,
-        CSSPropertyAnimationDirection,
-        CSSPropertyAnimationFillMode,
-        CSSPropertyAnimationPlayState,
-        CSSPropertyAnimationName
-    };
-    DEFINE_STATIC_LOCAL(StylePropertyShorthand, animationLonghandsForParsing, (CSSPropertyAnimation, animationPropertiesForParsing, WTF_ARRAY_LENGTH(animationPropertiesForParsing)));
-    return animationLonghandsForParsing;
-}
-
-const StylePropertyShorthand& transitionShorthandForParsing()
-{
-    static const CSSPropertyID transitionProperties[] = {
-        CSSPropertyTransitionDuration,
-        CSSPropertyTransitionTimingFunction,
-        CSSPropertyTransitionDelay,
-        CSSPropertyTransitionProperty
-    };
-    DEFINE_STATIC_LOCAL(StylePropertyShorthand, transitionLonghands, (CSSPropertyTransition, transitionProperties, WTF_ARRAY_LENGTH(transitionProperties)));
-    return transitionLonghands;
-}
-
 // Returns an empty list if the property is not a shorthand, otherwise the list of longhands for parsing.
 const StylePropertyShorthand& parsingShorthandForProperty(CSSPropertyID propertyID)
 {
     switch (propertyID) {
-    case CSSPropertyAnimation:
-        return animationShorthandForParsing();
     case CSSPropertyBorder:
         return borderShorthandForParsing();
-    case CSSPropertyTransition:
-        return transitionShorthandForParsing();
     default:
         return shorthandForProperty(propertyID);
     }

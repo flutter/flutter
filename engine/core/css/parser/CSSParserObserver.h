@@ -37,7 +37,6 @@ enum CSSParserError {
     InvalidSupportsConditionCSSError,
     InvalidRuleCSSError,
     InvalidMediaQueryCSSError,
-    InvalidKeyframeSelectorCSSError,
     InvalidSelectorPseudoCSSError,
     UnterminatedCommentCSSError,
     GeneralCSSError

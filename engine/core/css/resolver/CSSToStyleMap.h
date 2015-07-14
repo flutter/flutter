@@ -23,11 +23,8 @@
 #define SKY_ENGINE_CORE_CSS_RESOLVER_CSSTOSTYLEMAP_H_
 
 #include "gen/sky/core/CSSPropertyNames.h"
-#include "sky/engine/core/animation/Timing.h"
-#include "sky/engine/core/animation/css/CSSTransitionData.h"
 #include "sky/engine/core/css/resolver/ElementStyleResources.h"
 #include "sky/engine/core/rendering/style/RenderStyleConstants.h"
-#include "sky/engine/platform/animation/TimingFunction.h"
 #include "sky/engine/wtf/Noncopyable.h"
 
 namespace blink {
@@ -63,14 +60,10 @@ public:
     void mapFillYPosition(FillLayer*, CSSValue*) const;
 
     static double mapAnimationDelay(CSSValue*);
-    static Timing::PlaybackDirection mapAnimationDirection(CSSValue*);
     static double mapAnimationDuration(CSSValue*);
-    static Timing::FillMode mapAnimationFillMode(CSSValue*);
     static double mapAnimationIterationCount(CSSValue*);
     static AtomicString mapAnimationName(CSSValue*);
     static EAnimPlayState mapAnimationPlayState(CSSValue*);
-    static CSSTransitionData::TransitionProperty mapAnimationProperty(CSSValue*);
-    static PassRefPtr<TimingFunction> mapAnimationTimingFunction(CSSValue*, bool allowStepMiddle = false);
 
     void mapNinePieceImage(RenderStyle* mutableStyle, CSSPropertyID, CSSValue*, NinePieceImage&);
     void mapNinePieceImageSlice(CSSValue*, NinePieceImage&) const;

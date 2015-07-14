@@ -73,15 +73,6 @@ String StylePropertySerializer::asText() const
         String value;
 
         switch (propertyID) {
-        case CSSPropertyAnimationName:
-        case CSSPropertyAnimationDuration:
-        case CSSPropertyAnimationTimingFunction:
-        case CSSPropertyAnimationDelay:
-        case CSSPropertyAnimationIterationCount:
-        case CSSPropertyAnimationDirection:
-        case CSSPropertyAnimationFillMode:
-            shorthandPropertyID = CSSPropertyAnimation;
-            break;
         case CSSPropertyBackgroundAttachment:
         case CSSPropertyBackgroundClip:
         case CSSPropertyBackgroundColor:
@@ -159,12 +150,6 @@ String StylePropertySerializer::asText() const
         case CSSPropertyPaddingLeft:
             shorthandPropertyID = CSSPropertyPadding;
             break;
-        case CSSPropertyTransitionProperty:
-        case CSSPropertyTransitionDuration:
-        case CSSPropertyTransitionTimingFunction:
-        case CSSPropertyTransitionDelay:
-            shorthandPropertyID = CSSPropertyTransition;
-            break;
         case CSSPropertyFlexDirection:
         case CSSPropertyFlexWrap:
             shorthandPropertyID = CSSPropertyFlexFlow;
@@ -217,8 +202,6 @@ String StylePropertySerializer::getPropertyValue(CSSPropertyID propertyID) const
 {
     // Shorthand and 4-values properties
     switch (propertyID) {
-    case CSSPropertyAnimation:
-        return getLayeredShorthandValue(animationShorthand());
     case CSSPropertyBorderSpacing:
         return borderSpacingValue(borderSpacingShorthand());
     case CSSPropertyBackgroundPosition:
@@ -257,8 +240,6 @@ String StylePropertySerializer::getPropertyValue(CSSPropertyID propertyID) const
         return getCommonValue(overflowShorthand());
     case CSSPropertyPadding:
         return get4Values(paddingShorthand());
-    case CSSPropertyTransition:
-        return getLayeredShorthandValue(transitionShorthand());
     case CSSPropertyWebkitTextEmphasis:
         return getShorthandValue(webkitTextEmphasisShorthand());
     case CSSPropertyWebkitTextStroke:

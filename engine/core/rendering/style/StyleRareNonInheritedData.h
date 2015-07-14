@@ -41,14 +41,11 @@
 
 namespace blink {
 
-class CSSAnimationData;
-class CSSTransitionData;
 class LengthSize;
 class ShadowList;
 class StyleFilterData;
 class StyleFlexibleBoxData;
 class StyleTransformData;
-class StyleWillChangeData;
 
 // This struct is for rarely used non-inherited CSS3, CSS2, and WebKit-specific properties.
 // By grouping them together, we save space, and only allocate this object when someone
@@ -64,8 +61,6 @@ public:
 
     bool counterDataEquivalent(const StyleRareNonInheritedData&) const;
     bool shadowDataEquivalent(const StyleRareNonInheritedData&) const;
-    bool animationDataEquivalent(const StyleRareNonInheritedData&) const;
-    bool transitionDataEquivalent(const StyleRareNonInheritedData&) const;
     bool hasFilters() const;
     bool hasOpacity() const { return opacity < 1; }
 
@@ -80,16 +75,12 @@ public:
 
     DataRef<StyleFlexibleBoxData> m_flexibleBox;
     DataRef<StyleTransformData> m_transform; // Transform properties (rotate, scale, skew, etc.)
-    DataRef<StyleWillChangeData> m_willChange; // CSS Will Change
 
     DataRef<StyleFilterData> m_filter; // Filter operations (url, sepia, blur, etc.)
 
     OwnPtr<CounterDirectiveMap> m_counterDirectives;
 
     RefPtr<ShadowList> m_boxShadow;
-
-    OwnPtr<CSSAnimationData> m_animations;
-    OwnPtr<CSSTransitionData> m_transitions;
 
     RefPtr<ClipPathOperation> m_clipPath;
 

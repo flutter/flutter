@@ -114,22 +114,7 @@ private:
 
     void addFillValue(RefPtr<CSSValue>& lval, PassRefPtr<CSSValue> rval);
 
-    PassRefPtr<CSSValue> parseAnimationDelay();
-    PassRefPtr<CSSValue> parseAnimationDirection();
-    PassRefPtr<CSSValue> parseAnimationDuration();
-    PassRefPtr<CSSValue> parseAnimationFillMode();
-    PassRefPtr<CSSValue> parseAnimationIterationCount();
-    PassRefPtr<CSSValue> parseAnimationName();
-    PassRefPtr<CSSValue> parseAnimationPlayState();
-    PassRefPtr<CSSValue> parseAnimationProperty();
-    PassRefPtr<CSSValue> parseAnimationTimingFunction();
-
     bool parseWebkitTransformOriginShorthand();
-    bool parseCubicBezierTimingFunctionValue(CSSParserValueList*& args, double& result);
-    PassRefPtr<CSSValue> parseAnimationProperty(CSSPropertyID);
-    PassRefPtr<CSSValueList> parseAnimationPropertyList(CSSPropertyID);
-    bool parseTransitionShorthand(CSSPropertyID);
-    bool parseAnimationShorthand(CSSPropertyID);
 
     bool parseClipShape(CSSPropertyID);
 
@@ -178,8 +163,6 @@ private:
     bool parseLinearGradient(CSSParserValueList*, RefPtr<CSSValue>&, CSSGradientRepeat repeating);
     bool parseRadialGradient(CSSParserValueList*, RefPtr<CSSValue>&, CSSGradientRepeat repeating);
     bool parseGradientColorStops(CSSParserValueList*, CSSGradientValue*, bool expectComma);
-
-    PassRefPtr<CSSValue> parseWillChange();
 
     PassRefPtr<CSSValueList> parseFilter();
     PassRefPtr<CSSFilterValue> parseBuiltinFilterArguments(CSSParserValueList*, CSSFilterValue::FilterOperationType);

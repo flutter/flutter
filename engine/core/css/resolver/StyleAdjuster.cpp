@@ -96,29 +96,6 @@ static bool parentStyleForcesZIndexToCreateStackingContext(const RenderStyle* pa
     return parentStyle->isDisplayFlexibleBox();
 }
 
-static bool hasWillChangeThatCreatesStackingContext(const RenderStyle* style)
-{
-    for (size_t i = 0; i < style->willChangeProperties().size(); ++i) {
-        switch (style->willChangeProperties()[i]) {
-        case CSSPropertyOpacity:
-        case CSSPropertyTransform:
-        case CSSPropertyWebkitTransform:
-        case CSSPropertyTransformStyle:
-        case CSSPropertyWebkitTransformStyle:
-        case CSSPropertyPerspective:
-        case CSSPropertyWebkitPerspective:
-        case CSSPropertyWebkitClipPath:
-        case CSSPropertyFilter:
-        case CSSPropertyZIndex:
-        case CSSPropertyPosition:
-            return true;
-        default:
-            break;
-        }
-    }
-    return false;
-}
-
 void StyleAdjuster::adjustRenderStyle(RenderStyle* style, RenderStyle* parentStyle, Element& element)
 {
     ASSERT(parentStyle);
@@ -138,16 +115,8 @@ void StyleAdjuster::adjustRenderStyle(RenderStyle* style, RenderStyle* parentSty
         && (style->hasOpacity()
             || style->hasTransformRelatedProperty()
             || style->clipPath()
-            || style->hasFilter()
-            || hasWillChangeThatCreatesStackingContext(style)))
+            || style->hasFilter()))
         style->setZIndex(0);
-
-    // will-change:transform should result in the same rendering behavior as having a transform,
-    // including the creation of a containing block for fixed position descendants.
-    if (!style->hasTransform() && (style->willChangeProperties().contains(CSSPropertyWebkitTransform) || style->willChangeProperties().contains(CSSPropertyTransform))) {
-        bool makeIdentity = true;
-        style->setTransform(TransformOperations(makeIdentity));
-    }
 
     if (doesNotInheritTextDecoration(style, element))
         style->clearAppliedTextDecorations();
@@ -159,10 +128,6 @@ void StyleAdjuster::adjustRenderStyle(RenderStyle* style, RenderStyle* parentSty
 
     // Cull out any useless layers and also repeat patterns into additional layers.
     style->adjustBackgroundLayers();
-
-    // If we have transitions, or animations, do not share this style.
-    if (style->transitions() || style->animations())
-        style->setUnique();
 
     // FIXME: when dropping the -webkit prefix on transform-style, we should also have opacity < 1 cause flattening.
     if (style->preserves3D() && (style->overflowX() != OVISIBLE

@@ -34,7 +34,6 @@
 #include "base/rand_util.h"
 #include "gen/sky/platform/RuntimeEnabledFeatures.h"
 #include "mojo/common/message_pump_mojo.h"
-#include "sky/engine/core/animation/AnimationClock.h"
 #include "sky/engine/core/dom/Microtask.h"
 #include "sky/engine/core/frame/Settings.h"
 #include "sky/engine/core/Init.h"
@@ -56,7 +55,6 @@ namespace {
 
 void willProcessTask()
 {
-    AnimationClock::notifyTaskStart();
 }
 
 void didProcessTask()

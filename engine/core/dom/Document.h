@@ -30,8 +30,6 @@
 
 #include "sky/engine/tonic/dart_value.h"
 #include "sky/engine/bindings/exception_state_placeholder.h"
-#include "sky/engine/core/animation/AnimationClock.h"
-#include "sky/engine/core/animation/PendingAnimations.h"
 #include "sky/engine/core/dom/ContainerNode.h"
 #include "sky/engine/core/dom/DocumentInit.h"
 #include "sky/engine/core/dom/DocumentLifecycle.h"
@@ -43,7 +41,6 @@
 #include "sky/engine/core/dom/UserActionElementSet.h"
 #include "sky/engine/core/loader/DocumentLoadTiming.h"
 #include "sky/engine/core/page/FocusType.h"
-#include "sky/engine/core/page/PageVisibilityState.h"
 #include "sky/engine/platform/Length.h"
 #include "sky/engine/platform/Timer.h"
 #include "sky/engine/platform/heap/Handle.h"
@@ -60,7 +57,6 @@
 namespace blink {
 
 class AbstractModule;
-class AnimationTimeline;
 class Attr;
 class Comment;
 class ConsoleMessage;
@@ -178,18 +174,7 @@ public:
 
     KURL baseURI() const;
 
-    String visibilityState() const;
-    bool hidden() const;
-    void didChangeVisibilityState();
-
     PassRefPtr<Node> adoptNode(PassRefPtr<Node> source, ExceptionState&);
-
-    struct TransitionElementData {
-        String scope;
-        String selector;
-        String markup;
-    };
-    void getTransitionElementData(Vector<TransitionElementData>&);
 
     StyleResolver& styleResolver() const;
 
@@ -329,14 +314,10 @@ public:
         DOMNODEREMOVEDFROMDOCUMENT_LISTENER  = 1 << 3,
         DOMNODEINSERTEDINTODOCUMENT_LISTENER = 1 << 4,
         DOMCHARACTERDATAMODIFIED_LISTENER    = 1 << 5,
-        ANIMATIONEND_LISTENER                = 1 << 6,
-        ANIMATIONSTART_LISTENER              = 1 << 7,
-        ANIMATIONITERATION_LISTENER          = 1 << 8,
-        TRANSITIONEND_LISTENER               = 1 << 9,
     };
 
     bool hasListenerType(ListenerType listenerType) const { return (m_listenerTypes & listenerType); }
-    void addListenerTypeIfNeeded(const AtomicString& eventType);
+    void addListenerTypeIfNeeded(const AtomicString& eventType) { }
 
     bool hasMutationObserversOfType(MutationObserver::MutationType type) const
     {
@@ -430,10 +411,6 @@ public:
     void didLoadAllParserBlockingResources();
 
     bool inStyleRecalc() const { return m_lifecycle.state() == DocumentLifecycle::InStyleRecalc; }
-
-    AnimationClock& animationClock() { return m_animationClock; }
-    AnimationTimeline& timeline() const { return *m_timeline; }
-    PendingAnimations& pendingAnimations() { return m_pendingAnimations; }
 
     // A non-null m_templateDocumentHost implies that |this| was created by ensureTemplateDocument().
     bool isTemplateDocument() const { return !!m_templateDocumentHost; }
@@ -533,8 +510,6 @@ private:
 
     void loadEventDelayTimerFired(Timer<Document>*);
 
-    PageVisibilityState pageVisibilityState() const;
-
     // Note that dispatching a window load event may cause the LocalDOMWindow to be detached from
     // the LocalFrame, so callers should take a reference to the LocalDOMWindow (which owns us) to
     // prevent the Document from getting blown away from underneath them.
@@ -627,10 +602,6 @@ private:
     Timer<Document> m_elementDataCacheClearTimer;
 
     OwnPtr<ElementDataCache> m_elementDataCache;
-
-    AnimationClock m_animationClock;
-    RefPtr<AnimationTimeline> m_timeline;
-    PendingAnimations m_pendingAnimations;
 
     RefPtr<Document> m_templateDocument;
     // With Oilpan the templateDocument and the templateDocumentHost

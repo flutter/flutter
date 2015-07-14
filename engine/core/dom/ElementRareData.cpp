@@ -34,18 +34,11 @@
 
 namespace blink {
 
-struct SameSizeAsElementRareData : NodeRareData {
-    short index;
-    void* pointers[5];
-};
-
 CSSStyleDeclaration& ElementRareData::ensureInlineCSSStyleDeclaration(Element* ownerElement)
 {
     if (!m_cssomWrapper)
         m_cssomWrapper = adoptPtr(new InlineCSSStyleDeclaration(ownerElement));
     return *m_cssomWrapper;
 }
-
-COMPILE_ASSERT(sizeof(ElementRareData) == sizeof(SameSizeAsElementRareData), ElementRareDataShouldStaySmall);
 
 } // namespace blink

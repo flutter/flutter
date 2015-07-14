@@ -32,8 +32,6 @@
 #include "sky/engine/bindings/exception_messages.h"
 #include "sky/engine/bindings/exception_state.h"
 #include "sky/engine/bindings/exception_state_placeholder.h"
-#include "sky/engine/core/animation/AnimationTimeline.h"
-#include "sky/engine/core/animation/DocumentAnimations.h"
 #include "sky/engine/core/css/CSSFontSelector.h"
 #include "sky/engine/core/css/CSSStyleDeclaration.h"
 #include "sky/engine/core/css/CSSStyleSheet.h"
@@ -231,7 +229,6 @@ Document::Document(const DocumentInit& initializer)
     , m_referrerPolicy(ReferrerPolicyDefault)
     , m_elementRegistry(initializer.elementRegistry())
     , m_elementDataCacheClearTimer(this, &Document::elementDataCacheClearTimerFired)
-    , m_timeline(AnimationTimeline::create(this))
     , m_templateDocumentHost(nullptr)
     , m_hasViewportUnits(false)
     , m_styleRecalcElementCounter(0)
@@ -278,8 +275,6 @@ Document::~Document()
 #endif
 
 #if !ENABLE(OILPAN)
-
-    m_timeline->detachFromDocument();
 
     if (m_elemSheet)
         m_elemSheet->clearOwnerNode();
@@ -653,32 +648,6 @@ void Document::setDir(const AtomicString& value)
 {
 }
 
-PageVisibilityState Document::pageVisibilityState() const
-{
-    // The visibility of the document is inherited from the visibility of the
-    // page. If there is no page associated with the document, we will assume
-    // that the page is hidden, as specified by the spec:
-    // http://dvcs.w3.org/hg/webperf/raw-file/tip/specs/PageVisibility/Overview.html#dom-document-hidden
-    if (!m_frame || !m_frame->page())
-        return PageVisibilityStateHidden;
-    return m_frame->page()->visibilityState();
-}
-
-String Document::visibilityState() const
-{
-    return pageVisibilityStateString(pageVisibilityState());
-}
-
-bool Document::hidden() const
-{
-    return pageVisibilityState() != PageVisibilityStateVisible;
-}
-
-void Document::didChangeVisibilityState()
-{
-    dispatchEvent(Event::create(EventTypeNames::visibilitychange));
-}
-
 String Document::nodeName() const
 {
     return "#document";
@@ -740,8 +709,6 @@ bool Document::needsFullRenderTreeUpdate() const
     // FIXME: The childNeedsDistributionRecalc bit means either self or children, we should fix that.
     if (childNeedsDistributionRecalc())
         return true;
-    if (DocumentAnimations::needsOutdatedAnimationPlayerUpdate(*this))
-        return true;
     return false;
 }
 
@@ -772,8 +739,6 @@ void Document::scheduleRenderTreeUpdate()
 
 void Document::scheduleVisualUpdate()
 {
-    if (page())
-        page()->animator().scheduleVisualUpdate();
 }
 
 void Document::updateDistributionIfNeeded()
@@ -841,7 +806,6 @@ void Document::updateRenderTree(StyleRecalcChange change)
 
     m_styleRecalcElementCounter = 0;
 
-    DocumentAnimations::updateOutdatedAnimationPlayersIfNeeded(*this);
     evaluateMediaQueryListIfNeeded();
     updateDistributionIfNeeded();
 
@@ -856,8 +820,6 @@ void Document::updateRenderTree(StyleRecalcChange change)
 
     if (m_focusedElement && !m_focusedElement->isFocusable())
         clearFocusedElementSoon();
-
-    ASSERT(!m_timeline->hasOutdatedAnimationPlayer());
 }
 
 void Document::updateStyle(StyleRecalcChange change)
@@ -1576,19 +1538,6 @@ void Document::enqueueMediaQueryChangeListeners(Vector<RefPtr<MediaQueryListList
     ensureScriptedAnimationController().enqueueMediaQueryChangeListeners(listeners);
 }
 
-void Document::addListenerTypeIfNeeded(const AtomicString& eventType)
-{
-    if (eventType == EventTypeNames::animationstart) {
-        addListenerType(ANIMATIONSTART_LISTENER);
-    } else if (eventType == EventTypeNames::animationend) {
-        addListenerType(ANIMATIONEND_LISTENER);
-    } else if (eventType == EventTypeNames::animationiteration) {
-        addListenerType(ANIMATIONITERATION_LISTENER);
-    } else if (eventType == EventTypeNames::transitionend) {
-        addListenerType(TRANSITIONEND_LISTENER);
-    }
-}
-
 const AtomicString& Document::referrer() const
 {
     return nullAtom;
@@ -1941,10 +1890,6 @@ Element* Document::activeElement() const
     if (Element* element = treeScope().adjustedFocusedElement())
         return element;
     return nullptr;
-}
-
-void Document::getTransitionElementData(Vector<TransitionElementData>& elementData)
-{
 }
 
 bool Document::hasFocus() const

@@ -63,8 +63,4 @@ callback CustomElementConstructor = Element ();
     boolean hasFocus();
 
     [RaisesException] void registerElement(DOMString name, any type);
-
-    // Page visibility API.
-    readonly attribute DOMString visibilityState;
-    readonly attribute boolean hidden;
 };

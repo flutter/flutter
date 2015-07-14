@@ -44,7 +44,6 @@
 #include "sky/engine/core/css/CSSSelector.h"
 #include "sky/engine/core/css/CSSShadowValue.h"
 #include "sky/engine/core/css/CSSStyleSheet.h"
-#include "sky/engine/core/css/CSSTimingFunctionValue.h"
 #include "sky/engine/core/css/CSSTransformValue.h"
 #include "sky/engine/core/css/CSSUnicodeRangeValue.h"
 #include "sky/engine/core/css/CSSValueList.h"
@@ -703,23 +702,6 @@ PassRefPtr<CSSValueList> BisonCSSParser::parseFontFaceValue(const AtomicString& 
         return nullptr;
 
     return toCSSValueList(dummyStyle->getPropertyCSSValue(CSSPropertyFontFamily).get());
-}
-
-PassRefPtr<CSSValue> BisonCSSParser::parseAnimationTimingFunctionValue(const String& string)
-{
-    if (string.isEmpty())
-        return nullptr;
-    RefPtr<MutableStylePropertySet> style = MutableStylePropertySet::create();
-    if (!parseValue(style.get(), CSSPropertyTransitionTimingFunction, string, HTMLStandardMode, 0))
-        return nullptr;
-
-    RefPtr<CSSValue> value = style->getPropertyCSSValue(CSSPropertyTransitionTimingFunction);
-    if (!value || value->isInitialValue() || value->isInheritedValue())
-        return nullptr;
-    CSSValueList* valueList = toCSSValueList(value.get());
-    if (valueList->length() > 1)
-        return nullptr;
-    return valueList->item(0);
 }
 
 bool BisonCSSParser::parseValue(MutableStylePropertySet* declaration, CSSPropertyID propertyID, const String& string, const Document& document)

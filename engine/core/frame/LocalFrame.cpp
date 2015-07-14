@@ -159,12 +159,6 @@ void LocalFrame::setDOMWindow(PassRefPtr<LocalDOMWindow> domWindow)
     Frame::setDOMWindow(domWindow);
 }
 
-void LocalFrame::didChangeVisibilityState()
-{
-    if (document())
-        document()->didChangeVisibilityState();
-}
-
 void LocalFrame::addDestructionObserver(FrameDestructionObserver* observer)
 {
     m_destructionObservers.add(observer);

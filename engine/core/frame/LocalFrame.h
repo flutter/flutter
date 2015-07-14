@@ -92,8 +92,6 @@ namespace blink {
         SpellChecker& spellChecker() const;
         FrameConsole& console() const;
 
-        void didChangeVisibilityState();
-
         FrameLoaderClient* loaderClient() const;
 
     // ======== All public functions below this point are candidates to move out of LocalFrame into another class. ========

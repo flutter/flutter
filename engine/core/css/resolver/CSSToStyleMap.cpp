@@ -28,11 +28,9 @@
 #include "sky/engine/core/css/resolver/CSSToStyleMap.h"
 
 #include "gen/sky/core/CSSValueKeywords.h"
-#include "sky/engine/core/animation/css/CSSAnimationData.h"
 #include "sky/engine/core/css/CSSBorderImageSliceValue.h"
 #include "sky/engine/core/css/CSSPrimitiveValue.h"
 #include "sky/engine/core/css/CSSPrimitiveValueMappings.h"
-#include "sky/engine/core/css/CSSTimingFunctionValue.h"
 #include "sky/engine/core/css/Pair.h"
 #include "sky/engine/core/css/Rect.h"
 #include "sky/engine/core/css/resolver/StyleResolverState.h"
@@ -253,152 +251,6 @@ void CSSToStyleMap::mapFillYPosition(FillLayer* layer, CSSValue* value) const
     layer->setYPosition(length);
     if (pair)
         layer->setBackgroundYOrigin(*(pair->first()));
-}
-
-double CSSToStyleMap::mapAnimationDelay(CSSValue* value)
-{
-    if (value->isInitialValue())
-        return CSSTimingData::initialDelay();
-    return toCSSPrimitiveValue(value)->computeSeconds();
-}
-
-Timing::PlaybackDirection CSSToStyleMap::mapAnimationDirection(CSSValue* value)
-{
-    if (value->isInitialValue())
-        return CSSAnimationData::initialDirection();
-
-    switch (toCSSPrimitiveValue(value)->getValueID()) {
-    case CSSValueNormal:
-        return Timing::PlaybackDirectionNormal;
-    case CSSValueAlternate:
-        return Timing::PlaybackDirectionAlternate;
-    case CSSValueReverse:
-        return Timing::PlaybackDirectionReverse;
-    case CSSValueAlternateReverse:
-        return Timing::PlaybackDirectionAlternateReverse;
-    default:
-        ASSERT_NOT_REACHED();
-        return CSSAnimationData::initialDirection();
-    }
-}
-
-double CSSToStyleMap::mapAnimationDuration(CSSValue* value)
-{
-    if (value->isInitialValue())
-        return CSSTimingData::initialDuration();
-    return toCSSPrimitiveValue(value)->computeSeconds();
-}
-
-Timing::FillMode CSSToStyleMap::mapAnimationFillMode(CSSValue* value)
-{
-    if (value->isInitialValue())
-        return CSSAnimationData::initialFillMode();
-
-    switch (toCSSPrimitiveValue(value)->getValueID()) {
-    case CSSValueNone:
-        return Timing::FillModeNone;
-    case CSSValueForwards:
-        return Timing::FillModeForwards;
-    case CSSValueBackwards:
-        return Timing::FillModeBackwards;
-    case CSSValueBoth:
-        return Timing::FillModeBoth;
-    default:
-        ASSERT_NOT_REACHED();
-        return CSSAnimationData::initialFillMode();
-    }
-}
-
-double CSSToStyleMap::mapAnimationIterationCount(CSSValue* value)
-{
-    if (value->isInitialValue())
-        return CSSAnimationData::initialIterationCount();
-    CSSPrimitiveValue* primitiveValue = toCSSPrimitiveValue(value);
-    if (primitiveValue->getValueID() == CSSValueInfinite)
-        return std::numeric_limits<double>::infinity();
-    return primitiveValue->getFloatValue();
-}
-
-AtomicString CSSToStyleMap::mapAnimationName(CSSValue* value)
-{
-    if (value->isInitialValue())
-        return CSSAnimationData::initialName();
-    CSSPrimitiveValue* primitiveValue = toCSSPrimitiveValue(value);
-    if (primitiveValue->getValueID() == CSSValueNone)
-        return CSSAnimationData::initialName();
-    return AtomicString(primitiveValue->getStringValue());
-}
-
-EAnimPlayState CSSToStyleMap::mapAnimationPlayState(CSSValue* value)
-{
-    if (value->isInitialValue())
-        return CSSAnimationData::initialPlayState();
-    if (toCSSPrimitiveValue(value)->getValueID() == CSSValuePaused)
-        return AnimPlayStatePaused;
-    ASSERT(toCSSPrimitiveValue(value)->getValueID() == CSSValueRunning);
-    return AnimPlayStatePlaying;
-}
-
-CSSTransitionData::TransitionProperty CSSToStyleMap::mapAnimationProperty(CSSValue* value)
-{
-    if (value->isInitialValue())
-        return CSSTransitionData::initialProperty();
-    CSSPrimitiveValue* primitiveValue = toCSSPrimitiveValue(value);
-    if (primitiveValue->isString())
-        return CSSTransitionData::TransitionProperty(primitiveValue->getStringValue());
-    if (primitiveValue->getValueID() == CSSValueAll)
-        return CSSTransitionData::TransitionProperty(CSSTransitionData::TransitionAll);
-    if (primitiveValue->getValueID() == CSSValueNone)
-        return CSSTransitionData::TransitionProperty(CSSTransitionData::TransitionNone);
-    return CSSTransitionData::TransitionProperty(primitiveValue->getPropertyID());
-}
-
-PassRefPtr<TimingFunction> CSSToStyleMap::mapAnimationTimingFunction(CSSValue* value, bool allowStepMiddle)
-{
-    // FIXME: We should probably only call into this function with a valid
-    // single timing function value which isn't initial or inherit. We can
-    // currently get into here with initial since the parser expands unset
-    // properties in shorthands to initial.
-
-    if (value->isPrimitiveValue()) {
-        CSSPrimitiveValue* primitiveValue = toCSSPrimitiveValue(value);
-        switch (primitiveValue->getValueID()) {
-        case CSSValueLinear:
-            return LinearTimingFunction::shared();
-        case CSSValueEase:
-            return CubicBezierTimingFunction::preset(CubicBezierTimingFunction::Ease);
-        case CSSValueEaseIn:
-            return CubicBezierTimingFunction::preset(CubicBezierTimingFunction::EaseIn);
-        case CSSValueEaseOut:
-            return CubicBezierTimingFunction::preset(CubicBezierTimingFunction::EaseOut);
-        case CSSValueEaseInOut:
-            return CubicBezierTimingFunction::preset(CubicBezierTimingFunction::EaseInOut);
-        case CSSValueStepStart:
-            return StepsTimingFunction::preset(StepsTimingFunction::Start);
-        case CSSValueStepMiddle:
-            if (allowStepMiddle)
-                return StepsTimingFunction::preset(StepsTimingFunction::Middle);
-            return CSSTimingData::initialTimingFunction();
-        case CSSValueStepEnd:
-            return StepsTimingFunction::preset(StepsTimingFunction::End);
-        default:
-            ASSERT_NOT_REACHED();
-            return CSSTimingData::initialTimingFunction();
-        }
-    }
-
-    if (value->isCubicBezierTimingFunctionValue()) {
-        CSSCubicBezierTimingFunctionValue* cubicTimingFunction = toCSSCubicBezierTimingFunctionValue(value);
-        return CubicBezierTimingFunction::create(cubicTimingFunction->x1(), cubicTimingFunction->y1(), cubicTimingFunction->x2(), cubicTimingFunction->y2());
-    }
-
-    if (value->isInitialValue())
-        return CSSTimingData::initialTimingFunction();
-
-    CSSStepsTimingFunctionValue* stepsTimingFunction = toCSSStepsTimingFunctionValue(value);
-    if (stepsTimingFunction->stepAtPosition() == StepsTimingFunction::StepAtMiddle && !allowStepMiddle)
-        return CSSTimingData::initialTimingFunction();
-    return StepsTimingFunction::create(stepsTimingFunction->numberOfSteps(), stepsTimingFunction->stepAtPosition());
 }
 
 void CSSToStyleMap::mapNinePieceImage(RenderStyle* mutableStyle, CSSPropertyID property, CSSValue* value, NinePieceImage& image)

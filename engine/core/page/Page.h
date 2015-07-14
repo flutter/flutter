@@ -26,8 +26,6 @@
 #include "sky/engine/core/frame/SettingsDelegate.h"
 #include "sky/engine/core/inspector/ConsoleAPITypes.h"
 #include "sky/engine/core/page/FocusType.h"
-#include "sky/engine/core/page/PageAnimator.h"
-#include "sky/engine/core/page/PageVisibilityState.h"
 #include "sky/engine/platform/HostWindow.h"
 #include "sky/engine/platform/LifecycleContext.h"
 #include "sky/engine/platform/Supplementable.h"
@@ -99,7 +97,6 @@ public:
 
     void documentDetached(Document*);
 
-    PageAnimator& animator() { return m_animator; }
     DragCaretController& dragCaretController() const { return *m_dragCaretController; }
     FocusController& focusController() const { return *m_focusController; }
 
@@ -109,9 +106,6 @@ public:
 
     float deviceScaleFactor() const { return m_deviceScaleFactor; }
     void setDeviceScaleFactor(float);
-
-    PageVisibilityState visibilityState() const;
-    void setVisibilityState(PageVisibilityState, bool);
 
 #if ENABLE(ASSERT)
     void setIsPainting(bool painting) { m_isPainting = painting; }
@@ -169,7 +163,6 @@ private:
     // SettingsDelegate overrides.
     virtual void settingsChanged(SettingsDelegate::ChangeType) override;
 
-    PageAnimator m_animator;
     ChromeClient* m_chromeClient;
     const OwnPtr<DragCaretController> m_dragCaretController;
     const OwnPtr<FocusController> m_focusController;
@@ -195,8 +188,6 @@ private:
     float m_deviceScaleFactor;
 
     double m_timerAlignmentInterval;
-
-    PageVisibilityState m_visibilityState;
 
 #if ENABLE(ASSERT)
     bool m_isPainting;

@@ -72,12 +72,9 @@ StyleRareNonInheritedData::StyleRareNonInheritedData(const StyleRareNonInherited
     , m_perspectiveOriginY(o.m_perspectiveOriginY)
     , m_flexibleBox(o.m_flexibleBox)
     , m_transform(o.m_transform)
-    , m_willChange(o.m_willChange)
     , m_filter(o.m_filter)
     , m_counterDirectives(o.m_counterDirectives ? clone(*o.m_counterDirectives) : nullptr)
     , m_boxShadow(o.m_boxShadow)
-    , m_animations(o.m_animations ? CSSAnimationData::create(*o.m_animations) : nullptr)
-    , m_transitions(o.m_transitions ? CSSTransitionData::create(*o.m_transitions) : nullptr)
     , m_clipPath(o.m_clipPath)
     , m_textDecorationColor(o.m_textDecorationColor)
     , m_order(o.m_order)
@@ -118,12 +115,9 @@ bool StyleRareNonInheritedData::operator==(const StyleRareNonInheritedData& o) c
         && m_perspectiveOriginY == o.m_perspectiveOriginY
         && m_flexibleBox == o.m_flexibleBox
         && m_transform == o.m_transform
-        && m_willChange == o.m_willChange
         && m_filter == o.m_filter
         && counterDataEquivalent(o)
         && shadowDataEquivalent(o)
-        && animationDataEquivalent(o)
-        && transitionDataEquivalent(o)
         && m_clipPath == o.m_clipPath
         && m_textDecorationColor == o.m_textDecorationColor
         && m_order == o.m_order
@@ -157,24 +151,6 @@ bool StyleRareNonInheritedData::counterDataEquivalent(const StyleRareNonInherite
 bool StyleRareNonInheritedData::shadowDataEquivalent(const StyleRareNonInheritedData& o) const
 {
     return dataEquivalent(m_boxShadow, o.m_boxShadow);
-}
-
-bool StyleRareNonInheritedData::animationDataEquivalent(const StyleRareNonInheritedData& o) const
-{
-    if (!m_animations && !o.m_animations)
-        return true;
-    if (!m_animations || !o.m_animations)
-        return false;
-    return m_animations->animationsMatchForStyleRecalc(*o.m_animations);
-}
-
-bool StyleRareNonInheritedData::transitionDataEquivalent(const StyleRareNonInheritedData& o) const
-{
-    if (!m_transitions && !o.m_transitions)
-        return true;
-    if (!m_transitions || !o.m_transitions)
-        return false;
-    return m_transitions->transitionsMatchForStyleRecalc(*o.m_transitions);
 }
 
 bool StyleRareNonInheritedData::hasFilters() const

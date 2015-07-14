@@ -26,8 +26,6 @@
 #define SKY_ENGINE_CORE_RENDERING_STYLE_RENDERSTYLE_H_
 
 #include "gen/sky/core/CSSPropertyNames.h"
-#include "sky/engine/core/animation/css/CSSAnimationData.h"
-#include "sky/engine/core/animation/css/CSSTransitionData.h"
 #include "sky/engine/core/css/CSSLineBoxContainValue.h"
 #include "sky/engine/core/css/CSSPrimitiveValue.h"
 #include "sky/engine/core/rendering/style/BorderValue.h"
@@ -48,7 +46,6 @@
 #include "sky/engine/core/rendering/style/StyleSurroundData.h"
 #include "sky/engine/core/rendering/style/StyleTransformData.h"
 #include "sky/engine/core/rendering/style/StyleVisualData.h"
-#include "sky/engine/core/rendering/style/StyleWillChangeData.h"
 #include "sky/engine/platform/Length.h"
 #include "sky/engine/platform/LengthBox.h"
 #include "sky/engine/platform/LengthSize.h"
@@ -99,9 +96,6 @@ class StyleResolver;
 class TransformationMatrix;
 
 class RenderStyle: public RefCounted<RenderStyle> {
-    friend class AnimatedStyleBuilder; // Used by Web Animations CSS. Sets the color styles
-    friend class CSSAnimatableValueFactory; // Used by Web Animations CSS. Gets visited and unvisited colors separately.
-    friend class CSSPropertyEquality; // Used by CSS animations. We can't allow them to animate based off visited colors.
     friend class EditingStyle; // Editing has to only reveal unvisited info.
     friend class CSSComputedStyleDeclaration; // Ignores visited styles, so needs to be able to see unvisited info.
     friend class StyleBuilderFunctions; // Sets color styles
@@ -661,11 +655,6 @@ public:
 
     // Apple-specific property getter methods
     EPointerEvents pointerEvents() const { return static_cast<EPointerEvents>(inherited_flags._pointerEvents); }
-    const CSSAnimationData* animations() const { return rareNonInheritedData->m_animations.get(); }
-    const CSSTransitionData* transitions() const { return rareNonInheritedData->m_transitions.get(); }
-
-    CSSAnimationData& accessAnimations();
-    CSSTransitionData& accessTransitions();
 
     ETransformStyle3D transformStyle3D() const { return static_cast<ETransformStyle3D>(rareNonInheritedData->m_transformStyle3D); }
     bool preserves3D() const { return rareNonInheritedData->m_transformStyle3D == TransformStyle3DPreserve3D; }
@@ -686,10 +675,6 @@ public:
 
     TouchAction touchAction() const { return static_cast<TouchAction>(rareNonInheritedData->m_touchAction); }
     TouchActionDelay touchActionDelay() const { return static_cast<TouchActionDelay>(rareInheritedData->m_touchActionDelay); }
-
-    const Vector<CSSPropertyID>& willChangeProperties() const { return rareNonInheritedData->m_willChange->m_properties; }
-    bool willChangeContents() const { return rareNonInheritedData->m_willChange->m_contents; }
-    bool subtreeWillChangeContents() const { return rareInheritedData->m_subtreeWillChangeContents; }
 
 // attribute setter methods
 
@@ -810,7 +795,7 @@ public:
     void setUnicodeBidi(EUnicodeBidi b) { noninherited_flags.unicodeBidi = b; }
 
     bool setFontDescription(const FontDescription&);
-    // Only used for blending font sizes when animating and for text autosizing.
+    // Only used for text autosizing.
     void setFontSize(float);
     void setFontStretch(FontStretch);
     void setFontWeight(FontWeight);
@@ -941,16 +926,6 @@ public:
     // Apple-specific property setters
     void setPointerEvents(EPointerEvents p) { inherited_flags._pointerEvents = p; }
 
-    void clearAnimations()
-    {
-        rareNonInheritedData.access()->m_animations.clear();
-    }
-
-    void clearTransitions()
-    {
-        rareNonInheritedData.access()->m_transitions.clear();
-    }
-
     void setTransformStyle3D(ETransformStyle3D b) { SET_VAR(rareNonInheritedData, m_transformStyle3D, b); }
     void setPerspective(float p) { SET_VAR(rareNonInheritedData, m_perspective, p); }
     void setPerspectiveOriginX(const Length& l) { SET_VAR(rareNonInheritedData, m_perspectiveOriginX, l); }
@@ -960,10 +935,6 @@ public:
     void setTapHighlightColor(const Color& c) { SET_VAR(rareInheritedData, tapHighlightColor, c); }
     void setTouchAction(TouchAction t) { SET_VAR(rareNonInheritedData, m_touchAction, t); }
     void setTouchActionDelay(TouchActionDelay t) { SET_VAR(rareInheritedData, m_touchActionDelay, t); }
-
-    void setWillChangeProperties(const Vector<CSSPropertyID>& properties) { SET_VAR(rareNonInheritedData.access()->m_willChange, m_properties, properties); }
-    void setWillChangeContents(bool b) { SET_VAR(rareNonInheritedData.access()->m_willChange, m_contents, b); }
-    void setSubtreeWillChangeContents(bool b) { SET_VAR(rareInheritedData, m_subtreeWillChangeContents, b); }
 
     void setClipPath(PassRefPtr<ClipPathOperation> operation)
     {

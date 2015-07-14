@@ -43,6 +43,7 @@
 #include "sky/engine/core/rendering/RenderText.h"
 #include "sky/engine/platform/Logging.h"
 #include "sky/engine/wtf/text/CString.h"
+#include "sky/engine/wtf/text/StringBuilder.h"
 #include "sky/engine/wtf/unicode/CharacterNames.h"
 
 namespace blink {

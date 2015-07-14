@@ -30,8 +30,6 @@
 #include "gen/sky/platform/RuntimeEnabledFeatures.h"
 #include "sky/engine/bindings/exception_messages.h"
 #include "sky/engine/bindings/exception_state.h"
-#include "sky/engine/core/animation/AnimationTimeline.h"
-#include "sky/engine/core/animation/css/CSSAnimations.h"
 #include "sky/engine/core/css/CSSStyleSheet.h"
 #include "sky/engine/core/css/CSSValuePool.h"
 #include "sky/engine/core/css/PropertySetCSSStyleDeclaration.h"
@@ -195,30 +193,6 @@ void Element::setBooleanAttribute(const QualifiedName& name, bool value)
         setAttribute(name, emptyAtom);
     else
         removeAttribute(name);
-}
-
-ActiveAnimations* Element::activeAnimations() const
-{
-    if (hasRareData())
-        return elementRareData()->activeAnimations();
-    return 0;
-}
-
-ActiveAnimations& Element::ensureActiveAnimations()
-{
-    ElementRareData& rareData = ensureElementRareData();
-    if (!rareData.activeAnimations())
-        rareData.setActiveAnimations(adoptPtr(new ActiveAnimations()));
-    return *rareData.activeAnimations();
-}
-
-bool Element::hasActiveAnimations() const
-{
-    if (!hasRareData())
-        return false;
-
-    ActiveAnimations* activeAnimations = elementRareData()->activeAnimations();
-    return activeAnimations && !activeAnimations->isEmpty();
 }
 
 Node::NodeType Element::nodeType() const
@@ -686,13 +660,6 @@ void Element::attach(const AttachContext& context)
 
     RenderTreeBuilder(this, context.resolvedStyle).createRendererForElementIfNeeded();
 
-    if (hasRareData() && !renderer()) {
-        if (ActiveAnimations* activeAnimations = elementRareData()->activeAnimations()) {
-            activeAnimations->cssAnimations().cancel();
-            activeAnimations->setAnimationStyleChange(false);
-        }
-    }
-
     // When a shadow root exists, it does the work of attaching the children.
     if (ElementShadow* shadow = this->shadow())
         shadow->attach(context);
@@ -713,13 +680,6 @@ void Element::detach(const AttachContext& context)
             data->clearComputedStyle();
         }
 
-        if (ActiveAnimations* activeAnimations = data->activeAnimations()) {
-            if (!context.performingReattach) {
-                activeAnimations->cssAnimations().cancel();
-                activeAnimations->setAnimationStyleChange(false);
-            }
-        }
-
         if (ElementShadow* shadow = data->shadow())
             shadow->detach(context);
     }
@@ -732,16 +692,9 @@ PassRefPtr<RenderStyle> Element::styleForRenderer()
 
     // FIXME: Instead of clearing updates that may have been added from calls to styleForElement
     // outside recalcStyle, we should just never set them if we're not inside recalcStyle.
-    if (ActiveAnimations* activeAnimations = this->activeAnimations())
-        activeAnimations->cssAnimations().setPendingUpdate(nullptr);
 
     RefPtr<RenderStyle> style = document().styleResolver().styleForElement(this);
     ASSERT(style);
-
-    // styleForElement() might add active animations so we need to get it again.
-    if (ActiveAnimations* activeAnimations = this->activeAnimations()) {
-        activeAnimations->cssAnimations().maybeApplyPendingUpdate(this);
-    }
 
     document().didRecalculateStyleForElement();
     return style.release();
@@ -759,11 +712,6 @@ void Element::recalcStyle(StyleRecalcChange change)
         if (hasRareData()) {
             ElementRareData* data = elementRareData();
             data->clearComputedStyle();
-
-            if (change >= Inherit) {
-                if (ActiveAnimations* activeAnimations = data->activeAnimations())
-                    activeAnimations->setAnimationStyleChange(false);
-            }
         }
         if (parentRenderStyle())
             change = recalcOwnStyle(change);
@@ -852,23 +800,6 @@ ElementShadow* Element::shadow() const
 ElementShadow& Element::ensureShadow()
 {
     return ensureElementRareData().ensureShadow();
-}
-
-void Element::setAnimationStyleChange(bool animationStyleChange)
-{
-    if (animationStyleChange && document().inStyleRecalc())
-        return;
-    if (ActiveAnimations* activeAnimations = elementRareData()->activeAnimations())
-        activeAnimations->setAnimationStyleChange(animationStyleChange);
-}
-
-void Element::setNeedsAnimationStyleRecalc()
-{
-    if (styleChangeType() != NoStyleChange)
-        return;
-
-    setNeedsStyleRecalc(LocalStyleChange);
-    setAnimationStyleChange(true);
 }
 
 // TODO(esprehn): Implement the sky spec where shadow roots are a custom
@@ -1621,8 +1552,6 @@ bool Element::supportsStyleSharing() const
     // and no siblings or cousins will have the same state. There's also only one
     // :focus element per scope so we don't need to attempt to share.
     if (isUserActionElement())
-        return false;
-    if (hasActiveAnimations())
         return false;
     return true;
 }

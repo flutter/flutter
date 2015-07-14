@@ -37,7 +37,6 @@
 
 namespace blink {
 
-class ActiveAnimations;
 class Attr;
 class Attribute;
 class CSSStyleDeclaration;
@@ -112,7 +111,7 @@ public:
     // for performance.
     AttributeCollection attributes() const;
     // This variant will not update the potentially invalid attributes. To be used when not interested
-    // in style attribute or one of the SVG animation attributes.
+    // in style attribute.
     AttributeCollection attributesWithoutUpdate() const;
 
     int offsetLeft();
@@ -193,8 +192,6 @@ public:
 
     virtual RenderObject* createRenderer(RenderStyle*);
     void recalcStyle(StyleRecalcChange);
-    void setAnimationStyleChange(bool);
-    void setNeedsAnimationStyleRecalc();
 
     bool supportsStyleSharing() const;
 
@@ -280,10 +277,6 @@ public:
     bool hasID() const;
     bool hasClass() const;
     const SpaceSplitString& classNames() const;
-
-    ActiveAnimations* activeAnimations() const;
-    ActiveAnimations& ensureActiveAnimations();
-    bool hasActiveAnimations() const;
 
     void synchronizeAttribute(const AtomicString& localName) const;
 

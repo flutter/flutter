@@ -97,15 +97,6 @@ public:
     virtual void setBackgroundColor(WebColor) = 0;
     virtual WebColor backgroundColor() const = 0;
 
-    // Removes all animations with the given id.
-    virtual void removeAnimation(int animationId) = 0;
-
-    // Pauses all animations with the given id.
-    virtual void pauseAnimation(int animationId, double timeOffset) = 0;
-
-    // Returns true if this layer has any active animations - useful for tests.
-    virtual bool hasActiveAnimation() = 0;
-
     // If a scroll parent is set, this layer will inherit its parent's scroll
     // delta and offset even though it will not be a descendant of the scroll
     // in the layer hierarchy.

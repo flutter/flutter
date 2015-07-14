@@ -33,7 +33,6 @@
 
 namespace blink {
 
-class AnimatableValue;
 class CSSValue;
 class Document;
 class Element;
@@ -65,9 +64,6 @@ public:
     virtual ~StyleResolver();
 
     PassRefPtr<RenderStyle> styleForElement(Element*, RenderStyle* parentStyle = 0);
-
-    static PassRefPtr<AnimatableValue> createAnimatableValueSnapshot(Element&, CSSPropertyID, CSSValue&);
-    static PassRefPtr<AnimatableValue> createAnimatableValueSnapshot(StyleResolverState&, CSSPropertyID, CSSValue&);
 
     PassRefPtr<RenderStyle> defaultStyleForElement();
     PassRefPtr<RenderStyle> styleForText(Text*);
@@ -101,7 +97,6 @@ private:
     void matchRules(Element&, ElementRuleCollector&);
 
     void applyMatchedProperties(StyleResolverState&, const MatchResult&);
-    bool applyAnimatedProperties(StyleResolverState&, Element* animatingElement);
 
     enum StyleApplicationPass {
         HighPriorityProperties,
@@ -117,8 +112,6 @@ private:
     void applyMatchedProperties(StyleResolverState&, const MatchResult&, bool inheritedOnly);
     template <StyleApplicationPass pass>
     void applyProperties(StyleResolverState&, const StylePropertySet* properties, bool inheritedOnly);
-    template <StyleApplicationPass pass>
-    void applyAnimatedProperties(StyleResolverState&, const HashMap<CSSPropertyID, RefPtr<Interpolation> >&);
 
     MatchedPropertiesCache m_matchedPropertiesCache;
 

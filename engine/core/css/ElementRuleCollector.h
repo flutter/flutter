@@ -72,7 +72,6 @@ WTF_ALLOW_MOVE_AND_INIT_WITH_MEM_FUNCTIONS(blink::MatchedRule);
 
 namespace blink {
 
-// FIXME: oilpan: when transition types are gone this class can be replaced with HeapVector.
 class StyleRuleList final : public RefCounted<StyleRuleList> {
 public:
     static PassRefPtr<StyleRuleList> create() { return adoptRef(new StyleRuleList()); }

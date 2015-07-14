@@ -4,7 +4,6 @@
 
 // We should remove all those marked OBSOLETE now
 // We should remove all those marked LAYOUT once we have custom layout
-// We should remove all those marked ANIMATIONS once we have an animation system
 
 // - alias_for=other-property
 // Properties specifying alias_for do not get their own enum and instead map
@@ -20,11 +19,6 @@
 
 
 // Flags which go into CSSPropertyMetadata:
-// - animatable
-// The animatable flag indicates whether a property can be animated by CSS
-// animations and transitions. If this flag is set, the property should also be
-// added to the switch statements in AnimatedStyleBuilder, CSSPropertyEquality,
-// and CSSAnimatableValueFactory.
 // - inherited
 // The property will inherit by default if no value is specified, typically
 // mentioned in specifications as "Inherited: yes"
@@ -80,7 +74,7 @@
 
 // High Priority and all other font properties.
 // Other properties can depend upon high priority properties (e.g. font-size / ems)
-color animatable, inherited, custom_all
+color inherited, custom_all
 direction inherited, custom_value
 
 // FIXME: This is a mess due to crbug.com/353932. Shorthands shouldn't have
@@ -88,18 +82,18 @@ direction inherited, custom_value
 font custom_all, longhands=font-family;font-size;font-style;font-variant;font-weight;font-stretch;line-height
 font-family inherited, custom_all
 font-kerning inherited, font, type_name=FontDescription::Kerning, name_for_methods=Kerning
-font-size animatable, inherited, custom_all
+font-size inherited, custom_all
 font-stretch inherited, font, type_name=FontStretch, name_for_methods=Stretch
 font-style inherited, font, type_name=FontStyle, name_for_methods=Style
 font-variant inherited, font, type_name=FontVariant, name_for_methods=Variant
 font-variant-ligatures inherited, font, name_for_methods=VariantLigatures, converter=convertFontVariantLigatures
-font-weight animatable, inherited, font, type_name=FontWeight, name_for_methods=Weight, converter=convertFontWeight
+font-weight inherited, font, type_name=FontWeight, name_for_methods=Weight, converter=convertFontWeight
 -webkit-font-feature-settings inherited, font, name_for_methods=FeatureSettings, converter=convertFontFeatureSettings
 -webkit-font-smoothing inherited, font, type_name=FontSmoothingMode
 -webkit-locale inherited, custom_value
 -webkit-text-orientation inherited, custom_value
 text-rendering inherited, font, type_name=TextRenderingMode
-line-height animatable, inherited, getter=specifiedLineHeight, custom_value
+line-height inherited, getter=specifiedLineHeight, custom_value
 
 
 // LAYOUT
@@ -113,66 +107,66 @@ align-self custom_all
 
 background-attachment custom_all
 background-clip custom_all
-background-color animatable, custom_all
-background-image animatable, custom_all
+background-color custom_all
+background-image custom_all
 background-origin custom_all
-background-position-x animatable, custom_all
-background-position-y animatable, custom_all
+background-position-x custom_all
+background-position-y custom_all
 background-repeat-x custom_all
 background-repeat-y custom_all
-background-size animatable, custom_all
-border-bottom-color animatable, custom_all
-border-bottom-left-radius animatable, initial=initialBorderRadius, converter=convertRadius
-border-bottom-right-radius animatable, initial=initialBorderRadius, converter=convertRadius
+background-size custom_all
+border-bottom-color custom_all
+border-bottom-left-radius initial=initialBorderRadius, converter=convertRadius
+border-bottom-right-radius initial=initialBorderRadius, converter=convertRadius
 border-bottom-style type_name=EBorderStyle, initial=initialBorderStyle
-border-bottom-width animatable, initial=initialBorderWidth, converter=convertLineWidth<unsigned>
-border-image-outset animatable, custom_all
+border-bottom-width initial=initialBorderWidth, converter=convertLineWidth<unsigned>
+border-image-outset custom_all
 border-image-repeat custom_all
-border-image-slice animatable, custom_all
-border-image-source animatable, custom_value
-border-image-width animatable, custom_all
-border-left-color animatable, custom_all
+border-image-slice custom_all
+border-image-source custom_value
+border-image-width custom_all
+border-left-color custom_all
 border-left-style type_name=EBorderStyle, initial=initialBorderStyle
-border-left-width animatable, initial=initialBorderWidth, converter=convertLineWidth<unsigned>
-border-right-color animatable, custom_all
+border-left-width initial=initialBorderWidth, converter=convertLineWidth<unsigned>
+border-right-color custom_all
 border-right-style type_name=EBorderStyle, initial=initialBorderStyle
-border-right-width animatable, initial=initialBorderWidth, converter=convertLineWidth<unsigned>
-border-top-color animatable, custom_all
-border-top-left-radius animatable, initial=initialBorderRadius, converter=convertRadius
-border-top-right-radius animatable, initial=initialBorderRadius, converter=convertRadius
+border-right-width initial=initialBorderWidth, converter=convertLineWidth<unsigned>
+border-top-color custom_all
+border-top-left-radius initial=initialBorderRadius, converter=convertRadius
+border-top-right-radius initial=initialBorderRadius, converter=convertRadius
 border-top-style type_name=EBorderStyle, initial=initialBorderStyle
-border-top-width animatable, initial=initialBorderWidth, converter=convertLineWidth<unsigned>
+border-top-width initial=initialBorderWidth, converter=convertLineWidth<unsigned>
 
 // LAYOUT
-bottom animatable, initial=initialOffset, converter=convertLengthOrAuto
+bottom initial=initialOffset, converter=convertLengthOrAuto
 
-box-shadow animatable, converter=convertShadow
+box-shadow converter=convertShadow
 
 // LAYOUT
 box-sizing
 
-clip animatable, converter=convertClip, custom_all
+clip converter=convertClip, custom_all
 
 // LAYOUT
 display
 
 // LAYOUT
-flex-basis animatable, converter=convertLengthOrAuto
+flex-basis converter=convertLengthOrAuto
 
 // LAYOUT
 flex-direction
 
 // LAYOUT
-flex-grow animatable, type_name=float
+flex-grow type_name=float
 
 // LAYOUT
-flex-shrink animatable, type_name=float
+flex-shrink type_name=float
 
 // LAYOUT
 flex-wrap
 
 // LAYOUT
-height animatable, initial=initialSize, converter=convertLengthSizing
+height initial=initialSize, converter=convertLengthSizing
 
 image-rendering inherited
 
@@ -180,45 +174,45 @@ image-rendering inherited
 justify-content
 
 // LAYOUT
-left animatable, initial=initialOffset, converter=convertLengthOrAuto
+left initial=initialOffset, converter=convertLengthOrAuto
 
-letter-spacing animatable, inherited, initial=initialLetterWordSpacing, converter=convertSpacing
-
-// LAYOUT
-margin-bottom animatable, initial=initialMargin, converter=convertLengthOrAuto
+letter-spacing inherited, initial=initialLetterWordSpacing, converter=convertSpacing
 
 // LAYOUT
-margin-left animatable, initial=initialMargin, converter=convertLengthOrAuto
+margin-bottom initial=initialMargin, converter=convertLengthOrAuto
 
 // LAYOUT
-margin-right animatable, initial=initialMargin, converter=convertLengthOrAuto
+margin-left initial=initialMargin, converter=convertLengthOrAuto
 
 // LAYOUT
-margin-top animatable, initial=initialMargin, converter=convertLengthOrAuto
+margin-right initial=initialMargin, converter=convertLengthOrAuto
 
 // LAYOUT
-max-height animatable, initial=initialMaxSize, converter=convertLengthMaxSizing
+margin-top initial=initialMargin, converter=convertLengthOrAuto
 
 // LAYOUT
-max-width animatable, initial=initialMaxSize, converter=convertLengthMaxSizing
+max-height initial=initialMaxSize, converter=convertLengthMaxSizing
 
 // LAYOUT
-min-height animatable, initial=initialMinSize, converter=convertLengthSizing
+max-width initial=initialMaxSize, converter=convertLengthMaxSizing
 
 // LAYOUT
-min-width animatable, initial=initialMinSize, converter=convertLengthSizing
+min-height initial=initialMinSize, converter=convertLengthSizing
+
+// LAYOUT
+min-width initial=initialMinSize, converter=convertLengthSizing
 
 object-fit runtime_flag=ObjectFitPosition, type_name=ObjectFit
-object-position runtime_flag=ObjectFitPosition, animatable, converter=convertLengthPoint
-opacity animatable, type_name=float
+object-position runtime_flag=ObjectFitPosition, converter=convertLengthPoint
+opacity type_name=float
 
 // LAYOUT
 order type_name=int
 
-outline-color animatable, custom_all
-outline-offset animatable, converter=convertComputedLength<int>
+outline-color custom_all
+outline-offset converter=convertComputedLength<int>
 outline-style custom_all
-outline-width animatable, converter=convertLineWidth<unsigned short>
+outline-width converter=convertLineWidth<unsigned short>
 
 // OBSOLETE
 overflow-wrap inherited
@@ -230,19 +224,19 @@ overflow-x type_name=EOverflow
 overflow-y type_name=EOverflow
 
 // LAYOUT
-padding-bottom animatable, initial=initialPadding, converter=convertLength
+padding-bottom initial=initialPadding, converter=convertLength
 
 // LAYOUT
-padding-left animatable, initial=initialPadding, converter=convertLength
+padding-left initial=initialPadding, converter=convertLength
 
 // LAYOUT
-padding-right animatable, initial=initialPadding, converter=convertLength
+padding-right initial=initialPadding, converter=convertLength
 
 // LAYOUT
-padding-top animatable, initial=initialPadding, converter=convertLength
+padding-top initial=initialPadding, converter=convertLength
 
-perspective animatable, custom_value
-perspective-origin animatable, custom_all
+perspective custom_value
+perspective-origin custom_all
 
 // OBSOLETE
 pointer-events inherited
@@ -251,24 +245,24 @@ pointer-events inherited
 position
 
 // LAYOUT
-right animatable, initial=initialOffset, converter=convertLengthOrAuto
+right initial=initialOffset, converter=convertLengthOrAuto
 
 tab-size inherited, type_name=unsigned
 text-align inherited, custom_value
 text-align-last runtime_flag=CSS3Text, inherited, type_name=TextAlignLast
 // FIXME: We shouldn't switch between shorthand/not shorthand based on a runtime flag
 text-decoration use_handlers_for=CSSPropertyTextDecorationLine, longhands=text-decoration-line;text-decoration-style;text-decoration-color
-text-decoration-color runtime_flag=CSS3TextDecorations, animatable, custom_all
+text-decoration-color runtime_flag=CSS3TextDecorations, custom_all
 text-decoration-line runtime_flag=CSS3TextDecorations, name_for_methods=TextDecoration, converter=convertFlags<TextDecoration>
 text-decoration-style runtime_flag=CSS3TextDecorations, type_name=TextDecorationStyle
-text-indent animatable, inherited, custom_all
+text-indent inherited, custom_all
 text-justify runtime_flag=CSS3Text, inherited, type_name=TextJustify
 text-overflow type_name=TextOverflow
-text-shadow animatable, inherited, converter=convertShadow
+text-shadow inherited, converter=convertShadow
 text-underline-position runtime_flag=CSS3TextDecorations, inherited, type_name=TextUnderlinePosition
 
 // LAYOUT
-top animatable, initial=initialOffset, converter=convertLengthOrAuto
+top initial=initialOffset, converter=convertLengthOrAuto
 
 // OBSOLETE
 touch-action converter=convertFlags<TouchAction>
@@ -276,56 +270,32 @@ touch-action converter=convertFlags<TouchAction>
 // OBSOLETE
 touch-action-delay runtime_flag=CSSTouchActionDelay, inherited, type_name=TouchActionDelay
 
-transform animatable, custom_value
-transform-origin animatable, custom_all
+transform custom_value
+transform-origin custom_all
 transform-style name_for_methods=TransformStyle3D
 unicode-bidi
 
 // LAYOUT
-vertical-align animatable, custom_inherit, custom_value
+vertical-align custom_inherit, custom_value
 
-// ANIMATION
-animation-delay custom_all
-
-// ANIMATION
-animation-direction custom_all
-
-// ANIMATION
-animation-duration custom_all
-
-// ANIMATION
-animation-fill-mode custom_all
-
-// ANIMATION
-animation-iteration-count custom_all
-
-// ANIMATION
-animation-name custom_all
-
-// ANIMATION
-animation-play-state custom_all
-
-// ANIMATION
-animation-timing-function custom_all
-
-filter animatable, custom_value
+filter custom_value
 -webkit-aspect-ratio inherited, custom_all
 -webkit-background-clip use_handlers_for=CSSPropertyBackgroundClip
 -webkit-background-composite custom_all
 -webkit-background-origin use_handlers_for=CSSPropertyBackgroundOrigin
--webkit-background-size animatable, use_handlers_for=CSSPropertyBackgroundSize
+-webkit-background-size use_handlers_for=CSSPropertyBackgroundSize
 
 // LAYOUT
--webkit-border-horizontal-spacing animatable, inherited, name_for_methods=HorizontalBorderSpacing, converter=convertComputedLength<short>
+-webkit-border-horizontal-spacing inherited, name_for_methods=HorizontalBorderSpacing, converter=convertComputedLength<short>
 
 -webkit-border-image initial=initialNinePieceImage, custom_value
 
 // LAYOUT
--webkit-border-vertical-spacing animatable, inherited, name_for_methods=VerticalBorderSpacing, converter=convertComputedLength<short>
+-webkit-border-vertical-spacing inherited, name_for_methods=VerticalBorderSpacing, converter=convertComputedLength<short>
 
 -webkit-box-decoration-break
--webkit-box-shadow animatable, use_handlers_for=CSSPropertyBoxShadow
--webkit-clip-path animatable, custom_value
+-webkit-box-shadow use_handlers_for=CSSPropertyBoxShadow
+-webkit-clip-path custom_value
 
 // OBSOLETE
 -webkit-highlight inherited, converter=convertString<CSSValueNone>
@@ -346,25 +316,13 @@ filter animatable, custom_value
 -webkit-text-emphasis-position inherited, type_name=TextEmphasisPosition
 -webkit-text-emphasis-style inherited, custom_all
 -webkit-text-fill-color inherited, custom_all
--webkit-text-stroke-color animatable, inherited, custom_all
+-webkit-text-stroke-color inherited, custom_all
 -webkit-text-stroke-width inherited, converter=convertTextStrokeWidth
 -webkit-transform use_handlers_for=CSSPropertyTransform
 -webkit-transform-origin-x converter=convertLength
 -webkit-transform-origin-y converter=convertLength
 -webkit-transform-origin-z converter=convertComputedLength<float>
 -webkit-transform-style name_for_methods=TransformStyle3D
-
-// ANIMATION
-transition-delay custom_all
-
-// ANIMATION
-transition-duration custom_all
-
-// ANIMATION
-transition-property custom_all
-
-// ANIMATION
-transition-timing-function custom_all
 
 // OBSOLETE
 -webkit-user-modify inherited
@@ -375,18 +333,15 @@ transition-timing-function custom_all
 white-space inherited
 
 // LAYOUT
-width animatable, initial=initialSize, converter=convertLengthSizing
-
-// ANIMATION
-will-change custom_all
+width initial=initialSize, converter=convertLengthSizing
 
 word-break inherited
-word-spacing animatable, inherited, initial=initialLetterWordSpacing, converter=convertSpacing
+word-spacing inherited, initial=initialLetterWordSpacing, converter=convertSpacing
 // UAs must treat 'word-wrap' as an alternate name for the 'overflow-wrap' property. So using the same handlers.
 word-wrap inherited, name_for_methods=OverflowWrap
 
 // consider changing this to just be the way you decide what order to paint siblings by default
-z-index animatable, type_name=unsigned, custom_all
+z-index type_name=unsigned, custom_all
 
 
 // Non-standard direction aware properties
@@ -483,7 +438,6 @@ margin longhands=margin-top;margin-right;margin-bottom;margin-left
 outline longhands=outline-color;outline-style;outline-width
 overflow longhands=overflow-x;overflow-y
 padding longhands=padding-top;padding-right;padding-bottom;padding-left
-animation longhands=animation-name;animation-duration;animation-timing-function;animation-delay;animation-iteration-count;animation-direction;animation-fill-mode;animation-play-state
 -webkit-border-after longhands=-webkit-border-after-width;-webkit-border-after-style;-webkit-border-after-color
 -webkit-border-before longhands=-webkit-border-before-width;-webkit-border-before-style;-webkit-border-before-color
 -webkit-border-end longhands=-webkit-border-end-width;-webkit-border-end-style;-webkit-border-end-color
@@ -493,4 +447,3 @@ animation longhands=animation-name;animation-duration;animation-timing-function;
 -webkit-text-emphasis longhands=-webkit-text-emphasis-style;-webkit-text-emphasis-color
 -webkit-text-stroke longhands=-webkit-text-stroke-width;-webkit-text-stroke-color
 -webkit-transform-origin longhands=-webkit-transform-origin-x;-webkit-transform-origin-y;-webkit-transform-origin-z
-transition longhands=transition-property;transition-duration;transition-timing-function;transition-delay

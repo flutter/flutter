@@ -24,9 +24,7 @@ class CSSPropertyMetadataWriter(css_properties.CSSProperties):
     def generate_css_property_metadata_cpp(self):
         return {
             'properties': self._properties,
-            'switches': [('animatable', 'isAnimatableProperty'),
-                         ('inherited', 'isInheritedProperty'),
-                        ],
+            'switches': [('inherited', 'isInheritedProperty')],
             'first_enum_value': self._first_enum_value,
         }
 

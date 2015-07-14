@@ -89,8 +89,6 @@ public:
     bool isRadialGradientValue() const { return m_classType == RadialGradientClass; }
     bool isShadowValue() const { return m_classType == ShadowClass; }
     bool isTextCloneCSSValue() const { return m_isTextClone; }
-    bool isCubicBezierTimingFunctionValue() const { return m_classType == CubicBezierTimingFunctionClass; }
-    bool isStepsTimingFunctionValue() const { return m_classType == StepsTimingFunctionClass; }
     bool isTransformValue() const { return m_classType == CSSTransformClass; }
     bool isLineBoxContainValue() const { return m_classType == LineBoxContainClass; }
     bool isCalcValue() const {return m_classType == CalculationClass; }
@@ -116,10 +114,6 @@ protected:
         // Image generator classes.
         LinearGradientClass,
         RadialGradientClass,
-
-        // Timing function classes.
-        CubicBezierTimingFunctionClass,
-        StepsTimingFunctionClass,
 
         // Other class types.
         AspectRatioClass,

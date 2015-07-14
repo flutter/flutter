@@ -79,7 +79,7 @@ public:
     virtual void setOverhangBitmap(const SkBitmap&) { }
 
     // Sets whether this view is visible. In threaded mode, a view that is not visible will not
-    // composite or trigger updateAnimations() or layout() calls until it becomes visible.
+    // composite or trigger layout() calls until it becomes visible.
     virtual void setVisible(bool) = 0;
 
     virtual void heuristicsForGpuRasterizationUpdated(bool) { }
@@ -87,14 +87,8 @@ public:
 
     // Flow control and scheduling ---------------------------------------
 
-    // Indicates that an animation needs to be updated.
-    virtual void setNeedsAnimate() = 0;
-
     // Indicates whether a commit is pending.
     virtual bool commitRequested() const = 0;
-
-    // Relays the end of a fling animation.
-    virtual void didStopFlinging() { }
 
     // Blocks until the most recently composited frame has finished rendering on the GPU.
     // This can have a significant performance impact and should be used with care.

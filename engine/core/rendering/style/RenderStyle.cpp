@@ -106,7 +106,6 @@ ALWAYS_INLINE RenderStyle::RenderStyle(DefaultStyleTag)
     rareNonInheritedData.init();
     rareNonInheritedData.access()->m_flexibleBox.init();
     rareNonInheritedData.access()->m_transform.init();
-    rareNonInheritedData.access()->m_willChange.init();
     rareNonInheritedData.access()->m_filter.init();
     rareInheritedData.init();
     inherited.init();
@@ -283,9 +282,6 @@ StyleDifference RenderStyle::visualInvalidationDiff(const RenderStyle& other) co
 
     // Cursors are not checked, since they will be set appropriately in response to mouse events,
     // so they don't need to cause any paint invalidation or layout.
-
-    // Animations don't need to be checked either. We always set the new style on the RenderObject, so we will get a chance to fire off
-    // the resulting transition properly.
 
     return diff;
 }
@@ -657,20 +653,6 @@ const AtomicString& RenderStyle::textEmphasisMarkString() const
 
     ASSERT_NOT_REACHED();
     return nullAtom;
-}
-
-CSSAnimationData& RenderStyle::accessAnimations()
-{
-    if (!rareNonInheritedData.access()->m_animations)
-        rareNonInheritedData.access()->m_animations = CSSAnimationData::create();
-    return *rareNonInheritedData->m_animations;
-}
-
-CSSTransitionData& RenderStyle::accessTransitions()
-{
-    if (!rareNonInheritedData.access()->m_transitions)
-        rareNonInheritedData.access()->m_transitions = CSSTransitionData::create();
-    return *rareNonInheritedData->m_transitions;
 }
 
 const Font& RenderStyle::font() const { return inherited->font; }

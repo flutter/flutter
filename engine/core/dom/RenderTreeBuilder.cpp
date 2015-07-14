@@ -128,7 +128,6 @@ void RenderTreeBuilder::createRendererForTextIfNeeded()
 
     RenderObject* nextRenderer = this->nextRenderer();
     textNode->setRenderer(newRenderer);
-    // Parent takes care of the animations, no need to call setAnimatableStyle.
     newRenderer->setStyle(m_style.release());
     parentRenderer->addChild(newRenderer, nextRenderer);
 }

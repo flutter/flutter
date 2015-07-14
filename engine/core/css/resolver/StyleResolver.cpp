@@ -32,13 +32,6 @@
 #include "gen/sky/core/MediaTypeNames.h"
 #include "gen/sky/core/StylePropertyShorthand.h"
 #include "gen/sky/platform/RuntimeEnabledFeatures.h"
-#include "sky/engine/core/animation/ActiveAnimations.h"
-#include "sky/engine/core/animation/Animation.h"
-#include "sky/engine/core/animation/AnimationTimeline.h"
-#include "sky/engine/core/animation/StyleInterpolation.h"
-#include "sky/engine/core/animation/animatable/AnimatableValue.h"
-#include "sky/engine/core/animation/css/CSSAnimatableValueFactory.h"
-#include "sky/engine/core/animation/css/CSSAnimations.h"
 #include "sky/engine/core/css/CSSCalculationValue.h"
 #include "sky/engine/core/css/CSSFontSelector.h"
 #include "sky/engine/core/css/CSSSelector.h"
@@ -51,7 +44,6 @@
 #include "sky/engine/core/css/StylePropertySet.h"
 #include "sky/engine/core/css/StyleSheetContents.h"
 #include "sky/engine/core/css/parser/BisonCSSParser.h"
-#include "sky/engine/core/css/resolver/AnimatedStyleBuilder.h"
 #include "sky/engine/core/css/resolver/MatchResult.h"
 #include "sky/engine/core/css/resolver/SharedStyleFinder.h"
 #include "sky/engine/core/css/resolver/StyleAdjuster.h"
@@ -68,20 +60,6 @@
 #include "sky/engine/core/rendering/RenderView.h"
 #include "sky/engine/wtf/LeakAnnotations.h"
 #include "sky/engine/wtf/StdLibExtras.h"
-
-namespace {
-
-using namespace blink;
-
-void setAnimationUpdateIfNeeded(StyleResolverState& state, Element& element)
-{
-    // If any changes to CSS Animations were detected, stash the update away for application after the
-    // render object is updated if we're in the appropriate scope.
-    if (state.animationUpdate())
-        element.ensureActiveAnimations().cssAnimations().setPendingUpdate(state.takeAnimationUpdate());
-}
-
-} // namespace
 
 namespace blink {
 
@@ -228,37 +206,11 @@ PassRefPtr<RenderStyle> StyleResolver::styleForElement(Element* element, RenderS
     StyleAdjuster adjuster;
     adjuster.adjustRenderStyle(state.style(), state.parentStyle(), *element);
 
-    if (applyAnimatedProperties(state, element))
-        adjuster.adjustRenderStyle(state.style(), state.parentStyle(), *element);
-
-    setAnimationUpdateIfNeeded(state, *element);
-
     if (state.style()->hasViewportUnits())
         m_document.setHasViewportUnits();
 
     // Now return the style.
     return state.takeStyle();
-}
-
-// This function is used by the WebAnimations JavaScript API method animate().
-// FIXME: Remove this when animate() switches away from resolution-dependent parsing.
-PassRefPtr<AnimatableValue> StyleResolver::createAnimatableValueSnapshot(Element& element, CSSPropertyID property, CSSValue& value)
-{
-    RefPtr<RenderStyle> style;
-    if (element.renderStyle())
-        style = RenderStyle::clone(element.renderStyle());
-    else
-        style = RenderStyle::create();
-    StyleResolverState state(element.document(), &element);
-    state.setStyle(style);
-    state.fontBuilder().initForStyleResolve(state.document(), state.style());
-    return createAnimatableValueSnapshot(state, property, value);
-}
-
-PassRefPtr<AnimatableValue> StyleResolver::createAnimatableValueSnapshot(StyleResolverState& state, CSSPropertyID property, CSSValue& value)
-{
-    StyleBuilder::applyProperty(property, state, &value);
-    return CSSAnimatableValueFactory::create(property, *state.style());
 }
 
 PassRefPtr<RenderStyle> StyleResolver::defaultStyleForElement()
@@ -288,54 +240,6 @@ void StyleResolver::updateFont(StyleResolverState& state)
     state.fontBuilder().createFont(m_document.styleEngine()->fontSelector(), state.parentStyle(), state.style());
     if (state.fontBuilder().fontSizeHasViewportUnits())
         state.style()->setHasViewportUnits();
-}
-
-// -------------------------------------------------------------------------------------
-// this is mostly boring stuff on how to apply a certain rule to the renderstyle...
-
-bool StyleResolver::applyAnimatedProperties(StyleResolverState& state, Element* animatingElement)
-{
-    const Element* element = state.element();
-    ASSERT(element);
-
-    // The animating element may be this element, or its pseudo element. It is
-    // null when calculating the style for a potential pseudo element that has
-    // yet to be created.
-    ASSERT(animatingElement == element || !animatingElement || animatingElement->parentOrShadowHostElement() == element);
-
-    if (!(animatingElement && animatingElement->hasActiveAnimations())
-        && !state.style()->transitions() && !state.style()->animations())
-        return false;
-
-    state.setAnimationUpdate(CSSAnimations::calculateUpdate(animatingElement, *element, *state.style(), state.parentStyle()));
-    if (!state.animationUpdate())
-        return false;
-
-    const HashMap<CSSPropertyID, RefPtr<Interpolation> >& activeInterpolationsForAnimations = state.animationUpdate()->activeInterpolationsForAnimations();
-    const HashMap<CSSPropertyID, RefPtr<Interpolation> >& activeInterpolationsForTransitions = state.animationUpdate()->activeInterpolationsForTransitions();
-    applyAnimatedProperties<HighPriorityProperties>(state, activeInterpolationsForAnimations);
-    applyAnimatedProperties<HighPriorityProperties>(state, activeInterpolationsForTransitions);
-
-    updateFont(state);
-
-    applyAnimatedProperties<LowPriorityProperties>(state, activeInterpolationsForAnimations);
-    applyAnimatedProperties<LowPriorityProperties>(state, activeInterpolationsForTransitions);
-
-    ASSERT(!state.fontBuilder().fontDirty());
-
-    return true;
-}
-
-template <StyleResolver::StyleApplicationPass pass>
-void StyleResolver::applyAnimatedProperties(StyleResolverState& state, const HashMap<CSSPropertyID, RefPtr<Interpolation> >& activeInterpolations)
-{
-    for (HashMap<CSSPropertyID, RefPtr<Interpolation> >::const_iterator iter = activeInterpolations.begin(); iter != activeInterpolations.end(); ++iter) {
-        CSSPropertyID property = iter->key;
-        if (!isPropertyForPass<pass>(property))
-            continue;
-        const StyleInterpolation* interpolation = toStyleInterpolation(iter->value.get());
-        interpolation->apply(state);
-    }
 }
 
 // FIXME: Consider refactoring to create a new class which owns the following

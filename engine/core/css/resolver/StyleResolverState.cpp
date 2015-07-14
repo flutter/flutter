@@ -21,7 +21,6 @@
 
 #include "sky/engine/core/css/resolver/StyleResolverState.h"
 
-#include "sky/engine/core/animation/css/CSSAnimations.h"
 #include "sky/engine/core/dom/Node.h"
 #include "sky/engine/core/dom/NodeRenderStyle.h"
 #include "sky/engine/core/frame/FrameHost.h"
@@ -46,16 +45,6 @@ StyleResolverState::StyleResolverState(Document& document, Element* element, Ren
 
 StyleResolverState::~StyleResolverState()
 {
-}
-
-void StyleResolverState::setAnimationUpdate(PassOwnPtr<CSSAnimationUpdate> update)
-{
-    m_animationUpdate = update;
-}
-
-PassOwnPtr<CSSAnimationUpdate> StyleResolverState::takeAnimationUpdate()
-{
-    return m_animationUpdate.release();
 }
 
 } // namespace blink

@@ -27,7 +27,6 @@
 #include "sky/engine/core/frame/FrameView.h"
 
 #include "gen/sky/platform/RuntimeEnabledFeatures.h"
-#include "sky/engine/core/animation/DocumentAnimations.h"
 #include "sky/engine/core/css/resolver/StyleResolver.h"
 #include "sky/engine/core/dom/DocumentMarkerController.h"
 #include "sky/engine/core/editing/FrameSelection.h"
@@ -668,8 +667,6 @@ void FrameView::updateLayoutAndStyleForPainting()
 
     // TODO(ojan): Get rid of this and just have the LayoutClean state.
     lifecycle().advanceTo(DocumentLifecycle::StyleAndLayoutClean);
-
-    DocumentAnimations::startPendingAnimations(*m_frame->document());
 }
 
 void FrameView::updateLayoutAndStyleIfNeededRecursive()

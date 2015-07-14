@@ -527,40 +527,6 @@ void StyleBuilderFunctions::applyValueCSSPropertyWebkitTextEmphasisStyle(StyleRe
     }
 }
 
-void StyleBuilderFunctions::applyInitialCSSPropertyWillChange(StyleResolverState& state)
-{
-    state.style()->setWillChangeContents(false);
-    state.style()->setWillChangeProperties(Vector<CSSPropertyID>());
-    state.style()->setSubtreeWillChangeContents(state.parentStyle()->subtreeWillChangeContents());
-}
-
-void StyleBuilderFunctions::applyInheritCSSPropertyWillChange(StyleResolverState& state)
-{
-    state.style()->setWillChangeContents(state.parentStyle()->willChangeContents());
-    state.style()->setWillChangeProperties(state.parentStyle()->willChangeProperties());
-    state.style()->setSubtreeWillChangeContents(state.parentStyle()->subtreeWillChangeContents());
-}
-
-void StyleBuilderFunctions::applyValueCSSPropertyWillChange(StyleResolverState& state, CSSValue* value)
-{
-    ASSERT(value->isValueList());
-    bool willChangeContents = false;
-    Vector<CSSPropertyID> willChangeProperties;
-
-    for (CSSValueListIterator i(value); i.hasMore(); i.advance()) {
-        CSSPrimitiveValue* primitiveValue = toCSSPrimitiveValue(i.value());
-        if (CSSPropertyID propertyID = primitiveValue->getPropertyID())
-            willChangeProperties.append(propertyID);
-        else if (primitiveValue->getValueID() == CSSValueContents)
-            willChangeContents = true;
-        else
-            ASSERT_NOT_REACHED();
-    }
-    state.style()->setWillChangeContents(willChangeContents);
-    state.style()->setWillChangeProperties(willChangeProperties);
-    state.style()->setSubtreeWillChangeContents(willChangeContents || state.parentStyle()->subtreeWillChangeContents());
-}
-
 void StyleBuilderFunctions::applyInitialCSSPropertyFont(StyleResolverState&)
 {
     ASSERT_NOT_REACHED();

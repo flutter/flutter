@@ -385,36 +385,10 @@ logical
 visual
 
 //
-// animation-direction
-//
-// alternate
-
-alternate-reverse
-
-//
-// animation-play-state
-//
-running
-paused
-
-//
 // transform-style
 //
 flat
 preserve-3d
-
-//
-// transition-timing-function
-// animation-timing-function
-//
-ease
-linear
-ease-in
-ease-out
-ease-in-out
-step-start
-step-middle
-step-end
 
 //
 // pointer-events

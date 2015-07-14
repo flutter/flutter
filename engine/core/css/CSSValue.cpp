@@ -39,7 +39,6 @@
 #include "sky/engine/core/css/CSSLineBoxContainValue.h"
 #include "sky/engine/core/css/CSSPrimitiveValue.h"
 #include "sky/engine/core/css/CSSShadowValue.h"
-#include "sky/engine/core/css/CSSTimingFunctionValue.h"
 #include "sky/engine/core/css/CSSTransformValue.h"
 #include "sky/engine/core/css/CSSUnicodeRangeValue.h"
 #include "sky/engine/core/css/CSSValueList.h"
@@ -130,10 +129,6 @@ bool CSSValue::equals(const CSSValue& other) const
             return compareCSSValues<CSSPrimitiveValue>(*this, other);
         case ShadowClass:
             return compareCSSValues<CSSShadowValue>(*this, other);
-        case CubicBezierTimingFunctionClass:
-            return compareCSSValues<CSSCubicBezierTimingFunctionValue>(*this, other);
-        case StepsTimingFunctionClass:
-            return compareCSSValues<CSSStepsTimingFunctionValue>(*this, other);
         case UnicodeRangeClass:
             return compareCSSValues<CSSUnicodeRangeValue>(*this, other);
         case ValueListClass:
@@ -188,10 +183,6 @@ String CSSValue::cssText() const
         return toCSSPrimitiveValue(this)->customCSSText();
     case ShadowClass:
         return toCSSShadowValue(this)->customCSSText();
-    case CubicBezierTimingFunctionClass:
-        return toCSSCubicBezierTimingFunctionValue(this)->customCSSText();
-    case StepsTimingFunctionClass:
-        return toCSSStepsTimingFunctionValue(this)->customCSSText();
     case UnicodeRangeClass:
         return toCSSUnicodeRangeValue(this)->customCSSText();
     case ValueListClass:
@@ -251,12 +242,6 @@ void CSSValue::destroy()
         return;
     case ShadowClass:
         delete toCSSShadowValue(this);
-        return;
-    case CubicBezierTimingFunctionClass:
-        delete toCSSCubicBezierTimingFunctionValue(this);
-        return;
-    case StepsTimingFunctionClass:
-        delete toCSSStepsTimingFunctionValue(this);
         return;
     case UnicodeRangeClass:
         delete toCSSUnicodeRangeValue(this);

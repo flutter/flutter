@@ -73,45 +73,6 @@ namespace blink {
 {% endif %}
 {% endfor %}
 
-{% macro apply_animation(property_id, attribute, animation) %}
-{% set vector = attribute|lower_first + "List()" %}
-{{declare_initial_function(property_id)}}
-{
-    CSS{{animation}}Data& data = state.style()->access{{animation}}s();
-    data.{{vector}}.clear();
-    data.{{vector}}.append(CSS{{animation}}Data::initial{{attribute}}());
-}
-
-{{declare_inherit_function(property_id)}}
-{
-    const CSS{{animation}}Data* parentData = state.parentStyle()->{{animation|lower}}s();
-    if (!parentData)
-        applyInitial{{property_id}}(state);
-    else
-        state.style()->access{{animation}}s().{{vector}} = parentData->{{vector}};
-}
-
-{{declare_value_function(property_id)}}
-{
-    CSS{{animation}}Data& data = state.style()->access{{animation}}s();
-    data.{{vector}}.clear();
-    for (CSSValueListIterator i = value; i.hasMore(); i.advance())
-        data.{{vector}}.append(state.styleMap().mapAnimation{{attribute}}(i.value()));
-}
-{% endmacro %}
-{{apply_animation('CSSPropertyAnimationDelay', 'Delay', 'Animation')}}
-{{apply_animation('CSSPropertyAnimationDirection', 'Direction', 'Animation')}}
-{{apply_animation('CSSPropertyAnimationDuration', 'Duration', 'Animation')}}
-{{apply_animation('CSSPropertyAnimationFillMode', 'FillMode', 'Animation')}}
-{{apply_animation('CSSPropertyAnimationIterationCount', 'IterationCount', 'Animation')}}
-{{apply_animation('CSSPropertyAnimationName', 'Name', 'Animation')}}
-{{apply_animation('CSSPropertyAnimationPlayState', 'PlayState', 'Animation')}}
-{{apply_animation('CSSPropertyAnimationTimingFunction', 'TimingFunction', 'Animation')}}
-{{apply_animation('CSSPropertyTransitionDelay', 'Delay', 'Transition')}}
-{{apply_animation('CSSPropertyTransitionDuration', 'Duration', 'Transition')}}
-{{apply_animation('CSSPropertyTransitionProperty', 'Property', 'Transition')}}
-{{apply_animation('CSSPropertyTransitionTimingFunction', 'TimingFunction', 'Transition')}}
-
 {% macro apply_auto(property_id, auto_getter=none, auto_setter=none, auto_identity='CSSValueAuto') %}
 {% set property = properties[property_id] %}
 {% set auto_getter = auto_getter or 'hasAuto' + property.name_for_methods %}

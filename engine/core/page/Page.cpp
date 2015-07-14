@@ -62,7 +62,6 @@ float deviceScaleFactor(LocalFrame* frame)
 
 Page::Page(PageClients& pageClients, ServiceProvider* services)
     : SettingsDelegate(Settings::create())
-    , m_animator(this)
     , m_chromeClient(pageClients.chromeClient)
     , m_dragCaretController(DragCaretController::create())
     , m_focusController(FocusController::create(this))
@@ -72,7 +71,6 @@ Page::Page(PageClients& pageClients, ServiceProvider* services)
     , m_spellCheckerClient(pageClients.spellCheckerClient)
     , m_deviceScaleFactor(1)
     , m_timerAlignmentInterval(DOMTimer::visiblePageAlignmentInterval())
-    , m_visibilityState(PageVisibilityStateVisible)
 #if ENABLE(ASSERT)
     , m_isPainting(false)
 #endif
@@ -156,29 +154,6 @@ void Page::setTimerAlignmentInterval(double interval)
 double Page::timerAlignmentInterval() const
 {
     return m_timerAlignmentInterval;
-}
-
-void Page::setVisibilityState(PageVisibilityState visibilityState, bool isInitialState)
-{
-    if (m_visibilityState == visibilityState)
-        return;
-    m_visibilityState = visibilityState;
-
-    if (visibilityState == blink::PageVisibilityStateVisible)
-        setTimerAlignmentInterval(DOMTimer::visiblePageAlignmentInterval());
-    else
-        setTimerAlignmentInterval(DOMTimer::hiddenPageAlignmentInterval());
-
-    if (!isInitialState)
-        lifecycleNotifier().notifyPageVisibilityChanged();
-
-    if (!isInitialState && m_mainFrame)
-        mainFrame()->didChangeVisibilityState();
-}
-
-PageVisibilityState Page::visibilityState() const
-{
-    return m_visibilityState;
 }
 
 void Page::addMultisamplingChangedObserver(MultisamplingChangedObserver* observer)

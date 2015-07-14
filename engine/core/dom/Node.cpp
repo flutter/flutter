@@ -608,17 +608,11 @@ void Node::setNeedsStyleRecalc(StyleChangeType changeType)
 
     if (existingChangeType == NoStyleChange)
         markAncestorsWithChildNeedsStyleRecalc();
-
-    if (isElementNode() && hasRareData())
-        toElement(*this).setAnimationStyleChange(false);
 }
 
 void Node::clearNeedsStyleRecalc()
 {
     m_nodeFlags &= ~StyleChangeMask;
-
-    if (isElementNode() && hasRareData())
-        toElement(*this).setAnimationStyleChange(false);
 }
 
 bool Node::inActiveDocument() const

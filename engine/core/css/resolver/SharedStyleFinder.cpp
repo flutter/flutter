@@ -153,9 +153,8 @@ inline Element* SharedStyleFinder::findElementForStyleSharing() const
     for (StyleSharingList::iterator it = styleSharingList.begin(); it != styleSharingList.end(); ++it) {
         Element& candidate = **it;
         // We shouldn't have elements in the style sharing list that don't
-        // support style sharing but we can end up with one currently if it gets
-        // added to the list and then it starts an animation.
-        if (candidate.hasActiveAnimations() || !canShareStyleWithElement(candidate))
+        // support style sharing.
+        if (!canShareStyleWithElement(candidate))
             continue;
         if (it != styleSharingList.begin()) {
             // Move the element to the front of the LRU
