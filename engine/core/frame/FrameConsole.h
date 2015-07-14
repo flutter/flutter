@@ -40,7 +40,6 @@ class ConsoleMessage;
 class ConsoleMessageStorage;
 class Document;
 class FrameHost;
-class ResourceResponse;
 class LocalFrame;
 
 // FrameConsole takes per-frame console messages and routes them up through the FrameHost to the ChromeClient and Inspector.
@@ -54,8 +53,6 @@ public:
     }
 
     void addMessage(PassRefPtr<ConsoleMessage>);
-
-    void reportResourceResponseReceived(Document*, unsigned long requestIdentifier, const ResourceResponse&);
 
 private:
     explicit FrameConsole(LocalFrame&);

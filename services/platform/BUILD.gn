@@ -4,13 +4,8 @@
 
 source_set("platform") {
   sources = [
-    "net_constants.h",
     "platform_impl.cc",
     "platform_impl.h",
-    "url_request_types.cc",
-    "url_request_types.h",
-    "weburlloader_impl.cc",
-    "weburlloader_impl.h",
   ]
 
   deps = [
@@ -19,7 +14,6 @@ source_set("platform") {
     "//mojo/public/cpp/bindings",
     "//mojo/public/cpp/system",
     "//mojo/public/cpp/utility",
-    "//mojo/services/network/public/interfaces",
     "//sky/engine",
     "//url",
   ]

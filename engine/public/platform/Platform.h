@@ -37,7 +37,6 @@
 #include "sky/engine/public/platform/WebGraphicsContext3D.h"
 #include "sky/engine/public/platform/WebLocalizedString.h"
 #include "sky/engine/public/platform/WebString.h"
-#include "sky/engine/public/platform/WebURLError.h"
 #include "sky/engine/public/platform/WebVector.h"
 
 class GrContext;
@@ -60,7 +59,6 @@ class WebGraphicsContext3DProvider;
 class WebSandboxSupport;
 struct WebFloatPoint;
 class WebURL;
-class WebURLLoader;
 class WebUnitTestSupport;
 struct WebLocalizedString;
 struct WebSize;
@@ -151,13 +149,8 @@ public:
 
     virtual mojo::NetworkService* networkService() { return 0; }
 
-    // Returns a new WebURLLoader instance.
-    virtual WebURLLoader* createURLLoader() { return 0; }
-
     // A suggestion to cache this metadata in association with this URL.
     virtual void cacheMetadata(const WebURL&, double responseTime, const char* data, size_t dataSize) { }
-
-    virtual WebURLError cancelledError(const WebURL&) const { return WebURLError(); }
 
     // Resources -----------------------------------------------------------
 

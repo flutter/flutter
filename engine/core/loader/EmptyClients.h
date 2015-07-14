@@ -37,7 +37,6 @@
 #include "sky/engine/core/page/Page.h"
 #include "sky/engine/core/page/SpellCheckerClient.h"
 #include "sky/engine/platform/geometry/FloatRect.h"
-#include "sky/engine/platform/network/ResourceError.h"
 #include "sky/engine/platform/text/TextCheckerClient.h"
 #include "sky/engine/public/platform/WebScreenInfo.h"
 #include "sky/engine/wtf/Forward.h"
@@ -73,7 +72,6 @@ public:
     virtual void dispatchDidHandleOnloadEvents() override { }
     virtual void dispatchWillClose() override { }
     virtual void dispatchDidReceiveTitle(const String&) override { }
-    virtual void dispatchDidFailLoad(const ResourceError&) override { }
 
     virtual NavigationPolicy decidePolicyForNavigation(const ResourceRequest&, Document*, NavigationPolicy, bool isTransitionNavigation) override;
 

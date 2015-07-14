@@ -34,7 +34,6 @@
 
 #include "sky/engine/core/loader/FrameLoaderTypes.h"
 #include "sky/engine/platform/Timer.h"
-#include "sky/engine/platform/network/ResourceRequest.h"
 #include "sky/engine/wtf/Forward.h"
 #include "sky/engine/wtf/HashSet.h"
 #include "sky/engine/wtf/OwnPtr.h"

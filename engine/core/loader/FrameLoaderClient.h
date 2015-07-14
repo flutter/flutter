@@ -33,7 +33,6 @@
 #include "sky/engine/core/frame/FrameClient.h"
 #include "sky/engine/core/loader/FrameLoaderTypes.h"
 #include "sky/engine/core/loader/NavigationPolicy.h"
-#include "sky/engine/platform/network/ResourceLoadPriority.h"
 #include "sky/engine/platform/weborigin/Referrer.h"
 #include "sky/engine/wtf/Forward.h"
 #include "sky/engine/wtf/Vector.h"
@@ -60,7 +59,6 @@ namespace blink {
     class LocalFrame;
     class Page;
     class RemoteFrame;
-    class ResourceError;
     class ResourceHandle;
     class ResourceRequest;
     class ResourceResponse;
@@ -81,7 +79,6 @@ namespace blink {
         virtual void dispatchDidHandleOnloadEvents() = 0;
         virtual void dispatchWillClose() = 0;
         virtual void dispatchDidReceiveTitle(const String&) = 0;
-        virtual void dispatchDidFailLoad(const ResourceError&) = 0;
 
         virtual NavigationPolicy decidePolicyForNavigation(const ResourceRequest&, Document*, NavigationPolicy, bool isTransitionNavigation) = 0;
 
@@ -108,8 +105,6 @@ namespace blink {
         // Informs the embedder that a WebGL canvas inside this frame received a lost context
         // notification with the given GL_ARB_robustness guilt/innocence code (see Extensions3D.h).
         virtual void didLoseWebGLContext(int) { }
-
-        virtual void dispatchDidChangeResourcePriority(unsigned long identifier, ResourceLoadPriority, int intraPriorityValue) { }
 
         virtual void dispatchDidChangeManifest() { }
 

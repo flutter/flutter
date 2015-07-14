@@ -34,7 +34,6 @@
 #include "sky/engine/core/inspector/ConsoleMessage.h"
 #include "sky/engine/core/page/ChromeClient.h"
 #include "sky/engine/core/page/Page.h"
-#include "sky/engine/platform/network/ResourceResponse.h"
 #include "sky/engine/wtf/text/StringBuilder.h"
 
 namespace blink {
@@ -59,18 +58,6 @@ void FrameConsole::addMessage(PassRefPtr<ConsoleMessage> prpConsoleMessage)
     String messageURL = consoleMessage->url();
     unsigned lineNumber = consoleMessage->lineNumber();
     m_frame.page()->addMessageToConsole(&m_frame, consoleMessage->source(), consoleMessage->level(), consoleMessage->message(), lineNumber, messageURL, String());
-}
-
-void FrameConsole::reportResourceResponseReceived(Document* document, unsigned long requestIdentifier, const ResourceResponse& response)
-{
-    if (!document)
-        return;
-    if (response.httpStatusCode() < 400)
-        return;
-    String message = "Failed to load resource: the server responded with a status of " + String::number(response.httpStatusCode()) + " (" + response.httpStatusText() + ')';
-    RefPtr<ConsoleMessage> consoleMessage = ConsoleMessage::create(NetworkMessageSource, ErrorMessageLevel, message, response.url().string());
-    consoleMessage->setRequestIdentifier(requestIdentifier);
-    addMessage(consoleMessage.release());
 }
 
 } // namespace blink

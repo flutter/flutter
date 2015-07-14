@@ -53,15 +53,10 @@
 #include "sky/engine/core/page/Page.h"
 #include "sky/engine/platform/Logging.h"
 #include "sky/engine/platform/geometry/FloatRect.h"
-#include "sky/engine/platform/network/HTTPParsers.h"
-#include "sky/engine/platform/network/ResourceRequest.h"
 #include "sky/engine/platform/weborigin/SecurityPolicy.h"
-#include "sky/engine/public/platform/WebURLRequest.h"
 #include "sky/engine/wtf/TemporaryChange.h"
 #include "sky/engine/wtf/text/CString.h"
 #include "sky/engine/wtf/text/WTFString.h"
-
-using blink::WebURLRequest;
 
 namespace blink {
 

@@ -32,7 +32,6 @@
 
 #include "sky/engine/public/platform/Platform.h"
 #include "sky/engine/public/platform/WebURL.h"
-#include "sky/engine/public/platform/WebURLResponse.h"
 #include "sky/engine/public/platform/WebUnitTestSupport.h"
 
 namespace blink {
@@ -52,17 +51,6 @@ void registerMockedURLLoad(const WebURL& fullURL, const WebString& fileName, con
 
 void registerMockedURLLoad(const WebURL& fullURL, const WebString& fileName, const WebString& relativeBaseDirectory, const WebString& mimeType)
 {
-    WebURLResponse response(fullURL);
-    response.setMIMEType(mimeType);
-    response.setHTTPStatusCode(200);
-
-    // Physical file path for the mock = <webkitRootDir> + relativeBaseDirectory + fileName.
-    std::string filePath = std::string(Platform::current()->unitTestSupport()->webKitRootDir().utf8().data());
-    filePath.append("/engine/web/tests/data/");
-    filePath.append(std::string(relativeBaseDirectory.utf8().data()));
-    filePath.append(std::string(fileName.utf8().data()));
-
-    Platform::current()->unitTestSupport()->registerMockedURL(fullURL, response, WebString::fromUTF8(filePath.c_str()));
 }
 
 } // namespace URLTestHelpers
