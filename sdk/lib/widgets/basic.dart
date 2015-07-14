@@ -217,6 +217,21 @@ class ConstrainedBox extends OneChildRenderObjectWrapper {
   }
 }
 
+class AspectRatio extends OneChildRenderObjectWrapper {
+  AspectRatio({ String key, this.aspectRatio, Widget child })
+    : super(key: key, child: child);
+
+  final double aspectRatio;
+
+  RenderAspectRatio createNode() => new RenderAspectRatio(aspectRatio: aspectRatio);
+  RenderAspectRatio get root => super.root;
+
+  void syncRenderObject(AspectRatio old) {
+    super.syncRenderObject(old);
+    root.aspectRatio = aspectRatio;
+  }
+}
+
 class ShrinkWrapWidth extends OneChildRenderObjectWrapper {
   ShrinkWrapWidth({ String key, this.stepWidth, this.stepHeight, Widget child })
     : super(key: key, child: child);

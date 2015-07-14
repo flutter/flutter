@@ -591,6 +591,52 @@ class RenderConstrainedBox extends RenderProxyBox {
   String debugDescribeSettings(String prefix) => '${super.debugDescribeSettings(prefix)}${prefix}additionalConstraints: ${additionalConstraints}\n';
 }
 
+class RenderAspectRatio extends RenderProxyBox {
+  RenderAspectRatio({
+    RenderBox child,
+    double aspectRatio
+  }) : super(child), _aspectRatio = aspectRatio {
+    assert(_aspectRatio != null);
+  }
+
+  double _aspectRatio;
+  double get aspectRatio => _aspectRatio;
+  void set aspectRatio (double value) {
+    assert(value != null);
+    if (_aspectRatio == value)
+      return;
+    _aspectRatio = value;
+    markNeedsLayout();
+  }
+
+  double getMinIntrinsicHeight(BoxConstraints constraints) {
+    return _applyAspectRatio(constraints).height;
+  }
+
+  double getMaxIntrinsicHeight(BoxConstraints constraints) {
+    return _applyAspectRatio(constraints).height;
+  }
+
+  Size _applyAspectRatio(BoxConstraints constraints) {
+    double width = constraints.constrainWidth();
+    double height = constraints.constrainHeight(width / _aspectRatio);
+    return new Size(width, height);
+  }
+
+  bool get sizedByParent => true;
+
+  void performResize() {
+    size = _applyAspectRatio(constraints);
+  }
+
+  void performLayout() {
+    if (child != null)
+      child.layout(new BoxConstraints.tight(size));
+  }
+
+  String debugDescribeSettings(String prefix) => '${super.debugDescribeSettings(prefix)}${prefix}aspectRatio: ${aspectRatio}\n';
+}
+
 class RenderShrinkWrapWidth extends RenderProxyBox {
 
   // This class will attempt to size its child to the child's maximum

@@ -16,8 +16,9 @@ import 'package:sky/widgets/floating_action_button.dart';
 import 'package:sky/widgets/icon.dart';
 import 'package:sky/widgets/material.dart';
 import 'package:sky/editing/input.dart';
+import 'package:sky/widgets/scrollable_viewport.dart';
 
-class Field extends Container {
+class Field extends Component {
   Field({this.icon: null, this.placeholder: null});
 
   String icon;
@@ -29,13 +30,12 @@ class Field extends Container {
           padding: const EdgeDims.symmetric(horizontal: 16.0),
           child: new Icon(type:icon, size:24)
         ),
-        new Flexible(child:new Input(placeholder:placeholder))
+        new Flexible(child:new Input(placeholder:placeholder, focused:false))
       ],
       direction: FlexDirection.horizontal
     );
   }
 }
-
 
 class AddressBookApp extends App {
 
@@ -55,7 +55,13 @@ class AddressBookApp extends App {
 
   Widget buildBody() {
     return new Material(
-      child:new Block([
+      child: new ScrollableBlock([
+        new AspectRatio(
+          aspectRatio: 16.0 / 9.0,
+          child: new Container(
+            decoration: new BoxDecoration(backgroundColor: colors.Purple[300])
+          )
+        ),
         new Field(icon:"social/person", placeholder:"Name"),
         new Field(icon: "communication/phone", placeholder:"Phone"),
         new Field(icon: "communication/email", placeholder:"Email"),
