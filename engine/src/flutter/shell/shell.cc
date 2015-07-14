@@ -38,8 +38,7 @@ Shell::Shell(scoped_ptr<ServiceProviderContext> service_provider_context)
   ui_thread_.reset(new base::Thread("ui_thread"));
   ui_thread_->StartWithOptions(options);
 
-  ui_task_runner()->PostTask(
-      FROM_HERE, base::Bind(&Engine::Init, service_provider_context_.get()));
+  ui_task_runner()->PostTask(FROM_HERE, base::Bind(&Engine::Init));
 }
 
 Shell::~Shell() {
