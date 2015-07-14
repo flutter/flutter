@@ -4,6 +4,8 @@
 
 import 'dart:sky' as sky;
 
+import 'package:sky/base/debug.dart';
+
 typedef void Callback(double timeStamp);
 
 bool _haveScheduledVisualUpdate = false;
@@ -13,6 +15,8 @@ final List<Callback> _persistentCallbacks = new List<Callback>();
 Map<int, Callback> _transientCallbacks = new Map<int, Callback>();
 
 void _beginFrame(double timeStamp) {
+  timeStamp /= timeDilation;
+
   _haveScheduledVisualUpdate = false;
 
   Map<int, Callback> callbacks = _transientCallbacks;
