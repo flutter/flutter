@@ -24,37 +24,34 @@ PAINT FOR FRAME #2 ----------------------------------------------
 2 |  |  |  |  |  | drawRRect(Instance of 'RRect', Paint(color:Color(0xffffffff), drawLooper:true))
 2 |  |  |  |  |  | paintChild RenderShrinkWrapWidth at Point(260.0, 218.0)
 2 |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
-2 |  |  |  |  |  |  | paintChild RenderDecoratedBox at Point(260.0, 218.0)
+2 |  |  |  |  |  |  | paintChild RenderSizeObserver at Point(260.0, 218.0)
 2 |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
-2 |  |  |  |  |  |  |  | drawRect(Rect.fromLTRB(260.0, 218.0, 540.0, 382.0), Paint(color:Color(0xfffafafa)))
-2 |  |  |  |  |  |  |  | paintChild RenderSizeObserver at Point(260.0, 218.0)
+2 |  |  |  |  |  |  |  | paintChild RenderViewport at Point(260.0, 218.0)
 2 |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
-2 |  |  |  |  |  |  |  |  | paintChild RenderViewport at Point(260.0, 218.0)
+2 |  |  |  |  |  |  |  |  | save
+2 |  |  |  |  |  |  |  |  | clipRect(Rect.fromLTRB(260.0, 218.0, 540.0, 382.0))
+2 |  |  |  |  |  |  |  |  | paintChild RenderSizeObserver at Point(260.0, 218.0)
 2 |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
-2 |  |  |  |  |  |  |  |  |  | save
-2 |  |  |  |  |  |  |  |  |  | clipRect(Rect.fromLTRB(260.0, 218.0, 540.0, 382.0))
-2 |  |  |  |  |  |  |  |  |  | paintChild RenderSizeObserver at Point(260.0, 218.0)
+2 |  |  |  |  |  |  |  |  |  | paintChild RenderBlock at Point(260.0, 218.0)
 2 |  |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
-2 |  |  |  |  |  |  |  |  |  |  | paintChild RenderBlock at Point(260.0, 218.0)
+2 |  |  |  |  |  |  |  |  |  |  | paintChild RenderPadding at Point(260.0, 218.0)
 2 |  |  |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
-2 |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderPadding at Point(260.0, 218.0)
+2 |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderParagraph at Point(284.0, 242.0)
 2 |  |  |  |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
-2 |  |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderParagraph at Point(284.0, 242.0)
-2 |  |  |  |  |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
-2 |  |  |  |  |  |  |  |  |  |  |  |  |  | translate(284.0, 242.0)
-2 |  |  |  |  |  |  |  |  |  |  |  |  |  | translate(-284.0, -242.0)
-2 |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderPadding at Point(260.0, 270.0)
+2 |  |  |  |  |  |  |  |  |  |  |  |  | translate(284.0, 242.0)
+2 |  |  |  |  |  |  |  |  |  |  |  |  | translate(-284.0, -242.0)
+2 |  |  |  |  |  |  |  |  |  |  | paintChild RenderPadding at Point(260.0, 270.0)
+2 |  |  |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderParagraph at Point(284.0, 290.0)
 2 |  |  |  |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
-2 |  |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderParagraph at Point(284.0, 290.0)
-2 |  |  |  |  |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
-2 |  |  |  |  |  |  |  |  |  |  |  |  |  | translate(284.0, 290.0)
-2 |  |  |  |  |  |  |  |  |  |  |  |  |  | translate(-284.0, -290.0)
-2 |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderFlex at Point(260.0, 362.0)
+2 |  |  |  |  |  |  |  |  |  |  |  |  | translate(284.0, 290.0)
+2 |  |  |  |  |  |  |  |  |  |  |  |  | translate(-284.0, -290.0)
+2 |  |  |  |  |  |  |  |  |  |  | paintChild RenderFlex at Point(260.0, 362.0)
+2 |  |  |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
+2 |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderParagraph at Point(411.0, 362.0)
 2 |  |  |  |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
-2 |  |  |  |  |  |  |  |  |  |  |  |  | paintChild RenderParagraph at Point(411.0, 362.0)
-2 |  |  |  |  |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
-2 |  |  |  |  |  |  |  |  |  |  |  |  |  | translate(411.0, 362.0)
-2 |  |  |  |  |  |  |  |  |  |  |  |  |  | translate(-411.0, -362.0)
-2 |  |  |  |  |  |  |  |  |  | restore
+2 |  |  |  |  |  |  |  |  |  |  |  |  | translate(411.0, 362.0)
+2 |  |  |  |  |  |  |  |  |  |  |  |  | translate(-411.0, -362.0)
+2 |  |  |  |  |  |  |  |  | restore
 ------------------------------------------------------------------------
 PAINTED 2 FRAMES
