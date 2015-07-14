@@ -16,7 +16,6 @@ import 'fitness_types.dart';
 class FitnessApp extends App {
 
   NavigationState _navigationState;
-  FitnessApp();
 
   void initState() {
     _navigationState = new NavigationState([

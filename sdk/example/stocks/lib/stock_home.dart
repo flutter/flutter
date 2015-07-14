@@ -37,11 +37,7 @@ const Duration _kSnackbarSlideDuration = const Duration(milliseconds: 200);
 
 class StockHome extends AnimatedComponent {
 
-  StockHome(this.navigator, this.stocks, this.stockMode, this.modeUpdater) {
-    // if (debug)
-    //   new Timer(new Duration(seconds: 1), dumpState);
-    _drawerController = new DrawerController(_handleDrawerStatusChanged);
-  }
+  StockHome(this.navigator, this.stocks, this.stockMode, this.modeUpdater);
 
   Navigator navigator;
   List<Stock> stocks;
@@ -88,15 +84,22 @@ class StockHome extends AnimatedComponent {
     });
   }
 
-  DrawerController _drawerController;
   bool _drawerShowing = false;
+  DrawerStatus _drawerStatus = DrawerStatus.inactive;
 
-  void _handleDrawerStatusChanged(bool showing) {
-    if (!showing && navigator.currentRoute.name == "/drawer") {
+  void _handleOpenDrawer() {
+    setState(() {
+      _drawerShowing = true;
+      _drawerStatus = DrawerStatus.active;
+    });
+  }
+
+  void _handleDrawerStatusChange(DrawerStatus status) {
+    if (status == DrawerStatus.inactive && navigator.currentRoute.name == "/drawer") {
       navigator.pop();
     }
     setState(() {
-      _drawerShowing = showing;
+      _drawerStatus = status;
     });
   }
 
@@ -138,9 +141,13 @@ class StockHome extends AnimatedComponent {
   }
 
   Drawer buildDrawer() {
+    if (_drawerStatus == DrawerStatus.inactive)
+      return null;
     return new Drawer(
-      controller: _drawerController,
       level: 3,
+      showing: _drawerShowing,
+      onStatusChanged: _handleDrawerStatusChange,
+      navigator: navigator,
       children: [
         new DrawerHeader(children: [new Text('Stocks')]),
         new DrawerItem(
@@ -178,17 +185,8 @@ class StockHome extends AnimatedComponent {
   }
 
   void _handleShowSettings() {
-    assert(navigator.currentRoute.name == '/drawer');
     navigator.pop();
-    assert(navigator.currentRoute.name == '/');
     navigator.pushNamed('/settings');
-  }
-
-  void _handleOpenDrawer() {
-    _drawerController.open();
-    navigator.pushState("/drawer", (_) {
-      _drawerController.close();
-    });
   }
 
   Widget buildToolBar() {
@@ -325,7 +323,7 @@ class StockHome extends AnimatedComponent {
         body: buildTabNavigator(),
         snackBar: buildSnackBar(),
         floatingActionButton: buildFloatingActionButton(),
-        drawer: _drawerShowing ? buildDrawer() : null
+        drawer: buildDrawer()
       ),
     ];
     addMenuToOverlays(overlays);

@@ -10,6 +10,7 @@ import 'package:sky/theme/shadows.dart';
 import 'package:sky/widgets/animated_component.dart';
 import 'package:sky/widgets/animation_builder.dart';
 import 'package:sky/widgets/basic.dart';
+import 'package:sky/widgets/navigator.dart';
 import 'package:sky/widgets/scrollable_viewport.dart';
 import 'package:sky/widgets/theme.dart';
 
@@ -36,89 +37,65 @@ const Curve _kAnimationCurve = linear;
 
 typedef void DrawerStatusChangeHandler (bool showing);
 
-class DrawerController {
-  DrawerController(this.onStatusChange) {
-    builder = new AnimationBuilder()
-      ..position = new AnimatedType<Point>(
-          new Point(-_kWidth, 0.0), end: Point.origin, curve: _kAnimationCurve);
-    performance = builder.createPerformance([builder.position],
-                                              duration: _kBaseSettleDuration)
-        ..addListener(_checkValue);
-  }
-  final DrawerStatusChangeHandler onStatusChange;
-
-  AnimationPerformance performance;
-  AnimationBuilder builder;
-
-  double get xPosition => builder.position.value.x;
-
-  bool _oldClosedState = true;
-  void _checkValue() {
-    var newClosedState = isClosed;
-    if (onStatusChange != null && _oldClosedState != newClosedState) {
-      onStatusChange(!newClosedState);
-      _oldClosedState = newClosedState;
-    }
-  }
-
-  bool get isClosed => performance.isDismissed;
-  bool get _isMostlyClosed => xPosition <= -_kWidth/2;
-
-  void open() => performance.play();
-
-  void close() => performance.reverse();
-
-  void _settle() => _isMostlyClosed ? close() : open();
-
-  void handleMaskTap(_) => close();
-
-  // TODO(mpcomplete): Figure out how to generalize these handlers on a
-  // "PannableThingy" interface.
-  void handlePointerDown(_) => performance.stop();
-
-  void handlePointerMove(sky.PointerEvent event) {
-    if (performance.isAnimating)
-      return;
-    performance.progress += event.dx / _kWidth;
-  }
-
-  void handlePointerUp(_) {
-    if (!performance.isAnimating)
-      _settle();
-  }
-
-  void handlePointerCancel(_) {
-    if (!performance.isAnimating)
-      _settle();
-  }
-
-  void handleFlingStart(event) {
-    double velocityX = event.velocityX / 1000;
-    if (velocityX.abs() >= _kMinFlingVelocity)
-      performance.fling(velocity: velocityX / _kWidth);
-  }
+enum DrawerStatus {
+  active,
+  inactive,
 }
+
+typedef void DrawerStatusChangedCallback(DrawerStatus status);
 
 class Drawer extends AnimatedComponent {
   Drawer({
     String key,
-    this.controller,
     this.children,
-    this.level: 0
+    this.showing: false,
+    this.level: 0,
+    this.onStatusChanged,
+    this.navigator
   }) : super(key: key);
 
   List<Widget> children;
+  bool showing;
   int level;
-  DrawerController controller;
+  DrawerStatusChangedCallback onStatusChanged;
+  Navigator navigator;
+
+  AnimationPerformance _performance;
+  AnimationBuilder _builder;
 
   void initState() {
-    watch(controller.performance);
+    _builder = new AnimationBuilder()
+      ..position = new AnimatedType<Point>(
+          new Point(-_kWidth, 0.0), end: Point.origin, curve: _kAnimationCurve);
+    _performance = _builder.createPerformance([_builder.position],
+                                                duration: _kBaseSettleDuration)
+        ..addListener(_checkForStateChanged);
+    watch(_performance);
+    if (showing)
+      _performance.play();
   }
 
   void syncFields(Drawer source) {
+    const String kDrawerRouteName = "[open drawer]";
     children = source.children;
     level = source.level;
-    controller = source.controller;
+    navigator = source.navigator;
+    if (showing != source.showing) {
+      showing = source.showing;
+      if (showing) {
+        if (navigator != null) {
+          navigator.pushState(kDrawerRouteName, (_) {
+            onStatusChanged(DrawerStatus.inactive);
+          });
+        }
+        _performance.play();
+      } else {
+        if (navigator != null && navigator.currentRoute.name == kDrawerRouteName)
+          navigator.pop();
+        _performance.reverse();
+      }
+    }
+    onStatusChanged = source.onStatusChanged;
     super.syncFields(source);
   }
 
@@ -127,15 +104,15 @@ class Drawer extends AnimatedComponent {
   // like fades, slides, rotates, pinch, etc.
   Widget build() {
     // TODO(mpcomplete): animate as a fade-in.
-    double scaler = controller.performance.progress;
+    double scaler = _performance.progress;
     Color maskColor = new Color.fromARGB((0x7F * scaler).floor(), 0, 0, 0);
 
     var mask = new Listener(
       child: new Container(decoration: new BoxDecoration(backgroundColor: maskColor)),
-      onGestureTap: controller.handleMaskTap
+      onGestureTap: handleMaskTap
     );
 
-    Widget content = controller.builder.build(
+    Widget content = _builder.build(
       new Container(
         decoration: new BoxDecoration(
           backgroundColor: Theme.of(this).canvasColor,
@@ -146,12 +123,54 @@ class Drawer extends AnimatedComponent {
 
     return new Listener(
       child: new Stack([ mask, content ]),
-      onPointerDown: controller.handlePointerDown,
-      onPointerMove: controller.handlePointerMove,
-      onPointerUp: controller.handlePointerUp,
-      onPointerCancel: controller.handlePointerCancel,
-      onGestureFlingStart: controller.handleFlingStart
+      onPointerDown: handlePointerDown,
+      onPointerMove: handlePointerMove,
+      onPointerUp: handlePointerUp,
+      onPointerCancel: handlePointerCancel,
+      onGestureFlingStart: handleFlingStart
     );
   }
 
+  double get xPosition => _builder.position.value.x;
+
+  DrawerStatus _lastStatus;
+  void _checkForStateChanged() {
+    DrawerStatus status = _status;
+    if (_lastStatus != null && status != _lastStatus && onStatusChanged != null)
+      onStatusChanged(status);
+    _lastStatus = status;
+  }
+
+  DrawerStatus get _status => _performance.isDismissed ? DrawerStatus.inactive : DrawerStatus.active;
+  bool get _isMostlyClosed => xPosition <= -_kWidth/2;
+
+  void _settle() => _isMostlyClosed ? _performance.reverse() : _performance.play();
+
+  void handleMaskTap(_) => _performance.reverse();
+
+  // TODO(mpcomplete): Figure out how to generalize these handlers on a
+  // "PannableThingy" interface.
+  void handlePointerDown(_) => _performance.stop();
+
+  void handlePointerMove(sky.PointerEvent event) {
+    if (_performance.isAnimating)
+      return;
+    _performance.progress += event.dx / _kWidth;
+  }
+
+  void handlePointerUp(_) {
+    if (!_performance.isAnimating)
+      _settle();
+  }
+
+  void handlePointerCancel(_) {
+    if (!_performance.isAnimating)
+      _settle();
+  }
+
+  void handleFlingStart(event) {
+    double velocityX = event.velocityX / 1000;
+    if (velocityX.abs() >= _kMinFlingVelocity)
+      _performance.fling(velocity: velocityX / _kWidth);
+  }
 }

@@ -19,7 +19,6 @@ import 'stock_types.dart';
 class StocksApp extends App {
 
   NavigationState _navigationState;
-  StocksApp();
 
   void initState() {
     _navigationState = new NavigationState([

@@ -34,7 +34,6 @@ class HomeFragment extends StatefulComponent {
   void initState() {
     // if (debug)
     //   new Timer(new Duration(seconds: 1), dumpState);
-    _drawerController = new DrawerController(_handleDrawerStatusChanged);
     super.initState();
   }
 
@@ -46,30 +45,20 @@ class HomeFragment extends StatefulComponent {
   bool _isShowingSnackBar = false;
   bool _isRunning = false;
 
-  DrawerController _drawerController;
-  bool _drawerShowing = false;
-
-  void _handleDrawerStatusChanged(bool showing) {
-    if (!showing && navigator.currentRoute.name == "/drawer") {
-      navigator.pop();
-    }
-    setState(() {
-      _drawerShowing = showing;
-    });
-  }
-
   void _handleFitnessModeChange(FitnessMode value) {
     setState(() {
       _fitnessMode = value;
     });
-    assert(navigator.currentRoute.name == '/drawer');
-    navigator.pop();
   }
 
   Drawer buildDrawer() {
+    if (_drawerStatus == DrawerStatus.inactive)
+      return null;
     return new Drawer(
-      controller: _drawerController,
+      showing: _drawerShowing,
       level: 3,
+      onStatusChanged: _handleDrawerStatusChange,
+      navigator: navigator,
       children: [
         new DrawerHeader(children: [new Text('Fitness')]),
         new DrawerItem(
@@ -94,18 +83,28 @@ class HomeFragment extends StatefulComponent {
     );
   }
 
-  void _handleShowSettings() {
-    assert(navigator.currentRoute.name == '/drawer');
-    navigator.pop();
-    assert(navigator.currentRoute.name == '/');
-    navigator.pushNamed('/settings');
-  }
+  bool _drawerShowing = false;
+  DrawerStatus _drawerStatus = DrawerStatus.inactive;
 
   void _handleOpenDrawer() {
-    _drawerController.open();
-    navigator.pushState("/drawer", (_) {
-      _drawerController.close();
+    setState(() {
+      _drawerShowing = true;
+      _drawerStatus = DrawerStatus.active;
     });
+  }
+
+  void _handleDrawerStatusChange(DrawerStatus status) {
+    if (status == DrawerStatus.inactive && navigator.currentRoute.name == "/drawer") {
+      navigator.pop();
+    }
+    setState(() {
+      _drawerStatus = status;
+    });
+  }
+
+  void _handleShowSettings() {
+    navigator.pop();
+    navigator.pushNamed('/settings');
   }
 
   // TODO(jackson): We should be localizing
@@ -203,7 +202,7 @@ class HomeFragment extends StatefulComponent {
       body: buildBody(),
       snackBar: buildSnackBar(),
       floatingActionButton: buildFloatingActionButton(),
-      drawer: _drawerShowing ? buildDrawer() : null
+      drawer: buildDrawer()
     );
   }
 }
