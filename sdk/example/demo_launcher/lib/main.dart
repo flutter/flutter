@@ -146,10 +146,14 @@ class DemoList extends Component {
                 ),
                 new Container(
                   margin: const EdgeDims.all(24.0),
-                  child: new Block([
-                    new Text(demo.name, style: demo.textTheme.title),
-                    new Text(demo.description, style: demo.textTheme.subhead)
-                  ])
+                  child: new Flex([
+                      new Text(demo.name, style: demo.textTheme.title),
+                      new Flexible(
+                        child: new Text(demo.description, style: demo.textTheme.subhead)
+                      )
+                    ],
+                    direction: FlexDirection.vertical,
+                    alignItems: FlexAlignItems.start)
                 )
               ])
             ),
