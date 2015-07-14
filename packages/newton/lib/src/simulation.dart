@@ -15,9 +15,8 @@ abstract class Simulatable {
 /// The base class for all simulations. The user is meant to instantiate an
 /// instance of a simulation and query the same for the position and velocity
 /// of the body at a given interval.
-///
-/// Note: All operations on subclasses of Simulation are idempotent.
 abstract class Simulation implements Simulatable {
+  Tolerance tolerance = toleranceDefault;
 
   /// Returns if the simulation is done at a given time
   bool isDone(double time);

@@ -19,7 +19,8 @@ abstract class SimulationGroup extends Simulation {
 
   /// Called when a significant change in the interval is detected. Subclasses
   /// must decide if the the current simulation must be switched (or updated).
-  void step(double time);
+  /// The result is whether the simulation was switched in this step.
+  bool step(double time);
 
   double x(double time) {
     _stepIfNecessary(time);
@@ -32,6 +33,12 @@ abstract class SimulationGroup extends Simulation {
   }
 
   @override
+  void set tolerance(Tolerance t) {
+    this.currentSimulation.tolerance = t;
+    super.tolerance = t;
+  }
+
+  @override
   bool isDone(double time) {
     _stepIfNecessary(time);
     return currentSimulation.isDone(time);
@@ -39,11 +46,13 @@ abstract class SimulationGroup extends Simulation {
 
   double _lastStep = -1.0;
   void _stepIfNecessary(double time) {
-    if (_nearEqual(_lastStep, time)) {
+    if (_nearEqual(_lastStep, time, toleranceDefault.time)) {
       return;
     }
 
     _lastStep = time;
-    step(time);
+    if (step(time)) {
+      this.currentSimulation.tolerance = this.tolerance;
+    }
   }
 }

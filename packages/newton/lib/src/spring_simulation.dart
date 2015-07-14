@@ -58,5 +58,6 @@ class SpringSimulation extends Simulation {
 
   @override
   bool isDone(double time) =>
-      _nearEqual(x(time), _endPosition) && _nearZero(dx(time));
+      _nearEqual(x(time), _endPosition, this.tolerance.distance) &&
+          _nearZero(dx(time), this.tolerance.velocity);
 }

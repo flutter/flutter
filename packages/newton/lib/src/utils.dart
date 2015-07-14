@@ -4,9 +4,7 @@
 
 part of newton;
 
-const double _simulationEpsilon = 0.2;
+bool _nearEqual(double a, double b, double epsilon) =>
+    (a > (b - epsilon)) && (a < (b + epsilon));
 
-bool _nearEqual(double a, double b) =>
-    (a > (b - _simulationEpsilon)) && (a < (b + _simulationEpsilon));
-
-bool _nearZero(double a) => _nearEqual(a, 0.0);
+bool _nearZero(double a, double epsilon) => _nearEqual(a, 0.0, epsilon);

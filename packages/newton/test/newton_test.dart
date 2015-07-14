@@ -12,6 +12,8 @@ void main() {
   test('test_friction', () {
     var friction = new FrictionSimulation(0.3, 100.0, 400.0);
 
+    friction.tolerance = const Tolerance(velocity: 1.0);
+
     expect(friction.isDone(0.0), false);
     expect(friction.x(0.0), 100);
     expect(friction.dx(0.0), 400.0);
@@ -84,6 +86,9 @@ void main() {
   test('crit_spring', () {
     var crit = new SpringSimulation(new SpringDescription.withDampingRatio(
         mass: 1.0, springConstant: 100.0, ratio: 1.0), 0.0, 500.0, 0.0);
+
+    crit.tolerance = const Tolerance(distance: 0.01, velocity: 0.01);
+
     expect(crit.type, SpringType.criticallyDamped);
 
     expect(crit.isDone(0.0), false);
@@ -106,6 +111,9 @@ void main() {
   test('overdamped_spring', () {
     var over = new SpringSimulation(new SpringDescription.withDampingRatio(
         mass: 1.0, springConstant: 100.0, ratio: 1.25), 0.0, 500.0, 0.0);
+
+    over.tolerance = const Tolerance(distance: 0.01, velocity: 0.01);
+
     expect(over.type, SpringType.overDamped);
 
     expect(over.isDone(0.0), false);
@@ -145,6 +153,8 @@ void main() {
 
     var scroll = new ScrollSimulation(100.0, 800.0, 0.0, 300.0, spring, 0.3);
 
+    scroll.tolerance = const Tolerance(velocity: 0.01, distance: 0.01);
+
     expect(scroll.isDone(0.0), false);
     expect(scroll.isDone(3.5), true);
 
@@ -158,6 +168,8 @@ void main() {
 
     var scroll =
         new ScrollSimulation(100.0, 400.0, 0.0, double.INFINITY, spring, 0.3);
+
+    scroll.tolerance = const Tolerance(velocity: 1.0);
 
     expect(scroll.isDone(0.0), false);
     expect(scroll.x(0.0), 100);

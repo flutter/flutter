@@ -8,6 +8,7 @@ import 'dart:math' as math;
 
 part 'src/simulation.dart';
 part 'src/simulation_group.dart';
+part 'src/tolerance.dart';
 part 'src/utils.dart';
 
 part 'src/friction_simulation.dart';

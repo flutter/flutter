@@ -27,7 +27,7 @@ class ScrollSimulation extends SimulationGroup {
   }
 
   @override
-  void step(double time) => _chooseSimulation(
+  bool step(double time) => _chooseSimulation(
       _currentSimulation.x(time - _offset),
       _currentSimulation.dx(time - _offset), time);
 
@@ -37,7 +37,7 @@ class ScrollSimulation extends SimulationGroup {
   @override
   double get currentIntervalOffset => _offset;
 
-  void _chooseSimulation(
+  bool _chooseSimulation(
       double position, double velocity, double intervalOffset) {
 
     /// This simulation can only step forward.
@@ -47,19 +47,21 @@ class ScrollSimulation extends SimulationGroup {
         _offset = intervalOffset;
         _currentSimulation = new SpringSimulation(
             _springDesc, position, _trailingExtent, velocity);
-        return;
+        return true;
       } else if (position < _leadingExtent) {
         _isSpringing = true;
         _offset = intervalOffset;
         _currentSimulation = new SpringSimulation(
             _springDesc, position, _leadingExtent, velocity);
-        return;
+        return true;
       }
     }
 
     if (_currentSimulation == null) {
       _currentSimulation = new FrictionSimulation(_drag, position, velocity);
-      return;
+      return true;
     }
+
+    return false;
   }
 }
