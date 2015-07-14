@@ -80,7 +80,7 @@ void Engine::Init(ServiceProviderContext* service_provider_context) {
   mojo::ConnectToService(service_provider.get(), &network_service);
 
   DCHECK(!g_platform_impl);
-  g_platform_impl = new PlatformImpl(network_service.Pass());
+  g_platform_impl = new PlatformImpl();
   blink::initialize(g_platform_impl);
 }
 
