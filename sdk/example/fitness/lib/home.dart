@@ -94,9 +94,6 @@ class HomeFragment extends StatefulComponent {
   }
 
   void _handleDrawerStatusChange(DrawerStatus status) {
-    if (status == DrawerStatus.inactive && navigator.currentRoute.name == "/drawer") {
-      navigator.pop();
-    }
     setState(() {
       _drawerStatus = status;
     });

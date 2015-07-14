@@ -7,21 +7,22 @@ import 'package:sky/widgets/basic.dart';
 typedef Widget Builder(Navigator navigator, RouteBase route);
 
 abstract class RouteBase {
-  RouteBase({ this.name });
-  final String name;
+  RouteBase({ this.key });
+  final Object key;
   Widget build(Navigator navigator, RouteBase route);
   void popState() { }
 }
 
 class Route extends RouteBase {
-  Route({ String name, this.builder }) : super(name: name);
+  Route({ String name, this.builder }) : super(key: name);
+  String get name => key;
   final Builder builder;
   Widget build(Navigator navigator, RouteBase route) => builder(navigator, route);
 }
 
 class RouteState extends RouteBase {
 
-  RouteState({this.callback, this.route, String name}) : super(name: name);
+  RouteState({ this.callback, this.route, Object key }) : super(key: key);
 
   RouteBase route;
   Function callback;
@@ -86,9 +87,9 @@ class Navigator extends StatefulComponent {
 
   RouteBase get currentRoute => state.currentRoute;
 
-  void pushState(String name, Function callback) {
+  void pushState(Object key, Function callback) {
     RouteBase route = new RouteState(
-      name: name,
+      key: key,
       callback: callback,
       route: state.currentRoute
     );

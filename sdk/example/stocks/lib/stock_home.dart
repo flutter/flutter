@@ -57,7 +57,7 @@ class StockHome extends AnimatedComponent {
   AnimationBuilder _snackbarTransform;
 
   void _handleSearchBegin() {
-    navigator.pushState("/search", (_) {
+    navigator.pushState(this, (_) {
       setState(() {
         _isSearching = false;
         _searchQuery = null;
@@ -69,9 +69,8 @@ class StockHome extends AnimatedComponent {
   }
 
   void _handleSearchEnd() {
-    assert(navigator.currentRoute.name == '/search');
+    assert(navigator.currentRoute.key == this);
     navigator.pop();
-    assert(navigator.currentRoute.name == '/');
     setState(() {
       _isSearching = false;
       _searchQuery = null;
@@ -95,9 +94,6 @@ class StockHome extends AnimatedComponent {
   }
 
   void _handleDrawerStatusChange(DrawerStatus status) {
-    if (status == DrawerStatus.inactive && navigator.currentRoute.name == "/drawer") {
-      navigator.pop();
-    }
     setState(() {
       _drawerStatus = status;
     });

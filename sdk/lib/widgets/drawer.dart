@@ -72,26 +72,24 @@ class Drawer extends AnimatedComponent {
         ..addListener(_checkForStateChanged);
     watch(_performance);
     if (showing)
-      _performance.play();
+      _show();
+  }
+
+  void _show() {
+    if (navigator != null)
+      navigator.pushState(this, (_) => _performance.reverse());
+    _performance.play();
   }
 
   void syncFields(Drawer source) {
-    const String kDrawerRouteName = "[open drawer]";
     children = source.children;
     level = source.level;
     navigator = source.navigator;
     if (showing != source.showing) {
       showing = source.showing;
       if (showing) {
-        if (navigator != null) {
-          navigator.pushState(kDrawerRouteName, (_) {
-            onStatusChanged(DrawerStatus.inactive);
-          });
-        }
-        _performance.play();
+        _show();
       } else {
-        if (navigator != null && navigator.currentRoute.name == kDrawerRouteName)
-          navigator.pop();
         _performance.reverse();
       }
     }
@@ -136,8 +134,14 @@ class Drawer extends AnimatedComponent {
   DrawerStatus _lastStatus;
   void _checkForStateChanged() {
     DrawerStatus status = _status;
-    if (_lastStatus != null && status != _lastStatus && onStatusChanged != null)
-      onStatusChanged(status);
+    if (_lastStatus != null && status != _lastStatus) {
+      if (status == DrawerStatus.inactive &&
+          navigator != null && 
+          navigator.currentRoute.key == this)
+        navigator.pop();
+      if (onStatusChanged != null)
+        onStatusChanged(status);
+    }
     _lastStatus = status;
   }
 
