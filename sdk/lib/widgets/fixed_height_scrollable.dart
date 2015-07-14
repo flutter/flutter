@@ -61,24 +61,25 @@ abstract class FixedHeightScrollable extends Scrollable {
 
     int itemShowIndex = 0;
     int itemShowCount = 0;
-
     double offsetY = 0.0;
-
     if (_height != null && _height > 0.0) {
       if (scrollOffset < 0.0) {
         double visibleHeight = _height + scrollOffset;
         itemShowCount = (visibleHeight / itemHeight).round() + 1;
         offsetY = scrollOffset;
       } else {
-        itemShowCount = (_height / itemHeight).ceil() + 1;
+        itemShowCount = (_height / itemHeight).ceil();
         double alignmentDelta = -scrollOffset % itemHeight;
-        if (alignmentDelta != 0.0)
+        double drawStart;
+        if (alignmentDelta != 0.0) {
           alignmentDelta -= itemHeight;
-
-        double drawStart = scrollOffset + alignmentDelta;
+          itemShowCount += 1;
+          drawStart = scrollOffset + alignmentDelta;
+          offsetY = -alignmentDelta;
+        } else {
+          drawStart = scrollOffset;
+        }
         itemShowIndex = math.max(0, (drawStart / itemHeight).floor());
-
-        offsetY = -alignmentDelta;
       }
     }
 
