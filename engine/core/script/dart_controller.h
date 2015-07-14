@@ -9,7 +9,7 @@
 #include "base/macros.h"
 #include "base/memory/weak_ptr.h"
 #include "dart/runtime/include/dart_api.h"
-#include "mojo/services/network/public/interfaces/url_loader.mojom.h"
+#include "mojo/public/cpp/system/data_pipe.h"
 #include "sky/engine/wtf/OwnPtr.h"
 #include "sky/engine/wtf/text/AtomicString.h"
 #include "sky/engine/wtf/text/TextPosition.h"

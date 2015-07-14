@@ -72,15 +72,6 @@ public:
     virtual SkCanvas* canvas() const override { return m_surface ? m_surface->getCanvas() : 0; }
     virtual bool isValid() const override { return m_surface; }
     virtual bool isAccelerated() const override { return isValid() && m_surface->getCanvas()->getTopDevice()->accessRenderTarget(); }
-    virtual Platform3DObject getBackingTexture() const override
-    {
-        ASSERT(isAccelerated());
-        GrRenderTarget* renderTarget = m_surface->getCanvas()->getTopDevice()->accessRenderTarget();
-        if (renderTarget) {
-            return renderTarget->asTexture()->getTextureHandle();
-        }
-        return 0;
-    };
 
 private:
     RefPtr<SkSurface> m_surface;

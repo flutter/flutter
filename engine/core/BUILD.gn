@@ -13,7 +13,6 @@ rel_sky_core_gen_dir = rebase_path(sky_core_output_dir, root_build_dir)
 source_set("libraries") {
   public_deps = [
     "//base",
-    "//gpu/command_buffer/client:gles2_c_lib",
     "//mojo/application",
     "//mojo/common",
     "//mojo/public/c/system",
@@ -21,10 +20,6 @@ source_set("libraries") {
     "//mojo/public/cpp/system",
     "//mojo/public/cpp/utility",
     "//mojo/public/interfaces/application",
-    "//mojo/services/keyboard/public/interfaces",
-    "//mojo/services/navigation/public/interfaces",
-    "//mojo/services/network/public/interfaces",
-    "//mojo/services/view_manager/public/cpp",
     "//skia",
     "//sky/engine/tonic:tonic",
     "//sky/engine/wtf",

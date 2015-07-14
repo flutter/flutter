@@ -38,11 +38,8 @@
 #include "sky/engine/platform/geometry/IntRect.h"
 #include "sky/engine/platform/graphics/BitmapImage.h"
 #include "sky/engine/platform/graphics/GraphicsContext.h"
-#include "sky/engine/platform/graphics/GraphicsTypes3D.h"
 #include "sky/engine/platform/graphics/ImageBufferClient.h"
 #include "sky/engine/platform/graphics/UnacceleratedImageBufferSurface.h"
-#include "sky/engine/platform/graphics/gpu/DrawingBuffer.h"
-#include "sky/engine/platform/graphics/gpu/Extensions3DUtil.h"
 #include "sky/engine/platform/graphics/skia/NativeImageSkia.h"
 #include "sky/engine/platform/graphics/skia/SkiaUtils.h"
 #include "sky/engine/public/platform/Platform.h"
@@ -164,80 +161,10 @@ WebLayer* ImageBuffer::platformLayer() const
     return m_surface->layer();
 }
 
-bool ImageBuffer::copyToPlatformTexture(WebGraphicsContext3D* context, Platform3DObject texture, GLenum internalFormat, GLenum destType, GLint level, bool premultiplyAlpha, bool flipY)
-{
-    if (!m_surface->isAccelerated() || !platformLayer() || !isSurfaceValid())
-        return false;
-
-    if (!Extensions3DUtil::canUseCopyTextureCHROMIUM(internalFormat, destType, level))
-        return false;
-
-    OwnPtr<WebGraphicsContext3DProvider> provider = adoptPtr(Platform::current()->createSharedOffscreenGraphicsContext3DProvider());
-    if (!provider)
-        return false;
-    WebGraphicsContext3D* sharedContext = provider->context3d();
-    if (!sharedContext)
-        return false;
-
-    OwnPtr<WebExternalTextureMailbox> mailbox = adoptPtr(new WebExternalTextureMailbox);
-
-    // Contexts may be in a different share group. We must transfer the texture through a mailbox first
-    sharedContext->genMailboxCHROMIUM(mailbox->name);
-    sharedContext->produceTextureDirectCHROMIUM(getBackingTexture(), GL_TEXTURE_2D, mailbox->name);
-    sharedContext->flush();
-
-    mailbox->syncPoint = sharedContext->insertSyncPoint();
-
-    context->waitSyncPoint(mailbox->syncPoint);
-    Platform3DObject sourceTexture = context->createAndConsumeTextureCHROMIUM(GL_TEXTURE_2D, mailbox->name);
-
-    // The canvas is stored in a premultiplied format, so unpremultiply if necessary.
-    context->pixelStorei(GC3D_UNPACK_UNPREMULTIPLY_ALPHA_CHROMIUM, !premultiplyAlpha);
-
-    // The canvas is stored in an inverted position, so the flip semantics are reversed.
-    context->pixelStorei(GC3D_UNPACK_FLIP_Y_CHROMIUM, !flipY);
-    context->copyTextureCHROMIUM(GL_TEXTURE_2D, sourceTexture, texture, level, internalFormat, destType);
-
-    context->pixelStorei(GC3D_UNPACK_FLIP_Y_CHROMIUM, false);
-    context->pixelStorei(GC3D_UNPACK_UNPREMULTIPLY_ALPHA_CHROMIUM, false);
-
-    context->deleteTexture(sourceTexture);
-
-    context->flush();
-    sharedContext->waitSyncPoint(context->insertSyncPoint());
-
-    // Undo grContext texture binding changes introduced in this function
-    provider->grContext()->resetContext(kTextureBinding_GrGLBackendState);
-
-    return true;
-}
-
 static bool drawNeedsCopy(GraphicsContext* src, GraphicsContext* dst)
 {
     ASSERT(dst);
     return (src == dst);
-}
-
-Platform3DObject ImageBuffer::getBackingTexture()
-{
-    return m_surface->getBackingTexture();
-}
-
-bool ImageBuffer::copyRenderingResultsFromDrawingBuffer(DrawingBuffer* drawingBuffer, bool fromFrontBuffer)
-{
-    if (!drawingBuffer)
-        return false;
-    OwnPtr<WebGraphicsContext3DProvider> provider = adoptPtr(Platform::current()->createSharedOffscreenGraphicsContext3DProvider());
-    if (!provider)
-        return false;
-    WebGraphicsContext3D* context3D = provider->context3d();
-    Platform3DObject tex = m_surface->getBackingTexture();
-    if (!context3D || !tex)
-        return false;
-
-    m_surface->invalidateCachedBitmap();
-    return drawingBuffer->copyToPlatformTexture(context3D, tex, GL_RGBA,
-        GL_UNSIGNED_BYTE, 0, true, false, fromFrontBuffer);
 }
 
 void ImageBuffer::draw(GraphicsContext* context, const FloatRect& destRect, const FloatRect* srcPtr, CompositeOperator op, WebBlendMode blendMode)

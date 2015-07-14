@@ -31,10 +31,8 @@
 #include "sky/engine/platform/PlatformExport.h"
 #include "sky/engine/platform/geometry/FloatRect.h"
 #include "sky/engine/platform/geometry/IntSize.h"
-#include "sky/engine/platform/graphics/Canvas2DLayerBridge.h"
 #include "sky/engine/platform/graphics/ColorSpace.h"
 #include "sky/engine/platform/graphics/GraphicsTypes.h"
-#include "sky/engine/platform/graphics/GraphicsTypes3D.h"
 #include "sky/engine/platform/graphics/ImageBufferSurface.h"
 #include "sky/engine/platform/transforms/AffineTransform.h"
 #include "sky/engine/wtf/Forward.h"
@@ -45,7 +43,6 @@
 
 namespace blink {
 
-class DrawingBuffer;
 class GraphicsContext;
 class Image;
 class ImageBufferClient;
@@ -108,16 +105,6 @@ public:
     AffineTransform baseTransform() const { return AffineTransform(); }
     void transformColorSpace(ColorSpace srcColorSpace, ColorSpace dstColorSpace);
     WebLayer* platformLayer() const;
-
-    // FIXME: current implementations of this method have the restriction that they only work
-    // with textures that are RGB or RGBA format, UNSIGNED_BYTE type and level 0, as specified in
-    // Extensions3D::canUseCopyTextureCHROMIUM().
-    // Destroys the TEXTURE_2D binding for the active texture unit of the passed context
-    bool copyToPlatformTexture(WebGraphicsContext3D*, Platform3DObject, GLenum, GLenum, GLint, bool, bool);
-
-    Platform3DObject getBackingTexture();
-
-    bool copyRenderingResultsFromDrawingBuffer(DrawingBuffer*, bool fromFrontBuffer = false);
 
     void flush();
 
