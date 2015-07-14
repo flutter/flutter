@@ -12,7 +12,6 @@ group("sky") {
     "//sky/sdk/example",
     "//sky/tools/imagediff",
     "//sky/tools/packager($host_toolchain)",
-    "//sky/viewer",
     ":sky_dev",
   ]
 
