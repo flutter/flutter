@@ -20,7 +20,6 @@ common_deps = [
   "//sky/engine/tonic",
   "//sky/engine/wtf",
   "//sky/services/engine:interfaces",
-  "//sky/services/platform",
   "//sky/shell/dart",
   "//ui/gfx/geometry",
   "//ui/gl",
@@ -56,6 +55,8 @@ source_set("common") {
     "ui/input_event_converter.h",
     "ui/internals.cc",
     "ui/internals.h",
+    "ui/platform_impl.cc",
+    "ui/platform_impl.h",
     "ui_delegate.cc",
     "ui_delegate.h",
   ]

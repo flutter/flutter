@@ -1,10 +1,11 @@
-// Copyright 2014 The Chromium Authors. All rights reserved.
+// Copyright 2015 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "sky/services/platform/platform_impl.h"
+#include "sky/shell/ui/platform_impl.h"
 
 namespace sky {
+namespace shell {
 
 PlatformImpl::PlatformImpl()
     : main_thread_task_runner_(base::MessageLoop::current()->task_runner()) {
@@ -21,4 +22,5 @@ base::SingleThreadTaskRunner* PlatformImpl::mainThreadTaskRunner() {
   return main_thread_task_runner_.get();
 }
 
+}  // namespace shell
 }  // namespace sky
