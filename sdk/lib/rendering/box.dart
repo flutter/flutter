@@ -301,29 +301,30 @@ abstract class RenderBox extends RenderObject {
   // the first given baseline in the box's contents. This is used by
   // certain layout models to align adjacent boxes on a common
   // baseline, regardless of padding, font size differences, etc. If
-  // there is no baseline, then it returns the distance from the
-  // y-coordinate of the position of the box to the y-coordinate of
-  // the bottom of the box, i.e., the height of the box. Only call
-  // this after layout has been performed. You are only allowed to
-  // call this from the parent of this node during that parent's
-  // performLayout() or paint().
-  double getDistanceToBaseline(TextBaseline baseline) {
+  // there is no baseline, and the 'onlyReal' argument was not set to
+  // true, then it returns the distance from the y-coordinate of the
+  // position of the box to the y-coordinate of the bottom of the box,
+  // i.e., the height of the box. Only call this after layout has been
+  // performed. You are only allowed to call this from the parent of
+  // this node during that parent's performLayout() or paint().
+  double getDistanceToBaseline(TextBaseline baseline, { bool onlyReal: false }) {
     assert(!needsLayout);
     assert(!_debugDoingBaseline);
     final parent = this.parent; // TODO(ianh): Remove this once the analyzer is cleverer
     assert(parent is RenderObject);
     assert(() {
       if (RenderObject.debugDoingLayout)
-        return (parent == RenderObject.debugActiveLayout) && parent.debugDoingThisLayout;
+        return (RenderObject.debugActiveLayout == parent) && parent.debugDoingThisLayout;
       if (RenderObject.debugDoingPaint)
-        return (parent == RenderObject.debugActivePaint) && parent.debugDoingThisPaint;
+        return ((RenderObject.debugActivePaint == parent) && parent.debugDoingThisPaint) ||
+               ((RenderObject.debugActivePaint == this) && debugDoingThisPaint);
       return false;
     });
     assert(_debugSetDoingBaseline(true));
     double result = getDistanceToActualBaseline(baseline);
     assert(_debugSetDoingBaseline(false));
     assert(parent == this.parent); // TODO(ianh): Remove this once the analyzer is cleverer
-    if (result == null)
+    if (result == null && !onlyReal)
       return size.height;
     return result;
   }
@@ -434,6 +435,43 @@ abstract class RenderBox extends RenderObject {
   }
 
   Rect get paintBounds => Point.origin & size;
+  void debugPaint(PaintingCanvas canvas, Offset offset) {
+    if (debugPaintSizeEnabled)
+      debugPaintSize(canvas, offset);
+    if (debugPaintBaselinesEnabled)
+      debugPaintBaselines(canvas, offset);
+  }
+  void debugPaintSize(PaintingCanvas canvas, Offset offset) {
+    Paint paint = new Paint();
+    paint.setStyle(sky.PaintingStyle.stroke);
+    paint.strokeWidth = 1.0;
+    paint.color = debugPaintSizeColor;
+    canvas.drawRect(offset & size, paint);
+  }
+  void debugPaintBaselines(PaintingCanvas canvas, Offset offset) {
+    Paint paint = new Paint();
+    paint.setStyle(sky.PaintingStyle.stroke);
+    paint.strokeWidth = 0.25;
+    Path path;
+    // ideographic baseline
+    double baselineI = getDistanceToBaseline(TextBaseline.ideographic, onlyReal: true);
+    if (baselineI != null) {
+      paint.color = debugPaintIdeographicBaselineColor;
+      path = new Path();
+      path.moveTo(offset.dx, offset.dy + baselineI);
+      path.lineTo(offset.dx + size.width, offset.dy + baselineI);
+      canvas.drawPath(path, paint);
+    }
+    // alphabetic baseline
+    double baselineA = getDistanceToBaseline(TextBaseline.alphabetic, onlyReal: true);
+    if (baselineA != null) {
+      paint.color = debugPaintAlphabeticBaselineColor;
+      path = new Path();
+      path.moveTo(offset.dx, offset.dy + baselineA);
+      path.lineTo(offset.dx + size.width, offset.dy + baselineA);
+      canvas.drawPath(path, paint);
+    }
+  }
 
   String debugDescribeSettings(String prefix) => '${super.debugDescribeSettings(prefix)}${prefix}size: ${size}\n';
 }

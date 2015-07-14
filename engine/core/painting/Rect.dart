@@ -30,6 +30,13 @@ class Rect {
   double get right => _value[2];
   double get bottom => _value[3];
 
+  Rect shift(Offset offset) {
+    return new Rect.fromLTRB(left + offset.dx, top + offset.dy, right + offset.dx, bottom + offset.dy);
+  }
+  Rect inflate(double delta) {
+    return new Rect.fromLTRB(left - delta, top - delta, right + delta, bottom + delta);
+  }
+
   double get width => right - left;
   double get height => bottom - top;
 

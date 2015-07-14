@@ -370,7 +370,6 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     assert(!_needsLayout); // check that the paint() method didn't mark us dirty again
     assert(!_needsPaint); // check that the paint() method didn't mark us dirty again
     _paintingNode.setBackingDrawable(recorder.endRecordingAsDrawable());
-
     if (canvas._descendentsWithPaintingCanvases != null) {
       for (RenderObject node in canvas._descendentsWithPaintingCanvases) {
         assert(node.attached == attached);
@@ -388,10 +387,17 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
       _debugDoingThisPaint = true;
       debugLastActivePaint = _debugActivePaint;
       _debugActivePaint = this;
+      debugPaint(canvas, offset);
+      if (debugPaintBoundsEnabled) {
+        canvas.save();
+        canvas.clipRect(paintBounds.shift(offset));
+      }
       return true;
     });
     paint(canvas, offset);
     assert(() {
+      if (debugPaintBoundsEnabled)
+        canvas.restore();
       _debugActivePaint = debugLastActivePaint;
       _debugDoingThisPaint = false;
       return true;
@@ -401,6 +407,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
 
   bool get createNewDisplayList => false;
   Rect get paintBounds;
+  void debugPaint(PaintingCanvas canvas, Offset offset) { }
   void paint(PaintingCanvas canvas, Offset offset) { }
 
 
