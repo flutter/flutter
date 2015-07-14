@@ -109,7 +109,6 @@ class PopupMenu extends AnimatedComponent {
     controller = source.controller;
     items = source.items;
     level = source.level;
-    _painter = source._painter;
     super.syncFields(source);
   }
 
