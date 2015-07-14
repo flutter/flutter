@@ -10,8 +10,8 @@ import 'package:sky/widgets/scrollable.dart';
 
 abstract class FixedHeightScrollable extends Scrollable {
 
-  FixedHeightScrollable({ String key, this.itemHeight, Color backgroundColor, this.padding })
-      : super(key: key, backgroundColor: backgroundColor) {
+  FixedHeightScrollable({ String key, this.itemHeight, this.padding })
+      : super(key: key) {
     assert(itemHeight != null);
   }
 

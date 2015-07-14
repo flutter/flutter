@@ -47,8 +47,8 @@ class PopupMenu extends AnimatedComponent {
   int level;
 
   AnimatedType<double> _opacity;
-  AnimatedType<double> _height;
   AnimatedType<double> _width;
+  AnimatedType<double> _height;
   List<AnimatedType<double>> _itemOpacities;
   AnimationPerformance _performance;
 
@@ -82,13 +82,13 @@ class PopupMenu extends AnimatedComponent {
   }
 
   void _updateAnimationVariables() {
+    double unit = 1.0 / (items.length + 1);
     _opacity = new AnimatedType<double>(0.0, end: 1.0);
-    _width = new AnimatedType<double>(0.5, end: 1.0, interval: new Interval(0.0, 0.5));
-    _height = new AnimatedType<double>(0.0, end: 1.0, interval: new Interval(0.0, 0.33));
+    _width = new AnimatedType<double>(0.0, end: 1.0, interval: new Interval(0.0, unit));
+    _height = new AnimatedType<double>(0.0, end: 1.0, interval: new Interval(0.0, 0.5));
     _itemOpacities = new List<AnimatedType<double>>();
-    double unit = 1.0 / items.length;
     for (int i = 0; i < items.length; ++i) {
-      double start = i * unit;
+      double start = (i + 1) * unit;
       double end = (start + 1.5 * unit).clamp(0.0, 1.0);
       _itemOpacities.add(new AnimatedType<double>(
           0.0, end: 1.0, interval: new Interval(start, end)));
@@ -146,7 +146,7 @@ class PopupMenu extends AnimatedComponent {
           callback: (sky.Canvas canvas, Size size) {
             double width = _width.value * size.width;
             double height = _height.value * size.height;
-            _painter.paint(canvas, new Rect.fromLTRB(size.width - width, 0.0, width, height));
+            _painter.paint(canvas, new Rect.fromLTWH(size.width - width, 0.0, width, height));
           },
           child: new ConstrainedBox(
             constraints: new BoxConstraints(

@@ -9,7 +9,6 @@ import 'package:sky/animation/animated_simulation.dart';
 import 'package:sky/animation/scroll_behavior.dart';
 import 'package:sky/theme/view_configuration.dart' as config;
 import 'package:sky/widgets/basic.dart';
-import 'package:sky/widgets/material.dart';
 
 const double _kMillisecondsPerSecond = 1000.0;
 
@@ -28,11 +27,9 @@ abstract class Scrollable extends StatefulComponent {
 
   Scrollable({
     String key,
-    this.backgroundColor,
     this.direction: ScrollDirection.vertical
   }) : super(key: key);
 
-  Color backgroundColor;
   ScrollDirection direction;
 
   void initState() {
@@ -40,7 +37,6 @@ abstract class Scrollable extends StatefulComponent {
   }
 
   void syncFields(Scrollable source) {
-    backgroundColor = source.backgroundColor;
     direction == source.direction;
   }
 
@@ -61,11 +57,7 @@ abstract class Scrollable extends StatefulComponent {
 
   Widget build() {
     return new Listener(
-      child: new Material(
-        type: MaterialType.canvas,
-        child: buildContent(),
-        color: backgroundColor
-      ),
+      child: buildContent(),
       onPointerDown: _handlePointerDown,
       onPointerUp: _handlePointerUpOrCancel,
       onPointerCancel: _handlePointerUpOrCancel,
