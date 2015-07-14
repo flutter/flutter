@@ -10,23 +10,41 @@ abstract class AnimatedVariable {
   String toString();
 }
 
+class Interval {
+  final double start;
+  final double end;
+
+  double adjustTime(double t) {
+    return ((t - start) / (end - start)).clamp(0.0, 1.0);
+  }
+
+  Interval(this.start, this.end) {
+    assert(start >= 0.0);
+    assert(start <= 1.0);
+    assert(end >= 0.0);
+    assert(end <= 1.0);
+  }
+}
+
 class AnimatedType<T extends dynamic> extends AnimatedVariable {
-  AnimatedType(this.begin, { this.end, this.curve: linear }) {
+  AnimatedType(this.begin, { this.end, this.interval, this.curve: linear }) {
     value = begin;
   }
 
   T value;
   T begin;
   T end;
+  Interval interval;
   Curve curve;
 
   void setFraction(double t) {
     if (end != null) {
-      if (t == 1.0) {
+      double adjustedTime = interval == null ? t : interval.adjustTime(t);
+      if (adjustedTime == 1.0) {
         value = end;
       } else {
         // TODO(mpcomplete): Reverse the timeline and curve.
-        value = begin + (end - begin) * curve.transform(t);
+        value = begin + (end - begin) * curve.transform(adjustedTime);
       }
     }
   }

@@ -46,14 +46,16 @@ class PopupMenu extends AnimatedComponent {
   List<PopupMenuItem> items;
   int level;
 
-  AnimatedType<double> _position;
+  AnimatedType<double> _opacity;
+  AnimatedType<double> _height;
+  AnimatedType<double> _width;
+  List<AnimatedType<double>> _itemOpacities;
   AnimationPerformance _performance;
 
   void initState() {
-    _position = new AnimatedType<double>(0.0, end: 1.0);
     _performance = new AnimationPerformance()
-      ..variable = _position
       ..addListener(_checkForStateChanged);
+    _updateAnimationVariables();
     watch(_performance);
     _updateBoxPainter();
     if (showing)
@@ -73,8 +75,30 @@ class PopupMenu extends AnimatedComponent {
       level = source.level;
       _updateBoxPainter();
     }
+    if (items.length != source.items.length)
+      _updateAnimationVariables();
     items = source.items;
     super.syncFields(source);
+  }
+
+  void _updateAnimationVariables() {
+    _opacity = new AnimatedType<double>(0.0, end: 1.0);
+    _width = new AnimatedType<double>(0.5, end: 1.0, interval: new Interval(0.0, 0.5));
+    _height = new AnimatedType<double>(0.0, end: 1.0, interval: new Interval(0.0, 0.33));
+    _itemOpacities = new List<AnimatedType<double>>();
+    double unit = 1.0 / items.length;
+    for (int i = 0; i < items.length; ++i) {
+      double start = i * unit;
+      double end = (start + 1.5 * unit).clamp(0.0, 1.0);
+      _itemOpacities.add(new AnimatedType<double>(
+          0.0, end: 1.0, interval: new Interval(start, end)));
+    }
+    List<AnimatedVariable> variables = new List<AnimatedVariable>()
+      ..add(_opacity)
+      ..add(_width)
+      ..add(_height)
+      ..addAll(_itemOpacities);
+    _performance.variable = new AnimatedList(variables);
   }
 
   void _updateBoxPainter() {
@@ -84,7 +108,7 @@ class PopupMenu extends AnimatedComponent {
       boxShadow: shadows[level]));
   }
 
-  PopupMenuStatus get _status => _position.value != 0.0 ? PopupMenuStatus.active : PopupMenuStatus.inactive;
+  PopupMenuStatus get _status => _opacity.value != 0.0 ? PopupMenuStatus.active : PopupMenuStatus.inactive;
 
   PopupMenuStatus _lastStatus;
   void _checkForStateChanged() {
@@ -108,30 +132,20 @@ class PopupMenu extends AnimatedComponent {
 
   BoxPainter _painter;
 
-  double _opacityFor(int i) {
-    assert(_position.value != null);
-    if (_position.value == null || _position.value == 1.0)
-      return 1.0;
-    double unit = 1.0 / items.length;
-    double duration = 1.5 * unit;
-    double start = i * unit;
-    return math.max(0.0, math.min(1.0, (_position.value - start) / duration));
-  }
-
   Widget build() {
     int i = 0;
     List<Widget> children = new List.from(items.map((Widget item) {
-      return new Opacity(opacity: _opacityFor(i++), child: item);
+      return new Opacity(opacity: _itemOpacities[i++].value, child: item);
     }));
 
     return new Opacity(
-      opacity: math.min(1.0, _position.value * 3.0),
+      opacity: math.min(1.0, _opacity.value * 3.0),
       child: new Container(
         margin: new EdgeDims.all(_kMenuMargin),
         child: new CustomPaint(
           callback: (sky.Canvas canvas, Size size) {
-            double width = math.min(size.width, size.width * (0.5 + _position.value * 2.0));
-            double height = math.min(size.height, size.height * _position.value * 1.5);
+            double width = _width.value * size.width;
+            double height = _height.value * size.height;
             _painter.paint(canvas, new Rect.fromLTRB(size.width - width, 0.0, width, height));
           },
           child: new ConstrainedBox(
