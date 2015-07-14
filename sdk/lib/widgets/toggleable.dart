@@ -60,11 +60,10 @@ abstract class Toggleable extends AnimatedComponent {
     onChanged(!value);
   }
 
-  // Override these methods to draw yourself
-  void customPaintCallback(sky.Canvas canvas, Size size) {
-    assert(false);
-  }
-  Size get size => Size.zero;
+  // Override these to draw yourself
+  void customPaintCallback(sky.Canvas canvas, Size size);
+  Size get size;
+
   EdgeDims get margin => const EdgeDims.symmetric(horizontal: 5.0);
   double get duration => 200.0;
   Curve get curveUp => easeIn;
