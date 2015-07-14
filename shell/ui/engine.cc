@@ -62,6 +62,9 @@ Engine::Engine(const Config& config)
       activity_running_(false),
       have_surface_(false),
       weak_factory_(this) {
+  mojo::ServiceProviderPtr service_provider =
+      CreateServiceProvider(config.service_provider_context);
+  mojo::ConnectToService(service_provider.get(), &network_service_);
 }
 
 Engine::~Engine() {
@@ -71,13 +74,8 @@ base::WeakPtr<Engine> Engine::GetWeakPtr() {
   return weak_factory_.GetWeakPtr();
 }
 
-void Engine::Init(ServiceProviderContext* service_provider_context) {
+void Engine::Init() {
   TRACE_EVENT0("sky", "Engine::Init");
-
-  mojo::ServiceProviderPtr service_provider =
-      CreateServiceProvider(service_provider_context);
-  mojo::NetworkServicePtr network_service;
-  mojo::ConnectToService(service_provider.get(), &network_service);
 
   DCHECK(!g_platform_impl);
   g_platform_impl = new PlatformImpl();
@@ -175,7 +173,7 @@ void Engine::RunFromSnapshotStream(
 
 void Engine::RunFromNetwork(const mojo::String& url) {
   dart_library_provider_.reset(
-      new DartLibraryProviderNetwork(g_platform_impl->networkService()));
+      new DartLibraryProviderNetwork(network_service_.get()));
   RunFromLibrary(url);
 }
 

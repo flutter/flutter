@@ -45,10 +45,6 @@ namespace base {
 class SingleThreadTaskRunner;
 }
 
-namespace mojo {
-class NetworkService;
-}
-
 namespace blink {
 
 class WebBlobRegistry;
@@ -144,13 +140,6 @@ public:
     // Returns the maximum amount of memory a decoded image should be allowed.
     // See comments on ImageDecoder::m_maxDecodedBytes.
     virtual size_t maxDecodedImageBytes() { return noDecodedImageByteLimit; }
-
-    // Network -------------------------------------------------------------
-
-    virtual mojo::NetworkService* networkService() { return 0; }
-
-    // A suggestion to cache this metadata in association with this URL.
-    virtual void cacheMetadata(const WebURL&, double responseTime, const char* data, size_t dataSize) { }
 
     // Resources -----------------------------------------------------------
 

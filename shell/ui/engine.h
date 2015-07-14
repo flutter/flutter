@@ -14,13 +14,14 @@
 #include "mojo/public/interfaces/application/service_provider.mojom.h"
 #include "mojo/services/asset_bundle/public/interfaces/asset_bundle.mojom.h"
 #include "mojo/services/navigation/public/interfaces/navigation.mojom.h"
+#include "mojo/services/network/public/interfaces/network_service.mojom.h"
 #include "skia/ext/refptr.h"
 #include "sky/engine/public/platform/ServiceProvider.h"
 #include "sky/engine/public/sky/sky_view.h"
 #include "sky/engine/public/sky/sky_view_client.h"
 #include "sky/shell/gpu_delegate.h"
-#include "sky/shell/ui_delegate.h"
 #include "sky/shell/service_provider.h"
+#include "sky/shell/ui_delegate.h"
 #include "third_party/skia/include/core/SkPicture.h"
 #include "ui/gfx/geometry/size.h"
 
@@ -50,7 +51,7 @@ class Engine : public UIDelegate,
 
   base::WeakPtr<Engine> GetWeakPtr();
 
-  static void Init(ServiceProviderContext* service_provider_context);
+  static void Init();
 
   void BeginFrame(base::TimeTicks frame_time);
   skia::RefPtr<SkPicture> Paint();
@@ -97,6 +98,7 @@ class Engine : public UIDelegate,
   Config config_;
   scoped_ptr<Animator> animator_;
 
+  mojo::NetworkServicePtr network_service_;
   mojo::asset_bundle::AssetBundlePtr root_bundle_;
   scoped_ptr<blink::DartLibraryProvider> dart_library_provider_;
   std::unique_ptr<blink::SkyView> sky_view_;
