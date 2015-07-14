@@ -14,9 +14,8 @@ import 'package:sky/widgets/basic.dart';
 import 'package:sky/widgets/popup_menu_item.dart';
 import 'package:sky/widgets/scrollable_viewport.dart';
 
-const Duration _kMenuOpenDuration = const Duration(milliseconds: 300);
-const Duration _kMenuCloseDuration = const Duration(milliseconds: 200);
-const Duration _kMenuCloseDelay = const Duration(milliseconds: 100);
+const Duration _kMenuDuration = const Duration(milliseconds: 300);
+double _kMenuCloseIntervalEnd = 2.0 / 3.0;
 const double _kMenuWidthStep = 56.0;
 const double _kMenuMargin = 16.0; // 24.0 on tablet
 const double _kMenuMinWidth = 2.0 * _kMenuWidthStep;
@@ -50,10 +49,12 @@ class PopupMenu extends AnimatedComponent {
   AnimatedType<double> _width;
   AnimatedType<double> _height;
   List<AnimatedType<double>> _itemOpacities;
+  AnimatedList _animationList;
   AnimationPerformance _performance;
 
   void initState() {
     _performance = new AnimationPerformance()
+      ..duration = _kMenuDuration
       ..addListener(_checkForStateChanged);
     _updateAnimationVariables();
     watch(_performance);
@@ -82,10 +83,10 @@ class PopupMenu extends AnimatedComponent {
   }
 
   void _updateAnimationVariables() {
-    double unit = 1.0 / (items.length + 1);
+    double unit = 1.0 / (items.length + 1.5); // 1.0 for the width and 0.5 for the last item's fade.
     _opacity = new AnimatedType<double>(0.0, end: 1.0);
     _width = new AnimatedType<double>(0.0, end: 1.0, interval: new Interval(0.0, unit));
-    _height = new AnimatedType<double>(0.0, end: 1.0, interval: new Interval(0.0, 0.5));
+    _height = new AnimatedType<double>(0.0, end: 1.0, interval: new Interval(0.0, unit * items.length));
     _itemOpacities = new List<AnimatedType<double>>();
     for (int i = 0; i < items.length; ++i) {
       double start = (i + 1) * unit;
@@ -98,7 +99,8 @@ class PopupMenu extends AnimatedComponent {
       ..add(_width)
       ..add(_height)
       ..addAll(_itemOpacities);
-    _performance.variable = new AnimatedList(variables);
+    _animationList = new AnimatedList(variables);
+    _performance.variable = _animationList;
   }
 
   void _updateBoxPainter() {
@@ -119,15 +121,13 @@ class PopupMenu extends AnimatedComponent {
   }
 
   void _open() {
-    _performance
-      ..duration = _kMenuOpenDuration
-      ..play();
+    _animationList.interval = null;
+    _performance.play();
   }
 
   void _close() {
-    _performance
-      ..duration = _kMenuCloseDuration
-      ..reverse();
+    _animationList.interval = new Interval(0.0, _kMenuCloseIntervalEnd);
+    _performance.reverse();
   }
 
   BoxPainter _painter;

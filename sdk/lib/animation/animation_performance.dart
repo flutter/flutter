@@ -54,11 +54,16 @@ class AnimatedType<T extends dynamic> extends AnimatedVariable {
 
 class AnimatedList extends AnimatedVariable {
   List<AnimatedVariable> variables;
-  AnimatedList(this.variables);
+  Interval interval;
+
+  AnimatedList(this.variables, { this.interval });
+
   void setFraction(double t) {
+    double adjustedTime = interval == null ? t : interval.adjustTime(t);
     for (AnimatedVariable variable in variables)
-      variable.setFraction(t);
+      variable.setFraction(adjustedTime);
   }
+
   String toString() => 'AnimatedList([$variables])';
 }
 
