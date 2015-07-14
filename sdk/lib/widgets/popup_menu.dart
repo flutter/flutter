@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:math' as math;
 import 'dart:sky' as sky;
 
@@ -25,103 +24,98 @@ const double _kMenuMaxWidth = 5.0 * _kMenuWidthStep;
 const double _kMenuHorizontalPadding = 16.0;
 const double _kMenuVerticalPadding = 8.0;
 
-enum MenuState { closed, opening, open, closing }
-
-class PopupMenuController {
-
-  PopupMenuController() {
-    position = new AnimatedType<double>(0.0, end: 1.0);
-    performance = new AnimationPerformance()
-      ..variable = position
-      ..addListener(_updateState);
-  }
-
-  AnimatedType<double> position;
-  AnimationPerformance performance;
-
-  MenuState _state = MenuState.closed;
-  MenuState get state => _state;
-
-  bool get canReact => (_state == MenuState.opening) || (_state == MenuState.open);
-
-  void _updateState() {
-    if (position.value == 0.0) {
-      _state = MenuState.closed;
-      if (_closeCompleter != null)
-        _closeCompleter.complete();
-      return;
-    }
-
-    if (position.value == 1.0)
-      _state = MenuState.open;
-  }
-
-  Completer _closeCompleter;
-  Timer _closeTimer;
-
-  void open() {
-    if (_state != MenuState.closed)
-      return;
-    if (_closeTimer != null) {
-      _closeTimer.cancel();
-      _closeTimer = null;
-    }
-    _closeCompleter = null;
-    _state = MenuState.opening;
-    performance..duration = _kMenuOpenDuration
-               ..play();
-  }
-
-  Future close() {
-    if (_state == MenuState.closing || _state == MenuState.closed)
-      return _closeCompleter.future;
-
-    _state = MenuState.closing;
-    assert(_closeCompleter == null);
-    _closeCompleter = new Completer();
-    performance.duration = _kMenuCloseDuration;
-
-    assert(_closeTimer == null);
-    _closeTimer = new Timer(_kMenuCloseDelay, performance.reverse);
-
-    return _closeCompleter.future;
-  }
+enum PopupMenuStatus {
+  active,
+  inactive,
 }
+
+typedef void PopupMenuStatusChangedCallback(PopupMenuStatus status);
 
 class PopupMenu extends AnimatedComponent {
 
-  PopupMenu({ String key, this.controller, this.items, this.level })
-      : super(key: key);
+  PopupMenu({
+    String key,
+    this.showing,
+    this.onStatusChanged,
+    this.items,
+    this.level
+  }) : super(key: key);
 
-  PopupMenuController controller;
+  bool showing;
+  PopupMenuStatusChangedCallback onStatusChanged;
   List<PopupMenuItem> items;
   int level;
 
+  AnimatedType<double> _position;
+  AnimationPerformance _performance;
+
   void initState() {
+    _position = new AnimatedType<double>(0.0, end: 1.0);
+    _performance = new AnimationPerformance()
+      ..variable = _position
+      ..addListener(_checkForStateChanged);
+    watch(_performance);
+    _updateBoxPainter();
+    if (showing)
+      _open();
+  }
+
+  void syncFields(PopupMenu source) {
+    if (showing != source.showing) {
+      showing = source.showing;
+      if (showing)
+        _open();
+      else
+        _close();
+    }
+    onStatusChanged = source.onStatusChanged;
+    if (level != source.level) {
+      level = source.level;
+      _updateBoxPainter();
+    }
+    items = source.items;
+    super.syncFields(source);
+  }
+
+  void _updateBoxPainter() {
     _painter = new BoxPainter(new BoxDecoration(
       backgroundColor: Grey[50],
       borderRadius: 2.0,
       boxShadow: shadows[level]));
-    watch(controller.performance);
   }
 
-  void syncFields(PopupMenu source) {
-    controller = source.controller;
-    items = source.items;
-    level = source.level;
-    super.syncFields(source);
+  PopupMenuStatus get _status => _position.value != 0.0 ? PopupMenuStatus.active : PopupMenuStatus.inactive;
+
+  PopupMenuStatus _lastStatus;
+  void _checkForStateChanged() {
+    PopupMenuStatus status = _status;
+    if (_lastStatus != null && status != _lastStatus && onStatusChanged != null)
+      onStatusChanged(status);
+    _lastStatus = status;
+  }
+
+  void _open() {
+    _performance
+      ..duration = _kMenuOpenDuration
+      ..play();
+  }
+
+  void _close() {
+    _performance
+      ..duration = _kMenuCloseDuration
+      ..reverse();
   }
 
   BoxPainter _painter;
 
   double _opacityFor(int i) {
-    assert(controller.position.value != null);
-    if (controller.position.value == null || controller.position.value == 1.0)
+    assert(_position.value != null);
+    if (_position.value == null || _position.value == 1.0)
       return 1.0;
     double unit = 1.0 / items.length;
     double duration = 1.5 * unit;
     double start = i * unit;
-    return math.max(0.0, math.min(1.0, (controller.position.value - start) / duration));
+    return math.max(0.0, math.min(1.0, (_position.value - start) / duration));
   }
 
   Widget build() {
@@ -132,13 +126,13 @@ class PopupMenu extends AnimatedComponent {
     }));
 
     return new Opacity(
-      opacity: math.min(1.0, controller.position.value * 3.0),
+      opacity: math.min(1.0, _position.value * 3.0),
       child: new Container(
         margin: new EdgeDims.all(_kMenuMargin),
         child: new CustomPaint(
           callback: (sky.Canvas canvas, Size size) {
-            double width = math.min(size.width, size.width * (0.5 + controller.position.value * 2.0));
-            double height = math.min(size.height, size.height * controller.position.value * 1.5);
+            double width = math.min(size.width, size.width * (0.5 + _position.value * 2.0));
+            double height = math.min(size.height, size.height * _position.value * 1.5);
             _painter.paint(canvas, new Rect.fromLTRB(size.width - width, 0.0, width, height));
           },
           child: new ConstrainedBox(

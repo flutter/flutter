@@ -100,22 +100,25 @@ class StockHome extends AnimatedComponent {
     });
   }
 
-  PopupMenuController _menuController;
+  bool _menuShowing = false;
+  PopupMenuStatus _menuStatus = PopupMenuStatus.inactive;
 
   void _handleMenuShow() {
     setState(() {
-      _menuController = new PopupMenuController();
-      _menuController.open();
+      _menuShowing = true;
+      _menuStatus = PopupMenuStatus.active;
     });
   }
 
   void _handleMenuHide() {
     setState(() {
-      _menuController.close().then((_) {
-        setState(() {
-          _menuController = null;
-        });
-      });
+      _menuShowing = false;
+    });
+  }
+
+  void _handleMenuStatusChanged(PopupMenuStatus status) {
+    setState(() {
+      _menuStatus = status;
     });
   }
 
@@ -303,11 +306,12 @@ class StockHome extends AnimatedComponent {
   }
 
   void addMenuToOverlays(List<Widget> overlays) {
-    if (_menuController == null)
+    if (_menuStatus == PopupMenuStatus.inactive)
       return;
     overlays.add(new ModalOverlay(
       children: [new StockMenu(
-        controller: _menuController,
+        showing: _menuShowing,
+        onStatusChanged: _handleMenuStatusChanged,
         autorefresh: _autorefresh,
         onAutorefreshChanged: _handleAutorefreshChanged
       )],
