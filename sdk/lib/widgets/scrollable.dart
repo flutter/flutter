@@ -13,6 +13,7 @@ import 'package:sky/widgets/basic.dart';
 const double _kMillisecondsPerSecond = 1000.0;
 
 double _velocityForFlingGesture(double eventVelocity) {
+  // eventVelocity is pixels/second, config min,max limits are pixels/ms
   return eventVelocity.clamp(-config.kMaxFlingVelocity, config.kMaxFlingVelocity) /
     _kMillisecondsPerSecond;
 }

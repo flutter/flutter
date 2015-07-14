@@ -49,8 +49,8 @@ class BoundedBehavior extends ScrollBehavior {
 Simulation createDefaultScrollSimulation(double position, double velocity, double minScrollOffset, double maxScrollOffset) {
   double velocityPerSecond = velocity * _kSecondsPerMillisecond;
   SpringDescription spring = new SpringDescription.withDampingRatio(
-      mass: 1.0, springConstant: 85.0, ratio: 1.1);
-  double drag = 0.4;
+      mass: 1.0, springConstant: 170.0, ratio: 1.1);
+  double drag = 0.025;
   return new ScrollSimulation(position, velocityPerSecond, minScrollOffset, maxScrollOffset, spring, drag);
 }
 
@@ -76,7 +76,7 @@ class OverscrollBehavior extends BoundedBehavior {
     // If we're overscrolling, we want move the scroll offset 2x
     // slower than we would otherwise. Therefore, we "rewind" the
     // newScrollOffset by half the amount that we moved it above.
-    // Notice that we clap the "old" value to 0.0 so that we only
+    // Notice that we clamp the "old" value to 0.0 so that we only
     // reduce the portion of scrollDelta that's applied beyond 0.0. We
     // do similar things for overscroll in the other direction.
     if (newScrollOffset < 0.0) {

@@ -19,9 +19,12 @@ class VariableHeightScrollable extends Scrollable {
 
   IndexedBuilder builder;
   Object token;
+  bool _contentsChanged = true;
 
   void syncFields(VariableHeightScrollable source) {
     builder = source.builder;
+    if (token != source.token)
+      _contentsChanged = true;
     token = source.token;
     super.syncFields(source);
   }
@@ -40,9 +43,15 @@ class VariableHeightScrollable extends Scrollable {
     bool didReachLastChild
   ) {
     assert(childOffsets.length > 0);
-    scrollBehavior.contentsSize = didReachLastChild ? childOffsets.last : double.INFINITY;
-    if (didReachLastChild && scrollOffset > scrollBehavior.maxScrollOffset)
-      settleScrollOffset();
+    if (didReachLastChild) {
+      scrollBehavior.contentsSize = childOffsets.last;
+      if (_contentsChanged && scrollOffset > scrollBehavior.maxScrollOffset) {
+        _contentsChanged = false;
+        settleScrollOffset();
+      }
+    } else {
+      scrollBehavior.contentsSize = double.INFINITY;
+    }
   }
 
   Widget buildContent() {
