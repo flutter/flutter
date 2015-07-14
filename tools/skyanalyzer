@@ -23,6 +23,9 @@ _IGNORED_PATTERNS = [
   re.compile(r'^[0-9]+ errors? and [0-9]+ warnings? found.'),
   re.compile(r'^([0-9]+|No) (error|warning|issue)s? found.'),
 
+  # Ignore analyzer status output.
+  re.compile(r'^[0-9]+ errors, [0-9]+ warnings and [0-9]+ hints found.'),
+
   # Ignored because they don't affect Sky code
   re.compile(r'\[hint\] When compiled to JS, this test might return true when the left hand side is an int'),
 
