@@ -29,7 +29,9 @@ using std::vector;
 namespace android {
 
 const int CHAR_TAB = 0x0009;
+const uint16_t CHAR_HYPHEN_MINUS = 0x002D;
 const uint16_t CHAR_SOFT_HYPHEN = 0x00AD;
+const uint16_t CHAR_HYPHEN = 0x2010;
 
 // Large scores in a hierarchy; we prefer desperate breaks to an overfull line. All these
 // constants are larger than any reasonable actual width score.
@@ -138,6 +140,7 @@ float LineBreaker::addStyleRun(MinikinPaint* paint, const FontCollection* typefa
     size_t lastBreak = start;
     ParaWidth lastBreakWidth = mWidth;
     ParaWidth postBreak = mWidth;
+    bool temporarilySkipHyphenation = false;
     for (size_t i = start; i < end; i++) {
         uint16_t c = mTextBuf[i];
         if (c == CHAR_TAB) {
@@ -158,8 +161,12 @@ float LineBreaker::addStyleRun(MinikinPaint* paint, const FontCollection* typefa
             // Override ICU's treatment of soft hyphen as a break opportunity, because we want it
             // to be a hyphen break, with penalty and drawing behavior.
             if (c != CHAR_SOFT_HYPHEN) {
+                // TODO: Add a new type of HyphenEdit for breaks whose hyphen already exists, so
+                // we can pass the whole word down to Hyphenator like the soft hyphen case.
+                bool wordEndsInHyphen = (c == CHAR_HYPHEN_MINUS || c == CHAR_HYPHEN);
                 if (paint != nullptr && mHyphenator != nullptr &&
                         mHyphenationFrequency != kHyphenationFrequency_None &&
+                        !wordEndsInHyphen && !temporarilySkipHyphenation &&
                         wordEnd > lastBreak && wordEnd - lastBreak <= LONGEST_HYPHENATED_WORD) {
                     mHyphenator->hyphenate(&mHyphBuf, &mTextBuf[lastBreak], wordEnd - lastBreak);
     #if VERBOSE_DEBUG
@@ -188,6 +195,8 @@ float LineBreaker::addStyleRun(MinikinPaint* paint, const FontCollection* typefa
                         }
                     }
                 }
+                // Skip hyphenating the next word if and only if the present word ends in a hyphen
+                temporarilySkipHyphenation = wordEndsInHyphen;
 
                 // Skip break for zero-width characters.
                 if (current == mTextBuf.size() || mCharWidths[current] > 0) {
