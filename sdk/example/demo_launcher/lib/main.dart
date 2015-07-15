@@ -15,6 +15,7 @@ import 'package:sky/widgets/task_description.dart';
 import 'package:sky/widgets/theme.dart';
 import 'package:sky/widgets/tool_bar.dart';
 import 'package:sky/widgets/scrollable_list.dart';
+import 'package:sky/widgets/ink_well.dart';
 
 AssetBundle _initBundle() {
   if (rootBundle != null)
@@ -113,6 +114,7 @@ List<SkyDemo> demos = [
     )
   ),
   // new SkyDemo(
+
   //   'Touch Demo', '../../rendering/touch_demo.dart', 'Simple example showing handling of touch events at a low level'),
   new SkyDemo(
     name: 'Minedigger Game',
@@ -130,6 +132,25 @@ const double kCardHeight = 120.0;
 const EdgeDims kListPadding = const EdgeDims.all(4.0);
 
 class DemoList extends Component {
+  Widget buildCardContents(SkyDemo demo) {
+      return new Container(
+        decoration: demo.decoration,
+        child: new InkWell(
+          child: new Container(
+            margin: const EdgeDims.all(24.0),
+            child: new Flex([
+              new Text(demo.name, style: demo.textTheme.title),
+              new Flexible(
+                child: new Text(demo.description, style: demo.textTheme.subhead)
+              )
+            ],
+            direction: FlexDirection.vertical,
+            alignItems: FlexAlignItems.start)
+          )
+        )
+    );
+  }
+
   Widget buildDemo(SkyDemo demo) {
     return new Listener(
       key: demo.name,
@@ -137,27 +158,7 @@ class DemoList extends Component {
       child: new Container(
         height: kCardHeight,
         child: new Card(
-          child: new Flex([
-            new Flexible(
-              child: new Stack([
-                new Container(
-                  decoration: demo.decoration,
-                  child: new Container()
-                ),
-                new Container(
-                  margin: const EdgeDims.all(24.0),
-                  child: new Flex([
-                      new Text(demo.name, style: demo.textTheme.title),
-                      new Flexible(
-                        child: new Text(demo.description, style: demo.textTheme.subhead)
-                      )
-                    ],
-                    direction: FlexDirection.vertical,
-                    alignItems: FlexAlignItems.start)
-                )
-              ])
-            ),
-          ], direction: FlexDirection.vertical)
+          child: buildCardContents(demo)
         )
       )
     );
