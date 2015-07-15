@@ -6,7 +6,7 @@ assert(is_android)
 
 import("//sky/build/sky_app.gni")
 
-sky_app("stocks") {
+sky_app("fitness") {
   apk_name = "Fitness"
   main_dart = "lib/main.dart"
   manifest = "sky.yaml"
