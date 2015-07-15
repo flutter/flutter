@@ -1249,8 +1249,10 @@ class RenderViewport extends RenderBox with RenderObjectWithChildMixin<RenderBox
 
 class RenderImage extends RenderBox {
 
-  RenderImage(sky.Image image, Size requestedSize)
-    : _image = image, _requestedSize = requestedSize;
+  RenderImage(sky.Image image, Size requestedSize, { sky.ColorFilter colorFilter })
+    : _image = image,
+      _requestedSize = requestedSize,
+      _colorFilter = colorFilter;
 
   sky.Image _image;
   sky.Image get image => _image;
@@ -1272,6 +1274,26 @@ class RenderImage extends RenderBox {
       return;
     _requestedSize = value;
     markNeedsLayout();
+  }
+
+  sky.ColorFilter _colorFilter;
+  sky.ColorFilter get colorFilter => _colorFilter;
+  void set colorFilter (sky.ColorFilter value) {
+    if (value == _colorFilter)
+      return;
+    _colorFilter = value;
+    _cachedPaint = null;
+    markNeedsPaint();
+  }
+
+  Paint _cachedPaint;
+  Paint get _paint {
+    if (_cachedPaint == null) {
+      _cachedPaint = new Paint();
+      if (colorFilter != null)
+        _cachedPaint.setColorFilter(colorFilter);
+    }
+    return _cachedPaint;
   }
 
   Size _sizeForConstraints(BoxConstraints innerConstraints) {
@@ -1350,7 +1372,7 @@ class RenderImage extends RenderBox {
       canvas.scale(widthScale, heightScale);
       offset = Offset.zero;
     }
-    canvas.drawImage(_image, offset.toPoint(), new Paint());
+    canvas.drawImage(_image, offset.toPoint(), _paint);
     if (needsScale)
       canvas.restore();
   }

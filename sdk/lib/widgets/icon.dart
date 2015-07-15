@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:sky' as sky;
+
 import 'package:sky/mojo/asset_bundle.dart';
 import 'package:sky/widgets/basic.dart';
 import 'package:sky/widgets/theme.dart';
@@ -46,11 +48,18 @@ AssetBundle _initIconBundle() {
 final AssetBundle _iconBundle = _initIconBundle();
 
 class Icon extends Component {
-  Icon({ String key, this.size, this.type: '', this.color }) : super(key: key);
+  Icon({
+    String key,
+    this.size,
+    this.type: '',
+    this.color,
+    this.colorFilter
+  }) : super(key: key);
 
   final int size;
   final String type;
   final IconThemeColor color;
+  final sky.ColorFilter colorFilter;
 
   String get colorSuffix {
     IconThemeColor iconThemeColor = color;
@@ -84,7 +93,8 @@ class Icon extends Component {
     return new AssetImage(
       bundle: _iconBundle,
       name: '${category}/${density}/ic_${subtype}_${colorSuffix}_${size}dp.png',
-      size: new Size(size.toDouble(), size.toDouble())
+      size: new Size(size.toDouble(), size.toDouble()),
+      colorFilter: colorFilter
     );
   }
 }

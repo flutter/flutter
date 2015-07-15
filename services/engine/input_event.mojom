@@ -56,6 +56,8 @@ struct GestureData {
   float velocityY;
 };
 
+// TODO(abarth): Should we have a malloc-free way of creating an input event
+// message? What we have now could stress out the Android Java GC.
 struct InputEvent {
   EventType type;
   int64 time_stamp;

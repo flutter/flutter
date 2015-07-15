@@ -485,28 +485,32 @@ class Text extends Component {
 }
 
 class Image extends LeafRenderObjectWrapper {
-  Image({ sky.Image image, this.size })
+  Image({ sky.Image image, this.size, this.colorFilter })
     : image = image,
       super(key: image.hashCode.toString()); // TODO(ianh): Find a way to uniquely identify the sky.Image rather than using hashCode, which could collide
 
   final sky.Image image;
   final Size size;
+  final sky.ColorFilter colorFilter;
 
-  RenderImage createNode() => new RenderImage(image, size);
+  RenderImage createNode() => new RenderImage(image, size, colorFilter: colorFilter);
   RenderImage get root => super.root;
 
   void syncRenderObject(Widget old) {
     super.syncRenderObject(old);
     root.image = image;
     root.requestedSize = size;
+    root.colorFilter = colorFilter;
   }
 }
 
 class FutureImage extends StatefulComponent {
-  FutureImage({ String key, this.image, this.size }) : super(key: key);
+  FutureImage({ String key, this.image, this.size, this.colorFilter })
+    : super(key: key);
 
   Future<sky.Image> image;
   Size size;
+  sky.ColorFilter colorFilter;
 
   sky.Image _resolvedImage;
 
@@ -534,34 +538,44 @@ class FutureImage extends StatefulComponent {
   }
 
   Widget build() {
-    return new Image(image: _resolvedImage, size: size);
+    return new Image(image: _resolvedImage, size: size, colorFilter: colorFilter);
   }
 }
 
 class NetworkImage extends Component {
-  NetworkImage({ String src, this.size })
+  NetworkImage({ String src, this.size, this.colorFilter })
     : src = src,
       super(key: src);
 
   final String src;
   final Size size;
+  final sky.ColorFilter colorFilter;
 
   Widget build() {
-    return new FutureImage(image: image_cache.load(src), size: size);
+    return new FutureImage(
+      image: image_cache.load(src),
+      size: size,
+      colorFilter: colorFilter
+    );
   }
 }
 
 class AssetImage extends Component {
-  AssetImage({ String name, this.bundle, this.size })
+  AssetImage({ String name, this.bundle, this.size, this.colorFilter })
     : name = name,
       super(key: name);
 
   final String name;
   final AssetBundle bundle;
   final Size size;
+  final sky.ColorFilter colorFilter;
 
   Widget build() {
-    return new FutureImage(image: bundle.loadImage(name), size: size);
+    return new FutureImage(
+      image: bundle.loadImage(name),
+      size: size,
+      colorFilter: colorFilter
+    );
   }
 }
 

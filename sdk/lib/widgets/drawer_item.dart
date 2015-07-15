@@ -46,26 +46,24 @@ class DrawerItem extends ButtonBase {
     return colors.transparent;
   }
 
+  sky.ColorFilter _getColorFilter(ThemeData themeData) {
+    if (selected)
+      return new sky.ColorFilter.mode(themeData.primaryColor, sky.TransferMode.srcATop);
+    return new sky.ColorFilter.mode(const Color(0x73000000), sky.TransferMode.dstIn);
+  }
+
   Widget buildContent() {
     ThemeData themeData = Theme.of(this);
 
     List<Widget> flexChildren = new List<Widget>();
     if (icon != null) {
-      Widget child = new Icon(type: icon, size: 24);
-      if (selected) {
-        child = new ColorFilter(
-          color: themeData.primaryColor,
-          transferMode: sky.TransferMode.srcATop,
-          child: child
-        );
-      }
       flexChildren.add(
-        new Opacity(
-          opacity: selected ? 1.0 : 0.45,
-          child: new Padding(
-            padding: const EdgeDims.symmetric(horizontal: 16.0),
-            child: child
-          )
+        new Padding(
+          padding: const EdgeDims.symmetric(horizontal: 16.0),
+          child: new Icon(
+            type: icon,
+            size: 24,
+            colorFilter: _getColorFilter(themeData))
         )
       );
     }
