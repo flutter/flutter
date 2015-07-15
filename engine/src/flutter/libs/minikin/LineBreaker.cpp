@@ -29,9 +29,7 @@ using std::vector;
 namespace android {
 
 const int CHAR_TAB = 0x0009;
-const uint16_t CHAR_HYPHEN_MINUS = 0x002D;
 const uint16_t CHAR_SOFT_HYPHEN = 0x00AD;
-const uint16_t CHAR_HYPHEN = 0x2010;
 
 // Large scores in a hierarchy; we prefer desperate breaks to an overfull line. All these
 // constants are larger than any reasonable actual width score.
@@ -107,6 +105,24 @@ static bool isLineEndSpace(uint16_t c) {
             c == 0x205F || c == 0x3000;
 }
 
+// This function determines whether a character is like U+2010 HYPHEN in
+// line breaking and usage: a character immediately after which line breaks
+// are allowed, but words containing it should not be automatically
+// hyphenated. This is a curated set, created by manually inspecting all
+// the characters that have the Unicode line breaking property of BA or HY
+// and seeing which ones are hyphens.
+static bool isLineBreakingHyphen(uint16_t c) {
+    return (c == 0x002D || // HYPHEN-MINUS
+            c == 0x058A || // ARMENIAN HYPHEN
+            c == 0x05BE || // HEBREW PUNCTUATION MAQAF
+            c == 0x1400 || // CANADIAN SYLLABICS HYPHEN
+            c == 0x2010 || // HYPHEN
+            c == 0x2013 || // EN DASH
+            c == 0x2027 || // HYPHENATION POINT
+            c == 0x2E17 || // DOUBLE OBLIQUE HYPHEN
+            c == 0x2E40);  // DOUBLE HYPHEN
+}
+
 // Ordinarily, this method measures the text in the range given. However, when paint
 // is nullptr, it assumes the widths have already been calculated and stored in the
 // width buffer.
@@ -163,7 +179,7 @@ float LineBreaker::addStyleRun(MinikinPaint* paint, const FontCollection* typefa
             if (c != CHAR_SOFT_HYPHEN) {
                 // TODO: Add a new type of HyphenEdit for breaks whose hyphen already exists, so
                 // we can pass the whole word down to Hyphenator like the soft hyphen case.
-                bool wordEndsInHyphen = (c == CHAR_HYPHEN_MINUS || c == CHAR_HYPHEN);
+                bool wordEndsInHyphen = isLineBreakingHyphen(c);
                 if (paint != nullptr && mHyphenator != nullptr &&
                         mHyphenationFrequency != kHyphenationFrequency_None &&
                         !wordEndsInHyphen && !temporarilySkipHyphenation &&
