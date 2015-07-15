@@ -6,6 +6,7 @@ import 'dart:sky' as sky;
 
 import 'package:sky/widgets/basic.dart';
 import 'package:sky/widgets/checkbox.dart';
+import 'package:sky/widgets/navigator.dart';
 import 'package:sky/widgets/popup_menu_item.dart';
 import 'package:sky/widgets/popup_menu.dart';
 
@@ -16,12 +17,14 @@ class StockMenu extends Component {
     String key,
     this.showing,
     this.onStatusChanged,
+    this.navigator,
     this.autorefresh: false,
     this.onAutorefreshChanged
   }) : super(key: key);
 
-  bool showing;
-  PopupMenuStatusChangedCallback onStatusChanged;
+  final bool showing;
+  final PopupMenuStatusChangedCallback onStatusChanged;
+  final Navigator navigator;
   final bool autorefresh;
   final ValueChanged onAutorefreshChanged;
 
@@ -40,7 +43,8 @@ class StockMenu extends Component {
         ],
         level: 4,
         showing: showing,
-        onStatusChanged: onStatusChanged
+        onStatusChanged: onStatusChanged,
+        navigator: navigator
       ),
       right: sky.view.paddingRight,
       top: sky.view.paddingTop

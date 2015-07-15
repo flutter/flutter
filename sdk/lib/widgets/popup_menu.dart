@@ -11,6 +11,7 @@ import 'package:sky/theme/colors.dart';
 import 'package:sky/theme/shadows.dart';
 import 'package:sky/widgets/animated_component.dart';
 import 'package:sky/widgets/basic.dart';
+import 'package:sky/widgets/navigator.dart';
 import 'package:sky/widgets/popup_menu_item.dart';
 import 'package:sky/widgets/scrollable_viewport.dart';
 
@@ -37,13 +38,15 @@ class PopupMenu extends AnimatedComponent {
     this.showing,
     this.onStatusChanged,
     this.items,
-    this.level
+    this.level,
+    this.navigator
   }) : super(key: key);
 
   bool showing;
   PopupMenuStatusChangedCallback onStatusChanged;
   List<PopupMenuItem> items;
   int level;
+  Navigator navigator;
 
   AnimatedType<double> _opacity;
   AnimatedType<double> _width;
@@ -79,6 +82,7 @@ class PopupMenu extends AnimatedComponent {
     if (items.length != source.items.length)
       _updateAnimationVariables();
     items = source.items;
+    navigator = source.navigator;
     super.syncFields(source);
   }
 
@@ -115,14 +119,23 @@ class PopupMenu extends AnimatedComponent {
   PopupMenuStatus _lastStatus;
   void _checkForStateChanged() {
     PopupMenuStatus status = _status;
-    if (_lastStatus != null && status != _lastStatus && onStatusChanged != null)
-      onStatusChanged(status);
+    if (_lastStatus != null && status != _lastStatus) {
+      if (status == PopupMenuStatus.inactive &&
+          navigator != null && 
+          navigator.currentRoute.key == this)
+        navigator.pop();
+      if (onStatusChanged != null)
+        onStatusChanged(status);
+    }
     _lastStatus = status;
   }
+
 
   void _open() {
     _animationList.interval = null;
     _performance.play();
+    if (navigator != null)
+      navigator.pushState(this, (_) => _close());
   }
 
   void _close() {

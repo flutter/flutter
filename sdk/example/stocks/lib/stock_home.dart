@@ -306,6 +306,7 @@ class StockHome extends AnimatedComponent {
       children: [new StockMenu(
         showing: _menuShowing,
         onStatusChanged: _handleMenuStatusChanged,
+        navigator: navigator,
         autorefresh: _autorefresh,
         onAutorefreshChanged: _handleAutorefreshChanged
       )],
