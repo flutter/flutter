@@ -5,6 +5,7 @@
 package org.domokit.sky.shell;
 
 import android.content.Context;
+import android.os.Build;
 import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.SurfaceHolder;
@@ -170,15 +171,23 @@ public class PlatformViewAndroid extends SurfaceView
         inputEvent.timeStamp = event.getEventTime();
         inputEvent.pointerData = pointerData;
 
-
-
         mSkyEngine.onInputEvent(inputEvent);
     }
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
+        // TODO(abarth): This version check might not be effective in some
+        // versions of Android that statically compile code and will be upset
+        // at the lack of |requestUnbufferedDispatch|. Instead, we should factor
+        // version-dependent code into separate classes for each supported
+        // version and dispatch dynamically.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            requestUnbufferedDispatch(event);
+        }
         mGestureProvider.onTouchEvent(event);
 
+        // TODO(abarth): Rather than unpacking these events here, we should
+        // probably send them in one packet to the engine.
         int maskedAction = event.getActionMasked();
         // ACTION_UP, ACTION_POINTER_UP, ACTION_DOWN, and ACTION_POINTER_DOWN
         // only apply to a single pointer, other events apply to all pointers.
