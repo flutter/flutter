@@ -16,9 +16,9 @@
 
 #include <vector>
 #include <memory>
-#include <cctype>
 #include <algorithm>
 #include <string>
+#include <unicode/uchar.h>
 
 // HACK: for reading pattern file
 #include <fcntl.h>
@@ -95,8 +95,19 @@ void Hyphenator::hyphenate(vector<uint8_t>* result, const uint16_t* word, size_t
                     hyphenateSoft(result, word, len);
                     return;
                 }
-                // TODO: use locale-sensitive case folding from ICU.
-                c = tolower(c);
+                // TODO: This uses ICU's simple character to character lowercasing, which ignores
+                // the locale, and ignores cases when lowercasing a character results in more than
+                // one character. It should be fixed to consider the locale (in order for it to work
+                // correctly for Turkish and Azerbaijani), as well as support one-to-many, and
+                // many-to-many case conversions (including non-BMP cases).
+                if (c < 0x00C0) { // U+00C0 is the lowest uppercase non-ASCII character
+                    // Convert uppercase ASCII to lowercase ASCII, but keep other characters as-is
+                    if (0x0041 <= c && c <= 0x005A) {
+                        c += 0x0020;
+                    }
+                } else {
+                    c = u_tolower(c);
+                }
             }
             auto search = node->succ.find(c);
             if (search != node->succ.end()) {
