@@ -9,6 +9,8 @@
 #include "dart/runtime/include/dart_api.h"
 #include "sky/engine/tonic/dart_persistent_value.h"
 #include "sky/engine/tonic/dart_state.h"
+#include "sky/engine/wtf/PassRefPtr.h"
+#include "sky/engine/wtf/RefCounted.h"
 #include "sky/engine/wtf/RefPtr.h"
 
 namespace blink {
