@@ -10,7 +10,7 @@
     <uses-feature android:name="android.hardware.sensor.accelerometer" android:required="true" />
 
     <application android:icon="@mipmap/ic_launcher" android:label="Sky" android:name="SkyDemoApplication">
-        <activity android:configChanges="orientation|keyboardHidden|keyboard|screenSize" android:documentLaunchMode="always" android:hardwareAccelerated="true" android:launchMode="standard" android:name="SkyDemoActivity" android:theme="@android:style/Theme.Holo.Light.NoActionBar">
+        <activity android:configChanges="orientation|keyboardHidden|keyboard|screenSize" android:documentLaunchMode="always" android:hardwareAccelerated="true" android:launchMode="standard" android:name="SkyDemoActivity" android:theme="@android:style/Theme.Black.NoTitleBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

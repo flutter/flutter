@@ -12,7 +12,7 @@
     <application android:name="org.domokit.sky.shell.SkyApplication" android:label="Stocks">
         <activity android:name="org.domokit.sky.shell.SkyActivity"
                   android:launchMode="singleTask"
-                  android:theme="@android:style/Theme.Holo.Light.NoActionBar"
+                  android:theme="@android:style/Theme.Black.NoTitleBar"
                   android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
                   android:hardwareAccelerated="true">
             <intent-filter>
