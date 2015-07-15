@@ -30,7 +30,7 @@ import 'package:vector_math/vector_math.dart';
 // The right nav can vary depending on content.
 
 const double _kWidth = 304.0;
-const double _kMinFlingVelocity = 0.4;
+const double _kMinFlingVelocity = 1.2;
 const Duration _kBaseSettleDuration = const Duration(milliseconds: 246);
 // TODO(mpcomplete): The curve must be linear if we want the drawer to track
 // the user's finger. Odeon remedies this by attaching spring forces to the
@@ -176,8 +176,8 @@ class Drawer extends AnimatedComponent {
   }
 
   void handleFlingStart(event) {
-    double velocityX = event.velocityX / 1000;
+    double velocityX = event.velocityX / _kWidth;
     if (velocityX.abs() >= _kMinFlingVelocity)
-      _performance.fling(velocity: velocityX / _kWidth);
+      _performance.fling(velocity: velocityX);
   }
 }

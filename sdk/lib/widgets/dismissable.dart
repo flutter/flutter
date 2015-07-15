@@ -127,12 +127,9 @@ class Dismissable extends AnimatedComponent {
 
     if (_isHorizontalFlingGesture(event)) {
       _dragUnderway = false;
-      double distance = 1.0 - _performance.progress;
-      if (distance > 0.0) {
-        double duration = _kCardDismissFadeout.inSeconds * distance / event.velocityX.abs();
-        _dragX = event.velocityX.sign;
-        _performance.timeline.animateTo(1.0, duration: duration);
-      }
+      _dragX = event.velocityX.sign;
+      _position.end = _activeCardDragEndPoint;
+      _performance.fling(velocity: event.velocityX.abs() / _width);
     }
   }
 

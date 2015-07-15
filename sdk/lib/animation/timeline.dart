@@ -4,131 +4,88 @@
 
 import 'dart:async';
 
-import 'package:sky/base/scheduler.dart' as scheduler;
+import 'package:newton/newton.dart';
+import 'package:sky/animation/animated_simulation.dart';
 
-class Ticker {
-  Ticker(Function onTick) : _onTick = onTick;
+const  double _kEpsilon = 0.001;
 
-  final Function _onTick;
+// Simple simulation that linearly varies from |begin| to |end| over |duration|.
+class TweenSimulation extends Simulation {
+  final double _durationInSeconds;
+  final double begin;
+  final double end;
 
-  Completer _completer;
-  int _animationId;
-
-  Future start() {
-    assert(!isTicking);
-    _completer = new Completer();
-    _scheduleTick();
-    return _completer.future;
+  TweenSimulation(Duration duration, this.begin, this.end) :
+      _durationInSeconds = duration.inMilliseconds / 1000.0 {
+    assert(_durationInSeconds > 0.0);
+    assert(begin != null && begin >= 0.0 && begin <= 1.0);
+    assert(end != null && end >= 0.0 && end <= 1.0);
   }
 
-  void stop() {
-    if (!isTicking)
-      return;
-
-    if (_animationId != null) {
-      scheduler.cancelAnimationFrame(_animationId);
-      _animationId = null;
-    }
-
-    Completer localCompleter = _completer;
-    _completer = null;
-
-    // We take the _completer into a local variable so that !isTicking when we
-    // actually complete the future.
-    assert(!isTicking);
-    localCompleter.complete();
+  double x(double timeInSeconds) {
+    assert(timeInSeconds >= 0.0);
+    final double t = timeInSeconds / _durationInSeconds;
+    return t >= 1.0 ? end : begin + (end - begin) * t;
   }
 
-  bool get isTicking => _completer != null;
+  double dx(double timeInSeconds) => 1.0;
 
-  void _tick(double timeStamp) {
-    assert(isTicking);
-    assert(_animationId != null);
-    _animationId = null;
-
-    _onTick(timeStamp);
-
-    if (isTicking)
-      _scheduleTick();
-  }
-
-  void _scheduleTick() {
-    assert(isTicking);
-    assert(_animationId == null);
-    _animationId = scheduler.requestAnimationFrame(_tick);
-  }
+  bool isDone(double timeInSeconds) => timeInSeconds > _durationInSeconds;
 }
 
 class Timeline {
-
   Timeline(Function onTick) : _onTick = onTick {
-    _ticker = new Ticker(_tick);
+    _animation = new AnimatedSimulation(_tick);
   }
 
   final Function _onTick;
-  Ticker _ticker;
+  AnimatedSimulation _animation;
 
-  double _value = 0.0;
-  double get value => _value;
+  double get value => _animation.value.clamp(0.0, 1.0);
   void set value(double newValue) {
     assert(newValue != null && newValue >= 0.0 && newValue <= 1.0);
-    assert(!_ticker.isTicking);
-    _value = newValue;
-    _onTick(_value);
+    assert(!isAnimating);
+    _animation.value = newValue;
   }
 
-  double _duration;
-  double _begin;
-  double _end;
+  bool get isAnimating => _animation.isAnimating;
 
-  double _startTime;
-
-  Future start({
-    double duration,
+  Future _start({
+    Duration duration,
     double begin: 0.0,
     double end: 1.0
   }) {
-    assert(duration != null && duration > 0.0);
-    assert(begin != null && begin >= 0.0 && begin <= 1.0);
-    assert(end != null && end >= 0.0 && end <= 1.0);
+    assert(!_animation.isAnimating);
 
-    assert(!_ticker.isTicking);
-
-    _duration = duration;
-    _begin = begin;
-    _end = end;
-
-    _startTime = null;
-    _value = begin;
-
-    return _ticker.start();
+    return _animation.start(new TweenSimulation(duration, begin, end));
   }
 
-  Future animateTo(double target, { double duration }) {
-    return start(duration: duration, begin: _value, end: target);
+  Future animateTo(double target, { Duration duration }) {
+    return _start(duration: duration, begin: value, end: target);
   }
 
   void stop() {
-    _duration = null;
-    _begin = null;
-    _end = null;
-    _startTime = null;
-    _ticker.stop();
+    _animation.stop();
   }
 
-  bool get isAnimating => _ticker.isTicking;
+  static final SpringDescription _kDefaultSpringDesc =
+      new SpringDescription.withDampingRatio(
+          mass: 1.0, springConstant: 500.0, ratio: 1.0);
 
-  void _tick(double timeStamp) {
-    if (_startTime == null)
-      _startTime = timeStamp;
+  Simulation defaultSpringSimulation({double velocity: 0.0}) {
+    // Target just past the 0 or 1 endpoint, because the animation will stop
+    // once the Spring gets within the epsilon, and we want to stop at 0 or 1.
+    double target = velocity < 0.0 ? -_kEpsilon : 1.0 + _kEpsilon;
+    return new SpringSimulation(_kDefaultSpringDesc, value, target, velocity);
+  }
 
-    final double t = ((timeStamp - _startTime) / _duration).clamp(0.0, 1.0);
-    final bool isLastTick = t >= 1.0;
+  // Give |simulation| control over the timeline.
+  Future fling(Simulation simulation) {
+    stop();
+    return _animation.start(simulation);
+  }
 
-    _value = isLastTick ? _end : _begin + (_end - _begin) * t;
-    _onTick(_value);
-
-    if (isLastTick)
-      stop();
+  void _tick(double newValue) {
+    _onTick(value);
   }
 }

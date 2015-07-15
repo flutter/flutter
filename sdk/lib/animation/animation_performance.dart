@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:newton/newton.dart';
 import 'package:sky/animation/timeline.dart';
 import 'package:sky/animation/curves.dart';
 
@@ -110,15 +111,11 @@ class AnimationPerformance {
   }
 
   // Resume animating in a direction, with the given velocity.
-  // TODO(mpcomplete): this should be a force with friction so it slows over
-  // time.
+  // TODO(mpcomplete): Allow user to specify the Simulation.
   void fling({double velocity: 1.0}) {
-    double target = velocity.sign < 0.0 ? 0.0 : 1.0;
-    double distance = (target - timeline.value).abs();
-    double duration = distance / velocity.abs();
-
-    if (distance > 0.0)
-      timeline.animateTo(target, duration: duration);
+    Simulation simulation =
+        timeline.defaultSpringSimulation(velocity: velocity);
+    timeline.fling(simulation);
   }
 
   final List<Function> _listeners = new List<Function>();
@@ -141,7 +138,7 @@ class AnimationPerformance {
     double remainingDistance = (target - timeline.value).abs();
     timeline.stop();
     if (remainingDistance != 0.0)
-      timeline.animateTo(target, duration: remainingDistance * duration.inMilliseconds);
+      timeline.animateTo(target, duration: duration * remainingDistance);
   }
 
   void _tick(double t) {
