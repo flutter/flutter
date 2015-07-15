@@ -32,7 +32,8 @@ void DartSnapshotLoader::LoadSnapshot(mojo::ScopedDataPipeConsumerHandle pipe,
 }
 
 void DartSnapshotLoader::OnDataAvailable(const void* data, size_t num_bytes) {
-  buffer_.append(static_cast<const uint8_t*>(data), num_bytes);
+  const uint8_t* bytes = static_cast<const uint8_t*>(data);
+  buffer_.insert(buffer_.end(), bytes, bytes + num_bytes);
 }
 
 void DartSnapshotLoader::OnDataComplete() {

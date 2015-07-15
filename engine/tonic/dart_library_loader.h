@@ -5,6 +5,7 @@
 #ifndef SKY_ENGINE_TONIC_DART_LIBRARY_LOADER_H_
 #define SKY_ENGINE_TONIC_DART_LIBRARY_LOADER_H_
 
+#include <vector>
 #include "base/callback_forward.h"
 #include "base/macros.h"
 #include "base/memory/weak_ptr.h"
@@ -12,7 +13,6 @@
 #include "sky/engine/wtf/HashMap.h"
 #include "sky/engine/wtf/HashSet.h"
 #include "sky/engine/wtf/OwnPtr.h"
-#include "sky/engine/wtf/Vector.h"
 #include "sky/engine/wtf/text/WTFString.h"
 
 namespace blink {
@@ -64,8 +64,8 @@ class DartLibraryLoader {
   Dart_Handle Import(Dart_Handle library, Dart_Handle url);
   Dart_Handle Source(Dart_Handle library, Dart_Handle url);
   Dart_Handle CanonicalizeURL(Dart_Handle library, Dart_Handle url);
-  void DidCompleteImportJob(ImportJob* job, const Vector<uint8_t>& buffer);
-  void DidCompleteSourceJob(SourceJob* job, const Vector<uint8_t>& buffer);
+  void DidCompleteImportJob(ImportJob* job, const std::vector<uint8_t>& buffer);
+  void DidCompleteSourceJob(SourceJob* job, const std::vector<uint8_t>& buffer);
   void DidFailJob(Job* job);
 
   DartState* dart_state_;

@@ -21,7 +21,7 @@ using mojo::common::DataPipeDrainer;
 namespace blink {
 
 // A DartLibraryLoader::Job represents a network load. It fetches data from the
-// network and buffers the data in Vector. To cancel the job, delete this
+// network and buffers the data in std::vector. To cancel the job, delete this
 // object.
 class DartLibraryLoader::Job : public DartDependency,
                                public DataPipeDrainer::Client {
@@ -37,7 +37,7 @@ class DartLibraryLoader::Job : public DartDependency,
  protected:
   DartLibraryLoader* loader_;
   // TODO(abarth): Should we be using SharedBuffer to buffer the data?
-  Vector<uint8_t> buffer_;
+  std::vector<uint8_t> buffer_;
 
  private:
   void OnStreamAvailable(mojo::ScopedDataPipeConsumerHandle pipe) {
@@ -50,7 +50,8 @@ class DartLibraryLoader::Job : public DartDependency,
 
   // DataPipeDrainer::Client
   void OnDataAvailable(const void* data, size_t num_bytes) override {
-    buffer_.append(static_cast<const uint8_t*>(data), num_bytes);
+    const uint8_t* bytes = static_cast<const uint8_t*>(data);
+    buffer_.insert(buffer_.end(), bytes, bytes + num_bytes);
   }
   // Subclasses must implement OnDataComplete.
 
@@ -141,20 +142,20 @@ class DartLibraryLoader::WatcherSignaler {
         resolved_dependency_(resolved_dependency) {}
 
   ~WatcherSignaler() {
-    Vector<DependencyWatcher*> completed_watchers;
+    std::vector<DependencyWatcher*> completed_watchers;
     for (const auto& watcher : loader_.dependency_watchers_) {
       if (watcher->DidResolveDependency(resolved_dependency_,
                                         catcher_->dependencies()))
-        completed_watchers.append(watcher.get());
+        completed_watchers.push_back(watcher.get());
     }
 
     // Notice that we remove the dependency catcher and extract all the
     // callbacks before running any of them. We don't want to be re-entered
     // below the callbacks and end up in an inconsistent state.
     catcher_.clear();
-    Vector<base::Closure> callbacks;
+    std::vector<base::Closure> callbacks;
     for (const auto& watcher : completed_watchers) {
-      callbacks.append(watcher->callback());
+      callbacks.push_back(watcher->callback());
       loader_.dependency_watchers_.remove(watcher);
     }
 
@@ -235,8 +236,9 @@ Dart_Handle DartLibraryLoader::CanonicalizeURL(Dart_Handle library,
   return library_provider_->CanonicalizeURL(library, url);
 }
 
-void DartLibraryLoader::DidCompleteImportJob(ImportJob* job,
-                                             const Vector<uint8_t>& buffer) {
+void DartLibraryLoader::DidCompleteImportJob(
+    ImportJob* job,
+    const std::vector<uint8_t>& buffer) {
   DartIsolateScope scope(dart_state_->isolate());
   DartApiScope api_scope;
 
@@ -254,8 +256,9 @@ void DartLibraryLoader::DidCompleteImportJob(ImportJob* job,
   jobs_.remove(job);
 }
 
-void DartLibraryLoader::DidCompleteSourceJob(SourceJob* job,
-                                             const Vector<uint8_t>& buffer) {
+void DartLibraryLoader::DidCompleteSourceJob(
+    SourceJob* job,
+    const std::vector<uint8_t>& buffer) {
   DartIsolateScope scope(dart_state_->isolate());
   DartApiScope api_scope;
 
