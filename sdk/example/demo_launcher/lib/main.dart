@@ -90,27 +90,33 @@ List<SkyDemo> demos = [
     )
   ),
   new SkyDemo(
-    name: 'Interactive Flex',
-    href: '../../rendering/interactive_flex.dart',
-    bundle: 'interactive_flex.skyx',
-    description: 'Swipe to adjust the layout of the app',
+    name: 'Fitness',
+    href: '../../fitness/lib/main.dart',
+    bundle: 'fitness.skyx',
+    description: 'Collin should write a nice description',
     textTheme: typography.white,
     decoration: new BoxDecoration(
       backgroundColor: const Color(0xFF0081C6)
     )
   ),
   new SkyDemo(
-    name: 'Sector',
-    href: '../../widgets/sector.dart',
-    bundle: 'sector.skyx',
-    description: 'Demo of alternative layouts',
-    textTheme: typography.black,
+    name: 'Cards',
+    href: '../../widgets/card_collection.dart',
+    bundle: 'cards.skyx',
+    description: 'Demo of interactive Cards',
+    textTheme: typography.white,
     decoration: new BoxDecoration(
-      backgroundColor: colors.black,
-      backgroundImage: new BackgroundImage(
-        image: _bundle.loadImage('assets/sector_thumbnail.png'),
-        fit: BackgroundFit.cover
-      )
+      backgroundColor: const Color(0xFF0081C6)
+    )
+  ),
+  new SkyDemo(
+    name: 'Interactive Text',
+    href: '../../rendering/interactive_flex.dart',
+    bundle: 'interactive_flex.skyx',
+    description: 'Swipe to reflow the app',
+    textTheme: typography.white,
+    decoration: new BoxDecoration(
+      backgroundColor: const Color(0xFF0081C6)
     )
   ),
   // new SkyDemo(
@@ -178,7 +184,7 @@ class SkyHome extends App {
   Widget build() {
     return new Theme(
       data: new ThemeData(
-        brightness: ThemeBrightness.dark,
+        brightness: ThemeBrightness.light,
         primarySwatch: colors.Teal
       ),
       child: new TaskDescription(

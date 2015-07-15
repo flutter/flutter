@@ -12,11 +12,16 @@ skyx("piano") {
   main_dart = "piano.dart"
 }
 
+skyx("cards") {
+  main_dart = "card_collection.dart"
+}
+
 group("widgets") {
   testonly = true
 
   deps = [
-    ":sector",
+    ":cards",
     ":piano",
+    ":sector",
   ]
 }

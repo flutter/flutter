@@ -13,6 +13,8 @@ import 'package:sky/widgets/variable_height_scrollable.dart';
 import 'package:sky/widgets/theme.dart';
 import 'package:sky/widgets/tool_bar.dart';
 import 'package:sky/widgets/widget.dart';
+import 'package:sky/theme/colors.dart' as colors;
+import 'package:sky/widgets/task_description.dart';
 
 
 class CardCollectionApp extends App {
@@ -71,9 +73,19 @@ class CardCollectionApp extends App {
       )
     );
 
-    return new Scaffold(
-      toolbar: new ToolBar(center: new Text('Swipe Away')),
-      body: cardCollection
+    return new Theme(
+      data: new ThemeData(
+        brightness: ThemeBrightness.light,
+        primarySwatch: colors.Blue,
+        accentColor: colors.RedAccent[200]
+      ),
+      child: new TaskDescription(
+        label: 'Cards',
+        child: new Scaffold(
+          toolbar: new ToolBar(center: new Text('Swipe Away')),
+          body: cardCollection
+        )
+      )
     );
   }
 }

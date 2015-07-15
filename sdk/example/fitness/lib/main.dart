@@ -7,6 +7,7 @@ import 'package:sky/widgets/basic.dart';
 import 'package:sky/widgets/navigator.dart';
 import 'package:sky/widgets/theme.dart';
 import 'package:sky/widgets/widget.dart';
+import 'package:sky/widgets/task_description.dart';
 
 import 'measurement.dart';
 import 'home.dart';
@@ -20,7 +21,7 @@ class FitnessApp extends App {
   void initState() {
     _navigationState = new NavigationState([
       new Route(
-        name: '/', 
+        name: '/',
         builder: (navigator, route) => new HomeFragment(navigator, _userData)
       ),
       new Route(
@@ -61,7 +62,10 @@ class FitnessApp extends App {
         primarySwatch: colors.Indigo,
         accentColor: colors.PinkAccent[200]
       ),
-      child: new Navigator(_navigationState)
+      child: new TaskDescription(
+        label: 'Fitness',
+        child: new Navigator(_navigationState)
+      )
     );
   }
 }
