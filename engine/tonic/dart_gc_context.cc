@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <utility>
+
 #include "sky/engine/tonic/dart_gc_context.h"
 
 namespace blink {
@@ -15,13 +17,14 @@ DartGCContext::~DartGCContext() {
 Dart_WeakReferenceSet DartGCContext::AddToSetForRoot(
     const void* root,
     Dart_WeakPersistentHandle handle) {
-  const auto& it = references_.add(root, nullptr);
-  if (!it.isNewEntry) {
-    Dart_AppendToWeakReferenceSet(it.storedValue->value, handle, handle);
-    return it.storedValue->value;
+  const auto& result = references_.insert(std::make_pair(root, nullptr));
+  if (!result.second) {
+    // Already present.
+    Dart_AppendToWeakReferenceSet(result.first->second, handle, handle);
+    return result.first->second;
   }
-  it.storedValue->value = Dart_NewWeakReferenceSet(builder_, handle, handle);
-  return it.storedValue->value;
+  result.first->second = Dart_NewWeakReferenceSet(builder_, handle, handle);
+  return result.first->second;
 }
 
 }  // namespace blink

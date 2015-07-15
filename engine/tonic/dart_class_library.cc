@@ -21,13 +21,14 @@ DartClassLibrary::~DartClassLibrary() {
 Dart_PersistentHandle DartClassLibrary::GetClass(const DartWrapperInfo& info) {
   DCHECK(provider_);
 
-  const auto& result = cache_.add(&info, nullptr);
-  if (!result.isNewEntry)
-    return result.storedValue->value;
-
+  const auto& result = cache_.insert(std::make_pair(&info, nullptr));
+  if (!result.second) {
+    // Already present, return value.
+    return result.first->second;
+  }
   Dart_Handle class_handle = provider_->GetClassByName(info.interface_name);
-  result.storedValue->value = Dart_NewPersistentHandle(class_handle);
-  return result.storedValue->value;
+  result.first->second = Dart_NewPersistentHandle(class_handle);
+  return result.first->second;
 }
 
 }  // namespace blink

@@ -5,9 +5,10 @@
 #ifndef SKY_ENGINE_TONIC_DART_GC_CONTEXT_H_
 #define SKY_ENGINE_TONIC_DART_GC_CONTEXT_H_
 
+#include <unordered_map>
+
 #include "base/macros.h"
 #include "dart/runtime/include/dart_api.h"
-#include "sky/engine/wtf/HashMap.h"
 
 namespace blink {
 
@@ -21,7 +22,7 @@ class DartGCContext {
 
  private:
   Dart_WeakReferenceSetBuilder builder_;
-  HashMap<const void*, Dart_WeakReferenceSet> references_;
+  std::unordered_map<const void*, Dart_WeakReferenceSet> references_;
 
   DISALLOW_COPY_AND_ASSIGN(DartGCContext);
 };
