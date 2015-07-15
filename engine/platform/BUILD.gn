@@ -517,6 +517,10 @@ source_set("platform") {
     "weborigin/SecurityPolicy.h",
   ]
 
+  if (is_ios || is_mac) {
+    sources += [ "fonts/apple/FontPlatformDataApple.cpp" ]
+  }
+
   # Add in the generated files.
   sources += get_target_outputs(":font_family_names") +
              get_target_outputs(":runtime_enabled_features") +
@@ -577,10 +581,6 @@ source_set("platform") {
     set_sources_assignment_filter(sources_assignment_filter)
   }
 
-  if (is_ios) {
-    sources += [ "fonts/ios/FontPlatformDataIOS.cpp" ]
-  }
-
   if (is_linux) {
     direct_dependent_configs = [ "//build/config/linux:fontconfig" ]
   }
@@ -618,7 +618,6 @@ test("platform_unittests") {
     "graphics/GraphicsContextTest.cpp",
     "graphics/ThreadSafeDataTransportTest.cpp",
     "image-decoders/ImageDecoderTest.cpp",
-    "mac/ScrollElasticityControllerTest.mm",
     "testing/RunAllTests.cpp",
     "text/BidiResolverTest.cpp",
     "text/SegmentedStringTest.cpp",

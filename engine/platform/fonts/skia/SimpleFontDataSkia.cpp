@@ -67,7 +67,7 @@ void SimpleFontData::platformInit()
     int vdmxAscent = 0, vdmxDescent = 0;
     bool isVDMXValid = false;
 
-#if OS(LINUX) || OS(ANDROID) || OS(IOS)
+#if OS(LINUX) || OS(ANDROID) || OS(IOS) || OS(MACOSX)
     // Manually digging up VDMX metrics is only applicable when bytecode hinting using FreeType.
     // With GDI, the metrics will already have taken this into account (as needed).
     // With DirectWrite or CoreText, no bytecode hinting is ever done.

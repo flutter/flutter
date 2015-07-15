@@ -124,6 +124,8 @@ void Font::drawGlyphs(GraphicsContext* gc, const SimpleFontData* font,
     SkScalar x = SkFloatToScalar(point.x());
     SkScalar y = SkFloatToScalar(point.y());
 
+// ENABLE_OPENTYPE_VERTICAL is not enabled on MACOSX
+#if !OS(MACOSX)
     const OpenTypeVerticalData* verticalData = font->verticalData();
     if (font->platformData().orientation() == Vertical && verticalData) {
         SkAutoSTMalloc<32, SkPoint> storage(numGlyphs);
@@ -165,6 +167,7 @@ void Font::drawGlyphs(GraphicsContext* gc, const SimpleFontData* font,
         gc->setCTM(savedMatrix);
         return;
     }
+#endif
 
     if (!glyphBuffer.hasOffsets()) {
         SkAutoSTMalloc<64, SkScalar> storage(numGlyphs);

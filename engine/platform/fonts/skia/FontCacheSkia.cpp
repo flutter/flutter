@@ -49,7 +49,7 @@
 #include "third_party/skia/include/ports/SkFontConfigInterface.h"
 #endif
 
-#if !OS(WIN) && !OS(ANDROID) && !OS(IOS)
+#if !OS(WIN) && !OS(ANDROID) && !OS(IOS) && !OS(MACOSX)
 // TODO(bungeman) remove this temporary code ASAP.
 // This namespace exists to ease transition of SkTypeface from using SkStream to SkStreamAsset.
 namespace tmp {
@@ -215,7 +215,7 @@ PassRefPtr<SimpleFontData> FontCache::getLastResortFallbackFont(const FontDescri
 
 PassRefPtr<SkTypeface> FontCache::createTypeface(const FontDescription& fontDescription, const FontFaceCreationParams& creationParams, CString& name)
 {
-#if !OS(WIN) && !OS(ANDROID) && !OS(IOS)
+#if !OS(WIN) && !OS(ANDROID) && !OS(IOS) && !OS(MACOSX)
     if (creationParams.creationType() == CreateFontByFciIdAndTtcIndex) {
         // TODO(dro): crbug.com/381620 Use creationParams.ttcIndex() after
         // https://code.google.com/p/skia/issues/detail?id=1186 gets fixed.
