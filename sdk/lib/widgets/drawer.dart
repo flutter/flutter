@@ -7,12 +7,14 @@ import 'dart:sky' as sky;
 import 'package:sky/animation/animation_performance.dart';
 import 'package:sky/animation/curves.dart';
 import 'package:sky/theme/shadows.dart';
+import 'package:sky/theme/colors.dart' as colors;
 import 'package:sky/widgets/animated_component.dart';
 import 'package:sky/widgets/animation_builder.dart';
 import 'package:sky/widgets/basic.dart';
 import 'package:sky/widgets/navigator.dart';
 import 'package:sky/widgets/scrollable_viewport.dart';
 import 'package:sky/widgets/theme.dart';
+import 'package:vector_math/vector_math.dart';
 
 // TODO(eseidel): Draw width should vary based on device size:
 // http://www.google.com/design/spec/layout/structure.html#structure-side-nav
@@ -33,6 +35,8 @@ const Duration _kBaseSettleDuration = const Duration(milliseconds: 246);
 // TODO(mpcomplete): The curve must be linear if we want the drawer to track
 // the user's finger. Odeon remedies this by attaching spring forces to the
 // initial timeline when animating (so it doesn't look linear).
+const Point _kOpenPosition = Point.origin;
+const Point _kClosedPosition = const Point(-_kWidth, 0.0);
 const Curve _kAnimationCurve = linear;
 
 typedef void DrawerStatusChangeHandler (bool showing);
@@ -60,25 +64,20 @@ class Drawer extends AnimatedComponent {
   DrawerStatusChangedCallback onStatusChanged;
   Navigator navigator;
 
+  AnimatedType<Point> _position;
+  AnimatedColor _maskColor;
   AnimationPerformance _performance;
-  AnimationBuilder _builder;
 
   void initState() {
-    _builder = new AnimationBuilder()
-      ..position = new AnimatedType<Point>(
-          new Point(-_kWidth, 0.0), end: Point.origin, curve: _kAnimationCurve);
-    _performance = _builder.createPerformance([_builder.position],
-                                                duration: _kBaseSettleDuration)
-        ..addListener(_checkForStateChanged);
+    _position = new AnimatedType<Point>(_kClosedPosition, end: _kOpenPosition, curve: _kAnimationCurve);
+    _maskColor = new AnimatedColor(colors.transparent, end: const Color(0x7F000000));
+    _performance = new AnimationPerformance()
+      ..duration = _kBaseSettleDuration
+      ..variable = new AnimatedList([_position, _maskColor])
+      ..addListener(_checkForStateChanged);
     watch(_performance);
     if (showing)
       _show();
-  }
-
-  void _show() {
-    if (navigator != null)
-      navigator.pushState(this, (_) => _performance.reverse());
-    _performance.play();
   }
 
   void syncFields(Drawer source) {
@@ -87,31 +86,35 @@ class Drawer extends AnimatedComponent {
     navigator = source.navigator;
     if (showing != source.showing) {
       showing = source.showing;
-      if (showing) {
-        _show();
-      } else {
-        _performance.reverse();
-      }
+      showing ? _show() : _hide();
     }
     onStatusChanged = source.onStatusChanged;
     super.syncFields(source);
   }
 
-  // TODO(mpcomplete): the animation system should handle building, maybe? Or
-  // at least setting the transform. Figure out how this could work for things
-  // like fades, slides, rotates, pinch, etc.
-  Widget build() {
-    // TODO(mpcomplete): animate as a fade-in.
-    double scaler = _performance.progress;
-    Color maskColor = new Color.fromARGB((0x7F * scaler).floor(), 0, 0, 0);
+  void _show() {
+    if (navigator != null)
+      navigator.pushState(this, (_) => _performance.reverse());
+    _performance.play();
+  }
 
+  void _hide() {
+    _performance.reverse();
+  }
+
+  Widget build() {
     var mask = new Listener(
-      child: new Container(decoration: new BoxDecoration(backgroundColor: maskColor)),
+      child: new Container(
+        decoration: new BoxDecoration(backgroundColor: _maskColor.value)
+      ),
       onGestureTap: handleMaskTap
     );
 
-    Widget content = _builder.build(
-      new Container(
+    Matrix4 transform = new Matrix4.identity();
+    transform.translate(_position.value.x, _position.value.y);
+    Widget content = new Transform(
+      transform: transform,
+      child: new Container(
         decoration: new BoxDecoration(
           backgroundColor: Theme.of(this).canvasColor,
           boxShadow: shadows[level]),
@@ -129,14 +132,14 @@ class Drawer extends AnimatedComponent {
     );
   }
 
-  double get xPosition => _builder.position.value.x;
+  double get xPosition => _position.value.x;
 
   DrawerStatus _lastStatus;
   void _checkForStateChanged() {
     DrawerStatus status = _status;
     if (_lastStatus != null && status != _lastStatus) {
       if (status == DrawerStatus.inactive &&
-          navigator != null && 
+          navigator != null &&
           navigator.currentRoute.key == this)
         navigator.pop();
       if (onStatusChanged != null)
