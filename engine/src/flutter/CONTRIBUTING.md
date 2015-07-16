@@ -60,7 +60,7 @@ The Sky engine repository gladly accepts contributions via GitHub pull requests:
  * Hack away
  * `git commit -a`
  * `git push origin name_of_your_branch`
- * Go to `https://github.com/<your_name_here>/sky_engine` and click the
+ * `git pull-request` (if you are using [Hub](http://github.com/github/hub/)) or go to `https://github.com/<your_name_here>/sky_engine` and click the
    "Compare & pull request" button
 
 You must complete the
