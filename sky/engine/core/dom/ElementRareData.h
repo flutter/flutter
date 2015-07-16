@@ -39,21 +39,6 @@ public:
         return new ElementRareData(renderer);
     }
 
-    short tabIndex() const { return m_tabindex; }
-    bool hasTabIndex() const { return m_hasTabIndex; }
-
-    void setTabIndex(short index)
-    {
-        m_tabindex = index;
-        m_hasTabIndex = true;
-    }
-
-    void clearTabIndex()
-    {
-        m_tabindex = 0;
-        m_hasTabIndex = false;
-    }
-
     CSSStyleDeclaration& ensureInlineCSSStyleDeclaration(Element* ownerElement);
 
     RenderStyle* computedStyle() const { return m_computedStyle.get(); }
@@ -64,9 +49,6 @@ public:
     void setClassList(PassOwnPtr<DOMTokenList> classList) { m_classList = classList; }
 
 private:
-    unsigned m_tabindex : 16;
-    unsigned m_hasTabIndex : 1;
-
     OwnPtr<DOMTokenList> m_classList;
     OwnPtr<InlineCSSStyleDeclaration> m_cssomWrapper;
 
@@ -77,8 +59,6 @@ private:
 
 inline ElementRareData::ElementRareData(RenderObject* renderer)
     : NodeRareData(renderer)
-    , m_tabindex(0)
-    , m_hasTabIndex(false)
 {
     m_isElementRareData = true;
 }

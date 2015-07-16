@@ -298,11 +298,6 @@ void Node::AcceptDartGCVisitor(DartGCVisitor& visitor) const
     visitor.AddToSetForRoot(rootForGC(this), dart_wrapper());
 }
 
-short Node::tabIndex() const
-{
-    return 0;
-}
-
 PassRefPtr<Node> Node::insertBefore(PassRefPtr<Node> newChild, Node* refChild, ExceptionState& exceptionState)
 {
     if (isContainerNode())
@@ -416,9 +411,7 @@ bool Node::isContentRichlyEditable()
 
 bool Node::hasEditableStyle(EditableLevel editableLevel, UserSelectAllTreatment treatment) const
 {
-    // Ideally we'd call ASSERT(!needsStyleRecalc()) here, but
-    // ContainerNode::setFocus() calls setNeedsStyleRecalc(), so the assertion
-    // would fire in the middle of Document::setFocusedNode().
+    ASSERT(!needsStyleRecalc());
 
     for (const Node* node = this; node; node = node->parentNode()) {
         if (node->isElementNode() && node->renderer()) {
@@ -1215,11 +1208,6 @@ void Node::removedLastRef()
 }
 #endif
 
-void Node::setFocus(bool flag)
-{
-    document().userActionElements().setFocused(this, flag);
-}
-
 void Node::setActive(bool flag)
 {
     document().userActionElements().setActive(this, flag);
@@ -1246,12 +1234,6 @@ bool Node::isUserActionElementHovered() const
 {
     ASSERT(isUserActionElement());
     return document().userActionElements().isHovered(this);
-}
-
-bool Node::isUserActionElementFocused() const
-{
-    ASSERT(isUserActionElement());
-    return document().userActionElements().isFocused(this);
 }
 
 unsigned Node::lengthOfContents() const

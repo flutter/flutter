@@ -73,7 +73,6 @@
 #include "sky/engine/core/inspector/InspectorCounters.h"
 #include "sky/engine/core/loader/FrameLoaderClient.h"
 #include "sky/engine/core/page/ChromeClient.h"
-#include "sky/engine/core/page/FocusController.h"
 #include "sky/engine/core/page/Page.h"
 #include "sky/engine/core/painting/PaintingTasks.h"
 #include "sky/engine/core/painting/Picture.h"
@@ -256,7 +255,6 @@ void Document::dispose()
 
     // We must make sure not to be retaining any of our children through
     // these extra pointers or we will create a reference cycle.
-    m_focusedElement = nullptr;
     m_hoverNode = nullptr;
     m_activeHoverElement = nullptr;
     m_userActionElements.documentDidRemoveLastRef();
@@ -771,11 +769,6 @@ void Document::updateLayout()
         frameView->layout();
 }
 
-void Document::setNeedsFocusedElementCheck()
-{
-    setNeedsStyleRecalc(LocalStyleChange);
-}
-
 StyleResolver& Document::styleResolver() const
 {
     ASSERT(isActive());
@@ -811,7 +804,6 @@ void Document::detach(const AttachContext& context)
     m_scriptedAnimationController.clear();
 
     m_hoverNode = nullptr;
-    m_focusedElement = nullptr;
     m_activeHoverElement = nullptr;
 
     m_renderView = 0;
@@ -1046,19 +1038,6 @@ void Document::setActiveHoverElement(PassRefPtr<Element> newActiveElement)
     m_activeHoverElement = newActiveElement;
 }
 
-void Document::removeFocusedElementOfSubtree(Node* node, bool amongChildrenOnly)
-{
-    if (!m_focusedElement)
-        return;
-
-    // We can't be focused if we're not in the document.
-    if (!node->inDocument())
-        return;
-    bool contains = node->contains(m_focusedElement.get());
-    if (contains && (m_focusedElement != node || !amongChildrenOnly))
-        setFocusedElement(nullptr);
-}
-
 void Document::hoveredNodeDetached(Node* node)
 {
     if (!m_hoverNode)
@@ -1085,11 +1064,6 @@ void Document::activeChainNodeDetached(Node* node)
         activeNode = activeNode->parentNode();
 
     m_activeHoverElement = activeNode && activeNode->isElementNode() ? toElement(activeNode) : 0;
-}
-
-bool Document::setFocusedElement(PassRefPtr<Element> prpNewFocusedElement, FocusType type)
-{
-    return false;
 }
 
 void Document::updateRangesAfterChildrenChanged(ContainerNode* container)
@@ -1452,24 +1426,6 @@ void Document::decrementActiveParserCount()
 float Document::devicePixelRatio() const
 {
     return m_frame ? m_frame->devicePixelRatio() : 1.0;
-}
-
-Element* Document::activeElement() const
-{
-    if (Element* element = treeScope().adjustedFocusedElement())
-        return element;
-    return nullptr;
-}
-
-bool Document::hasFocus() const
-{
-    Page* page = this->page();
-    if (!page)
-        return false;
-    if (!page->focusController().isActive() || !page->focusController().isFocused())
-        return false;
-    Frame* focusedFrame = page->focusController().focusedFrame();
-    return focusedFrame && focusedFrame == frame();
 }
 
 Picture* Document::rootPicture() const

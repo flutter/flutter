@@ -219,7 +219,6 @@ public:
     bool active() const { return isUserActionElement() && isUserActionElementActive(); }
     bool inActiveChain() const { return isUserActionElement() && isUserActionElementInActiveChain(); }
     bool hovered() const { return isUserActionElement() && isUserActionElementHovered(); }
-    bool focused() const { return isUserActionElement() && isUserActionElementFocused(); }
 
     bool needsAttach() const { return styleChangeType() == NeedsReattachStyleChange; }
     bool needsStyleRecalc() const { return styleChangeType() != NoStyleChange; }
@@ -240,11 +239,8 @@ public:
     void markV8CollectableDuringMinorGC() { setFlag(true, V8CollectableDuringMinorGCFlag); }
     void clearV8CollectableDuringMinorGC() { setFlag(false, V8CollectableDuringMinorGCFlag); }
 
-    virtual void setFocus(bool flag);
     virtual void setActive(bool flag = true);
     virtual void setHovered(bool flag = true);
-
-    virtual short tabIndex() const;
 
     enum UserSelectAllTreatment {
         UserSelectAllDoesNotAffectEditability,
@@ -423,7 +419,7 @@ private:
         // ex. When setting the href attribute on an <a>.
         IsLinkFlag = 1 << 8,
 
-        // Changes based on :hover, :active and :focus state.
+        // Changes based on :hover and :active state.
         IsUserActionElementFlag = 1 << 9,
 
         // Tree state flags. These change when the element is added/removed
@@ -503,7 +499,6 @@ private:
     bool isUserActionElementActive() const;
     bool isUserActionElementInActiveChain() const;
     bool isUserActionElementHovered() const;
-    bool isUserActionElementFocused() const;
 
     void traceStyleChange(StyleChangeType);
     void traceStyleChangeIfNeeded(StyleChangeType);

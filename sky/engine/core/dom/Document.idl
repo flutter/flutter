@@ -51,7 +51,4 @@
     Range              caretRangeFromPoint([Default=Undefined] optional long x,
                                            [Default=Undefined] optional long y);
 
-    // HTML 5
-    readonly attribute Element activeElement;
-    boolean hasFocus();
 };

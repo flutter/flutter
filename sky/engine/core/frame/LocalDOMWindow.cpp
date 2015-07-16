@@ -1,4 +1,4 @@
-/*
+ /*
  * Copyright (C) 2006, 2007, 2008, 2010 Apple Inc. All rights reserved.
  * Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies)
  *
@@ -69,9 +69,6 @@
 #include "sky/engine/wtf/MainThread.h"
 #include "sky/engine/wtf/MathExtras.h"
 #include "sky/engine/wtf/text/WTFString.h"
-
-// The focus logic in this file is just disconnected cables now.
-// TODO(ianh): Remove the concept of focus.
 
 using std::min;
 using std::max;
@@ -272,21 +269,6 @@ Tracing& LocalDOMWindow::tracing() const
     if (!m_tracing)
         m_tracing = Tracing::create();
     return *m_tracing;
-}
-
-void LocalDOMWindow::focus()
-{
-    if (!m_frame)
-        return;
-
-    FrameHost* host = m_frame->host();
-    if (!host)
-        return;
-
-    host->page().focus();
-
-    if (!m_frame)
-        return;
 }
 
 int LocalDOMWindow::outerHeight() const

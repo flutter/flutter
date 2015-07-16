@@ -47,7 +47,6 @@ class TreeScope {
 public:
     TreeScope* parentTreeScope() const { return m_parentTreeScope; }
 
-    Element* adjustedFocusedElement() const;
     Element* getElementById(const AtomicString&) const;
     void addElementById(const AtomicString& elementId, Element*);
     void removeElementById(const AtomicString& elementId, Element*);

@@ -99,8 +99,6 @@ public:
     Location& location() const;
     void setLocation(const String& location, SetLocationLocking = LockHistoryBasedOnGestureState);
 
-    void focus();
-
     int outerHeight() const;
     int outerWidth() const;
     int innerHeight() const;

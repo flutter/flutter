@@ -40,11 +40,9 @@ class Element;
 class UserActionElementSet final {
     DISALLOW_ALLOCATION();
 public:
-    bool isFocused(const Node* node) { return hasFlags(node, IsFocusedFlag); }
     bool isActive(const Node* node) { return hasFlags(node, IsActiveFlag); }
     bool isInActiveChain(const Node* node) { return hasFlags(node, InActiveChainFlag); }
     bool isHovered(const Node* node) { return hasFlags(node, IsHoveredFlag); }
-    void setFocused(Node* node, bool enable) { setFlags(node, enable, IsFocusedFlag); }
     void setActive(Node* node, bool enable) { setFlags(node, enable, IsActiveFlag); }
     void setInActiveChain(Node* node, bool enable) { setFlags(node, enable, InActiveChainFlag); }
     void setHovered(Node* node, bool enable) { setFlags(node, enable, IsHoveredFlag); }
@@ -63,7 +61,6 @@ private:
         IsActiveFlag      = 1 ,
         InActiveChainFlag = 1 << 1,
         IsHoveredFlag     = 1 << 2,
-        IsFocusedFlag     = 1 << 3
     };
 
     void setFlags(Node* node, bool enable, unsigned flags) { enable ? setFlags(node, flags) : clearFlags(node, flags); }

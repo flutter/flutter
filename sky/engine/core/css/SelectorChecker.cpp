@@ -32,25 +32,13 @@
 #include "sky/engine/core/dom/Document.h"
 #include "sky/engine/core/frame/LocalFrame.h"
 #include "sky/engine/core/html/parser/HTMLParserIdioms.h"
-#include "sky/engine/core/page/FocusController.h"
 #include "sky/engine/core/rendering/style/RenderStyle.h"
 
 namespace blink {
 
-static bool matchesFocusPseudoClass(const Element& element)
-{
-    if (!element.focused())
-        return false;
-    LocalFrame* frame = element.document().frame();
-    if (!frame)
-        return false;
-    return true;
-}
-
 SelectorChecker::SelectorChecker(const Element& element)
     : m_element(element)
     , m_matchedAttributeSelector(false)
-    , m_matchedFocusSelector(false)
     , m_matchedHoverSelector(false)
     , m_matchedActiveSelector(false)
 {
@@ -122,10 +110,6 @@ bool SelectorChecker::checkOne(const CSSSelector& selector)
 bool SelectorChecker::checkPseudoClass(const CSSSelector& selector)
 {
     switch (selector.pseudoType()) {
-    case CSSSelector::PseudoFocus:
-        m_matchedFocusSelector = true;
-        return matchesFocusPseudoClass(m_element);
-
     case CSSSelector::PseudoHover:
         m_matchedHoverSelector = true;
         return m_element.hovered();

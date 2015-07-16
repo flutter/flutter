@@ -90,8 +90,6 @@ public:
     virtual void attach(const AttachContext& = AttachContext()) override;
     virtual void detach(const AttachContext& = AttachContext()) override;
     virtual LayoutRect boundingBox() const override final;
-    virtual void setFocus(bool) override;
-    void focusStateChanged();
     virtual void setActive(bool = true) override;
     virtual void setHovered(bool = true) override;
 

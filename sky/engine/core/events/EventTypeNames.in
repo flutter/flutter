@@ -2,8 +2,6 @@ namespace="EventType"
 
 DOMActivate
 DOMContentLoaded
-DOMFocusIn
-DOMFocusOut
 abort
 animationend
 animationiteration
@@ -11,7 +9,6 @@ animationstart
 beforecopy
 beforecut
 beforepaste
-blur
 boundary
 cached
 cancel
@@ -43,9 +40,6 @@ error
 exit
 fetch
 finish
-focus
-focusin
-focusout
 gesturescrollend
 gesturescrollstart
 gesturescrollupdate

@@ -134,8 +134,6 @@ PassRefPtr<Node> ContainerNode::insertBefore(PassRefPtr<Node> newChild, Node* re
     if (targets.isEmpty())
         return newChild;
 
-    // Must check this again beacuse focus events might run synchronously when
-    // removing children.
     checkAcceptChildHierarchy(*newChild, 0, exceptionState);
     if (exceptionState.had_exception())
         return nullptr;
@@ -252,8 +250,6 @@ PassRefPtr<Node> ContainerNode::replaceChild(PassRefPtr<Node> newChild, PassRefP
     if (exceptionState.had_exception())
         return nullptr;
 
-    // Must check this again beacuse focus events might run synchronously when
-    // removing children.
     checkAcceptChildHierarchy(*newChild, child.get(),exceptionState);
     if (exceptionState.had_exception())
         return nullptr;
@@ -384,10 +380,6 @@ PassRefPtr<Node> ContainerNode::removeChild(PassRefPtr<Node> oldChild, Exception
     RefPtr<Node> protect(this);
     RefPtr<Node> child = oldChild;
 
-    document().removeFocusedElementOfSubtree(child.get());
-
-    // Events fired when blurring currently focused node might have moved this
-    // child into a different parent.
     if (child->parentNode() != this) {
         exceptionState.ThrowDOMException(NotFoundError, "The node to be removed is no longer a child of this node. Perhaps it was moved in a 'blur' event handler?");
         return nullptr;
@@ -450,12 +442,6 @@ void ContainerNode::removeChildren()
     willRemoveChildren();
 
     {
-        // Exclude this node when looking for removed focusedElement since only
-        // children will be removed.
-        // This must be later than willRemoveChildren, which might change focus
-        // state of a child.
-        document().removeFocusedElementOfSubtree(this, true);
-
         // Removing a node from a selection can cause widget updates.
         document().nodeChildrenWillBeRemoved(*this);
     }
@@ -512,8 +498,6 @@ PassRefPtr<Node> ContainerNode::appendChild(PassRefPtr<Node> newChild, Exception
     if (targets.isEmpty())
         return newChild;
 
-    // Must check this again beacuse focus events might run synchronously when
-    // removing children.
     checkAcceptChildHierarchy(*newChild, 0, exceptionState);
     if (exceptionState.had_exception())
         return nullptr;
@@ -769,36 +753,6 @@ LayoutRect ContainerNode::boundingBox() const
     }
 
     return enclosingLayoutRect(FloatRect(upperLeft, lowerRight.expandedTo(upperLeft) - upperLeft));
-}
-
-// This is used by FrameSelection to denote when the active-state of the page has changed
-// independent of the focused element changing.
-void ContainerNode::focusStateChanged()
-{
-    // If we're just changing the window's active state and the focused node has no
-    // renderer we can just ignore the state change.
-    if (!renderer())
-        return;
-
-    if (styleChangeType() < SubtreeStyleChange) {
-        if (renderStyle()->affectedByFocus())
-            setNeedsStyleRecalc(LocalStyleChange);
-    }
-}
-
-void ContainerNode::setFocus(bool received)
-{
-    if (focused() == received)
-        return;
-
-    Node::setFocus(received);
-
-    focusStateChanged();
-
-    if (renderer() || received)
-        return;
-
-    setNeedsStyleRecalc(LocalStyleChange);
 }
 
 void ContainerNode::setActive(bool down)

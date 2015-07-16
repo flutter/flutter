@@ -36,7 +36,6 @@
 #include "sky/engine/core/dom/TreeScopeAdopter.h"
 #include "sky/engine/core/frame/FrameView.h"
 #include "sky/engine/core/frame/LocalFrame.h"
-#include "sky/engine/core/page/FocusController.h"
 #include "sky/engine/core/page/Page.h"
 #include "sky/engine/core/rendering/HitTestResult.h"
 #include "sky/engine/core/rendering/RenderView.h"
@@ -178,11 +177,6 @@ void TreeScope::adoptIfNeeded(Node& node)
     TreeScopeAdopter adopter(node, *this);
     if (adopter.needsScopeChange())
         adopter.execute();
-}
-
-Element* TreeScope::adjustedFocusedElement() const
-{
-    return 0;
 }
 
 unsigned short TreeScope::comparePosition(const TreeScope& otherScope) const
