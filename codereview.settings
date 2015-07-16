@@ -1,0 +1,6 @@
+# This file is used by gcl to get repository specific information.
+CODE_REVIEW_SERVER: codereview.chromium.org
+CC_LIST: mojo-reviews@chromium.org
+VIEW_VC: https://chromium.googlesource.com/external/mojo/+/
+PROJECT: mojo
+RUN_POST_UPLOAD_HOOK: True
