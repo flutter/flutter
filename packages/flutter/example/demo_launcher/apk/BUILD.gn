@@ -1,0 +1,31 @@
+# Copyright 2015 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+assert(is_android)
+
+import("//build/config/android/config.gni")
+import("//build/config/android/rules.gni")
+
+android_library("java") {
+  java_files = [
+    "org/domokit/sky/demo/SkyDemoActivity.java",
+    "org/domokit/sky/demo/SkyDemoApplication.java",
+  ]
+
+  deps = [
+    "//base:base_java",
+    "//mojo/public/java:bindings",
+    "//mojo/public/java:system",
+    "//mojo/services/sensors/public/interfaces:interfaces_java",
+    "//services/sensors:sensors_lib",
+    "//sky/services/media:media_lib",
+    "//sky/services/media:interfaces_java",
+    "//sky/shell:java",
+  ]
+}
+
+android_resources("resources") {
+  resource_dirs = [ "res" ]
+  android_manifest = "AndroidManifest.xml"
+}

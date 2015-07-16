@@ -1,0 +1,16 @@
+# Copyright 2015 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+group("example") {
+  testonly = true
+
+  deps = [
+    "//sky/sdk/example/demo_launcher",
+    "//sky/sdk/example/game",
+    "//sky/sdk/example/mine_digger",
+    "//sky/sdk/example/rendering",
+    "//sky/sdk/example/stocks",
+    "//sky/sdk/example/widgets",
+  ]
+}

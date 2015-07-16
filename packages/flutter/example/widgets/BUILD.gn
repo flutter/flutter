@@ -1,0 +1,27 @@
+# Copyright 2015 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//sky/build/skyx.gni")
+
+skyx("sector") {
+  main_dart = "sector.dart"
+}
+
+skyx("piano") {
+  main_dart = "piano.dart"
+}
+
+skyx("cards") {
+  main_dart = "card_collection.dart"
+}
+
+group("widgets") {
+  testonly = true
+
+  deps = [
+    ":cards",
+    ":piano",
+    ":sector",
+  ]
+}
