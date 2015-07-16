@@ -50,12 +50,12 @@ DartLibraryProviderFiles::~DartLibraryProviderFiles() {
 }
 
 void DartLibraryProviderFiles::GetLibraryAsStream(
-    const String& name,
+    const std::string& name,
     blink::DataPipeConsumerCallback callback) {
   mojo::DataPipe pipe;
   callback.Run(pipe.consumer_handle.Pass());
 
-  base::FilePath source(name.toUTF8());
+  base::FilePath source(name);
   scoped_refptr<base::TaskRunner> runner =
       base::WorkerPool::GetTaskRunner(true);
   mojo::common::CopyFromFile(source, pipe.producer_handle.Pass(), 0,
