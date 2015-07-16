@@ -6,10 +6,10 @@ Getting the code
 
 To get the code:
 
- 1. Fork https://github.com/domokit/sky_engine into your own GitHub account.
- 2. [Download depot_tools](http://www.chromium.org/developers/how-tos/install-depot-tools)
-    and make sure it is in your path.
- 3. Create a `.gclient` file in an empty directory with the following contents:
+ * Fork https://github.com/domokit/sky_engine into your own GitHub account.
+ * [Download depot_tools](http://www.chromium.org/developers/how-tos/install-depot-tools)
+   and make sure it is in your path.
+ * Create a `.gclient` file in an empty directory with the following contents:
 
 ```
 solutions = [
@@ -25,19 +25,27 @@ solutions = [
 target_os = ["android"]
 ```
 
- 4. `svn ls https://dart.googlecode.com/` and accept the certificate permanently.
- 5. `gclient sync`
- 6. `cd src`
- 7. `git remote add upstream git@github.com:domokit/sky_engine.git`
- 8. `./build/install-build-deps.sh`
+ * `svn ls https://dart.googlecode.com/` and accept the certificate permanently.
+ * `gclient sync`
+ * `cd src`
+ * `git remote add upstream git@github.com:domokit/sky_engine.git`
+ * `./build/install-build-deps.sh`
 
 Building the code
 -----------------
 
- 1. `./mojo/tools/mojob gn`
- 2. `ninja -C out/Debug`
+ * `./mojo/tools/mojob gn`
+ * `ninja -C out/Debug`
 
 Contributing code
 -----------------
 
-The Sky engine repository gladly accepts contributions via GitHub pull requests.
+The Sky engine repository gladly accepts contributions via GitHub pull requests:
+
+ * `git fetch upstream`
+ * `git checkout upstream/master -b name_of_your_branch`
+ * Hack away
+ * `git commit -a`
+ * `git push origin name_of_your_branch`
+ * Go to `https://github.com/<your_name_here>/sky_engine` and click the
+   "Compare & pull request" button
