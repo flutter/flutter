@@ -5,7 +5,6 @@
 import 'dart:sky' as sky;
 
 import 'package:sky/animation/animation_performance.dart';
-import 'package:sky/animation/curves.dart';
 import 'package:sky/theme/shadows.dart';
 import 'package:sky/theme/colors.dart' as colors;
 import 'package:sky/widgets/animated_component.dart';
@@ -30,14 +29,11 @@ import 'package:vector_math/vector_math.dart';
 // The right nav can vary depending on content.
 
 const double _kWidth = 304.0;
-const double _kMinFlingVelocity = 1.2;
+const double _kMinFlingVelocity = 365.0;
+const double _kFlingVelocityScale = 1.0/300.0;
 const Duration _kBaseSettleDuration = const Duration(milliseconds: 246);
-// TODO(mpcomplete): The curve must be linear if we want the drawer to track
-// the user's finger. Odeon remedies this by attaching spring forces to the
-// initial timeline when animating (so it doesn't look linear).
 const Point _kOpenPosition = Point.origin;
 const Point _kClosedPosition = const Point(-_kWidth, 0.0);
-const Curve _kAnimationCurve = linear;
 
 typedef void DrawerStatusChangeHandler (bool showing);
 
@@ -69,7 +65,7 @@ class Drawer extends AnimatedComponent {
   AnimationPerformance _performance;
 
   void initState() {
-    _position = new AnimatedType<Point>(_kClosedPosition, end: _kOpenPosition, curve: _kAnimationCurve);
+    _position = new AnimatedType<Point>(_kClosedPosition, end: _kOpenPosition);
     _maskColor = new AnimatedColor(colors.transparent, end: const Color(0x7F000000));
     _performance = new AnimationPerformance()
       ..duration = _kBaseSettleDuration
@@ -95,11 +91,18 @@ class Drawer extends AnimatedComponent {
   void _show() {
     if (navigator != null)
       navigator.pushState(this, (_) => _performance.reverse());
-    _performance.play();
+    _fling(1.0);
   }
 
   void _hide() {
-    _performance.reverse();
+    _fling(-1.0);
+  }
+
+  // We fling the performance timeline instead of animating it to give it a
+  // nice spring effect. We can't use curves for this because we need a linear
+  // curve in order to track the user's finger while dragging.
+  void _fling(double direction) {
+    _performance.fling(velocity: direction.sign);
   }
 
   Widget build() {
@@ -151,9 +154,9 @@ class Drawer extends AnimatedComponent {
   DrawerStatus get _status => _performance.isDismissed ? DrawerStatus.inactive : DrawerStatus.active;
   bool get _isMostlyClosed => xPosition <= -_kWidth/2;
 
-  void _settle() => _isMostlyClosed ? _performance.reverse() : _performance.play();
+  void _settle() => _fling(_isMostlyClosed ? -1.0 : 1.0);
 
-  void handleMaskTap(_) => _performance.reverse();
+  void handleMaskTap(_) => _fling(-1.0);
 
   // TODO(mpcomplete): Figure out how to generalize these handlers on a
   // "PannableThingy" interface.
@@ -176,8 +179,7 @@ class Drawer extends AnimatedComponent {
   }
 
   void handleFlingStart(event) {
-    double velocityX = event.velocityX / _kWidth;
-    if (velocityX.abs() >= _kMinFlingVelocity)
-      _performance.fling(velocity: velocityX);
+    if (event.velocityX.abs() >= _kMinFlingVelocity)
+      _performance.fling(velocity: event.velocityX * _kFlingVelocityScale);
   }
 }
