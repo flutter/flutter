@@ -2,9 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:newton/newton.dart';
+import 'dart:async';
+
 import 'package:sky/animation/timeline.dart';
 import 'package:sky/animation/curves.dart';
+import 'package:sky/animation/forces.dart';
 
 abstract class AnimatedVariable {
   void setFraction(double t);
@@ -99,23 +101,20 @@ class AnimationPerformance {
   bool get isCompleted => progress == 1.0;
   bool get isAnimating => timeline.isAnimating;
 
-  void play() {
-    _animateTo(1.0);
-  }
-  void reverse() {
-    _animateTo(0.0);
-  }
+  Future play() => _animateTo(1.0);
+  Future reverse() => _animateTo(0.0);
 
   void stop() {
     timeline.stop();
   }
 
-  // Resume animating in a direction, with the given velocity.
-  // TODO(mpcomplete): Allow user to specify the Simulation.
-  void fling({double velocity: 1.0}) {
-    Simulation simulation =
-        timeline.defaultSpringSimulation(velocity: velocity);
-    timeline.fling(simulation);
+  // Flings the timeline with an optional force (defaults to a critically damped
+  // spring) and initial velocity. Negative velocity causes the timeline to go
+  // in reverse.
+  Future fling({double velocity: 1.0, Force force}) {
+    if (force == null)
+      force = kDefaultSpringForce;
+    return timeline.fling(force.release(progress, velocity));
   }
 
   final List<Function> _listeners = new List<Function>();
@@ -134,11 +133,12 @@ class AnimationPerformance {
       listener();
   }
 
-  void _animateTo(double target) {
+  Future _animateTo(double target) {
     double remainingDistance = (target - timeline.value).abs();
     timeline.stop();
-    if (remainingDistance != 0.0)
-      timeline.animateTo(target, duration: duration * remainingDistance);
+    if (remainingDistance == 0.0)
+      return new Future.value();
+    return timeline.animateTo(target, duration: duration * remainingDistance);
   }
 
   void _tick(double t) {

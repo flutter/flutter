@@ -7,8 +7,6 @@ import 'dart:async';
 import 'package:newton/newton.dart';
 import 'package:sky/animation/animated_simulation.dart';
 
-const  double _kEpsilon = 0.001;
-
 // Simple simulation that linearly varies from |begin| to |end| over |duration|.
 class TweenSimulation extends Simulation {
   final double _durationInSeconds;
@@ -66,17 +64,6 @@ class Timeline {
 
   void stop() {
     _animation.stop();
-  }
-
-  static final SpringDescription _kDefaultSpringDesc =
-      new SpringDescription.withDampingRatio(
-          mass: 1.0, springConstant: 500.0, ratio: 1.0);
-
-  Simulation defaultSpringSimulation({double velocity: 0.0}) {
-    // Target just past the 0 or 1 endpoint, because the animation will stop
-    // once the Spring gets within the epsilon, and we want to stop at 0 or 1.
-    double target = velocity < 0.0 ? -_kEpsilon : 1.0 + _kEpsilon;
-    return new SpringSimulation(_kDefaultSpringDesc, value, target, velocity);
   }
 
   // Give |simulation| control over the timeline.
