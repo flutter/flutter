@@ -34,7 +34,7 @@ vars = {
   'cassowary_dart_revision': '7e5afc5b3956a18636d5b37b1dcba1705865564b',
   'collection_dart_revision': '79ebc6fc2dae581cb23ad50a5c600c1b7dd132f8',
   'crypto_dart_revision': 'd4558dea1639e5ad2a41d045265b8ece270c2d90',
-  'newton_dart_revision': '26da04f0c441d005a6ecbf62ae047cd02ec9abc5',
+  'newton_dart_revision': '9fbe5fbac809246f7ace4176feca13bdf731e393',
   'path_dart_revision': '2f3dcdec32011f1bc41194ae3640d6d9292a7096',
   'quiver_dart_revision': '6bab7dec34189eee579178eb16d3063c8ae69031',
   'source_span_dart_revision': '5c6c13f62fc111adaace3aeb4a38853d64481d06',
