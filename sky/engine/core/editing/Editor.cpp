@@ -361,8 +361,6 @@ void Editor::appliedEditing(PassRefPtr<CompositeEditCommand> cmd)
 {
     m_frame.document()->updateLayout();
 
-    EditCommandComposition* composition = cmd->composition();
-    ASSERT(composition);
     VisibleSelection newSelection(cmd->endingSelection());
 
     // Don't clear the typing style with this selection change. We do those things elsewhere if necessary.
