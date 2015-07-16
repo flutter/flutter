@@ -45,7 +45,6 @@
 #include "sky/engine/core/frame/LocalFrame.h"
 #include "sky/engine/core/frame/Settings.h"
 #include "sky/engine/core/page/EditorClient.h"
-#include "sky/engine/core/page/EventHandler.h"
 #include "sky/engine/core/rendering/RenderBox.h"
 #include "sky/engine/public/platform/Platform.h"
 #include "sky/engine/wtf/text/AtomicString.h"
@@ -73,19 +72,6 @@ static const bool allowExecutionWhenDisabled = true;
 static const bool doNotAllowExecutionWhenDisabled = false;
 
 static const float kMinFractionToStepWhenPaging = 0.875f;
-
-// Related to Editor::selectionForCommand.
-// Certain operations continue to use the target control's selection even if the event handler
-// already moved the selection outside of the text control.
-static LocalFrame* targetFrame(LocalFrame& frame, Event* event)
-{
-    if (!event)
-        return &frame;
-    Node* node = event->target()->toNode();
-    if (!node)
-        return &frame;
-    return node->document().frame();
-}
 
 static unsigned verticalScrollDistance(LocalFrame& frame)
 {
@@ -144,8 +130,7 @@ static bool executeDeleteWordForward(LocalFrame& frame, Event*, EditorCommandSou
 
 static bool executeInsertNewline(LocalFrame& frame, Event* event, EditorCommandSource, const String&)
 {
-    LocalFrame* targetFrame = blink::targetFrame(frame, event);
-    return targetFrame->eventHandler().handleTextInputEvent("\n", event, targetFrame->editor().canEditRichly() ? TextEventInputKeyboard : TextEventInputLineBreak);
+    return false;
 }
 
 static bool executeMoveDown(LocalFrame& frame, Event*, EditorCommandSource, const String&)

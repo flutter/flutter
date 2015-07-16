@@ -4,6 +4,9 @@
 
 #include "sky/engine/core/events/PointerEvent.h"
 
+#include "gen/sky/core/EventNames.h"
+#include "gen/sky/core/EventTypeNames.h"
+
 namespace blink {
 
 static AtomicString stringForType(WebInputEvent::Type type)

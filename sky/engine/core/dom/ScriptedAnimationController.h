@@ -37,7 +37,6 @@ namespace blink {
 
 class Document;
 class Event;
-class EventTarget;
 class MediaQueryListListener;
 class RequestAnimationFrameCallback;
 
@@ -80,7 +79,6 @@ private:
     CallbackId m_nextCallbackId;
     int m_suspendCount;
     Vector<RefPtr<Event> > m_eventQueue;
-    ListHashSet<std::pair<RawPtr<const EventTarget>, const StringImpl*> > m_perFrameEvents;
     typedef ListHashSet<RefPtr<MediaQueryListListener> > MediaQueryListListeners;
     MediaQueryListListeners m_mediaQueryListListeners;
 };

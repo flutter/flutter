@@ -20,10 +20,8 @@
 #ifndef SKY_ENGINE_CORE_CSS_MEDIAQUERYLIST_H_
 #define SKY_ENGINE_CORE_CSS_MEDIAQUERYLIST_H_
 
-#include "sky/engine/tonic/dart_wrappable.h"
-#include "sky/engine/core/dom/ActiveDOMObject.h"
-#include "sky/engine/core/events/EventTarget.h"
 #include "sky/engine/platform/heap/Handle.h"
+#include "sky/engine/tonic/dart_wrappable.h"
 #include "sky/engine/wtf/Forward.h"
 #include "sky/engine/wtf/LinkedHashSet.h"
 #include "sky/engine/wtf/ListHashSet.h"
@@ -44,20 +42,14 @@ class MediaQuerySet;
 // retrieve the current value of the given media query and to add/remove listeners that
 // will be called whenever the value of the query changes.
 
-class MediaQueryList final : public RefCounted<MediaQueryList>, public EventTargetWithInlineData, public ActiveDOMObject {
-    DEFINE_EVENT_TARGET_REFCOUNTING_WILL_BE_REMOVED(RefCounted<MediaQueryList>);
+class MediaQueryList final : public DartWrappable, public RefCounted<MediaQueryList> {
     DEFINE_WRAPPERTYPEINFO();
 public:
-    static PassRefPtr<MediaQueryList> create(ExecutionContext*, PassRefPtr<MediaQueryMatcher>, PassRefPtr<MediaQuerySet>);
+    static PassRefPtr<MediaQueryList> create(PassRefPtr<MediaQueryMatcher>, PassRefPtr<MediaQuerySet>);
     virtual ~MediaQueryList();
 
     String media() const;
     bool matches();
-
-    // These two functions are provided for compatibility with JS code
-    // written before the change listener became a DOM event.
-    void addDeprecatedListener(PassRefPtr<EventListener>);
-    void removeDeprecatedListener(PassRefPtr<EventListener>);
 
     // C++ code can use these functions to listen to changes instead of having to use DOM event listeners.
     void addListener(PassRefPtr<MediaQueryListListener>);
@@ -66,15 +58,8 @@ public:
     // Will return true if a DOM event should be scheduled.
     bool mediaFeaturesChanged(Vector<RefPtr<MediaQueryListListener> >* listenersToNotify);
 
-    // From ActiveDOMObject
-    virtual bool hasPendingActivity() const override;
-    virtual void stop() override;
-
-    virtual const AtomicString& interfaceName() const override;
-    virtual ExecutionContext* executionContext() const override;
-
 private:
-    MediaQueryList(ExecutionContext*, PassRefPtr<MediaQueryMatcher>, PassRefPtr<MediaQuerySet>);
+    MediaQueryList(PassRefPtr<MediaQueryMatcher>, PassRefPtr<MediaQuerySet>);
 
     bool updateMatches();
 

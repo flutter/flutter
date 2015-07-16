@@ -30,7 +30,6 @@
 #include "sky/engine/core/dom/TreeScope.h"
 #include "sky/engine/core/dom/TreeShared.h"
 #include "sky/engine/core/editing/EditingBoundary.h"
-#include "sky/engine/core/events/EventTarget.h"
 #include "sky/engine/core/inspector/InspectorCounters.h"
 #include "sky/engine/core/rendering/style/RenderStyleConstants.h"
 #include "sky/engine/platform/geometry/LayoutRect.h"
@@ -56,7 +55,6 @@ class LocalFrame;
 class IntRect;
 class KeyboardEvent;
 class NSResolver;
-class NodeEventContext;
 class NodeList;
 class NodeRareData;
 class QualifiedName;
@@ -96,8 +94,7 @@ private:
 
 // TreeShared should be the last to pack TreeShared::m_refCount and
 // Node::m_nodeFlags on 64bit platforms.
-class Node : public EventTarget, public TreeShared<Node> {
-    DEFINE_EVENT_TARGET_REFCOUNTING_WILL_BE_REMOVED(TreeShared<Node>);
+class Node : public DartWrappable, public TreeShared<Node> {
     DEFINE_WRAPPERTYPEINFO();
     friend class Document;
     friend class TreeScope;
@@ -281,9 +278,6 @@ public:
 
     void setIsLink(bool f);
 
-    bool hasEventTargetData() const { return getFlag(HasEventTargetDataFlag); }
-    void setHasEventTargetData(bool flag) { setFlag(flag, HasEventTargetDataFlag); }
-
     bool isV8CollectableDuringMinorGC() const { return getFlag(V8CollectableDuringMinorGCFlag); }
     void markV8CollectableDuringMinorGC() { setFlag(true, V8CollectableDuringMinorGCFlag); }
     void clearV8CollectableDuringMinorGC() { setFlag(false, V8CollectableDuringMinorGCFlag); }
@@ -446,31 +440,7 @@ public:
 
     unsigned short compareDocumentPosition(const Node*, ShadowTreesTreatment = TreatShadowTreesAsDisconnected) const;
 
-    virtual Node* toNode() override final;
     void AcceptDartGCVisitor(DartGCVisitor& visitor) const override;
-
-    virtual const AtomicString& interfaceName() const override;
-    virtual ExecutionContext* executionContext() const override final;
-
-    virtual bool addEventListener(const AtomicString& eventType, PassRefPtr<EventListener>, bool useCapture = false) override;
-    void removeAllEventListenersRecursively();
-
-    using EventTarget::dispatchEvent;
-    virtual bool dispatchEvent(PassRefPtr<Event>) override;
-
-    void dispatchScopedEvent(PassRefPtr<Event>);
-    void dispatchScopedEventDispatchMediator(PassRefPtr<EventDispatchMediator>);
-
-    virtual void handleLocalEvents(Event*);
-
-    bool dispatchDOMActivateEvent(int detail, PassRefPtr<Event> underlyingEvent);
-    void dispatchInputEvent();
-
-    // Perform the default action for an event.
-    virtual void defaultEventHandler(Event*);
-
-    virtual EventTargetData* eventTargetData() override;
-    virtual EventTargetData& ensureEventTargetData() override;
 
     void getRegisteredMutationObserversOfType(HashMap<RawPtr<MutationObserver>, MutationRecordDeliveryOptions>&, MutationObserver::MutationType, const QualifiedName* attributeName);
     void registerMutationObserver(MutationObserver&, MutationObserverOptions, const HashSet<AtomicString>& attributeFilter);
@@ -525,8 +495,7 @@ private:
         IsEditingTextFlag = 1 << 23,
         HasWeakReferencesFlag = 1 << 24,
         V8CollectableDuringMinorGCFlag = 1 << 25,
-        HasEventTargetDataFlag = 1 << 26,
-        AlreadySpellCheckedFlag = 1 << 27,
+        AlreadySpellCheckedFlag = 1 << 26,
 
         DefaultNodeFlags = ChildNeedsStyleRecalcFlag | NeedsReattachStyleChange
     };
@@ -556,19 +525,13 @@ protected:
 
     virtual void didMoveToNewDocument(Document& oldDocument);
 
-#if !ENABLE(OILPAN)
     void willBeDeletedFromDocument();
-#endif
 
     bool hasRareData() const { return getFlag(HasRareDataFlag); }
 
     NodeRareData* rareData() const;
     NodeRareData& ensureRareData();
-#if !ENABLE(OILPAN)
     void clearRareData();
-
-    void clearEventTargetData();
-#endif
 
     void setTreeScope(TreeScope* scope) { m_treeScope = scope; }
 

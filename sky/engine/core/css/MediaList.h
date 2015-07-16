@@ -96,9 +96,6 @@ private:
     RawPtr<CSSStyleSheet> m_parentStyleSheet;
 };
 
-// Adds message to inspector console whenever dpi or dpcm values are used for "screen" media.
-void reportMediaQueryWarningIfNeeded(Document*, const MediaQuerySet*);
-
 } // namespace blink
 
 #endif  // SKY_ENGINE_CORE_CSS_MEDIALIST_H_

@@ -50,8 +50,6 @@ from v8_globals import includes
 
 NON_WRAPPER_TYPES = frozenset([
     'CompareHow',
-    'EventHandler',
-    'EventListener',
     'NodeFilter',
     'SerializedScriptValue',
 ])
@@ -102,7 +100,6 @@ CPP_UNSIGNED_TYPES = set([
 CPP_SPECIAL_CONVERSION_RULES = {
     'CompareHow': 'Range::CompareHow',
     'Date': 'double',
-    'EventHandler': 'EventListener*',
     'Promise': 'ScriptPromise',
     'ScriptValue': 'ScriptValue',
     'boolean': 'bool',
@@ -201,11 +198,6 @@ def includes_for_cpp_class(class_name, relative_dir_posix):
 INCLUDES_FOR_TYPE = {
     'object': set(),
     'CompareHow': set(),
-    'EventHandler': set(['bindings/core/v8/V8AbstractEventListener.h',
-                         'bindings/core/v8/V8EventListenerList.h']),
-    'EventListener': set(['bindings/core/v8/BindingSecurity.h',
-                          'bindings/core/v8/V8EventListenerList.h',
-                          'core/frame/LocalDOMWindow.h']),
     'NodeList': set(['bindings/core/v8/V8NodeList.h',
                      'core/dom/NodeList.h',
                      'core/dom/StaticNodeList.h']),

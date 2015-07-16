@@ -52,19 +52,10 @@
 #include "sky/engine/core/dom/shadow/InsertionPoint.h"
 #include "sky/engine/core/dom/shadow/ShadowRoot.h"
 #include "sky/engine/core/editing/htmlediting.h"
-#include "sky/engine/core/events/Event.h"
-#include "sky/engine/core/events/EventDispatchMediator.h"
-#include "sky/engine/core/events/EventDispatcher.h"
-#include "sky/engine/core/events/EventListener.h"
-#include "sky/engine/core/events/KeyboardEvent.h"
-#include "sky/engine/core/events/TextEvent.h"
-#include "sky/engine/core/events/UIEvent.h"
 #include "sky/engine/core/frame/LocalFrame.h"
 #include "sky/engine/core/frame/Settings.h"
-#include "sky/engine/core/page/EventHandler.h"
 #include "sky/engine/core/page/Page.h"
 #include "sky/engine/core/rendering/RenderBox.h"
-#include "sky/engine/platform/EventDispatchForbiddenScope.h"
 #include "sky/engine/platform/JSONValues.h"
 #include "sky/engine/platform/Partitions.h"
 #include "sky/engine/platform/TraceEvent.h"
@@ -78,14 +69,6 @@
 
 namespace blink {
 
-struct SameSizeAsNode : public EventTarget, public TreeShared<Node> {
-    uint32_t m_nodeFlags;
-    void* m_pointer[5];
-};
-
-COMPILE_ASSERT(sizeof(Node) <= sizeof(SameSizeAsNode), Node_should_stay_small);
-
-#if !ENABLE(OILPAN)
 void* Node::operator new(size_t size)
 {
     ASSERT(isMainThread());
@@ -97,7 +80,6 @@ void Node::operator delete(void* ptr)
     ASSERT(isMainThread());
     partitionFree(ptr);
 }
-#endif
 
 #if DUMP_NODE_STATISTICS
 typedef HashSet<RawPtr<Node> > WeakNodeSet;
@@ -272,9 +254,6 @@ void Node::willBeDeletedFromDocument()
 
     Document& document = this->document();
 
-    if (hasEventTargetData())
-        clearEventTargetData();
-
     document.markers().removeMarkers(this);
 }
 #endif
@@ -327,12 +306,6 @@ static const Node* rootForGC(const Node* node)
 void Node::AcceptDartGCVisitor(DartGCVisitor& visitor) const
 {
     visitor.AddToSetForRoot(rootForGC(this), dart_wrapper());
-    EventTarget::AcceptDartGCVisitor(visitor);
-}
-
-Node* Node::toNode()
-{
-    return this;
 }
 
 short Node::tabIndex() const
@@ -715,9 +688,6 @@ void Node::attach(const AttachContext&)
 
 void Node::detach(const AttachContext& context)
 {
-    ASSERT(document().lifecycle().stateAllowsDetach());
-    DocumentLifecycle::DetachScope willDetach(document().lifecycle());
-
     if (renderer())
         renderer()->destroy();
     setRenderer(0);
@@ -1215,33 +1185,9 @@ static void showSubTreeAcrossFrame(const Node* node, const Node* markedNode, con
 
 // --------
 
-Element* Node::enclosingLinkEventParentOrSelf()
-{
-    return 0;
-}
-
-const AtomicString& Node::interfaceName() const
-{
-    return EventTargetNames::Node;
-}
-
-ExecutionContext* Node::executionContext() const
-{
-    return document().contextDocument().get();
-}
-
 void Node::didMoveToNewDocument(Document& oldDocument)
 {
     TreeScopeAdopter::ensureDidMoveToNewDocumentWasCalled(oldDocument);
-
-    if (const EventTargetData* eventTargetData = this->eventTargetData()) {
-        const EventListenerMap& listenerMap = eventTargetData->eventListenerMap;
-        if (!listenerMap.isEmpty()) {
-            Vector<AtomicString> types = listenerMap.eventTypes();
-            for (unsigned i = 0; i < types.size(); ++i)
-                document().addListenerTypeIfNeeded(types[i]);
-        }
-    }
 
     oldDocument.markers().removeMarkers(this);
     oldDocument.updateRangesAfterNodeMovedToAnotherDocument(*this);
@@ -1257,53 +1203,6 @@ void Node::didMoveToNewDocument(Document& oldDocument)
             document().addMutationObserverTypes((*iter)->mutationTypes());
         }
     }
-}
-
-bool Node::addEventListener(const AtomicString& eventType, PassRefPtr<EventListener> listener, bool useCapture)
-{
-    if (!EventTarget::addEventListener(eventType, listener, useCapture))
-        return false;
-
-    document().addListenerTypeIfNeeded(eventType);
-
-    return true;
-}
-
-void Node::removeAllEventListenersRecursively()
-{
-    for (Node* node = this; node; node = NodeTraversal::next(*node)) {
-        node->removeAllEventListeners();
-        if (ShadowRoot* root = node->shadowRoot())
-            root->removeAllEventListenersRecursively();
-    }
-}
-
-typedef HashMap<RawPtr<Node>, OwnPtr<EventTargetData> > EventTargetDataMap;
-
-static EventTargetDataMap& eventTargetDataMap()
-{
-    DEFINE_STATIC_LOCAL(OwnPtr<EventTargetDataMap>, map, (adoptPtr(new EventTargetDataMap())));
-    return *map;
-}
-
-EventTargetData* Node::eventTargetData()
-{
-    return hasEventTargetData() ? eventTargetDataMap().get(this) : 0;
-}
-
-EventTargetData& Node::ensureEventTargetData()
-{
-    if (hasEventTargetData())
-        return *eventTargetDataMap().get(this);
-    setHasEventTargetData(true);
-    EventTargetData* data = new EventTargetData;
-    eventTargetDataMap().set(this, adoptPtr(data));
-    return *data;
-}
-
-void Node::clearEventTargetData()
-{
-    eventTargetDataMap().remove(this);
 }
 
 Vector<OwnPtr<MutationObserverRegistration> >* Node::mutationObserverRegistry()
@@ -1423,66 +1322,6 @@ void Node::notifyMutationObserversNodeWillDetach()
             for (HashSet<RawPtr<MutationObserverRegistration> >::iterator iter = transientRegistry->begin(); iter != transientRegistry->end(); ++iter)
                 (*iter)->observedSubtreeNodeWillDetach(*this);
         }
-    }
-}
-
-void Node::handleLocalEvents(Event* event)
-{
-    if (!hasEventTargetData())
-        return;
-    fireEventListeners(event);
-}
-
-void Node::dispatchScopedEvent(PassRefPtr<Event> event)
-{
-    dispatchScopedEventDispatchMediator(EventDispatchMediator::create(event));
-}
-
-void Node::dispatchScopedEventDispatchMediator(PassRefPtr<EventDispatchMediator> eventDispatchMediator)
-{
-    EventDispatcher::dispatchScopedEvent(this, eventDispatchMediator);
-}
-
-bool Node::dispatchEvent(PassRefPtr<Event> event)
-{
-    return EventDispatcher::dispatchEvent(this, EventDispatchMediator::create(event));
-}
-
-bool Node::dispatchDOMActivateEvent(int detail, PassRefPtr<Event> underlyingEvent)
-{
-    ASSERT(!EventDispatchForbiddenScope::isEventDispatchForbidden());
-    RefPtr<UIEvent> event = UIEvent::create(EventTypeNames::DOMActivate, true, true, document().domWindow(), detail);
-    event->setUnderlyingEvent(underlyingEvent);
-    dispatchScopedEvent(event);
-    return event->defaultHandled();
-}
-
-void Node::dispatchInputEvent()
-{
-    dispatchScopedEvent(Event::createBubble(EventTypeNames::input));
-}
-
-void Node::defaultEventHandler(Event* event)
-{
-    if (event->target() != this)
-        return;
-    const AtomicString& eventType = event->type();
-    if (eventType == EventTypeNames::keydown || eventType == EventTypeNames::keypress) {
-        if (event->isKeyboardEvent()) {
-            if (LocalFrame* frame = document().frame())
-                frame->eventHandler().defaultKeyboardEventHandler(toKeyboardEvent(event));
-        }
-    } else if (eventType == EventTypeNames::click) {
-        int detail = event->isUIEvent() ? static_cast<UIEvent*>(event)->detail() : 0;
-        if (dispatchDOMActivateEvent(detail, event))
-            event->setDefaultHandled();
-    } else if (eventType == EventTypeNames::textInput) {
-        if (event->hasInterface(EventNames::TextEvent)) {
-            if (LocalFrame* frame = document().frame())
-                frame->eventHandler().defaultTextInputEventHandler(toTextEvent(event));
-        }
-    } else if (event->type() == EventTypeNames::webkitEditableContentChanged) {
-        dispatchInputEvent();
     }
 }
 

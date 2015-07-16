@@ -37,7 +37,6 @@ namespace blink {
 
 class Blob;
 class ExceptionState;
-class ExecutionContext;
 class URLRegistrable;
 
 class DOMURL final : public RefCounted<DOMURL>, public DartWrappable, public DOMURLUtils {

@@ -52,8 +52,6 @@ from v8_globals import includes
 NON_WRAPPER_TYPES = frozenset([
     'CompareHow',
     'DartValue',
-    'EventHandler',
-    'EventListener',
     'MediaQueryListListener',
     'NodeFilter',
 ])
@@ -106,7 +104,6 @@ CPP_UNSIGNED_TYPES = set([
 CPP_SPECIAL_CONVERSION_RULES = {
     'CompareHow': 'Range::CompareHow',
     'Date': 'double',
-    'EventHandler': 'EventListener*',
     'MediaQueryListListener': 'RefPtrWillBeRawPtr<MediaQueryListListener>',
     'Promise': 'ScriptPromise',
     # FIXME: Eliminate custom bindings for XPathNSResolver  http://crbug.com/345529
@@ -257,8 +254,6 @@ def includes_for_cpp_class(class_name, relative_dir_posix):
 INCLUDES_FOR_TYPE = {
     'object': set(),
     'CompareHow': set(),
-    'EventHandler': set(),
-    'EventListener': set(),
     'MediaQueryListListener': set(['sky/engine/core/css/MediaQueryListListener.h']),
     'NodeList': set(['sky/engine/core/dom/NodeList.h',
                      'sky/engine/core/dom/StaticNodeList.h']),
@@ -358,7 +353,6 @@ DART_TO_CPP_VALUE = {
     'unsigned long long': 'DartConverter<unsigned long long>::FromArguments(args, {index}, exception)',
     # Interface types
     'CompareHow': 'static_cast<Range::CompareHow>(0) /* FIXME, DART_TO_CPP_VALUE[CompareHow] */',
-    'EventTarget': '0 /* FIXME, DART_TO_CPP_VALUE[EventTarget] */',
     'MediaQueryListListener': 'nullptr /* FIXME, DART_TO_CPP_VALUE[MediaQueryListener] */',
     'NodeFilter': 'nullptr /* FIXME, DART_TO_CPP_VALUE[NodeFilter] */',
     'Promise': 'DartUtilities::dartToScriptPromise{null_check}(args, {index})',
@@ -645,7 +639,6 @@ DART_SET_RETURN_VALUE = {
     # and then use general Dart_SetReturnValue.
     'array': 'Dart_SetReturnValue(args, {cpp_value})',
     'Date': 'Dart_SetReturnValue(args, {cpp_value})',
-    'EventHandler': DART_FIX_ME,
     'ScriptPromise': 'Dart_SetReturnValue(args, {cpp_value})',
     'DartValue': 'DartConverter<DartValue*>::SetReturnValue(args, {cpp_value})',
     # DOMWrapper
@@ -678,7 +671,7 @@ def dart_set_return_value(idl_type, cpp_value,
     idl_type, cpp_value = preprocess_idl_type_and_value(idl_type, cpp_value, extended_attributes)
     this_dart_conversion_type = idl_type.dart_conversion_type(extended_attributes)
     # SetReturn-specific overrides
-    if this_dart_conversion_type in ['Date', 'EventHandler', 'ScriptPromise', 'SerializedScriptValue', 'array']:
+    if this_dart_conversion_type in ['Date', 'ScriptPromise', 'SerializedScriptValue', 'array']:
         # Convert value to Dart and then use general Dart_SetReturnValue
         # FIXME(vsm): Why do we differ from V8 here? It doesn't have a
         # creation_context.
@@ -753,8 +746,6 @@ CPP_VALUE_TO_DART_VALUE = {
     'unrestricted double': 'DartConverter<double>::ToDart({cpp_value})',
     # FIXME(vsm): Dart_Null?
     'void': '',
-    # Special cases
-    'EventHandler': '-----OOPS TO DART-EVENT---',
     # We need to generate the NullCheck version in some cases.
     'ScriptPromise': 'DartUtilities::scriptPromiseToDart({cpp_value})',
     'DartValue': 'DartConverter<DartValue*>::ToDart({cpp_value})',

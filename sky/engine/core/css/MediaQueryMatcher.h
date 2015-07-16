@@ -54,7 +54,6 @@ public:
 
     PassRefPtr<MediaQueryList> matchMedia(const String&);
 
-    void mediaFeaturesChanged();
     void viewportChanged();
     bool evaluate(const MediaQuerySet*);
 

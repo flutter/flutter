@@ -49,7 +49,8 @@ class Text;
 
 class Range final : public RefCounted<Range>, public DartWrappable {
     DEFINE_WRAPPERTYPEINFO();
-public:
+ public:
+    static PassRefPtr<Range> create(Document*);
     static PassRefPtr<Range> create(Document&);
     static PassRefPtr<Range> create(Document&, Node* startContainer, int startOffset, Node* endContainer, int endOffset);
     static PassRefPtr<Range> create(Document&, const Position&, const Position&);

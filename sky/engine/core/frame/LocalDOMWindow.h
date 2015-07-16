@@ -27,14 +27,14 @@
 #ifndef SKY_ENGINE_CORE_FRAME_LOCALDOMWINDOW_H_
 #define SKY_ENGINE_CORE_FRAME_LOCALDOMWINDOW_H_
 
-#include "sky/engine/core/events/EventTarget.h"
+#include "sky/engine/core/events/Event.h"
 #include "sky/engine/core/frame/DOMWindowBase64.h"
 #include "sky/engine/core/frame/FrameDestructionObserver.h"
-#include "sky/engine/platform/LifecycleContext.h"
 #include "sky/engine/platform/Supplementable.h"
 #include "sky/engine/platform/heap/Handle.h"
 
 #include "sky/engine/wtf/Forward.h"
+#include "sky/engine/wtf/HashSet.h"
 
 namespace blink {
 
@@ -42,8 +42,6 @@ class CSSStyleDeclaration;
 class DOMSelection;
 class DOMURL;
 class DOMWindowCSS;
-class DOMWindowEventQueue;
-class DOMWindowLifecycleNotifier;
 class DOMWindowProperty;
 class Database;
 class DatabaseCallback;
@@ -51,10 +49,8 @@ class Document;
 class DocumentInit;
 class Element;
 class EventListener;
-class EventQueue;
 class ExceptionState;
 class FloatRect;
-class FrameConsole;
 class IDBFactory;
 class LocalFrame;
 class Location;
@@ -75,9 +71,8 @@ enum PageshowEventPersistence {
 
 enum SetLocationLocking { LockHistoryBasedOnGestureState, LockHistoryAndBackForwardList };
 
-class LocalDOMWindow final : public RefCounted<LocalDOMWindow>, public EventTargetWithInlineData, public DOMWindowBase64, public FrameDestructionObserver, public Supplementable<LocalDOMWindow>, public LifecycleContext<LocalDOMWindow> {
+class LocalDOMWindow final : public DartWrappable, public RefCounted<LocalDOMWindow>, public DOMWindowBase64, public FrameDestructionObserver, public Supplementable<LocalDOMWindow> {
     DEFINE_WRAPPERTYPEINFO();
-    REFCOUNTED_EVENT_TARGET(LocalDOMWindow);
 public:
     static PassRefPtr<LocalDOMWindow> create(LocalFrame& frame)
     {
@@ -87,10 +82,6 @@ public:
 
     PassRefPtr<Document> installNewDocument(const DocumentInit&);
 
-    virtual const AtomicString& interfaceName() const override;
-    virtual ExecutionContext* executionContext() const override;
-
-    virtual LocalDOMWindow* toDOMWindow() override;
     void AcceptDartGCVisitor(DartGCVisitor& visitor) const override;
 
     void registerProperty(DOMWindowProperty*);
@@ -99,8 +90,6 @@ public:
     void reset();
 
     PassRefPtr<MediaQueryList> matchMedia(const String&);
-
-    unsigned pendingUnloadEventListeners() const;
 
     static FloatRect adjustWindowRect(LocalFrame&, const FloatRect& pendingChanges);
 
@@ -145,8 +134,6 @@ public:
 
     double devicePixelRatio() const;
 
-    FrameConsole* frameConsole() const;
-
     void printErrorMessage(const String&);
 
     void moveBy(float x, float y) const;
@@ -161,17 +148,6 @@ public:
 
     DOMWindowCSS& css() const;
 
-    // Events
-    // EventTarget API
-    virtual bool addEventListener(const AtomicString& eventType, PassRefPtr<EventListener>, bool useCapture = false) override;
-    virtual bool removeEventListener(const AtomicString& eventType, PassRefPtr<EventListener>, bool useCapture = false) override;
-    virtual void removeAllEventListeners() override;
-
-    using EventTarget::dispatchEvent;
-    bool dispatchEvent(PassRefPtr<Event> prpEvent, PassRefPtr<EventTarget> prpTarget);
-
-    void dispatchLoadEvent();
-
     // This is the interface orientation in degrees. Some examples are:
     //  0 is straight up; -90 is when the device is rotated 90 clockwise;
     //  90 is when rotated counter clockwise.
@@ -180,24 +156,6 @@ public:
     void willDetachDocumentFromFrame();
 
     bool isInsecureScriptAccess(LocalDOMWindow& callingWindow, const String& urlString);
-
-    PassOwnPtr<LifecycleNotifier<LocalDOMWindow> > createLifecycleNotifier();
-
-    EventQueue* eventQueue() const;
-    void enqueueWindowEvent(PassRefPtr<Event>);
-    void enqueueDocumentEvent(PassRefPtr<Event>);
-    void enqueuePageshowEvent(PageshowEventPersistence);
-    void enqueueHashchangeEvent(const String& oldURL, const String& newURL);
-    void dispatchWindowLoadEvent();
-    void documentWasClosed();
-
-    // FIXME: This shouldn't be public once LocalDOMWindow becomes ExecutionContext.
-    void clearEventQueue();
-
-    void acceptLanguagesChanged();
-
-protected:
-    DOMWindowLifecycleNotifier& lifecycleNotifier();
 
 private:
     explicit LocalDOMWindow(LocalFrame&);
@@ -211,18 +169,6 @@ private:
     void resetDOMWindowProperties();
     void willDestroyDocumentInFrame();
 
-    // FIXME: Oilpan: the need for this internal method will fall
-    // away when EventTargets are no longer using refcounts and
-    // window properties are also on the heap. Inline the minimal
-    // do-not-broadcast handling then and remove the enum +
-    // removeAllEventListenersInternal().
-    enum BroadcastListenerRemoval {
-        DoNotBroadcastListenerRemoval,
-        DoBroadcastListenerRemoval
-    };
-
-    void removeAllEventListenersInternal(BroadcastListenerRemoval);
-
     RefPtr<Document> m_document;
 
 #if ENABLE(ASSERT)
@@ -235,8 +181,6 @@ private:
     mutable RefPtr<Location> m_location;
     mutable RefPtr<Tracing> m_tracing;
     mutable RefPtr<DOMWindowCSS> m_css;
-
-    RefPtr<DOMWindowEventQueue> m_eventQueue;
 };
 
 } // namespace blink

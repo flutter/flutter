@@ -200,8 +200,6 @@ def argument_context(interface, method, argument, index):
 def cpp_value(interface, method, number_of_arguments):
     def cpp_argument(argument):
         idl_type = argument.idl_type
-        if idl_type.name == 'EventListener':
-            return argument.name
         if (idl_type.is_callback_interface or
             idl_type.name in ['NodeFilter', 'NodeFilterOrNull']):
             # FIXME: remove this special case

@@ -24,6 +24,7 @@
  *
  */
 
+#include "gen/sky/core/EventNames.h"
 #include "sky/engine/core/events/CompositionEvent.h"
 
 namespace blink {
@@ -63,9 +64,6 @@ CompositionEvent::~CompositionEvent()
 
 void CompositionEvent::initCompositionEvent(const AtomicString& type, bool canBubble, bool cancelable, PassRefPtr<AbstractView> view, const String& data)
 {
-    if (dispatched())
-        return;
-
     initUIEvent(type, canBubble, cancelable, view, 0);
 
     m_data = data;

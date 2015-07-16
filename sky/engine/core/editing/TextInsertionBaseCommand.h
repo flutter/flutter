@@ -43,7 +43,6 @@ protected:
     static void applyTextInsertionCommand(LocalFrame*, PassRefPtr<TextInsertionBaseCommand>, const VisibleSelection& selectionForInsertion, const VisibleSelection& endingSelection);
 };
 
-String dispatchBeforeTextInsertedEvent(const String& text, const VisibleSelection& selectionForInsertion, bool insertionIsForUpdatingComposition);
 bool canAppendNewLineFeedToSelection(const VisibleSelection&);
 
 // LineOperation should define member function "opeartor (size_t lineOffset, size_t lineLength, bool isLastLine)".

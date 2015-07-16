@@ -23,6 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "gen/sky/core/EventNames.h"
+#include "gen/sky/core/EventTypeNames.h"
 #include "sky/engine/core/events/BeforeTextInsertedEvent.h"
 
 namespace blink {

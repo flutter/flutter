@@ -46,19 +46,14 @@ class CSSFontFace;
 class CSSValueList;
 class Document;
 class ExceptionState;
-class ExecutionContext;
 class FontFaceReadyPromiseResolver;
 class StylePropertySet;
 class StyleRuleFontFace;
 
-class FontFace : public RefCounted<FontFace>, public DartWrappable {
-    DEFINE_WRAPPERTYPEINFO();
+class FontFace : public RefCounted<FontFace> {
 public:
     enum LoadStatus { Unloaded, Loading, Loaded, Error };
 
-    static PassRefPtr<FontFace> create(ExecutionContext*, const AtomicString& family, PassRefPtr<ArrayBuffer> source);
-    static PassRefPtr<FontFace> create(ExecutionContext*, const AtomicString& family, PassRefPtr<ArrayBufferView>);
-    static PassRefPtr<FontFace> create(ExecutionContext*, const AtomicString& family, const String& source);
     static PassRefPtr<FontFace> create(Document*, const StyleRuleFontFace*);
 
     ~FontFace();
@@ -70,15 +65,6 @@ public:
     String unicodeRange() const;
     String variant() const;
     String featureSettings() const;
-
-    // FIXME: Changing these attributes should affect font matching.
-    void setFamily(ExecutionContext*, const AtomicString& s, ExceptionState&) { m_family = s; }
-    void setStyle(ExecutionContext*, const String&, ExceptionState&);
-    void setWeight(ExecutionContext*, const String&, ExceptionState&);
-    void setStretch(ExecutionContext*, const String&, ExceptionState&);
-    void setUnicodeRange(ExecutionContext*, const String&, ExceptionState&);
-    void setVariant(ExecutionContext*, const String&, ExceptionState&);
-    void setFeatureSettings(ExecutionContext*, const String&, ExceptionState&);
 
     String status() const;
 
@@ -97,11 +83,11 @@ public:
         virtual void notifyLoaded(FontFace*) = 0;
         virtual void notifyError(FontFace*) = 0;
     };
-    void loadWithCallback(PassRefPtr<LoadFontCallback>, ExecutionContext*);
+    void loadWithCallback(PassRefPtr<LoadFontCallback>);
 
 private:
     FontFace();
-    FontFace(ExecutionContext*, const AtomicString& family);
+    FontFace(const AtomicString& family);
 
     void initCSSFontFace(Document*, PassRefPtr<CSSValue> src);
     void initCSSFontFace(const unsigned char* data, unsigned size);
@@ -109,7 +95,6 @@ private:
     bool setPropertyFromStyle(const StylePropertySet&, CSSPropertyID);
     bool setPropertyValue(PassRefPtr<CSSValue>, CSSPropertyID);
     bool setFamilyValue(CSSValueList*);
-    void loadInternal(ExecutionContext*);
 
     AtomicString m_family;
     RefPtr<CSSValue> m_src;

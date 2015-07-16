@@ -28,7 +28,7 @@
 // http://www.w3.org/html/wg/drafts/html/master/browsers.html#window
 [
     ImplementedAs=LocalDOMWindow,
-] interface Window : EventTarget {
+] interface Window {
     readonly attribute Screen screen;
     [Replaceable, PutForwards=href] readonly attribute Location location;
 
@@ -78,4 +78,4 @@
 };
 
 Window implements WindowBase64;
-Window implements WindowTimers;
+

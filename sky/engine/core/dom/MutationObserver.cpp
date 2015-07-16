@@ -34,7 +34,6 @@
 #include "base/bind.h"
 #include "sky/engine/bindings/exception_state.h"
 #include "sky/engine/core/dom/ExceptionCode.h"
-#include "sky/engine/core/dom/ExecutionContext.h"
 #include "sky/engine/core/dom/Microtask.h"
 #include "sky/engine/core/dom/MutationCallback.h"
 #include "sky/engine/core/dom/MutationObserverRegistration.h"
@@ -156,7 +155,7 @@ HashSet<RawPtr<Node> > MutationObserver::getObservedNodes() const
 
 bool MutationObserver::canDeliver()
 {
-    return !m_callback->executionContext()->activeDOMObjectsAreSuspended();
+    return true;
 }
 
 void MutationObserver::deliver()

@@ -28,6 +28,7 @@
 
 #include "gen/sky/core/CSSPropertyNames.h"
 #include "gen/sky/core/EventNames.h"
+#include "gen/sky/core/EventTypeNames.h"
 #include "sky/engine/bindings/exception_state_placeholder.h"
 #include "sky/engine/core/css/CSSComputedStyleDeclaration.h"
 #include "sky/engine/core/css/StylePropertySet.h"
@@ -45,19 +46,20 @@
 #include "sky/engine/core/editing/VisibleUnits.h"
 #include "sky/engine/core/editing/htmlediting.h"
 #include "sky/engine/core/events/KeyboardEvent.h"
-#include "sky/engine/core/events/ScopedEventQueue.h"
 #include "sky/engine/core/events/TextEvent.h"
 #include "sky/engine/core/frame/FrameView.h"
 #include "sky/engine/core/frame/LocalFrame.h"
 #include "sky/engine/core/frame/Settings.h"
 #include "sky/engine/core/loader/EmptyClients.h"
 #include "sky/engine/core/page/EditorClient.h"
-#include "sky/engine/core/page/EventHandler.h"
 #include "sky/engine/core/page/FocusController.h"
 #include "sky/engine/core/page/Page.h"
 #include "sky/engine/core/rendering/HitTestResult.h"
 #include "sky/engine/platform/weborigin/KURL.h"
 #include "sky/engine/wtf/unicode/CharacterNames.h"
+
+// This file is in tatters. It didn't survive the EventTarget removal at all well.
+// TODO(ianh): It should be next to go.
 
 namespace blink {
 
@@ -269,7 +271,6 @@ void Editor::pasteAsPlainText(const String& pastingText, bool smartReplace)
     ContainerNode* target = findEventTargetFromSelection();
     if (!target)
         return;
-    target->dispatchEvent(TextEvent::createForPlainTextPaste(m_frame.domWindow(), pastingText, smartReplace), IGNORE_EXCEPTION);
 }
 
 void Editor::pasteAsFragment(PassRefPtr<DocumentFragment> pastingFragment, bool smartReplace, bool matchStyle)
@@ -277,7 +278,6 @@ void Editor::pasteAsFragment(PassRefPtr<DocumentFragment> pastingFragment, bool 
     ContainerNode* target = findEventTargetFromSelection();
     if (!target)
         return;
-    target->dispatchEvent(TextEvent::createForFragmentPaste(m_frame.domWindow(), pastingFragment, smartReplace, matchStyle), IGNORE_EXCEPTION);
 }
 
 bool Editor::tryDHTMLCopy()
@@ -357,22 +357,12 @@ ContainerNode* Editor::findEventTargetFromSelection() const
     return findEventTargetFrom(m_frame.selection().selection());
 }
 
-static void dispatchEditableContentChangedEvents(PassRefPtr<Element> startRoot, PassRefPtr<Element> endRoot)
-{
-    if (startRoot)
-        startRoot->dispatchEvent(Event::create(EventTypeNames::webkitEditableContentChanged), IGNORE_EXCEPTION);
-    if (endRoot && endRoot != startRoot)
-        endRoot->dispatchEvent(Event::create(EventTypeNames::webkitEditableContentChanged), IGNORE_EXCEPTION);
-}
-
 void Editor::appliedEditing(PassRefPtr<CompositeEditCommand> cmd)
 {
-    EventQueueScope scope;
     m_frame.document()->updateLayout();
 
     EditCommandComposition* composition = cmd->composition();
     ASSERT(composition);
-    dispatchEditableContentChangedEvents(composition->startingRootEditableElement(), composition->endingRootEditableElement());
     VisibleSelection newSelection(cmd->endingSelection());
 
     // Don't clear the typing style with this selection change. We do those things elsewhere if necessary.
@@ -397,10 +387,7 @@ void Editor::appliedEditing(PassRefPtr<CompositeEditCommand> cmd)
 
 void Editor::unappliedEditing(PassRefPtr<EditCommandComposition> cmd)
 {
-    EventQueueScope scope;
     m_frame.document()->updateLayout();
-
-    dispatchEditableContentChangedEvents(cmd->startingRootEditableElement(), cmd->endingRootEditableElement());
 
     VisibleSelection newSelection(cmd->startingSelection());
     newSelection.validatePositionsIfNeeded();
@@ -415,10 +402,7 @@ void Editor::unappliedEditing(PassRefPtr<EditCommandComposition> cmd)
 
 void Editor::reappliedEditing(PassRefPtr<EditCommandComposition> cmd)
 {
-    EventQueueScope scope;
     m_frame.document()->updateLayout();
-
-    dispatchEditableContentChangedEvents(cmd->startingRootEditableElement(), cmd->endingRootEditableElement());
 
     VisibleSelection newSelection(cmd->endingSelection());
     changeSelectionAfterCommand(newSelection, FrameSelection::CloseTyping | FrameSelection::ClearTypingStyle);
@@ -458,7 +442,7 @@ void Editor::clear()
 
 bool Editor::insertText(const String& text, KeyboardEvent* triggeringEvent)
 {
-    return m_frame.eventHandler().handleTextInputEvent(text, triggeringEvent);
+  return false;
 }
 
 bool Editor::insertTextWithoutSendingTextEvent(const String& text, bool selectInsertedText, TextEvent* triggeringEvent)
@@ -549,10 +533,6 @@ void Editor::performDelete()
     if (!canDelete())
         return;
     deleteSelectionWithSmartDelete(canSmartCopyOrDelete());
-}
-
-void Editor::countEvent(ExecutionContext* executionContext, const Event* event)
-{
 }
 
 void Editor::copyImage(const HitTestResult& result)

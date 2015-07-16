@@ -19,7 +19,6 @@ class BuiltinSky : public DartClassProvider {
   explicit BuiltinSky(DOMDartState* dart_state);
   ~BuiltinSky();
 
-  void InstallWindow(DOMDartState* dart_state);
   void InstallView(View* view);
 
   // DartClassProvider:

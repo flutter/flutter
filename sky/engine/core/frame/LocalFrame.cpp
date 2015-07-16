@@ -36,15 +36,12 @@
 #include "sky/engine/core/editing/InputMethodController.h"
 #include "sky/engine/core/editing/SpellChecker.h"
 #include "sky/engine/core/events/Event.h"
-#include "sky/engine/core/frame/FrameConsole.h"
 #include "sky/engine/core/frame/FrameDestructionObserver.h"
 #include "sky/engine/core/frame/FrameHost.h"
 #include "sky/engine/core/frame/FrameView.h"
 #include "sky/engine/core/frame/LocalDOMWindow.h"
-#include "sky/engine/core/frame/NewEventHandler.h"
 #include "sky/engine/core/frame/Settings.h"
 #include "sky/engine/core/loader/FrameLoaderClient.h"
-#include "sky/engine/core/page/EventHandler.h"
 #include "sky/engine/core/page/FocusController.h"
 #include "sky/engine/core/page/Page.h"
 #include "sky/engine/core/rendering/HitTestResult.h"
@@ -65,9 +62,6 @@ inline LocalFrame::LocalFrame(FrameLoaderClient* client, FrameHost* host)
     , m_editor(Editor::create(*this))
     , m_spellChecker(SpellChecker::create(*this))
     , m_selection(FrameSelection::create(this))
-    , m_eventHandler(adoptPtr(new EventHandler(this)))
-    , m_newEventHandler(adoptPtr(new NewEventHandler(*this)))
-    , m_console(FrameConsole::create(*this))
     , m_inputMethodController(InputMethodController::create(*this))
     , m_document(nullptr)
 {
@@ -136,8 +130,6 @@ void LocalFrame::setView(PassRefPtr<FrameView> view)
         document()->prepareForDestruction();
     }
 
-    eventHandler().clear();
-
     m_view = view;
 }
 
@@ -199,7 +191,14 @@ String LocalFrame::selectedText() const
 
 VisiblePosition LocalFrame::visiblePositionForPoint(const IntPoint& framePoint)
 {
-    HitTestResult result = eventHandler().hitTestResultAtPoint(framePoint);
+    if (!contentRenderer() || !view() || !view()->didFirstLayout())
+      return VisiblePosition();
+
+    LayoutSize padding = LayoutSize();
+    HitTestResult result(framePoint, padding.height(), padding.width(), padding.height(), padding.width());
+    HitTestRequest request(HitTestRequest::ReadOnly | HitTestRequest::Active);
+    contentRenderer()->hitTest(request, result);
+
     Node* node = result.innerNonSharedNode();
     if (!node)
         return VisiblePosition();
@@ -227,19 +226,6 @@ Document* LocalFrame::document() const
     if (m_document)
         return m_document;
     return m_domWindow ? m_domWindow->document() : 0;
-}
-
-Document* LocalFrame::documentAtPoint(const IntPoint& point)
-{
-    if (!view())
-        return 0;
-
-    IntPoint pt = view()->windowToContents(point);
-    HitTestResult result = HitTestResult(pt);
-
-    if (contentRenderer())
-        result = eventHandler().hitTestResultAtPoint(pt, HitTestRequest::ReadOnly | HitTestRequest::Active);
-    return result.innerNode() ? &result.innerNode()->document() : 0;
 }
 
 PassRefPtr<Range> LocalFrame::rangeForPoint(const IntPoint& framePoint)

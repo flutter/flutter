@@ -67,9 +67,6 @@ CSSStyleSheet::~CSSStyleSheet()
 void CSSStyleSheet::setMediaQueries(PassRefPtr<MediaQuerySet> mediaQueries)
 {
     m_mediaQueries = mediaQueries;
-
-    // Add warning message to inspector whenever dpi/dpcm values are used for "screen" media.
-    reportMediaQueryWarningIfNeeded(ownerDocument(), m_mediaQueries.get());
 }
 
 void CSSStyleSheet::clearOwnerNode()

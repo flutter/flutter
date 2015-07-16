@@ -30,6 +30,10 @@
 #include "sky/engine/core/frame/LocalFrame.h"
 #include "sky/engine/wtf/Vector.h"
 
+// Note: when removing EventTarget, the MediaQuery logic was
+// disconnected from Documents, and as part of that, the
+// viewportChanged and mediaFeaturesChanged methods were dropped.
+
 namespace blink {
 
 PassRefPtr<MediaQueryMatcher> MediaQueryMatcher::create(Document& document)
@@ -82,9 +86,7 @@ PassRefPtr<MediaQueryList> MediaQueryMatcher::matchMedia(const String& query)
         return nullptr;
 
     RefPtr<MediaQuerySet> media = MediaQuerySet::create(query);
-    // Add warning message to inspector whenever dpi/dpcm values are used for "screen" media.
-    reportMediaQueryWarningIfNeeded(m_document, media.get());
-    return MediaQueryList::create(m_document, this, media);
+    return MediaQueryList::create(this, media);
 }
 
 void MediaQueryMatcher::addMediaQueryList(MediaQueryList* query)
@@ -113,34 +115,6 @@ void MediaQueryMatcher::removeViewportListener(MediaQueryListListener* listener)
     if (!m_document)
         return;
     m_viewportListeners.remove(listener);
-}
-
-void MediaQueryMatcher::mediaFeaturesChanged()
-{
-    if (!m_document)
-        return;
-
-    Vector<RefPtr<MediaQueryListListener> > listenersToNotify;
-    for (MediaQueryListSet::iterator it = m_mediaLists.begin(); it != m_mediaLists.end(); ++it) {
-        if ((*it)->mediaFeaturesChanged(&listenersToNotify)) {
-            RefPtr<Event> event(MediaQueryListEvent::create(*it));
-            event->setTarget(*it);
-            m_document->enqueueUniqueAnimationFrameEvent(event);
-        }
-    }
-    m_document->enqueueMediaQueryChangeListeners(listenersToNotify);
-}
-
-void MediaQueryMatcher::viewportChanged()
-{
-    if (!m_document)
-        return;
-
-    Vector<RefPtr<MediaQueryListListener> > listenersToNotify;
-    for (ViewportListenerSet::iterator it = m_viewportListeners.begin(); it != m_viewportListeners.end(); ++it)
-        listenersToNotify.append(*it);
-
-    m_document->enqueueMediaQueryChangeListeners(listenersToNotify);
 }
 
 }

@@ -27,7 +27,6 @@
 #define SKY_ENGINE_CORE_RENDERING_RENDEROBJECT_H_
 
 #include "sky/engine/core/dom/Document.h"
-#include "sky/engine/core/dom/DocumentLifecycle.h"
 #include "sky/engine/core/dom/Element.h"
 #include "sky/engine/core/editing/TextAffinity.h"
 #include "sky/engine/core/html/HTMLElement.h"
@@ -777,7 +776,7 @@ DEFINE_COMPARISON_OPERATORS_WITH_REFERENCES(RenderObject)
 
 inline bool RenderObject::documentBeingDestroyed() const
 {
-    return document().lifecycle().state() >= DocumentLifecycle::Stopping;
+    return !document().isActive();
 }
 
 // setNeedsLayout() won't cause full paint invalidations as

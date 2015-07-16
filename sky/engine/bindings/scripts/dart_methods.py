@@ -158,13 +158,6 @@ def cpp_value(interface, method, number_of_arguments):
         if idl_type.name == 'MojoDataPipeConsumer':
             return '%s.Pass()' % argument_name
 
-        if idl_type.name == 'EventListener':
-            if (interface.name == 'EventTarget' and
-                method.name == 'removeEventListener'):
-                # FIXME: remove this special case by moving get() into
-                # EventTarget::removeEventListener
-                return '%s.get()' % argument_name
-            return argument.name
         if idl_type.is_callback_interface:
             return '%s.release()' % argument_name
         return argument_name
@@ -235,11 +228,8 @@ def dart_value_to_local_cpp_value(interface, has_type_checking_interface,
     idl_type = argument.idl_type
     name = argument.name
 
-    # FIXME: V8 has some special logic around the addEventListener and
-    # removeEventListener methods that should be added in somewhere.
-    # There is also some logic in systemnative.py to force a null check
-    # for the useCapture argument of those same methods that we may need to
-    # pull over.
+    # TODO(ianh): why don't we need to null-check everything?
+    # https://github.com/domokit/mojo/issues/280
     null_check = ((argument.is_optional and idl_type.is_callback_interface) or
                   (argument.default_value and argument.default_value.is_null))
 

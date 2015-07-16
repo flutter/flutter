@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 #include "sky/engine/core/events/KeyboardEvent.h"
+#include "gen/sky/core/EventNames.h"
+#include "gen/sky/core/EventTypeNames.h"
 
 namespace blink {
 

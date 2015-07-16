@@ -9,8 +9,8 @@
 
 namespace blink {
 
-DOMDartState::DOMDartState(Document* document, const String& url)
-    : document_(document), url_(url) {
+DOMDartState::DOMDartState(const String& url)
+    : url_(url) {
 }
 
 DOMDartState::~DOMDartState() {
@@ -18,6 +18,10 @@ DOMDartState::~DOMDartState() {
   // DartPersistentValues so they don't try to enter the destroyed isolate to
   // clean themselves up.
   weak_factory_.InvalidateWeakPtrs();
+}
+
+DOMDartState* DOMDartState::Current() {
+  return static_cast<DOMDartState*>(DartState::Current());
 }
 
 void DOMDartState::DidSetIsolate() {
@@ -30,24 +34,6 @@ void DOMDartState::DidSetIsolate() {
 
   Dart_Handle sky_library = DartBuiltin::LookupLibrary("dart:sky");
   color_class_.Set(this, Dart_GetType(sky_library, ToDart("Color"), 0, 0));
-}
-
-DOMDartState* DOMDartState::Current() {
-  return static_cast<DOMDartState*>(DartState::Current());
-}
-
-Document* DOMDartState::CurrentDocument() {
-  return Current()->document_.get();
-}
-
-LocalFrame* DOMDartState::CurrentFrame() {
-  DCHECK(Current()->document_);
-  return Current()->document_->frame();
-}
-
-LocalDOMWindow* DOMDartState::CurrentWindow() {
-  DCHECK(Current()->document_);
-  return Current()->document_->domWindow();
 }
 
 }  // namespace blink

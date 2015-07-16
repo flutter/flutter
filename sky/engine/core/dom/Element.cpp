@@ -59,8 +59,6 @@
 #include "sky/engine/core/editing/FrameSelection.h"
 #include "sky/engine/core/editing/TextIterator.h"
 #include "sky/engine/core/editing/htmlediting.h"
-#include "sky/engine/core/events/EventDispatcher.h"
-#include "sky/engine/core/events/FocusEvent.h"
 #include "sky/engine/core/frame/FrameView.h"
 #include "sky/engine/core/frame/LocalFrame.h"
 #include "sky/engine/core/frame/Settings.h"
@@ -1141,32 +1139,6 @@ bool Element::isFocusable() const
 bool Element::isKeyboardFocusable() const
 {
     return isFocusable() && tabIndex() >= 0;
-}
-
-void Element::dispatchFocusEvent(Element* oldFocusedElement, FocusType type)
-{
-    RefPtr<FocusEvent> event = FocusEvent::create(EventTypeNames::focus, false, false, document().domWindow(), 0, oldFocusedElement);
-    EventDispatcher::dispatchEvent(this, FocusEventDispatchMediator::create(event.release()));
-}
-
-void Element::dispatchBlurEvent(Element* newFocusedElement)
-{
-    RefPtr<FocusEvent> event = FocusEvent::create(EventTypeNames::blur, false, false, document().domWindow(), 0, newFocusedElement);
-    EventDispatcher::dispatchEvent(this, BlurEventDispatchMediator::create(event.release()));
-}
-
-void Element::dispatchFocusInEvent(const AtomicString& eventType, Element* oldFocusedElement)
-{
-    ASSERT(!EventDispatchForbiddenScope::isEventDispatchForbidden());
-    ASSERT(eventType == EventTypeNames::focusin || eventType == EventTypeNames::DOMFocusIn);
-    dispatchScopedEventDispatchMediator(FocusInEventDispatchMediator::create(FocusEvent::create(eventType, true, false, document().domWindow(), 0, oldFocusedElement)));
-}
-
-void Element::dispatchFocusOutEvent(const AtomicString& eventType, Element* newFocusedElement)
-{
-    ASSERT(!EventDispatchForbiddenScope::isEventDispatchForbidden());
-    ASSERT(eventType == EventTypeNames::focusout || eventType == EventTypeNames::DOMFocusOut);
-    dispatchScopedEventDispatchMediator(FocusOutEventDispatchMediator::create(FocusEvent::create(eventType, true, false, document().domWindow(), 0, newFocusedElement)));
 }
 
 RenderStyle* Element::computedStyle()

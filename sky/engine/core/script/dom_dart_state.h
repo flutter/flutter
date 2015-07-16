@@ -6,8 +6,8 @@
 #define SKY_ENGINE_CORE_SCRIPT_DOM_DART_STATE_H_
 
 #include "dart/runtime/include/dart_api.h"
-#include "sky/engine/tonic/dart_state.h"
 #include "sky/engine/core/dom/Document.h"
+#include "sky/engine/tonic/dart_state.h"
 #include "sky/engine/wtf/RefPtr.h"
 
 namespace blink {
@@ -16,20 +16,14 @@ class LocalDOMWindow;
 
 class DOMDartState : public DartState {
  public:
-  explicit DOMDartState(Document* document, const String& url);
+  explicit DOMDartState(const String& url);
   ~DOMDartState() override;
 
   virtual void DidSetIsolate();
 
-  static DOMDartState* Current();
-
-  static Document* CurrentDocument();
-  static LocalFrame* CurrentFrame();
-  static LocalDOMWindow* CurrentWindow();
-
   const String& url() const { return url_; }
 
-  Document* document() const { return document_.get(); }
+  static DOMDartState* Current();
 
   // Cached handles to strings used in Dart/C++ conversions.
   Dart_Handle x_handle() { return x_handle_.value(); }
@@ -40,7 +34,6 @@ class DOMDartState : public DartState {
   Dart_Handle color_class() { return color_class_.value(); }
 
  private:
-  RefPtr<Document> document_;
   String url_;
 
   DartPersistentValue x_handle_;

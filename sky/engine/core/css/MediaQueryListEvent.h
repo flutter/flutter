@@ -5,6 +5,8 @@
 #ifndef SKY_ENGINE_CORE_CSS_MEDIAQUERYLISTEVENT_H_
 #define SKY_ENGINE_CORE_CSS_MEDIAQUERYLISTEVENT_H_
 
+#include "gen/sky/core/EventNames.h"
+#include "gen/sky/core/EventTypeNames.h"
 #include "sky/engine/core/css/MediaQueryList.h"
 #include "sky/engine/core/events/Event.h"
 

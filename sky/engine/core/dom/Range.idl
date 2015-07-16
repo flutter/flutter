@@ -20,8 +20,7 @@
 
 // Introduced in DOM Level 2:
 [
-    Constructor,
-    ConstructorCallWith=Document,
+ Constructor(Document document),
 ] interface Range {
 
     readonly attribute Node startContainer;

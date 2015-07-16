@@ -36,11 +36,6 @@
 
 namespace blink {
 
-std::pair<EventTarget*, StringImpl*> eventTargetKey(const Event* event)
-{
-    return std::make_pair(event->target(), event->type().impl());
-}
-
 ScriptedAnimationController::ScriptedAnimationController(Document* document)
     : m_document(document)
     , m_nextCallbackId(0)
@@ -101,18 +96,6 @@ void ScriptedAnimationController::dispatchEvents()
 {
     Vector<RefPtr<Event> > events;
     events.swap(m_eventQueue);
-    m_perFrameEvents.clear();
-
-    for (size_t i = 0; i < events.size(); ++i) {
-        EventTarget* eventTarget = events[i]->target();
-        // FIXME: we should figure out how to make dispatchEvent properly virtual to avoid
-        // special casting window.
-        // FIXME: We should not fire events for nodes that are no longer in the tree.
-        if (LocalDOMWindow* window = eventTarget->toDOMWindow())
-            window->dispatchEvent(events[i], nullptr);
-        else
-            eventTarget->dispatchEvent(events[i]);
-    }
 }
 
 void ScriptedAnimationController::executeCallbacks(double monotonicTimeNow)
@@ -179,8 +162,6 @@ void ScriptedAnimationController::enqueueEvent(PassRefPtr<Event> event)
 
 void ScriptedAnimationController::enqueuePerFrameEvent(PassRefPtr<Event> event)
 {
-    if (!m_perFrameEvents.add(eventTargetKey(event.get())).isNewEntry)
-        return;
     enqueueEvent(event);
 }
 

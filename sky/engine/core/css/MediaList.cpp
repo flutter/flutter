@@ -28,7 +28,6 @@
 #include "sky/engine/core/css/parser/MediaQueryParser.h"
 #include "sky/engine/core/dom/Document.h"
 #include "sky/engine/core/frame/LocalDOMWindow.h"
-#include "sky/engine/core/inspector/ConsoleMessage.h"
 #include "sky/engine/wtf/text/StringBuilder.h"
 
 namespace blink {
@@ -174,29 +173,6 @@ MediaList::~MediaList()
 {
 }
 
-static void addResolutionWarningMessageToConsole(Document* document, const String& serializedExpression, CSSPrimitiveValue::UnitType type)
-{
-    ASSERT(document);
-
-    DEFINE_STATIC_LOCAL(String, mediaQueryMessage, ("Consider using 'dppx' units, as in CSS '%replacementUnits%' means dots-per-CSS-%lengthUnit%, not dots-per-physical-%lengthUnit%, so does not correspond to the actual '%replacementUnits%' of a screen. In media query expression: "));
-    DEFINE_STATIC_LOCAL(String, mediaValueDPI, ("dpi"));
-    DEFINE_STATIC_LOCAL(String, mediaValueDPCM, ("dpcm"));
-    DEFINE_STATIC_LOCAL(String, lengthUnitInch, ("inch"));
-    DEFINE_STATIC_LOCAL(String, lengthUnitCentimeter, ("centimeter"));
-
-    StringBuilder message;
-    if (CSSPrimitiveValue::isDotsPerInch(type))
-        message.append(String(mediaQueryMessage).replace("%replacementUnits%", mediaValueDPI).replace("%lengthUnit%", lengthUnitInch));
-    else if (CSSPrimitiveValue::isDotsPerCentimeter(type))
-        message.append(String(mediaQueryMessage).replace("%replacementUnits%", mediaValueDPCM).replace("%lengthUnit%", lengthUnitCentimeter));
-    else
-        ASSERT_NOT_REACHED();
-
-    message.append(serializedExpression);
-
-    document->addConsoleMessage(ConsoleMessage::create(CSSMessageSource, DebugMessageLevel, message.toString()));
-}
-
 static inline bool isResolutionMediaFeature(const String& mediaFeature)
 {
     return mediaFeature == MediaFeatureNames::resolutionMediaFeature
@@ -236,9 +212,6 @@ void reportMediaQueryWarningIfNeeded(Document* document, const MediaQuerySet* me
             }
         }
     }
-
-    if (suspiciousType && !dotsPerPixelUsed)
-        addResolutionWarningMessageToConsole(document, mediaQuerySet->mediaText(), suspiciousType);
 }
 
 }

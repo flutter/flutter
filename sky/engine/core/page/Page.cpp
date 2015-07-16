@@ -26,8 +26,6 @@
 #include "sky/engine/core/editing/Caret.h"
 #include "sky/engine/core/editing/UndoStack.h"
 #include "sky/engine/core/events/Event.h"
-#include "sky/engine/core/frame/DOMTimer.h"
-#include "sky/engine/core/frame/FrameConsole.h"
 #include "sky/engine/core/frame/FrameHost.h"
 #include "sky/engine/core/frame/FrameView.h"
 #include "sky/engine/core/frame/LocalDOMWindow.h"
@@ -35,7 +33,6 @@
 #include "sky/engine/core/frame/Settings.h"
 #include "sky/engine/core/page/ChromeClient.h"
 #include "sky/engine/core/page/FocusController.h"
-#include "sky/engine/core/page/PageLifecycleNotifier.h"
 #include "sky/engine/core/rendering/RenderView.h"
 #include "sky/engine/platform/geometry/FloatRect.h"
 #include "sky/engine/public/platform/WebScreenInfo.h"
@@ -70,7 +67,6 @@ Page::Page(PageClients& pageClients, ServiceProvider* services)
     , m_editorClient(pageClients.editorClient)
     , m_spellCheckerClient(pageClients.spellCheckerClient)
     , m_deviceScaleFactor(1)
-    , m_timerAlignmentInterval(DOMTimer::visiblePageAlignmentInterval())
 #if ENABLE(ASSERT)
     , m_isPainting(false)
 #endif
@@ -140,22 +136,6 @@ void Page::setDeviceScaleFactor(float scaleFactor)
         mainFrame()->deviceOrPageScaleFactorChanged();
 }
 
-void Page::setTimerAlignmentInterval(double interval)
-{
-    if (interval == m_timerAlignmentInterval)
-        return;
-
-    m_timerAlignmentInterval = interval;
-    LocalFrame* frame = mainFrame();
-    if (frame->document())
-        frame->document()->didChangeTimerAlignmentInterval();
-}
-
-double Page::timerAlignmentInterval() const
-{
-    return m_timerAlignmentInterval;
-}
-
 void Page::addMultisamplingChangedObserver(MultisamplingChangedObserver* observer)
 {
     m_multisamplingChangedObservers.add(observer);
@@ -201,22 +181,7 @@ void Page::settingsChanged(SettingsDelegate::ChangeType changeType)
 
 void Page::didCommitLoad(LocalFrame* frame)
 {
-    lifecycleNotifier().notifyDidCommitLoad(frame);
-}
-
-void Page::acceptLanguagesChanged()
-{
-    mainFrame()->domWindow()->acceptLanguagesChanged();
-}
-
-PageLifecycleNotifier& Page::lifecycleNotifier()
-{
-    return static_cast<PageLifecycleNotifier&>(LifecycleContext<Page>::lifecycleNotifier());
-}
-
-PassOwnPtr<LifecycleNotifier<Page> > Page::createLifecycleNotifier()
-{
-    return PageLifecycleNotifier::create(this);
+    ASSERT_NOT_REACHED();
 }
 
 void Page::willBeDestroyed()

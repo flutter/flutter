@@ -41,17 +41,14 @@ namespace blink {
     class Document;
     class Editor;
     class Element;
-    class EventHandler;
     class FloatRect;
     class FloatSize;
-    class FrameConsole;
     class FrameDestructionObserver;
     class FrameSelection;
     class FrameView;
     class InputMethodController;
     class IntPoint;
     class IntSize;
-    class NewEventHandler;
     class Node;
     class Range;
     class RenderView;
@@ -85,12 +82,9 @@ namespace blink {
         RenderView* contentRenderer() const; // Root of the render tree for the document contained in this frame.
 
         Editor& editor() const;
-        EventHandler& eventHandler() const;
-        NewEventHandler& newEventHandler() const;
         FrameSelection& selection() const;
         InputMethodController& inputMethodController() const;
         SpellChecker& spellChecker() const;
-        FrameConsole& console() const;
 
         FrameLoaderClient* loaderClient() const;
 
@@ -104,7 +98,6 @@ namespace blink {
         String selectedText() const;
 
         VisiblePosition visiblePositionForPoint(const IntPoint& framePoint);
-        Document* documentAtPoint(const IntPoint& windowPoint);
         PassRefPtr<Range> rangeForPoint(const IntPoint& framePoint);
 
         void removeSpellingMarkersUnderWords(const Vector<String>& words);
@@ -122,9 +115,6 @@ namespace blink {
         const OwnPtr<Editor> m_editor;
         const OwnPtr<SpellChecker> m_spellChecker;
         const OwnPtr<FrameSelection> m_selection;
-        const OwnPtr<EventHandler> m_eventHandler;
-        const OwnPtr<NewEventHandler> m_newEventHandler;
-        const OwnPtr<FrameConsole> m_console;
         OwnPtr<InputMethodController> m_inputMethodController;
 
         Document* m_document;
@@ -150,26 +140,9 @@ namespace blink {
         return *m_spellChecker;
     }
 
-    inline FrameConsole& LocalFrame::console() const
-    {
-        return *m_console;
-    }
-
     inline InputMethodController& LocalFrame::inputMethodController() const
     {
         return *m_inputMethodController;
-    }
-
-    inline EventHandler& LocalFrame::eventHandler() const
-    {
-        ASSERT(m_eventHandler);
-        return *m_eventHandler;
-    }
-
-    inline NewEventHandler& LocalFrame::newEventHandler() const
-    {
-        ASSERT(m_newEventHandler);
-        return *m_newEventHandler;
     }
 
     DEFINE_TYPE_CASTS(LocalFrame, Frame, localFrame, true, true);
