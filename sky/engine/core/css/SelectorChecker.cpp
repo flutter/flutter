@@ -31,7 +31,6 @@
 #include "sky/engine/core/css/CSSSelectorList.h"
 #include "sky/engine/core/dom/Document.h"
 #include "sky/engine/core/dom/shadow/ShadowRoot.h"
-#include "sky/engine/core/editing/FrameSelection.h"
 #include "sky/engine/core/frame/LocalFrame.h"
 #include "sky/engine/core/html/parser/HTMLParserIdioms.h"
 #include "sky/engine/core/page/FocusController.h"
@@ -45,8 +44,6 @@ static bool matchesFocusPseudoClass(const Element& element)
         return false;
     LocalFrame* frame = element.document().frame();
     if (!frame)
-        return false;
-    if (!frame->selection().isFocusedAndActive())
         return false;
     return true;
 }

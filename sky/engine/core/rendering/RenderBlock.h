@@ -258,9 +258,6 @@ private:
     static void removeFromTrackedRendererMaps(RenderBox* descendant, TrackedDescendantsMap*&, TrackedContainerMap*&);
 
     void paintSelection(PaintInfo&, const LayoutPoint&);
-    void paintCarets(PaintInfo&, const LayoutPoint&);
-
-    bool hasCaret() const;
 
     // Obtains the nearest enclosing block (including this block) that contributes a first-line style to our inline
     // children.

@@ -36,8 +36,6 @@
 
 #include "sky/engine/core/dom/Document.h"
 #include "sky/engine/core/dom/Element.h"
-#include "sky/engine/core/editing/Editor.h"
-#include "sky/engine/core/editing/UndoStack.h"
 #include "sky/engine/core/events/PageTransitionEvent.h"
 #include "sky/engine/core/frame/FrameHost.h"
 #include "sky/engine/core/frame/FrameView.h"
@@ -85,19 +83,15 @@ bool FrameLoader::closeURL()
         m_frame->document()->dispatchUnloadEvents();
     stopLoading();
 
-    if (Page* page = m_frame->page())
-        page->undoStack().didUnloadFrame(*m_frame);
     return true;
 }
 
 void FrameLoader::clear()
 {
-    m_frame->editor().clear();
     m_frame->document()->cancelParsing();
     m_frame->document()->prepareForDestruction();
     m_frame->document()->removeFocusedElementOfSubtree(m_frame->document());
 
-    m_frame->selection().prepareForDestruction();
     if (m_frame->view())
         m_frame->view()->clear();
 }

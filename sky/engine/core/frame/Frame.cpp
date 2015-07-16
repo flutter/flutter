@@ -33,7 +33,6 @@
 #include "sky/engine/core/frame/FrameHost.h"
 #include "sky/engine/core/frame/LocalDOMWindow.h"
 #include "sky/engine/core/frame/Settings.h"
-#include "sky/engine/core/loader/EmptyClients.h"
 #include "sky/engine/core/loader/FrameLoaderClient.h"
 #include "sky/engine/core/page/ChromeClient.h"
 #include "sky/engine/core/page/FocusController.h"

@@ -34,7 +34,6 @@
 namespace blink {
 
 class ContainerNode;
-class DOMSelection;
 class Document;
 class Element;
 class HitTestResult;
@@ -67,8 +66,6 @@ public:
 
     // For accessibility.
     bool shouldCacheLabelsByForAttribute() const { return m_labelsByForAttribute; }
-
-    DOMSelection* getSelection() const;
 
     // Used by the basic DOM mutation methods (e.g., appendChild()).
     void adoptIfNeeded(Node&);
@@ -155,8 +152,6 @@ private:
     OwnPtr<DocumentOrderedMap> m_elementsById;
     OwnPtr<DocumentOrderedMap> m_imageMapsByName;
     OwnPtr<DocumentOrderedMap> m_labelsByForAttribute;
-
-    mutable RefPtr<DOMSelection> m_selection;
 
     int m_guardRefCount;
 };

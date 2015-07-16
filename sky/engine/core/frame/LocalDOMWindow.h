@@ -39,7 +39,6 @@
 namespace blink {
 
 class CSSStyleDeclaration;
-class DOMSelection;
 class DOMURL;
 class DOMWindowCSS;
 class DOMWindowProperty;
@@ -99,8 +98,6 @@ public:
 
     Location& location() const;
     void setLocation(const String& location, SetLocationLocking = LockHistoryBasedOnGestureState);
-
-    DOMSelection* getSelection();
 
     void focus();
 

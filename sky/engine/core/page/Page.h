@@ -41,8 +41,6 @@ namespace blink {
 class ChromeClient;
 class ClientRectList;
 class Document;
-class DragCaretController;
-class EditorClient;
 class FloatRect;
 class FocusController;
 class Frame;
@@ -55,9 +53,6 @@ class RenderBox;
 class RenderObject;
 class ServiceProvider;
 class Settings;
-class SpellCheckerClient;
-class UndoStack;
-class VisibleSelection;
 
 typedef uint64_t LinkHash;
 
@@ -75,8 +70,6 @@ public:
         ~PageClients();
 
         ChromeClient* chromeClient;
-        EditorClient* editorClient;
-        SpellCheckerClient* spellCheckerClient;
     };
 
     Page(PageClients&, ServiceProvider*);
@@ -86,16 +79,11 @@ public:
 
     void setNeedsRecalcStyleInAllFrames();
 
-    EditorClient& editorClient() const { return *m_editorClient; }
-    SpellCheckerClient& spellCheckerClient() const { return *m_spellCheckerClient; }
-    UndoStack& undoStack() const { return *m_undoStack; }
-
     void setMainFrame(LocalFrame*);
     LocalFrame* mainFrame() const { return m_mainFrame; }
 
     void documentDetached(Document*);
 
-    DragCaretController& dragCaretController() const { return *m_dragCaretController; }
     FocusController& focusController() const { return *m_focusController; }
 
     Settings& settings() const { return *m_settings; }
@@ -152,9 +140,7 @@ private:
     virtual void settingsChanged(SettingsDelegate::ChangeType) override;
 
     ChromeClient* m_chromeClient;
-    const OwnPtr<DragCaretController> m_dragCaretController;
     const OwnPtr<FocusController> m_focusController;
-    const OwnPtr<UndoStack> m_undoStack;
 
     // Typically, the main frame and Page should both be owned by the embedder,
     // which must call Page::willBeDestroyed() prior to destroying Page. This
@@ -169,9 +155,6 @@ private:
     // breaks this cycle, so the frame is still properly destroyed once no
     // longer needed.
     LocalFrame* m_mainFrame;
-
-    EditorClient* const m_editorClient;
-    SpellCheckerClient* const m_spellCheckerClient;
 
     float m_deviceScaleFactor;
 

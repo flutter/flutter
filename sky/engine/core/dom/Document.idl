@@ -53,9 +53,6 @@ callback CustomElementConstructor = Element ();
     Range              caretRangeFromPoint([Default=Undefined] optional long x,
                                            [Default=Undefined] optional long y);
 
-    // Mozilla extensions
-    Selection          getSelection();
-
     // HTML 5
     readonly attribute Element activeElement;
     boolean hasFocus();

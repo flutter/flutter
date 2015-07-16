@@ -28,6 +28,7 @@
 #define SKY_ENGINE_CORE_DOM_DOCUMENTMARKERCONTROLLER_H_
 
 #include "sky/engine/core/dom/DocumentMarker.h"
+#include "sky/engine/core/dom/Range.h"
 #include "sky/engine/platform/geometry/IntRect.h"
 #include "sky/engine/platform/heap/Handle.h"
 #include "sky/engine/wtf/HashMap.h"
