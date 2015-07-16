@@ -31,9 +31,6 @@ def to_gn_args(args):
     gn_args["is_debug"] = args.debug
     gn_args["is_clang"] = args.target_os not in ['android']
 
-    # TODO(abarth): Add support for goma.
-    gn_args["use_goma"] = False
-
     if args.target_os == 'android':
         gn_args["target_os"] = "android"
     elif args.target_os == 'ios':
@@ -52,17 +49,36 @@ def to_gn_args(args):
         gn_args["target_cpu"] = 'arm'
     else:
         gn_args["target_cpu"] = 'x64'
+
+    goma_dir = os.environ.get('GOMA_DIR')
+    goma_home_dir = os.path.join(os.getenv('HOME', ''), 'goma')
+    if args.goma and goma_dir:
+      gn_args['use_goma'] = True
+      gn_args['goma_dir'] = goma_dir
+    elif args.goma and os.path.exists(goma_home_dir):
+      gn_args['use_goma'] = True
+      gn_args['goma_dir'] = goma_home_dir
+    else:
+      gn_args['use_goma'] = False
+      gn_args['goma_dir'] = None
+
     return gn_args
 
 
 def main():
   parser = argparse.ArgumentParser(description='A script run` gn gen`.')
+
   parser.add_argument('--debug', default=True)
   parser.add_argument('--release', default=False, dest='debug', action='store_false')
+
   parser.add_argument('--target-os', type=str)
   parser.add_argument('--android', dest='target_os', action='store_const', const='android')
   parser.add_argument('--ios', dest='target_os', action='store_const', const='ios')
   parser.add_argument('--simulator', default=False)
+
+  parser.add_argument('--goma', default=True, action='store_true')
+  parser.add_argument('--no-goma', dest='goma', action='store_false')
+
   args = parser.parse_args()
 
   command = ['gn', 'gen', '--check']
