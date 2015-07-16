@@ -3,9 +3,11 @@ Contributing
 
 This SDK is generated from the
 [Sky repository](https://github.com/domokit/sky_engine) using
-[deploy_sdk.py](https://github.com/domokit/sky_engine/blob/master/sky/tools/deploy_sdk.py)
+[deploy_sdk.py](https://github.com/domokit/sky_engine/blob/master/sky/tools/deploy_sdk.py).
 Static files (including this README.md) are located under
-[sky/sdk](https://github.com/domokit/sky_engine/tree/master/sky/sdk).  Pull
+[sky/sdk](https://github.com/domokit/sky_engine/tree/master/sky/sdk).
+
+Pull
 requests and issue reports are gladly accepted at the
 [Sky repository](https://github.com/domokit/sky_engine)!
 
