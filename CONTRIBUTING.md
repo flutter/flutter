@@ -48,6 +48,7 @@ target.
 * (Only the first time) `./build/install-build-deps.sh`
 * `./sky/tools/gn`
 * `ninja -C out/Debug`
+* `./mojo/tools/mojodb start out/Debug sky/sdk/example/hello_world/lib/main.dart`
 
 Contributing code
 -----------------
