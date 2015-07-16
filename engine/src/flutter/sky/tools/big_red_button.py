@@ -19,7 +19,7 @@ import sys
 import distutils.util
 
 
-DEFAULT_MOJO_ROOT = '/src/mojo/src'
+DEFAULT_SKY_ENGINE_ROOT = '/src/sky_engine/src'
 DEFAULT_SKY_SDK_ROOT = '/src/sky_sdk'
 DEFAULT_DEMO_SITE_ROOT = '/src/domokit.github.io'
 CONFIRM_MESSAGE = """This tool is destructive and will revert your current branch to
@@ -52,8 +52,8 @@ def publish_packages(pub_path, packages_root):
 
 def main():
     parser = argparse.ArgumentParser(description='Deploy!')
-    parser.add_argument('--mojo-root', help='Path to mojo/src',
-        default=DEFAULT_MOJO_ROOT)
+    parser.add_argument('--sky-engine-root', help='Path to sky_engine/src',
+        default=DEFAULT_SKY_ENGINE_ROOT)
     parser.add_argument('--sky-sdk-root', help='Path to sky_sdk',
         default=DEFAULT_SKY_SDK_ROOT)
     parser.add_argument('--demo-site-root', help='Path to domokit.github.io',
@@ -71,24 +71,25 @@ def main():
         print "Aborted."
         return 1
 
-    mojo_root = os.path.abspath(os.path.expanduser(args.mojo_root))
+    sky_engine_root = os.path.abspath(os.path.expanduser(args.sky_engine_root))
     sky_sdk_root = os.path.abspath(os.path.expanduser(args.sky_sdk_root))
     demo_site_root = os.path.abspath(os.path.expanduser(args.demo_site_root))
 
     # Derived paths:
-    dart_sdk_root = os.path.join(mojo_root, 'third_party/dart-sdk/dart-sdk')
+    dart_sdk_root = os.path.join(sky_engine_root, 'third_party/dart-sdk/dart-sdk')
     pub_path = os.path.join(dart_sdk_root, 'bin/pub')
     packages_root = os.path.join(sky_sdk_root, 'packages')
 
-    run(mojo_root, ['git', 'pull', '--rebase'])
-    run(mojo_root, ['gclient', 'sync'])
-    run(mojo_root, ['mojo/tools/mojob.py', 'gn', '--android', '--release'])
-    run(mojo_root, ['mojo/tools/mojob.py', 'build', '--android', '--release'])
+    run(sky_engine_root, ['git', 'pull', '--rebase'])
+    run(sky_engine_root, ['gclient', 'sync'])
+    run(sky_engine_root, ['sky/tools/gn', 'gn', '--android', '--release'])
+    # TODO(eseidel): We shouldn't use mojob anymore, it likely will break.
+    run(sky_engine_root, ['mojo/tools/mojob.py', 'build', '--android', '--release'])
     # Run tests?
 
     run(sky_sdk_root, ['git', 'fetch'])
     run(sky_sdk_root, ['git', 'reset', '--hard', 'origin/master'])
-    run(mojo_root, [
+    run(sky_engine_root, [
         'sky/tools/deploy_sdk.py',
         '--non-interactive',
         '--commit',
@@ -98,7 +99,8 @@ def main():
 
     run(demo_site_root, ['git', 'fetch'])
     run(demo_site_root, ['git', 'reset', '--hard', 'origin/master'])
-    run(mojo_root, ['mojo/tools/deploy_domokit_site.py', demo_site_root])
+    # TODO(eseidel): We should move this script back into sky/tools.
+    run(sky_engine_root, ['mojo/tools/deploy_domokit_site.py', demo_site_root])
     # tag for version?
 
     if args.publish:
