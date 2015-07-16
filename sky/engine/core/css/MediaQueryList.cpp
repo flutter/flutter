@@ -18,7 +18,6 @@
  */
 
 #include "sky/engine/core/css/MediaQueryList.h"
-#include "gen/sky/core/EventTargetNames.h"
 #include "sky/engine/core/css/MediaList.h"
 #include "sky/engine/core/css/MediaQueryEvaluator.h"
 #include "sky/engine/core/css/MediaQueryListListener.h"
