@@ -82,7 +82,7 @@ def main():
 
     run(sky_engine_root, ['git', 'pull', '--rebase'])
     run(sky_engine_root, ['gclient', 'sync'])
-    run(sky_engine_root, ['sky/tools/gn', 'gn', '--android', '--release'])
+    run(sky_engine_root, ['sky/tools/gn', '--android', '--release'])
     # TODO(eseidel): We shouldn't use mojob anymore, it likely will break.
     run(sky_engine_root, ['mojo/tools/mojob.py', 'build', '--android', '--release'])
     # Run tests?
