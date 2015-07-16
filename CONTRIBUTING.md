@@ -29,13 +29,26 @@ target_os = ["android"]
  * `gclient sync`
  * `cd src`
  * `git remote add upstream git@github.com:domokit/sky_engine.git`
- * `./build/install-build-deps.sh`
 
 Building the code
 -----------------
 
- * `./mojo/tools/mojob gn`
- * `ninja -C out/Debug`
+Currently we support building for an Android target and for a headless Linux
+target.
+
+### Android
+
+* (Only the first time) `./build/install-build-deps-android.sh`
+* `./mojo/tools/mojob.py gn --android` (Note: There's currently a harmless
+  go-related error when running this command.)
+* `ninja -C out/android_Debug`
+
+### Linux
+
+* (Only the first time) `./build/install-build-deps.sh`
+* `./mojo/tools/mojob.py gn` (Note: There's currently a harmless go-related
+  error when running this command.)
+* `ninja -C out/Debug`
 
 Contributing code
 -----------------
