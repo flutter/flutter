@@ -28,6 +28,7 @@
 
 #include <algorithm>
 #include "gen/sky/platform/RuntimeEnabledFeatures.h"
+#include "gen/sky/core/EventTypeNames.h"
 #include "mojo/services/navigation/public/interfaces/navigation.mojom.h"
 #include "sky/engine/bindings/exception_messages.h"
 #include "sky/engine/bindings/exception_state.h"
@@ -40,15 +41,9 @@
 #include "sky/engine/core/dom/Document.h"
 #include "sky/engine/core/dom/Element.h"
 #include "sky/engine/core/dom/ExceptionCode.h"
-#include "sky/engine/core/dom/ExecutionContext.h"
 #include "sky/engine/core/dom/RequestAnimationFrameCallback.h"
 #include "sky/engine/core/editing/Editor.h"
-#include "sky/engine/core/events/DOMWindowEventQueue.h"
-#include "sky/engine/core/events/EventListener.h"
-#include "sky/engine/core/events/HashChangeEvent.h"
 #include "sky/engine/core/events/PageTransitionEvent.h"
-#include "sky/engine/core/frame/DOMWindowLifecycleNotifier.h"
-#include "sky/engine/core/frame/FrameConsole.h"
 #include "sky/engine/core/frame/FrameHost.h"
 #include "sky/engine/core/frame/FrameView.h"
 #include "sky/engine/core/frame/LocalFrame.h"
@@ -59,7 +54,6 @@
 #include "sky/engine/core/inspector/ConsoleMessage.h"
 #include "sky/engine/core/loader/FrameLoaderClient.h"
 #include "sky/engine/core/page/ChromeClient.h"
-#include "sky/engine/core/page/EventHandler.h"
 #include "sky/engine/core/page/Page.h"
 #include "sky/engine/core/rendering/style/RenderStyle.h"
 #include "sky/engine/core/script/dart_controller.h"
@@ -77,63 +71,16 @@
 #include "sky/engine/wtf/MathExtras.h"
 #include "sky/engine/wtf/text/WTFString.h"
 
+// The focus logic in this file is just disconnected cables now.
+// TODO(ianh): Remove the concept of focus.
+
 using std::min;
 using std::max;
 
 namespace blink {
 
-static void disableSuddenTermination()
-{
-    blink::Platform::current()->suddenTerminationChanged(false);
-}
-
-static void enableSuddenTermination()
-{
-    blink::Platform::current()->suddenTerminationChanged(true);
-}
-
 typedef HashCountedSet<LocalDOMWindow*> DOMWindowSet;
 
-static DOMWindowSet& windowsWithUnloadEventListeners()
-{
-    DEFINE_STATIC_LOCAL(DOMWindowSet, windowsWithUnloadEventListeners, ());
-    return windowsWithUnloadEventListeners;
-}
-
-static void addUnloadEventListener(LocalDOMWindow* domWindow)
-{
-    DOMWindowSet& set = windowsWithUnloadEventListeners();
-    if (set.isEmpty())
-        disableSuddenTermination();
-    set.add(domWindow);
-}
-
-static void removeUnloadEventListener(LocalDOMWindow* domWindow)
-{
-    DOMWindowSet& set = windowsWithUnloadEventListeners();
-    DOMWindowSet::iterator it = set.find(domWindow);
-    if (it == set.end())
-        return;
-    set.remove(it);
-    if (set.isEmpty())
-        enableSuddenTermination();
-}
-
-static void removeAllUnloadEventListeners(LocalDOMWindow* domWindow)
-{
-    DOMWindowSet& set = windowsWithUnloadEventListeners();
-    DOMWindowSet::iterator it = set.find(domWindow);
-    if (it == set.end())
-        return;
-    set.removeAll(it);
-    if (set.isEmpty())
-        enableSuddenTermination();
-}
-
-unsigned LocalDOMWindow::pendingUnloadEventListeners() const
-{
-    return windowsWithUnloadEventListeners().count(const_cast<LocalDOMWindow*>(this));
-}
 
 // This function:
 // 1) Validates the pending changes are not changing any value to NaN; in that case keep original value.
@@ -197,24 +144,8 @@ void LocalDOMWindow::clearDocument()
     if (!m_document)
         return;
 
-    // FIXME: This should be part of ActiveDOMObject shutdown
-    clearEventQueue();
-
     m_document->clearDOMWindow();
     m_document = nullptr;
-}
-
-void LocalDOMWindow::clearEventQueue()
-{
-    if (!m_eventQueue)
-        return;
-    m_eventQueue->close();
-    m_eventQueue.clear();
-}
-
-void LocalDOMWindow::acceptLanguagesChanged()
-{
-    dispatchEvent(Event::create(EventTypeNames::languagechange));
 }
 
 PassRefPtr<Document> LocalDOMWindow::installNewDocument(const DocumentInit& init)
@@ -224,55 +155,8 @@ PassRefPtr<Document> LocalDOMWindow::installNewDocument(const DocumentInit& init
     clearDocument();
 
     m_document = Document::create(init);
-    m_eventQueue = DOMWindowEventQueue::create(m_document.get());
     m_document->attach();
     return m_document;
-}
-
-EventQueue* LocalDOMWindow::eventQueue() const
-{
-    return m_eventQueue.get();
-}
-
-void LocalDOMWindow::enqueueWindowEvent(PassRefPtr<Event> event)
-{
-    if (!m_eventQueue)
-        return;
-    event->setTarget(this);
-    m_eventQueue->enqueueEvent(event);
-}
-
-void LocalDOMWindow::enqueueDocumentEvent(PassRefPtr<Event> event)
-{
-    if (!m_eventQueue)
-        return;
-    event->setTarget(m_document.get());
-    m_eventQueue->enqueueEvent(event);
-}
-
-void LocalDOMWindow::dispatchWindowLoadEvent()
-{
-    ASSERT(!EventDispatchForbiddenScope::isEventDispatchForbidden());
-    dispatchLoadEvent();
-}
-
-void LocalDOMWindow::documentWasClosed()
-{
-    dispatchWindowLoadEvent();
-    enqueuePageshowEvent(PageshowEventNotPersisted);
-}
-
-void LocalDOMWindow::enqueuePageshowEvent(PageshowEventPersistence persisted)
-{
-    // FIXME: https://bugs.webkit.org/show_bug.cgi?id=36334 Pageshow event needs to fire asynchronously.
-    // As per spec pageshow must be triggered asynchronously.
-    // However to be compatible with other browsers blink fires pageshow synchronously.
-    dispatchEvent(PageTransitionEvent::create(EventTypeNames::pageshow, persisted), m_document.get());
-}
-
-void LocalDOMWindow::enqueueHashchangeEvent(const String& oldURL, const String& newURL)
-{
-    enqueueWindowEvent(HashChangeEvent::create(oldURL, newURL));
 }
 
 LocalDOMWindow::~LocalDOMWindow()
@@ -280,40 +164,13 @@ LocalDOMWindow::~LocalDOMWindow()
     ASSERT(m_hasBeenReset);
     reset();
 
-#if ENABLE(OILPAN)
-    // Oilpan: the frame host and document objects are
-    // also garbage collected; cannot notify these
-    // when removing event listeners.
-    removeAllEventListenersInternal(DoNotBroadcastListenerRemoval);
-
-    // Cleared when detaching document.
-    ASSERT(!m_eventQueue);
-#else
-    removeAllEventListenersInternal(DoBroadcastListenerRemoval);
-
     ASSERT(m_document->isStopped());
     clearDocument();
-#endif
-}
 
-const AtomicString& LocalDOMWindow::interfaceName() const
-{
-    return EventTargetNames::LocalDOMWindow;
-}
-
-ExecutionContext* LocalDOMWindow::executionContext() const
-{
-    return m_document.get();
-}
-
-LocalDOMWindow* LocalDOMWindow::toDOMWindow()
-{
-    return this;
 }
 
 void LocalDOMWindow::AcceptDartGCVisitor(DartGCVisitor& visitor) const {
     visitor.AddToSetForRoot(document(), dart_wrapper());
-    EventTarget::AcceptDartGCVisitor(visitor);
 }
 
 PassRefPtr<MediaQueryList> LocalDOMWindow::matchMedia(const String& media)
@@ -404,11 +261,6 @@ Screen& LocalDOMWindow::screen() const
     return *m_screen;
 }
 
-FrameConsole* LocalDOMWindow::frameConsole() const
-{
-    return &m_frame->console();
-}
-
 Location& LocalDOMWindow::location() const
 {
     if (!m_location)
@@ -441,8 +293,6 @@ void LocalDOMWindow::focus()
 
     if (!m_frame)
         return;
-
-    m_frame->eventHandler().focusDocumentView();
 }
 
 int LocalDOMWindow::outerHeight() const
@@ -626,72 +476,6 @@ DOMWindowCSS& LocalDOMWindow::css() const
     return *m_css;
 }
 
-bool LocalDOMWindow::addEventListener(const AtomicString& eventType, PassRefPtr<EventListener> listener, bool useCapture)
-{
-    if (!EventTarget::addEventListener(eventType, listener, useCapture))
-        return false;
-
-    if (Document* document = this->document())
-        document->addListenerTypeIfNeeded(eventType);
-
-    lifecycleNotifier().notifyAddEventListener(this, eventType);
-
-    if (eventType == EventTypeNames::unload)
-        addUnloadEventListener(this);
-
-    return true;
-}
-
-bool LocalDOMWindow::removeEventListener(const AtomicString& eventType, PassRefPtr<EventListener> listener, bool useCapture)
-{
-    if (!EventTarget::removeEventListener(eventType, listener, useCapture))
-        return false;
-
-    lifecycleNotifier().notifyRemoveEventListener(this, eventType);
-
-    if (eventType == EventTypeNames::unload) {
-        removeUnloadEventListener(this);
-    }
-
-    return true;
-}
-
-void LocalDOMWindow::dispatchLoadEvent()
-{
-    RefPtr<Event> loadEvent(Event::create(EventTypeNames::load));
-    dispatchEvent(loadEvent, document());
-}
-
-bool LocalDOMWindow::dispatchEvent(PassRefPtr<Event> prpEvent, PassRefPtr<EventTarget> prpTarget)
-{
-    ASSERT(!EventDispatchForbiddenScope::isEventDispatchForbidden());
-
-    RefPtr<EventTarget> protect(this);
-    RefPtr<Event> event = prpEvent;
-
-    event->setTarget(prpTarget ? prpTarget : this);
-    event->setCurrentTarget(this);
-    event->setEventPhase(Event::AT_TARGET);
-
-    bool result = fireEventListeners(event.get());
-
-    return result;
-}
-
-void LocalDOMWindow::removeAllEventListenersInternal(BroadcastListenerRemoval mode)
-{
-    EventTarget::removeAllEventListeners();
-
-    lifecycleNotifier().notifyRemoveAllEventListeners(this);
-
-    removeAllUnloadEventListeners(this);
-}
-
-void LocalDOMWindow::removeAllEventListeners()
-{
-    removeAllEventListenersInternal(DoBroadcastListenerRemoval);
-}
-
 void LocalDOMWindow::setLocation(const String& urlString, SetLocationLocking locking)
 {
     if (!m_frame)
@@ -709,8 +493,6 @@ void LocalDOMWindow::printErrorMessage(const String& message)
 {
     if (message.isEmpty())
         return;
-
-    frameConsole()->addMessage(ConsoleMessage::create(JSMessageSource, ErrorMessageLevel, message));
 }
 
 
@@ -718,16 +500,6 @@ bool LocalDOMWindow::isInsecureScriptAccess(LocalDOMWindow& callingWindow, const
 {
     // FIXME(sky): remove.
     return false;
-}
-
-DOMWindowLifecycleNotifier& LocalDOMWindow::lifecycleNotifier()
-{
-    return static_cast<DOMWindowLifecycleNotifier&>(LifecycleContext<LocalDOMWindow>::lifecycleNotifier());
-}
-
-PassOwnPtr<LifecycleNotifier<LocalDOMWindow> > LocalDOMWindow::createLifecycleNotifier()
-{
-    return DOMWindowLifecycleNotifier::create(this);
 }
 
 } // namespace blink

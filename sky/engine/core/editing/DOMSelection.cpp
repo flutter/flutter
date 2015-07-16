@@ -386,17 +386,6 @@ void DOMSelection::addRange(Range* newRange)
     if (!m_frame)
         return;
 
-    // FIXME: Should we throw DOMException for error cases below?
-    if (!newRange) {
-        addConsoleError("The given range is null.");
-        return;
-    }
-
-    if (!newRange->startContainer()) {
-        addConsoleError("The given range has no container. Perhaps 'detach()' has been invoked on it?");
-        return;
-    }
-
     FrameSelection& selection = m_frame->selection();
 
     if (selection.isNone()) {
@@ -405,21 +394,6 @@ void DOMSelection::addRange(Range* newRange)
     }
 
     RefPtr<Range> originalRange = selection.firstRange();
-
-    if (originalRange->startContainer()->document() != newRange->startContainer()->document()) {
-        addConsoleError("The given range does not belong to the current selection's document.");
-        return;
-    }
-    if (originalRange->startContainer()->treeScope() != newRange->startContainer()->treeScope()) {
-        addConsoleError("The given range and the current selection belong to two different document fragments.");
-        return;
-    }
-
-    if (originalRange->compareBoundaryPoints(Range::START_TO_END, newRange, ASSERT_NO_EXCEPTION) < 0
-        || newRange->compareBoundaryPoints(Range::START_TO_END, originalRange.get(), ASSERT_NO_EXCEPTION) < 0) {
-        addConsoleError("Discontiguous selection is not supported.");
-        return;
-    }
 
     // FIXME: "Merge the ranges if they intersect" is Blink-specific behavior; other browsers supporting discontiguous
     // selection (obviously) keep each Range added and return it in getRangeAt(). But it's unclear if we can really
@@ -544,12 +518,6 @@ bool DOMSelection::isValidForPosition(Node* node) const
     if (!node)
         return true;
     return node->document() == m_frame->document();
-}
-
-void DOMSelection::addConsoleError(const String& message)
-{
-    if (m_treeScope)
-        m_treeScope->document().addConsoleMessage(ConsoleMessage::create(JSMessageSource, ErrorMessageLevel, message));
 }
 
 } // namespace blink

@@ -162,31 +162,7 @@ void TypingCommand::insertText(Document& document, const String& text, Options o
 // FIXME: We shouldn't need to take selectionForInsertion. It should be identical to FrameSelection's current selection.
 void TypingCommand::insertText(Document& document, const String& text, const VisibleSelection& selectionForInsertion, Options options, TextCompositionType compositionType)
 {
-    RefPtr<LocalFrame> frame = document.frame();
-    ASSERT(frame);
-
-    VisibleSelection currentSelection = frame->selection().selection();
-
-    String newText = dispatchBeforeTextInsertedEvent(text, selectionForInsertion, compositionType == TextCompositionUpdate);
-
-    // Set the starting and ending selection appropriately if we are using a selection
-    // that is different from the current selection.  In the future, we should change EditCommand
-    // to deal with custom selections in a general way that can be used by all of the commands.
-    if (RefPtr<TypingCommand> lastTypingCommand = lastTypingCommandIfStillOpenForTyping(frame.get())) {
-        if (lastTypingCommand->endingSelection() != selectionForInsertion) {
-            lastTypingCommand->setStartingSelection(selectionForInsertion);
-            lastTypingCommand->setEndingSelection(selectionForInsertion);
-        }
-
-        lastTypingCommand->setCompositionType(compositionType);
-        lastTypingCommand->setShouldRetainAutocorrectionIndicator(options & RetainAutocorrectionIndicator);
-        lastTypingCommand->setShouldPreventSpellChecking(options & PreventSpellChecking);
-        lastTypingCommand->insertText(newText, options & SelectInsertedText);
-        return;
-    }
-
-    RefPtr<TypingCommand> cmd = TypingCommand::create(document, InsertText, newText, options, compositionType);
-    applyTextInsertionCommand(frame.get(), cmd, selectionForInsertion, currentSelection);
+    ASSERT_NOT_REACHED();
 }
 
 void TypingCommand::insertLineBreak(Document& document, Options options)
@@ -365,6 +341,7 @@ void TypingCommand::insertParagraphSeparator()
 
 void TypingCommand::insertParagraphSeparatorInQuotedContent()
 {
+    ASSERT_NOT_REACHED();
 }
 
 bool TypingCommand::makeEditableRootEmpty()

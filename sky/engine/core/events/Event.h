@@ -25,14 +25,12 @@
 #define SKY_ENGINE_CORE_EVENTS_EVENT_H_
 
 #include "sky/engine/tonic/dart_wrappable.h"
-#include "sky/engine/core/events/EventPath.h"
 #include "sky/engine/platform/heap/Handle.h"
 #include "sky/engine/wtf/RefCounted.h"
 #include "sky/engine/wtf/text/AtomicString.h"
 
 namespace blink {
 
-class EventTarget;
 class EventDispatcher;
 class ExecutionContext;
 
@@ -44,7 +42,7 @@ private:
     STACK_ALLOCATED();
 };
 
-class Event : public RefCounted<Event>,  public DartWrappable {
+class Event : public RefCounted<Event>, public DartWrappable {
     DEFINE_WRAPPERTYPEINFO();
 public:
     enum PhaseType {
@@ -91,12 +89,6 @@ public:
     const AtomicString& type() const { return m_type; }
     void setType(const AtomicString& type) { m_type = type; }
 
-    EventTarget* target() const { return m_target.get(); }
-    void setTarget(PassRefPtr<EventTarget>);
-
-    EventTarget* currentTarget() const;
-    void setCurrentTarget(EventTarget* currentTarget) { m_currentTarget = currentTarget; }
-
     unsigned short eventPhase() const { return m_eventPhase; }
     void setEventPhase(unsigned short eventPhase) { m_eventPhase = eventPhase; }
 
@@ -107,14 +99,10 @@ public:
     void stopPropagation() { m_propagationStopped = true; }
     void stopImmediatePropagation() { m_immediatePropagationStopped = true; }
 
-    // IE Extensions
-    EventTarget* srcElement() const { return target(); } // MSIE extension - "the object that fired the event"
-
-    bool legacyReturnValue(ExecutionContext*) const;
-    void setLegacyReturnValue(ExecutionContext*, bool returnValue);
+    bool legacyReturnValue() const;
+    void setLegacyReturnValue(bool returnValue);
 
     virtual const AtomicString& interfaceName() const;
-    bool hasInterface(const AtomicString&) const;
 
     // These events are general classes of events.
     virtual bool isUIEvent() const;
@@ -148,20 +136,12 @@ public:
     Event* underlyingEvent() const { return m_underlyingEvent.get(); }
     void setUnderlyingEvent(PassRefPtr<Event>);
 
-    EventPath& eventPath() { ASSERT(m_eventPath); return *m_eventPath; }
-    EventPath& ensureEventPath();
-
-    PassRefPtr<StaticNodeList> path() const;
-
     bool isBeingDispatched() const { return eventPhase(); }
 
 protected:
     Event();
     Event(const AtomicString& type, bool canBubble, bool cancelable);
     Event(const AtomicString& type, const EventInit&);
-
-    virtual void receivedTarget();
-    bool dispatched() const { return m_target; }
 
     double m_timeStamp;
 
@@ -177,10 +157,7 @@ private:
     bool m_cancelBubble;
 
     unsigned short m_eventPhase;
-    RefPtr<EventTarget> m_currentTarget;
-    RefPtr<EventTarget> m_target;
     RefPtr<Event> m_underlyingEvent;
-    OwnPtr<EventPath> m_eventPath;
 };
 
 #define DEFINE_EVENT_TYPE_CASTS(typeName) \

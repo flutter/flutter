@@ -92,7 +92,6 @@ public:
     void pasteAsPlainText();
     void performDelete();
 
-    static void countEvent(ExecutionContext*, const Event*);
     void copyImage(const HitTestResult&);
 
     void transpose();

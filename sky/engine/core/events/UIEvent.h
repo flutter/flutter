@@ -25,7 +25,6 @@
 #define SKY_ENGINE_CORE_EVENTS_UIEVENT_H_
 
 #include "sky/engine/core/events/Event.h"
-#include "sky/engine/core/events/EventDispatchMediator.h"
 #include "sky/engine/core/frame/LocalDOMWindow.h"
 
 namespace blink {

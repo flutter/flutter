@@ -27,6 +27,7 @@
 #include "sky/engine/core/page/FocusController.h"
 
 #include <limits>
+#include "gen/sky/core/EventTypeNames.h"
 #include "sky/engine/core/dom/Document.h"
 #include "sky/engine/core/dom/Element.h"
 #include "sky/engine/core/dom/ElementTraversal.h"
@@ -43,10 +44,13 @@
 #include "sky/engine/core/frame/LocalFrame.h"
 #include "sky/engine/core/frame/Settings.h"
 #include "sky/engine/core/page/ChromeClient.h"
-#include "sky/engine/core/page/EventHandler.h"
 #include "sky/engine/core/page/Page.h"
 #include "sky/engine/core/rendering/HitTestResult.h"
 #include "sky/engine/core/rendering/RenderLayer.h"
+
+// This file is no longer needed now that nothing can be focused and
+// events can't be targetted at nodes.
+// TODO(ianh): We should remove it.
 
 namespace blink {
 
@@ -94,37 +98,6 @@ FocusNavigationScope FocusNavigationScope::ownedByShadowHost(Node* node)
 {
     ASSERT(isShadowHost(node));
     return FocusNavigationScope(toElement(node)->shadow()->shadowRoot());
-}
-
-static inline void dispatchEventsOnWindowAndFocusedNode(Document* document, bool focused)
-{
-    // If we have a focused node we should dispatch blur on it before we blur the window.
-    // If we have a focused node we should dispatch focus on it after we focus the window.
-    // https://bugs.webkit.org/show_bug.cgi?id=27105
-
-    if (!focused && document->focusedElement()) {
-        RefPtr<Element> focusedElement(document->focusedElement());
-        focusedElement->setFocus(false);
-        focusedElement->dispatchBlurEvent(0);
-        if (focusedElement == document->focusedElement()) {
-            focusedElement->dispatchFocusOutEvent(EventTypeNames::focusout, 0);
-            if (focusedElement == document->focusedElement())
-                focusedElement->dispatchFocusOutEvent(EventTypeNames::DOMFocusOut, 0);
-        }
-    }
-
-    if (LocalDOMWindow* window = document->domWindow())
-        window->dispatchEvent(Event::create(focused ? EventTypeNames::focus : EventTypeNames::blur));
-    if (focused && document->focusedElement()) {
-        RefPtr<Element> focusedElement(document->focusedElement());
-        focusedElement->setFocus(true);
-        focusedElement->dispatchFocusEvent(0, FocusTypePage);
-        if (focusedElement == document->focusedElement()) {
-            document->focusedElement()->dispatchFocusInEvent(EventTypeNames::focusin, 0);
-            if (focusedElement == document->focusedElement())
-                document->focusedElement()->dispatchFocusInEvent(EventTypeNames::DOMFocusIn, 0);
-        }
-    }
 }
 
 #if ENABLE(ASSERT)
@@ -200,17 +173,6 @@ void FocusController::setFocusedFrame(PassRefPtr<LocalFrame> frame)
 
     m_focusedFrame = frame.get();
 
-    // Now that the frame is updated, fire events and update the selection focused states of both frames.
-    if (oldFrame && oldFrame->view()) {
-        oldFrame->selection().setFocused(false);
-        oldFrame->domWindow()->dispatchEvent(Event::create(EventTypeNames::blur));
-    }
-
-    if (newFrame && newFrame->view() && isFocused()) {
-        newFrame->selection().setFocused(true);
-        newFrame->domWindow()->dispatchEvent(Event::create(EventTypeNames::focus));
-    }
-
     m_isChangingFocusedFrame = false;
 
     m_page->focusedFrameChanged(newFrame.get());
@@ -221,34 +183,6 @@ void FocusController::focusDocumentView(PassRefPtr<LocalFrame> frame)
     ASSERT(!frame || frame->page() == m_page);
     if (m_focusedFrame == frame)
         return;
-
-    RefPtr<LocalFrame> focusedFrame = m_focusedFrame.get();
-    if (focusedFrame && focusedFrame->view()) {
-        RefPtr<Document> document = focusedFrame->document();
-        Element* focusedElement = document ? document->focusedElement() : 0;
-        if (focusedElement) {
-            focusedElement->dispatchBlurEvent(0);
-            if (focusedElement == document->focusedElement()) {
-                focusedElement->dispatchFocusOutEvent(EventTypeNames::focusout, 0);
-                if (focusedElement == document->focusedElement())
-                    focusedElement->dispatchFocusOutEvent(EventTypeNames::DOMFocusOut, 0);
-            }
-        }
-    }
-
-    RefPtr<LocalFrame> newFocusedFrame = frame.get();
-    if (newFocusedFrame && newFocusedFrame->view()) {
-        RefPtr<Document> document = newFocusedFrame->document();
-        Element* focusedElement = document ? document->focusedElement() : 0;
-        if (focusedElement) {
-            focusedElement->dispatchFocusEvent(0, FocusTypePage);
-            if (focusedElement == document->focusedElement()) {
-                document->focusedElement()->dispatchFocusInEvent(EventTypeNames::focusin, 0);
-                if (focusedElement == document->focusedElement())
-                    document->focusedElement()->dispatchFocusInEvent(EventTypeNames::DOMFocusIn, 0);
-            }
-        }
-    }
 
     setFocusedFrame(frame);
 }
@@ -268,13 +202,6 @@ void FocusController::setFocused(bool focused)
 
     if (!m_focusedFrame)
         setFocusedFrame(m_page->mainFrame());
-
-    // setFocusedFrame above might reject to update m_focusedFrame, or
-    // m_focusedFrame might be changed by blur/focus event handlers.
-    if (m_focusedFrame->view()) {
-        m_focusedFrame->selection().setFocused(focused);
-        dispatchEventsOnWindowAndFocusedNode(m_focusedFrame->document(), focused);
-    }
 }
 
 Node* FocusController::findFocusableNodeDecendingDownIntoFrameDocument(FocusType type, Node* node)

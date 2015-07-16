@@ -74,13 +74,6 @@ private:
     bool m_shouldMatchStyle;
 };
 
-inline bool isTextEvent(const Event& event)
-{
-    return event.type() == EventTypeNames::textInput && event.hasInterface(EventNames::TextEvent);
-}
-
-DEFINE_TYPE_CASTS(TextEvent, Event, event, isTextEvent(*event), isTextEvent(event));
-
 } // namespace blink
 
 #endif  // SKY_ENGINE_CORE_EVENTS_TEXTEVENT_H_

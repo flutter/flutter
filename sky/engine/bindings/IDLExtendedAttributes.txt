@@ -35,11 +35,8 @@
 
 ActiveDOMObject
 CachedAttribute=*
-CallWith=ExecutionContext|ScriptState|ScriptArguments|ActiveWindow|FirstWindow|ThisValue
+CallWith=ScriptState|ScriptArguments|ActiveWindow|FirstWindow|ThisValue
 Constructor
-# FIXME: remove [ConstructorCallWith=Document], as can instead use
-# [ConstructorCallWith=ExecutionContext] + toDocument(executionContext)
-ConstructorCallWith=ExecutionContext|Document
 Custom=|Getter|Setter|VisitDOMWrapper|Wrap|PropertyGetter|PropertyEnumerator|PropertyQuery
 CustomConstructor
 CustomElementCallbacks

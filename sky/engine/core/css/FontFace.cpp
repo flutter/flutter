@@ -63,32 +63,6 @@ static PassRefPtr<CSSValue> parseCSSValue(const Document* document, const String
     return parsedStyle->getPropertyCSSValue(propertyID);
 }
 
-PassRefPtr<FontFace> FontFace::create(ExecutionContext* context, const AtomicString& family, const String& source)
-{
-    RefPtr<FontFace> fontFace = adoptRef(new FontFace(context, family));
-
-    RefPtr<CSSValue> src = parseCSSValue(toDocument(context), source, CSSPropertySrc);
-    if (!src || !src->isValueList())
-        fontFace->setError(DOMException::create(SyntaxError, "The source provided ('" + source + "') could not be parsed as a value list."));
-
-    fontFace->initCSSFontFace(toDocument(context), src);
-    return fontFace.release();
-}
-
-PassRefPtr<FontFace> FontFace::create(ExecutionContext* context, const AtomicString& family, PassRefPtr<ArrayBuffer> source)
-{
-    RefPtr<FontFace> fontFace = adoptRef(new FontFace(context, family));
-    fontFace->initCSSFontFace(static_cast<const unsigned char*>(source->data()), source->byteLength());
-    return fontFace.release();
-}
-
-PassRefPtr<FontFace> FontFace::create(ExecutionContext* context, const AtomicString& family, PassRefPtr<ArrayBufferView> source)
-{
-    RefPtr<FontFace> fontFace = adoptRef(new FontFace(context, family));
-    fontFace->initCSSFontFace(static_cast<const unsigned char*>(source->baseAddress()), source->byteLength());
-    return fontFace.release();
-}
-
 PassRefPtr<FontFace> FontFace::create(Document* document, const StyleRuleFontFace* fontFaceRule)
 {
     const StylePropertySet& properties = fontFaceRule->properties();
@@ -123,7 +97,7 @@ FontFace::FontFace()
 {
 }
 
-FontFace::FontFace(ExecutionContext* context, const AtomicString& family)
+FontFace::FontFace(const AtomicString& family)
     : m_family(family)
     , m_status(Unloaded)
 {
@@ -161,36 +135,6 @@ String FontFace::variant() const
 String FontFace::featureSettings() const
 {
     return m_featureSettings ? m_featureSettings->cssText() : "normal";
-}
-
-void FontFace::setStyle(ExecutionContext* context, const String& s, ExceptionState& exceptionState)
-{
-    setPropertyFromString(toDocument(context), s, CSSPropertyFontStyle, &exceptionState);
-}
-
-void FontFace::setWeight(ExecutionContext* context, const String& s, ExceptionState& exceptionState)
-{
-    setPropertyFromString(toDocument(context), s, CSSPropertyFontWeight, &exceptionState);
-}
-
-void FontFace::setStretch(ExecutionContext* context, const String& s, ExceptionState& exceptionState)
-{
-    setPropertyFromString(toDocument(context), s, CSSPropertyFontStretch, &exceptionState);
-}
-
-void FontFace::setUnicodeRange(ExecutionContext* context, const String& s, ExceptionState& exceptionState)
-{
-    setPropertyFromString(toDocument(context), s, CSSPropertyUnicodeRange, &exceptionState);
-}
-
-void FontFace::setVariant(ExecutionContext* context, const String& s, ExceptionState& exceptionState)
-{
-    setPropertyFromString(toDocument(context), s, CSSPropertyFontVariant, &exceptionState);
-}
-
-void FontFace::setFeatureSettings(ExecutionContext* context, const String& s, ExceptionState& exceptionState)
-{
-    setPropertyFromString(toDocument(context), s, CSSPropertyWebkitFontFeatureSettings, &exceptionState);
 }
 
 void FontFace::setPropertyFromString(const Document* document, const String& s, CSSPropertyID propertyID, ExceptionState* exceptionState)
@@ -322,23 +266,14 @@ void FontFace::setError(PassRefPtr<DOMException> error)
     setLoadStatus(Error);
 }
 
-void FontFace::loadWithCallback(PassRefPtr<LoadFontCallback> callback, ExecutionContext* context)
+void FontFace::loadWithCallback(PassRefPtr<LoadFontCallback> callback)
 {
-    loadInternal(context);
     if (m_status == Loaded)
         callback->notifyLoaded(this);
     else if (m_status == Error)
         callback->notifyError(this);
     else
         m_callbacks.append(callback);
-}
-
-void FontFace::loadInternal(ExecutionContext* context)
-{
-    if (m_status != Unloaded)
-        return;
-
-    m_cssFontFace->load();
 }
 
 FontTraits FontFace::traits() const

@@ -21,7 +21,7 @@
  */
 
 #include "sky/engine/core/events/UIEvent.h"
-
+#include "gen/sky/core/EventNames.h"
 
 namespace blink {
 
@@ -56,9 +56,6 @@ UIEvent::~UIEvent()
 
 void UIEvent::initUIEvent(const AtomicString& typeArg, bool canBubbleArg, bool cancelableArg, PassRefPtr<AbstractView> viewArg, int detailArg)
 {
-    if (dispatched())
-        return;
-
     initEvent(typeArg, canBubbleArg, cancelableArg);
 
     m_view = viewArg;

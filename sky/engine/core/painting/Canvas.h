@@ -35,6 +35,7 @@ public:
         return adoptRef(new Canvas(skCanvas));
     }
 
+    // TODO(ianh): fix crashes here https://github.com/domokit/mojo/issues/326
     static PassRefPtr<Canvas> create(PictureRecorder* recorder,
                                      Rect& bounds,
                                      ExceptionState& es) {

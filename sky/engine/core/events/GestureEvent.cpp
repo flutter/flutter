@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include "gen/sky/core/EventNames.h"
+#include "gen/sky/core/EventTypeNames.h"
 #include "sky/engine/core/dom/Element.h"
 #include "sky/engine/core/events/GestureEvent.h"
 #include "sky/engine/wtf/text/AtomicString.h"

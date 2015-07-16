@@ -35,7 +35,6 @@
 #include "sky/engine/core/frame/Settings.h"
 #include "sky/engine/core/loader/FrameLoaderClient.h"
 #include "sky/engine/core/page/ChromeClient.h"
-#include "sky/engine/core/page/EventHandler.h"
 #include "sky/engine/core/page/FocusController.h"
 #include "sky/engine/core/page/Page.h"
 #include "sky/engine/core/rendering/RenderLayer.h"
@@ -186,7 +185,6 @@ RenderObject* FrameView::layoutRoot(bool onlyDuringLayout) const
 void FrameView::performPreLayoutTasks()
 {
     TRACE_EVENT0("blink", "FrameView::performPreLayoutTasks");
-    lifecycle().advanceTo(DocumentLifecycle::InPreLayout);
 
     // Don't schedule more layouts, we're in one.
     TemporaryChange<bool> changeSchedulingEnabled(m_layoutSchedulingEnabled, false);
@@ -209,7 +207,6 @@ void FrameView::performPreLayoutTasks()
     }
 
     document->updateRenderTreeIfNeeded();
-    lifecycle().advanceTo(DocumentLifecycle::StyleClean);
 }
 
 void FrameView::performLayout(RenderObject* rootForThisLayout, bool inSubtreeLayout)
@@ -219,7 +216,6 @@ void FrameView::performLayout(RenderObject* rootForThisLayout, bool inSubtreeLay
     ScriptForbiddenScope forbidScript;
 
     ASSERT(!isInPerformLayout());
-    lifecycle().advanceTo(DocumentLifecycle::InPerformLayout);
 
     TemporaryChange<bool> changeInPerformLayout(m_inPerformLayout, true);
 
@@ -227,8 +223,6 @@ void FrameView::performLayout(RenderObject* rootForThisLayout, bool inSubtreeLay
     // FIXME: The 300 other lines in layout() probably belong in other helper functions
     // so that a single human could understand what layout() is actually doing.
     rootForThisLayout->layout();
-
-    lifecycle().advanceTo(DocumentLifecycle::AfterPerformLayout);
 }
 
 void FrameView::scheduleOrPerformPostLayoutTasks()
@@ -272,7 +266,6 @@ void FrameView::layout(bool allowSubtree)
     RefPtr<FrameView> protector(this);
 
     m_hasPendingLayout = false;
-    DocumentLifecycle::Scope lifecycleScope(lifecycle(), DocumentLifecycle::LayoutClean);
 
     RELEASE_ASSERT(!isPainting());
 
@@ -339,11 +332,6 @@ void FrameView::layout(bool allowSubtree)
 #endif
 }
 
-DocumentLifecycle& FrameView::lifecycle() const
-{
-    return m_frame->document()->lifecycle();
-}
-
 void FrameView::setMediaType(const AtomicString& mediaType)
 {
     ASSERT(m_frame->document());
@@ -403,7 +391,6 @@ void FrameView::scheduleRelayout()
     m_hasPendingLayout = true;
 
     m_frame->document()->scheduleVisualUpdate();
-    lifecycle().ensureStateAtMost(DocumentLifecycle::StyleClean);
 }
 
 static bool isObjectAncestorContainerOf(RenderObject* ancestor, RenderObject* descendant)
@@ -454,7 +441,6 @@ void FrameView::scheduleRelayoutOfSubtree(RenderObject* relayoutRoot)
         m_hasPendingLayout = true;
 
         m_frame->document()->scheduleVisualUpdate();
-        lifecycle().ensureStateAtMost(DocumentLifecycle::StyleClean);
     }
 }
 
@@ -466,7 +452,6 @@ bool FrameView::layoutPending() const
 
 bool FrameView::isInPerformLayout() const
 {
-    ASSERT(m_inPerformLayout == (lifecycle().state() == DocumentLifecycle::InPerformLayout));
     return m_inPerformLayout;
 }
 
@@ -549,11 +534,6 @@ bool FrameView::wasViewportResized()
 
 void FrameView::sendResizeEventIfNeeded()
 {
-    if (!wasViewportResized())
-        return;
-
-    m_lastViewportSize = layoutSize();
-    m_frame->document()->enqueueResizeEvent();
 }
 
 void FrameView::postLayoutTimerFired(Timer<FrameView>*)
@@ -623,7 +603,6 @@ void FrameView::paint(GraphicsContext* context, const IntRect& rect)
     }
 
     RELEASE_ASSERT(!needsLayout());
-    ASSERT(m_frame->document()->lifecycle().state() >= DocumentLifecycle::StyleAndLayoutClean);
 
     bool isTopLevelPainter = !s_inPaintContents;
     s_inPaintContents = true;
@@ -664,9 +643,6 @@ void FrameView::updateLayoutAndStyleForPainting()
     RefPtr<FrameView> protector(this);
 
     updateLayoutAndStyleIfNeededRecursive();
-
-    // TODO(ojan): Get rid of this and just have the LayoutClean state.
-    lifecycle().advanceTo(DocumentLifecycle::StyleAndLayoutClean);
 }
 
 void FrameView::updateLayoutAndStyleIfNeededRecursive()

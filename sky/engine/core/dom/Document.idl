@@ -38,8 +38,6 @@ callback CustomElementConstructor = Element ();
 
     Range createRange();
 
-    [ImplementedAs=executingWindow] readonly attribute Window defaultView;
-
     readonly attribute DOMString contentType;
 
              [TreatNullAs=NullString, CustomElementCallbacks] attribute DOMString dir;

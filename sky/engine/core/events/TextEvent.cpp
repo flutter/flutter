@@ -24,9 +24,10 @@
  *
  */
 
-#include "sky/engine/core/events/TextEvent.h"
-
+#include "gen/sky/core/EventNames.h"
+#include "gen/sky/core/EventTypeNames.h"
 #include "sky/engine/core/dom/DocumentFragment.h"
+#include "sky/engine/core/events/TextEvent.h"
 
 namespace blink {
 
@@ -89,9 +90,6 @@ TextEvent::~TextEvent()
 
 void TextEvent::initTextEvent(const AtomicString& type, bool canBubble, bool cancelable, PassRefPtr<AbstractView> view, const String& data)
 {
-    if (dispatched())
-        return;
-
     initUIEvent(type, canBubble, cancelable, view, 0);
 
     m_data = data;

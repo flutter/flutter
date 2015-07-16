@@ -88,7 +88,7 @@ void SkyView::CreateView(const String& name) {
   view_->setDisplayMetrics(display_metrics_);
 
   dart_controller_ = adoptPtr(new DartController);
-  dart_controller_->CreateIsolateFor(adoptPtr(new DOMDartState(nullptr, name)));
+  dart_controller_->CreateIsolateFor(adoptPtr(new DOMDartState(name)));
   dart_controller_->InstallView(view_.get());
 
   Dart_Isolate isolate = dart_controller_->dart_state()->isolate();

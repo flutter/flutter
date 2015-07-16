@@ -20,13 +20,6 @@ BuiltinSky::BuiltinSky(DOMDartState* dart_state) {
 BuiltinSky::~BuiltinSky() {
 }
 
-void BuiltinSky::InstallWindow(DOMDartState* dart_state) {
-  CHECK(!LogIfError(Dart_SetField(library_.value(),
-    ToDart("window"),
-    ToDart(dart_state->CurrentWindow()))));
-  // TODO(abarth): Retain the document wrapper.
-}
-
 void BuiltinSky::InstallView(View* view) {
   CHECK(!LogIfError(
       Dart_SetField(library_.value(), ToDart("view"), ToDart(view))));

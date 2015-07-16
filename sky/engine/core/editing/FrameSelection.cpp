@@ -48,7 +48,6 @@
 #include "sky/engine/core/frame/LocalFrame.h"
 #include "sky/engine/core/frame/Settings.h"
 #include "sky/engine/core/page/EditorClient.h"
-#include "sky/engine/core/page/EventHandler.h"
 #include "sky/engine/core/page/FocusController.h"
 #include "sky/engine/core/page/Page.h"
 #include "sky/engine/core/rendering/HitTestRequest.h"
@@ -265,8 +264,6 @@ void FrameSelection::setSelection(const VisibleSelection& newSelection, SetSelec
     }
 
     notifyAccessibilityForSelectionChange();
-
-    m_frame->domWindow()->enqueueDocumentEvent(Event::create(EventTypeNames::selectionchange));
 }
 
 static bool removingNodeRemovesPosition(Node& node, const Position& position)
@@ -1257,9 +1254,6 @@ void FrameSelection::selectAll()
     if (!root)
         return;
 
-    if (selectStartTarget && !selectStartTarget->dispatchEvent(Event::createCancelableBubble(EventTypeNames::selectstart)))
-        return;
-
     VisibleSelection newSelection(VisibleSelection::selectionFromContentsOfNode(root.get()));
     setSelection(newSelection);
     notifyRendererOfSelectionChange(UserTriggered);
@@ -1314,9 +1308,6 @@ void FrameSelection::focusedOrActiveStateChanged()
     else
         m_frame->spellChecker().spellCheckAfterBlur();
     setCaretVisibility(activeAndFocused ? Visible : Hidden);
-
-    // Update for caps lock state
-    m_frame->eventHandler().capsLockStateMayHaveChanged();
 
     // We may have lost active status even though the focusElement hasn't changed
     // give the element a chance to recalc style if its affected by focus.
@@ -1537,7 +1528,7 @@ bool FrameSelection::dispatchSelectStart()
     if (!selectStartTarget)
         return true;
 
-    return selectStartTarget->dispatchEvent(Event::createCancelableBubble(EventTypeNames::selectstart));
+    return false;
 }
 
 void FrameSelection::setShouldShowBlockCursor(bool shouldShowBlockCursor)

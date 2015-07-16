@@ -30,7 +30,6 @@
 #include "sky/engine/core/dom/NodeTraversal.h"
 #include "sky/engine/core/dom/RenderTreeBuilder.h"
 #include "sky/engine/core/dom/shadow/ShadowRoot.h"
-#include "sky/engine/core/events/ScopedEventQueue.h"
 #include "sky/engine/core/rendering/RenderText.h"
 #include "sky/engine/wtf/text/CString.h"
 #include "sky/engine/wtf/text/StringBuilder.h"
@@ -56,7 +55,6 @@ PassRefPtr<Text> Text::splitText(unsigned offset, ExceptionState& exceptionState
         return nullptr;
     }
 
-    EventQueueScope scope;
     String oldStr = data();
     RefPtr<Text> newText = cloneWithData(oldStr.substring(offset));
     setDataWithoutUpdate(oldStr.substring(0, offset));

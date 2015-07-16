@@ -23,6 +23,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "gen/sky/core/EventNames.h"
 #include "sky/engine/core/events/PageTransitionEvent.h"
 
 namespace blink {

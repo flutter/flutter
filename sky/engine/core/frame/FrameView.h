@@ -38,7 +38,6 @@
 
 namespace blink {
 
-class DocumentLifecycle;
 class Element;
 class FloatSize;
 class LocalFrame;
@@ -181,8 +180,6 @@ private:
     void performLayout(RenderObject* rootForThisLayout, bool inSubtreeLayout);
     void scheduleOrPerformPostLayoutTasks();
     void performPostLayoutTasks();
-
-    DocumentLifecycle& lifecycle() const;
 
     // FIXME(sky): Remove now that we're not a ScrollView?
     void contentsResized();

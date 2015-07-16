@@ -49,7 +49,6 @@
 #include "sky/engine/core/loader/FrameLoaderClient.h"
 #include "sky/engine/core/loader/UniqueIdentifier.h"
 #include "sky/engine/core/page/ChromeClient.h"
-#include "sky/engine/core/page/EventHandler.h"
 #include "sky/engine/core/page/Page.h"
 #include "sky/engine/platform/Logging.h"
 #include "sky/engine/platform/geometry/FloatRect.h"
@@ -99,7 +98,6 @@ void FrameLoader::clear()
     m_frame->document()->removeFocusedElementOfSubtree(m_frame->document());
 
     m_frame->selection().prepareForDestruction();
-    m_frame->eventHandler().clear();
     if (m_frame->view())
         m_frame->view()->clear();
 }
@@ -119,8 +117,6 @@ void FrameLoader::reportLocalLoadFailed(LocalFrame* frame, const String& url)
     ASSERT(!url.isEmpty());
     if (!frame)
         return;
-
-    frame->document()->addConsoleMessage(ConsoleMessage::create(SecurityMessageSource, ErrorMessageLevel, "Not allowed to load local resource: " + url));
 }
 
 void FrameLoader::stopAllLoaders()

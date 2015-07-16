@@ -17,10 +17,7 @@
  * Boston, MA 02110-1301, USA.
  */
 
-[
-    Constructor,
-    ConstructorCallWith=Document,
-] interface DocumentFragment : ParentNode {
+interface DocumentFragment : ParentNode {
     // NonElementParentNode API.
     Element getElementById(DOMString elementId);
 };

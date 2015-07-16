@@ -110,8 +110,6 @@ source_set("testing") {
   sources = [
     "testing/DummyPageHolder.cpp",
     "testing/DummyPageHolder.h",
-    "testing/NullExecutionContext.cpp",
-    "testing/NullExecutionContext.h",
     "testing/URLTestHelpers.cpp",
     "testing/URLTestHelpers.h",
   ]
@@ -227,8 +225,6 @@ group("core_names") {
   deps = [
     ":make_core_generated_css_property_names",
     ":make_core_generated_event_names",
-    ":make_core_generated_event_target_factory",
-    ":make_core_generated_event_target_names",
     ":make_core_generated_event_type_names",
     ":make_core_generated_html_element_factory",
     ":make_core_generated_media_type_names",
@@ -401,16 +397,6 @@ process_in_files("make_core_generated_media_feature_names") {
   ]
 }
 
-# make_event_factory -----------------------------------------------------------
-
-make_event_factory("make_core_generated_event_target_factory") {
-  in_files = [ "events/EventTargetFactory.in" ]
-  outputs = [
-    "$sky_core_output_dir/EventTargetHeaders.h",
-    "$sky_core_output_dir/EventTargetInterfaces.h",
-  ]
-}
-
 # make_names -------------------------------------------------------------------
 
 make_names("make_core_generated_media_type_names") {
@@ -426,14 +412,6 @@ make_names("make_core_generated_event_names") {
   outputs = [
     "$sky_core_output_dir/EventNames.cpp",
     "$sky_core_output_dir/EventNames.h",
-  ]
-}
-
-make_names("make_core_generated_event_target_names") {
-  in_files = [ "events/EventTargetFactory.in" ]
-  outputs = [
-    "$sky_core_output_dir/EventTargetNames.cpp",
-    "$sky_core_output_dir/EventTargetNames.h",
   ]
 }
 

@@ -26,6 +26,7 @@
 
 #include "sky/engine/core/editing/InputMethodController.h"
 
+#include "gen/sky/core/EventTypeNames.h"
 #include "sky/engine/core/dom/Document.h"
 #include "sky/engine/core/dom/Element.h"
 #include "sky/engine/core/dom/Range.h"
@@ -35,8 +36,10 @@
 #include "sky/engine/core/events/CompositionEvent.h"
 #include "sky/engine/core/frame/LocalFrame.h"
 #include "sky/engine/core/page/ChromeClient.h"
-#include "sky/engine/core/page/EventHandler.h"
 #include "sky/engine/core/rendering/RenderObject.h"
+
+// This file is new missing the logic it had relating to firing events, since EventTarget is gone.
+// TODO(ianh): This makes it essentially useless, and it should probably be removed soon.
 
 namespace blink {
 
@@ -87,7 +90,7 @@ void InputMethodController::clear()
 
 bool InputMethodController::insertTextForConfirmedComposition(const String& text)
 {
-    return m_frame.eventHandler().handleTextInputEvent(text, 0, TextEventInputComposition);
+    return false;
 }
 
 void InputMethodController::selectComposition() const
@@ -180,22 +183,6 @@ bool InputMethodController::finishComposition(const String& text, FinishComposit
     if (m_frame.selection().isNone())
         return false;
 
-    // Dispatch a compositionend event to the focused node.
-    // We should send this event before sending a TextEvent as written in Section 6.2.2 and 6.2.3 of
-    // the DOM Event specification.
-    if (Element* target = m_frame.document()->focusedElement()) {
-        unsigned baseOffset = m_frame.selection().base().downstream().deprecatedEditingOffset();
-        Vector<CompositionUnderline> underlines;
-        for (size_t i = 0; i < m_customCompositionUnderlines.size(); ++i) {
-            CompositionUnderline underline = m_customCompositionUnderlines[i];
-            underline.startOffset -= baseOffset;
-            underline.endOffset -= baseOffset;
-            underlines.append(underline);
-        }
-        RefPtr<CompositionEvent> event = CompositionEvent::create(EventTypeNames::compositionend, m_frame.domWindow(), text, underlines);
-        target->dispatchEvent(event, IGNORE_EXCEPTION);
-    }
-
     // If text is empty, then delete the old composition here. If text is non-empty, InsertTextCommand::input
     // will delete the old composition with an optimized replace operation.
     if (text.isEmpty() && mode != CancelComposition) {
@@ -229,40 +216,6 @@ void InputMethodController::setComposition(const String& text, const Vector<Comp
 
     if (m_frame.selection().isNone())
         return;
-
-    if (Element* target = m_frame.document()->focusedElement()) {
-        // Dispatch an appropriate composition event to the focused node.
-        // We check the composition status and choose an appropriate composition event since this
-        // function is used for three purposes:
-        // 1. Starting a new composition.
-        //    Send a compositionstart and a compositionupdate event when this function creates
-        //    a new composition node, i.e.
-        //    m_compositionNode == 0 && !text.isEmpty().
-        //    Sending a compositionupdate event at this time ensures that at least one
-        //    compositionupdate event is dispatched.
-        // 2. Updating the existing composition node.
-        //    Send a compositionupdate event when this function updates the existing composition
-        //    node, i.e. m_compositionNode != 0 && !text.isEmpty().
-        // 3. Canceling the ongoing composition.
-        //    Send a compositionend event when function deletes the existing composition node, i.e.
-        //    m_compositionNode != 0 && test.isEmpty().
-        RefPtr<CompositionEvent> event = nullptr;
-        if (!hasComposition()) {
-            // We should send a compositionstart event only when the given text is not empty because this
-            // function doesn't create a composition node when the text is empty.
-            if (!text.isEmpty()) {
-                target->dispatchEvent(CompositionEvent::create(EventTypeNames::compositionstart, m_frame.domWindow(), m_frame.selectedText(), underlines));
-                event = CompositionEvent::create(EventTypeNames::compositionupdate, m_frame.domWindow(), text, underlines);
-            }
-        } else {
-            if (!text.isEmpty())
-                event = CompositionEvent::create(EventTypeNames::compositionupdate, m_frame.domWindow(), text, underlines);
-            else
-                event = CompositionEvent::create(EventTypeNames::compositionend, m_frame.domWindow(), text, underlines);
-        }
-        if (event.get())
-            target->dispatchEvent(event, IGNORE_EXCEPTION);
-    }
 
     // If text is empty, then delete the old composition here. If text is non-empty, InsertTextCommand::input
     // will delete the old composition with an optimized replace operation.

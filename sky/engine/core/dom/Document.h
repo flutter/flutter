@@ -28,24 +28,22 @@
 #ifndef SKY_ENGINE_CORE_DOM_DOCUMENT_H_
 #define SKY_ENGINE_CORE_DOM_DOCUMENT_H_
 
-#include "sky/engine/tonic/dart_value.h"
 #include "sky/engine/bindings/exception_state_placeholder.h"
 #include "sky/engine/core/dom/ContainerNode.h"
 #include "sky/engine/core/dom/DocumentInit.h"
-#include "sky/engine/core/dom/DocumentLifecycle.h"
 #include "sky/engine/core/dom/DocumentSupplementable.h"
-#include "sky/engine/core/dom/ExecutionContext.h"
 #include "sky/engine/core/dom/MutationObserver.h"
 #include "sky/engine/core/dom/TextLinkColors.h"
 #include "sky/engine/core/dom/TreeScope.h"
 #include "sky/engine/core/dom/UserActionElementSet.h"
+#include "sky/engine/core/inspector/ScriptCallStack.h"
 #include "sky/engine/core/loader/DocumentLoadTiming.h"
 #include "sky/engine/core/page/FocusType.h"
 #include "sky/engine/platform/Length.h"
-#include "sky/engine/platform/Timer.h"
 #include "sky/engine/platform/heap/Handle.h"
 #include "sky/engine/platform/weborigin/KURL.h"
 #include "sky/engine/platform/weborigin/ReferrerPolicy.h"
+#include "sky/engine/tonic/dart_value.h"
 #include "sky/engine/wtf/HashSet.h"
 #include "sky/engine/wtf/OwnPtr.h"
 #include "sky/engine/wtf/PassOwnPtr.h"
@@ -64,14 +62,12 @@ class CSSStyleDeclaration;
 class CSSStyleSheet;
 class CustomElementRegistry;
 class DocumentFragment;
-class DocumentLifecycleNotifier;
 class DocumentLoadTiming;
 class DocumentMarkerController;
 class DocumentParser;
 class Element;
 class ElementDataCache;
 class Event;
-class EventListener;
 class ExceptionState;
 class FloatQuad;
 class FloatRect;
@@ -108,8 +104,7 @@ typedef int ExceptionCode;
 
 class Document;
 
-class Document : public ContainerNode, public TreeScope, public ExecutionContext, public ExecutionContextClient
-    , public DocumentSupplementable, public LifecycleContext<Document> {
+class Document : public ContainerNode, public TreeScope, public DocumentSupplementable {
     DEFINE_WRAPPERTYPEINFO();
 public:
     static PassRefPtr<Document> create(const DocumentInit& initializer = DocumentInit())
@@ -126,7 +121,6 @@ public:
     using ContainerNode::ref;
     using ContainerNode::deref;
 #endif
-    using ExecutionContextClient::addConsoleMessage;
     using TreeScope::getElementById;
 
     virtual bool canContainRangeEndPoint() const override { return true; }
@@ -355,8 +349,6 @@ public:
 
     const WTF::TextEncoding& encoding() const { return WTF::UTF8Encoding(); }
 
-    virtual void removeAllEventListeners() override final;
-
     bool allowExecutingScripts(Node*);
 
     enum LoadEventProgress {
@@ -373,8 +365,6 @@ public:
     bool loadEventFinished() const { return m_loadEventProgress >= LoadEventCompleted; }
     bool unloadStarted() const { return m_loadEventProgress >= PageHideInProgress; }
 
-    virtual bool isContextThread() const override final;
-
     bool containsValidityStyleRules() const { return m_containsValidityStyleRules; }
     void setContainsValidityStyleRules() { m_containsValidityStyleRules = true; }
 
@@ -382,10 +372,9 @@ public:
     void enqueueAnimationFrameEvent(PassRefPtr<Event>);
     // Only one event for a target/event type combination will be dispatched per frame.
     void enqueueUniqueAnimationFrameEvent(PassRefPtr<Event>);
-    void enqueueMediaQueryChangeListeners(Vector<RefPtr<MediaQueryListListener> >&);
 
     // Used to allow element that loads data without going through a FrameLoader to delay the 'load' event.
-    void incrementLoadEventDelayCount() { ++m_loadEventDelayCount; }
+    void incrementLoadEventDelayCount() { }
     void decrementLoadEventDelayCount();
     void checkLoadEventSoon();
     bool isDelayingLoadEvent();
@@ -393,9 +382,6 @@ public:
     int requestAnimationFrame(PassOwnPtr<RequestAnimationFrameCallback>);
     void cancelAnimationFrame(int id);
     void serviceScriptedAnimations(double monotonicAnimationStartTime);
-
-    virtual EventTarget* errorEventTarget() override final;
-    virtual void logExceptionToConsole(const String& errorMessage, int scriptId, const String& sourceURL, int lineNumber, int columnNumber, PassRefPtr<ScriptCallStack>) override final;
 
     IntSize initialViewportSize() const;
 
@@ -410,31 +396,24 @@ public:
 
     void didLoadAllParserBlockingResources();
 
-    bool inStyleRecalc() const { return m_lifecycle.state() == DocumentLifecycle::InStyleRecalc; }
+    bool inStyleRecalc() const { return m_inStyleRecalc; }
 
     // A non-null m_templateDocumentHost implies that |this| was created by ensureTemplateDocument().
     bool isTemplateDocument() const { return !!m_templateDocumentHost; }
     Document& ensureTemplateDocument();
     Document* templateDocumentHost() { return m_templateDocumentHost; }
 
-    virtual void addMessage(PassRefPtr<ConsoleMessage>) override final;
-
-    virtual LocalDOMWindow* executingWindow() override final;
     LocalFrame* executingFrame();
 
-    DocumentLifecycleNotifier& lifecycleNotifier();
-    DocumentLifecycle& lifecycle() { return m_lifecycle; }
-    bool isActive() const { return m_lifecycle.isActive(); }
-    bool isStopped() const { return m_lifecycle.state() == DocumentLifecycle::Stopped; }
-    bool isDisposed() const { return m_lifecycle.state() == DocumentLifecycle::Disposed; }
+    bool isActive() const { return m_active; }
+    bool isStopped() const { return m_stopped; }
+    bool isDisposed() const { return m_stopped; }
 
     enum HttpRefreshType {
         HttpRefreshFromHeader,
         HttpRefreshFromMetaTag
     };
     void maybeHandleHttpRefresh(const String&, HttpRefreshType);
-
-    PassOwnPtr<LifecycleNotifier<Document> > createLifecycleNotifier();
 
     void setHasViewportUnits() { m_hasViewportUnits = true; }
     bool hasViewportUnits() const { return m_hasViewportUnits; }
@@ -467,10 +446,8 @@ private:
     bool isElementNode() const = delete; // This will catch anyone doing an unnecessary check.
 
     ScriptedAnimationController& ensureScriptedAnimationController();
-    virtual EventQueue* eventQueue() const override final;
 
-    // FIXME: Rename the StyleRecalc state to RenderTreeUpdate.
-    bool hasPendingStyleRecalc() const { return m_lifecycle.state() == DocumentLifecycle::VisualUpdatePending; }
+    bool hasPendingStyleRecalc() const { return m_visualUpdatePending; }
 
     bool shouldScheduleRenderTreeUpdate() const;
     void scheduleRenderTreeUpdate();
@@ -486,44 +463,26 @@ private:
 
     void detachParser();
 
-    virtual bool isDocument() const override final { return true; }
-
     virtual String nodeName() const override final;
     virtual NodeType nodeType() const override final;
     virtual PassRefPtr<Node> cloneNode(bool deep = true) override final;
 
-#if !ENABLE(OILPAN)
-    virtual void refExecutionContext() override final { ref(); }
-    virtual void derefExecutionContext() override final { deref(); }
-#endif
+    virtual const KURL& virtualURL() const final; // Same as url(), but without virtual call
+    virtual KURL virtualCompleteURL(const String&) const final; // Same as completeURL() for the same reason as above.
 
-    virtual const KURL& virtualURL() const override final; // Same as url(), but needed for ExecutionContext to implement it without a performance loss for direct calls.
-    virtual KURL virtualCompleteURL(const String&) const override final; // Same as completeURL() for the same reason as above.
-
-    virtual void reportBlockedScriptExecutionToInspector(const String& directiveText) override final;
-
-    virtual double timerAlignmentInterval() const override final;
+    virtual void reportBlockedScriptExecutionToInspector(const String& directiveText) final;
 
     void updateBaseURL();
 
-    void resumeParserWaitingForResourcesTimerFired(Timer<Document>*);
-
-    void loadEventDelayTimerFired(Timer<Document>*);
-
-    // Note that dispatching a window load event may cause the LocalDOMWindow to be detached from
-    // the LocalFrame, so callers should take a reference to the LocalDOMWindow (which owns us) to
-    // prevent the Document from getting blown away from underneath them.
-    void dispatchWindowLoadEvent();
-
     void addListenerType(ListenerType listenerType) { m_listenerTypes |= listenerType; }
-
-    void clearFocusedElementSoon();
-    void clearFocusedElementTimerFired(Timer<Document>*);
 
     void setHoverNode(PassRefPtr<Node>);
     Node* hoverNode() const { return m_hoverNode.get(); }
 
-    DocumentLifecycle m_lifecycle;
+    bool m_active;
+    bool m_visualUpdatePending;
+    bool m_inStyleRecalc;
+    bool m_stopped;
 
     AbstractModule* m_module;
 
@@ -543,9 +502,6 @@ private:
 
     RefPtr<CSSStyleSheet> m_elemSheet;
 
-    Timer<Document> m_resumeParserWaitingForResourcesTimer;
-
-    Timer<Document> m_clearFocusedElementTimer;
     RefPtr<Element> m_focusedElement;
     RefPtr<Node> m_hoverNode;
     RefPtr<Element> m_activeHoverElement;
@@ -579,13 +535,7 @@ private:
 
     RenderView* m_renderView;
 
-#if !ENABLE(OILPAN)
     WeakPtrFactory<Document> m_weakFactory;
-#endif
-    WeakPtr<Document> m_contextDocument;
-
-    int m_loadEventDelayCount;
-    Timer<Document> m_loadEventDelayTimer;
 
     Length m_viewportDefaultMinWidth;
 
@@ -597,9 +547,6 @@ private:
     RefPtr<ScriptedAnimationController> m_scriptedAnimationController;
 
     RefPtr<CustomElementRegistry> m_elementRegistry;
-
-    void elementDataCacheClearTimerFired(Timer<Document>*);
-    Timer<Document> m_elementDataCacheClearTimer;
 
     OwnPtr<ElementDataCache> m_elementDataCache;
 
@@ -628,8 +575,6 @@ inline void Document::scheduleRenderTreeUpdateIfNeeded()
         scheduleRenderTreeUpdate();
 }
 
-DEFINE_TYPE_CASTS(Document, ExecutionContextClient, client, client->isDocument(), client.isDocument());
-DEFINE_TYPE_CASTS(Document, ExecutionContext, context, context->isDocument(), context.isDocument());
 DEFINE_NODE_TYPE_CASTS(Document, isDocumentNode());
 
 #define DEFINE_DOCUMENT_TYPE_CASTS(thisType) \

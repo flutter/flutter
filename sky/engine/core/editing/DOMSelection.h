@@ -107,8 +107,6 @@ private:
 
     bool isValidForPosition(Node*) const;
 
-    void addConsoleError(const String& message);
-
     RawPtr<const TreeScope> m_treeScope;
 };
 

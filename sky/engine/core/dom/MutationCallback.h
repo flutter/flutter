@@ -45,7 +45,6 @@ public:
     virtual ~MutationCallback() { }
 
     virtual void call(const Vector<RefPtr<MutationRecord> >&, MutationObserver*) = 0;
-    virtual ExecutionContext* executionContext() const = 0;
 };
 
 }

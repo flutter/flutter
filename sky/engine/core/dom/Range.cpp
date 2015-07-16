@@ -36,7 +36,6 @@
 #include "sky/engine/core/editing/TextIterator.h"
 #include "sky/engine/core/editing/VisiblePosition.h"
 #include "sky/engine/core/editing/VisibleUnits.h"
-#include "sky/engine/core/events/ScopedEventQueue.h"
 #include "sky/engine/core/html/HTMLElement.h"
 #include "sky/engine/core/rendering/RenderBoxModelObject.h"
 #include "sky/engine/core/rendering/RenderText.h"
@@ -67,6 +66,11 @@ inline Range::Range(Document& ownerDocument)
 PassRefPtr<Range> Range::create(Document& ownerDocument)
 {
     return adoptRef(new Range(ownerDocument));
+}
+
+PassRefPtr<Range> Range::create(Document* ownerDocument)
+{
+  return adoptRef(new Range(*ownerDocument));
 }
 
 inline Range::Range(Document& ownerDocument, Node* startContainer, int startOffset, Node* endContainer, int endOffset)
@@ -458,7 +462,6 @@ void Range::deleteContents(ExceptionState& exceptionState)
     ASSERT(boundaryPointsValid());
 
     {
-        EventQueueScope eventQueueScope;
         processContents(DELETE_CONTENTS, exceptionState);
     }
 }
@@ -840,7 +843,6 @@ void Range::insertNode(PassRefPtr<Node> prpNewNode, ExceptionState& exceptionSta
         break;
     }
 
-    EventQueueScope scope;
     bool collapsed = m_start == m_end;
     RefPtr<Node> container = nullptr;
     if (startIsText) {
@@ -855,8 +857,7 @@ void Range::insertNode(PassRefPtr<Node> prpNewNode, ExceptionState& exceptionSta
             return;
 
         if (collapsed) {
-            // The load event would be fired regardless of EventQueueScope;
-            // e.g. by ContainerNode::updateTreeAfterInsertion
+            // The load event would be fired e.g. by ContainerNode::updateTreeAfterInsertion
             // Given circumstance may mutate the tree so newText->parentNode() may become null
             if (!newText->parentNode()) {
                 exceptionState.ThrowDOMException(HierarchyRequestError, "This operation would set range's end to parent with new offset, but there's no parent into which to continue.");

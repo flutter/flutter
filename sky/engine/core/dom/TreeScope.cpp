@@ -37,7 +37,6 @@
 #include "sky/engine/core/dom/shadow/ElementShadow.h"
 #include "sky/engine/core/dom/shadow/ShadowRoot.h"
 #include "sky/engine/core/editing/DOMSelection.h"
-#include "sky/engine/core/events/EventPath.h"
 #include "sky/engine/core/frame/FrameView.h"
 #include "sky/engine/core/frame/LocalFrame.h"
 #include "sky/engine/core/page/FocusController.h"
@@ -222,22 +221,6 @@ void TreeScope::adoptIfNeeded(Node& node)
 
 Element* TreeScope::adjustedFocusedElement() const
 {
-    Document& document = rootNode().document();
-    Element* element = document.focusedElement();
-    if (!element)
-        return 0;
-
-    EventPath eventPath(element);
-    for (size_t i = 0; i < eventPath.size(); ++i) {
-        if (eventPath[i].node() == rootNode()) {
-            // eventPath.at(i).target() is one of the followings:
-            // - InsertionPoint
-            // - shadow host
-            // - Document::focusedElement()
-            // So, it's safe to do toElement().
-            return toElement(eventPath[i].target()->toNode());
-        }
-    }
     return 0;
 }
 

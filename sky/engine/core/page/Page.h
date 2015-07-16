@@ -27,7 +27,6 @@
 #include "sky/engine/core/inspector/ConsoleAPITypes.h"
 #include "sky/engine/core/page/FocusType.h"
 #include "sky/engine/platform/HostWindow.h"
-#include "sky/engine/platform/LifecycleContext.h"
 #include "sky/engine/platform/Supplementable.h"
 #include "sky/engine/platform/geometry/LayoutRect.h"
 #include "sky/engine/platform/geometry/Region.h"
@@ -51,7 +50,6 @@ class FrameHost;
 class IntRect;
 class LocalFrame;
 class Node;
-class PageLifecycleNotifier;
 class Range;
 class RenderBox;
 class RenderObject;
@@ -65,7 +63,7 @@ typedef uint64_t LinkHash;
 
 float deviceScaleFactor(LocalFrame*);
 
-class Page final : public Supplementable<Page>, public LifecycleContext<Page>, public SettingsDelegate, public HostWindow {
+class Page final : public Supplementable<Page>, public SettingsDelegate, public HostWindow {
     WTF_MAKE_NONCOPYABLE(Page);
     friend class Settings;
 public:
@@ -112,8 +110,6 @@ public:
     bool isPainting() const { return m_isPainting; }
 #endif
 
-    double timerAlignmentInterval() const;
-
     class MultisamplingChangedObserver {
     public:
         virtual void multisamplingChanged(bool) = 0;
@@ -123,10 +119,6 @@ public:
     void removeMultisamplingChangedObserver(MultisamplingChangedObserver*);
 
     void didCommitLoad(LocalFrame*);
-
-    void acceptLanguagesChanged();
-
-    PassOwnPtr<LifecycleNotifier<Page> > createLifecycleNotifier();
 
     void willBeDestroyed();
 
@@ -152,11 +144,7 @@ public:
     void* webView() const;
 
 private:
-    PageLifecycleNotifier& lifecycleNotifier();
-
     void initGroup();
-
-    void setTimerAlignmentInterval(double);
 
     void setNeedsLayoutInAllFrames();
 

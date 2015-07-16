@@ -144,9 +144,6 @@ void DartController::CreateIsolateFor(PassOwnPtr<DOMDartState> state) {
     builtin_sky_ = adoptPtr(new BuiltinSky(dart_state()));
     dart_state()->class_library().set_provider(builtin_sky_.get());
 
-    if (dart_state()->document())
-      builtin_sky_->InstallWindow(dart_state());
-
     EnsureHandleWatcherStarted();
   }
   Dart_ExitIsolate();

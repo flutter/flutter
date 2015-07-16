@@ -18,7 +18,7 @@
  */
 
 #include "sky/engine/core/css/MediaQueryList.h"
-
+#include "gen/sky/core/EventTargetNames.h"
 #include "sky/engine/core/css/MediaList.h"
 #include "sky/engine/core/css/MediaQueryEvaluator.h"
 #include "sky/engine/core/css/MediaQueryListListener.h"
@@ -27,16 +27,14 @@
 
 namespace blink {
 
-PassRefPtr<MediaQueryList> MediaQueryList::create(ExecutionContext* context, PassRefPtr<MediaQueryMatcher> matcher, PassRefPtr<MediaQuerySet> media)
+PassRefPtr<MediaQueryList> MediaQueryList::create(PassRefPtr<MediaQueryMatcher> matcher, PassRefPtr<MediaQuerySet> media)
 {
-    RefPtr<MediaQueryList> list = adoptRef(new MediaQueryList(context, matcher, media));
-    list->suspendIfNeeded();
+    RefPtr<MediaQueryList> list = adoptRef(new MediaQueryList(matcher, media));
     return list.release();
 }
 
-MediaQueryList::MediaQueryList(ExecutionContext* context, PassRefPtr<MediaQueryMatcher> matcher, PassRefPtr<MediaQuerySet> media)
-    : ActiveDOMObject(context)
-    , m_matcher(matcher)
+MediaQueryList::MediaQueryList(PassRefPtr<MediaQueryMatcher> matcher, PassRefPtr<MediaQuerySet> media)
+    : m_matcher(matcher)
     , m_media(media)
     , m_matchesDirty(true)
     , m_matches(false)
@@ -47,24 +45,12 @@ MediaQueryList::MediaQueryList(ExecutionContext* context, PassRefPtr<MediaQueryM
 
 MediaQueryList::~MediaQueryList()
 {
-#if !ENABLE(OILPAN)
     m_matcher->removeMediaQueryList(this);
-#endif
 }
 
 String MediaQueryList::media() const
 {
     return m_media->mediaText();
-}
-
-void MediaQueryList::addDeprecatedListener(PassRefPtr<EventListener> listener)
-{
-    addEventListener(EventTypeNames::change, listener, false);
-}
-
-void MediaQueryList::removeDeprecatedListener(PassRefPtr<EventListener> listener)
-{
-    removeEventListener(EventTypeNames::change, listener, false);
 }
 
 void MediaQueryList::addListener(PassRefPtr<MediaQueryListListener> listener)
@@ -84,19 +70,6 @@ void MediaQueryList::removeListener(PassRefPtr<MediaQueryListListener> listener)
     m_listeners.remove(listener);
 }
 
-bool MediaQueryList::hasPendingActivity() const
-{
-    return m_listeners.size() || hasEventListeners(EventTypeNames::change);
-}
-
-void MediaQueryList::stop()
-{
-    // m_listeners.clear() can drop the last ref to this MediaQueryList.
-    RefPtr<MediaQueryList> protect(this);
-    m_listeners.clear();
-    removeAllEventListeners();
-}
-
 bool MediaQueryList::mediaFeaturesChanged(Vector<RefPtr<MediaQueryListListener> >* listenersToNotify)
 {
     m_matchesDirty = true;
@@ -105,7 +78,7 @@ bool MediaQueryList::mediaFeaturesChanged(Vector<RefPtr<MediaQueryListListener> 
     for (ListenerList::const_iterator it = m_listeners.begin(), end = m_listeners.end(); it != end; ++it) {
         listenersToNotify->append(*it);
     }
-    return hasEventListeners(EventTypeNames::change);
+    return false;
 }
 
 bool MediaQueryList::updateMatches()
@@ -122,16 +95,6 @@ bool MediaQueryList::matches()
 {
     updateMatches();
     return m_matches;
-}
-
-const AtomicString& MediaQueryList::interfaceName() const
-{
-    return EventTargetNames::MediaQueryList;
-}
-
-ExecutionContext* MediaQueryList::executionContext() const
-{
-    return ActiveDOMObject::executionContext();
 }
 
 }

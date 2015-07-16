@@ -24,7 +24,7 @@ class ScheduledAction {
 
   ~ScheduledAction();
 
-  void Execute(ExecutionContext*);
+  void Execute();
 
  private:
   ScheduledAction(DartState* dart_state, Dart_Handle closure);

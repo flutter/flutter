@@ -28,6 +28,7 @@
 #include "sky/engine/core/dom/Document.h"
 
 #include "gen/sky/core/HTMLElementFactory.h"
+#include "gen/sky/core/EventNames.h"
 #include "gen/sky/platform/RuntimeEnabledFeatures.h"
 #include "sky/engine/bindings/exception_messages.h"
 #include "sky/engine/bindings/exception_state.h"
@@ -44,8 +45,6 @@
 #include "sky/engine/core/css/resolver/StyleResolverStats.h"
 #include "sky/engine/core/dom/Attr.h"
 #include "sky/engine/core/dom/DocumentFragment.h"
-#include "sky/engine/core/dom/DocumentLifecycleNotifier.h"
-#include "sky/engine/core/dom/DocumentLifecycleObserver.h"
 #include "sky/engine/core/dom/DocumentMarkerController.h"
 #include "sky/engine/core/dom/Element.h"
 #include "sky/engine/core/dom/ElementDataCache.h"
@@ -69,11 +68,7 @@
 #include "sky/engine/core/editing/FrameSelection.h"
 #include "sky/engine/core/editing/SpellChecker.h"
 #include "sky/engine/core/events/Event.h"
-#include "sky/engine/core/events/EventListener.h"
-#include "sky/engine/core/events/HashChangeEvent.h"
 #include "sky/engine/core/events/PageTransitionEvent.h"
-#include "sky/engine/core/events/ScopedEventQueue.h"
-#include "sky/engine/core/frame/FrameConsole.h"
 #include "sky/engine/core/frame/FrameHost.h"
 #include "sky/engine/core/frame/FrameView.h"
 #include "sky/engine/core/frame/LocalDOMWindow.h"
@@ -83,7 +78,6 @@
 #include "sky/engine/core/inspector/InspectorCounters.h"
 #include "sky/engine/core/loader/FrameLoaderClient.h"
 #include "sky/engine/core/page/ChromeClient.h"
-#include "sky/engine/core/page/EventHandler.h"
 #include "sky/engine/core/page/FocusController.h"
 #include "sky/engine/core/page/Page.h"
 #include "sky/engine/core/painting/PaintingTasks.h"
@@ -184,13 +178,6 @@ static inline bool isValidNamePart(UChar32 c)
     return true;
 }
 
-static bool acceptsEditingFocus(const Element& element)
-{
-    ASSERT(element.hasEditableStyle());
-
-    return element.document().frame() && element.rootEditableElement();
-}
-
 #ifndef NDEBUG
 typedef HashSet<RawPtr<Document> > WeakDocumentSet;
 static WeakDocumentSet& liveDocumentSet()
@@ -203,13 +190,15 @@ static WeakDocumentSet& liveDocumentSet()
 Document::Document(const DocumentInit& initializer)
     : ContainerNode(0, CreateDocument)
     , TreeScope(*this)
+    , m_active(false)
+    , m_visualUpdatePending(true)
+    , m_inStyleRecalc(false)
+    , m_stopped(false)
     , m_module(nullptr)
     , m_evaluateMediaQueriesOnStyleRecalc(false)
     , m_frame(initializer.frame())
     , m_domWindow(m_frame ? m_frame->domWindow() : 0)
     , m_activeParserCount(0)
-    , m_resumeParserWaitingForResourcesTimer(this, &Document::resumeParserWaitingForResourcesTimerFired)
-    , m_clearFocusedElementTimer(this, &Document::clearFocusedElementTimerFired)
     , m_listenerTypes(0)
     , m_mutationObserverTypes(0)
     , m_readyState(Complete)
@@ -222,20 +211,14 @@ Document::Document(const DocumentInit& initializer)
 #if !ENABLE(OILPAN)
     , m_weakFactory(this)
 #endif
-    , m_contextDocument(initializer.contextDocument())
-    , m_loadEventDelayCount(0)
-    , m_loadEventDelayTimer(this, &Document::loadEventDelayTimerFired)
     , m_didSetReferrerPolicy(false)
     , m_referrerPolicy(ReferrerPolicyDefault)
     , m_elementRegistry(initializer.elementRegistry())
-    , m_elementDataCacheClearTimer(this, &Document::elementDataCacheClearTimerFired)
     , m_templateDocumentHost(nullptr)
     , m_hasViewportUnits(false)
     , m_styleRecalcElementCounter(0)
     , m_frameView(nullptr)
 {
-    setClient(this);
-
     if (!m_elementRegistry)
         m_elementRegistry = CustomElementRegistry::Create();
 
@@ -249,8 +232,6 @@ Document::Document(const DocumentInit& initializer)
 
     InspectorCounters::incrementCounter(InspectorCounters::DocumentCounter);
 
-    m_lifecycle.advanceTo(DocumentLifecycle::Inactive);
-
 #ifndef NDEBUG
     liveDocumentSet().add(this);
 #endif
@@ -260,21 +241,11 @@ Document::~Document()
 {
     ASSERT(!renderView());
     ASSERT(!parentTreeScope());
-#if !ENABLE(OILPAN)
     ASSERT(m_ranges.isEmpty());
     ASSERT(!hasGuardRefCount());
 
     if (m_templateDocument)
         m_templateDocument->m_templateDocumentHost = nullptr; // balanced in ensureTemplateDocument().
-
-    // FIXME: Oilpan: Not removing event listeners here also means that we do
-    // not notify the inspector instrumentation that the event listeners are
-    // gone. The Document and all the nodes in the document are gone, so maybe
-    // that is OK?
-    removeAllEventListenersRecursively();
-#endif
-
-#if !ENABLE(OILPAN)
 
     if (m_elemSheet)
         m_elemSheet->clearOwnerNode();
@@ -287,9 +258,6 @@ Document::~Document()
 #ifndef NDEBUG
     liveDocumentSet().remove(this);
 #endif
-#endif
-
-    setClient(0);
 
     InspectorCounters::decrementCounter(InspectorCounters::DocumentCounter);
 }
@@ -318,13 +286,9 @@ void Document::dispose()
 
     m_markers->clear();
 
-    // FIXME: consider using ActiveDOMObject.
     if (m_scriptedAnimationController)
         m_scriptedAnimationController->clearDocumentPointer();
     m_scriptedAnimationController.clear();
-
-    m_lifecycle.advanceTo(DocumentLifecycle::Disposed);
-    lifecycleNotifier().notifyDocumentWasDisposed();
 }
 #endif
 
@@ -374,21 +338,6 @@ PassRefPtr<Text> Document::createText(const String& text)
 void Document::registerElement(const AtomicString& name, PassRefPtr<DartValue> type, ExceptionState& es)
 {
     m_elementRegistry->RegisterElement(name, type);
-}
-
-LocalDOMWindow* Document::executingWindow()
-{
-    if (LocalDOMWindow* owningWindow = domWindow())
-        return owningWindow;
-    return 0;
-}
-
-LocalFrame* Document::executingFrame()
-{
-    LocalDOMWindow* window = executingWindow();
-    if (!window)
-        return 0;
-    return window->frame();
 }
 
 PassRefPtr<DocumentFragment> Document::createDocumentFragment()
@@ -458,8 +407,6 @@ PassRefPtr<Node> Document::importNode(Node* importedNode, bool deep, ExceptionSt
 
 PassRefPtr<Node> Document::adoptNode(PassRefPtr<Node> source, ExceptionState& exceptionState)
 {
-    EventQueueScope scope;
-
     switch (source->nodeType()) {
     case DOCUMENT_NODE:
         exceptionState.ThrowDOMException(NotSupportedError, "The node provided is of type '" + source->nodeName() + "', which may not be adopted.");
@@ -514,7 +461,6 @@ void Document::setReadyState(ReadyState readyState)
     if (readyState == m_readyState)
         return;
     m_readyState = readyState;
-    dispatchEvent(Event::create(EventTypeNames::readystatechange));
 }
 
 bool Document::isLoadCompleted()
@@ -718,9 +664,6 @@ bool Document::shouldScheduleRenderTreeUpdate() const
         return false;
     if (inStyleRecalc())
         return false;
-    // InPreLayout will recalc style itself. There's no reason to schedule another recalc.
-    if (m_lifecycle.state() == DocumentLifecycle::InPreLayout)
-        return false;
     return true;
 }
 
@@ -731,10 +674,7 @@ void Document::scheduleRenderTreeUpdate()
     ASSERT(needsRenderTreeUpdate());
 
     scheduleVisualUpdate();
-
-    // TODO(esprehn): We should either rename this state, or change the other
-    // users of scheduleVisualUpdate() so they don't expect different states.
-    m_lifecycle.ensureStateAtMost(DocumentLifecycle::VisualUpdatePending);
+    m_visualUpdatePending = true;
 }
 
 void Document::scheduleVisualUpdate()
@@ -817,16 +757,13 @@ void Document::updateRenderTree(StyleRecalcChange change)
     // hits a null-dereference due to security code always assuming the document has a SecurityOrigin.
 
     updateStyle(change);
-
-    if (m_focusedElement && !m_focusedElement->isFocusable())
-        clearFocusedElementSoon();
 }
 
 void Document::updateStyle(StyleRecalcChange change)
 {
     TRACE_EVENT0("blink", "Document::updateStyle");
 
-    m_lifecycle.advanceTo(DocumentLifecycle::InStyleRecalc);
+    m_inStyleRecalc = true;
 
     if (styleChangeType() >= SubtreeStyleChange)
         change = Force;
@@ -867,10 +804,11 @@ void Document::updateStyle(StyleRecalcChange change)
 
     m_styleEngine->resolver().clearStyleSharingList();
 
+    m_visualUpdatePending = false;
+    m_inStyleRecalc = false;
+
     ASSERT(!needsStyleRecalc());
     ASSERT(!childNeedsStyleRecalc());
-    ASSERT(inStyleRecalc());
-    m_lifecycle.advanceTo(DocumentLifecycle::StyleClean);
 }
 
 void Document::updateRenderTreeForNodeIfNeeded(Node* node)
@@ -904,29 +842,11 @@ void Document::updateLayout()
 
     if (frameView->needsLayout())
         frameView->layout();
-
-    if (lifecycle().state() < DocumentLifecycle::LayoutClean)
-        lifecycle().advanceTo(DocumentLifecycle::LayoutClean);
 }
 
 void Document::setNeedsFocusedElementCheck()
 {
     setNeedsStyleRecalc(LocalStyleChange);
-}
-
-void Document::clearFocusedElementSoon()
-{
-    if (!m_clearFocusedElementTimer.isActive())
-        m_clearFocusedElementTimer.startOneShot(0, FROM_HERE);
-}
-
-void Document::clearFocusedElementTimerFired(Timer<Document>*)
-{
-    updateRenderTreeIfNeeded();
-    m_clearFocusedElementTimer.stop();
-
-    if (m_focusedElement && !m_focusedElement->isFocusable())
-        m_focusedElement->blur();
 }
 
 StyleResolver& Document::styleResolver() const
@@ -937,8 +857,6 @@ StyleResolver& Document::styleResolver() const
 
 void Document::attach(const AttachContext& context)
 {
-    ASSERT(m_lifecycle.state() == DocumentLifecycle::Inactive);
-
     m_styleEngine = StyleEngine::create(*this);
 
     m_renderView = new RenderView(this);
@@ -948,27 +866,22 @@ void Document::attach(const AttachContext& context)
 
     ContainerNode::attach(context);
 
-    m_lifecycle.advanceTo(DocumentLifecycle::StyleClean);
+    m_active = true;
 }
 
 void Document::detach(const AttachContext& context)
 {
     ASSERT(isActive());
-    m_lifecycle.advanceTo(DocumentLifecycle::Stopping);
+
+    m_active = false;
+    m_stopped = true;
 
     if (page())
         page()->documentDetached(this);
 
-    stopActiveDOMObjects();
-
-    // FIXME: consider using ActiveDOMObject.
     if (m_scriptedAnimationController)
         m_scriptedAnimationController->clearDocumentPointer();
     m_scriptedAnimationController.clear();
-
-    // FIXME: This shouldn't be needed once LocalDOMWindow becomes ExecutionContext.
-    if (m_domWindow)
-        m_domWindow->clearEventQueue();
 
     m_hoverNode = nullptr;
     m_focusedElement = nullptr;
@@ -988,14 +901,6 @@ void Document::detach(const AttachContext& context)
 
     if (m_mediaQueryMatcher)
         m_mediaQueryMatcher->documentDetached();
-
-    lifecycleNotifier().notifyDocumentWasDetached();
-    m_lifecycle.advanceTo(DocumentLifecycle::Stopped);
-#if ENABLE(OILPAN)
-    // Done with the window, explicitly clear to hasten its
-    // destruction.
-    clearDOMWindow();
-#endif
 }
 
 void Document::prepareForDestruction()
@@ -1009,14 +914,6 @@ void Document::prepareForDestruction()
     if (LocalDOMWindow* window = this->domWindow())
         window->willDetachDocumentFromFrame();
     detach();
-}
-
-void Document::removeAllEventListeners()
-{
-    ContainerNode::removeAllEventListeners();
-
-    if (LocalDOMWindow* domWindow = this->domWindow())
-        domWindow->removeAllEventListeners();
 }
 
 void Document::detachParser()
@@ -1054,12 +951,6 @@ void Document::implicitClose()
     // We have to clear the parser, in case someone document.write()s from the
     // onLoad event handler, as in Radar 3206524.
     detachParser();
-
-    // JS running below could remove the frame or destroy the RenderView so we call
-    // those two functions repeatedly and don't save them on the stack.
-
-    if (protectedWindow)
-        protectedWindow->documentWasClosed();
 
     if (frame())
         frame()->loaderClient()->dispatchDidHandleOnloadEvents();
@@ -1128,26 +1019,6 @@ KURL Document::virtualCompleteURL(const String& url) const
     return completeURL(url);
 }
 
-double Document::timerAlignmentInterval() const
-{
-    Page* p = page();
-    if (!p)
-        return DOMTimer::visiblePageAlignmentInterval();
-    return p->timerAlignmentInterval();
-}
-
-EventTarget* Document::errorEventTarget()
-{
-    return domWindow();
-}
-
-void Document::logExceptionToConsole(const String& errorMessage, int scriptId, const String& sourceURL, int lineNumber, int columnNumber, PassRefPtr<ScriptCallStack> callStack)
-{
-    RefPtr<ConsoleMessage> consoleMessage = ConsoleMessage::create(JSMessageSource, ErrorMessageLevel, errorMessage, sourceURL, lineNumber);
-    consoleMessage->setScriptId(scriptId);
-    addMessage(consoleMessage.release());
-}
-
 void Document::setURL(const KURL& url)
 {
     const KURL& newURL = url.isEmpty() ? blankURL() : url;
@@ -1168,11 +1039,6 @@ void Document::updateBaseURL()
 }
 
 void Document::didLoadAllParserBlockingResources()
-{
-    m_resumeParserWaitingForResourcesTimer.startOneShot(0, FROM_HERE);
-}
-
-void Document::resumeParserWaitingForResourcesTimerFired(Timer<Document>*)
 {
 }
 
@@ -1219,14 +1085,10 @@ void Document::evaluateMediaQueryListIfNeeded()
 
 void Document::evaluateMediaQueryList()
 {
-    if (m_mediaQueryMatcher)
-        m_mediaQueryMatcher->mediaFeaturesChanged();
 }
 
 void Document::notifyResizeForViewportUnits()
 {
-    if (m_mediaQueryMatcher)
-        m_mediaQueryMatcher->viewportChanged();
     if (!hasViewportUnits())
         return;
     styleResolver().notifyResizeForViewportUnits();
@@ -1300,106 +1162,7 @@ void Document::activeChainNodeDetached(Node* node)
 
 bool Document::setFocusedElement(PassRefPtr<Element> prpNewFocusedElement, FocusType type)
 {
-    m_clearFocusedElementTimer.stop();
-
-    RefPtr<Element> newFocusedElement = prpNewFocusedElement;
-
-    // Make sure newFocusedNode is actually in this document
-    if (newFocusedElement && (newFocusedElement->document() != this))
-        return true;
-
-    if (m_focusedElement == newFocusedElement)
-        return true;
-
-    bool focusChangeBlocked = false;
-    RefPtr<Element> oldFocusedElement = m_focusedElement;
-    m_focusedElement = nullptr;
-
-    // Remove focus from the existing focus node (if any)
-    if (oldFocusedElement) {
-        if (oldFocusedElement->active())
-            oldFocusedElement->setActive(false);
-
-        oldFocusedElement->setFocus(false);
-
-        // Dispatch the blur event and let the node do any other blur related activities (important for text fields)
-        // If page lost focus, blur event will have already been dispatched
-        if (page() && (page()->focusController().isFocused())) {
-            oldFocusedElement->dispatchBlurEvent(newFocusedElement.get());
-
-            if (m_focusedElement) {
-                // handler shifted focus
-                focusChangeBlocked = true;
-                newFocusedElement = nullptr;
-            }
-
-            oldFocusedElement->dispatchFocusOutEvent(EventTypeNames::focusout, newFocusedElement.get()); // DOM level 3 name for the bubbling blur event.
-            // FIXME: We should remove firing DOMFocusOutEvent event when we are sure no content depends
-            // on it, probably when <rdar://problem/8503958> is resolved.
-            oldFocusedElement->dispatchFocusOutEvent(EventTypeNames::DOMFocusOut, newFocusedElement.get()); // DOM level 2 name for compatibility.
-
-            if (m_focusedElement) {
-                // handler shifted focus
-                focusChangeBlocked = true;
-                newFocusedElement = nullptr;
-            }
-        }
-    }
-
-    if (newFocusedElement && newFocusedElement->isFocusable()) {
-        if (newFocusedElement->isRootEditableElement() && !acceptsEditingFocus(*newFocusedElement)) {
-            // delegate blocks focus change
-            focusChangeBlocked = true;
-            goto SetFocusedElementDone;
-        }
-        // Set focus on the new node
-        m_focusedElement = newFocusedElement;
-
-        // Dispatch the focus event and let the node do any other focus related activities (important for text fields)
-        // If page lost focus, event will be dispatched on page focus, don't duplicate
-        if (page() && (page()->focusController().isFocused())) {
-            m_focusedElement->dispatchFocusEvent(oldFocusedElement.get(), type);
-
-
-            if (m_focusedElement != newFocusedElement) {
-                // handler shifted focus
-                focusChangeBlocked = true;
-                goto SetFocusedElementDone;
-            }
-
-            m_focusedElement->dispatchFocusInEvent(EventTypeNames::focusin, oldFocusedElement.get()); // DOM level 3 bubbling focus event.
-
-            if (m_focusedElement != newFocusedElement) {
-                // handler shifted focus
-                focusChangeBlocked = true;
-                goto SetFocusedElementDone;
-            }
-
-            // FIXME: We should remove firing DOMFocusInEvent event when we are sure no content depends
-            // on it, probably when <rdar://problem/8503958> is m.
-            m_focusedElement->dispatchFocusInEvent(EventTypeNames::DOMFocusIn, oldFocusedElement.get()); // DOM level 2 for compatibility.
-
-            if (m_focusedElement != newFocusedElement) {
-                // handler shifted focus
-                focusChangeBlocked = true;
-                goto SetFocusedElementDone;
-            }
-        }
-
-        m_focusedElement->setFocus(true);
-
-        if (m_focusedElement->isRootEditableElement())
-            frame()->spellChecker().didBeginEditing(m_focusedElement.get());
-    }
-
-    if (!focusChangeBlocked && frameHost())
-        page()->focusedNodeChanged(m_focusedElement.get());
-
-SetFocusedElementDone:
-    updateRenderTreeIfNeeded();
-    if (LocalFrame* frame = this->frame())
-        frame->selection().didChangeFocus();
-    return !focusChangeBlocked;
+    return false;
 }
 
 void Document::updateRangesAfterChildrenChanged(ContainerNode* container)
@@ -1433,7 +1196,6 @@ void Document::nodeChildrenWillBeRemoved(ContainerNode& container)
 
     if (LocalFrame* frame = this->frame()) {
         for (Node* n = container.firstChild(); n; n = n->nextSibling()) {
-            frame->eventHandler().nodeWillBeRemoved(*n);
             frame->selection().nodeWillBeRemoved(*n);
             frame->page()->dragCaretController().nodeWillBeRemoved(*n);
         }
@@ -1449,7 +1211,6 @@ void Document::nodeWillBeRemoved(Node& n)
     }
 
     if (LocalFrame* frame = this->frame()) {
-        frame->eventHandler().nodeWillBeRemoved(n);
         frame->selection().nodeWillBeRemoved(n);
         frame->page()->dragCaretController().nodeWillBeRemoved(n);
     }
@@ -1507,35 +1268,6 @@ void Document::didSplitTextNode(Text& oldNode)
         m_frame->selection().didSplitTextNode(oldNode);
 
     // FIXME: This should update markers for spelling and grammar checking.
-}
-
-EventQueue* Document::eventQueue() const
-{
-    if (!m_domWindow)
-        return 0;
-    return m_domWindow->eventQueue();
-}
-
-void Document::enqueueAnimationFrameEvent(PassRefPtr<Event> event)
-{
-    ensureScriptedAnimationController().enqueueEvent(event);
-}
-
-void Document::enqueueUniqueAnimationFrameEvent(PassRefPtr<Event> event)
-{
-    ensureScriptedAnimationController().enqueuePerFrameEvent(event);
-}
-
-void Document::enqueueResizeEvent()
-{
-    RefPtr<Event> event = Event::create(EventTypeNames::resize);
-    event->setTarget(domWindow());
-    ensureScriptedAnimationController().enqueuePerFrameEvent(event.release());
-}
-
-void Document::enqueueMediaQueryChangeListeners(Vector<RefPtr<MediaQueryListListener> >& listeners)
-{
-    ensureScriptedAnimationController().enqueueMediaQueryChangeListeners(listeners);
 }
 
 const AtomicString& Document::referrer() const
@@ -1716,15 +1448,6 @@ Document& Document::topDocument() const
 
 WeakPtr<Document> Document::contextDocument()
 {
-    if (m_contextDocument)
-        return m_contextDocument;
-    if (m_frame) {
-#if ENABLE(OILPAN)
-        return this;
-#else
-        return m_weakFactory.createWeakPtr();
-#endif
-    }
     return WeakPtr<Document>(nullptr);
 }
 
@@ -1732,27 +1455,9 @@ void Document::finishedParsing()
 {
 }
 
-void Document::elementDataCacheClearTimerFired(Timer<Document>*)
-{
-    m_elementDataCache.clear();
-}
-
 bool Document::allowExecutingScripts(Node* node)
 {
-    // FIXME: Eventually we'd like to evaluate scripts which are inserted into a
-    // viewless document but this'll do for now.
-    // See http://bugs.webkit.org/show_bug.cgi?id=5727
-    LocalFrame* frame = executingFrame();
-    if (!frame)
-        return false;
-    if (!node->document().executingFrame())
-        return false;
-    return true;
-}
-
-bool Document::isContextThread() const
-{
-    return isMainThread();
+    return false;
 }
 
 void Document::attachRange(Range* range)
@@ -1772,38 +1477,19 @@ void Document::reportBlockedScriptExecutionToInspector(const String& directiveTe
 {
 }
 
-void Document::addMessage(PassRefPtr<ConsoleMessage> consoleMessage)
-{
-    if (!m_frame)
-        return;
-    m_frame->console().addMessage(consoleMessage);
-}
-
 void Document::decrementLoadEventDelayCount()
 {
-    ASSERT(m_loadEventDelayCount);
-    --m_loadEventDelayCount;
-
-    if (!m_loadEventDelayCount)
-        checkLoadEventSoon();
 }
 
 void Document::checkLoadEventSoon()
 {
-    if (frame() && !m_loadEventDelayTimer.isActive())
-        m_loadEventDelayTimer.startOneShot(0, FROM_HERE);
 }
 
 bool Document::isDelayingLoadEvent()
 {
-    return m_loadEventDelayCount;
+    return false;
 }
 
-
-void Document::loadEventDelayTimerFired(Timer<Document>*)
-{
-    checkCompleted();
-}
 
 ScriptedAnimationController& Document::ensureScriptedAnimationController()
 {
@@ -1873,16 +1559,6 @@ Document& Document::ensureTemplateDocument()
 float Document::devicePixelRatio() const
 {
     return m_frame ? m_frame->devicePixelRatio() : 1.0;
-}
-
-PassOwnPtr<LifecycleNotifier<Document> > Document::createLifecycleNotifier()
-{
-    return DocumentLifecycleNotifier::create(this);
-}
-
-DocumentLifecycleNotifier& Document::lifecycleNotifier()
-{
-    return static_cast<DocumentLifecycleNotifier&>(LifecycleContext<Document>::lifecycleNotifier());
 }
 
 Element* Document::activeElement() const

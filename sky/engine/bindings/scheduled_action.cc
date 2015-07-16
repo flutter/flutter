@@ -19,7 +19,7 @@ ScheduledAction::ScheduledAction(DartState* dart_state, Dart_Handle closure)
 ScheduledAction::~ScheduledAction() {
 }
 
-void ScheduledAction::Execute(ExecutionContext*) {
+void ScheduledAction::Execute() {
   if (!closure_.dart_state())
     return;
   DartIsolateScope scope(closure_.dart_state()->isolate());

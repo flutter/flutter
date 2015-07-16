@@ -18,6 +18,10 @@
  * Boston, MA 02110-1301, USA.
  */
 
+// This is the object that Sky's C++ code uses to send events to Sky's
+// Dart code.
+// TODO(ianh): It needs much work still.
+
 [
     // TODO(eseidel): Type is optional to appease dart analyzer:
     // The class 'Event' does not have a default constructor
@@ -30,8 +34,6 @@
     const unsigned short BUBBLING_PHASE      = 3;
 
     readonly attribute DOMString        type;
-    readonly attribute EventTarget      target;
-    readonly attribute EventTarget      currentTarget;
     readonly attribute unsigned short   eventPhase;
     [InitializedByEventConstructor] readonly attribute boolean bubbles;
     [InitializedByEventConstructor] readonly attribute boolean cancelable;
@@ -45,8 +47,6 @@
     void stopImmediatePropagation();
 
     // IE Extensions
-    readonly attribute EventTarget srcElement;
-    [CallWith=ExecutionContext, ImplementedAs=legacyReturnValue] attribute boolean returnValue;
+    [ImplementedAs=legacyReturnValue] attribute boolean returnValue;
     attribute boolean cancelBubble;
-    readonly attribute NodeList path;
 };
