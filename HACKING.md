@@ -17,26 +17,19 @@ Running applications
 
 To run an application on your device, run:
 
-* ``./mojo/tools/mojodb start out/android_Debug [url]``
+* `mojo/devtools/common/mojo_shell --sky [url] --android`
 
-`mojodb` has numerous commands, visible via `mojodb help`.  Common ones include:
-* `mojodb start` BUILD_DIR [url]
-* `mojodb load` [url]
-* `mojodb stop`
-* `mojodb start_tracing` # Starts recoding a performance trace (use stop_tracing to stop)
-* `mojodb print_crash` # Symbolicate the most recent crash from android.
-
-Once `mojodb start` is issued, all subsequent commands will be sent to
-the running mojo_shell instance (even on an attached android device).
-`mojodb start` reads gn args from the passed build directory to
-determine whether its using android, for example.
+When the shell is running, `mojo/devtools/common/debugger` allows you to
+collect traces, symbolize stack crashes and attach gdb if needed. Refer to the
+[documentation](https://github.com/domokit/mojo#debugging-tracing-profiling)
+for the details.
 
 Running tests
 -------------
 
 Tests are only supported on Linux currently.
 
-* ``./sky/tools/test_sky --debug``
+* ``sky/tools/test_sky --debug``
   * This runs the tests against ``//out/Debug``. If you want to run against
     ``//out/Release``, omit the ``--debug`` flag.
 
@@ -70,20 +63,22 @@ This document aims to explain how to debug Sky itself.
 
 ### C++
 
-Launch a debug Sky build on Linux as follows (where `app.dart` is the
-test you are running and trying to debug):
+Launch a debug Sky build on Android as usual:
 
-```bash
-mojodb start --gdb out/Debug app.dart
-mojodb gdb_attach
+```
+mojo/devtools/common/mojo_shell --sky [url] --android`
 ```
 
-Once gdb has loaded, hit `c` to start the app. The linux simulator
-will load (slowly), after spawning many threads. When your app
-crashes, it will pause in the debugger. At that point, regular gdb
-commands will work: `n` to step over the current statement, `s` to
-step into the current statement, `f` to step out of the current block,
-`c` to continue until the next breakpoint or exception.
+and use the debugger to attach gdb:
+```
+mojo/devtools/common/debugger gdb attach
+```
+
+Once gdb has loaded, hit `c` to continue the execution. When your app crashes,
+it will pause in the debugger. At that point, regular gdb commands will work:
+`n` to step over the current statement, `s` to step into the current statement,
+`f` to step out of the current block, `c` to continue until the next breakpoint
+or exception.
 
 ### Dart
 
