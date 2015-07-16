@@ -1,6 +1,6 @@
-CONSOLE: unittest-suite-wait-for-done
-CONSOLE: PASS: this is a test
-CONSOLE: 
-CONSOLE: All 1 tests passed.
-CONSOLE: unittest-suite-success
+unittest-suite-wait-for-done
+PASS: this is a test
+
+All 1 tests passed.
+unittest-suite-success
 DONE

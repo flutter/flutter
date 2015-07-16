@@ -1,9 +1,9 @@
-CONSOLE: TestRenderView enabled
-CONSOLE: 
+TestRenderView enabled
+
 PAINT FOR FRAME #1 ----------------------------------------------
 1 | TestPaintingCanvas() constructor: 800.0 x 600.0
 ------------------------------------------------------------------------
-CONSOLE: 
+
 PAINT FOR FRAME #2 ----------------------------------------------
 2 | TestPaintingCanvas() constructor: 800.0 x 600.0
 2 | paintChild RenderFlex at Point(0.0, 0.0)
@@ -65,7 +65,7 @@ PAINT FOR FRAME #2 ----------------------------------------------
 2 |  |  |  |  |  |  |  |  |  |  |  | translate(228.5, 365.0)
 2 |  |  |  |  |  |  |  |  |  |  |  | translate(-228.5, -365.0)
 ------------------------------------------------------------------------
-CONSOLE: 
+
 PAINT FOR FRAME #3 ----------------------------------------------
 3 | TestPaintingCanvas() constructor: 800.0 x 600.0
 3 | paintChild RenderFlex at Point(0.0, 0.0)
@@ -127,7 +127,7 @@ PAINT FOR FRAME #3 ----------------------------------------------
 3 |  |  |  |  |  |  |  |  |  |  |  | translate(290.5, 365.0)
 3 |  |  |  |  |  |  |  |  |  |  |  | translate(-290.5, -365.0)
 ------------------------------------------------------------------------
-CONSOLE: 
+
 PAINT FOR FRAME #4 ----------------------------------------------
 4 | TestPaintingCanvas() constructor: 800.0 x 600.0
 4 | paintChild RenderFlex at Point(0.0, 0.0)

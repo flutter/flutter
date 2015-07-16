@@ -1,9 +1,9 @@
-CONSOLE: unittest-suite-wait-for-done
-CONSOLE: PASS: should get by index
-CONSOLE: PASS: should set by name
-CONSOLE: PASS: should be case sensitive
-CONSOLE: PASS: should not live update
-CONSOLE: 
-CONSOLE: All 4 tests passed.
-CONSOLE: unittest-suite-success
+unittest-suite-wait-for-done
+PASS: should get by index
+PASS: should set by name
+PASS: should be case sensitive
+PASS: should not live update
+
+All 4 tests passed.
+unittest-suite-success
 DONE
