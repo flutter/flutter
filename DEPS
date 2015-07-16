@@ -21,12 +21,12 @@ vars = {
   'chromium_git': 'https://chromium.googlesource.com',
   'dart_svn': 'https://dart.googlecode.com',
   'skia_revision': '2ced78866fcadd98895777c8dffe92e229775181',
-  'angle_revision': 'bdd419f9f5b006e913606e7363125942c8ae06bc',
+  'angle_revision': '02df796f466cee47f42130bd8c7dbad6c72a1662',
   'dart_revision': 'e5e3d161e70d862608e6597facdf5ac8ae9ab2c3',
   'dart_observatory_packages_revision': '45565',
-  'boringssl_revision': '642f1498d056dbba3e50ed5a232ab2f482626dec',
+  'boringssl_revision': '7f15ff53d82a1991d6732d2303eb652b1cf7e023',
 
-  'buildtools_revision': 'fa660d47fa1a6c649d5c29e001348447c55709e6',
+  'buildtools_revision': '5215ee866bc3e8eb4a7f124212845abf4029e60b',
 
   'archive_dart_revision': '07ffd98c5403b7f9ae067b57dc9487611be420f5',
   'args_dart_revision': 'e0e8377412ee6cd6a5a4a8632848181c1db91f44',
@@ -55,10 +55,10 @@ deps = {
    Var('chromium_git') + '/chromium/buildtools.git' + '@' +  Var('buildtools_revision'),
 
   'src/testing/gtest':
-   Var('chromium_git') + '/external/googletest.git' + '@' + 'be1868139ffe0ccd0e8e3b37292b84c821d9c8ad', # from svn revision 704
+   Var('chromium_git') + '/external/googletest.git' + '@' + '23574bf2333f834ff665f894c97bef8a5b33a0a9',
 
   'src/testing/gmock':
-   Var('chromium_git') + '/external/googlemock.git' + '@' + '29763965ab52f24565299976b936d1265cb6a271', # from svn revision 501
+   Var('chromium_git') + '/external/googlemock.git' + '@' + '29763965ab52f24565299976b936d1265cb6a271',
 
   'src/third_party/angle':
    Var('chromium_git') + '/angle/angle.git' + '@' +  Var('angle_revision'),
@@ -80,7 +80,7 @@ deps = {
    Var('chromium_git') + '/chromium/deps/yasm/patched-yasm.git' + '@' + '4671120cd8558ce62ee8672ebf3eb6f5216f909b',
 
   'src/third_party/libjpeg_turbo':
-   Var('chromium_git') + '/chromium/deps/libjpeg_turbo.git' + '@' + '034e9a9747e0983bc19808ea70e469bc8342081f',
+   Var('chromium_git') + '/chromium/deps/libjpeg_turbo.git' + '@' + 'f4631b6ee8b1dbb05e51ae335a7886f9ac598ab6',
 
   'src/third_party/smhasher/src':
     Var('chromium_git') + '/external/smhasher.git' + '@' + 'e87738e57558e0ec472b2fc3a643b838e5b6e88f',
@@ -155,10 +155,7 @@ deps_os = {
      Var('chromium_git') + '/external/github.com/appurify/appurify-python.git' + '@' + 'ee7abd5c5ae3106f72b2a0b9d2cb55094688e867',
 
     'src/third_party/freetype-android/src':
-       Var('chromium_git') + '/chromium/src/third_party/freetype.git' + '@' + 'd1028db70bea988d1022e4d463de66581c696160',
-
-    'src/third_party/requests/src':
-      Var('chromium_git') + '/external/github.com/kennethreitz/requests.git' + '@' + 'f172b30356d821d180fa4ecfa3e71c7274a32de4',
+       Var('chromium_git') + '/chromium/src/third_party/freetype2.git' + '@' + 'e186230678ee8e4ea4ac4797ece8125761e3225a',
   },
 }
 
