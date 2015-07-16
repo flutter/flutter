@@ -206,7 +206,6 @@ test("gfx_unittests") {
     "//third_party/libpng",
     "//third_party/zlib",
     "//testing/gtest",
-    "//ui/base",
     "//ui/gfx/geometry",
   ]
 
