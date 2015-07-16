@@ -225,9 +225,9 @@ test("gfx_unittests") {
 if (is_android) {
   generate_jni("gfx_jni_headers") {
     sources = [
-      "../android/java/src/org/chromium/ui/gfx/BitmapHelper.java",
-      "../android/java/src/org/chromium/ui/gfx/DeviceDisplayInfo.java",
-      "../android/java/src/org/chromium/ui/gfx/ViewConfigurationHelper.java",
+      "android/java/src/org/chromium/ui/gfx/BitmapHelper.java",
+      "android/java/src/org/chromium/ui/gfx/DeviceDisplayInfo.java",
+      "android/java/src/org/chromium/ui/gfx/ViewConfigurationHelper.java",
     ]
     jni_package = "gfx"
   }
