@@ -625,7 +625,6 @@ test("skia_unittests") {
     ":skia",
     "//base",
     "//base/test:run_all_unittests",
-    "//cc:test_support",  # TODO: Fix this test to not depend on cc.
     "//testing/gtest",
     "//ui/gfx",
     "//ui/gfx/geometry",
