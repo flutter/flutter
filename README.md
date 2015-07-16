@@ -7,8 +7,8 @@ More specifically, Sky is a rendering engine, a scripting engine, an
 Sky is optimized for today's, and tomorrow's, mobile devices. We are focused
 on low-latency input, high frame rates, and we are purely mobile first.
 
-For information about using our latest stable release of Sky, please
-see the [Sky SDK](https://github.com/domokit/sky_sdk/) project page.
+For information about using the latest stable release of Sky, please
+see the [Sky SDK README](sky/sdk/README).
 
 For information about contributing to Sky, please see
 [CONTRIBUTING.md](CONTRIBUTING.md).
