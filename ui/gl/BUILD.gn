@@ -289,8 +289,8 @@ if (is_android) {
       ":surface_jni_headers",
     ]
     sources = [
-      "../android/java/src/org/chromium/ui/gl/SurfaceTextureListener.java",
-      "../android/java/src/org/chromium/ui/gl/SurfaceTexturePlatformWrapper.java",
+      "android/java/src/org/chromium/ui/gl/SurfaceTextureListener.java",
+      "android/java/src/org/chromium/ui/gl/SurfaceTexturePlatformWrapper.java",
     ]
     jni_package = "ui/gl"
   }
