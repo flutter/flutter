@@ -39,15 +39,13 @@ target.
 ### Android
 
 * (Only the first time) `./build/install-build-deps-android.sh`
-* `./mojo/tools/mojob.py gn --android` (Note: There's currently a harmless
-  go-related error when running this command.)
+* `./sky/tools/gn --android`
 * `ninja -C out/android_Debug`
 
 ### Linux
 
 * (Only the first time) `./build/install-build-deps.sh`
-* `./mojo/tools/mojob.py gn` (Note: There's currently a harmless go-related
-  error when running this command.)
+* `./sky/tools/gn`
 * `ninja -C out/Debug`
 
 Contributing code

@@ -1,0 +1,76 @@
+#!/usr/bin/env python
+# Copyright 2015 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import argparse
+import subprocess
+import sys
+import os
+
+def get_out_dir(args):
+    target_dir = 'Release'
+    if args.debug:
+        target_dir = 'Debug'
+    if args.target_os == 'android':
+        target_dir = 'android_' + target_dir
+    elif args.target_os == 'ios':
+        target_dir = 'ios_' + target_dir
+    return os.path.join('out', target_dir)
+
+def to_command_line(gn_args):
+    def merge(key, value):
+        if type(value) is bool:
+            return "%s=%s" % (key, "true" if value else "false")
+        return "%s=\"%s\"" % (key, value)
+    return [merge(x, y) for x, y in gn_args.iteritems()]
+
+def to_gn_args(args):
+    gn_args = {}
+
+    gn_args["is_debug"] = args.debug
+    gn_args["is_clang"] = args.target_os not in ['android']
+
+    # TODO(abarth): Add support for goma.
+    gn_args["use_goma"] = False
+
+    if args.target_os == 'android':
+        gn_args["target_os"] = "android"
+    elif args.target_os == 'ios':
+        gn_args["target_os"] = "ios"
+        gn_args["ios_deployment_target"] = "7.0"
+        gn_args["clang_use_chrome_plugins"] = False
+        if config.simulator:
+            gn_args["use_libjpeg_turbo"] = False
+        gn_args["use_ios_simulator"] = config.simulator
+    else:
+        gn_args["use_aura"] = False
+        gn_args["use_glib"] = False
+        gn_args["use_system_harfbuzz"] = False
+
+    if args.target_os in ['android', 'ios']:
+        gn_args["target_cpu"] = 'arm'
+    else:
+        gn_args["target_cpu"] = 'x64'
+    return gn_args
+
+
+def main():
+  parser = argparse.ArgumentParser(description='A script run` gn gen`.')
+  parser.add_argument('--debug', default=True)
+  parser.add_argument('--target-os', type=str)
+  parser.add_argument('--android', dest='target_os', action='store_const', const='android')
+  parser.add_argument('--ios', dest='target_os', action='store_const', const='ios')
+  parser.add_argument('--simulator', default=False)
+  args = parser.parse_args()
+
+  command = ['gn', 'gen', '--check']
+  gn_args = to_command_line(to_gn_args(args))
+  out_dir = get_out_dir(args)
+  command.append(out_dir)
+  command.append('--args=%s' % ' '.join(gn_args))
+  return subprocess.call(command)
+
+
+if __name__ == '__main__':
+    sys.exit(main())
