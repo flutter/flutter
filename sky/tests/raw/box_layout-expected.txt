@@ -1,0 +1,18 @@
+TestRenderView enabled
+
+PAINT FOR FRAME #1 ----------------------------------------------
+1 | TestPaintingCanvas() constructor: 800.0 x 600.0
+1 | paintChild RenderDecoratedBox at Point(0.0, 0.0)
+1 |  | TestPaintingCanvas() constructor: 800.0 x 600.0
+1 |  | drawRect(Rect.fromLTRB(0.0, 0.0, 800.0, 600.0), Paint(color:Color(0xff0000ff)))
+1 |  | paintChild RenderFlex at Point(0.0, 0.0)
+1 |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
+1 |  |  | paintChild RenderPadding at Point(0.0, 0.0)
+1 |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
+1 |  |  |  | paintChild RenderDecoratedBox at Point(50.0, 50.0)
+1 |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
+1 |  |  |  |  | drawRect(Rect.fromLTRB(50.0, 50.0, 750.0, 150.0), Paint(color:Color(0xff00ff00)))
+1 |  |  |  |  | paintChild RenderConstrainedBox at Point(50.0, 50.0)
+1 |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
+------------------------------------------------------------------------
+PAINTED 1 FRAMES

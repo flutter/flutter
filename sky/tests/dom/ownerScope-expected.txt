@@ -1,0 +1,10 @@
+unittest-suite-wait-for-done
+PASS: should return null for elements not a child of a scope
+PASS: should return the document for elements in the document scope
+PASS: should return the shadow root for elements in the shadow root scope
+PASS: should return self for a shadow root or document
+PASS: should dynamically update
+
+All 5 tests passed.
+unittest-suite-success
+DONE

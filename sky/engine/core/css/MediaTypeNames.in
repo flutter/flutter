@@ -1,0 +1,15 @@
+namespace="MediaType"
+export=""
+
+# http://www.w3.org/TR/CSS2/media.html#media-types
+
+all
+braille
+embossed
+handheld
+print
+projection
+screen
+speech
+tty
+tv

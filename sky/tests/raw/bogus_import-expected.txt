@@ -1,0 +1,6 @@
+unittest-suite-wait-for-done
+PASS: shouldn't crash on a bogus import (see line 1)
+
+All 1 tests passed.
+unittest-suite-success
+DONE

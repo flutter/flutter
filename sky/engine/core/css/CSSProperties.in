@@ -1,0 +1,449 @@
+// This file specifies all the CSS properties we support and the necessary
+// information for our code generation. The various supported arguments
+// are described below with example usage
+
+// We should remove all those marked OBSOLETE now
+// We should remove all those marked LAYOUT once we have custom layout
+
+// - alias_for=other-property
+// Properties specifying alias_for do not get their own enum and instead map
+// directly onto the CSSPropertyID they alias. Currently this means that the
+
+
+// - runtime_flag=CSSFooProperty
+// The flag on RuntimeEnabledFeatures conditionally enables the property
+
+
+// - longhands=property;other-property
+// The property is a shorthand for several other properties.
+
+
+// Flags which go into CSSPropertyMetadata:
+// - inherited
+// The property will inherit by default if no value is specified, typically
+// mentioned in specifications as "Inherited: yes"
+
+
+// The remaining arguments are used for the StyleBuilder and allow us to
+// succinctly describe how to apply properties. When default handlers are not
+// sufficient, we should prefer to use converter, and failing that define
+// custom property handlers in StyleBuilderCustom.cpp. We only should use
+// StyleBuilderFunctions.cpp.tmpl to define handlers when there are multiple
+// properties requiring the same handling, but converter doesn't suffice.
+
+// - font
+// The default property handlers call into the FontBuilder instead of setting
+// values directly onto the RenderStyle
+
+// - name_for_methods=BlendMode
+// Tweaks how we choose defaults for getter, setter, initial and type_name.
+// For example, setting this to BlendMode will make us use a setter of setBlendMode
+// - initial
+// The initial value accessor on the RenderStyle, defaults to e.g. initialBoxShadow
+// - getter
+// The RenderStyle getter, defaults to e.g. borderBottomLeft
+// - setter
+// The RenderStyle setter, defaults to e.g. setBorderBottomLeft
+// - type_name
+// The computed type for the property. Only required for the default value
+// application, defaults to e.g. EDisplay
+
+// - converter=convertRadius
+// The StyleBuilder will call the specified function on StyleBuilderConverter
+// to convert a CSSValue to an appropriate platform value
+
+// - custom_initial
+// - custom_inherit
+// - custom_value
+// - custom_all
+// Handlers of the given types will be declared but not defined. Setting
+// custom_all is equivalent to setting the other three flags
+
+// - use_handlers_for=CSSPropertyTransform
+// Use handlers for the specified property instead of defining new ones
+
+// - builder_skip
+// Ignore this property in the StyleBuilder
+
+// - direction_aware
+// This property resolves to a different property based on the current direction
+// and writing mode.
+
+
+// Properties with StyleBuilder handling
+
+// High Priority and all other font properties.
+// Other properties can depend upon high priority properties (e.g. font-size / ems)
+color inherited, custom_all
+direction inherited, custom_value
+
+// FIXME: This is a mess due to crbug.com/353932. Shorthands shouldn't have
+// any StyleBuilder handling!
+font custom_all, longhands=font-family;font-size;font-style;font-variant;font-weight;font-stretch;line-height
+font-family inherited, custom_all
+font-kerning inherited, font, type_name=FontDescription::Kerning, name_for_methods=Kerning
+font-size inherited, custom_all
+font-stretch inherited, font, type_name=FontStretch, name_for_methods=Stretch
+font-style inherited, font, type_name=FontStyle, name_for_methods=Style
+font-variant inherited, font, type_name=FontVariant, name_for_methods=Variant
+font-variant-ligatures inherited, font, name_for_methods=VariantLigatures, converter=convertFontVariantLigatures
+font-weight inherited, font, type_name=FontWeight, name_for_methods=Weight, converter=convertFontWeight
+-webkit-font-feature-settings inherited, font, name_for_methods=FeatureSettings, converter=convertFontFeatureSettings
+-webkit-font-smoothing inherited, font, type_name=FontSmoothingMode
+-webkit-locale inherited, custom_value
+-webkit-text-orientation inherited, custom_value
+text-rendering inherited, font, type_name=TextRenderingMode
+line-height inherited, getter=specifiedLineHeight, custom_value
+
+
+// LAYOUT
+align-content
+
+// LAYOUT
+align-items custom_all
+
+// LAYOUT
+align-self custom_all
+
+background-attachment custom_all
+background-clip custom_all
+background-color custom_all
+background-image custom_all
+background-origin custom_all
+background-position-x custom_all
+background-position-y custom_all
+background-repeat-x custom_all
+background-repeat-y custom_all
+background-size custom_all
+border-bottom-color custom_all
+border-bottom-left-radius initial=initialBorderRadius, converter=convertRadius
+border-bottom-right-radius initial=initialBorderRadius, converter=convertRadius
+border-bottom-style type_name=EBorderStyle, initial=initialBorderStyle
+border-bottom-width initial=initialBorderWidth, converter=convertLineWidth<unsigned>
+border-image-outset custom_all
+border-image-repeat custom_all
+border-image-slice custom_all
+border-image-source custom_value
+border-image-width custom_all
+border-left-color custom_all
+border-left-style type_name=EBorderStyle, initial=initialBorderStyle
+border-left-width initial=initialBorderWidth, converter=convertLineWidth<unsigned>
+border-right-color custom_all
+border-right-style type_name=EBorderStyle, initial=initialBorderStyle
+border-right-width initial=initialBorderWidth, converter=convertLineWidth<unsigned>
+border-top-color custom_all
+border-top-left-radius initial=initialBorderRadius, converter=convertRadius
+border-top-right-radius initial=initialBorderRadius, converter=convertRadius
+border-top-style type_name=EBorderStyle, initial=initialBorderStyle
+border-top-width initial=initialBorderWidth, converter=convertLineWidth<unsigned>
+
+// LAYOUT
+bottom initial=initialOffset, converter=convertLengthOrAuto
+
+box-shadow converter=convertShadow
+
+// LAYOUT
+box-sizing
+
+clip converter=convertClip, custom_all
+
+// LAYOUT
+display
+
+// LAYOUT
+flex-basis converter=convertLengthOrAuto
+
+// LAYOUT
+flex-direction
+
+// LAYOUT
+flex-grow type_name=float
+
+// LAYOUT
+flex-shrink type_name=float
+
+// LAYOUT
+flex-wrap
+
+// LAYOUT
+height initial=initialSize, converter=convertLengthSizing
+
+image-rendering inherited
+
+// LAYOUT
+justify-content
+
+// LAYOUT
+left initial=initialOffset, converter=convertLengthOrAuto
+
+letter-spacing inherited, initial=initialLetterWordSpacing, converter=convertSpacing
+
+// LAYOUT
+margin-bottom initial=initialMargin, converter=convertLengthOrAuto
+
+// LAYOUT
+margin-left initial=initialMargin, converter=convertLengthOrAuto
+
+// LAYOUT
+margin-right initial=initialMargin, converter=convertLengthOrAuto
+
+// LAYOUT
+margin-top initial=initialMargin, converter=convertLengthOrAuto
+
+// LAYOUT
+max-height initial=initialMaxSize, converter=convertLengthMaxSizing
+
+// LAYOUT
+max-width initial=initialMaxSize, converter=convertLengthMaxSizing
+
+// LAYOUT
+min-height initial=initialMinSize, converter=convertLengthSizing
+
+// LAYOUT
+min-width initial=initialMinSize, converter=convertLengthSizing
+
+object-fit runtime_flag=ObjectFitPosition, type_name=ObjectFit
+object-position runtime_flag=ObjectFitPosition, converter=convertLengthPoint
+opacity type_name=float
+
+// LAYOUT
+order type_name=int
+
+outline-color custom_all
+outline-offset converter=convertComputedLength<int>
+outline-style custom_all
+outline-width converter=convertLineWidth<unsigned short>
+
+// OBSOLETE
+overflow-wrap inherited
+
+// OBSOLETE
+overflow-x type_name=EOverflow
+
+// OBSOLETE
+overflow-y type_name=EOverflow
+
+// LAYOUT
+padding-bottom initial=initialPadding, converter=convertLength
+
+// LAYOUT
+padding-left initial=initialPadding, converter=convertLength
+
+// LAYOUT
+padding-right initial=initialPadding, converter=convertLength
+
+// LAYOUT
+padding-top initial=initialPadding, converter=convertLength
+
+perspective custom_value
+perspective-origin custom_all
+
+// OBSOLETE
+pointer-events inherited
+
+// LAYOUT
+position
+
+// LAYOUT
+right initial=initialOffset, converter=convertLengthOrAuto
+
+tab-size inherited, type_name=unsigned
+text-align inherited, custom_value
+text-align-last runtime_flag=CSS3Text, inherited, type_name=TextAlignLast
+// FIXME: We shouldn't switch between shorthand/not shorthand based on a runtime flag
+text-decoration use_handlers_for=CSSPropertyTextDecorationLine, longhands=text-decoration-line;text-decoration-style;text-decoration-color
+text-decoration-color runtime_flag=CSS3TextDecorations, custom_all
+text-decoration-line runtime_flag=CSS3TextDecorations, name_for_methods=TextDecoration, converter=convertFlags<TextDecoration>
+text-decoration-style runtime_flag=CSS3TextDecorations, type_name=TextDecorationStyle
+text-indent inherited, custom_all
+text-justify runtime_flag=CSS3Text, inherited, type_name=TextJustify
+text-overflow type_name=TextOverflow
+text-shadow inherited, converter=convertShadow
+text-underline-position runtime_flag=CSS3TextDecorations, inherited, type_name=TextUnderlinePosition
+
+// LAYOUT
+top initial=initialOffset, converter=convertLengthOrAuto
+
+// OBSOLETE
+touch-action converter=convertFlags<TouchAction>
+
+// OBSOLETE
+touch-action-delay runtime_flag=CSSTouchActionDelay, inherited, type_name=TouchActionDelay
+
+transform custom_value
+transform-origin custom_all
+transform-style name_for_methods=TransformStyle3D
+unicode-bidi
+
+// LAYOUT
+vertical-align custom_inherit, custom_value
+
+filter custom_value
+-webkit-aspect-ratio inherited, custom_all
+-webkit-background-clip use_handlers_for=CSSPropertyBackgroundClip
+-webkit-background-composite custom_all
+-webkit-background-origin use_handlers_for=CSSPropertyBackgroundOrigin
+-webkit-background-size use_handlers_for=CSSPropertyBackgroundSize
+
+// LAYOUT
+-webkit-border-horizontal-spacing inherited, name_for_methods=HorizontalBorderSpacing, converter=convertComputedLength<short>
+
+-webkit-border-image initial=initialNinePieceImage, custom_value
+
+// LAYOUT
+-webkit-border-vertical-spacing inherited, name_for_methods=VerticalBorderSpacing, converter=convertComputedLength<short>
+
+-webkit-box-decoration-break
+-webkit-box-shadow use_handlers_for=CSSPropertyBoxShadow
+-webkit-clip-path custom_value
+
+// OBSOLETE
+-webkit-highlight inherited, converter=convertString<CSSValueNone>
+
+-webkit-hyphenate-character inherited, name_for_methods=HyphenationString, converter=convertString<CSSValueAuto>
+-webkit-line-box-contain inherited, converter=convertLineBoxContain
+-webkit-line-break inherited, type_name=LineBreak
+-webkit-perspective custom_all
+-webkit-perspective-origin custom_all
+-webkit-perspective-origin-x converter=convertLength
+-webkit-perspective-origin-y converter=convertLength
+-webkit-rtl-ordering inherited, type_name=Order, setter=setRTLOrdering, initial=initialRTLOrdering
+
+// OBSOLETE
+-webkit-tap-highlight-color inherited, converter=convertColor
+
+-webkit-text-emphasis-color inherited, custom_all
+-webkit-text-emphasis-position inherited, type_name=TextEmphasisPosition
+-webkit-text-emphasis-style inherited, custom_all
+-webkit-text-fill-color inherited, custom_all
+-webkit-text-stroke-color inherited, custom_all
+-webkit-text-stroke-width inherited, converter=convertTextStrokeWidth
+-webkit-transform use_handlers_for=CSSPropertyTransform
+-webkit-transform-origin-x converter=convertLength
+-webkit-transform-origin-y converter=convertLength
+-webkit-transform-origin-z converter=convertComputedLength<float>
+-webkit-transform-style name_for_methods=TransformStyle3D
+
+// OBSOLETE
+-webkit-user-modify inherited
+
+// OBSOLETE
+-webkit-user-select inherited
+
+white-space inherited
+
+// LAYOUT
+width initial=initialSize, converter=convertLengthSizing
+
+word-break inherited
+word-spacing inherited, initial=initialLetterWordSpacing, converter=convertSpacing
+// UAs must treat 'word-wrap' as an alternate name for the 'overflow-wrap' property. So using the same handlers.
+word-wrap inherited, name_for_methods=OverflowWrap
+
+// consider changing this to just be the way you decide what order to paint siblings by default
+z-index type_name=unsigned, custom_all
+
+
+// Non-standard direction aware properties
+-webkit-border-end-color direction_aware
+-webkit-border-end-style direction_aware
+-webkit-border-end-width direction_aware
+-webkit-border-start-color direction_aware
+-webkit-border-start-style direction_aware
+-webkit-border-start-width direction_aware
+-webkit-border-before-color direction_aware
+-webkit-border-before-style direction_aware
+-webkit-border-before-width direction_aware
+-webkit-border-after-color direction_aware
+-webkit-border-after-style direction_aware
+-webkit-border-after-width direction_aware
+
+// LAYOUT
+-webkit-margin-end direction_aware
+
+// LAYOUT
+-webkit-margin-start direction_aware
+
+// LAYOUT
+-webkit-margin-before direction_aware
+
+// LAYOUT
+-webkit-margin-after direction_aware
+
+// LAYOUT
+-webkit-padding-end direction_aware
+
+// LAYOUT
+-webkit-padding-start direction_aware
+
+// LAYOUT
+-webkit-padding-before direction_aware
+
+// LAYOUT
+-webkit-padding-after direction_aware
+
+// LAYOUT
+-webkit-logical-width direction_aware
+
+// LAYOUT
+-webkit-logical-height direction_aware
+
+// LAYOUT
+-webkit-min-logical-width direction_aware
+
+// LAYOUT
+-webkit-min-logical-height direction_aware
+
+// LAYOUT
+-webkit-max-logical-width direction_aware
+
+// LAYOUT
+-webkit-max-logical-height direction_aware
+
+// OBSOLETE
+orientation builder_skip
+
+// OBSOLETE
+src builder_skip
+
+// OBSOLETE
+unicode-range builder_skip
+
+-webkit-font-size-delta builder_skip
+-webkit-text-decorations-in-effect inherited, builder_skip
+
+// Shorthands
+background longhands=background-image;background-position-x;background-position-y;background-size;background-repeat-x;background-repeat-y;background-attachment;background-origin;background-clip;background-color
+background-position longhands=background-position-x;background-position-y
+background-repeat longhands=background-repeat-x;background-repeat-y
+border longhands=border-top-color;border-top-style;border-top-width;border-right-color;border-right-style;border-right-width;border-bottom-color;border-bottom-style;border-bottom-width;border-left-color;border-left-style;border-left-width
+border-bottom longhands=border-bottom-width;border-bottom-style;border-bottom-color
+border-color longhands=border-top-color;border-right-color;border-bottom-color;border-left-color
+border-image longhands=border-image-source;border-image-slice;border-image-width;border-image-outset;border-image-repeat
+border-left longhands=border-left-width;border-left-style;border-left-color
+border-radius longhands=border-top-left-radius;border-top-right-radius;border-bottom-right-radius;border-bottom-left-radius
+border-right longhands=border-right-width;border-right-style;border-right-color
+border-spacing longhands=-webkit-border-horizontal-spacing;-webkit-border-vertical-spacing
+border-style longhands=border-top-style;border-right-style;border-bottom-style;border-left-style
+border-top longhands=border-top-width;border-top-style;border-top-color
+border-width longhands=border-top-width;border-right-width;border-bottom-width;border-left-width
+
+// LAYOUT
+flex longhands=flex-grow;flex-shrink;flex-basis
+
+// LAYOUT
+flex-flow longhands=flex-direction;flex-wrap
+
+margin longhands=margin-top;margin-right;margin-bottom;margin-left
+outline longhands=outline-color;outline-style;outline-width
+overflow longhands=overflow-x;overflow-y
+padding longhands=padding-top;padding-right;padding-bottom;padding-left
+-webkit-border-after longhands=-webkit-border-after-width;-webkit-border-after-style;-webkit-border-after-color
+-webkit-border-before longhands=-webkit-border-before-width;-webkit-border-before-style;-webkit-border-before-color
+-webkit-border-end longhands=-webkit-border-end-width;-webkit-border-end-style;-webkit-border-end-color
+// "-webkit-border-radius: 1px 2px" behaves as "border-radius: 1px / 2px"
+-webkit-border-radius longhands=border-top-left-radius;border-top-right-radius;border-bottom-right-radius;border-bottom-left-radius
+-webkit-border-start longhands=-webkit-border-start-width;-webkit-border-start-style;-webkit-border-start-color
+-webkit-text-emphasis longhands=-webkit-text-emphasis-style;-webkit-text-emphasis-color
+-webkit-text-stroke longhands=-webkit-text-stroke-width;-webkit-text-stroke-color
+-webkit-transform-origin longhands=-webkit-transform-origin-x;-webkit-transform-origin-y;-webkit-transform-origin-z

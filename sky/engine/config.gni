@@ -1,0 +1,67 @@
+# Copyright 2014 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//build/config/ui.gni")
+
+if (is_android) {
+  import("//build/config/android/config.gni")
+}
+
+if (target_cpu == "arm") {
+  import("//build/config/arm.gni")
+} else {
+  # TODO(brettw) remove this once && early-out is checked in.
+  arm_version = 0
+}
+
+declare_args() {
+  # Enable asserts, even in release builds.
+  sky_asserts_always_on = false
+
+  # Experimental support for the Dart VM.
+  sky_use_dart = false
+
+  # Default to strict mode in debug builds.
+  if (is_debug) {
+    sky_dart_strict_mode = true
+  } else {
+    sky_dart_strict_mode = false
+  }
+}
+
+# feature_defines_list ---------------------------------------------------------
+
+feature_defines_list = []
+
+if (is_debug) {
+  # TODO(GYP) this should also be set when release_valgrind_build is set,
+  # but we don't have that flag in the GN build yet.
+  feature_defines_list += [ "WTF_USE_DYNAMIC_ANNOTATIONS=1" ]
+}
+
+if (!is_mac) {
+  # Mac OS X has not implemented support for ENABLE(OPENTYPE_VERTICAL) yet.
+  feature_defines_list += [ "ENABLE_OPENTYPE_VERTICAL=1" ]
+}
+
+if (sky_asserts_always_on) {
+  feature_defines_list += [ "ENABLE_ASSERT=1" ]
+}
+
+if (sky_dart_strict_mode) {
+  feature_defines_list += [ "ENABLE_DART_STRICT=1" ]
+}
+
+if (sky_use_dart) {
+  feature_defines_list += [ "WTF_USE_DART=1" ]
+}
+
+# feature_defines_string -------------------------------------------------------
+
+# Convert the list to a space-separated string for passing to scripts.
+# This would be the equivalent of passing '<(feature_defines)' in GYP.
+feature_defines_string =
+    exec_script("build/gn_list_to_space_separated_string.py",
+                feature_defines_list,
+                "trim string")

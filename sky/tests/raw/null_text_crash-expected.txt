@@ -1,0 +1,6 @@
+unittest-suite-wait-for-done
+PASS: createText(null) shouldn't crash
+
+All 1 tests passed.
+unittest-suite-success
+DONE

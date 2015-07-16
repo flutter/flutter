@@ -1,0 +1,29 @@
+namespace="HTML"
+
+# Global
+class
+contenteditable
+dir
+id
+lang
+spellcheck
+style
+tabindex
+
+# <a>
+href
+
+# <img>
+crossorigin
+src
+
+# <import>
+as
+async
+# src
+
+# <style>
+media
+
+# <content>
+select

@@ -1,0 +1,69 @@
+# Copyright 2015 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+source_set("tonic") {
+  sources = [
+    "dart_api_scope.h",
+    "dart_builtin.cc",
+    "dart_builtin.h",
+    "dart_class_library.cc",
+    "dart_class_library.h",
+    "dart_class_provider.cc",
+    "dart_class_provider.h",
+    "dart_converter.cc",
+    "dart_converter.h",
+    "dart_dependency_catcher.cc",
+    "dart_dependency_catcher.h",
+    "dart_error.cc",
+    "dart_error.h",
+    "dart_exception_factory.cc",
+    "dart_exception_factory.h",
+    "dart_gc_context.cc",
+    "dart_gc_context.h",
+    "dart_gc_controller.cc",
+    "dart_gc_controller.h",
+    "dart_gc_visitor.cc",
+    "dart_gc_visitor.h",
+    "dart_invoke.cc",
+    "dart_invoke.h",
+    "dart_isolate_scope.cc",
+    "dart_isolate_scope.h",
+    "dart_library_loader.cc",
+    "dart_library_loader.h",
+    "dart_library_provider.cc",
+    "dart_library_provider.h",
+    "dart_persistent_value.cc",
+    "dart_persistent_value.h",
+    "dart_snapshot_loader.cc",
+    "dart_snapshot_loader.h",
+    "dart_state.cc",
+    "dart_state.h",
+    "dart_string.cc",
+    "dart_string.h",
+    "dart_string_cache.cc",
+    "dart_string_cache.h",
+    "dart_timer_heap.cc",
+    "dart_timer_heap.h",
+    "dart_value.cc",
+    "dart_value.h",
+    "dart_wrappable.cc",
+    "dart_wrappable.h",
+    "dart_wrapper_info.h",
+    "float32_list.cc",
+    "float32_list.h",
+    "mojo_converter.h",
+  ]
+
+  deps = [
+    "//base",
+    "//mojo/common",
+    "//mojo/public/cpp/system",
+    "//sky/engine/wtf",
+  ]
+
+  public_deps = [
+    "//dart/runtime:libdart",
+    "//dart/runtime/vm:libdart_platform",
+  ]
+}

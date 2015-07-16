@@ -1,0 +1,15 @@
+{% from "macros.tmpl" import license %}
+{{ license() }}
+
+#ifndef {{namespace}}ElementLookupTrie_h
+#define {{namespace}}ElementLookupTrie_h
+
+#include "wtf/text/StringImpl.h"
+
+namespace blink {
+
+StringImpl* lookup{{namespace}}Tag(const UChar* data, unsigned length);
+
+} // namespace blink
+
+#endif

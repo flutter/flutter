@@ -1,0 +1,9 @@
+unittest-suite-wait-for-done
+PASS: should get by index
+PASS: should set by name
+PASS: should be case sensitive
+PASS: should not live update
+
+All 4 tests passed.
+unittest-suite-success
+DONE

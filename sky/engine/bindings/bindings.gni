@@ -1,0 +1,50 @@
+# Copyright 2015 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+bindings_scripts_dir = "//sky/engine/bindings/scripts"
+bindings_output_dir = "$root_gen_dir/sky/bindings"
+
+idl_lexer_parser_files = [
+  # PLY (Python Lex-Yacc)
+  "//third_party/ply/lex.py",
+  "//third_party/ply/yacc.py",
+
+  # Web IDL lexer/parser (base parser)
+  "//tools/idl_parser/idl_lexer.py",
+  "//tools/idl_parser/idl_node.py",
+  "//tools/idl_parser/idl_parser.py",
+
+  # Blink IDL lexer/parser/constructor
+  "scripts/blink_idl_lexer.py",
+  "scripts/blink_idl_parser.py",
+]
+
+idl_compiler_files = [
+  "scripts/compiler.py",
+
+  # Blink IDL front end (ex-lexer/parser)
+  "scripts/idl_definitions.py",
+  "scripts/idl_reader.py",
+  "scripts/idl_types.py",
+  "scripts/idl_validator.py",
+  "scripts/interface_dependency_resolver.py",
+
+  # Dart Code gen goes here.
+  "scripts/dart_attributes.py",
+  "scripts/dart_callback_interface.py",
+  "scripts/dart_compiler.py",
+  "scripts/dart_interface.py",
+  "scripts/dart_methods.py",
+  "scripts/dart_types.py",
+  "scripts/dart_utilities.py",
+  "scripts/code_generator_dart.py",
+
+  # The dart files depend on the v8 files. :(
+  "scripts/v8_attributes.py",
+  "scripts/v8_globals.py",
+  "scripts/v8_interface.py",
+  "scripts/v8_methods.py",
+  "scripts/v8_types.py",
+  "scripts/v8_utilities.py",
+]

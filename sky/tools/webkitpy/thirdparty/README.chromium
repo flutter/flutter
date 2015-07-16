@@ -1,0 +1,29 @@
+This directory contains sources from other projects.
+
+Code in this directory must document the license under which the source is being
+used. If the source itself does not include a license header or file, create
+an entry in this file that refers to reliable documentation of the project's
+license terms on the web (and add a note pointing here in the README file in
+that directory).
+
+Name: BeautifulSoup - HTML parser
+Short Name: BeautifulSoup
+URL: http://www.crummy.com/software/BeautifulSoup/download/3.x/BeautifulSoup-3.2.1.tar.gz (?)
+Version: 3.2
+License: MIT
+License File: NOT_SHIPPED
+Security Critical: no
+Description: Used during the w3c import, other places
+Local Modifications: None
+
+Name: pep8 - A Python style guide checker
+Short Name: pep8
+URL: http://pypi.python.org/packages/source/p/pep8/pep8-0.5.0.tar.gz#md5=512a818af9979290cd619cce8e9c2e2b
+Version: 0.5.0
+License: MIT
+License File: NOT_SHIPPED
+Security Critical: no
+Description: Used during presubmit checks and via lint-webkitpy. There is
+    overlap between pep8 and pylint, but pep8 catches a bunch of stylistic
+	issues that pylint doesn't (e.g., warning about blank lines, various whitespace issues, etc.).
+Local Modifications: None

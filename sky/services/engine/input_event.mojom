@@ -1,0 +1,66 @@
+// Copyright 2015 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+module sky;
+
+enum EventType {
+  UNKNOWN,
+  POINTER_CANCEL,
+  POINTER_DOWN,
+  POINTER_MOVE,
+  POINTER_UP,
+  GESTURE_FLING_CANCEL,
+  GESTURE_FLING_START,
+  GESTURE_LONG_PRESS,
+  GESTURE_SCROLL_BEGIN,
+  GESTURE_SCROLL_END,
+  GESTURE_SCROLL_UPDATE,
+  GESTURE_SHOW_PRESS,
+  GESTURE_TAP,
+  GESTURE_TAP_DOWN,
+  BACK,
+};
+
+enum PointerKind {
+  TOUCH,
+};
+
+struct PointerData {
+  int32 pointer;
+  PointerKind kind;
+  float x;
+  float y;
+  int32 buttons;
+  float pressure;
+  float pressure_min;
+  float pressure_max;
+  float distance;
+  float distance_min;
+  float distance_max;
+  float radius_major;
+  float radius_minor;
+  float radius_min;
+  float radius_max;
+  float orientation;
+  float tilt;
+};
+
+struct GestureData {
+  int32 primary_pointer;
+  float x;
+  float y;
+  float dx;
+  float dy;
+  float velocityX;
+  float velocityY;
+};
+
+// TODO(abarth): Should we have a malloc-free way of creating an input event
+// message? What we have now could stress out the Android Java GC.
+struct InputEvent {
+  EventType type;
+  int64 time_stamp;
+  PointerData? pointer_data;
+  GestureData? gesture_data;
+};

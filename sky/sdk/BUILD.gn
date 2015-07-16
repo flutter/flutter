@@ -1,0 +1,156 @@
+# Copyright 2015 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//mojo/public/dart/rules.gni")
+
+dart_pkg("sky") {
+  sources = [
+    "CHANGELOG.md",
+    "bin/init.dart",
+    "lib/animation/animated_simulation.dart",
+    "lib/animation/animation_performance.dart",
+    "lib/animation/curves.dart",
+    "lib/animation/scroll_behavior.dart",
+    "lib/animation/timeline.dart",
+    "lib/assets/.gitignore",
+    "lib/assets/material-design-icons.sha1",
+    "lib/base/debug.dart",
+    "lib/base/hit_test.dart",
+    "lib/base/lerp.dart",
+    "lib/base/node.dart",
+    "lib/base/scheduler.dart",
+    "lib/download_material_design_icons",
+    "lib/editing/editable_string.dart",
+    "lib/editing/editable_text.dart",
+    "lib/editing/input.dart",
+    "lib/mojo/activity.dart",
+    "lib/mojo/asset_bundle.dart",
+    "lib/mojo/embedder.dart",
+    "lib/mojo/keyboard.dart",
+    "lib/mojo/net/fetch.dart",
+    "lib/mojo/net/image_cache.dart",
+    "lib/mojo/shell.dart",
+    "lib/painting/box_painter.dart",
+    "lib/painting/shadows.dart",
+    "lib/painting/text_style.dart",
+    "lib/rendering/auto_layout.dart",
+    "lib/rendering/block.dart",
+    "lib/rendering/box.dart",
+    "lib/rendering/flex.dart",
+    "lib/rendering/object.dart",
+    "lib/rendering/paragraph.dart",
+    "lib/rendering/sky_binding.dart",
+    "lib/rendering/stack.dart",
+    "lib/sky_tool",
+    "lib/theme/colors.dart",
+    "lib/theme/shadows.dart",
+    "lib/theme/theme_data.dart",
+    "lib/theme/typography.dart",
+    "lib/theme/view_configuration.dart",
+    "lib/widgets/animated_component.dart",
+    "lib/widgets/animation_builder.dart",
+    "lib/widgets/basic.dart",
+    "lib/widgets/block_viewport.dart",
+    "lib/widgets/button_base.dart",
+    "lib/widgets/card.dart",
+    "lib/widgets/checkbox.dart",
+    "lib/widgets/default_text_style.dart",
+    "lib/widgets/dialog.dart",
+    "lib/widgets/dismissable.dart",
+    "lib/widgets/drawer.dart",
+    "lib/widgets/drawer_divider.dart",
+    "lib/widgets/drawer_header.dart",
+    "lib/widgets/drawer_item.dart",
+    "lib/widgets/fixed_height_scrollable.dart",
+    "lib/widgets/flat_button.dart",
+    "lib/widgets/floating_action_button.dart",
+    "lib/widgets/icon.dart",
+    "lib/widgets/icon_button.dart",
+    "lib/widgets/ink_well.dart",
+    "lib/widgets/material.dart",
+    "lib/widgets/material_button.dart",
+    "lib/widgets/modal_overlay.dart",
+    "lib/widgets/navigator.dart",
+    "lib/widgets/popup_menu.dart",
+    "lib/widgets/popup_menu_item.dart",
+    "lib/widgets/radio.dart",
+    "lib/widgets/raised_button.dart",
+    "lib/widgets/scaffold.dart",
+    "lib/widgets/scrollable.dart",
+    "lib/widgets/scrollable_list.dart",
+    "lib/widgets/scrollable_viewport.dart",
+    "lib/widgets/snack_bar.dart",
+    "lib/widgets/switch.dart",
+    "lib/widgets/tabs.dart",
+    "lib/widgets/task_description.dart",
+    "lib/widgets/theme.dart",
+    "lib/widgets/toggleable.dart",
+    "lib/widgets/tool_bar.dart",
+    "lib/widgets/variable_height_scrollable.dart",
+    "lib/widgets/widget.dart",
+    "pubspec.yaml",
+  ]
+
+  # List of mojom targets that the sky pkg exports
+  deps = [
+    "//mojo/services/asset_bundle/public/interfaces",
+    "//mojo/services/keyboard/public/interfaces",
+    "//sky/services/activity:interfaces",
+    "//sky/services/engine:interfaces",
+  ]
+
+  datadeps = [
+    "//mojo/dart/mojo_services",
+    "//mojo/dart/mojom",
+    "//mojo/public/dart:mojo",
+    "//sky/engine/bindings",
+    "//sky/services/testing:interfaces",
+    "//sky/services/media:interfaces",
+    "//third_party/dart-pkg",
+  ]
+
+  sdk_ext_directory = "$root_gen_dir/sky/bindings"
+  sdk_ext_files = [
+    "//sky/engine/bindings/sky_internals.dart",
+    "//sky/engine/bindings/builtin_natives.dart",
+  ]
+  sdk_ext_mappings = [
+    "dart:sky,dart_sky.dart",
+    "dart:sky.internals,sky_internals.dart",
+    "dart:sky_builtin_natvies,builtin_natives.dart",
+  ]
+}
+
+action("material_design_icons") {
+  input_dir = "lib/assets/material-design-icons"
+  output_dir = "$root_gen_dir/dart-pkg/sky/lib/assets"
+  stamp = "$target_gen_dir/material_design_icons_linked"
+
+  sources = [
+    "lib/assets/material-design-icons.sha1",
+  ]
+  outputs = [
+    stamp,
+  ]
+
+  script = "//build/symlink.py"
+  args = [
+    "--force",
+    rebase_path(input_dir, output_dir),
+    rebase_path(output_dir, root_build_dir),
+    "--touch",
+    rebase_path(stamp, root_build_dir),
+  ]
+
+  deps = [
+    ":sky",
+  ]
+}
+
+group("sdk") {
+  deps = [
+    ":sky",
+    ":material_design_icons",
+  ]
+}

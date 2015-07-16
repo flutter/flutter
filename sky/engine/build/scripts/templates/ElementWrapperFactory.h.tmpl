@@ -1,0 +1,29 @@
+{% from "macros.tmpl" import license %}
+{{ license() }}
+
+#ifndef V8{{namespace}}ElementWrapperFactory_h
+#define V8{{namespace}}ElementWrapperFactory_h
+
+#include "bindings/core/v8/V8{{namespace}}Element.h"
+#include "bindings/core/v8/V8{{fallback_js_interface}}.h"
+#include "v8/include/v8.h"
+
+namespace blink {
+
+class {{namespace}}Element;
+
+const WrapperTypeInfo* findWrapperTypeFor{{namespace}}TagName(const AtomicString& name);
+
+v8::Handle<v8::Object> createV8{{namespace}}Wrapper({{namespace}}Element*, v8::Handle<v8::Object> creationContext, v8::Isolate*);
+inline v8::Handle<v8::Object> createV8{{namespace}}DirectWrapper({{namespace}}Element* element, v8::Handle<v8::Object> creationContext, v8::Isolate* isolate)
+{
+    return V8{{namespace}}Element::createWrapper(element, creationContext, isolate);
+}
+inline v8::Handle<v8::Object> createV8{{namespace}}FallbackWrapper({{fallback_js_interface}}* element, v8::Handle<v8::Object> creationContext, v8::Isolate* isolate)
+{
+    return V8{{fallback_js_interface}}::createWrapper(element, creationContext, isolate);
+}
+
+}
+
+#endif

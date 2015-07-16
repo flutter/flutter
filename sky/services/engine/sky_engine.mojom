@@ -1,0 +1,30 @@
+// Copyright 2015 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+module sky;
+
+import "sky/services/engine/input_event.mojom";
+
+struct ViewportMetrics {
+  int32 physical_width;
+  int32 physical_height;
+  float device_pixel_ratio = 1.0;
+  double padding_top;
+  double padding_right;
+  double padding_bottom;
+  double padding_left;
+};
+
+interface SkyEngine {
+  OnActivityPaused();
+  OnActivityResumed();
+
+  OnViewportMetricsChanged(ViewportMetrics metrics);
+  OnInputEvent(InputEvent event);
+
+  RunFromNetwork(string url);
+  RunFromFile(string main, string package_root);
+  RunFromSnapshot(string path);
+  RunFromBundle(string path);
+};

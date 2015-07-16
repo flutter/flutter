@@ -1,0 +1,66 @@
+/*
+ * Copyright (C) 2006, 2007, 2011 Apple Inc. All rights reserved.
+ * Copyright (C) 2006, 2007 Samuel Weinig <sam@webkit.org>
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public License
+ * along with this library; see the file COPYING.LIB.  If not, write to
+ * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+ * Boston, MA 02110-1301, USA.
+ */
+
+callback CustomElementConstructor = Element ();
+
+[
+    Constructor(),
+] interface Document : ParentNode {
+    [CustomElementCallbacks, RaisesException] Element createElement(DOMString tagName);
+    Text createText(DOMString? text);
+
+    DocumentFragment createDocumentFragment();
+
+    [CustomElementCallbacks, RaisesException, TypeChecking=Interface] Node importNode(Node node, [Named] optional boolean deep = false);
+
+    Element getElementById(DOMString elementId);
+
+    [RaisesException, CustomElementCallbacks, TypeChecking=Interface] Node adoptNode(Node node);
+
+    readonly attribute DOMString? baseURI;
+
+    Range createRange();
+
+    [ImplementedAs=executingWindow] readonly attribute Window defaultView;
+
+    readonly attribute DOMString contentType;
+
+             [TreatNullAs=NullString, CustomElementCallbacks] attribute DOMString dir;
+    readonly attribute DOMString referrer;
+    readonly attribute DOMString URL;
+
+    [PutForwards=href] readonly attribute Location location;
+
+    [TreatReturnedNullStringAs=Undefined] readonly attribute DOMString readyState;
+
+    Element            elementFromPoint([Default=Undefined] optional long x,
+                                        [Default=Undefined] optional long y);
+    Range              caretRangeFromPoint([Default=Undefined] optional long x,
+                                           [Default=Undefined] optional long y);
+
+    // Mozilla extensions
+    Selection          getSelection();
+
+    // HTML 5
+    readonly attribute Element activeElement;
+    boolean hasFocus();
+
+    [RaisesException] void registerElement(DOMString name, any type);
+};

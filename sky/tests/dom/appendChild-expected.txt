@@ -1,0 +1,8 @@
+unittest-suite-wait-for-done
+PASS: should throw with invalid arguments
+PASS: should insert children
+PASS: should insert children with a fragment
+
+All 3 tests passed.
+unittest-suite-success
+DONE

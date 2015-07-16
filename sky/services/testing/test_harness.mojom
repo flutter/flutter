@@ -1,0 +1,12 @@
+// Copyright 2014 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+module sky;
+
+import "mojo/services/input_events/public/interfaces/input_events.mojom";
+
+interface TestHarness {
+  OnTestComplete(string test_result, array<uint8>? pixels);
+  DispatchInputEvent(mojo.Event event);
+};

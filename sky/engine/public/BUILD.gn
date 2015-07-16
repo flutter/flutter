@@ -1,0 +1,76 @@
+# Copyright 2014 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//tools/grit/grit_rule.gni")
+
+group("test_support") {
+  deps = [
+    "//sky/engine/web:test_support",
+  ]
+}
+
+source_set("platform_headers") {
+  public = [
+    "platform/Platform.h",
+    "platform/ServiceProvider.h",
+    "platform/WebArrayBuffer.h",
+    "platform/WebBlendMode.h",
+    "platform/WebCString.h",
+    "platform/WebCallbacks.h",
+    "platform/WebCanvas.h",
+    "platform/WebClipboard.h",
+    "platform/WebColor.h",
+    "platform/WebCommon.h",
+    "platform/WebData.h",
+    "platform/WebDiscardableMemory.h",
+    "platform/WebExternalBitmap.h",
+    "platform/WebExternalTextureLayer.h",
+    "platform/WebExternalTextureLayerClient.h",
+    "platform/WebExternalTextureMailbox.h",
+    "platform/WebFallbackThemeEngine.h",
+    "platform/WebFloatPoint.h",
+    "platform/WebFloatPoint3D.h",
+    "platform/WebFloatRect.h",
+    "platform/WebFloatSize.h",
+    "platform/WebGestureDevice.h",
+    "platform/WebGraphicsContext3D.h",
+    "platform/WebGraphicsContext3DProvider.h",
+    "platform/WebImage.h",
+    "platform/WebImageLayer.h",
+    "platform/WebInputEvent.h",
+    "platform/WebLayer.h",
+    "platform/WebLayerScrollClient.h",
+    "platform/WebLayerTreeView.h",
+    "platform/WebLocalizedString.h",
+    "platform/WebNonCopyable.h",
+    "platform/WebPoint.h",
+    "platform/WebPrivateOwnPtr.h",
+    "platform/WebPrivatePtr.h",
+    "platform/WebRect.h",
+    "platform/WebReferrerPolicy.h",
+    "platform/WebRenderingStats.h",
+    "platform/WebScreenInfo.h",
+    "platform/WebScreenOrientationType.h",
+    "platform/WebSelectionBound.h",
+    "platform/WebSize.h",
+    "platform/WebString.h",
+    "platform/WebThread.h",
+    "platform/WebURL.h",
+    "platform/WebUnitTestSupport.h",
+    "platform/WebVector.h",
+    "platform/sky_display_metrics.h",
+    "platform/android/WebSandboxSupport.h",
+    "platform/linux/WebFallbackFont.h",
+    "platform/linux/WebFontInfo.h",
+    "platform/linux/WebFontRenderStyle.h",
+    "platform/linux/WebSandboxSupport.h",
+  ]
+}
+
+source_set("web_headers") {
+  public = [
+    "web/Sky.h",
+    "web/WebRuntimeFeatures.h",
+  ]
+}

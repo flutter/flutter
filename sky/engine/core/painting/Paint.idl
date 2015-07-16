@@ -1,0 +1,20 @@
+// Copyright 2015 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+[
+  Constructor(),
+] interface Paint {
+  attribute float strokeWidth;
+  attribute boolean isAntiAlias;
+  attribute Color color;
+
+  void setDrawLooper(DrawLooper looper);
+  void setColorFilter(ColorFilter filter);
+  void setMaskFilter(MaskFilter filter);
+  void setShader(Shader shader);
+  void setStyle(PaintingStyle style);
+  void setTransferMode(TransferMode transferMode);
+
+  DOMString toString();
+};

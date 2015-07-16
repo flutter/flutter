@@ -1,0 +1,88 @@
+#!/usr/bin/env python
+# Copyright 2014 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import subprocess
+import os
+import argparse
+import logging
+
+ROOT_DIR = os.path.abspath(os.path.join(__file__, os.pardir, os.pardir,
+    os.pardir))
+
+# Where to cache GN results (they're expensive to compute).
+GN_CACHE_PATH = os.path.abspath(os.path.join(ROOT_DIR, 'in_gn.txt'))
+
+
+def stripped_lines_from_command(cmd, cwd=None):
+    lines = subprocess.check_output(cmd, cwd=cwd).splitlines()
+    return map(str.strip, lines)
+
+
+def gn_desc(*args):
+    # GN doesn't understand absolute paths yet, so use a relative BUILD_DIR
+    # and pass ROOT_DIR as the CWD.
+    # Hard-coding Debug for now:
+    BUILD_DIR = '//out/Debug' # // means repository root-relative.
+    cmd = ['gn', 'desc', BUILD_DIR] + list(args)
+    return stripped_lines_from_command(cmd, cwd=ROOT_DIR)
+
+
+def targets_under(target):
+    targets = gn_desc(target, 'deps', '--all')
+    return filter(lambda s: s.startswith(target), targets)
+
+
+def used_files(target):
+    logging.info(target)
+    sources = map(lambda s: s[2:], gn_desc(target, 'sources'))
+    inputs = map(lambda s: s[2:], gn_desc(target, 'inputs'))
+    public = map(lambda s: s[2:], gn_desc(target, 'public'))
+    script = map(lambda s: s[2:], gn_desc(target, 'script'))
+    return sources + inputs + public + script
+
+
+def find_on_disk(path):
+    # FIXME: Use os.walk and do fancier ignoring.
+    find_cmd = ['find', path, '-type', 'f']
+    return stripped_lines_from_command(find_cmd, cwd=ROOT_DIR)
+
+
+def main():
+    logging.basicConfig(level=logging.INFO)
+
+    if os.path.exists(GN_CACHE_PATH):
+        logging.info('Using cached GN list: %s' % GN_CACHE_PATH)
+        in_gn = set(map(str.strip, open(GN_CACHE_PATH).readlines()))
+    else:
+        logging.info('No gn cache found, rebuilding: %s' % GN_CACHE_PATH)
+        in_gn = set(sum(map(used_files, targets_under('//sky')), []))
+        open(GN_CACHE_PATH, 'w+').write('\n'.join(in_gn))
+
+    on_disk = set(find_on_disk('sky/engine'))
+    # Ignore web/tests and bindings/tests
+    on_disk = set(filter(lambda p: '/tests/' not in p, on_disk))
+
+    missing_from_gn = sorted(on_disk - in_gn)
+
+    IGNORED_EXTENSIONS = [
+        '.py', # Probably some to remove, probably some to teach gn about.
+        # Python files not being known to gn can cause flaky builds too!
+        '.pyc',
+        '.gypi',
+        '.gn',
+        '.gni',
+    ]
+    for ext in IGNORED_EXTENSIONS:
+        missing_from_gn = filter(lambda p: not p.endswith(ext), missing_from_gn)
+
+    # All upper-case files like README, DEPS, etc. are fine.
+    missing_from_gn = filter(lambda p: not os.path.basename(p).isupper(),
+        missing_from_gn)
+
+    print '\n'.join(missing_from_gn)
+
+
+if __name__ == '__main__':
+    main()

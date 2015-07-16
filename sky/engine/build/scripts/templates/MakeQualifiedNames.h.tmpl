@@ -1,0 +1,38 @@
+{% from "macros.tmpl" import license %}
+{{ license() }}
+
+#ifndef {{namespace}}Names_h
+#define {{namespace}}Names_h
+
+#include "core/dom/QualifiedName.h"
+#include "wtf/PassOwnPtr.h"
+
+namespace blink {
+
+class {{namespace}}QualifiedName : public QualifiedName { };
+
+namespace {{namespace}}Names {
+
+// Tags
+{% for tag in tags|sort %}
+extern const blink::{{namespace}}QualifiedName& {{tag|symbol}}Tag;
+{% endfor %}
+
+// Attributes
+{% for attr in attrs|sort %}
+extern const blink::QualifiedName& {{attr|symbol}}Attr;
+{% endfor %}
+
+{% if tags %}
+const unsigned {{namespace}}TagsCount = {{tags|count}};
+PassOwnPtr<const {{namespace}}QualifiedName*[]> get{{namespace}}Tags();
+{% endif %}
+const unsigned {{namespace}}AttrsCount = {{attrs|count}};
+PassOwnPtr<const QualifiedName*[]> get{{namespace}}Attrs();
+
+void init();
+
+} // {{namespace}}Names
+} // namespace blink
+
+#endif

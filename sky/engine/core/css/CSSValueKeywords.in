@@ -1,0 +1,540 @@
+//
+// CSS value names
+//
+
+// The mode argument is used to limit the keyword to be used only for certain
+// CSSParserModes. Values that have the prefix -internal- are only allowed by
+// CSSParserModes listed in allowInternalPropertyAndValue()
+
+inherit
+initial
+//
+// outline-style
+// border-top-style
+// border-bottom-style
+// border-left-style
+// border-right-style
+// The order here must match the order of the EBorderStyle enum in RenderStyleConstants.h.
+none
+hidden
+inset
+groove
+outset
+ridge
+dotted
+dashed
+solid
+double
+
+
+//
+// font-style
+//
+//normal
+italic
+oblique
+// The following is only allowed in @font-face:
+all
+
+//
+// font-variant
+//
+//normal
+small-caps
+
+// font-variant-ligatures:
+//
+// normal
+common-ligatures
+no-common-ligatures
+discretionary-ligatures
+no-discretionary-ligatures
+historical-ligatures
+no-historical-ligatures
+contextual
+no-contextual
+
+//
+// font-weigth
+//
+normal
+bold
+bolder
+lighter
+100
+200
+300
+400
+500
+600
+700
+800
+900
+
+//
+// font-stretch
+//
+ultra-condensed
+extra-condensed
+condensed
+semi-condensed
+semi-expanded
+expanded
+extra-expanded
+ultra-expanded
+
+//
+// font-size
+//
+xx-small
+x-small
+small
+medium
+large
+x-large
+xx-large
+-webkit-xxx-large
+smaller
+larger
+
+//
+// font-family (<generic-family> in CSS 2.1)
+//
+serif
+sans-serif
+cursive
+fantasy
+monospace
+-webkit-body
+-webkit-pictograph
+
+//
+// color
+//
+currentcolor
+
+//
+// background-repeat
+//
+repeat
+repeat-x
+repeat-y
+no-repeat
+// round
+// space
+//
+// -webkit-background-composite
+//
+clear
+copy
+source-over
+source-in
+source-out
+source-atop
+destination-over
+destination-in
+destination-out
+destination-atop
+xor
+plus-darker
+// highlight
+plus-lighter
+//
+// vertical-align
+//
+baseline
+middle
+sub
+super
+text-top
+text-bottom
+top
+bottom
+// HTML alignment MIDDLE has no corresponding CSS alignment
+-webkit-baseline-middle
+//
+// text-align
+// The order here must match the order of the ETextAlign enum in RenderStyleConstants.h.
+//
+left
+right
+center
+justify
+-webkit-match-parent
+//
+// text-justify
+//
+//auto
+//none
+inter-word
+distribute
+
+circle
+square
+
+
+//
+// display
+// The order here must match the order of the EDisplay enum in RenderStyleConstants.h.
+//
+inline
+// Contains only inline content.
+paragraph
+// Contains only block content.
+flex
+inline-flex
+//none
+
+auto
+default
+text
+
+//
+// direction
+//
+ltr
+rtl
+
+//
+// visibility
+//
+visible
+//hidden
+collapse
+
+//
+// Unordered rest
+//
+absolute
+bidi-override
+blink
+both
+embed
+fixed
+invert
+-webkit-isolate
+-webkit-isolate-override
+-webkit-plaintext
+landscape
+line-through
+local
+nowrap
+overlay
+overline
+portrait
+pre
+pre-line
+pre-wrap
+static
+thick
+thin
+underline
+wavy
+-webkit-nowrap
+
+// CSS3 Values
+// box-align
+stretch
+start
+end
+//center
+//baseline
+
+// box-decoration-break
+clone
+slice
+
+// box-direction
+// normal
+reverse
+
+// box-orient
+horizontal
+vertical
+inline-axis
+block-axis
+
+// box-lines
+single
+multiple
+
+// align-content
+flex-start
+flex-end
+// center
+space-between
+space-around
+// stretch
+
+// flex-flow
+row
+row-reverse
+column
+column-reverse
+// nowrap
+wrap
+wrap-reverse
+
+// -internal-marquee-direction
+forwards
+backwards
+// reverse
+// left
+// right
+// auto
+
+// -internal-marquee-repetition
+infinite
+
+// -internal-marquee-style
+// none
+// scroll
+alternate
+
+//
+// -webkit-user-modify
+//
+read-only
+read-write
+read-write-plaintext-only
+
+//
+// -webkit-user-drag
+//
+element
+
+//
+// width/min-width/max-width
+//
+intrinsic
+min-intrinsic
+
+//
+// CSS3 intrinsic dimension keywords
+//
+-webkit-min-content
+-webkit-max-content
+-webkit-fill-available
+-webkit-fit-content
+min-content
+max-content
+
+//
+// text-overflow
+//
+clip
+ellipsis
+
+//
+// word-break
+//
+break-all
+
+//
+// word-wrap
+//
+break-word
+
+//
+// nbsp-mode
+//
+space
+
+//
+// -webkit-line-break
+//
+// auto
+loose
+// normal
+strict
+after-white-space
+
+//
+// border-image
+//
+// stretch
+// repeat
+round
+
+//
+// background-clip/background-origin
+//
+// border/content/padding are deprecated and ultimately will only apply to the -webkit- form of these properties.
+// border-box/content-box/padding-box should be used instead.
+//
+border
+border-box
+content
+content-box
+padding
+padding-box
+
+// CSS 3 SHAPES
+margin-box
+
+//
+// background-size
+//
+contain
+cover
+
+//
+// -webkit-rtl-ordering
+//
+logical
+visual
+
+//
+// transform-style
+//
+flat
+preserve-3d
+
+//
+// pointer-events
+//
+visiblePainted
+visibleFill
+visibleStroke
+//visible
+painted
+fill
+stroke
+bounding-box
+//all
+//none
+
+//
+// -webkit-font-smoothing
+//
+// auto
+// none
+antialiased
+subpixel-antialiased
+
+// text-rendering
+//auto
+optimizeSpeed
+optimizeLegibility
+geometricPrecision
+
+// -webkit-text-emphasis-position
+over
+under
+
+// -webkit-text-emphasis-style
+filled
+open
+dot
+// circle
+double-circle
+triangle
+sesame
+
+// -webkit-radial-gradient
+// circle
+ellipse
+closest-side
+closest-corner
+farthest-side
+farthest-corner
+// contain
+// cover
+
+// -webkit-text-orientation
+sideways
+sideways-right
+upright
+vertical-right
+
+// -webkit-line-box-contain
+block
+font
+glyphs
+inline-box
+replaced
+
+// -webkit-font-feature-settings
+on
+off
+
+// image-rendering
+//auto
+//optimizeSpeed
+optimizeQuality
+pixelated
+-webkit-optimize-contrast
+
+// shape-outside
+nonzero
+evenodd
+at
+// closest-side
+// farthest-side
+
+
+// (pointer:) media feature
+// none
+coarse
+fine
+
+// (hover:) media feature
+//  none
+on-demand
+hover
+
+// blend modes
+// normal
+multiply
+screen
+// overlay
+darken
+lighten
+color-dodge
+color-burn
+hard-light
+soft-light
+difference
+exclusion
+hue
+saturation
+color
+luminosity
+
+// object-fit
+scale-down
+
+// column-fill
+balance
+
+// overflow
+-webkit-paged-x
+-webkit-paged-y
+
+// text-indent
+each-line
+//hanging   // hanging exists in SVGCSSValueKeywords.in
+
+// (scan:) media feature
+progressive
+interlace
+
+// touch-action-delay
+// none
+script
+
+// touch-action
+pan-x
+pan-y
+manipulation
+
+last-baseline
+self-start
+self-end
+true
+safe
+legacy
+
+// will-change
+// auto
+contents

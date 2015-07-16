@@ -1,0 +1,17 @@
+unittest-suite-wait-for-done
+TestRenderView enabled
+
+PAINT FOR FRAME #1 ----------------------------------------------
+1 | TestPaintingCanvas() constructor: 800.0 x 600.0
+1 | paintChild RenderDecoratedBox at Point(0.0, 0.0)
+1 |  | TestPaintingCanvas() constructor: 800.0 x 600.0
+1 |  | paintChild RenderPadding at Point(0.0, 0.0)
+1 |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
+1 |  |  | paintChild RenderDecoratedBox at Point(10.0, 10.0)
+1 |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
+------------------------------------------------------------------------
+PASS: should not have a 0 sized colored Box
+
+All 1 tests passed.
+unittest-suite-success
+DONE

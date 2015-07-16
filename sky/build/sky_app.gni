@@ -1,0 +1,87 @@
+# Copyright 2015 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//sky/build/skyx.gni")
+
+template("sky_app") {
+  skyx_target_name = target_name
+
+  if (is_android) {
+    skyx_target_name = "app"
+  }
+
+  skyx(skyx_target_name) {
+    main_dart = invoker.main_dart
+
+    if (defined(invoker.manifest)) {
+      manifest = invoker.manifest
+    }
+
+    if (defined(invoker.sources)) {
+      sources = invoker.sources
+    }
+  }
+
+  if (is_android) {
+    import("//build/config/android/rules.gni")
+
+    bundle_prefix = target_name
+
+    copy("copy_${bundle_prefix}_bundle") {
+      sources = [
+        "$target_gen_dir/app.skyx",
+      ]
+      outputs = [
+        "$target_gen_dir/${bundle_prefix}.skyx",
+      ]
+
+      deps = [
+        ":app",
+      ]
+    }
+
+    copy_ex("assets") {
+      clear_dir = true
+      dest = "$target_gen_dir/assets"
+
+      sources = [
+        "$root_build_dir/icudtl.dat",
+        "$target_gen_dir/app.skyx",
+      ]
+      deps = [
+        "//third_party/icu",
+        ":copy_${bundle_prefix}_bundle",
+      ]
+
+      if (defined(invoker.bundles)) {
+        foreach(bundle, invoker.bundles) {
+          bundle_gen_dir = get_label_info(bundle, "target_gen_dir")
+          bundle_name = get_label_info(bundle, "name")
+          sources += [ "$bundle_gen_dir/${bundle_name}.skyx" ]
+          deps += [ bundle ]
+        }
+      }
+    }
+
+    android_apk(target_name) {
+      apk_name = invoker.apk_name
+      android_manifest = "apk/AndroidManifest.xml"
+
+      native_libs = [ "libsky_shell.so" ]
+      asset_location = "$target_gen_dir/assets"
+
+      deps = [
+        "//base:base_java",
+        "//sky/shell:assets",
+        "//sky/shell:java",
+        "//sky/shell:sky_shell",
+        ":assets",
+      ]
+
+      if (defined(invoker.deps)) {
+        deps += invoker.deps
+      }
+    }
+  }
+}

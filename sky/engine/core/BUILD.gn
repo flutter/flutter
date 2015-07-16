@@ -1,0 +1,510 @@
+# Copyright 2014 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//sky/engine/build/scripts/scripts.gni")
+import("//sky/engine/core/core.gni")
+import("//mojo/dart/embedder/embedder.gni")
+
+visibility = [ "//sky/engine/*" ]
+
+rel_sky_core_gen_dir = rebase_path(sky_core_output_dir, root_build_dir)
+
+source_set("libraries") {
+  public_deps = [
+    "//base",
+    "//mojo/application",
+    "//mojo/common",
+    "//mojo/public/c/system",
+    "//mojo/public/cpp/bindings",
+    "//mojo/public/cpp/system",
+    "//mojo/public/cpp/utility",
+    "//mojo/public/interfaces/application",
+    "//skia",
+    "//sky/engine/tonic:tonic",
+    "//sky/engine/wtf",
+    "//third_party/angle:translator",
+    "//third_party/iccjpeg",
+    "//third_party/libpng",
+    "//third_party/ots",
+    "//third_party/qcms",
+    "//third_party/zlib",
+    "//url",
+  ]
+}
+
+source_set("prerequisites") {
+  deps = [
+    ":libraries",
+    ":make_core_generated",
+    "//sky/engine/platform",
+  ]
+
+  forward_dependent_configs_from = [ ":libraries" ]
+
+  direct_dependent_configs = [
+    "//sky/engine:config",
+    "//sky/engine:inside_blink",
+    "//build/config/compiler:wexit_time_destructors",
+  ]
+}
+
+dart_embedder_resources("generate_sky_embedder_service_isolate_resources_cc") {
+  deps = [
+    "//mojo/dart/embedder:deploy_observatory",
+  ]
+  inputs = [
+    "//sky/engine/core/script/dart_service_isolate/loader.dart",
+    "//sky/engine/core/script/dart_service_isolate/main.dart",
+    "//sky/engine/core/script/dart_service_isolate/resources.dart",
+    "//sky/engine/core/script/dart_service_isolate/server.dart",
+  ]
+  root_prefix = "//sky/engine/core/script/"
+  input_directory = "$root_out_dir/observatory/deployed/web/"
+  output = "$target_gen_dir/sky_embedder_service_isolate_resources.cc"
+  table_name = "sky_embedder_service_isolate"
+}
+
+static_library("core") {
+  output_name = "sky_core"
+
+  deps = [
+    ":core_generated",
+    ":generate_sky_embedder_service_isolate_resources_cc",
+    ":libraries",
+    ":prerequisites",
+    "//sky/engine/platform",
+    "//sky/engine/bindings",
+    "//dart/runtime/bin:embedded_dart_io",
+    "//dart/runtime:libdart",
+    "//dart/runtime/vm:libdart_platform",
+  ]
+
+  sources = sky_core_files
+
+  sources += [ "$target_gen_dir/sky_embedder_service_isolate_resources.cc" ]
+
+  include_dirs = [
+    # Needed for dart_mirrors_api.h in dart_controller.cc
+    rebase_path("//dart/runtime"),
+  ]
+
+  forward_dependent_configs_from = [ ":libraries" ]
+
+  # core and core_generated are really the same thing.
+  allow_circular_includes_from = [
+    ":core_generated",
+    "//sky/engine/bindings",
+  ]
+}
+
+source_set("testing") {
+  deps = [
+    ":core",
+    ":core_generated",
+    ":prerequisites",
+    "//sky/engine/platform",
+    "//sky/engine/wtf",
+  ]
+
+  sources = [
+    "testing/DummyPageHolder.cpp",
+    "testing/DummyPageHolder.h",
+    "testing/NullExecutionContext.cpp",
+    "testing/NullExecutionContext.h",
+    "testing/URLTestHelpers.cpp",
+    "testing/URLTestHelpers.h",
+  ]
+}
+
+source_set("core_generated") {
+  sources = [
+    # Generated from CSSTokenizer-in.cpp
+    "$sky_core_output_dir/CSSTokenizer.cpp",
+
+    # Generated from BisonCSSParser-in.cpp
+    "$sky_core_output_dir/BisonCSSParser.cpp",
+
+    # Additional .cpp files from the make_core_generated rules.
+    "$sky_core_output_dir/CSSGrammar.cpp",
+  ]
+
+  configs += [ "..:inside_blink" ]
+
+  deps = [
+    ":make_core_generated",
+    ":prerequisites",
+    "//skia",
+    "//sky/engine/platform",
+    "//sky/engine/wtf",
+    "//third_party/iccjpeg",
+    "//third_party/libpng",
+    "//third_party/qcms",
+    "//url",
+  ]
+
+  include_dirs = [ "$root_build_dir" ]
+}
+
+# core_event_interfaces --------------------------------------------------------
+
+# Calls generate_event_interfaces
+#
+# Parameters:
+#   sources = A list of IDL files to process.
+#   output_file = The .in file to write, relative to the sky_gen_dir.
+#   suffix = (Optional) String to be passed to script via --suffix
+template("generate_event_interfaces") {
+  action(target_name) {
+    # Write the file list to a unique temp file to avoid blowing out the
+    # command line length limit.
+    idl_files_list = "$target_gen_dir/${target_name}_file_list.tmp"
+    write_file(idl_files_list, rebase_path(invoker.sources, root_build_dir))
+
+    inputs = [
+               "//sky/engine/bindings/scripts/utilities.py",
+               idl_files_list,
+             ] + invoker.sources
+
+    output_file = "$root_gen_dir/sky/" + invoker.output_file
+    outputs = [
+      output_file,
+    ]
+
+    script = "//sky/engine/bindings/scripts/generate_event_interfaces.py"
+    args = [
+      "--event-idl-files-list",
+      rebase_path(idl_files_list, root_build_dir),
+      "--event-interfaces-file",
+      rebase_path(output_file, root_build_dir),
+      "--write-file-only-if-changed=1",  # Always true for Ninja.
+    ]
+
+    if (defined(invoker.suffix)) {
+      args += [
+        "--suffix",
+        invoker.suffix,
+      ]
+    }
+  }
+}
+
+generate_event_interfaces("core_event_interfaces") {
+  sources = core_event_idl_files
+  output_file = "core/EventInterfaces.in"
+}
+
+# generated_testing_idls -------------------------------------------------------
+
+group("generated_testing_idls") {
+  deps = [
+    ":generated_testing_idls_settings",
+  ]
+}
+
+action("generated_testing_idls_settings") {
+  script = "../build/scripts/make_settings.py"
+
+  inputs = scripts_for_in_files + [
+             "../build/scripts/make_settings.py",
+             "../build/scripts/templates/SettingsMacros.h.tmpl",
+             "frame/Settings.in",
+           ]
+  outputs = [
+    "$sky_core_output_dir/SettingsMacros.h",
+  ]
+
+  args = [
+    rebase_path("frame/Settings.in", root_build_dir),
+    "--output_dir",
+    rel_sky_core_gen_dir,
+  ]
+}
+
+# make_core_generated ----------------------------------------------------------
+
+group("core_names") {
+  deps = [
+    ":make_core_generated_css_property_names",
+    ":make_core_generated_event_names",
+    ":make_core_generated_event_target_factory",
+    ":make_core_generated_event_target_names",
+    ":make_core_generated_event_type_names",
+    ":make_core_generated_html_element_factory",
+    ":make_core_generated_media_type_names",
+  ]
+}
+
+group("make_core_generated") {
+  deps = [
+    ":core_names",
+    ":make_core_generated_bison",
+    ":make_core_generated_css_property_metadata",
+    ":make_core_generated_css_value_keywords",
+    ":make_core_generated_event_factory",
+    ":make_core_generated_html_element_lookup_trie",
+    ":make_core_generated_html_element_type_helpers",
+    ":make_core_generated_make_parser",
+    ":make_core_generated_make_token_matcher",
+    ":make_core_generated_media_feature_names",
+    ":make_core_generated_media_features",
+    ":make_core_generated_media_query_tokenizer_codepoints",
+    ":make_core_generated_style_builder",
+    ":make_core_generated_style_property_shorthand",
+  ]
+}
+
+css_properties("make_core_generated_css_property_names") {
+  script = "../build/scripts/make_css_property_names.py"
+  outputs = [
+    "$sky_core_output_dir/CSSPropertyNames.cpp",
+    "$sky_core_output_dir/CSSPropertyNames.h",
+  ]
+}
+
+process_in_files("make_core_generated_media_features") {
+  script = "../build/scripts/make_media_features.py"
+  in_files = [ "css/MediaFeatureNames.in" ]
+  other_inputs = [
+    "../build/scripts/make_media_features.py",
+    "../build/scripts/templates/MediaFeatures.h.tmpl",
+  ]
+  outputs = [
+    "$sky_core_output_dir/MediaFeatures.h",
+  ]
+}
+
+css_properties("make_core_generated_style_property_shorthand") {
+  script = "../build/scripts/make_style_shorthands.py"
+  other_inputs = [
+    "../build/scripts/templates/StylePropertyShorthand.cpp.tmpl",
+    "../build/scripts/templates/StylePropertyShorthand.h.tmpl",
+  ]
+  outputs = [
+    "$sky_core_output_dir/StylePropertyShorthand.cpp",
+    "$sky_core_output_dir/StylePropertyShorthand.h",
+  ]
+  deps = [
+    ":core_names",
+  ]
+}
+
+css_properties("make_core_generated_style_builder") {
+  script = "../build/scripts/make_style_builder.py"
+  other_inputs = [
+    "../build/scripts/templates/StyleBuilder.cpp.tmpl",
+    "../build/scripts/templates/StyleBuilderFunctions.cpp.tmpl",
+    "../build/scripts/templates/StyleBuilderFunctions.h.tmpl",
+  ]
+  outputs = [
+    "$sky_core_output_dir/StyleBuilder.cpp",
+    "$sky_core_output_dir/StyleBuilderFunctions.h",
+    "$sky_core_output_dir/StyleBuilderFunctions.cpp",
+  ]
+
+  deps = [
+    ":core_names",
+    ":libraries",
+  ]
+}
+
+css_properties("make_core_generated_css_property_metadata") {
+  script = "../build/scripts/make_css_property_metadata.py"
+  other_inputs = [ "../build/scripts/templates/CSSPropertyMetadata.cpp.tmpl" ]
+  outputs = [
+    "$sky_core_output_dir/CSSPropertyMetadata.cpp",
+  ]
+
+  deps = [
+    ":core_names",
+  ]
+}
+
+process_in_files("make_core_generated_css_value_keywords") {
+  script = "../build/scripts/make_css_value_keywords.py"
+
+  in_files = [
+    "css/CSSValueKeywords.in",
+    "css/SVGCSSValueKeywords.in",
+  ]
+  outputs = [
+    "$sky_core_output_dir/CSSValueKeywords.cpp",
+    "$sky_core_output_dir/CSSValueKeywords.h",
+  ]
+  other_args = [
+    "--gperf",
+    gperf_exe,
+  ]
+
+  deps = [
+    "//sky/engine/wtf",
+  ]
+}
+
+process_in_files("make_core_generated_html_element_factory") {
+  script = "../build/scripts/make_element_factory.py"
+
+  in_files = [
+    "html/HTMLTagNames.in",
+    "html/HTMLAttributeNames.in",
+  ]
+  other_inputs = make_element_factory_files
+  outputs = [
+    "$sky_core_output_dir/HTMLElementFactory.cpp",
+    "$sky_core_output_dir/HTMLElementFactory.h",
+    "$sky_core_output_dir/HTMLNames.cpp",
+    "$sky_core_output_dir/HTMLNames.h",
+  ]
+  deps = [
+    ":libraries",
+  ]
+}
+
+process_in_files("make_core_generated_html_element_type_helpers") {
+  script = "../build/scripts/make_element_type_helpers.py"
+
+  in_files = [ "html/HTMLTagNames.in" ]
+  other_inputs = make_element_type_helpers_files
+  outputs = [
+    "$sky_core_output_dir/HTMLElementTypeHelpers.h",
+  ]
+}
+
+process_in_files("make_core_generated_event_factory") {
+  script = "../build/scripts/make_event_factory.py"
+
+  in_files = [
+    "$sky_core_output_dir/EventInterfaces.in",
+    "events/EventAliases.in",
+  ]
+  other_inputs = make_event_factory_files
+  outputs = [
+    "$sky_core_output_dir/EventHeaders.h",
+    "$sky_core_output_dir/EventInterfaces.h",
+  ]
+  deps = [
+    ":core_names",
+    ":libraries",
+  ]
+}
+
+process_in_files("make_core_generated_media_feature_names") {
+  script = "../build/scripts/make_media_feature_names.py"
+  in_files = [ "css/MediaFeatureNames.in" ]
+  other_inputs = make_names_files
+  outputs = [
+    "$sky_core_output_dir/MediaFeatureNames.cpp",
+    "$sky_core_output_dir/MediaFeatureNames.h",
+  ]
+  deps = [
+    ":libraries",
+  ]
+}
+
+# make_event_factory -----------------------------------------------------------
+
+make_event_factory("make_core_generated_event_target_factory") {
+  in_files = [ "events/EventTargetFactory.in" ]
+  outputs = [
+    "$sky_core_output_dir/EventTargetHeaders.h",
+    "$sky_core_output_dir/EventTargetInterfaces.h",
+  ]
+}
+
+# make_names -------------------------------------------------------------------
+
+make_names("make_core_generated_media_type_names") {
+  in_files = [ "css/MediaTypeNames.in" ]
+  outputs = [
+    "$sky_core_output_dir/MediaTypeNames.cpp",
+    "$sky_core_output_dir/MediaTypeNames.h",
+  ]
+}
+
+make_names("make_core_generated_event_names") {
+  in_files = [ "$sky_core_output_dir/EventInterfaces.in" ]
+  outputs = [
+    "$sky_core_output_dir/EventNames.cpp",
+    "$sky_core_output_dir/EventNames.h",
+  ]
+}
+
+make_names("make_core_generated_event_target_names") {
+  in_files = [ "events/EventTargetFactory.in" ]
+  outputs = [
+    "$sky_core_output_dir/EventTargetNames.cpp",
+    "$sky_core_output_dir/EventTargetNames.h",
+  ]
+}
+
+make_names("make_core_generated_event_type_names") {
+  in_files = [ "events/EventTypeNames.in" ]
+  outputs = [
+    "$sky_core_output_dir/EventTypeNames.cpp",
+    "$sky_core_output_dir/EventTypeNames.h",
+  ]
+}
+
+# make_token_matcher -----------------------------------------------------------
+
+make_token_matcher("make_core_generated_make_token_matcher") {
+  input_file = "css/parser/CSSTokenizer-in.cpp"
+  output_file = "$sky_core_output_dir/CSSTokenizer.cpp"
+}
+
+make_token_matcher("make_core_generated_make_parser") {
+  input_file = "css/parser/BisonCSSParser-in.cpp"
+  output_file = "$sky_core_output_dir/BisonCSSParser.cpp"
+}
+
+# One-off scripts --------------------------------------------------------------
+
+action("make_core_generated_media_query_tokenizer_codepoints") {
+  script = "../build/scripts/make_mediaquery_tokenizer_codepoints.py"
+
+  outputs = [
+    "$sky_core_output_dir/MediaQueryTokenizerCodepoints.cpp",
+  ]
+
+  args = [
+    "--output_dir",
+    rel_sky_core_gen_dir,
+  ]
+
+  deps = make_core_generated_deps
+}
+
+process_in_files("make_core_generated_html_element_lookup_trie") {
+  script = "../build/scripts/make_element_lookup_trie.py"
+  in_files = [ "html/HTMLTagNames.in" ]
+  other_inputs = [
+    "../build/scripts/templates/ElementLookupTrie.cpp.tmpl",
+    "../build/scripts/templates/ElementLookupTrie.h.tmpl",
+  ]
+  outputs = [
+    "$sky_core_output_dir/HTMLElementLookupTrie.cpp",
+    "$sky_core_output_dir/HTMLElementLookupTrie.h",
+  ]
+  deps = [
+    ":core_names",
+    ":libraries",
+  ]
+}
+
+action_foreach("make_core_generated_bison") {
+  script = "../build/scripts/rule_bison.py"
+  sources = [
+    "css/parser/CSSGrammar.y",
+  ]
+  outputs = [
+    "$sky_core_output_dir/{{source_name_part}}.cpp",
+    "$sky_core_output_dir/{{source_name_part}}.h",
+  ]
+  args = [
+    "{{source}}",
+    rel_sky_core_gen_dir,
+    bison_exe,
+  ]
+
+  deps = make_core_generated_deps
+}

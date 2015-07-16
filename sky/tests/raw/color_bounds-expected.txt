@@ -1,0 +1,8 @@
+unittest-suite-wait-for-done
+PASS: paint set to black
+PASS: color created with out of bounds value
+PASS: color created with wildly out of bounds value
+
+All 3 tests passed.
+unittest-suite-success
+DONE

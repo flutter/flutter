@@ -1,0 +1,24 @@
+// Copyright 2015 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+interface Node : EventTarget {
+  Node cloneNode([Named] optional boolean deep = true);
+
+  readonly attribute ParentNode owner;
+  readonly attribute ParentNode parentNode;
+  readonly attribute Element parentElement;
+
+  readonly attribute Node nextSibling;
+  readonly attribute Node previousSibling;
+  readonly attribute Element nextElementSibling;
+  readonly attribute Element previousElementSibling;
+
+  [CustomElementCallbacks, RaisesException, ImplementedAs=newInsertBefore] void insertBefore(sequence<Node> nodes);
+  [CustomElementCallbacks, RaisesException, ImplementedAs=newInsertAfter] void insertAfter(sequence<Node> nodes);
+  [CustomElementCallbacks, RaisesException] void replaceWith(sequence<Node> nodes);
+
+  [CustomElementCallbacks, RaisesException] void remove();
+
+  [TreatReturnedNullStringAs=Null, TreatNullAs=NullString] attribute DOMString textContent;
+};

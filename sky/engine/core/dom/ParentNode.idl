@@ -1,0 +1,28 @@
+// Copyright 2015 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+[
+  ImplementedAs=ContainerNode,
+] interface ParentNode : Node {
+  readonly attribute Node firstChild;
+  readonly attribute Node lastChild;
+  readonly attribute Element firstElementChild;
+  readonly attribute Element lastElementChild;
+
+  sequence<Node> getChildNodes();
+  sequence<Element> getChildElements();
+
+  [CustomElementCallbacks, RaisesException] void append(sequence<Node> nodes);
+  [CustomElementCallbacks, RaisesException] Node appendChild(Node node);
+  [CustomElementCallbacks, RaisesException] void prepend(sequence<Node> nodes);
+  [CustomElementCallbacks, RaisesException] Node prependChild(Node node);
+
+  [CustomElementCallbacks] void removeChildren();
+  [CustomElementCallbacks, RaisesException] Node setChild(Node node);
+  [CustomElementCallbacks, RaisesException] void setChildren(sequence<Node> nodes);
+
+  // TODO(abarth): Remove when we have the selector object.
+  [RaisesException] Element querySelector(DOMString selectors);
+  [RaisesException] sequence<Element> querySelectorAll(DOMString selectors);
+};

@@ -1,0 +1,130 @@
+#!/usr/bin/env python
+# Copyright 2014 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+from skypy.find_tests import find_tests
+from skypy.paths import Paths
+import argparse
+import os
+import re
+import requests
+import skypy.configuration as configuration
+import skypy.skyserver
+import subprocess
+
+
+SUPPORTED_MIME_TYPES = [
+    'text/sky',
+    'application/dart',
+]
+HTTP_PORT = 9999
+URL_ROOT = 'http://localhost:%s/' % HTTP_PORT
+DASHBOARD_URL = 'https://chromeperf.appspot.com/add_point'
+BENCHMARKS_DIR = 'benchmarks'
+
+
+def values_from_output(output):
+    # Parse out the raw values from the PerfRunner output:
+    #   values 90, 89, 93 ms
+    # We'll probably need a fancier parser at some point.
+    match = re.search(r'values (.+) ms', output, flags=re.MULTILINE)
+    return map(float, match.group(1).split(', '))
+
+
+def create_json_blob(values):
+    revision = subprocess.check_output(["git", "show-ref", "HEAD", "-s"]).strip()
+    return {
+        "master": "master.mojo.perf",
+        "bot": "sky-release",
+        "point_id": 123456, # FIXME: We need to generate a monotonicly increasing number somehow.
+        "versions": {
+          "mojo": revision
+        },
+        "chart_data": {
+            "format_version": "1.0",
+            "benchmark_name": "layout.simple-blocks",
+            "charts": {
+                "warm_times": {
+                    "traces": {
+                        "layout.simple-blocks": {
+                            "type": "list_of_scalar_values",
+                            "values": values,
+                        },
+                    }
+                }
+            }
+        }
+    }
+
+
+def send_json_to_dashboard(json):
+    requests.post(DASHBOARD_URL, params={ 'data': json })
+
+
+class PerfHarness(object):
+    def __init__(self, args):
+        self._sky_server = None
+        self.paths = Paths(os.path.join('out', 'Debug'))
+        self.args = args
+
+    def _start_server(self):
+        # TODO(eseidel): Shouldn't this just use skyserver.py?
+        return subprocess.Popen([
+            SkyServer.sky_server_path(),
+            self.paths.src_root,
+            str(HTTP_PORT),
+            '-t', self.args.configuration
+        ])
+
+    def _sky_tester_command(self, url):
+        content_handlers = ['%s,%s' % (mime_type, 'mojo:sky_viewer')
+            for mime_type in SUPPORTED_MIME_TYPES]
+        return [
+            self.paths.mojo_shell_path,
+            '--args-for=mojo:native_viewport_service --use-headless-config --use-osmesa',
+            '--args-for=mojo:window_manager %s' % url,
+            '--content-handlers=%s' % ','.join(content_handlers),
+            '--url-mappings=mojo:window_manager=mojo:sky_tester',
+            'mojo:window_manager',
+        ]
+
+    def _url_for_path(self, path):
+        return URL_ROOT + os.path.relpath(path, self.paths.src_root)
+
+    def _run_tests(self, path):
+        url = self._url_for_path(path)
+        output = subprocess.check_output(
+            self._sky_tester_command(url),
+            stderr=subprocess.STDOUT)
+        values = values_from_output(output)
+        print os.path.basename(path), "=>", values
+        # FIXME: Upload JSON blob to results server:
+        # json = create_json_blob(values)
+        # send_json_to_dashboard(json)
+
+    def main(self):
+        self._start_server()
+        map(self._run_tests, find_tests(os.path.join(self.paths.sky_root, BENCHMARKS_DIR)))
+
+    def shutdown(self):
+        if self._sky_server:
+            self._sky_server.terminate()
+
+
+def main():
+    parser = argparse.ArgumentParser(description='Sky performance tester')
+    configuration.add_arguments(parser)
+    args = parser.parse_args()
+
+    harness = PerfHarness(args)
+    try:
+        harness.main()
+    except (KeyboardInterrupt, SystemExit):
+        pass
+    finally:
+        harness.shutdown()
+
+
+if __name__ == '__main__':
+    main()

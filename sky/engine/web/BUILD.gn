@@ -1,0 +1,23 @@
+# Copyright 2014 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+component("web") {
+  output_name = "sky_web"
+
+  deps = [
+    "//sky/engine/core",
+    "//sky/engine/platform",
+  ]
+
+  configs += [
+    "//sky/engine:config",
+    "//sky/engine:inside_blink",
+    "//sky/engine:non_test_config",
+  ]
+
+  sources = [
+    "Sky.cpp",
+    "WebRuntimeFeatures.cpp",
+  ]
+}

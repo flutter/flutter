@@ -1,0 +1,12 @@
+// Copyright 2015 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+[
+    EventConstructor,
+] interface WheelEvent : Event {
+    [InitializedByEventConstructor] readonly attribute double x;
+    [InitializedByEventConstructor] readonly attribute double y;
+    [InitializedByEventConstructor] readonly attribute double offsetX;
+    [InitializedByEventConstructor] readonly attribute double offsetY;
+};

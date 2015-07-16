@@ -1,0 +1,55 @@
+// Copyright 2015 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+[
+  CustomConstructor,
+] interface Element : ParentNode {
+  readonly attribute DOMString tagName;
+
+  boolean hasAttribute(DOMString name);
+  [TreatReturnedNullStringAs=Null] DOMString getAttribute(DOMString name);
+  [CustomElementCallbacks, RaisesException] void setAttribute(DOMString name, optional DOMString? value);
+  [CustomElementCallbacks] void removeAttribute(DOMString name);
+
+  sequence<Attr> getAttributes();
+
+  readonly attribute ShadowRoot shadowRoot;
+
+  void setNeedsLayout();
+  void layout();
+  void setLayoutManager(LayoutCallback layout, LayoutCallback computeIntrinsicWidths);
+
+  // TODO(abarth): Move to Node.
+  readonly attribute CSSStyleDeclaration style;
+
+  // TODO(abarth): Remove these when we implement more of the system.
+  [RaisesException] boolean matches(DOMString selectors);
+  void focus();
+  void blur();
+  attribute long tabIndex;
+  readonly attribute DOMTokenList classList;
+  [RaisesException] ShadowRoot ensureShadowRoot();
+
+  ClientRect getBoundingClientRect();
+  readonly attribute long offsetLeft;
+  readonly attribute long offsetTop;
+  readonly attribute long offsetWidth;
+  readonly attribute long offsetHeight;
+  readonly attribute Element offsetParent;
+  readonly attribute long clientLeft;
+  readonly attribute long clientTop;
+  readonly attribute long clientWidth;
+  readonly attribute long clientHeight;
+
+  attribute double x;
+  attribute double y;
+  attribute double width;
+  attribute double height;
+  attribute double minContentWidth; // Intrinsic width if all wrappable points wrap.
+  attribute double maxContentWidth; // Intrinsic width if no wrappable points wrap.
+  readonly attribute double alphabeticBaseline; // Distance from top to alphabetic baseline of first line
+  readonly attribute double ideographicBaseline; // Distance from top to ideographic baseline of first line
+
+  void paint(Canvas canvas);
+};

@@ -1,0 +1,25 @@
+// Copyright 2015 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+#include <inttypes.h>
+#include <stdint.h>
+#include <stddef.h>
+
+namespace blink {
+
+// The string on the next line will be filled in with the contents of the
+// generated snapshot binary file for the vm isolate.
+// This string forms the content of the dart vm isolate snapshot which
+// is loaded into the vm isolate.
+static const uint8_t vm_isolate_snapshot_buffer_[] = { % s};
+const uint8_t* kDartVmIsolateSnapshotBuffer = vm_isolate_snapshot_buffer_;
+
+// The string on the next line will be filled in with the contents of the
+// generated snapshot binary file for a regular dart isolate.
+// This string forms the content of a regular dart isolate snapshot which
+// is loaded into an isolate when it is created.
+static const uint8_t isolate_snapshot_buffer_[] = { % s};
+const uint8_t* kDartIsolateSnapshotBuffer = isolate_snapshot_buffer_;
+
+}  // namespace blink

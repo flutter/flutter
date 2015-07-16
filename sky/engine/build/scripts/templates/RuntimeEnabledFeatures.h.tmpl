@@ -1,0 +1,51 @@
+{% from 'macros.tmpl' import license %}
+{{license()}}
+
+#ifndef RuntimeEnabledFeatures_h
+#define RuntimeEnabledFeatures_h
+
+#include "platform/PlatformExport.h"
+
+namespace blink {
+
+// A class that stores static enablers for all experimental features.
+
+class PLATFORM_EXPORT RuntimeEnabledFeatures {
+public:
+    {% for feature_set in feature_sets %}
+    static void set{{feature_set|capitalize}}FeaturesEnabled(bool);
+    {% endfor %}
+
+
+    {% for feature in features %}
+    {% if feature.custom %}
+    static bool {{feature.first_lowered_name}}Enabled();
+    {% else %}
+    {% if feature.condition %}
+#if ENABLE({{feature.condition}})
+    {% endif %}
+    static void set{{feature.name}}Enabled(bool isEnabled) { is{{feature.name}}Enabled = isEnabled; }
+    static bool {{feature.first_lowered_name}}Enabled() { return {{feature.enabled_condition}}; }
+    {% if feature.condition %}
+#else
+    static void set{{feature.name}}Enabled(bool) { }
+    static bool {{feature.first_lowered_name}}Enabled() { return false; }
+#endif
+    {% endif %}
+
+    {% endif %}
+    {% endfor %}
+
+private:
+    RuntimeEnabledFeatures() { }
+
+    {% for feature in features if not feature.custom %}
+    {% filter enable_conditional(feature.condition) %}
+    static bool is{{feature.name}}Enabled;
+    {% endfilter %}
+    {% endfor %}
+};
+
+} // namespace blink
+
+#endif // RuntimeEnabledFeatures_h

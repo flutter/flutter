@@ -1,0 +1,6 @@
+unittest-suite-wait-for-done
+PASS: getChildElements should only include immediate children
+
+All 1 tests passed.
+unittest-suite-success
+DONE

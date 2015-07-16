@@ -1,0 +1,74 @@
+/*
+ * Copyright (C) 2007 Apple Inc. All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *
+ * 1.  Redistributions of source code must retain the above copyright
+ *     notice, this list of conditions and the following disclaimer.
+ * 2.  Redistributions in binary form must reproduce the above copyright
+ *     notice, this list of conditions and the following disclaimer in the
+ *     documentation and/or other materials provided with the distribution.
+ * 3.  Neither the name of Apple Computer, Inc. ("Apple") nor the names of
+ *     its contributors may be used to endorse or promote products derived
+ *     from this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY APPLE AND ITS CONTRIBUTORS "AS IS" AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL APPLE OR ITS CONTRIBUTORS BE LIABLE FOR ANY
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+ * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+exception DOMException {
+
+    readonly attribute unsigned short   code;
+    readonly attribute DOMString        name;
+    readonly attribute DOMString        message;
+
+    // Override in a Mozilla compatible format
+    [NotEnumerable] DOMString toString();
+
+    // ExceptionCode
+    const unsigned short      INDEX_SIZE_ERR                 = 1;
+    const unsigned short      DOMSTRING_SIZE_ERR             = 2;
+    const unsigned short      HIERARCHY_REQUEST_ERR          = 3;
+    const unsigned short      WRONG_DOCUMENT_ERR             = 4;
+    const unsigned short      INVALID_CHARACTER_ERR          = 5;
+    const unsigned short      NO_DATA_ALLOWED_ERR            = 6;
+    const unsigned short      NO_MODIFICATION_ALLOWED_ERR    = 7;
+    const unsigned short      NOT_FOUND_ERR                  = 8;
+    const unsigned short      NOT_SUPPORTED_ERR              = 9;
+    const unsigned short      INUSE_ATTRIBUTE_ERR            = 10;
+    // Introduced in DOM Level 2:
+    const unsigned short      INVALID_STATE_ERR              = 11;
+    // Introduced in DOM Level 2:
+    const unsigned short      SYNTAX_ERR                     = 12;
+    // Introduced in DOM Level 2:
+    const unsigned short      INVALID_MODIFICATION_ERR       = 13;
+    // Introduced in DOM Level 2:
+    const unsigned short      INVALID_ACCESS_ERR             = 15;
+    // Introduced in DOM Level 3:
+    const unsigned short      VALIDATION_ERR                 = 16;
+    // Introduced in DOM Level 3:
+    const unsigned short      TYPE_MISMATCH_ERR              = 17;
+    // Introduced as an XHR extension:
+    const unsigned short      SECURITY_ERR                   = 18;
+    // Introduced in HTML5:
+    const unsigned short      NETWORK_ERR                    = 19;
+    const unsigned short      ABORT_ERR                      = 20;
+    const unsigned short      URL_MISMATCH_ERR               = 21;
+    const unsigned short      QUOTA_EXCEEDED_ERR             = 22;
+    // TIMEOUT_ERR is currently unused but was added for completeness.
+    const unsigned short      TIMEOUT_ERR                    = 23;
+    // INVALID_NODE_TYPE_ERR is currently unused but was added for completeness.
+    const unsigned short      INVALID_NODE_TYPE_ERR          = 24;
+    const unsigned short      DATA_CLONE_ERR                 = 25;
+};
+

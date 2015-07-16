@@ -1,0 +1,6 @@
+unittest-suite-wait-for-done
+PASS: should be settable using "style" attribute
+
+All 1 tests passed.
+unittest-suite-success
+DONE

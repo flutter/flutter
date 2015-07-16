@@ -1,0 +1,6 @@
+unittest-suite-wait-for-done
+PASS: should not crash when setting style to null
+
+All 1 tests passed.
+unittest-suite-success
+DONE

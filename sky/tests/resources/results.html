@@ -1,0 +1,1408 @@
+<!DOCTYPE html>
+<style>
+html {
+    height: 100%;
+}
+body {
+    margin: 0;
+    font-family: Helvetica, sans-serif;
+    font-size: 11pt;
+    display: -webkit-flex;
+    -webkit-flex-direction: column;
+    height: 100%;
+}
+
+body > * {
+    margin-left: 4px;
+    margin-top: 4px;
+}
+
+h1 {
+    font-size: 14pt;
+    margin-top: 1.5em;
+}
+
+p {
+    margin-bottom: 0.3em;
+}
+
+tr:not(.results-row) td {
+    white-space: nowrap;
+}
+
+tr:not(.results-row) td:first-of-type {
+    white-space: normal;
+}
+
+td:not(:first-of-type) {
+    text-transform: lowercase;
+}
+
+td {
+    padding: 1px 4px;
+}
+
+th:empty, td:empty {
+    padding: 0;
+}
+
+th {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+}
+
+.content-container {
+    -webkit-flex: 1;
+    min-height: -webkit-min-content;
+    overflow: auto;
+}
+
+.note {
+    color: gray;
+    font-size: smaller;
+}
+
+.results-row {
+    background-color: white;
+}
+
+.results-row iframe, .results-row img {
+    width: 800px;
+    height: 600px;
+}
+
+.results-row[data-expanded="false"] {
+    display: none;
+}
+
+#toolbar {
+    position: fixed;
+    padding: 4px;
+    top: 2px;
+    right: 2px;
+    text-align: right;
+    background-color: rgba(255, 255, 255, 0.85);
+    border: 1px solid silver;
+    border-radius: 4px;
+}
+
+.expand-button {
+    background-color: white;
+    width: 11px;
+    height: 12px;
+    border: 1px solid gray;
+    display: inline-block;
+    margin: 0 3px 0 0;
+    position: relative;
+    cursor: default;
+}
+
+.current {
+    color: red;
+}
+
+.current .expand-button {
+    border-color: red;
+}
+
+.expand-button-text {
+    position: absolute;
+    top: -0.3em;
+    left: 1px;
+}
+
+tbody .flag {
+    display: none;
+}
+
+tbody.flagged .flag {
+    display: inline;
+}
+
+.stopped-running-early-message {
+    border: 3px solid #d00;
+    font-weight: bold;
+    display: inline-block;
+    padding: 3px;
+}
+
+.result-container {
+    display: inline-block;
+    border: 1px solid gray;
+    margin: 4px;
+}
+
+.result-container iframe, .result-container img {
+    border: 0;
+    vertical-align: top;
+}
+
+.label {
+    padding-left: 3px;
+    font-weight: bold;
+    font-size: small;
+    background-color: silver;
+}
+
+.pixel-zoom-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 96%;
+    margin: 10px;
+    padding: 10px;
+    display: -webkit-box;
+    display: -moz-box;
+    pointer-events: none;
+    background-color: silver;
+    border-radius: 20px;
+    border: 1px solid gray;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.75);
+}
+
+.pixel-zoom-container > * {
+    -webkit-box-flex: 1;
+    -moz-box-flex: 1;
+    border: 1px solid black;
+    margin: 4px;
+    overflow: hidden;
+    background-color: white;
+}
+
+.pixel-zoom-container .scaled-image-container {
+    position: relative;
+    overflow: hidden;
+    width: 100%;
+    height: 400px;
+}
+
+.scaled-image-container > img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    image-rendering: -webkit-optimize-contrast;
+}
+
+#flagged-tests {
+    margin: 1px;
+    padding: 5px;
+    height: 100px;
+}
+
+#flagged-test-container h2 {
+    display: inline-block;
+    margin: 0 10px 0 0;
+}
+</style>
+<style id="unexpected-pass-style"></style>
+<style id="flaky-failures-style"></style>
+<style id="stderr-style"></style>
+<style id="unexpected-style"></style>
+
+<script>
+var g_state;
+function globalState()
+{
+    if (!g_state) {
+        g_state = {
+            crashTests: [],
+            leakTests: [],
+            flakyPassTests: [],
+            hasHttpTests: false,
+            hasImageFailures: false,
+            hasTextFailures: false,
+            missingResults: [],
+            results: {},
+            shouldToggleImages: true,
+            failingTests: [],
+            testsWithStderr: [],
+            timeoutTests: [],
+            unexpectedPassTests: []
+        }
+    }
+    return g_state;
+}
+
+function ADD_RESULTS(input)
+{
+    globalState().results = input;
+}
+</script>
+
+<script src="failing_results.json"></script>
+
+<script>
+function stripExtension(test)
+{
+    var index = test.lastIndexOf('.');
+    return test.substring(0, index);
+}
+
+function matchesSelector(node, selector)
+{
+    if (node.webkitMatchesSelector)
+        return node.webkitMatchesSelector(selector);
+
+    if (node.mozMatchesSelector)
+        return node.mozMatchesSelector(selector);
+}
+
+function parentOfType(node, selector)
+{
+    while (node = node.parentNode) {
+        if (matchesSelector(node, selector))
+            return node;
+    }
+    return null;
+}
+
+function remove(node)
+{
+    node.parentNode.removeChild(node);
+}
+
+function forEach(nodeList, handler)
+{
+    Array.prototype.forEach.call(nodeList, handler);
+}
+
+function resultIframe(src)
+{
+    // FIXME: use audio tags for AUDIO tests?
+    var layoutTestsIndex = src.indexOf('tests');
+    var name;
+    if (layoutTestsIndex != -1) {
+        var hasTrac = src.indexOf('trac.webkit.org') != -1;
+        var prefix = hasTrac ? 'trac.webkit.org/.../' : '';
+        name = prefix + src.substring(layoutTestsIndex + 'tests/'.length);
+    } else {
+        var lastDashIndex = src.lastIndexOf('-pretty');
+        if (lastDashIndex == -1)
+            lastDashIndex = src.lastIndexOf('-');
+        name = src.substring(lastDashIndex + 1);
+    }
+
+    var tagName = (src.lastIndexOf('.png') == -1) ? 'iframe' : 'img';
+
+    if (tagName != 'img')
+        src += '?format=txt';
+    return '<div class=result-container><div class=label>' + name + '</div><' + tagName + ' src="' + src + '"></' + tagName + '></div>';
+}
+
+function togglingImage(prefix)
+{
+    return '<div class=result-container><div class="label imageText"></div><img class=animatedImage data-prefix="' +
+        prefix + '"></img></div>';
+}
+
+function toggleExpectations(element)
+{
+    var expandLink = element;
+    if (expandLink.className != 'expand-button-text')
+        expandLink = expandLink.querySelector('.expand-button-text');
+
+    if (expandLink.textContent == '+')
+        expandExpectations(expandLink);
+    else
+        collapseExpectations(expandLink);
+}
+
+function collapseExpectations(expandLink)
+{
+    expandLink.textContent = '+';
+    var existingResultsRow = parentOfType(expandLink, 'tbody').querySelector('.results-row');
+    if (existingResultsRow)
+        updateExpandedState(existingResultsRow, false);
+}
+
+function updateExpandedState(row, isExpanded)
+{
+    row.setAttribute('data-expanded', isExpanded);
+    updateImageTogglingTimer();
+}
+
+function appendHTML(node, html)
+{
+    node.innerHTML += html;
+}
+
+function expandExpectations(expandLink)
+{
+    var row = parentOfType(expandLink, 'tr');
+    var parentTbody = row.parentNode;
+    var existingResultsRow = parentTbody.querySelector('.results-row');
+
+    var enDash = '\u2013';
+    expandLink.textContent = enDash;
+    if (existingResultsRow) {
+        updateExpandedState(existingResultsRow, true);
+        return;
+    }
+
+    var newRow = document.createElement('tr');
+    newRow.className = 'results-row';
+    var newCell = document.createElement('td');
+    newCell.colSpan = row.querySelectorAll('td').length;
+
+    var resultLinks = row.querySelectorAll('.result-link');
+    var hasTogglingImages = false;
+    for (var i = 0; i < resultLinks.length; i++) {
+        var link = resultLinks[i];
+        var result;
+        if (link.textContent == 'images') {
+            hasTogglingImages = true;
+            result = togglingImage(link.getAttribute('data-prefix'));
+        } else
+            result = resultIframe(link.href);
+
+        appendHTML(newCell, result);
+    }
+
+    newRow.appendChild(newCell);
+    parentTbody.appendChild(newRow);
+
+    updateExpandedState(newRow, true);
+
+    updateImageTogglingTimer();
+}
+
+function updateImageTogglingTimer()
+{
+    var hasVisibleAnimatedImage = document.querySelector('.results-row[data-expanded="true"] .animatedImage');
+    if (!hasVisibleAnimatedImage) {
+        clearInterval(globalState().togglingImageInterval);
+        globalState().togglingImageInterval = null;
+        return;
+    }
+
+    if (!globalState().togglingImageInterval) {
+        toggleImages();
+        globalState().togglingImageInterval = setInterval(toggleImages, 2000);
+    }
+}
+
+function async(func, args)
+{
+    setTimeout(function() { func.apply(null, args); }, 100);
+}
+
+function visibleTests(opt_container)
+{
+    var container = opt_container || document;
+    if (onlyShowUnexpectedFailures())
+        return container.querySelectorAll('tbody:not(.expected)');
+    else
+        return container.querySelectorAll('tbody');
+}
+
+function visibleExpandLinks()
+{
+    if (onlyShowUnexpectedFailures())
+        return document.querySelectorAll('tbody:not(.expected) .expand-button-text');
+    else
+        return document.querySelectorAll('.expand-button-text');
+}
+
+function expandAllExpectations()
+{
+    var expandLinks = visibleExpandLinks();
+    for (var i = 0, len = expandLinks.length; i < len; i++)
+        async(expandExpectations, [expandLinks[i]]);
+}
+
+function collapseAllExpectations()
+{
+    var expandLinks = visibleExpandLinks();
+    for (var i = 0, len = expandLinks.length; i < len; i++)
+        async(collapseExpectations, [expandLinks[i]]);
+}
+
+function shouldUseTracLinks()
+{
+    return !globalState().results.layout_tests_dir || !location.toString().indexOf('file://') == 0;
+}
+
+function testLinkTarget(test)
+{
+    var target;
+    if (shouldUseTracLinks()) {
+        var revision = globalState().results.revision;
+        target = 'http://src.chromium.org/viewvc/blink/trunk/tests/' + test;
+        if (revision)
+            target += '?pathrev=' + revision;
+        target += '#l1';
+    } else
+        target = globalState().results.layout_tests_dir + '/' + test;
+    return target;
+}
+
+function testLink(test)
+{
+    var target = testLinkTarget(test);
+    return '<a class=test-link href="' + target + '">' + test + '</a><span class=flag onclick="unflag(this)"> \u2691</span>';
+}
+
+function unflag(flag)
+{
+    var shouldFlag = false;
+    TestNavigator.flagTest(parentOfType(flag, 'tbody'), shouldFlag);
+}
+
+function testLinkWithExpandButton(test)
+{
+    return '<span class=expand-button onclick="toggleExpectations(this)"><span class=expand-button-text>+</span></span>' + testLink(test);
+}
+
+function resultLink(testPrefix, suffix, contents)
+{
+    return '<a class=result-link href="' + testPrefix + suffix + '" data-prefix="' + testPrefix + '">' + contents + '</a> ';
+}
+
+function processGlobalStateFor(testObject)
+{
+    var test = testObject.name;
+    if (testObject.has_stderr)
+        globalState().testsWithStderr.push(testObject);
+
+    globalState().hasHttpTests = globalState().hasHttpTests || test.indexOf('http/') == 0;
+
+    var actual = testObject.actual;
+    var expected = testObject.expected || 'PASS';
+
+    if (actual == 'MISSING') {
+        // FIXME: make sure that new-run-webkit-tests spits out an -actual.txt file for
+        // tests with MISSING results.
+        globalState().missingResults.push(testObject);
+        return;
+    }
+
+    var actualTokens = actual.split(' ');
+    var passedWithImageOnlyFailureInRetry = actualTokens[0] == 'TEXT' && actualTokens[1] == 'IMAGE';
+    if (actualTokens[1] && actual.indexOf('PASS') != -1 || (!globalState().results.pixel_tests_enabled && passedWithImageOnlyFailureInRetry)) {
+        globalState().flakyPassTests.push(testObject);
+        return;
+    }
+
+    if (actual == 'PASS' && expected != 'PASS') {
+        if (expected != 'IMAGE' || (globalState().results.pixel_tests_enabled || testObject.reftest_type)) {
+            globalState().unexpectedPassTests.push(testObject);
+        }
+        return;
+    }
+
+    if (actual == 'CRASH') {
+        globalState().crashTests.push(testObject);
+        return;
+    }
+
+    if (actual == 'LEAK') {
+        globalState().leakTests.push(testObject);
+        return;
+    }
+
+    if (actual == 'TIMEOUT') {
+        globalState().timeoutTests.push(testObject);
+        return;
+    }
+
+    globalState().failingTests.push(testObject);
+}
+
+function toggleImages()
+{
+    var images = document.querySelectorAll('.animatedImage');
+    var imageTexts = document.querySelectorAll('.imageText');
+    for (var i = 0, len = images.length; i < len; i++) {
+        var image = images[i];
+        var text = imageTexts[i];
+        if (text.textContent == 'Expected Image') {
+            text.textContent = 'Actual Image';
+            image.src = image.getAttribute('data-prefix') + '-actual.png';
+        } else {
+            text.textContent = 'Expected Image';
+            image.src = image.getAttribute('data-prefix') + '-expected.png';
+        }
+    }
+}
+
+function textResultLinks(test, prefix)
+{
+    var html = resultLink(prefix, '-expected.txt', 'expected') +
+        resultLink(prefix, '-actual.txt', 'actual') +
+        resultLink(prefix, '-diff.txt', 'diff');
+
+    if (globalState().results.has_pretty_patch)
+        html += resultLink(prefix, '-pretty-diff.html', 'pretty diff');
+
+    if (globalState().results.has_wdiff)
+        html += resultLink(prefix, '-wdiff.html', 'wdiff');
+
+    return html;
+}
+
+function imageResultsCell(testObject, testPrefix, actual) {
+    var row = '';
+
+    if (actual.indexOf('IMAGE') != -1) {
+        globalState().hasImageFailures = true;
+
+        if (testObject.reftest_type && testObject.reftest_type.indexOf('!=') != -1) {
+            row += resultLink(testPrefix, '-expected-mismatch.sky', 'ref mismatch html');
+            row += resultLink(testPrefix, '-actual.png', 'actual');
+        } else {
+            if (testObject.reftest_type && testObject.reftest_type.indexOf('==') != -1) {
+                row += resultLink(testPrefix, '-expected.sky', 'ref html');
+            }
+            if (globalState().shouldToggleImages) {
+                row += resultLink(testPrefix, '-diffs.html', 'images');
+            } else {
+                row += resultLink(testPrefix, '-expected.png', 'expected');
+                row += resultLink(testPrefix, '-actual.png', 'actual');
+            }
+
+            row += resultLink(testPrefix, '-diff.png', 'diff');
+        }
+    }
+
+    if (actual.indexOf('MISSING') != -1 && testObject.is_missing_image)
+        row += resultLink(testPrefix, '-actual.png', 'png result');
+
+    return row;
+}
+
+function tableRow(testObject)
+{
+    var row = '<tbody class="' + (testObject.is_unexpected ? '' : 'expected') + '"';
+    if (testObject.reftest_type && testObject.reftest_type.indexOf('!=') != -1)
+        row += ' mismatchreftest=true';
+    row += '><tr>';
+
+    row += '<td>' + testLinkWithExpandButton(testObject.name) + '</td>';
+
+    var testPrefix = stripExtension(testObject.name);
+    row += '<td>';
+
+    var actual = testObject.actual;
+    if (actual.indexOf('TEXT') != -1) {
+        globalState().hasTextFailures = true;
+        if (testObject.is_testharness_test) {
+            row += resultLink(testPrefix, '-actual.txt', 'actual');
+        } else {
+            row += textResultLinks(testObject.name, testPrefix);
+        }
+    }
+
+    if (actual.indexOf('AUDIO') != -1) {
+        row += resultLink(testPrefix, '-expected.wav', 'expected audio');
+        row += resultLink(testPrefix, '-actual.wav', 'actual audio');
+    }
+
+    if (actual.indexOf('MISSING') != -1) {
+        if (testObject.is_missing_audio)
+            row += resultLink(testPrefix, '-actual.wav', 'audio result');
+        if (testObject.is_missing_text)
+            row += resultLink(testPrefix, '-actual.txt', 'result');
+    }
+
+    if (actual.indexOf('CRASH') != -1) {
+        row += resultLink(testPrefix, '-crash-log.txt', 'crash log');
+        row += resultLink(testPrefix, '-sample.txt', 'sample');
+        if (testObject.has_stderr)
+            row += resultLink(testPrefix, '-stderr.txt', 'stderr');
+    }
+
+    if (testObject.has_repaint_overlay)
+        row += resultLink(testPrefix, '-overlay.html?' + encodeURIComponent(testLinkTarget(testObject.name)), 'overlay');
+
+    var actualTokens = actual.split(/\s+/);
+    var cell = imageResultsCell(testObject, testPrefix, actualTokens[0]);
+    if (!cell && actualTokens.length > 1)
+        cell = imageResultsCell(testObject, 'retries/' + testPrefix, actualTokens[1]);
+
+    row += '</td><td>' + cell + '</td>' +
+        '<td>' + actual + '</td>' +
+        '<td>' + (actual.indexOf('MISSING') == -1 ? testObject.expected : '') + '</td>' +
+    '</tr></tbody>';
+    return row;
+}
+
+function forEachTest(handler, opt_tree, opt_prefix)
+{
+    var tree = opt_tree || globalState().results.tests;
+    var prefix = opt_prefix || '';
+
+    for (var key in tree) {
+        var newPrefix = prefix ? (prefix + '/' + key) : key;
+        if ('actual' in tree[key]) {
+            var testObject = tree[key];
+            testObject.name = newPrefix;
+            handler(testObject);
+        } else
+            forEachTest(handler, tree[key], newPrefix);
+    }
+}
+
+function hasUnexpected(tests)
+{
+    return tests.some(function (test) { return test.is_unexpected; });
+}
+
+function updateTestlistCounts()
+{
+    forEach(document.querySelectorAll('.test-list-count'), function(count) {
+        var container = parentOfType(count, 'div');
+        var testContainers;
+        if (onlyShowUnexpectedFailures())
+            testContainers = container.querySelectorAll('tbody:not(.expected)');
+        else
+            testContainers = container.querySelectorAll('tbody');
+
+        count.textContent = testContainers.length;
+    })
+}
+
+function flagAll(headerLink)
+{
+    var tests = visibleTests(parentOfType(headerLink, 'div'));
+    forEach(tests, function(test) {
+        var shouldFlag = true;
+        TestNavigator.flagTest(test, shouldFlag);
+    })
+}
+
+function testListHeaderHtml(header)
+{
+    return '<h1>' + header + ' (<span class=test-list-count></span>): <a href="#" class=flag-all onclick="flagAll(this)">flag all</a></h1>';
+}
+
+function testList(tests, header, tableId)
+{
+    tests.sort();
+
+    var html = '<div' + ((!hasUnexpected(tests) && tableId != 'stderr-table') ? ' class=expected' : '') + ' id=' + tableId + '>' +
+        testListHeaderHtml(header) + '<table>';
+
+    // FIXME: Include this for all testLists.
+    if (tableId == 'passes-table')
+        html += '<thead><th>test</th><th>expected</th></thead>';
+
+    for (var i = 0; i < tests.length; i++) {
+        var testObject = tests[i];
+        var test = testObject.name;
+        html += '<tbody class="' + ((testObject.is_unexpected || tableId == 'stderr-table') ? '' : 'expected') + '"><tr><td>' +
+            ((tableId == 'passes-table') ? testLink(test) : testLinkWithExpandButton(test)) +
+        '</td><td>';
+
+        if (tableId == 'stderr-table')
+            html += resultLink(stripExtension(test), '-stderr.txt', 'stderr');
+        else if (tableId == 'passes-table')
+            html += testObject.expected;
+        else if (tableId == 'crash-tests-table') {
+            html += resultLink(stripExtension(test), '-crash-log.txt', 'crash log');
+            html += resultLink(stripExtension(test), '-sample.txt', 'sample');
+            if (testObject.has_stderr)
+                html += resultLink(stripExtension(test), '-stderr.txt', 'stderr');
+        } else if (tableId == 'leak-tests-table')
+            html += resultLink(stripExtension(test), '-leak-log.txt', 'leak log');
+        else if (tableId == 'timeout-tests-table') {
+            // FIXME: only include timeout actual/diff results here if we actually spit out results for timeout tests.
+            html += textResultLinks(test, stripExtension(test));
+        }
+
+        if (testObject.has_repaint_overlay)
+            html += resultLink(stripExtension(test), '-overlay.html?' + encodeURIComponent(testLinkTarget(test)), 'overlay');
+
+        html += '</td></tr></tbody>';
+    }
+    html += '</table></div>';
+    return html;
+}
+
+function toArray(nodeList)
+{
+    return Array.prototype.slice.call(nodeList);
+}
+
+function trim(string)
+{
+    return string.replace(/^[\s\xa0]+|[\s\xa0]+$/g, '');
+}
+
+// Just a namespace for code management.
+var TableSorter = {};
+
+TableSorter._forwardArrow = '<svg style="width:10px;height:10px"><polygon points="0,0 10,0 5,10" style="fill:#ccc"></svg>';
+
+TableSorter._backwardArrow = '<svg style="width:10px;height:10px"><polygon points="0,10 10,10 5,0" style="fill:#ccc"></svg>';
+
+TableSorter._sortedContents = function(header, arrow)
+{
+    return arrow + ' ' + trim(header.textContent) + ' ' + arrow;
+}
+
+TableSorter._updateHeaderClassNames = function(newHeader)
+{
+    var sortHeader = document.querySelector('.sortHeader');
+    if (sortHeader) {
+        if (sortHeader == newHeader) {
+            var isAlreadyReversed = sortHeader.classList.contains('reversed');
+            if (isAlreadyReversed)
+                sortHeader.classList.remove('reversed');
+            else
+                sortHeader.classList.add('reversed');
+        } else {
+            sortHeader.textContent = sortHeader.textContent;
+            sortHeader.classList.remove('sortHeader');
+            sortHeader.classList.remove('reversed');
+        }
+    }
+
+    newHeader.classList.add('sortHeader');
+}
+
+TableSorter._textContent = function(tbodyRow, column)
+{
+    return tbodyRow.querySelectorAll('td')[column].textContent;
+}
+
+TableSorter._sortRows = function(newHeader, reversed)
+{
+    var testsTable = document.getElementById('results-table');
+    var headers = toArray(testsTable.querySelectorAll('th'));
+    var sortColumn = headers.indexOf(newHeader);
+
+    var rows = toArray(testsTable.querySelectorAll('tbody'));
+
+    rows.sort(function(a, b) {
+        // Only need to support lexicographic sort for now.
+        var aText = TableSorter._textContent(a, sortColumn);
+        var bText = TableSorter._textContent(b, sortColumn);
+
+        // Forward sort equal values by test name.
+        if (sortColumn && aText == bText) {
+            var aTestName = TableSorter._textContent(a, 0);
+            var bTestName = TableSorter._textContent(b, 0);
+            if (aTestName == bTestName)
+                return 0;
+            return aTestName < bTestName ? -1 : 1;
+        }
+
+        if (reversed)
+            return aText < bText ? 1 : -1;
+        else
+            return aText < bText ? -1 : 1;
+    });
+
+    for (var i = 0; i < rows.length; i++)
+        testsTable.appendChild(rows[i]);
+}
+
+TableSorter.sortColumn = function(columnNumber)
+{
+    var newHeader = document.getElementById('results-table').querySelectorAll('th')[columnNumber];
+    TableSorter._sort(newHeader);
+}
+
+TableSorter.handleClick = function(e)
+{
+    var newHeader = e.target;
+    if (newHeader.localName != 'th')
+        return;
+    TableSorter._sort(newHeader);
+}
+
+TableSorter._sort = function(newHeader)
+{
+    TableSorter._updateHeaderClassNames(newHeader);
+
+    var reversed = newHeader.classList.contains('reversed');
+    var sortArrow = reversed ? TableSorter._backwardArrow : TableSorter._forwardArrow;
+    newHeader.innerHTML = TableSorter._sortedContents(newHeader, sortArrow);
+
+    TableSorter._sortRows(newHeader, reversed);
+}
+
+var PixelZoomer = {};
+
+PixelZoomer.showOnDelay = true;
+PixelZoomer._zoomFactor = 6;
+
+var kResultWidth = 800;
+var kResultHeight = 600;
+
+var kZoomedResultWidth = kResultWidth * PixelZoomer._zoomFactor;
+var kZoomedResultHeight = kResultHeight * PixelZoomer._zoomFactor;
+
+PixelZoomer._zoomImageContainer = function(url)
+{
+    var container = document.createElement('div');
+    container.className = 'zoom-image-container';
+
+    var title = url.match(/\-([^\-]*)\.png/)[1];
+
+    var label = document.createElement('div');
+    label.className = 'label';
+    label.appendChild(document.createTextNode(title));
+    container.appendChild(label);
+
+    var imageContainer = document.createElement('div');
+    imageContainer.className = 'scaled-image-container';
+
+    var image = new Image();
+    image.src = url;
+    image.style.display = 'none';
+
+    var canvas = document.createElement('canvas');
+
+    imageContainer.appendChild(image);
+    imageContainer.appendChild(canvas);
+    container.appendChild(imageContainer);
+
+    return container;
+}
+
+PixelZoomer._createContainer = function(e)
+{
+    var tbody = parentOfType(e.target, 'tbody');
+    var row = tbody.querySelector('tr');
+    var imageDiffLinks = row.querySelectorAll('a[href$=".png"]');
+
+    var container = document.createElement('div');
+    container.className = 'pixel-zoom-container';
+
+    var html = '';
+
+    var togglingImageLink = row.querySelector('a[href$="-diffs.html"]');
+    if (togglingImageLink) {
+        var prefix = togglingImageLink.getAttribute('data-prefix');
+        container.appendChild(PixelZoomer._zoomImageContainer(prefix + '-expected.png'));
+        container.appendChild(PixelZoomer._zoomImageContainer(prefix + '-actual.png'));
+    }
+
+    for (var i = 0; i < imageDiffLinks.length; i++)
+        container.appendChild(PixelZoomer._zoomImageContainer(imageDiffLinks[i].href));
+
+    document.body.appendChild(container);
+    PixelZoomer._drawAll();
+}
+
+PixelZoomer._draw = function(imageContainer)
+{
+    var image = imageContainer.querySelector('img');
+    var canvas = imageContainer.querySelector('canvas');
+
+    if (!image.complete) {
+        image.onload = function() {
+            PixelZoomer._draw(imageContainer);
+        };
+        return;
+    }
+
+    canvas.width = imageContainer.clientWidth;
+    canvas.height = imageContainer.clientHeight;
+
+    var ctx = canvas.getContext('2d');
+    ctx.mozImageSmoothingEnabled = false;
+    ctx.imageSmoothingEnabled = false;
+    ctx.translate(imageContainer.clientWidth / 2, imageContainer.clientHeight / 2);
+    ctx.translate(-PixelZoomer._percentX * kZoomedResultWidth, -PixelZoomer._percentY * kZoomedResultHeight);
+    ctx.strokeRect(-1.5, -1.5, kZoomedResultWidth + 2, kZoomedResultHeight + 2);
+    ctx.scale(PixelZoomer._zoomFactor, PixelZoomer._zoomFactor);
+    ctx.drawImage(image, 0, 0);
+}
+
+PixelZoomer._drawAll = function()
+{
+    forEach(document.querySelectorAll('.pixel-zoom-container .scaled-image-container'), PixelZoomer._draw);
+}
+
+PixelZoomer.handleMouseOut = function(e)
+{
+    if (e.relatedTarget && e.relatedTarget.tagName != 'IFRAME')
+        return;
+
+    // If e.relatedTarget is null, we've moused out of the document.
+    var container = document.querySelector('.pixel-zoom-container');
+    if (container)
+        remove(container);
+}
+
+PixelZoomer.handleMouseMove = function(e) {
+    if (PixelZoomer._mouseMoveTimeout)
+        clearTimeout(PixelZoomer._mouseMoveTimeout);
+
+    if (parentOfType(e.target, '.pixel-zoom-container'))
+        return;
+
+    var container = document.querySelector('.pixel-zoom-container');
+
+    var resultContainer = (e.target.className == 'result-container') ?
+        e.target : parentOfType(e.target, '.result-container');
+    if (!resultContainer || !resultContainer.querySelector('img')) {
+        if (container)
+            remove(container);
+        return;
+    }
+
+    var targetLocation = e.target.getBoundingClientRect();
+    PixelZoomer._percentX = (e.clientX - targetLocation.left) / targetLocation.width;
+    PixelZoomer._percentY = (e.clientY - targetLocation.top) / targetLocation.height;
+
+    if (!container) {
+        if (PixelZoomer.showOnDelay) {
+            PixelZoomer._mouseMoveTimeout = setTimeout(function() {
+                PixelZoomer._createContainer(e);
+            }, 400);
+            return;
+        }
+
+        PixelZoomer._createContainer(e);
+        return;
+    }
+
+    PixelZoomer._drawAll();
+}
+
+document.addEventListener('mousemove', PixelZoomer.handleMouseMove, false);
+document.addEventListener('mouseout', PixelZoomer.handleMouseOut, false);
+
+var TestNavigator = {};
+
+TestNavigator.reset = function() {
+    TestNavigator.currentTestIndex = -1;
+    TestNavigator.flaggedTests = {};
+    TestNavigator._createFlaggedTestContainer();
+}
+
+TestNavigator.handleKeyEvent = function(event)
+{
+    if (event.metaKey || event.shiftKey || event.ctrlKey)
+        return;
+
+    switch (String.fromCharCode(event.charCode)) {
+        case 'i':
+            TestNavigator._scrollToFirstTest();
+            break;
+        case 'j':
+            TestNavigator._scrollToNextTest();
+            break;
+        case 'k':
+            TestNavigator._scrollToPreviousTest();
+            break;
+        case 'l':
+            TestNavigator._scrollToLastTest();
+            break;
+        case 'e':
+            TestNavigator._expandCurrentTest();
+            break;
+        case 'c':
+            TestNavigator._collapseCurrentTest();
+            break;
+        case 't':
+            TestNavigator._toggleCurrentTest();
+            break;
+        case 'f':
+            TestNavigator._toggleCurrentTestFlagged();
+            break;
+    }
+}
+
+TestNavigator._scrollToFirstTest = function()
+{
+    if (TestNavigator._setCurrentTest(0))
+        TestNavigator._scrollToCurrentTest();
+}
+
+TestNavigator._scrollToLastTest = function()
+{
+    var links = visibleTests();
+    if (TestNavigator._setCurrentTest(links.length - 1))
+        TestNavigator._scrollToCurrentTest();
+}
+
+TestNavigator._scrollToNextTest = function()
+{
+    if (TestNavigator.currentTestIndex == -1)
+        TestNavigator._scrollToFirstTest();
+    else if (TestNavigator._setCurrentTest(TestNavigator.currentTestIndex + 1))
+        TestNavigator._scrollToCurrentTest();
+}
+
+TestNavigator._scrollToPreviousTest = function()
+{
+    if (TestNavigator.currentTestIndex == -1)
+        TestNavigator._scrollToLastTest();
+    else if (TestNavigator._setCurrentTest(TestNavigator.currentTestIndex - 1))
+        TestNavigator._scrollToCurrentTest();
+}
+
+TestNavigator._currentTestLink = function()
+{
+    var links = visibleTests();
+    return links[TestNavigator.currentTestIndex];
+}
+
+TestNavigator._currentTestExpandLink = function()
+{
+    return TestNavigator._currentTestLink().querySelector('.expand-button-text');
+}
+
+TestNavigator._expandCurrentTest = function()
+{
+    expandExpectations(TestNavigator._currentTestExpandLink());
+}
+
+TestNavigator._collapseCurrentTest = function()
+{
+    collapseExpectations(TestNavigator._currentTestExpandLink());
+}
+
+TestNavigator._toggleCurrentTest = function()
+{
+    toggleExpectations(TestNavigator._currentTestExpandLink());
+}
+
+TestNavigator._toggleCurrentTestFlagged = function()
+{
+    var testLink = TestNavigator._currentTestLink();
+    TestNavigator.flagTest(testLink, !testLink.classList.contains('flagged'));
+}
+
+// FIXME: Test navigator shouldn't know anything about flagging. It should probably call out to TestFlagger or something.
+TestNavigator.flagTest = function(testTbody, shouldFlag)
+{
+    var testName = testTbody.querySelector('.test-link').innerText;
+
+    if (shouldFlag) {
+        testTbody.classList.add('flagged');
+        TestNavigator.flaggedTests[testName] = 1;
+    } else {
+        testTbody.classList.remove('flagged');
+        delete TestNavigator.flaggedTests[testName];
+    }
+
+    TestNavigator.updateFlaggedTests();
+}
+
+TestNavigator._createFlaggedTestContainer = function()
+{
+    var flaggedTestContainer = document.createElement('div');
+    flaggedTestContainer.id = 'flagged-test-container';
+    flaggedTestContainer.innerHTML = '<h2>Flagged Tests</h2>' +
+        '<label title="Use newlines instead of spaces to separate flagged tests">' +
+            '<input id="use-newlines" type=checkbox checked onchange="handleToggleUseNewlines()">Use newlines</input>' +
+        '</label>' +
+        '<pre id="flagged-tests" contentEditable></pre>';
+    document.body.appendChild(flaggedTestContainer);
+}
+
+TestNavigator.updateFlaggedTests = function()
+{
+    var flaggedTestTextbox = document.getElementById('flagged-tests');
+    var flaggedTests = Object.keys(this.flaggedTests);
+    flaggedTests.sort();
+    var separator = document.getElementById('use-newlines').checked ? '\n' : ' ';
+    flaggedTestTextbox.innerHTML = flaggedTests.join(separator);
+    document.getElementById('flagged-test-container').style.display = flaggedTests.length ? '' : 'none';
+}
+
+TestNavigator._setCurrentTest = function(testIndex)
+{
+    var links = visibleTests();
+    if (testIndex < 0 || testIndex >= links.length)
+        return false;
+
+    var currentTest = links[TestNavigator.currentTestIndex];
+    if (currentTest)
+        currentTest.classList.remove('current');
+
+    TestNavigator.currentTestIndex = testIndex;
+
+    currentTest = links[TestNavigator.currentTestIndex];
+    currentTest.classList.add('current');
+
+    return true;
+}
+
+TestNavigator._scrollToCurrentTest = function()
+{
+    var targetLink = TestNavigator._currentTestLink();
+    if (!targetLink)
+        return;
+
+    var rowRect = targetLink.getBoundingClientRect();
+    var container = document.querySelector('.content-container');
+    // rowRect is in client coords (i.e. relative to viewport), so we just want to add its top to the current scroll position.
+    container.scrollTop += rowRect.top - 20;
+}
+
+TestNavigator.onlyShowUnexpectedFailuresChanged = function()
+{
+    var currentTest = document.querySelector('.current');
+    if (!currentTest)
+        return;
+
+    // If our currentTest became hidden, reset the currentTestIndex.
+    if (onlyShowUnexpectedFailures() && currentTest.classList.contains('expected'))
+        TestNavigator._scrollToFirstTest();
+    else {
+        // Recompute TestNavigator.currentTestIndex
+        var links = visibleTests();
+        TestNavigator.currentTestIndex = links.indexOf(currentTest);
+        window.console.log('TestNavigator.currentTestIndex is ', TestNavigator.currentTestIndex)
+    }
+}
+
+document.addEventListener('keypress', TestNavigator.handleKeyEvent, false);
+
+
+function onlyShowUnexpectedFailures()
+{
+    return !document.getElementById('show-expected-failures').checked;
+}
+
+function handleStderrChange()
+{
+    OptionWriter.save();
+    document.getElementById('stderr-style').textContent = document.getElementById('show-stderr').checked ?
+        '' : '#stderr-table { display: none; }';
+}
+
+function handleUnexpectedPassesChange()
+{
+    OptionWriter.save();
+    document.getElementById('unexpected-pass-style').textContent = document.getElementById('show-unexpected-passes').checked ?
+        '' : '#passes-table { display: none; }';
+}
+
+function handleFlakyFailuresChange()
+{
+    OptionWriter.save();
+    document.getElementById('flaky-failures-style').textContent = document.getElementById('show-flaky-failures').checked ?
+        '' : '.flaky { display: none; }';
+}
+
+function handleUnexpectedResultsChange()
+{
+    OptionWriter.save();
+    updateExpectedFailures();
+}
+
+function updateExpectedFailures()
+{
+    document.getElementById('unexpected-style').textContent = onlyShowUnexpectedFailures() ?
+        '.expected { display: none; }' : '';
+
+    updateTestlistCounts();
+    TestNavigator.onlyShowUnexpectedFailuresChanged();
+}
+
+var OptionWriter = {};
+
+OptionWriter._key = 'run-webkit-tests-options';
+
+OptionWriter.save = function()
+{
+    var options = document.querySelectorAll('label input');
+    var data = {};
+    for (var i = 0, len = options.length; i < len; i++) {
+        var option = options[i];
+        data[option.id] = option.checked;
+    }
+    localStorage.setItem(OptionWriter._key, JSON.stringify(data));
+}
+
+OptionWriter.apply = function()
+{
+    var json = localStorage.getItem(OptionWriter._key);
+    if (!json) {
+        updateAllOptions();
+        return;
+    }
+
+    var data = JSON.parse(json);
+    for (var id in data) {
+        var input = document.getElementById(id);
+        if (input)
+            input.checked = data[id];
+    }
+    updateAllOptions();
+}
+
+function updateAllOptions()
+{
+    forEach(document.querySelectorAll('input'), function(input) { input.onchange(); });
+}
+
+function handleToggleUseNewlines()
+{
+    OptionWriter.save();
+    TestNavigator.updateFlaggedTests();
+}
+
+function handleToggleImagesChange()
+{
+    OptionWriter.save();
+    updateTogglingImages();
+}
+
+function updateTogglingImages()
+{
+    var shouldToggle = document.getElementById('toggle-images').checked;
+    globalState().shouldToggleImages = shouldToggle;
+
+    if (shouldToggle) {
+        forEach(document.querySelectorAll('table:not(#missing-table) tbody:not([mismatchreftest]) a[href$=".png"]'), convertToTogglingHandler(function(prefix) {
+            return resultLink(prefix, '-diffs.html', 'images');
+        }));
+        forEach(document.querySelectorAll('table:not(#missing-table) tbody:not([mismatchreftest]) img[src$=".png"]'), convertToTogglingHandler(togglingImage));
+    } else {
+        forEach(document.querySelectorAll('a[href$="-diffs.html"]'), convertToNonTogglingHandler(resultLink));
+        forEach(document.querySelectorAll('.animatedImage'), convertToNonTogglingHandler(function (absolutePrefix, suffix) {
+            return resultIframe(absolutePrefix + suffix);
+        }));
+    }
+
+    updateImageTogglingTimer();
+}
+
+function getResultContainer(node)
+{
+    return (node.tagName == 'IMG') ? parentOfType(node, '.result-container') : node;
+}
+
+function convertToTogglingHandler(togglingImageFunction)
+{
+    return function(node) {
+        var url = (node.tagName == 'IMG') ? node.src : node.href;
+        if (url.match('-expected.png$'))
+            remove(getResultContainer(node));
+        else if (url.match('-actual.png$')) {
+            var name = parentOfType(node, 'tbody').querySelector('.test-link').textContent;
+            getResultContainer(node).outerHTML = togglingImageFunction(stripExtension(name));
+        }
+    }
+}
+
+function convertToNonTogglingHandler(resultFunction)
+{
+    return function(node) {
+        var prefix = node.getAttribute('data-prefix');
+        getResultContainer(node).outerHTML = resultFunction(prefix, '-expected.png', 'expected') + resultFunction(prefix, '-actual.png', 'actual');
+    }
+}
+
+function failingTestsTable(tests, title, id)
+{
+    if (!tests.length)
+        return '';
+
+    var numberofUnexpectedFailures = 0;
+    var tableRowHtml = '';
+    for (var i = 0; i < tests.length; i++){
+        tableRowHtml += tableRow(tests[i]);
+        if (tests[i].is_unexpected)
+            numberofUnexpectedFailures++;
+    }
+
+    var className = '';
+    if (id)
+        className += id.split('-')[0];
+    if (!hasUnexpected(tests))
+        className += ' expected';
+
+    var header = '<div';
+    if (className)
+        header += ' class="' + className + '"';
+
+    header += '>' + testListHeaderHtml(title) +
+        '<table id="' + id + '"><thead><tr>' +
+        '<th>test</th>' +
+        '<th id="text-results-header">results</th>' +
+        '<th id="image-results-header">image results</th>' +
+        '<th>actual</th>' +
+        '<th>expected</th>';
+
+    if (id == 'flaky-tests-table')
+        header += '<th>failures</th>';
+
+    header += '</tr></thead>';
+
+
+    return header + tableRowHtml + '</table></div>';
+}
+
+function generatePage()
+{
+    forEachTest(processGlobalStateFor);
+
+    var html = '<div class=content-container><div id=toolbar>' +
+        '<div class="note">Use the i, j, k and l keys to navigate, e, c to expand and collapse, and f to flag</div>' +
+        '<a href="dashboard.html" >Archived results&nbsp;</a>' +
+        '<a href="javascript:void()" onclick="expandAllExpectations()">expand all</a> ' +
+        '<a href="javascript:void()" onclick="collapseAllExpectations()">collapse all</a> ' +
+        '<label><input id="toggle-images" type=checkbox checked onchange="handleToggleImagesChange()">Toggle images</label>' +
+        '<div id=container>Show: '+
+        '<label><input id="show-expected-failures" type=checkbox onchange="handleUnexpectedResultsChange()">expected failures</label>' +
+        '<label><input id="show-flaky-failures" type=checkbox onchange="handleFlakyFailuresChange()">flaky failures</label>' +
+        '<label><input id="show-unexpected-passes" type=checkbox onchange="handleUnexpectedPassesChange()">unexpected passes</label>' +
+        '<label><input id="show-stderr" type=checkbox onchange="handleStderrChange()">stderr</label>' +
+        '</div></div>';
+
+    if (globalState().results.interrupted)
+        html += "<p class='stopped-running-early-message'>Testing exited early.</p>"
+
+    if (globalState().crashTests.length)
+        html += testList(globalState().crashTests, 'Tests that crashed', 'crash-tests-table');
+
+    if (globalState().leakTests.length)
+        html += testList(globalState().leakTests, 'Tests that leaked', 'leak-tests-table');
+
+    html += failingTestsTable(globalState().failingTests,
+        'Tests that failed text/pixel/audio diff', 'results-table');
+
+    html += failingTestsTable(globalState().missingResults,
+        'Tests that had no expected results (probably new)', 'missing-table');
+
+    if (globalState().timeoutTests.length)
+        html += testList(globalState().timeoutTests, 'Tests that timed out', 'timeout-tests-table');
+
+    if (globalState().testsWithStderr.length)
+        html += testList(globalState().testsWithStderr, 'Tests that had stderr output', 'stderr-table');
+
+    html += failingTestsTable(globalState().flakyPassTests,
+        'Flaky tests (failed the first run and passed on retry)', 'flaky-tests-table');
+
+    if (globalState().unexpectedPassTests.length)
+        html += testList(globalState().unexpectedPassTests, 'Tests expected to fail but passed', 'passes-table');
+
+    if (globalState().hasHttpTests) {
+        html += '<p>httpd access log: <a href="access_log.txt">access_log.txt</a></p>' +
+            '<p>httpd error log: <a href="error_log.txt">error_log.txt</a></p>';
+    }
+
+    html += '</div>';
+
+    document.body.innerHTML = html;
+
+    if (document.getElementById('results-table')) {
+        document.getElementById('results-table').addEventListener('click', TableSorter.handleClick, false);
+        TableSorter.sortColumn(0);
+        if (!globalState().hasTextFailures)
+            document.getElementById('text-results-header').textContent = '';
+        if (!globalState().hasImageFailures) {
+            document.getElementById('image-results-header').textContent = '';
+            parentOfType(document.getElementById('toggle-images'), 'label').style.display = 'none';
+        }
+    }
+
+    updateTestlistCounts();
+
+    TestNavigator.reset();
+    OptionWriter.apply();
+}
+</script>
+<!-- HACK: when json_results_test.js is included, loading this page runs the tests.
+It is not copied to the layout-test-results output directory. -->
+<script src="resources/results-test.js"></script>
+<body onload="generatePage()"></body>

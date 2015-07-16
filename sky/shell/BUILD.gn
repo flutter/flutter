@@ -1,0 +1,202 @@
+# Copyright 2015 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+common_deps = [
+  "//base",
+  "//base:i18n",
+  "//build/config/sanitizers:deps",
+  "//dart/runtime:libdart",
+  "//mojo/common",
+  "//mojo/edk/system",
+  "//mojo/public/cpp/application",
+  "//mojo/public/interfaces/application",
+  "//mojo/services/asset_bundle/public/interfaces",
+  "//mojo/services/navigation/public/interfaces",
+  "//mojo/services/network/public/interfaces",
+  "//services/asset_bundle:lib",
+  "//skia",
+  "//sky/engine",
+  "//sky/engine/tonic",
+  "//sky/engine/wtf",
+  "//sky/services/engine:interfaces",
+  "//sky/shell/dart",
+  "//ui/gfx/geometry",
+  "//ui/gl",
+]
+
+source_set("common") {
+  sources = [
+    "gpu/ganesh_context.cc",
+    "gpu/ganesh_context.h",
+    "gpu/ganesh_surface.cc",
+    "gpu/ganesh_surface.h",
+    "gpu/picture_serializer.cc",
+    "gpu/picture_serializer.h",
+    "gpu/rasterizer.cc",
+    "gpu/rasterizer.h",
+    "gpu_delegate.cc",
+    "gpu_delegate.h",
+    "platform_view.cc",
+    "platform_view.h",
+    "service_provider.cc",
+    "service_provider.h",
+    "shell.cc",
+    "shell.h",
+    "shell_view.cc",
+    "shell_view.h",
+    "switches.cc",
+    "switches.h",
+    "ui/animator.cc",
+    "ui/animator.h",
+    "ui/engine.cc",
+    "ui/engine.h",
+    "ui/input_event_converter.cc",
+    "ui/input_event_converter.h",
+    "ui/internals.cc",
+    "ui/internals.h",
+    "ui/platform_impl.cc",
+    "ui/platform_impl.h",
+    "ui_delegate.cc",
+    "ui_delegate.h",
+  ]
+
+  deps = common_deps
+}
+
+if (is_android) {
+  import("//build/config/android/config.gni")
+  import("//build/config/android/rules.gni")
+
+  generate_jni("jni_headers") {
+    sources = [
+      "android/org/domokit/sky/shell/PlatformServiceProvider.java",
+      "android/org/domokit/sky/shell/PlatformViewAndroid.java",
+      "android/org/domokit/sky/shell/SkyMain.java",
+      "android/org/domokit/sky/shell/TracingController.java",
+    ]
+    jni_package = "sky/shell"
+  }
+
+  shared_library("sky_shell") {
+    sources = [
+      "android/library_loader.cc",
+      "android/platform_service_provider_android.cc",
+      "android/platform_service_provider_android.h",
+      "android/platform_view_android.cc",
+      "android/platform_view_android.h",
+      "android/sky_main.cc",
+      "android/sky_main.h",
+      "android/tracing_controller.cc",
+      "android/tracing_controller.h",
+    ]
+
+    deps = common_deps + [
+             "//mojo/android:libsystem_java",
+             ":jni_headers",
+             ":common",
+           ]
+  }
+
+  android_library("java") {
+    java_files = [
+      "android/org/domokit/sky/shell/GestureProvider.java",
+      "android/org/domokit/sky/shell/PlatformServiceProvider.java",
+      "android/org/domokit/sky/shell/PlatformViewAndroid.java",
+      "android/org/domokit/sky/shell/ResourceCleaner.java",
+      "android/org/domokit/sky/shell/ResourceExtractor.java",
+      "android/org/domokit/sky/shell/ServiceFactory.java",
+      "android/org/domokit/sky/shell/ServiceRegistry.java",
+      "android/org/domokit/sky/shell/SkyActivity.java",
+      "android/org/domokit/sky/shell/SkyApplication.java",
+      "android/org/domokit/sky/shell/SkyMain.java",
+      "android/org/domokit/sky/shell/TracingController.java",
+    ]
+
+    deps = [
+      "//base:base_java",
+      "//mojo/android:system_java",
+      "//mojo/public/interfaces/application:application_java",
+      "//mojo/public/java:bindings",
+      "//mojo/public/java:system",
+      "//mojo/services/keyboard/public/interfaces:interfaces_java",
+      "//mojo/services/network/public/interfaces:interfaces_java",
+      "//services/keyboard",
+      "//sky/services/activity:activity_lib",
+      "//sky/services/activity:interfaces_java",
+      "//sky/services/engine:interfaces_java",
+      "//sky/services/oknet",
+    ]
+  }
+
+  copy_ex("assets") {
+    clear_dir = true
+    dest = "$root_build_dir/sky_shell/assets"
+    sources = [
+      "$root_build_dir/icudtl.dat",
+    ]
+    deps = [
+      "//third_party/icu",
+    ]
+  }
+} else if (is_ios) {
+  import("//build/config/ios/rules.gni")
+  import("//build/config/ios/ios_sdk.gni")
+
+  ios_app("shell") {
+    app_name = "Sky"
+    info_plist = "ios/Info.plist"
+    scaffolding_target = "ios_scaffolding"
+    entitlements_path = "ios/Entitlements.xcent"
+    code_signing_identity = ios_code_signing_identity
+
+    resource_copy_ios("sky_resources") {
+      resources = [ "//third_party/icu/android/icudtl.dat" ]
+      bundle_directory = "."
+    }
+
+    source_set(scaffolding_target) {
+      sources = [
+        "ios/main_ios.mm",
+        "ios/platform_service_provider_ios.cc",
+        "ios/platform_view_ios.h",
+        "ios/platform_view_ios.mm",
+        "ios/sky_app_delegate.h",
+        "ios/sky_app_delegate.mm",
+        "ios/sky_surface.h",
+        "ios/sky_surface.mm",
+        "ios/sky_view_controller.h",
+        "ios/sky_view_controller.mm",
+      ]
+
+      deps = common_deps + [
+               ":common",
+               "//sky/services/ns_net",
+             ]
+    }
+
+    deps = [
+      ":$scaffolding_target",
+      ":sky_resources",
+    ]
+  }
+} else if (is_linux) {
+  executable("shell") {
+    output_name = "sky_shell"
+
+    sources = [
+      "linux/main.cc",
+      "linux/platform_service_provider_linux.cc",
+      "linux/platform_view_linux.cc",
+      "testing/test_runner.cc",
+      "testing/test_runner.h",
+    ]
+
+    deps = common_deps + [
+             ":common",
+             "//sky/services/testing:interfaces",
+           ]
+  }
+} else {
+  assert(false, "Unsupported platform")
+}

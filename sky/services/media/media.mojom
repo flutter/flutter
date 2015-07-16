@@ -1,0 +1,17 @@
+// Copyright 2015 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+module media;
+
+interface MediaPlayer {
+  // ignored argument due to https://github.com/domokit/mojo/issues/282
+  Prepare(handle<data_pipe_consumer> data_source) => (bool ignored);
+  Start();
+  Pause();
+  SeekTo(uint32 msec);
+};
+
+interface MediaService {
+  CreatePlayer(MediaPlayer& player);
+};

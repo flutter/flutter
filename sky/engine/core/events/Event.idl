@@ -1,0 +1,52 @@
+/*
+ * Copyright (C) 2006, 2007, 2009, 2011 Apple Inc. All rights reserved.
+ * Copyright (C) 2006 Samuel Weinig <sam.weinig@gmail.com>
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public License
+ * along with this library; see the file COPYING.LIB.  If not, write to
+ * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+ * Boston, MA 02110-1301, USA.
+ */
+
+[
+    // TODO(eseidel): Type is optional to appease dart analyzer:
+    // The class 'Event' does not have a default constructor
+    Constructor([Named] optional DOMString type, [Named] optional boolean bubbles, [Named] optional boolean cancelable),
+] interface Event {
+    // DOM PhaseType
+    const unsigned short NONE                = 0;
+    const unsigned short CAPTURING_PHASE     = 1;
+    const unsigned short AT_TARGET           = 2;
+    const unsigned short BUBBLING_PHASE      = 3;
+
+    readonly attribute DOMString        type;
+    readonly attribute EventTarget      target;
+    readonly attribute EventTarget      currentTarget;
+    readonly attribute unsigned short   eventPhase;
+    [InitializedByEventConstructor] readonly attribute boolean bubbles;
+    [InitializedByEventConstructor] readonly attribute boolean cancelable;
+    readonly attribute double timeStamp;
+
+    void               stopPropagation();
+    void               preventDefault();
+
+    // DOM Level 3 Additions.
+    readonly attribute boolean defaultPrevented;
+    void stopImmediatePropagation();
+
+    // IE Extensions
+    readonly attribute EventTarget srcElement;
+    [CallWith=ExecutionContext, ImplementedAs=legacyReturnValue] attribute boolean returnValue;
+    attribute boolean cancelBubble;
+    readonly attribute NodeList path;
+};
