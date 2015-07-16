@@ -1,13 +1,15 @@
 Contributing
 ============
 
-[sky_sdk](https://github.com/domokit/sky_sdk) is generated from the
-[mojo repository](https://github.com/domokit/mojo) using
-[deploy_sdk.py](https://github.com/domokit/mojo/blob/master/sky/tools/deploy_sdk.py)
+This SDK is generated from the
+[Sky repository](https://github.com/domokit/sky_engine) using
+[deploy_sdk.py](https://github.com/domokit/sky_engine/blob/master/sky/tools/deploy_sdk.py).
 Static files (including this README.md) are located under
-[sky/sdk](https://github.com/domokit/mojo/tree/master/sky/sdk).  Pull
-requests and issue reports are glady accepted at the
-[mojo repository](https://github.com/domokit/mojo)!
+[sky/sdk](https://github.com/domokit/sky_engine/tree/master/sky/sdk).
+
+Pull
+requests and issue reports are gladly accepted at the
+[Sky repository](https://github.com/domokit/sky_engine)!
 
 Sky
 ===
@@ -118,10 +120,7 @@ Set up your computer
 2. Install the `adb` tool from the Android SDK:
   - https://developer.android.com/sdk/installing/index.html
 
-3. Install the Sky SDK:
-  - `git clone https://github.com/domokit/sky_sdk.git`
-
-4. Ensure that `$DART_SDK` is set to the path of your Dart SDK and `adb`
+3. Ensure that `$DART_SDK` is set to the path of your Dart SDK and `adb`
    (inside `platform-tools` in the android sdk) is in your `$PATH`.
 
 Set up your device
@@ -156,10 +155,8 @@ run one of the examples in this SDK, try:
    installed on the device.)
 
 4. Use `adb logcat` to view any errors or Dart `print()` output from the app.
-   `adb logcat -s chromium` can be used to filter only adb messages from
-   `SkyDemo.apk` (which for
-   [legacy reasons](https://github.com/domokit/mojo/issues/129) still uses the
-   android log tag `chromium`).
+   `adb logcat -s sky` can be used to filter only adb messages from
+   `SkyDemo.apk`.
 
 Measuring Performance
 ---------------------
@@ -187,7 +184,7 @@ Although it is possible to bundle the Sky Engine in your own app (instead of
 running your code inside SkyDemo.apk), right now doing so is difficult.
 
 There is one example of doing so if you're feeling brave:
-https://github.com/domokit/mojo/tree/master/sky/sdk/example/stocks
+https://github.com/domokit/sky_engine/tree/master/sky/sdk/example/stocks
 
 Eventually we plan to make this much easier and support platforms other than
 Android, but that work is yet in progress.
@@ -210,8 +207,8 @@ service to allow Sky Framework Dart code to interface with the underlying
 platform's Keyboard, but also to expose any additional non-Dart business logic
 to Sky/Dart UI code.
 
-As an example, [SkyApplication](https://github.com/domokit/mojo/blob/master/sky/shell/org/domokit/sky/shell/SkyApplication.java)
+As an example, [SkyApplication](https://github.com/domokit/sky_engine/blob/master/sky/shell/org/domokit/sky/shell/SkyApplication.java)
 exposes a mojo `network_service` (required by Sky Engine C++ code)
-[SkyDemoApplication](https://github.com/domokit/mojo/blob/master/sky/apk/demo/org/domokit/sky/demo/SkyDemoApplication.java)
+[SkyDemoApplication](https://github.com/domokit/sky_engine/blob/master/sky/apk/demo/org/domokit/sky/demo/SkyDemoApplication.java)
 additionally exposes `keyboard_service` and `sensor_service` for use by the Sky
 Framework from Dart.
