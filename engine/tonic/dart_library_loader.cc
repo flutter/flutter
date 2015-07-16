@@ -26,13 +26,13 @@ namespace blink {
 class DartLibraryLoader::Job : public DartDependency,
                                public DataPipeDrainer::Client {
  public:
-  Job(DartLibraryLoader* loader, const String& name)
+  Job(DartLibraryLoader* loader, const std::string& name)
       : loader_(loader), name_(name), weak_factory_(this) {
     loader->library_provider()->GetLibraryAsStream(
         name, base::Bind(&Job::OnStreamAvailable, weak_factory_.GetWeakPtr()));
   }
 
-  const String& name() const { return name_; }
+  const std::string& name() const { return name_; }
 
  protected:
   DartLibraryLoader* loader_;
@@ -55,7 +55,7 @@ class DartLibraryLoader::Job : public DartDependency,
   }
   // Subclasses must implement OnDataComplete.
 
-  String name_;
+  std::string name_;
   OwnPtr<DataPipeDrainer> drainer_;
 
   base::WeakPtrFactory<Job> weak_factory_;
@@ -63,9 +63,9 @@ class DartLibraryLoader::Job : public DartDependency,
 
 class DartLibraryLoader::ImportJob : public Job {
  public:
-  ImportJob(DartLibraryLoader* loader, const String& name) : Job(loader, name) {
+  ImportJob(DartLibraryLoader* loader, const std::string& name) : Job(loader, name) {
     TRACE_EVENT_ASYNC_BEGIN1("sky", "DartLibraryLoader::ImportJob", this, "url",
-                             name.ascii().toStdString());
+                             name);
   }
 
  private:
@@ -78,10 +78,10 @@ class DartLibraryLoader::ImportJob : public Job {
 
 class DartLibraryLoader::SourceJob : public Job {
  public:
-  SourceJob(DartLibraryLoader* loader, const String& name, Dart_Handle library)
+  SourceJob(DartLibraryLoader* loader, const std::string& name, Dart_Handle library)
       : Job(loader, name), library_(loader->dart_state(), library) {
     TRACE_EVENT_ASYNC_BEGIN1("sky", "DartLibraryLoader::SourceJob", this, "url",
-                             name.ascii().toStdString());
+                             name);
   }
 
   Dart_PersistentHandle library() const { return library_.value(); }
@@ -207,24 +207,26 @@ void DartLibraryLoader::WaitForDependencies(
       adoptPtr(new DependencyWatcher(dependencies, callback)));
 }
 
-void DartLibraryLoader::LoadLibrary(const String& name) {
-  const auto& result = pending_libraries_.add(name, nullptr);
-  if (result.isNewEntry) {
+void DartLibraryLoader::LoadLibrary(const std::string& name) {
+  const auto& result = pending_libraries_.insert(std::make_pair(name, nullptr));
+  if (result.second) {
+    // New entry.
     OwnPtr<Job> job = adoptPtr(new ImportJob(this, name));
-    result.storedValue->value = job.get();
+    result.first->second = job.get();
     jobs_.add(job.release());
   }
   if (dependency_catcher_)
-    dependency_catcher_->AddDependency(result.storedValue->value);
+    dependency_catcher_->AddDependency(result.first->second);
 }
 
 Dart_Handle DartLibraryLoader::Import(Dart_Handle library, Dart_Handle url) {
-  LoadLibrary(StringFromDart(url));
+  LoadLibrary(StdStringFromDart(url));
   return Dart_True();
 }
 
 Dart_Handle DartLibraryLoader::Source(Dart_Handle library, Dart_Handle url) {
-  OwnPtr<Job> job = adoptPtr(new SourceJob(this, StringFromDart(url), library));
+  OwnPtr<Job> job =
+      adoptPtr(new SourceJob(this, StdStringFromDart(url), library));
   if (dependency_catcher_)
     dependency_catcher_->AddDependency(job.get());
   jobs_.add(job.release());
@@ -245,14 +247,14 @@ void DartLibraryLoader::DidCompleteImportJob(
   WatcherSignaler watcher_signaler(*this, job);
 
   Dart_Handle result = Dart_LoadLibrary(
-      StringToDart(dart_state_, job->name()),
+      StdStringToDart(job->name()),
       Dart_NewStringFromUTF8(buffer.data(), buffer.size()), 0, 0);
   if (Dart_IsError(result)) {
-    LOG(ERROR) << "Error Loading " << job->name().utf8().data() << " "
+    LOG(ERROR) << "Error Loading " << job->name() << " "
         << Dart_GetError(result);
   }
 
-  pending_libraries_.remove(job->name());
+  pending_libraries_.erase(job->name());
   jobs_.remove(job);
 }
 
@@ -266,11 +268,11 @@ void DartLibraryLoader::DidCompleteSourceJob(
 
   Dart_Handle result = Dart_LoadSource(
       Dart_HandleFromPersistent(job->library()),
-      StringToDart(dart_state_, job->name()),
+      StdStringToDart(job->name()),
       Dart_NewStringFromUTF8(buffer.data(), buffer.size()), 0, 0);
 
   if (Dart_IsError(result)) {
-    LOG(ERROR) << "Error Loading " << job->name().utf8().data() << " "
+    LOG(ERROR) << "Error Loading " << job->name() << " "
         << Dart_GetError(result);
   }
 
@@ -283,7 +285,7 @@ void DartLibraryLoader::DidFailJob(Job* job) {
 
   WatcherSignaler watcher_signaler(*this, job);
 
-  LOG(ERROR) << "Library Load failed: " << job->name().utf8().data();
+  LOG(ERROR) << "Library Load failed: " << job->name();
   // TODO(eseidel): Call Dart_LibraryHandleError in the SourceJob case?
 
   jobs_.remove(job);

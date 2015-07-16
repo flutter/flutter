@@ -13,7 +13,6 @@
 #include "dart/runtime/include/dart_api.h"
 #include "mojo/common/data_pipe_drainer.h"
 #include "sky/engine/wtf/OwnPtr.h"
-#include "sky/engine/wtf/text/WTFString.h"
 
 namespace blink {
 class DartState;

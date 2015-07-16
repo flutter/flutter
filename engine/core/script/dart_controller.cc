@@ -115,7 +115,7 @@ void DartController::RunFromLibrary(const String& name,
   loader.set_library_provider(library_provider);
 
   DartDependencyCatcher dependency_catcher(loader);
-  loader.LoadLibrary(name);
+  loader.LoadLibrary(name.toUTF8());
   loader.WaitForDependencies(dependency_catcher.dependencies(),
                              base::Bind(&DartController::DidLoadMainLibrary,
                                         weak_factory_.GetWeakPtr(), name));

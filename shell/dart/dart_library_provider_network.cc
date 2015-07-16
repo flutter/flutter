@@ -14,13 +14,13 @@ namespace shell {
 namespace {
 
 mojo::URLLoaderPtr Fetch(mojo::NetworkService* network_service,
-                         const String& url,
+                         const std::string& url,
                          base::Callback<void(mojo::URLResponsePtr)> callback) {
   mojo::URLLoaderPtr loader;
   network_service->CreateURLLoader(GetProxy(&loader));
 
   mojo::URLRequestPtr request = mojo::URLRequest::New();
-  request->url = url.toUTF8();
+  request->url = url;
   request->auto_follow_redirects = true;
   loader->Start(request.Pass(), callback);
 
@@ -32,7 +32,7 @@ mojo::URLLoaderPtr Fetch(mojo::NetworkService* network_service,
 class DartLibraryProviderNetwork::Job {
  public:
   Job(DartLibraryProviderNetwork* provider,
-      const String& name,
+      const std::string& name,
       blink::DataPipeConsumerCallback callback)
       : provider_(provider), callback_(callback), weak_factory_(this) {
     url_loader_ =
@@ -66,7 +66,7 @@ DartLibraryProviderNetwork::~DartLibraryProviderNetwork() {
 }
 
 void DartLibraryProviderNetwork::GetLibraryAsStream(
-    const String& name,
+    const std::string& name,
     blink::DataPipeConsumerCallback callback) {
   jobs_.add(adoptPtr(new Job(this, name, callback)));
 }

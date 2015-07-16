@@ -5,15 +5,16 @@
 #ifndef SKY_ENGINE_TONIC_DART_LIBRARY_LOADER_H_
 #define SKY_ENGINE_TONIC_DART_LIBRARY_LOADER_H_
 
+#include <string>
+#include <unordered_map>
 #include <vector>
+
 #include "base/callback_forward.h"
 #include "base/macros.h"
 #include "base/memory/weak_ptr.h"
 #include "dart/runtime/include/dart_api.h"
-#include "sky/engine/wtf/HashMap.h"
 #include "sky/engine/wtf/HashSet.h"
 #include "sky/engine/wtf/OwnPtr.h"
-#include "sky/engine/wtf/text/WTFString.h"
 
 namespace blink {
 class DartDependency;
@@ -35,7 +36,7 @@ class DartLibraryLoader {
                                       Dart_Handle library,
                                       Dart_Handle url);
 
-  void LoadLibrary(const String& name);
+  void LoadLibrary(const std::string& name);
 
   void WaitForDependencies(const HashSet<DartDependency*>& dependencies,
                            const base::Closure& callback);
@@ -70,7 +71,7 @@ class DartLibraryLoader {
 
   DartState* dart_state_;
   DartLibraryProvider* library_provider_;
-  HashMap<String, Job*> pending_libraries_;
+  std::unordered_map<std::string, Job*> pending_libraries_;
   HashSet<OwnPtr<Job>> jobs_;
   HashSet<OwnPtr<DependencyWatcher>> dependency_watchers_;
   DartDependencyCatcher* dependency_catcher_;

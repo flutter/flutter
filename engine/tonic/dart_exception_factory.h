@@ -5,9 +5,11 @@
 #ifndef SKY_ENGINE_TONIC_DART_EXCEPTION_FACTORY_H_
 #define SKY_ENGINE_TONIC_DART_EXCEPTION_FACTORY_H_
 
+#include <string>
+#include <vector>
+
 #include "dart/runtime/include/dart_api.h"
 #include "sky/engine/tonic/dart_persistent_value.h"
-#include "sky/engine/wtf/text/WTFString.h"
 
 namespace blink {
 class DartState;
@@ -18,7 +20,10 @@ class DartExceptionFactory {
   ~DartExceptionFactory();
 
   Dart_Handle CreateNullArgumentException(int index);
-  Dart_Handle CreateException(const String& class_name, const String& message);
+  Dart_Handle CreateException(const std::string& class_name,
+                              const std::string& message);
+  Dart_Handle CreateException(const std::string& class_name,
+                              Dart_Handle message);
 
  private:
   DartState* dart_state_;
