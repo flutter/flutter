@@ -1,0 +1,61 @@
+Name: Darwin
+URL: http://www.opensource.apple.com/
+Version: unknown
+Security Critical: yes
+License: Apple Public Source License 2.0
+
+Four files are excerpted here:
+
+malloc.h from:
+http://www.opensource.apple.com/source/Libc/Libc-763.11/include/malloc/malloc.h
+
+Modifications:
+- Modified #ifdef guards.
+- Removed everything but the definition of malloc_zone_t.
+- Renamed _malloc_zone_t to ChromeMallocZone to avoid possible name conflicts.
+
+CFRuntime.h from:
+http://www.opensource.apple.com/source/CF/CF-635/CFRuntime.h
+
+Modifications:
+- Modified #ifdef guards.
+- Removed everything but the definition of CFRuntimeBase.
+- Renamed CFRuntimeBase to ChromeCFRuntimeBase to avoid possible name conflicts.
+
+CFBase.h from:
+http://www.opensource.apple.com/source/CF/CF-550/CFBase.c
+http://www.opensource.apple.com/source/CF/CF-635/CFBase.c
+
+Modifications:
+- Renamed the file to CFBase.h.
+- Added #ifdef guards.
+- Added an #include of the CFRuntime.h file.
+- Removed everything but the definition of __CFAllocator.
+- Modified the reference of CFRuntimeBase to ChromeCFRuntimeBase.
+- Renamed __CFAllocator to ChromeCFAllocatorLeopards (from CF-550) and to
+  ChromeCFAllocatorLions (from CF-635) to avoid possible name conflicts.
+
+cssmapplePriv.h from:
+http://www.opensource.apple.com/source/libsecurity_cssm/libsecurity_cssm-31536/lib/cssmapplePriv.h
+
+Warning: Technically, this is a private Apple header, and as such provides no
+guarantee for API stability. However, the use of this header is the only way
+to implement OCSP checking per Apple's public documentation on the usage of
+their Trust Policy Module. Further, the use of this private header is the
+recommended approach from Apple for modifying OCSP policies.
+
+See: http://developer.apple.com/documentation/Security/Reference/SecAppleTrustPolicyModuleSpec/Apple_Trust_Policy_Module_Functional_Specification.pdf
+and http://lists.apple.com/archives/apple-cdsa/2008/Aug/msg00008.html
+
+Modifications:
+- Removed unneeded definitions for internal Apple CSP DL enums and structs
+
+dnsinfo.h from:
+http://www.opensource.apple.com/source/configd/configd-453.19/dnsinfo/dnsinfo.h
+
+Provides dns_config_t which is used by /net/dns/dns_config_service_posix.cc to
+obtain system DNS configuration on Mac OS X. This private header is also used by
+Apple's open source mDNSResponder.
+
+Modifications:
+- Removed Availability.h and the corresponding macros.
