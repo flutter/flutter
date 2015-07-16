@@ -210,12 +210,13 @@ void Timer_create(Dart_NativeArguments args) {
   DartState* state = DartState::Current();
   CHECK(state);
 
-  OwnPtr<DartTimerHeap::Task> task = adoptPtr(new DartTimerHeap::Task);
+  std::unique_ptr<DartTimerHeap::Task> task =
+      std::unique_ptr<DartTimerHeap::Task>(new DartTimerHeap::Task);
   task->closure.Set(state, closure);
   task->delay = base::TimeDelta::FromMilliseconds(milliseconds);
   task->repeating = repeating;
 
-  int timer_id = state->timer_heap().Add(task.release());
+  int timer_id = state->timer_heap().Add(std::move(task));
   Dart_SetIntegerReturnValue(args, timer_id);
 }
 

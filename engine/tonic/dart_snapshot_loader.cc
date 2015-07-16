@@ -28,7 +28,8 @@ void DartSnapshotLoader::LoadSnapshot(mojo::ScopedDataPipeConsumerHandle pipe,
   TRACE_EVENT_ASYNC_BEGIN0("sky", "DartSnapshotLoader::LoadSnapshot", this);
 
   callback_ = callback;
-  drainer_ = adoptPtr(new DataPipeDrainer(this, pipe.Pass()));
+  drainer_ = std::unique_ptr<mojo::common::DataPipeDrainer>(
+      new DataPipeDrainer(this, pipe.Pass()));
 }
 
 void DartSnapshotLoader::OnDataAvailable(const void* data, size_t num_bytes) {

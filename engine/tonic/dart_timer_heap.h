@@ -11,8 +11,6 @@
 #include "base/time/time.h"
 #include "dart/runtime/include/dart_api.h"
 #include "sky/engine/tonic/dart_persistent_value.h"
-#include "sky/engine/wtf/OwnPtr.h"
-#include "sky/engine/wtf/PassOwnPtr.h"
 
 namespace blink {
 
@@ -27,15 +25,15 @@ class DartTimerHeap {
     bool repeating = false;
   };
 
-  int Add(PassOwnPtr<Task> task);
+  int Add(std::unique_ptr<Task> task);
   void Remove(int id);
 
  private:
-  void Schedule(int id, PassOwnPtr<Task> task);
+  void Schedule(int id, std::unique_ptr<Task> task);
   void Run(int id);
 
   int next_timer_id_;
-  std::unordered_map<int, OwnPtr<Task>> heap_;
+  std::unordered_map<int, std::unique_ptr<Task>> heap_;
 
   base::WeakPtrFactory<DartTimerHeap> weak_factory_;
 };

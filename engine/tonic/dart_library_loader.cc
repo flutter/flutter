@@ -21,13 +21,15 @@ using mojo::common::DataPipeDrainer;
 namespace blink {
 
 namespace {
-  // Helper to erase a T* from a container of std::unique_ptr<T>s.
-  template<typename T, typename C>
-  void EraseUniquePtr(C& container, T* item) {
-    std::unique_ptr<T> key = std::unique_ptr<T>(item);
-    container.erase(key);
-    key.release();
-  }
+
+// Helper to erase a T* from a container of std::unique_ptr<T>s.
+template<typename T, typename C>
+void EraseUniquePtr(C& container, T* item) {
+  std::unique_ptr<T> key = std::unique_ptr<T>(item);
+  container.erase(key);
+  key.release();
+}
+
 }
 
 // A DartLibraryLoader::Job represents a network load. It fetches data from the

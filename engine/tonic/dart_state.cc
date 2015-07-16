@@ -22,11 +22,15 @@ DartState::Scope::~Scope() {
 
 DartState::DartState()
     : isolate_(NULL),
-      class_library_(adoptPtr(new DartClassLibrary)),
-      exception_factory_(adoptPtr(new DartExceptionFactory(this))),
-      library_loader_(adoptPtr(new DartLibraryLoader(this))),
-      string_cache_(adoptPtr(new DartStringCache)),
-      timer_heap_(adoptPtr(new DartTimerHeap())),
+      class_library_(std::unique_ptr<DartClassLibrary>(new DartClassLibrary)),
+      exception_factory_(std::unique_ptr<DartExceptionFactory>(
+          new DartExceptionFactory(this))),
+      library_loader_(std::unique_ptr<DartLibraryLoader>(
+          new DartLibraryLoader(this))),
+      string_cache_(std::unique_ptr<DartStringCache>(
+          new DartStringCache)),
+      timer_heap_(std::unique_ptr<DartTimerHeap>(
+          new DartTimerHeap())),
       weak_factory_(this) {
 }
 

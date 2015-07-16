@@ -20,9 +20,9 @@ DartTimerHeap::DartTimerHeap() : next_timer_id_(1), weak_factory_(this) {
 DartTimerHeap::~DartTimerHeap() {
 }
 
-int DartTimerHeap::Add(PassOwnPtr<Task> task) {
+int DartTimerHeap::Add(std::unique_ptr<Task> task) {
   int id = next_timer_id_++;
-  Schedule(id, task);
+  Schedule(id, std::move(task));
   return id;
 }
 
@@ -30,9 +30,9 @@ void DartTimerHeap::Remove(int id) {
   heap_.erase(id);
 }
 
-void DartTimerHeap::Schedule(int id, PassOwnPtr<Task> task) {
+void DartTimerHeap::Schedule(int id, std::unique_ptr<Task> task) {
   base::TimeDelta delay = task->delay;
-  heap_[id] = task;
+  heap_[id] = std::move(task);
   base::MessageLoop::current()->PostDelayedTask(FROM_HERE,
     base::Bind(&DartTimerHeap::Run, weak_factory_.GetWeakPtr(), id), delay);
 }
@@ -41,7 +41,7 @@ void DartTimerHeap::Run(int id) {
   auto it = heap_.find(id);
   if (it == heap_.end())
     return;
-  OwnPtr<Task> task = it->second.release();
+  std::unique_ptr<Task> task = std::unique_ptr<Task>(it->second.release());
   heap_.erase(it);
   if (!task->closure.dart_state())
     return;
@@ -49,7 +49,7 @@ void DartTimerHeap::Run(int id) {
   DartApiScope api_scope;
   DartInvokeAppClosure(task->closure.value(), 0, nullptr);
   if (task->repeating)
-    Schedule(id, task.release());
+    Schedule(id, std::move(task));
 }
 
 }

@@ -12,7 +12,6 @@
 #include "base/memory/weak_ptr.h"
 #include "dart/runtime/include/dart_api.h"
 #include "mojo/common/data_pipe_drainer.h"
-#include "sky/engine/wtf/OwnPtr.h"
 
 namespace blink {
 class DartState;
@@ -31,7 +30,7 @@ class DartSnapshotLoader : public mojo::common::DataPipeDrainer::Client {
   void OnDataComplete() override;
 
   base::WeakPtr<DartState> dart_state_;
-  OwnPtr<mojo::common::DataPipeDrainer> drainer_;
+  std::unique_ptr<mojo::common::DataPipeDrainer> drainer_;
   // TODO(abarth): Should we be using SharedBuffer to buffer the data?
   std::vector<uint8_t> buffer_;
   base::Closure callback_;

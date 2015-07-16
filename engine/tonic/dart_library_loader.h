@@ -15,7 +15,6 @@
 #include "base/macros.h"
 #include "base/memory/weak_ptr.h"
 #include "dart/runtime/include/dart_api.h"
-#include "sky/engine/wtf/OwnPtr.h"
 
 namespace blink {
 class DartDependency;

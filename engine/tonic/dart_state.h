@@ -12,7 +12,6 @@
 #include "sky/engine/tonic/dart_api_scope.h"
 #include "sky/engine/tonic/dart_isolate_scope.h"
 #include "sky/engine/tonic/dart_persistent_value.h"
-#include "sky/engine/wtf/OwnPtr.h"
 
 namespace blink {
 class DartClassLibrary;
@@ -61,11 +60,11 @@ class DartState : public base::SupportsUserData {
 
  private:
   Dart_Isolate isolate_;
-  OwnPtr<DartClassLibrary> class_library_;
-  OwnPtr<DartExceptionFactory> exception_factory_;
-  OwnPtr<DartLibraryLoader> library_loader_;
-  OwnPtr<DartStringCache> string_cache_;
-  OwnPtr<DartTimerHeap> timer_heap_;
+  std::unique_ptr<DartClassLibrary> class_library_;
+  std::unique_ptr<DartExceptionFactory> exception_factory_;
+  std::unique_ptr<DartLibraryLoader> library_loader_;
+  std::unique_ptr<DartStringCache> string_cache_;
+  std::unique_ptr<DartTimerHeap> timer_heap_;
   DartPersistentValue index_handle_;
 
  protected:
