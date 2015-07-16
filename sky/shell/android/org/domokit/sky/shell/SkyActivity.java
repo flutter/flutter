@@ -37,9 +37,11 @@ public class SkyActivity extends Activity {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             getWindow().addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
             getWindow().setStatusBarColor(0x40000000);
-            // TODO(abarth): We should get this value from the Android framework somehow.
-            edgeDims.top = 25.0;
         }
+        // TODO(abarth): We should get this value from the Android framework somehow.
+        edgeDims.top = 25.0;
+        // TODO(abarth): Unclear if we want to use fullscreen if we don't have
+        // a transparent system bar.
         getWindow().getDecorView().setSystemUiVisibility(
                 View.SYSTEM_UI_FLAG_LAYOUT_STABLE
                 | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
