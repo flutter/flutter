@@ -13,4 +13,4 @@ mojo_build_mojo_shell_from_source = true
 
 # To build the network service from source, set this variable to true. To use
 # the prebuilt network service, omit this variable or set it to false.
-mojo_build_network_service_from_source = false
+mojo_build_network_service_from_source = true
