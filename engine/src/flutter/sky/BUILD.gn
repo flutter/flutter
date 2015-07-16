@@ -1,0 +1,36 @@
+# Copyright 2014 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+group("sky") {
+  testonly = true
+
+  deps = [
+    "//sky/engine/platform:platform_unittests",
+    "//sky/engine/wtf:unittests",
+    "//sky/sdk/example",
+    "//sky/tools/imagediff",
+    "//sky/tools/packager($host_toolchain)",
+    ":sky_dev",
+  ]
+
+  if (!is_android) {
+    deps += [ "//third_party/mesa:osmesa" ]
+  }
+}
+
+group("sky_dev") {
+  testonly = true
+
+  deps = [
+    "//sky/sdk",
+  ]
+
+  if (is_android) {
+    deps += [ "//sky/services/activity" ]
+  }
+
+  if (is_linux) {
+    deps += [ "//sky/shell" ]
+  }
+}

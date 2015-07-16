@@ -1,0 +1,74 @@
+#!/usr/bin/env python
+# Copyright 2015 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import argparse
+import subprocess
+import sys
+import os
+import yaml
+
+
+SKY_TOOLS_DIR = os.path.dirname(os.path.abspath(__file__))
+SRC_ROOT = os.path.dirname(os.path.dirname(SKY_TOOLS_DIR))
+SKY_SDK_DIR = os.path.join(SRC_ROOT, 'sky', 'sdk')
+SKY_PUBSPEC = os.path.join(SKY_SDK_DIR, 'pubspec.yaml')
+SKY_PUBSPEC_LOCK = os.path.join(SKY_SDK_DIR, 'pubspec.lock')
+SDK_EXT = os.path.join(SKY_SDK_DIR, 'lib', '_sdkext')
+
+SDK_EXT_TEMPLATE = '''{
+  "dart:sky": "%(build_dir)s/gen/dart-pkg/sky/sdk_ext/dart_sky.dart",
+  "dart:sky.internals": "%(build_dir)s/gen/dart-pkg/sky/sdk_ext/sky_internals.dart",
+  "dart:sky_builtin_natvies": "%(build_dir)s/gen/dart-pkg/sky/sdk_ext/builtin_natives.dart"
+}'''
+
+def version_for_pubspec(pubspec_path):
+    with open(pubspec_path, 'r') as stream:
+        dependency_spec = yaml.load(stream)
+        return dependency_spec['version']
+
+
+def entry_for_dependency(dart_pkg_dir, dependency):
+    dependency_path = os.path.join(dart_pkg_dir, dependency)
+    version = version_for_pubspec(os.path.join(dependency_path, 'pubspec.yaml'))
+    return {
+        'description': {
+            'path': os.path.relpath(dependency_path, SKY_SDK_DIR),
+            'relative': True,
+        },
+        'source': 'path',
+        'version': version,
+    }
+
+
+def main():
+    parser = argparse.ArgumentParser(description='Adds files to the source tree to make the dart analyzer happy')
+    parser.add_argument('build_dir', type=str, help='Path the build directory to use for build artifacts')
+    args = parser.parse_args()
+
+    dart_pkg_dir = os.path.join(args.build_dir, 'gen', 'dart-pkg')
+
+    if not os.path.exists(dart_pkg_dir):
+        print 'Cannot find Dart pacakges at "%s".' % dart_pkg_dir
+        print 'Did you run `ninja -C %s sky` ?' % os.path.relpath(args.build_dir, os.getcwd())
+        return 1
+
+    packages = {}
+
+    with open(SKY_PUBSPEC, 'r') as stream:
+        spec = yaml.load(stream)
+        for dependency in spec['dependencies'].keys():
+            packages[dependency] = entry_for_dependency(dart_pkg_dir, dependency)
+
+    lock = { 'packages': packages }
+    with open(SKY_PUBSPEC_LOCK, 'w') as stream:
+        yaml.dump(lock, stream=stream, default_flow_style=False)
+
+    with open(SDK_EXT, 'w') as stream:
+        rebased_build_dir = os.path.relpath(args.build_dir, os.path.dirname(SDK_EXT))
+        stream.write(SDK_EXT_TEMPLATE % { 'build_dir': rebased_build_dir })
+
+
+if __name__ == '__main__':
+    sys.exit(main())
