@@ -54,7 +54,7 @@ You must complete the
 [Contributor License Agreement](https://cla.developers.google.com/clas).
 You can do this online, and it only takes a minute.
 If you've never submitted code before, you must add your (or your
-organization's) name and contact info to the ``AUTHORS``(AUTHORS) file.
+organization's) name and contact info to the [AUTHORS](AUTHORS) file.
 
 Running tests
 -------------
