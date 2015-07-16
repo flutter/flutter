@@ -14,7 +14,6 @@
 #include "sky/engine/tonic/dart_isolate_scope.h"
 #include "sky/engine/tonic/dart_library_provider.h"
 #include "sky/engine/tonic/dart_state.h"
-#include "sky/engine/wtf/MainThread.h"
 
 using mojo::common::DataPipeDrainer;
 
@@ -200,11 +199,9 @@ Dart_Handle DartLibraryLoader::HandleLibraryTag(Dart_LibraryTag tag,
   if (tag == Dart_kCanonicalizeUrl)
     return DartState::Current()->library_loader().CanonicalizeURL(library, url);
   if (tag == Dart_kImportTag) {
-    CHECK(WTF::isMainThread());
     return DartState::Current()->library_loader().Import(library, url);
   }
   if (tag == Dart_kSourceTag) {
-    CHECK(WTF::isMainThread());
     return DartState::Current()->library_loader().Source(library, url);
   }
   DCHECK(false);

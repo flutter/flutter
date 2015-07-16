@@ -10,7 +10,6 @@
 #include "sky/engine/tonic/dart_converter.h"
 #include "sky/engine/tonic/dart_error.h"
 #include "sky/engine/tonic/dart_isolate_scope.h"
-#include "sky/engine/wtf/MainThread.h"
 
 using mojo::common::DataPipeDrainer;
 

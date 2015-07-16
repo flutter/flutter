@@ -10,7 +10,6 @@
 #include "sky/engine/tonic/dart_library_loader.h"
 #include "sky/engine/tonic/dart_string_cache.h"
 #include "sky/engine/tonic/dart_timer_heap.h"
-#include "sky/engine/wtf/PassOwnPtr.h"
 
 namespace blink {
 
