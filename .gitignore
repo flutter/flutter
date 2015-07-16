@@ -6,12 +6,13 @@
 .classpath
 .cproject
 .gdb_history
+.checkstyle
 .gdbinit
 .landmines
+.packages
 .project
 .pub
 .pydevproject
-.checkstyle
 cscope.*
 Session.vim
 tags
@@ -67,7 +68,7 @@ v8.log
 /third_party/pdfium/
 /third_party/pywebsocket/src/
 /third_party/requests/src/
-/third_party/robolectric/src/
+/third_party/robolectric/lib/
 /third_party/skia/
 /third_party/smhasher/src/
 /third_party/yasm/binaries/
