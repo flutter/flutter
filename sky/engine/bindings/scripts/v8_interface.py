@@ -74,9 +74,6 @@ def interface_context(interface):
         header_includes.update(v8_types.includes_for_interface(parent_interface))
     extended_attributes = interface.extended_attributes
 
-    # [ActiveDOMObject]
-    is_active_dom_object = 'ActiveDOMObject' in extended_attributes
-
     # [DependentLifetime]
     is_dependent_lifetime = 'DependentLifetime' in extended_attributes
 
@@ -134,14 +131,12 @@ def interface_context(interface):
         'has_visit_dom_wrapper': has_visit_dom_wrapper,
         'header_includes': header_includes,
         'interface_name': interface.name,
-        'is_active_dom_object': is_active_dom_object,
         'is_dependent_lifetime': is_dependent_lifetime,
         'is_exception': interface.is_exception,
         'is_script_wrappable': is_script_wrappable,
         'iterator_method': iterator_method,
         'lifetime': 'Dependent'
             if (has_visit_dom_wrapper or
-                is_active_dom_object or
                 is_dependent_lifetime)
             else 'Independent',
         'parent_interface': parent_interface,

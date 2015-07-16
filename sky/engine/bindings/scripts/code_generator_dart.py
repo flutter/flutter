@@ -168,7 +168,6 @@ class CodeGeneratorDart(object):
             interface_global = {'component_dir': interface_info['component_dir'],
                                 'name': template_contents['interface_name'],
                                 'parent_interface': template_contents['parent_interface'],
-                                'is_active_dom_object': template_contents['is_active_dom_object'],
                                 'has_resolver': template_contents['interface_name'],
                                 'native_entries': sorted(template_contents['native_entries'], key=lambda(x): x['blink_entry']),
                                }

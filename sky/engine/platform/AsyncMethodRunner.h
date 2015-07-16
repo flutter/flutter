@@ -70,8 +70,7 @@ public:
     }
 
     // If it's scheduled to run the method, cancel it and remember to schedule
-    // it again when resume() is called. Mainly for implementing
-    // ActiveDOMObject::suspend().
+    // it again when resume() is called.
     void suspend()
     {
         if (m_suspended)
