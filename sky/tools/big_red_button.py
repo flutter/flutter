@@ -42,14 +42,6 @@ def confirm(prompt):
         return False
 
 
-def publish_packages(pub_path, packages_root):
-    for package in os.listdir(packages_root):
-        package_path = os.path.join(packages_root, package)
-        if not os.path.isdir(package_path):
-            continue
-        run(package_path, [pub_path, 'publish', '--force'])
-
-
 def main():
     parser = argparse.ArgumentParser(description='Deploy!')
     parser.add_argument('--sky-engine-root', help='Path to sky_engine/src',
@@ -104,7 +96,8 @@ def main():
     # tag for version?
 
     if args.publish:
-        publish_packages(pub_path, packages_root)
+        package_path = os.path.join(packages_root, 'sky')
+        run(package_path, [pub_path, 'publish', '--force'])
 
     run(sky_sdk_root, ['git', 'push'])
     run(demo_site_root, ['git', 'push'])
