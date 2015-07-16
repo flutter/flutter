@@ -334,7 +334,7 @@ class Listener extends TagNode  {
     PointerEventListener onPointerDown,
     PointerEventListener onPointerMove,
     PointerEventListener onPointerUp,
-    Map<String, sky.EventListener> custom
+    Map<String, EventListener> custom
   }) : listeners = _createListeners(
          onWheel: onWheel,
          onGestureFlingCancel: onGestureFlingCancel,
@@ -351,9 +351,9 @@ class Listener extends TagNode  {
        ),
        super(child, key: key);
 
-  final Map<String, sky.EventListener> listeners;
+  final Map<String, EventListener> listeners;
 
-  static Map<String, sky.EventListener> _createListeners({
+  static Map<String, EventListener> _createListeners({
     EventListener onWheel,
     GestureEventListener onGestureFlingCancel,
     GestureEventListener onGestureFlingStart,
@@ -365,11 +365,11 @@ class Listener extends TagNode  {
     PointerEventListener onPointerDown,
     PointerEventListener onPointerMove,
     PointerEventListener onPointerUp,
-    Map<String, sky.EventListener> custom
+    Map<String, EventListener> custom
   }) {
     var listeners = custom != null ?
-        new HashMap<String, sky.EventListener>.from(custom) :
-        new HashMap<String, sky.EventListener>();
+        new HashMap<String, EventListener>.from(custom) :
+        new HashMap<String, EventListener>();
 
     if (onWheel != null)
       listeners['wheel'] = onWheel;
@@ -398,7 +398,7 @@ class Listener extends TagNode  {
   }
 
   void _handleEvent(sky.Event e) {
-    sky.EventListener listener = listeners[e.type];
+    EventListener listener = listeners[e.type];
     if (listener != null) {
       listener(e);
     }
