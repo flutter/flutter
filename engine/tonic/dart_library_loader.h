@@ -5,15 +5,16 @@
 #ifndef SKY_ENGINE_TONIC_DART_LIBRARY_LOADER_H_
 #define SKY_ENGINE_TONIC_DART_LIBRARY_LOADER_H_
 
+#include <memory>
 #include <string>
 #include <unordered_map>
+#include <unordered_set>
 #include <vector>
 
 #include "base/callback_forward.h"
 #include "base/macros.h"
 #include "base/memory/weak_ptr.h"
 #include "dart/runtime/include/dart_api.h"
-#include "sky/engine/wtf/HashSet.h"
 #include "sky/engine/wtf/OwnPtr.h"
 
 namespace blink {
@@ -38,8 +39,9 @@ class DartLibraryLoader {
 
   void LoadLibrary(const std::string& name);
 
-  void WaitForDependencies(const HashSet<DartDependency*>& dependencies,
-                           const base::Closure& callback);
+  void WaitForDependencies(
+      const std::unordered_set<DartDependency*>& dependencies,
+      const base::Closure& callback);
 
   void set_dependency_catcher(DartDependencyCatcher* dependency_catcher) {
     DCHECK(!dependency_catcher_ || !dependency_catcher);
@@ -72,8 +74,8 @@ class DartLibraryLoader {
   DartState* dart_state_;
   DartLibraryProvider* library_provider_;
   std::unordered_map<std::string, Job*> pending_libraries_;
-  HashSet<OwnPtr<Job>> jobs_;
-  HashSet<OwnPtr<DependencyWatcher>> dependency_watchers_;
+  std::unordered_set<std::unique_ptr<Job>> jobs_;
+  std::unordered_set<std::unique_ptr<DependencyWatcher>> dependency_watchers_;
   DartDependencyCatcher* dependency_catcher_;
 
   DISALLOW_COPY_AND_ASSIGN(DartLibraryLoader);

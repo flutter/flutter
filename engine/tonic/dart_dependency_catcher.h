@@ -5,8 +5,9 @@
 #ifndef SKY_ENGINE_TONIC_DART_DEPENDENCY_CATCHER_H_
 #define SKY_ENGINE_TONIC_DART_DEPENDENCY_CATCHER_H_
 
+#include <unordered_set>
+
 #include "base/macros.h"
-#include "sky/engine/wtf/HashSet.h"
 
 namespace blink {
 class DartLibraryLoader;
@@ -22,11 +23,13 @@ class DartDependencyCatcher {
   ~DartDependencyCatcher();
 
   void AddDependency(DartDependency* dependency);
-  const HashSet<DartDependency*>& dependencies() const { return dependencies_; }
+  const std::unordered_set<DartDependency*>& dependencies() const {
+    return dependencies_;
+  }
 
  private:
   DartLibraryLoader& loader_;
-  HashSet<DartDependency*> dependencies_;
+  std::unordered_set<DartDependency*> dependencies_;
 
   DISALLOW_COPY_AND_ASSIGN(DartDependencyCatcher);
 };

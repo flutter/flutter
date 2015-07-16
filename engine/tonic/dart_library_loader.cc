@@ -20,6 +20,16 @@ using mojo::common::DataPipeDrainer;
 
 namespace blink {
 
+namespace {
+  // Helper to erase a T* from a container of std::unique_ptr<T>s.
+  template<typename T, typename C>
+  void EraseUniquePtr(C& container, T* item) {
+    std::unique_ptr<T> key = std::unique_ptr<T>(item);
+    container.erase(key);
+    key.release();
+  }
+}
+
 // A DartLibraryLoader::Job represents a network load. It fetches data from the
 // network and buffers the data in std::vector. To cancel the job, delete this
 // object.
@@ -102,27 +112,28 @@ class DartLibraryLoader::SourceJob : public Job {
 // the |callback| will be invoked.
 class DartLibraryLoader::DependencyWatcher {
  public:
-  DependencyWatcher(const HashSet<DartDependency*>& dependencies,
+  DependencyWatcher(const std::unordered_set<DartDependency*>& dependencies,
                     const base::Closure& callback)
       : dependencies_(dependencies), callback_(callback) {
-    DCHECK(!dependencies_.isEmpty());
+    DCHECK(!dependencies_.empty());
   }
 
-  bool DidResolveDependency(DartDependency* resolved_dependency,
-                            const HashSet<DartDependency*>& new_dependencies) {
+  bool DidResolveDependency(
+      DartDependency* resolved_dependency,
+      const std::unordered_set<DartDependency*>& new_dependencies) {
     const auto& it = dependencies_.find(resolved_dependency);
     if (it == dependencies_.end())
       return false;
-    dependencies_.remove(it);
+    dependencies_.erase(it);
     for (const auto& dependency : new_dependencies)
-      dependencies_.add(dependency);
-    return dependencies_.isEmpty();
+      dependencies_.insert(dependency);
+    return dependencies_.empty();
   }
 
   const base::Closure& callback() const { return callback_; }
 
  private:
-  HashSet<DartDependency*> dependencies_;
+  std::unordered_set<DartDependency*> dependencies_;
   base::Closure callback_;
 };
 
@@ -156,7 +167,7 @@ class DartLibraryLoader::WatcherSignaler {
     std::vector<base::Closure> callbacks;
     for (const auto& watcher : completed_watchers) {
       callbacks.push_back(watcher->callback());
-      loader_.dependency_watchers_.remove(watcher);
+      EraseUniquePtr(loader_.dependency_watchers_, watcher);
     }
 
     // Finally, run all the callbacks while touching only data on the stack.
@@ -199,21 +210,22 @@ Dart_Handle DartLibraryLoader::HandleLibraryTag(Dart_LibraryTag tag,
 }
 
 void DartLibraryLoader::WaitForDependencies(
-    const HashSet<DartDependency*>& dependencies,
+    const std::unordered_set<DartDependency*>& dependencies,
     const base::Closure& callback) {
-  if (dependencies.isEmpty())
+  if (dependencies.empty())
     return callback.Run();
-  dependency_watchers_.add(
-      adoptPtr(new DependencyWatcher(dependencies, callback)));
+  dependency_watchers_.insert(
+      std::unique_ptr<DependencyWatcher>(
+          new DependencyWatcher(dependencies, callback)));
 }
 
 void DartLibraryLoader::LoadLibrary(const std::string& name) {
   const auto& result = pending_libraries_.insert(std::make_pair(name, nullptr));
   if (result.second) {
     // New entry.
-    OwnPtr<Job> job = adoptPtr(new ImportJob(this, name));
+    std::unique_ptr<Job> job = std::unique_ptr<Job>(new ImportJob(this, name));
     result.first->second = job.get();
-    jobs_.add(job.release());
+    jobs_.insert(std::move(job));
   }
   if (dependency_catcher_)
     dependency_catcher_->AddDependency(result.first->second);
@@ -225,11 +237,11 @@ Dart_Handle DartLibraryLoader::Import(Dart_Handle library, Dart_Handle url) {
 }
 
 Dart_Handle DartLibraryLoader::Source(Dart_Handle library, Dart_Handle url) {
-  OwnPtr<Job> job =
-      adoptPtr(new SourceJob(this, StdStringFromDart(url), library));
+  std::unique_ptr<Job> job = std::unique_ptr<Job>(
+      new SourceJob(this, StdStringFromDart(url), library));
   if (dependency_catcher_)
     dependency_catcher_->AddDependency(job.get());
-  jobs_.add(job.release());
+  jobs_.insert(std::move(job));
   return Dart_True();
 }
 
@@ -255,7 +267,7 @@ void DartLibraryLoader::DidCompleteImportJob(
   }
 
   pending_libraries_.erase(job->name());
-  jobs_.remove(job);
+  EraseUniquePtr<Job>(jobs_, job);
 }
 
 void DartLibraryLoader::DidCompleteSourceJob(
@@ -276,7 +288,7 @@ void DartLibraryLoader::DidCompleteSourceJob(
         << Dart_GetError(result);
   }
 
-  jobs_.remove(job);
+  EraseUniquePtr<Job>(jobs_, job);
 }
 
 void DartLibraryLoader::DidFailJob(Job* job) {
@@ -288,7 +300,7 @@ void DartLibraryLoader::DidFailJob(Job* job) {
   LOG(ERROR) << "Library Load failed: " << job->name();
   // TODO(eseidel): Call Dart_LibraryHandleError in the SourceJob case?
 
-  jobs_.remove(job);
+  EraseUniquePtr<Job>(jobs_, job);
 }
 
 }  // namespace blink

@@ -5,11 +5,12 @@
 #ifndef SKY_ENGINE_TONIC_DART_TIMER_HEAP_H_
 #define SKY_ENGINE_TONIC_DART_TIMER_HEAP_H_
 
+#include <unordered_map>
+
 #include "base/memory/weak_ptr.h"
 #include "base/time/time.h"
 #include "dart/runtime/include/dart_api.h"
 #include "sky/engine/tonic/dart_persistent_value.h"
-#include "sky/engine/wtf/HashMap.h"
 #include "sky/engine/wtf/OwnPtr.h"
 #include "sky/engine/wtf/PassOwnPtr.h"
 
@@ -34,7 +35,7 @@ class DartTimerHeap {
   void Run(int id);
 
   int next_timer_id_;
-  HashMap<int, OwnPtr<Task>> heap_;
+  std::unordered_map<int, OwnPtr<Task>> heap_;
 
   base::WeakPtrFactory<DartTimerHeap> weak_factory_;
 };

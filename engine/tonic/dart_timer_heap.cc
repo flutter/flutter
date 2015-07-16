@@ -27,12 +27,12 @@ int DartTimerHeap::Add(PassOwnPtr<Task> task) {
 }
 
 void DartTimerHeap::Remove(int id) {
-  heap_.remove(id);
+  heap_.erase(id);
 }
 
 void DartTimerHeap::Schedule(int id, PassOwnPtr<Task> task) {
   base::TimeDelta delay = task->delay;
-  heap_.add(id, task);
+  heap_[id] = task;
   base::MessageLoop::current()->PostDelayedTask(FROM_HERE,
     base::Bind(&DartTimerHeap::Run, weak_factory_.GetWeakPtr(), id), delay);
 }
@@ -41,8 +41,8 @@ void DartTimerHeap::Run(int id) {
   auto it = heap_.find(id);
   if (it == heap_.end())
     return;
-  OwnPtr<Task> task = it->value.release();
-  heap_.remove(it);
+  OwnPtr<Task> task = it->second.release();
+  heap_.erase(it);
   if (!task->closure.dart_state())
     return;
   DartIsolateScope scope(task->closure.dart_state()->isolate());

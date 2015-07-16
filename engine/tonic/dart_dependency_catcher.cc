@@ -18,7 +18,7 @@ DartDependencyCatcher::~DartDependencyCatcher() {
 }
 
 void DartDependencyCatcher::AddDependency(DartDependency* dependency) {
-  dependencies_.add(dependency);
+  dependencies_.insert(dependency);
 }
 
 }  // namespace blink
