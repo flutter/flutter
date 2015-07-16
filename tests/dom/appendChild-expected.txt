@@ -1,8 +1,8 @@
-CONSOLE: unittest-suite-wait-for-done
-CONSOLE: PASS: should throw with invalid arguments
-CONSOLE: PASS: should insert children
-CONSOLE: PASS: should insert children with a fragment
-CONSOLE: 
-CONSOLE: All 3 tests passed.
-CONSOLE: unittest-suite-success
+unittest-suite-wait-for-done
+PASS: should throw with invalid arguments
+PASS: should insert children
+PASS: should insert children with a fragment
+
+All 3 tests passed.
+unittest-suite-success
 DONE

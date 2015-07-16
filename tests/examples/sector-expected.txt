@@ -1,9 +1,9 @@
-CONSOLE: TestRenderView enabled
-CONSOLE: 
+TestRenderView enabled
+
 PAINT FOR FRAME #1 ----------------------------------------------
 1 | TestPaintingCanvas() constructor: 800.0 x 600.0
 ------------------------------------------------------------------------
-CONSOLE: 
+
 PAINT FOR FRAME #2 ----------------------------------------------
 2 | TestPaintingCanvas() constructor: 800.0 x 600.0
 2 | paintChild RenderScaffold at Point(0.0, 0.0)
@@ -127,7 +127,7 @@ PAINT FOR FRAME #2 ----------------------------------------------
 2 |  |  |  |  |  |  |  |  | translate(32.0, 14.0)
 2 |  |  |  |  |  |  |  |  | translate(-32.0, -14.0)
 ------------------------------------------------------------------------
-CONSOLE: 
+
 PAINT FOR FRAME #3 ----------------------------------------------
 3 | TestPaintingCanvas() constructor: 800.0 x 600.0
 3 | paintChild RenderScaffold at Point(0.0, 0.0)
@@ -256,7 +256,7 @@ PAINT FOR FRAME #3 ----------------------------------------------
 3 |  |  |  |  |  |  |  |  | translate(32.0, 14.0)
 3 |  |  |  |  |  |  |  |  | translate(-32.0, -14.0)
 ------------------------------------------------------------------------
-CONSOLE: 
+
 PAINT FOR FRAME #4 ----------------------------------------------
 4 | TestPaintingCanvas() constructor: 800.0 x 600.0
 4 | paintChild RenderScaffold at Point(0.0, 0.0)
@@ -388,7 +388,7 @@ PAINT FOR FRAME #4 ----------------------------------------------
 4 |  |  |  |  |  |  |  |  | translate(32.0, 14.0)
 4 |  |  |  |  |  |  |  |  | translate(-32.0, -14.0)
 ------------------------------------------------------------------------
-CONSOLE: 
+
 PAINT FOR FRAME #5 ----------------------------------------------
 5 | TestPaintingCanvas() constructor: 800.0 x 600.0
 5 | paintChild RenderScaffold at Point(0.0, 0.0)
@@ -523,7 +523,7 @@ PAINT FOR FRAME #5 ----------------------------------------------
 5 |  |  |  |  |  |  |  |  | translate(32.0, 14.0)
 5 |  |  |  |  |  |  |  |  | translate(-32.0, -14.0)
 ------------------------------------------------------------------------
-CONSOLE: 
+
 PAINT FOR FRAME #6 ----------------------------------------------
 6 | TestPaintingCanvas() constructor: 800.0 x 600.0
 6 | paintChild RenderScaffold at Point(0.0, 0.0)
@@ -655,7 +655,7 @@ PAINT FOR FRAME #6 ----------------------------------------------
 6 |  |  |  |  |  |  |  |  | translate(32.0, 14.0)
 6 |  |  |  |  |  |  |  |  | translate(-32.0, -14.0)
 ------------------------------------------------------------------------
-CONSOLE: 
+
 PAINT FOR FRAME #7 ----------------------------------------------
 7 | TestPaintingCanvas() constructor: 800.0 x 600.0
 7 | paintChild RenderScaffold at Point(0.0, 0.0)
@@ -784,7 +784,7 @@ PAINT FOR FRAME #7 ----------------------------------------------
 7 |  |  |  |  |  |  |  |  | translate(32.0, 14.0)
 7 |  |  |  |  |  |  |  |  | translate(-32.0, -14.0)
 ------------------------------------------------------------------------
-CONSOLE: 
+
 PAINT FOR FRAME #8 ----------------------------------------------
 8 | TestPaintingCanvas() constructor: 800.0 x 600.0
 8 | paintChild RenderScaffold at Point(0.0, 0.0)

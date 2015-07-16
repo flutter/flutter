@@ -1,9 +1,9 @@
-CONSOLE: TestRenderView enabled
-CONSOLE: 
+TestRenderView enabled
+
 PAINT FOR FRAME #1 ----------------------------------------------
 1 | TestPaintingCanvas() constructor: 800.0 x 600.0
 ------------------------------------------------------------------------
-CONSOLE: 
+
 PAINT FOR FRAME #2 ----------------------------------------------
 2 | TestPaintingCanvas() constructor: 800.0 x 600.0
 2 | paintChild RenderStack at Point(0.0, 0.0)

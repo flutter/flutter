@@ -1,12 +1,12 @@
-CONSOLE: unittest-suite-wait-for-done
-CONSOLE: PASS: should allow replacing the document element
-CONSOLE: PASS: should allow replacing a text child with an element
-CONSOLE: PASS: should allow replacing the document element with text
-CONSOLE: PASS: should allow inserting text with a fragment
-CONSOLE: PASS: should allow replacing the document element with a fragment
-CONSOLE: PASS: should throw when inserting multiple elements
-CONSOLE: PASS: should throw when inserting multiple elements with a fragment
-CONSOLE: 
-CONSOLE: All 7 tests passed.
-CONSOLE: unittest-suite-success
+unittest-suite-wait-for-done
+PASS: should allow replacing the document element
+PASS: should allow replacing a text child with an element
+PASS: should allow replacing the document element with text
+PASS: should allow inserting text with a fragment
+PASS: should allow replacing the document element with a fragment
+PASS: should throw when inserting multiple elements
+PASS: should throw when inserting multiple elements with a fragment
+
+All 7 tests passed.
+unittest-suite-success
 DONE

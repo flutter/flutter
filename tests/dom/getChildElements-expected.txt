@@ -1,6 +1,6 @@
-CONSOLE: unittest-suite-wait-for-done
-CONSOLE: PASS: getChildElements should only include immediate children
-CONSOLE: 
-CONSOLE: All 1 tests passed.
-CONSOLE: unittest-suite-success
+unittest-suite-wait-for-done
+PASS: getChildElements should only include immediate children
+
+All 1 tests passed.
+unittest-suite-success
 DONE

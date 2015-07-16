@@ -1,6 +1,6 @@
-CONSOLE: unittest-suite-wait-for-done
-CONSOLE: TestRenderView enabled
-CONSOLE: 
+unittest-suite-wait-for-done
+TestRenderView enabled
+
 PAINT FOR FRAME #1 ----------------------------------------------
 1 | TestPaintingCanvas() constructor: 800.0 x 600.0
 1 | paintChild RenderDecoratedBox at Point(0.0, 0.0)
@@ -31,8 +31,8 @@ PAINT FOR FRAME #1 ----------------------------------------------
 1 |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 1 |  |  |  |  |  | drawRect(Rect.fromLTRB(266.6666564941406, 240.0, 800.0, 600.0), Paint(color:Color(0xff0000ff)))
 ------------------------------------------------------------------------
-CONSOLE: PASS: should flex
-CONSOLE: 
-CONSOLE: All 1 tests passed.
-CONSOLE: unittest-suite-success
+PASS: should flex
+
+All 1 tests passed.
+unittest-suite-success
 DONE

@@ -1,8 +1,8 @@
-CONSOLE: unittest-suite-wait-for-done
-CONSOLE: PASS: should replace elements
-CONSOLE: PASS: should replace text
-CONSOLE: PASS: should replace children with a fragment
-CONSOLE: 
-CONSOLE: All 3 tests passed.
-CONSOLE: unittest-suite-success
+unittest-suite-wait-for-done
+PASS: should replace elements
+PASS: should replace text
+PASS: should replace children with a fragment
+
+All 3 tests passed.
+unittest-suite-success
 DONE
