@@ -1,0 +1,12 @@
+#!/bin/bash
+# Copyright (c) 2010 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+script=$(readlink $0)
+source $(dirname ${script:-$0})/git-utils.sh
+
+if git diff-tree ORIG_HEAD HEAD | grep -qs $'\tDEPS$'; then
+    warn "DEPS has changed; you probably need to re-run gclient sync."
+fi
+

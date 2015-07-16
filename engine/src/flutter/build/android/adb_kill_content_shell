@@ -1,0 +1,24 @@
+#!/bin/bash
+#
+# Copyright (c) 2012 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+#
+# Kill a running content shell.
+#
+# Assumes you have sourced the build/android/envsetup.sh script.
+
+SHELL_PID_LINES=$(adb shell ps | grep ' org.chromium.content_shell_apk')
+VAL=$(echo "$SHELL_PID_LINES" | wc -l)
+if [ $VAL -lt 1 ] ; then
+   echo "Not running Content shell."
+else
+   SHELL_PID=$(echo $SHELL_PID_LINES | awk '{print $2}')
+   if [ "$SHELL_PID" != "" ] ; then
+      set -x
+      adb shell kill $SHELL_PID
+      set -
+   else
+     echo "Content shell does not appear to be running."
+   fi
+fi

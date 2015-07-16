@@ -1,0 +1,18 @@
+# Times out
+IPCSyncChannelTest.ChattyServer
+
+# MultiProcessTest related failures. These tests fail if DCHECK is enabled.
+IPCChannelPosixTest.AdvancedConnected
+IPCChannelPosixTest.ResetState
+IPCChannelPosixTest.MultiConnection
+IPCFuzzingTest.SanityTest
+IPCFuzzingTest.MsgBadPayloadArgs
+IPCFuzzingTest.MsgBadPayloadShort
+IPCSendFdsTest.DescriptorTest
+IPCChannelProxyTest.MessageClassFilters
+IPCChannelProxyTest.GlobalAndMessageClassFilters
+IPCChannelProxyTest.FilterRemoval
+IPCChannelTest.ChannelTest
+IPCChannelTest.ChannelProxyTest
+IPCChannelTest.SendMessageInChannelConnected
+SyncSocketTest.SanityTest

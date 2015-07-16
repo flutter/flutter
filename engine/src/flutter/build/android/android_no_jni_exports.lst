@@ -1,0 +1,17 @@
+# Copyright 2014 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# This script makes all JNI exported symbols local, to prevent the JVM from
+# being able to find them, enforcing use of manual JNI function registration.
+# This is used for all Android binaries by default, unless they explicitly state
+# that they want JNI exported symbols to remain visible, as we need to ensure
+# the manual registration path is correct to maintain compatibility with the
+# crazy linker.
+# Check ld version script manual:
+# https://sourceware.org/binutils/docs-2.24/ld/VERSION.html#VERSION
+
+{
+  local:
+    Java_*;
+};

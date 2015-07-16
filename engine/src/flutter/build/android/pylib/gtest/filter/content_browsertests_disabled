@@ -1,0 +1,65 @@
+# List of suppressions
+# Timeouts
+Http/MediaTest.*
+File/MediaTest.*
+MediaTest.*
+DatabaseTest.*
+
+# Crashes
+RenderFrameHostManagerTest.IgnoreRendererDebugURLsWhenCrashed
+
+# Plugins are not supported.
+BrowserPluginThreadedCompositorPixelTest.*
+BrowserPluginHostTest.*
+BrowserPluginTest.*
+PluginTest.*
+
+# http://crbug.com/463740
+CrossPlatformAccessibilityBrowserTest.SelectedEditableTextAccessibility
+
+# http://crbug.com/297230
+DumpAccessibilityTreeTest.AccessibilityAriaLevel
+DumpAccessibilityTreeTest.AccessibilityAriaProgressbar
+DumpAccessibilityTreeTest.AccessibilityListMarkers
+DumpAccessibilityTreeTest.AccessibilityUl
+DumpAccessibilityTreeTest.AccessibilityCanvas
+RendererAccessibilityTest.DetachAccessibilityObject
+DumpAccessibilityTreeTest.AccessibilityDialog
+DumpAccessibilityTreeTest.AccessibilityModalDialogClosed
+DumpAccessibilityTreeTest.AccessibilityModalDialogInIframeOpened
+RendererAccessibilityTest.EventOnObjectNotInTree
+
+# http://crbug.com/187500
+RenderViewImplTest.*
+RendererAccessibilityTest.SendFullAccessibilityTreeOnReload
+RendererAccessibilityTest.HideAccessibilityObject
+RendererAccessibilityTest.ShowAccessibilityObject
+
+# http://crbug.com/215894
+DownloadContentTest.CancelInterruptedDownload
+DownloadContentTest.CancelResumingDownload
+DownloadContentTest.RemoveDownload
+DownloadContentTest.RemoveResumingDownload
+DownloadContentTest.ResumeInterruptedDownload
+DownloadContentTest.ResumeInterruptedDownloadNoRange
+DownloadContentTest.ResumeInterruptedDownloadNoVerifiers
+DownloadContentTest.ResumeInterruptedDownloadBadPrecondition
+DownloadContentTest.ResumeWithDeletedFile
+
+# http://crbug.com/386227
+IndexedDBBrowserTest.VersionChangeCrashResilience
+
+# http://crbug.com/386222
+IndexedDBBrowserTest.DoesntHangTest
+
+# http://crbug.com/233118
+IndexedDBBrowserTest.NullKeyPathPersistence
+
+# http://crbug.com/342525
+IndexedDBBrowserTestSingleProcess.RenderThreadShutdownTest
+
+# http://crbug.com/338421
+GinBrowserTest.GinAndGarbageCollection
+
+# http://crbug.com/343604
+MSE_ClearKey/EncryptedMediaTest.ConfigChangeVideo/0

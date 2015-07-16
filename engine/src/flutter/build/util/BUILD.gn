@@ -1,0 +1,28 @@
+# Copyright (c) 2013 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+action("webkit_version") {
+  script = "version.py"
+
+  lastchange_file = "LASTCHANGE.blink"
+
+  # TODO(brettw) move from content to this directory.
+  template_file = "//content/webkit_version.h.in"
+  inputs = [
+    lastchange_file,
+    template_file,
+  ]
+
+  output_file = "$root_gen_dir/webkit_version.h"
+  outputs = [
+    output_file,
+  ]
+
+  args = [
+    "-f",
+    rebase_path(lastchange_file, root_build_dir),
+    rebase_path(template_file, root_build_dir),
+    rebase_path(output_file, root_build_dir),
+  ]
+}

@@ -1,0 +1,30 @@
+# Copyright 2014 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+declare_args() {
+  # SDK path to use. When empty this will use the default SDK based on the
+  # value of use_ios_simulator.
+  ios_sdk_path = ""
+
+  # Set to true when targeting a simulator build on iOS. False means that the
+  # target is for running on the device. The default value is to use the
+  # Simulator except when targeting GYP's Xcode builds (for compat with the
+  # existing GYP build).
+  use_ios_simulator = true
+
+  # Version of iOS that we're targeting.
+  ios_deployment_target = "6.0"
+}
+
+if (ios_sdk_path == "") {
+  # Compute default target.
+  if (use_ios_simulator) {
+    _ios_sdk_to_query = "iphonesimulator"
+  } else {
+    _ios_sdk_to_query = "iphoneos"
+  }
+  _ios_sdk_result =
+      exec_script("ios_sdk.py", [ _ios_sdk_to_query ], "list lines")
+  ios_sdk_path = _ios_sdk_result[0]
+}

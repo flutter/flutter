@@ -1,0 +1,18 @@
+Name: Freetype
+URL: https://android.googlesource.com/platform/external/freetype/
+Version: 9c745321260bb728ab1cd1c8fd5f075854b2ad49
+License: Custom license "inspired by the BSD, Artistic, and IJG (Independent
+         JPEG Group) licenses"
+License File: src/NOTICE
+Security Critical: yes
+License Android Compatible: yes
+
+Description:
+This package was copied from Android source tree and just used for Android.
+For other platforms, the freetype is normally found outside the Chromium tree;
+e.g. on Mac it's in /usr/include
+
+How to update:
+1. Follow the directions in src/README.chromium to update the source.
+2. Update freetype.gyp and BUILD.gn to reflect any changes in src/Android.mk.
+3. Commit build changes while rolling Chromium DEPS to new commit.

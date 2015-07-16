@@ -1,0 +1,32 @@
+# Copyright 2014 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//build/config/android/config.gni")
+import("//build/config/sysroot.gni")
+
+config("sdk") {
+  if (sysroot != "") {
+    cflags = [ "--sysroot=" + sysroot ]
+    ldflags = [ "--sysroot=" + sysroot ]
+
+    # Need to get some linker flags out of the sysroot.
+    sysroot_ld_path = rebase_path("//build/config/linux/sysroot_ld_path.py")
+    ldflags += [ exec_script(sysroot_ld_path,
+                             [
+                               rebase_path("//build/linux/sysroot_ld_path.sh"),
+                               sysroot,
+                             ],
+                             "value") ]
+  }
+}
+
+config("executable_config") {
+  cflags = [ "-fPIE" ]
+  ldflags = [ "-pie" ]
+}
+
+config("hide_native_jni_exports") {
+  ldflags = [ "-Wl,--version-script=" +
+              rebase_path("//build/android/android_no_jni_exports.lst") ]
+}

@@ -1,0 +1,10 @@
+Name: JUnit
+URL: http://junit.org
+Version: 4.10
+License: Common Public License 1.0
+License File: NOT_SHIPPED
+Security Critical: no
+License Android Compatible: yes
+Description: JUnit is a java unit testing library.
+Local Modifications: None
+

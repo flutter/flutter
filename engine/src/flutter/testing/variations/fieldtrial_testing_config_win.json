@@ -1,0 +1,97 @@
+{
+    "BrowserBlacklist": [
+        {
+            "group_name": "Enabled"
+        }
+    ],
+    "CTRequiredForEVTrial": [
+        {
+            "group_name": "RequirementEnforced"
+        }
+    ],
+    "ChildAccountDetection": [
+        {
+            "group_name": "Disabled"
+        }
+    ],
+    "ChromeDashboard": [
+        {
+            "group_name": "Default"
+        }
+    ],
+    "ExtensionContentVerification": [
+        {
+            "group_name": "Enforce"
+        }
+    ],
+    "ExtensionInstallVerification": [
+        {
+            "group_name": "Enforce"
+        }
+    ],
+    "GoogleNow": [
+        {
+            "group_name": "Enable"
+        }
+    ],
+    "IconNTP": [
+        {
+            "group_name": "Default"
+        }
+    ],
+    "NewProfileManagement": [
+        {
+            "group_name": "Enabled"
+        }
+    ],
+    "PasswordGeneration": [
+        {
+            "group_name": "Disabled"
+        }
+    ],
+    "RefreshTokenDeviceId": [
+        {
+            "group_name": "Enabled"
+        }
+    ],
+    "SHA1IdentityUIWarning": [
+        {
+            "group_name": "Enabled"
+        }
+    ],
+    "SHA1ToolbarUIJanuary2016": [
+        {
+            "group_name": "Warning"
+        }
+    ],
+    "SHA1ToolbarUIJanuary2017": [
+        {
+            "group_name": "Error"
+        }
+    ],
+    "SRTPromptFieldTrial": [
+        {
+            "group_name": "Default"
+        }
+    ],
+    "SettingsEnforcement": [
+        {
+            "group_name": "enforce_always_with_extensions_and_dse"
+        }
+    ],
+    "ShowAppLauncherPromo": [
+        {
+            "group_name": "ShowPromoUntilDismissed"
+        }
+    ],
+    "UwSInterstitialStatus": [
+        {
+            "group_name": "On"
+        }
+    ],
+    "VoiceTrigger": [
+        {
+            "group_name": "Install"
+        }
+    ]
+}

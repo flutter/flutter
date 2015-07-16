@@ -1,0 +1,148 @@
+# Copyright 2014 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("config.gni")
+import("//testing/test.gni")
+
+assert(relocation_packing_supported)
+
+if (target_cpu == "arm") {
+  target_define = "TARGET_ARM"
+} else if (target_cpu == "arm64") {
+  target_define = "TARGET_ARM64"
+}
+
+if (current_toolchain == host_toolchain) {
+  # GYP: //tools/relocation_packer/relocation_packer.gyp:lib_relocation_packer
+  source_set("lib_relocation_packer") {
+    defines = [ target_define ]
+    deps = [
+      "//third_party/elfutils:libelf",
+    ]
+    configs -= [ "//build/config/compiler:chromium_code" ]
+    configs += [ "//build/config/compiler:no_chromium_code" ]
+    sources = [
+      "src/debug.cc",
+      "src/delta_encoder.cc",
+      "src/elf_file.cc",
+      "src/leb128.cc",
+      "src/packer.cc",
+      "src/run_length_encoder.cc",
+      "src/sleb128.cc",
+    ]
+  }
+
+  # GYP: //tools/relocation_packer/relocation_packer.gyp:relocation_packer
+  executable("relocation_packer") {
+    defines = [ target_define ]
+    deps = [
+      ":lib_relocation_packer",
+      "//third_party/elfutils:libelf",
+    ]
+    sources = [
+      "src/main.cc",
+    ]
+  }
+
+  # GYP: //tools/relocation_packer/relocation_packer.gyp:relocation_packer_unittests
+  test("relocation_packer_unittests") {
+    sources = [
+      "src/debug_unittest.cc",
+      "src/delta_encoder_unittest.cc",
+      "src/elf_file_unittest.cc",
+      "src/leb128_unittest.cc",
+      "src/packer_unittest.cc",
+      "src/run_all_unittests.cc",
+      "src/run_length_encoder_unittest.cc",
+      "src/sleb128_unittest.cc",
+    ]
+    rebased_test_data = rebase_path("test_data", root_build_dir)
+    data = [
+      "test_data/elf_file_unittest_relocs_arm32.so",
+      "test_data/elf_file_unittest_relocs_arm32_packed.so",
+      "test_data/elf_file_unittest_relocs_arm64.so",
+      "test_data/elf_file_unittest_relocs_arm64_packed.so",
+    ]
+    defines = [
+      target_define,
+      "INTERMEDIATE_DIR=\"$rebased_test_data\"",
+    ]
+    include_dirs = [ "//" ]
+    deps = [
+      ":lib_relocation_packer",
+      ":relocation_packer_test_data",
+      "//testing:gtest",
+    ]
+  }
+}
+
+if (current_toolchain == default_toolchain &&
+    (target_cpu == "arm" || target_cpu == "arm64")) {
+  # Targets to build test data.  These participate only in building test
+  # data for use with elf_file_unittest.cc, and are not part of the main
+  # relocation packer build.  Unit test data files are checked in to the
+  # source tree as 'golden' data, and are not generated 'on the fly' by
+  # the build.
+  #
+  # See test_data/generate_elf_file_unittest_relocs.sh for instructions.
+
+  # GYP: //tools/relocation_packer/relocation_packer.gyp:relocation_packer_test_data
+  shared_library("relocation_packer_test_data") {
+    cflags = [
+      "-O0",
+      "-g0",
+    ]
+    sources = [
+      "test_data/elf_file_unittest_relocs.cc",
+    ]
+  }
+
+  # GYP: //tools/relocation_packer/relocation_packer.gyp:relocation_packer_unittests_test_data
+  action("relocation_packer_unittests_test_data") {
+    script = "test_data/generate_elf_file_unittest_relocs.py"
+    test_file = "$root_build_dir/librelocation_packer_test_data.so"
+    if (target_cpu == "arm") {
+      added_section = ".android.rel.dyn"
+      packed_output = "elf_file_unittest_relocs_arm32_packed.so"
+      unpacked_output = "elf_file_unittest_relocs_arm32.so"
+    } else if (target_cpu == "arm64") {
+      added_section = ".android.rela.dyn"
+      packed_output = "elf_file_unittest_relocs_arm64_packed.so"
+      unpacked_output = "elf_file_unittest_relocs_arm64.so"
+    } else {
+      assert(false, "Unsupported target arch for relocation packer")
+    }
+
+    packed_output = "$root_build_dir/$packed_output"
+    unpacked_output = "$root_build_dir/$unpacked_output"
+
+    inputs = [
+      test_file,
+    ]
+
+    deps = [
+      ":relocation_packer_test_data",
+      ":relocation_packer($host_toolchain)",
+    ]
+
+    outputs = [
+      packed_output,
+      unpacked_output,
+    ]
+
+    args = [
+      "--android-pack-relocations",
+      rebase_path(relocation_packer_exe, root_build_dir),
+      "--android-objcopy",
+      rebase_path(android_objcopy, root_build_dir),
+      "--added-section=$added_section",
+      "--test-file",
+      rebase_path(test_file, root_build_dir),
+      "--packed-output",
+      rebase_path(packed_output, root_build_dir),
+      "--unpacked-output",
+      rebase_path(unpacked_output, root_build_dir),
+    ]
+  }
+}

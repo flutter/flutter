@@ -1,0 +1,499 @@
+{
+  "Linux ChromeOS MSan Tests": {
+    "gtest_tests": [
+      {
+        "swarming": {
+          "can_use_on_swarming_builders": true
+        },
+        "test": "accessibility_unittests"
+      },
+      {
+        "swarming": {
+          "can_use_on_swarming_builders": true
+        },
+        "test": "app_list_unittests"
+      },
+      {
+        "test": "aura_unittests"
+      },
+      {
+        "test": "base_unittests"
+      },
+      {
+        "swarming": {
+          "can_use_on_swarming_builders": true,
+          "shards": 5
+        },
+        "test": "browser_tests"
+      },
+      {
+        "test": "cacheinvalidation_unittests"
+      },
+      {
+        "test": "cast_unittests"
+      },
+      {
+        "test": "cc_unittests"
+      },
+      {
+        "test": "chromedriver_unittests"
+      },
+      {
+        "test": "components_unittests"
+      },
+      {
+        "test": "compositor_unittests"
+      },
+      {
+        "test": "content_browsertests"
+      },
+      {
+        "test": "content_unittests"
+      },
+      {
+        "test": "crypto_unittests"
+      },
+      {
+        "test": "dbus_unittests"
+      },
+      {
+        "test": "device_unittests"
+      },
+      {
+        "test": "display_unittests"
+      },
+      {
+        "test": "events_unittests"
+      },
+      {
+        "test": "extensions_browsertests"
+      },
+      {
+        "test": "extensions_unittests"
+      },
+      {
+        "test": "gcm_unit_tests"
+      },
+      {
+        "test": "gl_unittests"
+      },
+      {
+        "test": "google_apis_unittests"
+      },
+      {
+        "test": "gpu_unittests"
+      },
+      {
+        "swarming": {
+          "can_use_on_swarming_builders": true,
+          "shards": 2
+        },
+        "test": "interactive_ui_tests"
+      },
+      {
+        "test": "ipc_mojo_unittests"
+      },
+      {
+        "test": "ipc_tests"
+      },
+      {
+        "test": "jingle_unittests"
+      },
+      {
+        "test": "media_unittests"
+      },
+      {
+        "test": "midi_unittests"
+      },
+      {
+        "test": "mojo_common_unittests"
+      },
+      {
+        "test": "mojo_public_bindings_unittests"
+      },
+      {
+        "test": "mojo_public_environment_unittests"
+      },
+      {
+        "test": "mojo_public_system_unittests"
+      },
+      {
+        "test": "mojo_public_utility_unittests"
+      },
+      {
+        "test": "mojo_system_unittests"
+      },
+      {
+        "test": "nacl_loader_unittests"
+      },
+      {
+        "test": "net_unittests"
+      },
+      {
+        "test": "ppapi_unittests"
+      },
+      {
+        "test": "printing_unittests"
+      },
+      {
+        "test": "remoting_unittests"
+      },
+      {
+        "test": "sandbox_linux_unittests"
+      },
+      {
+        "test": "skia_unittests"
+      },
+      {
+        "test": "sql_unittests"
+      },
+      {
+        "test": "sync_unit_tests"
+      },
+      {
+        "test": "ui_base_unittests"
+      },
+      {
+        "test": "unit_tests"
+      },
+      {
+        "test": "url_unittests"
+      },
+      {
+        "test": "views_unittests"
+      },
+      {
+        "test": "wm_unittests"
+      }
+    ]
+  },
+  "Linux MSan Tests": {
+    "gtest_tests": [
+      {
+        "swarming": {
+          "can_use_on_swarming_builders": true
+        },
+        "test": "accessibility_unittests"
+      },
+      {
+        "swarming": {
+          "can_use_on_swarming_builders": true
+        },
+        "test": "app_list_unittests"
+      },
+      {
+        "test": "aura_unittests"
+      },
+      {
+        "test": "base_unittests"
+      },
+      {
+        "swarming": {
+          "can_use_on_swarming_builders": true,
+          "shards": 5
+        },
+        "test": "browser_tests"
+      },
+      {
+        "test": "cacheinvalidation_unittests"
+      },
+      {
+        "test": "cast_unittests"
+      },
+      {
+        "test": "cc_unittests"
+      },
+      {
+        "test": "chromedriver_unittests"
+      },
+      {
+        "test": "components_unittests"
+      },
+      {
+        "test": "compositor_unittests"
+      },
+      {
+        "test": "content_browsertests"
+      },
+      {
+        "test": "content_unittests"
+      },
+      {
+        "test": "crypto_unittests"
+      },
+      {
+        "test": "dbus_unittests"
+      },
+      {
+        "test": "device_unittests"
+      },
+      {
+        "test": "display_unittests"
+      },
+      {
+        "test": "events_unittests"
+      },
+      {
+        "test": "extensions_browsertests"
+      },
+      {
+        "test": "extensions_unittests"
+      },
+      {
+        "test": "gcm_unit_tests"
+      },
+      {
+        "test": "gfx_unittests"
+      },
+      {
+        "test": "gl_unittests"
+      },
+      {
+        "test": "google_apis_unittests"
+      },
+      {
+        "test": "gpu_unittests"
+      },
+      {
+        "swarming": {
+          "can_use_on_swarming_builders": true
+        },
+        "test": "interactive_ui_tests"
+      },
+      {
+        "test": "ipc_mojo_unittests"
+      },
+      {
+        "test": "ipc_tests"
+      },
+      {
+        "test": "jingle_unittests"
+      },
+      {
+        "test": "media_unittests"
+      },
+      {
+        "test": "midi_unittests"
+      },
+      {
+        "test": "mojo_common_unittests"
+      },
+      {
+        "test": "mojo_public_bindings_unittests"
+      },
+      {
+        "test": "mojo_public_environment_unittests"
+      },
+      {
+        "test": "mojo_public_system_unittests"
+      },
+      {
+        "test": "mojo_public_utility_unittests"
+      },
+      {
+        "test": "mojo_system_unittests"
+      },
+      {
+        "test": "nacl_loader_unittests"
+      },
+      {
+        "test": "net_unittests"
+      },
+      {
+        "test": "ppapi_unittests"
+      },
+      {
+        "test": "printing_unittests"
+      },
+      {
+        "test": "remoting_unittests"
+      },
+      {
+        "test": "sandbox_linux_unittests"
+      },
+      {
+        "test": "skia_unittests"
+      },
+      {
+        "test": "sql_unittests"
+      },
+      {
+        "test": "sync_unit_tests"
+      },
+      {
+        "test": "ui_base_unittests"
+      },
+      {
+        "test": "ui_touch_selection_unittests"
+      },
+      {
+        "test": "unit_tests"
+      },
+      {
+        "test": "url_unittests"
+      },
+      {
+        "test": "views_unittests"
+      },
+      {
+        "test": "wm_unittests"
+      }
+    ]
+  },
+  "Linux TSan Tests": {
+    "disabled_tests": {
+      "app_shell_browsertests": "http://crbug.com/455633",
+      "browser_tests": "Too many errors, clean content_browsertests first. http://crbug.com/368525",
+      "cc_unittests": "http://crbug.com/437454",
+      "interactive_ui_tests": "http://crbug.com/455679"
+    },
+    "gtest_tests": [
+      {
+        "swarming": {
+          "can_use_on_swarming_builders": true
+        },
+        "test": "accessibility_unittests"
+      },
+      {
+        "swarming": {
+          "can_use_on_swarming_builders": true
+        },
+        "test": "app_list_unittests"
+      },
+      {
+        "test": "aura_unittests"
+      },
+      {
+        "swarming": {
+          "can_use_on_swarming_builders": true
+        },
+        "test": "base_unittests"
+      },
+      {
+        "test": "cacheinvalidation_unittests"
+      },
+      {
+        "test": "cast_unittests"
+      },
+      {
+        "test": "chromedriver_unittests"
+      },
+      {
+        "test": "components_unittests"
+      },
+      {
+        "swarming": {
+          "can_use_on_swarming_builders": true
+        },
+        "test": "content_browsertests"
+      },
+      {
+        "swarming": {
+          "can_use_on_swarming_builders": true
+        },
+        "test": "content_unittests"
+      },
+      {
+        "test": "crypto_unittests"
+      },
+      {
+        "test": "dbus_unittests"
+      },
+      {
+        "test": "device_unittests"
+      },
+      {
+        "test": "display_unittests"
+      },
+      {
+        "test": "events_unittests"
+      },
+      {
+        "test": "extensions_unittests"
+      },
+      {
+        "test": "gcm_unit_tests"
+      },
+      {
+        "test": "gfx_unittests"
+      },
+      {
+        "test": "gl_unittests"
+      },
+      {
+        "test": "google_apis_unittests"
+      },
+      {
+        "test": "gpu_unittests"
+      },
+      {
+        "test": "ipc_mojo_unittests"
+      },
+      {
+        "test": "ipc_tests"
+      },
+      {
+        "test": "jingle_unittests"
+      },
+      {
+        "test": "media_unittests"
+      },
+      {
+        "test": "midi_unittests"
+      },
+      {
+        "test": "mojo_common_unittests"
+      },
+      {
+        "swarming": {
+          "can_use_on_swarming_builders": true,
+          "shards": 4
+        },
+        "test": "net_unittests"
+      },
+      {
+        "test": "ppapi_unittests"
+      },
+      {
+        "test": "printing_unittests"
+      },
+      {
+        "test": "remoting_unittests"
+      },
+      {
+        "test": "sandbox_linux_unittests"
+      },
+      {
+        "test": "skia_unittests"
+      },
+      {
+        "test": "sql_unittests"
+      },
+      {
+        "test": "sync_unit_tests"
+      },
+      {
+        "test": "ui_base_unittests"
+      },
+      {
+        "test": "ui_touch_selection_unittests"
+      },
+      {
+        "swarming": {
+          "can_use_on_swarming_builders": true,
+          "shards": 2
+        },
+        "test": "unit_tests"
+      },
+      {
+        "test": "url_unittests"
+      },
+      {
+        "test": "views_unittests"
+      },
+      {
+        "test": "wm_unittests"
+      }
+    ]
+  }
+}

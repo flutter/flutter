@@ -1,0 +1,75 @@
+# Copyright 2015 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//mojo/public/dart/rules.gni")
+
+group("dart-pkg") {
+  deps = [
+    ":archive",
+    ":args",
+    ":box2d",
+    ":cassowary",
+    ":collection",
+    ":crypto",
+    ":newton",
+    ":path",
+    ":quiver",
+    ":source_span",
+    ":string_scanner",
+    ":vector_math",
+    ":yaml",
+  ]
+}
+
+dart_pkg("archive") {
+  pkg_dir = "//third_party/dart-pkg/archive"
+}
+
+dart_pkg("args") {
+  pkg_dir = "//third_party/dart-pkg/args"
+}
+
+dart_pkg("box2d") {
+  pkg_dir = "//third_party/dart-pkg/box2d"
+}
+
+dart_pkg("cassowary") {
+  pkg_dir = "//third_party/dart-pkg/cassowary"
+}
+
+dart_pkg("collection") {
+  pkg_dir = "//third_party/dart-pkg/collection"
+}
+
+dart_pkg("crypto") {
+  pkg_dir = "//third_party/dart-pkg/crypto"
+}
+
+dart_pkg("newton") {
+  pkg_dir = "//third_party/dart-pkg/newton"
+}
+
+dart_pkg("path") {
+  pkg_dir = "//third_party/dart-pkg/path"
+}
+
+dart_pkg("quiver") {
+  pkg_dir = "//third_party/dart-pkg/quiver"
+}
+
+dart_pkg("source_span") {
+  pkg_dir = "//third_party/dart-pkg/source_span"
+}
+
+dart_pkg("string_scanner") {
+  pkg_dir = "//third_party/dart-pkg/string_scanner"
+}
+
+dart_pkg("vector_math") {
+  pkg_dir = "//third_party/dart-pkg/vector_math"
+}
+
+dart_pkg("yaml") {
+  pkg_dir = "//third_party/dart-pkg/yaml"
+}

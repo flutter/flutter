@@ -1,0 +1,19 @@
+#!/bin/bash
+#
+# Copyright 2015 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# If no flags are given, prints the current Chrome flags.
+#
+# Otherwise, the given flags are used to REPLACE (not modify) the Chrome
+# flags. For example:
+#   adb_chrome_public_command_line --enable-webgl
+#
+# To remove all Chrome flags, pass an empty string for the flags:
+#   adb_chrome_public_command_line ""
+
+. $(dirname $0)/adb_command_line_functions.sh
+CMD_LINE_FILE=/data/local/chrome-command-line
+REQUIRES_SU=1
+set_command_line "$@"

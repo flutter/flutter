@@ -1,0 +1,43 @@
+# Copyright 2015 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//testing/test.gni")
+
+group("mojom") {
+  testonly = true
+  deps = [
+    ":tests",
+  ]
+}
+
+group("tests") {
+  testonly = true
+  deps = [
+    ":lexer_unittest",
+  ]
+}
+
+test("lexer_unittest") {
+  sources = [
+    "lexer_unittest.cc",
+  ]
+
+  deps = [
+    "//base",
+    "//base/test:run_all_unittests",
+    "//testing/gtest",
+    ":lexer",
+  ]
+}
+
+source_set("lexer") {
+  sources = [
+    "lexer.cc",
+    "lexer.h",
+  ]
+
+  deps = [
+    "//base",
+  ]
+}
