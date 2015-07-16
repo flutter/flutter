@@ -26,6 +26,10 @@
 #include "sky/engine/tonic/dart_value.h"
 #include "sky/engine/wtf/text/WTFString.h"
 
+#if defined(OS_ANDROID)
+#include <android/log.h>
+#endif
+
 namespace blink {
 
 #define REGISTER_FUNCTION(name, count)                                         \
@@ -159,14 +163,13 @@ void Logger_PrintString(Dart_NativeArguments args) {
   if (Dart_IsError(result)) {
     Dart_PropagateError(result);
   } else {
-
-  String message(chars, length);
-  // TODO(dart): Hook up to developer console (if/when that's a thing).
-#if OS(ANDROID) || OS(IOS)
-    LOG(INFO) << "CONSOLE: " << message.utf8().data();
-#else
-    printf("CONSOLE: %s\n", message.utf8().data());
-    fflush(stdout);
+    // Uses fwrite to support printing NUL bytes.
+    fwrite(chars, 1, length, stdout);
+    fputs("\n", stdout);
+#if defined(OS_ANDROID)
+    // In addition to writing to the stdout, write to the logcat so that the
+    // message is discoverable when running on an unrooted device.
+    __android_log_print(ANDROID_LOG_INFO, "sky", "%.*s", length, chars);
 #endif
   }
 }
