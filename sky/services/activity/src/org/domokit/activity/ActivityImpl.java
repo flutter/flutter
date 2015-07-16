@@ -7,6 +7,7 @@ package org.domokit.activity;
 import android.content.ActivityNotFoundException;
 import android.net.Uri;
 import android.util.Log;
+import android.os.Build;
 
 import org.chromium.mojo.system.MojoException;
 import org.chromium.mojom.activity.Activity;
@@ -81,6 +82,9 @@ public class ActivityImpl implements Activity {
     @Override
     public void setTaskDescription(TaskDescription description) {
         if (sCurrentActivity == null) {
+            return;
+        }
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
             return;
         }
         sCurrentActivity.setTaskDescription(
