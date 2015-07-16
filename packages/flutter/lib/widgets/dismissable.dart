@@ -13,6 +13,7 @@ import 'package:vector_math/vector_math.dart';
 const Duration _kCardDismissFadeout = const Duration(milliseconds: 300);
 const double _kMinFlingVelocity = 700.0;
 const double _kMinFlingVelocityDelta = 400.0;
+const double _kFlingVelocityScale = 1.0/300.0;
 const double _kDismissCardThreshold = 0.6;
 
 typedef void DismissedCallback();
@@ -129,7 +130,7 @@ class Dismissable extends AnimatedComponent {
       _dragUnderway = false;
       _dragX = event.velocityX.sign;
       _position.end = _activeCardDragEndPoint;
-      _performance.fling(velocity: event.velocityX.abs() / _width);
+      _performance.fling(velocity: event.velocityX.abs() * _kFlingVelocityScale);
     }
   }
 

@@ -11,6 +11,7 @@ dart_pkg("sky") {
     "lib/animation/animated_simulation.dart",
     "lib/animation/animation_performance.dart",
     "lib/animation/curves.dart",
+    "lib/animation/forces.dart",
     "lib/animation/scroll_behavior.dart",
     "lib/animation/timeline.dart",
     "lib/assets/.gitignore",
