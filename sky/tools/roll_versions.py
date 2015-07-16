@@ -11,9 +11,6 @@ import xml.etree.ElementTree as ET
 
 PUBSPECS = [
     'sky/sdk/pubspec.yaml',
-    'mojo/public/dart/pubspec.yaml',
-    'mojo/dart/mojo_services/pubspec.yaml',
-    'mojo/dart/mojom/pubspec.yaml',
 ]
 
 MANIFESTS = [

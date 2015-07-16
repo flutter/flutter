@@ -1,0 +1,7 @@
+Fixed a common startup crasher on Android systems before 5.0
+Fixed to not draw behind the status bar on before Android 5.0
+First release from new http://github.com/domokit/sky_engine repository.
+
+I suspect there may still be some crashes we will be fixing
+in the coming days as we set up systems to catch these crashes
+before they are shipped to users.
