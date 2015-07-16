@@ -1,0 +1,480 @@
+# Copyright 2014 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//build/module_args/mojo.gni")
+import("mojo.gni")
+import("mojo_sdk.gni")
+
+# Generate a binary mojo application.The parameters of this template are those
+# of a shared library.
+template("mojo_native_application") {
+  if (defined(invoker.output_name)) {
+    base_target_name = invoker.output_name
+  } else {
+    base_target_name = target_name
+  }
+
+  final_target_name = target_name
+
+  if (!is_nacl) {
+    output = base_target_name + ".mojo"
+    library_target_name = base_target_name + "_library"
+    copy_symbols_target = "__${final_target_name}_copy_symbols"
+
+    if (is_linux || is_android) {
+      library_name = "lib${library_target_name}.so"
+    } else if (is_win) {
+      library_name = "${library_target_name}.dll"
+    } else if (is_mac || is_ios) {
+      library_name = "lib${library_target_name}.dylib"
+    } else {
+      assert(false, "Platform not supported.")
+    }
+
+    if (is_android) {
+      # On android, use the stripped version of the library, because applications
+      # are always fetched over the network.
+      library_dir = "${root_out_dir}/lib.stripped"
+    } else {
+      library_dir = root_out_dir
+    }
+
+    shared_library(library_target_name) {
+      if (defined(invoker.cflags)) {
+        cflags = invoker.cflags
+      }
+      if (defined(invoker.cflags_c)) {
+        cflags_c = invoker.cflags_c
+      }
+      if (defined(invoker.cflags_cc)) {
+        cflags_cc = invoker.cflags_cc
+      }
+      if (defined(invoker.cflags_objc)) {
+        cflags_objc = invoker.cflags_objc
+      }
+      if (defined(invoker.cflags_objcc)) {
+        cflags_objcc = invoker.cflags_objcc
+      }
+      if (defined(invoker.defines)) {
+        defines = invoker.defines
+      }
+      if (defined(invoker.include_dirs)) {
+        include_dirs = invoker.include_dirs
+      }
+      if (defined(invoker.ldflags)) {
+        ldflags = invoker.ldflags
+      }
+      if (defined(invoker.lib_dirs)) {
+        lib_dirs = invoker.lib_dirs
+      }
+      if (defined(invoker.libs)) {
+        libs = invoker.libs
+      }
+
+      data_deps = []
+      if (defined(invoker.data_deps)) {
+        data_deps = invoker.data_deps
+      }
+
+      # Copy any necessary prebuilt artifacts.
+      if (mojo_use_prebuilt_mojo_shell) {
+        data_deps +=
+            [ rebase_path("mojo/public/tools:copy_mojo_shell", ".", mojo_root) ]
+      }
+      if (mojo_use_prebuilt_network_service) {
+        data_deps += [ rebase_path("mojo/public/tools:copy_network_service",
+                                   ".",
+                                   mojo_root) ]
+      }
+
+      deps = rebase_path([
+                           "mojo/public/c/system",
+                           "mojo/public/platform/native:system",
+                         ],
+                         ".",
+                         mojo_root)
+      if (defined(invoker.deps)) {
+        deps += invoker.deps
+      }
+      if (defined(invoker.forward_dependent_configs_from)) {
+        forward_dependent_configs_from = invoker.forward_dependent_configs_from
+      }
+      if (defined(invoker.public_deps)) {
+        public_deps = invoker.public_deps
+      }
+      if (defined(invoker.all_dependent_configs)) {
+        all_dependent_configs = invoker.all_dependent_configs
+      }
+      if (defined(invoker.public_configs)) {
+        public_configs = invoker.public_configs
+      }
+      if (defined(invoker.check_includes)) {
+        check_includes = invoker.check_includes
+      }
+      if (defined(invoker.configs)) {
+        configs += invoker.configs
+      }
+      if (defined(invoker.data)) {
+        data = invoker.data
+      }
+      if (defined(invoker.inputs)) {
+        inputs = invoker.inputs
+      }
+      if (defined(invoker.public)) {
+        public = invoker.public
+      }
+      if (defined(invoker.sources)) {
+        sources = invoker.sources
+      }
+      if (defined(invoker.testonly)) {
+        testonly = invoker.testonly
+      }
+
+      visibility = [
+        ":${final_target_name}",
+        ":${copy_symbols_target}",
+      ]
+    }
+
+    copy(copy_symbols_target) {
+      if (defined(invoker.testonly)) {
+        testonly = invoker.testonly
+      }
+      visibility = [ ":${final_target_name}" ]
+      deps = [
+        ":${library_target_name}",
+      ]
+
+      sources = [
+        "${root_out_dir}/${library_name}",
+      ]
+      outputs = [
+        "${root_out_dir}/symbols/${library_name}",
+      ]
+    }
+
+    copy(final_target_name) {
+      if (defined(invoker.testonly)) {
+        testonly = invoker.testonly
+      }
+      if (defined(invoker.visibility)) {
+        visibility = invoker.visibility
+      }
+      deps = [
+        ":${library_target_name}",
+        ":${copy_symbols_target}",
+      ]
+
+      sources = [
+        "${library_dir}/${library_name}",
+      ]
+      outputs = [
+        "${root_out_dir}/${output}",
+      ]
+    }
+  } else {
+    nexe_target_name = base_target_name + "_nexe"
+    nexe_name = base_target_name + ".nexe"
+
+    output = "${base_target_name}_${target_cpu}.nexe.mojo"
+
+    executable(nexe_target_name) {
+      output_name = base_target_name
+
+      if (defined(invoker.cflags)) {
+        cflags = invoker.cflags
+      }
+      if (defined(invoker.cflags_c)) {
+        cflags_c = invoker.cflags_c
+      }
+      if (defined(invoker.cflags_cc)) {
+        cflags_cc = invoker.cflags_cc
+      }
+      if (defined(invoker.cflags_objc)) {
+        cflags_objc = invoker.cflags_objc
+      }
+      if (defined(invoker.cflags_objcc)) {
+        cflags_objcc = invoker.cflags_objcc
+      }
+      if (defined(invoker.defines)) {
+        defines = invoker.defines
+      }
+      if (defined(invoker.include_dirs)) {
+        include_dirs = invoker.include_dirs
+      }
+      if (defined(invoker.ldflags)) {
+        ldflags = invoker.ldflags
+      }
+      if (defined(invoker.lib_dirs)) {
+        lib_dirs = invoker.lib_dirs
+      }
+      if (defined(invoker.libs)) {
+        libs = invoker.libs
+      }
+
+      data_deps = []
+      if (defined(invoker.data_deps)) {
+        data_deps = invoker.data_deps
+      }
+
+      # Copy any necessary prebuilt artifacts.
+      if (mojo_use_prebuilt_mojo_shell) {
+        data_deps +=
+            [ rebase_path("mojo/public/tools:copy_mojo_shell", ".", mojo_root) ]
+      }
+      if (mojo_use_prebuilt_network_service) {
+        data_deps += [ rebase_path("mojo/public/tools:copy_network_service",
+                                   ".",
+                                   mojo_root) ]
+      }
+
+      deps = rebase_path([
+                           "mojo/public/c/system",
+                           "mojo/public/platform/nacl:system",
+                         ],
+                         ".",
+                         mojo_root)
+      if (defined(invoker.deps)) {
+        deps += invoker.deps
+      }
+      if (defined(invoker.forward_dependent_configs_from)) {
+        forward_dependent_configs_from = invoker.forward_dependent_configs_from
+      }
+      if (defined(invoker.public_deps)) {
+        public_deps = invoker.public_deps
+      }
+      if (defined(invoker.all_dependent_configs)) {
+        all_dependent_configs = invoker.all_dependent_configs
+      }
+      if (defined(invoker.public_configs)) {
+        public_configs = invoker.public_configs
+      }
+      if (defined(invoker.check_includes)) {
+        check_includes = invoker.check_includes
+      }
+      if (defined(invoker.configs)) {
+        configs += invoker.configs
+      }
+      if (defined(invoker.data)) {
+        data = invoker.data
+      }
+      if (defined(invoker.inputs)) {
+        inputs = invoker.inputs
+      }
+      if (defined(invoker.public)) {
+        public = invoker.public
+      }
+      if (defined(invoker.sources)) {
+        sources = invoker.sources
+      }
+      if (defined(invoker.testonly)) {
+        testonly = invoker.testonly
+      }
+
+      visibility = [ ":${final_target_name}" ]
+    }
+
+    action(target_name) {
+      if (defined(invoker.testonly)) {
+        testonly = invoker.testonly
+      }
+      if (defined(invoker.visibility)) {
+        visibility = invoker.visibility
+      }
+
+      script = rebase_path("mojo/public/tools/prepend.py", ".", mojo_root)
+
+      input_path = "${root_out_dir}/${nexe_name}"
+      inputs = [
+        input_path,
+      ]
+
+      output_path = "${root_build_dir}/${output}"
+      outputs = [
+        output_path,
+      ]
+
+      deps = [
+        ":${nexe_target_name}",
+      ]
+
+      rebase_input = rebase_path(input_path, root_build_dir)
+      rebase_output = rebase_path(output_path, root_build_dir)
+      args = [
+        "--input=$rebase_input",
+        "--output=$rebase_output",
+        "--line=#!mojo mojo:nacl_content_handler",
+      ]
+    }
+  }
+}
+
+if (is_android) {
+  import("//build/config/android/rules.gni")
+
+  # Declares an Android Mojo application consisting of an .so file and a
+  # corresponding .dex.jar file.
+  #
+  # Variables:
+  #   sources (optional): The c++ sources.
+  #   deps (optional): The c++ dependencies.
+  #   java_sources (optional): The java sources.
+  #   java_deps (optional): The java dependencies.
+  #   jni_package (optional): The c++ package for the generated jni headers.
+  #   output_name (optional): override for the output file name
+  #   public_deps / data_deps (optional): Dependencies.
+  template("mojo_android_application") {
+    shared_library_name = "__${target_name}_lib"
+    library_basename = "lib${shared_library_name}.so"
+    if (defined(invoker.jni_package)) {
+      assert(defined(invoker.java_sources))
+      generate_jni_name = "__${target_name}_jni"
+    }
+    if (defined(invoker.java_sources)) {
+      java_library_name = "__${target_name}_java"
+    }
+    android_standalone_library_name = "__${target_name}_java_lib"
+    dex_output_path = "${target_gen_dir}/${target_name}.dex.jar"
+    zip_action_name = "__${target_name}_zip"
+    zip_action_output = "${target_gen_dir}/${target_name}.zip"
+    copy_symbols_target = "__${target_name}_copy_symbols"
+    final_target_name = target_name
+
+    if (defined(invoker.jni_package)) {
+      generate_jni(generate_jni_name) {
+        visibility = [ ":${shared_library_name}" ]
+
+        sources = invoker.java_sources
+        jni_package = invoker.jni_package
+      }
+    }
+
+    shared_library(shared_library_name) {
+      visibility = [
+        ":${copy_symbols_target}",
+        ":${zip_action_name}",
+      ]
+
+      if (defined(invoker.sources)) {
+        sources = invoker.sources
+      }
+
+      deps = []
+      if (defined(invoker.jni_package)) {
+        deps += [ ":${generate_jni_name}" ]
+      }
+      if (defined(invoker.deps)) {
+        deps += invoker.deps
+      }
+    }
+
+    copy(copy_symbols_target) {
+      visibility = [ ":${final_target_name}" ]
+      deps = [
+        ":${shared_library_name}",
+      ]
+
+      sources = [
+        "${root_out_dir}/${library_basename}",
+      ]
+      outputs = [
+        "${root_out_dir}/symbols/${library_basename}",
+      ]
+    }
+
+    if (defined(invoker.java_sources)) {
+      android_library(java_library_name) {
+        visibility = [ ":*" ]
+
+        java_files = invoker.java_sources
+
+        if (defined(invoker.java_deps)) {
+          deps = invoker.java_deps
+        }
+      }
+    }
+
+    android_standalone_library(android_standalone_library_name) {
+      deps = []
+
+      if (defined(invoker.java_sources)) {
+        deps += [ ":${java_library_name}" ]
+      }
+
+      if (defined(invoker.java_deps)) {
+        deps += invoker.java_deps
+      }
+
+      dex_path = dex_output_path
+    }
+
+    action(zip_action_name) {
+      visibility = [ ":${final_target_name}" ]
+      script = "//build/android/gn/zip.py"
+
+      inputs = [
+        "${root_out_dir}/lib.stripped/${library_basename}",
+        dex_output_path,
+      ]
+
+      output = zip_action_output
+      outputs = [
+        output,
+      ]
+
+      rebase_inputs = rebase_path(inputs, root_build_dir)
+      rebase_output = rebase_path(output, root_build_dir)
+      args = [
+        "--inputs=${rebase_inputs}",
+        "--output=${rebase_output}",
+      ]
+
+      if (defined(invoker.deps)) {
+        deps = invoker.deps
+      }
+      if (defined(invoker.public_deps)) {
+        public_deps = invoker.public_deps
+      }
+      if (defined(invoker.data_deps)) {
+        data_deps = invoker.data_deps
+      }
+    }
+
+    if (defined(invoker.output_name)) {
+      mojo_output = "${root_out_dir}/" + invoker.output_name + ".mojo"
+    } else {
+      mojo_output = "${root_out_dir}/" + target_name + ".mojo"
+    }
+
+    action(final_target_name) {
+      script = rebase_path("mojo/public/tools/prepend.py", ".", mojo_root)
+
+      input = zip_action_output
+      inputs = [
+        input,
+      ]
+
+      output = mojo_output
+      outputs = [
+        output,
+      ]
+
+      rebase_input = rebase_path(input, root_build_dir)
+      rebase_output = rebase_path(output, root_build_dir)
+      args = [
+        "--input=${rebase_input}",
+        "--output=${rebase_output}",
+        "--line=#!mojo mojo:android_handler",
+      ]
+
+      deps = [
+        ":${copy_symbols_target}",
+      ]
+
+      public_deps = [
+        ":${zip_action_name}",
+      ]
+    }
+  }
+}

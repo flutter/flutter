@@ -1,0 +1,5 @@
+# This test intentionally crashes with a NULL deref.
+UnitTests.SEGVDeathWithMessage
+# http://crbug.com/407357
+SandboxBPF.StartSingleThreadedAsMultiThreaded
+SandboxBPF.StartMultiThreadedAsSingleThreaded

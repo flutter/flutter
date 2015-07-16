@@ -1,0 +1,18 @@
+[dist4]message_header  // num_bytes
+[u4]0                  // version
+[u4]1                  // name
+[u4]0                  // flags
+[anchr]message_header
+
+[dist4]method1_params  // num_bytes
+[u4]0                  // version
+[dist8]param0_ptr      // param0
+[anchr]method1_params
+
+[u1]0  // Causes the following struct to be misaligned.
+
+[anchr]param0_ptr
+[dist4]struct_a  // num_bytes
+[u4]0            // version
+[u8]1234         // i
+[anchr]struct_a

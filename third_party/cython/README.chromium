@@ -1,0 +1,14 @@
+Name: cython
+URL: http://cython.org/
+Version: 0.20.2
+Security Critical: no
+License: Apache Version 2.0
+License File: NOT_SHIPPED
+Source File: http://cython.org/release/Cython-0.20.2.zip
+Source File SHA256: 52eb018be32f7f9745171ed77d3363f4782046cc94d19ee68e10bd10531833b1
+Description:
+Cython is an optimising static compiler for both the Python programming
+language and the extended Cython programming language (based on Pyrex). It
+makes writing C extensions for Python as easy as Python itself.
+
+Tests, documentation and demo have been removed from the project.

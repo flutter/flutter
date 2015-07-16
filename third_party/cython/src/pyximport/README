@@ -1,0 +1,73 @@
+ == Pyximport == 
+
+Download: pyx-import-1.0.tar.gz
+<http://www.prescod.net/pyximport/pyximport-1.0.tar.gz>
+
+Pyrex is a compiler. Therefore it is natural that people tend to go
+through an edit/compile/test cycle with Pyrex modules. But my personal
+opinion is that one of the deep insights in Python's implementation is
+that a language can be compiled (Python modules are compiled to .pyc)
+files and hide that compilation process from the end-user so that they
+do not have to worry about it. Pyximport does this for Pyrex modules.
+For instance if you write a Pyrex module called "foo.pyx", with
+Pyximport you can import it in a regular Python module like this:
+
+
+import pyximport; pyximport.install()
+import foo
+
+Doing so will result in the compilation of foo.pyx (with appropriate
+exceptions if it has an error in it).
+
+If you would always like to import pyrex files without building them
+specially, you can also the first line above to your sitecustomize.py.
+That will install the hook every time you run Python. Then you can use
+Pyrex modules just with simple import statements. I like to test my
+Pyrex modules like this:
+
+
+python -c "import foo"
+
+See help(pyximport.install) to learn its options for controlling the
+default behavior of "import" and "reload".
+
+ == Dependency Handling == 
+
+In Pyximport 1.1 it is possible to declare that your module depends on
+multiple files, (likely ".h" and ".pxd" files). If your Pyrex module is
+named "foo" and thus has the filename "foo.pyx" then you should make
+another file in the same directory called "foo.pyxdep". The
+"modname.pyxdep" file can be a list of filenames or "globs" (like
+"*.pxd" or "include/*.h"). Each filename or glob must be on a separate
+line. Pyximport will check the file date for each of those files before
+deciding whether to rebuild the module. In order to keep track of the
+fact that the dependency has been handled, Pyximport updates the
+modification time of your ".pyx" source file. Future versions may do
+something more sophisticated like informing distutils of the
+dependencies directly.
+
+ == Limitations == 
+
+Pyximport does not give you any control over how your Pyrex file is
+compiled. Usually the defaults are fine. You might run into problems if
+you wanted to write your program in half-C, half-Pyrex and build them
+into a single library. Pyximport 1.2 will probably do this.
+
+Pyximport does not hide the Distutils/GCC warnings and errors generated
+by the import process. Arguably this will give you better feedback if
+something went wrong and why. And if nothing went wrong it will give you
+the warm fuzzy that pyximport really did rebuild your module as it was
+supposed to.
+
+ == For further thought and discussion == 
+
+"setup.py install" does not modify sitecustomize.py for you. Should it?
+Modifying Python's "standard interpreter" behaviour may be more than
+most people expect of a package they install..
+
+Pyximport puts your ".c" file beside your ".pyx" file (analogous to
+".pyc" beside ".py"). But it puts the platform-specific binary in a
+build directory as per normal for Distutils. If I could wave a magic
+wand and get Pyrex or distutils or whoever to put the build directory I
+might do it but not necessarily: having it at the top level is VERY
+HELPFUL for debugging Pyrex problems.

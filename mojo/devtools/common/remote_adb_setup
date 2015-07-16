@@ -1,0 +1,51 @@
+#!/bin/bash
+# Copyright 2015 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+if [[ $# -ne 1 && $# -ne 2 ]]; then
+  cat <<'EOF'
+Usage: remote_adb_setup REMOTE_HOST [REMOTE_ADB]
+
+Configures adb on a remote machine to communicate with a device attached to the
+local machine. This is useful for installing APKs, running tests, etc while
+working remotely.
+
+Arguments:
+  REMOTE_HOST  hostname of remote machine
+  REMOTE_ADB   path to adb on the remote machine (you can omit this if adb is in
+               the remote host's path)
+EOF
+  exit 1
+fi
+
+remote_host="$1"
+remote_adb="${2:-adb}"
+
+# Ensure adb is in the local machine's path.
+if ! which adb >/dev/null; then
+  echo "error: adb must be in your local machine's path."
+  exit 1
+fi
+
+if which kinit >/dev/null; then
+  # Allow ssh to succeed without typing your password multiple times.
+  kinit -R || kinit
+fi
+
+# Kill the adb server on the remote host.
+ssh "$remote_host" "$remote_adb kill-server"
+
+# Start the adb server locally.
+adb start-server
+
+# Forward various ports from the remote host to the local host:
+#   5037: adb
+# and from the local host to the remote host:
+#   9998: http server for Sky
+#   31840: http server for the local mojo: origin
+ssh -C \
+    -R 5037:127.0.0.1:5037 \
+    -L 9998:127.0.0.1:9998 \
+    -L 31840:127.0.0.1:31840 \
+    "$remote_host"

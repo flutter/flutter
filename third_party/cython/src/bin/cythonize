@@ -1,0 +1,8 @@
+#!/usr/bin/env python
+
+#
+# command line frontend for cythonize()
+#
+
+from Cython.Build.Cythonize import main
+main()

@@ -1,0 +1,344 @@
+diff --git a/AUTHORS b/AUTHORS
+index 3c0f928..e17d9bf 100644
+--- a/AUTHORS
++++ b/AUTHORS
+@@ -8,5 +8,6 @@
+ 
+ # Please keep the list sorted.
+ 
++Brian Gunlogson <unixman83@gmail.com>
+ Google Inc.
+ Stefano Rivera <stefano.rivera@gmail.com>
+diff --git a/CONTRIBUTORS b/CONTRIBUTORS
+index 7b44e04..7f6a93d 100644
+--- a/CONTRIBUTORS
++++ b/CONTRIBUTORS
+@@ -26,6 +26,7 @@
+ 
+ # Please keep the list sorted.
+ 
++Brian Gunlogson <unixman83@gmail.com>
+ Dominic Battré <battre@chromium.org>
+ John Millikin <jmillikin@gmail.com>
+ Rob Pike <r@google.com>
+diff --git a/re2/compile.cc b/re2/compile.cc
+index 9cddb71..adb45fd 100644
+--- a/re2/compile.cc
++++ b/re2/compile.cc
+@@ -502,7 +502,7 @@ int Compiler::RuneByteSuffix(uint8 lo, uint8 hi, bool foldcase, int next) {
+     return UncachedRuneByteSuffix(lo, hi, foldcase, next);
+   }
+ 
+-  uint64 key = ((uint64)next << 17) | (lo<<9) | (hi<<1) | foldcase;
++  uint64 key = ((uint64)next << 17) | (lo<<9) | (hi<<1) | (foldcase ? 1ULL : 0ULL);
+   map<uint64, int>::iterator it = rune_cache_.find(key);
+   if (it != rune_cache_.end())
+     return it->second;
+diff --git a/re2/prefilter_tree.cc b/re2/prefilter_tree.cc
+index d8bc37a..cdcf77e 100644
+--- a/re2/prefilter_tree.cc
++++ b/re2/prefilter_tree.cc
+@@ -8,6 +8,11 @@
+ #include "re2/prefilter_tree.h"
+ #include "re2/re2.h"
+ 
++#ifdef WIN32
++#include <stdio.h>
++#define snprintf _snprintf
++#endif
++
+ DEFINE_int32(filtered_re2_min_atom_len,
+              3,
+              "Strings less than this length are not stored as atoms");
+diff --git a/re2/re2.cc b/re2/re2.cc
+index 8d1d468..0da886d 100644
+--- a/re2/re2.cc
++++ b/re2/re2.cc
+@@ -11,7 +11,13 @@
+ 
+ #include <stdio.h>
+ #include <string>
++#ifdef WIN32
++#define strtoll _strtoi64
++#define strtoull _strtoui64
++#define strtof strtod
++#else
+ #include <pthread.h>
++#endif
+ #include <errno.h>
+ #include "util/util.h"
+ #include "util/flags.h"
+@@ -31,10 +37,22 @@ const VariadicFunction2<bool, const StringPiece&, const RE2&, RE2::Arg, RE2::Par
+ const VariadicFunction2<bool, StringPiece*, const RE2&, RE2::Arg, RE2::ConsumeN> RE2::Consume;
+ const VariadicFunction2<bool, StringPiece*, const RE2&, RE2::Arg, RE2::FindAndConsumeN> RE2::FindAndConsume;
+ 
+-// This will trigger LNK2005 error in MSVC.
+-#ifndef COMPILER_MSVC
+-const int RE2::Options::kDefaultMaxMem;  // initialized in re2.h
+-#endif  // COMPILER_MSVC
++#define kDefaultMaxMem (8<<20)
++
++RE2::Options::Options()
++  :  encoding_(EncodingUTF8),
++     posix_syntax_(false),
++     longest_match_(false),
++     log_errors_(true),
++     max_mem_(kDefaultMaxMem),
++     literal_(false),
++     never_nl_(false),
++     never_capture_(false),
++     case_sensitive_(true),
++     perl_classes_(false),
++     word_boundary_(false),
++     one_line_(false) {
++}
+ 
+ RE2::Options::Options(RE2::CannedOptions opt)
+   : encoding_(opt == RE2::Latin1 ? EncodingLatin1 : EncodingUTF8),
+diff --git a/re2/re2.h b/re2/re2.h
+index 272028b..c509853 100644
+--- a/re2/re2.h
++++ b/re2/re2.h
+@@ -552,28 +552,16 @@ class RE2 {
+     // If this happens too often, RE2 falls back on the NFA implementation.
+ 
+     // For now, make the default budget something close to Code Search.
++#ifndef WIN32
+     static const int kDefaultMaxMem = 8<<20;
++#endif
+ 
+     enum Encoding {
+       EncodingUTF8 = 1,
+       EncodingLatin1
+     };
+ 
+-    Options() :
+-      encoding_(EncodingUTF8),
+-      posix_syntax_(false),
+-      longest_match_(false),
+-      log_errors_(true),
+-      max_mem_(kDefaultMaxMem),
+-      literal_(false),
+-      never_nl_(false),
+-      never_capture_(false),
+-      case_sensitive_(true),
+-      perl_classes_(false),
+-      word_boundary_(false),
+-      one_line_(false) {
+-    }
+-    
++    Options();
+     /*implicit*/ Options(CannedOptions);
+ 
+     Encoding encoding() const { return encoding_; }
+diff --git a/re2/stringpiece.h b/re2/stringpiece.h
+index ab9297c..38a5150 100644
+--- a/re2/stringpiece.h
++++ b/re2/stringpiece.h
+@@ -23,6 +23,9 @@
+ #include <cstddef>
+ #include <iosfwd>
+ #include <string>
++#ifdef WIN32
++#include <algorithm>
++#endif
+ 
+ namespace re2 {
+ 
+diff --git a/re2/testing/re2_test.cc b/re2/testing/re2_test.cc
+index b99cacf..911e868 100644
+--- a/re2/testing/re2_test.cc
++++ b/re2/testing/re2_test.cc
+@@ -6,7 +6,9 @@
+ // TODO: Test extractions for PartialMatch/Consume
+ 
+ #include <sys/types.h>
++#ifndef WIN32
+ #include <sys/mman.h>
++#endif
+ #include <sys/stat.h>
+ #include <errno.h>
+ #include <vector>
+@@ -14,6 +16,11 @@
+ #include "re2/re2.h"
+ #include "re2/regexp.h"
+ 
++#ifdef WIN32
++#include <stdio.h>
++#define snprintf _snprintf
++#endif
++
+ DECLARE_bool(logtostderr);
+ 
+ namespace re2 {
+@@ -657,6 +664,7 @@ TEST(RE2, FullMatchTypedNullArg) {
+   CHECK(!RE2::FullMatch("hello", "(.*)", (float*)NULL));
+ }
+ 
++#ifndef WIN32
+ // Check that numeric parsing code does not read past the end of
+ // the number being parsed.
+ TEST(RE2, NULTerminated) {
+@@ -678,6 +686,7 @@ TEST(RE2, NULTerminated) {
+   CHECK(RE2::FullMatch(StringPiece(v + pagesize - 1, 1), "(.*)", &x));
+   CHECK_EQ(x, 1);
+ }
++#endif
+ 
+ TEST(RE2, FullMatchTypeTests) {
+   // Type tests
+diff --git a/util/logging.h b/util/logging.h
+index 4443f7c..d0a2d87 100644
+--- a/util/logging.h
++++ b/util/logging.h
+@@ -7,8 +7,13 @@
+ #ifndef RE2_UTIL_LOGGING_H__
+ #define RE2_UTIL_LOGGING_H__
+ 
++#ifndef WIN32
+ #include <unistd.h>  /* for write */
++#endif
+ #include <sstream>
++#ifdef WIN32
++#include <io.h>
++#endif
+ 
+ // Debug-only checking.
+ #define DCHECK(condition) assert(condition)
+diff --git a/util/mutex.h b/util/mutex.h
+index 9787bfb..e321fae 100644
+--- a/util/mutex.h
++++ b/util/mutex.h
+@@ -12,8 +12,10 @@
+ 
+ namespace re2 {
+ 
++#ifndef WIN32
+ #define HAVE_PTHREAD 1
+ #define HAVE_RWLOCK 1
++#endif
+ 
+ #if defined(NO_THREADS)
+   typedef int MutexType;      // to keep a lock-count
+@@ -32,7 +34,9 @@ namespace re2 {
+ # include <pthread.h>
+   typedef pthread_mutex_t MutexType;
+ #elif defined(WIN32)
+-# define WIN32_LEAN_AND_MEAN  // We only need minimal includes
++# ifndef WIN32_LEAN_AND_MEAN
++#  define WIN32_LEAN_AND_MEAN  // We only need minimal includes
++# endif
+ # ifdef GMUTEX_TRYLOCK
+   // We need Windows NT or later for TryEnterCriticalSection().  If you
+   // don't need that functionality, you can remove these _WIN32_WINNT
+diff --git a/util/pcre.cc b/util/pcre.cc
+index 5e67e1f..1602133 100644
+--- a/util/pcre.cc
++++ b/util/pcre.cc
+@@ -11,6 +11,11 @@
+ #include "util/flags.h"
+ #include "util/pcre.h"
+ 
++#ifdef WIN32
++#define strtoll _strtoi64
++#define strtoull _strtoui64
++#endif
++
+ #define PCREPORT(level) LOG(level)
+ 
+ // Default PCRE limits.
+diff --git a/util/pcre.h b/util/pcre.h
+index 4dda95d..771ac91 100644
+--- a/util/pcre.h
++++ b/util/pcre.h
+@@ -180,9 +180,15 @@ struct pcre_extra { int flags, match_limit, match_limit_recursion; };
+ #define PCRE_ERROR_MATCHLIMIT 2
+ #define PCRE_ERROR_RECURSIONLIMIT 3
+ #define PCRE_INFO_CAPTURECOUNT 0
++#ifndef WIN32
+ #define pcre_compile(a,b,c,d,e) ({ (void)(a); (void)(b); *(c)=""; *(d)=0; (void)(e); ((pcre*)0); })
+ #define pcre_exec(a, b, c, d, e, f, g, h) ({ (void)(a); (void)(b); (void)(c); (void)(d); (void)(e); (void)(f); (void)(g); (void)(h); 0; })
+ #define pcre_fullinfo(a, b, c, d) ({ (void)(a); (void)(b); (void)(c); *(d) = 0; 0; })
++#else
++#define pcre_compile(a,b,c,d,e) NULL
++#define pcre_exec(a, b, c, d, e, f, g, h) NULL
++#define pcre_fullinfo(a, b, c, d) NULL
++#endif
+ }  // namespace re2
+ #endif
+ 
+diff --git a/util/test.cc b/util/test.cc
+index 0644829..2fe1bfa 100644
+--- a/util/test.cc
++++ b/util/test.cc
+@@ -3,7 +3,9 @@
+ // license that can be found in the LICENSE file.
+ 
+ #include <stdio.h>
++#ifndef WIN32
+ #include <sys/resource.h>
++#endif
+ #include "util/test.h"
+ 
+ DEFINE_string(test_tmpdir, "/var/tmp", "temp directory");
+@@ -23,9 +25,13 @@ void RegisterTest(void (*fn)(void), const char *name) {
+ 
+ namespace re2 {
+ int64 VirtualProcessSize() {
++#ifndef WIN32
+   struct rusage ru;
+   getrusage(RUSAGE_SELF, &ru);
+   return (int64)ru.ru_maxrss*1024;
++#else
++  return 0;
++#endif
+ }
+ }  // namespace re2
+ 
+diff --git a/util/util.h b/util/util.h
+index c46ab1b..17ef824 100644
+--- a/util/util.h
++++ b/util/util.h
+@@ -12,7 +12,9 @@
+ #include <stddef.h>         // For size_t
+ #include <assert.h>
+ #include <stdarg.h>
++#ifndef WIN32
+ #include <sys/time.h>
++#endif
+ #include <time.h>
+ #include <ctype.h>	// For isdigit, isalpha.
+ 
+@@ -51,7 +53,11 @@ using std::tr1::unordered_set;
+ #else
+ 
+ #include <unordered_set>
++#ifdef WIN32
++using std::tr1::unordered_set;
++#else
+ using std::unordered_set;
++#endif
+ 
+ #endif
+ 
+diff --git a/util/valgrind.h b/util/valgrind.h
+index ca10b1a..d097b0c 100644
+--- a/util/valgrind.h
++++ b/util/valgrind.h
+@@ -4064,6 +4064,7 @@ typedef
+ #endif /* PLAT_ppc64_aix5 */
+ 
+ 
++#ifndef WIN32
+ /* ------------------------------------------------------------------ */
+ /* ARCHITECTURE INDEPENDENT MACROS for CLIENT REQUESTS.               */
+ /*                                                                    */
+@@ -4170,7 +4171,7 @@ typedef
+                                VG_USERREQ__DISCARD_TRANSLATIONS,  \
+                                _qzz_addr, _qzz_len, 0, 0, 0);     \
+    }
+-
++#endif
+ 
+ /* These requests are for getting Valgrind itself to print something.
+    Possibly with a backtrace.  This is a really ugly hack.  The return value

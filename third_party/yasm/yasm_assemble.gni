@@ -1,0 +1,203 @@
+# Copyright 2014 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# This provides the yasm_assemble() template which uses YASM to assemble
+# assembly files.
+#
+# Files to be assembled with YASM should have an extension of .asm.
+#
+# Parameters
+#
+#   yasm_flags (optional)
+#       [list of strings] Pass additional flags into YASM. These are appended
+#       to the command line. Note that the target machine type and system is
+#       already set up based on the current toolchain so you don't need to
+#       specify these things (see below).
+#
+#       Example: yasm_flags = [ "--force-strict" ]
+#
+#   include_dirs (optional)
+#       [list of dir names] List of additional include dirs. Note that the
+#       source root and the root generated file dir is always added, just like
+#       our C++ build sets up.
+#
+#       Example: include_dirs = [ "//some/other/path", target_gen_dir ]
+#
+#   defines (optional)
+#       [list of strings] List of defines, as with the native code defines.
+#
+#       Example: defines = [ "FOO", "BAR=1" ]
+#
+#   inputs, deps, visibility  (optional)
+#       These have the same meaning as in an action.
+#
+# Example
+#
+#   yasm_assemble("my_yasm_target") {
+#     sources = [
+#       "ultra_optimized_awesome.asm",
+#     ]
+#     include_dirs = [ "assembly_include" ]
+#   }
+
+if (is_mac || is_ios) {
+  if (current_cpu == "x86") {
+    _yasm_flags = [
+      "-fmacho32",
+      "-m",
+      "x86",
+    ]
+  } else if (current_cpu == "x64") {
+    _yasm_flags = [
+      "-fmacho64",
+      "-m",
+      "amd64",
+    ]
+  }
+} else if (is_posix) {
+  if (current_cpu == "x86") {
+    _yasm_flags = [
+      "-felf32",
+      "-m",
+      "x86",
+    ]
+  } else if (current_cpu == "x64") {
+    _yasm_flags = [
+      "-DPIC",
+      "-felf64",
+      "-m",
+      "amd64",
+    ]
+  }
+} else if (is_win) {
+  if (current_cpu == "x86") {
+    _yasm_flags = [
+      "-DPREFIX",
+      "-fwin32",
+      "-m",
+      "x86",
+    ]
+  } else if (current_cpu == "x64") {
+    _yasm_flags = [
+      "-fwin64",
+      "-m",
+      "amd64",
+    ]
+  }
+}
+
+if (is_win) {
+  asm_obj_extension = "obj"
+} else {
+  asm_obj_extension = "o"
+}
+
+template("yasm_assemble") {
+  # TODO(ajwong): Support use_system_yasm.
+  assert(defined(invoker.sources), "Need sources defined for $target_name")
+
+  # Only depend on YASM on x86 systems. Force compilation of .asm files for
+  # ARM to fail.
+  assert(current_cpu == "x86" || current_cpu == "x64")
+
+  action_name = "${target_name}_action"
+  source_set_name = target_name
+
+  action_foreach(action_name) {
+    # Only the source set can depend on this.
+    visibility = [ ":$source_set_name" ]
+
+    script = "//third_party/yasm/run_yasm.py"
+    sources = invoker.sources
+
+    if (defined(invoker.inputs)) {
+      inputs = invoker.inputs
+    }
+
+    # Executable (first in the args). The binary might be in the root build dir
+    # (no cross-compiling) or in a toolchain-specific subdirectory of that
+    # (when cross-compiling).
+    yasm_label = "//third_party/yasm($host_toolchain)"
+    args = [ "./" +  # Force current dir.
+             rebase_path(get_label_info(yasm_label, "root_out_dir") + "/yasm",
+                         root_build_dir) ]
+
+    # Deps.
+    deps = [
+      yasm_label,
+    ]
+    if (defined(invoker.deps)) {
+      deps += invoker.deps
+    }
+
+    # Flags.
+    args += _yasm_flags
+    if (defined(invoker.yasm_flags)) {
+      args += invoker.yasm_flags
+    }
+
+    # User defined include dirs go first.
+    if (defined(invoker.include_dirs)) {
+      foreach(include, invoker.include_dirs) {
+        args += [ "-I" + rebase_path(include, root_build_dir) ]
+      }
+    }
+
+    # Default yasm include dirs. Make it match the native build (source root and
+    # root generated code directory).
+    # This goes to the end of include list.
+    args += [
+      "-I.",
+
+      # Using "//." will produce a relative path "../.." which looks better than
+      # "../../" which will result from using "//" as the base (although both
+      # work). This is because rebase_path will terminate the result in a
+      # slash if the input ends in a slash.
+      "-I" + rebase_path("//.", root_build_dir),
+      "-I" + rebase_path(root_gen_dir, root_build_dir),
+    ]
+
+    # Extra defines.
+    if (defined(invoker.defines)) {
+      foreach(def, invoker.defines) {
+        args += [ "-D$def" ]
+      }
+    }
+
+    # Output file.
+    #
+    # TODO(brettw) it might be nice if there was a source expansion for the
+    # path of the source file relative to the source root. Then we could
+    # exactly duplicate the naming and location of object files from the
+    # native build, which would be:
+    # "$root_out_dir/${target_name}.{{source_dir_part}}.$asm_obj_extension"
+    outputs = [
+      "$target_out_dir/{{source_name_part}}.o",
+    ]
+    args += [
+      "-o",
+      rebase_path(outputs[0], root_build_dir),
+      "{{source}}",
+    ]
+
+    # The wrapper script run_yasm will write the depfile to the same name as
+    # the output but with .d appended (like gcc will).
+    depfile = outputs[0] + ".d"
+  }
+
+  # Gather the .o files into a linkable thing. This doesn't actually link
+  # anything (a source set just compiles files to link later), but will pass
+  # the object files generated by the action up the dependency chain.
+  source_set(source_set_name) {
+    if (defined(invoker.visibility)) {
+      visibility = invoker.visibility
+    }
+
+    sources = get_target_outputs(":$action_name")
+
+    deps = [
+      ":$action_name",
+    ]
+  }
+}

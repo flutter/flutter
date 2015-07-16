@@ -1,0 +1,6 @@
+
+Found a potentially leaking cycle starting from a GC root:
+./cycle_sub.h:31:5:  blink::C (m_a) => blink::A
+./cycle_sub.h:22:11: blink::A (<subclass>) => blink::B
+./cycle_sub.h:26:5:  blink::B (m_c) => blink::C
+

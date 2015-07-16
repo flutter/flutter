@@ -1,0 +1,20 @@
+// Copyright 2015 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+{% macro define(enum) %}
+type {{enum|name}} int32
+
+const (
+{% for field in enum.fields %}
+{%   if field.value %}
+	{{enum|name}}_{{field|name}} = {{field.value|expression_to_text}}
+{%   elif loop.first %}
+	{{enum|name}}_{{field|name}} = 0
+{%   else %}
+	{{enum|name}}_{{field|name}} = {{enum|name}}_{{enum.fields[loop.index0 - 1]|name}} + 1;
+{%   endif %}
+{% endfor %}
+)
+
+{% endmacro %}

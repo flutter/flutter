@@ -1,0 +1,582 @@
+hw.ncpu: 2
+hw.byteorder: 1234
+hw.memsize: 4294967296
+hw.activecpu: 2
+hw.physicalcpu: 2
+hw.physicalcpu_max: 2
+hw.logicalcpu: 2
+hw.logicalcpu_max: 2
+hw.cputype: 7
+hw.cpusubtype: 4
+hw.cpu64bit_capable: 1
+hw.cpufamily: 1114597871
+hw.cacheconfig: 2 1 2 0 0 0 0 0 0 0
+hw.cachesize: 3221225472 32768 2097152 0 0 0 0 0 0 0
+hw.pagesize: 4096
+hw.busfrequency: 664000000
+hw.busfrequency_min: 664000000
+hw.busfrequency_max: 664000000
+hw.cpufrequency: 1830000000
+hw.cpufrequency_min: 1830000000
+hw.cpufrequency_max: 1830000000
+hw.cachelinesize: 64
+hw.l1icachesize: 32768
+hw.l1dcachesize: 32768
+hw.l2cachesize: 2097152
+hw.tbfrequency: 1000000000
+hw.packages: 1
+hw.optional.floatingpoint: 1
+hw.optional.mmx: 1
+hw.optional.sse: 1
+hw.optional.sse2: 1
+hw.optional.sse3: 1
+hw.optional.supplementalsse3: 1
+hw.optional.sse4_1: 0
+hw.optional.sse4_2: 0
+hw.optional.x86_64: 1
+hw.machine = i386
+hw.model = Macmini2,1
+hw.ncpu = 2
+hw.byteorder = 1234
+hw.physmem = 2147483648
+hw.usermem = 1849147392
+hw.pagesize = 4096
+hw.epoch = 0
+hw.vectorunit = 1
+hw.busfrequency = 664000000
+hw.cpufrequency = 1830000000
+hw.cachelinesize = 64
+hw.l1icachesize = 32768
+hw.l1dcachesize = 32768
+hw.l2settings = 1
+hw.l2cachesize = 2097152
+hw.tbfrequency = 1000000000
+hw.memsize = 4294967296
+hw.availcpu = 2
+
+machdep.cpu.max_basic: 10
+machdep.cpu.max_ext: 2147483656
+machdep.cpu.vendor: GenuineIntel
+machdep.cpu.brand_string: Intel(R) Core(TM)2 CPU         T5600  @ 1.83GHz
+machdep.cpu.family: 6
+machdep.cpu.model: 15
+machdep.cpu.extmodel: 0
+machdep.cpu.extfamily: 0
+machdep.cpu.stepping: 2
+machdep.cpu.feature_bits: 3219913727 58301
+machdep.cpu.extfeature_bits: 537921536 1
+machdep.cpu.signature: 1778
+machdep.cpu.brand: 0
+machdep.cpu.features:  FPU VME DE PSE TSC MSR PAE MCE CX8 APIC SEP MTRR PGE MCA CMOV PAT PSE36 CLFSH DS ACPI MMX FXSR SSE SSE2 SS HTT TM SSE3 MON DSCPL VMX EST TM2 SSSE3 CX16 TPR PDCM
+machdep.cpu.extfeatures:  SYSCALL XD EM64T
+machdep.cpu.logical_per_package: 2
+machdep.cpu.cores_per_package: 2
+machdep.cpu.microcode_version: 87
+machdep.cpu.mwait.linesize_min: 64
+machdep.cpu.mwait.linesize_max: 64
+machdep.cpu.mwait.extensions: 3
+machdep.cpu.mwait.sub_Cstates: 139808
+machdep.cpu.thermal.sensor: 1
+machdep.cpu.thermal.dynamic_acceleration: 0
+machdep.cpu.thermal.thresholds: 2
+machdep.cpu.thermal.ACNT_MCNT: 1
+machdep.cpu.arch_perf.version: 2
+machdep.cpu.arch_perf.number: 2
+machdep.cpu.arch_perf.width: 40
+machdep.cpu.arch_perf.events_number: 7
+machdep.cpu.arch_perf.events: 0
+machdep.cpu.arch_perf.fixed_number: 0
+machdep.cpu.arch_perf.fixed_width: 0
+machdep.cpu.cache.linesize: 64
+machdep.cpu.cache.L2_associativity: 6
+machdep.cpu.cache.size: 2048
+machdep.cpu.tlb.inst.small: 128
+machdep.cpu.tlb.inst.large: 8
+machdep.cpu.tlb.data.small: 16
+machdep.cpu.tlb.data.small_level1: 256
+machdep.cpu.tlb.data.large: 16
+machdep.cpu.tlb.data.large_level1: 32
+machdep.cpu.address_bits.physical: 36
+machdep.cpu.address_bits.virtual: 48
+machdep.cpu.core_count: 2
+machdep.cpu.thread_count: 2
+
+
+==BENCHMARK== mini.local Fri Feb 26 16:57:10 PST 2010
+# Darwin mini.local 10.2.0 Darwin Kernel Version 10.2.0: Tue Nov  3 10:37:10 PST 2009; root:xnu-1486.2.11~1/RELEASE_I386 i386
+# i686-apple-darwin10-g++-4.2.1 (GCC) 4.2.1 (Apple Inc. build 5646) (dot 1)
+# Copyright (C) 2007 Free Software Foundation, Inc.
+# This is free software; see the source for copying conditions.  There is NO
+# warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+# 
+# a94585d91e66+ tip
+# obj/test/regexp_benchmark: Mach-O 64-bit executable x86_64
+
+Search_Easy0_CachedPCRE/8	10000000	       176 ns/op	  45.40 MB/s
+Search_Easy0_CachedPCRE/16	10000000	       209 ns/op	  76.41 MB/s
+Search_Easy0_CachedPCRE/32	10000000	       269 ns/op	 118.53 MB/s
+Search_Easy0_CachedPCRE/64	 5000000	       398 ns/op	 160.77 MB/s
+Search_Easy0_CachedPCRE/128	 5000000	       536 ns/op	 238.69 MB/s
+Search_Easy0_CachedPCRE/256	 2000000	       897 ns/op	 285.22 MB/s
+Search_Easy0_CachedPCRE/512	 1000000	      2161 ns/op	 236.92 MB/s
+Search_Easy0_CachedPCRE/1K	  500000	      4769 ns/op	 214.70 MB/s
+Search_Easy0_CachedPCRE/2K	  200000	      8031 ns/op	 255.00 MB/s
+Search_Easy0_CachedPCRE/4K	  100000	     16208 ns/op	 252.71 MB/s
+Search_Easy0_CachedPCRE/8K	   50000	     32219 ns/op	 254.26 MB/s
+Search_Easy0_CachedPCRE/16K	   50000	     63347 ns/op	 258.64 MB/s
+Search_Easy0_CachedPCRE/32K	   10000	    125875 ns/op	 260.32 MB/s
+Search_Easy0_CachedPCRE/64K	   10000	    247829 ns/op	 264.44 MB/s
+Search_Easy0_CachedPCRE/128K	    5000	    498699 ns/op	 262.83 MB/s
+Search_Easy0_CachedPCRE/256K	    2000	    978021 ns/op	 268.04 MB/s
+Search_Easy0_CachedPCRE/512K	    1000	   1975059 ns/op	 265.45 MB/s
+Search_Easy0_CachedPCRE/1M	     500	   3994258 ns/op	 262.52 MB/s
+Search_Easy0_CachedPCRE/2M	     200	   7959640 ns/op	 263.47 MB/s
+Search_Easy0_CachedPCRE/4M	     100	  15950300 ns/op	 262.96 MB/s
+Search_Easy0_CachedPCRE/8M	      50	  32435540 ns/op	 258.62 MB/s
+Search_Easy0_CachedPCRE/16M	      50	  64686180 ns/op	 259.36 MB/s
+Search_Easy0_CachedRE2/8	 5000000	       535 ns/op	  14.95 MB/s
+Search_Easy0_CachedRE2/16	 5000000	       557 ns/op	  28.70 MB/s
+Search_Easy0_CachedRE2/32	 5000000	       595 ns/op	  53.75 MB/s
+Search_Easy0_CachedRE2/64	 5000000	       643 ns/op	  99.50 MB/s
+Search_Easy0_CachedRE2/128	 2000000	       759 ns/op	 168.64 MB/s
+Search_Easy0_CachedRE2/256	 2000000	       972 ns/op	 263.30 MB/s
+Search_Easy0_CachedRE2/512	 1000000	      1458 ns/op	 351.13 MB/s
+Search_Easy0_CachedRE2/1K	 1000000	      2544 ns/op	 402.51 MB/s
+Search_Easy0_CachedRE2/2K	  500000	      4551 ns/op	 449.99 MB/s
+Search_Easy0_CachedRE2/4K	  200000	      8677 ns/op	 472.01 MB/s
+Search_Easy0_CachedRE2/8K	  100000	     17188 ns/op	 476.59 MB/s
+Search_Easy0_CachedRE2/16K	   50000	     33869 ns/op	 483.73 MB/s
+Search_Easy0_CachedRE2/32K	   50000	     67787 ns/op	 483.39 MB/s
+Search_Easy0_CachedRE2/64K	   10000	    133362 ns/op	 491.41 MB/s
+Search_Easy0_CachedRE2/128K	   10000	    266469 ns/op	 491.88 MB/s
+Search_Easy0_CachedRE2/256K	    5000	    536980 ns/op	 488.18 MB/s
+Search_Easy0_CachedRE2/512K	    2000	   1050843 ns/op	 498.92 MB/s
+Search_Easy0_CachedRE2/1M	    1000	   2120649 ns/op	 494.46 MB/s
+Search_Easy0_CachedRE2/2M	     500	   4273918 ns/op	 490.69 MB/s
+Search_Easy0_CachedRE2/4M	     200	   8591285 ns/op	 488.20 MB/s
+Search_Easy0_CachedRE2/8M	     100	  17197390 ns/op	 487.78 MB/s
+Search_Easy0_CachedRE2/16M	      50	  34338780 ns/op	 488.58 MB/s
+Search_Easy1_CachedPCRE/8	10000000	       174 ns/op	  45.74 MB/s
+Search_Easy1_CachedPCRE/16	10000000	       206 ns/op	  77.31 MB/s
+Search_Easy1_CachedPCRE/32	10000000	       270 ns/op	 118.43 MB/s
+Search_Easy1_CachedPCRE/64	 5000000	       402 ns/op	 159.07 MB/s
+Search_Easy1_CachedPCRE/128	 5000000	       540 ns/op	 236.84 MB/s
+Search_Easy1_CachedPCRE/256	 2000000	       909 ns/op	 281.34 MB/s
+Search_Easy1_CachedPCRE/512	 1000000	      1852 ns/op	 276.34 MB/s
+Search_Easy1_CachedPCRE/1K	  500000	      4318 ns/op	 237.12 MB/s
+Search_Easy1_CachedPCRE/2K	  200000	      8346 ns/op	 245.37 MB/s
+Search_Easy1_CachedPCRE/4K	  100000	     16214 ns/op	 252.62 MB/s
+Search_Easy1_CachedPCRE/8K	   50000	     32438 ns/op	 252.54 MB/s
+Search_Easy1_CachedPCRE/16K	   50000	     62914 ns/op	 260.42 MB/s
+Search_Easy1_CachedPCRE/32K	   10000	    124792 ns/op	 262.58 MB/s
+Search_Easy1_CachedPCRE/64K	   10000	    250941 ns/op	 261.16 MB/s
+Search_Easy1_CachedPCRE/128K	    5000	    498405 ns/op	 262.98 MB/s
+Search_Easy1_CachedPCRE/256K	    2000	    997305 ns/op	 262.85 MB/s
+Search_Easy1_CachedPCRE/512K	    1000	   2023179 ns/op	 259.14 MB/s
+Search_Easy1_CachedPCRE/1M	     500	   4005202 ns/op	 261.80 MB/s
+Search_Easy1_CachedPCRE/2M	     200	   8116410 ns/op	 258.38 MB/s
+Search_Easy1_CachedPCRE/4M	     100	  16145970 ns/op	 259.77 MB/s
+Search_Easy1_CachedPCRE/8M	      50	  32471260 ns/op	 258.34 MB/s
+Search_Easy1_CachedPCRE/16M	      50	  64734020 ns/op	 259.17 MB/s
+Search_Easy1_CachedRE2/8	 5000000	       543 ns/op	  14.72 MB/s
+Search_Easy1_CachedRE2/16	 5000000	       570 ns/op	  28.07 MB/s
+Search_Easy1_CachedRE2/32	 5000000	       605 ns/op	  52.81 MB/s
+Search_Easy1_CachedRE2/64	 5000000	       643 ns/op	  99.39 MB/s
+Search_Easy1_CachedRE2/128	 2000000	       764 ns/op	 167.45 MB/s
+Search_Easy1_CachedRE2/256	 2000000	       970 ns/op	 263.85 MB/s
+Search_Easy1_CachedRE2/512	 1000000	      1455 ns/op	 351.75 MB/s
+Search_Easy1_CachedRE2/1K	 1000000	      2506 ns/op	 408.48 MB/s
+Search_Easy1_CachedRE2/2K	  500000	      4571 ns/op	 447.97 MB/s
+Search_Easy1_CachedRE2/4K	  200000	      8812 ns/op	 464.81 MB/s
+Search_Easy1_CachedRE2/8K	  100000	     17079 ns/op	 479.65 MB/s
+Search_Easy1_CachedRE2/16K	   50000	     33802 ns/op	 484.70 MB/s
+Search_Easy1_CachedRE2/32K	   50000	     67171 ns/op	 487.83 MB/s
+Search_Easy1_CachedRE2/64K	   10000	    131505 ns/op	 498.35 MB/s
+Search_Easy1_CachedRE2/128K	   10000	    263228 ns/op	 497.94 MB/s
+Search_Easy1_CachedRE2/256K	    5000	    528135 ns/op	 496.36 MB/s
+Search_Easy1_CachedRE2/512K	    2000	   1052768 ns/op	 498.01 MB/s
+Search_Easy1_CachedRE2/1M	    1000	   2112714 ns/op	 496.32 MB/s
+Search_Easy1_CachedRE2/2M	     500	   4289478 ns/op	 488.91 MB/s
+Search_Easy1_CachedRE2/4M	     200	   8519430 ns/op	 492.32 MB/s
+Search_Easy1_CachedRE2/8M	     100	  17002860 ns/op	 493.36 MB/s
+Search_Easy1_CachedRE2/16M	      50	  34341100 ns/op	 488.55 MB/s
+Search_Medium_CachedPCRE/8	10000000	       175 ns/op	  45.48 MB/s
+Search_Medium_CachedPCRE/16	10000000	       206 ns/op	  77.31 MB/s
+Search_Medium_CachedPCRE/32	10000000	       273 ns/op	 117.10 MB/s
+Search_Medium_CachedPCRE/64	 5000000	       427 ns/op	 149.60 MB/s
+Search_Medium_CachedPCRE/128	  200000	      9382 ns/op	  13.64 MB/s
+Search_Medium_CachedPCRE/256	  100000	     15339 ns/op	  16.69 MB/s
+Search_Medium_CachedPCRE/512	   50000	     35837 ns/op	  14.29 MB/s
+Search_Medium_CachedPCRE/1K	   50000	     71109 ns/op	  14.40 MB/s
+Search_Medium_CachedPCRE/2K	   10000	    111371 ns/op	  18.39 MB/s
+Search_Medium_CachedPCRE/4K	   10000	    264964 ns/op	  15.46 MB/s
+Search_Medium_CachedPCRE/8K	    5000	    554964 ns/op	  14.76 MB/s
+Search_Medium_CachedPCRE/16K	    2000	   1122116 ns/op	  14.60 MB/s
+Search_Medium_CachedPCRE/32K	    1000	   2305129 ns/op	  14.22 MB/s
+Search_Medium_CachedPCRE/64K	     500	   4401888 ns/op	  14.89 MB/s
+Search_Medium_CachedPCRE/128K	     200	   8591800 ns/op	  15.26 MB/s
+Search_Medium_CachedPCRE/256K	     100	  17534580 ns/op	  14.95 MB/s
+Search_Medium_CachedRE2/8	 5000000	       531 ns/op	  15.06 MB/s
+Search_Medium_CachedRE2/16	 5000000	       579 ns/op	  27.60 MB/s
+Search_Medium_CachedRE2/32	 5000000	       666 ns/op	  47.99 MB/s
+Search_Medium_CachedRE2/64	 2000000	       817 ns/op	  78.31 MB/s
+Search_Medium_CachedRE2/128	 1000000	      1174 ns/op	 108.94 MB/s
+Search_Medium_CachedRE2/256	 1000000	      1824 ns/op	 140.30 MB/s
+Search_Medium_CachedRE2/512	  500000	      3097 ns/op	 165.29 MB/s
+Search_Medium_CachedRE2/1K	  500000	      6101 ns/op	 167.84 MB/s
+Search_Medium_CachedRE2/2K	  200000	     12024 ns/op	 170.32 MB/s
+Search_Medium_CachedRE2/4K	  100000	     21483 ns/op	 190.66 MB/s
+Search_Medium_CachedRE2/8K	   50000	     41321 ns/op	 198.25 MB/s
+Search_Medium_CachedRE2/16K	   20000	     82227 ns/op	 199.25 MB/s
+Search_Medium_CachedRE2/32K	   10000	    166314 ns/op	 197.02 MB/s
+Search_Medium_CachedRE2/64K	    5000	    334190 ns/op	 196.10 MB/s
+Search_Medium_CachedRE2/128K	    5000	    672222 ns/op	 194.98 MB/s
+Search_Medium_CachedRE2/256K	    2000	   1335691 ns/op	 196.26 MB/s
+Search_Medium_CachedRE2/512K	    1000	   2650973 ns/op	 197.77 MB/s
+Search_Medium_CachedRE2/1M	     500	   5401168 ns/op	 194.14 MB/s
+Search_Medium_CachedRE2/2M	     100	  10724160 ns/op	 195.55 MB/s
+Search_Medium_CachedRE2/4M	     100	  21647840 ns/op	 193.75 MB/s
+Search_Medium_CachedRE2/8M	      50	  43369000 ns/op	 193.42 MB/s
+Search_Medium_CachedRE2/16M	      20	  85095750 ns/op	 197.16 MB/s
+Search_Hard_CachedPCRE/8	10000000	       178 ns/op	  44.77 MB/s
+Search_Hard_CachedPCRE/16	10000000	       211 ns/op	  75.54 MB/s
+Search_Hard_CachedPCRE/32	10000000	       274 ns/op	 116.75 MB/s
+Search_Hard_CachedPCRE/64	 5000000	       401 ns/op	 159.58 MB/s
+Search_Hard_CachedPCRE/128	    5000	    331833 ns/op	   0.39 MB/s
+Search_Hard_CachedPCRE/256	    2000	   1299658 ns/op	   0.20 MB/s
+Search_Hard_CachedPCRE/512	     500	   5361070 ns/op	   0.10 MB/s
+Search_Hard_CachedPCRE/1K	     100	  20744900 ns/op	   0.05 MB/s
+Search_Hard_CachedPCRE/2K	      20	  78382950 ns/op	   0.03 MB/s
+Search_Hard_CachedPCRE/4K	       5	 335826800 ns/op	   0.01 MB/s
+Search_Hard_CachedRE2/8	 5000000	       550 ns/op	  14.53 MB/s
+Search_Hard_CachedRE2/16	 5000000	       600 ns/op	  26.66 MB/s
+Search_Hard_CachedRE2/32	 5000000	       683 ns/op	  46.80 MB/s
+Search_Hard_CachedRE2/64	 2000000	       834 ns/op	  76.69 MB/s
+Search_Hard_CachedRE2/128	 1000000	      1168 ns/op	 109.57 MB/s
+Search_Hard_CachedRE2/256	 1000000	      1833 ns/op	 139.65 MB/s
+Search_Hard_CachedRE2/512	  500000	      3069 ns/op	 166.81 MB/s
+Search_Hard_CachedRE2/1K	  500000	      5780 ns/op	 177.14 MB/s
+Search_Hard_CachedRE2/2K	  200000	     11060 ns/op	 185.17 MB/s
+Search_Hard_CachedRE2/4K	  100000	     21511 ns/op	 190.41 MB/s
+Search_Hard_CachedRE2/8K	   50000	     41962 ns/op	 195.22 MB/s
+Search_Hard_CachedRE2/16K	   20000	     82460 ns/op	 198.69 MB/s
+Search_Hard_CachedRE2/32K	   10000	    164209 ns/op	 199.55 MB/s
+Search_Hard_CachedRE2/64K	    5000	    326354 ns/op	 200.81 MB/s
+Search_Hard_CachedRE2/128K	    5000	    659142 ns/op	 198.85 MB/s
+Search_Hard_CachedRE2/256K	    2000	   1333642 ns/op	 196.56 MB/s
+Search_Hard_CachedRE2/512K	    1000	   2687422 ns/op	 195.09 MB/s
+Search_Hard_CachedRE2/1M	     500	   5351592 ns/op	 195.94 MB/s
+Search_Hard_CachedRE2/2M	     100	  10581690 ns/op	 198.19 MB/s
+Search_Hard_CachedRE2/4M	     100	  21324320 ns/op	 196.69 MB/s
+Search_Hard_CachedRE2/8M	      50	  41892520 ns/op	 200.24 MB/s
+Search_Hard_CachedRE2/16M	      20	  85475700 ns/op	 196.28 MB/s
+Search_Parens_CachedPCRE/8	10000000	       298 ns/op	  26.80 MB/s
+Search_Parens_CachedRE2/8	 5000000	       562 ns/op	  14.21 MB/s
+Search_Parens_CachedRE2/16	 5000000	       598 ns/op	  26.71 MB/s
+Search_Parens_CachedRE2/32	 5000000	       676 ns/op	  47.27 MB/s
+Search_Parens_CachedRE2/64	 2000000	       828 ns/op	  77.21 MB/s
+Search_Parens_CachedRE2/128	 1000000	      1155 ns/op	 110.73 MB/s
+Search_Parens_CachedRE2/256	 1000000	      1788 ns/op	 143.13 MB/s
+Search_Parens_CachedRE2/512	  500000	      3064 ns/op	 167.09 MB/s
+Search_Parens_CachedRE2/1K	  500000	      5698 ns/op	 179.69 MB/s
+Search_Parens_CachedRE2/2K	  200000	     10961 ns/op	 186.84 MB/s
+Search_Parens_CachedRE2/4K	  100000	     21527 ns/op	 190.27 MB/s
+Search_Parens_CachedRE2/8K	   50000	     41923 ns/op	 195.40 MB/s
+Search_Parens_CachedRE2/16K	   20000	     85505 ns/op	 191.61 MB/s
+Search_Parens_CachedRE2/32K	   10000	    164437 ns/op	 199.27 MB/s
+Search_Parens_CachedRE2/64K	    5000	    332654 ns/op	 197.01 MB/s
+Search_Parens_CachedRE2/128K	    5000	    677745 ns/op	 193.39 MB/s
+Search_Parens_CachedRE2/256K	    2000	   1331012 ns/op	 196.95 MB/s
+Search_Parens_CachedRE2/512K	    1000	   2692594 ns/op	 194.71 MB/s
+Search_Parens_CachedRE2/1M	     500	   5355880 ns/op	 195.78 MB/s
+Search_Parens_CachedRE2/2M	     100	  10822340 ns/op	 193.78 MB/s
+Search_Parens_CachedRE2/4M	     100	  21464430 ns/op	 195.41 MB/s
+Search_Parens_CachedRE2/8M	      50	  42875940 ns/op	 195.65 MB/s
+Search_Parens_CachedRE2/16M	      20	  84654300 ns/op	 198.19 MB/s
+Search_BigFixed_CachedPCRE/8	 5000000	       360 ns/op	  22.21 MB/s
+Search_BigFixed_CachedPCRE/16	 5000000	       442 ns/op	  36.15 MB/s
+Search_BigFixed_CachedPCRE/32	 5000000	       606 ns/op	  52.73 MB/s
+Search_BigFixed_CachedPCRE/64	 2000000	       935 ns/op	  68.39 MB/s
+Search_BigFixed_CachedPCRE/128	 1000000	      1525 ns/op	  83.91 MB/s
+Search_BigFixed_CachedPCRE/256	 1000000	      2718 ns/op	  94.18 MB/s
+Search_BigFixed_CachedPCRE/512	  500000	      5020 ns/op	 101.98 MB/s
+Search_BigFixed_CachedPCRE/1K	  200000	      9761 ns/op	 104.90 MB/s
+Search_BigFixed_CachedPCRE/2K	  100000	     19275 ns/op	 106.25 MB/s
+Search_BigFixed_CachedPCRE/4K	   50000	     38488 ns/op	 106.42 MB/s
+Search_BigFixed_CachedPCRE/8K	   20000	     76229 ns/op	 107.46 MB/s
+Search_BigFixed_CachedPCRE/16K	   10000	    155350 ns/op	 105.46 MB/s
+Search_BigFixed_CachedPCRE/32K	    5000	    309242 ns/op	 105.96 MB/s
+Search_BigFixed_CachedRE2/8	10000000	       194 ns/op	  41.03 MB/s
+Search_BigFixed_CachedRE2/16	 5000000	       589 ns/op	  27.15 MB/s
+Search_BigFixed_CachedRE2/32	 5000000	       655 ns/op	  48.83 MB/s
+Search_BigFixed_CachedRE2/64	 5000000	       715 ns/op	  89.46 MB/s
+Search_BigFixed_CachedRE2/128	 2000000	       882 ns/op	 145.09 MB/s
+Search_BigFixed_CachedRE2/256	 1000000	      1293 ns/op	 197.97 MB/s
+Search_BigFixed_CachedRE2/512	 1000000	      1924 ns/op	 266.06 MB/s
+Search_BigFixed_CachedRE2/1K	  500000	      3294 ns/op	 310.79 MB/s
+Search_BigFixed_CachedRE2/2K	  500000	      6057 ns/op	 338.10 MB/s
+Search_BigFixed_CachedRE2/4K	  200000	     11475 ns/op	 356.93 MB/s
+Search_BigFixed_CachedRE2/8K	  100000	     22395 ns/op	 365.79 MB/s
+Search_BigFixed_CachedRE2/16K	   50000	     44333 ns/op	 369.56 MB/s
+Search_BigFixed_CachedRE2/32K	   20000	     88061 ns/op	 372.11 MB/s
+Search_BigFixed_CachedRE2/64K	   10000	    173649 ns/op	 377.40 MB/s
+Search_BigFixed_CachedRE2/128K	    5000	    347251 ns/op	 377.46 MB/s
+Search_BigFixed_CachedRE2/256K	    2000	    702561 ns/op	 373.13 MB/s
+Search_BigFixed_CachedRE2/512K	    1000	   1408041 ns/op	 372.35 MB/s
+Search_BigFixed_CachedRE2/1M	     500	   3003070 ns/op	 349.17 MB/s
+Search_Success_PCRE/8	  500000	      3891 ns/op	   2.06 MB/s
+Search_Success_PCRE/16	  500000	      3865 ns/op	   4.14 MB/s
+Search_Success_PCRE/32	  500000	      3861 ns/op	   8.29 MB/s
+Search_Success_PCRE/64	  500000	      3921 ns/op	  16.32 MB/s
+Search_Success_PCRE/128	  500000	      4677 ns/op	  27.37 MB/s
+Search_Success_PCRE/256	  500000	      5362 ns/op	  47.73 MB/s
+Search_Success_PCRE/512	  500000	      7125 ns/op	  71.85 MB/s
+Search_Success_PCRE/1K	  200000	     10643 ns/op	  96.21 MB/s
+Search_Success_PCRE/2K	  100000	     17620 ns/op	 116.23 MB/s
+Search_Success_PCRE/4K	   50000	     31657 ns/op	 129.39 MB/s
+Search_Success_PCRE/8K	   50000	     59290 ns/op	 138.17 MB/s
+Search_Success_PCRE/16K	   10000	    115346 ns/op	 142.04 MB/s
+Search_Success_PCRE/32K	   10000	    225258 ns/op	 145.47 MB/s
+Search_Success_PCRE/64K	    5000	    452994 ns/op	 144.67 MB/s
+Search_Success_PCRE/128K	    2000	    904745 ns/op	 144.87 MB/s
+Search_Success_PCRE/256K	    1000	   1786683 ns/op	 146.72 MB/s
+Search_Success_PCRE/512K	     500	   3600316 ns/op	 145.62 MB/s
+Search_Success_PCRE/1M	     200	   7413055 ns/op	 141.45 MB/s
+Search_Success_PCRE/2M	     100	  15261930 ns/op	 137.41 MB/s
+Search_Success_PCRE/4M	      50	  32827960 ns/op	 127.77 MB/s
+Search_Success_PCRE/8M	      20	  73886450 ns/op	 113.53 MB/s
+Search_Success_PCRE/16M	       5	 247881200 ns/op	  67.68 MB/s
+Search_Success_RE2/8	  100000	     18948 ns/op	   0.42 MB/s
+Search_Success_RE2/16	   50000	     40076 ns/op	   0.40 MB/s
+Search_Success_RE2/32	   50000	     40543 ns/op	   0.79 MB/s
+Search_Success_RE2/64	   50000	     40520 ns/op	   1.58 MB/s
+Search_Success_RE2/128	   50000	     41222 ns/op	   3.11 MB/s
+Search_Success_RE2/256	   50000	     41361 ns/op	   6.19 MB/s
+Search_Success_RE2/512	   50000	     42418 ns/op	  12.07 MB/s
+Search_Success_RE2/1K	   50000	     45239 ns/op	  22.64 MB/s
+Search_Success_RE2/2K	   50000	     50568 ns/op	  40.50 MB/s
+Search_Success_RE2/4K	   50000	     60722 ns/op	  67.45 MB/s
+Search_Success_RE2/8K	   20000	     82046 ns/op	  99.85 MB/s
+Search_Success_RE2/16K	   10000	    125412 ns/op	 130.64 MB/s
+Search_Success_RE2/32K	   10000	    211805 ns/op	 154.71 MB/s
+Search_Success_RE2/64K	    5000	    373132 ns/op	 175.64 MB/s
+Search_Success_RE2/128K	    2000	    710166 ns/op	 184.57 MB/s
+Search_Success_RE2/256K	    2000	   1392231 ns/op	 188.29 MB/s
+Search_Success_RE2/512K	    1000	   2763051 ns/op	 189.75 MB/s
+Search_Success_RE2/1M	     500	   5547628 ns/op	 189.01 MB/s
+Search_Success_RE2/2M	     100	  11709090 ns/op	 179.10 MB/s
+Search_Success_RE2/4M	      50	  25220160 ns/op	 166.31 MB/s
+Search_Success_RE2/8M	      20	  59411600 ns/op	 141.19 MB/s
+Search_Success_RE2/16M	       5	 219468600 ns/op	  76.44 MB/s
+Search_Success_CachedPCRE/8	 5000000	       328 ns/op	  24.35 MB/s
+Search_Success_CachedPCRE/16	 5000000	       389 ns/op	  41.06 MB/s
+Search_Success_CachedPCRE/32	 5000000	       507 ns/op	  63.11 MB/s
+Search_Success_CachedPCRE/64	 2000000	       754 ns/op	  84.80 MB/s
+Search_Success_CachedPCRE/128	 1000000	      1164 ns/op	 109.89 MB/s
+Search_Success_CachedPCRE/256	 1000000	      2051 ns/op	 124.81 MB/s
+Search_Success_CachedPCRE/512	  500000	      3831 ns/op	 133.64 MB/s
+Search_Success_CachedPCRE/1K	  500000	      7280 ns/op	 140.66 MB/s
+Search_Success_CachedPCRE/2K	  200000	     14254 ns/op	 143.67 MB/s
+Search_Success_CachedPCRE/4K	  100000	     28223 ns/op	 145.13 MB/s
+Search_Success_CachedPCRE/8K	   50000	     55445 ns/op	 147.75 MB/s
+Search_Success_CachedPCRE/16K	   10000	    112739 ns/op	 145.33 MB/s
+Search_Success_CachedPCRE/32K	   10000	    219943 ns/op	 148.98 MB/s
+Search_Success_CachedPCRE/64K	    5000	    440884 ns/op	 148.65 MB/s
+Search_Success_CachedPCRE/128K	    2000	    898950 ns/op	 145.81 MB/s
+Search_Success_CachedPCRE/256K	    1000	   1775905 ns/op	 147.61 MB/s
+Search_Success_CachedPCRE/512K	     500	   3579178 ns/op	 146.48 MB/s
+Search_Success_CachedPCRE/1M	     200	   7278075 ns/op	 144.07 MB/s
+Search_Success_CachedPCRE/2M	     100	  14954670 ns/op	 140.23 MB/s
+Search_Success_CachedPCRE/4M	      50	  31865060 ns/op	 131.63 MB/s
+Search_Success_CachedPCRE/8M	      20	  73977900 ns/op	 113.39 MB/s
+Search_Success_CachedPCRE/16M	       5	 250587400 ns/op	  66.95 MB/s
+Search_Success_CachedRE2/8	10000000	       206 ns/op	  38.80 MB/s
+Search_Success_CachedRE2/16	 5000000	       598 ns/op	  26.75 MB/s
+Search_Success_CachedRE2/32	 5000000	       675 ns/op	  47.39 MB/s
+Search_Success_CachedRE2/64	 2000000	       847 ns/op	  75.52 MB/s
+Search_Success_CachedRE2/128	 1000000	      1211 ns/op	 105.65 MB/s
+Search_Success_CachedRE2/256	 1000000	      1886 ns/op	 135.73 MB/s
+Search_Success_CachedRE2/512	  500000	      3123 ns/op	 163.90 MB/s
+Search_Success_CachedRE2/1K	  500000	      5754 ns/op	 177.94 MB/s
+Search_Success_CachedRE2/2K	  200000	     10929 ns/op	 187.38 MB/s
+Search_Success_CachedRE2/4K	  100000	     20887 ns/op	 196.10 MB/s
+Search_Success_CachedRE2/8K	   50000	     41295 ns/op	 198.37 MB/s
+Search_Success_CachedRE2/16K	   20000	     82338 ns/op	 198.98 MB/s
+Search_Success_CachedRE2/32K	   10000	    168893 ns/op	 194.02 MB/s
+Search_Success_CachedRE2/64K	    5000	    337449 ns/op	 194.21 MB/s
+Search_Success_CachedRE2/128K	    5000	    670247 ns/op	 195.56 MB/s
+Search_Success_CachedRE2/256K	    2000	   1342666 ns/op	 195.24 MB/s
+Search_Success_CachedRE2/512K	    1000	   2711677 ns/op	 193.34 MB/s
+Search_Success_CachedRE2/1M	     500	   5403052 ns/op	 194.07 MB/s
+Search_Success_CachedRE2/2M	     100	  11697250 ns/op	 179.29 MB/s
+Search_Success_CachedRE2/4M	      50	  24796680 ns/op	 169.15 MB/s
+Search_Success_CachedRE2/8M	      20	  59587450 ns/op	 140.78 MB/s
+Search_Success_CachedRE2/16M	       5	 225415400 ns/op	  74.43 MB/s
+Search_Success1_PCRE/8	  500000	      4063 ns/op	   1.97 MB/s
+Search_Success1_PCRE/16	  500000	      4104 ns/op	   3.90 MB/s
+Search_Success1_PCRE/32	  500000	      4162 ns/op	   7.69 MB/s
+Search_Success1_PCRE/64	  500000	      4284 ns/op	  14.94 MB/s
+Search_Success1_PCRE/128	  500000	      4857 ns/op	  26.35 MB/s
+Search_Success1_PCRE/256	  500000	      5507 ns/op	  46.48 MB/s
+Search_Success1_PCRE/512	  500000	      7203 ns/op	  71.08 MB/s
+Search_Success1_PCRE/1K	  200000	     10470 ns/op	  97.80 MB/s
+Search_Success1_PCRE/2K	  100000	     17455 ns/op	 117.33 MB/s
+Search_Success1_PCRE/4K	   50000	     31564 ns/op	 129.77 MB/s
+Search_Success1_PCRE/8K	   50000	     59112 ns/op	 138.58 MB/s
+Search_Success1_PCRE/16K	   10000	    115903 ns/op	 141.36 MB/s
+Search_Success1_PCRE/32K	   10000	    223311 ns/op	 146.74 MB/s
+Search_Success1_PCRE/64K	    5000	    447509 ns/op	 146.45 MB/s
+Search_Success1_PCRE/128K	    2000	    874543 ns/op	 149.87 MB/s
+Search_Success1_PCRE/256K	    1000	   1836342 ns/op	 142.75 MB/s
+Search_Success1_PCRE/512K	     500	   3636250 ns/op	 144.18 MB/s
+Search_Success1_PCRE/1M	     200	   7256345 ns/op	 144.50 MB/s
+Search_Success1_PCRE/2M	     100	  15093450 ns/op	 138.94 MB/s
+Search_Success1_PCRE/4M	      50	  32167920 ns/op	 130.39 MB/s
+Search_Success1_PCRE/8M	      20	  74735800 ns/op	 112.24 MB/s
+Search_Success1_PCRE/16M	       5	 252818600 ns/op	  66.36 MB/s
+Search_Success1_RE2/8	   50000	     51778 ns/op	   0.15 MB/s
+Search_Success1_RE2/16	   50000	     50754 ns/op	   0.32 MB/s
+Search_Success1_RE2/32	   50000	     51127 ns/op	   0.63 MB/s
+Search_Success1_RE2/64	   50000	     51305 ns/op	   1.25 MB/s
+Search_Success1_RE2/128	   50000	     51580 ns/op	   2.48 MB/s
+Search_Success1_RE2/256	   50000	     52019 ns/op	   4.92 MB/s
+Search_Success1_RE2/512	   50000	     53145 ns/op	   9.63 MB/s
+Search_Success1_RE2/1K	   50000	     55871 ns/op	  18.33 MB/s
+Search_Success1_RE2/2K	   50000	     61477 ns/op	  33.31 MB/s
+Search_Success1_RE2/4K	   50000	     71875 ns/op	  56.99 MB/s
+Search_Success1_RE2/8K	   20000	     94822 ns/op	  86.39 MB/s
+Search_Success1_RE2/16K	   10000	    137021 ns/op	 119.57 MB/s
+Search_Success1_RE2/32K	   10000	    220596 ns/op	 148.54 MB/s
+Search_Success1_RE2/64K	    5000	    377808 ns/op	 173.46 MB/s
+Search_Success1_RE2/128K	    5000	    707546 ns/op	 185.25 MB/s
+Search_Success1_RE2/256K	    2000	   1367308 ns/op	 191.72 MB/s
+Search_Success1_RE2/512K	    1000	   2729291 ns/op	 192.10 MB/s
+Search_Success1_RE2/1M	     500	   5439634 ns/op	 192.77 MB/s
+Search_Success1_RE2/2M	     100	  11626860 ns/op	 180.37 MB/s
+Search_Success1_RE2/4M	      50	  24603160 ns/op	 170.48 MB/s
+Search_Success1_RE2/8M	      20	  59001300 ns/op	 142.18 MB/s
+Search_Success1_RE2/16M	       5	 219520200 ns/op	  76.43 MB/s
+Search_Success1_Cached_PCRE/8	 5000000	       373 ns/op	  21.41 MB/s
+Search_Success1_Cached_PCRE/16	 5000000	       437 ns/op	  36.61 MB/s
+Search_Success1_Cached_PCRE/32	 5000000	       543 ns/op	  58.84 MB/s
+Search_Success1_Cached_PCRE/64	 2000000	       784 ns/op	  81.60 MB/s
+Search_Success1_Cached_PCRE/128	 1000000	      1193 ns/op	 107.29 MB/s
+Search_Success1_Cached_PCRE/256	 1000000	      2044 ns/op	 125.23 MB/s
+Search_Success1_Cached_PCRE/512	  500000	      3734 ns/op	 137.10 MB/s
+Search_Success1_Cached_PCRE/1K	  500000	      7121 ns/op	 143.78 MB/s
+Search_Success1_Cached_PCRE/2K	  200000	     13767 ns/op	 148.76 MB/s
+Search_Success1_Cached_PCRE/4K	  100000	     27176 ns/op	 150.72 MB/s
+Search_Success1_Cached_PCRE/8K	   50000	     54155 ns/op	 151.27 MB/s
+Search_Success1_Cached_PCRE/16K	   10000	    109309 ns/op	 149.89 MB/s
+Search_Success1_Cached_PCRE/32K	   10000	    215890 ns/op	 151.78 MB/s
+Search_Success1_Cached_PCRE/64K	    5000	    432550 ns/op	 151.51 MB/s
+Search_Success1_Cached_PCRE/128K	    2000	    870568 ns/op	 150.56 MB/s
+Search_Success1_Cached_PCRE/256K	    1000	   1756215 ns/op	 149.27 MB/s
+Search_Success1_Cached_PCRE/512K	     500	   3671994 ns/op	 142.78 MB/s
+Search_Success1_Cached_PCRE/1M	     200	   7134810 ns/op	 146.97 MB/s
+Search_Success1_Cached_PCRE/2M	     100	  14672580 ns/op	 142.93 MB/s
+Search_Success1_Cached_PCRE/4M	      50	  31146040 ns/op	 134.67 MB/s
+Search_Success1_Cached_PCRE/8M	      20	  72224500 ns/op	 116.15 MB/s
+Search_Success1_Cached_PCRE/16M	       5	 243683800 ns/op	  68.85 MB/s
+Search_Success1_Cached_RE2/8	 5000000	       544 ns/op	  14.69 MB/s
+Search_Success1_Cached_RE2/16	 5000000	       583 ns/op	  27.43 MB/s
+Search_Success1_Cached_RE2/32	 5000000	       661 ns/op	  48.37 MB/s
+Search_Success1_Cached_RE2/64	 2000000	       818 ns/op	  78.23 MB/s
+Search_Success1_Cached_RE2/128	 1000000	      1148 ns/op	 111.40 MB/s
+Search_Success1_Cached_RE2/256	 1000000	      1778 ns/op	 143.95 MB/s
+Search_Success1_Cached_RE2/512	  500000	      3036 ns/op	 168.64 MB/s
+Search_Success1_Cached_RE2/1K	  500000	      5549 ns/op	 184.53 MB/s
+Search_Success1_Cached_RE2/2K	  200000	     10580 ns/op	 193.56 MB/s
+Search_Success1_Cached_RE2/4K	  100000	     20645 ns/op	 198.39 MB/s
+Search_Success1_Cached_RE2/8K	   50000	     40775 ns/op	 200.90 MB/s
+Search_Success1_Cached_RE2/16K	   20000	     81030 ns/op	 202.20 MB/s
+Search_Success1_Cached_RE2/32K	   10000	    162338 ns/op	 201.85 MB/s
+Search_Success1_Cached_RE2/64K	    5000	    324387 ns/op	 202.03 MB/s
+Search_Success1_Cached_RE2/128K	    5000	    648468 ns/op	 202.13 MB/s
+Search_Success1_Cached_RE2/256K	    2000	   1299439 ns/op	 201.74 MB/s
+Search_Success1_Cached_RE2/512K	    1000	   2608958 ns/op	 200.96 MB/s
+Search_Success1_Cached_RE2/1M	     500	   5263964 ns/op	 199.20 MB/s
+Search_Success1_Cached_RE2/2M	     200	  10793175 ns/op	 194.30 MB/s
+Search_Success1_Cached_RE2/4M	      50	  24138120 ns/op	 173.76 MB/s
+Search_Success1_Cached_RE2/8M	      20	  58223300 ns/op	 144.08 MB/s
+Search_Success1_Cached_RE2/16M	       5	 215741400 ns/op	  77.77 MB/s
+Search_Digits_PCRE	  500000	      7534 ns/op
+Search_Digits_RE2	   50000	     44162 ns/op
+Parse_Digits_PCRE	  200000	      7664 ns/op
+Parse_Digits_RE2	  100000	     22595 ns/op
+Parse_CachedDigits_PCRE	 5000000	       721 ns/op
+Parse_CachedDigits_RE2	 5000000	       413 ns/op
+Parse_DigitDs_PCRE	  500000	      7095 ns/op
+Parse_DigitDs_RE2	  100000	     22259 ns/op
+Parse_CachedDigitDs_PCRE	 5000000	       704 ns/op
+Parse_CachedDigitDs_RE2	 5000000	       415 ns/op
+Parse_Split_PCRE	  500000	      5540 ns/op
+Parse_Split_RE2	  100000	     23817 ns/op
+Parse_CachedSplit_PCRE	 5000000	       490 ns/op
+Parse_CachedSplit_RE2	10000000	       251 ns/op
+Parse_SplitHard_PCRE	  500000	      5410 ns/op
+Parse_SplitHard_RE2	  100000	     28518 ns/op
+Parse_CachedSplitHard_PCRE	 5000000	       488 ns/op
+Parse_CachedSplitHard_RE2	 1000000	      2489 ns/op
+Parse_CachedSplitBig1_PCRE	     500	   7171752 ns/op
+Parse_CachedSplitBig1_RE2	    2000	    990722 ns/op
+Parse_CachedSplitBig2_PCRE	    5000	    658331 ns/op
+Parse_CachedSplitBig2_RE2	      20	  81205250 ns/op
+BM_PCRE_Compile	  500000	      6443 ns/op
+BM_RE2_Compile	  100000	     24103 ns/op
+SearchPhone_CachedPCRE/8	 1000000	      2010 ns/op	   3.98 MB/s
+SearchPhone_CachedPCRE/16	  500000	      3286 ns/op	   4.87 MB/s
+SearchPhone_CachedPCRE/32	  500000	      5953 ns/op	   5.37 MB/s
+SearchPhone_CachedPCRE/64	  200000	     11181 ns/op	   5.72 MB/s
+SearchPhone_CachedPCRE/128	  100000	     21634 ns/op	   5.92 MB/s
+SearchPhone_CachedPCRE/256	   50000	     42315 ns/op	   6.05 MB/s
+SearchPhone_CachedPCRE/512	   20000	     83969 ns/op	   6.10 MB/s
+SearchPhone_CachedPCRE/1K	   10000	    166005 ns/op	   6.17 MB/s
+SearchPhone_CachedPCRE/2K	    5000	    327433 ns/op	   6.25 MB/s
+SearchPhone_CachedPCRE/4K	    5000	    654794 ns/op	   6.26 MB/s
+SearchPhone_CachedPCRE/8K	    2000	   1302747 ns/op	   6.29 MB/s
+SearchPhone_CachedPCRE/16K	    1000	   2601137 ns/op	   6.30 MB/s
+SearchPhone_CachedPCRE/32K	     500	   5170166 ns/op	   6.34 MB/s
+SearchPhone_CachedPCRE/64K	     100	  10378910 ns/op	   6.31 MB/s
+SearchPhone_CachedPCRE/128K	     100	  20783360 ns/op	   6.31 MB/s
+SearchPhone_CachedPCRE/256K	      50	  41632940 ns/op	   6.30 MB/s
+SearchPhone_CachedPCRE/512K	      20	  83663300 ns/op	   6.27 MB/s
+SearchPhone_CachedPCRE/1M	      10	 167093400 ns/op	   6.28 MB/s
+SearchPhone_CachedPCRE/2M	       5	 335078800 ns/op	   6.26 MB/s
+SearchPhone_CachedPCRE/4M	       5	 673405400 ns/op	   6.23 MB/s
+SearchPhone_CachedPCRE/8M	       1	1335761000 ns/op	   6.28 MB/s
+SearchPhone_CachedPCRE/16M	       1	2682908000 ns/op	   6.25 MB/s
+SearchPhone_CachedRE2/8	 1000000	      1470 ns/op	   5.44 MB/s
+SearchPhone_CachedRE2/16	 1000000	      1496 ns/op	  10.69 MB/s
+SearchPhone_CachedRE2/32	 1000000	      1570 ns/op	  20.38 MB/s
+SearchPhone_CachedRE2/64	 1000000	      1770 ns/op	  36.15 MB/s
+SearchPhone_CachedRE2/128	 1000000	      2082 ns/op	  61.46 MB/s
+SearchPhone_CachedRE2/256	 1000000	      2701 ns/op	  94.78 MB/s
+SearchPhone_CachedRE2/512	  500000	      3963 ns/op	 129.19 MB/s
+SearchPhone_CachedRE2/1K	  500000	      6487 ns/op	 157.85 MB/s
+SearchPhone_CachedRE2/2K	  200000	     11527 ns/op	 177.67 MB/s
+SearchPhone_CachedRE2/4K	  100000	     21579 ns/op	 189.81 MB/s
+SearchPhone_CachedRE2/8K	   50000	     41804 ns/op	 195.96 MB/s
+SearchPhone_CachedRE2/16K	   20000	     82228 ns/op	 199.25 MB/s
+SearchPhone_CachedRE2/32K	   10000	    163444 ns/op	 200.48 MB/s
+SearchPhone_CachedRE2/64K	    5000	    325307 ns/op	 201.46 MB/s
+SearchPhone_CachedRE2/128K	    5000	    648559 ns/op	 202.10 MB/s
+SearchPhone_CachedRE2/256K	    2000	   1295574 ns/op	 202.34 MB/s
+SearchPhone_CachedRE2/512K	    1000	   2591267 ns/op	 202.33 MB/s
+SearchPhone_CachedRE2/1M	     500	   5178738 ns/op	 202.48 MB/s
+SearchPhone_CachedRE2/2M	     100	  10389680 ns/op	 201.85 MB/s
+SearchPhone_CachedRE2/4M	     100	  20851510 ns/op	 201.15 MB/s
+SearchPhone_CachedRE2/8M	      50	  41763800 ns/op	 200.86 MB/s
+SearchPhone_CachedRE2/16M	      20	  83492800 ns/op	 200.94 MB/s
+EmptyPartialMatchPCRE	10000000	       195 ns/op
+EmptyPartialMatchRE2	 5000000	       497 ns/op
+SimplePartialMatchPCRE	10000000	       276 ns/op
+SimplePartialMatchRE2	 5000000	       548 ns/op
+HTTPPartialMatchPCRE	 2000000	       826 ns/op
+HTTPPartialMatchRE2	 2000000	       894 ns/op
+SmallHTTPPartialMatchPCRE	 2000000	       825 ns/op
+SmallHTTPPartialMatchRE2	 2000000	       895 ns/op
+DotMatchPCRE	 2000000	       810 ns/op
+DotMatchRE2	 2000000	       976 ns/op
+ASCIIMatchPCRE	 5000000	       604 ns/op
+ASCIIMatchRE2	 2000000	       976 ns/op

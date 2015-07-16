@@ -1,0 +1,98 @@
+/* Copyright (c) 2013 The Chromium Authors. All rights reserved.
+   Use of this source code is governed by a BSD-style license that can be
+  found in the LICENSE file. */
+
+/* Test Dictionary productions
+
+Run with --test to generate an AST and verify that all comments accurately
+reflect the state of the Nodes.
+
+BUILD Type(Name)
+This comment signals that a node of type <Type> is created with the
+name <Name>.
+
+ERROR Error String
+This comment signals that a error of <Error String> is generated.  The error
+is not assigned to a node, but are expected in order.
+
+PROP Key=Value
+This comment signals that a property has been set on the Node such that
+<Key> = <Value>.
+
+TREE
+Type(Name)
+  Type(Name)
+  Type(Name)
+    Type(Name)
+    ...
+This comment signals that a tree of nodes matching the BUILD comment
+symatics should exist.  This is an exact match.
+*/
+
+
+/* TREE
+ *Dictionary(MyDict)
+ */
+dictionary MyDict { };
+
+/* TREE
+ *Dictionary(MyDictInherit)
+ *  Inherit(Foo)
+ */
+dictionary MyDictInherit : Foo {};
+
+/* TREE
+ *Dictionary(MyDictPartial)
+ */
+partial dictionary MyDictPartial { };
+
+/* ERROR Unexpected ":" after identifier "MyDictInherit". */
+partial dictionary MyDictInherit : Foo {};
+
+/* TREE
+ *Dictionary(MyDictBig)
+ *  Key(setString)
+ *    Type()
+ *      PrimitiveType(DOMString)
+ *    Default(Foo)
+ *  Key(setLong)
+ *    Type()
+ *      PrimitiveType(unsigned long long)
+ *    Default(123)
+ *  Key(unsetLong)
+ *    Type()
+ *      PrimitiveType(long)
+ */
+dictionary MyDictBig {
+  DOMString setString = "Foo";
+  unsigned long long setLong = 123;
+  long unsetLong;
+};
+
+
+/* ERROR Unexpected "{" after keyword "dictionary". */
+dictionary {
+  DOMString? setString = null;
+};
+
+
+/* ERROR Unexpected identifier "NoColon" after identifier "ForParent". */
+dictionary ForParent NoColon {
+  DOMString? setString = null;
+};
+
+/* TREE
+ *Dictionary(MyDictNull)
+ *  Key(setString)
+ *    Type()
+ *      PrimitiveType(DOMString)
+ *    Default(NULL)
+ */
+dictionary MyDictNull {
+  DOMString? setString = null;
+};
+
+/* ERROR Unexpected keyword "attribute" after "{". */
+dictionary MyDictUnexpectedAttribute {
+  attribute DOMString foo = "";
+};

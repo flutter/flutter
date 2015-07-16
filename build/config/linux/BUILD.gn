@@ -1,0 +1,252 @@
+# Copyright (c) 2013 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//build/config/linux/pkg_config.gni")
+import("//build/config/features.gni")
+import("//build/config/sysroot.gni")
+import("//build/config/ui.gni")
+import("//tools/generate_library_loader/generate_library_loader.gni")
+
+gypi_values = exec_script("//build/gypi_to_gn.py",
+                          [ rebase_path("../../linux/system.gyp") ],
+                          "scope",
+                          [ "../../linux/system.gyp" ])
+
+config("sdk") {
+  if (sysroot != "") {
+    cflags = [ "--sysroot=" + sysroot ]
+    ldflags = [ "--sysroot=" + sysroot ]
+
+    # Need to get some linker flags out of the sysroot.
+    ldflags += [ exec_script("sysroot_ld_path.py",
+                             [
+                               rebase_path("//build/linux/sysroot_ld_path.sh",
+                                           root_build_dir),
+                               sysroot,
+                             ],
+                             "value") ]
+  }
+
+  # Set here because OS_CHROMEOS cannot be autodetected in build_config.h like
+  # OS_LINUX and the like.
+  if (is_chromeos) {
+    defines = [ "OS_CHROMEOS" ]
+  }
+}
+
+pkg_config("atk") {
+  packages = [ "atk" ]
+  atk_lib_dir = exec_script(pkg_config_script,
+                            [
+                              "--libdir",
+                              "atk",
+                            ],
+                            "string")
+  defines = [ "ATK_LIB_DIR=\"$atk_lib_dir\"" ]
+}
+
+# gn orders flags on a target before flags from configs. The default config
+# adds -Wall, and these flags have to be after -Wall -- so they need to come
+# from a config and can't be on the target directly.
+config("atk_warnings") {
+  # glib uses the pre-c++11 typedef-as-static_assert hack.
+  cflags = [ "-Wno-unused-local-typedef" ]
+}
+
+config("fontconfig") {
+  libs = [ "fontconfig" ]
+}
+
+pkg_config("freetype2") {
+  packages = [ "freetype2" ]
+}
+
+pkg_config("glib") {
+  packages = [
+    "glib-2.0",
+    "gmodule-2.0",
+    "gobject-2.0",
+    "gthread-2.0",
+  ]
+}
+
+pkg_config("pangocairo") {
+  packages = [ "pangocairo" ]
+}
+
+pkg_config("pangoft2") {
+  packages = [ "pangoft2" ]
+}
+
+# Note: if your target also depends on //dbus, you don't need to add this
+# config (it will get added automatically if you depend on //dbus).
+pkg_config("dbus") {
+  packages = [ "dbus-1" ]
+}
+
+if (use_evdev_gestures) {
+  pkg_config("libevdev-cros") {
+    packages = [ "libevdev-cros" ]
+  }
+
+  pkg_config("libgestures") {
+    packages = [ "libgestures" ]
+  }
+}
+
+config("x11") {
+  libs = [
+    "X11",
+    "Xcomposite",
+    "Xcursor",
+    "Xdamage",
+    "Xext",
+    "Xfixes",
+    "Xi",
+    "Xrender",
+    "Xtst",
+  ]
+}
+
+config("xcomposite") {
+  libs = [ "Xcomposite" ]
+}
+
+config("xext") {
+  libs = [ "Xext" ]
+}
+
+config("xrandr") {
+  libs = [ "Xrandr" ]
+}
+
+config("xscrnsaver") {
+  libs = [ "Xss" ]
+}
+
+config("xfixes") {
+  libs = [ "Xfixes" ]
+}
+
+config("libcap") {
+  libs = [ "cap" ]
+}
+
+config("xi") {
+  libs = [ "Xi" ]
+}
+
+config("xtst") {
+  libs = [ "Xtst" ]
+}
+
+config("libresolv") {
+  libs = [ "resolv" ]
+}
+
+# CrOS doesn't install GTK, gconf or any gnome packages.
+if (!is_chromeos) {
+  # These packages should _only_ be expected when building for a target.
+  # If these extra checks are not run, gconf is required when building host
+  # tools for a CrOS build.
+  if (current_toolchain == default_toolchain) {
+    pkg_config("gconf") {
+      packages = [ "gconf-2.0" ]
+      defines = [ "USE_GCONF" ]
+    }
+  }
+}
+
+# If brlapi isn't needed, don't require it to be installed.
+if (use_brlapi) {
+  config("brlapi_config") {
+    defines = [ "USE_BRLAPI" ]
+  }
+
+  # TODO(GYP) linux_link_brlapi support. Is this needed?
+  generate_library_loader("libbrlapi") {
+    name = "LibBrlapiLoader"
+    output_h = "libbrlapi.h"
+    output_cc = "libbrlapi_loader.cc"
+    header = "<brlapi.h>"
+    config = ":brlapi_config"
+
+    functions = gypi_values.libbrlapi_functions
+  }
+}
+
+pkg_config("gio_config") {
+  packages = [ "gio-2.0" ]
+
+  # glib >=2.40 deprecate g_settings_list_schemas in favor of
+  # g_settings_schema_source_list_schemas. This function is not available on
+  # earlier versions that we still need to support (specifically, 2.32), so
+  # disable the warning with the GLIB_DISABLE_DEPRECATION_WARNINGS define.
+  # TODO(mgiuca): Remove this suppression when we drop support for Ubuntu 13.10
+  # (saucy) and earlier. Update the code to use
+  # g_settings_schema_source_list_schemas instead.
+  defines = [
+    "USE_GIO",
+    "GLIB_DISABLE_DEPRECATION_WARNINGS",
+  ]
+
+  # TODO(brettw) Theoretically I think ignore_libs should be set so that we
+  # don't link directly to GIO and use the loader generated below. But the gio
+  # target in GYP doesn't make any sense to me and appears to link directly to
+  # GIO in addition to making a loader. This this uncommented, the link in
+  # component build fails, so I think this is closer to the GYP build.
+  #ignore_libs = true  # Loader generated below.
+}
+
+if (is_desktop_linux) {
+  # This generates a target named "gio".
+  generate_library_loader("gio") {
+    name = "LibGioLoader"
+    output_h = "libgio.h"
+    output_cc = "libgio_loader.cc"
+    header = "<gio/gio.h>"
+    config = ":gio_config"
+
+    functions = gypi_values.libgio_functions
+  }
+}
+
+# This generates a target named "libpci".
+generate_library_loader("libpci") {
+  name = "LibPciLoader"
+  output_h = "libpci.h"
+  output_cc = "libpci_loader.cc"
+  header = "<pci/pci.h>"
+
+  functions = gypi_values.libpci_functions
+}
+
+# Looking for libspeechd? Use //third_party/speech-dispatcher
+
+# This generates a target named "udev0_loader".
+generate_library_loader("udev0_loader") {
+  name = "LibUdev0Loader"
+  output_h = "libudev0.h"
+  output_cc = "libudev0_loader.cc"
+  header = "\"third_party/libudev/libudev0.h\""
+
+  functions = gypi_values.libudev_functions
+}
+
+# This generates a target named "udev1_loader".
+generate_library_loader("udev1_loader") {
+  name = "LibUdev1Loader"
+  output_h = "libudev1.h"
+  output_cc = "libudev1_loader.cc"
+  header = "\"third_party/libudev/libudev1.h\""
+
+  functions = gypi_values.libudev_functions
+}
+
+group("udev") {
+  deps = [
+    ":udev0_loader",
+    ":udev1_loader",
+  ]
+}

@@ -1,0 +1,7 @@
+Name: asan_symbolize.py
+License: University of Illinois Open Source License.
+Version: r227327
+URL: http://llvm.org/viewvc/llvm-project/compiler-rt/trunk/lib/asan/scripts/asan_symbolize.py?view=co&content-type=text%2Fplain
+Security Critical: no
+
+asan_symbolize.py is a verbatim copy of asan_symbolize.py in the LLVM trunk.

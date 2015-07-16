@@ -1,0 +1,36 @@
+# This is the official list of people who can contribute
+# (and typically have contributed) code to the RE2 repository.
+# The AUTHORS file lists the copyright holders; this file
+# lists people.  For example, Google employees are listed here
+# but not in AUTHORS, because Google holds the copyright.
+#
+# The submission process automatically checks to make sure
+# that people submitting code are listed in this file (by email address).
+#
+# Names should be added to this file only after verifying that
+# the individual or the individual's organization has agreed to
+# the appropriate Contributor License Agreement, found here:
+#
+#     http://code.google.com/legal/individual-cla-v1.0.html
+#     http://code.google.com/legal/corporate-cla-v1.0.html
+#
+# The agreement for individuals can be filled out on the web.
+#
+# When adding J Random Contributor's name to this file,
+# either J's name or J's organization's name should be
+# added to the AUTHORS file, depending on whether the
+# individual or corporate CLA was used.
+
+# Names should be added to this file like so:
+#     Name <email address>
+
+# Please keep the list sorted.
+
+Brian Gunlogson <unixman83@gmail.com>
+Dominic Battré <battre@chromium.org>
+John Millikin <jmillikin@gmail.com>
+Rob Pike <r@google.com>
+Russ Cox <rsc@swtch.com>
+Sanjay Ghemawat <sanjay@google.com>
+Stefano Rivera <stefano.rivera@gmail.com>
+Srinivasan Venkatachary <vsri@google.com>

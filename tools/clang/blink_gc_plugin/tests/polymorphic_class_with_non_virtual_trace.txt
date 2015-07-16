@@ -1,0 +1,8 @@
+In file included from polymorphic_class_with_non_virtual_trace.cpp:5:
+./polymorphic_class_with_non_virtual_trace.h:17:1: warning: [blink-gc] Left-most base class 'NonPolymorphicBase' of derived class 'IsNotLeftMostPolymorphic' must be polymorphic.
+class NonPolymorphicBase {
+^
+./polymorphic_class_with_non_virtual_trace.h:45:1: warning: [blink-gc] Left-most base class 'TemplatedNonPolymorphicBase<blink::TemplatedIsNotLeftMostPolymorphic>' of derived class 'TemplatedIsNotLeftMostPolymorphic' must be polymorphic.
+class TemplatedNonPolymorphicBase
+^
+2 warnings generated.

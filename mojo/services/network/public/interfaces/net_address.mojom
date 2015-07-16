@@ -1,0 +1,39 @@
+// Copyright 2014 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+module mojo;
+
+enum NetAddressFamily {
+  UNSPECIFIED,
+  IPV4,
+  IPV6
+};
+
+struct NetAddressIPv4 {
+  // The port number. This is in the local machine's endianness.
+  uint16 port;
+
+  // The address is expressed in network byte order, so the most significant
+  // byte ("127" in the address "127.0.0.1") will be at index 0.
+  array<uint8, 4> addr;
+};
+
+// All members are expressed in network byte order.
+struct NetAddressIPv6 {
+  // The port number. This is in the local machine's endianness.
+  uint16 port;
+
+  // The address is expressed in network byte order, so the most significant
+  // byte is at index 0.
+  array<uint8, 16> addr;
+};
+
+struct NetAddress {
+  NetAddressFamily family = UNSPECIFIED;
+
+  // At most one of the following fields is non-NULL depending on the value of
+  // |family|.
+  NetAddressIPv4? ipv4;
+  NetAddressIPv6? ipv6;
+};

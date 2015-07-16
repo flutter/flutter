@@ -1,0 +1,55 @@
+Name
+
+    CHROMIUM_lose_context
+
+Name Strings
+
+    GL_CHROMIUM_lose_context
+
+Version
+
+    Last Modifed Date: December 17, 2012
+
+Dependencies
+
+    OpenGL ES 2.0 is required.
+
+Overview
+
+    This extension allows an application to force a lost context event.
+    This is useful for debugging that an app can correctly handle the context
+    becoming lost.
+
+Issues
+
+    None
+
+New Tokens
+
+    None
+
+New Procedures and Functions
+
+    void LoseContextCHROMIUM (GLenum current, GLenum other)
+
+    Causes the current context and all other contexts in the same share group
+    to become lost. <current> and <other> can each be one of:
+
+        GL_GUILTY_CONTEXT_RESET_EXT
+        GL_INNOCENT_CONTEXT_RESET_EXT
+        GL_UNKNOWN_CONTEXT_RESET_EXT
+
+    INVALID_ENUM is generated if <current> or <other> is not one of the values
+    mentioned above.
+
+Errors
+
+    None.
+
+New State
+
+    None.
+
+Revision History
+
+    12/17/2012    Documented the extension

@@ -1,0 +1,2370 @@
+Classfile out_android/Debug/gen/content/jni/android/view/MotionEvent.class
+  Last modified Feb 27, 2014; size 13369 bytes
+  MD5 checksum 3718d77a994cb8aceb7b35c5df3c4dd1
+  Compiled from "MotionEvent.java"
+public final class android.view.MotionEvent extends android.view.InputEvent implements android.os.Parcelable
+  SourceFile: "MotionEvent.java"
+  InnerClasses:
+       public static final #10= #9 of #6; //PointerProperties=class android/view/MotionEvent$PointerProperties of class android/view/MotionEvent
+       public static final #13= #12 of #6; //PointerCoords=class android/view/MotionEvent$PointerCoords of class android/view/MotionEvent
+       public static #150= #149 of #8; //Creator=class android/os/Parcelable$Creator of class android/os/Parcelable
+  minor version: 0
+  major version: 49
+  flags: ACC_PUBLIC, ACC_FINAL, ACC_SUPER
+Constant pool:
+    #1 = Methodref          #7.#293       //  android/view/InputEvent."<init>":()V
+    #2 = Class              #294          //  java/lang/RuntimeException
+    #3 = String             #295          //  Stub!
+    #4 = Methodref          #2.#296       //  java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+    #5 = Fieldref           #6.#297       //  android/view/MotionEvent.CREATOR:Landroid/os/Parcelable$Creator;
+    #6 = Class              #298          //  android/view/MotionEvent
+    #7 = Class              #299          //  android/view/InputEvent
+    #8 = Class              #300          //  android/os/Parcelable
+    #9 = Class              #301          //  android/view/MotionEvent$PointerProperties
+   #10 = Utf8               PointerProperties
+   #11 = Utf8               InnerClasses
+   #12 = Class              #302          //  android/view/MotionEvent$PointerCoords
+   #13 = Utf8               PointerCoords
+   #14 = Utf8               INVALID_POINTER_ID
+   #15 = Utf8               I
+   #16 = Utf8               ConstantValue
+   #17 = Integer            -1
+   #18 = Utf8               ACTION_MASK
+   #19 = Integer            255
+   #20 = Utf8               ACTION_DOWN
+   #21 = Integer            0
+   #22 = Utf8               ACTION_UP
+   #23 = Integer            1
+   #24 = Utf8               ACTION_MOVE
+   #25 = Integer            2
+   #26 = Utf8               ACTION_CANCEL
+   #27 = Integer            3
+   #28 = Utf8               ACTION_OUTSIDE
+   #29 = Integer            4
+   #30 = Utf8               ACTION_POINTER_DOWN
+   #31 = Integer            5
+   #32 = Utf8               ACTION_POINTER_UP
+   #33 = Integer            6
+   #34 = Utf8               ACTION_HOVER_MOVE
+   #35 = Integer            7
+   #36 = Utf8               ACTION_SCROLL
+   #37 = Integer            8
+   #38 = Utf8               ACTION_HOVER_ENTER
+   #39 = Integer            9
+   #40 = Utf8               ACTION_HOVER_EXIT
+   #41 = Integer            10
+   #42 = Utf8               ACTION_POINTER_INDEX_MASK
+   #43 = Integer            65280
+   #44 = Utf8               ACTION_POINTER_INDEX_SHIFT
+   #45 = Utf8               ACTION_POINTER_1_DOWN
+   #46 = Utf8               Deprecated
+   #47 = Utf8               RuntimeVisibleAnnotations
+   #48 = Utf8               Ljava/lang/Deprecated;
+   #49 = Utf8               ACTION_POINTER_2_DOWN
+   #50 = Integer            261
+   #51 = Utf8               ACTION_POINTER_3_DOWN
+   #52 = Integer            517
+   #53 = Utf8               ACTION_POINTER_1_UP
+   #54 = Utf8               ACTION_POINTER_2_UP
+   #55 = Integer            262
+   #56 = Utf8               ACTION_POINTER_3_UP
+   #57 = Integer            518
+   #58 = Utf8               ACTION_POINTER_ID_MASK
+   #59 = Utf8               ACTION_POINTER_ID_SHIFT
+   #60 = Utf8               FLAG_WINDOW_IS_OBSCURED
+   #61 = Utf8               EDGE_TOP
+   #62 = Utf8               EDGE_BOTTOM
+   #63 = Utf8               EDGE_LEFT
+   #64 = Utf8               EDGE_RIGHT
+   #65 = Utf8               AXIS_X
+   #66 = Utf8               AXIS_Y
+   #67 = Utf8               AXIS_PRESSURE
+   #68 = Utf8               AXIS_SIZE
+   #69 = Utf8               AXIS_TOUCH_MAJOR
+   #70 = Utf8               AXIS_TOUCH_MINOR
+   #71 = Utf8               AXIS_TOOL_MAJOR
+   #72 = Utf8               AXIS_TOOL_MINOR
+   #73 = Utf8               AXIS_ORIENTATION
+   #74 = Utf8               AXIS_VSCROLL
+   #75 = Utf8               AXIS_HSCROLL
+   #76 = Utf8               AXIS_Z
+   #77 = Integer            11
+   #78 = Utf8               AXIS_RX
+   #79 = Integer            12
+   #80 = Utf8               AXIS_RY
+   #81 = Integer            13
+   #82 = Utf8               AXIS_RZ
+   #83 = Integer            14
+   #84 = Utf8               AXIS_HAT_X
+   #85 = Integer            15
+   #86 = Utf8               AXIS_HAT_Y
+   #87 = Integer            16
+   #88 = Utf8               AXIS_LTRIGGER
+   #89 = Integer            17
+   #90 = Utf8               AXIS_RTRIGGER
+   #91 = Integer            18
+   #92 = Utf8               AXIS_THROTTLE
+   #93 = Integer            19
+   #94 = Utf8               AXIS_RUDDER
+   #95 = Integer            20
+   #96 = Utf8               AXIS_WHEEL
+   #97 = Integer            21
+   #98 = Utf8               AXIS_GAS
+   #99 = Integer            22
+  #100 = Utf8               AXIS_BRAKE
+  #101 = Integer            23
+  #102 = Utf8               AXIS_DISTANCE
+  #103 = Integer            24
+  #104 = Utf8               AXIS_TILT
+  #105 = Integer            25
+  #106 = Utf8               AXIS_GENERIC_1
+  #107 = Integer            32
+  #108 = Utf8               AXIS_GENERIC_2
+  #109 = Integer            33
+  #110 = Utf8               AXIS_GENERIC_3
+  #111 = Integer            34
+  #112 = Utf8               AXIS_GENERIC_4
+  #113 = Integer            35
+  #114 = Utf8               AXIS_GENERIC_5
+  #115 = Integer            36
+  #116 = Utf8               AXIS_GENERIC_6
+  #117 = Integer            37
+  #118 = Utf8               AXIS_GENERIC_7
+  #119 = Integer            38
+  #120 = Utf8               AXIS_GENERIC_8
+  #121 = Integer            39
+  #122 = Utf8               AXIS_GENERIC_9
+  #123 = Integer            40
+  #124 = Utf8               AXIS_GENERIC_10
+  #125 = Integer            41
+  #126 = Utf8               AXIS_GENERIC_11
+  #127 = Integer            42
+  #128 = Utf8               AXIS_GENERIC_12
+  #129 = Integer            43
+  #130 = Utf8               AXIS_GENERIC_13
+  #131 = Integer            44
+  #132 = Utf8               AXIS_GENERIC_14
+  #133 = Integer            45
+  #134 = Utf8               AXIS_GENERIC_15
+  #135 = Integer            46
+  #136 = Utf8               AXIS_GENERIC_16
+  #137 = Integer            47
+  #138 = Utf8               BUTTON_PRIMARY
+  #139 = Utf8               BUTTON_SECONDARY
+  #140 = Utf8               BUTTON_TERTIARY
+  #141 = Utf8               BUTTON_BACK
+  #142 = Utf8               BUTTON_FORWARD
+  #143 = Utf8               TOOL_TYPE_UNKNOWN
+  #144 = Utf8               TOOL_TYPE_FINGER
+  #145 = Utf8               TOOL_TYPE_STYLUS
+  #146 = Utf8               TOOL_TYPE_MOUSE
+  #147 = Utf8               TOOL_TYPE_ERASER
+  #148 = Utf8               CREATOR
+  #149 = Class              #303          //  android/os/Parcelable$Creator
+  #150 = Utf8               Creator
+  #151 = Utf8               Landroid/os/Parcelable$Creator;
+  #152 = Utf8               Signature
+  #153 = Utf8               Landroid/os/Parcelable$Creator<Landroid/view/MotionEvent;>;
+  #154 = Utf8               <init>
+  #155 = Utf8               ()V
+  #156 = Utf8               Code
+  #157 = Utf8               LineNumberTable
+  #158 = Utf8               LocalVariableTable
+  #159 = Utf8               this
+  #160 = Utf8               Landroid/view/MotionEvent;
+  #161 = Utf8               finalize
+  #162 = Utf8               Exceptions
+  #163 = Class              #304          //  java/lang/Throwable
+  #164 = Utf8               obtain
+  #165 = Utf8               (JJII[Landroid/view/MotionEvent$PointerProperties;[Landroid/view/MotionEvent$PointerCoords;IIFFIIII)Landroid/view/MotionEvent;
+  #166 = Utf8               downTime
+  #167 = Utf8               J
+  #168 = Utf8               eventTime
+  #169 = Utf8               action
+  #170 = Utf8               pointerCount
+  #171 = Utf8               pointerProperties
+  #172 = Utf8               [Landroid/view/MotionEvent$PointerProperties;
+  #173 = Utf8               pointerCoords
+  #174 = Utf8               [Landroid/view/MotionEvent$PointerCoords;
+  #175 = Utf8               metaState
+  #176 = Utf8               buttonState
+  #177 = Utf8               xPrecision
+  #178 = Utf8               F
+  #179 = Utf8               yPrecision
+  #180 = Utf8               deviceId
+  #181 = Utf8               edgeFlags
+  #182 = Utf8               source
+  #183 = Utf8               flags
+  #184 = Utf8               (JJII[I[Landroid/view/MotionEvent$PointerCoords;IFFIIII)Landroid/view/MotionEvent;
+  #185 = Utf8               pointerIds
+  #186 = Utf8               [I
+  #187 = Utf8               (JJIFFFFIFFII)Landroid/view/MotionEvent;
+  #188 = Utf8               x
+  #189 = Utf8               y
+  #190 = Utf8               pressure
+  #191 = Utf8               size
+  #192 = Utf8               (JJIIFFFFIFFII)Landroid/view/MotionEvent;
+  #193 = Utf8               (JJIFFI)Landroid/view/MotionEvent;
+  #194 = Utf8               (Landroid/view/MotionEvent;)Landroid/view/MotionEvent;
+  #195 = Utf8               other
+  #196 = Utf8               obtainNoHistory
+  #197 = Utf8               recycle
+  #198 = Utf8               getDeviceId
+  #199 = Utf8               ()I
+  #200 = Utf8               getSource
+  #201 = Utf8               setSource
+  #202 = Utf8               (I)V
+  #203 = Utf8               getAction
+  #204 = Utf8               getActionMasked
+  #205 = Utf8               getActionIndex
+  #206 = Utf8               getFlags
+  #207 = Utf8               getDownTime
+  #208 = Utf8               ()J
+  #209 = Utf8               getEventTime
+  #210 = Utf8               getX
+  #211 = Utf8               ()F
+  #212 = Utf8               getY
+  #213 = Utf8               getPressure
+  #214 = Utf8               getSize
+  #215 = Utf8               getTouchMajor
+  #216 = Utf8               getTouchMinor
+  #217 = Utf8               getToolMajor
+  #218 = Utf8               getToolMinor
+  #219 = Utf8               getOrientation
+  #220 = Utf8               getAxisValue
+  #221 = Utf8               (I)F
+  #222 = Utf8               axis
+  #223 = Utf8               getPointerCount
+  #224 = Utf8               getPointerId
+  #225 = Utf8               (I)I
+  #226 = Utf8               pointerIndex
+  #227 = Utf8               getToolType
+  #228 = Utf8               findPointerIndex
+  #229 = Utf8               pointerId
+  #230 = Utf8               (II)F
+  #231 = Utf8               getPointerCoords
+  #232 = Utf8               (ILandroid/view/MotionEvent$PointerCoords;)V
+  #233 = Utf8               outPointerCoords
+  #234 = Utf8               Landroid/view/MotionEvent$PointerCoords;
+  #235 = Utf8               getPointerProperties
+  #236 = Utf8               (ILandroid/view/MotionEvent$PointerProperties;)V
+  #237 = Utf8               outPointerProperties
+  #238 = Utf8               Landroid/view/MotionEvent$PointerProperties;
+  #239 = Utf8               getMetaState
+  #240 = Utf8               getButtonState
+  #241 = Utf8               getRawX
+  #242 = Utf8               getRawY
+  #243 = Utf8               getXPrecision
+  #244 = Utf8               getYPrecision
+  #245 = Utf8               getHistorySize
+  #246 = Utf8               getHistoricalEventTime
+  #247 = Utf8               (I)J
+  #248 = Utf8               pos
+  #249 = Utf8               getHistoricalX
+  #250 = Utf8               getHistoricalY
+  #251 = Utf8               getHistoricalPressure
+  #252 = Utf8               getHistoricalSize
+  #253 = Utf8               getHistoricalTouchMajor
+  #254 = Utf8               getHistoricalTouchMinor
+  #255 = Utf8               getHistoricalToolMajor
+  #256 = Utf8               getHistoricalToolMinor
+  #257 = Utf8               getHistoricalOrientation
+  #258 = Utf8               getHistoricalAxisValue
+  #259 = Utf8               (III)F
+  #260 = Utf8               getHistoricalPointerCoords
+  #261 = Utf8               (IILandroid/view/MotionEvent$PointerCoords;)V
+  #262 = Utf8               getEdgeFlags
+  #263 = Utf8               setEdgeFlags
+  #264 = Utf8               setAction
+  #265 = Utf8               offsetLocation
+  #266 = Utf8               (FF)V
+  #267 = Utf8               deltaX
+  #268 = Utf8               deltaY
+  #269 = Utf8               setLocation
+  #270 = Utf8               transform
+  #271 = Utf8               (Landroid/graphics/Matrix;)V
+  #272 = Utf8               matrix
+  #273 = Utf8               Landroid/graphics/Matrix;
+  #274 = Utf8               addBatch
+  #275 = Utf8               (JFFFFI)V
+  #276 = Utf8               (J[Landroid/view/MotionEvent$PointerCoords;I)V
+  #277 = Utf8               toString
+  #278 = Utf8               ()Ljava/lang/String;
+  #279 = Utf8               actionToString
+  #280 = Utf8               (I)Ljava/lang/String;
+  #281 = Utf8               axisToString
+  #282 = Utf8               axisFromString
+  #283 = Utf8               (Ljava/lang/String;)I
+  #284 = Utf8               symbolicName
+  #285 = Utf8               Ljava/lang/String;
+  #286 = Utf8               writeToParcel
+  #287 = Utf8               (Landroid/os/Parcel;I)V
+  #288 = Utf8               out
+  #289 = Utf8               Landroid/os/Parcel;
+  #290 = Utf8               <clinit>
+  #291 = Utf8               SourceFile
+  #292 = Utf8               MotionEvent.java
+  #293 = NameAndType        #154:#155     //  "<init>":()V
+  #294 = Utf8               java/lang/RuntimeException
+  #295 = Utf8               Stub!
+  #296 = NameAndType        #154:#305     //  "<init>":(Ljava/lang/String;)V
+  #297 = NameAndType        #148:#151     //  CREATOR:Landroid/os/Parcelable$Creator;
+  #298 = Utf8               android/view/MotionEvent
+  #299 = Utf8               android/view/InputEvent
+  #300 = Utf8               android/os/Parcelable
+  #301 = Utf8               android/view/MotionEvent$PointerProperties
+  #302 = Utf8               android/view/MotionEvent$PointerCoords
+  #303 = Utf8               android/os/Parcelable$Creator
+  #304 = Utf8               java/lang/Throwable
+  #305 = Utf8               (Ljava/lang/String;)V
+{
+  public static final int INVALID_POINTER_ID;
+    Signature: I
+    flags: ACC_PUBLIC, ACC_STATIC, ACC_FINAL
+    ConstantValue: int -1
+
+
+  public static final int ACTION_MASK;
+    Signature: I
+    flags: ACC_PUBLIC, ACC_STATIC, ACC_FINAL
+    ConstantValue: int 255
+
+
+  public static final int ACTION_DOWN;
+    Signature: I
+    flags: ACC_PUBLIC, ACC_STATIC, ACC_FINAL
+    ConstantValue: int 0
+
+
+  public static final int ACTION_UP;
+    Signature: I
+    flags: ACC_PUBLIC, ACC_STATIC, ACC_FINAL
+    ConstantValue: int 1
+
+
+  public static final int ACTION_MOVE;
+    Signature: I
+    flags: ACC_PUBLIC, ACC_STATIC, ACC_FINAL
+    ConstantValue: int 2
+
+
+  public static final int ACTION_CANCEL;
+    Signature: I
+    flags: ACC_PUBLIC, ACC_STATIC, ACC_FINAL
+    ConstantValue: int 3
+
+
+  public static final int ACTION_OUTSIDE;
+    Signature: I
+    flags: ACC_PUBLIC, ACC_STATIC, ACC_FINAL
+    ConstantValue: int 4
+
+
+  public static final int ACTION_POINTER_DOWN;
+    Signature: I
+    flags: ACC_PUBLIC, ACC_STATIC, ACC_FINAL
+    ConstantValue: int 5
+
+
+  public static final int ACTION_POINTER_UP;
+    Signature: I
+    flags: ACC_PUBLIC, ACC_STATIC, ACC_FINAL
+    ConstantValue: int 6
+
+
+  public static final int ACTION_HOVER_MOVE;
+    Signature: I
+    flags: ACC_PUBLIC, ACC_STATIC, ACC_FINAL
+    ConstantValue: int 7
+
+
+  public static final int ACTION_SCROLL;
+    Signature: I
+    flags: ACC_PUBLIC, ACC_STATIC, ACC_FINAL
+    ConstantValue: int 8
+
+
+  public static final int ACTION_HOVER_ENTER;
+    Signature: I
+    flags: ACC_PUBLIC, ACC_STATIC, ACC_FINAL
+    ConstantValue: int 9
+
+
+  public static final int ACTION_HOVER_EXIT;
+    Signature: I
+    flags: ACC_PUBLIC, ACC_STATIC, ACC_FINAL
+    ConstantValue: int 10
+
+
+  public static final int ACTION_POINTER_INDEX_MASK;
+    Signature: I
+    flags: ACC_PUBLIC, ACC_STATIC, ACC_FINAL
+    ConstantValue: int 65280
+
+
+  public static final int ACTION_POINTER_INDEX_SHIFT;
+    Signature: I
+    flags: ACC_PUBLIC, ACC_STATIC, ACC_FINAL
+    ConstantValue: int 8
+
+
+  public static final int ACTION_POINTER_1_DOWN;
+    Signature: I
+    flags: ACC_PUBLIC, ACC_STATIC, ACC_FINAL
+    ConstantValue: int 5
+    Deprecated: true
+    RuntimeVisibleAnnotations:
+      0: #48()
+
+
+  public static final int ACTION_POINTER_2_DOWN;
+    Signature: I
+    flags: ACC_PUBLIC, ACC_STATIC, ACC_FINAL
+    ConstantValue: int 261
+    Deprecated: true
+    RuntimeVisibleAnnotations:
+      0: #48()
+
+
+  public static final int ACTION_POINTER_3_DOWN;
+    Signature: I
+    flags: ACC_PUBLIC, ACC_STATIC, ACC_FINAL
+    ConstantValue: int 517
+    Deprecated: true
+    RuntimeVisibleAnnotations:
+      0: #48()
+
+
+  public static final int ACTION_POINTER_1_UP;
+    Signature: I
+    flags: ACC_PUBLIC, ACC_STATIC, ACC_FINAL
+    ConstantValue: int 6
+    Deprecated: true
+    RuntimeVisibleAnnotations:
+      0: #48()
+
+
+  public static final int ACTION_POINTER_2_UP;
+    Signature: I
+    flags: ACC_PUBLIC, ACC_STATIC, ACC_FINAL
+    ConstantValue: int 262
+    Deprecated: true
+    RuntimeVisibleAnnotations:
+      0: #48()
+
+
+  public static final int ACTION_POINTER_3_UP;
+    Signature: I
+    flags: ACC_PUBLIC, ACC_STATIC, ACC_FINAL
+    ConstantValue: int 518
+    Deprecated: true
+    RuntimeVisibleAnnotations:
+      0: #48()
+
+
+  public static final int ACTION_POINTER_ID_MASK;
+    Signature: I
+    flags: ACC_PUBLIC, ACC_STATIC, ACC_FINAL
+    ConstantValue: int 65280
+    Deprecated: true
+    RuntimeVisibleAnnotations:
+      0: #48()
+
+
+  public static final int ACTION_POINTER_ID_SHIFT;
+    Signature: I
+    flags: ACC_PUBLIC, ACC_STATIC, ACC_FINAL
+    ConstantValue: int 8
+    Deprecated: true
+    RuntimeVisibleAnnotations:
+      0: #48()
+
+
+  public static final int FLAG_WINDOW_IS_OBSCURED;
+    Signature: I
+    flags: ACC_PUBLIC, ACC_STATIC, ACC_FINAL
+    ConstantValue: int 1
+
+
+  public static final int EDGE_TOP;
+    Signature: I
+    flags: ACC_PUBLIC, ACC_STATIC, ACC_FINAL
+    ConstantValue: int 1
+
+
+  public static final int EDGE_BOTTOM;
+    Signature: I
+    flags: ACC_PUBLIC, ACC_STATIC, ACC_FINAL
+    ConstantValue: int 2
+
+
+  public static final int EDGE_LEFT;
+    Signature: I
+    flags: ACC_PUBLIC, ACC_STATIC, ACC_FINAL
+    ConstantValue: int 4
+
+
+  public static final int EDGE_RIGHT;
+    Signature: I
+    flags: ACC_PUBLIC, ACC_STATIC, ACC_FINAL
+    ConstantValue: int 8
+
+
+  public static final int AXIS_X;
+    Signature: I
+    flags: ACC_PUBLIC, ACC_STATIC, ACC_FINAL
+    ConstantValue: int 0
+
+
+  public static final int AXIS_Y;
+    Signature: I
+    flags: ACC_PUBLIC, ACC_STATIC, ACC_FINAL
+    ConstantValue: int 1
+
+
+  public static final int AXIS_PRESSURE;
+    Signature: I
+    flags: ACC_PUBLIC, ACC_STATIC, ACC_FINAL
+    ConstantValue: int 2
+
+
+  public static final int AXIS_SIZE;
+    Signature: I
+    flags: ACC_PUBLIC, ACC_STATIC, ACC_FINAL
+    ConstantValue: int 3
+
+
+  public static final int AXIS_TOUCH_MAJOR;
+    Signature: I
+    flags: ACC_PUBLIC, ACC_STATIC, ACC_FINAL
+    ConstantValue: int 4
+
+
+  public static final int AXIS_TOUCH_MINOR;
+    Signature: I
+    flags: ACC_PUBLIC, ACC_STATIC, ACC_FINAL
+    ConstantValue: int 5
+
+
+  public static final int AXIS_TOOL_MAJOR;
+    Signature: I
+    flags: ACC_PUBLIC, ACC_STATIC, ACC_FINAL
+    ConstantValue: int 6
+
+
+  public static final int AXIS_TOOL_MINOR;
+    Signature: I
+    flags: ACC_PUBLIC, ACC_STATIC, ACC_FINAL
+    ConstantValue: int 7
+
+
+  public static final int AXIS_ORIENTATION;
+    Signature: I
+    flags: ACC_PUBLIC, ACC_STATIC, ACC_FINAL
+    ConstantValue: int 8
+
+
+  public static final int AXIS_VSCROLL;
+    Signature: I
+    flags: ACC_PUBLIC, ACC_STATIC, ACC_FINAL
+    ConstantValue: int 9
+
+
+  public static final int AXIS_HSCROLL;
+    Signature: I
+    flags: ACC_PUBLIC, ACC_STATIC, ACC_FINAL
+    ConstantValue: int 10
+
+
+  public static final int AXIS_Z;
+    Signature: I
+    flags: ACC_PUBLIC, ACC_STATIC, ACC_FINAL
+    ConstantValue: int 11
+
+
+  public static final int AXIS_RX;
+    Signature: I
+    flags: ACC_PUBLIC, ACC_STATIC, ACC_FINAL
+    ConstantValue: int 12
+
+
+  public static final int AXIS_RY;
+    Signature: I
+    flags: ACC_PUBLIC, ACC_STATIC, ACC_FINAL
+    ConstantValue: int 13
+
+
+  public static final int AXIS_RZ;
+    Signature: I
+    flags: ACC_PUBLIC, ACC_STATIC, ACC_FINAL
+    ConstantValue: int 14
+
+
+  public static final int AXIS_HAT_X;
+    Signature: I
+    flags: ACC_PUBLIC, ACC_STATIC, ACC_FINAL
+    ConstantValue: int 15
+
+
+  public static final int AXIS_HAT_Y;
+    Signature: I
+    flags: ACC_PUBLIC, ACC_STATIC, ACC_FINAL
+    ConstantValue: int 16
+
+
+  public static final int AXIS_LTRIGGER;
+    Signature: I
+    flags: ACC_PUBLIC, ACC_STATIC, ACC_FINAL
+    ConstantValue: int 17
+
+
+  public static final int AXIS_RTRIGGER;
+    Signature: I
+    flags: ACC_PUBLIC, ACC_STATIC, ACC_FINAL
+    ConstantValue: int 18
+
+
+  public static final int AXIS_THROTTLE;
+    Signature: I
+    flags: ACC_PUBLIC, ACC_STATIC, ACC_FINAL
+    ConstantValue: int 19
+
+
+  public static final int AXIS_RUDDER;
+    Signature: I
+    flags: ACC_PUBLIC, ACC_STATIC, ACC_FINAL
+    ConstantValue: int 20
+
+
+  public static final int AXIS_WHEEL;
+    Signature: I
+    flags: ACC_PUBLIC, ACC_STATIC, ACC_FINAL
+    ConstantValue: int 21
+
+
+  public static final int AXIS_GAS;
+    Signature: I
+    flags: ACC_PUBLIC, ACC_STATIC, ACC_FINAL
+    ConstantValue: int 22
+
+
+  public static final int AXIS_BRAKE;
+    Signature: I
+    flags: ACC_PUBLIC, ACC_STATIC, ACC_FINAL
+    ConstantValue: int 23
+
+
+  public static final int AXIS_DISTANCE;
+    Signature: I
+    flags: ACC_PUBLIC, ACC_STATIC, ACC_FINAL
+    ConstantValue: int 24
+
+
+  public static final int AXIS_TILT;
+    Signature: I
+    flags: ACC_PUBLIC, ACC_STATIC, ACC_FINAL
+    ConstantValue: int 25
+
+
+  public static final int AXIS_GENERIC_1;
+    Signature: I
+    flags: ACC_PUBLIC, ACC_STATIC, ACC_FINAL
+    ConstantValue: int 32
+
+
+  public static final int AXIS_GENERIC_2;
+    Signature: I
+    flags: ACC_PUBLIC, ACC_STATIC, ACC_FINAL
+    ConstantValue: int 33
+
+
+  public static final int AXIS_GENERIC_3;
+    Signature: I
+    flags: ACC_PUBLIC, ACC_STATIC, ACC_FINAL
+    ConstantValue: int 34
+
+
+  public static final int AXIS_GENERIC_4;
+    Signature: I
+    flags: ACC_PUBLIC, ACC_STATIC, ACC_FINAL
+    ConstantValue: int 35
+
+
+  public static final int AXIS_GENERIC_5;
+    Signature: I
+    flags: ACC_PUBLIC, ACC_STATIC, ACC_FINAL
+    ConstantValue: int 36
+
+
+  public static final int AXIS_GENERIC_6;
+    Signature: I
+    flags: ACC_PUBLIC, ACC_STATIC, ACC_FINAL
+    ConstantValue: int 37
+
+
+  public static final int AXIS_GENERIC_7;
+    Signature: I
+    flags: ACC_PUBLIC, ACC_STATIC, ACC_FINAL
+    ConstantValue: int 38
+
+
+  public static final int AXIS_GENERIC_8;
+    Signature: I
+    flags: ACC_PUBLIC, ACC_STATIC, ACC_FINAL
+    ConstantValue: int 39
+
+
+  public static final int AXIS_GENERIC_9;
+    Signature: I
+    flags: ACC_PUBLIC, ACC_STATIC, ACC_FINAL
+    ConstantValue: int 40
+
+
+  public static final int AXIS_GENERIC_10;
+    Signature: I
+    flags: ACC_PUBLIC, ACC_STATIC, ACC_FINAL
+    ConstantValue: int 41
+
+
+  public static final int AXIS_GENERIC_11;
+    Signature: I
+    flags: ACC_PUBLIC, ACC_STATIC, ACC_FINAL
+    ConstantValue: int 42
+
+
+  public static final int AXIS_GENERIC_12;
+    Signature: I
+    flags: ACC_PUBLIC, ACC_STATIC, ACC_FINAL
+    ConstantValue: int 43
+
+
+  public static final int AXIS_GENERIC_13;
+    Signature: I
+    flags: ACC_PUBLIC, ACC_STATIC, ACC_FINAL
+    ConstantValue: int 44
+
+
+  public static final int AXIS_GENERIC_14;
+    Signature: I
+    flags: ACC_PUBLIC, ACC_STATIC, ACC_FINAL
+    ConstantValue: int 45
+
+
+  public static final int AXIS_GENERIC_15;
+    Signature: I
+    flags: ACC_PUBLIC, ACC_STATIC, ACC_FINAL
+    ConstantValue: int 46
+
+
+  public static final int AXIS_GENERIC_16;
+    Signature: I
+    flags: ACC_PUBLIC, ACC_STATIC, ACC_FINAL
+    ConstantValue: int 47
+
+
+  public static final int BUTTON_PRIMARY;
+    Signature: I
+    flags: ACC_PUBLIC, ACC_STATIC, ACC_FINAL
+    ConstantValue: int 1
+
+
+  public static final int BUTTON_SECONDARY;
+    Signature: I
+    flags: ACC_PUBLIC, ACC_STATIC, ACC_FINAL
+    ConstantValue: int 2
+
+
+  public static final int BUTTON_TERTIARY;
+    Signature: I
+    flags: ACC_PUBLIC, ACC_STATIC, ACC_FINAL
+    ConstantValue: int 4
+
+
+  public static final int BUTTON_BACK;
+    Signature: I
+    flags: ACC_PUBLIC, ACC_STATIC, ACC_FINAL
+    ConstantValue: int 8
+
+
+  public static final int BUTTON_FORWARD;
+    Signature: I
+    flags: ACC_PUBLIC, ACC_STATIC, ACC_FINAL
+    ConstantValue: int 16
+
+
+  public static final int TOOL_TYPE_UNKNOWN;
+    Signature: I
+    flags: ACC_PUBLIC, ACC_STATIC, ACC_FINAL
+    ConstantValue: int 0
+
+
+  public static final int TOOL_TYPE_FINGER;
+    Signature: I
+    flags: ACC_PUBLIC, ACC_STATIC, ACC_FINAL
+    ConstantValue: int 1
+
+
+  public static final int TOOL_TYPE_STYLUS;
+    Signature: I
+    flags: ACC_PUBLIC, ACC_STATIC, ACC_FINAL
+    ConstantValue: int 2
+
+
+  public static final int TOOL_TYPE_MOUSE;
+    Signature: I
+    flags: ACC_PUBLIC, ACC_STATIC, ACC_FINAL
+    ConstantValue: int 3
+
+
+  public static final int TOOL_TYPE_ERASER;
+    Signature: I
+    flags: ACC_PUBLIC, ACC_STATIC, ACC_FINAL
+    ConstantValue: int 4
+
+
+  public static final android.os.Parcelable$Creator<android.view.MotionEvent> CREATOR;
+    Signature: Landroid/os/Parcelable$Creator;
+    flags: ACC_PUBLIC, ACC_STATIC, ACC_FINAL
+    Signature: #153                         // Landroid/os/Parcelable$Creator<Landroid/view/MotionEvent;>;
+
+
+  android.view.MotionEvent();
+    Signature: ()V
+    flags:
+    Code:
+      stack=3, locals=1, args_size=1
+         0: aload_0
+         1: invokespecial #1                  // Method android/view/InputEvent."<init>":()V
+         4: new           #2                  // class java/lang/RuntimeException
+         7: dup
+         8: ldc           #3                  // String Stub!
+        10: invokespecial #4                  // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+        13: athrow
+      LineNumberTable:
+        line 35: 0
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+               0      14     0  this   Landroid/view/MotionEvent;
+
+  protected void finalize() throws java.lang.Throwable;
+    Signature: ()V
+    flags: ACC_PROTECTED
+    Code:
+      stack=3, locals=1, args_size=1
+         0: new           #2                  // class java/lang/RuntimeException
+         3: dup
+         4: ldc           #3                  // String Stub!
+         6: invokespecial #4                  // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         9: athrow
+      LineNumberTable:
+        line 36: 0
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+               0      10     0  this   Landroid/view/MotionEvent;
+    Exceptions:
+      throws java.lang.Throwable
+
+  public static android.view.MotionEvent obtain(long, long, int, int, android.view.MotionEvent$PointerProperties[], android.view.MotionEvent$PointerCoords[], int, int, float, float, int, int, int, int);
+    Signature: (JJII[Landroid/view/MotionEvent$PointerProperties;[Landroid/view/MotionEvent$PointerCoords;IIFFIIII)Landroid/view/MotionEvent;
+    flags: ACC_PUBLIC, ACC_STATIC
+    Code:
+      stack=3, locals=16, args_size=14
+         0: new           #2                  // class java/lang/RuntimeException
+         3: dup
+         4: ldc           #3                  // String Stub!
+         6: invokespecial #4                  // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         9: athrow
+      LineNumberTable:
+        line 37: 0
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+               0      10     0 downTime   J
+               0      10     2 eventTime   J
+               0      10     4 action   I
+               0      10     5 pointerCount   I
+               0      10     6 pointerProperties   [Landroid/view/MotionEvent$PointerProperties;
+               0      10     7 pointerCoords   [Landroid/view/MotionEvent$PointerCoords;
+               0      10     8 metaState   I
+               0      10     9 buttonState   I
+               0      10    10 xPrecision   F
+               0      10    11 yPrecision   F
+               0      10    12 deviceId   I
+               0      10    13 edgeFlags   I
+               0      10    14 source   I
+               0      10    15 flags   I
+
+  public static android.view.MotionEvent obtain(long, long, int, int, int[], android.view.MotionEvent$PointerCoords[], int, float, float, int, int, int, int);
+    Signature: (JJII[I[Landroid/view/MotionEvent$PointerCoords;IFFIIII)Landroid/view/MotionEvent;
+    flags: ACC_PUBLIC, ACC_STATIC
+    Code:
+      stack=3, locals=15, args_size=13
+         0: new           #2                  // class java/lang/RuntimeException
+         3: dup
+         4: ldc           #3                  // String Stub!
+         6: invokespecial #4                  // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         9: athrow
+      LineNumberTable:
+        line 39: 0
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+               0      10     0 downTime   J
+               0      10     2 eventTime   J
+               0      10     4 action   I
+               0      10     5 pointerCount   I
+               0      10     6 pointerIds   [I
+               0      10     7 pointerCoords   [Landroid/view/MotionEvent$PointerCoords;
+               0      10     8 metaState   I
+               0      10     9 xPrecision   F
+               0      10    10 yPrecision   F
+               0      10    11 deviceId   I
+               0      10    12 edgeFlags   I
+               0      10    13 source   I
+               0      10    14 flags   I
+    Deprecated: true
+    RuntimeVisibleAnnotations:
+      0: #48()
+
+  public static android.view.MotionEvent obtain(long, long, int, float, float, float, float, int, float, float, int, int);
+    Signature: (JJIFFFFIFFII)Landroid/view/MotionEvent;
+    flags: ACC_PUBLIC, ACC_STATIC
+    Code:
+      stack=3, locals=14, args_size=12
+         0: new           #2                  // class java/lang/RuntimeException
+         3: dup
+         4: ldc           #3                  // String Stub!
+         6: invokespecial #4                  // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         9: athrow
+      LineNumberTable:
+        line 40: 0
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+               0      10     0 downTime   J
+               0      10     2 eventTime   J
+               0      10     4 action   I
+               0      10     5     x   F
+               0      10     6     y   F
+               0      10     7 pressure   F
+               0      10     8  size   F
+               0      10     9 metaState   I
+               0      10    10 xPrecision   F
+               0      10    11 yPrecision   F
+               0      10    12 deviceId   I
+               0      10    13 edgeFlags   I
+
+  public static android.view.MotionEvent obtain(long, long, int, int, float, float, float, float, int, float, float, int, int);
+    Signature: (JJIIFFFFIFFII)Landroid/view/MotionEvent;
+    flags: ACC_PUBLIC, ACC_STATIC
+    Code:
+      stack=3, locals=15, args_size=13
+         0: new           #2                  // class java/lang/RuntimeException
+         3: dup
+         4: ldc           #3                  // String Stub!
+         6: invokespecial #4                  // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         9: athrow
+      LineNumberTable:
+        line 42: 0
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+               0      10     0 downTime   J
+               0      10     2 eventTime   J
+               0      10     4 action   I
+               0      10     5 pointerCount   I
+               0      10     6     x   F
+               0      10     7     y   F
+               0      10     8 pressure   F
+               0      10     9  size   F
+               0      10    10 metaState   I
+               0      10    11 xPrecision   F
+               0      10    12 yPrecision   F
+               0      10    13 deviceId   I
+               0      10    14 edgeFlags   I
+    Deprecated: true
+    RuntimeVisibleAnnotations:
+      0: #48()
+
+  public static android.view.MotionEvent obtain(long, long, int, float, float, int);
+    Signature: (JJIFFI)Landroid/view/MotionEvent;
+    flags: ACC_PUBLIC, ACC_STATIC
+    Code:
+      stack=3, locals=8, args_size=6
+         0: new           #2                  // class java/lang/RuntimeException
+         3: dup
+         4: ldc           #3                  // String Stub!
+         6: invokespecial #4                  // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         9: athrow
+      LineNumberTable:
+        line 43: 0
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+               0      10     0 downTime   J
+               0      10     2 eventTime   J
+               0      10     4 action   I
+               0      10     5     x   F
+               0      10     6     y   F
+               0      10     7 metaState   I
+
+  public static android.view.MotionEvent obtain(android.view.MotionEvent);
+    Signature: (Landroid/view/MotionEvent;)Landroid/view/MotionEvent;
+    flags: ACC_PUBLIC, ACC_STATIC
+    Code:
+      stack=3, locals=1, args_size=1
+         0: new           #2                  // class java/lang/RuntimeException
+         3: dup
+         4: ldc           #3                  // String Stub!
+         6: invokespecial #4                  // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         9: athrow
+      LineNumberTable:
+        line 44: 0
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+               0      10     0 other   Landroid/view/MotionEvent;
+
+  public static android.view.MotionEvent obtainNoHistory(android.view.MotionEvent);
+    Signature: (Landroid/view/MotionEvent;)Landroid/view/MotionEvent;
+    flags: ACC_PUBLIC, ACC_STATIC
+    Code:
+      stack=3, locals=1, args_size=1
+         0: new           #2                  // class java/lang/RuntimeException
+         3: dup
+         4: ldc           #3                  // String Stub!
+         6: invokespecial #4                  // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         9: athrow
+      LineNumberTable:
+        line 45: 0
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+               0      10     0 other   Landroid/view/MotionEvent;
+
+  public final void recycle();
+    Signature: ()V
+    flags: ACC_PUBLIC, ACC_FINAL
+    Code:
+      stack=3, locals=1, args_size=1
+         0: new           #2                  // class java/lang/RuntimeException
+         3: dup
+         4: ldc           #3                  // String Stub!
+         6: invokespecial #4                  // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         9: athrow
+      LineNumberTable:
+        line 46: 0
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+               0      10     0  this   Landroid/view/MotionEvent;
+
+  public final int getDeviceId();
+    Signature: ()I
+    flags: ACC_PUBLIC, ACC_FINAL
+    Code:
+      stack=3, locals=1, args_size=1
+         0: new           #2                  // class java/lang/RuntimeException
+         3: dup
+         4: ldc           #3                  // String Stub!
+         6: invokespecial #4                  // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         9: athrow
+      LineNumberTable:
+        line 47: 0
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+               0      10     0  this   Landroid/view/MotionEvent;
+
+  public final int getSource();
+    Signature: ()I
+    flags: ACC_PUBLIC, ACC_FINAL
+    Code:
+      stack=3, locals=1, args_size=1
+         0: new           #2                  // class java/lang/RuntimeException
+         3: dup
+         4: ldc           #3                  // String Stub!
+         6: invokespecial #4                  // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         9: athrow
+      LineNumberTable:
+        line 48: 0
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+               0      10     0  this   Landroid/view/MotionEvent;
+
+  public final void setSource(int);
+    Signature: (I)V
+    flags: ACC_PUBLIC, ACC_FINAL
+    Code:
+      stack=3, locals=2, args_size=2
+         0: new           #2                  // class java/lang/RuntimeException
+         3: dup
+         4: ldc           #3                  // String Stub!
+         6: invokespecial #4                  // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         9: athrow
+      LineNumberTable:
+        line 49: 0
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+               0      10     0  this   Landroid/view/MotionEvent;
+               0      10     1 source   I
+
+  public final int getAction();
+    Signature: ()I
+    flags: ACC_PUBLIC, ACC_FINAL
+    Code:
+      stack=3, locals=1, args_size=1
+         0: new           #2                  // class java/lang/RuntimeException
+         3: dup
+         4: ldc           #3                  // String Stub!
+         6: invokespecial #4                  // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         9: athrow
+      LineNumberTable:
+        line 50: 0
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+               0      10     0  this   Landroid/view/MotionEvent;
+
+  public final int getActionMasked();
+    Signature: ()I
+    flags: ACC_PUBLIC, ACC_FINAL
+    Code:
+      stack=3, locals=1, args_size=1
+         0: new           #2                  // class java/lang/RuntimeException
+         3: dup
+         4: ldc           #3                  // String Stub!
+         6: invokespecial #4                  // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         9: athrow
+      LineNumberTable:
+        line 51: 0
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+               0      10     0  this   Landroid/view/MotionEvent;
+
+  public final int getActionIndex();
+    Signature: ()I
+    flags: ACC_PUBLIC, ACC_FINAL
+    Code:
+      stack=3, locals=1, args_size=1
+         0: new           #2                  // class java/lang/RuntimeException
+         3: dup
+         4: ldc           #3                  // String Stub!
+         6: invokespecial #4                  // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         9: athrow
+      LineNumberTable:
+        line 52: 0
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+               0      10     0  this   Landroid/view/MotionEvent;
+
+  public final int getFlags();
+    Signature: ()I
+    flags: ACC_PUBLIC, ACC_FINAL
+    Code:
+      stack=3, locals=1, args_size=1
+         0: new           #2                  // class java/lang/RuntimeException
+         3: dup
+         4: ldc           #3                  // String Stub!
+         6: invokespecial #4                  // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         9: athrow
+      LineNumberTable:
+        line 53: 0
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+               0      10     0  this   Landroid/view/MotionEvent;
+
+  public final long getDownTime();
+    Signature: ()J
+    flags: ACC_PUBLIC, ACC_FINAL
+    Code:
+      stack=3, locals=1, args_size=1
+         0: new           #2                  // class java/lang/RuntimeException
+         3: dup
+         4: ldc           #3                  // String Stub!
+         6: invokespecial #4                  // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         9: athrow
+      LineNumberTable:
+        line 54: 0
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+               0      10     0  this   Landroid/view/MotionEvent;
+
+  public final long getEventTime();
+    Signature: ()J
+    flags: ACC_PUBLIC, ACC_FINAL
+    Code:
+      stack=3, locals=1, args_size=1
+         0: new           #2                  // class java/lang/RuntimeException
+         3: dup
+         4: ldc           #3                  // String Stub!
+         6: invokespecial #4                  // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         9: athrow
+      LineNumberTable:
+        line 55: 0
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+               0      10     0  this   Landroid/view/MotionEvent;
+
+  public final float getX();
+    Signature: ()F
+    flags: ACC_PUBLIC, ACC_FINAL
+    Code:
+      stack=3, locals=1, args_size=1
+         0: new           #2                  // class java/lang/RuntimeException
+         3: dup
+         4: ldc           #3                  // String Stub!
+         6: invokespecial #4                  // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         9: athrow
+      LineNumberTable:
+        line 56: 0
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+               0      10     0  this   Landroid/view/MotionEvent;
+
+  public final float getY();
+    Signature: ()F
+    flags: ACC_PUBLIC, ACC_FINAL
+    Code:
+      stack=3, locals=1, args_size=1
+         0: new           #2                  // class java/lang/RuntimeException
+         3: dup
+         4: ldc           #3                  // String Stub!
+         6: invokespecial #4                  // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         9: athrow
+      LineNumberTable:
+        line 57: 0
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+               0      10     0  this   Landroid/view/MotionEvent;
+
+  public final float getPressure();
+    Signature: ()F
+    flags: ACC_PUBLIC, ACC_FINAL
+    Code:
+      stack=3, locals=1, args_size=1
+         0: new           #2                  // class java/lang/RuntimeException
+         3: dup
+         4: ldc           #3                  // String Stub!
+         6: invokespecial #4                  // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         9: athrow
+      LineNumberTable:
+        line 58: 0
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+               0      10     0  this   Landroid/view/MotionEvent;
+
+  public final float getSize();
+    Signature: ()F
+    flags: ACC_PUBLIC, ACC_FINAL
+    Code:
+      stack=3, locals=1, args_size=1
+         0: new           #2                  // class java/lang/RuntimeException
+         3: dup
+         4: ldc           #3                  // String Stub!
+         6: invokespecial #4                  // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         9: athrow
+      LineNumberTable:
+        line 59: 0
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+               0      10     0  this   Landroid/view/MotionEvent;
+
+  public final float getTouchMajor();
+    Signature: ()F
+    flags: ACC_PUBLIC, ACC_FINAL
+    Code:
+      stack=3, locals=1, args_size=1
+         0: new           #2                  // class java/lang/RuntimeException
+         3: dup
+         4: ldc           #3                  // String Stub!
+         6: invokespecial #4                  // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         9: athrow
+      LineNumberTable:
+        line 60: 0
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+               0      10     0  this   Landroid/view/MotionEvent;
+
+  public final float getTouchMinor();
+    Signature: ()F
+    flags: ACC_PUBLIC, ACC_FINAL
+    Code:
+      stack=3, locals=1, args_size=1
+         0: new           #2                  // class java/lang/RuntimeException
+         3: dup
+         4: ldc           #3                  // String Stub!
+         6: invokespecial #4                  // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         9: athrow
+      LineNumberTable:
+        line 61: 0
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+               0      10     0  this   Landroid/view/MotionEvent;
+
+  public final float getToolMajor();
+    Signature: ()F
+    flags: ACC_PUBLIC, ACC_FINAL
+    Code:
+      stack=3, locals=1, args_size=1
+         0: new           #2                  // class java/lang/RuntimeException
+         3: dup
+         4: ldc           #3                  // String Stub!
+         6: invokespecial #4                  // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         9: athrow
+      LineNumberTable:
+        line 62: 0
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+               0      10     0  this   Landroid/view/MotionEvent;
+
+  public final float getToolMinor();
+    Signature: ()F
+    flags: ACC_PUBLIC, ACC_FINAL
+    Code:
+      stack=3, locals=1, args_size=1
+         0: new           #2                  // class java/lang/RuntimeException
+         3: dup
+         4: ldc           #3                  // String Stub!
+         6: invokespecial #4                  // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         9: athrow
+      LineNumberTable:
+        line 63: 0
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+               0      10     0  this   Landroid/view/MotionEvent;
+
+  public final float getOrientation();
+    Signature: ()F
+    flags: ACC_PUBLIC, ACC_FINAL
+    Code:
+      stack=3, locals=1, args_size=1
+         0: new           #2                  // class java/lang/RuntimeException
+         3: dup
+         4: ldc           #3                  // String Stub!
+         6: invokespecial #4                  // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         9: athrow
+      LineNumberTable:
+        line 64: 0
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+               0      10     0  this   Landroid/view/MotionEvent;
+
+  public final float getAxisValue(int);
+    Signature: (I)F
+    flags: ACC_PUBLIC, ACC_FINAL
+    Code:
+      stack=3, locals=2, args_size=2
+         0: new           #2                  // class java/lang/RuntimeException
+         3: dup
+         4: ldc           #3                  // String Stub!
+         6: invokespecial #4                  // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         9: athrow
+      LineNumberTable:
+        line 65: 0
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+               0      10     0  this   Landroid/view/MotionEvent;
+               0      10     1  axis   I
+
+  public final int getPointerCount();
+    Signature: ()I
+    flags: ACC_PUBLIC, ACC_FINAL
+    Code:
+      stack=3, locals=1, args_size=1
+         0: new           #2                  // class java/lang/RuntimeException
+         3: dup
+         4: ldc           #3                  // String Stub!
+         6: invokespecial #4                  // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         9: athrow
+      LineNumberTable:
+        line 66: 0
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+               0      10     0  this   Landroid/view/MotionEvent;
+
+  public final int getPointerId(int);
+    Signature: (I)I
+    flags: ACC_PUBLIC, ACC_FINAL
+    Code:
+      stack=3, locals=2, args_size=2
+         0: new           #2                  // class java/lang/RuntimeException
+         3: dup
+         4: ldc           #3                  // String Stub!
+         6: invokespecial #4                  // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         9: athrow
+      LineNumberTable:
+        line 67: 0
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+               0      10     0  this   Landroid/view/MotionEvent;
+               0      10     1 pointerIndex   I
+
+  public final int getToolType(int);
+    Signature: (I)I
+    flags: ACC_PUBLIC, ACC_FINAL
+    Code:
+      stack=3, locals=2, args_size=2
+         0: new           #2                  // class java/lang/RuntimeException
+         3: dup
+         4: ldc           #3                  // String Stub!
+         6: invokespecial #4                  // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         9: athrow
+      LineNumberTable:
+        line 68: 0
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+               0      10     0  this   Landroid/view/MotionEvent;
+               0      10     1 pointerIndex   I
+
+  public final int findPointerIndex(int);
+    Signature: (I)I
+    flags: ACC_PUBLIC, ACC_FINAL
+    Code:
+      stack=3, locals=2, args_size=2
+         0: new           #2                  // class java/lang/RuntimeException
+         3: dup
+         4: ldc           #3                  // String Stub!
+         6: invokespecial #4                  // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         9: athrow
+      LineNumberTable:
+        line 69: 0
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+               0      10     0  this   Landroid/view/MotionEvent;
+               0      10     1 pointerId   I
+
+  public final float getX(int);
+    Signature: (I)F
+    flags: ACC_PUBLIC, ACC_FINAL
+    Code:
+      stack=3, locals=2, args_size=2
+         0: new           #2                  // class java/lang/RuntimeException
+         3: dup
+         4: ldc           #3                  // String Stub!
+         6: invokespecial #4                  // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         9: athrow
+      LineNumberTable:
+        line 70: 0
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+               0      10     0  this   Landroid/view/MotionEvent;
+               0      10     1 pointerIndex   I
+
+  public final float getY(int);
+    Signature: (I)F
+    flags: ACC_PUBLIC, ACC_FINAL
+    Code:
+      stack=3, locals=2, args_size=2
+         0: new           #2                  // class java/lang/RuntimeException
+         3: dup
+         4: ldc           #3                  // String Stub!
+         6: invokespecial #4                  // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         9: athrow
+      LineNumberTable:
+        line 71: 0
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+               0      10     0  this   Landroid/view/MotionEvent;
+               0      10     1 pointerIndex   I
+
+  public final float getPressure(int);
+    Signature: (I)F
+    flags: ACC_PUBLIC, ACC_FINAL
+    Code:
+      stack=3, locals=2, args_size=2
+         0: new           #2                  // class java/lang/RuntimeException
+         3: dup
+         4: ldc           #3                  // String Stub!
+         6: invokespecial #4                  // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         9: athrow
+      LineNumberTable:
+        line 72: 0
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+               0      10     0  this   Landroid/view/MotionEvent;
+               0      10     1 pointerIndex   I
+
+  public final float getSize(int);
+    Signature: (I)F
+    flags: ACC_PUBLIC, ACC_FINAL
+    Code:
+      stack=3, locals=2, args_size=2
+         0: new           #2                  // class java/lang/RuntimeException
+         3: dup
+         4: ldc           #3                  // String Stub!
+         6: invokespecial #4                  // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         9: athrow
+      LineNumberTable:
+        line 73: 0
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+               0      10     0  this   Landroid/view/MotionEvent;
+               0      10     1 pointerIndex   I
+
+  public final float getTouchMajor(int);
+    Signature: (I)F
+    flags: ACC_PUBLIC, ACC_FINAL
+    Code:
+      stack=3, locals=2, args_size=2
+         0: new           #2                  // class java/lang/RuntimeException
+         3: dup
+         4: ldc           #3                  // String Stub!
+         6: invokespecial #4                  // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         9: athrow
+      LineNumberTable:
+        line 74: 0
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+               0      10     0  this   Landroid/view/MotionEvent;
+               0      10     1 pointerIndex   I
+
+  public final float getTouchMinor(int);
+    Signature: (I)F
+    flags: ACC_PUBLIC, ACC_FINAL
+    Code:
+      stack=3, locals=2, args_size=2
+         0: new           #2                  // class java/lang/RuntimeException
+         3: dup
+         4: ldc           #3                  // String Stub!
+         6: invokespecial #4                  // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         9: athrow
+      LineNumberTable:
+        line 75: 0
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+               0      10     0  this   Landroid/view/MotionEvent;
+               0      10     1 pointerIndex   I
+
+  public final float getToolMajor(int);
+    Signature: (I)F
+    flags: ACC_PUBLIC, ACC_FINAL
+    Code:
+      stack=3, locals=2, args_size=2
+         0: new           #2                  // class java/lang/RuntimeException
+         3: dup
+         4: ldc           #3                  // String Stub!
+         6: invokespecial #4                  // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         9: athrow
+      LineNumberTable:
+        line 76: 0
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+               0      10     0  this   Landroid/view/MotionEvent;
+               0      10     1 pointerIndex   I
+
+  public final float getToolMinor(int);
+    Signature: (I)F
+    flags: ACC_PUBLIC, ACC_FINAL
+    Code:
+      stack=3, locals=2, args_size=2
+         0: new           #2                  // class java/lang/RuntimeException
+         3: dup
+         4: ldc           #3                  // String Stub!
+         6: invokespecial #4                  // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         9: athrow
+      LineNumberTable:
+        line 77: 0
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+               0      10     0  this   Landroid/view/MotionEvent;
+               0      10     1 pointerIndex   I
+
+  public final float getOrientation(int);
+    Signature: (I)F
+    flags: ACC_PUBLIC, ACC_FINAL
+    Code:
+      stack=3, locals=2, args_size=2
+         0: new           #2                  // class java/lang/RuntimeException
+         3: dup
+         4: ldc           #3                  // String Stub!
+         6: invokespecial #4                  // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         9: athrow
+      LineNumberTable:
+        line 78: 0
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+               0      10     0  this   Landroid/view/MotionEvent;
+               0      10     1 pointerIndex   I
+
+  public final float getAxisValue(int, int);
+    Signature: (II)F
+    flags: ACC_PUBLIC, ACC_FINAL
+    Code:
+      stack=3, locals=3, args_size=3
+         0: new           #2                  // class java/lang/RuntimeException
+         3: dup
+         4: ldc           #3                  // String Stub!
+         6: invokespecial #4                  // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         9: athrow
+      LineNumberTable:
+        line 79: 0
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+               0      10     0  this   Landroid/view/MotionEvent;
+               0      10     1  axis   I
+               0      10     2 pointerIndex   I
+
+  public final void getPointerCoords(int, android.view.MotionEvent$PointerCoords);
+    Signature: (ILandroid/view/MotionEvent$PointerCoords;)V
+    flags: ACC_PUBLIC, ACC_FINAL
+    Code:
+      stack=3, locals=3, args_size=3
+         0: new           #2                  // class java/lang/RuntimeException
+         3: dup
+         4: ldc           #3                  // String Stub!
+         6: invokespecial #4                  // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         9: athrow
+      LineNumberTable:
+        line 80: 0
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+               0      10     0  this   Landroid/view/MotionEvent;
+               0      10     1 pointerIndex   I
+               0      10     2 outPointerCoords   Landroid/view/MotionEvent$PointerCoords;
+
+  public final void getPointerProperties(int, android.view.MotionEvent$PointerProperties);
+    Signature: (ILandroid/view/MotionEvent$PointerProperties;)V
+    flags: ACC_PUBLIC, ACC_FINAL
+    Code:
+      stack=3, locals=3, args_size=3
+         0: new           #2                  // class java/lang/RuntimeException
+         3: dup
+         4: ldc           #3                  // String Stub!
+         6: invokespecial #4                  // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         9: athrow
+      LineNumberTable:
+        line 81: 0
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+               0      10     0  this   Landroid/view/MotionEvent;
+               0      10     1 pointerIndex   I
+               0      10     2 outPointerProperties   Landroid/view/MotionEvent$PointerProperties;
+
+  public final int getMetaState();
+    Signature: ()I
+    flags: ACC_PUBLIC, ACC_FINAL
+    Code:
+      stack=3, locals=1, args_size=1
+         0: new           #2                  // class java/lang/RuntimeException
+         3: dup
+         4: ldc           #3                  // String Stub!
+         6: invokespecial #4                  // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         9: athrow
+      LineNumberTable:
+        line 82: 0
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+               0      10     0  this   Landroid/view/MotionEvent;
+
+  public final int getButtonState();
+    Signature: ()I
+    flags: ACC_PUBLIC, ACC_FINAL
+    Code:
+      stack=3, locals=1, args_size=1
+         0: new           #2                  // class java/lang/RuntimeException
+         3: dup
+         4: ldc           #3                  // String Stub!
+         6: invokespecial #4                  // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         9: athrow
+      LineNumberTable:
+        line 83: 0
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+               0      10     0  this   Landroid/view/MotionEvent;
+
+  public final float getRawX();
+    Signature: ()F
+    flags: ACC_PUBLIC, ACC_FINAL
+    Code:
+      stack=3, locals=1, args_size=1
+         0: new           #2                  // class java/lang/RuntimeException
+         3: dup
+         4: ldc           #3                  // String Stub!
+         6: invokespecial #4                  // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         9: athrow
+      LineNumberTable:
+        line 84: 0
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+               0      10     0  this   Landroid/view/MotionEvent;
+
+  public final float getRawY();
+    Signature: ()F
+    flags: ACC_PUBLIC, ACC_FINAL
+    Code:
+      stack=3, locals=1, args_size=1
+         0: new           #2                  // class java/lang/RuntimeException
+         3: dup
+         4: ldc           #3                  // String Stub!
+         6: invokespecial #4                  // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         9: athrow
+      LineNumberTable:
+        line 85: 0
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+               0      10     0  this   Landroid/view/MotionEvent;
+
+  public final float getXPrecision();
+    Signature: ()F
+    flags: ACC_PUBLIC, ACC_FINAL
+    Code:
+      stack=3, locals=1, args_size=1
+         0: new           #2                  // class java/lang/RuntimeException
+         3: dup
+         4: ldc           #3                  // String Stub!
+         6: invokespecial #4                  // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         9: athrow
+      LineNumberTable:
+        line 86: 0
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+               0      10     0  this   Landroid/view/MotionEvent;
+
+  public final float getYPrecision();
+    Signature: ()F
+    flags: ACC_PUBLIC, ACC_FINAL
+    Code:
+      stack=3, locals=1, args_size=1
+         0: new           #2                  // class java/lang/RuntimeException
+         3: dup
+         4: ldc           #3                  // String Stub!
+         6: invokespecial #4                  // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         9: athrow
+      LineNumberTable:
+        line 87: 0
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+               0      10     0  this   Landroid/view/MotionEvent;
+
+  public final int getHistorySize();
+    Signature: ()I
+    flags: ACC_PUBLIC, ACC_FINAL
+    Code:
+      stack=3, locals=1, args_size=1
+         0: new           #2                  // class java/lang/RuntimeException
+         3: dup
+         4: ldc           #3                  // String Stub!
+         6: invokespecial #4                  // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         9: athrow
+      LineNumberTable:
+        line 88: 0
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+               0      10     0  this   Landroid/view/MotionEvent;
+
+  public final long getHistoricalEventTime(int);
+    Signature: (I)J
+    flags: ACC_PUBLIC, ACC_FINAL
+    Code:
+      stack=3, locals=2, args_size=2
+         0: new           #2                  // class java/lang/RuntimeException
+         3: dup
+         4: ldc           #3                  // String Stub!
+         6: invokespecial #4                  // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         9: athrow
+      LineNumberTable:
+        line 89: 0
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+               0      10     0  this   Landroid/view/MotionEvent;
+               0      10     1   pos   I
+
+  public final float getHistoricalX(int);
+    Signature: (I)F
+    flags: ACC_PUBLIC, ACC_FINAL
+    Code:
+      stack=3, locals=2, args_size=2
+         0: new           #2                  // class java/lang/RuntimeException
+         3: dup
+         4: ldc           #3                  // String Stub!
+         6: invokespecial #4                  // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         9: athrow
+      LineNumberTable:
+        line 90: 0
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+               0      10     0  this   Landroid/view/MotionEvent;
+               0      10     1   pos   I
+
+  public final float getHistoricalY(int);
+    Signature: (I)F
+    flags: ACC_PUBLIC, ACC_FINAL
+    Code:
+      stack=3, locals=2, args_size=2
+         0: new           #2                  // class java/lang/RuntimeException
+         3: dup
+         4: ldc           #3                  // String Stub!
+         6: invokespecial #4                  // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         9: athrow
+      LineNumberTable:
+        line 91: 0
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+               0      10     0  this   Landroid/view/MotionEvent;
+               0      10     1   pos   I
+
+  public final float getHistoricalPressure(int);
+    Signature: (I)F
+    flags: ACC_PUBLIC, ACC_FINAL
+    Code:
+      stack=3, locals=2, args_size=2
+         0: new           #2                  // class java/lang/RuntimeException
+         3: dup
+         4: ldc           #3                  // String Stub!
+         6: invokespecial #4                  // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         9: athrow
+      LineNumberTable:
+        line 92: 0
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+               0      10     0  this   Landroid/view/MotionEvent;
+               0      10     1   pos   I
+
+  public final float getHistoricalSize(int);
+    Signature: (I)F
+    flags: ACC_PUBLIC, ACC_FINAL
+    Code:
+      stack=3, locals=2, args_size=2
+         0: new           #2                  // class java/lang/RuntimeException
+         3: dup
+         4: ldc           #3                  // String Stub!
+         6: invokespecial #4                  // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         9: athrow
+      LineNumberTable:
+        line 93: 0
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+               0      10     0  this   Landroid/view/MotionEvent;
+               0      10     1   pos   I
+
+  public final float getHistoricalTouchMajor(int);
+    Signature: (I)F
+    flags: ACC_PUBLIC, ACC_FINAL
+    Code:
+      stack=3, locals=2, args_size=2
+         0: new           #2                  // class java/lang/RuntimeException
+         3: dup
+         4: ldc           #3                  // String Stub!
+         6: invokespecial #4                  // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         9: athrow
+      LineNumberTable:
+        line 94: 0
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+               0      10     0  this   Landroid/view/MotionEvent;
+               0      10     1   pos   I
+
+  public final float getHistoricalTouchMinor(int);
+    Signature: (I)F
+    flags: ACC_PUBLIC, ACC_FINAL
+    Code:
+      stack=3, locals=2, args_size=2
+         0: new           #2                  // class java/lang/RuntimeException
+         3: dup
+         4: ldc           #3                  // String Stub!
+         6: invokespecial #4                  // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         9: athrow
+      LineNumberTable:
+        line 95: 0
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+               0      10     0  this   Landroid/view/MotionEvent;
+               0      10     1   pos   I
+
+  public final float getHistoricalToolMajor(int);
+    Signature: (I)F
+    flags: ACC_PUBLIC, ACC_FINAL
+    Code:
+      stack=3, locals=2, args_size=2
+         0: new           #2                  // class java/lang/RuntimeException
+         3: dup
+         4: ldc           #3                  // String Stub!
+         6: invokespecial #4                  // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         9: athrow
+      LineNumberTable:
+        line 96: 0
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+               0      10     0  this   Landroid/view/MotionEvent;
+               0      10     1   pos   I
+
+  public final float getHistoricalToolMinor(int);
+    Signature: (I)F
+    flags: ACC_PUBLIC, ACC_FINAL
+    Code:
+      stack=3, locals=2, args_size=2
+         0: new           #2                  // class java/lang/RuntimeException
+         3: dup
+         4: ldc           #3                  // String Stub!
+         6: invokespecial #4                  // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         9: athrow
+      LineNumberTable:
+        line 97: 0
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+               0      10     0  this   Landroid/view/MotionEvent;
+               0      10     1   pos   I
+
+  public final float getHistoricalOrientation(int);
+    Signature: (I)F
+    flags: ACC_PUBLIC, ACC_FINAL
+    Code:
+      stack=3, locals=2, args_size=2
+         0: new           #2                  // class java/lang/RuntimeException
+         3: dup
+         4: ldc           #3                  // String Stub!
+         6: invokespecial #4                  // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         9: athrow
+      LineNumberTable:
+        line 98: 0
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+               0      10     0  this   Landroid/view/MotionEvent;
+               0      10     1   pos   I
+
+  public final float getHistoricalAxisValue(int, int);
+    Signature: (II)F
+    flags: ACC_PUBLIC, ACC_FINAL
+    Code:
+      stack=3, locals=3, args_size=3
+         0: new           #2                  // class java/lang/RuntimeException
+         3: dup
+         4: ldc           #3                  // String Stub!
+         6: invokespecial #4                  // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         9: athrow
+      LineNumberTable:
+        line 99: 0
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+               0      10     0  this   Landroid/view/MotionEvent;
+               0      10     1  axis   I
+               0      10     2   pos   I
+
+  public final float getHistoricalX(int, int);
+    Signature: (II)F
+    flags: ACC_PUBLIC, ACC_FINAL
+    Code:
+      stack=3, locals=3, args_size=3
+         0: new           #2                  // class java/lang/RuntimeException
+         3: dup
+         4: ldc           #3                  // String Stub!
+         6: invokespecial #4                  // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         9: athrow
+      LineNumberTable:
+        line 100: 0
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+               0      10     0  this   Landroid/view/MotionEvent;
+               0      10     1 pointerIndex   I
+               0      10     2   pos   I
+
+  public final float getHistoricalY(int, int);
+    Signature: (II)F
+    flags: ACC_PUBLIC, ACC_FINAL
+    Code:
+      stack=3, locals=3, args_size=3
+         0: new           #2                  // class java/lang/RuntimeException
+         3: dup
+         4: ldc           #3                  // String Stub!
+         6: invokespecial #4                  // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         9: athrow
+      LineNumberTable:
+        line 101: 0
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+               0      10     0  this   Landroid/view/MotionEvent;
+               0      10     1 pointerIndex   I
+               0      10     2   pos   I
+
+  public final float getHistoricalPressure(int, int);
+    Signature: (II)F
+    flags: ACC_PUBLIC, ACC_FINAL
+    Code:
+      stack=3, locals=3, args_size=3
+         0: new           #2                  // class java/lang/RuntimeException
+         3: dup
+         4: ldc           #3                  // String Stub!
+         6: invokespecial #4                  // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         9: athrow
+      LineNumberTable:
+        line 102: 0
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+               0      10     0  this   Landroid/view/MotionEvent;
+               0      10     1 pointerIndex   I
+               0      10     2   pos   I
+
+  public final float getHistoricalSize(int, int);
+    Signature: (II)F
+    flags: ACC_PUBLIC, ACC_FINAL
+    Code:
+      stack=3, locals=3, args_size=3
+         0: new           #2                  // class java/lang/RuntimeException
+         3: dup
+         4: ldc           #3                  // String Stub!
+         6: invokespecial #4                  // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         9: athrow
+      LineNumberTable:
+        line 103: 0
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+               0      10     0  this   Landroid/view/MotionEvent;
+               0      10     1 pointerIndex   I
+               0      10     2   pos   I
+
+  public final float getHistoricalTouchMajor(int, int);
+    Signature: (II)F
+    flags: ACC_PUBLIC, ACC_FINAL
+    Code:
+      stack=3, locals=3, args_size=3
+         0: new           #2                  // class java/lang/RuntimeException
+         3: dup
+         4: ldc           #3                  // String Stub!
+         6: invokespecial #4                  // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         9: athrow
+      LineNumberTable:
+        line 104: 0
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+               0      10     0  this   Landroid/view/MotionEvent;
+               0      10     1 pointerIndex   I
+               0      10     2   pos   I
+
+  public final float getHistoricalTouchMinor(int, int);
+    Signature: (II)F
+    flags: ACC_PUBLIC, ACC_FINAL
+    Code:
+      stack=3, locals=3, args_size=3
+         0: new           #2                  // class java/lang/RuntimeException
+         3: dup
+         4: ldc           #3                  // String Stub!
+         6: invokespecial #4                  // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         9: athrow
+      LineNumberTable:
+        line 105: 0
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+               0      10     0  this   Landroid/view/MotionEvent;
+               0      10     1 pointerIndex   I
+               0      10     2   pos   I
+
+  public final float getHistoricalToolMajor(int, int);
+    Signature: (II)F
+    flags: ACC_PUBLIC, ACC_FINAL
+    Code:
+      stack=3, locals=3, args_size=3
+         0: new           #2                  // class java/lang/RuntimeException
+         3: dup
+         4: ldc           #3                  // String Stub!
+         6: invokespecial #4                  // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         9: athrow
+      LineNumberTable:
+        line 106: 0
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+               0      10     0  this   Landroid/view/MotionEvent;
+               0      10     1 pointerIndex   I
+               0      10     2   pos   I
+
+  public final float getHistoricalToolMinor(int, int);
+    Signature: (II)F
+    flags: ACC_PUBLIC, ACC_FINAL
+    Code:
+      stack=3, locals=3, args_size=3
+         0: new           #2                  // class java/lang/RuntimeException
+         3: dup
+         4: ldc           #3                  // String Stub!
+         6: invokespecial #4                  // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         9: athrow
+      LineNumberTable:
+        line 107: 0
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+               0      10     0  this   Landroid/view/MotionEvent;
+               0      10     1 pointerIndex   I
+               0      10     2   pos   I
+
+  public final float getHistoricalOrientation(int, int);
+    Signature: (II)F
+    flags: ACC_PUBLIC, ACC_FINAL
+    Code:
+      stack=3, locals=3, args_size=3
+         0: new           #2                  // class java/lang/RuntimeException
+         3: dup
+         4: ldc           #3                  // String Stub!
+         6: invokespecial #4                  // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         9: athrow
+      LineNumberTable:
+        line 108: 0
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+               0      10     0  this   Landroid/view/MotionEvent;
+               0      10     1 pointerIndex   I
+               0      10     2   pos   I
+
+  public final float getHistoricalAxisValue(int, int, int);
+    Signature: (III)F
+    flags: ACC_PUBLIC, ACC_FINAL
+    Code:
+      stack=3, locals=4, args_size=4
+         0: new           #2                  // class java/lang/RuntimeException
+         3: dup
+         4: ldc           #3                  // String Stub!
+         6: invokespecial #4                  // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         9: athrow
+      LineNumberTable:
+        line 109: 0
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+               0      10     0  this   Landroid/view/MotionEvent;
+               0      10     1  axis   I
+               0      10     2 pointerIndex   I
+               0      10     3   pos   I
+
+  public final void getHistoricalPointerCoords(int, int, android.view.MotionEvent$PointerCoords);
+    Signature: (IILandroid/view/MotionEvent$PointerCoords;)V
+    flags: ACC_PUBLIC, ACC_FINAL
+    Code:
+      stack=3, locals=4, args_size=4
+         0: new           #2                  // class java/lang/RuntimeException
+         3: dup
+         4: ldc           #3                  // String Stub!
+         6: invokespecial #4                  // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         9: athrow
+      LineNumberTable:
+        line 110: 0
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+               0      10     0  this   Landroid/view/MotionEvent;
+               0      10     1 pointerIndex   I
+               0      10     2   pos   I
+               0      10     3 outPointerCoords   Landroid/view/MotionEvent$PointerCoords;
+
+  public final int getEdgeFlags();
+    Signature: ()I
+    flags: ACC_PUBLIC, ACC_FINAL
+    Code:
+      stack=3, locals=1, args_size=1
+         0: new           #2                  // class java/lang/RuntimeException
+         3: dup
+         4: ldc           #3                  // String Stub!
+         6: invokespecial #4                  // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         9: athrow
+      LineNumberTable:
+        line 111: 0
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+               0      10     0  this   Landroid/view/MotionEvent;
+
+  public final void setEdgeFlags(int);
+    Signature: (I)V
+    flags: ACC_PUBLIC, ACC_FINAL
+    Code:
+      stack=3, locals=2, args_size=2
+         0: new           #2                  // class java/lang/RuntimeException
+         3: dup
+         4: ldc           #3                  // String Stub!
+         6: invokespecial #4                  // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         9: athrow
+      LineNumberTable:
+        line 112: 0
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+               0      10     0  this   Landroid/view/MotionEvent;
+               0      10     1 flags   I
+
+  public final void setAction(int);
+    Signature: (I)V
+    flags: ACC_PUBLIC, ACC_FINAL
+    Code:
+      stack=3, locals=2, args_size=2
+         0: new           #2                  // class java/lang/RuntimeException
+         3: dup
+         4: ldc           #3                  // String Stub!
+         6: invokespecial #4                  // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         9: athrow
+      LineNumberTable:
+        line 113: 0
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+               0      10     0  this   Landroid/view/MotionEvent;
+               0      10     1 action   I
+
+  public final void offsetLocation(float, float);
+    Signature: (FF)V
+    flags: ACC_PUBLIC, ACC_FINAL
+    Code:
+      stack=3, locals=3, args_size=3
+         0: new           #2                  // class java/lang/RuntimeException
+         3: dup
+         4: ldc           #3                  // String Stub!
+         6: invokespecial #4                  // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         9: athrow
+      LineNumberTable:
+        line 114: 0
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+               0      10     0  this   Landroid/view/MotionEvent;
+               0      10     1 deltaX   F
+               0      10     2 deltaY   F
+
+  public final void setLocation(float, float);
+    Signature: (FF)V
+    flags: ACC_PUBLIC, ACC_FINAL
+    Code:
+      stack=3, locals=3, args_size=3
+         0: new           #2                  // class java/lang/RuntimeException
+         3: dup
+         4: ldc           #3                  // String Stub!
+         6: invokespecial #4                  // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         9: athrow
+      LineNumberTable:
+        line 115: 0
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+               0      10     0  this   Landroid/view/MotionEvent;
+               0      10     1     x   F
+               0      10     2     y   F
+
+  public final void transform(android.graphics.Matrix);
+    Signature: (Landroid/graphics/Matrix;)V
+    flags: ACC_PUBLIC, ACC_FINAL
+    Code:
+      stack=3, locals=2, args_size=2
+         0: new           #2                  // class java/lang/RuntimeException
+         3: dup
+         4: ldc           #3                  // String Stub!
+         6: invokespecial #4                  // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         9: athrow
+      LineNumberTable:
+        line 116: 0
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+               0      10     0  this   Landroid/view/MotionEvent;
+               0      10     1 matrix   Landroid/graphics/Matrix;
+
+  public final void addBatch(long, float, float, float, float, int);
+    Signature: (JFFFFI)V
+    flags: ACC_PUBLIC, ACC_FINAL
+    Code:
+      stack=3, locals=8, args_size=7
+         0: new           #2                  // class java/lang/RuntimeException
+         3: dup
+         4: ldc           #3                  // String Stub!
+         6: invokespecial #4                  // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         9: athrow
+      LineNumberTable:
+        line 117: 0
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+               0      10     0  this   Landroid/view/MotionEvent;
+               0      10     1 eventTime   J
+               0      10     3     x   F
+               0      10     4     y   F
+               0      10     5 pressure   F
+               0      10     6  size   F
+               0      10     7 metaState   I
+
+  public final void addBatch(long, android.view.MotionEvent$PointerCoords[], int);
+    Signature: (J[Landroid/view/MotionEvent$PointerCoords;I)V
+    flags: ACC_PUBLIC, ACC_FINAL
+    Code:
+      stack=3, locals=5, args_size=4
+         0: new           #2                  // class java/lang/RuntimeException
+         3: dup
+         4: ldc           #3                  // String Stub!
+         6: invokespecial #4                  // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         9: athrow
+      LineNumberTable:
+        line 118: 0
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+               0      10     0  this   Landroid/view/MotionEvent;
+               0      10     1 eventTime   J
+               0      10     3 pointerCoords   [Landroid/view/MotionEvent$PointerCoords;
+               0      10     4 metaState   I
+
+  public java.lang.String toString();
+    Signature: ()Ljava/lang/String;
+    flags: ACC_PUBLIC
+    Code:
+      stack=3, locals=1, args_size=1
+         0: new           #2                  // class java/lang/RuntimeException
+         3: dup
+         4: ldc           #3                  // String Stub!
+         6: invokespecial #4                  // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         9: athrow
+      LineNumberTable:
+        line 119: 0
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+               0      10     0  this   Landroid/view/MotionEvent;
+
+  public static java.lang.String actionToString(int);
+    Signature: (I)Ljava/lang/String;
+    flags: ACC_PUBLIC, ACC_STATIC
+    Code:
+      stack=3, locals=1, args_size=1
+         0: new           #2                  // class java/lang/RuntimeException
+         3: dup
+         4: ldc           #3                  // String Stub!
+         6: invokespecial #4                  // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         9: athrow
+      LineNumberTable:
+        line 120: 0
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+               0      10     0 action   I
+
+  public static java.lang.String axisToString(int);
+    Signature: (I)Ljava/lang/String;
+    flags: ACC_PUBLIC, ACC_STATIC
+    Code:
+      stack=3, locals=1, args_size=1
+         0: new           #2                  // class java/lang/RuntimeException
+         3: dup
+         4: ldc           #3                  // String Stub!
+         6: invokespecial #4                  // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         9: athrow
+      LineNumberTable:
+        line 121: 0
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+               0      10     0  axis   I
+
+  public static int axisFromString(java.lang.String);
+    Signature: (Ljava/lang/String;)I
+    flags: ACC_PUBLIC, ACC_STATIC
+    Code:
+      stack=3, locals=1, args_size=1
+         0: new           #2                  // class java/lang/RuntimeException
+         3: dup
+         4: ldc           #3                  // String Stub!
+         6: invokespecial #4                  // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         9: athrow
+      LineNumberTable:
+        line 122: 0
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+               0      10     0 symbolicName   Ljava/lang/String;
+
+  public void writeToParcel(android.os.Parcel, int);
+    Signature: (Landroid/os/Parcel;I)V
+    flags: ACC_PUBLIC
+    Code:
+      stack=3, locals=3, args_size=3
+         0: new           #2                  // class java/lang/RuntimeException
+         3: dup
+         4: ldc           #3                  // String Stub!
+         6: invokespecial #4                  // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         9: athrow
+      LineNumberTable:
+        line 123: 0
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+               0      10     0  this   Landroid/view/MotionEvent;
+               0      10     1   out   Landroid/os/Parcel;
+               0      10     2 flags   I
+
+  static {};
+    Signature: ()V
+    flags: ACC_STATIC
+    Code:
+      stack=1, locals=0, args_size=0
+         0: aconst_null
+         1: putstatic     #5                  // Field CREATOR:Landroid/os/Parcelable$Creator;
+         4: return
+      LineNumberTable:
+        line 213: 0
+}

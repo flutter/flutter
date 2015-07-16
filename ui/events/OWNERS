@@ -1,0 +1,6 @@
+sadrul@chromium.org
+per-file latency_info*=jbauman@chromium.org
+per-file latency_info*=miletus@chromium.org
+
+# If you're doing structural changes get a review from one of the OWNERS.
+per-file *.gyp*=*

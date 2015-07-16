@@ -1,0 +1,43 @@
+option optimize_for = LITE_RUNTIME;
+
+message ShaderVariableProto {
+  optional uint32 type = 1;
+  optional uint32 precision = 2;
+  optional string name = 3;
+  optional string mapped_name = 4;
+  optional uint32 array_size = 5;
+  optional bool static_use = 6;
+  repeated ShaderVariableProto fields = 7;
+  optional string struct_name = 8;
+}
+
+message ShaderAttributeProto {
+  optional ShaderVariableProto basic = 1;
+  optional int32 location = 2;
+}
+
+message ShaderUniformProto {
+  optional ShaderVariableProto basic = 1;
+}
+
+message ShaderVaryingProto {
+  optional ShaderVariableProto basic = 1;
+  optional int32 interpolation = 2;
+  optional bool is_invariant = 3;
+}
+
+message ShaderProto {
+  optional bytes sha = 1;
+  repeated ShaderAttributeProto attribs = 2;
+  repeated ShaderUniformProto uniforms = 3;
+  repeated ShaderVaryingProto varyings = 4;
+}
+
+message GpuProgramProto {
+  optional bytes sha = 1;
+  optional uint32 format = 2;
+  optional bytes program = 3;
+
+  optional ShaderProto vertex_shader = 4;
+  optional ShaderProto fragment_shader = 5;
+}

@@ -1,0 +1,4 @@
+TODOs:
+ - Optimize Buffer classes?
+ - Add compile-time asserts to verify object packing and padding.
+ - Investigate making arrays of objects not be arrays of pointers.

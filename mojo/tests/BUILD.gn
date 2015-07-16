@@ -1,0 +1,32 @@
+# Copyright 2015 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//testing/test.gni")
+import("//mojo/public/mojo.gni")
+
+test("mojo_task_tracker_perftests") {
+  deps = [
+    "//base/test:test_support",
+    "//mojo/common",
+    "//mojo/edk/system",
+    "//mojo/edk/test:test_support",
+    "//mojo/edk/test:test_support_impl",
+    "//mojo/environment:chromium",
+    "//mojo/public/c/test_support",
+    "//mojo/public/cpp/bindings",
+    "//mojo/public/cpp/bindings:callback",
+    "//mojo/public/cpp/environment",
+    "//mojo/public/cpp/system",
+    "//mojo/public/cpp/test_support:test_utils",
+    "//mojo/public/cpp/utility",
+    "//mojo/public/interfaces/bindings/tests:test_interfaces",
+    "//base",
+    "//testing/gtest",
+  ]
+
+  sources = [
+    "../edk/test/run_all_perftests.cc",
+    "task_tracker_perftest.cc",
+  ]
+}

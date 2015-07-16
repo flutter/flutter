@@ -1,0 +1,17 @@
+--- a/xdgmimecache.c
++++ b/xdgmimecache.c
+@@ -40,6 +40,8 @@
+ 
+ #include <netinet/in.h> /* for ntohl/ntohs */
+ 
++#define HAVE_MMAP 1
++
+ #ifdef HAVE_MMAP
+ #include <sys/mman.h>
+ #else
+@@ -1000,5 +1002,3 @@
+ 	    dump_glob_node (cache, offset + 20 * j, 0);
+   }
+ }
+-
+-

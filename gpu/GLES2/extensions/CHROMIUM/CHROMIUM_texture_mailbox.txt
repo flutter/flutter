@@ -1,0 +1,143 @@
+Name
+
+    CHROMIUM_texture_mailbox
+
+Name Strings
+
+    GL_CHROMIUM_texture_mailbox
+
+Version
+
+    Last Modifed Date: June 2, 2014
+
+Dependencies
+
+    OpenGL ES 2.0 is required.
+
+Overview
+
+    This extension defines a way of sharing texture image data between texture
+    objects in different contexts where the contexts would not normally share
+    texture resources. Five new functions are exported. glGenMailboxCHROMIUM
+    generates a name that can be used to identify texture image data outside
+    the scope of a context group. glProduceMailboxCHROMIUM and 
+    glProduceTextureDirectCHROMIUM associate a texture object with a global
+    mailbox name. glConsumeMailboxCHROMIUM and glCreateAndConsumeTextureCHROMIUM
+    associate the texture object referenced by a mailbox name to a texture name.
+
+New Procedures and Functions
+
+    void glGenMailboxCHROMIUM (GLbyte *mailbox)
+
+    Generates a unique name identifying a mailbox. The name is generated using
+    a cryptographic random number generator and is intended to be difficult to
+    guess. The scope of the name is implementation specific, for example it
+    might not span multiple displays.
+
+    <mailbox> returns a GL_MAILBOX_SIZE_CHROMIUM byte sized name
+
+
+    void glProduceTextureCHROMIUM (GLenum target, const GLbyte *mailbox)
+
+    Associates the currently bound texture object with the mailbox name. A
+    given texture object can be associated with several mailbox names. If a
+    mailbox name was previously associated with a texture object, that
+    previous association is broken. The currently bound texture object is not
+    modified by the operation.
+
+    If glProduceTextureCHROMIUM generates an error, the mailbox name keeps its
+    current association, if any.
+
+    The mailbox does not keep a reference to the texture object. When the
+    texture object is destroyed (deleted from all context groups, and unbound
+    from all texture units and framebuffer attachments), the mailbox is
+    disassociated from the texture object.
+
+    <target> uses the same parameters as TexImage2D.
+
+    <mailbox> identifies a GL_MAILBOX_SIZE_CHROMIUM byte sized name returned by
+    glGenMailboxCHROMIUM.
+
+    INVALID_OPERATION is generated if <target> is not a valid target.
+
+    INVALID_OPERATION is generated if <mailbox> is invalid.
+
+
+    void glProduceTextureDirectCHROMIUM (GLuint texture, GLenum target,
+        const GLbyte *mailbox)
+
+    Associates the specified texture object with the mailbox name. Performs
+    identically to glProduceTextureCHROMIUM except that the texture specified by
+    <texture> is used instead of the currently bound texture. This operation
+    does not change the texture bindings or alter the bound texture in any way.
+
+    <texture> Specifies the name of a texture.
+
+
+    void glConsumeTextureCHROMIUM (GLenum target, const GLbyte *mailbox)
+
+    <target> uses the same parameters as TexImage2D.
+
+    <mailbox> identifies a GL_MAILBOX_SIZE_CHROMIUM byte sized name returned by
+    glGenMailboxCHROMIUM.
+    
+    Deletes the currently bound texture object, and redefines its texture name
+    to point to the texture object associated with the mailbox name. All the
+    contexts that have consumed the texture object, as well as produced it share
+    the texture object, as if the contexts were part of the share group. The
+    texture object is deleted once all contexts have deleted the texture name
+    associated with the texture object, and detached it from all framebuffer
+    objects as well as texture unit bindings. See Appendix C of the OpenGL ES
+    2.0 specification for details relative to visibility in one context of
+    changes to the shared texture object in another context.
+
+    If glConsumeTextureCHROMIUM generates an error, the currently bound texture
+    object is preserved.
+
+    INVALID_OPERATION is generated if <target> is not a valid target.
+
+    INVALID_OPERATION is generated if <mailbox> is invalid.
+
+    INVALID_OPERATION is generated if <mailbox> is not associated with a texture
+    object.
+
+    INVALID_OPERATION is generated if the texture object associated with
+    <mailbox> has a different target than <target>.
+
+    INVALID_OPERATION is generated if the currently bound texture was previously
+    deleted (for example in another context), hence doesn't have a name.
+
+
+    GLuint glCreateAndConsumeTextureCHROMIUM (GLenum target,
+        const GLbyte *mailbox)
+    
+    Returns a new texture name associated with the given target pointing to the
+    texture object associated with the mailbox name. Does not alter the texture
+    bindings or alter the currently bound texture in any way. Otherwise performs
+    identically to glConsumeTextureCHROMIUM.
+
+New Tokens
+
+    The size of a mailbox name in bytes.
+
+        GL_MAILBOX_SIZE_CHROMIUM                             64
+
+Errors
+
+    None.
+
+New Tokens
+
+    None.
+
+New State
+
+    None.
+
+Revision History
+
+    4/25/2011    Documented the extension
+    5/23/2013    Major revision in Produce/Consume semantics, introducing
+                 sharing.
+    6/02/2014    Added glProduceTextureDirectCHROMIUM and
+                 glCreateAndConsumeTextureCHROMIUM definitions.

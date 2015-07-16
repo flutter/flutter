@@ -1,0 +1,75 @@
+# Copyright 2015 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Trusted code
+if (!is_nacl) {
+  # A simple shell for running untrusted binaries that talk to the Mojo
+  # embedder. (No services.)
+  executable("monacl_shell") {
+    testonly = true
+    sources = [
+      "monacl_shell.cc",
+    ]
+    deps = [
+      "//base:base",
+      "//mojo/edk/system:system",
+      "//nacl_bindings:monacl_sel",
+    ]
+
+    data_deps = [ "//nacl_bindings:irt_mojo(//native_client/build/toolchain/nacl:irt_${target_cpu})" ]
+  }
+}
+
+# Untrusted code
+if (is_nacl) {
+  # Unit test for the Mojo public API.
+  executable("monacl_test") {
+    testonly = true
+    sources = [
+      "//mojo/public/cpp/system/tests/core_unittest.cc",
+      "//mojo/public/cpp/system/tests/macros_unittest.cc",
+    ]
+    deps = [
+      "//mojo/public/c/system/tests:tests",
+      "//mojo/public/cpp/system:system",
+      "//mojo/public/platform/nacl:mojo",
+      "//testing/gtest:gtest",
+      "//testing/gtest:gtest_main",
+    ]
+  }
+
+  group("mojo_nacl_tests_untrusted") {
+    testonly = true
+    deps = [
+      ":monacl_test",
+      "//examples/apptest",
+      "//examples/wget",
+      "//services/clipboard",
+      "//services/clipboard:apptests",
+      "//services/files:apptests",
+
+      # TODO(ncbray): enable when NaCl has pthread rw locks.
+      #"//services/http_server",
+      "//services/http_server:apptests",
+      "//services/view_manager:mojo_view_manager_client_apptests",
+      "//services/view_manager:view_manager_service_apptests",
+      "//services/window_manager:window_manager_apptests",
+      "//shell:apptests",
+    ]
+  }
+}
+
+group("mojo_nacl") {
+  deps = [
+    "//services/nacl:nacl_content_handler",
+  ]
+}
+
+group("mojo_nacl_tests") {
+  testonly = true
+  deps = [
+    ":mojo_nacl_tests_untrusted(//native_client/build/toolchain/nacl:clang_newlib_${current_cpu})",
+    ":monacl_shell",
+  ]
+}

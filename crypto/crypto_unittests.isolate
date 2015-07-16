@@ -1,0 +1,72 @@
+# Copyright 2015 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+{
+  'conditions': [
+    ['OS=="linux"', {
+      'variables': {
+        'command': [
+          '../testing/xvfb.py',
+          '<(PRODUCT_DIR)',
+          '<(PRODUCT_DIR)/crypto_unittests<(EXECUTABLE_SUFFIX)',
+          '--brave-new-test-launcher',
+          '--test-launcher-bot-mode',
+          '--asan=<(asan)',
+          '--lsan=<(lsan)',
+          '--msan=<(msan)',
+          '--tsan=<(tsan)',
+        ],
+        'files': [
+          '../testing/xvfb.py',
+        ],
+      },
+    }],
+    ['OS=="linux" and use_ozone==0', {
+      'variables': {
+        'files': [
+          '<(PRODUCT_DIR)/xdisplaycheck<(EXECUTABLE_SUFFIX)',
+        ],
+      },
+    }],
+    ['OS=="linux" or OS=="mac" or OS=="win"', {
+      'variables': {
+        'files': [
+          '../testing/test_env.py',
+          '<(PRODUCT_DIR)/crypto_unittests<(EXECUTABLE_SUFFIX)',
+        ],
+        'read_only': 1,
+      },
+    }],
+    ['OS=="mac" or OS=="win"', {
+      'variables': {
+        'command': [
+          '../testing/test_env.py',
+          '<(PRODUCT_DIR)/crypto_unittests<(EXECUTABLE_SUFFIX)',
+          '--brave-new-test-launcher',
+          '--test-launcher-bot-mode',
+          '--asan=<(asan)',
+          '--lsan=<(lsan)',
+          '--msan=<(msan)',
+          '--tsan=<(tsan)',
+        ],
+      },
+    }],
+    ['OS=="mac" and asan==1 and fastbuild==0', {
+      'variables': {
+        'files': [
+          '<(PRODUCT_DIR)/crypto_unittests.dSYM/',
+        ],
+      },
+    }],
+    ['OS=="win" and (fastbuild==0 or fastbuild==1)', {
+      'variables': {
+        'files': [
+          '<(PRODUCT_DIR)/crypto_unittests.exe.pdb',
+        ],
+      },
+    }],
+  ],
+  'includes': [
+    '../base/base.isolate',
+  ],
+}

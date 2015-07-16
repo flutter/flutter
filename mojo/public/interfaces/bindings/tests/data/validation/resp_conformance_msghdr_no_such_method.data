@@ -1,0 +1,6 @@
+[dist4]message_header  // num_bytes
+[u4]1                  // version
+[u4]11                 // name: Method11 does not have a response message.
+[u4]2                  // flags: kMessageIsResponse
+[u8]1                  // request_id
+[anchr]message_header

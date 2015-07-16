@@ -1,0 +1,14 @@
+// Copyright 2014 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+module mojo;
+
+// Represents a TCP socket connected to a remote system.
+//
+// Reading and writing over the connection are done via the data pipe supplied
+// by the caller when creating the socket.
+interface TCPConnectedSocket {
+  // TODO(brettw) here we put options and what not for controlling the
+  // connection.
+};

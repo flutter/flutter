@@ -1,0 +1,50 @@
+cdef extern from "stdio.h":
+    int puts(char *s)
+
+cdef extern:
+    void some_c_function()
+
+import os
+
+cdef int c_var = 12
+python_var = 13
+
+def spam(a=0):
+    cdef:
+        int b, c
+    
+    b = c = d = 0
+    
+    b = 1
+    c = 2
+    int(10)
+    puts("spam")
+    os.path.join("foo", "bar")
+    some_c_function()
+
+cpdef eggs():
+    pass    
+    
+cdef ham():
+    pass
+    
+cdef class SomeClass(object):
+    def spam(self):
+        pass
+
+def outer():
+    cdef object a = "an object"
+    def inner():
+        b = 2
+        # access closed over variables
+        print a, b
+    return inner
+
+
+outer()()
+
+spam()
+print "bye!"
+
+def use_ham():
+    ham()

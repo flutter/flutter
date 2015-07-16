@@ -1,0 +1,70 @@
+# Copyright (c) 2015 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+source_set("memory") {
+  sources = [
+    "aligned_memory.cc",
+    "aligned_memory.h",
+    "discardable_memory.cc",
+    "discardable_memory.h",
+    "discardable_memory_allocator.cc",
+    "discardable_memory_allocator.h",
+    "discardable_shared_memory.cc",
+    "discardable_shared_memory.h",
+    "linked_ptr.h",
+    "manual_constructor.h",
+    "memory_pressure_listener.cc",
+    "memory_pressure_listener.h",
+    "memory_pressure_monitor.cc",
+    "memory_pressure_monitor.h",
+    "memory_pressure_monitor_chromeos.cc",
+    "memory_pressure_monitor_chromeos.h",
+    "memory_pressure_monitor_mac.cc",
+    "memory_pressure_monitor_mac.h",
+    "memory_pressure_monitor_win.cc",
+    "memory_pressure_monitor_win.h",
+    "raw_scoped_refptr_mismatch_checker.h",
+    "ref_counted.cc",
+    "ref_counted.h",
+    "ref_counted_delete_on_message_loop.h",
+    "ref_counted_memory.cc",
+    "ref_counted_memory.h",
+    "scoped_policy.h",
+    "scoped_ptr.h",
+    "scoped_vector.h",
+    "shared_memory.h",
+    "shared_memory_android.cc",
+    "shared_memory_nacl.cc",
+    "shared_memory_posix.cc",
+    "shared_memory_win.cc",
+    "singleton.cc",
+    "singleton.h",
+    "weak_ptr.cc",
+    "weak_ptr.h",
+  ]
+
+  if (is_nacl) {
+    sources -= [
+      "discardable_memory.cc",
+      "discardable_memory.h",
+      "discardable_memory_allocator.cc",
+      "discardable_memory_allocator.h",
+      "discardable_shared_memory.cc",
+      "discardable_shared_memory.h",
+      "shared_memory_posix.cc",
+    ]
+  } else {
+    sources -= [ "shared_memory_nacl.cc" ]
+  }
+
+  if (is_android) {
+    deps = [
+      "//third_party/ashmem",
+    ]
+  }
+
+  configs += [ "//base:base_implementation" ]
+
+  visibility = [ "//base/*" ]
+}

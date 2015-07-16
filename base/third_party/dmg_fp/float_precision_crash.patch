@@ -1,0 +1,13 @@
+diff --git a/base/third_party/dmg_fp/dtoa.cc b/base/third_party/dmg_fp/dtoa.cc
+index 3f7e794..3312fa4 100644
+--- dtoa.cc
++++ dtoa.cc
+@@ -3891,7 +3891,7 @@ dtoa
+ 				goto no_digits;
+ 			goto one_digit;
+ 			}
+-		for(i = 1;; i++, dval(&u) *= 10.) {
++		for(i = 1; i <= k + 1; i++, dval(&u) *= 10.) {
+ 			L = (Long)(dval(&u) / ds);
+ 			dval(&u) -= L*ds;
+ #ifdef Check_FLT_ROUNDS

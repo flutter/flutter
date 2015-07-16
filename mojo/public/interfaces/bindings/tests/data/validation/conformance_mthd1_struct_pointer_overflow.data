@@ -1,0 +1,11 @@
+[dist4]message_header  // num_bytes
+[u4]0                  // version
+[u4]1                  // name
+[u4]0                  // flags
+[anchr]message_header
+
+[dist4]method1_params   // num_bytes
+[u4]0                   // version
+[u8]0xFFFFFFFFFFFFFFFF  // param0: Test whether decoding the pointer causes
+                        // overflow.
+[anchr]method1_params

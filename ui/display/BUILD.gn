@@ -1,0 +1,83 @@
+# Copyright 2014 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//build/config/ui.gni")
+
+component("display") {
+  sources = [
+    "chromeos/display_configurator.cc",
+    "chromeos/display_configurator.h",
+    "chromeos/x11/display_configurator_x11.cc",
+    "chromeos/x11/display_mode_x11.cc",
+    "chromeos/x11/display_mode_x11.h",
+    "chromeos/x11/display_snapshot_x11.cc",
+    "chromeos/x11/display_snapshot_x11.h",
+    "chromeos/x11/display_util_x11.cc",
+    "chromeos/x11/display_util_x11.h",
+    "chromeos/x11/native_display_delegate_x11.cc",
+    "chromeos/x11/native_display_delegate_x11.h",
+    "chromeos/x11/native_display_event_dispatcher_x11.cc",
+    "chromeos/x11/native_display_event_dispatcher_x11.h",
+    "display_export.h",
+    "display_switches.cc",
+    "display_switches.h",
+  ]
+
+  defines = [ "DISPLAY_IMPLEMENTATION" ]
+
+  deps = [
+    "//base",
+    "//ui/display/util",
+    "//ui/gfx",
+    "//ui/gfx/geometry",
+  ]
+
+  if (use_x11) {
+    configs += [
+      "//build/config/linux:x11",
+      "//build/config/linux:xext",
+      "//build/config/linux:xi",
+      "//build/config/linux:xrandr",
+    ]
+    deps += [ "//ui/events/platform" ]
+  }
+}
+
+component("test_util") {
+  output_name = "display_test_util"
+  sources = [
+    "chromeos/test/test_display_snapshot.cc",
+    "chromeos/test/test_display_snapshot.h",
+  ]
+
+  defines = [ "DISPLAY_IMPLEMENTATION" ]
+
+  public_deps = [
+    ":display",
+  ]
+  deps = [
+    "//base",
+    "//ui/gfx",
+    "//ui/gfx/geometry",
+  ]
+}
+
+test("display_unittests") {
+  sources = [
+    "chromeos/display_configurator_unittest.cc",
+    "chromeos/x11/display_util_x11_unittest.cc",
+    "chromeos/x11/native_display_event_dispatcher_x11_unittest.cc",
+    "util/display_util_unittest.cc",
+    "util/edid_parser_unittest.cc",
+  ]
+
+  deps = [
+    ":test_util",
+    "//base",
+    "//base/test:run_all_unittests",
+    "//testing/gtest",
+    "//ui/display/util",
+    "//ui/gfx/geometry",
+  ]
+}

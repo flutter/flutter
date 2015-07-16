@@ -1,0 +1,34 @@
+// Copyright 2015 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+module mojo.test.versioning;
+
+// versioning_test_service.mojom and versioning_test_client.mojom contain
+// different versions of Mojom definitions for a fictitious human resource
+// management system. They are used to test the versioning mechanism.
+
+enum Department {
+  SALES,
+  DEV
+};
+
+struct Employee {
+  uint64 employee_id;
+  string name;
+  Department department;
+};
+
+interface HumanResourceDatabase {
+  AddEmployee(Employee employee) => (bool success);
+
+  QueryEmployee(uint64 id, [MinVersion=1] bool retrieve_finger_print)
+      => (Employee? employee, [MinVersion=1] array<uint8>? finger_print);
+
+  [MinVersion=1]
+  AttachFingerPrint(uint64 id, array<uint8> finger_print)
+      => (bool success);
+
+  [MinVersion=2]
+  ListEmployeeIds() => (array<uint64>? ids);
+};

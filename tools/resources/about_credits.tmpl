@@ -1,0 +1,76 @@
+#!mojo mojo:sky_viewer
+<html>
+<head>
+<meta charset="utf-8">
+<title>Credits</title>
+<import src="/packages/sky/framework/elements/sky-scrollable.sky" />
+<style>
+body {
+  background-color: white;
+  font-size: 84%;
+  max-width: 1020px;
+}
+.page-title {
+  font-size: 164%;
+  font-weight: bold;
+  margin-top: 26px; /* Avoid Android status bar */
+}
+.product {
+  background-color: #c3d9ff;
+  border-radius: 5px;
+  margin-top: 16px;
+  overflow: auto;
+  padding: 2px;
+}
+.product .title {
+  float: left;
+  font-size: 110%;
+  font-weight: bold;
+  margin: 3px;
+}
+.product .homepage {
+  float: right;
+  margin: 3px;
+  text-align: right;
+}
+.product .homepage::after {
+  content: " - ";
+}
+.product .show {
+  float: right;
+  margin: 3px;
+  text-align: right;
+}
+.licence {
+  background-color: #e8eef7;
+  border-radius: 3px;
+  clear: both;
+  padding: 16px;
+}
+.licence h3 {
+  margin-top: 0;
+}
+.licence pre {
+  white-space: pre;
+}
+.dialog #print-link,
+.dialog .homepage {
+  display: none;
+}
+sky-scrollable {
+  height: -webkit-fill-available;
+}
+pre, span, a {
+  display: paragraph;
+}
+</style>
+</head>
+<body>
+<sky-scrollable>
+<span class="page-title" style="float:left;">Credits</span>
+<div style="clear:both; overflow:auto;"><!-- Chromium <3s the following projects -->
+{{entries}}
+</div>
+</sky-scrollable>
+</body>
+</html>

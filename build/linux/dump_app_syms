@@ -1,0 +1,36 @@
+#!/bin/sh
+
+# Copyright (c) 2010 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+#
+# Helper script to run dump_syms on Chrome Linux executables and strip
+# them if needed.
+
+set -e
+
+usage() {
+  echo -n "$0 <dump_syms_exe> <strip_binary> " >&2
+  echo "<binary_with_symbols> <symbols_output>" >&2
+}
+
+
+if [ $# -ne 4 ]; then
+  usage
+  exit 1
+fi
+
+SCRIPTDIR="$(readlink -f "$(dirname "$0")")"
+DUMPSYMS="$1"
+STRIP_BINARY="$2"
+INFILE="$3"
+OUTFILE="$4"
+
+# Dump the symbols from the given binary.
+if [ ! -e "$OUTFILE" -o "$INFILE" -nt "$OUTFILE" ]; then
+  "$DUMPSYMS" -r "$INFILE" > "$OUTFILE"
+fi
+
+if [ "$STRIP_BINARY" != "0" ]; then
+  strip "$INFILE"
+fi

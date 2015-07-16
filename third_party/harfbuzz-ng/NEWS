@@ -1,0 +1,1124 @@
+Overview of changes leading to 0.9.40
+Friday, March 20, 2015
+=====================================
+
+- Another hb-coretext crasher fix.  Ouch!
+- Happy Norouz!
+
+
+Overview of changes leading to 0.9.39
+Wednesday, March 4, 2015
+=====================================
+
+- Critical hb-coretext fixes.
+- Optimizations and refactoring; no functional change
+  expected.
+- Misc build fixes.
+
+
+Overview of changes leading to 0.9.38
+Friday, January 23, 2015
+=====================================
+
+- Fix minor out-of-bounds access in Indic shaper.
+- Change New Tai Lue shaping engine from South-East Asian to default,
+  reflecting change in Unicode encoding model.
+- Add hb-shape --font-size.  Can take up to two numbers for separate
+  x / y size.
+- Fix CoreText and FreeType scale issues with negative scales.
+- Reject blobs larger than 2GB.  This might break some icu-le-hb clients
+  that need security fixes.  See:
+  http://www.icu-project.org/trac/ticket/11450
+- Avoid accessing font tables during face destruction, in casce rogue
+  clients released face data already.
+- Fix up gobject-introspection a bit.  Python bindings kinda working.
+  See README.python.
+- Misc fixes.
+- API additions:
+  hb_ft_face_create_referenced()
+  hb_ft_font_create_referenced()
+
+
+Overview of changes leading to 0.9.37
+Wednesday, December 17, 2014
+=====================================
+
+- Fix out-of-bounds access in Context lookup format 3.
+- Indic: Allow ZWJ/ZWNJ before syllable modifiers.
+
+
+Overview of changes leading to 0.9.36
+Thursday, November 20, 2014
+=====================================
+
+- First time that three months went by without a release since
+  0.9.2 was released on August 10, 2012!
+- Fix performance bug in hb_ot_collect_glyphs():
+  https://bugzilla.mozilla.org/show_bug.cgi?id=1090869
+- Add basic vertical-text support to hb-ot-font.
+- Misc build fixes.
+
+
+Overview of changes leading to 0.9.35
+Saturday, August 13, 2014
+=====================================
+
+- Fix major shape-plan caching bug when more than one shaper were
+  provided to hb_shape_full() (as exercised by XeTeX).
+  http://www.mail-archive.com/debian-bugs-dist@lists.debian.org/msg1246370.html
+- Fix Arabic fallback shaping regression.  This was broken in 0.9.32.
+- Major hb-coretext fixes.  That backend is complete now, including
+  respecing buffer direction and language, down to vertical writing.
+- Build fixes for Windows CE.  Should build fine now.
+- Misc fixes:
+  Use atexit() only if it's safe to call from shared library
+  https://bugs.freedesktop.org/show_bug.cgi?id=82246
+  Mandaic had errors in its Unicode Joining_Type
+  https://bugs.freedesktop.org/show_bug.cgi?id=82306
+- API changes:
+
+  * hb_buffer_clear_contents() does not reset buffer flags now.
+
+    After 763e5466c0a03a7c27020e1e2598e488612529a7, one doesn't
+    need to set flags for different pieces of text.  The flags now
+    are something the client sets up once, depending on how it
+    actually uses the buffer.  As such, don't clear it in
+    clear_contents().
+
+    I don't expect any changes to be needed to any existing client.
+
+
+Overview of changes leading to 0.9.34
+Saturday, August 2, 2014
+=====================================
+
+- hb_feature_from_string() now accepts CSS font-feature-settings format.
+- As a result, hb-shape / hb-view --features also accept CSS-style strings.
+  Eg, "'liga' off" is accepted now.
+- Add old-spec Myanmar shaper:
+  https://bugs.freedesktop.org/show_bug.cgi?id=81775
+- Don't apply 'calt' in Hangul shaper.
+- Fix mark advance zeroing for Hebrew shaper:
+  https://bugs.freedesktop.org/show_bug.cgi?id=76767
+- Implement Windows-1256 custom Arabic shaping.  Only built on Windows,
+  and requires help from get_glyph().  Used by Firefox.
+  https://bugzilla.mozilla.org/show_bug.cgi?id=1045139
+- Disable 'liga' in vertical text.
+- Build fixes.
+- API changes:
+
+  * Make HB_BUFFER_FLAG_BOT/EOT easier to use.
+
+    Previously, we expected users to provide BOT/EOT flags when the
+    text *segment* was at paragraph boundaries.  This meant that for
+    clients that provide full paragraph to HarfBuzz (eg. Pango), they
+    had code like this:
+
+      hb_buffer_set_flags (hb_buffer,
+                           (item_offset == 0 ? HB_BUFFER_FLAG_BOT : 0) |
+                           (item_offset + item_length == paragraph_length ?
+                            HB_BUFFER_FLAG_EOT : 0));
+
+      hb_buffer_add_utf8 (hb_buffer,
+                          paragraph_text, paragraph_length,
+                          item_offset, item_length);
+
+    After this change such clients can simply say:
+
+      hb_buffer_set_flags (hb_buffer,
+                           HB_BUFFER_FLAG_BOT | HB_BUFFER_FLAG_EOT);
+
+      hb_buffer_add_utf8 (hb_buffer,
+                          paragraph_text, paragraph_length,
+                          item_offset, item_length);
+
+    Ie, HarfBuzz itself checks whether the segment is at the beginning/end
+    of the paragraph.  Clients that only pass item-at-a-time to HarfBuzz
+    continue not setting any flags whatsoever.
+
+    Another way to put it is: if there's pre-context text in the buffer,
+    HarfBuzz ignores the BOT flag.  If there's post-context, it ignores
+    EOT flag.
+
+
+Overview of changes leading to 0.9.33
+Tuesday, July 22, 2014
+=====================================
+
+- Turn off ARabic 'cswh' feature that was accidentally turned on.
+- Add HB_TAG_MAX_SIGNED.
+- Make hb_face_make_immutable() really make face immutable!
+- Windows build fixes.
+
+
+Overview of changes leading to 0.9.32
+Thursday, July 17, 2014
+=====================================
+
+- Apply Arabic shaping features in spec order exactly.
+- Another fix for Mongolian free variation selectors.
+- For non-Arabic scripts in Arabic shaper apply 'rlig' and 'calt'
+  together.
+- Minor adjustment to U+FFFD logic.
+- Fix hb-coretext build.
+
+
+Overview of changes leading to 0.9.31
+Wednesday, July 16, 2014
+=====================================
+
+- Only accept valid UTF-8/16/32; we missed many cases before.
+- Better shaping of invalid UTF-8/16/32.  Falls back to
+  U+FFFD REPLACEMENT CHARACTER now.
+- With all changes in this release, the buffer will contain fully
+  valid Unicode after hb_buffer_add_utf8/16/32 no matter how
+  broken the input is.  This can be overriden though.  See below.
+- Fix Mongolian Variation Selectors for fonts without GDEF.
+- Fix minor invalid buffer access.
+- Accept zh-Hant and zh-Hans language tags.  hb_ot_tag_to_language()
+  now uses these instead of private tags.
+- Build fixes.
+- New API:
+  * hb_buffer_add_codepoints().  This does what hb_buffer_add_utf32()
+    used to do, ie. no validity check on the input at all.  add_utf32
+    now replaces invalid Unicode codepoints with the replacement
+    character (see below).
+  * hb_buffer_set_replacement_codepoint()
+  * hb_buffer_get_replacement_codepoint()
+    Previously, in hb_buffer_add_utf8 and hb_buffer_add_utf16, when
+    we detected broken input, we replaced that with (hb_codepoint_t)-1.
+    This has changed to use U+FFFD now, but can be changed using these
+    new API.
+
+
+Overview of changes leading to 0.9.30
+Wednesday, July 9, 2014
+=====================================
+
+- Update to Unicode 7.0.0:
+  * New scripts Manichaean and Psalter Pahlavi are shaped using
+    Arabic shaper.
+  * All the other new scripts to through the generic shaper for
+    now.
+- Minor Indic improvements.
+- Fix graphite2 backend cluster mapping [crasher!]
+- API changes:
+  * New HB_SCRIPT_* values for Unicode 7.0 scripts.
+  * New function hb_ot_layout_language_get_required_feature().
+- Build fixes.
+
+
+Overview of changes leading to 0.9.29
+Thursday, May 29, 2014
+=====================================
+
+- Implement cmap in hb-ot-font.h.  No variation-selectors yet.
+- Myanmar: Allow MedialYa+Asat.
+- Various Indic fixes:
+  * Support most characters in Extended Devanagary and Vedic
+    Unicode blocks.
+  * Allow digits and a some punctuation as consonant placeholders.
+- Build fixes.
+
+
+Overview of changes leading to 0.9.28
+Monday, April 28, 2014
+=====================================
+
+- Unbreak old-spec Indic shaping. (bug 76705)
+- Fix shaping of U+17DD and U+0FC6.
+- Add HB_NO_MERGE_CLUSTERS build option.  NOT to be enabled by default
+  for shipping libraries.  It's an option for further experimentation
+  right now.  When we are sure how to do it properly, we will add
+  public run-time API for the functionality.
+- Build fixes.
+
+
+Overview of changes leading to 0.9.27
+Tuesday, March 18, 2014
+=====================================
+
+- Don't use "register" storage class specifier
+- Wrap definition of free_langs() with HAVE_ATEXIT
+- Add coretext_aat shaper and hb_coretext_face_create() constructor
+- If HAVE_ICU_BUILTIN is defined, use hb-icu Unicode callbacks
+- Add Myanmar test case from OpenType Myanmar spec
+- Only do fallback Hebrew composition if no GPOS 'mark' available
+- Allow bootstrapping without gtk-doc
+- Use AM_MISSING_PROG for ragel and git
+- Typo in ucdn's Makefile.am
+- Improve MemoryBarrier() implementation
+
+
+Overview of changes leading to 0.9.26
+Thursday, January 30, 2014
+=====================================
+
+- Misc fixes.
+- Fix application of 'rtlm' feature.
+- Automatically apply frac/numr/dnom around U+2044 FRACTION SLASH.
+- New header: hb-ot-shape.h
+- Uniscribe: fix scratch-buffer accounting.
+- Reorder Tai Tham SAKOT to after tone-marks.
+- Add Hangul shaper.
+- New files:
+  hb-ot-shape-complex-hangul.cc
+  hb-ot-shape-complex-hebrew.cc
+  hb-ot-shape-complex-tibetan.cc
+- Disable 'cswh' feature in Arabic shaper.
+- Coretext: better handle surrogate pairs.
+- Add HB_TAG_MAX and _HB_SCRIPT_MAX_VALUE.
+
+
+Overview of changes leading to 0.9.25
+Wednesday, December 4, 2013
+=====================================
+
+- Myanmar shaper improvements.
+- Avoid font fallback in CoreText backend.
+- Additional OpenType language tag mappiongs.
+- More aggressive shape-plan caching.
+- Build with / require automake 1.13.
+- Build with libtool 2.4.2.418 alpha to support ppc64le.
+
+
+Overview of changes leading to 0.9.24
+Tuesday, November 13, 2013
+=====================================
+
+- Misc compiler warning fixes with clang.
+- No functional changes.
+
+
+Overview of changes leading to 0.9.23
+Monday, October 28, 2013
+=====================================
+
+- "Udupi HarfBuzz Hackfest", Paris, October 14..18 2013.
+- Fix (Chain)Context recursion with non-monotone lookup positions.
+- Misc Indic bug fixes.
+- New Javanese / Buginese shaping, similar to Windows 8.1.
+
+
+Overview of changes leading to 0.9.22
+Thursday, October 3, 2013
+=====================================
+
+- Fix use-after-end-of-scope in hb_language_from_string().
+- Fix hiding of default_ignorables if font doesn't have space glyph.
+- Protect against out-of-range lookup indices.
+
+- API Changes:
+
+  * Added hb_ot_layout_table_get_lookup_count()
+
+
+Overview of changes leading to 0.9.21
+Monday, September 16, 2013
+=====================================
+
+- Rename gobject-introspection library name from harfbuzz to HarfBuzz.
+- Remove (long disabled) hb-old and hb-icu-le test shapers.
+- Misc gtk-doc and gobject-introspection annotations.
+- Misc fixes.
+- API changes:
+
+  * Add HB_SET_VALUE_INVALID
+
+Overview of changes leading to 0.9.20
+Thursday, August 29, 2013
+=====================================
+
+General:
+- Misc substitute_closure() fixes.
+- Build fixes.
+
+Documentation:
+- gtk-doc boilerplate integrated.  Docs are built now, but
+  contain no contents.  By next release hopefully we have
+  some content in.  Enable using --enable-gtk-doc.
+
+GObject and Introspection:
+- Added harfbuzz-gobject library (hb-gobject.h) that has type
+  bindings for all HarfBuzz objects and enums.  Enable using
+  --with-gobject.
+- Added gobject-introspection boilerplate.  Nothing useful
+  right now.  Work in progress.  Gets enabled automatically if
+  --with-gobject is used.  Override with --disable-introspection.
+
+OpenType shaper:
+- Apply 'mark' in Myanmar shaper.
+- Don't apply 'dlig' by default.
+
+Uniscribe shaper:
+- Support user features.
+- Fix loading of fonts that are also installed on the system.
+- Fix shaping of Arabic Presentation Forms.
+- Fix build with wide chars.
+
+CoreText shaper:
+- Support user features.
+
+Source changes:
+- hb_face_t code moved to hb-face.h / hb-face.cc.
+- Added hb-deprecated.h.
+
+API changes:
+- Added HB_DISABLE_DEPRECATED.
+- Deprecated HB_SCRIPT_CANADIAN_ABORIGINAL; replaced by
+  HB_SCRIPT_CANADIAN_SYLLABICS.
+- Deprecated HB_BUFFER_FLAGS_DEFAULT; replaced by
+  HB_BUFFER_FLAG_DEFAULT.
+- Deprecated HB_BUFFER_SERIALIZE_FLAGS_DEFAULT; replaced by
+  HB_BUFFER_SERIALIZE_FLAG_DEFAULT.
+
+
+Overview of changes leading to 0.9.19
+Tuesday, July 16, 2013
+=====================================
+
+- Build fixes.
+- Better handling of multiple variation selectors in a row.
+- Pass on variation selector to GSUB if not consumed by cmap.
+- Fix undefined memory access.
+- Add Javanese config to Indic shaper.
+- Misc bug fixes.
+
+Overview of changes leading to 0.9.18
+Tuesday, May 28, 2013
+=====================================
+
+New build system:
+
+- All unneeded code is all disabled by default,
+
+- Uniscribe and CoreText shapers can be enabled with their --with options,
+
+- icu_le and old shapers cannot be enabled for now,
+
+- glib, freetype, and cairo will be detected automatically.
+  They can be force on/off'ed with their --with options,
+
+- icu and graphite2 are default off, can be enabled with their --with
+  options,
+
+Moreover, ICU support is now build into a separate library:
+libharfbuzz-icu.so, and a new harfbuzz-icu.pc is shipped for it.
+Distros can enable ICU now without every application on earth
+getting linked to via libharfbuzz.so.
+
+For distros I recommend that they make sure they are building --with-glib
+--with-freetype --with-cairo, --with-icu, and optionally --with-graphite2;
+And package harfbuzz and harfbuzz-icu separately.
+
+
+Overview of changes leading to 0.9.17
+Monday, May 20, 2013
+=====================================
+
+- Build fixes.
+- Fix bug in hb_set_get_min().
+- Fix regression with Arabic mark positioning / width-zeroing.
+
+Overview of changes leading to 0.9.16
+Friday, April 19, 2013
+=====================================
+
+- Major speedup in OpenType lookup processing.  With the Amiri
+  Arabic font, this release is over 3x faster than previous
+  release.  All scripts / languages should see this speedup.
+
+- New --num-iterations option for hb-shape / hb-view; useful for
+  profiling.
+
+Overview of changes leading to 0.9.15
+Friday, April 05, 2013
+=====================================
+
+- Build fixes.
+- Fix crasher in graphite2 shaper.
+- Fix Arabic mark width zeroing regression.
+- Don't compose Hangul jamo into Unicode syllables.
+
+
+Overview of changes leading to 0.9.14
+Thursday, March 21, 2013
+=====================================
+
+- Build fixes.
+- Fix time-consuming sanitize with malicious fonts.
+- Implement hb_buffer_deserialize_glyphs() for both json and text.
+- Do not ignore Hangul filler characters.
+- Indic fixes:
+  * Fix Malayalam pre-base reordering interaction with post-forms.
+  * Further adjust ZWJ handling.  Should fix known regressions from
+    0.9.13.
+
+
+Overview of changes leading to 0.9.13
+Thursday, February 25, 2013
+=====================================
+
+- Build fixes.
+- Ngapi HarfBuzz Hackfest in London (February 2013):
+  * Fixed all known Indic bugs,
+  * New Win8-style Myanmar shaper,
+  * New South-East Asian shaper for Tai Tham, Cham, and New Tai Lue,
+  * Smartly ignore Default_Ignorable characters (joiners, etc) wheb
+    matching GSUB/GPOS lookups,
+  * Fix 'Phags-Pa U+A872 shaping,
+  * Fix partial disabling of default-on features,
+  * Allow disabling of TrueType kerning.
+- Fix possible crasher with broken fonts with overlapping tables.
+- Removed generated files from git again.  So, one needs ragel to
+  bootstrap from the git tree.
+
+API changes:
+- hb_shape() and related APIs now abort if buffer direction is
+  HB_DIRECTION_INVALID.  Previously, hb_shape() was calling
+  hb_buffer_guess_segment_properties() on the buffer before
+  shaping.  The heuristics in that function are fragile.  If the
+  user really wants the old behvaior, they can call that function
+  right before calling hb_shape() to get the old behavior.
+- hb_blob_create_sub_blob() always creates sub-blob with
+  HB_MEMORY_MODE_READONLY.  See comments for the reason.
+
+
+Overview of changes leading to 0.9.12
+Thursday, January 18, 2013
+=====================================
+
+- Build fixes for Sun compiler.
+- Minor bug fix.
+
+Overview of changes leading to 0.9.11
+Thursday, January 10, 2013
+=====================================
+
+- Build fixes.
+- Fix GPOS mark attachment with null Anchor offsets.
+- [Indic] Fix old-spec reordering of viramas if sequence ends in one.
+- Fix multi-threaded shaper data creation crash.
+- Add atomic ops for Solaris.
+
+API changes:
+- Rename hb_buffer_clear() to hb_buffer_clear_contents().
+
+
+Overview of changes leading to 0.9.10
+Thursday, January 3, 2013
+=====================================
+
+- [Indic] Fixed rendering of Malayalam dot-reph
+- Updated OT language tags.
+- Updated graphite2 backend.
+- Improved hb_ot_layout_get_size_params() logic.
+- Improve hb-shape/hb-view help output.
+- Fixed hb-set.h implementation to not crash.
+- Fixed various issues with hb_ot_layout_collect_lookups().
+- Various build fixes.
+
+New API:
+
+hb_graphite2_face_get_gr_face()
+hb_graphite2_font_get_gr_font()
+hb_coretext_face_get_cg_font()
+
+Modified API:
+
+hb_ot_layout_get_size_params()
+
+
+Overview of changes leading to 0.9.9
+Wednesday, December 5, 2012
+====================================
+
+- Fix build on Windows.
+- Minor improvements.
+
+
+Overview of changes leading to 0.9.8
+Tuesday, December 4, 2012
+====================================
+
+
+- Actually implement hb_shape_plan_get_shaper ().
+- Make UCDB data tables const.
+- Lots of internal refactoring in OTLayout tables.
+- Flesh out hb_ot_layout_lookup_collect_glyphs().
+
+New API:
+
+hb_ot_layout_collect_lookups()
+hb_ot_layout_get_size_params()
+
+
+Overview of changes leading to 0.9.7
+Sunday, November 21, 2012
+====================================
+
+
+HarfBuzz "All-You-Can-Eat-Sushi" (aka Vancouver) Hackfest and follow-on fixes.
+
+- Fix Arabic contextual joining using pre-context text.
+- Fix Sinhala "split matra" mess.
+- Fix Khmer shaping with broken fonts.
+- Implement Thai "PUA" shaping for old fonts.
+- Do NOT route Kharoshthi script through the Indic shaper.
+- Disable fallback positioning for Indic and Thai shapers.
+- Misc fixes.
+
+
+hb-shape / hb-view changes:
+
+- Add --text-before and --text-after
+- Add --bot / --eot / --preserve-default-ignorables
+- hb-shape --output-format=json
+
+
+New API:
+
+hb_buffer_clear()
+
+hb_buffer_flags_t
+
+HB_BUFFER_FLAGS_DEFAULT
+HB_BUFFER_FLAG_BOT
+HB_BUFFER_FLAG_EOT
+HB_BUFFER_FLAG_PRESERVE_DEFAULT_IGNORABLES
+
+hb_buffer_set_flags()
+hb_buffer_get_flags()
+
+HB_BUFFER_SERIALIZE_FLAGS
+hb_buffer_serialize_glyphs()
+hb_buffer_deserialize_glyphs()
+hb_buffer_serialize_list_formats()
+
+hb_set_add_range()
+hb_set_del_range()
+hb_set_get_population()
+hb_set_next_range()
+
+hb_face_[sg]et_glyph_count()
+
+hb_segment_properties_t
+HB_SEGMENT_PROPERTIES_DEFAULT
+hb_segment_properties_equal()
+hb_segment_properties_hash()
+
+hb_buffer_set_segment_properties()
+hb_buffer_get_segment_properties()
+
+hb_ot_layout_glyph_class_t
+hb_ot_layout_get_glyph_class()
+hb_ot_layout_get_glyphs_in_class()
+
+hb_shape_plan_t
+hb_shape_plan_create()
+hb_shape_plan_create_cached()
+hb_shape_plan_get_empty()
+hb_shape_plan_reference()
+hb_shape_plan_destroy()
+hb_shape_plan_set_user_data()
+hb_shape_plan_get_user_data()
+hb_shape_plan_execute()
+hb_shape_plan_get_shaper()
+
+hb_ot_shape_plan_collect_lookups()
+
+
+API changes:
+
+- Remove "mask" parameter from hb_buffer_add().
+- Rename hb_ot_layout_would_substitute_lookup() and hb_ot_layout_substitute_closure_lookup().
+- hb-set.h API const correction.
+- Renamed hb_set_min/max() to hb_set_get_min/max().
+- Rename hb_ot_layout_feature_get_lookup_indexes() to hb_ot_layout_feature_get_lookups().
+- Rename hb_buffer_guess_properties() to hb_buffer_guess_segment_properties().
+
+
+
+Overview of changes leading to 0.9.6
+Sunday, November 13, 2012
+====================================
+
+- Don't clear pre-context text if no new context is provided.
+- Fix ReverseChainingSubstLookup, which was totally borked.
+- Adjust output format of hb-shape a bit.
+- Include config.h.in in-tree.  Makes it easier for alternate build systems.
+- Fix hb_buffer_set_length(buffer, 0) invalid memory allocation.
+- Use ICU LayoutEngine's C API instead of C++.  Avoids much headache.
+- Drop glyphs for all of Unicode Default_Ignorable characters.
+- Misc build fixes.
+
+Arabic shaper:
+- Enable 'dlig' and 'mset' features in Arabic shaper.
+- Implement 'Phags-pa shaping, improve Mongolian.
+
+Indic shaper:
+- Decompose Sinhala split matras the way old HarfBuzz / Pango did.
+- Initial support for Consonant Medials.
+- Start adding new-style Myanmar shaping.
+- Make reph and 'pref' logic introspect the font.
+- Route Meetei-Mayek through the Indic shaper.
+- Don't apply 'liga' in Indic shaper.
+- Improve Malayalam pre-base reordering Ra interaction with Chillus.
+
+
+
+Overview of changes leading to 0.9.5
+Sunday, October 14, 2012
+====================================
+
+- Synthetic-GSUB Arabic fallback shaping.
+
+- Misc Indic improvements.
+
+- Add build system support for pthread.
+
+- Imported UCDN for in-tree Unicode callbacks implementation.
+
+- Context-aware Arabic joining.
+
+- Misc other fixes.
+
+- New API:
+
+  hb_feature_to/from-string()
+  hb_buffer_[sg]et_content_type()
+
+
+
+Overview of changes leading to 0.9.4
+Tuesday, Sep 03, 2012
+====================================
+
+- Indic improvements with old-spec Malayalam.
+
+- Better fallback glyph positioning, specially with Thai / Lao marks.
+
+- Implement dotted-circle insertion.
+
+- Better Arabic fallback shaping / ligation.
+
+- Added ICU LayoutEngine backend for testing.  Call it by the 'icu_le' name.
+
+- Misc fixes.
+
+
+
+Overview of changes leading to 0.9.3
+Friday, Aug 18, 2012
+====================================
+
+- Fixed fallback mark positioning for left-to-right text.
+
+- Improve mark positioning for the remaining combining classes.
+
+- Unbreak Thai and fallback Arabic shaping.
+
+- Port Arabic shaper to shape-plan caching.
+
+- Use new ICU normalizer functions.
+
+
+
+Overview of changes leading to 0.9.2
+Friday, Aug 10, 2012
+====================================
+
+- Over a thousand commits!  This is the first major release of HarfBuzz.
+
+- HarfBuzz is feature-complete now!  It should be in par, or better, than
+  both Pango's shapers and old HarfBuzz / Qt shapers.
+
+- New Indic shaper, supporting main Indic scripts, Sinhala, and Khmer.
+
+- Improved Arabic shaper, with fallback Arabic shaping, supporting Arabic,
+  Sinhala, N'ko, Mongolian, and Mandaic.
+
+- New Thai / Lao shaper.
+
+- Tibetan / Hangul support in the generic shaper.
+
+- Synthetic GDEF support for fonts without a GDEF table.
+
+- Fallback mark positioning for fonts without a GPOS table.
+
+- Unicode normalization shaping heuristic during glyph mapping.
+
+- New experimental Graphite2 backend.
+
+- New Uniscribe backend (primarily for testing).
+
+- New CoreText backend (primarily for testing).
+
+- Major optimization and speedup.
+
+- Test suites and testing infrastructure (work in progress).
+
+- Greatly improved hb-view cmdline tool.
+
+- hb-shape cmdline tool.
+
+- Unicode 6.1 support.
+
+Summary of API changes:
+
+o Changed API:
+
+  - Users are expected to only include main header files now (ie. hb.h,
+    hb-glib.h, hb-ft.h, ...)
+
+  - All struct tag names had their initial underscore removed.
+    Ie. "struct _hb_buffer_t" is "struct hb_buffer_t" now.
+
+  - All set_user_data() functions now take a "replace" boolean parameter.
+
+  - hb_buffer_create() takes zero arguments now.
+    Use hb_buffer_pre_allocate() to pre-allocate.
+
+  - hb_buffer_add_utf*() now accept -1 for length parameteres,
+    meaning "nul-terminated".
+
+  - hb_direction_t enum values changed.
+
+  - All *_from_string() APIs now take a length parameter to allow for
+    non-nul-terminated strings. A -1 length means "nul-terminated".
+
+  - Typedef for hb_language_t changed.
+
+  - hb_get_table_func_t renamed to hb_reference_table_func_t.
+
+  - hb_ot_layout_table_choose_script()
+
+  - Various renames in hb-unicode.h.
+
+o New API:
+
+  - hb_buffer_guess_properties()
+    Automatically called by hb_shape().
+
+  - hb_buffer_normalize_glyphs()
+
+  - hb_tag_from_string()
+
+  - hb-coretext.h
+
+  - hb-uniscribe.h
+
+  - hb_face_reference_blob()
+  - hb_face_[sg]et_index()
+  - hb_face_set_upem()
+
+  - hb_font_get_glyph_name_func_t
+    hb_font_get_glyph_from_name_func_t
+    hb_font_funcs_set_glyph_name_func()
+    hb_font_funcs_set_glyph_from_name_func()
+    hb_font_get_glyph_name()
+    hb_font_get_glyph_from_name()
+    hb_font_glyph_to_string()
+    hb_font_glyph_from_string()
+
+  - hb_font_set_funcs_data()
+
+  - hb_ft_font_set_funcs()
+  - hb_ft_font_get_face()
+
+  - hb-gobject.h (work in progress)
+
+  - hb_ot_shape_glyphs_closure()
+    hb_ot_layout_substitute_closure_lookup()
+
+  - hb-set.h
+
+  - hb_shape_full()
+
+  - hb_unicode_combining_class_t
+
+  - hb_unicode_compose_func_t
+    hb_unicode_decompose_func_t
+    hb_unicode_decompose_compatibility_func_t
+    hb_unicode_funcs_set_compose_func()
+    hb_unicode_funcs_set_decompose_func()
+    hb_unicode_funcs_set_decompose_compatibility_func()
+    hb_unicode_compose()
+    hb_unicode_decompose()
+    hb_unicode_decompose_compatibility()
+
+o Removed API:
+
+  - hb_ft_get_font_funcs()
+
+  - hb_ot_layout_substitute_start()
+    hb_ot_layout_substitute_lookup()
+    hb_ot_layout_substitute_finish()
+    hb_ot_layout_position_start()
+    hb_ot_layout_position_lookup()
+    hb_ot_layout_position_finish()
+
+
+
+Overview of changes leading to 0.6.0
+Friday, May 27, 2011
+====================================
+
+- Vertical text support in GPOS
+- Almost all API entries have unit tests now, under test/
+- All thread-safety issues are fixed
+
+Summary of API changes follows.
+
+
+* Simple Types API:
+
+  o New API:
+    HB_LANGUAGE_INVALID
+    hb_language_get_default()
+    hb_direction_to_string()
+    hb_direction_from_string()
+    hb_script_get_horizontal_direction()
+    HB_UNTAG()
+
+  o Renamed API:
+    hb_category_t renamed to hb_unicode_general_category_t
+
+  o Changed API:
+    hb_language_t is a typed pointers now
+
+  o Removed API:
+    HB_TAG_STR()
+
+
+* Use ISO 15924 tags for hb_script_t:
+
+  o New API:
+    hb_script_from_iso15924_tag()
+    hb_script_to_iso15924_tag()
+    hb_script_from_string()
+
+  o Changed API:
+    HB_SCRIPT_* enum members changed value.
+
+
+* Buffer API streamlined:
+
+  o New API:
+    hb_buffer_reset()
+    hb_buffer_set_length()
+    hb_buffer_allocation_successful()
+
+  o Renamed API:
+    hb_buffer_ensure() renamed to hb_buffer_pre_allocate()
+    hb_buffer_add_glyph() renamed to hb_buffer_add()
+
+  o Removed API:
+    hb_buffer_clear()
+    hb_buffer_clear_positions()
+
+  o Changed API:
+    hb_buffer_get_glyph_infos() takes an out length parameter now
+    hb_buffer_get_glyph_positions() takes an out length parameter now
+
+
+* Blob API streamlined:
+
+  o New API:
+    hb_blob_get_data()
+    hb_blob_get_data_writable()
+
+  o Renamed API:
+    hb_blob_create_empty() renamed to hb_blob_get_empty()
+
+  o Removed API:
+    hb_blob_lock()
+    hb_blob_unlock()
+    hb_blob_is_writable()
+    hb_blob_try_writable()
+
+  o Changed API:
+    hb_blob_create() takes user_data before destroy now
+
+
+* Unicode functions API:
+
+  o Unicode function vectors can subclass other unicode function vectors now.
+    Unimplemented callbacks in the subclass automatically chainup to the parent.
+
+  o All hb_unicode_funcs_t callbacks take a user_data now.  Their setters
+    take a user_data and its respective destroy callback.
+
+  o New API:
+    hb_unicode_funcs_get_empty()
+    hb_unicode_funcs_get_default()
+    hb_unicode_funcs_get_parent()
+
+  o Changed API:
+    hb_unicode_funcs_create() now takes a parent_funcs.
+
+  o Removed func getter functions:
+    hb_unicode_funcs_get_mirroring_func()
+    hb_unicode_funcs_get_general_category_func()
+    hb_unicode_funcs_get_script_func()
+    hb_unicode_funcs_get_combining_class_func()
+    hb_unicode_funcs_get_eastasian_width_func()
+
+
+* Face API:
+
+  o Renamed API:
+    hb_face_get_table() renamed to hb_face_reference_table()
+    hb_face_create_for_data() renamed to hb_face_create()
+
+  o Changed API:
+    hb_face_create_for_tables() takes user_data before destroy now
+    hb_face_reference_table() returns empty blob instead of NULL
+    hb_get_table_func_t accepts the face as first parameter now
+
+* Font API:
+
+  o Fonts can subclass other fonts now.  Unimplemented callbacks in the
+    subclass automatically chainup to the parent.  When chaining up,
+    scale is adjusted if the parent font has a different scale.
+
+  o All hb_font_funcs_t callbacks take a user_data now.  Their setters
+    take a user_data and its respective destroy callback.
+
+  o New API:
+    hb_font_get_parent()
+    hb_font_funcs_get_empty()
+    hb_font_create_sub_font()
+
+  o Removed API:
+    hb_font_funcs_copy()
+    hb_font_unset_funcs()
+
+  o Removed func getter functions:
+    hb_font_funcs_get_glyph_func()
+    hb_font_funcs_get_glyph_advance_func()
+    hb_font_funcs_get_glyph_extents_func()
+    hb_font_funcs_get_contour_point_func()
+    hb_font_funcs_get_kerning_func()
+
+  o Changed API:
+    hb_font_create() takes a face and references it now
+    hb_font_set_funcs() takes user_data before destroy now
+    hb_font_set_scale() accepts signed integers now
+    hb_font_get_contour_point_func_t now takes glyph first, then point_index
+    hb_font_get_glyph_func_t returns a success boolean now
+
+
+* Changed object model:
+
+  o All object types have a _get_empty() now:
+    hb_blob_get_empty()
+    hb_buffer_get_empty()
+    hb_face_get_empty()
+    hb_font_get_empty()
+    hb_font_funcs_get_empty()
+    hb_unicode_funcs_get_empty()
+
+  o Added _set_user_data() and _get_user_data() for all object types:
+    hb_blob_get_user_data()
+    hb_blob_set_user_data()
+    hb_buffer_get_user_data()
+    hb_buffer_set_user_data()
+    hb_face_get_user_data()
+    hb_face_set_user_data()
+    hb_font_funcs_get_user_data()
+    hb_font_funcs_set_user_data()
+    hb_font_get_user_data()
+    hb_font_set_user_data()
+    hb_unicode_funcs_get_user_data()
+    hb_unicode_funcs_set_user_data()
+
+  o Removed the _get_reference_count() from all object types:
+    hb_blob_get_reference_count()
+    hb_buffer_get_reference_count()
+    hb_face_get_reference_count()
+    hb_font_funcs_get_reference_count()
+    hb_font_get_reference_count()
+    hb_unicode_funcs_get_reference_count()
+
+  o Added _make_immutable() and _is_immutable() for all object types except for buffer:
+    hb_blob_make_immutable()
+    hb_blob_is_immutable()
+    hb_face_make_immutable()
+    hb_face_is_immutable()
+
+
+* Changed API for vertical text support
+
+  o The following callbacks where removed:
+    hb_font_get_glyph_advance_func_t
+    hb_font_get_kerning_func_t
+
+  o The following new callbacks added instead:
+    hb_font_get_glyph_h_advance_func_t
+    hb_font_get_glyph_v_advance_func_t
+    hb_font_get_glyph_h_origin_func_t
+    hb_font_get_glyph_v_origin_func_t
+    hb_font_get_glyph_h_kerning_func_t
+    hb_font_get_glyph_v_kerning_func_t
+
+  o The following API removed as such:
+    hb_font_funcs_set_glyph_advance_func()
+    hb_font_funcs_set_kerning_func()
+    hb_font_get_glyph_advance()
+    hb_font_get_kerning()
+
+  o New API added instead:
+    hb_font_funcs_set_glyph_h_advance_func()
+    hb_font_funcs_set_glyph_v_advance_func()
+    hb_font_funcs_set_glyph_h_origin_func()
+    hb_font_funcs_set_glyph_v_origin_func()
+    hb_font_funcs_set_glyph_h_kerning_func()
+    hb_font_funcs_set_glyph_v_kerning_func()
+    hb_font_get_glyph_h_advance()
+    hb_font_get_glyph_v_advance()
+    hb_font_get_glyph_h_origin()
+    hb_font_get_glyph_v_origin()
+    hb_font_get_glyph_h_kerning()
+    hb_font_get_glyph_v_kerning()
+
+  o The following higher-leve API added for convenience:
+    hb_font_get_glyph_advance_for_direction()
+    hb_font_get_glyph_origin_for_direction()
+    hb_font_add_glyph_origin_for_direction()
+    hb_font_subtract_glyph_origin_for_direction()
+    hb_font_get_glyph_kerning_for_direction()
+    hb_font_get_glyph_extents_for_origin()
+    hb_font_get_glyph_contour_point_for_origin()
+
+
+* OpenType Layout API:
+
+  o New API:
+    hb_ot_layout_position_start()
+    hb_ot_layout_substitute_start()
+    hb_ot_layout_substitute_finish()
+
+
+* Glue code:
+
+  o New API:
+    hb_glib_script_to_script()
+    hb_glib_script_from_script()
+    hb_icu_script_to_script()
+    hb_icu_script_from_script()
+
+
+* Version API added:
+
+  o New API:
+    HB_VERSION_MAJOR
+    HB_VERSION_MINOR
+    HB_VERSION_MICRO
+    HB_VERSION_STRING
+    HB_VERSION_CHECK()
+    hb_version()
+    hb_version_string()
+    hb_version_check()
+
+

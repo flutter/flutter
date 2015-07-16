@@ -1,0 +1,11 @@
+Name: boringssl
+URL: https://boringssl.googlesource.com/boringssl
+Version: git
+License: BSDish
+License File: NOTICE
+License Android Compatible: yes
+Security Critical: yes
+
+Description:
+This is BoringSSL, a fork of OpenSSL. See
+https://www.imperialviolet.org/2014/06/20/boringssl.html

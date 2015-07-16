@@ -1,0 +1,130 @@
+size_t GetSerializedSize_(const {{union.name}}Ptr& input, bool inlined) {
+  size_t size = 0U;
+  if (!inlined) {
+    size += sizeof(internal::{{union.name}}_Data);
+  }
+
+  if (!input)
+    return size;
+
+  mojo::internal::UnionAccessor<{{union.name}}> input_acc(input.get());
+  switch (input->which()) {
+{%  for field in union.fields %}
+{%    if field.kind|is_object_kind %}
+    case {{union.name}}::Tag::{{field.name|upper}}:
+{%      if field.kind|is_union_kind %}
+      size += GetSerializedSize_(*(input_acc.data()->{{field.name}}), false);
+{%      else %}
+      size += GetSerializedSize_(*(input_acc.data()->{{field.name}}));
+{%      endif %}
+      break;
+{%-   endif %}
+{%- endfor %}
+    default:
+      break;
+  }
+  return size;
+}
+
+void SerializeUnion_({{union.name}}Ptr input, mojo::internal::Buffer* buf,
+                     internal::{{union.name}}_Data** output, bool inlined) {
+  internal::{{union.name}}_Data* result = *output;
+  if (input) {
+    if (!inlined) {
+      result = internal::{{union.name}}_Data::New(buf);
+    }
+    mojo::internal::UnionAccessor<{{union.name}}> input_acc(input.get());
+    // TODO(azani): Handle unknown and objects.
+    // Set the not-null flag.
+    result->size = 16;
+    result->tag = input->which();
+    switch (input->which()) {
+{%  for field in union.fields %}
+      case {{union.name}}::Tag::{{field.name|upper}}: {
+{%    if field.kind|is_object_kind %}
+{%      if field.kind|is_string_kind %}
+        Serialize_(
+            *(input_acc.data()->{{field.name}}),
+            buf, &result->data.f_{{field.name}}.ptr);
+{%      elif field.kind|is_struct_kind %}
+        Serialize_(
+            mojo::internal::Forward(*(input_acc.data()->{{field.name}})),
+            buf, &result->data.f_{{field.name}}.ptr);
+{%      elif field.kind|is_union_kind %}
+        SerializeUnion_(
+            mojo::internal::Forward(*(input_acc.data()->{{field.name}})),
+            buf, &result->data.f_{{field.name}}.ptr, false);
+{%      elif field.kind|is_array_kind %}
+        const mojo::internal::ArrayValidateParams {{field.name}}_validate_params(
+            {{field.kind|get_array_validate_params_ctor_args|indent(16)}});
+        SerializeArray_(
+            mojo::internal::Forward(*(input_acc.data()->{{field.name}})),
+            buf, &result->data.f_{{field.name}}.ptr, &{{field.name}}_validate_params);
+{%      elif field.kind|is_map_kind %}
+        const mojo::internal::ArrayValidateParams {{field.name}}_validate_params(
+            {{field.kind.value_kind|get_map_validate_params_ctor_args|indent(16)}});
+        SerializeMap_(
+            mojo::internal::Forward(*(input_acc.data()->{{field.name}})),
+            buf, &result->data.f_{{field.name}}.ptr, &{{field.name}}_validate_params);
+{%-     endif %}
+{%    elif field.kind|is_any_handle_kind %}
+        result->data.f_{{field.name}} =
+            input_acc.data()->{{field.name}}->release().value();
+{%    elif field.kind|is_interface_kind %}
+        mojo::internal::Interface_Data* {{field.name}} =
+            reinterpret_cast<mojo::internal::Interface_Data*>(
+                &result->data.f_{{field.name}});
+        mojo::internal::InterfacePointerToData(
+            input_acc.data()->{{field.name}}->Pass(), {{field.name}});
+{%    else %}
+        result->data.f_{{field.name}} = input_acc.data()->{{field.name}};
+{%-   endif %}
+        break;
+      }
+{%- endfor %}
+    }
+  } else if (inlined) {
+    result->set_null();
+  } else {
+    result = nullptr;
+  }
+  *output = result;
+}
+
+void Deserialize_(internal::{{union.name}}_Data* input,
+                  {{union.name}}Ptr* output) {
+  if (input && !input->is_null()) {
+    {{union.name}}Ptr result({{union.name}}::New());
+    mojo::internal::UnionAccessor<{{union.name}}> result_acc(result.get());
+    switch (input->tag) {
+{%  for field in union.fields %}
+      case {{union.name}}::Tag::{{field.name|upper}}: {
+{%    if field.kind|is_object_kind %}
+        result_acc.SwitchActive({{union.name}}::Tag::{{field.name|upper}});
+        Deserialize_(input->data.f_{{field.name}}.ptr, result_acc.data()->{{field.name}});
+{%    elif field.kind|is_any_handle_kind %}
+        {{field.kind|cpp_wrapper_type}}* {{field.name}} =
+            reinterpret_cast<{{field.kind|cpp_wrapper_type}}*>(&input->data.f_{{field.name}});
+        result->set_{{field.name}}({{field.name}}->Pass());
+{%    elif field.kind|is_interface_kind %}
+        {{field.kind|cpp_wrapper_type}} {{field.name}}_out;
+        mojo::internal::Interface_Data* {{field.name}}_in =
+            reinterpret_cast<mojo::internal::Interface_Data*>(
+                &input->data.f_{{field.name}});
+        mojo::internal::InterfaceDataToPointer(
+            {{field.name}}_in, &{{field.name}}_out);
+        result->set_{{field.name}}({{field.name}}_out.Pass());
+{%    elif field.kind|is_enum_kind %}
+        result->set_{{field.name}}(static_cast<{{field.kind|cpp_wrapper_type}}>(input->data.f_{{field.name}}));
+{%    else %}
+        result->set_{{field.name}}(input->data.f_{{field.name}});
+{%-   endif %}
+        break;
+      }
+{%- endfor %}
+    }
+    *output = result.Pass();
+  } else {
+    output->reset();
+  }
+}

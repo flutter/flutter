@@ -1,0 +1,47 @@
+Name
+
+    CHROMIUM_texture_compression_dxt5
+
+Name Strings
+
+    GL_CHROMIUM_texture_compression_dxt5
+
+Version
+
+    Last Modifed Date: August 1, 2011
+
+Dependencies
+
+    OpenGL ES 2.0 is required.
+
+Overview
+
+    This extensions is pretty much the same as EXT_texture_compression_dxt1
+    except it supports dxt5.
+
+New Procedures and Functions
+
+    None
+
+New Tokens
+
+    Accepted by the <internalformat> parameter of CompressedTexImage2D
+    and the <format> parameter of CompressedTexSubImage2D:
+
+    COMPRESSED_RGBA_S3TC_DXT5_EXT                     0x83F3
+
+New Procedures and Functions
+
+    None.
+
+Errors
+
+    None.
+
+New State
+
+    None.
+
+Revision History
+
+    8/1/2011    Documented the extension

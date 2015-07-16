@@ -1,0 +1,53 @@
+// Copyright 2015 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+[JavaPackage="org.chromium.mojo.bindings.test.mojom.test_constants"]
+module mojo.test;
+
+// Integral types.
+const bool kBoolValue = true;
+
+const int8 kInt8Value = -2;
+
+// In the range of (MAX_INT8, MAX_UINT8].
+const uint8 kUint8Value = 128;
+
+// In the range of [MIN_INT16, MIN_INT8).
+const int16 kInt16Value = -233;
+
+// In the range of (MAX_INT16, MAX_UINT16].
+const uint16 kUint16Value = 44204;
+
+// In the range of [MIN_INT32, MIN_INT16).
+const int32 kInt32Value = -44204;
+
+// In the range of (MAX_INT32, MAX_UINT32].
+const uint32 kUint32Value = 4294967295;
+
+// In the range of [MIN_INT64, MIN_INT32).
+const int64 kInt64Value = -9223372036854775807;
+
+// In the range of (MAX_INT64, MAX_UINT64].
+const uint64 kUint64Value = 9999999999999999999;
+
+// Floating point types.
+const double kDoubleValue = 3.14159;
+const double kDoubleInfinity = double.INFINITY;
+const double kDoubleNegativeInfinity = double.NEGATIVE_INFINITY;
+const double kDoubleNaN = double.NAN;
+
+const float kFloatValue = 2.71828;
+const float kFloatInfinity = float.INFINITY;
+const float kFloatNegativeInfinity = float.NEGATIVE_INFINITY;
+const float kFloatNaN = float.NAN;
+
+struct StructWithConstants {
+  const int8 kInt8Value = 5;
+  const float kFloatValue = 765.432;
+};
+
+interface InterfaceWithConstants {
+  const uint32 kUint32Value = 20100722;
+  const double kDoubleValue = 12.34567;
+};

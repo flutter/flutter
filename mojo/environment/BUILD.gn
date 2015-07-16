@@ -1,0 +1,54 @@
+# Copyright 2014 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+source_set("chromium") {
+  output_name = "mojo_environment_chromium"
+
+  sources = [
+    "environment.cc",
+
+    # TODO(vtl): This is kind of ugly. (See TODO in logging.h.)
+    "../public/cpp/environment/async_waiter.h",
+    "../public/cpp/environment/lib/async_waiter.cc",
+    "../public/cpp/environment/lib/logging.cc",
+    "../public/cpp/environment/lib/scoped_task_tracking.cc",
+    "../public/cpp/environment/lib/scoped_task_tracking.h",
+    "../public/cpp/environment/logging.h",
+  ]
+
+  public_deps = [
+    ":chromium_impl",
+  ]
+
+  deps = [
+    "//mojo/public/c/environment",
+    "//mojo/public/cpp/bindings:callback",
+    "//mojo/public/cpp/environment",
+    "//mojo/public/cpp/system",
+  ]
+}
+
+component("chromium_impl") {
+  output_name = "mojo_environment_impl"
+  visibility = [ "//mojo/*" ]
+
+  sources = [
+    "default_async_waiter_impl.cc",
+    "default_async_waiter_impl.h",
+    "default_logger_impl.cc",
+    "default_logger_impl.h",
+    "default_run_loop_impl.cc",
+    "default_run_loop_impl.h",
+    "default_task_tracker_impl.cc",
+    "default_task_tracker_impl.h",
+  ]
+
+  deps = [
+    "//base",
+    "//base/third_party/dynamic_annotations",
+    "//mojo/common",
+    "//mojo/public/c/environment",
+    "//mojo/public/cpp/environment",
+  ]
+}

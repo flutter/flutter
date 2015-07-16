@@ -1,0 +1,11 @@
+Metadata-Version: 1.0
+Name: pyximport
+Version: 1.0
+Summary: Hooks to build and run Pyrex files as if they were simple Python files
+Home-page: http://www.prescod.net/pyximport
+Author: Paul Prescod
+Author-email: paul@prescod.net
+License: Python
+Description: UNKNOWN
+Keywords: pyrex import hook
+Platform: UNKNOWN

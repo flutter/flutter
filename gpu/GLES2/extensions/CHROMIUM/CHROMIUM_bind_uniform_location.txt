@@ -1,0 +1,131 @@
+Name
+
+    CHROMIUM_bind_uniform_location
+
+Name Strings
+
+    GL_CHROMIUM_bind_uniform_location
+
+Version
+
+    Last Modifed Date: June 20, 2012
+
+Dependencies
+
+    OpenGL ES 2.0 is required.
+
+Overview
+
+    This extension is simlar to glBindAttribLocation but instead
+    lets you choose a location for a uniform. This allows you
+    to not have to query the locations of uniforms.
+
+    This allows the client program to know the locations of uniforms
+    without having to wait for shaders to compile or GLSL programs to
+    link to query the locations and therefore have no blocking calls
+    when initializing programs.
+
+Issues
+
+    If a uniform is an array you can only call glBindUniformLocation
+    for the location of the first element. Other elements' locations
+    must be queried if you need them. Often this is not an issue
+    because you can set all the elements with a single gl call from
+    the first location.
+
+    Good Example:
+
+        --shader--
+        uniform float u_someArray[4];
+
+        --C--
+        GLint location = 123;
+        glBindUniformLocation(program, location, "u_someArray");
+        glLinkProgram(program);
+        glUseProgram(program);
+
+        // set all 4 floats in u_someArray
+        float values[] = { 0.1f, 0.2f, 0.3f, 0.4f, };
+        glUniform1fv(location, 4, values);
+
+    Bad example 1:
+
+        GLint location = 123;
+        glBindUniformLocation(program, location, "u_someArray");
+        glLinkProgram(program);
+        glUseProgram(program);
+
+        // set floats in u_someArray one at a time
+        glUniform1f(location, 0.1f);
+        glUniform1f(location + 1, 0.2f);  // ERROR! math not allowed on locations
+
+    Bad example 2:
+
+        GLint location0 = 123;
+        GLint location1 = 124;
+        glBindUniformLocation(program, location0, "u_someArray[0]");
+        glBindUniformLocation(program, location1, "u_someArray[1]"); // ERROR!
+        // not allowed to assign locations to array elements
+
+    If you need to set individual elements of a uniform array you must query the
+    location of the each element you wish to set.
+
+New Tokens
+
+    None
+
+New Procedures and Functions
+
+    void BindUniformLocationCHROMIUM (GLuint program, GLint location,
+                                      const GLhchar* name);
+
+    specifes that the uniform variable named <name> in program <program>
+    should be bound to uniform location <location> when the program is next
+    linked.  If <name> was bound previously, its assigned binding is replaced
+    with <location>. <name> must be a null terminated string.  The error
+    INVALID_VALUE is generated if <location> is equal or greater than
+
+    (MAX_VERTEX_UNIFORM_VECTORS + MAX_FRAGMENT_UNIFORM_VECTORS) * 4
+
+    or less than 0. BindUniformLocation has no effect until the program is
+    linked. In particular, it doesn't modify the bindings of active uniforms
+    variables in a program that has already been linked.
+
+    The error INVALID_OPERATION is generated if name starts with the reserved
+    "gl_" prefix. The error INVALID_VALUE is generated if name ends with
+    an array element expression other than "[0]".
+
+    When a program is linked, any active uniforms without a binding specified
+    through BindUniformLocation will be automatically be bound to locations by
+    the GL.  Such bindings can be queried using the command
+    GetUniformLocation.
+
+    BindUniformLocation may be issued before any shader objects are attached
+    to a program object.  Hence it is allowed to bind any name (except a name
+    starting with "gl_") to an index, including a name that is never used as a
+    uniform in any shader object.  Assigned bindings for uniform variables
+    that do not exist or are not active are ignored.
+
+    It is possible for an application to bind more than one uniform name to
+    the same location.  This is referred to as aliasing.  This will only work
+    if only one of the aliased uniforms is active in the executable program,
+    or if no path through the shader consumes more than one uniform of a set
+    of uniforms aliased to the same location.  A link error can occur if the
+    linker determines that every path through the shader consumes multiple
+    aliased uniforms, but implementations are not required to generate an
+    error in this case.  The compiler and linker are allowed to assume that no
+    aliasing is done, and may employ optimizations that work only in the
+    absence of aliasing.
+
+Errors
+
+    None.
+
+New State
+
+    None.
+
+Revision History
+
+    7/20/2012    Documented the extension
+

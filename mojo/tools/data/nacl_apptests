@@ -1,0 +1,33 @@
+# This file contains a list of NaCl Mojo gtest unit tests.
+# This must be a valid python dictionary.
+# TODO(vtl|msw): Add a way of specifying data dependencies.
+tests = [
+  # TODO(ncbray): support other architectures.
+  {
+    "test": "mojo:clipboard_apptests_x64.nexe",
+  },
+  {
+    "test": "mojo:example_apptests_x64.nexe",
+    # ExampleApplicationTest.CheckCommandLineArg checks --example_apptest_arg.
+    "test-args": ["--example_apptest_arg"],
+  },
+  {
+    "test": "mojo:files_apptests_x64.nexe",
+  },
+  {
+    "test": "mojo:mojo_view_manager_client_apptests_x64.nexe",
+    "shell-args": ["--args-for=mojo:native_viewport_service --use-headless-config --use-osmesa"],
+  },
+  {
+    "test": "mojo:view_manager_service_apptests_x64.nexe",
+    "type": "gtest_isolated",
+    "shell-args": ["--args-for=mojo:native_viewport_service --use-headless-config --use-osmesa"],
+  },
+  {
+    "test": "mojo:window_manager_apptests_x64.nexe",
+  },
+  {
+    "test": "mojo:shell_apptests_x64.nexe",
+  },
+  # TODO(ncbray): http_server_apptests (uses two-stage data pipe reads)
+]

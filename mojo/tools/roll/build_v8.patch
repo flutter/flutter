@@ -1,0 +1,11 @@
+diff --git a/build/module_args/v8.gni b/build/module_args/v8.gni
+index 8b5204c..aa2848c 100644
+--- a/build/module_args/v8.gni
++++ b/build/module_args/v8.gni
+@@ -9,5 +9,5 @@ if (is_android) {
+ # TODO(sky): nuke this. Temporary while sorting out http://crbug.com/465456.
+ enable_correct_v8_arch = false
+ 
+-v8_use_external_startup_data = !(is_chromeos || is_win)
++v8_use_external_startup_data = false
+ v8_extra_library_files = []

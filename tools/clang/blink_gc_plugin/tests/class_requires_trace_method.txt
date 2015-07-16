@@ -1,0 +1,20 @@
+In file included from class_requires_trace_method.cpp:5:
+./class_requires_trace_method.h:14:1: warning: [blink-gc] Class 'PartObject' requires a trace method.
+class PartObject {
+^
+./class_requires_trace_method.h:17:5: note: [blink-gc] Untraced field 'm_obj' declared here:
+    Member<HeapObject> m_obj;
+    ^
+./class_requires_trace_method.h:20:1: warning: [blink-gc] Class 'HeapObject' requires a trace method.
+class HeapObject : public GarbageCollected<HeapObject> {
+^
+./class_requires_trace_method.h:22:5: note: [blink-gc] Untraced field 'm_part' declared here:
+    PartObject m_part;
+    ^
+./class_requires_trace_method.h:31:1: warning: [blink-gc] Class 'HeapObjectMixin' which inherits from GarbageCollectedMixin must locally declare and override trace(Visitor*)
+class HeapObjectMixin : public GarbageCollected<HeapObjectMixin>, public Mixin {
+^
+./class_requires_trace_method.h:40:1: warning: [blink-gc] Class 'HeapObjectMixin2' which inherits from GarbageCollectedMixin must locally declare and override trace(Visitor*)
+class HeapObjectMixin2
+^
+4 warnings generated.

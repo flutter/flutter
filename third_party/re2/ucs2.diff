@@ -1,0 +1,567 @@
+This is a dump from Google's source control system of the change
+that removed UCS-2 support from RE2.  As the explanation below
+says, UCS-2 mode is fundamentally at odds with things like ^ and $,
+so it never really worked very well.  But if you are interested in using
+it without those operators, it did work for that.  It assumed that the
+UCS-2 data was in the native host byte order.
+
+If you are interested in adding UCS-2 mode back, this patch might
+be a good starting point.
+
+
+Change 12780686 by rsc@rsc-re2 on 2009/09/16 15:30:15
+
+	Retire UCS-2 mode.
+	
+	I added it as an experiment for V8, but it
+	requires 2-byte lookahead to do completely,
+	and RE2 has 1-byte lookahead (enough for UTF-8)
+	as a fairly deep fundamental assumption,
+	so it did not support ^ or $.
+
+==== re2/bitstate.cc#2 - re2/bitstate.cc#3 ====
+re2/bitstate.cc#2:314,321 - re2/bitstate.cc#3:314,319
+      cap_[0] = p;
+      if (TrySearch(prog_->start(), p))  // Match must be leftmost; done.
+        return true;
+-     if (prog_->flags() & Regexp::UCS2)
+-       p++;
+    }
+    return false;
+  }
+==== re2/compile.cc#17 - re2/compile.cc#18 ====
+re2/compile.cc#17:95,101 - re2/compile.cc#18:95,100
+  // Input encodings.
+  enum Encoding {
+    kEncodingUTF8 = 1,  // UTF-8 (0-10FFFF)
+-   kEncodingUCS2,     // UCS-2 (0-FFFF), native byte order
+    kEncodingLatin1,    // Latin1 (0-FF)
+  };
+  
+re2/compile.cc#17:168,176 - re2/compile.cc#18:167,172
+    void AddRuneRangeLatin1(Rune lo, Rune hi, bool foldcase);
+    void AddRuneRangeUTF8(Rune lo, Rune hi, bool foldcase);
+    void Add_80_10ffff();
+-   void AddRuneRangeUCS2(Rune lo, Rune hi, bool foldcase);
+-   void AddUCS2Pair(uint8 lo1, uint8 hi1, bool fold1,
+-                    uint8 lo2, uint8 hi2, bool fold2);
+  
+    // New suffix that matches the byte range lo-hi, then goes to next.
+    Inst* RuneByteSuffix(uint8 lo, uint8 hi, bool foldcase, Inst* next);
+re2/compile.cc#17:475,481 - re2/compile.cc#18:471,477
+  
+  // Converts rune range lo-hi into a fragment that recognizes
+  // the bytes that would make up those runes in the current
+- // encoding (Latin 1, UTF-8, or UCS-2).
++ // encoding (Latin 1 or UTF-8).
+  // This lets the machine work byte-by-byte even when
+  // using multibyte encodings.
+  
+re2/compile.cc#17:488,496 - re2/compile.cc#18:484,489
+      case kEncodingLatin1:
+        AddRuneRangeLatin1(lo, hi, foldcase);
+        break;
+-     case kEncodingUCS2:
+-       AddRuneRangeUCS2(lo, hi, foldcase);
+-       break;
+    }
+  }
+  
+re2/compile.cc#17:503,581 - re2/compile.cc#18:496,501
+    AddSuffix(RuneByteSuffix(lo, hi, foldcase, NULL));
+  }
+  
+- // Test whether 16-bit values are big or little endian.
+- static bool BigEndian() {
+-   union {
+-     char byte[2];
+-     int16 endian;
+-   } u;
+- 
+-   u.byte[0] = 1;
+-   u.byte[1] = 2;
+-   return u.endian == 0x0102;
+- }
+- 
+- void Compiler::AddUCS2Pair(uint8 lo1, uint8 hi1, bool fold1,
+-                            uint8 lo2, uint8 hi2, bool fold2) {
+-   Inst* ip;
+-   if (reversed_) {
+-     ip = RuneByteSuffix(lo1, hi1, fold1, NULL);
+-     ip = RuneByteSuffix(lo2, hi2, fold2, ip);
+-   } else {
+-     ip = RuneByteSuffix(lo2, hi2, fold2, NULL);
+-     ip = RuneByteSuffix(lo1, hi1, fold1, ip);
+-   }
+-   AddSuffix(ip);
+- }
+- 
+- void Compiler::AddRuneRangeUCS2(Rune lo, Rune hi, bool foldcase) {
+-   if (lo > hi || lo > 0xFFFF)
+-     return;
+-   if (hi > 0xFFFF)
+-     hi = 0xFFFF;
+- 
+-   // We'll assemble a pattern assuming big endian.
+-   // If the machine isn't, tell Cat to reverse its arguments.
+-   bool oldreversed = reversed_;
+-   if (!BigEndian()) {
+-     reversed_ = !oldreversed;
+-   }
+- 
+-   // Split into bytes.
+-   int lo1 = lo >> 8;
+-   int lo2 = lo & 0xFF;
+-   int hi1 = hi >> 8;
+-   int hi2 = hi & 0xFF;
+- 
+-   if (lo1 == hi1) {
+-     // Easy case: high bits are same in both.
+-     // Only do ASCII case folding on the second byte if the top byte is 00.
+-     AddUCS2Pair(lo1, lo1, false, lo2, hi2, lo1==0 && foldcase);
+-   } else {
+-     // Harder case: different second byte ranges depending on first byte.
+- 
+-     // Initial fragment.
+-     if (lo2 > 0) {
+-       AddUCS2Pair(lo1, lo1, false, lo2, 0xFF, lo1==0 && foldcase);
+-       lo1++;
+-     }
+- 
+-     // Trailing fragment.
+-     if (hi2 < 0xFF) {
+-       AddUCS2Pair(hi1, hi1, false, 0, hi2, false);
+-       hi1--;
+-     }
+- 
+-     // Inner ranges.
+-     if (lo1 <= hi1) {
+-       AddUCS2Pair(lo1, hi1, false, 0, 0xFF, false);
+-     }
+-   }
+- 
+-   // Restore reverse setting.
+-   reversed_ = oldreversed;
+- }
+- 
+  // Table describing how to make a UTF-8 matching machine
+  // for the rune range 80-10FFFF (Runeself-Runemax).
+  // This range happens frequently enough (for example /./ and /[^a-z]/)
+re2/compile.cc#17:707,716 - re2/compile.cc#18:627,634
+  
+  Frag Compiler::Literal(Rune r, bool foldcase) {
+    switch (encoding_) {
+-     default:  // UCS-2 or something new
+-       BeginRange();
+-       AddRuneRange(r, r, foldcase);
+-       return EndRange();
++     default:
++       return kNullFrag;
+  
+      case kEncodingLatin1:
+        return ByteRange(r, r, foldcase);
+re2/compile.cc#17:927,934 - re2/compile.cc#18:845,850
+  
+    if (re->parse_flags() & Regexp::Latin1)
+      c.encoding_ = kEncodingLatin1;
+-   else if (re->parse_flags() & Regexp::UCS2)
+-     c.encoding_ = kEncodingUCS2;
+    c.reversed_ = reversed;
+    if (max_mem <= 0) {
+      c.max_inst_ = 100000;  // more than enough
+re2/compile.cc#17:983,993 - re2/compile.cc#18:899,905
+      c.prog_->set_start_unanchored(c.prog_->start());
+    } else {
+      Frag dot;
+-     if (c.encoding_ == kEncodingUCS2) {
+-       dot = c.Cat(c.ByteRange(0x00, 0xFF, false), c.ByteRange(0x00, 0xFF, false));
+-     } else {
+-       dot = c.ByteRange(0x00, 0xFF, false);
+-     }
++     dot = c.ByteRange(0x00, 0xFF, false);
+      Frag dotloop = c.Star(dot, true);
+      Frag unanchored = c.Cat(dotloop, all);
+      c.prog_->set_start_unanchored(unanchored.begin);
+==== re2/nfa.cc#8 - re2/nfa.cc#9 ====
+re2/nfa.cc#8:426,432 - re2/nfa.cc#9:426,431
+    const char* bp = context.begin();
+    int c = -1;
+    int wasword = 0;
+-   bool ucs2 = prog_->flags() & Regexp::UCS2;
+  
+    if (text.begin() > context.begin()) {
+      c = text.begin()[-1] & 0xFF;
+re2/nfa.cc#8:492,498 - re2/nfa.cc#9:491,497
+        // If there's a required first byte for an unanchored search
+        // and we're not in the middle of any possible matches,
+        // use memchr to search for the byte quickly.
+-       if (!ucs2 && !anchored && first_byte_ >= 0 && runq->size() == 0 &&
++       if (!anchored && first_byte_ >= 0 && runq->size() == 0 &&
+            p < text.end() && (p[0] & 0xFF) != first_byte_) {
+          p = reinterpret_cast<const char*>(memchr(p, first_byte_,
+                                                   text.end() - p));
+re2/nfa.cc#8:505,526 - re2/nfa.cc#9:504,514
+          flag = Prog::EmptyFlags(context, p);
+        }
+  
+-       // In UCS-2 mode, if we need to start a new thread,
+-       // make sure to do it on an even boundary.
+-       if(ucs2 && runq->size() == 0 &&
+-           (p - context.begin()) % 2 && p < text.end()) {
+-         p++;
+-         flag = Prog::EmptyFlags(context, p);
+-       }
+- 
+        // Steal match storage (cleared but unused as of yet)
+        // temporarily to hold match boundaries for new thread.
+-       // In UCS-2 mode, only start the thread on a 2-byte boundary.
+-       if(!ucs2 || (p - context.begin()) % 2 == 0) {
+-         match_[0] = p;
+-         AddToThreadq(runq, start_, flag, p, match_);
+-         match_[0] = NULL;
+-       }
++       match_[0] = p;
++       AddToThreadq(runq, start_, flag, p, match_);
++       match_[0] = NULL;
+      }
+  
+      // If all the threads have died, stop early.
+==== re2/parse.cc#22 - re2/parse.cc#23 ====
+re2/parse.cc#22:160,167 - re2/parse.cc#23:160,165
+      status_(status), stacktop_(NULL), ncap_(0) {
+    if (flags_ & Latin1)
+      rune_max_ = 0xFF;
+-   else if (flags & UCS2)
+-     rune_max_ = 0xFFFF;
+    else
+      rune_max_ = Runemax;
+  }
+re2/parse.cc#22:365,387 - re2/parse.cc#23:363,374
+  bool Regexp::ParseState::PushCarat() {
+    if (flags_ & OneLine) {
+      return PushSimpleOp(kRegexpBeginText);
+-   } else {
+-     if (flags_ & UCS2) {
+-       status_->set_code(kRegexpUnsupported);
+-       status_->set_error_arg("multiline ^ in UCS-2 mode");
+-       return false;
+-     }
+-     return PushSimpleOp(kRegexpBeginLine);
+    }
++   return PushSimpleOp(kRegexpBeginLine);
+  }
+  
+  // Pushes a \b or \B onto the stack.
+  bool Regexp::ParseState::PushWordBoundary(bool word) {
+-   if (flags_ & UCS2) {
+-     status_->set_code(kRegexpUnsupported);
+-     status_->set_error_arg("\\b or \\B in UCS-2 mode");
+-     return false;
+-   }
+    if (word)
+      return PushSimpleOp(kRegexpWordBoundary);
+    return PushSimpleOp(kRegexpNoWordBoundary);
+re2/parse.cc#22:397,407 - re2/parse.cc#23:384,389
+      bool ret = PushSimpleOp(kRegexpEndText);
+      flags_ = oflags;
+      return ret;
+-   }
+-   if (flags_ & UCS2) {
+-     status_->set_code(kRegexpUnsupported);
+-     status_->set_error_arg("multiline $ in UCS-2 mode");
+-     return false;
+    }
+    return PushSimpleOp(kRegexpEndLine);
+  }
+==== re2/re2.cc#34 - re2/re2.cc#35 ====
+re2/re2.cc#34:79,86 - re2/re2.cc#35:79,84
+        return RE2::ErrorBadUTF8;
+      case re2::kRegexpBadNamedCapture:
+        return RE2::ErrorBadNamedCapture;
+-     case re2::kRegexpUnsupported:
+-       return RE2::ErrorUnsupported;
+    }
+    return RE2::ErrorInternal;
+  }
+re2/re2.cc#34:122,130 - re2/re2.cc#35:120,125
+        break;
+      case RE2::Options::EncodingLatin1:
+        flags |= Regexp::Latin1;
+-       break;
+-     case RE2::Options::EncodingUCS2:
+-       flags |= Regexp::UCS2;
+        break;
+    }
+  
+==== re2/re2.h#36 - re2/re2.h#37 ====
+re2/re2.h#36:246,252 - re2/re2.h#37:246,251
+      ErrorBadUTF8,            // invalid UTF-8 in regexp
+      ErrorBadNamedCapture,    // bad named capture group
+      ErrorPatternTooLarge,    // pattern too large (compile failed)
+-     ErrorUnsupported,        // unsupported feature (in UCS-2 mode)
+    };
+  
+    // Predefined common options.
+re2/re2.h#36:570,576 - re2/re2.h#37:569,574
+  
+      enum Encoding {
+        EncodingUTF8 = 1,
+-       EncodingUCS2,      // 16-bit Unicode 0-FFFF only
+        EncodingLatin1
+      };
+  
+==== re2/regexp.cc#15 - re2/regexp.cc#16 ====
+re2/regexp.cc#15:324,333 - re2/regexp.cc#16:324,329
+  // the regexp that remains after the prefix.  The prefix might
+  // be ASCII case-insensitive.
+  bool Regexp::RequiredPrefix(string *prefix, bool *foldcase, Regexp** suffix) {
+-   // Don't even bother for UCS-2; it's time to throw that code away.
+-   if (parse_flags_ & UCS2)
+-     return false;
+- 
+    // No need for a walker: the regexp must be of the form
+    // 1. some number of ^ anchors
+    // 2. a literal char or string
+==== re2/regexp.h#20 - re2/regexp.h#21 ====
+re2/regexp.h#20:187,193 - re2/regexp.h#21:187,192
+    kRegexpBadPerlOp,          // bad perl operator
+    kRegexpBadUTF8,            // invalid UTF-8 in regexp
+    kRegexpBadNamedCapture,    // bad named capture
+-   kRegexpUnsupported,        // unsupported operator
+  };
+  
+  // Error status for certain operations.
+re2/regexp.h#20:307,316 - re2/regexp.h#21:306,314
+                             //   \Q and \E to disable/enable metacharacters
+                             //   (?P<name>expr) for named captures
+                             //   \C to match any single byte
+-     UCS2         = 1<<10,  // Text is in UCS-2, regexp is in UTF-8.
+-     UnicodeGroups = 1<<11, // Allow \p{Han} for Unicode Han group
++     UnicodeGroups = 1<<10, // Allow \p{Han} for Unicode Han group
+                             //   and \P{Han} for its negation.
+-     NeverNL      = 1<<12,  // Never match NL, even if the regexp mentions
++     NeverNL      = 1<<11,  // Never match NL, even if the regexp mentions
+                             //   it explicitly.
+  
+      // As close to Perl as we can get.
+==== re2/testing/backtrack.cc#4 - re2/testing/backtrack.cc#5 ====
+re2/testing/backtrack.cc#4:134,141 - re2/testing/backtrack.cc#5:134,139
+      cap_[0] = p;
+      if (Visit(prog_->start(), p))  // Match must be leftmost; done.
+        return true;
+-     if (prog_->flags() & Regexp::UCS2)
+-       p++;
+    }
+    return false;
+  }
+==== re2/testing/tester.cc#12 - re2/testing/tester.cc#13 ====
+re2/testing/tester.cc#12:144,154 - re2/testing/tester.cc#13:144,152
+  static ParseMode parse_modes[] = {
+    { single_line,                   "single-line"          },
+    { single_line|Regexp::Latin1,    "single-line, latin1"  },
+-   { single_line|Regexp::UCS2,     "single-line, ucs2"   },
+    { multi_line,                    "multiline"            },
+    { multi_line|Regexp::NonGreedy,  "multiline, nongreedy" },
+    { multi_line|Regexp::Latin1,     "multiline, latin1"    },
+-   { multi_line|Regexp::UCS2,      "multiline, ucs2"     },
+  };
+  
+  static string FormatMode(Regexp::ParseFlags flags) {
+re2/testing/tester.cc#12:179,189 - re2/testing/tester.cc#13:177,185
+    RegexpStatus status;
+    regexp_ = Regexp::Parse(regexp_str, flags, &status);
+    if (regexp_ == NULL) {
+-     if (status.code() != kRegexpUnsupported) {
+-       LOG(INFO) << "Cannot parse: " << CEscape(regexp_str_)
+-                 << " mode: " << FormatMode(flags);
+-       error_ = true;
+-     }
++     LOG(INFO) << "Cannot parse: " << CEscape(regexp_str_)
++               << " mode: " << FormatMode(flags);
++     error_ = true;
+      return;
+    }
+    prog_ = regexp_->CompileToProg(0);
+re2/testing/tester.cc#12:230,237 - re2/testing/tester.cc#13:226,231
+      RE2::Options options;
+      if (flags & Regexp::Latin1)
+        options.set_encoding(RE2::Options::EncodingLatin1);
+-     else if (flags & Regexp::UCS2)
+-       options.set_encoding(RE2::Options::EncodingUCS2);
+      if (kind_ == Prog::kLongestMatch)
+        options.set_longest_match(true);
+      re2_ = new RE2(re, options);
+re2/testing/tester.cc#12:281,379 - re2/testing/tester.cc#13:275,280
+      delete re2_;
+  }
+  
+- // Converts UTF-8 string in text into UCS-2 string in new_text.
+- static bool ConvertUTF8ToUCS2(const StringPiece& text, StringPiece* new_text) {
+-   const char* p = text.begin();
+-   const char* ep = text.end();
+-   uint16* q = new uint16[ep - p];
+-   uint16* q0 = q;
+- 
+-   int n;
+-   Rune r;
+-   for (; p < ep; p += n) {
+-     if (!fullrune(p, ep - p)) {
+-       delete[] q0;
+-       return false;
+-     }
+-     n = chartorune(&r, p);
+-     if (r > 0xFFFF) {
+-       delete[] q0;
+-       return false;
+-     }
+-     *q++ = r;
+-   }
+-   *new_text = StringPiece(reinterpret_cast<char*>(q0), 2*(q - q0));
+-   return true;
+- }
+- 
+- // Rewrites *sp from being a pointer into text8 (UTF-8)
+- // to being a pointer into text16 (equivalent text but in UCS-2).
+- static void AdjustUTF8ToUCS2(const StringPiece& text8, const StringPiece& text16,
+-                               StringPiece *sp) {
+-   if (sp->begin() == NULL && text8.begin() != NULL)
+-     return;
+- 
+-   int nrune = 0;
+-   int n;
+-   Rune r;
+-   const char* p = text8.begin();
+-   const char* ep = text8.end();
+-   const char* spbegin = NULL;
+-   const char* spend = NULL;
+-   for (;;) {
+-     if (p == sp->begin())
+-       spbegin = text16.begin() + sizeof(uint16)*nrune;
+-     if (p == sp->end())
+-       spend = text16.begin() + sizeof(uint16)*nrune;
+-     if (p >= ep)
+-       break;
+-     n = chartorune(&r, p);
+-     p += n;
+-     nrune++;
+-   }
+-   if (spbegin == NULL || spend == NULL) {
+-     LOG(FATAL) << "Error in AdjustUTF8ToUCS2 "
+-                << CEscape(text8) << " "
+-                << (int)(sp->begin() - text8.begin()) << " "
+-                << (int)(sp->end() - text8.begin());
+-   }
+-   *sp = StringPiece(spbegin, spend - spbegin);
+- }
+- 
+- // Rewrites *sp from begin a pointer into text16 (UCS-2)
+- // to being a pointer into text8 (equivalent text but in UTF-8).
+- static void AdjustUCS2ToUTF8(const StringPiece& text16, const StringPiece& text8,
+-                               StringPiece* sp) {
+-   if (sp->begin() == NULL)
+-     return;
+- 
+-   int nrune = 0;
+-   int n;
+-   Rune r;
+-   const char* p = text8.begin();
+-   const char* ep = text8.end();
+-   const char* spbegin = NULL;
+-   const char* spend = NULL;
+-   for (;;) {
+-     if (nrune == (sp->begin() - text16.begin())/2)
+-       spbegin = p;
+-     if (nrune == (sp->end() - text16.begin())/2)
+-       spend = p;
+-     if (p >= ep)
+-       break;
+-     n = chartorune(&r, p);
+-     p += n;
+-     nrune++;
+-   }
+-   if (text8.begin() != NULL && (spbegin == NULL || spend == NULL)) {
+-     LOG(FATAL) << "Error in AdjustUCS2ToUTF8 "
+-                << CEscape(text16) << " "
+-                << (int)(sp->begin() - text16.begin()) << " "
+-                << (int)(sp->end() - text16.begin());
+-   }
+-   *sp = StringPiece(spbegin, spend - spbegin);
+- }
+- 
+  // Runs a single search using the named engine type.
+  // This interface hides all the irregularities of the various
+  // engine interfaces from the rest of this file.
+re2/testing/tester.cc#12:393,411 - re2/testing/tester.cc#13:294,300
+  
+    StringPiece text = orig_text;
+    StringPiece context = orig_context;
+-   bool ucs2 = false;
+  
+-   if ((flags() & Regexp::UCS2) && type != kEnginePCRE) {
+-     if (!ConvertUTF8ToUCS2(orig_context, &context)) {
+-       result->skipped = true;
+-       return;
+-     }
+- 
+-     // Rewrite context to refer to new text.
+-     AdjustUTF8ToUCS2(orig_context, context, &text);
+-     ucs2 = true;
+-   }
+- 
+    switch (type) {
+      default:
+        LOG(FATAL) << "Bad RunSearch type: " << (int)type;
+re2/testing/tester.cc#12:557,577 - re2/testing/tester.cc#13:446,451
+      }
+    }
+  
+-   // If we did UCS-2 matching, rewrite the matches to refer
+-   // to the original UTF-8 text.
+-   if (ucs2) {
+-     if (result->matched) {
+-       if (result->have_submatch0) {
+-         AdjustUCS2ToUTF8(context, orig_context, &result->submatch[0]);
+-       } else if (result->have_submatch) {
+-         for (int i = 0; i < nsubmatch; i++) {
+-           AdjustUCS2ToUTF8(context, orig_context, &result->submatch[i]);
+-         }
+-       }
+-     }
+-     delete[] context.begin();
+-   }
+- 
+    if (!result->matched)
+      memset(result->submatch, 0, sizeof result->submatch);
+  }
+re2/testing/tester.cc#12:596,617 - re2/testing/tester.cc#13:470,475
+    return true;
+  }
+  
+- // Check whether text uses only Unicode points <= 0xFFFF
+- // (in the BMP).
+- static bool IsBMP(const StringPiece& text) {
+-   const char* p = text.begin();
+-   const char* ep = text.end();
+-   while (p < ep) {
+-     if (!fullrune(p, ep - p))
+-       return false;
+-     Rune r;
+-     p += chartorune(&r, p);
+-     if (r > 0xFFFF)
+-       return false;
+-   }
+-   return true;
+- }
+- 
+  // Runs a single test.
+  bool TestInstance::RunCase(const StringPiece& text, const StringPiece& context,
+                             Prog::Anchor anchor) {
+re2/testing/tester.cc#12:619,625 - re2/testing/tester.cc#13:477,483
+    Result correct;
+    RunSearch(kEngineBacktrack, text, context, anchor, &correct);
+    if (correct.skipped) {
+-     if (regexp_ == NULL || !IsBMP(context))  // okay to skip in UCS-2 mode
++     if (regexp_ == NULL)
+        return true;
+      LOG(ERROR) << "Skipped backtracking! " << CEscape(regexp_str_)
+                 << " " << FormatMode(flags_);

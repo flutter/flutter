@@ -1,0 +1,2 @@
+# Flaky, see http://crbug.com/118370
+SyncSchedulerTest.TransientPollFailure

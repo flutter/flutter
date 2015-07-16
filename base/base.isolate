@@ -1,0 +1,98 @@
+# Copyright 2014 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+{
+  'includes': [
+    # While the target 'base' doesn't depend on ../third_party/icu/icu.gyp
+    # itself, virtually all targets using it has to include icu. The only
+    # exception is the Windows sandbox (?).
+    '../third_party/icu/icu.isolate',
+    # Sanitizer-instrumented third-party libraries (if enabled).
+    '../third_party/instrumented_libraries/instrumented_libraries.isolate',
+  ],
+  'conditions': [
+    ['use_custom_libcxx==1', {
+      'variables': {
+        'files': [
+          '<(PRODUCT_DIR)/lib/libc++.so',
+        ],
+      },
+    }],
+    ['OS=="mac" and asan==1', {
+      'variables': {
+        'files': [
+          '<(PRODUCT_DIR)/libclang_rt.asan_osx_dynamic.dylib',
+        ],
+      },
+    }],
+    ['OS=="win"', {
+      # Required for base/stack_trace_win.cc to symbolize correctly.
+      'variables': {
+        'files': [
+          '<(PRODUCT_DIR)/dbghelp.dll',
+        ],
+      },
+    }],
+    ['OS=="win" and asan==1 and component=="shared_library"', {
+      'variables': {
+        'files': [
+          '../third_party/llvm-build/Release+Asserts/lib/clang/3.7.0/lib/windows/clang_rt.asan_dynamic-i386.dll',
+        ],
+      },
+    }],
+    ['OS=="linux" and (asan==1 or lsan==1 or msan==1 or tsan==1)', {
+      'variables': {
+        'files': [
+          # For llvm-symbolizer.
+          '../third_party/llvm-build/Release+Asserts/lib/libstdc++.so.6',
+        ],
+      },
+    }],
+    ['asan==1 or lsan==1 or msan==1 or tsan==1', {
+      'variables': {
+        'files': [
+          '../tools/valgrind/asan/',
+          '../third_party/llvm-build/Release+Asserts/bin/llvm-symbolizer<(EXECUTABLE_SUFFIX)',
+        ],
+      },
+    }],
+    # Copy the VS runtime DLLs into the isolate so that they
+    # don't have to be preinstalled on the target machine.
+    ['OS=="win" and component=="shared_library" and CONFIGURATION_NAME=="Debug"', {
+      'variables': {
+        'files': [
+          '<(PRODUCT_DIR)/x64/msvcp120d.dll',
+          '<(PRODUCT_DIR)/x64/msvcr120d.dll',
+        ],
+      },
+    }],
+    ['OS=="win" and component=="shared_library" and CONFIGURATION_NAME=="Release"', {
+      'variables': {
+        'files': [
+          '<(PRODUCT_DIR)/x64/msvcp120.dll',
+          '<(PRODUCT_DIR)/x64/msvcr120.dll',
+        ],
+      },
+    }],
+    ['OS=="win" and component=="shared_library" and (CONFIGURATION_NAME=="Debug" or CONFIGURATION_NAME=="Debug_x64")', {
+      'variables': {
+        'files': [
+          '<(PRODUCT_DIR)/msvcp120d.dll',
+          '<(PRODUCT_DIR)/msvcr120d.dll',
+        ],
+      },
+    }],
+    ['OS=="win" and component=="shared_library" and (CONFIGURATION_NAME=="Release" or CONFIGURATION_NAME=="Release_x64")', {
+      'variables': {
+        'files': [
+          '<(PRODUCT_DIR)/msvcp120.dll',
+          '<(PRODUCT_DIR)/msvcr120.dll',
+        ],
+      },
+    }],
+    # Workaround for https://code.google.com/p/swarming/issues/detail?id=211
+    ['asan==0 or lsan==0 or msan==0 or tsan==0', {
+      'variables': {},
+    }],
+  ],
+}

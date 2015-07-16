@@ -1,0 +1,19 @@
+[dist4]message_header  // num_bytes
+[u4]0                  // version
+[u4]8                  // name
+[u4]0                  // flags
+[anchr]message_header
+
+[dist4]method8_params  // num_bytes
+[u4]0                  // version
+[dist8]param0_ptr      // param0
+[anchr]method8_params
+
+[anchr]param0_ptr
+[dist4]array_param  // num_bytes
+[u4]0x20000001      // num_elements: The corresponding array size should be
+                    // 0x20000001 * 8 + 8 = 0x100000010 which is
+                    // 2^32 + 16 (base-10), while |num_bytes| is a 32-bit
+                    // unsigned integer and its value is 16.
+[u8]0
+[anchr]array_param

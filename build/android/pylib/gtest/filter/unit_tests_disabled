@@ -1,0 +1,119 @@
+# List of suppressions
+
+# The UDP related tests currently do not work on Android because
+# we lack a UDP forwarder tool.
+NetworkStatsTestUDP.*
+
+# Missing test resource of 16MB.
+HistoryProfileTest.TypicalProfileVersion
+
+# crbug.com/139408
+SQLitePersistentCookieStoreTest.TestDontLoadOldSessionCookies
+SQLitePersistentCookieStoreTest.PersistIsPersistent
+
+# crbug.com/139433
+AutofillTableTest.AutofillProfile*
+AutofillTableTest.UpdateAutofillProfile
+
+# crbug.com/139400
+AutofillProfileTest.*
+CreditCardTest.SetInfoExpirationMonth
+
+# crbug.com/139398
+DownloadItemModelTest.InterruptTooltip
+
+# Tests crashing in the APK
+# l10n_util.cc(655)] Check failed: std::string::npos != pos
+DownloadItemModelTest.InterruptStatus
+# l10n_util.cc(655)] Check failed: std::string::npos != pos
+WebsiteSettingsTest.OnSiteDataAccessed
+
+# crbug.com/139423
+ValueStoreFrontendTest.GetExistingData
+
+# crbug.com/139421
+ChromeSelectFilePolicyTest.ExpectAsynchronousListenerCall
+
+# http://crbug.com/139033
+ChromeDownloadManagerDelegateTest.StartDownload_PromptAlways
+
+# Extension support is limited on Android.
+# Some of these can be enabled if we register extension related prefs in
+# browser_prefs.cc
+ExtensionTest.*
+ExtensionAPI.*
+ExtensionFileUtilTest.*
+ExtensionPermissionsTest.*
+ExtensionUnpackerTest.*
+ActiveTabTest.*
+ExtensionAppsPromo.*
+ComponentLoaderTest.*
+ExtensionFromUserScript.*
+ExtensionFromWebApp.*
+ExtensionIconManagerTest.*
+ExtensionServiceTest.*
+ExtensionServiceTestSimple.*
+ExtensionSourcePriorityTest.*
+ExtensionSpecialStoragePolicyTest.*
+ExternalPolicyProviderTest.*
+ExternalProviderImplTest.*
+MenuManagerTest.*
+PageActionControllerTest.*
+PermissionsUpdaterTest.*
+ImageLoaderTest.*
+ImageLoadingTrackerTest.*
+ExtensionSettingsFrontendTest.*
+ExtensionSettingsSyncTest.*
+ExtensionUpdaterTest.*
+UserScriptListenerTest.*
+WebApplicationTest.GetShortcutInfoForTab
+ExtensionActionIconFactoryTest.*
+
+# crbug.com/139411
+AutocompleteProviderTest.*
+HistoryContentsProviderBodyOnlyTest.*
+HistoryContentsProviderTest.*
+HQPOrderingTest.*
+SearchProviderTest.*
+
+ProtocolHandlerRegistryTest.TestOSRegistrationFailure
+
+# crbug.com/139418
+SQLiteServerBoundCertStoreTest.TestUpgradeV1
+SQLiteServerBoundCertStoreTest.TestUpgradeV2
+
+ProfileSyncComponentsFactoryImplTest.*
+PermissionsTest.GetWarningMessages_Plugins
+ImageOperations.ResizeShouldAverageColors
+
+# crbug.com/138275
+PrerenderTest.*
+RenderWidgetTest.OnMsgPaintAtSize
+
+# crbug.com/139643
+VariationsUtilTest.DisableAfterInitialization
+VariationsUtilTest.AssociateGoogleVariationID
+VariationsUtilTest.NoAssociation
+
+# crbug.com/141473
+AutofillManagerTest.UpdatePasswordSyncState
+AutofillManagerTest.UpdatePasswordGenerationState
+
+# crbug.com/144227
+ExtensionIconImageTest.*
+
+# crbug.com/145843
+EntropyProviderTest.UseOneTimeRandomizationSHA1
+EntropyProviderTest.UseOneTimeRandomizationPermuted
+
+# crbug.com/147500
+ManifestTest.RestrictedKeys
+
+# crbug.com/152599
+SyncSearchEngineDataTypeControllerTest.*
+
+# crbug.com/256259
+DiagnosticsModelTest.RunAll
+
+# Death tests are not supported with apks.
+*DeathTest*

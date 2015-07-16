@@ -1,0 +1,27 @@
+// Copyright 2014 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+module http_server;
+
+import "http_server/public/interfaces/http_request.mojom";
+import "http_server/public/interfaces/http_response.mojom";
+
+interface HttpServer {
+  // Sets a handler for URLs matching a regex pattern. Handlers are considered
+  // in the order they were registered.
+  //
+  // Returns false if there was already a handler registered for the given
+  // pattern.
+  //
+  // To unregister a handler, destroy the underlying pipe.
+  SetHandler(string pattern, HttpHandler handler) => (bool success);
+
+  // Returns the TCP port at which the server is running. This will not return
+  // until the server is ready, ie. listening for connections.
+  GetPort() => (uint16 port);
+};
+
+interface HttpHandler {
+  HandleRequest(HttpRequest request) => (HttpResponse response);
+};

@@ -1,0 +1,96 @@
+diff --git a/gold/gold.cc b/gold/gold.cc
+index 4833aec..bdfb33d 100644
+--- a/gold/gold.cc
++++ b/gold/gold.cc
+@@ -808,6 +808,8 @@ queue_final_tasks(const General_options& options,
+   if (!any_postprocessing_sections)
+     {
+       input_sections_blocker = new Task_token(true);
++      // Write_symbols_task, Relocate_tasks.
++      input_sections_blocker->add_blocker();
+       input_sections_blocker->add_blockers(input_objects->number_of_relobjs());
+     }
+ 
+@@ -836,6 +838,7 @@ queue_final_tasks(const General_options& options,
+ 
+   // Queue a task to write out the output sections.
+   workqueue->queue(new Write_sections_task(layout, of, output_sections_blocker,
++					   input_sections_blocker,
+ 					   final_blocker));
+ 
+   // Queue a task to write out everything else.
+diff --git a/gold/layout.cc b/gold/layout.cc
+index 82db775..ef0a879 100644
+--- a/gold/layout.cc
++++ b/gold/layout.cc
+@@ -5532,6 +5532,8 @@ void
+ Write_sections_task::locks(Task_locker* tl)
+ {
+   tl->add(this, this->output_sections_blocker_);
++  if (this->input_sections_blocker_ != NULL)
++    tl->add(this, this->input_sections_blocker_);
+   tl->add(this, this->final_blocker_);
+ }
+ 
+diff --git a/gold/layout.h b/gold/layout.h
+index 7c0113c..032f5f3 100644
+--- a/gold/layout.h
++++ b/gold/layout.h
+@@ -1454,9 +1454,11 @@ class Write_sections_task : public Task
+  public:
+   Write_sections_task(const Layout* layout, Output_file* of,
+ 		      Task_token* output_sections_blocker,
++		      Task_token* input_sections_blocker,
+ 		      Task_token* final_blocker)
+     : layout_(layout), of_(of),
+       output_sections_blocker_(output_sections_blocker),
++      input_sections_blocker_(input_sections_blocker),
+       final_blocker_(final_blocker)
+   { }
+ 
+@@ -1481,6 +1483,7 @@ class Write_sections_task : public Task
+   const Layout* layout_;
+   Output_file* of_;
+   Task_token* output_sections_blocker_;
++  Task_token* input_sections_blocker_;
+   Task_token* final_blocker_;
+ };
+ 
+diff --git a/gold/testsuite/Makefile.am b/gold/testsuite/Makefile.am
+index dd06d5f..35cd013 100644
+--- a/gold/testsuite/Makefile.am
++++ b/gold/testsuite/Makefile.am
+@@ -2380,10 +2380,9 @@ endif DEFAULT_TARGET_X86_64
+ if DEFAULT_TARGET_X86_64
+ check_PROGRAMS += exception_x86_64_bnd_test
+ exception_x86_64_bnd_test_SOURCES = exception_test_main.cc
+-exception_x86_64_bnd_test_DEPENDENCIES = exception_x86_64_bnd_1.o \
+-					 exception_x86_64_bnd_2.o
++exception_x86_64_bnd_test_DEPENDENCIES = gcctestdir/ld exception_x86_64_bnd_1.o exception_x86_64_bnd_2.o
+ exception_x86_64_bnd_test_LDFLAGS = $(exception_test_LDFLAGS)
+-exception_x86_64_bnd_test_LDADD = $(exception_x86_64_bnd_test_DEPENDENCIES)
++exception_x86_64_bnd_test_LDADD = exception_x86_64_bnd_1.o exception_x86_64_bnd_2.o
+ exception_x86_64_bnd_1.o: exception_test_1.cc gcctestdir/as
+ 	$(CXXCOMPILE) -c -fpic -Bgcctestdir/ -Wa,-madd-bnd-prefix -o $@ $<
+ exception_x86_64_bnd_2.o: exception_test_2.cc gcctestdir/as
+diff --git a/gold/testsuite/Makefile.in b/gold/testsuite/Makefile.in
+index fed610f..8fbb644 100644
+--- a/gold/testsuite/Makefile.in
++++ b/gold/testsuite/Makefile.in
+@@ -2732,11 +2732,9 @@ LDADD = libgoldtest.a ../libgold.a ../../libiberty/libiberty.a $(LIBINTL) \
+ @GCC_TRUE@@NATIVE_LINKER_TRUE@ehdr_start_test_5_LDFLAGS = -Bgcctestdir/
+ @GCC_TRUE@@NATIVE_LINKER_TRUE@ehdr_start_test_5_LDADD = 
+ @DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@exception_x86_64_bnd_test_SOURCES = exception_test_main.cc
+-@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@exception_x86_64_bnd_test_DEPENDENCIES = exception_x86_64_bnd_1.o \
+-@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@					 exception_x86_64_bnd_2.o
+-
++@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@exception_x86_64_bnd_test_DEPENDENCIES = gcctestdir/ld exception_x86_64_bnd_1.o exception_x86_64_bnd_2.o
+ @DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@exception_x86_64_bnd_test_LDFLAGS = $(exception_test_LDFLAGS)
+-@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@exception_x86_64_bnd_test_LDADD = $(exception_x86_64_bnd_test_DEPENDENCIES)
++@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@exception_x86_64_bnd_test_LDADD = exception_x86_64_bnd_1.o exception_x86_64_bnd_2.o
+ @DEFAULT_TARGET_I386_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@SPLIT_DEFSYMS = --defsym __morestack=0x100 --defsym __morestack_non_split=0x200
+ @DEFAULT_TARGET_X86_64_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@SPLIT_DEFSYMS = --defsym __morestack=0x100 --defsym __morestack_non_split=0x200
+ all: $(BUILT_SOURCES)
+-- 
+1.7.1
+

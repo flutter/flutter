@@ -1,0 +1,5 @@
+*.o
+*.txt.uncompressed
+*.bro
+*.unbro
+/tools/bro

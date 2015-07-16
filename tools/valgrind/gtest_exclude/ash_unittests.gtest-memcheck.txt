@@ -1,0 +1,8 @@
+# http://crbug.com/336351
+AutoclickTest.UserInputCancelsAutoclick
+# http://crbug.com/337149
+AutoclickTest.SynthesizedMouseMovesIgnored
+# http://crbug.com/383384
+SystemGestureEventFilterTest.TwoFingerDragDelayed
+# http://crbug.com/421888
+WebNotificationTrayTest.*TouchFeedback*

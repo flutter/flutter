@@ -1,0 +1,35 @@
+diff --git a/re2/dfa.cc b/re2/dfa.cc
+index 2556c0f..f1fc7b0 100644
+--- a/re2/dfa.cc
++++ b/re2/dfa.cc
+@@ -27,6 +27,8 @@
+ #include "util/flags.h"
+ #include "util/sparse_set.h"
+ 
++#define NO_THREAD_SAFETY_ANALYSIS
++
+ DEFINE_bool(re2_dfa_bail_when_slow, true,
+             "Whether the RE2 DFA should bail out early "
+             "if the NFA would be faster (for testing).");
+diff --git a/util/util.h b/util/util.h
+index 471c64f..c46ab1b 100644
+--- a/util/util.h
++++ b/util/util.h
+@@ -27,6 +27,8 @@
+ #include <utility>
+ #include <set>
+ 
++#include "base/third_party/dynamic_annotations/dynamic_annotations.h"
++
+ // Use std names.
+ using std::set;
+ using std::pair;
+@@ -119,8 +121,6 @@ static inline uint64 Hash64StringWithSeed(const char* s, int len, uint32 seed) {
+   return ((uint64)x << 32) | y;
+ }
+ 
+-int RunningOnValgrind();
+-
+ }  // namespace re2
+ 
+ #include "util/arena.h"

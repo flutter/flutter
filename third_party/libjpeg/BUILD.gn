@@ -1,0 +1,79 @@
+# Copyright 2014 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Do not use the targets in this file unless you need a certain libjpeg
+# implementation. Use the meta target //third_party:jpeg instead.
+
+config("libjpeg_config") {
+  include_dirs = [ "." ]
+}
+
+source_set("libjpeg") {
+  sources = [
+    "jcapimin.c",
+    "jcapistd.c",
+    "jccoefct.c",
+    "jccolor.c",
+    "jcdctmgr.c",
+    "jchuff.c",
+    "jchuff.h",
+    "jcinit.c",
+    "jcmainct.c",
+    "jcmarker.c",
+    "jcmaster.c",
+    "jcomapi.c",
+    "jconfig.h",
+    "jcparam.c",
+    "jcphuff.c",
+    "jcprepct.c",
+    "jcsample.c",
+    "jdapimin.c",
+    "jdapistd.c",
+    "jdatadst.c",
+    "jdatasrc.c",
+    "jdcoefct.c",
+    "jdcolor.c",
+    "jdct.h",
+    "jddctmgr.c",
+    "jdhuff.c",
+    "jdhuff.h",
+    "jdinput.c",
+    "jdmainct.c",
+    "jdmarker.c",
+    "jdmaster.c",
+    "jdmerge.c",
+    "jdphuff.c",
+    "jdpostct.c",
+    "jdsample.c",
+    "jerror.c",
+    "jerror.h",
+    "jfdctflt.c",
+    "jfdctfst.c",
+    "jfdctint.c",
+    "jidctflt.c",
+    "jidctfst.c",
+    "jidctint.c",
+    "jinclude.h",
+    "jmemmgr.c",
+    "jmemnobs.c",
+    "jmemsys.h",
+    "jmorecfg.h",
+    "jpegint.h",
+    "jpeglib.h",
+    "jquant1.c",
+    "jquant2.c",
+    "jutils.c",
+    "jversion.h",
+  ]
+
+  defines = [ "NO_GETENV" ]  # getenv() is not thread-safe.
+
+  configs -= [ "//build/config/compiler:chromium_code" ]
+  configs += [
+    ":libjpeg_config",
+    "//build/config/compiler:no_chromium_code",
+  ]
+
+  public_configs = [ ":libjpeg_config" ]
+}

@@ -1,0 +1,20 @@
+/* tests data packing and unpacking */
+
+struct msg {
+	string from_name = 1;
+	string to_name = 2;
+	optional struct[kill] attack = 3;
+	array struct[run] run = 4;
+}
+
+struct kill {
+	string weapon = 0x10121;
+	string action = 2;
+	optional int how_often = 3;
+}
+
+struct run {
+	string how = 1;
+	optional bytes some_bytes = 2;
+	bytes fixed_bytes[24] = 3;
+}

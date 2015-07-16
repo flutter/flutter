@@ -1,0 +1,12 @@
+[handles]4
+
+[dist4]message_header  // num_bytes
+[u4]0                  // version
+[u4]9                  // name
+[u4]0                  // flags
+[anchr]message_header
+
+[dist4]method9_params  // num_bytes
+[u4]0                  // version
+[u8]0                  // param0: A null pointer, which is okay.
+[anchr]method9_params

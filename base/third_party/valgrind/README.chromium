@@ -1,0 +1,11 @@
+Name: valgrind
+URL: http://valgrind.org
+License: BSD
+
+Header files in this directory define runtime macros that determine whether the
+current process is running under Valgrind and tell Memcheck tool about custom
+memory allocators.
+
+These header files were taken from Valgrind source code
+(svn://svn.valgrind.org/valgrind/trunk@11504, dated 21 Jan 2011). The files are
+covered under BSD license as described within.

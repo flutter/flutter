@@ -1,0 +1,141 @@
+Name
+
+    CHROMIUM_copy_texture
+
+Name Strings
+
+    GL_CHROMIUM_copy_texture
+
+Version
+
+    Last Modifed Date: July 16, 2014
+
+Dependencies
+
+    OpenGL ES 2.0 is required.
+
+    CHROMIUM_flipy affects the definition of this extension.
+    EXT_texture_format_BGRA8888 affects the definition of this extension.
+
+Overview
+
+    This extension expands on the functionality provided by the
+    glCopyTexImage2D command.  A new function is exported,
+    glCopyTextureCHROMIUM, that performs the same copy operation as
+    glCopyTexImage2D, while respecting the pixel-storage modifiers
+    UNPACK_FLIP_Y_CHROMIUM, GL_UNPACK_PREMULTIPLY_ALPHA_CHROMIUM and
+    GL_UNPACK_UNPREMULTIPLY_ALPHA_CHROMIUM.
+
+    If GL_UNPACK_PREMULTIPLY_ALPHA_CHROMIUM and
+    GL_UNPACK_UNPREMULTIPLY_ALPHA_CHROMIUM are enabled.  Then no alpha
+    processing occurs.  This is the equivalent of having neither flag set.
+
+    The extension also supports copying BGRA textures and copying
+    EXTERNAL_OES texture to BGRA texture, which is not explicitly
+    granted by EXT_texture_format_BGRA8888.
+
+New Procedures and Functions
+
+    The command
+
+        void glCopyTextureCHROMIUM (GLenum target, GLenum source_id,
+                                    GLenum dest_id,
+                                    GLint internal_format, GLenum dest_type)
+
+    Copies the contents of texture referred to by <source_id> to <dest_id>
+    texture. If <source_id> texture is not defined or has different dimension
+    to <dest_id> texture, define <source_id> texture same to <dest_id> texture.
+
+    Texture level 0 is copied from the source image to level 0 of the
+    destination texture.
+
+    The internal format of the destination texture is converted to that
+    specified by <internal_format>. Must be one of the following symbolic
+    constants: GL_RGB, GL_RGBA
+    The internal format of <source_id> texture must be one of the following
+    symbolic constants: GL_ALPHA, GL_LUMINANCE, GL_LUMINANCE_ALPHA, GL_RGB,
+    GL_RGBA, GL_BGRA_EXT
+    When <source_id> texture doens't contain a superset of the component
+    required by <internal_format>, fill the components by following rules.
+
+                   source format          color components
+             =================================================
+                   GL_ALPHA               (0, 0, 0, A)
+                   GL_LUMINANCE           (L, L, L, 1)
+                   GL_LUMINANCE_ALPHA     (L, L, L, A)
+                   GL_RGB                 (R, G, B, 1)
+                   GL_RGBA                (R, G, B, A)
+                   GL_BGRA_EXT            (R, G, B, A)
+
+    The format type of the destination texture is converted to that specified
+    by <dest_type>.
+
+    <target> uses the same parameters as TexImage2D.
+
+    INVALID_OPERATION is generated if <internal_format> is not one of the valid formats
+    described above.
+
+    INVALID_OPERATION is generated if the internal format of <source_id> is not one of
+    formats from the table above.
+
+    INVALID_VALUE is generated if <target> is not GL_TEXTURE_2D.
+
+    INVALID_VALUE is generated if <source_id> or <dest_id> are not valid texture
+    objects.
+
+    INVALID_VALUE is generated if textures corresponding to <dest_id> have not
+    been bound as GL_TEXTURE_2D object.
+
+    INVALID_VALUE is generated if textures corresponding to <source_id> have not
+    been bound as GL_TEXTURE_2D, GL_TEXTURE_RECTANGLE_ARB or
+    GL_TEXTURE_EXTERNAL_OES objects.
+
+    INVALID_VALUE is generated if level 0 of the source texture is not defined.
+
+    The command
+
+        void glCopySubTextureCHROMIUM (GLenum target, GLenum source_id,
+                                       GLenum dest_id,
+                                       GLint xoffset, GLint yoffset)
+
+    Copies the sub contents of texture referred to by <source_id> to <dest_id>
+    texture without redefining <dest_id> texture.
+
+    See CopyTextureCHROMIUM for the interpretation of the <target> arguments.
+
+    <xoffset> and <yoffset> specify a texel offset in the x and y direction
+    respectively within the destination texture.
+
+    INVALID_OPERATION is generated if source internal_format and destination
+    internal_format are not one of the valid formats described above.
+
+    INVALID_VALUE is generated if <target> is not GL_TEXTURE_2D.
+
+    INVALID_OPERATION is generated if the destination texture has not been
+    defined.
+
+    INVALID_VALUE is generated if level 0 of the source texture or
+    the destination texture is not defined.
+
+    INVALID_VALUE is generated if <xoffset> < 0 , or <yoffset> < 0.
+
+    INVALID_VALUE is generated if (<xoffset> + source_width) > dest_width,
+    or (<yoffset> + source_height) > dest_height.
+
+Errors
+
+    None.
+
+New Tokens
+
+    None.
+
+New State
+
+    None.
+
+Revision History
+
+    8/1/2011    Documented the extension
+    7/4/2013    Add a new parameter dest_type to glCopyTextureCHROMIUM()
+    16/7/2014   Add GL_TEXTURE_RECTANGLE_ARB as valid source_id target.

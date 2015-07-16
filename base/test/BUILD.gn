@@ -1,0 +1,214 @@
+# Copyright (c) 2013 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//build/config/ui.gni")
+
+if (is_android) {
+  import("//build/config/android/rules.gni")
+}
+
+source_set("test_config") {
+  # TODO http://crbug.com/412064 enable this flag all the time.
+  testonly = !is_component_build
+  sources = [
+    "test_switches.cc",
+    "test_switches.h",
+    "test_timeouts.cc",
+    "test_timeouts.h",
+  ]
+  deps = [
+    "//base",
+  ]
+}
+
+# GYP: //base/base.gyp:test_support_base
+source_set("test_support") {
+  # TODO http://crbug.com/412064 enable this flag all the time.
+  testonly = !is_component_build
+  sources = [
+    "expectations/expectation.cc",
+    "expectations/expectation.h",
+    "expectations/parser.cc",
+    "expectations/parser.h",
+    "gtest_util.cc",
+    "gtest_util.h",
+    "gtest_xml_unittest_result_printer.cc",
+    "gtest_xml_unittest_result_printer.h",
+    "gtest_xml_util.cc",
+    "gtest_xml_util.h",
+    "histogram_tester.cc",
+    "histogram_tester.h",
+    "launcher/test_launcher.cc",
+    "launcher/test_launcher.h",
+    "launcher/test_result.cc",
+    "launcher/test_result.h",
+    "launcher/test_results_tracker.cc",
+    "launcher/test_results_tracker.h",
+    "launcher/unit_test_launcher.cc",
+    "launcher/unit_test_launcher.h",
+    "launcher/unit_test_launcher_ios.cc",
+    "mock_chrome_application_mac.h",
+    "mock_chrome_application_mac.mm",
+    "mock_devices_changed_observer.cc",
+    "mock_devices_changed_observer.h",
+    "mock_entropy_provider.cc",
+    "mock_entropy_provider.h",
+    "mock_log.cc",
+    "mock_log.h",
+    "multiprocess_test.cc",
+    "multiprocess_test.h",
+    "multiprocess_test_android.cc",
+    "null_task_runner.cc",
+    "null_task_runner.h",
+    "opaque_ref_counted.cc",
+    "opaque_ref_counted.h",
+    "perf_log.cc",
+    "perf_log.h",
+    "perf_test_suite.cc",
+    "perf_test_suite.h",
+    "perf_time_logger.cc",
+    "perf_time_logger.h",
+    "power_monitor_test_base.cc",
+    "power_monitor_test_base.h",
+    "scoped_locale.cc",
+    "scoped_locale.h",
+    "scoped_path_override.cc",
+    "scoped_path_override.h",
+    "sequenced_task_runner_test_template.cc",
+    "sequenced_task_runner_test_template.h",
+    "sequenced_worker_pool_owner.cc",
+    "sequenced_worker_pool_owner.h",
+    "simple_test_clock.cc",
+    "simple_test_clock.h",
+    "simple_test_tick_clock.cc",
+    "simple_test_tick_clock.h",
+    "task_runner_test_template.cc",
+    "task_runner_test_template.h",
+    "test_discardable_memory_allocator.cc",
+    "test_discardable_memory_allocator.h",
+    "test_file_util.cc",
+    "test_file_util.h",
+    "test_file_util_android.cc",
+    "test_file_util_linux.cc",
+    "test_file_util_mac.cc",
+    "test_file_util_posix.cc",
+    "test_file_util_win.cc",
+    "test_io_thread.cc",
+    "test_io_thread.h",
+    "test_listener_ios.h",
+    "test_listener_ios.mm",
+    "test_mock_time_task_runner.cc",
+    "test_mock_time_task_runner.h",
+    "test_pending_task.cc",
+    "test_pending_task.h",
+    "test_reg_util_win.cc",
+    "test_reg_util_win.h",
+    "test_shortcut_win.cc",
+    "test_shortcut_win.h",
+    "test_simple_task_runner.cc",
+    "test_simple_task_runner.h",
+    "test_suite.cc",
+    "test_suite.h",
+    "test_support_android.cc",
+    "test_support_android.h",
+    "test_support_ios.h",
+    "test_support_ios.mm",
+    "test_ui_thread_android.cc",
+    "test_ui_thread_android.h",
+    "thread_test_helper.cc",
+    "thread_test_helper.h",
+    "trace_event_analyzer.cc",
+    "trace_event_analyzer.h",
+    "trace_to_file.cc",
+    "trace_to_file.h",
+    "user_action_tester.cc",
+    "user_action_tester.h",
+    "values_test_util.cc",
+    "values_test_util.h",
+  ]
+
+  public_deps = [
+    ":test_config",
+    "//base",
+    "//base:i18n",
+    "//base:base_static",
+  ]
+  deps = [
+    "//base/third_party/dynamic_annotations",
+    "//testing/gmock",
+    "//testing/gtest",
+    "//third_party/libxml",
+    "//third_party/icu:icuuc",
+  ]
+
+  if (!is_posix) {
+    sources -= [
+      "scoped_locale.cc",
+      "scoped_locale.h",
+    ]
+  }
+  if (is_ios) {
+    # iOS uses its own unit test launcher.
+    sources -= [ "launcher/unit_test_launcher.cc" ]
+
+    # Pull in specific Mac files for iOS (which have been filtered out
+    # by file name rules).
+    set_sources_assignment_filter([])
+    sources += [ "test_file_util_mac.cc" ]
+  }
+
+  if (is_android) {
+    deps += [ ":base_unittests_jni_headers" ]
+  }
+}
+
+config("perf_test_config") {
+  defines = [ "PERF_TEST" ]
+}
+
+source_set("test_support_perf") {
+  testonly = true
+  sources = [
+    "run_all_perftests.cc",
+  ]
+  deps = [
+    ":test_support",
+    "//base",
+    "//testing/gtest",
+  ]
+
+  public_configs = [ ":perf_test_config" ]
+}
+
+source_set("run_all_unittests") {
+  testonly = true
+  sources = [
+    "run_all_unittests.cc",
+  ]
+  deps = [
+    ":test_support",
+  ]
+}
+
+if (is_linux) {
+  shared_library("malloc_wrapper") {
+    testonly = true
+    sources = [
+      "malloc_wrapper.cc",
+    ]
+    deps = [
+      "//base",
+    ]
+  }
+}
+
+if (is_android) {
+  generate_jni("base_unittests_jni_headers") {
+    sources = [
+      "android/java/src/org/chromium/base/ContentUriTestUtils.java",
+      "android/java/src/org/chromium/base/TestUiThread.java",
+    ]
+    jni_package = "base"
+  }
+}

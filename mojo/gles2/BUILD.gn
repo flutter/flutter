@@ -1,0 +1,52 @@
+# Copyright 2014 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//mojo/public/tools/bindings/mojom.gni")
+
+config("mojo_use_gles2") {
+  defines = [ "MOJO_USE_GLES2_IMPL" ]
+}
+
+config("gles2_use_mojo") {
+  defines = [ "GLES2_USE_MOJO" ]
+}
+
+source_set("gles2") {
+  sources = [
+    "command_buffer_client_impl.cc",
+    "command_buffer_client_impl.h",
+    "gles2_impl.cc",
+    "gles2_context.cc",
+    "gles2_context.h",
+  ]
+
+  defines = [
+    "GL_GLEXT_PROTOTYPES",
+    "MOJO_GLES2_IMPLEMENTATION",
+  ]
+
+  configs += [
+    ":gles2_use_mojo",
+    ":mojo_use_gles2",
+  ]
+  public_configs = [ ":gles2_use_mojo" ]
+  all_dependent_configs = [ ":mojo_use_gles2" ]
+
+  deps = [
+    "//base",
+    "//base/third_party/dynamic_annotations",
+    "//gpu/command_buffer/client",
+    "//gpu/command_buffer/client:gles2_cmd_helper",
+    "//gpu/command_buffer/client:gles2_implementation",
+    "//gpu/command_buffer/client:gles2_interface",
+    "//gpu/command_buffer/common",
+    "//mojo/environment:chromium",
+    "//mojo/public/c/gles2:headers",
+    "//mojo/public/c/system",
+    "//mojo/public/cpp/bindings",
+    "//mojo/public/cpp/system",
+    "//mojo/services/gpu/public/interfaces",
+    "//services/gles2:lib",
+  ]
+}

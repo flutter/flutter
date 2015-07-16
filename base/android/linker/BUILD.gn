@@ -1,0 +1,27 @@
+# Copyright 2014 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//build/config/android/config.gni")
+
+assert(is_android)
+
+# GYP: //base/base.gyp:chromium_android_linker
+shared_library("chromium_android_linker") {
+  sources = [
+    "linker_jni.cc",
+  ]
+
+  # The NDK contains the crazy_linker here:
+  #   '<(android_ndk_root)/crazy_linker.gyp:crazy_linker'
+  # However, we use our own fork.  See bug 384700.
+  deps = [
+    "//third_party/android_crazy_linker",
+  ]
+
+  # TODO(GYP):
+  # The crazy linker is never instrumented.
+  #'cflags!': [
+  #'-finstrument-functions',
+  #],
+}

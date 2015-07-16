@@ -1,0 +1,155 @@
+#!/usr/bin/perl
+# XXX
+
+sub table() {
+	my ($name) = @_;
+	print <<'EOF';
+<table border=0>
+<tr><th>System</th><th>PCRE</th><th>RE2</th></tr>
+EOF
+	foreach my $sys (@sys) {
+		my $ns_pcre = $data{$sys}->{sprintf($name, "PCRE")}->{'ns/op'};
+		my $ns_re2 = $data{$sys}->{sprintf($name, "RE2")}->{'ns/op'};
+		printf "<tr><td>%s</td><td>%.1f µs</td><td>%.1f µs</td></tr>\n", $sysname{$sys}, $ns_pcre/1000., $ns_re2/1000.;
+	}
+	print <<'EOF';
+<tr height=5><td colspan=3></td></tr>
+</table>
+EOF
+}
+
+@sizes = (
+	"8", "16", "32", "64", "128", "256", "512",
+	"1K", "2K", "4K", "8K", "16K", "32K", "64K", "128K", "256K", "512K",
+	"1M", "2M", "4M", "8M", "16M"
+);
+
+%color = (
+	"PCRE" => "0.7 0 0",
+	"RE2" => "0 0 1",
+);
+
+$ngraph = 0;
+
+sub graph() {
+	my ($name) = @_;
+	
+	my $sys = "wreck";
+	my $base = sprintf("regexp3g%d", ++$ngraph);
+
+	open(JGR, ">$base.jgr") || die "open >$base.jgr: $!";
+	printf JGR "bbox -20 -12 392 95\n";
+	printf JGR "newgraph clip x_translate 0.25 y_translate 0.25\n";
+	$ymax = 0;
+	%lastx = ();
+	%lasty = ();
+	foreach my $who ("PCRE", "RE2") {
+		printf JGR "newcurve pts\n";
+		for(my $i=0; $i<@sizes; $i++) {
+			my $key = sprintf("%s%s/%s", $name, $who, $sizes[$i]);
+			my $val = $data{$sys}->{$key}->{'MB/s'};
+			next if !defined($val);
+			if($val > $ymax) {
+				$ymax = $val;
+			}
+			$lastx{$who} = $i;
+			$lasty{$who} = $val;
+			printf JGR "$i %f (* %s *)\n", $val, $key;
+		}
+		my $color = $color{$who};
+		printf JGR "marktype none color $color linethickness 2 linetype solid label : $who\n";
+	}
+	my $n = @sizes;
+	printf JGR "xaxis min -1 max $n size 5 label : text size (bytes)\n";
+	printf JGR "  no_auto_hash_marks hash_labels fontsize 9\n";
+	for($i=0; $i<@sizes; $i+=3) {
+		printf JGR "  hash_at $i hash_label at $i : $sizes[$i]\n";
+	}
+	my $y = 1;
+	while(10*$y <= $ymax) {
+		$y = 10*$y;
+	}
+	for($i=2; $i<=10; $i++) {
+		if($i*$y > $ymax) {
+			$y = $i*$y;
+			last;
+		}
+	}
+	foreach my $who ("PCRE", "RE2") {
+		$x1 = $lastx{$who};
+		$y1 = $lasty{$who};
+		$x1 *= 1.01;
+		my $v = "vjc";
+		if($y1 < 0.05 * $y) {
+			$v = "vjb";
+			$y1 = 0.05 * $y;
+		}
+		printf JGR "newstring x $x1 y $y1 hjl $v : $who\n";
+	}
+	printf JGR "yaxis min 0 max $y size 1 label : speed (MB/s)\n";
+	printf JGR "  hash_labels fontsize 9\n";
+	# printf JGR "legend defaults font Times-Roman fontsize 10 x 0 y $y hjl vjt\n";
+
+	system("jgraph $base.jgr >$base.eps"); # die "system: $!";
+	system("gs -dTextAlphaBits=4 -dGraphicsAlphaBits=4 -dEPSCrop -sDEVICE=png16m -r100 -sOutputFile=$base.png -dBATCH -dQUIT -dQUIET -dNOPAUSE $base.eps");
+	
+	printf "<img src=$base.png>\n"
+	
+}
+
+sub skip() {
+	while(<>) {
+		if(/^<!-- -->/) {
+			print;
+			last;
+		}
+	}
+}
+
+@sys = ("r70", "c2", "wreck", "mini");
+%sysname = (
+	"r70" => "AMD Opteron 8214 HE, 2.2 GHz",
+	"c2" => "Intel Core2 Duo E7200, 2.53 GHz",
+	"wreck" => "Intel Xeon 5150, 2.66 GHz (Mac Pro)",
+	"mini" => "Intel Core2 T5600, 1.83 GHz (Mac Mini)",
+);
+
+%func = (
+	"table" => \&table,
+	"graph" => \&graph,
+	
+);
+
+foreach my $sys (@sys) {
+	open(F, "benchlog.$sys") || die "open benchlog.$sys: $!";
+	my %sysdat;
+	while(<F>) {
+		if(/^([A-Za-z0-9_\/]+)\s+(\d+)\s+(\d+) ns\/op/) {
+			my %row;
+			$row{"name"} = $1;
+			$row{"iter"} = $2;
+			$row{"ns/op"} = $3;
+			if(/([\d.]+) MB\/s/){
+				$row{"MB/s"} = $1;
+			}
+			$sysdat{$row{"name"}} = \%row;
+		}
+	}
+	close F;	
+	$data{$sys} = \%sysdat;
+}
+
+while(<>) {
+	print;
+	if(/^<!-- benchlog (\w+) -->/) {
+		$func{$1}();
+		skip();
+		next;
+	}
+	if(/^<!-- benchlog (\w+) ([%\w]+) -->/) {
+		$func{$1}($2);
+		skip();
+		next;
+	}
+}
+

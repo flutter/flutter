@@ -1,0 +1,172 @@
+#!/usr/bin/env python
+#
+# Copyright (C) 2013 The Android Open Source Project
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+"""stack symbolizes native crash dumps."""
+
+import getopt
+import glob
+import os
+import sys
+
+import stack_core
+import subprocess
+import symbol
+import sys
+
+DEFAULT_SYMROOT='/tmp/symbols'
+
+def PrintUsage():
+  """Print usage and exit with error."""
+  # pylint: disable-msg=C6310
+  print
+  print "  usage: " + sys.argv[0] + " [options] [FILE]"
+  print
+  print "  --symbols-dir=path"
+  print "       the path to a symbols dir, such as =/tmp/out/target/product/dream/symbols"
+  print
+  print "  --chrome-symbols-dir=path"
+  print "       the path to a Chrome symbols dir (can be absolute or relative"
+  print "       to src), such as =out/Debug/lib"
+  print "       If not specified, will look for the newest lib in out/Debug or"
+  print "       out/Release"
+  print
+  print "  --symbols-zip=path"
+  print "       the path to a symbols zip file, such as =dream-symbols-12345.zip"
+  print
+  print "  --more-info"
+  print "  --less-info"
+  print "       Change the level of detail in the output."
+  print "       --more-info is slower and more verbose, but more functions will"
+  print "       be fully qualified with namespace/classname and have full"
+  print "       argument information. Also, the 'stack data' section will be"
+  print "       printed."
+  print
+  print "  --arch=arm|arm64|x86_64|x86|mips"
+  print "       the target architecture"
+  print
+  print "  FILE should contain a stack trace in it somewhere"
+  print "       the tool will find that and re-print it with"
+  print "       source files and line numbers.  If you don't"
+  print "       pass FILE, or if file is -, it reads from"
+  print "       stdin."
+  print
+  # pylint: enable-msg=C6310
+  sys.exit(1)
+
+def UnzipSymbols(symbolfile, symdir=None):
+  """Unzips a file to DEFAULT_SYMROOT and returns the unzipped location.
+
+  Args:
+    symbolfile: The .zip file to unzip
+    symdir: Optional temporary directory to use for extraction
+
+  Returns:
+    A tuple containing (the directory into which the zip file was unzipped,
+    the path to the "symbols" directory in the unzipped file).  To clean
+    up, the caller can delete the first element of the tuple.
+
+  Raises:
+    SymbolDownloadException: When the unzip fails.
+  """
+  if not symdir:
+    symdir = "%s/%s" % (DEFAULT_SYMROOT, hash(symbolfile))
+  if not os.path.exists(symdir):
+    os.makedirs(symdir)
+
+  print "extracting %s..." % symbolfile
+  saveddir = os.getcwd()
+  os.chdir(symdir)
+  try:
+    unzipcode = subprocess.call(["unzip", "-qq", "-o", symbolfile])
+    if unzipcode > 0:
+      os.remove(symbolfile)
+      raise SymbolDownloadException("failed to extract symbol files (%s)."
+                                    % symbolfile)
+  finally:
+    os.chdir(saveddir)
+
+  android_symbols = glob.glob("%s/out/target/product/*/symbols" % symdir)
+  if android_symbols:
+    return (symdir, android_symbols[0])
+  else:
+    # This is a zip of Chrome symbols, so symbol.CHROME_SYMBOLS_DIR needs to be
+    # updated to point here.
+    symbol.CHROME_SYMBOLS_DIR = symdir
+    return (symdir, symdir)
+
+
+def main():
+  try:
+    options, arguments = getopt.getopt(sys.argv[1:], "",
+                                       ["more-info",
+                                        "less-info",
+                                        "chrome-symbols-dir=",
+                                        "symbols-dir=",
+                                        "symbols-zip=",
+                                        "arch=",
+                                        "help"])
+  except getopt.GetoptError, unused_error:
+    PrintUsage()
+
+  zip_arg = None
+  more_info = False
+  for option, value in options:
+    if option == "--help":
+      PrintUsage()
+    elif option == "--symbols-dir":
+      symbol.SYMBOLS_DIR = os.path.expanduser(value)
+    elif option == "--symbols-zip":
+      zip_arg = os.path.expanduser(value)
+    elif option == "--arch":
+      symbol.ARCH = value
+    elif option == "--chrome-symbols-dir":
+      symbol.CHROME_SYMBOLS_DIR = os.path.join(symbol.CHROME_SYMBOLS_DIR, value)
+    elif option == "--more-info":
+      more_info = True
+    elif option == "--less-info":
+      more_info = False
+
+  if len(arguments) > 1:
+    PrintUsage()
+
+  if not arguments or arguments[0] == "-":
+    print "Reading native crash info from stdin"
+    f = sys.stdin
+  else:
+    print "Searching for native crashes in %s" % arguments[0]
+    f = open(arguments[0], "r")
+
+  lines = f.readlines()
+  f.close()
+
+  rootdir = None
+  if zip_arg:
+    rootdir, symbol.SYMBOLS_DIR = UnzipSymbols(zip_arg)
+
+  print "Reading Android symbols from", symbol.SYMBOLS_DIR
+  print "Reading Chrome symbols from", symbol.CHROME_SYMBOLS_DIR
+  stack_core.ConvertTrace(lines, more_info)
+
+  if rootdir:
+    # be a good citizen and clean up...os.rmdir and os.removedirs() don't work
+    cmd = "rm -rf \"%s\"" % rootdir
+    print "\ncleaning up (%s)" % cmd
+    os.system(cmd)
+
+if __name__ == "__main__":
+  main()
+
+# vi: ts=2 sw=2

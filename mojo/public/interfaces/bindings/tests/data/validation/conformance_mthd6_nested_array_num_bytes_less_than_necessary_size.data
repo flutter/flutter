@@ -1,0 +1,22 @@
+[dist4]message_header  // num_bytes
+[u4]0                  // version
+[u4]6                  // name
+[u4]0                  // flags
+[anchr]message_header
+
+[dist4]method6_params  // num_bytes
+[u4]0                  // version
+[dist8]param0_ptr      // param0
+[anchr]method6_params
+
+[anchr]param0_ptr
+[dist4]array_param  // num_bytes
+[u4]1               // num_elements
+[dist8]element_ptr
+[anchr]array_param
+
+[anchr]element_ptr
+[dist4]array_element  // num_bytes: It is insufficient to store 12 elements.
+[u4]12                // num_elements
+0 1 2 3 4 5 6 7 8 9
+[anchr]array_element

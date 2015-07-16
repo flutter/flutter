@@ -1,0 +1,16 @@
+[dist4]message_header  // num_bytes
+[u4]0                  // version
+[u4]3                  // name
+[u4]0                  // flags
+[anchr]message_header
+
+[dist4]method3_params  // num_bytes
+[u4]0                  // version
+[dist8]param0_ptr      // param0
+[anchr]method3_params
+
+[anchr]param0_ptr
+[u4]7   // num_bytes: Less than the size of array header.
+[u4]12  // num_elements
+[b]01010101
+[b]00001111

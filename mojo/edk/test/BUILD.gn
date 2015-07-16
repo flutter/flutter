@@ -1,0 +1,162 @@
+# Copyright 2014 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("../mojo_edk.gni")
+import("../../public/mojo.gni")
+import("//testing/test.gni")
+
+mojo_edk_source_set("test_support") {
+  testonly = true
+  sources = [
+    "multiprocess_test_helper.cc",
+    "multiprocess_test_helper.h",
+    "scoped_ipc_support.cc",
+    "scoped_ipc_support.h",
+    "test_utils.h",
+    "test_utils_posix.cc",
+    "test_utils_win.cc",
+  ]
+
+  deps = [
+    "//base",
+    "//base/test:test_support",
+    "//testing/gtest",
+  ]
+
+  mojo_edk_deps = [ "mojo/edk/system" ]
+
+  mojo_sdk_public_deps = [ "mojo/public/cpp/system" ]
+}
+
+mojo_edk_source_set("run_all_unittests") {
+  testonly = true
+  sources = [
+    "run_all_unittests.cc",
+  ]
+
+  deps = [
+    ":test_support_impl",
+    "//base",
+    "//base/test:test_support",
+    "//testing/gtest",
+  ]
+
+  mojo_edk_deps = [ "mojo/edk/system" ]
+
+  mojo_sdk_deps = [ "mojo/public/c/test_support" ]
+}
+
+mojo_edk_source_set("run_all_perftests") {
+  testonly = true
+  deps = [
+    ":test_support_impl",
+    "//base",
+    "//base/test:test_support",
+  ]
+
+  mojo_edk_deps = [ "mojo/edk/system" ]
+
+  mojo_sdk_deps = [ "mojo/public/c/test_support" ]
+
+  sources = [
+    "run_all_perftests.cc",
+  ]
+}
+
+mojo_edk_source_set("test_support_impl") {
+  testonly = true
+  deps = [
+    "//base",
+    "//base/test:test_support",
+  ]
+
+  mojo_sdk_deps = [ "mojo/public/c/test_support" ]
+
+  mojo_sdk_public_deps = [ "mojo/public/cpp/system" ]
+
+  sources = [
+    "test_support_impl.cc",
+    "test_support_impl.h",
+  ]
+}
+
+# Public SDK test targets follow. These targets are not defined within the
+# public SDK itself as running the unittests requires the EDK.
+# TODO(vtl): These don't really belong here. (They should be converted to
+# apptests, but even apart from that these targets belong somewhere else.)
+
+group("public_tests") {
+  testonly = true
+  deps = [
+    ":mojo_public_bindings_perftests",
+    ":mojo_public_bindings_unittests",
+    ":mojo_public_environment_unittests",
+    ":mojo_public_system_perftests",
+    ":mojo_public_system_unittests",
+    ":mojo_public_utility_unittests",
+    ":mojo_system_impl_private_unittests",
+  ]
+
+  if (mojo_use_application_in_sdk) {
+    deps += [ ":mojo_public_application_unittests" ]
+  }
+}
+
+if (mojo_use_application_in_sdk) {
+  test("mojo_public_application_unittests") {
+    deps = [
+      ":run_all_unittests",
+      "../../public/cpp/application/tests",
+    ]
+  }
+}
+
+test("mojo_public_bindings_unittests") {
+  deps = [
+    ":run_all_unittests",
+    "../../public/cpp/bindings/tests",
+  ]
+}
+
+test("mojo_public_bindings_perftests") {
+  deps = [
+    ":run_all_perftests",
+    "../../public/cpp/bindings/tests:perftests",
+  ]
+}
+
+test("mojo_public_environment_unittests") {
+  deps = [
+    ":run_all_unittests",
+    "../../public/cpp/environment/tests",
+  ]
+}
+
+test("mojo_public_system_perftests") {
+  deps = [
+    ":run_all_perftests",
+    "../../public/c/system/tests:perftests",
+  ]
+}
+
+test("mojo_public_system_unittests") {
+  deps = [
+    ":run_all_unittests",
+    "../../public/cpp/system/tests",
+  ]
+}
+
+test("mojo_public_utility_unittests") {
+  deps = [
+    ":run_all_unittests",
+    "../../public/cpp/utility/tests",
+  ]
+}
+
+test("mojo_system_impl_private_unittests") {
+  deps = [
+    ":run_all_unittests",
+    "../../public/platform/native:system_impl_private_tests",
+  ]
+}

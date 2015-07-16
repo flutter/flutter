@@ -1,0 +1,34 @@
+[handles]4
+
+[dist4]message_header  // num_bytes
+[u4]0                  // version
+[u4]9                  // name
+[u4]0                  // flags
+[anchr]message_header
+
+[dist4]method9_params  // num_bytes
+[u4]0                  // version
+[dist8]param0_ptr      // param0
+[anchr]method9_params
+
+[anchr]param0_ptr
+[dist4]array_param         // num_bytes
+[u4]2                      // num_elements
+[dist8]nested_array_ptr_0
+[dist8]nested_array_ptr_1
+[anchr]array_param
+
+[anchr]nested_array_ptr_0
+[dist4]nested_array_0  // num_bytes
+[u4]2                  // num_elements
+[u4]0
+[s4]-1                 // An invalid handle, which is okay.
+[anchr]nested_array_0
+
+[anchr]nested_array_ptr_1
+[dist4]nested_array_1  // num_bytes
+[u4]3                  // num_elements
+[u4]2
+[s4]-1                 // An invalid handle, which is okay.
+[u4]3
+[anchr]nested_array_1

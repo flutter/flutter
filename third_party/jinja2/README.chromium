@@ -1,0 +1,25 @@
+Name: Jinja2 Python Template Engine
+Short Name: jinja2
+URL: http://jinja.pocoo.org/
+Version: 2.7.1
+License: BSD 3-clause License
+License File: NOT_SHIPPED
+Security Critical: no
+
+Description:
+Template engine for code generation in Blink.
+
+Source: https://pypi.python.org/packages/source/J/Jinja2/Jinja2-2.7.1.tar.gz
+MD5: 282aed153e69f970d6e76f78ed9d027a
+SHA-1: a9b24d887f2be772921b3ee30a0b9d435cffadda
+
+Local Modifications:
+This only includes the jinja2 directory from the tarball and the LICENSE and
+AUTHORS files. Unit tests (testsuite directory) have been removed.
+Additional chromium-specific files are:
+* README.chromium (this file)
+* OWNERS
+* install script (get_jinja2.sh)
+* files of hashes (MD5 is also posted on website, SHA-512 computed locally).
+Script checks hash then unpacks archive and installs desired files.
+Retrieve or update by executing jinja2/get_jinja2.sh from third_party.

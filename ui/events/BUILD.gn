@@ -1,0 +1,240 @@
+# Copyright 2014 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//build/config/ui.gni")
+import("//testing/test.gni")
+
+static_library("dom4_keycode_converter") {
+  sources = [
+    "keycodes/dom4/keycode_converter.cc",
+    "keycodes/dom4/keycode_converter.h",
+    "keycodes/dom4/keycode_converter_data.h",
+  ]
+
+  deps = [
+    "//base",
+  ]
+}
+
+component("events_base") {
+  sources = [
+    "device_data_manager.cc",
+    "device_data_manager.h",
+    "device_hotplug_event_observer.h",
+    "event_constants.h",
+    "event_switches.cc",
+    "event_switches.h",
+    "events_base_export.h",
+    "gesture_curve.h",
+    "gesture_event_details.cc",
+    "gesture_event_details.h",
+    "gestures/fling_curve.cc",
+    "gestures/fling_curve.h",
+    "gestures/gesture_configuration.cc",
+    "gestures/gesture_configuration.h",
+    "keycodes/keyboard_code_conversion.cc",
+    "keycodes/keyboard_code_conversion.h",
+    "keycodes/keyboard_code_conversion_android.cc",
+    "keycodes/keyboard_code_conversion_android.h",
+    "keycodes/keyboard_codes.h",
+    "latency_info.cc",
+    "latency_info.h",
+    "touchscreen_device.cc",
+    "touchscreen_device.h",
+  ]
+
+  defines = [ "EVENTS_BASE_IMPLEMENTATION" ]
+
+  deps = [
+    ":dom4_keycode_converter",
+    "//base/third_party/dynamic_annotations",
+    "//skia",
+  ]
+
+  public_deps = [
+    "//base",
+    "//ui/gfx",
+    "//ui/gfx/geometry",
+  ]
+}
+
+component("events") {
+  sources = [
+    "event.cc",
+    "event.h",
+    "event_dispatcher.cc",
+    "event_dispatcher.h",
+    "event_handler.cc",
+    "event_handler.h",
+    "event_processor.cc",
+    "event_processor.h",
+    "event_rewriter.h",
+    "event_source.cc",
+    "event_source.h",
+    "event_target.cc",
+    "event_target.h",
+    "event_target_iterator.h",
+    "event_targeter.cc",
+    "event_targeter.h",
+    "event_utils.cc",
+    "event_utils.h",
+    "events_export.h",
+    "gestures/gesture_provider_impl.cc",
+    "gestures/gesture_provider_impl.h",
+    "gestures/gesture_recognizer.h",
+    "gestures/gesture_recognizer_impl.cc",
+    "gestures/gesture_recognizer_impl.h",
+    "gestures/gesture_types.h",
+    "gestures/motion_event_impl.cc",
+    "gestures/motion_event_impl.h",
+  ]
+
+  defines = [ "EVENTS_IMPLEMENTATION" ]
+
+  public_deps = [
+    ":events_base",
+  ]
+  deps = [
+    ":dom4_keycode_converter",
+    ":gesture_detection",
+    "//base/third_party/dynamic_annotations",
+    "//skia",
+    "//ui/gfx",
+    "//ui/gfx/geometry",
+  ]
+}
+
+component("gesture_detection") {
+  sources = [
+    "gesture_detection/bitset_32.h",
+    "gesture_detection/filtered_gesture_provider.cc",
+    "gesture_detection/filtered_gesture_provider.h",
+    "gesture_detection/gesture_config_helper.h",
+    "gesture_detection/gesture_config_helper_aura.cc",
+    "gesture_detection/gesture_detection_export.h",
+    "gesture_detection/gesture_detector.cc",
+    "gesture_detection/gesture_detector.h",
+    "gesture_detection/gesture_event_data.cc",
+    "gesture_detection/gesture_event_data.h",
+    "gesture_detection/gesture_event_data_packet.cc",
+    "gesture_detection/gesture_event_data_packet.h",
+    "gesture_detection/gesture_listeners.cc",
+    "gesture_detection/gesture_listeners.h",
+    "gesture_detection/gesture_provider.cc",
+    "gesture_detection/gesture_provider.h",
+    "gesture_detection/gesture_touch_uma_histogram.cc",
+    "gesture_detection/gesture_touch_uma_histogram.h",
+    "gesture_detection/motion_event.cc",
+    "gesture_detection/motion_event.h",
+    "gesture_detection/motion_event_buffer.cc",
+    "gesture_detection/motion_event_buffer.h",
+    "gesture_detection/motion_event_generic.cc",
+    "gesture_detection/motion_event_generic.h",
+    "gesture_detection/scale_gesture_detector.cc",
+    "gesture_detection/scale_gesture_detector.h",
+    "gesture_detection/scale_gesture_listeners.cc",
+    "gesture_detection/scale_gesture_listeners.h",
+    "gesture_detection/snap_scroll_controller.cc",
+    "gesture_detection/snap_scroll_controller.h",
+    "gesture_detection/touch_disposition_gesture_filter.cc",
+    "gesture_detection/touch_disposition_gesture_filter.h",
+    "gesture_detection/velocity_tracker.cc",
+    "gesture_detection/velocity_tracker.h",
+    "gesture_detection/velocity_tracker_state.cc",
+    "gesture_detection/velocity_tracker_state.h",
+  ]
+
+  deps = [
+    ":events_base",
+    "//base",
+    "//ui/gfx",
+    "//ui/gfx/geometry",
+  ]
+
+  defines = [ "GESTURE_DETECTION_IMPLEMENTATION" ]
+}
+
+source_set("test_support") {
+  sources = [
+    "test/events_test_utils.cc",
+    "test/events_test_utils.h",
+    "test/mock_motion_event.cc",
+    "test/mock_motion_event.h",
+    "test/platform_event_waiter.cc",
+    "test/platform_event_waiter.h",
+    "test/test_event_handler.cc",
+    "test/test_event_handler.h",
+    "test/test_event_processor.cc",
+    "test/test_event_processor.h",
+    "test/test_event_target.cc",
+    "test/test_event_target.h",
+  ]
+
+  public_deps = [
+    ":events",
+    ":events_base",
+    ":gesture_detection",
+  ]
+  deps = [
+    "//base",
+    "//skia",
+    "//ui/events/platform",
+    "//ui/gfx/geometry",
+  ]
+
+  if (use_x11) {
+    sources += [
+      "test/events_test_utils_x11.cc",
+      "test/events_test_utils_x11.h",
+    ]
+    deps += [ "//ui/gfx/x" ]
+  }
+}
+
+test("events_unittests") {
+  sources = [
+    "event_dispatcher_unittest.cc",
+    "event_processor_unittest.cc",
+    "event_rewriter_unittest.cc",
+    "event_unittest.cc",
+    "gesture_detection/bitset_32_unittest.cc",
+    "gesture_detection/gesture_event_data_packet_unittest.cc",
+    "gesture_detection/gesture_provider_unittest.cc",
+    "gesture_detection/motion_event_buffer_unittest.cc",
+    "gesture_detection/motion_event_generic_unittest.cc",
+    "gesture_detection/touch_disposition_gesture_filter_unittest.cc",
+    "gesture_detection/velocity_tracker_unittest.cc",
+    "gestures/fling_curve_unittest.cc",
+    "gestures/gesture_provider_impl_unittest.cc",
+    "keycodes/dom4/keycode_converter_unittest.cc",
+    "latency_info_unittest.cc",
+    "platform/platform_event_builder_x_unittest.cc",
+    "platform/platform_event_source_unittest.cc",
+    "platform/x11/platform_event_utils_x_unittest.cc",
+  ]
+
+  deps = [
+    ":dom4_keycode_converter",
+    ":events",
+    ":events_base",
+    ":gesture_detection",
+    ":test_support",
+    "//base",
+    "//base/test:run_all_unittests",
+    "//skia",
+    "//testing/gtest",
+    "//ui/events/platform",
+    "//ui/gfx:test_support",
+  ]
+
+  if (use_x11) {
+    configs += [ "//build/config/linux:x11" ]
+    deps += [ "//ui/gfx/x" ]
+  } else {
+    sources -= [
+      "platform/platform_event_builder_x_unittest.cc",
+      "platform/x11/platform_event_utils_x_unittest.cc",
+    ]
+  }
+}

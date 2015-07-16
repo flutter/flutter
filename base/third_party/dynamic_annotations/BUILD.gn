@@ -1,0 +1,26 @@
+# Copyright (c) 2013 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+if (is_nacl) {
+  # Native client doesn't need dynamic annotations, so we provide a
+  # dummy target in order for clients to not have to special-case the
+  # dependency.
+  source_set("dynamic_annotations") {
+    sources = [
+      "dynamic_annotations.h",
+    ]
+  }
+} else {
+  source_set("dynamic_annotations") {
+    sources = [
+      "../valgrind/valgrind.h",
+      "dynamic_annotations.c",
+      "dynamic_annotations.h",
+    ]
+    if (is_android && !is_debug) {
+      configs -= [ "//build/config/compiler:optimize" ]
+      configs += [ "//build/config/compiler:optimize_max" ]
+    }
+  }
+}

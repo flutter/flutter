@@ -1,0 +1,26 @@
+[dist4]message_header  // num_bytes
+[u4]0                  // version
+[u4]11                 // name
+[u4]0                  // flags
+[anchr]message_header
+
+[dist4]method11_params  // num_bytes
+[u4]0                   // version
+[dist8]param0_ptr       // param0
+[anchr]method11_params
+
+[anchr]param0_ptr
+[dist4]struct_g         // num_bytes
+[u4]3                   // version
+[s4]123                 // i
+[b]00000001             // b
+0 0 0                   // padding
+[u8]0                   // struct_a
+[dist8]str_ptr          // str
+[anchr]struct_g
+
+[anchr]str_ptr
+[dist4]string           // num_bytes
+[u4]2                   // num_elements
+0 1
+[anchr]string

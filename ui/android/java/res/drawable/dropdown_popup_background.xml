@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- Copyright 2014 The Chromium Authors. All rights reserved.
+
+     Use of this source code is governed by a BSD-style license that can be
+     found in the LICENSE file.
+-->
+
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_above_anchor="true"
+        android:drawable="@drawable/dropdown_popup_background_up" />
+    <item android:drawable="@drawable/dropdown_popup_background_down" />
+</selector>

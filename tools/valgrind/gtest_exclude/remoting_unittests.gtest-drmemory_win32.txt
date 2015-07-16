@@ -1,0 +1,12 @@
+# This test fails on an assertion, see http://crbug.com/57266
+EncoderVp8Test.TestEncoder
+DecoderVp8Test.EncodeAndDecode
+
+# These test intentionally generate exceptions to verify if a dump is generated
+# during the crash.
+BreakpadWinDeathTest.TestAccessViolation
+BreakpadWinDeathTest.TestInvalidParameter
+BreakpadWinDeathTest.TestDebugbreak
+
+# DrM-i#1465
+RdpClientTest.Basic

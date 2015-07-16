@@ -1,0 +1,317 @@
+{%- import "interface_macros.tmpl" as interface_macros %}
+{%- import "struct_macros.tmpl" as struct_macros %}
+{%- set class_name = interface.name %}
+{%- set proxy_name = interface.name ~ "Proxy" %}
+{%- set namespace_as_string = "%s"|format(namespace|replace(".","::")) %}
+
+{%- macro alloc_params(struct) %}
+{%-   for param in struct.packed.packed_fields_in_ordinal_order %}
+  {{param.field.kind|cpp_result_type}} p_{{param.field.name}}{};
+{%-   endfor %}
+  {{struct_macros.deserialize(struct, "params", "p_%s")}}
+{%- endmacro %}
+
+{%- macro pass_params(parameters) %}
+{%-   for param in parameters %}
+{%-     if param.kind|is_move_only_kind -%}
+p_{{param.name}}.Pass()
+{%-     else -%}
+p_{{param.name}}
+{%-     endif -%}
+{%-     if not loop.last %}, {% endif %}
+{%-   endfor %}
+{%- endmacro %}
+
+{%- macro build_message(struct, struct_display_name) -%}
+  {{struct_macros.serialize(struct, struct_display_name, "in_%s", "params", "builder.buffer()")}}
+  mojo::Message message;
+  params->EncodePointersAndHandles(message.mutable_handles());
+  builder.Finish(&message);
+{%- endmacro %}
+
+{#--- Begin #}
+MOJO_STATIC_CONST_MEMBER_DEFINITION const char {{class_name}}::Name_[] = "{{namespace_as_string}}::{{class_name}}";
+MOJO_STATIC_CONST_MEMBER_DEFINITION const uint32_t {{class_name}}::Version_;
+
+{#--- Constants #}
+{%-  for constant in interface.constants %}
+{%-   if constant.kind|is_integral_kind %}
+MOJO_STATIC_CONST_MEMBER_DEFINITION const {{constant.kind|cpp_pod_type}} {{interface.name}}::{{constant.name}};
+{%-   else %}
+MOJO_STATIC_CONST_MEMBER_DEFINITION const {{constant.kind|cpp_pod_type}} {{interface.name}}::{{constant.name}} = {{constant|constant_value}};
+{%-   endif %}
+{%- endfor %}
+
+{#--- ForwardToCallback definition #}
+{%- for method in interface.methods -%}
+{%-   if method.response_parameters != None %}
+class {{class_name}}_{{method.name}}_ForwardToCallback
+    : public mojo::MessageReceiver {
+ public:
+  {{class_name}}_{{method.name}}_ForwardToCallback(
+      const {{class_name}}::{{method.name}}Callback& callback)
+      : callback_(callback) {
+  }
+  bool Accept(mojo::Message* message) override;
+ private:
+  {{class_name}}::{{method.name}}Callback callback_;
+  MOJO_DISALLOW_COPY_AND_ASSIGN({{class_name}}_{{method.name}}_ForwardToCallback);
+};
+bool {{class_name}}_{{method.name}}_ForwardToCallback::Accept(
+    mojo::Message* message) {
+  internal::{{class_name}}_{{method.name}}_ResponseParams_Data* params =
+      reinterpret_cast<internal::{{class_name}}_{{method.name}}_ResponseParams_Data*>(
+          message->mutable_payload());
+
+  params->DecodePointersAndHandles(message->mutable_handles());
+  {{alloc_params(method.response_param_struct)}}
+  callback_.Run({{pass_params(method.response_parameters)}});
+  return true;
+}
+{%-   endif %}
+{%- endfor %}
+
+{{proxy_name}}::{{proxy_name}}(mojo::MessageReceiverWithResponder* receiver)
+    : ControlMessageProxy(receiver) {
+}
+
+{#--- Proxy definitions #}
+
+{%- for method in interface.methods %}
+{%-   set message_name =
+          "internal::k%s_%s_Name"|format(interface.name, method.name) %}
+{%-   set params_struct = method.param_struct %}
+{%-   set params_description =
+          "%s.%s request"|format(interface.name, method.name) %}
+void {{proxy_name}}::{{method.name}}(
+    {{interface_macros.declare_request_params("in_", method)}}) {
+  {{struct_macros.get_serialized_size(params_struct, "in_%s")}}
+
+{%- if method.response_parameters != None %}
+  mojo::internal::RequestMessageBuilder builder({{message_name}}, size);
+{%- else %}
+  mojo::internal::MessageBuilder builder({{message_name}}, size);
+{%- endif %}
+
+  {{build_message(params_struct, params_description)}}
+
+{%- if method.response_parameters != None %}
+  mojo::MessageReceiver* responder =
+      new {{class_name}}_{{method.name}}_ForwardToCallback(callback);
+  if (!receiver_->AcceptWithResponder(&message, responder))
+    delete responder;
+{%- else %}
+  bool ok = receiver_->Accept(&message);
+  // This return value may be ignored as !ok implies the Connector has
+  // encountered an error, which will be visible through other means.
+  MOJO_ALLOW_UNUSED_LOCAL(ok);
+{%- endif %}
+}
+{%- endfor %}
+
+{#--- ProxyToResponder definition #}
+{%- for method in interface.methods -%}
+{%-   if method.response_parameters != None %}
+{%-     set message_name =
+            "internal::k%s_%s_Name"|format(interface.name, method.name) %}
+{%-     set response_params_struct = method.response_param_struct %}
+{%-     set params_description =
+            "%s.%s response"|format(interface.name, method.name) %}
+class {{class_name}}_{{method.name}}_ProxyToResponder
+    : public {{class_name}}::{{method.name}}Callback::Runnable {
+ public:
+  ~{{class_name}}_{{method.name}}_ProxyToResponder() override {
+    // Is the Mojo application destroying the callback without running it
+    // and without first closing the pipe?
+    bool callback_was_dropped = responder_ && responder_->IsValid();
+    // If the Callback was dropped then deleting the responder will close
+    // the pipe so the calling application knows to stop waiting for a reply.
+    delete responder_;
+    MOJO_DCHECK(!callback_was_dropped)  << "The callback passed to "
+        "{{class_name}}::{{method.name}}({%- if method.parameters -%}{{pass_params(method.parameters)}}, {% endif -%}callback) "
+        "was never run.";
+  }
+
+  {{class_name}}_{{method.name}}_ProxyToResponder(
+      uint64_t request_id,
+      mojo::MessageReceiverWithStatus* responder)
+      : request_id_(request_id),
+        responder_(responder) {
+  }
+
+  void Run({{interface_macros.declare_params("in_", method.response_parameters)}}) const override;
+
+ private:
+  uint64_t request_id_;
+  mutable mojo::MessageReceiverWithStatus* responder_;
+  MOJO_DISALLOW_COPY_AND_ASSIGN({{class_name}}_{{method.name}}_ProxyToResponder);
+};
+void {{class_name}}_{{method.name}}_ProxyToResponder::Run(
+    {{interface_macros.declare_params("in_", method.response_parameters)}}) const {
+  {{struct_macros.get_serialized_size(response_params_struct, "in_%s")}}
+  mojo::internal::ResponseMessageBuilder builder(
+      {{message_name}}, size, request_id_);
+  {{build_message(response_params_struct, params_description)}}
+  bool ok = responder_->Accept(&message);
+  MOJO_ALLOW_UNUSED_LOCAL(ok);
+  // TODO(darin): !ok returned here indicates a malformed message, and that may
+  // be good reason to close the connection. However, we don't have a way to do
+  // that from here. We should add a way.
+  delete responder_;
+  responder_ = nullptr;
+}
+{%-   endif -%}
+{%- endfor %}
+
+{{class_name}}Stub::{{class_name}}Stub()
+    : sink_(nullptr),
+      control_message_handler_({{interface.name}}::Version_) {
+}
+
+{{class_name}}Stub::~{{interface.name}}Stub() {}
+
+{#--- Stub definition #}
+
+bool {{class_name}}Stub::Accept(mojo::Message* message) {
+  if (mojo::internal::ControlMessageHandler::IsControlMessage(message))
+    return control_message_handler_.Accept(message);
+{%- if interface.methods %}
+  switch (message->header()->name) {
+{%-   for method in interface.methods %}
+    case internal::k{{class_name}}_{{method.name}}_Name: {
+      mojo::internal::ScopedTaskTracking task_id("mojo.{{namespace_as_string}}.{{class_name}}.{{method.name}}", __FILE__, __LINE__);
+{%-     if method.response_parameters == None %}
+      internal::{{class_name}}_{{method.name}}_Params_Data* params =
+          reinterpret_cast<internal::{{class_name}}_{{method.name}}_Params_Data*>(
+              message->mutable_payload());
+
+      params->DecodePointersAndHandles(message->mutable_handles());
+      {{alloc_params(method.param_struct)|indent(4)}}
+      // A null |sink_| means no implementation was bound.
+      assert(sink_);
+      sink_->{{method.name}}({{pass_params(method.parameters)}});
+      return true;
+{%-     else %}
+      break;
+{%-     endif %}
+    }
+{%-   endfor %}
+  }
+{%- endif %}
+  return false;
+}
+
+bool {{class_name}}Stub::AcceptWithResponder(
+    mojo::Message* message, mojo::MessageReceiverWithStatus* responder) {
+  if (mojo::internal::ControlMessageHandler::IsControlMessage(message))
+    return control_message_handler_.AcceptWithResponder(message, responder);
+{%- if interface.methods %}
+  switch (message->header()->name) {
+{%-   for method in interface.methods %}
+    case internal::k{{class_name}}_{{method.name}}_Name: {
+      mojo::internal::ScopedTaskTracking task_id("mojo::{{namespace_as_string}}::{{class_name}}::{{method.name}}", __FILE__, __LINE__);
+{%-     if method.response_parameters != None %}
+      internal::{{class_name}}_{{method.name}}_Params_Data* params =
+          reinterpret_cast<internal::{{class_name}}_{{method.name}}_Params_Data*>(
+              message->mutable_payload());
+
+      params->DecodePointersAndHandles(message->mutable_handles());
+      {{class_name}}::{{method.name}}Callback::Runnable* runnable =
+          new {{class_name}}_{{method.name}}_ProxyToResponder(
+              message->request_id(), responder);
+      {{class_name}}::{{method.name}}Callback callback(runnable);
+      {{alloc_params(method.param_struct)|indent(4)}}
+      // A null |sink_| means no implementation was bound.
+      assert(sink_);
+      sink_->{{method.name}}(
+{%- if method.parameters -%}{{pass_params(method.parameters)}}, {% endif -%}callback);
+      return true;
+{%-     else %}
+      break;
+{%-     endif %}
+    }
+{%-   endfor %}
+  }
+{%- endif %}
+  return false;
+}
+
+{#--- Request validator definitions #}
+
+{{class_name}}RequestValidator::{{class_name}}RequestValidator(
+    mojo::MessageReceiver* sink) : MessageFilter(sink) {
+}
+
+bool {{class_name}}RequestValidator::Accept(mojo::Message* message) {
+  assert(sink_);
+
+  if (mojo::internal::ControlMessageHandler::IsControlMessage(message)) {
+    if (!mojo::internal::ValidateControlRequest(message))
+      return false;
+    return sink_->Accept(message);
+  }
+
+  switch (message->header()->name) {
+{%- for method in interface.methods %}
+    case internal::k{{class_name}}_{{method.name}}_Name: {
+{%-   if method.response_parameters != None %}
+      if (!mojo::internal::ValidateMessageIsRequestExpectingResponse(message))
+        return false;
+{%-   else %}
+      if (!mojo::internal::ValidateMessageIsRequestWithoutResponse(message))
+        return false;
+{%-   endif %}
+      if (!mojo::internal::ValidateMessagePayload<
+               internal::{{class_name}}_{{method.name}}_Params_Data>(message)) {
+        return false;
+      }
+      return sink_->Accept(message);
+    }
+{%- endfor %}
+    default:
+      break;
+  }
+
+  // Unrecognized message.
+  ReportValidationError(
+      mojo::internal::VALIDATION_ERROR_MESSAGE_HEADER_UNKNOWN_METHOD);
+  return false;
+}
+
+{#--- Response validator definitions #}
+{% if interface|has_callbacks %}
+{{class_name}}ResponseValidator::{{class_name}}ResponseValidator(
+    mojo::MessageReceiver* sink) : MessageFilter(sink) {
+}
+
+bool {{class_name}}ResponseValidator::Accept(mojo::Message* message) {
+  assert(sink_);
+
+  if (mojo::internal::ControlMessageHandler::IsControlMessage(message)) {
+    if (!mojo::internal::ValidateControlResponse(message))
+      return false;
+    return sink_->Accept(message);
+  }
+
+  if (!mojo::internal::ValidateMessageIsResponse(message))
+    return false;
+  switch (message->header()->name) {
+{%- for method in interface.methods if method.response_parameters != None %}
+    case internal::k{{class_name}}_{{method.name}}_Name: {
+      if (!mojo::internal::ValidateMessagePayload<
+               internal::{{class_name}}_{{method.name}}_ResponseParams_Data>(message)) {
+        return false;
+      }
+      return sink_->Accept(message);
+    }
+{%- endfor %}
+    default:
+      break;
+  }
+
+  // Unrecognized message.
+  ReportValidationError(
+      mojo::internal::VALIDATION_ERROR_MESSAGE_HEADER_UNKNOWN_METHOD);
+  return false;
+}
+{%- endif -%}

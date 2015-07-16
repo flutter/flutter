@@ -1,0 +1,4 @@
+name: apptest
+version: 0.0.1
+dependencies:
+  unittest: '>=0.11.5+4 <0.12.0'

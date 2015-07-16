@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+     Copyright 2013 The Chromium Authors. All rights reserved.
+     Use of this source code is governed by a BSD-style license that can be
+     found in the LICENSE file.
+-->
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="15dp">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <org.chromium.ui.ColorPickerAdvanced
+            android:id="@+id/color_picker_advanced"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+    </ScrollView>
+
+    <org.chromium.ui.ColorPickerSimple
+        android:id="@+id/color_picker_simple"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:divider="@color/color_picker_border_color"
+        android:dividerHeight="1px"
+        android:paddingStart="1px"
+        android:paddingEnd="1px"
+        android:paddingTop="1px"
+        android:background="@drawable/color_picker_border" />
+
+    <FrameLayout
+        android:id="@+id/more_colors_button_border"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/color_picker_border"
+        android:padding="1px">
+
+        <org.chromium.ui.ColorPickerMoreButton
+            android:id="@+id/more_colors_button"
+            style="?android:attr/buttonBarButtonStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="48dp"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:text="@string/color_picker_button_more" />
+    </FrameLayout>
+</LinearLayout>

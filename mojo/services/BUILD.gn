@@ -1,0 +1,35 @@
+# Copyright 2014 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//build/config/ui.gni")
+
+group("services") {
+  deps = [
+    "//mojo/services/accessibility/public/interfaces",
+    "//mojo/services/asset_bundle/public/interfaces",
+    "//mojo/services/authenticating_url_loader_interceptor/public/interfaces",
+    "//mojo/services/authentication/public/interfaces",
+    "//mojo/services/camera_roll/public/interfaces",
+    "//mojo/services/clipboard/public/interfaces",
+    "//mojo/services/content_handler/public/interfaces",
+    "//mojo/services/device_info/public/interfaces",
+    "//mojo/services/files/public/interfaces",
+    "//mojo/services/geometry/public/interfaces",
+    "//mojo/services/http_server/public/interfaces",
+    "//mojo/services/input_events/public/interfaces",
+    "//mojo/services/location/public/interfaces",
+    "//mojo/services/native_viewport/public/interfaces",
+    "//mojo/services/navigation/public/interfaces",
+    "//mojo/services/network/public/interfaces",
+    "//mojo/services/notifications/public/interfaces",
+    "//mojo/services/nfc/public/interfaces",
+    "//mojo/services/sensors/public/interfaces",
+    "//mojo/services/service_registry/public/interfaces",
+    "//mojo/services/speech_recognizer/public/interfaces",
+    "//mojo/services/surfaces/public/interfaces",
+    "//mojo/services/terminal/public/interfaces",
+    "//mojo/services/view_manager/public/interfaces",
+    "//mojo/services/window_manager/public/interfaces",
+  ]
+}

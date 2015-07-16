@@ -1,0 +1,49 @@
+# Copyright 2015 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+template("embed_file") {
+  assert(defined(invoker.variable))
+  assert(defined(invoker.source))
+  assert(defined(invoker.namespace))
+
+  variable = invoker.variable
+  generator_target_name = "__${target_name}_generator"
+  generator_outputs = [
+    "${target_gen_dir}/${variable}.cc",
+    "${target_gen_dir}/${variable}.h",
+  ]
+
+  action(generator_target_name) {
+    script = "//mojo/tools/embed/embed_data.py"
+    sources = [
+      invoker.source,
+    ]
+    outputs = generator_outputs
+    args = [
+      rebase_path(invoker.source),
+      rebase_path(target_gen_dir),
+      invoker.namespace,
+      variable,
+    ]
+
+    if (defined(invoker.testonly)) {
+      testonly = invoker.testonly
+    }
+    if (defined(invoker.deps)) {
+      deps = invoker.deps
+    }
+  }
+
+  source_set(target_name) {
+    sources = generator_outputs
+
+    if (defined(invoker.testonly)) {
+      testonly = invoker.testonly
+    }
+
+    deps = [
+      ":${generator_target_name}",
+    ]
+  }
+}

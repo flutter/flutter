@@ -1,0 +1,13 @@
+ben@chromium.org
+sky@chromium.org
+
+# Mac stuff
+avi@chromium.org
+thakis@chromium.org
+
+per-file *.isolate=csharp@chromium.org
+per-file *.isolate=maruel@chromium.org
+
+# If you're doing structural changes get a review from one of the OWNERS.
+per-file *.gyp*=*
+per-file BUILD.gn=*

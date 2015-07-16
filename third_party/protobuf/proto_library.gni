@@ -1,0 +1,167 @@
+# Copyright 2014 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Compile a protocol buffer.
+#
+# Protobuf parameters:
+#
+#   proto_out_dir (optional)
+#       Specifies the path suffix that output files are generated under. This
+#       path will be appended to the root_gen_dir.
+#
+#       Targets that depend on the proto target will be able to include the
+#       resulting proto headers with an include like:
+#         #include "dir/for/my_proto_lib/foo.pb.h"
+#       If undefined, this defaults to matching the input directory for each
+#       .proto file (you should almost always use the default mode).
+#
+#   cc_generator_options (optional)
+#       List of extra flags passed to the protocol compiler.  If you need to
+#       add an EXPORT macro to a protobuf's C++ header, set the
+#       'cc_generator_options' variable with the value:
+#       'dllexport_decl=FOO_EXPORT:' (note trailing colon).
+#
+#       It is likely you also need to #include a file for the above EXPORT
+#       macro to work. See cc_include.
+#
+#   cc_include (optional)
+#       String listing an extra include that should be passed.
+#       Example: cc_include = "foo/bar.h"
+#
+#   deps (optional)
+#       Additional dependencies.
+#
+# Parameters for compiling the generated code:
+#
+#   defines (optional)
+#       Defines to supply to the source set that compiles the generated source
+#       code.
+#
+#   extra_configs (optional)
+#       A list of config labels that will be appended to the configs applying
+#       to the source set.
+#
+# Example:
+#  proto_library("mylib") {
+#    sources = [
+#      "foo.proto",
+#    ]
+#  }
+
+template("proto_library") {
+  assert(defined(invoker.sources), "Need sources for proto_library")
+
+  action_name = "${target_name}_gen"
+  source_set_name = target_name
+  action_foreach(action_name) {
+    visibility = [ ":$source_set_name" ]
+
+    script = "//tools/protoc_wrapper/protoc_wrapper.py"
+
+    sources = invoker.sources
+
+    # Compute the output directory, both relative to the source root (for
+    # declaring "outputs") and relative to the build dir (for passing to the
+    # script).
+    if (defined(invoker.proto_out_dir)) {
+      # Put the results in the specified dir in the gen tree.
+      out_dir = "$root_gen_dir/" + invoker.proto_out_dir
+      rel_out_dir = rebase_path(out_dir, root_build_dir)
+    } else {
+      # Use the gen directory corresponding to the source file. This expansion
+      # will be done differently in the outputs and the args, so we don't need
+      # to worry about rebasing as above.
+      out_dir = "{{source_gen_dir}}"
+      rel_out_dir = "{{source_gen_dir}}"
+    }
+
+    outputs = [
+      "$out_dir/{{source_name_part}}_pb2.py",
+      "$out_dir/{{source_name_part}}.pb.cc",
+      "$out_dir/{{source_name_part}}.pb.h",
+    ]
+
+    args = []
+    if (defined(invoker.cc_include)) {
+      args += [
+        "--include",
+        invoker.cc_include,
+      ]
+    }
+
+    args += [
+      "--protobuf",
+      "$rel_out_dir/{{source_name_part}}.pb.h",
+      "--proto-in-dir",
+      "{{source_dir}}",
+      "--proto-in-file",
+      "{{source_file_part}}",
+
+      # TODO(brettw) support system protobuf compiler.
+      "--use-system-protobuf=0",
+    ]
+
+    protoc_label = "//third_party/protobuf:protoc($host_toolchain)"
+    args += [
+      "--",
+
+      # Prepend with "./" so this will never pick up the system one (normally
+      # when not cross-compiling, protoc's output directory will be the same
+      # as the build dir, so the relative location will be empty).
+      "./" +
+          rebase_path(get_label_info(protoc_label, "root_out_dir") + "/protoc",
+                      root_build_dir),
+    ]
+
+    # If passed cc_generator_options should end in a colon, which will separate
+    # it from the directory when we concatenate them. The proto compiler
+    # understands this syntax.
+    if (defined(invoker.cc_generator_options)) {
+      cc_generator_options = invoker.cc_generator_options
+    } else {
+      cc_generator_options = ""
+    }
+    args += [
+      # cc_generator_options is supposed to end in a colon if it's nonempty.
+      "--cpp_out",
+      "$cc_generator_options$rel_out_dir",
+      "--python_out",
+      rel_out_dir,
+    ]
+
+    deps = [
+      protoc_label,
+    ]
+
+    if (defined(invoker.deps)) {
+      deps += invoker.deps
+    }
+  }
+
+  source_set(target_name) {
+    if (defined(invoker.visibility)) {
+      visibility = invoker.visibility
+    }
+
+    sources = get_target_outputs(":$action_name")
+
+    if (defined(invoker.defines)) {
+      defines = invoker.defines
+    }
+    if (defined(invoker.extra_configs)) {
+      configs += invoker.extra_configs
+    }
+
+    public_configs = [ "//third_party/protobuf:using_proto" ]
+
+    public_deps = [
+      # The generated headers reference headers within protobuf_lite, so
+      # dependencies must be able to find those headers too.
+      "//third_party/protobuf:protobuf_lite",
+    ]
+    deps = [
+      ":$action_name",
+    ]
+  }
+}

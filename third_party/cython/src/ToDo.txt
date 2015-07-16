@@ -1,0 +1,289 @@
+See http://trac.cython.org/cython_trac and http://wiki.cython.org/enhancements
+
+
+-- The Original Pyrex Todo List --
+
+DONE - Pointer-to-function types.
+
+DONE - Nested declarators.
+
+DONE - Varargs C func defs and calls.
+
+DONE - * and ** args in Python func defs.
+
+DONE - Default argument values.
+
+DONE - Tracebacks.
+
+DONE - Disallow creating char * from Python temporary anywhere
+       (not just on assignment).
+
+DONE - Module and function and class doc strings.
+
+DONE - Predeclare C functions.
+
+DONE - Constant expressions.
+
+DONE - Forward C struct declarations.
+
+DONE - Prefix & operator.
+
+DONE - Get rid of auto string->char coercion and
+       add a c'X' syntax for char literals.
+
+DONE - Cascaded assignments (a = b = c).
+
+DONE - 'include' statement for including other Pyrex files.
+
+DONE - Add command line option for specifying name of generated C file.
+
+DONE - Add 'else' clause to try-except.
+
+DONE - Allow extension types to be declared "public" so they
+       can be accessed from another Pyrex module or a C file.
+
+DONE - Don't try to generate objstruct definition for external
+       extension type declared without suite (treat as though
+       declared with empty suite).
+
+DONE - Implement two-argument form of 'assert' statement.
+
+Const types.
+
+Tuple/list construction: Evaluate & store items one at a time?
+
+Varargs argument traversal.
+
+Use PyDict_SetItemString to build keyword arg dicts?
+(Or wait until names are interned.)
+
+Intern names.
+
+print >>file
+
+abs() and anything similar.
+
+Semicolon-separated statement lists.
+
+Optional semicolons after C declarations.
+
+Multiple C declarations on one line?
+
+Optimise return without value outside of try-finally.
+
+exec statement.
+
+from ... import statement.
+
+Use iterator protocol for unpacking.
+
+Save & restore exception being handled on function entry/exit.
+
+In-place operators (+=, etc).
+
+Constant declarations. Syntax?
+
+DONE - Some way for C functions to signal Python errors?
+
+Check for lack of return with value in non-void C functions?
+
+Allow 'pass' in struct/union/enum definition.
+
+Make C structs callable as constructors.
+
+DONE - Provide way of specifying C names.
+
+DONE - Public cdefs.
+
+When calling user __dealloc__ func, save & restore exception.
+
+DONE - Forward declaration of extension types.
+
+Complex number parsetuple format?
+
+DONE - long long type
+
+DONE - long double type?
+
+Windows __fooblarg function declaration things.
+
+Generate type, var and func declarations in the same order that
+they appear in the source file.
+
+Provide a way of declaring a C function as returning a
+borrowed Python reference.
+
+Provide a way of specifying whether a Python object obtained
+by casting a pointer should be treated as a new reference
+or not.
+
+Optimize integer for-loops.
+
+Make sizeof() take types as well as variables.
+
+Allow "unsigned" to be used alone as a type name.
+
+Allow duplicate declarations, at least in extern-from.
+
+Do something about installing proper version of pyrexc
+script according to platform in setup.py.
+
+DONE - Add "-o filename" command line option to unix/dos versions.
+
+Recognise #line directives?
+
+Catch floating point exceptions?
+
+Check that forward-declared non-external extension types
+are defined.
+
+Generate type test when casting from one Python type
+to another.
+
+Generate a Pyrex include file for public declarations
+as well as a C one.
+
+Syntax for defining indefinite-sized int & float types.
+
+Allow ranges of exception values.
+
+Support "complex double" and "complex float"?
+
+Allow module-level Python variables to be declared extern.
+
+Consider:
+>cdef extern from "foo.h":
+>    int dosomething() except -1 raise MyException
+
+Properties for Python types.
+
+DONE - Properties for extension types.
+
+Find a way to make classmethod and staticmethod work better.
+
+DONE - Document workarounds for classmethod and staticmethod.
+
+Statically initialised C arrays & structs.
+
+Reduce generation of unused vars and unreachable code?
+
+Support for acquiring and releasing GIL.
+
+Make docstrings of extension type special methods work.
+
+Treat result of getting C attribute of extension type as non-ephemeral.
+
+Make None a reserved identifier.
+
+Teach it about builtin functions that correspond to
+Python/C API calls.
+
+Teach it about common builtin types.
+
+Option for generating a main() function?
+
+DONE - Allow an extension type to inherit from another type.
+
+Do something about external C functions declared as returning
+const * types?
+
+Use PyString_FromStringAndSize for string literals?
+
+DONE - C functions as methods of extension types.
+
+What to do about __name__ etc. attributes of a module (they are
+currently assumed to be built-in names).
+
+Use PyDict_GetItem etc. on module & builtins dicts for speed.
+
+Intern all string literals used as Python strings?
+[Koshy <jkoshy@freebsd.org>]
+
+Make extension types weak-referenceable.
+[Matthias Baas <baas@ira.uka.de>]
+
+Make 'pass' work in the body of an extern-from struct
+or union.
+
+Disallow a filename which results in an illegal identifier when
+used as a module name.
+
+Use ctypedef names.
+
+Provide an easy way of exposing a set of enum values as Python names.
+[John J Lee <jjl@pobox.com>]
+
+Prevent user from returning a value from special methods that
+return an error indicator only.
+
+Use PyObject_TypeCheck instead of PyObject_IsInstance?
+
+Allow * in cimport? [John J Lee <jjl@pobox.com>]
+
+FAQ: Q. Pyrex says my extension type object has no attribute 'rhubarb', but
+     I know it does.
+
+     A. Have you declared the type at the point where you're using it?
+
+Eliminate lvalue casts! (Illegal in C++, also disallowed by some C compilers)
+[Matthias Baas <baas@ira.uka.de>]
+
+Make Python class construction work more like it does in Python.
+
+Give the right module name to Python classes.
+
+Command line switch for full pathnames in backtraces?
+
+Use PyString_FromStringAndSize on string literals containing
+nulls.
+
+Peephole optimisation? [Vladislav Bulatov <vrbulatov@list.ru>]
+
+Avoid PyArg_ParseTuple call when a function takes no positional args.
+
+Omit incref/decref of arguments that are not assigned to?
+
+Can a faster way of instantiating extension types be found?
+
+Disallow declaring a special method of an extension type with
+'cdef' instead of 'def'.
+
+Use PySequence_GetItem instead of PyObject_GetItem when index
+is an integer.
+
+If a __getitem__ method is declared with an int index, use the
+sq_item slot instead of the mp_subscript slot.
+
+Provide some way of controlling the argument list passed to
+an extension type's base __new__ method?
+[Alain Pointdexter <alainpoint@yahoo.fr>]
+
+Rename __new__ in extension types to __alloc__.
+
+Implement a true __new__ for extension types.
+
+Way to provide constructors for extension types that are not
+available to Python and can accept C types directly?
+
+Support generators by turning them into extension types?
+
+List comprehensions.
+
+Variable declarations inside inner code blocks?
+
+Initial values when declaring variables?
+
+Do something about __stdcall.
+
+Support class methods in extension types using METH_CLASS flag.
+
+Disallow defaulting types to 'object' in C declarations?
+
+C globals with static initialisers.
+
+Find a way of providing C-only initialisers for extension types.
+
+Metaclasses for extension types?
+
+Make extension types use Py_TPFLAGS_HEAPTYPE so their __module__
+will get set dynamically?

@@ -1,0 +1,100 @@
+# Copyright 2014 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Config for us and everybody else depending on BoringSSL.
+config("openssl_config") {
+  include_dirs = []
+  include_dirs += [ "src/include" ]
+  if (is_component_build) {
+    defines = [ "BORINGSSL_SHARED_LIBRARY" ]
+  }
+}
+
+# Config internal to this build file.
+config("openssl_internal_config") {
+  visibility = [ ":*" ]  # Only targets in this file can depend on this.
+}
+
+# The list of BoringSSL files is kept in boringssl.gypi.
+gypi_values =
+    exec_script("//build/gypi_to_gn.py",
+                [ rebase_path("//third_party/boringssl/boringssl.gypi") ],
+                "scope",
+                [ "//third_party/boringssl/boringssl.gypi" ])
+
+# Windows' assembly is built with Yasm. The other platforms use the platform
+# assembler.
+if (is_win) {
+  import("//third_party/yasm/yasm_assemble.gni")
+  yasm_assemble("boringssl_asm") {
+    if (current_cpu == "x64") {
+      sources = gypi_values.boringssl_win_x86_64_sources
+    } else if (current_cpu == "x86") {
+      sources = gypi_values.boringssl_win_x86_sources
+    }
+  }
+}
+
+component("boringssl") {
+  sources = gypi_values.boringssl_lib_sources
+
+  public_configs = [ ":openssl_config" ]
+
+  cflags = []
+  defines = [
+    "BORINGSSL_IMPLEMENTATION",
+    "BORINGSSL_NO_STATIC_INITIALIZER",
+  ]
+  deps = []
+  if (is_component_build) {
+    defines += [ "BORINGSSL_SHARED_LIBRARY" ]
+  }
+
+  configs -= [ "//build/config/compiler:chromium_code" ]
+  configs += [
+    "//build/config/compiler:no_chromium_code",
+
+    # TODO(davidben): Fix size_t truncations in BoringSSL.
+    # https://crbug.com/429039
+    "//build/config/compiler:no_size_t_to_int_warning",
+  ]
+
+  # Also gets the include dirs from :openssl_config
+  include_dirs = [
+    "src/include",
+
+    # This is for arm_arch.h, which is needed by some asm files. Since the
+    # asm files are generated and kept in a different directory, they
+    # cannot use relative paths to find this file.
+    "src/crypto",
+  ]
+
+  if (current_cpu == "x64") {
+    if (is_mac) {
+      sources += gypi_values.boringssl_mac_x86_64_sources
+    } else if (is_linux || is_android) {
+      sources += gypi_values.boringssl_linux_x86_64_sources
+    } else if (is_win) {
+      deps += [ ":boringssl_asm" ]
+    } else {
+      defines += [ "OPENSSL_NO_ASM" ]
+    }
+  } else if (current_cpu == "x86") {
+    if (is_mac) {
+      sources += gypi_values.boringssl_mac_x86_sources
+    } else if (is_linux || is_android) {
+      sources += gypi_values.boringssl_linux_x86_sources
+    } else if (is_win) {
+      deps += [ ":boringssl_asm" ]
+    } else {
+      defines += [ "OPENSSL_NO_ASM" ]
+    }
+  } else if (current_cpu == "arm") {
+    sources += gypi_values.boringssl_linux_arm_sources
+  } else if (current_cpu == "arm64") {
+    sources += gypi_values.boringssl_linux_aarch64_sources
+  } else {
+    defines += [ "OPENSSL_NO_ASM" ]
+  }
+}

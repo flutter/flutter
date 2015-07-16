@@ -1,0 +1,243 @@
+------------------------------------------------------------------------------
+ot-sanitise - TTF/OTF font validator/transcoder
+
+Description:
+  ot-sanitise is a program which validates and/or transcodes a truetype or
+  opentype font file using the OTS library:
+
+      transcoded_font = ValidateAndTranscode(original_font);
+      if (validation_error)
+        PrintErrorAndExit;
+      OutputToStdout(transcoded_font);
+
+Usage:
+  $ ./ot-sanitise ttf_or_otf_file [transcoded_file]
+
+Example:
+  $ ./ot-sanitise sample.otf transcoded_sample.otf
+  $ ./ot-sanitise malformed.ttf
+  WARNING at ots/src/ots.cc:158: bad range shift
+  ERROR at ots/src/ots.cc:199 (bool<unnamed>::do_ots_process(ots::OpenTypeFile*, ots::OTSStream*, const uint8_t*, size_t))
+  Failed to sanitise file!
+  $
+
+------------------------------------------------------------------------------
+idempotent - TTF/OTF font transcoder (for OTS debugging)
+
+Description:
+  idempotent is a program which validates and transcodes a truetype or opentype
+  font file using OTS. This tool transcodes the original font twice and then
+  verifies that the two transcoded fonts are identical:
+
+      t1 = ValidateAndTranscode(original_font);
+      if (validation_error)
+        PrintErrorAndExit;
+      t2 = ValidateAndTranscode(t1);
+      if (validation_error)
+        PrintErrorAndExit;
+      if (t1 != t2)
+        PrintErrorAndExit;
+
+  This tool is basically for OTS developers.
+
+Usage:
+  $ ./idempotent ttf_or_otf_file
+
+Example:
+  $ ./idempotent sample.otf
+  $ ./idempotent malformed.ttf
+  WARNING at ots/src/ots.cc:158: bad range shift
+  ERROR at ots/src/ots.cc:199 (bool<unnamed>::do_ots_process(ots::OpenTypeFile*, ots::OTSStream*, const uint8_t*, size_t))
+  Failed to sanitise file!
+  $
+
+------------------------------------------------------------------------------
+validator_checker - font validation checker
+
+Description:
+  validator_checker is a program which is intended to validate malformed fonts.
+  If the program detects that the font is invalid, it prints "OK" and returns
+  with 0 (success). If it coulndn't detect any errors, the program then opens
+  the transcoded font and renders some characters using FreeType2:
+
+      transcoded_font = ValidateAndTranscode(malicious_font);
+      if (validation_error)
+        Print("OK");
+      OpenAndRenderSomeCharacters(transcoded_font);  # may cause SIGSEGV
+      Print("OK");
+
+  If SEGV doesn't raise inside FreeType2 library, the program prints "OK" and
+  returns with 0 as well. You should run this tool under the catchsegv or
+  valgrind command so that you can easily verify that all transformed fonts
+  don't crash the library (see the example below).
+
+Usage:
+  $ catchsegv ./validator_checker malicous_ttf_or_otf_file
+
+Example:
+  $ for f in malformed/*.ttf ; do catchsegv ./validator-checker "$f" ; done
+  OK: the malicious font was filtered: malformed/1.ttf
+  OK: the malicious font was filtered: malformed/2.ttf
+  OK: FreeType2 didn't crash: malformed/3.ttf
+  OK: the malicious font was filtered: malformed/4.ttf
+  $
+
+------------------------------------------------------------------------------
+perf - performance checker
+
+Description:
+  perf is a program which validates and transcodes a truetype or opentype font
+  file N times using OTS, then prints the elapsed time:
+
+      for (N times)
+        ValidateAndTranscode(original_font);
+      Print(elapsed_time_in_us / N);
+
+Usage:
+  $ ./perf ttf_or_otf_file
+
+Example:
+  $ ./perf sample.ttf 
+  903 [us] sample.ttf (139332 bytes, 154 [byte/us])
+  $ ./perf sample-bold.otf
+  291 [us] sample-bold.otf (150652 bytes, 517 [byte/us])
+
+------------------------------------------------------------------------------
+side-by-side - font quality checker
+
+Description:
+  side-by-side is a program which renders some characters (ASCII, Latin-1, CJK)
+  using both original font and transcoded font and checks that the two rendering
+  results are exactly equal.
+
+  The following Unicode characters are used during the test:
+    0x0020 - 0x007E  // Basic Latin
+    0x00A1 - 0x017F  // Latin-1
+    0x1100 - 0x11FF  // Hangul
+    0x3040 - 0x309F  // Japanese HIRAGANA letters
+    0x3130 - 0x318F  // Hangul
+    0x4E00 - 0x4F00  // CJK Kanji/Hanja
+    0xAC00 - 0xAD00  // Hangul
+
+  This tool uses FreeType2 library.
+  Note: This tool doesn't check kerning (GPOS/kern) nor font substitution
+  (GSUB). These should be tested in Layout tests if necessary.
+
+Usage:
+  $ ./side-by-side ttf_or_otf_file
+
+Example:
+  $ ./side-by-side linux/kochi-gothic.ttf  # no problem
+  $ ./side-by-side free/kredit1.ttf        # this is known issue of OTS.
+  bitmap metrics doesn't match! (14, 57), (37, 45)
+  EXPECTED:
+                
+    +#######*.  
+   +##########+ 
+  .###+.#.   .#.
+  *#*   #     #*
+  ##.   #     ##
+  ##    #     ##
+  ##    #     ##
+  ##    #.    ##
+  ##.   #.   .##
+  ##.   #.   .##
+  *#+   *+   +#*
+  *#+   *+   +#*
+  *#+   *+   +#*
+  *#+   *+   +#*
+  *#+   *+   *#*
+  *#+   ++   *#+
+  +#*   +*   *#+
+  +#*   +*   *#+
+  +#*   +*   *#+
+  +#*   +*   ##.
+  +#*   +*   ##.
+  .##   .#   ## 
+  .##   .#   ## 
+  .##   .#   ## 
+   ##    #   ## 
+   ##    #   ## 
+   ##    #  .## 
+   ##    #  .## 
+   ##   .#+ +#* 
+   ##  +######* 
+   ##.+#######* 
+   *##########* 
+   +##########+ 
+    #########*  
+    .########   
+      +####+    
+                
+                
+                
+                
+                
+                
+    .*######*   
+   +##*.*#####  
+  .##+.#+    +# 
+  *#* ##      #+
+  ##*###      ##
+  ######      ##
+  ##+.##+    +##
+  ##  ##########
+  ##  +#########
+  ##   +########
+  *#. .########*
+  .#* #########.
+   +##########+ 
+    +*######*   
+  
+  ACTUAL:
+
+    .*##*+                             
+   +##+.##*.                           
+  .#* .##.+#*                          
+  *#  ###   *#+                        
+  #*######+  .*#+                      
+  #########*.  +#*.                    
+  ###########*   +#*                   
+  *############+   *#+                 
+  +##############.  .##.               
+   *##############*   +#*              
+    +###############+   *#+            
+      *###############+  .*#+          
+       .###############*.  +#*.        
+         +###############*   +#*       
+           *###############+   *#+     
+            .*###############+  .*#+   
+              +###############*.  +#*  
+                +###############*   ** 
+                  *###############+  #+
+                   .###############* ##
+                     +############+  ##
+                       +########*   .##
+                        .######.   +###
+                       +#####+   .*#..#
+                     +#####*    *###..#
+                    *#####.   +#######*
+                  +#####+   .*########.
+                +#####*    +#########* 
+               *#####.   +##########+  
+             +#####+    *#########*.   
+           .#####*    +##########+     
+          *#####.   +##########*       
+        +#####+    *#########*.        
+      .#####*    +##########+          
+     *#####+   +##########*            
+   .#*++#+    *#########*.             
+  .#+  ##   +##########+               
+  ****###+.##########*                 
+  ##################.                  
+  ###+  *#########+                    
+  ##   +########*                      
+  *#+ *########.                       
+   ##.#######+                         
+   +#######*                           
+     *###*.                            
+  
+  
+  Glyph mismatch! (file: free/kredit1.ttf, U+0021, 100pt)!
+  $
+------------------------------------------------------------------------------

@@ -1,0 +1,2 @@
+The first line is the same.
+The second line is different.

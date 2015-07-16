@@ -1,0 +1,8 @@
+In file included from class_overrides_new.cpp:5:
+./class_overrides_new.h:13:5: warning: [blink-gc] Garbage collected class 'HeapObject' is not permitted to override its new operator.
+    WTF_MAKE_FAST_ALLOCATED;
+    ^
+./heap/stubs.h:14:5: note: expanded from macro 'WTF_MAKE_FAST_ALLOCATED'
+    void* operator new(size_t size);            \
+    ^
+1 warning generated.

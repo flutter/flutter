@@ -1,0 +1,14 @@
+In file included from ref_ptr_to_gc_managed_class.cpp:5:
+./ref_ptr_to_gc_managed_class.h:14:1: warning: [blink-gc] Class 'PartObject' contains invalid fields.
+class PartObject {
+^
+./ref_ptr_to_gc_managed_class.h:17:5: note: [blink-gc] RefPtr field 'm_obj' to a GC managed class declared here:
+    RefPtr<HeapObject> m_obj;
+    ^
+./ref_ptr_to_gc_managed_class.h:20:1: warning: [blink-gc] Class 'HeapObject' contains invalid fields.
+class HeapObject : public GarbageCollectedFinalized<HeapObject> {
+^
+./ref_ptr_to_gc_managed_class.h:25:5: note: [blink-gc] RefPtr field 'm_objs' to a GC managed class declared here:
+    Vector<RefPtr<HeapObject> > m_objs;
+    ^
+2 warnings generated.

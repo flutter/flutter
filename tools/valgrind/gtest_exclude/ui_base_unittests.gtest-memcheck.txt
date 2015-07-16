@@ -1,0 +1,8 @@
+# http://crbug.com/222606
+RenderTextTest.DisplayRectShowsCursorLTR
+
+# http://crbug.com/370168
+TouchExplorationTest.*
+
+# http://crbug.com/414191
+MenuControllerTest.OpenClose

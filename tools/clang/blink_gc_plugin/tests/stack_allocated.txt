@@ -1,0 +1,17 @@
+In file included from stack_allocated.cpp:5:
+./stack_allocated.h:14:1: warning: [blink-gc] Class 'PartObject' requires a trace method.
+class PartObject {
+^
+./stack_allocated.h:17:5: note: [blink-gc] Untraced field 'm_obj' declared here:
+    Member<HeapObject> m_obj; // Needs tracing.
+    ^
+./stack_allocated.h:26:28: warning: [blink-gc] Stack-allocated class 'AnotherStackObject' derives class 'PartObject' which is not stack allocated.
+class AnotherStackObject : public PartObject { // Invalid base.
+                           ^
+./stack_allocated.h:32:1: warning: [blink-gc] Class 'HeapObject' contains invalid fields.
+class HeapObject : public GarbageCollected<HeapObject> {
+^
+./stack_allocated.h:36:5: note: [blink-gc] Stack-allocated field 'm_part' declared here:
+    StackObject m_part; // Cannot embed a stack allocated object.
+    ^
+3 warnings generated.

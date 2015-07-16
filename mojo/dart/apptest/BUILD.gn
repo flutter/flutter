@@ -1,0 +1,23 @@
+# Copyright 2015 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//mojo/public/dart/rules.gni")
+
+dartzip_package("apptest") {
+  uses_pub = true
+  sources = [
+    "lib/apptest.dart",
+    "pubspec.yaml",
+  ]
+  deps = [
+    "//mojo/public/dart",
+  ]
+}
+
+dart_pkg("apptest_pkg") {
+  sources = [
+    "lib/apptest.dart",
+    "pubspec.yaml",
+  ]
+}

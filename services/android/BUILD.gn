@@ -1,0 +1,37 @@
+# Copyright 2014 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//build/config/android/rules.gni")
+import("//mojo/public/mojo_application.gni")
+
+mojo_android_application("java_handler") {
+  sources = [
+    "java_handler.cc",
+  ]
+
+  deps = [
+    "//base",
+    "//mojo/android:libsystem_java",
+    "//mojo/android:system_java_jni_headers",
+    "//mojo/application",
+    "//mojo/application:content_handler",
+    "//mojo/common:tracing_impl",
+    "//mojo/environment:chromium",
+    "//mojo/public/c/system:for_shared_library",
+    "//mojo/public/cpp/bindings",
+    "//mojo/public/cpp/system",
+    "//mojo/services/content_handler/public/interfaces",
+    "//mojo/services/url_response_disk_cache/public/interfaces",
+  ]
+
+  java_sources = [ "java/src/org/chromium/services/android/JavaHandler.java" ]
+
+  java_deps = [
+    "//base:base_java",
+    "//mojo/android:system_java",
+    "//mojo/public/java:system",
+  ]
+
+  jni_package = "mojo"
+}

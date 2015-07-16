@@ -1,0 +1,11 @@
+# Too slow under Valgrind/Wine and TSan/Windows
+TimeTicks.WinRollover
+
+# Very sensitive to slowdown
+TimeTicks.Deltas
+TimerTest.RepeatingTimer*
+
+# This Windows-native sampling profiler test does not work under our tools
+# because it assumes the original code runs, not the modified version
+# with instrumentation. See http://crbug.com/106829
+SamplingProfilerTest.Sample

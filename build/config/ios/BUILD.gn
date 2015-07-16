@@ -1,0 +1,22 @@
+# Copyright 2014 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//build/config/sysroot.gni")
+import("//build/config/ios/ios_sdk.gni")
+
+config("sdk") {
+  common_flags = [
+    "-isysroot",
+    sysroot,
+  ]
+
+  if (use_ios_simulator) {
+    common_flags += [ "-mios-simulator-version-min=$ios_deployment_target" ]
+  } else {
+    common_flags += [ "-miphoneos-version-min=$ios_deployment_target" ]
+  }
+
+  cflags = common_flags
+  ldflags = common_flags
+}

@@ -1,0 +1,15 @@
+Change bogus '(unsigned long)' cast to '(unsigned short)'
+
+Index: libxml/xmlregexp.c
+===================================================================
+--- libxml.orig/xmlregexp.c	2010-07-09 14:16:36.990430641 -0700
++++ libxml/xmlregexp.c	2010-07-09 14:16:40.939742007 -0700
+@@ -6470,7 +6470,7 @@
+     if (name != NULL) {
+ 	value += 30 * (*name);
+ 	while ((ch = *name++) != 0) {
+-	    value = value ^ ((value << 5) + (value >> 3) + (unsigned long)ch);
++	    value = value ^ ((value << 5) + (value >> 3) + (unsigned short)ch);
+ 	}
+     }
+     return (value);

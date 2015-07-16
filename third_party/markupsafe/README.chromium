@@ -1,0 +1,24 @@
+Name: MarkupSafe Python Safe String Class
+Short Name: markupsafe
+URL: https://github.com/mitsuhiko/markupsafe
+Version: 0.18
+License: BSD 3-clause License
+License File: NOT_SHIPPED
+Security Critical: no
+
+Description:
+Safe string class, used by Jinja2 template engine.
+
+Source:
+https://pypi.python.org/packages/source/M/MarkupSafe/MarkupSafe-0.18.tar.gz
+MD5: f8d252fd05371e51dec2fe9a36890687
+SHA-512: 0438ddf0fdab465c40d9afba8c14ad346be0868df654c11130d05e329992d456
+         a9bc278551970cbd09244a29c77213885d0c363c951b0cfd4d9aa95b248ecff5
+
+Local Modifications:
+This only includes the markup directory from the tarball and the LICENSE and
+AUTHORS files, removing the unneeded unit tests (tests.py).
+Also includes install script (get_markupsafe.sh) and files of hashes (MD5 is
+also posted on website, SHA-512 computed locally); script checks hash then
+unpacks archive and installs desired files.
+Retrieve or update by executing markupsafe/get_markupsafe.sh from third_party.

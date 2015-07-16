@@ -1,0 +1,66 @@
+Name
+
+    CHROMIUM_gpu_memory_buffer_image
+
+Name Strings
+
+    GL_CHROMIUM_gpu_memory_buffer_image
+
+Version
+
+    Last Modifed Date: Sep 29, 2014
+
+Dependencies
+
+    OpenGL ES 2.0 is required.
+
+    GL_CHROMIUM_image is required.
+
+Overview
+
+    This extension provide a mechanism for creating a GpuMemoryBuffer
+    backed image resource.
+
+Issues
+
+    None
+
+New Tokens
+
+    Accepted by the <usage> parameter of CreateGpuMemoryBufferImageCHROMIUM:
+
+        MAP_CHROMIUM 0x78F1
+        SCANOUT_CHROMIUM 0x78F2
+
+New Procedures and Functions
+
+    GLuint CreateGpuMemoryBufferImageCHROMIUM(GLsizei width,
+                                              GLsizei height,
+                                              GLenum internalformat,
+                                              GLenum usage)
+
+    Create a GpuMemoryBuffer backed image with width equal to <width>
+    and height equal to <height> and format equal to <internalformat>.
+
+    Returns a unique identifier for the image that could be used in
+    subsequent operations.
+
+    INVALID_VALUE is generated if <width> or <height> is nonpositive.
+
+    INVALID_ENUM is generated if <internalformat> is not one of
+    RGB or RGBA.
+
+    INVALID_ENUM is generated if <usage> is not one of
+    MAP_CHROMIUM or SCANOUT_CHROMIUM.
+
+Errors
+
+    None.
+
+New State
+
+    None.
+
+Revision History
+
+    9/29/2014   Documented the extension.

@@ -1,0 +1,6 @@
+[dist4]message_header  // num_bytes
+[u4]0                  // version
+[u4]0x80000000         // name
+[u4]1                  // flags: This is a response message which expects to
+                       // have a request ID.
+[anchr]message_header

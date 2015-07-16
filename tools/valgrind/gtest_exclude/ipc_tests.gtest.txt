@@ -1,0 +1,6 @@
+# Takes 27-40 seconds to run.
+IPCSyncChannelTest.ChattyServer
+# Hangs on Linux sometimes.  See http://crbug.com/22141
+IPCChannelTest.ChannelTest
+# Crashes under Valgrind. See http://crbug.com/46782
+IPCSyncChannelTest.Multiple

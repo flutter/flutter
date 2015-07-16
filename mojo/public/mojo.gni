@@ -1,0 +1,47 @@
+# Copyright 2014 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//build/module_args/mojo.gni")
+
+# If using the prebuilt shell, gate its usage by the platforms for which it is
+# published.
+mojo_use_prebuilt_mojo_shell = false
+if (!defined(mojo_build_mojo_shell_from_source) ||
+    !mojo_build_mojo_shell_from_source) {
+  mojo_use_prebuilt_mojo_shell = is_linux || is_android
+}
+
+# If using the prebuilt network service, gate its usage by the platforms for
+# which it is published.
+mojo_use_prebuilt_network_service = false
+if (!defined(mojo_build_network_service_from_source) ||
+    !mojo_build_network_service_from_source) {
+  mojo_use_prebuilt_network_service = is_linux || is_android
+}
+
+# Enable Dart apptest framework by default.
+mojo_use_dart_apptest_framework = true
+if (defined(mojo_disable_dart_apptest_framework) &&
+    mojo_disable_dart_apptest_framework) {
+  mojo_use_dart_apptest_framework = false
+}
+
+# Embedder uses Mojo application code.
+mojo_use_application_in_sdk = true
+if (defined(mojo_disable_application_in_sdk) &&
+    mojo_disable_application_in_sdk) {
+  mojo_use_application_in_sdk = false
+}
+
+# Embedder uses Mojo network interfaces.
+mojo_use_network_in_sdk = true
+if (defined(mojo_disable_network_in_sdk) && mojo_disable_network_in_sdk) {
+  mojo_use_network_in_sdk = false
+}
+
+# The absolute path to the directory containing the mojo public SDK (i.e., the
+# directory containing mojo/public). The build files within the Mojo public
+# SDK use this variable to allow themselves to be parameterized by the location
+# of the public SDK within a client repo.
+mojo_root = get_path_info("../..", "abspath")

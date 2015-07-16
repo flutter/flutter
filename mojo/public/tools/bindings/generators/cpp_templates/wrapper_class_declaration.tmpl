@@ -1,0 +1,47 @@
+
+class {{struct.name}} {
+ public:
+  using Data_ = internal::{{struct.name}}_Data;
+
+{#--- Enums #}
+{%- for enum in struct.enums -%}
+{%    macro enum_def() %}{% include "enum_declaration.tmpl" %}{% endmacro %}
+  {{enum_def()|indent(2)}}
+{%- endfor %}
+
+{#--- Constants #}
+{%- for constant in struct.constants %}
+{%-   if constant.kind|is_integral_kind %}
+  static const {{constant.kind|cpp_pod_type}} {{constant.name}} = {{constant|constant_value}};
+{%-   else %}
+  static const {{constant.kind|cpp_pod_type}} {{constant.name}};
+{%-   endif %}
+{%- endfor %}
+
+  static {{struct.name}}Ptr New();
+
+  template <typename U>
+  static {{struct.name}}Ptr From(const U& u) {
+    return mojo::TypeConverter<{{struct.name}}Ptr, U>::Convert(u);
+  }
+
+  template <typename U>
+  U To() const {
+    return mojo::TypeConverter<U, {{struct.name}}>::Convert(*this);
+  }
+
+  {{struct.name}}();
+  ~{{struct.name}}();
+
+{%  if struct|is_cloneable_kind %}
+  {{struct.name}}Ptr Clone() const;
+{%- endif %}
+  bool Equals(const {{struct.name}}& other) const;
+
+{#--- Struct members #}
+{%  for field in struct.fields %}
+{%-   set type = field.kind|cpp_wrapper_type %}
+{%-   set name = field.name %}
+  {{type}} {{name}};
+{%- endfor %}
+};

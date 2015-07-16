@@ -1,0 +1,100 @@
+# Copyright 2014 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//build/module_args/mojo.gni")
+import("../mojo.gni")
+
+if (mojo_use_prebuilt_mojo_shell) {
+  copy("copy_mojo_shell") {
+    filename = "mojo_shell"
+    if (is_android) {
+      filename = "MojoShell.apk"
+      sources = [
+        "prebuilt/shell/android-arm/$filename",
+      ]
+      outputs = [
+        "$root_out_dir/apks/$filename",
+      ]
+    } else {
+      assert(is_linux)
+      sources = [
+        "prebuilt/shell/linux-x64/$filename",
+      ]
+      outputs = [
+        "$root_out_dir/$filename",
+      ]
+    }
+  }
+}
+
+if (mojo_use_prebuilt_network_service) {
+  copy("copy_network_service") {
+    filename = "network_service.mojo"
+    if (defined(mojo_prebuilt_network_service_location) &&
+        mojo_prebuilt_network_service_location != "") {
+      sources = [
+        "$mojo_prebuilt_network_service_location",
+      ]
+    } else {
+      if (is_android) {
+        assert(current_cpu == "arm",
+               "Only arm version prebuilt netowrk_service.mojo is available.")
+        sources = [
+          "prebuilt/network_service/android-arm/$filename",
+        ]
+      } else {
+        assert(is_linux)
+        sources = [
+          "prebuilt/network_service/linux-x64/$filename",
+        ]
+      }
+    }
+
+    outputs = [
+      "$root_out_dir/$filename",
+    ]
+  }
+
+  copy("copy_network_service_apptests") {
+    filename = "network_service_apptests.mojo"
+    if (defined(mojo_prebuilt_network_service_apptests_location) &&
+        mojo_prebuilt_network_service_apptests_location != "") {
+      sources = [
+        "$mojo_prebuilt_network_service_apptests_location",
+      ]
+    } else {
+      if (is_android) {
+        assert(
+            target_cpu == "arm",
+            "Only arm version prebuilt netowrk_service_apptests.mojo is available.")
+        sources = [
+          "prebuilt/network_service_apptests/android-arm/$filename",
+        ]
+      } else {
+        assert(is_linux)
+        sources = [
+          "prebuilt/network_service_apptests/linux-x64/$filename",
+        ]
+      }
+    }
+    outputs = [
+      "$root_out_dir/$filename",
+    ]
+  }
+}
+
+# This rule can be seen as a sort of adapter. This takes a dart framework
+# loaded from Google Storage and then puts it in a rule which the
+# "dartzip_package" template in mojo/public/dart/rules.gni can introspect on,
+# accessing the 'label' and 'target_out_dir' variables.
+if (mojo_use_dart_apptest_framework) {
+  copy("dart_apptest_framework") {
+    sources = [
+      "prebuilt/frameworks/apptest.dartzip",
+    ]
+    outputs = [
+      "$target_out_dir/dart_apptest_framework.dartzip",
+    ]
+  }
+}

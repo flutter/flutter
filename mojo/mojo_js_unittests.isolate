@@ -1,0 +1,49 @@
+# Copyright 2014 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+{
+  'includes': [
+    '../third_party/icu/icu.isolate',
+  ],
+  'conditions': [
+    ['OS=="win" or OS=="mac" or OS=="linux"', {
+      'variables': {
+        'command': [
+          '../testing/test_env.py',
+          '<(PRODUCT_DIR)/mojo_js_unittests<(EXECUTABLE_SUFFIX)',
+          '--brave-new-test-launcher',
+          '--test-launcher-bot-mode',
+        ],
+        'files': [
+          '../gin/test/expect.js',
+          '../testing/test_env.py',
+          '<(PRODUCT_DIR)/gen/mojo/public/interfaces/bindings/tests/',
+          '<(PRODUCT_DIR)/mojo_js_unittests<(EXECUTABLE_SUFFIX)',
+          'bindings/js/',
+          'public/js/bindings/',
+        ],
+      },
+    }],
+    ['OS=="win"', {
+      'variables': {
+        'files': [
+          '<(PRODUCT_DIR)/mojo_test_support.dll',
+        ],
+      },
+    }],
+    ['OS=="linux"', {
+      'variables': {
+        'files': [
+          '<(PRODUCT_DIR)/lib/libmojo_test_support.so',
+        ],
+      },
+    }],
+    ['OS=="mac"', {
+      'variables': {
+        'files': [
+          '<(PRODUCT_DIR)/libmojo_test_support.dylib',
+        ],
+      },
+    }],
+  ],
+}

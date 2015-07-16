@@ -1,0 +1,100 @@
+{#--- Begin #}
+  function {{struct.name}}(values) {
+    this.initDefaults_();
+    this.initFields_(values);
+  }
+
+{#--- Enums #}
+{%- from "enum_definition.tmpl" import enum_def %}
+{%  for enum in struct.enums %}
+  {{enum_def("%s.%s"|format(struct.name, enum.name), enum)}}
+{%-  endfor %}
+
+{#--- Constants #}
+{%  for constant in struct.constants %}
+  {{struct.name}}.{{constant.name}} = {{constant.value|expression_to_text}};
+{%-  endfor %}
+
+{#--- initDefaults() #}
+  {{struct.name}}.prototype.initDefaults_ = function() {
+{%- for packed_field in struct.packed.packed_fields %}
+    this.{{packed_field.field.name}} = {{packed_field.field|default_value}};
+{%- endfor %}
+  };
+
+{#--- initFields() #}
+  {{struct.name}}.prototype.initFields_ = function(fields) {
+    for(var field in fields) {
+        if (this.hasOwnProperty(field))
+          this[field] = fields[field];
+    }
+  };
+
+{#--- Validation #}
+
+  {{struct.name}}.validate = function(messageValidator, offset) {
+    var err;
+    err = messageValidator.validateStructHeader(offset, {{struct.name}}.encodedSize, {{struct.versions[-1].version}});
+    if (err !== validator.validationError.NONE)
+        return err;
+
+{%- from "validation_macros.tmpl" import validate_struct_field %}
+{%- for packed_field in struct.packed.packed_fields %}
+{%-   set offset = packed_field|field_offset %}
+{%-   set field = packed_field.field %}
+{%-   set name = struct.name ~ '.' ~ field.name %}
+{{validate_struct_field(field, offset, name)|indent(4)}}
+{%- endfor %}
+
+    return validator.validationError.NONE;
+  };
+
+{#--- Encoding and decoding #}
+
+  {{struct.name}}.encodedSize = codec.kStructHeaderSize + {{struct.packed|payload_size}};
+
+  {{struct.name}}.decode = function(decoder) {
+    var packed;
+    var val = new {{struct.name}}();
+    var numberOfBytes = decoder.readUint32();
+    var version = decoder.readUint32();
+{%- for byte in struct.bytes %}
+{%-   if byte.packed_fields|length > 1 %}
+    packed = decoder.readUint8();
+{%-     for packed_field in byte.packed_fields %}
+    val.{{packed_field.field.name}} = (packed >> {{packed_field.bit}}) & 1 ? true : false;
+{%-     endfor %}
+{%-   else %}
+{%-     for packed_field in byte.packed_fields %}
+    val.{{packed_field.field.name}} = decoder.{{packed_field.field.kind|decode_snippet}};
+{%-     endfor %}
+{%-   endif %}
+{%-   if byte.is_padding %}
+    decoder.skip(1);
+{%-   endif %}
+{%- endfor %}
+    return val;
+  };
+
+  {{struct.name}}.encode = function(encoder, val) {
+    var packed;
+    encoder.writeUint32({{struct.name}}.encodedSize);
+    encoder.writeUint32({{struct.versions[-1].version}});
+
+{%- for byte in struct.bytes %}
+{%-   if byte.packed_fields|length > 1 %}
+    packed = 0;
+{%-     for packed_field in byte.packed_fields %}
+    packed |= (val.{{packed_field.field.name}} & 1) << {{packed_field.bit}}
+{%-     endfor %}
+    encoder.writeUint8(packed);
+{%-   else %}
+{%-     for packed_field in byte.packed_fields %}
+    encoder.{{packed_field.field.kind|encode_snippet}}val.{{packed_field.field.name}});
+{%-     endfor %}
+{%-   endif %}
+{%-   if byte.is_padding %}
+    encoder.skip(1);
+{%-   endif %}
+{%- endfor %}
+  };

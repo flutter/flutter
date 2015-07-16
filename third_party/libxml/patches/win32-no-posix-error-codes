@@ -1,0 +1,14 @@
+diff --git a/third_party/libxml/src/libxml.h b/third_party/libxml/src/libxml.h
+index 1656ac2..f8a368c 100644
+--- a/third_party/libxml/src/libxml.h
++++ b/third_party/libxml/src/libxml.h
+@@ -17,6 +17,9 @@
+ #define _FILE_OFFSET_BITS 64
+ #endif
+ #endif
++#ifndef _CRT_NO_POSIX_ERROR_CODES
++#define _CRT_NO_POSIX_ERROR_CODES
++#endif
+ 
+ #if defined(macintosh)
+ #include "config-mac.h"

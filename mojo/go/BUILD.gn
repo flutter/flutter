@@ -1,0 +1,92 @@
+# Copyright 2014 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("rules.gni")
+
+go_library("application") {
+  sources = [
+    "//mojo/public/go/application/application_impl.go",
+    "//mojo/public/go/application/connection.go",
+  ]
+  deps = [
+    ":bindings",
+    ":system",
+  ]
+}
+
+go_library("bindings") {
+  sources = [
+    "//mojo/public/go/bindings/async_waiter.go",
+    "//mojo/public/go/bindings/connector.go",
+    "//mojo/public/go/bindings/decoder.go",
+    "//mojo/public/go/bindings/encoder.go",
+    "//mojo/public/go/bindings/interface.go",
+    "//mojo/public/go/bindings/invalid_handle.go",
+    "//mojo/public/go/bindings/message.go",
+    "//mojo/public/go/bindings/router.go",
+    "//mojo/public/go/bindings/stub.go",
+    "//mojo/public/go/bindings/util.go",
+  ]
+  deps = [
+    ":system",
+  ]
+}
+
+go_library("system") {
+  sources = [
+    "//mojo/public/go/system/core.go",
+    "//mojo/public/go/system/data_pipe.go",
+    "//mojo/public/go/system/handle.go",
+    "//mojo/public/go/system/message_pipe.go",
+    "//mojo/public/go/system/mojo_types.go",
+    "//mojo/public/go/system/shared_buffer.go",
+    "//mojo/public/go/system/system.go",
+    "//mojo/public/go/system/system_android.go",
+    "//mojo/public/go/system/system_linux.go",
+    "//mojo/public/go/system/system_nacl.go",
+  ]
+}
+
+go_library("platform_cgo") {
+  sources = [
+    "//mojo/public/platform/native_cgo/system_cgo.go",
+  ]
+}
+
+if (is_linux) {
+  group("go") {
+    testonly = true
+    deps = [
+      ":system_test",
+    ]
+  }
+  go_test_binary("system_test") {
+    sources = [
+      "tests/application_impl_test.go",
+      "tests/async_waiter_test.go",
+      "tests/encoding_test.go",
+      "tests/interface_test.go",
+      "tests/message_test.go",
+      "tests/request_response_test.go",
+      "tests/router_test.go",
+      "tests/system_test.go",
+      "tests/testutil.go",
+      "tests/testutil_test.go",
+      "tests/union_test.go",
+      "tests/validation_test.go",
+    ]
+    static_library_sources = [
+      "c_embedder/c_embedder.cc",
+      "c_embedder/c_embedder.h",
+    ]
+    deps = [
+      ":application",
+      ":platform_cgo",
+      "//examples/echo",
+      "//mojo/edk/system",
+      "//mojo/public/interfaces/bindings/tests:test_interfaces",
+      "//mojo/public/interfaces/bindings/tests:test_interfaces_experimental",
+    ]
+  }
+}

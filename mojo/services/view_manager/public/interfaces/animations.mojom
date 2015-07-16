@@ -1,0 +1,61 @@
+// Copyright 2014 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+module mojo;
+
+import "geometry/public/interfaces/geometry.mojom";
+
+enum AnimationTweenType {
+  LINEAR,
+  EASE_IN,
+  EASE_OUT,
+  EASE_IN_OUT,
+};
+
+enum AnimationProperty {
+  // Used for pausing.
+  NONE,
+  OPACITY,
+  TRANSFORM,
+};
+
+struct AnimationValue {
+  float float_value;
+  Transform transform;
+};
+
+// Identifies how a particular property should be animated between a start and
+// target value.
+struct AnimationElement {
+  AnimationProperty property;
+
+  // Duration is in microseconds.
+  int64 duration;
+
+  AnimationTweenType tween_type;
+
+  // If not specified the start value is taken from either the current value
+  // (for the first element) or the target_value of the previous element.
+  AnimationValue? start_value;
+
+  // target_value may be null when property is NONE.
+  AnimationValue? target_value;
+};
+
+// An AnimationSequence consists of a number of AnimationElements to animate.
+// Each element is animated serially.
+struct AnimationSequence {
+  // Number of times to run the sequence. Value of 0 means run until
+  // explicitly stopped.
+  uint32 cycle_count;
+
+  array<AnimationElement> elements;
+};
+
+// AnimationGroup identifies a view and a set of AnimationSequences to apply
+// to the view. Each sequence is run in parallel.
+struct AnimationGroup {
+  uint32 view_id;
+  array<AnimationSequence> sequences;
+};

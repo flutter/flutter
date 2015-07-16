@@ -1,0 +1,22 @@
+# Copyright 2014 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+{
+  'conditions': [
+    ['OS=="linux"', {
+      'variables': {
+        'command': [
+          'tools/run_mojo_python_bindings_tests.py',
+          '--build-dir=<(PRODUCT_DIR)',
+        ],
+        'files': [
+          '<(PRODUCT_DIR)/gen/mojo/public/interfaces/bindings/tests/',
+          '<(PRODUCT_DIR)/python/',
+          'python/tests/',
+          'tools/pylib/mojo_python_tests_runner.py',
+          'tools/run_mojo_python_bindings_tests.py',
+        ],
+      },
+    }],
+  ],
+}

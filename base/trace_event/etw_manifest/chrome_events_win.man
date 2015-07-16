@@ -1,0 +1,84 @@
+﻿<?xml version='1.0' encoding='utf-8' standalone='yes'?>
+<instrumentationManifest
+    xmlns="http://schemas.microsoft.com/win/2004/08/events"
+    xmlns:win="http://manifests.microsoft.com/win/2004/08/windows/events"
+    xmlns:xs="http://www.w3.org/2001/XMLSchema"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://schemas.microsoft.com/win/2004/08/events eventman.xsd"
+    >
+  <instrumentation>
+    <events>
+      <provider
+          guid="{D2D578D9-2936-45B6-A09f-30E32715F42D}"
+          messageFileName="chrome.dll"
+          name="Chrome"
+          resourceFileName="chrome.dll"
+          symbol="CHROME"
+          >
+        <channels>
+          <importChannel
+              chid="SYSTEM"
+              name="System"
+              />
+        </channels>
+        <templates>
+          <template tid="tid_chrome_event">
+            <data
+                inType="win:AnsiString"
+                name="Name"
+                />
+            <data
+                inType="win:AnsiString"
+                name="Phase"
+                />
+            <data
+                inType="win:AnsiString"
+                name="Arg Name 1"
+                />
+            <data
+                inType="win:AnsiString"
+                name="Arg Value 1"
+                />
+            <data
+                inType="win:AnsiString"
+                name="Arg Name 2"
+                />
+            <data
+                inType="win:AnsiString"
+                name="Arg Value 2"
+                />
+            <data
+                inType="win:AnsiString"
+                name="Arg Name 3"
+                />
+            <data
+                inType="win:AnsiString"
+                name="Arg Value 3"
+                />
+          </template>
+        </templates>
+        <events>
+          <event
+              channel="SYSTEM"
+              level="win:Informational"
+              message="$(string.ChromeEvent.EventMessage)"
+              opcode="win:Info"
+              symbol="ChromeEvent"
+              template="tid_chrome_event"
+              value="1"
+              />
+        </events>
+      </provider>
+    </events>
+  </instrumentation>
+  <localization xmlns="http://schemas.microsoft.com/win/2004/08/events">
+    <resources culture="en-US">
+      <stringTable>
+        <string
+            id="ChromeEvent.EventMessage"
+            value="Chrome Event: %1 (%2)"
+            />
+      </stringTable>
+    </resources>
+  </localization>
+</instrumentationManifest>

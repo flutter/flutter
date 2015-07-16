@@ -1,0 +1,31 @@
+# Copyright 2014 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("../../../mojo_sdk.gni")
+
+mojo_sdk_source_set("tests") {
+  testonly = true
+
+  sources = [
+    "run_loop_unittest.cc",
+  ]
+
+  deps = [
+    "//testing/gtest",
+  ]
+
+  mojo_sdk_deps = [
+    "mojo/public/cpp/system",
+    "mojo/public/cpp/test_support:test_utils",
+    "mojo/public/cpp/utility",
+  ]
+
+  # crbug.com/342893
+  if (!is_win) {
+    sources += [
+      "mutex_unittest.cc",
+      "thread_unittest.cc",
+    ]
+  }
+}

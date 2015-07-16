@@ -1,0 +1,63 @@
+diff --git a/third_party/re2/util/sparse_array.h b/third_party/re2/util/sparse_array.h
+index 3e33f89..4ee5c94 100644
+--- a/third_party/re2/util/sparse_array.h
++++ b/third_party/re2/util/sparse_array.h
+@@ -231,7 +231,8 @@ class SparseArray {
+ 
+ template<typename Value>
+ SparseArray<Value>::SparseArray()
+-    : size_(0), max_size_(0), sparse_to_dense_(NULL), dense_(), valgrind_(RunningOnValgrind()) {}
++    : size_(0), max_size_(0), sparse_to_dense_(NULL), dense_(),
++      valgrind_(RunningOnValgrindOrMemorySanitizer()) {}
+ 
+ // IndexValue pairs: exposed in SparseArray::iterator.
+ template<typename Value>
+@@ -418,7 +419,7 @@ void SparseArray<Value>::create_index(int i) {
+ template<typename Value> SparseArray<Value>::SparseArray(int max_size) {
+   max_size_ = max_size;
+   sparse_to_dense_ = new int[max_size];
+-  valgrind_ = RunningOnValgrind();
++  valgrind_ = RunningOnValgrindOrMemorySanitizer();
+   dense_.resize(max_size);
+   // Don't need to zero the new memory, but appease Valgrind.
+   if (valgrind_) {
+diff --git a/third_party/re2/util/sparse_set.h b/third_party/re2/util/sparse_set.h
+index 165dd09..4a324d7 100644
+--- a/third_party/re2/util/sparse_set.h
++++ b/third_party/re2/util/sparse_set.h
+@@ -54,13 +54,14 @@ namespace re2 {
+ class SparseSet {
+  public:
+   SparseSet()
+-    : size_(0), max_size_(0), sparse_to_dense_(NULL), dense_(NULL), valgrind_(RunningOnValgrind()) {}
++    : size_(0), max_size_(0), sparse_to_dense_(NULL), dense_(NULL),
++      valgrind_(RunningOnValgrindOrMemorySanitizer()) {}
+ 
+   SparseSet(int max_size) {
+     max_size_ = max_size;
+     sparse_to_dense_ = new int[max_size];
+     dense_ = new int[max_size];
+-    valgrind_ = RunningOnValgrind();
++    valgrind_ = RunningOnValgrindOrMemorySanitizer();
+     // Don't need to zero the memory, but do so anyway
+     // to appease Valgrind.
+     if (valgrind_) {
+diff --git a/third_party/re2/util/util.h b/third_party/re2/util/util.h
+index de1ef5b..49159c2 100644
+--- a/third_party/re2/util/util.h
++++ b/third_party/re2/util/util.h
+@@ -129,6 +129,14 @@ static inline uint64 Hash64StringWithSeed(const char* s, int len, uint32 seed) {
+   return ((uint64)x << 32) | y;
+ }
+ 
++inline bool RunningOnValgrindOrMemorySanitizer() {
++#if defined(MEMORY_SANITIZER)
++  return true;
++#else
++  return RunningOnValgrind();
++#endif
++}
++
+ }  // namespace re2
+ 
+ #include "util/arena.h"

@@ -1,0 +1,371 @@
+// Copyright 2013 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+[JavaPackage="org.chromium.mojo.bindings.test.mojom.test_structs"]
+module mojo.test;
+
+import "mojo/public/interfaces/bindings/tests/rect.mojom";
+
+struct NamedRegion {
+  string? name;
+  array<Rect>? rects;
+};
+
+struct RectPair {
+  Rect? first;
+  Rect? second;
+};
+
+struct EmptyStruct {
+};
+
+// Used to verify that struct fields which don't specify a default are
+// initialized to: false for bool, 0 for numbers, and null for strings,
+// handles, and structs. The "?" nullable suffix shouldn't have any
+// impact on initial field values.
+
+struct NoDefaultFieldValues {
+  bool f0;
+  int8 f1;
+  uint8 f2;
+  int16 f3;
+  uint16 f4;
+  int32 f5;
+  uint32 f6;
+  int64 f7;
+  uint64 f8;
+  float f9;
+  double f10;
+  string f11;
+  string? f12;
+  handle<message_pipe> f13;
+  handle<data_pipe_consumer> f14;
+  handle<data_pipe_producer> f15;
+  handle<message_pipe>? f16;
+  handle<data_pipe_consumer>? f17;
+  handle<data_pipe_producer>? f18;
+  handle f19;
+  handle? f20;
+  handle<shared_buffer> f21;
+  handle<shared_buffer>? f22;
+  array<string> f23;
+  array<string?> f24;
+  array<string>? f25;
+  array<string?>? f26;
+  EmptyStruct f27;
+  EmptyStruct? f28;
+};
+
+// Used to verify that struct fields with an explicit default value
+// are initialized correctly. The "?" nullable suffix shouldn't have any
+// impact on initial field values.
+
+struct DefaultFieldValues {
+  const string kFoo = "foo";
+  bool f0 = true;
+  int8 f1 = 100;
+  uint8 f2 = 100;
+  int16 f3 = 100;
+  uint16 f4 = 100;
+  int32 f5 = 100;
+  uint32 f6 = 100;
+  int64 f7 = 100;
+  uint64 f8 = 100;
+  float f9 = 100;
+  float f10 = 100.0;
+  double f11 = 100;
+  double f12 = 100.0;
+  string f13 = kFoo;
+  string? f14 = kFoo;
+  Rect f15 = default;
+  Rect? f16 = default;
+};
+
+// Used to verify that the code generated for enum and const values defined
+// within a struct is correct. Assuming that a constant's value can be a literal
+// or another constant and that enum values can either be an integer constant or
+// another value from the same enum type.
+
+struct ScopedConstants {
+  const int32 TEN = 10;
+  const int32 ALSO_TEN = TEN;
+  enum EType {
+    E0,
+    E1,
+    E2 = 10,
+    E3 = E2,
+    E4,
+  };
+  const int32 TEN_TOO = EType.E2;
+  EType f0 = E0; // 0
+  EType f1 = E1; // 1
+  EType f2 = E2; // 10
+  EType f3 = E3; // 10
+  EType f4 = E4; // 11
+  int32 f5 = TEN;
+  int32 f6 = ALSO_TEN;
+};
+
+// Used to verify that all possible Map key field types can be encoded and
+// decoded successfully.
+
+struct MapKeyTypes {
+  map<bool, bool> f0;
+  map<int8, int8> f1;
+  map<uint8, uint8> f2;
+  map<int16, int16> f3;
+  map<uint16, uint16> f4;
+  map<int32, int32> f5;
+  map<uint32, uint32> f6;
+  map<int64, int64> f7;
+  map<uint64, uint64> f8;
+  map<float, float> f9;
+  map<double, double> f10;
+  map<string, string> f11;
+};
+
+// Used to verify that various map value types can be encoded and decoded
+// successfully.
+
+struct MapValueTypes {
+  map<string, array<string>> f0;
+  map<string, array<string>?> f1;
+  map<string, array<string?>> f2;
+  map<string, array<string, 2>> f3;
+  map<string, array<array<string, 2>?>> f4;
+  map<string, array<array<string, 2>, 1>> f5;
+  map<string, Rect?> f6;
+  map<string, map<string, string>> f7;
+  map<string, array<map<string, string>>> f8;
+  map<string, handle> f9;
+  map<string, array<handle>> f10;
+  map<string, map<string, handle>> f11;
+};
+
+// Used to verify that various array types can be encoded and decoded
+// successfully.
+
+struct ArrayValueTypes {
+  array<int8> f0;
+  array<int16> f1;
+  array<int32> f2;
+  array<int64> f3;
+  array<float> f4;
+  array<double> f5;
+};
+
+// Used to verify that various float and double values can be encoded and
+// decoded correctly.
+
+struct FloatNumberValues {
+  const double V0 = double.INFINITY;
+  const double V1 = double.NEGATIVE_INFINITY;
+  const double V2 = double.NAN;
+  const float V3 = float.INFINITY;
+  const float V4 = float.NEGATIVE_INFINITY;
+  const float V5 = float.NAN;
+  const float V6 = 0;
+  const double V7 = 1234567890.123;
+  const double V8 = 1.2E+20;
+  const double V9 = -1.2E+20;
+
+  double f0 = V0;
+  double f1 = V1;
+  double f2 = V2;
+  float f3 = V3;
+  float f4 = V4;
+  float f5 = V5;
+  float f6 = V6;
+  double f7 = V7;
+  double f8 = V8;
+  double f9 = V9;
+};
+
+// Used to verify that various signed integer values can be encoded and
+// decoded correctly.
+
+struct IntegerNumberValues {
+  const int8 V0 = -128; // Minimum
+  const int8 V1 = -1;   // -1
+  const int8 V2 = 0;    // 0
+  const int8 V3 = 42;   // An arbitrary valid value.
+  const int8 V4 = 127;  // Maximum
+
+  const int16 V5 = -32768; // ...
+  const int16 V6 = -1;
+  const int16 V7 = 0;
+  const int16 V8 = 12345;
+  const int16 V9 = 32767;
+
+  const int32 V10 = -2147483648;
+  const int32 V11 = -1;
+  const int32 V12 = 0;
+  const int32 V13 = 1234567890;
+  const int32 V14 = 2147483647;
+
+  // The limits for JavaScript integers are +/- (2^53 - 1).
+  const int64 V15 = -9007199254740991; // Number.MIN_SAFE_INTEGER
+  const int64 V16 = -1;
+  const int64 V17 = 0;
+  const int64 V18 = 1234567890123456;
+  const int64 V19 = 9007199254740991; // Number.MAX_SAFE_INTEGER
+
+  int8 f0 = V0;
+  int8 f1 = V1;
+  int8 f2 = V2;
+  int8 f3 = V3;
+  int8 f4 = V4;
+
+  int16 f5 = V5;
+  int16 f6 = V6;
+  int16 f7 = V7;
+  int16 f8 = V8;
+  int16 f9 = V9;
+
+  int32 f10 = V10;
+  int32 f11 = V11;
+  int32 f12 = V12;
+  int32 f13 = V13;
+  int32 f14 = V14;
+
+  int64 f15 = V15;
+  int64 f16 = V16;
+  int64 f17 = V17;
+  int64 f18 = V18;
+  int64 f19 = V19;
+};
+
+// Used to verify that various unsigned integer values can be encoded and
+// decoded correctly.
+
+struct UnsignedNumberValues {
+  const uint8 V0 = 0;    // Minimum = 0.
+  const uint8 V1 = 42;   // An arbitrary valid value.
+  const uint8 V2 = 0xFF; // Maximum
+
+  const uint16 V3 = 0; // ...
+  const uint16 V4 = 12345;
+  const uint16 V5 = 0xFFFF;
+
+  const uint32 V6 = 0;
+  const uint32 V7 = 1234567890;
+  const uint32 V8 = 0xFFFFFFFF;
+
+  // The limits for JavaScript integers are +/- (2^53 - 1).
+  const uint64 V9 = 0;
+  const uint64 V10 = 1234567890123456;
+  const uint64 V11 = 9007199254740991; // Number.MAX_SAFE_INTEGER
+
+  uint8 f0 = V0;
+  uint8 f1 = V1;
+  uint8 f2 = V2;
+
+  uint16 f3 = V3;
+  uint16 f4 = V4;
+  uint16 f5 = V5;
+
+  uint32 f6 = V6;
+  uint32 f7  = V7;
+  uint32 f8 = V8;
+
+  uint64 f9 = V9;
+  uint64 f10 = V10;
+  uint64 f11 = V11;
+};
+
+// Used to verify that various (packed) boolean array values can be encoded
+// and decoded correctly.
+
+struct BitArrayValues {
+  array<bool, 1> f0;
+  array<bool, 7> f1;
+  array<bool, 9> f2;
+  array<bool> f3;
+  array<array<bool>> f4;
+  array<array<bool>?> f5;
+  array<array<bool, 2>?> f6;
+};
+
+// Used to verify that different versions can be decoded correctly.
+
+struct MultiVersionStruct {
+  [MinVersion=0]
+  int32 f_int32;
+  [MinVersion=1]
+  Rect? f_rect;
+  [MinVersion=3]
+  string? f_string;
+  [MinVersion=5]
+  array<int8>? f_array;
+  [MinVersion=7]
+  handle<message_pipe>? f_message_pipe;
+  [MinVersion=7]
+  bool f_bool;
+  [MinVersion=9]
+  int16 f_int16;
+};
+
+struct MultiVersionStructV0 {
+  [MinVersion=0]
+  int32 f_int32;
+};
+
+struct MultiVersionStructV1 {
+  [MinVersion=0]
+  int32 f_int32;
+  [MinVersion=1]
+  Rect? f_rect;
+};
+
+struct MultiVersionStructV3 {
+  [MinVersion=0]
+  int32 f_int32;
+  [MinVersion=1]
+  Rect? f_rect;
+  [MinVersion=3]
+  string? f_string;
+};
+
+struct MultiVersionStructV5 {
+  [MinVersion=0]
+  int32 f_int32;
+  [MinVersion=1]
+  Rect? f_rect;
+  [MinVersion=3]
+  string? f_string;
+  [MinVersion=5]
+  array<int8>? f_array;
+};
+
+struct MultiVersionStructV7 {
+  [MinVersion=0]
+  int32 f_int32;
+  [MinVersion=1]
+  Rect? f_rect;
+  [MinVersion=3]
+  string? f_string;
+  [MinVersion=5]
+  array<int8>? f_array;
+  [MinVersion=7]
+  handle<message_pipe>? f_message_pipe;
+  [MinVersion=7]
+  bool f_bool;
+};
+
+// Used to verify that interfaces that are struct members can be defined in the
+// same file.
+
+interface SomeInterface {
+  SomeMethod(RectPair pair) => (RectPair other_pair);
+};
+
+struct ContainsInterface {
+  SomeInterface some_interface;
+};
+
+// Regression: Verify that a field can be called |other|.
+
+struct ContainsOther {
+  int32 other;
+};

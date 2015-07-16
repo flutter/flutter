@@ -1,0 +1,221 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<grit current_release="1" latest_public_release="0">
+  <outputs>
+    <output filename="values-am/android_ui_strings.xml" lang="am" type="android" />
+    <output filename="values-ar/android_ui_strings.xml" lang="ar" type="android" />
+    <output filename="values-bg/android_ui_strings.xml" lang="bg" type="android" />
+    <output filename="values-ca/android_ui_strings.xml" lang="ca" type="android" />
+    <output filename="values-cs/android_ui_strings.xml" lang="cs" type="android" />
+    <output filename="values-da/android_ui_strings.xml" lang="da" type="android" />
+    <output filename="values-de/android_ui_strings.xml" lang="de" type="android" />
+    <output filename="values-el/android_ui_strings.xml" lang="el" type="android" />
+    <output filename="values/android_ui_strings.xml" lang="en" type="android" />
+    <output filename="values-en-rGB/android_ui_strings.xml" lang="en-GB" type="android" />
+    <output filename="values-es/android_ui_strings.xml" lang="es" type="android" />
+    <output filename="values-es-rUS/android_ui_strings.xml" lang="es-419" type="android" />
+    <output filename="values-fa/android_ui_strings.xml" lang="fa" type="android" />
+    <output filename="values-fi/android_ui_strings.xml" lang="fi" type="android" />
+    <output filename="values-tl/android_ui_strings.xml" lang="fil" type="android" />
+    <output filename="values-fr/android_ui_strings.xml" lang="fr" type="android" />
+    <output filename="values-hi/android_ui_strings.xml" lang="hi" type="android" />
+    <output filename="values-hr/android_ui_strings.xml" lang="hr" type="android" />
+    <output filename="values-hu/android_ui_strings.xml" lang="hu" type="android" />
+    <output filename="values-in/android_ui_strings.xml" lang="id" type="android" />
+    <output filename="values-it/android_ui_strings.xml" lang="it" type="android" />
+    <output filename="values-iw/android_ui_strings.xml" lang="iw" type="android" />
+    <output filename="values-ja/android_ui_strings.xml" lang="ja" type="android" />
+    <output filename="values-ko/android_ui_strings.xml" lang="ko" type="android" />
+    <output filename="values-lt/android_ui_strings.xml" lang="lt" type="android" />
+    <output filename="values-lv/android_ui_strings.xml" lang="lv" type="android" />
+    <output filename="values-nl/android_ui_strings.xml" lang="nl" type="android" />
+    <output filename="values-nb/android_ui_strings.xml" lang="no" type="android" />
+    <output filename="values-pl/android_ui_strings.xml" lang="pl" type="android" />
+    <output filename="values-pt-rBR/android_ui_strings.xml" lang="pt-BR" type="android" />
+    <output filename="values-pt-rPT/android_ui_strings.xml" lang="pt-PT" type="android" />
+    <output filename="values-ro/android_ui_strings.xml" lang="ro" type="android" />
+    <output filename="values-ru/android_ui_strings.xml" lang="ru" type="android" />
+    <output filename="values-sk/android_ui_strings.xml" lang="sk" type="android" />
+    <output filename="values-sl/android_ui_strings.xml" lang="sl" type="android" />
+    <output filename="values-sr/android_ui_strings.xml" lang="sr" type="android" />
+    <output filename="values-sv/android_ui_strings.xml" lang="sv" type="android" />
+    <output filename="values-sw/android_ui_strings.xml" lang="sw" type="android" />
+    <output filename="values-th/android_ui_strings.xml" lang="th" type="android" />
+    <output filename="values-tr/android_ui_strings.xml" lang="tr" type="android" />
+    <output filename="values-uk/android_ui_strings.xml" lang="uk" type="android" />
+    <output filename="values-vi/android_ui_strings.xml" lang="vi" type="android" />
+    <output filename="values-zh-rCN/android_ui_strings.xml" lang="zh-CN" type="android" />
+    <output filename="values-zh-rTW/android_ui_strings.xml" lang="zh-TW" type="android" />
+  </outputs>
+  <translations>
+    <file lang="am" path="translations/android_ui_strings_am.xtb" />
+    <file lang="ar" path="translations/android_ui_strings_ar.xtb" />
+    <file lang="bg" path="translations/android_ui_strings_bg.xtb" />
+    <file lang="ca" path="translations/android_ui_strings_ca.xtb" />
+    <file lang="cs" path="translations/android_ui_strings_cs.xtb" />
+    <file lang="da" path="translations/android_ui_strings_da.xtb" />
+    <file lang="de" path="translations/android_ui_strings_de.xtb" />
+    <file lang="el" path="translations/android_ui_strings_el.xtb" />
+    <file lang="en-GB" path="translations/android_ui_strings_en-GB.xtb" />
+    <file lang="es" path="translations/android_ui_strings_es.xtb" />
+    <file lang="es-419" path="translations/android_ui_strings_es-419.xtb" />
+    <file lang="fa" path="translations/android_ui_strings_fa.xtb" />
+    <file lang="fi" path="translations/android_ui_strings_fi.xtb" />
+    <file lang="fil" path="translations/android_ui_strings_fil.xtb" />
+    <file lang="fr" path="translations/android_ui_strings_fr.xtb" />
+    <file lang="hi" path="translations/android_ui_strings_hi.xtb" />
+    <file lang="hr" path="translations/android_ui_strings_hr.xtb" />
+    <file lang="hu" path="translations/android_ui_strings_hu.xtb" />
+    <file lang="id" path="translations/android_ui_strings_id.xtb" />
+    <file lang="it" path="translations/android_ui_strings_it.xtb" />
+    <file lang="iw" path="translations/android_ui_strings_iw.xtb" />
+    <file lang="ja" path="translations/android_ui_strings_ja.xtb" />
+    <file lang="ko" path="translations/android_ui_strings_ko.xtb" />
+    <file lang="lt" path="translations/android_ui_strings_lt.xtb" />
+    <file lang="lv" path="translations/android_ui_strings_lv.xtb" />
+    <file lang="nl" path="translations/android_ui_strings_nl.xtb" />
+    <file lang="no" path="translations/android_ui_strings_no.xtb" />
+    <file lang="pl" path="translations/android_ui_strings_pl.xtb" />
+    <file lang="pt-BR" path="translations/android_ui_strings_pt-BR.xtb" />
+    <file lang="pt-PT" path="translations/android_ui_strings_pt-PT.xtb" />
+    <file lang="ro" path="translations/android_ui_strings_ro.xtb" />
+    <file lang="ru" path="translations/android_ui_strings_ru.xtb" />
+    <file lang="sk" path="translations/android_ui_strings_sk.xtb" />
+    <file lang="sl" path="translations/android_ui_strings_sl.xtb" />
+    <file lang="sr" path="translations/android_ui_strings_sr.xtb" />
+    <file lang="sv" path="translations/android_ui_strings_sv.xtb" />
+    <file lang="sw" path="translations/android_ui_strings_sw.xtb" />
+    <file lang="th" path="translations/android_ui_strings_th.xtb" />
+    <file lang="tr" path="translations/android_ui_strings_tr.xtb" />
+    <file lang="uk" path="translations/android_ui_strings_uk.xtb" />
+    <file lang="vi" path="translations/android_ui_strings_vi.xtb" />
+    <file lang="zh-CN" path="translations/android_ui_strings_zh-CN.xtb" />
+    <file lang="zh-TW" path="translations/android_ui_strings_zh-TW.xtb" />
+  </translations>
+  <release allow_pseudo="false" seq="1">
+    <messages fallback_to_english="true">
+      <message desc="Error shown when the browser is restarted due to low memory during a file picker operation. [CHAR-LIMIT=NONE]" name="IDS_LOW_MEMORY_ERROR">
+        Unable to complete previous operation due to low memory
+      </message>
+      <message desc="Toast when the browser is unable to open a file for upload. [CHAR-LIMIT=32]" name="IDS_OPENING_FILE_ERROR">
+        Failed to open selected file
+      </message>
+      <message desc="Text for ColorPicker button to go to advanced view. [CHAR-LIMIT=20]" name="IDS_COLOR_PICKER_BUTTON_MORE">
+        More
+      </message>
+      <message desc="Label for hue slider in ColorPicker." name="IDS_COLOR_PICKER_HUE">
+        Hue
+      </message>
+      <message desc="Label for saturation slider in ColorPicker." name="IDS_COLOR_PICKER_SATURATION">
+        Saturation
+      </message>
+      <message desc="Label for value slider in ColorPicker." name="IDS_COLOR_PICKER_VALUE">
+        Value
+      </message>
+      <message desc="Label for button in ColorPicker dialog for user to accept the currently chosen color. [CHAR-LIMIT=20]" name="IDS_COLOR_PICKER_BUTTON_SET">       
+        Set
+      </message>
+      <message desc="Label for button in ColorPicker dialog for user to cancel picking a color. [CHAR-LIMIT=20]" name="IDS_COLOR_PICKER_BUTTON_CANCEL">
+        Cancel
+      </message>
+      <message desc="Title of ColorPicker dialog. [CHAR-LIMIT=20]" name="IDS_COLOR_PICKER_DIALOG_TITLE">
+        Select color
+      </message>
+      <message desc="Accessibility label for button to select the red color." name="IDS_COLOR_PICKER_BUTTON_RED">
+        Red
+      </message>
+      <message desc="Accessibility label for button to select the cyan color." name="IDS_COLOR_PICKER_BUTTON_CYAN">
+        Cyan
+      </message>
+      <message desc="Accessibility label for button to select the blue color." name="IDS_COLOR_PICKER_BUTTON_BLUE">
+        Blue
+      </message>
+      <message desc="Accessibility label for button to select the green color." name="IDS_COLOR_PICKER_BUTTON_GREEN">
+        Green
+      </message>
+      <message desc="Accessibility label for button to select the magenta color." name="IDS_COLOR_PICKER_BUTTON_MAGENTA">
+        Magenta
+      </message>
+      <message desc="Accessibility label for button to select the yellow color." name="IDS_COLOR_PICKER_BUTTON_YELLOW">
+        Yellow
+      </message>
+      <message desc="Accessibility label for button to select the black color." name="IDS_COLOR_PICKER_BUTTON_BLACK">
+        Black
+      </message>
+      <message desc="Accessibility label for button to select the white color." name="IDS_COLOR_PICKER_BUTTON_WHITE">
+        White
+      </message>
+      <message desc="Notification for when copying to the clipboard fails. [CHAR-LIMIT=64]" name="IDS_COPY_TO_CLIPBOARD_FAILURE_MESSAGE">
+        Failed to copy to the clipboard
+      </message>
+      <message desc="Content description for the date time picker month component. [CHAR-LIMIT=32]" name="IDS_ACCESSIBILITY_DATE_PICKER_MONTH">
+        Month
+      </message>
+      <message desc="Content description for the date time picker year component. [CHAR-LIMIT=32]" name="IDS_ACCESSIBILITY_DATE_PICKER_YEAR">
+        Year
+      </message>
+      <message desc="Label for 'set' button in date picker dialog and time picker dialog, used to replace the contents of a field with the chosen date or time [CHAR-LIMIT=12]" name="IDS_DATE_PICKER_DIALOG_SET">
+        Set
+      </message>
+      <message desc="Title for the month picker dialog, which can be used to choose a month. [CHAR-LIMIT=32]" name="IDS_MONTH_PICKER_DIALOG_TITLE">
+        Set month
+      </message>
+      <message desc="Content description for the date time picker week component. [CHAR-LIMIT=32]" name="IDS_ACCESSIBILITY_DATE_PICKER_WEEK">
+        Week
+      </message>
+      <message desc="Title for the week picker dialog, which can be used to choose a week. [CHAR-LIMIT=32]" name="IDS_WEEK_PICKER_DIALOG_TITLE">
+        Set week
+      </message>
+      <message desc="Value for AM in AM/PM in the time picker dialog. AM represents the morning (ante-meridiem). [CHAR-LIMIT=12]" name="IDS_TIME_PICKER_DIALOG_AM">
+        AM
+      </message>
+      <message desc="Value for PM in AM/PM in the time picker dialog. PM represents the afternoon (post-meridiem). [CHAR-LIMIT=12]" name="IDS_TIME_PICKER_DIALOG_PM">
+        PM
+      </message>
+      <message desc="Title for the time picker dialog, which can be used to choose a time. [CHAR-LIMIT=32]" name="IDS_TIME_PICKER_DIALOG_TITLE">
+        Set time
+      </message>
+      <message desc="Content description for the time picker hour component. [CHAR-LIMIT=32]" name="IDS_ACCESSIBILITY_TIME_PICKER_HOUR">
+        Hour
+      </message>
+      <message desc="Content description for the time picker minute component. [CHAR-LIMIT=32]" name="IDS_ACCESSIBILITY_TIME_PICKER_MINUTE">
+        Minute
+      </message>
+      <message desc="Content description for the time picker second component. [CHAR-LIMIT=32]" name="IDS_ACCESSIBILITY_TIME_PICKER_SECOND">
+        Second
+      </message>
+      <message desc="Content description for the time picker milli component. [CHAR-LIMIT=32]" name="IDS_ACCESSIBILITY_TIME_PICKER_MILLI">
+        Millisecond
+      </message>
+      <message desc="Content description for the time picker AM/PM component. [CHAR-LIMIT=32]" name="IDS_ACCESSIBILITY_TIME_PICKER_AMPM">
+        AM/PM
+      </message>
+      <message desc="Separator used between hours and minutes in the time pickerr dialog (hh:mm) [CHAR-LIMIT=1]" name="IDS_TIME_PICKER_DIALOG_HOUR_MINUTE_SEPARATOR">
+        :
+      </message>
+      <message desc="Separator used between minutes and seconds in the time picker dialog (hh:mm:ss) [CHAR-LIMIT=1]" name="IDS_TIME_PICKER_DIALOG_MINUTE_SECOND_SEPARATOR">
+        :
+      </message>
+      <message desc="Separator used between seconds and subseconds in the time picker dialog (hh:mm:ss.sss) [CHAR-LIMIT=1]" name="IDS_TIME_PICKER_DIALOG_SECOND_SUBSECOND_SEPARATOR">
+        .
+      </message>
+      <message desc="Title for the date/time picker dialog, which can be used to choose a date and time. [CHAR-LIMIT=32]" name="IDS_DATE_TIME_PICKER_DIALOG_TITLE">
+        Set date and time
+      </message>
+      <message desc="Content description for the date time picker date component. [CHAR-LIMIT=32]" name="IDS_ACCESSIBILITY_DATETIME_PICKER_DATE">
+        Date
+      </message>
+      <message desc="Content description for the date time picker time component. [CHAR-LIMIT=32]" name="IDS_ACCESSIBILITY_DATETIME_PICKER_TIME">
+        Time
+      </message>
+      <message desc="Label for 'other' button in date picker dialog and time picker dialog, used to close the list of suggestions and open the the full date/time picker [CHAR-LIMIT=32]" name="IDS_DATE_PICKER_DIALOG_OTHER_BUTTON_LABEL">
+        Other
+      </message>
+      <message desc="Title for the date picker dialog, which can be used to choose a date. [CHAR-LIMIT=32]" name="IDS_DATE_PICKER_DIALOG_TITLE">
+        Set date
+      </message>
+      <message desc="Label for 'clear' button in date picker dialog and time picker dialog, used to replace the contents of a field with the empty string [CHAR-LIMIT=12]" name="IDS_DATE_PICKER_DIALOG_CLEAR">
+        Clear
+      </message>
+    </messages>
+  </release>
+</grit>

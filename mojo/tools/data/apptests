@@ -1,0 +1,133 @@
+# This file contains a list of Mojo gtest unit tests.
+#
+# This must be valid Python. It may use the |config| global that will be a
+# mopy.config.Config object, and must set a |tests| global that will contain the
+# list of tests to run.
+#
+# The entries in |tests| are dictionaries of the form described in
+# devtoolslib/apptest_runner.py.
+
+tests = [
+  {
+    "test": "mojo:asset_bundle_apptests",
+  },
+  {
+    "test": "mojo:authenticating_url_loader_interceptor_apptests",
+  },
+  {
+    "test": "mojo:clipboard_apptests",
+  },
+  {
+    "test": "mojo:example_apptests",
+    # ExampleApplicationTest.CheckCommandLineArg checks --example_apptest_arg.
+    "test-args": ["--example_apptest_arg"],
+  },
+  {
+    "test": "mojo:example_apptests",
+    "name": "mojo:example_apptests (multiprocess)",
+    # ExampleApplicationTest.CheckCommandLineArg checks --example_apptest_arg.
+    "test-args": ["--example_apptest_arg"],
+    "shell-args": ["--enable-multiprocess"],
+  },
+  {
+    "test": "mojo:files_apptests",
+  },
+  {
+    "test": "mojo:http_server_apptests",
+  },
+  {
+    "test": "mojo:mojio_apptests",
+  },
+  {
+    "test": "mojo:moterm_apptests",
+    "shell-args": ["--args-for=mojo:native_viewport_service --use-headless-config --use-osmesa"],
+  },
+  {
+    "test": "mojo:texture_apptests",
+    "shell-args": ["--args-for=mojo:native_viewport_service --use-headless-config --use-osmesa"],
+  },
+  {
+    "test": "mojo:mojo_view_manager_client_apptests",
+    "shell-args": ["--args-for=mojo:native_viewport_service --use-headless-config --use-osmesa"],
+  },
+  {
+    "test": "mojo:prediction_apptests",
+  },
+  {
+    "test": "mojo:view_manager_service_apptests",
+    "type": "gtest_isolated",
+    "shell-args": ["--args-for=mojo:native_viewport_service --use-headless-config --use-osmesa"],
+  },
+  {
+    "test": "mojo:network_service_apptests",
+  },
+  {
+    "test": "mojo:window_manager_apptests",
+    "shell-args": ["--args-for=mojo:native_viewport_service --use-headless-config --use-osmesa"],
+  },
+  {
+    "test": "mojo:versioning_apptests",
+  },
+  {
+    "test": "mojo:url_response_disk_cache_apptests",
+  },
+]
+
+if config.target_os == config.OS_LINUX:
+  tests += [
+    {
+      "test": "mojo:example_apptests",
+      "name": "mojo:example_apptests (python_example_service)",
+      # ExampleApplicationTest.CheckCommandLineArg checks --example_apptest_arg.
+      "test-args": ["--example_apptest_arg"],
+      "shell-args": [
+        "--url-mappings=mojo:example_service=mojo:python_example_service"
+      ],
+    },
+    {
+      "test": "mojo:mojo_url_redirector_apptests",
+      "test-args": ["--redirector_port=49152",
+                    "--app_location_files_port=49153"],
+      "shell-args": ["--args-for=mojo:mojo_url_redirector 0.0.0.0:49152 http://localhost:49153"],
+    }
+  ]
+
+if config.target_os == config.OS_ANDROID:
+  tests += [
+    {
+      "test": "mojo:example_apptests",
+      "name": "mojo:example_apptests (android_example_service)",
+      # ExampleApplicationTest.CheckCommandLineArg checks --example_apptest_arg.
+      "test-args": ["--example_apptest_arg"],
+      "shell-args": [
+        "--url-mappings=mojo:example_service=mojo:android_example_service"
+      ],
+    },
+    {
+      "test": "mojo:notification_apptests",
+    },
+    {
+      "test": "mojo:shell_nfc_apptests",
+    },
+  ]
+
+if config.target_os != config.OS_ANDROID:
+  tests += [
+    {
+      "test": "mojo:js_apptests",
+      "type": "gtest_isolated",
+    },
+    {
+      "test": "mojo:reaper_apptests",
+    },
+    {
+      "test": "mojo:dart_apptests",
+      "type": "dart",
+    },
+    {
+      # https://github.com/domokit/mojo/issues/61
+      # Sometime the shell get a trucated application when exposed through the
+      # http server.
+      "test": "mojo:shell_apptests",
+    },
+  ]

@@ -1,0 +1,131 @@
+﻿Name
+
+   CHROMIUM_get_sync_values
+
+Name Strings
+
+   EGL_CHROMIUM_get_sync_values
+
+Contact
+
+   Stéphane Marchesin, Google (marcheu 'at' google.com)
+
+Status
+
+   Draft.
+
+Version
+
+   Last Modified Date: N/A   Revision: 1.0
+
+   Based on GLX_OML_sync_control Revision 6.0
+
+Number
+
+   ???
+
+Dependencies
+
+   The extension is written against the EGL 1.2 Specification, although it
+   should work on other versions of these specifications. This extension
+   also requires an operating system which supports CLOCK_MONOTONIC.
+
+Overview
+
+   This extension provides counters which let applications know about the
+   timing of the last vertical retrace. By looking at the system clock, as
+   well as the refresh rate of the monitor, this should enable applications
+   to predict the position of future retraces so as to schedule an optimal
+   workload.
+
+   This extension incorporates the use of three counters that provide
+   the necessary synchronization. The Unadjusted System Time (or UST)
+   is the 64-bit CLOCK_MONOTONIC clock; in particular this lets the
+   application schedule future vertical retraces by querying this clock.
+   The graphics Media Stream Counter (or graphics MSC) is a counter
+   that is unique to the graphics subsystem and increments for each
+   vertical retrace that occurs. The Swap Buffer Counter (SBC) is an
+   attribute of an EGLSurface and is incremented each time a swap
+   buffer action is performed on the associated surface.
+
+   The use of these three counters allows the application to
+   synchronize graphics rendering to vertical retraces and/or swap
+   buffer actions. For example, by querying the synchronization values for
+   a given surface, the application can accurately predict the timing for
+   the next vertical retraces and schedule rendering accordingly.
+
+Issues
+
+   None.
+
+IP Status
+
+   No known issues.
+
+New Procedures and Functions
+
+   Bool eglGetSyncValuesCHROMIUM(EGLDisplay dpy,
+                                 EGLSurface surface,
+                                 int64_t* ust,
+                                 int64_t* msc,
+                                 int64_t* sbc)
+
+
+New Tokens
+
+   None
+
+Additions to the EGL 1.3 Specification
+
+   eglGetSyncValuesCHROMIUM returns the current UST/MSC/SBC triple. A UST
+   timestamp is obtained each time the graphics MSC is incremented.
+   If this value does not reflect the value of the UST at the time the
+   first scan line of the display begins passing through the video
+   output port, it will be adjusted by the graphics driver to do so
+   prior to being returned by any of the functions defined by this
+   extension.
+
+   This UST timestamp, together with the current graphics MSC and the
+   current SBC, comprise the current UST/MSC/SBC triple. The UST,
+   graphics MSC, and SBC values are not part of the render context
+   state. These values cannot be pushed or popped. The graphics MSC
+   value is initialized to 0 when the graphics device is initialized.
+   The SBC is per-surface state and is initialized to 0 when the
+   EGLSurface data structure is initialized.
+
+   The SBC value is incremented by the graphics driver at the completion
+   of each buffer swap (e.g., the pixel copy has been completed or the
+   hardware register that swaps memory banks has been written). For pixel
+   formats that do not contain a back buffer, the SBC will always be
+   returned as 0.
+
+   The graphics MSC value is incremented once for each screen refresh.
+   For a non-interlaced display, this means that the graphics MSC value
+   is incremented for each frame. For an interlaced display, it means
+   that it will be incremented for each field. For a multi-monitor
+   system, the monitor used to determine MSC is the one where the surface
+   is located. If the surface spans multiple monitors, the monitor used
+   to determine MSC is the one with the biggest coverage in pixels.
+
+   The function eglGetSyncValuesCHROMIUM will return TRUE if the function
+   completed successfully, FALSE otherwise.
+
+   Each time eglSwapBuffer succeeds, the SBC will be increased within a
+   finite time period.
+
+Errors
+
+   eglGetSyncValuesCHROMIUM will return FALSE if there is no current
+   EGLContext.
+
+New State
+
+   Get Value                 Get Command            Type    Initial Value
+   ---------                 -----------            ----    -------------
+     [UST]             eglGetSyncValuesCHROMIUM      Z      unspecified
+     [MSC]             eglGetSyncValuesCHROMIUM      Z                  0
+     [SBC]             eglGetSyncValuesCHROMIUM      Z                  0
+
+New Implementation Dependent State
+
+   None

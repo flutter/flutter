@@ -1,0 +1,80 @@
+// Copyright (c) 2013 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+// A valid gpu control list json file is in the format of
+// {
+//   "version": "x.y",
+//   "entries": [
+//     { // entry 1
+//     },
+//     ...
+//     { // entry n
+//     }
+//   ]
+// }
+//
+// Each entry contains the following fields (fields are optional unless
+// specifically described as mandatory below):
+// 1. "id" is an integer.  0 is reserved.  This field is mandatory.
+// 2. "os" contains "type" and an optional "version". "type" could be "macosx",
+//    "linux", "win", "chromeos", or "any".  "any" is the same as not specifying
+//    "os".
+//    "version" is a VERSION structure (defined below).
+// 3. "vendor_id" is a string.  0 is reserved.
+// 4. "device_id" is an array of strings.  0 is reserved.
+// 5. "multi_gpu_style" is a string, valid values include:
+//      a) "optimus": NVIDIA dual GPU
+//      b) "amd_switchable": AMD dual GPU
+//      c) "amd_switchable_integrated": AMD dual GPU, integrated GPU is active
+//      d) "amd_switchable_discrete": AMD dual GPU, discrete GPU is active
+//    c) and d) are only valid on Win, as on Mac we can switch GPU on the fly.
+// 6. "multi_gpu_category" is a string, valid values include "any", "primary",
+//    "secondary", and "active". If unspecified, the default value is "primary".
+//    See gpu_control_list.h for more details on the meanings of the strings.
+// 7. "driver_vendor" is a string pattern.
+// 8. "driver_version" is a VERSION structure (defined below).
+// 9. "driver_date" is a VERSION structure (defined below).
+//    The version is interpreted as "year.month.day".
+// 10. "gl_type" is a string, valid values include "gl", "gles", and "angle".
+//    If "gl_version" is specified and "gl_type" is not, use the default value.
+//    The default value on Android is "gles", on Windows is "angle", on other
+//    platforms is "gl".
+// 11. "gl_version" is a VERSION structure (defined below).
+// 12. "gl_vendor" is a string pattern.
+// 13. "gl_renderer" is a string pattern.
+// 14. "gl_extensions" is a string pattern.
+// 15. "machine_model_name" is an array of string patterns.
+// 16. "machine_model_version" is a VERSION structure (defined below).
+// 17. "gpu_count" is a INT structure (defined below).
+// 18. "cpu_info" is a string pattern.
+// 19. "exceptions" is a list of entries.
+// 20. "features" is a list of gpu control list options, which can be
+//     configured by a specific list. See its *_json.cc file for a list of
+//     supported features. This field is mandatory.
+// 21. "description" has the description of the entry.
+// 22. "webkit_bugs" is an array of associated webkit bug numbers.
+// 23. "cr_bugs" is an array of associated webkit bug numbers.
+// 24. "disabled" is a boolean. If it is present, the entry will be skipped.
+//     This can not be used in exceptions.
+// 25. "direct_rendering" is a boolean. If present, this will filter on whether
+//     the GL contexts are direct or indirect based on the value.
+//
+// VERSION includes "op", "style", "value", and "value2".  "op" can be any of
+// the following values: "=", "<", "<=", ">", ">=", "any", "between".  "style"
+// is optional and can be "lexical" or "numerical"; if it's not specified, it
+// defaults to "numerical".  "value2" is only used if "op" is "between".
+// "between" is "value <= * <= value2".
+// "value" is used for all "op" values except "any". "value" and "value2"
+// are in the format of x, x.x, x.x.x, etc.
+// Only "driver_version" supports lexical style if the format is major.minor;
+// in that case, major is still numerical, but minor is lexical. 
+//
+// FLOAT includes "op" "value", and "value2".  "op" can be any of the
+// following values: "=", "<", "<=", ">", ">=", "any", "between".  "value2" is
+// only used if "op" is "between".  "value" is used for all "op" values except
+// "any". "value" and "value2" are valid float numbers.
+// INT is very much like FLOAT, except that the values need to be integers.
+//
+// String pattern syntax can be found at
+// https://code.google.com/p/re2/wiki/Syntax.

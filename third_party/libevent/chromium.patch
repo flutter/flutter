@@ -1,0 +1,148 @@
+diff --git a/third_party/libevent/evdns.c b/third_party/libevent/evdns.c
+index f07ecc9..da6ea19 100644
+--- a/third_party/libevent/evdns.c
++++ b/third_party/libevent/evdns.c
+@@ -134,7 +134,7 @@
+ typedef ev_uint8_t u_char;
+ typedef unsigned int uint;
+ #endif
+-#include <event.h>
++#include "event.h"
+
+ #define u64 ev_uint64_t
+ #define u32 ev_uint32_t
+diff --git a/third_party/libevent/evdns.h b/third_party/libevent/evdns.h
+index 1eb5c38..fca4ac3 100644
+--- a/third_party/libevent/evdns.h
++++ b/third_party/libevent/evdns.h
+@@ -165,7 +165,7 @@ extern "C" {
+ #endif
+
+ /* For integer types. */
+-#include <evutil.h>
++#include "evutil.h"
+
+ /** Error codes 0-5 are as described in RFC 1035. */
+ #define DNS_ERR_NONE 0
+diff --git a/third_party/libevent/event-config.h b/third_party/libevent/event-config.h
+new file mode 100644
+index 0000000..78a4727
+--- /dev/null
++++ b/third_party/libevent/event-config.h
+@@ -0,0 +1,16 @@
++// Copyright (c) 2009 The Chromium Authors. All rights reserved.
++// Use of this source code is governed by a BSD-style license that can be
++// found in the LICENSE file.
++
++// This file is Chromium-specific, and brings in the appropriate
++// event-config.h depending on your platform.
++
++#if defined(__APPLE__)
++#include "mac/event-config.h"
++#elif defined(__linux__)
++#include "linux/event-config.h"
++#elif defined(__FreeBSD__)
++#include "freebsd/event-config.h"
++#else
++#error generate event-config.h for your platform
++#endif
+diff --git a/third_party/libevent/event.h b/third_party/libevent/event.h
+index cfa0fc3..72e9b8b 100644
+--- a/third_party/libevent/event.h
++++ b/third_party/libevent/event.h
+@@ -159,7 +159,7 @@
+ extern "C" {
+ #endif
+ 
+-#include <event-config.h>
++#include "event-config.h"
+ #ifdef _EVENT_HAVE_SYS_TYPES_H
+ #include <sys/types.h>
+ #endif
+@@ -172,7 +172,7 @@ extern "C" {
+ #include <stdarg.h>
+ 
+ /* For int types. */
+-#include <evutil.h>
++#include "evutil.h"
+ 
+ #ifdef WIN32
+ #define WIN32_LEAN_AND_MEAN
+diff --git a/third_party/libevent/evutil.h b/third_party/libevent/evutil.h
+index dcb0013..8b664b9 100644
+--- a/third_party/libevent/evutil.h
++++ b/third_party/libevent/evutil.h
+@@ -38,7 +38,7 @@
+ extern "C" {
+ #endif
+ 
+-#include <event-config.h>
++#include "event-config.h"
+ #ifdef _EVENT_HAVE_SYS_TIME_H
+ #include <sys/time.h>
+ #endif
+diff --git a/third_party/libevent/README.chromium b/third_party/libevent/README.chromium
+index 9969566..7e5f8ba 100644
+diff --git a/third_party/libevent/event.c b/third_party/libevent/event.c
+index 1253352..8b6cae5 100644
+--- a/third_party/libevent/event.c
++++ b/third_party/libevent/event.c
+@@ -107,7 +107,7 @@ static const struct eventop *eventops[] = {
+ /* Global state */
+ struct event_base *current_base = NULL;
+ extern struct event_base *evsignal_base;
+-static int use_monotonic;
++static int use_monotonic = 1;
+ 
+ /* Prototypes */
+ static void	event_queue_insert(struct event_base *, struct event *, int);
+@@ -120,17 +120,6 @@ static int	timeout_next(struct event_base *, struct timeval **);
+ static void	timeout_process(struct event_base *);
+ static void	timeout_correct(struct event_base *, struct timeval *);
+ 
+-static void
+-detect_monotonic(void)
+-{
+-#if defined(HAVE_CLOCK_GETTIME) && defined(CLOCK_MONOTONIC)
+-	struct timespec	ts;
+-
+-	if (clock_gettime(CLOCK_MONOTONIC, &ts) == 0)
+-		use_monotonic = 1;
+-#endif
+-}
+-
+ static int
+ gettime(struct event_base *base, struct timeval *tp)
+ {
+@@ -140,18 +129,18 @@ gettime(struct event_base *base, struct timeval *tp)
+ 	}
+ 
+ #if defined(HAVE_CLOCK_GETTIME) && defined(CLOCK_MONOTONIC)
+-	if (use_monotonic) {
+-		struct timespec	ts;
+-
+-		if (clock_gettime(CLOCK_MONOTONIC, &ts) == -1)
+-			return (-1);
++	struct timespec	ts;
+ 
++	if (use_monotonic &&
++	    clock_gettime(CLOCK_MONOTONIC, &ts) == 0) {
+ 		tp->tv_sec = ts.tv_sec;
+ 		tp->tv_usec = ts.tv_nsec / 1000;
+ 		return (0);
+ 	}
+ #endif
+ 
++	use_monotonic = 0;
++
+ 	return (evutil_gettimeofday(tp, NULL));
+ }
+ 
+@@ -175,7 +164,6 @@ event_base_new(void)
+ 	if ((base = calloc(1, sizeof(struct event_base))) == NULL)
+ 		event_err(1, "%s: calloc", __func__);
+ 
+-	detect_monotonic();
+ 	gettime(base, &base->event_tv);
+ 	
+ 	min_heap_ctor(&base->timeheap);

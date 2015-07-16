@@ -1,0 +1,59 @@
+Notes about the Chrome memory allocator.
+
+Background
+----------
+We use this library as a generic way to fork into any of several allocators.
+Currently we can, at runtime, switch between:
+   the default windows allocator
+   the windows low-fragmentation-heap
+   tcmalloc
+   jemalloc (the heap used most notably within Mozilla Firefox)
+
+The mechanism for hooking LIBCMT in windows is rather tricky.  The core
+problem is that by default, the windows library does not declare malloc and
+free as weak symbols.  Because of this, they cannot be overriden.  To work
+around this, we start with the LIBCMT.LIB, and manually remove all allocator
+related functions from it using the visual studio library tool.  Once removed,
+we can now link against the library and provide custom versions of the 
+allocator related functionality.
+
+
+Source code
+-----------
+This directory contains just the allocator (i.e. shim) layer that switches
+between the different underlying memory allocation implementations.
+
+The tcmalloc and jemalloc libraries originate outside of Chromium
+and exist in ../../third_party/tcmalloc and ../../third_party/jemalloc
+(currently, the actual locations are defined in the allocator.gyp file).
+The third party sources use a vendor-branch SCM pattern to track
+Chromium-specific changes independently from upstream changes.
+
+The general intent is to push local changes upstream so that over
+time we no longer need any forked files.
+
+
+Adding a new allocator
+----------------------
+Adding a new allocator requires definition of the following five functions:
+
+  extern "C" {
+    bool init();
+    void* malloc(size_t s);
+    void* realloc(void* p, size_t s);
+    void free(void* s);
+    size_t msize(void* p);
+  }
+
+All other allocation related functions (new/delete/calloc/etc) have been
+implemented generically to work across all allocators.
+
+
+Usage
+-----
+You can use the different allocators by setting the environment variable
+CHROME_ALLOCATOR to:
+   "tcmalloc"  - TC Malloc (default)
+   "jemalloc"  - JE Malloc
+   "winheap"   - Windows default heap
+   "winlfh"    - Windows Low-Fragmentation heap

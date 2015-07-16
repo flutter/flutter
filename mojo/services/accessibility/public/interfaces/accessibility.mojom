@@ -1,0 +1,35 @@
+// Copyright 2014 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+module mojo;
+
+import "geometry/public/interfaces/geometry.mojom";
+
+interface AxProvider {
+  GetTree() => (array<AxNode> nodes);
+};
+
+struct AxNode {
+  // Must be non-zero.
+  uint32 id;
+
+  // Can be zero if the node has no parent or next sibling.
+  uint32 parent_id;
+  uint32 next_sibling_id;
+
+  mojo.Rect bounds;
+
+  // At most one of the below will be present.
+  // TODO(aa): These should become a union.
+  AxLink? link;
+  AxText? text;
+};
+
+struct AxLink {
+  string url;
+};
+
+struct AxText {
+  string content;
+};

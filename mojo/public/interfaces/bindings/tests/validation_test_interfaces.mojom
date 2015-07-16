@@ -1,0 +1,79 @@
+// Copyright 2014 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+
+[JavaPackage="org.chromium.mojo.bindings.test.mojom.mojo"]
+module mojo.test;
+
+struct StructA {
+  uint64 i;
+};
+
+struct StructB {
+  StructA struct_a;
+};
+
+struct StructC {
+  array<uint8> data;
+};
+
+struct StructD {
+  array<handle<message_pipe>> message_pipes;
+};
+
+struct StructE {
+  StructD struct_d;
+  handle<data_pipe_consumer> data_pipe_consumer;
+};
+
+struct StructF {
+  array<uint8, 3> fixed_size_array;
+};
+
+struct StructG {
+  int32 i;
+  [MinVersion=1]
+  StructA? struct_a;
+  [MinVersion=3]
+  string? str;
+  [MinVersion=3]
+  bool b;
+};
+
+interface InterfaceA {
+};
+
+// This interface is used for testing bounds-checking in the mojom
+// binding code. If you add a method please update the files
+// ./data/validation/boundscheck_*. If you add a response please update
+// ./data/validation/resp_boundscheck_*.
+interface BoundsCheckTestInterface {
+  Method0(uint8 param0) => (uint8 param0);
+  Method1(uint8 param0);
+};
+
+interface ConformanceTestInterface {
+  Method0(float param0);
+  Method1(StructA param0);
+  Method2(StructB param0, StructA param1);
+  Method3(array<bool> param0);
+  Method4(StructC param0, array<uint8> param1);
+  Method5(StructE param0, handle<data_pipe_producer> param1);
+  Method6(array<array<uint8>> param0);
+  Method7(StructF param0, array<array<uint8, 3>?, 2> param1);
+  Method8(array<array<string>?> param0);
+  Method9(array<array<handle?>>? param0);
+  Method10(map<string, uint8> param0);
+  Method11(StructG param0);
+  Method12(float param0) => (float param0);
+  Method13(InterfaceA? param0, uint32 param1, InterfaceA? param2);
+};
+
+struct BasicStruct {
+  int32 a;
+};
+
+interface IntegrationTestInterface {
+  Method0(BasicStruct param0) => (array<uint8> param0);
+};

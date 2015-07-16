@@ -1,0 +1,23 @@
+diff --git a/third_party/re2/util/util.h b/third_party/re2/util/util.h
+index 8f54040..de1ef5b 100644
+--- a/third_party/re2/util/util.h
++++ b/third_party/re2/util/util.h
+@@ -46,7 +46,8 @@ using std::sort;
+ using std::swap;
+ using std::make_pair;
+ 
+-#if defined(__GNUC__) && !defined(USE_CXX0X) && !defined(OS_ANDROID)
++#if defined(__GNUC__) && !defined(USE_CXX0X) && !defined(OS_ANDROID) && \
++    !defined(_LIBCPP_ABI_VERSION)
+ 
+ #include <tr1/unordered_set>
+ using std::tr1::unordered_set;
+@@ -54,1 +55,1 @@ using std::tr1::unordered_set;
+ #else
+
+ #include <unordered_set>
+-#if defined(WIN32) || defined(OS_ANDROID)
++#if defined(WIN32) || (defined(OS_ANDROID) && !defined(_LIBCPP_ABI_VERSION))
+ using std::tr1::unordered_set;
+ #else
+ using std::unordered_set;

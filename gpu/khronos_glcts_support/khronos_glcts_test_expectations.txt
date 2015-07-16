@@ -1,0 +1,37 @@
+// Copyright 2014 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+// This file contains a list of defective khronos_glcts conformance tests. The
+// expected format is:
+//  {BUG#} {MODIFIERS} : {TEST_NAME} = {PASS,FAIL,FLAKY,TIMEOUT,SKIP}
+//
+// MODIFIERS can be a combination of the below list:
+//  WIN XP VISTA WIN7 MAC LEOPARD SNOWLEOPARD LION LINUX CHROMEOS MOUNTAINLION
+//  MAVERICKS
+//  NVIDIA AMD INTEL
+//  0xabcd - GPU PCI device ID. Specifying a PCI id requires a vendor.
+//  DEBUG RELEASE
+//
+// TEST_NAME can be a specific test name, or have a '*' in the end, which
+// indicates a prefix matching.
+//
+// Any tests whose expectations are not PASS will be skipped on the bots.
+//
+// Examples:
+//  91530 MAC WIN LINUX : context_lost_restored = TIMEOUT
+//  91533 WIN : gl_min_uniforms = FAIL
+//  91531 MAC WIN LINUX : conformance_more_* = SKIP
+//  91532 MAC NVIDIA 0x0640 : tex_image_and_sub_image_2d_with_video = PASS FAIL
+
+// Chromium implements GL_ARB_texture_rectangle which makes this test fail
+139729 DEBUG RELEASE : ES2_CTS_gtf_GL_build_Texture_Rectangle_Samplers_frag = FAIL
+
+// eglGetCurrentDisplay() returns EGL_NO_DISPLAY which causes this test to fail.
+421568 DEBUG RELEASE : ES2_CTS_gtf_GL2ExtensionTests_egl_create_context_egl_create_context = FAIL
+
+////////////////////////////////////////////////////////////////////////////////
+//
+//  Temporary entries: they should be removed once the bugs are fixed.
+//
+////////////////////////////////////////////////////////////////////////////////

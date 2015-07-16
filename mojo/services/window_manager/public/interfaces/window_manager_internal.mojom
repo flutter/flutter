@@ -1,0 +1,39 @@
+// Copyright 2014 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+module mojo;
+
+import "geometry/public/interfaces/geometry.mojom";
+import "input_events/public/interfaces/input_events.mojom";
+
+// WindowManagerInternal is an interface provided by the WindowManager
+// exclusively to the ViewManager.
+interface WindowManagerInternal {
+  // Creates a connection to the WindowManager specifically for a connection to
+  // the ViewManager. |connection_id| is the id of the connection to the
+  // ViewManager. See view_manager.mojom for details on the id.
+  CreateWindowManagerForViewManagerClient(
+      uint16 connection_id,
+      handle<message_pipe> window_manager_pipe);
+
+  SetViewManagerClient(handle<message_pipe> view_manager_client_request);
+};
+
+// WindowManagerInternalClient is an interface provide by the ViewManager
+// exclusively to the WindowManager. It provides functionality only available
+// to the WindowManager.
+interface WindowManagerInternalClient {
+  // Dispatches the specified input event to the specified view.
+  DispatchInputEventToView(uint32 view_id, mojo.Event event);
+
+  // Sets the native viewport size.
+  SetViewportSize(mojo.Size size);
+
+  // Clones the tree rooted at |view_id|. When the animation completes the clone
+  // is destroyed.
+  // TODO(sky): add actual animation.
+  // TODO(sky): I think this only makes sense when destroying (view is
+  // already visible), should it be named to indicate this?
+  CloneAndAnimate(uint32 view_id);
+};

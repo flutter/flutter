@@ -1,0 +1,46 @@
+# Copyright 2014 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("../../../mojo_sdk.gni")
+
+mojo_sdk_source_set("tests") {
+  testonly = true
+
+  mojo_sdk_visibility =
+      [ "mojo/public/cpp/system/tests:mojo_public_system_unittests" ]
+
+  sources = [
+    "core_unittest.cc",
+    "core_unittest_pure_c.c",
+    "macros_unittest.cc",
+  ]
+
+  deps = [
+    "//testing/gtest",
+  ]
+
+  mojo_sdk_deps = [
+    "mojo/public/c/environment",
+    "mojo/public/c/system",
+  ]
+}
+
+mojo_sdk_source_set("perftests") {
+  testonly = true
+
+  sources = [
+    "core_perftest.cc",
+  ]
+
+  deps = [
+    "//testing/gtest",
+  ]
+
+  mojo_sdk_deps = [
+    "mojo/public/c/environment",
+    "mojo/public/cpp/system",
+    "mojo/public/cpp/test_support:test_utils",
+    "mojo/public/cpp/utility",
+  ]
+}

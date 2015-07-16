@@ -1,0 +1,65 @@
+Name
+
+    CHROMIUM_path_rendering
+
+Name Strings
+
+    GL_CHROMIUM_path_rendering
+
+Version
+
+    Last Modifed Date: August 14, 2014
+
+Dependencies
+
+    OpenGL ES 3.0 is required.
+
+Overview
+
+    This extensions implements path rendering using
+    OpenGL API.
+
+New Tokens
+
+    Accepted by the <matrixMode> parameter of MatrixLoadfCHROMIUM and
+    MatrixLoadIdentityCHROMIUM:
+    PATH_MODELVIEW_CHROMIUM                           0x1700
+    PATH_PROJECTION_CHROMIUM                          0x1701
+
+    Accepted by the <pname> parameter of GetIntegerv,
+    GetFloatv:
+    PATH_MODELVIEW_MATRIX_CHROMIUM                    0x0BA6
+    PATH_PROJECTION_MATRIX_CHROMIUM                   0x0BA7
+
+
+New Procedures and Functions
+
+    void MatrixLoadfCHROMIUM(enum matrixMode, float* matrix)
+
+    Takes a pointer to a 4x4 matrix stored in column-major order as 16
+    consecutive ﬂoating-point values. The matrixMode specifies which
+    matrix, PATH_MODELVIEW_CHROMIUM or PATH_PROJECTION_CHROMIUM is used.
+
+    The funcition specifies either modelview or projection matrix
+    to be used with path rendering API calls.
+
+    void MatrixLoadIdentityCHROMIUM(enum matrixMode)
+
+    Effectively calls MatrixLoadf with the identity matrix.
+
+Errors
+
+    None.
+
+New State
+
+    Get Value                       Type   Get Command  Initial  Description
+    -----------------------------  -----  ------------ -------- -------------------
+    PATH_MODELVIEW_MATRIX_CHROMIUM  16xR   GetFloatv    all 0's  Current modelview
+                                                                 matrix for path rendering
+    PATH_PROJECTION_MATRIX_CHROMIUM 16xR   GetFloatv    all 0's  Current projection
+                                                                 matrix for path rendering
+
+Revision History
+
+    14/8/2014    Documented the extension

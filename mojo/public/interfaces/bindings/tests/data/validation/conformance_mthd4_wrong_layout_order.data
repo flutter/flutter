@@ -1,0 +1,33 @@
+[dist4]message_header  // num_bytes
+[u4]0                  // version
+[u4]4                  // name
+[u4]0                  // flags
+[anchr]message_header
+
+[dist4]method4_params  // num_bytes
+[u4]0                  // version
+[dist8]param0_ptr      // param0
+[dist8]param1_ptr      // param1
+[anchr]method4_params
+
+[anchr]param0_ptr
+[dist4]struct_c   // num_bytes
+[u4]0             // version
+[dist8]array_ptr  // array
+[anchr]struct_c
+
+// The following two arrays are arranged in wrong order.
+
+[anchr]param1_ptr
+[dist4]array_param  // num_bytes
+[u4]10              // num_elements
+0 1 2 3 4 5 6 7 8 9
+[anchr]array_param
+
+[u4]0 [u2]0  // Padding to make the next array aligned properly.
+
+[anchr]array_ptr
+[dist4]array_member  // num_bytes
+[u4]3                // num_elements
+0 1 2
+[anchr]array_member

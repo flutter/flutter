@@ -1,0 +1,66 @@
+# Copyright 2014 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("mojo.gni")
+
+group("public") {
+  # Meta-target, don't link into production code.
+  testonly = true
+  deps = [
+    ":libmojo_sdk",
+    ":sdk",
+    "cpp/bindings",
+    "cpp/environment:standalone",
+    "cpp/utility",
+    "interfaces/bindings/tests:test_interfaces",
+  ]
+
+  if (mojo_use_application_in_sdk) {
+    deps += [ "cpp/application:standalone" ]
+  }
+
+  if (is_linux) {
+    deps += [ "python" ]
+  }
+
+  if (is_android) {
+    deps += [
+      "java:system",
+      "java:bindings",
+    ]
+  }
+
+  if (is_android && mojo_use_application_in_sdk) {
+    deps += [ "java:application" ]
+  }
+}
+
+group("sdk") {
+  deps = [
+    "c/system",
+    "cpp/bindings",
+    "cpp/environment:standalone",
+    "cpp/utility",
+    "interfaces/bindings",
+    "js",
+  ]
+
+  if (mojo_use_application_in_sdk) {
+    deps += [
+      "cpp/application:standalone",
+      "interfaces/application",
+    ]
+  }
+
+  if (mojo_use_network_in_sdk) {
+    deps += [ "interfaces/network" ]
+  }
+}
+
+static_library("libmojo_sdk") {
+  complete_static_lib = true
+  deps = [
+    ":sdk",
+  ]
+}

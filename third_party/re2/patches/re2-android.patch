@@ -1,0 +1,30 @@
+diff --git a/util/util.h b/util/util.h
+index 17ef824..8f54040 100644
+--- a/util/util.h
++++ b/util/util.h
+@@ -29,6 +29,7 @@
+ #include <utility>
+ #include <set>
+ 
++#include "build/build_config.h"
+ #include "base/third_party/dynamic_annotations/dynamic_annotations.h"
+ 
+ // Use std names.
+@@ -45,7 +46,7 @@ using std::sort;
+ using std::swap;
+ using std::make_pair;
+ 
+-#if defined(__GNUC__) && !defined(USE_CXX0X)
++#if defined(__GNUC__) && !defined(USE_CXX0X) && !defined(OS_ANDROID)
+ 
+ #include <tr1/unordered_set>
+ using std::tr1::unordered_set;
+@@ -53,7 +54,7 @@ using std::tr1::unordered_set;
+ #else
+ 
+ #include <unordered_set>
+-#ifdef WIN32
++#if defined(WIN32) || defined(OS_ANDROID)
+ using std::tr1::unordered_set;
+ #else
+ using std::unordered_set;

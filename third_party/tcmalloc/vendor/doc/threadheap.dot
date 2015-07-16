@@ -1,0 +1,21 @@
+digraph ThreadHeap {
+rankdir=LR
+node [shape=box, width=0.3, height=0.3]
+nodesep=.05
+
+heap [shape=record, height=2, label="<f0>class 0|<f1>class 1|<f2>class 2|..."]
+O0 [label=""]
+O1 [label=""]
+O2 [label=""]
+O3 [label=""]
+O4 [label=""]
+O5 [label=""]
+sep1 [shape=plaintext, label="..."]
+sep2 [shape=plaintext, label="..."]
+sep3 [shape=plaintext, label="..."]
+
+heap:f0 -> O0 -> O1 -> sep1
+heap:f1 -> O2 -> O3 -> sep2
+heap:f2 -> O4 -> O5 -> sep3
+
+}

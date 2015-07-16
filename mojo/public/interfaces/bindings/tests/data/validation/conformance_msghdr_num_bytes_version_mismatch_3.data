@@ -1,0 +1,5 @@
+[dist4]message_header  // num_bytes
+[u4]8                  // version: |num_bytes| is too small for |version|.
+[u4]0x80000000         // name
+[u4]0                  // flags
+[anchr]message_header

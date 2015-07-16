@@ -1,0 +1,44 @@
+# Copyright 2014 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//testing/test.gni")
+
+test("js_unittests") {
+  deps = [
+    "../../js",
+    "../../js:js_unittests",
+    "../../test:run_all_unittests",
+    "../../test:test_support",
+    "../../../public/cpp/environment",
+    "../../../public/cpp/system",
+    "../../../public/cpp/utility",
+    "../../../public/interfaces/bindings/tests:test_interfaces",
+    "../../../public/interfaces/bindings/tests:test_interfaces_experimental",
+    "//base",
+    "//gin:gin_test",
+    "//mojo/environment:chromium",
+  ]
+
+  sources = [
+    "run_js_tests.cc",
+  ]
+}
+
+test("js_integration_tests") {
+  deps = [
+    "../../js",
+    "../../js/tests:js_to_cpp_tests",
+    "../../test:run_all_unittests",
+    "../../test:test_support",
+    "../../../public/cpp/bindings",
+    "../../../public/interfaces/bindings/tests:test_interfaces",
+    "//base",
+    "//gin:gin_test",
+    "//mojo/environment:chromium",
+  ]
+
+  sources = [
+    "run_js_integration_tests.cc",
+  ]
+}

@@ -1,0 +1,19 @@
+[dist4]message_header  // num_bytes
+[u4]0                  // version
+[u4]11                 // name
+[u4]0                  // flags
+[anchr]message_header
+
+[dist4]method11_params  // num_bytes
+[u4]0                   // version
+[dist8]param0_ptr       // param0
+[anchr]method11_params
+
+[anchr]param0_ptr
+[dist4]struct_g         // num_bytes: The size is too big for the version.
+[u4]1                   // version
+[s4]123                 // i
+[u4]0                   // padding
+[u8]0                   // struct_a
+[u8]0                   // Unexpected contents that cause the mismatch.
+[anchr]struct_g

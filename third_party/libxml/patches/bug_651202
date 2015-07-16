@@ -1,0 +1,13 @@
+Fix for https://bugzilla.gnome.org/show_bug.cgi?id=651202
+
+--- libxml/xmlschemas.c.orig	Thu May 26 20:21:54 2011
++++ libxml/xmlschemas.c	Thu May 26 20:22:02 2011
+@@ -13946,7 +13946,7 @@
+     */
+     if ((sub->negNsSet != NULL) &&
+ 	(super->negNsSet != NULL) &&
+-	(sub->negNsSet->value == sub->negNsSet->value))
++	(sub->negNsSet->value == super->negNsSet->value))
+ 	return (0);
+     /*
+     * 3.1 sub must be a set whose members are either namespace names or �absent�.

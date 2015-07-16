@@ -1,0 +1,17 @@
+In file included from non_virtual_trace.cpp:5:
+./non_virtual_trace.h:12:1: warning: [blink-gc] Left-most base class 'A' of derived class 'D' must define a virtual trace method.
+class A : public GarbageCollected<A> {
+^
+non_virtual_trace.cpp:13:1: warning: [blink-gc] Class 'C' overrides non-virtual trace of base class 'A'.
+void C::trace(Visitor* visitor)
+^
+./non_virtual_trace.h:14:5: note: [blink-gc] Non-virtual trace method declared here:
+    void trace(Visitor*);
+    ^
+non_virtual_trace.cpp:18:1: warning: [blink-gc] Class 'D' overrides non-virtual trace of base class 'A'.
+void D::trace(Visitor* visitor)
+^
+./non_virtual_trace.h:14:5: note: [blink-gc] Non-virtual trace method declared here:
+    void trace(Visitor*);
+    ^
+3 warnings generated.

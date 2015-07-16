@@ -1,0 +1,67 @@
+Name
+
+    CHROMIUM_enable_feature
+
+Name Strings
+
+    GL_CHROMIUM_enable_feature
+
+Version
+
+    Last Modifed Date: August 11, 2011
+
+Dependencies
+
+    OpenGL ES 2.0 is required.
+
+Overview
+
+    This extension allows certain optional features to be turned on in
+    the Chromium OpenGL ES 2.0 implementation.
+
+Issues
+
+
+New Tokens
+
+    None
+
+New Procedures and Functions
+
+    CommandBufferEnableCHROMIUM(const GLchar *feature)
+
+    <feature> is a null terminated string of the feature you wish to enable.
+    The requestable feature strings are as follows:
+
+    Note: If used this function MUST be called before any other GL commands
+    except GetString. Calling any other functions first will result in
+    undefined behavior.
+
+    pepper3d_allow_buffers_on_mulitple_targets
+
+    OpenGL ES 2.0 allows a single buffer to be bound to both the ARRAY_BUFFER
+    and ELEMENT_ARRAY_BUFFER bind points. By default Chromium does not allow
+    this.
+
+    This feature is only provided for full OpenGL ES 2.0 compatibility. It is
+    expensive to use and should generally be avoided.
+
+    pepper3d_support_fixed_attribs
+
+    Turns on support for the type GL_FIXED. By default this feature is off in
+    Chromium.
+
+    This feature is only provided for full OpenGL ES 2.0 compatibility. It is
+    expensive to use and should generally be avoided.
+
+Errors
+
+    None.
+
+New State
+
+    None.
+
+Revision History
+
+    8/11/2011    Documented the extension

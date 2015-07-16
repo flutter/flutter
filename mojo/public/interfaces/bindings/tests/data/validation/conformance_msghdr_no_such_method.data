@@ -1,0 +1,5 @@
+[dist4]message_header  // num_bytes
+[u4]0                  // version number
+[u4]9999               // There is no Method9999.
+[u4]0                  // flags
+[anchr]message_header

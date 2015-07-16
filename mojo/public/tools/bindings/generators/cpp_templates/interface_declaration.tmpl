@@ -1,0 +1,49 @@
+{%- import "interface_macros.tmpl" as interface_macros %}
+class {{interface.name}}Proxy;
+class {{interface.name}}Stub;
+
+class {{interface.name}}RequestValidator;
+{%- if interface|has_callbacks %}
+class {{interface.name}}ResponseValidator;
+{%- endif %}
+
+class {{interface.name}} {
+ public:
+  static const char Name_[];
+  static const uint32_t Version_ = {{interface.version}};
+
+  using Proxy_ = {{interface.name}}Proxy;
+  using Stub_ = {{interface.name}}Stub;
+
+  using RequestValidator_ = {{interface.name}}RequestValidator;
+{%- if interface|has_callbacks %}
+  using ResponseValidator_ = {{interface.name}}ResponseValidator;
+{%- else %}
+  using ResponseValidator_ = mojo::PassThroughFilter;
+{%- endif %}
+
+{#--- Enums #}
+{%- for enum in interface.enums %}
+{%    macro enum_def() %}{% include "enum_declaration.tmpl" %}{% endmacro %}
+  {{enum_def()|indent(2)}}
+{%- endfor %}
+
+{#--- Constants #}
+{%- for constant in interface.constants %}
+{%-   if constant.kind|is_integral_kind %}
+  static const {{constant.kind|cpp_pod_type}} {{constant.name}} = {{constant|constant_value}};
+{%-   else %}
+  static const {{constant.kind|cpp_pod_type}} {{constant.name}};
+{%-   endif %}
+{%- endfor %}
+
+{#--- Methods #}
+  virtual ~{{interface.name}}() {}
+
+{%- for method in interface.methods %}
+{%    if method.response_parameters != None %}
+  using {{method.name}}Callback = {{interface_macros.declare_callback(method)}};
+{%-   endif %}
+  virtual void {{method.name}}({{interface_macros.declare_request_params("", method)}}) = 0;
+{%- endfor %}
+};

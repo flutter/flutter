@@ -1,0 +1,48 @@
+{%- set class_name = struct.name ~ "_Data" -%}
+
+class {{class_name}} {
+ public:
+  static {{class_name}}* New(mojo::internal::Buffer* buf);
+
+  static bool Validate(const void* data,
+                       mojo::internal::BoundsChecker* bounds_checker);
+
+  void EncodePointersAndHandles(std::vector<mojo::Handle>* handles);
+  void DecodePointersAndHandles(std::vector<mojo::Handle>* handles);
+
+  mojo::internal::StructHeader header_;
+{%- for packed_field in struct.packed.packed_fields %}
+{%-   set name = packed_field.field.name %}
+{%-   set kind = packed_field.field.kind %}
+{%-   if kind.spec == 'b' %}
+  uint8_t {{name}} : 1;
+{%-   elif kind|is_enum_kind %}
+  int32_t {{name}};
+{%-   else %}
+  {{kind|cpp_field_type}} {{name}};
+{%-   endif %}
+{%-   if not loop.last %}
+{%-     set next_pf = struct.packed.packed_fields[loop.index0 + 1] %}
+{%-     set pad = next_pf.offset - (packed_field.offset + packed_field.size) %}
+{%-     if pad > 0 %}
+  uint8_t pad{{loop.index0}}_[{{pad}}];
+{%-     endif %}
+{%-   endif %}
+{%- endfor %}
+
+{%- set num_fields = struct.versions[-1].num_fields %}
+{%- if num_fields > 0 %}
+{%-   set last_field = struct.packed.packed_fields[num_fields - 1] %}
+{%-   set offset = last_field.offset + last_field.size %}
+{%-   set pad = offset|get_pad(8) %}
+{%-   if pad > 0 %}
+  uint8_t padfinal_[{{pad}}];
+{%-   endif %}
+{%- endif %}
+
+ private:
+  {{class_name}}();
+  ~{{class_name}}() = delete;
+};
+static_assert(sizeof({{class_name}}) == {{struct.versions[-1].num_bytes}},
+              "Bad sizeof({{class_name}})");

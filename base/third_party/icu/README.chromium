@@ -1,0 +1,16 @@
+Name: ICU
+URL: http://site.icu-project.org/
+License: MIT
+License File: NOT_SHIPPED
+
+This file has the relevant components from ICU copied to handle basic
+UTF8/16/32 conversions. Components are copied from utf.h utf8.h utf16.h and
+utf_impl.c
+
+The same module appears in third_party/icu, so we don't repeat the license
+file here.
+
+The main change is that U_/U8_/U16_ prefixes have been replaced with
+CBU_/CBU8_/CBU16_ (for "Chrome Base") to avoid confusion with the "real" ICU
+macros should ICU be in use on the system. For the same reason, the functions
+and types have been put in the "base_icu" namespace.

@@ -1,0 +1,31 @@
+# Copyright 2014 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+assert(is_nacl)
+
+import("../../mojo_sdk.gni")
+
+# Untrusted code
+if (is_nacl) {
+  # Thunk mapping the Mojo public API onto NaCl syscalls.
+  mojo_sdk_source_set("mojo") {
+    sources = [
+      "libmojo.cc",
+      "mojo_irt.h",
+    ]
+    mojo_sdk_deps = [ "mojo/public/c/system" ]
+  }
+
+  mojo_sdk_source_set("system") {
+    sources = [
+      "mojo_initial_handle.h",
+      "mojo_main_thunk.cc",
+    ]
+
+    mojo_sdk_deps = [
+      "mojo/public/c/system",
+      "mojo/public/platform/nacl:mojo",
+    ]
+  }
+}

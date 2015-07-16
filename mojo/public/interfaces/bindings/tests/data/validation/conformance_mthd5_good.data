@@ -1,0 +1,35 @@
+[handles]10  // Larger than the number of handles that we know about is okay.
+
+[dist4]message_header  // num_bytes
+[u4]0                  // version
+[u4]5                  // name
+[u4]0                  // flags
+[anchr]message_header
+
+[dist4]method5_params  // num_bytes
+[u4]0                  // version
+[dist8]param0_ptr      // param0
+[u4]4                  // param1
+[u4]0                  // padding
+[anchr]method5_params
+
+[anchr]param0_ptr
+[dist4]struct_e      // num_bytes
+[u4]0                // version
+[dist8]struct_d_ptr  // struct_d
+[u4]3                // data_pipe_consumer
+[u4]0                // padding
+[anchr]struct_e
+
+[anchr]struct_d_ptr
+[dist4]struct_d           // num_bytes
+[u4]0                     // version
+[dist8]message_pipes_ptr  // message_pipes
+[anchr]struct_d
+
+[anchr]message_pipes_ptr
+[dist4]message_pipe_array  // num_bytes
+[u4]2                      // num_elements
+[u4]0
+[u4]1
+[anchr]message_pipe_array

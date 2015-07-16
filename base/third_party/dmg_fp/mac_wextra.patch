@@ -1,0 +1,53 @@
+Index: g_fmt.cc
+===================================================================
+--- g_fmt.cc	(revision 49784)
++++ g_fmt.cc	(working copy)
+@@ -46,7 +46,7 @@
+ 	if (sign)
+ 		*b++ = '-';
+ 	if (decpt == 9999) /* Infinity or Nan */ {
+-		while((*b++ = *s++));
++		while((*b++ = *s++)) {}
+ 		goto done0;
+ 		}
+ 	if (decpt <= -4 || decpt > se - s + 5) {
+@@ -64,7 +64,7 @@
+ 			}
+ 		else
+ 			*b++ = '+';
+-		for(j = 2, k = 10; 10*k <= decpt; j++, k *= 10);
++		for(j = 2, k = 10; 10*k <= decpt; j++, k *= 10) {}
+ 		for(;;) {
+ 			i = decpt / k;
+ 			*b++ = i + '0';
+@@ -79,7 +79,7 @@
+ 		*b++ = '.';
+ 		for(; decpt < 0; decpt++)
+ 			*b++ = '0';
+-		while((*b++ = *s++));
++		while((*b++ = *s++)) {}
+ 		}
+ 	else {
+ 		while((*b = *s++)) {
+Index: dtoa.cc
+===================================================================
+--- dtoa.cc	(revision 49784)
++++ dtoa.cc	(working copy)
+@@ -3863,7 +3863,7 @@
+ 					if (dval(&u) > 0.5 + dval(&eps))
+ 						goto bump_up;
+ 					else if (dval(&u) < 0.5 - dval(&eps)) {
+-						while(*--s == '0');
++						while(*--s == '0') {}
+ 						s++;
+ 						goto ret1;
+ 						}
+@@ -4176,7 +4176,7 @@
+ #ifdef Honor_FLT_ROUNDS
+  trimzeros:
+ #endif
+-		while(*--s == '0');
++		while(*--s == '0') {}
+ 		s++;
+ 		}
+  ret:

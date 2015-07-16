@@ -1,0 +1,18 @@
+# Copyright 2015 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+component("native_viewport") {
+  sources = [
+    "surface_configuration_type_converters.cc",
+    "surface_configuration_type_converters.h",
+  ]
+
+  deps = [
+    "//base",
+    "//ui/gl",
+    "//mojo/environment:chromium",
+    "//mojo/public/c/system",
+    "//mojo/services/native_viewport/public/interfaces",
+  ]
+}

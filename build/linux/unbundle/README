@@ -1,0 +1,44 @@
+This directory contains files that make it possible to use system libraries.
+
+For more info please read the following:
+
+ - https://fedoraproject.org/wiki/Packaging:No_Bundled_Libraries
+ - https://wiki.gentoo.org/wiki/Why_not_bundle_dependencies
+ - http://www.debian.org/doc/debian-policy/ch-source.html#s-embeddedfiles
+
+For more Chromium-specific context please read
+http://spot.livejournal.com/312320.html .
+
+This directory is provided in the source tree to follow above guidelines.
+It is a compromise solution which takes into account Chromium developers
+who want to avoid the perceived burden of more conditional code in gyp,
+and expectations of Open Source community, where using system-provided
+libraries is the norm.
+
+Usage:
+
+1. remove_bundled_libraries.py <preserved-directories>
+
+   For example: remove_bundled_libraries.py third_party/mesa
+
+   The script scans sources looking for third_party directories.
+   Everything that is not explicitly preserved is removed (except for
+   gyp files), and the script fails if any directory passed on command
+   line does not exist (to ensure list is kept up to date).
+
+   This is intended to be used on sources extracted from a tarball,
+   not a repository.
+
+   NOTE: by default this will not remove anything (for safety). Pass
+   --do-remove flag to actually remove files.
+
+2. replace_gyp_files.py <gyp-flags>
+
+   For example: replace_gyp_files.py -Duse_system_harfbuzz=1
+
+   The script ignores flags other than -D for convenience. This makes it
+   possible to have a variable e.g. ${myconf} with all the options, and
+   execute:
+
+   build/linux/unbundle/replace_gyp_files.py ${myconf}
+   build/gyp_chromium ${myconf}

@@ -1,0 +1,4 @@
+# Hangs under Dr. Memory
+# https://github.com/DynamoRIO/drmemory/issues/978
+WinAudioTest.SyncSocketBasic
+AudioBusTest.CopyTo

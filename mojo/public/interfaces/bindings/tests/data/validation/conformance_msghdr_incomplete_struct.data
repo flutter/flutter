@@ -1,0 +1,2 @@
+[u4]16  // num_bytes: Bigger than the total size of the message.
+[u4]0   // version

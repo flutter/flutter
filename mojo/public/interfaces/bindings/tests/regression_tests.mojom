@@ -1,0 +1,54 @@
+// Copyright 2014 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+// Module containing entities for regression tests of the generator. Entities
+// must never be modified, instead new entity must be added to add new tests.
+[JavaPackage="org.chromium.mojo.bindings.test.mojom.regression_tests"]
+module regression_tests;
+
+interface CheckMethodWithEmptyResponse {
+WithouParameterAndEmptyResponse() => ();
+WithParameterAndEmptyResponse(bool b) => ();
+};
+
+interface CheckNameCollision {
+WithNameCollision(bool message, bool response) => (bool message, bool response);
+};
+
+enum EnumWithReference {
+  k_STEREO_AND_KEYBOARD_MIC = 30,
+  k_MAX = k_STEREO_AND_KEYBOARD_MIC
+};
+
+enum EnumWithLowercase {
+  PlanarF16,
+  PlanarF32
+};
+
+enum EnumWithNumbers {
+  k_2_1 = 4
+};
+
+enum EnumWithK {
+  K = 0
+};
+
+struct Edge {
+  Vertex? v;
+};
+
+struct Vertex {
+  EmptyStruct? e;
+};
+
+struct EmptyStruct {
+};
+
+struct A {
+  B? b;
+};
+
+struct B {
+  A? a;
+};

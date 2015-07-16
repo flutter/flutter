@@ -1,0 +1,146 @@
+{#  TODO(yzshen): Make these templates more readable. #}
+
+{#  Computes the serialized size for the specified struct.
+    |struct| is the struct definition.
+    |input_field_pattern| should be a pattern that contains one string
+    placeholder, for example, "input->%s", "p_%s". The placeholder will be
+    substituted with struct field names to refer to the input fields.
+    This macro is expanded to compute seriailized size for both:
+    - user-defined structs: the input is an instance of the corresponding struct
+      wrapper class.
+    - method parameters/response parameters: the input is a list of
+      arguments.
+    It declares |size| of type size_t to store the resulting size. #}
+{%- macro get_serialized_size(struct, input_field_pattern) -%}
+  size_t size = sizeof(internal::{{struct.name}}_Data);
+{%-   for pf in struct.packed.packed_fields_in_ordinal_order if pf.field.kind|is_object_kind %}
+{%-     if pf.field.kind|is_union_kind %}
+  size += GetSerializedSize_({{input_field_pattern|format(pf.field.name)}}, true);
+{%-     else %}
+  size += GetSerializedSize_({{input_field_pattern|format(pf.field.name)}});
+{%-     endif %}
+{%-   endfor %}
+{%- endmacro -%}
+
+{#  Serializes the specified struct.
+    |struct| is the struct definition.
+    |struct_display_name| is the display name for the struct that can be showed
+    in error/log messages, for example, "FooStruct", "FooMethod request".
+    |input_field_pattern| should be a pattern that contains one string
+    placeholder, for example, "input->%s", "p_%s". The placeholder will be
+    substituted with struct field names to refer to the input fields.
+    |output| is the name of the output struct instance.
+    |buffer| is the name of the Buffer instance used.
+    This macro is expanded to do serialization for both:
+    - user-defined structs: the input is an instance of the corresponding struct
+      wrapper class.
+    - method parameters/response parameters: the input is a list of
+      arguments. #}
+{%- macro serialize(struct, struct_display_name, input_field_pattern, output, buffer) -%}
+  internal::{{struct.name}}_Data* {{output}} =
+      internal::{{struct.name}}_Data::New({{buffer}});
+{%- for pf in struct.packed.packed_fields_in_ordinal_order %}
+{%-   set input_field = input_field_pattern|format(pf.field.name) %}
+{%-   set name = pf.field.name %}
+{%-   set kind = pf.field.kind %}
+{%-   if kind|is_object_kind %}
+{%-     if kind|is_array_kind %}
+  const mojo::internal::ArrayValidateParams {{name}}_validate_params(
+      {{kind|get_array_validate_params_ctor_args|indent(10)}});
+  mojo::SerializeArray_(mojo::internal::Forward({{input_field}}), {{buffer}},
+      &{{output}}->{{name}}.ptr, &{{name}}_validate_params);
+{%-     elif kind|is_map_kind %}
+  const mojo::internal::ArrayValidateParams {{name}}_validate_params(
+      {{kind.value_kind|get_map_validate_params_ctor_args|indent(10)}});
+  mojo::SerializeMap_(
+      mojo::internal::Forward({{input_field}}), {{buffer}}, &{{output}}->{{name}}.ptr,
+      &{{name}}_validate_params);
+{%-     elif kind|is_union_kind %}
+  internal::{{kind.name}}_Data* {{name}}_ptr = &{{output}}->{{name}};
+  SerializeUnion_(mojo::internal::Forward({{input_field}}), {{buffer}}, &{{name}}_ptr, true);
+{%-     else %}
+  Serialize_(mojo::internal::Forward({{input_field}}), {{buffer}}, &{{output}}->{{name}}.ptr);
+{%-     endif %}
+{%-     if not kind|is_nullable_kind %}
+  MOJO_INTERNAL_DLOG_SERIALIZATION_WARNING(
+{%-       if kind|is_union_kind %}
+      {{output}}->{{name}}.is_null(),
+{%-       else %}
+      !{{output}}->{{name}}.ptr,
+{%-       endif %}
+      mojo::internal::VALIDATION_ERROR_UNEXPECTED_NULL_POINTER,
+      "null {{name}} in {{struct_display_name}}");
+{%-     endif %}
+{%-   elif kind|is_any_handle_kind or kind|is_interface_kind %}
+{%-     if kind|is_interface_kind %}
+  mojo::internal::InterfacePointerToData({{input_field}}.Pass(), &{{output}}->{{name}});
+{%-     elif kind|is_interface_request_kind %}
+  {{output}}->{{name}} = {{input_field}}.PassMessagePipe().release();
+{%-     else %}
+  {{output}}->{{name}} = {{input_field}}.release();
+{%-     endif %}
+{%-     if not kind|is_nullable_kind %}
+  MOJO_INTERNAL_DLOG_SERIALIZATION_WARNING(
+{%-       if kind|is_interface_kind %}
+      !{{output}}->{{name}}.handle.is_valid(),
+{%-       else %}
+      !{{output}}->{{name}}.is_valid(),
+{%-       endif %}
+      mojo::internal::VALIDATION_ERROR_UNEXPECTED_INVALID_HANDLE,
+      "invalid {{name}} in {{struct_display_name}}");
+{%-     endif %}
+{%-   else %}
+  {{output}}->{{name}} = {{input_field}};
+{%-   endif %}
+{%- endfor %}
+{%- endmacro -%}
+
+{#  Deserializes the specified struct.
+    |struct| is the struct definition.
+    |input| is the name of the input struct instance.
+    |output_field_pattern| should be a pattern that contains one string
+    placeholder, for example, "result->%s", "p_%s". The placeholder will be
+    substituted with struct field names to refer to the output fields.
+    This macro is expanded to do deserialization for both:
+    - user-defined structs: the output is an instance of the corresponding
+      struct wrapper class.
+    - method parameters/response parameters: the output is a list of
+      arguments. #}
+{%- macro deserialize(struct, input, output_field_pattern) -%}
+  do {
+    // NOTE: The memory backing |{{input}}| may has be smaller than
+    // |sizeof(*{{input}})| if the message comes from an older version.
+{#-   Before deserialize fields introduced at a certain version, we need to add
+      a version check, which makes sure we skip further deserialization if
+      |input| is from an earlier version. |last_checked_version| records the
+      last version that we have added such version check. #}
+{%-   set last_checked_version = 0 %}
+{%-   for pf in struct.packed.packed_fields_in_ordinal_order %}
+{%-     set output_field = output_field_pattern|format(pf.field.name) %}
+{%-     set name = pf.field.name %}
+{%-     set kind = pf.field.kind %}
+{%-     if pf.min_version > last_checked_version %}
+{%-       set last_checked_version = pf.min_version %}
+    if ({{input}}->header_.version < {{pf.min_version}})
+      break;
+{%-     endif %}
+{%-     if kind|is_object_kind %}
+{%-       if kind|is_union_kind %}
+    Deserialize_(&{{input}}->{{name}}, &{{output_field}});
+{%-       else %}
+    Deserialize_({{input}}->{{name}}.ptr, &{{output_field}});
+{%-       endif %}
+{%-     elif kind|is_interface_kind %}
+    mojo::internal::InterfaceDataToPointer(&{{input}}->{{name}}, &{{output_field}});
+{%-     elif kind|is_interface_request_kind %}
+    {{output_field}}.Bind(mojo::MakeScopedHandle(mojo::internal::FetchAndReset(&{{input}}->{{name}})));
+{%-     elif kind|is_any_handle_kind %}
+    {{output_field}}.reset(mojo::internal::FetchAndReset(&{{input}}->{{name}}));
+{%-     elif kind|is_enum_kind %}
+    {{output_field}} = static_cast<{{kind|cpp_wrapper_type}}>({{input}}->{{name}});
+{%-     else %}
+    {{output_field}} = {{input}}->{{name}};
+{%-     endif %}
+{%-   endfor %}
+  } while (false);
+{%- endmacro %}

@@ -1,0 +1,23 @@
+# Copyright 2014 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//build/config/ui.gni")
+
+component("util") {
+  output_name = "display_util"
+  sources = [
+    "display_util.cc",
+    "display_util.h",
+    "display_util_export.h",
+    "edid_parser.cc",
+    "edid_parser.h",
+  ]
+
+  defines = [ "DISPLAY_UTIL_IMPLEMENTATION" ]
+
+  deps = [
+    "//base",
+    "//ui/gfx/geometry",
+  ]
+}

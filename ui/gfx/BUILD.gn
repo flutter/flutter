@@ -1,0 +1,235 @@
+# Copyright 2014 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//build/config/ui.gni")
+import("//testing/test.gni")
+
+if (is_android) {
+  import("//build/config/android/config.gni")
+  import("//build/config/android/rules.gni")
+}
+
+# Several targets want to include this header file, and some of them are
+# child dependencies of "gfx". Therefore, we separate it out here so multiple
+# targets can all have a dependency for header checking purposes without
+# creating circular dependencies.
+source_set("gfx_export") {
+  sources = [
+    "gfx_export.h",
+  ]
+}
+
+component("gfx") {
+  sources = [
+    "android/device_display_info.cc",
+    "android/device_display_info.h",
+    "android/gfx_jni_registrar.cc",
+    "android/gfx_jni_registrar.h",
+    "android/java_bitmap.cc",
+    "android/java_bitmap.h",
+    "android/shared_device_display_info.cc",
+    "android/shared_device_display_info.h",
+    "android/view_configuration.cc",
+    "android/view_configuration.h",
+    "animation/animation.cc",
+    "animation/animation.h",
+    "animation/animation_container.cc",
+    "animation/animation_container.h",
+    "animation/animation_container_element.h",
+    "animation/animation_container_observer.h",
+    "animation/animation_delegate.h",
+    "animation/linear_animation.cc",
+    "animation/linear_animation.h",
+    "animation/multi_animation.cc",
+    "animation/multi_animation.h",
+    "animation/slide_animation.cc",
+    "animation/slide_animation.h",
+    "animation/throb_animation.cc",
+    "animation/throb_animation.h",
+    "animation/tween.cc",
+    "animation/tween.h",
+    "codec/jpeg_codec.cc",
+    "codec/jpeg_codec.h",
+    "codec/png_codec.cc",
+    "codec/png_codec.h",
+    "display.cc",
+    "display.h",
+    "display_change_notifier.cc",
+    "display_change_notifier.h",
+    "display_observer.cc",
+    "display_observer.h",
+    "frame_time.h",
+    "gpu_memory_buffer.cc",
+    "gpu_memory_buffer.h",
+    "hud_font.cc",
+    "hud_font.h",
+    "native_widget_types.h",
+    "sequential_id_generator.cc",
+    "sequential_id_generator.h",
+    "shadow_value.cc",
+    "shadow_value.h",
+    "skia_util.cc",
+    "skia_util.h",
+    "transform.cc",
+    "transform.h",
+    "transform_util.cc",
+    "transform_util.h",
+    "ui_gfx_exports.cc",
+    "vsync_provider.h",
+    "win/hwnd_util.cc",
+    "win/hwnd_util.h",
+    "win/scoped_set_map_mode.h",
+    "win/singleton_hwnd.cc",
+    "win/singleton_hwnd.h",
+    "win/window_impl.cc",
+    "win/window_impl.h",
+  ]
+
+  defines = [ "GFX_IMPLEMENTATION" ]
+
+  deps = [
+    ":gfx_export",
+    "//base/third_party/dynamic_annotations",
+    "//base:base_static",
+    "//base:i18n",
+    "//skia",
+    "//third_party/harfbuzz-ng",
+    "//third_party/libpng",
+    "//third_party/zlib",
+    "//third_party:jpeg",
+    "//ui/gfx/geometry",
+  ]
+  public_deps = [
+    "//base",
+    "//skia",
+    "//third_party/icu",
+  ]
+
+  # Android.
+  if (is_android) {
+    sources -= [
+      "animation/throb_animation.cc",
+      "display_observer.cc",
+    ]
+
+    # TODO(jdduke): Revisit optimization after gauging benefit, crbug/419051.
+    if (!is_debug) {
+      configs -= [ "//build/config/compiler:optimize" ]
+      configs += [ "//build/config/compiler:optimize_max" ]
+    }
+
+    deps += [ ":gfx_jni_headers" ]
+    libs = [
+      "android",
+      "jnigraphics",
+    ]
+  }
+
+  # Linux.
+  if (is_linux) {
+    configs += [ "//build/config/linux:fontconfig" ]
+  }
+
+  if (use_x11) {
+    deps += [ "//ui/gfx/x" ]
+  }
+}
+
+# Looking for gfx_geometry? It's //ui/gfx/geometry:geometry
+
+source_set("test_support") {
+  testonly = true
+  sources = [
+    "test/fontconfig_util_linux.cc",
+    "test/fontconfig_util_linux.h",
+    "test/gfx_util.cc",
+    "test/gfx_util.h",
+  ]
+
+  public_deps = [
+    ":gfx",
+  ]
+
+  deps = [
+    "//base",
+    "//base/test:test_support",
+    "//skia",
+    "//testing/gtest",
+    "//ui/gfx/geometry",
+  ]
+
+  if (is_linux) {
+    configs += [ "//build/config/linux:fontconfig" ]
+  }
+}
+
+test("gfx_unittests") {
+  sources = [
+    "animation/animation_container_unittest.cc",
+    "animation/animation_unittest.cc",
+    "animation/multi_animation_unittest.cc",
+    "animation/slide_animation_unittest.cc",
+    "animation/tween_unittest.cc",
+    "codec/jpeg_codec_unittest.cc",
+    "codec/png_codec_unittest.cc",
+    "display_change_notifier_unittest.cc",
+    "display_unittest.cc",
+    "geometry/box_unittest.cc",
+    "geometry/cubic_bezier_unittest.cc",
+    "geometry/insets_unittest.cc",
+    "geometry/matrix3_unittest.cc",
+    "geometry/point3_unittest.cc",
+    "geometry/point_unittest.cc",
+    "geometry/quad_unittest.cc",
+    "geometry/r_tree_unittest.cc",
+    "geometry/rect_unittest.cc",
+    "geometry/safe_integer_conversions_unittest.cc",
+    "geometry/scroll_offset_unittest.cc",
+    "geometry/size_unittest.cc",
+    "geometry/vector2d_unittest.cc",
+    "geometry/vector3d_unittest.cc",
+    "sequential_id_generator_unittest.cc",
+    "skrect_conversion_unittest.cc",
+    "test/run_all_unittests.cc",
+    "transform_unittest.cc",
+    "transform_util_unittest.cc",
+  ]
+
+  deps = [
+    ":gfx",
+    ":test_support",
+    "//base",
+    "//base/test:test_support",
+    "//skia",
+    "//third_party/icu:icuuc",
+    "//third_party/libpng",
+    "//third_party/zlib",
+    "//testing/gtest",
+    "//ui/base",
+    "//ui/gfx/geometry",
+  ]
+
+  if (is_android) {
+    sources -= [
+      # Do not run display_change_notifier_unittest.cc on Android because it
+      # does not compile display_observer.cc
+      "display_change_notifier_unittest.cc",
+    ]
+
+    deps += [
+      #'../../testing/android/native_test.gyp:native_test_native_code', TODO(GYP)
+    ]
+  }
+}
+
+if (is_android) {
+  generate_jni("gfx_jni_headers") {
+    sources = [
+      "../android/java/src/org/chromium/ui/gfx/BitmapHelper.java",
+      "../android/java/src/org/chromium/ui/gfx/DeviceDisplayInfo.java",
+      "../android/java/src/org/chromium/ui/gfx/ViewConfigurationHelper.java",
+    ]
+    jni_package = "gfx"
+  }
+}

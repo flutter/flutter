@@ -1,0 +1,139 @@
+# Copyright 2014 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# The absolute path to the directory containing the mojo public SDK (i.e., the
+# directory containing mojo/public). The build files within the Mojo public
+# SDK use this variable to allow themselves to be parameterized by the location
+# of the public SDK within a client repo.
+mojo_root = get_path_info("../..", "abspath")
+
+# Takes as input a "source_set" that includes dependencies that are relative to
+# the parent directory of the Mojo public SDK (given in |mojo_sdk_deps|).
+# Generates a source_set that has the mojo_sdk_deps added as ordinary deps
+# rebased to the current directory.
+# By default, restricts the entries that are given in invoker.deps and
+# invoker.public_deps to be only within the same file and on a small set of
+# whitelisted external dependencies. This check can be elided by setting
+# restrict_external_deps to false in the invoker. DO NOT DO THIS in
+# //mojo/public.
+#
+# Example of a mojo_sdk_source_set:
+#
+# mojo_sdk_source_set("foo") {
+#   sources = [
+#     "foo.h",
+#     "foo.cc",
+#   ]
+#
+#   # Same-file deps are specified in the ordinary way. Any external
+#   dependencies are specified the same way (although in general there should
+#   be very few of these).
+#   deps = [
+#     ":bar",
+#   ]
+#
+#   # Mojo SDK deps are specified relative to the containing directory of the
+#   SDK via mojo_sdk_deps.
+#   mojo_sdk_deps = [
+#     "mojo/public/cpp/bindings",
+#     "mojo/public/cpp/environment",
+#     "mojo/public/cpp/system",
+#   ]
+# }
+#
+template("mojo_sdk_source_set") {
+  source_set(target_name) {
+    if (defined(invoker.visibility)) {
+      visibility = invoker.visibility
+    } else {
+      visibility = [ "*" ]
+    }
+    if (defined(invoker.mojo_sdk_visibility)) {
+      foreach(sdk_target, invoker.mojo_sdk_visibility) {
+        # Check that the SDK target was not mistakenly given as an absolute
+        # path.
+        assert(get_path_info(sdk_target, "abspath") != sdk_target)
+        visibility += [ rebase_path(sdk_target, ".", mojo_root) ]
+      }
+    }
+
+    if (defined(invoker.testonly)) {
+      testonly = invoker.testonly
+    }
+
+    if (defined(invoker.sources)) {
+      sources = invoker.sources
+    }
+
+    if (defined(invoker.defines)) {
+      defines = invoker.defines
+    }
+
+    if (defined(invoker.libs)) {
+      libs = invoker.libs
+    }
+
+    public_configs =
+        [ rebase_path("mojo/public/build/config:mojo_sdk", ".", mojo_root) ]
+    if (defined(invoker.public_configs)) {
+      public_configs += invoker.public_configs
+    }
+
+    if (defined(invoker.configs)) {
+      configs += invoker.configs
+    }
+
+    if (defined(invoker.allow_circular_includes_from)) {
+      allow_circular_includes_from = invoker.allow_circular_includes_from
+    }
+
+    if (defined(invoker.public_deps) || defined(invoker.deps)) {
+      restrict_external_deps = true
+      if (defined(invoker.restrict_external_deps)) {
+        restrict_external_deps = invoker.restrict_external_deps
+      }
+    }
+
+    public_deps = []
+    if (defined(invoker.public_deps)) {
+      foreach(dep, invoker.public_deps) {
+        if (restrict_external_deps) {
+          # The only deps that are not specified relative to the location of
+          # the Mojo SDK should be on targets within the same file or on a
+          # whitelisted set of external dependencies.
+          assert(get_path_info(dep, "dir") == ".")
+        }
+        public_deps += [ dep ]
+      }
+    }
+    if (defined(invoker.mojo_sdk_public_deps)) {
+      foreach(sdk_dep, invoker.mojo_sdk_public_deps) {
+        # Check that the SDK dep was not mistakenly given as an absolute path.
+        assert(get_path_info(sdk_dep, "abspath") != sdk_dep)
+        public_deps += [ rebase_path(sdk_dep, ".", mojo_root) ]
+      }
+    }
+
+    deps = []
+    if (defined(invoker.deps)) {
+      foreach(dep, invoker.deps) {
+        if (restrict_external_deps) {
+          # The only deps that are not specified relative to the location of
+          # the Mojo SDK should be on targets within the same file or on a
+          # whitelisted set of external dependencies.
+          dep_dir = get_path_info(dep, "dir")
+          assert(dep_dir == "." || dep == "//testing/gtest")
+        }
+        deps += [ dep ]
+      }
+    }
+    if (defined(invoker.mojo_sdk_deps)) {
+      foreach(sdk_dep, invoker.mojo_sdk_deps) {
+        # Check that the SDK dep was not mistakenly given as an absolute path.
+        assert(get_path_info(sdk_dep, "abspath") != sdk_dep)
+        deps += [ rebase_path(sdk_dep, ".", mojo_root) ]
+      }
+    }
+  }
+}

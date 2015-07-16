@@ -1,0 +1,35 @@
+# Copyright 2014 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("../../mojo_sdk.gni")
+
+mojo_sdk_source_set("utility") {
+  sources = [
+    "mutex.h",
+    "run_loop.h",
+    "run_loop_handler.h",
+    "thread.h",
+    "lib/mutex.cc",
+    "lib/run_loop.cc",
+    "lib/thread.cc",
+    "lib/thread_local.h",
+    "lib/thread_local_posix.cc",
+    "lib/thread_local_win.cc",
+  ]
+
+  mojo_sdk_deps = [
+    "mojo/public/cpp/bindings:callback",
+    "mojo/public/cpp/system",
+  ]
+
+  if (is_win) {
+    # See crbug.com/342893:
+    sources -= [
+      "mutex.h",
+      "thread.h",
+      "lib/mutex.cc",
+      "lib/thread.cc",
+    ]
+  }
+}

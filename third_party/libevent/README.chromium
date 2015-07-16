@@ -1,0 +1,28 @@
+Name: libevent
+URL: http://www.monkey.org/~provos/libevent/
+Version: 1.4.13
+License: BSD
+Security Critical: yes
+
+Local Modifications:
+Rather than use libevent's own build system, we just build a Chrome
+static library using GYP.
+
+1) Run configure and "make event-config.h" on Linux, FreeBSD, Solaris,
+   and Mac and copy config.h and event-config.h to linux/, freebsd/,
+   solaris/, and mac/ respectively.
+2) Add libevent.gyp.
+3) chromium.patch is applied to allow libevent to be used without
+   being installed and to fix a race condition.
+4) The directories WIN32-Code and WIN32-Prj are not included.
+5) Apply r87338.
+6) The configs for android were copied from Linux's which were very close to
+   android one with the exception of HAVE_FD_MASK and HAVE_STRLCPY.
+7) Add files to support building with the PNaCl toolchain. Added
+   libevent_nacl_nonsfi.gyp for build rule. nacl_nonsfi/config.h and
+   nacl_nonsfi/event-config.h are derived from linux/ counterparts.
+   nacl_nonsfi/random.c is also added to provide the random() function,
+   which is missing in the newlib-based PNaCl toolchain.
+8) Apply https://github.com/libevent/libevent/commit/ea6b1df
+9) Stub out signal.c for nacl_helper_nonsfi. socketpair() will be prohibited
+   by sandbox in nacl_helper_nonsfi.

@@ -1,0 +1,9 @@
+enum {{enum.name}} : int32_t {
+{%- for field in enum.fields %}
+{%-    if field.value %}
+  {{enum.name|to_all_caps}}_{{field.name}} = {{field.value|expression_to_text}},
+{%-    else %}
+  {{enum.name|to_all_caps}}_{{field.name}},
+{%-    endif %}
+{%- endfor %}
+};

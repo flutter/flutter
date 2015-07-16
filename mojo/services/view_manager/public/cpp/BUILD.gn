@@ -1,0 +1,62 @@
+# Copyright 2014 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//build/module_args/mojo.gni")
+import("$mojo_sdk_root/mojo/public/mojo_sdk.gni")
+
+mojo_sdk_source_set("cpp") {
+  restrict_external_deps = false
+  public_configs = [ "../../../public/build/config:mojo_services" ]
+  sources = [
+    "lib/view.cc",
+    "lib/view_manager_client_factory.cc",
+    "lib/view_manager_client_impl.cc",
+    "lib/view_manager_client_impl.h",
+    "lib/view_manager_context.cc",
+    "lib/view_observer.cc",
+    "lib/view_private.cc",
+    "lib/view_private.h",
+    "view.h",
+    "view_manager.h",
+    "view_manager_client_factory.h",
+    "view_manager_context.h",
+    "view_manager_delegate.cc",
+    "view_manager_delegate.h",
+    "view_observer.h",
+    "view_property.h",
+    "view_tracker.cc",
+    "view_tracker.h",
+  ]
+
+  public_deps = [
+    ":common",
+  ]
+
+  deps = [
+    "../interfaces",
+    "../../../geometry/public/interfaces",
+    "../../../input_events/public/interfaces",
+    "../../../surfaces/public/interfaces:surface_id",
+    "../../../window_manager/public/interfaces",
+    "//base",
+  ]
+
+  mojo_sdk_deps = [
+    "mojo/public/c/gles2:headers",
+    "mojo/public/cpp/application",
+    "mojo/public/cpp/bindings:bindings",
+    "mojo/public/cpp/system",
+    "mojo/public/interfaces/application",
+  ]
+}
+
+source_set("common") {
+  configs += [ "../../../public/build/config:mojo_services" ]
+
+  sources = [
+    "keys.cc",
+    "keys.h",
+    "types.h",
+  ]
+}

@@ -1,0 +1,367 @@
+{% from "constant_definition.tmpl" import constant_def %}
+{% from "enum_definition.tmpl" import enum_def %}
+
+{%- macro equality(kind, v1, v2, ne=False) -%}
+{%-   if kind|is_reference_kind -%}
+{%-     if kind|is_array_kind -%}
+{%-       if kind.kind|is_reference_kind -%}
+{% if ne %}!{% endif %}java.util.Arrays.deepEquals({{v1}}, {{v2}})
+{%-       else -%}
+{% if ne %}!{% endif %}java.util.Arrays.equals({{v1}}, {{v2}})
+{%-       endif -%}
+{%-     else -%}
+{% if ne %}!{% endif %}org.chromium.mojo.bindings.BindingsHelper.equals({{v1}}, {{v2}})
+{%-     endif -%}
+{%-   else -%}
+{{v1}} {% if ne %}!={% else %}=={% endif %} {{v2}}
+{%-   endif -%}
+{%- endmacro -%}
+
+{%- macro hash(kind, v) -%}
+{%-   if kind|is_array_kind -%}
+{%-     if kind.kind|is_reference_kind -%}
+java.util.Arrays.deepHashCode({{v}})
+{%-     else -%}
+java.util.Arrays.hashCode({{v}})
+{%-     endif -%}
+{%-   else -%}
+org.chromium.mojo.bindings.BindingsHelper.hashCode({{v}})
+{%-   endif -%}
+{%- endmacro -%}
+
+{%- macro array_element_size(kind) -%}
+{%-  if kind|is_union_kind %}
+org.chromium.mojo.bindings.BindingsHelper.UNION_SIZE
+{%-  else -%}
+org.chromium.mojo.bindings.BindingsHelper.POINTER_SIZE
+{%-  endif -%}
+{%- endmacro -%}
+
+{% macro encode(variable, kind, offset, bit, level=0, check_for_null=True) %}
+{% if kind|is_pointer_array_kind or kind|is_union_array_kind %}
+{% set sub_kind = kind.kind %}
+{%   if check_for_null %}
+if ({{variable}} == null) {
+    encoder{{level}}.encodeNullPointer({{offset}}, {{kind|is_nullable_kind|java_true_false}});
+} else {
+{%   else %}
+{
+{%   endif %}
+{%   if kind|is_pointer_array_kind %}
+{%     set encodePointer = 'encodePointerArray' %}
+{%   else %}
+{%     set encodePointer = 'encodeUnionArray' %}
+{%   endif %}
+    org.chromium.mojo.bindings.Encoder encoder{{level + 1}} = encoder{{level}}.{{encodePointer}}({{variable}}.length, {{offset}}, {{kind|array_expected_length}});
+    for (int i{{level}} = 0; i{{level}} < {{variable}}.length; ++i{{level}}) {
+        {{encode(variable~'[i'~level~']', sub_kind, 'org.chromium.mojo.bindings.DataHeader.HEADER_SIZE + ' ~ array_element_size(sub_kind) ~ ' * i'~level, 0, level+1)|indent(8)}}
+    }
+}
+{% elif kind|is_map_kind %}
+if ({{variable}} == null) {
+    encoder{{level}}.encodeNullPointer({{offset}}, {{kind|is_nullable_kind|java_true_false}});
+} else {
+    org.chromium.mojo.bindings.Encoder encoder{{level + 1}} = encoder{{level}}.encoderForMap({{offset}});
+    int size{{level}} = {{variable}}.size();
+    {{kind.key_kind|java_type}}[] keys{{level}} = {{kind.key_kind|array|new_array('size'~level)}};
+    {{kind.value_kind|java_type}}[] values{{level}} = {{kind.value_kind|array|new_array('size'~level)}};
+    int index{{level}} = 0;
+    for (java.util.Map.Entry<{{kind.key_kind|java_type(true)}}, {{kind.value_kind|java_type(true)}}> entry{{level}} : {{variable}}.entrySet()) {
+        keys{{level}}[index{{level}}] = entry{{level}}.getKey();
+        values{{level}}[index{{level}}] = entry{{level}}.getValue();
+        ++index{{level}};
+    }
+    {{encode('keys'~level, kind.key_kind|array, 'org.chromium.mojo.bindings.DataHeader.HEADER_SIZE', 0, level+1, False)|indent(4)}}
+    {{encode('values'~level, kind.value_kind|array, 'org.chromium.mojo.bindings.DataHeader.HEADER_SIZE + org.chromium.mojo.bindings.BindingsHelper.POINTER_SIZE', 0, level+1, False)|indent(4)}}
+}
+{% else %}
+encoder{{level}}.{{kind|encode_method(variable, offset, bit)}};
+{% endif %}
+{% endmacro %}
+
+{% macro decode(variable, kind, offset, bit, level=0) %}
+{% if kind|is_struct_kind or
+      kind|is_pointer_array_kind or
+      kind|is_union_array_kind or
+      kind|is_map_kind %}
+org.chromium.mojo.bindings.Decoder decoder{{level+1}} = decoder{{level}}.readPointer({{offset}}, {{kind|is_nullable_kind|java_true_false}});
+{%   if kind|is_struct_kind %}
+{{variable}} = {{kind|java_type}}.decode(decoder{{level+1}});
+{%   else %}{# kind|is_pointer_array_kind or is_map_kind #}
+{%     if kind|is_nullable_kind %}
+if (decoder{{level+1}} == null) {
+    {{variable}} = null;
+} else {
+{%     else %}
+{
+{%     endif %}
+{%     if kind|is_map_kind %}
+    decoder{{level+1}}.readDataHeaderForMap();
+    {{kind.key_kind|java_type}}[] keys{{level}};
+    {{kind.value_kind|java_type}}[] values{{level}};
+    {
+        {{decode('keys'~level, kind.key_kind|array, 'org.chromium.mojo.bindings.DataHeader.HEADER_SIZE', 0, level+1)|indent(8)}}
+    }
+    {
+        {{decode('values'~level, kind.value_kind|array('keys'~level~'.length'), 'org.chromium.mojo.bindings.DataHeader.HEADER_SIZE + org.chromium.mojo.bindings.BindingsHelper.POINTER_SIZE', 0, level+1)|indent(8)}}
+    }
+    {{variable}} = new java.util.HashMap<{{kind.key_kind|java_type(true)}}, {{kind.value_kind|java_type(true)}}>();
+    for (int index{{level}} = 0; index{{level}} < keys{{level}}.length; ++index{{level}}) {
+        {{variable}}.put(keys{{level}}[index{{level}}],  values{{level}}[index{{level}}]);
+    }
+{%     else %}
+    org.chromium.mojo.bindings.DataHeader si{{level+1}} = decoder{{level+1}}.readDataHeaderForPointerArray({{kind|array_expected_length}});
+    {{variable}} = {{kind|new_array('si'~(level+1)~'.elementsOrVersion')}};
+    for (int i{{level+1}} = 0; i{{level+1}} < si{{level+1}}.elementsOrVersion; ++i{{level+1}}) {
+        {{decode(variable~'[i'~(level+1)~']', kind.kind, 'org.chromium.mojo.bindings.DataHeader.HEADER_SIZE + ' ~ array_element_size(kind.kind) ~' * i'~(level+1), 0, level+1)|indent(8)}}
+    }
+{%     endif %}
+}
+{%   endif %}
+{% elif kind|is_union_kind %}
+{{variable}} = {{kind|java_type}}.decode(decoder{{level}}, {{offset}});
+{% else %}
+{{variable}} = decoder{{level}}.{{kind|decode_method(offset, bit)}};
+{% endif %}
+{% endmacro %}
+
+{% macro struct_def(struct, inner_class=False) %}
+{{'static' if inner_class else 'public'}} final class {{struct|name}} extends org.chromium.mojo.bindings.Struct {
+
+    private static final int STRUCT_SIZE = {{struct.versions[-1].num_bytes}};
+    private static final org.chromium.mojo.bindings.DataHeader[] VERSION_ARRAY = new org.chromium.mojo.bindings.DataHeader[] {
+{%-   for version in struct.versions -%}
+        new org.chromium.mojo.bindings.DataHeader({{version.num_bytes}}, {{version.version}}){% if not loop.last %}, {% endif -%}
+{%-   endfor -%}
+    };
+    private static final org.chromium.mojo.bindings.DataHeader DEFAULT_STRUCT_INFO = VERSION_ARRAY[{{struct.versions|length - 1}}];
+{%  for constant in struct.constants %}
+
+    {{constant_def(constant)|indent(4)}}
+{%  endfor %}
+{%  for enum in struct.enums %}
+
+    {{enum_def(enum, false)|indent(4)}}
+{% endfor %}
+{% if struct.fields %}
+
+{%   for field in struct.fields %}
+    public {{field.kind|java_type}} {{field|name}};
+{%   endfor %}
+{% endif %}
+
+    private {{struct|name}}(int version) {
+        super(STRUCT_SIZE, version);
+{% for field in struct.fields %}
+{%   if field.default %}
+        {{field|name}} = {{field|default_value}};
+{%   elif field.kind|is_any_handle_kind and not field.kind|is_interface_request_kind %}
+        {{field|name}} = org.chromium.mojo.system.InvalidHandle.INSTANCE;
+{%   endif %}
+{% endfor %}
+    }
+
+    public {{struct|name}}() {
+        this({{struct.versions[-1].version}});
+    }
+
+    public static {{struct|name}} deserialize(org.chromium.mojo.bindings.Message message) {
+        return decode(new org.chromium.mojo.bindings.Decoder(message));
+    }
+
+    @SuppressWarnings("unchecked")
+    public static {{struct|name}} decode(org.chromium.mojo.bindings.Decoder decoder0) {
+        if (decoder0 == null) {
+            return null;
+        }
+        org.chromium.mojo.bindings.DataHeader mainDataHeader = decoder0.readAndValidateDataHeader(VERSION_ARRAY);
+        {{struct|name}} result = new {{struct|name}}(mainDataHeader.elementsOrVersion);
+{% for byte in struct.bytes %}
+{%   for packed_field in byte.packed_fields %}
+        if (mainDataHeader.elementsOrVersion >= {{packed_field.min_version}}) {
+            {{decode('result.' ~ packed_field.field|name, packed_field.field.kind, 8+packed_field.offset, packed_field.bit)|indent(12)}}
+        }
+{%   endfor %}
+{% endfor %}
+        return result;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    protected final void encode(org.chromium.mojo.bindings.Encoder encoder) {
+{% if not struct.bytes %}
+        encoder.getEncoderAtDataOffset(DEFAULT_STRUCT_INFO);
+{% else %}
+        org.chromium.mojo.bindings.Encoder encoder0 = encoder.getEncoderAtDataOffset(DEFAULT_STRUCT_INFO);
+{% endif %}
+{% for byte in struct.bytes %}
+{%   for packed_field in byte.packed_fields %}
+        {{encode(packed_field.field|name, packed_field.field.kind, 8+packed_field.offset, packed_field.bit)|indent(8)}}
+{%   endfor %}
+{% endfor %}
+    }
+
+    /**
+     * @see Object#equals(Object)
+     */
+    @Override
+    public boolean equals(Object object) {
+        if (object == this)
+            return true;
+        if (object == null)
+            return false;
+        if (getClass() != object.getClass())
+            return false;
+{% if struct.fields|length %}
+        {{struct|name}} other = ({{struct|name}}) object;
+{%   for field in struct.fields %}
+        if ({{equality(field.kind, 'this.'~field|name, 'other.'~field|name, True)}})
+            return false;
+{%   endfor %}
+{% endif %}
+        return true;
+    }
+
+    /**
+     * @see Object#hashCode()
+     */
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = prime + getClass().hashCode();
+{% for field in struct.fields %}
+        result = prime * result + {{hash(field.kind, field|name)}};
+{% endfor %}
+        return result;
+    }
+}
+{% endmacro %}
+
+
+{% macro union_def(union) %}
+public final class {{union|name}} extends org.chromium.mojo.bindings.Union {
+
+    public static final class Tag {
+{%   for field in union.fields %}
+        public static final int {{field|ucc}} = {{field.ordinal}};
+{%   endfor %}
+    };
+
+    private int mTag_ = -1;
+{%   for field in union.fields %}
+    private {{field.kind|java_type}} m{{field|ucc}};
+{%   endfor %}
+
+    public int which() {
+      return mTag_;
+    }
+
+    public boolean isUnknown() {
+      return mTag_ == -1;
+    }
+{%   for field in union.fields %}
+
+    public void set{{field|ucc}}({{field.kind|java_type}} {{field|name}}) {
+        mTag_ = {{field.ordinal}};
+        m{{field|ucc}} = {{field|name}};
+    }
+
+    public {{field.kind|java_type}} get{{field|ucc}}() {
+        assert mTag_ == {{field.ordinal}};
+        return m{{field|ucc}};
+    }
+{%   endfor %}
+
+
+    @Override
+    protected final void encode(org.chromium.mojo.bindings.Encoder encoder0, int offset) {
+        encoder0.encode(org.chromium.mojo.bindings.BindingsHelper.UNION_SIZE, offset);
+        encoder0.encode(mTag_, offset + 4);
+        switch (mTag_) {
+{%   for field in union.fields %}
+            case {{field.ordinal}}: {
+{%     if field.kind|is_union_kind %}
+                if (m{{field|ucc}} == null) {
+                    encoder0.encodeNullPointer(offset + 8, {{field.kind|is_nullable_kind|java_true_false}});
+                } else {
+                    m{{field|ucc}}.encode(encoder0.encoderForUnionPointer(offset + 8), 0);
+                }
+{%     else %}
+                {{encode('m' ~ field|ucc, field.kind, 'offset + 8', 0)|indent(16)}}
+{%     endif %}
+                break;
+            }
+{%   endfor %}
+        }
+    }
+
+    public static {{union|name}} deserialize(org.chromium.mojo.bindings.Message message) {
+        return decode(new org.chromium.mojo.bindings.Decoder(message).decoderForSerializedUnion(), 0);
+    }
+
+    public static final {{union|name}} decode(org.chromium.mojo.bindings.Decoder decoder0, int offset) {
+        org.chromium.mojo.bindings.DataHeader dataHeader = decoder0.readDataHeaderForUnion(offset);
+        if (dataHeader.size == 0) {
+            return null;
+        }
+        {{union|name}} result = new {{union|name}}();
+        switch (dataHeader.elementsOrVersion) {
+{%   for field in union.fields %}
+            case {{field.ordinal}}: {
+{%     if field.kind|is_union_kind %}
+                org.chromium.mojo.bindings.Decoder decoder1 = decoder0.readPointer(offset + org.chromium.mojo.bindings.DataHeader.HEADER_SIZE, {{field.kind|is_nullable_kind|java_true_false}});
+                if (decoder1 != null) {
+                    result.m{{field|ucc}} = {{field.kind|name}}.decode(decoder1, 0);
+                }
+{%     else %}
+                {{decode('result.m'~field|ucc, field.kind, 'offset + org.chromium.mojo.bindings.DataHeader.HEADER_SIZE', 0)|indent(16)}}
+{%     endif %}
+                result.mTag_ = {{field.ordinal}};
+                break;
+            }
+{%   endfor %}
+        }
+        return result;
+    }
+
+    /**
+     * @see Object#equals(Object)
+     */
+    @Override
+    public boolean equals(Object object) {
+        if (object == this)
+            return true;
+        if (object == null)
+            return false;
+        if (getClass() != object.getClass())
+            return false;
+        {{union|name}} other = ({{union|name}}) object;
+        if (mTag_ != other.mTag_)
+            return false;
+        switch (mTag_) {
+{%   for field in union.fields %}
+            case {{field.ordinal}}:
+                return {{equality(field.kind, 'm'~field|ucc, 'other.m'~field|ucc)}};
+{%   endfor %}
+        }
+        return false;
+    }
+
+    /**
+     * @see Object#hashCode()
+     */
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = prime + getClass().hashCode();
+        result = prime * result + org.chromium.mojo.bindings.BindingsHelper.hashCode(mTag_);
+        switch (mTag_) {
+{%   for field in union.fields %}
+            case {{field.ordinal}}:
+                result = prime * result + {{hash(field.kind, 'm'~field|ucc)}};
+{%   endfor %}
+        }
+        return result;
+    }
+}
+{% endmacro %}

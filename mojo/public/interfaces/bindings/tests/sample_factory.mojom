@@ -1,0 +1,41 @@
+// Copyright 2013 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+[JavaPackage="org.chromium.mojo.bindings.test.mojom.sample"]
+module sample;
+
+import "sample_import.mojom";
+
+// This sample shows how handles to MessagePipes can be sent as both parameters
+// to methods as well as fields on structs.
+
+struct Request {
+  int32 x;
+  handle<message_pipe>? pipe;
+  array<handle<message_pipe>>? more_pipes;
+
+  // Interfaces can be used as members.
+  imported.ImportedInterface? obj;
+};
+
+struct Response {
+  int32 x;
+  handle<message_pipe>? pipe;
+};
+
+interface NamedObject {
+  SetName(string name);
+  GetName() => (string name);
+};
+
+interface Factory {
+  DoStuff(Request request, handle<message_pipe>? pipe) =>
+      (Response response, string text);
+  DoStuff2(handle<data_pipe_consumer> pipe) => (string text);
+  CreateNamedObject(NamedObject& obj);
+  RequestImportedInterface(
+      imported.ImportedInterface& obj) => (imported.ImportedInterface& obj);
+  TakeImportedInterface(
+      imported.ImportedInterface obj) => (imported.ImportedInterface obj);
+};

@@ -1,0 +1,118 @@
+Name
+
+    CHROMIUM_flipy
+
+Name Strings
+
+    GL_CHROMIUM_flipy
+
+Version
+
+    Last Modifed Date: April 9, 2012
+
+Dependencies
+
+    OpenGL ES 2.0 is required.
+
+Overview
+
+    This extension adds the ability to vertically flip texture image data when
+    calling TexImage2D and TexSubImage2D.
+
+Issues
+
+
+New Tokens
+
+    Accepted by the <param> parameter of PixelStorei:
+
+        UNPACK_FLIP_Y_CHROMIUM              0x9240
+
+Additions to the OpenGL ES 2.0 Specification
+
+    Modifications to Table 3.1 (PixelStore Parameters)
+
+        Add the following entry:
+
+        Parameter Name                   Type      Initial Value  Valid Range
+        ==============                   ====      =============  ===========
+        UNPACK_FLIP_Y_CHROMIUM           boolean   FALSE          {TRUE, FALSE}
+
+    Modifications to 3.6.2 Transfer of Pixel Rectangles, in the Unpacking
+    section:
+
+    Change
+        "If p indicates the location in memory of the first element of the first
+        row, then the first element of the Nth row is indicated by
+                            p + Nk (3.9)"
+    to
+        "If p indicates the location in memory of the first element of the first
+        row, then the first element of the Nth row is indicated by
+                            p + Nk (3.9)
+        if UNPACK_FLIP_Y is FALSE. Otherwise, the first element of the Nth row
+        is indicated by
+                            p - Nk (3.10)
+
+    After the sentence
+
+        "If the number of bits per element is not 1, 2, 4, or 8 times the number
+        of bits in a GL ubyte, then k = nl for all values of a."
+
+    insert:
+
+        "If UNPACK_FLIP_Y_CHROMIUM is FALSE then p is equal to pixels. Otherwise
+        p is pixels + (height - 1)k."
+
+Interactions with GL_EXT_unpack_subimage
+
+    Do not add the sentence "If UNPACK_FLIP_Y_CHROMIUM is FALSE ..." described
+    in this extension. Instead do the following after applying
+    GL_EXT_unpack_subimage:
+
+    Change
+
+         "There is a mechanism for selecting a sub-rectangle of groups
+          from a larger containing rectangle. This mechanism relies on
+          three integer parameters: UNPACK_ROW_LENGTH, UNPACK_SKIP_ROWS,
+          and UNPACK_SKIP_PIXELS. Before obtaining the first group from
+          memory, the pointer supplied to TexImage2D is effectively
+          advanced by (UNPACK_SKIP_PIXELS)n + (UNPACK_SKIP_ROWS)k
+          elements. Then <width> groups are obtained from contiguous
+          elements in memory (without advancing the pointer), after
+          which the pointer is advanced by k elements. <height> sets of
+          <width> groups of values are obtained this way. See figure
+          3.6."
+
+    to
+
+         "There is a mechanism for selecting a sub-rectangle of groups
+          from a larger containing rectangle. This mechanism relies on
+          three integer parameters: UNPACK_ROW_LENGTH, UNPACK_SKIP_ROWS,
+          and UNPACK_SKIP_PIXELS. IF UNPACK_FLIP_Y_CHROMIUM is FALSE then
+          p, the location of the first element of the first
+          group, is pixels + (UNPACK_SKIP_PIXELS)n + (UNPACK_SKIP_ROWS)k.
+          When UNPACK_FLIP_Y_CHROMIUM is TRUE then p is pixels +
+          (UNPACK_SKIP_PIXELS)n + (UNPACK_SKIP_ROWS + height - 1)k. After
+          p is determined <width> groups are obtained from contiguous
+          elements in memory (without advancing the pointer), after which
+          the pointer is advanced by +/-k elements depending on the value
+          of UNPACK_CHROMIUM_FLIP_Y. <height> sets of <width> groups of
+          values are obtained this way. See figure 3.6."
+
+New Procedures and Functions
+
+    None.
+
+Errors
+
+    None.
+
+New State
+
+    None.
+
+Revision History
+
+    7/22/2011    Documented the extension
+    4/09/2012    Added more documentation and described interactions with
+                 GL_EXT_unpack_subimage

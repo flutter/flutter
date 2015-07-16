@@ -1,0 +1,111 @@
+// Copyright 2013 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+[JavaPackage="org.chromium.mojo.bindings.test.mojom.sample"]
+module sample;
+
+import "sample_import.mojom";
+import "sample_import2.mojom";
+
+const uint8 kTwelve = 12;
+
+struct Bar {
+  enum Type {
+    VERTICAL = 1,
+    HORIZONTAL,
+    BOTH,
+    INVALID
+  };
+  uint8 alpha@0 = 0xff;
+  uint8 beta@1;
+  uint8 gamma@2;
+  Type type@3 = sample.Bar.Type.VERTICAL;
+};
+
+struct Foo {
+  const string kFooby = "Fooby";
+  string name@8 = kFooby;
+  int32 x@0;
+  int32 y@1;
+  bool a@2 = true;
+  bool b@3;
+  bool c@4;
+  Bar? bar@5;
+  array<Bar>? extra_bars@7;
+  array<uint8>? data@6;
+  handle<message_pipe>? source@9;
+  array<handle<data_pipe_consumer>>? input_streams@10;
+  array<handle<data_pipe_producer>>? output_streams@11;
+  array<array<bool>>? array_of_array_of_bools@12;
+  array<array<array<string>>>? multi_array_of_strings@13;
+  array<bool>? array_of_bools@14;
+};
+
+struct DefaultsTest {
+  int8 a0@0 = -12;
+  uint8 a1@1 = sample.kTwelve;
+  int16 a2@2 = 1234;
+  uint16 a3@3 = 34567;
+  int32 a4@4 = 123456;
+  uint32 a5@5 = 3456789012;
+  int64 a6@6 = -111111111111;
+  uint64 a7@7 = 9999999999999999999;
+  int32 a8@8 = 0x12345;
+  int32 a9@9 = -0x12345;
+  int32 a10@10 = +1234;
+  bool a11@11 = true;
+  bool a12@12 = false;
+  float a13@13 = 123.25;
+  double a14@14 = 1234567890.123;
+  double a15@15 = 1E10;
+  double a16@16 = -1.2E+20;
+  double a17@17 = +1.23E-20;
+
+  // TODO(vtl): Add tests for default vs null when those are implemented (for
+  // structs, arrays, and strings).
+  array<uint8> a18@18;
+  string a19@19;
+
+  Bar.Type a20@20 = BOTH;
+  imported.Point a21@21;
+  imported.Thing a22@22 = default;
+
+  uint64 a23@23 = 0xFFFFFFFFFFFFFFFF;
+  int64 a24@24 = 0x123456789;
+  int64 a25@25 = -0x123456789;
+
+  double a26@26 = double.INFINITY;
+  double a27@27 = double.NEGATIVE_INFINITY;
+  double a28@28 = double.NAN;
+  float a29@29 = float.INFINITY;
+  float a30@30 = float.NEGATIVE_INFINITY;
+  float a31@31 = float.NAN;
+};
+
+struct StructWithHoleV1 {
+  int32 v1 = 1;
+  int64 v2 = 2;
+};
+
+struct StructWithHoleV2 {
+  int32 v1 = 1;
+  int64 v2 = 2;
+  int32 v3 = 3;
+};
+
+interface Service {
+  enum BazOptions {
+    REGULAR = 0,
+    EXTRA
+  };
+  const uint8 kFavoriteBaz = 1;
+  Frobinate@0(Foo? foo@0, BazOptions baz@1, Port? port@2) => (int32 result@0);
+  GetPort@1(Port& port @0);
+};
+
+// This interface is referenced above where it is defined. It also refers to
+// itself from a method.
+interface Port {
+  PostMessage@0(string message_text@0, Port port@1);
+};

@@ -1,0 +1,57 @@
+# Copyright (c) 2013 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+source_set("common") {
+  sources = [
+    "bitfield_helpers.h",
+    "buffer.cc",
+    "buffer.h",
+    "capabilities.cc",
+    "capabilities.h",
+    "cmd_buffer_common.cc",
+    "cmd_buffer_common.h",
+    "command_buffer.h",
+    "constants.h",
+    "debug_marker_manager.cc",
+    "debug_marker_manager.h",
+    "gles2_cmd_format.cc",
+    "gles2_cmd_format.h",
+    "gles2_cmd_format_autogen.h",
+    "gles2_cmd_ids.h",
+    "gles2_cmd_ids_autogen.h",
+    "id_allocator.cc",
+    "id_allocator.h",
+    "mailbox.cc",
+    "mailbox.h",
+    "mailbox_holder.cc",
+    "mailbox_holder.h",
+    "thread_local.h",
+    "time.h",
+    "value_state.cc",
+    "value_state.h",
+  ]
+
+  configs += [ "//gpu:gpu_implementation" ]
+
+  deps = [
+    ":gles2_utils",
+    "//base",
+  ]
+}
+
+component("gles2_utils") {
+  sources = [
+    "gles2_cmd_utils.cc",
+    "gles2_cmd_utils.h",
+    "gles2_utils_export.h",
+  ]
+
+  defines = [ "GLES2_UTILS_IMPLEMENTATION" ]
+
+  deps = [
+    "//base",
+  ]
+
+  all_dependent_configs = [ "//third_party/khronos:khronos_headers" ]
+}

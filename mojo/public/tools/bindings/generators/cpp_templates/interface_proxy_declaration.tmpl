@@ -1,0 +1,13 @@
+{%- import "interface_macros.tmpl" as interface_macros %}
+class {{interface.name}}Proxy
+    : public {{interface.name}},
+      public mojo::internal::ControlMessageProxy {
+ public:
+  explicit {{interface.name}}Proxy(mojo::MessageReceiverWithResponder* receiver);
+
+{%- for method in interface.methods %}
+  void {{method.name}}(
+      {{interface_macros.declare_request_params("", method)}}
+  ) override;
+{%- endfor %}
+};

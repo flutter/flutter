@@ -1,0 +1,38 @@
+// Copyright 2014 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+module mojo;
+
+import "mojo/public/interfaces/application/service_provider.mojom";
+
+// An interface through which a Mojo application may communicate with the Mojo
+// system and request connections to other applications.
+interface Shell {
+  // Establishes a connection with another application (located at
+  // |application_url|) through which the calling application and the other
+  // application may request services from one another.
+  //
+  // If the calling application would like to request services from the other
+  // application, it should pass a valid interface request in the |services|
+  // parameter (i.e. one containing a valid message pipe endpoint). If the other
+  // application does not wish to offer services, it may either not bind an
+  // implementation to the interface request, or else bind an implementation
+  // that will reject some or all service requests.
+  //
+  // If the calling application would like to offer services to the other
+  // application, it should pass a bound interface through the
+  // |exposed_services| parameter. The other application may then request
+  // services through that interface.
+  //
+  // At least one of |services| or |exposed_services| should be valid/bound in
+  // the call.
+  //
+  // If the |application_url| does not contain a domain, but is of the form
+  // "mojo:{service}", it is up to the Mojo shell to select an appropriate
+  // application for the service. Currently, the shell does this based on the
+  // value of its --origin flag.
+  ConnectToApplication(string application_url,
+                       ServiceProvider&? services,
+                       ServiceProvider? exposed_services);
+};

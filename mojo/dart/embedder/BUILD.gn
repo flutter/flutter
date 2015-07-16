@@ -1,0 +1,414 @@
+# Copyright 2014 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# embedder specific template rules.
+import("embedder.gni")
+
+source_set("dart_controller_no_snapshot") {
+  sources = [
+    "$target_gen_dir/dart_embedder_patch_resources.cc",
+    "$target_gen_dir/dart_embedder_service_isolate_resources.cc",
+    "builtin.cc",
+    "builtin.h",
+    "builtin_natives.cc",
+    "common.cc",
+    "common.h",
+    "dart_controller.cc",
+    "dart_controller.h",
+    "dart_debugger.cc",
+    "dart_debugger.h",
+    "io/internet_address.h",
+    "isolate_data.h",
+    "mojo_io_natives.cc",
+    "mojo_io_natives.h",
+    "mojo_natives.cc",
+    "mojo_natives.h",
+    "monitor.h",
+    "vmservice.cc",
+    "vmservice.h",
+  ]
+
+  if (is_linux) {
+    sources += [ "io/internet_address_linux.cc" ]
+  }
+
+  if (is_android) {
+    sources += [ "io/internet_address_android.cc" ]
+  }
+
+  deps = [
+    ":dart_embedder_packages",
+    ":generate_dart_embedder_patch_resources_cc",
+    ":generate_dart_embedder_service_isolate_resources_cc",
+    "//base",
+    "//base:i18n",
+    "//crypto",
+    "//dart/runtime:libdart",
+    "//dart/runtime/bin:libdart_embedder_noio",
+    "//third_party/dart-pkg",
+    "//mojo/public/c/system",
+    "//mojo/public/cpp/system",
+  ]
+
+  defines = []
+  if (is_debug) {
+    defines += [ "DEBUG" ]
+  } else {
+    defines += [ "NDEBUG" ]
+  }
+
+  include_dirs = [ "//dart/runtime" ]
+}
+
+dart_embedder_resources("generate_dart_embedder_patch_resources_cc") {
+  inputs = [
+    "//mojo/dart/embedder/core/natives_patch.dart",
+    "//mojo/dart/embedder/io/internet_address_patch.dart",
+    "//mojo/dart/embedder/io/mojo_patch.dart",
+    "//mojo/dart/embedder/io/platform_patch.dart",
+    "//mojo/dart/embedder/io/socket_patch.dart",
+    "//mojo/dart/embedder/io/server_socket_patch.dart",
+  ]
+  root_prefix = "//mojo/dart/embedder/"
+  output = "$target_gen_dir/dart_embedder_patch_resources.cc"
+  table_name = "dart_embedder_patch"
+}
+
+group("dart_embedder_packages") {
+  deps = [
+    ":dart_embedder_package_sdk",
+    ":dart_embedder_package_application",
+    ":dart_embedder_package_bindings",
+    ":dart_embedder_package_network",
+    ":dart_embedder_package_network_service",
+  ]
+}
+
+dart_embedder_package("dart_embedder_package_application") {
+  package = "mojo/public/interfaces/application"
+  destination = "mojom/mojo"
+}
+
+dart_embedder_package("dart_embedder_package_bindings") {
+  package = "mojo/public/interfaces/bindings"
+  destination = "mojom/mojo"
+}
+
+dart_embedder_package("dart_embedder_package_network") {
+  package = "mojo/public/interfaces/network"
+  destination = "mojom/mojo"
+}
+
+dart_embedder_package("dart_embedder_package_network_service") {
+  package = "mojo/services/network/public/interfaces"
+  destination = "mojom/mojo"
+}
+
+action_foreach("dart_embedder_package_sdk") {
+  sources = [
+    "//mojo/public/dart/lib/application.dart",
+    "//mojo/public/dart/lib/bindings.dart",
+    "//mojo/public/dart/lib/core.dart",
+    "//mojo/public/dart/lib/src/application.dart",
+    "//mojo/public/dart/lib/src/application_connection.dart",
+    "//mojo/public/dart/lib/src/buffer.dart",
+    "//mojo/public/dart/lib/src/codec.dart",
+    "//mojo/public/dart/lib/src/control_message.dart",
+    "//mojo/public/dart/lib/src/data_pipe.dart",
+    "//mojo/public/dart/lib/src/drain_data.dart",
+    "//mojo/public/dart/lib/src/event_stream.dart",
+    "//mojo/public/dart/lib/src/handle.dart",
+    "//mojo/public/dart/lib/src/message.dart",
+    "//mojo/public/dart/lib/src/message_pipe.dart",
+    "//mojo/public/dart/lib/src/proxy.dart",
+    "//mojo/public/dart/lib/src/struct.dart",
+    "//mojo/public/dart/lib/src/stub.dart",
+    "//mojo/public/dart/lib/src/types.dart",
+    "//mojo/public/dart/lib/src/union.dart",
+    "//mojo/public/dart/sdk_ext/internal.dart",
+    "//mojo/public/dart/sdk_ext/src/handle_watcher.dart",
+    "//mojo/public/dart/sdk_ext/src/natives.dart",
+    "//mojo/public/dart/sdk_ext/src/timer_queue.dart",
+  ]
+  outputs = [
+    "$root_gen_dir/dart_embedder_packages/{{source_root_relative_dir}}/{{source_file_part}}",
+  ]
+  script = rebase_path(
+          "//mojo/dart/embedder/tools/dart_rewrite_embedder_package_imports.py")
+  args = [
+    rebase_path("{{source}}", "", root_build_dir),
+    rebase_path(
+        "$root_gen_dir/dart_embedder_packages/{{source_root_relative_dir}}/{{source_file_part}}"),
+  ]
+}
+
+dart_embedder_resources("generate_dart_embedder_service_isolate_resources_cc") {
+  deps = [
+    ":deploy_observatory",
+  ]
+  inputs = [
+    "//mojo/dart/embedder/vmservice/loader.dart",
+    "//mojo/dart/embedder/vmservice/main.dart",
+    "//mojo/dart/embedder/vmservice/resources.dart",
+    "//mojo/dart/embedder/vmservice/server.dart",
+  ]
+  root_prefix = "//mojo/dart/embedder/"
+  input_directory = "$root_out_dir/observatory/deployed/web/"
+  output = "$target_gen_dir/dart_embedder_service_isolate_resources.cc"
+  table_name = "dart_embedder_service_isolate"
+}
+
+observatory_sources_gypi =
+    exec_script("../../../dart/tools/gypi_to_gn.py",
+                [ rebase_path(
+                    "//dart/runtime/observatory/observatory_sources.gypi") ],
+                "scope",
+                [ "//dart/runtime/observatory/observatory_sources.gypi" ])
+
+copy("copy_observatory") {
+  sources = rebase_path(observatory_sources_gypi.sources,
+                        "",
+                        "../../../dart/runtime/observatory")
+  outputs = [
+    "$root_gen_dir/observatory_copy/{{source_root_relative_dir}}/{{source_file_part}}",
+  ]
+}
+
+action("write_observatory_pubspec_yaml") {
+  deps = [
+    ":copy_observatory",
+  ]
+
+  script = "//dart/tools/observatory_tool.py"
+
+  inputs = [
+    rebase_path("//dart/runtime/observatory/pubspec.yaml"),
+  ]
+
+  args = [
+    "--silent=True",
+    "--pub-executable",
+    rebase_path("//third_party/dart-sdk/dart-sdk/bin/pub"),
+    "--directory",
+    rebase_path("$root_gen_dir/observatory_copy/dart/runtime/observatory/"),
+    "--command",
+    "rewrite",
+    rebase_path("//dart/runtime/observatory/pubspec.yaml"),
+    rebase_path(
+        "$root_gen_dir/observatory_copy/dart/runtime/observatory/pubspec.yaml"),
+    "../../third_party/",
+    rebase_path("../../../dart/third_party/"),
+  ]
+
+  outputs = [
+    "$root_gen_dir/observatory_copy/dart/runtime/observatory/pubspec.yaml",
+  ]
+}
+
+action("copy_observatory_deps") {
+  deps = [
+    ":write_observatory_pubspec_yaml",
+  ]
+
+  script = "//dart/tools/observatory_tool.py"
+
+  inputs = [
+    script,
+    "$root_gen_dir/observatory_copy/dart/runtime/observatory/pubspec.yaml",
+  ]
+
+  args = [
+    "--silent=True",
+    "--pub-executable",
+    rebase_path("//third_party/dart-sdk/dart-sdk/bin/pub"),
+    "--directory",
+    rebase_path("$root_gen_dir/observatory_copy/dart/runtime/observatory/"),
+    "--command",
+    "get",
+  ]
+
+  outputs = [
+    "$root_gen_dir/observatory_copy/dart/runtime/observatory/pubspec.lock",
+  ]
+}
+
+action("pub_build_observatory") {
+  sources =
+      rebase_path(observatory_sources_gypi.sources,
+                  "",
+                  "$root_gen_dir/observatory_copy/dart/runtime/observatory")
+
+  deps = [
+    ":copy_observatory",
+    ":copy_observatory_deps",
+  ]
+
+  script = "//dart/tools/observatory_tool.py"
+
+  inputs = [
+    script,
+  ]
+  inputs += sources
+
+  args = [
+    "--silent=True",
+    "--pub-executable",
+    rebase_path("//third_party/dart-sdk/dart-sdk/bin/pub"),
+    "--directory",
+    rebase_path("$root_gen_dir/observatory_copy/dart/runtime/observatory/"),
+    "--command",
+    "build",
+    rebase_path("$root_out_dir/observatory/build"),
+  ]
+
+  outputs = [
+    "$root_out_dir/observatory/build/web/index.html",
+    "$root_out_dir/observatory/build/web/index.html.polymer.bootstrap.dart.js",
+  ]
+}
+
+action("deploy_observatory") {
+  deps = [
+    ":pub_build_observatory",
+  ]
+
+  script = "//dart/tools/observatory_tool.py"
+
+  inputs = [
+    script,
+    "$root_out_dir/observatory/build/web/index.html",
+    "$root_out_dir/observatory/build/web/index.html.polymer.bootstrap.dart.js",
+  ]
+
+  args = [
+    "--silent=True",
+    "--pub-executable",
+    rebase_path("//third_party/dart-sdk/dart-sdk/bin/pub"),
+    "--directory",
+    rebase_path("$root_out_dir/observatory"),
+    "--command",
+    "deploy",
+  ]
+
+  outputs = [
+    "$root_out_dir/observatory/deployed/web/index.html",
+    "$root_out_dir/observatory/deployed/web/index.html.polymer.bootstrap.dart.js",
+  ]
+}
+
+action("generate_snapshot_bin") {
+  deps = [
+    "//dart/runtime/bin:gen_snapshot($host_toolchain)",
+    ":dart_embedder_packages",
+  ]
+  inputs = [
+    "snapshot.dart",
+    "//dart/runtime/tools/create_snapshot_bin.py",
+    "//mojo/dart/embedder/builtin.dart",
+    "//mojo/dart/embedder/packages.dart",
+    "//mojo/public/dart/sdk_ext/internal.dart",
+    "//mojo/public/dart/sdk_ext/src/handle_watcher.dart",
+    "//mojo/public/dart/sdk_ext/src/natives.dart",
+    "//mojo/public/dart/sdk_ext/src/timer_queue.dart",
+  ]
+  vm_isolate_snapshot = "$target_gen_dir/vm_isolate_snapshot.bin"
+  isolate_snapshot = "$target_gen_dir/isolate_snapshot.bin"
+  outputs = [
+    vm_isolate_snapshot,
+    isolate_snapshot,
+  ]
+
+  gen_snapshot_dir =
+      get_label_info("//dart/runtime/bin:gen_snapshot($host_toolchain)",
+                     "root_out_dir")
+  script = "//dart/runtime/tools/create_snapshot_bin.py"
+  builtin_path = rebase_path("//mojo/dart/embedder/builtin.dart")
+  internal_path = rebase_path("//mojo/public/dart/sdk_ext/internal.dart")
+  io_path = rebase_path("//dart/sdk/lib/io/io.dart")
+
+  embedder_packages_path = rebase_path("//mojo/dart/embedder/packages.dart")
+  embedder_package_application_path = rebase_path(
+          "$root_gen_dir/dart_embedder_packages/mojo/public/dart/lib/application.dart")
+  embedder_package_bindings_path = rebase_path(
+          "$root_gen_dir/dart_embedder_packages/mojo/public/dart/lib/bindings.dart")
+  embedder_package_core_path =
+      rebase_path(
+          "$root_gen_dir/dart_embedder_packages/mojo/public/dart/lib/core.dart")
+  url_mappings_script =
+      rebase_path("//mojo/dart/embedder/tools/dart_embedder_url_mappings.py")
+
+  application_mojoms = rebase_path("//mojo/public/interfaces/application")
+  bindings_mojoms = rebase_path("//mojo/public/interfaces/bindings")
+  network_mojoms = rebase_path("//mojo/public/interfaces/network")
+  network_service_mojoms =
+      rebase_path("//mojo/services/network/public/interfaces")
+
+  # This script generates --url_mapping command line arguments for all
+  # generated mojom.dart bindings files. See HACKING.md for more information.
+  embedder_mojom_url_mappings =
+      exec_script(url_mappings_script,
+                  [
+                    # File system path containing target imports.
+                    rebase_path("$root_gen_dir/dart_embedder_packages"),
+
+                    # Embedder package directories.
+                    "$application_mojoms,mojom/mojo",
+                    "$bindings_mojoms,mojom/mojo",
+                    "$network_mojoms,mojom/mojo",
+                    "$network_service_mojoms,mojom/mojo",
+                  ],
+                  "list lines")
+
+  args = [
+           "--executable",
+           rebase_path("$gen_snapshot_dir/gen_snapshot"),
+           "--package_root",
+           rebase_path("$root_gen_dir/dart-gen"),
+           "--script",
+           rebase_path("snapshot.dart"),
+           "--vm_output_bin",
+           rebase_path(vm_isolate_snapshot, root_build_dir),
+           "--output_bin",
+           rebase_path(isolate_snapshot, root_build_dir),
+           "--target_os",
+           current_os,
+           "--url_mapping=dart:mojo.builtin,$builtin_path",
+           "--url_mapping=dart:mojo.internal,$internal_path",
+           "--url_mapping=dart:io,$io_path",
+
+           # Embedder packages
+           "--url_mapping=dart:embedder_private_packages,$embedder_packages_path",
+           "--url_mapping=dart:_mojo/application.dart,$embedder_package_application_path",
+           "--url_mapping=dart:_mojo/bindings.dart,$embedder_package_bindings_path",
+           "--url_mapping=dart:_mojo/core.dart,$embedder_package_core_path",
+         ] + embedder_mojom_url_mappings
+}
+
+action("generate_snapshot_file") {
+  deps = [
+    ":generate_snapshot_bin",
+  ]
+  inputs = [
+    "//dart/runtime/tools/create_snapshot_file.py",
+    "//mojo/dart/embedder/snapshot.cc.tmpl",
+    "$target_gen_dir/vm_isolate_snapshot.bin",
+    "$target_gen_dir/isolate_snapshot.bin",
+  ]
+  output = "$root_gen_dir/dart_snapshot.cc"
+  outputs = [
+    output,
+  ]
+
+  script = "//dart/runtime/tools/create_snapshot_file.py"
+  args = [
+    "--vm_input_bin",
+    rebase_path("$target_gen_dir/vm_isolate_snapshot.bin"),
+    "--input_bin",
+    rebase_path("$target_gen_dir/isolate_snapshot.bin"),
+    "--input_cc",
+    rebase_path("//mojo/dart/embedder/snapshot.cc.tmpl"),
+    "--output",
+    rebase_path(output),
+  ]
+}

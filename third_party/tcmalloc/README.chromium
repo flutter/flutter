@@ -1,0 +1,100 @@
+Name: tcmalloc
+Short Name: gperftools
+URL: http://gperftools.googlecode.com/
+Version: unknown
+Revision: 144
+Security Critical: yes
+License: BSD
+
+Description:
+This contains Chromium's locally patched copy of tcmalloc.
+
+Contents:
+
+  chromium/
+
+    The chromium patched sources, copied from the vendor/
+    subdirectory and containing our local modifications.
+
+    We only copy over the vendor/src/ subdirectory (the only piece
+    we need) but still leave it in a chromium/src/ subdirectory to
+    keep the directory structures in parallel.
+
+  vendor/
+
+    Vanilla sources from upstream:
+
+      http://gperftools.googlecode.com/svn/trunk
+
+    The current revision is:
+
+      Last Changed Rev: 144
+      Last Changed Date: 2012-02-04 00:10:11 +0000 (Sat, 04 Feb 2012)
+
+
+
+HOWTOs:
+
+  Take a new version from upstream:
+
+    1)  Grab the revision:
+
+        $ svn export [-r {tcmalloc-rev}] \
+          http://gperftools.googlecode.com/svn/trunk \
+          vendor-{tcmalloc-rev}
+
+    2)  Check for added or deleted files:
+
+        $ diff -q -r -x .svn vendor vendor-{tcmalloc-rev}
+
+    3)  Copy the new revision on top of the checked-in vendor branch:
+
+        $ cp -r vendor-{tcmalloc-rev}/* vendor
+
+        C:\> xcopy /e/y/i vendor-{tcmalloc-rev}\* vendor
+
+    4)  Make all vendor files non-executable.
+
+        $ find . -executable -type f -exec chmod a-x {} \;
+
+    5)  "svn add" or "svn rm" added or removed files (based on your
+        "diff -q -r" output from above)
+
+    6)  Create the CL, upload, check it in:
+
+        $ gcl change CL
+        $ gcl upload CL
+        $ gcl commit CL
+
+        Note the revision number since you're going to want to merge
+        that to the local chromium branch.
+
+  Merge a new upstream version with our local patched copy:
+
+    1)  Merge the local revision to chromium/src
+
+        $ svn merge -c {chrome-rev} svn://chrome-svn/chrome/trunk/src/third_party/tcmalloc/vendor/src chromium/src
+
+    2)  Resolve any conflicts
+
+    3)  Create the CL, upload, check in:
+
+        $ gcl change CL
+        $ gcl upload CL
+        $ gcl commit CL
+
+
+Modifications:
+- Converted to utf-8 with: vim +"argdo write ++enc=utf-8" *.h *.c
+- Added support for android.
+- Use NULL instead of static_cast<uintptr_t>(0) in stack_trace_table.cc,
+  for -std=c++11 compatibility.
+- Added support for pseudo-stack heap profiling via a callback to retrieve a
+  simulated stack from the embedding application.
+- Inserted spaces around PRIx64, SCNx64 and friends, for c++11 compatibility.
+- Fix sprintf formatting warning in MaybeDumpProfileLocked
+- Added tc_malloc_skip_new_handler.
+- Fix logging issues in android
+- Changed DEFINE_foo macros to ignore envname unless ENABLE_PROFILING is defined
+- Changed DEFINE_string to define const char*s instead of strings
+- Disabled HEAPPROFILE envvar unless ENABLE_PROFILING is defined

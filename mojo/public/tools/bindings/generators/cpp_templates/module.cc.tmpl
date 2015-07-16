@@ -1,0 +1,125 @@
+// Copyright 2013 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+#if defined(__clang__)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-private-field"
+#elif defined(_MSC_VER)
+#pragma warning(push)
+#pragma warning(disable:4056)
+#pragma warning(disable:4065)
+#pragma warning(disable:4756)
+#endif
+
+#include "{{module.path}}.h"
+
+#include <math.h>
+
+#include "mojo/public/cpp/bindings/lib/array_serialization.h"
+#include "mojo/public/cpp/bindings/lib/bindings_serialization.h"
+#include "mojo/public/cpp/bindings/lib/bounds_checker.h"
+#include "mojo/public/cpp/bindings/lib/map_data_internal.h"
+#include "mojo/public/cpp/bindings/lib/map_serialization.h"
+#include "mojo/public/cpp/bindings/lib/message_builder.h"
+#include "mojo/public/cpp/bindings/lib/string_serialization.h"
+#include "mojo/public/cpp/bindings/lib/validate_params.h"
+#include "mojo/public/cpp/bindings/lib/validation_errors.h"
+#include "mojo/public/cpp/bindings/lib/validation_util.h"
+#include "mojo/public/cpp/environment/lib/scoped_task_tracking.h"
+#include "mojo/public/cpp/environment/logging.h"
+#include "mojo/public/interfaces/bindings/interface_control_messages.mojom.h"
+
+{%- for namespace in namespaces_as_array %}
+namespace {{namespace}} {
+{%- endfor %}
+
+{#--- Constants #}
+{%- for constant in module.constants %}
+{%-   if not constant.kind|is_integral_kind %}
+const {{constant.kind|cpp_pod_type}} {{constant.name}} = {{constant|constant_value}};
+{%-   endif %}
+{%- endfor %}
+
+namespace internal {
+namespace {
+
+#pragma pack(push, 1)
+
+{#--- Interface parameter definitions #}
+{%- for interface in interfaces %}
+{%-   for method in interface.methods %}
+{%-     set method_name = "k%s_%s_Name"|format(interface.name, method.name) %}
+const uint32_t {{method_name}} = {{method.ordinal}};
+{%      set struct = method.param_struct %}
+{%      include "struct_declaration.tmpl" %}
+{%-     include "struct_definition.tmpl" %}
+{%-     if method.response_parameters != None %}
+{%-       set struct = method.response_param_struct %}
+{%        include "struct_declaration.tmpl" %}
+{%-       include "struct_definition.tmpl" %}
+{%-     endif %}
+{%-   endfor %}
+{%- endfor %}
+
+#pragma pack(pop)
+
+}  // namespace
+
+{#--- Struct definitions #}
+{%  for struct in structs %}
+{%-   include "struct_definition.tmpl" %}
+{%- endfor %}
+
+{#--- Union definitions #}
+{%  for union in unions %}
+{%-   include "union_definition.tmpl" %}
+{%- endfor %}
+
+}  // namespace internal
+
+{#--- Struct Constants #}
+{%- for struct in structs %}
+{%-   for constant in struct.constants %}
+{%-     if constant.kind|is_integral_kind %}
+MOJO_STATIC_CONST_MEMBER_DEFINITION const {{constant.kind|cpp_pod_type}} {{struct.name}}::{{constant.name}};
+{%-     else %}
+MOJO_STATIC_CONST_MEMBER_DEFINITION const {{constant.kind|cpp_pod_type}} {{struct.name}}::{{constant.name}} = {{constant|constant_value}};
+{%-     endif %}
+{%-   endfor %}
+{%- endfor %}
+
+{#--- Struct builder definitions #}
+{%- for struct in structs %}
+{%-   include "wrapper_class_definition.tmpl" %}
+{%- endfor %}
+
+{#--- Union builder definitions #}
+{%- for union in unions %}
+{%-   include "wrapper_union_class_definition.tmpl" %}
+{%- endfor %}
+
+{#--- Interface definitions #}
+{%- for interface in interfaces %}
+{%-   include "interface_definition.tmpl" %}
+{%- endfor %}
+
+{#--- Struct Serialization Helpers #}
+{%- for struct in structs %}
+{%-   include "struct_serialization_definition.tmpl" %}
+{%- endfor %}
+
+{#--- Union Serialization Helpers #}
+{%- for union in unions %}
+{%-   include "union_serialization_definition.tmpl" %}
+{%- endfor %}
+
+{%- for namespace in namespaces_as_array|reverse %}
+}  // namespace {{namespace}}
+{%- endfor %}
+
+#if defined(__clang__)
+#pragma clang diagnostic pop
+#elif defined(_MSC_VER)
+#pragma warning(pop)
+#endif

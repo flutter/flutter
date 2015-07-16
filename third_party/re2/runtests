@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+
+success=true
+for i
+do
+	printf "%-40s" $i
+	if sh -c "$i >$i.log 2>&1" 2>/dev/null
+	then
+		echo PASS
+	else
+		echo FAIL';' output in $i.log
+		success=false
+	fi
+done
+
+if $success; then
+	echo 'ALL TESTS PASSED.'
+	exit 0
+fi
+echo 'TESTS FAILED.'
+exit 1

@@ -1,0 +1,230 @@
+// Copyright 2014 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+module mojo;
+
+import "geometry/public/interfaces/geometry.mojom";
+import "input_events/public/interfaces/input_events.mojom";
+import "mojo/public/interfaces/application/service_provider.mojom";
+import "native_viewport/public/interfaces/native_viewport.mojom";
+import "surfaces/public/interfaces/surface_id.mojom";
+import "view_manager/public/interfaces/view_manager_constants.mojom";
+
+struct ViewData {
+  uint32 parent_id;
+  uint32 view_id;
+  mojo.Rect bounds;
+  map<string, array<uint8>> properties;
+  // True if this view is visible. The view may not be drawn on screen (see
+  // drawn for specifics).
+  bool visible;
+  // True if this view is drawn on screen. A view is drawn if attached to the
+  // root and all ancestors (including this view) are visible.
+  bool drawn;
+  ViewportMetrics viewport_metrics;
+};
+
+enum ErrorCode {
+  NONE,
+  VALUE_IN_USE,
+  ILLEGAL_ARGUMENT,
+};
+
+// Views are identified by a uint32. The upper 16 bits are the connection id,
+// and the lower 16 the id assigned by the client.
+//
+// The root view is identified with a connection id of 0, and value of 1.
+interface ViewManagerService {
+  // Creates a new view with the specified id. It is up to the client to ensure
+  // the id is unique to the connection (the id need not be globally unique).
+  // Additionally the connection id (embedded in |view_id|) must match that of
+  // the connection.
+  // Errors:
+  //   ERROR_CODE_VALUE_IN_USE: a view already exists with the specified id.
+  //   ERROR_CODE_ILLEGAL_ARGUMENT: The connection part of |view_id| does not
+  //     match the connection id of the client.
+  //
+  // TODO(erg): Once we have default values in mojo, make this take a map of
+  // properties.
+  CreateView(uint32 view_id) => (ErrorCode error_code);
+
+  // Deletes a view. This does not recurse. No hierarchy change notifications
+  // are sent as a result of this. Only the connection that created the view can
+  // delete it.
+  DeleteView(uint32 view_id) => (bool success);
+
+  // Sets the specified bounds of the specified view.
+  SetViewBounds(uint32 view_id, mojo.Rect bounds) => (bool success);
+
+  // Sets the visibility of the specified view to |visible|. Connections are
+  // allowed to change the visibility of any view they have created, as well as
+  // any of their roots.
+  SetViewVisibility(uint32 view_id, bool visible) => (bool success);
+
+  // Sets an individual named property. Setting an individual property to null
+  // deletes the property.
+  SetViewProperty(uint32 view_id,
+                  string name,
+                  array<uint8>? value) => (bool success);
+
+  // Reparents a view.
+  // This fails for any of the following reasons:
+  // . |parent| or |child| does not identify a valid view.
+  // . |child| is an ancestor of |parent|.
+  // . |child| is already a child of |parent|.
+  //
+  // This may result in a connection getting OnViewDeleted(). See
+  // RemoveViewFromParent for details.
+  AddView(uint32 parent, uint32 child) => (bool success);
+
+  // Removes a view from its current parent. This fails if the view is not
+  // valid or the view already has no parent.
+  //
+  // Removing a view from a parent may result in OnViewDeleted() being sent to
+  // other connections. For example, connection A has views 1 and 2, with 2 a
+  // child of 1. Connection B has a root 1. If 2 is removed from 1 then B gets
+  // OnViewDeleted(). This is done as view 2 is effectively no longer visible to
+  // connection B.
+  RemoveViewFromParent(uint32 view_id) => (bool success);
+
+  // Reorders a view in its parent, relative to |relative_view_id| according to
+  // |direction|.
+  // Only the connection that created the view's parent can reorder its
+  // children.
+  ReorderView(uint32 view_id,
+              uint32 relative_view_id,
+              OrderDirection direction) => (bool success);
+
+  // Returns the views comprising the tree starting at |view_id|. |view_id| is
+  // the first result in the return value, unless |view_id| is invalid, in which
+  // case an empty vector is returned. The views are visited using a depth first
+  // search (pre-order).
+  GetViewTree(uint32 view_id) => (array<ViewData> views);
+
+  // Shows the surface in the specified view.
+  SetViewSurfaceId(uint32 view_id, SurfaceId surface_id) => (bool success);
+
+  // A connection may grant access to a view from another connection by way of
+  // the embed functions. There are two variants of this call:
+  //
+  // . EmbedUrl: the ViewManager connects to the app at the supplied url and
+  //   asks it for a ViewManagerClient.
+  // . With the second variant a ViewManagerClient is directly supplied.
+  //
+  // In both cases the new ViewManagerClient is configured with a root of
+  // |view_id|.
+  //
+  // The caller must have created |view_id|. If not the request fails and the
+  // response is false.
+  //
+  // A view may only be a root of one connection at a time. Subsequent calls to
+  // Embed() for the same view result in the view being removed from the
+  // currently embedded app. The embedded app is told this by way of
+  // OnViewDeleted().
+  //
+  // The embedder can detect when the embedded app disconnects by way of
+  // OnEmbeddedAppDisconnected().
+  //
+  // When a connection embeds an app the connection no longer has priviledges
+  // to access or see any of the children of the view. If the view had existing
+  // children the children are removed. The one exception is the root
+  // connection.
+  //
+  // |services| encapsulates services offered by the embedder to the embedded
+  // app alongside this Embed() call. |exposed_services| provides a means for
+  // the embedder to connect to services exposed by the embedded app. Note that
+  // if a different app is subsequently embedded at |view_id| the
+  // ServiceProvider connections to its client in the embedded app and any
+  // services it provided are not broken and continue to be valid.
+  EmbedUrl(string url,
+           uint32 view_id,
+           ServiceProvider&? services,
+           ServiceProvider? exposed_services) => (bool success);
+  Embed(uint32 view_id, ViewManagerClient client) => (bool success);
+
+  // Requests the WindowManager to perform an action on the specified view.
+  // It's up to the WindowManager to decide what |action| is.
+  //
+  // TODO(sky): nuke this. This is here to guarantee the state of the
+  // WindowManager matches that of the ViewManager at the time the client
+  // invokes the function. When we can enforce ordering this won't be necessary.
+  PerformAction(uint32 view_id, string action) => (bool success);
+};
+
+// Changes to views are not sent to the connection that originated the
+// change. For example, if connection 1 changes the bounds of a view by calling
+// SetBounds(), connection 1 does not receive OnViewBoundsChanged().
+interface ViewManagerClient {
+  // Invoked when the client application has been embedded at |root|.
+  // See Embed() on ViewManagerService for more details. |view_manager_service|
+  // will be a handle back to the view manager service, unless the connection is
+  // to the WindowManager in which case it will be null.
+  // |window_manager_pipe| is a pipe to the WindowManager.
+  OnEmbed(uint16 connection_id,
+          string embedder_url,
+          ViewData root,
+          ViewManagerService? view_manager_service,
+          ServiceProvider&? services,
+          ServiceProvider? exposed_services,
+          handle<message_pipe> window_manager_pipe);
+
+  // Invoked when the application embedded at |view| is disconnected.
+  OnEmbeddedAppDisconnected(uint32 view);
+
+  // Invoked when a view's bounds have changed.
+  OnViewBoundsChanged(uint32 view,
+                      mojo.Rect old_bounds,
+                      mojo.Rect new_bounds);
+
+  // Invoked when the viewport metrics for the view have changed.
+  // Clients are expected to propagate this to the view tree.
+  OnViewViewportMetricsChanged(mojo.ViewportMetrics old_metrics,
+                               mojo.ViewportMetrics new_metrics);
+
+  // Invoked when a change is done to the hierarchy. A value of 0 is used to
+  // identify a null view. For example, if the old_parent is NULL, 0 is
+  // supplied.
+  // |views| contains any views that are that the client has not been told
+  // about. This is not sent for hierarchy changes of views not known to this
+  // client or not attached to the tree.
+  OnViewHierarchyChanged(uint32 view,
+                         uint32 new_parent,
+                         uint32 old_parent,
+                         array<ViewData> views);
+
+  // Invoked when the order of views within a parent changes.
+  OnViewReordered(uint32 view_id,
+                  uint32 relative_view_id,
+                  OrderDirection direction);
+
+  // Invoked when a view is deleted.
+  OnViewDeleted(uint32 view);
+
+  // Invoked when the visibility of the specified view changes.
+  OnViewVisibilityChanged(uint32 view, bool visible);
+
+  // Invoked when a change to the visibility of |view| or one if it's ancestors
+  // is done such that the drawn state changes. This is only invoked for the
+  // top most view of a particular connection. For example, if you have the
+  // hierarchy: A -> B1 -> B2 (B2 is a child of B1 and B1 a child of A), B1/B2
+  // are from connection 2 and A from connection 1 with all views visible and
+  // drawn and the visiblity of A changes to false, then connection 2 is told
+  // the drawn state of B1 has changed (to false), but is not told anything
+  // about B2 as it's drawn state can be calculated from that of B1.
+  //
+  // NOTE: This is not invoked if OnViewVisibilityChanged() is invoked.
+  OnViewDrawnStateChanged(uint32 view, bool drawn);
+
+  // Invoked when a view property is changed. If this change is a removal,
+  // |new_data| is null.
+  OnViewSharedPropertyChanged(uint32 view, string name, array<uint8>? new_data);
+
+  // Invoked when an event is targeted at the specified view.
+  OnViewInputEvent(uint32 view, mojo.Event event) => ();
+
+  // Invoked solely on the WindowManager. See comments in PerformAction() above
+  // for details.
+  // TODO(sky): nuke this.
+  OnPerformAction(uint32 view_id, string action) => (bool success);
+};

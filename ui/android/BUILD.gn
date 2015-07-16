@@ -1,0 +1,79 @@
+import("//build/config/android/rules.gni")
+
+assert(is_android)
+
+java_cpp_enum("java_enums_srcjar") {
+  sources = [
+    "../gfx/android/java_bitmap.h",
+  ]
+  outputs = [
+    "org/chromium/ui/gfx/BitmapFormat.java",
+  ]
+}
+
+java_strings_grd("ui_strings_grd") {
+  grd_file = "java/strings/android_ui_strings.grd"
+  outputs = [
+    "values-am/android_ui_strings.xml",
+    "values-ar/android_ui_strings.xml",
+    "values-bg/android_ui_strings.xml",
+    "values-ca/android_ui_strings.xml",
+    "values-cs/android_ui_strings.xml",
+    "values-da/android_ui_strings.xml",
+    "values-de/android_ui_strings.xml",
+    "values-el/android_ui_strings.xml",
+    "values/android_ui_strings.xml",
+    "values-en-rGB/android_ui_strings.xml",
+    "values-es/android_ui_strings.xml",
+    "values-es-rUS/android_ui_strings.xml",
+    "values-fa/android_ui_strings.xml",
+    "values-fi/android_ui_strings.xml",
+    "values-tl/android_ui_strings.xml",
+    "values-fr/android_ui_strings.xml",
+    "values-hi/android_ui_strings.xml",
+    "values-hr/android_ui_strings.xml",
+    "values-hu/android_ui_strings.xml",
+    "values-in/android_ui_strings.xml",
+    "values-it/android_ui_strings.xml",
+    "values-iw/android_ui_strings.xml",
+    "values-ja/android_ui_strings.xml",
+    "values-ko/android_ui_strings.xml",
+    "values-lt/android_ui_strings.xml",
+    "values-lv/android_ui_strings.xml",
+    "values-nl/android_ui_strings.xml",
+    "values-nb/android_ui_strings.xml",
+    "values-pl/android_ui_strings.xml",
+    "values-pt-rBR/android_ui_strings.xml",
+    "values-pt-rPT/android_ui_strings.xml",
+    "values-ro/android_ui_strings.xml",
+    "values-ru/android_ui_strings.xml",
+    "values-sk/android_ui_strings.xml",
+    "values-sl/android_ui_strings.xml",
+    "values-sr/android_ui_strings.xml",
+    "values-sv/android_ui_strings.xml",
+    "values-sw/android_ui_strings.xml",
+    "values-th/android_ui_strings.xml",
+    "values-tr/android_ui_strings.xml",
+    "values-uk/android_ui_strings.xml",
+    "values-vi/android_ui_strings.xml",
+    "values-zh-rCN/android_ui_strings.xml",
+    "values-zh-rTW/android_ui_strings.xml",
+  ]
+}
+
+android_resources("ui_java_resources") {
+  custom_package = "org.chromium.ui"
+  resource_dirs = [ "java/res" ]
+  deps = [
+    ":ui_strings_grd",
+  ]
+}
+
+android_library("ui_java") {
+  DEPRECATED_java_in_dir = "java/src"
+  deps = [
+    ":ui_java_resources",
+    "//base:base_java",
+  ]
+  srcjar_deps = [ ":java_enums_srcjar" ]
+}

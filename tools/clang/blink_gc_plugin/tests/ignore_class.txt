@@ -1,0 +1,7 @@
+ignore_class.cpp:14:1: warning: [blink-gc] Class 'C' has untraced fields that require tracing.
+void C::trace(Visitor* visitor)
+^
+./ignore_class.h:35:5: note: [blink-gc] Untraced field 'm_obj' declared here:
+    Member<HeapObject> m_obj;
+    ^
+1 warning generated.

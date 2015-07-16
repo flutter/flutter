@@ -1,0 +1,48 @@
+# Copyright 2014 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("../../../tools/bindings/mojom.gni")
+
+mojom("test_interfaces") {
+  testonly = true
+  sources = [
+    "math_calculator.mojom",
+    "no_module.mojom",
+    "ping_service.mojom",
+    "rect.mojom",
+    "regression_tests.mojom",
+    "sample_factory.mojom",
+    "sample_import.mojom",
+    "sample_import2.mojom",
+    "sample_interfaces.mojom",
+    "sample_service.mojom",
+    "serialization_test_structs.mojom",
+    "test_constants.mojom",
+    "test_structs.mojom",
+    "validation_test_interfaces.mojom",
+  ]
+}
+
+mojom("test_interfaces_experimental") {
+  testonly = true
+  sources = [
+    "test_unions.mojom",
+  ]
+}
+
+mojom("versioning_test_service_interfaces") {
+  # FIXME: Dart packaged applications cannot depend on testonly mojoms.
+  # testonly = true
+  sources = [
+    "versioning_test_service.mojom",
+  ]
+}
+
+mojom("versioning_test_client_interfaces") {
+  # FIXME: Dart packaged applications cannot depend on testonly mojoms.
+  # testonly = true
+  sources = [
+    "versioning_test_client.mojom",
+  ]
+}

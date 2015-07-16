@@ -1,0 +1,33 @@
+include MANIFEST.in README.txt INSTALL.txt ToDo.txt USAGE.txt CHANGES.rst
+include COPYING.txt LICENSE.txt Makefile
+include .gitrev
+include pylintrc
+include setup.py
+include setupegg.py
+include bin/*
+include cython.py
+include cygdb.py
+recursive-include Cython *.pyx *.pxd
+include Doc/*
+
+include Demos/*.pyx
+include Demos/*.py
+include Demos/callback/*
+include Demos/benchmarks/*
+include Demos/embed/*
+include Demos/freeze/*
+include Demos/libraries/*
+include Demos/Makefile*
+recursive-include Cython/Debugger/Tests *.pyx *.pxd *.c *.h
+recursive-include Cython/Utility *.pyx *.pxd *.c *.h *.cpp
+recursive-include Tools *
+recursive-include tests *.pyx *.pxd *.pxi *.py *.h *.BROKEN bugs.txt
+recursive-include tests *_lib.cpp *.srctree
+recursive-include docs *
+include runtests.py
+
+include Cython/Debugger/Tests/cfuncs.c
+include Cython/Debugger/Tests/codefile
+
+recursive-include pyximport *.py
+include pyximport/PKG-INFO pyximport/README

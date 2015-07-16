@@ -1,0 +1,161 @@
+# Copyright 2014 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+template("python_binary_source_set") {
+  # Only available on linux for now.
+  assert(is_linux)
+  assert(defined(invoker.cython_sources) || defined(invoker.sources))
+
+  config_name = target_name + "_python_config"
+
+  target_visibility = [ ":$target_name" ]
+
+  if (defined(invoker.cython_sources)) {
+    generator_target_name = target_name + "_cython_compiler"
+
+    cython_root = "//third_party/cython"
+    cython_script = "$cython_root/src/cython.py"
+    cython_output = "${target_out_dir}/${target_name}.cc"
+
+    action(generator_target_name) {
+      visibility = target_visibility
+      script = cython_script
+      sources = invoker.cython_sources
+      outputs = [
+        cython_output,
+      ]
+      args = [
+               "--cplus",
+               "-I",
+               rebase_path("//", root_build_dir),
+               "-I",
+               rebase_path(target_gen_dir, root_build_dir),
+               "-o",
+               rebase_path(cython_output, root_build_dir),
+             ] + rebase_path(sources, root_build_dir)
+    }
+  }
+
+  config(config_name) {
+    visibility = target_visibility
+    python_flags = "//third_party/cython/python_flags.py"
+    include_dirs = exec_script(python_flags, [ "--includes" ], "list lines")
+    libs = exec_script(python_flags, [ "--libraries" ], "list lines")
+    lib_dirs = exec_script(python_flags, [ "--library_dirs" ], "list lines")
+    if (!is_win) {
+      # Generated code includes static utility functions that often go unused.
+      cflags = [ "-Wno-unused-function" ]
+    }
+  }
+
+  source_set(target_name) {
+    if (defined(invoker.visibility)) {
+      visibility = invoker.visibility
+    }
+    sources = []
+    if (defined(invoker.cython_sources)) {
+      sources += [ cython_output ]
+    }
+    if (defined(invoker.sources)) {
+      sources += invoker.sources
+    }
+    if (defined(invoker.configs)) {
+      configs += invoker.configs
+    }
+    all_dependent_configs = [ ":$config_name" ]
+    deps = []
+    if (defined(invoker.cython_sources)) {
+      deps += [ ":$generator_target_name" ]
+    }
+    if (defined(invoker.deps)) {
+      deps += invoker.deps
+    }
+    if (defined(invoker.datadeps)) {
+      datadeps = invoker.datadeps
+    }
+  }
+}
+
+template("python_binary_module") {
+  # Only available on linux for now.
+  assert(is_linux)
+
+  has_sources = defined(invoker.cython_sources) || defined(invoker.sources)
+
+  assert(has_sources || defined(invoker.deps))
+  assert(
+      !defined(invoker.python_base_module) || invoker.python_base_module != "")
+
+  sources_target_name = target_name + "_cython_sources"
+  shared_library_name = target_name + "_shared_library"
+
+  if (is_linux) {
+    shared_library_prefix = "lib"
+    shared_library_suffix = ".so"
+    python_module_suffix = ".so"
+  }
+
+  target_visibility = [
+    ":$sources_target_name",
+    ":$shared_library_name",
+    ":$target_name",
+  ]
+
+  if (has_sources) {
+    python_binary_source_set(sources_target_name) {
+      visibility = target_visibility
+      if (defined(invoker.cython_sources)) {
+        cython_sources = invoker.cython_sources
+      }
+      if (defined(invoker.sources)) {
+        sources = invoker.sources
+      }
+      if (defined(invoker.configs)) {
+        configs = invoker.configs
+      }
+      if (defined(invoker.deps)) {
+        deps = invoker.deps
+      }
+      if (defined(invoker.datadeps)) {
+        datadeps = invoker.datadeps
+      }
+    }
+  }
+
+  shared_library(shared_library_name) {
+    visibility = target_visibility
+    if (defined(invoker.configs)) {
+      configs += invoker.configs
+    }
+    deps = []
+    if (has_sources) {
+      deps += [ ":$sources_target_name" ]
+    }
+    if (defined(invoker.deps)) {
+      deps += invoker.deps
+    }
+    if (defined(invoker.datadeps)) {
+      datadeps = invoker.datadeps
+    }
+  }
+
+  copy(target_name) {
+    if (defined(invoker.python_base_module)) {
+      python_base_module = invoker.python_base_module
+      output = "$root_out_dir/python/$python_base_module/${target_name}${python_module_suffix}"
+    } else {
+      output = "$root_out_dir/python/${target_name}${python_module_suffix}"
+    }
+
+    sources = [
+      "$root_out_dir/${shared_library_prefix}${shared_library_name}${shared_library_suffix}",
+    ]
+    outputs = [
+      output,
+    ]
+    deps = [
+      ":$shared_library_name",
+    ]
+  }
+}

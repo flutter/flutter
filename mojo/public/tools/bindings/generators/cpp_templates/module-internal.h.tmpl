@@ -1,0 +1,71 @@
+// Copyright 2013 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+{%- set header_guard = "%s_INTERNAL_H_"|
+        format(module.path|upper|replace("/","_")|replace(".","_")) %}
+
+#ifndef {{header_guard}}
+#define {{header_guard}}
+
+#include "mojo/public/cpp/bindings/lib/bindings_internal.h"
+#include "mojo/public/cpp/bindings/lib/buffer.h"
+#include "mojo/public/cpp/bindings/lib/union_accessor.h"
+#include "mojo/public/cpp/bindings/struct_ptr.h"
+
+{%- for import in imports %}
+#include "{{import.module.path}}-internal.h"
+{%- endfor %}
+
+namespace mojo {
+namespace internal {
+class BoundsChecker;
+}
+}
+
+{%- for namespace in namespaces_as_array %}
+namespace {{namespace}} {
+{%- endfor %}
+
+{#--- Wrapper forward declarations #}
+{%  for struct in structs %}
+class {{struct.name}};
+{%- endfor %}
+
+{#--- Wrapper forward declarations for unions #}
+{%  for union in unions %}
+class {{union.name}};
+{%- endfor %}
+
+namespace internal {
+
+{#--- Internal forward declarations #}
+{%  for struct in structs %}
+class {{struct.name}}_Data;
+{%- endfor %}
+
+{%  for union in unions %}
+class {{union.name}}_Data;
+{%- endfor %}
+
+#pragma pack(push, 1)
+
+{#--- Unions must be declared first because they can be members of structs #}
+{#--- Union class declarations #}
+{%  for union in unions %}
+{%    include "union_declaration.tmpl" %}
+{%- endfor %}
+
+{#--- Class declarations #}
+{%  for struct in structs %}
+{%    include "struct_declaration.tmpl" %}
+{%- endfor %}
+
+#pragma pack(pop)
+
+}  // namespace internal
+{%- for namespace in namespaces_as_array|reverse %}
+}  // namespace {{namespace}}
+{%- endfor %}
+
+#endif  // {{header_guard}}

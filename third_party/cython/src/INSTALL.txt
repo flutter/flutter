@@ -1,0 +1,22 @@
+Cython - Installation Instructions
+==================================
+
+You have two installation options:
+
+(1) Run the setup.py script in this directory
+    as follows:
+
+        python setup.py install
+
+    This will install the Cython package
+    into your Python system.
+
+OR
+
+(2) If you prefer not to modify your Python
+    installation, arrange for the directory
+    containing this file (INSTALL.txt) to be in
+    your PYTHONPATH. On unix, also put the bin
+    directory on your PATH.
+
+See README.txt for pointers to other documentation.

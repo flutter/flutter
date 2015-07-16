@@ -1,0 +1,7 @@
+[dist4]message_header  // num_bytes
+[u4]0                  // version
+[u4]0                  // name
+[u4]0                  // flags
+[anchr]message_header
+
+[u4]16  // num_bytes: Incomplete struct header.

@@ -1,0 +1,66 @@
+# Copyright 2014 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//mojo/public/tools/bindings/mojom.gni")
+import("//testing/test.gni")
+
+source_set("dart_controller_for_test") {
+  testonly = true
+  sources = [
+    "$root_gen_dir/dart_snapshot.cc",
+  ]
+  deps = [
+    "//mojo/dart/embedder:dart_controller_no_snapshot",
+    "//mojo/dart/embedder:generate_snapshot_file",
+  ]
+}
+
+test("dart_unittests") {
+  sources = [
+    "run_dart_tests.cc",
+    "validation_unittest.cc",
+  ]
+  deps = [
+    "//mojo/public/dart:mojo",
+    "//mojo/dart/testing",
+    ":dart_controller_for_test",
+    ":dart_to_cpp_unittests",
+    "//base",
+    "//crypto:crypto",
+    "//mojo/dart/embedder:dart_controller_no_snapshot",
+    "//mojo/edk/test:run_all_unittests",
+    "//mojo/edk/test:test_support",
+    "//mojo/public/cpp/environment",
+    "//mojo/public/cpp/system",
+    "//mojo/public/cpp/utility",
+    "//mojo/environment:chromium",
+    "//testing/gtest",
+  ]
+}
+
+source_set("dart_to_cpp_unittests") {
+  testonly = true
+  sources = [
+    "dart_to_cpp_tests.cc",
+  ]
+  deps = [
+    ":dart_controller_for_test",
+    ":dart_to_cpp_bindings",
+    "//base",
+    "//crypto",
+    "//mojo/dart/embedder:dart_controller_no_snapshot",
+    "//mojo/edk/test:test_support",
+    "//mojo/public/cpp/bindings",
+    "//mojo/public/cpp/system",
+    "//mojo/public/interfaces/bindings/tests:test_interfaces",
+    "//mojo/public/interfaces/bindings/tests:test_interfaces_experimental",
+    "//testing/gtest",
+  ]
+}
+
+mojom("dart_to_cpp_bindings") {
+  sources = [
+    "dart_to_cpp.mojom",
+  ]
+}

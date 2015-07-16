@@ -1,0 +1,336 @@
+#!/usr/bin/env python
+# Copyright 2014 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import argparse
+import codecs
+import logging
+import os.path
+import requests
+import signal
+import subprocess
+import sys
+import tempfile
+
+
+from android_gdb.install_remote_file_reader import install
+
+
+_MOJO_DEBUGGER_PORT = 7777
+_DEFAULT_PACKAGE_NAME = 'org.chromium.mojo.shell'
+
+
+# TODO(etiennej): Refactor with similar methods in subdirectories
+class DirectoryNotFoundException(Exception):
+  """Directory has not been found."""
+  pass
+
+
+def _get_dir_above(dirname):
+  """Returns the directory "above" this file containing |dirname|."""
+  path = os.path.abspath(__file__)
+  while True:
+    path, tail = os.path.split(path)
+    if not tail:
+      raise DirectoryNotFoundException(dirname)
+    if dirname in os.listdir(path):
+      return path
+
+
+# The two methods below are taken from //tools/find_depot_tools.py.
+def _is_real_depot_tools(path):
+  return os.path.isfile(os.path.join(path, 'gclient.py'))
+
+
+def _get_depot_tools_path():
+  """Searches for depot_tools."""
+  # First look if depot_tools is already in PYTHONPATH.
+  for i in sys.path:
+    if i.rstrip(os.sep).endswith('depot_tools') and _is_real_depot_tools(i):
+      return i
+  # Then look if depot_tools is in PATH, common case.
+  for i in os.environ['PATH'].split(os.pathsep):
+    if _is_real_depot_tools(i):
+      return i
+  # Rare case, it's not even in PATH, look upward up to root.
+  root_dir = os.path.dirname(os.path.abspath(__file__))
+  previous_dir = os.path.abspath(__file__)
+  while root_dir and root_dir != previous_dir:
+    i = os.path.join(root_dir, 'depot_tools')
+    if _is_real_depot_tools(i):
+      return i
+    previous_dir = root_dir
+    root_dir = os.path.dirname(root_dir)
+  return None
+
+
+def _send_request(request, payload=None):
+  """Sends a request to mojo:debugger."""
+  try:
+    url = 'http://localhost:%s/%s' % (_MOJO_DEBUGGER_PORT, request)
+    if payload:
+      return requests.post(url, payload)
+    else:
+      return requests.get(url)
+  except requests.exceptions.ConnectionError:
+    print 'Failed to connect to mojo:debugger, make sure the shell is running.'
+    return None
+
+
+def _tracing_start(_):
+  """Starts tracing."""
+  if not _send_request('start_tracing'):
+    return 1
+  print "Started tracing."
+  return 0
+
+
+def _tracing_stop(args):
+  """Stops tracing and writes trace to file."""
+  if args.file_name:
+    file_name = args.file_name
+  else:
+    for i in xrange(1000):
+      candidate_file_name = 'mojo_trace_%03d.json' % i
+      if not os.path.exists(candidate_file_name):
+        file_name = candidate_file_name
+        break
+    else:
+      print 'Failed to pick a name for the trace output file.'
+      return 1
+
+  response = _send_request('stop_tracing')
+  if not response:
+    return 1
+
+  # https://github.com/domokit/mojo/issues/253
+  if int(response.headers['content-length']) != len(response.content):
+    print 'Response is truncated.'
+    return 1
+
+  with open(file_name, "wb") as trace_file:
+    trace_file.write('{"traceEvents":[')
+    trace_file.write(response.content)
+    trace_file.write(']}')
+  print "Trace saved in %s" % file_name
+  return 0
+
+
+def _add_tracing_command(subparsers):
+  """Sets up the command line parser to manage tracing."""
+  tracing_parser = subparsers.add_parser('tracing',
+      help='trace event profiler')
+  tracing_subparser = tracing_parser.add_subparsers(
+      help='the command to run')
+
+  start_tracing_parser = tracing_subparser.add_parser('start',
+      help='start tracing')
+  start_tracing_parser.set_defaults(func=_tracing_start)
+
+  stop_tracing_parser = tracing_subparser.add_parser('stop',
+      help='stop tracing and retrieve the result')
+  stop_tracing_parser.add_argument('file_name', type=str, nargs='?',
+      help='name of the output file (optional)')
+  stop_tracing_parser.set_defaults(func=_tracing_stop)
+
+
+def _wm_load(args):
+  """Loads (embeds) the given url in the window manager."""
+  if not _send_request('load', args.url):
+    return 1
+  return 0
+
+
+def _add_wm_command(subparsers):
+  """Sets up the parser for the 'wm' command."""
+  wm_parser = subparsers.add_parser('wm', help='window manager')
+  wm_subparser = wm_parser.add_subparsers(
+      help='the command to run')
+
+  wm_load_parser = wm_subparser.add_parser('load',
+      help='load (embed) the given url')
+  wm_load_parser.add_argument('url', type=str,
+      help='the url to load')
+  wm_load_parser.set_defaults(func=_wm_load)
+
+
+def _device_stack(args):
+  """Runs the device logcat through android_stack_parser."""
+  adb_path = args.adb_path if args.adb_path else 'adb'
+  logcat_cmd = [adb_path, 'logcat', '-d']
+  try:
+    logcat = subprocess.Popen(logcat_cmd, stdout=subprocess.PIPE)
+  except OSError:
+    print 'failed to call adb, make sure it is in PATH or pass --adb-path'
+    return 1
+
+  devtools_dir = os.path.dirname(os.path.abspath(__file__))
+  stack_command = [os.path.join(devtools_dir, 'android_stack_parser', 'stack')]
+  if args.build_dir:
+    stack_command.append('--build-dir=' + os.path.abspath(args.build_dir))
+  if args.ndk_dir:
+    stack_command.append('--ndk-dir=' + os.path.abspath(args.ndk_dir))
+  stack_command.append('-')
+  stack = subprocess.Popen(stack_command, stdin=logcat.stdout)
+
+  logcat.wait()
+  stack.wait()
+
+  if logcat.returncode:
+    print 'adb logcat failed, make sure the device is connected and available'
+    return logcat.returncode
+  if stack.returncode:
+    return stack.returncode
+  return 0
+
+
+def _gdb_attach(args):
+  """Run GDB on an instance of Mojo Shell on an android device."""
+  if args.ndk_dir:
+    ndk_dir = args.ndk_dir
+  else:
+    try:
+      ndk_dir = os.path.join(_get_dir_above('third_party'), 'third_party',
+                             'android_tools', 'ndk')
+      if not os.path.exists(ndk_dir):
+        raise DirectoryNotFoundException()
+    except DirectoryNotFoundException:
+      logging.fatal("Unable to find the Android NDK, please specify its path "
+          "with --ndk-dir.")
+      return
+
+  install_args = {}
+  if args.gsutil_dir:
+    install_args['gsutil'] = os.path.join(args.gsutil_dir, 'gsutil')
+  else:
+    try:
+      install_args['gsutil'] = os.path.join(
+          _get_depot_tools_path(), 'third_party', 'gsutil',
+          'gsutil')
+      if not os.path.exists(install_args['gsutil']):
+        raise DirectoryNotFoundException()
+    except DirectoryNotFoundException:
+      logging.fatal("Unable to find gsutil, please specify its path with " "--gsutil-dir.")
+      return
+
+  if args.adb_path:
+    install_args['adb'] = args.adb_path
+  install(**install_args)
+
+  gdb_path = os.path.join(
+      ndk_dir,
+      'toolchains',
+      # TODO(etiennej): Always select the most recent toolchain?
+      'arm-linux-androideabi-4.9',
+      'prebuilt',
+      # TODO(etiennej): DEPS mac NDK and use it on macs.
+      'linux-x86_64',
+      'bin',
+      'arm-linux-androideabi-gdb')
+  python_gdb_script_path = os.path.join(os.path.dirname(__file__),
+                                        'android_gdb', 'session.py')
+  debug_session_arguments = {}
+  if args.build_dir:
+    debug_session_arguments["build_directory"] = args.build_dir
+  else:
+    try:
+      debug_session_arguments["build_directory"] = os.path.join(
+          _get_dir_above('out'), 'out', 'android_Debug')
+      if not os.path.exists(debug_session_arguments["build_directory"]):
+        raise DirectoryNotFoundException()
+    except DirectoryNotFoundException:
+      logging.fatal("Unable to find the build directory, please specify it "
+                    "using --build-dir.")
+      return
+
+  if args.package_name:
+    debug_session_arguments["package_name"] = args.package_name
+  else:
+    debug_session_arguments["package_name"] = _DEFAULT_PACKAGE_NAME
+  if args.pyelftools_dir:
+    debug_session_arguments["pyelftools_dir"] = args.pyelftools_dir
+  else:
+    debug_session_arguments["pyelftools_dir"] = os.path.join(
+        _get_dir_above('third_party'), 'third_party', 'pyelftools')
+
+  debug_session_arguments_str = ', '.join(
+      [k + '="' + codecs.encode(v, 'string_escape') + '"'
+       for k, v in debug_session_arguments.items()])
+
+  # We need to pass some commands to GDB at startup.
+  gdb_commands_file = tempfile.NamedTemporaryFile()
+  gdb_commands_file.write('source ' + python_gdb_script_path + '\n')
+  gdb_commands_file.write('py d = DebugSession(' + debug_session_arguments_str
+                          + ')\n')
+  gdb_commands_file.write('py d.start()\n')
+  gdb_commands_file.flush()
+
+  gdb_proc = subprocess.Popen([gdb_path, '-x', gdb_commands_file.name],
+                              stdin=sys.stdin,
+                              stdout=sys.stdout,
+                              stderr=sys.stderr)
+
+  # We don't want SIGINT to stop this program. It is automatically propagated by
+  # the system to gdb.
+  signal.signal(signal.SIGINT, signal.SIG_IGN)
+  gdb_proc.wait()
+  signal.signal(signal.SIGINT, signal.SIG_DFL)
+
+
+def _add_device_command(subparsers):
+  """Sets up the parser for the 'device' command."""
+  device_parser = subparsers.add_parser('device',
+      help='interact with the Android device (requires adb in PATH or passing '
+           '--adb-path)')
+  device_parser.add_argument('--adb-path', type=str,
+      help='path to the adb tool from the Android SDK (optional)')
+  device_subparser = device_parser.add_subparsers(
+      help='the command to run')
+
+  device_stack_parser = device_subparser.add_parser('stack',
+      help='symbolize the crash stacktraces from the device log')
+  device_stack_parser.add_argument('--ndk-dir', type=str,
+      help='path to the directory containing the Android NDK')
+  device_stack_parser.add_argument('--build-dir', type=str,
+      help='path to the build directory')
+  device_stack_parser.set_defaults(func=_device_stack)
+
+
+def _add_gdb_command(subparsers):
+  gdb_parser = subparsers.add_parser(
+      'gdb', help='Debug Mojo Shell and its apps using GDB')
+  gdb_subparser = gdb_parser.add_subparsers(
+      help='Commands to GDB')
+
+  gdb_attach_parser = gdb_subparser.add_parser(
+      'attach', help='Attach GDB to a running Mojo Shell process')
+  gdb_attach_parser.add_argument('--adb-path', type=str,
+      help='path to the adb tool from the Android SDK (optional)')
+  gdb_attach_parser.add_argument('--ndk-dir', type=str,
+      help='path to the directory containing the Android NDK')
+  gdb_attach_parser.add_argument('--build-dir', type=str,
+      help='path to the build directory')
+  gdb_attach_parser.add_argument('--pyelftools-dir', type=str,
+      help='Path to a directory containing third party libraries')
+  gdb_attach_parser.add_argument('--gsutil-dir', type=str,
+      help='Path to a directory containing gsutil')
+  gdb_attach_parser.add_argument('--package-name', type=str,
+      help='Name of the Mojo Shell android package to debug')
+  gdb_attach_parser.set_defaults(func=_gdb_attach)
+
+
+def main():
+  parser = argparse.ArgumentParser(description='Command-line interface for '
+                                                'mojo:debugger')
+  subparsers = parser.add_subparsers(help='the tool to run')
+  _add_device_command(subparsers)
+  _add_tracing_command(subparsers)
+  _add_wm_command(subparsers)
+  _add_gdb_command(subparsers)
+
+  args = parser.parse_args()
+  return args.func(args)
+
+if __name__ == '__main__':
+  sys.exit(main())

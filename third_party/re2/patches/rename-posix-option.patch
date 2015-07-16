@@ -1,0 +1,28 @@
+diff --git a/re2/re2.cc b/re2/re2.cc
+index b9e44fc..fb43abf 100644
+--- a/re2/re2.cc
++++ b/re2/re2.cc
+@@ -56,8 +56,8 @@ RE2::Options::Options()
+ 
+ RE2::Options::Options(RE2::CannedOptions opt)
+   : encoding_(opt == RE2::Latin1 ? EncodingLatin1 : EncodingUTF8),
+-    posix_syntax_(opt == RE2::POSIX),
+-    longest_match_(opt == RE2::POSIX),
++    posix_syntax_(opt == RE2::POSIX_SYNTAX),
++    longest_match_(opt == RE2::POSIX_SYNTAX),
+     log_errors_(opt != RE2::Quiet),
+     max_mem_(kDefaultMaxMem),
+     literal_(false),
+diff --git a/re2/re2.h b/re2/re2.h
+index c509853..98b06b8 100644
+--- a/re2/re2.h
++++ b/re2/re2.h
+@@ -251,7 +251,7 @@ class RE2 {
+   enum CannedOptions {
+     DefaultOptions = 0,
+     Latin1, // treat input as Latin-1 (default UTF-8)
+-    POSIX, // POSIX syntax, leftmost-longest match
++    POSIX_SYNTAX, // POSIX syntax, leftmost-longest match
+     Quiet // do not log about regexp parse errors
+   };
+ 

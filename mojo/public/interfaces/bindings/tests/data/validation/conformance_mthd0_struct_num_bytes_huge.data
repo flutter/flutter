@@ -1,0 +1,10 @@
+[dist4]message_header  // num_bytes
+[u4]0                  // version
+[u4]0                  // name
+[u4]0                  // flags
+[anchr]message_header
+
+[u4]0xFFFFFFFF  // num_bytes: Test whether a huge value will cause overflow.
+[u4]0           // version
+[f]-1           // param0
+[u4]0           // padding

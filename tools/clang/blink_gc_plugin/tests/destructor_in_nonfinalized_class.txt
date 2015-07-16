@@ -1,0 +1,8 @@
+In file included from destructor_in_nonfinalized_class.cpp:5:
+./destructor_in_nonfinalized_class.h:12:1: warning: [blink-gc] Class 'HeapObject' requires finalization.
+class HeapObject : public GarbageCollected<HeapObject> {
+^
+destructor_in_nonfinalized_class.cpp:9:1: note: [blink-gc] User-declared destructor declared here:
+HeapObject::~HeapObject()
+^
+1 warning generated.

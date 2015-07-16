@@ -1,0 +1,68 @@
+# Copyright 2014 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("../mojo_edk.gni")
+
+# TODO(hansmuller): The organization of tests in this directory is weird:
+#   * Really, js_unittests tests public stuff, so that should live in public
+#     and be reworked as some sort of apptest.
+#   * Both js_unittests and js_integration_tests should auto-generate their
+#     tests somehow. The .cc files are just test runner stubs, including
+#     explicit lists of .js files.
+group("tests") {
+  testonly = true
+  deps = [
+    "test:js_unittests",
+    "test:js_integration_tests",
+  ]
+}
+
+mojo_edk_source_set("js") {
+  sources = [
+    "core.cc",
+    "core.h",
+    "drain_data.cc",
+    "drain_data.h",
+    "handle.cc",
+    "handle.h",
+    "handle_close_observer.h",
+    "mojo_runner_delegate.cc",
+    "mojo_runner_delegate.h",
+    "support.cc",
+    "support.h",
+    "threading.cc",
+    "threading.h",
+    "waiting_callback.cc",
+    "waiting_callback.h",
+  ]
+
+  public_deps = [
+    "//base",
+    "//gin",
+    "//v8",
+  ]
+
+  mojo_sdk_deps = [
+    "mojo/public/cpp/environment",
+    "mojo/public/cpp/system",
+  ]
+}
+
+mojo_edk_source_set("js_unittests") {
+  testonly = true
+  sources = [
+    "handle_unittest.cc",
+  ]
+
+  deps = [
+    "//testing/gtest",
+  ]
+
+  mojo_edk_deps = [
+    "mojo/edk/js",
+    "mojo/edk/test:test_support",
+  ]
+
+  mojo_sdk_deps = [ "mojo/public/cpp/system" ]
+}

@@ -1,0 +1,20 @@
+# Copyright (c) 2013 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+source_set("symbolize") {
+  visibility = [ "//base/*" ]
+  sources = [
+    "config.h",
+    "demangle.cc",
+    "demangle.h",
+    "glog/logging.h",
+    "glog/raw_logging.h",
+    "symbolize.cc",
+    "symbolize.h",
+    "utilities.h",
+  ]
+
+  configs -= [ "//build/config/compiler:chromium_code" ]
+  configs += [ "//build/config/compiler:no_chromium_code" ]
+}

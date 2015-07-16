@@ -1,0 +1,38 @@
+[dist4]message_header  // num_bytes
+[u4]0                  // version
+[u4]7                  // name
+[u4]0                  // flags
+[anchr]message_header
+
+[dist4]method7_params  // num_bytes
+[u4]0                  // version
+[dist8]param0_ptr      // param0
+[dist8]param1_ptr      // param1
+[anchr]method7_params
+
+[anchr]param0_ptr
+[dist4]struct_f        // num_bytes
+[u4]0                  // version
+[dist8]array_ptr       // fixed_size_array
+[anchr]struct_f
+
+[anchr]array_ptr
+[dist4]array_member    // num_bytes
+[u4]3                  // num_elements
+0 1 2
+[anchr]array_member
+
+[u4]0 [u1]0            // Padding to make the next array aligned properly.
+
+[anchr]param1_ptr
+[dist4]array_param     // num_bytes
+[u4]2                  // num_elements
+[u8]0                  // A null pointer, which is okay.
+[dist8]array_element_ptr
+[anchr]array_param
+
+[anchr]array_element_ptr
+[dist4]array_element   // num_bytes
+[u4]3                  // num_elements
+0 1 2
+[anchr]array_element

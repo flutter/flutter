@@ -1,0 +1,1144 @@
+# HG changeset patch
+# User Sturla Molden <sturla@molden.no>
+# Date 1256723843 25200
+# Node ID 0a6ce52272f641d58c874fa007187778d4c2c81c
+# Parent  db4133d43a7ee34d4f172aced054785acba65a57
+Syntax highlighting for Cython and NumPy for KATE and KDevelop.
+
+diff -r db4133d43a7e -r 0a6ce52272f6 Tools/cython-numpy-mode-kate.xml
+--- /dev/null	Thu Jan 01 00:00:00 1970 +0000
++++ b/Tools/cython-numpy-mode-kate.xml	Wed Oct 28 02:57:23 2009 -0700
+@@ -0,0 +1,1133 @@
++<?xml version="1.0" encoding="UTF-8"?>
++<!DOCTYPE language>
++<!-- Python syntax highlightning v0.9 by Per Wigren -->
++<!-- Python syntax highlighting v1.9 by Michael Bueker (improved keyword differentiation) -->
++<!-- Python syntax highlighting v1.97 by Paul Giannaros -->
++<!-- Pyrex syntax highlighting v0.1 by Matthew Marshall -->
++<!-- Cython syntax highlighting v1.0 by Martin Gysel -->
++<!-- Cython syntax highlighting v2.0 by Sturla Molden -->
++
++<!--
++
++Disclaimer: IANAL. This file is a derivative work of KDE's Python 
++syntax file. KDE does not specify a license for the syntax file python.xml 
++in it's katepart component. However, katepart and KATE as a whole is 
++released with LGPL v2. Assuing python.xml is LGPL'd, this file is hereby 
++released with the same license. Note that this only applies to this XML 
++file. It does not apply to any work written using this file to highlighting
++syntax. Any changes  you make to this file will be covered by the LGPL, 
++but it does not to my knowledge taint your source code. At least not 
++any more than using KDE would do. Sturla Molden
++
++Thus:
++
++This library is free software; you can redistribute it and/or
++modify it under the terms of the GNU Library General Public
++License as published by the Free Software Foundation; either
++version 2 of the License, or (at your option) any later version.
++
++This library is distributed in the hope that it will be useful,
++but WITHOUT ANY WARRANTY; without even the implied warranty of
++MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
++Library General Public License for more details.
++
++You should have received a copy of the GNU Library General Public
++License along with this library; if not, write to the
++Free Software Foundation, Inc., 51 Franklin St, Fifth Floor,
++Boston, MA  02110-1301, USA.
++
++
++
++-->
++
++<language name="Cython with NumPy" version="1.1" kateversion="2.4" section="Sources" extensions="*.pyx;*.pxi;*.pxd" mimetype="application/x-cython;text/x-cython" casesensitive="1" author="Sturla Molden" license="LGPL">
++	<highlighting>
++        <list name="as">
++            <item> as </item>
++        </list>
++       	<list name="imports">
++			<item> cimport </item>
++            <item> import </item>
++            <item> from </item>
++            <item> as </item>
++        </list>
++        <list name="prep">
++            <item> DEF </item>
++            <item> IF </item>
++            <item> ELIF </item>
++            <item> ELSE </item>
++            <item> include </item>
++        </list>
++        <list name="defs">
++            <item> class </item>
++			<item> cpdef </item>
++            <item> def </item>
++        </list>
++        <list name="cdef">
++            <item> cdef </item>
++            <item> ctypedef </item>
++        </list>
++        <list name="keyw" >
++			<item> extern </item>
++            <item> api </item>			 
++			<item> del </item>
++			<item> global </item>
++			<item> property </item>			
++            <item> nogil </item>
++			<item> gil </item>
++            <item> inline </item>
++		</list>
++        <list name="access">
++            <item> readonly </item>
++            <item> public </item>
++        </list>        
++		<list name="operators">
++			<item> and </item>
++			<item> assert </item>
++			<item> in </item>
++			<item> is </item>
++            <item> by </item>
++			<item> not </item>
++			<item> or </item>
++            <item> sizeof </item> 
++		</list>
++		<list name="commands">
++			<!-- <item> exec </item> -->
++			<item> print </item>
++		</list>
++		<list name="flow">
++			<item> break </item>
++			<item> continue </item>
++			<item> elif </item>
++			<item> else </item>
++			<item> except </item>
++			<item> finally </item>
++			<item> for </item>
++			<item> if </item>
++			<item> pass </item>
++			<item> raise </item>
++			<item> return </item>
++			<item> try </item>
++			<item> while </item>
++			<item> with </item>
++            <!-- <item> yield </item> -->
++		</list>
++		<list name="builtinfuncs">
++			<item> __import__ </item>
++			<item> abs </item>
++			<item> all </item>
++			<item> any </item>
++			<item> apply </item>
++			<item> basestring </item>
++			<item> buffer </item>
++			<item> callable </item>
++			<item> chr </item>
++			<item> classmethod </item>
++			<item> cmp </item>
++			<item> coerce </item>
++			<item> compile </item>
++			<item> delattr </item>
++			<item> dir </item>
++			<item> divmod </item>
++			<item> enumerate </item>
++			<item> eval </item>
++			<item> execfile </item>
++			<item> filter </item>
++			<item> getattr </item>
++			<!-- <item> globals </item> -->
++			<item> hasattr </item>
++			<item> hash </item>
++			<item> hex </item>
++			<item> id </item>
++			<item> input </item>
++			<item> intern </item>
++			<item> isinstance </item>
++			<item> issubclass </item>
++			<item> iter </item>
++			<item> len </item>
++			<!-- <item> locals </item> -->
++			<item> map </item>
++			<item> max </item>
++			<item> min </item>
++			<item> oct </item>
++			<item> open </item>
++			<item> ord </item>
++			<item> pow </item>
++			<!-- <item> property </item> -->
++			<item> range </item>
++			<item> raw_input </item>
++			<item> reduce </item>
++			<item> reload </item>
++			<item> repr </item>
++			<item> reversed </item>
++			<item> round </item>
++			<item> setattr </item>
++			<item> sorted </item>
++			<item> staticmethod </item>
++			<item> sum </item>
++			<item> super </item>
++			<item> type </item>
++			<item> unichr </item>
++			<item> unicode </item>
++			<!-- <item> vars </item> -->
++			<item> xrange </item>
++			<item> zip </item>
++  		</list>
++		<list name="ctypes">
++            <!-- native types -->
++			<item> unsigned </item>
++			<item> void </item>
++			<item> enum </item>
++            <item> double </item>
++			<item> long </item>
++			<item> short </item>
++			<item> char </item>
++			<item> Py_ssize_t </item>
++            <item> Py_intptr_t </item>
++            <item> Py_buffer </item>
++            <item> bint </item>
++            <item> struct </item>
++            <item> union </item>
++            <item> enum </item>
++            <!-- python types -->
++        </list>
++        <list name="pytypes">
++            <item> int </item>
++            <item> float </item>
++            <item> object </item>
++            <item> list </item>
++            <item> tuple </item>
++            <item> str </item>
++            <item> dict </item>
++            <item> set </item>
++            <item> frozenset </item>
++            <item> slice </item>
++            <item> bool </item>
++            <item> complex </item>
++            <item> file </item>
++            <!-- numpy types -->
++        </list>
++        <list name="numpyselector">
++            <item> np </item>
++            <item> numpy </item>
++        </list>
++        <list name="numpymodule">
++            <item> numpy </item>
++        </list>
++        <list name="cythonmodule">
++            <item> cython </item>
++        </list>        
++        <list name="numpytypes">
++            <item>  dtype </item>
++            <item>  flatiter </item>
++            <item>  broadcast </item>
++            <item>  ndarray </item>
++            <item>  int8_t </item>
++            <item>  int16_t </item>
++            <item>  int32_t </item>
++            <item>  int64_t </item>
++            <item>  uint8_t </item>
++            <item>  uint16_t </item>
++            <item>  uint32_t </item>
++            <item>  uint64_t </item>
++            <item>  float32_t </item>
++            <item>  float64_t </item>
++            <item>  complex64_t </item>
++            <item>  complex128_t </item>
++            <item>  int_t </item>
++            <item>  long_t </item>
++            <item>  uint_t </item>
++            <item>  ulong_t </item>
++            <item>  float_t </item>
++            <item>  double_t </item>
++            <item>  longdouble_t </item>
++            <item>  cfloat_t </item>
++            <item>  cdouble_t </item>
++            <item>  clongdouble_t </item>
++            <item>  complex_t </item>            
++            <item>  npy_int8 </item> 
++            <item>  npy_int16 </item> 
++            <item>  npy_int32 </item> 
++            <item>  npy_int64 </item> 
++            <item>  npy_int96 </item> 
++            <item>  npy_int128 </item> 
++            <item>  npy_uint8 </item> 
++            <item>  npy_uint16 </item> 
++            <item>  npy_uint32 </item> 
++            <item>  npy_uint64 </item> 
++            <item>  npy_uint96 </item> 
++            <item>  npy_uint128 </item> 
++            <item>  npy_float32 </item> 
++            <item>  npy_float64 </item> 
++            <item>  npy_float80 </item> 
++            <item>  npy_float96 </item> 
++            <item>  npy_float128 </item> 
++            <item>  npy_complex64 </item> 
++            <item>  npy_complex128 </item> 
++            <item>  npy_complex120 </item> 
++            <item>  npy_complex192 </item> 
++            <item>  npy_complex256 </item> 
++            <item>  npy_cfloat </item> 
++            <item>  npy_cdouble </item> 
++            <item>  npy_clongdouble </item> 
++            <item>  npy_bool </item> 
++            <item>  npy_byte </item> 
++            <item>  npy_short </item> 
++            <item>  npy_int </item> 
++            <item>  npy_long </item> 
++            <item>  npy_longlong </item> 
++            <item>  npy_ubyte </item> 
++            <item>  npy_ushort </item> 
++            <item>  npy_uint </item> 
++            <item>  npy_ulong </item> 
++            <item>  npy_ulonglong </item> 
++            <item>  npy_float </item> 
++            <item>  npy_double </item> 
++            <item>  npy_longdouble </item> 
++            <item>  npy_intp </item>
++   		</list>        
++        <list name="numpyfuncs">
++            <item> DataSource </item>
++            <item> MachAr </item>
++            <item> PackageLoader </item>
++            <item> RankWarning </item>
++            <item> Tester </item>
++            <item> abs </item>
++            <item> absolute </item>
++            <item> add </item>
++            <item> add_docstring </item>
++            <item> add_newdoc </item>
++            <item> alen </item>
++            <item> all </item>
++            <item> allclose </item>
++            <item> alltrue </item>
++            <item> alterdot </item>
++            <item> amax </item>
++            <item> amin </item>
++            <item> angle </item>
++            <item> any </item>
++            <item> append </item>
++            <item> apply_along_axis </item>
++            <item> apply_over_axes </item>
++            <item> arange </item>
++            <item> arccos </item>
++            <item> arccosh </item>
++            <item> arcsin </item>
++            <item> arcsinh </item>
++            <item> arctan </item>
++            <item> arctan2 </item>
++            <item> arctanh </item>
++            <item> argmax </item>
++            <item> argmin </item>
++            <item> argsort </item>
++            <item> argwhere </item>
++            <item> around </item>
++            <item> array </item>
++            <item> array2string </item>
++            <item> array_equal </item>
++            <item> array_equiv </item>
++            <item> array_repr </item>
++            <item> array_split </item>
++            <item> array_str </item>
++            <item> asanyarray </item>
++            <item> asarray </item>
++            <item> asarray_chkfinite </item>
++            <item> ascontiguousarray </item>
++            <item> asfarray </item>
++            <item> asfortranarray </item>
++            <item> asmatrix </item>
++            <item> asscalar </item>
++            <item> atleast_1d </item>
++            <item> atleast_2d </item>
++            <item> atleast_3d </item>
++            <item> average </item>
++            <item> bartlett </item>
++            <item> base_repr </item>
++            <item> bench </item>
++            <item> binary_repr </item>
++            <item> bincount </item>
++            <item> bitwise_and </item>
++            <item> bitwise_not </item>
++            <item> bitwise_or </item>
++            <item> bitwise_xor </item>
++            <item> blackman </item>
++            <item> bmat </item>
++            <item> bool </item>
++            <item> bool8 </item>
++            <item> bool_ </item>
++            <item> broadcast </item>
++            <item> broadcast_arrays </item>
++            <item> byte </item>
++            <item> byte_bounds </item>
++            <item> can_cast </item>
++            <item> cdouble </item>
++            <item> ceil </item>
++            <item> cfloat </item>
++            <item> character </item>
++            <item> chararray </item>
++            <item> choose </item>
++            <item> clip </item>
++            <item> clongdouble </item>
++            <item> clongfloat </item>
++            <item> column_stack </item>
++            <item> common_type </item>
++            <item> compare_chararrays </item>
++            <item> complex </item>
++            <item> complex128 </item>
++            <item> complex192 </item>
++            <item> complex64 </item>
++            <item> complex_ </item>
++            <item> complexfloating </item>
++            <item> compress </item>
++            <item> concatenate </item>
++            <item> conj </item>
++            <item> conjugate </item>
++            <item> convolve </item>
++            <item> copy </item>
++            <item> corrcoef </item>
++            <item> correlate </item>
++            <item> cos </item>
++            <item> cosh </item>
++            <item> cov </item>
++            <item> cross </item>
++            <item> csingle </item>
++            <item> cumprod </item>
++            <item> cumproduct </item>
++            <item> cumsum </item>
++            <item> deg2rad </item>
++            <item> degrees </item>
++            <item> delete </item>
++            <item> deprecate </item>
++            <item> deprecate_with_doc </item>
++            <item> diag </item>
++            <item> diagflat </item>
++            <item> diagonal </item>
++            <item> diff </item>
++            <item> digitize </item>
++            <item> disp </item>
++            <item> divide </item>
++            <item> dot </item>
++            <item> double </item>
++            <item> dsplit </item>
++            <item> dstack </item>
++            <item> dtype </item>
++            <item> ediff1d </item>
++            <item> empty </item>
++            <item> empty_like </item>
++            <item> equal </item>
++            <item> errstate </item>
++            <item> exp </item>
++            <item> exp2 </item>
++            <item> expand_dims </item>
++            <item> expm1 </item>
++            <item> extract </item>
++            <item> eye </item>
++            <item> fabs </item>
++            <item> fastCopyAndTranspose </item>
++            <item> find_common_type </item>
++            <item> finfo </item>
++            <item> fix </item>
++            <item> flatiter </item>
++            <item> flatnonzero </item>
++            <item> flexible </item>
++            <item> fliplr </item>
++            <item> flipud </item>
++            <item> float </item>
++            <item> float32 </item>
++            <item> float64 </item>
++            <item> float96 </item>
++            <item> float_ </item>
++            <item> floating </item>
++            <item> floor </item>
++            <item> floor_divide </item>
++            <item> fmax </item>
++            <item> fmin </item>
++            <item> fmod </item>
++            <item> frexp </item>
++            <item> frombuffer </item>
++            <item> fromfile </item>
++            <item> fromfunction </item>
++            <item> fromiter </item>
++            <item> frompyfunc </item>
++            <item> fromregex </item>
++            <item> fromstring </item>
++            <item> fv </item>
++            <item> generic </item>
++            <item> genfromtxt </item>
++            <item> get_array_wrap </item>
++            <item> get_include </item>
++            <item> get_numarray_include </item>
++            <item> get_numpy_include </item>
++            <item> get_printoptions </item>
++            <item> getbuffer </item>
++            <item> getbufsize </item>
++            <item> geterr </item>
++            <item> geterrcall </item>
++            <item> geterrobj </item>
++            <item> gradient </item>
++            <item> greater </item>
++            <item> greater_equal </item>
++            <item> hamming </item>
++            <item> hanning </item>
++            <item> histogram </item>
++            <item> histogram2d </item>
++            <item> histogramdd </item>
++            <item> hsplit </item>
++            <item> hstack </item>
++            <item> hypot </item>
++            <item> i0 </item>
++            <item> identity </item>
++            <item> imag </item>
++            <item> indices </item>
++            <item> inexact </item>
++            <item> info </item>
++            <item> inner </item>
++            <item> insert </item>
++            <item> int </item>
++            <item> int0 </item>
++            <item> int16 </item>
++            <item> int32 </item>
++            <item> int64 </item>
++            <item> int8 </item>
++            <item> int_ </item>
++            <item> int_asbuffer </item>
++            <item> intc </item>
++            <item> integer </item>
++            <item> interp </item>
++            <item> intersect1d </item>
++            <item> intersect1d_nu </item>
++            <item> intp </item>
++            <item> invert </item>
++            <item> ipmt </item>
++            <item> irr </item>
++            <item> iscomplex </item>
++            <item> iscomplexobj </item>
++            <item> isfinite </item>
++            <item> isfortran </item>
++            <item> isinf </item>
++            <item> isnan </item>
++            <item> isneginf </item>
++            <item> isposinf </item>
++            <item> isreal </item>
++            <item> isrealobj </item>
++            <item> isscalar </item>
++            <item> issctype </item>
++            <item> issubclass_ </item>
++            <item> issubdtype </item>
++            <item> issubsctype </item>
++            <item> iterable </item>
++            <item> ix_ </item>
++            <item> kaiser </item>
++            <item> kron </item>
++            <item> ldexp </item>
++            <item> left_shift </item>
++            <item> less </item>
++            <item> less_equal </item>
++            <item> lexsort </item>
++            <item> linspace </item>
++            <item> load </item>
++            <item> loads </item>
++            <item> loadtxt </item>
++            <item> log </item>
++            <item> log10 </item>
++            <item> log1p </item>
++            <item> log2 </item>
++            <item> logaddexp </item>
++            <item> logaddexp2 </item>
++            <item> logical_and </item>
++            <item> logical_not </item>
++            <item> logical_or </item>
++            <item> logical_xor </item>
++            <item> logspace </item>
++            <item> long </item>
++            <item> longcomplex </item>
++            <item> longdouble </item>
++            <item> longfloat </item>
++            <item> longlong </item>
++            <item> lookfor </item>
++            <item> mafromtxt </item>
++            <item> mat </item>
++            <item> matrix </item>
++            <item> max </item>
++            <item> maximum </item>
++            <item> maximum_sctype </item>
++            <item> may_share_memory </item>
++            <item> mean </item>
++            <item> median </item>
++            <item> memmap </item>
++            <item> meshgrid </item>
++            <item> min </item>
++            <item> minimum </item>
++            <item> mintypecode </item>
++            <item> mirr </item>
++            <item> mod </item>
++            <item> modf </item>
++            <item> msort </item>
++            <item> multiply </item>
++            <item> nan_to_num </item>
++            <item> nanargmax </item>
++            <item> nanargmin </item>
++            <item> nanmax </item>
++            <item> nanmin </item>
++            <item> nansum </item>
++            <item> ndarray </item>
++            <item> ndenumerate </item>
++            <item> ndfromtxt </item>
++            <item> ndim </item>
++            <item> ndindex </item>
++            <item> negative </item>
++            <item> newbuffer </item>
++            <item> nonzero </item>
++            <item> not_equal </item>
++            <item> nper </item>
++            <item> npv </item>
++            <item> number </item>
++            <item> obj2sctype </item>
++            <item> object </item>
++            <item> object0 </item>
++            <item> object_ </item>
++            <item> ones </item>
++            <item> ones_like </item>
++            <item> outer </item>
++            <item> packbits </item>
++            <item> piecewise </item>
++            <item> pkgload </item>
++            <item> place </item>
++            <item> pmt </item>
++            <item> poly </item>
++            <item> poly1d </item>
++            <item> polyadd </item>
++            <item> polyder </item>
++            <item> polydiv </item>
++            <item> polyfit </item>
++            <item> polyint </item>
++            <item> polymul </item>
++            <item> polysub </item>
++            <item> polyval </item>
++            <item> power </item>
++            <item> ppmt </item>
++            <item> prod </item>
++            <item> product </item>
++            <item> ptp </item>
++            <item> put </item>
++            <item> putmask </item>
++            <item> pv </item>
++            <item> rad2deg </item>
++            <item> radians </item>
++            <item> rank </item>
++            <item> rate </item>
++            <item> ravel </item>
++            <item> real </item>
++            <item> real_if_close </item>
++            <item> recarray </item>
++            <item> recfromcsv </item>
++            <item> recfromtxt </item>
++            <item> reciprocal </item>
++            <item> record </item>
++            <item> remainder </item>
++            <item> repeat </item>
++            <item> require </item>
++            <item> reshape </item>
++            <item> resize </item>
++            <item> restoredot </item>
++            <item> right_shift </item>
++            <item> rint </item>
++            <item> roll </item>
++            <item> rollaxis </item>
++            <item> roots </item>
++            <item> rot90 </item>
++            <item> round </item>
++            <item> round_ </item>
++            <item> row_stack </item>
++            <item> safe_eval </item>
++            <item> save </item>
++            <item> savetxt </item>
++            <item> savez </item>
++            <item> sctype2char </item>
++            <item> searchsorted </item>
++            <item> select </item>
++            <item> set_numeric_ops </item>
++            <item> set_printoptions </item>
++            <item> set_string_function </item>
++            <item> setbufsize </item>
++            <item> setdiff1d </item>
++            <item> seterr </item>
++            <item> seterrcall </item>
++            <item> seterrobj </item>
++            <item> setmember1d </item>
++            <item> setxor1d </item>
++            <item> shape </item>
++            <item> short </item>
++            <item> show_config </item>
++            <item> sign </item>
++            <item> signbit </item>
++            <item> signedinteger </item>
++            <item> sin </item>
++            <item> sinc </item>
++            <item> single </item>
++            <item> singlecomplex </item>
++            <item> sinh </item>
++            <item> size </item>
++            <item> sometrue </item>
++            <item> sort </item>
++            <item> sort_complex </item>
++            <item> source </item>
++            <item> split </item>
++            <item> sqrt </item>
++            <item> square </item>
++            <item> squeeze </item>
++            <item> std </item>
++            <item> str </item>
++            <item> str_ </item>
++            <item> string0 </item>
++            <item> string_ </item>
++            <item> subtract </item>
++            <item> sum </item>
++            <item> swapaxes </item>
++            <item> take </item>
++            <item> tan </item>
++            <item> tanh </item>
++            <item> tensordot </item>
++            <item> test </item>
++            <item> tile </item>
++            <item> trace </item>
++            <item> transpose </item>
++            <item> trapz </item>
++            <item> tri </item>
++            <item> tril </item>
++            <item> trim_zeros </item>
++            <item> triu </item>
++            <item> true_divide </item>
++            <item> trunc </item>
++            <item> typename </item>
++            <item> ubyte </item>
++            <item> ufunc </item>
++            <item> uint </item>
++            <item> uint0 </item>
++            <item> uint16 </item>
++            <item> uint32 </item>
++            <item> uint64 </item>
++            <item> uint8 </item>
++            <item> uintc </item>
++            <item> uintp </item>
++            <item> ulonglong </item>
++            <item> unicode </item>
++            <item> unicode0 </item>
++            <item> unicode_ </item>
++            <item> union1d </item>
++            <item> unique </item>
++            <item> unique1d </item>
++            <item> unpackbits </item>
++            <item> unravel_index </item>
++            <item> unsignedinteger </item>
++            <item> unwrap </item>
++            <item> ushort </item>
++            <item> vander </item>
++            <item> var </item>
++            <item> vdot </item>
++            <item> vectorize </item>
++            <item> void </item>
++            <item> void0 </item>
++            <item> vsplit </item>
++            <item> vstack </item>
++            <item> where </item>
++            <item> who </item>
++            <item> zeros </item>
++            <item> zeros_like </item>
++        </list>
++        <list name="specialvars">
++            <item> __future__ </item>
++            <item> __import__ </item>
++            <item> __name__ </item>
++            <item> __cythonbufferdefaults__ </item>
++            <item> __weakref__ </item>
++			<item> None </item>
++			<item> self </item>
++			<item> True </item>
++			<item> False </item>
++			<item> NotImplemented </item>
++			<item> Ellipsis </item>
++			<item> NULL </item>
++		</list>
++        <list name="overloaders">
++            <item>__new__</item>
++            <item>__init__</item>
++            <item> __cinit__ </item>
++            <item> __dealloc__ </item>
++            <item> __cmp__ </item>
++            <item> __richcmp__ </item>
++            <item> __str__ </item>
++            <item> __repr__ </item>
++            <item> __hash__ </item>
++            <item> __call__ </item>
++            <item> __iter__ </item>
++            <item> __getattr__ </item>
++            <item> __setattr__ </item>
++            <item> __delattr__ </item>
++            <item> __add__ </item>
++            <item> __sub__ </item>
++            <item> __mul__ </item>
++            <item> __div__ </item>
++            <item> __floordiv__ </item>
++            <item> __truediv__ </item>
++            <item> __mod__ </item>
++            <item> __divmod__ </item>
++            <item> __pow__ </item>
++            <item> __neg__ </item>
++            <item> __pos__ </item>
++            <item> __abs__ </item>
++            <item> __nonzero__ </item>
++            <item> __invert__ </item>
++            <item> __lshift__ </item>
++            <item> __rshift__ </item>
++            <item> __and__ </item>
++            <item> __or__ </item>
++            <item> __xor__ </item>
++            <item> __int__ </item>
++            <item> __long__ </item>
++            <item> __float__ </item>
++            <item> __oct__ </item>
++            <item> __hex__ </item>
++            <item> __index__ </item>
++            <item> __iadd__ </item>
++            <item> __isub__ </item>
++            <item> __imul__ </item>
++            <item> __idiv__ </item>
++            <item> __ifloordiv__ </item>
++            <item> __itruediv__ </item>
++            <item> __imod__ </item>
++            <item> __ipow__ </item>
++            <item> __ilshift__ </item>
++            <item> __irshift__ </item>
++            <item> __iand__ </item>
++            <item> __ior__ </item>
++            <item> __ixor__ </item>
++            <item> __len__ </item>
++            <item> __getitem__ </item>
++            <item> __setitem__ </item>
++            <item> __delitem__ </item>
++            <item> __getslice__ </item>
++            <item> __setslice__ </item>
++            <item> __delslice__ </item>
++            <item> __contains__ </item>
++            <item> __next__ </item>
++            <item> __getreadbuffer__ </item>
++            <item> __getwritebuffer__ </item>
++            <item> __getsegcount__ </item>
++            <item> __getcharbuffer__ </item>
++            <item> __get__ </item>
++            <item> __set__ </item>
++            <item> __delete__ </item>
++            <item> __getbuffer__ </item>
++            <item> __releasebuffer__ </item>
++        </list>
++        <list name="exceptions">
++            <item>ArithmeticError</item>
++            <item>AssertionError</item>
++            <item>AttributeError</item>
++            <item>BaseException</item>
++            <item>DeprecationWarning</item>
++            <item>EnvironmentError</item>
++            <item>EOFError</item>
++            <item>Exception</item>
++            <item>FloatingPointError</item>
++            <item>FutureWarning</item>
++            <item>GeneratorExit</item>
++            <item>IOError</item>
++            <item>ImportError</item>
++            <item>ImportWarning</item>
++            <item>IndexError</item>
++            <item>KeyError</item>
++            <item>KeyboardInterrupt</item>
++            <item>LookupError</item>
++            <item>MemoryError</item>
++            <item>NameError</item>
++            <item>NotImplementedError</item>
++            <item>OSError</item>
++            <item>OverflowError</item>
++            <item>PendingDeprecationWarning</item>
++            <item>ReferenceError</item>
++            <item>RuntimeError</item>
++            <item>RuntimeWarning</item>
++            <item>StandardError</item>
++            <item>StopIteration</item>
++            <item>SyntaxError</item>
++            <item>SyntaxWarning</item>
++            <item>SystemError</item>
++            <item>SystemExit</item>
++            <item>TypeError</item>
++            <item>UnboundLocalError</item>
++            <item>UserWarning</item>
++            <item>UnicodeError</item>
++            <item>UnicodeWarning</item>
++            <item>UnicodeEncodeError</item>
++            <item>UnicodeDecodeError</item>
++            <item>UnicodeTranslateError</item>
++            <item>ValueError</item>
++            <item>Warning</item>
++            <item>WindowsError</item>
++            <item>ZeroDivisionError</item>
++        </list>
++        
++        <contexts>
++                      
++			<context name="Normal" attribute="Normal Text" lineEndContext="#stay">
++                
++                <keyword attribute="Definition Keyword" String="cdef" context="cdefname"/>
++                <keyword attribute="Definition Keyword" String="defs" context="defname"/>
++                <keyword attribute="Definition Keyword" String="keyw" context="#stay"/>
++                
++				<keyword attribute="Import Keyword" String="imports" context="#stay"/>
++                <keyword attribute="Preprocessor" String="prep" context="#stay"/>
++				<keyword attribute="Operator" String="operators" context="#stay"/>
++				<keyword attribute="Command Keyword" String="commands" context="#stay"/>
++				<keyword attribute="Flow Control Keyword" String="flow" context="#stay"/>
++				<keyword attribute="Builtin Function" String="builtinfuncs" context="#stay"/>
++                
++				<keyword attribute="Special Variable" String="specialvars" context="#stay"/>
++				<keyword attribute="Special Variable" String="exceptions" context="#stay"/>
++                <keyword attribute="Special Variable" String="overloaders" context="#stay"/>
++                
++                <keyword attribute="C Type" context="#stay" String="ctypes" />
++				<keyword attribute="Python Type" context="#stay" String="pytypes" />
++                                                                                
++                <RegExpr attribute="Hex" String="0[Xx][0-9a-fA-F]+" context="#stay"/>
++                <RegExpr attribute="Octal" String="0[1-9][0-9]*" context="#stay"/>
++                <RegExpr attribute="Binary" String="0[Bb][0-9a-fA-F]+" context="#stay"/>
++                
++				<RegExpr attribute="Complex" String=" ((([0-9]*\.[0-9]+|[0-9]+\.)|([0-9]+|([0-9]*\.[0-9]+|[0-9]+\.))[eE](\+|-)?[0-9]+)|[0-9]+)[jJ]" context="#stay"/>
++				<RegExpr attribute="Float" String="([0-9]+\.[0-9]*|\.[0-9]+)([eE][0-9]+)?" context="#stay"/>
++				
++                <RegExpr attribute="Int" String="([1-9][0-9]*([eE][0-9]+)?|0)" context="#stay"/>
++				<RegExpr attribute="Long" String="[1-9][0-9]*([eE][0-9.]+)?[Ll]" context="#stay"/>
++				
++                <keyword attribute="NumPyAttr" String="numpyselector" context="numpy"/>
++                
++                <RegExpr attribute="Decorator" String="@[a-zA-Z_][a-zA-Z_0-9\.]+" context="#stay"/>
++                
++                <RegExpr attribute="Normal" String="[a-zA-Z_][a-zA-Z_0-9]+" context="#stay"/>
++
++				<RegExpr attribute="Raw String" String="[rR]'''" context="Raw Tripple A-string"/>
++				<RegExpr attribute="Raw String" String="[rR]&quot;&quot;&quot;" context="Raw Tripple Q-string"/>
++
++				<RegExpr attribute="Raw String" String="[rR]'" context="Raw A-string"/>
++				<RegExpr attribute="Raw String" String="[rR]&quot;" context="Raw Q-string"/>
++
++				<RegExpr attribute="Comment" String="#.*$" context="#stay"/>
++				<RegExpr attribute="Comment" String="^\s*'''" context="Tripple A-comment" beginRegion="Tripple A-region"/>
++				<RegExpr attribute="Comment" String="^\s*&quot;&quot;&quot;" context="Tripple Q-comment" beginRegion="Tripple Q-region"/>
++       
++  				<StringDetect attribute="String" String="'''" context="Tripple A-string" beginRegion="Tripple A-region"/>
++				<StringDetect attribute="String" String="&quot;&quot;&quot;" context="Tripple Q-string" beginRegion="Tripple Q-region"/>
++				<DetectChar attribute="String" char="'" context="Single A-string"/>
++				<DetectChar attribute="String" char="&quot;" context="Single Q-string"/>
++                
++                
++                <DetectChar attribute="Operator" char="(" context="parenthesis" />
++				
++                <DetectChar attribute="Operator" char="[" context="bracet" />
++                
++                <DetectChar attribute="Operator" char="{" context="dict" />
++                              
++				<RegExpr attribute="Operator" String="[+*/%\|=;\!&lt;&gt;!^&amp;~-]" context="#stay"/>
++                
++				<RegExpr attribute="String Substitution" String="%[a-zA-Z]" context="#stay"/>
++			
++            </context>
++            
++             <context name="numpy" attribute="Normal Text" lineEndContext="#pop" noIndentationBasedFolding="True">
++                <!-- highlight types in numpy.pxd after cimport numpy --> 
++                <keyword attribute="Import Keyword" context="#pop" String="as" />
++                <DetectChar attribute="Dot" context="#stay" char="." />
++                <keyword attribute="NumPy Type" context="#pop" String="numpytypes" />
++                <keyword attribute="NumPy Function" context="#pop" String="numpyfuncs" />
++            </context>
++                                    
++			<context name="parenthesis" attribute="Normal Text" lineEndContext="#stay" noIndentationBasedFolding="True">
++                <DetectChar attribute="Operator" char=")" context="#pop" /> 
++				<IncludeRules context="Normal" />
++			</context>
++            
++            <context name="bracet" attribute="Normal Text" lineEndContext="#stay" noIndentationBasedFolding="True">
++                <StringDetect attribute="Normal" String="readonly" context="#stay" />   
++                <DetectChar attribute="Operator" char="]" context="#pop" /> 
++                <IncludeRules context="Normal" />
++            </context>
++            
++            <context name="dict" attribute="Normal Text" lineEndContext="#stay" noIndentationBasedFolding="True">
++                <DetectChar attribute="Operator" char="}" context="#pop" />
++                <IncludeRules context="Normal" />
++            </context>
++            
++            <context name="defname" attribute="Normal Text" lineEndContext="#pop" noIndentationBasedFolding="True">
++                <RegExpr attribute="Definition Name" String="[a-zA-Z_][a-zA-Z_0-9]+" context="#stay"/>
++                <DetectChar attribute="Operator" char="(" context="callargs" />
++                <DetectChar attribute="Operator" char="[" context="callbracket" />
++                <IncludeRules context="Normal" />
++            </context>
++            
++            <context name="callargs" attribute="Normal Text" lineEndContext="#stay" noIndentationBasedFolding="True">
++                <DetectChar attribute="Operator" char=")" context="#pop#pop" />
++                <IncludeRules context="Normal" />
++            </context>
++            
++            <context name="callbracket" attribute="Normal Text" lineEndContext="#stay" noIndentationBasedFolding="True">
++                <DetectChar attribute="Operator" char="]" context="#pop#pop" />
++                <IncludeRules context="Normal" />
++            </context>
++            
++            
++            <context name="cdefname" attribute="Normal Text" lineEndContext="#pop" noIndentationBasedFolding="True">
++                <keyword attribute="Definition Keyword" String="defs" context="defname"/>
++                <keyword attribute="Definition Keyword" String="keyw" context="#stay"/>
++                <keyword attribute="Definition Keyword" String="access" context="#stay"/>
++                <keyword attribute="Import Keyword" String="imports" context="#stay"/>
++                <keyword attribute="Special Variable" String="specialvars" context="#stay"/>
++                
++                <keyword attribute="C Type" context="#pop" String="ctypes" />
++                <keyword attribute="Python Type" context="#pop" String="pytypes" />
++                                                                                
++                <RegExpr attribute="Hex" String="0[Xx][0-9a-fA-F]+" context="#stay"/>
++                <RegExpr attribute="Octal" String="0[1-9][0-9]*" context="#stay"/>
++                <RegExpr attribute="Binary" String="0[Bb][0-9a-fA-F]+" context="#stay"/>
++                
++                <RegExpr attribute="Complex" String=" ((([0-9]*\.[0-9]+|[0-9]+\.)|([0-9]+|([0-9]*\.[0-9]+|[0-9]+\.))[eE](\+|-)?[0-9]+)|[0-9]+)[jJ]" context="#stay"/>
++                <RegExpr attribute="Float" String="([0-9]+\.[0-9]*|\.[0-9]+)([eE][0-9]+)?" context="#stay"/>
++                
++                <RegExpr attribute="Int" String="([1-9][0-9]*([eE][0-9]+)?|0)" context="#stay"/>
++                <RegExpr attribute="Long" String="[1-9][0-9]*([eE][0-9.]+)?[Ll]" context="#stay"/>
++                
++                <keyword attribute="NumPyAttr" String="numpyselector" context="numpy2"/>
++                                
++                <RegExpr attribute="C Definition Name" String="[a-zA-Z_][a-zA-Z_0-9]+" context="#stay"/>
++                <DetectChar attribute="Operator" char="(" context="callargs" />
++                <IncludeRules context="Normal" />
++            </context>
++            
++            <context name="callargs" attribute="Normal Text" lineEndContext="#stay" noIndentationBasedFolding="True">
++                <DetectChar attribute="Operator" char=")" context="#pop#pop" />
++                <IncludeRules context="Normal" />
++            </context>
++            
++            
++            
++            
++            
++            
++            
++            
++            <context name="numpy2" attribute="Normal Text" lineEndContext="#pop" noIndentationBasedFolding="True">
++                <!-- highlight types in numpy.pxd after cimport numpy -->
++                <DetectChar attribute="Dot" context="#stay" char="." />
++                <keyword attribute="NumPy Type" context="#pop#pop" String="numpytypes" />
++            </context>
++            
++            
++            
++            
++			<context name="Tripple A-comment" attribute="Comment" lineEndContext="#stay" noIndentationBasedFolding="True">
++				<StringDetect attribute="Comment" String="'''" context="#pop" endRegion="Tripple A-region"/>
++			</context>
++			<context name="Tripple Q-comment" attribute="Comment" lineEndContext="#stay" noIndentationBasedFolding="True">
++				<HlCChar attribute="Comment" context="#stay"/>
++				<RegExpr attribute="Comment" String="&quot;&quot;&quot;" context="#pop" endRegion="Tripple Q-region"/>
++			</context>
++			<context name="Tripple A-string" attribute="String" lineEndContext="#stay" noIndentationBasedFolding="True">
++				<HlCStringChar attribute="String Char" context="#stay"/>
++				<RegExpr attribute="String Substitution" String="%\([a-zA-Z0-9_]+\)[a-zA-Z]" context="#stay"/>
++				<RegExpr attribute="String Substitution" String="%[a-zA-Z]" context="#stay"/>
++				<RegExpr attribute="String" String="'''" context="#pop" endRegion="Tripple A-region"/>
++			</context>
++			<context name="Raw Tripple A-string" attribute="Raw String" lineEndContext="#stay" noIndentationBasedFolding="True">
++				<HlCStringChar attribute="Raw String" context="#stay"/>
++				<RegExpr attribute="String Substitution" String="%\([a-zA-Z0-9_]+\)[a-zA-Z]" context="#stay"/>
++				<RegExpr attribute="String Substitution" String="%[a-zA-Z]" context="#stay"/>
++				<RegExpr attribute="String" String="'''" context="#pop" endRegion="Tripple A-region"/>
++			</context>
++			<context name="Tripple Q-string" attribute="String" lineEndContext="#stay" noIndentationBasedFolding="True">
++				<HlCStringChar attribute="String Char" context="#stay"/>
++				<RegExpr attribute="String Substitution" String="%\([a-zA-Z0-9_]+\)[a-zA-Z]" context="#stay"/>
++				<RegExpr attribute="String Substitution" String="%[a-zA-Z]" context="#stay"/>
++				<RegExpr attribute="String" String="&quot;&quot;&quot;" context="#pop" endRegion="Tripple Q-region"/>
++			</context>
++			<context name="Raw Tripple Q-string" attribute="Raw String" lineEndContext="#stay" noIndentationBasedFolding="True">
++				<HlCStringChar attribute="Raw String" context="#stay"/>
++				<RegExpr attribute="String Substitution" String="%\([a-zA-Z0-9_]+\)[a-zA-Z]" context="#stay"/>
++				<RegExpr attribute="String Substitution" String="%[a-zA-Z]" context="#stay"/>
++				<RegExpr attribute="String" String="&quot;&quot;&quot;" context="#pop" endRegion="Tripple Q-region"/>
++			</context>
++			<context name="Single A-comment" attribute="Comment" lineEndContext="#stay">
++				<HlCStringChar attribute="Comment" context="#stay"/>
++				<DetectChar attribute="Comment" char="'" context="#pop"/>
++			</context>
++			<context name="Single Q-comment" attribute="Comment" lineEndContext="#stay">
++				<HlCStringChar attribute="Comment" context="#stay"/>
++				<DetectChar attribute="Comment" char="&quot;" context="#pop"/>
++			</context>
++			<context name="Single A-string" attribute="String" lineEndContext="#stay">
++				<HlCStringChar attribute="String Char" context="#stay"/>
++				<RegExpr attribute="String Substitution" String="%\([a-zA-Z0-9_]+\)[a-zA-Z]" context="#stay"/>
++				<RegExpr attribute="String Substitution" String="%[a-zA-Z]" context="#stay"/>
++				<DetectChar attribute="String" char="'" context="#pop"/>
++			</context>
++			<context name="Single Q-string" attribute="String" lineEndContext="#stay">
++				<HlCStringChar attribute="String Char" context="#stay"/>
++				<RegExpr attribute="String Substitution" String="%\([a-zA-Z0-9_]+\)[a-zA-Z]" context="#stay"/>
++				<RegExpr attribute="String Substitution" String="%[a-zA-Z]" context="#stay"/>
++				<DetectChar attribute="String" char="&quot;" context="#pop"/>
++			</context>
++			<context name="Raw A-string" attribute="Raw String" lineEndContext="#stay">
++				<HlCStringChar attribute="Raw String" context="#stay"/>
++				<RegExpr attribute="String Substitution" String="%\([a-zA-Z0-9_]+\)[a-zA-Z]" context="#stay"/>
++				<RegExpr attribute="String Substitution" String="%[a-zA-Z]" context="#stay"/>
++				<DetectChar attribute="Raw String" char="'" context="#pop"/>
++			</context>
++			<context name="Raw Q-string" attribute="Raw String" lineEndContext="#stay">
++				<HlCStringChar attribute="Raw String" context="#stay"/>
++				<RegExpr attribute="String Substitution" String="%\([a-zA-Z0-9_]+\)[a-zA-Z]" context="#stay"/>
++				<RegExpr attribute="String Substitution" String="%[a-zA-Z]" context="#stay"/>
++				<DetectChar attribute="Raw String" char="&quot;" context="#pop"/>
++			</context>
++		</contexts>
++		<itemDatas>
++			<itemData name="Normal Text" defStyleNum="dsNormal"/>
++			<itemData name="Import Keyword" defStyleNum="dsKeyword"/>
++            <itemData name="Definition Keyword" defStyleNum="dsKeyword"/>
++            <itemData name="Definition Name" defStyleNum="dsOthers"/>
++            <itemData name="Operator" defStyleNum="dsKeyword"/>
++			<itemData name="String Substitution" defStyleNum="dsNormal"/>
++			<itemData name="Command Keyword" defStyleNum="dsFunction"/>
++			<itemData name="Flow Control Keyword" defStyleNum="dsKeyword"/>
++			<itemData name="Builtin Function" defStyleNum="dsFunction"/>
++			<itemData name="C Type" defStyleNum="dsDataType"/>
++            <itemData name="Python Type" defStyleNum="dsDataType"/>
++            <itemData name="NumPy Type" defStyleNum="dsDataType"/>
++            <itemData name="NumPy Function" defStyleNum="dsFunction"/>
++   			<itemData name="Special Variable" defStyleNum="dsOthers"/>
++			<itemData name="Preprocessor" defStyleNum="dsOthers"/>
++            <itemData name="Decorator" defStyleNum="dsFunction"/>
++			<itemData name="String Char" defStyleNum="dsChar"/>
++			<itemData name="Long" defStyleNum="dsOthers"/>
++			<itemData name="Float" defStyleNum="dsFloat"/>
++			<itemData name="Int" defStyleNum="dsDecVal"/>
++			<itemData name="Hex" defStyleNum="dsOthers"/>
++			<itemData name="Octal" defStyleNum="dsOthers"/>
++            <itemData name="Binary" defStyleNum="dsOthers"/>
++			<itemData name="Complex" defStyleNum="dsOthers"/>
++			<itemData name="Comment" defStyleNum="dsComment"/>
++			<itemData name="String" defStyleNum="dsString"/>
++			<itemData name="Raw String" defStyleNum="dsString"/>
++		</itemDatas>
++	</highlighting>
++	<general>
++		<folding indentationsensitive="1" />
++		<emptyLines>
++			<emptyLine regexpr="\s+" casesensitive="false"/>
++			<emptyLine regexpr="\s*#.*$" casesensitive="false"/>
++		</emptyLines>
++		<comments>
++			<comment name="singleLine" start="#" position="afterwhitespace"/>
++		</comments>
++		<keywords casesensitive="1"/>
++	</general>
++</language>

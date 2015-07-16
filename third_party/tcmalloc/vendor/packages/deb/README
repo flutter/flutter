@@ -1,0 +1,7 @@
+The list of files here isn't complete.  For a step-by-step guide on
+how to set this package up correctly, check out
+    http://www.debian.org/doc/maint-guide/
+
+Most of the files that are in this directory are boilerplate.
+However, you may need to change the list of binary-arch dependencies
+in 'rules'.

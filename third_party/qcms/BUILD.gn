@@ -1,0 +1,44 @@
+# Copyright 2014 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+config("qcms_config") {
+  include_dirs = [ "src" ]
+}
+
+source_set("qcms") {
+  sources = [
+    "src/chain.c",
+    "src/chain.h",
+    "src/iccread.c",
+    "src/matrix.c",
+    "src/matrix.h",
+    "src/qcms.h",
+    "src/qcmsint.h",
+    "src/qcmstypes.h",
+    "src/transform.c",
+    "src/transform_util.c",
+    "src/transform_util.h",
+  ]
+
+  configs -= [ "//build/config/compiler:chromium_code" ]
+  configs += [ "//build/config/compiler:no_chromium_code" ]
+  public_configs = [ ":qcms_config" ]
+
+  if (current_cpu == "x86" || current_cpu == "x64") {
+    defines = [ "SSE2_ENABLE" ]
+    sources += [ "src/transform-sse2.c" ]
+    if (!(is_win && current_cpu == "x64")) {
+      # QCMS assumes this target isn't compiled since MSVC x64 doesn't support
+      # the MMX intrinsics present in the SSE1 code.
+      sources += [ "src/transform-sse1.c" ]
+    }
+  }
+
+  if (is_win) {
+    cflags = [
+      "/wd4056",  # Overflow in floating-point constant arithmetic (INFINITY).
+      "/wd4756",  # Overflow in constant arithmetic (INFINITY).
+    ]
+  }
+}

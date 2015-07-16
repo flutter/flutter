@@ -1,0 +1,26 @@
+# Copyright 2014 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+component("x11") {
+  output_name = "x11_window"
+
+  deps = [
+    "//base",
+    "//skia",
+    "//ui/events",
+    "//ui/events/platform",
+    "//ui/gfx/x",
+    "//ui/platform_window",
+  ]
+
+  configs += [ "//build/config/linux:x11" ]
+
+  defines = [ "X11_WINDOW_IMPLEMENTATION" ]
+
+  sources = [
+    "x11_window.cc",
+    "x11_window.h",
+    "x11_window_export.h",
+  ]
+}

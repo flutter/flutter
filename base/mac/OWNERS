@@ -1,0 +1,14 @@
+mark@chromium.org
+thakis@chromium.org
+
+# sdk_forward_declarations.[h|mm] will likely need to be modified by Cocoa
+# developers in general; keep in sync with OWNERS of //chrome/browser/ui/cocoa.
+per-file sdk_forward_declarations.*=asvitkine@chromium.org
+per-file sdk_forward_declarations.*=avi@chromium.org
+per-file sdk_forward_declarations.*=groby@chromium.org
+per-file sdk_forward_declarations.*=jeremy@chromium.org
+per-file sdk_forward_declarations.*=mark@chromium.org
+per-file sdk_forward_declarations.*=rohitrao@chromium.org
+per-file sdk_forward_declarations.*=rsesek@chromium.org
+per-file sdk_forward_declarations.*=shess@chromium.org
+per-file sdk_forward_declarations.*=thakis@chromium.org

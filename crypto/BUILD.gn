@@ -1,0 +1,67 @@
+# Copyright (c) 2013 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//build/config/crypto.gni")
+import("//testing/test.gni")
+
+component("crypto") {
+  output_name = "crcrypto"  # Avoid colliding with OpenSSL's libcrypto.
+  sources = [
+    "crypto_export.h",
+    "openssl_util.cc",
+    "openssl_util.h",
+    "random.cc",
+    "random.h",
+    "secure_hash.h",
+    "secure_hash_openssl.cc",
+    "sha2.cc",
+    "sha2.h",
+  ]
+
+  deps = [
+    "//base",
+    "//base/third_party/dynamic_annotations",
+    "//third_party/boringssl",
+  ]
+
+  if (is_android) {
+    deps += [ "//third_party/android_tools:cpu_features" ]
+  }
+
+  if (is_win) {
+    # TODO(jschuh): crbug.com/167187 fix size_t to int truncations.
+    cflags = [ "/wd4267" ]
+  }
+
+  defines = [ "CRYPTO_IMPLEMENTATION" ]
+}
+
+# TODO(GYP): Make this link on win as well.
+if (!is_win) {
+  test("crypto_unittests") {
+    sources = [
+      # Tests.
+      "random_unittest.cc",
+      "secure_hash_unittest.cc",
+      "sha2_unittest.cc",
+    ]
+
+    deps = [
+      ":crypto",
+      "//base",
+      "//base/test:run_all_unittests",
+      "//base/test:test_support",
+      "//testing/gmock",
+      "//testing/gtest",
+      "//third_party/boringssl",
+    ]
+
+    if (is_android) {
+      apk_deps = [
+        "//base:base_java",
+        "//base:base_java_unittest_support",
+      ]
+    }
+  }
+}

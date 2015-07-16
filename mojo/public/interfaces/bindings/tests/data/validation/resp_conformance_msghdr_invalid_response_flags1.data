@@ -1,0 +1,6 @@
+[dist4]message_header  // num_bytes
+[u4]1                  // version
+[u4]12                 // name
+[u4]0                  // flags: kMessageIsResponse is not set in a response.
+[u8]1                  // request_id
+[anchr]message_header

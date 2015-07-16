@@ -1,0 +1,21 @@
+{%- macro enum_value(enum, field, index) -%}
+{%- if field.value -%}
+(int) ({{field.value|expression_to_text('i32')}})
+{%- elif index == 0 -%}
+0
+{%- else -%}
+{{enum.fields[index - 1]|name}} + 1
+{%- endif -%}
+{%- endmacro -%}
+
+{%- macro enum_def(enum, top_level) -%}
+public {{ 'static ' if not top_level }}final class {{enum|name}} {
+
+{% for field in enum.fields %}
+    public static final int {{field|name}} = {{enum_value(enum, field, loop.index0)}};
+{% endfor %}
+
+    private {{enum|name}}() {}
+
+}
+{%- endmacro -%}

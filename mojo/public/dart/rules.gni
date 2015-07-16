@@ -1,0 +1,336 @@
+# Copyright 2015 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Rules to generate zipped applications for Dart.
+# Rules to generate dart-pkg and dart-pkg/packages.
+
+import("//build/module_args/mojo.gni")
+
+template("dartzip_package") {
+  package_target_name = "$target_name"
+  package_output = "$target_out_dir/$target_name.dartzip"
+
+  if (defined(invoker.uses_pub) && invoker.uses_pub) {
+    # Repackage all dependencies pulled in via "pub get" in a dartzip file.
+    action("${package_target_name}_repackage") {
+      target_dir = get_label_info(":$target_name", "dir")
+      script = rebase_path("mojo/public/tools/gn/zip.py", ".", mojo_sdk_root)
+
+      package_name = "$package_target_name"
+      if (defined(invoker.package_name_override)) {
+        package_name = invoker.package_name_override
+      }
+
+      # Get a list of the files in packages/ as inputs.
+      list_packages_contents_script =
+          rebase_path("mojo/public/tools/dart_list_packages_contents.py",
+                      ".",
+                      mojo_sdk_root)
+      rebase_target_dir = rebase_path(target_dir, root_build_dir)
+      inputs = exec_script(list_packages_contents_script,
+                           [
+                             "--target-directory",
+                             rebase_target_dir,
+                             "--package-name",
+                             package_name,
+                           ],
+                           "list lines",
+                           [ target_dir + "/pubspec.lock" ])
+
+      # Zip up all the pulled-in files relative to their location in the
+      # packages dir.
+      output = "$target_out_dir/$target_name.dartzip"
+      outputs = [
+        output,
+      ]
+      rebase_base_dir = rebase_target_dir
+      rebase_inputs = rebase_path(inputs, root_build_dir)
+      rebase_output = rebase_path(output, root_build_dir)
+      args = [
+        "--base-dir=$rebase_base_dir",
+        "--inputs=$rebase_inputs",
+        "--output=$rebase_output",
+      ]
+    }
+  }
+
+  action("${package_target_name}_package") {
+    script =
+        rebase_path("mojo/public/tools/dart_package.py", ".", mojo_sdk_root)
+
+    inputs = invoker.sources
+
+    deps = []
+    zip_inputs = []
+
+    if (defined(invoker.uses_pub) && invoker.uses_pub) {
+      deps += [ ":${package_target_name}_repackage" ]
+    }
+
+    if (defined(invoker.deps)) {
+      deps += invoker.deps
+      foreach(d, deps) {
+        dep_name = get_label_info(d, "name")
+        dep_target_out_dir = get_label_info(d, "target_out_dir")
+        zip_inputs += [ "$dep_target_out_dir/$dep_name.dartzip" ]
+      }
+    }
+
+    if (defined(invoker.datadeps)) {
+      datadeps = invoker.datadeps
+    }
+
+    output = package_output
+    outputs = [
+      output,
+    ]
+
+    rebase_base_dir =
+        rebase_path(get_label_info(":$package_target_name", "dir"),
+                    root_build_dir)
+    if (defined(invoker.base_dir)) {
+      rebase_base_dir = invoker.base_dir
+    }
+    rebase_inputs = rebase_path(inputs, root_build_dir)
+    rebase_zip_inputs = rebase_path(zip_inputs, root_build_dir)
+    rebase_output = rebase_path(output, root_build_dir)
+
+    args = [
+      "--base-dir=$rebase_base_dir",
+      "--inputs=$rebase_inputs",
+      "--zip-inputs=$rebase_zip_inputs",
+      "--output=$rebase_output",
+    ]
+  }
+
+  action(target_name) {
+    script =
+        rebase_path("mojo/public/tools/dart_analyze.py", ".", mojo_sdk_root)
+
+    sources = [
+      package_output,
+    ]
+
+    args = [
+      rebase_path(package_output),
+      rebase_path("$target_gen_dir/${package_target_name}_analyze.stamp"),
+      "--no-hints",
+    ]
+
+    deps = [
+      ":${package_target_name}_package",
+    ]
+    if (defined(invoker.deps)) {
+      deps += invoker.deps
+    }
+
+    if (defined(invoker.datadeps)) {
+      datadeps = invoker.datadeps
+    }
+
+    outputs = [
+      "$target_gen_dir/${package_target_name}_analyze.stamp",
+    ]
+  }
+}
+
+# Use this template to generate a .mojo dart application. One of the source
+# files should be named main.dart and contain a main function as the
+# entry point. Dependencies of dart_packaged_application targets should be
+# either mojom targets (and specified using the mojom_deps variable) or
+# dartzip_package targets.
+template("dartzip_packaged_application") {
+  package_name = "${target_name}_package"
+  package_output = "$target_out_dir/$package_name.dartzip"
+
+  if (defined(invoker.output_name)) {
+    mojo_output = "$root_out_dir/" + invoker.output_name + ".mojo"
+  } else {
+    mojo_output = "$root_out_dir/" + target_name + ".mojo"
+  }
+
+  dartzip_package(package_name) {
+    sources = invoker.sources
+    if (defined(invoker.deps)) {
+      deps = invoker.deps
+    }
+    if (defined(invoker.uses_pub)) {
+      uses_pub = invoker.uses_pub
+    }
+    if (defined(invoker.mojom_deps)) {
+      mojom_deps = invoker.mojom_deps
+    }
+    if (defined(invoker.datadeps)) {
+      datadeps = invoker.datadeps
+    }
+  }
+
+  action(target_name) {
+    script = rebase_path("mojo/public/tools/prepend.py", ".", mojo_sdk_root)
+
+    input = package_output
+    inputs = [
+      input,
+    ]
+
+    output = mojo_output
+    outputs = [
+      output,
+    ]
+
+    deps = [
+      ":$package_name",
+    ]
+    if (defined(invoker.deps)) {
+      deps += invoker.deps
+    }
+    if (defined(invoker.mojom_deps)) {
+      deps += invoker.mojom_deps
+    }
+    if (defined(invoker.datadeps)) {
+      datadeps = invoker.datadeps
+    }
+
+    line = "#!mojo mojo:dart_content_handler"
+    if (is_debug || (defined(invoker.strict) && invoker.strict == true)) {
+      line = "#!mojo mojo:dart_content_handler?strict=true"
+    }
+
+    rebase_input = rebase_path(input, root_build_dir)
+    rebase_output = rebase_path(output, root_build_dir)
+    args = [
+      "--input=$rebase_input",
+      "--output=$rebase_output",
+      "--line=$line",
+    ]
+  }
+}
+
+# Creates a gen/dart-pkg/package_name directory containing symlinks to package
+# sources. Also copies any mojom dependencies into lib/mojom.
+#
+#   sources
+#       List of sources to include in the package.
+#
+#   pkg_dir (optional)
+#       Directory containing the package sources. This overrides sources.
+#
+#   deps (optional)
+#       Note: this can only contain mojom targets.
+#
+#   datadeps (optional)
+#
+#   sdk_ext_directory (optional)
+#       Directory containing sdk-ext .dart sources.
+#
+#   sdk_ext_files (optional)
+#       List of sources to include in sdk-ext.
+#
+#   sdk_ext_mappings (optional)
+#       Mappings for dart libraries that are part of of sdk_ext.
+#
+template("dart_pkg") {
+  if (defined(invoker.pkg_dir)) {
+    pubspec_yaml_path = rebase_path("pubspec.yaml", "", invoker.pkg_dir)
+  } else {
+    pubspec_yaml_path = rebase_path("pubspec.yaml")
+  }
+  dart_package_name_script =
+      rebase_path("mojo/public/tools/dart_package_name.py", ".", mojo_sdk_root)
+  package_name = exec_script(dart_package_name_script,
+                             [
+                               "--pubspec",
+                               pubspec_yaml_path,
+                             ],
+                             "trim string",
+                             [ pubspec_yaml_path ])
+
+  pkg_directory = rebase_path("$root_gen_dir/dart-pkg")
+  package_root = rebase_path("$root_gen_dir/dart-pkg/packages")
+  stamp_file = "$root_gen_dir/dart-pkg/${package_name}.stamp"
+
+  assert(defined(invoker.sources) || defined(invoker.pkg_dir))
+
+  action(target_name) {
+    deps = []
+    if (defined(invoker.deps)) {
+      deps += invoker.deps
+    }
+
+    datadeps = []
+    if (defined(invoker.datadeps)) {
+      datadeps += invoker.datadeps
+    }
+
+    list_mojoms_script =
+        rebase_path("mojo/public/tools/dart_list_mojoms.py", ".", mojo_sdk_root)
+    mojom_sources = []
+    foreach(d, deps) {
+      root_prefix = rebase_path(".", "", mojo_sdk_root)
+      source_directory = rebase_path(get_label_info(d, "dir"))
+      mojom_sources += exec_script(list_mojoms_script,
+                                   [
+                                     source_directory,
+                                     root_prefix,
+                                   ],
+                                   "list lines")
+    }
+
+    sdk_ext_directory = []
+    if (defined(invoker.sdk_ext_directory)) {
+      sdk_ext_directory += [ invoker.sdk_ext_directory ]
+    }
+
+    sdk_ext_files = []
+    if (defined(invoker.sdk_ext_files)) {
+      sdk_ext_files += invoker.sdk_ext_files
+    }
+
+    sdk_ext_mappings = []
+    if (defined(invoker.sdk_ext_mappings)) {
+      sdk_ext_mappings += invoker.sdk_ext_mappings
+    }
+
+    script = rebase_path("mojo/public/tools/dart_pkg.py", ".", mojo_sdk_root)
+    outputs = [
+      stamp_file,
+    ]
+
+    if (defined(invoker.sources)) {
+      sources = invoker.sources
+    } else {
+      assert(defined(invoker.pkg_dir))
+      list_script = rebase_path("build/ls.py", ".", mojo_sdk_root)
+      sources = exec_script(list_script,
+                            [
+                              "--target-directory",
+                              rebase_path(invoker.pkg_dir),
+                            ],
+                            "list lines")
+    }
+
+    inputs = [
+               list_mojoms_script,
+               script,
+             ] + rebase_path(sources)
+
+    args = [
+             "--package-name",
+             package_name,
+             "--gen-directory",
+             rebase_path("$root_gen_dir/dart-gen"),
+             "--pkg-directory",
+             pkg_directory,
+             "--package-root",
+             package_root,
+             "--stamp-file",
+             rebase_path(stamp_file),
+             "--package-sources",
+           ] + rebase_path(sources) + [ "--mojom-sources" ] +
+           rebase_path(mojom_sources, "", mojo_sdk_root) +
+           [ "--sdk-ext-directories" ] + rebase_path(sdk_ext_directory) +
+           [ "--sdk-ext-files" ] + rebase_path(sdk_ext_files) +
+           [ "--sdk-ext-mappings" ] + sdk_ext_mappings
+  }
+}

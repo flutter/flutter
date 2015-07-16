@@ -1,0 +1,88 @@
+Name
+
+    CHROMIUM_get_multiple
+
+Name Strings
+
+    GL_CHROMIUM_get_multiple
+
+Version
+
+    Last Modifed Date: July 22, 2011
+
+Dependencies
+
+    OpenGL ES 2.0 is required.
+
+Overview
+
+    This extension adds the ability to query multiple program information in a
+    single call.
+
+Issues
+
+
+New Tokens
+
+    None
+
+New Procedures and Functions
+
+    void GetProgrmaInfoCHROMIUM (GLuint program, GLsizei bufsize,
+                                 GLsizei* size, void* info)
+
+    <program> is the program to query. <bufsize> is the size of the buffer to
+    hold the results. <size> is a pointer to a GLsizei to store the size needed
+    to hold the results. <info> is a pointer to memory to store the result.
+
+    To query the space needed for the results set <info> to NULL.
+
+    The format of the data that will be stored in the memory pointed to by
+    <info> is as follows.
+
+        struct ProgramInfoHeader {
+          uint32 link_status;  // same as GetProgramiv called with LINK_STATUS
+          uint32 num_attribs;  // the number of active attributes
+          uint32 num_uniforms;  // the number of active uniforms
+          ProgramInput inputs[num_attribs + num_uniforms];
+        }
+
+        // The data for one attrib or uniform from GetProgramInfoCHROMIUM.
+        struct ProgramInput {
+          uint32 type;             // The type (GL_VEC3, GL_SAMPLER_2D, etc.
+          int32 size;              // The size (size of array for uniforms)
+          uint32 location_offset;  // offset from ProgramInfoHeader to 'size'
+                                   // locations for uniforms, 1 for attribs.
+          uint32 name_offset;      // offset from ProgrmaInfoHeader to start of
+                                   // name.
+          uint32 name_length;      // length of the name.
+        };
+
+    It is important to note that for attribs, size is the size of the attrib and
+    location_offset points to a single location. For uniforms, size is the
+    number of array elements and location_offset points to an array of size
+    locations, one of each element of the array.
+
+    INVALID_VALUE is generated if <bufsize> is less than 0
+
+    INVALID_VALUE is generated if <size> is NULL
+
+    INVALID_OPERATION is returned if <size> is less than the size needed to hold
+    all the results.
+
+
+    NOTE: This function is not intended to be used directly. Chromium uses it
+    internally to cache data.
+
+
+Errors
+
+    None.
+
+New State
+
+    None.
+
+Revision History
+
+    7/22/2011    Documented the extension

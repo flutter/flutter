@@ -1,0 +1,27 @@
+// Copyright 2015 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+module http_server;
+
+import "http_server/public/interfaces/http_server.mojom";
+import "network/public/interfaces/net_address.mojom";
+
+interface HttpServerFactory {
+  // Creates an http server running on the specified local network address.  If
+  // |local_address| is null, it will take the default value of 0.0.0.0 at a
+  // system-allocated port.
+  //
+  // Note that the port value of 0 means that the operating system will pick
+  // one of available ports. You can use HttpServer::GetPort() to retrieve the
+  // allocated port.
+  //
+  // Only one backing server will be created for each local network address. It
+  // will be shared among clients, if more than one client requests a server
+  // running on a particular network address.
+  //
+  // TODO(ppi): would it be better to create a server only for the first caller
+  // and require the access to it to be explicitly shared by the party that
+  // requests it first?
+  CreateHttpServer(HttpServer& server_request, mojo.NetAddress? local_address);
+};

@@ -1,0 +1,141 @@
+// Copyright 2013 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+{%- set header_guard = "%s_H_"|
+        format(module.path|upper|replace("/","_")|replace(".","_")) %}
+
+#ifndef {{header_guard}}
+#define {{header_guard}}
+
+#include <stdint.h>
+
+#include "mojo/public/cpp/bindings/array.h"
+#include "mojo/public/cpp/bindings/callback.h"
+#include "mojo/public/cpp/bindings/interface_ptr.h"
+#include "mojo/public/cpp/bindings/interface_request.h"
+#include "mojo/public/cpp/bindings/lib/control_message_handler.h"
+#include "mojo/public/cpp/bindings/lib/control_message_proxy.h"
+#include "mojo/public/cpp/bindings/map.h"
+#include "mojo/public/cpp/bindings/message_filter.h"
+#include "mojo/public/cpp/bindings/no_interface.h"
+#include "mojo/public/cpp/bindings/string.h"
+#include "mojo/public/cpp/bindings/struct_ptr.h"
+#include "{{module.path}}-internal.h"
+{%- for import in imports %}
+#include "{{import.module.path}}.h"
+{%- endfor %}
+
+{%- for namespace in namespaces_as_array %}
+namespace {{namespace}} {
+{%- endfor %}
+
+{#--- Enums #}
+{%  for enum in enums %}
+{%    include "enum_declaration.tmpl" %}
+{%- endfor %}
+
+{#--- Constants #}
+{%- for constant in module.constants %}
+{#-   To be consistent with constants defined inside interfaces, only make
+      integral types compile-time constants. #}
+{%-   if constant.kind|is_integral_kind %}
+const {{constant.kind|cpp_pod_type}} {{constant.name}} = {{constant|constant_value}};
+{%-   else %}
+extern const {{constant.kind|cpp_pod_type}} {{constant.name}};
+{%-   endif %}
+{%- endfor %}
+
+{#--- Interface Forward Declarations -#}
+{%  for interface in interfaces %}
+class {{interface.name}};
+using {{interface.name}}Ptr = mojo::InterfacePtr<{{interface.name}}>;
+{%  endfor %}
+
+{#--- Struct Forward Declarations -#}
+{%  for struct in structs %}
+class {{struct.name}};
+{%    if struct|should_inline %}
+using {{struct.name}}Ptr = mojo::InlinedStructPtr<{{struct.name}}>;
+{%    else %}
+using {{struct.name}}Ptr = mojo::StructPtr<{{struct.name}}>;
+{%    endif %}
+{%  endfor %}
+
+{#--- Union Forward Declarations -#}
+{%  for union in unions %}
+class {{union.name}};
+{%    if union|should_inline_union %}
+typedef mojo::InlinedStructPtr<{{union.name}}> {{union.name}}Ptr;
+{%    else %}
+typedef mojo::StructPtr<{{union.name}}> {{union.name}}Ptr;
+{%    endif %}
+{%- endfor %}
+
+{#--- Interfaces -#}
+{%  for interface in interfaces %}
+{%    include "interface_declaration.tmpl" %}
+{%- endfor %}
+
+{#--- Interface Proxies -#}
+{%  for interface in interfaces %}
+{%    include "interface_proxy_declaration.tmpl" %}
+{%- endfor %}
+
+{#--- Interface Stubs -#}
+{%  for interface in interfaces %}
+{%    include "interface_stub_declaration.tmpl" %}
+{%- endfor %}
+
+{#--- Interface Request Validators -#}
+{%  for interface in interfaces %}
+{%    include "interface_request_validator_declaration.tmpl" %}
+{%- endfor %}
+
+{#--- Interface Response Validators -#}
+{%  for interface in interfaces if interface|has_callbacks %}
+{%    include "interface_response_validator_declaration.tmpl" %}
+{%- endfor %}
+
+{#--- Unions must be declared first because they can be members of structs #}
+{#--- Unions #}
+{%  for union in unions %}
+{%    include "wrapper_union_class_declaration.tmpl" %}
+{%- endfor %}
+
+{#--- NOTE: Non-inlined structs may have pointers to inlined structs, so we  #}
+{#---       need to fully define inlined structs ahead of the others.        #}
+
+{#--- Inlined structs #}
+{%  for struct in structs %}
+{%    if struct|should_inline %}
+{%      include "wrapper_class_declaration.tmpl" %}
+{%    endif %}
+{%- endfor %}
+
+{#--- Non-inlined structs #}
+{%  for struct in structs %}
+{%    if not struct|should_inline %}
+{%      include "wrapper_class_declaration.tmpl" %}
+{%    endif %}
+{%- endfor %}
+
+{#--- Struct Serialization Helpers -#}
+{%  if structs %}
+{%    for struct in structs %}
+{%      include "struct_serialization_declaration.tmpl" %}
+{%-   endfor %}
+{%- endif %}
+
+{#--- Union Serialization Helpers -#}
+{%  if unions %}
+{%    for union in unions %}
+{%      include "union_serialization_declaration.tmpl" %}
+{%-   endfor %}
+{%- endif %}
+
+{%- for namespace in namespaces_as_array|reverse %}
+}  // namespace {{namespace}}
+{%- endfor %}
+
+#endif  // {{header_guard}}

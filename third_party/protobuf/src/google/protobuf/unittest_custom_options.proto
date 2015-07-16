@@ -1,0 +1,387 @@
+// Protocol Buffers - Google's data interchange format
+// Copyright 2008 Google Inc.  All rights reserved.
+// http://code.google.com/p/protobuf/
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are
+// met:
+//
+//     * Redistributions of source code must retain the above copyright
+// notice, this list of conditions and the following disclaimer.
+//     * Redistributions in binary form must reproduce the above
+// copyright notice, this list of conditions and the following disclaimer
+// in the documentation and/or other materials provided with the
+// distribution.
+//     * Neither the name of Google Inc. nor the names of its
+// contributors may be used to endorse or promote products derived from
+// this software without specific prior written permission.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+// Author: benjy@google.com (Benjy Weinberger)
+//  Based on original Protocol Buffers design by
+//  Sanjay Ghemawat, Jeff Dean, and others.
+//
+// A proto file used to test the "custom options" feature of proto2.
+
+
+// Some generic_services option(s) added automatically.
+// See:  http://go/proto2-generic-services-default
+option cc_generic_services = true;     // auto-added
+option java_generic_services = true;   // auto-added
+option py_generic_services = true;
+
+// A custom file option (defined below).
+option (file_opt1) = 9876543210;
+
+import "google/protobuf/descriptor.proto";
+
+// We don't put this in a package within proto2 because we need to make sure
+// that the generated code doesn't depend on being in the proto2 namespace.
+package protobuf_unittest;
+
+
+// Some simple test custom options of various types.
+
+extend google.protobuf.FileOptions {
+  optional uint64 file_opt1 = 7736974;
+}
+
+extend google.protobuf.MessageOptions {
+  optional int32 message_opt1 = 7739036;
+}
+
+extend google.protobuf.FieldOptions {
+  optional fixed64 field_opt1 = 7740936;
+  // This is useful for testing that we correctly register default values for
+  // extension options.
+  optional int32 field_opt2 = 7753913 [default=42];
+}
+
+extend google.protobuf.EnumOptions {
+  optional sfixed32 enum_opt1 = 7753576;
+}
+
+extend google.protobuf.EnumValueOptions {
+  optional int32 enum_value_opt1 = 1560678;
+}
+
+extend google.protobuf.ServiceOptions {
+  optional sint64 service_opt1 = 7887650;
+}
+
+enum MethodOpt1 {
+  METHODOPT1_VAL1 = 1;
+  METHODOPT1_VAL2 = 2;
+}
+
+extend google.protobuf.MethodOptions {
+  optional MethodOpt1 method_opt1 = 7890860;
+}
+
+// A test message with custom options at all possible locations (and also some
+// regular options, to make sure they interact nicely).
+message TestMessageWithCustomOptions {
+  option message_set_wire_format = false;
+
+  option (message_opt1) = -56;
+
+  optional string field1 = 1 [ctype=CORD,
+                              (field_opt1)=8765432109];
+
+  enum AnEnum {
+    option (enum_opt1) = -789;
+
+    ANENUM_VAL1 = 1;
+    ANENUM_VAL2 = 2 [(enum_value_opt1) = 123];
+  }
+}
+
+
+// A test RPC service with custom options at all possible locations (and also
+// some regular options, to make sure they interact nicely).
+message CustomOptionFooRequest {
+}
+
+message CustomOptionFooResponse {
+}
+
+message CustomOptionFooClientMessage {
+}
+
+message CustomOptionFooServerMessage {
+}
+
+service TestServiceWithCustomOptions {
+  option (service_opt1) = -9876543210;
+
+  rpc Foo(CustomOptionFooRequest) returns (CustomOptionFooResponse) {
+    option (method_opt1) = METHODOPT1_VAL2;
+  }
+}
+
+
+
+// Options of every possible field type, so we can test them all exhaustively.
+
+message DummyMessageContainingEnum {
+  enum TestEnumType {
+    TEST_OPTION_ENUM_TYPE1 = 22;
+    TEST_OPTION_ENUM_TYPE2 = -23;
+  }
+}
+
+message DummyMessageInvalidAsOptionType {
+}
+
+extend google.protobuf.MessageOptions {
+  optional         bool     bool_opt = 7706090;
+  optional        int32    int32_opt = 7705709;
+  optional        int64    int64_opt = 7705542;
+  optional       uint32   uint32_opt = 7704880;
+  optional       uint64   uint64_opt = 7702367;
+  optional       sint32   sint32_opt = 7701568;
+  optional       sint64   sint64_opt = 7700863;
+  optional      fixed32  fixed32_opt = 7700307;
+  optional      fixed64  fixed64_opt = 7700194;
+  optional     sfixed32 sfixed32_opt = 7698645;
+  optional     sfixed64 sfixed64_opt = 7685475;
+  optional        float    float_opt = 7675390;
+  optional       double   double_opt = 7673293;
+  optional       string   string_opt = 7673285;
+  optional        bytes    bytes_opt = 7673238;
+  optional DummyMessageContainingEnum.TestEnumType enum_opt = 7673233;
+  optional DummyMessageInvalidAsOptionType message_type_opt = 7665967;
+}
+
+message CustomOptionMinIntegerValues {
+  option     (bool_opt) = false;
+  option    (int32_opt) = -0x80000000;
+  option    (int64_opt) = -0x8000000000000000;
+  option   (uint32_opt) = 0;
+  option   (uint64_opt) = 0;
+  option   (sint32_opt) = -0x80000000;
+  option   (sint64_opt) = -0x8000000000000000;
+  option  (fixed32_opt) = 0;
+  option  (fixed64_opt) = 0;
+  option (sfixed32_opt) = -0x80000000;
+  option (sfixed64_opt) = -0x8000000000000000;
+}
+
+message CustomOptionMaxIntegerValues {
+  option     (bool_opt) = true;
+  option    (int32_opt) = 0x7FFFFFFF;
+  option    (int64_opt) = 0x7FFFFFFFFFFFFFFF;
+  option   (uint32_opt) = 0xFFFFFFFF;
+  option   (uint64_opt) = 0xFFFFFFFFFFFFFFFF;
+  option   (sint32_opt) = 0x7FFFFFFF;
+  option   (sint64_opt) = 0x7FFFFFFFFFFFFFFF;
+  option  (fixed32_opt) = 0xFFFFFFFF;
+  option  (fixed64_opt) = 0xFFFFFFFFFFFFFFFF;
+  option (sfixed32_opt) = 0x7FFFFFFF;
+  option (sfixed64_opt) = 0x7FFFFFFFFFFFFFFF;
+}
+
+message CustomOptionOtherValues {
+  option  (int32_opt) = -100;  // To test sign-extension.
+  option  (float_opt) = 12.3456789;
+  option (double_opt) = 1.234567890123456789;
+  option (string_opt) = "Hello, \"World\"";
+  option  (bytes_opt) = "Hello\0World";
+  option   (enum_opt) = TEST_OPTION_ENUM_TYPE2;
+}
+
+message SettingRealsFromPositiveInts {
+  option  (float_opt) = 12;
+  option (double_opt) = 154;
+}
+
+message SettingRealsFromNegativeInts {
+  option  (float_opt) = -12;
+  option  (double_opt) = -154;
+}
+
+// Options of complex message types, themselves combined and extended in
+// various ways.
+
+message ComplexOptionType1 {
+  optional int32 foo = 1;
+  optional int32 foo2 = 2;
+  optional int32 foo3 = 3;
+
+  extensions 100 to max;
+}
+
+message ComplexOptionType2 {
+  optional ComplexOptionType1 bar = 1;
+  optional int32 baz = 2;
+
+  message ComplexOptionType4 {
+    optional int32 waldo = 1;
+
+    extend google.protobuf.MessageOptions {
+      optional ComplexOptionType4 complex_opt4 = 7633546;
+    }
+  }
+
+  optional ComplexOptionType4 fred = 3;
+
+  extensions 100 to max;
+}
+
+message ComplexOptionType3 {
+  optional int32 qux = 1;
+
+  optional group ComplexOptionType5 = 2 {
+    optional int32 plugh = 3;
+  }
+}
+
+extend ComplexOptionType1 {
+  optional int32 quux = 7663707;
+  optional ComplexOptionType3 corge = 7663442;
+}
+
+extend ComplexOptionType2 {
+  optional int32 grault = 7650927;
+  optional ComplexOptionType1 garply = 7649992;
+}
+
+extend google.protobuf.MessageOptions {
+  optional protobuf_unittest.ComplexOptionType1 complex_opt1 = 7646756;
+  optional ComplexOptionType2 complex_opt2 = 7636949;
+  optional ComplexOptionType3 complex_opt3 = 7636463;
+  optional group ComplexOpt6 = 7595468 {
+    optional int32 xyzzy = 7593951;
+  }
+}
+
+// Note that we try various different ways of naming the same extension.
+message VariousComplexOptions {
+  option (.protobuf_unittest.complex_opt1).foo = 42;
+  option (protobuf_unittest.complex_opt1).(.protobuf_unittest.quux) = 324;
+  option (.protobuf_unittest.complex_opt1).(protobuf_unittest.corge).qux = 876;
+  option (complex_opt2).baz = 987;
+  option (complex_opt2).(grault) = 654;
+  option (complex_opt2).bar.foo = 743;
+  option (complex_opt2).bar.(quux) = 1999;
+  option (complex_opt2).bar.(protobuf_unittest.corge).qux = 2008;
+  option (complex_opt2).(garply).foo = 741;
+  option (complex_opt2).(garply).(.protobuf_unittest.quux) = 1998;
+  option (complex_opt2).(protobuf_unittest.garply).(corge).qux = 2121;
+  option (ComplexOptionType2.ComplexOptionType4.complex_opt4).waldo = 1971;
+  option (complex_opt2).fred.waldo = 321;
+  option (protobuf_unittest.complex_opt3).qux = 9;
+  option (complex_opt3).complexoptiontype5.plugh = 22;
+  option (complexopt6).xyzzy = 24;
+}
+
+// ------------------------------------------------------
+// Definitions for testing aggregate option parsing.
+// See descriptor_unittest.cc.
+
+message AggregateMessageSet {
+  option message_set_wire_format = true;
+  extensions 4 to max;
+}
+
+message AggregateMessageSetElement {
+  extend AggregateMessageSet {
+    optional AggregateMessageSetElement message_set_extension = 15447542;
+  }
+  optional string s = 1;
+}
+
+// A helper type used to test aggregate option parsing
+message Aggregate {
+  optional int32 i = 1;
+  optional string s = 2;
+
+  // A nested object
+  optional Aggregate sub = 3;
+
+  // To test the parsing of extensions inside aggregate values
+  optional google.protobuf.FileOptions file = 4;
+  extend google.protobuf.FileOptions {
+    optional Aggregate nested = 15476903;
+  }
+
+  // An embedded message set
+  optional AggregateMessageSet mset = 5;
+}
+
+// Allow Aggregate to be used as an option at all possible locations
+// in the .proto grammer.
+extend google.protobuf.FileOptions      { optional Aggregate fileopt    = 15478479; }
+extend google.protobuf.MessageOptions   { optional Aggregate msgopt     = 15480088; }
+extend google.protobuf.FieldOptions     { optional Aggregate fieldopt   = 15481374; }
+extend google.protobuf.EnumOptions      { optional Aggregate enumopt    = 15483218; }
+extend google.protobuf.EnumValueOptions { optional Aggregate enumvalopt = 15486921; }
+extend google.protobuf.ServiceOptions   { optional Aggregate serviceopt = 15497145; }
+extend google.protobuf.MethodOptions    { optional Aggregate methodopt  = 15512713; }
+
+// Try using AggregateOption at different points in the proto grammar
+option (fileopt) = {
+  s: 'FileAnnotation'
+  // Also test the handling of comments
+  /* of both types */ i: 100
+
+  sub { s: 'NestedFileAnnotation' }
+
+  // Include a google.protobuf.FileOptions and recursively extend it with
+  // another fileopt.
+  file {
+    [protobuf_unittest.fileopt] {
+      s:'FileExtensionAnnotation'
+    }
+  }
+
+  // A message set inside an option value
+  mset {
+    [protobuf_unittest.AggregateMessageSetElement.message_set_extension] {
+      s: 'EmbeddedMessageSetElement'
+    }
+  }
+};
+
+message AggregateMessage {
+  option (msgopt) = { i:101 s:'MessageAnnotation' };
+  optional int32 fieldname = 1 [(fieldopt) = { s:'FieldAnnotation' }];
+}
+
+service AggregateService {
+  option (serviceopt) = { s:'ServiceAnnotation' };
+  rpc Method (AggregateMessage) returns (AggregateMessage) {
+    option (methodopt) = { s:'MethodAnnotation' };
+  }
+}
+
+enum AggregateEnum {
+  option (enumopt) = { s:'EnumAnnotation' };
+  VALUE = 1 [(enumvalopt) = { s:'EnumValueAnnotation' }];
+}
+
+// Test custom options for nested type.
+message NestedOptionType {
+  message NestedMessage {
+    option (message_opt1) = 1001;
+    optional int32 nested_field = 1 [(field_opt1) = 1002];
+  }
+  enum NestedEnum {
+    option (enum_opt1) = 1003;
+    NESTED_ENUM_VALUE = 1 [(enum_value_opt1) = 1004];
+  }
+  extend google.protobuf.FileOptions {
+    optional int32 nested_extension = 7912573 [(field_opt2) = 1005];
+  }
+}

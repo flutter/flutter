@@ -1,0 +1,132 @@
+# Copyright (c) 2013 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+config("zlib_config") {
+  include_dirs = [ "." ]
+}
+
+static_library("zlib_x86_simd") {
+  if (!is_ios && (current_cpu == "x86" || current_cpu == "x64")) {
+    sources = [
+      "crc_folding.c",
+      "fill_window_sse.c",
+    ]
+    if (!is_win || is_clang) {
+      cflags = [
+        "-msse4.2",
+        "-mpclmul",
+      ]
+    }
+  } else {
+    sources = [
+      "simd_stub.c",
+    ]
+  }
+
+  configs -= [ "//build/config/compiler:chromium_code" ]
+  configs += [ "//build/config/compiler:no_chromium_code" ]
+}
+
+static_library("zlib") {
+  if (!is_win) {
+    # Don't stomp on "libzlib" on other platforms.
+    output_name = "chrome_zlib"
+  }
+
+  sources = [
+    "adler32.c",
+    "compress.c",
+    "crc32.c",
+    "crc32.h",
+    "deflate.c",
+    "deflate.h",
+    "gzclose.c",
+    "gzguts.h",
+    "gzlib.c",
+    "gzread.c",
+    "gzwrite.c",
+    "infback.c",
+    "inffast.c",
+    "inffast.h",
+    "inffixed.h",
+    "inflate.c",
+    "inflate.h",
+    "inftrees.c",
+    "inftrees.h",
+    "mozzconf.h",
+    "trees.c",
+    "trees.h",
+    "uncompr.c",
+    "x86.h",
+    "zconf.h",
+    "zlib.h",
+    "zutil.c",
+    "zutil.h",
+  ]
+
+  if (!is_ios && (current_cpu == "x86" || current_cpu == "x64")) {
+    sources += [ "x86.c" ]
+  }
+
+  configs -= [ "//build/config/compiler:chromium_code" ]
+  configs += [ "//build/config/compiler:no_chromium_code" ]
+
+  public_configs = [ ":zlib_config" ]
+  deps = [
+    ":zlib_x86_simd",
+  ]
+}
+
+static_library("minizip") {
+  sources = [
+    "contrib/minizip/ioapi.c",
+    "contrib/minizip/ioapi.h",
+    "contrib/minizip/iowin32.c",
+    "contrib/minizip/iowin32.h",
+    "contrib/minizip/unzip.c",
+    "contrib/minizip/unzip.h",
+    "contrib/minizip/zip.c",
+    "contrib/minizip/zip.h",
+  ]
+
+  if (!is_win) {
+    sources -= [
+      "contrib/minizip/iowin32.c",
+      "contrib/minizip/iowin32.h",
+    ]
+  }
+  if (is_mac || is_ios || is_android) {
+    # Mac, Android and the BSDs don't have fopen64, ftello64, or fseeko64. We
+    # use fopen, ftell, and fseek instead on these systems.
+    defines = [ "USE_FILE32API" ]
+  }
+
+  if (is_clang) {
+    # zlib uses `if ((a == b))` for some reason.
+    cflags = [ "-Wno-parentheses-equality" ]
+  }
+
+  deps = [
+    ":zlib",
+  ]
+
+  configs -= [ "//build/config/compiler:chromium_code" ]
+  configs += [ "//build/config/compiler:no_chromium_code" ]
+  public_configs = [ ":zlib_config" ]
+}
+
+static_library("zip") {
+  sources = [
+    "google/zip.cc",
+    "google/zip.h",
+    "google/zip_internal.cc",
+    "google/zip_internal.h",
+    "google/zip_reader.cc",
+    "google/zip_reader.h",
+  ]
+  deps = [
+    ":minizip",
+    "//base",
+  ]
+}

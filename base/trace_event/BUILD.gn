@@ -1,0 +1,113 @@
+# Copyright 2015 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+source_set("trace_event") {
+  sources = [
+    "java_heap_dump_provider_android.cc",
+    "java_heap_dump_provider_android.h",
+    "memory_allocator_dump.cc",
+    "memory_allocator_dump.h",
+    "memory_allocator_dump_guid.cc",
+    "memory_allocator_dump_guid.h",
+    "memory_dump_manager.cc",
+    "memory_dump_manager.h",
+    "memory_dump_provider.h",
+    "memory_dump_request_args.h",
+    "memory_dump_session_state.cc",
+    "memory_dump_session_state.h",
+    "process_memory_dump.cc",
+    "process_memory_dump.h",
+    "process_memory_maps.cc",
+    "process_memory_maps.h",
+    "process_memory_maps_dump_provider.cc",
+    "process_memory_maps_dump_provider.h",
+    "process_memory_totals.cc",
+    "process_memory_totals.h",
+    "process_memory_totals_dump_provider.cc",
+    "process_memory_totals_dump_provider.h",
+    "trace_config.cc",
+    "trace_config.h",
+    "trace_event.h",
+    "trace_event_android.cc",
+    "trace_event_argument.cc",
+    "trace_event_argument.h",
+    "trace_event_etw_export_win.cc",
+    "trace_event_etw_export_win.h",
+    "trace_event_impl.cc",
+    "trace_event_impl.h",
+    "trace_event_impl_constants.cc",
+    "trace_event_memory.cc",
+    "trace_event_memory.h",
+    "trace_event_synthetic_delay.cc",
+    "trace_event_synthetic_delay.h",
+    "trace_event_system_stats_monitor.cc",
+    "trace_event_system_stats_monitor.h",
+    "trace_event_win.cc",
+    "trace_event_win.h",
+    "winheap_dump_provider_win.cc",
+    "winheap_dump_provider_win.h",
+  ]
+
+  if (is_nacl) {
+    sources -= [
+      "process_memory_totals_dump_provider.cc",
+      "trace_event_system_stats_monitor.cc",
+    ]
+  }
+
+  if (is_linux || is_android) {
+    sources += [
+      "malloc_dump_provider.cc",
+      "malloc_dump_provider.h",
+    ]
+  }
+
+  configs += [ "//base:base_implementation" ]
+
+  deps = [
+    "//base/debug",
+    "//base/json",
+    "//base/memory",
+    "//base/process",
+    "//base/third_party/dynamic_annotations",
+  ]
+
+  if (is_win) {
+    deps += [ "//base/trace_event/etw_manifest:chrome_events_win" ]
+  }
+
+  allow_circular_includes_from = [
+    "//base/debug",
+    "//base/memory",
+    "//base/process",
+  ]
+
+  visibility = [ "//base/*" ]
+}
+
+source_set("trace_event_unittests") {
+  testonly = true
+  sources = [
+    "java_heap_dump_provider_android_unittest.cc",
+    "memory_allocator_dump_unittest.cc",
+    "memory_dump_manager_unittest.cc",
+    "process_memory_dump_unittest.cc",
+    "process_memory_maps_dump_provider_unittest.cc",
+    "process_memory_totals_dump_provider_unittest.cc",
+    "trace_config_unittest.cc",
+    "trace_event_argument_unittest.cc",
+    "trace_event_memory_unittest.cc",
+    "trace_event_synthetic_delay_unittest.cc",
+    "trace_event_system_stats_monitor_unittest.cc",
+    "trace_event_unittest.cc",
+    "trace_event_win_unittest.cc",
+    "winheap_dump_provider_win_unittest.cc",
+  ]
+
+  deps = [
+    "//base/test:test_support",
+    "//testing/gmock",
+    "//testing/gtest",
+  ]
+}

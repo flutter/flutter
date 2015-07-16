@@ -1,0 +1,95 @@
+diff --git a/re2/compile.cc b/re2/compile.cc
+index adb45fd..14e401a 100644
+--- a/re2/compile.cc
++++ b/re2/compile.cc
+@@ -44,7 +44,7 @@ struct PatchList {
+   static PatchList Append(Prog::Inst *inst0, PatchList l1, PatchList l2);
+ };
+ 
+-static PatchList nullPatchList;
++static PatchList nullPatchList = { 0 };
+ 
+ // Returns patch list containing just p.
+ PatchList PatchList::Mk(uint32 p) {
+@@ -106,12 +106,13 @@ struct Frag {
+   uint32 begin;
+   PatchList end;
+ 
+-  explicit Frag(LinkerInitialized) {}
+   Frag() : begin(0) { end.p = 0; }  // needed so Frag can go in vector
+   Frag(uint32 begin, PatchList end) : begin(begin), end(end) {}
+ };
+ 
+-static Frag kNullFrag(LINKER_INITIALIZED);
++static Frag NullFrag() {
++  return Frag();
++}
+ 
+ // Input encodings.
+ enum Encoding {
+@@ -684,13 +685,13 @@ Frag Compiler::PreVisit(Regexp* re, Frag, bool* stop) {
+   if (failed_)
+     *stop = true;
+ 
+-  return kNullFrag;  // not used by caller
++  return NullFrag();  // not used by caller
+ }
+ 
+ Frag Compiler::Literal(Rune r, bool foldcase) {
+   switch (encoding_) {
+     default:
+-      return kNullFrag;
++      return NullFrag();
+ 
+     case kEncodingLatin1:
+       return ByteRange(r, r, foldcase);
+@@ -1006,7 +1007,7 @@ Prog* Compiler::Compile(Regexp* re, bool reversed, int64 max_mem) {
+   bool is_anchor_end = IsAnchorEnd(&sre, 0);
+ 
+   // Generate fragment for entire regexp.
+-  Frag f = c.WalkExponential(sre, kNullFrag, 2*c.max_inst_);
++  Frag f = c.WalkExponential(sre, NullFrag(), 2*c.max_inst_);
+   sre->Decref();
+   if (c.failed_)
+     return NULL;
+@@ -1097,7 +1098,7 @@ Prog* Compiler::CompileSet(const RE2::Options& options, RE2::Anchor anchor,
+   c.Setup(pf, options.max_mem(), anchor);
+ 
+   // Compile alternation of fragments.
+-  Frag all = c.WalkExponential(re, kNullFrag, 2*c.max_inst_);
++  Frag all = c.WalkExponential(re, NullFrag(), 2*c.max_inst_);
+   re->Decref();
+   if (c.failed_)
+     return NULL;
+diff --git a/re2/re2.cc b/re2/re2.cc
+index 0da886d..b9e44fc 100644
+--- a/re2/re2.cc
++++ b/re2/re2.cc
+@@ -32,10 +32,10 @@ namespace re2 {
+ static const int kMaxArgs = 16;
+ static const int kVecSize = 1+kMaxArgs;
+ 
+-const VariadicFunction2<bool, const StringPiece&, const RE2&, RE2::Arg, RE2::FullMatchN> RE2::FullMatch;
+-const VariadicFunction2<bool, const StringPiece&, const RE2&, RE2::Arg, RE2::PartialMatchN> RE2::PartialMatch;
+-const VariadicFunction2<bool, StringPiece*, const RE2&, RE2::Arg, RE2::ConsumeN> RE2::Consume;
+-const VariadicFunction2<bool, StringPiece*, const RE2&, RE2::Arg, RE2::FindAndConsumeN> RE2::FindAndConsume;
++const VariadicFunction2<bool, const StringPiece&, const RE2&, RE2::Arg, RE2::FullMatchN> RE2::FullMatch = {};
++const VariadicFunction2<bool, const StringPiece&, const RE2&, RE2::Arg, RE2::PartialMatchN> RE2::PartialMatch = {};
++const VariadicFunction2<bool, StringPiece*, const RE2&, RE2::Arg, RE2::ConsumeN> RE2::Consume = {};
++const VariadicFunction2<bool, StringPiece*, const RE2&, RE2::Arg, RE2::FindAndConsumeN> RE2::FindAndConsume = {};
+ 
+ #define kDefaultMaxMem (8<<20)
+ 
+diff --git a/re2/variadic_function.h b/re2/variadic_function.h
+index 8d2b763..7c7d6d5 100644
+--- a/re2/variadic_function.h
++++ b/re2/variadic_function.h
+@@ -11,8 +11,6 @@ template <typename Result, typename Param0, typename Param1, typename Arg,
+           Result (*Func)(Param0, Param1, const Arg* const [], int count)>
+ class VariadicFunction2 {
+  public:
+-  VariadicFunction2() {}
+-
+   Result operator()(Param0 p0, Param1 p1) const {
+     return Func(p0, p1, 0, 0);
+   }

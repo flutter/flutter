@@ -1,0 +1,25 @@
+Source: gperftools
+Priority: optional
+Maintainer: Google Inc. and others <google-perftools@googlegroups.com>
+Build-Depends: debhelper (>= 4.0.0), binutils
+Standards-Version: 3.6.1
+
+Package: libgperftools-dev
+Section: libdevel
+Architecture: any
+Depends: libgperftools0 (= ${Source-Version})
+Description: libraries for CPU and heap analysis, plus an efficient thread-caching malloc
+ The gperftools package contains some utilities to improve and
+ analyze the performance of C++ programs.  This includes an optimized
+ thread-caching malloc() and cpu and heap profiling utilities.  The
+ devel package contains static and debug libraries and header files
+ for developing applications that use the gperftools package.
+
+Package: libgperftools0
+Section: libs
+Architecture: any
+Depends: ${shlibs:Depends}
+Description: libraries for CPU and heap analysis, plus an efficient thread-caching malloc
+ The gperftools package contains some utilities to improve and
+ analyze the performance of C++ programs.  This includes an optimized
+ thread-caching malloc() and cpu and heap profiling utilities.

@@ -1,0 +1,113 @@
+Name
+
+    CHROMIUM_subscribe_uniform
+
+Name Strings
+
+    CHROMIUM_subscribe_uniform
+
+Version
+
+    Last Modifed Date: October 30, 2014
+
+Dependencies
+
+    OpenGL ES 2.0 is required.
+
+Overview
+
+    Allows clients to subscribe to a set of input uniforms which can
+    be populated within buffers and used to modify uniform variables within
+    their programs.
+
+    Decreases percieved latency for operations performed against these
+    uniforms.
+
+New Tokens
+
+    Accepted by the <target> parameter of glBindValueBufferCHROMIUM,
+    glSubscribeValueCHROMIUM, glPopulateSubscribedValuesCHROMIUM and
+    glUniformValueBufferCHROMIUM
+
+    GL_SUBSCRIBED_VALUES_BUFFER_CHROMIUM                        0x924B
+
+    Accepted by the <subscription> parameter of glSubscribeValueCHROMIUM and
+    glUniformValueBufferCHROMIUM:
+
+    GL_MOUSE_POSITION_CHROMIUM                                  0x924C
+
+New Procedures and Functions
+
+    The command
+
+       void glGenValuebuffersCHROMIUM(GLsizei n, GLuint* buffers)
+
+    Generates value buffer object names.
+    <n> Specifies the number of value buffer object names to be generated.
+    <buffers> Specifies an array in which the generated value buffer object 
+              names are stored.
+
+   The command
+
+      void glDeleteValuebuffersCHROMIUM(GLsizei n, const GLuint* valuebuffers)
+
+   Deletes named value buffer objects.
+   <n> Specifies the number of value buffer objects to be deleted.
+   <buffers> Specifies an array of value buffer objects to be deleted.
+
+   The command
+
+      boolean glIsValuebufferCHROMIUM(GLuint buffer);
+
+   Returns whether an object is a value buffer object.
+   <buffer> Specifies the name of a buffer object.
+
+   The command
+
+      void glBindValuebufferCHROMIUM(GLenum target, GLuint buffer);
+
+   Lets you use a named value buffer object.
+   <target> Specifies the target to which the buffer object is bound.
+   <buffer> Specifies the name of a buffer object.
+
+   The command
+
+      void glSubscribeValueCHROMIUM(GLenum target, GLenum subscription)
+
+   Subscribes the currently bound buffer object to a subscription target.
+   <target> Specifies the target to which the buffer object is bound.
+   <subscription> Specifies the subscription to which the currently bound
+                  buffer object should be subscribed.
+
+   The command
+
+      void glPopulateSubscribedValuesCHROMIUM(GLenum target)
+
+   Populates the currently bound buffer object with all subscription states
+   to which it is subscribed.
+   <target> Specifies the target to which the buffer object is bound.
+
+   The command
+ 
+      void glUniformValueBufferCHROMIUM(GLint location, GLenum target,
+                                       GLenum subscription)
+
+   Populates the uniform specified by location within the currently bound
+   program with the value in the currently bound buffer for the subscription
+   target.
+   <location> Specifies the location of the uniform variable to by modified.
+   <target> Specifies the target to which the buffer object is bound.
+   <subscription> Specifies the subscription in the currently bound buffer
+                  whose value should be used to populate the uniform.
+
+Errors
+
+    None.
+
+New State
+
+    None.
+
+Revision History
+
+    10/30/2014    Documented the extension

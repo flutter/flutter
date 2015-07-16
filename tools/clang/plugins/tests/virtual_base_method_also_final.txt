@@ -1,0 +1,29 @@
+virtual_base_method_also_final.cpp:10:3: warning: [chromium-style] 'virtual' is redundant; 'final' implies 'virtual'.
+  VIRTUAL void F() final {}
+  ^~~~~~~~
+virtual_base_method_also_final.cpp:5:17: note: expanded from macro 'VIRTUAL'
+#define VIRTUAL virtual
+                ^
+virtual_base_method_also_final.cpp:10:3: warning: [chromium-style] The virtual method does not override anything and is final; consider making it non-virtual.
+  VIRTUAL void F() final {}
+  ^~~~~~~~         ~~~~~~
+virtual_base_method_also_final.cpp:5:17: note: expanded from macro 'VIRTUAL'
+#define VIRTUAL virtual
+                ^
+virtual_base_method_also_final.cpp:13:3: warning: [chromium-style] 'virtual' is redundant; 'final' implies 'virtual'.
+  void VIRTUAL G() final {}
+  ^
+virtual_base_method_also_final.cpp:13:3: warning: [chromium-style] The virtual method does not override anything and is final; consider making it non-virtual.
+  void VIRTUAL G() final {}
+  ^                ~~~~~~
+virtual_base_method_also_final.cpp:16:3: warning: [chromium-style] 'virtual' is redundant; 'final' implies 'virtual'.
+  VIRTUAL_VOID H() final {}
+  ^
+virtual_base_method_also_final.cpp:6:22: note: expanded from macro 'VIRTUAL_VOID'
+#define VIRTUAL_VOID virtual void
+                     ^
+virtual_base_method_also_final.cpp:16:3: warning: [chromium-style] The virtual method does not override anything and is final; consider making it non-virtual.
+virtual_base_method_also_final.cpp:6:22: note: expanded from macro 'VIRTUAL_VOID'
+#define VIRTUAL_VOID virtual void
+                     ^
+6 warnings generated.

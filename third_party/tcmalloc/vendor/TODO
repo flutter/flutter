@@ -1,0 +1,47 @@
+HEAP PROFILER
+
+1) Fix heap profiling under all STLs
+   * Find out how to force non-glibc STL libraries to call new() and
+     delete() for every allocation / deallocation.
+   * Make heap profiler ignore STL-internal allocations for those
+     libraries under which we cannot profile accurately, so we only
+     see object-level leaks.
+2) Remove dependency on tcmalloc?
+3) Port to non-linux O/Ses (right now code uses /proc for library info)
+4) Port to non-x86 architectures (locking code in spinlock is x86-specific)
+5) Port to C?
+6) Figure out how to get setenv() to work properly before main() in
+   shared libaries, and get rid of the profile-naming hack once we
+   do.  (See HeapProfiler::Init().)
+
+
+HEAP CHECKER
+
+1) Remove requirement that the heap-checker must be linked last into
+   an application (hard! -- it needs its global constructor to run
+   first)
+
+TCMALLOC
+
+1) Implement mallinfo/mallopt
+2) Have tcmalloc work correctly when libpthread is not linked in
+   (currently working for glibc, could use other libc's too)
+3) Return memory to the system when requirements drop
+4) Explore coloring allocated objects to avoid cache conflicts
+5) Explore biasing reclamation to larger addresses
+6) Add contention stats to a synchronization.cc (can do spinlocks,
+   but threads? -- may have to provide our own thread implementation)
+
+CPU PROFILER
+
+1) Figure out how to get setenv() to work properly before main() in
+   shared libaries(), and get rid of the profile-naming hack once we
+   do.  (See Profiler::GetUniquePathFromEnv().)
+2) Resolve crashing problems on x86_64 (see README)
+
+STACKTRACE
+
+1) Remove dependency on linux/x86
+
+---
+11 March 2008

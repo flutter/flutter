@@ -1,0 +1,122 @@
+// static
+{{union.name}}Ptr {{union.name}}::New() {
+  {{union.name}}Ptr rv;
+  mojo::internal::StructHelper<{{union.name}}>::Initialize(&rv);
+  return rv.Pass();
+}
+
+{{union.name}}::{{union.name}}() {
+  // TODO(azani): Implement default values here when/if we support them.
+  // TODO(azani): Set to UNKNOWN when unknown is implemented.
+  SetActive(static_cast<Tag>(0));
+}
+
+{{union.name}}::~{{union.name}}() {
+  DestroyActive();
+}
+
+{%  if union|is_cloneable_kind %}
+{{union.name}}Ptr {{union.name}}::Clone() const {
+  {{union.name}}Ptr rv(New());
+  switch (tag_) {
+{%    for field in union.fields %}
+    case Tag::{{field.name|upper}}:
+{%    if field.kind|is_string_kind %}
+      rv->set_{{field.name}}(*(data_.{{field.name}}));
+{%    elif field.kind|is_object_kind %}
+      rv->set_{{field.name}}(data_.{{field.name}}->Clone());
+{%-   else %}
+      rv->set_{{field.name}}(data_.{{field.name}});
+{%-   endif %}
+      break;
+{%-   endfor %}
+  };
+  return rv.Pass();
+}
+{%- endif %}
+
+bool {{union.name}}::Equals(const {{union.name}}& other) const {
+  if (tag_ != other.which()) {
+    return false;
+  }
+
+  switch (tag_) {
+{%  for field in union.fields %}
+    case Tag::{{field.name|upper}}:
+{%    if field.kind|is_object_kind or field.kind|is_any_handle_kind
+          or field.kind|is_interface_kind %}
+      return mojo::internal::ValueTraits<{{field.kind|cpp_wrapper_type}}>::Equals(*(data_.{{field.name}}), *(other.data_.{{field.name}}));
+{%-   else %}
+      return mojo::internal::ValueTraits<{{field.kind|cpp_wrapper_type}}>::Equals(data_.{{field.name}}, other.data_.{{field.name}});
+{%-   endif %}
+{%- endfor %}
+  };
+
+  return false;
+}
+
+{%  for field in union.fields %}
+bool {{union.name}}::is_{{field.name}}() const {
+  return tag_ == Tag::{{field.name|upper}};
+}
+
+{{field.kind|cpp_union_getter_return_type}} {{union.name}}::get_{{field.name}}() const {
+  MOJO_DCHECK(tag_ == Tag::{{field.name|upper}});
+{%    if field.kind|is_object_kind or field.kind|is_any_handle_kind
+          or field.kind|is_interface_kind %}
+  return *(data_.{{field.name}});
+{%-   else %}
+  return data_.{{field.name}};
+{%-   endif %}
+}
+
+void {{union.name}}::set_{{field.name}}({{field.kind|cpp_const_wrapper_type}} {{field.name}}) {
+  SwitchActive(Tag::{{field.name|upper}});
+{%    if field.kind|is_string_kind %}
+  *(data_.{{field.name}}) = {{field.name}};
+{%    elif field.kind|is_object_kind or field.kind|is_interface_kind %}
+  *(data_.{{field.name}}) = {{field.name}}.Pass();
+{%    elif field.kind|is_any_handle_kind %}
+  data_.{{field.name}}->reset({{field.name}}.release());
+{%-   else %}
+  data_.{{field.name}} = {{field.name}};
+{%-   endif %}
+}
+{%- endfor %}
+
+void {{union.name}}::SwitchActive(Tag new_active) {
+  if (new_active == tag_) {
+    return;
+  }
+
+  DestroyActive();
+  SetActive(new_active);
+}
+
+void {{union.name}}::SetActive(Tag new_active) {
+  switch (new_active) {
+{%  for field in union.fields %}
+    case Tag::{{field.name|upper}}:
+{%    if field.kind|is_object_kind or field.kind|is_any_handle_kind
+          or field.kind|is_interface_kind %}
+      data_.{{field.name}} = new {{field.kind|cpp_wrapper_type}}();
+{%-   endif %}
+      break;
+{%- endfor %}
+  }
+
+  tag_ = new_active;
+}
+
+void {{union.name}}::DestroyActive() {
+  switch (tag_) {
+{%  for field in union.fields %}
+    case Tag::{{field.name|upper}}:
+{%    if field.kind|is_object_kind or field.kind|is_any_handle_kind
+          or field.kind|is_interface_kind %}
+      delete data_.{{field.name}};
+{%-   endif %}
+      break;
+{%- endfor %}
+  }
+}

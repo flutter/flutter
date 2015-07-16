@@ -1,0 +1,20 @@
+# Copyright 2014 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+static_library("skia") {
+  sources = [
+    "ganesh_context.cc",
+    "ganesh_context.h",
+    "ganesh_surface.cc",
+    "ganesh_surface.h",
+  ]
+
+  deps = [
+    "//base",
+    "//gpu/command_buffer/client:gles2_c_lib",
+    "//gpu/skia_bindings",
+    "//mojo/gpu",
+    "//skia",
+  ]
+}

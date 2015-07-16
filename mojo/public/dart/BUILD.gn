@@ -1,0 +1,55 @@
+import("../mojo_sdk.gni")
+import("rules.gni")
+
+dart_mojo_sdk_sources = [
+  "lib/application.dart",
+  "lib/bindings.dart",
+  "lib/core.dart",
+  "lib/src/application_connection.dart",
+  "lib/src/application.dart",
+  "lib/src/buffer.dart",
+  "lib/src/codec.dart",
+  "lib/src/control_message.dart",
+  "lib/src/data_pipe.dart",
+  "lib/src/drain_data.dart",
+  "lib/src/event_stream.dart",
+  "lib/src/handle.dart",
+  "lib/src/message.dart",
+  "lib/src/message_pipe.dart",
+  "lib/src/proxy.dart",
+  "lib/src/struct.dart",
+  "lib/src/stub.dart",
+  "lib/src/union.dart",
+  "lib/src/types.dart",
+]
+
+dartzip_package("dart") {
+  sources = dart_mojo_sdk_sources + [
+              "pubspec.yaml",
+              "CHANGELOG.md",
+              "README.md",
+            ]
+  uses_pub = true
+  package_name_override = "mojo"
+  deps = [
+    "../interfaces/application",
+    "../interfaces/bindings",
+    "../interfaces/network",
+  ]
+}
+
+dart_pkg("mojo") {
+  sources = dart_mojo_sdk_sources + [
+              "pubspec.yaml",
+              "CHANGELOG.md",
+              "README.md",
+            ]
+
+  sdk_ext_directory = "sdk_ext"
+  sdk_ext_mappings = [ "dart:mojo.internal,internal.dart" ]
+
+  # List of mojom targets that the mojo pkg exports
+  deps = [
+    "../interfaces",
+  ]
+}

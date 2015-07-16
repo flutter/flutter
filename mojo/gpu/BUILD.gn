@@ -1,0 +1,65 @@
+# Copyright 2014 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//mojo/public/mojo_application.gni")
+
+source_set("gpu") {
+  sources = [
+    "gl_context.cc",
+    "gl_context.h",
+    "gl_context_owner.cc",
+    "gl_context_owner.h",
+    "gl_texture.cc",
+    "gl_texture.h",
+    "mojo_context_support.cc",
+    "mojo_context_support.h",
+    "texture_cache.cc",
+    "texture_cache.h",
+    "texture_uploader.cc",
+    "texture_uploader.h",
+  ]
+
+  deps = [
+    "//base",
+    "//gpu/command_buffer/client:gles2_interface",
+    "//gpu/command_buffer/common",
+    "//mojo/environment:chromium",
+    "//mojo/public/c/gles2",
+    "//mojo/public/c/system",
+    "//mojo/public/cpp/application",
+    "//mojo/public/cpp/bindings",
+    "//mojo/public/cpp/environment",
+    "//mojo/public/cpp/system",
+    "//mojo/public/cpp/utility",
+    "//mojo/public/interfaces/application",
+    "//mojo/services/geometry/public/cpp",
+    "//mojo/services/geometry/public/interfaces",
+    "//mojo/services/gpu/public/interfaces",
+    "//mojo/services/surfaces/public/cpp",
+    "//mojo/services/surfaces/public/interfaces",
+    "//mojo/services/surfaces/public/interfaces:surface_id",
+  ]
+}
+
+mojo_native_application("apptests") {
+  output_name = "texture_apptests"
+
+  testonly = true
+
+  sources = [
+    "texture_cache_unittest.cc",
+    "texture_uploader_unittest.cc",
+  ]
+
+  deps = [
+    ":gpu",
+    "//base",
+    "//mojo/application",
+    "//mojo/application:test_support",
+    "//mojo/public/cpp/bindings:callback",
+    "//mojo/services/geometry/public/interfaces",
+    "//mojo/services/surfaces/public/interfaces:surface_id",
+    "//testing/gtest",
+  ]
+}

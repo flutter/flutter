@@ -1,0 +1,66 @@
+Name
+
+    CHROMIUM_image
+
+Name Strings
+
+    GL_CHROMIUM_image
+
+Version
+
+    Last Modifed Date: Oct 7, 2014
+
+Dependencies
+
+    OpenGL ES 2.0 is required.
+
+Overview
+
+    This extension defines a new resource type that is suitable for
+    sharing 2D arrays of image data between client APIs.
+
+Issues
+
+    None
+
+New Tokens
+
+    None
+
+New Procedures and Functions
+
+    GLuint CreateImageCHROMIUM(ClientBuffer buffer,
+                               GLsizei width,
+                               GLsizei height,
+                               GLenum internalformat)
+
+    Create an image from <buffer> with width equal to <width> and
+    height equal to <height> and format equal to <internalformat>.
+
+    Returns a unique identifier for the image that could be used in
+    subsequent operations.
+
+    INVALID_VALUE is generated if <width> or <height> is nonpositive.
+
+    INVALID_ENUM is generated if <internalformat> is not one of
+    RGB or RGBA.
+
+    void DestroyImageCHROMIUM(GLuint image_id)
+
+    Frees the image previously created by a call to CreateImageCHROMIUM.
+
+    INVALID_OPERATION is generated if <image_id> is not a valid image id.
+
+Errors
+
+    None.
+
+New State
+
+    None.
+
+Revision History
+
+    5/9/2013    Documented the extension
+    4/30/2014   Moved usage flag to creation function.
+    10/7/2014   Remove map/unmap API.

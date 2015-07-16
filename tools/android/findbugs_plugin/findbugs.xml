@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Copyright (c) 2012 The Chromium Authors. All rights reserved.
+  Use of this source code is governed by a BSD-style license that can be
+  found in the LICENSE file.
+-->
+
+<FindbugsPlugin xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="findbugsplugin.xsd"
+        pluginid="SynchronizedThisDetector"
+        provider="chromium"
+        website="http://code.google.com/p/chromium/wiki/UseFindBugsForAndroid">
+        <Detector class="org.chromium.tools.findbugs.plugin.SynchronizedThisDetector" reports="CHROMIUM_SYNCHRONIZED_THIS" />
+        <BugPattern type="CHROMIUM_SYNCHRONIZED_THIS" abbrev="CHROMIUM" category="CORRECTNESS"/>
+
+        <Detector class="org.chromium.tools.findbugs.plugin.SynchronizedMethodDetector" reports="CHROMIUM_SYNCHRONIZED_METHOD" />
+        <BugPattern type="CHROMIUM_SYNCHRONIZED_METHOD" abbrev="CHROMIUM" category="CORRECTNESS"/>
+</FindbugsPlugin>

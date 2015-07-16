@@ -1,0 +1,51 @@
+# Copyright 2014 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("../../mojo_sdk.gni")
+
+config("gles2_config") {
+  defines = [ "GLES2_USE_MOJO" ]
+}
+
+group("gles2") {
+  public_configs = [ "//third_party/khronos:khronos_headers" ]
+  public_deps = [
+    ":headers",
+  ]
+  deps = [
+    "../../platform/native:gles2",
+  ]
+}
+
+mojo_sdk_source_set("headers") {
+  sources = [
+    "chromium_copy_texture.h",
+    "chromium_image.h",
+    "chromium_miscellaneous.h",
+    "chromium_pixel_transfer_buffer_object.h",
+    "chromium_sub_image.h",
+    "chromium_sync_point.h",
+    "chromium_texture_mailbox.h",
+    "gles2.h",
+    "gles2_call_visitor_autogen.h",
+    "gles2_call_visitor_chromium_copy_texture_autogen.h",
+    "gles2_call_visitor_chromium_image_autogen.h",
+    "gles2_call_visitor_chromium_miscellaneous_autogen.h",
+    "gles2_call_visitor_chromium_pixel_transfer_buffer_object_autogen.h",
+    "gles2_call_visitor_chromium_sub_image_autogen.h",
+    "gles2_call_visitor_chromium_sync_point_autogen.h",
+    "gles2_call_visitor_chromium_texture_mailbox_autogen.h",
+    "gles2_call_visitor_occlusion_query_ext_autogen.h",
+    "gles2_export.h",
+    "gles2_types.h",
+    "occlusion_query_ext.h",
+  ]
+
+  public_configs = [ ":gles2_config" ]
+
+  mojo_sdk_public_deps = [
+    "mojo/public/c/environment",
+    "mojo/public/c/system",
+  ]
+}

@@ -1,0 +1,360 @@
+// Protocol Buffers - Google's data interchange format
+// Copyright 2008 Google Inc.  All rights reserved.
+// http://code.google.com/p/protobuf/
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are
+// met:
+//
+//     * Redistributions of source code must retain the above copyright
+// notice, this list of conditions and the following disclaimer.
+//     * Redistributions in binary form must reproduce the above
+// copyright notice, this list of conditions and the following disclaimer
+// in the documentation and/or other materials provided with the
+// distribution.
+//     * Neither the name of Google Inc. nor the names of its
+// contributors may be used to endorse or promote products derived from
+// this software without specific prior written permission.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+// Author: kenton@google.com (Kenton Varda)
+//
+// This is like unittest.proto but with optimize_for = LITE_RUNTIME.
+
+package protobuf_unittest;
+
+import "google/protobuf/unittest_import_lite.proto";
+
+option optimize_for = LITE_RUNTIME;
+
+option java_package = "com.google.protobuf";
+
+// Same as TestAllTypes but with the lite runtime.
+message TestAllTypesLite {
+  message NestedMessage {
+    optional int32 bb = 1;
+  }
+
+  enum NestedEnum {
+    FOO = 1;
+    BAR = 2;
+    BAZ = 3;
+  }
+
+  // Singular
+  optional    int32 optional_int32    =  1;
+  optional    int64 optional_int64    =  2;
+  optional   uint32 optional_uint32   =  3;
+  optional   uint64 optional_uint64   =  4;
+  optional   sint32 optional_sint32   =  5;
+  optional   sint64 optional_sint64   =  6;
+  optional  fixed32 optional_fixed32  =  7;
+  optional  fixed64 optional_fixed64  =  8;
+  optional sfixed32 optional_sfixed32 =  9;
+  optional sfixed64 optional_sfixed64 = 10;
+  optional    float optional_float    = 11;
+  optional   double optional_double   = 12;
+  optional     bool optional_bool     = 13;
+  optional   string optional_string   = 14;
+  optional    bytes optional_bytes    = 15;
+
+  optional group OptionalGroup = 16 {
+    optional int32 a = 17;
+  }
+
+  optional NestedMessage      optional_nested_message  = 18;
+  optional ForeignMessageLite optional_foreign_message = 19;
+  optional protobuf_unittest_import.ImportMessageLite
+    optional_import_message = 20;
+
+  optional NestedEnum      optional_nested_enum     = 21;
+  optional ForeignEnumLite optional_foreign_enum    = 22;
+  optional protobuf_unittest_import.ImportEnumLite optional_import_enum = 23;
+
+  optional string optional_string_piece = 24 [ctype=STRING_PIECE];
+  optional string optional_cord = 25 [ctype=CORD];
+
+  // Defined in unittest_import_public.proto
+  optional protobuf_unittest_import.PublicImportMessageLite
+      optional_public_import_message = 26;
+
+  optional NestedMessage optional_lazy_message = 27 [lazy=true];
+
+  // Repeated
+  repeated    int32 repeated_int32    = 31;
+  repeated    int64 repeated_int64    = 32;
+  repeated   uint32 repeated_uint32   = 33;
+  repeated   uint64 repeated_uint64   = 34;
+  repeated   sint32 repeated_sint32   = 35;
+  repeated   sint64 repeated_sint64   = 36;
+  repeated  fixed32 repeated_fixed32  = 37;
+  repeated  fixed64 repeated_fixed64  = 38;
+  repeated sfixed32 repeated_sfixed32 = 39;
+  repeated sfixed64 repeated_sfixed64 = 40;
+  repeated    float repeated_float    = 41;
+  repeated   double repeated_double   = 42;
+  repeated     bool repeated_bool     = 43;
+  repeated   string repeated_string   = 44;
+  repeated    bytes repeated_bytes    = 45;
+
+  repeated group RepeatedGroup = 46 {
+    optional int32 a = 47;
+  }
+
+  repeated NestedMessage      repeated_nested_message  = 48;
+  repeated ForeignMessageLite repeated_foreign_message = 49;
+  repeated protobuf_unittest_import.ImportMessageLite
+    repeated_import_message = 50;
+
+  repeated NestedEnum      repeated_nested_enum  = 51;
+  repeated ForeignEnumLite repeated_foreign_enum = 52;
+  repeated protobuf_unittest_import.ImportEnumLite repeated_import_enum = 53;
+
+  repeated string repeated_string_piece = 54 [ctype=STRING_PIECE];
+  repeated string repeated_cord = 55 [ctype=CORD];
+
+  repeated NestedMessage repeated_lazy_message = 57 [lazy=true];
+
+  // Singular with defaults
+  optional    int32 default_int32    = 61 [default =  41    ];
+  optional    int64 default_int64    = 62 [default =  42    ];
+  optional   uint32 default_uint32   = 63 [default =  43    ];
+  optional   uint64 default_uint64   = 64 [default =  44    ];
+  optional   sint32 default_sint32   = 65 [default = -45    ];
+  optional   sint64 default_sint64   = 66 [default =  46    ];
+  optional  fixed32 default_fixed32  = 67 [default =  47    ];
+  optional  fixed64 default_fixed64  = 68 [default =  48    ];
+  optional sfixed32 default_sfixed32 = 69 [default =  49    ];
+  optional sfixed64 default_sfixed64 = 70 [default = -50    ];
+  optional    float default_float    = 71 [default =  51.5  ];
+  optional   double default_double   = 72 [default =  52e3  ];
+  optional     bool default_bool     = 73 [default = true   ];
+  optional   string default_string   = 74 [default = "hello"];
+  optional    bytes default_bytes    = 75 [default = "world"];
+
+  optional NestedEnum default_nested_enum = 81 [default = BAR];
+  optional ForeignEnumLite default_foreign_enum = 82
+      [default = FOREIGN_LITE_BAR];
+  optional protobuf_unittest_import.ImportEnumLite
+      default_import_enum = 83 [default = IMPORT_LITE_BAR];
+
+  optional string default_string_piece = 84 [ctype=STRING_PIECE,default="abc"];
+  optional string default_cord = 85 [ctype=CORD,default="123"];
+}
+
+message ForeignMessageLite {
+  optional int32 c = 1;
+}
+
+enum ForeignEnumLite {
+  FOREIGN_LITE_FOO = 4;
+  FOREIGN_LITE_BAR = 5;
+  FOREIGN_LITE_BAZ = 6;
+}
+
+message TestPackedTypesLite {
+  repeated    int32 packed_int32    =  90 [packed = true];
+  repeated    int64 packed_int64    =  91 [packed = true];
+  repeated   uint32 packed_uint32   =  92 [packed = true];
+  repeated   uint64 packed_uint64   =  93 [packed = true];
+  repeated   sint32 packed_sint32   =  94 [packed = true];
+  repeated   sint64 packed_sint64   =  95 [packed = true];
+  repeated  fixed32 packed_fixed32  =  96 [packed = true];
+  repeated  fixed64 packed_fixed64  =  97 [packed = true];
+  repeated sfixed32 packed_sfixed32 =  98 [packed = true];
+  repeated sfixed64 packed_sfixed64 =  99 [packed = true];
+  repeated    float packed_float    = 100 [packed = true];
+  repeated   double packed_double   = 101 [packed = true];
+  repeated     bool packed_bool     = 102 [packed = true];
+  repeated ForeignEnumLite packed_enum  = 103 [packed = true];
+}
+
+message TestAllExtensionsLite {
+  extensions 1 to max;
+}
+
+extend TestAllExtensionsLite {
+  // Singular
+  optional    int32 optional_int32_extension_lite    =  1;
+  optional    int64 optional_int64_extension_lite    =  2;
+  optional   uint32 optional_uint32_extension_lite   =  3;
+  optional   uint64 optional_uint64_extension_lite   =  4;
+  optional   sint32 optional_sint32_extension_lite   =  5;
+  optional   sint64 optional_sint64_extension_lite   =  6;
+  optional  fixed32 optional_fixed32_extension_lite  =  7;
+  optional  fixed64 optional_fixed64_extension_lite  =  8;
+  optional sfixed32 optional_sfixed32_extension_lite =  9;
+  optional sfixed64 optional_sfixed64_extension_lite = 10;
+  optional    float optional_float_extension_lite    = 11;
+  optional   double optional_double_extension_lite   = 12;
+  optional     bool optional_bool_extension_lite     = 13;
+  optional   string optional_string_extension_lite   = 14;
+  optional    bytes optional_bytes_extension_lite    = 15;
+
+  optional group OptionalGroup_extension_lite = 16 {
+    optional int32 a = 17;
+  }
+
+  optional TestAllTypesLite.NestedMessage optional_nested_message_extension_lite
+      = 18;
+  optional ForeignMessageLite optional_foreign_message_extension_lite = 19;
+  optional protobuf_unittest_import.ImportMessageLite
+    optional_import_message_extension_lite = 20;
+
+  optional TestAllTypesLite.NestedEnum optional_nested_enum_extension_lite = 21;
+  optional ForeignEnumLite optional_foreign_enum_extension_lite = 22;
+  optional protobuf_unittest_import.ImportEnumLite
+    optional_import_enum_extension_lite = 23;
+
+  optional string optional_string_piece_extension_lite = 24
+      [ctype=STRING_PIECE];
+  optional string optional_cord_extension_lite = 25 [ctype=CORD];
+
+  optional protobuf_unittest_import.PublicImportMessageLite
+    optional_public_import_message_extension_lite = 26;
+
+  optional TestAllTypesLite.NestedMessage
+    optional_lazy_message_extension_lite = 27 [lazy=true];
+
+  // Repeated
+  repeated    int32 repeated_int32_extension_lite    = 31;
+  repeated    int64 repeated_int64_extension_lite    = 32;
+  repeated   uint32 repeated_uint32_extension_lite   = 33;
+  repeated   uint64 repeated_uint64_extension_lite   = 34;
+  repeated   sint32 repeated_sint32_extension_lite   = 35;
+  repeated   sint64 repeated_sint64_extension_lite   = 36;
+  repeated  fixed32 repeated_fixed32_extension_lite  = 37;
+  repeated  fixed64 repeated_fixed64_extension_lite  = 38;
+  repeated sfixed32 repeated_sfixed32_extension_lite = 39;
+  repeated sfixed64 repeated_sfixed64_extension_lite = 40;
+  repeated    float repeated_float_extension_lite    = 41;
+  repeated   double repeated_double_extension_lite   = 42;
+  repeated     bool repeated_bool_extension_lite     = 43;
+  repeated   string repeated_string_extension_lite   = 44;
+  repeated    bytes repeated_bytes_extension_lite    = 45;
+
+  repeated group RepeatedGroup_extension_lite = 46 {
+    optional int32 a = 47;
+  }
+
+  repeated TestAllTypesLite.NestedMessage repeated_nested_message_extension_lite
+      = 48;
+  repeated ForeignMessageLite repeated_foreign_message_extension_lite = 49;
+  repeated protobuf_unittest_import.ImportMessageLite
+    repeated_import_message_extension_lite = 50;
+
+  repeated TestAllTypesLite.NestedEnum repeated_nested_enum_extension_lite = 51;
+  repeated ForeignEnumLite repeated_foreign_enum_extension_lite = 52;
+  repeated protobuf_unittest_import.ImportEnumLite
+    repeated_import_enum_extension_lite = 53;
+
+  repeated string repeated_string_piece_extension_lite = 54
+      [ctype=STRING_PIECE];
+  repeated string repeated_cord_extension_lite = 55 [ctype=CORD];
+
+  repeated TestAllTypesLite.NestedMessage
+    repeated_lazy_message_extension_lite = 57 [lazy=true];
+
+  // Singular with defaults
+  optional    int32 default_int32_extension_lite    = 61 [default =  41    ];
+  optional    int64 default_int64_extension_lite    = 62 [default =  42    ];
+  optional   uint32 default_uint32_extension_lite   = 63 [default =  43    ];
+  optional   uint64 default_uint64_extension_lite   = 64 [default =  44    ];
+  optional   sint32 default_sint32_extension_lite   = 65 [default = -45    ];
+  optional   sint64 default_sint64_extension_lite   = 66 [default =  46    ];
+  optional  fixed32 default_fixed32_extension_lite  = 67 [default =  47    ];
+  optional  fixed64 default_fixed64_extension_lite  = 68 [default =  48    ];
+  optional sfixed32 default_sfixed32_extension_lite = 69 [default =  49    ];
+  optional sfixed64 default_sfixed64_extension_lite = 70 [default = -50    ];
+  optional    float default_float_extension_lite    = 71 [default =  51.5  ];
+  optional   double default_double_extension_lite   = 72 [default =  52e3  ];
+  optional     bool default_bool_extension_lite     = 73 [default = true   ];
+  optional   string default_string_extension_lite   = 74 [default = "hello"];
+  optional    bytes default_bytes_extension_lite    = 75 [default = "world"];
+
+  optional TestAllTypesLite.NestedEnum
+    default_nested_enum_extension_lite = 81 [default = BAR];
+  optional ForeignEnumLite
+    default_foreign_enum_extension_lite = 82 [default = FOREIGN_LITE_BAR];
+  optional protobuf_unittest_import.ImportEnumLite
+    default_import_enum_extension_lite = 83 [default = IMPORT_LITE_BAR];
+
+  optional string default_string_piece_extension_lite = 84 [ctype=STRING_PIECE,
+                                                            default="abc"];
+  optional string default_cord_extension_lite = 85 [ctype=CORD, default="123"];
+}
+
+message TestPackedExtensionsLite {
+  extensions 1 to max;
+}
+
+extend TestPackedExtensionsLite {
+  repeated    int32 packed_int32_extension_lite    =  90 [packed = true];
+  repeated    int64 packed_int64_extension_lite    =  91 [packed = true];
+  repeated   uint32 packed_uint32_extension_lite   =  92 [packed = true];
+  repeated   uint64 packed_uint64_extension_lite   =  93 [packed = true];
+  repeated   sint32 packed_sint32_extension_lite   =  94 [packed = true];
+  repeated   sint64 packed_sint64_extension_lite   =  95 [packed = true];
+  repeated  fixed32 packed_fixed32_extension_lite  =  96 [packed = true];
+  repeated  fixed64 packed_fixed64_extension_lite  =  97 [packed = true];
+  repeated sfixed32 packed_sfixed32_extension_lite =  98 [packed = true];
+  repeated sfixed64 packed_sfixed64_extension_lite =  99 [packed = true];
+  repeated    float packed_float_extension_lite    = 100 [packed = true];
+  repeated   double packed_double_extension_lite   = 101 [packed = true];
+  repeated     bool packed_bool_extension_lite     = 102 [packed = true];
+  repeated ForeignEnumLite packed_enum_extension_lite = 103 [packed = true];
+}
+
+message TestNestedExtensionLite {
+  extend TestAllExtensionsLite {
+    optional int32 nested_extension = 12345;
+  }
+}
+
+// Test that deprecated fields work.  We only verify that they compile (at one
+// point this failed).
+message TestDeprecatedLite {
+  optional int32 deprecated_field = 1 [deprecated = true];
+}
+
+// See the comments of the same type in unittest.proto.
+message TestParsingMergeLite {
+  message RepeatedFieldsGenerator {
+    repeated TestAllTypesLite field1 = 1;
+    repeated TestAllTypesLite field2 = 2;
+    repeated TestAllTypesLite field3 = 3;
+    repeated group Group1 = 10 {
+      optional TestAllTypesLite field1 = 11;
+    }
+    repeated group Group2 = 20 {
+      optional TestAllTypesLite field1 = 21;
+    }
+    repeated TestAllTypesLite ext1 = 1000;
+    repeated TestAllTypesLite ext2 = 1001;
+  }
+  required TestAllTypesLite required_all_types = 1;
+  optional TestAllTypesLite optional_all_types = 2;
+  repeated TestAllTypesLite repeated_all_types = 3;
+  optional group OptionalGroup = 10 {
+    optional TestAllTypesLite optional_group_all_types = 11;
+  }
+  repeated group RepeatedGroup = 20 {
+    optional TestAllTypesLite repeated_group_all_types = 21;
+  }
+  extensions 1000 to max;
+  extend TestParsingMergeLite {
+    optional TestAllTypesLite optional_ext = 1000;
+    repeated TestAllTypesLite repeated_ext = 1001;
+  }
+}

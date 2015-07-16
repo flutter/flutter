@@ -1,0 +1,20 @@
+// Copyright 2014 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+module mojo;
+
+// A surface ID is composed of two parts, a local part and a namespace. The
+// local part is allocated by the client using any scheme that avoids
+// duplicates. The namespace is allocated by the service and will be different
+// for each client (aka each connection to mojo.Surface).
+//
+// The special id_namespace value 0 is equivalent to the namespace of the
+// client. This can be used to create, destroy and submit frames to
+// surfaces before learning the namespace and to reference other surfaces
+// owned by the same client. The actual id namespace must be used to pass
+// surface ids to other clients for them to reference.
+struct SurfaceId {
+  uint32 local;
+  uint32 id_namespace;
+};

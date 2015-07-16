@@ -1,0 +1,15 @@
+[dist4]message_header  // num_bytes
+[u4]0                  // version
+[u4]13                 // name
+[u4]0                  // flags
+[anchr]message_header
+
+[dist4]method13_params // num_bytes
+[u4]0                  // version
+[u4]0xFFFFFFFF         // param0
+[u4]1234
+[u4]65535              // param1
+[u4]0xFFFFFFFF         // param2
+[u4]3242
+[u4]0                  // padding
+[anchr]method13_params

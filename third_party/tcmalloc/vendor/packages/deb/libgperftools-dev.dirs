@@ -1,0 +1,5 @@
+usr/lib
+usr/lib/pkgconfig
+usr/include
+usr/include/google
+usr/include/gperftools

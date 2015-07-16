@@ -1,0 +1,53 @@
+// Copyright 2014 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+module dart_to_cpp;
+
+// This struct encompasses all of the basic types, so that they
+// may be sent from C++ to Dart and back for validation.
+struct EchoArgs {
+  int64 si64;
+  int32 si32;
+  int16 si16;
+  int8  si8;
+  uint64 ui64;
+  uint32 ui32;
+  uint16 ui16;
+  uint8  ui8;
+  float float_val;
+  float float_inf;
+  float float_nan;
+  double double_val;
+  double double_inf;
+  double double_nan;
+  string? name;
+  array<string>? string_array;
+  handle<message_pipe>? message_handle;
+  handle<data_pipe_consumer>? data_handle;
+};
+
+struct EchoArgsList {
+  EchoArgsList? next;
+  EchoArgs? item;
+};
+
+// Note: For messages which control test flow, pick numbers that are unlikely
+// to be hit as a result of our deliberate corruption of response messages.
+interface CppSide {
+  // Sent for all tests to notify that the Dart side is now ready.
+  StartTest@88888888();
+
+  // Indicates end for echo, bit-flip, and back-pointer tests.
+  TestFinished@99999999();
+
+  // Responses from specific tests.
+  PingResponse();
+  EchoResponse(EchoArgsList list);
+};
+
+interface DartSide {
+  SetClient(CppSide cppSide);
+  Ping();
+  Echo(int32 numIterations, EchoArgs arg);
+};

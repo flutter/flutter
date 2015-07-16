@@ -1,0 +1,36 @@
+// Copyright 2014 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+[JavaPackage="org.chromium.mojo.bindings.test.mojom.mojo"]
+module mojo.test;
+
+struct Struct1 {
+  uint8 i;
+};
+
+struct Struct2 {
+  handle hdl;
+};
+
+struct Struct3 {
+  Struct1 struct_1;
+};
+
+struct Struct4 {
+  array<Struct1> data;
+};
+
+struct Struct5 {
+  array<Struct1, 2> pair;
+};
+
+struct Struct6 {
+  string str;
+};
+
+struct StructOfNullables {
+  handle? hdl;
+  Struct1? struct_1;
+  string? str;
+};

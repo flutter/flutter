@@ -1,0 +1,93 @@
+# This file contains a list of Mojo gtest unit tests.
+# This must be valid python. It can use the |config| global that will be a
+# mopy.config.Config object and must set a |tests| global that will contain the
+# tests to run.
+# TODO(vtl): Add a way of specifying data dependencies instead of cacheable.
+
+tests = [
+  # System tests:
+  {
+    "test": "mojo_system_unittests",
+  },
+
+  # Public tests:
+  {
+    "test": "mojo_public_bindings_unittests",
+    "cacheable": False,
+  },
+  {
+    "test": "mojo_public_environment_unittests",
+  },
+  {
+    "test": "mojo_public_system_unittests",
+  },
+  {
+    "test": "mojo_public_utility_unittests",
+  },
+  {
+    "test": "mojo_system_impl_private_unittests",
+  },
+
+  # Non-system, non-public tests:
+  {
+    "test": "crypto_unittests",
+  },
+  {
+    "test": "mojo_application_manager_unittests",
+  },
+  {
+    "test": "mojo_common_unittests",
+  },
+  {
+    "test": "mojo_view_manager_lib_unittests",
+  },
+  {
+    "test": "mojo_surfaces_lib_unittests",
+  },
+  {
+    "test": "view_manager_service_unittests",
+  },
+  {
+    "test": "window_manager_unittests",
+  },
+
+  # Shell integration tests:
+  {
+    "test": "mojo_shell_tests",
+    "cacheable": False,
+  },
+]
+
+if config.target_os != config.OS_ANDROID:
+  tests += [
+    # Tests for components we depend on:
+    {
+      "test": "gfx_unittests",
+    },
+    {
+      "test": "events_unittests",
+    },
+
+    # JavaScript tests:
+    {
+      "test": "js_unittests",
+      "cacheable": False,
+    },
+    {
+      "test": "js_integration_tests",
+      "cacheable": False,
+    },
+    {
+      "test": "js_services_unittests",
+      "cacheable": False,
+    },
+  ]
+
+# TODO: get dart unittests working with android.
+if config.target_os != config.OS_ANDROID:
+  tests += [
+    {
+      "test": "dart_unittests",
+      "cacheable": False,
+    },
+  ]

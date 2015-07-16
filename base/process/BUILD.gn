@@ -1,0 +1,108 @@
+# Copyright (c) 2015 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+source_set("process") {
+  sources = [
+    "internal_linux.cc",
+    "internal_linux.h",
+    "kill.cc",
+    "kill.h",
+    "kill_mac.cc",
+    "kill_posix.cc",
+    "kill_win.cc",
+    "launch.cc",
+    "launch.h",
+    "launch_ios.cc",
+    "launch_mac.cc",
+    "launch_posix.cc",
+    "launch_win.cc",
+    "memory.cc",
+    "memory.h",
+    "memory_linux.cc",
+    "memory_mac.mm",
+    "memory_win.cc",
+    "process.h",
+    "process_handle_freebsd.cc",
+    "process_handle_linux.cc",
+    "process_handle_mac.cc",
+    "process_handle_openbsd.cc",
+    "process_handle_posix.cc",
+    "process_handle_win.cc",
+    "process_info.h",
+    "process_info_linux.cc",
+    "process_info_mac.cc",
+    "process_info_win.cc",
+    "process_iterator.cc",
+    "process_iterator.h",
+    "process_iterator_freebsd.cc",
+    "process_iterator_linux.cc",
+    "process_iterator_mac.cc",
+    "process_iterator_openbsd.cc",
+    "process_iterator_win.cc",
+    "process_linux.cc",
+    "process_mac.cc",
+    "process_metrics.cc",
+    "process_metrics.h",
+    "process_metrics_freebsd.cc",
+    "process_metrics_ios.cc",
+    "process_metrics_linux.cc",
+    "process_metrics_mac.cc",
+    "process_metrics_openbsd.cc",
+    "process_metrics_posix.cc",
+    "process_metrics_win.cc",
+    "process_posix.cc",
+    "process_win.cc",
+  ]
+
+  sources -= [
+    "process_handle_freebsd.cc",
+    "process_handle_openbsd.cc",
+    "process_iterator_freebsd.cc",
+    "process_iterator_openbsd.cc",
+    "process_metrics_freebsd.cc",
+    "process_metrics_openbsd.cc",
+  ]
+
+  if (is_android) {
+    # Android uses some Linux sources, put those back.
+    set_sources_assignment_filter([])
+    sources += [
+      "internal_linux.cc",
+      "memory_linux.cc",
+      "process_handle_linux.cc",
+      "process_iterator_linux.cc",
+      "process_metrics_linux.cc",
+    ]
+    set_sources_assignment_filter(sources_assignment_filter)
+  }
+
+  if (is_nacl) {
+    sources -= [
+      "kill.cc",
+      "kill.h",
+      "kill_posix.cc",
+      "launch.cc",
+      "launch.h",
+      "launch_posix.cc",
+      "memory.cc",
+      "memory.h",
+      "process_iterator.cc",
+      "process_iterator.h",
+      "process_metrics.cc",
+      "process_metrics_posix.cc",
+      "process_posix.cc",
+    ]
+  }
+
+  configs += [ "//base:base_implementation" ]
+
+  deps = [
+    "//base/memory",
+    "//base/third_party/dynamic_annotations",
+  ]
+
+  allow_circular_includes_from = [ "//base/memory" ]
+
+  visibility = [ "//base/*" ]
+}

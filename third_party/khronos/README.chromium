@@ -1,0 +1,41 @@
+Name: Khronos header files
+Short Name: khronos_headers
+URL: http://www.khronos.org/registry
+Version: unknown
+Date: 2014-11-26
+License: MIT/X11, SGI Free Software License B
+Security Critical: no
+
+Description:
+This package contains header files for the EGL and OpenGL ES APIs from
+Khronos. They are used for compiling code against these APIs as well as for
+generating the GL binding initialization logic.
+
+MIT/X11 (BSD like) license is for {EGL,KHR}/*, SGI Free Software License B is
+for noninclude/GL/*, GLES2/* and GLES3/*.
+
+Local Modifications:
+
+NOTE: Please add Chromium-specific declarations to files in gpu/{GL,EGL,GLES2}
+and not here.
+
+noninclude/GL/glext.h
+ - Added missing function prototypes and enums for GL_KHR_robustness
+GLES2/gl2.h
+ - Added include of gl2chromium.h
+GLES2/gl2ext.h
+ - Chromium-specific define to account for issues in gles2_conform_test,
+   see http://crbug.com/329708.
+ - Commented out GL_SAMPLER, conflicts with third_party/gles2_conform
+ - Drop const from last argument of GLDEBUGPROCKHR (win trybot fail)
+ - Added ifdef around GL_LINES_ADJACENCY_EXT to fix conflict with OSX
+   OpenGL framework headers.
+EGL/eglplatform.h
+ - Added EGLNative*Type for Mac.
+ - Added EGLNative*Type for native linux framebuffers.
+EGL/eglext.h
+ - Added EGL_ARM_implicit_external_sync extension tokens
+KHR/khrplatform.h
+ - Modified KHRONOS_APICALL and KHRONOS_APIENTRY
+DEPS
+ - Added DEPS file to prevent inclusion of external dependencies.

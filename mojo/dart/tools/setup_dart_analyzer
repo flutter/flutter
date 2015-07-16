@@ -1,0 +1,72 @@
+#!/usr/bin/env python
+# Copyright 2015 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import argparse
+import subprocess
+import sys
+import os
+import yaml
+
+
+MOJO_DART_TOOLS_DIR = os.path.dirname(os.path.abspath(__file__))
+SRC_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(MOJO_DART_TOOLS_DIR)))
+MOJO_DIR = os.path.join(SRC_DOOT, 'mojo', 'public', 'dart')
+MOJO_PUBSPEC = os.path.join(MOJO_DIR, 'pubspec.yaml')
+MOJO_PUBSPEC_LOCK = os.path.join(MOJO_DIR, 'pubspec.lock')
+SDK_EXT = os.path.join(MOJO_DIR, 'lib', '_sdkext')
+
+SDK_EXT_TEMPLATE = '''{
+  "dart:mojo.internal": "%(build_dir)s/gen/dart-pkg/mojo/sdk_ext/internal.dart"
+}'''
+
+def version_for_pubspec(pubspec_path):
+    with open(pubspec_path, 'r') as stream:
+        dependency_spec = yaml.load(stream)
+        return dependency_spec['version']
+
+
+def entry_for_dependency(dart_pkg_dir, dependency):
+    dependency_path = os.path.join(dart_pkg_dir, dependency)
+    version = version_for_pubspec(os.path.join(dependency_path, 'pubspec.yaml'))
+    return {
+        'description': {
+            'path': os.path.relpath(dependency_path, MOJO_DIR),
+            'relative': True,
+        },
+        'source': 'path',
+        'version': version,
+    }
+
+
+def main():
+    parser = argparse.ArgumentParser(description='Adds files to the source tree to make the dart analyzer happy')
+    parser.add_argument('build_dir', type=str, help='Path the build directory to use for build artifacts')
+    args = parser.parse_args()
+
+    dart_pkg_dir = os.path.join(args.build_dir, 'gen', 'dart-pkg')
+
+    if not os.path.exists(dart_pkg_dir):
+        print 'Cannot find Dart pacakges at "%s".' % dart_pkg_dir
+        print 'Did you run `ninja -C %s` ?' % os.path.relpath(args.build_dir, os.getcwd())
+        return 1
+
+    packages = {}
+
+    with open(MOJO_PUBSPEC, 'r') as stream:
+        spec = yaml.load(stream)
+        for dependency in spec['dependencies'].keys():
+            packages[dependency] = entry_for_dependency(dart_pkg_dir, dependency)
+
+    lock = { 'packages': packages }
+    with open(MOJO_PUBSPEC_LOCK, 'w') as stream:
+        yaml.dump(lock, stream=stream, default_flow_style=False)
+
+    with open(SDK_EXT, 'w') as stream:
+        rebased_build_dir = os.path.relpath(args.build_dir, os.path.dirname(SDK_EXT))
+        stream.write(SDK_EXT_TEMPLATE % { 'build_dir': rebased_build_dir })
+
+
+if __name__ == '__main__':
+    sys.exit(main())

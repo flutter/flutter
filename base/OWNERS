@@ -1,0 +1,31 @@
+mark@chromium.org
+darin@chromium.org
+thakis@chromium.org
+danakj@chromium.org
+rvargas@chromium.org
+thestig@chromium.org
+
+# On extended leave.
+willchan@chromium.org
+
+# Chromium is a very mature project, most things that are generally useful are
+# already here, and that things not here aren't generally useful.
+#
+# Base is pulled into many projects. For example, various ChromeOS daemons. So
+# the bar for adding stuff is that it must have demonstrated wide
+# applicability. Prefer to add things closer to where they're used (i.e. "not
+# base"), and pull into base only when needed.  In a project our size,
+# sometimes even duplication is OK and inevitable.
+#
+# Adding a new logging macro DPVELOG_NE is not more clear than just
+# writing the stuff you want to log in a regular logging statement, even
+# if it makes your calling code longer. Just add it to your own code.
+
+per-file *.isolate=csharp@chromium.org
+per-file *.isolate=maruel@chromium.org
+per-file security_unittest.cc=jln@chromium.org
+
+# For Android-specific changes:
+per-file *android*=nyquist@chromium.org
+per-file *android*=rmcilroy@chromium.org
+per-file *android*=yfriedman@chromium.org

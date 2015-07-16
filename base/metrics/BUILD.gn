@@ -1,0 +1,49 @@
+# Copyright (c) 2015 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+source_set("metrics") {
+  sources = [
+    "bucket_ranges.cc",
+    "bucket_ranges.h",
+    "field_trial.cc",
+    "field_trial.h",
+    "histogram.cc",
+    "histogram.h",
+    "histogram_base.cc",
+    "histogram_base.h",
+    "histogram_delta_serialization.cc",
+    "histogram_delta_serialization.h",
+    "histogram_flattener.h",
+    "histogram_macros.h",
+    "histogram_samples.cc",
+    "histogram_samples.h",
+    "histogram_snapshot_manager.cc",
+    "histogram_snapshot_manager.h",
+    "sample_map.cc",
+    "sample_map.h",
+    "sample_vector.cc",
+    "sample_vector.h",
+    "sparse_histogram.cc",
+    "sparse_histogram.h",
+    "statistics_recorder.cc",
+    "statistics_recorder.h",
+    "user_metrics.cc",
+    "user_metrics.h",
+    "user_metrics_action.h",
+  ]
+
+  if (is_nacl) {
+    sources -= [ "field_trial.cc" ]
+  }
+
+  configs += [ "//base:base_implementation" ]
+
+  deps = [
+    "//base/debug",
+    "//base/json",
+    "//base/memory",
+  ]
+
+  visibility = [ "//base/*" ]
+}

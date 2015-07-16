@@ -1,0 +1,32 @@
+Name: re2 - an efficient, principled regular expression library
+Short Name: re2
+URL: http://code.google.com/p/re2/
+Version: 7f91923f3ad4
+Date: 2012-06-20
+Revision: 100:7f91923f3ad4
+License: BSD 3-Clause License
+License File: LICENSE
+Security Critical: yes
+
+Description:
+RE2 is a fast, safe, thread-friendly alternative to backtracking regular
+expression engines like those used in PCRE, Perl, and Python.
+
+Local Modifications (to be applied in this order):
+- Remove valgrind specific code that exists in chromium already
+  (patches/remove-valgrind-code.patch)
+- Support for Windows (patches/re2-msvc9-chrome.patch)
+- Support Android (patches/re2-android.patch)
+- Remove static initializers (patches/remove-static-initializers.patch)
+- Rename POSIX configuration (patches/rename-posix-option.patch)
+- Support libcxx (patches/re2-libcxx.patch)
+  https://code.google.com/p/re2/issues/detail?id=76
+- Memory optimization for filtered trees
+  (patches/re2-memory-optimization.patch)
+- Prevent unwanted reports from MemorySanitizer. Note: there's an upstream fix
+  for this (https://code.google.com/p/re2/issues/detail?id=77) which is rendered
+  ineffective by patches/remove-valgrind-code.patch
+  (patches/re2-msan.patch)
+- Remove comparisons of this with NULL, merges upstream b92ce81f1e25
+- Let COMPILE_ASSERT use static_assert if available, merges upstream
+  2225f94df8ec

@@ -1,0 +1,39 @@
+// Copyright 2014 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+module mojo;
+
+struct Point {
+  int32 x;
+  int32 y;
+};
+
+struct PointF {
+  float x;
+  float y;
+};
+
+struct Size {
+  int32 width;
+  int32 height;
+};
+
+struct Rect {
+  int32 x;
+  int32 y;
+  int32 width;
+  int32 height;
+};
+
+struct RectF {
+  float x;
+  float y;
+  float width;
+  float height;
+};
+
+struct Transform {
+  // Row major order.
+  array<float, 16> matrix;
+};

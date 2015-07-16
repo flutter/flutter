@@ -1,0 +1,99 @@
+# Copyright 2014 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//build/config/ui.gni")
+
+declare_args() {
+  # Use the PCI lib to collect GPU information on Linux.
+  use_libpci = true
+}
+
+source_set("config") {
+  sources = [
+    "dx_diag_node.cc",
+    "dx_diag_node.h",
+    "gpu_blacklist.cc",
+    "gpu_blacklist.h",
+    "gpu_control_list.cc",
+    "gpu_control_list.h",
+    "gpu_control_list_jsons.h",
+    "gpu_driver_bug_list.cc",
+    "gpu_driver_bug_list.h",
+    "gpu_driver_bug_list_json.cc",
+    "gpu_driver_bug_workaround_type.h",
+    "gpu_dx_diagnostics_win.cc",
+    "gpu_feature_type.h",
+    "gpu_info.cc",
+    "gpu_info.h",
+    "gpu_info_collector.cc",
+    "gpu_info_collector.h",
+    "gpu_info_collector_android.cc",
+    "gpu_info_collector_linux.cc",
+    "gpu_info_collector_linux.h",
+    "gpu_info_collector_mac.mm",
+    "gpu_info_collector_ozone.cc",
+    "gpu_info_collector_win.cc",
+    "gpu_info_collector_x11.cc",
+    "gpu_switches.cc",
+    "gpu_switches.h",
+    "gpu_test_config.cc",
+    "gpu_test_config.h",
+    "gpu_test_expectations_parser.cc",
+    "gpu_test_expectations_parser.h",
+    "gpu_util.cc",
+    "gpu_util.h",
+    "software_rendering_list_json.cc",
+  ]
+
+  configs += [
+    # TODO(jschuh): crbug.com/167187 fix size_t to int truncations.
+    "//build/config/compiler:no_size_t_to_int_warning",
+    "//gpu:gpu_implementation",
+  ]
+
+  deps = [
+    "//base",
+    "//third_party/re2",
+    "//ui/gl",
+  ]
+
+  # Prefer mesa GL headers to system headers, which cause problems on Win.
+  include_dirs = [ "//third_party/mesa/src/include" ]
+
+  if (is_win) {
+    deps += [ "//third_party/libxml" ]
+    libs = [
+      "dxguid.lib",
+      "setupapi.lib",
+    ]
+
+    if (is_chrome_branded && is_official_build) {
+      sources += [
+        "//third_party/amd/AmdCfxPxExt.h",
+        "//third_party/amd/amd_videocard_info_win.cc",
+      ]
+    }
+  }
+  if (use_libpci) {
+    defines = [ "USE_LIBPCI=1" ]
+  }
+  if (is_linux && use_libpci && (use_x11 || use_ozone)) {
+    deps += [ "//build/config/linux:libpci" ]
+  }
+  if (is_linux && use_x11) {
+    configs += [
+      "//build/config/linux:x11",
+      "//build/config/linux:xext",
+    ]
+    deps += [
+      "//third_party/libXNVCtrl",
+      "//ui/gfx/x",
+    ]
+  } else {
+    sources -= [ "gpu_info_collector_x11.cc" ]
+  }
+  if (!use_ozone) {
+    sources -= [ "gpu_info_collector_ozone.cc" ]
+  }
+}

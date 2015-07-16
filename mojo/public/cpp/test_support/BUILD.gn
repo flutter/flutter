@@ -1,0 +1,25 @@
+# Copyright 2014 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("../../mojo_sdk.gni")
+
+# GYP version: mojo/public/mojo_public.gyp:mojo_public_test_utils
+mojo_sdk_source_set("test_utils") {
+  testonly = true
+
+  sources = [
+    "lib/test_support.cc",
+    "lib/test_utils.cc",
+    "test_utils.h",
+  ]
+
+  deps = [
+    "//testing/gtest",
+  ]
+
+  mojo_sdk_deps = [
+    "mojo/public/c/test_support",
+    "mojo/public/cpp/system",
+  ]
+}

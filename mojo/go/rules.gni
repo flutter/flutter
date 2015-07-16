@@ -1,0 +1,159 @@
+# Copyright 2014 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+declare_args() {
+  # By default, there is no go build tool, because go builds are not supported.
+  go_build_tool = ""
+}
+
+# Declare a go library.
+#
+# The target only writes a time stamp for input sources as the build is manages
+# by the go tool.
+#
+# Variables:
+#   sources(required): list of .go files
+#   deps: dependencies for the go library
+
+template("go_library") {
+  action(target_name) {
+    sources = invoker.sources
+    script = "//mojo/go/stamp.py"
+    outputs = [
+      "${target_out_dir}/${target_name}.script.stamp",
+    ]
+    if (defined(invoker.deps)) {
+      deps = invoker.deps
+    }
+    args = [ rebase_path(target_out_dir, root_build_dir) +
+             "/${target_name}.script.stamp" ]
+  }
+}
+
+# Declare a go test binary target.
+#
+# The target generates a go test executable, linking against other C code,
+# which is compiled into a static library and linked against Go.
+#
+# Only works on linux. |go_build_tool| must be set to the absolute path
+# of the go build tool.
+#
+# Variables (all required)
+#   sources: list of .go files to compile
+#   static_library_sources: list of C sources needed for the static library
+#   deps: dependencies for the static library
+
+template("go_test_binary") {
+  # Only available on linux for now.
+  assert(is_linux)
+  assert(defined(invoker.sources))
+  assert(go_build_tool != "")
+
+  static_library_name = target_name + "_static_library"
+
+  static_library(static_library_name) {
+    testonly = true
+    sources = invoker.static_library_sources
+    deps = invoker.deps
+    complete_static_lib = true
+  }
+
+  action(target_name) {
+    testonly = true
+    deps = [
+      ":$static_library_name",
+    ]
+    script = "//mojo/go/go.py"
+    inputs = invoker.sources
+    outputs = [
+      "${target_out_dir}/${target_name}",
+    ]
+
+    # Since go test does not permit specifying an output directory or output
+    # binary name, we create a temporary build directory, and the python
+    # script will later identify the output, copy it to the target location,
+    # and clean up the temporary build directory.
+    build_dir = "${target_out_dir}/${target_name}_build"
+    args = [
+             "--",
+             "${go_build_tool}",
+             rebase_path(build_dir, root_build_dir),
+             rebase_path(target_out_dir, root_build_dir) + "/${target_name}",
+             rebase_path("//", root_build_dir),
+             rebase_path(root_out_dir, root_build_dir),
+             "-I" + rebase_path("//"),
+             "-L" + rebase_path(target_out_dir) + " -l" + static_library_name +
+                 " -lstdc++ -lpthread -lm -lglib-2.0 -lrt",
+             "test",
+             "-c",
+           ] + rebase_path(invoker.sources, build_dir)
+  }
+}
+
+template("go_mojo_application") {
+  assert(is_android || is_linux)
+  assert(defined(invoker.sources))
+  assert(go_build_tool != "")
+
+  static_library_name = target_name + "_static_library"
+  static_library(static_library_name) {
+    complete_static_lib = true
+    deps = [
+      "//mojo/public/platform/native:system",
+    ]
+  }
+
+  go_library_name = target_name + "_go"
+  action(go_library_name) {
+    deps = invoker.deps + [
+             ":${static_library_name}",
+             "//mojo/go:application",
+             "//mojo/go:platform_cgo",
+             "//mojo/public/c/system",
+           ]
+    script = "//mojo/go/go.py"
+    inputs = invoker.sources
+    outputs = [
+      "${target_out_dir}/${target_name}",
+    ]
+
+    # Since go test does not permit specifying an output directory or output
+    # binary name, we create a temporary build directory, and the python
+    # script will later identify the output, copy it to the target location,
+    # and clean up the temporary build directory.
+    build_dir = "${target_out_dir}/${target_name}_build"
+    args = []
+    if (is_android) {
+      args += [ "--android" ]
+    }
+    args += [
+      "--",
+      "${go_build_tool}",
+      rebase_path(build_dir, root_build_dir),
+      rebase_path(target_out_dir, root_build_dir) + "/${target_name}",
+      rebase_path("//", root_build_dir),
+      rebase_path(root_out_dir, root_build_dir),
+      "-I" + rebase_path("//"),
+      "-L" + rebase_path(target_out_dir) + " -l" + static_library_name + "",
+      "build",
+      "-ldflags=-shared",
+    ]
+    if (is_linux) {
+      args += [ "-buildmode=c-shared" ]
+    }
+    args += rebase_path(invoker.sources, build_dir)
+  }
+
+  copy(target_name) {
+    deps = [
+      ":${go_library_name}",
+    ]
+    sources = [
+      "${target_out_dir}/${go_library_name}",
+    ]
+    outputs = [
+      "${root_out_dir}/${target_name}.mojo",
+    ]
+  }
+}

@@ -1,0 +1,33 @@
+// Copyright 2015 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+module mojo;
+
+import "gpu/public/interfaces/context_provider.mojom";
+import "gpu/public/interfaces/viewport_parameter_listener.mojom";
+import "surfaces/public/interfaces/surfaces.mojom";
+
+interface Display {
+  // Submits a new frame to the display to be drawn when possible. The callback
+  // will be run after the frame has been issued to the display but possibly
+  // before the frame is actually visible.
+  //
+  // The Display will be resized to the size of the last entry in |frame|'s
+  // |passes| list (aka the root pass).
+  //
+  // Any resources submitted in the frame will be returned via the
+  // ResourceReturner associated with the Display at construction time.
+  SubmitFrame(Frame frame) => ();
+};
+
+// DisplayFactory creates new Display instances.
+interface DisplayFactory {
+  // Create associates a Display that will draw to contexts produced by
+  // |context_provider|. Any resources submitted to the display will be
+  // returned via the |returner|, if supplied.
+  Create(ContextProvider context_provider,
+         ResourceReturner? returner,
+         Display& display_request);
+};
+

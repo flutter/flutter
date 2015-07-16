@@ -1,0 +1,7 @@
+Name: asan_device_setup.sh
+License: University of Illinois Open Source License.
+Version: 226816
+URL: http://llvm.org/viewvc/llvm-project/compiler-rt/trunk/lib/asan/scripts/asan_device_setup?view=co
+Security Critical: no
+
+asan_device_setup.sh is a verbatim copy of asan_device_setup in the LLVM trunk.

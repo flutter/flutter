@@ -1,0 +1,78 @@
+# Copyright 2014 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+config("libpng_config") {
+  include_dirs = [ "." ]
+
+  defines = [
+    "CHROME_PNG_WRITE_SUPPORT",
+    "PNG_USER_CONFIG",
+  ]
+
+  if (is_android) {
+    #'toolsets': ['target', 'host'],
+    defines += [ "CHROME_PNG_READ_PACK_SUPPORT" ]  # Required by freetype.
+  }
+
+  if (is_win) {
+    if (component_mode == "shared_library") {
+      defines += [
+        "PNG_USE_DLL",
+        "PNG_NO_MODULEDEF",
+      ]
+    }
+  }
+}
+
+source_set("libpng_sources") {
+  sources = [
+    "png.c",
+    "png.h",
+    "pngconf.h",
+    "pngerror.c",
+    "pnggccrd.c",
+    "pngget.c",
+    "pngmem.c",
+    "pngpread.c",
+    "pngread.c",
+    "pngrio.c",
+    "pngrtran.c",
+    "pngrutil.c",
+    "pngset.c",
+    "pngtrans.c",
+    "pngusr.h",
+    "pngvcrd.c",
+    "pngwio.c",
+    "pngwrite.c",
+    "pngwtran.c",
+    "pngwutil.c",
+  ]
+
+  configs -= [ "//build/config/compiler:chromium_code" ]
+  configs += [ "//build/config/compiler:no_chromium_code" ]
+
+  if (is_win && is_component_build) {
+    defines = [ "PNG_BUILD_DLL" ]
+  }
+
+  public_configs = [ ":libpng_config" ]
+
+  public_deps = [
+    "//third_party/zlib",
+  ]
+}
+
+if (is_win) {
+  component("libpng") {
+    public_deps = [
+      ":libpng_sources",
+    ]
+  }
+} else {
+  group("libpng") {
+    public_deps = [
+      ":libpng_sources",
+    ]
+  }
+}

@@ -1,0 +1,15 @@
+// Copyright 2015 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+module mojo.terminal;
+
+import "files/public/interfaces/file.mojom";
+
+// Interface for applications that want to be able to be connected to by a
+// terminal. (Once connected, such an application will be able to write to/read
+// from the terminal by performing the corresponding operations on the provided
+// "file".)
+interface TerminalClient {
+  ConnectToTerminal(mojo.files.File terminal);
+};

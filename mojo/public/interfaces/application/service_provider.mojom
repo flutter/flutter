@@ -1,0 +1,17 @@
+// Copyright 2014 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+module mojo;
+
+// An interface through which a client may request services from a host.
+// Instances of this interface are created within the context of an
+// already-identified client and host pair, so there is no need to explicitly
+// identify the client or host in the methods below.
+interface ServiceProvider {
+  // Asks the host to provide the service identified by |interface_name| through
+  // the message |pipe| endpoint supplied by the caller. If the host is not
+  // willing or able to provide the requested service, it should close the
+  // |pipe|.
+  ConnectToService(string interface_name, handle<message_pipe> pipe);
+};

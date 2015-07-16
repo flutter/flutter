@@ -1,0 +1,54 @@
+// Copyright 2014 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+module mojo;
+
+struct GpuShaderPrecision {
+  int32 min_range;
+  int32 max_range;
+  int32 precision;
+};
+
+struct GpuPerStagePrecisions {
+  GpuShaderPrecision low_int;
+  GpuShaderPrecision medium_int;
+  GpuShaderPrecision high_int;
+  GpuShaderPrecision low_float;
+  GpuShaderPrecision medium_float;
+  GpuShaderPrecision high_float;
+};
+
+struct GpuCapabilities {
+  GpuPerStagePrecisions vertex_shader_precisions;
+  GpuPerStagePrecisions fragment_shader_precisions;
+  int32 max_combined_texture_image_units;
+  int32 max_cube_map_texture_size;
+  int32 max_fragment_uniform_vectors;
+  int32 max_renderbuffer_size;
+  int32 max_texture_image_units;
+  int32 max_texture_size;
+  int32 max_varying_vectors;
+  int32 max_vertex_attribs;
+  int32 max_vertex_texture_image_units;
+  int32 max_vertex_uniform_vectors;
+  int32 num_compressed_texture_formats;
+  int32 num_shader_binary_formats;
+  int32 bind_generates_resource_chromium;
+
+  bool post_sub_buffer;
+  bool egl_image_external;
+  bool texture_format_bgra8888;
+  bool texture_format_etc1;
+  bool texture_format_etc1_npot;
+  bool texture_rectangle;
+  bool iosurface;
+  bool texture_usage;
+  bool texture_storage;
+  bool discard_framebuffer;
+  bool sync_query;
+  bool image;
+  bool future_sync_points;
+  bool blend_equation_advanced;
+  bool blend_equation_advanced_coherent;
+};

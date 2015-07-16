@@ -1,0 +1,73 @@
+Name
+
+    CHROMIUM_sync_point
+
+Name Strings
+
+    GL_CHROMIUM_sync_point
+
+Version
+
+    Last Modifed Date: February 25, 2013
+
+Dependencies
+
+    OpenGL ES 2.0 is required.
+
+Overview
+
+    This extension allows a client to order operations between contexts.
+
+    This extension implements a small subset of ARB_sync, with weaker
+    guarantees. In particular it doesn't ensure commands are actually executed
+    by the server, it only guarantees submission order.
+
+    It does however guarantee operation order with respect to
+    ConsumeTextureCHROMIUM and ProduceTextureCHROMIUM from
+    CHROMIUM_texture_mailbox, if present.
+
+Issues
+
+    None
+
+New Tokens
+
+    None
+
+New Procedures and Functions
+
+    The command
+
+        uint InsertSyncPointCHROMIUM()
+
+    flushes the stream of commands for the current context and creates and
+    inserts a sync point. The sync point acts as a fence, which is signaled when
+    previous commands have been submitted to the server, or when the context is
+    destroyed, whichever happens first. The sync point name is returned. The
+    sync point is implicitly deleted when it becomes signaled. The sync point
+    namespace is shared between all contexts on the same server, including other
+    context groups.
+
+
+    The command
+
+        void WaitSyncPointCHROMIUM(uint sync_point)
+
+    causes the current context to stop submitting commands until the specified
+    sync point becomes signaled. This is implemented as a server-side wait.
+    <sync_point> is the name of the sync point to wait for. If <sync_point>
+    isn't a valid sync point returned by InsertSyncPointCHROMIUM, or if the sync
+    point has already been deleted, the command is equivalent to a no-op and no
+    error is generated.
+
+Errors
+
+    None.
+
+New State
+
+    None.
+
+Revision History
+
+    2/25/2013    Documented the extension

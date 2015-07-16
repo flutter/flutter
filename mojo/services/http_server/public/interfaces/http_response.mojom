@@ -1,0 +1,22 @@
+// Copyright 2014 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+module http_server;
+
+struct HttpResponse {
+  // The HTTP status code.
+  uint32 status_code = 200;
+
+  // The payload for the response body.
+  handle<data_pipe_consumer>? body;
+
+  // This must be the number of bytes in |body|.
+  int64 content_length = 0;
+
+  // The content type.
+  string content_type = "text/html; charset=utf-8";
+
+  // Additional HTTP response headers.
+  map<string, string>? custom_headers;
+};

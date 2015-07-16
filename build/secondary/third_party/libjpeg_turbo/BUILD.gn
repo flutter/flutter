@@ -1,0 +1,211 @@
+# Copyright 2014 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Do not use the targets in this file unless you need a certain libjpeg
+# implementation. Use the meta target //third_party:jpeg instead.
+
+if (current_cpu == "arm") {
+  import("//build/config/arm.gni")
+}
+
+if (current_cpu == "x86" || current_cpu == "x64") {
+  import("//third_party/yasm/yasm_assemble.gni")
+
+  yasm_assemble("simd_asm") {
+    defines = []
+
+    if (current_cpu == "x86") {
+      sources = [
+        "simd/jccolmmx.asm",
+        "simd/jccolss2.asm",
+        "simd/jcgrammx.asm",
+        "simd/jcgrass2.asm",
+        "simd/jcqnt3dn.asm",
+        "simd/jcqntmmx.asm",
+        "simd/jcqnts2f.asm",
+        "simd/jcqnts2i.asm",
+        "simd/jcqntsse.asm",
+        "simd/jcsammmx.asm",
+        "simd/jcsamss2.asm",
+        "simd/jdcolmmx.asm",
+        "simd/jdcolss2.asm",
+        "simd/jdmermmx.asm",
+        "simd/jdmerss2.asm",
+        "simd/jdsammmx.asm",
+        "simd/jdsamss2.asm",
+        "simd/jf3dnflt.asm",
+        "simd/jfmmxfst.asm",
+        "simd/jfmmxint.asm",
+        "simd/jfss2fst.asm",
+        "simd/jfss2int.asm",
+        "simd/jfsseflt.asm",
+        "simd/ji3dnflt.asm",
+        "simd/jimmxfst.asm",
+        "simd/jimmxint.asm",
+        "simd/jimmxred.asm",
+        "simd/jiss2flt.asm",
+        "simd/jiss2fst.asm",
+        "simd/jiss2int.asm",
+        "simd/jiss2red.asm",
+        "simd/jisseflt.asm",
+        "simd/jsimdcpu.asm",
+      ]
+      defines += [ "__x86__" ]
+    } else if (current_cpu == "x64") {
+      sources = [
+        "simd/jccolss2-64.asm",
+        "simd/jcgrass2-64.asm",
+        "simd/jcqnts2f-64.asm",
+        "simd/jcqnts2i-64.asm",
+        "simd/jcsamss2-64.asm",
+        "simd/jdcolss2-64.asm",
+        "simd/jdmerss2-64.asm",
+        "simd/jdsamss2-64.asm",
+        "simd/jfss2fst-64.asm",
+        "simd/jfss2int-64.asm",
+        "simd/jfsseflt-64.asm",
+        "simd/jiss2flt-64.asm",
+        "simd/jiss2fst-64.asm",
+        "simd/jiss2int-64.asm",
+        "simd/jiss2red-64.asm",
+      ]
+      defines += [ "__x86_64__" ]
+    }
+
+    if (is_win) {
+      defines += [ "MSVC" ]
+      include_dirs = [ "win" ]
+      if (current_cpu == "x86") {
+        defines += [ "WIN32" ]
+      } else {
+        defines += [ "WIN64" ]
+      }
+    } else if (is_mac) {
+      defines += [ "MACHO" ]
+      include_dirs = [ "mac" ]
+    } else if (is_linux || is_android) {
+      defines += [ "ELF" ]
+      include_dirs = [ "linux" ]
+    }
+  }
+}
+
+source_set("simd") {
+  if (current_cpu == "x86") {
+    deps = [
+      ":simd_asm",
+    ]
+    sources = [
+      "simd/jsimd_i386.c",
+    ]
+    if (is_win) {
+      cflags = [ "/wd4245" ]
+    }
+  } else if (current_cpu == "x64") {
+    deps = [
+      ":simd_asm",
+    ]
+    sources = [
+      "simd/jsimd_x86_64.c",
+    ]
+  } else if (current_cpu == "arm" && arm_version >= 7 &&
+             (arm_use_neon || arm_optionally_use_neon)) {
+    sources = [
+      "simd/jsimd_arm.c",
+      "simd/jsimd_arm_neon.S",
+    ]
+  } else {
+    sources = [
+      "jsimd_none.c",
+    ]
+  }
+}
+
+config("libjpeg_config") {
+  include_dirs = [ "." ]
+}
+
+source_set("libjpeg") {
+  sources = [
+    "jcapimin.c",
+    "jcapistd.c",
+    "jccoefct.c",
+    "jccolor.c",
+    "jcdctmgr.c",
+    "jchuff.c",
+    "jchuff.h",
+    "jcinit.c",
+    "jcmainct.c",
+    "jcmarker.c",
+    "jcmaster.c",
+    "jcomapi.c",
+    "jconfig.h",
+    "jcparam.c",
+    "jcphuff.c",
+    "jcprepct.c",
+    "jcsample.c",
+    "jdapimin.c",
+    "jdapistd.c",
+    "jdatadst.c",
+    "jdatasrc.c",
+    "jdcoefct.c",
+    "jdcolor.c",
+    "jdct.h",
+    "jddctmgr.c",
+    "jdhuff.c",
+    "jdhuff.h",
+    "jdinput.c",
+    "jdmainct.c",
+    "jdmarker.c",
+    "jdmaster.c",
+    "jdmerge.c",
+    "jdphuff.c",
+    "jdpostct.c",
+    "jdsample.c",
+    "jerror.c",
+    "jerror.h",
+    "jfdctflt.c",
+    "jfdctfst.c",
+    "jfdctint.c",
+    "jidctflt.c",
+    "jidctfst.c",
+    "jidctint.c",
+    "jidctred.c",
+    "jinclude.h",
+    "jmemmgr.c",
+    "jmemnobs.c",
+    "jmemsys.h",
+    "jmorecfg.h",
+    "jpegint.h",
+    "jpeglib.h",
+    "jpeglibmangler.h",
+    "jquant1.c",
+    "jquant2.c",
+    "jutils.c",
+    "jversion.h",
+  ]
+
+  defines = [
+    "WITH_SIMD",
+    "MOTION_JPEG_SUPPORTED",
+    "NO_GETENV",
+  ]
+
+  configs += [ ":libjpeg_config" ]
+
+  public_configs = [ ":libjpeg_config" ]
+
+  # MemorySanitizer doesn't support assembly code, so keep it disabled in
+  # MSan builds for now.
+  # TODO: Enable on Linux when .asm files are recognized.
+  if (is_msan || is_linux) {
+    sources += [ "jsimd_none.c" ]
+  } else {
+    deps = [
+      ":simd",
+    ]
+  }
+
+  # TODO(GYP): Compile the .asm files with YASM as GYP does.
+}

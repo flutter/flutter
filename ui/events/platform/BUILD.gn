@@ -1,0 +1,65 @@
+# Copyright 2014 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//build/config/ui.gni")
+
+component("platform") {
+  sources = [
+    # Allow this target to include events_export.h without depending on the
+    # events target (which would be circular).
+    "../events_export.h",
+    "platform_event_builder.cc",
+    "platform_event_builder.h",
+    "platform_event_dispatcher.h",
+    "platform_event_observer.h",
+    "platform_event_source.cc",
+    "platform_event_source.h",
+    "platform_event_types.h",
+    "scoped_event_dispatcher.cc",
+    "scoped_event_dispatcher.h",
+  ]
+
+  defines = [ "EVENTS_IMPLEMENTATION" ]
+
+  deps = [
+    "//base",
+
+    # TODO(erg): Figure out what to do with this dependency later. Maybe get to
+    # the point where we can remove it before we commit this.
+    "//ui/events",
+  ]
+
+  if (use_x11) {
+    configs += [ "//build/config/linux:x11" ]
+
+    sources += [
+      "x11/device_data_manager_x11.cc",
+      "x11/device_data_manager_x11.h",
+      "x11/device_list_cache_x.cc",
+      "x11/device_list_cache_x.h",
+      "x11/hotplug_event_handler_x11.cc",
+      "x11/hotplug_event_handler_x11.h",
+      "x11/keyboard_code_conversion_x11.cc",
+      "x11/keyboard_code_conversion_x11.h",
+      "x11/keysym_to_unicode.cc",
+      "x11/keysym_to_unicode.h",
+      "x11/platform_event_utils_x11.cc",
+      "x11/touch_factory_x11.cc",
+      "x11/touch_factory_x11.h",
+      "x11/x11_event_source.cc",
+      "x11/x11_event_source.h",
+      "x11/x11_event_source_libevent.cc",
+    ]
+
+    deps += [
+      "//ui/events:dom4_keycode_converter",
+      "//ui/gfx/x",
+    ]
+  } else {
+    sources += [
+      "platform_event_source_stub.cc",
+      "platform_event_stub.cc",
+    ]
+  }
+}

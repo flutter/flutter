@@ -1,0 +1,9 @@
+# Copyright (c) 2013 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+declare_args() {
+  # Enable the optional type profiler in Clang, which will tag heap allocations
+  # with the allocation type.
+  use_clang_type_profiler = false
+}

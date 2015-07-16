@@ -1,0 +1,24 @@
+[dist4]message_header  // num_bytes
+[u4]0                  // version
+[u4]4                  // name
+[u4]0                  // flags
+[anchr]message_header
+
+[dist4]method4_params  // num_bytes
+[u4]0                  // version
+[dist8]param0_ptr      // param0
+[dist8]param1_ptr      // param1
+[anchr]method4_params
+
+[anchr]param0_ptr
+[dist4]struct_c   // num_bytes
+[u4]0             // version
+[dist8]array_ptr  // array
+[anchr]struct_c
+
+[anchr]param1_ptr
+[anchr]array_ptr
+[dist4]array_member  // num_bytes
+[u4]3                // num_elements
+0 1 2
+[anchr]array_member

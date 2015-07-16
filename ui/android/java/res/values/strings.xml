@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (c) 2012 The Chromium Authors. All rights reserved.
+
+     Use of this source code is governed by a BSD-style license that can be
+     found in the LICENSE file.
+-->
+
+<!-- DO NOT ADD STRINGS HERE.
+
+    Android ui strings now live in
+    ui/android/java/strings/android_ui_strings.grd
+
+    See http://www.chromium.org/developers/design-documents/ui-localization
+-->
+
+<resources/>

@@ -1,0 +1,86 @@
+// Copyright 2014 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+module mojo.test;
+
+enum AnEnum {
+  FIRST, SECOND
+};
+
+union PodUnion {
+  int8   f_int8;
+  int8   f_int8_other;
+  uint8  f_uint8;
+  int16  f_int16;
+  uint16 f_uint16;
+  int32  f_int32;
+  uint32 f_uint32;
+  int64  f_int64;
+  uint64 f_uint64;
+  float  f_float;
+  double f_double;
+  bool   f_bool;
+  AnEnum f_enum;
+};
+
+union ObjectUnion {
+  int8   f_int8;
+  string f_string;
+  DummyStruct f_dummy;
+  DummyStruct? f_nullable;
+  array<int8> f_array_int8;
+  map<string, int8> f_map_int8;
+  PodUnion f_pod_union;
+};
+
+union HandleUnion {
+  handle f_handle;
+  handle<message_pipe> f_message_pipe;
+  handle<data_pipe_consumer> f_data_pipe_consumer;
+  handle<data_pipe_producer> f_data_pipe_producer;
+  handle<shared_buffer> f_shared_buffer;
+  SmallCache f_small_cache;
+};
+
+struct WrapperStruct {
+  ObjectUnion? object_union;
+  PodUnion? pod_union;
+  HandleUnion? handle_union;
+};
+
+struct DummyStruct {
+  int8 f_int8;
+};
+
+struct SmallStruct {
+  DummyStruct? dummy_struct;
+  PodUnion? pod_union;
+  array<PodUnion>? pod_union_array;
+  array<PodUnion?>? nullable_pod_union_array;
+  array<DummyStruct>? s_array;
+  map<string, PodUnion>? pod_union_map;
+  map<string, PodUnion?>? nullable_pod_union_map;
+};
+
+struct SmallStructNonNullableUnion {
+  PodUnion pod_union;
+};
+
+struct SmallObjStruct {
+  ObjectUnion obj_union;
+};
+
+interface SmallCache {
+  SetIntValue(int64 int_value);
+  GetIntValue() => (int64 int_value);
+};
+
+interface UnionInterface {
+  Echo(PodUnion in_val) => (PodUnion out_val);
+};
+
+struct TryNonNullStruct {
+  DummyStruct? nullable;
+  DummyStruct non_nullable;
+};

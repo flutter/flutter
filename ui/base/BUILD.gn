@@ -1,0 +1,78 @@
+# Copyright 2014 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//build/config/ui.gni")
+
+if (is_android) {
+  import("//build/config/android/config.gni")
+  import("//build/config/android/rules.gni")
+}
+
+component("base") {
+  output_name = "ui_base"
+  sources = [
+    "accelerators/accelerator.cc",
+    "accelerators/accelerator.h",
+    "accelerators/accelerator_history.cc",
+    "accelerators/accelerator_history.h",
+    "accelerators/accelerator_manager.cc",
+    "accelerators/accelerator_manager.h",
+    "accelerators/platform_accelerator.h",
+  ]
+
+  defines = [ "UI_BASE_IMPLEMENTATION" ]
+
+  public_deps = [
+    "//base",
+    "//skia",
+    "//ui/events",
+    "//ui/events/platform",
+    "//ui/events:events_base",
+    "//ui/gfx",
+    "//ui/gfx/geometry",
+  ]
+  deps = [
+    "//base/third_party/dynamic_annotations",
+    "//base:base_static",
+    "//base:i18n",
+    "//third_party/icu",
+    "//url",
+  ]
+
+  if (is_linux) {
+    configs += [ "//build/config/linux:fontconfig" ]
+  }
+
+  libs = []
+
+  if (use_x11) {
+    #'all_dependent_settings': {
+    #'ldflags': [
+    #'-L<(PRODUCT_DIR)',
+    #],
+    #},
+    configs += [ "//build/config/linux:x11" ]
+  }
+
+  if (is_android) {
+    deps += [
+      ":ui_base_jni_headers",
+      "//cc",
+    ]
+
+    libs += [ "jnigraphics" ]
+  }
+}
+
+if (is_android) {
+  generate_jni("ui_base_jni_headers") {
+    sources = [
+      "../android/java/src/org/chromium/ui/base/DeviceFormFactor.java",
+      "../android/java/src/org/chromium/ui/base/SelectFileDialog.java",
+      "../android/java/src/org/chromium/ui/base/ViewAndroid.java",
+      "../android/java/src/org/chromium/ui/base/WindowAndroid.java",
+    ]
+    jni_package = "base"
+  }
+}

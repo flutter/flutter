@@ -1,0 +1,19 @@
+# Copyright 2014 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("../../mojo_sdk.gni")
+
+mojo_sdk_source_set("system") {
+  sources = [
+    "buffer.h",
+    "core.h",
+    "data_pipe.h",
+    "functions.h",
+    "handle.h",
+    "macros.h",
+    "message_pipe.h",
+  ]
+
+  mojo_sdk_public_deps = [ "mojo/public/c/system" ]
+}

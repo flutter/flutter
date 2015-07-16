@@ -1,0 +1,4 @@
+# Flaky. crbug.com/234776
+DiskCacheEntryTest.SimpleCacheStreamAccess
+DiskCacheEntryTest.SimpleCacheGrowData
+DiskCacheEntryTest.SimpleCacheSizeChanges

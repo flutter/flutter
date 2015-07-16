@@ -1,0 +1,37 @@
+// static
+{{struct.name}}Ptr {{struct.name}}::New() {
+  {{struct.name}}Ptr rv;
+  mojo::internal::StructHelper<{{struct.name}}>::Initialize(&rv);
+  return rv.Pass();
+}
+
+{{struct.name}}::{{struct.name}}()
+{%- for field in struct.fields %}
+    {% if loop.first %}:{% else %} {% endif %} {{field.name}}({{field|default_value}}){% if not loop.last %},{% endif %}
+{%- endfor %} {
+}
+
+{{struct.name}}::~{{struct.name}}() {
+}
+
+{%  if struct|is_cloneable_kind %}
+{{struct.name}}Ptr {{struct.name}}::Clone() const {
+  {{struct.name}}Ptr rv(New());
+{%-   for field in struct.fields %}
+{%-     if field.kind|is_object_kind and not field.kind|is_string_kind %}
+  rv->{{field.name}} = {{field.name}}.Clone();
+{%-     else %}
+  rv->{{field.name}} = {{field.name}};
+{%-     endif %}
+{%-   endfor %}
+  return rv.Pass();
+}
+{%  endif %}
+
+bool {{struct.name}}::Equals(const {{struct.name}}& other) const {
+{%-  for field in struct.fields %}
+  if (!mojo::internal::ValueTraits<{{field.kind|cpp_wrapper_type}}>::Equals(this->{{field.name}}, other.{{field.name}}))
+    return false;
+{%-  endfor %}
+  return true;
+}

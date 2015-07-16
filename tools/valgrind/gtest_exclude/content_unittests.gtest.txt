@@ -1,0 +1,16 @@
+# False positive, according to crbug.com/386080
+WebLayerImplFixedBoundsTest.CompareToWebLayerImplComplex
+WebLayerImplFixedBoundsTest.CompareToWebLayerImplSimple
+
+# http://crbug.com/418258
+DevToolsManagerTest.TestObserver
+
+# http://crbug.com/430391
+WebDataConsumerHandleImplTest.*
+
+# https://crbug.com/449103
+WebInputEventAuraTest.TestMakeWebKeyboardEventWindowsKeyCode
+
+# Flaky: https://crbug.com/460578
+DesktopCaptureDeviceTest.InvertedFrame
+DesktopCaptureDeviceTest.UnpackedFrame

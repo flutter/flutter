@@ -1,0 +1,16 @@
+Name: JSR 305: Annotations for Software Defect Detection in Java
+Short Name: jsr-305
+URL: https://code.google.com/p/jsr-305/
+Version: r51
+License: BSD 2-Clause License
+License File: src/ri/LICENSE
+Security Critical: no
+
+Description:
+This project contains reference implementations, test cases, and other
+documents under source code control for Java Specification Request 305:
+Annotations for Software Defect Detection. More information at the Google
+group: http://groups.google.com/group/jsr-305
+
+Local Modifications:
+None.

@@ -1,0 +1,95 @@
+// Copyright 2014 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+package org.chromium.base.library_loader;
+
+import org.chromium.base.annotations.SuppressFBWarnings;
+
+@SuppressFBWarnings
+public class NativeLibraries {
+    /**
+     * IMPORTANT NOTE: The variables defined here must _not_ be 'final'.
+     *
+     * The reason for this is very subtle:
+     *
+     * - This template is used to generate several distinct, but similar
+     *   files used in different contexts:
+     *
+     *   o .../gen/templates/org/chromium/base/library_loader/NativeLibraries.java
+     *
+     *     This file is used to build base.jar, which is the library
+     *     jar used by chromium projects. However, the
+     *     corresponding NativeLibraries.class file will _not_ be part
+     *     of the final base.jar.
+     *
+     *   o .../$PROJECT/native_libraries_java/NativeLibraries.java
+     *
+     *     This file is used to build an APK (e.g. $PROJECT
+     *     could be 'content_shell_apk'). Its content will depend on
+     *     this target's specific build configuration, and differ from
+     *     the source file above.
+     *
+     * - During the final link, all .jar files are linked together into
+     *   a single .dex file, and the second version of NativeLibraries.class
+     *   will be put into the final output file, and used at runtime.
+     *
+     * - If the variables were defined as 'final', their value would be
+     *   optimized out inside of 'base.jar', and could not be specialized
+     *   for every chromium program. This, however, doesn't apply to arrays of
+     *   strings, which can be defined as final.
+     *
+     * This exotic scheme is used to avoid injecting project-specific, or
+     * even build-specific, values into the base layer. E.g. this is
+     * how the component build is supported on Android without modifying
+     * the sources of each and every Chromium-based target.
+     */
+
+#if defined(ENABLE_CHROMIUM_LINKER_LIBRARY_IN_ZIP_FILE) && \
+    !defined(ENABLE_CHROMIUM_LINKER)
+#error "Must have ENABLE_CHROMIUM_LINKER to enable library in zip file"
+#endif
+
+    // Set to true to enable the use of the Chromium Linker.
+#if defined(ENABLE_CHROMIUM_LINKER)
+    public static boolean sUseLinker = true;
+#else
+    public static boolean sUseLinker = false;
+#endif
+
+#if defined(ENABLE_CHROMIUM_LINKER_LIBRARY_IN_ZIP_FILE)
+    public static boolean sUseLibraryInZipFile = true;
+#else
+    public static boolean sUseLibraryInZipFile = false;
+#endif
+
+#if defined(ENABLE_CHROMIUM_LINKER_TESTS)
+    public static boolean sEnableLinkerTests = true;
+#else
+    public static boolean sEnableLinkerTests = false;
+#endif
+
+    // This is the list of native libraries to be loaded (in the correct order)
+    // by LibraryLoader.java.  The base java library is compiled with no
+    // array defined, and then the build system creates a version of the file
+    // with the real list of libraries required (which changes based upon which
+    // .apk is being built).
+    // TODO(cjhopman): This is public since it is referenced by NativeTestActivity.java
+    // directly. The two ways of library loading should be refactored into one.
+    public static final String[] LIBRARIES =
+#if defined(NATIVE_LIBRARIES_LIST)
+      NATIVE_LIBRARIES_LIST;
+#else
+      {};
+#endif
+
+    // This is the expected version of the 'main' native library, which is the one that
+    // implements the initial set of base JNI functions including
+    // base::android::nativeGetVersionName()
+    static String sVersionNumber =
+#if defined(NATIVE_LIBRARIES_VERSION_NUMBER)
+      NATIVE_LIBRARIES_VERSION_NUMBER;
+#else
+      "";
+#endif
+}

@@ -1,0 +1,255 @@
+#!/usr/bin/env python
+#
+# Copyright (C) 2013 The Android Open Source Project
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+"""stack symbolizes native crash dumps."""
+
+import getopt
+import glob
+import os
+import re
+import sys
+
+import stack_core
+import subprocess
+import symbol
+
+_DEFAULT_SYMROOT = '/tmp/symbols'
+_DEFAULT_BUILD_DIR = 'out/android_Debug'
+_DEFAULT_NDK_DIR = 'third_party/android_tools/ndk'
+
+
+def PrintUsage():
+  """Print usage and exit with error."""
+  # pylint: disable-msg=C6310
+  print
+  print "  usage: " + sys.argv[0] + " [options] [FILE]"
+  print
+  print "  --symbols-dir=path"
+  print "       the path to a symbols dir, this is generally for system level"
+  print "       symbols"
+  print
+  print "  --build-dir=path"
+  print "       the path to a directory containing Mojo symbols (can be"
+  print "       absolute or relative to src), such as =out/android_Debug"
+
+  print "  --ndk-dir=path"
+  print "       the path to a directory containing Android NDK"
+  print
+  print "  --symbols-zip=path"
+  print "       the path to a symbols zip file, such as =dream-symbols-12345.zip"
+  print
+  print "  --more-info"
+  print "  --less-info"
+  print "       Change the level of detail in the output."
+  print "       --more-info is slower and more verbose, but more functions will"
+  print "       be fully qualified with namespace/classname and have full"
+  print "       argument information. Also, the 'stack data' section will be"
+  print "       printed."
+  print
+  print "  --arch=arm|arm64|x64|x86|mips"
+  print "       the target architecture"
+  print
+  print "  FILE should contain a stack trace in it somewhere"
+  print "       the tool will find that and re-print it with"
+  print "       source files and line numbers.  If you don't"
+  print "       pass FILE, or if file is -, it reads from"
+  print "       stdin."
+  print
+  # pylint: enable-msg=C6310
+  sys.exit(1)
+
+def UnzipSymbols(symbolfile, symdir=None):
+  """Unzips a file to _DEFAULT_SYMROOT and returns the unzipped location.
+
+  Args:
+    symbolfile: The .zip file to unzip
+    symdir: Optional temporary directory to use for extraction
+
+  Returns:
+    A tuple containing (the directory into which the zip file was unzipped,
+    the path to the "symbols" directory in the unzipped file).  To clean
+    up, the caller can delete the first element of the tuple.
+
+  Raises:
+    SymbolDownloadException: When the unzip fails.
+  """
+  if not symdir:
+    symdir = "%s/%s" % (_DEFAULT_SYMROOT, hash(symbolfile))
+  if not os.path.exists(symdir):
+    os.makedirs(symdir)
+
+  print "extracting %s..." % symbolfile
+  saveddir = os.getcwd()
+  os.chdir(symdir)
+  try:
+    unzipcode = subprocess.call(["unzip", "-qq", "-o", symbolfile])
+    if unzipcode > 0:
+      os.remove(symbolfile)
+      raise SymbolDownloadException("failed to extract symbol files (%s)."
+                                    % symbolfile)
+  finally:
+    os.chdir(saveddir)
+
+  android_symbols = glob.glob("%s/out/target/product/*/symbols" % symdir)
+  if android_symbols:
+    return (symdir, android_symbols[0])
+  else:
+    # This is a zip of Chrome symbols, so symbol.CHROME_SYMBOLS_DIR needs to be
+    # updated to point here.
+    symbol.CHROME_SYMBOLS_DIR = symdir
+    return (symdir, symdir)
+
+
+def GetBasenameFromMojoApp(url):
+  """Used by GetSymbolMapping() to extract the basename from the location the
+  mojo app was downloaded from. The location is a URL, e.g.
+  http://foo/bar/x.so."""
+  index = url.rfind('/')
+  return url[(index + 1):] if index != -1 else url
+
+
+def GetSymboledNameForMojoApp(path):
+  """Used by GetSymbolMapping to get the non-stripped library name for an
+  installed mojo app."""
+  # e.g. tracing.mojo -> libtracing_library.so
+  name, ext = os.path.splitext(path)
+  if ext != '.mojo':
+    return path
+  return 'lib%s_library.so' % name
+
+
+def GetSymbolMapping(lines):
+  """Returns a mapping (dictionary) from download file to .so."""
+  regex = re.compile('Caching mojo app (\S+) at (\S+)')
+  mappings = {}
+  for line in lines:
+    result = regex.search(line)
+    if result:
+      url = GetBasenameFromMojoApp(result.group(1))
+      mappings[result.group(2)] = GetSymboledNameForMojoApp(url)
+  return mappings
+
+
+def _LowestAncestorContainingRelpath(dir_path, relpath):
+  """Returns the lowest ancestor dir of |dir_path| that contains |relpath|.
+  """
+  cur_dir_path = os.path.abspath(dir_path)
+  while True:
+    if os.path.exists(os.path.join(cur_dir_path, relpath)):
+      return cur_dir_path
+
+    next_dir_path = os.path.dirname(cur_dir_path)
+    if next_dir_path != cur_dir_path:
+      cur_dir_path = next_dir_path
+    else:
+      return None
+
+
+def _GuessDir(relpath):
+  """Returns absolute path to location |relpath| in the lowest ancestor of this
+  file that contains it."""
+  lowest_ancestor = _LowestAncestorContainingRelpath(
+      os.path.dirname(__file__), relpath)
+  if not lowest_ancestor:
+    return None
+  return os.path.join(lowest_ancestor, relpath)
+
+
+
+def main():
+  try:
+    options, arguments = getopt.getopt(sys.argv[1:], "",
+                                       ["more-info",
+                                        "less-info",
+                                        "build-dir=",
+                                        "ndk-dir=",
+                                        "symbols-dir=",
+                                        "symbols-zip=",
+                                        "arch=",
+                                        "help"])
+  except getopt.GetoptError, unused_error:
+    PrintUsage()
+
+  zip_arg = None
+  more_info = False
+  for option, value in options:
+    if option == "--help":
+      PrintUsage()
+    elif option == "--symbols-dir":
+      symbol.SYMBOLS_DIR = os.path.expanduser(value)
+    elif option == "--symbols-zip":
+      zip_arg = os.path.expanduser(value)
+    elif option == "--arch":
+      symbol.ARCH = value
+    elif option == "--build-dir":
+      symbol.BUILD_DIR = value
+    elif option == "--ndk-dir":
+      symbol.NDK_DIR = value
+    elif option == "--more-info":
+      more_info = True
+    elif option == "--less-info":
+      more_info = False
+
+  if not symbol.BUILD_DIR:
+    guess = _GuessDir(_DEFAULT_BUILD_DIR)
+    if not guess:
+      print "Couldn't find the build directory, please pass --build-dir."
+      return 1
+    print "Inferring the build directory path as " + guess
+    symbol.BUILD_DIR = guess
+
+  if not symbol.NDK_DIR:
+    guess = _GuessDir(_DEFAULT_NDK_DIR)
+    if not guess:
+      print "Couldn't find the Android NDK, please pass --ndk-dir."
+      return 1
+    print "Inferring the Android NDK path as " + guess
+    symbol.NDK_DIR = guess
+
+
+  if len(arguments) > 1:
+    PrintUsage()
+
+  if not arguments or arguments[0] == "-":
+    print "Reading native crash info from stdin"
+    f = sys.stdin
+  else:
+    print "Searching for native crashes in %s" % arguments[0]
+    f = open(arguments[0], "r")
+
+  lines = f.readlines()
+  f.close()
+
+  rootdir = None
+  if zip_arg:
+    rootdir, symbol.SYMBOLS_DIR = UnzipSymbols(zip_arg)
+
+  if symbol.SYMBOLS_DIR:
+    print "Reading Android symbols from", symbol.SYMBOLS_DIR
+
+  print "Reading Mojo symbols from", symbol.BUILD_DIR
+  stack_core.ConvertTrace(lines, more_info, GetSymbolMapping(lines))
+
+  if rootdir:
+    # be a good citizen and clean up...os.rmdir and os.removedirs() don't work
+    cmd = "rm -rf \"%s\"" % rootdir
+    print "\ncleaning up (%s)" % cmd
+    os.system(cmd)
+
+if __name__ == "__main__":
+  main()
+
+# vi: ts=2 sw=2

@@ -1,0 +1,30 @@
+Name: Android Platform engineering tools
+Short Name: android platform development
+URL: https://android.googlesource.com/platform/development
+Version: 0
+Date: 2014/05/02
+Revision: 1b10ec4
+License: Apache 2.0
+License File: NOT_SHIPPED
+Security Critical: no
+
+Description:
+Android Platform engineering tools, specifically stack symbolization scripts
+and a jar containing the AOSP framework to compile the Android WebView
+glue layer against. The sources used to build the AOSP framework jar can be
+checked out using repo on the corresponding manifest file. The AOSP framework
+jar is built by invoking make on the android_system_stubs target.
+
+Local Modifications:
+Only picked the few scripts needed by chrome.
+Updated output directories to use environment variable.
+When calling addr2line, check the symbol is a file (and not a directory).
+Added support for parsing LOG(FATAL) and DCHECK errors and their
+    stack traces, as emitted by src/base/debug/stack_trace_android.cc
+Added support for finding symbols when library is loaded directly from the APK.
+Changed the toolchain to remove references to 4.6 toolchains.
+Added support for arch=x64 as an alias to arch=x86_64
+Added support for mojo. Specifically detection of mojo apps downloaded
+    to temporary files which are in crash stacks.
+Taught `stack` to find the output directory and android_tools regardless of
+    where under the checkout root it is placed.

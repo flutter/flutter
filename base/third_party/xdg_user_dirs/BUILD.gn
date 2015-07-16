@@ -1,0 +1,11 @@
+# Copyright (c) 2013 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+source_set("xdg_user_dirs") {
+  visibility = [ "//base/*" ]
+  sources = [
+    "xdg_user_dir_lookup.cc",
+    "xdg_user_dir_lookup.h",
+  ]
+}

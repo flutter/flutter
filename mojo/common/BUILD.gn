@@ -1,0 +1,95 @@
+# Copyright 2014 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//mojo/public/tools/bindings/mojom.gni")
+import("//testing/test.gni")
+
+component("common") {
+  output_name = "mojo_common_lib"
+
+  sources = [
+    "common_type_converters.cc",
+    "common_type_converters.h",
+    "data_pipe_drainer.cc",
+    "data_pipe_drainer.h",
+    "data_pipe_file_utils.cc",
+    "data_pipe_utils.cc",
+    "data_pipe_utils.h",
+    "data_pipe_utils_internal.h",
+    "handle_watcher.cc",
+    "handle_watcher.h",
+    "message_pump_mojo.cc",
+    "message_pump_mojo.h",
+    "message_pump_mojo_handler.h",
+    "task_tracker.cc",
+    "task_tracker.h",
+    "time_helper.cc",
+    "time_helper.h",
+    "weak_binding_set.h",
+  ]
+
+  if (is_nacl) {
+    sources -= [ "data_pipe_file_utils.cc" ]
+  }
+
+  deps = [
+    "//base",
+    "//base/third_party/dynamic_annotations",
+    "//mojo/public/c/system",
+    "//mojo/public/cpp/bindings",
+    "//mojo/public/cpp/system",
+    "//url",
+  ]
+}
+
+test("mojo_common_unittests") {
+  sources = [
+    "common_type_converters_unittest.cc",
+    "data_pipe_utils_unittest.cc",
+    "handle_watcher_unittest.cc",
+    "message_pump_mojo_unittest.cc",
+    "task_tracker_unittest.cc",
+    "weak_interface_ptr_set_unittest.cc",
+  ]
+
+  deps = [
+    ":common",
+    ":test_interfaces",
+    "//base",
+    "//base/test:test_support",
+    "//base:message_loop_tests",
+    "//mojo/edk/test:run_all_unittests",
+    "//mojo/edk/test:test_support",
+    "//mojo/environment:chromium",
+    "//mojo/public/cpp/bindings",
+    "//mojo/public/cpp/bindings:callback",
+    "//mojo/public/cpp/system",
+    "//mojo/public/cpp/test_support:test_utils",
+    "//testing/gtest",
+    "//url",
+  ]
+}
+
+mojom("test_interfaces") {
+  testonly = true
+  sources = [
+    "test_interfaces.mojom",
+  ]
+}
+
+source_set("tracing_impl") {
+  sources = [
+    "trace_controller_impl.cc",
+    "trace_controller_impl.h",
+    "tracing_impl.cc",
+    "tracing_impl.h",
+  ]
+
+  deps = [
+    "//base",
+    "//mojo/public/cpp/application",
+    "//mojo/public/cpp/bindings",
+    "//mojo/services/tracing/public/interfaces",
+  ]
+}

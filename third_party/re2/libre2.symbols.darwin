@@ -1,0 +1,11 @@
+# Linker doesn't like these unmangled:
+# re2::RE2*
+__ZN3re23RE2*
+__ZNK3re23RE2*
+# re2::StringPiece*
+__ZN3re211StringPiece*
+__ZNK3re211StringPiece*
+# operator<<(std::ostream&, re2::StringPiece const&)
+__ZlsRSoRKN3re211StringPieceE
+# re2::FilteredRE2*
+__ZN3re211FilteredRE2*

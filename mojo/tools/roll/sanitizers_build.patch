@@ -1,0 +1,35 @@
+diff --git a/build/config/sanitizers/BUILD.gn b/build/config/sanitizers/BUILD.gn
+index 8996951..023315f 100644
+--- a/build/config/sanitizers/BUILD.gn
++++ b/build/config/sanitizers/BUILD.gn
+@@ -8,9 +8,12 @@ import("//build/config/sanitizers/sanitizers.gni")
+ # shared_libraries. Unconditionally depend upon this target as it is empty if
+ # |is_asan|, |is_lsan|, |is_tsan|, |is_msan| and |use_custom_libcxx| are false.
+ group("deps") {
+-  deps = [
+-    "//third_party/instrumented_libraries:deps",
+-  ]
++  # TODO(vtl): Chromium has the following (but we don't have
++  # instrumented_libraries).
++  # deps = [
++  #   "//third_party/instrumented_libraries:deps",
++  # ]
++  deps = []
+   if (is_asan || is_lsan || is_tsan || is_msan) {
+     public_configs = [ ":sanitizer_options_link_helper" ]
+     deps += [ ":options_sources" ]
+diff --git a/build/config/sanitizers/sanitizers.gni b/build/config/sanitizers/sanitizers.gni
+index a7b9658..0edc144 100644
+--- a/build/config/sanitizers/sanitizers.gni
++++ b/build/config/sanitizers/sanitizers.gni
+@@ -6,7 +6,9 @@ declare_args() {
+   # Use libc++ (buildtools/third_party/libc++ and
+   # buildtools/third_party/libc++abi) instead of stdlibc++ as standard library.
+   # This is intended to be used for instrumented builds.
+-  use_custom_libcxx = (is_asan && is_linux) || is_tsan || is_msan
++  # TODO(vtl): We don't use this, since building fails, for some reason.
++  use_custom_libcxx = false
++  # use_custom_libcxx = (is_asan && is_linux) || is_tsan || is_msan
+ 
+   # Track where uninitialized memory originates from. From fastest to slowest:
+   # 0 - no tracking, 1 - track only the initial allocation site, 2 - track the

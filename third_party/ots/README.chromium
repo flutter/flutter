@@ -1,0 +1,8 @@
+Name: OTS
+URL: https://github.com/khaledhosny/ots.git
+Version: 4d011721c2eadd4e649326f8d164423db060d85e
+Security Critical: yes
+License: BSD
+
+Local Modifications:
+- src/woff2.cc: Changed include path to brotli/dec/decode.h.

@@ -1,0 +1,13 @@
+weak_ptr_factory.cpp:54:38: warning: [chromium-style] WeakPtrFactory members which refer to their outer class must be the last member in the outer class definition.
+  base::WeakPtrFactory<FactoryFirst> factory_;
+                                     ^
+weak_ptr_factory.cpp:60:39: warning: [chromium-style] WeakPtrFactory members which refer to their outer class must be the last member in the outer class definition.
+  base::WeakPtrFactory<FactoryMiddle> factory_;
+                                      ^
+weak_ptr_factory.cpp:66:44: warning: [chromium-style] WeakPtrFactory members which refer to their outer class must be the last member in the outer class definition.
+  base::WeakPtrFactory<TwoFactoriesOneBad> factory1_;
+                                           ^
+weak_ptr_factory.cpp:76:39: warning: [chromium-style] WeakPtrFactory members which refer to their outer class must be the last member in the outer class definition.
+  base::WeakPtrFactory<ClassTemplate> factory_;
+                                      ^
+4 warnings generated.

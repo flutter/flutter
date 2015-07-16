@@ -1,0 +1,14 @@
+In file included from class_requires_finalization_base.cpp:5:
+./class_requires_finalization_base.h:23:1: warning: [blink-gc] Class 'NeedsFinalizer' requires finalization.
+class NeedsFinalizer : public A, public B {
+^
+./class_requires_finalization_base.h:23:34: note: [blink-gc] Base class 'B' requiring finalization declared here:
+class NeedsFinalizer : public A, public B {
+                                 ^
+./class_requires_finalization_base.h:40:1: warning: [blink-gc] Class 'GCedClassWithAScriptWrappableAndAFinalizableBase' requires finalization.
+class GCedClassWithAScriptWrappableAndAFinalizableBase
+^
+./class_requires_finalization_base.h:42:7: note: [blink-gc] Base class 'B' requiring finalization declared here:
+    , public B
+      ^
+2 warnings generated.

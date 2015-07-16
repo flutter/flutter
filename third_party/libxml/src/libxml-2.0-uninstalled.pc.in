@@ -1,0 +1,12 @@
+prefix=
+exec_prefix=
+libdir=${pcfiledir}
+includedir=${pcfiledir}/include
+
+
+Name: libXML
+Version: @VERSION@
+Description: libXML library version2.
+Requires:
+Libs: -L${libdir} -lxml2 @THREAD_LIBS@ @Z_LIBS@ @ICONV_LIBS@ @M_LIBS@ @LIBS@
+Cflags: -I${includedir} @XML_INCLUDEDIR@ @XML_CFLAGS@

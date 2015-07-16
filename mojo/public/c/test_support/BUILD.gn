@@ -1,0 +1,27 @@
+# Copyright 2014 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# GYP version: mojo/public/mojo_public.gyp:mojo_test_support
+shared_library("test_support") {
+  output_name = "mojo_test_support"
+
+  defines = [ "MOJO_TEST_SUPPORT_IMPLEMENTATION" ]
+
+  public_configs = [ "../../build/config:mojo_sdk" ]
+
+  sources = [
+    "test_support.h",
+    "test_support_export.h",
+
+    # TODO(vtl): Convert this to thunks http://crbug.com/386799
+    "../../tests/test_support_private.cc",
+    "../../tests/test_support_private.h",
+  ]
+
+  if (is_mac) {
+    # TODO(GYP)
+    #   # Make it a run-path dependent library.
+    #   'DYLIB_INSTALL_NAME_BASE': '@loader_path',
+  }
+}

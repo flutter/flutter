@@ -1,0 +1,118 @@
+# Copyright 2015 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Rules to generate python packaged applications for Mojo
+
+import("../mojo_sdk.gni")
+
+template("python_package") {
+  action(target_name) {
+    script = rebase_path("mojo/public/tools/gn/zip.py", ".", mojo_root)
+
+    inputs = invoker.sources
+
+    deps = []
+    zip_inputs = []
+
+    if (defined(invoker.deps)) {
+      deps += invoker.deps
+      foreach(d, invoker.deps) {
+        dep_name = get_label_info(d, "name")
+        dep_target_out_dir = get_label_info(d, "target_out_dir")
+        zip_inputs += [ "$dep_target_out_dir/$dep_name.pyzip" ]
+      }
+    }
+
+    if (defined(invoker.datadeps)) {
+      datadeps = invoker.datadeps
+    }
+
+    output = "$target_out_dir/$target_name.pyzip"
+    outputs = [
+      output,
+    ]
+
+    rebase_base_dir =
+        rebase_path(get_label_info(":$target_name", "dir"), root_build_dir)
+    rebase_inputs = rebase_path(inputs, root_build_dir)
+    rebase_zip_inputs = rebase_path(zip_inputs, root_build_dir)
+    rebase_output = rebase_path(output, root_build_dir)
+    args = [
+      "--base-dir=$rebase_base_dir",
+      "--inputs=$rebase_inputs",
+      "--zip-inputs=$rebase_zip_inputs",
+      "--output=$rebase_output",
+    ]
+  }
+}
+
+# Use this template to generate a .mojo python application. One of the source
+# files should be named __mojo__.py and contain a MojoMain function as the
+# entry point. Dependencies of python_packaged_application targets should be
+# either mojom targets (and specified using the mojom_deps variable) or
+# python_package targets.
+template("python_packaged_application") {
+  package_name = "${target_name}_package"
+  package_output = "$target_out_dir/$package_name.pyzip"
+
+  if (defined(invoker.output_name)) {
+    mojo_output = "$root_out_dir/" + invoker.output_name + ".mojo"
+  } else {
+    mojo_output = "$root_out_dir/" + target_name + ".mojo"
+  }
+
+  if (defined(invoker.debug) && invoker.debug) {
+    content_handler_param = "?debug=true"
+  } else {
+    content_handler_param = ""
+  }
+
+  python_package(package_name) {
+    sources = invoker.sources
+    if (defined(invoker.deps)) {
+      deps = invoker.deps
+    }
+    if (defined(invoker.mojom_deps)) {
+      mojom_deps = invoker.mojom_deps
+    }
+    if (defined(invoker.datadeps)) {
+      datadeps = invoker.datadeps
+    }
+  }
+
+  action(target_name) {
+    script = rebase_path("mojo/public/tools/prepend.py", ".", mojo_root)
+
+    input = package_output
+    inputs = [
+      input,
+    ]
+
+    output = mojo_output
+    outputs = [
+      output,
+    ]
+
+    deps = [
+      ":$package_name",
+    ]
+    if (defined(invoker.deps)) {
+      deps += invoker.deps
+    }
+    if (defined(invoker.mojom_deps)) {
+      deps += invoker.mojom_deps
+    }
+    if (defined(invoker.datadeps)) {
+      datadeps = invoker.datadeps
+    }
+
+    rebase_input = rebase_path(input, root_build_dir)
+    rebase_output = rebase_path(output, root_build_dir)
+    args = [
+      "--input=$rebase_input",
+      "--output=$rebase_output",
+      "--line=#!mojo mojo:py_content_handler${content_handler_param}",
+    ]
+  }
+}

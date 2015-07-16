@@ -1,0 +1,63 @@
+Name: Quick Color Management System
+Short Name: qcms
+URL: https://github.com/jrmuizel/qcms/tree/v4
+Version: v4
+Date: 2012-03-13
+License: MIT
+License File: src/COPYING
+Security Critical: yes
+
+Description:
+Contains support for applying an ICC color profile to an image.  The code is
+originally based on tinycms, re-written by Mozilla for better security and
+performance.  This copy is a source-drop from Mozilla on March 13, 2012.
+
+Local Modifications:
+Some files only have license headers in the master branch.
+ - Added the same license headers to the versions brought down from the 'v4'
+   branch src URL qcms/tree/v4
+google.patch contains the following modifications. Apply with
+   patch -p1 < google.patch.
+ - Add bgra output support.
+ - Use HAVE_POSIX_MEMALIGN instead of HAS_POSIX_MEMALIG
+   (https://bugzilla.mozilla.org/show_bug.cgi?id=692922)
+ - Applied upstream patch:
+   - https://bug752254.bugzilla.mozilla.org/attachment.cgi?id=626102
+ - Applied upstream patch for sanitizing gamma table:
+   - Expanded gamma clamp range to allow 1.0.
+ - Do not short-circuit bogus profile check for A2B0 or B2A0 unless v4 enabled.
+ - Only reference code from transform-sse1.c and transform-sse2.c when SSE is
+   enabled.
+ - Do not use an x86-only attribute on ARM or MIPS.
+ - Fix integer truncation warning/errors on Win64 build.
+ - Apply upstream thread safety (fix) patch from
+   - https://bugzilla.mozilla.org/show_bug.cgi?id=853169
+ - Apply upstream fix for qcms_profile_from_memory from
+   - https://bugzilla.mozilla.org/show_bug.cgi?id=969226
+ - Apply upstream simplification of qcmstypes.h
+   - https://hg.mozilla.org/mozilla-central/rev/b5be94737a83
+ - Check for unused tag_len in read_nested_curveType()
+ - Apply qcms_transform_precacheLUT_float does not properly free dest buffer
+   - https://bugzilla.mozilla.org/show_bug.cgi?id=701348
+ - Add qcms_profile_match api
+   - https://code.google.com/p/chromium/issues/detail?id=401971
+ - Add qcms_profile_get_description api
+   - https://code.google.com/p/chromium/issues/detail?id=401971
+ - Convert MLUC profile description embedded nulls to '.'
+   - https://code.google.com/p/chromium/issues/detail?id=401971
+ - [APPLE port] Use en-localized profile description names
+   - https://code.google.com/p/chromium/issues/detail?id=401971
+ - [APPLE port] Use mmod data for profile descriptions
+   - https://code.google.com/p/chromium/issues/detail?id=401971
+ - Minor variable name change: description -> description_offset
+   - https://code.google.com/p/chromium/issues/detail?id=401971
+ - Avoid divisions creating sample points in the float cube LUT builder
+   - https://code.google.com/p/chromium/issues/detail?id=443863
+ - Add bgra (z,y,x) sampled transform lookup table api
+   - https://code.google.com/p/chromium/issues/detail?id=443863
+ - Apply upstream fix reject invalid sizes from
+   - https://bugzilla.mozilla.org/show_bug.cgi?id=1132468
+ - lut_inverse_interp16: remove odd whitespace formatting
+   - https://code.google.com/p/chromium/issues/detail?id=458024
+To regenerate google.patch:
+  git diff b8456f38 src > google.patch

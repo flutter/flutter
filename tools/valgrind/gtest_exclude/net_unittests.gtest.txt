@@ -1,0 +1,6 @@
+# Very slow under Valgrind.
+KeygenHandlerTest.*SmokeTest
+KeygenHandlerTest.*ConcurrencyTest
+
+# Hangs, see http://crbug.com/61908
+DirectoryListerTest.BigDirRecursiveTest

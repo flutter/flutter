@@ -1,0 +1,4 @@
+[dist4]message_header  // num_bytes: Less than the minimal size of message
+                       // header.
+[u4]0                  // version
+[anchr]message_header

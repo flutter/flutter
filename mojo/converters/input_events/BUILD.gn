@@ -1,0 +1,24 @@
+# Copyright 2014 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# GYP version: mojo/mojo_converters.gypi:mojo_input_events_lib
+component("input_events") {
+  sources = [
+    "input_events_type_converters.cc",
+    "input_events_type_converters.h",
+    "mojo_extended_key_event_data.cc",
+    "mojo_extended_key_event_data.h",
+  ]
+
+  deps = [
+    "//base",
+    "//ui/events",
+    "//ui/gfx/geometry",
+    "//mojo/converters/geometry",
+    "//mojo/environment:chromium",
+    "//mojo/public/c/system",
+    "//mojo/services/geometry/public/interfaces",
+    "//mojo/services/input_events/public/interfaces",
+  ]
+}

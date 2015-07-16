@@ -1,0 +1,18 @@
+// Copyright 2014 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+module http_server;
+
+struct HttpRequest {
+  string relative_url;  // Starts with '/'. Example: "/test?query=foo"
+
+  // The HTTP method if applicable.
+  string method = "GET";
+
+  // Additional HTTP request headers.
+  map<string, string>? headers;
+
+  // The payload for the request body. Only set for "POST" or "PUT".
+  handle<data_pipe_consumer>? body;
+};

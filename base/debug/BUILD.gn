@@ -1,0 +1,76 @@
+# Copyright (c) 2015 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+source_set("debug") {
+  sources = [
+    "alias.cc",
+    "alias.h",
+    "asan_invalid_access.cc",
+    "asan_invalid_access.h",
+    "crash_logging.cc",
+    "crash_logging.h",
+    "debugger.cc",
+    "debugger.h",
+    "debugger_posix.cc",
+    "debugger_win.cc",
+    "dump_without_crashing.cc",
+    "dump_without_crashing.h",
+    "gdi_debug_util_win.cc",
+    "gdi_debug_util_win.h",
+
+    # This file depends on files from the "allocator" target,
+    # but this target does not depend on "allocator" (see
+    # allocator.gyp for details).
+    "leak_annotations.h",
+    "leak_tracker.h",
+    "proc_maps_linux.cc",
+    "proc_maps_linux.h",
+    "profiler.cc",
+    "profiler.h",
+    "stack_trace.cc",
+    "stack_trace.h",
+    "stack_trace_android.cc",
+    "stack_trace_posix.cc",
+    "stack_trace_win.cc",
+    "task_annotator.cc",
+    "task_annotator.h",
+  ]
+
+  if (is_android) {
+    # Android uses some Linux sources, put those back.
+    set_sources_assignment_filter([])
+    sources += [ "proc_maps_linux.cc" ]
+    set_sources_assignment_filter(sources_assignment_filter)
+
+    sources -= [ "stack_trace_posix.cc" ]
+  }
+
+  if (is_nacl) {
+    sources -= [
+      "crash_logging.cc",
+      "crash_logging.h",
+      "stack_trace.cc",
+      "stack_trace_posix.cc",
+    ]
+  }
+
+  configs += [ "//base:base_implementation" ]
+
+  deps = [
+    "//base/memory",
+    "//base/process",
+  ]
+
+  if (is_linux) {
+    defines = [ "USE_SYMBOLIZE" ]
+    deps += [ "//base/third_party/symbolize" ]
+  }
+
+  allow_circular_includes_from = [
+    "//base/memory",
+    "//base/process",
+  ]
+
+  visibility = [ "//base/*" ]
+}

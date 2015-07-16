@@ -1,0 +1,13 @@
+// Copyright 2014 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+[JavaPackage="org.chromium.mojo.bindings.test.mojom.test_structs"]
+module mojo.test;
+
+struct Rect {
+  int32 x;
+  int32 y;
+  int32 width;
+  int32 height;
+};

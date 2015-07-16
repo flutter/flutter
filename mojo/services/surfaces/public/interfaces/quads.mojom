@@ -1,0 +1,212 @@
+// Copyright 2014 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+module mojo;
+
+import "geometry/public/interfaces/geometry.mojom";
+import "surfaces/public/interfaces/surface_id.mojom";
+
+struct Color {
+  uint32 rgba;
+};
+
+// TODO(jamesr): Populate subtype fields.
+struct CheckerboardQuadState {};
+
+struct DebugBorderQuadState {};
+
+struct IoSurfaceContentQuadState {};
+
+struct RenderPassId {
+  int32 layer_id;
+  int32 index;
+};
+
+struct RenderPassQuadState {
+  RenderPassId render_pass_id;
+
+  // If nonzero, resource id of mask to use when drawing this pass.
+  uint32 mask_resource_id;
+  PointF mask_uv_scale;
+  Size mask_texture_size;
+
+  // Post-processing filters, applied to the pixels in the render pass' texture.
+  // TODO(jamesr): Support
+  // FilterOperations filters;
+
+  // The scale from layer space of the root layer of the render pass to
+  // the render pass physical pixels. This scale is applied to the filter
+  // parameters for pixel-moving filters. This scale should include
+  // content-to-target-space scale, and device pixel ratio.
+  PointF filters_scale;
+
+  // Post-processing filters, applied to the pixels showing through the
+  // background of the render pass, from behind it.
+  // TODO(jamesr): Support
+  // FilterOperations background_filters;
+};
+
+struct SolidColorQuadState {
+  Color color;
+  bool force_anti_aliasing_off;
+};
+
+struct SurfaceQuadState {
+  SurfaceId surface;
+};
+
+struct TextureQuadState {
+  uint32 resource_id;
+  bool premultiplied_alpha;
+  PointF uv_top_left;
+  PointF uv_bottom_right;
+  Color background_color;
+  array<float, 4> vertex_opacity;
+  bool flipped;
+  bool nearest_neighbor;
+};
+
+struct TileQuadState {
+  RectF tex_coord_rect;
+  Size texture_size;
+  bool swizzle_contents;
+  uint32 resource_id;
+  bool nearest_neighbor;
+};
+
+struct StreamVideoQuadState {};
+
+enum YUVColorSpace {
+  REC_601,       // SDTV standard with restricted "studio swing" color range.
+  REC_709,       // HDTV standard with restricted "studio swing" color range.
+  JPEG,          // Full color range [0, 255] JPEG color space.
+};
+
+struct YUVVideoQuadState {
+  RectF tex_coord_rect;
+  uint32 y_plane_resource_id;
+  uint32 u_plane_resource_id;
+  uint32 v_plane_resource_id;
+  uint32 a_plane_resource_id;
+  YUVColorSpace color_space;
+};
+
+enum Material {
+  CHECKERBOARD = 1,
+  DEBUG_BORDER,
+  IO_SURFACE_CONTENT,
+  PICTURE_CONTENT,
+  RENDER_PASS,
+  SOLID_COLOR,
+  STREAM_VIDEO_CONTENT,
+  SURFACE_CONTENT,
+  TEXTURE_CONTENT,
+  TILED_CONTENT,
+  YUV_VIDEO_CONTENT,
+};
+
+struct Quad {
+  Material material;
+
+  // This rect, after applying the quad_transform(), gives the geometry that
+  // this quad should draw to. This rect lives in content space.
+  Rect rect;
+
+  // This specifies the region of the quad that is opaque. This rect lives in
+  // content space.
+  Rect opaque_rect;
+
+  // Allows changing the rect that gets drawn to make it smaller. This value
+  // should be clipped to |rect|. This rect lives in content space.
+  Rect visible_rect;
+
+  // Allows changing the rect that gets drawn to make it smaller. This value
+  // should be clipped to |rect|. This rect lives in content space.
+  bool needs_blending;
+
+  // Index into the containing pass' shared quad state array which has state
+  // (transforms etc) shared by multiple quads.
+  uint32 shared_quad_state_index;
+
+  // Only one of the following will be set, depending on the material.
+  CheckerboardQuadState? checkerboard_quad_state;
+  DebugBorderQuadState? debug_border_quad_state;
+  IoSurfaceContentQuadState? io_surface_quad_state;
+  RenderPassQuadState? render_pass_quad_state;
+  SolidColorQuadState? solid_color_quad_state;
+  SurfaceQuadState? surface_quad_state;
+  TextureQuadState? texture_quad_state;
+  TileQuadState? tile_quad_state;
+  StreamVideoQuadState? stream_video_quad_state;
+  YUVVideoQuadState? yuv_video_quad_state;
+};
+
+enum SkXfermode {
+  kClear_Mode = 0,    //!< [0, 0]
+  kSrc_Mode,      //!< [Sa, Sc]
+  kDst_Mode,      //!< [Da, Dc]
+  kSrcOver_Mode,  //!< [Sa + Da - Sa*Da, Rc = Sc + (1 - Sa)*Dc]
+  kDstOver_Mode,  //!< [Sa + Da - Sa*Da, Rc = Dc + (1 - Da)*Sc]
+  kSrcIn_Mode,    //!< [Sa * Da, Sc * Da]
+  kDstIn_Mode,    //!< [Sa * Da, Sa * Dc]
+  kSrcOut_Mode,   //!< [Sa * (1 - Da), Sc * (1 - Da)]
+  kDstOut_Mode,   //!< [Da * (1 - Sa), Dc * (1 - Sa)]
+  kSrcATop_Mode,  //!< [Da, Sc * Da + (1 - Sa) * Dc]
+  kDstATop_Mode,  //!< [Sa, Sa * Dc + Sc * (1 - Da)]
+  kXor_Mode,      //!< [Sa + Da - 2 * Sa * Da, Sc * (1 - Da) + (1 - Sa) * Dc]
+  kPlus_Mode,     //!< [Sa + Da, Sc + Dc]
+  kModulate_Mode, // multiplies all components (= alpha and color)
+
+  // Following blend modes are defined in the CSS Compositing standard:
+  // https://dvcs.w3.org/hg/FXTF/rawfile/tip/compositing/index.html#blending
+  kScreen_Mode,
+  kLastCoeffMode = kScreen_Mode,
+
+  kOverlay_Mode,
+  kDarken_Mode,
+  kLighten_Mode,
+  kColorDodge_Mode,
+  kColorBurn_Mode,
+  kHardLight_Mode,
+  kSoftLight_Mode,
+  kDifference_Mode,
+  kExclusion_Mode,
+  kMultiply_Mode,
+  kLastSeparableMode = kMultiply_Mode,
+
+  kHue_Mode,
+  kSaturation_Mode,
+  kColor_Mode,
+  kLuminosity_Mode,
+  kLastMode = kLuminosity_Mode
+};
+
+struct SharedQuadState {
+  // Transforms from quad's original content space to its target content space.
+  Transform content_to_target_transform;
+
+  // This size lives in the content space for the quad's originating layer.
+  Size content_bounds;
+
+  // This rect lives in the content space for the quad's originating layer.
+  Rect visible_content_rect;
+
+  // This rect lives in the target content space.
+  Rect clip_rect;
+
+  bool is_clipped;
+  float opacity;
+  SkXfermode blend_mode;
+  int32 sorting_context_id;
+};
+
+struct Pass {
+  int32 id;
+  Rect output_rect;
+  Rect damage_rect;
+  Transform transform_to_root_target;
+  bool has_transparent_background;
+  array<Quad> quads;
+  array<SharedQuadState> shared_quad_states;
+};

@@ -1,0 +1,58 @@
+# Copyright (c) 2012 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+{
+  'variables': {
+    'command': [
+      '../testing/test_env.py',
+      '<(PRODUCT_DIR)/base_unittests<(EXECUTABLE_SUFFIX)',
+      '--brave-new-test-launcher',
+      '--test-launcher-bot-mode',
+      '--asan=<(asan)',
+      '--msan=<(msan)',
+      '--tsan=<(tsan)',
+    ],
+  },
+  'conditions': [
+    ['OS=="android" or OS=="linux" or OS=="mac" or OS=="win"', {
+      'variables': {
+        'files': [
+          'test/data/',
+        ],
+      },
+    }],
+    ['OS=="linux" or OS=="mac" or OS=="win"', {
+      'variables': {
+        'files': [
+          '../testing/test_env.py',
+          '<(PRODUCT_DIR)/base_unittests<(EXECUTABLE_SUFFIX)',
+        ],
+        'read_only': 1,
+      },
+    }],
+    ['OS=="linux"', {
+      'variables': {
+        'files': [
+          '<(PRODUCT_DIR)/lib/libmalloc_wrapper.so',
+        ],
+      },
+    }],
+    ['OS=="mac" and asan==1 and fastbuild==0', {
+      'variables': {
+        'files': [
+          '<(PRODUCT_DIR)/base_unittests.dSYM/',
+        ],
+      },
+    }],
+    ['OS=="win" and (fastbuild==0 or fastbuild==1)', {
+      'variables': {
+        'files': [
+          '<(PRODUCT_DIR)/base_unittests.exe.pdb',
+        ],
+      },
+    }],
+  ],
+  'includes': [
+    'base.isolate',
+  ],
+}

@@ -1,0 +1,28 @@
+// Copyright 2014 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+[JavaPackage="org.chromium.mojo.bindings.test.mojom.imported"]
+module imported;
+
+import "sample_import.mojom";
+
+// This sample adds more types and constants to the "imported" namespace,
+// to test a bug with importing multiple modules with the same namespace.
+
+enum Color {
+  RED,
+  BLACK,
+};
+
+struct Size {
+  int32 width;
+  int32 height;
+};
+
+struct Thing {
+  imported.Shape shape = RECTANGLE;
+  int32 color = Color.BLACK;
+  Point location;
+  Size size;
+};

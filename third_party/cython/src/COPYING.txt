@@ -1,0 +1,12 @@
+The original Pyrex code as of 2006-04 is licensed under the following
+license: "Copyright stuff: Pyrex is free of restrictions. You may use,
+redistribute, modify and distribute modified versions."
+
+------------------
+
+Cython, which derives from Pyrex, is licensed under the Apache 2.0
+Software License.  More precisely, all modifications and new code
+made to go from Pyrex to Cython are so licensed.
+
+See LICENSE.txt for more details.
+

@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+     Copyright 2013 The Chromium Authors. All rights reserved.
+     Use of this source code is governed by a BSD-style license that can be
+     found in the LICENSE file.
+-->
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android" 
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+    <TextView
+        android:id="@+id/text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/color_picker_gradient_margin"
+        android:layout_marginEnd="@dimen/color_picker_gradient_margin"
+        android:textAppearance="@android:style/TextAppearance.Medium"
+        android:textIsSelectable="false" />
+
+    <FrameLayout
+        android:id="@+id/gradient_border"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_below="@id/text"
+        android:layout_marginStart="@dimen/color_picker_gradient_margin"
+        android:layout_marginEnd="@dimen/color_picker_gradient_margin"
+        android:layout_marginTop="3dp"
+        android:background="@drawable/color_picker_border"
+        android:padding="1dp" >
+
+        <View
+            android:id="@+id/gradient"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+    </FrameLayout>
+
+    <SeekBar
+        android:id="@+id/seek_bar"
+        android:layout_width="match_parent"
+        android:layout_height="75dp"
+        android:layout_below="@id/text"
+        android:progressDrawable="@android:color/transparent"
+        android:thumb="@drawable/color_picker_advanced_select_handle"
+        android:translationY="25dp" />
+
+</RelativeLayout>

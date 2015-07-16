@@ -1,0 +1,8 @@
+In file included from nested_class_inline_ctor.cpp:5:
+./nested_class_inline_ctor.h:15:5: warning: [chromium-style] Complex constructor has an inlined body.
+    Bar() {}
+    ^
+./nested_class_inline_ctor.h:16:5: warning: [chromium-style] Complex destructor has an inline body.
+    ~Bar() {}
+    ^
+2 warnings generated.

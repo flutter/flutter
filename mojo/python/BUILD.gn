@@ -1,0 +1,66 @@
+# Copyright 2014 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//mojo/public/python/rules.gni")
+import("//third_party/cython/rules.gni")
+
+group("python") {
+  deps = [
+    ":mojo_embedder",
+    ":packaged_utils",
+    ":utils",
+    ":validation_util",
+    "//mojo/public/python",
+  ]
+}
+
+copy("utils") {
+  sources = [
+    "mojo_utils/__init__.py",
+    "mojo_utils/data_pipe_utils.py",
+  ]
+  outputs = [
+    "$root_out_dir/python/mojo_utils/{{source_file_part}}",
+  ]
+}
+
+python_package("packaged_utils") {
+  sources = [
+    "mojo_utils/__init__.py",
+    "mojo_utils/data_pipe_utils.py",
+  ]
+  datadeps = [
+    "//mojo/public/python:mojo_system",
+  ]
+}
+
+python_binary_module("mojo_embedder") {
+  cython_sources = [ "system/mojo_embedder.pyx" ]
+  deps = [
+    "//mojo/edk/system",
+  ]
+  datadeps = [
+    "//mojo/public/python:mojo_system",
+  ]
+}
+
+copy("tests_module") {
+  sources = [
+    "system/mojo_tests/__init__.py",
+  ]
+  outputs = [
+    "$root_out_dir/python/mojo_tests/{{source_file_part}}",
+  ]
+}
+
+python_binary_module("validation_util") {
+  python_base_module = "mojo_tests"
+  cython_sources = [ "system/mojo_tests/validation_util.pyx" ]
+  deps = [
+    "//mojo/public/cpp/bindings/tests:mojo_public_bindings_test_utils",
+  ]
+  datadeps = [
+    ":tests_module",
+  ]
+}

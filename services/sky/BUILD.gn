@@ -1,0 +1,61 @@
+# Copyright 2014 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//mojo/public/mojo_application.gni")
+import("//mojo/public/tools/bindings/mojom.gni")
+
+mojo_native_application("sky") {
+  output_name = "sky_viewer"
+
+  sources = [
+    "content_handler_impl.cc",
+    "content_handler_impl.h",
+    "converters/basic_types.cc",
+    "converters/basic_types.h",
+    "converters/input_event_types.cc",
+    "converters/input_event_types.h",
+    "dart_library_provider_impl.cc",
+    "dart_library_provider_impl.h",
+    "document_view.cc",
+    "document_view.h",
+    "internals.cc",
+    "internals.h",
+    "platform_impl.cc",
+    "platform_impl.h",
+    "runtime_flags.cc",
+    "runtime_flags.h",
+    "viewer.cc",
+  ]
+
+  deps = [
+    "//mojo/application",
+    "//mojo/common",
+    "//mojo/common:tracing_impl",
+    "//mojo/converters/geometry",
+    "//mojo/converters/input_events",
+    "//mojo/icu",
+    "//mojo/public/cpp/bindings",
+    "//mojo/public/cpp/system",
+    "//mojo/public/cpp/utility",
+    "//mojo/public/interfaces/application",
+    "//mojo/services/content_handler/public/interfaces",
+    "//mojo/services/gpu/public/interfaces",
+    "//mojo/services/input_events/public/interfaces",
+    "//mojo/services/navigation/public/interfaces",
+    "//mojo/services/network/public/interfaces",
+    "//mojo/services/service_registry/public/interfaces",
+    "//mojo/services/surfaces/public/interfaces",
+    "//mojo/services/view_manager/public/cpp",
+    "//mojo/services/view_manager/public/interfaces",
+    "//services/sky/compositor",
+    "//skia",
+    "//sky/engine/public/sky",
+    "//sky/engine/tonic",
+    "//sky/engine/web",
+    "//sky/shell/dart",
+    "//third_party/icu",
+    "//ui/events",
+    "//url",
+  ]
+}

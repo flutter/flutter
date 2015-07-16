@@ -1,0 +1,9 @@
+# Copyright 2015 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+relocation_packer_target =
+    "//third_party/android_platform/relocation_packer($host_toolchain)"
+relocation_packer_dir =
+    get_label_info("$relocation_packer_target", "root_out_dir")
+relocation_packer_exe = "${relocation_packer_dir}/android_relocation_packer"

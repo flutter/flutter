@@ -1,0 +1,46 @@
+/* Copyright (c) 2013 The Chromium Authors. All rights reserved.
+   Use of this source code is governed by a BSD-style license that can be
+  found in the LICENSE file. */
+
+/* Test Typedef productions
+
+Run with --test to generate an AST and verify that all comments accurately
+reflect the state of the Nodes.
+
+BUILD Type(Name)
+This comment signals that a node of type <Type> is created with the
+name <Name>.
+
+ERROR Error String
+This comment signals that a error of <Error String> is generated.  The error
+is not assigned to a node, but are expected in order.
+
+PROP Key=Value
+This comment signals that a property has been set on the Node such that
+<Key> = <Value>.
+
+TREE
+Type(Name)
+  Type(Name)
+  Type(Name)
+    Type(Name)
+    ...
+This comment signals that a tree of nodes matching the BUILD comment
+symatics should exist.  This is an exact match.
+*/
+
+/* TREE
+ *Inline(C)
+ */
+
+#inline C
+This is my block of C code
+#endinl
+
+/* TREE
+ *Inline(CC)
+ */
+#inline CC
+This is my block of CC code
+#endinl
+

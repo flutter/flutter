@@ -1,0 +1,4 @@
+# These contain un-analyzed test failures and leaks
+# http://crbug.com/402257
+ApiTestBaseTest.*
+SerialApiTest.*

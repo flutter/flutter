@@ -1,0 +1,90 @@
+// Copyright 2015 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+[JavaPackage="org.chromium.mojo.bindings"]
+module mojo;
+
+// For each message pipe representing a user-defined interface, some control
+// functions are provided at the same end of the message pipe as the
+// user-defined interface, providing information about the user-defined
+// interface and controlling behavior of the message pipe.
+
+////////////////////////////////////////////////////////////////////////////////
+// Run@0xFFFFFFFF(RunInput input) => (RunOutput? output);
+//
+// This control function runs the input command. If the command is not
+// supported, |output| is set to null; otherwise |output| stores the result,
+// whose type depends on the input.
+//
+// TODO(yzshen): Once union support is ready, switch the following definition
+// to:
+// struct RunMessageParams {
+//   RunInput input;
+// };
+// union RunInput {
+//   QueryVersion query_version;
+// };
+//
+// struct RunResponseMessageParams {
+//   RunOutput? output;
+// };
+// union RunOutput {
+//   QueryVersionResult query_version_result;
+// };
+
+const uint32 kRunMessageId = 0xFFFFFFFF;
+
+struct RunMessageParams {
+  // The reserved fields make the layout compatible with the RunInput union
+  // described above.
+  uint32 reserved0;  // Must be set to 16.
+  uint32 reserved1;  // Must be set to 0;
+  QueryVersion query_version;
+};
+
+struct RunResponseMessageParams {
+  // The reserved fields make the layout compatible with the RunOutput union
+  // described above.
+  uint32 reserved0;  // Must be set to 16.
+  uint32 reserved1;  // Must be set to 0.
+  QueryVersionResult query_version_result;
+};
+
+// Queries the max supported version of the user-defined interface.
+struct QueryVersion {
+};
+struct QueryVersionResult {
+  uint32 version;
+};
+
+////////////////////////////////////////////////////////////////////////////////
+// RunOrClosePipe@0xFFFFFFFE(RunOrClosePipeInput input);
+//
+// This control function runs the input command. If the operation fails or the
+// command is not supported, the message pipe is closed.
+//
+// TODO(yzshen): Once union support is ready, switch the following definition
+// to:
+// struct RunOrClosePipeMessageParams {
+//   RunOrClosePipeInput input;
+// };
+// union RunOrClosePipeInput {
+//   RequireVersion require_version;
+// };
+
+const uint32 kRunOrClosePipeMessageId = 0xFFFFFFFE;
+
+struct RunOrClosePipeMessageParams {
+  // The reserved fields make the layout compatible with the RunOrClosePipeInput
+  // union described above.
+  uint32 reserved0;  // Must be set to 16.
+  uint32 reserved1;  // Must be set to 0.
+  RequireVersion require_version;
+};
+
+// If the specified version of the user-defined interface is not supported, the
+// function fails and the pipe is closed.
+struct RequireVersion {
+  uint32 version;
+};

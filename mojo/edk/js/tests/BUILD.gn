@@ -1,0 +1,37 @@
+# Copyright 2014 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("../../mojo_edk.gni")
+import("../../../public/tools/bindings/mojom.gni")
+
+mojo_edk_source_set("js_to_cpp_tests") {
+  testonly = true
+
+  deps = [
+    ":js_to_cpp_bindings",
+    "//gin:gin_test",
+  ]
+
+  mojo_edk_deps = [
+    "mojo/edk/js",
+    "mojo/edk/test:test_support",
+  ]
+  
+  mojo_sdk_deps = [
+    "mojo/public/cpp/bindings",
+    "mojo/public/cpp/system",
+    "mojo/public/interfaces/bindings/tests:test_interfaces",
+    "mojo/public/interfaces/bindings/tests:test_interfaces_experimental",
+  ]
+
+  sources = [
+    "js_to_cpp_tests.cc",
+  ]
+}
+
+mojom("js_to_cpp_bindings") {
+  sources = [
+    "js_to_cpp.mojom",
+  ]
+}

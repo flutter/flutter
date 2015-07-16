@@ -1,0 +1,124 @@
+# Required table(s) are missing (e.g. OS/2 table).
+AppleGothic.ttf
+AppleMyungjo.ttf
+ArialHB.ttf
+ArialHBBold.ttf
+Corsiva.ttf
+CorsivaBold.ttf
+InaiMathi.ttf
+NISC18030.ttf
+NewPeninimMT.ttf
+NewPeninimMTBold.ttf
+NewPeninimMTBoldInclined.ttf
+NewPeninimMTInclined.ttf
+Raanana.ttf
+RaananaBold.ttf
+
+# The length field of a table is weird.
+homa.ttf
+nazli.ttf
+titr.ttf
+ume-tgc4.ttf
+ume-tgs4.ttf
+ume-tgc5.ttf
+ume-tgs5.ttf
+ume-tms3.ttf
+
+# Table(s) are not 4-byte aligned.
+UnBatang.ttf
+UnBom.ttf
+UnDotum.ttf
+UnGraphic.ttf
+UnGungseo.ttf
+UnJamoBatang.ttf
+UnJamoDotum.ttf
+UnJamoNovel.ttf
+UnJamoSora.ttf
+UnPenheulim.ttf
+UnPen.ttf
+UnPilgiBold.ttf
+UnPilgi.ttf
+UnShinmun.ttf
+UnTaza.ttf
+UnYetgul.ttf
+
+# Tables are not sorted by table tags.
+f500.ttf
+
+# non-ASCII characters are used in a table tag
+SyrCOMAdiabene.otf
+SyrCOMAntioch.otf
+SyrCOMBatnanBold.otf
+SyrCOMBatnan.otf
+SyrCOMCtesiphon.otf
+SyrCOMJerusalemBold.otf
+SyrCOMJerusalemItalic.otf
+SyrCOMJerusalem.otf
+SyrCOMJerusalemOutline.otf
+SyrCOMKharput.otf
+SyrCOMMalankara.otf
+SyrCOMMardinBold.otf
+SyrCOMMardin.otf
+SyrCOMMidyat.otf
+SyrCOMNisibin.otf
+SyrCOMNisibinOutline.otf
+SyrCOMQenNeshrin.otf
+SyrCOMTalada.otf
+SyrCOMTurAbdin.otf
+SyrCOMUrhoyBold.otf
+SyrCOMUrhoy.otf
+
+# Malformed SFNT table; unexpected entry selector
+misakimn.ttf
+misaki.ttf
+
+# Malformed CMAP table; Subtables are not sorted by platform ID
+ani.ttf
+Caliban.ttf
+
+# Malformed CMAP table; Entries in a 3-0-4 or 3-1-4 subtable are not sorted.
+LucidaSansOblique.ttf
+LucidaTypewriterOblique.ttf
+bkai00mp.ttf
+bsmi00lp.ttf
+modelwor.ttf
+
+# Malformed CMAP table; "search range" in a 3-0-4 or 3-1-4 subtable are invalid.
+cmmi10.ttf
+cmsy10.ttf
+msam10.ttf
+
+# Malformed CMAP table; The 3-10-12 table is too short.
+BPG_Chveulebrivi.ttf
+BPG_Chveulebrivi_bold.ttf
+
+# Unsupported CMAP table; ots doesn't support non-Unicode fonts.
+Apple Symbols.ttf
+儷宋 Pro.ttf
+儷黑 Pro.ttf
+华文仿宋.ttf
+华文宋体.ttf
+华文楷体.ttf
+华文细黑.ttf
+华文黑体.ttf
+
+# Unsupported CMAP table; The Unicode BMP table is missing, while the UCS-4 table is available.
+DroidSansJapanese.ttf
+DroidSansFallback.ttf
+
+# Malformed GLYF table; The content of flags array and the lengths of xCoordinates, yCoordinates are inconsistent.
+DecoTypeNaskh.ttf
+
+# Malformed HMTX table; The table is too short.
+mona.ttf
+
+# CMAP glyph id is out of range.
+Samyak-Oriya.ttf
+
+# Unsupported CFF table; "supplemental encoding" is not supported at the moment. This should be fixed in the future.
+Walbf___.otf
+
+# GDEF MarkAttachClassDef offset is invalid.
+ManchuFont.ttf
+arianamu.ttf
+summersby.ttf

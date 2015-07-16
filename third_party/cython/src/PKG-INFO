@@ -1,0 +1,37 @@
+Metadata-Version: 1.1
+Name: Cython
+Version: 0.20.2
+Summary: The Cython compiler for writing C extensions for the Python language.
+Home-page: http://www.cython.org
+Author: Robert Bradshaw, Stefan Behnel, Dag Seljebotn, Greg Ewing, et al.
+Author-email: cython-devel@python.org
+License: UNKNOWN
+Description:   The Cython language makes writing C extensions for the Python language as
+          easy as Python itself.  Cython is a source code translator based on the
+          well-known Pyrex_, but supports more cutting edge functionality and
+          optimizations.
+        
+          The Cython language is very close to the Python language (and most Python
+          code is also valid Cython code), but Cython additionally supports calling C
+          functions and declaring C types on variables and class attributes. This
+          allows the compiler to generate very efficient C code from Cython code.
+        
+          This makes Cython the ideal language for writing glue code for external C
+          libraries, and for fast C modules that speed up the execution of Python
+          code.
+        
+          .. _Pyrex: http://www.cosc.canterbury.ac.nz/greg.ewing/python/Pyrex/
+          
+Platform: UNKNOWN
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: Apache Software License
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python
+Classifier: Programming Language :: Python :: 2
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: C
+Classifier: Programming Language :: Cython
+Classifier: Topic :: Software Development :: Code Generators
+Classifier: Topic :: Software Development :: Compilers
+Classifier: Topic :: Software Development :: Libraries :: Python Modules

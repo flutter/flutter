@@ -1,0 +1,101 @@
+# Copyright 2014 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+assert(!defined(is_nacl) || !is_nacl)
+
+import("../../mojo_sdk.gni")
+
+mojo_sdk_source_set("system") {
+  sources = [
+    "system_thunks.cc",
+    "system_thunks.h",
+  ]
+  defines = [ "MOJO_SYSTEM_IMPLEMENTATION" ]
+  mojo_sdk_deps = [ "mojo/public/c/system" ]
+
+  # The GYP target analogous to this one builds this code into a
+  # static library.  When building for Android, both the GYP and GN
+  # builds add --exclude-libs=ALL globally, which means that all
+  # symbols in static libraries are excluded from export.  That's a
+  # problem, as code outside this target needs to be able to call
+  # MojoSetSystemThunks(). Therefore, the GYP target needs to specifiy
+  # that all dependent targets remove that link flag. Since GN uses a
+  # source_set here, this flag change is not needed.
+}
+
+# For internal use only.
+mojo_sdk_source_set("system_impl_private") {
+  sources = [
+    "system_impl_private_thunks.cc",
+    "system_impl_private_thunks.h",
+  ]
+  defines = [ "MOJO_SYSTEM_IMPLEMENTATION" ]
+  deps = [
+    ":system_impl_private_api",
+  ]
+  mojo_sdk_deps = [ "mojo/public/c/system" ]
+}
+
+# For internal use only.
+mojo_sdk_source_set("system_impl_private_api") {
+  sources = [
+    "system_impl_private.h",
+  ]
+  mojo_sdk_deps = [ "mojo/public/c/system" ]
+}
+
+mojo_sdk_source_set("system_impl_private_tests") {
+  testonly = true
+
+  sources = [
+    "system_impl_private_unittest.cc",
+  ]
+
+  deps = [
+    ":system_impl_private_api",
+    "//testing/gtest",
+  ]
+
+  mojo_sdk_deps = [ "mojo/public/c/system" ]
+}
+
+mojo_sdk_source_set("gles2") {
+  sources = [
+    "gles2_impl_chromium_copy_texture_thunks.cc",
+    "gles2_impl_chromium_copy_texture_thunks.h",
+    "gles2_impl_chromium_image_thunks.cc",
+    "gles2_impl_chromium_image_thunks.h",
+    "gles2_impl_chromium_miscellaneous_thunks.cc",
+    "gles2_impl_chromium_miscellaneous_thunks.h",
+    "gles2_impl_chromium_pixel_transfer_buffer_object_thunks.cc",
+    "gles2_impl_chromium_pixel_transfer_buffer_object_thunks.h",
+    "gles2_impl_chromium_sub_image_thunks.cc",
+    "gles2_impl_chromium_sub_image_thunks.h",
+    "gles2_impl_chromium_sync_point_thunks.cc",
+    "gles2_impl_chromium_sync_point_thunks.h",
+    "gles2_impl_chromium_texture_mailbox_thunks.cc",
+    "gles2_impl_chromium_texture_mailbox_thunks.h",
+    "gles2_impl_occlusion_query_ext_thunks.cc",
+    "gles2_impl_occlusion_query_ext_thunks.h",
+    "gles2_impl_thunks.cc",
+    "gles2_impl_thunks.h",
+    "gles2_thunks.cc",
+    "gles2_thunks.h",
+  ]
+
+  defines = [ "MOJO_GLES2_IMPLEMENTATION" ]
+
+  configs = [ "//third_party/khronos:khronos_headers" ]
+
+  mojo_sdk_deps = [
+    "mojo/public/c/gles2:headers",
+    "mojo/public/c/environment",
+    "mojo/public/c/system",
+  ]
+
+  if (is_mac) {
+    # TODO(GYP): Make it a run-path dependent library.
+    # 'DYLIB_INSTALL_NAME_BASE': '@loader_path',
+  }
+}

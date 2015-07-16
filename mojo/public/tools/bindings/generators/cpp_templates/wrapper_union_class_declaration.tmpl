@@ -1,0 +1,55 @@
+class {{union.name}} {
+ public:
+  using Data_ = internal::{{union.name}}_Data;
+  using Tag = Data_::{{union.name}}_Tag;
+
+  static {{union.name}}Ptr New();
+
+  template <typename U>
+  static {{union.name}}Ptr From(const U& u) {
+    return mojo::TypeConverter<{{union.name}}Ptr, U>::Convert(u);
+  }
+
+  template <typename U>
+  U To() const {
+    return mojo::TypeConverter<U, {{union.name}}>::Convert(*this);
+  }
+
+  {{union.name}}();
+  ~{{union.name}}();
+
+{%  if union|is_cloneable_kind %}
+  {{union.name}}Ptr Clone() const;
+{%- endif %}
+  bool Equals(const {{union.name}}& other) const;
+
+  Tag which() const {
+    return tag_;
+  }
+
+{%  for field in union.fields %}
+  bool is_{{field.name}}() const;
+  {{field.kind|cpp_union_getter_return_type}} get_{{field.name}}() const;
+  void set_{{field.name}}({{field.kind|cpp_const_wrapper_type}} {{field.name}});
+{%- endfor %}
+
+ private:
+  friend class mojo::internal::UnionAccessor<{{union.name}}>;
+  union Union_ {
+    Union_() {}
+    ~Union_() {}
+{%  for field in union.fields %}
+{%    if field.kind|is_object_kind or field.kind|is_any_handle_kind
+          or field.kind|is_interface_kind -%}
+    {{field.kind|cpp_wrapper_type}}* {{field.name}};
+{%    else -%}
+    {{field.kind|cpp_wrapper_type}} {{field.name}};
+{%    endif -%}
+{%- endfor %}
+  };
+  void SwitchActive(Tag new_active);
+  void SetActive(Tag new_active);
+  void DestroyActive();
+  Tag tag_;
+  Union_ data_;
+};

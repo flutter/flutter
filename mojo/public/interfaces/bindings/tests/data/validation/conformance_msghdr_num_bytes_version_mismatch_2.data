@@ -1,0 +1,8 @@
+[dist4]message_header  // num_bytes
+[u4]1                  // version
+[u4]0x80000000         // name
+[u4]1                  // flags
+[u8]0                  // request_id
+[u8]0                  // Extra bytes that result in mismatched |num_bytes| and
+                       // |version|.
+[anchr]message_header

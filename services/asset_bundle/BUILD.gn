@@ -1,0 +1,64 @@
+# Copyright 2015 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//mojo/public/mojo_application.gni")
+
+source_set("lib") {
+  sources = [
+    "asset_bundle_impl.cc",
+    "asset_bundle_impl.h",
+    "asset_unpacker_impl.cc",
+    "asset_unpacker_impl.h",
+    "asset_unpacker_job.cc",
+    "asset_unpacker_job.h",
+  ]
+
+  deps = [
+    "//base",
+    "//mojo/common",
+    "//mojo/public/cpp/bindings:callback",
+    "//mojo/public/cpp/system",
+    "//mojo/services/asset_bundle/public/interfaces",
+    "//third_party/zlib:zip",
+  ]
+}
+
+mojo_native_application("asset_bundle") {
+  sources = [
+    "main.cc",
+  ]
+
+  deps = [
+    "//base",
+    "//mojo/application",
+    "//mojo/common",
+    "//mojo/public/cpp/application",
+    "//mojo/public/cpp/bindings:callback",
+    "//mojo/public/cpp/system",
+    "//mojo/services/asset_bundle/public/interfaces",
+    ":lib",
+  ]
+}
+
+mojo_native_application("apptests") {
+  output_name = "asset_bundle_apptests"
+
+  testonly = true
+
+  sources = [
+    "asset_bundle_apptest.cc",
+  ]
+
+  deps = [
+    "//base",
+    "//mojo/application",
+    "//mojo/application:test_support",
+    "//mojo/common",
+    "//mojo/public/cpp/bindings",
+    "//mojo/services/asset_bundle/public/interfaces",
+    "//third_party/zlib:zip",
+  ]
+
+  data_deps = [ ":asset_bundle($default_toolchain)" ]
+}

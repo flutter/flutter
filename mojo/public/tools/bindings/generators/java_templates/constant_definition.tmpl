@@ -1,0 +1,3 @@
+{% macro constant_def(constant) %}
+public static final {{constant.kind|java_type}} {{constant|name}} = {{constant|constant_value}};
+{% endmacro %}

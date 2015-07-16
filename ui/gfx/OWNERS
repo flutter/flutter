@@ -1,0 +1,25 @@
+# Font rendering and what not.
+asvitkine@chromium.org
+
+# Primitive graphics types (size, rect, vector ...)
+danakj@chromium.org
+
+# RenderText and related classes.
+msw@chromium.org
+
+# Display and related classes.
+per-file display*=oshima@chromium.org
+per-file screen*=oshima@chromium.org
+
+# Transform, interpolated transform and transform util.
+per-file transform*=vollick@chromium.org
+per-file interpolated_transform*=vollick@chromium.org
+
+# GPU memory buffer interface.
+per-file gpu_memory_buffer*=reveman@chromium.org
+
+# R-Tree implementation.
+per-file r_tree*=luken@chromium.org
+
+# If you're doing structural changes get a review from one of the OWNERS.
+per-file *.gyp*=*

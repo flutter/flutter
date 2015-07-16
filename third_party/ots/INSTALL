@@ -1,0 +1,38 @@
+How to build (using gyp):
+
+  (Note: test programs which require gtest can't build with gyp for now)
+
+  1. If you are building OTS on Windows, download both the source
+     code and compiled driver for zlib from http://www.zlib.net/
+     and put them in third_party/zlib.
+
+  2. If you are building from cloned Git repository, make sure to update the
+     submodules as well:
+
+     $ git submodule init
+     $ git submodule update
+
+  3. Run gyp_ots
+
+    $ python gyp_ots
+
+    This will fetch gyp and generate build files. By default, following
+    files will be generated:
+      - MSVS solution file on Windows
+      - Xcode project file on Mac
+      - Makefile on Linux
+
+    If you want to generate Makefile on Mac, you can use -f option:
+
+    $ python gyp_ots -f make
+
+  4. Build OTS
+
+    Using MSVS:
+      Open ots-standalone.sln and build the solution.
+
+    Using Xcode:
+      $ xcodebuild -target ots-standalone.xcodeproj -target all
+
+    Using Makefile:
+      $ make

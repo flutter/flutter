@@ -1,0 +1,87 @@
+In file included from base_refcounted.cpp:5:
+./base_refcounted.h:47:3: warning: [chromium-style] Classes that are ref-counted should have destructors that are declared protected or private.
+  ~PublicRefCountedDtorInHeader() {}
+  ^
+./base_refcounted.h:44:7: note: [chromium-style] 'PublicRefCountedDtorInHeader' inherits from 'base::RefCounted<PublicRefCountedDtorInHeader>' here
+    : public base::RefCounted<PublicRefCountedDtorInHeader> {
+      ^
+./base_refcounted.h:59:3: warning: [chromium-style] Classes that are ref-counted should have destructors that are declared protected or private.
+  ~PublicRefCountedThreadSafeDtorInHeader() {}
+  ^
+./base_refcounted.h:55:7: note: [chromium-style] 'PublicRefCountedThreadSafeDtorInHeader' inherits from 'base::RefCountedThreadSafe<PublicRefCountedThreadSafeDtorInHeader>' here
+    : public base::RefCountedThreadSafe<
+      ^
+./base_refcounted.h:73:3: warning: [chromium-style] Classes that are ref-counted and have non-private destructors should declare their destructor virtual.
+  ~ProtectedRefCountedDtorInHeader() {}
+  ^
+./base_refcounted.h:110:3: warning: [chromium-style] Classes that are ref-counted should have destructors that are declared protected or private.
+  ~DerivedProtectedToPublicInHeader() override {}
+  ^
+./base_refcounted.h:107:7: note: [chromium-style] 'DerivedProtectedToPublicInHeader' inherits from 'ProtectedRefCountedVirtualDtorInHeader' here
+    : public ProtectedRefCountedVirtualDtorInHeader {
+      ^
+./base_refcounted.h:81:7: note: [chromium-style] 'ProtectedRefCountedVirtualDtorInHeader' inherits from 'base::RefCounted<ProtectedRefCountedVirtualDtorInHeader>' here
+    : public base::RefCounted<ProtectedRefCountedVirtualDtorInHeader> {
+      ^
+./base_refcounted.h:115:7: warning: [chromium-style] Classes that are ref-counted should have explicit destructors that are declared protected or private.
+class ImplicitDerivedProtectedToPublicInHeader
+      ^
+./base_refcounted.h:116:7: note: [chromium-style] 'ImplicitDerivedProtectedToPublicInHeader' inherits from 'ProtectedRefCountedVirtualDtorInHeader' here
+    : public ProtectedRefCountedVirtualDtorInHeader {
+      ^
+./base_refcounted.h:81:7: note: [chromium-style] 'ProtectedRefCountedVirtualDtorInHeader' inherits from 'base::RefCounted<ProtectedRefCountedVirtualDtorInHeader>' here
+    : public base::RefCounted<ProtectedRefCountedVirtualDtorInHeader> {
+      ^
+./base_refcounted.h:145:1: warning: [chromium-style] Classes that are ref-counted should have destructors that are declared protected or private.
+class ImplementsAPublicInterface
+^
+./base_refcounted.h:147:7: note: [chromium-style] 'ImplementsAPublicInterface' inherits from 'base::RefCounted<ImplementsAPublicInterface>' here
+      public base::RefCounted<ImplementsAPublicInterface> {
+      ^
+./base_refcounted.h:139:3: note: [chromium-style] Public destructor declared here
+  virtual ~APublicInterface() {}
+  ^
+./base_refcounted.h:146:7: note: [chromium-style] 'ImplementsAPublicInterface' inherits from 'APublicInterface' here
+    : public APublicInterface,
+      ^
+./base_refcounted.h:164:1: warning: [chromium-style] Classes that are ref-counted should have explicit destructors that are declared protected or private.
+class ImplementsAnImplicitInterface
+^
+./base_refcounted.h:166:7: note: [chromium-style] 'ImplementsAnImplicitInterface' inherits from 'base::RefCounted<ImplementsAnImplicitInterface>' here
+      public base::RefCounted<ImplementsAnImplicitInterface> {
+      ^
+./base_refcounted.h:158:7: note: [chromium-style] No explicit destructor for 'AnImplicitInterface' defined
+class AnImplicitInterface {
+      ^
+./base_refcounted.h:165:7: note: [chromium-style] 'ImplementsAnImplicitInterface' inherits from 'AnImplicitInterface' here
+    : public AnImplicitInterface,
+      ^
+./base_refcounted.h:204:3: warning: [chromium-style] Classes that are ref-counted and have non-private destructors should declare their destructor virtual.
+  ~RefcountedType() {}
+  ^
+./base_refcounted.h:204:3: warning: [chromium-style] Classes that are ref-counted and have non-private destructors should declare their destructor virtual.
+base_refcounted.cpp:16:3: warning: [chromium-style] Classes that are ref-counted should have destructors that are declared protected or private.
+  ~AnonymousDerivedProtectedToPublicInImpl() override {}
+  ^
+base_refcounted.cpp:13:7: note: [chromium-style] 'AnonymousDerivedProtectedToPublicInImpl' inherits from 'ProtectedRefCountedVirtualDtorInHeader' here
+    : public ProtectedRefCountedVirtualDtorInHeader {
+      ^
+./base_refcounted.h:81:7: note: [chromium-style] 'ProtectedRefCountedVirtualDtorInHeader' inherits from 'base::RefCounted<ProtectedRefCountedVirtualDtorInHeader>' here
+    : public base::RefCounted<ProtectedRefCountedVirtualDtorInHeader> {
+      ^
+./base_refcounted.h:73:3: warning: [chromium-style] Classes that are ref-counted and have non-private destructors should declare their destructor virtual.
+  ~ProtectedRefCountedDtorInHeader() {}
+  ^
+base_refcounted.cpp:33:3: warning: [chromium-style] Classes that are ref-counted should have destructors that are declared protected or private.
+  ~PublicRefCountedDtorInImpl() {}
+  ^
+base_refcounted.cpp:30:7: note: [chromium-style] 'PublicRefCountedDtorInImpl' inherits from 'base::RefCounted<PublicRefCountedDtorInImpl>' here
+    : public base::RefCounted<PublicRefCountedDtorInImpl> {
+      ^
+base_refcounted.cpp:59:3: warning: [chromium-style] Classes that are ref-counted should have destructors that are declared protected or private.
+  ~UnsafeTypedefChainInImpl() {}
+  ^
+base_refcounted.cpp:56:34: note: [chromium-style] 'UnsafeTypedefChainInImpl' inherits from 'Baz::MyLocalTypedef' (aka 'RefCounted<Foo::BarInterface>') here
+class UnsafeTypedefChainInImpl : public Baz::MyLocalTypedef {
+                                 ^
+13 warnings generated.

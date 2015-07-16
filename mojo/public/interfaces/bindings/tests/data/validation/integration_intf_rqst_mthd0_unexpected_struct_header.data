@@ -1,0 +1,15 @@
+[dist4]message_header  // num_bytes
+[u4]1                  // version
+[u4]0                  // name
+[u4]1                  // flags kMessageExpectsResponse
+[u8]7                  // request_id
+[anchr]message_header
+
+[dist4]method0_params  // num_bytes
+[u4]0                  // version
+[dist8]param0_ptr      // param0
+[anchr]method0_params
+
+[anchr]param0_ptr
+[u4]0  // num_bytes: The struct size is too small.
+[u4]0  // version

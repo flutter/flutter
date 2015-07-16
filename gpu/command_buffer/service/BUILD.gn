@@ -1,0 +1,179 @@
+# Copyright 2014 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//build/config/ui.gni")
+import("//third_party/protobuf/proto_library.gni")
+
+source_set("service") {
+  sources = [
+    "async_pixel_transfer_delegate.cc",
+    "async_pixel_transfer_delegate.h",
+    "async_pixel_transfer_manager.cc",
+    "async_pixel_transfer_manager.h",
+    "async_pixel_transfer_manager_android.cc",
+    "async_pixel_transfer_manager_idle.cc",
+    "async_pixel_transfer_manager_idle.h",
+    "async_pixel_transfer_manager_linux.cc",
+    "async_pixel_transfer_manager_mac.cc",
+    "async_pixel_transfer_manager_share_group.cc",
+    "async_pixel_transfer_manager_share_group.h",
+    "async_pixel_transfer_manager_stub.cc",
+    "async_pixel_transfer_manager_stub.h",
+    "async_pixel_transfer_manager_sync.cc",
+    "async_pixel_transfer_manager_sync.h",
+    "async_pixel_transfer_manager_win.cc",
+    "buffer_manager.cc",
+    "buffer_manager.h",
+    "cmd_buffer_engine.h",
+    "cmd_parser.cc",
+    "cmd_parser.h",
+    "command_buffer_service.cc",
+    "command_buffer_service.h",
+    "common_decoder.cc",
+    "common_decoder.h",
+    "context_group.cc",
+    "context_group.h",
+    "context_state.cc",
+    "context_state.h",
+    "context_state_autogen.h",
+    "context_state_impl_autogen.h",
+    "error_state.cc",
+    "error_state.h",
+    "feature_info.cc",
+    "feature_info.h",
+    "framebuffer_manager.cc",
+    "framebuffer_manager.h",
+    "gl_context_virtual.cc",
+    "gl_context_virtual.h",
+    "gl_state_restorer_impl.cc",
+    "gl_state_restorer_impl.h",
+    "gl_utils.h",
+    "gles2_cmd_clear_framebuffer.cc",
+    "gles2_cmd_clear_framebuffer.h",
+    "gles2_cmd_copy_texture_chromium.cc",
+    "gles2_cmd_copy_texture_chromium.h",
+    "gles2_cmd_decoder.cc",
+    "gles2_cmd_decoder.h",
+    "gles2_cmd_decoder_autogen.h",
+    "gles2_cmd_validation.cc",
+    "gles2_cmd_validation.h",
+    "gles2_cmd_validation_autogen.h",
+    "gles2_cmd_validation_implementation_autogen.h",
+    "gpu_scheduler.cc",
+    "gpu_scheduler.h",
+    "gpu_state_tracer.cc",
+    "gpu_state_tracer.h",
+    "gpu_switches.cc",
+    "gpu_switches.h",
+    "gpu_tracer.cc",
+    "gpu_tracer.h",
+    "id_manager.cc",
+    "id_manager.h",
+    "image_factory.cc",
+    "image_factory.h",
+    "image_manager.cc",
+    "image_manager.h",
+    "in_process_command_buffer.cc",
+    "in_process_command_buffer.h",
+    "logger.cc",
+    "logger.h",
+    "mailbox_manager.h",
+    "mailbox_manager_impl.cc",
+    "mailbox_manager_impl.h",
+    "mailbox_manager_sync.cc",
+    "mailbox_manager_sync.h",
+    "memory_program_cache.cc",
+    "memory_program_cache.h",
+    "program_cache.cc",
+    "program_cache.h",
+    "program_manager.cc",
+    "program_manager.h",
+    "query_manager.cc",
+    "query_manager.h",
+    "renderbuffer_manager.cc",
+    "renderbuffer_manager.h",
+    "shader_manager.cc",
+    "shader_manager.h",
+    "shader_translator.cc",
+    "shader_translator.h",
+    "shader_translator_cache.cc",
+    "shader_translator_cache.h",
+    "stream_texture_manager_in_process_android.cc",
+    "stream_texture_manager_in_process_android.h",
+    "sync_point_manager.cc",
+    "sync_point_manager.h",
+    "texture_definition.cc",
+    "texture_definition.h",
+    "texture_manager.cc",
+    "texture_manager.h",
+    "transfer_buffer_manager.cc",
+    "transfer_buffer_manager.h",
+    "valuebuffer_manager.cc",
+    "valuebuffer_manager.h",
+    "vertex_array_manager.cc",
+    "vertex_array_manager.h",
+    "vertex_attrib_manager.cc",
+    "vertex_attrib_manager.h",
+  ]
+
+  configs += [
+    "//gpu:gpu_implementation",
+    "//third_party/khronos:khronos_headers",
+  ]
+
+  # Prefer mesa GL headers to system headers, which cause problems on Win.
+  include_dirs = [ "//third_party/mesa/src/include" ]
+
+  public_deps = [
+    "//gpu/command_buffer/common",
+  ]
+  deps = [
+    ":disk_cache_proto",
+    "//base",
+    "//base/third_party/dynamic_annotations",
+    "//crypto",
+    "//gpu/config",
+    "//third_party/angle:translator",
+    "//third_party/protobuf:protobuf_lite",
+    "//third_party/re2",
+    "//third_party/smhasher:cityhash",
+    "//ui/gfx",
+    "//ui/gfx/geometry",
+    "//ui/gl",
+  ]
+
+  if (is_ios) {
+    deps -= [ ":disk_cache_proto" ]
+
+    sources -= [
+      "gles2_cmd_decoder.cc",
+      "gles2_cmd_decoder.h",
+      "memory_program_cache.cc",
+      "memory_program_cache.h",
+    ]
+  }
+
+  if (ui_compositor_image_transport) {
+    include_dirs += [ "//third_party/khronos" ]
+  }
+
+  if (is_win || is_android || (is_linux && use_x11)) {
+    sources += [
+      "async_pixel_transfer_manager_egl.cc",
+      "async_pixel_transfer_manager_egl.h",
+    ]
+  }
+
+  if (is_android && !is_debug) {
+    # On Android optimize more since this component can be a bottleneck.
+    configs -= [ "//build/config/compiler:optimize" ]
+    configs += [ "//build/config/compiler:optimize_max" ]
+  }
+}
+
+proto_library("disk_cache_proto") {
+  sources = [
+    "disk_cache_proto.proto",
+  ]
+}

@@ -1,0 +1,11 @@
+In file included from virtual_and_trace_after_dispatch.cpp:5:
+./virtual_and_trace_after_dispatch.h:12:1: warning: [blink-gc] Left-most base class 'A' of derived class 'B' must be polymorphic.
+class A : public GarbageCollected<A> {
+^
+./virtual_and_trace_after_dispatch.h:23:1: warning: [blink-gc] Class 'B' contains or inherits virtual methods but implements manual dispatching.
+class B : public A {
+^
+./virtual_and_trace_after_dispatch.h:14:5: note: [blink-gc] Manual dispatch 'trace' declared here:
+    void trace(Visitor*);
+    ^
+2 warnings generated.

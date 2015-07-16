@@ -1,0 +1,11 @@
+In file included from class_does_not_require_finalization.cpp:5:
+./class_does_not_require_finalization.h:18:1: warning: [blink-gc] Class 'DoesNotNeedFinalizer' may not require finalization.
+class DoesNotNeedFinalizer
+^
+./class_does_not_require_finalization.h:24:1: warning: [blink-gc] Class 'DoesNotNeedFinalizer2' may not require finalization.
+class DoesNotNeedFinalizer2
+^
+./class_does_not_require_finalization.h:36:1: warning: [blink-gc] Class 'DoesNotNeedFinalizer3' may not require finalization.
+class DoesNotNeedFinalizer3
+^
+3 warnings generated.

@@ -1,0 +1,7 @@
+[dist4]message_header  // num_bytes
+[u4]1                  // version
+[u4]0                  // name
+[u4]1                  // flags: kMessageExpectsResponse is set in a request
+                       // for a method that does not take a response.
+[u8]1                  // request_id
+[anchr]message_header

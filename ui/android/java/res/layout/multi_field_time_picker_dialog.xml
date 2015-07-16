@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright 2013 The Chromium Authors. All rights reserved.
+
+     Use of this source code is governed by a BSD-style license that can be
+     found in the LICENSE file.
+-->
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center_vertical"
+    android:orientation="vertical"
+    android:gravity="start">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/time_picker_dialog_title"
+    android:textSize="20sp"
+    android:paddingStart="5dp"
+    android:paddingEnd="5dp"
+    android:paddingBottom="5dp"
+    android:paddingTop="5dp"
+    android:gravity="start"
+    android:textColor="#33B5E5"
+    />
+
+    <View
+    android:layout_width="match_parent"
+    android:layout_height="2dp"
+    android:paddingBottom="5dp"
+    android:paddingTop="5dp"
+    android:background="#33B5E5"/>
+
+    <LinearLayout
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center_horizontal"
+    android:orientation="horizontal"
+    android:gravity="center">
+
+    <NumberPicker
+        android:id="@+id/hour"
+        android:layout_width="0dp"
+        android:layout_weight=".2"
+        android:textSize="12sp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="4dp"
+        android:layout_marginEnd="4dp"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
+        android:contentDescription="@string/accessibility_time_picker_hour"
+        />
+    <TextView
+        android:layout_width="wrap_content"
+        android:textSize="12sp"
+        android:layout_height="wrap_content"
+        android:text="@string/time_picker_dialog_hour_minute_separator"
+        />
+    <NumberPicker
+        android:id="@+id/minute"
+        android:layout_width="0dp"
+        android:layout_weight=".2"
+        android:textSize="12sp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="4dp"
+        android:layout_marginEnd="4dp"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
+        android:contentDescription="@string/accessibility_time_picker_minute"
+        />
+    <TextView
+        android:id="@+id/second_colon"
+        android:layout_width="wrap_content"
+        android:textSize="12sp"
+        android:layout_height="wrap_content"
+        android:text="@string/time_picker_dialog_minute_second_separator"	    />
+    <NumberPicker
+        android:id="@+id/second"
+        android:layout_width="0dp"
+        android:layout_weight=".2"
+        android:textSize="12sp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="4dp"
+        android:layout_marginEnd="4dp"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
+        android:contentDescription="@string/accessibility_time_picker_second"
+        />
+    <TextView
+        android:id="@+id/second_dot"
+        android:layout_width="wrap_content"
+        android:textSize="12sp"
+        android:layout_height="wrap_content"
+        android:text="@string/time_picker_dialog_second_subsecond_separator"
+        />
+    <NumberPicker
+        android:id="@+id/milli"
+        android:layout_width="0dp"
+        android:layout_weight=".2"
+        android:textSize="12sp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="4dp"
+        android:layout_marginEnd="4dp"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
+        android:contentDescription="@string/accessibility_time_picker_milli"
+        />
+    <NumberPicker
+        android:id="@+id/ampm"
+        android:layout_width="0dp"
+        android:layout_weight=".2"
+        android:textSize="12sp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="4dp"
+        android:layout_marginEnd="4dp"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
+        android:contentDescription="@string/accessibility_time_picker_ampm"
+        />
+    </LinearLayout>
+</LinearLayout>

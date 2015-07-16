@@ -1,0 +1,14 @@
+In file included from missing_ctor_dllexport.cpp:5:
+./missing_ctor_dllexport.h:23:1: warning: [chromium-style] Complex class/struct needs an explicit out-of-line constructor.
+class __declspec(dllexport) MissingCtorsArentOKInHeader {
+^
+./missing_ctor_dllexport.h:47:3: warning: [chromium-style] Complex constructor has an inlined body.
+  ExplicitlyDefaultedInlineAlsoWarns() = default;
+  ^
+./missing_ctor_dllexport.h:49:3: warning: [chromium-style] Complex constructor has an inlined body.
+  ExplicitlyDefaultedInlineAlsoWarns(
+  ^
+./missing_ctor_dllexport.h:51:3: warning: [chromium-style] Complex constructor has an inlined body.
+  ExplicitlyDefaultedInlineAlsoWarns(ExplicitlyDefaultedInlineAlsoWarns&&) =
+  ^
+4 warnings generated.

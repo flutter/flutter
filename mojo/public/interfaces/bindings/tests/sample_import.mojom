@@ -1,0 +1,38 @@
+// Copyright 2014 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+[JavaPackage="org.chromium.mojo.bindings.test.mojom.imported"]
+module imported;
+
+// This sample just defines some types that are imported into
+// sample_service.mojom, to show how import works.
+
+enum Shape {
+  RECTANGLE = 1,
+  CIRCLE,
+  TRIANGLE,
+  LAST = TRIANGLE,
+};
+
+// These enum values should not interfere with those of Shape above.
+enum AnotherShape {
+  RECTANGLE = 10,
+  CIRCLE,
+  TRIANGLE,
+};
+
+enum YetAnotherShape {
+  RECTANGLE = 20,
+  CIRCLE,
+  TRIANGLE,
+};
+
+struct Point {
+  int32 x;
+  int32 y;
+};
+
+interface ImportedInterface {
+  DoSomething();
+};
