@@ -26,10 +26,6 @@ class StockRow extends Component {
     if (stock.percentChange > 0) changeInPrice = "+" + changeInPrice;
 
     List<Widget> children = [
-      new Container(
-        child: new StockArrow(percentChange: stock.percentChange),
-        margin: const EdgeDims.only(right: 5.0)
-      ),
       new Flexible(
         child: new Text(stock.symbol),
         flex: 2
@@ -58,7 +54,13 @@ class StockRow extends Component {
             bottom: new BorderSide(color: Theme.of(this).dividerColor)
           )
         ),
-        child: new Flex(children)
+        child: new Flex([
+          new Container(
+            child: new StockArrow(percentChange: stock.percentChange),
+            margin: const EdgeDims.only(right: 5.0)
+          ),
+          new Flex(children, alignItems: FlexAlignItems.baseline)
+        ])
       )
     );
   }

@@ -34,6 +34,7 @@ enum FlexAlignItems {
   end,
   center,
   stretch,
+  baseline,
 }
 
 typedef double _ChildSizingFunction(RenderBox child, BoxConstraints constraints);
@@ -315,6 +316,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     // Steps 4-5. Distribute remaining space to flexible children.
     double spacePerFlex = totalFlex > 0 ? (freeSpace / totalFlex) : 0.0;
     double usedSpace = 0.0;
+    double maxBaselineDistance = 0.0;
     child = firstChild;
     while (child != null) {
       int flex = _getFlex(child);
@@ -337,6 +339,12 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
         usedSpace += _getMainSize(child);
         crossSize = math.max(crossSize, _getCrossSize(child));
       }
+      if (alignItems == FlexAlignItems.baseline) {
+        // TODO(jackson): Support for non-alphabetic baselines
+        double distance = child.getDistanceToBaseline(TextBaseline.alphabetic, onlyReal: true);
+        if (distance != null)
+          maxBaselineDistance = math.max(maxBaselineDistance, distance);
+      }
       assert(child.parentData is FlexBoxParentData);
       child = child.parentData.nextSibling;
     }
@@ -345,7 +353,6 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     double remainingSpace = math.max(0.0, freeSpace - usedSpace);
     double leadingSpace;
     double betweenSpace;
-    child = firstChild;
     switch (_justifyContent) {
       case FlexJustifyContent.start:
         leadingSpace = 0.0;
@@ -396,6 +403,15 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
           break;
         case FlexAlignItems.center:
           childCrossPosition = crossSize / 2.0 - _getCrossSize(child) / 2.0;
+          break;
+        case FlexAlignItems.baseline:
+          childCrossPosition = 0.0;
+          if (_direction == FlexDirection.horizontal) {
+            // TODO(jackson): Support for non-alphabetic baselines
+            double distance = child.getDistanceToBaseline(TextBaseline.alphabetic, onlyReal: true);
+            if (distance != null)
+              childCrossPosition = maxBaselineDistance - distance;
+          }
           break;
       }
       switch (_direction) {
