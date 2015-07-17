@@ -189,7 +189,7 @@ PAINT FOR FRAME #3 ----------------------------------------------
 3 |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 3 |  |  |  |  |  |  |  |  | paintChild RenderDecoratedBox at Point(496.75, 89.0)
 3 |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
-3 |  |  |  |  |  |  |  |  |  | drawRRect(Instance of 'RRect', Paint(color:Color(0xffd6d6d6)))
+3 |  |  |  |  |  |  |  |  |  | drawRRect(Instance of 'RRect', Paint(color:Color(0xffd6d6d6), drawLooper:true))
 3 |  |  |  |  |  |  |  |  |  | paintChild RenderInkWell at Point(496.75, 89.0)
 3 |  |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 3 |  |  |  |  |  |  |  |  |  |  | paintChild RenderPadding at Point(496.75, 89.0)
@@ -318,7 +318,7 @@ PAINT FOR FRAME #4 ----------------------------------------------
 4 |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 4 |  |  |  |  |  |  |  |  | paintChild RenderDecoratedBox at Point(496.75, 89.0)
 4 |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
-4 |  |  |  |  |  |  |  |  |  | drawRRect(Instance of 'RRect', Paint(color:Color(0xffd6d6d6)))
+4 |  |  |  |  |  |  |  |  |  | drawRRect(Instance of 'RRect', Paint(color:Color(0xffd6d6d6), drawLooper:true))
 4 |  |  |  |  |  |  |  |  |  | paintChild RenderInkWell at Point(496.75, 89.0)
 4 |  |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 4 |  |  |  |  |  |  |  |  |  |  | paintChild RenderPadding at Point(496.75, 89.0)
@@ -450,7 +450,7 @@ PAINT FOR FRAME #5 ----------------------------------------------
 5 |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 5 |  |  |  |  |  |  |  |  | paintChild RenderDecoratedBox at Point(496.75, 89.0)
 5 |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
-5 |  |  |  |  |  |  |  |  |  | drawRRect(Instance of 'RRect', Paint(color:Color(0xffd6d6d6)))
+5 |  |  |  |  |  |  |  |  |  | drawRRect(Instance of 'RRect', Paint(color:Color(0xffd6d6d6), drawLooper:true))
 5 |  |  |  |  |  |  |  |  |  | paintChild RenderInkWell at Point(496.75, 89.0)
 5 |  |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 5 |  |  |  |  |  |  |  |  |  |  | paintChild RenderPadding at Point(496.75, 89.0)
@@ -585,7 +585,7 @@ PAINT FOR FRAME #6 ----------------------------------------------
 6 |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 6 |  |  |  |  |  |  |  |  | paintChild RenderDecoratedBox at Point(496.75, 89.0)
 6 |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
-6 |  |  |  |  |  |  |  |  |  | drawRRect(Instance of 'RRect', Paint(color:Color(0xffd6d6d6)))
+6 |  |  |  |  |  |  |  |  |  | drawRRect(Instance of 'RRect', Paint(color:Color(0xffd6d6d6), drawLooper:true))
 6 |  |  |  |  |  |  |  |  |  | paintChild RenderInkWell at Point(496.75, 89.0)
 6 |  |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 6 |  |  |  |  |  |  |  |  |  |  | paintChild RenderPadding at Point(496.75, 89.0)
@@ -717,7 +717,7 @@ PAINT FOR FRAME #7 ----------------------------------------------
 7 |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 7 |  |  |  |  |  |  |  |  | paintChild RenderDecoratedBox at Point(496.75, 89.0)
 7 |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
-7 |  |  |  |  |  |  |  |  |  | drawRRect(Instance of 'RRect', Paint(color:Color(0xffd6d6d6)))
+7 |  |  |  |  |  |  |  |  |  | drawRRect(Instance of 'RRect', Paint(color:Color(0xffd6d6d6), drawLooper:true))
 7 |  |  |  |  |  |  |  |  |  | paintChild RenderInkWell at Point(496.75, 89.0)
 7 |  |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 7 |  |  |  |  |  |  |  |  |  |  | paintChild RenderPadding at Point(496.75, 89.0)
@@ -846,7 +846,7 @@ PAINT FOR FRAME #8 ----------------------------------------------
 8 |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 8 |  |  |  |  |  |  |  |  | paintChild RenderDecoratedBox at Point(496.75, 89.0)
 8 |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
-8 |  |  |  |  |  |  |  |  |  | drawRRect(Instance of 'RRect', Paint(color:Color(0xffd6d6d6)))
+8 |  |  |  |  |  |  |  |  |  | drawRRect(Instance of 'RRect', Paint(color:Color(0xffd6d6d6), drawLooper:true))
 8 |  |  |  |  |  |  |  |  |  | paintChild RenderInkWell at Point(496.75, 89.0)
 8 |  |  |  |  |  |  |  |  |  |  | TestPaintingCanvas() constructor: 800.0 x 600.0
 8 |  |  |  |  |  |  |  |  |  |  | paintChild RenderPadding at Point(496.75, 89.0)

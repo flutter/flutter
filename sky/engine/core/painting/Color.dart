@@ -22,6 +22,22 @@ class Color {
 
   bool operator ==(other) => other is Color && _value == other._value;
 
+  Color withAlpha(int a) {
+    return new Color.fromARGB(a, red, green, blue);
+  }
+
+  Color withRed(int r) {
+    return new Color.fromARGB(alpha, r, green, blue);
+  }
+
+  Color withGreen(int g) {
+    return new Color.fromARGB(alpha, red, g, blue);
+  }
+
+  Color withBlue(int b) {
+    return new Color.fromARGB(alpha, red, green, b);
+  }
+
   int get hashCode => _value.hashCode;
   String toString() => "Color(0x${_value.toRadixString(16).padLeft(8, '0')})";
 }
