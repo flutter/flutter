@@ -11,6 +11,7 @@ import sys
 import urllib2
 from utils import commit
 from utils import system
+import patch
 
 # //base and its dependencies
 _base_deps = [
@@ -95,33 +96,39 @@ files_not_to_roll = [
     'build/config/ui.gni',
     'build/ls.py',
     'build/module_args/mojo.gni',
+    'build/symlink.py',
+    'tools/android/VERSION_LINUX_NDK',
+    'tools/android/VERSION_LINUX_SDK',
+    'tools/android/VERSION_MACOSX_NDK',
+    'tools/android/VERSION_MACOSX_SDK',
+    'tools/android/download_android_tools.py',
 ]
 
 
-def rev(source_dir, dest_dir, dirs_to_rev):
-  for d in dirs_to_rev:
-    print "removing directory %s" % d
-    try:
-      system(["git", "rm", "-r", d], cwd=dest_dir)
-    except subprocess.CalledProcessError:
-      print "Could not remove %s" % d
-    print "cloning directory %s" % d
-    files = system(["git", "ls-files", d], cwd=source_dir)
-    for f in files.splitlines():
-      source_path = os.path.join(source_dir, f)
-      if not os.path.isfile(source_path):
-        continue
-      dest_path = os.path.join(dest_dir, f)
-      system(["mkdir", "-p", os.path.dirname(dest_path)], cwd=source_dir)
-      system(["cp", source_path, dest_path], cwd=source_dir)
-    system(["git", "add", d], cwd=dest_dir)
+def rev(source_dir, dest_dir, dirs_to_rev, name):
+    for d in dirs_to_rev:
+      print "removing directory %s" % d
+      try:
+          system(["git", "rm", "-r", d], cwd=dest_dir)
+      except subprocess.CalledProcessError:
+          print "Could not remove %s" % d
+      print "cloning directory %s" % d
+      files = system(["git", "ls-files", d], cwd=source_dir)
+      for f in files.splitlines():
+          source_path = os.path.join(source_dir, f)
+          if not os.path.isfile(source_path):
+              continue
+          dest_path = os.path.join(dest_dir, f)
+          system(["mkdir", "-p", os.path.dirname(dest_path)], cwd=source_dir)
+          system(["cp", source_path, dest_path], cwd=source_dir)
+      system(["git", "add", d], cwd=dest_dir)
 
-  for f in files_not_to_roll:
-    system(["git", "checkout", "HEAD", f], cwd=dest_dir)
+    for f in files_not_to_roll:
+        system(["git", "checkout", "HEAD", f], cwd=dest_dir)
 
-  system(["git", "add", "."], cwd=dest_dir)
-  src_commit = system(["git", "rev-parse", "HEAD"], cwd=source_dir).strip()
-  commit("Update to mojo %s" % src_commit, cwd=dest_dir)
+    system(["git", "add", "."], cwd=dest_dir)
+    src_commit = system(["git", "rev-parse", "HEAD"], cwd=source_dir).strip()
+    commit("Update to %s %s" % (name, src_commit), cwd=dest_dir)
 
 
 def main():
@@ -134,10 +141,17 @@ def main():
   args = parser.parse_args()
 
   if args.mojo_dir:
-    rev(args.mojo_dir, args.dest_dir, dirs_from_mojo)
+      rev(args.mojo_dir, args.dest_dir, dirs_from_mojo, 'mojo')
 
   if args.chromium_dir:
-    rev(args.chromium_dir, args.dest_dir, dirs_from_chromium)
+      rev(args.chromium_dir, args.dest_dir, dirs_from_chromium, 'chromium')
+    
+      try:
+          patch.patch_and_filter()
+      except subprocess.CalledProcessError:
+          print "ERROR: Roll failed due to a patch not applying"
+          print "Fix the patch to apply, commit the result, and re-run this script"
+          return 1
 
   return 0
 
