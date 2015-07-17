@@ -66,7 +66,7 @@ HEADER = """\
 // // Will invoke mock.HandleFlowers("orchids", n, request)
 // // "orchids" is a pre-bound argument, and <n> and <request> are call-time
 // // arguments - they are not known until the OnRequest mock is invoked.
-// EXPECT_CALL(mock, OnRequest(Ge(5), StartsWith("flower"))
+// EXPECT_CALL(mock, OnRequest(Ge(5), base::StartsWith("flower"))
 //   .Times(1)
 //   .WillOnce(Invoke(CreateFunctor(&mock, &Mock::HandleFlowers,
 //       string("orchids"))));

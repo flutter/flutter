@@ -15,6 +15,7 @@
 #include "base/memory/singleton.h"
 #include "base/process/process_handle.h"
 #include "base/single_thread_task_runner.h"
+#include "base/strings/pattern.h"
 #include "base/strings/stringprintf.h"
 #include "base/synchronization/waitable_event.h"
 #include "base/threading/platform_thread.h"
@@ -47,6 +48,8 @@ const int kAsyncId = 5;
 const char kAsyncIdStr[] = "0x5";
 const int kAsyncId2 = 6;
 const char kAsyncId2Str[] = "0x6";
+const int kFlowId = 7;
+const char kFlowIdStr[] = "0x7";
 
 const  char kRecordAllCategoryFilter[] = "*";
 
@@ -85,7 +88,14 @@ class TraceEventTestFixture : public testing::Test {
                                         TraceLog::RECORDING_MODE);
   }
 
+  void CancelTrace() {
+    WaitableEvent flush_complete_event(false, false);
+    CancelTraceAsync(&flush_complete_event);
+    flush_complete_event.Wait();
+  }
+
   void EndTraceAndFlush() {
+    num_flush_callbacks_ = 0;
     WaitableEvent flush_complete_event(false, false);
     EndTraceAndFlushAsync(&flush_complete_event);
     flush_complete_event.Wait();
@@ -101,6 +111,13 @@ class TraceEventTestFixture : public testing::Test {
         FROM_HERE, base::Bind(&TraceEventTestFixture::EndTraceAndFlushAsync,
                               base::Unretained(this), &flush_complete_event));
     flush_complete_event.Wait();
+  }
+
+  void CancelTraceAsync(WaitableEvent* flush_complete_event) {
+    TraceLog::GetInstance()->CancelTracing(
+        base::Bind(&TraceEventTestFixture::OnTraceDataCollected,
+                   base::Unretained(static_cast<TraceEventTestFixture*>(this)),
+                   base::Unretained(flush_complete_event)));
   }
 
   void EndTraceAndFlushAsync(WaitableEvent* flush_complete_event) {
@@ -134,6 +151,7 @@ class TraceEventTestFixture : public testing::Test {
     ASSERT_FALSE(tracelog->IsEnabled());
     trace_buffer_.SetOutputCallback(json_output_.GetCallback());
     event_watch_notification_ = 0;
+    num_flush_callbacks_ = 0;
   }
   void TearDown() override {
     if (TraceLog::GetInstance())
@@ -150,6 +168,7 @@ class TraceEventTestFixture : public testing::Test {
   TraceResultBuffer trace_buffer_;
   TraceResultBuffer::SimpleOutput json_output_;
   int event_watch_notification_;
+  size_t num_flush_callbacks_;
 
  private:
   // We want our singleton torn down after each test.
@@ -161,6 +180,10 @@ void TraceEventTestFixture::OnTraceDataCollected(
     WaitableEvent* flush_complete_event,
     const scoped_refptr<base::RefCountedString>& events_str,
     bool has_more_events) {
+  num_flush_callbacks_++;
+  if (num_flush_callbacks_ > 1) {
+    EXPECT_FALSE(events_str->data().empty());
+  }
   AutoLock lock(lock_);
   json_output_.json_output.clear();
   trace_buffer_.Start();
@@ -430,6 +453,12 @@ void TraceWithAllMacroVariants(WaitableEvent* task_complete_event) {
                            "name1", "value1",
                            "name2", "value2");
 
+    TRACE_EVENT_FLOW_BEGIN0("all", "TRACE_EVENT_FLOW_BEGIN0 call", kFlowId);
+    TRACE_EVENT_FLOW_STEP0("all", "TRACE_EVENT_FLOW_STEP0 call",
+                           kFlowId, "step1");
+    TRACE_EVENT_FLOW_END_BIND_TO_ENCLOSING0("all",
+        "TRACE_EVENT_FLOW_END_BIND_TO_ENCLOSING0 call", kFlowId);
+
     TRACE_EVENT_BEGIN_ETW("TRACE_EVENT_BEGIN_ETW0 call", kAsyncId, NULL);
     TRACE_EVENT_BEGIN_ETW("TRACE_EVENT_BEGIN_ETW1 call", kAsyncId, "value");
     TRACE_EVENT_END_ETW("TRACE_EVENT_END_ETW0 call", kAsyncId, NULL);
@@ -612,6 +641,17 @@ void ValidateAllTraceMacrosCreatedData(const ListValue& trace_parsed) {
   EXPECT_SUB_FIND_("value1");
   EXPECT_SUB_FIND_("name2");
   EXPECT_SUB_FIND_("value2");
+
+  EXPECT_FIND_("TRACE_EVENT_FLOW_BEGIN0 call");
+  EXPECT_SUB_FIND_("id");
+  EXPECT_SUB_FIND_(kFlowIdStr);
+  EXPECT_FIND_("TRACE_EVENT_FLOW_STEP0 call");
+  EXPECT_SUB_FIND_("id");
+  EXPECT_SUB_FIND_(kFlowIdStr);
+  EXPECT_SUB_FIND_("step1");
+  EXPECT_FIND_("TRACE_EVENT_FLOW_END_BIND_TO_ENCLOSING0 call");
+  EXPECT_SUB_FIND_("id");
+  EXPECT_SUB_FIND_(kFlowIdStr);
 
   EXPECT_FIND_("TRACE_EVENT_BEGIN_ETW0 call");
   EXPECT_SUB_FIND_("id");
@@ -882,6 +922,19 @@ TEST_F(TraceEventTestFixture, DataCaptured) {
   ValidateAllTraceMacrosCreatedData(trace_parsed_);
 }
 
+// Emit some events and validate that only empty strings are received
+// if we tell Flush() to discard events.
+TEST_F(TraceEventTestFixture, DataDiscarded) {
+  TraceLog::GetInstance()->SetEnabled(TraceConfig(kRecordAllCategoryFilter, ""),
+                                      TraceLog::RECORDING_MODE);
+
+  TraceWithAllMacroVariants(NULL);
+
+  CancelTrace();
+
+  EXPECT_TRUE(trace_parsed_.empty());
+}
+
 class MockEnabledStateChangedObserver :
       public TraceLog::EnabledStateObserver {
  public:
@@ -968,7 +1021,7 @@ class AfterStateChangeEnabledStateObserver
     : public TraceLog::EnabledStateObserver {
  public:
   AfterStateChangeEnabledStateObserver() {}
-  virtual ~AfterStateChangeEnabledStateObserver() {}
+  ~AfterStateChangeEnabledStateObserver() override {}
 
   // TraceLog::EnabledStateObserver overrides:
   void OnTraceLogEnabled() override {
@@ -999,7 +1052,7 @@ class SelfRemovingEnabledStateObserver
     : public TraceLog::EnabledStateObserver {
  public:
   SelfRemovingEnabledStateObserver() {}
-  virtual ~SelfRemovingEnabledStateObserver() {}
+  ~SelfRemovingEnabledStateObserver() override {}
 
   // TraceLog::EnabledStateObserver overrides:
   void OnTraceLogEnabled() override {}
@@ -1052,6 +1105,43 @@ TEST_F(TraceEventTestFixture, NewTraceRecording) {
   EndTraceAndFlush();
 }
 
+TEST_F(TraceEventTestFixture, TestTraceFlush) {
+  size_t min_traces = 1;
+  size_t max_traces = 1;
+  do {
+    max_traces *= 2;
+    TraceLog::GetInstance()->SetEnabled(TraceConfig(),
+                                        TraceLog::RECORDING_MODE);
+    for (size_t i = 0; i < max_traces; i++) {
+      TRACE_EVENT_INSTANT0("x", "y", TRACE_EVENT_SCOPE_THREAD);
+    }
+    EndTraceAndFlush();
+  } while (num_flush_callbacks_ < 2);
+
+  while (min_traces + 50 <  max_traces) {
+    size_t traces = (min_traces + max_traces) / 2;
+    TraceLog::GetInstance()->SetEnabled(TraceConfig(),
+                                        TraceLog::RECORDING_MODE);
+    for (size_t i = 0; i < traces; i++) {
+      TRACE_EVENT_INSTANT0("x", "y", TRACE_EVENT_SCOPE_THREAD);
+    }
+    EndTraceAndFlush();
+    if (num_flush_callbacks_ < 2) {
+      min_traces = traces - 10;
+    } else {
+      max_traces = traces + 10;
+    }
+  }
+
+  for (size_t traces = min_traces; traces < max_traces; traces++) {
+    TraceLog::GetInstance()->SetEnabled(TraceConfig(),
+                                        TraceLog::RECORDING_MODE);
+    for (size_t i = 0; i < traces; i++) {
+      TRACE_EVENT_INSTANT0("x", "y", TRACE_EVENT_SCOPE_THREAD);
+    }
+    EndTraceAndFlush();
+  }
+}
 
 // Test that categories work.
 TEST_F(TraceEventTestFixture, Categories) {
@@ -2149,8 +2239,8 @@ namespace {
 
 bool IsTraceEventArgsWhitelisted(const char* category_group_name,
                                  const char* event_name) {
-  if (MatchPattern(category_group_name, "toplevel") &&
-      MatchPattern(event_name, "*")) {
+  if (base::MatchPattern(category_group_name, "toplevel") &&
+      base::MatchPattern(event_name, "*")) {
     return true;
   }
 
@@ -2187,7 +2277,10 @@ TEST_F(TraceEventTestFixture, ArgsWhitelisting) {
   dict->GetDictionary("args", &args_dict);
   ASSERT_TRUE(args_dict);
   EXPECT_FALSE(args_dict->GetInteger("int_two", &int_value));
-  EXPECT_TRUE(args_dict->GetInteger("stripped", &int_value));
+
+  std::string args_string;
+  EXPECT_TRUE(dict->GetString("args", &args_string));
+  EXPECT_EQ(args_string, "__stripped__");
 }
 
 class TraceEventCallbackTest : public TraceEventTestFixture {
@@ -2247,7 +2340,7 @@ class TraceEventCallbackTest : public TraceEventTestFixture {
                        const char* const arg_names[],
                        const unsigned char arg_types[],
                        const unsigned long long arg_values[],
-                       unsigned char flags) {
+                       unsigned int flags) {
     s_instance->collected_events_phases_.push_back(phase);
     s_instance->collected_events_categories_.push_back(
         TraceLog::GetCategoryGroupName(category_group_enabled));

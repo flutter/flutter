@@ -32,53 +32,49 @@ FilePath GetTestDataPath() {
 
 #if defined(OS_WIN)
 TEST(FileVersionInfoTest, HardCodedProperties) {
-  const wchar_t* kDLLNames[] = {
-    L"FileVersionInfoTest1.dll"
-  };
+  const wchar_t kDLLName[] = {L"FileVersionInfoTest1.dll"};
 
-  const wchar_t* kExpectedValues[1][15] = {
+  const wchar_t* const kExpectedValues[15] = {
       // FileVersionInfoTest.dll
-      L"Goooooogle",                      // company_name
-      L"Google",                          // company_short_name
-      L"This is the product name",        // product_name
-      L"This is the product short name",  // product_short_name
-      L"The Internal Name",               // internal_name
-      L"4.3.2.1",                         // product_version
-      L"Private build property",          // private_build
-      L"Special build property",          // special_build
+      L"Goooooogle",                                  // company_name
+      L"Google",                                      // company_short_name
+      L"This is the product name",                    // product_name
+      L"This is the product short name",              // product_short_name
+      L"The Internal Name",                           // internal_name
+      L"4.3.2.1",                                     // product_version
+      L"Private build property",                      // private_build
+      L"Special build property",                      // special_build
       L"This is a particularly interesting comment",  // comments
-      L"This is the original filename",   // original_filename
-      L"This is my file description",     // file_description
-      L"1.2.3.4",                         // file_version
-      L"This is the legal copyright",     // legal_copyright
-      L"This is the legal trademarks",    // legal_trademarks
-      L"This is the last change",         // last_change
+      L"This is the original filename",               // original_filename
+      L"This is my file description",                 // file_description
+      L"1.2.3.4",                                     // file_version
+      L"This is the legal copyright",                 // legal_copyright
+      L"This is the legal trademarks",                // legal_trademarks
+      L"This is the last change",                     // last_change
   };
 
-  for (int i = 0; i < arraysize(kDLLNames); ++i) {
-    FilePath dll_path = GetTestDataPath();
-    dll_path = dll_path.Append(kDLLNames[i]);
+  FilePath dll_path = GetTestDataPath();
+  dll_path = dll_path.Append(kDLLName);
 
-    scoped_ptr<FileVersionInfo> version_info(
-        FileVersionInfo::CreateFileVersionInfo(dll_path));
+  scoped_ptr<FileVersionInfo> version_info(
+      FileVersionInfo::CreateFileVersionInfo(dll_path));
 
-    int j = 0;
-    EXPECT_EQ(kExpectedValues[i][j++], version_info->company_name());
-    EXPECT_EQ(kExpectedValues[i][j++], version_info->company_short_name());
-    EXPECT_EQ(kExpectedValues[i][j++], version_info->product_name());
-    EXPECT_EQ(kExpectedValues[i][j++], version_info->product_short_name());
-    EXPECT_EQ(kExpectedValues[i][j++], version_info->internal_name());
-    EXPECT_EQ(kExpectedValues[i][j++], version_info->product_version());
-    EXPECT_EQ(kExpectedValues[i][j++], version_info->private_build());
-    EXPECT_EQ(kExpectedValues[i][j++], version_info->special_build());
-    EXPECT_EQ(kExpectedValues[i][j++], version_info->comments());
-    EXPECT_EQ(kExpectedValues[i][j++], version_info->original_filename());
-    EXPECT_EQ(kExpectedValues[i][j++], version_info->file_description());
-    EXPECT_EQ(kExpectedValues[i][j++], version_info->file_version());
-    EXPECT_EQ(kExpectedValues[i][j++], version_info->legal_copyright());
-    EXPECT_EQ(kExpectedValues[i][j++], version_info->legal_trademarks());
-    EXPECT_EQ(kExpectedValues[i][j++], version_info->last_change());
-  }
+  int j = 0;
+  EXPECT_EQ(kExpectedValues[j++], version_info->company_name());
+  EXPECT_EQ(kExpectedValues[j++], version_info->company_short_name());
+  EXPECT_EQ(kExpectedValues[j++], version_info->product_name());
+  EXPECT_EQ(kExpectedValues[j++], version_info->product_short_name());
+  EXPECT_EQ(kExpectedValues[j++], version_info->internal_name());
+  EXPECT_EQ(kExpectedValues[j++], version_info->product_version());
+  EXPECT_EQ(kExpectedValues[j++], version_info->private_build());
+  EXPECT_EQ(kExpectedValues[j++], version_info->special_build());
+  EXPECT_EQ(kExpectedValues[j++], version_info->comments());
+  EXPECT_EQ(kExpectedValues[j++], version_info->original_filename());
+  EXPECT_EQ(kExpectedValues[j++], version_info->file_description());
+  EXPECT_EQ(kExpectedValues[j++], version_info->file_version());
+  EXPECT_EQ(kExpectedValues[j++], version_info->legal_copyright());
+  EXPECT_EQ(kExpectedValues[j++], version_info->legal_trademarks());
+  EXPECT_EQ(kExpectedValues[j++], version_info->last_change());
 }
 #endif
 

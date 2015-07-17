@@ -20,6 +20,7 @@ public class RobotiumBundleGenerator implements ResultsBundleGenerator {
     public Bundle generate(Map<String, ResultsBundleGenerator.TestResult> rawResults) {
         int testsPassed = 0;
         int testsFailed = 0;
+        int testsErrored = 0;
 
         for (Map.Entry<String, ResultsBundleGenerator.TestResult> entry : rawResults.entrySet()) {
             switch (entry.getValue()) {
@@ -32,6 +33,9 @@ public class RobotiumBundleGenerator implements ResultsBundleGenerator {
                     Log.d(TAG, "FAILED: " + entry.getKey());
                     ++testsFailed;
                     break;
+                case UNKNOWN:
+                    ++testsErrored;
+                    break;
                 default:
                     Log.w(TAG, "Unhandled: " + entry.getKey() + ", "
                             + entry.getValue().toString());
@@ -40,10 +44,11 @@ public class RobotiumBundleGenerator implements ResultsBundleGenerator {
         }
 
         StringBuilder resultBuilder = new StringBuilder();
-        if (testsFailed > 0) {
-            resultBuilder.append(
-                    "\nFAILURES!!! Tests run: " + Integer.toString(rawResults.size())
-                    + ", Failures: " + Integer.toString(testsFailed) + ", Errors: 0");
+        if (testsFailed > 0 || testsErrored > 0) {
+            resultBuilder.append("\nFAILURES!!! ")
+                    .append("Tests run: ").append(Integer.toString(rawResults.size()))
+                    .append(", Failures: ").append(Integer.toString(testsFailed))
+                    .append(", Errors: ").append(Integer.toString(testsErrored));
         } else {
             resultBuilder.append("\nOK (" + Integer.toString(testsPassed) + " tests)");
         }

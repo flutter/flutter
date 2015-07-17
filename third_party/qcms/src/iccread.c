@@ -146,13 +146,10 @@ static uInt16Number read_uInt16Number(struct mem_source *mem, size_t offset)
 static void check_CMM_type_signature(struct mem_source *src)
 {
 	//uint32_t CMM_type_signature = read_u32(src, 4);
-	//TODO: do the check?
-
 }
 
 static void check_profile_version(struct mem_source *src)
 {
-
 	/*
 	uint8_t major_revision = read_u8(src, 8 + 0);
 	uint8_t minor_revision = read_u8(src, 8 + 1);
@@ -217,8 +214,7 @@ static void read_pcs(qcms_profile *profile, struct mem_source *mem)
 	}
 }
 
-struct tag
-{
+struct tag {
 	uint32_t signature;
 	uint32_t offset;
 	uint32_t size;
@@ -341,22 +337,84 @@ qcms_bool qcms_profile_is_bogus(qcms_profile *profile)
 #define TAG_B2A0 0x42324130
 #define TAG_CHAD 0x63686164
 #define TAG_desc 0x64657363
+#define TAG_vcgt 0x76636774
 
 static struct tag *find_tag(struct tag_index index, uint32_t tag_id)
 {
 	unsigned int i;
-	struct tag *tag = NULL;
+
 	for (i = 0; i < index.count; i++) {
-		if (index.tags[i].signature == tag_id) {
+		if (index.tags[i].signature == tag_id)
 			return &index.tags[i];
-		}
 	}
-	return tag;
+
+	return NULL;
 }
 
 #define DESC_TYPE 0x64657363 // 'desc'
 #define MLUC_TYPE 0x6d6c7563 // 'mluc'
 #define MMOD_TYPE 0x6D6D6F64 // 'mmod'
+#define VCGT_TYPE 0x76636774 // 'vcgt'
+
+static qcms_bool read_tag_vcgtType(qcms_profile *profile, struct mem_source *src, struct tag_index index)
+{
+	size_t tag_offset = find_tag(index, TAG_vcgt)->offset;
+	uint32_t tag_type = read_u32(src, tag_offset);
+	uint32_t vcgt_type = read_u32(src, tag_offset + 8);
+	uint16_t channels = read_u16(src, tag_offset + 12);
+	uint16_t elements = read_u16(src, tag_offset + 14);
+	uint16_t byte_depth = read_u16(src, tag_offset + 16);
+	size_t table_offset = tag_offset + 18;
+	uint32_t i;
+	uint16_t *dest;
+
+	if (!src->valid || tag_type != VCGT_TYPE)
+		goto invalid_vcgt_tag;
+
+	// Only support 3 channels.
+	if (channels != 3)
+		return true;
+	// Only support single or double byte values.
+	if (byte_depth != 1 && byte_depth != 2)
+		return true;
+	// Only support table data, not equation.
+	if (vcgt_type != 0)
+		return true;
+	// Limit the table to a sensible size; 10-bit gamma is a reasonable
+	// maximum for hardware correction.
+	if (elements > 1024)
+		return true;
+
+	// Empty table is invalid.
+	if (!elements)
+		goto invalid_vcgt_tag;
+
+	profile->vcgt.length = elements;
+	profile->vcgt.data = malloc(3 * elements * sizeof(uint16_t));
+	if (!profile->vcgt.data)
+		return false;
+
+	dest = profile->vcgt.data;
+
+	for (i = 0; i < 3 * elements; ++i) {
+		if (byte_depth == 1) {
+			*dest++ = read_u8(src, table_offset) * 256;
+		} else {
+			*dest++ = read_u16(src, table_offset);
+		}
+
+		table_offset += byte_depth;
+
+		if (!src->valid)
+			goto invalid_vcgt_tag;
+	}
+
+	return true;
+
+invalid_vcgt_tag:
+	invalid_source(src, "invalid vcgt tag");
+	return false;
+}
 
 static bool read_tag_descType(qcms_profile *profile, struct mem_source *src, struct tag_index index, uint32_t tag_id)
 {
@@ -1090,6 +1148,8 @@ qcms_profile* qcms_profile_create_rgb_with_table(
 
 /* from lcms: cmsWhitePointFromTemp */
 /* tempK must be >= 4000. and <= 25000.
+ * Invalid values of tempK will return
+ * (x,y,Y) = (-1.0, -1.0, -1.0)
  * similar to argyll: icx_DTEMP2XYZ() */
 static qcms_CIE_xyY white_point_from_temp(int temp_K)
 {
@@ -1111,7 +1171,14 @@ static qcms_CIE_xyY white_point_from_temp(int temp_K)
 		if (T > 7000.0 && T <= 25000.0) {
 			x = -2.0064*(1E9/T3) + 1.9018*(1E6/T2) + 0.24748*(1E3/T) + 0.237040;
 		} else {
+			// Invalid tempK
+			white_point.x = -1.0;
+			white_point.y = -1.0;
+			white_point.Y = -1.0;
+
 			assert(0 && "invalid temp");
+
+			return white_point;
 		}
 	}
 
@@ -1158,7 +1225,6 @@ qcms_profile* qcms_profile_sRGB(void)
 	free(table);
 	return profile;
 }
-
 
 /* qcms_profile_from_memory does not hold a reference to the memory passed in */
 qcms_profile* qcms_profile_from_memory(const void *mem, size_t size)
@@ -1222,6 +1288,11 @@ qcms_profile* qcms_profile_from_memory(const void *mem, size_t size)
 		profile->chromaticAdaption.invalid = true; //Signal the data is not present
 	}
 
+	if (find_tag(index, TAG_vcgt)) {
+		if (!read_tag_vcgtType(profile, src, index))
+			goto invalid_tag_table;
+	}
+
 	if (profile->class == DISPLAY_DEVICE_PROFILE || profile->class == INPUT_DEVICE_PROFILE ||
             profile->class == OUTPUT_DEVICE_PROFILE  || profile->class == COLOR_SPACE_PROFILE) {
 		if (profile->color_space == RGB_SIGNATURE) {
@@ -1276,11 +1347,11 @@ qcms_profile* qcms_profile_from_memory(const void *mem, size_t size)
 		goto invalid_tag_table;
 
 	free(index.tags);
-
 	return profile;
 
 invalid_tag_table:
-	free(index.tags);
+	if (index.tags)
+		free(index.tags);
 invalid_profile:
 	qcms_profile_release(profile);
 	return INVALID_PROFILE;
@@ -1288,12 +1359,12 @@ invalid_profile:
 
 qcms_bool qcms_profile_match(qcms_profile *p1, qcms_profile *p2)
 {
-    return memcmp(p1->description, p2->description, sizeof p1->description) == 0;
+	return memcmp(p1->description, p2->description, sizeof p1->description) == 0;
 }
 
 const char* qcms_profile_get_description(qcms_profile *profile)
 {
-    return profile->description;
+	return profile->description;
 }
 
 qcms_intent qcms_profile_get_rendering_intent(qcms_profile *profile)
@@ -1301,10 +1372,28 @@ qcms_intent qcms_profile_get_rendering_intent(qcms_profile *profile)
 	return profile->rendering_intent;
 }
 
-icColorSpaceSignature
-qcms_profile_get_color_space(qcms_profile *profile)
+qcms_color_space qcms_profile_get_color_space(qcms_profile *profile)
 {
 	return profile->color_space;
+}
+
+size_t qcms_profile_get_vcgt_channel_length(qcms_profile *profile)
+{
+	return profile->vcgt.length;
+}
+
+// Check unsigned short is uint16_t.
+typedef char assert_short_not_16b[(sizeof(unsigned short) == sizeof(uint16_t)) ? 1 : -1];
+
+qcms_bool qcms_profile_get_vcgt_rgb_channels(qcms_profile *profile, unsigned short *data)
+{
+	size_t vcgt_channel_bytes = qcms_profile_get_vcgt_channel_length(profile) * sizeof(uint16_t);
+
+	if (!vcgt_channel_bytes || !data)
+		return false;
+
+	memcpy(data, profile->vcgt.data, 3 * vcgt_channel_bytes);
+	return true;
 }
 
 static void lut_release(struct lutType *lut)
@@ -1331,6 +1420,9 @@ void qcms_profile_release(qcms_profile *profile)
 	if (profile->mBA)
 		mAB_release(profile->mBA);
 
+	if (profile->vcgt.data)
+		free(profile->vcgt.data);
+
 	free(profile->redTRC);
 	free(profile->blueTRC);
 	free(profile->greenTRC);
@@ -1338,8 +1430,8 @@ void qcms_profile_release(qcms_profile *profile)
 	free(profile);
 }
 
-
 #include <stdio.h>
+
 qcms_profile* qcms_profile_from_file(FILE *file)
 {
 	uint32_t length, remaining_length;

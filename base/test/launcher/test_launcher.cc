@@ -25,6 +25,7 @@
 #include "base/process/kill.h"
 #include "base/process/launch.h"
 #include "base/single_thread_task_runner.h"
+#include "base/strings/pattern.h"
 #include "base/strings/string_number_conversions.h"
 #include "base/strings/string_split.h"
 #include "base/strings/string_util.h"
@@ -569,7 +570,7 @@ void TestLauncher::OnTestFinished(const TestResult& result) {
           snippet_lines.begin() + truncated_size);
       snippet_lines.insert(snippet_lines.begin(), "<truncated>");
     }
-    fprintf(stdout, "%s", JoinString(snippet_lines, "\n").c_str());
+    fprintf(stdout, "%s", base::JoinString(snippet_lines, "\n").c_str());
     fflush(stdout);
   }
 

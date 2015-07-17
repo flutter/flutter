@@ -77,6 +77,35 @@
         },
       ],
     }, # build_output_dirs
+    {
+      'target_name': 'sun_tools_java',
+      'type': 'none',
+      'variables': {
+        'found_jar_path': '<(PRODUCT_DIR)/sun_tools_java/tools.jar',
+        'jar_path': '<(found_jar_path)',
+      },
+      'includes': [
+        '../../build/host_prebuilt_jar.gypi',
+      ],
+      'actions': [
+        {
+          'action_name': 'find_sun_tools_jar',
+          'variables' : {
+          },
+          'inputs' : [
+            'gyp/find_sun_tools_jar.py',
+            'gyp/util/build_utils.py',
+          ],
+          'outputs': [
+            '<(found_jar_path)',
+          ],
+          'action': [
+            'python', 'gyp/find_sun_tools_jar.py',
+            '--output', '<(found_jar_path)',
+          ],
+        },
+      ],
+    }, # sun_tools_java
   ]
 }
 

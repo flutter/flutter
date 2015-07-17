@@ -8,10 +8,10 @@
 #include <string>
 
 #include "base/strings/string16.h"
+#include "url/third_party/mozilla/url_parse.h"
 #include "url/url_canon.h"
 #include "url/url_constants.h"
 #include "url/url_export.h"
-#include "url/url_parse.h"
 
 namespace url {
 
@@ -20,14 +20,13 @@ namespace url {
 // Initialization is NOT required, it will be implicitly initialized when first
 // used. However, this implicit initialization is NOT threadsafe. If you are
 // using this library in a threaded environment and don't have a consistent
-// "first call" (an example might be calling "AddStandardScheme" with your
-// special application-specific schemes) then you will want to call initialize
-// before spawning any threads.
+// "first call" (an example might be calling AddStandardScheme with your special
+// application-specific schemes) then you will want to call initialize before
+// spawning any threads.
 //
-// It is OK to call this function more than once, subsequent calls will simply
-// "noop", unless Shutdown() was called in the mean time. This will also be a
-// "noop" if other calls to the library have forced an initialization
-// beforehand.
+// It is OK to call this function more than once, subsequent calls will be
+// no-ops, unless Shutdown was called in the mean time. This will also be a
+// no-op if other calls to the library have forced an initialization beforehand.
 URL_EXPORT void Initialize();
 
 // Cleanup is not required, except some strings may leak. For most user
@@ -38,10 +37,13 @@ URL_EXPORT void Shutdown();
 
 // Schemes --------------------------------------------------------------------
 
-// Adds an application-defined scheme to the internal list of "standard" URL
-// schemes. This function is not threadsafe and can not be called concurrently
-// with any other url_util function. It will assert if the list of standard
-// schemes has been locked (see LockStandardSchemes).
+// Adds an application-defined scheme to the internal list of "standard-format"
+// URL schemes. A standard-format scheme adheres to what RFC 3986 calls "generic
+// URI syntax" (https://tools.ietf.org/html/rfc3986#section-3).
+//
+// This function is not threadsafe and can not be called concurrently with any
+// other url_util function. It will assert if the list of standard schemes has
+// been locked (see LockStandardSchemes).
 URL_EXPORT void AddStandardScheme(const char* new_scheme);
 
 // Sets a flag to prevent future calls to AddStandardScheme from succeeding.
@@ -85,18 +87,10 @@ inline bool FindAndCompareScheme(const base::string16& str,
                               compare, found_scheme);
 }
 
-// Returns true if the given string represents a standard URL. This means that
-// either the scheme is in the list of known standard schemes.
+// Returns true if the given string represents a URL whose scheme is in the list
+// of known standard-format schemes (see AddStandardScheme).
 URL_EXPORT bool IsStandard(const char* spec, const Component& scheme);
 URL_EXPORT bool IsStandard(const base::char16* spec, const Component& scheme);
-
-// TODO(brettw) remove this. This is a temporary compatibility hack to avoid
-// breaking the WebKit build when this version is synced via Chrome.
-inline bool IsStandard(const char* spec,
-                       int spec_len,
-                       const Component& scheme) {
-  return IsStandard(spec, scheme);
-}
 
 // URL library wrappers -------------------------------------------------------
 
@@ -171,23 +165,6 @@ URL_EXPORT bool ReplaceComponents(
     Parsed* out_parsed);
 
 // String helper functions ----------------------------------------------------
-
-// Compare the lower-case form of the given string against the given ASCII
-// string.  This is useful for doing checking if an input string matches some
-// token, and it is optimized to avoid intermediate string copies.
-//
-// The versions of this function that don't take a b_end assume that the b
-// string is NULL terminated.
-URL_EXPORT bool LowerCaseEqualsASCII(const char* a_begin,
-                                     const char* a_end,
-                                     const char* b);
-URL_EXPORT bool LowerCaseEqualsASCII(const char* a_begin,
-                                     const char* a_end,
-                                     const char* b_begin,
-                                     const char* b_end);
-URL_EXPORT bool LowerCaseEqualsASCII(const base::char16* a_begin,
-                                     const base::char16* a_end,
-                                     const char* b);
 
 // Unescapes the given string using URL escaping rules.
 URL_EXPORT void DecodeURLEscapeSequences(const char* input,

@@ -9,6 +9,10 @@
       'dependencies': [
         '../zlib/zlib.gyp:zlib',
       ],
+      'variables': {
+        # Upstream uses self-assignment to avoid warnings.
+        'clang_warning_flags': [ '-Wno-self-assign' ]
+      },
       'defines': [
         'CHROME_PNG_WRITE_SUPPORT',
         'PNG_USER_CONFIG',
@@ -67,7 +71,7 @@
             'defines': [
               'PNG_USE_DLL',
             ],
-          },          
+          },
         }],
         ['OS=="android"', {
           'toolsets': ['target', 'host'],

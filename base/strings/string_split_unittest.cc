@@ -169,7 +169,81 @@ TEST(SplitStringUsingSubstrTest, EmptyString) {
   EXPECT_THAT(results, ElementsAre(""));
 }
 
-TEST(StringUtilTest, SplitString) {
+TEST(StringUtilTest, SplitString_Basics) {
+  std::vector<std::string> r;
+
+  r = SplitString(std::string(), ",:;", KEEP_WHITESPACE, SPLIT_WANT_ALL);
+  EXPECT_TRUE(r.empty());
+
+  // Empty separator list
+  r = SplitString("hello, world", "", KEEP_WHITESPACE, SPLIT_WANT_ALL);
+  ASSERT_EQ(1u, r.size());
+  EXPECT_EQ("hello, world", r[0]);
+
+  // Should split on any of the separators.
+  r = SplitString("::,,;;", ",:;", KEEP_WHITESPACE, SPLIT_WANT_ALL);
+  ASSERT_EQ(7u, r.size());
+  for (auto str : r)
+    ASSERT_TRUE(str.empty());
+
+  r = SplitString("red, green; blue:", ",:;", TRIM_WHITESPACE,
+                  SPLIT_WANT_NONEMPTY);
+  ASSERT_EQ(3u, r.size());
+  EXPECT_EQ("red", r[0]);
+  EXPECT_EQ("green", r[1]);
+  EXPECT_EQ("blue", r[2]);
+
+  // Want to split a string along whitespace sequences.
+  r = SplitString("  red green   \tblue\n", " \t\n", TRIM_WHITESPACE,
+                  SPLIT_WANT_NONEMPTY);
+  ASSERT_EQ(3u, r.size());
+  EXPECT_EQ("red", r[0]);
+  EXPECT_EQ("green", r[1]);
+  EXPECT_EQ("blue", r[2]);
+
+  // Weird case of splitting on spaces but not trimming.
+  r = SplitString(" red ", " ", TRIM_WHITESPACE, SPLIT_WANT_ALL);
+  ASSERT_EQ(3u, r.size());
+  EXPECT_EQ("", r[0]);  // Before the first space.
+  EXPECT_EQ("red", r[1]);
+  EXPECT_EQ("", r[2]);  // After the last space.
+}
+
+TEST(StringUtilTest, SplitString_WhitespaceAndResultType) {
+  std::vector<std::string> r;
+
+  // Empty input handling.
+  r = SplitString(std::string(), ",", KEEP_WHITESPACE, SPLIT_WANT_ALL);
+  EXPECT_TRUE(r.empty());
+  r = SplitString(std::string(), ",", KEEP_WHITESPACE, SPLIT_WANT_NONEMPTY);
+  EXPECT_TRUE(r.empty());
+
+  // Input string is space and we're trimming.
+  r = SplitString(" ", ",", TRIM_WHITESPACE, SPLIT_WANT_ALL);
+  ASSERT_EQ(1u, r.size());
+  EXPECT_EQ("", r[0]);
+  r = SplitString(" ", ",", TRIM_WHITESPACE, SPLIT_WANT_NONEMPTY);
+  EXPECT_TRUE(r.empty());
+
+  // Test all 4 combinations of flags on ", ,".
+  r = SplitString(", ,", ",", KEEP_WHITESPACE, SPLIT_WANT_ALL);
+  ASSERT_EQ(3u, r.size());
+  EXPECT_EQ("", r[0]);
+  EXPECT_EQ(" ", r[1]);
+  EXPECT_EQ("", r[2]);
+  r = SplitString(", ,", ",", KEEP_WHITESPACE, SPLIT_WANT_NONEMPTY);
+  ASSERT_EQ(1u, r.size());
+  ASSERT_EQ(" ", r[0]);
+  r = SplitString(", ,", ",", TRIM_WHITESPACE, SPLIT_WANT_ALL);
+  ASSERT_EQ(3u, r.size());
+  EXPECT_EQ("", r[0]);
+  EXPECT_EQ("", r[1]);
+  EXPECT_EQ("", r[2]);
+  r = SplitString(", ,", ",", TRIM_WHITESPACE, SPLIT_WANT_NONEMPTY);
+  ASSERT_TRUE(r.empty());
+}
+
+TEST(StringUtilTest, SplitString_Legacy) {
   std::vector<std::wstring> r;
 
   SplitString(std::wstring(), L',', &r);
@@ -191,6 +265,13 @@ TEST(StringUtilTest, SplitString) {
   r.clear();
 
   SplitString(L"a,,c", L',', &r);
+  ASSERT_EQ(3U, r.size());
+  EXPECT_EQ(r[0], L"a");
+  EXPECT_EQ(r[1], L"");
+  EXPECT_EQ(r[2], L"c");
+  r.clear();
+
+  SplitString(L"a, ,c", L',', &r);
   ASSERT_EQ(3U, r.size());
   EXPECT_EQ(r[0], L"a");
   EXPECT_EQ(r[1], L"");

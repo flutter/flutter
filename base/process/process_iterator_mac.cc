@@ -10,6 +10,7 @@
 #include <unistd.h>
 
 #include "base/logging.h"
+#include "base/strings/string_split.h"
 #include "base/strings/string_util.h"
 
 namespace base {
@@ -99,7 +100,8 @@ bool ProcessIterator::CheckForNextProcess() {
     // |entry_.cmd_line_args_|.
     std::string delimiters;
     delimiters.push_back('\0');
-    Tokenize(data, delimiters, &entry_.cmd_line_args_);
+    entry_.cmd_line_args_ = SplitString(data, delimiters,
+                                        KEEP_WHITESPACE, SPLIT_WANT_NONEMPTY);
 
     // |data| starts with the full executable path followed by a null character.
     // We search for the first instance of '\0' and extract everything before it

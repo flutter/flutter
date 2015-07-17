@@ -524,7 +524,7 @@
         },
       ],
     }],
-    ['ozone_platform_dri==1 or ozone_platform_drm==1 or ozone_platform_gbm==1', {
+    ['ozone_platform_drm==1 or ozone_platform_gbm==1', {
       'targets': [
         {
           'target_name': 'libdrm',

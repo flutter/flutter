@@ -49,10 +49,10 @@ testRegexpFile(const char *filename) {
     while (fgets(expression, 4500, input) != NULL) {
 	len = strlen(expression);
 	len--;
-	while ((len >= 0) && 
+	while ((len >= 0) &&
 	       ((expression[len] == '\n') || (expression[len] == '\t') ||
 		(expression[len] == '\r') || (expression[len] == ' '))) len--;
-	expression[len + 1] = 0;      
+	expression[len + 1] = 0;
 	if (len >= 0) {
 	    if (expression[0] == '#')
 		continue;
@@ -103,10 +103,10 @@ runFileTest(xmlExpCtxtPtr ctxt, const char *filename) {
     while (fgets(expression, 4500, input) != NULL) {
 	len = strlen(expression);
 	len--;
-	while ((len >= 0) && 
+	while ((len >= 0) &&
 	       ((expression[len] == '\n') || (expression[len] == '\t') ||
 		(expression[len] == '\r') || (expression[len] == ' '))) len--;
-	expression[len + 1] = 0;      
+	expression[len + 1] = 0;
 	if (len >= 0) {
 	    if (expression[0] == '#')
 		continue;
@@ -115,7 +115,7 @@ runFileTest(xmlExpCtxtPtr ctxt, const char *filename) {
 
 		if (expr != NULL) {
 		    xmlExpFree(ctxt, expr);
-		    if (xmlExpCtxtNbNodes(ctxt) != 0) 
+		    if (xmlExpCtxtNbNodes(ctxt) != 0)
 		        printf(" Parse/free of Expression leaked %d\n",
 			       xmlExpCtxtNbNodes(ctxt));
 		    expr = NULL;
@@ -142,7 +142,7 @@ runFileTest(xmlExpCtxtPtr ctxt, const char *filename) {
 		    break;
 		} else {
 		    int ret;
-		    
+
 		    nodes2 = xmlExpCtxtNbNodes(ctxt);
 		    ret = xmlExpSubsume(ctxt, expr, sub);
 
@@ -174,14 +174,14 @@ runFileTest(xmlExpCtxtPtr ctxt, const char *filename) {
     }
     if (expr != NULL) {
 	xmlExpFree(ctxt, expr);
-	if (xmlExpCtxtNbNodes(ctxt) != 0) 
+	if (xmlExpCtxtNbNodes(ctxt) != 0)
 	    printf(" Parse/free of Expression leaked %d\n",
 		   xmlExpCtxtNbNodes(ctxt));
     }
     fclose(input);
 }
 
-static void 
+static void
 testReduce(xmlExpCtxtPtr ctxt, xmlExpNodePtr expr, const char *tst) {
     xmlBufferPtr xmlExpBuf;
     xmlExpNodePtr sub, deriv;
@@ -213,7 +213,7 @@ testReduce(xmlExpCtxtPtr ctxt, xmlExpNodePtr expr, const char *tst) {
     xmlExpFree(ctxt, sub);
 }
 
-static void 
+static void
 exprDebug(xmlExpCtxtPtr ctxt, xmlExpNodePtr expr) {
     xmlBufferPtr xmlExpBuf;
     xmlExpNodePtr deriv;

@@ -239,17 +239,15 @@ class WriteFlagChecker : public TestingPrefStore {
   }
 
   void SetValue(const std::string& key,
-                base::Value* value,
+                scoped_ptr<base::Value> value,
                 uint32 flags) override {
     SetLastWriteFlags(flags);
-    delete value;
   }
 
   void SetValueSilently(const std::string& key,
-                        base::Value* value,
+                        scoped_ptr<base::Value> value,
                         uint32 flags) override {
     SetLastWriteFlags(flags);
-    delete value;
   }
 
   void RemoveValue(const std::string& key, uint32 flags) override {

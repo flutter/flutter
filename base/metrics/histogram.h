@@ -121,6 +121,20 @@ class BASE_EXPORT Histogram : public HistogramBase {
                                        size_t bucket_count,
                                        int32 flags);
 
+  // Overloads of the above two functions that take a const char* |name| param,
+  // to avoid code bloat from the std::string constructor being inlined into
+  // call sites.
+  static HistogramBase* FactoryGet(const char* name,
+                                   Sample minimum,
+                                   Sample maximum,
+                                   size_t bucket_count,
+                                   int32 flags);
+  static HistogramBase* FactoryTimeGet(const char* name,
+                                       base::TimeDelta minimum,
+                                       base::TimeDelta maximum,
+                                       size_t bucket_count,
+                                       int32 flags);
+
   static void InitializeBucketRanges(Sample minimum,
                                      Sample maximum,
                                      BucketRanges* ranges);
@@ -277,6 +291,20 @@ class BASE_EXPORT LinearHistogram : public Histogram {
                                        size_t bucket_count,
                                        int32 flags);
 
+  // Overloads of the above two functions that take a const char* |name| param,
+  // to avoid code bloat from the std::string constructor being inlined into
+  // call sites.
+  static HistogramBase* FactoryGet(const char* name,
+                                   Sample minimum,
+                                   Sample maximum,
+                                   size_t bucket_count,
+                                   int32 flags);
+  static HistogramBase* FactoryTimeGet(const char* name,
+                                       TimeDelta minimum,
+                                       TimeDelta maximum,
+                                       size_t bucket_count,
+                                       int32 flags);
+
   struct DescriptionPair {
     Sample sample;
     const char* description;  // Null means end of a list of pairs.
@@ -339,6 +367,11 @@ class BASE_EXPORT BooleanHistogram : public LinearHistogram {
  public:
   static HistogramBase* FactoryGet(const std::string& name, int32 flags);
 
+  // Overload of the above function that takes a const char* |name| param,
+  // to avoid code bloat from the std::string constructor being inlined into
+  // call sites.
+  static HistogramBase* FactoryGet(const char* name, int32 flags);
+
   HistogramType GetHistogramType() const override;
 
  private:
@@ -361,6 +394,13 @@ class BASE_EXPORT CustomHistogram : public Histogram {
   // compatibility). The limits can be unordered or contain duplication, but
   // client should not depend on this.
   static HistogramBase* FactoryGet(const std::string& name,
+                                   const std::vector<Sample>& custom_ranges,
+                                   int32 flags);
+
+  // Overload of the above function that takes a const char* |name| param,
+  // to avoid code bloat from the std::string constructor being inlined into
+  // call sites.
+  static HistogramBase* FactoryGet(const char* name,
                                    const std::vector<Sample>& custom_ranges,
                                    int32 flags);
 

@@ -58,7 +58,7 @@ while test $# -gt 0; do
       ;;
 
     --version)
-	echo 2.7.7
+	echo 2.9.2
 	exit 0
 	;;
 
@@ -86,12 +86,12 @@ while test $# -gt 0; do
 	then
 	    if [ "-L${libdir}" = "-L/usr/lib" -o "-L${libdir}" = "-L/usr/lib64" ]
 	    then
-		echo -lxml2 -lz   -lm  
+		echo -lxml2 -lz   -lm  -ldl
 	    else
-		echo -L${libdir} -lxml2 -lz   -lm  
+		echo -L${libdir} -lxml2 -lz   -lm  -ldl
 	    fi
 	else
-	    echo -L${libdir} -lxml2 -lz   -lm  
+	    echo -L${libdir} -lxml2 -lz   -lm  -ldl 
 	fi
        	;;
 

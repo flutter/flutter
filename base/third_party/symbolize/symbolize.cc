@@ -651,7 +651,8 @@ char *itoa_r(intptr_t i, char *buf, size_t sz, int base, size_t padding) {
 
   // Handle negative numbers (only for base 10).
   if (i < 0 && base == 10) {
-    j = -i;
+    // This does "j = -i" while avoiding integer overflow.
+    j = static_cast<uintptr_t>(-(i + 1)) + 1;
 
     // Make sure we can write the '-' character.
     if (++n > sz) {

@@ -31,6 +31,7 @@ public final class CollectionUtil {
         return list;
     }
 
+    @VisibleForTesting
     public static <E> ArrayList<E> newArrayList(Iterable<E> iterable) {
         ArrayList<E> list = new ArrayList<E>();
         for (E element : iterable) {

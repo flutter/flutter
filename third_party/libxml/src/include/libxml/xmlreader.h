@@ -130,16 +130,16 @@ XMLPUBFUN int XMLCALL
 
 #ifdef LIBXML_WRITER_ENABLED
 XMLPUBFUN xmlChar * XMLCALL
-			xmlTextReaderReadInnerXml	(xmlTextReaderPtr reader);
+			xmlTextReaderReadInnerXml(xmlTextReaderPtr reader);
 
 XMLPUBFUN xmlChar * XMLCALL
-			xmlTextReaderReadOuterXml	(xmlTextReaderPtr reader);
+			xmlTextReaderReadOuterXml(xmlTextReaderPtr reader);
 #endif
 
 XMLPUBFUN xmlChar * XMLCALL
-			xmlTextReaderReadString		(xmlTextReaderPtr reader);
+			xmlTextReaderReadString	(xmlTextReaderPtr reader);
 XMLPUBFUN int XMLCALL
-			xmlTextReaderReadAttributeValue	(xmlTextReaderPtr reader);
+			xmlTextReaderReadAttributeValue(xmlTextReaderPtr reader);
 
 /*
  * Attributes of the node
@@ -285,6 +285,11 @@ XMLPUBFUN int XMLCALL
 		    xmlTextReaderRelaxNGValidate(xmlTextReaderPtr reader,
 						 const char *rng);
 XMLPUBFUN int XMLCALL
+		    xmlTextReaderRelaxNGValidateCtxt(xmlTextReaderPtr reader,
+						 xmlRelaxNGValidCtxtPtr ctxt,
+						 int options);
+
+XMLPUBFUN int XMLCALL
 		    xmlTextReaderRelaxNGSetSchema(xmlTextReaderPtr reader,
 						 xmlRelaxNGPtr schema);
 XMLPUBFUN int XMLCALL
@@ -392,27 +397,26 @@ typedef void *  xmlTextReaderLocatorPtr;
  *
  * Signature of an error callback from a reader parser
  */
-typedef void   (XMLCALL *xmlTextReaderErrorFunc)(void *arg,
-						 const char *msg,
-						 xmlParserSeverities severity,
-						 xmlTextReaderLocatorPtr locator);
+typedef void (XMLCALL *xmlTextReaderErrorFunc)(void *arg,
+					       const char *msg,
+					       xmlParserSeverities severity,
+					       xmlTextReaderLocatorPtr locator);
 XMLPUBFUN int XMLCALL
-		    xmlTextReaderLocatorLineNumber(xmlTextReaderLocatorPtr locator);
-/*int             xmlTextReaderLocatorLinePosition(xmlTextReaderLocatorPtr locator);*/
+	    xmlTextReaderLocatorLineNumber(xmlTextReaderLocatorPtr locator);
 XMLPUBFUN xmlChar * XMLCALL
-		    xmlTextReaderLocatorBaseURI (xmlTextReaderLocatorPtr locator);
+	    xmlTextReaderLocatorBaseURI (xmlTextReaderLocatorPtr locator);
 XMLPUBFUN void XMLCALL
-		    xmlTextReaderSetErrorHandler(xmlTextReaderPtr reader,
-						 xmlTextReaderErrorFunc f,
-						 void *arg);
+	    xmlTextReaderSetErrorHandler(xmlTextReaderPtr reader,
+					 xmlTextReaderErrorFunc f,
+					 void *arg);
 XMLPUBFUN void XMLCALL
-		    xmlTextReaderSetStructuredErrorHandler(xmlTextReaderPtr reader,
-							   xmlStructuredErrorFunc f,
-							   void *arg);
+	    xmlTextReaderSetStructuredErrorHandler(xmlTextReaderPtr reader,
+						   xmlStructuredErrorFunc f,
+						   void *arg);
 XMLPUBFUN void XMLCALL
-		    xmlTextReaderGetErrorHandler(xmlTextReaderPtr reader,
-						 xmlTextReaderErrorFunc *f,
-						 void **arg);
+	    xmlTextReaderGetErrorHandler(xmlTextReaderPtr reader,
+					 xmlTextReaderErrorFunc *f,
+					 void **arg);
 
 #endif /* LIBXML_READER_ENABLED */
 

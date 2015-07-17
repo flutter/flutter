@@ -32,13 +32,13 @@ bool MallocDumpProvider::OnMemoryDump(ProcessMemoryDump* pmd) {
   struct mallinfo info = mallinfo();
   DCHECK_GE(info.arena + info.hblkhd, info.uordblks);
 
-  // When the system allocator is implemented by tcmalloc, the total physical
+  // When the system allocator is implemented by tcmalloc, the total heap
   // size is given by |arena| and |hblkhd| is 0. In case of Android's jemalloc
   // |arena| is 0 and the outer pages size is reported by |hblkhd|. In case of
   // dlmalloc the total is given by |arena| + |hblkhd|.
   // For more details see link: http://goo.gl/fMR8lF.
   MemoryAllocatorDump* outer_dump = pmd->CreateAllocatorDump("malloc");
-  outer_dump->AddScalar(MemoryAllocatorDump::kNameSize,
+  outer_dump->AddScalar("heap_virtual_size",
                         MemoryAllocatorDump::kUnitsBytes,
                         info.arena + info.hblkhd);
 

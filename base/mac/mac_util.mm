@@ -483,6 +483,7 @@ enum {
   MOUNTAIN_LION_MINOR_VERSION = 8,
   MAVERICKS_MINOR_VERSION = 9,
   YOSEMITE_MINOR_VERSION = 10,
+  EL_CAPITAN_MINOR_VERSION = 11,
 };
 
 }  // namespace
@@ -544,6 +545,18 @@ bool IsOSYosemiteOrLater() {
 #if !defined(BASE_MAC_MAC_UTIL_H_INLINED_GT_10_10)
 bool IsOSLaterThanYosemite_DontCallThis() {
   return MacOSXMinorVersion() > YOSEMITE_MINOR_VERSION;
+}
+#endif
+
+#if !defined(BASE_MAC_MAC_UTIL_H_INLINED_GT_10_11)
+bool IsOSElCapitan() {
+  return MacOSXMinorVersion() == EL_CAPITAN_MINOR_VERSION;
+}
+#endif
+
+#if !defined(BASE_MAC_MAC_UTIL_H_INLINED_GE_10_11)
+bool IsOSElCapitanOrLater() {
+  return MacOSXMinorVersion() >= EL_CAPITAN_MINOR_VERSION;
 }
 #endif
 

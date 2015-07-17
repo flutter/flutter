@@ -49,7 +49,7 @@ def TestUpdate(device, old_apk, new_apk, app_data, package_name):
   # Restore command is not synchronous
   raw_input('Select "Restore my data" on the device. Then press enter to '
             'continue.')
-  device_path = device.GetApplicationPath(package_name)
+  device_path = device.GetApplicationPaths(package_name)
   if not device_path:
     raise Exception('Expected package %s to already be installed. '
                     'Package name might have changed!' % package_name)

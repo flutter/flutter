@@ -436,7 +436,7 @@ const LogSeverity LOG_0 = LOG_ERROR;
 #if defined(OFFICIAL_BUILD) && defined(NDEBUG) && !defined(OS_ANDROID)
 
 // Make all CHECK functions discard their log strings to reduce code
-// bloat for official release builds.
+// bloat for official release builds (except Android).
 
 // TODO(akalin): This would be more valuable if there were some way to
 // remove BreakDebugger() from the backtrace, perhaps by turning it
@@ -470,9 +470,10 @@ const LogSeverity LOG_0 = LOG_ERROR;
 
 #else  // _PREFAST_
 
-#define CHECK(condition)                       \
-  LAZY_STREAM(LOG_STREAM(FATAL), !(condition)) \
-  << "Check failed: " #condition ". "
+// Do as much work as possible out of line to reduce inline code size.
+#define CHECK(condition)                                                    \
+  LAZY_STREAM(logging::LogMessage(__FILE__, __LINE__, #condition).stream(), \
+              !(condition))
 
 #define PCHECK(condition)                       \
   LAZY_STREAM(PLOG_STREAM(FATAL), !(condition)) \
@@ -726,6 +727,9 @@ class BASE_EXPORT LogMessage {
  public:
   // Used for LOG(severity).
   LogMessage(const char* file, int line, LogSeverity severity);
+
+  // Used for CHECK().  Implied severity = LOG_FATAL.
+  LogMessage(const char* file, int line, const char* condition);
 
   // Used for CHECK_EQ(), etc. Takes ownership of the given string.
   // Implied severity = LOG_FATAL.

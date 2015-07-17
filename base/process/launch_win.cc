@@ -238,7 +238,7 @@ Process LaunchElevatedProcess(const CommandLine& cmdline,
   const string16 file = cmdline.GetProgram().value();
   const string16 arguments = cmdline.GetArgumentsString();
 
-  SHELLEXECUTEINFO shex_info = {0};
+  SHELLEXECUTEINFO shex_info = {};
   shex_info.cbSize = sizeof(shex_info);
   shex_info.fMask = SEE_MASK_NOCLOSEPROCESS;
   shex_info.hwnd = GetActiveWindow();
@@ -261,7 +261,7 @@ Process LaunchElevatedProcess(const CommandLine& cmdline,
 }
 
 bool SetJobObjectLimitFlags(HANDLE job_object, DWORD limit_flags) {
-  JOBOBJECT_EXTENDED_LIMIT_INFORMATION limit_info = {0};
+  JOBOBJECT_EXTENDED_LIMIT_INFORMATION limit_info = {};
   limit_info.BasicLimitInformation.LimitFlags = limit_flags;
   return 0 != SetInformationJobObject(
       job_object,

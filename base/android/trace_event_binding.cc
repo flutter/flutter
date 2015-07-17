@@ -8,6 +8,7 @@
 
 #include <set>
 
+#include "base/android/jni_string.h"
 #include "base/lazy_instance.h"
 #include "base/trace_event/trace_event.h"
 #include "base/trace_event/trace_event_impl.h"
@@ -25,32 +26,28 @@ const char kLooperDispatchMessage[] = "Looper.dispatchMessage";
 // Boilerplate for safely converting Java data to TRACE_EVENT data.
 class TraceEventDataConverter {
  public:
-  TraceEventDataConverter(JNIEnv* env,
-                          jstring jname,
-                          jstring jarg)
+  TraceEventDataConverter(JNIEnv* env, jstring jname, jstring jarg)
       : env_(env),
         jname_(jname),
         jarg_(jarg),
-        name_(env->GetStringUTFChars(jname, NULL)),
-        arg_(jarg ? env->GetStringUTFChars(jarg, NULL) : NULL) {
-  }
+        name_(ConvertJavaStringToUTF8(env, jname)),
+        has_arg_(jarg != nullptr),
+        arg_(jarg ? ConvertJavaStringToUTF8(env, jarg) : "") {}
   ~TraceEventDataConverter() {
-    env_->ReleaseStringUTFChars(jname_, name_);
-    if (jarg_)
-      env_->ReleaseStringUTFChars(jarg_, arg_);
   }
 
   // Return saves values to pass to TRACE_EVENT macros.
-  const char* name() { return name_; }
-  const char* arg_name() { return arg_ ? "arg" : NULL; }
-  const char* arg() { return arg_; }
+  const char* name() { return name_.c_str(); }
+  const char* arg_name() { return has_arg_ ? "arg" : nullptr; }
+  const char* arg() { return has_arg_ ? arg_.c_str() : nullptr; }
 
  private:
   JNIEnv* env_;
   jstring jname_;
   jstring jarg_;
-  const char* name_;
-  const char* arg_;
+  std::string name_;
+  bool has_arg_;
+  std::string arg_;
 
   DISALLOW_COPY_AND_ASSIGN(TraceEventDataConverter);
 };

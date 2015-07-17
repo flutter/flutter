@@ -86,12 +86,12 @@ while test $# -gt 0; do
 	then
 	    if [ "@XML_LIBDIR@" = "-L/usr/lib" -o "@XML_LIBDIR@" = "-L/usr/lib64" ]
 	    then
-		echo @XML_LIBS@ 
+		echo @XML_LIBS@ @MODULE_PLATFORM_LIBS@
 	    else
-		echo @XML_LIBDIR@ @XML_LIBS@ 
+		echo @XML_LIBDIR@ @XML_LIBS@ @MODULE_PLATFORM_LIBS@
 	    fi
 	else
-	    echo @XML_LIBDIR@ @XML_LIBS@ @WIN32_EXTRA_LIBADD@
+	    echo @XML_LIBDIR@ @XML_LIBS@ @MODULE_PLATFORM_LIBS@ @WIN32_EXTRA_LIBADD@
 	fi
        	;;
 

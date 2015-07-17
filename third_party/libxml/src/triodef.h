@@ -48,6 +48,8 @@
  * based on the DECC compiler later on.
  */
 # define TRIO_PLATFORM_VMS
+#elif defined(__OS400__)
+# define TRIO_PLATFORM_OS400
 #elif defined(unix) || defined(__unix) || defined(__unix__)
 # define TRIO_PLATFORM_UNIX
 #elif defined(TRIO_COMPILER_XLC) || defined(_AIX)
@@ -98,6 +100,10 @@
 #   define TRIO_COMPILER_SUPPORTS_C94
 #  endif
 # endif
+#elif defined(TRIO_COMPILER_XLC) && defined(__EXTENDED__)
+# define TRIO_COMPILER_SUPPORTS_C89
+# define TRIO_COMPILER_SUPPORTS_C90
+# define TRIO_COMPILER_SUPPORTS_C94
 #endif
 
 #if defined(_XOPEN_SOURCE)

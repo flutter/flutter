@@ -46,7 +46,7 @@ TRIO_PUBLIC double trio_pinf TRIO_PROTO((void));
  * Return negative infinity.
  */
 TRIO_PUBLIC double trio_ninf TRIO_PROTO((void));
-  
+
 /*
  * Return negative zero.
  */

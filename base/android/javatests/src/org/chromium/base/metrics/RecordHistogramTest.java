@@ -20,7 +20,8 @@ public class RecordHistogramTest extends InstrumentationTestCase {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        LibraryLoader.get(LibraryProcessType.PROCESS_BROWSER).ensureInitialized();
+        LibraryLoader.get(LibraryProcessType.PROCESS_BROWSER)
+                .ensureInitialized(getInstrumentation().getTargetContext());
         RecordHistogram.initialize();
     }
 

@@ -1,0 +1,2281 @@
+#
+# Officially exported symbols, for which header
+# file definitions are installed in /usr/include/libxml2
+#
+# Automatically generated from symbols.xml and syms.xsl
+#
+# Versions here are *fixed* to match the libxml2 version
+# at which the symbol was introduced. This ensures that
+# a new client app requiring symbol foo() can't accidentally
+# run with old libxml2.so not providing foo() - the global
+# soname version info can't enforce this since we never
+# change the soname
+#
+
+LIBXML2_2.4.30 {
+    global:
+
+# debugXML
+  xmlBoolToText;
+  xmlDebugDumpAttr;
+  xmlDebugDumpAttrList;
+  xmlDebugDumpDTD;
+  xmlDebugDumpDocument;
+  xmlDebugDumpDocumentHead;
+  xmlDebugDumpEntities;
+  xmlDebugDumpNode;
+  xmlDebugDumpNodeList;
+  xmlDebugDumpOneNode;
+  xmlDebugDumpString;
+  xmlLsCountNode;
+  xmlLsOneNode;
+  xmlShell;
+  xmlShellBase;
+  xmlShellCat;
+  xmlShellDir;
+  xmlShellDu;
+  xmlShellList;
+  xmlShellLoad;
+  xmlShellPrintNode;
+  xmlShellPrintXPathError;
+  xmlShellPrintXPathResult;
+  xmlShellPwd;
+  xmlShellSave;
+  xmlShellValidate;
+  xmlShellWrite;
+
+# xpointer
+  xmlXPtrBuildNodeList;
+  xmlXPtrEval;
+  xmlXPtrEvalRangePredicate;
+  xmlXPtrFreeLocationSet;
+  xmlXPtrLocationSetAdd;
+  xmlXPtrLocationSetCreate;
+  xmlXPtrLocationSetDel;
+  xmlXPtrLocationSetMerge;
+  xmlXPtrLocationSetRemove;
+  xmlXPtrNewCollapsedRange;
+  xmlXPtrNewContext;
+  xmlXPtrNewLocationSetNodeSet;
+  xmlXPtrNewLocationSetNodes;
+  xmlXPtrNewRange;
+  xmlXPtrNewRangeNodeObject;
+  xmlXPtrNewRangeNodePoint;
+  xmlXPtrNewRangeNodes;
+  xmlXPtrNewRangePointNode;
+  xmlXPtrNewRangePoints;
+  xmlXPtrRangeToFunction;
+  xmlXPtrWrapLocationSet;
+
+# SAX
+  attribute;
+  attributeDecl;
+  cdataBlock;
+  characters;
+  checkNamespace;
+  comment;
+
+# SAX2
+  docbDefaultSAXHandlerInit;
+
+# SAX
+  elementDecl;
+  endDocument;
+  endElement;
+  entityDecl;
+  externalSubset;
+  getColumnNumber;
+  getEntity;
+  getLineNumber;
+  getNamespace;
+  getParameterEntity;
+  getPublicId;
+  getSystemId;
+  globalNamespace;
+  hasExternalSubset;
+  hasInternalSubset;
+
+# SAX2
+  htmlDefaultSAXHandlerInit;
+
+# SAX
+  ignorableWhitespace;
+  initdocbDefaultSAXHandler;
+  inithtmlDefaultSAXHandler;
+  initxmlDefaultSAXHandler;
+  internalSubset;
+  isStandalone;
+  namespaceDecl;
+  notationDecl;
+  processingInstruction;
+  reference;
+  resolveEntity;
+  setDocumentLocator;
+  setNamespace;
+  startDocument;
+  startElement;
+  unparsedEntityDecl;
+
+# SAX2
+  xmlDefaultSAXHandlerInit;
+
+# parserInternals
+  htmlCreateFileParserCtxt;
+  htmlInitAutoClose;
+  inputPop;
+  inputPush;
+  namePop;
+  namePush;
+  nodePop;
+  nodePush;
+  xmlCheckLanguageID;
+  xmlCopyChar;
+  xmlCopyCharMultiByte;
+  xmlCreateEntityParserCtxt;
+  xmlCreateFileParserCtxt;
+  xmlCreateMemoryParserCtxt;
+  xmlCurrentChar;
+  xmlDecodeEntities;
+  xmlFreeInputStream;
+  xmlHandleEntity;
+
+# chvalid
+  xmlIsBaseChar;
+  xmlIsBlank;
+  xmlIsChar;
+  xmlIsCombining;
+  xmlIsDigit;
+  xmlIsExtender;
+  xmlIsIdeographic;
+
+# parserInternals
+  xmlIsLetter;
+
+# chvalid
+  xmlIsPubidChar;
+
+# parserInternals
+  xmlNamespaceParseNCName;
+  xmlNamespaceParseNSDef;
+  xmlNamespaceParseQName;
+  xmlNewEntityInputStream;
+  xmlNewInputFromFile;
+  xmlNewInputStream;
+
+# parser
+  xmlNewParserCtxt;
+
+# parserInternals
+  xmlNewStringInputStream;
+  xmlNextChar;
+  xmlParseAttValue;
+  xmlParseAttribute;
+  xmlParseAttributeListDecl;
+  xmlParseAttributeType;
+  xmlParseCDSect;
+  xmlParseCharData;
+  xmlParseCharRef;
+  xmlParseComment;
+  xmlParseContent;
+  xmlParseDefaultDecl;
+  xmlParseDocTypeDecl;
+  xmlParseElement;
+  xmlParseElementChildrenContentDecl;
+  xmlParseElementContentDecl;
+  xmlParseElementDecl;
+  xmlParseElementMixedContentDecl;
+  xmlParseEncName;
+  xmlParseEncodingDecl;
+  xmlParseEndTag;
+  xmlParseEntityDecl;
+  xmlParseEntityRef;
+  xmlParseEntityValue;
+  xmlParseEnumeratedType;
+  xmlParseEnumerationType;
+  xmlParseExternalID;
+  xmlParseExternalSubset;
+  xmlParseMarkupDecl;
+  xmlParseMisc;
+  xmlParseName;
+  xmlParseNamespace;
+  xmlParseNmtoken;
+  xmlParseNotationDecl;
+  xmlParseNotationType;
+  xmlParsePEReference;
+  xmlParsePI;
+  xmlParsePITarget;
+  xmlParsePubidLiteral;
+  xmlParseQuotedString;
+  xmlParseReference;
+  xmlParseSDDecl;
+  xmlParseStartTag;
+  xmlParseSystemLiteral;
+  xmlParseTextDecl;
+  xmlParseVersionInfo;
+  xmlParseVersionNum;
+  xmlParseXMLDecl;
+  xmlParserHandlePEReference;
+  xmlParserHandleReference;
+  xmlParserInputShrink;
+  xmlPopInput;
+  xmlPushInput;
+  xmlScanName;
+  xmlSetEntityReferenceFunc;
+  xmlSkipBlankChars;
+  xmlSplitQName;
+  xmlStringComment; # variable
+  xmlStringCurrentChar;
+  xmlStringDecodeEntities;
+  xmlStringText; # variable
+  xmlStringTextNoenc; # variable
+  xmlSwitchEncoding;
+  xmlSwitchToEncoding;
+
+# c14n
+  xmlC14NDocDumpMemory;
+  xmlC14NDocSave;
+  xmlC14NDocSaveTo;
+  xmlC14NExecute;
+
+# catalog
+  xmlACatalogAdd;
+  xmlACatalogDump;
+  xmlACatalogRemove;
+  xmlACatalogResolve;
+  xmlACatalogResolvePublic;
+  xmlACatalogResolveSystem;
+  xmlACatalogResolveURI;
+  xmlCatalogAdd;
+  xmlCatalogAddLocal;
+  xmlCatalogCleanup;
+  xmlCatalogConvert;
+  xmlCatalogDump;
+  xmlCatalogFreeLocal;
+  xmlCatalogGetDefaults;
+  xmlCatalogGetPublic;
+  xmlCatalogGetSystem;
+  xmlCatalogIsEmpty;
+  xmlCatalogLocalResolve;
+  xmlCatalogLocalResolveURI;
+  xmlCatalogRemove;
+  xmlCatalogResolve;
+  xmlCatalogResolvePublic;
+  xmlCatalogResolveSystem;
+  xmlCatalogResolveURI;
+  xmlCatalogSetDebug;
+  xmlCatalogSetDefaultPrefer;
+  xmlCatalogSetDefaults;
+  xmlConvertSGMLCatalog;
+  xmlFreeCatalog;
+  xmlInitializeCatalog;
+  xmlLoadACatalog;
+  xmlLoadCatalog;
+  xmlLoadCatalogs;
+  xmlLoadSGMLSuperCatalog;
+  xmlNewCatalog;
+  xmlParseCatalogFile;
+
+# xpathInternals
+  valuePop;
+  valuePush;
+  xmlXPathAddValues;
+  xmlXPathBooleanFunction;
+  xmlXPathCeilingFunction;
+  xmlXPathCompareValues;
+  xmlXPathConcatFunction;
+  xmlXPathContainsFunction;
+  xmlXPathCountFunction;
+  xmlXPathDebugDumpCompExpr;
+  xmlXPathDebugDumpObject;
+  xmlXPathDifference;
+  xmlXPathDistinct;
+  xmlXPathDistinctSorted;
+  xmlXPathDivValues;
+  xmlXPathEqualValues;
+  xmlXPathEvalExpr;
+  xmlXPathEvaluatePredicateResult;
+  xmlXPathFalseFunction;
+  xmlXPathFloorFunction;
+  xmlXPathFreeParserContext;
+  xmlXPathFunctionLookup;
+  xmlXPathFunctionLookupNS;
+  xmlXPathHasSameNodes;
+  xmlXPathIdFunction;
+  xmlXPathIntersection;
+  xmlXPathIsNodeType;
+  xmlXPathLangFunction;
+  xmlXPathLastFunction;
+  xmlXPathLeading;
+  xmlXPathLeadingSorted;
+  xmlXPathLocalNameFunction;
+  xmlXPathModValues;
+  xmlXPathMultValues;
+  xmlXPathNamespaceURIFunction;
+  xmlXPathNewBoolean;
+  xmlXPathNewCString;
+  xmlXPathNewFloat;
+  xmlXPathNewNodeSet;
+  xmlXPathNewNodeSetList;
+  xmlXPathNewParserContext;
+  xmlXPathNewString;
+  xmlXPathNewValueTree;
+  xmlXPathNextAncestor;
+  xmlXPathNextAncestorOrSelf;
+  xmlXPathNextAttribute;
+  xmlXPathNextChild;
+  xmlXPathNextDescendant;
+  xmlXPathNextDescendantOrSelf;
+  xmlXPathNextFollowing;
+  xmlXPathNextFollowingSibling;
+  xmlXPathNextNamespace;
+  xmlXPathNextParent;
+  xmlXPathNextPreceding;
+  xmlXPathNextPrecedingSibling;
+  xmlXPathNextSelf;
+  xmlXPathNodeLeading;
+  xmlXPathNodeLeadingSorted;
+  xmlXPathNodeSetAdd;
+  xmlXPathNodeSetAddNs;
+  xmlXPathNodeSetAddUnique;
+  xmlXPathNodeSetContains;
+  xmlXPathNodeSetDel;
+  xmlXPathNodeSetFreeNs;
+  xmlXPathNodeSetMerge;
+  xmlXPathNodeSetRemove;
+  xmlXPathNodeSetSort;
+  xmlXPathNodeTrailing;
+  xmlXPathNodeTrailingSorted;
+  xmlXPathNormalizeFunction;
+  xmlXPathNotEqualValues;
+  xmlXPathNotFunction;
+  xmlXPathNsLookup;
+  xmlXPathNumberFunction;
+  xmlXPathParseNCName;
+  xmlXPathParseName;
+  xmlXPathPopBoolean;
+  xmlXPathPopExternal;
+  xmlXPathPopNodeSet;
+  xmlXPathPopNumber;
+  xmlXPathPopString;
+  xmlXPathPositionFunction;
+  xmlXPathRegisterAllFunctions;
+  xmlXPathRegisterFunc;
+  xmlXPathRegisterFuncLookup;
+  xmlXPathRegisterFuncNS;
+  xmlXPathRegisterNs;
+  xmlXPathRegisterVariable;
+  xmlXPathRegisterVariableLookup;
+  xmlXPathRegisterVariableNS;
+  xmlXPathRegisteredFuncsCleanup;
+  xmlXPathRegisteredNsCleanup;
+  xmlXPathRegisteredVariablesCleanup;
+  xmlXPathRoot;
+  xmlXPathRoundFunction;
+  xmlXPathStartsWithFunction;
+  xmlXPathStringEvalNumber;
+  xmlXPathStringFunction;
+  xmlXPathStringLengthFunction;
+  xmlXPathSubValues;
+  xmlXPathSubstringAfterFunction;
+  xmlXPathSubstringBeforeFunction;
+  xmlXPathSubstringFunction;
+  xmlXPathSumFunction;
+  xmlXPathTrailing;
+  xmlXPathTrailingSorted;
+  xmlXPathTranslateFunction;
+  xmlXPathTrueFunction;
+  xmlXPathValueFlipSign;
+  xmlXPathVariableLookup;
+  xmlXPathVariableLookupNS;
+  xmlXPathWrapCString;
+  xmlXPathWrapExternal;
+  xmlXPathWrapNodeSet;
+  xmlXPathWrapString;
+  xmlXPatherror;
+
+# xmlautomata
+  xmlAutomataCompile;
+  xmlAutomataGetInitState;
+  xmlAutomataIsDeterminist;
+  xmlAutomataNewAllTrans;
+  xmlAutomataNewCountTrans;
+  xmlAutomataNewCountedTrans;
+  xmlAutomataNewCounter;
+  xmlAutomataNewCounterTrans;
+  xmlAutomataNewEpsilon;
+  xmlAutomataNewOnceTrans;
+  xmlAutomataNewState;
+  xmlAutomataNewTransition;
+  xmlAutomataSetFinalState;
+  xmlFreeAutomata;
+  xmlNewAutomata;
+
+# HTMLtree
+  htmlDocContentDumpFormatOutput;
+  htmlDocContentDumpOutput;
+  htmlDocDump;
+  htmlDocDumpMemory;
+  htmlGetMetaEncoding;
+  htmlIsBooleanAttr;
+  htmlNewDoc;
+  htmlNewDocNoDtD;
+  htmlNodeDump;
+  htmlNodeDumpFile;
+  htmlNodeDumpFileFormat;
+  htmlNodeDumpFormatOutput;
+  htmlNodeDumpOutput;
+  htmlSaveFile;
+  htmlSaveFileEnc;
+  htmlSaveFileFormat;
+  htmlSetMetaEncoding;
+
+# nanoftp
+  xmlNanoFTPCheckResponse;
+  xmlNanoFTPCleanup;
+  xmlNanoFTPClose;
+  xmlNanoFTPCloseConnection;
+  xmlNanoFTPConnect;
+  xmlNanoFTPConnectTo;
+  xmlNanoFTPCwd;
+  xmlNanoFTPFreeCtxt;
+  xmlNanoFTPGet;
+  xmlNanoFTPGetConnection;
+  xmlNanoFTPGetResponse;
+  xmlNanoFTPGetSocket;
+  xmlNanoFTPInit;
+  xmlNanoFTPList;
+  xmlNanoFTPNewCtxt;
+  xmlNanoFTPOpen;
+  xmlNanoFTPProxy;
+  xmlNanoFTPQuit;
+  xmlNanoFTPRead;
+  xmlNanoFTPScanProxy;
+  xmlNanoFTPUpdateURL;
+
+# DOCBparser
+  docbCreateFileParserCtxt;
+  docbCreatePushParserCtxt;
+  docbEncodeEntities;
+  docbFreeParserCtxt;
+  docbParseChunk;
+  docbParseDoc;
+  docbParseDocument;
+  docbParseFile;
+  docbSAXParseDoc;
+  docbSAXParseFile;
+
+# xpath
+  xmlXPathCastBooleanToNumber;
+  xmlXPathCastBooleanToString;
+  xmlXPathCastNodeSetToBoolean;
+  xmlXPathCastNodeSetToNumber;
+  xmlXPathCastNodeSetToString;
+  xmlXPathCastNodeToNumber;
+  xmlXPathCastNodeToString;
+  xmlXPathCastNumberToBoolean;
+  xmlXPathCastNumberToString;
+  xmlXPathCastStringToBoolean;
+  xmlXPathCastStringToNumber;
+  xmlXPathCastToBoolean;
+  xmlXPathCastToNumber;
+  xmlXPathCastToString;
+  xmlXPathCmpNodes;
+  xmlXPathCompile;
+  xmlXPathCompiledEval;
+  xmlXPathConvertBoolean;
+  xmlXPathConvertNumber;
+  xmlXPathConvertString;
+  xmlXPathEval;
+  xmlXPathEvalExpression;
+  xmlXPathEvalPredicate;
+  xmlXPathFreeCompExpr;
+  xmlXPathFreeContext;
+  xmlXPathFreeNodeSet;
+  xmlXPathFreeNodeSetList;
+  xmlXPathFreeObject;
+  xmlXPathInit;
+  xmlXPathIsInf;
+  xmlXPathIsNaN;
+  xmlXPathNAN; # variable
+  xmlXPathNINF; # variable
+  xmlXPathNewContext;
+  xmlXPathNodeSetCreate;
+  xmlXPathObjectCopy;
+  xmlXPathPINF; # variable
+
+# xlink
+  xlinkGetDefaultDetect;
+  xlinkGetDefaultHandler;
+  xlinkIsLink;
+  xlinkSetDefaultDetect;
+  xlinkSetDefaultHandler;
+
+# entities
+  xmlAddDocEntity;
+  xmlAddDtdEntity;
+  xmlCleanupPredefinedEntities;
+  xmlCopyEntitiesTable;
+  xmlCreateEntitiesTable;
+  xmlDumpEntitiesTable;
+  xmlDumpEntityDecl;
+  xmlEncodeEntities;
+  xmlEncodeEntitiesReentrant;
+  xmlEncodeSpecialChars;
+  xmlFreeEntitiesTable;
+  xmlGetDocEntity;
+  xmlGetDtdEntity;
+  xmlGetParameterEntity;
+  xmlGetPredefinedEntity;
+  xmlInitializePredefinedEntities;
+
+# xinclude
+  xmlXIncludeProcess;
+
+# list
+  xmlLinkGetData;
+  xmlListAppend;
+  xmlListClear;
+  xmlListCopy;
+  xmlListCreate;
+  xmlListDelete;
+  xmlListDup;
+  xmlListEmpty;
+  xmlListEnd;
+  xmlListFront;
+  xmlListInsert;
+  xmlListMerge;
+  xmlListPopBack;
+  xmlListPopFront;
+  xmlListPushBack;
+  xmlListPushFront;
+  xmlListRemoveAll;
+  xmlListRemoveFirst;
+  xmlListRemoveLast;
+  xmlListReverse;
+  xmlListReverseSearch;
+  xmlListReverseWalk;
+  xmlListSearch;
+  xmlListSize;
+  xmlListSort;
+  xmlListWalk;
+
+# xmlmemory
+  xmlInitMemory;
+  xmlMallocLoc;
+  xmlMemDisplay;
+  xmlMemFree;
+  xmlMemGet;
+  xmlMemMalloc;
+  xmlMemRealloc;
+  xmlMemSetup;
+  xmlMemShow;
+  xmlMemStrdupLoc;
+  xmlMemUsed;
+  xmlMemoryDump;
+  xmlMemoryStrdup;
+  xmlReallocLoc;
+
+# xmlIO
+  xmlAllocOutputBuffer;
+  xmlAllocParserInputBuffer;
+  xmlCheckFilename;
+  xmlCleanupInputCallbacks;
+  xmlCleanupOutputCallbacks;
+  xmlFileClose;
+  xmlFileMatch;
+  xmlFileOpen;
+  xmlFileRead;
+  xmlFreeParserInputBuffer;
+  xmlIOFTPClose;
+  xmlIOFTPMatch;
+  xmlIOFTPOpen;
+  xmlIOFTPRead;
+  xmlIOHTTPClose;
+  xmlIOHTTPMatch;
+  xmlIOHTTPOpen;
+  xmlIOHTTPOpenW;
+  xmlIOHTTPRead;
+  xmlNoNetExternalEntityLoader;
+  xmlNormalizeWindowsPath;
+  xmlOutputBufferClose;
+  xmlOutputBufferCreateFd;
+  xmlOutputBufferCreateFile;
+  xmlOutputBufferCreateFilename;
+  xmlOutputBufferCreateIO;
+  xmlOutputBufferFlush;
+  xmlOutputBufferWrite;
+  xmlOutputBufferWriteString;
+  xmlParserGetDirectory;
+  xmlParserInputBufferCreateFd;
+  xmlParserInputBufferCreateFile;
+  xmlParserInputBufferCreateFilename;
+  xmlParserInputBufferCreateIO;
+  xmlParserInputBufferCreateMem;
+  xmlParserInputBufferGrow;
+  xmlParserInputBufferPush;
+  xmlParserInputBufferRead;
+  xmlRegisterDefaultInputCallbacks;
+  xmlRegisterDefaultOutputCallbacks;
+  xmlRegisterHTTPPostCallbacks;
+  xmlRegisterInputCallbacks;
+  xmlRegisterOutputCallbacks;
+
+# xmlversion
+  xmlCheckVersion;
+
+# valid
+  xmlAddAttributeDecl;
+  xmlAddElementDecl;
+  xmlAddID;
+  xmlAddNotationDecl;
+  xmlAddRef;
+  xmlCopyAttributeTable;
+  xmlCopyElementContent;
+  xmlCopyElementTable;
+  xmlCopyEnumeration;
+  xmlCopyNotationTable;
+  xmlCreateEnumeration;
+  xmlDumpAttributeDecl;
+  xmlDumpAttributeTable;
+  xmlDumpElementDecl;
+  xmlDumpElementTable;
+  xmlDumpNotationDecl;
+  xmlDumpNotationTable;
+  xmlFreeAttributeTable;
+  xmlFreeElementContent;
+  xmlFreeElementTable;
+  xmlFreeEnumeration;
+  xmlFreeIDTable;
+  xmlFreeNotationTable;
+  xmlFreeRefTable;
+  xmlGetDtdAttrDesc;
+  xmlGetDtdElementDesc;
+  xmlGetDtdNotationDesc;
+  xmlGetDtdQAttrDesc;
+  xmlGetDtdQElementDesc;
+  xmlGetID;
+  xmlGetRefs;
+  xmlIsID;
+  xmlIsMixedElement;
+  xmlIsRef;
+  xmlNewElementContent;
+  xmlRemoveID;
+  xmlRemoveRef;
+  xmlSnprintfElementContent;
+
+# tree
+  xmlSplitQName2;
+
+# valid
+  xmlSprintfElementContent;
+  xmlValidBuildContentModel;
+  xmlValidCtxtNormalizeAttributeValue;
+  xmlValidGetPotentialChildren;
+  xmlValidGetValidElements;
+  xmlValidNormalizeAttributeValue;
+  xmlValidateAttributeDecl;
+  xmlValidateAttributeValue;
+  xmlValidateDocument;
+  xmlValidateDocumentFinal;
+  xmlValidateDtd;
+  xmlValidateDtdFinal;
+  xmlValidateElement;
+  xmlValidateElementDecl;
+  xmlValidateNameValue;
+  xmlValidateNamesValue;
+  xmlValidateNmtokenValue;
+  xmlValidateNmtokensValue;
+  xmlValidateNotationDecl;
+  xmlValidateNotationUse;
+  xmlValidateOneAttribute;
+  xmlValidateOneElement;
+  xmlValidateOneNamespace;
+  xmlValidateRoot;
+
+# HTMLparser
+  UTF8ToHtml;
+  htmlAutoCloseTag;
+  htmlCreatePushParserCtxt;
+  htmlEncodeEntities;
+  htmlEntityLookup;
+  htmlEntityValueLookup;
+  htmlFreeParserCtxt;
+  htmlHandleOmittedElem;
+  htmlIsAutoClosed;
+  htmlIsScriptAttribute;
+  htmlParseCharRef;
+  htmlParseChunk;
+  htmlParseDoc;
+  htmlParseDocument;
+  htmlParseElement;
+  htmlParseEntityRef;
+  htmlParseFile;
+  htmlSAXParseDoc;
+  htmlSAXParseFile;
+  htmlTagLookup;
+
+# xmlstring
+  xmlCharStrdup;
+  xmlCharStrndup;
+
+# parser
+  xmlCleanupParser;
+  xmlClearNodeInfoSeq;
+  xmlClearParserCtxt;
+  xmlCreateDocParserCtxt;
+  xmlCreateIOParserCtxt;
+  xmlCreatePushParserCtxt;
+  xmlFreeParserCtxt;
+  xmlGetExternalEntityLoader;
+  xmlGetFeature;
+  xmlGetFeaturesList;
+
+# globals
+  xmlGetWarningsDefaultValue; # variable
+
+# parser
+  xmlIOParseDTD;
+  xmlInitNodeInfoSeq;
+  xmlInitParser;
+  xmlInitParserCtxt;
+  xmlKeepBlanksDefault;
+  xmlLineNumbersDefault;
+  xmlLoadExternalEntity;
+  xmlNewIOInputStream;
+  xmlParseBalancedChunkMemory;
+  xmlParseBalancedChunkMemoryRecover;
+  xmlParseChunk;
+  xmlParseCtxtExternalEntity;
+  xmlParseDTD;
+  xmlParseDoc;
+  xmlParseDocument;
+  xmlParseEntity;
+  xmlParseExtParsedEnt;
+  xmlParseExternalEntity;
+  xmlParseFile;
+  xmlParseMemory;
+  xmlParserAddNodeInfo;
+  xmlParserFindNodeInfo;
+  xmlParserFindNodeInfoIndex;
+  xmlParserInputGrow;
+  xmlParserInputRead;
+  xmlPedanticParserDefault;
+  xmlRecoverDoc;
+  xmlRecoverFile;
+  xmlRecoverMemory;
+  xmlSAXParseDTD;
+  xmlSAXParseDoc;
+  xmlSAXParseEntity;
+  xmlSAXParseFile;
+  xmlSAXParseFileWithData;
+  xmlSAXParseMemory;
+  xmlSAXParseMemoryWithData;
+  xmlSAXUserParseFile;
+  xmlSAXUserParseMemory;
+  xmlSetExternalEntityLoader;
+  xmlSetFeature;
+  xmlSetupParserForBuffer;
+  xmlStopParser;
+
+# xmlstring
+  xmlStrEqual;
+  xmlStrcasecmp;
+  xmlStrcasestr;
+  xmlStrcat;
+  xmlStrchr;
+  xmlStrcmp;
+  xmlStrdup;
+  xmlStrlen;
+  xmlStrncasecmp;
+  xmlStrncat;
+  xmlStrncmp;
+  xmlStrndup;
+  xmlStrstr;
+  xmlStrsub;
+
+# parser
+  xmlSubstituteEntitiesDefault;
+
+# xmlreader
+  xmlFreeTextReader;
+  xmlNewTextReader;
+  xmlNewTextReaderFilename;
+  xmlTextReaderAttributeCount;
+  xmlTextReaderBaseUri;
+  xmlTextReaderDepth;
+  xmlTextReaderHasAttributes;
+  xmlTextReaderHasValue;
+  xmlTextReaderIsDefault;
+  xmlTextReaderIsEmptyElement;
+  xmlTextReaderLocalName;
+  xmlTextReaderName;
+  xmlTextReaderNamespaceUri;
+  xmlTextReaderNodeType;
+  xmlTextReaderPrefix;
+  xmlTextReaderQuoteChar;
+  xmlTextReaderRead;
+  xmlTextReaderValue;
+  xmlTextReaderXmlLang;
+
+# globals
+  docbDefaultSAXHandler; # variable
+  htmlDefaultSAXHandler; # variable
+  xmlDefaultSAXHandler; # variable
+  xmlDefaultSAXLocator; # variable
+  xmlDoValidityCheckingDefaultValue; # variable
+  xmlFree; # variable
+  xmlGenericError; # variable
+  xmlGenericErrorContext; # variable
+  xmlInitializeGlobalState;
+  xmlKeepBlanksDefaultValue; # variable
+  xmlLineNumbersDefaultValue; # variable
+  xmlLoadExtDtdDefaultValue; # variable
+  xmlMalloc; # variable
+  xmlMemStrdup; # variable
+  xmlParserDebugEntities; # variable
+  xmlParserVersion; # variable
+  xmlPedanticParserDefaultValue; # variable
+  xmlRealloc; # variable
+  xmlSaveNoEmptyTags; # variable
+  xmlSubstituteEntitiesDefaultValue; # variable
+  xmlTreeIndentString; # variable
+
+# threads
+  xmlCleanupThreads;
+  xmlFreeMutex;
+  xmlFreeRMutex;
+  xmlGetGlobalState;
+  xmlGetThreadId;
+  xmlInitThreads;
+  xmlIsMainThread;
+  xmlLockLibrary;
+  xmlMutexLock;
+  xmlMutexUnlock;
+  xmlNewMutex;
+  xmlNewRMutex;
+  xmlRMutexLock;
+  xmlRMutexUnlock;
+  xmlUnlockLibrary;
+
+# hash
+  xmlHashAddEntry;
+  xmlHashAddEntry2;
+  xmlHashAddEntry3;
+  xmlHashCopy;
+  xmlHashCreate;
+  xmlHashFree;
+  xmlHashLookup;
+  xmlHashLookup2;
+  xmlHashLookup3;
+  xmlHashRemoveEntry;
+  xmlHashRemoveEntry2;
+  xmlHashRemoveEntry3;
+  xmlHashScan;
+  xmlHashScan3;
+  xmlHashScanFull;
+  xmlHashScanFull3;
+  xmlHashSize;
+  xmlHashUpdateEntry;
+  xmlHashUpdateEntry2;
+  xmlHashUpdateEntry3;
+
+# xmlerror
+  initGenericErrorDefaultFunc;
+  xmlParserError;
+  xmlParserPrintFileContext;
+  xmlParserPrintFileInfo;
+  xmlParserValidityError;
+  xmlParserValidityWarning;
+  xmlParserWarning;
+  xmlSetGenericErrorFunc;
+
+# globals
+  oldXMLWDcompatibility; # variable
+
+# tree
+  xmlAddChild;
+  xmlAddChildList;
+  xmlAddNextSibling;
+  xmlAddPrevSibling;
+  xmlAddSibling;
+  xmlBufferAdd;
+  xmlBufferAddHead;
+
+# globals
+  xmlBufferAllocScheme; # variable
+
+# tree
+  xmlBufferCCat;
+  xmlBufferCat;
+  xmlBufferContent;
+  xmlBufferCreate;
+  xmlBufferCreateSize;
+  xmlBufferDump;
+  xmlBufferEmpty;
+  xmlBufferFree;
+  xmlBufferGrow;
+  xmlBufferLength;
+  xmlBufferResize;
+  xmlBufferSetAllocationScheme;
+  xmlBufferShrink;
+  xmlBufferWriteCHAR;
+  xmlBufferWriteChar;
+  xmlBufferWriteQuotedString;
+  xmlCopyDoc;
+  xmlCopyDtd;
+  xmlCopyNamespace;
+  xmlCopyNamespaceList;
+  xmlCopyNode;
+  xmlCopyNodeList;
+  xmlCopyProp;
+  xmlCopyPropList;
+  xmlCreateIntSubset;
+
+# globals
+  xmlDefaultBufferSize; # variable
+
+# tree
+  xmlDocCopyNode;
+  xmlDocDump;
+  xmlDocDumpFormatMemory;
+  xmlDocDumpFormatMemoryEnc;
+  xmlDocDumpMemory;
+  xmlDocDumpMemoryEnc;
+  xmlDocFormatDump;
+  xmlDocGetRootElement;
+  xmlDocSetRootElement;
+  xmlElemDump;
+  xmlFreeDoc;
+  xmlFreeDtd;
+  xmlFreeNode;
+  xmlFreeNodeList;
+  xmlFreeNs;
+  xmlFreeNsList;
+  xmlFreeProp;
+  xmlFreePropList;
+  xmlGetBufferAllocationScheme;
+  xmlGetCompressMode;
+  xmlGetDocCompressMode;
+  xmlGetIntSubset;
+  xmlGetLastChild;
+  xmlGetLineNo;
+  xmlGetNodePath;
+  xmlGetNsList;
+  xmlGetNsProp;
+  xmlGetProp;
+  xmlHasNsProp;
+  xmlHasProp;
+
+# globals
+  xmlIndentTreeOutput; # variable
+
+# tree
+  xmlIsBlankNode;
+  xmlIsXHTML;
+  xmlNewCDataBlock;
+  xmlNewCharRef;
+  xmlNewChild;
+  xmlNewComment;
+  xmlNewDoc;
+  xmlNewDocComment;
+  xmlNewDocFragment;
+  xmlNewDocNode;
+  xmlNewDocNodeEatName;
+  xmlNewDocProp;
+  xmlNewDocRawNode;
+  xmlNewDocText;
+  xmlNewDocTextLen;
+  xmlNewDtd;
+  xmlNewGlobalNs;
+  xmlNewNode;
+  xmlNewNodeEatName;
+  xmlNewNs;
+  xmlNewNsProp;
+  xmlNewNsPropEatName;
+  xmlNewPI;
+  xmlNewProp;
+  xmlNewReference;
+  xmlNewText;
+  xmlNewTextChild;
+  xmlNewTextLen;
+  xmlNodeAddContent;
+  xmlNodeAddContentLen;
+  xmlNodeDump;
+  xmlNodeDumpOutput;
+  xmlNodeGetBase;
+  xmlNodeGetContent;
+  xmlNodeGetLang;
+  xmlNodeGetSpacePreserve;
+  xmlNodeIsText;
+  xmlNodeListGetRawString;
+  xmlNodeListGetString;
+  xmlNodeSetBase;
+  xmlNodeSetContent;
+  xmlNodeSetContentLen;
+  xmlNodeSetLang;
+  xmlNodeSetName;
+  xmlNodeSetSpacePreserve;
+  xmlReconciliateNs;
+  xmlRemoveProp;
+  xmlReplaceNode;
+  xmlSaveFile;
+  xmlSaveFileEnc;
+  xmlSaveFileTo;
+  xmlSaveFormatFile;
+  xmlSaveFormatFileEnc;
+  xmlSaveFormatFileTo;
+  xmlSearchNs;
+  xmlSearchNsByHref;
+  xmlSetBufferAllocationScheme;
+  xmlSetCompressMode;
+  xmlSetDocCompressMode;
+  xmlSetListDoc;
+  xmlSetNs;
+  xmlSetNsProp;
+  xmlSetProp;
+  xmlSetTreeDoc;
+  xmlStringGetNodeList;
+  xmlStringLenGetNodeList;
+  xmlTextConcat;
+  xmlTextMerge;
+  xmlUnlinkNode;
+  xmlUnsetNsProp;
+  xmlUnsetProp;
+
+# xmlregexp
+  xmlRegExecPushString;
+  xmlRegFreeExecCtxt;
+  xmlRegFreeRegexp;
+  xmlRegNewExecCtxt;
+  xmlRegexpCompile;
+  xmlRegexpExec;
+  xmlRegexpIsDeterminist;
+  xmlRegexpPrint;
+
+# nanohttp
+  xmlNanoHTTPAuthHeader;
+  xmlNanoHTTPCleanup;
+  xmlNanoHTTPClose;
+  xmlNanoHTTPFetch;
+  xmlNanoHTTPInit;
+  xmlNanoHTTPMethod;
+  xmlNanoHTTPMethodRedir;
+  xmlNanoHTTPOpen;
+  xmlNanoHTTPOpenRedir;
+  xmlNanoHTTPRead;
+  xmlNanoHTTPReturnCode;
+  xmlNanoHTTPSave;
+  xmlNanoHTTPScanProxy;
+
+# xmlunicode
+  xmlUCSIsAlphabeticPresentationForms;
+  xmlUCSIsArabic;
+  xmlUCSIsArabicPresentationFormsA;
+  xmlUCSIsArabicPresentationFormsB;
+  xmlUCSIsArmenian;
+  xmlUCSIsArrows;
+  xmlUCSIsBasicLatin;
+  xmlUCSIsBengali;
+  xmlUCSIsBlock;
+  xmlUCSIsBlockElements;
+  xmlUCSIsBopomofo;
+  xmlUCSIsBopomofoExtended;
+  xmlUCSIsBoxDrawing;
+  xmlUCSIsBraillePatterns;
+  xmlUCSIsByzantineMusicalSymbols;
+  xmlUCSIsCJKCompatibility;
+  xmlUCSIsCJKCompatibilityForms;
+  xmlUCSIsCJKCompatibilityIdeographs;
+  xmlUCSIsCJKCompatibilityIdeographsSupplement;
+  xmlUCSIsCJKRadicalsSupplement;
+  xmlUCSIsCJKSymbolsandPunctuation;
+  xmlUCSIsCJKUnifiedIdeographs;
+  xmlUCSIsCJKUnifiedIdeographsExtensionA;
+  xmlUCSIsCJKUnifiedIdeographsExtensionB;
+  xmlUCSIsCat;
+  xmlUCSIsCatC;
+  xmlUCSIsCatCc;
+  xmlUCSIsCatCf;
+  xmlUCSIsCatCo;
+  xmlUCSIsCatCs;
+  xmlUCSIsCatL;
+  xmlUCSIsCatLl;
+  xmlUCSIsCatLm;
+  xmlUCSIsCatLo;
+  xmlUCSIsCatLt;
+  xmlUCSIsCatLu;
+  xmlUCSIsCatM;
+  xmlUCSIsCatMc;
+  xmlUCSIsCatMe;
+  xmlUCSIsCatMn;
+  xmlUCSIsCatN;
+  xmlUCSIsCatNd;
+  xmlUCSIsCatNl;
+  xmlUCSIsCatNo;
+  xmlUCSIsCatP;
+  xmlUCSIsCatPc;
+  xmlUCSIsCatPd;
+  xmlUCSIsCatPe;
+  xmlUCSIsCatPf;
+  xmlUCSIsCatPi;
+  xmlUCSIsCatPo;
+  xmlUCSIsCatPs;
+  xmlUCSIsCatS;
+  xmlUCSIsCatSc;
+  xmlUCSIsCatSk;
+  xmlUCSIsCatSm;
+  xmlUCSIsCatSo;
+  xmlUCSIsCatZ;
+  xmlUCSIsCatZl;
+  xmlUCSIsCatZp;
+  xmlUCSIsCatZs;
+  xmlUCSIsCherokee;
+  xmlUCSIsCombiningDiacriticalMarks;
+  xmlUCSIsCombiningHalfMarks;
+  xmlUCSIsCombiningMarksforSymbols;
+  xmlUCSIsControlPictures;
+  xmlUCSIsCurrencySymbols;
+  xmlUCSIsCyrillic;
+  xmlUCSIsDeseret;
+  xmlUCSIsDevanagari;
+  xmlUCSIsDingbats;
+  xmlUCSIsEnclosedAlphanumerics;
+  xmlUCSIsEnclosedCJKLettersandMonths;
+  xmlUCSIsEthiopic;
+  xmlUCSIsGeneralPunctuation;
+  xmlUCSIsGeometricShapes;
+  xmlUCSIsGeorgian;
+  xmlUCSIsGothic;
+  xmlUCSIsGreek;
+  xmlUCSIsGreekExtended;
+  xmlUCSIsGujarati;
+  xmlUCSIsGurmukhi;
+  xmlUCSIsHalfwidthandFullwidthForms;
+  xmlUCSIsHangulCompatibilityJamo;
+  xmlUCSIsHangulJamo;
+  xmlUCSIsHangulSyllables;
+  xmlUCSIsHebrew;
+  xmlUCSIsHighPrivateUseSurrogates;
+  xmlUCSIsHighSurrogates;
+  xmlUCSIsHiragana;
+  xmlUCSIsIPAExtensions;
+  xmlUCSIsIdeographicDescriptionCharacters;
+  xmlUCSIsKanbun;
+  xmlUCSIsKangxiRadicals;
+  xmlUCSIsKannada;
+  xmlUCSIsKatakana;
+  xmlUCSIsKhmer;
+  xmlUCSIsLao;
+  xmlUCSIsLatin1Supplement;
+  xmlUCSIsLatinExtendedA;
+  xmlUCSIsLatinExtendedAdditional;
+  xmlUCSIsLatinExtendedB;
+  xmlUCSIsLetterlikeSymbols;
+  xmlUCSIsLowSurrogates;
+  xmlUCSIsMalayalam;
+  xmlUCSIsMathematicalAlphanumericSymbols;
+  xmlUCSIsMathematicalOperators;
+  xmlUCSIsMiscellaneousSymbols;
+  xmlUCSIsMiscellaneousTechnical;
+  xmlUCSIsMongolian;
+  xmlUCSIsMusicalSymbols;
+  xmlUCSIsMyanmar;
+  xmlUCSIsNumberForms;
+  xmlUCSIsOgham;
+  xmlUCSIsOldItalic;
+  xmlUCSIsOpticalCharacterRecognition;
+  xmlUCSIsOriya;
+  xmlUCSIsPrivateUse;
+  xmlUCSIsRunic;
+  xmlUCSIsSinhala;
+  xmlUCSIsSmallFormVariants;
+  xmlUCSIsSpacingModifierLetters;
+  xmlUCSIsSpecials;
+  xmlUCSIsSuperscriptsandSubscripts;
+  xmlUCSIsSyriac;
+  xmlUCSIsTags;
+  xmlUCSIsTamil;
+  xmlUCSIsTelugu;
+  xmlUCSIsThaana;
+  xmlUCSIsThai;
+  xmlUCSIsTibetan;
+  xmlUCSIsUnifiedCanadianAboriginalSyllabics;
+  xmlUCSIsYiRadicals;
+  xmlUCSIsYiSyllables;
+
+# uri
+  xmlBuildURI;
+  xmlCreateURI;
+  xmlFreeURI;
+  xmlNormalizeURIPath;
+  xmlParseURI;
+  xmlParseURIReference;
+  xmlPrintURI;
+  xmlSaveUri;
+  xmlURIEscape;
+  xmlURIEscapeStr;
+  xmlURIUnescapeString;
+
+# encoding
+  UTF8Toisolat1;
+  isolat1ToUTF8;
+  xmlAddEncodingAlias;
+  xmlCharEncCloseFunc;
+  xmlCharEncFirstLine;
+  xmlCharEncInFunc;
+  xmlCharEncOutFunc;
+
+# xmlstring
+  xmlCheckUTF8;
+
+# encoding
+  xmlCleanupCharEncodingHandlers;
+  xmlCleanupEncodingAliases;
+  xmlDelEncodingAlias;
+  xmlDetectCharEncoding;
+  xmlFindCharEncodingHandler;
+  xmlGetCharEncodingHandler;
+  xmlGetCharEncodingName;
+  xmlGetEncodingAlias;
+
+# xmlstring
+  xmlGetUTF8Char;
+
+# encoding
+  xmlInitCharEncodingHandlers;
+  xmlNewCharEncodingHandler;
+  xmlParseCharEncoding;
+  xmlRegisterCharEncodingHandler;
+
+# xmlstring
+  xmlUTF8Strlen;
+  xmlUTF8Strloc;
+  xmlUTF8Strndup;
+  xmlUTF8Strpos;
+  xmlUTF8Strsize;
+  xmlUTF8Strsub;
+} ;
+
+LIBXML2_2.5.0 {
+    global:
+
+# globals
+  xmlDeregisterNodeDefault;
+  xmlDeregisterNodeDefaultValue; # variable
+  xmlRegisterNodeDefault;
+  xmlRegisterNodeDefaultValue; # variable
+
+# xmlreader
+  xmlTextReaderClose;
+  xmlTextReaderCurrentDoc;
+  xmlTextReaderCurrentNode;
+  xmlTextReaderGetAttributeNo;
+  xmlTextReaderGetAttributeNs;
+  xmlTextReaderGetAttribute;
+  xmlTextReaderGetParserProp;
+  xmlTextReaderGetRemainder;
+  xmlTextReaderLookupNamespace;
+  xmlTextReaderMoveToAttributeNo;
+  xmlTextReaderMoveToAttributeNs;
+  xmlTextReaderMoveToAttribute;
+  xmlTextReaderMoveToElement;
+  xmlTextReaderMoveToFirstAttribute;
+  xmlTextReaderMoveToNextAttribute;
+  xmlTextReaderNormalization;
+  xmlTextReaderReadAttributeValue;
+  xmlTextReaderReadInnerXml;
+  xmlTextReaderReadOuterXml;
+  xmlTextReaderReadState;
+  xmlTextReaderReadString;
+  xmlTextReaderSetParserProp;
+
+# valid
+  xmlValidatePopElement;
+  xmlValidatePushCData;
+  xmlValidatePushElement;
+} LIBXML2_2.4.30;
+
+LIBXML2_2.5.2 {
+    global:
+
+# tree
+  xmlGetNoNsProp;
+
+# HTMLparser
+  htmlAttrAllowed;
+  htmlElementAllowedHere;
+  htmlElementStatusHere;
+  htmlNodeStatus;
+
+# relaxng
+  xmlRelaxNGCleanupTypes;
+  xmlRelaxNGDump;
+  xmlRelaxNGFreeParserCtxt;
+  xmlRelaxNGFree;
+  xmlRelaxNGFreeValidCtxt;
+  xmlRelaxNGNewMemParserCtxt;
+  xmlRelaxNGNewParserCtxt;
+  xmlRelaxNGNewValidCtxt;
+  xmlRelaxNGParse;
+  xmlRelaxNGSetParserErrors;
+  xmlRelaxNGSetValidErrors;
+  xmlRelaxNGValidateDoc;
+
+# xmlreader
+  xmlTextReaderGetErrorHandler;
+  xmlTextReaderLocatorBaseURI;
+  xmlTextReaderLocatorLineNumber;
+  xmlTextReaderSetErrorHandler;
+
+# relaxng
+# xmlRelaxNGValidateStream; removed in 2.5.5
+} LIBXML2_2.5.0;
+
+LIBXML2_2.5.4 {
+    global:
+
+# uri
+  xmlCanonicPath;
+
+# relaxng
+  xmlRelaxNGDumpTree;
+
+# tree
+  xmlValidateName;
+  xmlValidateNCName;
+  xmlValidateNMToken;
+  xmlValidateQName;
+} LIBXML2_2.5.2;
+
+LIBXML2_2.5.5 {
+    global:
+
+# nanoftp
+  xmlNanoFTPDele;
+} LIBXML2_2.5.4;
+
+LIBXML2_2.5.6 {
+    global:
+
+# xpath
+  xmlXPathOrderDocElems;
+} LIBXML2_2.5.5;
+
+LIBXML2_2.5.7 {
+    global:
+
+# HTMLparser
+  htmlCreateMemoryParserCtxt;
+
+# xmlautomata
+  xmlAutomataNewTransition2;
+
+# tree
+  xmlBuildQName;
+
+# xmlmemory
+  xmlGcMemGet;
+  xmlGcMemSetup;
+
+# globals
+  xmlMallocAtomic; # variable
+
+# xmlregexp
+  xmlRegExecPushString2;
+
+# relaxng
+  xmlRelaxNGNewDocParserCtxt;
+  xmlRelaxNGValidateFullElement;
+  xmlRelaxNGValidatePopElement;
+  xmlRelaxNGValidatePushCData;
+  xmlRelaxNGValidatePushElement;
+
+# xmlreader
+  xmlTextReaderExpand;
+  xmlTextReaderIsValid;
+  xmlTextReaderNext;
+  xmlTextReaderRelaxNGSetSchema;
+  xmlTextReaderRelaxNGValidate;
+} LIBXML2_2.5.6;
+
+LIBXML2_2.5.8 {
+    global:
+
+# globals
+  xmlCleanupGlobals;
+  xmlInitGlobals;
+
+# valid
+  xmlFreeValidCtxt;
+  xmlNewValidCtxt;
+
+# schemasInternals
+  xmlSchemaFreeType;
+
+# xmlschemas
+  xmlSchemaDump;
+  xmlSchemaFreeParserCtxt;
+  xmlSchemaFreeValidCtxt;
+  xmlSchemaFree;
+  xmlSchemaNewMemParserCtxt;
+  xmlSchemaNewParserCtxt;
+  xmlSchemaNewValidCtxt;
+  xmlSchemaParse;
+  xmlSchemaSetParserErrors;
+  xmlSchemaSetValidErrors;
+  xmlSchemaValidateDoc;
+  xmlSchemaValidateStream;
+
+# xmlschemastypes
+  xmlSchemaCheckFacet;
+  xmlSchemaCleanupTypes;
+  xmlSchemaCompareValues;
+  xmlSchemaFreeFacet;
+  xmlSchemaFreeValue;
+  xmlSchemaGetPredefinedType;
+  xmlSchemaInitTypes;
+  xmlSchemaNewFacet;
+  xmlSchemaValidateFacet;
+  xmlSchemaValidatePredefinedType;
+  xmlSchemaValPredefTypeNode;
+
+# globals
+  xmlThrDefBufferAllocScheme;
+  xmlThrDefDefaultBufferSize;
+  xmlThrDefDeregisterNodeDefault;
+  xmlThrDefDoValidityCheckingDefaultValue;
+  xmlThrDefGetWarningsDefaultValue;
+  xmlThrDefIndentTreeOutput;
+  xmlThrDefKeepBlanksDefaultValue;
+  xmlThrDefLineNumbersDefaultValue;
+  xmlThrDefLoadExtDtdDefaultValue;
+  xmlThrDefParserDebugEntities;
+  xmlThrDefPedanticParserDefaultValue;
+  xmlThrDefRegisterNodeDefault;
+  xmlThrDefSaveNoEmptyTags;
+  xmlThrDefSetGenericErrorFunc;
+  xmlThrDefSubstituteEntitiesDefaultValue;
+  xmlThrDefTreeIndentString;
+} LIBXML2_2.5.7;
+
+LIBXML2_2.5.9 {
+    global:
+
+# xmlmemory
+  xmlMallocAtomicLoc;
+
+# relaxng
+  xmlRelaxNGGetParserErrors;
+  xmlRelaxNGGetValidErrors;
+
+# tree
+  xmlSplitQName3;
+
+# xmlstring
+  xmlUTF8Charcmp;
+  xmlUTF8Size;
+
+# xinclude
+  xmlXIncludeProcessTree;
+} LIBXML2_2.5.8;
+
+LIBXML2_2.6.0 {
+    global:
+
+# SAX2
+  xmlSAX2AttributeDecl;
+  xmlSAX2CDataBlock;
+  xmlSAX2Characters;
+  xmlSAX2Comment;
+  xmlSAX2ElementDecl;
+  xmlSAX2EndDocument;
+  xmlSAX2EndElementNs;
+  xmlSAX2EndElement;
+  xmlSAX2EntityDecl;
+  xmlSAX2ExternalSubset;
+  xmlSAX2GetColumnNumber;
+  xmlSAX2GetEntity;
+  xmlSAX2GetLineNumber;
+  xmlSAX2GetParameterEntity;
+  xmlSAX2GetPublicId;
+  xmlSAX2GetSystemId;
+  xmlSAX2HasExternalSubset;
+  xmlSAX2HasInternalSubset;
+  xmlSAX2IgnorableWhitespace;
+  xmlSAX2InitDefaultSAXHandler;
+  xmlSAX2InitDocbDefaultSAXHandler;
+  xmlSAX2InitHtmlDefaultSAXHandler;
+  xmlSAX2InternalSubset;
+  xmlSAX2IsStandalone;
+  xmlSAX2NotationDecl;
+  xmlSAX2ProcessingInstruction;
+  xmlSAX2Reference;
+  xmlSAX2ResolveEntity;
+  xmlSAX2SetDocumentLocator;
+  xmlSAX2StartDocument;
+  xmlSAX2StartElementNs;
+  xmlSAX2StartElement;
+  xmlSAX2UnparsedEntityDecl;
+  xmlSAXDefaultVersion;
+  xmlSAXVersion;
+
+# HTMLparser
+  htmlCtxtReadDoc;
+  htmlCtxtReadFd;
+  htmlCtxtReadFile;
+  htmlCtxtReadIO;
+  htmlCtxtReadMemory;
+  htmlCtxtReset;
+  htmlCtxtUseOptions;
+  htmlReadDoc;
+  htmlReadFd;
+  htmlReadFile;
+  htmlReadIO;
+  htmlReadMemory;
+
+# tree
+  xmlBufferCreateStatic;
+
+# chvalid
+  xmlCharInRange;
+
+# xmlIO
+  xmlCheckHTTPInput;
+
+# xmlerror
+  xmlCopyError;
+  xmlCtxtGetLastError;
+  xmlGetLastError;
+  xmlResetError;
+  xmlResetLastError;
+  xmlSetStructuredErrorFunc;
+
+# parser
+  xmlCtxtReadDoc;
+  xmlCtxtReadFd;
+  xmlCtxtReadFile;
+  xmlCtxtReadIO;
+  xmlCtxtReadMemory;
+
+# xmlerror
+  xmlCtxtResetLastError;
+
+# parser
+  xmlCtxtReset;
+  xmlCtxtUseOptions;
+  xmlReadDoc;
+  xmlReadFd;
+  xmlReadFile;
+  xmlReadIO;
+  xmlReadMemory;
+
+# xmlstring
+  xmlStrPrintf;
+  xmlStrQEqual;
+
+# dict
+  xmlDictCreate;
+  xmlDictFree;
+  xmlDictLookup;
+  xmlDictOwns;
+  xmlDictQLookup;
+  xmlDictReference;
+  xmlDictSize;
+
+# parserInternals
+  xmlErrMemory;
+  xmlParserMaxDepth; # variable
+  xmlStringLenDecodeEntities;
+  xmlSwitchInputEncoding;
+
+# xmlwriter
+  xmlFreeTextWriter;
+  xmlNewTextWriterFilename;
+  xmlNewTextWriterMemory;
+  xmlNewTextWriter;
+  xmlTextWriterEndAttribute;
+  xmlTextWriterEndCDATA;
+  xmlTextWriterEndDocument;
+  xmlTextWriterEndDTD;
+  xmlTextWriterEndElement;
+  xmlTextWriterEndPI;
+  xmlTextWriterFlush;
+  xmlTextWriterFullEndElement;
+  xmlTextWriterStartAttributeNS;
+  xmlTextWriterStartAttribute;
+  xmlTextWriterStartCDATA;
+  xmlTextWriterStartDocument;
+  xmlTextWriterStartDTDAttlist;
+  xmlTextWriterStartDTDElement;
+  xmlTextWriterStartDTDEntity;
+  xmlTextWriterStartDTD;
+  xmlTextWriterStartElementNS;
+  xmlTextWriterStartElement;
+  xmlTextWriterStartPI;
+  xmlTextWriterWriteAttributeNS;
+  xmlTextWriterWriteAttribute;
+  xmlTextWriterWriteBase64;
+  xmlTextWriterWriteBinHex;
+  xmlTextWriterWriteCDATA;
+  xmlTextWriterWriteComment;
+  xmlTextWriterWriteDTDAttlist;
+  xmlTextWriterWriteDTDElement;
+  xmlTextWriterWriteDTDEntity;
+  xmlTextWriterWriteDTDExternalEntity;
+  xmlTextWriterWriteDTDInternalEntity;
+  xmlTextWriterWriteDTDNotation;
+  xmlTextWriterWriteDTD;
+  xmlTextWriterWriteElementNS;
+  xmlTextWriterWriteElement;
+  xmlTextWriterWriteFormatAttributeNS;
+  xmlTextWriterWriteFormatAttribute;
+  xmlTextWriterWriteFormatCDATA;
+  xmlTextWriterWriteFormatComment;
+  xmlTextWriterWriteFormatDTDAttlist;
+  xmlTextWriterWriteFormatDTDElement;
+  xmlTextWriterWriteFormatDTDInternalEntity;
+  xmlTextWriterWriteFormatDTD;
+  xmlTextWriterWriteFormatElementNS;
+  xmlTextWriterWriteFormatElement;
+  xmlTextWriterWriteFormatPI;
+  xmlTextWriterWriteFormatRaw;
+  xmlTextWriterWriteFormatString;
+  xmlTextWriterWritePI;
+  xmlTextWriterWriteRawLen;
+  xmlTextWriterWriteRaw;
+  xmlTextWriterWriteString;
+  xmlTextWriterWriteVFormatAttributeNS;
+  xmlTextWriterWriteVFormatAttribute;
+  xmlTextWriterWriteVFormatCDATA;
+  xmlTextWriterWriteVFormatComment;
+  xmlTextWriterWriteVFormatDTDAttlist;
+  xmlTextWriterWriteVFormatDTDElement;
+  xmlTextWriterWriteVFormatDTDInternalEntity;
+  xmlTextWriterWriteVFormatDTD;
+  xmlTextWriterWriteVFormatElementNS;
+  xmlTextWriterWriteVFormatElement;
+  xmlTextWriterWriteVFormatPI;
+  xmlTextWriterWriteVFormatRaw;
+  xmlTextWriterWriteVFormatString;
+
+# hash
+  xmlHashQLookup2;
+  xmlHashQLookup3;
+  xmlHashQLookup;
+
+# chvalid
+  xmlIsBaseCharGroup; # variable
+  xmlIsCharGroup; # variable
+  xmlIsCombiningGroup; # variable
+  xmlIsDigitGroup; # variable
+  xmlIsExtenderGroup; # variable
+  xmlIsIdeographicGroup; # variable
+  xmlIsPubidChar_tab; # variable
+
+# globals
+  xmlLastError; # variable
+
+# nanohttp
+  xmlNanoHTTPEncoding;
+  xmlNanoHTTPMimeType;
+  xmlNanoHTTPRedir;
+
+# tree
+  xmlNodeBufGetContent;
+
+# xmlIO
+  xmlParserInputBufferCreateStatic;
+
+# xmlreader
+  xmlReaderForDoc;
+  xmlReaderForFd;
+  xmlReaderForFile;
+  xmlReaderForIO;
+  xmlReaderForMemory;
+  xmlReaderNewDoc;
+  xmlReaderNewFd;
+  xmlReaderNewFile;
+  xmlReaderNewIO;
+  xmlReaderNewMemory;
+  xmlReaderNewWalker;
+  xmlReaderWalker;
+  xmlTextReaderConstBaseUri;
+  xmlTextReaderConstLocalName;
+  xmlTextReaderConstNamespaceUri;
+  xmlTextReaderConstName;
+  xmlTextReaderConstPrefix;
+  xmlTextReaderConstString;
+  xmlTextReaderConstValue;
+  xmlTextReaderConstXmlLang;
+  xmlTextReaderNextSibling;
+  xmlTextReaderPreserve;
+
+# globals
+  xmlStructuredError; # variable
+  xmlThrDefSetStructuredErrorFunc;
+
+# xpathInternals
+  xmlXPathErr;
+
+# SAX2
+# xmlSAX2CheckNamespace; removed in 2.6.10
+# xmlSAX2GetNamespace; removed in 2.6.10
+# xmlSAX2GlobalNamespace; removed in 2.6.10
+# xmlSAX2NamespaceDecl; removed in 2.6.10
+# xmlSAX2SetNamespace; removed in 2.6.10
+} LIBXML2_2.5.9;
+
+LIBXML2_2.6.1 {
+    global:
+
+# parser
+  xmlCtxtResetPush;
+} LIBXML2_2.6.0;
+
+LIBXML2_2.6.2 {
+    global:
+
+# parserInternals
+  xmlCreateURLParserCtxt;
+
+# xmlschemas
+  xmlSchemaNewDocParserCtxt;
+
+# xmlstring
+  xmlStrVPrintf;
+
+# xinclude
+  xmlXIncludeFreeContext;
+  xmlXIncludeNewContext;
+  xmlXIncludeProcessNode;
+} LIBXML2_2.6.1;
+
+LIBXML2_2.6.3 {
+    global:
+
+# pattern
+  xmlFreePatternList;
+  xmlFreePattern;
+  xmlPatterncompile;
+  xmlPatternMatch;
+
+# xmlwriter
+  xmlNewTextWriterDoc;
+  xmlNewTextWriterPushParser;
+  xmlNewTextWriterTree;
+
+# xmlreader
+  xmlTextReaderPreservePattern;
+
+# xmlunicode
+  xmlUCSIsAegeanNumbers;
+  xmlUCSIsBuhid;
+  xmlUCSIsCombiningDiacriticalMarksforSymbols;
+  xmlUCSIsCypriotSyllabary;
+  xmlUCSIsCyrillicSupplement;
+  xmlUCSIsGreekandCoptic;
+  xmlUCSIsHanunoo;
+  xmlUCSIsKatakanaPhoneticExtensions;
+  xmlUCSIsKhmerSymbols;
+  xmlUCSIsLimbu;
+  xmlUCSIsLinearBIdeograms;
+  xmlUCSIsLinearBSyllabary;
+  xmlUCSIsMiscellaneousMathematicalSymbolsA;
+  xmlUCSIsMiscellaneousMathematicalSymbolsB;
+  xmlUCSIsMiscellaneousSymbolsandArrows;
+  xmlUCSIsOsmanya;
+  xmlUCSIsPhoneticExtensions;
+  xmlUCSIsPrivateUseArea;
+  xmlUCSIsShavian;
+  xmlUCSIsSupplementalArrowsA;
+  xmlUCSIsSupplementalArrowsB;
+  xmlUCSIsSupplementalMathematicalOperators;
+  xmlUCSIsSupplementaryPrivateUseAreaA;
+  xmlUCSIsSupplementaryPrivateUseAreaB;
+  xmlUCSIsTagalog;
+  xmlUCSIsTagbanwa;
+  xmlUCSIsTaiLe;
+  xmlUCSIsTaiXuanJingSymbols;
+  xmlUCSIsUgaritic;
+  xmlUCSIsVariationSelectorsSupplement;
+  xmlUCSIsVariationSelectors;
+  xmlUCSIsYijingHexagramSymbols;
+
+# xinclude
+  xmlXIncludeProcessFlags;
+  xmlXIncludeProcessTreeFlags;
+  xmlXIncludeSetFlags;
+} LIBXML2_2.6.2;
+
+LIBXML2_2.6.5 {
+    global:
+
+# xmlmemory
+  xmlCleanupMemory;
+
+# dict
+  xmlDictCreateSub;
+
+# relaxng
+  xmlRelaxParserSetFlag;
+
+# xmlstring
+  xmlStrncatNew;
+
+# xmlwriter
+  xmlTextWriterSetIndentString;
+  xmlTextWriterSetIndent;
+
+# xpath
+  xmlXPathCtxtCompile;
+} LIBXML2_2.6.3;
+
+LIBXML2_2.6.6 {
+    global:
+
+# tree
+  xmlAttrSerializeTxtContent;
+
+# parser
+  xmlByteConsumed;
+
+# xmlreader
+  xmlTextReaderSetStructuredErrorHandler;
+} LIBXML2_2.6.5;
+
+LIBXML2_2.6.7 {
+    global:
+
+# xmlwriter
+  xmlTextWriterEndComment;
+  xmlTextWriterStartComment;
+} LIBXML2_2.6.6;
+
+LIBXML2_2.6.8 {
+    global:
+
+# xmlsave
+  xmlSaveClose;
+  xmlSaveDoc;
+  xmlSaveFlush;
+  xmlSaveToFd;
+  xmlSaveToFilename;
+  xmlSaveToIO;
+  xmlSaveTree;
+
+# xmlwriter
+  xmlTextWriterEndDTDAttlist;
+  xmlTextWriterEndDTDElement;
+  xmlTextWriterEndDTDEntity;
+  xmlTextWriterWriteDTDExternalEntityContents;
+} LIBXML2_2.6.7;
+
+LIBXML2_2.6.10 {
+    global:
+
+# xmlIO
+  xmlOutputBufferWriteEscape;
+  xmlPopInputCallbacks;
+
+# xmlsave
+  xmlSaveSetAttrEscape;
+  xmlSaveSetEscape;
+} LIBXML2_2.6.8;
+
+LIBXML2_2.6.11 {
+    global:
+
+# uri
+  xmlBuildRelativeURI;
+
+# globals
+  xmlOutputBufferCreateFilenameDefault;
+  xmlOutputBufferCreateFilenameValue; # variable
+  xmlParserInputBufferCreateFilenameDefault;
+  xmlParserInputBufferCreateFilenameValue; # variable
+  xmlThrDefOutputBufferCreateFilenameDefault;
+  xmlThrDefParserInputBufferCreateFilenameDefault;
+
+# schemasInternals
+  xmlSchemaFreeWildcard;
+
+# xmlschemastypes
+  xmlSchemaCollapseString;
+  xmlSchemaGetBuiltInListSimpleTypeItemType;
+  xmlSchemaGetBuiltInType;
+  xmlSchemaIsBuiltInTypeFacet;
+  xmlSchemaValidateListSimpleTypeFacet;
+} LIBXML2_2.6.10;
+
+LIBXML2_2.6.12 {
+    global:
+
+# parser
+  xmlParseInNodeContext;
+
+# xmlschemastypes
+  xmlSchemaGetFacetValueAsULong;
+  xmlSchemaValidateLengthFacet;
+  xmlSchemaValPredefTypeNodeNoNorm;
+
+# xmlschemas
+  xmlSchemaGetParserErrors;
+  xmlSchemaGetValidErrors;
+} LIBXML2_2.6.11;
+
+LIBXML2_2.6.14 {
+    global:
+
+# xmlautomata
+  xmlAutomataNewCountTrans2;
+  xmlAutomataNewOnceTrans2;
+
+# nanohttp
+  xmlNanoHTTPContentLength;
+
+# xmlschemas
+  xmlSchemaSetValidOptions;
+  xmlSchemaValidateOneElement;
+  xmlSchemaValidCtxtGetOptions;
+} LIBXML2_2.6.12;
+
+LIBXML2_2.6.15 {
+    global:
+
+# debugXML
+  xmlDebugCheckDocument;
+
+# tree
+  xmlDocCopyNodeList;
+  xmlNewDocPI;
+
+# xmlreader
+  xmlTextReaderConstEncoding;
+  xmlTextReaderConstXmlVersion;
+  xmlTextReaderIsNamespaceDecl;
+  xmlTextReaderStandalone;
+} LIBXML2_2.6.14;
+
+LIBXML2_2.6.16 {
+    global:
+
+# xmlmemory
+  xmlMemBlocks;
+
+# relaxng
+  xmlRelaxNGInitTypes;
+} LIBXML2_2.6.15;
+
+LIBXML2_2.6.17 {
+    global:
+
+# dict
+  xmlDictExists;
+
+# xmlmodule
+  xmlModuleClose;
+  xmlModuleFree;
+  xmlModuleOpen;
+  xmlModuleSymbol;
+
+# xmlregexp
+  xmlRegExecErrInfo;
+  xmlRegExecNextValues;
+
+# xmlschemastypes
+  xmlSchemaWhiteSpaceReplace;
+
+# xmlreader
+  xmlTextReaderGetParserColumnNumber;
+  xmlTextReaderGetParserLineNumber;
+} LIBXML2_2.6.16;
+
+LIBXML2_2.6.18 {
+    global:
+
+# valid
+  xmlCopyDocElementContent;
+  xmlFreeDocElementContent;
+  xmlNewDocElementContent;
+
+# dict
+  xmlDictCleanup;
+
+# hash
+  xmlHashCreateDict;
+
+# pattern
+  xmlFreeStreamCtxt;
+  xmlPatternFromRoot;
+  xmlPatternGetStreamCtxt;
+  xmlPatternMaxDepth;
+  xmlPatternStreamable;
+  xmlStreamPop;
+  xmlStreamPushAttr;
+  xmlStreamPush;
+
+# xmlschemastypes
+  xmlSchemaCompareValuesWhtsp;
+  xmlSchemaCopyValue;
+  xmlSchemaGetCanonValue;
+  xmlSchemaNewNOTATIONValue;
+  xmlSchemaNewStringValue;
+
+# xmlreader
+  xmlTextReaderByteConsumed;
+} LIBXML2_2.6.17;
+
+LIBXML2_2.6.19 {
+    global:
+
+# xmlschemastypes
+  xmlSchemaGetValType;
+  xmlSchemaValidateFacetWhtsp;
+  xmlSchemaValidateLengthFacetWhtsp;
+} LIBXML2_2.6.18;
+
+LIBXML2_2.6.20 {
+    global:
+
+# tree
+  xmlDOMWrapAdoptNode;
+  xmlDOMWrapFreeCtxt;
+  xmlDOMWrapNewCtxt;
+  xmlDOMWrapReconcileNamespaces;
+  xmlDOMWrapRemoveNode;
+
+# xmlschemastypes
+  xmlSchemaGetCanonValueWhtsp;
+  xmlSchemaNewQNameValue;
+  xmlSchemaValueAppend;
+  xmlSchemaValueGetAsBoolean;
+  xmlSchemaValueGetAsString;
+  xmlSchemaValueGetNext;
+
+# xmlschemas
+  xmlSchemaIsValid;
+  xmlSchemaSAXPlug;
+  xmlSchemaSAXUnplug;
+  xmlSchemaValidateFile;
+
+# xmlreader
+  xmlTextReaderSchemaValidate;
+  xmlTextReaderSetSchema;
+} LIBXML2_2.6.19;
+
+LIBXML2_2.6.21 {
+    global:
+
+# xmlautomata
+  xmlAutomataNewNegTrans;
+
+# xmlregexp
+  emptyExp; # variable
+  forbiddenExp; # variable
+  xmlExpCtxtNbCons;
+  xmlExpCtxtNbNodes;
+  xmlExpDump;
+  xmlExpExpDerive;
+  xmlExpFreeCtxt;
+  xmlExpFree;
+  xmlExpGetLanguage;
+  xmlExpGetStart;
+  xmlExpIsNillable;
+  xmlExpMaxToken;
+  xmlExpNewAtom;
+  xmlExpNewCtxt;
+  xmlExpNewOr;
+  xmlExpNewRange;
+  xmlExpNewSeq;
+  xmlExpParse;
+  xmlExpRef;
+  xmlExpStringDerive;
+  xmlExpSubsume;
+
+# parser
+  xmlHasFeature;
+
+# uri
+  xmlParseURIRaw;
+
+# pattern
+  xmlPatternMinDepth;
+
+# relaxng
+  xmlRelaxNGSetValidStructuredErrors;
+
+# xmlschemas
+  xmlSchemaSetValidStructuredErrors;
+
+# schematron
+  xmlSchematronFreeParserCtxt;
+  xmlSchematronFree;
+  xmlSchematronFreeValidCtxt;
+  xmlSchematronNewDocParserCtxt;
+  xmlSchematronNewMemParserCtxt;
+  xmlSchematronNewParserCtxt;
+  xmlSchematronNewValidCtxt;
+  xmlSchematronParse;
+  xmlSchematronValidateDoc;
+} LIBXML2_2.6.20;
+
+LIBXML2_2.6.23 {
+    global:
+
+# HTMLtree
+  htmlDocDumpMemoryFormat;
+
+# xmlIO
+  xmlOutputBufferCreateBuffer;
+
+# xmlsave
+  xmlSaveToBuffer;# suppressed in 2.6.11, readded in 2.6.23
+
+
+# xmlschemas
+  xmlSchemaSetParserStructuredErrors;
+
+# pattern
+  xmlStreamPushNode;
+  xmlStreamWantsAnyNode;
+
+# xmlreader
+  xmlTextReaderSchemaValidateCtxt;
+} LIBXML2_2.6.21;
+
+LIBXML2_2.6.24 {
+    global:
+
+# tree
+  xmlDOMWrapCloneNode;
+
+# relaxng
+  xmlRelaxNGSetParserStructuredErrors;
+} LIBXML2_2.6.23;
+
+LIBXML2_2.6.25 {
+    global:
+
+# xpath
+  xmlXPathContextSetCache;
+} LIBXML2_2.6.24;
+
+LIBXML2_2.6.27 {
+    global:
+
+# HTMLparser
+  htmlNewParserCtxt;
+
+# uri
+  xmlPathToURI;
+
+# xinclude
+  xmlXIncludeProcessFlagsData;
+
+# xpath
+  xmlXPathCompiledEvalToBoolean;
+} LIBXML2_2.6.25;
+
+LIBXML2_2.6.28 {
+    global:
+
+# xmlreader
+  xmlTextReaderSetup;
+} LIBXML2_2.6.27;
+
+LIBXML2_2.6.29 {
+    global:
+
+# threads
+  xmlDllMain;
+} LIBXML2_2.6.28;
+
+LIBXML2_2.6.32 {
+    global:
+
+# schematron
+  xmlSchematronSetValidStructuredErrors;
+} LIBXML2_2.6.29;
+
+LIBXML2_2.7.0 {
+    global:
+
+# xmlmemory
+  xmlMemDisplayLast;
+
+# entities
+  xmlNewEntity;
+
+# xmlschemas
+  xmlSchemaValidCtxtGetParserCtxt;
+} LIBXML2_2.6.32;
+
+LIBXML2_2.7.3 {
+    global:
+
+# tree
+  xmlChildElementCount;
+  xmlFirstElementChild;
+  xmlLastElementChild;
+  xmlNextElementSibling;
+  xmlPreviousElementSibling;
+} LIBXML2_2.7.0;
+
+LIBXML2_2.7.4 {
+    global:
+
+# globals
+  xmlStructuredErrorContext; # variable
+
+# xinclude
+  xmlXIncludeProcessTreeFlagsData;
+} LIBXML2_2.7.3;
+
+LIBXML2_2.8.0 {
+    global:
+
+# xmlreader
+  xmlTextReaderRelaxNGValidateCtxt;
+
+# tree
+  xmlBufferDetach;
+
+# dict
+  xmlInitializeDict;
+} LIBXML2_2.7.4;
+
+LIBXML2_2.9.0 {
+    global:
+
+# tree
+  xmlBufContent;
+  xmlBufEnd;
+  xmlBufGetNodeContent;
+  xmlBufNodeDump;
+  xmlBufShrink;
+  xmlBufUse;
+
+# dict
+  xmlDictGetUsage;
+  xmlDictSetLimit;
+
+# xmlschemas
+  xmlSchemaValidateSetFilename;
+  xmlSchemaValidateSetLocator;
+
+# xmlIO
+  xmlOutputBufferGetContent;
+  xmlOutputBufferGetSize;
+
+# xmlwriter
+  xmlTextWriterSetQuoteChar;
+} LIBXML2_2.8.0;
+
+LIBXML2_2.9.1 {
+    global:
+
+# xpath
+  xmlXPathNodeEval;
+  xmlXPathSetContextNode;
+} LIBXML2_2.9.0;
+

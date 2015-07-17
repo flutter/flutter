@@ -6,9 +6,7 @@ declare_args() {
   # Use libc++ (buildtools/third_party/libc++ and
   # buildtools/third_party/libc++abi) instead of stdlibc++ as standard library.
   # This is intended to be used for instrumented builds.
-  # TODO(vtl): We don't use this, since building fails, for some reason.
-  use_custom_libcxx = false
-  # use_custom_libcxx = (is_asan && is_linux) || is_tsan || is_msan
+  use_custom_libcxx = (is_asan && is_linux) || is_tsan || is_msan
 
   # Track where uninitialized memory originates from. From fastest to slowest:
   # 0 - no tracking, 1 - track only the initial allocation site, 2 - track the

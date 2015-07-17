@@ -53,7 +53,7 @@ docbEncodeEntities(unsigned char *out ATTRIBUTE_UNUSED,
 /**
  * docbParseDocument:
  * @ctxt:  an SGML parser context
- * 
+ *
  * parse an SGML document (and build a tree if using the standard SAX
  * interface).
  *
@@ -163,12 +163,12 @@ docbCreatePushParserCtxt(docbSAXHandlerPtr sax ATTRIBUTE_UNUSED,
  * @cur:  a pointer to an array of xmlChar
  * @encoding:  a free form C string describing the SGML document encoding, or NULL
  * @sax:  the SAX handler block
- * @userData: if using SAX, this pointer will be provided on callbacks. 
+ * @userData: if using SAX, this pointer will be provided on callbacks.
  *
  * parse an SGML in-memory document and build a tree.
  * It use the given SAX function block to handle the parsing callback.
  * If sax is NULL, fallback to the default DOM tree building routines.
- * 
+ *
  * Returns the resulting document tree
  */
 
@@ -196,7 +196,7 @@ docbSAXParseDoc(xmlChar * cur ATTRIBUTE_UNUSED,
  * @encoding:  a free form C string describing the SGML document encoding, or NULL
  *
  * parse an SGML in-memory document and build a tree.
- * 
+ *
  * Returns the resulting document tree
  */
 
@@ -221,7 +221,7 @@ docbParseDoc(xmlChar * cur ATTRIBUTE_UNUSED,
  * @filename:  the filename
  * @encoding:  the SGML document encoding, or NULL
  *
- * Create a parser context for a file content. 
+ * Create a parser context for a file content.
  * Automatic support for ZLIB/Compress compressed document is provided
  * by default if found at compile-time.
  *
@@ -247,7 +247,7 @@ docbCreateFileParserCtxt(const char *filename ATTRIBUTE_UNUSED,
  * @filename:  the filename
  * @encoding:  a free form C string describing the SGML document encoding, or NULL
  * @sax:  the SAX handler block
- * @userData: if using SAX, this pointer will be provided on callbacks. 
+ * @userData: if using SAX, this pointer will be provided on callbacks.
  *
  * parse an SGML file and build a tree. Automatic support for ZLIB/Compress
  * compressed document is provided by default if found at compile-time.

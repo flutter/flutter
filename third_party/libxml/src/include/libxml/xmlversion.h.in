@@ -98,6 +98,15 @@ XMLPUBFUN void XMLCALL xmlCheckVersion(int version);
 #endif
 
 /**
+ * LIBXML_THREAD_ALLOC_ENABLED:
+ *
+ * Whether the allocation hooks are per-thread
+ */
+#if @WITH_THREAD_ALLOC@
+#define LIBXML_THREAD_ALLOC_ENABLED
+#endif
+
+/**
  * LIBXML_TREE_ENABLED:
  *
  * Whether the DOM like tree manipulation API support is configured in
@@ -391,6 +400,15 @@ XMLPUBFUN void XMLCALL xmlCheckVersion(int version);
 #define LIBXML_ZLIB_ENABLED
 #endif
 
+/**
+ * LIBXML_LZMA_ENABLED:
+ *
+ * Whether the Lzma support is compiled in
+ */
+#if @WITH_LZMA@
+#define LIBXML_LZMA_ENABLED
+#endif
+
 #ifdef __GNUC__
 #ifdef HAVE_ANSIDECL_H
 #include <ansidecl.h>
@@ -403,7 +421,11 @@ XMLPUBFUN void XMLCALL xmlCheckVersion(int version);
  */
 
 #ifndef ATTRIBUTE_UNUSED
-#define ATTRIBUTE_UNUSED __attribute__((unused))
+# if ((__GNUC__ > 2) || ((__GNUC__ == 2) && (__GNUC_MINOR__ >= 7)))
+#  define ATTRIBUTE_UNUSED __attribute__((unused))
+# else
+#  define ATTRIBUTE_UNUSED
+# endif
 #endif
 
 /**

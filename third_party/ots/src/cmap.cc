@@ -287,7 +287,7 @@ bool Parse31012(ots::OpenTypeFile *file,
     return OTS_FAILURE_MSG("can't read number of format 12 subtable groups");
   }
   if (num_groups == 0 || num_groups > kMaxCMAPGroups) {
-    return OTS_FAILURE_MSG("bad format 12 subtable group count %d", num_groups);
+    return OTS_FAILURE_MSG("Bad format 12 subtable group count %d", num_groups);
   }
 
   std::vector<ots::OpenTypeCMAPSubtableRange> &groups
@@ -376,7 +376,7 @@ bool Parse31013(ots::OpenTypeFile *file,
   // We limit the number of groups in the same way as in 3.10.12 tables. See
   // the comment there in
   if (num_groups == 0 || num_groups > kMaxCMAPGroups) {
-    return OTS_FAILURE_MSG("Bad number of groups (%d) in a cmap subtable", num_groups);
+    return OTS_FAILURE_MSG("Bad format 13 subtable group count %d", num_groups);
   }
 
   std::vector<ots::OpenTypeCMAPSubtableRange> &groups
@@ -434,7 +434,7 @@ bool Parse0514(ots::OpenTypeFile *file,
     return OTS_FAILURE_MSG("Can't read number of records in cmap subtable");
   }
   if (num_records == 0 || num_records > kMaxCMAPSelectorRecords) {
-    return OTS_FAILURE_MSG("Bad number of records (%d) in cmap subtable", num_records);
+    return OTS_FAILURE_MSG("Bad format 14 subtable records count %d", num_records);
   }
 
   std::vector<ots::OpenTypeCMAPSubtableVSRecord>& records
@@ -483,8 +483,8 @@ bool Parse0514(ots::OpenTypeFile *file,
       if (!subtable.ReadU32(&num_ranges)) {
         return OTS_FAILURE_MSG("Can't read number of ranges in record %d", i);
       }
-      if (!num_ranges || num_ranges > kMaxCMAPGroups) {
-        return OTS_FAILURE_MSG("number of ranges too high (%d > %d) in record %d", num_ranges, kMaxCMAPGroups, i);
+      if (num_ranges == 0 || num_ranges > kMaxCMAPGroups) {
+        return OTS_FAILURE_MSG("Bad number of ranges (%d) in record %d", num_ranges, i);
       }
 
       uint32_t last_unicode_value = 0;
@@ -517,8 +517,8 @@ bool Parse0514(ots::OpenTypeFile *file,
       if (!subtable.ReadU32(&num_mappings)) {
         return OTS_FAILURE_MSG("Can't read number of mappings in variation selector record %d", i);
       }
-      if (!num_mappings || num_mappings > kMaxCMAPGroups) {
-        return OTS_FAILURE_MSG("Number of mappings too high (%d) in variation selector record %d", num_mappings, i);
+      if (num_mappings == 0) {
+        return OTS_FAILURE_MSG("Bad number of mappings (%d) in variation selector record %d", num_mappings, i);
       }
 
       uint32_t last_unicode_value = 0;
@@ -1023,10 +1023,6 @@ bool ots_cmap_serialise(OTSStream *out, OpenTypeFile *file) {
   }
 
   const off_t table_end = out->Tell();
-  // We might have hanging bytes from the above's checksum which the OTSStream
-  // then merges into the table of offsets.
-  OTSStream::ChecksumState saved_checksum = out->SaveChecksumState();
-  out->ResetChecksum();
 
   // Now seek back and write the table of offsets
   if (!out->Seek(record_offset)) {
@@ -1092,7 +1088,6 @@ bool ots_cmap_serialise(OTSStream *out, OpenTypeFile *file) {
   if (!out->Seek(table_end)) {
     return OTS_FAILURE();
   }
-  out->RestoreChecksum(saved_checksum);
 
   return true;
 }

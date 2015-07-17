@@ -7,6 +7,7 @@
 #include "base/guid.h"
 #include "base/logging.h"
 #include "base/strings/string_number_conversions.h"
+#include "base/strings/string_split.h"
 #include "base/strings/string_util.h"
 #include "base/strings/utf_string_conversions.h"
 #include "testing/gtest/include/gtest/gtest.h"
@@ -32,8 +33,10 @@ void DeleteStaleTestKeys(const base::Time& now,
                                                         test_key_root.c_str());
   for (; iterator_test_root_key.Valid(); ++iterator_test_root_key) {
     base::string16 key_name = iterator_test_root_key.Name();
-    std::vector<base::string16> tokens;
-    if (!Tokenize(key_name, base::string16(kTimestampDelimiter), &tokens))
+    std::vector<base::string16> tokens = base::SplitString(
+        key_name, kTimestampDelimiter, base::KEEP_WHITESPACE,
+        base::SPLIT_WANT_NONEMPTY);
+    if (tokens.empty())
       continue;
     int64 key_name_as_number = 0;
 

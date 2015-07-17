@@ -23,6 +23,8 @@ class BASE_EXPORT MemoryAllocatorDumpGuid {
   // global scope of all the traced processes.
   explicit MemoryAllocatorDumpGuid(const std::string& guid_str);
 
+  uint64 ToUint64() const { return guid_; }
+
   // Returns a (hex-encoded) string representation of the guid.
   std::string ToString() const;
 

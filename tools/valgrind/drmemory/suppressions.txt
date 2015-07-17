@@ -420,7 +420,7 @@ skia.dll!HDCOffscreen::draw
 skia.dll!SkScalerContext::getImage
 skia.dll!SkGlyphCache::findImage
 skia.dll!D1G_RectClip
-skia.dll!SkDraw::drawText
+skia.dll!SkDraw::draw*
 
 HANDLE LEAK
 name=http://crbug.com/346842
@@ -720,7 +720,7 @@ name=http://crbug.com/463261
 blink_web.dll!blink::WebFrameWidgetImpl::selectionBounds
 ...
 content.dll!content::RenderWidget::UpdateSelectionBounds
-content.dll!content::RenderWidget::willBeginCompositorFrame
+content.dll!content::RenderWidget::WillBeginCompositorFrame
 cc.dll!base::internal::InvokeHelper<>::MakeItSo
 
 UNADDRESSABLE ACCESS
@@ -773,14 +773,34 @@ ntdll.dll!RtlDosPathNameToNtPathName_U_WithStatus
 ntdll.dll!RtlDosPathNameToNtPathName_U_WithStatus
 ntdll.dll!RtlIntegerToUnicodeString
 
-UNINITIALIZED READ
-name=http://crbug.com/498519_a
-blink_web.dll!blink::Element::styleForLayoutObject
-blink_web.dll!blink::LayoutTreeBuilderForElement::style
-blink_web.dll!blink::LayoutTreeBuilderForElement::shouldCreateLayoutObject
+HANDLE LEAK
+name=http://crbug.com/487500b
+system call NtCreateEvent
+ntdll.dll!RtlDosPathNameToNtPathName_U_WithStatus
+ntdll.dll!RtlDosPathNameToNtPathName_U_WithStatus
+ntdll.dll!RtlEncodePointer
 
-UNINITIALIZED READ
-name=http://crbug.com/498519_b
-blink_web.dll!blink::Element::styleForLayoutObject
-blink_web.dll!blink::Element::recalcOwnStyle
-blink_web.dll!blink::Element::recalcStyle
+UNADDRESSABLE ACCESS
+name=http://crbug.com/508820
+...
+*!blink::FocusController::focusedOrMainFrame
+*!content::RenderWidget::UpdateSelectionBounds
+*!content::RenderWidget::WillBeginCompositorFrame
+*!base::internal::InvokeHelper<>::MakeItSo
+*!base::internal::Invoker<>::Run
+*!base::debug::TaskAnnotator::RunTask
+
+UNADDRESSABLE ACCESS
+name=http://crbug.com/509508
+*!blink::WebLocalFrameImpl::setFrameWidget
+*!blink::WebFrameWidgetImpl::close
+*!scheduler::TaskQueueManager::ProcessTaskFromWorkQueue
+*!scheduler::TaskQueueManager::DoWork
+*!base::internal::Invoker<>::Run
+...
+*!content::RendererMain
+*!content::RunNamedProcessTypeMain
+*!content::ContentMainRunnerImpl::Run
+*!content::ContentMain
+*!content::LaunchTests
+*!main

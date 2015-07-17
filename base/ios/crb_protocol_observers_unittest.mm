@@ -4,6 +4,7 @@
 
 #import "base/ios/crb_protocol_observers.h"
 #include "base/ios/weak_nsobject.h"
+#include "base/logging.h"
 #include "base/mac/scoped_nsautorelease_pool.h"
 #include "base/mac/scoped_nsobject.h"
 #include "testing/gtest/include/gtest/gtest.h"
@@ -36,10 +37,9 @@
 @end
 
 @interface TestMutateObserver : TestCompleteObserver
-
 - (instancetype)initWithObserver:(CRBProtocolObservers*)observer
     NS_DESIGNATED_INITIALIZER;
-
+- (instancetype)init NS_UNAVAILABLE;
 @end
 
 namespace {
@@ -264,6 +264,11 @@ TEST_F(CRBProtocolObserversTest, NestedMutateObservers) {
     _observers = observers;
   }
   return self;
+}
+
+- (instancetype)init {
+  NOTREACHED();
+  return nil;
 }
 
 - (void)mutateByAddingObserver:(id<TestObserver>)observer {

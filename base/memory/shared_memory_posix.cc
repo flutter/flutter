@@ -4,16 +4,13 @@
 
 #include "base/memory/shared_memory.h"
 
-#include <errno.h>
 #include <fcntl.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
-#include <sys/types.h>
 #include <unistd.h>
 
 #include "base/files/file_util.h"
 #include "base/files/scoped_file.h"
-#include "base/lazy_instance.h"
 #include "base/logging.h"
 #include "base/posix/eintr_wrapper.h"
 #include "base/posix/safe_strerror.h"
@@ -21,13 +18,6 @@
 #include "base/profiler/scoped_tracker.h"
 #include "base/scoped_generic.h"
 #include "base/strings/utf_string_conversions.h"
-#include "base/synchronization/lock.h"
-#include "base/threading/platform_thread.h"
-#include "base/threading/thread_restrictions.h"
-
-#if defined(OS_MACOSX)
-#include "base/mac/foundation_util.h"
-#endif  // OS_MACOSX
 
 #if defined(OS_ANDROID)
 #include "base/os_compat_android.h"
@@ -37,8 +27,6 @@
 namespace base {
 
 namespace {
-
-LazyInstance<Lock>::Leaky g_thread_lock_ = LAZY_INSTANCE_INITIALIZER;
 
 struct ScopedPathUnlinkerTraits {
   static FilePath* InvalidValue() { return nullptr; }
@@ -118,7 +106,7 @@ SharedMemory::SharedMemory()
       requested_size_(0) {
 }
 
-SharedMemory::SharedMemory(SharedMemoryHandle handle, bool read_only)
+SharedMemory::SharedMemory(const SharedMemoryHandle& handle, bool read_only)
     : mapped_file_(handle.fd),
       readonly_mapped_file_(-1),
       mapped_size_(0),
@@ -127,7 +115,8 @@ SharedMemory::SharedMemory(SharedMemoryHandle handle, bool read_only)
       requested_size_(0) {
 }
 
-SharedMemory::SharedMemory(SharedMemoryHandle handle, bool read_only,
+SharedMemory::SharedMemory(const SharedMemoryHandle& handle,
+                           bool read_only,
                            ProcessHandle process)
     : mapped_file_(handle.fd),
       readonly_mapped_file_(-1),
@@ -298,7 +287,6 @@ bool SharedMemory::Create(const SharedMemoryCreateOptions& options) {
     requested_size_ = options.size;
   }
   if (fp == NULL) {
-#if !defined(OS_MACOSX)
     PLOG(ERROR) << "Creating shared memory in " << path.value() << " failed";
     FilePath dir = path.DirName();
     if (access(dir.value().c_str(), W_OK | X_OK) < 0) {
@@ -308,9 +296,6 @@ bool SharedMemory::Create(const SharedMemoryCreateOptions& options) {
                    << "/dev/shm.  Try 'sudo chmod 1777 /dev/shm' to fix.";
       }
     }
-#else
-    PLOG(ERROR) << "Creating shared memory in " << path.value() << " failed";
-#endif
     return false;
   }
 
@@ -414,16 +399,6 @@ void SharedMemory::Close() {
   }
 }
 
-void SharedMemory::LockDeprecated() {
-  g_thread_lock_.Get().Acquire();
-  LockOrUnlockCommon(F_LOCK);
-}
-
-void SharedMemory::UnlockDeprecated() {
-  LockOrUnlockCommon(F_ULOCK);
-  g_thread_lock_.Get().Release();
-}
-
 #if !defined(OS_ANDROID)
 bool SharedMemory::PrepareMapFile(ScopedFILE fp, ScopedFD readonly_fd) {
   DCHECK_EQ(-1, mapped_file_);
@@ -477,38 +452,15 @@ bool SharedMemory::FilePathForMemoryName(const std::string& mem_name,
   if (!GetShmemTempDir(false, &temp_dir))
     return false;
 
-#if !defined(OS_MACOSX)
 #if defined(GOOGLE_CHROME_BUILD)
   std::string name_base = std::string("com.google.Chrome");
 #else
   std::string name_base = std::string("org.chromium.Chromium");
 #endif
-#else  // OS_MACOSX
-  std::string name_base = std::string(base::mac::BaseBundleID());
-#endif  // OS_MACOSX
   *path = temp_dir.AppendASCII(name_base + ".shmem." + mem_name);
   return true;
 }
 #endif  // !defined(OS_ANDROID)
-
-void SharedMemory::LockOrUnlockCommon(int function) {
-  DCHECK_GE(mapped_file_, 0);
-  while (lockf(mapped_file_, function, 0) < 0) {
-    if (errno == EINTR) {
-      continue;
-    } else if (errno == ENOLCK) {
-      // temporary kernel resource exaustion
-      base::PlatformThread::Sleep(base::TimeDelta::FromMilliseconds(500));
-      continue;
-    } else {
-      NOTREACHED() << "lockf() failed."
-                   << " function:" << function
-                   << " fd:" << mapped_file_
-                   << " errno:" << errno
-                   << " msg:" << base::safe_strerror(errno);
-    }
-  }
-}
 
 bool SharedMemory::ShareToProcessCommon(ProcessHandle process,
                                         SharedMemoryHandle* new_handle,

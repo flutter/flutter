@@ -59,8 +59,10 @@ class BASE_EXPORT SimpleThread : public PlatformThread::Delegate {
  public:
   class BASE_EXPORT Options {
    public:
-    Options() : stack_size_(0), priority_(ThreadPriority::NORMAL) { }
-    ~Options() { }
+    Options() : stack_size_(0), priority_(ThreadPriority::NORMAL) {}
+    explicit Options(ThreadPriority priority)
+        : stack_size_(0), priority_(priority) {}
+    ~Options() {}
 
     // We use the standard compiler-supplied copy constructor.
 
@@ -108,12 +110,6 @@ class BASE_EXPORT SimpleThread : public PlatformThread::Delegate {
 
   // Overridden from PlatformThread::Delegate:
   void ThreadMain() override;
-
-  // Only set priorities with a careful understanding of the consequences.
-  // This is meant for very limited use cases.
-  void SetThreadPriority(ThreadPriority priority) {
-    PlatformThread::SetThreadPriority(thread_, priority);
-  }
 
  private:
   const std::string name_prefix_;

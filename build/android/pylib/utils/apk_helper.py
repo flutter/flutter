@@ -9,12 +9,15 @@ import re
 
 from pylib import cmd_helper
 from pylib import constants
+from pylib.sdk import aapt
 
 
 _AAPT_PATH = os.path.join(constants.ANDROID_SDK_TOOLS, 'aapt')
 _MANIFEST_ATTRIBUTE_RE = re.compile(
     r'\s*A: ([^\(\)= ]*)\([^\(\)= ]*\)="(.*)" \(Raw: .*\)$')
 _MANIFEST_ELEMENT_RE = re.compile(r'\s*(?:E|N): (\S*) .*$')
+_PACKAGE_NAME_RE = re.compile(r'package: .*name=\'(\S*)\'')
+_SPLIT_NAME_RE = re.compile(r'package: .*split=\'(\S*)\'')
 
 
 def GetPackageName(apk_path):
@@ -30,8 +33,7 @@ def GetInstrumentationName(apk_path):
 
 
 def _ParseManifestFromApk(apk_path):
-  aapt_cmd = [_AAPT_PATH, 'dump', 'xmltree', apk_path, 'AndroidManifest.xml']
-  aapt_output = cmd_helper.GetCmdOutput(aapt_cmd).split('\n')
+  aapt_output = aapt.Dump('xmltree', apk_path, 'AndroidManifest.xml')
 
   parsed_manifest = {}
   node_stack = [parsed_manifest]
@@ -70,6 +72,7 @@ class ApkHelper(object):
     self._apk_path = apk_path
     self._manifest = None
     self._package_name = None
+    self._split_name = None
 
   def GetActivityName(self):
     """Returns the name of the Activity in the apk."""
@@ -100,15 +103,26 @@ class ApkHelper(object):
     if self._package_name:
       return self._package_name
 
-    aapt_cmd = [_AAPT_PATH, 'dump', 'badging', self._apk_path]
-    aapt_output = cmd_helper.GetCmdOutput(aapt_cmd).split('\n')
-    package_name_re = re.compile(r'package: .*name=\'(\S*)\'')
+    aapt_output = aapt.Dump('badging', self._apk_path)
     for line in aapt_output:
-      m = package_name_re.match(line)
+      m = _PACKAGE_NAME_RE.match(line)
       if m:
         self._package_name = m.group(1)
         return self._package_name
     raise Exception('Failed to determine package name of %s' % self._apk_path)
+
+  def GetSplitName(self):
+    """Returns the name of the split of the apk."""
+    if self._split_name:
+      return self._split_name
+
+    aapt_output = aapt.Dump('badging', self._apk_path)
+    for line in aapt_output:
+      m = _SPLIT_NAME_RE.match(line)
+      if m:
+        self._split_name = m.group(1)
+        return self._split_name
+    return None
 
   def _GetManifest(self):
     if not self._manifest:

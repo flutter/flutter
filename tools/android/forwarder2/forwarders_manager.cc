@@ -14,7 +14,6 @@
 #include "base/callback_helpers.h"
 #include "base/location.h"
 #include "base/logging.h"
-#include "base/message_loop/message_loop_proxy.h"
 #include "base/posix/eintr_wrapper.h"
 #include "tools/android/forwarder2/forwarder.h"
 #include "tools/android/forwarder2/socket.h"
@@ -35,7 +34,7 @@ void ForwardersManager::CreateAndStartNewForwarder(scoped_ptr<Socket> socket1,
                                                    scoped_ptr<Socket> socket2) {
   // Note that the internal Forwarder vector is populated on the internal thread
   // which is the only thread from which it's accessed.
-  thread_.message_loop_proxy()->PostTask(
+  thread_.task_runner()->PostTask(
       FROM_HERE,
       base::Bind(&ForwardersManager::CreateNewForwarderOnInternalThread,
                  base::Unretained(this), base::Passed(&socket1),
@@ -49,19 +48,19 @@ void ForwardersManager::CreateAndStartNewForwarder(scoped_ptr<Socket> socket1,
 void ForwardersManager::CreateNewForwarderOnInternalThread(
     scoped_ptr<Socket> socket1,
     scoped_ptr<Socket> socket2) {
-  DCHECK(thread_.message_loop_proxy()->RunsTasksOnCurrentThread());
+  DCHECK(thread_.task_runner()->RunsTasksOnCurrentThread());
   forwarders_.push_back(new Forwarder(socket1.Pass(), socket2.Pass()));
 }
 
 void ForwardersManager::WaitForEventsOnInternalThreadSoon() {
-  thread_.message_loop_proxy()->PostTask(
+  thread_.task_runner()->PostTask(
       FROM_HERE,
       base::Bind(&ForwardersManager::WaitForEventsOnInternalThread,
                  base::Unretained(this)));
 }
 
 void ForwardersManager::WaitForEventsOnInternalThread() {
-  DCHECK(thread_.message_loop_proxy()->RunsTasksOnCurrentThread());
+  DCHECK(thread_.task_runner()->RunsTasksOnCurrentThread());
   fd_set read_fds;
   fd_set write_fds;
 

@@ -11,6 +11,7 @@
 #include "base/bind_helpers.h"
 #include "base/logging.h"
 #include "base/memory/scoped_ptr.h"
+#include "base/thread_task_runner_handle.h"
 #include "tools/android/forwarder2/command.h"
 #include "tools/android/forwarder2/forwarder.h"
 #include "tools/android/forwarder2/socket.h"
@@ -79,12 +80,12 @@ HostController::HostController(
       global_exit_notifier_fd_(exit_notifier_fd),
       adb_control_socket_(adb_control_socket.Pass()),
       delete_controller_notifier_(delete_controller_notifier.Pass()),
-      deletion_task_runner_(base::MessageLoopProxy::current()),
+      deletion_task_runner_(base::ThreadTaskRunnerHandle::Get()),
       thread_("HostControllerThread") {
 }
 
 void HostController::ReadNextCommandSoon() {
-  thread_.message_loop_proxy()->PostTask(
+  thread_.task_runner()->PostTask(
       FROM_HERE,
       base::Bind(&HostController::ReadCommandOnInternalThread,
                  base::Unretained(this)));

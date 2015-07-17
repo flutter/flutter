@@ -40,7 +40,7 @@ int RecordStack(CONTEXT* context,
     instruction_pointers[i] = reinterpret_cast<const void*>(context->Rip);
 
     if (runtime_function) {
-      KNONVOLATILE_CONTEXT_POINTERS nvcontext = {0};
+      KNONVOLATILE_CONTEXT_POINTERS nvcontext = {};
       void* handler_data;
       ULONG64 establisher_frame;
       RtlVirtualUnwind(0, image_base, context->Rip, runtime_function, context,

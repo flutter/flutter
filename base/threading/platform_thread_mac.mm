@@ -155,10 +155,10 @@ void SetPriorityRealtimeAudio(mach_port_t mach_thread_id) {
 }  // anonymous namespace
 
 // static
-void PlatformThread::SetThreadPriority(PlatformThreadHandle handle,
-                                       ThreadPriority priority) {
+void PlatformThread::SetCurrentThreadPriority(ThreadPriority priority) {
   // Convert from pthread_t to mach thread identifier.
-  mach_port_t mach_thread_id = pthread_mach_thread_np(handle.platform_handle());
+  mach_port_t mach_thread_id =
+      pthread_mach_thread_np(PlatformThread::CurrentHandle().platform_handle());
 
   switch (priority) {
     case ThreadPriority::NORMAL:
@@ -174,7 +174,7 @@ void PlatformThread::SetThreadPriority(PlatformThreadHandle handle,
 }
 
 // static
-ThreadPriority PlatformThread::GetThreadPriority(PlatformThreadHandle handle) {
+ThreadPriority PlatformThread::GetCurrentThreadPriority() {
   NOTIMPLEMENTED();
   return ThreadPriority::NORMAL;
 }

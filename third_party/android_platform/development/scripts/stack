@@ -18,6 +18,7 @@
 
 import getopt
 import glob
+import logging
 import os
 import sys
 
@@ -54,8 +55,11 @@ def PrintUsage():
   print "       argument information. Also, the 'stack data' section will be"
   print "       printed."
   print
-  print "  --arch=arm|arm64|x86_64|x86|mips"
+  print "  --arch=arm|arm64|x64|x86|mips"
   print "       the target architecture"
+  print
+  print "  --verbose"
+  print "       enable extra logging, particularly for debugging failed symbolization"
   print
   print "  FILE should contain a stack trace in it somewhere"
   print "       the tool will find that and re-print it with"
@@ -108,15 +112,16 @@ def UnzipSymbols(symbolfile, symdir=None):
     return (symdir, symdir)
 
 
-def main():
+def main(argv):
   try:
-    options, arguments = getopt.getopt(sys.argv[1:], "",
+    options, arguments = getopt.getopt(argv, "",
                                        ["more-info",
                                         "less-info",
                                         "chrome-symbols-dir=",
                                         "symbols-dir=",
                                         "symbols-zip=",
                                         "arch=",
+                                        "verbose",
                                         "help"])
   except getopt.GetoptError, unused_error:
     PrintUsage()
@@ -138,6 +143,8 @@ def main():
       more_info = True
     elif option == "--less-info":
       more_info = False
+    elif option == "--verbose":
+      logging.basicConfig(level=logging.DEBUG)
 
   if len(arguments) > 1:
     PrintUsage()
@@ -167,6 +174,6 @@ def main():
     os.system(cmd)
 
 if __name__ == "__main__":
-  main()
+  sys.exit(main(sys.argv[1:]))
 
 # vi: ts=2 sw=2

@@ -16,8 +16,7 @@ Local Modifications:
 Some files only have license headers in the master branch.
  - Added the same license headers to the versions brought down from the 'v4'
    branch src URL qcms/tree/v4
-google.patch contains the following modifications. Apply with
-   patch -p1 < google.patch.
+The following changes have been made since qcms was imported:
  - Add bgra output support.
  - Use HAVE_POSIX_MEMALIGN instead of HAS_POSIX_MEMALIG
    (https://bugzilla.mozilla.org/show_bug.cgi?id=692922)
@@ -28,7 +27,8 @@ google.patch contains the following modifications. Apply with
  - Do not short-circuit bogus profile check for A2B0 or B2A0 unless v4 enabled.
  - Only reference code from transform-sse1.c and transform-sse2.c when SSE is
    enabled.
- - Do not use an x86-only attribute on ARM or MIPS.
+ - Limit the use an x86-only attribute to 32-bit x86 builds.
+   - https://code.google.com/p/chromium/issues/detail?id=490016
  - Fix integer truncation warning/errors on Win64 build.
  - Apply upstream thread safety (fix) patch from
    - https://bugzilla.mozilla.org/show_bug.cgi?id=853169
@@ -59,5 +59,34 @@ google.patch contains the following modifications. Apply with
    - https://bugzilla.mozilla.org/show_bug.cgi?id=1132468
  - lut_inverse_interp16: remove odd whitespace formatting
    - https://code.google.com/p/chromium/issues/detail?id=458024
-To regenerate google.patch:
-  git diff b8456f38 src > google.patch
+ - lut_inverse_interp16: better handle degenerate TRC curves
+   - https://code.google.com/p/chromium/issues/detail?id=458024
+ - Add vcgt tag reader and API to read its RGB gamma data
+   - https://code.google.com/p/chromium/issues/detail?id=471749
+ - Consolidate loop over channels and elements in VCGT parser
+   - https://code.google.com/p/chromium/issues/detail?id=471749
+ - Limit vcgt table to a maximum of 1024 entries
+   - https://code.google.com/p/chromium/issues/detail?id=471749
+ - Add float to half float conversion routine
+   - https://code.google.com/p/chromium/issues/detail?id=491784
+ - Use half float conversion tables (not functions)
+   - https://code.google.com/p/chromium/issues/detail?id=491784
+ - Add matrix transform flag and matrix extraction api
+   - https://code.google.com/p/chromium/issues/detail?id=491826
+ - Add tone reproduction curve (TRC) extraction api
+   - https://code.google.com/p/chromium/issues/detail?id=491826
+ - lut_inverse_interp16: interpolate degenerate zeros in TRC curves
+   - https://code.google.com/p/chromium/issues/detail?id=458024
+ - Make half float code self-contained: add halffloat.h
+   - https://code.google.com/p/chromium/issues/detail?id=491784
+ - lut_inverse_interp16: fix black level inversion error
+   - https://code.google.com/p/chromium/issues/detail?id=504681
+ - Apply upstream fix of uninitialized value
+   - https://github.com/jrmuizel/qcms/commit/0edb697
+ - Apply Keep the output of the TRC between 0 and 1
+   - https://bugzilla.mozilla.org/show_bug.cgi?id=764181
+ - Drop SSE1 code as Chromium mandates SSE2 as a minimum requirement
+   - https://code.google.com/p/chromium/issues/detail?id=506856
+
+For the Chromium changes, since the import, in a patch format run:
+  git diff b8456f38 src

@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 
 #include "base/logging.h"
+#include "url/third_party/mozilla/url_parse.h"
 #include "url/url_file.h"
-#include "url/url_parse.h"
 #include "url/url_parse_internal.h"
 
 // Interesting IE file:isms...

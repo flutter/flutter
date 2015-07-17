@@ -7,8 +7,8 @@
 #include <string>
 
 #include "base/process/process_handle.h"
+#include "base/strings/string_number_conversions.h"
 #include "base/strings/string_util.h"
-#include "base/strings/stringprintf.h"
 
 #if defined(OS_WIN)
 #include "base/win/pe_image.h"
@@ -30,8 +30,8 @@ static int profile_count = 0;
 void StartProfiling(const std::string& name) {
   ++profile_count;
   std::string full_name(name);
-  std::string pid = StringPrintf("%d", GetCurrentProcId());
-  std::string count = StringPrintf("%d", profile_count);
+  std::string pid = IntToString(GetCurrentProcId());
+  std::string count = IntToString(profile_count);
   ReplaceSubstringsAfterOffset(&full_name, 0, "{pid}", pid);
   ReplaceSubstringsAfterOffset(&full_name, 0, "{count}", count);
   ProfilerStart(full_name.c_str());

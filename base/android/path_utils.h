@@ -31,6 +31,10 @@ BASE_EXPORT bool GetDatabaseDirectory(FilePath* result);
 // cache dir.
 BASE_EXPORT bool GetCacheDirectory(FilePath* result);
 
+// Retrieves the path to the thumbnail cache directory. The result is placed
+// in the FilePath pointed to by 'result'.
+BASE_EXPORT bool GetThumbnailCacheDirectory(FilePath* result);
+
 // Retrieves the path to the public downloads directory. The result is placed
 // in the FilePath pointed to by 'result'.
 BASE_EXPORT bool GetDownloadsDirectory(FilePath* result);

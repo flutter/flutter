@@ -89,6 +89,7 @@ class PlatformThreadHandle {
         id_(id) {
   }
 
+  // TODO(toyoshim): Remove id() and use PlatformThread::CurrentId() instead.
   PlatformThreadId id() const {
     return id_;
   }
@@ -112,8 +113,8 @@ class PlatformThreadHandle {
 
 const PlatformThreadId kInvalidThreadId(0);
 
-// Valid values for SetThreadPriority(), listed in increasing order of
-// importance.
+// Valid values for priority of Thread::Options and SimpleThread::Options, and
+// SetCurrentThreadPriority(), listed in increasing order of importance.
 enum class ThreadPriority {
   // Suitable for threads that shouldn't disrupt high priority work.
   BACKGROUND,
@@ -176,8 +177,7 @@ class BASE_EXPORT PlatformThread {
                      PlatformThreadHandle* thread_handle);
 
   // CreateWithPriority() does the same thing as Create() except the priority of
-  // the thread is set based on |priority|.  Can be used in place of Create()
-  // followed by SetThreadPriority().
+  // the thread is set based on |priority|.
   static bool CreateWithPriority(size_t stack_size, Delegate* delegate,
                                  PlatformThreadHandle* thread_handle,
                                  ThreadPriority priority);
@@ -192,15 +192,15 @@ class BASE_EXPORT PlatformThread {
   // |thread_handle|.
   static void Join(PlatformThreadHandle thread_handle);
 
-  // Toggles the target thread's priority at runtime.  Prefer
-  // CreateWithPriority() to set the thread's initial priority.
-  // NOTE: The call may fail if the caller thread is not the same as the
-  // target thread on POSIX.  For example, seccomp-bpf blocks it by default
-  // in the sandbox.
-  static void SetThreadPriority(PlatformThreadHandle handle,
-                                ThreadPriority priority);
+  // Toggles the current thread's priority at runtime. A thread may not be able
+  // to raise its priority back up after lowering it if the process does not
+  // have a proper permission, e.g. CAP_SYS_NICE on Linux.
+  // Since changing other threads' priority is not permitted in favor of
+  // security, this interface is restricted to change only the current thread
+  // priority (https://crbug.com/399473).
+  static void SetCurrentThreadPriority(ThreadPriority priority);
 
-  static ThreadPriority GetThreadPriority(PlatformThreadHandle handle);
+  static ThreadPriority GetCurrentThreadPriority();
 
  private:
   DISALLOW_IMPLICIT_CONSTRUCTORS(PlatformThread);

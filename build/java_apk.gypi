@@ -31,8 +31,10 @@
 #  additional_bundled_libs - Additional libraries what will be stripped and
 #    bundled in the apk.
 #  asset_location - The directory where assets are located.
-#  create_density_splits - Whether to create density-based apk splits. Splits
+#  create_abi_split - Whether to create abi-based spilts. Splits
 #    are supported only for minSdkVersion >= 21.
+#  create_density_splits - Whether to create density-based apk splits.
+#  language_splits - List of languages to create apk splits for.
 #  generated_src_dirs - Same as additional_src_dirs except used for .java files
 #    that are generated at build time. This should be set automatically by a
 #    target's dependencies. The .java files in these directories are not
@@ -70,6 +72,7 @@
     'tested_apk_dex_path%': '/',
     'additional_input_paths': [],
     'create_density_splits%': 0,
+    'language_splits': [],
     'input_jars_paths': [],
     'library_dexed_jars_paths': [],
     'additional_src_dirs': [],
@@ -89,7 +92,9 @@
     'additional_res_packages': [],
     'additional_bundled_libs%': [],
     'is_test_apk%': 0,
-    'extensions_to_not_compress%': '',
+    # Allow icu data, v8 snapshots, and pak files to be loaded directly from the .apk.
+    # Note: These are actually suffix matches, not necessarily extensions.
+    'extensions_to_not_compress%': '.dat,.bin,.pak',
     'resource_input_paths': [],
     'intermediate_dir': '<(PRODUCT_DIR)/<(_target_name)',
     'asset_location%': '<(intermediate_dir)/assets',
@@ -115,7 +120,7 @@
     'instr_stamp': '<(intermediate_dir)/instr.stamp',
     'jar_stamp': '<(intermediate_dir)/jar.stamp',
     'obfuscate_stamp': '<(intermediate_dir)/obfuscate.stamp',
-    'pack_arm_relocations_stamp': '<(intermediate_dir)/pack_arm_relocations.stamp',
+    'pack_relocations_stamp': '<(intermediate_dir)/pack_relocations.stamp',
     'strip_stamp': '<(intermediate_dir)/strip.stamp',
     'stripped_libraries_dir': '<(intermediate_dir)/stripped_libraries',
     'strip_additional_stamp': '<(intermediate_dir)/strip_additional.stamp',
@@ -208,6 +213,8 @@
     'native_lib_placeholder_stamp': '<(apk_package_native_libs_dir)/<(android_app_abi)/native_lib_placeholder.stamp',
     'native_lib_placeholders': [],
     'main_apk_name': '<(apk_name)',
+    'enable_errorprone%': '0',
+    'errorprone_exe_path': '<(PRODUCT_DIR)/bin.java/chromium_errorprone',
   },
   # Pass the jar path to the apk's "fake" jar target.  This would be better as
   # direct_dependent_settings, but a variable set by a direct_dependent_settings
@@ -248,6 +255,11 @@
     ['use_chromium_linker == 1', {
       'dependencies': [
         '<(DEPTH)/base/base.gyp:chromium_android_linker',
+      ],
+    }],
+    ['enable_errorprone == 1', {
+      'dependencies': [
+        '<(DEPTH)/third_party/errorprone/errorprone.gyp:chromium_errorprone',
       ],
     }],
     ['native_lib_target != ""', {
@@ -387,7 +399,7 @@
           'includes': ['../build/android/insert_chromium_version.gypi'],
         },
         {
-          'action_name': 'pack_arm_relocations',
+          'action_name': 'pack_relocations',
           'variables': {
             'conditions': [
               ['use_chromium_linker == 1 and use_relocation_packer == 1 and profiling != 1', {
@@ -405,9 +417,9 @@
             'input_paths': [
               '<(version_stamp)'
             ],
-            'stamp': '<(pack_arm_relocations_stamp)',
+            'stamp': '<(pack_relocations_stamp)',
           },
-          'includes': ['../build/android/pack_arm_relocations.gypi'],
+          'includes': ['../build/android/pack_relocations.gypi'],
         },
         {
           'variables': {
@@ -509,7 +521,7 @@
                     'inputs': [
                       '<(ordered_libraries_file)',
                       '<(strip_additional_stamp)',
-                      '<(pack_arm_relocations_stamp)',
+                      '<(pack_relocations_stamp)',
                     ],
                     'output_apk_path': '<(unsigned_standalone_apk_path)',
                     'libraries_top_dir%': '<(libraries_top_dir)',
@@ -526,7 +538,7 @@
             'libraries_source_dir': '<(apk_package_native_libs_dir)/<(android_app_abi)',
             'package_input_paths': [
               '<(strip_additional_stamp)',
-              '<(pack_arm_relocations_stamp)',
+              '<(pack_relocations_stamp)',
             ],
           },
         }],
@@ -581,6 +593,7 @@
             'asset_location': '',
             'android_manifest_path': '<(split_android_manifest_path)',
             'create_density_splits': 0,
+            'language_splits=': [],
           },
           'includes': [ 'android/package_resources_action.gypi' ],
         },
@@ -663,13 +676,23 @@
                 '<(final_apk_path_no_extension)-density-hdpi.apk',
                 '<(final_apk_path_no_extension)-density-xhdpi.apk',
                 '<(final_apk_path_no_extension)-density-xxhdpi.apk',
+                '<(final_apk_path_no_extension)-density-xxxhdpi.apk',
                 '<(final_apk_path_no_extension)-density-tvdpi.apk',
               ],
               'action': [
                 '--split-apk-path=<(final_apk_path_no_extension)-density-hdpi.apk',
                 '--split-apk-path=<(final_apk_path_no_extension)-density-xhdpi.apk',
                 '--split-apk-path=<(final_apk_path_no_extension)-density-xxhdpi.apk',
+                '--split-apk-path=<(final_apk_path_no_extension)-density-xxxhdpi.apk',
                 '--split-apk-path=<(final_apk_path_no_extension)-density-tvdpi.apk',
+              ],
+            }],
+            ['language_splits != []', {
+              'inputs': [
+                "<!@(python <(DEPTH)/build/apply_locales.py '<(final_apk_path_no_extension)-lang-ZZLOCALE.apk' <(language_splits))",
+              ],
+              'action': [
+                "<!@(python <(DEPTH)/build/apply_locales.py -- '--split-apk-path=<(final_apk_path_no_extension)-lang-ZZLOCALE.apk' <(language_splits))",
               ],
             }],
           ],
@@ -792,6 +815,8 @@
       'action_name': 'javac_<(_target_name)',
       'message': 'Compiling java for <(_target_name)',
       'variables': {
+        'extra_args': [],
+        'extra_inputs': [],
         'gen_src_dirs': [
           '<(intermediate_dir)/gen',
           '>@(generated_src_dirs)',
@@ -807,7 +832,14 @@
         # targets use the same java_in_dir and both use java_apk.gypi or
         # both use java.gypi.)
         'java_sources': ['>!@(find >(java_in_dir)>(java_in_dir_suffix) >(additional_src_dirs) -name "*.java"  # apk)'],
-
+        'conditions': [
+          ['enable_errorprone == 1', {
+            'extra_inputs': [
+              '<(errorprone_exe_path)',
+            ],
+            'extra_args': [ '--use-errorprone-path=<(errorprone_exe_path)' ],
+          }],
+        ],
       },
       'inputs': [
         '<(DEPTH)/build/android/gyp/util/build_utils.py',
@@ -815,6 +847,7 @@
         '>@(java_sources)',
         '>@(input_jars_paths)',
         '<(codegen_stamp)',
+        '<@(extra_inputs)',
       ],
       'conditions': [
         ['native_lib_target != ""', {
@@ -827,6 +860,7 @@
       ],
       'action': [
         'python', '<(DEPTH)/build/android/gyp/javac.py',
+        '--bootclasspath=<(android_sdk_jar)',
         '--classpath=>(input_jars_paths) <(android_sdk_jar)',
         '--src-gendirs=>(gen_src_dirs)',
         '--javac-includes=<(javac_includes)',
@@ -834,6 +868,7 @@
         '--jar-path=<(javac_jar_path)',
         '--jar-excluded-classes=<(jar_excluded_classes)',
         '--stamp=<(compile_stamp)',
+        '<@(extra_args)',
         '>@(java_sources)',
       ],
     },

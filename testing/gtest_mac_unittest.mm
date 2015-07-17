@@ -55,3 +55,55 @@ TEST(GTestMac, ExpectNSNil) {
 
   // TODO(shess): Test that EXPECT_NSNE(nil, nil) fails.
 }
+
+#if !defined(GTEST_OS_IOS)
+
+TEST(GTestMac, ExpectNSEQRect) {
+  base::mac::ScopedNSAutoreleasePool pool;
+
+  EXPECT_NSEQ(NSMakeRect(1, 2, 3, 4), NSMakeRect(1, 2, 3, 4));
+}
+
+TEST(GTestMac, AssertNSEQRect) {
+  base::mac::ScopedNSAutoreleasePool pool;
+
+  ASSERT_NSEQ(NSMakeRect(1, 2, 3, 4), NSMakeRect(1, 2, 3, 4));
+}
+
+TEST(GTestMac, ExpectNSNERect) {
+  base::mac::ScopedNSAutoreleasePool pool;
+
+  EXPECT_NSNE(NSMakeRect(1, 2, 3, 4), NSMakeRect(5, 6, 7, 8));
+}
+
+TEST(GTestMac, AssertNSNERect) {
+  base::mac::ScopedNSAutoreleasePool pool;
+
+  ASSERT_NSNE(NSMakeRect(1, 2, 3, 4), NSMakeRect(5, 6, 7, 8));
+}
+
+TEST(GTestMac, ExpectNSEQPoint) {
+  base::mac::ScopedNSAutoreleasePool pool;
+
+  EXPECT_NSEQ(NSMakePoint(1, 2), NSMakePoint(1, 2));
+}
+
+TEST(GTestMac, AssertNSEQPoint) {
+  base::mac::ScopedNSAutoreleasePool pool;
+
+  ASSERT_NSEQ(NSMakePoint(1, 2), NSMakePoint(1, 2));
+}
+
+TEST(GTestMac, ExpectNSNEPoint) {
+  base::mac::ScopedNSAutoreleasePool pool;
+
+  EXPECT_NSNE(NSMakePoint(1, 2), NSMakePoint(3, 4));
+}
+
+TEST(GTestMac, AssertNSNEPoint) {
+  base::mac::ScopedNSAutoreleasePool pool;
+
+  ASSERT_NSNE(NSMakePoint(1, 2), NSMakePoint(3, 4));
+}
+
+#endif  // !GTEST_OS_IOS

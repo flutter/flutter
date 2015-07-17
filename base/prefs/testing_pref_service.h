@@ -182,7 +182,7 @@ void TestingPrefServiceBase<SuperPrefService, ConstructionPrefRegistry>::
     SetPref(TestingPrefStore* pref_store,
             const std::string& path,
             base::Value* value) {
-  pref_store->SetValue(path, value,
+  pref_store->SetValue(path, make_scoped_ptr(value),
                        WriteablePrefStore::DEFAULT_PREF_WRITE_FLAGS);
 }
 

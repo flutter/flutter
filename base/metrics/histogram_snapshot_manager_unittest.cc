@@ -7,8 +7,8 @@
 #include <string>
 #include <vector>
 
-#include "base/metrics/histogram.h"
 #include "base/metrics/histogram_delta_serialization.h"
+#include "base/metrics/histogram_macros.h"
 #include "base/metrics/statistics_recorder.h"
 #include "testing/gtest/include/gtest/gtest.h"
 

@@ -19,6 +19,7 @@ TESTING_DIR = os.path.join(
 sys.path.append(TESTING_DIR)
 
 from legion import legion_test_case
+from legion import jsonrpclib
 
 
 class ExampleTestController(legion_test_case.TestCase):
@@ -90,6 +91,41 @@ class ExampleTestController(legion_test_case.TestCase):
     self.assertEqual(ls.GetReturncode(), 0)
     self.assertIn('task.isolate', ls.ReadStdout())
 
+  def testProcessOutput(self):
+    """Tests that a process's output gets logged to a file in the output-dir."""
+    code = ('import sys\n'
+            'sys.stdout.write("Hello stdout")\n'
+            'sys.stderr.write("Hello stderr")')
+    self.task.rpc.WriteFile('test.py', code)
+    proc = self.task.Process(['python', 'test.py'],)
+
+    self.CheckProcessOutput('stdout', proc.key, 'Hello stdout')
+    self.CheckProcessOutput('stderr', proc.key, 'Hello stderr')
+
+  def testCustomKey(self):
+    """Tests that a custom key passed to a process works correctly."""
+    code = ('import sys\n'
+            'sys.stdout.write("Hello CustomKey stdout")\n'
+            'sys.stderr.write("Hello CustomKey stderr")')
+    self.task.rpc.WriteFile('test.py', code)
+    self.task.Process(['python', 'test.py'], key='CustomKey')
+
+    self.CheckProcessOutput('stdout', 'CustomKey', 'Hello CustomKey stdout')
+    self.CheckProcessOutput('stderr', 'CustomKey', 'Hello CustomKey stderr')
+
+  def testKeyReuse(self):
+    """Tests that a key cannot be reused."""
+    self.task.Process(['ls'], key='KeyReuse')
+    self.assertRaises(jsonrpclib.Fault, self.task.Process, ['ls'],
+                      key='KeyReuse')
+
+  def CheckProcessOutput(self, pipe, key, expected):
+    """Checks that a process' output files are correct."""
+    logging.info('Reading output file')
+    output_dir = self.task.rpc.GetOutputDir()
+    path = self.task.rpc.PathJoin(output_dir, '%s.%s' % (key, pipe))
+    actual = self.task.rpc.ReadFile(path)
+    self.assertEqual(expected, actual)
 
 if __name__ == '__main__':
   legion_test_case.main()

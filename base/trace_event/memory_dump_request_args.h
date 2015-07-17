@@ -20,9 +20,14 @@ enum class MemoryDumpType {
   TASK_BEGIN,         // Dumping memory at the beginning of a message-loop task.
   TASK_END,           // Dumping memory at the ending of a message-loop task.
   PERIODIC_INTERVAL,  // Dumping memory at periodic intervals.
+  PERIODIC_INTERVAL_WITH_MMAPS,  // As above but w/ heavyweight mmaps dumps.
+                                 // Temporary workaround for crbug.com/499731.
   EXPLICITLY_TRIGGERED,  // Non maskable dump request.
   LAST = EXPLICITLY_TRIGGERED // For IPC macros.
 };
+
+// Returns the name in string for the dump type given.
+BASE_EXPORT const char* MemoryDumpTypeToString(const MemoryDumpType& dump_type);
 
 using MemoryDumpCallback = Callback<void(uint64 dump_guid, bool success)>;
 

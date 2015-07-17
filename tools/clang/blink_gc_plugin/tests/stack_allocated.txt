@@ -14,4 +14,10 @@ class HeapObject : public GarbageCollected<HeapObject> {
 ./stack_allocated.h:36:5: note: [blink-gc] Stack-allocated field 'm_part' declared here:
     StackObject m_part; // Cannot embed a stack allocated object.
     ^
-3 warnings generated.
+stack_allocated.cpp:12:1: warning: [blink-gc] Class 'AnonStackObject' contains invalid fields.
+class AnonStackObject : public StackObject {
+^
+stack_allocated.cpp:14:5: note: [blink-gc] Raw pointer field 'm_obj' to a GC managed class declared here:
+    HeapObject* m_obj;
+    ^
+4 warnings generated.

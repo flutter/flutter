@@ -64,7 +64,7 @@ bool ParseFlagsForSimpleGlyph(ots::OpenTypeFile *file,
   }
 
   if ((flag & (1u << 6)) || (flag & (1u << 7))) {  // reserved flags
-    return OTS_FAILURE_MSG("Bad flag value (%d)", flag);
+    return OTS_FAILURE_MSG("Bad glyph flag value (%d), reserved flags must be set to zero", flag);
   }
 
   *xy_coordinates_length += delta;

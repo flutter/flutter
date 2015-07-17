@@ -221,31 +221,29 @@ bool JsonPrefStore::GetMutableValue(const std::string& key,
 }
 
 void JsonPrefStore::SetValue(const std::string& key,
-                             base::Value* value,
+                             scoped_ptr<base::Value> value,
                              uint32 flags) {
   DCHECK(CalledOnValidThread());
 
   DCHECK(value);
-  scoped_ptr<base::Value> new_value(value);
   base::Value* old_value = NULL;
   prefs_->Get(key, &old_value);
   if (!old_value || !value->Equals(old_value)) {
-    prefs_->Set(key, new_value.Pass());
+    prefs_->Set(key, value.Pass());
     ReportValueChanged(key, flags);
   }
 }
 
 void JsonPrefStore::SetValueSilently(const std::string& key,
-                                     base::Value* value,
+                                     scoped_ptr<base::Value> value,
                                      uint32 flags) {
   DCHECK(CalledOnValidThread());
 
   DCHECK(value);
-  scoped_ptr<base::Value> new_value(value);
   base::Value* old_value = NULL;
   prefs_->Get(key, &old_value);
   if (!old_value || !value->Equals(old_value)) {
-    prefs_->Set(key, new_value.Pass());
+    prefs_->Set(key, value.Pass());
     ScheduleWrite(flags);
   }
 }

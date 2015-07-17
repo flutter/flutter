@@ -1835,18 +1835,6 @@ name=bug_455417
 UNINITIALIZED READ
 name=bug_468169
 ...
-*!vp9_foreach_transformed_block_in_plane
-...
-*!nonrd_select_partition
-*!encode_nonrd_sb_row
-*!vp9_encode_tile
-
-UNINITIALIZED READ
-name=bug_468169_b
-...
-*!vp9_pick_inter_mode
-...
-*!nonrd_select_partition
 *!encode_nonrd_sb_row
 *!vp9_encode_tile
 
@@ -1883,34 +1871,6 @@ content.dll!content::RenderThreadImpl::HostAllocateSharedMemoryBuffer
 content.dll!content::RenderThreadImpl::AllocateSharedMemory
 ...
 content.dll!content::WebGraphicsContext3DCommandBufferImpl::CreateContext
-
-HANDLE LEAK
-name=https://crbug.com/487492
-system call NtCreateSection
-KERNELBASE.dll!CreateFileMappingW
-base.dll!base::SharedMemory::Create
-base.dll!base::SharedMemory::CreateAnonymous
-content.dll!content::ChildThreadImpl::AllocateSharedMemory
-...
-ppapi_proxy.dll!ppapi::proxy::PPB_ImageData_Proxy::CreateImageData
-
-HANDLE LEAK
-name=https://crbug.com/487492_b
-system call NtGdiCreateDIBSection
-GDI32.dll!CreateDIBSection
-skia.dll!`anonymous namespace'::CreateHBitmap
-...
-content.dll!content::PepperGraphics2DHost::Flush
-
-HANDLE LEAK
-name=https://crbug.com/487492_c
-system call NtCreateSection
-KERNELBASE.dll!CreateFileMappingW
-base.dll!base::SharedMemory::Create
-base.dll!base::SharedMemory::CreateAnonymous
-content.dll!content::ChildThreadImpl::AllocateSharedMemory
-...
-content.dll!content::PepperPluginInstanceImpl::PrepareTextureMailbox
 
 HANDLE LEAK
 name=https://crbug.com/489779
@@ -1952,3 +1912,103 @@ KERNEL32.dll!WriteFile
 *!sessions::SessionBackend::AppendCommandsToFile
 *!sessions::SessionBackend::AppendCommands
 *!base::internal::RunnableAdapter<>::Run
+
+UNADDRESSABLE ACCESS
+name=bug_505734
+webcore_shared.dll!blink::FocusController::focusedOrMainFrame
+content.dll!content::RenderWidget::GetSelectionBounds
+content.dll!content::RenderWidget::UpdateSelectionBounds
+content.dll!content::RenderWidget::WillBeginCompositorFrame
+cc.dll!base::internal::InvokeHelper<>::MakeItSo
+cc.dll!base::internal::Invoker<>::Run
+
+UNADDRESSABLE ACCESS
+name=bug_506557_a
+drmemorylib.dll!replace_memmove
+base.dll!base::trace_event::TraceLog::RemoveEnabledStateObserver
+base.dll!base::trace_event::TraceEventSystemStatsMonitor::~TraceEventSystemStatsMonitor
+content.dll!content::BrowserMainLoop::ShutdownThreadsAndCleanUp
+content.dll!content::BrowserMainRunnerImpl::Shutdown
+content.dll!content::BrowserMain
+content.dll!content::RunNamedProcessTypeMain
+content.dll!content::ContentMainRunnerImpl::Run
+content.dll!content::ContentMain
+*!content::BrowserTestBase::SetUp
+*!InProcessBrowserTest::SetUp
+*!testing::internal::HandleExceptionsInMethodIfSupported<>
+
+UNINITIALIZED READ
+name=bug_506557_b
+base.dll!base::trace_event::TraceLog::RemoveEnabledStateObserver
+content.dll!content::V8SamplingProfiler::~V8SamplingProfiler
+content.dll!content::RenderThreadImpl::~RenderThreadImpl
+content.dll!content::RenderThreadImpl::`vector deleting destructor'
+content.dll!content::ChildProcess::~ChildProcess
+content.dll!content::RenderProcessImpl::`scalar deleting destructor'
+content.dll!content::InProcessRendererThread::CleanUp
+base.dll!base::`anonymous namespace'::ThreadFunc
+KERNEL32.dll!BaseThreadInitThunk
+
+UNADDRESSABLE ACCESS
+name=bug_506557_c
+base.dll!base::trace_event::TraceLog::RemoveEnabledStateObserver
+content.dll!content::V8SamplingProfiler::~V8SamplingProfiler
+content.dll!content::RenderThreadImpl::~RenderThreadImpl
+content.dll!content::RenderThreadImpl::`vector deleting destructor'
+content.dll!content::ChildProcess::~ChildProcess
+content.dll!content::RenderProcessImpl::`scalar deleting destructor'
+content.dll!content::InProcessRendererThread::CleanUp
+base.dll!base::`anonymous namespace'::ThreadFunc
+KERNEL32.dll!BaseThreadInitThunk
+
+UNADDRESSABLE ACCESS
+name=bug_506557_d
+base.dll!std::vector<>::push_back
+base.dll!base::trace_event::TraceLog::AddEnabledStateObserver
+base.dll!base::trace_event::MemoryDumpManager::Initialize
+content.dll!content::ChildThreadImpl::Init
+content.dll!content::ChildThreadImpl::ChildThreadImpl
+content.dll!content::RenderThreadImpl::RenderThreadImpl
+content.dll!content::InProcessRendererThread::Init
+base.dll!base::`anonymous namespace'::ThreadFunc
+KERNEL32.dll!BaseThreadInitThunk
+
+UNADDRESSABLE ACCESS
+name=bug_506557_e
+base.dll!std::vector<>::push_back
+base.dll!base::trace_event::TraceLog::AddEnabledStateObserver
+content.dll!content::V8SamplingProfiler::V8SamplingProfiler
+content.dll!content::RenderThreadImpl::EnsureWebKitInitialized
+content.dll!content::RenderThreadImpl::OnCreateNewView
+content.dll!ViewMsg_New::Dispatch<>
+content.dll!content::RenderThreadImpl::OnControlMessageReceived
+content.dll!content::ChildThreadImpl::OnMessageReceived
+ipc.dll!IPC::ChannelProxy::Context::OnDispatchMessage
+ipc.dll!base::internal::Invoker<>::Run
+base.dll!base::debug::TaskAnnotator::RunTask
+scheduler.dll!scheduler::TaskQueueManager::ProcessTaskFromWorkQueue
+scheduler.dll!scheduler::TaskQueueManager::DoWork
+scheduler.dll!base::internal::Invoker<>::Run
+base.dll!base::debug::TaskAnnotator::RunTask
+base.dll!base::MessageLoop::RunTask
+base.dll!base::MessageLoop::DeferOrRunPendingTask
+base.dll!base::MessageLoop::DoWork
+base.dll!base::MessagePumpForUI::DoRunLoop
+base.dll!base::MessagePumpWin::Run
+base.dll!base::MessageLoop::RunHandler
+base.dll!base::MessageLoop::Run
+base.dll!base::Thread::Run
+base.dll!base::Thread::ThreadMain
+base.dll!base::`anonymous namespace'::ThreadFunc
+KERNEL32.dll!BaseThreadInitThunk
+
+UNINITIALIZED READ
+name=bug_508794
+MSVCR120.dll!mbtowc_l
+MSVCR120.dll!fputwc_nolock
+MSVCR120.dll!vsnwprintf_s_l
+MSVCR120.dll!vsnwprintf_s
+*!base::`anonymous namespace'::StringAppendVT<>
+*!base::StringPrintf
+*!content::AccessibilityTreeFormatter::ToString
+*!content::AccessibilityTreeFormatter::RecursiveFormatAccessibilityTree

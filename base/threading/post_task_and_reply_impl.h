@@ -25,6 +25,8 @@ namespace internal {
 // may want base::WorkerPool.
 class PostTaskAndReplyImpl {
  public:
+  virtual ~PostTaskAndReplyImpl() = default;
+
   // Implementation for TaskRunner::PostTaskAndReply and
   // WorkerPool::PostTaskAndReply.
   bool PostTaskAndReply(const tracked_objects::Location& from_here,

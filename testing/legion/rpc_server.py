@@ -17,16 +17,16 @@ be achieved in 2 ways:
 import logging
 import threading
 import time
-import xmlrpclib
-import SimpleXMLRPCServer
 import SocketServer
 
 #pylint: disable=relative-import
 import common_lib
 import rpc_methods
+import ssl_util
+import SimpleJSONRPCServer
 
 
-class RequestHandler(SimpleXMLRPCServer.SimpleXMLRPCRequestHandler):
+class RequestHandler(SimpleJSONRPCServer.SimpleJSONRPCRequestHandler):
   """Restricts access to only specified IP address.
 
   This call assumes the server is RPCServer.
@@ -44,20 +44,19 @@ class RequestHandler(SimpleXMLRPCServer.SimpleXMLRPCRequestHandler):
       self.end_headers()
       self.wfile.write(response)
     else:
-      return SimpleXMLRPCServer.SimpleXMLRPCRequestHandler.do_POST(self)
+      return SimpleJSONRPCServer.SimpleJSONRPCRequestHandler.do_POST(self)
 
 
-class RPCServer(SimpleXMLRPCServer.SimpleXMLRPCServer,
+class RpcServer(ssl_util.SslRpcServer,
                 SocketServer.ThreadingMixIn):
   """Restricts all endpoints to only specified IP addresses."""
 
   def __init__(self, authorized_address,
                idle_timeout_secs=common_lib.DEFAULT_TIMEOUT_SECS):
-    SimpleXMLRPCServer.SimpleXMLRPCServer.__init__(
+    ssl_util.SslRpcServer.__init__(
         self, (common_lib.SERVER_ADDRESS, common_lib.SERVER_PORT),
         allow_none=True, logRequests=False,
         requestHandler=RequestHandler)
-
     self.authorized_address = authorized_address
     self.idle_timeout_secs = idle_timeout_secs
     self.register_instance(rpc_methods.RPCMethods(self))
@@ -73,7 +72,7 @@ class RPCServer(SimpleXMLRPCServer.SimpleXMLRPCServer,
     idle timeout thread to quit.
     """
     self._shutdown_requested_event.set()
-    SimpleXMLRPCServer.SimpleXMLRPCServer.shutdown(self)
+    SimpleJSONRPCServer.SimpleJSONRPCServer.shutdown(self)
     logging.info('Server shutdown complete')
 
   def serve_forever(self, poll_interval=0.5):
@@ -88,7 +87,7 @@ class RPCServer(SimpleXMLRPCServer.SimpleXMLRPCServer,
     """
     logging.info('RPC server starting')
     self._idle_thread.start()
-    SimpleXMLRPCServer.SimpleXMLRPCServer.serve_forever(self, poll_interval)
+    SimpleJSONRPCServer.SimpleJSONRPCServer.serve_forever(self, poll_interval)
 
   def _dispatch(self, method, params):
     """Dispatch the call to the correct method with the provided params.
@@ -105,7 +104,8 @@ class RPCServer(SimpleXMLRPCServer.SimpleXMLRPCServer,
     """
     logging.debug('Calling %s%s', method, params)
     self._rpc_received_event.set()
-    return SimpleXMLRPCServer.SimpleXMLRPCServer._dispatch(self, method, params)
+    return SimpleJSONRPCServer.SimpleJSONRPCServer._dispatch(
+        self, method, params)
 
   def _CheckForIdleQuit(self):
     """Check for, and exit, if the server is idle for too long.

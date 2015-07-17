@@ -43,6 +43,20 @@ throws a RuntimeException.
 Level here is either `VERBOSE`, `DEBUG`, `INFO`, `WARN`, `ERROR`, `ASSERT`, or `SUPPRESS`
 By default, the level for all tags is `INFO`.
 
+### An exception trace is printed when the exception is the last parameter ###
+
+As with `java.util.Log`, putting a throwable as last parameter will dump the corresponding stack
+trace:
+
+    Log.i(TAG, "An error happened: %s", e)
+
+    I/cr.YourModuleTag: ( 999): An error happened: This is the exception's message
+    I/cr.YourModuleTag: ( 999): java.lang.Exception: This is the exception's message
+    I/cr.YourModuleTag: ( 999):     at foo.bar.MyClass.test(MyClass.java:42)
+    I/cr.YourModuleTag: ( 999):     ...
+
+Having the exception as last parameter doesn't prevent it from being used for string formatting.
+
 ### Logging Best Practices
 
 #### Rule #1: Never log PII (Personal Identification Information):
@@ -111,7 +125,7 @@ complementary ways:
     while the previous method can enable or disable debugging for a whole feature without changing
     any source file.
 
--   Annotate debug functions with the `@NoSideEffects` annotation.
+-   Annotate debug functions with the `@RemovableInRelease` annotation.
 
     That annotation tells Proguard to assume that a given function has no side effects, and is
     called only for its returned value. If this value is unused, the call will be removed. If the
@@ -121,7 +135,7 @@ complementary ways:
   
         /* If that function is only used in Log.d calls, proguard should completely remove it from
          * the release builds. */
-        @NoSideEffects
+        @RemovableInRelease
         private static String getSomeDebugLogString(Thing[] things) {
           /* Still needs to be guarded to avoid impacting debug builds, or in case it's used for
            * some other log levels. But at least it is done only once, inside the function. */

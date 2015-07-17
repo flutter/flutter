@@ -52,24 +52,24 @@ class ScopedComPtr : public scoped_refptr<Interface> {
   // Note that this function equates to IUnknown::Release and should not
   // be confused with e.g. scoped_ptr::release().
   void Release() {
-    if (ptr_ != NULL) {
-      ptr_->Release();
-      ptr_ = NULL;
+    if (this->ptr_ != NULL) {
+      this->ptr_->Release();
+      this->ptr_ = NULL;
     }
   }
 
   // Sets the internal pointer to NULL and returns the held object without
   // releasing the reference.
   Interface* Detach() {
-    Interface* p = ptr_;
-    ptr_ = NULL;
+    Interface* p = this->ptr_;
+    this->ptr_ = NULL;
     return p;
   }
 
   // Accepts an interface pointer that has already been addref-ed.
   void Attach(Interface* p) {
-    DCHECK(!ptr_);
-    ptr_ = p;
+    DCHECK(!this->ptr_);
+    this->ptr_ = p;
   }
 
   // Retrieves the pointer address.
@@ -77,8 +77,8 @@ class ScopedComPtr : public scoped_refptr<Interface> {
   // The function DCHECKs on the current value being NULL.
   // Usage: Foo(p.Receive());
   Interface** Receive() {
-    DCHECK(!ptr_) << "Object leak. Pointer must be NULL";
-    return &ptr_;
+    DCHECK(!this->ptr_) << "Object leak. Pointer must be NULL";
+    return &this->ptr_;
   }
 
   // A convenience for whenever a void pointer is needed as an out argument.
@@ -89,18 +89,18 @@ class ScopedComPtr : public scoped_refptr<Interface> {
   template <class Query>
   HRESULT QueryInterface(Query** p) {
     DCHECK(p != NULL);
-    DCHECK(ptr_ != NULL);
+    DCHECK(this->ptr_ != NULL);
     // IUnknown already has a template version of QueryInterface
     // so the iid parameter is implicit here. The only thing this
     // function adds are the DCHECKs.
-    return ptr_->QueryInterface(p);
+    return this->ptr_->QueryInterface(p);
   }
 
   // QI for times when the IID is not associated with the type.
   HRESULT QueryInterface(const IID& iid, void** obj) {
     DCHECK(obj != NULL);
-    DCHECK(ptr_ != NULL);
-    return ptr_->QueryInterface(iid, obj);
+    DCHECK(this->ptr_ != NULL);
+    return this->ptr_->QueryInterface(iid, obj);
   }
 
   // Queries |other| for the interface this object wraps and returns the
@@ -113,18 +113,18 @@ class ScopedComPtr : public scoped_refptr<Interface> {
   // Convenience wrapper around CoCreateInstance
   HRESULT CreateInstance(const CLSID& clsid, IUnknown* outer = NULL,
                          DWORD context = CLSCTX_ALL) {
-    DCHECK(!ptr_);
+    DCHECK(!this->ptr_);
     HRESULT hr = ::CoCreateInstance(clsid, outer, context, *interface_id,
-                                    reinterpret_cast<void**>(&ptr_));
+                                    reinterpret_cast<void**>(&this->ptr_));
     return hr;
   }
 
   // Checks if the identity of |other| and this object is the same.
   bool IsSameObject(IUnknown* other) {
-    if (!other && !ptr_)
+    if (!other && !this->ptr_)
       return true;
 
-    if (!other || !ptr_)
+    if (!other || !this->ptr_)
       return false;
 
     ScopedComPtr<IUnknown> my_identity;
@@ -147,8 +147,8 @@ class ScopedComPtr : public scoped_refptr<Interface> {
   // by statically casting the ScopedComPtr instance to the wrapped interface
   // and then making the call... but generally that shouldn't be necessary.
   BlockIUnknownMethods* operator->() const {
-    DCHECK(ptr_ != NULL);
-    return reinterpret_cast<BlockIUnknownMethods*>(ptr_);
+    DCHECK(this->ptr_ != NULL);
+    return reinterpret_cast<BlockIUnknownMethods*>(this->ptr_);
   }
 
   // Pull in operator=() from the parent class.

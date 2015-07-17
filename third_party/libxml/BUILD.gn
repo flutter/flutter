@@ -38,13 +38,15 @@ static_library("libxml") {
     "src/HTMLtree.c",
     "src/SAX.c",
     "src/SAX2.c",
-    "src/acconfig.h",
+    "src/buf.c",
+    "src/buf.h",
     "src/c14n.c",
     "src/catalog.c",
     "src/chvalid.c",
     "src/debugXML.c",
     "src/dict.c",
     "src/elfgcchack.h",
+    "src/enc.h",
     "src/encoding.c",
     "src/entities.c",
     "src/error.c",
@@ -103,8 +105,10 @@ static_library("libxml") {
     "src/parserInternals.c",
     "src/pattern.c",
     "src/relaxng.c",
+    "src/save.h",
     "src/schematron.c",
     "src/threads.c",
+    "src/timsort.h",
     "src/tree.c",
 
     #"src/trio.c",
@@ -132,6 +136,9 @@ static_library("libxml") {
     "src/xmlwriter.c",
     "src/xpath.c",
     "src/xpointer.c",
+
+    #"src/xzlib.c",
+    "src/xzlib.h",
     "win32/config.h",
     "win32/include/libxml/xmlversion.h",
   ]
@@ -149,7 +156,7 @@ static_library("libxml") {
 
   if (is_win) {
     cflags_c = [ "/wd4101" ]  # Unreferenced local variable.
-  } else if (is_mac || is_android) {
+  } else if (is_mac || is_ios || is_android) {
     # http://www.xmlsoft.org/threads.html says that this is required when using
     # libxml from several threads, which can possibly happen in chrome. On
     # linux, this is picked up by transitivity from pkg-config output from
@@ -175,6 +182,19 @@ static_library("libxml") {
       "-Wno-ignored-attributes",
     ]
   }
+  config("libxml_warnings") {
+    if (is_clang) {
+      cflags += [
+        # libxml casts from int to long to void*.
+        "-Wno-int-to-void-pointer-cast",
+
+        # libxml passes a volatile LPCRITICAL_SECTION* to a function expecting
+        # a void* volatile*.
+        "-Wno-incompatible-pointer-types",
+      ]
+    }
+  }
+  configs += [ ":libxml_warnings" ]
 
   include_dirs = [ "$os_include" ]
 }

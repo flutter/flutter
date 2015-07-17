@@ -153,11 +153,17 @@ class BASE_EXPORT Pickle {
   // Performs a deep copy.
   Pickle& operator=(const Pickle& other);
 
-  // Returns the size of the Pickle's data.
+  // Returns the number of bytes written in the Pickle, including the header.
   size_t size() const { return header_size_ + header_->payload_size; }
 
   // Returns the data for this Pickle.
   const void* data() const { return header_; }
+
+  // Returns the effective memory capacity of this Pickle, that is, the total
+  // number of bytes currently dynamically allocated or 0 in the case of a
+  // read-only Pickle. This should be used only for diagnostic / profiling
+  // purposes.
+  size_t GetTotalAllocatedSize() const;
 
   // Methods for adding to the payload of the Pickle.  These values are
   // appended to the end of the Pickle's payload.  When reading values from a

@@ -848,7 +848,7 @@ bool ReadMessage(const string &wire_buffer, T *message) {
   return message->ParseFromArray(wire_buffer.data(), wire_buffer.size());
 }
 
-bool StartsWith(const string& s, const string& prefix) {
+bool base::StartsWith(const string& s, const string& prefix) {
   return s.substr(0, prefix.length()) == prefix;
 }
 
@@ -863,10 +863,11 @@ TEST(Utf8ValidationTest, WriteInvalidUTF8String) {
   }
 #ifdef GOOGLE_PROTOBUF_UTF8_VALIDATION_ENABLED
   ASSERT_EQ(1, errors.size());
-  EXPECT_TRUE(StartsWith(errors[0],
-                         "String field contains invalid UTF-8 data when "
-                         "serializing a protocol buffer. Use the "
-                         "'bytes' type if you intend to send raw bytes."));
+  EXPECT_TRUE(
+      base::StartsWith(errors[0],
+                       "String field contains invalid UTF-8 data when "
+                       "serializing a protocol buffer. Use the "
+                       "'bytes' type if you intend to send raw bytes."));
 #else
   ASSERT_EQ(0, errors.size());
 #endif  // GOOGLE_PROTOBUF_UTF8_VALIDATION_ENABLED
@@ -885,10 +886,11 @@ TEST(Utf8ValidationTest, ReadInvalidUTF8String) {
   }
 #ifdef GOOGLE_PROTOBUF_UTF8_VALIDATION_ENABLED
   ASSERT_EQ(1, errors.size());
-  EXPECT_TRUE(StartsWith(errors[0],
-                         "String field contains invalid UTF-8 data when "
-                         "parsing a protocol buffer. Use the "
-                         "'bytes' type if you intend to send raw bytes."));
+  EXPECT_TRUE(
+      base::StartsWith(errors[0],
+                       "String field contains invalid UTF-8 data when "
+                       "parsing a protocol buffer. Use the "
+                       "'bytes' type if you intend to send raw bytes."));
 
 #else
   ASSERT_EQ(0, errors.size());

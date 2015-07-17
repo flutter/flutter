@@ -49,9 +49,6 @@ DownloadContentTest.ResumeWithDeletedFile
 # http://crbug.com/386227
 IndexedDBBrowserTest.VersionChangeCrashResilience
 
-# http://crbug.com/386222
-IndexedDBBrowserTest.DoesntHangTest
-
 # http://crbug.com/233118
 IndexedDBBrowserTest.NullKeyPathPersistence
 

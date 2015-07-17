@@ -55,6 +55,9 @@ if (current_toolchain == host_toolchain) {
       ":yasm_config",
       "//build/config/compiler:no_chromium_code",
     ]
+    deps = [
+      "//build/config/sanitizers:deps",
+    ]
   }
 
   executable("genmodule") {
@@ -65,6 +68,9 @@ if (current_toolchain == host_toolchain) {
     configs += [
       ":yasm_config",
       "//build/config/compiler:no_chromium_code",
+    ]
+    deps = [
+      "//build/config/sanitizers:deps",
     ]
   }
 
@@ -82,6 +88,7 @@ if (current_toolchain == host_toolchain) {
 
     deps = [
       ":yasm_utils",
+      "//build/config/sanitizers:deps",
     ]
   }
 
@@ -109,6 +116,9 @@ if (current_toolchain == host_toolchain) {
       ":yasm_config",
       "//build/config/compiler:no_chromium_code",
     ]
+    deps = [
+      "//build/config/sanitizers:deps",
+    ]
   }
 
   executable("genversion") {
@@ -119,6 +129,9 @@ if (current_toolchain == host_toolchain) {
     configs += [
       ":yasm_config",
       "//build/config/compiler:no_chromium_code",
+    ]
+    deps = [
+      "//build/config/sanitizers:deps",
     ]
   }
 
@@ -145,6 +158,9 @@ if (current_toolchain == host_toolchain) {
     if (is_posix) {
       cflags = [ "-Wno-switch" ]
     }
+    deps = [
+      "//build/config/sanitizers:deps",
+    ]
   }
 
   executable("yasm") {
@@ -267,6 +283,7 @@ if (current_toolchain == host_toolchain) {
       ":generate_module",
       ":generate_version",
       ":yasm_utils",
+      "//build/config/sanitizers:deps",
     ]
   }
 

@@ -96,6 +96,10 @@
               # For GetKnownDeadTerminationStatus and GetTerminationStatus.
               'process/kill_posix.cc',
 
+              # For ForkWithFlags.
+              'process/launch.h',
+              'process/launch_posix.cc',
+
               # Unlike libbase_nacl, for Non-SFI build, we need to use
               # rand_util_posix for random implementation, instead of
               # rand_util_nacl.cc, which is based on IRT. rand_util_nacl.cc is

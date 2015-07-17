@@ -38,18 +38,16 @@ def GetClassesInZipFile(zip_file):
 
 
 def CallJavap(classpath, classes):
-  output = ''
-  for i in range(0, len(classes), 2000):
-    javap_cmd = [
-        'javap',
-        '-package',  # Show public/protected/package.
-        # -verbose is required to get constant values (which can be inlined in
-        # dependents).
-        '-verbose',
-        '-classpath', classpath
-        ] + classes[i:i+2000]
-    output += build_utils.CheckOutput(javap_cmd)
-  return output
+  javap_cmd = [
+      'javap',
+      '-package',  # Show public/protected/package.
+      # -verbose is required to get constant values (which can be inlined in
+      # dependents).
+      '-verbose',
+      '-J-XX:NewSize=4m',
+      '-classpath', classpath
+      ] + classes
+  return build_utils.CheckOutput(javap_cmd)
 
 
 def ExtractToc(disassembled_classes):

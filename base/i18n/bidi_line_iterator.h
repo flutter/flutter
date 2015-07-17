@@ -7,6 +7,7 @@
 
 #include "base/basictypes.h"
 #include "base/i18n/base_i18n_export.h"
+#include "base/i18n/rtl.h"
 #include "base/strings/string16.h"
 #include "third_party/icu/source/common/unicode/ubidi.h"
 
@@ -23,7 +24,7 @@ class BASE_I18N_EXPORT BiDiLineIterator {
 
   // Initializes the bidirectional iterator with the specified text.  Returns
   // whether initialization succeeded.
-  bool Open(const string16& text, bool right_to_left);
+  bool Open(const string16& text, TextDirection direction);
 
   // Returns the number of visual runs in the text, or zero on error.
   int CountRuns();

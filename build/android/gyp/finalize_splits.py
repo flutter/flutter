@@ -12,6 +12,7 @@ import optparse
 import sys
 
 import finalize_apk
+from util import build_utils
 
 def main():
   parser = optparse.OptionParser()
@@ -25,20 +26,27 @@ def main():
   parser.add_option('--key-name', help='Keystore name')
   parser.add_option('--densities',
       help='Comma separated list of densities finalize.')
+  parser.add_option('--languages',
+      help='GYP list of language splits to finalize.')
 
   options, _ = parser.parse_args()
   options.load_library_from_zip = 0
 
   if options.densities:
     for density in options.densities.split(','):
-      options.unsigned_apk_path = ("%s-%s" %
+      options.unsigned_apk_path = ("%s_%s" %
           (options.resource_packaged_apk_path, density))
       options.final_apk_path = ("%s-density-%s.apk" %
           (options.base_output_path, density))
       finalize_apk.FinalizeApk(options)
-  else:
-    raise Exception('Language splits not yet implemented')
 
+  if options.languages:
+    for lang in build_utils.ParseGypList(options.languages):
+      options.unsigned_apk_path = ("%s_%s" %
+          (options.resource_packaged_apk_path, lang))
+      options.final_apk_path = ("%s-lang-%s.apk" %
+          (options.base_output_path, lang))
+      finalize_apk.FinalizeApk(options)
 
 if __name__ == '__main__':
   sys.exit(main())

@@ -67,6 +67,11 @@ const char kProfilerTiming[]                = "profiler-timing";
 // chrome://profiler.
 const char kProfilerTimingDisabledValue[]   = "0";
 
+#if defined(OS_WIN)
+// Disables the USB keyboard detection for blocking the OSK on Win8+.
+const char kDisableUsbKeyboardDetect[]      = "disable-usb-keyboard-detect";
+#endif
+
 #if defined(OS_POSIX)
 // Used for turning on Breakpad crash reporting in a debug environment where
 // crash reporting is typically compiled but disabled.

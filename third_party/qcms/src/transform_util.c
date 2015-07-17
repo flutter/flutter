@@ -36,16 +36,18 @@
 
 /* value must be a value between 0 and 1 */
 //XXX: is the above a good restriction to have?
-float lut_interp_linear(double value, uint16_t *table, size_t length)
+// the output range of this function is 0..1
+float lut_interp_linear(double input_value, uint16_t *table, size_t length)
 {
 	int upper, lower;
-	value = value * (length - 1); // scale to length of the array
-	upper = ceil(value);
-	lower = floor(value);
+	float value;
+	input_value = input_value * (length - 1); // scale to length of the array
+	upper = ceil(input_value);
+	lower = floor(input_value);
 	//XXX: can we be more performant here?
-	value = table[upper]*(1. - (upper - value)) + table[lower]*(upper - value);
+	value = table[upper]*(1. - (upper - input_value)) + table[lower]*(upper - input_value);
 	/* scale the value */
-	return value * (1./65535.);
+	return value * (1.f/65535.f);
 }
 
 /* same as above but takes and returns a uint16_t value representing a range from 0..1 */
@@ -120,15 +122,17 @@ uint16_t lut_interp_linear16(uint16_t input_value, uint16_t *table, int length)
 }
 #endif
 
-void compute_curve_gamma_table_type1(float gamma_table[256], double gamma)
+void compute_curve_gamma_table_type1(float gamma_table[256], uint16_t gamma)
 {
 	unsigned int i;
+	float gamma_float = u8Fixed8Number_to_float(gamma);
 	for (i = 0; i < 256; i++) {
-		gamma_table[i] = pow(i/255., gamma);
+		// 0..1^(0..255 + 255/256) will always be between 0 and 1
+		gamma_table[i] = pow(i/255., gamma_float);
 	}
 }
 
-void compute_curve_gamma_table_type2(float gamma_table[256], uint16_t *table, int length)
+void compute_curve_gamma_table_type2(float gamma_table[256], uint16_t *table, size_t length)
 {
 	unsigned int i;
 	for (i = 0; i < 256; i++) {
@@ -191,9 +195,9 @@ void compute_curve_gamma_table_type_parametric(float gamma_table[256], float par
                         // XXX The equations are not exactly as definied in the spec but are
                         //     algebraic equivilent.
                         // TODO Should division by 255 be for the whole expression.
-                        gamma_table[X] = pow(a * X / 255. + b, y) + c + e;
+                        gamma_table[X] = clamp_float(pow(a * X / 255. + b, y) + c + e);
                 } else {
-                        gamma_table[X] = c * X / 255. + f;
+                        gamma_table[X] = clamp_float(c * X / 255. + f);
                 }
         }
 }
@@ -206,15 +210,26 @@ void compute_curve_gamma_table_type0(float gamma_table[256])
 	}
 }
 
-
 float clamp_float(float a)
 {
-        if (a > 1.)
-                return 1.;
-        else if (a < 0)
-                return 0;
-        else
-                return a;
+	/* One would naturally write this function as the following:
+	if (a > 1.)
+		return 1.;
+	else if (a < 0)
+		return 0;
+	else
+		return a;
+
+	However, that version will let NaNs pass through which is undesirable
+	for most consumers.
+	*/
+
+	if (a > 1.)
+		return 1.;
+	else if (a >= 0)
+		return a;
+	else // a < 0 or a is NaN
+		return 0;
 }
 
 unsigned char clamp_u8(float v)
@@ -263,7 +278,7 @@ float *build_input_gamma_table(struct curveType *TRC)
 			if (TRC->count == 0) {
 				compute_curve_gamma_table_type0(gamma_table);
 			} else if (TRC->count == 1) {
-				compute_curve_gamma_table_type1(gamma_table, u8Fixed8Number_to_float(TRC->data[0]));
+				compute_curve_gamma_table_type1(gamma_table, TRC->data[0]);
 			} else {
 				compute_curve_gamma_table_type2(gamma_table, TRC->data, TRC->count);
 			}
@@ -328,11 +343,14 @@ uint16_fract_t lut_inverse_interp16(uint16_t Value, uint16_t LutTable[], int len
         // Does the curve belong to this case?
         if (NumZeroes > 1 || NumPoles > 1)
         {
-                int a, b;
+                int a, b, sample;
 
                 // Identify if value fall downto 0 or FFFF zone
                 if (Value == 0) return 0;
-               // if (Value == 0xFFFF) return 0xFFFF;
+                // if (Value == 0xFFFF) return 0xFFFF;
+                sample = (length-1) * ((double) Value * (1./65535.));
+                if (LutTable[sample] == 0xffff)
+                    return 0xffff;
 
                 // else restrict to valid zone
 
@@ -341,8 +359,29 @@ uint16_fract_t lut_inverse_interp16(uint16_t Value, uint16_t LutTable[], int len
 
                 l = a - 1;
                 r = b + 1;
+
+                // Ensure a valid binary search range
+
+                if (l < 1)
+                    l = 1;
+                if (r > 0x10000)
+                    r = 0x10000;
+
+                // If the search range is inverted due to degeneracy,
+                // deem LutTable non-invertible in this search range.
+                // Refer to https://bugzil.la/1132467
+
+                if (r <= l)
+                    return 0;
         }
 
+        // For input 0, return that to maintain black level. Note the binary search
+        // does not. For example, it inverts the standard sRGB gamma curve to 7 at
+        // the origin, causing a black level error.
+
+        if (Value == 0 && NumZeroes) {
+            return 0;
+        }
 
         // Seems not a degenerated case... apply binary search
 
@@ -365,13 +404,19 @@ uint16_fract_t lut_inverse_interp16(uint16_t Value, uint16_t LutTable[], int len
 
         // Not found, should we interpolate?
 
-
         // Get surrounding nodes
+
+        assert(x >= 1);
 
         val2 = (length-1) * ((double) (x - 1) / 65535.0);
 
         cell0 = (int) floor(val2);
         cell1 = (int) ceil(val2);
+
+        assert(cell0 >= 0);
+        assert(cell1 >= 0);
+        assert(cell0 < length);
+        assert(cell1 < length);
 
         if (cell0 == cell1) return (uint16_fract_t) x;
 

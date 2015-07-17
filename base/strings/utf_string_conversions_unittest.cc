@@ -185,11 +185,11 @@ TEST(UTFStringConversionsTest, ConvertUTF32ToUTF8) {
 #endif  // defined(WCHAR_T_IS_UTF32)
 
 TEST(UTFStringConversionsTest, ConvertMultiString) {
-  static wchar_t wmulti[] = {
-    L'f', L'o', L'o', L'\0',
-    L'b', L'a', L'r', L'\0',
-    L'b', L'a', L'z', L'\0',
-    L'\0'
+  static char16 multi16[] = {
+    'f', 'o', 'o', '\0',
+    'b', 'a', 'r', '\0',
+    'b', 'a', 'z', '\0',
+    '\0'
   };
   static char multi[] = {
     'f', 'o', 'o', '\0',
@@ -197,13 +197,14 @@ TEST(UTFStringConversionsTest, ConvertMultiString) {
     'b', 'a', 'z', '\0',
     '\0'
   };
-  std::wstring wmultistring;
-  memcpy(WriteInto(&wmultistring, arraysize(wmulti)), wmulti, sizeof(wmulti));
-  EXPECT_EQ(arraysize(wmulti) - 1, wmultistring.length());
+  string16 multistring16;
+  memcpy(WriteInto(&multistring16, arraysize(multi16)), multi16,
+                   sizeof(multi16));
+  EXPECT_EQ(arraysize(multi16) - 1, multistring16.length());
   std::string expected;
   memcpy(WriteInto(&expected, arraysize(multi)), multi, sizeof(multi));
   EXPECT_EQ(arraysize(multi) - 1, expected.length());
-  const std::string& converted = WideToUTF8(wmultistring);
+  const std::string& converted = UTF16ToUTF8(multistring16);
   EXPECT_EQ(arraysize(multi) - 1, converted.length());
   EXPECT_EQ(expected, converted);
 }

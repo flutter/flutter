@@ -20,6 +20,7 @@ import android.util.Printer;
 public class TraceEvent {
 
     private static volatile boolean sEnabled = false;
+    private static volatile boolean sATraceEnabled = false; // True when taking an Android systrace.
 
     private static class BasicLooperMonitor implements Printer {
         @Override
@@ -176,6 +177,8 @@ public class TraceEvent {
     @CalledByNative
     public static void setEnabled(boolean enabled) {
         sEnabled = enabled;
+        // Android M+ systrace logs this on its own. Only log it if not writing to Android systrace.
+        if (sATraceEnabled) return;
         ThreadUtils.getUiThreadLooper().setMessageLogging(
                 enabled ? LooperMonitorHolder.sInstance : null);
     }
@@ -186,10 +189,15 @@ public class TraceEvent {
      * systrace, this is for WebView only.
      */
     public static void setATraceEnabled(boolean enabled) {
-        if (sEnabled == enabled) return;
+        if (sATraceEnabled == enabled) return;
+        sATraceEnabled = enabled;
         if (enabled) {
+            // Calls TraceEvent.setEnabled(true) via
+            // TraceLog::EnabledStateObserver::OnTraceLogEnabled
             nativeStartATrace();
         } else {
+            // Calls TraceEvent.setEnabled(false) via
+            // TraceLog::EnabledStateObserver::OnTraceLogDisabled
             nativeStopATrace();
         }
     }

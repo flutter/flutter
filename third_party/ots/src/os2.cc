@@ -2,8 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "os2.h"
+#include <string>
 
+#include "os2.h"
 #include "head.h"
 
 // OS/2 - OS/2 and Windows Metrics
@@ -35,26 +36,29 @@ bool ots_os2_parse(OpenTypeFile *file, const uint8_t *data, size_t length) {
       !table.ReadS16(&os2->strikeout_size) ||
       !table.ReadS16(&os2->strikeout_position) ||
       !table.ReadS16(&os2->family_class)) {
-    return OTS_FAILURE_MSG("Failed toi read basic os2 elements");
+    return OTS_FAILURE_MSG("Error reading basic table elements");
   }
 
-  if (os2->version > 4) {
-    return OTS_FAILURE_MSG("os2 version too high %d", os2->version);
+  if (os2->version > 5) {
+    return OTS_FAILURE_MSG("Unsupported table version: %u", os2->version);
   }
 
-  // Some linux fonts (e.g., Kedage-t.ttf and LucidaSansDemiOblique.ttf) have
-  // weird weight/width classes. Overwrite them with FW_NORMAL/1/9.
-  if (os2->weight_class < 100 ||
-      os2->weight_class > 900 ||
-      os2->weight_class % 100) {
-    OTS_WARNING("bad weight: %u", os2->weight_class);
-    os2->weight_class = 400;  // FW_NORMAL
+  // Follow WPF Font Selection Model's advice.
+  if (1 <= os2->weight_class && os2->weight_class <= 9) {
+    OTS_WARNING("Bad usWeightClass: %u, changing it to: %u", os2->weight_class, os2->weight_class * 100);
+    os2->weight_class *= 100;
   }
+  // Ditto.
+  if (os2->weight_class > 999) {
+    OTS_WARNING("Bad usWeightClass: %u, changing it to: %d", os2->weight_class, 999);
+    os2->weight_class = 999;
+  }
+
   if (os2->width_class < 1) {
-    OTS_WARNING("bad width: %u", os2->width_class);
+    OTS_WARNING("Bad usWidthClass: %u, changing it to: %d", os2->width_class, 1);
     os2->width_class = 1;
   } else if (os2->width_class > 9) {
-    OTS_WARNING("bad width: %u", os2->width_class);
+    OTS_WARNING("Bad usWidthClass: %u, changing it to: %d", os2->width_class, 9);
     os2->width_class = 9;
   }
 
@@ -73,30 +77,34 @@ bool ots_os2_parse(OpenTypeFile *file, const uint8_t *data, size_t length) {
   // mask reserved bits. use only 0..3, 8, 9 bits.
   os2->type &= 0x30f;
 
-  if (os2->subscript_x_size < 0) {
-    OTS_WARNING("bad subscript_x_size: %d", os2->subscript_x_size);
-    os2->subscript_x_size = 0;
-  }
-  if (os2->subscript_y_size < 0) {
-    OTS_WARNING("bad subscript_y_size: %d", os2->subscript_y_size);
-    os2->subscript_y_size = 0;
-  }
-  if (os2->superscript_x_size < 0) {
-    OTS_WARNING("bad superscript_x_size: %d", os2->superscript_x_size);
-    os2->superscript_x_size = 0;
-  }
-  if (os2->superscript_y_size < 0) {
-    OTS_WARNING("bad superscript_y_size: %d", os2->superscript_y_size);
-    os2->superscript_y_size = 0;
-  }
-  if (os2->strikeout_size < 0) {
-    OTS_WARNING("bad strikeout_size: %d", os2->strikeout_size);
-    os2->strikeout_size = 0;
+#define SET_TO_ZERO(a, b)                                     \
+  if (os2->b < 0) {                                           \
+    OTS_WARNING("Bad " a ": %d, setting it to zero", os2->b); \
+    os2->b = 0;                                               \
   }
 
+  SET_TO_ZERO("ySubscriptXSize", subscript_x_size);
+  SET_TO_ZERO("ySubscriptYSize", subscript_y_size);
+  SET_TO_ZERO("ySuperscriptXSize", superscript_x_size);
+  SET_TO_ZERO("ySuperscriptYSize", superscript_y_size);
+  SET_TO_ZERO("yStrikeoutSize", strikeout_size);
+#undef SET_TO_ZERO
+
+  static std::string panose_strings[10] = {
+    "bFamilyType",
+    "bSerifStyle",
+    "bWeight",
+    "bProportion",
+    "bContrast",
+    "bStrokeVariation",
+    "bArmStyle",
+    "bLetterform",
+    "bMidline",
+    "bXHeight",
+  };
   for (unsigned i = 0; i < 10; ++i) {
     if (!table.ReadU8(&os2->panose[i])) {
-      return OTS_FAILURE_MSG("Failed to read panose in os2 table");
+      return OTS_FAILURE_MSG("Error reading PANOSE %s", panose_strings[i].c_str());
     }
   }
 
@@ -113,7 +121,7 @@ bool ots_os2_parse(OpenTypeFile *file, const uint8_t *data, size_t length) {
       !table.ReadS16(&os2->typo_linegap) ||
       !table.ReadU16(&os2->win_ascent) ||
       !table.ReadU16(&os2->win_descent)) {
-    return OTS_FAILURE_MSG("Failed to read more basic os2 fields");
+    return OTS_FAILURE_MSG("Error reading more basic table fields");
   }
 
   // If bit 6 is set, then bits 0 and 5 must be clear.
@@ -124,7 +132,7 @@ bool ots_os2_parse(OpenTypeFile *file, const uint8_t *data, size_t length) {
   // the settings of bits 0 and 1 must be reflected in the macStyle bits
   // in the 'head' table.
   if (!file->head) {
-    return OTS_FAILURE_MSG("Head table missing from font as needed by os2 table");
+    return OTS_FAILURE_MSG("Needed head table is missing from the font");
   }
   if ((os2->selection & 0x1) &&
       !(file->head->mac_style & 0x2)) {
@@ -148,7 +156,7 @@ bool ots_os2_parse(OpenTypeFile *file, const uint8_t *data, size_t length) {
   if ((os2->version < 4) &&
       (os2->selection & 0x300)) {
     // bit 8 and 9 must be unset in OS/2 table versions less than 4.
-    return OTS_FAILURE_MSG("OS2 version %d incompatible with selection %d", os2->version, os2->selection);
+    return OTS_FAILURE_MSG("Version %d incompatible with selection %d", os2->version, os2->selection);
   }
 
   // mask reserved bits. use only 0..9 bits.
@@ -198,7 +206,7 @@ bool ots_os2_parse(OpenTypeFile *file, const uint8_t *data, size_t length) {
       !table.ReadU16(&os2->default_char) ||
       !table.ReadU16(&os2->break_char) ||
       !table.ReadU16(&os2->max_context)) {
-    return OTS_FAILURE_MSG("Failed to read os2 version 2 information");
+    return OTS_FAILURE_MSG("Failed to read version 2-specific fields");
   }
 
   if (os2->x_height < 0) {
@@ -208,6 +216,26 @@ bool ots_os2_parse(OpenTypeFile *file, const uint8_t *data, size_t length) {
   if (os2->cap_height < 0) {
     OTS_WARNING("bad cap_height: %d", os2->cap_height);
     os2->cap_height = 0;
+  }
+
+  if (os2->version < 5) {
+    // http://www.microsoft.com/typography/otspec/os2ver4.htm
+    return true;
+  }
+
+  if (!table.ReadU16(&os2->lower_optical_pointsize) ||
+      !table.ReadU16(&os2->upper_optical_pointsize)) {
+    return OTS_FAILURE_MSG("Failed to read version 5-specific fields");
+  }
+
+  if (os2->lower_optical_pointsize > 0xFFFE) {
+    OTS_WARNING("'usLowerOpticalPointSize' is bigger than 0xFFFE: %d", os2->lower_optical_pointsize);
+    os2->lower_optical_pointsize = 0xFFFE;
+  }
+
+  if (os2->upper_optical_pointsize < 2) {
+    OTS_WARNING("'usUpperOpticalPointSize' is lower than 2: %d", os2->upper_optical_pointsize);
+    os2->upper_optical_pointsize = 2;
   }
 
   return true;
@@ -258,7 +286,7 @@ bool ots_os2_serialise(OTSStream *out, OpenTypeFile *file) {
       !out->WriteS16(os2->typo_linegap) ||
       !out->WriteU16(os2->win_ascent) ||
       !out->WriteU16(os2->win_descent)) {
-    return OTS_FAILURE_MSG("Failed to write os2 version 1 information");
+    return OTS_FAILURE_MSG("Failed to write version 1-specific fields");
   }
 
   if (os2->version < 1) {
@@ -279,7 +307,16 @@ bool ots_os2_serialise(OTSStream *out, OpenTypeFile *file) {
       !out->WriteU16(os2->default_char) ||
       !out->WriteU16(os2->break_char) ||
       !out->WriteU16(os2->max_context)) {
-    return OTS_FAILURE_MSG("Failed to write os2 version 2 information");
+    return OTS_FAILURE_MSG("Failed to write version 2-specific fields");
+  }
+
+  if (os2->version < 5) {
+    return true;
+  }
+
+  if (!out->WriteU16(os2->lower_optical_pointsize) ||
+      !out->WriteU16(os2->upper_optical_pointsize)) {
+    return OTS_FAILURE_MSG("Failed to write version 5-specific fields");
   }
 
   return true;

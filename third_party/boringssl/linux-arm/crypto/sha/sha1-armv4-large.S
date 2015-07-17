@@ -1,9 +1,10 @@
+#if defined(__arm__)
 #include "arm_arch.h"
 
 .text
 .code	32
 
-.global	sha1_block_data_order
+.globl	sha1_block_data_order
 .type	sha1_block_data_order,%function
 
 .align	5
@@ -12,12 +13,15 @@ sha1_block_data_order:
 	sub	r3,pc,#8		@ sha1_block_data_order
 	ldr	r12,.LOPENSSL_armcap
 	ldr	r12,[r3,r12]		@ OPENSSL_armcap_P
+#ifdef	__APPLE__
+	ldr	r12,[r12]
+#endif
 	tst	r12,#ARMV8_SHA1
 	bne	.LARMv8
 	tst	r12,#ARMV7_NEON
 	bne	.LNEON
 #endif
-	stmdb	sp!,{r4-r12,lr}
+	stmdb	sp!,{r4,r5,r6,r7,r8,r9,r10,r11,r12,lr}
 	add	r2,r1,r2,lsl#6	@ r2 to point at the end of r1
 	ldmia	r0,{r3,r4,r5,r6,r7}
 .Lloop:
@@ -193,7 +197,7 @@ sha1_block_data_order:
 	add	r6,r6,r7,ror#27			@ E+=ROR(A,27)
 	eor	r9,r9,r11,ror#31
 	str	r9,[r14,#-4]!
-	and r10,r3,r10,ror#2					@ F_xx_xx
+	and	r10,r3,r10,ror#2					@ F_xx_xx
 						@ F_xx_xx
 	add	r6,r6,r9			@ E+=X[i]
 	eor	r10,r10,r5,ror#2		@ F_00_19(B,C,D)
@@ -210,7 +214,7 @@ sha1_block_data_order:
 	add	r5,r5,r6,ror#27			@ E+=ROR(A,27)
 	eor	r9,r9,r11,ror#31
 	str	r9,[r14,#-4]!
-	and r10,r7,r10,ror#2					@ F_xx_xx
+	and	r10,r7,r10,ror#2					@ F_xx_xx
 						@ F_xx_xx
 	add	r5,r5,r9			@ E+=X[i]
 	eor	r10,r10,r4,ror#2		@ F_00_19(B,C,D)
@@ -227,7 +231,7 @@ sha1_block_data_order:
 	add	r4,r4,r5,ror#27			@ E+=ROR(A,27)
 	eor	r9,r9,r11,ror#31
 	str	r9,[r14,#-4]!
-	and r10,r6,r10,ror#2					@ F_xx_xx
+	and	r10,r6,r10,ror#2					@ F_xx_xx
 						@ F_xx_xx
 	add	r4,r4,r9			@ E+=X[i]
 	eor	r10,r10,r3,ror#2		@ F_00_19(B,C,D)
@@ -244,7 +248,7 @@ sha1_block_data_order:
 	add	r3,r3,r4,ror#27			@ E+=ROR(A,27)
 	eor	r9,r9,r11,ror#31
 	str	r9,[r14,#-4]!
-	and r10,r5,r10,ror#2					@ F_xx_xx
+	and	r10,r5,r10,ror#2					@ F_xx_xx
 						@ F_xx_xx
 	add	r3,r3,r9			@ E+=X[i]
 	eor	r10,r10,r7,ror#2		@ F_00_19(B,C,D)
@@ -265,7 +269,7 @@ sha1_block_data_order:
 	add	r7,r7,r3,ror#27			@ E+=ROR(A,27)
 	eor	r9,r9,r11,ror#31
 	str	r9,[r14,#-4]!
-	eor r10,r4,r10,ror#2					@ F_xx_xx
+	eor	r10,r4,r10,ror#2					@ F_xx_xx
 						@ F_xx_xx
 	add	r7,r7,r9			@ E+=X[i]
 	add	r7,r7,r10			@ E+=F_20_39(B,C,D)
@@ -281,7 +285,7 @@ sha1_block_data_order:
 	add	r6,r6,r7,ror#27			@ E+=ROR(A,27)
 	eor	r9,r9,r11,ror#31
 	str	r9,[r14,#-4]!
-	eor r10,r3,r10,ror#2					@ F_xx_xx
+	eor	r10,r3,r10,ror#2					@ F_xx_xx
 						@ F_xx_xx
 	add	r6,r6,r9			@ E+=X[i]
 	add	r6,r6,r10			@ E+=F_20_39(B,C,D)
@@ -297,7 +301,7 @@ sha1_block_data_order:
 	add	r5,r5,r6,ror#27			@ E+=ROR(A,27)
 	eor	r9,r9,r11,ror#31
 	str	r9,[r14,#-4]!
-	eor r10,r7,r10,ror#2					@ F_xx_xx
+	eor	r10,r7,r10,ror#2					@ F_xx_xx
 						@ F_xx_xx
 	add	r5,r5,r9			@ E+=X[i]
 	add	r5,r5,r10			@ E+=F_20_39(B,C,D)
@@ -313,7 +317,7 @@ sha1_block_data_order:
 	add	r4,r4,r5,ror#27			@ E+=ROR(A,27)
 	eor	r9,r9,r11,ror#31
 	str	r9,[r14,#-4]!
-	eor r10,r6,r10,ror#2					@ F_xx_xx
+	eor	r10,r6,r10,ror#2					@ F_xx_xx
 						@ F_xx_xx
 	add	r4,r4,r9			@ E+=X[i]
 	add	r4,r4,r10			@ E+=F_20_39(B,C,D)
@@ -329,7 +333,7 @@ sha1_block_data_order:
 	add	r3,r3,r4,ror#27			@ E+=ROR(A,27)
 	eor	r9,r9,r11,ror#31
 	str	r9,[r14,#-4]!
-	eor r10,r5,r10,ror#2					@ F_xx_xx
+	eor	r10,r5,r10,ror#2					@ F_xx_xx
 						@ F_xx_xx
 	add	r3,r3,r9			@ E+=X[i]
 	add	r3,r3,r10			@ E+=F_20_39(B,C,D)
@@ -352,8 +356,8 @@ sha1_block_data_order:
 	add	r7,r7,r3,ror#27			@ E+=ROR(A,27)
 	eor	r9,r9,r11,ror#31
 	str	r9,[r14,#-4]!
-	and r10,r4,r10,ror#2					@ F_xx_xx
-	and r11,r5,r6					@ F_xx_xx
+	and	r10,r4,r10,ror#2					@ F_xx_xx
+	and	r11,r5,r6					@ F_xx_xx
 	add	r7,r7,r9			@ E+=X[i]
 	add	r7,r7,r10			@ E+=F_40_59(B,C,D)
 	add	r7,r7,r11,ror#2
@@ -369,8 +373,8 @@ sha1_block_data_order:
 	add	r6,r6,r7,ror#27			@ E+=ROR(A,27)
 	eor	r9,r9,r11,ror#31
 	str	r9,[r14,#-4]!
-	and r10,r3,r10,ror#2					@ F_xx_xx
-	and r11,r4,r5					@ F_xx_xx
+	and	r10,r3,r10,ror#2					@ F_xx_xx
+	and	r11,r4,r5					@ F_xx_xx
 	add	r6,r6,r9			@ E+=X[i]
 	add	r6,r6,r10			@ E+=F_40_59(B,C,D)
 	add	r6,r6,r11,ror#2
@@ -386,8 +390,8 @@ sha1_block_data_order:
 	add	r5,r5,r6,ror#27			@ E+=ROR(A,27)
 	eor	r9,r9,r11,ror#31
 	str	r9,[r14,#-4]!
-	and r10,r7,r10,ror#2					@ F_xx_xx
-	and r11,r3,r4					@ F_xx_xx
+	and	r10,r7,r10,ror#2					@ F_xx_xx
+	and	r11,r3,r4					@ F_xx_xx
 	add	r5,r5,r9			@ E+=X[i]
 	add	r5,r5,r10			@ E+=F_40_59(B,C,D)
 	add	r5,r5,r11,ror#2
@@ -403,8 +407,8 @@ sha1_block_data_order:
 	add	r4,r4,r5,ror#27			@ E+=ROR(A,27)
 	eor	r9,r9,r11,ror#31
 	str	r9,[r14,#-4]!
-	and r10,r6,r10,ror#2					@ F_xx_xx
-	and r11,r7,r3					@ F_xx_xx
+	and	r10,r6,r10,ror#2					@ F_xx_xx
+	and	r11,r7,r3					@ F_xx_xx
 	add	r4,r4,r9			@ E+=X[i]
 	add	r4,r4,r10			@ E+=F_40_59(B,C,D)
 	add	r4,r4,r11,ror#2
@@ -420,8 +424,8 @@ sha1_block_data_order:
 	add	r3,r3,r4,ror#27			@ E+=ROR(A,27)
 	eor	r9,r9,r11,ror#31
 	str	r9,[r14,#-4]!
-	and r10,r5,r10,ror#2					@ F_xx_xx
-	and r11,r6,r7					@ F_xx_xx
+	and	r10,r5,r10,ror#2					@ F_xx_xx
+	and	r11,r6,r7					@ F_xx_xx
 	add	r3,r3,r9			@ E+=X[i]
 	add	r3,r3,r10			@ E+=F_40_59(B,C,D)
 	add	r3,r3,r11,ror#2
@@ -445,25 +449,26 @@ sha1_block_data_order:
 	bne	.Lloop			@ [+18], total 1307
 
 #if __ARM_ARCH__>=5
-	ldmia	sp!,{r4-r12,pc}
+	ldmia	sp!,{r4,r5,r6,r7,r8,r9,r10,r11,r12,pc}
 #else
-	ldmia	sp!,{r4-r12,lr}
+	ldmia	sp!,{r4,r5,r6,r7,r8,r9,r10,r11,r12,lr}
 	tst	lr,#1
 	moveq	pc,lr			@ be binary compatible with V4, yet
-	.word	0xe12fff1e			@ interoperable with Thumb ISA:-)
+.word	0xe12fff1e			@ interoperable with Thumb ISA:-)
 #endif
 .size	sha1_block_data_order,.-sha1_block_data_order
 
 .align	5
-.LK_00_19:	.word	0x5a827999
-.LK_20_39:	.word	0x6ed9eba1
-.LK_40_59:	.word	0x8f1bbcdc
-.LK_60_79:	.word	0xca62c1d6
+.LK_00_19:.word	0x5a827999
+.LK_20_39:.word	0x6ed9eba1
+.LK_40_59:.word	0x8f1bbcdc
+.LK_60_79:.word	0xca62c1d6
 #if __ARM_MAX_ARCH__>=7
 .LOPENSSL_armcap:
 .word	OPENSSL_armcap_P-sha1_block_data_order
 #endif
-.asciz	"SHA1 block transform for ARMv4/NEON/ARMv8, CRYPTOGAMS by <appro@openssl.org>"
+.byte	83,72,65,49,32,98,108,111,99,107,32,116,114,97,110,115,102,111,114,109,32,102,111,114,32,65,82,77,118,52,47,78,69,79,78,47,65,82,77,118,56,44,32,67,82,89,80,84,79,71,65,77,83,32,98,121,32,60,97,112,112,114,111,64,111,112,101,110,115,115,108,46,111,114,103,62,0
+.align	2
 .align	5
 #if __ARM_MAX_ARCH__>=7
 .arch	armv7-a
@@ -473,7 +478,7 @@ sha1_block_data_order:
 .align	4
 sha1_block_data_order_neon:
 .LNEON:
-	stmdb	sp!,{r4-r12,lr}
+	stmdb	sp!,{r4,r5,r6,r7,r8,r9,r10,r11,r12,lr}
 	add	r2,r1,r2,lsl#6	@ r2 to point at the end of r1
 	@ dmb				@ errata #451034 on early Cortex A8
 	@ vstmdb	sp!,{d8-d15}	@ ABI specification says so
@@ -485,21 +490,21 @@ sha1_block_data_order_neon:
 	ldmia	r0,{r3,r4,r5,r6,r7}	@ load context
 	mov	r12,sp
 
-	vld1.8		{q0-q1},[r1]!	@ handles unaligned
-	veor		q15,q15,q15
-	vld1.8		{q2-q3},[r1]!
-	vld1.32		{d28[],d29[]},[r8,:32]!	@ load K_00_19
+	vld1.8	{q0,q1},[r1]!	@ handles unaligned
+	veor	q15,q15,q15
+	vld1.8	{q2,q3},[r1]!
+	vld1.32	{d28[],d29[]},[r8,:32]!	@ load K_00_19
 	vrev32.8	q0,q0		@ yes, even on
 	vrev32.8	q1,q1		@ big-endian...
 	vrev32.8	q2,q2
 	vadd.i32	q8,q0,q14
 	vrev32.8	q3,q3
 	vadd.i32	q9,q1,q14
-	vst1.32		{q8},[r12,:128]!
+	vst1.32	{q8},[r12,:128]!
 	vadd.i32	q10,q2,q14
-	vst1.32		{q9},[r12,:128]!
-	vst1.32		{q10},[r12,:128]!
-	ldr		r9,[sp]			@ big RAW stall
+	vst1.32	{q9},[r12,:128]!
+	vst1.32	{q10},[r12,:128]!
+	ldr	r9,[sp]			@ big RAW stall
 
 .Loop_neon:
 	vext.8	q8,q0,q1,#8
@@ -1177,10 +1182,10 @@ sha1_block_data_order_neon:
 	teq	r1,r2
 	sub	r8,r8,#16
 	subeq	r1,r1,#64
-	vld1.8	{q0-q1},[r1]!
+	vld1.8	{q0,q1},[r1]!
 	ldr	r9,[sp,#4]
 	eor	r11,r10,r6
-	vld1.8	{q2-q3},[r1]!
+	vld1.8	{q2,q3},[r1]!
 	add	r3,r3,r4,ror#27
 	mov	r5,r5,ror#2
 	vld1.32	{d28[],d29[]},[r8,:32]!
@@ -1313,7 +1318,7 @@ sha1_block_data_order_neon:
 	bne	.Loop_neon
 
 	@ vldmia	sp!,{d8-d15}
-	ldmia	sp!,{r4-r12,pc}
+	ldmia	sp!,{r4,r5,r6,r7,r8,r9,r10,r11,r12,pc}
 .size	sha1_block_data_order_neon,.-sha1_block_data_order_neon
 #endif
 #if __ARM_MAX_ARCH__>=7
@@ -1321,7 +1326,7 @@ sha1_block_data_order_neon:
 .align	5
 sha1_block_data_order_armv8:
 .LARMv8:
-	vstmdb	sp!,{d8-d15}		@ ABI specification says so
+	vstmdb	sp!,{d8,d9,d10,d11,d12,d13,d14,d15}		@ ABI specification says so
 
 	veor	q1,q1,q1
 	adr	r3,.LK_00_19
@@ -1334,123 +1339,124 @@ sha1_block_data_order_armv8:
 	vld1.32	{d22[],d23[]},[r3,:32]
 
 .Loop_v8:
-	vld1.8		{q4-q5},[r1]!
-	vld1.8		{q6-q7},[r1]!
+	vld1.8	{q4,q5},[r1]!
+	vld1.8	{q6,q7},[r1]!
 	vrev32.8	q4,q4
 	vrev32.8	q5,q5
 
 	vadd.i32	q12,q8,q4
 	vrev32.8	q6,q6
-	vmov		q14,q0	@ offload
-	subs		r2,r2,#1
+	vmov	q14,q0	@ offload
+	subs	r2,r2,#1
 
 	vadd.i32	q13,q8,q5
 	vrev32.8	q7,q7
-	.byte	0xc0,0x62,0xb9,0xf3	@ sha1h q3,q0		@ 0
-	.byte	0x68,0x0c,0x02,0xf2	@ sha1c q0,q1,q12
+.byte	0xc0,0x62,0xb9,0xf3	@ sha1h q3,q0		@ 0
+.byte	0x68,0x0c,0x02,0xf2	@ sha1c q0,q1,q12
 	vadd.i32	q12,q8,q6
-	.byte	0x4c,0x8c,0x3a,0xf2	@ sha1su0 q4,q5,q6
-	.byte	0xc0,0x42,0xb9,0xf3	@ sha1h q2,q0		@ 1
-	.byte	0x6a,0x0c,0x06,0xf2	@ sha1c q0,q3,q13
+.byte	0x4c,0x8c,0x3a,0xf2	@ sha1su0 q4,q5,q6
+.byte	0xc0,0x42,0xb9,0xf3	@ sha1h q2,q0		@ 1
+.byte	0x6a,0x0c,0x06,0xf2	@ sha1c q0,q3,q13
 	vadd.i32	q13,q8,q7
-	.byte	0x8e,0x83,0xba,0xf3	@ sha1su1 q4,q7
-	.byte	0x4e,0xac,0x3c,0xf2	@ sha1su0 q5,q6,q7
-	.byte	0xc0,0x62,0xb9,0xf3	@ sha1h q3,q0		@ 2
-	.byte	0x68,0x0c,0x04,0xf2	@ sha1c q0,q2,q12
+.byte	0x8e,0x83,0xba,0xf3	@ sha1su1 q4,q7
+.byte	0x4e,0xac,0x3c,0xf2	@ sha1su0 q5,q6,q7
+.byte	0xc0,0x62,0xb9,0xf3	@ sha1h q3,q0		@ 2
+.byte	0x68,0x0c,0x04,0xf2	@ sha1c q0,q2,q12
 	vadd.i32	q12,q8,q4
-	.byte	0x88,0xa3,0xba,0xf3	@ sha1su1 q5,q4
-	.byte	0x48,0xcc,0x3e,0xf2	@ sha1su0 q6,q7,q4
-	.byte	0xc0,0x42,0xb9,0xf3	@ sha1h q2,q0		@ 3
-	.byte	0x6a,0x0c,0x06,0xf2	@ sha1c q0,q3,q13
+.byte	0x88,0xa3,0xba,0xf3	@ sha1su1 q5,q4
+.byte	0x48,0xcc,0x3e,0xf2	@ sha1su0 q6,q7,q4
+.byte	0xc0,0x42,0xb9,0xf3	@ sha1h q2,q0		@ 3
+.byte	0x6a,0x0c,0x06,0xf2	@ sha1c q0,q3,q13
 	vadd.i32	q13,q9,q5
-	.byte	0x8a,0xc3,0xba,0xf3	@ sha1su1 q6,q5
-	.byte	0x4a,0xec,0x38,0xf2	@ sha1su0 q7,q4,q5
-	.byte	0xc0,0x62,0xb9,0xf3	@ sha1h q3,q0		@ 4
-	.byte	0x68,0x0c,0x04,0xf2	@ sha1c q0,q2,q12
+.byte	0x8a,0xc3,0xba,0xf3	@ sha1su1 q6,q5
+.byte	0x4a,0xec,0x38,0xf2	@ sha1su0 q7,q4,q5
+.byte	0xc0,0x62,0xb9,0xf3	@ sha1h q3,q0		@ 4
+.byte	0x68,0x0c,0x04,0xf2	@ sha1c q0,q2,q12
 	vadd.i32	q12,q9,q6
-	.byte	0x8c,0xe3,0xba,0xf3	@ sha1su1 q7,q6
-	.byte	0x4c,0x8c,0x3a,0xf2	@ sha1su0 q4,q5,q6
-	.byte	0xc0,0x42,0xb9,0xf3	@ sha1h q2,q0		@ 5
-	.byte	0x6a,0x0c,0x16,0xf2	@ sha1p q0,q3,q13
+.byte	0x8c,0xe3,0xba,0xf3	@ sha1su1 q7,q6
+.byte	0x4c,0x8c,0x3a,0xf2	@ sha1su0 q4,q5,q6
+.byte	0xc0,0x42,0xb9,0xf3	@ sha1h q2,q0		@ 5
+.byte	0x6a,0x0c,0x16,0xf2	@ sha1p q0,q3,q13
 	vadd.i32	q13,q9,q7
-	.byte	0x8e,0x83,0xba,0xf3	@ sha1su1 q4,q7
-	.byte	0x4e,0xac,0x3c,0xf2	@ sha1su0 q5,q6,q7
-	.byte	0xc0,0x62,0xb9,0xf3	@ sha1h q3,q0		@ 6
-	.byte	0x68,0x0c,0x14,0xf2	@ sha1p q0,q2,q12
+.byte	0x8e,0x83,0xba,0xf3	@ sha1su1 q4,q7
+.byte	0x4e,0xac,0x3c,0xf2	@ sha1su0 q5,q6,q7
+.byte	0xc0,0x62,0xb9,0xf3	@ sha1h q3,q0		@ 6
+.byte	0x68,0x0c,0x14,0xf2	@ sha1p q0,q2,q12
 	vadd.i32	q12,q9,q4
-	.byte	0x88,0xa3,0xba,0xf3	@ sha1su1 q5,q4
-	.byte	0x48,0xcc,0x3e,0xf2	@ sha1su0 q6,q7,q4
-	.byte	0xc0,0x42,0xb9,0xf3	@ sha1h q2,q0		@ 7
-	.byte	0x6a,0x0c,0x16,0xf2	@ sha1p q0,q3,q13
+.byte	0x88,0xa3,0xba,0xf3	@ sha1su1 q5,q4
+.byte	0x48,0xcc,0x3e,0xf2	@ sha1su0 q6,q7,q4
+.byte	0xc0,0x42,0xb9,0xf3	@ sha1h q2,q0		@ 7
+.byte	0x6a,0x0c,0x16,0xf2	@ sha1p q0,q3,q13
 	vadd.i32	q13,q9,q5
-	.byte	0x8a,0xc3,0xba,0xf3	@ sha1su1 q6,q5
-	.byte	0x4a,0xec,0x38,0xf2	@ sha1su0 q7,q4,q5
-	.byte	0xc0,0x62,0xb9,0xf3	@ sha1h q3,q0		@ 8
-	.byte	0x68,0x0c,0x14,0xf2	@ sha1p q0,q2,q12
+.byte	0x8a,0xc3,0xba,0xf3	@ sha1su1 q6,q5
+.byte	0x4a,0xec,0x38,0xf2	@ sha1su0 q7,q4,q5
+.byte	0xc0,0x62,0xb9,0xf3	@ sha1h q3,q0		@ 8
+.byte	0x68,0x0c,0x14,0xf2	@ sha1p q0,q2,q12
 	vadd.i32	q12,q10,q6
-	.byte	0x8c,0xe3,0xba,0xf3	@ sha1su1 q7,q6
-	.byte	0x4c,0x8c,0x3a,0xf2	@ sha1su0 q4,q5,q6
-	.byte	0xc0,0x42,0xb9,0xf3	@ sha1h q2,q0		@ 9
-	.byte	0x6a,0x0c,0x16,0xf2	@ sha1p q0,q3,q13
+.byte	0x8c,0xe3,0xba,0xf3	@ sha1su1 q7,q6
+.byte	0x4c,0x8c,0x3a,0xf2	@ sha1su0 q4,q5,q6
+.byte	0xc0,0x42,0xb9,0xf3	@ sha1h q2,q0		@ 9
+.byte	0x6a,0x0c,0x16,0xf2	@ sha1p q0,q3,q13
 	vadd.i32	q13,q10,q7
-	.byte	0x8e,0x83,0xba,0xf3	@ sha1su1 q4,q7
-	.byte	0x4e,0xac,0x3c,0xf2	@ sha1su0 q5,q6,q7
-	.byte	0xc0,0x62,0xb9,0xf3	@ sha1h q3,q0		@ 10
-	.byte	0x68,0x0c,0x24,0xf2	@ sha1m q0,q2,q12
+.byte	0x8e,0x83,0xba,0xf3	@ sha1su1 q4,q7
+.byte	0x4e,0xac,0x3c,0xf2	@ sha1su0 q5,q6,q7
+.byte	0xc0,0x62,0xb9,0xf3	@ sha1h q3,q0		@ 10
+.byte	0x68,0x0c,0x24,0xf2	@ sha1m q0,q2,q12
 	vadd.i32	q12,q10,q4
-	.byte	0x88,0xa3,0xba,0xf3	@ sha1su1 q5,q4
-	.byte	0x48,0xcc,0x3e,0xf2	@ sha1su0 q6,q7,q4
-	.byte	0xc0,0x42,0xb9,0xf3	@ sha1h q2,q0		@ 11
-	.byte	0x6a,0x0c,0x26,0xf2	@ sha1m q0,q3,q13
+.byte	0x88,0xa3,0xba,0xf3	@ sha1su1 q5,q4
+.byte	0x48,0xcc,0x3e,0xf2	@ sha1su0 q6,q7,q4
+.byte	0xc0,0x42,0xb9,0xf3	@ sha1h q2,q0		@ 11
+.byte	0x6a,0x0c,0x26,0xf2	@ sha1m q0,q3,q13
 	vadd.i32	q13,q10,q5
-	.byte	0x8a,0xc3,0xba,0xf3	@ sha1su1 q6,q5
-	.byte	0x4a,0xec,0x38,0xf2	@ sha1su0 q7,q4,q5
-	.byte	0xc0,0x62,0xb9,0xf3	@ sha1h q3,q0		@ 12
-	.byte	0x68,0x0c,0x24,0xf2	@ sha1m q0,q2,q12
+.byte	0x8a,0xc3,0xba,0xf3	@ sha1su1 q6,q5
+.byte	0x4a,0xec,0x38,0xf2	@ sha1su0 q7,q4,q5
+.byte	0xc0,0x62,0xb9,0xf3	@ sha1h q3,q0		@ 12
+.byte	0x68,0x0c,0x24,0xf2	@ sha1m q0,q2,q12
 	vadd.i32	q12,q10,q6
-	.byte	0x8c,0xe3,0xba,0xf3	@ sha1su1 q7,q6
-	.byte	0x4c,0x8c,0x3a,0xf2	@ sha1su0 q4,q5,q6
-	.byte	0xc0,0x42,0xb9,0xf3	@ sha1h q2,q0		@ 13
-	.byte	0x6a,0x0c,0x26,0xf2	@ sha1m q0,q3,q13
+.byte	0x8c,0xe3,0xba,0xf3	@ sha1su1 q7,q6
+.byte	0x4c,0x8c,0x3a,0xf2	@ sha1su0 q4,q5,q6
+.byte	0xc0,0x42,0xb9,0xf3	@ sha1h q2,q0		@ 13
+.byte	0x6a,0x0c,0x26,0xf2	@ sha1m q0,q3,q13
 	vadd.i32	q13,q11,q7
-	.byte	0x8e,0x83,0xba,0xf3	@ sha1su1 q4,q7
-	.byte	0x4e,0xac,0x3c,0xf2	@ sha1su0 q5,q6,q7
-	.byte	0xc0,0x62,0xb9,0xf3	@ sha1h q3,q0		@ 14
-	.byte	0x68,0x0c,0x24,0xf2	@ sha1m q0,q2,q12
+.byte	0x8e,0x83,0xba,0xf3	@ sha1su1 q4,q7
+.byte	0x4e,0xac,0x3c,0xf2	@ sha1su0 q5,q6,q7
+.byte	0xc0,0x62,0xb9,0xf3	@ sha1h q3,q0		@ 14
+.byte	0x68,0x0c,0x24,0xf2	@ sha1m q0,q2,q12
 	vadd.i32	q12,q11,q4
-	.byte	0x88,0xa3,0xba,0xf3	@ sha1su1 q5,q4
-	.byte	0x48,0xcc,0x3e,0xf2	@ sha1su0 q6,q7,q4
-	.byte	0xc0,0x42,0xb9,0xf3	@ sha1h q2,q0		@ 15
-	.byte	0x6a,0x0c,0x16,0xf2	@ sha1p q0,q3,q13
+.byte	0x88,0xa3,0xba,0xf3	@ sha1su1 q5,q4
+.byte	0x48,0xcc,0x3e,0xf2	@ sha1su0 q6,q7,q4
+.byte	0xc0,0x42,0xb9,0xf3	@ sha1h q2,q0		@ 15
+.byte	0x6a,0x0c,0x16,0xf2	@ sha1p q0,q3,q13
 	vadd.i32	q13,q11,q5
-	.byte	0x8a,0xc3,0xba,0xf3	@ sha1su1 q6,q5
-	.byte	0x4a,0xec,0x38,0xf2	@ sha1su0 q7,q4,q5
-	.byte	0xc0,0x62,0xb9,0xf3	@ sha1h q3,q0		@ 16
-	.byte	0x68,0x0c,0x14,0xf2	@ sha1p q0,q2,q12
+.byte	0x8a,0xc3,0xba,0xf3	@ sha1su1 q6,q5
+.byte	0x4a,0xec,0x38,0xf2	@ sha1su0 q7,q4,q5
+.byte	0xc0,0x62,0xb9,0xf3	@ sha1h q3,q0		@ 16
+.byte	0x68,0x0c,0x14,0xf2	@ sha1p q0,q2,q12
 	vadd.i32	q12,q11,q6
-	.byte	0x8c,0xe3,0xba,0xf3	@ sha1su1 q7,q6
-	.byte	0xc0,0x42,0xb9,0xf3	@ sha1h q2,q0		@ 17
-	.byte	0x6a,0x0c,0x16,0xf2	@ sha1p q0,q3,q13
+.byte	0x8c,0xe3,0xba,0xf3	@ sha1su1 q7,q6
+.byte	0xc0,0x42,0xb9,0xf3	@ sha1h q2,q0		@ 17
+.byte	0x6a,0x0c,0x16,0xf2	@ sha1p q0,q3,q13
 	vadd.i32	q13,q11,q7
 
-	.byte	0xc0,0x62,0xb9,0xf3	@ sha1h q3,q0		@ 18
-	.byte	0x68,0x0c,0x14,0xf2	@ sha1p q0,q2,q12
+.byte	0xc0,0x62,0xb9,0xf3	@ sha1h q3,q0		@ 18
+.byte	0x68,0x0c,0x14,0xf2	@ sha1p q0,q2,q12
 
-	.byte	0xc0,0x42,0xb9,0xf3	@ sha1h q2,q0		@ 19
-	.byte	0x6a,0x0c,0x16,0xf2	@ sha1p q0,q3,q13
+.byte	0xc0,0x42,0xb9,0xf3	@ sha1h q2,q0		@ 19
+.byte	0x6a,0x0c,0x16,0xf2	@ sha1p q0,q3,q13
 
 	vadd.i32	q1,q1,q2
 	vadd.i32	q0,q0,q14
-	bne		.Loop_v8
+	bne	.Loop_v8
 
-	vst1.32		{q0},[r0]!
-	vst1.32		{d2[0]},[r0]
+	vst1.32	{q0},[r0]!
+	vst1.32	{d2[0]},[r0]
 
-	vldmia	sp!,{d8-d15}
+	vldmia	sp!,{d8,d9,d10,d11,d12,d13,d14,d15}
 	bx	lr					@ bx lr
 .size	sha1_block_data_order_armv8,.-sha1_block_data_order_armv8
 #endif
 #if __ARM_MAX_ARCH__>=7
 .comm	OPENSSL_armcap_P,4,4
 .hidden	OPENSSL_armcap_P
+#endif
 #endif

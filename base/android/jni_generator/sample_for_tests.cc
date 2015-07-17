@@ -18,7 +18,7 @@ using base::android::ScopedJavaLocalRef;
 namespace base {
 namespace android {
 
-jdouble CPPClass::InnerClass::MethodOtherP0(JNIEnv* env, jobject obj) {
+jdouble CPPClass::InnerClass::MethodOtherP0(JNIEnv* env, jobject caller) {
   return 0.0;
 }
 
@@ -33,22 +33,22 @@ bool CPPClass::RegisterJNI(JNIEnv* env) {
   return RegisterNativesImpl(env);  // Generated in SampleForTests_jni.h
 }
 
-void CPPClass::Destroy(JNIEnv* env, jobject obj) {
+void CPPClass::Destroy(JNIEnv* env, jobject caller) {
   delete this;
 }
 
-jint CPPClass::Method(JNIEnv* env, jobject obj) {
+jint CPPClass::Method(JNIEnv* env, jobject caller) {
   return 0;
 }
 
-void CPPClass::AddStructB(JNIEnv* env, jobject obj, jobject structb) {
+void CPPClass::AddStructB(JNIEnv* env, jobject caller, jobject structb) {
   long key = Java_InnerStructB_getKey(env, structb);
   std::string value = ConvertJavaStringToUTF8(
       env, Java_InnerStructB_getValue(env, structb).obj());
   map_[key] = value;
 }
 
-void CPPClass::IterateAndDoSomethingWithStructB(JNIEnv* env, jobject obj) {
+void CPPClass::IterateAndDoSomethingWithStructB(JNIEnv* env, jobject caller) {
   // Iterate over the elements and do something with them.
   for (std::map<long, std::string>::const_iterator it = map_.begin();
        it != map_.end(); ++it) {
@@ -59,14 +59,14 @@ void CPPClass::IterateAndDoSomethingWithStructB(JNIEnv* env, jobject obj) {
 }
 
 base::android::ScopedJavaLocalRef<jstring> CPPClass::ReturnAString(
-    JNIEnv* env, jobject obj) {
+    JNIEnv* env, jobject caller) {
   base::android::ScopedJavaLocalRef<jstring> ret = ConvertUTF8ToJavaString(
       env, "test");
   return ret;
 }
 
 // Static free functions declared and called directly from java.
-static jlong Init(JNIEnv* env, jobject obj, jstring param) {
+static jlong Init(JNIEnv* env, jobject caller, jstring param) {
   return 0;
 }
 

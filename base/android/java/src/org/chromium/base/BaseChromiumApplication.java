@@ -8,7 +8,6 @@ import android.app.Activity;
 import android.app.Application;
 import android.content.Context;
 import android.os.Bundle;
-import android.view.KeyEvent;
 import android.view.Window;
 
 import java.lang.reflect.InvocationHandler;
@@ -38,9 +37,6 @@ public class BaseChromiumApplication extends Application {
     /**
      * Intercepts calls to an existing Window.Callback. Most invocations are passed on directly
      * to the composed Window.Callback but enables intercepting/manipulating others.
-     *
-     * This is used to relay window focus changes throughout the app and remedy a bug in the
-     * appcompat library.
      */
     private class WindowCallbackProxy implements InvocationHandler {
         private final Window.Callback mCallback;
@@ -57,9 +53,6 @@ public class BaseChromiumApplication extends Application {
                     && args[0] instanceof Boolean) {
                 onWindowFocusChanged((boolean) args[0]);
                 return null;
-            } else if (method.getName().equals("dispatchKeyEvent") && args.length == 1
-                    && args[0] instanceof KeyEvent) {
-                return dispatchKeyEvent((KeyEvent) args[0]);
             } else {
                 try {
                     return method.invoke(mCallback, args);
@@ -84,15 +77,6 @@ public class BaseChromiumApplication extends Application {
             for (WindowFocusChangedListener listener : mWindowFocusListeners) {
                 listener.onWindowFocusChanged(mActivity, hasFocus);
             }
-        }
-
-        public boolean dispatchKeyEvent(KeyEvent event) {
-            // TODO(aurimas): remove this once AppCompatDelegateImpl no longer steals
-            // KEYCODE_MENU. (see b/20529185)
-            if (event.getKeyCode() == KeyEvent.KEYCODE_MENU && mActivity.dispatchKeyEvent(event)) {
-                return true;
-            }
-            return mCallback.dispatchKeyEvent(event);
         }
     }
     @Override

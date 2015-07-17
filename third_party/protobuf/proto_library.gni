@@ -52,6 +52,12 @@
 template("proto_library") {
   assert(defined(invoker.sources), "Need sources for proto_library")
 
+  # Don't apply OS-specific sources filtering to the assignments later on.
+  # Platform files should have gotten filtered out in the sources assignment
+  # when this template was invoked. If they weren't, it was on purpose and
+  # this template shouldn't re-apply the filter.
+  set_sources_assignment_filter([])
+
   action_name = "${target_name}_gen"
   source_set_name = target_name
   action_foreach(action_name) {
@@ -68,16 +74,20 @@ template("proto_library") {
       # Put the results in the specified dir in the gen tree.
       out_dir = "$root_gen_dir/" + invoker.proto_out_dir
       rel_out_dir = rebase_path(out_dir, root_build_dir)
+      py_out_dir = "$root_out_dir/pyproto/" + invoker.proto_out_dir
     } else {
-      # Use the gen directory corresponding to the source file. This expansion
-      # will be done differently in the outputs and the args, so we don't need
-      # to worry about rebasing as above.
+      # Use the gen directory corresponding to the source file for C++ sources.
+      # This expansion will be done differently in the outputs and the args, so
+      # we don't need to worry about rebasing as above. Always put Python
+      # sources in "pyproto".
       out_dir = "{{source_gen_dir}}"
       rel_out_dir = "{{source_gen_dir}}"
+      py_out_dir = "$root_out_dir/pyproto/{{source_root_relative_dir}}"
     }
+    rel_py_out_dir = rebase_path(py_out_dir, root_build_dir)
 
     outputs = [
-      "$out_dir/{{source_name_part}}_pb2.py",
+      "$py_out_dir/{{source_name_part}}_pb2.py",
       "$out_dir/{{source_name_part}}.pb.cc",
       "$out_dir/{{source_name_part}}.pb.h",
     ]
@@ -127,7 +137,7 @@ template("proto_library") {
       "--cpp_out",
       "$cc_generator_options$rel_out_dir",
       "--python_out",
-      rel_out_dir,
+      rel_py_out_dir,
     ]
 
     deps = [

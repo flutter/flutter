@@ -519,7 +519,7 @@ void HeapProfileTable::DumpMarkedIterator(const void* ptr, AllocValue* v,
   b.depth = v->bucket()->depth;
   b.stack = v->bucket()->stack;
   char addr[16];
-  snprintf(addr, 16, "0x%08" PRIxPTR, ptr);
+  snprintf(addr, 16, "0x%08" PRIxPTR, reinterpret_cast<uintptr_t>(ptr));
   char buf[1024];
   int len = UnparseBucket(b, buf, 0, sizeof(buf), addr, NULL);
   RawWrite(args.fd, buf, len);

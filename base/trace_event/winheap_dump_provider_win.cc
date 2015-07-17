@@ -6,6 +6,7 @@
 
 #include <windows.h>
 
+#include "base/debug/profiler.h"
 #include "base/trace_event/process_memory_dump.h"
 #include "base/win/windows_version.h"
 
@@ -58,6 +59,13 @@ bool WinHeapDumpProvider::OnMemoryDump(ProcessMemoryDump* pmd) {
   // See https://crbug.com/487291 for more details about this.
   if (base::win::GetVersion() < base::win::VERSION_VISTA)
     return false;
+
+  // Disable this dump provider for the SyzyASan instrumented build
+  // because they don't support the heap walking functions yet.
+#if defined(SYZYASAN)
+  if (base::debug::IsBinaryInstrumented())
+    return false;
+#endif
 
   // Retrieves the number of heaps in the current process.
   DWORD number_of_heaps = ::GetProcessHeaps(0, NULL);

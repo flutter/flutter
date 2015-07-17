@@ -1,0 +1,2 @@
+# MSan needs an interceptor for wcsxfrm(). http://crbug.com/423410
+fun:g_utf8_collate_key

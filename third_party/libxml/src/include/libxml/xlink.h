@@ -57,7 +57,7 @@ typedef enum {
  * xlinkNodeDetectFunc:
  * @ctx:  user data pointer
  * @node:  the node to check
- * 
+ *
  * This is the prototype for the link detection routine.
  * It calls the default link detection callbacks upon link detection.
  */
@@ -157,26 +157,26 @@ struct _xlinkHandler {
 
 /*
  * The default detection routine, can be overridden, they call the default
- * detection callbacks. 
+ * detection callbacks.
  */
 
-XMLPUBFUN xlinkNodeDetectFunc XMLCALL	
+XMLPUBFUN xlinkNodeDetectFunc XMLCALL
 		xlinkGetDefaultDetect	(void);
-XMLPUBFUN void XMLCALL			
+XMLPUBFUN void XMLCALL
 		xlinkSetDefaultDetect	(xlinkNodeDetectFunc func);
 
 /*
  * Routines to set/get the default handlers.
  */
-XMLPUBFUN xlinkHandlerPtr XMLCALL	
+XMLPUBFUN xlinkHandlerPtr XMLCALL
 		xlinkGetDefaultHandler	(void);
-XMLPUBFUN void XMLCALL		
+XMLPUBFUN void XMLCALL
 		xlinkSetDefaultHandler	(xlinkHandlerPtr handler);
 
 /*
  * Link detection module itself.
  */
-XMLPUBFUN xlinkType XMLCALL	 
+XMLPUBFUN xlinkType XMLCALL
 		xlinkIsLink		(xmlDocPtr doc,
 					 xmlNodePtr node);
 

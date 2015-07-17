@@ -563,17 +563,15 @@ bool ParseProcMeminfo(const std::string& meminfo_data,
   // MemTotal value
   meminfo->total = 0;
 
-  std::vector<std::string> meminfo_lines;
-  Tokenize(meminfo_data, "\n", &meminfo_lines);
-  for (std::vector<std::string>::iterator it = meminfo_lines.begin();
-       it != meminfo_lines.end(); ++it) {
-    std::vector<std::string> tokens;
-    SplitStringAlongWhitespace(*it, &tokens);
+  for (const StringPiece& line : SplitStringPiece(
+           meminfo_data, "\n", KEEP_WHITESPACE, SPLIT_WANT_NONEMPTY)) {
+    std::vector<StringPiece> tokens = SplitStringPiece(
+        line, kWhitespaceASCII, TRIM_WHITESPACE, SPLIT_WANT_NONEMPTY);
     // HugePages_* only has a number and no suffix so we can't rely on
     // there being exactly 3 tokens.
     if (tokens.size() <= 1) {
       DLOG(WARNING) << "meminfo: tokens: " << tokens.size()
-                    << " malformed line: " << *it;
+                    << " malformed line: " << line.as_string();
       continue;
     }
 
@@ -630,12 +628,10 @@ bool ParseProcVmstat(const std::string& vmstat_data,
   // We iterate through the whole file because the position of the
   // fields are dependent on the kernel version and configuration.
 
-  std::vector<std::string> vmstat_lines;
-  Tokenize(vmstat_data, "\n", &vmstat_lines);
-  for (std::vector<std::string>::iterator it = vmstat_lines.begin();
-       it != vmstat_lines.end(); ++it) {
-    std::vector<std::string> tokens;
-    SplitString(*it, ' ', &tokens);
+  for (const StringPiece& line : SplitStringPiece(
+           vmstat_data, "\n", KEEP_WHITESPACE, SPLIT_WANT_NONEMPTY)) {
+    std::vector<StringPiece> tokens = SplitStringPiece(
+        line, " ", KEEP_WHITESPACE, SPLIT_WANT_NONEMPTY);
     if (tokens.size() != 2)
       continue;
 
@@ -792,9 +788,9 @@ bool GetSystemDiskInfo(SystemDiskInfo* diskinfo) {
     return false;
   }
 
-  std::vector<std::string> diskinfo_lines;
-  size_t line_count = Tokenize(diskinfo_data, "\n", &diskinfo_lines);
-  if (line_count == 0) {
+  std::vector<StringPiece> diskinfo_lines = SplitStringPiece(
+      diskinfo_data, "\n", KEEP_WHITESPACE, SPLIT_WANT_NONEMPTY);
+  if (diskinfo_lines.size() == 0) {
     DLOG(WARNING) << "No lines found";
     return false;
   }
@@ -823,12 +819,12 @@ bool GetSystemDiskInfo(SystemDiskInfo* diskinfo) {
   uint64 io_time = 0;
   uint64 weighted_io_time = 0;
 
-  for (size_t i = 0; i < line_count; i++) {
-    std::vector<std::string> disk_fields;
-    SplitStringAlongWhitespace(diskinfo_lines[i], &disk_fields);
+  for (const StringPiece& line : diskinfo_lines) {
+    std::vector<StringPiece> disk_fields = SplitStringPiece(
+        line, kWhitespaceASCII, TRIM_WHITESPACE, SPLIT_WANT_NONEMPTY);
 
     // Fields may have overflowed and reset to zero.
-    if (IsValidDiskName(disk_fields[kDiskDriveName])) {
+    if (IsValidDiskName(disk_fields[kDiskDriveName].as_string())) {
       StringToUint64(disk_fields[kDiskReads], &reads);
       StringToUint64(disk_fields[kDiskReadsMerged], &reads_merged);
       StringToUint64(disk_fields[kDiskSectorsRead], &sectors_read);

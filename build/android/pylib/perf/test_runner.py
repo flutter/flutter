@@ -277,6 +277,12 @@ class TestRunner(base_test_runner.BaseTestRunner):
       self._device_battery.LetBatteryCoolToTemperature(
           self._options.max_battery_temp)
 
+    logging.info('Charge level: %s%%',
+        str(self._device_battery.GetBatteryInfo().get('level')))
+    if self._options.min_battery_level:
+      self._device_battery.ChargeDeviceToLevel(
+          self._options.min_battery_level)
+
     logging.info('%s : %s', test_name, cmd)
     start_time = datetime.datetime.now()
 

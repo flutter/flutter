@@ -192,7 +192,8 @@ void RunBasicJsonPrefStoreTest(JsonPrefStore* pref_store,
   EXPECT_EQ(base::FilePath::StringType(FILE_PATH_LITERAL("/usr/local/")), path);
   base::FilePath some_path(FILE_PATH_LITERAL("/usr/sbin/"));
 
-  pref_store->SetValue(kSomeDirectory, new StringValue(some_path.value()),
+  pref_store->SetValue(kSomeDirectory,
+                       make_scoped_ptr(new StringValue(some_path.value())),
                        WriteablePrefStore::DEFAULT_PREF_WRITE_FLAGS);
   EXPECT_TRUE(pref_store->GetValue(kSomeDirectory, &actual));
   EXPECT_TRUE(actual->GetAsString(&path));
@@ -204,7 +205,8 @@ void RunBasicJsonPrefStoreTest(JsonPrefStore* pref_store,
   EXPECT_TRUE(actual->GetAsBoolean(&boolean));
   EXPECT_TRUE(boolean);
 
-  pref_store->SetValue(kNewWindowsInTabs, new FundamentalValue(false),
+  pref_store->SetValue(kNewWindowsInTabs,
+                       make_scoped_ptr(new FundamentalValue(false)),
                        WriteablePrefStore::DEFAULT_PREF_WRITE_FLAGS);
   EXPECT_TRUE(pref_store->GetValue(kNewWindowsInTabs, &actual));
   EXPECT_TRUE(actual->GetAsBoolean(&boolean));
@@ -214,15 +216,16 @@ void RunBasicJsonPrefStoreTest(JsonPrefStore* pref_store,
   int integer = 0;
   EXPECT_TRUE(actual->GetAsInteger(&integer));
   EXPECT_EQ(20, integer);
-  pref_store->SetValue(kMaxTabs, new FundamentalValue(10),
+  pref_store->SetValue(kMaxTabs, make_scoped_ptr(new FundamentalValue(10)),
                        WriteablePrefStore::DEFAULT_PREF_WRITE_FLAGS);
   EXPECT_TRUE(pref_store->GetValue(kMaxTabs, &actual));
   EXPECT_TRUE(actual->GetAsInteger(&integer));
   EXPECT_EQ(10, integer);
 
-  pref_store->SetValue(kLongIntPref,
-                       new StringValue(base::Int64ToString(214748364842LL)),
-                       WriteablePrefStore::DEFAULT_PREF_WRITE_FLAGS);
+  pref_store->SetValue(
+      kLongIntPref,
+      make_scoped_ptr(new StringValue(base::Int64ToString(214748364842LL))),
+      WriteablePrefStore::DEFAULT_PREF_WRITE_FLAGS);
   EXPECT_TRUE(pref_store->GetValue(kLongIntPref, &actual));
   EXPECT_TRUE(actual->GetAsString(&string_value));
   int64 value;
@@ -312,9 +315,9 @@ TEST_F(JsonPrefStoreTest, PreserveEmptyValues) {
       pref_file, message_loop_.task_runner(), scoped_ptr<PrefFilter>());
 
   // Set some keys with empty values.
-  pref_store->SetValue("list", new base::ListValue,
+  pref_store->SetValue("list", make_scoped_ptr(new base::ListValue),
                        WriteablePrefStore::DEFAULT_PREF_WRITE_FLAGS);
-  pref_store->SetValue("dict", new base::DictionaryValue,
+  pref_store->SetValue("dict", make_scoped_ptr(new base::DictionaryValue),
                        WriteablePrefStore::DEFAULT_PREF_WRITE_FLAGS);
 
   // Write to file.
@@ -343,9 +346,9 @@ TEST_F(JsonPrefStoreTest, RemoveClearsEmptyParent) {
   scoped_refptr<JsonPrefStore> pref_store = new JsonPrefStore(
       pref_file, message_loop_.task_runner(), scoped_ptr<PrefFilter>());
 
-  base::DictionaryValue* dict = new base::DictionaryValue;
+  scoped_ptr<base::DictionaryValue> dict(new base::DictionaryValue);
   dict->SetString("key", "value");
-  pref_store->SetValue("dict", dict,
+  pref_store->SetValue("dict", dict.Pass(),
                        WriteablePrefStore::DEFAULT_PREF_WRITE_FLAGS);
 
   pref_store->RemoveValue("dict.key",
@@ -845,7 +848,8 @@ TEST_F(JsonPrefStoreLossyWriteTest, LossyWriteBasic) {
 
   // Set a normal pref and check that it gets scheduled to be written.
   ASSERT_FALSE(file_writer->HasPendingWrite());
-  pref_store->SetValue("normal", new base::StringValue("normal"),
+  pref_store->SetValue("normal",
+                       make_scoped_ptr(new base::StringValue("normal")),
                        WriteablePrefStore::DEFAULT_PREF_WRITE_FLAGS);
   ASSERT_TRUE(file_writer->HasPendingWrite());
   file_writer->DoScheduledWrite();
@@ -854,14 +858,15 @@ TEST_F(JsonPrefStoreLossyWriteTest, LossyWriteBasic) {
 
   // Set a lossy pref and check that it is not scheduled to be written.
   // SetValue/RemoveValue.
-  pref_store->SetValue("lossy", new base::StringValue("lossy"),
+  pref_store->SetValue("lossy", make_scoped_ptr(new base::StringValue("lossy")),
                        WriteablePrefStore::LOSSY_PREF_WRITE_FLAG);
   ASSERT_FALSE(file_writer->HasPendingWrite());
   pref_store->RemoveValue("lossy", WriteablePrefStore::LOSSY_PREF_WRITE_FLAG);
   ASSERT_FALSE(file_writer->HasPendingWrite());
 
   // SetValueSilently/RemoveValueSilently.
-  pref_store->SetValueSilently("lossy", new base::StringValue("lossy"),
+  pref_store->SetValueSilently("lossy",
+                               make_scoped_ptr(new base::StringValue("lossy")),
                                WriteablePrefStore::LOSSY_PREF_WRITE_FLAG);
   ASSERT_FALSE(file_writer->HasPendingWrite());
   pref_store->RemoveValueSilently("lossy",
@@ -869,7 +874,7 @@ TEST_F(JsonPrefStoreLossyWriteTest, LossyWriteBasic) {
   ASSERT_FALSE(file_writer->HasPendingWrite());
 
   // ReportValueChanged.
-  pref_store->SetValue("lossy", new base::StringValue("lossy"),
+  pref_store->SetValue("lossy", make_scoped_ptr(new base::StringValue("lossy")),
                        WriteablePrefStore::LOSSY_PREF_WRITE_FLAG);
   ASSERT_FALSE(file_writer->HasPendingWrite());
   pref_store->ReportValueChanged("lossy",
@@ -890,12 +895,13 @@ TEST_F(JsonPrefStoreLossyWriteTest, LossyWriteMixedLossyFirst) {
 
   // Set a lossy pref and check that it is not scheduled to be written.
   ASSERT_FALSE(file_writer->HasPendingWrite());
-  pref_store->SetValue("lossy", new base::StringValue("lossy"),
+  pref_store->SetValue("lossy", make_scoped_ptr(new base::StringValue("lossy")),
                        WriteablePrefStore::LOSSY_PREF_WRITE_FLAG);
   ASSERT_FALSE(file_writer->HasPendingWrite());
 
   // Set a normal pref and check that it is scheduled to be written.
-  pref_store->SetValue("normal", new base::StringValue("normal"),
+  pref_store->SetValue("normal",
+                       make_scoped_ptr(new base::StringValue("normal")),
                        WriteablePrefStore::DEFAULT_PREF_WRITE_FLAGS);
   ASSERT_TRUE(file_writer->HasPendingWrite());
 
@@ -912,12 +918,13 @@ TEST_F(JsonPrefStoreLossyWriteTest, LossyWriteMixedLossySecond) {
 
   // Set a normal pref and check that it is scheduled to be written.
   ASSERT_FALSE(file_writer->HasPendingWrite());
-  pref_store->SetValue("normal", new base::StringValue("normal"),
+  pref_store->SetValue("normal",
+                       make_scoped_ptr(new base::StringValue("normal")),
                        WriteablePrefStore::DEFAULT_PREF_WRITE_FLAGS);
   ASSERT_TRUE(file_writer->HasPendingWrite());
 
   // Set a lossy pref and check that the write is still scheduled.
-  pref_store->SetValue("lossy", new base::StringValue("lossy"),
+  pref_store->SetValue("lossy", make_scoped_ptr(new base::StringValue("lossy")),
                        WriteablePrefStore::LOSSY_PREF_WRITE_FLAG);
   ASSERT_TRUE(file_writer->HasPendingWrite());
 
@@ -933,7 +940,7 @@ TEST_F(JsonPrefStoreLossyWriteTest, ScheduleLossyWrite) {
   ImportantFileWriter* file_writer = GetImportantFileWriter(pref_store);
 
   // Set a lossy pref and check that it is not scheduled to be written.
-  pref_store->SetValue("lossy", new base::StringValue("lossy"),
+  pref_store->SetValue("lossy", make_scoped_ptr(new base::StringValue("lossy")),
                        WriteablePrefStore::LOSSY_PREF_WRITE_FLAG);
   ASSERT_FALSE(file_writer->HasPendingWrite());
 

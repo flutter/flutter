@@ -4,9 +4,9 @@
 
 #include "base/macros.h"
 #include "testing/gtest/include/gtest/gtest.h"
+#include "url/third_party/mozilla/url_parse.h"
 #include "url/url_canon.h"
 #include "url/url_canon_stdstring.h"
-#include "url/url_parse.h"
 #include "url/url_test_utils.h"
 #include "url/url_util.h"
 

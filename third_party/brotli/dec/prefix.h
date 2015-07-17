@@ -11,8 +11,9 @@
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
+*/
 
-   Lookup tables to map prefix codes to value ranges. This is used during
+/* Lookup tables to map prefix codes to value ranges. This is used during
    decoding of the block lengths, literal insertion lengths and copy lengths.
 */
 

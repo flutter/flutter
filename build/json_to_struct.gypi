@@ -10,7 +10,8 @@
     #   cc_dir: path to generated files
     # Functions and namespaces can be excluded by setting "nocompile" to true.
     'struct_gen_dir': '<(DEPTH)/tools/json_to_struct',
-    'struct_gen': '<(struct_gen_dir)/json_to_struct.py',
+    'struct_gen%': '<(struct_gen_dir)/json_to_struct.py',
+    'output_filename%': '<(RULE_INPUT_ROOT)',
   },
   'rules': [
     {
@@ -18,14 +19,15 @@
       'rule_name': 'genstaticinit',
       'extension': 'json',
       'inputs': [
+        '<(struct_gen)',
         '<(struct_gen_dir)/element_generator.py',
         '<(struct_gen_dir)/json_to_struct.py',
         '<(struct_gen_dir)/struct_generator.py',
         '<(schema_file)',
       ],
       'outputs': [
-        '<(SHARED_INTERMEDIATE_DIR)/<(cc_dir)/<(RULE_INPUT_ROOT).cc',
-        '<(SHARED_INTERMEDIATE_DIR)/<(cc_dir)/<(RULE_INPUT_ROOT).h',
+        '<(SHARED_INTERMEDIATE_DIR)/<(cc_dir)/<(output_filename).cc',
+        '<(SHARED_INTERMEDIATE_DIR)/<(cc_dir)/<(output_filename).h',
       ],
       'action': [
         'python',
@@ -35,6 +37,7 @@
         '--destdir=<(cc_dir)',
         '--namespace=<(namespace)',
         '--schema=<(schema_file)',
+        '--output=<(output_filename)',
       ],
       'message': 'Generating C++ static initializers from <(RULE_INPUT_PATH)',
       'process_outputs_as_sources': 1,

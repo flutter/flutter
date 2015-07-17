@@ -24,6 +24,7 @@ namespace {
 // Generate a message with or without a table tag, when 'header' is the OpenTypeFile pointer
 #define OTS_FAILURE_MSG_TAG(msg_,tag_) OTS_FAILURE_MSG_TAG_(header, msg_, tag_)
 #define OTS_FAILURE_MSG_HDR(msg_)      OTS_FAILURE_MSG_(header, msg_)
+#define OTS_WARNING_MSG_HDR(msg_)      OTS_WARNING_MSG_(header, msg_)
 
 
 struct OpenTypeTable {
@@ -57,10 +58,8 @@ struct OutputTable {
   size_t length;
   uint32_t chksum;
 
-  static bool SortByTag(const OutputTable& a, const OutputTable& b) {
-    const uint32_t atag = ntohl(a.tag);
-    const uint32_t btag = ntohl(b.tag);
-    return atag < btag;
+  bool operator<(const OutputTable& other) const {
+    return ntohl(tag) < ntohl(other.tag);
   }
 };
 
@@ -145,7 +144,6 @@ const struct {
     ots::ots_vmtx_should_serialise, ots::ots_vmtx_free, false },
   { "MATH", ots::ots_math_parse, ots::ots_math_serialise,
     ots::ots_math_should_serialise, ots::ots_math_free, false },
-  // TODO(bashi): Support mort, base, and jstf tables.
   { 0, NULL, NULL, NULL, NULL, false },
 };
 
@@ -194,7 +192,7 @@ bool ProcessTTF(ots::OpenTypeFile *header,
   // Don't call ots_failure() here since ~25% of fonts (250+ fonts) in
   // http://www.princexml.com/fonts/ have unexpected search_range value.
   if (header->search_range != expected_search_range) {
-    OTS_FAILURE_MSG_HDR("bad search range");
+    OTS_WARNING_MSG_HDR("bad search range");
     header->search_range = expected_search_range;  // Fix the value.
   }
 
@@ -209,7 +207,7 @@ bool ProcessTTF(ots::OpenTypeFile *header,
   const uint16_t expected_range_shift =
       16 * header->num_tables - header->search_range;
   if (header->range_shift != expected_range_shift) {
-    OTS_FAILURE_MSG_HDR("bad range shift");
+    OTS_WARNING_MSG_HDR("bad range shift");
     header->range_shift = expected_range_shift;  // the same as above.
   }
 
@@ -472,7 +470,7 @@ bool ProcessGeneric(ots::OpenTypeFile *header, uint32_t signature,
       const uint32_t this_tag = ntohl(tables[i].tag);
       const uint32_t prev_tag = ntohl(tables[i - 1].tag);
       if (this_tag <= prev_tag) {
-        return OTS_FAILURE_MSG_HDR("table directory not correctly ordered");
+        OTS_WARNING_MSG_HDR("Table directory is not correctly ordered");
       }
     }
 
@@ -737,7 +735,7 @@ bool ProcessGeneric(ots::OpenTypeFile *header, uint32_t signature,
   const size_t end_of_file = output->Tell();
 
   // Need to sort the output tables for inclusion in the file
-  std::sort(out_tables.begin(), out_tables.end(), OutputTable::SortByTag);
+  std::sort(out_tables.begin(), out_tables.end());
   if (!output->Seek(table_record_offset)) {
     return OTS_FAILURE_MSG_HDR("error writing output");
   }
@@ -816,12 +814,6 @@ bool OTSContext::Process(OTSStream *output,
     table_parsers[i].free(&header);
   }
   return result;
-}
-
-// For backward compatibility
-bool Process(OTSStream *output, const uint8_t *data, size_t length) {
-  static OTSContext context;
-  return context.Process(output, data, length);
 }
 
 }  // namespace ots

@@ -81,6 +81,11 @@
       'conditions': [
         ['OS!="ios" and (target_arch=="ia32" or target_arch=="x64")', {
           'sources' : [ 'x86.c', ],
+          'variables': {
+            'clang_warning_flags': [
+              '-Wno-incompatible-pointer-types',
+            ],
+          },
         }],
         ['OS!="win"', {
           'product_name': 'chrome_zlib',

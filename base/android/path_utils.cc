@@ -41,6 +41,16 @@ bool GetCacheDirectory(FilePath* result) {
   return true;
 }
 
+bool GetThumbnailCacheDirectory(FilePath* result) {
+  JNIEnv* env = AttachCurrentThread();
+  ScopedJavaLocalRef<jstring> path =
+      Java_PathUtils_getThumbnailCacheDirectoryPath(env,
+                                                    GetApplicationContext());
+  FilePath thumbnail_cache_path(ConvertJavaStringToUTF8(path));
+  *result = thumbnail_cache_path;
+  return true;
+}
+
 bool GetDownloadsDirectory(FilePath* result) {
   JNIEnv* env = AttachCurrentThread();
   ScopedJavaLocalRef<jstring> path =

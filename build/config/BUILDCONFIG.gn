@@ -2,6 +2,38 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+# =============================================================================
+# PLATFORM SELECTION
+# =============================================================================
+#
+# There are two main things to set: "os" and "cpu". The "toolchain" is the name
+# of the GN thing that encodes combinations of these things.
+#
+# Users typically only set the variables "target_os" and "target_cpu" in "gn
+# args", the rest are set up by our build and internal to GN.
+#
+# There are three different types of each of these things: The "host"
+# represents the computer doing the compile and never changes. The "target"
+# represents the main thing we're trying to build. The "current" represents
+# which configuration is currently being defined, which can be either the
+# host, the target, or something completely different (like nacl). GN will
+# run the same build file multiple times for the different required
+# configuration in the same build.
+#
+# This gives the following variables:
+#  - host_os, host_cpu, host_toolchain
+#  - target_os, target_cpu, default_toolchain
+#  - current_os, current_cpu, current_toolchain.
+#
+# Note the default_toolchain isn't symmetrical (you would expect
+# target_toolchain). This is because the "default" toolchain is a GN built-in
+# concept, and "target" is something our build sets up that's symmetrical with
+# its GYP counterpart. Potentially the built-in default_toolchain variable
+# could be renamed in the future.
+#
+# When writing build files, to do something only for the host:
+#   if (current_toolchain == host_toolchain) { ...
+
 if (target_os == "") {
   target_os = host_os
 }
@@ -100,18 +132,6 @@ declare_args() {
   # to configure warnings.
   is_clang = current_os == "mac" || current_os == "ios" ||
              current_os == "linux" || current_os == "chromeos"
-
-  # Selects the desired build flavor. Official builds get additional
-  # processing to prepare for release. Normally you will want to develop and
-  # test with this flag off.
-  # TODO(brettw) move to chrome_build.gni when DEPS are updated.
-  is_official_build = false
-
-  # Select the desired branding flavor. False means normal Chromium branding,
-  # true means official Google Chrome branding (requires extra Google-internal
-  # resources).
-  # TODO(brettw) move to chrome_build.gni when DEPS are updated.
-  is_chrome_branded = false
 
   # Compile for Address Sanitizer to find memory bugs.
   is_asan = false

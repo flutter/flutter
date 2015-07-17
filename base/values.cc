@@ -482,27 +482,30 @@ void DictionaryValue::SetStringWithoutPathExpansion(
   SetWithoutPathExpansion(path, new StringValue(in_value));
 }
 
-bool DictionaryValue::Get(const std::string& path,
+bool DictionaryValue::Get(StringPiece path,
                           const Value** out_value) const {
   DCHECK(IsStringUTF8(path));
-  std::string current_path(path);
+  StringPiece current_path(path);
   const DictionaryValue* current_dictionary = this;
   for (size_t delimiter_position = current_path.find('.');
        delimiter_position != std::string::npos;
        delimiter_position = current_path.find('.')) {
     const DictionaryValue* child_dictionary = NULL;
-    if (!current_dictionary->GetDictionary(
-            current_path.substr(0, delimiter_position), &child_dictionary))
+    if (!current_dictionary->GetDictionaryWithoutPathExpansion(
+            current_path.substr(0, delimiter_position).as_string(),
+            &child_dictionary)) {
       return false;
+    }
 
     current_dictionary = child_dictionary;
-    current_path.erase(0, delimiter_position + 1);
+    current_path = current_path.substr(delimiter_position + 1);
   }
 
-  return current_dictionary->GetWithoutPathExpansion(current_path, out_value);
+  return current_dictionary->GetWithoutPathExpansion(current_path.as_string(),
+                                                     out_value);
 }
 
-bool DictionaryValue::Get(const std::string& path, Value** out_value)  {
+bool DictionaryValue::Get(StringPiece path, Value** out_value)  {
   return static_cast<const DictionaryValue&>(*this).Get(
       path,
       const_cast<const Value**>(out_value));
@@ -588,7 +591,7 @@ bool DictionaryValue::GetBinary(const std::string& path,
       const_cast<const BinaryValue**>(out_value));
 }
 
-bool DictionaryValue::GetDictionary(const std::string& path,
+bool DictionaryValue::GetDictionary(StringPiece path,
                                     const DictionaryValue** out_value) const {
   const Value* value;
   bool result = Get(path, &value);
@@ -601,7 +604,7 @@ bool DictionaryValue::GetDictionary(const std::string& path,
   return true;
 }
 
-bool DictionaryValue::GetDictionary(const std::string& path,
+bool DictionaryValue::GetDictionary(StringPiece path,
                                     DictionaryValue** out_value) {
   return static_cast<const DictionaryValue&>(*this).GetDictionary(
       path,

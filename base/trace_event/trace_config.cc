@@ -6,6 +6,7 @@
 
 #include "base/json/json_reader.h"
 #include "base/json/json_writer.h"
+#include "base/strings/pattern.h"
 #include "base/strings/string_split.h"
 #include "base/strings/string_tokenizer.h"
 #include "base/strings/stringprintf.h"
@@ -147,8 +148,8 @@ bool TraceConfig::IsCategoryGroupEnabled(
     if (IsCategoryEnabled(category_group_token.c_str())) {
       return true;
     }
-    if (!MatchPattern(category_group_token.c_str(),
-                      TRACE_DISABLED_BY_DEFAULT("*")))
+    if (!base::MatchPattern(category_group_token.c_str(),
+                            TRACE_DISABLED_BY_DEFAULT("*")))
       had_enabled_by_default = true;
   }
   // Do a second pass to check for explicitly disabled categories
@@ -160,7 +161,7 @@ bool TraceConfig::IsCategoryGroupEnabled(
     for (StringList::const_iterator ci = excluded_categories_.begin();
          ci != excluded_categories_.end();
          ++ci) {
-      if (MatchPattern(category_group_token.c_str(), ci->c_str())) {
+      if (base::MatchPattern(category_group_token.c_str(), ci->c_str())) {
         // Current token of category_group_name is present in excluded_list.
         // Flag the exclusion and proceed further to check if any of the
         // remaining categories of category_group_name is not present in the
@@ -515,17 +516,17 @@ bool TraceConfig::IsCategoryEnabled(const char* category_name) const {
   for (ci = disabled_categories_.begin();
        ci != disabled_categories_.end();
        ++ci) {
-    if (MatchPattern(category_name, ci->c_str()))
+    if (base::MatchPattern(category_name, ci->c_str()))
       return true;
   }
 
-  if (MatchPattern(category_name, TRACE_DISABLED_BY_DEFAULT("*")))
+  if (base::MatchPattern(category_name, TRACE_DISABLED_BY_DEFAULT("*")))
     return false;
 
   for (ci = included_categories_.begin();
        ci != included_categories_.end();
        ++ci) {
-    if (MatchPattern(category_name, ci->c_str()))
+    if (base::MatchPattern(category_name, ci->c_str()))
       return true;
   }
 

@@ -24,7 +24,9 @@
 #include "base/synchronization/lock.h"
 #include "base/threading/thread.h"
 #include "base/threading/thread_local.h"
+#include "base/trace_event/memory_dump_provider.h"
 #include "base/trace_event/trace_config.h"
+#include "base/trace_event/trace_event_memory_overhead.h"
 
 // Older style trace macros with explicit id and extra data
 // Only these macros result in publishing data to ETW as currently implemented.
@@ -64,6 +66,8 @@ class BASE_EXPORT ConvertableToTraceFormat
   // escaped. There is no processing applied to the content after it is
   // appended.
   virtual void AppendAsTraceFormat(std::string* out) const = 0;
+
+  virtual void EstimateTraceMemoryOverhead(TraceEventMemoryOverhead* overhead);
 
   std::string ToString() const {
     std::string result;
@@ -117,11 +121,13 @@ class BASE_EXPORT TraceEvent {
       const unsigned char* arg_types,
       const unsigned long long* arg_values,
       const scoped_refptr<ConvertableToTraceFormat>* convertable_values,
-      unsigned char flags);
+      unsigned int flags);
 
   void Reset();
 
   void UpdateDuration(const TraceTicks& now, const ThreadTicks& thread_now);
+
+  void EstimateTraceMemoryOverhead(TraceEventMemoryOverhead*);
 
   // Serialize event data to JSON
   typedef base::Callback<bool(const char* category_group_name,
@@ -142,7 +148,7 @@ class BASE_EXPORT TraceEvent {
   TimeDelta duration() const { return duration_; }
   TimeDelta thread_duration() const { return thread_duration_; }
   unsigned long long id() const { return id_; }
-  unsigned char flags() const { return flags_; }
+  unsigned int flags() const { return flags_; }
 
   // Exposed for unittesting:
 
@@ -168,6 +174,7 @@ class BASE_EXPORT TraceEvent {
   TimeDelta thread_duration_;
   // id_ can be used to store phase-specific data.
   unsigned long long id_;
+  scoped_ptr<TraceEventMemoryOverhead> cached_memory_overhead_estimate_;
   TraceValue arg_values_[kTraceMaxNumArgs];
   const char* arg_names_[kTraceMaxNumArgs];
   scoped_refptr<ConvertableToTraceFormat> convertable_values_[kTraceMaxNumArgs];
@@ -176,7 +183,7 @@ class BASE_EXPORT TraceEvent {
   scoped_refptr<base::RefCountedString> parameter_copy_storage_;
   int thread_id_;
   char phase_;
-  unsigned char flags_;
+  unsigned int flags_;
   unsigned char arg_types_[kTraceMaxNumArgs];
 
   DISALLOW_COPY_AND_ASSIGN(TraceEvent);
@@ -185,10 +192,8 @@ class BASE_EXPORT TraceEvent {
 // TraceBufferChunk is the basic unit of TraceBuffer.
 class BASE_EXPORT TraceBufferChunk {
  public:
-  explicit TraceBufferChunk(uint32 seq)
-      : next_free_(0),
-        seq_(seq) {
-  }
+  explicit TraceBufferChunk(uint32 seq);
+  ~TraceBufferChunk();
 
   void Reset(uint32 new_seq);
   TraceEvent* AddTraceEvent(size_t* event_index);
@@ -209,10 +214,13 @@ class BASE_EXPORT TraceBufferChunk {
 
   scoped_ptr<TraceBufferChunk> Clone() const;
 
+  void EstimateTraceMemoryOverhead(TraceEventMemoryOverhead* overhead);
+
   static const size_t kTraceBufferChunkSize = 64;
 
  private:
   size_t next_free_;
+  scoped_ptr<TraceEventMemoryOverhead> cached_overhead_estimate_when_full_;
   TraceEvent chunk_[kTraceBufferChunkSize];
   uint32 seq_;
 };
@@ -235,6 +243,11 @@ class BASE_EXPORT TraceBuffer {
   virtual const TraceBufferChunk* NextChunk() = 0;
 
   virtual scoped_ptr<TraceBuffer> CloneForIteration() const = 0;
+
+  // Computes an estimate of the size of the buffer, including all the retained
+  // objects.
+  virtual void EstimateTraceMemoryOverhead(
+      TraceEventMemoryOverhead* overhead) = 0;
 };
 
 // TraceResultBuffer collects and converts trace fragments returned by TraceLog
@@ -289,7 +302,7 @@ struct BASE_EXPORT TraceLogStatus {
   size_t event_count;
 };
 
-class BASE_EXPORT TraceLog {
+class BASE_EXPORT TraceLog : public MemoryDumpProvider {
  public:
   enum Mode {
     DISABLED = 0,
@@ -321,6 +334,10 @@ class BASE_EXPORT TraceLog {
   // Retrieves a copy (for thread-safety) of the current TraceConfig.
   TraceConfig GetCurrentTraceConfig() const;
 
+  // Initializes the thread-local event buffer, if not already initialized and
+  // if the current thread supports that (has a message loop).
+  void InitializeThreadLocalEventBufferIfSupported();
+
   // Enables normal tracing (recording trace events in the trace buffer).
   // See TraceConfig comments for details on how to control what categories
   // will be traced. If tracing has already been enabled, |category_filter| will
@@ -350,6 +367,8 @@ class BASE_EXPORT TraceLog {
   // on-demand.
   class BASE_EXPORT EnabledStateObserver {
    public:
+    virtual ~EnabledStateObserver() = default;
+
     // Called just after the tracing system becomes enabled, outside of the
     // |lock_|. TraceLog::IsEnabled() is true at this point.
     virtual void OnTraceLogEnabled() = 0;
@@ -364,6 +383,10 @@ class BASE_EXPORT TraceLog {
 
   TraceLogStatus GetStatus() const;
   bool BufferIsFull() const;
+
+  // Computes an estimate of the size of the TraceLog including all the retained
+  // objects.
+  void EstimateTraceMemoryOverhead(TraceEventMemoryOverhead* overhead);
 
   // Not using base::Callback because of its limited by 7 parameters.
   // Also, using primitive type allows directly passing callback from WebCore.
@@ -383,7 +406,7 @@ class BASE_EXPORT TraceLog {
                                 const char* const arg_names[],
                                 const unsigned char arg_types[],
                                 const unsigned long long arg_values[],
-                                unsigned char flags);
+                                unsigned int flags);
 
   // Enable tracing for EventCallback.
   void SetEventCallbackEnabled(const TraceConfig& trace_config,
@@ -407,6 +430,9 @@ class BASE_EXPORT TraceLog {
   void Flush(const OutputCallback& cb, bool use_worker_thread = false);
   void FlushButLeaveBufferIntact(const OutputCallback& flush_output_callback);
 
+  // Cancels tracing and discards collected data.
+  void CancelTracing(const OutputCallback& cb);
+
   // Called by TRACE_EVENT* macros, don't call this directly.
   // The name parameter is a category group for example:
   // TRACE_EVENT0("renderer,webkit", "WebViewImpl::HandleInputEvent")
@@ -427,7 +453,7 @@ class BASE_EXPORT TraceLog {
       const unsigned char* arg_types,
       const unsigned long long* arg_values,
       const scoped_refptr<ConvertableToTraceFormat>* convertable_values,
-      unsigned char flags);
+      unsigned int flags);
   TraceEventHandle AddTraceEventWithThreadIdAndTimestamp(
       char phase,
       const unsigned char* category_group_enabled,
@@ -440,7 +466,7 @@ class BASE_EXPORT TraceLog {
       const unsigned char* arg_types,
       const unsigned long long* arg_values,
       const scoped_refptr<ConvertableToTraceFormat>* convertable_values,
-      unsigned char flags);
+      unsigned int flags);
   static void AddTraceEventEtw(char phase,
                                const char* category_group,
                                const void* id,
@@ -528,6 +554,9 @@ class BASE_EXPORT TraceLog {
   // by the Singleton class.
   friend struct DefaultSingletonTraits<TraceLog>;
 
+  // MemoryDumpProvider implementation.
+  bool OnMemoryDump(ProcessMemoryDump* pmd) override;
+
   // Enable/disable each category group based on the current mode_,
   // category_filter_, event_callback_ and event_callback_category_filter_.
   // Enable the category group in the enabled mode if category_filter_ matches
@@ -547,7 +576,7 @@ class BASE_EXPORT TraceLog {
   class OptionalAutoLock;
 
   TraceLog();
-  ~TraceLog();
+  ~TraceLog() override;
   const unsigned char* GetCategoryGroupEnabledInternal(const char* name);
   void AddMetadataEventsWhileLocked();
 
@@ -572,16 +601,20 @@ class BASE_EXPORT TraceLog {
   TraceEvent* GetEventByHandleInternal(TraceEventHandle handle,
                                        OptionalAutoLock* lock);
 
+  void FlushInternal(const OutputCallback& cb,
+                     bool use_worker_thread,
+                     bool discard_events);
+
   // |generation| is used in the following callbacks to check if the callback
   // is called for the flush of the current |logged_events_|.
-  void FlushCurrentThread(int generation);
+  void FlushCurrentThread(int generation, bool discard_events);
   // Usually it runs on a different thread.
   static void ConvertTraceEventsToTraceFormat(
       scoped_ptr<TraceBuffer> logged_events,
       const TraceLog::OutputCallback& flush_output_callback,
       const TraceEvent::ArgumentFilterPredicate& argument_filter_predicate);
-  void FinishFlush(int generation);
-  void OnFlushTimeout(int generation);
+  void FinishFlush(int generation, bool discard_events);
+  void OnFlushTimeout(int generation, bool discard_events);
 
   int generation() const {
     return static_cast<int>(subtle::NoBarrier_Load(&generation_));

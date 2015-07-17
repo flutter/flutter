@@ -33,7 +33,7 @@ void XMLCDECL xmlGenericErrorDefaultFunc	(void *ctx ATTRIBUTE_UNUSED,
 								\
     while (size < 64000) {					\
 	va_start(ap, msg);					\
-  	chars = vsnprintf(str, size, msg, ap);			\
+	chars = vsnprintf(str, size, msg, ap);			\
 	va_end(ap);						\
 	if ((chars > -1) && (chars < size)) {			\
 	    if (prev_size == chars) {				\
@@ -54,9 +54,9 @@ void XMLCDECL xmlGenericErrorDefaultFunc	(void *ctx ATTRIBUTE_UNUSED,
 }
 
 /************************************************************************
- * 									*
- * 			Handling of out of context errors		*
- * 									*
+ *									*
+ *			Handling of out of context errors		*
+ *									*
  ************************************************************************/
 
 /**
@@ -64,7 +64,7 @@ void XMLCDECL xmlGenericErrorDefaultFunc	(void *ctx ATTRIBUTE_UNUSED,
  * @ctx:  an error context
  * @msg:  the message to display/transmit
  * @...:  extra parameters for the message display
- * 
+ *
  * Default handler for out of context error messages.
  */
 void XMLCDECL
@@ -82,7 +82,7 @@ xmlGenericErrorDefaultFunc(void *ctx ATTRIBUTE_UNUSED, const char *msg, ...) {
 /**
  * initGenericErrorDefaultFunc:
  * @handler:  the handler
- * 
+ *
  * Set or reset (if NULL) the default handler for generic errors
  * to the builtin error function.
  */
@@ -137,15 +137,15 @@ xmlSetStructuredErrorFunc(void *ctx, xmlStructuredErrorFunc handler) {
 }
 
 /************************************************************************
- * 									*
- * 			Handling of parsing errors			*
- * 									*
+ *									*
+ *			Handling of parsing errors			*
+ *									*
  ************************************************************************/
 
 /**
  * xmlParserPrintFileInfo:
  * @input:  an xmlParserInputPtr input
- * 
+ *
  * Displays the associated file and line informations for the current input
  */
 
@@ -165,12 +165,12 @@ xmlParserPrintFileInfo(xmlParserInputPtr input) {
 /**
  * xmlParserPrintFileContext:
  * @input:  an xmlParserInputPtr input
- * 
+ *
  * Displays current context within the input content for error tracking
  */
 
 static void
-xmlParserPrintFileContextInternal(xmlParserInputPtr input , 
+xmlParserPrintFileContextInternal(xmlParserInputPtr input ,
 		xmlGenericErrorFunc channel, void *data ) {
     const xmlChar *cur, *base;
     unsigned int n, col;	/* GCC warns if signed, because compared with sizeof() */
@@ -186,8 +186,8 @@ xmlParserPrintFileContextInternal(xmlParserInputPtr input ,
     }
     n = 0;
     /* search backwards for beginning-of-line (to max buff size) */
-    while ((n++ < (sizeof(content)-1)) && (cur > base) && 
-    	   (*(cur) != '\n') && (*(cur) != '\r'))
+    while ((n++ < (sizeof(content)-1)) && (cur > base) &&
+	   (*(cur) != '\n') && (*(cur) != '\r'))
         cur--;
     if ((*(cur) == '\n') || (*(cur) == '\r')) cur++;
     /* calculate the error position in terms of the current position */
@@ -196,8 +196,8 @@ xmlParserPrintFileContextInternal(xmlParserInputPtr input ,
     n = 0;
     ctnt = content;
     /* copy selected text to our buffer */
-    while ((*cur != 0) && (*(cur) != '\n') && 
-    	   (*(cur) != '\r') && (n < sizeof(content)-1)) {
+    while ((*cur != 0) && (*(cur) != '\n') &&
+	   (*(cur) != '\r') && (n < sizeof(content)-1)) {
 		*ctnt++ = *cur++;
 	n++;
     }
@@ -221,7 +221,7 @@ xmlParserPrintFileContextInternal(xmlParserInputPtr input ,
 /**
  * xmlParserPrintFileContext:
  * @input:  an xmlParserInputPtr input
- * 
+ *
  * Displays current context within the input content for error tracking
  */
 void
@@ -292,7 +292,10 @@ xmlReportError(xmlErrorPtr err, xmlParserCtxtPtr ctxt, const char *str,
     } else {
         if (file != NULL)
             channel(data, "%s:%d: ", file, line);
-        else if ((line != 0) && (domain == XML_FROM_PARSER))
+        else if ((line != 0) &&
+	         ((domain == XML_FROM_PARSER) || (domain == XML_FROM_SCHEMASV)||
+		  (domain == XML_FROM_SCHEMASP)||(domain == XML_FROM_DTD) ||
+		  (domain == XML_FROM_RELAXNGP)||(domain == XML_FROM_RELAXNGV)))
             channel(data, "Entity: line %d: ", line);
     }
     if (name != NULL) {
@@ -359,6 +362,15 @@ xmlReportError(xmlErrorPtr err, xmlParserCtxtPtr ctxt, const char *str,
             break;
         case XML_FROM_I18N:
             channel(data, "encoding ");
+            break;
+        case XML_FROM_SCHEMATRONV:
+            channel(data, "schematron ");
+            break;
+        case XML_FROM_BUFFER:
+            channel(data, "internal buffer ");
+            break;
+        case XML_FROM_URI:
+            channel(data, "URI ");
             break;
         default:
             break;
@@ -429,7 +441,7 @@ xmlReportError(xmlErrorPtr err, xmlParserCtxtPtr ctxt, const char *str,
  * @str2: extra string info
  * @str3: extra string info
  * @int1: extra int info
- * @col: column number of the error or 0 if N/A 
+ * @col: column number of the error or 0 if N/A
  * @msg:  the message to display/transmit
  * @...:  extra parameters for the message display
  *
@@ -452,6 +464,8 @@ __xmlRaiseError(xmlStructuredErrorFunc schannel,
     xmlErrorPtr to = &xmlLastError;
     xmlNodePtr baseptr = NULL;
 
+    if (code == XML_ERR_OK)
+        return;
     if ((xmlGetWarningsDefaultValue == 0) && (level == XML_ERR_WARNING))
         return;
     if ((domain == XML_FROM_PARSER) || (domain == XML_FROM_HTML) ||
@@ -459,8 +473,11 @@ __xmlRaiseError(xmlStructuredErrorFunc schannel,
 	(domain == XML_FROM_IO) || (domain == XML_FROM_VALID)) {
 	ctxt = (xmlParserCtxtPtr) ctx;
 	if ((schannel == NULL) && (ctxt != NULL) && (ctxt->sax != NULL) &&
-	    (ctxt->sax->initialized == XML_SAX2_MAGIC))
+	    (ctxt->sax->initialized == XML_SAX2_MAGIC) &&
+	    (ctxt->sax->serror != NULL)) {
 	    schannel = ctxt->sax->serror;
+	    data = ctxt->userData;
+	}
     }
     /*
      * Check if structured error handler set
@@ -473,16 +490,6 @@ __xmlRaiseError(xmlStructuredErrorFunc schannel,
 	if (schannel != NULL)
 	    data = xmlStructuredErrorContext;
     }
-    if ((domain == XML_FROM_VALID) &&
-        ((channel == xmlParserValidityError) ||
-	 (channel == xmlParserValidityWarning))) {
-	ctxt = (xmlParserCtxtPtr) ctx;
-	if ((schannel == NULL) && (ctxt != NULL) && (ctxt->sax != NULL) &&
-	    (ctxt->sax->initialized == XML_SAX2_MAGIC))
-	    schannel = ctxt->sax->serror;
-    }
-    if (code == XML_ERR_OK)
-        return;
     /*
      * Formatting the message
      */
@@ -526,6 +533,8 @@ __xmlRaiseError(xmlStructuredErrorFunc schannel,
 
 	if ((node != NULL) && (node->type == XML_ELEMENT_NODE))
 	    line = node->line;
+	if ((line == 0) || (line == 65535))
+	    line = xmlGetLineNo(node);
     }
 
     /*
@@ -589,6 +598,11 @@ __xmlRaiseError(xmlStructuredErrorFunc schannel,
     if (to != &xmlLastError)
         xmlCopyError(to,&xmlLastError);
 
+    if (schannel != NULL) {
+	schannel(data, to);
+	return;
+    }
+
     /*
      * Find the callback channel if channel param is NULL
      */
@@ -600,19 +614,12 @@ __xmlRaiseError(xmlStructuredErrorFunc schannel,
 	    channel = ctxt->sax->error;
 	data = ctxt->userData;
     } else if (channel == NULL) {
-        if ((schannel == NULL) && (xmlStructuredError != NULL)) {
-	    schannel = xmlStructuredError;
-	    data = xmlStructuredErrorContext;
+	channel = xmlGenericError;
+	if (ctxt != NULL) {
+	    data = ctxt;
 	} else {
-	    channel = xmlGenericError;
-	    if (!data) {
-		data = xmlGenericErrorContext;
-	    }
+	    data = xmlGenericErrorContext;
 	}
-    }
-    if (schannel != NULL) {
-        schannel(data, to);
-	return;
     }
     if (channel == NULL)
         return;
@@ -664,7 +671,7 @@ __xmlSimpleError(int domain, int code, xmlNodePtr node,
  * @ctx:  an XML parser context
  * @msg:  the message to display/transmit
  * @...:  extra parameters for the message display
- * 
+ *
  * Display and format an error messages, gives file, line, position and
  * extra parameters.
  */
@@ -707,7 +714,7 @@ xmlParserError(void *ctx, const char *msg, ...)
  * @ctx:  an XML parser context
  * @msg:  the message to display/transmit
  * @...:  extra parameters for the message display
- * 
+ *
  * Display and format a warning messages, gives file, line, position and
  * extra parameters.
  */
@@ -728,7 +735,7 @@ xmlParserWarning(void *ctx, const char *msg, ...)
 	}
 	xmlParserPrintFileInfo(input);
     }
-        
+
     xmlGenericError(xmlGenericErrorContext, "warning: ");
     XML_GET_VAR_STR(msg, str);
     xmlGenericError(xmlGenericErrorContext, "%s", str);
@@ -746,9 +753,9 @@ xmlParserWarning(void *ctx, const char *msg, ...)
 }
 
 /************************************************************************
- * 									*
- * 			Handling of validation errors			*
- * 									*
+ *									*
+ *			Handling of validation errors			*
+ *									*
  ************************************************************************/
 
 /**
@@ -756,7 +763,7 @@ xmlParserWarning(void *ctx, const char *msg, ...)
  * @ctx:  an XML parser context
  * @msg:  the message to display/transmit
  * @...:  extra parameters for the message display
- * 
+ *
  * Display and format an validity error messages, gives file,
  * line, position and extra parameters.
  */
@@ -774,7 +781,7 @@ xmlParserValidityError(void *ctx, const char *msg, ...)
 	    input = ctxt->input;
 	    if ((input->filename == NULL) && (ctxt->inputNr > 1))
 		input = ctxt->inputTab[ctxt->inputNr - 2];
-		
+
 	    if (had_info == 0) {
 		xmlParserPrintFileInfo(input);
 	    }
@@ -800,7 +807,7 @@ xmlParserValidityError(void *ctx, const char *msg, ...)
  * @ctx:  an XML parser context
  * @msg:  the message to display/transmit
  * @...:  extra parameters for the message display
- * 
+ *
  * Display and format a validity warning messages, gives file, line,
  * position and extra parameters.
  */
@@ -819,7 +826,7 @@ xmlParserValidityWarning(void *ctx, const char *msg, ...)
 
 	xmlParserPrintFileInfo(input);
     }
-        
+
     xmlGenericError(xmlGenericErrorContext, "validity warning: ");
     XML_GET_VAR_STR(msg, str);
     xmlGenericError(xmlGenericErrorContext, "%s", str);

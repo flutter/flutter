@@ -69,17 +69,17 @@ typedef xmlSchematronValidCtxt *xmlSchematronValidCtxtPtr;
 /*
  * Interfaces for parsing.
  */
-XMLPUBFUN xmlSchematronParserCtxtPtr XMLCALL 
+XMLPUBFUN xmlSchematronParserCtxtPtr XMLCALL
 	    xmlSchematronNewParserCtxt	(const char *URL);
-XMLPUBFUN xmlSchematronParserCtxtPtr XMLCALL 
+XMLPUBFUN xmlSchematronParserCtxtPtr XMLCALL
 	    xmlSchematronNewMemParserCtxt(const char *buffer,
 					 int size);
 XMLPUBFUN xmlSchematronParserCtxtPtr XMLCALL
 	    xmlSchematronNewDocParserCtxt(xmlDocPtr doc);
-XMLPUBFUN void XMLCALL		
+XMLPUBFUN void XMLCALL
 	    xmlSchematronFreeParserCtxt	(xmlSchematronParserCtxtPtr ctxt);
 /*****
-XMLPUBFUN void XMLCALL		
+XMLPUBFUN void XMLCALL
 	    xmlSchematronSetParserErrors(xmlSchematronParserCtxtPtr ctxt,
 					 xmlSchematronValidityErrorFunc err,
 					 xmlSchematronValidityWarningFunc warn,
@@ -92,9 +92,9 @@ XMLPUBFUN int XMLCALL
 XMLPUBFUN int XMLCALL
 		xmlSchematronIsValid	(xmlSchematronValidCtxtPtr ctxt);
  *****/
-XMLPUBFUN xmlSchematronPtr XMLCALL	
+XMLPUBFUN xmlSchematronPtr XMLCALL
 	    xmlSchematronParse		(xmlSchematronParserCtxtPtr ctxt);
-XMLPUBFUN void XMLCALL		
+XMLPUBFUN void XMLCALL
 	    xmlSchematronFree		(xmlSchematronPtr schema);
 /*
  * Interfaces for validating
@@ -105,7 +105,7 @@ XMLPUBFUN void XMLCALL
 					  xmlStructuredErrorFunc serror,
 					  void *ctx);
 /******
-XMLPUBFUN void XMLCALL		
+XMLPUBFUN void XMLCALL
 	    xmlSchematronSetValidErrors	(xmlSchematronValidCtxtPtr ctxt,
 					 xmlSchematronValidityErrorFunc err,
 					 xmlSchematronValidityWarningFunc warn,
@@ -125,12 +125,12 @@ XMLPUBFUN int XMLCALL
 			                 xmlNodePtr elem);
  *******/
 
-XMLPUBFUN xmlSchematronValidCtxtPtr XMLCALL	
+XMLPUBFUN xmlSchematronValidCtxtPtr XMLCALL
 	    xmlSchematronNewValidCtxt	(xmlSchematronPtr schema,
-	    				 int options);
-XMLPUBFUN void XMLCALL			
+					 int options);
+XMLPUBFUN void XMLCALL
 	    xmlSchematronFreeValidCtxt	(xmlSchematronValidCtxtPtr ctxt);
-XMLPUBFUN int XMLCALL			
+XMLPUBFUN int XMLCALL
 	    xmlSchematronValidateDoc	(xmlSchematronValidCtxtPtr ctxt,
 					 xmlDocPtr instance);
 

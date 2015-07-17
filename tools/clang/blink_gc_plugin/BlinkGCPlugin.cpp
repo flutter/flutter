@@ -1015,7 +1015,6 @@ class BlinkGCPluginConsumer : public ASTConsumer {
 
     // Only check structures in the blink and WebKit namespaces.
     options_.checked_namespaces.insert("blink");
-    options_.checked_namespaces.insert("WebKit");
 
     // Ignore GC implementation files.
     options_.ignored_directories.push_back("/heap/");
@@ -1752,6 +1751,8 @@ class BlinkGCPluginConsumer : public ASTConsumer {
          !context->isTranslationUnit();
          context = context->getParent()) {
       if (NamespaceDecl* decl = dyn_cast<NamespaceDecl>(context)) {
+        if (decl->isAnonymousNamespace())
+          return true;
         if (options_.checked_namespaces.find(decl->getNameAsString()) !=
             options_.checked_namespaces.end()) {
           return true;

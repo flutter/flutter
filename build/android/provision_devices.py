@@ -11,6 +11,7 @@ Usage:
 """
 
 import argparse
+import json
 import logging
 import os
 import posixpath
@@ -61,6 +62,9 @@ def ProvisionDevices(options):
   if options.auto_reconnect:
     _LaunchHostHeartbeat()
   blacklist = device_blacklist.ReadBlacklist()
+  if options.output_device_blacklist:
+    with open(options.output_device_blacklist, 'w') as f:
+      json.dump(blacklist, f)
   if all(d in blacklist for d in devices):
     raise device_errors.NoDevicesError
   return 0
@@ -79,7 +83,11 @@ def ProvisionDevice(device, options):
     return not options.phases or phase_name in options.phases
 
   def run_phase(phase_func, reboot=True):
-    device.WaitUntilFullyBooted(timeout=reboot_timeout)
+    try:
+      device.WaitUntilFullyBooted(timeout=reboot_timeout, retries=0)
+    except device_errors.CommandTimeoutError:
+      logging.error('Device did not finish booting. Will try to reboot.')
+      device.Reboot(timeout=reboot_timeout)
     phase_func(device, options)
     if reboot:
       device.Reboot(False, retries=0)
@@ -173,24 +181,18 @@ def SetProperties(device, options):
   else:
     device_settings.ConfigureContentSettings(
         device, device_settings.ENABLE_LOCATION_SETTINGS)
+
+  if options.disable_mock_location:
+    device_settings.ConfigureContentSettings(
+        device, device_settings.DISABLE_MOCK_LOCATION_SETTINGS)
+  else:
+    device_settings.ConfigureContentSettings(
+        device, device_settings.ENABLE_MOCK_LOCATION_SETTINGS)
+
   device_settings.SetLockScreenSettings(device)
   if options.disable_network:
     device_settings.ConfigureContentSettings(
         device, device_settings.NETWORK_DISABLED_SETTINGS)
-
-  if options.min_battery_level is not None:
-    try:
-      battery = battery_utils.BatteryUtils(device)
-      battery.ChargeDeviceToLevel(options.min_battery_level)
-    except device_errors.CommandFailedError as e:
-      logging.exception('Unable to charge device to specified level.')
-
-  if options.max_battery_temp is not None:
-    try:
-      battery = battery_utils.BatteryUtils(device)
-      battery.LetBatteryCoolToTemperature(options.max_battery_temp)
-    except device_errors.CommandFailedError as e:
-      logging.exception('Unable to let battery cool to specified temperature.')
 
 def _ConfigureLocalProperties(device, java_debug=True):
   """Set standard readonly testing device properties prior to reboot."""
@@ -218,6 +220,20 @@ def _ConfigureLocalProperties(device, java_debug=True):
 
 
 def FinishProvisioning(device, options):
+  if options.min_battery_level is not None:
+    try:
+      battery = battery_utils.BatteryUtils(device)
+      battery.ChargeDeviceToLevel(options.min_battery_level)
+    except device_errors.CommandFailedError:
+      logging.exception('Unable to charge device to specified level.')
+
+  if options.max_battery_temp is not None:
+    try:
+      battery = battery_utils.BatteryUtils(device)
+      battery.LetBatteryCoolToTemperature(options.max_battery_temp)
+    except device_errors.CommandFailedError:
+      logging.exception('Unable to let battery cool to specified temperature.')
+
   device.RunShellCommand(
       ['date', '-s', time.strftime('%Y%m%d.%H%M%S', time.gmtime())],
       as_root=True, check_return=True)
@@ -301,6 +317,8 @@ def main():
                       ' level before trying to continue')
   parser.add_argument('--disable-location', action='store_true',
                       help='disable Google location services on devices')
+  parser.add_argument('--disable-mock-location', action='store_true',
+                      default=False, help='Set ALLOW_MOCK_LOCATION to false')
   parser.add_argument('--disable-network', action='store_true',
                       help='disable network access on devices')
   parser.add_argument('--disable-java-debug', action='store_false',
@@ -317,6 +335,8 @@ def main():
                       help='Log more information.')
   parser.add_argument('--max-battery-temp', type=int, metavar='NUM',
                       help='Wait for the battery to have this temp or lower.')
+  parser.add_argument('--output-device-blacklist',
+                      help='Json file to output the device blacklist.')
   args = parser.parse_args()
   constants.SetBuildType(args.target)
 

@@ -48,29 +48,6 @@ class BASE_EXPORT ProcessMemoryDump {
   ProcessMemoryDump(const scoped_refptr<MemoryDumpSessionState>& session_state);
   ~ProcessMemoryDump();
 
-  // Called at trace generation time to populate the TracedValue.
-  void AsValueInto(TracedValue* value) const;
-
-  // Removes all the MemoryAllocatorDump(s) contained in this instance. This
-  // ProcessMemoryDump can be safely reused as if it was new once this returns.
-  void Clear();
-
-  // Merges all MemoryAllocatorDump(s) contained in |other| inside this
-  // ProcessMemoryDump, transferring their ownership to this instance.
-  // |other| will be an empty ProcessMemoryDump after this method returns.
-  // This is to allow dump providers to pre-populate ProcessMemoryDump instances
-  // and later move their contents into the ProcessMemoryDump passed as argument
-  // of the MemoryDumpProvider::OnMemoryDump(ProcessMemoryDump*) callback.
-  void TakeAllDumpsFrom(ProcessMemoryDump* other);
-
-  ProcessMemoryTotals* process_totals() { return &process_totals_; }
-  bool has_process_totals() const { return has_process_totals_; }
-  void set_has_process_totals() { has_process_totals_ = true; }
-
-  ProcessMemoryMaps* process_mmaps() { return &process_mmaps_; }
-  bool has_process_mmaps() const { return has_process_mmaps_; }
-  void set_has_process_mmaps() { has_process_mmaps_ = true; }
-
   // Creates a new MemoryAllocatorDump with the given name and returns the
   // empty object back to the caller.
   // Arguments:
@@ -80,7 +57,8 @@ class BASE_EXPORT ProcessMemoryDump {
   //       Leading or trailing slashes are not allowed.
   //   guid: an optional identifier, unique among all processes within the
   //       scope of a global dump. This is only relevant when using
-  //       AddOwnershipEdge(). If omitted, it will be automatically generated.
+  //       AddOwnershipEdge() to express memory sharing. If omitted,
+  //       it will be automatically generated.
   // ProcessMemoryDump handles the memory ownership of its MemoryAllocatorDumps.
   MemoryAllocatorDump* CreateAllocatorDump(const std::string& absolute_name);
   MemoryAllocatorDump* CreateAllocatorDump(const std::string& absolute_name,
@@ -130,6 +108,29 @@ class BASE_EXPORT ProcessMemoryDump {
   const scoped_refptr<MemoryDumpSessionState>& session_state() const {
     return session_state_;
   }
+
+  // Removes all the MemoryAllocatorDump(s) contained in this instance. This
+  // ProcessMemoryDump can be safely reused as if it was new once this returns.
+  void Clear();
+
+  // Merges all MemoryAllocatorDump(s) contained in |other| inside this
+  // ProcessMemoryDump, transferring their ownership to this instance.
+  // |other| will be an empty ProcessMemoryDump after this method returns.
+  // This is to allow dump providers to pre-populate ProcessMemoryDump instances
+  // and later move their contents into the ProcessMemoryDump passed as argument
+  // of the MemoryDumpProvider::OnMemoryDump(ProcessMemoryDump*) callback.
+  void TakeAllDumpsFrom(ProcessMemoryDump* other);
+
+  // Called at trace generation time to populate the TracedValue.
+  void AsValueInto(TracedValue* value) const;
+
+  ProcessMemoryTotals* process_totals() { return &process_totals_; }
+  bool has_process_totals() const { return has_process_totals_; }
+  void set_has_process_totals() { has_process_totals_ = true; }
+
+  ProcessMemoryMaps* process_mmaps() { return &process_mmaps_; }
+  bool has_process_mmaps() const { return has_process_mmaps_; }
+  void set_has_process_mmaps() { has_process_mmaps_ = true; }
 
  private:
   void AddAllocatorDumpInternal(MemoryAllocatorDump* mad);

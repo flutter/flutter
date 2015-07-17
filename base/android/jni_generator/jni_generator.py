@@ -236,6 +236,9 @@ class JniParams(object):
         'Ljava/lang/Object',
         'Ljava/lang/String',
         'Ljava/lang/Class',
+        'Ljava/lang/CharSequence',
+        'Ljava/lang/Runnable',
+        'Ljava/lang/Throwable',
     ]
 
     prefix = ''

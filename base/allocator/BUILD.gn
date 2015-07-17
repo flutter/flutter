@@ -63,6 +63,17 @@ if (use_allocator == "tcmalloc") {
       "$tcmalloc_dir/src/base/abort.cc",
       "$tcmalloc_dir/src/base/abort.h",
       "$tcmalloc_dir/src/base/arm_instruction_set_select.h",
+      "$tcmalloc_dir/src/base/atomicops-internals-arm-generic.h",
+      "$tcmalloc_dir/src/base/atomicops-internals-arm-v6plus.h",
+      "$tcmalloc_dir/src/base/atomicops-internals-linuxppc.h",
+      "$tcmalloc_dir/src/base/atomicops-internals-macosx.h",
+      "$tcmalloc_dir/src/base/atomicops-internals-windows.h",
+      "$tcmalloc_dir/src/base/atomicops-internals-x86.cc",
+      "$tcmalloc_dir/src/base/atomicops-internals-x86.h",
+      "$tcmalloc_dir/src/base/atomicops.h",
+      "$tcmalloc_dir/src/base/basictypes.h",
+      "$tcmalloc_dir/src/base/commandlineflags.h",
+      "$tcmalloc_dir/src/base/cycleclock.h",
 
       # We don't list dynamic_annotations.c since its copy is already
       # present in the dynamic_annotations target.

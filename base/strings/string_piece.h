@@ -18,12 +18,6 @@
 // Both of these have the same lifetime semantics.  Passing by value
 // generates slightly smaller code.  For more discussion, Googlers can see
 // the thread go/stringpiecebyvalue on c-users.
-//
-// StringPiece16 is similar to StringPiece but for base::string16 instead of
-// std::string. We do not define as large of a subset of the STL functions
-// from basic_string as in StringPiece, but this can be changed if these
-// functions (find, find_first_of, etc.) are found to be useful in this context.
-//
 
 #ifndef BASE_STRINGS_STRING_PIECE_H_
 #define BASE_STRINGS_STRING_PIECE_H_

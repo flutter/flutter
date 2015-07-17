@@ -60,3 +60,6 @@ WebRtcBrowserTest.CanMakeAudioCallAndThenRenegotiateToVideo
 
 # https://crbug.com/487501
 */MediaTest.VideoBearSilentWebm/0
+
+# https://crbug.com/505714
+NaClBrowserTestGLibc.PPAPICore

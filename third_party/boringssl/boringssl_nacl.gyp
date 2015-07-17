@@ -16,7 +16,6 @@
         'build_pnacl_newlib': 1,
       },
       'dependencies': [
-        '<(DEPTH)/native_client/tools.gyp:prep_toolchain',
         '<(DEPTH)/native_client_sdk/native_client_sdk_untrusted.gyp:nacl_io_untrusted',
       ],
       'includes': [
@@ -24,7 +23,8 @@
         'boringssl.gypi'
       ],
       'sources': [
-        '<@(boringssl_lib_sources)',
+        '<@(boringssl_crypto_sources)',
+        '<@(boringssl_ssl_sources)',
       ],
       'defines': [
         'OPENSSL_NO_ASM',

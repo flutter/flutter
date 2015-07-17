@@ -313,5 +313,13 @@ TEST_F(JSONParserTest, Decode4ByteUtf8Char) {
   EXPECT_TRUE(root.get()) << error_message;
 }
 
+TEST_F(JSONParserTest, DecodeUnicodeNonCharacter) {
+  // Tests Unicode code points (encoded as escaped UTF-16) that are not valid
+  // characters.
+  EXPECT_FALSE(JSONReader::Read("[\"\\ufdd0\"]"));
+  EXPECT_FALSE(JSONReader::Read("[\"\\ufffe\"]"));
+  EXPECT_FALSE(JSONReader::Read("[\"\\ud83f\\udffe\"]"));
+}
+
 }  // namespace internal
 }  // namespace base

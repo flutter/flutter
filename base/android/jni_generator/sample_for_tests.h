@@ -148,19 +148,19 @@ class CPPClass {
 
   class InnerClass {
    public:
-    jdouble MethodOtherP0(JNIEnv* env, jobject obj);
+    jdouble MethodOtherP0(JNIEnv* env, jobject caller);
   };
 
-  void Destroy(JNIEnv* env, jobject obj);
+  void Destroy(JNIEnv* env, jobject caller);
 
-  jint Method(JNIEnv* env, jobject obj);
+  jint Method(JNIEnv* env, jobject caller);
 
-  void AddStructB(JNIEnv* env, jobject obj, jobject structb);
+  void AddStructB(JNIEnv* env, jobject caller, jobject structb);
 
-  void IterateAndDoSomethingWithStructB(JNIEnv* env, jobject obj);
+  void IterateAndDoSomethingWithStructB(JNIEnv* env, jobject caller);
 
   base::android::ScopedJavaLocalRef<jstring> ReturnAString(
-      JNIEnv* env, jobject obj);
+      JNIEnv* env, jobject caller);
 
  private:
   std::map<long, std::string> map_;

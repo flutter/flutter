@@ -119,7 +119,7 @@ void SetCrashKeyFromAddresses(const base::StringPiece& key,
       hex_backtrace.push_back(s);
     }
 
-    value = JoinString(hex_backtrace, ' ');
+    value = base::JoinString(hex_backtrace, " ");
 
     // Warn if this exceeds the breakpad limits.
     DCHECK_LE(value.length(), kBreakpadValueMax);

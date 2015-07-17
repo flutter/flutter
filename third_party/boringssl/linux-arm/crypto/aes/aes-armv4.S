@@ -1,3 +1,4 @@
+#if defined(__arm__)
 
 @ ====================================================================
 @ Written by Andy Polyakov <appro@openssl.org> for the OpenSSL
@@ -43,7 +44,7 @@
 .code	32
 #else
 .syntax	unified
-# ifdef __thumb2__
+# if defined(__thumb2__) && !defined(__APPLE__)
 .thumb
 # else
 .code	32
@@ -158,9 +159,9 @@ AES_Te:
 
 @ void asm_AES_encrypt(const unsigned char *in, unsigned char *out,
 @ 		       const AES_KEY *key) {
-.global asm_AES_encrypt
-.hidden asm_AES_encrypt
-.type   asm_AES_encrypt,%function
+.globl	asm_AES_encrypt
+.hidden	asm_AES_encrypt
+.type	asm_AES_encrypt,%function
 .align	5
 asm_AES_encrypt:
 #if __ARM_ARCH__<7
@@ -168,10 +169,14 @@ asm_AES_encrypt:
 #else
 	adr	r3,asm_AES_encrypt
 #endif
-	stmdb   sp!,{r1,r4-r12,lr}
+	stmdb	sp!,{r1,r4-r12,lr}
+#ifdef	__APPLE__
+	adr	r10,AES_Te
+#else
+	sub	r10,r3,#asm_AES_encrypt-AES_Te	@ Te
+#endif
 	mov	r12,r0		@ inp
 	mov	r11,r2
-	sub	r10,r3,#asm_AES_encrypt-AES_Te	@ Te
 #if __ARM_ARCH__<7
 	ldrb	r0,[r12,#3]	@ load input data in endian-neutral
 	ldrb	r4,[r12,#2]	@ manner...
@@ -258,20 +263,20 @@ asm_AES_encrypt:
 	strb	r3,[r12,#15]
 #endif
 #if __ARM_ARCH__>=5
-	ldmia	sp!,{r4-r12,pc}
+	ldmia	sp!,{r4,r5,r6,r7,r8,r9,r10,r11,r12,pc}
 #else
-	ldmia   sp!,{r4-r12,lr}
+	ldmia	sp!,{r4,r5,r6,r7,r8,r9,r10,r11,r12,lr}
 	tst	lr,#1
 	moveq	pc,lr			@ be binary compatible with V4, yet
-	.word	0xe12fff1e			@ interoperable with Thumb ISA:-)
+.word	0xe12fff1e			@ interoperable with Thumb ISA:-)
 #endif
 .size	asm_AES_encrypt,.-asm_AES_encrypt
 
-.type   _armv4_AES_encrypt,%function
+.type	_armv4_AES_encrypt,%function
 .align	2
 _armv4_AES_encrypt:
 	str	lr,[sp,#-4]!		@ push lr
-	ldmia	r11!,{r4-r7}
+	ldmia	r11!,{r4,r5,r6,r7}
 	eor	r0,r0,r4
 	ldr	r12,[r11,#240-16]
 	eor	r1,r1,r5
@@ -404,9 +409,9 @@ _armv4_AES_encrypt:
 	ldr	pc,[sp],#4		@ pop and return
 .size	_armv4_AES_encrypt,.-_armv4_AES_encrypt
 
-.global asm_AES_set_encrypt_key
-.hidden asm_AES_set_encrypt_key
-.type   asm_AES_set_encrypt_key,%function
+.globl	asm_AES_set_encrypt_key
+.hidden	asm_AES_set_encrypt_key
+.type	asm_AES_set_encrypt_key,%function
 .align	5
 asm_AES_set_encrypt_key:
 _armv4_AES_set_encrypt_key:
@@ -439,12 +444,16 @@ _armv4_AES_set_encrypt_key:
 	movne	r0,#-1
 	bne	.Labrt
 
-.Lok:	stmdb   sp!,{r4-r12,lr}
-	sub	r10,r3,#_armv4_AES_set_encrypt_key-AES_Te-1024	@ Te4
-
+.Lok:	stmdb	sp!,{r4,r5,r6,r7,r8,r9,r10,r11,r12,lr}
 	mov	r12,r0		@ inp
 	mov	lr,r1			@ bits
 	mov	r11,r2			@ key
+
+#ifdef	__APPLE__
+	adr	r10,AES_Te+1024				@ Te4
+#else
+	sub	r10,r3,#_armv4_AES_set_encrypt_key-AES_Te-1024	@ Te4
+#endif
 
 #if __ARM_ARCH__<7
 	ldrb	r0,[r12,#3]	@ load input data in endian-neutral
@@ -696,20 +705,20 @@ _armv4_AES_set_encrypt_key:
 
 .align	2
 .Ldone:	mov	r0,#0
-	ldmia   sp!,{r4-r12,lr}
+	ldmia	sp!,{r4,r5,r6,r7,r8,r9,r10,r11,r12,lr}
 .Labrt:
-#if defined(__thumb2__) && __ARM_ARCH__>=7
-	.short	0x4770			@ .word	0xe12fff1e in Thumb2 encoding
+#if __ARM_ARCH__>=5
+	bx	lr				@ .word	0xe12fff1e
 #else
 	tst	lr,#1
 	moveq	pc,lr			@ be binary compatible with V4, yet
-	.word	0xe12fff1e			@ interoperable with Thumb ISA:-)
+.word	0xe12fff1e			@ interoperable with Thumb ISA:-)
 #endif
 .size	asm_AES_set_encrypt_key,.-asm_AES_set_encrypt_key
 
-.global asm_AES_set_decrypt_key
-.hidden asm_AES_set_decrypt_key
-.type   asm_AES_set_decrypt_key,%function
+.globl	asm_AES_set_decrypt_key
+.hidden	asm_AES_set_decrypt_key
+.type	asm_AES_set_decrypt_key,%function
 .align	5
 asm_AES_set_decrypt_key:
 	str	lr,[sp,#-4]!            @ push lr
@@ -724,13 +733,13 @@ asm_AES_set_decrypt_key:
 .size	asm_AES_set_decrypt_key,.-asm_AES_set_decrypt_key
 
 @ void AES_set_enc2dec_key(const AES_KEY *inp,AES_KEY *out)
-.global	AES_set_enc2dec_key
+.globl	AES_set_enc2dec_key
 .hidden	AES_set_enc2dec_key
 .type	AES_set_enc2dec_key,%function
 .align	5
 AES_set_enc2dec_key:
 _armv4_AES_set_enc2dec_key:
-	stmdb   sp!,{r4-r12,lr}
+	stmdb	sp!,{r4,r5,r6,r7,r8,r9,r10,r11,r12,lr}
 
 	ldr	r12,[r0,#240]
 	mov	r7,r0			@ input
@@ -812,12 +821,12 @@ _armv4_AES_set_enc2dec_key:
 
 	mov	r0,#0
 #if __ARM_ARCH__>=5
-	ldmia	sp!,{r4-r12,pc}
+	ldmia	sp!,{r4,r5,r6,r7,r8,r9,r10,r11,r12,pc}
 #else
-	ldmia   sp!,{r4-r12,lr}
+	ldmia	sp!,{r4,r5,r6,r7,r8,r9,r10,r11,r12,lr}
 	tst	lr,#1
 	moveq	pc,lr			@ be binary compatible with V4, yet
-	.word	0xe12fff1e			@ interoperable with Thumb ISA:-)
+.word	0xe12fff1e			@ interoperable with Thumb ISA:-)
 #endif
 .size	AES_set_enc2dec_key,.-AES_set_enc2dec_key
 
@@ -925,9 +934,9 @@ AES_Td:
 
 @ void asm_AES_decrypt(const unsigned char *in, unsigned char *out,
 @ 		       const AES_KEY *key) {
-.global asm_AES_decrypt
-.hidden asm_AES_decrypt
-.type   asm_AES_decrypt,%function
+.globl	asm_AES_decrypt
+.hidden	asm_AES_decrypt
+.type	asm_AES_decrypt,%function
 .align	5
 asm_AES_decrypt:
 #if __ARM_ARCH__<7
@@ -935,10 +944,14 @@ asm_AES_decrypt:
 #else
 	adr	r3,asm_AES_decrypt
 #endif
-	stmdb   sp!,{r1,r4-r12,lr}
+	stmdb	sp!,{r1,r4-r12,lr}
+#ifdef	__APPLE__
+	adr	r10,AES_Td
+#else
+	sub	r10,r3,#asm_AES_decrypt-AES_Td	@ Td
+#endif
 	mov	r12,r0		@ inp
 	mov	r11,r2
-	sub	r10,r3,#asm_AES_decrypt-AES_Td		@ Td
 #if __ARM_ARCH__<7
 	ldrb	r0,[r12,#3]	@ load input data in endian-neutral
 	ldrb	r4,[r12,#2]	@ manner...
@@ -1025,20 +1038,20 @@ asm_AES_decrypt:
 	strb	r3,[r12,#15]
 #endif
 #if __ARM_ARCH__>=5
-	ldmia	sp!,{r4-r12,pc}
+	ldmia	sp!,{r4,r5,r6,r7,r8,r9,r10,r11,r12,pc}
 #else
-	ldmia   sp!,{r4-r12,lr}
+	ldmia	sp!,{r4,r5,r6,r7,r8,r9,r10,r11,r12,lr}
 	tst	lr,#1
 	moveq	pc,lr			@ be binary compatible with V4, yet
-	.word	0xe12fff1e			@ interoperable with Thumb ISA:-)
+.word	0xe12fff1e			@ interoperable with Thumb ISA:-)
 #endif
 .size	asm_AES_decrypt,.-asm_AES_decrypt
 
-.type   _armv4_AES_decrypt,%function
+.type	_armv4_AES_decrypt,%function
 .align	2
 _armv4_AES_decrypt:
 	str	lr,[sp,#-4]!		@ push lr
-	ldmia	r11!,{r4-r7}
+	ldmia	r11!,{r4,r5,r6,r7}
 	eor	r0,r0,r4
 	ldr	r12,[r11,#240-16]
 	eor	r1,r1,r5
@@ -1179,7 +1192,9 @@ _armv4_AES_decrypt:
 	sub	r10,r10,#1024
 	ldr	pc,[sp],#4		@ pop and return
 .size	_armv4_AES_decrypt,.-_armv4_AES_decrypt
-.asciz	"AES for ARMv4, CRYPTOGAMS by <appro@openssl.org>"
+.byte	65,69,83,32,102,111,114,32,65,82,77,118,52,44,32,67,82,89,80,84,79,71,65,77,83,32,98,121,32,60,97,112,112,114,111,64,111,112,101,110,115,115,108,46,111,114,103,62,0
+.align	2
 .align	2
 
+#endif
 #endif

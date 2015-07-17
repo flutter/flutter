@@ -9,7 +9,7 @@ namespace base {
 namespace win {
 
 // Global, const instance of an empty variant.
-const VARIANT ScopedVariant::kEmptyVariant = { VT_EMPTY };
+const VARIANT ScopedVariant::kEmptyVariant = {{{VT_EMPTY}}};
 
 ScopedVariant::~ScopedVariant() {
   COMPILE_ASSERT(sizeof(ScopedVariant) == sizeof(VARIANT), ScopedVariantSize);
@@ -82,7 +82,7 @@ VARIANT* ScopedVariant::Receive() {
 }
 
 VARIANT ScopedVariant::Copy() const {
-  VARIANT ret = { VT_EMPTY };
+  VARIANT ret = {{{VT_EMPTY}}};
   ::VariantCopy(&ret, &var_);
   return ret;
 }

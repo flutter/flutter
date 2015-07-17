@@ -94,8 +94,9 @@ bool Thread::StartWithOptions(const Options& options) {
     type = MessageLoop::TYPE_CUSTOM;
 
   message_loop_timer_slack_ = options.timer_slack;
-  message_loop_ = new MessageLoop(type, options.message_pump_factory);
-
+  scoped_ptr<MessageLoop> message_loop = MessageLoop::CreateUnbound(
+      type, options.message_pump_factory);
+  message_loop_ = message_loop.get();
   start_event_.reset(new WaitableEvent(false, false));
 
   // Hold the thread_lock_ while starting a new thread, so that we can make sure
@@ -111,12 +112,15 @@ bool Thread::StartWithOptions(const Options& options) {
     }
     if (!created) {
       DLOG(ERROR) << "failed to create thread";
-      delete message_loop_;
       message_loop_ = nullptr;
       start_event_.reset();
       return false;
     }
   }
+
+  // The ownership of message_loop is managemed by the newly created thread
+  // within the ThreadMain.
+  ignore_result(message_loop.release());
 
   DCHECK(message_loop_);
   return true;
@@ -188,13 +192,6 @@ bool Thread::IsRunning() const {
   // only while it is inside Run().
   AutoLock lock(running_lock_);
   return running_;
-}
-
-void Thread::SetPriority(ThreadPriority priority) {
-  // The thread must be started (and id known) for this to be
-  // compatible with all platforms.
-  DCHECK(message_loop_ != nullptr);
-  PlatformThread::SetThreadPriority(thread_, priority);
 }
 
 void Thread::Run(MessageLoop* message_loop) {

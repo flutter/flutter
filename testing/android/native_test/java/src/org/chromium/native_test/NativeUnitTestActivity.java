@@ -9,7 +9,6 @@ import android.os.Bundle;
 import org.chromium.base.Log;
 import org.chromium.base.PathUtils;
 import org.chromium.base.PowerMonitor;
-import org.chromium.base.ResourceExtractor;
 import org.chromium.base.library_loader.NativeLibraries;
 
 /**
@@ -26,11 +25,6 @@ public class NativeUnitTestActivity extends NativeTestActivity {
 
         // Needed by path_utils_unittest.cc
         PathUtils.setPrivateDataDirectorySuffix("chrome", getApplicationContext());
-
-        ResourceExtractor resourceExtractor = ResourceExtractor.get(getApplicationContext());
-        resourceExtractor.setExtractAllPaksAndV8SnapshotForTesting();
-        resourceExtractor.startExtractingResources();
-        resourceExtractor.waitForCompletion();
 
         // Needed by system_monitor_unittest.cc
         PowerMonitor.createForTests(this);

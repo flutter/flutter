@@ -1,4 +1,3 @@
-
 /*
  * Summary: text writing API for XML
  * Description: text writing API for XML
@@ -470,6 +469,10 @@ extern "C" {
     XMLPUBFUN int XMLCALL
         xmlTextWriterSetIndentString(xmlTextWriterPtr writer,
                                      const xmlChar * str);
+
+    XMLPUBFUN int XMLCALL
+        xmlTextWriterSetQuoteChar(xmlTextWriterPtr writer, xmlChar quotechar);
+
 
 /*
  * misc

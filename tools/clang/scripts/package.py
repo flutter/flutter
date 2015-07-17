@@ -75,10 +75,13 @@ def main():
            log, fail_hard=False)
     TeeCmd(['svn', 'diff', os.path.join(LLVM_DIR, 'tools', 'clang')],
            log, fail_hard=False)
+    # TODO(thakis): compiler-rt is in projects/compiler-rt on Windows but
+    # llvm/compiler-rt elsewhere. So this diff call is currently only right on
+    # Windows.
     Tee('Diff in llvm/compiler-rt:\n', log)
-    TeeCmd(['svn', 'stat', os.path.join(LLVM_DIR, 'compiler-rt')],
+    TeeCmd(['svn', 'stat', os.path.join(LLVM_DIR, 'projects', 'compiler-rt')],
            log, fail_hard=False)
-    TeeCmd(['svn', 'diff', os.path.join(LLVM_DIR, 'compiler-rt')],
+    TeeCmd(['svn', 'diff', os.path.join(LLVM_DIR, 'projects', 'compiler-rt')],
            log, fail_hard=False)
     Tee('Diff in llvm/projects/libcxx:\n', log)
     TeeCmd(['svn', 'stat', os.path.join(LLVM_DIR, 'projects', 'libcxx')],
@@ -183,6 +186,7 @@ def main():
   # Set up symlinks.
   if sys.platform != 'win32':
     os.symlink('clang', os.path.join(pdir, 'bin', 'clang++'))
+    os.symlink('clang', os.path.join(pdir, 'bin', 'clang-cl'))
   if sys.platform == 'darwin':
     os.symlink('libc++.1.dylib', os.path.join(pdir, 'bin', 'libc++.dylib'))
     # Also copy libc++ headers.

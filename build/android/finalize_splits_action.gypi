@@ -18,7 +18,7 @@
     'keystore_password%': 'chromium',
     'zipalign_path%': '<(android_sdk_tools)/zipalign',
     'density_splits%': 0,
-    'language_splits%': 0,
+    'language_splits%': [],
     'resource_packaged_apk_name': '<(apk_name)-resources.ap_',
     'resource_packaged_apk_path': '<(intermediate_dir)/<(resource_packaged_apk_name)',
     'base_output_path': '<(PRODUCT_DIR)/apks/<(apk_name)',
@@ -42,27 +42,33 @@
     ['density_splits == 1', {
       'message': 'Signing/aligning <(_target_name) density splits',
       'inputs': [
-        '<(resource_packaged_apk_path)-hdpi',
-        '<(resource_packaged_apk_path)-xhdpi',
-        '<(resource_packaged_apk_path)-xxhdpi',
-        '<(resource_packaged_apk_path)-tvdpi',
+        '<(resource_packaged_apk_path)_hdpi',
+        '<(resource_packaged_apk_path)_xhdpi',
+        '<(resource_packaged_apk_path)_xxhdpi',
+        '<(resource_packaged_apk_path)_xxxhdpi',
+        '<(resource_packaged_apk_path)_tvdpi',
       ],
       'outputs': [
         '<(base_output_path)-density-hdpi.apk',
         '<(base_output_path)-density-xhdpi.apk',
         '<(base_output_path)-density-xxhdpi.apk',
+        '<(base_output_path)-density-xxxhdpi.apk',
         '<(base_output_path)-density-tvdpi.apk',
       ],
       'action': [
-        '--densities=hdpi,xhdpi,xxhdpi,tvdpi',
+        '--densities=hdpi,xhdpi,xxhdpi,xxxhdpi,tvdpi',
       ],
     }],
-    # TODO(agrieve): Implement language splits
-    ['language_splits == 1', {
+    ['language_splits != []', {
       'message': 'Signing/aligning <(_target_name) language splits',
       'inputs': [
+        "<!@(python <(DEPTH)/build/apply_locales.py '<(resource_packaged_apk_path)_ZZLOCALE' <(language_splits))",
       ],
       'outputs': [
+        "<!@(python <(DEPTH)/build/apply_locales.py '<(base_output_path)-lang-ZZLOCALE.apk' <(language_splits))",
+      ],
+      'action': [
+        '--languages=<(language_splits)',
       ],
     }],
   ],

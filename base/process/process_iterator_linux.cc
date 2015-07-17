@@ -7,6 +7,7 @@
 #include "base/files/file_util.h"
 #include "base/logging.h"
 #include "base/process/internal_linux.h"
+#include "base/strings/string_split.h"
 #include "base/strings/string_util.h"
 #include "base/threading/thread_restrictions.h"
 
@@ -48,7 +49,8 @@ bool GetProcCmdline(pid_t pid, std::vector<std::string>* proc_cmd_line_args) {
     return false;
   std::string delimiters;
   delimiters.push_back('\0');
-  Tokenize(cmd_line, delimiters, proc_cmd_line_args);
+  *proc_cmd_line_args = SplitString(cmd_line, delimiters, KEEP_WHITESPACE,
+                                    SPLIT_WANT_NONEMPTY);
   return true;
 }
 

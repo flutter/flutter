@@ -36,11 +36,8 @@ const ThreadPriorityToNiceValuePair kThreadPriorityToNiceValueMap[4] = {
     {ThreadPriority::REALTIME_AUDIO, -10},
 }
 
-bool SetThreadPriorityForPlatform(PlatformThreadHandle handle,
-                                  ThreadPriority priority) {
+bool SetCurrentThreadPriorityForPlatform(ThreadPriority priority) {
 #if !defined(OS_NACL)
-  // TODO(gab): Assess the correctness of using |pthread_self()| below instead
-  // of |handle|. http://crbug.com/468793.
   return priority == ThreadPriority::REALTIME_AUDIO &&
          pthread_setschedparam(pthread_self(), SCHED_RR, &kRealTimePrio) == 0;
 #else
@@ -48,11 +45,8 @@ bool SetThreadPriorityForPlatform(PlatformThreadHandle handle,
 #endif
 }
 
-bool GetThreadPriorityForPlatform(PlatformThreadHandle handle,
-                                  ThreadPriority* priority) {
+bool GetCurrentThreadPriorityForPlatform(ThreadPriority* priority) {
 #if !defined(OS_NACL)
-  // TODO(gab): Assess the correctness of using |pthread_self()| below instead
-  // of |handle|. http://crbug.com/468793.
   int maybe_sched_rr = 0;
   struct sched_param maybe_realtime_prio = {0};
   if (pthread_getschedparam(pthread_self(), &maybe_sched_rr,

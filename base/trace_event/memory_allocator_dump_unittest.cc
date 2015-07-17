@@ -11,6 +11,7 @@
 #include "base/trace_event/memory_dump_session_state.h"
 #include "base/trace_event/process_memory_dump.h"
 #include "base/trace_event/trace_event_argument.h"
+#include "base/values.h"
 #include "testing/gtest/include/gtest/gtest.h"
 
 namespace base {
@@ -47,20 +48,23 @@ class FakeMemoryAllocatorDumpProvider : public MemoryDumpProvider {
   }
 };
 
-bool CheckAttribute(const MemoryAllocatorDump* dump,
-                    const std::string& name,
-                    const char* expected_type,
-                    const char* expected_units,
-                    const Value** out_value) {
-  const char* attr_type;
-  const char* attr_units;
-  bool res = dump->Get(name, &attr_type, &attr_units, out_value);
-  EXPECT_TRUE(res);
-  if (!res)
-    return false;
-  EXPECT_EQ(expected_type, std::string(attr_type));
-  EXPECT_EQ(expected_units, std::string(attr_units));
-  return true;
+scoped_ptr<Value> CheckAttribute(const MemoryAllocatorDump* dump,
+                                 const std::string& name,
+                                 const char* expected_type,
+                                 const char* expected_units) {
+  scoped_ptr<Value> raw_attrs = dump->attributes_for_testing()->ToBaseValue();
+  DictionaryValue* args = nullptr;
+  DictionaryValue* arg = nullptr;
+  std::string arg_value;
+  const Value* out_value = nullptr;
+  EXPECT_TRUE(raw_attrs->GetAsDictionary(&args));
+  EXPECT_TRUE(args->GetDictionary(name, &arg));
+  EXPECT_TRUE(arg->GetString("type", &arg_value));
+  EXPECT_EQ(expected_type, arg_value);
+  EXPECT_TRUE(arg->GetString("units", &arg_value));
+  EXPECT_EQ(expected_units, arg_value);
+  EXPECT_TRUE(arg->Get("value", &out_value));
+  return out_value ? out_value->CreateDeepCopy() : scoped_ptr<Value>();
 }
 
 void CheckString(const MemoryAllocatorDump* dump,
@@ -68,12 +72,8 @@ void CheckString(const MemoryAllocatorDump* dump,
                  const char* expected_type,
                  const char* expected_units,
                  const std::string& expected_value) {
-  const Value* attr_value = nullptr;
   std::string attr_str_value;
-  bool res =
-      CheckAttribute(dump, name, expected_type, expected_units, &attr_value);
-  if (!res)
-    return;
+  auto attr_value = CheckAttribute(dump, name, expected_type, expected_units);
   EXPECT_TRUE(attr_value->GetAsString(&attr_str_value));
   EXPECT_EQ(expected_value, attr_str_value);
 }
@@ -90,12 +90,9 @@ void CheckScalarF(const MemoryAllocatorDump* dump,
                   const std::string& name,
                   const char* expected_units,
                   double expected_value) {
-  const Value* attr_value = nullptr;
+  auto attr_value = CheckAttribute(dump, name, MemoryAllocatorDump::kTypeScalar,
+                                   expected_units);
   double attr_double_value;
-  bool res = CheckAttribute(dump, name, MemoryAllocatorDump::kTypeScalar,
-                            expected_units, &attr_value);
-  if (!res)
-    return;
   EXPECT_TRUE(attr_value->GetAsDouble(&attr_double_value));
   EXPECT_EQ(expected_value, attr_double_value);
 }
@@ -154,15 +151,15 @@ TEST(MemoryAllocatorDumpTest, DumpIntoProcessMemoryDump) {
               MemoryAllocatorDump::kUnitsBytes, 1);
   CheckScalar(sub_heap, MemoryAllocatorDump::kNameObjectsCount,
               MemoryAllocatorDump::kUnitsObjects, 3);
-
   const MemoryAllocatorDump* empty_sub_heap =
       pmd.GetAllocatorDump("foobar_allocator/sub_heap/empty");
   ASSERT_NE(nullptr, empty_sub_heap);
   EXPECT_EQ("foobar_allocator/sub_heap/empty", empty_sub_heap->absolute_name());
-  ASSERT_FALSE(empty_sub_heap->Get(MemoryAllocatorDump::kNameSize, nullptr,
-                                   nullptr, nullptr));
-  ASSERT_FALSE(empty_sub_heap->Get(MemoryAllocatorDump::kNameObjectsCount,
-                                   nullptr, nullptr, nullptr));
+  auto raw_attrs = empty_sub_heap->attributes_for_testing()->ToBaseValue();
+  DictionaryValue* attrs = nullptr;
+  ASSERT_TRUE(raw_attrs->GetAsDictionary(&attrs));
+  ASSERT_FALSE(attrs->HasKey(MemoryAllocatorDump::kNameSize));
+  ASSERT_FALSE(attrs->HasKey(MemoryAllocatorDump::kNameObjectsCount));
 
   // Check that the AsValueInfo doesn't hit any DCHECK.
   scoped_refptr<TracedValue> traced_value(new TracedValue());

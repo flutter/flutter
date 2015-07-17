@@ -125,6 +125,9 @@ use_udev = is_linux
 # Enable the spell checker.
 enable_spellcheck = !is_android
 
+# Use the operating system's spellchecker rather than hunspell.
+use_platform_spellchecker = is_android || is_mac
+
 enable_pepper_cdms = enable_plugins && (is_linux || is_mac || is_win)
 
 # Enable basic printing support and UI.
@@ -165,7 +168,8 @@ win_pdf_metafile_for_printing = true
 
 # Whether we are using the rlz library or not.  Platforms like Android send
 # rlz codes for searches but do not use the library.
-enable_rlz = is_chrome_branded && (is_win || is_mac || is_ios || is_chromeos)
+enable_rlz_support = is_win || is_mac || is_ios || is_chromeos
+enable_rlz = is_chrome_branded && enable_rlz_support
 
 enable_settings_app = enable_app_list && !is_chromeos
 
@@ -183,8 +187,6 @@ enable_chromevox_next = false
 # Use brlapi from brltty for braille display support.
 use_brlapi = is_chromeos
 
-enable_media_router = !is_ios && !is_android
-
 # Option controlling the use of GConf (the classic GNOME configuration
 # system).
 # TODO(GYP) also require !embedded to enable.
@@ -197,3 +199,6 @@ enable_hangout_services_extension = false
 
 # Whether to back up data before sync.
 enable_pre_sync_backup = is_win || is_mac || (is_linux && !is_chromeos)
+
+# WebVR support disabled until platform implementations have been added
+enable_webvr = false

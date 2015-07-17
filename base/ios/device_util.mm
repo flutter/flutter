@@ -59,7 +59,7 @@ std::string GetPlatform() {
   std::string platform;
   size_t size = 0;
   sysctlbyname("hw.machine", NULL, &size, NULL, 0);
-  sysctlbyname("hw.machine", WriteInto(&platform, size), &size, NULL, 0);
+  sysctlbyname("hw.machine", base::WriteInto(&platform, size), &size, NULL, 0);
   return platform;
 }
 

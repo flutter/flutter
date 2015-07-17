@@ -12,6 +12,9 @@
 #include "base/synchronization/waitable_event.h"
 #include "base/trace_event/trace_event.h"
 
+namespace base {
+namespace trace_event {
+
 namespace {
 
 int g_atrace_fd = -1;
@@ -24,28 +27,26 @@ void WriteEvent(
     unsigned long long id,
     const char** arg_names,
     const unsigned char* arg_types,
-    const base::trace_event::TraceEvent::TraceValue* arg_values,
-    const scoped_refptr<base::trace_event::ConvertableToTraceFormat>*
-        convertable_values,
-    unsigned char flags) {
-  std::string out = base::StringPrintf("%c|%d|%s", phase, getpid(), name);
+    const TraceEvent::TraceValue* arg_values,
+    const scoped_refptr<ConvertableToTraceFormat>* convertable_values,
+    unsigned int flags) {
+  std::string out = StringPrintf("%c|%d|%s", phase, getpid(), name);
   if (flags & TRACE_EVENT_FLAG_HAS_ID)
-    base::StringAppendF(&out, "-%" PRIx64, static_cast<uint64>(id));
+    StringAppendF(&out, "-%" PRIx64, static_cast<uint64>(id));
   out += '|';
 
-  for (int i = 0; i < base::trace_event::kTraceMaxNumArgs && arg_names[i];
+  for (int i = 0; i < kTraceMaxNumArgs && arg_names[i];
        ++i) {
     if (i)
       out += ';';
     out += arg_names[i];
     out += '=';
     std::string::size_type value_start = out.length();
-    if (arg_types[i] == TRACE_VALUE_TYPE_CONVERTABLE) {
+    if (arg_types[i] == TRACE_VALUE_TYPE_CONVERTABLE)
       convertable_values[i]->AppendAsTraceFormat(&out);
-    } else {
-      base::trace_event::TraceEvent::AppendValueAsJSON(arg_types[i],
-                                                       arg_values[i], &out);
-    }
+    else
+      TraceEvent::AppendValueAsJSON(arg_types[i], arg_values[i], &out);
+
     // Remove the quotes which may confuse the atrace script.
     ReplaceSubstringsAfterOffset(&out, value_start, "\\\"", "'");
     ReplaceSubstringsAfterOffset(&out, value_start, "\"", "");
@@ -59,24 +60,21 @@ void WriteEvent(
   write(g_atrace_fd, out.c_str(), out.size());
 }
 
-void NoOpOutputCallback(base::WaitableEvent* complete_event,
-                        const scoped_refptr<base::RefCountedString>&,
+void NoOpOutputCallback(WaitableEvent* complete_event,
+                        const scoped_refptr<RefCountedString>&,
                         bool has_more_events) {
   if (!has_more_events)
     complete_event->Signal();
 }
 
-void EndChromeTracing(base::trace_event::TraceLog* trace_log,
-                      base::WaitableEvent* complete_event) {
+void EndChromeTracing(TraceLog* trace_log,
+                      WaitableEvent* complete_event) {
   trace_log->SetDisabled();
   // Delete the buffered trace events as they have been sent to atrace.
-  trace_log->Flush(base::Bind(&NoOpOutputCallback, complete_event));
+  trace_log->Flush(Bind(&NoOpOutputCallback, complete_event));
 }
 
 }  // namespace
-
-namespace base {
-namespace trace_event {
 
 // These functions support Android systrace.py when 'webview' category is
 // traced. With the new adb_profile_chrome, we may have two phases:

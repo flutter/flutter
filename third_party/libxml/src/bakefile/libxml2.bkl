@@ -1,0 +1,749 @@
+<?xml version="1.0" ?>
+
+<!-- Author: Francesco Montorsi <frm@users.sourceforge.net>         -->
+<!-- Date: 30/8/2004                                                -->
+<!-- Last revision: 26/1/2005                                       -->
+
+
+<!--                    LIBXML2 BAKEFILE                            -->
+<!--                                                                -->
+<!--    The bakefile used to build the library and the test         -->
+<!--    programs. The makefiles output is put:                      -->
+<!--                                                                -->
+<!--    - in the ..\LIB folder                                      -->
+<!--    - in the ..\BIN folder                                      -->
+<!--                                                                -->
+
+<makefile>
+
+    <using module="datafiles"/>
+    <requires version="0.1.5"/>
+    
+
+    <!-- This is a bakefile, that is, a generic template used to    -->
+    <!-- generate makefiles ALL supported compilers.                -->
+    <!-- To use this project file you need Bakefile installed.      -->
+    <!-- With the command "bakefile_gen" you can regen all the      -->
+    <!-- makefiles and project files.                               -->
+    <!-- See http://bakefile.sourceforge.net for more info.         -->
+
+
+	<!--
+	 This file is divided in:
+		- generic options
+		- generic variables
+		- libxml2 options
+		- libxml2 variables
+		- about config.h creation
+		- templates
+		- libxml2 library target
+		- libxml2 test program targets
+	-->
+
+
+
+    <!--                                                            -->
+    <!--                      GENERIC OPTIONS                       -->
+    <!--                                                            -->
+
+     
+    <!--    This is a standard option that determines               -->
+    <!--    whether the user wants to build this library as         -->
+    <!--    a dll or as a static library.                           -->
+    <option name="SHARED">
+        <values>0,1</values>
+        <values-description>,DLL</values-description>
+        <default-value>0</default-value>
+        <description>If set to zero a STATIC libxml library will be built</description>
+    </option>
+
+    <!-- Configuration for building the bakefile with               -->
+    <!-- unicode strings or not (unicode or ansi).                  -->
+    <option name="UNICODE">
+        <values>0,1</values>
+        <values-description>,Unicode</values-description>
+        <default-value>0</default-value>        
+        <description>Compile Unicode build?</description>
+    </option>
+
+
+    <!-- There are several options that deal with build             -->
+    <!-- types. First, there's this one, BUILD.                     -->
+    <!--                                                            -->
+    <!-- BUILD determines whether or not we want to build           -->
+    <!-- in release or debug mode.  Note that in practice           -->
+    <!-- this means modifying the optimize tag, which by            -->
+    <!-- default is set to off.  In this case debug means           -->
+    <!-- off (no optimizations), and release means speed            -->
+    <!-- (fast with inlining).  There is also a size option         -->
+    <!-- that is not addressed in this example bakefile.            -->
+    <option name="BUILD">
+        <values>debug,release</values>
+        <values-description>Debug,Release</values-description>
+        <default-value>release</default-value>
+        <description>
+            Type of compiled binaries
+        </description>
+    </option>
+
+
+
+    <!--                                                            -->
+    <!--                    GENERIC VARIABLES                       -->
+    <!--                                                            -->
+
+    <!--    Set the ISDLL variable, so that we can use it           -->
+    <!--    inside an if statement later on (options not            -->
+    <!--    allowed in if statements).                              -->
+    <set var="ISDLL" cond="SHARED=='1'">1</set>
+    <set var="ISDLL" cond="SHARED=='0'">0</set>
+
+    <!--    The unicode define we want.  By default bakefile        -->
+    <!--    makes variables an empty string, so if unicode          -->
+    <!--    is not defined $(UNICODE_DEFINE) would expand           -->
+    <!--    to nothing (literally).                                 -->
+    <set var="UNICODE_DEFINE">
+        <if cond="FORMAT!='autoconf' and UNICODE=='1'">_UNICODE</if>
+    </set>    
+    
+    <!--    The debug define we need with win32 compilers           -->    
+    <!--    (on Linux, the wx-config program is used).              -->    
+    <set var="DEBUG_DEFINE">        
+        <if cond="FORMAT!='autoconf' and BUILD=='debug'">
+            __WXDEBUG__
+        </if>    
+    </set>
+
+    <!--    Value we will use later on for the debug-info           -->
+    <!--    tag inside our templates.                               -->
+    <set var="DEBUGINFO">
+        <if cond="BUILD=='debug'">on</if>
+        <if cond="BUILD=='release'">off</if>
+    </set>
+
+    <!--    Value we will use later on for the debug-runtime        -->
+    <!--    tag inside our templates.                               -->
+    <set var="DEBUGRUNTIME">
+        <if cond="BUILD=='debug'">on</if>
+        <if cond="BUILD=='release'">off</if>
+    </set>
+
+    <!--    Value for optimize tag.                                 -->
+    <set var="OPTIMIZEFLAG">
+        <if cond="BUILD=='debug'">off</if>
+        <if cond="BUILD=='release'">speed</if>
+    </set>
+
+    <!-- Level of warnings.  Here we max it out in debug            -->
+    <!-- mode, and turn them off in release mode.                   -->
+    <set var="WARNINGS">
+        <if cond="BUILD=='debug'">max</if>
+        <if cond="BUILD=='release'">no</if>
+    </set>
+
+    <!-- Set MYCPPFLAGS as empty; maybe it will be filled later...  -->
+    <set var="MYCPPFLAGS"></set>
+    <if cond="FORMAT=='mingw' or FORMAT=='autoconf'">
+
+        <!-- With GCC, settings warnings to MAX would force         -->
+        <!-- Bakefile to call GCC with "-W -Wall" which generates   -->
+        <!-- a *lot* of warnings about wxWidgets headers...         -->
+        <!-- this is why "-W -Wall" is here replaced by "-Wall".    -->
+        <set var="WARNINGS">default</set>
+        <set var="MYCPPFLAGS">-Wall</set>
+    </if>
+    
+    
+    
+  
+
+
+    <!--                                                            -->
+    <!--                      LIBXML2 OPTIONS                       -->
+    <!--                                                            -->
+    <!-- Note #1: not all of them are used by win32 makefiles       -->
+	<!--                                                            -->
+	<!-- Note #2: since all combinations of non-path options are    -->
+	<!--          translated into different 'configurations' by     -->
+	<!--          Bakefile when using the MSVC6PRJ output, we must  -->
+	<!--          avoid to create a 10 MB libxml2.dsp file forcing  -->
+	<!--          some options to their default values... this      -->
+	<!--          behaviour can be overridden by the                -->
+	<!--                        FULL_OPTIONS_SUPPORT                -->
+	<!--          variable defined below...                         -->
+    
+	<set var="FULL_OPTIONS_SUPPORT">
+		<if cond="FORMAT=='msvc6prj'">0</if>
+		<if cond="FORMAT!='msvc6prj'">1</if>
+	</set>
+
+    <option name="ICONV_DIR" category="path">
+        <default-value>c:\iconv</default-value>
+        <description>The iconv library main folder</description>
+    </option>
+
+    <option name="WITH_TRIO">
+    	<values>0,1</values>
+        <default-value>0</default-value>
+        <description>Enable TRIO string manipulator</description>
+    </option>
+
+	<!-- see the note #2 -->
+	<if cond="FULL_OPTIONS_SUPPORT=='0'">
+		<set var="WITH_THREADS">native</set>
+	</if>
+	<if cond="FULL_OPTIONS_SUPPORT=='1'">
+		<option name="WITH_THREADS">
+    		<values>no,ctls,native,posix</values>
+			<default-value>native</default-value>
+			<description>Enable thread safety</description>
+		</option>
+    </if>
+
+    <option name="WITH_FTP">
+    	<values>0,1</values>
+        <default-value>1</default-value>
+        <description>Enable FTP client</description>
+    </option>
+
+    <option name="WITH_HTTP">
+    	<values>0,1</values>
+        <default-value>1</default-value>
+        <description>Enable HTTP client</description>
+    </option>
+
+    <option name="WITH_C14N">
+    	<values>0,1</values>
+        <default-value>1</default-value>
+        <description>Enable C14N support</description>
+    </option>
+
+    <option name="WITH_CATALOG">
+    	<values>0,1</values>
+        <default-value>1</default-value>
+        <description>Enable catalog support</description>
+    </option>
+
+    <option name="WITH_DOCB">
+    	<values>0,1</values>
+        <default-value>1</default-value>
+        <description>Enable DocBook support</description>
+    </option>
+	
+    <option name="WITH_XPATH">
+    	<values>0,1</values>
+        <default-value>1</default-value>
+        <description>Enable XPath support</description>
+    </option>
+	
+    <option name="WITH_XPTR">
+    	<values>0,1</values>
+        <default-value>1</default-value>
+        <description>Enable XPointer support</description>
+    </option>
+	
+    <option name="WITH_XINCLUDE">
+    	<values>0,1</values>
+        <default-value>1</default-value>
+        <description>Enable XInclude support</description>
+    </option>
+	
+	<!-- see the note #2 -->
+	<if cond="FULL_OPTIONS_SUPPORT=='0'">
+		<set var="WITH_ICONV">1</set>
+	</if>
+	<if cond="FULL_OPTIONS_SUPPORT=='1'">
+		<option name="WITH_ICONV">
+    		<values>0,1</values>
+			<default-value>1</default-value>
+			<description>Enable iconv support</description>
+		</option>
+	</if>
+	
+    <option name="WITH_ISO8859X">
+    	<values>0,1</values>
+        <default-value>0</default-value>
+        <description>Enable iso8859x support</description>
+    </option>
+	
+	<!-- see the note #2 -->
+	<if cond="FULL_OPTIONS_SUPPORT=='0'">
+		<set var="WITH_ZLIB">0</set>
+	</if>
+	<if cond="FULL_OPTIONS_SUPPORT=='1'">
+		<option name="WITH_ZLIB">
+    		<values>0,1</values>
+			<default-value>0</default-value>
+			<description>Enable ZLIB support</description>
+		</option>
+	</if>
+	
+    <option name="WITH_REGEXPS">
+    	<values>0,1</values>
+        <default-value>1</default-value>
+        <description>Enable regular expressions</description>
+    </option>
+	
+    <option name="WITH_TREE">
+    	<values>0,1</values>
+        <default-value>1</default-value>
+        <description>Enable tree api</description>
+    </option>
+	
+    <option name="WITH_READER">
+    	<values>0,1</values>
+        <default-value>1</default-value>
+        <description>Enable xmlReader api</description>
+    </option>
+	
+    <option name="WITH_WRITER">
+    	<values>0,1</values>
+        <default-value>1</default-value>
+        <description>Enable xmlWriter api</description>
+    </option>
+	
+    <option name="WITH_WALKER">
+    	<values>0,1</values>
+        <default-value>1</default-value>
+        <description>Enable xmlDocWalker api</description>
+    </option>    
+	
+    <option name="WITH_PATTERN">
+    	<values>0,1</values>
+        <default-value>1</default-value>
+        <description>Enable xmlPattern api</description>
+    </option>
+	
+    <option name="WITH_PUSH">
+    	<values>0,1</values>
+        <default-value>1</default-value>
+        <description>Enable push api</description>
+    </option>
+	
+    <option name="WITH_VALID">
+    	<values>0,1</values>
+        <default-value>1</default-value>
+        <description>Enable DTD validation support</description>
+    </option>
+	
+    <option name="WITH_SAX1">
+    	<values>0,1</values>
+        <default-value>1</default-value>
+        <description>Enable SAX1 api</description>
+    </option>    
+                	
+    <option name="WITH_SCHEMAS">
+    	<values>0,1</values>
+        <default-value>1</default-value>
+        <description>Enable XML Schema support</description>
+    </option>
+	
+    <option name="WITH_LEGACY">
+    	<values>0,1</values>
+        <default-value>1</default-value>
+        <description>Enable deprecated APIs</description>
+    </option>    
+                	
+    <option name="WITH_OUTPUT">
+    	<values>0,1</values>
+        <default-value>1</default-value>
+        <description>Enable serialization support</description>
+    </option>					
+                	
+    <option name="WITH_PYTHON">
+    	<values>0,1</values>
+        <default-value>0</default-value>
+        <description>Build Python bindings</description>
+    </option>
+
+
+ 
+
+    <!--                                                            -->
+    <!--                    LIBXML2 VARIABLES                       -->
+    <!--                                                            -->   
+
+    <!-- Put all the objects files generated by         -->
+    <!-- the compilation in a subfolder of BUILD        -->
+    <set var="BUILDDIR">$(FORMAT)</set>
+    
+    <!-- This variable is set to 1 when the current output writer supports -->
+   	<!-- the __DEFINE_ARG variable. Otherwise it's set to zero. -->
+   	<set var="HAS_DEFINE_ARG">
+   		<if cond="FORMAT!='msvc6prj'">1</if>
+   		<if cond="FORMAT=='msvc6prj'">0</if>   		
+   	</set>
+
+	<!-- The root directory of libxml2 -->
+	<set var="XMLBASEDIR">..</set>
+	
+	<!-- The directory where libxml2' tests will be put -->
+	<set var="XMLTESTDIR">$(XMLBASEDIR)$(DIRSEP)bin</set>
+	
+	<set var="LIBXML_MAJOR_VERSION">2</set>
+	<set var="LIBXML_MINOR_VERSION">6</set>
+	<set var="LIBXML_MICRO_VERSION">16</set>
+	
+	<!-- some defines related to threads -->
+	<set var="THREADS_DEF">
+		<if cond="HAS_DEFINE_ARG=='1' and WITH_THREADS=='native'">
+			$(__DEFINE_ARG)_REENTRANT $(__DEFINE_ARG)HAVE_WIN32_THREADS
+		</if>
+		<if cond="HAS_DEFINE_ARG=='1' and WITH_THREADS=='ctls'">
+			$(__DEFINE_ARG)_REENTRANT $(__DEFINE_ARG)HAVE_WIN32_THREADS $(__DEFINE_ARG)HAVE_COMPILER_TLS
+		</if>
+		<if cond="HAS_DEFINE_ARG=='1' and WITH_THREADS=='posix'">
+			$(__DEFINE_ARG)_REENTRANT $(__DEFINE_ARG)HAVE_PTHREAD_H
+		</if>
+	</set>
+	<if cond="FORMAT=='borland'">
+		<set var="THREADS_DEF">
+			<if cond="WITH_THREADS=='native'">$(THREADS_DEF) $(__DEFINE_ARG)__MT__</if>
+			<if cond="WITH_THREADS=='ctls'">$(THREADS_DEF) $(__DEFINE_ARG)__MT__</if>
+			<if cond="WITH_THREADS=='posix'">$(THREADS_DEF) $(__DEFINE_ARG)__MT__</if>
+		</set>
+	</if>	
+	
+	
+	<!-- some other conditional defines -->
+	<set var="ZLIB_DEF"><if cond="WITH_ZLIB=='1'">HAVE_ZLIB_H</if></set>
+	<set var="DEBUG_DEF"><if cond="BUILD=='debug'">_DEBUG</if></set>
+	<set var="DEBUG_DEF"><if cond="BUILD=='release'">NDEBUG</if></set>
+	
+	<!-- this is very very important when compiling with MINGW: without this line,
+	the test programs (and all the programs built with libxml2 which use xmlFree)
+	won't build because of "undefined references to __xmlFree" -->
+	<set var="STATIC_DEF"><if cond="SHARED=='0'">LIBXML_STATIC</if></set>
+	
+	<!-- some conditional libraries dependencies -->
+	<set var="ICONV_LIB"><if cond="WITH_ICONV=='1'">iconv</if></set>
+	<set var="WSOCK32_LIB"><if cond="WITH_THREADS=='native'">wsock32</if></set>
+	<set var="ZLIB_LIB"><if cond="WITH_ZLIB=='1'">zdll</if></set>
+	<set var="POSIX_LIB"><if cond="WITH_THREADS=='posix'">pthreadVC</if></set>
+	
+	<set var="XMLINCLUDEDIR">$(XMLBASEDIR)$(DIRSEP)include$(DIRSEP)libxml$(DIRSEP)</set>
+
+  
+
+ 
+    <!--                                                            -->
+    <!--               ABOUT CONFIG.H HEADER CREATION               -->
+    <!--                                                            -->   
+    
+    <set var="CONFIG_SRCNAME">win32config.h</set>
+    <set var="CONFIG_DSTNAME">config.h</set>
+    
+	<if cond="FORMAT!='msvc6prj' and FORMAT!='autoconf' and FORMAT!='gnu'">
+		<copy-file-to-file id="setup">
+			<!-- On win32 we need to manually copy a default config.h file -->
+			<!-- from the include/mc/msw folder to include/mc			   -->
+			<src>../include/$(CONFIG_SRCNAME)</src>
+			<dst>../$(CONFIG_DSTNAME)</dst>
+			<dependency-of>all</dependency-of>
+
+			<!-- With autoconf, we will use the configure script to translate -->
+			<!-- include/mc/config.h.in to include/mc/config.h and thus we do -->
+			<!-- not need to do anything here...							  -->
+		</copy-file-to-file>
+	</if>
+    
+	<if cond="FORMAT!='msvc6prj'">
+	    
+		<mkdir id="setuplibdir"><dir>$(XMLBASEDIR)$(DIRSEP)lib</dir></mkdir>
+		<mkdir id="setupbindir"><dir>$(XMLBASEDIR)$(DIRSEP)bin</dir></mkdir>
+			
+	    <!-- Creates all output folders -->	
+	    <phony id="setupdirs">
+			<dependency-of>all</dependency-of>	    
+	    	<depends>setuplibdir</depends>
+	    	<depends>setupbindir</depends>
+	    </phony>
+	</if>
+
+    <!-- This defines a tag which includes headers on MSVC          -->
+    <!-- Note that $(value) is stuck in there by bakefile,          -->
+    <!-- and is the value between the beginning and end tag.        -->
+    <define-tag name="headers" rules="dll,lib,exe">
+        <if cond="FORMAT=='msvc6prj'">
+            <msvc-project-files>
+                $(value)
+            </msvc-project-files>
+        </if>
+    </define-tag>
+    		
+	<!-- Creates the following custom build rule for MSVC6PRJ file:
+	     copies ..\include\win32config.h into ..\config.h
+	     NOTE: this tag must be used before the <sources> tag if you want that the configuration
+	           file will be created before any other source file is compiled... -->
+    <define-tag name="msvc-copy-setup-h" rules="dll,lib,action">
+        <if cond="FORMAT=='msvc6prj'">
+	        <headers>$(XMLBASEDIR)\include\$(CONFIG_SRCNAME)</headers>
+	        <set var="__subdir">$(value)</set>
+            <set var="_custom_build_files" append="1">$(XMLBASEDIR)\include\$(CONFIG_SRCNAME)</set>
+            <set var="_custom_build____include_win32config_h">
+Creating the configuration file ..\$(CONFIG_DSTNAME) from ..\include\$(CONFIG_SRCNAME)
+InputPath=..\include\$(CONFIG_SRCNAME)
+
+"..\$(CONFIG_DSTNAME)" : $(DOLLAR)(SOURCE) "$(DOLLAR)(INTDIR)" "$(DOLLAR)(OUTDIR)"
+$(TAB)copy "$(DOLLAR)(InputPath)" ..\$(CONFIG_DSTNAME)
+            </set>
+        </if>
+    </define-tag>
+
+ 
+
+
+
+    <!--                                                            -->
+    <!--                          TEMPLATES                         -->
+    <!--                                                            -->   
+
+	<!-- The basic template: used by all the targets -->
+    <template id="base">
+        <if cond="FORMAT=='mingw'">                    
+            <define>HAVE_W32API_H</define>
+            <ldflags>-mthreads</ldflags>
+        </if>
+
+        <cxxflags>$(MYCPPFLAGS)</cxxflags>
+        <warnings>$(WARNINGS)</warnings>
+        <define>$(UNICODE_DEFINE)</define>
+        <optimize>$(OPTIMIZEFLAG)</optimize>
+        <debug-info>$(DEBUGINFO)</debug-info>
+        <debug-runtime-libs>$(DEBUGRUNTIME)</debug-runtime-libs>
+	</template>
+	
+	<!-- The template used both by the library and by the test programs -->
+    <template id="xml2" template="base">
+    
+        <!-- -I & -L equivalents -->
+        <include>$(XMLBASEDIR)$(DIRSEP)include</include>
+        <include>$(ICONV_DIR)$(DIRSEP)include</include>
+        <lib-path>$(ICONV_DIR)$(DIRSEP)lib</lib-path>    
+        
+		<!-- some conditional define flags -->
+        <cflags>$(THREADS_DEF)</cflags>
+		<define>$(ZLIB_DEF)</define>
+		<define>$(DEBUG_DEF)</define>
+		<define>$(STATIC_DEF)</define>
+	
+		<if cond="HAS_DEFINE_ARG=='0'">
+		
+			<!-- we are probably using an IDE output: defaults to WITH_THREADS=='native' -->
+			<define>_REENTRANT</define>
+			<define>HAVE_WIN32_THREADS</define>
+		</if>
+
+		
+		<!-- these must always be defined on win32 -->
+		<define>WIN32</define>		
+		<define>_WINDOWS</define>
+		<define>_MBCS</define>
+
+		<if cond="FORMAT=='borland'">
+			<define>_NO_VCL</define>
+			<define>EILSEQ=2</define>
+		</if>
+    </template>
+    
+	<!-- The template used by libxml2 test programs -->
+	<template id="xml2test" template="xml2">
+        <dirname>$(XMLTESTDIR)</dirname>
+        <app-type>console</app-type>        
+
+        <library>libxml2</library>
+		
+        <sys-lib>$(ICONV_LIB)</sys-lib>
+        <sys-lib>$(WSOCK32_LIB)</sys-lib>
+		<sys-lib>$(ZLIB_LIB)</sys-lib> 
+        <sys-lib>$(POSIX_LIB)</sys-lib>
+	</template>
+
+
+
+
+ 
+
+    <!--                                                            -->
+    <!--                  LIBXML2 LIBRARY TARGET                    -->
+    <!--                                                            -->  
+    
+    <lib id="libxml2" template="xml2">
+    	
+    	<!-- this is useful only when using MSVC6PRJ -->
+    	<if cond="FORMAT=='msvc6prj'">
+    		<msvc-copy-setup-h/>
+    		<msvc-file-group>Config headers:*config.h</msvc-file-group>
+    	</if>
+    	<if cond="FORMAT!='msvc6prj'">
+	    	<depends>setup</depends>
+    		<depends>setuplibdir</depends>
+    	</if>
+    	    
+    	<!-- output folder -->
+        <dirname>$(XMLBASEDIR)$(DIRSEP)lib</dirname>
+		
+		<!-- The output name must be "libxml2.lib" with all compilers.
+		     Since mingw format autoadds the "lib" prefix to the library
+			 name, we must intercept that case to avoid to get "liblibxml2.a" -->
+		<if cond="FORMAT!='mingw'">
+	        <libname>libxml2</libname>
+		</if>
+		<if cond="FORMAT=='mingw'">
+	        <libname>xml2</libname>
+		</if>
+		        
+        <!-- the list of source files to compile -->            
+        <sources>
+			$(XMLBASEDIR)$(DIRSEP)c14n.c
+			$(XMLBASEDIR)$(DIRSEP)catalog.c
+			$(XMLBASEDIR)$(DIRSEP)chvalid.c
+			$(XMLBASEDIR)$(DIRSEP)debugXML.c
+			$(XMLBASEDIR)$(DIRSEP)dict.c
+			$(XMLBASEDIR)$(DIRSEP)DOCBparser.c
+			$(XMLBASEDIR)$(DIRSEP)encoding.c
+			$(XMLBASEDIR)$(DIRSEP)entities.c
+			$(XMLBASEDIR)$(DIRSEP)error.c
+			$(XMLBASEDIR)$(DIRSEP)globals.c
+			$(XMLBASEDIR)$(DIRSEP)hash.c
+			$(XMLBASEDIR)$(DIRSEP)HTMLparser.c
+			$(XMLBASEDIR)$(DIRSEP)HTMLtree.c
+			$(XMLBASEDIR)$(DIRSEP)legacy.c
+			$(XMLBASEDIR)$(DIRSEP)list.c
+			$(XMLBASEDIR)$(DIRSEP)nanoftp.c
+			$(XMLBASEDIR)$(DIRSEP)nanohttp.c
+			$(XMLBASEDIR)$(DIRSEP)parser.c
+			$(XMLBASEDIR)$(DIRSEP)parserInternals.c
+			$(XMLBASEDIR)$(DIRSEP)pattern.c
+			$(XMLBASEDIR)$(DIRSEP)relaxng.c
+			$(XMLBASEDIR)$(DIRSEP)SAX2.c
+			$(XMLBASEDIR)$(DIRSEP)SAX.c
+			$(XMLBASEDIR)$(DIRSEP)threads.c
+			$(XMLBASEDIR)$(DIRSEP)tree.c
+			$(XMLBASEDIR)$(DIRSEP)uri.c
+			$(XMLBASEDIR)$(DIRSEP)valid.c
+			$(XMLBASEDIR)$(DIRSEP)xinclude.c
+			$(XMLBASEDIR)$(DIRSEP)xlink.c
+			$(XMLBASEDIR)$(DIRSEP)xmlIO.c
+			$(XMLBASEDIR)$(DIRSEP)xmlmemory.c
+			$(XMLBASEDIR)$(DIRSEP)xmlreader.c
+			$(XMLBASEDIR)$(DIRSEP)xmlregexp.c
+			$(XMLBASEDIR)$(DIRSEP)xmlsave.c
+			$(XMLBASEDIR)$(DIRSEP)xmlschemas.c
+			$(XMLBASEDIR)$(DIRSEP)xmlschemastypes.c
+			$(XMLBASEDIR)$(DIRSEP)xmlunicode.c
+			$(XMLBASEDIR)$(DIRSEP)xmlwriter.c
+			$(XMLBASEDIR)$(DIRSEP)xpath.c
+			$(XMLBASEDIR)$(DIRSEP)xpointer.c
+			$(XMLBASEDIR)$(DIRSEP)xmlstring.c
+        </sources>
+        
+        <!-- the list of header files (for IDE projects) -->
+        <headers>
+			$(XMLINCLUDEDIR)c14n.h
+			$(XMLINCLUDEDIR)catalog.h
+			$(XMLINCLUDEDIR)chvalid.h
+			$(XMLINCLUDEDIR)debugXML.h
+			$(XMLINCLUDEDIR)dict.h
+			$(XMLINCLUDEDIR)DOCBparser.h
+			$(XMLINCLUDEDIR)encoding.h
+			$(XMLINCLUDEDIR)entities.h
+			$(XMLINCLUDEDIR)globals.h
+			$(XMLINCLUDEDIR)hash.h
+			$(XMLINCLUDEDIR)HTMLparser.h
+			$(XMLINCLUDEDIR)HTMLtree.h
+			$(XMLINCLUDEDIR)list.h
+			$(XMLINCLUDEDIR)nanoftp.h
+			$(XMLINCLUDEDIR)nanohttp.h
+			$(XMLINCLUDEDIR)parser.h
+			$(XMLINCLUDEDIR)parserInternals.h
+			$(XMLINCLUDEDIR)pattern.h
+			$(XMLINCLUDEDIR)relaxng.h
+			$(XMLINCLUDEDIR)SAX.h
+			$(XMLINCLUDEDIR)SAX2.h
+			$(XMLINCLUDEDIR)schemasInternals.h
+			$(XMLINCLUDEDIR)threads.h
+			$(XMLINCLUDEDIR)tree.h
+			$(XMLINCLUDEDIR)uri.h
+			$(XMLINCLUDEDIR)valid.h
+			$(XMLINCLUDEDIR)xinclude.h
+			$(XMLINCLUDEDIR)xlink.h
+			$(XMLINCLUDEDIR)xmlautomata.h
+			$(XMLINCLUDEDIR)xmlerror.h
+			$(XMLINCLUDEDIR)xmlexports.h
+			$(XMLINCLUDEDIR)xmlIO.h
+			$(XMLINCLUDEDIR)xmlmemory.h
+			$(XMLINCLUDEDIR)xmlmodule.h
+			$(XMLINCLUDEDIR)xmlreader.h
+			$(XMLINCLUDEDIR)xmlregexp.h
+			$(XMLINCLUDEDIR)xmlsave.h
+			$(XMLINCLUDEDIR)xmlschemas.h
+			$(XMLINCLUDEDIR)xmlschemastypes.h
+			$(XMLINCLUDEDIR)xmlstring.h
+			$(XMLINCLUDEDIR)xmlunicode.h
+			$(XMLINCLUDEDIR)xmlversion.h			
+			$(XMLINCLUDEDIR)xmlwriter.h
+			$(XMLINCLUDEDIR)xpath.h
+			$(XMLINCLUDEDIR)xpathInternals.h
+			$(XMLINCLUDEDIR)xpointer.h
+		</headers>
+
+		<!-- these ones are not inside the include/libxml folder -->
+		<headers>
+			$(XMLBASEDIR)$(DIRSEP)libxml.h
+			$(XMLBASEDIR)$(DIRSEP)triodef.h
+			$(XMLBASEDIR)$(DIRSEP)trionan.h
+			$(XMLBASEDIR)$(DIRSEP)include$(DIRSEP)wsockcompat.h			
+       </headers>
+    </lib>
+
+
+
+    <!--                                                -->
+    <!--               LIBXML2 test programs            -->
+    <!--                                                -->
+	
+	<set var="BUILD_ALL_TESTS">
+
+		<!-- when using full options support with MSVC6PRJ we should
+		     avoid to create all the DSP files required for the test
+			 programs: they would take a _lot_ of space !! -->
+		<if cond="FORMAT=='msvc6prj' and FULL_OPTIONS_SUPPORT=='1'">0</if>
+
+		<!-- when creating a makefile or using MSVC6PRJ with limited
+		     options support, then we can build all the tests safely -->
+		<if cond="FORMAT!='msvc6prj' or FULL_OPTIONS_SUPPORT=='0'">1</if>
+
+	</set>
+
+    <if cond="BUILD_ALL_TESTS=='1'">
+
+		<exe id="testAutomata" template="xml2test"><sources>$(XMLBASEDIR)$(DIRSEP)testAutomata.c</sources></exe>
+		<exe id="testC14N" template="xml2test"><sources>$(XMLBASEDIR)$(DIRSEP)testC14N.c</sources></exe>
+		<exe id="testHTML" template="xml2test"><sources>$(XMLBASEDIR)$(DIRSEP)testHTML.c</sources></exe>
+		<exe id="testReader" template="xml2test"><sources>$(XMLBASEDIR)$(DIRSEP)testReader.c</sources></exe>
+		<exe id="testRegexp" template="xml2test"><sources>$(XMLBASEDIR)$(DIRSEP)testRegexp.c</sources></exe>
+		<exe id="testRelax" template="xml2test"><sources>$(XMLBASEDIR)$(DIRSEP)testRelax.c</sources></exe>
+		<exe id="testSax" template="xml2test"><sources>$(XMLBASEDIR)$(DIRSEP)testSax.c</sources></exe>
+		<exe id="testSchemas" template="xml2test"><sources>$(XMLBASEDIR)$(DIRSEP)testSchemas.c</sources></exe>
+		<exe id="testURI" template="xml2test"><sources>$(XMLBASEDIR)$(DIRSEP)testURI.c</sources></exe>
+		<exe id="testXPath" template="xml2test"><sources>$(XMLBASEDIR)$(DIRSEP)testXPath.c</sources></exe>
+		<exe id="xmllint" template="xml2test"><sources>$(XMLBASEDIR)$(DIRSEP)xmllint.c</sources></exe>
+
+		<if cond="FORMAT=='autoconf'">
+			<exe id="testdso" template="xml2test"><sources>$(XMLBASEDIR)$(DIRSEP)testdso.c</sources></exe>
+		</if>
+
+	<!-- FIXME:
+		<exe id="testModule" template="xml2test"><sources>$(XMLBASEDIR)$(DIRSEP)testModule.c</sources></exe>
+
+		<if cond="WITH_THREADS=='posix'">
+			<exe id="testThreads" template="xml2test"><sources>$(XMLBASEDIR)$(DIRSEP)testThreads.c</sources></exe>
+		</if>
+		<if cond="WITH_THREADS=='ctls' or WITH_THREADS=='native'">
+			<exe id="testThreadsWin32" template="xml2test"><sources>$(XMLBASEDIR)$(DIRSEP)testThreadsWin32.c</sources></exe>
+		</if>
+	-->
+	</if>
+
+</makefile>

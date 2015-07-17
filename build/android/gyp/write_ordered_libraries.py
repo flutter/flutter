@@ -73,7 +73,7 @@ def GetDependencies(library_or_executable):
 
 
 def GetNonSystemDependencies(library_name):
-  all_deps = GetDependencies(FullLibraryPath(library_name))
+  all_deps = GetDependencies(library_name)
   return set((lib for lib in all_deps if not IsSystemLibrary(lib)))
 
 
@@ -119,8 +119,13 @@ def main():
   java_libraries_list = (
       '{%s}' % ','.join(['"%s"' % s[3:-3] for s in libraries]))
 
+  out_json = {
+      'libraries': libraries,
+      'lib_paths': [FullLibraryPath(l) for l in libraries],
+      'java_libraries_list': java_libraries_list
+      }
   build_utils.WriteJson(
-      {'libraries': libraries, 'java_libraries_list': java_libraries_list},
+      out_json,
       options.output,
       only_if_changed=True)
 

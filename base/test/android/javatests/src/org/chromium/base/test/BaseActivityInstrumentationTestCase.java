@@ -10,16 +10,7 @@ import android.os.SystemClock;
 import android.test.ActivityInstrumentationTestCase2;
 import android.util.Log;
 
-import org.chromium.base.BaseChromiumApplication;
-import org.chromium.base.CommandLine;
 import org.chromium.base.test.util.CommandLineFlags;
-
-import java.lang.reflect.AnnotatedElement;
-import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 /**
  * Base class for all Activity-based Instrumentation tests.
@@ -43,26 +34,10 @@ public class BaseActivityInstrumentationTestCase<T extends Activity>
         super(activityClass);
     }
 
-    /**
-     * Sets up the CommandLine with the appropriate flags.
-     *
-     * This will add the difference of the sets of flags specified by {@link CommandLineFlags.Add}
-     * and {@link CommandLineFlags.Remove} to the {@link org.chromium.base.CommandLine}. Note that
-     * trying to remove a flag set externally, i.e. by the command-line flags file, will not work.
-     */
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-
-        CommandLine.reset();
-        Context targetContext = getTargetContext();
-        assertNotNull("Unable to get a non-null target context.", targetContext);
-
-        BaseChromiumApplication.initCommandLine(targetContext);
-        Set<String> flags = getFlags(getClass().getMethod(getName()));
-        for (String flag : flags) {
-            CommandLine.getInstance().appendSwitch(flag);
-        }
+        CommandLineFlags.setUp(getTargetContext(), getClass().getMethod(getName()));
     }
 
     /**
@@ -87,32 +62,5 @@ public class BaseActivityInstrumentationTestCase<T extends Activity>
             Log.e(TAG, "Interrupted while attempting to initialize the command line.");
         }
         return targetContext;
-    }
-
-    private static Set<String> getFlags(AnnotatedElement element) {
-        AnnotatedElement parent = (element instanceof Method)
-                ? ((Method) element).getDeclaringClass()
-                : ((Class) element).getSuperclass();
-        Set<String> flags = (parent == null) ? new HashSet<String>() : getFlags(parent);
-
-        if (element.isAnnotationPresent(CommandLineFlags.Add.class)) {
-            flags.addAll(
-                    Arrays.asList(element.getAnnotation(CommandLineFlags.Add.class).value()));
-        }
-
-        if (element.isAnnotationPresent(CommandLineFlags.Remove.class)) {
-            List<String> flagsToRemove =
-                    Arrays.asList(element.getAnnotation(CommandLineFlags.Remove.class).value());
-            for (String flagToRemove : flagsToRemove) {
-                // If your test fails here, you have tried to remove a command-line flag via
-                // CommandLineFlags.Remove that was loaded into CommandLine via something other
-                // than CommandLineFlags.Add (probably the command-line flag file).
-                assertFalse("Unable to remove command-line flag \"" + flagToRemove + "\".",
-                        CommandLine.getInstance().hasSwitch(flagToRemove));
-            }
-            flags.removeAll(flagsToRemove);
-        }
-
-        return flags;
     }
 }

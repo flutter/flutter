@@ -10,6 +10,7 @@
       'type': 'none',
       'variables': {
         'jar_path': 'src/lib/hamcrest-core-1.1.jar',
+        'enable_errorprone': '0',
       },
       'includes': [
         '../../build/host_prebuilt_jar.gypi',
@@ -24,6 +25,7 @@
       ],
       'variables': {
         'src_paths': [ 'src/src/main/java' ],
+        'enable_errorprone': '0',
       },
       'includes': [
         '../../build/host_jar.gypi',

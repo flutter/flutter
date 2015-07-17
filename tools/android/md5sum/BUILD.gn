@@ -5,8 +5,6 @@
 # GYP: //tools/android/md5sum/md5sum.gyp:md5sum
 group("md5sum") {
   datadeps = [
-    ":md5sum_bin($host_toolchain)",
-    ":md5sum_bin($default_toolchain)",
     ":md5sum_prepare_dist($default_toolchain)",
     ":md5sum_copy_host($host_toolchain)",
   ]
@@ -45,15 +43,25 @@ if (current_toolchain == default_toolchain) {
   }
 } else {
   # GYP: //tools/android/md5sum/md5sum.gyp:md5sum_bin_host
-  copy("md5sum_copy_host") {
+  action("md5sum_copy_host") {
+    # Symlink rather than copy. When copied and using a component build, it
+    # fails to find libbase.so (since it's actually at clang_x64/libbase.so).
+    script = "//build/symlink.py"
+    _src = "$root_out_dir/md5sum_bin"
+    _target = "$root_build_dir/md5sum_bin_host"
     sources = [
-      "$root_out_dir/md5sum_bin",
+      _src,
     ]
     outputs = [
-      "$root_build_dir/md5sum_bin_host",
+      _target,
     ]
     deps = [
       ":md5sum_bin",
+    ]
+    args = [
+      "-f",
+      rebase_path(_src, root_build_dir),
+      rebase_path(_target, root_build_dir),
     ]
   }
 }

@@ -46,8 +46,12 @@ bool SparseHistogram::HasConstructionArguments(
 }
 
 void SparseHistogram::Add(Sample value) {
-  base::AutoLock auto_lock(lock_);
-  samples_.Accumulate(value, 1);
+  {
+    base::AutoLock auto_lock(lock_);
+    samples_.Accumulate(value, 1);
+  }
+
+  FindAndRunCallback(value);
 }
 
 scoped_ptr<HistogramSamples> SparseHistogram::SnapshotSamples() const {

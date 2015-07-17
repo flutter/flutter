@@ -93,7 +93,7 @@ class HostControllersManager {
     if (!thread_.get())
       return;
     // Delete the controllers on the thread they were created on.
-    thread_->message_loop_proxy()->DeleteSoon(
+    thread_->task_runner()->DeleteSoon(
         FROM_HERE, controllers_.release());
   }
 
@@ -104,7 +104,7 @@ class HostControllersManager {
                      scoped_ptr<Socket> client_socket) {
     // Lazy initialize so that the CLI process doesn't get this thread created.
     InitOnce();
-    thread_->message_loop_proxy()->PostTask(
+    thread_->task_runner()->PostTask(
         FROM_HERE,
         base::Bind(&HostControllersManager::HandleRequestOnInternalThread,
                    base::Unretained(this), adb_path, device_serial, device_port,
@@ -143,7 +143,7 @@ class HostControllersManager {
       // then all the controllers (including |controller|) were also deleted.
       return;
     }
-    DCHECK(manager->thread_->message_loop_proxy()->RunsTasksOnCurrentThread());
+    DCHECK(manager->thread_->task_runner()->RunsTasksOnCurrentThread());
     // Note that this will delete |controller| which is owned by the map.
     DeleteRefCountedValueInMap(
         MakeHostControllerMapKey(

@@ -237,6 +237,18 @@ OPENSSL_wipe_cpu:
 	movl	(%ecx),%ecx
 	btl	$1,(%ecx)
 	jnc	.L016no_x87
+	andl	$83886080,%ecx
+	cmpl	$83886080,%ecx
+	jne	.L017no_sse2
+	pxor	%xmm0,%xmm0
+	pxor	%xmm1,%xmm1
+	pxor	%xmm2,%xmm2
+	pxor	%xmm3,%xmm3
+	pxor	%xmm4,%xmm4
+	pxor	%xmm5,%xmm5
+	pxor	%xmm6,%xmm6
+	pxor	%xmm7,%xmm7
+.L017no_sse2:
 .long	4007259865,4007259865,4007259865,4007259865,2430851995
 .L016no_x87:
 	leal	4(%esp),%eax
@@ -253,11 +265,11 @@ OPENSSL_atomic_add:
 	pushl	%ebx
 	nop
 	movl	(%edx),%eax
-.L017spin:
+.L018spin:
 	leal	(%eax,%ecx,1),%ebx
 	nop
 .long	447811568
-	jne	.L017spin
+	jne	.L018spin
 	movl	%ebx,%eax
 	popl	%ebx
 	ret
@@ -297,11 +309,11 @@ OPENSSL_indirect_call:
 OPENSSL_ia32_rdrand:
 .L_OPENSSL_ia32_rdrand_begin:
 	movl	$8,%ecx
-.L018loop:
+.L019loop:
 .byte	15,199,240
-	jc	.L019break
-	loop	.L018loop
-.L019break:
+	jc	.L020break
+	loop	.L019loop
+.L020break:
 	cmpl	$0,%eax
 	cmovel	%ecx,%eax
 	ret

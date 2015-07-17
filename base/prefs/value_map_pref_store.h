@@ -29,13 +29,13 @@ class BASE_PREFS_EXPORT ValueMapPrefStore : public WriteablePrefStore {
 
   // WriteablePrefStore overrides:
   void SetValue(const std::string& key,
-                base::Value* value,
+                scoped_ptr<base::Value> value,
                 uint32 flags) override;
   void RemoveValue(const std::string& key, uint32 flags) override;
   bool GetMutableValue(const std::string& key, base::Value** value) override;
   void ReportValueChanged(const std::string& key, uint32 flags) override;
   void SetValueSilently(const std::string& key,
-                        base::Value* value,
+                        scoped_ptr<base::Value> value,
                         uint32 flags) override;
 
  protected:

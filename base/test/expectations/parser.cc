@@ -39,7 +39,7 @@ inline bool Parser::HasNext() {
 Parser::StateFunc Parser::Start() {
   // If at the start of a line is whitespace, skip it and arrange to come back
   // here.
-  if (IsAsciiWhitespace(*pos_))
+  if (base::IsAsciiWhitespace(*pos_))
     return SkipWhitespaceAndNewLines(&Parser::Start);
 
   // Handle comments at the start of lines.
@@ -161,7 +161,7 @@ Parser::StateFunc Parser::End() {
 
 Parser::StateFunc Parser::ExtractString(StateFunc success) {
   const char* start = pos_;
-  while (!IsAsciiWhitespace(*pos_) && *pos_ != ']' && HasNext()) {
+  while (!base::IsAsciiWhitespace(*pos_) && *pos_ != ']' && HasNext()) {
     ++pos_;
     if (*pos_ == '#') {
       return SyntaxError("Unexpected start of comment");
@@ -179,7 +179,7 @@ Parser::StateFunc Parser::SkipWhitespace(Parser::StateFunc next) {
 }
 
 Parser::StateFunc Parser::SkipWhitespaceAndNewLines(Parser::StateFunc next) {
-  while (IsAsciiWhitespace(*pos_) && HasNext()) {
+  while (base::IsAsciiWhitespace(*pos_) && HasNext()) {
     if (*pos_ == '\n') {
       ++line_number_;
     }

@@ -59,6 +59,8 @@
   'target_defaults': {
     # Silence warnings in libc++ builds (C code doesn't need this flag).
     'ldflags!': [ '-stdlib=libc++', ],
+    # https://crbug.com/489901
+    'cflags!': [ '-fsanitize=bounds' ],
   },
   'targets': [
     {
@@ -91,7 +93,7 @@
           # https://connect.microsoft.com/VisualStudio/feedback/details/1014799/internal-compiler-error-when-using-analyze
           'msvs_settings': {
             'VCCLCompilerTool': {
-              'AdditionalOptions!': [ '/analyze' ]
+              'AdditionalOptions!': [ '/analyze:WX-' ]
             },
           },
         }],

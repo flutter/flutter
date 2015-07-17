@@ -1,7 +1,61 @@
-#include "arm_arch.h"
+#if defined(__arm__)
+
+@ ====================================================================
+@ Written by Andy Polyakov <appro@openssl.org> for the OpenSSL
+@ project. The module is, however, dual licensed under OpenSSL and
+@ CRYPTOGAMS licenses depending on where you obtain it. For further
+@ details see http://www.openssl.org/~appro/cryptogams/.
+@
+@ Permission to use under GPL terms is granted.
+@ ====================================================================
+
+@ SHA256 block procedure for ARMv4. May 2007.
+
+@ Performance is ~2x better than gcc 3.4 generated code and in "abso-
+@ lute" terms is ~2250 cycles per 64-byte block or ~35 cycles per
+@ byte [on single-issue Xscale PXA250 core].
+
+@ July 2010.
+@
+@ Rescheduling for dual-issue pipeline resulted in 22% improvement on
+@ Cortex A8 core and ~20 cycles per processed byte.
+
+@ February 2011.
+@
+@ Profiler-assisted and platform-specific optimization resulted in 16%
+@ improvement on Cortex A8 core and ~15.4 cycles per processed byte.
+
+@ September 2013.
+@
+@ Add NEON implementation. On Cortex A8 it was measured to process one
+@ byte in 12.5 cycles or 23% faster than integer-only code. Snapdragon
+@ S4 does it in 12.5 cycles too, but it's 50% faster than integer-only
+@ code (meaning that latter performs sub-optimally, nothing was done
+@ about it).
+
+@ May 2014.
+@
+@ Add ARMv8 code path performing at 2.0 cpb on Apple A7.
+
+#ifndef __KERNEL__
+# include "arm_arch.h"
+#else
+# define __ARM_ARCH__ __LINUX_ARM_ARCH__
+# define __ARM_MAX_ARCH__ 7
+#endif
 
 .text
+#if __ARM_ARCH__<7
 .code	32
+#else
+.syntax	unified
+# if defined(__thumb2__) && !defined(__APPLE__)
+#  define adrl adr
+.thumb
+# else
+.code	32
+# endif
+#endif
 
 .type	K256,%object
 .align	5
@@ -24,25 +78,33 @@ K256:
 .word	0x90befffa,0xa4506ceb,0xbef9a3f7,0xc67178f2
 .size	K256,.-K256
 .word	0				@ terminator
-#if __ARM_MAX_ARCH__>=7
+#if __ARM_MAX_ARCH__>=7 && !defined(__KERNEL__)
 .LOPENSSL_armcap:
-.word	OPENSSL_armcap_P-sha256_block_data_order
+.word	OPENSSL_armcap_P-.Lsha256_block_data_order
 #endif
 .align	5
 
-.global	sha256_block_data_order
+.globl	sha256_block_data_order
 .type	sha256_block_data_order,%function
 sha256_block_data_order:
+.Lsha256_block_data_order:
+#if __ARM_ARCH__<7
 	sub	r3,pc,#8		@ sha256_block_data_order
-	add	r2,r1,r2,lsl#6	@ len to point at the end of inp
-#if __ARM_MAX_ARCH__>=7
+#else
+	adr	r3,sha256_block_data_order
+#endif
+#if __ARM_MAX_ARCH__>=7 && !defined(__KERNEL__)
 	ldr	r12,.LOPENSSL_armcap
 	ldr	r12,[r3,r12]		@ OPENSSL_armcap_P
+#ifdef	__APPLE__
+	ldr	r12,[r12]
+#endif
 	tst	r12,#ARMV8_SHA256
 	bne	.LARMv8
 	tst	r12,#ARMV7_NEON
 	bne	.LNEON
 #endif
+	add	r2,r1,r2,lsl#6	@ len to point at the end of inp
 	stmdb	sp!,{r0,r1,r2,r4-r11,lr}
 	ldmia	r0,{r4,r5,r6,r7,r8,r9,r10,r11}
 	sub	r14,r3,#256+32	@ K256
@@ -63,7 +125,9 @@ sha256_block_data_order:
 	eor	r0,r8,r8,ror#5
 	add	r4,r4,r12			@ h+=Maj(a,b,c) from the past
 	eor	r0,r0,r8,ror#19	@ Sigma1(e)
+# ifndef __ARMEB__
 	rev	r2,r2
+# endif
 #else
 	@ ldrb	r2,[r1,#3]			@ 0
 	add	r4,r4,r12			@ h+=Maj(a,b,c) from the past
@@ -119,7 +183,9 @@ sha256_block_data_order:
 	eor	r0,r7,r7,ror#5
 	add	r11,r11,r3			@ h+=Maj(a,b,c) from the past
 	eor	r0,r0,r7,ror#19	@ Sigma1(e)
+# ifndef __ARMEB__
 	rev	r2,r2
+# endif
 #else
 	@ ldrb	r2,[r1,#3]			@ 1
 	add	r11,r11,r3			@ h+=Maj(a,b,c) from the past
@@ -175,7 +241,9 @@ sha256_block_data_order:
 	eor	r0,r6,r6,ror#5
 	add	r10,r10,r12			@ h+=Maj(a,b,c) from the past
 	eor	r0,r0,r6,ror#19	@ Sigma1(e)
+# ifndef __ARMEB__
 	rev	r2,r2
+# endif
 #else
 	@ ldrb	r2,[r1,#3]			@ 2
 	add	r10,r10,r12			@ h+=Maj(a,b,c) from the past
@@ -231,7 +299,9 @@ sha256_block_data_order:
 	eor	r0,r5,r5,ror#5
 	add	r9,r9,r3			@ h+=Maj(a,b,c) from the past
 	eor	r0,r0,r5,ror#19	@ Sigma1(e)
+# ifndef __ARMEB__
 	rev	r2,r2
+# endif
 #else
 	@ ldrb	r2,[r1,#3]			@ 3
 	add	r9,r9,r3			@ h+=Maj(a,b,c) from the past
@@ -287,7 +357,9 @@ sha256_block_data_order:
 	eor	r0,r4,r4,ror#5
 	add	r8,r8,r12			@ h+=Maj(a,b,c) from the past
 	eor	r0,r0,r4,ror#19	@ Sigma1(e)
+# ifndef __ARMEB__
 	rev	r2,r2
+# endif
 #else
 	@ ldrb	r2,[r1,#3]			@ 4
 	add	r8,r8,r12			@ h+=Maj(a,b,c) from the past
@@ -343,7 +415,9 @@ sha256_block_data_order:
 	eor	r0,r11,r11,ror#5
 	add	r7,r7,r3			@ h+=Maj(a,b,c) from the past
 	eor	r0,r0,r11,ror#19	@ Sigma1(e)
+# ifndef __ARMEB__
 	rev	r2,r2
+# endif
 #else
 	@ ldrb	r2,[r1,#3]			@ 5
 	add	r7,r7,r3			@ h+=Maj(a,b,c) from the past
@@ -399,7 +473,9 @@ sha256_block_data_order:
 	eor	r0,r10,r10,ror#5
 	add	r6,r6,r12			@ h+=Maj(a,b,c) from the past
 	eor	r0,r0,r10,ror#19	@ Sigma1(e)
+# ifndef __ARMEB__
 	rev	r2,r2
+# endif
 #else
 	@ ldrb	r2,[r1,#3]			@ 6
 	add	r6,r6,r12			@ h+=Maj(a,b,c) from the past
@@ -455,7 +531,9 @@ sha256_block_data_order:
 	eor	r0,r9,r9,ror#5
 	add	r5,r5,r3			@ h+=Maj(a,b,c) from the past
 	eor	r0,r0,r9,ror#19	@ Sigma1(e)
+# ifndef __ARMEB__
 	rev	r2,r2
+# endif
 #else
 	@ ldrb	r2,[r1,#3]			@ 7
 	add	r5,r5,r3			@ h+=Maj(a,b,c) from the past
@@ -511,7 +589,9 @@ sha256_block_data_order:
 	eor	r0,r8,r8,ror#5
 	add	r4,r4,r12			@ h+=Maj(a,b,c) from the past
 	eor	r0,r0,r8,ror#19	@ Sigma1(e)
+# ifndef __ARMEB__
 	rev	r2,r2
+# endif
 #else
 	@ ldrb	r2,[r1,#3]			@ 8
 	add	r4,r4,r12			@ h+=Maj(a,b,c) from the past
@@ -567,7 +647,9 @@ sha256_block_data_order:
 	eor	r0,r7,r7,ror#5
 	add	r11,r11,r3			@ h+=Maj(a,b,c) from the past
 	eor	r0,r0,r7,ror#19	@ Sigma1(e)
+# ifndef __ARMEB__
 	rev	r2,r2
+# endif
 #else
 	@ ldrb	r2,[r1,#3]			@ 9
 	add	r11,r11,r3			@ h+=Maj(a,b,c) from the past
@@ -623,7 +705,9 @@ sha256_block_data_order:
 	eor	r0,r6,r6,ror#5
 	add	r10,r10,r12			@ h+=Maj(a,b,c) from the past
 	eor	r0,r0,r6,ror#19	@ Sigma1(e)
+# ifndef __ARMEB__
 	rev	r2,r2
+# endif
 #else
 	@ ldrb	r2,[r1,#3]			@ 10
 	add	r10,r10,r12			@ h+=Maj(a,b,c) from the past
@@ -679,7 +763,9 @@ sha256_block_data_order:
 	eor	r0,r5,r5,ror#5
 	add	r9,r9,r3			@ h+=Maj(a,b,c) from the past
 	eor	r0,r0,r5,ror#19	@ Sigma1(e)
+# ifndef __ARMEB__
 	rev	r2,r2
+# endif
 #else
 	@ ldrb	r2,[r1,#3]			@ 11
 	add	r9,r9,r3			@ h+=Maj(a,b,c) from the past
@@ -735,7 +821,9 @@ sha256_block_data_order:
 	eor	r0,r4,r4,ror#5
 	add	r8,r8,r12			@ h+=Maj(a,b,c) from the past
 	eor	r0,r0,r4,ror#19	@ Sigma1(e)
+# ifndef __ARMEB__
 	rev	r2,r2
+# endif
 #else
 	@ ldrb	r2,[r1,#3]			@ 12
 	add	r8,r8,r12			@ h+=Maj(a,b,c) from the past
@@ -791,7 +879,9 @@ sha256_block_data_order:
 	eor	r0,r11,r11,ror#5
 	add	r7,r7,r3			@ h+=Maj(a,b,c) from the past
 	eor	r0,r0,r11,ror#19	@ Sigma1(e)
+# ifndef __ARMEB__
 	rev	r2,r2
+# endif
 #else
 	@ ldrb	r2,[r1,#3]			@ 13
 	add	r7,r7,r3			@ h+=Maj(a,b,c) from the past
@@ -847,7 +937,9 @@ sha256_block_data_order:
 	eor	r0,r10,r10,ror#5
 	add	r6,r6,r12			@ h+=Maj(a,b,c) from the past
 	eor	r0,r0,r10,ror#19	@ Sigma1(e)
+# ifndef __ARMEB__
 	rev	r2,r2
+# endif
 #else
 	@ ldrb	r2,[r1,#3]			@ 14
 	add	r6,r6,r12			@ h+=Maj(a,b,c) from the past
@@ -903,7 +995,9 @@ sha256_block_data_order:
 	eor	r0,r9,r9,ror#5
 	add	r5,r5,r3			@ h+=Maj(a,b,c) from the past
 	eor	r0,r0,r9,ror#19	@ Sigma1(e)
+# ifndef __ARMEB__
 	rev	r2,r2
+# endif
 #else
 	@ ldrb	r2,[r1,#3]			@ 15
 	add	r5,r5,r3			@ h+=Maj(a,b,c) from the past
@@ -1736,6 +1830,9 @@ sha256_block_data_order:
 	eor	r12,r12,r6			@ Maj(a,b,c)
 	add	r4,r4,r0,ror#2	@ h+=Sigma0(a)
 	@ add	r4,r4,r12			@ h+=Maj(a,b,c)
+#if __ARM_ARCH__>=7
+	ite	eq			@ Thumb2 thing, sanity check in ARM
+#endif
 	ldreq	r3,[sp,#16*4]		@ pull ctx
 	bne	.Lrounds_16_xx
 
@@ -1765,61 +1862,64 @@ sha256_block_data_order:
 
 	add	sp,sp,#19*4	@ destroy frame
 #if __ARM_ARCH__>=5
-	ldmia	sp!,{r4-r11,pc}
+	ldmia	sp!,{r4,r5,r6,r7,r8,r9,r10,r11,pc}
 #else
-	ldmia	sp!,{r4-r11,lr}
+	ldmia	sp!,{r4,r5,r6,r7,r8,r9,r10,r11,lr}
 	tst	lr,#1
 	moveq	pc,lr			@ be binary compatible with V4, yet
-	.word	0xe12fff1e			@ interoperable with Thumb ISA:-)
+.word	0xe12fff1e			@ interoperable with Thumb ISA:-)
 #endif
 .size	sha256_block_data_order,.-sha256_block_data_order
 #if __ARM_MAX_ARCH__>=7
 .arch	armv7-a
 .fpu	neon
 
+.globl	sha256_block_data_order_neon
 .type	sha256_block_data_order_neon,%function
 .align	4
 sha256_block_data_order_neon:
 .LNEON:
-	stmdb	sp!,{r4-r12,lr}
+	stmdb	sp!,{r4,r5,r6,r7,r8,r9,r10,r11,r12,lr}
 
+	sub	r11,sp,#16*4+16
+	adrl	r14,K256
+	bic	r11,r11,#15		@ align for 128-bit stores
 	mov	r12,sp
-	sub	sp,sp,#16*4+16		@ alloca
-	sub	r14,r3,#256+32	@ K256
-	bic	sp,sp,#15		@ align for 128-bit stores
+	mov	sp,r11			@ alloca
+	add	r2,r1,r2,lsl#6	@ len to point at the end of inp
 
-	vld1.8		{q0},[r1]!
-	vld1.8		{q1},[r1]!
-	vld1.8		{q2},[r1]!
-	vld1.8		{q3},[r1]!
-	vld1.32		{q8},[r14,:128]!
-	vld1.32		{q9},[r14,:128]!
-	vld1.32		{q10},[r14,:128]!
-	vld1.32		{q11},[r14,:128]!
+	vld1.8	{q0},[r1]!
+	vld1.8	{q1},[r1]!
+	vld1.8	{q2},[r1]!
+	vld1.8	{q3},[r1]!
+	vld1.32	{q8},[r14,:128]!
+	vld1.32	{q9},[r14,:128]!
+	vld1.32	{q10},[r14,:128]!
+	vld1.32	{q11},[r14,:128]!
 	vrev32.8	q0,q0		@ yes, even on
-	str		r0,[sp,#64]
+	str	r0,[sp,#64]
 	vrev32.8	q1,q1		@ big-endian
-	str		r1,[sp,#68]
-	mov		r1,sp
+	str	r1,[sp,#68]
+	mov	r1,sp
 	vrev32.8	q2,q2
-	str		r2,[sp,#72]
+	str	r2,[sp,#72]
 	vrev32.8	q3,q3
-	str		r12,[sp,#76]		@ save original sp
+	str	r12,[sp,#76]		@ save original sp
 	vadd.i32	q8,q8,q0
 	vadd.i32	q9,q9,q1
-	vst1.32		{q8},[r1,:128]!
+	vst1.32	{q8},[r1,:128]!
 	vadd.i32	q10,q10,q2
-	vst1.32		{q9},[r1,:128]!
+	vst1.32	{q9},[r1,:128]!
 	vadd.i32	q11,q11,q3
-	vst1.32		{q10},[r1,:128]!
-	vst1.32		{q11},[r1,:128]!
+	vst1.32	{q10},[r1,:128]!
+	vst1.32	{q11},[r1,:128]!
 
-	ldmia		r0,{r4-r11}
-	sub		r1,r1,#64
-	ldr		r2,[sp,#0]
-	eor		r12,r12,r12
-	eor		r3,r5,r6
-	b		.L_00_48
+	ldmia	r0,{r4,r5,r6,r7,r8,r9,r10,r11}
+	sub	r1,r1,#64
+	ldr	r2,[sp,#0]
+	eor	r12,r12,r12
+	eor	r3,r5,r6
+	b	.L_00_48
 
 .align	4
 .L_00_48:
@@ -2220,17 +2320,19 @@ sha256_block_data_order_neon:
 	sub	r1,r1,#64
 	bne	.L_00_48
 
-	ldr		r1,[sp,#68]
-	ldr		r0,[sp,#72]
-	sub		r14,r14,#256	@ rewind r14
-	teq		r1,r0
-	subeq		r1,r1,#64		@ avoid SEGV
-	vld1.8		{q0},[r1]!		@ load next input block
-	vld1.8		{q1},[r1]!
-	vld1.8		{q2},[r1]!
-	vld1.8		{q3},[r1]!
-	strne		r1,[sp,#68]
-	mov		r1,sp
+	ldr	r1,[sp,#68]
+	ldr	r0,[sp,#72]
+	sub	r14,r14,#256	@ rewind r14
+	teq	r1,r0
+	it	eq
+	subeq	r1,r1,#64		@ avoid SEGV
+	vld1.8	{q0},[r1]!		@ load next input block
+	vld1.8	{q1},[r1]!
+	vld1.8	{q2},[r1]!
+	vld1.8	{q3},[r1]!
+	it	ne
+	strne	r1,[sp,#68]
+	mov	r1,sp
 	add	r11,r11,r2
 	eor	r2,r9,r10
 	eor	r0,r8,r8,ror#5
@@ -2540,157 +2642,177 @@ sha256_block_data_order_neon:
 	str	r6,[r2],#4
 	add	r11,r11,r1
 	str	r7,[r2],#4
-	stmia	r2,{r8-r11}
+	stmia	r2,{r8,r9,r10,r11}
 
+	ittte	ne
 	movne	r1,sp
 	ldrne	r2,[sp,#0]
 	eorne	r12,r12,r12
 	ldreq	sp,[sp,#76]			@ restore original sp
+	itt	ne
 	eorne	r3,r5,r6
 	bne	.L_00_48
 
-	ldmia	sp!,{r4-r12,pc}
+	ldmia	sp!,{r4,r5,r6,r7,r8,r9,r10,r11,r12,pc}
 .size	sha256_block_data_order_neon,.-sha256_block_data_order_neon
 #endif
-#if __ARM_MAX_ARCH__>=7
+#if __ARM_MAX_ARCH__>=7 && !defined(__KERNEL__)
+
+# if defined(__thumb2__) && !defined(__APPLE__)
+#  define INST(a,b,c,d)	.byte	c,d|0xc,a,b
+# else
+#  define INST(a,b,c,d)	.byte	a,b,c,d
+# endif
+
 .type	sha256_block_data_order_armv8,%function
 .align	5
 sha256_block_data_order_armv8:
 .LARMv8:
 	vld1.32	{q0,q1},[r0]
-	sub	r3,r3,#sha256_block_data_order-K256
+# ifdef	__APPLE__
+	sub	r3,r3,#256+32
+# elif	defined(__thumb2__)
+	adr	r3,.LARMv8
+	sub	r3,r3,#.LARMv8-K256
+# else
+	adrl	r3,K256
+# endif
+	add	r2,r1,r2,lsl#6	@ len to point at the end of inp
 
 .Loop_v8:
-	vld1.8		{q8-q9},[r1]!
-	vld1.8		{q10-q11},[r1]!
-	vld1.32		{q12},[r3]!
+	vld1.8	{q8,q9},[r1]!
+	vld1.8	{q10,q11},[r1]!
+	vld1.32	{q12},[r3]!
 	vrev32.8	q8,q8
 	vrev32.8	q9,q9
 	vrev32.8	q10,q10
 	vrev32.8	q11,q11
-	vmov		q14,q0	@ offload
-	vmov		q15,q1
-	teq		r1,r2
-	vld1.32		{q13},[r3]!
+	vmov	q14,q0	@ offload
+	vmov	q15,q1
+	teq	r1,r2
+	vld1.32	{q13},[r3]!
 	vadd.i32	q12,q12,q8
-	.byte	0xe2,0x03,0xfa,0xf3	@ sha256su0 q8,q9
-	vmov		q2,q0
-	.byte	0x68,0x0c,0x02,0xf3	@ sha256h q0,q1,q12
-	.byte	0x68,0x2c,0x14,0xf3	@ sha256h2 q1,q2,q12
-	.byte	0xe6,0x0c,0x64,0xf3	@ sha256su1 q8,q10,q11
-	vld1.32		{q12},[r3]!
+	INST(0xe2,0x03,0xfa,0xf3)	@ sha256su0 q8,q9
+	vmov	q2,q0
+	INST(0x68,0x0c,0x02,0xf3)	@ sha256h q0,q1,q12
+	INST(0x68,0x2c,0x14,0xf3)	@ sha256h2 q1,q2,q12
+	INST(0xe6,0x0c,0x64,0xf3)	@ sha256su1 q8,q10,q11
+	vld1.32	{q12},[r3]!
 	vadd.i32	q13,q13,q9
-	.byte	0xe4,0x23,0xfa,0xf3	@ sha256su0 q9,q10
-	vmov		q2,q0
-	.byte	0x6a,0x0c,0x02,0xf3	@ sha256h q0,q1,q13
-	.byte	0x6a,0x2c,0x14,0xf3	@ sha256h2 q1,q2,q13
-	.byte	0xe0,0x2c,0x66,0xf3	@ sha256su1 q9,q11,q8
-	vld1.32		{q13},[r3]!
+	INST(0xe4,0x23,0xfa,0xf3)	@ sha256su0 q9,q10
+	vmov	q2,q0
+	INST(0x6a,0x0c,0x02,0xf3)	@ sha256h q0,q1,q13
+	INST(0x6a,0x2c,0x14,0xf3)	@ sha256h2 q1,q2,q13
+	INST(0xe0,0x2c,0x66,0xf3)	@ sha256su1 q9,q11,q8
+	vld1.32	{q13},[r3]!
 	vadd.i32	q12,q12,q10
-	.byte	0xe6,0x43,0xfa,0xf3	@ sha256su0 q10,q11
-	vmov		q2,q0
-	.byte	0x68,0x0c,0x02,0xf3	@ sha256h q0,q1,q12
-	.byte	0x68,0x2c,0x14,0xf3	@ sha256h2 q1,q2,q12
-	.byte	0xe2,0x4c,0x60,0xf3	@ sha256su1 q10,q8,q9
-	vld1.32		{q12},[r3]!
+	INST(0xe6,0x43,0xfa,0xf3)	@ sha256su0 q10,q11
+	vmov	q2,q0
+	INST(0x68,0x0c,0x02,0xf3)	@ sha256h q0,q1,q12
+	INST(0x68,0x2c,0x14,0xf3)	@ sha256h2 q1,q2,q12
+	INST(0xe2,0x4c,0x60,0xf3)	@ sha256su1 q10,q8,q9
+	vld1.32	{q12},[r3]!
 	vadd.i32	q13,q13,q11
-	.byte	0xe0,0x63,0xfa,0xf3	@ sha256su0 q11,q8
-	vmov		q2,q0
-	.byte	0x6a,0x0c,0x02,0xf3	@ sha256h q0,q1,q13
-	.byte	0x6a,0x2c,0x14,0xf3	@ sha256h2 q1,q2,q13
-	.byte	0xe4,0x6c,0x62,0xf3	@ sha256su1 q11,q9,q10
-	vld1.32		{q13},[r3]!
+	INST(0xe0,0x63,0xfa,0xf3)	@ sha256su0 q11,q8
+	vmov	q2,q0
+	INST(0x6a,0x0c,0x02,0xf3)	@ sha256h q0,q1,q13
+	INST(0x6a,0x2c,0x14,0xf3)	@ sha256h2 q1,q2,q13
+	INST(0xe4,0x6c,0x62,0xf3)	@ sha256su1 q11,q9,q10
+	vld1.32	{q13},[r3]!
 	vadd.i32	q12,q12,q8
-	.byte	0xe2,0x03,0xfa,0xf3	@ sha256su0 q8,q9
-	vmov		q2,q0
-	.byte	0x68,0x0c,0x02,0xf3	@ sha256h q0,q1,q12
-	.byte	0x68,0x2c,0x14,0xf3	@ sha256h2 q1,q2,q12
-	.byte	0xe6,0x0c,0x64,0xf3	@ sha256su1 q8,q10,q11
-	vld1.32		{q12},[r3]!
+	INST(0xe2,0x03,0xfa,0xf3)	@ sha256su0 q8,q9
+	vmov	q2,q0
+	INST(0x68,0x0c,0x02,0xf3)	@ sha256h q0,q1,q12
+	INST(0x68,0x2c,0x14,0xf3)	@ sha256h2 q1,q2,q12
+	INST(0xe6,0x0c,0x64,0xf3)	@ sha256su1 q8,q10,q11
+	vld1.32	{q12},[r3]!
 	vadd.i32	q13,q13,q9
-	.byte	0xe4,0x23,0xfa,0xf3	@ sha256su0 q9,q10
-	vmov		q2,q0
-	.byte	0x6a,0x0c,0x02,0xf3	@ sha256h q0,q1,q13
-	.byte	0x6a,0x2c,0x14,0xf3	@ sha256h2 q1,q2,q13
-	.byte	0xe0,0x2c,0x66,0xf3	@ sha256su1 q9,q11,q8
-	vld1.32		{q13},[r3]!
+	INST(0xe4,0x23,0xfa,0xf3)	@ sha256su0 q9,q10
+	vmov	q2,q0
+	INST(0x6a,0x0c,0x02,0xf3)	@ sha256h q0,q1,q13
+	INST(0x6a,0x2c,0x14,0xf3)	@ sha256h2 q1,q2,q13
+	INST(0xe0,0x2c,0x66,0xf3)	@ sha256su1 q9,q11,q8
+	vld1.32	{q13},[r3]!
 	vadd.i32	q12,q12,q10
-	.byte	0xe6,0x43,0xfa,0xf3	@ sha256su0 q10,q11
-	vmov		q2,q0
-	.byte	0x68,0x0c,0x02,0xf3	@ sha256h q0,q1,q12
-	.byte	0x68,0x2c,0x14,0xf3	@ sha256h2 q1,q2,q12
-	.byte	0xe2,0x4c,0x60,0xf3	@ sha256su1 q10,q8,q9
-	vld1.32		{q12},[r3]!
+	INST(0xe6,0x43,0xfa,0xf3)	@ sha256su0 q10,q11
+	vmov	q2,q0
+	INST(0x68,0x0c,0x02,0xf3)	@ sha256h q0,q1,q12
+	INST(0x68,0x2c,0x14,0xf3)	@ sha256h2 q1,q2,q12
+	INST(0xe2,0x4c,0x60,0xf3)	@ sha256su1 q10,q8,q9
+	vld1.32	{q12},[r3]!
 	vadd.i32	q13,q13,q11
-	.byte	0xe0,0x63,0xfa,0xf3	@ sha256su0 q11,q8
-	vmov		q2,q0
-	.byte	0x6a,0x0c,0x02,0xf3	@ sha256h q0,q1,q13
-	.byte	0x6a,0x2c,0x14,0xf3	@ sha256h2 q1,q2,q13
-	.byte	0xe4,0x6c,0x62,0xf3	@ sha256su1 q11,q9,q10
-	vld1.32		{q13},[r3]!
+	INST(0xe0,0x63,0xfa,0xf3)	@ sha256su0 q11,q8
+	vmov	q2,q0
+	INST(0x6a,0x0c,0x02,0xf3)	@ sha256h q0,q1,q13
+	INST(0x6a,0x2c,0x14,0xf3)	@ sha256h2 q1,q2,q13
+	INST(0xe4,0x6c,0x62,0xf3)	@ sha256su1 q11,q9,q10
+	vld1.32	{q13},[r3]!
 	vadd.i32	q12,q12,q8
-	.byte	0xe2,0x03,0xfa,0xf3	@ sha256su0 q8,q9
-	vmov		q2,q0
-	.byte	0x68,0x0c,0x02,0xf3	@ sha256h q0,q1,q12
-	.byte	0x68,0x2c,0x14,0xf3	@ sha256h2 q1,q2,q12
-	.byte	0xe6,0x0c,0x64,0xf3	@ sha256su1 q8,q10,q11
-	vld1.32		{q12},[r3]!
+	INST(0xe2,0x03,0xfa,0xf3)	@ sha256su0 q8,q9
+	vmov	q2,q0
+	INST(0x68,0x0c,0x02,0xf3)	@ sha256h q0,q1,q12
+	INST(0x68,0x2c,0x14,0xf3)	@ sha256h2 q1,q2,q12
+	INST(0xe6,0x0c,0x64,0xf3)	@ sha256su1 q8,q10,q11
+	vld1.32	{q12},[r3]!
 	vadd.i32	q13,q13,q9
-	.byte	0xe4,0x23,0xfa,0xf3	@ sha256su0 q9,q10
-	vmov		q2,q0
-	.byte	0x6a,0x0c,0x02,0xf3	@ sha256h q0,q1,q13
-	.byte	0x6a,0x2c,0x14,0xf3	@ sha256h2 q1,q2,q13
-	.byte	0xe0,0x2c,0x66,0xf3	@ sha256su1 q9,q11,q8
-	vld1.32		{q13},[r3]!
+	INST(0xe4,0x23,0xfa,0xf3)	@ sha256su0 q9,q10
+	vmov	q2,q0
+	INST(0x6a,0x0c,0x02,0xf3)	@ sha256h q0,q1,q13
+	INST(0x6a,0x2c,0x14,0xf3)	@ sha256h2 q1,q2,q13
+	INST(0xe0,0x2c,0x66,0xf3)	@ sha256su1 q9,q11,q8
+	vld1.32	{q13},[r3]!
 	vadd.i32	q12,q12,q10
-	.byte	0xe6,0x43,0xfa,0xf3	@ sha256su0 q10,q11
-	vmov		q2,q0
-	.byte	0x68,0x0c,0x02,0xf3	@ sha256h q0,q1,q12
-	.byte	0x68,0x2c,0x14,0xf3	@ sha256h2 q1,q2,q12
-	.byte	0xe2,0x4c,0x60,0xf3	@ sha256su1 q10,q8,q9
-	vld1.32		{q12},[r3]!
+	INST(0xe6,0x43,0xfa,0xf3)	@ sha256su0 q10,q11
+	vmov	q2,q0
+	INST(0x68,0x0c,0x02,0xf3)	@ sha256h q0,q1,q12
+	INST(0x68,0x2c,0x14,0xf3)	@ sha256h2 q1,q2,q12
+	INST(0xe2,0x4c,0x60,0xf3)	@ sha256su1 q10,q8,q9
+	vld1.32	{q12},[r3]!
 	vadd.i32	q13,q13,q11
-	.byte	0xe0,0x63,0xfa,0xf3	@ sha256su0 q11,q8
-	vmov		q2,q0
-	.byte	0x6a,0x0c,0x02,0xf3	@ sha256h q0,q1,q13
-	.byte	0x6a,0x2c,0x14,0xf3	@ sha256h2 q1,q2,q13
-	.byte	0xe4,0x6c,0x62,0xf3	@ sha256su1 q11,q9,q10
-	vld1.32		{q13},[r3]!
+	INST(0xe0,0x63,0xfa,0xf3)	@ sha256su0 q11,q8
+	vmov	q2,q0
+	INST(0x6a,0x0c,0x02,0xf3)	@ sha256h q0,q1,q13
+	INST(0x6a,0x2c,0x14,0xf3)	@ sha256h2 q1,q2,q13
+	INST(0xe4,0x6c,0x62,0xf3)	@ sha256su1 q11,q9,q10
+	vld1.32	{q13},[r3]!
 	vadd.i32	q12,q12,q8
-	vmov		q2,q0
-	.byte	0x68,0x0c,0x02,0xf3	@ sha256h q0,q1,q12
-	.byte	0x68,0x2c,0x14,0xf3	@ sha256h2 q1,q2,q12
+	vmov	q2,q0
+	INST(0x68,0x0c,0x02,0xf3)	@ sha256h q0,q1,q12
+	INST(0x68,0x2c,0x14,0xf3)	@ sha256h2 q1,q2,q12
 
-	vld1.32		{q12},[r3]!
+	vld1.32	{q12},[r3]!
 	vadd.i32	q13,q13,q9
-	vmov		q2,q0
-	.byte	0x6a,0x0c,0x02,0xf3	@ sha256h q0,q1,q13
-	.byte	0x6a,0x2c,0x14,0xf3	@ sha256h2 q1,q2,q13
+	vmov	q2,q0
+	INST(0x6a,0x0c,0x02,0xf3)	@ sha256h q0,q1,q13
+	INST(0x6a,0x2c,0x14,0xf3)	@ sha256h2 q1,q2,q13
 
-	vld1.32		{q13},[r3]
+	vld1.32	{q13},[r3]
 	vadd.i32	q12,q12,q10
-	sub		r3,r3,#256-16	@ rewind
-	vmov		q2,q0
-	.byte	0x68,0x0c,0x02,0xf3	@ sha256h q0,q1,q12
-	.byte	0x68,0x2c,0x14,0xf3	@ sha256h2 q1,q2,q12
+	sub	r3,r3,#256-16	@ rewind
+	vmov	q2,q0
+	INST(0x68,0x0c,0x02,0xf3)	@ sha256h q0,q1,q12
+	INST(0x68,0x2c,0x14,0xf3)	@ sha256h2 q1,q2,q12
 
 	vadd.i32	q13,q13,q11
-	vmov		q2,q0
-	.byte	0x6a,0x0c,0x02,0xf3	@ sha256h q0,q1,q13
-	.byte	0x6a,0x2c,0x14,0xf3	@ sha256h2 q1,q2,q13
+	vmov	q2,q0
+	INST(0x6a,0x0c,0x02,0xf3)	@ sha256h q0,q1,q13
+	INST(0x6a,0x2c,0x14,0xf3)	@ sha256h2 q1,q2,q13
 
 	vadd.i32	q0,q0,q14
 	vadd.i32	q1,q1,q15
-	bne		.Loop_v8
+	it	ne
+	bne	.Loop_v8
 
-	vst1.32		{q0,q1},[r0]
+	vst1.32	{q0,q1},[r0]
 
 	bx	lr		@ bx lr
 .size	sha256_block_data_order_armv8,.-sha256_block_data_order_armv8
 #endif
-.asciz  "SHA256 block transform for ARMv4/NEON/ARMv8, CRYPTOGAMS by <appro@openssl.org>"
+.byte	83,72,65,50,53,54,32,98,108,111,99,107,32,116,114,97,110,115,102,111,114,109,32,102,111,114,32,65,82,77,118,52,47,78,69,79,78,47,65,82,77,118,56,44,32,67,82,89,80,84,79,71,65,77,83,32,98,121,32,60,97,112,112,114,111,64,111,112,101,110,115,115,108,46,111,114,103,62,0
 .align	2
-#if __ARM_MAX_ARCH__>=7
-.comm   OPENSSL_armcap_P,4,4
-.hidden OPENSSL_armcap_P
+.align	2
+#if __ARM_MAX_ARCH__>=7 && !defined(__KERNEL__)
+.comm	OPENSSL_armcap_P,4,4
+.hidden	OPENSSL_armcap_P
+#endif
 #endif

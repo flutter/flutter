@@ -86,6 +86,14 @@ template("findbugs") {
 
     rebased_build_config = rebase_path(build_config, root_build_dir)
 
+    if (defined(invoker.deps)) {
+      deps = invoker.deps
+    }
+
+    if (defined(invoker.testonly)) {
+      testonly = invoker.testonly
+    }
+
     inputs = [
       "//build/android/pylib/utils/findbugs.py",
       exclusions_file,
@@ -603,15 +611,24 @@ template("create_apk") {
     _configuration_name = "Debug"
   }
 
-  _create_density_splits =
-      defined(invoker.create_density_splits) && invoker.create_density_splits
-  if (_create_density_splits) {
+  _keystore_path = invoker.keystore_path
+  _keystore_name = invoker.keystore_name
+  _keystore_password = invoker.keystore_password
+
+  _split_densities = []
+  if (defined(invoker.create_density_splits) && invoker.create_density_splits) {
     _split_densities = [
       "hdpi",
       "xhdpi",
       "xxhdpi",
+      "xxxhdpi",
       "tvdpi",
     ]
+  }
+
+  _split_languages = []
+  if (defined(invoker.language_splits)) {
+    _split_languages = invoker.language_splits
   }
 
   _package_resources_target_name = "${target_name}__package_resources"
@@ -664,11 +681,23 @@ template("create_apk") {
     if (_shared_resources) {
       args += [ "--shared-resources" ]
     }
-    if (_create_density_splits) {
+    if (_split_densities != []) {
       args += [ "--create-density-splits" ]
       foreach(_density, _split_densities) {
-        outputs += [ "${_resource_packaged_apk_path}-${_density}" ]
+        outputs += [ "${_resource_packaged_apk_path}_${_density}" ]
       }
+    }
+    if (_split_languages != []) {
+      args += [ "--language-splits=$_split_languages" ]
+      foreach(_language, _split_languages) {
+        outputs += [ "${_resource_packaged_apk_path}_${_language}" ]
+      }
+    }
+    if (defined(invoker.extensions_to_not_compress)) {
+      args += [
+        "--no-compress",
+        invoker.extensions_to_not_compress,
+      ]
     }
   }
 
@@ -736,9 +765,9 @@ template("create_apk") {
   finalize_apk(_finalize_apk_rule_name) {
     input_apk_path = _packaged_apk_path
     output_apk_path = _final_apk_path
-    keystore_path = invoker.keystore_path
-    keystore_name = invoker.keystore_name
-    keystore_password = invoker.keystore_password
+    keystore_path = _keystore_path
+    keystore_name = _keystore_name
+    keystore_password = _keystore_password
     rezip_apk = _load_library_from_apk
 
     public_deps = [
@@ -749,21 +778,39 @@ template("create_apk") {
 
   _final_deps = [ ":${_finalize_apk_rule_name}" ]
 
-  if (_create_density_splits) {
-    foreach(_density, _split_densities) {
-      _finalize_split_rule_name = "${target_name}__finalize_${_density}_split"
-      finalize_apk(_finalize_split_rule_name) {
-        input_apk_path = "${_resource_packaged_apk_path}-${_density}"
-        _output_paths = process_file_template(
-                [ _final_apk_path ],
-                "{{source_dir}}/{{source_name_part}}-${_density}.apk")
-        output_apk_path = _output_paths[0]
-        keystore_path = invoker.keystore_path
-        keystore_name = invoker.keystore_name
-        keystore_password = invoker.keystore_password
-      }
-      _final_deps += [ ":${_finalize_split_rule_name}" ]
+  template("finalize_split") {
+    finalize_apk(target_name) {
+      _config = invoker.split_config
+      _type = invoker.split_type
+      input_apk_path = "${_resource_packaged_apk_path}_${_config}"
+      _output_paths = process_file_template(
+              [ _final_apk_path ],
+              "{{source_dir}}/{{source_name_part}}-${_type}-${_config}.apk")
+      output_apk_path = _output_paths[0]
+      keystore_path = _keystore_path
+      keystore_name = _keystore_name
+      keystore_password = _keystore_password
+      deps = [
+        ":${_package_resources_target_name}",
+      ]
     }
+  }
+
+  foreach(_split, _split_densities) {
+    _split_rule = "${target_name}__finalize_${_split}_split"
+    finalize_split(_split_rule) {
+      split_type = "density"
+      split_config = _split
+    }
+    _final_deps += [ ":$_split_rule" ]
+  }
+  foreach(_split, _split_languages) {
+    _split_rule = "${target_name}__finalize_${_split}_split"
+    finalize_split(_split_rule) {
+      split_type = "lang"
+      split_config = _split
+    }
+    _final_deps += [ ":$_split_rule" ]
   }
 
   group(target_name) {
@@ -787,6 +834,14 @@ template("java_prebuilt_impl") {
   if (_supports_android) {
     _dex_path = _base_path + ".dex.jar"
   }
+  _deps = []
+  if (defined(invoker.deps)) {
+    _deps = invoker.deps
+  }
+  _jar_deps = []
+  if (defined(invoker.jar_dep)) {
+    _jar_deps = [ invoker.jar_dep ]
+  }
 
   _template_name = target_name
 
@@ -802,10 +857,7 @@ template("java_prebuilt_impl") {
     requires_android =
         defined(invoker.requires_android) && invoker.requires_android
 
-    deps = []
-    if (defined(invoker.deps)) {
-      deps += invoker.deps
-    }
+    deps = _deps
     build_config = _build_config
     jar_path = _jar_path
     if (_supports_android) {
@@ -828,9 +880,7 @@ template("java_prebuilt_impl") {
     input_jar_path = invoker.jar_path
     output_jar_path = _jar_path
 
-    deps = [
-      ":$build_config_target_name",
-    ]
+    deps = [ ":$build_config_target_name" ] + _deps + _jar_deps
   }
 
   if (_supports_android) {
@@ -839,9 +889,7 @@ template("java_prebuilt_impl") {
         _jar_path,
       ]
       output = _dex_path
-      deps = [
-        ":$process_jar_target_name",
-      ]
+      deps = [ ":$process_jar_target_name" ] + _deps + _jar_deps
     }
   }
 
@@ -849,6 +897,9 @@ template("java_prebuilt_impl") {
     deps = [
       ":$process_jar_target_name",
     ]
+    if (defined(invoker.data_deps)) {
+      data_deps = invoker.data_deps
+    }
     if (_supports_android) {
       deps += [ ":$dex_target_name" ]
     }
@@ -895,6 +946,17 @@ template("compile_java") {
   if (defined(invoker.chromium_code)) {
     _chromium_code = invoker.chromium_code
   }
+
+  _supports_android = true
+  if (defined(invoker.supports_android)) {
+    _supports_android = invoker.supports_android
+  }
+
+  _enable_errorprone = use_errorprone_java_compiler
+  if (defined(invoker.enable_errorprone)) {
+    _enable_errorprone = invoker.enable_errorprone
+  }
+
   _manifest_entries = []
   if (defined(invoker.manifest_entries)) {
     _manifest_entries = invoker.manifest_entries
@@ -958,13 +1020,23 @@ template("compile_java") {
       "--java-srcjars=@FileArg($_rebased_build_config:javac:srcjars)",
       "--jar-excluded-classes=$_jar_excluded_patterns",
     ]
+    if (_supports_android) {
+      _rebased_android_sdk_jar = rebase_path(android_sdk_jar, root_build_dir)
+      args += [ "--bootclasspath=$_rebased_android_sdk_jar" ]
+    }
     foreach(e, _manifest_entries) {
       args += [ "--manifest-entry=" + e ]
     }
     if (_chromium_code) {
       args += [ "--chromium-code=1" ]
     }
-
+    if (_enable_errorprone) {
+      deps += [ "//third_party/errorprone:chromium_errorprone" ]
+      args += [
+        "--use-errorprone-path",
+        "bin/chromium_errorprone",
+      ]
+    }
     args += rebase_path(_java_files, root_build_dir)
   }
 
@@ -1114,6 +1186,9 @@ template("java_library_impl") {
     chromium_code = _chromium_code
     android = _requires_android
 
+    if (defined(invoker.enable_errorprone)) {
+      enable_errorprone = invoker.enable_errorprone
+    }
     if (defined(invoker.jar_excluded_patterns)) {
       jar_excluded_patterns = invoker.jar_excluded_patterns
     }
@@ -1130,6 +1205,7 @@ template("java_library_impl") {
       manifest_entries = invoker.manifest_entries
     }
 
+    supports_android = _supports_android
     deps = build_config_deps
   }
 
@@ -1414,6 +1490,9 @@ template("generate_split_manifest") {
 
   action(target_name) {
     depfile = "$target_gen_dir/$target_name.d"
+    if (defined(invoker.deps)) {
+      deps = invoker.deps
+    }
     args = [
       "--main-manifest",
       rebase_path(invoker.main_manifest, root_build_dir),
@@ -1484,6 +1563,12 @@ template("test_runner_script") {
         "--test-apk",
         invoker.test_apk,
       ]
+      if (defined(invoker.support_apk_path)) {
+        test_runner_args += [
+          "--support-apk",
+          rebase_path(invoker.support_apk_path, root_build_dir),
+        ]
+      }
     } else {
       assert(false, "Invalid test type: $_test_type.")
     }

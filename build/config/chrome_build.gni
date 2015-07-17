@@ -6,17 +6,14 @@ declare_args() {
   # Selects the desired build flavor. Official builds get additional
   # processing to prepare for release. Normally you will want to develop and
   # test with this flag off.
-  # TODO(brettw) move here from BUILDCONFIG.gn when DEPS are updated.
-  #is_official_build = false
+  is_official_build = false
 
   # Select the desired branding flavor. False means normal Chromium branding,
   # true means official Google Chrome branding (requires extra Google-internal
   # resources).
-  # TODO(brettw) move here from BUILDCONFIG.gn when DEPS are updated.
-  #is_chrome_branded = false
+  is_chrome_branded = false
 
   # Break chrome.dll into multple pieces based on process type. Only available
   # on Windows.
-  # TODO(brettw) make this work. When it does, the declaration should be:
   is_multi_dll_chrome = is_win && !is_component_build
 }

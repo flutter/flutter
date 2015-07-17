@@ -47,7 +47,7 @@ void ReplyAdapter(const Callback<void(ReplyArgType)>& callback,
 // PostTaskAndReplyWithResult as in this example:
 //
 // PostTaskAndReplyWithResult(
-//     target_thread_.message_loop_proxy(),
+//     target_thread_.task_runner(),
 //     FROM_HERE,
 //     Bind(&DoWorkAndReturn),
 //     Bind(&Callback));

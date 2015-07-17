@@ -6,7 +6,10 @@
 #define BASE_TEST_HISTOGRAM_TESTER_H_
 
 #include <map>
+#include <ostream>
 #include <string>
+#include <utility>
+#include <vector>
 
 #include "base/basictypes.h"
 #include "base/memory/scoped_ptr.h"
@@ -15,6 +18,7 @@
 
 namespace base {
 
+struct Bucket;
 class HistogramSamples;
 
 // HistogramTester provides a simple interface for examining histograms, UMA
@@ -47,6 +51,24 @@ class HistogramTester {
   void ExpectTotalCount(const std::string& name,
                         base::HistogramBase::Count count) const;
 
+  // Returns a list of all of the buckets recorded since creation of this
+  // object, as vector<Bucket>, where the Bucket represents the min boundary of
+  // the bucket and the count of samples recorded to that bucket since creation.
+  //
+  // Example usage, using gMock:
+  //   EXPECT_THAT(histogram_tester.GetAllSamples("HistogramName"),
+  //               ElementsAre(Bucket(1, 5), Bucket(2, 10), Bucket(3, 5)));
+  //
+  // If you build the expected list programmatically, you can use ContainerEq:
+  //   EXPECT_THAT(histogram_tester.GetAllSamples("HistogramName"),
+  //               ContainerEq(expected_buckets));
+  //
+  // or EXPECT_EQ if you prefer not to depend on gMock, at the expense of a
+  // slightly less helpful failure message:
+  //   EXPECT_EQ(expected_buckets,
+  //             histogram_tester.GetAllSamples("HistogramName"));
+  std::vector<Bucket> GetAllSamples(const std::string& name);
+
   // Access a modified HistogramSamples containing only what has been logged
   // to the histogram since the creation of this object.
   scoped_ptr<HistogramSamples> GetHistogramSamplesSinceCreation(
@@ -75,6 +97,18 @@ class HistogramTester {
 
   DISALLOW_COPY_AND_ASSIGN(HistogramTester);
 };
+
+struct Bucket {
+  Bucket(base::HistogramBase::Sample min, base::HistogramBase::Count count)
+      : min(min), count(count) {}
+
+  bool operator==(const Bucket& other) const;
+
+  base::HistogramBase::Sample min;
+  base::HistogramBase::Count count;
+};
+
+void PrintTo(const Bucket& value, std::ostream* os);
 
 }  // namespace base
 

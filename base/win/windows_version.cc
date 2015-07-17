@@ -73,7 +73,7 @@ OSInfo::OSInfo()
   service_pack_.major = version_info.wServicePackMajor;
   service_pack_.minor = version_info.wServicePackMinor;
 
-  SYSTEM_INFO system_info = { 0 };
+  SYSTEM_INFO system_info = {};
   ::GetNativeSystemInfo(&system_info);
   switch (system_info.wProcessorArchitecture) {
     case PROCESSOR_ARCHITECTURE_INTEL: architecture_ = X86_ARCHITECTURE; break;

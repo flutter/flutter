@@ -12,19 +12,24 @@
 namespace base {
 namespace i18n {
 
-BASE_I18N_EXPORT extern const char kIcuDataFileName[];
-
 #if !defined(OS_NACL)
 // Call this function to load ICU's data tables for the current process.  This
 // function should be called before ICU is used.
 BASE_I18N_EXPORT bool InitializeICU();
 
+#if ICU_UTIL_DATA_IMPL == ICU_UTIL_DATA_FILE
+// Returns the PlatformFile and Region that was initialized by InitializeICU().
+// Use with InitializeICUWithFileDescriptor().
+BASE_I18N_EXPORT PlatformFile GetIcuDataFileHandle(
+    MemoryMappedFile::Region* out_region);
+
 // Android and html_viewer use a file descriptor passed by browser process to
 // initialize ICU in render processes.
 BASE_I18N_EXPORT bool InitializeICUWithFileDescriptor(
     PlatformFile data_fd,
-    MemoryMappedFile::Region data_region);
-#endif
+    const MemoryMappedFile::Region& data_region);
+#endif  // ICU_UTIL_DATA_IMPL == ICU_UTIL_DATA_FILE
+#endif  // !defined(OS_NACL)
 
 // In a test binary, the call above might occur twice.
 BASE_I18N_EXPORT void AllowMultipleInitializeCallsForTesting();

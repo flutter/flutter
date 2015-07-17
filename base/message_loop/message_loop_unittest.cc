@@ -10,12 +10,12 @@
 #include "base/logging.h"
 #include "base/memory/ref_counted.h"
 #include "base/message_loop/message_loop.h"
-#include "base/message_loop/message_loop_proxy_impl.h"
 #include "base/message_loop/message_loop_test.h"
 #include "base/pending_task.h"
 #include "base/posix/eintr_wrapper.h"
 #include "base/run_loop.h"
 #include "base/synchronization/waitable_event.h"
+#include "base/test/test_simple_task_runner.h"
 #include "base/thread_task_runner_handle.h"
 #include "base/threading/platform_thread.h"
 #include "base/threading/thread.h"
@@ -1011,5 +1011,27 @@ TEST(MessageLoopTest, AlwaysHaveUserMessageWhenNesting) {
   ASSERT_TRUE(UnregisterClass(MAKEINTATOM(atom), instance));
 }
 #endif  // defined(OS_WIN)
+
+TEST(MessageLoopTest, SetTaskRunner) {
+  MessageLoop loop;
+  scoped_refptr<SingleThreadTaskRunner> new_runner(new TestSimpleTaskRunner());
+
+  loop.SetTaskRunner(new_runner);
+  EXPECT_EQ(new_runner, loop.task_runner());
+  EXPECT_EQ(new_runner, ThreadTaskRunnerHandle::Get());
+}
+
+TEST(MessageLoopTest, OriginalRunnerWorks) {
+  MessageLoop loop;
+  scoped_refptr<SingleThreadTaskRunner> new_runner(new TestSimpleTaskRunner());
+  scoped_refptr<SingleThreadTaskRunner> original_runner(loop.task_runner());
+  loop.SetTaskRunner(new_runner);
+
+  scoped_refptr<Foo> foo(new Foo());
+  original_runner->PostTask(FROM_HERE,
+                            Bind(&Foo::Test1ConstRef, foo.get(), "a"));
+  loop.RunUntilIdle();
+  EXPECT_EQ(1, foo->test_count());
+}
 
 }  // namespace base

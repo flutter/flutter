@@ -97,6 +97,9 @@ char kLSanDefaultSuppressions[] =
 // http://crbug.com/356306
 "leak:content::SetProcessTitleFromCommandLine\n"
 
+// http://crbug.com/506433
+"leak:blink::ResourceFetcher::garbageCollectDocumentResources\n"
+
 // PLEASE READ ABOVE BEFORE ADDING NEW SUPPRESSIONS.
 
 // End of suppressions.

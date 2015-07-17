@@ -90,18 +90,6 @@
           ],
         }],
         ['OS == "android" and _toolset == "target"', {
-          'conditions': [
-            ['target_arch == "ia32" or target_arch == "x64"', {
-              'sources/': [
-                ['include', '^atomicops_internals_x86_gcc\\.cc$'],
-              ],
-            }],
-            ['target_arch == "mipsel"', {
-              'sources/': [
-                ['include', '^atomicops_internals_mips_gcc\\.cc$'],
-              ],
-            }],
-          ],
           'dependencies': [
             'base_java',
             'base_jni_headers',
@@ -464,6 +452,7 @@
         'containers/linked_list_unittest.cc',
         'containers/mru_cache_unittest.cc',
         'containers/scoped_ptr_hash_map_unittest.cc',
+        'containers/scoped_ptr_map_unittest.cc',
         'containers/small_map_unittest.cc',
         'containers/stack_container_unittest.cc',
         'cpu_unittest.cc',
@@ -513,6 +502,7 @@
         'lazy_instance_unittest.cc',
         'logging_unittest.cc',
         'mac/bind_objc_block_unittest.mm',
+        'mac/call_with_eh_frame_unittest.mm',
         'mac/dispatch_source_mach_unittest.cc',
         'mac/foundation_util_unittest.mm',
         'mac/libdispatch_task_runner_unittest.cc',
@@ -537,8 +527,7 @@
         'memory/singleton_unittest.cc',
         'memory/weak_ptr_unittest.cc',
         'memory/weak_ptr_unittest.nc',
-        'message_loop/message_loop_proxy_impl_unittest.cc',
-        'message_loop/message_loop_proxy_unittest.cc',
+        'message_loop/message_loop_task_runner_unittest.cc',
         'message_loop/message_loop_unittest.cc',
         'message_loop/message_pump_glib_unittest.cc',
         'message_loop/message_pump_io_ios_unittest.cc',
@@ -592,6 +581,7 @@
         'sha1_unittest.cc',
         'stl_util_unittest.cc',
         'strings/nullable_string16_unittest.cc',
+        'strings/pattern_unittest.cc',
         'strings/safe_sprintf_unittest.cc',
         'strings/string16_unittest.cc',
         'strings/string_number_conversions_unittest.cc',
@@ -699,7 +689,9 @@
         }],
         ['OS == "ios" and _toolset != "host"', {
           'sources/': [
-            # Only test the iOS-meaningful portion of process_utils.
+            # Only test the iOS-meaningful portion of memory and process_utils.
+            ['exclude', '^memory/discardable_shared_memory_unittest\\.cc$'],
+            ['exclude', '^memory/shared_memory_unittest\\.cc$'],
             ['exclude', '^process/memory_unittest'],
             ['exclude', '^process/process_unittest\\.cc$'],
             ['exclude', '^process/process_util_unittest\\.cc$'],
@@ -1545,7 +1537,7 @@
           'target_name': 'chromium_android_linker',
           'type': 'shared_library',
           'sources': [
-            'android/linker/linker_jni.cc',
+            'android/linker/legacy_linker_jni.cc',
           ],
           # The crazy linker is never instrumented.
           'cflags!': [

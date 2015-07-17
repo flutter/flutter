@@ -26,7 +26,6 @@ void TaskAnnotator::DidQueueTask(const char* queue_function,
 }
 
 void TaskAnnotator::RunTask(const char* queue_function,
-                            const char* run_function,
                             const PendingTask& pending_task) {
   tracked_objects::TaskStopwatch stopwatch;
   stopwatch.Start();
@@ -38,18 +37,6 @@ void TaskAnnotator::RunTask(const char* queue_function,
                         TRACE_ID_MANGLE(GetTaskTraceID(pending_task)),
                         "queue_duration",
                         queue_duration.InMilliseconds());
-
-  // When tracing memory for posted tasks it's more valuable to attribute the
-  // memory allocations to the source function than generically to the task
-  // runner.
-  TRACE_EVENT_WITH_MEMORY_TAG2(
-      "toplevel",
-      run_function,
-      pending_task.posted_from.function_name(),  // Name for memory tracking.
-      "src_file",
-      pending_task.posted_from.file_name(),
-      "src_func",
-      pending_task.posted_from.function_name());
 
   // Before running the task, store the program counter where it was posted
   // and deliberately alias it to ensure it is on the stack if the task

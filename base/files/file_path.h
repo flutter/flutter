@@ -112,7 +112,7 @@
 #include "base/compiler_specific.h"
 #include "base/containers/hash_tables.h"
 #include "base/strings/string16.h"
-#include "base/strings/string_piece.h"  // For implicit conversions.
+#include "base/strings/string_piece.h"
 #include "build/build_config.h"
 
 // Windows-style drive letter support and pathname separator characters can be
@@ -144,6 +144,7 @@ class BASE_EXPORT FilePath {
   typedef std::wstring StringType;
 #endif  // OS_WIN
 
+  typedef BasicStringPiece<StringType> StringPieceType;
   typedef StringType::value_type CharType;
 
   // Null-terminated array of separators used to separate components in
@@ -166,7 +167,7 @@ class BASE_EXPORT FilePath {
 
   FilePath();
   FilePath(const FilePath& that);
-  explicit FilePath(const StringType& path);
+  explicit FilePath(StringPieceType path);
   ~FilePath();
   FilePath& operator=(const FilePath& that);
 
@@ -268,25 +269,23 @@ class BASE_EXPORT FilePath {
   // path == "C:\pics\jojo"     suffix == " (1)", returns "C:\pics\jojo (1)"
   // path == "C:\pics.old\jojo" suffix == " (1)", returns "C:\pics.old\jojo (1)"
   FilePath InsertBeforeExtension(
-      const StringType& suffix) const WARN_UNUSED_RESULT;
+      StringPieceType suffix) const WARN_UNUSED_RESULT;
   FilePath InsertBeforeExtensionASCII(
-      const base::StringPiece& suffix) const WARN_UNUSED_RESULT;
+      StringPiece suffix) const WARN_UNUSED_RESULT;
 
   // Adds |extension| to |file_name|. Returns the current FilePath if
   // |extension| is empty. Returns "" if BaseName() == "." or "..".
-  FilePath AddExtension(
-      const StringType& extension) const WARN_UNUSED_RESULT;
+  FilePath AddExtension(StringPieceType extension) const WARN_UNUSED_RESULT;
 
   // Replaces the extension of |file_name| with |extension|.  If |file_name|
   // does not have an extension, then |extension| is added.  If |extension| is
   // empty, then the extension is removed from |file_name|.
   // Returns "" if BaseName() == "." or "..".
-  FilePath ReplaceExtension(
-      const StringType& extension) const WARN_UNUSED_RESULT;
+  FilePath ReplaceExtension(StringPieceType extension) const WARN_UNUSED_RESULT;
 
   // Returns true if the file path matches the specified extension. The test is
   // case insensitive. Don't forget the leading period if appropriate.
-  bool MatchesExtension(const StringType& extension) const;
+  bool MatchesExtension(StringPieceType extension) const;
 
   // Returns a FilePath by appending a separator and the supplied path
   // component to this object's path.  Append takes care to avoid adding
@@ -294,7 +293,7 @@ class BASE_EXPORT FilePath {
   // If this object's path is kCurrentDirectory, a new FilePath corresponding
   // only to |component| is returned.  |component| must be a relative path;
   // it is an error to pass an absolute path.
-  FilePath Append(const StringType& component) const WARN_UNUSED_RESULT;
+  FilePath Append(StringPieceType component) const WARN_UNUSED_RESULT;
   FilePath Append(const FilePath& component) const WARN_UNUSED_RESULT;
 
   // Although Windows StringType is std::wstring, since the encoding it uses for
@@ -303,8 +302,7 @@ class BASE_EXPORT FilePath {
   // On Linux, although it can use any 8-bit encoding for paths, we assume that
   // ASCII is a valid subset, regardless of the encoding, since many operating
   // system paths will always be ASCII.
-  FilePath AppendASCII(const base::StringPiece& component)
-      const WARN_UNUSED_RESULT;
+  FilePath AppendASCII(StringPiece component) const WARN_UNUSED_RESULT;
 
   // Returns true if this FilePath contains an absolute path.  On Windows, an
   // absolute path begins with either a drive letter specification followed by
@@ -388,14 +386,14 @@ class BASE_EXPORT FilePath {
   // on parts of a file path, e.g., just the extension.
   // CompareIgnoreCase() returns -1, 0 or 1 for less-than, equal-to and
   // greater-than respectively.
-  static int CompareIgnoreCase(const StringType& string1,
-                               const StringType& string2);
-  static bool CompareEqualIgnoreCase(const StringType& string1,
-                                     const StringType& string2) {
+  static int CompareIgnoreCase(StringPieceType string1,
+                               StringPieceType string2);
+  static bool CompareEqualIgnoreCase(StringPieceType string1,
+                                     StringPieceType string2) {
     return CompareIgnoreCase(string1, string2) == 0;
   }
-  static bool CompareLessIgnoreCase(const StringType& string1,
-                                    const StringType& string2) {
+  static bool CompareLessIgnoreCase(StringPieceType string1,
+                                    StringPieceType string2) {
     return CompareIgnoreCase(string1, string2) < 0;
   }
 
@@ -405,14 +403,14 @@ class BASE_EXPORT FilePath {
   // http://developer.apple.com/mac/library/technotes/tn/tn1150.html#UnicodeSubtleties
   // for further comments.
   // Returns the epmty string if the conversion failed.
-  static StringType GetHFSDecomposedForm(const FilePath::StringType& string);
+  static StringType GetHFSDecomposedForm(StringPieceType string);
 
   // Special UTF-8 version of FastUnicodeCompare. Cf:
   // http://developer.apple.com/mac/library/technotes/tn/tn1150.html#StringComparisonAlgorithm
   // IMPORTANT: The input strings must be in the special HFS decomposed form!
   // (cf. above GetHFSDecomposedForm method)
-  static int HFSFastUnicodeCompare(const StringType& string1,
-                                   const StringType& string2);
+  static int HFSFastUnicodeCompare(StringPieceType string1,
+                                   StringPieceType string2);
 #endif
 
 #if defined(OS_ANDROID)

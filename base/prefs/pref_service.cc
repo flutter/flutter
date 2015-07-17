@@ -471,7 +471,8 @@ base::Value* PrefService::GetMutableUserPref(const std::string& path,
     } else {
       NOTREACHED();
     }
-    user_pref_store_->SetValueSilently(path, value, GetWriteFlags(pref));
+    user_pref_store_->SetValueSilently(path, make_scoped_ptr(value),
+                                       GetWriteFlags(pref));
   }
   return value;
 }
@@ -498,7 +499,7 @@ void PrefService::SetUserPrefValue(const std::string& path,
     return;
   }
 
-  user_pref_store_->SetValue(path, owned_value.release(), GetWriteFlags(pref));
+  user_pref_store_->SetValue(path, owned_value.Pass(), GetWriteFlags(pref));
 }
 
 void PrefService::UpdateCommandLinePrefStore(PrefStore* command_line_store) {

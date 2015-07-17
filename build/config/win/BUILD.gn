@@ -103,8 +103,8 @@ if (current_cpu == "x64") {
   # 5.02 = Windows Server 2003.
   subsystem_version_suffix = ",5.02"
 } else {
-  # Don't specify a min version on x86.
-  subsystem_version_suffix = ""
+  # 5.01 = Windows XP.
+  subsystem_version_suffix = ",5.01"
 }
 
 config("console") {

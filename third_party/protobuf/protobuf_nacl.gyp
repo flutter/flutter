@@ -17,9 +17,6 @@
         'build_pnacl_newlib': 1,
         'config_h_dir': '.',
       },
-      'dependencies': [
-        '../../native_client/tools.gyp:prep_toolchain',
-      ],
       'pnacl_compile_flags': [
         # This disables #warning in hash_map/hash_set headers which are
         # deprecated but still used in protobuf.

@@ -22,6 +22,6 @@ bool IsTrivial(const std::string& bytes) {
 
 TEST(RandBytes, RandBytes) {
   std::string bytes(16, '\0');
-  crypto::RandBytes(WriteInto(&bytes, bytes.size()), bytes.size());
+  crypto::RandBytes(base::WriteInto(&bytes, bytes.size()), bytes.size());
   EXPECT_TRUE(!IsTrivial(bytes));
 }

@@ -55,7 +55,7 @@ class ServerDelegate : public Daemon::ServerDelegate {
     // thread. Make sure that it gets deleted on that same thread. Note that
     // DeleteSoon() is not used here since it would imply reading |controller_|
     // from the main thread while it's set on the internal thread.
-    controller_thread_->message_loop_proxy()->PostTask(
+    controller_thread_->task_runner()->PostTask(
         FROM_HERE,
         base::Bind(&ServerDelegate::DeleteControllerOnInternalThread,
                    base::Unretained(this)));
@@ -63,7 +63,7 @@ class ServerDelegate : public Daemon::ServerDelegate {
 
   void DeleteControllerOnInternalThread() {
     DCHECK(
-        controller_thread_->message_loop_proxy()->RunsTasksOnCurrentThread());
+        controller_thread_->task_runner()->RunsTasksOnCurrentThread());
     controller_.reset();
   }
 

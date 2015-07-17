@@ -9,18 +9,22 @@ import android.content.pm.ApplicationInfo;
 import android.os.AsyncTask;
 import android.os.Environment;
 
+import java.io.File;
 import java.util.concurrent.ExecutionException;
 
 /**
  * This class provides the path related methods for the native library.
  */
 public abstract class PathUtils {
+    private static final String THUMBNAIL_DIRECTORY = "textures";
 
     private static final int DATA_DIRECTORY = 0;
     private static final int DATABASE_DIRECTORY = 1;
     private static final int CACHE_DIRECTORY = 2;
     private static final int NUM_DIRECTORIES = 3;
     private static AsyncTask<String, Void, String[]> sDirPathFetchTask;
+
+    private static File sThumbnailDirectory;
 
     // Prevent instantiation.
     private PathUtils() {}
@@ -89,6 +93,18 @@ public abstract class PathUtils {
     public static String getCacheDirectory(Context appContext) {
         assert sDirPathFetchTask != null : "setDataDirectorySuffix must be called first.";
         return getDirectoryPath(CACHE_DIRECTORY);
+    }
+
+    public static File getThumbnailCacheDirectory(Context appContext) {
+        if (sThumbnailDirectory == null) {
+            sThumbnailDirectory = appContext.getDir(THUMBNAIL_DIRECTORY, Context.MODE_PRIVATE);
+        }
+        return sThumbnailDirectory;
+    }
+
+    @CalledByNative
+    public static String getThumbnailCacheDirectoryPath(Context appContext) {
+        return getThumbnailCacheDirectory(appContext).getAbsolutePath();
     }
 
     /**

@@ -27,6 +27,7 @@
 #include <string.h> //memcpy
 #include "qcmsint.h"
 #include "chain.h"
+#include "halffloat.h"
 #include "matrix.h"
 #include "transform_util.h"
 
@@ -1252,6 +1253,8 @@ qcms_transform* qcms_transform_create(
             return NULL;
         }
 
+	transform->transform_flags = 0;
+
 	if (out->output_table_r &&
 			out->output_table_g &&
 			out->output_table_b) {
@@ -1301,23 +1304,12 @@ qcms_transform* qcms_transform_create(
                 	return NULL;
             	}
 		if (precache) {
-#if defined(SSE2_ENABLE) && defined(X86)
+#if defined(SSE2_ENABLE)
 		    if (sse_version_available() >= 2) {
 			    if (in_type == QCMS_DATA_RGB_8)
 				    transform->transform_fn = qcms_transform_data_rgb_out_lut_sse2;
 			    else
 				    transform->transform_fn = qcms_transform_data_rgba_out_lut_sse2;
-
-#if defined(SSE2_ENABLE) && !(defined(_MSC_VER) && defined(_M_AMD64))
-                    /* Microsoft Compiler for x64 doesn't support MMX.
-                     * SSE code uses MMX so that we disable on x64 */
-		    } else
-		    if (sse_version_available() >= 1) {
-			    if (in_type == QCMS_DATA_RGB_8)
-				    transform->transform_fn = qcms_transform_data_rgb_out_lut_sse1;
-			    else
-				    transform->transform_fn = qcms_transform_data_rgba_out_lut_sse1;
-#endif
 		    } else
 #endif
 			{
@@ -1365,6 +1357,9 @@ qcms_transform* qcms_transform_create(
 		transform->matrix[1][2] = result.m[2][1];
 		transform->matrix[2][2] = result.m[2][2];
 
+		/* Flag transform as matrix. */
+		transform->transform_flags |= TRANSFORM_FLAG_MATRIX;
+
 	} else if (in->color_space == GRAY_SIGNATURE) {
 		if (in_type != QCMS_DATA_GRAY_8 &&
 				in_type != QCMS_DATA_GRAYA_8){
@@ -1405,7 +1400,7 @@ qcms_transform* qcms_transform_create(
  * of the attribute but is currently only supported by clang */
 #if defined(__has_attribute)
 #define HAS_FORCE_ALIGN_ARG_POINTER __has_attribute(__force_align_arg_pointer__)
-#elif defined(__GNUC__) && !defined(__x86_64__) && !defined(__amd64__) && !defined(__arm__) && !defined(__mips__)
+#elif defined(__GNUC__) && defined(__i386__)
 #define HAS_FORCE_ALIGN_ARG_POINTER 1
 #else
 #define HAS_FORCE_ALIGN_ARG_POINTER 0
@@ -1431,7 +1426,117 @@ void qcms_transform_data_type(qcms_transform *transform, void *src, void *dest, 
 }
 
 qcms_bool qcms_supports_iccv4;
+
 void qcms_enable_iccv4()
 {
 	qcms_supports_iccv4 = true;
+}
+
+static inline qcms_bool transform_is_matrix(qcms_transform *t)
+{
+	return (t->transform_flags & TRANSFORM_FLAG_MATRIX) ? true : false;
+}
+
+qcms_bool qcms_transform_is_matrix(qcms_transform *t)
+{
+	return transform_is_matrix(t);
+}
+
+float qcms_transform_get_matrix(qcms_transform *t, unsigned i, unsigned j)
+{
+	assert(transform_is_matrix(t) && i < 3 && j < 3);
+
+	// Return transform matrix element in row major order (permute i and j)
+
+	return t->matrix[j][i];
+}
+
+static inline qcms_bool supported_trc_type(qcms_trc_type type)
+{
+	return type == QCMS_TRC_HALF_FLOAT;
+}
+
+const uint16_t half_float_one = 0x3c00;
+
+size_t qcms_transform_get_input_trc_rgba(qcms_transform *t, qcms_profile *in, qcms_trc_type type, unsigned short *data)
+{
+	const size_t size = 256; // The input gamma tables always have 256 entries.
+
+	size_t i;
+
+	if (in->color_space != RGB_SIGNATURE || !supported_trc_type(type))
+		return 0;
+
+	// qcms_profile *in is assumed to be the profile on the input-side of the color transform t.
+	// When a transform is created, the input gamma curve data is stored in the transform ...
+
+	if (!t->input_gamma_table_r || !t->input_gamma_table_g || !t->input_gamma_table_b)
+		return 0;
+
+	// Report the size if no output data is requested. This allows callers to first work out the
+	// the curve size, then provide allocated memory sufficient to store the curve rgba data.
+
+	if (!data)
+		return size;
+
+	for (i = 0; i < size; ++i) {
+		*data++ = float_to_half_float(t->input_gamma_table_r[i]); // r
+		*data++ = float_to_half_float(t->input_gamma_table_g[i]); // g
+		*data++ = float_to_half_float(t->input_gamma_table_b[i]); // b
+		*data++ = half_float_one;                                 // a
+	}
+
+	return size;
+}
+
+const float inverse65535 = (float) (1.0 / 65535.0);
+
+size_t qcms_transform_get_output_trc_rgba(qcms_transform *t, qcms_profile *out, qcms_trc_type type, unsigned short *data)
+{
+	size_t size, i;
+
+	if (out->color_space != RGB_SIGNATURE || !supported_trc_type(type))
+		return 0;
+
+	// qcms_profile *out is assumed to be the profile on the output-side of the transform t.
+	// If the transform output gamma curves need building, do that. They're usually built when
+	// the transform was created, but sometimes not due to the output gamma precache ...
+
+	if (!out->redTRC || !out->greenTRC || !out->blueTRC)
+		return 0;
+	if (!t->output_gamma_lut_r)
+		build_output_lut(out->redTRC, &t->output_gamma_lut_r, &t->output_gamma_lut_r_length);
+	if (!t->output_gamma_lut_g)
+		build_output_lut(out->greenTRC, &t->output_gamma_lut_g, &t->output_gamma_lut_g_length);
+	if (!t->output_gamma_lut_b)
+		build_output_lut(out->blueTRC, &t->output_gamma_lut_b, &t->output_gamma_lut_b_length);
+
+	if (!t->output_gamma_lut_r || !t->output_gamma_lut_g || !t->output_gamma_lut_b)
+		return 0;
+
+	// Output gamma tables should have the same size and should have 4096 entries at most (the
+	// minimum is 256). Larger tables are rare and ignored here: fail by returning 0.
+
+	size = t->output_gamma_lut_r_length;
+	if (size != t->output_gamma_lut_g_length)
+		return 0;
+	if (size != t->output_gamma_lut_b_length)
+		return 0;
+	if (size < 256 || size > 4096)
+		return 0;
+
+	// Report the size if no output data is requested. This allows callers to first work out the
+	// the curve size, then provide allocated memory sufficient to store the curve rgba data.
+
+	if (!data)
+		return size;
+
+	for (i = 0; i < size; ++i) {
+		*data++ = float_to_half_float(t->output_gamma_lut_r[i] * inverse65535); // r
+		*data++ = float_to_half_float(t->output_gamma_lut_g[i] * inverse65535); // g
+		*data++ = float_to_half_float(t->output_gamma_lut_b[i] * inverse65535); // b
+		*data++ = half_float_one;                                               // a
+	}
+
+	return size;
 }

@@ -2,7 +2,7 @@
 // source: google/protobuf/descriptor.proto
 
 #define INTERNAL_SUPPRESS_PROTOBUF_FIELD_DEPRECATION
-#include "google/protobuf/descriptor.pb.h"
+#include <google/protobuf/descriptor.pb.h>
 
 #include <algorithm>
 

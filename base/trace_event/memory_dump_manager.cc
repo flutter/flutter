@@ -8,6 +8,8 @@
 
 #include "base/atomic_sequence_num.h"
 #include "base/compiler_specific.h"
+#include "base/hash.h"
+#include "base/thread_task_runner_handle.h"
 #include "base/trace_event/memory_dump_provider.h"
 #include "base/trace_event/memory_dump_session_state.h"
 #include "base/trace_event/process_memory_dump.h"
@@ -40,102 +42,38 @@ namespace {
 // trace event synthetic delays.
 const char kTraceCategory[] = TRACE_DISABLED_BY_DEFAULT("memory-infra");
 
-MemoryDumpManager* g_instance_for_testing = nullptr;
-const int kDumpIntervalSeconds = 2;
+// Throttle mmaps at a rate of once every kHeavyMmapsDumpsRate standard dumps.
+const int kHeavyMmapsDumpsRate = 8;  // 250 ms * 8 = 2000 ms.
+const int kDumpIntervalMs = 250;
 const int kTraceEventNumArgs = 1;
 const char* kTraceEventArgNames[] = {"dumps"};
 const unsigned char kTraceEventArgTypes[] = {TRACE_VALUE_TYPE_CONVERTABLE};
+
 StaticAtomicSequenceNumber g_next_guid;
-
-const char* MemoryDumpTypeToString(const MemoryDumpType& dump_type) {
-  switch (dump_type) {
-    case MemoryDumpType::TASK_BEGIN:
-      return "TASK_BEGIN";
-    case MemoryDumpType::TASK_END:
-      return "TASK_END";
-    case MemoryDumpType::PERIODIC_INTERVAL:
-      return "PERIODIC_INTERVAL";
-    case MemoryDumpType::EXPLICITLY_TRIGGERED:
-      return "EXPLICITLY_TRIGGERED";
-  }
-  NOTREACHED();
-  return "UNKNOWN";
-}
-
-// Internal class used to hold details about ProcessMemoryDump requests for the
-// current process.
-// TODO(primiano): In the upcoming CLs, ProcessMemoryDump will become async.
-// and this class will be used to convey more details across PostTask()s.
-class ProcessMemoryDumpHolder
-    : public RefCountedThreadSafe<ProcessMemoryDumpHolder> {
- public:
-  ProcessMemoryDumpHolder(
-      MemoryDumpRequestArgs req_args,
-      const scoped_refptr<MemoryDumpSessionState>& session_state,
-      MemoryDumpCallback callback)
-      : process_memory_dump(session_state),
-        req_args(req_args),
-        callback(callback),
-        task_runner(MessageLoop::current()->task_runner()),
-        num_pending_async_requests(0) {}
-
-  ProcessMemoryDump process_memory_dump;
-  const MemoryDumpRequestArgs req_args;
-
-  // Callback passed to the initial call to CreateProcessDump().
-  MemoryDumpCallback callback;
-
-  // Thread on which FinalizeDumpAndAddToTrace() should be called, which is the
-  // same that invoked the initial CreateProcessDump().
-  const scoped_refptr<SingleThreadTaskRunner> task_runner;
-
-  // Number of pending ContinueAsyncProcessDump() calls.
-  int num_pending_async_requests;
-
- private:
-  friend class RefCountedThreadSafe<ProcessMemoryDumpHolder>;
-  virtual ~ProcessMemoryDumpHolder() {}
-  DISALLOW_COPY_AND_ASSIGN(ProcessMemoryDumpHolder);
-};
-
-void FinalizeDumpAndAddToTrace(
-    const scoped_refptr<ProcessMemoryDumpHolder>& pmd_holder) {
-  DCHECK_EQ(0, pmd_holder->num_pending_async_requests);
-
-  if (!pmd_holder->task_runner->BelongsToCurrentThread()) {
-    pmd_holder->task_runner->PostTask(
-        FROM_HERE, Bind(&FinalizeDumpAndAddToTrace, pmd_holder));
-    return;
-  }
-
-  scoped_refptr<ConvertableToTraceFormat> event_value(new TracedValue());
-  pmd_holder->process_memory_dump.AsValueInto(
-      static_cast<TracedValue*>(event_value.get()));
-  const char* const event_name =
-      MemoryDumpTypeToString(pmd_holder->req_args.dump_type);
-
-  TRACE_EVENT_API_ADD_TRACE_EVENT(
-      TRACE_EVENT_PHASE_MEMORY_DUMP,
-      TraceLog::GetCategoryGroupEnabled(kTraceCategory), event_name,
-      pmd_holder->req_args.dump_guid, kTraceEventNumArgs, kTraceEventArgNames,
-      kTraceEventArgTypes, nullptr /* arg_values */, &event_value,
-      TRACE_EVENT_FLAG_HAS_ID);
-
-  if (!pmd_holder->callback.is_null()) {
-    pmd_holder->callback.Run(pmd_holder->req_args.dump_guid, true);
-    pmd_holder->callback.Reset();
-  }
-}
+uint32 g_periodic_dumps_count = 0;
+MemoryDumpManager* g_instance_for_testing = nullptr;
+MemoryDumpProvider* g_mmaps_dump_provider = nullptr;
 
 void RequestPeriodicGlobalDump() {
-  MemoryDumpManager::GetInstance()->RequestGlobalDump(
-      MemoryDumpType::PERIODIC_INTERVAL);
+  MemoryDumpType dump_type = g_periodic_dumps_count == 0
+                                 ? MemoryDumpType::PERIODIC_INTERVAL_WITH_MMAPS
+                                 : MemoryDumpType::PERIODIC_INTERVAL;
+  if (++g_periodic_dumps_count == kHeavyMmapsDumpsRate)
+    g_periodic_dumps_count = 0;
+
+  MemoryDumpManager::GetInstance()->RequestGlobalDump(dump_type);
 }
 
 }  // namespace
 
 // static
 const char* const MemoryDumpManager::kTraceCategoryForTesting = kTraceCategory;
+
+// static
+const uint64 MemoryDumpManager::kInvalidTracingProcessId = 0;
+
+// static
+const int MemoryDumpManager::kMaxConsecutiveFailuresCount = 3;
 
 // static
 MemoryDumpManager* MemoryDumpManager::GetInstance() {
@@ -154,8 +92,10 @@ void MemoryDumpManager::SetInstanceForTesting(MemoryDumpManager* instance) {
 }
 
 MemoryDumpManager::MemoryDumpManager()
-    : delegate_(nullptr),
+    : did_unregister_dump_provider_(false),
+      delegate_(nullptr),
       memory_tracing_enabled_(0),
+      tracing_process_id_(kInvalidTracingProcessId),
       skip_core_dumpers_auto_registration_for_testing_(false) {
   g_next_guid.GetNext();  // Make sure that first guid is not zero.
 }
@@ -177,7 +117,8 @@ void MemoryDumpManager::Initialize() {
 #endif
 
 #if defined(OS_LINUX) || defined(OS_ANDROID)
-  RegisterDumpProvider(ProcessMemoryMapsDumpProvider::GetInstance());
+  g_mmaps_dump_provider = ProcessMemoryMapsDumpProvider::GetInstance();
+  RegisterDumpProvider(g_mmaps_dump_provider);
   RegisterDumpProvider(MallocDumpProvider::GetInstance());
 #endif
 
@@ -199,9 +140,9 @@ void MemoryDumpManager::SetDelegate(MemoryDumpManagerDelegate* delegate) {
 void MemoryDumpManager::RegisterDumpProvider(
     MemoryDumpProvider* mdp,
     const scoped_refptr<SingleThreadTaskRunner>& task_runner) {
-  MemoryDumpProviderInfo mdp_info(task_runner);
+  MemoryDumpProviderInfo mdp_info(mdp, task_runner);
   AutoLock lock(lock_);
-  dump_providers_.insert(std::make_pair(mdp, mdp_info));
+  dump_providers_.insert(mdp_info);
 }
 
 void MemoryDumpManager::RegisterDumpProvider(MemoryDumpProvider* mdp) {
@@ -211,11 +152,15 @@ void MemoryDumpManager::RegisterDumpProvider(MemoryDumpProvider* mdp) {
 void MemoryDumpManager::UnregisterDumpProvider(MemoryDumpProvider* mdp) {
   AutoLock lock(lock_);
 
-  auto it = dump_providers_.find(mdp);
-  if (it == dump_providers_.end())
+  auto mdp_iter = dump_providers_.begin();
+  for (; mdp_iter != dump_providers_.end(); ++mdp_iter) {
+    if (mdp_iter->dump_provider == mdp)
+      break;
+  }
+
+  if (mdp_iter == dump_providers_.end())
     return;
 
-  const MemoryDumpProviderInfo& mdp_info = it->second;
   // Unregistration of a MemoryDumpProvider while tracing is ongoing is safe
   // only if the MDP has specified a thread affinity (via task_runner()) AND
   // the unregistration happens on the same thread (so the MDP cannot unregister
@@ -224,13 +169,12 @@ void MemoryDumpManager::UnregisterDumpProvider(MemoryDumpProvider* mdp) {
   // race-free. If you hit this DCHECK, your MDP has a bug.
   DCHECK_IMPLIES(
       subtle::NoBarrier_Load(&memory_tracing_enabled_),
-      mdp_info.task_runner && mdp_info.task_runner->BelongsToCurrentThread())
+      mdp_iter->task_runner && mdp_iter->task_runner->BelongsToCurrentThread())
       << "The MemoryDumpProvider attempted to unregister itself in a racy way. "
-      << " Please file a crbug.";
+      << "Please file a crbug.";
 
-  // Remove from the enabled providers list. This is to deal with the case that
-  // UnregisterDumpProvider is called while the trace is enabled.
-  dump_providers_.erase(it);
+  dump_providers_.erase(mdp_iter);
+  did_unregister_dump_provider_ = true;
 }
 
 void MemoryDumpManager::RequestGlobalDump(
@@ -265,96 +209,179 @@ void MemoryDumpManager::RequestGlobalDump(MemoryDumpType dump_type) {
   RequestGlobalDump(dump_type, MemoryDumpCallback());
 }
 
-// Creates a memory dump for the current process and appends it to the trace.
 void MemoryDumpManager::CreateProcessDump(const MemoryDumpRequestArgs& args,
                                           const MemoryDumpCallback& callback) {
-  scoped_refptr<ProcessMemoryDumpHolder> pmd_holder(
-      new ProcessMemoryDumpHolder(args, session_state_, callback));
-  ProcessMemoryDump* pmd = &pmd_holder->process_memory_dump;
-  bool did_any_provider_dump = false;
-
-  // Iterate over the active dump providers and invoke OnMemoryDump(pmd).
-  // The MDM guarantees linearity (at most one MDP is active within one
-  // process) and thread-safety (MDM enforces the right locking when entering /
-  // leaving the MDP.OnMemoryDump() call). This is to simplify the clients'
-  // design
-  // and not let the MDPs worry about locking.
-  // As regards thread affinity, depending on the MDP configuration (see
-  // memory_dump_provider.h), the OnMemoryDump() invocation can happen:
-  //  - Synchronousy on the MDM thread, when MDP.task_runner() is not set.
-  //  - Posted on MDP.task_runner(), when MDP.task_runner() is set.
+  scoped_ptr<ProcessMemoryDumpAsyncState> pmd_async_state;
   {
     AutoLock lock(lock_);
-    for (auto it = dump_providers_.begin(); it != dump_providers_.end(); ++it) {
-      MemoryDumpProvider* mdp = it->first;
-      MemoryDumpProviderInfo* mdp_info = &it->second;
-      if (mdp_info->disabled)
-        continue;
-      if (mdp_info->task_runner) {
-        // The OnMemoryDump() call must be posted.
-        bool did_post_async_task = mdp_info->task_runner->PostTask(
-            FROM_HERE, Bind(&MemoryDumpManager::ContinueAsyncProcessDump,
-                            Unretained(this), Unretained(mdp), pmd_holder));
-        // The thread underlying the TaskRunner might have gone away.
-        if (did_post_async_task)
-          ++pmd_holder->num_pending_async_requests;
-      } else {
-        // Invoke the dump provider synchronously.
-        did_any_provider_dump |= InvokeDumpProviderLocked(mdp, pmd);
-      }
-    }
-  }  // AutoLock
-
-  // If at least one synchronous provider did dump and there are no pending
-  // asynchronous requests, add the dump to the trace and invoke the callback
-  // straight away (FinalizeDumpAndAddToTrace() takes care of the callback).
-  if (did_any_provider_dump && pmd_holder->num_pending_async_requests == 0)
-    FinalizeDumpAndAddToTrace(pmd_holder);
-}
-
-// Invokes the MemoryDumpProvider.OnMemoryDump(), taking care of the fail-safe
-// logic which disables the dumper when failing (crbug.com/461788).
-bool MemoryDumpManager::InvokeDumpProviderLocked(MemoryDumpProvider* mdp,
-                                                 ProcessMemoryDump* pmd) {
-  lock_.AssertAcquired();
-  bool dump_successful = mdp->OnMemoryDump(pmd);
-  if (!dump_successful) {
-    LOG(ERROR) << "The memory dumper failed, possibly due to sandboxing "
-                  "(crbug.com/461788), disabling it for current process. Try "
-                  "restarting chrome with the --no-sandbox switch.";
-    dump_providers_.find(mdp)->second.disabled = true;
+    did_unregister_dump_provider_ = false;
+    pmd_async_state.reset(new ProcessMemoryDumpAsyncState(
+        args, dump_providers_.begin(), session_state_, callback));
   }
-  return dump_successful;
+
+  // Start the thread hop. |dump_providers_| are kept sorted by thread, so
+  // ContinueAsyncProcessDump will hop at most once per thread (w.r.t. thread
+  // affinity specified by the MemoryDumpProvider(s) in RegisterDumpProvider()).
+  ContinueAsyncProcessDump(pmd_async_state.Pass());
 }
 
-// This is posted to arbitrary threads as a continuation of CreateProcessDump(),
-// when one or more MemoryDumpProvider(s) require the OnMemoryDump() call to
-// happen on a different thread.
+// At most one ContinueAsyncProcessDump() can be active at any time for a given
+// PMD, regardless of status of the |lock_|. |lock_| is used here purely to
+// ensure consistency w.r.t. (un)registrations of |dump_providers_|.
+// The linearization of dump providers' OnMemoryDump invocations is achieved by
+// means of subsequent PostTask(s).
+//
+// 1) Prologue:
+//   - Check if the dump provider is disabled, if so skip the dump.
+//   - Check if we are on the right thread. If not hop and continue there.
+// 2) Invoke the dump provider's OnMemoryDump() (unless skipped).
+// 3) Epilogue:
+//  - Unregister the dump provider if it failed too many times consecutively.
+//  - Advance the |next_dump_provider| iterator to the next dump provider.
+//  - If this was the last hop, create a trace event, add it to the trace
+//    and finalize (invoke callback).
+
 void MemoryDumpManager::ContinueAsyncProcessDump(
-    MemoryDumpProvider* mdp,
-    scoped_refptr<ProcessMemoryDumpHolder> pmd_holder) {
-  bool should_finalize_dump = false;
+    scoped_ptr<ProcessMemoryDumpAsyncState> pmd_async_state) {
+  // Initalizes the ThreadLocalEventBuffer to guarantee that the TRACE_EVENTs
+  // in the PostTask below don't end up registering their own dump providers
+  // (for discounting trace memory overhead) while holding the |lock_|.
+  TraceLog::GetInstance()->InitializeThreadLocalEventBufferIfSupported();
+
+  // DO NOT put any LOG() statement in the locked sections, as in some contexts
+  // (GPU process) LOG() ends up performing PostTask/IPCs.
+  MemoryDumpProvider* mdp;
+  bool skip_dump = false;
   {
-    // The lock here is to guarantee that different asynchronous dumps on
-    // different threads are still serialized, so that the MemoryDumpProvider
-    // has a consistent view of the |pmd| argument passed.
     AutoLock lock(lock_);
-    ProcessMemoryDump* pmd = &pmd_holder->process_memory_dump;
+    // In the unlikely event that a dump provider was unregistered while
+    // dumping, abort the dump, as that would make |next_dump_provider| invalid.
+    // Registration, on the other hand, is safe as per std::set<> contract.
+    if (did_unregister_dump_provider_) {
+      return AbortDumpLocked(pmd_async_state->callback,
+                             pmd_async_state->task_runner,
+                             pmd_async_state->req_args.dump_guid);
+    }
 
-    // Check if the MemoryDumpProvider is still there. It might have been
-    // destroyed and unregistered while hopping threads.
-    if (dump_providers_.count(mdp))
-      InvokeDumpProviderLocked(mdp, pmd);
+    auto* mdp_info = &*pmd_async_state->next_dump_provider;
+    mdp = mdp_info->dump_provider;
+    if (mdp_info->disabled) {
+      skip_dump = true;
+    } else if (mdp == g_mmaps_dump_provider &&
+               pmd_async_state->req_args.dump_type !=
+                   MemoryDumpType::PERIODIC_INTERVAL_WITH_MMAPS) {
+      // Mmaps dumping is very heavyweight and cannot be performed at the same
+      // rate of other dumps. TODO(primiano): this is a hack and should be
+      // cleaned up as part of crbug.com/499731.
+      skip_dump = true;
+    } else if (mdp_info->task_runner &&
+               !mdp_info->task_runner->BelongsToCurrentThread()) {
+      // It's time to hop onto another thread.
 
-    // Finalize the dump appending it to the trace if this was the last
-    // asynchronous request pending.
-    --pmd_holder->num_pending_async_requests;
-    if (pmd_holder->num_pending_async_requests == 0)
-      should_finalize_dump = true;
+      // Copy the callback + arguments just for the unlikley case in which
+      // PostTask fails. In such case the Bind helper will destroy the
+      // pmd_async_state and we must keep a copy of the fields to notify the
+      // abort.
+      MemoryDumpCallback callback = pmd_async_state->callback;
+      scoped_refptr<SingleThreadTaskRunner> callback_task_runner =
+          pmd_async_state->task_runner;
+      const uint64 dump_guid = pmd_async_state->req_args.dump_guid;
+
+      const bool did_post_task = mdp_info->task_runner->PostTask(
+          FROM_HERE, Bind(&MemoryDumpManager::ContinueAsyncProcessDump,
+                          Unretained(this), Passed(pmd_async_state.Pass())));
+      if (did_post_task)
+        return;
+
+      // The thread is gone. At this point the best thing we can do is to
+      // disable the dump provider and abort this dump.
+      mdp_info->disabled = true;
+      return AbortDumpLocked(callback, callback_task_runner, dump_guid);
+    }
   }  // AutoLock(lock_)
 
-  if (should_finalize_dump)
-    FinalizeDumpAndAddToTrace(pmd_holder);
+  // Invoke the dump provider without holding the |lock_|.
+  bool finalize = false;
+  bool dump_successful = false;
+  if (!skip_dump)
+    dump_successful = mdp->OnMemoryDump(&pmd_async_state->process_memory_dump);
+
+  {
+    AutoLock lock(lock_);
+    if (did_unregister_dump_provider_) {
+      return AbortDumpLocked(pmd_async_state->callback,
+                             pmd_async_state->task_runner,
+                             pmd_async_state->req_args.dump_guid);
+    }
+    auto* mdp_info = &*pmd_async_state->next_dump_provider;
+    if (dump_successful) {
+      mdp_info->consecutive_failures = 0;
+    } else if (!skip_dump) {
+      ++mdp_info->consecutive_failures;
+      if (mdp_info->consecutive_failures >= kMaxConsecutiveFailuresCount) {
+        mdp_info->disabled = true;
+      }
+    }
+    ++pmd_async_state->next_dump_provider;
+    finalize = pmd_async_state->next_dump_provider == dump_providers_.end();
+  }
+
+  if (!skip_dump && !dump_successful) {
+    LOG(ERROR) << "A memory dumper failed, possibly due to sandboxing "
+                  "(crbug.com/461788). Disabling dumper for current process. "
+                  "Try restarting chrome with the --no-sandbox switch.";
+  }
+
+  if (finalize)
+    return FinalizeDumpAndAddToTrace(pmd_async_state.Pass());
+
+  ContinueAsyncProcessDump(pmd_async_state.Pass());
+}
+
+// static
+void MemoryDumpManager::FinalizeDumpAndAddToTrace(
+    scoped_ptr<ProcessMemoryDumpAsyncState> pmd_async_state) {
+  if (!pmd_async_state->task_runner->BelongsToCurrentThread()) {
+    scoped_refptr<SingleThreadTaskRunner> task_runner =
+        pmd_async_state->task_runner;
+    task_runner->PostTask(FROM_HERE,
+                          Bind(&MemoryDumpManager::FinalizeDumpAndAddToTrace,
+                               Passed(pmd_async_state.Pass())));
+    return;
+  }
+
+  scoped_refptr<ConvertableToTraceFormat> event_value(new TracedValue());
+  pmd_async_state->process_memory_dump.AsValueInto(
+      static_cast<TracedValue*>(event_value.get()));
+  const char* const event_name =
+      MemoryDumpTypeToString(pmd_async_state->req_args.dump_type);
+
+  TRACE_EVENT_API_ADD_TRACE_EVENT(
+      TRACE_EVENT_PHASE_MEMORY_DUMP,
+      TraceLog::GetCategoryGroupEnabled(kTraceCategory), event_name,
+      pmd_async_state->req_args.dump_guid, kTraceEventNumArgs,
+      kTraceEventArgNames, kTraceEventArgTypes, nullptr /* arg_values */,
+      &event_value, TRACE_EVENT_FLAG_HAS_ID);
+
+  if (!pmd_async_state->callback.is_null()) {
+    pmd_async_state->callback.Run(pmd_async_state->req_args.dump_guid,
+                                  true /* success */);
+    pmd_async_state->callback.Reset();
+  }
+}
+
+// static
+void MemoryDumpManager::AbortDumpLocked(
+    MemoryDumpCallback callback,
+    scoped_refptr<SingleThreadTaskRunner> task_runner,
+    uint64 dump_guid) {
+  if (callback.is_null())
+    return;  // There is nothing to NACK.
+
+  // Post the callback even if we are already on the right thread to avoid
+  // invoking the callback while holding the lock_.
+  task_runner->PostTask(FROM_HERE,
+                        Bind(callback, dump_guid, false /* success */));
 }
 
 void MemoryDumpManager::OnTraceLogEnabled() {
@@ -364,25 +391,33 @@ void MemoryDumpManager::OnTraceLogEnabled() {
   bool enabled;
   TRACE_EVENT_CATEGORY_GROUP_ENABLED(kTraceCategory, &enabled);
 
+  // Initialize the TraceLog for the current thread. This is to avoid that the
+  // TraceLog memory dump provider is registered lazily in the PostTask() below
+  // while the |lock_| is taken;
+  TraceLog::GetInstance()->InitializeThreadLocalEventBufferIfSupported();
+
   AutoLock lock(lock_);
 
   // There is no point starting the tracing without a delegate.
   if (!enabled || !delegate_) {
     // Disable all the providers.
     for (auto it = dump_providers_.begin(); it != dump_providers_.end(); ++it)
-      it->second.disabled = true;
+      it->disabled = true;
     return;
   }
 
   session_state_ = new MemoryDumpSessionState();
-  for (auto it = dump_providers_.begin(); it != dump_providers_.end(); ++it)
-    it->second.disabled = false;
+  for (auto it = dump_providers_.begin(); it != dump_providers_.end(); ++it) {
+    it->disabled = false;
+    it->consecutive_failures = 0;
+  }
 
   subtle::NoBarrier_Store(&memory_tracing_enabled_, 1);
 
   if (delegate_->IsCoordinatorProcess()) {
+    g_periodic_dumps_count = 0;
     periodic_dump_timer_.Start(FROM_HERE,
-                               TimeDelta::FromSeconds(kDumpIntervalSeconds),
+                               TimeDelta::FromMilliseconds(kDumpIntervalMs),
                                base::Bind(&RequestPeriodicGlobalDump));
   }
 }
@@ -394,11 +429,47 @@ void MemoryDumpManager::OnTraceLogDisabled() {
   session_state_ = nullptr;
 }
 
-MemoryDumpManager::MemoryDumpProviderInfo::MemoryDumpProviderInfo(
-    const scoped_refptr<SingleThreadTaskRunner>& task_runner)
-    : task_runner(task_runner), disabled(false) {
+// static
+uint64 MemoryDumpManager::ChildProcessIdToTracingProcessId(
+    int child_process_id) {
+  return static_cast<uint64>(
+             Hash(reinterpret_cast<const char*>(&child_process_id),
+                  sizeof(child_process_id))) +
+         1;
 }
+
+MemoryDumpManager::MemoryDumpProviderInfo::MemoryDumpProviderInfo(
+    MemoryDumpProvider* dump_provider,
+    const scoped_refptr<SingleThreadTaskRunner>& task_runner)
+    : dump_provider(dump_provider),
+      task_runner(task_runner),
+      consecutive_failures(0),
+      disabled(false) {
+}
+
 MemoryDumpManager::MemoryDumpProviderInfo::~MemoryDumpProviderInfo() {
+}
+
+bool MemoryDumpManager::MemoryDumpProviderInfo::operator<(
+    const MemoryDumpProviderInfo& other) const {
+  if (task_runner == other.task_runner)
+    return dump_provider < other.dump_provider;
+  return task_runner < other.task_runner;
+}
+
+MemoryDumpManager::ProcessMemoryDumpAsyncState::ProcessMemoryDumpAsyncState(
+    MemoryDumpRequestArgs req_args,
+    MemoryDumpProviderInfoSet::iterator next_dump_provider,
+    const scoped_refptr<MemoryDumpSessionState>& session_state,
+    MemoryDumpCallback callback)
+    : process_memory_dump(session_state),
+      req_args(req_args),
+      next_dump_provider(next_dump_provider),
+      callback(callback),
+      task_runner(MessageLoop::current()->task_runner()) {
+}
+
+MemoryDumpManager::ProcessMemoryDumpAsyncState::~ProcessMemoryDumpAsyncState() {
 }
 
 }  // namespace trace_event

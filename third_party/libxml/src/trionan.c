@@ -261,7 +261,7 @@ trio_pinf(TRIO_NOARGS)
   static double result = 0.0;
 
   if (result == 0.0) {
-    
+
 #if defined(INFINITY) && defined(__STDC_IEC_559__)
     result = (double)INFINITY;
 
@@ -283,7 +283,7 @@ trio_pinf(TRIO_NOARGS)
       /* Force overflow */
       result += HUGE_VAL;
     }
-    
+
 # if defined(TRIO_PLATFORM_UNIX)
     signal(SIGFPE, signal_handler);
 # endif
@@ -326,13 +326,13 @@ trio_nan(TRIO_NOARGS)
   static double result = 0.0;
 
   if (result == 0.0) {
-    
+
 #if defined(TRIO_COMPILER_SUPPORTS_C99)
     result = nan("");
 
 #elif defined(NAN) && defined(__STDC_IEC_559__)
     result = (double)NAN;
-  
+
 #elif defined(USE_IEEE_754)
     result = trio_make_double(ieee_754_qnan_array);
 
@@ -349,13 +349,13 @@ trio_nan(TRIO_NOARGS)
 # if defined(TRIO_PLATFORM_UNIX)
     void (*signal_handler)(int) = signal(SIGFPE, SIG_IGN);
 # endif
-    
+
     result = trio_pinf() / trio_pinf();
-    
+
 # if defined(TRIO_PLATFORM_UNIX)
     signal(SIGFPE, signal_handler);
 # endif
-    
+
 #endif
   }
   return result;
@@ -381,7 +381,7 @@ TRIO_ARGS1((number),
    * the conservative approach and only use it for UNIX95.
    */
   return isnan(number);
-  
+
 #elif defined(TRIO_COMPILER_MSVC) || defined(TRIO_COMPILER_BCB)
   /*
    * Microsoft Visual C++ and Borland C++ Builder have an _isnan()
@@ -398,20 +398,20 @@ TRIO_ARGS1((number),
   int is_special_quantity;
 
   is_special_quantity = trio_is_special_quantity(number, &has_mantissa);
-  
+
   return (is_special_quantity && has_mantissa);
-  
+
 #else
   /*
    * Fallback solution
    */
   int status;
   double integral, fraction;
-  
+
 # if defined(TRIO_PLATFORM_UNIX)
   void (*signal_handler)(int) = signal(SIGFPE, SIG_IGN);
 # endif
-  
+
   status = (/*
 	     * NaN is the only number which does not compare to itself
 	     */
@@ -422,13 +422,13 @@ TRIO_ARGS1((number),
 	    ((number != 0.0) &&
 	     (fraction = modf(number, &integral),
 	      integral == fraction)));
-  
+
 # if defined(TRIO_PLATFORM_UNIX)
   signal(SIGFPE, signal_handler);
 # endif
-  
+
   return status;
-  
+
 #endif
 }
 
@@ -459,7 +459,7 @@ TRIO_ARGS1((number),
   return isinf(number)
     ? ((number > 0.0) ? 1 : -1)
     : 0;
-  
+
 #elif defined(TRIO_COMPILER_MSVC) || defined(TRIO_COMPILER_BCB)
   /*
    * Microsoft Visual C++ and Borland C++ Builder have an _fpclass()
@@ -478,7 +478,7 @@ TRIO_ARGS1((number),
   int is_special_quantity;
 
   is_special_quantity = trio_is_special_quantity(number, &has_mantissa);
-  
+
   return (is_special_quantity && !has_mantissa)
     ? ((number < 0.0) ? -1 : 1)
     : 0;
@@ -488,23 +488,23 @@ TRIO_ARGS1((number),
    * Fallback solution.
    */
   int status;
-  
+
 # if defined(TRIO_PLATFORM_UNIX)
   void (*signal_handler)(int) = signal(SIGFPE, SIG_IGN);
 # endif
-  
+
   double infinity = trio_pinf();
-  
+
   status = ((number == infinity)
 	    ? 1
 	    : ((number == -infinity) ? -1 : 0));
-  
+
 # if defined(TRIO_PLATFORM_UNIX)
   signal(SIGFPE, signal_handler);
 # endif
-  
+
   return status;
-  
+
 #endif
 }
 
@@ -526,7 +526,7 @@ TRIO_ARGS1((number),
    * C99 defines isfinite() as a macro.
    */
   return isfinite(number);
-  
+
 #elif defined(TRIO_COMPILER_MSVC) || defined(TRIO_COMPILER_BCB)
   /*
    * Microsoft Visual C++ and Borland C++ Builder use _finite().
@@ -547,7 +547,7 @@ TRIO_ARGS1((number),
    * Fallback solution.
    */
   return ((trio_isinf(number) == 0) && (trio_isnan(number) == 0));
-  
+
 #endif
 }
 
@@ -596,7 +596,7 @@ TRIO_ARGS2((number, is_negative),
 #  define TRIO_NEGATIVE_ZERO FP_NEG_ZERO
 #  define TRIO_POSITIVE_NORMAL FP_POS_NORM
 #  define TRIO_NEGATIVE_NORMAL FP_NEG_NORM
-  
+
 # elif defined(TRIO_COMPILER_MSVC) || defined(TRIO_COMPILER_BCB)
   /*
    * Microsoft Visual C++ and Borland C++ Builder have an _fpclass()
@@ -613,7 +613,7 @@ TRIO_ARGS2((number, is_negative),
 #  define TRIO_NEGATIVE_ZERO _FPCLASS_NZ
 #  define TRIO_POSITIVE_NORMAL _FPCLASS_PN
 #  define TRIO_NEGATIVE_NORMAL _FPCLASS_NN
-  
+
 # elif defined(FP_PLUS_NORM)
   /*
    * HP-UX 9.x and 10.x have an fpclassify() function, that is different
@@ -678,13 +678,13 @@ TRIO_ARGS2((number, is_negative),
     *is_negative = (number < 0.0);
     return TRIO_FP_NORMAL;
   }
-  
+
 # else
   /*
    * Fallback solution.
    */
   int rc;
-  
+
   if (number == 0.0) {
     /*
      * In IEEE 754 the sign of zero is ignored in comparisons, so we
@@ -716,7 +716,7 @@ TRIO_ARGS2((number, is_negative),
   }
   *is_negative = (number < 0.0);
   return TRIO_FP_NORMAL;
-  
+
 # endif
 #endif
 }
@@ -734,7 +734,7 @@ TRIO_ARGS1((number),
 	   double number)
 {
   int is_negative;
-  
+
   (void)trio_fpclassify_and_signbit(number, &is_negative);
   return is_negative;
 }
@@ -753,7 +753,7 @@ TRIO_ARGS1((number),
 	   double number)
 {
   int dummy;
-  
+
   return trio_fpclassify_and_signbit(number, &dummy);
 }
 
@@ -828,7 +828,7 @@ int main(TRIO_NOARGS)
   print_class("NNorm", -1.0);
   print_class("PSub", 1.01e-307 - 1.00e-307);
   print_class("NSub", 1.00e-307 - 1.01e-307);
-  
+
   printf("NaN : %4g 0x%02x%02x%02x%02x%02x%02x%02x%02x (%2d, %2d)\n",
 	 my_nan,
 	 ((unsigned char *)&my_nan)[0],
@@ -862,11 +862,11 @@ int main(TRIO_NOARGS)
 	 ((unsigned char *)&my_ninf)[6],
 	 ((unsigned char *)&my_ninf)[7],
 	 trio_isnan(my_ninf), trio_isinf(my_ninf));
-  
+
 # if defined(TRIO_PLATFORM_UNIX)
   signal_handler = signal(SIGFPE, SIG_IGN);
 # endif
-  
+
   my_pinf = DBL_MAX + DBL_MAX;
   my_ninf = -my_pinf;
   my_nan = my_pinf / my_pinf;
@@ -874,7 +874,7 @@ int main(TRIO_NOARGS)
 # if defined(TRIO_PLATFORM_UNIX)
   signal(SIGFPE, signal_handler);
 # endif
-  
+
   printf("NaN : %4g 0x%02x%02x%02x%02x%02x%02x%02x%02x (%2d, %2d)\n",
 	 my_nan,
 	 ((unsigned char *)&my_nan)[0],
@@ -908,7 +908,7 @@ int main(TRIO_NOARGS)
 	 ((unsigned char *)&my_ninf)[6],
 	 ((unsigned char *)&my_ninf)[7],
 	 trio_isnan(my_ninf), trio_isinf(my_ninf));
-  
+
   return 0;
 }
 #endif

@@ -28,7 +28,7 @@
  * Use autoconf defines if present. Packages using trio must define
  * HAVE_CONFIG_H as a compiler option themselves.
  */
-#if defined(HAVE_CONFIG_H)
+#if defined(TRIO_HAVE_CONFIG_H)
 # include "config.h"
 #endif
 
@@ -155,45 +155,59 @@ void trio_locale_set_grouping TRIO_PROTO((char *grouping));
 #ifdef TRIO_REPLACE_STDIO
 /* Replace the <stdio.h> functions */
 #ifndef HAVE_PRINTF
+# undef printf
 # define printf trio_printf
 #endif
 #ifndef HAVE_VPRINTF
+# undef vprintf
 # define vprintf trio_vprintf
 #endif
 #ifndef HAVE_FPRINTF
+# undef fprintf
 # define fprintf trio_fprintf
 #endif
 #ifndef HAVE_VFPRINTF
+# undef vfprintf
 # define vfprintf trio_vfprintf
 #endif
 #ifndef HAVE_SPRINTF
+# undef sprintf
 # define sprintf trio_sprintf
 #endif
 #ifndef HAVE_VSPRINTF
+# undef vsprintf
 # define vsprintf trio_vsprintf
 #endif
 #ifndef HAVE_SNPRINTF
+# undef snprintf
 # define snprintf trio_snprintf
 #endif
 #ifndef HAVE_VSNPRINTF
+# undef vsnprintf
 # define vsnprintf trio_vsnprintf
 #endif
 #ifndef HAVE_SCANF
+# undef scanf
 # define scanf trio_scanf
 #endif
 #ifndef HAVE_VSCANF
+# undef vscanf
 # define vscanf trio_vscanf
 #endif
 #ifndef HAVE_FSCANF
+# undef fscanf
 # define fscanf trio_fscanf
 #endif
 #ifndef HAVE_VFSCANF
+# undef vfscanf
 # define vfscanf trio_vfscanf
 #endif
 #ifndef HAVE_SSCANF
+# undef sscanf
 # define sscanf trio_sscanf
 #endif
 #ifndef HAVE_VSSCANF
+# undef vsscanf
 # define vsscanf trio_vsscanf
 #endif
 /* These aren't stdio functions, but we make them look similar */

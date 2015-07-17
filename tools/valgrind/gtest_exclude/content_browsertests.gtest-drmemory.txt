@@ -41,3 +41,19 @@ PluginTest.VerifyPluginWindowRect
 
 # http://crbug.com/484852
 PluginTest.NPObjectIdentity
+
+# http://crbug.com/500070
+DumpAccessibilityEventsTest.AccessibilityEventsListboxNext
+
+# https://crbug.com/500576
+NavigationControllerBrowserTest.DontIgnoreBackAfterNavEntryLimit
+
+# https://crbug.com/504186
+WebRtcBrowserTest.CallInsideIframe
+
+# https://crbug.com/504187
+WebRtcGetUserMediaBrowserTest.TestGetUserMediaAspectRatio1To1
+WebRtcGetUserMediaBrowserTest.TestGetUserMediaAspectRatio16To9
+WebRtcGetUserMediaBrowserTest.TestGetUserMediaAspectRatio4To3
+WebRtcGetUserMediaBrowserTest.TwoGetUserMediaAndCheckCallbackAfterFailure
+WebRtcGetUserMediaBrowserTest.TwoGetUserMediaWithEqualConstraints

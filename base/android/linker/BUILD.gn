@@ -9,7 +9,7 @@ assert(is_android)
 # GYP: //base/base.gyp:chromium_android_linker
 shared_library("chromium_android_linker") {
   sources = [
-    "linker_jni.cc",
+    "legacy_linker_jni.cc",
   ]
 
   # The NDK contains the crazy_linker here:
