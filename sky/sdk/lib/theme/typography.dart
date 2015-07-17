@@ -9,20 +9,21 @@ import 'dart:sky';
 import 'package:sky/painting/text_style.dart';
 
 // TODO(eseidel): Font weights are supposed to be language relative!
+// TODO(jackson): Baseline should be language relative!
 // These values are for English-like text.
 class TextTheme {
   TextTheme._(Color color54, Color color87)
-    : display4 = new TextStyle(fontSize: 112.0, fontWeight: FontWeight.w100, color: color54),
-      display3 = new TextStyle(fontSize:  56.0, fontWeight: FontWeight.w400, color: color54),
-      display2 = new TextStyle(fontSize:  45.0, fontWeight: FontWeight.w400, color: color54, height: 48.0 / 45.0),
-      display1 = new TextStyle(fontSize:  34.0, fontWeight: FontWeight.w400, color: color54, height: 40.0 / 34.0),
-      headline = new TextStyle(fontSize:  24.0, fontWeight: FontWeight.w400, color: color87, height: 32.0 / 24.0),
-      title    = new TextStyle(fontSize:  20.0, fontWeight: FontWeight.w500, color: color87, height: 28.0 / 20.0),
-      subhead  = new TextStyle(fontSize:  16.0, fontWeight: FontWeight.w400, color: color87, height: 24.0 / 16.0),
-      body2    = new TextStyle(fontSize:  14.0, fontWeight: FontWeight.w500, color: color87, height: 24.0 / 14.0),
-      body1    = new TextStyle(fontSize:  14.0, fontWeight: FontWeight.w400, color: color87, height: 20.0 / 14.0),
-      caption  = new TextStyle(fontSize:  12.0, fontWeight: FontWeight.w400, color: color54),
-      button   = new TextStyle(fontSize:  14.0, fontWeight: FontWeight.w500, color: color87);
+    : display4 = new TextStyle(fontSize: 112.0, fontWeight: FontWeight.w100, color: color54, textBaseline: TextBaseline.alphabetic),
+      display3 = new TextStyle(fontSize:  56.0, fontWeight: FontWeight.w400, color: color54, textBaseline: TextBaseline.alphabetic),
+      display2 = new TextStyle(fontSize:  45.0, fontWeight: FontWeight.w400, color: color54, height: 48.0 / 45.0, textBaseline: TextBaseline.alphabetic),
+      display1 = new TextStyle(fontSize:  34.0, fontWeight: FontWeight.w400, color: color54, height: 40.0 / 34.0, textBaseline: TextBaseline.alphabetic),
+      headline = new TextStyle(fontSize:  24.0, fontWeight: FontWeight.w400, color: color87, height: 32.0 / 24.0, textBaseline: TextBaseline.alphabetic),
+      title    = new TextStyle(fontSize:  20.0, fontWeight: FontWeight.w500, color: color87, height: 28.0 / 20.0, textBaseline: TextBaseline.alphabetic),
+      subhead  = new TextStyle(fontSize:  16.0, fontWeight: FontWeight.w400, color: color87, height: 24.0 / 16.0, textBaseline: TextBaseline.alphabetic),
+      body2    = new TextStyle(fontSize:  14.0, fontWeight: FontWeight.w500, color: color87, height: 24.0 / 14.0, textBaseline: TextBaseline.alphabetic),
+      body1    = new TextStyle(fontSize:  14.0, fontWeight: FontWeight.w400, color: color87, height: 20.0 / 14.0, textBaseline: TextBaseline.alphabetic),
+      caption  = new TextStyle(fontSize:  12.0, fontWeight: FontWeight.w400, color: color54, textBaseline: TextBaseline.alphabetic),
+      button   = new TextStyle(fontSize:  14.0, fontWeight: FontWeight.w500, color: color87, textBaseline: TextBaseline.alphabetic);
 
   final TextStyle display4;
   final TextStyle display3;
