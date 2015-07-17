@@ -13,7 +13,7 @@ git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git
 export PATH="$(pwd)/depot_tools:${PATH}"
 
 # Get dependencies.
-sudo apt-get install libdbus-1-dev libgconf2-dev bison gperf wdiff python-openssl
+sudo apt-get install libdbus-1-dev libgconf2-dev bison gperf wdiff python-openssl libxtst-dev
 sudo easy_install pip
 sudo pip install requests
 
