@@ -51,15 +51,12 @@
   "ui/resources/ui_resources.grd": {
     "structures": [5500],
   },
+  "ui/views/resources/views_resources.grd": {
+    "structures": [5800],
+  },
   "ash/resources/ash_resources.grd": {
     "includes": [6100],
     "structures": [6150],
-  },
-  "athena/resources/athena_resources.grd": {
-    "structures": [6400],
-  },
-  "athena/strings/athena_strings.grd": {
-    "messages": [6500],
   },
   "chrome/app/theme/theme_resources.grd": {
     "structures": [7000],
@@ -224,9 +221,6 @@
   "ui/login/login_resources.grd": {
     "includes": [28310],
   },
-  "ui/oobe/oobe_resources.grd": {
-    "includes": [28320],
-  },
   "chrome/browser/resources/translate_internals_resources.grd": {
     "includes": [28510],
   },
@@ -247,9 +241,6 @@
   },
   "components/resources/components_scaled_resources.grd": {
     "structures": [30310],
-  },
-  "components/resources/enhanced_bookmarks/enhanced_bookmarks_resources.grd": {
-    "includes": [30340],
   },
   "third_party/WebKit/public/blink_resources.grd": {
     "includes": [30350],

@@ -13,6 +13,9 @@ if (current_cpu == "mipsel" || current_cpu == "mips64el") {
 if (is_posix) {
   import("//build/config/gcc/gcc_version.gni")
 }
+if (is_win) {
+  import("//build/config/win/visual_studio_version.gni")
+}
 
 import("//build/toolchain/ccache.gni")
 import("//build/config/sanitizers/sanitizers.gni")
@@ -48,8 +51,8 @@ declare_args() {
   # with some utilities such as icecc and ccache. Requires gold and
   # gcc >= 4.8 or clang.
   # http://gcc.gnu.org/wiki/DebugFission
-  use_debug_fission =
-      !is_win && use_gold && linux_use_bundled_binutils && !use_ccache
+  use_debug_fission = is_debug && !is_win && use_gold &&
+                      linux_use_bundled_binutils && !use_ccache
 
   if (is_win) {
     # Whether the VS xtree header has been patched to disable warning 4702. If
@@ -126,6 +129,14 @@ config("compiler") {
         ]
       } else {
         cflags += [ "-m64" ]
+      }
+      if (exec_script("//build/win/use_ansi_codes.py", [], "trim string") ==
+          "True") {
+        cflags += [
+          # cmd.exe doesn't understand ANSI escape codes by default,
+          # so only enable them if something emulating them is around.
+          "-fansi-escape-codes",
+        ]
       }
     }
   } else {
@@ -405,13 +416,6 @@ config("compiler") {
     } else {
       cflags += [ "-funwind-tables" ]
     }
-
-    if (is_clang && !is_nacl && !is_debug) {
-      # Non-unique section names appears to make linker dead stripping
-      # less effective. See http://crbug.com/483026#c20
-      # TODO(hans): Remove this if resolved upstream.
-      cflags += [ "-funique-section-names" ]
-    }
   }
 
   # Linux/Android common flags setup.
@@ -463,17 +467,7 @@ config("compiler") {
 
     if (!is_asan && !is_msan && !is_lsan && !is_tsan) {
       # TODO(brettw) common.gypi has this only for target toolset.
-      if (current_cpu == "x64") {
-        # --icf=safe disables much more folding on x86_64 than elsewhere, see
-        # http://crbug.com/492177.  Turning it on saves over 12 MB of binary
-        # size, but it seems to regress cold startup time by over a second
-        # (see http://crbug.com/492809).
-        # TODO(thakis): Check if disabling ICF would inmprove android cold start
-        # times by several seconds too.
-        ldflags += [ "-Wl,--icf=safe" ]
-      } else {
-        ldflags += [ "-Wl,--icf=all" ]
-      }
+      ldflags += [ "-Wl,--icf=all" ]
     }
 
     # TODO(thestig): Make this flag work with GN.
@@ -657,8 +651,6 @@ config("runtime_library") {
     # arm-linux-androideabi-4.4.3 toolchain (circa Gingerbread) will exhibit
     # strange errors. The include ordering here is important; change with
     # caution.
-    android_libcpp_root = "$android_ndk_root/sources/cxx-stl/llvm-libc++"
-
     cflags += [
       "-isystem" +
           rebase_path("$android_libcpp_root/libcxx/include", root_build_dir),
@@ -671,13 +663,6 @@ config("runtime_library") {
     ]
 
     lib_dirs += [ "$android_libcpp_root/libs/$android_app_abi" ]
-
-    if (component_mode == "shared_library") {
-      android_libcpp_library = "c++_shared"
-    } else {
-      android_libcpp_library = "c++_static"
-    }
-
     libs += [ "$android_libcpp_library" ]
 
     if (current_cpu == "mipsel") {
@@ -767,6 +752,12 @@ if (is_win) {
     # prevent it.
     "/wd4503",
 
+    # Warning C4589 says: "Constructor of abstract class ignores
+    # initializer for virtual base class." Disable this warning because it
+    # is flaky in VS 2015 RTM. It triggers on compiler generated
+    # copy-constructors in some cases.
+    "/wd4589",
+
     # C4611: interaction between 'function' and C++ object destruction is
     #        non-portable
     # This warning is unavoidable when using e.g. setjmp/longjmp.  MSDN
@@ -803,40 +794,14 @@ if (is_win) {
   # Keep this in sync with the similar block in build/common.gypi
   if (is_clang) {
     default_warning_flags += [
-      # TODO(hans): Make this list shorter eventually.
-      "-Qunused-arguments",
-      "-Wno-c++11-compat-deprecated-writable-strings",
-      "-Wno-deprecated-declarations",
-      "-Wno-empty-body",
-      "-Wno-enum-conversion",
-      "-Wno-extra-tokens",
-      "-Wno-ignored-attributes",
-      "-Wno-incompatible-pointer-types",
-      "-Wno-int-to-void-pointer-cast",
-      "-Wno-invalid-noreturn",
-      "-Wno-logical-op-parentheses",
-      "-Wno-microsoft",
-      "-Wno-missing-braces",
-      "-Wno-missing-declarations",
-      "-Wno-msvc-include",
-      "-Wno-null-dereference",
-      "-Wno-overloaded-virtual",
-      "-Wno-parentheses",
-      "-Wno-pointer-sign",
-      "-Wno-reorder",
-      "-Wno-return-type-c-linkage",
-      "-Wno-self-assign",
-      "-Wno-sometimes-uninitialized",
-      "-Wno-switch",
-      "-Wno-tautological-compare",
-      "-Wno-unknown-pragmas",
-      "-Wno-unsequenced",
-      "-Wno-unused-function",
-      "-Wno-unused-private-field",
-      "-Wno-unused-value",
-      "-Wno-unused-variable",
+      # TODO(hans): Make this list shorter eventually, http://crbug.com/504657
+      "-Qunused-arguments",  # http://crbug.com/504658
+      "-Wno-microsoft",  # http://crbug.com/505296
+      "-Wno-switch",  # http://crbug.com/505308
+      "-Wno-unknown-pragmas",  # http://crbug.com/505314
+      "-Wno-unused-function",  # http://crbug.com/505316
+      "-Wno-unused-value",  # http://crbug.com/505318
       "-Wno-unused-local-typedef",  # http://crbug.com/411648
-      "-Wno-inconsistent-missing-override",  #http://crbug.com/428099
     ]
   }
 } else {
@@ -943,8 +908,11 @@ if (is_clang) {
   if (!is_nacl) {
     # Flags NaCl does not recognize.
     default_warning_flags += [
-      # TODO(hans): Get this cleaned up.
+      # TODO(hans): Get this cleaned up, http://crbug.com/428099
       "-Wno-inconsistent-missing-override",
+
+      # TODO(thakis): Enable this, crbug.com/507717
+      "-Wno-shift-negative-value",
     ]
   }
 }
@@ -1014,6 +982,18 @@ config("no_chromium_code") {
     # not support this option, since they are usually using gcc 4.2.1, which
     # does not have this flag yet.
     cflags += [ "-Wno-unused-result" ]
+  }
+
+  if (is_clang) {
+    cflags += [
+      # TODO(mgiuca): Move this suppression into individual third-party
+      # libraries as required. http://crbug.com/505301.
+      "-Wno-overloaded-virtual",
+
+      # Lots of third-party libraries have unused variables. Instead of
+      # suppressing them individually, we just blanket suppress them here.
+      "-Wno-unused-variable",
+    ]
   }
 
   if (is_linux || is_android) {
@@ -1088,12 +1068,11 @@ config("no_size_t_to_int_warning") {
 #   configs += [ "//build/config/compiler/optimize_max" ]
 
 # Shared settings for both "optimize" and "optimize_max" configs.
+# IMPORTANT: On Windows "/O1" and "/O2" must go before the common flags.
 if (is_win) {
   common_optimize_on_cflags = [
-    "/O2",
-    "/Ob2",  # both explicit and auto inlining.
-    "/Oy-",  # disable omitting frame pointers, must be after /o2.
-    "/Os",  # favor size over speed.
+    "/Ob2",  # Both explicit and auto inlining.
+    "/Oy-",  # Disable omitting frame pointers, must be after /O2.
   ]
   if (!is_asan) {
     common_optimize_on_cflags += [
@@ -1159,15 +1138,16 @@ if (is_win) {
 
 # Default "optimization on" config. On Windows, this favors size over speed.
 config("optimize") {
-  cflags = common_optimize_on_cflags
-  ldflags = common_optimize_on_ldflags
   if (is_win) {
-    cflags += [ "/Os" ]  # favor size over speed.
+    # Favor size over speed, /O1 must be before the common flags. The GYP
+    # build also specifies /Os and /GF but these are implied by /O1.
+    cflags = [ "/O1" ] + common_optimize_on_cflags + [ "/Oi" ]
   } else if (is_android || is_ios) {
-    cflags += [ "-Os" ]  # Favor size over speed.
+    cflags = [ "-Os" ] + common_optimize_on_cflags  # Favor size over speed.
   } else {
-    cflags += [ "-O2" ]
+    cflags = [ "-O2" ] + common_optimize_on_cflags
   }
+  ldflags = common_optimize_on_ldflags
 }
 
 # Turn off optimizations.
@@ -1199,11 +1179,11 @@ config("no_optimize") {
 # optimization and link-time code generation which is very expensive and should
 # be used sparingly.
 config("optimize_max") {
-  cflags = common_optimize_on_cflags
   ldflags = common_optimize_on_ldflags
   if (is_win) {
-    cflags -= [ "/Os" ]
-    cflags += [ "/Ot" ]  # Favor speed over size.
+    # Favor speed over size, /O2 must be before the common flags. The GYP
+    # build also specifies /Ot, /Oi, and /GF, but these are implied by /O2.
+    cflags = [ "/O2" ] + common_optimize_on_cflags
     if (is_official_build) {
       # TODO(GYP): TODO(dpranke): Should these only be on in an official
       # build, or on all the time? For now we'll require official build so
@@ -1220,7 +1200,7 @@ config("optimize_max") {
       ldflags += [ "/LTCG" ]
     }
   } else {
-    cflags += [ "-O2" ]
+    cflags = [ "-O2" ] + common_optimize_on_cflags
   }
 }
 

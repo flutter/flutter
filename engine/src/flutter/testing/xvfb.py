@@ -3,11 +3,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-"""Runs the test with xvfb on linux. Runs the test normally on other platforms.
-
-For simplicity in gyp targets, this script just runs the test normal on
-non-linux platforms.
-"""
+"""Runs tests with Xvfb and Openbox on Linux and normally on other platforms."""
 
 import os
 import platform
@@ -18,120 +14,101 @@ import sys
 import test_env
 
 
-def kill(pid):
-  """Kills a process and traps exception if the process doesn't exist anymore.
-  """
-  # If the process doesn't exist, it raises an exception that we can ignore.
+def kill(proc):
+  """Kills |proc| and ignores exceptions thrown for non-existent processes."""
   try:
-    os.kill(pid, signal.SIGKILL)
+    if proc and proc.pid:
+      os.kill(proc.pid, signal.SIGKILL)
   except OSError:
     pass
-
-
-def get_xvfb_path(server_dir):
-  """Figures out which X server to use."""
-  xvfb_path = os.path.join(server_dir, 'Xvfb.' + platform.architecture()[0])
-  if not os.path.exists(xvfb_path):
-    xvfb_path = os.path.join(server_dir, 'Xvfb')
-  if not os.path.exists(xvfb_path):
-    print >> sys.stderr, (
-        'No Xvfb found in designated server path: %s' % server_dir)
-    raise Exception('No virtual server')
-  return xvfb_path
-
-
-def start_xvfb(xvfb_path, display):
-  """Starts a virtual X server that we run the tests in.
-
-  This makes it so we can run the tests even if we didn't start the tests from
-  an X session.
-
-  Args:
-    xvfb_path: Path to Xvfb.
-  """
-  cmd = [xvfb_path, display, '-screen', '0', '1024x768x24', '-ac',
-         '-nolisten', 'tcp', '-dpi', '96']
-  try:
-    proc = subprocess.Popen(
-        cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-  except OSError:
-    print >> sys.stderr, 'Failed to run %s' % ' '.join(cmd)
-    return
-  return proc
 
 
 def wait_for_xvfb(xdisplaycheck, env):
   """Waits for xvfb to be fully initialized by using xdisplaycheck."""
   try:
-    _logs = subprocess.check_output(
-        [xdisplaycheck],
-        stderr=subprocess.STDOUT,
-        env=env)
+    subprocess.check_output([xdisplaycheck], stderr=subprocess.STDOUT, env=env)
   except OSError:
     print >> sys.stderr, 'Failed to load %s with cwd=%s' % (
         xdisplaycheck, os.getcwd())
     return False
   except subprocess.CalledProcessError as e:
-    print >> sys.stderr, (
-        'Xvfb failed to load properly (code %d) according to %s' %
-        (e.returncode, xdisplaycheck))
+    print >> sys.stderr, ('Xvfb failed to load (code %d) according to %s' %
+                          (e.returncode, xdisplaycheck))
     return False
 
   return True
 
 
-def run_executable(cmd, build_dir, env):
-  """Runs an executable within a xvfb buffer on linux or normally on other
-  platforms.
+def should_start_xvfb(env):
+  """Xvfb is only used on Linux and shouldn't be invoked recursively."""
+  return sys.platform == 'linux2' and env.get('_CHROMIUM_INSIDE_XVFB') != '1'
 
-  Requires that both xvfb and openbox are installed on linux.
 
-  Detects recursion with an environment variable and do not create a recursive X
-  buffer if present.
+def start_xvfb(env, build_dir, xvfb_path='Xvfb', display=':9'):
+  """Start a virtual X server that can run tests without an existing X session.
+
+  Returns the Xvfb and Openbox process Popen objects, or None on failure.
+  The |env| dictionary is modified to set the DISPLAY and prevent re-entry.
+
+  Args:
+    env:       The os.environ dictionary [copy] to check for re-entry.
+    build_dir: The path of the build directory, used for xdisplaycheck.
+    xvfb_path: The path to Xvfb.
+    display:   The X display number to use.
   """
-  # First look if we are inside a display.
-  if env.get('_CHROMIUM_INSIDE_XVFB') == '1':
-    # No need to recurse.
-    return test_env.run_executable(cmd, env)
+  assert should_start_xvfb(env)
+  assert env.get('_CHROMIUM_INSIDE_XVFB') != '1'
+  env['_CHROMIUM_INSIDE_XVFB'] = '1'
+  env['DISPLAY'] = display
+  xvfb_proc = None
+  openbox_proc = None
 
-  pid = None
-  xvfb = 'Xvfb'
   try:
-    if sys.platform == 'linux2':
-      # Defaults to X display 9.
-      display = ':9'
-      xvfb_proc = start_xvfb(xvfb, display)
-      if not xvfb_proc or not xvfb_proc.pid:
-        return 1
-      env['DISPLAY'] = display
-      if not wait_for_xvfb(os.path.join(build_dir, 'xdisplaycheck'), env):
-        rc = xvfb_proc.poll()
-        if rc is None:
-          print 'Xvfb still running, stopping.'
-          xvfb_proc.terminate()
-        else:
-          print 'Xvfb exited, code %d' % rc
+    xvfb_cmd = [xvfb_path, display, '-screen', '0', '1024x768x24', '-ac',
+                '-nolisten', 'tcp', '-dpi', '96']
+    xvfb_proc = subprocess.Popen(xvfb_cmd, stdout=subprocess.PIPE,
+                                 stderr=subprocess.STDOUT)
 
-        print 'Xvfb output:'
-        for l in xvfb_proc.communicate()[0].splitlines():
-          print '> %s' % l
+    if not wait_for_xvfb(os.path.join(build_dir, 'xdisplaycheck'), env):
+      rc = xvfb_proc.poll()
+      if rc is None:
+        print 'Xvfb still running after xdisplaycheck failure, stopping.'
+        kill(xvfb_proc)
+      else:
+        print 'Xvfb exited (code %d) after xdisplaycheck failure.' % rc
+      print 'Xvfb output:'
+      for l in xvfb_proc.communicate()[0].splitlines():
+        print '> %s' % l
+      return (None, None)
 
-        return 3
-      # Inhibit recursion.
-      env['_CHROMIUM_INSIDE_XVFB'] = '1'
-      # Some ChromeOS tests need a window manager. Technically, it could be
-      # another script but that would be overkill.
-      try:
-        wm_cmd = ['openbox']
-        subprocess.Popen(
-            wm_cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, env=env)
-      except OSError:
-        print >> sys.stderr, 'Failed to run %s' % ' '.join(wm_cmd)
-        return 1
+    # Some ChromeOS tests need a window manager.
+    openbox_proc = subprocess.Popen('openbox', stdout=subprocess.PIPE,
+                                    stderr=subprocess.STDOUT, env=env)
+  except OSError as e:
+    print >> sys.stderr, 'Failed to start Xvfb or Openbox: %s' % str(e)
+    kill(xvfb_proc)
+    kill(openbox_proc)
+    return (None, None)
+
+  return (xvfb_proc, openbox_proc)
+
+
+def run_executable(cmd, build_dir, env):
+  """Runs an executable within Xvfb on Linux or normally on other platforms.
+
+  Returns the exit code of the specified commandline, or 1 on failure.
+  """
+  xvfb = None
+  openbox = None
+  if should_start_xvfb(env):
+    (xvfb, openbox) = start_xvfb(env, build_dir)
+    if not xvfb or not xvfb.pid or not openbox or not openbox.pid:
+      return 1
+  try:
     return test_env.run_executable(cmd, env)
   finally:
-    if pid:
-      kill(pid)
+    kill(xvfb)
+    kill(openbox)
 
 
 def main():

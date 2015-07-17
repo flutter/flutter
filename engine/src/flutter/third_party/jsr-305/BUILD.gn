@@ -1,6 +1,7 @@
 import("//build/config/android/rules.gni")
 
-android_library("jsr_305_javalib") {
+java_library("jsr_305_javalib") {
+  supports_android = true
   java_files = [
     "src/ri/src/main/java/javax/annotation/PropertyKey.java",
     "src/ri/src/main/java/javax/annotation/CheckForSigned.java",

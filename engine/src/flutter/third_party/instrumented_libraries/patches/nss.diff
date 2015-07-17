@@ -1,0 +1,30 @@
+diff -rupN ./nss/lib/freebl/Makefile ../nss-3.17.1-patched/nss/lib/freebl/Makefile
+--- ./nss/lib/freebl/Makefile	2014-09-23 23:09:22.000000000 +0400
++++ ../nss-3.17.1-patched/nss/lib/freebl/Makefile	2014-09-26 20:36:05.639317008 +0400
+@@ -196,18 +196,20 @@ endif # Darwin
+ 
+ ifeq ($(OS_TARGET),Linux)
+ ifeq ($(CPU_ARCH),x86_64)
+-    ASFILES  = arcfour-amd64-gas.s mpi_amd64_gas.s
++#   Disable inline asm in instrumented builds.
++#    ASFILES  = arcfour-amd64-gas.s mpi_amd64_gas.s
+     ASFLAGS += -fPIC -Wa,--noexecstack
+-    DEFINES += -DNSS_BEVAND_ARCFOUR -DMPI_AMD64 -DMP_ASSEMBLY_MULTIPLY
+-    DEFINES += -DNSS_USE_COMBA
++#    DEFINES += -DNSS_BEVAND_ARCFOUR -DMPI_AMD64 -DMP_ASSEMBLY_MULTIPLY
++#    DEFINES += -DNSS_USE_COMBA
+     DEFINES += -DMP_CHAR_STORE_SLOW -DMP_IS_LITTLE_ENDIAN
+ #   DEFINES += -DMPI_AMD64_ADD
+     # comment the next four lines to turn off Intel HW acceleration.
+-    DEFINES += -DUSE_HW_AES -DINTEL_GCM
+-    ASFILES += intel-aes.s intel-gcm.s
++#    DEFINES += -DUSE_HW_AES -DINTEL_GCM
++#    ASFILES += intel-aes.s intel-gcm.s
++#   This is just intrinsics and should be fine.
+     EXTRA_SRCS += intel-gcm-wrap.c
+     INTEL_GCM = 1
+-    MPI_SRCS += mpi_amd64.c mp_comba.c
++#    MPI_SRCS += mpi_amd64.c mp_comba.c
+ endif
+ ifeq ($(CPU_ARCH),x86)
+     ASFILES  = mpi_x86.s

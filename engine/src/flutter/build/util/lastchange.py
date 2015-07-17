@@ -121,7 +121,7 @@ def FetchGitRevision(directory):
   return VersionInfo('git', '%s-%s' % (hsh, pos))
 
 
-def FetchGitSVNURLAndRevision(directory, svn_url_regex):
+def FetchGitSVNURLAndRevision(directory, svn_url_regex, go_deeper):
   """
   Fetch the Subversion URL and revision through Git.
 
@@ -130,7 +130,10 @@ def FetchGitSVNURLAndRevision(directory, svn_url_regex):
   Returns:
     A tuple containing the Subversion URL and revision.
   """
-  proc = RunGitCommand(directory, ['log', '-1', '--format=%b'])
+  git_args = ['log', '-1', '--format=%b']
+  if go_deeper:
+    git_args.append('--grep=git-svn-id')
+  proc = RunGitCommand(directory, git_args)
   if proc:
     output = proc.communicate()[0].strip()
     if proc.returncode == 0 and output:
@@ -149,20 +152,21 @@ def FetchGitSVNURLAndRevision(directory, svn_url_regex):
   return None, None
 
 
-def FetchGitSVNRevision(directory, svn_url_regex):
+def FetchGitSVNRevision(directory, svn_url_regex, go_deeper):
   """
   Fetch the Git-SVN identifier for the local tree.
 
   Errors are swallowed.
   """
-  url, revision = FetchGitSVNURLAndRevision(directory, svn_url_regex)
+  url, revision = FetchGitSVNURLAndRevision(directory, svn_url_regex, go_deeper)
   if url and revision:
     return VersionInfo(url, revision)
   return None
 
 
 def FetchVersionInfo(default_lastchange, directory=None,
-                     directory_regex_prior_to_src_url='chrome|blink|svn'):
+                     directory_regex_prior_to_src_url='chrome|blink|svn',
+                     go_deeper=False):
   """
   Returns the last change (in the form of a branch, revision tuple),
   from some appropriate revision control system.
@@ -171,7 +175,7 @@ def FetchVersionInfo(default_lastchange, directory=None,
       r'.*/(' + directory_regex_prior_to_src_url + r')(/.*)')
 
   version_info = (FetchSVNRevision(directory, svn_url_regex) or
-                  FetchGitSVNRevision(directory, svn_url_regex) or
+                  FetchGitSVNRevision(directory, svn_url_regex, go_deeper) or
                   FetchGitRevision(directory))
   if not version_info:
     if default_lastchange and os.path.exists(default_lastchange):
@@ -256,6 +260,9 @@ def main(argv=None):
                     "file-output-related options.")
   parser.add_option("-s", "--source-dir", metavar="DIR",
                     help="Use repository in the given directory.")
+  parser.add_option("--git-svn-go-deeper", action='store_true',
+                    help="In a Git-SVN repo, dig down to the last committed " +
+                    "SVN change (historic behaviour).")
   opts, args = parser.parse_args(argv[1:])
 
   out_file = opts.output
@@ -274,7 +281,9 @@ def main(argv=None):
   else:
     src_dir = os.path.dirname(os.path.abspath(__file__))
 
-  version_info = FetchVersionInfo(opts.default_lastchange, src_dir)
+  version_info = FetchVersionInfo(opts.default_lastchange,
+                                  directory=src_dir,
+                                  go_deeper=opts.git_svn_go_deeper)
 
   if version_info.revision == None:
     version_info.revision = '0'

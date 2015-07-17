@@ -8,7 +8,6 @@ import argparse
 import logging
 import os
 import socket
-import xmlrpclib
 
 LOGGING_LEVELS = ['DEBUG', 'INFO', 'WARNING', 'WARN', 'ERROR']
 MY_IP = socket.gethostbyname(socket.gethostname())
@@ -36,8 +35,9 @@ def InitLogging():
       datefmt='%H:%M:%S', level=args.verbosity)
 
 
-def ConnectToServer(server):
-  """Connect to an RPC server."""
-  addr = 'http://%s:%d' % (server, SERVER_PORT)
-  logging.debug('Connecting to RPC server at %s', addr)
-  return xmlrpclib.Server(addr, allow_none=True)
+def GetOutputDir():
+  """Get the isolated output directory specified on the command line."""
+  parser = argparse.ArgumentParser()
+  parser.add_argument('--output-dir')
+  args, _ = parser.parse_known_args()
+  return args.output_dir

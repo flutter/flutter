@@ -80,18 +80,16 @@ _DEVICE_PROFILES = [
         'echo Connected > '
         '/sys/bus/i2c/drivers/bq2419x/0-006b/input_cable_state && '
         'dumpsys battery set ac 0 && dumpsys battery set usb 0'),
-    'charge_counter': (
-        '/sys/class/power_supply/max170xx_battery/charge_counter_ext'),
-    'voltage': '/sys/class/power_supply/max170xx_battery/voltage_now',
-    'current': '/sys/class/power_supply/max170xx_battery/current_now',
+    'charge_counter': '/sys/class/power_supply/battery/charge_counter_ext',
+    'voltage': '/sys/class/power_supply/battery/voltage_now',
+    'current': '/sys/class/power_supply/battery/current_now',
   },
   {
     'name': 'Nexus 10',
     'witness_file': None,
     'enable_command': None,
     'disable_command': None,
-    'charge_counter': (
-        '/sys/class/power_supply/ds2784-fuelgauge/charge_counter_ext'),
+    'charge_counter': None,
     'voltage': '/sys/class/power_supply/ds2784-fuelgauge/voltage_now',
     'current': '/sys/class/power_supply/ds2784-fuelgauge/current_now',
 

@@ -80,12 +80,15 @@ template("msvc_toolchain") {
 
     tool("cc") {
       rspfile = "{{output}}.rsp"
+
+      # TODO(brettw) enable this when GN support in the binary has been rolled.
+      #precompiled_header_type = "msvc"
       pdbname = "{{target_out_dir}}/{{target_output_name}}_c.pdb"
       command = "ninja -t msvc -e $env -- $cl /nologo /showIncludes /FC @$rspfile /c {{source}} /Fo{{output}} /Fd$pdbname"
       depsformat = "msvc"
       description = "CC {{output}}"
       outputs = [
-        "{{source_out_dir}}/{{target_output_name}}.{{source_name_part}}.obj",
+        "{{target_out_dir}}/{{target_output_name}}/{{source_name_part}}.obj",
       ]
       rspfile_content = "{{defines}} {{include_dirs}} {{cflags}} {{cflags_c}}"
     }
@@ -93,13 +96,16 @@ template("msvc_toolchain") {
     tool("cxx") {
       rspfile = "{{output}}.rsp"
 
+      # TODO(brettw) enable this when GN support in the binary has been rolled.
+      #precompiled_header_type = "msvc"
+
       # The PDB name needs to be different between C and C++ compiled files.
       pdbname = "{{target_out_dir}}/{{target_output_name}}_cc.pdb"
       command = "ninja -t msvc -e $env -- $cl /nologo /showIncludes /FC @$rspfile /c {{source}} /Fo{{output}} /Fd$pdbname"
       depsformat = "msvc"
       description = "CXX {{output}}"
       outputs = [
-        "{{source_out_dir}}/{{target_output_name}}.{{source_name_part}}.obj",
+        "{{target_out_dir}}/{{target_output_name}}/{{source_name_part}}.obj",
       ]
       rspfile_content = "{{defines}} {{include_dirs}} {{cflags}} {{cflags_cc}}"
     }
@@ -107,7 +113,7 @@ template("msvc_toolchain") {
     tool("rc") {
       command = "$python_path gyp-win-tool rc-wrapper $env rc.exe {{defines}} {{include_dirs}} /fo{{output}} {{source}}"
       outputs = [
-        "{{source_out_dir}}/{{target_output_name}}.{{source_name_part}}.res",
+        "{{target_out_dir}}/{{target_output_name}}/{{source_name_part}}.res",
       ]
       description = "RC {{output}}"
     }
@@ -118,7 +124,7 @@ template("msvc_toolchain") {
       command = "$python_path gyp-win-tool asm-wrapper $env ml.exe {{defines}} {{include_dirs}} /safeseh /c /Fo {{output}} {{source}}"
       description = "ASM {{output}}"
       outputs = [
-        "{{source_out_dir}}/{{target_output_name}}.{{source_name_part}}.obj",
+        "{{target_out_dir}}/{{target_output_name}}/{{source_name_part}}.obj",
       ]
     }
 

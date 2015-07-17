@@ -36,10 +36,9 @@ if (current_toolchain == default_toolchain && target_sysroot != "") {
   # For official builds, use the sysroot checked into the internal source repo
   # so that the builds work on older versions of Linux.
   if (current_cpu == "x64") {
-    sysroot =
-        rebase_path("//chrome/installer/linux/debian_wheezy_amd64-sysroot")
+    sysroot = rebase_path("//build/linux/debian_wheezy_amd64-sysroot")
   } else if (current_cpu == "x86") {
-    sysroot = rebase_path("//chrome/installer/linux/debian_wheezy_i386-sysroot")
+    sysroot = rebase_path("//build/linux/debian_wheezy_i386-sysroot")
   } else {
     # Any other builds don't use a sysroot.
     sysroot = ""

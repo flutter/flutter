@@ -10,6 +10,7 @@ import sys
 import threading
 
 #pylint: disable=relative-import
+import common_lib
 import process
 
 
@@ -49,3 +50,30 @@ class RPCMethods(object):
     """
     t = threading.Thread(target=self._server.shutdown)
     t.start()
+
+  def GetOutputDir(self):
+    """Returns the isolated output directory on the task machine."""
+    return common_lib.GetOutputDir()
+
+  def WriteFile(self, path, text, mode='wb+'):
+    """Writes a file on the task machine."""
+    with open(path, mode) as fh:
+      fh.write(text)
+
+  def ReadFile(self, path, mode='rb'):
+    """Reads a file from the local task machine."""
+    with open(path, mode) as fh:
+      return fh.read()
+
+  def PathJoin(self, *parts):
+    """Performs an os.path.join on the task machine.
+
+    This is needed due to the fact that there is no guarantee that os.sep will
+    be the same across all machines in a particular test. This method will
+    join the path parts locally to ensure the correct separator is used.
+    """
+    return os.path.join(*parts)
+
+  def ListDir(self, path):
+    """Returns the results of os.listdir."""
+    return os.listdir(path)

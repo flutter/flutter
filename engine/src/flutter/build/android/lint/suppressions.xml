@@ -51,11 +51,16 @@ Still reading?
     <ignore path="chrome/android/java/res/drawable-xxxhdpi"/>
     <ignore path="ui/android/java/res/drawable-xxhdpi"/>
     <ignore path="ui/android/java/res/drawable-xxxhdpi"/>
+    <ignore regexp=".*: reader_mode_bar_background.9.png, tabs_moved_htc.png, tabs_moved_nexus.png, tabs_moved_samsung.png$"/>
   </issue>
-  <!-- It is OK for content_shell_apk and chrome_shell_apk to have missing assets. -->
   <issue id="IconLocation">
+    <!-- It is OK for content_shell_apk and chrome_shell_apk to have missing assets. -->
     <ignore path="content/shell/android/java/res/"/>
     <ignore path="chrome/android/shell/res/"/>
+    <!-- Suppression for chrome/test/chromedriver/test/webview_shell/java/res/drawable/icon.png -->
+    <ignore path="res/drawable/icon.png"/>
+    <!-- TODO(lambroslambrou) remove this once crbug.com/502030 is fixed. -->
+    <ignore path="remoting/android/java/res"/>
   </issue>
   <issue id="InconsistentLayout" severity="ignore"/>
   <issue id="InflateParams" severity="ignore"/>
@@ -72,6 +77,7 @@ Still reading?
     <ignore path="org/chromium/base/SysUtils.class"/>
     <ignore path="org/chromium/chrome/browser/TtsPlatformImpl.class"/>
     <ignore path="org/chromium/chrome/browser/TtsPlatformImpl$*.class"/>
+    <ignore path="chrome/android/java/res/values-v17/styles.xml"/>
   </issue>
   <issue id="OldTargetApi">
     <ignore path="AndroidManifest.xml"/>
@@ -87,11 +93,13 @@ Still reading?
   </issue>
   <issue id="SetJavaScriptEnabled" severity="ignore"/>
   <issue id="UnusedResources">
-    <!--
-      TODO(pkotwicz): Re-enable after the chrome_java and chrome_staging_java
-      targets have been merged. crbug.com/484934
-    -->
-    <ignore path="chrome/android/java/res" />
+    <!-- Used by chrome/android/java/AndroidManifest.xml -->
+    <ignore path="chrome/android/java/res/drawable/window_background.xml" />
+    <ignore path="chrome/android/java/res/xml/bookmark_thumbnail_widget_info.xml" />
+    <ignore path="chrome/android/java/res/xml/file_paths.xml" />
+
+    <ignore path="content/shell/android/shell_apk/res/layout/content_shell_activity.xml" />
+    <ignore path="content/shell/android/shell_apk/res/values/strings.xml" />
   </issue>
   <issue id="SignatureOrSystemPermissions" severity="ignore"/>
   <issue id="UnusedAttribute" severity="ignore"/>

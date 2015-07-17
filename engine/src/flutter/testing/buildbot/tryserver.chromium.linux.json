@@ -1,13 +1,22 @@
 {
   "android_chromium_gn_compile_dbg": {
     "additional_compile_targets": [
+      "chrome_public_apk",
+      "chrome_public_test_apk",
       "chrome_shell_apk",
+      "chrome_shell_test_apk",
+      "content_shell_apk",
       "mandoline:all"
     ]
   },
   "android_chromium_gn_compile_rel": {
     "additional_compile_targets": [
+      "chrome_public_apk",
+      "chrome_public_test_apk",
       "chrome_shell_apk",
+      "chrome_shell_test_apk",
+      "content_shell_apk",
+      "content_shell_test_apk",
       "mandoline:all"
     ]
   },
@@ -347,10 +356,6 @@
         ],
         "name": "gyp_flag_compare",
         "script": "gyp_flag_compare.py"
-      },
-      {
-        "name": "mojo_apptest",
-        "script": "mojo_apptest.py"
       }
     ]
   }

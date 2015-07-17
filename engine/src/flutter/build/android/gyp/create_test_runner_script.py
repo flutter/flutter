@@ -57,6 +57,7 @@ def main():
   group = parser.add_argument_group('Test runner path arguments.')
   group.add_argument('--output-directory')
   group.add_argument('--isolate-file-path')
+  group.add_argument('--support-apk')
   args, test_runner_args = parser.parse_known_args()
 
   def RelativizePathToScript(path):
@@ -74,6 +75,9 @@ def main():
   if args.isolate_file_path:
     test_runner_path_args['--isolate-file-path'] = RelativizePathToScript(
         args.isolate_file_path)
+  if args.support_apk:
+    test_runner_path_args['--support-apk'] = RelativizePathToScript(
+        args.support_apk)
 
   with open(args.script_output_path, 'w') as script:
     script.write(SCRIPT_TEMPLATE.format(

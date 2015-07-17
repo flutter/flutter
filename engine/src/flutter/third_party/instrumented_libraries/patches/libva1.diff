@@ -1,0 +1,22 @@
+diff --git a/va/va.c b/va/va.c
+index 6cb17ef..0ba595b 100644
+--- a/va/va.c
++++ b/va/va.c
+@@ -515,15 +515,15 @@ VAStatus vaTerminate (
+   free(old_ctx->vtable_vpp);
+   old_ctx->vtable_vpp = NULL;
+ 
+-  if (VA_STATUS_SUCCESS == vaStatus)
+-      pDisplayContext->vaDestroy(pDisplayContext);
+-
+   VA_TRACE_LOG(va_TraceTerminate, dpy);
+ 
+   va_TraceEnd(dpy);
+ 
+   va_FoolEnd(dpy);
+ 
++  if (VA_STATUS_SUCCESS == vaStatus)
++      pDisplayContext->vaDestroy(pDisplayContext);
++
+   return vaStatus;
+ }

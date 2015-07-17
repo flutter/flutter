@@ -5,7 +5,6 @@
 
 """A utility script for downloading versioned Syzygy binaries."""
 
-import cStringIO
 import hashlib
 import errno
 import json
@@ -17,15 +16,15 @@ import shutil
 import stat
 import sys
 import subprocess
-import urllib2
+import tempfile
+import time
 import zipfile
 
 
 _LOGGER = logging.getLogger(os.path.basename(__file__))
 
-# The URL where official builds are archived.
-_SYZYGY_ARCHIVE_URL = ('https://syzygy-archive.commondatastorage.googleapis.com'
-    '/builds/official/%(revision)s')
+# The relative path where official builds are archived in their GS bucket.
+_SYZYGY_ARCHIVE_PATH = ('/builds/official/%(revision)s')
 
 # A JSON file containing the state of the download directory. If this file and
 # directory state do not agree, then the binaries will be downloaded and
@@ -47,17 +46,6 @@ _RESOURCES = [
   ('binaries.zip', 'binaries', 'exe', None),
   ('symbols.zip', 'symbols', 'exe',
       lambda x: x.filename.endswith('.dll.pdb'))]
-
-
-def _Shell(*cmd, **kw):
-  """Runs |cmd|, returns the results from Popen(cmd).communicate()."""
-  _LOGGER.debug('Executing %s.', cmd)
-  prog = subprocess.Popen(cmd, shell=True, **kw)
-
-  stdout, stderr = prog.communicate()
-  if prog.returncode != 0:
-    raise RuntimeError('Command "%s" returned %d.' % (cmd, prog.returncode))
-  return (stdout, stderr)
 
 
 def _LoadState(output_dir):
@@ -248,12 +236,50 @@ def _CleanState(output_dir, state, dry_run=False):
   return deleted
 
 
-def _Download(url):
-  """Downloads the given URL and returns the contents as a string."""
-  response = urllib2.urlopen(url)
-  if response.code != 200:
-    raise RuntimeError('Failed to download "%s".' % url)
-  return response.read()
+def _FindGsUtil():
+  """Looks for depot_tools and returns the absolute path to gsutil.py."""
+  for path in os.environ['PATH'].split(os.pathsep):
+    path = os.path.abspath(path)
+    git_cl = os.path.join(path, 'git_cl.py')
+    gs_util = os.path.join(path, 'gsutil.py')
+    if os.path.exists(git_cl) and os.path.exists(gs_util):
+      return gs_util
+  return None
+
+
+def _GsUtil(*cmd):
+  """Runs the given command in gsutil with exponential backoff and retries."""
+  gs_util = _FindGsUtil()
+  cmd = [sys.executable, gs_util] + list(cmd)
+
+  retries = 3
+  timeout = 4  # Seconds.
+  while True:
+    _LOGGER.debug('Running %s', cmd)
+    prog = subprocess.Popen(cmd, shell=False)
+    prog.communicate()
+
+    # Stop retrying on success.
+    if prog.returncode == 0:
+      return
+
+    # Raise a permanent failure if retries have been exhausted.
+    if retries == 0:
+      raise RuntimeError('Command "%s" returned %d.' % (cmd, prog.returncode))
+
+    _LOGGER.debug('Sleeping %d seconds and trying again.', timeout)
+    time.sleep(timeout)
+    retries -= 1
+    timeout *= 2
+
+
+def _Download(resource):
+  """Downloads the given GS resource to a temporary file, returning its path."""
+  tmp = tempfile.mkstemp(suffix='syzygy_archive')
+  os.close(tmp[0])
+  url = 'gs://syzygy-archive' + resource
+  _GsUtil('cp', url, tmp[1])
+  return tmp[1]
 
 
 def _InstallBinaries(options, deleted={}):
@@ -261,7 +287,7 @@ def _InstallBinaries(options, deleted={}):
   already been cleaned, as it will refuse to overwrite existing files."""
   contents = {}
   state = { 'revision': options.revision, 'contents': contents }
-  archive_url = _SYZYGY_ARCHIVE_URL % { 'revision': options.revision }
+  archive_path = _SYZYGY_ARCHIVE_PATH % { 'revision': options.revision }
   if options.resources:
     resources = [(resource, resource, '', None)
                  for resource in options.resources]
@@ -278,33 +304,37 @@ def _InstallBinaries(options, deleted={}):
       if not options.dry_run:
         os.makedirs(fulldir)
 
-    # Download the archive.
-    url = archive_url + '/' + base
-    _LOGGER.debug('Retrieving %s archive at "%s".', name, url)
-    data = _Download(url)
+    # Download and read the archive.
+    resource = archive_path + '/' + base
+    _LOGGER.debug('Retrieving %s archive at "%s".', name, resource)
+    path = _Download(resource)
 
     _LOGGER.debug('Unzipping %s archive.', name)
-    archive = zipfile.ZipFile(cStringIO.StringIO(data))
-    for entry in archive.infolist():
-      if not filt or filt(entry):
-        fullpath = os.path.normpath(os.path.join(fulldir, entry.filename))
-        relpath = os.path.relpath(fullpath, options.output_dir)
-        if os.path.exists(fullpath):
-          # If in a dry-run take into account the fact that the file *would*
-          # have been deleted.
-          if options.dry_run and relpath in deleted:
-            pass
-          else:
-            raise Exception('Path already exists: %s' % fullpath)
+    with open(path, 'rb') as data:
+      archive = zipfile.ZipFile(data)
+      for entry in archive.infolist():
+        if not filt or filt(entry):
+          fullpath = os.path.normpath(os.path.join(fulldir, entry.filename))
+          relpath = os.path.relpath(fullpath, options.output_dir)
+          if os.path.exists(fullpath):
+            # If in a dry-run take into account the fact that the file *would*
+            # have been deleted.
+            if options.dry_run and relpath in deleted:
+              pass
+            else:
+              raise Exception('Path already exists: %s' % fullpath)
 
-        # Extract the file and update the state dictionary.
-        _LOGGER.debug('Extracting "%s".', fullpath)
-        if not options.dry_run:
-          archive.extract(entry.filename, fulldir)
-          md5 = _Md5(fullpath)
-          contents[relpath] = md5
-          if sys.platform == 'cygwin':
-            os.chmod(fullpath, os.stat(fullpath).st_mode | stat.S_IXUSR)
+          # Extract the file and update the state dictionary.
+          _LOGGER.debug('Extracting "%s".', fullpath)
+          if not options.dry_run:
+            archive.extract(entry.filename, fulldir)
+            md5 = _Md5(fullpath)
+            contents[relpath] = md5
+            if sys.platform == 'cygwin':
+              os.chmod(fullpath, os.stat(fullpath).st_mode | stat.S_IXUSR)
+
+    _LOGGER.debug('Removing temporary file "%s".', path)
+    os.remove(path)
 
   return state
 
@@ -316,6 +346,9 @@ def _ParseCommandLine():
       help='If true then will simply list actions that would be performed.')
   option_parser.add_option('--force', action='store_true', default=False,
       help='Force an installation even if the binaries are up to date.')
+  option_parser.add_option('--no-cleanup', action='store_true', default=False,
+      help='Allow installation on non-Windows platforms, and skip the forced '
+           'cleanup step.')
   option_parser.add_option('--output-dir', type='string',
       help='The path where the binaries will be replaced. Existing binaries '
            'will only be overwritten if not up to date.')
@@ -408,7 +441,10 @@ def main():
   # wasn't gated on OS types, and those OSes downloaded and installed binaries.
   # This will cleanup orphaned files on those operating systems.
   if sys.platform not in ('win32', 'cygwin'):
-    return _RemoveOrphanedFiles(options)
+    if options.no_cleanup:
+      _LOGGER.debug('Skipping usual cleanup for non-Windows platforms.')
+    else:
+      return _RemoveOrphanedFiles(options)
 
   # Load the current installation state, and validate it against the
   # requested installation.

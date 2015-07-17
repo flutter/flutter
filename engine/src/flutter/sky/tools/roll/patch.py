@@ -7,18 +7,17 @@ import os
 import subprocess
 import utils
 
-def patch_and_filter():
-  """Applies the *.patch files in the current dir and some hardcoded filters."""
-  os.chdir(utils.mojo_root_dir)
+def patch_and_filter(dest_dir):
+  os.chdir(dest_dir)
 
   utils.filter_file("build/landmines.py",
       lambda line: not "gyp_environment" in line)
   utils.commit("filter gyp_environment out of build/landmines.py")
 
-  patch()
+  patch(dest_dir)
 
 
-def patch(relative_patches_dir=os.curdir):
+def patch(dest_dir, relative_patches_dir=os.curdir):
   """Applies the *.patch files in |relative_patches_dir|.
 
   Args:
@@ -32,7 +31,7 @@ def patch(relative_patches_dir=os.curdir):
                              relative_patches_dir)
   assert os.path.isdir(patches_dir)
 
-  os.chdir(utils.mojo_root_dir)
+  os.chdir(dest_dir)
   for p in utils.find(["*.patch"], patches_dir):
     print "applying patch %s" % os.path.basename(p)
     try:

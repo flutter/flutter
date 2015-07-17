@@ -42,6 +42,9 @@ if (is_android) {
 
     # Set to true to run findbugs on JAR targets.
     run_findbugs = false
+
+    # Set to true to enable the Errorprone compiler
+    use_errorprone_java_compiler = false
   }
 
   # Host stuff -----------------------------------------------------------------
@@ -159,12 +162,21 @@ if (is_android) {
   android_gdbserver =
       "$android_ndk_root/prebuilt/$android_prebuilt_arch/gdbserver/gdbserver"
 
-  # libc++ stuff ---------------------------------------------------------------
+  # Toolchain stuff ------------------------------------------------------------
 
+  android_libcpp_root = "$android_ndk_root/sources/cxx-stl/llvm-libc++"
   if (component_mode == "shared_library") {
     android_libcpp_library = "c++_shared"
   } else {
     android_libcpp_library = "c++_static"
+  }
+
+  if (component_mode == "shared_library") {
+    # By appending .cr, we prevent name collisions with libraries already
+    # loaded by the Android zygote.
+    android_product_extension = ".cr.so"
+  } else {
+    android_product_extension = ".so"
   }
 
   # ABI ------------------------------------------------------------------------
