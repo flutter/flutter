@@ -59,7 +59,9 @@ class StockRow extends Component {
             child: new StockArrow(percentChange: stock.percentChange),
             margin: const EdgeDims.only(right: 5.0)
           ),
-          new Flex(children, alignItems: FlexAlignItems.baseline)
+          new Flexible(
+            child: new Flex(children, alignItems: FlexAlignItems.baseline)
+          )
         ])
       )
     );
