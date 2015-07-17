@@ -387,7 +387,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
         break;
     }
 
-    // Position elements. For now, center the flex items in the cross direction
+    // Position elements
     double childMainPosition = leadingSpace;
     child = firstChild;
     while (child != null) {
@@ -406,6 +406,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
           break;
         case FlexAlignItems.baseline:
           childCrossPosition = 0.0;
+          // TODO(jackson): Support for vertical baselines
           if (_direction == FlexDirection.horizontal) {
             // TODO(jackson): Support for non-alphabetic baselines
             double distance = child.getDistanceToBaseline(TextBaseline.alphabetic, onlyReal: true);
