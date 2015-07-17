@@ -181,7 +181,8 @@ def main(argv):
   possible_deps_config_paths = build_utils.ParseGypList(
       options.possible_deps_configs)
 
-  allow_unknown_deps = options.type == 'android_apk'
+  allow_unknown_deps = (options.type == 'android_apk' or
+                        options.type == 'android_resources')
   unknown_deps = [
       c for c in possible_deps_config_paths if not os.path.exists(c)]
   if unknown_deps and not allow_unknown_deps:

@@ -129,7 +129,9 @@ def FilterTestNames(all_tests, gtest_filter):
     Filtered subset of the given list of test names.
   """
   pattern_groups = gtest_filter.split('-')
-  positive_patterns = pattern_groups[0].split(':')
+  positive_patterns = ['*']
+  if pattern_groups[0]:
+    positive_patterns = pattern_groups[0].split(':')
   negative_patterns = None
   if len(pattern_groups) > 1:
     negative_patterns = pattern_groups[1].split(':')

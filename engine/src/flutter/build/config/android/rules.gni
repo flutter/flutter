@@ -544,6 +544,69 @@ template("jinja_template_resources") {
   }
 }
 
+# Creates a resources.zip with locale.pak files placed into appropriate
+# resource configs (e.g. en-GB.pak -> res/raw-en/en_gb.pak). Also generates
+# a locale_paks TypedArray so that resource files can be enumerated at runtime.
+#
+# If this target is included in the deps of an android resources/library/apk,
+# the resources will be included with that target.
+#
+# Variables:
+#   sources: List of .pak files. Names must be of the form "en.pak" or
+#       "en-US.pak".
+#   deps: (optional) List of dependencies that might be needed to generate
+#       the .pak files.
+#
+# Example
+#   locale_pak_resources("locale_paks") {
+#     sources = [ "path/en-US.pak", "path/fr.pak", ... ]
+#   }
+template("locale_pak_resources") {
+  set_sources_assignment_filter([])
+  assert(defined(invoker.sources))
+
+  _base_path = "$target_gen_dir/$target_name"
+  _resources_zip = _base_path + ".resources.zip"
+  _build_config = _base_path + ".build_config"
+
+  write_build_config("${target_name}__build_config") {
+    build_config = _build_config
+    resources_zip = _resources_zip
+    type = "android_resources"
+  }
+
+  action("${target_name}__create_resources_zip") {
+    sources = invoker.sources
+    script = "//build/android/gyp/locale_pak_resources.py"
+    depfile = "$target_gen_dir/$target_name.d"
+
+    outputs = [
+      depfile,
+      _resources_zip,
+    ]
+
+    _rebased_sources = rebase_path(invoker.sources, root_build_dir)
+    args = [
+      "--locale-paks=${_rebased_sources}",
+      "--resources-zip",
+      rebase_path(_resources_zip, root_build_dir),
+      "--depfile",
+      rebase_path(depfile, root_build_dir),
+    ]
+
+    if (defined(invoker.deps)) {
+      deps = invoker.deps
+    }
+  }
+
+  group(target_name) {
+    deps = [
+      ":${target_name}__build_config",
+      ":${target_name}__create_resources_zip",
+    ]
+  }
+}
+
 # Declare an Android resources target
 #
 # This creates a resources zip file that will be used when building an Android
@@ -798,6 +861,7 @@ template("java_strings_grd_prebuilt") {
 #     android_library target, for example.
 #
 #   chromium_code: If true, extra analysis warning/errors will be enabled.
+#   enable_errorprone: If true, enables the errorprone compiler.
 #
 #   data_deps, testonly
 #
@@ -825,6 +889,9 @@ template("java_binary") {
     if (defined(invoker.deps)) {
       deps = invoker.deps
     }
+    if (defined(invoker.enable_errorprone)) {
+      enable_errorprone = invoker.enable_errorprone
+    }
     if (defined(invoker.java_files)) {
       java_files = invoker.java_files
     }
@@ -841,6 +908,7 @@ template("java_binary") {
       testonly = invoker.testonly
     }
 
+    supports_android = false
     main_class = invoker.main_class
   }
 }
@@ -919,6 +987,8 @@ template("junit_binary") {
 #     ease the gyp->gn conversion and will be removed in the future.
 #
 #   chromium_code: If true, extra analysis warning/errors will be enabled.
+#   enable_errorprone: If true, enables the errorprone compiler.
+#
 #   jar_excluded_patterns: List of patterns of .class files to exclude from the
 #     final jar.
 #
@@ -967,6 +1037,9 @@ template("java_library") {
     if (defined(invoker.deps)) {
       deps = invoker.deps
     }
+    if (defined(invoker.enable_errorprone)) {
+      enable_errorprone = invoker.enable_errorprone
+    }
     if (defined(invoker.jar_excluded_patterns)) {
       jar_excluded_patterns = invoker.jar_excluded_patterns
     }
@@ -1007,6 +1080,7 @@ template("java_library") {
 #   deps: Specifies the dependencies of this target. Java targets in this list
 #     will be added to the javac classpath.
 #   jar_path: Path to the prebuilt jar.
+#   jar_dep: Target that builds jar_path (optional).
 #   proguard_preprocess: If true, proguard preprocessing will be run. This can
 #     be used to remove unwanted parts of the library.
 #   proguard_config: Path to the proguard config for preprocessing.
@@ -1023,11 +1097,17 @@ template("java_prebuilt") {
   set_sources_assignment_filter([])
   java_prebuilt_impl(target_name) {
     jar_path = invoker.jar_path
+    if (defined(invoker.jar_dep)) {
+      jar_dep = invoker.jar_dep
+    }
     if (defined(invoker.testonly)) {
       testonly = invoker.testonly
     }
     if (defined(invoker.deps)) {
       deps = invoker.deps
+    }
+    if (defined(invoker.data_deps)) {
+      data_deps = invoker.data_deps
     }
     if (defined(invoker.proguard_config)) {
       proguard_config = invoker.proguard_config
@@ -1058,6 +1138,8 @@ template("java_prebuilt") {
 #     ease the gyp->gn conversion and will be removed in the future.
 #
 #   chromium_code: If true, extra analysis warning/errors will be enabled.
+#   enable_errorprone: If true, enables the errorprone compiler.
+#
 #   jar_excluded_patterns: List of patterns of .class files to exclude from the
 #     final jar.
 #
@@ -1102,6 +1184,9 @@ template("android_library") {
     }
     if (defined(invoker.deps)) {
       deps = invoker.deps
+    }
+    if (defined(invoker.enable_errorprone)) {
+      enable_errorprone = invoker.enable_errorprone
     }
     if (defined(invoker.jar_excluded_patterns)) {
       jar_excluded_patterns = invoker.jar_excluded_patterns
@@ -1201,6 +1286,9 @@ template("android_java_prebuilt") {
     if (defined(invoker.deps)) {
       deps = invoker.deps
     }
+    if (defined(invoker.data_deps)) {
+      data_deps = invoker.data_deps
+    }
     if (defined(invoker.proguard_config)) {
       proguard_config = invoker.proguard_config
     }
@@ -1217,6 +1305,7 @@ template("android_java_prebuilt") {
 #
 # Variables
 #   android_manifest: Path to AndroidManifest.xml.
+#   android_manifest_dep: Target that generates AndroidManifest (if applicable)
 #   data_deps: List of dependencies needed at runtime. These will be built but
 #     won't change the generated .apk in any way (in fact they may be built
 #     after the .apk is).
@@ -1348,15 +1437,22 @@ template("android_apk") {
              "Relocation packing requires use of the" + " Chromium linker.")
     }
 
-    _native_libs = process_file_template(
-            invoker.native_libs,
-            "$root_build_dir/lib.stripped/{{source_file_part}}")
+    if (is_component_build) {
+      _native_libs += [ "$root_out_dir/lib.stripped/libc++_shared.so" ]
+      _chromium_linker_dep += [ "//build/android:cpplib_stripped" ]
+    }
+
+    # Allow native_libs to be in the form "foo.so" or "foo.cr.so"
+    _first_ext_removed =
+        process_file_template(invoker.native_libs, "{{source_name_part}}")
+    _native_libs += process_file_template(
+            _first_ext_removed,
+            "$root_build_dir/lib.stripped/{{source_name_part}}$android_product_extension")
 
     _native_libs_dir = base_path + "/libs"
 
     if (_use_chromium_linker) {
-      _native_libs +=
-          [ "$root_build_dir/lib.stripped/libchromium_android_linker.so" ]
+      _native_libs += [ "$root_build_dir/lib.stripped/libchromium_android_linker$android_product_extension" ]
     }
 
     _enable_relocation_packing = false
@@ -1365,13 +1461,22 @@ template("android_apk") {
       _enable_relocation_packing = true
     }
 
-    _native_lib_version_name = ""
-    if (defined(invoker.native_lib_version_name)) {
-      _native_lib_version_name = invoker.native_lib_version_name
+    _native_lib_version_rule = ""
+    if (defined(invoker.native_lib_version_rule)) {
+      _native_lib_version_rule = invoker.native_lib_version_rule
+    }
+    _native_lib_version_arg = "\"\""
+    if (defined(invoker.native_lib_version_arg)) {
+      _native_lib_version_arg = invoker.native_lib_version_arg
     }
   }
 
+  _android_manifest_deps = []
+  if (defined(invoker.android_manifest_dep)) {
+    _android_manifest_deps = [ invoker.android_manifest_dep ]
+  }
   _android_manifest = invoker.android_manifest
+
   _rebased_build_config = rebase_path(_build_config, root_build_dir)
   _create_abi_split =
       defined(invoker.create_abi_split) && invoker.create_abi_split
@@ -1389,7 +1494,7 @@ template("android_apk") {
     build_config = _build_config
     android_manifest = _android_manifest
 
-    deps = _chromium_linker_dep
+    deps = _chromium_linker_dep + _android_manifest_deps
     if (defined(invoker.deps)) {
       deps += invoker.deps
     }
@@ -1419,9 +1524,7 @@ template("android_apk") {
     }
 
     build_config = _build_config
-    deps = [
-      ":$build_config_target",
-    ]
+    deps = _android_manifest_deps + [ ":$build_config_target" ]
     if (defined(invoker.deps)) {
       deps += invoker.deps
     }
@@ -1445,11 +1548,14 @@ template("android_apk") {
       deps = [
         ":$build_config_target",
       ]
+      if (_native_lib_version_rule != "") {
+        deps += [ _native_lib_version_rule ]
+      }
 
       defines = [
         "NATIVE_LIBRARIES_LIST=" +
             "@FileArg($_rebased_build_config:native:java_libraries_list)",
-        "NATIVE_LIBRARIES_VERSION_NUMBER=\"$_native_lib_version_name\"",
+        "NATIVE_LIBRARIES_VERSION_NUMBER=$_native_lib_version_arg",
       ]
       if (_use_chromium_linker) {
         defines += [ "ENABLE_CHROMIUM_LINKER" ]
@@ -1470,9 +1576,7 @@ template("android_apk") {
     supports_android = true
     requires_android = true
     override_build_config = _build_config
-    deps = [
-      ":$build_config_target",
-    ]
+    deps = _android_manifest_deps + [ ":$build_config_target" ]
 
     android_manifest = _android_manifest
     chromium_code = true
@@ -1544,7 +1648,7 @@ template("android_apk") {
 
   if (_native_libs != []) {
     action("${_template_name}__prepare_native") {
-      script = "//build/android/gyp/pack_arm_relocations.py"
+      script = "//build/android/gyp/pack_relocations.py"
       packed_libraries_dir = "$_native_libs_dir/$android_app_abi"
       depfile = "$target_gen_dir/$target_name.d"
       outputs = [
@@ -1559,7 +1663,7 @@ template("android_apk") {
 
       skip_packing_list = [
         "gdbserver",
-        "libchromium_android_linker.so",
+        "libchromium_android_linker$android_product_extension",
       ]
 
       enable_packing_arg = 0
@@ -1609,6 +1713,17 @@ template("android_apk") {
     dex_path = final_dex_path
     load_library_from_apk = _load_library_from_apk
     create_density_splits = _create_density_splits
+    if (defined(invoker.language_splits)) {
+      language_splits = invoker.language_splits
+    }
+    if (defined(invoker.extensions_to_not_compress)) {
+      extensions_to_not_compress = invoker.extensions_to_not_compress
+    } else {
+      # Allow icu data, v8 snapshots, and pak files to be loaded directly from
+      # the .apk.
+      # Note: These are actually suffix matches, not necessarily extensions.
+      extensions_to_not_compress = ".dat,.bin,.pak"
+    }
 
     version_code = _version_code
     version_name = _version_name
@@ -1618,10 +1733,10 @@ template("android_apk") {
     keystore_password = _keystore_password
 
     # This target generates the input file _all_resources_zip_path.
-    deps = [
-      ":$process_resources_target",
-      ":$final_dex_target_name",
-    ]
+    deps = _android_manifest_deps + [
+             ":$process_resources_target",
+             ":$final_dex_target_name",
+           ]
     if (defined(invoker.deps)) {
       deps += invoker.deps
     }
@@ -1650,6 +1765,7 @@ template("android_apk") {
       out_manifest =
           "$gen_dir/split-manifests/${android_app_abi}/AndroidManifest.xml"
       split_name = "abi_${android_app_abi}"
+      deps = _android_manifest_deps
     }
 
     _apk_rule = "${_template_name}__split_apk_abi_${android_app_abi}"
@@ -1675,6 +1791,7 @@ template("android_apk") {
       native_libs_dir = _native_libs_dir
       deps = [
         ":${_template_name}__prepare_native",
+        ":${_manifest_rule}",
       ]
     }
   }
@@ -1705,6 +1822,9 @@ template("android_apk") {
 #   srcjar_deps: List of srcjar dependencies. The .java files in the srcjars
 #      will be added to java_files and be included in this apk.
 #   apk_name: Name for final apk.
+#   support_apk_path: Path to a support apk. If present, the test runner script
+#      will install it on the device before running the instrumentation tests.
+#      Should be a path relative to the src root.
 #   final_apk_path: Path to final built apk. Default is
 #     $root_out_dir/apks/$apk_name.apk. Setting this will override apk_name.
 #   native_libs: List paths of native libraries to include in this apk. If these
@@ -1743,6 +1863,9 @@ template("instrumentation_test_apk") {
       test_apk = invoker.apk_name
       if (defined(invoker.isolate_file)) {
         isolate_file = invoker.isolate_file
+      }
+      if (defined(invoker.support_apk_path)) {
+        support_apk_path = invoker.support_apk_path
       }
     }
   }
@@ -1830,7 +1953,7 @@ template("unittest_apk") {
   if (defined(invoker.unittests_binary)) {
     unittests_binary = invoker.unittests_binary
   } else {
-    unittests_binary = "lib" + test_suite_name + ".so"
+    unittests_binary = "lib${test_suite_name}${android_product_extension}"
   }
 
   if (defined(invoker.apk_name)) {
@@ -1856,6 +1979,7 @@ template("unittest_apk") {
       "//base:base_java",
       "//build/android/pylib/remote/device/dummy:remote_device_dummy_apk",
       "//testing/android/appurify_support:appurify_support_java",
+      "//testing/android/reporter:reporter_java",
     ]
     if (defined(invoker.deps)) {
       deps += invoker.deps
@@ -1979,11 +2103,6 @@ template("create_native_executable_dist") {
   libraries_list =
       "${target_gen_dir}/${template_name}_library_dependencies.list"
 
-  # TODO(gyp)
-  #'dependencies': [
-  #'<(DEPTH)/build/android/setup.gyp:copy_system_libraries',
-  #],
-
   find_deps_target_name = "${template_name}__find_library_dependencies"
   copy_target_name = "${template_name}__copy_libraries_and_exe"
 
@@ -2031,7 +2150,7 @@ template("create_native_executable_dist") {
     rebased_libraries_list = rebase_path(libraries_list, root_build_dir)
     args = [
       "--files=$rebased_binaries_list",
-      "--files=@FileArg($rebased_libraries_list:libraries)",
+      "--files=@FileArg($rebased_libraries_list:lib_paths)",
     ]
 
     deps = [

@@ -332,6 +332,11 @@ def AddInstrumentationTestOptions(parser):
                      help=('The name of the apk containing the tests '
                            '(without the .apk extension; '
                            'e.g. "ContentShellTest").'))
+  group.add_argument('--support-apk', dest='test_support_apk_path',
+                     help=('The path to an optional support apk to be '
+                           'installed alongside the test apk. The '
+                           'path should be relative to the output '
+                           'directory (--output-directory).'))
   group.add_argument('--coverage-dir',
                      help=('Directory in which to place all generated '
                            'EMMA coverage files.'))
@@ -379,8 +384,6 @@ def ProcessInstrumentationOptions(args):
       constants.GetOutDirectory(),
       constants.SDK_BUILD_TEST_JAVALIB_DIR,
       '%s.jar' %  args.test_apk)
-  args.test_support_apk_path = '%sSupport%s' % (
-      os.path.splitext(args.test_apk_path))
 
   args.test_runner = apk_helper.GetInstrumentationName(args.test_apk_path)
 
@@ -613,6 +616,9 @@ def AddPerfTestOptions(parser):
            'temperature (0.1 C)')
   group.add_argument('single_step_command', nargs='*', action=SingleStepAction,
                      help='If --single-step is specified, the command to run.')
+  group.add_argument('--min-battery-level', type=int,
+                     help='Only starts tests when the battery is charged above '
+                          'given level.')
   AddCommonOptions(parser)
   AddDeviceOptions(parser)
 
@@ -635,7 +641,7 @@ def ProcessPerfTestOptions(args):
       args.steps, args.flaky_steps, args.output_json_list,
       args.print_step, args.no_timeout, args.test_filter,
       args.dry_run, args.single_step, args.collect_chartjson_data,
-      args.output_chartjson_data, args.max_battery_temp)
+      args.output_chartjson_data, args.max_battery_temp, args.min_battery_level)
 
 
 def AddPythonTestOptions(parser):

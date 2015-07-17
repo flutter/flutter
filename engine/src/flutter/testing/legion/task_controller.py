@@ -13,11 +13,12 @@ import subprocess
 import sys
 import tempfile
 import threading
-import xmlrpclib
 
 #pylint: disable=relative-import
 import common_lib
 import process
+import ssl_util
+import jsonrpclib
 
 ISOLATE_PY = os.path.join(common_lib.SWARMING_DIR, 'isolate.py')
 SWARMING_PY = os.path.join(common_lib.SWARMING_DIR, 'swarming.py')
@@ -68,6 +69,7 @@ class TaskController(object):
     self._ip_address = None
     self._otp = self._CreateOTP()
     self._rpc = None
+    self._output_dir = None
 
     run_id = run_id or datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
     self._task_name = '%s/%s/%s' % (
@@ -121,14 +123,19 @@ class TaskController(object):
       level = logging.getLevelName(level)
     self._verbosity = level  #pylint: disable=attribute-defined-outside-init
 
+  @property
+  def output_dir(self):
+    if not self._output_dir:
+      self._output_dir = self.rpc.GetOutputDir()
+    return self._output_dir
+
   @classmethod
   def ReleaseAllTasks(cls):
     for task in cls._tasks:
       task.Release()
 
-  def Process(self, cmd, verbose=False, detached=False, cwd=None):
-    return process.ControllerProcessWrapper(
-        self.rpc, cmd, verbose, detached, cwd)
+  def Process(self, cmd, *args, **kwargs):
+    return process.ControllerProcessWrapper(self.rpc, cmd, *args, **kwargs)
 
   def _CreateOTP(self):
     """Creates the OTP."""
@@ -160,10 +167,12 @@ class TaskController(object):
   def Release(self):
     """Quits the task's RPC server so it can release the machine."""
     if self._rpc is not None and self._connected:
+      logging.info('Copying output-dir files to controller')
+      self.RetrieveOutputFiles()
       logging.info('Releasing %s', self._name)
       try:
         self._rpc.Quit()
-      except (socket.error, xmlrpclib.Fault):
+      except (socket.error, jsonrpclib.Fault):
         logging.error('Unable to connect to %s to call Quit', self.name)
       self._rpc = None
       self._connected = False
@@ -192,6 +201,7 @@ class TaskController(object):
         '--otp', self._otp,
         '--verbosity', self._verbosity,
         '--idle-timeout', str(self._idle_timeout_secs),
+        '--output-dir', '${ISOLATED_OUTDIR}'
         ])
 
     self._ExecuteProcess(cmd)
@@ -208,6 +218,17 @@ class TaskController(object):
     """Receives task ip address on connection."""
     self._ip_address = ip_address
     self._connected = True
-    self._rpc = common_lib.ConnectToServer(self._ip_address)
+    self._rpc = ssl_util.SslRpcServer.Connect(self._ip_address)
     logging.info('%s connected from %s', self._name, ip_address)
     self._connect_event.set()
+
+  def RetrieveOutputFiles(self):
+    """Retrieves all files in the output-dir."""
+    files = self.rpc.ListDir(self.output_dir)
+    for fname in files:
+      remote_path = self.rpc.PathJoin(self.output_dir, fname)
+      local_name = os.path.join(common_lib.GetOutputDir(),
+                                '%s.%s' % (self.name, fname))
+      contents = self.rpc.ReadFile(remote_path)
+      with open(local_name, 'wb+') as fh:
+        fh.write(contents)

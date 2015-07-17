@@ -38,6 +38,7 @@ public class Unzip {
         s.println("unzip [zipfile]");
     }
 
+    @SuppressWarnings("Finally")
     private void unzip(String[] args) {
         ZipInputStream zis = null;
         try {

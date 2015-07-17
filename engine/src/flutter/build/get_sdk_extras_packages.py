@@ -13,9 +13,12 @@ SDK_EXTRAS_JSON_FILE = os.path.join(os.path.dirname(__file__),
 def main():
   with open(SDK_EXTRAS_JSON_FILE) as json_file:
     packages = json.load(json_file)
-  for package in packages:
-    print package['package'].replace('_', ' ')
 
+  out = []
+  for package in packages:
+    out.append(package['package_id'])
+
+  print ','.join(out)
 
 if __name__ == '__main__':
   sys.exit(main())

@@ -949,7 +949,8 @@ class DeviceUtils(object):
     for h, d in host_device_tuples:
       if os.path.isdir(h):
         self.RunShellCommand(['mkdir', '-p', d], check_return=True)
-      (changed_files, stale_files) = self._GetChangedAndStaleFiles(h, d)
+      changed_files, stale_files = (
+          self._GetChangedAndStaleFiles(h, d, delete_device_stale))
       all_changed_files += changed_files
       all_stale_files += stale_files
 
@@ -962,17 +963,19 @@ class DeviceUtils(object):
 
     self._PushFilesImpl(host_device_tuples, all_changed_files)
 
-  def _GetChangedAndStaleFiles(self, host_path, device_path):
+  def _GetChangedAndStaleFiles(self, host_path, device_path, track_stale=False):
     """Get files to push and delete
 
     Args:
       host_path: an absolute path of a file or directory on the host
       device_path: an absolute path of a file or directory on the device
+      track_stale: whether to bother looking for stale files (slower)
 
     Returns:
       a two-element tuple
       1st element: a list of (host_files_path, device_files_path) tuples to push
-      2nd element: a list of stale files under device_path
+      2nd element: a list of stale files under device_path, or [] when
+        track_stale == False
     """
     real_host_path = os.path.realpath(host_path)
     try:
@@ -985,8 +988,13 @@ class DeviceUtils(object):
 
     try:
       host_checksums = md5sum.CalculateHostMd5Sums([real_host_path])
+      interesting_device_paths = [real_device_path]
+      if not track_stale and os.path.isdir(real_host_path):
+        interesting_device_paths = [
+            posixpath.join(real_device_path, os.path.relpath(p, real_host_path))
+            for p in host_checksums.keys()]
       device_checksums = md5sum.CalculateDeviceMd5Sums(
-        [real_device_path], self)
+          interesting_device_paths, self)
     except EnvironmentError as e:
       logging.warning('Error calculating md5: %s', e)
       return ([(host_path, device_path)], [])

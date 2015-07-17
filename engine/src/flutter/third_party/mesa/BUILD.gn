@@ -78,10 +78,6 @@ config("mesa_internal_config") {
     "$generated_src_dir/mesa/glapi",
   ]
 
-  if (is_clang) {
-    cflags += [ "-Wno-tautological-constant-out-of-range-compare" ]
-  }
-
   if (is_android) {
     defines += [
       "__GLIBC__",
@@ -91,6 +87,15 @@ config("mesa_internal_config") {
 
   if (is_linux) {
     defines += [ "_GNU_SOURCE" ]
+  }
+
+  if (is_win) {
+    defines += [
+      # Generated files use const only if __cplusplus or __STDC__ is defined.
+      # On Windows, neither is defined, so define YY_USE_CONST to explicitly
+      # enable const.
+      "YY_USE_CONST",
+    ]
   }
 
   if (is_posix) {
@@ -108,7 +113,20 @@ config("mesa_internal_config") {
       cflags += [ "-fPIC" ]
     }
   }
+}
 
+# mesa_internal_config is prepended to the config lists.  Flags that
+# disable warnings need to be appended instead so that they show up
+# after flags like -Wall. (gn orders flags on a target before flags from
+# configs.)
+config("mesa_internal_warnings") {
+  cflags = []
+  if (is_clang) {
+    cflags += [
+      "-Wno-tautological-constant-out-of-range-compare",
+      "-Wno-mismatched-tags",  # Fixed upstream.
+    ]
+  }
   if (is_win) {
     # TODO(scottmg): http://crbug.com/143877 These should be removed if
     # Mesa is ever rolled and the warnings are fixed.
@@ -117,7 +135,6 @@ config("mesa_internal_config") {
       "/wd4065",  # Switch statement contains 'default' but no 'case' labels.
       "/wd4090",  # 'Operation' : different 'modifier' qualifiers
       "/wd4099",  # Type name struct-vs-class doesn't match.
-      "/wd4267",  # size_t to type.
       "/wd4273",  # Inconsistent DLL linkage.
       "/wd4291",  # No matching operator delete found for placement new.
       "/wd4305",  # Truncation from int to float.
@@ -235,7 +252,8 @@ static_library("mesa_libglslcommon") {
   configs += [ "//build/config/compiler:no_chromium_code" ]
   previous_configs = configs
   configs = []
-  configs = [ ":mesa_internal_config" ] + previous_configs
+  configs = [ ":mesa_internal_config" ] + previous_configs +
+            [ ":mesa_internal_warnings" ]
 
   if (is_clang) {
     # Mesa triggers some of these Clang warnings.
@@ -617,7 +635,8 @@ static_library("mesa") {
   configs += [ "//build/config/compiler:no_chromium_code" ]
   previous_configs = configs
   configs = []
-  configs = [ ":mesa_internal_config" ] + previous_configs
+  configs = [ ":mesa_internal_config" ] + previous_configs +
+            [ ":mesa_internal_warnings" ]
 
   if (is_clang) {
     # Mesa triggers some of these Clang warnings.
@@ -634,8 +653,10 @@ static_library("mesa") {
   }
 
   if (is_win) {
-    # Because we're building as a static library
-    defines = [ "_GLAPI_NO_EXPORTS" ]
+    defines = [
+      # Because we're building as a static library
+      "_GLAPI_NO_EXPORTS",
+    ]
   }
 
   deps = [
@@ -655,7 +676,6 @@ if (!is_android) {  # TODO(GYP) enable for Android.
       "src/src/mesa/drivers/common/meta.c",
       "src/src/mesa/drivers/common/meta.h",
       "src/src/mesa/drivers/osmesa/osmesa.c",
-      "src/src/mesa/drivers/osmesa/osmesa.def",
     ]
 
     configs -= [ "//build/config/compiler:chromium_code" ]
@@ -665,13 +685,20 @@ if (!is_android) {  # TODO(GYP) enable for Android.
     ]
     previous_configs = configs
     configs = []
-    configs = [ ":mesa_internal_config" ] + previous_configs
+    configs = [ ":mesa_internal_config" ] + previous_configs +
+              [ ":mesa_internal_warnings" ]
 
     include_dirs = [ "src/src/mesa/drivers" ]
 
     if (is_clang) {
       # Mesa triggers some of these Clang warnings.
       configs -= [ "//build/config/clang:extra_warnings" ]
+    }
+
+    if (is_win) {
+      ldflags =
+          [ "/DEF:" + rebase_path("src/src/mesa/drivers/osmesa/osmesa.def",
+                                  root_build_dir) ]
     }
 
     deps = [

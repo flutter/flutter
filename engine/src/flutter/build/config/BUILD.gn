@@ -80,6 +80,9 @@ config("feature_flags") {
   if (enable_spellcheck) {
     defines += [ "ENABLE_SPELLCHECK=1" ]
   }
+  if (use_platform_spellchecker) {
+    defines += [ "USE_PLATFORM_SPELLCHECKER=1" ]
+  }
   if (dont_embed_build_metadata) {
     defines += [ "DONT_EMBED_BUILD_METADATA" ]
   }
@@ -89,9 +92,6 @@ config("feature_flags") {
   if (use_udev) {
     # TODO(brettw) should probably be "=1".
     defines += [ "USE_UDEV" ]
-  }
-  if (toolkit_views) {
-    defines += [ "TOOLKIT_VIEWS=1" ]
   }
   if (ui_compositor_image_transport) {
     # TODO(brettw) should probably be "=1".
@@ -228,7 +228,7 @@ config("feature_flags") {
     defines += [ "ENABLE_HIDPI=1" ]
   }
   if (enable_topchrome_md) {
-    defines += [ "ENABLE_TOPCHRME_MD=1" ]
+    defines += [ "ENABLE_TOPCHROME_MD=1" ]
   }
   if (proprietary_codecs) {
     defines += [ "USE_PROPRIETARY_CODECS" ]
@@ -271,6 +271,9 @@ config("feature_flags") {
   }
   if (enable_media_router) {
     defines += [ "ENABLE_MEDIA_ROUTER=1" ]
+  }
+  if (enable_webvr) {
+    defines += [ "ENABLE_WEBVR" ]
   }
 }
 
@@ -394,5 +397,33 @@ config("default_libs") {
     ]
   } else if (is_linux) {
     libs = [ "dl" ]
+  }
+}
+
+# Add this config to your target to enable precompiled headers.
+#
+# On Windows, precompiled headers are done on a per-target basis. If you have
+# just a couple of files, the time it takes to precompile (~2 seconds) can
+# actually be longer than the time saved. On a Z620, a 100 file target compiles
+# about 2 seconds faster with precompiled headers, with greater savings for
+# larger targets.
+#
+# Recommend precompiled headers for targets with more than 50 .cc files.
+config("precompiled_headers") {
+  # TODO(brettw) enable this when GN support in the binary has been rolled.
+  #if (is_win) {
+  if (false) {
+    # This is a string rather than a file GN knows about. It has to match
+    # exactly what's in the /FI flag below, and what might appear in the source
+    # code in quotes for an #include directive.
+    precompiled_header = "build/precompile.h"
+
+    # This is a file that GN will compile with the above header. It will be
+    # implicitly added to the sources (potentially multiple times, with one
+    # variant for each language used in the target).
+    precompiled_source = "//build/precompile.cc"
+
+    # Force include the header.
+    cflags = [ "/FI$precompiled_header" ]
   }
 }

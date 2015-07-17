@@ -43,6 +43,11 @@ class TestPackageApk(TestPackage):
     else:
       self._package_info = constants.PACKAGE_INFO['gtest']
 
+    if suite_name == 'net_unittests':
+      self._extras = {'RunInSubThread': ''}
+    else:
+      self._extras = []
+
   def _CreateCommandLineFileOnDevice(self, device, options):
     device.WriteFile(self._package_info.cmdline_file,
                      self.suite_name + ' ' + options)
@@ -74,7 +79,8 @@ class TestPackageApk(TestPackage):
     device.StartActivity(
         intent.Intent(package=self._package_info.package,
                       activity=self._package_info.activity,
-                      action='android.intent.action.MAIN'),
+                      action='android.intent.action.MAIN',
+                      extras=self._extras),
         # No wait since the runner waits for FIFO creation anyway.
         blocking=False,
         force_stop=force_stop)

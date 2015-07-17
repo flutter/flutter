@@ -3,6 +3,7 @@
     "dir_name": "google",
     "version": "21.0.0",
     "zip": "google_google_play_services_21.0.0.zip",
-    "package": "google_play_services"
+    "package": "google_play_services",
+    "package_id": "extra-google-google_play_services"
   }
 ]

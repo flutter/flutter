@@ -11,11 +11,10 @@
 #       Path to .grd file.
 #
 #   outputs (required)
-#       List of outputs from grit, relative to the target_gen_dir. If supplied,
-#       a call to Grit to compute the outputs can be skipped which will make
-#       GN run faster. Grit will verify at build time that this list is correct
-#       and will fail if there is a mismatch between the outputs specified by
-#       the .grd file and the outputs list here.
+#       List of outputs from grit, relative to the target_gen_dir. Grit will
+#       verify at build time that this list is correct and will fail if there
+#       is a mismatch between the outputs specified by the .grd file and the
+#       outputs list here.
 #
 #       To get this list, you can look in the .grd file for
 #       <output filename="..." and put those filename here. The base directory
@@ -49,6 +48,10 @@
 #       files. Normally these are based on the target name and go in the
 #       output_dir, but if multiple targets with the same name end up in
 #       the same output_dir, they can collide.
+#
+#   depfile_dir (optional)
+#       If set, used to store the depfile and corresponding stamp file.
+#       Defaults to output_dir
 #
 #   use_qualified_include (optional)
 #       If set, output_dir is not added to include_dirs.
@@ -331,6 +334,12 @@ template("grit") {
     grit_output_name = target_name
   }
 
+  if (defined(invoker.depfile_dir)) {
+    depfile_dir = invoker.depfile_dir
+  } else {
+    depfile_dir = output_dir
+  }
+
   # These are all passed as arguments to the script so have to be relative to
   # the build directory.
   if (resource_ids != "") {
@@ -383,7 +392,7 @@ template("grit") {
     script = "//tools/grit/grit.py"
     inputs = grit_inputs
 
-    depfile = "$output_dir/${grit_output_name}_stamp.d"
+    depfile = "$depfile_dir/${grit_output_name}_stamp.d"
     outputs = [ "${depfile}.stamp" ] + grit_outputs
 
     args = [

@@ -10,6 +10,7 @@ formatted.
 """
 
 import argparse
+import ast
 import collections
 import glob
 import json
@@ -38,16 +39,30 @@ SKIP = {
 
   # http://crbug.com/480053
   'Linux GN',
+  'Linux GN (dbg)',
   'linux_chromium_gn_rel',
 
   # Unmaintained builders on chromium.fyi
   'ClangToTMac',
   'ClangToTMacASan',
 
+  # This builder is fine, but win8_chromium_ng uses GN and this configuration,
+  # which breaks everything.
+  'Win8 Aura',
+
   # One off builders. Note that Swarming does support ARM.
   'Linux ARM Cross-Compile',
   'Site Isolation Linux',
   'Site Isolation Win',
+}
+
+
+# TODO(GYP): These targets have not been ported to GN yet.
+SKIP_NINJA_TO_GN_TARGETS = {
+  'cast_media_unittests',
+  'cast_shell_browser_test',
+  'chromevox_tests',
+  'nacl_helper_nonsfi_unittests',
 }
 
 
@@ -61,7 +76,7 @@ def get_isolates():
   return [os.path.basename(f) for f in files if f.endswith('.isolate')]
 
 
-def process_builder_convert(data, filename, builder, test_name):
+def process_builder_convert(data, test_name):
   """Converts 'test_name' to run on Swarming in 'data'.
 
   Returns True if 'test_name' was found.
@@ -72,7 +87,6 @@ def process_builder_convert(data, filename, builder, test_name):
       continue
     test.setdefault('swarming', {})
     if not test['swarming'].get('can_use_on_swarming_builders'):
-      print('- %s: %s' % (filename, builder))
       test['swarming']['can_use_on_swarming_builders'] = True
     result = True
   return result
@@ -90,8 +104,9 @@ def process_builder_remaining(data, filename, builder, tests_location):
           filename, []).append(builder)
 
 
-def process_file(mode, test_name, tests_location, filepath):
-  """Processes a file.
+def process_file(mode, test_name, tests_location, filepath, ninja_targets,
+                 ninja_targets_seen):
+  """Processes a json file describing what tests should be run for each recipe.
 
   The action depends on mode. Updates tests_location.
 
@@ -120,12 +135,24 @@ def process_file(mode, test_name, tests_location, filepath):
       raise Error(
           '%s: %s is broken: %s' % (filename, builder, data['gtest_tests']))
 
+    for d in data['gtest_tests']:
+      if (d['test'] not in ninja_targets and
+          d['test'] not in SKIP_NINJA_TO_GN_TARGETS):
+        raise Error('%s: %s / %s is not listed in ninja_to_gn.pyl.' %
+                    (filename, builder, d['test']))
+      elif d['test'] in ninja_targets:
+        ninja_targets_seen.add(d['test'])
+
     config[builder]['gtest_tests'] = sorted(
         data['gtest_tests'], key=lambda x: x['test'])
-    if mode == 'remaining':
+
+    # The trick here is that process_builder_remaining() is called before
+    # process_builder_convert() so tests_location can be used to know how many
+    # tests were converted.
+    if mode in ('convert', 'remaining'):
       process_builder_remaining(data, filename, builder, tests_location)
-    elif mode == 'convert':
-      process_builder_convert(data, filename, builder, test_name)
+    if mode == 'convert':
+      process_builder_convert(data, test_name)
 
   expected = json.dumps(
       config, sort_keys=True, indent=2, separators=(',', ': ')) + '\n'
@@ -142,7 +169,26 @@ def process_file(mode, test_name, tests_location, filepath):
   return True
 
 
-def print_remaining(test_name,tests_location):
+def print_convert(test_name, tests_location):
+  """Prints statistics for a test being converted for use in a CL description.
+  """
+  data = tests_location[test_name]
+  print('Convert %s to run exclusively on Swarming' % test_name)
+  print('')
+  print('%d configs already ran on Swarming' % data['count_run_on_swarming'])
+  print('%d used to run locally and were converted:' % data['count_run_local'])
+  for master, builders in sorted(data['local_configs'].iteritems()):
+    for builder in builders:
+      print('- %s: %s' % (master, builder))
+  print('')
+  print('Ran:')
+  print('  ./manage.py --convert %s' % test_name)
+  print('')
+  print('R=')
+  print('BUG=98637')
+
+
+def print_remaining(test_name, tests_location):
   """Prints a visual summary of what tests are yet to be converted to run on
   Swarming.
   """
@@ -222,13 +268,29 @@ def main():
         'count_run_local': 0, 'count_run_on_swarming': 0, 'local_configs': {}
       })
 
+  with open(os.path.join(THIS_DIR, "ninja_to_gn.pyl")) as fp:
+    ninja_targets = ast.literal_eval(fp.read())
+
   try:
     result = 0
+    ninja_targets_seen = set()
     for filepath in glob.glob(os.path.join(THIS_DIR, '*.json')):
-      if not process_file(args.mode, args.test_name, tests_location, filepath):
+      if not process_file(args.mode, args.test_name, tests_location, filepath,
+                          ninja_targets, ninja_targets_seen):
         result = 1
 
-    if args.mode == 'remaining':
+    extra_targets = set(ninja_targets) - ninja_targets_seen
+    if extra_targets:
+      if len(extra_targets) > 1:
+        extra_targets_str = ', '.join(extra_targets) + ' are'
+      else:
+        extra_targets_str = list(extra_targets)[0] + ' is'
+      raise Error('%s listed in ninja_to_gn.pyl but not in any .json files' %
+                  extra_targets_str)
+
+    if args.mode == 'convert':
+      print_convert(args.test_name, tests_location)
+    elif args.mode == 'remaining':
       print_remaining(args.test_name, tests_location)
     return result
   except Error as e:

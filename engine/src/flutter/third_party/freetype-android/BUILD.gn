@@ -5,7 +5,10 @@
 assert(is_android, "This library is only used on Android")
 
 config("freetype_config") {
-  include_dirs = [ "src/include" ]
+  include_dirs = [
+    "include",
+    "src/include",
+  ]
 }
 
 source_set("freetype") {
@@ -14,12 +17,12 @@ source_set("freetype") {
     # same order as in Android.mk to ease maintenance.
     "src/src/base/ftbbox.c",
     "src/src/base/ftbitmap.c",
+    "src/src/base/ftfntfmt.c",
     "src/src/base/ftfstype.c",
     "src/src/base/ftglyph.c",
     "src/src/base/ftlcdfil.c",
     "src/src/base/ftstroke.c",
     "src/src/base/fttype1.c",
-    "src/src/base/ftxf86.c",
     "src/src/base/ftbase.c",
     "src/src/base/ftsystem.c",
     "src/src/base/ftinit.c",
@@ -39,6 +42,9 @@ source_set("freetype") {
   defines = [
     "FT2_BUILD_LIBRARY",
     "DARWIN_NO_CARBON",
+    # Long directory name to avoid accidentally using wrong headers.
+    "FT_CONFIG_MODULES_H=<freetype-android-config/ftmodule.h>",
+    "FT_CONFIG_OPTIONS_H=<freetype-android-config/ftoption.h>",
   ]
 
   public_configs = [ ":freetype_config" ]

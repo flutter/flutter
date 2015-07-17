@@ -16,6 +16,8 @@ class TestPackage(test_jar.TestJar):
 
     if not os.path.exists(apk_path):
       raise Exception('%s not found, please build it' % apk_path)
+    if test_support_apk_path and not os.path.exists(test_support_apk_path):
+      raise Exception('%s not found, please build it' % test_support_apk_path)
     self._apk_path = apk_path
     self._apk_name = os.path.splitext(os.path.basename(apk_path))[0]
     self._package_name = apk_helper.GetPackageName(self._apk_path)

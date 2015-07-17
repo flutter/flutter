@@ -3,7 +3,6 @@
 # found in the LICENSE file.
 
 """This module wraps Android's split-select tool."""
-# pylint: disable=unused-argument
 
 import os
 
@@ -12,25 +11,21 @@ from pylib import constants
 from pylib.utils import timeout_retry
 
 _SPLIT_SELECT_PATH = os.path.join(constants.ANDROID_SDK_TOOLS, 'split-select')
-_DEFAULT_TIMEOUT = 30
-_DEFAULT_RETRIES = 2
 
-def _RunSplitSelectCmd(args, timeout=None, retries=None):
+def _RunSplitSelectCmd(args):
   """Runs a split-select command.
 
   Args:
     args: A list of arguments for split-select.
-    timeout: Timeout in seconds.
-    retries: Number of retries.
 
   Returns:
     The output of the command.
   """
   cmd = [_SPLIT_SELECT_PATH] + args
-  status, output = cmd_helper.GetCmdStatusAndOutputWithTimeout(
-      cmd, timeout_retry.CurrentTimeoutThread().GetRemainingTime())
+  status, output = cmd_helper.GetCmdStatusAndOutput(cmd)
   if status != 0:
-    raise Exception('Failed running command %s' % str(cmd))
+    raise Exception('Failed running command "%s" with output "%s".' %
+                    (' '.join(cmd), output))
   return output
 
 def _SplitConfig(device):
@@ -45,16 +40,13 @@ def _SplitConfig(device):
            device.screen_density,
            device.product_cpu_abi))
 
-def SelectSplits(device, base_apk, split_apks,
-                 timeout=_DEFAULT_TIMEOUT, retries=_DEFAULT_RETRIES):
+def SelectSplits(device, base_apk, split_apks):
   """Determines which APK splits the device requires.
 
   Args:
     device: A DeviceUtils object.
     base_apk: The path of the base APK.
     split_apks: A list of paths of APK splits.
-    timeout: Timeout in seconds.
-    retries: Number of retries.
 
   Returns:
     The list of APK splits that the device requires.
@@ -63,4 +55,4 @@ def SelectSplits(device, base_apk, split_apks,
   args = ['--target', config, '--base', base_apk]
   for split in split_apks:
     args.extend(['--split', split])
-  return _RunSplitSelectCmd(args, timeout=timeout, retries=retries).splitlines()
+  return _RunSplitSelectCmd(args).splitlines()
