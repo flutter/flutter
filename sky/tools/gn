@@ -68,7 +68,7 @@ def to_gn_args(args):
 def main():
   parser = argparse.ArgumentParser(description='A script run` gn gen`.')
 
-  parser.add_argument('--debug', default=True)
+  parser.add_argument('--debug', default=True, action='store_true')
   parser.add_argument('--release', default=False, dest='debug', action='store_false')
 
   parser.add_argument('--target-os', type=str)
