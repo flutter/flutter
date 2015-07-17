@@ -39,9 +39,7 @@ class ExceptionState;
 class Length;
 class LengthSize;
 class Pair;
-class Quad;
 class RGBColor;
-class Rect;
 class RenderStyle;
 
 // Dimension calculations are imprecise, often resulting in values of e.g.
@@ -94,7 +92,6 @@ public:
         CSS_URI = 20,
         CSS_IDENT = 21,
         CSS_ATTR = 22,
-        CSS_RECT = 24,
         CSS_RGBCOLOR = 25,
         // From CSS Values and Units. Viewport-percentage Lengths (vw/vh/vmin/vmax).
         CSS_VW = 26,
@@ -118,9 +115,6 @@ public:
 
         // This is used by the CSS Shapes draft
         CSS_SHAPE = 111,
-
-        // Used by border images.
-        CSS_QUAD = 112,
 
         CSS_CALC = 113,
         CSS_CALC_PERCENTAGE_WITH_NUMBER = 114,
@@ -188,7 +182,6 @@ public:
     bool isNumber() const { return primitiveType() == CSS_NUMBER; }
     bool isPercentage() const { return primitiveType() == CSS_PERCENTAGE; }
     bool isPx() const { return primitiveType() == CSS_PX; }
-    bool isRect() const { return m_primitiveUnitType == CSS_RECT; }
     bool isRGBColor() const { return m_primitiveUnitType == CSS_RGBCOLOR; }
     bool isShape() const { return m_primitiveUnitType == CSS_SHAPE; }
     bool isString() const { return m_primitiveUnitType == CSS_STRING; }
@@ -294,12 +287,6 @@ public:
     String getStringValue(ExceptionState&) const;
     String getStringValue() const;
 
-    Rect* getRectValue(ExceptionState&) const;
-    Rect* getRectValue() const { return m_primitiveUnitType != CSS_RECT ? 0 : m_value.rect; }
-
-    Quad* getQuadValue(ExceptionState&) const;
-    Quad* getQuadValue() const { return m_primitiveUnitType != CSS_QUAD ? 0 : m_value.quad; }
-
     PassRefPtr<RGBColor> getRGBColorValue(ExceptionState&) const;
     RGBA32 getRGBA32Value() const { return m_primitiveUnitType != CSS_RGBCOLOR ? 0 : m_value.rgbcolor; }
 
@@ -362,9 +349,7 @@ private:
 
     void init(const Length&);
     void init(const LengthSize&, const RenderStyle&);
-    void init(PassRefPtr<Rect>);
     void init(PassRefPtr<Pair>);
-    void init(PassRefPtr<Quad>);
     void init(PassRefPtr<CSSBasicShape>);
     void init(PassRefPtr<CSSCalcValue>);
     bool getDoubleValueInternal(UnitType targetUnitType, double* result) const;
@@ -382,8 +367,6 @@ private:
         CSSBasicShape* shape;
         CSSCalcValue* calc;
         Pair* pair;
-        Rect* rect;
-        Quad* quad;
     } m_value;
 };
 

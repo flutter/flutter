@@ -120,11 +120,6 @@ border-bottom-left-radius initial=initialBorderRadius, converter=convertRadius
 border-bottom-right-radius initial=initialBorderRadius, converter=convertRadius
 border-bottom-style type_name=EBorderStyle, initial=initialBorderStyle
 border-bottom-width initial=initialBorderWidth, converter=convertLineWidth<unsigned>
-border-image-outset custom_all
-border-image-repeat custom_all
-border-image-slice custom_all
-border-image-source custom_value
-border-image-width custom_all
 border-left-color custom_all
 border-left-style type_name=EBorderStyle, initial=initialBorderStyle
 border-left-width initial=initialBorderWidth, converter=convertLineWidth<unsigned>
@@ -144,8 +139,6 @@ box-shadow converter=convertShadow
 
 // LAYOUT
 box-sizing
-
-clip converter=convertClip, custom_all
 
 // LAYOUT
 display
@@ -288,8 +281,6 @@ filter custom_value
 // LAYOUT
 -webkit-border-horizontal-spacing inherited, name_for_methods=HorizontalBorderSpacing, converter=convertComputedLength<short>
 
--webkit-border-image initial=initialNinePieceImage, custom_value
-
 // LAYOUT
 -webkit-border-vertical-spacing inherited, name_for_methods=VerticalBorderSpacing, converter=convertComputedLength<short>
 
@@ -419,7 +410,6 @@ background-repeat longhands=background-repeat-x;background-repeat-y
 border longhands=border-top-color;border-top-style;border-top-width;border-right-color;border-right-style;border-right-width;border-bottom-color;border-bottom-style;border-bottom-width;border-left-color;border-left-style;border-left-width
 border-bottom longhands=border-bottom-width;border-bottom-style;border-bottom-color
 border-color longhands=border-top-color;border-right-color;border-bottom-color;border-left-color
-border-image longhands=border-image-source;border-image-slice;border-image-width;border-image-outset;border-image-repeat
 border-left longhands=border-left-width;border-left-style;border-left-color
 border-radius longhands=border-top-left-radius;border-top-right-radius;border-bottom-right-radius;border-bottom-left-radius
 border-right longhands=border-right-width;border-right-style;border-right-color

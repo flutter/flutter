@@ -297,7 +297,6 @@ public:
     bool hasLayer() const { return m_bitfields.hasLayer(); }
 
     bool hasBoxDecorationBackground() const { return m_bitfields.hasBoxDecorationBackground(); }
-    bool canRenderBorderImage() const;
     bool hasBackground() const { return style()->hasBackground(); }
     bool hasEntirelyFixedBackground() const;
 

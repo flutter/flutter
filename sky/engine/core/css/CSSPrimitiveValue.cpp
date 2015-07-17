@@ -28,7 +28,6 @@
 #include "sky/engine/core/css/CSSToLengthConversionData.h"
 #include "sky/engine/core/css/Pair.h"
 #include "sky/engine/core/css/RGBColor.h"
-#include "sky/engine/core/css/Rect.h"
 #include "sky/engine/core/css/StyleSheetContents.h"
 #include "sky/engine/core/dom/ExceptionCode.h"
 #include "sky/engine/core/dom/Node.h"
@@ -90,8 +89,6 @@ static inline bool isValidCSSUnitTypeForDoubleConversion(CSSPrimitiveValue::Unit
     case CSSPrimitiveValue::CSS_VALUE_ID:
     case CSSPrimitiveValue::CSS_PAIR:
     case CSSPrimitiveValue::CSS_PARSER_HEXCOLOR:
-    case CSSPrimitiveValue::CSS_RECT:
-    case CSSPrimitiveValue::CSS_QUAD:
     case CSSPrimitiveValue::CSS_RGBCOLOR:
     case CSSPrimitiveValue::CSS_SHAPE:
     case CSSPrimitiveValue::CSS_STRING:
@@ -369,20 +366,6 @@ void CSSPrimitiveValue::init(const LengthSize& lengthSize, const RenderStyle& st
     m_value.pair = Pair::create(create(lengthSize.width()), create(lengthSize.height()), Pair::KeepIdenticalValues).leakRef();
 }
 
-void CSSPrimitiveValue::init(PassRefPtr<Rect> r)
-{
-    m_primitiveUnitType = CSS_RECT;
-    m_hasCachedCSSText = false;
-    m_value.rect = r.leakRef();
-}
-
-void CSSPrimitiveValue::init(PassRefPtr<Quad> quad)
-{
-    m_primitiveUnitType = CSS_QUAD;
-    m_hasCachedCSSText = false;
-    m_value.quad = quad.leakRef();
-}
-
 void CSSPrimitiveValue::init(PassRefPtr<Pair> p)
 {
     m_primitiveUnitType = CSS_PAIR;
@@ -418,18 +401,6 @@ void CSSPrimitiveValue::cleanup()
     case CSS_PARSER_HEXCOLOR:
         if (m_value.string)
             m_value.string->deref();
-        break;
-    case CSS_RECT:
-        // We must not call deref() when oilpan is enabled because m_value.rect is traced.
-#if !ENABLE(OILPAN)
-        m_value.rect->deref();
-#endif
-        break;
-    case CSS_QUAD:
-        // We must not call deref() when oilpan is enabled because m_value.quad is traced.
-#if !ENABLE(OILPAN)
-        m_value.quad->deref();
-#endif
         break;
     case CSS_PAIR:
         // We must not call deref() when oilpan is enabled because m_value.pair is traced.
@@ -925,26 +896,6 @@ String CSSPrimitiveValue::getStringValue() const
     return String();
 }
 
-Rect* CSSPrimitiveValue::getRectValue(ExceptionState& exceptionState) const
-{
-    if (m_primitiveUnitType != CSS_RECT) {
-        exceptionState.ThrowDOMException(InvalidAccessError, "This object is not a rect value.");
-        return 0;
-    }
-
-    return m_value.rect;
-}
-
-Quad* CSSPrimitiveValue::getQuadValue(ExceptionState& exceptionState) const
-{
-    if (m_primitiveUnitType != CSS_QUAD) {
-        exceptionState.ThrowDOMException(InvalidAccessError, "This object is not a quad value.");
-        return 0;
-    }
-
-    return m_value.quad;
-}
-
 PassRefPtr<RGBColor> CSSPrimitiveValue::getRGBColorValue(ExceptionState& exceptionState) const
 {
     if (m_primitiveUnitType != CSS_RGBCOLOR) {
@@ -1049,8 +1000,6 @@ const char* CSSPrimitiveValue::unitTypeToString(UnitType type)
     case CSS_VALUE_ID:
     case CSS_PROPERTY_ID:
     case CSS_ATTR:
-    case CSS_RECT:
-    case CSS_QUAD:
     case CSS_RGBCOLOR:
     case CSS_PARSER_HEXCOLOR:
     case CSS_PAIR:
@@ -1135,12 +1084,6 @@ String CSSPrimitiveValue::customCSSText(CSSTextFormattingFlags formattingFlag) c
             text = result.toString();
             break;
         }
-        case CSS_RECT:
-            text = getRectValue()->cssText();
-            break;
-        case CSS_QUAD:
-            text = getQuadValue()->cssText();
-            break;
         case CSS_RGBCOLOR:
         case CSS_PARSER_HEXCOLOR: {
             RGBA32 rgbColor = m_value.rgbcolor;
@@ -1176,12 +1119,6 @@ PassRefPtr<CSSPrimitiveValue> CSSPrimitiveValue::cloneForCSSOM() const
     case CSS_URI:
     case CSS_ATTR:
         result = CSSPrimitiveValue::create(m_value.string, static_cast<UnitType>(m_primitiveUnitType));
-        break;
-    case CSS_RECT:
-        result = CSSPrimitiveValue::create(m_value.rect->cloneForCSSOM());
-        break;
-    case CSS_QUAD:
-        result = CSSPrimitiveValue::create(m_value.quad->cloneForCSSOM());
         break;
     case CSS_PAIR:
         // Pair is not exposed to the CSSOM, no need for a deep clone.
@@ -1290,10 +1227,6 @@ bool CSSPrimitiveValue::equals(const CSSPrimitiveValue& other) const
     case CSS_ATTR:
     case CSS_PARSER_HEXCOLOR:
         return equal(m_value.string, other.m_value.string);
-    case CSS_RECT:
-        return m_value.rect && other.m_value.rect && m_value.rect->equals(*other.m_value.rect);
-    case CSS_QUAD:
-        return m_value.quad && other.m_value.quad && m_value.quad->equals(*other.m_value.quad);
     case CSS_RGBCOLOR:
         return m_value.rgbcolor == other.m_value.rgbcolor;
     case CSS_PAIR:

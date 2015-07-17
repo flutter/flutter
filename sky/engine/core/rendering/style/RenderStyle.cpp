@@ -1057,42 +1057,6 @@ Color RenderStyle::initialTapHighlightColor()
     return RenderTheme::tapHighlightColor();
 }
 
-LayoutBoxExtent RenderStyle::imageOutsets(const NinePieceImage& image) const
-{
-    return LayoutBoxExtent(NinePieceImage::computeOutset(image.outset().top(), borderTopWidth()),
-                           NinePieceImage::computeOutset(image.outset().right(), borderRightWidth()),
-                           NinePieceImage::computeOutset(image.outset().bottom(), borderBottomWidth()),
-                           NinePieceImage::computeOutset(image.outset().left(), borderLeftWidth()));
-}
-
-void RenderStyle::setBorderImageSource(PassRefPtr<StyleImage> image)
-{
-    if (surround->border.m_image.image() == image.get())
-        return;
-    surround.access()->border.m_image.setImage(image);
-}
-
-void RenderStyle::setBorderImageSlices(const LengthBox& slices)
-{
-    if (surround->border.m_image.imageSlices() == slices)
-        return;
-    surround.access()->border.m_image.setImageSlices(slices);
-}
-
-void RenderStyle::setBorderImageWidth(const BorderImageLengthBox& slices)
-{
-    if (surround->border.m_image.borderSlices() == slices)
-        return;
-    surround.access()->border.m_image.setBorderSlices(slices);
-}
-
-void RenderStyle::setBorderImageOutset(const BorderImageLengthBox& outset)
-{
-    if (surround->border.m_image.outset() == outset)
-        return;
-    surround.access()->border.m_image.setOutset(outset);
-}
-
 float calcBorderRadiiConstraintScaleFor(const FloatRect& rect, const FloatRoundedRect::Radii& radii)
 {
     // Constrain corner radii using CSS3 rules:

@@ -31,7 +31,6 @@
 #include "sky/engine/core/css/CSSPrimitiveValueMappings.h"
 #include "sky/engine/core/css/CSSShadowValue.h"
 #include "sky/engine/core/css/Pair.h"
-#include "sky/engine/core/css/Rect.h"
 
 namespace blink {
 
@@ -44,16 +43,6 @@ Color StyleBuilderConverter::convertColor(StyleResolverState& state, CSSValue* v
 AtomicString StyleBuilderConverter::convertFragmentIdentifier(StyleResolverState& state, CSSValue* value)
 {
     return nullAtom;
-}
-
-LengthBox StyleBuilderConverter::convertClip(StyleResolverState& state, CSSValue* value)
-{
-    Rect* rect = toCSSPrimitiveValue(value)->getRectValue();
-
-    return LengthBox(convertLengthOrAuto(state, rect->top()),
-        convertLengthOrAuto(state, rect->right()),
-        convertLengthOrAuto(state, rect->bottom()),
-        convertLengthOrAuto(state, rect->left()));
 }
 
 PassRefPtr<FontFeatureSettings> StyleBuilderConverter::convertFontFeatureSettings(StyleResolverState& state, CSSValue* value)

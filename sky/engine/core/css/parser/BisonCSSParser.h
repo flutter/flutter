@@ -48,7 +48,6 @@ namespace blink {
 
 class CSSBasicShape;
 class CSSBasicShapeInset;
-class CSSBorderImageSliceValue;
 class CSSPrimitiveValue;
 class CSSSelectorList;
 class CSSValue;

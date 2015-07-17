@@ -40,7 +40,6 @@
 
 namespace blink {
 
-class CSSBorderImageSliceValue;
 class CSSPrimitiveValue;
 class CSSValue;
 class CSSValueList;
@@ -116,8 +115,6 @@ private:
 
     bool parseWebkitTransformOriginShorthand();
 
-    bool parseClipShape(CSSPropertyID);
-
     bool parseItemPositionOverflowPosition(CSSPropertyID);
 
     PassRefPtr<CSSValue> parseShapeProperty(CSSPropertyID propId);
@@ -146,12 +143,6 @@ private:
 
     // CSS3 Parsing Routines (for properties specific to CSS3)
     PassRefPtr<CSSValueList> parseShadow(CSSParserValueList*, CSSPropertyID);
-    bool parseBorderImageShorthand(CSSPropertyID);
-    PassRefPtr<CSSValue> parseBorderImage(CSSPropertyID);
-    bool parseBorderImageRepeat(RefPtr<CSSValue>&);
-    bool parseBorderImageSlice(CSSPropertyID, RefPtr<CSSBorderImageSliceValue>&);
-    bool parseBorderImageWidth(RefPtr<CSSPrimitiveValue>&);
-    bool parseBorderImageOutset(RefPtr<CSSPrimitiveValue>&);
     bool parseBorderRadius(CSSPropertyID);
 
     PassRefPtr<CSSValue> parseAspectRatio();
@@ -267,7 +258,6 @@ private:
     inline bool validUnit(CSSParserValue* value, Units unitflags, ReleaseParsedCalcValueCondition releaseCalc = DoNotReleaseParsedCalcValue) { return validUnit(value, unitflags, m_context.mode(), releaseCalc); }
     bool validUnit(CSSParserValue*, Units, CSSParserMode, ReleaseParsedCalcValueCondition releaseCalc = DoNotReleaseParsedCalcValue);
 
-    bool parseBorderImageQuad(Units, RefPtr<CSSPrimitiveValue>&);
     int colorIntFromValue(CSSParserValue*);
     bool isCalculation(CSSParserValue*);
 
@@ -290,9 +280,6 @@ private:
     // FIXME: There is probably a small set of APIs we could expose for these
     // classes w/o needing to make them friends.
     friend class ShadowParseContext;
-    friend class BorderImageParseContext;
-    friend class BorderImageSliceParseContext;
-    friend class BorderImageQuadParseContext;
     friend class TransformOperationInfo;
     friend PassRefPtr<CSSPrimitiveValue> parseGradientColorOrKeyword(CSSPropertyParser*, CSSParserValue*);
 };

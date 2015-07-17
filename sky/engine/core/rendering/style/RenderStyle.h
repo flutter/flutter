@@ -31,7 +31,6 @@
 #include "sky/engine/core/rendering/style/BorderValue.h"
 #include "sky/engine/core/rendering/style/CounterDirectives.h"
 #include "sky/engine/core/rendering/style/DataRef.h"
-#include "sky/engine/core/rendering/style/NinePieceImage.h"
 #include "sky/engine/core/rendering/style/OutlineValue.h"
 #include "sky/engine/core/rendering/style/RenderStyleConstants.h"
 #include "sky/engine/core/rendering/style/ShapeValue.h"
@@ -299,16 +298,6 @@ public:
         return hasBackgroundImage();
     }
 
-    LayoutBoxExtent imageOutsets(const NinePieceImage&) const;
-    bool hasBorderImageOutsets() const
-    {
-        return borderImage().hasImage() && borderImage().outset().nonZero();
-    }
-    LayoutBoxExtent borderImageOutsets() const
-    {
-        return imageOutsets(borderImage());
-    }
-
     FilterOutsets filterOutsets() const { return hasFilter() ? filter().outsets() : FilterOutsets(); }
 
     Order rtlOrdering() const { return static_cast<Order>(inherited_flags.m_rtlOrdering); }
@@ -364,12 +353,6 @@ public:
     const BorderValue& borderAfter() const;
     const BorderValue& borderStart() const;
     const BorderValue& borderEnd() const;
-
-    const NinePieceImage& borderImage() const { return surround->border.image(); }
-    StyleImage* borderImageSource() const { return surround->border.image().image(); }
-    const LengthBox& borderImageSlices() const { return surround->border.image().imageSlices(); }
-    const BorderImageLengthBox& borderImageWidth() const { return surround->border.image().borderSlices(); }
-    const BorderImageLengthBox& borderImageOutset() const { return surround->border.image().outset(); }
 
     const LengthSize& borderTopLeftRadius() const { return surround->border.topLeft(); }
     const LengthSize& borderTopRightRadius() const { return surround->border.topRight(); }
@@ -608,7 +591,7 @@ public:
 
     // FIXME: reflections should belong to this helper function but they are currently handled
     // through their self-painting layers. So the rendering code doesn't account for them.
-    bool hasVisualOverflowingEffect() const { return boxShadow() || hasBorderImageOutsets() || hasOutline(); }
+    bool hasVisualOverflowingEffect() const { return boxShadow() || hasOutline(); }
 
     EBoxSizing boxSizing() const { return m_box->boxSizing(); }
     EUserModify userModify() const { return static_cast<EUserModify>(rareInheritedData->userModify); }
@@ -709,7 +692,6 @@ public:
 
     void resetBorder()
     {
-        resetBorderImage();
         resetBorderTop();
         resetBorderRight();
         resetBorderBottom();
@@ -723,7 +705,6 @@ public:
     void resetBorderRight() { SET_VAR(surround, border.m_right, BorderValue()); }
     void resetBorderBottom() { SET_VAR(surround, border.m_bottom, BorderValue()); }
     void resetBorderLeft() { SET_VAR(surround, border.m_left, BorderValue()); }
-    void resetBorderImage() { SET_VAR(surround, border.m_image, NinePieceImage()); }
     void resetBorderTopLeftRadius() { SET_VAR(surround, border.m_topLeft, initialBorderRadius()); }
     void resetBorderTopRightRadius() { SET_VAR(surround, border.m_topRight, initialBorderRadius()); }
     void resetBorderBottomLeftRadius() { SET_VAR(surround, border.m_bottomLeft, initialBorderRadius()); }
@@ -735,12 +716,6 @@ public:
     void setBackgroundYPosition(const Length& length) { SET_VAR(m_background, m_background.m_yPosition, length); }
     void setBackgroundSize(EFillSizeType b) { SET_VAR(m_background, m_background.m_sizeType, b); }
     void setBackgroundSizeLength(const LengthSize& s) { SET_VAR(m_background, m_background.m_sizeLength, s); }
-
-    void setBorderImage(const NinePieceImage& b) { SET_VAR(surround, border.m_image, b); }
-    void setBorderImageSource(PassRefPtr<StyleImage>);
-    void setBorderImageSlices(const LengthBox&);
-    void setBorderImageWidth(const BorderImageLengthBox&);
-    void setBorderImageOutset(const BorderImageLengthBox&);
 
     void setBorderTopLeftRadius(const LengthSize& s) { SET_VAR(surround, border.m_topLeft, s); }
     void setBorderTopRightRadius(const LengthSize& s) { SET_VAR(surround, border.m_topRight, s); }
@@ -987,7 +962,6 @@ public:
     // Initial values for all the properties
     static EBorderStyle initialBorderStyle() { return BNONE; }
     static OutlineIsAuto initialOutlineStyleIsAuto() { return AUTO_OFF; }
-    static NinePieceImage initialNinePieceImage() { return NinePieceImage(); }
     static LengthSize initialBorderRadius() { return LengthSize(Length(0, Fixed), Length(0, Fixed)); }
     static LengthBox initialClip() { return LengthBox(); }
     static TextDirection initialDirection() { return LTR; }
@@ -1090,7 +1064,6 @@ public:
     static ImageResolutionSource initialImageResolutionSource() { return ImageResolutionSpecified; }
     static ImageResolutionSnap initialImageResolutionSnap() { return ImageResolutionNoSnap; }
     static float initialImageResolution() { return 1; }
-    static StyleImage* initialBorderImageSource() { return 0; }
     static TouchAction initialTouchAction() { return TouchActionAuto; }
     static TouchActionDelay initialTouchActionDelay() { return TouchActionDelayScript; }
     static ShadowList* initialBoxShadow() { return 0; }

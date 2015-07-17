@@ -160,7 +160,6 @@ void InlineFlowBox::addToLine(InlineBox* child)
             if (box.hasRenderOverflow() || box.hasSelfPaintingLayer())
                 child->clearKnownToHaveNoOverflow();
         } else if (child->renderer().style(isFirstLineStyle())->boxShadow() || hasSelfPaintingLayer(child)
-            || child->renderer().style(isFirstLineStyle())->hasBorderImageOutsets()
             || child->renderer().style(isFirstLineStyle())->hasOutline()) {
             child->clearKnownToHaveNoOverflow();
         }
@@ -738,37 +737,7 @@ inline void InlineFlowBox::addBoxShadowVisualOverflow(LayoutRect& logicalVisualO
 
 inline void InlineFlowBox::addBorderOutsetVisualOverflow(LayoutRect& logicalVisualOverflow)
 {
-    // border-image-outset on root line boxes is applying to the block and not to the lines.
-    if (!parent())
-        return;
-
-    RenderStyle* style = renderer().style(isFirstLineStyle());
-    if (!style->hasBorderImageOutsets())
-        return;
-
-    LayoutBoxExtent borderOutsets = style->borderImageOutsets();
-
-    LayoutUnit borderOutsetLogicalTop = borderOutsets.logicalTop();
-    LayoutUnit borderOutsetLogicalBottom = borderOutsets.logicalBottom();
-    LayoutUnit borderOutsetLogicalLeft = borderOutsets.logicalLeft();
-    LayoutUnit borderOutsetLogicalRight = borderOutsets.logicalRight();
-
-    // Similar to how glyph overflow works, if our lines are flipped, then it's actually the opposite border that applies, since
-    // the line is "upside down" in terms of block coordinates. vertical-rl and horizontal-bt are the flipped line modes.
-    LayoutUnit outsetLogicalTop = borderOutsetLogicalTop;
-    LayoutUnit outsetLogicalBottom = borderOutsetLogicalBottom;
-
-    LayoutUnit logicalTopVisualOverflow = std::min(pixelSnappedLogicalTop() - outsetLogicalTop, logicalVisualOverflow.y());
-    LayoutUnit logicalBottomVisualOverflow = std::max(pixelSnappedLogicalBottom() + outsetLogicalBottom, logicalVisualOverflow.maxY());
-
-    LayoutUnit outsetLogicalLeft = includeLogicalLeftEdge() ? borderOutsetLogicalLeft : LayoutUnit();
-    LayoutUnit outsetLogicalRight = includeLogicalRightEdge() ? borderOutsetLogicalRight : LayoutUnit();
-
-    LayoutUnit logicalLeftVisualOverflow = std::min(pixelSnappedLogicalLeft() - outsetLogicalLeft, logicalVisualOverflow.x());
-    LayoutUnit logicalRightVisualOverflow = std::max(pixelSnappedLogicalRight() + outsetLogicalRight, logicalVisualOverflow.maxX());
-
-    logicalVisualOverflow = LayoutRect(logicalLeftVisualOverflow, logicalTopVisualOverflow,
-                                       logicalRightVisualOverflow - logicalLeftVisualOverflow, logicalBottomVisualOverflow - logicalTopVisualOverflow);
+    return;
 }
 
 inline void InlineFlowBox::addOutlineVisualOverflow(LayoutRect& logicalVisualOverflow)
@@ -1083,22 +1052,6 @@ void InlineFlowBox::paintBoxShadow(const PaintInfo& info, RenderStyle* s, Shadow
     }
 }
 
-static LayoutRect clipRectForNinePieceImageStrip(InlineFlowBox* box, const NinePieceImage& image, const LayoutRect& paintRect)
-{
-    LayoutRect clipRect(paintRect);
-    RenderStyle* style = box->renderer().style();
-    LayoutBoxExtent outsets = style->imageOutsets(image);
-    clipRect.setY(paintRect.y() - outsets.top());
-    clipRect.setHeight(paintRect.height() + outsets.top() + outsets.bottom());
-    if (box->includeLogicalLeftEdge()) {
-        clipRect.setX(paintRect.x() - outsets.left());
-        clipRect.setWidth(paintRect.width() + outsets.left());
-    }
-    if (box->includeLogicalRightEdge())
-        clipRect.setWidth(clipRect.width() + outsets.right());
-    return clipRect;
-}
-
 void InlineFlowBox::paintBoxDecorationBackground(PaintInfo& paintInfo, const LayoutPoint& paintOffset)
 {
     // You can use p::first-line to specify a background. If so, the root line boxes for
@@ -1133,41 +1086,7 @@ void InlineFlowBox::paintBoxDecorationBackground(PaintInfo& paintInfo, const Lay
     // :first-line cannot be used to put borders on a line. Always paint borders with our
     // non-first-line style.
     if (parent() && renderer().style()->hasBorder()) {
-        const NinePieceImage& borderImage = renderer().style()->borderImage();
-        StyleImage* borderImageSource = borderImage.image();
-        bool hasBorderImage = borderImageSource && borderImageSource->canRender(renderer());
-        if (hasBorderImage && !borderImageSource->isLoaded())
-            return; // Don't paint anything while we wait for the image to load.
-
-        // The simple case is where we either have no border image or we are the only box for this object.
-        // In those cases only a single call to draw is required.
-        if (!hasBorderImage || (!prevLineBox() && !nextLineBox())) {
-            boxModelObject()->paintBorder(paintInfo, paintRect, renderer().style(isFirstLineStyle()), BackgroundBleedNone, includeLogicalLeftEdge(), includeLogicalRightEdge());
-        } else {
-            // We have a border image that spans multiple lines.
-            // We need to adjust tx and ty by the width of all previous lines.
-            // Think of border image painting on inlines as though you had one long line, a single continuous
-            // strip. Even though that strip has been broken up across multiple lines, you still paint it
-            // as though you had one single line. This means each line has to pick up the image where
-            // the previous line left off.
-            // FIXME: What the heck do we do with RTL here? The math we're using is obviously not right,
-            // but it isn't even clear how this should work at all.
-            LayoutUnit logicalOffsetOnLine = 0;
-            for (InlineFlowBox* curr = prevLineBox(); curr; curr = curr->prevLineBox())
-                logicalOffsetOnLine += curr->logicalWidth();
-            LayoutUnit totalLogicalWidth = logicalOffsetOnLine;
-            for (InlineFlowBox* curr = this; curr; curr = curr->nextLineBox())
-                totalLogicalWidth += curr->logicalWidth();
-            LayoutUnit stripX = adjustedPaintOffset.x() - logicalOffsetOnLine;
-            LayoutUnit stripY = adjustedPaintOffset.y();
-            LayoutUnit stripWidth = totalLogicalWidth;
-            LayoutUnit stripHeight = frameRect.height();
-
-            LayoutRect clipRect = clipRectForNinePieceImageStrip(this, borderImage, paintRect);
-            GraphicsContextStateSaver stateSaver(*paintInfo.context);
-            paintInfo.context->clip(clipRect);
-            boxModelObject()->paintBorder(paintInfo, LayoutRect(stripX, stripY, stripWidth, stripHeight), renderer().style(isFirstLineStyle()));
-        }
+        boxModelObject()->paintBorder(paintInfo, paintRect, renderer().style(isFirstLineStyle()), BackgroundBleedNone, includeLogicalLeftEdge(), includeLogicalRightEdge());
     }
 }
 

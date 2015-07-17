@@ -35,8 +35,6 @@ class CSSValue;
 class RenderStyle;
 class StyleImage;
 class StyleResolverState;
-class NinePieceImage;
-class BorderImageLengthBox;
 
 // CSSToStyleMap is a short-lived helper object which
 // given the current StyleResolverState can map
@@ -64,11 +62,6 @@ public:
     static double mapAnimationIterationCount(CSSValue*);
     static AtomicString mapAnimationName(CSSValue*);
     static EAnimPlayState mapAnimationPlayState(CSSValue*);
-
-    void mapNinePieceImage(RenderStyle* mutableStyle, CSSPropertyID, CSSValue*, NinePieceImage&);
-    void mapNinePieceImageSlice(CSSValue*, NinePieceImage&) const;
-    BorderImageLengthBox mapNinePieceImageQuad(CSSValue*) const;
-    void mapNinePieceImageRepeat(CSSValue*, NinePieceImage&) const;
 
 private:
     const CSSToLengthConversionData& cssToLengthConversionData() const;
