@@ -5,6 +5,8 @@
 import 'package:sky/widgets/basic.dart';
 import 'package:sky/widgets/material.dart';
 
+const EdgeDims kCardMargins = const EdgeDims.all(4.0);
+
 /// A material design card
 ///
 /// <https://www.google.com/design/spec/components/cards.html>
@@ -16,7 +18,7 @@ class Card extends Component {
 
   Widget build() {
     return new Container(
-      margin: const EdgeDims.all(4.0),
+      margin: kCardMargins,
       child: new Material(
         color: color,
         type: MaterialType.card,
