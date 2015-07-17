@@ -26,4 +26,4 @@ use_openssl_certs = is_android
 # True if NSS is used for certificate verification. Note that this is
 # independent from use_openssl. It is possible to use OpenSSL for the crypto
 # library, but NSS for the platform certificate library.
-use_nss_certs = is_linux
+use_nss_certs = false

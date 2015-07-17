@@ -39,6 +39,7 @@ target.
 ### Android
 
 * (Only the first time) `./build/install-build-deps-android.sh`
+* (Only the first time) `./tools/android/download_android_tools.py`
 * `./sky/tools/gn --android`
 * `ninja -C out/android_Debug`
 * `./sky/tools/shelldb start out/android_Debug/ sky/sdk/example/hello_world/lib/main.dart`

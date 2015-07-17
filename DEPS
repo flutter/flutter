@@ -185,12 +185,6 @@ hooks = [
     'action': ['python', 'src/tools/dart/update.py'],
   },
   {
-    # This downloads android_tools according to tools/android/VERSION_*.
-    'name': 'android_tools',
-    'pattern': '.',
-    'action': ['python', 'src/tools/android/download_android_tools.py'],
-  },
-  {
     # This downloads SDK extras and puts them in the
     # third_party/android_tools/sdk/extras directory on the bots. Developers
     # need to manually install these packages and accept the ToS.
