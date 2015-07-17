@@ -17,7 +17,7 @@ if (is_android) {
   if (!defined(default_android_sdk_root)) {
     default_android_sdk_root = "//third_party/android_tools/sdk"
     default_android_sdk_version = "22"
-    default_android_sdk_build_tools_version = "22.0.0"
+    default_android_sdk_build_tools_version = "22.0.1"
   }
 
   if (!defined(google_play_services_library)) {
