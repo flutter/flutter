@@ -47,10 +47,12 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     List<RenderBox> children,
     FlexDirection direction: FlexDirection.horizontal,
     FlexJustifyContent justifyContent: FlexJustifyContent.start,
-    FlexAlignItems alignItems: FlexAlignItems.center
+    FlexAlignItems alignItems: FlexAlignItems.center,
+    TextBaseline textBaseline
   }) : _direction = direction,
        _justifyContent = justifyContent,
-       _alignItems = alignItems {
+       _alignItems = alignItems,
+       _textBaseline = textBaseline {
     addAll(children);
   }
 
@@ -77,6 +79,15 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
   void set alignItems (FlexAlignItems value) {
     if (_alignItems != value) {
       _alignItems = value;
+      markNeedsLayout();
+    }
+  }
+
+  TextBaseline _textBaseline;
+  TextBaseline get textBaseline => _textBaseline;
+  void set textBaseline (TextBaseline value) {
+    if (_textBaseline != value) {
+      _textBaseline = value;
       markNeedsLayout();
     }
   }
@@ -342,8 +353,8 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
         crossSize = math.max(crossSize, _getCrossSize(child));
       }
       if (alignItems == FlexAlignItems.baseline) {
-        // TODO(jackson): Support for non-alphabetic baselines
-        double distance = child.getDistanceToBaseline(TextBaseline.alphabetic, onlyReal: true);
+        assert(textBaseline != null);
+        double distance = child.getDistanceToBaseline(textBaseline, onlyReal: true);
         if (distance != null)
           maxBaselineDistance = math.max(maxBaselineDistance, distance);
       }
@@ -412,10 +423,9 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
           break;
         case FlexAlignItems.baseline:
           childCrossPosition = 0.0;
-          // TODO(jackson): Support for vertical baselines
           if (_direction == FlexDirection.horizontal) {
-            // TODO(jackson): Support for non-alphabetic baselines
-            double distance = child.getDistanceToBaseline(TextBaseline.alphabetic, onlyReal: true);
+            assert(textBaseline != null);
+            double distance = child.getDistanceToBaseline(textBaseline, onlyReal: true);
             if (distance != null)
               childCrossPosition = maxBaselineDistance - distance;
           }
