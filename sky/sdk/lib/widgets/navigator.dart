@@ -46,7 +46,13 @@ const Duration _kTransitionDuration = const Duration(milliseconds: 200);
 const Point _kTransitionStartPoint = const Point(0.0, 100.0);
 enum TransitionDirection { forward, reverse }
 class Transition extends AnimatedComponent {
-  Transition({ this.content, this.direction, this.onDismissed, this.interactive });
+  Transition({
+    String key,
+    this.content,
+    this.direction,
+    this.onDismissed,
+    this.interactive
+  }) : super(key: key);
   Widget content;
   TransitionDirection direction;
   bool interactive;
@@ -206,6 +212,7 @@ class Navigator extends StatefulComponent {
   Widget build() {
     List<Widget> visibleRoutes = new List<Widget>();
     for (int i = 0; i < state.history.length; i++) {
+      // TODO(jackson): Avoid building routes that are not visible
       HistoryEntry historyEntry = state.history[i];
       Widget content = historyEntry.route.build(this, historyEntry.route);
       if (i == 0) {
@@ -214,7 +221,8 @@ class Navigator extends StatefulComponent {
       }
       if (content == null)
         continue;
-      Transition transition = new Transition(content: content)
+      String key = historyEntry.route.key;
+      Transition transition = new Transition(content: content, key: key)
         ..direction = (i <= state.historyIndex) ? TransitionDirection.forward : TransitionDirection.reverse
         ..interactive = (i == state.historyIndex)
         ..onDismissed = () {
