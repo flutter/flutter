@@ -31,7 +31,6 @@
 #include "sky/engine/core/rendering/style/CounterDirectives.h"
 #include "sky/engine/core/rendering/style/DataRef.h"
 #include "sky/engine/core/rendering/style/FillLayer.h"
-#include "sky/engine/core/rendering/style/NinePieceImage.h"
 #include "sky/engine/core/rendering/style/RenderStyleConstants.h"
 #include "sky/engine/core/rendering/style/ShapeValue.h"
 #include "sky/engine/platform/LengthPoint.h"

@@ -76,7 +76,6 @@ public:
     bool isBaseValueList() const { return m_classType == ValueListClass; }
 
     bool isAspectRatioValue() const { return m_classType == AspectRatioClass; }
-    bool isBorderImageSliceValue() const { return m_classType == BorderImageSliceClass; }
     bool isFontFeatureValue() const { return m_classType == FontFeatureClass; }
     bool isFontValue() const { return m_classType == FontClass; }
     bool isFunctionValue() const { return m_classType == FunctionClass; }
@@ -117,7 +116,6 @@ protected:
 
         // Other class types.
         AspectRatioClass,
-        BorderImageSliceClass,
         FontFeatureClass,
         FontClass,
         FunctionClass,

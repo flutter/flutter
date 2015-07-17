@@ -27,7 +27,6 @@
 #include "sky/engine/core/css/CSSValue.h"
 
 #include "sky/engine/core/css/CSSAspectRatioValue.h"
-#include "sky/engine/core/css/CSSBorderImageSliceValue.h"
 #include "sky/engine/core/css/CSSCalculationValue.h"
 #include "sky/engine/core/css/CSSFilterValue.h"
 #include "sky/engine/core/css/CSSFontFeatureValue.h"
@@ -109,8 +108,6 @@ bool CSSValue::equals(const CSSValue& other) const
         switch (m_classType) {
         case AspectRatioClass:
             return compareCSSValues<CSSAspectRatioValue>(*this, other);
-        case BorderImageSliceClass:
-            return compareCSSValues<CSSBorderImageSliceValue>(*this, other);
         case FontClass:
             return compareCSSValues<CSSFontValue>(*this, other);
         case FontFeatureClass:
@@ -163,8 +160,6 @@ String CSSValue::cssText() const
     switch (classType()) {
     case AspectRatioClass:
         return toCSSAspectRatioValue(this)->customCSSText();
-    case BorderImageSliceClass:
-        return toCSSBorderImageSliceValue(this)->customCSSText();
     case FontClass:
         return toCSSFontValue(this)->customCSSText();
     case FontFeatureClass:
@@ -212,9 +207,6 @@ void CSSValue::destroy()
     switch (classType()) {
     case AspectRatioClass:
         delete toCSSAspectRatioValue(this);
-        return;
-    case BorderImageSliceClass:
-        delete toCSSBorderImageSliceValue(this);
         return;
     case FontClass:
         delete toCSSFontValue(this);

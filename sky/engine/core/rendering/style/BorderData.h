@@ -26,7 +26,6 @@
 #define SKY_ENGINE_CORE_RENDERING_STYLE_BORDERDATA_H_
 
 #include "sky/engine/core/rendering/style/BorderValue.h"
-#include "sky/engine/core/rendering/style/NinePieceImage.h"
 #include "sky/engine/platform/LengthSize.h"
 #include "sky/engine/platform/geometry/IntRect.h"
 
@@ -43,8 +42,7 @@ public:
     }
     bool hasBorder() const
     {
-        bool haveImage = m_image.hasImage();
-        return m_left.nonZero(!haveImage) || m_right.nonZero(!haveImage) || m_top.nonZero(!haveImage) || m_bottom.nonZero(!haveImage);
+        return m_left.nonZero() || m_right.nonZero() || m_top.nonZero() || m_bottom.nonZero();
     }
 
     bool hasBorderRadius() const
@@ -62,35 +60,35 @@ public:
 
     unsigned borderLeftWidth() const
     {
-        if (!m_image.hasImage() && (m_left.style() == BNONE || m_left.style() == BHIDDEN))
+        if ((m_left.style() == BNONE || m_left.style() == BHIDDEN))
             return 0;
         return m_left.width();
     }
 
     unsigned borderRightWidth() const
     {
-        if (!m_image.hasImage() && (m_right.style() == BNONE || m_right.style() == BHIDDEN))
+        if ((m_right.style() == BNONE || m_right.style() == BHIDDEN))
             return 0;
         return m_right.width();
     }
 
     unsigned borderTopWidth() const
     {
-        if (!m_image.hasImage() && (m_top.style() == BNONE || m_top.style() == BHIDDEN))
+        if ((m_top.style() == BNONE || m_top.style() == BHIDDEN))
             return 0;
         return m_top.width();
     }
 
     unsigned borderBottomWidth() const
     {
-        if (!m_image.hasImage() && (m_bottom.style() == BNONE || m_bottom.style() == BHIDDEN))
+        if ((m_bottom.style() == BNONE || m_bottom.style() == BHIDDEN))
             return 0;
         return m_bottom.width();
     }
 
     bool operator==(const BorderData& o) const
     {
-        return m_left == o.m_left && m_right == o.m_right && m_top == o.m_top && m_bottom == o.m_bottom && m_image == o.m_image
+        return m_left == o.m_left && m_right == o.m_right && m_top == o.m_top && m_bottom == o.m_bottom
                && m_topLeft == o.m_topLeft && m_topRight == o.m_topRight && m_bottomLeft == o.m_bottomLeft && m_bottomRight == o.m_bottomRight;
     }
 
@@ -100,7 +98,6 @@ public:
             && m_right.visuallyEqual(o.m_right)
             && m_top.visuallyEqual(o.m_top)
             && m_bottom.visuallyEqual(o.m_bottom)
-            && m_image == o.m_image
             && m_topLeft == o.m_topLeft
             && m_topRight == o.m_topRight
             && m_bottomLeft == o.m_bottomLeft
@@ -117,8 +114,6 @@ public:
     const BorderValue& top() const { return m_top; }
     const BorderValue& bottom() const { return m_bottom; }
 
-    const NinePieceImage& image() const { return m_image; }
-
     const LengthSize& topLeft() const { return m_topLeft; }
     const LengthSize& topRight() const { return m_topRight; }
     const LengthSize& bottomLeft() const { return m_bottomLeft; }
@@ -129,8 +124,6 @@ private:
     BorderValue m_right;
     BorderValue m_top;
     BorderValue m_bottom;
-
-    NinePieceImage m_image;
 
     LengthSize m_topLeft;
     LengthSize m_topRight;

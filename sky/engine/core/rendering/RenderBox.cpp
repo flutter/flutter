@@ -954,7 +954,7 @@ void RenderBox::paintRootBoxFillLayers(const PaintInfo& paintInfo)
 
 BackgroundBleedAvoidance RenderBox::determineBackgroundBleedAvoidance(GraphicsContext* context, const BoxDecorationData& boxDecorationData) const
 {
-    if (!boxDecorationData.hasBackground || !boxDecorationData.hasBorder || !style()->hasBorderRadius() || canRenderBorderImage())
+    if (!boxDecorationData.hasBackground || !boxDecorationData.hasBorder || !style()->hasBorderRadius())
         return BackgroundBleedNone;
 
     // FIXME: See crbug.com/382491. getCTM does not accurately reflect the scale at the time content is
@@ -2840,14 +2840,6 @@ LayoutBoxExtent RenderBox::computeVisualEffectOverflowExtent() const
         // Negate to make them positive.
         top = -top;
         left = -left;
-    }
-
-    if (style()->hasBorderImageOutsets()) {
-        LayoutBoxExtent borderOutsets = style()->borderImageOutsets();
-        top = std::max(top, borderOutsets.top());
-        right = std::max(right, borderOutsets.right());
-        bottom = std::max(bottom, borderOutsets.bottom());
-        left = std::max(left, borderOutsets.left());
     }
 
     if (style()->hasOutline()) {

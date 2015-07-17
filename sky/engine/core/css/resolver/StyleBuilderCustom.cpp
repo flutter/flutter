@@ -424,13 +424,6 @@ void StyleBuilderFunctions::applyValueCSSPropertyWebkitAspectRatio(StyleResolver
     state.style()->setAspectRatioNumerator(aspectRatioValue->numeratorValue());
 }
 
-void StyleBuilderFunctions::applyValueCSSPropertyWebkitBorderImage(StyleResolverState& state, CSSValue* value)
-{
-    NinePieceImage image;
-    state.styleMap().mapNinePieceImage(state.style(), CSSPropertyWebkitBorderImage, value, image);
-    state.style()->setBorderImage(image);
-}
-
 void StyleBuilderFunctions::applyValueCSSPropertyWebkitClipPath(StyleResolverState& state, CSSValue* value)
 {
     if (value->isPrimitiveValue()) {

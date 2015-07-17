@@ -30,7 +30,6 @@
 #include "sky/engine/bindings/exception_state.h"
 #include "sky/engine/core/css/BasicShapeFunctions.h"
 #include "sky/engine/core/css/CSSAspectRatioValue.h"
-#include "sky/engine/core/css/CSSBorderImage.h"
 #include "sky/engine/core/css/CSSFilterValue.h"
 #include "sky/engine/core/css/CSSFontFeatureValue.h"
 #include "sky/engine/core/css/CSSFontValue.h"
@@ -45,7 +44,6 @@
 #include "sky/engine/core/css/CSSValueList.h"
 #include "sky/engine/core/css/CSSValuePool.h"
 #include "sky/engine/core/css/Pair.h"
-#include "sky/engine/core/css/Rect.h"
 #include "sky/engine/core/css/StylePropertySet.h"
 #include "sky/engine/core/css/parser/BisonCSSParser.h"
 #include "sky/engine/core/css/resolver/StyleResolver.h"
@@ -77,11 +75,6 @@ static const CSSPropertyID staticComputableProperties[] = {
     CSSPropertyBorderBottomRightRadius,
     CSSPropertyBorderBottomStyle,
     CSSPropertyBorderBottomWidth,
-    CSSPropertyBorderImageOutset,
-    CSSPropertyBorderImageRepeat,
-    CSSPropertyBorderImageSlice,
-    CSSPropertyBorderImageSource,
-    CSSPropertyBorderImageWidth,
     CSSPropertyBorderLeftColor,
     CSSPropertyBorderLeftStyle,
     CSSPropertyBorderLeftWidth,
@@ -96,7 +89,6 @@ static const CSSPropertyID staticComputableProperties[] = {
     CSSPropertyBottom,
     CSSPropertyBoxShadow,
     CSSPropertyBoxSizing,
-    CSSPropertyClip,
     CSSPropertyColor,
     CSSPropertyDirection,
     CSSPropertyDisplay,
@@ -168,7 +160,6 @@ static const CSSPropertyID staticComputableProperties[] = {
     CSSPropertyWebkitBackgroundOrigin,
     CSSPropertyWebkitBackgroundSize,
     CSSPropertyWebkitBorderHorizontalSpacing,
-    CSSPropertyWebkitBorderImage,
     CSSPropertyWebkitBorderVerticalSpacing,
     CSSPropertyWebkitBoxDecorationBreak,
     CSSPropertyWebkitBoxShadow,
@@ -220,163 +211,6 @@ static const Vector<CSSPropertyID>& computableProperties()
     if (properties.isEmpty())
         CSSPropertyMetadata::filterEnabledCSSPropertiesIntoVector(staticComputableProperties, WTF_ARRAY_LENGTH(staticComputableProperties), properties);
     return properties;
-}
-
-static CSSValueID valueForRepeatRule(int rule)
-{
-    switch (rule) {
-        case RepeatImageRule:
-            return CSSValueRepeat;
-        case RoundImageRule:
-            return CSSValueRound;
-        case SpaceImageRule:
-            return CSSValueSpace;
-        default:
-            return CSSValueStretch;
-    }
-}
-
-static PassRefPtr<CSSBorderImageSliceValue> valueForNinePieceImageSlice(const NinePieceImage& image)
-{
-    // Create the slices.
-    RefPtr<CSSPrimitiveValue> top = nullptr;
-    RefPtr<CSSPrimitiveValue> right = nullptr;
-    RefPtr<CSSPrimitiveValue> bottom = nullptr;
-    RefPtr<CSSPrimitiveValue> left = nullptr;
-
-    if (image.imageSlices().top().isPercent())
-        top = cssValuePool().createValue(image.imageSlices().top().value(), CSSPrimitiveValue::CSS_PERCENTAGE);
-    else
-        top = cssValuePool().createValue(image.imageSlices().top().value(), CSSPrimitiveValue::CSS_NUMBER);
-
-    if (image.imageSlices().right() == image.imageSlices().top() && image.imageSlices().bottom() == image.imageSlices().top()
-        && image.imageSlices().left() == image.imageSlices().top()) {
-        right = top;
-        bottom = top;
-        left = top;
-    } else {
-        if (image.imageSlices().right().isPercent())
-            right = cssValuePool().createValue(image.imageSlices().right().value(), CSSPrimitiveValue::CSS_PERCENTAGE);
-        else
-            right = cssValuePool().createValue(image.imageSlices().right().value(), CSSPrimitiveValue::CSS_NUMBER);
-
-        if (image.imageSlices().bottom() == image.imageSlices().top() && image.imageSlices().right() == image.imageSlices().left()) {
-            bottom = top;
-            left = right;
-        } else {
-            if (image.imageSlices().bottom().isPercent())
-                bottom = cssValuePool().createValue(image.imageSlices().bottom().value(), CSSPrimitiveValue::CSS_PERCENTAGE);
-            else
-                bottom = cssValuePool().createValue(image.imageSlices().bottom().value(), CSSPrimitiveValue::CSS_NUMBER);
-
-            if (image.imageSlices().left() == image.imageSlices().right())
-                left = right;
-            else {
-                if (image.imageSlices().left().isPercent())
-                    left = cssValuePool().createValue(image.imageSlices().left().value(), CSSPrimitiveValue::CSS_PERCENTAGE);
-                else
-                    left = cssValuePool().createValue(image.imageSlices().left().value(), CSSPrimitiveValue::CSS_NUMBER);
-            }
-        }
-    }
-
-    RefPtr<Quad> quad = Quad::create();
-    quad->setTop(top);
-    quad->setRight(right);
-    quad->setBottom(bottom);
-    quad->setLeft(left);
-
-    return CSSBorderImageSliceValue::create(cssValuePool().createValue(quad.release()), image.fill());
-}
-
-static PassRefPtr<CSSPrimitiveValue> valueForNinePieceImageQuad(const BorderImageLengthBox& box, const RenderStyle& style)
-{
-    // Create the slices.
-    RefPtr<CSSPrimitiveValue> top = nullptr;
-    RefPtr<CSSPrimitiveValue> right = nullptr;
-    RefPtr<CSSPrimitiveValue> bottom = nullptr;
-    RefPtr<CSSPrimitiveValue> left = nullptr;
-
-    if (box.top().isNumber())
-        top = cssValuePool().createValue(box.top().number(), CSSPrimitiveValue::CSS_NUMBER);
-    else
-        top = cssValuePool().createValue(box.top().length(), style);
-
-    if (box.right() == box.top() && box.bottom() == box.top() && box.left() == box.top()) {
-        right = top;
-        bottom = top;
-        left = top;
-    } else {
-        if (box.right().isNumber())
-            right = cssValuePool().createValue(box.right().number(), CSSPrimitiveValue::CSS_NUMBER);
-        else
-            right = cssValuePool().createValue(box.right().length(), style);
-
-        if (box.bottom() == box.top() && box.right() == box.left()) {
-            bottom = top;
-            left = right;
-        } else {
-            if (box.bottom().isNumber())
-                bottom = cssValuePool().createValue(box.bottom().number(), CSSPrimitiveValue::CSS_NUMBER);
-            else
-                bottom = cssValuePool().createValue(box.bottom().length(), style);
-
-            if (box.left() == box.right())
-                left = right;
-            else {
-                if (box.left().isNumber())
-                    left = cssValuePool().createValue(box.left().number(), CSSPrimitiveValue::CSS_NUMBER);
-                else
-                    left = cssValuePool().createValue(box.left().length(), style);
-            }
-        }
-    }
-
-    RefPtr<Quad> quad = Quad::create();
-    quad->setTop(top);
-    quad->setRight(right);
-    quad->setBottom(bottom);
-    quad->setLeft(left);
-
-    return cssValuePool().createValue(quad.release());
-}
-
-static PassRefPtr<CSSValue> valueForNinePieceImageRepeat(const NinePieceImage& image)
-{
-    RefPtr<CSSPrimitiveValue> horizontalRepeat = nullptr;
-    RefPtr<CSSPrimitiveValue> verticalRepeat = nullptr;
-
-    horizontalRepeat = cssValuePool().createIdentifierValue(valueForRepeatRule(image.horizontalRule()));
-    if (image.horizontalRule() == image.verticalRule())
-        verticalRepeat = horizontalRepeat;
-    else
-        verticalRepeat = cssValuePool().createIdentifierValue(valueForRepeatRule(image.verticalRule()));
-    return cssValuePool().createValue(Pair::create(horizontalRepeat.release(), verticalRepeat.release(), Pair::DropIdenticalValues));
-}
-
-static PassRefPtr<CSSValue> valueForNinePieceImage(const NinePieceImage& image, const RenderStyle& style)
-{
-    if (!image.hasImage())
-        return cssValuePool().createIdentifierValue(CSSValueNone);
-
-    // Image first.
-    RefPtr<CSSValue> imageValue = nullptr;
-    if (image.image())
-        imageValue = image.image()->cssValue();
-
-    // Create the image slice.
-    RefPtr<CSSBorderImageSliceValue> imageSlices = valueForNinePieceImageSlice(image);
-
-    // Create the border area slices.
-    RefPtr<CSSValue> borderSlices = valueForNinePieceImageQuad(image.borderSlices(), style);
-
-    // Create the border outset.
-    RefPtr<CSSValue> outset = valueForNinePieceImageQuad(image.outset(), style);
-
-    // Create the repeat rules.
-    RefPtr<CSSValue> repeat = valueForNinePieceImageRepeat(image);
-
-    return createBorderImageValue(imageValue.release(), imageSlices.release(), borderSlices.release(), outset.release(), repeat.release());
 }
 
 inline static PassRefPtr<CSSPrimitiveValue> pixelValue(double value, const RenderStyle&)
@@ -1122,10 +956,6 @@ PassRefPtr<CSSValue> CSSComputedStyleDeclaration::getPropertyCSSValue(CSSPropert
             return pixelValue(style->horizontalBorderSpacing(), *style);
         case CSSPropertyWebkitBorderVerticalSpacing:
             return pixelValue(style->verticalBorderSpacing(), *style);
-        case CSSPropertyBorderImageSource:
-            if (style->borderImageSource())
-                return style->borderImageSource()->cssValue();
-            return cssValuePool().createIdentifierValue(CSSValueNone);
         case CSSPropertyBorderTopColor:
             return m_allowVisitedStyle ? cssValuePool().createColorValue(style->colorIncludingFallback(CSSPropertyBorderTopColor).rgb()) : currentColorOrValidColor(*style, style->borderTopColor());
         case CSSPropertyBorderRightColor:
@@ -1540,16 +1370,6 @@ PassRefPtr<CSSValue> CSSComputedStyleDeclaration::getPropertyCSSValue(CSSPropert
             if (!style->hasAspectRatio())
                 return cssValuePool().createIdentifierValue(CSSValueNone);
             return CSSAspectRatioValue::create(style->aspectRatioNumerator(), style->aspectRatioDenominator());
-        case CSSPropertyWebkitBorderImage:
-            return valueForNinePieceImage(style->borderImage(), *style);
-        case CSSPropertyBorderImageOutset:
-            return valueForNinePieceImageQuad(style->borderImage().outset(), *style);
-        case CSSPropertyBorderImageRepeat:
-            return valueForNinePieceImageRepeat(style->borderImage());
-        case CSSPropertyBorderImageSlice:
-            return valueForNinePieceImageSlice(style->borderImage());
-        case CSSPropertyBorderImageWidth:
-            return valueForNinePieceImageQuad(style->borderImage().borderSlices(), *style);
         case CSSPropertyWebkitFontSizeDelta:
             // Not a real style property -- used by the editing engine -- so has no computed value.
             break;
@@ -1590,16 +1410,6 @@ PassRefPtr<CSSValue> CSSComputedStyleDeclaration::getPropertyCSSValue(CSSPropert
             return valueForBorderRadiusCorner(style->borderTopLeftRadius(), *style);
         case CSSPropertyBorderTopRightRadius:
             return valueForBorderRadiusCorner(style->borderTopRightRadius(), *style);
-        case CSSPropertyClip: {
-            if (style->hasAutoClip())
-                return cssValuePool().createIdentifierValue(CSSValueAuto);
-            RefPtr<Rect> rect = Rect::create();
-            rect->setTop(pixelValue(style->clip().top().value(), *style));
-            rect->setRight(pixelValue(style->clip().right().value(), *style));
-            rect->setBottom(pixelValue(style->clip().bottom().value(), *style));
-            rect->setLeft(pixelValue(style->clip().left().value(), *style));
-            return cssValuePool().createValue(rect.release());
-        }
         case CSSPropertyTransform:
         case CSSPropertyWebkitTransform:
             return computedTransform(renderer, *style);
@@ -1659,8 +1469,6 @@ PassRefPtr<CSSValue> CSSComputedStyleDeclaration::getPropertyCSSValue(CSSPropert
             return valuesForSidesShorthand(borderColorShorthand());
         case CSSPropertyBorderLeft:
             return valuesForShorthandProperty(borderLeftShorthand());
-        case CSSPropertyBorderImage:
-            return valueForNinePieceImage(style->borderImage(), *style);
         case CSSPropertyBorderRadius:
             return valueForBorderRadiusShorthand(*style);
         case CSSPropertyBorderRight:

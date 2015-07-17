@@ -598,14 +598,6 @@ RenderBlock* RenderObject::containingBlock() const
     return toRenderBlock(o);
 }
 
-bool RenderObject::canRenderBorderImage() const
-{
-    ASSERT(style()->hasBorder());
-
-    StyleImage* borderImage = style()->borderImage().image();
-    return borderImage && borderImage->canRender(*this) && borderImage->isLoaded();
-}
-
 void RenderObject::drawLineForBoxSide(GraphicsContext* graphicsContext, int x1, int y1, int x2, int y2,
                                       BoxSide side, Color color, EBorderStyle style,
                                       int adjacentWidth1, int adjacentWidth2, bool antialias)
@@ -1188,7 +1180,6 @@ void RenderObject::setStyle(PassRefPtr<RenderStyle> style)
     setStyleInternal(style);
 
     updateFillImages(oldStyle ? &oldStyle->backgroundLayers() : 0, m_style->backgroundLayers());
-    updateImage(oldStyle ? oldStyle->borderImage().image() : 0, m_style->borderImage().image());
 
     bool doesNotNeedLayout = !m_parent || isText();
 
@@ -1596,9 +1587,6 @@ void RenderObject::postDestroy()
             if (StyleImage* backgroundImage = bgLayer->image())
                 backgroundImage->removeClient(this);
         }
-
-        if (StyleImage* borderImage = m_style->borderImage().image())
-            borderImage->removeClient(this);
     }
     delete this;
 }
