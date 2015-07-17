@@ -10,9 +10,9 @@ List<Route> routes = [
   new Route(
     name: 'home',
     builder: (navigator, route) => new Container(
-      padding: const EdgeDims.all(20.0),
+      padding: const EdgeDims.all(30.0),
       decoration: new BoxDecoration(backgroundColor: const Color(0xFFCCCCCC)),
-      child: new Block([
+      child: new Flex([
         new Text("You are at home"),
         new RaisedButton(
           child: new Text('GO SHOPPING'),
@@ -22,7 +22,7 @@ List<Route> routes = [
           child: new Text('START ADVENTURE'),
           onPressed: () => navigator.pushNamed('adventure')
         )
-      ])
+      ], direction: FlexDirection.vertical, alignItems: FlexAlignItems.center)
     )
   ),
   new Route(
@@ -30,7 +30,7 @@ List<Route> routes = [
     builder: (navigator, route) => new Container(
       padding: const EdgeDims.all(20.0),
       decoration: new BoxDecoration(backgroundColor: const Color(0xFFBF5FFF)),
-      child: new Block([
+      child: new Flex([
         new Text("Village Shop"),
         new RaisedButton(
           child: new Text('RETURN HOME'),
@@ -40,7 +40,7 @@ List<Route> routes = [
           child: new Text('GO TO DUNGEON'),
           onPressed: () => navigator.push(routes[2])
         )
-      ])
+      ], direction: FlexDirection.vertical)
     )
   ),
   new Route(
@@ -48,13 +48,13 @@ List<Route> routes = [
     builder: (navigator, route) => new Container(
       padding: const EdgeDims.all(20.0),
       decoration: new BoxDecoration(backgroundColor: const Color(0xFFDC143C)),
-      child: new Block([
+      child: new Flex([
         new Text("Monster's Lair"),
         new RaisedButton(
           child: new Text('NO WAIT! GO BACK!'),
           onPressed: () => navigator.pop()
         )
-      ])
+      ], direction: FlexDirection.vertical)
     )
   )
 ];
