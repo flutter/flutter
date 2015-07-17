@@ -24,6 +24,7 @@ group("sky_dev") {
 
   deps = [
     "//sky/sdk",
+    "//sky/sdk/example/demo_launcher",
   ]
 
   if (is_android) {
