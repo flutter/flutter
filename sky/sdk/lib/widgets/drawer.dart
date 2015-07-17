@@ -46,16 +46,6 @@ enum DrawerStatus {
 
 typedef void DrawerStatusChangedCallback(DrawerStatus status);
 
-// TODO(mpcomplete): find a better place for this.
-class AnimatedColor extends AnimatedType<Color> {
-  AnimatedColor(Color begin, { Color end, Curve curve: linear })
-    : super(begin, end: end, curve: curve);
-
-  void setFraction(double t) {
-    value = lerpColor(begin, end, t);
-  }
-}
-
 class Drawer extends AnimatedComponent {
   Drawer({
     String key,

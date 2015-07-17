@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:sky/animation/animated_value.dart';
 import 'package:sky/animation/animation_performance.dart';
 import 'package:sky/painting/text_style.dart';
 import 'package:sky/theme/typography.dart' as typography;
@@ -69,11 +70,11 @@ class SnackBar extends AnimatedComponent {
     }
   }
 
-  AnimatedType<Point> _position;
+  AnimatedValue<Point> _position;
   AnimationPerformance _performance;
 
   void initState() {
-    _position = new AnimatedType<Point>(new Point(0.0, 50.0), end: Point.origin);
+    _position = new AnimatedValue<Point>(new Point(0.0, 50.0), end: Point.origin);
     _performance = new AnimationPerformance()
       ..duration = _kSlideInDuration
       ..variable = _position
