@@ -38,8 +38,6 @@
 #include "sky/engine/core/dom/NodeRenderStyle.h"
 #include "sky/engine/core/dom/QualifiedName.h"
 #include "sky/engine/core/dom/SpaceSplitString.h"
-#include "sky/engine/core/dom/shadow/ElementShadow.h"
-#include "sky/engine/core/dom/shadow/InsertionPoint.h"
 #include "sky/engine/core/html/HTMLElement.h"
 #include "sky/engine/core/rendering/style/RenderStyle.h"
 #include "sky/engine/wtf/HashSet.h"
@@ -89,16 +87,7 @@ bool SharedStyleFinder::sharingCandidateHasIdenticalStyleAffectingAttributes(Ele
 
 bool SharedStyleFinder::sharingCandidateCanShareHostStyles(Element& candidate) const
 {
-    const ElementShadow* elementShadow = element().shadow();
-    const ElementShadow* candidateShadow = candidate.shadow();
-
-    if (!elementShadow && !candidateShadow)
-        return true;
-
-    if (static_cast<bool>(elementShadow) != static_cast<bool>(candidateShadow))
-        return false;
-
-    return elementShadow->hasSameStyles(candidateShadow);
+    return true;
 }
 
 bool SharedStyleFinder::canShareStyleWithElement(Element& candidate) const
@@ -116,7 +105,7 @@ bool SharedStyleFinder::canShareStyleWithElement(Element& candidate) const
         return false;
     if (!style->isSharable())
         return false;
-    ContainerNode* parent = NodeRenderingTraversal::parent(&candidate);
+    ContainerNode* parent = candidate.parentNode();
     if (!parent)
         return false;
     RenderStyle* parentStyle = parent->renderStyle();
@@ -181,7 +170,7 @@ RenderStyle* SharedStyleFinder::findSharedStyle()
 
     // Cache whether context.element() is affected by any known class selectors.
     m_elementAffectedByClassRules = element().hasClass() && classNamesAffectedByRules(element());
-    m_renderingParent = NodeRenderingTraversal::parent(&element());
+    m_renderingParent = element().parentNode();
 
     Element* shareElement = findElementForStyleSharing();
 

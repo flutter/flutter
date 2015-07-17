@@ -53,8 +53,6 @@
 #include "sky/engine/core/dom/NodeRenderStyle.h"
 #include "sky/engine/core/dom/StyleEngine.h"
 #include "sky/engine/core/dom/Text.h"
-#include "sky/engine/core/dom/shadow/ElementShadow.h"
-#include "sky/engine/core/dom/shadow/ShadowRoot.h"
 #include "sky/engine/core/frame/FrameView.h"
 #include "sky/engine/core/frame/LocalFrame.h"
 #include "sky/engine/core/rendering/RenderView.h"
@@ -133,9 +131,6 @@ void StyleResolver::matchRules(Element& element, ElementRuleCollector& collector
 
     collector.collectMatchingRules(MatchRequest(&defaultStyles()), ++cascadeOrder);
 
-    if (ShadowRoot* shadowRoot = element.shadowRoot())
-        shadowRoot->scopedStyleResolver().collectMatchingHostRules(collector, ++cascadeOrder);
-
     ScopedStyleResolver& resolver = element.treeScope().scopedStyleResolver();
     resolver.collectMatchingAuthorRules(collector, ++cascadeOrder);
 
@@ -176,18 +171,10 @@ PassRefPtr<RenderStyle> StyleResolver::styleForElement(Element* element, RenderS
 
     if (state.parentStyle()) {
         state.setStyle(RenderStyle::create());
-        state.style()->inheritFrom(state.parentStyle(), isAtShadowBoundary(element) ? RenderStyle::AtShadowBoundary : RenderStyle::NotAtShadowBoundary);
+        state.style()->inheritFrom(state.parentStyle());
     } else {
         state.setStyle(defaultStyleForElement());
         state.setParentStyle(RenderStyle::clone(state.style()));
-    }
-    // contenteditable attribute (implemented by -webkit-user-modify) should
-    // be propagated from shadow host to distributed node.
-    if (state.distributedToInsertionPoint()) {
-        if (Element* parent = element->parentElement()) {
-            if (RenderStyle* styleOfShadowHost = parent->renderStyle())
-                state.style()->setUserModify(styleOfShadowHost->userModify());
-        }
     }
 
     state.fontBuilder().initForStyleResolve(state.document(), state.style());
@@ -229,7 +216,7 @@ PassRefPtr<RenderStyle> StyleResolver::styleForText(Text* textNode)
 {
     ASSERT(textNode);
 
-    Node* parentNode = NodeRenderingTraversal::parent(textNode);
+    Node* parentNode = textNode->parentNode();
     if (!parentNode || !parentNode->renderStyle())
         return defaultStyleForElement();
     return parentNode->renderStyle();
@@ -353,8 +340,8 @@ void StyleResolver::applyMatchedProperties(StyleResolverState& state, const Matc
         // style declarations. We then only need to apply the inherited properties, if any, as their values can depend on the
         // element context. This is fast and saves memory by reusing the style data structures.
         state.style()->copyNonInheritedFrom(cachedMatchedProperties->renderStyle.get());
-        if (state.parentStyle()->inheritedDataShared(cachedMatchedProperties->parentRenderStyle.get()) && !isAtShadowBoundary(element)
-            && (!state.distributedToInsertionPoint() || state.style()->userModify() == READ_ONLY)) {
+        if (state.parentStyle()->inheritedDataShared(cachedMatchedProperties->parentRenderStyle.get()) &&
+            (state.style()->userModify() == READ_ONLY)) {
             INCREMENT_STYLE_STATS_COUNTER(*this, matchedPropertyCacheInheritedHit);
 
             // If the cache item parent style has identical inherited properties to the current parent style then the

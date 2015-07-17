@@ -237,8 +237,6 @@ group("make_core_generated") {
     ":make_core_generated_css_property_metadata",
     ":make_core_generated_css_value_keywords",
     ":make_core_generated_event_factory",
-    ":make_core_generated_html_element_lookup_trie",
-    ":make_core_generated_html_element_type_helpers",
     ":make_core_generated_make_parser",
     ":make_core_generated_make_token_matcher",
     ":make_core_generated_media_feature_names",
@@ -340,28 +338,15 @@ process_in_files("make_core_generated_html_element_factory") {
   script = "../build/scripts/make_element_factory.py"
 
   in_files = [
-    "html/HTMLTagNames.in",
     "html/HTMLAttributeNames.in",
   ]
   other_inputs = make_element_factory_files
   outputs = [
-    "$sky_core_output_dir/HTMLElementFactory.cpp",
-    "$sky_core_output_dir/HTMLElementFactory.h",
     "$sky_core_output_dir/HTMLNames.cpp",
     "$sky_core_output_dir/HTMLNames.h",
   ]
   deps = [
     ":libraries",
-  ]
-}
-
-process_in_files("make_core_generated_html_element_type_helpers") {
-  script = "../build/scripts/make_element_type_helpers.py"
-
-  in_files = [ "html/HTMLTagNames.in" ]
-  other_inputs = make_element_type_helpers_files
-  outputs = [
-    "$sky_core_output_dir/HTMLElementTypeHelpers.h",
   ]
 }
 
@@ -449,23 +434,6 @@ action("make_core_generated_media_query_tokenizer_codepoints") {
   ]
 
   deps = make_core_generated_deps
-}
-
-process_in_files("make_core_generated_html_element_lookup_trie") {
-  script = "../build/scripts/make_element_lookup_trie.py"
-  in_files = [ "html/HTMLTagNames.in" ]
-  other_inputs = [
-    "../build/scripts/templates/ElementLookupTrie.cpp.tmpl",
-    "../build/scripts/templates/ElementLookupTrie.h.tmpl",
-  ]
-  outputs = [
-    "$sky_core_output_dir/HTMLElementLookupTrie.cpp",
-    "$sky_core_output_dir/HTMLElementLookupTrie.h",
-  ]
-  deps = [
-    ":core_names",
-    ":libraries",
-  ]
 }
 
 action_foreach("make_core_generated_bison") {

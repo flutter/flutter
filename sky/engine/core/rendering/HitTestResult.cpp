@@ -23,8 +23,6 @@
 
 #include "gen/sky/core/HTMLNames.h"
 #include "sky/engine/core/dom/DocumentMarkerController.h"
-#include "sky/engine/core/dom/NodeRenderingTraversal.h"
-#include "sky/engine/core/dom/shadow/ShadowRoot.h"
 #include "sky/engine/core/editing/PositionWithAffinity.h"
 #include "sky/engine/core/editing/VisiblePosition.h"
 #include "sky/engine/core/frame/LocalFrame.h"
@@ -245,7 +243,7 @@ void HitTestResult::resolveRectBasedTest(Node* resolvedInnerNode, const LayoutPo
 
 Element* HitTestResult::innerElement() const
 {
-    for (Node* node = m_innerNode.get(); node; node = NodeRenderingTraversal::parent(node)) {
+    for (Node* node = m_innerNode.get(); node; node = node->parentNode()) {
         if (node->isElementNode())
             return toElement(node);
     }

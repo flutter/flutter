@@ -18,21 +18,19 @@
  * Boston, MA 02110-1301, USA.
  */
 
-callback CustomElementConstructor = Element ();
-
 [
     Constructor(),
 ] interface Document : ParentNode {
-    [CustomElementCallbacks, RaisesException] Element createElement(DOMString tagName);
+    [RaisesException] Element createElement(DOMString tagName);
     Text createText(DOMString? text);
 
     DocumentFragment createDocumentFragment();
 
-    [CustomElementCallbacks, RaisesException, TypeChecking=Interface] Node importNode(Node node, [Named] optional boolean deep = false);
+    [RaisesException, TypeChecking=Interface] Node importNode(Node node, [Named] optional boolean deep = false);
 
     Element getElementById(DOMString elementId);
 
-    [RaisesException, CustomElementCallbacks, TypeChecking=Interface] Node adoptNode(Node node);
+    [RaisesException, TypeChecking=Interface] Node adoptNode(Node node);
 
     readonly attribute DOMString? baseURI;
 
@@ -40,7 +38,7 @@ callback CustomElementConstructor = Element ();
 
     readonly attribute DOMString contentType;
 
-             [TreatNullAs=NullString, CustomElementCallbacks] attribute DOMString dir;
+             [TreatNullAs=NullString] attribute DOMString dir;
     readonly attribute DOMString referrer;
     readonly attribute DOMString URL;
 
@@ -56,6 +54,4 @@ callback CustomElementConstructor = Element ();
     // HTML 5
     readonly attribute Element activeElement;
     boolean hasFocus();
-
-    [RaisesException] void registerElement(DOMString name, any type);
 };

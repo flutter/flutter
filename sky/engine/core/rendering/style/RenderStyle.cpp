@@ -149,15 +149,9 @@ StyleRecalcChange RenderStyle::stylePropagationDiff(const RenderStyle* oldStyle,
     return NoInherit;
 }
 
-void RenderStyle::inheritFrom(const RenderStyle* inheritParent, IsAtShadowBoundary isAtShadowBoundary)
+void RenderStyle::inheritFrom(const RenderStyle* inheritParent)
 {
-    if (isAtShadowBoundary == AtShadowBoundary) {
-        // Even if surrounding content is user-editable, shadow DOM should act as a single unit, and not necessarily be editable
-        EUserModify currentUserModify = userModify();
-        rareInheritedData = inheritParent->rareInheritedData;
-        setUserModify(currentUserModify);
-    } else
-        rareInheritedData = inheritParent->rareInheritedData;
+    rareInheritedData = inheritParent->rareInheritedData;
     inherited = inheritParent->inherited;
     inherited_flags = inheritParent->inherited_flags;
 }

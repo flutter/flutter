@@ -114,22 +114,19 @@ def getter_context(interface, attribute, context):
     extended_attributes = attribute.extended_attributes
 
     cpp_value = getter_expression(interface, attribute, context)
-    # Normally we can inline the function call into the return statement to
-    # avoid the overhead of using a Ref<> temporary, but for some cases
-    # (nullable types, EventHandler, [CachedAttribute], or if there are
-    # exceptions), we need to use a local variable.
+    # Normally we can inline the function call into the return
+    # statement to avoid the overhead of using a Ref<> temporary, but
+    # for some cases (nullable types, [CachedAttribute], or if there
+    # are exceptions), we need to use a local variable.
     # FIXME: check if compilers are smart enough to inline this, and if so,
     # always use a local variable (for readability and CG simplicity).
     release = False
     if (idl_type.is_nullable or
-        base_idl_type == 'EventHandler' or
         'CachedAttribute' in extended_attributes or
-        'ReflectOnly' in extended_attributes or
         context['is_getter_raises_exception']):
         context['cpp_value_original'] = cpp_value
         cpp_value = 'result'
-        # EventHandler has special handling
-        if base_idl_type != 'EventHandler' and idl_type.is_interface_type:
+        if idl_type.is_interface_type:
             release = True
 
     dart_set_return_value = \
@@ -229,16 +226,8 @@ def setter_expression(interface, attribute, context):
         not attribute.is_static):
         arguments.append('*receiver')
     idl_type = attribute.idl_type
-    if idl_type.base_type == 'EventHandler':
-        getter_name = DartUtilities.scoped_name(interface, attribute, DartUtilities.cpp_name(attribute))
-        context['event_handler_getter_expression'] = '%s(%s)' % (
-            getter_name, ', '.join(arguments))
-        # FIXME(vsm): Do we need to support this? If so, what's our analogue of
-        # V8EventListenerList?
-        arguments.append('nullptr')
-    else:
-        attribute_name = dart_types.check_reserved_name(attribute.name)
-        arguments.append(attribute_name)
+    attribute_name = dart_types.check_reserved_name(attribute.name)
+    arguments.append(attribute_name)
     if context['is_setter_raises_exception']:
         arguments.append('es')
 

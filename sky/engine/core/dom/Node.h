@@ -63,7 +63,6 @@ class RenderBox;
 class RenderBoxModelObject;
 class RenderObject;
 class RenderStyle;
-class ShadowRoot;
 template <typename NodeType> class StaticNodeTypeList;
 typedef StaticNodeTypeList<Node> StaticNodeList;
 class Text;
@@ -133,6 +132,7 @@ public:
     virtual String nodeName() const = 0;
     virtual NodeType nodeType() const = 0;
     ContainerNode* parentNode() const;
+    void setParentNode(ContainerNode*);
     Element* parentElement() const;
     Node* previousSibling() const { return m_previous; }
     Node* nextSibling() const { return m_next; }
@@ -170,20 +170,6 @@ public:
     bool isTextNode() const { return getFlag(IsTextFlag); }
     bool isHTMLElement() const { return getFlag(IsHTMLFlag); }
 
-    bool isCustomElement() const { return getFlag(CustomElementFlag); }
-    enum CustomElementState {
-        NotCustomElement  = 0,
-        WaitingForUpgrade = 1 << 0,
-        Upgraded          = 1 << 1
-    };
-    CustomElementState customElementState() const
-    {
-        return isCustomElement()
-            ? (getFlag(CustomElementUpgradedFlag) ? Upgraded : WaitingForUpgrade)
-            : NotCustomElement;
-    }
-    void setCustomElementState(CustomElementState newState);
-
     // StyledElements allow inline style (style="border: 1px"), presentational attributes (ex. color),
     // class names (ex. class="foo bar") and other non-basic styling features. They and also control
     // if this element can participate in style sharing.
@@ -197,27 +183,6 @@ public:
     bool isDocumentNode() const;
     bool isTreeScope() const;
     bool isDocumentFragment() const { return getFlag(IsDocumentFragmentFlag); }
-    bool isShadowRoot() const { return isDocumentFragment() && isTreeScope(); }
-    bool isInsertionPoint() const { return getFlag(IsInsertionPointFlag); }
-
-    // If this node is in a shadow tree, returns its shadow host. Otherwise, returns 0.
-    Element* shadowHost() const;
-    ShadowRoot* containingShadowRoot() const;
-    ShadowRoot* shadowRoot() const;
-
-    // Returns 0, a child of ShadowRoot, or a legacy shadow root.
-    Node* nonBoundaryShadowTreeRootNode();
-
-    // Node's parent, shadow tree host.
-    ContainerNode* parentOrShadowHostNode() const;
-    Element* parentOrShadowHostElement() const;
-    void setParentOrShadowHostNode(ContainerNode*);
-
-    // Knows about all kinds of hosts.
-    ContainerNode* parentOrShadowHostOrTemplateHostNode() const;
-
-    // Returns the parent node, but 0 if the parent node is a ShadowRoot.
-    ContainerNode* nonShadowBoundaryParentNode() const;
 
     // Returns the enclosing event parent Element (or self) that, when clicked, would trigger a navigation.
     Element* enclosingLinkEventParentOrSelf();
@@ -268,13 +233,6 @@ public:
 
     void setNeedsStyleRecalc(StyleChangeType);
     void clearNeedsStyleRecalc();
-
-    bool childNeedsDistributionRecalc() const { return getFlag(ChildNeedsDistributionRecalcFlag); }
-    void setChildNeedsDistributionRecalc()  { setFlag(ChildNeedsDistributionRecalcFlag); }
-    void clearChildNeedsDistributionRecalc()  { clearFlag(ChildNeedsDistributionRecalcFlag); }
-    void markAncestorsWithChildNeedsDistributionRecalc();
-
-    void recalcDistribution();
 
     void setIsLink(bool f);
 
@@ -350,15 +308,12 @@ public:
     {
         return getFlag(InDocumentFlag);
     }
-    bool isInShadowTree() const { return getFlag(IsInShadowTreeFlag); }
-    bool isInTreeScope() const { return getFlag(static_cast<NodeFlags>(InDocumentFlag | IsInShadowTreeFlag)); }
+    bool isInTreeScope() const { return getFlag(static_cast<NodeFlags>(InDocumentFlag)); }
 
     unsigned countChildren() const;
 
     bool isDescendantOf(const Node*) const;
     bool contains(const Node*) const;
-    bool containsIncludingShadowDOM(const Node*) const;
-    bool containsIncludingHostElements(const Node&) const;
 
     // Used to determine whether range offsets use characters or node indices.
     virtual bool offsetInCharacters() const;
@@ -433,12 +388,7 @@ public:
     void showTreeAndMark(const Node* markedNode1, const char* markedLabel1, const Node* markedNode2 = 0, const char* markedLabel2 = 0) const;
 #endif
 
-    enum ShadowTreesTreatment {
-        TreatShadowTreesAsDisconnected,
-        TreatShadowTreesAsComposed
-    };
-
-    unsigned short compareDocumentPosition(const Node*, ShadowTreesTreatment = TreatShadowTreesAsDisconnected) const;
+    unsigned short compareDocumentPosition(const Node*) const;
 
     void AcceptDartGCVisitor(DartGCVisitor& visitor) const override;
 
@@ -479,23 +429,18 @@ private:
         // Tree state flags. These change when the element is added/removed
         // from a DOM tree.
         InDocumentFlag = 1 << 10,
-        IsInShadowTreeFlag = 1 << 11,
 
         // Flags related to recalcStyle.
 
-        // FIXME(sky): Flags 12-16 are free.
+        // FIXME(sky): Flags 11-17 are free.
 
-        ChildNeedsDistributionRecalcFlag = 1 << 17,
         ChildNeedsStyleRecalcFlag = 1 << 18,
         StyleChangeMask = 1 << nodeStyleChangeShift | 1 << (nodeStyleChangeShift + 1),
 
-        CustomElementFlag = 1 << 21,
-        CustomElementUpgradedFlag = 1 << 22,
-
-        IsEditingTextFlag = 1 << 23,
-        HasWeakReferencesFlag = 1 << 24,
-        V8CollectableDuringMinorGCFlag = 1 << 25,
-        AlreadySpellCheckedFlag = 1 << 26,
+        IsEditingTextFlag = 1 << 21,
+        HasWeakReferencesFlag = 1 << 22,
+        V8CollectableDuringMinorGCFlag = 1 << 23,
+        AlreadySpellCheckedFlag = 1 << 24,
 
         DefaultNodeFlags = ChildNeedsStyleRecalcFlag | NeedsReattachStyleChange
     };
@@ -513,7 +458,6 @@ protected:
         CreateText = DefaultNodeFlags | IsTextFlag,
         CreateContainer = DefaultNodeFlags | IsContainerFlag,
         CreateElement = CreateContainer | IsElementFlag,
-        CreateShadowRoot = CreateContainer | IsDocumentFragmentFlag | IsInShadowTreeFlag,
         CreateDocumentFragment = CreateContainer | IsDocumentFragmentFlag,
         CreateHTMLElement = CreateElement | IsHTMLFlag,
         CreateDocument = CreateContainer | InDocumentFlag,
@@ -536,7 +480,6 @@ protected:
     void setTreeScope(TreeScope* scope) { m_treeScope = scope; }
 
     // isTreeScopeInitialized() can be false
-    // - in the destruction of Document or ShadowRoot where m_treeScope is set to null or
     // - in the Node constructor called by these two classes where m_treeScope is set by TreeScope ctor.
     bool isTreeScopeInitialized() const { return m_treeScope; }
 
@@ -551,7 +494,7 @@ private:
 #if !ENABLE(OILPAN)
     void removedLastRef();
 #endif
-    bool hasTreeSharedParent() const { return !!parentOrShadowHostNode(); }
+    bool hasTreeSharedParent() const { return !!parentNode(); }
 
     enum EditableLevel { Editable, RichlyEditable };
     bool hasEditableStyle(EditableLevel, UserSelectAllTreatment = UserSelectAllIsAlwaysNonEditable) const;
@@ -574,7 +517,7 @@ private:
     HashSet<RawPtr<MutationObserverRegistration> >* transientMutationObserverRegistry();
 
     uint32_t m_nodeFlags;
-    ContainerNode* m_parentOrShadowHostNode;
+    ContainerNode* m_parentNode;
     TreeScope* m_treeScope;
     Node* m_previous;
     Node* m_next;
@@ -585,22 +528,17 @@ private:
         NodeRareDataBase* m_rareData;
     } m_data;
 };
-
-inline void Node::setParentOrShadowHostNode(ContainerNode* parent)
+ 
+inline void Node::setParentNode(ContainerNode* parent)
 {
     ASSERT(isMainThread());
-    m_parentOrShadowHostNode = parent;
-}
-
-inline ContainerNode* Node::parentOrShadowHostNode() const
-{
-    ASSERT(isMainThread());
-    return m_parentOrShadowHostNode;
+    m_parentNode = parent;
 }
 
 inline ContainerNode* Node::parentNode() const
 {
-    return isShadowRoot() ? 0 : parentOrShadowHostNode();
+    ASSERT(isMainThread());
+    return m_parentNode;
 }
 
 inline void Node::lazyReattachIfAttached()

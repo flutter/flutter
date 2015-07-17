@@ -51,8 +51,6 @@ public:
     Node* rootNode() const;
     Element* owner() const;
     static FocusNavigationScope focusNavigationScopeOf(Node*);
-    static FocusNavigationScope ownedByNonFocusableFocusScopeOwner(Node*);
-    static FocusNavigationScope ownedByShadowHost(Node*);
 
 private:
     explicit FocusNavigationScope(TreeScope*);

@@ -28,7 +28,6 @@
 
 #include "sky/engine/core/dom/Document.h"
 #include "sky/engine/core/dom/Node.h"
-#include "sky/engine/core/dom/NodeRenderingTraversal.h"
 #include "sky/engine/wtf/RefPtr.h"
 
 namespace blink {
@@ -50,7 +49,7 @@ public:
         ASSERT(node->document().inStyleRecalc());
         ASSERT(node->inActiveDocument());
 
-        m_renderingParent = NodeRenderingTraversal::parent(node, &m_parentDetails);
+        m_renderingParent = node->parentNode();
     }
 
     void createRendererForTextIfNeeded();
@@ -64,7 +63,6 @@ private:
 
     RawPtr<Node> m_node;
     RawPtr<ContainerNode> m_renderingParent;
-    NodeRenderingTraversal::ParentDetails m_parentDetails;
     mutable RefPtr<RenderStyle> m_style;
 };
 

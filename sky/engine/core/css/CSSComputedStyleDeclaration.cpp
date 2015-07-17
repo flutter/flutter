@@ -859,7 +859,7 @@ PassRefPtr<CSSValue> CSSComputedStyleDeclaration::getPropertyCSSValue(CSSPropert
 
         style = computeRenderStyle(propertyID);
 
-        bool forceFullLayout = isLayoutDependent(propertyID, style, renderer) || m_node->isInShadowTree();
+        bool forceFullLayout = isLayoutDependent(propertyID, style, renderer);
 
         if (forceFullLayout) {
             document.updateLayout();

@@ -158,7 +158,6 @@ private:
 
     inline void checkAcceptChildType(const Node* newChild, ExceptionState&) const;
     inline void checkAcceptChildHierarchy(const Node& newChild, const Node* oldChild, ExceptionState&) const;
-    inline bool containsConsideringHostElements(const Node&) const;
 
     void attachChildren(const AttachContext& = AttachContext());
     void detachChildren(const AttachContext& = AttachContext());
@@ -189,9 +188,8 @@ inline void ContainerNode::attachChildren(const AttachContext& context)
     childrenContext.resolvedStyle = 0;
 
     for (Node* child = firstChild(); child; child = child->nextSibling()) {
-        ASSERT(child->needsAttach() || childAttachedAllowedWhenAttachingChildren(this));
-        if (child->needsAttach())
-            child->attach(childrenContext);
+        ASSERT(child->needsAttach());
+        child->attach(childrenContext);
     }
 }
 

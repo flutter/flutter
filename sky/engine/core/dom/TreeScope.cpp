@@ -34,8 +34,6 @@
 #include "sky/engine/core/dom/ElementTraversal.h"
 #include "sky/engine/core/dom/NodeRenderStyle.h"
 #include "sky/engine/core/dom/TreeScopeAdopter.h"
-#include "sky/engine/core/dom/shadow/ElementShadow.h"
-#include "sky/engine/core/dom/shadow/ShadowRoot.h"
 #include "sky/engine/core/frame/FrameView.h"
 #include "sky/engine/core/frame/LocalFrame.h"
 #include "sky/engine/core/page/FocusController.h"
@@ -75,15 +73,6 @@ TreeScope::~TreeScope()
 
     if (m_parentTreeScope)
         m_parentTreeScope->guardDeref();
-}
-
-bool TreeScope::isInclusiveOlderSiblingShadowRootOrAncestorTreeScopeOf(const TreeScope& scope) const
-{
-    for (const TreeScope* current = &scope; current; current = current->parentTreeScope()) {
-        if (current == this)
-            return true;
-    }
-    return false;
 }
 
 bool TreeScope::rootNodeHasTreeSharedParent() const
@@ -139,15 +128,8 @@ void TreeScope::removeElementById(const AtomicString& elementId, Element* elemen
 
 Node* TreeScope::ancestorInThisScope(Node* node) const
 {
-    while (node) {
-        if (node->treeScope() == this)
-            return node;
-        if (!node->isInShadowTree())
-            return 0;
-
-        node = node->shadowHost();
-    }
-
+    if (node->treeScope() == this)
+        return node;
     return 0;
 }
 
@@ -178,8 +160,8 @@ Element* TreeScope::elementFromPoint(int x, int y) const
     if (!node || node->isDocumentNode())
         return 0;
     if (node->isTextNode())
-        node = node->parentOrShadowHostNode();
-    ASSERT(!node || node->isElementNode() || node->isShadowRoot());
+        node = node->parentNode();
+    ASSERT(!node || node->isElementNode());
     node = ancestorInThisScope(node);
     if (!node || !node->isElementNode())
         return 0;
@@ -225,11 +207,6 @@ unsigned short TreeScope::comparePosition(const TreeScope& otherScope) const
         const TreeScope* child1 = chain1[--index1];
         const TreeScope* child2 = chain2[--index2];
         if (child1 != child2) {
-            Node* shadowHost1 = child1->rootNode().parentOrShadowHostNode();
-            Node* shadowHost2 = child2->rootNode().parentOrShadowHostNode();
-            if (shadowHost1 != shadowHost2)
-                return shadowHost1->compareDocumentPosition(shadowHost2, Node::TreatShadowTreesAsDisconnected);
-
             return Node::DOCUMENT_POSITION_PRECEDING;
         }
     }
@@ -267,17 +244,6 @@ TreeScope* TreeScope::commonAncestorTreeScope(TreeScope& other)
     return const_cast<TreeScope*>(static_cast<const TreeScope&>(*this).commonAncestorTreeScope(other));
 }
 
-static void listTreeScopes(Node* node, Vector<TreeScope*, 5>& treeScopes)
-{
-    while (true) {
-        treeScopes.append(&node->treeScope());
-        Element* ancestor = node->shadowHost();
-        if (!ancestor)
-            break;
-        node = ancestor;
-    }
-}
-
 TreeScope* commonTreeScope(Node* nodeA, Node* nodeB)
 {
     if (!nodeA || !nodeB)
@@ -286,18 +252,7 @@ TreeScope* commonTreeScope(Node* nodeA, Node* nodeB)
     if (nodeA->treeScope() == nodeB->treeScope())
         return &nodeA->treeScope();
 
-    Vector<TreeScope*, 5> treeScopesA;
-    listTreeScopes(nodeA, treeScopesA);
-
-    Vector<TreeScope*, 5> treeScopesB;
-    listTreeScopes(nodeB, treeScopesB);
-
-    size_t indexA = treeScopesA.size();
-    size_t indexB = treeScopesB.size();
-
-    for (; indexA > 0 && indexB > 0 && treeScopesA[indexA - 1] == treeScopesB[indexB - 1]; --indexA, --indexB) { }
-
-    return treeScopesA[indexA] == treeScopesB[indexB] ? treeScopesA[indexA] : 0;
+    return 0;
 }
 
 #if ENABLE(SECURITY_ASSERT) && !ENABLE(OILPAN)
@@ -331,8 +286,6 @@ bool TreeScope::isInclusiveAncestorOf(const TreeScope& scope) const
 void TreeScope::setNeedsStyleRecalcForViewportUnits()
 {
     for (Element* element = ElementTraversal::firstWithin(rootNode()); element; element = ElementTraversal::next(*element)) {
-        if (ShadowRoot* root = element->shadowRoot())
-            root->setNeedsStyleRecalcForViewportUnits();
         RenderStyle* style = element->renderStyle();
         if (style && style->hasViewportUnits())
             element->setNeedsStyleRecalc(LocalStyleChange);

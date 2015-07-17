@@ -111,7 +111,6 @@ void CSSSelector::show(int indent) const
 {
     printf("%*sselectorText(): %s\n", indent, "", selectorText().ascii().data());
     printf("%*sm_match: %d\n", indent, "", m_match);
-    printf("%*sisCustomPseudoElement(): %d\n", indent, "", isCustomPseudoElement());
     if (m_match != Tag)
         printf("%*svalue(): %s\n", indent, "", value().ascii().data());
     printf("%*spseudoType(): %d\n", indent, "", pseudoType());
@@ -140,33 +139,7 @@ void CSSSelector::extractPseudoType() const
 {
     if (m_match != PseudoClass && m_match != PseudoElement)
         return;
-
-    m_pseudoType = parsePseudoType(value());
-
-    bool element = false; // pseudo-element
-    bool compat = false; // single colon compatbility mode
-
-    switch (m_pseudoType) {
-    case PseudoUserAgentCustomElement:
-        element = true;
-        break;
-    case PseudoUnknown:
-    case PseudoHover:
-    case PseudoFocus:
-    case PseudoActive:
-    case PseudoLang:
-    case PseudoNotParsed:
-    case PseudoHost:
-        break;
-    }
-
-    if (m_match == PseudoClass && element) {
-        if (!compat)
-            m_pseudoType = PseudoUnknown;
-        else
-            m_match = PseudoElement;
-    } else if (m_match == PseudoElement && !element)
-        m_pseudoType = PseudoUnknown;
+    m_pseudoType = PseudoUnknown;
 }
 
 bool CSSSelector::operator==(const CSSSelector& other) const

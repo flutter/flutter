@@ -26,7 +26,6 @@
 #include "sky/engine/core/dom/Document.h"
 #include "sky/engine/core/dom/Element.h"
 #include "sky/engine/core/dom/StyleEngine.h"
-#include "sky/engine/core/dom/shadow/ShadowRoot.h"
 #include "sky/engine/core/frame/FrameView.h"
 #include "sky/engine/core/frame/LocalFrame.h"
 #include "sky/engine/core/frame/Settings.h"

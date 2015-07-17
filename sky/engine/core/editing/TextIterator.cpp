@@ -31,7 +31,6 @@
 #include "sky/engine/bindings/exception_state_placeholder.h"
 #include "sky/engine/core/dom/Document.h"
 #include "sky/engine/core/dom/NodeTraversal.h"
-#include "sky/engine/core/dom/shadow/ShadowRoot.h"
 #include "sky/engine/core/editing/VisiblePosition.h"
 #include "sky/engine/core/editing/VisibleUnits.h"
 #include "sky/engine/core/editing/htmlediting.h"
@@ -147,22 +146,23 @@ unsigned BitStack::size() const
     return m_size;
 }
 
-// --------
 
 #if ENABLE(ASSERT)
 
-static unsigned depthCrossingShadowBoundaries(Node* node)
+static unsigned depth(Node* node)
 {
     unsigned depth = 0;
-    for (ContainerNode* parent = node->parentOrShadowHostNode(); parent; parent = parent->parentOrShadowHostNode())
+    for (ContainerNode* parent = node->parentNode(); parent; parent = parent->parentNode())
         ++depth;
     return depth;
 }
 
 #endif
 
-// This function is like Range::pastLastNode, except for the fact that it can climb up out of shadow trees.
-static Node* nextInPreOrderCrossingShadowBoundaries(Node* rangeEndContainer, int rangeEndOffset)
+// --------
+
+// This function is like Range::pastLastNode
+static Node* nextInPreOrder(Node* rangeEndContainer, int rangeEndOffset)
 {
     if (!rangeEndContainer)
         return 0;
@@ -170,7 +170,7 @@ static Node* nextInPreOrderCrossingShadowBoundaries(Node* rangeEndContainer, int
         if (Node* next = NodeTraversal::childAt(*rangeEndContainer, rangeEndOffset))
             return next;
     }
-    for (Node* node = rangeEndContainer; node; node = node->parentOrShadowHostNode()) {
+    for (Node* node = rangeEndContainer; node; node = node->parentNode()) {
         if (Node* next = node->nextSibling())
             return next;
     }
@@ -197,16 +197,7 @@ static inline bool ignoresContainerClip(Node* node)
 
 static void pushFullyClippedState(BitStack& stack, Node* node)
 {
-    ASSERT(stack.size() == depthCrossingShadowBoundaries(node));
-
-    // FIXME: m_fullyClippedStack was added in response to <https://bugs.webkit.org/show_bug.cgi?id=26364>
-    // ("Search can find text that's hidden by overflow:hidden"), but the logic here will not work correctly if
-    // a shadow tree redistributes nodes. m_fullyClippedStack relies on the assumption that DOM node hierarchy matches
-    // the render tree, which is not necessarily true if there happens to be shadow DOM distribution or other mechanics
-    // that shuffle around the render objects regardless of node tree hierarchy (like CSS flexbox).
-    //
-    // A more appropriate way to handle this situation is to detect overflow:hidden blocks by using only rendering
-    // primitives, not with DOM primitives.
+    ASSERT(stack.size() == depth(node));
 
     // Push true if this node full clips its contents, or if a parent already has fully
     // clipped and this is not a node that ignores its container's clip.
@@ -217,7 +208,7 @@ static void setUpFullyClippedStack(BitStack& stack, Node* node)
 {
     // Put the nodes in a vector so we can iterate in reverse order.
     Vector<RawPtr<ContainerNode>, 100> ancestry;
-    for (ContainerNode* parent = node->parentOrShadowHostNode(); parent; parent = parent->parentOrShadowHostNode())
+    for (ContainerNode* parent = node->parentNode(); parent; parent = parent->parentNode())
         ancestry.append(parent);
 
     // Call pushFullyClippedState on each node starting with the earliest ancestor.
@@ -226,7 +217,7 @@ static void setUpFullyClippedStack(BitStack& stack, Node* node)
         pushFullyClippedState(stack, ancestry[size - i - 1]);
     pushFullyClippedState(stack, node);
 
-    ASSERT(stack.size() == 1 + depthCrossingShadowBoundaries(node));
+    ASSERT(stack.size() == 1 + depth(node));
 }
 
 // --------
@@ -248,7 +239,6 @@ TextIterator::TextIterator(const Range* range, TextIteratorBehaviorFlags behavio
     , m_emitsCharactersBetweenAllVisiblePositions(behavior & TextIteratorEmitsCharactersBetweenAllVisiblePositions)
     , m_emitsOriginalText(behavior & TextIteratorEmitsOriginalText)
     , m_ignoresStyleVisibility(behavior & TextIteratorIgnoresStyleVisibility)
-    , m_entersAuthorShadowRoots(behavior & TextIteratorEntersAuthorShadowRoots)
     , m_emitsObjectReplacementCharacter(behavior & TextIteratorEmitsObjectReplacementCharacter)
 {
     if (range)
@@ -272,7 +262,6 @@ TextIterator::TextIterator(const Position& start, const Position& end, TextItera
     , m_emitsCharactersBetweenAllVisiblePositions(behavior & TextIteratorEmitsCharactersBetweenAllVisiblePositions)
     , m_emitsOriginalText(behavior & TextIteratorEmitsOriginalText)
     , m_ignoresStyleVisibility(behavior & TextIteratorIgnoresStyleVisibility)
-    , m_entersAuthorShadowRoots(behavior & TextIteratorEntersAuthorShadowRoots)
     , m_emitsObjectReplacementCharacter(behavior & TextIteratorEmitsObjectReplacementCharacter)
 {
     initialize(start, end);
@@ -298,14 +287,6 @@ void TextIterator::initialize(const Position& start, const Position& end)
     m_endContainer = endContainer;
     m_endOffset = endOffset;
 
-    // Figure out the initial value of m_shadowDepth: the depth of startContainer's tree scope from
-    // the common ancestor tree scope.
-    const TreeScope* commonAncestorTreeScope = startContainer->treeScope().commonAncestorTreeScope(endContainer->treeScope());
-    ASSERT(commonAncestorTreeScope);
-    m_shadowDepth = 0;
-    for (const TreeScope* treeScope = &startContainer->treeScope(); treeScope != commonAncestorTreeScope; treeScope = treeScope->parentTreeScope())
-        ++m_shadowDepth;
-
     // Set up the current node for processing.
     if (startContainer->offsetInCharacters())
         m_node = startContainer;
@@ -326,7 +307,7 @@ void TextIterator::initialize(const Position& start, const Position& end)
     m_iterationProgress = HandledNone;
 
     // Calculate first out of bounds node.
-    m_pastEndNode = nextInPreOrderCrossingShadowBoundaries(endContainer, endOffset);
+    m_pastEndNode = nextInPreOrder(endContainer, endOffset);
 
     // Identify the first run.
     advance();
@@ -374,7 +355,7 @@ void TextIterator::advance()
             return;
     }
 
-    while (m_node && (m_node != m_pastEndNode || m_shadowDepth > 0)) {
+    while (m_node && (m_node != m_pastEndNode)) {
         // if the range ends at offset 0 of an element, represent the
         // position, but not the content, of that element e.g. if the
         // node is a blockflow element, emit a newline that
@@ -387,31 +368,8 @@ void TextIterator::advance()
 
         RenderObject* renderer = m_node->renderer();
         if (!renderer) {
-            if (m_node->isShadowRoot()) {
-                // A shadow root doesn't have a renderer, but we want to visit children anyway.
-                m_iterationProgress = m_iterationProgress < HandledNode ? HandledNode : m_iterationProgress;
-            } else {
-                m_iterationProgress = HandledChildren;
-            }
+            m_iterationProgress = HandledChildren;
         } else {
-            // Enter author shadow roots, from youngest, if any and if necessary.
-            if (m_iterationProgress < HandledAuthorShadowRoots) {
-                if (m_entersAuthorShadowRoots && m_node->isElementNode() && toElement(m_node)->hasAuthorShadowRoot()) {
-                    ShadowRoot* youngestShadowRoot = toElement(m_node)->shadowRoot();
-                    m_node = youngestShadowRoot;
-                    m_iterationProgress = HandledNone;
-                    ++m_shadowDepth;
-                    pushFullyClippedState(m_fullyClippedStack, m_node);
-                    continue;
-                }
-
-                m_iterationProgress = HandledAuthorShadowRoots;
-            }
-
-            // Enter user-agent shadow root, if necessary.
-            if (m_iterationProgress < HandledUserAgentShadowRoot)
-                m_iterationProgress = HandledUserAgentShadowRoot;
-
             // Handle the current node according to its type.
             if (m_iterationProgress < HandledNode) {
                 bool handledNode = false;
@@ -456,16 +414,6 @@ void TextIterator::advance()
                         return;
                     }
                     next = m_node->nextSibling();
-                }
-
-                if (!next && !parentNode && m_shadowDepth > 0) {
-                    // 4. Reached the top of a shadow root.
-                    ShadowRoot* shadowRoot = toShadowRoot(m_node);
-                    m_node = shadowRoot->host();
-                    m_iterationProgress = HandledAuthorShadowRoots;
-                    --m_shadowDepth;
-                    m_fullyClippedStack.pop();
-                    continue;
                 }
             }
             m_fullyClippedStack.pop();
@@ -1055,7 +1003,7 @@ void SimplifiedBackwardsTextIterator::advance()
 
             // Exit all other containers.
             while (!m_node->previousSibling()) {
-                if (!advanceRespectingRange(m_node->parentOrShadowHostNode()))
+                if (!advanceRespectingRange(m_node->parentNode()))
                     break;
                 m_fullyClippedStack.pop();
                 exitNode();
@@ -1837,7 +1785,7 @@ tryAgain:
     return matchLength;
 }
 
-static const TextIteratorBehaviorFlags iteratorFlagsForFindPlainText = TextIteratorEntersAuthorShadowRoots;
+static const TextIteratorBehaviorFlags iteratorFlagsForFindPlainText = 0;
 
 PassRefPtr<Range> findPlainText(const Range* range, const String& target, FindOptions options)
 {

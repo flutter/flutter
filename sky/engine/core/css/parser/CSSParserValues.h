@@ -227,7 +227,6 @@ public:
     bool hasHostPseudoSelector() const;
 
     CSSSelector::PseudoType pseudoType() const { return m_selector->pseudoType(); }
-    bool isCustomPseudoElement() const { return m_selector->isCustomPseudoElement(); }
 
     bool isSimple() const;
 

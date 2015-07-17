@@ -27,8 +27,6 @@
 #include "sky/engine/core/dom/Attr.h"
 #include "sky/engine/core/dom/Document.h"
 #include "sky/engine/core/dom/NodeTraversal.h"
-#include "sky/engine/core/dom/shadow/ElementShadow.h"
-#include "sky/engine/core/dom/shadow/ShadowRoot.h"
 
 namespace blink {
 
@@ -50,12 +48,6 @@ void TreeScopeAdopter::moveTreeToNewScope(Node& root) const
 
         if (!node->isElementNode())
             continue;
-
-        if (ShadowRoot* shadow = node->shadowRoot()) {
-            shadow->setParentTreeScope(newScope());
-            if (willMoveToNewDocument)
-                moveTreeToNewDocument(*shadow, oldDocument, newDocument);
-        }
     }
 
     oldScope().guardDeref();
@@ -66,9 +58,6 @@ void TreeScopeAdopter::moveTreeToNewDocument(Node& root, Document& oldDocument, 
     ASSERT(oldDocument != newDocument);
     for (Node* node = &root; node; node = NodeTraversal::next(*node, &root)) {
         moveNodeToNewDocument(*node, oldDocument, newDocument);
-
-        if (ShadowRoot* shadow = node->shadowRoot())
-            moveTreeToNewDocument(*shadow, oldDocument, newDocument);
     }
 }
 
@@ -98,9 +87,6 @@ inline void TreeScopeAdopter::updateTreeScope(Node& node) const
 inline void TreeScopeAdopter::moveNodeToNewDocument(Node& node, Document& oldDocument, Document& newDocument) const
 {
     ASSERT(oldDocument != newDocument);
-
-    if (node.isShadowRoot())
-        toShadowRoot(node).setDocument(newDocument);
 
 #if ENABLE(ASSERT)
     didMoveToNewDocumentWasCalled = false;

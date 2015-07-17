@@ -24,7 +24,6 @@
 #include "gen/sky/core/CSSValueKeywords.h"
 #include "gen/sky/platform/RuntimeEnabledFeatures.h"
 #include "sky/engine/core/dom/Document.h"
-#include "sky/engine/core/dom/shadow/ElementShadow.h"
 #include "sky/engine/core/frame/LocalFrame.h"
 #include "sky/engine/core/frame/Settings.h"
 #include "sky/engine/core/html/parser/HTMLParserIdioms.h"

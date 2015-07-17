@@ -25,7 +25,6 @@
 
 #include "sky/engine/core/editing/htmlediting.h"
 
-#include "gen/sky/core/HTMLElementFactory.h"
 #include "sky/engine/bindings/exception_state.h"
 #include "sky/engine/bindings/exception_state_placeholder.h"
 #include "sky/engine/core/dom/Document.h"
@@ -34,7 +33,6 @@
 #include "sky/engine/core/dom/PositionIterator.h"
 #include "sky/engine/core/dom/Range.h"
 #include "sky/engine/core/dom/Text.h"
-#include "sky/engine/core/dom/shadow/ShadowRoot.h"
 #include "sky/engine/core/editing/PlainTextRange.h"
 #include "sky/engine/core/editing/TextIterator.h"
 #include "sky/engine/core/editing/VisiblePosition.h"
@@ -54,8 +52,7 @@ bool isAtomicNode(const Node *node)
     return node && (!node->hasChildren() || editingIgnoresContent(node));
 }
 
-// Compare two positions, taking into account the possibility that one or both
-// could be inside a shadow tree. Only works for non-null values.
+// Compare two positions. Only works for non-null values.
 int comparePositions(const Position& a, const Position& b)
 {
     ASSERT(a.isNotNull());
@@ -228,13 +225,9 @@ VisiblePosition firstEditableVisiblePositionAfterPositionInRoot(const Position& 
 
     Position editablePosition = position;
 
-    if (position.deprecatedNode()->treeScope() != highestRoot->treeScope()) {
-        Node* shadowAncestor = highestRoot->treeScope().ancestorInThisScope(editablePosition.deprecatedNode());
-        if (!shadowAncestor)
-            return VisiblePosition();
-
-        editablePosition = positionAfterNode(shadowAncestor);
-    }
+    // TODO(ianh): not really sure what's going on here
+    if (position.deprecatedNode()->treeScope() != highestRoot->treeScope())
+        editablePosition = positionAfterNode(editablePosition.deprecatedNode());
 
     while (editablePosition.deprecatedNode() && !isEditablePosition(editablePosition) && editablePosition.deprecatedNode()->isDescendantOf(highestRoot))
         editablePosition = isAtomicNode(editablePosition.deprecatedNode()) ? positionInParentAfterNode(*editablePosition.deprecatedNode()) : nextVisuallyDistinctCandidate(editablePosition);
@@ -258,13 +251,9 @@ Position lastEditablePositionBeforePositionInRoot(const Position& position, Node
 
     Position editablePosition = position;
 
-    if (position.deprecatedNode()->treeScope() != highestRoot->treeScope()) {
-        Node* shadowAncestor = highestRoot->treeScope().ancestorInThisScope(editablePosition.deprecatedNode());
-        if (!shadowAncestor)
-            return Position();
-
-        editablePosition = firstPositionInOrBeforeNode(shadowAncestor);
-    }
+    // TODO(ianh): not really sure what's going on here
+    if (position.deprecatedNode()->treeScope() != highestRoot->treeScope())
+        editablePosition = firstPositionInOrBeforeNode(editablePosition.deprecatedNode());
 
     while (editablePosition.deprecatedNode() && !isEditablePosition(editablePosition) && editablePosition.deprecatedNode()->isDescendantOf(highestRoot))
         editablePosition = isAtomicNode(editablePosition.deprecatedNode()) ? positionInParentBeforeNode(*editablePosition.deprecatedNode()) : previousVisuallyDistinctCandidate(editablePosition);
@@ -479,7 +468,6 @@ VisiblePosition visiblePositionBeforeNode(Node& node)
     if (node.hasChildren())
         return VisiblePosition(firstPositionInOrBeforeNode(&node), DOWNSTREAM);
     ASSERT(node.parentNode());
-    ASSERT(!node.parentNode()->isShadowRoot());
     return VisiblePosition(positionInParentBeforeNode(node));
 }
 
@@ -489,7 +477,6 @@ VisiblePosition visiblePositionAfterNode(Node& node)
     if (node.hasChildren())
         return VisiblePosition(lastPositionInOrAfterNode(&node), DOWNSTREAM);
     ASSERT(node.parentNode());
-    ASSERT(!node.parentNode()->isShadowRoot());
     return VisiblePosition(positionInParentAfterNode(node));
 }
 
@@ -719,15 +706,15 @@ void updatePositionForNodeRemoval(Position& position, Node& node)
     case Position::PositionIsOffsetInAnchor:
         if (position.containerNode() == node.parentNode() && static_cast<unsigned>(position.offsetInContainerNode()) > node.nodeIndex())
             position.moveToOffset(position.offsetInContainerNode() - 1);
-        else if (node.containsIncludingShadowDOM(position.containerNode()))
+        else if (node.contains(position.containerNode()))
             position = positionInParentBeforeNode(node);
         break;
     case Position::PositionIsAfterAnchor:
-        if (node.containsIncludingShadowDOM(position.anchorNode()))
+        if (node.contains(position.anchorNode()))
             position = positionInParentAfterNode(node);
         break;
     case Position::PositionIsBeforeAnchor:
-        if (node.containsIncludingShadowDOM(position.anchorNode()))
+        if (node.contains(position.anchorNode()))
             position = positionInParentBeforeNode(node);
         break;
     }
@@ -790,12 +777,7 @@ int indexForVisiblePosition(const VisiblePosition& visiblePosition, RefPtr<Conta
 
     Position p(visiblePosition.deepEquivalent());
     Document& document = *p.document();
-    ShadowRoot* shadowRoot = p.anchorNode()->containingShadowRoot();
-
-    if (shadowRoot)
-        scope = shadowRoot;
-    else
-        scope = &document;
+    scope = &document;
 
     RefPtr<Range> range = Range::create(document, firstPositionInNode(scope.get()), p.parentAnchoredEquivalent());
 

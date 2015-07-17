@@ -30,7 +30,6 @@
 #include "sky/engine/core/css/CSSSelector.h"
 #include "sky/engine/core/css/CSSSelectorList.h"
 #include "sky/engine/core/dom/Document.h"
-#include "sky/engine/core/dom/shadow/ShadowRoot.h"
 #include "sky/engine/core/frame/LocalFrame.h"
 #include "sky/engine/core/html/parser/HTMLParserIdioms.h"
 #include "sky/engine/core/page/FocusController.h"
@@ -163,7 +162,6 @@ bool SelectorChecker::checkPseudoClass(const CSSSelector& selector)
 
     case CSSSelector::PseudoUnknown:
     case CSSSelector::PseudoNotParsed:
-    case CSSSelector::PseudoUserAgentCustomElement:
         return false;
     }
     ASSERT_NOT_REACHED();
