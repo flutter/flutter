@@ -15,7 +15,6 @@ build is clobbered.
 
 import difflib
 import errno
-import gyp_environment
 import logging
 import optparse
 import os
@@ -120,7 +119,6 @@ def main():
   if landmine_utils.builder() in ('dump_dependency_json', 'eclipse'):
     return 0
 
-  gyp_environment.SetEnvironment()
 
   landmines = []
   for s in landmine_scripts:
