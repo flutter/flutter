@@ -38,7 +38,7 @@ target.
 
 ### Android
 
-* (Only the first time) `./build/install-build-deps-android.sh`
+* (Only the first time) `sudo ./build/install-build-deps-android.sh`
 * (Only the first time) `./tools/android/download_android_tools.py`
 * `./sky/tools/gn --android`
 * `ninja -C out/android_Debug`
@@ -46,7 +46,7 @@ target.
 
 ### Linux
 
-* (Only the first time) `./build/install-build-deps.sh`
+* (Only the first time) `sudo ./build/install-build-deps.sh`
 * `./sky/tools/gn`
 * `ninja -C out/Debug`
 * `./out/Debug/sky_shell --package-root=out/Debug/gen/dart-pkg/packages sky/sdk/example/hello_world/lib/main.dart`
