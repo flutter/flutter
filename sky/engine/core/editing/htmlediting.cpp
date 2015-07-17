@@ -35,12 +35,9 @@
 #include "sky/engine/core/dom/Range.h"
 #include "sky/engine/core/dom/Text.h"
 #include "sky/engine/core/dom/shadow/ShadowRoot.h"
-#include "sky/engine/core/editing/Editor.h"
-#include "sky/engine/core/editing/HTMLInterchange.h"
 #include "sky/engine/core/editing/PlainTextRange.h"
 #include "sky/engine/core/editing/TextIterator.h"
 #include "sky/engine/core/editing/VisiblePosition.h"
-#include "sky/engine/core/editing/VisibleSelection.h"
 #include "sky/engine/core/editing/VisibleUnits.h"
 #include "sky/engine/core/frame/LocalFrame.h"
 #include "sky/engine/core/rendering/RenderObject.h"
@@ -780,34 +777,6 @@ bool lineBreakExistsAtPosition(const Position& position)
     return offset < textNode->length() && textNode->data()[offset] == '\n';
 }
 
-// Modifies selections that have an end point at the edge of a table
-// that contains the other endpoint so that they don't confuse
-// code that iterates over selected paragraphs.
-VisibleSelection selectionForParagraphIteration(const VisibleSelection& original)
-{
-    VisibleSelection newSelection(original);
-    VisiblePosition startOfSelection(newSelection.visibleStart());
-    VisiblePosition endOfSelection(newSelection.visibleEnd());
-
-    // If the end of the selection to modify is just after a table, and
-    // if the start of the selection is inside that table, then the last paragraph
-    // that we'll want modify is the last one inside the table, not the table itself
-    // (a table is itself a paragraph).
-    if (Element* table = isFirstPositionAfterTable(endOfSelection))
-        if (startOfSelection.deepEquivalent().deprecatedNode()->isDescendantOf(table))
-            newSelection = VisibleSelection(startOfSelection, endOfSelection.previous(CannotCrossEditingBoundary));
-
-    // If the start of the selection to modify is just before a table,
-    // and if the end of the selection is inside that table, then the first paragraph
-    // we'll want to modify is the first one inside the table, not the paragraph
-    // containing the table itself.
-    if (Element* table = isLastPositionBeforeTable(startOfSelection))
-        if (endOfSelection.deepEquivalent().deprecatedNode()->isDescendantOf(table))
-            newSelection = VisibleSelection(startOfSelection.next(CannotCrossEditingBoundary), endOfSelection);
-
-    return newSelection;
-}
-
 // FIXME: indexForVisiblePosition and visiblePositionForIndex use TextIterators to convert between
 // VisiblePositions and indices. But TextIterator iteration using TextIteratorEmitsCharactersBetweenAllVisiblePositions
 // does not exactly match VisiblePosition iteration, so using them to preserve a selection during an editing
@@ -893,31 +862,6 @@ bool isBlockFlowElement(const Node& node)
 {
     RenderObject* renderer = node.renderer();
     return node.isElementNode() && renderer && renderer->isRenderParagraph();
-}
-
-Position adjustedSelectionStartForStyleComputation(const VisibleSelection& selection)
-{
-    // This function is used by range style computations to avoid bugs like:
-    // <rdar://problem/4017641> REGRESSION (Mail): you can only bold/unbold a selection starting from end of line once
-    // It is important to skip certain irrelevant content at the start of the selection, so we do not wind up
-    // with a spurious "mixed" style.
-
-    VisiblePosition visiblePosition(selection.start());
-    if (visiblePosition.isNull())
-        return Position();
-
-    // if the selection is a caret, just return the position, since the style
-    // behind us is relevant
-    if (selection.isCaret())
-        return visiblePosition.deepEquivalent();
-
-    // if the selection starts just before a paragraph break, skip over it
-    if (isEndOfParagraph(visiblePosition))
-        return visiblePosition.next().deepEquivalent().downstream();
-
-    // otherwise, make sure to be at the start of the first selected node,
-    // instead of possibly at the end of the last node before the selection
-    return visiblePosition.deepEquivalent().downstream();
 }
 
 } // namespace blink

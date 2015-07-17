@@ -23,8 +23,6 @@
 #include "sky/engine/core/dom/Document.h"
 #include "sky/engine/core/dom/DocumentMarkerController.h"
 #include "sky/engine/core/dom/StyleEngine.h"
-#include "sky/engine/core/editing/Caret.h"
-#include "sky/engine/core/editing/UndoStack.h"
 #include "sky/engine/core/events/Event.h"
 #include "sky/engine/core/frame/FrameHost.h"
 #include "sky/engine/core/frame/FrameView.h"
@@ -60,20 +58,14 @@ float deviceScaleFactor(LocalFrame* frame)
 Page::Page(PageClients& pageClients, ServiceProvider* services)
     : SettingsDelegate(Settings::create())
     , m_chromeClient(pageClients.chromeClient)
-    , m_dragCaretController(DragCaretController::create())
     , m_focusController(FocusController::create(this))
-    , m_undoStack(UndoStack::create())
     , m_mainFrame(0)
-    , m_editorClient(pageClients.editorClient)
-    , m_spellCheckerClient(pageClients.spellCheckerClient)
     , m_deviceScaleFactor(1)
 #if ENABLE(ASSERT)
     , m_isPainting(false)
 #endif
     , m_frameHost(FrameHost::create(*this, services))
 {
-    ASSERT(m_editorClient);
-
 #ifndef NDEBUG
     pageCounter.increment();
 #endif
@@ -265,8 +257,6 @@ void* Page::webView() const
 
 Page::PageClients::PageClients()
     : chromeClient(0)
-    , editorClient(0)
-    , spellCheckerClient(0)
 {
 }
 

@@ -39,20 +39,16 @@ namespace blink {
     class Color;
     class DartController;
     class Document;
-    class Editor;
     class Element;
     class FloatRect;
     class FloatSize;
     class FrameDestructionObserver;
-    class FrameSelection;
     class FrameView;
-    class InputMethodController;
     class IntPoint;
     class IntSize;
     class Node;
     class Range;
     class RenderView;
-    class SpellChecker;
     class TreeScope;
     class TreeScope;
     class VisiblePosition;
@@ -81,11 +77,6 @@ namespace blink {
 
         RenderView* contentRenderer() const; // Root of the render tree for the document contained in this frame.
 
-        Editor& editor() const;
-        FrameSelection& selection() const;
-        InputMethodController& inputMethodController() const;
-        SpellChecker& spellChecker() const;
-
         FrameLoaderClient* loaderClient() const;
 
     // ======== All public functions below this point are candidates to move out of LocalFrame into another class. ========
@@ -94,8 +85,6 @@ namespace blink {
 
         void deviceOrPageScaleFactorChanged();
         double devicePixelRatio() const;
-
-        String selectedText() const;
 
         VisiblePosition visiblePositionForPoint(const IntPoint& framePoint);
         PassRefPtr<Range> rangeForPoint(const IntPoint& framePoint);
@@ -112,37 +101,12 @@ namespace blink {
 
         RefPtr<FrameView> m_view;
 
-        const OwnPtr<Editor> m_editor;
-        const OwnPtr<SpellChecker> m_spellChecker;
-        const OwnPtr<FrameSelection> m_selection;
-        OwnPtr<InputMethodController> m_inputMethodController;
-
         Document* m_document;
     };
 
     inline FrameView* LocalFrame::view() const
     {
         return m_view.get();
-    }
-
-    inline FrameSelection& LocalFrame::selection() const
-    {
-        return *m_selection;
-    }
-
-    inline Editor& LocalFrame::editor() const
-    {
-        return *m_editor;
-    }
-
-    inline SpellChecker& LocalFrame::spellChecker() const
-    {
-        return *m_spellChecker;
-    }
-
-    inline InputMethodController& LocalFrame::inputMethodController() const
-    {
-        return *m_inputMethodController;
     }
 
     DEFINE_TYPE_CASTS(LocalFrame, Frame, localFrame, true, true);

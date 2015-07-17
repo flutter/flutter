@@ -29,8 +29,6 @@
 #include "sky/engine/core/dom/Text.h"
 #include "sky/engine/core/editing/CompositionUnderline.h"
 #include "sky/engine/core/editing/CompositionUnderlineRangeFilter.h"
-#include "sky/engine/core/editing/Editor.h"
-#include "sky/engine/core/editing/InputMethodController.h"
 #include "sky/engine/core/frame/LocalFrame.h"
 #include "sky/engine/core/frame/Settings.h"
 #include "sky/engine/core/page/Page.h"
@@ -526,10 +524,6 @@ void InlineTextBox::paint(PaintInfo& paintInfo, const LayoutPoint& paintOffset, 
     boxOrigin.move(adjustedPaintOffset.x().toFloat(), adjustedPaintOffset.y().toFloat());
     FloatRect boxRect(boxOrigin, LayoutSize(logicalWidth(), logicalHeight()));
 
-    // Determine whether or not we have composition underlines to draw.
-    bool containsComposition = renderer().frame() && renderer().node() && renderer().frame()->inputMethodController().compositionNode() == renderer().node();
-    bool useCustomUnderlines = renderer().frame() && containsComposition && renderer().frame()->inputMethodController().compositionUsesCustomUnderlines();
-
     bool haveSelection = selectionState() != RenderObject::SelectionNone;
 
     // Determine text colors.
@@ -542,15 +536,9 @@ void InlineTextBox::paint(PaintInfo& paintInfo, const LayoutPoint& paintOffset, 
 
     FloatPoint textOrigin = FloatPoint(boxOrigin.x(), boxOrigin.y() + font.fontMetrics().ascent());
 
-    // 1. Paint backgrounds behind text if needed. Examples of such backgrounds include selection
-    // and composition highlights.
-    if (containsComposition) {
-        paintCompositionBackgrounds(context, boxOrigin, styleToUse, font, useCustomUnderlines);
-    }
-
+    // 1. Paint backgrounds behind text if needed. Examples of such backgrounds include selection.
     paintDocumentMarkers(context, boxOrigin, styleToUse, font, true);
-
-    if (haveSelection && !useCustomUnderlines)
+    if (haveSelection)
         paintSelection(context, boxOrigin, styleToUse, font, selectionStyle.fillColor);
 
     // 2. Now paint the foreground, including text and decorations like underline/overline (in quirks mode only).
@@ -619,16 +607,6 @@ void InlineTextBox::paint(PaintInfo& paintInfo, const LayoutPoint& paintOffset, 
 
     paintDocumentMarkers(context, boxOrigin, styleToUse, font, false);
 
-    // Paint custom underlines for compositions.
-    if (useCustomUnderlines) {
-        const Vector<CompositionUnderline>& underlines = renderer().frame()->inputMethodController().customCompositionUnderlines();
-        CompositionUnderlineRangeFilter filter(underlines, start(), end());
-        for (CompositionUnderlineRangeFilter::ConstIterator it = filter.begin(); it != filter.end(); ++it) {
-            if (it->color == Color::transparent)
-                continue;
-            paintCompositionUnderline(context, boxOrigin, *it);
-        }
-    }
 }
 
 void InlineTextBox::selectionStartEnd(int& sPos, int& ePos)
@@ -1064,9 +1042,10 @@ void InlineTextBox::paintTextMatchMarker(GraphicsContext* pt, const FloatPoint& 
 
 void InlineTextBox::paintCompositionBackgrounds(GraphicsContext* pt, const FloatPoint& boxOrigin, RenderStyle* style, const Font& font, bool useCustomUnderlines)
 {
+    ASSERT_NOT_REACHED(); // TODO(ianh): this is unused right now, but we should probably expose it if it's useful
     if (useCustomUnderlines) {
         // Paint custom background highlights for compositions.
-        const Vector<CompositionUnderline>& underlines = renderer().frame()->inputMethodController().customCompositionUnderlines();
+        Vector<CompositionUnderline> underlines; // TODO(ianh): if we expose this function, provide a way to let authors set this
         CompositionUnderlineRangeFilter filter(underlines, start(), end());
         for (CompositionUnderlineRangeFilter::ConstIterator it = filter.begin(); it != filter.end(); ++it) {
             if (it->backgroundColor == Color::transparent)
@@ -1075,9 +1054,9 @@ void InlineTextBox::paintCompositionBackgrounds(GraphicsContext* pt, const Float
         }
 
     } else {
-        paintSingleCompositionBackgroundRun(pt, boxOrigin, style, font, RenderTheme::theme().platformDefaultCompositionBackgroundColor(),
-            renderer().frame()->inputMethodController().compositionStart(),
-            renderer().frame()->inputMethodController().compositionEnd());
+        unsigned start; // TODO(ianh): if we expose this function, provide a way to let authors set this
+        unsigned end; // TODO(ianh): if we expose this function, provide a way to let authors set this
+        paintSingleCompositionBackgroundRun(pt, boxOrigin, style, font, RenderTheme::theme().platformDefaultCompositionBackgroundColor(), start, end);
     }
 }
 

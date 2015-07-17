@@ -27,8 +27,6 @@
 #include "sky/engine/core/dom/Element.h"
 #include "sky/engine/core/dom/StyleEngine.h"
 #include "sky/engine/core/dom/shadow/ShadowRoot.h"
-#include "sky/engine/core/editing/Editor.h"
-#include "sky/engine/core/editing/FrameSelection.h"
 #include "sky/engine/core/frame/FrameView.h"
 #include "sky/engine/core/frame/LocalFrame.h"
 #include "sky/engine/core/frame/Settings.h"
@@ -399,7 +397,7 @@ void RenderBlock::paint(PaintInfo& paintInfo, const LayoutPoint& paintOffset, Ve
     // There are some cases where not all clipped visual overflow is accounted for.
     // FIXME: reduce the number of such cases.
     ContentsClipBehavior contentsClipBehavior = ForceContentsClip;
-    if (hasOverflowClip() && !shouldPaintSelectionGaps() && !hasCaret())
+    if (hasOverflowClip() && !shouldPaintSelectionGaps())
         contentsClipBehavior = SkipContentsClipIfPossible;
 
     bool pushedClip = pushContentsClip(paintInfo, adjustedPaintOffset, contentsClipBehavior);
@@ -418,37 +416,6 @@ void RenderBlock::paintChildren(PaintInfo& paintInfo, const LayoutPoint& paintOf
     }
 }
 
-static inline bool hasCursorCaret(const FrameSelection& selection, const RenderBlock* block)
-{
-    return selection.caretRenderer() == block && selection.hasEditableStyle();
-}
-
-static inline bool hasDragCaret(const DragCaretController& dragCaretController, const RenderBlock* block)
-{
-    return dragCaretController.caretRenderer() == block && dragCaretController.isContentEditable();
-}
-
-bool RenderBlock::hasCaret() const
-{
-    return hasCursorCaret(frame()->selection(), this)
-        || hasDragCaret(frame()->page()->dragCaretController(), this);
-}
-
-void RenderBlock::paintCarets(PaintInfo& paintInfo, const LayoutPoint& paintOffset)
-{
-    if (!frame())
-        return;
-    FrameSelection& selection = frame()->selection();
-    if (hasCursorCaret(selection, this)) {
-        selection.paintCaret(paintInfo.context, paintOffset, paintInfo.rect);
-    }
-
-    DragCaretController& dragCaretController = frame()->page()->dragCaretController();
-    if (hasDragCaret(dragCaretController, this)) {
-        dragCaretController.paintDragCaret(frame(), paintInfo.context, paintOffset, paintInfo.rect);
-    }
-}
-
 void RenderBlock::paintObject(PaintInfo& paintInfo, const LayoutPoint& paintOffset, Vector<RenderBox*>& layers)
 {
     if (hasBoxDecorationBackground())
@@ -459,8 +426,6 @@ void RenderBlock::paintObject(PaintInfo& paintInfo, const LayoutPoint& paintOffs
 
     if (style()->hasOutline() && !style()->outlineStyleIsAuto())
         paintOutline(paintInfo, LayoutRect(paintOffset, size()));
-
-    paintCarets(paintInfo, paintOffset);
 }
 
 bool RenderBlock::shouldPaintSelectionGaps() const
@@ -1114,7 +1079,7 @@ PositionWithAffinity RenderBlock::positionForPointWithInlineChildren(const Layou
         }
     }
 
-    bool moveCaretToBoundary = document().frame()->editor().behavior().shouldMoveCaretToHorizontalBoundaryWhenPastTopOrBottom();
+    bool moveCaretToBoundary = false; // TODO(ianh): expose whether we should move the caret to a horizontal boundary when past the top or bottom
 
     if (!moveCaretToBoundary && !closestBox && lastRootBoxWithChildren) {
         // y coordinate is below last root line box, pretend we hit it

@@ -27,7 +27,6 @@
 
 #include "sky/engine/core/css/StylePropertySet.h"
 #include "sky/engine/core/dom/Document.h"
-#include "sky/engine/core/editing/FrameSelection.h"
 #include "sky/engine/core/frame/FrameView.h"
 #include "sky/engine/core/frame/LocalFrame.h"
 #include "sky/engine/core/html/HTMLElement.h"
@@ -435,29 +434,6 @@ String nodePositionAsStringForTesting(Node* node)
     return result.toString();
 }
 
-static void writeSelection(TextStream& ts, const RenderObject* o)
-{
-    Node* n = o->node();
-    if (!n || !n->isDocumentNode())
-        return;
-
-    Document* doc = toDocument(n);
-    LocalFrame* frame = doc->frame();
-    if (!frame)
-        return;
-
-    VisibleSelection selection = frame->selection().selection();
-    if (selection.isCaret()) {
-        ts << "caret: position " << selection.start().deprecatedEditingOffset() << " of " << nodePositionAsStringForTesting(selection.start().deprecatedNode());
-        if (selection.affinity() == UPSTREAM)
-            ts << " (upstream affinity)";
-        ts << "\n";
-    } else if (selection.isRange()) {
-        ts << "selection start: position " << selection.start().deprecatedEditingOffset() << " of " << nodePositionAsStringForTesting(selection.start().deprecatedNode()) << "\n"
-            << "selection end:   position " << selection.end().deprecatedEditingOffset() << " of " << nodePositionAsStringForTesting(selection.end().deprecatedNode()) << "\n";
-    }
-}
-
 static String externalRepresentation(RenderBox* renderer, RenderAsTextBehavior behavior)
 {
     TextStream ts;
@@ -466,7 +442,6 @@ static String externalRepresentation(RenderBox* renderer, RenderAsTextBehavior b
 
     RenderLayer* layer = renderer->layer();
     RenderTreeAsText::writeLayers(ts, layer, layer, layer->rect(), 0, behavior);
-    writeSelection(ts, renderer);
     return ts.release();
 }
 

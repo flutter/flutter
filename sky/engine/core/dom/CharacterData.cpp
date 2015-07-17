@@ -27,7 +27,6 @@
 #include "sky/engine/core/dom/MutationObserverInterestGroup.h"
 #include "sky/engine/core/dom/MutationRecord.h"
 #include "sky/engine/core/dom/Text.h"
-#include "sky/engine/core/editing/FrameSelection.h"
 #include "sky/engine/core/frame/LocalFrame.h"
 #include "sky/engine/wtf/CheckedArithmetic.h"
 
@@ -163,9 +162,6 @@ void CharacterData::setDataAndUpdate(const String& newData, unsigned offsetOfRep
     ASSERT(!renderer() || isTextNode());
     if (isTextNode())
         toText(this)->updateTextRenderer(offsetOfReplacedData, oldLength, recalcStyleBehavior);
-
-    if (document().frame())
-        document().frame()->selection().didUpdateCharacterData(this, offsetOfReplacedData, oldLength, newLength);
 
     didModifyData(oldData);
 }

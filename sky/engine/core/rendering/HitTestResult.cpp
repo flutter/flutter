@@ -25,7 +25,8 @@
 #include "sky/engine/core/dom/DocumentMarkerController.h"
 #include "sky/engine/core/dom/NodeRenderingTraversal.h"
 #include "sky/engine/core/dom/shadow/ShadowRoot.h"
-#include "sky/engine/core/editing/FrameSelection.h"
+#include "sky/engine/core/editing/PositionWithAffinity.h"
+#include "sky/engine/core/editing/VisiblePosition.h"
 #include "sky/engine/core/frame/LocalFrame.h"
 #include "sky/engine/core/rendering/RenderBox.h"
 #include "sky/engine/core/rendering/RenderObject.h"
@@ -124,11 +125,6 @@ LocalFrame* HitTestResult::innerNodeFrame() const
 
 bool HitTestResult::isSelected() const
 {
-    if (!m_innerNonSharedNode)
-        return false;
-
-    if (LocalFrame* frame = m_innerNonSharedNode->document().frame())
-        return frame->selection().contains(m_hitTestLocation.point());
     return false;
 }
 

@@ -56,7 +56,6 @@
 #include "sky/engine/core/dom/custom/custom_element.h"
 #include "sky/engine/core/dom/shadow/InsertionPoint.h"
 #include "sky/engine/core/dom/shadow/ShadowRoot.h"
-#include "sky/engine/core/editing/FrameSelection.h"
 #include "sky/engine/core/editing/TextIterator.h"
 #include "sky/engine/core/editing/htmlediting.h"
 #include "sky/engine/core/frame/FrameView.h"
@@ -1094,17 +1093,6 @@ void Element::updateFocusAppearance(bool /*restorePreviousSelection*/)
         RefPtr<LocalFrame> frame(document().frame());
         if (!frame)
             return;
-
-        // When focusing an editable element in an iframe, don't reset the selection if it already contains a selection.
-        if (this == frame->selection().rootEditableElement())
-            return;
-
-        // FIXME: We should restore the previous selection if there is one.
-        VisibleSelection newSelection = VisibleSelection(firstPositionInOrBeforeNode(this), DOWNSTREAM);
-        // Passing DoNotSetFocus as this function is called after FocusController::setFocusedElement()
-        // and we don't want to change the focus to a new Element.
-        frame->selection().setSelection(newSelection,  FrameSelection::CloseTyping | FrameSelection::ClearTypingStyle | FrameSelection::DoNotSetFocus);
-        frame->selection().revealSelection();
     }
 }
 

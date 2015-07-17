@@ -35,8 +35,6 @@
 #include "sky/engine/core/dom/Range.h"
 #include "sky/engine/core/dom/shadow/ElementShadow.h"
 #include "sky/engine/core/dom/shadow/ShadowRoot.h"
-#include "sky/engine/core/editing/Editor.h"
-#include "sky/engine/core/editing/FrameSelection.h"
 #include "sky/engine/core/editing/htmlediting.h"
 #include "sky/engine/core/events/Event.h"
 #include "sky/engine/core/frame/FrameView.h"
@@ -510,8 +508,6 @@ void FocusController::setActive(bool active)
         return;
 
     m_isActive = active;
-
-    focusedOrMainFrame()->selection().pageActivationChanged();
 }
 
 } // namespace blink

@@ -30,11 +30,10 @@
 #include "sky/engine/core/frame/LocalFrame.h"
 
 #include "gen/sky/platform/RuntimeEnabledFeatures.h"
-#include "sky/engine/core/editing/Editor.h"
-#include "sky/engine/core/editing/FrameSelection.h"
+#include "sky/engine/core/dom/Range.h"
 #include "sky/engine/core/editing/htmlediting.h"
-#include "sky/engine/core/editing/InputMethodController.h"
-#include "sky/engine/core/editing/SpellChecker.h"
+#include "sky/engine/core/editing/RenderedPosition.h"
+#include "sky/engine/core/editing/VisiblePosition.h"
 #include "sky/engine/core/events/Event.h"
 #include "sky/engine/core/frame/FrameDestructionObserver.h"
 #include "sky/engine/core/frame/FrameHost.h"
@@ -59,10 +58,6 @@ namespace blink {
 inline LocalFrame::LocalFrame(FrameLoaderClient* client, FrameHost* host)
     : Frame(client, host)
     , m_deprecatedLoader(this)
-    , m_editor(Editor::create(*this))
-    , m_spellChecker(SpellChecker::create(*this))
-    , m_selection(FrameSelection::create(this))
-    , m_inputMethodController(InputMethodController::create(*this))
     , m_document(nullptr)
 {
     if (page())
@@ -184,11 +179,6 @@ void LocalFrame::detachFromFrameHost()
     m_host = 0;
 }
 
-String LocalFrame::selectedText() const
-{
-    return selection().selectedText();
-}
-
 VisiblePosition LocalFrame::visiblePositionForPoint(const IntPoint& framePoint)
 {
     if (!contentRenderer() || !view() || !view()->didFirstLayout())
@@ -228,6 +218,35 @@ Document* LocalFrame::document() const
     return m_domWindow ? m_domWindow->document() : 0;
 }
 
+IntRect firstRectForRange(Range* range)
+{
+    LayoutUnit extraWidthToEndOfLine = 0;
+    ASSERT(range->startContainer());
+    ASSERT(range->endContainer());
+
+    IntRect startCaretRect = RenderedPosition(VisiblePosition(range->startPosition()).deepEquivalent(), DOWNSTREAM).absoluteRect(&extraWidthToEndOfLine);
+    if (startCaretRect == LayoutRect())
+        return IntRect();
+
+    IntRect endCaretRect = RenderedPosition(VisiblePosition(range->endPosition()).deepEquivalent(), UPSTREAM).absoluteRect();
+    if (endCaretRect == LayoutRect())
+        return IntRect();
+
+    if (startCaretRect.y() == endCaretRect.y()) {
+        // start and end are on the same line
+        return IntRect(std::min(startCaretRect.x(), endCaretRect.x()),
+            startCaretRect.y(),
+            abs(endCaretRect.x() - startCaretRect.x()),
+            std::max(startCaretRect.height(), endCaretRect.height()));
+    }
+
+    // start and end aren't on the same line, so go from start to the end of its line
+    return IntRect(startCaretRect.x(),
+        startCaretRect.y(),
+        startCaretRect.width() + extraWidthToEndOfLine,
+        startCaretRect.height());
+}
+
 PassRefPtr<Range> LocalFrame::rangeForPoint(const IntPoint& framePoint)
 {
     VisiblePosition position = visiblePositionForPoint(framePoint);
@@ -237,14 +256,14 @@ PassRefPtr<Range> LocalFrame::rangeForPoint(const IntPoint& framePoint)
     VisiblePosition previous = position.previous();
     if (previous.isNotNull()) {
         RefPtr<Range> previousCharacterRange = makeRange(previous, position);
-        LayoutRect rect = editor().firstRectForRange(previousCharacterRange.get());
+        LayoutRect rect = firstRectForRange(previousCharacterRange.get());
         if (rect.contains(framePoint))
             return previousCharacterRange.release();
     }
 
     VisiblePosition next = position.next();
     if (RefPtr<Range> nextCharacterRange = makeRange(position, next)) {
-        LayoutRect rect = editor().firstRectForRange(nextCharacterRange.get());
+        LayoutRect rect = firstRectForRange(nextCharacterRange.get());
         if (rect.contains(framePoint))
             return nextCharacterRange.release();
     }
@@ -272,11 +291,6 @@ void LocalFrame::createView(const IntSize& viewportSize, const Color& background
 void LocalFrame::deviceOrPageScaleFactorChanged()
 {
     document()->mediaQueryAffectingValueChanged();
-}
-
-void LocalFrame::removeSpellingMarkersUnderWords(const Vector<String>& words)
-{
-    spellChecker().removeSpellingMarkersUnderWords(words);
 }
 
 double LocalFrame::devicePixelRatio() const

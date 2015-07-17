@@ -30,10 +30,10 @@
 #include "gen/sky/platform/RuntimeEnabledFeatures.h"
 #include "sky/engine/core/css/resolver/StyleResolver.h"
 #include "sky/engine/core/dom/ElementTraversal.h"
+#include "sky/engine/core/dom/Range.h"
 #include "sky/engine/core/dom/StyleEngine.h"
 #include "sky/engine/core/dom/shadow/ShadowRoot.h"
 #include "sky/engine/core/editing/EditingBoundary.h"
-#include "sky/engine/core/editing/FrameSelection.h"
 #include "sky/engine/core/editing/htmlediting.h"
 #include "sky/engine/core/frame/FrameView.h"
 #include "sky/engine/core/frame/LocalFrame.h"
@@ -1087,24 +1087,28 @@ bool RenderObject::isSelectable() const
 
 Color RenderObject::selectionBackgroundColor() const
 {
+    ASSERT_NOT_REACHED();
+    // TODO(ianh): if we expose selection painting, we should expose a way to set the background colour
+    // TODO(ianh): need to be able to configure whether to consider the selection focused and active or not
     if (!isSelectable())
         return Color::transparent;
-
-    return frame()->selection().isFocusedAndActive() ?
+    bool isFocusedAndActive = true;
+    return isFocusedAndActive ?
         RenderTheme::theme().activeSelectionBackgroundColor() :
         RenderTheme::theme().inactiveSelectionBackgroundColor();
 }
 
 Color RenderObject::selectionColor(int colorProperty) const
 {
-    // If the element is unselectable, don't override the foreground
-    // color with the selection foreground color.
+    ASSERT_NOT_REACHED();
+    // TODO(ianh): if we expose selection painting, we should expose a way to set the text colour
+    // TODO(ianh): need to be able to configure whether to consider the selection focused and active or not
     if (!isSelectable())
         return resolveColor(colorProperty);
-
     if (!RenderTheme::theme().supportsSelectionForegroundColors())
         return resolveColor(colorProperty);
-    return frame()->selection().isFocusedAndActive() ?
+    bool isFocusedAndActive = true;
+    return isFocusedAndActive ?
         RenderTheme::theme().activeSelectionForegroundColor() :
         RenderTheme::theme().inactiveSelectionForegroundColor();
 }

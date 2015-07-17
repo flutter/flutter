@@ -29,7 +29,6 @@
 #include "gen/sky/platform/RuntimeEnabledFeatures.h"
 #include "sky/engine/core/css/resolver/StyleResolver.h"
 #include "sky/engine/core/dom/DocumentMarkerController.h"
-#include "sky/engine/core/editing/FrameSelection.h"
 #include "sky/engine/core/frame/FrameHost.h"
 #include "sky/engine/core/frame/LocalFrame.h"
 #include "sky/engine/core/frame/Settings.h"
@@ -514,9 +513,6 @@ void FrameView::performPostLayoutTasks()
     RefPtr<FrameView> protect(this);
 
     m_postLayoutTasksTimer.stop();
-
-    m_frame->selection().setCaretRectNeedsUpdate();
-    m_frame->selection().updateAppearance();
 
     ASSERT(m_frame->document());
     if (m_nestedLayoutCount <= 1) {

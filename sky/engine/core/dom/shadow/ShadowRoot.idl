@@ -28,7 +28,6 @@ interface ShadowRoot : DocumentFragment {
     readonly attribute Element activeElement;
 
     [RaisesException] Node cloneNode([Named] optional boolean deep = true);
-    Selection getSelection();
     Element getElementById([Default=Undefined] optional DOMString elementId);
 
     Element elementFromPoint([Default=Undefined] optional long x,

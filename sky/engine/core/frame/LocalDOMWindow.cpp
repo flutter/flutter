@@ -42,7 +42,6 @@
 #include "sky/engine/core/dom/Element.h"
 #include "sky/engine/core/dom/ExceptionCode.h"
 #include "sky/engine/core/dom/RequestAnimationFrameCallback.h"
-#include "sky/engine/core/editing/Editor.h"
 #include "sky/engine/core/events/PageTransitionEvent.h"
 #include "sky/engine/core/frame/FrameHost.h"
 #include "sky/engine/core/frame/FrameView.h"
@@ -273,11 +272,6 @@ Tracing& LocalDOMWindow::tracing() const
     if (!m_tracing)
         m_tracing = Tracing::create();
     return *m_tracing;
-}
-
-DOMSelection* LocalDOMWindow::getSelection()
-{
-    return m_frame->document()->getSelection();
 }
 
 void LocalDOMWindow::focus()

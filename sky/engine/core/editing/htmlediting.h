@@ -43,7 +43,6 @@ class Position;
 class PositionWithAffinity;
 class Range;
 class VisiblePosition;
-class VisibleSelection;
 
 
 // This file contains a set of helper functions used by the editing commands
@@ -209,16 +208,6 @@ Element* unsplittableElementForPosition(const Position&);
 // Boolean functions on Element
 
 bool canMergeLists(Element* firstList, Element* secondList);
-
-// -------------------------------------------------------------------------
-// VisibleSelection
-// -------------------------------------------------------------------------
-
-// Functions returning VisibleSelection
-VisibleSelection selectionForParagraphIteration(const VisibleSelection&);
-
-Position adjustedSelectionStartForStyleComputation(const VisibleSelection&);
-
 
 // Miscellaneous functions on Text
 inline bool isWhitespace(UChar c)

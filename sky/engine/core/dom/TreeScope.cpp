@@ -36,7 +36,6 @@
 #include "sky/engine/core/dom/TreeScopeAdopter.h"
 #include "sky/engine/core/dom/shadow/ElementShadow.h"
 #include "sky/engine/core/dom/shadow/ShadowRoot.h"
-#include "sky/engine/core/editing/DOMSelection.h"
 #include "sky/engine/core/frame/FrameView.h"
 #include "sky/engine/core/frame/LocalFrame.h"
 #include "sky/engine/core/page/FocusController.h"
@@ -73,11 +72,6 @@ TreeScope::~TreeScope()
 {
     ASSERT(!m_guardRefCount);
     m_rootNode->setTreeScope(0);
-
-    if (m_selection) {
-        m_selection->clearTreeScope();
-        m_selection = nullptr;
-    }
 
     if (m_parentTreeScope)
         m_parentTreeScope->guardDeref();
@@ -190,21 +184,6 @@ Element* TreeScope::elementFromPoint(int x, int y) const
     if (!node || !node->isElementNode())
         return 0;
     return toElement(node);
-}
-
-DOMSelection* TreeScope::getSelection() const
-{
-    if (!rootNode().document().frame())
-        return 0;
-
-    if (m_selection)
-        return m_selection.get();
-
-    // FIXME: The correct selection in Shadow DOM requires that Position can have a ShadowRoot
-    // as a container.
-    // See https://bugs.webkit.org/show_bug.cgi?id=82697
-    m_selection = DOMSelection::create(this);
-    return m_selection.get();
 }
 
 void TreeScope::adoptIfNeeded(Node& node)

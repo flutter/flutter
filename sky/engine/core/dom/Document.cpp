@@ -56,6 +56,7 @@
 #include "sky/engine/core/dom/NodeRenderingTraversal.h"
 #include "sky/engine/core/dom/NodeTraversal.h"
 #include "sky/engine/core/dom/NodeWithIndex.h"
+#include "sky/engine/core/dom/Range.h"
 #include "sky/engine/core/dom/RequestAnimationFrameCallback.h"
 #include "sky/engine/core/dom/ScriptedAnimationController.h"
 #include "sky/engine/core/dom/SelectorQuery.h"
@@ -65,8 +66,7 @@
 #include "sky/engine/core/dom/custom/custom_element_registry.h"
 #include "sky/engine/core/dom/shadow/ElementShadow.h"
 #include "sky/engine/core/dom/shadow/ShadowRoot.h"
-#include "sky/engine/core/editing/FrameSelection.h"
-#include "sky/engine/core/editing/SpellChecker.h"
+#include "sky/engine/core/editing/PositionWithAffinity.h"
 #include "sky/engine/core/events/Event.h"
 #include "sky/engine/core/events/PageTransitionEvent.h"
 #include "sky/engine/core/frame/FrameHost.h"
@@ -1193,13 +1193,6 @@ void Document::nodeChildrenWillBeRemoved(ContainerNode& container)
         for (AttachedRangeSet::const_iterator it = m_ranges.begin(); it != end; ++it)
             (*it)->nodeChildrenWillBeRemoved(container);
     }
-
-    if (LocalFrame* frame = this->frame()) {
-        for (Node* n = container.firstChild(); n; n = n->nextSibling()) {
-            frame->selection().nodeWillBeRemoved(*n);
-            frame->page()->dragCaretController().nodeWillBeRemoved(*n);
-        }
-    }
 }
 
 void Document::nodeWillBeRemoved(Node& n)
@@ -1208,11 +1201,6 @@ void Document::nodeWillBeRemoved(Node& n)
         AttachedRangeSet::const_iterator rangesEnd = m_ranges.end();
         for (AttachedRangeSet::const_iterator it = m_ranges.begin(); it != rangesEnd; ++it)
             (*it)->nodeWillBeRemoved(n);
-    }
-
-    if (LocalFrame* frame = this->frame()) {
-        frame->selection().nodeWillBeRemoved(n);
-        frame->page()->dragCaretController().nodeWillBeRemoved(n);
     }
 }
 
@@ -1250,9 +1238,6 @@ void Document::didMergeTextNodes(Text& oldNode, unsigned offset)
             (*it)->didMergeTextNodes(oldNodeWithIndex, offset);
     }
 
-    if (m_frame)
-        m_frame->selection().didMergeTextNodes(oldNode, offset);
-
     // FIXME: This should update markers for spelling and grammar checking.
 }
 
@@ -1263,9 +1248,6 @@ void Document::didSplitTextNode(Text& oldNode)
         for (AttachedRangeSet::const_iterator it = m_ranges.begin(); it != end; ++it)
             (*it)->didSplitTextNode(oldNode);
     }
-
-    if (m_frame)
-        m_frame->selection().didSplitTextNode(oldNode);
 
     // FIXME: This should update markers for spelling and grammar checking.
 }
