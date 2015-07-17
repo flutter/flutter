@@ -21,8 +21,10 @@ List<Route> routes = [
         new RaisedButton(
           child: new Text('START ADVENTURE'),
           onPressed: () => navigator.pushNamed('adventure')
-        )
-      ], direction: FlexDirection.vertical, alignItems: FlexAlignItems.center)
+        )],
+        direction: FlexDirection.vertical,
+        justifyContent: FlexJustifyContent.center
+      )
     )
   ),
   new Route(
@@ -39,8 +41,10 @@ List<Route> routes = [
         new RaisedButton(
           child: new Text('GO TO DUNGEON'),
           onPressed: () => navigator.push(routes[2])
-        )
-      ], direction: FlexDirection.vertical)
+        )],
+        direction: FlexDirection.vertical,
+        justifyContent: FlexJustifyContent.center
+      )
     )
   ),
   new Route(
@@ -51,10 +55,12 @@ List<Route> routes = [
       child: new Flex([
         new Text("Monster's Lair"),
         new RaisedButton(
-          child: new Text('NO WAIT! GO BACK!'),
+          child: new Text('RUN!!!'),
           onPressed: () => navigator.pop()
-        )
-      ], direction: FlexDirection.vertical)
+        )],
+        direction: FlexDirection.vertical,
+        justifyContent: FlexJustifyContent.center
+      )
     )
   )
 ];
