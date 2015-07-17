@@ -1,0 +1,9 @@
+language: dart
+sudo: required
+before_install:
+  - ./travis/before_install.sh
+before_script:
+  - ./travis/setup.sh
+  - export PATH=$PWD/depot_tools:$PATH
+  - export BOTO_CONFIG=$PWD/boto
+script: ./travis/build.sh
