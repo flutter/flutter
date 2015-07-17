@@ -68,6 +68,16 @@ List<Route> routes = [
 class NavigationExampleApp extends App {
   NavigationState _navState = new NavigationState(routes);
 
+  void onBack() {
+    if (_navState.hasPrevious()) {
+      setState(() {
+        _navState.pop();
+      });
+    } else {
+      super.onBack();
+    }
+  }
+
   Widget build() {
     return new Flex([new Navigator(_navState)]);
   }

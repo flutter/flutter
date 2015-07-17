@@ -42,8 +42,8 @@ class RouteState extends RouteBase {
 
 // TODO(jackson): Refactor this into its own file
 // and support multiple transition types
-const Duration _kTransitionDuration = const Duration(milliseconds: 200);
-const Point _kTransitionStartPoint = const Point(0.0, 100.0);
+const Duration _kTransitionDuration = const Duration(milliseconds: 150);
+const Point _kTransitionStartPoint = const Point(0.0, 75.0);
 enum TransitionDirection { forward, reverse }
 class Transition extends AnimatedComponent {
   Transition({
@@ -51,12 +51,14 @@ class Transition extends AnimatedComponent {
     this.content,
     this.direction,
     this.onDismissed,
+    this.onCompleted,
     this.interactive
   }) : super(key: key);
   Widget content;
   TransitionDirection direction;
   bool interactive;
   Function onDismissed;
+  Function onCompleted;
 
   AnimatedType<Point> _position;
   AnimatedType<double> _opacity;
@@ -73,7 +75,8 @@ class Transition extends AnimatedComponent {
     _performance = new AnimationPerformance()
       ..duration = _kTransitionDuration
       ..variable = new AnimatedList([_position, _opacity])
-      ..addListener(_checkDismissed);
+      ..addListener(_checkDismissed)
+      ..addListener(_checkCompleted);
     if (direction == TransitionDirection.reverse)
       _performance.progress = 1.0;
     watch(_performance);
@@ -114,6 +117,17 @@ class Transition extends AnimatedComponent {
     }
   }
 
+  bool _completed = false;
+  void _checkCompleted() {
+    if (!_completed &&
+        direction == TransitionDirection.forward &&
+        _performance.isCompleted) {
+      if (onCompleted != null)
+        onCompleted();
+      _completed = true;
+    }
+  }
+
   Widget build() {
     Matrix4 transform = new Matrix4.identity()
       ..translate(_position.value.x, _position.value.y);
@@ -133,6 +147,7 @@ class HistoryEntry {
   HistoryEntry({ this.route, this.key });
   final RouteBase route;
   final int key;
+  bool transitionFinished = false;
   // TODO(jackson): Keep track of the requested transition
 }
 
@@ -170,6 +185,7 @@ class NavigationState {
     if (historyIndex > 0) {
       HistoryEntry entry = history[historyIndex];
       entry.route.popState();
+      entry.transitionFinished = false;
       historyIndex--;
     }
   }
@@ -217,7 +233,9 @@ class Navigator extends StatefulComponent {
   Widget build() {
     List<Widget> visibleRoutes = new List<Widget>();
     for (int i = 0; i < state.history.length; i++) {
-      // TODO(jackson): Avoid building routes that are not visible
+      // Avoid building routes that are not visible
+      if (i + 1 < state.history.length && state.history[i + 1].transitionFinished)
+        continue;
       HistoryEntry historyEntry = state.history[i];
       Widget content = historyEntry.route.build(this, historyEntry.route);
       if (i == 0) {
@@ -234,6 +252,11 @@ class Navigator extends StatefulComponent {
         onDismissed: () {
           setState(() {
             state.history.remove(historyEntry);
+          });
+        },
+        onCompleted: () {
+          setState(() {
+            historyEntry.transitionFinished = true;
           });
         }
       );
