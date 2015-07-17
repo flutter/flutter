@@ -125,8 +125,8 @@ dart_pkg("sky") {
 }
 
 action("material_design_icons") {
-  input_dir = "lib/assets/material-design-icons"
-  output_dir = "$root_gen_dir/dart-pkg/sky/lib/assets"
+  source_file = "lib/assets/material-design-icons"
+  target_file = "$root_gen_dir/dart-pkg/sky/lib/assets/material-design-icons"
   stamp = "$target_gen_dir/material_design_icons_linked"
 
   sources = [
@@ -136,11 +136,10 @@ action("material_design_icons") {
     stamp,
   ]
 
-  script = "//build/symlink.py"
+  script = "//sky/build/symlink.py"
   args = [
-    "--force",
-    rebase_path(input_dir, output_dir),
-    rebase_path(output_dir, root_build_dir),
+    rebase_path(source_file, root_build_dir),
+    rebase_path(target_file, root_build_dir),
     "--touch",
     rebase_path(stamp, root_build_dir),
   ]
